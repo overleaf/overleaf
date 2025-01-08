@@ -122,12 +122,13 @@ const dispatchSelectionAndScroll = (
   view: EditorView,
   selection: SelectionRange
 ) => {
-  view.dispatch({
-    selection,
-    effects: EditorView.scrollIntoView(selection, { y: 'center' }),
+  window.setTimeout(() => {
+    view.dispatch({
+      selection,
+      effects: EditorView.scrollIntoView(selection, { y: 'center' }),
+    })
+    view.focus()
   })
-
-  view.focus()
 }
 
 export const setCursorLineAndScroll = (
