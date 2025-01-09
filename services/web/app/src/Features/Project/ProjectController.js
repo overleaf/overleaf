@@ -487,7 +487,7 @@ const _ProjectController = {
       const [
         linkSharingChanges,
         linkSharingEnforcement,
-        reviewerRoleAssigment,
+        reviewerRoleAssignment,
       ] = await Promise.all([
         SplitTestHandler.promises.getAssignmentForUser(
           project.owner_ref,
@@ -837,7 +837,7 @@ const _ProjectController = {
         isSaas: Features.hasFeature('saas'),
         shouldLoadHotjar: splitTestAssignments.hotjar?.variant === 'enabled',
         isReviewerRoleEnabled:
-          reviewerRoleAssigment ||
+          reviewerRoleAssignment?.variant === 'enabled' ||
           Object.keys(project.reviewer_refs || {}).length > 0,
       })
       timer.done()
