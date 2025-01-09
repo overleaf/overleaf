@@ -7,7 +7,8 @@ function projectHistoryURLWithFilestoreFallback(
   origin
 ) {
   const filestoreURL = `${Settings.apis.filestore.url}/project/${projectId}/file/${fileRef._id}?from=${origin}`
-  if (fileRef.hash) {
+  // TODO: When this file is converted to ES modules we will be able to use Features.hasFeature('project-history-blobs'). Currently we can't stub the feature return value in tests.
+  if (fileRef.hash && Settings.enableProjectHistoryBlobs) {
     return {
       url: `${Settings.apis.project_history.url}/project/${historyId}/blob/${fileRef.hash}`,
       fallbackURL: filestoreURL,

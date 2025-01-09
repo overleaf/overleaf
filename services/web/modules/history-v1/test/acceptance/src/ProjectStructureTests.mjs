@@ -257,7 +257,7 @@ describe('ProjectStructureChanges', function () {
       expect(updates[2].type).to.equal('add-file')
       expect(updates[2].userId).to.equal(owner._id)
       expect(updates[2].pathname).to.equal('/frog.jpg')
-      if (Features.hasFeature('saas')) {
+      if (Features.hasFeature('project-history-blobs')) {
         expect(updates[2].url).to.be.null
       } else {
         expect(updates[2].url).to.be.a('string')

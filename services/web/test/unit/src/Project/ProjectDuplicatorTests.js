@@ -221,6 +221,9 @@ describe('ProjectDuplicator', function () {
         flushProjectToTpds: sinon.stub().resolves(),
       },
     }
+    this.Features = {
+      hasFeature: sinon.stub().withArgs('project-history-blobs').returns(true),
+    }
 
     this.ProjectDuplicator = SandboxedModule.require(MODULE_PATH, {
       requires: {
@@ -241,6 +244,7 @@ describe('ProjectDuplicator', function () {
         '../ThirdPartyDataStore/TpdsProjectFlusher': this.TpdsProjectFlusher,
         '../Tags/TagsHandler': this.TagsHandler,
         '../History/HistoryManager': this.HistoryManager,
+        '../../infrastructure/Features': this.Features,
       },
     })
   })

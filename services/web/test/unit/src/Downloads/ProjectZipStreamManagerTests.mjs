@@ -27,6 +27,7 @@ describe('ProjectZipStreamManager', function () {
       info: sinon.stub(),
       debug: sinon.stub(),
     }
+
     return (this.ProjectZipStreamManager = await esmock.strict(modulePath, {
       archiver: (this.archiver = sinon.stub().returns(this.archive)),
       '@overleaf/logger': this.logger,
@@ -36,6 +37,14 @@ describe('ProjectZipStreamManager', function () {
         (this.HistoryManager = {}),
       '../../../../app/src/Features/Project/ProjectGetter':
         (this.ProjectGetter = {}),
+      '../../../../app/src/Features/FileStore/FileStoreHandler':
+        (this.FileStoreHandler = {}),
+      '../../../../app/src/infrastructure/Features': (this.Features = {
+        hasFeature: sinon
+          .stub()
+          .withArgs('project-history-blobs')
+          .returns(true),
+      }),
     }))
   })
 
@@ -380,65 +389,89 @@ describe('ProjectZipStreamManager', function () {
       this.ProjectEntityHandler.getAllFiles = sinon
         .stub()
         .callsArgWith(1, null, this.files)
-      this.HistoryManager.requestBlobWithFallback = (
-        projectId,
-        hash,
-        fileId,
-        callback
-      ) => {
-        return callback(null, { stream: this.streams[fileId] })
-      }
-      sinon.spy(this.HistoryManager, 'requestBlobWithFallback')
-      this.ProjectZipStreamManager.addAllFilesToArchive(
-        this.project_id,
-        this.archive,
-        this.callback
-      )
-      return (() => {
-        const result = []
+    })
+    describe('with project-history-blobs feature enabled', function () {
+      beforeEach(function () {
+        this.HistoryManager.requestBlobWithFallback = (
+          projectId,
+          hash,
+          fileId,
+          callback
+        ) => {
+          return callback(null, { stream: this.streams[fileId] })
+        }
+        sinon.spy(this.HistoryManager, 'requestBlobWithFallback')
+        this.ProjectZipStreamManager.addAllFilesToArchive(
+          this.project_id,
+          this.archive,
+          this.callback
+        )
         for (const path in this.streams) {
           const stream = this.streams[path]
-          result.push(stream.emit('end'))
+          stream.emit('end')
         }
-        return result
-      })()
-    })
+      })
 
-    it('should get the files for the project', function () {
-      return this.ProjectEntityHandler.getAllFiles
-        .calledWith(this.project_id)
-        .should.equal(true)
-    })
+      it('should get the files for the project', function () {
+        return this.ProjectEntityHandler.getAllFiles
+          .calledWith(this.project_id)
+          .should.equal(true)
+      })
 
-    it('should get a stream for each file', function () {
-      return (() => {
-        const result = []
+      it('should get a stream for each file', function () {
         for (const path in this.files) {
           const file = this.files[path]
-          result.push(
-            this.HistoryManager.requestBlobWithFallback
-              .calledWith(this.project_id, file.hash, file._id)
-              .should.equal(true)
-          )
-        }
-        return result
-      })()
-    })
 
-    it('should add each file to the archive', function () {
-      return (() => {
-        const result = []
+          this.HistoryManager.requestBlobWithFallback
+            .calledWith(this.project_id, file.hash, file._id)
+            .should.equal(true)
+        }
+      })
+
+      it('should add each file to the archive', function () {
         for (let path in this.files) {
           const file = this.files[path]
           path = path.slice(1) // remove "/"
-          result.push(
-            this.archive.append
-              .calledWith(this.streams[file._id], { name: path })
-              .should.equal(true)
-          )
+          this.archive.append
+            .calledWith(this.streams[file._id], { name: path })
+            .should.equal(true)
         }
-        return result
-      })()
+      })
+    })
+
+    describe('with project-history-blobs feature disabled', function () {
+      beforeEach(function () {
+        this.FileStoreHandler.getFileStream = (
+          projectId,
+          fileId,
+          query,
+          callback
+        ) => callback(null, this.streams[fileId])
+
+        sinon.spy(this.FileStoreHandler, 'getFileStream')
+        this.Features.hasFeature
+          .withArgs('project-history-blobs')
+          .returns(false)
+        this.ProjectZipStreamManager.addAllFilesToArchive(
+          this.project_id,
+          this.archive,
+          this.callback
+        )
+        for (const path in this.streams) {
+          const stream = this.streams[path]
+          stream.emit('end')
+        }
+      })
+
+      it('should get a stream for each file', function () {
+        for (const path in this.files) {
+          const file = this.files[path]
+
+          this.FileStoreHandler.getFileStream
+            .calledWith(this.project_id, file._id)
+            .should.equal(true)
+        }
+      })
     })
   })
 })

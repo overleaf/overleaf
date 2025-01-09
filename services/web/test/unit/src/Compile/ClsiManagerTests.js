@@ -144,6 +144,9 @@ describe('ClsiManager', function () {
       enablePdfCaching: true,
       clsiCookie: { key: 'clsiserver' },
     }
+    this.Features = {
+      hasFeature: sinon.stub().withArgs('project-history-blobs').returns(true),
+    }
     this.HistoryManager = {
       getBlobLocation: sinon.stub().callsFake((historyId, hash) => {
         if (hash === GLOBAL_BLOB_HASH) {
@@ -162,6 +165,7 @@ describe('ClsiManager', function () {
         '../../models/Project': {
           Project: this.Project,
         },
+        '../../infrastructure/Features': this.Features,
         '../Project/ProjectEntityHandler': this.ProjectEntityHandler,
         '../Project/ProjectGetter': this.ProjectGetter,
         '../DocumentUpdater/DocumentUpdaterHandler':

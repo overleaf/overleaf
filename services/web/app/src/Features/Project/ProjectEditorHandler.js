@@ -1,6 +1,7 @@
 let ProjectEditorHandler
 const _ = require('lodash')
 const Path = require('path')
+const Features = require('../../infrastructure/Features')
 
 function mergeDeletedDocs(a, b) {
   const docIdsInA = new Set(a.map(doc => doc._id.toString()))
@@ -123,12 +124,18 @@ module.exports = ProjectEditorHandler = {
   },
 
   buildFileModelView(file) {
+    const additionalFileProperties = {}
+
+    if (Features.hasFeature('project-history-blobs')) {
+      additionalFileProperties.hash = file.hash
+    }
+
     return {
       _id: file._id,
       name: file.name,
       linkedFileData: file.linkedFileData,
       created: file.created,
-      hash: file.hash,
+      ...additionalFileProperties,
     }
   },
 

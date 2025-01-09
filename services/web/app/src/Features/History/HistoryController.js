@@ -77,6 +77,9 @@ module.exports = HistoryController = {
    *  has a hash.
    * */
   fileToBlobRedirectMiddleware(req, res, next) {
+    if (!Features.hasFeature('project-history-blobs')) {
+      return next()
+    }
     const projectId = req.params.Project_id
     const fileId = req.params.File_id
     ProjectLocator.findElement(

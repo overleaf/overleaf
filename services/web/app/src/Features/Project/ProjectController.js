@@ -800,6 +800,9 @@ const _ProjectController = {
           isInvitedMember
         ),
         chatEnabled: Features.hasFeature('chat'),
+        projectHistoryBlobsEnabled: Features.hasFeature(
+          'project-history-blobs'
+        ),
         roMirrorOnClientNoLocalStorage:
           Settings.adminOnlyLogin || project.name.startsWith('Debug: '),
         languages: Settings.languages,

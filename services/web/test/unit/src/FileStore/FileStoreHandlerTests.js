@@ -8,6 +8,7 @@ const MODULE_PATH = '../../../../app/src/Features/FileStore/FileStoreHandler.js'
 
 describe('FileStoreHandler', function () {
   beforeEach(function () {
+    this.fileSize = 999
     this.fs = {
       createReadStream: sinon.stub(),
       lstat: sinon.stub().callsArgWith(1, null, {
@@ -40,7 +41,6 @@ describe('FileStoreHandler', function () {
     this.fileId = 'file_id_here'
     this.projectId = '1312312312'
     this.historyId = 123
-    this.fileSize = 999
     this.hashValue = '2aae6c35c94fcfb415dbe95f408b9ce91ee846ed'
     this.fsPath = 'uploads/myfile.eps'
     this.getFileUrl = (projectId, fileId) =>
@@ -69,6 +69,10 @@ describe('FileStoreHandler', function () {
       }),
     }
 
+    this.Features = {
+      hasFeature: sinon.stub(),
+    }
+
     this.handler = SandboxedModule.require(MODULE_PATH, {
       requires: {
         '@overleaf/settings': this.settings,
@@ -76,6 +80,7 @@ describe('FileStoreHandler', function () {
         '../History/HistoryManager': this.HistoryManager,
         '../Project/ProjectDetailsHandler': this.ProjectDetailsHandler,
         './FileHashManager': this.FileHashManager,
+        '../../infrastructure/Features': this.Features,
         // FIXME: need to stub File object here
         '../../models/File': {
           File: this.FileModel,
@@ -134,31 +139,55 @@ describe('FileStoreHandler', function () {
       )
     })
 
-    it('should upload the file to the history store as a blob', function (done) {
-      this.fs.createReadStream.returns({
-        pipe() {},
-        on(type, cb) {
-          if (type === 'open') {
-            cb()
+    describe('when project-history-blobs feature is enabled', function () {
+      it('should upload the file to the history store as a blob', function (done) {
+        this.fs.createReadStream.returns({
+          pipe() {},
+          on(type, cb) {
+            if (type === 'open') {
+              cb()
+            }
+          },
+        })
+        this.Features.hasFeature.withArgs('project-history-blobs').returns(true)
+        this.handler.uploadFileFromDisk(
+          this.projectId,
+          this.fileArgs,
+          this.fsPath,
+          () => {
+            this.HistoryManager.uploadBlobFromDisk
+              .calledWith(
+                this.historyId,
+                this.hashValue,
+                this.fileSize,
+                this.fsPath
+              )
+              .should.equal(true)
+            done()
           }
-        },
+        )
       })
-      this.handler.uploadFileFromDisk(
-        this.projectId,
-        this.fileArgs,
-        this.fsPath,
-        () => {
-          this.HistoryManager.uploadBlobFromDisk
-            .calledWith(
-              this.historyId,
-              this.hashValue,
-              this.fileSize,
-              this.fsPath
-            )
-            .should.equal(true)
-          done()
-        }
-      )
+    })
+    describe('when project-history-blobs feature is disabled', function () {
+      it('should not upload the file to the history store as a blob', function (done) {
+        this.fs.createReadStream.returns({
+          pipe() {},
+          on(type, cb) {
+            if (type === 'open') {
+              cb()
+            }
+          },
+        })
+        this.handler.uploadFileFromDisk(
+          this.projectId,
+          this.fileArgs,
+          this.fsPath,
+          () => {
+            this.HistoryManager.uploadBlobFromDisk.called.should.equal(false)
+            done()
+          }
+        )
+      })
     })
 
     it('should create read stream', function (done) {

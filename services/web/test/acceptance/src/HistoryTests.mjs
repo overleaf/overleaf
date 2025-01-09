@@ -9,6 +9,7 @@ import { fileURLToPath } from 'node:url'
 import sinon from 'sinon'
 import logger from '@overleaf/logger'
 import Metrics from './helpers/metrics.js'
+import Features from '../../../app/src/infrastructure/Features.js'
 const User = UserHelper.promises
 
 let MockV1HistoryApi, MockFilestoreApi
@@ -75,41 +76,45 @@ describe('HistoryTests', function () {
     afterEach(function () {
       spy.restore()
     })
-    it('should work from history-v1', async function () {
-      const { response, body } = await user.doRequest('GET', downloadZIPURL)
-      expect(response.statusCode).to.equal(200)
-      expect(body).to.include('2pixel.png')
-      await expectHistoryV1Hit()
-    })
-    it('should work from filestore', async function () {
-      MockV1HistoryApi.reset()
-      const { response, body } = await user.doRequest('GET', downloadZIPURL)
-      expect(response.statusCode).to.equal(200)
-      expect(body).to.include('2pixel.png')
-      await expectFilestoreHit()
-    })
-    it('should not include when missing in both places', async function () {
-      MockFilestoreApi.reset()
-      MockV1HistoryApi.reset()
-      const { response, body } = await user.doRequest('GET', downloadZIPURL)
-      expect(response.statusCode).to.equal(200)
-      expect(
-        spy.args.find(([, msg]) => msg === 'error adding files to zip stream')
-      ).to.exist
-      expect(body).to.not.include('2pixel.png')
-      await expectNoIncrement()
-    })
+    if (Features.hasFeature('project-history-blobs')) {
+      it('should work from history-v1', async function () {
+        const { response, body } = await user.doRequest('GET', downloadZIPURL)
+        expect(response.statusCode).to.equal(200)
+        expect(body).to.include('2pixel.png')
+        await expectHistoryV1Hit()
+      })
+      it('should work from filestore', async function () {
+        MockV1HistoryApi.reset()
+        const { response, body } = await user.doRequest('GET', downloadZIPURL)
+        expect(response.statusCode).to.equal(200)
+        expect(body).to.include('2pixel.png')
+        await expectFilestoreHit()
+      })
+      it('should not include when missing in both places', async function () {
+        MockFilestoreApi.reset()
+        MockV1HistoryApi.reset()
+        const { response, body } = await user.doRequest('GET', downloadZIPURL)
+        expect(response.statusCode).to.equal(200)
+        expect(
+          spy.args.find(([, msg]) => msg === 'error adding files to zip stream')
+        ).to.exist
+        expect(body).to.not.include('2pixel.png')
+        await expectNoIncrement()
+      })
+    }
   })
 
   describe('/project/:projectId/blob/:hash', function () {
     describe('HEAD', function () {
-      it('should fetch the file size from history-v1', async function () {
-        const { response } = await user.doRequest('HEAD', fileURL)
-        expect(response.statusCode).to.equal(200)
-        expect(response.headers['x-served-by']).to.include('history-v1')
-        expect(response.headers['content-length']).to.equal('3694')
-        await expectHistoryV1Hit()
-      })
+      if (Features.hasFeature('project-history-blobs')) {
+        it('should fetch the file size from history-v1', async function () {
+          const { response } = await user.doRequest('HEAD', fileURL)
+          expect(response.statusCode).to.equal(200)
+          expect(response.headers['x-served-by']).to.include('history-v1')
+          expect(response.headers['content-length']).to.equal('3694')
+          await expectHistoryV1Hit()
+        })
+      }
       it('should return 404 without fallback', async function () {
         MockV1HistoryApi.reset()
         const { response } = await user.doRequest('HEAD', fileURL)
@@ -133,13 +138,15 @@ describe('HistoryTests', function () {
       })
     })
     describe('GET', function () {
-      it('should fetch the file from history-v1', async function () {
-        const { response, body } = await user.doRequest('GET', fileURL)
-        expect(response.statusCode).to.equal(200)
-        expect(response.headers['x-served-by']).to.include('history-v1')
-        expect(body).to.equal(fileContent)
-        await expectHistoryV1Hit()
-      })
+      if (Features.hasFeature('project-history-blobs')) {
+        it('should fetch the file from history-v1', async function () {
+          const { response, body } = await user.doRequest('GET', fileURL)
+          expect(response.statusCode).to.equal(200)
+          expect(response.headers['x-served-by']).to.include('history-v1')
+          expect(body).to.equal(fileContent)
+          await expectHistoryV1Hit()
+        })
+      }
       it('should return 404 without fallback', async function () {
         MockV1HistoryApi.reset()
         const { response } = await user.doRequest('GET', fileURL)

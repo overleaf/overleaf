@@ -57,6 +57,7 @@ describe('TpdsUpdateSender', function () {
           url: projectHistoryUrl,
         },
       },
+      enableProjectHistoryBlobs: true,
     }
     const getUsers = sinon.stub()
     getUsers

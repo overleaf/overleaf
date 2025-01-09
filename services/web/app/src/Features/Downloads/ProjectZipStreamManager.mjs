@@ -4,6 +4,8 @@ import logger from '@overleaf/logger'
 import ProjectEntityHandler from '../Project/ProjectEntityHandler.js'
 import ProjectGetter from '../Project/ProjectGetter.js'
 import HistoryManager from '../History/HistoryManager.js'
+import FileStoreHandler from '../FileStore/FileStoreHandler.js'
+import Features from '../../infrastructure/Features.js'
 let ProjectZipStreamManager
 
 export default ProjectZipStreamManager = {
@@ -108,17 +110,35 @@ export default ProjectZipStreamManager = {
     })
   },
 
+  getFileStream: (projectId, file, callback) => {
+    if (Features.hasFeature('project-history-blobs')) {
+      HistoryManager.requestBlobWithFallback(
+        projectId,
+        file.hash,
+        file._id,
+        (error, result) => {
+          if (error) {
+            return callback(error)
+          }
+          const { stream } = result
+          callback(null, stream)
+        }
+      )
+    } else {
+      FileStoreHandler.getFileStream(projectId, file._id, {}, callback)
+    }
+  },
+
   addAllFilesToArchive(projectId, archive, callback) {
     ProjectEntityHandler.getAllFiles(projectId, (error, files) => {
       if (error) {
         return callback(error)
       }
       const jobs = Object.entries(files).map(([path, file]) => cb => {
-        HistoryManager.requestBlobWithFallback(
+        ProjectZipStreamManager.getFileStream(
           projectId,
-          file.hash,
-          file._id,
-          (error, result) => {
+          file,
+          (error, stream) => {
             if (error) {
               logger.warn(
                 { err: error, projectId, fileId: file._id },
@@ -129,7 +149,6 @@ export default ProjectZipStreamManager = {
             if (path[0] === '/') {
               path = path.slice(1)
             }
-            const { stream } = result
             archive.append(stream, { name: path })
             stream.on('end', () => cb())
           }

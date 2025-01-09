@@ -11,6 +11,7 @@ const { File } = require('../../models/File')
 const Errors = require('../Errors/Errors')
 const OError = require('@overleaf/o-error')
 const { promisifyAll } = require('@overleaf/promise-utils')
+const Features = require('../../infrastructure/Features')
 
 const ONE_MIN_IN_MS = 60 * 1000
 const FIVE_MINS_IN_MS = ONE_MIN_IN_MS * 5
@@ -36,6 +37,28 @@ const FileStoreHandler = {
         callback
       )
     })
+  },
+
+  _uploadToHistory(historyId, hash, size, fsPath, callback) {
+    if (Features.hasFeature('project-history-blobs')) {
+      Async.retry(
+        FileStoreHandler.RETRY_ATTEMPTS,
+        cb =>
+          HistoryManager.uploadBlobFromDisk(historyId, hash, size, fsPath, cb),
+        error => callback(error, true)
+      )
+    } else {
+      callback(null, false)
+    }
+  },
+
+  _uploadToFileStore(projectId, fileArgs, fsPath, callback) {
+    Async.retry(
+      FileStoreHandler.RETRY_ATTEMPTS,
+      (cb, results) =>
+        FileStoreHandler._doUploadFileFromDisk(projectId, fileArgs, fsPath, cb),
+      callback
+    )
   },
 
   uploadFileFromDiskWithHistoryId(
@@ -68,30 +91,20 @@ const FileStoreHandler = {
         if (err) {
           return callback(err)
         }
-        Async.retry(
-          FileStoreHandler.RETRY_ATTEMPTS,
-          cb =>
-            HistoryManager.uploadBlobFromDisk(
-              historyId,
-              hash,
-              stat.size,
-              fsPath,
-              cb
-            ),
-          function (err) {
+        FileStoreHandler._uploadToHistory(
+          historyId,
+          hash,
+          stat.size,
+          fsPath,
+          function (err, createdBlob) {
             if (err) {
               return callback(err)
             }
             fileArgs = { ...fileArgs, hash }
-            Async.retry(
-              FileStoreHandler.RETRY_ATTEMPTS,
-              (cb, results) =>
-                FileStoreHandler._doUploadFileFromDisk(
-                  projectId,
-                  fileArgs,
-                  fsPath,
-                  cb
-                ),
+            FileStoreHandler._uploadToFileStore(
+              projectId,
+              fileArgs,
+              fsPath,
               function (err, result) {
                 if (err) {
                   OError.tag(err, 'Error uploading file, retries failed', {
@@ -100,7 +113,7 @@ const FileStoreHandler = {
                   })
                   return callback(err)
                 }
-                callback(err, result.url, result.fileRef, true)
+                callback(err, result.url, result.fileRef, createdBlob)
               }
             )
           }
@@ -159,7 +172,7 @@ const FileStoreHandler = {
     const historyId = project.overleaf?.history?.id
     const fileId = file._id
     const hash = file.hash
-    if (historyId && hash) {
+    if (historyId && hash && Features.hasFeature('project-history-blobs')) {
       // new behaviour - request from history
       const range = _extractRange(query?.range)
       HistoryManager.requestBlobWithFallback(

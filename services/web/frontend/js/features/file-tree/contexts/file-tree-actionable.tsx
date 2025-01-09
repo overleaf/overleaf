@@ -34,6 +34,7 @@ import {
 import { Folder } from '../../../../../types/folder'
 import { useReferencesContext } from '@/features/ide-react/context/references-context'
 import { usePermissionsContext } from '@/features/ide-react/context/permissions-context'
+import { fileUrl } from '@/features/utils/fileUrl'
 
 type DroppedFile = File & {
   relativePath?: string
@@ -494,7 +495,7 @@ export const FileTreeActionableProvider: FC = ({ children }) => {
       const selectedEntity = findInTree(fileTreeData, selectedEntityId)
 
       if (selectedEntity?.type === 'fileRef') {
-        return `/project/${projectId}/blob/${selectedEntity.entity.hash}?fallback=${selectedEntityId}`
+        return fileUrl(projectId, selectedEntityId, selectedEntity.entity.hash)
       }
 
       if (selectedEntity?.type === 'doc') {

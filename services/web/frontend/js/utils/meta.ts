@@ -165,6 +165,7 @@ export interface Meta {
   'ol-prefetchedProjectsBlob': GetProjectsResponseBody | undefined
   'ol-primaryEmail': { email: string; confirmed: boolean }
   'ol-project': any // TODO
+  'ol-projectHistoryBlobsEnabled': boolean
   'ol-projectSyncSuccessMessage': string
   'ol-projectTags': Tag[]
   'ol-project_id': string
