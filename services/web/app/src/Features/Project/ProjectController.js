@@ -484,7 +484,11 @@ const _ProjectController = {
           anonRequestToken
         )
 
-      const [linkSharingChanges, linkSharingEnforcement] = await Promise.all([
+      const [
+        linkSharingChanges,
+        linkSharingEnforcement,
+        reviewerRoleAssigment,
+      ] = await Promise.all([
         SplitTestHandler.promises.getAssignmentForUser(
           project.owner_ref,
           'link-sharing-warning'
@@ -492,6 +496,10 @@ const _ProjectController = {
         SplitTestHandler.promises.getAssignmentForUser(
           project.owner_ref,
           'link-sharing-enforcement'
+        ),
+        SplitTestHandler.promises.getAssignmentForUser(
+          project.owner_ref,
+          'reviewer-role'
         ),
       ])
 
@@ -829,8 +837,7 @@ const _ProjectController = {
         isSaas: Features.hasFeature('saas'),
         shouldLoadHotjar: splitTestAssignments.hotjar?.variant === 'enabled',
         isReviewerRoleEnabled:
-          (privilegeLevel === PrivilegeLevels.OWNER &&
-            splitTestAssignments['reviewer-role']?.variant === 'enabled') ||
+          reviewerRoleAssigment ||
           Object.keys(project.reviewer_refs || {}).length > 0,
       })
       timer.done()

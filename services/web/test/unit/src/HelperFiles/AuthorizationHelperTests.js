@@ -77,7 +77,6 @@ describe('AuthorizationHelper', function () {
         })
       expect(
         await this.AuthorizationHelper.promises.isReviewerRoleEnabled(
-          'userId',
           'projectId'
         )
       ).to.be.false
@@ -95,7 +94,6 @@ describe('AuthorizationHelper', function () {
         })
       expect(
         await this.AuthorizationHelper.promises.isReviewerRoleEnabled(
-          'userId',
           'projectId'
         )
       ).to.be.true
@@ -112,7 +110,6 @@ describe('AuthorizationHelper', function () {
         })
       expect(
         await this.AuthorizationHelper.promises.isReviewerRoleEnabled(
-          'userId',
           'projectId'
         )
       ).to.be.true
@@ -129,7 +126,6 @@ describe('AuthorizationHelper', function () {
         })
       expect(
         await this.AuthorizationHelper.promises.isReviewerRoleEnabled(
-          'userId',
           'projectId'
         )
       ).to.be.true

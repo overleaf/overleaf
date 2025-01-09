@@ -22,7 +22,7 @@ function hasAnyStaffAccess(user) {
   return false
 }
 
-async function isReviewerRoleEnabled(userId, projectId) {
+async function isReviewerRoleEnabled(projectId) {
   const project = await ProjectGetter.promises.getProject(projectId, {
     reviewer_refs: 1,
     owner_ref: 1,
@@ -34,15 +34,11 @@ async function isReviewerRoleEnabled(userId, projectId) {
   }
 
   // if there are no reviewers, check split test from project owner
-  if (project.owner_ref === userId) {
-    const reviewerRoleAssigment =
-      await SplitTestHandler.promises.getAssignmentForUser(
-        userId,
-        'reviewer-role'
-      )
+  const reviewerRoleAssigment =
+    await SplitTestHandler.promises.getAssignmentForUser(
+      project.owner_ref,
+      'reviewer-role'
+    )
 
-    return reviewerRoleAssigment.variant === 'enabled'
-  }
-
-  return false
+  return reviewerRoleAssigment.variant === 'enabled'
 }
