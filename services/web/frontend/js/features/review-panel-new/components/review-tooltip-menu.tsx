@@ -34,9 +34,11 @@ import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
 import { useModalsContext } from '@/features/ide-react/context/modals-context'
 import { numberOfChangesInSelection } from '../utils/changes-in-selection'
 import { useEditorManagerContext } from '@/features/ide-react/context/editor-manager-context'
+import classNames from 'classnames'
 
 const TRACK_CHANGES_ON_WIDGET_HEIGHT = 25
 const CM_LINE_RIGHT_PADDING = 2
+const TOOLTIP_SHOW_DELAY = 120
 
 const ReviewTooltipMenu: FC = () => {
   const state = useCodeMirrorStateContext()
@@ -82,6 +84,7 @@ const ReviewTooltipMenuContent: FC<{
   const { showGenericConfirmModal } = useModalsContext()
   const { wantTrackChanges } = useEditorManagerContext()
   const [tooltipStyle, setTooltipStyle] = useState<CSSProperties | undefined>()
+  const [visible, setVisible] = useState(false)
 
   const addComment = useCallback(() => {
     setReviewPanelOpen(true)
@@ -196,8 +199,24 @@ const ReviewTooltipMenuContent: FC<{
     })
   }, [view, reviewPanelOpen, wantTrackChanges])
 
+  useEffect(() => {
+    setVisible(false)
+    const timeout = setTimeout(() => {
+      setVisible(true)
+    }, TOOLTIP_SHOW_DELAY)
+
+    return () => {
+      clearTimeout(timeout)
+    }
+  }, [])
+
   return (
-    <div className="review-tooltip-menu" style={tooltipStyle}>
+    <div
+      className={classNames('review-tooltip-menu', {
+        'review-tooltip-menu-visible': visible,
+      })}
+      style={tooltipStyle}
+    >
       <button
         className="review-tooltip-menu-button review-tooltip-add-comment-button"
         onClick={addComment}

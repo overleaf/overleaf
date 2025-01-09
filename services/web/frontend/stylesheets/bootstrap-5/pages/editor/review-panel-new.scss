@@ -693,6 +693,12 @@
   border-radius: var(--border-radius-base);
   padding: var(--spacing-02);
   gap: var(--spacing-02);
+  transition: opacity 0.05s ease-in;
+  opacity: 0;
+}
+
+.review-tooltip-menu-visible {
+  opacity: 1;
 }
 
 .review-tooltip-menu-button {
