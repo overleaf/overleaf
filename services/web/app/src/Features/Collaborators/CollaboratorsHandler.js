@@ -149,31 +149,11 @@ async function addUserIdToProject(
   }
 
   if (privilegeLevel === PrivilegeLevels.REVIEW) {
-    const trackChanges =
-      typeof project.track_changes === 'object' ? project.track_changes : {}
-
+    const trackChanges = await convertTrackChangesToExplicitFormat(
+      projectId,
+      project.track_changes
+    )
     trackChanges[userId] = true
-
-    if (project.track_changes === true) {
-      // track changes are enabled for all
-      // we need to convert it to explicit format
-      const members =
-        await CollaboratorsGetter.promises.getMemberIdsWithPrivilegeLevels(
-          project
-        )
-
-      for (const { id, privilegeLevel } of members) {
-        if (
-          [
-            PrivilegeLevels.OWNER,
-            PrivilegeLevels.READ_AND_WRITE,
-            PrivilegeLevels.REVIEW,
-          ].includes(privilegeLevel)
-        ) {
-          trackChanges[id] = true
-        }
-      }
-    }
 
     await Project.updateOne(
       { _id: projectId },
@@ -312,6 +292,22 @@ async function setCollaboratorPrivilegeLevel(
         },
         $addToSet: { reviewer_refs: userId },
       }
+
+      const project = await ProjectGetter.promises.getProject(projectId, {
+        track_changes: true,
+      })
+      const newTrackChangesState = await convertTrackChangesToExplicitFormat(
+        projectId,
+        project.track_changes
+      )
+      if (newTrackChangesState[userId] !== true) {
+        newTrackChangesState[userId] = true
+      }
+      if (typeof project.track_changes === 'object') {
+        update.$set = { [`track_changes.${userId}`]: true }
+      } else {
+        update.$set = { track_changes: newTrackChangesState }
+      }
       break
     }
     case PrivilegeLevels.READ_ONLY: {
@@ -333,6 +329,14 @@ async function setCollaboratorPrivilegeLevel(
   const mongoResponse = await Project.updateOne(query, update).exec()
   if (mongoResponse.matchedCount === 0) {
     throw new Errors.NotFoundError('project or collaborator not found')
+  }
+
+  if (update.$set?.track_changes) {
+    EditorRealTimeController.emitToRoom(
+      projectId,
+      'toggle-track-changes',
+      update.$set.track_changes
+    )
   }
 }
 
@@ -366,4 +370,38 @@ async function _flushProjects(projectIds) {
   for (const projectId of projectIds) {
     await TpdsProjectFlusher.promises.flushProjectToTpds(projectId)
   }
+}
+
+async function convertTrackChangesToExplicitFormat(
+  projectId,
+  trackChangesState
+) {
+  if (typeof trackChangesState === 'object') {
+    return { ...trackChangesState }
+  }
+
+  if (trackChangesState === true) {
+    // track changes are enabled for all
+    const members =
+      await CollaboratorsGetter.promises.getMemberIdsWithPrivilegeLevels(
+        projectId
+      )
+
+    const newTrackChangesState = {}
+    for (const { id, privilegeLevel } of members) {
+      if (
+        [
+          PrivilegeLevels.OWNER,
+          PrivilegeLevels.READ_AND_WRITE,
+          PrivilegeLevels.REVIEW,
+        ].includes(privilegeLevel)
+      ) {
+        newTrackChangesState[id] = true
+      }
+    }
+
+    return newTrackChangesState
+  }
+
+  return {}
 }
