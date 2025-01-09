@@ -21,7 +21,12 @@ export default function SurveyWidget() {
   // Short-term hard-coded special case: hide the "DS nav" survey for users on
   // the default variant
   if (survey?.name === 'ds-nav') {
-    return null
+    // temp workaround to allow for offline survey to target specifically users not on ds-nav split test
+    survey.preText =
+      'Do you want to use Overleaf offline or do you struggle with unstable connections?'
+    survey.name = 'offline-mode'
+    survey.linkText = 'We want your feedback'
+    survey.url = 'https://forms.gle/CUVaduCnqAauVi9aA'
   }
 
   return (
