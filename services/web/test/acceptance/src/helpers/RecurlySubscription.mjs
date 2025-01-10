@@ -1,6 +1,6 @@
 import mongodb from 'mongodb-legacy'
 import Subscription from './Subscription.mjs'
-import MockRecurlyApiClass from '../mocks/MockRecurlyApi.js'
+import MockRecurlyApiClass from '../mocks/MockRecurlyApi.mjs'
 import RecurlyWrapper from '../../../../app/src/Features/Subscription/RecurlyWrapper.js'
 import { promisifyClass } from '@overleaf/promise-utils'
 

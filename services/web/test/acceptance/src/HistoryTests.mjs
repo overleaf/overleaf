@@ -1,14 +1,14 @@
 import fs from 'node:fs'
 import Path from 'node:path'
 import { expect } from 'chai'
-import UserHelper from './helpers/User.js'
-import MockV1HistoryApiClass from './mocks/MockV1HistoryApi.js'
+import UserHelper from './helpers/User.mjs'
+import MockV1HistoryApiClass from './mocks/MockV1HistoryApi.mjs'
 import ProjectGetter from '../../../app/src/Features/Project/ProjectGetter.js'
-import MockFilestoreApiClass from './mocks/MockFilestoreApi.js'
+import MockFilestoreApiClass from './mocks/MockFilestoreApi.mjs'
 import { fileURLToPath } from 'node:url'
 import sinon from 'sinon'
 import logger from '@overleaf/logger'
-import Metrics from './helpers/metrics.js'
+import Metrics from './helpers/metrics.mjs'
 import Features from '../../../app/src/infrastructure/Features.js'
 const User = UserHelper.promises
 

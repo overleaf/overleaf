@@ -1,6 +1,6 @@
 import { expect } from 'chai'
 import Settings from '@overleaf/settings'
-import UserHelper from './helpers/User.js'
+import UserHelper from './helpers/User.mjs'
 
 const User = UserHelper.promises
 

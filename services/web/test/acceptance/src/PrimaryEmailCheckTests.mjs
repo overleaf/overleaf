@@ -1,8 +1,8 @@
-import UserHelper from './helpers/UserHelper.js'
+import UserHelper from './helpers/UserHelper.mjs'
 import Settings from '@overleaf/settings'
 import { expect } from 'chai'
 import Features from '../../../app/src/infrastructure/Features.js'
-import MockV1ApiClass from './mocks/MockV1Api.js'
+import MockV1ApiClass from './mocks/MockV1Api.mjs'
 import SubscriptionHelper from './helpers/Subscription.mjs'
 
 const Subscription = SubscriptionHelper.promises

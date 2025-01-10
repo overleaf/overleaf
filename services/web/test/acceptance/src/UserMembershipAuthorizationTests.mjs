@@ -1,9 +1,9 @@
 import { expect } from 'chai'
 import async from 'async'
-import User from './helpers/User.js'
+import User from './helpers/User.mjs'
 import Institution from './helpers/Institution.mjs'
 import Subscription from './helpers/Subscription.mjs'
-import Publisher from './helpers/Publisher.js'
+import Publisher from './helpers/Publisher.mjs'
 
 describe('UserMembershipAuthorization', function () {
   beforeEach(function (done) {

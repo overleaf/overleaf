@@ -1,6 +1,6 @@
 import Settings from '@overleaf/settings'
 import { expect } from 'chai'
-import UserHelper from './helpers/User.js'
+import UserHelper from './helpers/User.mjs'
 import { getSafeAdminDomainRedirect } from '../../../app/src/Features/Helpers/UrlHelper.js'
 
 const User = UserHelper.promises

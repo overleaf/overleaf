@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import UserHelper from '../src/helpers/UserHelper.js'
+import UserHelper from '../src/helpers/UserHelper.mjs'
 
 describe('BetaProgram', function () {
   let email, userHelper

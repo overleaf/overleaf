@@ -1,4 +1,4 @@
-import User from './helpers/User.js'
+import User from './helpers/User.mjs'
 import { expect } from 'chai'
 
 describe('EditorHttpController', function () {

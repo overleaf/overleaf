@@ -1,6 +1,6 @@
-const AbstractMockApi = require('./AbstractMockApi')
-const SubscriptionController = require('../../../../app/src/Features/Subscription/SubscriptionController')
-const { xmlResponse } = require('../../../../app/src/infrastructure/Response')
+import AbstractMockApi from './AbstractMockApi.mjs'
+import SubscriptionController from '../../../../app/src/Features/Subscription/SubscriptionController.js'
+import { xmlResponse } from '../../../../app/src/infrastructure/Response.js'
 
 class MockRecurlyApi extends AbstractMockApi {
   reset() {
@@ -132,7 +132,7 @@ class MockRecurlyApi extends AbstractMockApi {
   }
 }
 
-module.exports = MockRecurlyApi
+export default MockRecurlyApi
 
 // type hint for the inherited `instance` method
 /**

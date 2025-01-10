@@ -1,10 +1,10 @@
-const AbstractMockApi = require('./AbstractMockApi')
-const { EventEmitter } = require('events')
-const {
+import AbstractMockApi from './AbstractMockApi.mjs'
+import { EventEmitter } from 'node:events'
+import {
   zipAttachment,
   prepareZipAttachment,
-} = require('../../../../app/src/infrastructure/Response')
-const Joi = require('joi')
+} from '../../../../app/src/infrastructure/Response.js'
+import Joi from 'joi'
 
 class MockV1HistoryApi extends AbstractMockApi {
   reset() {
@@ -120,7 +120,7 @@ class MockV1HistoryApi extends AbstractMockApi {
   }
 }
 
-module.exports = MockV1HistoryApi
+export default MockV1HistoryApi
 
 // type hint for the inherited `instance` method
 /**

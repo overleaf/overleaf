@@ -1,6 +1,6 @@
-const { expect } = require('chai')
+import { expect } from 'chai'
 
-module.exports = {
+export default {
   requireLogin: {
     json(response, body) {
       expect(response.statusCode).to.equal(401)

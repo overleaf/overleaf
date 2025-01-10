@@ -1,4 +1,4 @@
-const AbstractMockApi = require('./AbstractMockApi')
+import AbstractMockApi from './AbstractMockApi.mjs'
 
 class MockFilestoreApi extends AbstractMockApi {
   reset() {
@@ -70,7 +70,7 @@ class MockFilestoreApi extends AbstractMockApi {
   }
 }
 
-module.exports = MockFilestoreApi
+export default MockFilestoreApi
 
 // type hint for the inherited `instance` method
 /**

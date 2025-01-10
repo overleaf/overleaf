@@ -1,7 +1,7 @@
 import OError from '@overleaf/o-error'
 import { expect } from 'chai'
 import async from 'async'
-import User from './helpers/User.js'
+import User from './helpers/User.mjs'
 
 describe('AdminEmails', function () {
   beforeEach(function (done) {

@@ -1,9 +1,9 @@
-const AbstractMockApi = require('./AbstractMockApi')
-const _ = require('lodash')
-const { ObjectId } = require('mongodb-legacy')
-const {
-  plainTextResponse,
-} = require('../../../../app/src/infrastructure/Response')
+import AbstractMockApi from './AbstractMockApi.mjs'
+import _ from 'lodash'
+import mongodb from 'mongodb-legacy'
+import { plainTextResponse } from '../../../../app/src/infrastructure/Response.js'
+
+const { ObjectId } = mongodb
 
 class MockProjectHistoryApi extends AbstractMockApi {
   reset() {
@@ -148,7 +148,7 @@ class MockProjectHistoryApi extends AbstractMockApi {
   }
 }
 
-module.exports = MockProjectHistoryApi
+export default MockProjectHistoryApi
 
 // type hint for the inherited `instance` method
 /**

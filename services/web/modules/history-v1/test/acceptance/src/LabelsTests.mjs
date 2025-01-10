@@ -1,7 +1,7 @@
 import { expect } from 'chai'
 import mongodb from 'mongodb-legacy'
-import User from '../../../../../test/acceptance/src/helpers/User.js'
-import MockProjectHistoryApiClass from '../../../../../test/acceptance/src/mocks/MockProjectHistoryApi.js'
+import User from '../../../../../test/acceptance/src/helpers/User.mjs'
+import MockProjectHistoryApiClass from '../../../../../test/acceptance/src/mocks/MockProjectHistoryApi.mjs'
 
 const { ObjectId } = mongodb
 

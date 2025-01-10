@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import UserHelper from './helpers/UserHelper.js'
+import UserHelper from './helpers/UserHelper.mjs'
 import { db } from '../../../app/src/infrastructure/mongodb.js'
 
 describe('PasswordReset', function () {

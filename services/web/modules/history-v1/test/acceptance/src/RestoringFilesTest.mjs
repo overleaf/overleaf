@@ -4,10 +4,10 @@ import _ from 'lodash'
 import fs from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import Path from 'node:path'
-import User from '../../../../../test/acceptance/src/helpers/User.js'
-import MockProjectHistoryApiClass from '../../../../../test/acceptance/src/mocks/MockProjectHistoryApi.js'
-import MockDocstoreApiClass from '../../../../../test/acceptance/src/mocks/MockDocstoreApi.js'
-import MockFilestoreApiClass from '../../../../../test/acceptance/src/mocks/MockFilestoreApi.js'
+import User from '../../../../../test/acceptance/src/helpers/User.mjs'
+import MockProjectHistoryApiClass from '../../../../../test/acceptance/src/mocks/MockProjectHistoryApi.mjs'
+import MockDocstoreApiClass from '../../../../../test/acceptance/src/mocks/MockDocstoreApi.mjs'
+import MockFilestoreApiClass from '../../../../../test/acceptance/src/mocks/MockFilestoreApi.mjs'
 
 let MockProjectHistoryApi, MockDocstoreApi, MockFilestoreApi
 

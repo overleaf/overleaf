@@ -1,6 +1,6 @@
 import { expect } from 'chai'
 import async from 'async'
-import UserHelper from './helpers/User.js'
+import UserHelper from './helpers/User.mjs'
 import redis from './helpers/redis.mjs'
 import UserSessionsRedis from '../../../app/src/Features/User/UserSessionsRedis.js'
 const rclient = UserSessionsRedis.client()

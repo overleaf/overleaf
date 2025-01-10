@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import UserHelper from './helpers/User.js'
+import UserHelper from './helpers/User.mjs'
 import logger from '@overleaf/logger'
 import sinon from 'sinon'
 import { db } from '../../../app/src/infrastructure/mongodb.js'

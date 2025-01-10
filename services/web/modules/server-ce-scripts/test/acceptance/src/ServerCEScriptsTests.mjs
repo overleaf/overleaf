@@ -3,7 +3,7 @@ import fs from 'node:fs'
 import Settings from '@overleaf/settings'
 import { expect } from 'chai'
 import { db } from '../../../../../app/src/infrastructure/mongodb.js'
-import UserHelper from '../../../../../test/acceptance/src/helpers/User.js'
+import UserHelper from '../../../../../test/acceptance/src/helpers/User.mjs'
 
 const { promises: User } = UserHelper
 

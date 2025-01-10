@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import User from './helpers/User.js'
+import User from './helpers/User.mjs'
 
 const botUserAgents = new Map([
   [

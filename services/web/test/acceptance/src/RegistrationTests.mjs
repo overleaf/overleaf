@@ -1,7 +1,7 @@
 import { expect } from 'chai'
 import async from 'async'
-import metrics from './helpers/metrics.js'
-import User from './helpers/User.js'
+import metrics from './helpers/metrics.mjs'
+import User from './helpers/User.mjs'
 import redis from './helpers/redis.mjs'
 import Features from '../../../app/src/infrastructure/Features.js'
 

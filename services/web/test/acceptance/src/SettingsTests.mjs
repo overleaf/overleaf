@@ -11,7 +11,7 @@
 import { expect } from 'chai'
 
 import async from 'async'
-import User from './helpers/User.js'
+import User from './helpers/User.mjs'
 import Features from '../../../app/src/infrastructure/Features.js'
 
 describe('SettingsPage', function () {

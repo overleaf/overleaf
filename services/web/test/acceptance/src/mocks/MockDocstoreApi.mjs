@@ -1,5 +1,5 @@
-const { db, ObjectId } = require('../../../../app/src/infrastructure/mongodb')
-const AbstractMockApi = require('./AbstractMockApi')
+import { db, ObjectId } from '../../../../app/src/infrastructure/mongodb.js'
+import AbstractMockApi from './AbstractMockApi.mjs'
 
 class MockDocstoreApi extends AbstractMockApi {
   reset() {
@@ -97,7 +97,7 @@ class MockDocstoreApi extends AbstractMockApi {
   }
 }
 
-module.exports = MockDocstoreApi
+export default MockDocstoreApi
 
 // type hint for the inherited `instance` method
 /**

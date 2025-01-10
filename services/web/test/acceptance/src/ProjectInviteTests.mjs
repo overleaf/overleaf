@@ -1,6 +1,6 @@
 import { expect } from 'chai'
 import Async from 'async'
-import User from './helpers/User.js'
+import User from './helpers/User.mjs'
 import settings from '@overleaf/settings'
 import CollaboratorsEmailHandler from '../../../app/src/Features/Collaborators/CollaboratorsEmailHandler.mjs'
 import CollaboratorsInviteHelper from '../../../app/src/Features/Collaborators/CollaboratorsInviteHelper.js'

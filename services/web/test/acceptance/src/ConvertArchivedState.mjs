@@ -1,7 +1,7 @@
 import { expect } from 'chai'
-import { exec } from 'child_process'
+import { exec } from 'node:child_process'
 import mongodb from 'mongodb-legacy'
-import UserHelper from './helpers/User.js'
+import UserHelper from './helpers/User.mjs'
 
 const User = UserHelper.promises
 

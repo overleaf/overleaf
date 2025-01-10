@@ -1,8 +1,8 @@
-import { promisify } from 'util'
+import { promisify } from 'node:util'
 import { expect } from 'chai'
 import Features from '../../../app/src/infrastructure/Features.js'
-import MetricsHelper from './helpers/metrics.js'
-import UserHelper from './helpers/User.js'
+import MetricsHelper from './helpers/metrics.mjs'
+import UserHelper from './helpers/User.mjs'
 const sleep = promisify(setTimeout)
 
 const User = UserHelper.promises

@@ -1,6 +1,6 @@
 import { expect } from 'chai'
-import UserHelper from './helpers/User.js'
-import MetricsHelper from './helpers/metrics.js'
+import UserHelper from './helpers/User.mjs'
+import MetricsHelper from './helpers/metrics.mjs'
 
 const User = UserHelper.promises
 

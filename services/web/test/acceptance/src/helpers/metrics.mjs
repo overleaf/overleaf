@@ -1,6 +1,6 @@
-const { callbackify } = require('util')
-const request = require('./request')
-const metrics = require('@overleaf/metrics')
+import { callbackify } from 'node:util'
+import request from './request.js'
+import metrics from '@overleaf/metrics'
 
 async function getMetric(matcher) {
   const { body } = await request.promises.request('/metrics')
@@ -16,7 +16,7 @@ function resetMetrics() {
   metrics.register.resetMetrics()
 }
 
-module.exports = {
+export default {
   getMetric: callbackify(getMetric),
   resetMetrics,
   promises: {

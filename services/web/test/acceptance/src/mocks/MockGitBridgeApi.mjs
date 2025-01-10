@@ -1,4 +1,4 @@
-import AbstractMockApi from './AbstractMockApi.js'
+import AbstractMockApi from './AbstractMockApi.mjs'
 
 class MockGitBridgeApi extends AbstractMockApi {
   reset() {

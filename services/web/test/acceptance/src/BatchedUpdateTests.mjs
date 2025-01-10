@@ -1,4 +1,4 @@
-import { spawnSync } from 'child_process'
+import { spawnSync } from 'node:child_process'
 import { expect } from 'chai'
 import { db, ObjectId } from '../../../app/src/infrastructure/mongodb.js'
 

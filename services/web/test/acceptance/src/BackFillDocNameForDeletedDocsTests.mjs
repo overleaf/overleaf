@@ -1,9 +1,9 @@
-import { exec } from 'child_process'
-import { promisify } from 'util'
+import { exec } from 'node:child_process'
+import { promisify } from 'node:util'
 import { expect } from 'chai'
 import logger from '@overleaf/logger'
 import { db, ObjectId } from '../../../app/src/infrastructure/mongodb.js'
-import UserHelper from './helpers/User.js'
+import UserHelper from './helpers/User.mjs'
 import { renderObjectId } from '@overleaf/mongo-utils/batchedUpdate.js'
 
 const User = UserHelper.promises

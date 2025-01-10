@@ -1,8 +1,8 @@
 import '../../../../../test/acceptance/src/helpers/InitApp.mjs'
-import MockProjectHistoryApi from '../../../../../test/acceptance/src/mocks/MockProjectHistoryApi.js'
-import MockDocstoreApi from '../../../../../test/acceptance/src/mocks/MockDocstoreApi.js'
-import MockDocUpdaterApi from '../../../../../test/acceptance/src/mocks/MockDocUpdaterApi.js'
-import MockV1Api from '../../../../admin-panel/test/acceptance/src/mocks/MockV1Api.js'
+import MockProjectHistoryApi from '../../../../../test/acceptance/src/mocks/MockProjectHistoryApi.mjs'
+import MockDocstoreApi from '../../../../../test/acceptance/src/mocks/MockDocstoreApi.mjs'
+import MockDocUpdaterApi from '../../../../../test/acceptance/src/mocks/MockDocUpdaterApi.mjs'
+import MockV1Api from '../../../../admin-panel/test/acceptance/src/mocks/MockV1Api.mjs'
 
 const mockOpts = {
   debug: ['1', 'true', 'TRUE'].includes(process.env.DEBUG_MOCKS),

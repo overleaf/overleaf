@@ -7,7 +7,7 @@ import {
   normalizeQuery,
   normalizeMultiQuery,
 } from '../../../app/src/Features/Helpers/Mongo.js'
-import UserHelper from './helpers/User.js'
+import UserHelper from './helpers/User.mjs'
 
 const User = UserHelper.promises
 

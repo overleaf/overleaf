@@ -14,7 +14,7 @@
 import { expect } from 'chai'
 
 import async from 'async'
-import User from './helpers/User.js'
+import User from './helpers/User.mjs'
 
 describe('User Must Reconfirm', function () {
   beforeEach(function (done) {

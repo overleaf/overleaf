@@ -1,4 +1,4 @@
-import AbstractMockApi from './AbstractMockApi.js'
+import AbstractMockApi from './AbstractMockApi.mjs'
 
 // Currently there is nothing implemented here as we have no acceptance tests
 // for the notifications API. This does however stop errors appearing in the

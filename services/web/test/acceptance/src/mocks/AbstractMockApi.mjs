@@ -1,6 +1,6 @@
-const OError = require('@overleaf/o-error')
-const express = require('express')
-const bodyParser = require('body-parser')
+import OError from '@overleaf/o-error'
+import express from 'express'
+import bodyParser from 'body-parser'
 
 /**
  * Abstract class for running a mock API via Express. Handles setting up of
@@ -190,4 +190,4 @@ class AbstractMockApi {
   }
 }
 
-module.exports = AbstractMockApi
+export default AbstractMockApi

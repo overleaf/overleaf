@@ -1,9 +1,9 @@
-import User from './helpers/User.js'
+import User from './helpers/User.mjs'
 import async from 'async'
 import { expect } from 'chai'
 import _ from 'lodash'
 import request from './helpers/request.js'
-import expectErrorResponse from './helpers/expectErrorResponse.js'
+import expectErrorResponse from './helpers/expectErrorResponse.mjs'
 
 const _initUser = (user, callback) => {
   async.series([cb => user.login(cb), cb => user.getCsrfToken(cb)], callback)

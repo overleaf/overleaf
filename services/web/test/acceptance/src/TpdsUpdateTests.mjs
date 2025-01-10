@@ -1,7 +1,7 @@
 import { expect } from 'chai'
 import ProjectGetter from '../../../app/src/Features/Project/ProjectGetter.js'
 import request from './helpers/request.js'
-import User from './helpers/User.js'
+import User from './helpers/User.mjs'
 
 describe('TpdsUpdateTests', function () {
   beforeEach(function (done) {

@@ -1,10 +1,13 @@
-const fs = require('fs')
-const path = require('path')
-const SignedXml = require('xml-crypto').SignedXml
-const { SamlLog } = require('../../../../app/src/models/SamlLog')
-const { expect } = require('chai')
-const zlib = require('zlib')
-const xml2js = require('xml2js')
+import fs from 'node:fs'
+import path from 'node:path'
+import { SignedXml } from 'xml-crypto'
+import { SamlLog } from '../../../../app/src/models/SamlLog.js'
+import { expect } from 'chai'
+import zlib from 'node:zlib'
+import { fileURLToPath } from 'node:url'
+import xml2js from 'xml2js'
+
+const __dirname = fileURLToPath(new URL('.', import.meta.url))
 
 const samlDataDefaults = {
   firstName: 'first-name',
@@ -246,4 +249,4 @@ const SAMLHelper = {
   getRequestId,
 }
 
-module.exports = SAMLHelper
+export default SAMLHelper

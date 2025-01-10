@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import UserHelper from './helpers/User.js'
+import UserHelper from './helpers/User.mjs'
 import { Project } from '../../../app/src/models/Project.js'
 import mongodb from 'mongodb-legacy'
 import cheerio from 'cheerio'

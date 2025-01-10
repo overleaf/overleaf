@@ -1,10 +1,10 @@
 import { expect } from 'chai'
 import async from 'async'
-import User from './helpers/User.js'
+import User from './helpers/User.mjs'
 import request from './helpers/request.js'
 import settings from '@overleaf/settings'
 import { db } from '../../../app/src/infrastructure/mongodb.js'
-import expectErrorResponse from './helpers/expectErrorResponse.js'
+import expectErrorResponse from './helpers/expectErrorResponse.mjs'
 import SplitTestHandler from '../../../app/src/Features/SplitTests/SplitTestHandler.js'
 import sinon from 'sinon'
 

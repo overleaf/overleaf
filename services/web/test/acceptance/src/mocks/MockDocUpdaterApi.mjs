@@ -1,4 +1,4 @@
-const AbstractMockApi = require('./AbstractMockApi')
+import AbstractMockApi from './AbstractMockApi.mjs'
 
 class MockDocUpdaterApi extends AbstractMockApi {
   reset() {
@@ -56,7 +56,7 @@ class MockDocUpdaterApi extends AbstractMockApi {
   }
 }
 
-module.exports = MockDocUpdaterApi
+export default MockDocUpdaterApi
 
 // type hint for the inherited `instance` method
 /**

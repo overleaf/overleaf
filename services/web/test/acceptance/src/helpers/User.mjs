@@ -1,14 +1,16 @@
-const OError = require('@overleaf/o-error')
-const request = require('./request')
-const settings = require('@overleaf/settings')
-const { db, ObjectId } = require('../../../../app/src/infrastructure/mongodb')
-const UserModel = require('../../../../app/src/models/User').User
-const UserUpdater = require('../../../../app/src/Features/User/UserUpdater')
-const AuthenticationManager = require('../../../../app/src/Features/Authentication/AuthenticationManager')
-const { promisifyClass } = require('@overleaf/promise-utils')
-const fs = require('fs')
-const Path = require('path')
-const { Cookie } = require('tough-cookie')
+import OError from '@overleaf/o-error'
+import request from './request.js'
+import settings from '@overleaf/settings'
+import { db, ObjectId } from '../../../../app/src/infrastructure/mongodb.js'
+import { User as UserModel } from '../../../../app/src/models/User.js'
+import UserUpdater from '../../../../app/src/Features/User/UserUpdater.js'
+import AuthenticationManager from '../../../../app/src/Features/Authentication/AuthenticationManager.js'
+import { promisifyClass } from '@overleaf/promise-utils'
+import fs from 'node:fs'
+import Path from 'node:path'
+import { fileURLToPath } from 'node:url'
+import { Cookie } from 'tough-cookie'
+const __dirname = fileURLToPath(new URL('.', import.meta.url))
 const COOKIE_DOMAIN = settings.cookieDomain
 // The cookie domain has a leading '.' but the cookie jar stores it without.
 const DEFAULT_COOKIE_URL = `https://${COOKIE_DOMAIN.replace(/^\./, '')}/`
@@ -1296,4 +1298,4 @@ User.promises.prototype.doRequest = async function (method, params) {
   })
 }
 
-module.exports = User
+export default User

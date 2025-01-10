@@ -1,5 +1,5 @@
-const { assert } = require('chai')
-const { CacheFlow } = require('cache-flow')
+import { assert } from 'chai'
+import { CacheFlow } from 'cache-flow'
 
 const sendStaffRequest = async function (
   staffUser,
@@ -52,7 +52,7 @@ const expectResponse = async function (
   }
 }
 
-module.exports = {
+export default {
   sendStaffRequest,
   createTest,
   updateTestConfig,

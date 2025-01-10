@@ -1,6 +1,6 @@
 import { expect } from 'chai'
 import cheerio from 'cheerio'
-import UserHelper from '../../../../../test/acceptance/src/helpers/UserHelper.js'
+import UserHelper from '../../../../../test/acceptance/src/helpers/UserHelper.mjs'
 
 describe('Launchpad', function () {
   const adminEmail = 'admin@example.com'

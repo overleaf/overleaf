@@ -6,8 +6,8 @@ import fs from 'node:fs'
 import Settings from '@overleaf/settings'
 import _ from 'lodash'
 import ProjectGetter from '../../../../../app/src/Features/Project/ProjectGetter.js'
-import User from '../../../../../test/acceptance/src/helpers/User.js'
-import MockDocUpdaterApiClass from '../../../../../test/acceptance/src/mocks/MockDocUpdaterApi.js'
+import User from '../../../../../test/acceptance/src/helpers/User.mjs'
+import MockDocUpdaterApiClass from '../../../../../test/acceptance/src/mocks/MockDocUpdaterApi.mjs'
 import Features from '../../../../../app/src/infrastructure/Features.js'
 
 const { ObjectId } = mongodb

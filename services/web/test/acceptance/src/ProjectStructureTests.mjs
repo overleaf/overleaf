@@ -4,9 +4,9 @@ import Path from 'node:path'
 import fs from 'node:fs'
 import { Project } from '../../../app/src/models/Project.js'
 import ProjectGetter from '../../../app/src/Features/Project/ProjectGetter.js'
-import UserHelper from './helpers/User.js'
-import MockDocStoreApiClass from './mocks/MockDocstoreApi.js'
-import MockDocUpdaterApiClass from './mocks/MockDocUpdaterApi.js'
+import UserHelper from './helpers/User.mjs'
+import MockDocStoreApiClass from './mocks/MockDocstoreApi.mjs'
+import MockDocUpdaterApiClass from './mocks/MockDocUpdaterApi.mjs'
 import { fileURLToPath } from 'node:url'
 
 const User = UserHelper.promises

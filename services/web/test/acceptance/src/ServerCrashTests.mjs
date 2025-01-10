@@ -1,10 +1,10 @@
 import { expect } from 'chai'
-import fs from 'fs'
-import Path from 'path'
+import fs from 'node:fs'
+import Path from 'node:path'
 import fetch from 'node-fetch'
-import UserHelper from './helpers/UserHelper.js'
+import UserHelper from './helpers/UserHelper.mjs'
 import glob from 'glob'
-import { fileURLToPath } from 'url'
+import { fileURLToPath } from 'node:url'
 
 const BASE_URL = UserHelper.baseUrl()
 

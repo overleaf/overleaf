@@ -1,5 +1,5 @@
 import AuthenticationManager from '../../../app/src/Features/Authentication/AuthenticationManager.js'
-import UserHelper from './helpers/UserHelper.js'
+import UserHelper from './helpers/UserHelper.mjs'
 import Features from '../../../app/src/infrastructure/Features.js'
 import { expect } from 'chai'
 

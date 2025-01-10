@@ -1,6 +1,8 @@
-const { ObjectId } = require('mongodb-legacy')
-const PublisherModel = require('../../../../app/src/models/Publisher').Publisher
-const { callbackifyClass } = require('@overleaf/promise-utils')
+import mongodb from 'mongodb-legacy'
+import { Publisher as PublisherModel } from '../../../../app/src/models/Publisher.js'
+import { callbackifyClass } from '@overleaf/promise-utils'
+
+const { ObjectId } = mongodb
 
 let count = parseInt(Math.random() * 999999)
 
@@ -35,4 +37,4 @@ class PromisifiedPublisher {
 const Publisher = callbackifyClass(PromisifiedPublisher)
 Publisher.promises = class extends PromisifiedPublisher {}
 
-module.exports = Publisher
+export default Publisher

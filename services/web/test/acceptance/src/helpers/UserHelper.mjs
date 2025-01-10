@@ -1,23 +1,22 @@
-const { CookieJar } = require('tough-cookie')
-const AuthenticationManager = require('../../../../app/src/Features/Authentication/AuthenticationManager')
-const Settings = require('@overleaf/settings')
-const InstitutionsAPI = require('../../../../app/src/Features/Institutions/InstitutionsAPI')
-const UserCreator = require('../../../../app/src/Features/User/UserCreator')
-const UserGetter = require('../../../../app/src/Features/User/UserGetter')
-const UserUpdater = require('../../../../app/src/Features/User/UserUpdater')
-const moment = require('moment')
-const fetch = require('node-fetch')
-const { db } = require('../../../../app/src/infrastructure/mongodb')
-const { ObjectId } = require('mongodb-legacy')
-const {
-  UserAuditLogEntry,
-} = require('../../../../app/src/models/UserAuditLogEntry')
+import { CookieJar } from 'tough-cookie'
+import AuthenticationManager from '../../../../app/src/Features/Authentication/AuthenticationManager.js'
+import Settings from '@overleaf/settings'
+import InstitutionsAPI from '../../../../app/src/Features/Institutions/InstitutionsAPI.js'
+import UserCreator from '../../../../app/src/Features/User/UserCreator.js'
+import UserGetter from '../../../../app/src/Features/User/UserGetter.js'
+import UserUpdater from '../../../../app/src/Features/User/UserUpdater.js'
+import moment from 'moment'
+import fetch from 'node-fetch'
+import { db } from '../../../../app/src/infrastructure/mongodb.js'
+import mongodb from 'mongodb-legacy'
+
+import { UserAuditLogEntry } from '../../../../app/src/models/UserAuditLogEntry.js'
 
 // Import the rate limiter so we can clear it between tests
 
-const {
-  RateLimiter,
-} = require('../../../../app/src/infrastructure/RateLimiter')
+import { RateLimiter } from '../../../../app/src/infrastructure/RateLimiter.js'
+
+const { ObjectId } = mongodb
 
 const rateLimiters = {
   resendConfirmation: new RateLimiter('resend-confirmation'),
@@ -557,4 +556,4 @@ class UserHelper {
   }
 }
 
-module.exports = UserHelper
+export default UserHelper

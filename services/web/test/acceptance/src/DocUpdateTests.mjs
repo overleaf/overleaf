@@ -1,4 +1,4 @@
-import User from './helpers/User.js'
+import User from './helpers/User.mjs'
 import request from './helpers/request.js'
 import { expect } from 'chai'
 import settings from '@overleaf/settings'

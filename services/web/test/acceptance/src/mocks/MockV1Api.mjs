@@ -1,6 +1,6 @@
-const AbstractMockApi = require('./AbstractMockApi')
-const moment = require('moment')
-const sinon = require('sinon')
+import AbstractMockApi from './AbstractMockApi.mjs'
+import moment from 'moment'
+import sinon from 'sinon'
 
 class MockV1Api extends AbstractMockApi {
   reset() {
@@ -462,7 +462,7 @@ class MockV1Api extends AbstractMockApi {
   }
 }
 
-module.exports = MockV1Api
+export default MockV1Api
 
 // type hint for the inherited `instance` method
 /**
