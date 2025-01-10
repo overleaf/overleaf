@@ -281,6 +281,7 @@ module.exports = {
         `http://${process.env.V1_HISTORY_HOST || '127.0.0.1'}:${
           process.env.V1_HISTORY_PORT || '3100'
         }/api`,
+      urlForGitBridge: process.env.V1_HISTORY_URL_FOR_GIT_BRIDGE,
       user: process.env.V1_HISTORY_USER || 'staging',
       pass:
         process.env.V1_HISTORY_PASS ||
