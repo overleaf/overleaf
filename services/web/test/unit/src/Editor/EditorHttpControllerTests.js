@@ -132,9 +132,6 @@ describe('EditorHttpController', function () {
     this.SplitTestHandler = {
       promises: {
         getAssignmentForUser: sinon.stub().resolves({ variant: 'default' }),
-        getAssignmentForMongoUser: sinon
-          .stub()
-          .resolves({ variant: 'default' }),
       },
     }
     this.UserGetter = { promises: { getUser: sinon.stub().resolves(null, {}) } }

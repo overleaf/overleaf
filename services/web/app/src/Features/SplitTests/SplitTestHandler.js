@@ -128,42 +128,6 @@ async function getAssignmentForUser(
 }
 
 /**
- * Get the assignment of a user to a split test by their pre-fetched mongo doc.
- *
- * Warning: this does not support query parameters override, nor makes the assignment and split test info available to
- * the frontend through locals. Wherever possible, `getAssignment` should be used instead.
- *
- * @param user the user
- * @param splitTestName the unique name of the split test
- * @param options {Object<sync: boolean>} - for test purposes only, to force the synchronous update of the user's profile
- * @returns {Promise<Assignment>}
- */
-async function getAssignmentForMongoUser(
-  user,
-  splitTestName,
-  { sync = false } = {}
-) {
-  try {
-    if (!Features.hasFeature('saas')) {
-      return _getNonSaasAssignment(splitTestName)
-    }
-
-    return _getAssignment(splitTestName, {
-      analyticsId: await UserAnalyticsIdCache.get(user._id),
-      sync,
-      user,
-      userId: user._id.toString(),
-    })
-  } catch (error) {
-    logger.error(
-      { err: error },
-      'Failed to get split test assignment for mongo user'
-    )
-    return DEFAULT_ASSIGNMENT
-  }
-}
-
-/**
  * Get a mapping of the active split test assignments for the given user
  */
 async function getActiveAssignmentsForUser(userId, removeArchived = false) {
@@ -238,8 +202,7 @@ async function getOneTimeAssignment(splitTestName) {
       variant: selectedVariantName,
       currentVersion,
       isFirstNonDefaultAssignment:
-        selectedVariantName !== DEFAULT_VARIANT &&
-        currentVersion.analyticsEnabled,
+        selectedVariantName !== DEFAULT_VARIANT && _isSplitTest(splitTest),
     })
   } catch (error) {
     logger.error({ err: error }, 'Failed to get one time split test assignment')
@@ -344,7 +307,7 @@ async function _getAssignment(
   }
 
   if (activeForUser) {
-    if (currentVersion.analyticsEnabled) {
+    if (_isSplitTest(splitTest)) {
       // if the user is logged in, persist the assignment
       if (userId) {
         const assignmentData = {
@@ -424,7 +387,25 @@ async function _getAssignment(
 
 async function _getAssignmentMetadata(analyticsId, user, splitTest) {
   const currentVersion = SplitTestUtils.getCurrentVersion(splitTest)
+  const versionNumber = currentVersion.versionNumber
   const phase = currentVersion.phase
+
+  // For continuity on phase rollout for gradual rollouts, we keep all users from the previous phase enrolled to the variant.
+  // In beta, all alpha users are cohorted to the variant, and the same in release phase all alpha & beta users.
+  if (
+    _isGradualRollout(splitTest) &&
+    ((phase === BETA_PHASE && user?.alphaProgram) ||
+      (phase === RELEASE_PHASE && (user?.alphaProgram || user?.betaProgram)))
+  ) {
+    return {
+      activeForUser: true,
+      selectedVariantName: currentVersion.variants[0].name,
+      phase,
+      versionNumber,
+      isFirstNonDefaultAssignment: false,
+    }
+  }
+
   if (
     (phase === ALPHA_PHASE && !user?.alphaProgram) ||
     (phase === BETA_PHASE && !user?.betaProgram)
@@ -433,6 +414,7 @@ async function _getAssignmentMetadata(analyticsId, user, splitTest) {
       activeForUser: false,
     }
   }
+
   const userId = user?._id.toString()
   const percentile = getPercentile(analyticsId || userId, splitTest.name, phase)
   const selectedVariantName =
@@ -442,10 +424,10 @@ async function _getAssignmentMetadata(analyticsId, user, splitTest) {
     activeForUser: true,
     selectedVariantName,
     phase,
-    versionNumber: currentVersion.versionNumber,
+    versionNumber,
     isFirstNonDefaultAssignment:
       selectedVariantName !== DEFAULT_VARIANT &&
-      currentVersion.analyticsEnabled &&
+      _isSplitTest(splitTest) &&
       (!Array.isArray(user?.splitTests?.[splitTest.name]) ||
         !user?.splitTests?.[splitTest.name]?.some(
           assignment => assignment.variantName !== DEFAULT_VARIANT
@@ -582,10 +564,17 @@ async function _getSplitTest(name) {
   }
 }
 
+function _isSplitTest(featureFlag) {
+  return SplitTestUtils.getCurrentVersion(featureFlag).analyticsEnabled
+}
+
+function _isGradualRollout(featureFlag) {
+  return !SplitTestUtils.getCurrentVersion(featureFlag).analyticsEnabled
+}
+
 module.exports = {
   getPercentile,
   getAssignment: callbackify(getAssignment),
-  getAssignmentForMongoUser: callbackify(getAssignmentForMongoUser),
   getAssignmentForUser: callbackify(getAssignmentForUser),
   getOneTimeAssignment: callbackify(getOneTimeAssignment),
   getActiveAssignmentsForUser: callbackify(getActiveAssignmentsForUser),
@@ -593,7 +582,6 @@ module.exports = {
   clearOverridesInSession,
   promises: {
     getAssignment,
-    getAssignmentForMongoUser,
     getAssignmentForUser,
     getOneTimeAssignment,
     getActiveAssignmentsForUser,

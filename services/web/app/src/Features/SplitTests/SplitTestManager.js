@@ -83,7 +83,12 @@ async function createSplitTest(
 ) {
   const stripedVariants = []
   let stripeStart = 0
-  _checkNewVariantsConfiguration([], configuration.variants)
+
+  _checkNewVariantsConfiguration(
+    [],
+    configuration.variants,
+    configuration.analyticsEnabled
+  )
   for (const variant of configuration.variants) {
     stripedVariants.push({
       name: (variant.name || '').trim(),
@@ -139,7 +144,11 @@ async function updateSplitTestConfig({ name, configuration, comment }, userId) {
       `Cannot update with different phase - use /switch-to-next-phase endpoint instead`
     )
   }
-  _checkNewVariantsConfiguration(lastVersion.variants, configuration.variants)
+  _checkNewVariantsConfiguration(
+    lastVersion.variants,
+    configuration.variants,
+    configuration.analyticsEnabled
+  )
   const updatedVariants = _updateVariantsWithNewConfiguration(
     lastVersion.variants,
     configuration.variants
@@ -320,7 +329,15 @@ async function clearCache() {
   await CacheFlow.reset('split-test')
 }
 
-function _checkNewVariantsConfiguration(variants, newVariantsConfiguration) {
+function _checkNewVariantsConfiguration(
+  variants,
+  newVariantsConfiguration,
+  analyticsEnabled
+) {
+  if (newVariantsConfiguration?.length > 1 && !analyticsEnabled) {
+    throw new OError(`Gradual rollouts can only have a single variant`)
+  }
+
   const totalRolloutPercentage = _getTotalRolloutPercentage(
     newVariantsConfiguration
   )
