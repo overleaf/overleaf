@@ -187,8 +187,23 @@ describe('TeamInvitesController', function () {
     describe('when user is logged out', function () {
       it('renders logged out invite page', function (done) {
         const res = {
-          render: template => {
+          render: (template, data) => {
             expect(template).to.equal('subscriptions/team/invite_logged_out')
+            expect(data.groupSSOActive).to.be.undefined
+            done()
+          },
+        }
+        this.Controller.viewInvite(
+          { params: { token: 'token123' }, session: {} },
+          res
+        )
+      })
+
+      it('includes groupSSOActive flag when the group has SSO enabled', function (done) {
+        this.Modules.promises.hooks.fire = sinon.stub().resolves([true])
+        const res = {
+          render: (template, data) => {
+            expect(data.groupSSOActive).to.be.true
             done()
           },
         }

@@ -25,10 +25,10 @@ block content
 									p #{translate("invited_to_group_login_benefits", {appName: appName})}
 									p #{translate("invited_to_group_login", {emailAddress: emailAddress})}
 									p
-										a.btn.btn-primary(href=`/login?redir=/subscription/invites/${inviteToken}`) #{translate("login_to_accept_invitation")}
+										a.btn.btn-primary(href=`/login?redir=/subscription/invites/${inviteToken}${groupSSOActive ? "&hide_sso_login=true" : ""}`) #{translate("login_to_accept_invitation")}
 							else
 								div
 									p #{translate("invited_to_group_register_benefits", {appName: appName})}
 									p #{translate("invited_to_group_register", {inviterName: inviterName})}
 									p
-										a.btn.btn-primary(href=`/register?redir=/subscription/invites/${inviteToken}`) #{translate("register_to_accept_invitation")}
+										a.btn.btn-primary(href=`/register?redir=/subscription/invites/${inviteToken}${groupSSOActive ? "&hide_sso_login=true" : ""}`) #{translate("register_to_accept_invitation")}

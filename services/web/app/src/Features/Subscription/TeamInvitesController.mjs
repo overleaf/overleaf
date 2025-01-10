@@ -80,6 +80,10 @@ async function viewInvite(req, res, next) {
     return ErrorController.notFound(req, res)
   }
 
+  const groupSSOActive = (
+    await Modules.promises.hooks.fire('hasGroupSSOEnabled', subscription)
+  )?.[0]
+
   let validationStatus = new Map()
   if (userId) {
     const personalSubscription =
@@ -91,10 +95,6 @@ async function viewInvite(req, res, next) {
       personalSubscription.recurlyStatus?.state !== 'canceled' &&
       personalSubscription.recurlySubscription_id &&
       personalSubscription.recurlySubscription_id !== ''
-
-    const groupSSOActive = (
-      await Modules.promises.hooks.fire('hasGroupSSOEnabled', subscription)
-    )?.[0]
 
     if (subscription?.groupPolicy) {
       if (!subscription.populated('groupPolicy')) {
@@ -178,6 +178,7 @@ async function viewInvite(req, res, next) {
       accountExists: userByEmail != null,
       emailAddress: invite.email,
       user: { id: null },
+      groupSSOActive,
     })
   }
 }
