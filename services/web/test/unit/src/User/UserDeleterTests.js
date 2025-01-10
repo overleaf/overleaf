@@ -299,18 +299,45 @@ describe('UserDeleter', function () {
             this.DeletedUserMock.verify()
           })
 
-          it('should email the user', async function () {
-            await this.UserDeleter.promises.deleteUser(this.userId, {
-              ipAddress: this.ipAddress,
+          describe('email notifications', function () {
+            it('should email the user', async function () {
+              await this.UserDeleter.promises.deleteUser(this.userId, {
+                ipAddress: this.ipAddress,
+              })
+              const emailOptions = {
+                to: 'bob@bob.com',
+                action: 'account deleted',
+                actionDescribed: 'your Overleaf account was deleted',
+              }
+              expect(
+                this.EmailHandler.promises.sendEmail
+              ).to.have.been.calledWith('securityAlert', emailOptions)
             })
-            const emailOptions = {
-              to: 'bob@bob.com',
-              action: 'account deleted',
-              actionDescribed: 'your Overleaf account was deleted',
-            }
-            expect(
-              this.EmailHandler.promises.sendEmail
-            ).to.have.been.calledWith('securityAlert', emailOptions)
+
+            it('should fail when the email service fails', async function () {
+              this.EmailHandler.promises.sendEmail = sinon
+                .stub()
+                .rejects(new Error('email failed'))
+              await expect(
+                this.UserDeleter.promises.deleteUser(this.userId, {
+                  ipAddress: this.ipAddress,
+                })
+              ).to.be.rejectedWith('email failed')
+            })
+
+            describe('with "force: true" option', function () {
+              it('should succeed when the email service fails', async function () {
+                this.EmailHandler.promises.sendEmail = sinon
+                  .stub()
+                  .rejects(new Error('email failed'))
+                await expect(
+                  this.UserDeleter.promises.deleteUser(this.userId, {
+                    ipAddress: this.ipAddress,
+                    force: true,
+                  })
+                ).to.be.fulfilled
+              })
+            })
           })
 
           it('should add an audit log entry', async function () {

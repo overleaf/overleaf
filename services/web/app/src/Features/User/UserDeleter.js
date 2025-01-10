@@ -56,7 +56,7 @@ async function deleteUser(userId, options) {
     )
     await _createDeletedUser(user, options)
     await ProjectDeleter.promises.deleteUsersProjects(user._id)
-    await _sendDeleteEmail(user)
+    await _sendDeleteEmail(user, options.force)
     await deleteMongoUser(user._id)
   } catch (error) {
     logger.warn({ error, userId }, 'something went wrong deleting the user')
@@ -119,13 +119,24 @@ async function ensureCanDeleteUser(user) {
   }
 }
 
-async function _sendDeleteEmail(user) {
+async function _sendDeleteEmail(user, force) {
   const emailOptions = {
     to: user.email,
     action: 'account deleted',
     actionDescribed: 'your Overleaf account was deleted',
   }
-  await EmailHandler.promises.sendEmail('securityAlert', emailOptions)
+  try {
+    await EmailHandler.promises.sendEmail('securityAlert', emailOptions)
+  } catch (error) {
+    if (force) {
+      logger.error(
+        { error },
+        'error sending account deletion email notification'
+      )
+    } else {
+      throw error
+    }
+  }
 }
 
 async function _createDeletedUser(user, options) {

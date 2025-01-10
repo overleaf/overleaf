@@ -24,6 +24,7 @@ async function main() {
       }
       const options = {
         ipAddress: '0.0.0.0',
+        force: true,
       }
       UserDeleter.deleteUser(user._id, options, function (err) {
         if (err) {
