@@ -40,3 +40,7 @@ block content
 									span(data-ol-inflight="idle") #{translate("login")}
 									span(hidden data-ol-inflight="pending") #{translate("logging_in")}…
 								a.pull-right(href='/user/password/reset') #{translate("forgot_your_password")}?
+							if login_support_text
+								hr
+								p.text-center !{login_support_text}	
+	
