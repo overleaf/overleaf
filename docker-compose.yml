@@ -40,10 +40,6 @@ services:
             # Disables email confirmation requirement
             EMAIL_CONFIRMATION_DISABLED: 'true'
 
-            # temporary fix for LuaLaTex compiles
-            # see https://github.com/overleaf/overleaf/issues/695
-            TEXMFVAR: /var/lib/overleaf/tmp/texmf-var
-
             ## Set for SSL via nginx-proxy
             #VIRTUAL_HOST: 103.112.212.22
 
@@ -102,7 +98,7 @@ services:
 
     mongo:
         restart: always
-        image: mongo:5.0
+        image: mongo:6.0
         container_name: mongo
         command: '--replSet overleaf'
         volumes:
