@@ -2,6 +2,7 @@ import { Panel, PanelGroup } from 'react-resizable-panels'
 import classNames from 'classnames'
 import { HorizontalResizeHandle } from '@/features/ide-react/components/resize/horizontal-resize-handle'
 import PdfPreview from '@/features/pdf-preview/components/pdf-preview'
+import { Editor } from './editor'
 
 export default function MainLayout() {
   return (
@@ -34,8 +35,8 @@ export default function MainLayout() {
             hitAreaMargins={{ coarse: 0, fine: 0 }}
           />
           <Panel id="ide-redesign-editor-panel" order={2}>
-            <div className="ide-skeleton-block ide-redesign-full-height">
-              Editor
+            <div className="ide-redesign-editor-container">
+              <Editor />
             </div>
           </Panel>
           <HorizontalResizeHandle
