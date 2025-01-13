@@ -1,6 +1,6 @@
 import { expect } from 'chai'
 
-import { getHueForUserId } from '../../../../frontend/js/shared/utils/colors'
+import { getHueForUserId } from '@/shared/utils/colors'
 
 describe('colors', function () {
   const currentUser = '5bf7dab7a18b0b7a1cf6738c'
