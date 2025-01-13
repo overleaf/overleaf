@@ -1,21 +1,26 @@
 import DictionaryModal from '@/features/dictionary/components/dictionary-modal'
 import { EditorProviders } from '../../../helpers/editor-providers'
+import { learnedWords } from '@/features/source-editor/extensions/spelling/learned-words'
 
 describe('<DictionaryModalContent />', function () {
+  let originalLearnedWords
+
   beforeEach(function () {
+    cy.then(() => {
+      originalLearnedWords = learnedWords.global
+    })
     cy.interceptCompile()
   })
 
   afterEach(function () {
-    cy.window().then(win => {
-      win.dispatchEvent(new CustomEvent('learnedWords:doreset'))
+    cy.then(() => {
+      learnedWords.global = originalLearnedWords
     })
   })
 
   it('list words', function () {
-    cy.window().then(win => {
-      win.metaAttributesCache.set('ol-learnedWords', ['foo', 'bar'])
-      win.dispatchEvent(new CustomEvent('learnedWords:doreset'))
+    cy.then(win => {
+      learnedWords.global = new Set(['foo', 'bar'])
     })
 
     cy.mount(
@@ -29,9 +34,8 @@ describe('<DictionaryModalContent />', function () {
   })
 
   it('shows message when empty', function () {
-    cy.window().then(win => {
-      win.metaAttributesCache.set('ol-learnedWords', [])
-      win.dispatchEvent(new CustomEvent('learnedWords:doreset'))
+    cy.then(win => {
+      learnedWords.global = new Set([])
     })
 
     cy.mount(
@@ -46,9 +50,8 @@ describe('<DictionaryModalContent />', function () {
   it('removes words', function () {
     cy.intercept('/spelling/unlearn', { statusCode: 200 })
 
-    cy.window().then(win => {
-      win.metaAttributesCache.set('ol-learnedWords', ['Foo', 'bar'])
-      win.dispatchEvent(new CustomEvent('learnedWords:doreset'))
+    cy.then(win => {
+      learnedWords.global = new Set(['Foo', 'bar'])
     })
 
     cy.mount(
@@ -73,9 +76,8 @@ describe('<DictionaryModalContent />', function () {
   it('handles errors', function () {
     cy.intercept('/spelling/unlearn', { statusCode: 500 }).as('unlearn')
 
-    cy.window().then(win => {
-      win.metaAttributesCache.set('ol-learnedWords', ['foo'])
-      win.dispatchEvent(new CustomEvent('learnedWords:doreset'))
+    cy.then(win => {
+      learnedWords.global = new Set(['foo'])
     })
 
     cy.mount(

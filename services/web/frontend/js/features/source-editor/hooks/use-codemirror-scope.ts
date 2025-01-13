@@ -33,12 +33,7 @@ import { setAutoPair } from '../extensions/auto-pair'
 import { setAutoComplete } from '../extensions/auto-complete'
 import { usePhrases } from './use-phrases'
 import { setPhrases } from '../extensions/phrases'
-import {
-  addLearnedWord,
-  removeLearnedWord,
-  resetLearnedWords,
-  setSpellCheckLanguage,
-} from '../extensions/spelling'
+import { setSpellCheckLanguage } from '../extensions/spelling'
 import {
   createChangeManager,
   dispatchEditorEvent,
@@ -565,39 +560,6 @@ function useCodeMirrorScope(view: EditorView) {
       })
     }
   }, [view, cursorHighlights, currentDoc])
-
-  const handleAddLearnedWords = useCallback(
-    (event: CustomEvent<string>) => {
-      // If the word addition is from adding the word to the dictionary via the
-      // editor, there will be a transaction running now so wait for that to
-      // finish before starting a new one
-      window.setTimeout(() => {
-        view.dispatch(addLearnedWord(spellCheckLanguage, event.detail))
-      }, 0)
-    },
-    [spellCheckLanguage, view]
-  )
-
-  useEventListener('learnedWords:add', handleAddLearnedWords)
-
-  const handleRemoveLearnedWords = useCallback(
-    (event: CustomEvent<string>) => {
-      window.setTimeout(() => {
-        view.dispatch(removeLearnedWord(spellCheckLanguage, event.detail))
-      })
-    },
-    [spellCheckLanguage, view]
-  )
-
-  useEventListener('learnedWords:remove', handleRemoveLearnedWords)
-
-  const handleResetLearnedWords = useCallback(() => {
-    window.setTimeout(() => {
-      view.dispatch(resetLearnedWords())
-    })
-  }, [view])
-
-  useEventListener('learnedWords:reset', handleResetLearnedWords)
 
   useEventListener(
     'editor:focus',

@@ -2,7 +2,6 @@ import { useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import useAsync from '../../../shared/hooks/use-async'
 import { postJSON } from '../../../infrastructure/fetch-json'
-import ignoredWords from '../ignored-words'
 import { debugConsole } from '@/utils/debugging'
 import {
   OLModalBody,
@@ -15,6 +14,7 @@ import OLNotification from '@/features/ui/components/ol/ol-notification'
 import OLButton from '@/features/ui/components/ol/ol-button'
 import OLIconButton from '@/features/ui/components/ol/ol-icon-button'
 import { bsVersion } from '@/features/utils/bootstrap-5'
+import { learnedWords as initialLearnedWords } from '@/features/source-editor/extensions/spelling/learned-words'
 
 type DictionaryModalContentProps = {
   handleHide: () => void
@@ -26,22 +26,24 @@ export default function DictionaryModalContent({
   handleHide,
 }: DictionaryModalContentProps) {
   const { t } = useTranslation()
-  const [learnedWords, setLearnedWords] = useState(ignoredWords.learnedWords)
+
+  const [learnedWords, setLearnedWords] = useState<Set<string>>(
+    initialLearnedWords.global
+  )
 
   const { isError, runAsync } = useAsync()
 
   const handleRemove = useCallback(
     word => {
-      runAsync(
-        postJSON('/spelling/unlearn', {
-          body: {
-            word,
-          },
-        })
-      )
+      runAsync(postJSON('/spelling/unlearn', { body: { word } }))
         .then(() => {
-          ignoredWords.remove(word)
-          setLearnedWords(new Set(ignoredWords.learnedWords))
+          setLearnedWords(value => {
+            value.delete(word)
+            return new Set(value)
+          })
+          window.dispatchEvent(
+            new CustomEvent('editor:remove-learned-word', { detail: word })
+          )
         })
         .catch(debugConsole.error)
     },
@@ -62,7 +64,7 @@ export default function DictionaryModalContent({
           />
         ) : null}
 
-        {learnedWords?.size > 0 ? (
+        {learnedWords.size > 0 ? (
           <ul className="list-unstyled dictionary-entries-list">
             {[...learnedWords].sort(wordsSortFunction).map(learnedWord => (
               <li key={learnedWord} className="dictionary-entry">

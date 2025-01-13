@@ -5,8 +5,6 @@ import {
   Prec,
 } from '@codemirror/state'
 import { EditorView, showTooltip, Tooltip, keymap } from '@codemirror/view'
-import { addIgnoredWord } from './ignored-words'
-import { learnWordRequest } from './backend'
 import { Word, Mark, getMarkAtPosition } from './spellchecker'
 import { debugConsole } from '@/utils/debugging'
 import {
@@ -17,6 +15,8 @@ import { sendMB } from '@/infrastructure/event-tracking'
 import ReactDOM from 'react-dom'
 import { SpellingSuggestions } from '@/features/source-editor/extensions/spelling/spelling-suggestions'
 import { SplitTestProvider } from '@/shared/context/split-test-context'
+import { addLearnedWord } from '@/features/source-editor/extensions/spelling/learned-words'
+import { postJSON } from '@/infrastructure/fetch-json'
 
 /*
  * The time until which a click event will be ignored, so it doesn't immediately close the spelling menu.
@@ -176,10 +176,14 @@ const createSpellingSuggestionList = (word: Word) => (view: EditorView) => {
           }
         }}
         handleLearnWord={() => {
-          learnWordRequest(word)
+          postJSON('/spelling/learn', {
+            body: {
+              word: word.text,
+            },
+          })
             .then(() => {
-              view.dispatch({
-                effects: [addIgnoredWord.of(word), hideSpellingMenu.of(null)],
+              view.dispatch(addLearnedWord(word.text), {
+                effects: hideSpellingMenu.of(null),
               })
               sendMB('spelling-word-added', {
                 language: getSpellCheckLanguage(view.state),
@@ -203,9 +207,11 @@ const createSpellingSuggestionList = (word: Word) => (view: EditorView) => {
             return
           }
 
-          view.dispatch({
-            changes: [{ from: tooltip.pos, to: tooltip.end, insert: text }],
-            effects: [hideSpellingMenu.of(null)],
+          window.setTimeout(() => {
+            view.dispatch({
+              changes: [{ from: tooltip.pos, to: tooltip.end, insert: text }],
+              effects: [hideSpellingMenu.of(null)],
+            })
           })
           view.focus()
 

@@ -1,6 +1,6 @@
-import { WordCache } from '../../../../../../frontend/js/features/source-editor/extensions/spelling/cache'
+import { WordCache } from '@/features/source-editor/extensions/spelling/cache'
 import { expect } from 'chai'
-import { Word } from '../../../../../../frontend/js/features/source-editor/extensions/spelling/spellchecker'
+import { Word } from '@/features/source-editor/extensions/spelling/spellchecker'
 
 describe('WordCache', function () {
   describe('basic operations', function () {
@@ -18,25 +18,25 @@ describe('WordCache', function () {
 
       word = 'bar'
       expect(cache.get(lang, word)).to.not.exist
-      cache.set(lang, word, ['a', 'b'])
-      expect(cache.get(lang, word)).to.deep.equal(['a', 'b'])
+      cache.set(lang, word, false)
+      expect(cache.get(lang, word)).to.equal(false)
     })
 
     it('should store words in separate languages', function () {
       const word = 'foo'
       const otherLang = 'zz'
 
-      cache.set(lang, word, 101)
-      expect(cache.get(lang, word)).to.equal(101)
+      cache.set(lang, word, true)
+      expect(cache.get(lang, word)).to.equal(true)
       expect(cache.get(otherLang, word)).to.not.exist
 
-      cache.set(otherLang, word, 202)
-      expect(cache.get(lang, word)).to.equal(101)
-      expect(cache.get(otherLang, word)).to.equal(202)
+      cache.set(otherLang, word, false)
+      expect(cache.get(lang, word)).to.equal(true)
+      expect(cache.get(otherLang, word)).to.equal(false)
     })
 
     it('should check words against cache', function () {
-      cache.set(lang, 'foo', ['a', 'b'])
+      cache.set(lang, 'foo', false)
       cache.set(lang, 'bar', true)
       cache.set(lang, 'baz', true)
       const wordsToCheck = [
@@ -49,8 +49,8 @@ describe('WordCache', function () {
       const result = cache.checkWords(lang, wordsToCheck)
       expect(result).to.have.keys('knownMisspelledWords', 'unknownWords')
       expect(result.knownMisspelledWords).to.deep.equal([
-        { text: 'foo', suggestions: ['a', 'b'], from: 0 },
-        { text: 'foo', suggestions: ['a', 'b'], from: 3 },
+        { text: 'foo', from: 0 },
+        { text: 'foo', from: 3 },
       ])
       expect(result.unknownWords).to.deep.equal([
         { text: 'quux', from: 2 },

@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
 import getMeta from '@/utils/meta'
-import { globalLearnedWords } from '@/features/dictionary/ignored-words'
+import { globalIgnoredWords } from '@/features/dictionary/ignored-words'
 import { HunspellManager } from '@/features/source-editor/hunspell/HunspellManager'
 import { debugConsole } from '@/utils/debugging'
+import { learnedWords } from '@/features/source-editor/extensions/spelling/learned-words'
 
 export const useHunspell = (spellCheckLanguage: string | null) => {
   const [hunspellManager, setHunspellManager] = useState<HunspellManager>()
@@ -14,8 +15,8 @@ export const useHunspell = (spellCheckLanguage: string | null) => {
       )
       if (lang?.dic) {
         const hunspellManager = new HunspellManager(lang.dic, [
-          ...globalLearnedWords,
-          ...getMeta('ol-learnedWords'),
+          ...globalIgnoredWords,
+          ...learnedWords.global,
         ])
         setHunspellManager(hunspellManager)
         debugConsole.log(spellCheckLanguage, hunspellManager)

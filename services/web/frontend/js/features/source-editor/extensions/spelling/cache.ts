@@ -7,16 +7,14 @@ export const cacheKey = (lang: string, wordText: string) => {
   return `${lang}:${wordText}`
 }
 
-export type WordCacheValue = string[] | boolean | number
-
 export class WordCache {
-  private _cache: LRU<string, WordCacheValue>
+  private _cache: LRU<string, boolean>
 
   constructor() {
     this._cache = new LRU({ max: CACHE_MAX })
   }
 
-  set(lang: string, wordText: string, value: WordCacheValue) {
+  set(lang: string, wordText: string, value: boolean) {
     const key = cacheKey(lang, wordText)
     this._cache.set(key, value)
   }
@@ -29,6 +27,10 @@ export class WordCache {
   remove(lang: string, wordText: string) {
     const key = cacheKey(lang, wordText)
     this._cache.delete(key)
+  }
+
+  reset() {
+    this._cache = new LRU({ max: CACHE_MAX })
   }
 
   /*
@@ -44,23 +46,20 @@ export class WordCache {
     knownMisspelledWords: Word[]
     unknownWords: Word[]
   } {
-    const knownMisspelledWords = []
-    const unknownWords = []
-    const seen: Record<string, WordCacheValue | undefined> = {}
+    const knownMisspelledWords: Word[] = []
+    const unknownWords: Word[] = []
+    const seen: Record<string, boolean | undefined> = {}
     for (const word of wordsToCheck) {
       const wordText = word.text
-      if (seen[wordText] == null) {
+      if (seen[wordText] === undefined) {
         seen[wordText] = this.get(lang, wordText)
       }
       const cached = seen[wordText]
-      if (cached == null) {
+      if (cached === undefined) {
         // Word is not known
         unknownWords.push(word)
-      } else if (cached === true) {
-        // Word is known to be correct
-      } else {
+      } else if (!cached) {
         // Word is known to be misspelled
-        word.suggestions = cached
         knownMisspelledWords.push(word)
       }
     }
@@ -74,7 +73,7 @@ export class WordCache {
 export const addWordToCache = StateEffect.define<{
   lang: string
   wordText: string
-  value: string[] | boolean
+  value: boolean
 }>()
 
 export const removeWordFromCache = StateEffect.define<{

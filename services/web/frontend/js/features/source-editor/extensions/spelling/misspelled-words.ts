@@ -1,6 +1,6 @@
 import { StateField, StateEffect, Line } from '@codemirror/state'
 import { EditorView, Decoration, DecorationSet } from '@codemirror/view'
-import { updateAfterAddingIgnoredWord } from './ignored-words'
+import { addLearnedWordEffect } from './learned-words'
 import { Word } from './spellchecker'
 import { setSpellCheckLanguageEffect } from '@/features/source-editor/extensions/spelling/index'
 
@@ -59,11 +59,15 @@ export const misspelledWordsField = StateField.define<DecorationSet>({
           add: effect.value.map(word => createMark(word)),
           sort: true,
         })
-      } else if (effect.is(updateAfterAddingIgnoredWord)) {
+      } else if (effect.is(addLearnedWordEffect)) {
+        const word = effect.value
         // Remove existing marks matching the text of a supplied word
         marks = marks.update({
           filter(_from, _to, mark) {
-            return mark.spec.word.text !== effect.value
+            return (
+              mark.spec.word.text !== word &&
+              mark.spec.word.text !== capitaliseWord(word)
+            )
           },
         })
       } else if (effect.is(setSpellCheckLanguageEffect)) {
@@ -76,3 +80,6 @@ export const misspelledWordsField = StateField.define<DecorationSet>({
     return EditorView.decorations.from(field)
   },
 })
+
+const capitaliseWord = (word: string) =>
+  word.charAt(0).toUpperCase() + word.substring(1)

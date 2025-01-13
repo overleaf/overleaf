@@ -6,20 +6,12 @@ import {
   TransactionSpec,
 } from '@codemirror/state'
 import { misspelledWordsField } from './misspelled-words'
-import {
-  addIgnoredWord,
-  ignoredWordsField,
-  removeIgnoredWord,
-  resetSpellChecker,
-  updateAfterAddingIgnoredWord,
-} from './ignored-words'
-import { addWordToCache, cacheField, removeWordFromCache } from './cache'
+import { removeLearnedWord } from './learned-words'
+import { cacheField } from './cache'
 import { hideSpellingMenu, spellingMenuField } from './context-menu'
 import { SpellChecker } from './spellchecker'
 import { parserWatcher } from '../wait-for-parser'
 import type { HunspellManager } from '@/features/source-editor/hunspell/HunspellManager'
-import { debugConsole } from '@/utils/debugging'
-import { captureException } from '@/infrastructure/error-reporter'
 
 type Options = {
   spellCheckLanguage?: string
@@ -44,11 +36,25 @@ export const spelling = ({ spellCheckLanguage, hunspellManager }: Options) => {
         : null
     ),
     misspelledWordsField,
-    ignoredWordsField,
     cacheField,
     spellingMenuField,
+    dictionary,
   ]
 }
+
+const dictionary = ViewPlugin.define(view => {
+  const listener = (event: Event) => {
+    view.dispatch(removeLearnedWord((event as CustomEvent<string>).detail))
+  }
+
+  window.addEventListener('editor:remove-learned-word', listener)
+
+  return {
+    destroy() {
+      window.removeEventListener('editor:remove-learned-word', listener)
+    },
+  }
+})
 
 const spellingTheme = EditorView.baseTheme({
   '.ol-cm-spelling-error': {
@@ -82,16 +88,6 @@ const spellCheckerField = StateField.define<SpellChecker | null>({
               effect.value.hunspellManager
             )
           : null
-      } else if (effect.is(addIgnoredWord)) {
-        value?.addWord(effect.value.text).catch(error => {
-          captureException(error)
-          debugConsole.error(error)
-        })
-      } else if (effect.is(removeIgnoredWord)) {
-        value?.removeWord(effect.value.text).catch(error => {
-          captureException(error)
-          debugConsole.error(error)
-        })
       }
     }
     return value
@@ -155,42 +151,5 @@ export const setSpellCheckLanguage = ({
       }),
       hideSpellingMenu.of(null),
     ],
-  }
-}
-
-export const addLearnedWord = (
-  spellCheckLanguage: string,
-  word: string
-): TransactionSpec => {
-  return {
-    effects: [
-      addWordToCache.of({
-        lang: spellCheckLanguage,
-        wordText: word,
-        value: true,
-      }),
-      updateAfterAddingIgnoredWord.of(word),
-    ],
-  }
-}
-
-export const removeLearnedWord = (
-  spellCheckLanguage: string,
-  word: string
-): TransactionSpec => {
-  return {
-    effects: [
-      removeWordFromCache.of({
-        lang: spellCheckLanguage,
-        wordText: word,
-      }),
-      removeIgnoredWord.of({ text: word }),
-    ],
-  }
-}
-
-export const resetLearnedWords = (): TransactionSpec => {
-  return {
-    effects: [resetSpellChecker.of(null)],
   }
 }
