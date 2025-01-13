@@ -367,6 +367,21 @@ const DocumentManager = {
     }
   },
 
+  async getComment(projectId, docId, commentId) {
+    const { ranges } = await DocumentManager.getDoc(projectId, docId)
+
+    const comment = ranges?.comments?.find(comment => comment.id === commentId)
+
+    if (!comment) {
+      throw new Errors.NotFoundError({
+        message: 'comment not found',
+        info: { commentId },
+      })
+    }
+
+    return { comment }
+  },
+
   async deleteComment(projectId, docId, commentId, userId) {
     const { lines, version, ranges, pathname, historyRangesSupport } =
       await DocumentManager.getDoc(projectId, docId)
@@ -497,6 +512,16 @@ const DocumentManager = {
       DocumentManager.getDoc,
       projectId,
       docId
+    )
+  },
+
+  async getCommentWithLock(projectId, docId, commentId) {
+    const UpdateManager = require('./UpdateManager')
+    return await UpdateManager.promises.lockUpdatesAndDo(
+      DocumentManager.getComment,
+      projectId,
+      docId,
+      commentId
     )
   },
 
@@ -676,6 +701,7 @@ module.exports = {
         'pathname',
         'projectHistoryId',
       ],
+      getCommentWithLock: ['comment'],
     },
   }),
   promises: DocumentManager,

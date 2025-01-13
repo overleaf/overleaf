@@ -184,6 +184,65 @@ describe('HttpController', function () {
     })
   })
 
+  describe('getComment', function () {
+    beforeEach(function () {
+      this.ranges = {
+        changes: 'mock',
+        comments: [
+          {
+            id: 'comment-id-1',
+          },
+          {
+            id: 'comment-id-2',
+          },
+        ],
+      }
+      this.req = {
+        params: {
+          project_id: this.project_id,
+          doc_id: this.doc_id,
+          comment_id: this.comment_id,
+        },
+        query: {},
+        body: {},
+      }
+    })
+
+    beforeEach(function () {
+      this.DocumentManager.getCommentWithLock = sinon
+        .stub()
+        .callsArgWith(3, null, this.ranges.comments[0])
+      this.HttpController.getComment(this.req, this.res, this.next)
+    })
+
+    it('should get the comment', function () {
+      this.DocumentManager.getCommentWithLock
+        .calledWith(this.project_id, this.doc_id, this.comment_id)
+        .should.equal(true)
+    })
+
+    it('should return the comment as JSON', function () {
+      this.res.json
+        .calledWith({
+          id: 'comment-id-1',
+        })
+        .should.equal(true)
+    })
+
+    it('should log the request', function () {
+      this.logger.debug
+        .calledWith(
+          {
+            projectId: this.project_id,
+            docId: this.doc_id,
+            commentId: this.comment_id,
+          },
+          'getting comment via http'
+        )
+        .should.equal(true)
+    })
+  })
+
   describe('setDoc', function () {
     beforeEach(function () {
       this.lines = ['one', 'two', 'three']

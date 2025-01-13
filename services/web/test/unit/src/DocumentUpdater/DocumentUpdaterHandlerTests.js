@@ -459,6 +459,40 @@ describe('DocumentUpdaterHandler', function () {
     })
   })
 
+  describe('getComment', function () {
+    describe('successfully', function () {
+      beforeEach(function () {
+        this.comment = {
+          id: 'mock-comment-id-1',
+        }
+        this.body = this.comment
+        this.request.callsArgWith(1, null, { statusCode: 200 }, this.body)
+        this.handler.getComment(
+          this.project_id,
+          this.doc_id,
+          this.comment.id,
+          this.callback
+        )
+      })
+
+      it('should get the comment from the document updater', function () {
+        const url = `${this.settings.apis.documentupdater.url}/project/${this.project_id}/doc/${this.doc_id}/comment/${this.comment.id}`
+        this.request
+          .calledWith({
+            url,
+            method: 'GET',
+            json: true,
+            timeout: 30 * 1000,
+          })
+          .should.equal(true)
+      })
+
+      it('should call the callback with the comment', function () {
+        this.callback.calledWithExactly(null, this.comment).should.equal(true)
+      })
+    })
+  })
+
   describe('getDocument', function () {
     describe('successfully', function () {
       beforeEach(function () {

@@ -12,6 +12,8 @@ describe('AuthorizationManager', function () {
   beforeEach(function () {
     this.user = { _id: new ObjectId() }
     this.project = { _id: new ObjectId() }
+    this.doc = { _id: new ObjectId() }
+    this.thread = { _id: new ObjectId() }
     this.token = 'some-token'
 
     this.ProjectGetter = {
@@ -46,6 +48,14 @@ describe('AuthorizationManager', function () {
       },
     }
 
+    this.DocumentUpdaterHandler = {
+      promises: {
+        getComment: sinon
+          .stub()
+          .resolves({ metadata: { user_id: new ObjectId() } }),
+      },
+    }
+
     this.AuthorizationManager = SandboxedModule.require(modulePath, {
       requires: {
         'mongodb-legacy': { ObjectId },
@@ -54,6 +64,8 @@ describe('AuthorizationManager', function () {
         '../Project/ProjectGetter': this.ProjectGetter,
         '../../models/User': { User: this.User },
         '../TokenAccess/TokenAccessHandler': this.TokenAccessHandler,
+        '../DocumentUpdater/DocumentUpdaterHandler':
+          this.DocumentUpdaterHandler,
         '@overleaf/settings': {
           passwordStrengthOptions: {},
           adminPrivilegeAvailable: true,
@@ -70,6 +82,7 @@ describe('AuthorizationManager', function () {
         ['id', 'readAndWrite', true, true],
         ['id', 'readOnly', false, false],
         ['id', 'readOnly', false, true],
+        ['id', 'review', false, true],
       ]
       const restrictedScenarios = [
         [null, 'readOnly', false, false],
@@ -432,11 +445,21 @@ describe('AuthorizationManager', function () {
     siteAdmin: true,
     owner: true,
     readAndWrite: true,
+    review: true,
     readOnly: true,
     publicReadAndWrite: true,
     publicReadOnly: true,
     tokenReadAndWrite: true,
     tokenReadOnly: true,
+  })
+
+  testPermission('canUserReviewProjectContent', {
+    siteAdmin: true,
+    owner: true,
+    readAndWrite: true,
+    review: true,
+    publicReadAndWrite: true,
+    tokenReadAndWrite: true,
   })
 
   testPermission('canUserWriteProjectContent', {
@@ -503,6 +526,80 @@ describe('AuthorizationManager', function () {
       })
     })
   })
+
+  describe('canUserReviewThread', function () {
+    it('should return true when user has write permissions', async function () {
+      this.CollaboratorsGetter.promises.getMemberIdPrivilegeLevel
+        .withArgs(this.user._id, this.project._id)
+        .resolves(PrivilegeLevels.READ_AND_WRITE)
+
+      const canResolve =
+        await this.AuthorizationManager.promises.canUserResolveThread(
+          this.user._id,
+          this.project._id,
+          this.doc._id,
+          this.thread._id,
+          this.token
+        )
+
+      expect(canResolve).to.equal(true)
+    })
+
+    it('should return false when user has read permission', async function () {
+      this.CollaboratorsGetter.promises.getMemberIdPrivilegeLevel
+        .withArgs(this.user._id, this.project._id)
+        .resolves(PrivilegeLevels.READ_ONLY)
+
+      const canResolve =
+        await this.AuthorizationManager.promises.canUserResolveThread(
+          this.user._id,
+          this.project._id,
+          this.doc._id,
+          this.thread._id,
+          this.token
+        )
+
+      expect(canResolve).to.equal(false)
+    })
+
+    describe('when user has review permission', function () {
+      beforeEach(function () {
+        this.CollaboratorsGetter.promises.getMemberIdPrivilegeLevel
+          .withArgs(this.user._id, this.project._id)
+          .resolves(PrivilegeLevels.REVIEW)
+      })
+
+      it('should return false when user is not the comment author', async function () {
+        const canResolve =
+          await this.AuthorizationManager.promises.canUserResolveThread(
+            this.user._id,
+            this.project._id,
+            this.doc._id,
+            this.thread._id,
+            this.token
+          )
+
+        expect(canResolve).to.equal(false)
+      })
+
+      it('should return true when user is the comment author', async function () {
+        this.DocumentUpdaterHandler.promises.getComment
+          .withArgs(this.project._id, this.doc._id, this.thread._id)
+          .resolves({ metadata: { user_id: this.user._id } })
+
+        const canResolve =
+          await this.AuthorizationManager.promises.canUserResolveThread(
+            this.user._id,
+            this.project._id,
+            this.doc._id,
+            this.thread._id,
+            this.token
+          )
+
+        expect(canResolve).to.equal(true)
+      })
+    })
+  })
 })
 
 function testPermission(permission, privilegeLevels) {
@@ -523,6 +620,11 @@ function testPermission(permission, privilegeLevels) {
       describe('when user has read-write access', function () {
         setupUserPrivilegeLevel(PrivilegeLevels.READ_AND_WRITE)
         expectPermission(permission, privilegeLevels.readAndWrite || false)
+      })
+
+      describe('when user has review access', function () {
+        setupUserPrivilegeLevel(PrivilegeLevels.REVIEW)
+        expectPermission(permission, privilegeLevels.review || false)
       })
 
       describe('when user has read-only access', function () {

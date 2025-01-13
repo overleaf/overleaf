@@ -80,6 +80,23 @@ function deleteDoc(projectId, docId, ignoreFlushErrors, callback) {
   )
 }
 
+function getComment(projectId, docId, commentId, callback) {
+  _makeRequest(
+    {
+      path: `/project/${projectId}/doc/${docId}/comment/${commentId}`,
+      json: true,
+    },
+    projectId,
+    'get-comment',
+    function (error, comment) {
+      if (error) {
+        return callback(error)
+      }
+      callback(null, comment)
+    }
+  )
+}
+
 function getDocument(projectId, docId, fromVersion, callback) {
   _makeRequest(
     {
@@ -548,6 +565,7 @@ module.exports = {
   flushProjectToMongoAndDelete,
   flushDocToMongo,
   deleteDoc,
+  getComment,
   getDocument,
   setDocument,
   appendToDocument,
@@ -567,6 +585,7 @@ module.exports = {
     flushProjectToMongoAndDelete: promisify(flushProjectToMongoAndDelete),
     flushDocToMongo: promisify(flushDocToMongo),
     deleteDoc: promisify(deleteDoc),
+    getComment: promisify(getComment),
     getDocument: promisifyMultiResult(getDocument, [
       'lines',
       'version',

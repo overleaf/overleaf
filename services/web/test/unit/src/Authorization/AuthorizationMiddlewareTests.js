@@ -11,6 +11,8 @@ describe('AuthorizationMiddleware', function () {
   beforeEach(function () {
     this.userId = new ObjectId().toString()
     this.project_id = new ObjectId().toString()
+    this.doc_id = new ObjectId().toString()
+    this.thread_id = new ObjectId().toString()
     this.token = 'some-token'
     this.AuthenticationController = {}
     this.SessionManager = {
@@ -23,8 +25,10 @@ describe('AuthorizationMiddleware', function () {
         canUserReadProject: sinon.stub(),
         canUserWriteProjectSettings: sinon.stub(),
         canUserWriteProjectContent: sinon.stub(),
+        canUserResolveThread: sinon.stub(),
         canUserAdminProject: sinon.stub(),
         canUserRenameProject: sinon.stub(),
+        canUserReviewProjectContent: sinon.stub(),
         isUserSiteAdmin: sinon.stub(),
         isRestrictedUserForProject: sinon.stub(),
       },
@@ -34,6 +38,11 @@ describe('AuthorizationMiddleware', function () {
     }
     this.TokenAccessHandler = {
       getRequestToken: sinon.stub().returns(this.token),
+    }
+    this.DocumentUpdaterHandler = {
+      promises: {
+        getComment: sinon.stub().resolves(),
+      },
     }
     this.AuthorizationMiddleware = SandboxedModule.require(MODULE_PATH, {
       requires: {
@@ -47,6 +56,8 @@ describe('AuthorizationMiddleware', function () {
         '../Helpers/AdminAuthorizationHelper': {
           canRedirectToAdminDomain: sinon.stub().returns(false),
         },
+        '../DocumentUpdater/DocumentUpdaterHandler':
+          this.DocumentUpdaterHandler,
       },
     })
     this.req = {
@@ -73,6 +84,46 @@ describe('AuthorizationMiddleware', function () {
       'ensureUserCanWriteProjectContent',
       'canUserWriteProjectContent'
     )
+  })
+
+  describe('ensureUserCanResolveThread', function () {
+    beforeEach(function () {
+      this.req.params.doc_id = this.doc_id
+      this.req.params.thread_id = this.thread_id
+    })
+    describe('when user has permission', function () {
+      beforeEach(function () {
+        this.AuthorizationManager.promises.canUserResolveThread
+          .withArgs(
+            this.userId,
+            this.project_id,
+            this.doc_id,
+            this.thread_id,
+            this.token
+          )
+          .resolves(true)
+      })
+
+      invokeMiddleware('ensureUserCanResolveThread')
+      expectNext()
+    })
+
+    describe("when user doesn't have permission", function () {
+      beforeEach(function () {
+        this.AuthorizationManager.promises.canUserResolveThread
+          .withArgs(
+            this.userId,
+            this.project_id,
+            this.doc_id,
+            this.thread_id,
+            this.token
+          )
+          .resolves(false)
+      })
+
+      invokeMiddleware('ensureUserCanResolveThread')
+      expectForbidden()
+    })
   })
 
   describe('ensureUserCanWriteProjectSettings', function () {

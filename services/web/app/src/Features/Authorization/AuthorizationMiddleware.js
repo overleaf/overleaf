@@ -103,6 +103,32 @@ async function ensureUserCanWriteProjectSettings(req, res, next) {
   next()
 }
 
+async function ensureUserCanResolveThread(req, res, next) {
+  const projectId = _getProjectId(req)
+  const docId = _getDocId(req)
+  const threadId = _getThreadId(req)
+  const userId = _getUserId(req)
+  const token = TokenAccessHandler.getRequestToken(req, projectId)
+  const canResolveThread =
+    await AuthorizationManager.promises.canUserResolveThread(
+      userId,
+      projectId,
+      docId,
+      threadId,
+      token
+    )
+  if (canResolveThread) {
+    logger.debug({ userId, projectId }, 'allowing user resolve comment thread')
+    return next()
+  }
+
+  logger.debug(
+    { userId, projectId, threadId },
+    'denying user to resolve comment thread'
+  )
+  return HttpErrorHandler.forbidden(req, res)
+}
+
 async function ensureUserCanWriteProjectContent(req, res, next) {
   const projectId = _getProjectId(req)
   const userId = _getUserId(req)
@@ -166,6 +192,28 @@ function _getProjectId(req) {
   return projectId
 }
 
+function _getDocId(req) {
+  const docId = req.params.doc_id
+  if (!docId) {
+    throw new Error('Expected doc_id in request parameters')
+  }
+  if (!ObjectId.isValid(docId)) {
+    throw new Errors.NotFoundError(`invalid docId: ${docId}`)
+  }
+  return docId
+}
+
+function _getThreadId(req) {
+  const threadId = req.params.thread_id
+  if (!threadId) {
+    throw new Error('Expected thread_id in request parameters')
+  }
+  if (!ObjectId.isValid(threadId)) {
+    throw new Errors.NotFoundError(`invalid threadId: ${threadId}`)
+  }
+  return threadId
+}
+
 function _getUserId(req) {
   return (
     SessionManager.getLoggedInUserId(req.session) ||
@@ -200,6 +248,7 @@ module.exports = {
   ensureUserCanWriteProjectSettings: expressify(
     ensureUserCanWriteProjectSettings
   ),
+  ensureUserCanResolveThread: expressify(ensureUserCanResolveThread),
   ensureUserCanWriteProjectContent: expressify(
     ensureUserCanWriteProjectContent
   ),

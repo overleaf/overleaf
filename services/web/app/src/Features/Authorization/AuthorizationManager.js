@@ -10,6 +10,7 @@ const PublicAccessLevels = require('./PublicAccessLevels')
 const Errors = require('../Errors/Errors')
 const { hasAdminAccess } = require('../Helpers/AdminAuthorizationHelper')
 const Settings = require('@overleaf/settings')
+const DocumentUpdaterHandler = require('../DocumentUpdater/DocumentUpdaterHandler')
 
 function isRestrictedUser(
   userId,
@@ -190,6 +191,19 @@ async function canUserReadProject(userId, projectId, token) {
   ].includes(privilegeLevel)
 }
 
+async function canUserReviewProjectContent(userId, projectId, token) {
+  const privilegeLevel = await getPrivilegeLevelForProject(
+    userId,
+    projectId,
+    token
+  )
+  return [
+    PrivilegeLevels.OWNER,
+    PrivilegeLevels.READ_AND_WRITE,
+    PrivilegeLevels.REVIEW,
+  ].includes(privilegeLevel)
+}
+
 async function canUserWriteProjectContent(userId, projectId, token) {
   const privilegeLevel = await getPrivilegeLevelForProject(
     userId,
@@ -240,9 +254,37 @@ async function isUserSiteAdmin(userId) {
   return hasAdminAccess(user)
 }
 
+async function canUserResolveThread(userId, projectId, docId, threadId, token) {
+  const privilegeLevel = await getPrivilegeLevelForProject(
+    userId,
+    projectId,
+    token,
+    { ignorePublicAccess: true }
+  )
+  if (
+    privilegeLevel === PrivilegeLevels.OWNER ||
+    privilegeLevel === PrivilegeLevels.READ_AND_WRITE
+  ) {
+    return true
+  }
+
+  if (privilegeLevel !== PrivilegeLevels.REVIEW) {
+    return false
+  }
+
+  const comment = await DocumentUpdaterHandler.promises.getComment(
+    projectId,
+    docId,
+    threadId
+  )
+  return comment.metadata.user_id === userId
+}
+
 module.exports = {
   canUserReadProject: callbackify(canUserReadProject),
   canUserWriteProjectContent: callbackify(canUserWriteProjectContent),
+  canUserReviewProjectContent: callbackify(canUserReviewProjectContent),
+  canUserResolveThread: callbackify(canUserResolveThread),
   canUserWriteProjectSettings: callbackify(canUserWriteProjectSettings),
   canUserRenameProject: callbackify(canUserRenameProject),
   canUserAdminProject: callbackify(canUserAdminProject),
@@ -253,6 +295,8 @@ module.exports = {
   promises: {
     canUserReadProject,
     canUserWriteProjectContent,
+    canUserReviewProjectContent,
+    canUserResolveThread,
     canUserWriteProjectSettings,
     canUserRenameProject,
     canUserAdminProject,

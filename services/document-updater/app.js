@@ -135,6 +135,10 @@ app.use((req, res, next) => {
 })
 
 app.get('/project/:project_id/doc/:doc_id', HttpController.getDoc)
+app.get(
+  '/project/:project_id/doc/:doc_id/comment/:comment_id',
+  HttpController.getComment
+)
 app.get('/project/:project_id/doc/:doc_id/peek', HttpController.peekDoc)
 // temporarily keep the GET method for backwards compatibility
 app.get('/project/:project_id/doc', HttpController.getProjectDocsAndFlushIfOld)

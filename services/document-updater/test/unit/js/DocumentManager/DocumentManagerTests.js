@@ -835,6 +835,77 @@ describe('DocumentManager', function () {
     })
   })
 
+  describe('getComment', function () {
+    beforeEach(function () {
+      this.ranges.comments = [
+        {
+          id: 'mock-comment-id-1',
+        },
+        {
+          id: 'mock-comment-id-2',
+        },
+      ]
+      this.DocumentManager.promises.getDoc = sinon.stub().resolves({
+        lines: this.lines,
+        version: this.version,
+        ranges: this.ranges,
+      })
+    })
+
+    describe('when comment exists', function () {
+      beforeEach(async function () {
+        await expect(
+          this.DocumentManager.promises.getComment(
+            this.project_id,
+            this.doc_id,
+            'mock-comment-id-1'
+          )
+        ).to.eventually.deep.equal({
+          comment: { id: 'mock-comment-id-1' },
+        })
+      })
+
+      it("should get the document's current ranges", function () {
+        this.DocumentManager.promises.getDoc
+          .calledWith(this.project_id, this.doc_id)
+          .should.equal(true)
+      })
+    })
+
+    describe('when comment doesnt exists', function () {
+      beforeEach(async function () {
+        await expect(
+          this.DocumentManager.promises.getComment(
+            this.project_id,
+            this.doc_id,
+            'mock-comment-id-x'
+          )
+        ).to.be.rejectedWith(Errors.NotFoundError)
+      })
+
+      it("should get the document's current ranges", function () {
+        this.DocumentManager.promises.getDoc
+          .calledWith(this.project_id, this.doc_id)
+          .should.equal(true)
+      })
+    })
+
+    describe('when the doc is not found', function () {
+      beforeEach(async function () {
+        this.DocumentManager.promises.getDoc = sinon
+          .stub()
+          .resolves({ lines: null, version: null, ranges: null })
+        await expect(
+          this.DocumentManager.promises.acceptChanges(
+            this.project_id,
+            this.doc_id,
+            [this.change_id]
+          )
+        ).to.be.rejectedWith(Errors.NotFoundError)
+      })
+    })
+  })
+
   describe('deleteComment', function () {
     beforeEach(function () {
       this.comment_id = 'mock-comment-id'
