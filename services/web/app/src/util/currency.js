@@ -3,7 +3,7 @@
  */
 
 /**
- * @import { CurrencyCode } from '../../../types/currency-code'
+ * @import { CurrencyCode } from '../../../types/subscription/currency'
  */
 
 /**
@@ -13,7 +13,7 @@
  * @param {boolean} stripIfInteger
  * @returns {string}
  */
-function formatCurrencyLocalized(amount, currency, locale, stripIfInteger) {
+function formatCurrency(amount, currency, locale, stripIfInteger) {
   const options = { style: 'currency', currency }
   if (stripIfInteger && Number.isInteger(amount)) {
     options.minimumFractionDigits = 0
@@ -34,5 +34,5 @@ function formatCurrencyLocalized(amount, currency, locale, stripIfInteger) {
 }
 
 module.exports = {
-  formatCurrencyLocalized,
+  formatCurrency,
 }

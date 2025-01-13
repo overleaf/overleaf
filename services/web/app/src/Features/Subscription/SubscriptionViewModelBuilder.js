@@ -69,11 +69,7 @@ async function getRedirectToHostedPage(userId, pageType) {
   ].join('')
 }
 
-async function buildUsersSubscriptionViewModel(
-  user,
-  locale = 'en',
-  formatPrice = SubscriptionFormatters.formatPriceDefault
-) {
+async function buildUsersSubscriptionViewModel(user, locale = 'en') {
   let {
     personalSubscription,
     memberGroupSubscriptions,
@@ -313,19 +309,21 @@ async function buildUsersSubscriptionViewModel(
       const pendingSubscriptionTax =
         personalSubscription.recurly.taxRate *
         recurlySubscription.pending_subscription.unit_amount_in_cents
-      personalSubscription.recurly.displayPrice = formatPrice(
-        recurlySubscription.pending_subscription.unit_amount_in_cents +
-          pendingAddOnPrice +
-          pendingAddOnTax +
-          pendingSubscriptionTax,
-        recurlySubscription.currency,
-        locale
-      )
-      personalSubscription.recurly.currentPlanDisplayPrice = formatPrice(
-        recurlySubscription.unit_amount_in_cents + addOnPrice + tax,
-        recurlySubscription.currency,
-        locale
-      )
+      personalSubscription.recurly.displayPrice =
+        SubscriptionFormatters.formatPriceLocalized(
+          recurlySubscription.pending_subscription.unit_amount_in_cents +
+            pendingAddOnPrice +
+            pendingAddOnTax +
+            pendingSubscriptionTax,
+          recurlySubscription.currency,
+          locale
+        )
+      personalSubscription.recurly.currentPlanDisplayPrice =
+        SubscriptionFormatters.formatPriceLocalized(
+          recurlySubscription.unit_amount_in_cents + addOnPrice + tax,
+          recurlySubscription.currency,
+          locale
+        )
       const pendingTotalLicenses =
         (pendingPlan.membersLimit || 0) + pendingAdditionalLicenses
       personalSubscription.recurly.pendingAdditionalLicenses =
@@ -333,11 +331,12 @@ async function buildUsersSubscriptionViewModel(
       personalSubscription.recurly.pendingTotalLicenses = pendingTotalLicenses
       personalSubscription.pendingPlan = pendingPlan
     } else {
-      personalSubscription.recurly.displayPrice = formatPrice(
-        recurlySubscription.unit_amount_in_cents + addOnPrice + tax,
-        recurlySubscription.currency,
-        locale
-      )
+      personalSubscription.recurly.displayPrice =
+        SubscriptionFormatters.formatPriceLocalized(
+          recurlySubscription.unit_amount_in_cents + addOnPrice + tax,
+          recurlySubscription.currency,
+          locale
+        )
     }
   }
 

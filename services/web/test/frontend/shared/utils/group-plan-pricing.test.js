@@ -1,6 +1,5 @@
 import { expect } from 'chai'
 import { createLocalizedGroupPlanPrice } from '../../../../frontend/js/features/plans/utils/group-plan-pricing'
-import { formatCurrencyLocalized } from '@/shared/utils/currency'
 
 describe('group-plan-pricing', function () {
   beforeEach(function () {
@@ -25,11 +24,6 @@ describe('group-plan-pricing', function () {
         },
       },
     })
-    window.metaAttributesCache.set('ol-currencySymbols', {
-      CHF: 'Fr',
-      DKK: 'kr',
-      USD: '$',
-    })
     window.metaAttributesCache.set('ol-i18n', { currentLangCode: 'en' })
   })
 
@@ -41,7 +35,6 @@ describe('group-plan-pricing', function () {
           currency: 'CHF',
           licenseSize: '2',
           usage: 'enterprise',
-          formatCurrency: formatCurrencyLocalized,
         })
 
         expect(localizedGroupPlanPrice).to.deep.equal({
@@ -57,7 +50,6 @@ describe('group-plan-pricing', function () {
           currency: 'DKK',
           licenseSize: '2',
           usage: 'enterprise',
-          formatCurrency: formatCurrencyLocalized,
         })
 
         expect(localizedGroupPlanPrice).to.deep.equal({
@@ -73,7 +65,6 @@ describe('group-plan-pricing', function () {
           currency: 'USD',
           licenseSize: '2',
           usage: 'enterprise',
-          formatCurrency: formatCurrencyLocalized,
         })
 
         expect(localizedGroupPlanPrice).to.deep.equal({

@@ -2,7 +2,7 @@ import getMeta from '@/utils/meta'
 
 const DEFAULT_LOCALE = getMeta('ol-i18n')?.currentLangCode ?? 'en'
 
-export function formatCurrencyLocalized(
+export function formatCurrency(
   amount: number,
   currency: string,
   locale: string = DEFAULT_LOCALE,

@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { Card, ListGroup } from 'react-bootstrap-5'
-import { formatCurrencyLocalized } from '@/shared/utils/currency'
+import { formatCurrency } from '@/shared/utils/currency'
 import { formatTime } from '@/features/utils/format-date'
 import {
   GroupPlanUpgrade,
@@ -39,7 +39,7 @@ function UpgradeSummary({ subscriptionChange }: UpgradeSummaryProps) {
                 {t('users')}
               </span>
               <span data-testid="subtotal">
-                {formatCurrencyLocalized(
+                {formatCurrency(
                   subscriptionChange.immediateCharge.subtotal,
                   subscriptionChange.currency
                 )}
@@ -48,7 +48,7 @@ function UpgradeSummary({ subscriptionChange }: UpgradeSummaryProps) {
             <ListGroup.Item className="bg-transparent border-0 px-0 gap-3 card-description-secondary">
               <span className="me-auto">{t('sales_tax')}</span>
               <span data-testid="tax">
-                {formatCurrencyLocalized(
+                {formatCurrency(
                   subscriptionChange.immediateCharge.tax,
                   subscriptionChange.currency
                 )}
@@ -57,7 +57,7 @@ function UpgradeSummary({ subscriptionChange }: UpgradeSummaryProps) {
             <ListGroup.Item className="bg-transparent border-0 px-0 gap-3 card-description-secondary">
               <strong className="me-auto">{t('total_due_today')}</strong>
               <strong data-testid="total">
-                {formatCurrencyLocalized(
+                {formatCurrency(
                   subscriptionChange.immediateCharge.total,
                   subscriptionChange.currency
                 )}
@@ -73,7 +73,7 @@ function UpgradeSummary({ subscriptionChange }: UpgradeSummaryProps) {
         </div>
         <div>
           {t('after_that_well_bill_you_x_annually_on_date_unless_you_cancel', {
-            subtotal: formatCurrencyLocalized(
+            subtotal: formatCurrency(
               subscriptionChange.nextInvoice.subtotal,
               subscriptionChange.currency
             ),

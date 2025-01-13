@@ -3,11 +3,8 @@ import _ from 'lodash'
 import { SplitTestContext } from '../../frontend/js/shared/context/split-test-context'
 
 export const splitTestsArgTypes = {
-  'local-ccy-format-v2': {
-    description: 'Use local currency formatting',
-    control: { type: 'radio' as const },
-    options: ['default', 'enabled'],
-  },
+  // to be able to use this utility, you need to add the argTypes for each split test in this object
+  // Check the original implementation for an example: https://github.com/overleaf/internal/pull/17809
 }
 
 export const withSplitTests = (

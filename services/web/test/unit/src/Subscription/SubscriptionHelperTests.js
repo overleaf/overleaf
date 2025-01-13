@@ -1,6 +1,5 @@
 const SandboxedModule = require('sandboxed-module')
 const { expect } = require('chai')
-const { formatCurrencyLocalized } = require('../../../../app/src/util/currency')
 const modulePath =
   '../../../../app/src/Features/Subscription/SubscriptionHelper'
 
@@ -34,15 +33,7 @@ describe('SubscriptionHelper', function () {
   beforeEach(function () {
     this.INITIAL_LICENSE_SIZE = 2
     this.settings = {
-      groupPlanModalOptions: {
-        currencySymbols: {
-          USD: '$',
-          CHF: 'Fr',
-          DKK: 'kr',
-          NOK: 'kr',
-          SEK: 'kr',
-        },
-      },
+      groupPlanModalOptions: {},
     }
     this.GroupPlansData = {
       enterprise: {
@@ -154,8 +145,7 @@ describe('SubscriptionHelper', function () {
         const localizedPrice =
           this.SubscriptionHelper.generateInitialLocalizedGroupPrice(
             'CHF',
-            'fr',
-            formatCurrencyLocalized
+            'fr'
           )
 
         expect(localizedPrice).to.deep.equal({
@@ -176,8 +166,7 @@ describe('SubscriptionHelper', function () {
         const localizedPrice =
           this.SubscriptionHelper.generateInitialLocalizedGroupPrice(
             'DKK',
-            'da',
-            formatCurrencyLocalized
+            'da'
           )
 
         expect(localizedPrice).to.deep.equal({
@@ -198,8 +187,7 @@ describe('SubscriptionHelper', function () {
         const localizedPrice =
           this.SubscriptionHelper.generateInitialLocalizedGroupPrice(
             'SEK',
-            'sv',
-            formatCurrencyLocalized
+            'sv'
           )
 
         expect(localizedPrice).to.deep.equal({
@@ -222,8 +210,7 @@ describe('SubscriptionHelper', function () {
             'NOK',
             // there seem to be possible inconsistencies with the CI
             // maybe it depends on what languages are installed on the server?
-            'en',
-            formatCurrencyLocalized
+            'en'
           )
 
         expect(localizedPrice).to.deep.equal({
@@ -244,8 +231,7 @@ describe('SubscriptionHelper', function () {
         const localizedPrice =
           this.SubscriptionHelper.generateInitialLocalizedGroupPrice(
             'USD',
-            'en',
-            formatCurrencyLocalized
+            'en'
           )
 
         expect(localizedPrice).to.deep.equal({

@@ -176,7 +176,7 @@ describe('SubscriptionController', function () {
         },
         '../../infrastructure/Features': this.Features,
         '../../util/currency': (this.currency = {
-          formatCurrencyLocalized: sinon.stub(),
+          formatCurrency: sinon.stub(),
         }),
       },
     })
@@ -380,26 +380,10 @@ describe('SubscriptionController', function () {
       })
     })
 
-    describe('localCcyAssignment', function () {
-      it('uses formatCurrencyLocalized when variant is enabled', function (done) {
-        this.SplitTestV2Hander.promises.getAssignment
-          .withArgs(this.req, this.res, 'local-ccy-format-v2')
-          .resolves({
-            variant: 'enabled',
-          })
+    describe('formatCurrency data', function () {
+      it('return correct formatCurrency function', function (done) {
         this.res.render = (page, opts) => {
-          expect(opts.formatCurrency).to.equal(
-            this.currency.formatCurrencyLocalized
-          )
-          done()
-        }
-        this.SubscriptionController.plansPage(this.req, this.res)
-      })
-      it('uses formatCurrencyDefault when variant is default', function (done) {
-        this.res.render = (page, opts) => {
-          expect(opts.formatCurrency).to.equal(
-            this.SubscriptionHelper.formatCurrencyDefault
-          )
+          expect(opts.formatCurrency).to.equal(this.currency.formatCurrency)
           done()
         }
         this.SubscriptionController.plansPage(this.req, this.res)
@@ -698,26 +682,10 @@ describe('SubscriptionController', function () {
       })
     })
 
-    describe('localCcyAssignment', function () {
-      it('uses formatCurrencyLocalized when variant is enabled', function (done) {
-        this.SplitTestV2Hander.promises.getAssignment
-          .withArgs(this.req, this.res, 'local-ccy-format-v2')
-          .resolves({
-            variant: 'enabled',
-          })
+    describe('formatCurrency data', function () {
+      it('return correct formatCurrency function', function (done) {
         this.res.render = (page, opts) => {
-          expect(opts.formatCurrency).to.equal(
-            this.currency.formatCurrencyLocalized
-          )
-          done()
-        }
-        this.SubscriptionController.plansPageLightDesign(this.req, this.res)
-      })
-      it('uses formatCurrencyDefault when variant is default', function (done) {
-        this.res.render = (page, opts) => {
-          expect(opts.formatCurrency).to.equal(
-            this.SubscriptionHelper.formatCurrencyDefault
-          )
+          expect(opts.formatCurrency).to.equal(this.currency.formatCurrency)
           done()
         }
         this.SubscriptionController.plansPageLightDesign(this.req, this.res)

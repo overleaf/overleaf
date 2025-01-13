@@ -1,12 +1,8 @@
-import { updateGroupModalPlanPricing } from '../../../../features/plans/group-plan-modal'
 import '../../../../features/plans/plans-v2-group-plan-modal'
-import {
-  createLocalizedGroupPlanPrice,
-  formatCurrencyDefault,
-} from '../../../../features/plans/utils/group-plan-pricing'
+
 import getMeta from '../../../../utils/meta'
-import { getSplitTestVariant } from '@/utils/splitTestUtils'
-import { formatCurrencyLocalized } from '@/shared/utils/currency'
+import { updateGroupModalPlanPricing } from '../../../../features/plans/group-plan-modal'
+import { createLocalizedGroupPlanPrice } from '../../../../features/plans/utils/group-plan-pricing'
 
 const MINIMUM_LICENSE_SIZE_EDUCATIONAL_DISCOUNT = 10
 
@@ -26,11 +22,6 @@ export function updateMainGroupPlanPricing() {
     ? 'educational'
     : 'enterprise'
 
-  const localCcyVariant = getSplitTestVariant('local-ccy-format-v2')
-  const formatCurrency =
-    localCcyVariant === 'enabled'
-      ? formatCurrencyLocalized
-      : formatCurrencyDefault
   const {
     localizedPrice: localizedPriceProfessional,
     localizedPerUserPrice: localizedPerUserPriceProfessional,
@@ -39,7 +30,6 @@ export function updateMainGroupPlanPricing() {
     licenseSize,
     currency,
     usage,
-    formatCurrency,
   })
 
   const {
@@ -50,7 +40,6 @@ export function updateMainGroupPlanPricing() {
     licenseSize,
     currency,
     usage,
-    formatCurrency,
   })
 
   document.querySelector(

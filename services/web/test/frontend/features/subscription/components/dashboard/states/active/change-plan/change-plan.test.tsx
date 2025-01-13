@@ -344,7 +344,7 @@ describe('<ChangePlanModal />', function () {
       within(modal).getByText('Customize your group subscription')
       within(modal).getByText('Save 30% or more')
 
-      within(modal).getByText('$1290 per year')
+      within(modal).getByText('$1,290 per year')
       expect(within(modal).getAllByText('$129 per user').length).to.equal(2)
 
       within(modal).getByText('Each user will have access to:')
@@ -432,9 +432,9 @@ describe('<ChangePlanModal />', function () {
 
       within(modal).getByText('Total:', { exact: false })
       expect(
-        within(modal).getAllByText('€1438.40', { exact: false }).length
+        within(modal).getAllByText('€1,438.40', { exact: false }).length
       ).to.equal(3)
-      within(modal).getByText('(€1160.00 + €278.40 tax) per year', {
+      within(modal).getByText('(€1,160.00 + €278.40 tax) per year', {
         exact: false,
       })
     })
@@ -444,7 +444,7 @@ describe('<ChangePlanModal />', function () {
 
       await openModal()
 
-      within(modal).getByText('$1290 per year')
+      within(modal).getByText('$1,290 per year')
       within(modal).getAllByText('$129 per user')
 
       // plan type (pro collab)
@@ -468,7 +468,7 @@ describe('<ChangePlanModal />', function () {
       ) as HTMLInputElement
       expect(professionalPlanRadioInput.checked).to.be.true
 
-      await within(modal).findByText('$2590 per year')
+      await within(modal).findByText('$2,590 per year')
       await within(modal).findAllByText('$259 per user')
 
       // user count
@@ -478,7 +478,7 @@ describe('<ChangePlanModal />', function () {
       sizeSelect = within(modal).getByRole('combobox') as HTMLInputElement
       expect(sizeSelect.value).to.equal('5')
 
-      await within(modal).findByText('$1395 per year')
+      await within(modal).findByText('$1,395 per year')
       await within(modal).findAllByText('$279 per user')
 
       // usage (enterprise or educational)
@@ -493,12 +493,12 @@ describe('<ChangePlanModal />', function () {
       expect(educationInput.checked).to.be.true
 
       // make sure doesn't change price until back at min user to qualify
-      await within(modal).findByText('$1395 per year')
+      await within(modal).findByText('$1,395 per year')
       await within(modal).findAllByText('$279 per user')
 
       await userEvent.selectOptions(sizeSelect, [screen.getByText('10')])
 
-      await within(modal).findByText('$1550 per year')
+      await within(modal).findByText('$1,550 per year')
       await within(modal).findAllByText('$155 per user')
     })
 

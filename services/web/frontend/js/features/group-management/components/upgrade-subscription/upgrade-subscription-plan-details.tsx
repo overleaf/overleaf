@@ -3,7 +3,7 @@ import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Card, Row, Col } from 'react-bootstrap-5'
 import MaterialIcon from '@/shared/components/material-icon'
-import { formatCurrencyLocalized } from '@/shared/utils/currency'
+import { formatCurrency } from '@/shared/utils/currency'
 
 const LICENSE_ADD_ON = 'additional-license'
 
@@ -30,7 +30,7 @@ function UpgradeSubscriptionPlanDetails() {
           <Col>
             <span className="per-user-price" data-testid="per-user-price">
               <b>
-                {formatCurrencyLocalized(
+                {formatCurrency(
                   licenseUnitPrice,
                   preview.currency,
                   getMeta('ol-i18n')?.currentLangCode ?? 'en',

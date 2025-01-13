@@ -21,15 +21,13 @@ import {
 import { Institution } from '../../../../../types/institution'
 import getMeta from '../../../utils/meta'
 import {
-  formatCurrencyDefault,
   loadDisplayPriceWithTaxPromise,
   loadGroupDisplayPriceWithTaxPromise,
 } from '../util/recurly-pricing'
 import { isRecurlyLoaded } from '../util/is-recurly-loaded'
 import { SubscriptionDashModalIds } from '../../../../../types/subscription/dashboard/modal-ids'
 import { debugConsole } from '@/utils/debugging'
-import { useFeatureFlag } from '@/shared/context/split-test-context'
-import { formatCurrencyLocalized } from '@/shared/utils/currency'
+import { formatCurrency } from '@/shared/utils/currency'
 import { ManagedInstitution } from '../../../../../types/subscription/dashboard/managed-institution'
 import { Publisher } from '../../../../../types/subscription/dashboard/publisher'
 
@@ -141,10 +139,6 @@ export function SubscriptionDashboardProvider({
       memberGroupSubscriptions?.length > 0
   )
 
-  const formatCurrency = useFeatureFlag('local-ccy-format-v2')
-    ? formatCurrencyLocalized
-    : formatCurrencyDefault
-
   useEffect(() => {
     if (!isRecurlyLoaded()) {
       setRecurlyLoadError(true)
@@ -167,8 +161,7 @@ export function SubscriptionDashboardProvider({
               plan.planCode,
               currency,
               taxRate,
-              i18n.language,
-              formatCurrency
+              i18n.language
             )
             if (priceData?.totalAsNumber !== undefined) {
               plan.displayPrice = formatCurrency(
@@ -186,12 +179,7 @@ export function SubscriptionDashboardProvider({
       }
       fetchPlansDisplayPrices().catch(debugConsole.error)
     }
-  }, [
-    personalSubscription,
-    plansWithoutDisplayPrice,
-    i18n.language,
-    formatCurrency,
-  ])
+  }, [personalSubscription, plansWithoutDisplayPrice, i18n.language])
 
   useEffect(() => {
     if (
@@ -214,8 +202,7 @@ export function SubscriptionDashboardProvider({
             taxRate,
             groupPlanToChangeToSize,
             groupPlanToChangeToUsage,
-            i18n.language,
-            formatCurrency
+            i18n.language
           )
         } catch (e) {
           debugConsole.error(e)
@@ -231,7 +218,6 @@ export function SubscriptionDashboardProvider({
     groupPlanToChangeToSize,
     personalSubscription,
     groupPlanToChangeToCode,
-    formatCurrency,
     i18n.language,
   ])
 

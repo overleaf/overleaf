@@ -8,7 +8,7 @@ import {
   PremiumSubscriptionChange,
 } from '../../../../../../types/subscription/subscription-change-preview'
 import getMeta from '@/utils/meta'
-import { formatCurrencyLocalized } from '@/shared/utils/currency'
+import { formatCurrency } from '@/shared/utils/currency'
 import useAsync from '@/shared/hooks/use-async'
 import { useLocation } from '@/shared/hooks/use-location'
 import { debugConsole } from '@/utils/debugging'
@@ -101,7 +101,7 @@ function PreviewSubscriptionChange() {
                 <Col xs={9}>{changeName}</Col>
                 <Col xs={3} className="text-right">
                   <strong>
-                    {formatCurrencyLocalized(
+                    {formatCurrency(
                       preview.immediateCharge.subtotal,
                       preview.currency
                     )}
@@ -115,7 +115,7 @@ function PreviewSubscriptionChange() {
                     {t('vat')} {preview.nextInvoice.tax.rate * 100}%
                   </Col>
                   <Col xs={3} className="text-right">
-                    {formatCurrencyLocalized(
+                    {formatCurrency(
                       preview.immediateCharge.tax,
                       preview.currency
                     )}
@@ -127,7 +127,7 @@ function PreviewSubscriptionChange() {
                 <Col xs={9}>{t('total_today')}</Col>
                 <Col xs={3} className="text-right">
                   <strong>
-                    {formatCurrencyLocalized(
+                    {formatCurrency(
                       preview.immediateCharge.total,
                       preview.currency
                     )}
@@ -169,7 +169,7 @@ function PreviewSubscriptionChange() {
               <Row className="mt-1">
                 <Col xs={9}>{preview.nextInvoice.plan.name}</Col>
                 <Col xs={3} className="text-right">
-                  {formatCurrencyLocalized(
+                  {formatCurrency(
                     preview.nextInvoice.plan.amount,
                     preview.currency
                   )}
@@ -183,7 +183,7 @@ function PreviewSubscriptionChange() {
                     {addOn.quantity > 1 ? ` ×${addOn.quantity}` : ''}
                   </Col>
                   <Col xs={3} className="text-right">
-                    {formatCurrencyLocalized(addOn.amount, preview.currency)}
+                    {formatCurrency(addOn.amount, preview.currency)}
                   </Col>
                 </Row>
               ))}
@@ -194,7 +194,7 @@ function PreviewSubscriptionChange() {
                     {t('vat')} {preview.nextInvoice.tax.rate * 100}%
                   </Col>
                   <Col xs={3} className="text-right">
-                    {formatCurrencyLocalized(
+                    {formatCurrency(
                       preview.nextInvoice.tax.amount,
                       preview.currency
                     )}
@@ -209,10 +209,7 @@ function PreviewSubscriptionChange() {
                     : t('total_per_month')}
                 </Col>
                 <Col xs={3} className="text-right">
-                  {formatCurrencyLocalized(
-                    preview.nextInvoice.total,
-                    preview.currency
-                  )}
+                  {formatCurrency(preview.nextInvoice.total, preview.currency)}
                 </Col>
               </Row>
             </div>

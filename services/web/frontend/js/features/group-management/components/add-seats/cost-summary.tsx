@@ -1,6 +1,6 @@
 import { Trans, useTranslation } from 'react-i18next'
 import { Card, ListGroup } from 'react-bootstrap-5'
-import { formatCurrencyLocalized } from '@/shared/utils/currency'
+import { formatCurrency } from '@/shared/utils/currency'
 import { formatTime } from '@/features/utils/format-date'
 import {
   AddOnUpdate,
@@ -67,7 +67,7 @@ function CostSummary({ subscriptionChange, totalLicenses }: CostSummaryProps) {
                     {t('seats')}
                   </span>
                   <span data-testid="price">
-                    {formatCurrencyLocalized(
+                    {formatCurrency(
                       subscriptionChange.immediateCharge.subtotal,
                       subscriptionChange.currency
                     )}
@@ -82,7 +82,7 @@ function CostSummary({ subscriptionChange, totalLicenses }: CostSummaryProps) {
                     {subscriptionChange.nextInvoice.tax.rate * 100}%
                   </span>
                   <span data-testid="price">
-                    {formatCurrencyLocalized(
+                    {formatCurrency(
                       subscriptionChange.immediateCharge.tax,
                       subscriptionChange.currency
                     )}
@@ -94,7 +94,7 @@ function CostSummary({ subscriptionChange, totalLicenses }: CostSummaryProps) {
                 >
                   <strong className="me-auto">{t('total_due_today')}</strong>
                   <strong data-testid="price">
-                    {formatCurrencyLocalized(
+                    {formatCurrency(
                       subscriptionChange.immediateCharge.total,
                       subscriptionChange.currency
                     )}
@@ -112,7 +112,7 @@ function CostSummary({ subscriptionChange, totalLicenses }: CostSummaryProps) {
               {t(
                 'after_that_well_bill_you_x_annually_on_date_unless_you_cancel',
                 {
-                  subtotal: formatCurrencyLocalized(
+                  subtotal: formatCurrency(
                     subscriptionChange.nextInvoice.total,
                     subscriptionChange.currency
                   ),

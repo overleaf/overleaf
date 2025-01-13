@@ -23,8 +23,7 @@ const SubscriptionHelper = require('./SubscriptionHelper')
 const AuthorizationManager = require('../Authorization/AuthorizationManager')
 const Modules = require('../../infrastructure/Modules')
 const async = require('async')
-const { formatCurrencyLocalized } = require('../../util/currency')
-const SubscriptionFormatters = require('./SubscriptionFormatters')
+const { formatCurrency } = require('../../util/currency')
 const HttpErrorHandler = require('../Errors/HttpErrorHandler')
 const { URLSearchParams } = require('url')
 const RecurlyClient = require('./RecurlyClient')
@@ -113,16 +112,6 @@ async function plansPage(req, res) {
   const { showLATAMBanner, showInrGeoBanner, showBrlGeoBanner } =
     _plansBanners(countryCode)
 
-  const localCcyAssignment = await SplitTestHandler.promises.getAssignment(
-    req,
-    res,
-    'local-ccy-format-v2'
-  )
-  const formatCurrency =
-    localCcyAssignment.variant === 'enabled'
-      ? formatCurrencyLocalized
-      : SubscriptionHelper.formatCurrencyDefault
-
   const shouldLoadHotjar = await getShouldLoadHotjar(req, res)
 
   res.render('subscriptions/plans', {
@@ -142,8 +131,7 @@ async function plansPage(req, res) {
     initialLocalizedGroupPrice:
       SubscriptionHelper.generateInitialLocalizedGroupPrice(
         currency ?? 'USD',
-        language,
-        formatCurrency
+        language
       ),
     showInrGeoBanner,
     showBrlGeoBanner,
@@ -162,16 +150,6 @@ async function plansPageLightDesign(req, res) {
   const currentView = 'annual'
   const plans = SubscriptionViewModelBuilder.buildPlansList()
   const groupPlanModalDefaults = _getGroupPlanModalDefaults(req, currency)
-
-  const localCcyAssignment = await SplitTestHandler.promises.getAssignment(
-    req,
-    res,
-    'local-ccy-format-v2'
-  )
-  const formatCurrency =
-    localCcyAssignment.variant === 'enabled'
-      ? formatCurrencyLocalized
-      : SubscriptionHelper.formatCurrencyDefault
 
   const { showLATAMBanner, showInrGeoBanner, showBrlGeoBanner } =
     _plansBanners(countryCode)
@@ -197,8 +175,7 @@ async function plansPageLightDesign(req, res) {
     initialLocalizedGroupPrice:
       SubscriptionHelper.generateInitialLocalizedGroupPrice(
         currency ?? 'USD',
-        language,
-        formatCurrency
+        language
       ),
     showLATAMBanner,
     showInrGeoBanner,
@@ -222,11 +199,6 @@ function formatGroupPlansDataForDash() {
 async function userSubscriptionPage(req, res) {
   const user = SessionManager.getSessionUser(req.session)
 
-  const localCcyAssignment = await SplitTestHandler.promises.getAssignment(
-    req,
-    res,
-    'local-ccy-format-v2'
-  )
   await SplitTestHandler.promises.getAssignment(req, res, 'ai-add-on')
 
   // Populates splitTestVariants with a value for the split test name and allows
@@ -241,10 +213,7 @@ async function userSubscriptionPage(req, res) {
   const results =
     await SubscriptionViewModelBuilder.promises.buildUsersSubscriptionViewModel(
       user,
-      req.i18n.language,
-      localCcyAssignment.variant === 'enabled'
-        ? SubscriptionFormatters.formatPriceLocalized
-        : SubscriptionFormatters.formatPriceDefault
+      req.i18n.language
     )
   const {
     personalSubscription,
@@ -364,12 +333,6 @@ async function interstitialPaymentPage(req, res) {
     const { showLATAMBanner, showInrGeoBanner, showBrlGeoBanner } =
       _plansBanners(countryCode)
 
-    const localCcyAssignment = await SplitTestHandler.promises.getAssignment(
-      req,
-      res,
-      'local-ccy-format-v2'
-    )
-
     const shouldLoadHotjar = await getShouldLoadHotjar(req, res)
 
     res.render(template, {
@@ -380,11 +343,8 @@ async function interstitialPaymentPage(req, res) {
       recommendedCurrency,
       interstitialPaymentConfig,
       showSkipLink,
-      formatCurrency:
-        localCcyAssignment.variant === 'enabled'
-          ? formatCurrencyLocalized
-          : SubscriptionHelper.formatCurrencyDefault,
-      showCurrencyAndPaymentMethods: localCcyAssignment.variant === 'enabled',
+      formatCurrency,
+      showCurrencyAndPaymentMethods: true, // TODO: remove hardcode
       showInrGeoBanner,
       showBrlGeoBanner,
       showLATAMBanner,
@@ -399,18 +359,11 @@ async function interstitialPaymentPage(req, res) {
 
 async function successfulSubscription(req, res) {
   const user = SessionManager.getSessionUser(req.session)
-  const localCcyAssignment = await SplitTestHandler.promises.getAssignment(
-    req,
-    res,
-    'local-ccy-format-v2'
-  )
+
   const { personalSubscription } =
     await SubscriptionViewModelBuilder.promises.buildUsersSubscriptionViewModel(
       user,
-      req.i18n.language,
-      localCcyAssignment.variant === 'enabled'
-        ? SubscriptionFormatters.formatPriceLocalized
-        : SubscriptionFormatters.formatPriceDefault
+      req.i18n.language
     )
 
   const postCheckoutRedirect = req.session?.postCheckoutRedirect

@@ -13,10 +13,6 @@ export function sendPlansViewEvent() {
         'group-tab-improvements'
       )
 
-      const websiteRedesignPlansTestVariant = getMeta(
-        'ol-websiteRedesignPlansVariant'
-      )
-
       const periodToggleTestVariant = getSplitTestVariant(
         'period-toggle-improvements'
       )
@@ -32,7 +28,6 @@ export function sendPlansViewEvent() {
         currency,
         countryCode,
         device,
-        'website-redesign-plans': websiteRedesignPlansTestVariant,
         'group-tab-improvements': groupTabImprovementsVariant,
         plan: planTabParam,
         'period-toggle-improvements': periodToggleTestVariant,

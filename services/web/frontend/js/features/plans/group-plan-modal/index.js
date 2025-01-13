@@ -1,12 +1,7 @@
 import getMeta from '../../../utils/meta'
 import { swapModal } from '../../utils/swapModal'
 import * as eventTracking from '../../../infrastructure/event-tracking'
-import {
-  createLocalizedGroupPlanPrice,
-  formatCurrencyDefault,
-} from '../utils/group-plan-pricing'
-import { getSplitTestVariant } from '@/utils/splitTestUtils'
-import { formatCurrencyLocalized } from '@/shared/utils/currency'
+import { createLocalizedGroupPlanPrice } from '../utils/group-plan-pricing'
 
 export const GROUP_PLAN_MODAL_HASH = '#groups'
 
@@ -27,18 +22,12 @@ export function updateGroupModalPlanPricing() {
   const modalEl = document.querySelector('[data-ol-group-plan-modal]')
   const { planCode, size, currency, usage } = getFormValues()
 
-  const localCcyVariant = getSplitTestVariant('local-ccy-format-v2')
-
   const { localizedPrice, localizedPerUserPrice } =
     createLocalizedGroupPlanPrice({
       plan: planCode,
       licenseSize: size,
       currency,
       usage,
-      formatCurrency:
-        localCcyVariant === 'enabled'
-          ? formatCurrencyLocalized
-          : formatCurrencyDefault,
     })
 
   modalEl.querySelectorAll('[data-ol-group-plan-plan-code]').forEach(el => {
