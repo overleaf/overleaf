@@ -16,6 +16,7 @@ import { ReviewPanelChangeUser } from './review-panel-change-user'
 import { ReviewPanelEntry } from './review-panel-entry'
 import { useModalsContext } from '@/features/ide-react/context/modals-context'
 import { ExpandableContent } from './review-panel-expandable-content'
+import { useUserContext } from '@/shared/context/user-context'
 
 export const ReviewPanelChange = memo<{
   change: Change<EditOperation>
@@ -44,6 +45,7 @@ export const ReviewPanelChange = memo<{
     const permissions = usePermissionsContext()
     const changesUsers = useChangesUsersContext()
     const { showGenericMessageModal } = useModalsContext()
+    const user = useUserContext()
 
     const [accepting, setAccepting] = useState(false)
 
@@ -69,6 +71,8 @@ export const ReviewPanelChange = memo<{
       // if users are not loaded yet, do not show "Unknown" user
       return null
     }
+
+    const isChangeAuthor = change.metadata?.user_id === user.id
 
     return (
       <ReviewPanelEntry
@@ -100,51 +104,56 @@ export const ReviewPanelChange = memo<{
                 {formatTimeBasedOnYear(change.metadata?.ts)}
               </div>
             </div>
-            {editable && permissions.write && (
+            {editable && (
               <div className="review-panel-entry-actions">
-                <OLTooltip
-                  id="accept-change"
-                  overlayProps={{ placement: 'bottom' }}
-                  description={t('accept_change')}
-                  tooltipProps={{ className: 'review-panel-tooltip' }}
-                >
-                  <button
-                    type="button"
-                    className="btn"
-                    onClick={acceptHandler}
-                    tabIndex={0}
+                {permissions.write && (
+                  <OLTooltip
+                    id="accept-change"
+                    overlayProps={{ placement: 'bottom' }}
+                    description={t('accept_change')}
+                    tooltipProps={{ className: 'review-panel-tooltip' }}
                   >
-                    <MaterialIcon
-                      type="check"
-                      className="review-panel-entry-actions-icon"
-                      accessibilityLabel={t('accept_change')}
-                    />
-                  </button>
-                </OLTooltip>
+                    <button
+                      type="button"
+                      className="btn"
+                      onClick={acceptHandler}
+                      tabIndex={0}
+                    >
+                      <MaterialIcon
+                        type="check"
+                        className="review-panel-entry-actions-icon"
+                        accessibilityLabel={t('accept_change')}
+                      />
+                    </button>
+                  </OLTooltip>
+                )}
 
-                <OLTooltip
-                  id="reject-change"
-                  description={t('reject_change')}
-                  overlayProps={{ placement: 'bottom' }}
-                  tooltipProps={{ className: 'review-panel-tooltip' }}
-                >
-                  <button
-                    tabIndex={0}
-                    type="button"
-                    className="btn"
-                    onClick={() =>
-                      aggregate
-                        ? rejectChanges(change.id, aggregate.id)
-                        : rejectChanges(change.id)
-                    }
+                {(permissions.write ||
+                  (permissions.trackedWrite && isChangeAuthor)) && (
+                  <OLTooltip
+                    id="reject-change"
+                    description={t('reject_change')}
+                    overlayProps={{ placement: 'bottom' }}
+                    tooltipProps={{ className: 'review-panel-tooltip' }}
                   >
-                    <MaterialIcon
-                      className="review-panel-entry-actions-icon"
-                      accessibilityLabel={t('reject_change')}
-                      type="close"
-                    />
-                  </button>
-                </OLTooltip>
+                    <button
+                      tabIndex={0}
+                      type="button"
+                      className="btn"
+                      onClick={() =>
+                        aggregate
+                          ? rejectChanges(change.id, aggregate.id)
+                          : rejectChanges(change.id)
+                      }
+                    >
+                      <MaterialIcon
+                        className="review-panel-entry-actions-icon"
+                        accessibilityLabel={t('reject_change')}
+                        type="close"
+                      />
+                    </button>
+                  </OLTooltip>
+                )}
               </div>
             )}
           </div>
