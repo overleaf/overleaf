@@ -316,7 +316,7 @@ class RangesTracker {
     const movedChanges = []
     const removeChanges = []
     const newChanges = []
-
+    const trackedDeletesAtOpPosition = []
     for (let i = 0; i < this.changes.length; i++) {
       change = this.changes[i]
       const changeStart = change.op.p
@@ -327,13 +327,15 @@ class RangesTracker {
           change.op.p += opLength
           movedChanges.push(change)
         } else if (opStart === changeStart) {
-          // If we are undoing, then we want to cancel any existing delete ranges if we can.
-          // Check if the insert matches the start of the delete, and just remove it from the delete instead if so.
           if (
+            !(op.orderedRejections && alreadyMerged) &&
             undoing &&
             change.op.d.length >= op.i.length &&
             change.op.d.slice(0, op.i.length) === op.i
           ) {
+            // If we are undoing, then we want to reject any existing tracked delete if we can.
+            // Check if the insert matches the start of the delete, and just
+            // remove it from the delete instead if so.
             change.op.d = change.op.d.slice(op.i.length)
             change.op.p += op.i.length
             if (change.op.d === '') {
@@ -342,9 +344,27 @@ class RangesTracker {
               movedChanges.push(change)
             }
             alreadyMerged = true
+
+            if (op.orderedRejections) {
+              // Any tracked delete that came before this tracked delete
+              // rejection was moved after the incoming insert. Move them back
+              // so that they appear before the tracked delete rejection.
+              for (const trackedDelete of trackedDeletesAtOpPosition) {
+                trackedDelete.op.p -= opLength
+              }
+            }
           } else {
+            // We're not rejecting that tracked delete. Move it after the
+            // insert.
             change.op.p += opLength
             movedChanges.push(change)
+
+            // Keep track of tracked deletes that are at the same position as the
+            // insert. If we find a tracked delete to reject, we'll want to
+            // reposition them.
+            if (!alreadyMerged) {
+              trackedDeletesAtOpPosition.push(change)
+            }
           }
         }
       } else if (change.op.i != null) {
@@ -624,9 +644,13 @@ class RangesTracker {
   }
 
   _addOp(op, metadata) {
+    // Don't take a reference to the existing op since we'll modify this in place with future changes
+    op = this._clone(op)
+    // TODO: Remove this when the orderedRejections transition is over
+    delete op.orderedRejections
     const change = {
       id: this.newId(),
-      op: this._clone(op), // Don't take a reference to the existing op since we'll modify this in place with future changes
+      op,
       metadata: this._clone(metadata),
     }
     this.changes.push(change)

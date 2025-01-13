@@ -323,6 +323,44 @@ describe('RangesManager', function () {
         })
       })
 
+      describe('tracked delete rejections with multiple tracked deletes at the same position', function () {
+        beforeEach(function () {
+          // original text is "one [two ][three ][four ]five"
+          // [] denotes tracked deletes
+          this.ranges = {
+            changes: makeRanges([
+              { d: 'two ', p: 4 },
+              { d: 'three ', p: 4 },
+              { d: 'four ', p: 4 },
+            ]),
+          }
+          this.updates = makeUpdates([{ i: 'three ', p: 4, u: true }])
+          this.newDocLines = ['one three five']
+          this.result = this.RangesManager.applyUpdate(
+            this.project_id,
+            this.doc_id,
+            this.ranges,
+            this.updates,
+            this.newDocLines,
+            { historyRangesSupport: true }
+          )
+        })
+
+        it('should insert the text at the right history position', function () {
+          expect(this.result.historyUpdates.map(x => x.op)).to.deep.equal([
+            [
+              {
+                i: 'three ',
+                p: 4,
+                hpos: 8,
+                u: true,
+                trackedDeleteRejection: true,
+              },
+            ],
+          ])
+        })
+      })
+
       describe('deletes over tracked changes', function () {
         beforeEach(function () {
           // original text is "on[1]e [22](three) f[333]ou[4444]r [55555]five"
