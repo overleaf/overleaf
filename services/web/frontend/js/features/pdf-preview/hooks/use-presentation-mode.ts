@@ -133,6 +133,8 @@ export default function usePresentationMode(
       pdfJsWrapper.viewer.scrollMode = 3 // page
       pdfJsWrapper.viewer.spreadMode = 0 // none
 
+      pdfJsWrapper.fetchAllData()
+
       setPresentationMode(true)
     }
   }, [pdfJsWrapper, setScale, scale])

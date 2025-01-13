@@ -99,6 +99,10 @@ export default class PDFJSWrapper {
     }
   }
 
+  async fetchAllData() {
+    await this.viewer.pdfDocument?.getData()
+  }
+
   // update the current scale value if the container size changes
   updateOnResize() {
     if (!this.isVisible()) {
