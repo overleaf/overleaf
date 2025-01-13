@@ -1,7 +1,7 @@
 import './../utils/meta'
 import './../utils/webpack-public-path'
 import './../infrastructure/error-reporter'
-import './../i18n'
+import '@/i18n'
 import '../features/event-tracking'
 import '../features/cookie-banner'
 import '../features/link-helpers/slow-link'

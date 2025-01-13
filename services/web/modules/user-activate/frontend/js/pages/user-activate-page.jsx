@@ -1,4 +1,4 @@
-import '../../../../../frontend/js/marketing'
+import '@/marketing'
 
 import ReactDOM from 'react-dom'
 import UserActivateRegister from '../components/user-activate-register'

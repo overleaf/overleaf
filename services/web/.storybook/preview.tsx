@@ -1,7 +1,7 @@
 import type { Preview } from '@storybook/react'
 
 // Storybook does not (currently) support async loading of "stories". Therefore
-// the strategy in frontend/js/i18n.js does not work (because we cannot wait on
+// the strategy in frontend/js/i18n.ts does not work (because we cannot wait on
 // the promise to resolve).
 // Therefore we have to use the synchronous method for configuring
 // react-i18next. Because this, we can only hard-code a single language.

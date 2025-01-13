@@ -1,5 +1,5 @@
 /* global io */
-import '../../../../../frontend/js/marketing'
+import '@/marketing'
 import {
   inflightHelper,
   toggleDisplay,
