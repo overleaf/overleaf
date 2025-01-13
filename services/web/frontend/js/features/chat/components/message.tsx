@@ -1,20 +1,26 @@
-import PropTypes from 'prop-types'
 import { getHueForUserId } from '../../../shared/utils/colors'
 import MessageContent from './message-content'
+import type { Message as MessageType } from '@/features/chat/context/chat-context'
+import { User } from '../../../../../types/user'
 
-function Message({ message, userId }) {
-  function hue(user) {
+interface MessageProps {
+  message: MessageType
+  userId: string | null
+}
+
+function Message({ message, userId }: MessageProps) {
+  function hue(user?: User) {
     return user ? getHueForUserId(user.id, userId) : 0
   }
 
-  function getMessageStyle(user) {
+  function getMessageStyle(user?: User) {
     return {
       borderColor: `hsl(${hue(user)}, 85%, 40%)`,
       backgroundColor: `hsl(${hue(user)}, 85%, 40%`,
     }
   }
 
-  function getArrowStyle(user) {
+  function getArrowStyle(user?: User) {
     return {
       borderColor: `hsl(${hue(user)}, 85%, 40%)`,
     }
@@ -24,7 +30,7 @@ function Message({ message, userId }) {
 
   return (
     <div className="message-wrapper">
-      {!isMessageFromSelf && (
+      {!isMessageFromSelf && message.user.id && (
         <div className="name">
           <span>{message.user.first_name || message.user.email}</span>
         </div>
@@ -41,18 +47,6 @@ function Message({ message, userId }) {
       </div>
     </div>
   )
-}
-
-Message.propTypes = {
-  message: PropTypes.shape({
-    contents: PropTypes.arrayOf(PropTypes.string).isRequired,
-    user: PropTypes.shape({
-      id: PropTypes.string,
-      email: PropTypes.string,
-      first_name: PropTypes.string,
-    }),
-  }),
-  userId: PropTypes.string,
 }
 
 export default Message

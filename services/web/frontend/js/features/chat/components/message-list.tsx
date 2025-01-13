@@ -1,10 +1,11 @@
-import PropTypes from 'prop-types'
 import moment from 'moment'
 import Message from './message'
+import { UserId } from '../../../../../types/user'
+import type { Message as MessageType } from '@/features/chat/context/chat-context'
 
 const FIVE_MINUTES = 5 * 60 * 1000
 
-function formatTimestamp(date) {
+function formatTimestamp(date: moment.MomentInput) {
   if (!date) {
     return 'N/A'
   } else {
@@ -12,14 +13,28 @@ function formatTimestamp(date) {
   }
 }
 
-function MessageList({ messages, resetUnreadMessages, userId }) {
-  function shouldRenderDate(messageIndex) {
+interface MessageListProps {
+  messages: MessageType[]
+  resetUnreadMessages(...args: unknown[]): unknown
+  userId: UserId | null
+}
+
+function MessageList({
+  messages,
+  resetUnreadMessages,
+  userId,
+}: MessageListProps) {
+  function shouldRenderDate(messageIndex: number) {
     if (messageIndex === 0) {
       return true
     } else {
       const message = messages[messageIndex]
       const previousMessage = messages[messageIndex - 1]
-      return message.timestamp - previousMessage.timestamp > FIVE_MINUTES
+      return (
+        message.timestamp &&
+        previousMessage.timestamp &&
+        message.timestamp - previousMessage.timestamp > FIVE_MINUTES
+      )
     }
   }
 
@@ -51,17 +66,6 @@ function MessageList({ messages, resetUnreadMessages, userId }) {
       ))}
     </ul>
   )
-}
-
-MessageList.propTypes = {
-  messages: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.string.isRequired,
-      timestamp: PropTypes.number,
-    })
-  ).isRequired,
-  resetUnreadMessages: PropTypes.func.isRequired,
-  userId: PropTypes.string,
 }
 
 export default MessageList

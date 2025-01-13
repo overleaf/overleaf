@@ -1,9 +1,12 @@
-import PropTypes from 'prop-types'
 import { useTranslation } from 'react-i18next'
 import OLNotification from '@/features/ui/components/ol/ol-notification'
 import OLButton from '@/features/ui/components/ol/ol-button'
 
-function ChatFallbackError({ reconnect }) {
+interface ChatFallbackErrorProps {
+  reconnect?: () => void
+}
+
+function ChatFallbackError({ reconnect }: ChatFallbackErrorProps) {
   const { t } = useTranslation()
 
   return (
@@ -20,10 +23,6 @@ function ChatFallbackError({ reconnect }) {
       </div>
     </aside>
   )
-}
-
-ChatFallbackError.propTypes = {
-  reconnect: PropTypes.any,
 }
 
 export default ChatFallbackError

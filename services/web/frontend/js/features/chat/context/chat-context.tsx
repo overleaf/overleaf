@@ -19,13 +19,15 @@ import { useLayoutContext } from '../../../shared/context/layout-context'
 import { useIdeContext } from '@/shared/context/ide-context'
 import getMeta from '@/utils/meta'
 import { debugConsole } from '@/utils/debugging'
+import { User } from '../../../../../types/user'
 
 const PAGE_SIZE = 50
 
 export type Message = {
   id: string
   timestamp: number
-  contents: string
+  contents: string[]
+  user: User
 }
 
 type State = {
