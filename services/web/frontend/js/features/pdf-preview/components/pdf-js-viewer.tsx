@@ -501,6 +501,7 @@ function PdfJsViewer({ url, pdfFile }: PdfJsViewerProps) {
           setPage={handlePageChange}
           page={page}
           totalPages={totalPages}
+          pdfContainer={pdfJsWrapper?.container}
         />
       )}
     </div>

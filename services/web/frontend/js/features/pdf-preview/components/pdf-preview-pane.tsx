@@ -9,6 +9,8 @@ import { PdfPreviewMessages } from './pdf-preview-messages'
 import CompileTimeWarningUpgradePrompt from './compile-time-warning-upgrade-prompt'
 import { PdfPreviewProvider } from './pdf-preview-provider'
 import importOverleafModules from '../../../../macros/import-overleaf-module.macro'
+import { useFeatureFlag } from '@/shared/context/split-test-context'
+import PdfPreviewHybridToolbarNew from '@/features/ide-redesign/components/pdf-preview-hybrid-toolbar'
 
 const pdfPreviewPromotions = importOverleafModules('pdfPreviewPromotions') as {
   import: { default: ElementType }
@@ -20,10 +22,16 @@ function PdfPreviewPane() {
   const classes = classNames('pdf', 'full-size', {
     'pdf-empty': !pdfUrl,
   })
+  const newEditor = useFeatureFlag('editor-redesign')
+
   return (
     <div className={classes}>
       <PdfPreviewProvider>
-        <PdfHybridPreviewToolbar />
+        {newEditor ? (
+          <PdfPreviewHybridToolbarNew />
+        ) : (
+          <PdfHybridPreviewToolbar />
+        )}
         <PdfPreviewMessages>
           {pdfPreviewPromotions.map(
             ({ import: { default: Component }, path }) => (

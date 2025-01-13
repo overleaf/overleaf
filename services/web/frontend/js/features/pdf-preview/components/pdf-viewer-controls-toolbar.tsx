@@ -14,6 +14,7 @@ type PdfViewerControlsToolbarProps = {
   setPage: (page: number) => void
   page: number
   totalPages: number
+  pdfContainer?: HTMLDivElement
 }
 
 function PdfViewerControlsToolbar({
@@ -23,6 +24,7 @@ function PdfViewerControlsToolbar({
   setPage,
   page,
   totalPages,
+  pdfContainer,
 }: PdfViewerControlsToolbarProps) {
   const { showLogs } = useCompileContext()
 
@@ -61,6 +63,7 @@ function PdfViewerControlsToolbar({
         setPage={setPage}
         page={page}
         totalPages={totalPages}
+        pdfContainer={pdfContainer}
       />
     </div>,
 
@@ -75,6 +78,8 @@ type InnerControlsProps = {
   setPage: (page: number) => void
   page: number
   totalPages: number
+  // eslint-disable-next-line react/no-unused-prop-types
+  pdfContainer?: HTMLDivElement
 }
 
 function PdfViewerControlsToolbarFull({
@@ -111,6 +116,7 @@ function PdfViewerControlsToolbarSmall({
   setPage,
   page,
   totalPages,
+  pdfContainer,
 }: InnerControlsProps) {
   return (
     <div className="pdfjs-viewer-controls-small">
@@ -124,6 +130,7 @@ function PdfViewerControlsToolbarSmall({
         setPage={setPage}
         page={page}
         totalPages={totalPages}
+        pdfContainer={pdfContainer}
       />
     </div>
   )

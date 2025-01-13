@@ -154,6 +154,19 @@
   top: var(--toolbar-small-height);
 }
 
+.ide-redesign-main {
+  .pdf-viewer {
+    .pdfjs-viewer {
+      .page {
+        box-shadow:
+          0 5px 5px 0 #23282f0d,
+          0 3px 14px 0 #23282f08,
+          0 8px 10px 0 #23282f14;
+      }
+    }
+  }
+}
+
 .pdf-viewer {
   iframe {
     width: 100%;

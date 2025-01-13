@@ -45,6 +45,18 @@
   --editor-toolbar-bg: var(--white);
 }
 
+.ide-redesign-main {
+  --toolbar-alt-bg-color: var(--bg-light-secondary);
+  --toolbar-btn-color: var(--content-primary);
+  --toolbar-btn-hover-bg-color: var(--neutral-80);
+  --toolbar-btn-hover-color: var(--white);
+  --editor-toolbar-bg: var(--white);
+
+  .toolbar {
+    border-bottom: none;
+  }
+}
+
 .toolbar {
   display: flex;
   align-items: center;

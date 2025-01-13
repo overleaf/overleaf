@@ -15,6 +15,7 @@ type PdfViewerControlsMenuButtonProps = {
   setPage: (page: number) => void
   page: number
   totalPages: number
+  pdfContainer?: HTMLDivElement
 }
 
 export default function PdfViewerControlsMenuButton({
@@ -22,6 +23,7 @@ export default function PdfViewerControlsMenuButton({
   setPage,
   page,
   totalPages,
+  pdfContainer,
 }: PdfViewerControlsMenuButtonProps) {
   const { t } = useTranslation()
 
@@ -54,6 +56,7 @@ export default function PdfViewerControlsMenuButton({
         show={popoverOpen}
         target={targetRef.current}
         placement="bottom"
+        container={pdfContainer}
         containerPadding={0}
         transition
         rootClose
