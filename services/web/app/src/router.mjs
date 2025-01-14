@@ -32,6 +32,7 @@ import ProjectDownloadsController from './Features/Downloads/ProjectDownloadsCon
 import FileStoreController from './Features/FileStore/FileStoreController.mjs'
 import DocumentUpdaterController from './Features/DocumentUpdater/DocumentUpdaterController.mjs'
 import HistoryController from './Features/History/HistoryController.js'
+import HistoryRouter from './Features/History/HistoryRouter.mjs'
 import ExportsController from './Features/Exports/ExportsController.mjs'
 import PasswordResetRouter from './Features/PasswordReset/PasswordResetRouter.mjs'
 import StaticPagesRouter from './Features/StaticPages/StaticPagesRouter.mjs'
@@ -120,24 +121,6 @@ const rateLimiters = {
     points: 10,
     duration: 60,
   }),
-  downloadProjectRevision: new RateLimiter('download-project-revision', {
-    points: 30,
-    duration: 60 * 60,
-  }),
-  flushHistory: new RateLimiter('flush-project-history', {
-    // Allow flushing once every 30s-1s (allow for network jitter).
-    points: 1,
-    duration: 30 - 1,
-  }),
-  getProjectBlob: new RateLimiter('get-project-blob', {
-    // Download project in full once per hour
-    points: Settings.maxEntitiesPerProject,
-    duration: 60 * 60,
-  }),
-  getHistorySnapshot: new RateLimiter(
-    'get-history-snapshot',
-    openProjectRateLimiter.getOptions()
-  ),
   endorseEmail: new RateLimiter('endorse-email', {
     points: 30,
     duration: 60,
@@ -552,36 +535,10 @@ async function initialize(webRouter, privateApiRouter, publicApiRouter) {
     HistoryController.fileToBlobRedirectMiddleware,
     FileStoreController.getFile
   )
-  webRouter.head(
-    '/project/:project_id/blob/:hash',
-    validate({
-      params: Joi.object({
-        project_id: Joi.objectId().required(),
-        hash: Joi.string().required().hex().length(40),
-      }),
-      query: Joi.object({
-        fallback: Joi.objectId().optional(),
-      }),
-    }),
-    RateLimiterMiddleware.rateLimit(rateLimiters.getProjectBlob),
-    AuthorizationMiddleware.ensureUserCanReadProject,
-    HistoryController.headBlob
-  )
-  webRouter.get(
-    '/project/:project_id/blob/:hash',
-    validate({
-      params: Joi.object({
-        project_id: Joi.objectId().required(),
-        hash: Joi.string().required().hex().length(40),
-      }),
-      query: Joi.object({
-        fallback: Joi.objectId().optional(),
-      }),
-    }),
-    RateLimiterMiddleware.rateLimit(rateLimiters.getProjectBlob),
-    AuthorizationMiddleware.ensureUserCanReadProject,
-    HistoryController.getBlob
-  )
+
+  // Has to be applied after any route using fileToBlobRedirectMiddleware
+  HistoryRouter.apply(webRouter, privateApiRouter)
+
   webRouter.get(
     '/Project/:Project_id/doc/:Doc_id/download', // "download" suffix to avoid conflict with private API route at doc/:doc_id
     AuthorizationMiddleware.ensureUserCanReadProject,
@@ -801,75 +758,6 @@ async function initialize(webRouter, privateApiRouter, publicApiRouter) {
     AuthorizationMiddleware.ensureUserCanAdminProject,
     ProjectController.renameProject
   )
-  webRouter.get(
-    '/project/:Project_id/updates',
-    AuthorizationMiddleware.blockRestrictedUserFromProject,
-    AuthorizationMiddleware.ensureUserCanReadProject,
-    HistoryController.proxyToHistoryApiAndInjectUserDetails
-  )
-  webRouter.get(
-    '/project/:Project_id/doc/:doc_id/diff',
-    AuthorizationMiddleware.blockRestrictedUserFromProject,
-    AuthorizationMiddleware.ensureUserCanReadProject,
-    HistoryController.proxyToHistoryApi
-  )
-  webRouter.get(
-    '/project/:Project_id/diff',
-    AuthorizationMiddleware.blockRestrictedUserFromProject,
-    AuthorizationMiddleware.ensureUserCanReadProject,
-    HistoryController.proxyToHistoryApiAndInjectUserDetails
-  )
-  webRouter.get(
-    '/project/:Project_id/filetree/diff',
-    AuthorizationMiddleware.blockRestrictedUserFromProject,
-    AuthorizationMiddleware.ensureUserCanReadProject,
-    HistoryController.proxyToHistoryApi
-  )
-  webRouter.post(
-    '/project/:project_id/restore_file',
-    AuthorizationMiddleware.ensureUserCanWriteProjectContent,
-    HistoryController.restoreFileFromV2
-  )
-  webRouter.post(
-    '/project/:project_id/revert_file',
-    AuthorizationMiddleware.ensureUserCanWriteProjectContent,
-    HistoryController.revertFile
-  )
-  webRouter.post(
-    '/project/:project_id/revert-project',
-    AuthorizationMiddleware.ensureUserCanWriteProjectContent,
-    HistoryController.revertProject
-  )
-  webRouter.get(
-    '/project/:project_id/version/:version/zip',
-    RateLimiterMiddleware.rateLimit(rateLimiters.downloadProjectRevision),
-    AuthorizationMiddleware.blockRestrictedUserFromProject,
-    AuthorizationMiddleware.ensureUserCanReadProject,
-    HistoryController.downloadZipOfVersion
-  )
-  privateApiRouter.post(
-    '/project/:Project_id/history/resync',
-    AuthenticationController.requirePrivateApiAuth(),
-    HistoryController.resyncProjectHistory
-  )
-
-  webRouter.get(
-    '/project/:Project_id/labels',
-    AuthorizationMiddleware.blockRestrictedUserFromProject,
-    AuthorizationMiddleware.ensureUserCanReadProject,
-    HistoryController.getLabels
-  )
-  webRouter.post(
-    '/project/:Project_id/labels',
-    AuthorizationMiddleware.ensureUserCanWriteProjectContent,
-    HistoryController.createLabel
-  )
-  webRouter.delete(
-    '/project/:Project_id/labels/:label_id',
-    AuthorizationMiddleware.ensureUserCanWriteProjectContent,
-    HistoryController.deleteLabel
-  )
-
   webRouter.post(
     '/project/:project_id/export/:brand_variation_id',
     AuthorizationMiddleware.ensureUserCanWriteProjectContent,
