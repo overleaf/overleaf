@@ -672,10 +672,13 @@ const _ProjectController = {
 
       const hasNonRecurlySubscription =
         subscription && !subscription.recurlySubscription_id
+      const hasManuallyCollectedSubscription =
+        subscription?.collectionMethod === 'manual'
       const canUseErrorAssistant =
         user.features?.aiErrorAssistant ||
         (splitTestAssignments['ai-add-on']?.variant === 'enabled' &&
-          !hasNonRecurlySubscription)
+          !hasNonRecurlySubscription &&
+          !hasManuallyCollectedSubscription)
 
       let featureUsage = {}
 
