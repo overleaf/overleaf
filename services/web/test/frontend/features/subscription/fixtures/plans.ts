@@ -227,6 +227,7 @@ export const groupPlans: GroupPlans = {
     },
   ],
   sizes: ['2', '3', '4', '5', '10', '20', '50'],
+  sizesForHighDenominationCurrencies: ['2', '3', '4', '5', '10', '20'],
 }
 
 export const groupPriceByUsageTypeAndSize = {

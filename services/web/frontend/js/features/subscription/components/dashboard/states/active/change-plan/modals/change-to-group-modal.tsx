@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useTranslation, Trans } from 'react-i18next'
-import { Subscription } from '../../../../../../../../../../types/subscription/dashboard/subscription'
+import { RecurlySubscription } from '../../../../../../../../../../types/subscription/dashboard/subscription'
 import { PriceForDisplayData } from '../../../../../../../../../../types/subscription/plan'
 import { postJSON } from '../../../../../../../../infrastructure/fetch-json'
 import getMeta from '../../../../../../../../utils/meta'
@@ -118,7 +118,7 @@ export function ChangeToGroupModal() {
   const { modal: contactModal, showModal: showContactModal } =
     useContactUsModal({ autofillProjectUrl: false })
   const groupPlans = getMeta('ol-groupPlans')
-  const personalSubscription = getMeta('ol-subscription') as Subscription
+  const personalSubscription = getMeta('ol-subscription') as RecurlySubscription
   const [error, setError] = useState(false)
   const [inflight, setInflight] = useState(false)
   const location = useLocation()
@@ -155,9 +155,15 @@ export function ChangeToGroupModal() {
     !groupPlans ||
     !groupPlans.plans ||
     !groupPlans.sizes ||
+    !groupPlans.sizesForHighDenominationCurrencies ||
     !groupPlanToChangeToCode
   )
     return null
+
+  const isUsingCOP = personalSubscription.recurly?.currency === 'COP'
+  const groupPlanSizes = isUsingCOP
+    ? groupPlans.sizesForHighDenominationCurrencies
+    : groupPlans.sizes
 
   return (
     <>
@@ -241,7 +247,7 @@ export function ChangeToGroupModal() {
                       value={groupPlanToChangeToSize}
                       onChange={e => setGroupPlanToChangeToSize(e.target.value)}
                     >
-                      {groupPlans.sizes.map(size => (
+                      {groupPlanSizes.map(size => (
                         <option key={`size-option-${size}`}>{size}</option>
                       ))}
                     </OLFormSelect>
@@ -352,7 +358,7 @@ export function ChangeToGroupModal() {
               onClick={showContactModal}
             >
               {t('need_more_than_x_licenses', {
-                x: 50,
+                x: isUsingCOP ? 20 : 50,
               })}{' '}
               {t('please_get_in_touch')}
             </OLButton>

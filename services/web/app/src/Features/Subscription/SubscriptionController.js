@@ -38,6 +38,9 @@ function formatGroupPlansDataForDash() {
   return {
     plans: [...groupPlanModalOptions.plan_codes],
     sizes: [...groupPlanModalOptions.sizes],
+    sizesForHighDenominationCurrencies: [
+      ...groupPlanModalOptions.sizesForHighDenominationCurrencies,
+    ],
     usages: [...groupPlanModalOptions.usages],
     priceByUsageTypeAndSize: JSON.parse(JSON.stringify(GroupPlansData)),
   }
