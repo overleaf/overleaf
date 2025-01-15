@@ -3,7 +3,6 @@ import Icon from '../../../../shared/components/icon'
 import { useCallback, useEffect, useState } from 'react'
 import * as eventTracking from '../../../../infrastructure/event-tracking'
 import StartFreeTrialButton from '../../../../shared/components/start-free-trial-button'
-import { paywallPrompt } from '../../../../main/account-upgrade'
 import { useFeatureFlag } from '@/shared/context/split-test-context'
 
 function FeatureItem({ text }: { text: string }) {
@@ -22,7 +21,7 @@ export function OwnerPaywallPrompt() {
 
   useEffect(() => {
     eventTracking.send('subscription-funnel', 'editor-click-feature', 'history')
-    paywallPrompt('history')
+    eventTracking.sendMB('paywall-prompt', { 'paywall-type': 'history' })
   }, [])
 
   const handleFreeTrialClick = useCallback(() => {

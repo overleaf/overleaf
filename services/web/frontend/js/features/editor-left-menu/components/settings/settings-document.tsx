@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import isValidTeXFile from '../../../../main/is-valid-tex-file'
+import { isValidTeXFile } from '../../../../main/is-valid-tex-file'
 import { useEditorContext } from '../../../../shared/context/editor-context'
 import { useProjectSettingsContext } from '../../context/project-settings-context'
 import SettingsMenuSelect from './settings-menu-select'

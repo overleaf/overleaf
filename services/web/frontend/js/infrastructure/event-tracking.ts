@@ -1,25 +1,40 @@
-import sessionStorage from '../infrastructure/session-storage'
+import sessionStorage from './session-storage'
 import getMeta from '@/utils/meta'
+
+type Segmentation = Record<
+  string,
+  string | number | boolean | undefined | unknown | any // TODO: RecurlyError
+>
 
 const CACHE_KEY = 'mbEvents'
 
-function alreadySent(key) {
+function alreadySent(key: string) {
   const eventCache = sessionStorage.getItem(CACHE_KEY) || {}
   return !!eventCache[key]
 }
-function markAsSent(key) {
+function markAsSent(key: string) {
   const eventCache = sessionStorage.getItem(CACHE_KEY) || {}
   eventCache[key] = true
   sessionStorage.setItem(CACHE_KEY, eventCache)
 }
 
-export function send(category, action, label, value) {
+export function send(
+  category: string,
+  action: string,
+  label?: string,
+  value?: string
+) {
   if (typeof window.ga === 'function') {
     window.ga('send', 'event', category, action, label, value)
   }
 }
 
-export function sendOnce(category, action, label, value) {
+export function sendOnce(
+  category: string,
+  action: string,
+  label: string,
+  value: string
+) {
   if (alreadySent(category)) return
   if (typeof window.ga !== 'function') return
 
@@ -27,7 +42,7 @@ export function sendOnce(category, action, label, value) {
   markAsSent(category)
 }
 
-export function sendMB(key, segmentation = {}) {
+export function sendMB(key: string, segmentation: Segmentation = {}) {
   if (!segmentation.page) {
     segmentation.page = window.location.pathname
   }
@@ -40,21 +55,28 @@ export function sendMB(key, segmentation = {}) {
   }
 }
 
-export function sendMBOnce(key, segmentation = {}) {
+export function sendMBOnce(key: string, segmentation: Segmentation = {}) {
   if (alreadySent(key)) return
   sendMB(key, segmentation)
   markAsSent(key)
 }
 
-export function sendMBSampled(key, body = {}, rate = 0.01) {
+export function sendMBSampled(
+  key: string,
+  segmentation: Segmentation = {},
+  rate = 0.01
+) {
   if (Math.random() < rate) {
-    sendMB(key, body)
+    sendMB(key, segmentation)
   }
 }
 
 const sentOncePerPageLoad = new Set()
 
-export function sendMBOncePerPageLoad(key, segmentation = {}) {
+export function sendMBOncePerPageLoad(
+  key: string,
+  segmentation: Segmentation = {}
+) {
   if (sentOncePerPageLoad.has(key)) return
   sendMB(key, segmentation)
   sentOncePerPageLoad.add(key)
@@ -66,7 +88,7 @@ export function sendMBOncePerPageLoad(key, segmentation = {}) {
 // @screen-sm: 768px;
 export const isSmallDevice = window.screen.width < 768
 
-function sendBeacon(key, data) {
+function sendBeacon(key: string, data: Segmentation) {
   if (!navigator || !navigator.sendBeacon) return
   if (!getMeta('ol-ExposedSettings').isOverleaf) return
 

@@ -7,11 +7,19 @@
 // Remove a listener for the foo event with the bar namespace: .off 'foo.bar'
 
 export default class EventEmitter {
+  events: Record<
+    string,
+    {
+      callback: (...args: any[]) => void
+      namespace: string
+    }[]
+  >
+
   constructor() {
     this.events = {}
   }
 
-  on(event, callback) {
+  on(event: string, callback: (...args: any[]) => void) {
     if (!this.events) {
       this.events = {}
     }
@@ -26,7 +34,7 @@ export default class EventEmitter {
     })
   }
 
-  off(event, cb) {
+  off(event?: string, callback?: (...args: any[]) => void) {
     if (!this.events) {
       this.events = {}
     }
@@ -36,8 +44,10 @@ export default class EventEmitter {
       if (!this.events[event]) {
         this.events[event] = []
       }
-      if (cb) {
-        this.events[event] = this.events[event].filter(e => e.callback !== cb)
+      if (callback) {
+        this.events[event] = this.events[event].filter(
+          e => e.callback !== callback
+        )
       } else if (!namespace) {
         // Clear all listeners for event
         delete this.events[event]
@@ -53,7 +63,7 @@ export default class EventEmitter {
     }
   }
 
-  trigger(event, ...args) {
+  trigger(event: string, ...args: any[]) {
     if (!this.events) {
       this.events = {}
     }
@@ -62,7 +72,7 @@ export default class EventEmitter {
     }
   }
 
-  emit(...args) {
-    this.trigger(...args)
+  emit(event: string, ...args: any[]) {
+    this.trigger(event, ...args)
   }
 }

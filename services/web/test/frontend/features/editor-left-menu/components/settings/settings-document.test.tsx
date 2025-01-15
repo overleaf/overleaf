@@ -1,17 +1,13 @@
 import { screen, within } from '@testing-library/dom'
 import { expect } from 'chai'
-import sinon from 'sinon'
 import fetchMock from 'fetch-mock'
 import SettingsDocument from '../../../../../../frontend/js/features/editor-left-menu/components/settings/settings-document'
-import * as isValidTeXFileModule from '../../../../../../frontend/js/main/is-valid-tex-file'
 import { Folder } from '../../../../../../types/folder'
 import { EditorLeftMenuProvider } from '@/features/editor-left-menu/components/editor-left-menu-context'
 import { render } from '@testing-library/react'
 import { EditorProviders } from '../../../../helpers/editor-providers'
 
 describe('<SettingsDocument />', function () {
-  let isValidTeXFileStub: sinon.SinonStub
-
   const rootFolder: Folder = {
     _id: 'root-folder-id',
     name: 'rootFolder',
@@ -25,15 +21,18 @@ describe('<SettingsDocument />', function () {
     folders: [],
   }
 
+  let originalSettings: typeof window.metaAttributesCache
+
   beforeEach(function () {
-    isValidTeXFileStub = sinon
-      .stub(isValidTeXFileModule, 'default')
-      .returns(true)
+    originalSettings = window.metaAttributesCache.get('ol-ExposedSettings')
+    window.metaAttributesCache.set('ol-ExposedSettings', {
+      validRootDocExtensions: ['tex'],
+    })
   })
 
   afterEach(function () {
     fetchMock.reset()
-    isValidTeXFileStub.restore()
+    window.metaAttributesCache.set('ol-ExposedSettings', originalSettings)
   })
 
   it('shows correct menu', async function () {

@@ -7,7 +7,7 @@ import {
   resetProjectListContextFetch,
   renderWithProjectListContext,
 } from '../../helpers/render-with-context'
-import * as eventTracking from '../../../../../../frontend/js/infrastructure/event-tracking'
+import * as eventTracking from '@/infrastructure/event-tracking'
 
 describe('<ProjectsActionModal />', function () {
   const actionHandler = sinon.stub().resolves({})

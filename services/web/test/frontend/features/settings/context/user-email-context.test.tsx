@@ -14,7 +14,7 @@ import {
   fakeUsersData,
   unconfirmedCommonsUserData,
 } from '../fixtures/test-user-email-data'
-import localStorage from '../../../../../frontend/js/infrastructure/local-storage'
+import localStorage from '@/infrastructure/local-storage'
 
 const renderUserEmailsContext = () =>
   renderHook(() => useUserEmailsContext(), {

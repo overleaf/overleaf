@@ -1,6 +1,6 @@
 import { expect } from 'chai'
 import { fireEvent, screen, waitFor } from '@testing-library/react'
-import * as eventTracking from '../../../../../../../../frontend/js/infrastructure/event-tracking'
+import * as eventTracking from '@/infrastructure/event-tracking'
 import { RecurlySubscription } from '../../../../../../../../types/subscription/dashboard/subscription'
 import {
   annualActiveSubscription,

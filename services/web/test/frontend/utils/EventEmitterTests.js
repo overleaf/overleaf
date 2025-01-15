@@ -1,22 +1,11 @@
-/* eslint-disable
-    max-len,
-    no-return-assign,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 import { expect } from 'chai'
 import sinon from 'sinon'
 
-import EventEmitter from '../../../frontend/js/utils/EventEmitter'
+import EventEmitter from '@/utils/EventEmitter'
 
-export default describe('EventEmitter', function () {
+describe('EventEmitter', function () {
   beforeEach(function () {
-    return (this.eventEmitter = new EventEmitter())
+    this.eventEmitter = new EventEmitter()
   })
 
   it('calls listeners', function () {
@@ -28,7 +17,7 @@ export default describe('EventEmitter', function () {
     this.eventEmitter.trigger('foo')
 
     expect(cb1).to.have.been.called
-    return expect(cb2).to.not.have.been.called
+    expect(cb2).to.not.have.been.called
   })
 
   it('calls multiple listeners', function () {
@@ -40,7 +29,7 @@ export default describe('EventEmitter', function () {
     this.eventEmitter.trigger('foo')
 
     expect(cb1).to.have.been.called
-    return expect(cb2).to.have.been.called
+    expect(cb2).to.have.been.called
   })
 
   it('calls listeners with namespace', function () {
@@ -52,7 +41,7 @@ export default describe('EventEmitter', function () {
     this.eventEmitter.trigger('foo')
 
     expect(cb1).to.have.been.called
-    return expect(cb2).to.have.been.called
+    expect(cb2).to.have.been.called
   })
 
   it('removes listeners', function () {
@@ -62,7 +51,7 @@ export default describe('EventEmitter', function () {
 
     this.eventEmitter.trigger('foo')
 
-    return expect(cb).to.not.have.been.called
+    expect(cb).to.not.have.been.called
   })
 
   it('removes namespaced listeners', function () {
@@ -72,7 +61,7 @@ export default describe('EventEmitter', function () {
 
     this.eventEmitter.trigger('foo')
 
-    return expect(cb).to.not.have.been.called
+    expect(cb).to.not.have.been.called
   })
 
   it('does not remove unnamespaced listeners if off called with namespace', function () {
@@ -85,6 +74,6 @@ export default describe('EventEmitter', function () {
     this.eventEmitter.trigger('foo')
 
     expect(cb1).to.have.been.called
-    return expect(cb2).to.not.have.been.called
+    expect(cb2).to.not.have.been.called
   })
 })

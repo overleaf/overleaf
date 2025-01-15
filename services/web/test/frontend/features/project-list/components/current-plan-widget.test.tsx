@@ -7,7 +7,7 @@ import {
   IndividualPlanSubscription,
 } from '../../../../../types/project/dashboard/subscription'
 import { DeepReadonly } from '../../../../../types/utils'
-import * as eventTracking from '../../../../../frontend/js/infrastructure/event-tracking'
+import * as eventTracking from '@/infrastructure/event-tracking'
 import CurrentPlanWidget from '../../../../../frontend/js/features/project-list/components/current-plan-widget/current-plan-widget'
 
 describe('<CurrentPlanWidget />', function () {

@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next'
 import Icon from '../../../../shared/components/icon'
 import { useProjectContext } from '../../../../shared/context/project-context'
 import { useUserContext } from '../../../../shared/context/user-context'
-import { startFreeTrial, upgradePlan } from '../../../../main/account-upgrade'
+import { startFreeTrial, upgradePlan } from '@/main/account-upgrade'
 import { memo } from 'react'
 import { useFeatureFlag } from '@/shared/context/split-test-context'
 import OLModal, {

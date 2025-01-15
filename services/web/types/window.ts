@@ -37,5 +37,7 @@ declare global {
         store: ScopeValueStore
       }
     }
+    ga?: (...args: any) => void
+    gtag?: (...args: any) => void
   }
 }

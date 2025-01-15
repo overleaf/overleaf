@@ -12,7 +12,11 @@ import { debugConsole } from '@/utils/debugging'
  * @param {string?} key Key passed to the sessionStorage function (if any)
  * @param {any?} value Value passed to the sessionStorage function (if any)
  */
-const callSafe = function (fn, key, value) {
+const callSafe = function (
+  fn: (...args: any) => any,
+  key?: string,
+  value?: any
+) {
   try {
     return fn(key, value)
   } catch (e) {
@@ -21,11 +25,12 @@ const callSafe = function (fn, key, value) {
   }
 }
 
-const getItem = function (key) {
-  return JSON.parse(sessionStorage.getItem(key))
+const getItem = function (key: string) {
+  const value = sessionStorage.getItem(key)
+  return value === null ? null : JSON.parse(value)
 }
 
-const setItem = function (key, value) {
+const setItem = function (key: string, value: any) {
   sessionStorage.setItem(key, JSON.stringify(value))
 }
 
@@ -33,15 +38,15 @@ const clear = function () {
   sessionStorage.clear()
 }
 
-const removeItem = function (key) {
+const removeItem = function (key: string) {
   return sessionStorage.removeItem(key)
 }
 
 const customSessionStorage = {
-  getItem: key => callSafe(getItem, key),
-  setItem: (key, value) => callSafe(setItem, key, value),
+  getItem: (key: string) => callSafe(getItem, key),
+  setItem: (key: string, value: any) => callSafe(setItem, key, value),
   clear: () => callSafe(clear),
-  removeItem: key => callSafe(removeItem, key),
+  removeItem: (key: string) => callSafe(removeItem, key),
 }
 
 export default customSessionStorage

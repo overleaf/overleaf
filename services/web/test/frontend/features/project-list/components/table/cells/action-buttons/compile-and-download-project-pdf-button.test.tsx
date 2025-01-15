@@ -5,7 +5,7 @@ import { projectsData } from '../../../../fixtures/projects-data'
 import * as useLocationModule from '../../../../../../../../frontend/js/shared/hooks/use-location'
 import { CompileAndDownloadProjectPDFButtonTooltip } from '../../../../../../../../frontend/js/features/project-list/components/table/cells/action-buttons/compile-and-download-project-pdf-button'
 import fetchMock from 'fetch-mock'
-import * as eventTracking from '../../../../../../../../frontend/js/infrastructure/event-tracking'
+import * as eventTracking from '@/infrastructure/event-tracking'
 
 describe('<CompileAndDownloadProjectPDFButton />', function () {
   let assignStub: sinon.SinonStub

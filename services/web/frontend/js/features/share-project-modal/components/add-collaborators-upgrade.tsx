@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useUserContext } from '../../../shared/context/user-context'
-import { upgradePlan } from '../../../main/account-upgrade'
+import { upgradePlan } from '@/main/account-upgrade'
 import StartFreeTrialButton from '../../../shared/components/start-free-trial-button'
 import Icon from '../../../shared/components/icon'
 import { useFeatureFlag } from '../../../shared/context/split-test-context'

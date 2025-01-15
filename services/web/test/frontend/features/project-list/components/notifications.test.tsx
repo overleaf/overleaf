@@ -36,7 +36,7 @@ import { DeepPartial } from '../../../../../types/utils'
 import { Project } from '../../../../../types/project/dashboard/api'
 import GroupsAndEnterpriseBanner from '../../../../../frontend/js/features/project-list/components/notifications/groups-and-enterprise-banner'
 import GroupSsoSetupSuccess from '../../../../../frontend/js/features/project-list/components/notifications/groups/group-sso-setup-success'
-import localStorage from '../../../../../frontend/js/infrastructure/local-storage'
+import localStorage from '@/infrastructure/local-storage'
 import * as useLocationModule from '../../../../../frontend/js/shared/hooks/use-location'
 import {
   commonsSubscription,

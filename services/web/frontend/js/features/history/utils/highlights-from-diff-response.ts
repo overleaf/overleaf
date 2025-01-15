@@ -1,8 +1,8 @@
-import displayNameForUser from '../../../ide/history/util/displayNameForUser'
 import moment from 'moment/moment'
 import ColorManager from '../../../ide/colors/ColorManager'
 import { DocDiffChunk, Highlight } from '../services/types/doc'
 import { TFunction } from 'i18next'
+import displayNameForUser from './display-name-for-user'
 
 export function highlightsFromDiffResponse(
   chunks: DocDiffChunk[],

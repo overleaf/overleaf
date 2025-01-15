@@ -9,7 +9,7 @@ import {
   prefetchLargeEnabled,
   trackPdfDownloadEnabled,
 } from './pdf-caching-flags'
-import { isNetworkError } from '@/utils/isNetworkError'
+import { isNetworkError } from '@/utils/is-network-error'
 import { debugConsole } from '@/utils/debugging'
 import { PDFJS } from './pdf-js'
 

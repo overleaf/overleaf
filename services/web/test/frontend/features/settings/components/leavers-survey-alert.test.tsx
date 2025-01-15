@@ -3,8 +3,8 @@ import sinon from 'sinon'
 import { fireEvent, screen, render } from '@testing-library/react'
 import { UserEmailsProvider } from '../../../../../frontend/js/features/settings/context/user-email-context'
 import { LeaversSurveyAlert } from '../../../../../frontend/js/features/settings/components/leavers-survey-alert'
-import * as eventTracking from '../../../../../frontend/js/infrastructure/event-tracking'
-import localStorage from '../../../../../frontend/js/infrastructure/local-storage'
+import * as eventTracking from '@/infrastructure/event-tracking'
+import localStorage from '@/infrastructure/local-storage'
 import fetchMock from 'fetch-mock'
 
 function renderWithProvider() {

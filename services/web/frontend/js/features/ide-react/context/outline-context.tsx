@@ -12,7 +12,7 @@ import useScopeEventEmitter from '@/shared/hooks/use-scope-event-emitter'
 import useEventListener from '@/shared/hooks/use-event-listener'
 import * as eventTracking from '@/infrastructure/event-tracking'
 import useScopeValue from '@/shared/hooks/use-scope-value'
-import isValidTeXFile from '@/main/is-valid-tex-file'
+import { isValidTeXFile } from '@/main/is-valid-tex-file'
 import localStorage from '@/infrastructure/local-storage'
 import { useProjectContext } from '@/shared/context/project-context'
 

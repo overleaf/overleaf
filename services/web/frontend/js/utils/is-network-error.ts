@@ -68,6 +68,6 @@ const NETWORK_ERRORS = [
   '요청한 시간이 초과되었습니다.',
 ]
 
-export function isNetworkError(err) {
-  return NETWORK_ERRORS.includes(err?.message)
+export function isNetworkError(err?: Error) {
+  return err && NETWORK_ERRORS.includes(err.message)
 }

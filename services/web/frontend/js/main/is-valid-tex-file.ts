@@ -1,6 +1,6 @@
 import getMeta from '@/utils/meta'
 
-function isValidTeXFile(filename) {
+export const isValidTeXFile = (filename: string) => {
   const validTeXFileRegExp = new RegExp(
     `\\.(${getMeta('ol-ExposedSettings').validRootDocExtensions.join('|')})$`,
     'i'
@@ -8,5 +8,3 @@ function isValidTeXFile(filename) {
 
   return validTeXFileRegExp.test(filename)
 }
-
-export default isValidTeXFile

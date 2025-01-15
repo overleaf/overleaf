@@ -3,7 +3,7 @@ import useScopeValue from '@/shared/hooks/use-scope-value'
 import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
 import useTutorial from '@/shared/hooks/promotions/use-tutorial'
 import { sendMB } from '../../../infrastructure/event-tracking'
-import isValidTeXFile from '../../../main/is-valid-tex-file'
+import { isValidTeXFile } from '../../../main/is-valid-tex-file'
 import { useTranslation } from 'react-i18next'
 import {
   EditorSwitchBeginnerTooltip,

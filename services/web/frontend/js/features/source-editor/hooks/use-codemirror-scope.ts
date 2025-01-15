@@ -47,7 +47,7 @@ import { setVisual } from '../extensions/visual/visual'
 import { useFileTreePathContext } from '@/features/file-tree/contexts/file-tree-path'
 import { useUserSettingsContext } from '@/shared/context/user-settings-context'
 import { setDocName } from '@/features/source-editor/extensions/doc-name'
-import isValidTexFile from '@/main/is-valid-tex-file'
+import { isValidTeXFile } from '@/main/is-valid-tex-file'
 import { captureException } from '@/infrastructure/error-reporter'
 import grammarlyExtensionPresent from '@/shared/utils/grammarly'
 import { DocumentContainer } from '@/features/ide-react/editor/document-container'
@@ -288,7 +288,7 @@ function useCodeMirrorScope(view: EditorView) {
 
   const { previewByPath } = useFileTreePathContext()
 
-  const showVisual = visual && isValidTexFile(docName)
+  const showVisual = visual && isValidTeXFile(docName)
 
   const visualRef = useRef({
     previewByPath,

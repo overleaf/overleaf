@@ -1,5 +1,5 @@
 import '../../helpers/bootstrap-3'
-import localStorage from '../../../../frontend/js/infrastructure/local-storage'
+import localStorage from '@/infrastructure/local-storage'
 import PdfPreview from '../../../../frontend/js/features/pdf-preview/components/pdf-preview'
 import { EditorProviders } from '../../helpers/editor-providers'
 import { mockScope } from './scope'

@@ -2,7 +2,7 @@ import { expect } from 'chai'
 import sinon from 'sinon'
 import { screen, fireEvent, render, waitFor } from '@testing-library/react'
 import { IntegrationLinkingWidget } from '../../../../../../frontend/js/features/settings/components/linking/integration-widget'
-import * as eventTracking from '../../../../../../frontend/js/infrastructure/event-tracking'
+import * as eventTracking from '@/infrastructure/event-tracking'
 
 describe('<IntegrationLinkingWidgetTest/>', function () {
   const defaultProps = {

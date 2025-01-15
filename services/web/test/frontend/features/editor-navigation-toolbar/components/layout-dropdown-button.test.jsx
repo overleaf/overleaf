@@ -4,7 +4,7 @@ import { expect } from 'chai'
 import { fireEvent, screen } from '@testing-library/react'
 import LayoutDropdownButton from '../../../../../frontend/js/features/editor-navigation-toolbar/components/layout-dropdown-button'
 import { renderWithEditorContext } from '../../../helpers/render-with-context'
-import * as eventTracking from '../../../../../frontend/js/infrastructure/event-tracking'
+import * as eventTracking from '@/infrastructure/event-tracking'
 
 describe('<LayoutDropdownButton />', function () {
   let openStub

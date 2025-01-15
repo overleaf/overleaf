@@ -1,7 +1,7 @@
 import { expect } from 'chai'
 import sinon from 'sinon'
 
-import customLocalStorage from '../../../frontend/js/infrastructure/local-storage'
+import customLocalStorage from '@/infrastructure/local-storage'
 import { debugConsole } from '@/utils/debugging'
 
 describe('localStorage', function () {

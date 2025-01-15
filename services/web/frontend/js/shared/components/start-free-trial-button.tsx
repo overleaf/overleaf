@@ -1,6 +1,6 @@
 import { MouseEventHandler, useCallback, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { startFreeTrial } from '../../main/account-upgrade'
+import { startFreeTrial } from '@/main/account-upgrade'
 import * as eventTracking from '../../infrastructure/event-tracking'
 import OLButton from '@/features/ui/components/ol/ol-button'
 
@@ -41,7 +41,7 @@ export default function StartFreeTrialButton({
         handleClick(event)
       }
 
-      startFreeTrial(source, null, null, variant)
+      startFreeTrial(source, variant)
     },
     [handleClick, source, variant]
   )

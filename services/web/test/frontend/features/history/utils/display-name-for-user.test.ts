@@ -1,19 +1,8 @@
-/* eslint-disable
-    no-return-assign,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 import { expect } from 'chai'
+import displayNameForUser from '@/features/history/utils/display-name-for-user'
 
-import displayNameForUser from '../../../../../frontend/js/ide/history/util/displayNameForUser'
-
-export default describe('displayNameForUser', function () {
-  const currentUsersId = 42
+describe('displayNameForUser', function () {
+  const currentUsersId = 'user-a'
   beforeEach(function () {
     window.metaAttributesCache.set('ol-user', { id: currentUsersId })
   })

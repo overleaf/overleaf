@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import Notification from '@/shared/components/notification'
-import { upgradePlan } from '../../../../main/account-upgrade'
+import { upgradePlan } from '@/main/account-upgrade'
 import { linkSharingEnforcementDate } from '../../utils/link-sharing'
 import { useProjectContext } from '@/shared/context/project-context'
 import { useUserContext } from '@/shared/context/user-context'
