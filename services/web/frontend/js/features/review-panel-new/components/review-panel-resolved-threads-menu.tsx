@@ -56,6 +56,10 @@ export const ReviewPanelResolvedThreadsMenu: FC = () => {
         resolvedThreads.push({ thread, id })
       }
     }
+    resolvedThreads.sort((a, b) => {
+      return Date.parse(b.thread.resolved_at) - Date.parse(a.thread.resolved_at)
+    })
+
     return resolvedThreads
   }, [threads])
 
