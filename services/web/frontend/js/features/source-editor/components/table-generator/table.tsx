@@ -21,6 +21,7 @@ import { ChangeSpec } from '@codemirror/state'
 import { startCompileKeypress } from '@/features/pdf-preview/hooks/use-compile-triggers'
 import { useTabularContext } from './contexts/tabular-context'
 import { ColumnSizeIndicator } from './column-size-indicator'
+import { isMac } from '@/shared/utils/os'
 
 type NavigationKey =
   | 'ArrowRight'
@@ -38,7 +39,6 @@ type NavigationMap = {
   }
 }
 
-const isMac = /Mac/.test(window.navigator?.platform)
 const MINIMUM_CELL_WIDTH_CHARACTERS = 15
 const MINIMUM_EDITING_CELL_WIDTH_CHARACTERS = 20
 const CELL_WIDTH_BUFFER = 3 // characters

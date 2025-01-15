@@ -21,6 +21,7 @@ import { FindResult } from '@/features/file-tree/util/path'
 import { fileCollator } from '@/features/file-tree/util/file-collator'
 import { Folder } from '../../../../../types/folder'
 import { FileTreeEntity } from '../../../../../types/file-tree-entity'
+import { isMac } from '@/shared/utils/os'
 
 const FileTreeSelectableContext = createContext<
   | {
@@ -233,8 +234,6 @@ export const FileTreeSelectableProvider: FC<{
     </FileTreeSelectableContext.Provider>
   )
 }
-
-const isMac = /Mac/.test(window.navigator?.platform)
 
 export function useSelectableEntity(id: string, type: string) {
   const { view, setView } = useLayoutContext()

@@ -18,8 +18,7 @@ import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/boots
 import MaterialIcon from '@/shared/components/material-icon'
 import OLOverlay from '@/features/ui/components/ol/ol-overlay'
 import OLPopover from '@/features/ui/components/ol/ol-popover'
-
-const isMac = /Mac/.test(window.navigator?.platform)
+import { isMac } from '@/shared/utils/os'
 
 export const PastedContentMenu: FC<{
   insertPastedContent: (

@@ -14,8 +14,7 @@ import {
   DropdownToggle,
 } from '@/features/ui/components/bootstrap-5/dropdown-menu'
 import FormControl from '@/features/ui/components/bootstrap-5/form/form-control'
-
-const isMac = /Mac/.test(window.navigator?.platform)
+import { isMac } from '@/shared/utils/os'
 
 const shortcuts = isMac
   ? {

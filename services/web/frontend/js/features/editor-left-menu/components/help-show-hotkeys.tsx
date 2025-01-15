@@ -5,12 +5,12 @@ import { useProjectContext } from '../../../shared/context/project-context'
 import HotkeysModal from '../../hotkeys-modal/components/hotkeys-modal'
 import LeftMenuButton from './left-menu-button'
 import { bsVersionIcon } from '@/features/utils/bootstrap-5'
+import { isMac } from '@/shared/utils/os'
 
 export default function HelpShowHotkeys() {
   const [showModal, setShowModal] = useState(false)
   const { t } = useTranslation()
   const { features } = useProjectContext()
-  const isMac = /Mac/.test(window.navigator?.platform)
 
   const showModalWithAnalytics = useCallback(() => {
     eventTracking.sendMB('left-menu-hotkeys')

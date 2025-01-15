@@ -13,8 +13,7 @@ import { TableInserterDropdown } from './table-inserter-dropdown'
 import { withinFormattingCommand } from '@/features/source-editor/utils/tree-operations/formatting'
 import { bsVersion } from '@/features/utils/bootstrap-5'
 import { isSplitTestEnabled } from '@/utils/splitTestUtils'
-
-const isMac = /Mac/.test(window.navigator?.platform)
+import { isMac } from '@/shared/utils/os'
 
 export const ToolbarItems: FC<{
   state: EditorState

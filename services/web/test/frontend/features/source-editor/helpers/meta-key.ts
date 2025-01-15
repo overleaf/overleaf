@@ -1,3 +1,3 @@
-const isMac = /Mac/.test(window.navigator?.platform)
+import { isMac } from '@/shared/utils/os'
 
 export const metaKey = isMac ? 'meta' : 'ctrl'
