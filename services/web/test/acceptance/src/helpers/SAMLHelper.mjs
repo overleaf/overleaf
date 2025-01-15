@@ -57,7 +57,9 @@ function createMockSamlAssertion(samlData = {}, opts = {}) {
   const { signedAssertion = true } = opts
 
   const userIdAttributeName = samlData.userIdAttribute || 'uniqueId'
-  const userIdAttribute = `<saml:AttributeStatement>
+  const userIdAttribute =
+    uniqueId &&
+    `<saml:AttributeStatement>
     <saml:Attribute Name="${userIdAttributeName}" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:unspecified">
       <saml:AttributeValue xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xs:string">${uniqueId}</saml:AttributeValue>
     </saml:Attribute>
