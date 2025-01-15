@@ -155,3 +155,7 @@ export const toggleSearch: Command = view => {
   }
   return true
 }
+
+export const addComment = () => {
+  window.dispatchEvent(new Event('add-new-review-comment'))
+}

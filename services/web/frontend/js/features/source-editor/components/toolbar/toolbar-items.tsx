@@ -12,6 +12,7 @@ import { MathDropdown } from './math-dropdown'
 import { TableInserterDropdown } from './table-inserter-dropdown'
 import { withinFormattingCommand } from '@/features/source-editor/utils/tree-operations/formatting'
 import { bsVersion } from '@/features/utils/bootstrap-5'
+import { isSplitTestEnabled } from '@/utils/splitTestUtils'
 
 const isMac = /Mac/.test(window.navigator?.platform)
 
@@ -124,6 +125,15 @@ export const ToolbarItems: FC<{
                 command={commands.wrapInHref}
                 icon={bsVersion({ bs5: 'add_link', bs3: 'link' })}
               />
+              {isSplitTestEnabled('review-panel-redesign') && (
+                <ToolbarButton
+                  id="toolbar-add-comment"
+                  label={t('add_comment')}
+                  disabled={state.selection.main.empty}
+                  command={commands.addComment}
+                  icon={bsVersion({ bs5: 'add_comment', bs3: 'comment' })}
+                />
+              )}
               <ToolbarButton
                 id="toolbar-ref"
                 label={t('toolbar_insert_cross_reference')}
