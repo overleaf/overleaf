@@ -36,13 +36,22 @@
   margin: 0;
 }
 
-h1,
-h2,
-h3,
-h4,
-h5 {
-  > span.mono-text {
-    display: block;
-    margin-bottom: var(--spacing-04);
-  }
+.eyebrow-text {
+  @extend .mono-text;
+
+  display: block;
+  margin-bottom: var(--spacing-04);
+}
+
+p:has(.eyebrow-text) {
+  margin-bottom: 0;
+}
+
+p:has(.eyebrow-text) + h1,
+p:has(.eyebrow-text) + h2,
+p:has(.eyebrow-text) + h3,
+p:has(.eyebrow-text) + h4,
+p:has(.eyebrow-text) + h5,
+p:has(.eyebrow-text) + h6 {
+  margin-top: 0;
 }

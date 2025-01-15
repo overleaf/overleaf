@@ -45,10 +45,14 @@
   h1,
   h2,
   h3 {
-    > span.mono-text {
+    > span.eyebrow-text {
       display: block;
       margin-bottom: @margin-xs;
     }
+  }
+
+  .eyebrow-text {
+    .mono-text;
   }
 
   // override .btn default style
