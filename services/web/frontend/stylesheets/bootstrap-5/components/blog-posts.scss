@@ -32,6 +32,10 @@
 
   .blog-list-container-title {
     margin-top: var(--spacing-11);
+
+    small {
+      color: var(--neutral-70);
+    }
   }
 }
 
