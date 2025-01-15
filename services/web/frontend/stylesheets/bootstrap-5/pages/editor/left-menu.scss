@@ -189,54 +189,6 @@
   background-color: transparent;
 }
 
-.nav {
-  margin-bottom: 0;
-  padding-left: 0;
-  list-style: none;
-  display: block;
-
-  > li {
-    position: relative;
-    display: block;
-
-    > a {
-      position: relative;
-      display: block;
-      padding: var(--spacing-04) var(--spacing-06);
-
-      &:hover,
-      &:focus {
-        text-decoration: none;
-        background-color: var(--bg-info-01);
-        color: white;
-      }
-    }
-
-    // Disabled state sets text to gray and nukes hover/tab effects
-    &.disabled > a {
-      color: var(--content-disabled);
-
-      &:hover,
-      &:focus {
-        color: var(--content-disabled);
-        text-decoration: none;
-        background-color: transparent;
-        cursor: not-allowed;
-      }
-    }
-  }
-
-  // Open dropdowns
-  .open > a {
-    &,
-    &:hover,
-    &:focus {
-      background-color: var(--bg-info-01);
-      border-color: var(--link-ui);
-    }
-  }
-}
-
 .loading-spinner-container {
   display: flex;
   align-items: center;
