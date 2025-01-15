@@ -60,6 +60,7 @@ $editor-toggler-bg-dark-color: color.adjust(
   background-color: var(--file-tree-bg);
   height: 100%;
   color: var(--content-secondary-dark);
+  position: relative;
 }
 
 .ide-react-body {

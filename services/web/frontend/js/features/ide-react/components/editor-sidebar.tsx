@@ -5,6 +5,12 @@ import classNames from 'classnames'
 import { useLayoutContext } from '@/shared/context/layout-context'
 import { OutlineContainer } from '@/features/outline/components/outline-container'
 import { useOutlinePane } from '@/features/ide-react/hooks/use-outline-pane'
+import React, { ElementType } from 'react'
+import importOverleafModules from '../../../../macros/import-overleaf-module.macro'
+
+const editorSidebarComponents = importOverleafModules(
+  'editorSidebarComponents'
+) as { import: { default: ElementType }; path: string }[]
 
 export default function EditorSidebar() {
   const { view } = useLayoutContext()
@@ -17,6 +23,11 @@ export default function EditorSidebar() {
         hidden: view === 'history',
       })}
     >
+      {editorSidebarComponents.map(
+        ({ import: { default: Component }, path }) => (
+          <Component key={path} />
+        )
+      )}
       <PanelGroup autoSaveId="ide-editor-sidebar-layout" direction="vertical">
         <Panel
           defaultSize={50}

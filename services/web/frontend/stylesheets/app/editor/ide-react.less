@@ -51,12 +51,12 @@
 
   // Enable ::before and ::after pseudo-elements to position themselves correctly
   position: relative;
-
   background-color: @editor-resizer-bg-color;
 
   .custom-toggler {
     padding: 0;
     border-width: 0;
+
     // Override react-resizable-panels which sets a global * { cursor: ew-resize }
     cursor: pointer !important;
   }
@@ -74,9 +74,11 @@
       width: 7px;
       height: 18px;
     }
+
     &::before {
       top: 25%;
     }
+
     &::after {
       top: 75%;
     }
@@ -89,6 +91,7 @@
   .synctex-controls {
     left: -8px;
     margin: 0;
+
     // Ensure that SyncTex controls appear in front of PDF viewer controls and logs pane
     z-index: 12;
 
@@ -128,6 +131,7 @@
   height: 100%;
   background-color: @file-tree-bg;
   color: var(--neutral-20);
+  position: relative;
 }
 
 .ide-react-symbol-palette {

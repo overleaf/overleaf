@@ -333,6 +333,7 @@ const _ProjectController = {
     const splitTests = [
       !anonymous && 'bib-file-tpr-prompt',
       'compile-log-events',
+      'full-project-search',
       'math-preview',
       'null-test-share-modal',
       'paywall-cta',

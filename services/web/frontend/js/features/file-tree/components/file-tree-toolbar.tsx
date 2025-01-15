@@ -7,6 +7,12 @@ import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
 import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
 import MaterialIcon from '@/shared/components/material-icon'
 import OLButtonToolbar from '@/features/ui/components/ol/ol-button-toolbar'
+import importOverleafModules from '../../../../macros/import-overleaf-module.macro'
+import React, { ElementType } from 'react'
+
+const fileTreeToolbarComponents = importOverleafModules(
+  'fileTreeToolbarComponents'
+) as { import: { default: ElementType }; path: string }[]
 
 function FileTreeToolbar() {
   const { fileTreeReadOnly } = useFileTreeData()
@@ -105,12 +111,14 @@ function FileTreeToolbarRight() {
   const { canRename, canDelete, startRenaming, startDeleting } =
     useFileTreeActionable()
 
-  if (!canRename && !canDelete) {
-    return null
-  }
-
   return (
     <div className="toolbar-right">
+      {fileTreeToolbarComponents.map(
+        ({ import: { default: Component }, path }) => (
+          <Component key={path} />
+        )
+      )}
+
       {canRename ? (
         <OLTooltip
           id="rename"
@@ -127,6 +135,7 @@ function FileTreeToolbarRight() {
           </button>
         </OLTooltip>
       ) : null}
+
       {canDelete ? (
         <OLTooltip
           id="delete"

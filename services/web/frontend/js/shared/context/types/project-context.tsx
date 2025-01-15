@@ -1,5 +1,6 @@
 import { UserId } from '../../../../../types/user'
 import { PublicAccessLevel } from '../../../../../types/public-access-level'
+import { ProjectSnapshot } from '@/infrastructure/project-snapshot'
 
 export type ProjectContextMember = {
   _id: UserId
@@ -46,6 +47,7 @@ export type ProjectContextValue = {
     color?: string
   }[]
   trackChangesState: boolean | Record<UserId | '__guests__', boolean>
+  projectSnapshot: ProjectSnapshot
 }
 
 export type ProjectContextUpdateValue = Partial<ProjectContextValue>

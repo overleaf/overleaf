@@ -983,6 +983,8 @@ module.exports = {
     autoCompleteExtensions: [],
     sectionTitleGenerators: [],
     toastGenerators: [],
+    editorSidebarComponents: [],
+    fileTreeToolbarComponents: [],
   },
 
   moduleImportSequence: [
