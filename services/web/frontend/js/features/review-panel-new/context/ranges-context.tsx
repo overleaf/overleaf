@@ -98,7 +98,9 @@ export const RangesProvider: FC = ({ children }) => {
   useEffect(() => {
     if (currentDoc) {
       const listener = () => {
-        setRanges(buildRanges(currentDoc))
+        window.setTimeout(() => {
+          setRanges(buildRanges(currentDoc))
+        })
       }
 
       // currentDoc.on('ranges:clear.cm6', listener)
