@@ -16,7 +16,6 @@ import { useLocation } from '../../../../../../../shared/hooks/use-location'
 import { debugConsole } from '@/utils/debugging'
 import OLButton from '@/features/ui/components/ol/ol-button'
 import moment from 'moment'
-import { getSplitTestVariant } from '@/utils/splitTestUtils'
 import OLNotification from '@/features/ui/components/ol/ol-notification'
 
 const planCodeToDowngradeTo = 'paid-personal'
@@ -160,8 +159,6 @@ export function CancelSubscription() {
     isSuccessSecondaryAction ||
     isSuccessCancel
 
-  const groupPricingVariant = getSplitTestVariant('group-pricing-2025')
-
   if (!personalSubscription || !('recurly' in personalSubscription)) return null
 
   const showDowngrade = showDowngradeOption(
@@ -179,7 +176,6 @@ export function CancelSubscription() {
   const startDate = moment.utc(personalSubscription.recurly.account.created_at)
   const pricingChangeEffectiveDate = moment.utc('2025-01-08T12:00:00Z')
   const displayPricingWarning =
-    groupPricingVariant === 'enabled' &&
     personalSubscription.plan.groupPlan &&
     startDate.isBefore(pricingChangeEffectiveDate)
 

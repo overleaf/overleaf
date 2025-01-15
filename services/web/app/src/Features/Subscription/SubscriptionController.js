@@ -55,7 +55,6 @@ async function userSubscriptionPage(req, res) {
     res,
     'bootstrap-5-subscription'
   )
-  await SplitTestHandler.promises.getAssignment(req, res, 'group-pricing-2025')
 
   const results =
     await SubscriptionViewModelBuilder.promises.buildUsersSubscriptionViewModel(

@@ -322,7 +322,7 @@ describe('<ChangePlanModal />', function () {
     const standardPlanCollaboratorText = '10 collaborators per project'
     const professionalPlanCollaboratorText = 'Unlimited collaborators'
     const educationInputLabel =
-      'This license is for educational purposes (applies to students or faculty using Overleaf for teaching)'
+      '40% educational discountI confirm this subscription is for educational purposes (applies to students or faculty using Overleaf for teaching)'
 
     let modal: HTMLElement
     async function openModal() {
@@ -342,7 +342,6 @@ describe('<ChangePlanModal />', function () {
       await openModal()
 
       within(modal).getByText('Customize your group subscription')
-      within(modal).getByText('Save 30% or more')
 
       within(modal).getByText('$1,290 per year')
       expect(within(modal).getAllByText('$129 per user').length).to.equal(2)
@@ -369,16 +368,14 @@ describe('<ChangePlanModal />', function () {
       expect(sizeSelect.value).to.equal('10')
       const sizeOption = within(sizeSelect).getAllByRole('option')
       expect(sizeOption.length).to.equal(groupPlans.sizes.length)
-      within(modal).getByText(
-        'Overleaf offers a 40% educational discount for groups of 10 or more.'
-      )
+      within(modal).getByText('40% educational discount')
 
       const educationalCheckbox = within(modal).getByRole(
         'checkbox'
       ) as HTMLInputElement
       expect(educationalCheckbox.checked).to.be.false
       within(modal).getByText(
-        'This license is for educational purposes (applies to students or faculty using Overleaf for teaching)'
+        'I confirm this subscription is for educational purposes (applies to students or faculty using Overleaf for teaching)'
       )
 
       within(modal).getByText(
@@ -406,10 +403,8 @@ describe('<ChangePlanModal />', function () {
       expect(within(modal).queryByText(standardPlanCollaboratorText)).to.be.null
     })
 
-    it('shows educational discount applied when input checked and also notes if not enough users to get discount', async function () {
+    it('shows educational discount applied when input checked', async function () {
       const discountAppliedText = '40% educational discount applied!'
-      const discountNotAppliedText =
-        'The educational discount is available for groups of 10 or more'
       renderActiveSubscription(annualActiveSubscription)
 
       await openModal()
@@ -417,12 +412,10 @@ describe('<ChangePlanModal />', function () {
       const educationInput = within(modal).getByLabelText(educationInputLabel)
       fireEvent.click(educationInput)
       await within(modal).findByText(discountAppliedText)
-      expect(within(modal).queryByText(discountNotAppliedText)).to.be.null
 
       const sizeSelect = within(modal).getByRole('combobox') as HTMLInputElement
       await userEvent.selectOptions(sizeSelect, [screen.getByText('5')])
-      await within(modal).findByText(discountNotAppliedText)
-      expect(within(modal).queryByText(discountAppliedText)).to.be.null
+      await within(modal).findByText(discountAppliedText)
     })
 
     it('shows total with tax when tax applied', async function () {
