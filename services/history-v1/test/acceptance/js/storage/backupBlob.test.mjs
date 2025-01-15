@@ -158,6 +158,12 @@ describe('backupBlob', function () {
       storedSize: 29, // zlib.gzipSync(content).byteLength
     },
     {
+      name: 'large text file',
+      // 'ä' is a 2-byte utf-8 character -> 4MB.
+      content: Buffer.from('ü'.repeat(2 * 1024 * 1024)),
+      storedSize: 4101, // zlib.gzipSync(content).byteLength
+    },
+    {
       name: 'binary file',
       content: Buffer.from([0, 1, 2, 3]),
       storedSize: 4,
