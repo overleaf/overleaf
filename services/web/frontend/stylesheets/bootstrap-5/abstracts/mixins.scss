@@ -174,3 +174,33 @@
     border-bottom-color: transparent;
   }
 }
+
+// Form validation states
+
+@mixin form-control-validation($color) {
+  color: $color;
+
+  // Color the label and help text
+  .help-block,
+  .control-label,
+  .radio,
+  .checkbox,
+  .radio-inline,
+  .checkbox-inline,
+  .form-label {
+    color: $color;
+  }
+
+  .form-control {
+    border-color: $color;
+
+    &:focus {
+      border-color: $border-active;
+    }
+  }
+
+  // Optional feedback icon
+  .form-control-feedback {
+    color: $color;
+  }
+}
