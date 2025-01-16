@@ -15,6 +15,7 @@ import * as WebApiManager from './WebApiManager.js'
 import * as SyncManager from './SyncManager.js'
 import * as Versions from './Versions.js'
 import * as Errors from './Errors.js'
+import * as Metrics from './Metrics.js'
 import { Profiler } from './Profiler.js'
 
 const keys = Settings.redis.lock.key_schema
@@ -61,6 +62,7 @@ export function getRawUpdates(projectId, batchSize, callback) {
 
 // Process all updates for a project, only check project-level information once
 export function processUpdatesForProject(projectId, callback) {
+  const startTimeMs = Date.now()
   LockManager.runWithLock(
     keys.projectHistoryLock({ project_id: projectId }),
     (extendLock, releaseLock) => {
@@ -76,6 +78,11 @@ export function processUpdatesForProject(projectId, callback) {
         OError.tag(error)
       }
       ErrorRecorder.record(projectId, queueSize, error, callback)
+      if (queueSize > 0) {
+        const duration = (Date.now() - startTimeMs) / 1000
+        Metrics.historyFlushDurationSeconds.observe(duration)
+        Metrics.historyFlushQueueSize.observe(queueSize)
+      }
       // clear the timestamp in the background if the queue is now empty
       RedisManager.clearDanglingFirstOpTimestamp(projectId, () => {})
     }
