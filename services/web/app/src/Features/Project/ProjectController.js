@@ -341,7 +341,6 @@ const _ProjectController = {
       'pdf-caching-mode',
       'pdf-caching-prefetch-large',
       'pdf-caching-prefetching',
-      'pdf-presentation-mode',
       'revert-file',
       'revert-project',
       'review-panel-redesign',
