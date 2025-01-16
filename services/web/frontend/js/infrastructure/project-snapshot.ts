@@ -56,7 +56,7 @@ export class ProjectSnapshot {
     if (file == null) {
       return null
     }
-    return file.getContent() ?? null
+    return file.getContent({ filterTrackedDeletes: true }) ?? null
   }
 
   private async loadDocs() {
