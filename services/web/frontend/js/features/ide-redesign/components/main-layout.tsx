@@ -3,15 +3,13 @@ import classNames from 'classnames'
 import { HorizontalResizeHandle } from '@/features/ide-react/components/resize/horizontal-resize-handle'
 import PdfPreview from '@/features/pdf-preview/components/pdf-preview'
 import { Editor } from './editor'
+import { RailLayout } from './rail'
 
 export default function MainLayout() {
   return (
     <div className="ide-redesign-main">
       <div className="ide-skeleton-block">Toolbar</div>
       <div className="ide-redesign-body">
-        <div className="ide-skeleton-block ide-redesign-full-height">
-          Left menu
-        </div>
         <PanelGroup
           autoSaveId="ide-redesign-outer-layout"
           direction="horizontal"
@@ -19,17 +17,7 @@ export default function MainLayout() {
             'ide-panel-group-resizing': false,
           })}
         >
-          <Panel
-            id="ide-redesign-sidebar-panel"
-            order={1}
-            defaultSize={15}
-            minSize={5}
-            maxSize={80}
-          >
-            <div className="ide-skeleton-block ide-redesign-full-height">
-              Side bar
-            </div>
-          </Panel>
+          <RailLayout />
           <HorizontalResizeHandle
             resizable
             hitAreaMargins={{ coarse: 0, fine: 0 }}

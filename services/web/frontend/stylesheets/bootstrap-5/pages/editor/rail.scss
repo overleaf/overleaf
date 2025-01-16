@@ -1,0 +1,57 @@
+:root {
+  --ide-rail-background: #fff;
+  --ide-rail-color: var(--neutral-90);
+  --ide-rail-link-background: #fff;
+  --ide-rail-link-active-background: var(--neutral-10);
+  --ide-rail-link-active-indicator-background: var(--neutral-90);
+}
+
+.ide-rail-tab-link {
+  border-radius: 12px;
+  display: block;
+  height: 48px;
+  width: 48px;
+  text-align: center;
+  padding: 0;
+  color: var(--ide-rail-color);
+  background-color: var(--ide-rail-link-background);
+  position: relative;
+  overflow-y: hidden;
+
+  .ide-rail-tab-link-icon {
+    line-height: 48px;
+    font-size: 20px;
+  }
+
+  &.active {
+    color: var(--ide-rail-color);
+    background-color: var(--ide-rail-link-active-background);
+
+    &::after {
+      $indicator-height: 3px;
+
+      border-radius: 12px;
+      content: '';
+      position: absolute;
+      bottom: -$indicator-height;
+      left: 25%;
+      box-sizing: border-box;
+      width: 50%;
+      height: $indicator-height * 2;
+      border: $indicator-height solid
+        var(--ide-rail-link-active-indicator-background);
+      background-color: var(--ide-rail-link-active-indicator-background);
+    }
+  }
+}
+
+.ide-rail {
+  height: 100%;
+  padding: var(--spacing-02);
+  background: var(--ide-rail-background);
+}
+
+.ide-rail-content {
+  height: 100%;
+  border: 1px solid var(--border-divider);
+}
