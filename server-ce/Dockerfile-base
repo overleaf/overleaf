@@ -99,3 +99,7 @@ RUN adduser --system --group --home /overleaf --no-create-home overleaf && \
 	chown www-data:www-data /var/log/overleaf && \
 	mkdir -p /var/lib/overleaf/data/template_files && \
 	chown www-data:www-data /var/lib/overleaf/data/template_files
+
+# Add Inkscape for svg support
+
+RUN add-apt-repository universe && add-apt-repository ppa:inkscape.dev/stable && apt-get update && apt install -y inkscape
