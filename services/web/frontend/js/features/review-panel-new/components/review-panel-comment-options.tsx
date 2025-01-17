@@ -28,9 +28,14 @@ const ReviewPanelCommentOptions: FC<{
   onEdit: () => void
   onDelete: () => void
   id: string
-  belongsToCurrentUser: boolean
-}> = ({ onEdit, onDelete, id, belongsToCurrentUser }) => {
+  canEdit: boolean
+  canDelete: boolean
+}> = ({ onEdit, onDelete, id, canEdit, canDelete }) => {
   const { t } = useTranslation()
+
+  if (!canEdit && !canDelete) {
+    return null
+  }
 
   return (
     <BootstrapVersionSwitcher
@@ -49,10 +54,10 @@ const ReviewPanelCommentOptions: FC<{
             />
           </BS3Dropdown.Toggle>
           <BS3Dropdown.Menu>
-            {belongsToCurrentUser && (
-              <BS3MenuItem onClick={onEdit}>{t('edit')}</BS3MenuItem>
+            {canEdit && <BS3MenuItem onClick={onEdit}>{t('edit')}</BS3MenuItem>}
+            {canDelete && (
+              <BS3MenuItem onClick={onDelete}>{t('delete')}</BS3MenuItem>
             )}
-            <BS3MenuItem onClick={onDelete}>{t('delete')}</BS3MenuItem>
           </BS3Dropdown.Menu>
         </ControlledDropdown>
       }
@@ -70,18 +75,20 @@ const ReviewPanelCommentOptions: FC<{
             />
           </DropdownToggle>
           <DropdownMenu flip={false}>
-            {belongsToCurrentUser && (
+            {canEdit && (
               <li role="none">
                 <DropdownItem as="button" onClick={onEdit}>
                   {t('edit')}
                 </DropdownItem>
               </li>
             )}
-            <li role="none">
-              <DropdownItem as="button" onClick={onDelete}>
-                {t('delete')}
-              </DropdownItem>
-            </li>
+            {canDelete && (
+              <li role="none">
+                <DropdownItem as="button" onClick={onDelete}>
+                  {t('delete')}
+                </DropdownItem>
+              </li>
+            )}
           </DropdownMenu>
         </Dropdown>
       }

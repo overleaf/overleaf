@@ -13,6 +13,7 @@ import { ExpandableContent } from './review-panel-expandable-content'
 import ReviewPanelDeleteCommentModal from './review-panel-delete-comment-modal'
 import { useUserContext } from '@/shared/context/user-context'
 import ReviewPanelEntryUser from './review-panel-entry-user'
+import { usePermissionsContext } from '@/features/ide-react/context/permissions-context'
 
 export const ReviewPanelMessage: FC<{
   message: ReviewPanelCommentThreadMessage
@@ -36,6 +37,12 @@ export const ReviewPanelMessage: FC<{
   const [deleting, setDeleting] = useState(false)
   const [content, setContent] = useState(message.content)
   const user = useUserContext()
+  const { write, trackedWrite } = usePermissionsContext()
+
+  const isCommentAuthor = user.id === message.user.id
+  const canEdit = isCommentAuthor
+  const canResolve = write || (trackedWrite && isCommentAuthor)
+  const canDelete = write || (trackedWrite && isCommentAuthor)
 
   const handleEditOption = useCallback(() => setEditing(true), [])
   const showDeleteModal = useCallback(() => setDeleting(true), [])
@@ -62,7 +69,7 @@ export const ReviewPanelMessage: FC<{
         </div>
 
         <div className="review-panel-entry-actions">
-          {!editing && !isReply && !isThreadResolved && (
+          {!editing && !isReply && !isThreadResolved && canResolve && (
             <OLTooltip
               id="resolve-thread"
               overlayProps={{ placement: 'bottom' }}
@@ -86,7 +93,8 @@ export const ReviewPanelMessage: FC<{
 
           {!editing && !isThreadResolved && (
             <ReviewPanelCommentOptions
-              belongsToCurrentUser={user.id === message.user.id}
+              canDelete={canDelete}
+              canEdit={canEdit}
               onEdit={handleEditOption}
               onDelete={showDeleteModal}
               id={message.id}
