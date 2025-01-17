@@ -160,9 +160,14 @@ export class HunspellManager {
     } else if (rest.loaded) {
       this.loaded = true
     } else if (rest.loadingFailed) {
-      captureException(new Error('Spell check loading failed'), {
-        tags: { ol_spell_check_language: this.language },
-      })
+      captureException(
+        new Error('Spell check loading failed', {
+          cause: rest.loadingFailed,
+        }),
+        {
+          tags: { ol_spell_check_language: this.language },
+        }
+      )
       this.loadingFailed = true
       this.pendingMessages.length = 0
     }
