@@ -5,8 +5,8 @@ import getMeta from '../../../../utils/meta'
 import SettingsMenuSelect, { Option } from './settings-menu-select'
 import { useProjectSettingsContext } from '../../context/project-settings-context'
 import type { OverallThemeMeta } from '../../../../../../types/project-settings'
-import type { OverallTheme } from '../../../source-editor/extensions/theme'
 import { isIEEEBranded } from '@/utils/is-ieee-branded'
+import { OverallTheme } from '@/shared/utils/styles'
 
 export default function SettingsOverallTheme() {
   const { t } = useTranslation()

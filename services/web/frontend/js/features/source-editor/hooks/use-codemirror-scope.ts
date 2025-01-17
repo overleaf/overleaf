@@ -5,11 +5,7 @@ import useScopeEventEmitter from '../../../shared/hooks/use-scope-event-emitter'
 import useEventListener from '../../../shared/hooks/use-event-listener'
 import useScopeEventListener from '../../../shared/hooks/use-scope-event-listener'
 import { createExtensions } from '../extensions'
-import {
-  lineHeights,
-  setEditorTheme,
-  setOptionsTheme,
-} from '../extensions/theme'
+import { setEditorTheme, setOptionsTheme } from '../extensions/theme'
 import {
   restoreCursorPosition,
   setCursorLineAndScroll,
@@ -63,6 +59,7 @@ import { useThreadsContext } from '@/features/review-panel-new/context/threads-c
 import { useHunspell } from '@/features/source-editor/hooks/use-hunspell'
 import { isBootstrap5 } from '@/features/utils/bootstrap-5'
 import { Permissions } from '@/features/ide-react/types/permissions'
+import { lineHeights } from '@/shared/utils/styles'
 
 function useCodeMirrorScope(view: EditorView) {
   const { fileTreeData } = useFileTreeData()

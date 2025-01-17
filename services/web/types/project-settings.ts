@@ -1,5 +1,5 @@
-import { OverallTheme } from '../frontend/js/features/source-editor/extensions/theme'
 import { Brand } from './helpers/brand'
+import { OverallTheme } from '@/shared/utils/styles'
 
 export type AllowedImageName = {
   imageDesc: string

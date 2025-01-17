@@ -1,8 +1,8 @@
 import { useTranslation } from 'react-i18next'
-import { FontFamily } from '../../../source-editor/extensions/theme'
 import { useProjectSettingsContext } from '../../context/project-settings-context'
 import SettingsMenuSelect from './settings-menu-select'
 import BetaBadge from '@/shared/components/beta-badge'
+import { FontFamily } from '@/shared/utils/styles'
 
 export default function SettingsFontFamily() {
   const { t } = useTranslation()

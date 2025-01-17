@@ -1,8 +1,6 @@
 import { EditorView } from '@codemirror/view'
 import { Compartment, TransactionSpec } from '@codemirror/state'
-
-export type FontFamily = 'monaco' | 'lucida' | 'opendyslexicmono'
-export type LineHeight = 'compact' | 'normal' | 'wide'
+import { FontFamily, LineHeight, userStyles } from '@/shared/utils/styles'
 
 export type Options = {
   fontSize: number
@@ -17,31 +15,20 @@ export const theme = (options: Options) => [
   optionsThemeConf.of(createThemeFromOptions(options)),
 ]
 
-export const lineHeights: Record<LineHeight, number> = {
-  compact: 1.33,
-  normal: 1.6,
-  wide: 2,
-}
-
-const fontFamilies: Record<FontFamily, string[]> = {
-  monaco: ['Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'monospace'],
-  lucida: ['Lucida Console', 'Source Code Pro', 'monospace'],
-  opendyslexicmono: ['OpenDyslexic Mono', 'monospace'],
-}
-
 const createThemeFromOptions = ({
   fontSize = 12,
   fontFamily = 'monaco',
   lineHeight = 'normal',
 }: Options) => {
   // Theme styles that depend on settings
-  const fontFamilyValue = fontFamilies[fontFamily]?.join(', ')
+  const styles = userStyles({ fontSize, fontFamily, lineHeight })
+
   return [
     EditorView.editorAttributes.of({
       style: Object.entries({
-        '--font-size': `${fontSize}px`,
-        '--source-font-family': fontFamilyValue,
-        '--line-height': lineHeights[lineHeight],
+        '--font-size': styles.fontSize,
+        '--source-font-family': styles.fontFamily,
+        '--line-height': styles.lineHeight,
       })
         .map(([key, value]) => `${key}: ${value}`)
         .join(';'),
@@ -50,8 +37,8 @@ const createThemeFromOptions = ({
     // TODO: set these on document.body, or a new container element for the tooltips, without using a style mod
     EditorView.theme({
       '.cm-tooltip': {
-        '--font-size': `${fontSize}px`,
-        '--source-font-family': fontFamilyValue,
+        '--font-size': styles.fontSize,
+        '--source-font-family': styles.fontFamily,
       },
     }),
   ]
