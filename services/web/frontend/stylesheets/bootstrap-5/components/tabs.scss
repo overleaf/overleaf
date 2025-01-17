@@ -36,6 +36,7 @@
           margin-right: unset;
           padding: var(--spacing-04);
           line-height: var(--line-height-03);
+          text-decoration: none;
 
           &:focus,
           &:hover {
@@ -77,50 +78,4 @@
 // a bookmarked tab hash
 [data-ol-bookmarkable-tabset] .tab-pane {
   scroll-margin-top: 120px;
-}
-
-[data-ol-bookmarkable-tabset] {
-  .nav-tabs-container {
-    .nav-tabs {
-      gap: 8px;
-      flex-wrap: nowrap;
-
-      > li {
-        float: left;
-
-        // Make the list-items overlay the bottom border
-        margin-bottom: -1px;
-
-        // Actual tabs (as links)
-        > a {
-          color: var(--content-secondary);
-          border: 1px solid transparent;
-          border-radius: var(--border-radius-base) var(--border-radius-base) 0 0;
-          padding: var(--spacing-04);
-          text-decoration: none;
-
-          &:hover,
-          &:focus {
-            cursor: pointer;
-            background-color: var(--bg-light-secondary);
-          }
-        }
-
-        // Active state, and its :hover to override normal :hover
-        > a.active {
-          color: var(--content-primary);
-          background-color: var(--bg-light-primary);
-          border: 1px solid var(--border-divider);
-          border-bottom-color: transparent;
-          cursor: default;
-        }
-      }
-    }
-
-    .tab-content {
-      border: 1px solid #ddd;
-      border-top: none;
-      padding: var(--spacing-05);
-    }
-  }
 }

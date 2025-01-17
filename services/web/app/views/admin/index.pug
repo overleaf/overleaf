@@ -13,9 +13,9 @@ block content
 						.card-body
 							.page-header
 								h1 Admin Panel
-							div(data-ol-bookmarkable-tabset)
+							.ol-tabs(data-ol-bookmarkable-tabset)
 								.nav-tabs-container
-									ul.nav.nav-tabs.d-flex(role="tablist")
+									ul.nav.nav-tabs(role="tablist")
 										+bookmarkable-tabset-header('system-messages', 'System Messages', true)
 										+bookmarkable-tabset-header('open-sockets', 'Open Sockets')
 										+bookmarkable-tabset-header('open-close-editor', 'Open/Close Editor')
