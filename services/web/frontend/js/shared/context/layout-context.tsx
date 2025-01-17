@@ -19,6 +19,7 @@ import { BinaryFile } from '@/features/file-view/types/binary-file'
 import useScopeEventEmitter from '@/shared/hooks/use-scope-event-emitter'
 import useEventListener from '@/shared/hooks/use-event-listener'
 import { isSplitTestEnabled } from '@/utils/splitTestUtils'
+import { isMac } from '@/shared/utils/os'
 
 export type IdeLayout = 'sideBySide' | 'flat'
 export type IdeView = 'editor' | 'file' | 'pdf' | 'history'
@@ -54,8 +55,6 @@ type LayoutContextValue = {
   projectSearchIsOpen: boolean
   setProjectSearchIsOpen: Dispatch<SetStateAction<boolean>>
 }
-
-const isMac = /Mac/.test(window.navigator?.platform)
 
 const debugPdfDetach = getMeta('ol-debugPdfDetach')
 
