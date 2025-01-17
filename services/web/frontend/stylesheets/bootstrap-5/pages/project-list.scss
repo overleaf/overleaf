@@ -155,6 +155,9 @@
   .project-tools {
     flex-shrink: 0;
     margin-left: auto;
+    min-height: 38px;
+    display: flex;
+    align-items: center;
   }
 
   @include media-breakpoint-down(md) {
