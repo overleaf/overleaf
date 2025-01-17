@@ -5,7 +5,7 @@ import type { NavbarSessionUser } from '@/features/ui/components/types/navbar'
 import DropdownListItem from '@/features/ui/components/bootstrap-5/dropdown-list-item'
 import NavDropdownDivider from './nav-dropdown-divider'
 import NavDropdownLinkItem from './nav-dropdown-link-item'
-import { useIsDsNav } from '@/features/project-list/components/use-is-ds-nav'
+import { useDsNavStyle } from '@/features/project-list/components/use-is-ds-nav'
 import { SignOut } from '@phosphor-icons/react'
 
 export function AccountMenuItems({
@@ -17,7 +17,7 @@ export function AccountMenuItems({
 }) {
   const { t } = useTranslation()
   const logOutFormId = 'logOutForm'
-  const isDsNav = useIsDsNav()
+  const dsNavStyle = useDsNavStyle()
   return (
     <>
       <Dropdown.Item as="li" disabled role="menuitem">
@@ -48,7 +48,7 @@ export function AccountMenuItems({
           className="d-flex align-items-center justify-content-between"
         >
           <span>{t('log_out')}</span>
-          {isDsNav && <SignOut size={16} />}
+          {dsNavStyle && <SignOut size={16} />}
         </Dropdown.Item>
         <form id={logOutFormId} method="POST" action="/logout">
           <input type="hidden" name="_csrf" value={getMeta('ol-csrfToken')} />

@@ -316,9 +316,4 @@
       @include body-xs;
     }
   }
-
-  // Only show the dropdown caret icon in the DS nav version of the project dashboard
-  .navbar-dropdown-caret {
-    display: unset;
-  }
 }

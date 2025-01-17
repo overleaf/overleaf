@@ -775,8 +775,3 @@ form.project-search {
     inset: 0;
   }
 }
-
-// Hide expander caret icon by default so that it only ever appears in the DS nav version of the project dashboard
-.navbar-dropdown-caret {
-  display: none;
-}
