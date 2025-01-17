@@ -66,6 +66,7 @@ import logger from '@overleaf/logger'
 import _ from 'lodash'
 import { plainTextResponse } from './infrastructure/Response.js'
 import PublicAccessLevels from './Features/Authorization/PublicAccessLevels.js'
+import SocketDiagnostics from './Features/SocketDiagnostics/SocketDiagnostics.mjs'
 const ClsiCookieManager = ClsiCookieManagerFactory(
   Settings.apis.clsi != null ? Settings.apis.clsi.backendGroupName : undefined
 )
@@ -230,6 +231,8 @@ async function initialize(webRouter, privateApiRouter, publicApiRouter) {
   )
 
   webRouter.get('/account-suspended', UserPagesController.accountSuspended)
+
+  webRouter.get('/socket-diagnostics', SocketDiagnostics.index)
 
   if (Settings.enableLegacyLogin) {
     AuthenticationController.addEndpointToLoginWhitelist('/login/legacy')

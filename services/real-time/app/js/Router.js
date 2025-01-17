@@ -169,20 +169,27 @@ module.exports = Router = {
         }
         return
       }
-
+      const isDebugging = !!client.handshake?.query?.debugging
       const projectId = client.handshake?.query?.projectId
-      try {
-        Joi.assert(projectId, JOI_OBJECT_ID)
-      } catch (error) {
-        metrics.inc('socket-io.connection', 1, {
-          status: client.transport,
-          method: projectId ? 'bad-project-id' : 'missing-project-id',
-        })
-        client.emit('connectionRejected', {
-          message: 'missing/bad ?projectId=... query flag on handshake',
-        })
-        client.disconnect()
-        return
+
+      if (isDebugging) {
+        client.connectedAt = Date.now()
+      }
+
+      if (!isDebugging) {
+        try {
+          Joi.assert(projectId, JOI_OBJECT_ID)
+        } catch (error) {
+          metrics.inc('socket-io.connection', 1, {
+            status: client.transport,
+            method: projectId ? 'bad-project-id' : 'missing-project-id',
+          })
+          client.emit('connectionRejected', {
+            message: 'missing/bad ?projectId=... query flag on handshake',
+          })
+          client.disconnect()
+          return
+        }
       }
 
       // The client.id is security sensitive. Generate a publicId for sending to other clients.
@@ -198,7 +205,10 @@ module.exports = Router = {
       })
       metrics.gauge('socket-io.clients', io.sockets.clients().length)
 
-      logger.debug({ session, clientId: client.id }, 'client connected')
+      logger.debug(
+        { session, clientId: client.id, isDebugging },
+        'client connected'
+      )
 
       let user
       if (session && session.passport && session.passport.user) {
@@ -222,7 +232,30 @@ module.exports = Router = {
           callback(HOSTNAME)
         })
       }
+      client.on('debug', (data, callback) => {
+        if (typeof callback !== 'function') {
+          return Router._handleInvalidArguments(client, 'debug', arguments)
+        }
 
+        logger.debug({ clientId: client.id }, 'received debug message')
+
+        const response = {
+          serverTime: Date.now(),
+          data,
+          client: {
+            publicId: client.publicId,
+            remoteIp: client.remoteIp,
+            userAgent: client.userAgent,
+            connected: !client.disconnected,
+            connectedAt: client.connectedAt,
+          },
+          server: {
+            hostname: settings.exposeHostname ? HOSTNAME : undefined,
+          },
+        }
+
+        callback(response)
+      })
       const joinProject = function (callback) {
         WebsocketController.joinProject(
           client,
@@ -244,6 +277,12 @@ module.exports = Router = {
       client.on('disconnect', function () {
         metrics.inc('socket-io.disconnect', 1, { status: client.transport })
         metrics.gauge('socket-io.clients', io.sockets.clients().length)
+
+        if (client.isDebugging) {
+          const duration = Date.now() - client.connectedAt
+          metrics.timing('socket-io.debugging.duration', duration)
+          logger.debug({ duration }, 'debug client disconnected')
+        }
 
         WebsocketController.leaveProject(io, client, function (err) {
           if (err) {
@@ -435,19 +474,21 @@ module.exports = Router = {
         )
       })
 
-      joinProject((err, project, permissionsLevel, protocolVersion) => {
-        if (err) {
-          client.emit('connectionRejected', err)
-          client.disconnect()
-          return
-        }
-        client.emit('joinProjectResponse', {
-          publicId: client.publicId,
-          project,
-          permissionsLevel,
-          protocolVersion,
+      if (!isDebugging) {
+        joinProject((err, project, permissionsLevel, protocolVersion) => {
+          if (err) {
+            client.emit('connectionRejected', err)
+            client.disconnect()
+            return
+          }
+          client.emit('joinProjectResponse', {
+            publicId: client.publicId,
+            project,
+            permissionsLevel,
+            protocolVersion,
+          })
         })
-      })
+      }
     })
   },
 }
