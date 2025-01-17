@@ -544,7 +544,7 @@ async function redirectToHostedPage(req, res) {
   res.redirect(url)
 }
 
-async function _getRecommendedCurrency(req, res) {
+async function getRecommendedCurrency(req, res) {
   const userId = SessionManager.getLoggedInUserId(req.session)
   let ip = req.ip
   if (
@@ -683,8 +683,6 @@ module.exports = {
   purchaseAddon,
   removeAddon,
   makeChangePreview,
-  promises: {
-    getRecommendedCurrency: _getRecommendedCurrency,
-    getLatamCountryBannerDetails,
-  },
+  getRecommendedCurrency,
+  getLatamCountryBannerDetails,
 }

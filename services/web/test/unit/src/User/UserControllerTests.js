@@ -916,7 +916,7 @@ describe('UserController', function () {
   describe('ensureAffiliationMiddleware', function () {
     describe('without affiliations feature', function () {
       beforeEach(async function () {
-        await this.UserController.promises.ensureAffiliationMiddleware(
+        await this.UserController.ensureAffiliationMiddleware(
           this.req,
           this.res,
           this.next
@@ -938,7 +938,7 @@ describe('UserController', function () {
     describe('without ensureAffiliation query parameter', function () {
       beforeEach(async function () {
         this.Features.hasFeature.withArgs('affiliations').returns(true)
-        await this.UserController.promises.ensureAffiliationMiddleware(
+        await this.UserController.ensureAffiliationMiddleware(
           this.req,
           this.res,
           this.next
@@ -968,7 +968,7 @@ describe('UserController', function () {
         ]
         this.Features.hasFeature.withArgs('affiliations').returns(true)
         this.req.query.ensureAffiliation = true
-        await this.UserController.promises.ensureAffiliationMiddleware(
+        await this.UserController.ensureAffiliationMiddleware(
           this.req,
           this.res,
           this.next
@@ -1005,7 +1005,7 @@ describe('UserController', function () {
         this.Features.hasFeature.withArgs('affiliations').returns(true)
         this.req.query.ensureAffiliation = true
         this.req.assertPermission = sinon.stub()
-        await this.UserController.promises.ensureAffiliationMiddleware(
+        await this.UserController.ensureAffiliationMiddleware(
           this.req,
           this.res,
           this.next
@@ -1047,7 +1047,7 @@ describe('UserController', function () {
         this.Features.hasFeature.withArgs('affiliations').returns(true)
         this.req.query.ensureAffiliation = true
         this.req.assertPermission = sinon.stub()
-        await this.UserController.promises.ensureAffiliationMiddleware(
+        await this.UserController.ensureAffiliationMiddleware(
           this.req,
           this.res,
           this.next
@@ -1089,7 +1089,7 @@ describe('UserController', function () {
         this.Features.hasFeature.withArgs('affiliations').returns(true)
         this.req.query.ensureAffiliation = true
         this.req.assertPermission = sinon.stub()
-        await this.UserController.promises.ensureAffiliationMiddleware(
+        await this.UserController.ensureAffiliationMiddleware(
           this.req,
           this.res,
           this.next

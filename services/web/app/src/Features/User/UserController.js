@@ -16,7 +16,7 @@ const HttpErrorHandler = require('../Errors/HttpErrorHandler')
 const OError = require('@overleaf/o-error')
 const EmailHandler = require('../Email/EmailHandler')
 const UrlHelper = require('../Helpers/UrlHelper')
-const { promisify, callbackify } = require('util')
+const { promisify } = require('util')
 const { expressify } = require('@overleaf/promise-utils')
 const {
   acceptsJson,
@@ -212,11 +212,7 @@ async function ensureAffiliationMiddleware(req, res, next) {
       return next()
     }
   }
-  try {
-    await ensureAffiliation(user)
-  } catch (error) {
-    return next(error)
-  }
+  await ensureAffiliation(user)
   return next()
 }
 
@@ -505,13 +501,9 @@ module.exports = {
   subscribe: expressify(subscribe),
   unsubscribe: expressify(unsubscribe),
   updateUserSettings: expressify(updateUserSettings),
-  doLogout: callbackify(doLogout),
   logout: expressify(logout),
   expireDeletedUser: expressify(expireDeletedUser),
   expireDeletedUsersAfterDuration: expressify(expireDeletedUsersAfterDuration),
-  promises: {
-    doLogout,
-    ensureAffiliation,
-    ensureAffiliationMiddleware,
-  },
+  ensureAffiliationMiddleware: expressify(ensureAffiliationMiddleware),
+  ensureAffiliation,
 }

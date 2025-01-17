@@ -15,7 +15,7 @@ const query = {
 
 async function _handleEnsureAffiliation(user) {
   try {
-    await UserController.promises.ensureAffiliation(user)
+    await UserController.ensureAffiliation(user)
     console.log(`✔ ${user._id}`)
     success.push(user._id)
   } catch (error) {

@@ -314,7 +314,7 @@ async function initialize(webRouter, privateApiRouter, publicApiRouter) {
     '/user/emails',
     AuthenticationController.requireLogin(),
     PermissionsController.useCapabilities(),
-    UserController.promises.ensureAffiliationMiddleware,
+    UserController.ensureAffiliationMiddleware,
     UserEmailsController.list
   )
   webRouter.get(

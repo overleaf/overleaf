@@ -38,6 +38,7 @@ describe('DocumentUpdaterController', function () {
     }
     this.lines = ['test', '', 'testing']
     this.res = new MockResponse()
+    this.next = sinon.stub()
     this.doc = { name: 'myfile.tex' }
   })
 
@@ -53,8 +54,7 @@ describe('DocumentUpdaterController', function () {
     })
 
     it('should call the document updater handler with the project_id and doc_id', async function () {
-      await this.controller.promises.getDoc(this.req, this.res)
-
+      await this.controller.getDoc(this.req, this.res, this.next)
       expect(
         this.DocumentUpdaterHandler.promises.getDocument
       ).to.have.been.calledOnceWith(
@@ -65,13 +65,14 @@ describe('DocumentUpdaterController', function () {
     })
 
     it('should return the content', async function () {
-      await this.controller.promises.getDoc(this.req, this.res)
+      await this.controller.getDoc(this.req, this.res)
+      expect(this.next).to.not.have.been.called
       expect(this.res.statusCode).to.equal(200)
       expect(this.res.body).to.equal('test\n\ntesting')
     })
 
     it('should find the doc in the project', async function () {
-      await this.controller.promises.getDoc(this.req, this.res)
+      await this.controller.getDoc(this.req, this.res)
       expect(
         this.ProjectLocator.promises.findElement
       ).to.have.been.calledOnceWith({
@@ -82,7 +83,7 @@ describe('DocumentUpdaterController', function () {
     })
 
     it('should set the Content-Disposition header', async function () {
-      await this.controller.promises.getDoc(this.req, this.res)
+      await this.controller.getDoc(this.req, this.res)
       expect(this.res.setContentDisposition).to.have.been.calledWith(
         'attachment',
         { filename: this.doc.name }

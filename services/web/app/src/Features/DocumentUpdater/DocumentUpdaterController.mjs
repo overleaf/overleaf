@@ -44,7 +44,4 @@ async function getDoc(req, res) {
 
 export default {
   getDoc: expressify(getDoc),
-  promises: {
-    getDoc,
-  },
 }
