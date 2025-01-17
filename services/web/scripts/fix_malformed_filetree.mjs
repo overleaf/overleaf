@@ -29,6 +29,11 @@ async function main() {
     )
   } else if (isName(mongoPath)) {
     modifiedCount = await fixName(projectId, mongoPath)
+  } else if (isHash(mongoPath)) {
+    console.error(`Missing file hash: ${mongoPath}`)
+    console.error('SaaS: likely needs filestore restore')
+    console.error('Server Pro: please reach out to support')
+    process.exit(1)
   } else {
     console.error(`Unexpected mongo path: ${mongoPath}`)
     process.exit(1)
@@ -70,6 +75,10 @@ function isDocOrFileId(path) {
 
 function isName(path) {
   return /\.name$/.test(path)
+}
+
+function isHash(path) {
+  return /\.hash$/.test(path)
 }
 
 function parentPath(path) {

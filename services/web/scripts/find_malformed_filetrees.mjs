@@ -47,62 +47,59 @@ function findBadPaths(folder) {
     result.push('name')
   }
 
-  if (folder.folders) {
-    if (Array.isArray(folder.folders)) {
-      for (const [i, subfolder] of folder.folders.entries()) {
-        if (!subfolder || typeof subfolder !== 'object') {
-          result.push(`folders.${i}`)
-          continue
-        }
-        for (const badPath of findBadPaths(subfolder)) {
-          result.push(`folders.${i}.${badPath}`)
-        }
+  if (folder.folders && Array.isArray(folder.folders)) {
+    for (const [i, subfolder] of folder.folders.entries()) {
+      if (!subfolder || typeof subfolder !== 'object') {
+        result.push(`folders.${i}`)
+        continue
       }
-    } else {
-      result.push('folders')
+      for (const badPath of findBadPaths(subfolder)) {
+        result.push(`folders.${i}.${badPath}`)
+      }
     }
+  } else {
+    result.push('folders')
   }
 
-  if (folder.docs) {
-    if (Array.isArray(folder.docs)) {
-      for (const [i, doc] of folder.docs.entries()) {
-        if (!doc || typeof doc !== 'object') {
-          result.push(`docs.${i}`)
-          continue
-        }
-        if (!doc._id) {
-          result.push(`docs.${i}._id`)
-          // no need to check further: this doc can be deleted
-          continue
-        }
-        if (typeof doc.name !== 'string' || !doc.name) {
-          result.push(`docs.${i}.name`)
-        }
+  if (folder.docs && Array.isArray(folder.docs)) {
+    for (const [i, doc] of folder.docs.entries()) {
+      if (!doc || typeof doc !== 'object') {
+        result.push(`docs.${i}`)
+        continue
       }
-    } else {
-      result.push('docs')
+      if (!doc._id) {
+        result.push(`docs.${i}._id`)
+        // no need to check further: this doc can be deleted
+        continue
+      }
+      if (typeof doc.name !== 'string' || !doc.name) {
+        result.push(`docs.${i}.name`)
+      }
     }
+  } else {
+    result.push('docs')
   }
 
-  if (folder.fileRefs) {
-    if (Array.isArray(folder.fileRefs)) {
-      for (const [i, file] of folder.fileRefs.entries()) {
-        if (!file || typeof file !== 'object') {
-          result.push(`fileRefs.${i}`)
-          continue
-        }
-        if (!file._id) {
-          result.push(`fileRefs.${i}._id`)
-          // no need to check further: this file can be deleted
-          continue
-        }
-        if (typeof file.name !== 'string' || !file.name) {
-          result.push(`fileRefs.${i}.name`)
-        }
+  if (folder.fileRefs && Array.isArray(folder.fileRefs)) {
+    for (const [i, file] of folder.fileRefs.entries()) {
+      if (!file || typeof file !== 'object') {
+        result.push(`fileRefs.${i}`)
+        continue
       }
-    } else {
-      result.push('fileRefs')
+      if (!file._id) {
+        result.push(`fileRefs.${i}._id`)
+        // no need to check further: this file can be deleted
+        continue
+      }
+      if (typeof file.name !== 'string' || !file.name) {
+        result.push(`fileRefs.${i}.name`)
+      }
+      if (typeof file.hash !== 'string' || !file.hash) {
+        result.push(`fileRefs.${i}.hash`)
+      }
     }
+  } else {
+    result.push('fileRefs')
   }
   return result
 }
