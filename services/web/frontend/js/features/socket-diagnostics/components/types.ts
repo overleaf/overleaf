@@ -12,6 +12,7 @@ export interface DebugInfo {
   clockDelta: number | null
   onLine: boolean | null
   client: Client | null
+  unansweredSince: number | null
   lastReceived: number | null
 }
 

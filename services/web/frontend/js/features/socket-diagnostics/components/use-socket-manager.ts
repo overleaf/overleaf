@@ -5,6 +5,7 @@ import type { DebugInfo, SocketState } from './types'
 
 export function useSocketManager() {
   const [socket, setSocket] = useState<Socket | null>(null)
+  const [autoping, setAutoping] = useState<boolean>(false)
 
   const [socketState, setSocketState] = useState<SocketState>({
     connected: false,
@@ -20,6 +21,7 @@ export function useSocketManager() {
     onLine: null,
     clockDelta: null,
     client: null,
+    unansweredSince: null,
     lastReceived: null,
   })
 
@@ -65,29 +67,45 @@ export function useSocketManager() {
     connectSocket()
   }, [connectSocket])
 
+  const sendPing = useCallback(() => {
+    if (socket?.socket.connected) {
+      const time = Date.now()
+      setDebugInfo(prev => ({
+        ...prev,
+        sent: prev.sent + 1,
+        unansweredSince: prev.unansweredSince ?? time,
+      }))
+      socket.emit('debug', { time }, (info: any) => {
+        const beforeTime = info.data.time
+        const now = Date.now()
+        const latency = now - beforeTime
+        const clockDelta = (beforeTime + beforeTime) / 2 - info.serverTime
+        setDebugInfo(prev => ({
+          ...prev,
+          received: prev.received + 1,
+          latency,
+          maxLatency: Math.max(prev.maxLatency ?? 0, latency),
+          clockDelta,
+          client: info.client,
+          lastReceived: now,
+          unansweredSince: null,
+        }))
+      })
+    }
+  }, [socket])
+
+  useEffect(() => {
+    if (!socket || !autoping) return
+
+    const statsInterval = setInterval(sendPing, 2000)
+
+    return () => {
+      clearInterval(statsInterval)
+    }
+  }, [socket, autoping, sendPing])
+
   useEffect(() => {
     if (!socket) return
-
-    const statsInterval = setInterval(() => {
-      if (socket.socket.connected) {
-        setDebugInfo(prev => ({ ...prev, sent: prev.sent + 1 }))
-        socket.emit('debug', { time: Date.now() }, (info: any) => {
-          const beforeTime = info.data.time
-          const now = Date.now()
-          const latency = now - beforeTime
-          const clockDelta = (beforeTime + beforeTime) / 2 - info.serverTime
-          setDebugInfo(prev => ({
-            ...prev,
-            received: prev.received + 1,
-            latency,
-            maxLatency: Math.max(prev.maxLatency ?? 0, latency),
-            clockDelta,
-            client: info.client,
-            lastReceived: now,
-          }))
-        })
-      }
-    }, 2000)
 
     socket.on('connect', () => {
       setSocketState(prev => ({
@@ -97,6 +115,7 @@ export function useSocketManager() {
         lastSuccess: Date.now(),
         lastError: '',
       }))
+      sendPing()
     })
 
     socket.on('disconnect', (reason: string) => {
@@ -119,16 +138,13 @@ export function useSocketManager() {
     socket.socket.connect()
 
     return () => {
-      clearInterval(statsInterval)
       socket.disconnect()
     }
-  }, [socket])
+  }, [sendPing, socket])
 
   useEffect(() => {
     const updateNetworkInfo = () => {
-      if ('connection' in navigator) {
-        setDebugInfo(prev => ({ ...prev, onLine: navigator.onLine }))
-      }
+      setDebugInfo(prev => ({ ...prev, onLine: navigator.onLine }))
     }
 
     window.addEventListener('online', updateNetworkInfo)
@@ -148,5 +164,7 @@ export function useSocketManager() {
     disconnectSocket,
     forceReconnect,
     socket,
+    autoping,
+    setAutoping,
   }
 }

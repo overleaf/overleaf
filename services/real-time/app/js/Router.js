@@ -127,7 +127,10 @@ module.exports = Router = {
 
       if (client) {
         client.on('error', function (err) {
-          logger.err({ clientErr: err }, 'socket.io client error')
+          logger.err(
+            { clientErr: err, publicId: client.publicId, clientId: client.id },
+            'socket.io client error'
+          )
           if (client.connected) {
             client.emit('reconnectGracefully')
             client.disconnect()
@@ -174,6 +177,7 @@ module.exports = Router = {
 
       if (isDebugging) {
         client.connectedAt = Date.now()
+        client.isDebugging = true
       }
 
       if (!isDebugging) {
@@ -205,10 +209,17 @@ module.exports = Router = {
       })
       metrics.gauge('socket-io.clients', io.sockets.clients().length)
 
-      logger.debug(
-        { session, clientId: client.id, isDebugging },
-        'client connected'
-      )
+      const info = {
+        session,
+        publicId: client.publicId,
+        clientId: client.id,
+        isDebugging,
+      }
+      if (isDebugging) {
+        logger.info(info, 'client connected')
+      } else {
+        logger.debug(info, 'client connected')
+      }
 
       let user
       if (session && session.passport && session.passport.user) {
@@ -237,7 +248,10 @@ module.exports = Router = {
           return Router._handleInvalidArguments(client, 'debug', arguments)
         }
 
-        logger.debug({ clientId: client.id }, 'received debug message')
+        logger.info(
+          { publicId: client.publicId, clientId: client.id },
+          'received debug message'
+        )
 
         const response = {
           serverTime: Date.now(),
@@ -281,7 +295,10 @@ module.exports = Router = {
         if (client.isDebugging) {
           const duration = Date.now() - client.connectedAt
           metrics.timing('socket-io.debugging.duration', duration)
-          logger.debug({ duration }, 'debug client disconnected')
+          logger.info(
+            { duration, publicId: client.publicId, clientId: client.id },
+            'debug client disconnected'
+          )
         }
 
         WebsocketController.leaveProject(io, client, function (err) {

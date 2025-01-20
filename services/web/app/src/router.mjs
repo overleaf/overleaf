@@ -232,7 +232,11 @@ async function initialize(webRouter, privateApiRouter, publicApiRouter) {
 
   webRouter.get('/account-suspended', UserPagesController.accountSuspended)
 
-  webRouter.get('/socket-diagnostics', SocketDiagnostics.index)
+  webRouter.get(
+    '/socket-diagnostics',
+    AuthenticationController.requireLogin(),
+    SocketDiagnostics.index
+  )
 
   if (Settings.enableLegacyLogin) {
     AuthenticationController.addEndpointToLoginWhitelist('/login/legacy')

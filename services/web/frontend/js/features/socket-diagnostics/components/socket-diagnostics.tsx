@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import type { ConnectionStatus } from './types'
 import { useSocketManager } from './use-socket-manager'
 import {
@@ -9,6 +9,7 @@ import {
 } from './diagnostic-component'
 import { Container } from 'react-bootstrap-5'
 import MaterialIcon from '@/shared/components/material-icon'
+import OLFormCheckbox from '@/features/ui/components/ol/ol-form-checkbox'
 
 type NetworkInformation = {
   downlink: number
@@ -38,9 +39,26 @@ const NavigatorInfo = () => {
   )
 }
 
+const useCurrentTime = () => {
+  const [time, setTime] = React.useState(new Date())
+  useEffect(() => {
+    const interval = setInterval(() => setTime(new Date()), 1000)
+    return () => clearInterval(interval)
+  }, [])
+  return time
+}
+
 export const SocketDiagnostics = () => {
-  const { socketState, debugInfo, disconnectSocket, forceReconnect, socket } =
-    useSocketManager()
+  const {
+    socketState,
+    debugInfo,
+    disconnectSocket,
+    forceReconnect,
+    socket,
+    autoping,
+    setAutoping,
+  } = useSocketManager()
+  const now = useCurrentTime()
 
   const getConnectionState = (): ConnectionStatus => {
     if (socketState.connected) return 'connected'
@@ -49,8 +67,12 @@ export const SocketDiagnostics = () => {
   }
 
   const lastReceivedS = debugInfo.lastReceived
-    ? Math.round((Date.now() - debugInfo.lastReceived) / 1000)
+    ? Math.round((now.getTime() - debugInfo.lastReceived) / 1000)
     : null
+
+  const isLate =
+    !!debugInfo.unansweredSince &&
+    now.getTime() - debugInfo.unansweredSince >= 3000
 
   return (
     <Container>
@@ -78,6 +100,12 @@ export const SocketDiagnostics = () => {
           <MaterialIcon type="speed" /> Connection Stats
         </h3>
         <div className="space-y-2">
+          <OLFormCheckbox
+            label="Auto ping"
+            id="autoping"
+            checked={autoping}
+            onChange={e => setAutoping(e.target.checked)}
+          />
           <DiagnosticItem
             icon="network_ping"
             label="Ping Count"
@@ -92,13 +120,7 @@ export const SocketDiagnostics = () => {
                 )}
               </>
             }
-            type={
-              lastReceivedS !== null
-                ? lastReceivedS < 4
-                  ? 'success'
-                  : 'danger'
-                : undefined
-            }
+            type={isLate === null ? undefined : isLate ? 'danger' : 'success'}
           />
 
           <DiagnosticItem
@@ -117,7 +139,7 @@ export const SocketDiagnostics = () => {
             }
             type={
               debugInfo.latency
-                ? debugInfo.latency < 150
+                ? debugInfo.latency < 450
                   ? 'success'
                   : 'danger'
                 : undefined
@@ -149,7 +171,7 @@ export const SocketDiagnostics = () => {
           <DiagnosticItem
             icon="schedule"
             label="Current time"
-            value={new Date().toUTCString()}
+            value={now.toUTCString()}
           />
           <DiagnosticItem
             icon="hourglass"
