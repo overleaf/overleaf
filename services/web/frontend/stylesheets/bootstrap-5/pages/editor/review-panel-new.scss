@@ -57,7 +57,8 @@
   }
 
   .review-panel-entry.review-panel-entry-selected,
-  .review-panel-entry.review-panel-entry-highlighted {
+  .review-panel-entry.review-panel-entry-highlighted,
+  .review-panel-entry.review-panel-entry-textarea-focused {
     margin-left: var(--spacing-01);
     border: 1px solid var(--border-active);
 

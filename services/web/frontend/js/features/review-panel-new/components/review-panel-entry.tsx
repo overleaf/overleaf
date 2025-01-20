@@ -1,4 +1,4 @@
-import { FC, useCallback, useEffect, useState } from 'react'
+import { FC, useCallback, useEffect, useRef, useState } from 'react'
 import { AnyOperation } from '../../../../../types/change'
 import {
   useCodeMirrorStateContext,
@@ -15,6 +15,7 @@ import { useLayoutContext } from '@/shared/context/layout-context'
 import { EditorSelection } from '@codemirror/state'
 import { EditorView } from '@codemirror/view'
 import MaterialIcon from '@/shared/components/material-icon'
+import { OFFSET_FOR_ENTRIES_ABOVE } from '../utils/position-items'
 
 export const ReviewPanelEntry: FC<{
   position: number
@@ -47,8 +48,10 @@ export const ReviewPanelEntry: FC<{
   const { openDocId, getCurrentDocId } = useEditorManagerContext()
   const [selected, setSelected] = useState(false)
   const [focused, setFocused] = useState(false)
+  const [textareaFocused, setTextareaFocused] = useState(false)
   const { setReviewPanelOpen, reviewPanelOpen } = useLayoutContext()
   const highlighted = isSelectionWithinOp(op, state.selection.main)
+  const entryRef = useRef<HTMLDivElement>(null)
 
   const openReviewPanel = useCallback(() => {
     setReviewPanelOpen(true)
@@ -69,6 +72,17 @@ export const ReviewPanelEntry: FC<{
         return
       }
 
+      if (event.target instanceof HTMLTextAreaElement) {
+        const entryBottom =
+          (entryRef.current?.offsetTop || 0) +
+          (entryRef.current?.offsetHeight || 0)
+
+        if (entryBottom > OFFSET_FOR_ENTRIES_ABOVE) {
+          setTextareaFocused(true)
+          return
+        }
+      }
+
       setSelected(true)
 
       if (!selectLineOnFocus) {
@@ -76,10 +90,7 @@ export const ReviewPanelEntry: FC<{
       }
 
       if (getCurrentDocId() !== docId) {
-        const focusIsOnTextarea = event.target instanceof HTMLTextAreaElement
-        if (focusIsOnTextarea === false) {
-          openDocId(docId, { gotoOffset: position, keepCurrentView: true })
-        }
+        openDocId(docId, { gotoOffset: position, keepCurrentView: true })
       } else {
         setTimeout(() =>
           view.dispatch({
@@ -113,10 +124,12 @@ export const ReviewPanelEntry: FC<{
 
   return (
     <div
+      ref={entryRef}
       onFocus={focusHandler}
       onBlur={() => {
         setSelected(false)
         setFocused(false)
+        setTextareaFocused(false)
       }}
       onMouseEnter={() => {
         if (hoverRanges) {
@@ -143,6 +156,10 @@ export const ReviewPanelEntry: FC<{
           // 'highlighted' is set if the selection is within op but that doesn't necessarily mean it should be selected
           // multiple entries can be highlighted at the same time
           'review-panel-entry-highlighted': highlighted,
+          // 'textarea-focused' only changes entry styling (border, shadow etc)
+          // it doesnt change selected entry because that moves the cursor
+          // and repositions entries which can cause textarea to be scrolled out of view
+          'review-panel-entry-textarea-focused': textareaFocused,
           'review-panel-entry-disabled': disabled,
         },
         className
