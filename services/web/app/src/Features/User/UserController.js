@@ -202,7 +202,7 @@ async function ensureAffiliationMiddleware(req, res, next) {
   try {
     user = await UserGetter.promises.getUser(userId)
   } catch (error) {
-    return new Errors.UserNotFoundError({ info: { userId } })
+    throw new Errors.UserNotFoundError({ info: { userId } })
   }
   // if the user does not have permission to add an affiliation, we skip this middleware
   try {

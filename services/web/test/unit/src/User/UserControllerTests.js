@@ -1106,5 +1106,22 @@ describe('UserController', function () {
         expect(this.next).to.be.calledWith(sinon.match.instanceOf(Error))
       })
     })
+
+    describe('when user is not found', function () {
+      beforeEach(async function () {
+        this.UserGetter.promises.getUser.rejects(new Error('not found'))
+        this.Features.hasFeature.withArgs('affiliations').returns(true)
+        this.req.query.ensureAffiliation = true
+        await this.UserController.ensureAffiliationMiddleware(
+          this.req,
+          this.res,
+          this.next
+        )
+      })
+
+      it('should return the error', function () {
+        expect(this.next).to.be.calledWith(sinon.match.instanceOf(Error))
+      })
+    })
   })
 })
