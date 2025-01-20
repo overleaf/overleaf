@@ -1,22 +1,22 @@
 .project-url-lookup {
   margin-top: var(--spacing-08);
-}
 
-.project-url-lookup-results {
-  margin-top: var(--spacing-08);
-}
+  .project-url-lookup-results {
+    margin-top: var(--spacing-08);
+  }
 
-.project-url-lookup-link-box {
-  background-color: var(--bg-light-secondary);
-  border: 1px solid var(--border-primary-dark);
-  padding: var(--spacing-03) var(--spacing-05);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
+  .project-url-lookup-link-box {
+    background-color: var(--bg-light-secondary);
+    border: 1px solid var(--border-primary-dark);
+    padding: var(--spacing-03) var(--spacing-05);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
 
-.project-url-lookup-hint {
-  display: flex;
-  align-items: center;
-  padding: var(--spacing-03);
+  .project-url-lookup-hint {
+    display: flex;
+    align-items: center;
+    padding: var(--spacing-03);
+  }
 }

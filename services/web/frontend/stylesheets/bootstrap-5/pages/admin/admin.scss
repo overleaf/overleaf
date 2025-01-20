@@ -1,0 +1,78 @@
+#survey-form,
+#split-test-edit,
+#split-test-create {
+  .material-switch {
+    input[type='checkbox'] {
+      display: none;
+
+      &:checked + label::before {
+        background: inherit;
+        opacity: 0.5;
+      }
+
+      &:checked + label::after {
+        background: inherit;
+        left: 20px;
+      }
+
+      &:disabled + label {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+    }
+
+    label {
+      cursor: pointer;
+      height: 0;
+      position: relative;
+      width: 40px;
+      background-color: var(--bg-accent-01);
+
+      &::before {
+        background: rgb(0 0 0);
+        box-shadow: inset 0 0 10px rgb(0 0 0 / 50%);
+        border-radius: var(--border-radius-medium);
+        content: '';
+        height: 16px;
+        margin-top: calc(var(--spacing-01) * -1);
+        position: absolute;
+        opacity: 0.3;
+        transition: all 0.2s ease-in-out;
+        width: 40px;
+      }
+
+      &::after {
+        background: rgb(255 255 255);
+        border-radius: var(--border-radius-large);
+        box-shadow: 0 0 5px rgb(0 0 0 / 30%);
+        content: '';
+        height: 24px;
+        left: -4px;
+        margin-top: calc(var(--spacing-01) * -1);
+        position: absolute;
+        top: -4px;
+        transition: all 0.2s ease-in-out;
+        width: 24px;
+      }
+    }
+  }
+
+  .hr-sect {
+    display: flex;
+    flex-basis: 100%;
+    align-items: center;
+    color: rgb(0 0 0 / 35%);
+    margin: var(--spacing-04) 0;
+  }
+
+  .hr-sect::before,
+  .hr-sect::after {
+    content: '';
+    flex-grow: 1;
+    background: rgb(0 0 0 / 35%);
+    height: 1px;
+    font-size: 0;
+    line-height: 0;
+    margin: 0 var(--spacing-04);
+  }
+}
