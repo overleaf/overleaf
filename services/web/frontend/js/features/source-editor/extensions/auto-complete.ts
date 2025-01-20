@@ -74,6 +74,7 @@ const createAutoComplete = ({ enabled, ...rest }: AutoCompleteOptions) => {
           return `ol-cm-completion-${completion.type}`
         },
         interactionDelay: 0,
+        activateOnTypingDelay: 0,
       }),
       /**
        * A keymap which adds Tab for accepting a completion and Ctrl-Space for opening autocomplete.
