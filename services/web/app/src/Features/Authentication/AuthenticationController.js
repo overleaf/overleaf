@@ -357,6 +357,7 @@ const AuthenticationController = {
         return AuthenticationController._redirectToLoginOrRegisterPage(req, res)
       } else {
         req.user = SessionManager.getSessionUser(req.session)
+        req.logger?.addFields({ userId: req.user._id })
         return next()
       }
     }
