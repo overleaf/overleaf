@@ -1,15 +1,9 @@
 import classNames from 'classnames'
 import React from 'react'
 import { bsVersion } from '@/features/utils/bootstrap-5'
+import unfilledIconTypes from '../../../fonts/material-symbols/unfilled-symbols.mjs'
 
-// NOTE: When updating this list, make sure to update the bundled .woff2
-//       file as well. See details in material-symbols.css
-export type AvailableUnfilledIcon =
-  | 'description'
-  | 'forum'
-  | 'integration_instructions'
-  | 'rate_review'
-  | 'report'
+export type AvailableUnfilledIcon = (typeof unfilledIconTypes)[number]
 
 type BaseIconProps = React.ComponentProps<'i'> & {
   accessibilityLabel?: string
