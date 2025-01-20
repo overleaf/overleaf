@@ -11,6 +11,7 @@ import {
   CommentId,
   ThreadId,
 } from '../../../../../types/review-panel/review-panel'
+import { usePermissionsContext } from '@/features/ide-react/context/permissions-context'
 
 export const ReviewPanelCommentContent = memo<{
   comment: Change<CommentOperation>
@@ -36,6 +37,7 @@ export const ReviewPanelCommentContent = memo<{
   }) => {
     const { t } = useTranslation()
     const threads = useThreadsContext()
+    const permissions = usePermissionsContext()
 
     const handleSubmit = useCallback(
       (content, setContent) => onReply?.(content).then(() => setContent('')),
@@ -90,7 +92,7 @@ export const ReviewPanelCommentContent = memo<{
           </div>
         )}
 
-        {!isResolved && (
+        {permissions.comment && !isResolved && (
           <AutoExpandingTextArea
             name="content"
             className="review-panel-comment-input"
