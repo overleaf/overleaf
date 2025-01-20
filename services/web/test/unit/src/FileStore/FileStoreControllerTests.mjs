@@ -14,11 +14,15 @@ const expectedFileHeaders = {
 describe('FileStoreController', function () {
   beforeEach(async function () {
     this.FileStoreHandler = {
-      getFileStream: sinon.stub(),
-      getFileSize: sinon.stub(),
+      promises: {
+        getFileStream: sinon.stub(),
+        getFileSize: sinon.stub(),
+      },
     }
-    this.ProjectLocator = { findElement: sinon.stub() }
+    this.ProjectLocator = { promises: { findElement: sinon.stub() } }
+    this.Stream = { pipeline: sinon.stub().resolves() }
     this.controller = await esmock.strict(MODULE_PATH, {
+      'node:stream/promises': this.Stream,
       '@overleaf/settings': this.settings,
       '../../../../app/src/Features/Project/ProjectLocator':
         this.ProjectLocator,
@@ -37,69 +41,57 @@ describe('FileStoreController', function () {
       get(key) {
         return undefined
       },
+      logger: {
+        addFields: sinon.stub(),
+      },
     }
     this.res = new MockResponse()
+    this.next = sinon.stub()
     this.file = { name: 'myfile.png' }
   })
 
   describe('getFile', function () {
     beforeEach(function () {
-      this.FileStoreHandler.getFileStream.callsArgWith(3, null, this.stream)
-      this.ProjectLocator.findElement.callsArgWith(1, null, this.file)
+      this.FileStoreHandler.promises.getFileStream.resolves(this.stream)
+      this.ProjectLocator.promises.findElement.resolves(this.file)
     })
 
-    it('should call the file store handler with the project_id file_id and any query string', function (done) {
-      this.stream.pipe = des => {
-        this.FileStoreHandler.getFileStream
-          .calledWith(
-            this.req.params.Project_id,
-            this.req.params.File_id,
-            this.req.query
-          )
-          .should.equal(true)
-        done()
-      }
-      this.controller.getFile(this.req, this.res)
+    it('should call the file store handler with the project_id file_id and any query string', async function () {
+      await this.controller.getFile(this.req, this.res)
+      this.FileStoreHandler.promises.getFileStream.should.have.been.calledWith(
+        this.req.params.Project_id,
+        this.req.params.File_id,
+        this.req.query
+      )
     })
 
-    it('should pipe to res', function (done) {
-      this.stream.pipe = des => {
-        des.should.equal(this.res)
-        done()
-      }
-      this.controller.getFile(this.req, this.res)
+    it('should pipe to res', async function () {
+      await this.controller.getFile(this.req, this.res)
+      this.Stream.pipeline.should.have.been.calledWith(this.stream, this.res)
     })
 
-    it('should get the file from the db', function (done) {
-      this.stream.pipe = des => {
-        const opts = {
-          project_id: this.projectId,
-          element_id: this.fileId,
-          type: 'file',
-        }
-        this.ProjectLocator.findElement.calledWith(opts).should.equal(true)
-        done()
-      }
-      this.controller.getFile(this.req, this.res)
+    it('should get the file from the db', async function () {
+      await this.controller.getFile(this.req, this.res)
+      this.ProjectLocator.promises.findElement.should.have.been.calledWith({
+        project_id: this.projectId,
+        element_id: this.fileId,
+        type: 'file',
+      })
     })
 
-    it('should set the Content-Disposition header', function (done) {
-      this.stream.pipe = des => {
-        this.res.setContentDisposition.should.be.calledWith('attachment', {
-          filename: this.file.name,
-        })
-        done()
-      }
-      this.controller.getFile(this.req, this.res)
+    it('should set the Content-Disposition header', async function () {
+      await this.controller.getFile(this.req, this.res)
+      this.res.setContentDisposition.should.be.calledWith('attachment', {
+        filename: this.file.name,
+      })
     })
 
-    it('should return a 404 when not found', function (done) {
-      this.res.callback = () => {
-        expect(this.res.statusCode).to.equal(404)
-        done()
-      }
-      this.ProjectLocator.findElement.yields(new Errors.NotFoundError())
-      this.controller.getFile(this.req, this.res)
+    it('should return a 404 when not found', async function () {
+      this.ProjectLocator.promises.findElement.rejects(
+        new Errors.NotFoundError()
+      )
+      await this.controller.getFile(this.req, this.res)
+      expect(this.res.statusCode).to.equal(404)
     })
 
     // Test behaviour around handling html files
@@ -115,14 +107,11 @@ describe('FileStoreController', function () {
         })
 
         describe('from a non-ios browser', function () {
-          it('should not set Content-Type', function (done) {
-            this.stream.pipe = des => {
-              this.res.headers.should.deep.equal({
-                ...expectedFileHeaders,
-              })
-              done()
-            }
-            this.controller.getFile(this.req, this.res)
+          it('should not set Content-Type', async function () {
+            await this.controller.getFile(this.req, this.res)
+            this.res.headers.should.deep.equal({
+              ...expectedFileHeaders,
+            })
           })
         })
 
@@ -135,16 +124,13 @@ describe('FileStoreController', function () {
             }
           })
 
-          it("should set Content-Type to 'text/plain'", function (done) {
-            this.stream.pipe = des => {
-              this.res.headers.should.deep.equal({
-                ...expectedFileHeaders,
-                'Content-Type': 'text/plain; charset=utf-8',
-                'X-Content-Type-Options': 'nosniff',
-              })
-              done()
-            }
-            this.controller.getFile(this.req, this.res)
+          it("should set Content-Type to 'text/plain'", async function () {
+            await this.controller.getFile(this.req, this.res)
+            this.res.headers.should.deep.equal({
+              ...expectedFileHeaders,
+              'Content-Type': 'text/plain; charset=utf-8',
+              'X-Content-Type-Options': 'nosniff',
+            })
           })
         })
 
@@ -157,16 +143,13 @@ describe('FileStoreController', function () {
             }
           })
 
-          it("should set Content-Type to 'text/plain'", function (done) {
-            this.stream.pipe = des => {
-              this.res.headers.should.deep.equal({
-                ...expectedFileHeaders,
-                'Content-Type': 'text/plain; charset=utf-8',
-                'X-Content-Type-Options': 'nosniff',
-              })
-              done()
-            }
-            this.controller.getFile(this.req, this.res)
+          it("should set Content-Type to 'text/plain'", async function () {
+            await this.controller.getFile(this.req, this.res)
+            this.res.headers.should.deep.equal({
+              ...expectedFileHeaders,
+              'Content-Type': 'text/plain; charset=utf-8',
+              'X-Content-Type-Options': 'nosniff',
+            })
           })
         })
       })
@@ -194,14 +177,11 @@ describe('FileStoreController', function () {
               this.user_agent = `Some ${browser} thing`
             })
 
-            it('Should not set the Content-type', function (done) {
-              this.stream.pipe = des => {
-                this.res.headers.should.deep.equal({
-                  ...expectedFileHeaders,
-                })
-                done()
-              }
-              this.controller.getFile(this.req, this.res)
+            it('Should not set the Content-type', async function () {
+              await this.controller.getFile(this.req, this.res)
+              this.res.headers.should.deep.equal({
+                ...expectedFileHeaders,
+              })
             })
           })
         })
@@ -212,12 +192,12 @@ describe('FileStoreController', function () {
   describe('getFileHead', function () {
     it('reports the file size', function (done) {
       const expectedFileSize = 99393
-      this.FileStoreHandler.getFileSize.yields(
+      this.FileStoreHandler.promises.getFileSize.rejects(
         new Error('getFileSize: unexpected arguments')
       )
-      this.FileStoreHandler.getFileSize
+      this.FileStoreHandler.promises.getFileSize
         .withArgs(this.projectId, this.fileId)
-        .yields(null, expectedFileSize)
+        .resolves(expectedFileSize)
 
       this.res.end = () => {
         expect(this.res.status.lastCall.args).to.deep.equal([200])
@@ -232,21 +212,12 @@ describe('FileStoreController', function () {
     })
 
     it('returns 404 on NotFoundError', function (done) {
-      this.FileStoreHandler.getFileSize.yields(new Errors.NotFoundError())
+      this.FileStoreHandler.promises.getFileSize.rejects(
+        new Errors.NotFoundError()
+      )
 
       this.res.end = () => {
         expect(this.res.status.lastCall.args).to.deep.equal([404])
-        done()
-      }
-
-      this.controller.getFileHead(this.req, this.res)
-    })
-
-    it('returns 500 on error', function (done) {
-      this.FileStoreHandler.getFileSize.yields(new Error('boom!'))
-
-      this.res.end = () => {
-        expect(this.res.status.lastCall.args).to.deep.equal([500])
         done()
       }
 
