@@ -1,5 +1,4 @@
 import pLimit from 'p-limit'
-import OError from '@overleaf/o-error'
 import { Change, Chunk, Snapshot } from 'overleaf-editor-core'
 import { RawChange, RawChunk } from 'overleaf-editor-core/lib/types'
 import { FetchError, getJSON, postJSON } from '@/infrastructure/fetch-json'
@@ -15,16 +14,18 @@ export class ProjectSnapshot {
   private version: number
   private blobStore: SimpleBlobStore
   private refreshPromise: Promise<void>
-  private queuedRefreshPromise: Promise<void>
-  private state: ProjectSnapshotState
+  private initialized: boolean
+  private refreshing: boolean
+  private queued: boolean
 
   constructor(projectId: string) {
     this.projectId = projectId
     this.snapshot = new Snapshot()
     this.version = 0
     this.refreshPromise = Promise.resolve()
-    this.queuedRefreshPromise = Promise.resolve()
-    this.state = new ProjectSnapshotState()
+    this.initialized = false
+    this.refreshing = false
+    this.queued = false
     this.blobStore = new SimpleBlobStore(this.projectId)
   }
 
@@ -36,31 +37,19 @@ export class ProjectSnapshot {
    * function was called.
    */
   async refresh() {
-    switch (this.state.getState()) {
-      case 'init':
-        this.refreshPromise = this.initialize()
-        await this.refreshPromise
-        break
-
-      case 'ready':
-        this.refreshPromise = this.loadChanges()
-        await this.refreshPromise
-        break
-
-      case 'refreshing':
-        this.queuedRefreshPromise = this.queueRefresh()
-        await this.queuedRefreshPromise
-        break
-
-      case 'queued-ready':
-      case 'queued-waiting':
-        await this.queuedRefreshPromise
-        break
-
-      default:
-        throw new OError('Unknown state for project snapshot', {
-          state: this.state.getState(),
-        })
+    if (this.queued) {
+      // There already is a queued refresh that will run after this call.
+      // Just wait for it to complete.
+      await this.refreshPromise
+    } else if (this.refreshing) {
+      // There is a refresh running, but no queued refresh. Queue a refresh
+      // after this one and make it the new promise to wait for.
+      this.refreshPromise = this.queueRefresh()
+      await this.refreshPromise
+    } else {
+      // There is no refresh running. Start one.
+      this.refreshPromise = this.startRefresh()
+      await this.refreshPromise
     }
   }
 
@@ -84,19 +73,48 @@ export class ProjectSnapshot {
   }
 
   /**
+   * Immediately start a refresh
+   */
+  private async startRefresh() {
+    this.refreshing = true
+    try {
+      if (!this.initialized) {
+        await this.initialize()
+      } else {
+        await this.loadChanges()
+      }
+    } finally {
+      this.refreshing = false
+    }
+  }
+
+  /**
+   * Queue a refresh after the currently running refresh
+   */
+  private async queueRefresh() {
+    this.queued = true
+    try {
+      await this.refreshPromise
+    } catch {
+      // Ignore errors
+    }
+    this.queued = false
+    await this.startRefresh()
+  }
+
+  /**
    * Initialize the snapshot using the project's latest chunk.
    *
    * This is run on the first refresh.
    */
   private async initialize() {
-    this.state.startRefresh()
     await flushHistory(this.projectId)
     const chunk = await fetchLatestChunk(this.projectId)
     this.snapshot = chunk.getSnapshot()
     this.snapshot.applyAll(chunk.getChanges())
     this.version = chunk.getEndVersion()
     await this.loadDocs()
-    this.state.endRefresh()
+    this.initialized = true
   }
 
   /**
@@ -105,22 +123,11 @@ export class ProjectSnapshot {
    * This is run on the second and subsequent refreshes
    */
   private async loadChanges() {
-    this.state.startRefresh()
     await flushHistory(this.projectId)
     const changes = await fetchLatestChanges(this.projectId, this.version)
     this.snapshot.applyAll(changes)
     this.version += changes.length
     await this.loadDocs()
-    this.state.endRefresh()
-  }
-
-  /**
-   * Wait for the current refresh to complete, then start a refresh.
-   */
-  private async queueRefresh() {
-    this.state.queueRefresh()
-    await this.refreshPromise
-    await this.loadChanges()
   }
 
   /**
@@ -140,106 +147,6 @@ export class ProjectSnapshot {
         })
       )
     )
-  }
-}
-
-/**
- * State machine for the project snapshot
- *
- * There are 5 states:
- *
- * - init: when the snapshot is built
- * - refreshing: while the snapshot is refreshing
- * - queued-waiting: while the snapshot is refreshing and another refresh is queued
- * - queued-ready: when a refresh is queued, but no refresh is running
- * - ready: when no refresh is running and no refresh is queued
- *
- * There are three transitions:
- *
- * - start: start a refresh operation
- * - end: end a refresh operation
- * - queue: queue a refresh operation
- *
- * Valid transitions are as follows:
- *
- *                       +------------+
- *                       |   ready    |
- *                       +------------+
- *                         ^       |
- *                         |       |
- *                        end    start
- *                         |       |
- *                         |       v
- * +------+              +------------+             +----------------+
- * | init |----start---->| refreshing |---queue---> | queued-waiting |
- * +------+              +------------+             +----------------+
- *                             ^                             |
- *                             |                             |
- *                           start                          end
- *                             |                             |
- *                             |     +--------------+        |
- *                             +-----| queued-ready |<-------+
- *                                   +--------------+
- *
- * These transitions ensure that there are never two refreshes running
- * concurrently. In every path, "start" and "end" transitions always alternate.
- * You never have two consecutive "start" or two consecutive "end".
- */
-class ProjectSnapshotState {
-  private state:
-    | 'init'
-    | 'refreshing'
-    | 'ready'
-    | 'queued-waiting'
-    | 'queued-ready' = 'init'
-
-  getState() {
-    return this.state
-  }
-
-  startRefresh() {
-    switch (this.state) {
-      case 'init':
-      case 'ready':
-      case 'queued-ready':
-        this.state = 'refreshing'
-        break
-
-      default:
-        throw new OError("Can't start a snapshot refresh in this state", {
-          state: this.state,
-        })
-    }
-  }
-
-  endRefresh() {
-    switch (this.state) {
-      case 'refreshing':
-        this.state = 'ready'
-        break
-
-      case 'queued-waiting':
-        this.state = 'queued-ready'
-        break
-
-      default:
-        throw new OError("Can't end a snapshot refresh in this state", {
-          state: this.state,
-        })
-    }
-  }
-
-  queueRefresh() {
-    switch (this.state) {
-      case 'refreshing':
-        this.state = 'queued-waiting'
-        break
-
-      default:
-        throw new OError("Can't queue a snapshot refresh in this state", {
-          state: this.state,
-        })
-    }
   }
 }
 
