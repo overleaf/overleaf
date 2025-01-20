@@ -157,6 +157,13 @@
   .form-control-end-icon {
     right: 0;
     padding-right: calc(var(--form-control-padding-x) + var(--bs-border-width));
+
+    .form-control-search-clear-btn {
+      @include reset-button;
+
+      display: flex;
+      justify-content: center;
+    }
   }
 
   --icon-width: 20px;

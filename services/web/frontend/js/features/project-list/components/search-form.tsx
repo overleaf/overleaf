@@ -91,7 +91,7 @@ function SearchForm({
               inputValue.length > 0 && (
                 <button
                   type="button"
-                  className="project-search-clear-btn"
+                  className="form-control-search-clear-btn"
                   aria-label={t('clear_search')}
                   onClick={handleClear}
                 >

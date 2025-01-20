@@ -226,7 +226,7 @@ export const WithIcons: Story = {
             append={
               <button
                 type="button"
-                className="project-search-clear-btn"
+                className="form-control-search-clear-btn"
                 onClick={handleClear}
               >
                 <MaterialIcon type="clear" />
@@ -246,7 +246,7 @@ export const WithIcons: Story = {
             append={
               <button
                 type="button"
-                className="project-search-clear-btn"
+                className="form-control-search-clear-btn"
                 onClick={handleClear}
               >
                 <MaterialIcon type="clear" />
@@ -265,7 +265,7 @@ export const WithIcons: Story = {
             append={
               <button
                 type="button"
-                className="project-search-clear-btn"
+                className="form-control-search-clear-btn"
                 onClick={handleClear}
               >
                 <MaterialIcon type="clear" />
@@ -286,7 +286,7 @@ export const WithIcons: Story = {
             append={
               <button
                 type="button"
-                className="project-search-clear-btn"
+                className="form-control-search-clear-btn"
                 onClick={handleClear}
                 disabled
               >

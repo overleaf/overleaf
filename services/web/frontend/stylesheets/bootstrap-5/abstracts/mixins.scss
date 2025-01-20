@@ -61,13 +61,11 @@
 }
 
 @mixin reset-button() {
-  appearance: none;
+  padding: 0;
+  cursor: pointer;
   background: transparent;
   border: 0;
-  cursor: pointer;
-  height: 20px;
-  padding: 0;
-  width: 20px;
+  appearance: none;
 }
 
 @mixin modal-lg {
