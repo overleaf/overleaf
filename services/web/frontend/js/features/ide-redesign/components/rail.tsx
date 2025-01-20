@@ -1,15 +1,24 @@
-import { ReactElement, useCallback, useState } from 'react'
+import { ReactElement, useCallback, useMemo, useState } from 'react'
 import { Nav, NavLink, Tab, TabContainer } from 'react-bootstrap-5'
 import MaterialIcon, {
   AvailableUnfilledIcon,
 } from '@/shared/components/material-icon'
 import { Panel } from 'react-resizable-panels'
+import { useLayoutContext } from '@/shared/context/layout-context'
 
 type RailElement = {
   icon: AvailableUnfilledIcon
   key: string
   component: ReactElement
 }
+
+type RailActionLink = { key: string; icon: AvailableUnfilledIcon; href: string }
+type RailActionButton = {
+  key: string
+  icon: AvailableUnfilledIcon
+  action: () => void
+}
+type RailAction = RailActionLink | RailActionButton
 
 const RAIL_TABS: RailElement[] = [
   // NOTE: The file tree **MUST** be the first (i.e. default) tab in the list
@@ -45,6 +54,19 @@ export const RailLayout = () => {
   const [selectedTab, setSelectedTab] = useState<string | undefined>(
     RAIL_TABS[0]?.key
   )
+  const { setLeftMenuShown } = useLayoutContext()
+  const railActions: RailAction[] = useMemo(
+    () => [
+      { key: 'support', icon: 'help', href: '/learn' },
+      {
+        key: 'settings',
+        icon: 'settings',
+        action: () => setLeftMenuShown(true),
+      },
+    ],
+    [setLeftMenuShown]
+  )
+
   return (
     <TabContainer
       mountOnEnter // Only render when necessary (so that we can lazy load tab content)
@@ -55,7 +77,10 @@ export const RailLayout = () => {
       id="ide-rail-tabs"
     >
       <div className="ide-rail">
-        <Nav defaultActiveKey={RAIL_TABS[0]?.key} className="flex-column">
+        <Nav
+          defaultActiveKey={RAIL_TABS[0]?.key}
+          className="d-flex flex-column ide-rail-tabs-nav"
+        >
           {RAIL_TABS.map(({ icon, key }) => (
             <RailTab
               active={selectedTab === key}
@@ -63,6 +88,10 @@ export const RailLayout = () => {
               eventKey={key}
               icon={icon}
             />
+          ))}
+          <div className="flex-grow-1" />
+          {railActions?.map(action => (
+            <RailActionElement key={action.key} action={action} />
           ))}
         </Nav>
       </div>
@@ -105,4 +134,42 @@ const RailTab = ({
       />
     </NavLink>
   )
+}
+
+const RailActionElement = ({ action }: { action: RailAction }) => {
+  const icon = (
+    <MaterialIcon
+      className="ide-rail-tab-link-icon"
+      type={action.icon}
+      unfilled
+    />
+  )
+  const onActionClick = useCallback(() => {
+    if ('action' in action) {
+      action.action()
+    }
+  }, [action])
+
+  if ('href' in action) {
+    return (
+      <a
+        href={action.href}
+        target="_blank"
+        rel="noopener"
+        className="ide-rail-tab-link"
+      >
+        {icon}
+      </a>
+    )
+  } else {
+    return (
+      <button
+        onClick={onActionClick}
+        className="ide-rail-tab-link ide-rail-tab-button"
+        type="button"
+      >
+        {icon}
+      </button>
+    )
+  }
 }

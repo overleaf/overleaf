@@ -1,0 +1,45 @@
+.ide-settings-tab-nav.nav {
+  width: 240px;
+  border-right: var(--bs-modal-header-border-width) solid
+    var(--bs-modal-header-border-color);
+  padding: var(--spacing-02);
+  gap: var(--spacing-02);
+}
+
+.ide-settings-tab-content {
+  padding: var(--spacing-06) var(--spacing-08);
+  max-height: 75%;
+  height: 400px;
+}
+
+.ide-settings-tab-subtitle {
+  font-size: var(--font-size-04);
+  line-height: var(--line-height-03);
+  padding: var(--spacing-06) var(--spacing-08);
+}
+
+.ide-settings-tab-link {
+  display: flex;
+  align-items: flex-start;
+  flex-direction: row;
+  gap: var(--spacing-02);
+  color: var(--neutral-90);
+  padding: var(--spacing-02);
+  border-radius: var(--border-radius-base);
+  font-size: var(--font-size-02);
+  line-height: var(--line-height-02);
+  text-decoration: none;
+
+  &:visited {
+    color: var(--neutral-90);
+  }
+
+  &.active {
+    color: #fff;
+    background-color: var(--neutral-90);
+  }
+}
+
+.ide-settings-modal-body {
+  padding: 0;
+}

@@ -6,6 +6,11 @@
   --ide-rail-link-active-indicator-background: var(--neutral-90);
 }
 
+.ide-rail-tab-button {
+  border: 0;
+  background: none;
+}
+
 .ide-rail-tab-link {
   border-radius: 12px;
   display: block;
@@ -54,4 +59,8 @@
 .ide-rail-content {
   height: 100%;
   border: 1px solid var(--border-divider);
+}
+
+.ide-rail-tabs-nav {
+  height: 100%;
 }

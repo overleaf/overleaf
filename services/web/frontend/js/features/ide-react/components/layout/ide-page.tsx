@@ -16,6 +16,9 @@ import { useFeatureFlag } from '@/shared/context/split-test-context'
 const MainLayoutNew = lazy(
   () => import('@/features/ide-redesign/components/main-layout')
 )
+const SettingsModalNew = lazy(
+  () => import('@/features/ide-redesign/components/settings/settings-modal')
+)
 
 export default function IdePage() {
   useLayoutEventTracking() // sent event when the layout changes
@@ -33,6 +36,7 @@ export default function IdePage() {
       <Modals />
       {newEditor ? (
         <Suspense fallback={null}>
+          <SettingsModalNew />
           <MainLayoutNew />
         </Suspense>
       ) : (
