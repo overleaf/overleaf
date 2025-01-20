@@ -60,7 +60,7 @@ function ThinFooter({
             {showPoweredBy ? (
               <>
                 <li>
-                  {/* year of Server Pro release, static */}© 2024{' '}
+                  {/* year of Server Pro release, static */}© 2025{' '}
                   <a href="https://www.overleaf.com/for/enterprises">
                     Powered by Overleaf
                   </a>
