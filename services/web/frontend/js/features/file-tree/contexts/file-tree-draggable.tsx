@@ -15,6 +15,7 @@ import { useFileTreeActionable } from './file-tree-actionable'
 import { useFileTreeData } from '@/shared/context/file-tree-data-context'
 import { useFileTreeSelectable } from '../contexts/file-tree-selectable'
 import { isAcceptableFile } from '@/features/file-tree/util/is-acceptable-file'
+import { FileTreeFindResult } from '@/features/ide-react/types/file-tree'
 
 const DRAGGABLE_TYPE = 'ENTITY'
 export const FileTreeDraggableProvider: FC<{
@@ -171,7 +172,7 @@ function getDraggedTitle(
 }
 
 // Get all children folder ids of any of the dragged items.
-function getForbiddenFolderIds(draggedItems: Set<any>) {
+function getForbiddenFolderIds(draggedItems: Set<FileTreeFindResult>) {
   const draggedFoldersArray = Array.from(draggedItems)
     .filter(draggedItem => {
       return draggedItem.type === 'folder'

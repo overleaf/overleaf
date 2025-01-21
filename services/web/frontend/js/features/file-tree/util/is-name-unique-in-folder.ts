@@ -1,4 +1,4 @@
-import { findInTree } from '../util/find-in-tree'
+import { findInTreeOrThrow } from '../util/find-in-tree'
 import { Folder } from '../../../../../types/folder'
 import { Doc } from '../../../../../types/doc'
 import { FileRef } from '../../../../../types/file-ref'
@@ -20,7 +20,7 @@ export function findFileByNameInFolder(
   name: string
 ): Doc | FileRef | undefined {
   if (tree._id !== parentFolderId) {
-    tree = findInTree(tree, parentFolderId).entity
+    tree = findInTreeOrThrow(tree, parentFolderId).entity as Folder
   }
 
   return (
@@ -35,7 +35,7 @@ export function findFolderByNameInFolder(
   name: string
 ): Folder | undefined {
   if (tree._id !== parentFolderId) {
-    tree = findInTree(tree, parentFolderId).entity
+    tree = findInTreeOrThrow(tree, parentFolderId).entity as Folder
   }
 
   return tree.folders.find(entity => entity.name === name)

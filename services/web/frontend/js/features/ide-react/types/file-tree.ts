@@ -9,7 +9,7 @@ interface BaseFileTreeFindResult<T> {
   entity: T
   parent: T[]
   parentFolderId: string
-  path: string
+  path: string[]
   index: number
 }
 

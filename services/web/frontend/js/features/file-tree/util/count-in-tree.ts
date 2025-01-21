@@ -1,6 +1,15 @@
 import getMeta from '@/utils/meta'
+import { Folder } from '../../../../../types/folder'
 
-export function countFiles(fileTreeData) {
+type FileCountStatus = 'success' | 'warning' | 'error'
+
+type FileCount = {
+  value: number
+  status: FileCountStatus
+  limit: number
+}
+
+export function countFiles(fileTreeData: Folder | undefined): 0 | FileCount {
   if (!fileTreeData) {
     return 0
   }
@@ -13,7 +22,11 @@ export function countFiles(fileTreeData) {
   return { value, status, limit }
 }
 
-function fileCountStatus(value, limit, range) {
+function fileCountStatus(
+  value: number,
+  limit: number,
+  range: number
+): FileCountStatus {
   if (value >= limit) {
     return 'error'
   }
@@ -26,8 +39,8 @@ function fileCountStatus(value, limit, range) {
 }
 
 // Copied and adapted from ProjectEntityMongoUpdateHandler
-function _countElements(rootFolder) {
-  function countFolder(folder) {
+function _countElements(rootFolder: Folder): number {
+  function countFolder(folder: Folder) {
     if (folder == null) {
       return 0
     }

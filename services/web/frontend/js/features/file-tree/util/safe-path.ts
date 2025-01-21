@@ -58,7 +58,7 @@ prototype\
 
 const MAX_PATH = 1024 // Maximum path length, in characters. This is fairly arbitrary.
 
-export function clean(filename) {
+export function clean(filename: string): string {
   filename = filename.replace(BADCHAR_RX, '_')
   // for BADFILE_RX replace any matches with an equal number of underscores
   filename = filename.replace(BADFILE_RX, match =>
@@ -69,7 +69,7 @@ export function clean(filename) {
   return filename
 }
 
-export function isCleanFilename(filename) {
+export function isCleanFilename(filename: string): boolean {
   return (
     isAllowedLength(filename) &&
     !filename.match(BADCHAR_RX) &&
@@ -77,13 +77,13 @@ export function isCleanFilename(filename) {
   )
 }
 
-export function isBlockedFilename(filename) {
+export function isBlockedFilename(filename: string): boolean {
   return BLOCKEDFILE_RX.test(filename)
 }
 
 // returns whether a full path is 'clean' - e.g. is a full or relative path
 // that points to a file, and each element passes the rules in 'isCleanFilename'
-export function isCleanPath(path) {
+export function isCleanPath(path: string): boolean {
   const elements = path.split('/')
 
   const lastElementIsEmpty = elements[elements.length - 1].length === 0
@@ -105,6 +105,6 @@ export function isCleanPath(path) {
   return true
 }
 
-export function isAllowedLength(pathname) {
+export function isAllowedLength(pathname: string): boolean {
   return pathname.length > 0 && pathname.length <= MAX_PATH
 }

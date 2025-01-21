@@ -10,7 +10,7 @@ import {
 } from 'react'
 import classNames from 'classnames'
 import _ from 'lodash'
-import { findInTree } from '../util/find-in-tree'
+import { findInTree, findInTreeOrThrow } from '../util/find-in-tree'
 import { useFileTreeData } from '../../../shared/context/file-tree-data-context'
 import { useProjectContext } from '../../../shared/context/project-context'
 import { useLayoutContext } from '../../../shared/context/layout-context'
@@ -177,7 +177,7 @@ export const FileTreeSelectableProvider: FC<{
     }
     const _selectedEntities = Array.from(selectedEntityIds)
       .map(id => findInTree(fileTreeData, id))
-      .filter(Boolean)
+      .filter(entity => entity !== null)
     onSelect(_selectedEntities)
     setSelectedEntities(_selectedEntities)
   }, [
@@ -282,7 +282,7 @@ export function useSelectableEntity(id: string, type: string) {
 
   const chooseView = useCallback(() => {
     for (const id of selectedEntityIds) {
-      const selectedEntity = findInTree(fileTreeData, id)
+      const selectedEntity = findInTreeOrThrow(fileTreeData, id)
 
       if (selectedEntity.type === 'doc') {
         return 'editor'

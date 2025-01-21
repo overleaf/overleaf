@@ -60,7 +60,7 @@ const FileTreeActionableContext = createContext<
       canRename: boolean
       canCreate: boolean
       parentFolderId: string
-      selectedFileName: string | null
+      selectedFileName: string | null | undefined
       isDuplicate: (parentFolderId: string, name: string) => boolean
       startRenaming: any
       finishRenaming: any
@@ -320,7 +320,7 @@ export const FileTreeActionableProvider: FC = ({ children }) => {
 
   // moves entities. Tree is updated immediately and data are sync'd after.
   const finishMoving = useCallback(
-    (toFolderId, draggedEntityIds) => {
+    (toFolderId: string, draggedEntityIds: Set<string>) => {
       dispatch({ type: ACTION_TYPES.MOVING })
 
       // find entities and filter out no-ops and nested files
@@ -624,7 +624,7 @@ function validateCreate(
 
 function validateRename(
   fileTreeData: Folder,
-  found: { parentFolderId: string; path: string; type: string },
+  found: { parentFolderId: string; path: string[]; type: string },
   newName: string
 ) {
   if (!isCleanFilename(newName)) {

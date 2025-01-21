@@ -1,20 +1,25 @@
 import OError from '@overleaf/o-error'
+import { Folder } from '../../../../../types/folder'
+import { FileTreeFindResult } from '@/features/ide-react/types/file-tree'
 
-export function findInTreeOrThrow(tree, id) {
+export function findInTreeOrThrow(tree: Folder, id: string) {
   const found = findInTree(tree, id)
   if (found) return found
   throw new OError('Entity not found in tree', { entityId: id })
 }
 
-export function findAllInTreeOrThrow(tree, ids) {
-  const list = new Set()
+export function findAllInTreeOrThrow(
+  tree: Folder,
+  ids: Set<string>
+): Set<FileTreeFindResult> {
+  const list: Set<FileTreeFindResult> = new Set()
   ids.forEach(id => {
     list.add(findInTreeOrThrow(tree, id))
   })
   return list
 }
 
-export function findAllFolderIdsInFolder(folder) {
+export function findAllFolderIdsInFolder(folder: Folder): Set<string> {
   const list = new Set([folder._id])
   for (const index in folder.folders) {
     const subFolder = folder.folders[index]
@@ -25,8 +30,8 @@ export function findAllFolderIdsInFolder(folder) {
   return list
 }
 
-export function findAllFolderIdsInFolders(folders) {
-  const list = new Set()
+export function findAllFolderIdsInFolders(folders: Set<Folder>): Set<string> {
+  const list: Set<string> = new Set()
   folders.forEach(folder => {
     findAllFolderIdsInFolder(folder).forEach(folderId => {
       list.add(folderId)
@@ -35,7 +40,11 @@ export function findAllFolderIdsInFolders(folders) {
   return list
 }
 
-export function findInTree(tree, id, path) {
+export function findInTree(
+  tree: Folder,
+  id: string,
+  path?: string[]
+): FileTreeFindResult | null {
   if (!path) {
     path = [tree._id]
   }
@@ -48,7 +57,7 @@ export function findInTree(tree, id, path) {
         parent: tree.docs,
         parentFolderId: tree._id,
         path,
-        index,
+        index: Number(index),
       }
     }
   }
@@ -62,7 +71,7 @@ export function findInTree(tree, id, path) {
         parent: tree.fileRefs,
         parentFolderId: tree._id,
         path,
-        index,
+        index: Number(index),
       }
     }
   }
@@ -76,7 +85,7 @@ export function findInTree(tree, id, path) {
         parent: tree.folders,
         parentFolderId: tree._id,
         path,
-        index,
+        index: Number(index),
       }
     }
     const found = findInTree(folder, id, path.concat(folder._id))

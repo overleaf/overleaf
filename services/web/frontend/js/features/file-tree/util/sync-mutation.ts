@@ -1,6 +1,11 @@
 import { postJSON, deleteJSON } from '../../../infrastructure/fetch-json'
 
-export function syncRename(projectId, entityType, entityId, newName) {
+export function syncRename(
+  projectId: string,
+  entityType: string,
+  entityId: string,
+  newName: string
+) {
   return postJSON(
     `/project/${projectId}/${getEntityPathName(entityType)}/${entityId}/rename`,
     {
@@ -11,13 +16,22 @@ export function syncRename(projectId, entityType, entityId, newName) {
   )
 }
 
-export function syncDelete(projectId, entityType, entityId) {
+export function syncDelete(
+  projectId: string,
+  entityType: string,
+  entityId: string
+) {
   return deleteJSON(
     `/project/${projectId}/${getEntityPathName(entityType)}/${entityId}`
   )
 }
 
-export function syncMove(projectId, entityType, entityId, toFolderId) {
+export function syncMove(
+  projectId: string,
+  entityType: string,
+  entityId: string,
+  toFolderId: string
+) {
   return postJSON(
     `/project/${projectId}/${getEntityPathName(entityType)}/${entityId}/move`,
     {
@@ -28,7 +42,14 @@ export function syncMove(projectId, entityType, entityId, toFolderId) {
   )
 }
 
-export function syncCreateEntity(projectId, parentFolderId, newEntityData) {
+export function syncCreateEntity(
+  projectId: string,
+  parentFolderId: string,
+  newEntityData: {
+    endpoint: 'doc' | 'folder' | 'linked-file'
+    [key: string]: unknown
+  }
+) {
   const { endpoint, ...newEntity } = newEntityData
   return postJSON(`/project/${projectId}/${endpoint}`, {
     body: {
@@ -38,6 +59,6 @@ export function syncCreateEntity(projectId, parentFolderId, newEntityData) {
   })
 }
 
-function getEntityPathName(entityType) {
+function getEntityPathName(entityType: string) {
   return entityType === 'fileRef' ? 'file' : entityType
 }
