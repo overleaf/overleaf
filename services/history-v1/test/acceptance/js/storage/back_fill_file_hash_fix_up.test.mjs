@@ -505,6 +505,7 @@ describe('back_fill_file_hash_fix_up script', function () {
           env: {
             ...process.env,
             USER_FILES_BUCKET_NAME,
+            SLEEP_BEFORE_EXIT: '1',
             ...env,
             LOG_LEVEL: 'warn', // Override LOG_LEVEL of acceptance tests
           },

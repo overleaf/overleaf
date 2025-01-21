@@ -585,6 +585,7 @@ describe('back_fill_file_hash script', function () {
           env: {
             ...process.env,
             USER_FILES_BUCKET_NAME,
+            SLEEP_BEFORE_EXIT: '1',
             ...env,
             LOG_LEVEL: 'warn', // Override LOG_LEVEL of acceptance tests
           },
@@ -1430,6 +1431,76 @@ describe('back_fill_file_hash script', function () {
       })
     })
 
+    it('should print stats', function () {
+      expect(outputPart0.stats).to.deep.equal(STATS_UP_TO_PROJECT1)
+      expect(outputPart1.stats).to.deep.equal(STATS_UP_FROM_PROJECT1_ONWARD)
+    })
+    commonAssertions()
+  })
+
+  describe('projectIds from file', () => {
+    const path0 = '/tmp/project-ids-0.txt'
+    const path1 = '/tmp/project-ids-1.txt'
+    beforeEach('create project-ids.txt files', async function () {
+      await fs.promises.writeFile(
+        path0,
+        [projectId0, projectId1].map(id => id.toString()).join('\n')
+      )
+      await fs.promises.writeFile(
+        path1,
+        [
+          projectId2,
+          projectId3,
+          projectIdDeleted0,
+          projectIdDeleted1,
+          projectIdNoHistory,
+          projectIdNoHistoryDeleted,
+          projectIdHardDeleted,
+          projectIdNoOverleaf,
+          projectIdNoOverleafDeleted,
+          projectIdBadFileTree0,
+          projectIdBadFileTree1,
+          projectIdBadFileTree2,
+          projectIdBadFileTree3,
+        ]
+          .map(id => id.toString())
+          .join('\n')
+      )
+    })
+
+    let outputPart0, outputPart1
+    beforeEach('run script on part 0', async function () {
+      outputPart0 = await runScript([`--projectIdsFrom=${path0}`])
+    })
+    beforeEach('run script on part 1', async function () {
+      outputPart1 = await runScript([`--projectIdsFrom=${path1}`])
+    })
+
+    /**
+     * @param {string} msg
+     * @param {ObjectId} projectId
+     */
+    function expectLogEntry(msg, projectId) {
+      expect(outputPart1.result.stdout).to.include(msg)
+      const log = JSON.parse(
+        outputPart1.result.stdout
+          .split('\n')
+          .find(l => l.includes(`"${msg}"`) && l.includes(projectId.toString()))
+      )
+      expect(log).to.contain({
+        projectId: projectId.toString(),
+        msg,
+      })
+    }
+    it('should flag the hard-deleted project', function () {
+      expectLogEntry('project hard-deleted', projectIdHardDeleted)
+    })
+    it('should flag the projects without history id', function () {
+      expectLogEntry('project has no history id', projectIdNoOverleaf)
+      expectLogEntry('project has no history id', projectIdNoOverleafDeleted)
+      expectLogEntry('project has no history id', projectIdNoHistory)
+      expectLogEntry('project has no history id', projectIdNoHistoryDeleted)
+    })
     it('should print stats', function () {
       expect(outputPart0.stats).to.deep.equal(STATS_UP_TO_PROJECT1)
       expect(outputPart1.stats).to.deep.equal(STATS_UP_FROM_PROJECT1_ONWARD)

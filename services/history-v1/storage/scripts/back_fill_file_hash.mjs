@@ -35,6 +35,7 @@ import {
 import { backedUpBlobs as backedUpBlobsCollection, db } from '../lib/mongodb.js'
 import filestorePersistor from '../lib/persistor.js'
 import commandLineArgs from 'command-line-args'
+import readline from 'node:readline'
 
 // Silence warning.
 Events.setMaxListeners(20)
@@ -46,6 +47,8 @@ ObjectId.cacheHexString = true
  * @typedef {import("overleaf-editor-core").Blob} Blob
  * @typedef {import("perf_hooks").EventLoopUtilization} EventLoopUtilization
  * @typedef {import("mongodb").Collection} Collection
+ * @typedef {import("mongodb").Collection<Project>} ProjectsCollection
+ * @typedef {import("mongodb").Collection<{project:Project}>} DeletedProjectsCollection
  * @typedef {import("@overleaf/object-persistor/src/PerProjectEncryptedS3Persistor").CachedPerProjectEncryptedS3Persistor} CachedPerProjectEncryptedS3Persistor
  */
 
@@ -86,7 +89,7 @@ ObjectId.cacheHexString = true
  */
 
 /**
- * @return {{PROCESS_HASHED_FILES: boolean, PROCESS_DELETED_FILES: boolean, LOGGING_IDENTIFIER: string, BATCH_RANGE_START: string, PROCESS_BLOBS: boolean, BATCH_RANGE_END: string, PROCESS_NON_DELETED_PROJECTS: boolean, PROCESS_DELETED_PROJECTS: boolean, COLLECT_BACKED_UP_BLOBS: boolean}}
+ * @return {{PROJECT_IDS_FROM: string, PROCESS_HASHED_FILES: boolean, PROCESS_DELETED_FILES: boolean, LOGGING_IDENTIFIER: string, BATCH_RANGE_START: string, PROCESS_BLOBS: boolean, BATCH_RANGE_END: string, PROCESS_NON_DELETED_PROJECTS: boolean, PROCESS_DELETED_PROJECTS: boolean, COLLECT_BACKED_UP_BLOBS: boolean}}
  */
 function parseArgs() {
   const PUBLIC_LAUNCH_DATE = new Date('2012-01-01T00:00:00Z')
@@ -96,6 +99,7 @@ function parseArgs() {
     { name: 'processDeletedFiles', type: String, defaultValue: 'false' },
     { name: 'processHashedFiles', type: String, defaultValue: 'false' },
     { name: 'processBlobs', type: String, defaultValue: 'true' },
+    { name: 'projectIdsFrom', type: String, defaultValue: '' },
     { name: 'collectBackedUpBlobs', type: String, defaultValue: 'true' },
     {
       name: 'BATCH_RANGE_START',
@@ -133,6 +137,7 @@ function parseArgs() {
     BATCH_RANGE_START,
     BATCH_RANGE_END,
     LOGGING_IDENTIFIER: args['LOGGING_IDENTIFIER'] || BATCH_RANGE_START,
+    PROJECT_IDS_FROM: args['projectIdsFrom'],
   }
 }
 
@@ -146,6 +151,7 @@ const {
   BATCH_RANGE_START,
   BATCH_RANGE_END,
   LOGGING_IDENTIFIER,
+  PROJECT_IDS_FROM,
 } = parseArgs()
 
 // We need to handle the start and end differently as ids of deleted projects are created at time of deletion.
@@ -174,9 +180,14 @@ const STREAM_HIGH_WATER_MARK = parseInt(
   10
 )
 const LOGGING_INTERVAL = parseInt(process.env.LOGGING_INTERVAL || '60000', 10)
+const SLEEP_BEFORE_EXIT = parseInt(process.env.SLEEP_BEFORE_EXIT || '1000', 10)
 
 const projectsCollection = db.collection('projects')
+/** @type {ProjectsCollection} */
+const typedProjectsCollection = db.collection('projects')
 const deletedProjectsCollection = db.collection('deletedProjects')
+/** @type {DeletedProjectsCollection} */
+const typedDeletedProjectsCollection = db.collection('deletedProjects')
 const deletedFilesCollection = db.collection('deletedFiles')
 
 const concurrencyLimit = pLimit(CONCURRENCY)
@@ -1316,6 +1327,51 @@ function estimateBlobSize(blob) {
   return size
 }
 
+async function processProjectsFromFile() {
+  const rl = readline.createInterface({
+    input: fs.createReadStream(PROJECT_IDS_FROM),
+  })
+  for await (const projectId of rl) {
+    if (!projectId) continue // skip over trailing new line
+    let project = await typedProjectsCollection.findOne(
+      { _id: new ObjectId(projectId) },
+      { projection: { rootFolder: 1, _id: 1, 'overleaf.history.id': 1 } }
+    )
+    let prefix = 'rootFolder.0'
+    if (!project) {
+      const deletedProject = await typedDeletedProjectsCollection.findOne(
+        { 'deleterData.deletedProjectId': new ObjectId(projectId) },
+        {
+          projection: {
+            'project.rootFolder': 1,
+            'project._id': 1,
+            'project.overleaf.history.id': 1,
+          },
+        }
+      )
+      if (!deletedProject?.project) {
+        logger.warn({ projectId }, 'project hard-deleted')
+        continue
+      }
+      project = deletedProject.project
+      prefix = 'project.rootFolder.0'
+    }
+    if (!project?.overleaf?.history?.id) {
+      logger.warn({ projectId }, 'project has no history id')
+      continue
+    }
+    try {
+      await queueNextBatch([project], prefix)
+    } catch (err) {
+      gracefulShutdownInitiated = true
+      await waitForDeferredQueues()
+      throw err
+    }
+  }
+  await waitForDeferredQueues()
+  console.warn('Done updating projects from input file')
+}
+
 async function processNonDeletedProjects() {
   try {
     await batchedUpdate(
@@ -1367,11 +1423,15 @@ async function processDeletedProjects() {
 
 async function main() {
   await loadGlobalBlobs()
-  if (PROCESS_NON_DELETED_PROJECTS) {
-    await processNonDeletedProjects()
-  }
-  if (PROCESS_DELETED_PROJECTS) {
-    await processDeletedProjects()
+  if (PROJECT_IDS_FROM) {
+    await processProjectsFromFile()
+  } else {
+    if (PROCESS_NON_DELETED_PROJECTS) {
+      await processNonDeletedProjects()
+    }
+    if (PROCESS_DELETED_PROJECTS) {
+      await processDeletedProjects()
+    }
   }
   console.warn('Done.')
 }
@@ -1407,8 +1467,10 @@ try {
     )
     code++
   }
+  await setTimeout(SLEEP_BEFORE_EXIT)
   process.exit(code)
 } catch (err) {
   console.error(err)
+  await setTimeout(SLEEP_BEFORE_EXIT)
   process.exit(1)
 }

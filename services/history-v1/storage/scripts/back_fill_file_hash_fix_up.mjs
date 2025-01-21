@@ -18,6 +18,7 @@ import readline from 'node:readline'
 import { _blobIsBackedUp, backupBlob } from '../lib/backupBlob.mjs'
 import { NotFoundError } from '@overleaf/object-persistor/src/Errors.js'
 import filestorePersistor from '../lib/persistor.js'
+import { setTimeout } from 'node:timers/promises'
 
 // Silence warning.
 Events.setMaxListeners(20)
@@ -102,6 +103,7 @@ const STREAM_HIGH_WATER_MARK = parseInt(
   process.env.STREAM_HIGH_WATER_MARK || (64 * 1024).toString(),
   10
 )
+const SLEEP_BEFORE_EXIT = parseInt(process.env.SLEEP_BEFORE_EXIT || '1000', 10)
 
 /** @type {ProjectsCollection} */
 const projectsCollection = db.collection('projects')
@@ -630,6 +632,7 @@ async function main() {
     }
   }
   const { skipped, failed, unmatched } = STATS
+  await setTimeout(SLEEP_BEFORE_EXIT)
   if (failed > 0) {
     process.exit(Math.min(failed, 99))
   } else if (unmatched > 0) {
