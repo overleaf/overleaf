@@ -1,107 +1,163 @@
-import {
-  db,
-  READ_PREFERENCE_SECONDARY,
-} from '../app/src/infrastructure/mongodb.js'
+// @ts-check
+import { db, ObjectId } from '../app/src/infrastructure/mongodb.js'
+import { batchedUpdate } from '@overleaf/mongo-utils/batchedUpdate.js'
+
+/**
+ * @typedef {Object} Doc
+ * @property {ObjectId} _id
+ * @property {string} name
+ */
+
+/**
+ * @typedef {Object} FileRef
+ * @property {ObjectId} _id
+ * @property {string} name
+ * @property {string} hash
+ */
+
+/**
+ * @typedef {Object} Folder
+ * @property {ObjectId} _id
+ * @property {string} name
+ * @property {Array<Doc>} docs
+ * @property {Array<Folder>} folders
+ * @property {Array<FileRef>} fileRefs
+ */
+
+/**
+ * @typedef {Object} Project
+ * @property {ObjectId} _id
+ * @property {Array<Folder>} rootFolder
+ */
 
 async function main() {
-  const projects = db.projects.find(
-    {},
-    {
-      projection: { rootFolder: 1 },
-      readPreference: READ_PREFERENCE_SECONDARY,
-    }
-  )
   let projectsProcessed = 0
-  for await (const project of projects) {
-    projectsProcessed += 1
-    if (projectsProcessed % 100000 === 0) {
-      console.log(projectsProcessed, 'projects processed')
-    }
-    processProject(project)
-  }
+  await batchedUpdate(
+    db.projects,
+    {},
+    /**
+     * @param {Array<Project>} projects
+     * @return {Promise<void>}
+     */
+    async function projects(projects) {
+      for (const project of projects) {
+        projectsProcessed += 1
+        if (projectsProcessed % 100000 === 0) {
+          console.log(projectsProcessed, 'projects processed')
+        }
+        const projectId = project._id.toString()
+        for (const { reason, path, _id } of processProject(project)) {
+          console.log(
+            JSON.stringify({
+              msg: 'bad file-tree path',
+              projectId,
+              reason,
+              path,
+              _id,
+            })
+          )
+        }
+      }
+    },
+    { _id: 1, rootFolder: 1 }
+  )
 }
 
-function processProject(project) {
+/**
+ * @param {Project} project
+ * @return {Generator<{path: string, reason: string, _id: any}, void, *>}
+ */
+function* processProject(project) {
   if (!project.rootFolder || !Array.isArray(project.rootFolder)) {
-    console.log('BAD PATH:', project._id, 'rootFolder')
-    return
-  }
-  if (!project.rootFolder[0]) {
-    console.log('BAD PATH:', project._id, 'rootFolder.0')
-    return
-  }
-  const badPaths = findBadPaths(project.rootFolder[0])
-  for (const path of badPaths) {
-    console.log('BAD PATH:', project._id, `rootFolder.0.${path}`)
+    yield { reason: 'bad rootFolder', path: 'rootFolder', _id: null }
+  } else if (!project.rootFolder[0]) {
+    yield { reason: 'missing rootFolder', path: 'rootFolder.0', _id: null }
+  } else {
+    for (const { path, reason, _id } of findBadPaths(project.rootFolder[0])) {
+      yield { reason, path: `rootFolder.0${path}`, _id }
+    }
   }
 }
 
-function findBadPaths(folder) {
-  const result = []
+/**
+ * @param {Folder} folder
+ * @return {Generator<{path: string, reason: string, _id: any}, void, *>}
+ */
+function* findBadPaths(folder) {
+  const folderId = folder._id
 
-  if (!folder._id) {
-    result.push('_id')
+  if (!(folderId instanceof ObjectId)) {
+    yield { path: '._id', reason: 'bad folder id', _id: folderId }
   }
 
   if (typeof folder.name !== 'string' || !folder.name) {
-    result.push('name')
+    yield { path: '.name', reason: 'bad folder name', _id: folderId }
   }
 
   if (folder.folders && Array.isArray(folder.folders)) {
     for (const [i, subfolder] of folder.folders.entries()) {
       if (!subfolder || typeof subfolder !== 'object') {
-        result.push(`folders.${i}`)
+        yield { path: `.folders.${i}`, reason: 'bad folder', _id: folderId }
         continue
       }
-      for (const badPath of findBadPaths(subfolder)) {
-        result.push(`folders.${i}.${badPath}`)
+      for (const { path, reason, _id } of findBadPaths(subfolder)) {
+        yield { path: `.folders.${i}${path}`, reason, _id }
       }
     }
   } else {
-    result.push('folders')
+    yield { path: '.folders', reason: 'missing .folders', _id: folderId }
   }
 
   if (folder.docs && Array.isArray(folder.docs)) {
     for (const [i, doc] of folder.docs.entries()) {
       if (!doc || typeof doc !== 'object') {
-        result.push(`docs.${i}`)
+        yield { path: `.docs.${i}`, reason: 'bad doc', _id: folderId }
         continue
       }
-      if (!doc._id) {
-        result.push(`docs.${i}._id`)
+      const docId = doc._id
+      if (!(docId instanceof ObjectId)) {
+        yield { path: `.docs.${i}._id`, reason: 'bad doc id', _id: docId }
         // no need to check further: this doc can be deleted
         continue
       }
       if (typeof doc.name !== 'string' || !doc.name) {
-        result.push(`docs.${i}.name`)
+        yield { path: `.docs.${i}.name`, reason: 'bad doc name', _id: docId }
       }
     }
   } else {
-    result.push('docs')
+    yield { path: '.docs', reason: 'missing .docs', _id: folderId }
   }
 
   if (folder.fileRefs && Array.isArray(folder.fileRefs)) {
     for (const [i, file] of folder.fileRefs.entries()) {
       if (!file || typeof file !== 'object') {
-        result.push(`fileRefs.${i}`)
+        yield { path: `.fileRefs.${i}`, reason: 'bad file', _id: folderId }
         continue
       }
-      if (!file._id) {
-        result.push(`fileRefs.${i}._id`)
+      const fileId = file._id
+      if (!(fileId instanceof ObjectId)) {
+        yield { path: `.fileRefs.${i}._id`, reason: 'bad file id', _id: fileId }
         // no need to check further: this file can be deleted
         continue
       }
       if (typeof file.name !== 'string' || !file.name) {
-        result.push(`fileRefs.${i}.name`)
+        yield {
+          path: `.fileRefs.${i}.name`,
+          reason: 'bad file name',
+          _id: fileId,
+        }
       }
       if (typeof file.hash !== 'string' || !file.hash) {
-        result.push(`fileRefs.${i}.hash`)
+        yield {
+          path: `.fileRefs.${i}.hash`,
+          reason: 'bad file hash',
+          _id: fileId,
+        }
       }
     }
   } else {
-    result.push('fileRefs')
+    yield { path: '.fileRefs', reason: 'missing .fileRefs', _id: folderId }
   }
-  return result
 }
 
 try {
