@@ -1,5 +1,4 @@
 import { useEffect } from 'react'
-import PropTypes from 'prop-types'
 import { useTranslation } from 'react-i18next'
 import classNames from 'classnames'
 
@@ -15,8 +14,23 @@ import FileTreeFolderList from './file-tree-folder-list'
 import usePersistedState from '../../../shared/hooks/use-persisted-state'
 import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
 import MaterialIcon from '@/shared/components/material-icon'
+import { Folder } from '../../../../../types/folder'
+import { Doc } from '../../../../../types/doc'
+import { FileRef } from '../../../../../types/file-ref'
 
-function FileTreeFolder({ name, id, folders, docs, files }) {
+function FileTreeFolder({
+  name,
+  id,
+  folders,
+  docs,
+  files,
+}: {
+  name: string
+  id: string
+  folders: Folder[]
+  docs: Doc[]
+  files: FileRef[]
+}) {
   const { t } = useTranslation()
 
   const { isSelected, props: selectableEntityProps } = useSelectableEntity(
@@ -24,7 +38,7 @@ function FileTreeFolder({ name, id, folders, docs, files }) {
     'folder'
   )
 
-  const { selectedEntityParentIds } = useFileTreeSelectable(id)
+  const { selectedEntityParentIds } = useFileTreeSelectable()
 
   const [expanded, setExpanded] = usePersistedState(
     `folder.${id}.expanded`,
@@ -94,7 +108,7 @@ function FileTreeFolder({ name, id, folders, docs, files }) {
         {...selectableEntityProps}
         aria-expanded={expanded}
         aria-label={name}
-        tabIndex="0"
+        tabIndex={0}
         ref={dropRefRoot}
         className={classNames(selectableEntityProps.className, {
           'dnd-droppable-hover': isOverRoot || isOverList,
@@ -118,14 +132,6 @@ function FileTreeFolder({ name, id, folders, docs, files }) {
       ) : null}
     </>
   )
-}
-
-FileTreeFolder.propTypes = {
-  name: PropTypes.string.isRequired,
-  id: PropTypes.string.isRequired,
-  folders: PropTypes.array.isRequired,
-  docs: PropTypes.array.isRequired,
-  files: PropTypes.array.isRequired,
 }
 
 export default FileTreeFolder

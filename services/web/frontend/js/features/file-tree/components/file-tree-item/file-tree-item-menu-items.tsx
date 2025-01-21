@@ -89,7 +89,7 @@ function FileTreeItemMenuItems() {
               <DropdownItem
                 href={downloadPath}
                 onClick={downloadWithAnalytics}
-                download={selectedFileName}
+                download={selectedFileName ?? undefined}
               >
                 {t('download')}
               </DropdownItem>
@@ -102,7 +102,7 @@ function FileTreeItemMenuItems() {
           ) : null}
           {canCreate ? (
             <>
-              <DropdownDivider role="none" />
+              <DropdownDivider />
               <li role="none">
                 <DropdownItem onClick={createWithAnalytics}>
                   {t('new_file')}

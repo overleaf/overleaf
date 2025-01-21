@@ -1,9 +1,14 @@
-import PropTypes from 'prop-types'
 import classNames from 'classnames'
 
 import FileTreeDoc from './file-tree-doc'
 import FileTreeFolder from './file-tree-folder'
 import { fileCollator } from '../util/file-collator'
+import { Folder } from '../../../../../types/folder'
+import { Doc } from '../../../../../types/doc'
+import { FileRef } from '../../../../../types/file-ref'
+import { ConnectDropTarget } from 'react-dnd'
+
+type ExtendedFileRef = FileRef & { isFile: true }
 
 function FileTreeFolderList({
   folders,
@@ -13,9 +18,17 @@ function FileTreeFolderList({
   dropRef = null,
   children,
   dataTestId,
+}: {
+  folders: Folder[]
+  docs: Doc[]
+  files: FileRef[]
+  classes?: { root?: string }
+  dropRef?: ConnectDropTarget | null
+  children?: React.ReactNode
+  dataTestId?: string
 }) {
   files = files.map(file => ({ ...file, isFile: true }))
-  const docsAndFiles = [...docs, ...files]
+  const docsAndFiles: (Doc | ExtendedFileRef)[] = [...docs, ...files]
 
   return (
     <ul
@@ -37,34 +50,26 @@ function FileTreeFolderList({
         )
       })}
       {docsAndFiles.sort(compareFunction).map(doc => {
-        return (
-          <FileTreeDoc
-            key={doc._id}
-            name={doc.name}
-            id={doc._id}
-            isFile={doc.isFile}
-            isLinkedFile={doc.linkedFileData && !!doc.linkedFileData.provider}
-          />
-        )
+        if ('isFile' in doc) {
+          return (
+            <FileTreeDoc
+              key={doc._id}
+              name={doc.name}
+              id={doc._id}
+              isFile={doc.isFile}
+              isLinkedFile={doc.linkedFileData && !!doc.linkedFileData.provider}
+            />
+          )
+        }
+
+        return <FileTreeDoc key={doc._id} name={doc.name} id={doc._id} />
       })}
       {children}
     </ul>
   )
 }
 
-FileTreeFolderList.propTypes = {
-  folders: PropTypes.array.isRequired,
-  docs: PropTypes.array.isRequired,
-  files: PropTypes.array.isRequired,
-  classes: PropTypes.exact({
-    root: PropTypes.string,
-  }),
-  dropRef: PropTypes.func,
-  children: PropTypes.node,
-  dataTestId: PropTypes.string,
-}
-
-function compareFunction(one, two) {
+function compareFunction(one: { name: string }, two: { name: string }) {
   return fileCollator.compare(one.name, two.name)
 }
 

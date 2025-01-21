@@ -1,11 +1,16 @@
-import { useState, useEffect } from 'react'
-import PropTypes from 'prop-types'
-
+import { useState, useEffect, RefObject } from 'react'
 import { useRefWithAutoFocus } from '../../../../shared/hooks/use-ref-with-auto-focus'
-
 import { useFileTreeActionable } from '../../contexts/file-tree-actionable'
 
-function FileTreeItemName({ name, isSelected, setIsDraggable }) {
+function FileTreeItemName({
+  name,
+  isSelected,
+  setIsDraggable,
+}: {
+  name: string
+  isSelected: boolean
+  setIsDraggable: (isDraggable: boolean) => void
+}) {
   const { isRenaming, startRenaming, finishRenaming, error, cancel } =
     useFileTreeActionable()
 
@@ -33,13 +38,15 @@ function FileTreeItemName({ name, isSelected, setIsDraggable }) {
   )
 }
 
-FileTreeItemName.propTypes = {
-  name: PropTypes.string.isRequired,
-  isSelected: PropTypes.bool.isRequired,
-  setIsDraggable: PropTypes.func.isRequired,
-}
-
-function DisplayName({ name, isSelected, startRenaming }) {
+function DisplayName({
+  name,
+  isSelected,
+  startRenaming,
+}: {
+  name: string
+  isSelected: boolean
+  startRenaming: () => void
+}) {
   const [clicksInSelectedCount, setClicksInSelectedCount] = useState(0)
 
   function onClick() {
@@ -67,13 +74,15 @@ function DisplayName({ name, isSelected, startRenaming }) {
   )
 }
 
-DisplayName.propTypes = {
-  name: PropTypes.string.isRequired,
-  startRenaming: PropTypes.func.isRequired,
-  isSelected: PropTypes.bool.isRequired,
-}
-
-function InputName({ initialValue, finishRenaming, cancel }) {
+function InputName({
+  initialValue,
+  finishRenaming,
+  cancel,
+}: {
+  initialValue: string
+  finishRenaming: (value: string) => void
+  cancel: () => void
+}) {
   const [value, setValue] = useState(initialValue)
 
   // The react-bootstrap Dropdown re-focuses on the Dropdown.Toggle
@@ -84,16 +93,16 @@ function InputName({ initialValue, finishRenaming, cancel }) {
   // shown
   const { autoFocusedRef } = useRefWithAutoFocus()
 
-  function handleFocus(ev) {
+  function handleFocus(ev: React.FocusEvent<HTMLInputElement>) {
     const lastDotIndex = ev.target.value.lastIndexOf('.')
     ev.target.setSelectionRange(0, lastDotIndex)
   }
 
-  function handleChange(ev) {
+  function handleChange(ev: React.ChangeEvent<HTMLInputElement>) {
     setValue(ev.target.value)
   }
 
-  function handleKeyDown(ev) {
+  function handleKeyDown(ev: React.KeyboardEvent<HTMLInputElement>) {
     if (ev.key === 'Enter') {
       finishRenaming(value)
     }
@@ -115,16 +124,10 @@ function InputName({ initialValue, finishRenaming, cancel }) {
         onChange={handleChange}
         onBlur={handleBlur}
         onFocus={handleFocus}
-        ref={autoFocusedRef}
+        ref={autoFocusedRef as RefObject<HTMLInputElement>}
       />
     </span>
   )
-}
-
-InputName.propTypes = {
-  initialValue: PropTypes.string.isRequired,
-  finishRenaming: PropTypes.func.isRequired,
-  cancel: PropTypes.func.isRequired,
 }
 
 export default FileTreeItemName

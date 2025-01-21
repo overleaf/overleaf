@@ -1,23 +1,20 @@
 import { useRef } from 'react'
-import PropTypes from 'prop-types'
 import { useTranslation } from 'react-i18next'
-
 import Icon from '../../../../shared/components/icon'
-
 import { useFileTreeMainContext } from '../../contexts/file-tree-main'
 import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
 import MaterialIcon from '@/shared/components/material-icon'
 
-function FileTreeItemMenu({ id, name }) {
+function FileTreeItemMenu({ id, name }: { id: string; name: string }) {
   const { t } = useTranslation()
   const { contextMenuCoords, setContextMenuCoords } = useFileTreeMainContext()
-  const menuButtonRef = useRef()
+  const menuButtonRef = useRef<HTMLButtonElement>(null)
 
   const isMenuOpen = Boolean(contextMenuCoords)
 
-  function handleClick(event) {
+  function handleClick(event: React.MouseEvent) {
     event.stopPropagation()
-    if (!contextMenuCoords) {
+    if (!contextMenuCoords && menuButtonRef.current) {
       const target = menuButtonRef.current.getBoundingClientRect()
       setContextMenuCoords({
         top: target.top + target.height / 2,
@@ -46,11 +43,6 @@ function FileTreeItemMenu({ id, name }) {
       </button>
     </div>
   )
-}
-
-FileTreeItemMenu.propTypes = {
-  id: PropTypes.string.isRequired,
-  name: PropTypes.string.isRequired,
 }
 
 export default FileTreeItemMenu

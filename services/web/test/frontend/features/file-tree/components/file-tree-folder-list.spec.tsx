@@ -31,8 +31,15 @@ describe('<FileTreeFolderList/>', function () {
                 fileRefs: [],
               },
             ]}
-            docs={[{ _id: '789ghi', name: 'doc.tex', linkedFileData: {} }]}
-            files={[{ _id: '987jkl', name: 'file.bib', linkedFileData: {} }]}
+            docs={[{ _id: '789ghi', name: 'doc.tex' }]}
+            files={[
+              {
+                _id: '987jkl',
+                name: 'file.bib',
+                hash: 'some hash',
+                linkedFileData: {},
+              },
+            ]}
           />
         </FileTreeProvider>
       </EditorProviders>

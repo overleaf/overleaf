@@ -1,5 +1,3 @@
-import PropTypes from 'prop-types'
-
 import { useSelectableEntity } from '../contexts/file-tree-selectable'
 
 import FileTreeItemInner from './file-tree-item/file-tree-item-inner'
@@ -10,7 +8,17 @@ import classnames from 'classnames'
 import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
 import MaterialIcon from '@/shared/components/material-icon'
 
-function FileTreeDoc({ name, id, isFile, isLinkedFile }) {
+function FileTreeDoc({
+  name,
+  id,
+  isFile,
+  isLinkedFile,
+}: {
+  name: string
+  id: string
+  isFile?: boolean
+  isLinkedFile?: boolean
+}) {
   const type = isFile ? 'file' : 'doc'
 
   const { isSelected, props: selectableEntityProps } = useSelectableEntity(
@@ -25,7 +33,7 @@ function FileTreeDoc({ name, id, isFile, isLinkedFile }) {
       // aria-selected is provided in selectableEntityProps
       {...selectableEntityProps}
       aria-label={name}
-      tabIndex="0"
+      tabIndex={0}
     >
       <FileTreeItemInner
         id={id}
@@ -38,14 +46,13 @@ function FileTreeDoc({ name, id, isFile, isLinkedFile }) {
   )
 }
 
-FileTreeDoc.propTypes = {
-  name: PropTypes.string.isRequired,
-  id: PropTypes.string.isRequired,
-  isFile: PropTypes.bool,
-  isLinkedFile: PropTypes.bool,
-}
-
-export const FileTreeIcon = ({ isLinkedFile, name }) => {
+export const FileTreeIcon = ({
+  isLinkedFile,
+  name,
+}: {
+  name: string
+  isLinkedFile?: boolean
+}) => {
   const { t } = useTranslation()
 
   const className = classnames('file-tree-icon', {
@@ -85,11 +92,6 @@ export const FileTreeIcon = ({ isLinkedFile, name }) => {
       />
     </>
   )
-}
-
-FileTreeIcon.propTypes = {
-  name: PropTypes.string.isRequired,
-  isLinkedFile: PropTypes.bool,
 }
 
 export default FileTreeDoc

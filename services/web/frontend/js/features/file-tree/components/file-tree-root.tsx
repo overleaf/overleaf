@@ -136,7 +136,7 @@ function FileTreeRootFolder({ onDelete }: { onDelete: () => void }) {
             'file-tree-dragging': dragLayer.isDragging,
           }),
         }}
-        dropRef={dropRef as any}
+        dropRef={dropRef}
         dataTestId="file-tree-list-root"
       />
     </>
