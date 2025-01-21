@@ -113,6 +113,8 @@ describe('back_fill_file_hash_fix_up script', function () {
   const fileIdRestoreFromFilestore0 = objectIdFromTime('2017-02-01T00:10:00Z')
   const fileIdRestoreFromFilestore1 = objectIdFromTime('2017-02-01T00:11:00Z')
   const fileIdMissing2 = objectIdFromTime('2017-02-01T00:12:00Z')
+  const fileIdHashMissing0 = objectIdFromTime('2017-02-01T00:13:00Z')
+  const fileIdHashMissing1 = objectIdFromTime('2017-02-01T00:14:00Z')
   const contentCorruptedBlob = 'string that produces another hash'
   const contentDoesNotExistAsBlob = 'does not exist as blob'
   const hashDoesNotExistAsBlob = gitBlobHashBuffer(
@@ -144,6 +146,16 @@ describe('back_fill_file_hash_fix_up script', function () {
       projectId: projectId0,
       historyId: historyId0,
       fileId: fileIdRestoreFromFilestore1,
+    },
+    {
+      projectId: projectId0,
+      historyId: historyId0,
+      fileId: fileIdHashMissing0,
+    },
+    {
+      projectId: projectId0,
+      historyId: historyId0,
+      fileId: fileIdHashMissing1,
     },
     {
       projectId: projectIdDeleted0,
@@ -263,6 +275,19 @@ describe('back_fill_file_hash_fix_up script', function () {
       err: { message: 'some other error' },
       msg: 'failed to process file',
     },
+    // from find_malformed_filetrees.mjs
+    {
+      projectId: projectId0,
+      _id: fileIdHashMissing0,
+      reason: 'bad file hash',
+      msg: 'bad file-tree path',
+    },
+    {
+      projectId: projectId0,
+      _id: fileIdHashMissing1,
+      reason: 'bad file hash',
+      msg: 'bad file-tree path',
+    },
   ]
   if (PRINT_IDS_AND_HASHES_FOR_DEBUGGING) {
     const fileIds = {
@@ -279,6 +304,8 @@ describe('back_fill_file_hash_fix_up script', function () {
       fileIdWithDifferentHashRestore,
       fileIdRestoreFromFilestore0,
       fileIdRestoreFromFilestore1,
+      fileIdHashMissing0,
+      fileIdHashMissing1,
     }
     console.log({
       projectId0,
@@ -315,6 +342,19 @@ describe('back_fill_file_hash_fix_up script', function () {
       USER_FILES_BUCKET_NAME,
       `${projectId0}/${fileIdRestoreFromFilestore1}`,
       Stream.Readable.from([fileIdRestoreFromFilestore1.toString()])
+    )
+    await FILESTORE_PERSISTOR.sendStream(
+      USER_FILES_BUCKET_NAME,
+      `${projectId0}/${fileIdHashMissing0}`,
+      Stream.Readable.from([fileIdHashMissing0.toString()])
+    )
+    await FILESTORE_PERSISTOR.sendStream(
+      USER_FILES_BUCKET_NAME,
+      `${projectId0}/${fileIdHashMissing1}`,
+      Stream.Readable.from([fileIdHashMissing1.toString()])
+    )
+    await new BlobStore(historyId0.toString()).putString(
+      fileIdHashMissing1.toString() // partially processed
     )
     await new BlobStore(historyId0.toString()).putString(
       fileIdBlobExistsInGCS0.toString()
@@ -362,6 +402,8 @@ describe('back_fill_file_hash_fix_up script', function () {
               { _id: fileIdMissing0 },
               { _id: fileIdMissing0 }, // bad file-tree, duplicated fileRef.
               { _id: fileIdMissing2 },
+              { _id: fileIdHashMissing0 },
+              { _id: fileIdHashMissing1 },
               {
                 _id: fileIdWithDifferentHashFound,
                 hash: gitBlobHash(fileIdInGoodState),
@@ -506,8 +548,8 @@ describe('back_fill_file_hash_fix_up script', function () {
   })
   it('should print stats', function () {
     expect(stats).to.contain({
-      processedLines: 14,
-      success: 9,
+      processedLines: 16,
+      success: 11,
       alreadyProcessed: 0,
       fileDeleted: 0,
       skipped: 0,
@@ -518,9 +560,9 @@ describe('back_fill_file_hash_fix_up script', function () {
   it('should handle re-run on same logs', async function () {
     ;({ stats } = await runScriptWithLogs())
     expect(stats).to.contain({
-      processedLines: 14,
+      processedLines: 16,
       success: 0,
-      alreadyProcessed: 6,
+      alreadyProcessed: 8,
       fileDeleted: 3,
       skipped: 0,
       failed: 3,
@@ -577,6 +619,16 @@ describe('back_fill_file_hash_fix_up script', function () {
               // { _id: fileIdMissing0 },
               // Removed
               // { _id: fileIdMissing2 },
+              // Added hash
+              {
+                _id: fileIdHashMissing0,
+                hash: gitBlobHash(fileIdHashMissing0),
+              },
+              // Added hash
+              {
+                _id: fileIdHashMissing1,
+                hash: gitBlobHash(fileIdHashMissing1),
+              },
               // No change, should warn about the find.
               {
                 _id: fileIdWithDifferentHashFound,
@@ -639,7 +691,7 @@ describe('back_fill_file_hash_fix_up script', function () {
         ],
         overleaf: { history: { id: historyId0 } },
         // Incremented when removing file/updating hash
-        version: 6,
+        version: 8,
       },
     ])
     expect(await deletedProjectsCollection.find({}).toArray()).to.deep.equal([
