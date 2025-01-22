@@ -16,6 +16,8 @@ $editor-toggler-bg-dark-color: color.adjust(
 }
 
 #ide-root {
+  display: flex;
+  flex-direction: column;
   height: 100vh; /* for backwards compatibility */
   height: 100dvh; /* needed for mobile devices */
 
@@ -71,7 +73,7 @@ $editor-toggler-bg-dark-color: color.adjust(
 }
 
 .ide-react-main {
-  height: 100%;
+  flex: 1;
   display: flex;
   flex-direction: column;
 
