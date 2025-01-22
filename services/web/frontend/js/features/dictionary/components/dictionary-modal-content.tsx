@@ -37,9 +37,10 @@ export default function DictionaryModalContent({
     word => {
       runAsync(postJSON('/spelling/unlearn', { body: { word } }))
         .then(() => {
-          setLearnedWords(value => {
-            value.delete(word)
-            return new Set(value)
+          setLearnedWords(prevLearnedWords => {
+            const learnedWords = new Set(prevLearnedWords)
+            learnedWords.delete(word)
+            return learnedWords
           })
           window.dispatchEvent(
             new CustomEvent('editor:remove-learned-word', { detail: word })
