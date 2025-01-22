@@ -17,12 +17,7 @@ export const ssoAvailableForDomain = (
 
 export const ssoAvailableForInstitution = (institution: Institution | null) => {
   const { hasSamlBeta, hasSamlFeature } = getMeta('ol-ExposedSettings')
-  if (
-    !hasSamlFeature ||
-    !institution ||
-    !institution.confirmed ||
-    !institution.isUniversity
-  ) {
+  if (!hasSamlFeature || !institution || !institution.confirmed) {
     return false
   }
   if (institution.ssoEnabled) {
