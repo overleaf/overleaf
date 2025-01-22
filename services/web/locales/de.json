@@ -479,6 +479,7 @@
   "gallery": "Gallerie",
   "gallery_find_more": "Mehr __itemPlural__ anzeigen",
   "gallery_page_title": "Gallerie – Vorlagen, Beispiele und Artikel verfasst in LaTeX",
+  "general": "Allgemein",
   "generate_token": "Token generieren",
   "generic_if_problem_continues_contact_us": "Wenn das Problem weiterhin besteht, kontaktiere uns bitte",
   "generic_linked_file_compile_error": "Die Ausgabedateien dieses Projekts sind nicht verfügbar, da sie nicht kompiliert werden konnten. Öffne das Projekt, um die Fehlerdetails des Kompiliervorgangs anzuzeigen.",

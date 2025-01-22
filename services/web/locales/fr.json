@@ -507,6 +507,7 @@
   "full_document_history": "<0>Historique</0> complet du document",
   "full_width": "Pleine largeur",
   "gallery_back_to_all": "Retour aux __itemPlural__",
+  "general": "Général",
   "generate_token": "Générer un jeton",
   "generic_if_problem_continues_contact_us": "Si ce problème persiste, veuillez nous contacter",
   "generic_linked_file_compile_error": "Les fichiers de sortie de ce projet ne sont pas disponibles car la compilation a échoué. Veuillez ouvrir le projet pour obtenir des détails sur l’erreur de compilation.",

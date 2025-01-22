@@ -684,6 +684,7 @@
   "gallery": "模版集",
   "gallery_find_more": "查找更多__itemPlural__",
   "gallery_page_title": "模版集 - 用LaTeX编写的模板、示例和文章",
+  "general": "常用",
   "generate_token": "生成令牌",
   "generic_if_problem_continues_contact_us": "如果问题仍然存在，请与我们联系",
   "generic_linked_file_compile_error": "此项目的输出文件不可用，因为它未能成功编译。请打开项目以查看编译错误的详细信息。",

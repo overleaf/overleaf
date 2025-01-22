@@ -310,6 +310,7 @@
   "free_plan_label": "Du har en <b>gratisplan</b>",
   "free_plan_tooltip": "Klicka för att ta reda på hur du kan dra nytta av Overleafs premiumfunktioner!",
   "full_doc_history": "Full dokumenthistorik",
+  "general": "Allmänt",
   "generic_if_problem_continues_contact_us": "Om problemet kvarstår, vänligen kontakta oss.",
   "generic_linked_file_compile_error": "Projektets utdatafiler är inte tillgängliga eftersom det inte gick att kompilera. Vänligen öppna projektet för att se information om kompileringsfel.",
   "generic_something_went_wrong": "Ursäkta, något gick snett",
