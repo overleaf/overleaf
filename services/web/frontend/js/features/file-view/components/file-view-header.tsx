@@ -103,6 +103,18 @@ export default function FileViewHeader({ file }: FileViewHeaderProps) {
       {refreshError && (
         <FileViewRefreshError file={file} refreshError={refreshError} />
       )}
+
+      {/* Workaround for Safari issue: https://github.com/overleaf/internal/issues/21363
+       * The editor behind a file view receives key events and updates the file even if Codemirror view is not focused.
+       * Changing the focus to a hidden textarea prevents this
+       */}
+      <textarea
+        // eslint-disable-next-line jsx-a11y/no-autofocus
+        autoFocus
+        aria-hidden="true"
+        tabIndex={-1}
+        style={{ position: 'absolute', left: '-9999px' }}
+      />
     </>
   )
 }
