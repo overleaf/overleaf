@@ -37,14 +37,6 @@
   border-style: solid;
 }
 
-.table-hover {
-  th {
-    &:hover {
-      background-color: $table-hover-bg;
-    }
-  }
-}
-
 .table-striped {
   tr,
   td,
