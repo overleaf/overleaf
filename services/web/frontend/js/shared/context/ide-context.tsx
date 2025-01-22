@@ -29,6 +29,7 @@ export const IdeProvider: FC<{
    *   - `editor.open_doc_id`,
    *   - `settings.theme`
    *   - `settings.keybindings`
+   *   - `settings.fontSize`
    */
   useEffect(() => {
     window.overleaf = {

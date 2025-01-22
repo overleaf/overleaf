@@ -37,6 +37,7 @@ type UserSettingsContextValue = {
 type ScopeSettings = {
   overallTheme: 'light' | 'dark'
   keybindings: Keybindings
+  fontSize: number
 }
 
 export const UserSettingsContext = createContext<
@@ -54,6 +55,7 @@ export const UserSettingsProvider: FC = ({ children }) => {
     setScopeSettings({
       overallTheme: userSettings.overallTheme === 'light-' ? 'light' : 'dark',
       keybindings: userSettings.mode === 'none' ? 'default' : userSettings.mode,
+      fontSize: userSettings.fontSize,
     })
   }, [setScopeSettings, userSettings])
 
