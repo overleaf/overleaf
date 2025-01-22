@@ -1,10 +1,11 @@
 import 'recurly__recurly-js'
 import { ScopeValueStore } from './ide/scope-value-store'
+import { MetaAttributesCache } from '@/utils/meta'
 
 declare global {
   // eslint-disable-next-line no-unused-vars
   interface Window {
-    metaAttributesCache: Map<string, any>
+    metaAttributesCache: MetaAttributesCache
     _ide: Record<string, unknown> & {
       $scope: Record<string, unknown> & {
         pdf?: {

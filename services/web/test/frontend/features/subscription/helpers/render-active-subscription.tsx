@@ -2,30 +2,31 @@ import { ActiveSubscription } from '../../../../../frontend/js/features/subscrip
 import { RecurlySubscription } from '../../../../../types/subscription/dashboard/subscription'
 import { groupPlans, plans } from '../fixtures/plans'
 import { renderWithSubscriptionDashContext } from './render-with-subscription-dash-context'
+import { MetaTag } from '@/utils/meta'
+import { CurrencyCode } from '../../../../../types/subscription/currency'
 
 export function renderActiveSubscription(
   subscription: RecurlySubscription,
-  tags: { name: string; value: string | object | Array<object> }[] = [],
-  currencyCode?: string
+  tags: MetaTag[] = [],
+  currencyCode?: CurrencyCode
 ) {
-  const renderOptions = {
-    currencyCode,
-    metaTags: [
-      ...tags,
-      { name: 'ol-plans', value: plans },
-      {
-        name: 'ol-groupPlans',
-        value: groupPlans,
-      },
-      { name: 'ol-subscription', value: subscription },
-      {
-        name: 'ol-recommendedCurrency',
-        value: currencyCode || 'USD',
-      },
-    ],
-  }
   renderWithSubscriptionDashContext(
     <ActiveSubscription subscription={subscription} />,
-    renderOptions
+    {
+      currencyCode,
+      metaTags: [
+        ...tags,
+        { name: 'ol-plans', value: plans },
+        {
+          name: 'ol-groupPlans',
+          value: groupPlans,
+        },
+        { name: 'ol-subscription', value: subscription },
+        {
+          name: 'ol-recommendedCurrency',
+          value: currencyCode || 'USD',
+        },
+      ],
+    }
   )
 }

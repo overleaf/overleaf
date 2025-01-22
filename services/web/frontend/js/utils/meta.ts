@@ -72,6 +72,7 @@ export interface Meta {
   'ol-cannot-reactivate-subscription': boolean
   'ol-cannot-use-ai': boolean
   'ol-chatEnabled': boolean
+  'ol-compilesUserContentDomain': string
   'ol-countryCode': PricingFormState['country']
   'ol-couponCode': PricingFormState['coupon']
   'ol-createdAt': Date
@@ -163,9 +164,11 @@ export interface Meta {
   'ol-postCheckoutRedirect': string
   'ol-postUrl': string
   'ol-prefetchedProjectsBlob': GetProjectsResponseBody | undefined
+  'ol-preventCompileOnLoad'?: boolean
   'ol-primaryEmail': { email: string; confirmed: boolean }
   'ol-project': any // TODO
   'ol-projectHistoryBlobsEnabled': boolean
+  'ol-projectName': string
   'ol-projectSyncSuccessMessage': string
   'ol-projectTags': Tag[]
   'ol-project_id': string
@@ -231,6 +234,22 @@ export interface Meta {
   'ol-writefullJsUrl': string
   'ol-wsUrl': string
 }
+
+type DeepPartial<T> =
+  T extends Record<string, any> ? { [P in keyof T]?: DeepPartial<T[P]> } : T
+
+export type PartialMeta = DeepPartial<Meta>
+
+export type MetaAttributesCache<
+  K extends keyof PartialMeta = keyof PartialMeta,
+> = Map<K, PartialMeta[K]>
+
+export type MetaTag = {
+  [K in keyof Meta]: {
+    name: K
+    value: Meta[K]
+  }
+}[keyof Meta]
 
 // cache for parsed values
 window.metaAttributesCache = window.metaAttributesCache || new Map()

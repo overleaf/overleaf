@@ -3,22 +3,22 @@ import { screen, within } from '@testing-library/react'
 import SuccessfulSubscription from '../../../../../../frontend/js/features/subscription/components/successful-subscription/successful-subscription'
 import { renderWithSubscriptionDashContext } from '../../helpers/render-with-subscription-dash-context'
 import { annualActiveSubscription } from '../../fixtures/subscriptions'
+import { ExposedSettings } from '../../../../../../types/exposed-settings'
 
 describe('successful subscription page', function () {
   it('renders the invoices link', function () {
     const adminEmail = 'foo@example.com'
-    const options = {
+    renderWithSubscriptionDashContext(<SuccessfulSubscription />, {
       metaTags: [
         {
           name: 'ol-ExposedSettings',
           value: {
             adminEmail,
-          },
+          } as ExposedSettings,
         },
         { name: 'ol-subscription', value: annualActiveSubscription },
       ],
-    }
-    renderWithSubscriptionDashContext(<SuccessfulSubscription />, options)
+    })
 
     screen.getByRole('heading', { name: /thanks for subscribing/i })
     const alert = screen.getByRole('alert')

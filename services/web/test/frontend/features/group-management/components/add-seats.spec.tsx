@@ -11,10 +11,6 @@ describe('<AddSeats />', function () {
     cy.window().then(win => {
       win.metaAttributesCache.set('ol-groupName', 'My Awesome Team')
       win.metaAttributesCache.set('ol-subscriptionId', '123')
-      win.metaAttributesCache.set(
-        'ol-subscriptionEndsAt',
-        '2025-01-01T12:00:00.000Z'
-      )
       win.metaAttributesCache.set('ol-totalLicenses', this.totalLicenses)
       win.metaAttributesCache.set('ol-isProfessional', false)
     })

@@ -22,6 +22,7 @@ import {
   subscriptionUpdateUrl,
 } from '../../../../../../../../frontend/js/features/subscription/data/subscription-url'
 import * as useLocationModule from '../../../../../../../../frontend/js/shared/hooks/use-location'
+import { MetaTag } from '@/utils/meta'
 
 describe('<ActiveSubscription />', function () {
   let sendMBSpy: sinon.SinonSpy
@@ -318,9 +319,9 @@ describe('<ActiveSubscription />', function () {
     })
 
     describe('extend trial', function () {
-      const canExtend = {
+      const canExtend: MetaTag = {
         name: 'ol-userCanExtendTrial',
-        value: 'true',
+        value: true,
       }
       const cancelButtonText = 'No thanks, I still want to cancel'
       const extendTrialButtonText = 'I’ll take it!'

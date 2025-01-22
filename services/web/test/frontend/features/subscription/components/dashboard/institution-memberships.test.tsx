@@ -5,8 +5,9 @@ import {
   cleanUpContext,
   renderWithSubscriptionDashContext,
 } from '../../helpers/render-with-subscription-dash-context'
+import { Institution } from '../../../../../../types/institution'
 
-const memberships = [
+const memberships: Institution[] = [
   {
     id: 9258,
     name: 'Test University',
@@ -16,6 +17,7 @@ const memberships = [
     ssoBeta: false,
     ssoEnabled: false,
     maxConfirmationMonths: 6,
+    writefullCommonsAccount: false,
   },
   {
     id: 9259,
@@ -26,6 +28,7 @@ const memberships = [
     ssoBeta: false,
     ssoEnabled: true,
     maxConfirmationMonths: 12,
+    writefullCommonsAccount: false,
   },
 ]
 

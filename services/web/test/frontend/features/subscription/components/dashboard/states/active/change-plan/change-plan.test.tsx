@@ -23,8 +23,6 @@ import { renderActiveSubscription } from '../../../../../helpers/render-active-s
 import * as useLocationModule from '../../../../../../../../../frontend/js/shared/hooks/use-location'
 
 describe('<ChangePlanModal />', function () {
-  const plansMetaTag = { name: 'ol-plans', value: plans }
-
   let reloadStub: sinon.SinonStub
 
   beforeEach(function () {
@@ -83,7 +81,7 @@ describe('<ChangePlanModal />', function () {
       {
         metaTags: [
           { name: 'ol-subscription', value: annualActiveSubscription },
-          plansMetaTag,
+          { name: 'ol-plans', value: plans },
         ],
       }
     )
