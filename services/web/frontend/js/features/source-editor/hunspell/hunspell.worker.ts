@@ -33,7 +33,7 @@ const createSpellChecker = async ({
   const {
     cwrap,
     FS,
-    WORKERFS,
+    MEMFS,
     stringToNewUTF8,
     _malloc,
     _free,
@@ -66,23 +66,16 @@ const createSpellChecker = async ({
 
   const [dic, aff] = await Promise.all([
     fetch(new URL(`./${lang}.dic`, dictionariesRootURL)).then(response =>
-      response.blob()
+      response.arrayBuffer()
     ),
     fetch(new URL(`./${lang}.aff`, dictionariesRootURL)).then(response =>
-      response.blob()
+      response.arrayBuffer()
     ),
   ])
 
-  FS.mount(
-    WORKERFS,
-    {
-      blobs: [
-        { name: 'index.dic', data: dic },
-        { name: 'index.aff', data: aff },
-      ],
-    },
-    '/dictionaries'
-  )
+  FS.mount(MEMFS, {}, '/dictionaries')
+  FS.writeFile('/dictionaries/index.dic', new Uint8Array(dic))
+  FS.writeFile('/dictionaries/index.aff', new Uint8Array(aff))
 
   const dicPtr = stringToNewUTF8('/dictionaries/index.dic')
   const affPtr = stringToNewUTF8('/dictionaries/index.aff')

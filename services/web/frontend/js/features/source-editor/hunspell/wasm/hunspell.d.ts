@@ -50,14 +50,15 @@ declare class Hunspell {
   getValue(ptr: number, type: string): number
   FS: {
     mkdir(path: string): void
-    mount(
-      type: any,
-      data: { blobs: Record<{ name: string; data: BlobPart }>[] },
-      dir: string
-    ): void
+    mount(type: any, opts: Record<string, any>, dir: string): void
+    writeFile(
+      path: string,
+      data: string | ArrayBufferView,
+      opts?: { flags?: string }
+    )
   }
 
-  WORKERFS: any
+  MEMFS: any
 }
 
 declare const factory = async (options?: Record<string, any>) =>
