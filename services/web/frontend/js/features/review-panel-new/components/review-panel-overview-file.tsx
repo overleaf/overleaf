@@ -16,9 +16,9 @@ import {
 } from '../../../../../types/change'
 import { canAggregate } from '../utils/can-aggregate'
 
-import MaterialIcon from '@/shared/components/material-icon'
 import useOverviewFileCollapsed from '../hooks/use-overview-file-collapsed'
 import { useThreadsContext } from '../context/threads-context'
+import { CollapsibleFileHeader } from '@/shared/components/collapsible-file-header'
 
 export const ReviewPanelOverviewFile: FC<{
   doc: MainDocument
@@ -64,19 +64,12 @@ export const ReviewPanelOverviewFile: FC<{
   return (
     <>
       <div>
-        <button
-          type="button"
-          className="review-panel-overview-file-header"
-          onClick={toggleCollapsed}
-        >
-          <MaterialIcon
-            type={collapsed ? 'keyboard_arrow_right' : 'keyboard_arrow_down'}
-          />
-          {doc.doc.name}
-          <div className="review-panel-overview-file-entry-count">
-            {entries.length}
-          </div>
-        </button>
+        <CollapsibleFileHeader
+          name={doc.doc.name}
+          count={entries.length}
+          collapsed={collapsed}
+          toggleCollapsed={toggleCollapsed}
+        />
 
         {!collapsed && (
           <div className="review-panel-overview-file-entries">

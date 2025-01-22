@@ -1,0 +1,18 @@
+.collapsible-file-header {
+  all: unset;
+  padding: var(--spacing-03) var(--spacing-04);
+  font-size: var(--font-size-02);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-04);
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.collapsible-file-header-count {
+  background-color: var(--neutral-20);
+  padding: var(--spacing-01) var(--spacing-02);
+  margin-left: auto;
+  border-radius: var(--border-radius-base);
+}

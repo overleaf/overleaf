@@ -1,0 +1,31 @@
+.panel-heading {
+  display: flex;
+  align-items: center;
+  padding: var(--spacing-03) var(--spacing-02);
+  gap: 2px;
+}
+
+.panel-heading-label {
+  font-size: var(--font-size-02);
+  font-weight: bold;
+  margin: 0;
+  flex: 1;
+  text-align: start;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-02);
+}
+
+.panel-heading-close-button {
+  display: flex;
+  align-items: center;
+  border: none;
+  background-color: transparent;
+  color: var(--content-primary);
+  padding: var(--spacing-01);
+
+  &:hover,
+  &:focus {
+    background-color: var(--neutral-20);
+  }
+}

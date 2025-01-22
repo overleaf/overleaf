@@ -253,39 +253,6 @@
     }
   }
 
-  .review-panel-heading {
-    display: flex;
-    align-items: center;
-    padding: var(--spacing-03) var(--spacing-02);
-    gap: 2px;
-
-    .review-panel-label {
-      font-size: var(--font-size-02);
-      font-weight: bold;
-      margin: 0;
-      flex: 1;
-      text-align: start;
-    }
-
-    .review-panel-split-test-badge {
-      margin-left: var(--spacing-02);
-    }
-
-    .review-panel-close-button {
-      display: flex;
-      align-items: center;
-      border: none;
-      background-color: transparent;
-      color: var(--content-primary);
-      padding: var(--spacing-01);
-
-      &:hover,
-      &:focus {
-        background-color: var(--neutral-20);
-      }
-    }
-  }
-
   &.review-panel-resolved-comments {
     --bs-popover-border-width: 1px;
     --bs-popover-bg: var(--bg-light-secondary);
@@ -505,18 +472,6 @@
     }
   }
 
-  .review-panel-overview-file-header {
-    all: unset;
-    padding: var(--spacing-03) var(--spacing-04);
-    font-size: var(--font-size-02);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-04);
-    box-sizing: border-box;
-    width: 100%;
-  }
-
   .review-panel-overfile-divider {
     border-bottom: 1px solid var(--border-divider);
     margin: var(--spacing-01) 0;
@@ -529,13 +484,6 @@
     overflow: hidden;
     padding-top: var(--spacing-02);
     padding-bottom: var(--spacing-03);
-  }
-
-  .review-panel-overview-file-entry-count {
-    background-color: var(--neutral-20);
-    padding: var(--spacing-01) var(--spacing-02);
-    margin-left: auto;
-    border-radius: var(--border-radius-base);
   }
 
   .review-panel-footer {
