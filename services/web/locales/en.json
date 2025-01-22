@@ -1352,6 +1352,7 @@
   "no_symbols_found": "No symbols found",
   "no_thanks_cancel_now": "No thanks, I still want to cancel",
   "no_update_email": "No, update email",
+  "non_deletable_entity": "The specified entity may not be deleted",
   "normal": "Normal",
   "normally_x_price_per_month": "Normally __price__ per month",
   "normally_x_price_per_year": "Normally __price__ per year",

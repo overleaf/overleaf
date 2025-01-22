@@ -1,4 +1,4 @@
-import { expect } from 'chai'
+import chai, { expect } from 'chai'
 import mongodb from 'mongodb-legacy'
 import Path from 'node:path'
 import fs from 'node:fs'
@@ -7,13 +7,13 @@ import ProjectGetter from '../../../app/src/Features/Project/ProjectGetter.js'
 import UserHelper from './helpers/User.mjs'
 import MockDocStoreApiClass from './mocks/MockDocstoreApi.mjs'
 import MockDocUpdaterApiClass from './mocks/MockDocUpdaterApi.mjs'
-import { fileURLToPath } from 'node:url'
+import chaiAsPromised from 'chai-as-promised'
+
+chai.use(chaiAsPromised)
 
 const User = UserHelper.promises
 
 const ObjectId = mongodb.ObjectId
-
-const __dirname = fileURLToPath(new URL('.', import.meta.url))
 
 let MockDocStoreApi, MockDocUpdaterApi
 
@@ -76,7 +76,7 @@ describe('ProjectStructureChanges', function () {
 
   async function uploadExampleProject(owner, zipFilename, options = {}) {
     const zipFile = fs.createReadStream(
-      Path.resolve(Path.join(__dirname, '..', 'files', zipFilename))
+      Path.resolve(Path.join(import.meta.dirname, '..', 'files', zipFilename))
     )
 
     const { response, body } = await owner.doRequest('POST', {
@@ -206,6 +206,47 @@ describe('ProjectStructureChanges', function () {
       const project = await ProjectGetter.promises.getProject(exampleProjectId)
       expect(project.rootFolder[0].folders[0].name).to.equal('styles')
       expect(project.rootFolder[0].folders[0].docs[0].name).to.equal('ao.sty')
+    })
+  })
+
+  describe('deleting folders', function () {
+    beforeEach(async function () {
+      const { projectId } = await createExampleProject(owner)
+      this.exampleProjectId = projectId
+    })
+    describe('when the folder is the rootFolder', function () {
+      beforeEach(async function () {
+        const project = await ProjectGetter.promises.getProject(
+          this.exampleProjectId
+        )
+        this.rootFolderId = project.rootFolder[0]._id
+      })
+
+      it('should fail with a 422 error', async function () {
+        await expect(
+          deleteItem(owner, this.exampleProjectId, 'folder', this.rootFolderId)
+        )
+          .to.be.rejected.and.eventually.match(/status=422/)
+          .and.eventually.match(/body="cannot delete root folder"/)
+      })
+    })
+
+    describe('when the folder is not the rootFolder', function () {
+      beforeEach(async function () {
+        const folderId = await createExampleFolder(owner, this.exampleProjectId)
+        this.exampleFolderId = folderId
+      })
+
+      it('should succeed', async function () {
+        await expect(
+          deleteItem(
+            owner,
+            this.exampleProjectId,
+            'folder',
+            this.exampleFolderId
+          )
+        ).to.be.fulfilled
+      })
     })
   })
 

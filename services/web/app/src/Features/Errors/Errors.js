@@ -268,6 +268,12 @@ class InvalidInstitutionalEmailError extends OError {
   }
 }
 
+class NonDeletableEntityError extends OError {
+  get i18nKey() {
+    return 'non_deletable_entity'
+  }
+}
+
 module.exports = {
   OError,
   BackwardCompatibleError,
@@ -318,4 +324,5 @@ module.exports = {
   AffiliationError,
   InvalidEmailError,
   InvalidInstitutionalEmailError,
+  NonDeletableEntityError,
 }

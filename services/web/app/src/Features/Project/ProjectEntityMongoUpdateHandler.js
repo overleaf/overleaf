@@ -375,11 +375,20 @@ async function moveEntity(projectId, entityId, destFolderId, entityType) {
   return { project, startPath, endPath, rev: entity.rev, changes }
 }
 
-async function deleteEntity(projectId, entityId, entityType, callback) {
+async function deleteEntity(projectId, entityId, entityType) {
   const project = await ProjectGetter.promises.getProjectWithoutLock(
     projectId,
     { name: true, rootFolder: true, overleaf: true, rootDoc_id: true }
   )
+  if (
+    entityType === 'folder' &&
+    project.rootFolder.some(
+      rootFolder => rootFolder._id.toString() === entityId.toString()
+    )
+  ) {
+    throw new Errors.NonDeletableEntityError('cannot delete root folder')
+  }
+
   const deleteRootDoc =
     project.rootDoc_id &&
     entityId &&
