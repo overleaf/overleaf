@@ -105,6 +105,8 @@ describe('SubscriptionHandler', function () {
         getSubscription: sinon
           .stub()
           .resolves(this.activeRecurlyClientSubscription),
+        pauseSubscriptionByUuid: sinon.stub().resolves(),
+        resumeSubscriptionByUuid: sinon.stub().resolves(),
       },
     }
 
@@ -437,6 +439,152 @@ describe('SubscriptionHandler', function () {
           'canceledSubscription',
           { to: this.user.email, first_name: this.user.first_name },
           ONE_HOUR_IN_MS
+        )
+      })
+    })
+  })
+
+  describe('resumeSubscription', function () {
+    describe('for a user without a subscription', function () {
+      beforeEach(async function () {
+        this.LimitationsManager.promises.userHasSubscription.resolves({
+          hasSubscription: false,
+          subscription: this.subscription,
+        })
+      })
+      it('should not make a resume call to recurly', async function () {
+        expect(
+          this.SubscriptionHandler.promises.resumeSubscription(this.user)
+        ).to.be.rejectedWith('No active subscription to resume')
+        this.RecurlyClient.promises.resumeSubscriptionByUuid.called.should.equal(
+          false
+        )
+      })
+    })
+
+    describe('for a user with a subscription', function () {
+      beforeEach(async function () {
+        this.LimitationsManager.promises.userHasSubscription.resolves({
+          hasSubscription: true,
+          subscription: {
+            recurlySubscription_id: this.activeRecurlySubscription.uuid,
+            recurlyStatus: { state: 'non-trial' },
+            planCode: 'collaborator',
+          },
+        })
+      })
+      it('should make a resume call to recurly', async function () {
+        await this.SubscriptionHandler.promises.resumeSubscription(this.user)
+
+        this.RecurlyClient.promises.resumeSubscriptionByUuid.called.should.equal(
+          true
+        )
+      })
+    })
+  })
+
+  describe('pauseSubscription', function () {
+    describe('for a user without a subscription', function () {
+      beforeEach(async function () {
+        this.LimitationsManager.promises.userHasSubscription.resolves({
+          hasSubscription: false,
+          subscription: this.subscription,
+        })
+      })
+      it('should not make a pause call to recurly', async function () {
+        expect(
+          this.SubscriptionHandler.promises.pauseSubscription(this.user, 3)
+        ).to.be.rejectedWith('No active subscription to pause')
+        this.RecurlyClient.promises.pauseSubscriptionByUuid.called.should.equal(
+          false
+        )
+      })
+    })
+
+    describe('for a user with an annual subscription', function () {
+      beforeEach(async function () {
+        this.LimitationsManager.promises.userHasSubscription.resolves({
+          hasSubscription: false,
+          subscription: {
+            recurlySubscription_id: this.activeRecurlySubscription.uuid,
+            recurlyStatus: { state: 'non-trial' },
+            planCode: 'collaborator-annual',
+          },
+        })
+      })
+      it('should not make a pause call to recurly', async function () {
+        expect(
+          this.SubscriptionHandler.promises.pauseSubscription(this.user, 3)
+        ).to.be.rejectedWith('Can only pause monthly individual plans')
+        this.RecurlyClient.promises.pauseSubscriptionByUuid.called.should.equal(
+          false
+        )
+      })
+    })
+
+    describe('for a user with a subscription', function () {
+      beforeEach(async function () {
+        this.LimitationsManager.promises.userHasSubscription.resolves({
+          hasSubscription: true,
+          subscription: {
+            recurlySubscription_id: this.activeRecurlySubscription.uuid,
+            recurlyStatus: { state: 'non-trial' },
+            planCode: 'collaborator',
+            addOns: [],
+          },
+        })
+      })
+      it('should make a pause call to recurly', async function () {
+        await this.SubscriptionHandler.promises.pauseSubscription(this.user, 3)
+
+        this.RecurlyClient.promises.pauseSubscriptionByUuid.called.should.equal(
+          true
+        )
+      })
+    })
+
+    describe('for a user in a trial', function () {
+      beforeEach(async function () {
+        this.LimitationsManager.promises.userHasSubscription.resolves({
+          hasSubscription: true,
+          subscription: {
+            recurlySubscription_id: this.activeRecurlySubscription.uuid,
+            recurlyStatus: {
+              state: 'trial',
+              trialEndsAt: Date.now() + 1000000,
+            },
+            planCode: 'collaborator',
+          },
+        })
+      })
+      it('should not make a pause call to recurly', async function () {
+        expect(
+          this.SubscriptionHandler.promises.pauseSubscription(this.user, 3)
+        ).to.be.rejectedWith('Cannot pause a subscription in a trial')
+        this.RecurlyClient.promises.pauseSubscriptionByUuid.called.should.equal(
+          false
+        )
+      })
+    })
+
+    describe('for a user with addons', function () {
+      beforeEach(async function () {
+        this.LimitationsManager.promises.userHasSubscription.resolves({
+          hasSubscription: true,
+          subscription: {
+            recurlySubscription_id: this.activeRecurlySubscription.uuid,
+            recurlyStatus: { state: 'non-trial' },
+            planCode: 'collaborator',
+            addOns: ['mock-addon'],
+          },
+        })
+      })
+      it('should not make a pause call to recurly', async function () {
+        expect(
+          this.SubscriptionHandler.promises.pauseSubscription(this.user, 3)
+        ).to.be.rejectedWith('Cannot pause a subscription with addons')
+        this.RecurlyClient.promises.pauseSubscriptionByUuid.called.should.equal(
+          false
         )
       })
     })

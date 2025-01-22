@@ -15,6 +15,8 @@ describe('<CurrentPlanWidget />', function () {
     /click to find out how you could benefit from overleaf premium features/i
   const paidPlanTooltipMessage =
     /click to find out how to make the most of your overleaf premium features/i
+  const pausedTooltipMessage =
+    /click to unpause and reactivate your overleaf premium features/i
 
   let sendMBSpy: sinon.SinonSpy
 
@@ -23,6 +25,30 @@ describe('<CurrentPlanWidget />', function () {
   })
   afterEach(function () {
     sendMBSpy.restore()
+  })
+
+  describe('paused', function () {
+    beforeEach(function () {
+      window.metaAttributesCache.set('ol-usersBestSubscription', {
+        type: 'individual',
+        subscription: {
+          recurlyStatus: {
+            state: 'paused',
+          },
+        },
+      })
+
+      render(<CurrentPlanWidget />)
+    })
+
+    it('shows text and tooltip on mouseover', function () {
+      const link = screen.getByRole('link', {
+        name: /plan is paused/i,
+      })
+      fireEvent.mouseOver(link)
+
+      screen.getByRole('tooltip', { name: pausedTooltipMessage })
+    })
   })
 
   describe('free plan', function () {

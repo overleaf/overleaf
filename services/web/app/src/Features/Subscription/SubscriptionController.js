@@ -51,6 +51,8 @@ async function userSubscriptionPage(req, res) {
 
   await SplitTestHandler.promises.getAssignment(req, res, 'ai-add-on')
 
+  await SplitTestHandler.promises.getAssignment(req, res, 'pause-subscription')
+
   // Populates splitTestVariants with a value for the split test name and allows
   // Pug to read it
   await SplitTestHandler.promises.getAssignment(
@@ -170,6 +172,56 @@ async function successfulSubscription(req, res) {
       postCheckoutRedirect,
       user,
     })
+  }
+}
+
+async function pauseSubscription(req, res, next) {
+  const user = SessionManager.getSessionUser(req.session)
+  const pauseCycles = req.params.pauseCycles
+  if (!('pauseCycles' in req.params)) {
+    return HttpErrorHandler.badRequest(
+      req,
+      res,
+      `Pausing subscription requires a 'pauseCycles' argument with number of billing cycles to pause for`
+    )
+  }
+  if (pauseCycles < 0) {
+    return HttpErrorHandler.badRequest(
+      req,
+      res,
+      `'pauseCycles' should be a number of billing cycles to pause for, or 0 to cancel a pending pause`
+    )
+  }
+  logger.debug(
+    { userId: user._id },
+    `pausing subscription for ${pauseCycles} billing cycles`
+  )
+  try {
+    await SubscriptionHandler.promises.pauseSubscription(user, pauseCycles)
+    return res.sendStatus(200)
+  } catch (err) {
+    if (err instanceof Error) {
+      OError.tag(err, 'something went wrong pausing subscription', {
+        user_id: user._id,
+      })
+    }
+    return next(err)
+  }
+}
+
+async function resumeSubscription(req, res, next) {
+  const user = SessionManager.getSessionUser(req.session)
+  logger.debug({ userId: user._id }, `resuming subscription`)
+  try {
+    await SubscriptionHandler.promises.resumeSubscription(user)
+    return res.sendStatus(200)
+  } catch (err) {
+    if (err instanceof Error) {
+      OError.tag(err, 'something went wrong resuming subscription', {
+        user_id: user._id,
+      })
+    }
+    return next(err)
   }
 }
 
@@ -458,6 +510,8 @@ function recurlyCallback(req, res, next) {
       'new_subscription_notification',
       'updated_subscription_notification',
       'expired_subscription_notification',
+      'subscription_paused_notification',
+      'subscription_resumed_notification',
     ].includes(event)
   ) {
     const recurlySubscription = eventData.subscription
@@ -667,6 +721,8 @@ module.exports = {
   userSubscriptionPage: expressify(userSubscriptionPage),
   successfulSubscription: expressify(successfulSubscription),
   cancelSubscription,
+  pauseSubscription,
+  resumeSubscription,
   canceledSubscription: expressify(canceledSubscription),
   cancelV1Subscription,
   previewSubscription: expressify(previewSubscription),

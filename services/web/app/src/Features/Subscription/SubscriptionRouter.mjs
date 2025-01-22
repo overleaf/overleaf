@@ -206,6 +206,23 @@ export default {
       SubscriptionController.cancelSubscription
     )
     webRouter.post(
+      '/user/subscription/pause/:pauseCycles',
+      AuthenticationController.requireLogin(),
+      validate({
+        params: Joi.object({
+          pauseCycles: Joi.number().integer().max(12),
+        }),
+      }),
+      RateLimiterMiddleware.rateLimit(subscriptionRateLimiter),
+      SubscriptionController.pauseSubscription
+    )
+    webRouter.post(
+      '/user/subscription/resume',
+      AuthenticationController.requireLogin(),
+      RateLimiterMiddleware.rateLimit(subscriptionRateLimiter),
+      SubscriptionController.resumeSubscription
+    )
+    webRouter.post(
       '/user/subscription/reactivate',
       AuthenticationController.requireLogin(),
       RateLimiterMiddleware.rateLimit(subscriptionRateLimiter),

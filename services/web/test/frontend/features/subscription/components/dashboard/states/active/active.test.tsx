@@ -199,6 +199,8 @@ describe('<ActiveSubscription />', function () {
         assign: assignStub,
         replace: sinon.stub(),
         reload: reloadStub,
+        setHash: sinon.stub(),
+        toString: sinon.stub(),
       })
     })
 

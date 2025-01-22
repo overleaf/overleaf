@@ -2,6 +2,7 @@ import { Trans, useTranslation } from 'react-i18next'
 import { RecurlySubscription } from '../../../../../../types/subscription/dashboard/subscription'
 import { ActiveSubscription } from './states/active/active'
 import { ActiveAiAddonSubscription } from './states/active/active-ai-addon'
+import { PausedSubscription } from './states/active/paused'
 import { CanceledSubscription } from './states/canceled'
 import { ExpiredSubscription } from './states/expired'
 import { useSubscriptionDashboardContext } from '../../context/subscription-dashboard-context'
@@ -57,6 +58,8 @@ function PersonalSubscriptionStates({
     return <CanceledSubscription subscription={subscription} />
   } else if (state === 'expired') {
     return <ExpiredSubscription subscription={subscription} />
+  } else if (state === 'paused') {
+    return <PausedSubscription subscription={subscription} />
   } else {
     return <>{t('problem_with_subscription_contact_us')}</>
   }

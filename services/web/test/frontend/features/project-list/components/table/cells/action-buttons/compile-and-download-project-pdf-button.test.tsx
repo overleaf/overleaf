@@ -19,6 +19,7 @@ describe('<CompileAndDownloadProjectPDFButton />', function () {
       assign: assignStub,
       replace: sinon.stub(),
       reload: sinon.stub(),
+      setHash: sinon.stub(),
     })
     render(
       <CompileAndDownloadProjectPDFButtonTooltip project={projectsData[0]} />

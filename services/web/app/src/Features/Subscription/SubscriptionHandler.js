@@ -381,6 +381,48 @@ async function getSubscriptionForUser(userId) {
   }
 }
 
+async function pauseSubscription(user, pauseCycles) {
+  // only allow pausing on monthly plans not in a trial
+  const { subscription } =
+    await LimitationsManager.promises.userHasSubscription(user)
+  if (!subscription || !subscription.recurlyStatus) {
+    throw new Error('No active subscription to pause')
+  }
+
+  if (
+    !subscription.planCode ||
+    subscription.planCode.includes('ann') ||
+    subscription.groupPlan
+  ) {
+    throw new Error('Can only pause monthly individual plans')
+  }
+  if (
+    subscription.recurlyStatus.trialEndsAt &&
+    subscription.recurlyStatus.trialEndsAt > new Date()
+  ) {
+    throw new Error('Cannot pause a subscription in a trial')
+  }
+  if (subscription.addOns?.length) {
+    throw new Error('Cannot pause a subscription with addons')
+  }
+
+  await RecurlyClient.promises.pauseSubscriptionByUuid(
+    subscription.recurlySubscription_id,
+    pauseCycles
+  )
+}
+
+async function resumeSubscription(user) {
+  const { subscription } =
+    await LimitationsManager.promises.userHasSubscription(user)
+  if (!subscription || !subscription.recurlyStatus) {
+    throw new Error('No active subscription to resume')
+  }
+  await RecurlyClient.promises.resumeSubscriptionByUuid(
+    subscription.recurlySubscription_id
+  )
+}
+
 module.exports = {
   validateNoSubscriptionInRecurly: callbackify(validateNoSubscriptionInRecurly),
   createSubscription: callbackify(createSubscription),
@@ -395,6 +437,8 @@ module.exports = {
   previewAddonPurchase: callbackify(previewAddonPurchase),
   purchaseAddon: callbackify(purchaseAddon),
   removeAddon: callbackify(removeAddon),
+  pauseSubscription: callbackify(pauseSubscription),
+  resumeSubscription: callbackify(resumeSubscription),
   promises: {
     validateNoSubscriptionInRecurly,
     createSubscription,
@@ -409,5 +453,7 @@ module.exports = {
     previewAddonPurchase,
     purchaseAddon,
     removeAddon,
+    pauseSubscription,
+    resumeSubscription,
   },
 }

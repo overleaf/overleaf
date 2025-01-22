@@ -81,6 +81,7 @@ describe('<GroupSubscriptionMemberships />', function () {
         assign: sinon.stub(),
         replace: sinon.stub(),
         reload: reloadStub,
+        setHash: sinon.stub(),
       })
 
       render(

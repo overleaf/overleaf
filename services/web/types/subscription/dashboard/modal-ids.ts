@@ -5,3 +5,5 @@ export type SubscriptionDashModalIds =
   | 'leave-group'
   | 'change-plan'
   | 'cancel-ai-add-on'
+  | 'pause-subscription'
+  | 'unpause-subscription'

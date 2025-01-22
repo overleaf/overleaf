@@ -383,6 +383,24 @@ describe('RecurlyClient', function () {
     })
   })
 
+  describe('pauseSubscriptionByUuid', function () {
+    it('should attempt to pause the subscription', async function () {
+      this.client.pauseSubscription = sinon
+        .stub()
+        .resolves(this.recurlySubscription)
+      const subscription =
+        await this.RecurlyClient.promises.pauseSubscriptionByUuid(
+          this.subscription.uuid,
+          3
+        )
+      expect(subscription).to.deep.equal(this.recurlySubscription)
+      expect(this.client.pauseSubscription).to.be.calledWith(
+        'uuid-' + this.subscription.uuid,
+        { remainingPauseCycles: 3 }
+      )
+    })
+  })
+
   describe('previewSubscriptionChange', function () {
     describe('compute immediate charge', function () {
       it('only has charge invoice', async function () {

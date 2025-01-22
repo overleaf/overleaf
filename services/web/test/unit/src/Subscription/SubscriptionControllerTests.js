@@ -53,6 +53,8 @@ describe('SubscriptionController', function () {
         updateSubscription: sinon.stub().resolves(),
         reactivateSubscription: sinon.stub().resolves(),
         cancelSubscription: sinon.stub().resolves(),
+        pauseSubscription: sinon.stub().resolves(),
+        resumeSubscription: sinon.stub().resolves(),
         syncSubscription: sinon.stub().resolves(),
         attemptPaypalInvoiceCollection: sinon.stub().resolves(),
         startFreeTrial: sinon.stub().resolves(),
@@ -160,6 +162,10 @@ describe('SubscriptionController', function () {
         '../Errors/HttpErrorHandler': (this.HttpErrorHandler = {
           unprocessableEntity: sinon.stub().callsFake((req, res, message) => {
             res.status(422)
+            res.json({ message })
+          }),
+          badRequest: sinon.stub().callsFake((req, res, message) => {
+            res.status(400)
             res.json({ message })
           }),
         }),
@@ -413,6 +419,60 @@ describe('SubscriptionController', function () {
         this.next.calledWith(sinon.match.instanceOf(Error)).should.equal(true)
         done()
       })
+    })
+  })
+
+  describe('pauseSubscription', function () {
+    it('should throw an error if no pause length is provided', async function () {
+      this.res = new MockResponse()
+      this.req = new MockRequest()
+      this.next = sinon.stub()
+      await this.SubscriptionController.pauseSubscription(
+        this.req,
+        this.res,
+        this.next
+      )
+      expect(this.res.statusCode).to.equal(400)
+    })
+
+    it('should throw an error if an invalid pause length is provided', async function () {
+      this.res = new MockResponse()
+      this.req = new MockRequest()
+      this.req.params = { pauseCycles: -10 }
+      this.next = sinon.stub()
+      await this.SubscriptionController.pauseSubscription(
+        this.req,
+        this.res,
+        this.next
+      )
+      expect(this.res.statusCode).to.equal(400)
+    })
+
+    it('should return a 200 when requesting a pause', async function () {
+      this.res = new MockResponse()
+      this.req = new MockRequest()
+      this.req.params = { pauseCycles: 3 }
+      this.next = sinon.stub()
+      await this.SubscriptionController.pauseSubscription(
+        this.req,
+        this.res,
+        this.next
+      )
+      expect(this.res.statusCode).to.equal(200)
+    })
+  })
+
+  describe('resumeSubscription', function () {
+    it('should return a 200 when resuming a subscription', async function () {
+      this.res = new MockResponse()
+      this.req = new MockRequest()
+      this.next = sinon.stub()
+      await this.SubscriptionController.resumeSubscription(
+        this.req,
+        this.res,
+        this.next
+      )
+      expect(this.res.statusCode).to.equal(200)
     })
   })
 

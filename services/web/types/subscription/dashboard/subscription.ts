@@ -3,7 +3,7 @@ import { Nullable } from '../../utils'
 import { Plan, AddOn } from '../plan'
 import { User } from '../../user'
 
-type SubscriptionState = 'active' | 'canceled' | 'expired'
+type SubscriptionState = 'active' | 'canceled' | 'expired' | 'paused'
 
 // when puchasing a new add-on in recurly, we only need to provide the code
 export type PurchasingAddOnCode = {
@@ -45,6 +45,8 @@ type Recurly = {
   currentPlanDisplayPrice?: string
   pendingAdditionalLicenses?: number
   pendingTotalLicenses?: number
+  pausedAt?: Nullable<string>
+  remainingPauseCycles?: Nullable<number>
 }
 
 export type GroupPolicy = {

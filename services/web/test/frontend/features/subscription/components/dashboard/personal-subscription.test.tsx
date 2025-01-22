@@ -56,6 +56,8 @@ describe('<PersonalSubscription />', function () {
         assign: sinon.stub(),
         replace: sinon.stub(),
         reload: reloadStub,
+        setHash: sinon.stub(),
+        toString: sinon.stub(),
       })
     })
 

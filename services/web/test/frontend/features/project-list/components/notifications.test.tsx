@@ -708,6 +708,7 @@ describe('<UserNotifications />', function () {
         assign: assignStub,
         replace: sinon.stub(),
         reload: sinon.stub(),
+        setHash: sinon.stub(),
       })
       fetchMock.reset()
     })

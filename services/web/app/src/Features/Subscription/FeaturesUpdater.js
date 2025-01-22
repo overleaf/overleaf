@@ -117,7 +117,7 @@ async function computeFeatures(userId) {
 async function _getIndividualFeatures(userId) {
   const subscription =
     await SubscriptionLocator.promises.getUsersSubscription(userId)
-  if (subscription == null) {
+  if (subscription == null || subscription?.recurlyStatus?.state === 'paused') {
     return {}
   }
 

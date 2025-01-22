@@ -62,6 +62,7 @@ describe('<LeaveModalForm />', function () {
         assign: assignStub,
         replace: sinon.stub(),
         reload: sinon.stub(),
+        setHash: sinon.stub(),
       })
       Object.assign(getMeta('ol-ExposedSettings'), { isOverleaf: true })
     })

@@ -30,6 +30,7 @@ import { debugConsole } from '@/utils/debugging'
 import { formatCurrency } from '@/shared/utils/currency'
 import { ManagedInstitution } from '../../../../../types/subscription/dashboard/managed-institution'
 import { Publisher } from '../../../../../types/subscription/dashboard/publisher'
+import { formatTime } from '@/features/utils/format-date'
 
 type SubscriptionDashboardContextValue = {
   groupPlanToChangeToCode: string
@@ -73,6 +74,7 @@ type SubscriptionDashboardContextValue = {
   leavingGroupId?: string
   setLeavingGroupId: React.Dispatch<React.SetStateAction<string | undefined>>
   userCanExtendTrial: boolean
+  getFormattedRenewalDate: () => string
 }
 
 export const SubscriptionDashboardContext = createContext<
@@ -138,6 +140,20 @@ export function SubscriptionDashboardProvider({
       institutionMemberships?.length > 0 ||
       memberGroupSubscriptions?.length > 0
   )
+
+  const getFormattedRenewalDate = useCallback(() => {
+    if (
+      !personalSubscription.recurly.pausedAt ||
+      !personalSubscription.recurly.remainingPauseCycles
+    ) {
+      return personalSubscription.recurly.nextPaymentDueAt
+    }
+    const pausedDate = new Date(personalSubscription.recurly.pausedAt)
+    pausedDate.setMonth(
+      pausedDate.getMonth() + personalSubscription.recurly.remainingPauseCycles
+    )
+    return formatTime(pausedDate, 'MMMM Do, YYYY')
+  }, [personalSubscription])
 
   useEffect(() => {
     if (!isRecurlyLoaded()) {
@@ -283,6 +299,7 @@ export function SubscriptionDashboardProvider({
       leavingGroupId,
       setLeavingGroupId,
       userCanExtendTrial,
+      getFormattedRenewalDate,
     }),
     [
       groupPlanToChangeToCode,
@@ -319,6 +336,7 @@ export function SubscriptionDashboardProvider({
       leavingGroupId,
       setLeavingGroupId,
       userCanExtendTrial,
+      getFormattedRenewalDate,
     ]
   )
 

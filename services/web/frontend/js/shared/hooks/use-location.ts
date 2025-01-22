@@ -29,5 +29,24 @@ export const useLocation = () => {
     }
   }, [isMounted])
 
-  return useMemo(() => ({ assign, replace, reload }), [assign, replace, reload])
+  const setHash = useCallback(
+    (hash: string) => {
+      if (isMounted.current) {
+        location.setHash(hash)
+      }
+    },
+    [isMounted]
+  )
+
+  const toString = useCallback(() => {
+    if (isMounted.current) {
+      return location.toString()
+    }
+    return ''
+  }, [isMounted])
+
+  return useMemo(
+    () => ({ assign, replace, reload, setHash, toString }),
+    [assign, replace, reload, setHash, toString]
+  )
 }

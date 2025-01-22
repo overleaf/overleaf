@@ -176,6 +176,16 @@ async function cancelSubscriptionByUuid(subscriptionUuid) {
   }
 }
 
+async function pauseSubscriptionByUuid(subscriptionUuid, pauseCycles) {
+  return await client.pauseSubscription('uuid-' + subscriptionUuid, {
+    remainingPauseCycles: pauseCycles,
+  })
+}
+
+async function resumeSubscriptionByUuid(subscriptionUuid) {
+  return await client.resumeSubscription('uuid-' + subscriptionUuid)
+}
+
 /**
  * Get the payment method for the given user
  *
@@ -459,6 +469,8 @@ module.exports = {
   getAddOn: callbackify(getAddOn),
   getPlan: callbackify(getPlan),
   subscriptionIsCanceledOrExpired,
+  pauseSubscriptionByUuid: callbackify(pauseSubscriptionByUuid),
+  resumeSubscriptionByUuid: callbackify(resumeSubscriptionByUuid),
 
   promises: {
     getSubscription,
@@ -471,6 +483,8 @@ module.exports = {
     removeSubscriptionChangeByUuid,
     reactivateSubscriptionByUuid,
     cancelSubscriptionByUuid,
+    pauseSubscriptionByUuid,
+    resumeSubscriptionByUuid,
     getPaymentMethod,
     getAddOn,
     getPlan,

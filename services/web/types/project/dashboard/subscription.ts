@@ -8,6 +8,10 @@ export type FreePlanSubscription = {
 
 type FreeSubscription = FreePlanSubscription
 
+type RecurlyStatus = {
+  state: 'active' | 'canceled' | 'expired' | 'paused'
+}
+
 type PaidSubscriptionBase = {
   plan: {
     name: string
@@ -15,6 +19,7 @@ type PaidSubscriptionBase = {
   subscription: {
     teamName?: string
     name: string
+    recurlyStatus?: RecurlyStatus
   }
 } & SubscriptionBase
 

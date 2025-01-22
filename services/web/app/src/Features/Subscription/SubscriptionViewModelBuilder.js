@@ -279,6 +279,8 @@ async function buildUsersSubscriptionViewModel(user, locale = 'en') {
       trial_ends_at: recurlySubscription.trial_ends_at,
       activeCoupons: recurlyCoupons,
       account: recurlySubscription.account,
+      pausedAt: recurlySubscription.paused_at,
+      remainingPauseCycles: recurlySubscription.remaining_pause_cycles,
     }
     if (recurlySubscription.pending_subscription) {
       const pendingPlan = PlansLocator.findLocalPlanInSettings(
