@@ -268,6 +268,9 @@ const searchFormTheme = EditorView.theme({
     '--ol-cm-search-form-error-shadow':
       'inset 0 1px 1px rgb(0 0 0 / 8%), 0 0 8px var(--red-50)',
     containerType: 'inline-size',
+    '& .form-control-sm, & .btn-sm': {
+      padding: 'var(--spacing-03) var(--spacing-05)',
+    },
   },
   '&.bootstrap-5 .ol-cm-search-form': {
     '--ol-cm-search-form-gap': 'var(--spacing-05)',
