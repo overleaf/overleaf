@@ -25,6 +25,10 @@
           border-bottom-width: 0;
         }
       }
+
+      th[scope='row'] {
+        font-weight: normal;
+      }
     }
   }
 }
