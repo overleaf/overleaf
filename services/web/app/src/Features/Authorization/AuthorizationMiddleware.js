@@ -103,28 +103,31 @@ async function ensureUserCanWriteProjectSettings(req, res, next) {
   next()
 }
 
-async function ensureUserCanResolveThread(req, res, next) {
+async function ensureUserCanDeleteOrResolveThread(req, res, next) {
   const projectId = _getProjectId(req)
   const docId = _getDocId(req)
   const threadId = _getThreadId(req)
   const userId = _getUserId(req)
   const token = TokenAccessHandler.getRequestToken(req, projectId)
-  const canResolveThread =
-    await AuthorizationManager.promises.canUserResolveThread(
+  const canDeleteThread =
+    await AuthorizationManager.promises.canUserDeleteOrResolveThread(
       userId,
       projectId,
       docId,
       threadId,
       token
     )
-  if (canResolveThread) {
-    logger.debug({ userId, projectId }, 'allowing user resolve comment thread')
+  if (canDeleteThread) {
+    logger.debug(
+      { userId, projectId },
+      'allowing user to delete or resolve a comment thread'
+    )
     return next()
   }
 
   logger.debug(
     { userId, projectId, threadId },
-    'denying user to resolve comment thread'
+    'denying user to delete or resolve a comment thread'
   )
   return HttpErrorHandler.forbidden(req, res)
 }
@@ -267,7 +270,9 @@ module.exports = {
   ensureUserCanWriteProjectSettings: expressify(
     ensureUserCanWriteProjectSettings
   ),
-  ensureUserCanResolveThread: expressify(ensureUserCanResolveThread),
+  ensureUserCanDeleteOrResolveThread: expressify(
+    ensureUserCanDeleteOrResolveThread
+  ),
   ensureUserCanSendComment: expressify(ensureUserCanSendComment),
   ensureUserCanWriteProjectContent: expressify(
     ensureUserCanWriteProjectContent

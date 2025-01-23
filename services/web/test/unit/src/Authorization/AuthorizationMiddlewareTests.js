@@ -25,7 +25,7 @@ describe('AuthorizationMiddleware', function () {
         canUserReadProject: sinon.stub(),
         canUserWriteProjectSettings: sinon.stub(),
         canUserWriteProjectContent: sinon.stub(),
-        canUserResolveThread: sinon.stub(),
+        canUserDeleteOrResolveThread: sinon.stub(),
         canUserSendComment: sinon.stub(),
         canUserAdminProject: sinon.stub(),
         canUserRenameProject: sinon.stub(),
@@ -91,14 +91,14 @@ describe('AuthorizationMiddleware', function () {
     testMiddleware('ensureUserCanSendComment', 'canUserSendComment')
   })
 
-  describe('ensureUserCanResolveThread', function () {
+  describe('ensureUserCanDeleteOrResolveThread', function () {
     beforeEach(function () {
       this.req.params.doc_id = this.doc_id
       this.req.params.thread_id = this.thread_id
     })
     describe('when user has permission', function () {
       beforeEach(function () {
-        this.AuthorizationManager.promises.canUserResolveThread
+        this.AuthorizationManager.promises.canUserDeleteOrResolveThread
           .withArgs(
             this.userId,
             this.project_id,
@@ -109,13 +109,13 @@ describe('AuthorizationMiddleware', function () {
           .resolves(true)
       })
 
-      invokeMiddleware('ensureUserCanResolveThread')
+      invokeMiddleware('ensureUserCanDeleteOrResolveThread')
       expectNext()
     })
 
     describe("when user doesn't have permission", function () {
       beforeEach(function () {
-        this.AuthorizationManager.promises.canUserResolveThread
+        this.AuthorizationManager.promises.canUserDeleteOrResolveThread
           .withArgs(
             this.userId,
             this.project_id,
@@ -126,7 +126,7 @@ describe('AuthorizationMiddleware', function () {
           .resolves(false)
       })
 
-      invokeMiddleware('ensureUserCanResolveThread')
+      invokeMiddleware('ensureUserCanDeleteOrResolveThread')
       expectForbidden()
     })
   })

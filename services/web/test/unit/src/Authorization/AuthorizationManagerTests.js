@@ -536,14 +536,14 @@ describe('AuthorizationManager', function () {
     })
   })
 
-  describe('canUserReviewThread', function () {
+  describe('canUserDeleteOrResolveThread', function () {
     it('should return true when user has write permissions', async function () {
       this.CollaboratorsGetter.promises.getMemberIdPrivilegeLevel
         .withArgs(this.user._id, this.project._id)
         .resolves(PrivilegeLevels.READ_AND_WRITE)
 
       const canResolve =
-        await this.AuthorizationManager.promises.canUserResolveThread(
+        await this.AuthorizationManager.promises.canUserDeleteOrResolveThread(
           this.user._id,
           this.project._id,
           this.doc._id,
@@ -560,7 +560,7 @@ describe('AuthorizationManager', function () {
         .resolves(PrivilegeLevels.READ_ONLY)
 
       const canResolve =
-        await this.AuthorizationManager.promises.canUserResolveThread(
+        await this.AuthorizationManager.promises.canUserDeleteOrResolveThread(
           this.user._id,
           this.project._id,
           this.doc._id,
@@ -580,7 +580,7 @@ describe('AuthorizationManager', function () {
 
       it('should return false when user is not the comment author', async function () {
         const canResolve =
-          await this.AuthorizationManager.promises.canUserResolveThread(
+          await this.AuthorizationManager.promises.canUserDeleteOrResolveThread(
             this.user._id,
             this.project._id,
             this.doc._id,
@@ -597,7 +597,7 @@ describe('AuthorizationManager', function () {
           .resolves({ metadata: { user_id: this.user._id } })
 
         const canResolve =
-          await this.AuthorizationManager.promises.canUserResolveThread(
+          await this.AuthorizationManager.promises.canUserDeleteOrResolveThread(
             this.user._id,
             this.project._id,
             this.doc._id,

@@ -254,7 +254,13 @@ async function isUserSiteAdmin(userId) {
   return hasAdminAccess(user)
 }
 
-async function canUserResolveThread(userId, projectId, docId, threadId, token) {
+async function canUserDeleteOrResolveThread(
+  userId,
+  projectId,
+  docId,
+  threadId,
+  token
+) {
   const privilegeLevel = await getPrivilegeLevelForProject(
     userId,
     projectId,
@@ -297,7 +303,7 @@ module.exports = {
   canUserReadProject: callbackify(canUserReadProject),
   canUserWriteProjectContent: callbackify(canUserWriteProjectContent),
   canUserReviewProjectContent: callbackify(canUserReviewProjectContent),
-  canUserResolveThread: callbackify(canUserResolveThread),
+  canUserDeleteOrResolveThread: callbackify(canUserDeleteOrResolveThread),
   canUserSendComment: callbackify(canUserSendComment),
   canUserWriteProjectSettings: callbackify(canUserWriteProjectSettings),
   canUserRenameProject: callbackify(canUserRenameProject),
@@ -310,7 +316,7 @@ module.exports = {
     canUserReadProject,
     canUserWriteProjectContent,
     canUserReviewProjectContent,
-    canUserResolveThread,
+    canUserDeleteOrResolveThread,
     canUserSendComment,
     canUserWriteProjectSettings,
     canUserRenameProject,
