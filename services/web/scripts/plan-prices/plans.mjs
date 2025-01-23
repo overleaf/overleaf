@@ -1,5 +1,5 @@
 // Creates data for localizedPlanPricing object in settings.overrides.saas.js
-// and plans object in main/plans.js
+// and group plans object in app/templates/plans/groups.json
 
 // https://github.com/import-js/eslint-plugin-import/issues/1810
 // eslint-disable-next-line import/no-unresolved
@@ -64,10 +64,13 @@ const currencies = [
   'USD',
 ]
 
+function roundUpToNearest5Cents(number) {
+  return Math.ceil(number * 20) / 20
+}
+
 function generatePlans(workSheetJSON) {
   // localizedPlanPricing object for settings.overrides.saas.js
   const localizedPlanPricing = {}
-  // plans object for main/plans.js
 
   for (const currency of currencies) {
     localizedPlanPricing[currency] = {
@@ -102,17 +105,26 @@ function generatePlans(workSheetJSON) {
       const monthly = Number(monthlyPlan[currency])
       const monthlyTimesTwelve = Number(monthlyPlan[currency] * 12)
       const annual = Number(annualPlan[currency])
+      const annualDividedByTwelve = Number(
+        roundUpToNearest5Cents(annualPlan[currency] / 12)
+      )
 
       localizedPlanPricing[currency] = {
         ...localizedPlanPricing[currency],
-        [outputKey]: { monthly, monthlyTimesTwelve, annual },
+        [outputKey]: {
+          monthly,
+          monthlyTimesTwelve,
+          annual,
+          annualDividedByTwelve,
+        },
       }
     }
   }
-  return { localizedPlanPricing }
+  return localizedPlanPricing
 }
 
 function generateGroupPlans(workSheetJSON) {
+  // group plans object for app/templates/plans/groups.json
   const groupPlans = workSheetJSON.filter(data =>
     data.plan_code.startsWith('group')
   )
@@ -174,7 +186,7 @@ function writeFile(outputFile, data) {
   fs.writeFileSync(outputFile, data)
 }
 
-const { localizedPlanPricing } = generatePlans(input)
+const localizedPlanPricing = generatePlans(input)
 const groupPlans = generateGroupPlans(input)
 
 if (argv.output) {

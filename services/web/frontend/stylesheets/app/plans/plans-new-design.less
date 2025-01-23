@@ -417,6 +417,7 @@
     .plans-new-table-header-price-unit {
       font-size: var(--font-size-02);
       line-height: var(--line-height-02);
+      text-align: center;
     }
 
     .plans-new-table-cta {
@@ -809,6 +810,10 @@
       .plans-card-price-container-mobile {
         display: flex;
         align-items: baseline;
+
+        .light-gray-text:has(.billed-annually-disclaimer) {
+          align-self: center;
+        }
       }
 
       .group-plans-card-price-container-mobile {
