@@ -20,7 +20,13 @@ async function processRecord(record) {
     mongoId(record._id)
     const newId = new ObjectId(record._id)
     if (config.commit) {
-      await backedUpBlobs.insertOne({ _id: newId, blobs: record.blobs })
+      await backedUpBlobs.updateOne(
+        { _id: newId },
+        {
+          $addToSet: { blobs: { $each: record.blobs } },
+        },
+        { upsert: true }
+      )
       await backedUpBlobs.deleteOne({ _id: record._id })
     }
     STATS.replaced++
