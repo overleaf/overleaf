@@ -115,7 +115,7 @@ export const LocalCompileProvider: FC = ({ children }) => {
   const ide = useIdeContext()
 
   const { hasPremiumCompile, isProjectOwner } = useEditorContext()
-  const { openDocId } = useEditorManagerContext()
+  const { openDocId, openDocs } = useEditorManagerContext()
 
   const { _id: projectId, rootDocId } = useProjectContext()
 
@@ -299,6 +299,7 @@ export const LocalCompileProvider: FC = ({ children }) => {
       cleanupCompileResult,
       compilingRef,
       signal,
+      openDocs,
     })
   })
 

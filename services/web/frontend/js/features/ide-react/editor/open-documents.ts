@@ -95,4 +95,35 @@ export class OpenDocuments {
     }
     return ids
   }
+
+  async awaitBufferedOps(signal: AbortSignal) {
+    if (this.hasUnsavedChanges()) {
+      const { promise, resolve } = Promise.withResolvers<void>()
+
+      let resolved = false
+
+      const listener = () => {
+        if (!this.hasUnsavedChanges()) {
+          debugConsole.log('saved')
+          window.removeEventListener('doc:saved', listener)
+          resolved = true
+          resolve()
+        }
+      }
+
+      window.addEventListener('doc:saved', listener)
+
+      signal.addEventListener('abort', () => {
+        if (!resolved) {
+          debugConsole.log('aborted')
+          window.removeEventListener('doc:saved', listener)
+          resolve()
+        }
+      })
+
+      this.flushAll()
+
+      await promise
+    }
+  }
 }

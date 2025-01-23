@@ -10,6 +10,7 @@ import {
   EditorManagerContext,
 } from '@/features/ide-react/context/editor-manager-context'
 import { EditorView } from '@codemirror/view'
+import { OpenDocuments } from '@/features/ide-react/editor/open-documents'
 
 describe('<PdfLogsEntries/>', function () {
   const fakeFindEntityResult: FindResult = {
@@ -36,6 +37,8 @@ describe('<PdfLogsEntries/>', function () {
   const EditorManagerProvider: FC = ({ children }) => {
     const value = {
       openDocId: cy.spy().as('openDocId'),
+      // @ts-ignore
+      openDocs: new OpenDocuments(),
     } as unknown as EditorManager
 
     return (

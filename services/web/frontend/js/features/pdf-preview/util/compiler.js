@@ -30,6 +30,7 @@ export default class DocumentCompiler {
     setError,
     cleanupCompileResult,
     signal,
+    openDocs,
   }) {
     this.compilingRef = compilingRef
     this.projectId = projectId
@@ -41,6 +42,7 @@ export default class DocumentCompiler {
     this.setError = setError
     this.cleanupCompileResult = cleanupCompileResult
     this.signal = signal
+    this.openDocs = openDocs
 
     this.projectRootDocId = null
     this.clsiServerId = null
@@ -61,40 +63,6 @@ export default class DocumentCompiler {
         maxWait: AUTO_COMPILE_MAX_WAIT,
       }
     )
-
-    this._onDocSavedCallback = null
-  }
-
-  async _awaitBufferedOps() {
-    const removeEventListener = () => {
-      clearTimeout(this.pendingOpTimeout)
-      if (this._onDocSavedCallback) {
-        window.removeEventListener('doc:saved', this._onDocSavedCallback)
-        this._onDocSavedCallback = null
-      }
-    }
-
-    removeEventListener()
-    return new Promise(resolve => {
-      if (!this.currentDoc?.hasBufferedOps?.()) {
-        return resolve()
-      }
-
-      this._onDocSavedCallback = () => {
-        // TODO: it's possible that there's more than one doc open with buffered ops, and ideally we'd wait for all docs to be flushed
-        removeEventListener()
-        resolve()
-      }
-
-      clearTimeout(this.pendingOpTimeout)
-      this.pendingOpTimeout = setTimeout(() => {
-        removeEventListener()
-        resolve()
-      }, PENDING_OP_MAX_WAIT)
-
-      window.addEventListener('doc:saved', this._onDocSavedCallback)
-      window.dispatchEvent(new CustomEvent('flush-changes'))
-    })
   }
 
   // The main "compile" function.
@@ -118,7 +86,17 @@ export default class DocumentCompiler {
     }
 
     try {
-      await this._awaitBufferedOps()
+      if (
+        typeof AbortSignal.any === 'function' &&
+        typeof AbortSignal.timeout === 'function'
+      ) {
+        await this.openDocs.awaitBufferedOps(
+          AbortSignal.any([
+            this.signal,
+            AbortSignal.timeout(PENDING_OP_MAX_WAIT),
+          ])
+        )
+      }
 
       // reset values
       this.setChangedAt(0) // TODO: wait for doc:saved?
