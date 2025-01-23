@@ -416,3 +416,24 @@
 
   font-weight: 600;
 }
+
+.not-student-switch {
+  font-size: var(--font-size-02);
+  margin-left: var(--spacing-08);
+
+  label {
+    font-weight: normal;
+  }
+
+  button {
+    margin: 0 0 0 var(--spacing-03);
+    padding: 0;
+    color: var(--link-web);
+    font-size: var(--font-size-02);
+    vertical-align: inherit;
+
+    .button-content {
+      color: var(--link-web);
+    }
+  }
+}
