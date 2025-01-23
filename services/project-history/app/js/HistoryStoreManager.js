@@ -557,11 +557,11 @@ function _requestHistoryService(options, callback) {
     if (res.statusCode >= 200 && res.statusCode < 300) {
       callback(null, body)
     } else {
+      const { method, url, qs } = requestOptions
       error = new OError(
-        `history store a non-success status code: ${res.statusCode}`
+        `history store a non-success status code: ${res.statusCode}`,
+        { method, url, qs, statusCode: res.statusCode }
       )
-      error.statusCode = res.statusCode
-      error.body = body
       logger.warn({ err: error }, error.message)
       callback(error)
     }
