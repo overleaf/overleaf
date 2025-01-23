@@ -115,6 +115,7 @@ export const createExtensions = (options: Record<string, any>): Extension[] => [
   autoComplete({
     enabled: options.settings.autoComplete,
     projectFeatures: options.projectFeatures,
+    referencesSearchMode: options.settings.referencesSearchMode,
   }),
 
   // NOTE: `keybindings` needs to be before `language` so that Vim/Emacs bindings take

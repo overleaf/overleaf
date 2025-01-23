@@ -386,6 +386,11 @@ async function updateUserSettings(req, res, next) {
   if (req.body.mathPreview != null) {
     user.ace.mathPreview = req.body.mathPreview
   }
+  if (req.body.referencesSearchMode != null) {
+    const mode =
+      req.body.referencesSearchMode === 'simple' ? 'simple' : 'advanced'
+    user.ace.referencesSearchMode = mode
+  }
   await user.save()
 
   const newEmail = req.body.email?.trim().toLowerCase()

@@ -25,6 +25,7 @@ const defaultSettings: UserSettings = {
   fontFamily: 'monaco',
   lineHeight: 'normal',
   mathPreview: true,
+  referencesSearchMode: 'advanced',
 }
 
 type UserSettingsContextValue = {

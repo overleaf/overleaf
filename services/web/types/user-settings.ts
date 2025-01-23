@@ -15,4 +15,5 @@ export type UserSettings = {
   fontFamily: FontFamily
   lineHeight: LineHeight
   mathPreview: boolean
+  referencesSearchMode: 'advanced' | 'simple'
 }

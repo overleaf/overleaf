@@ -425,6 +425,33 @@ describe('UserController', function () {
       this.UserController.updateUserSettings(this.req, this.res)
     })
 
+    it('should set referencesSearchMode to advanced', function (done) {
+      this.req.body = { referencesSearchMode: 'advanced' }
+      this.res.sendStatus = code => {
+        this.user.ace.referencesSearchMode.should.equal('advanced')
+        done()
+      }
+      this.UserController.updateUserSettings(this.req, this.res)
+    })
+
+    it('should set referencesSearchMode to simple', function (done) {
+      this.req.body = { referencesSearchMode: 'simple' }
+      this.res.sendStatus = code => {
+        this.user.ace.referencesSearchMode.should.equal('simple')
+        done()
+      }
+      this.UserController.updateUserSettings(this.req, this.res)
+    })
+
+    it('should not allow arbitrary referencesSearchMode', function (done) {
+      this.req.body = { referencesSearchMode: 'foobar' }
+      this.res.sendStatus = code => {
+        this.user.ace.referencesSearchMode.should.equal('advanced')
+        done()
+      }
+      this.UserController.updateUserSettings(this.req, this.res)
+    })
+
     it('should send an error if the email is 0 len', function (done) {
       this.req.body.email = ''
       this.res.sendStatus = function (code) {

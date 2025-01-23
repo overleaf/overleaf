@@ -792,6 +792,7 @@ const _ProjectController = {
           lineHeight: user.ace.lineHeight || 'normal',
           overallTheme: user.ace.overallTheme,
           mathPreview: user.ace.mathPreview,
+          referencesSearchMode: user.ace.referencesSearchMode,
         },
         privilegeLevel,
         anonymous,

@@ -96,6 +96,7 @@ function useCodeMirrorScope(view: EditorView) {
     mode,
     syntaxValidation,
     mathPreview,
+    referencesSearchMode,
   } = userSettings
 
   const [cursorHighlights] = useScopeValue<Record<string, Highlight[]>>(
@@ -169,6 +170,7 @@ function useCodeMirrorScope(view: EditorView) {
     mode,
     syntaxValidation,
     mathPreview,
+    referencesSearchMode,
   })
 
   const currentDocRef = useRef({
@@ -430,6 +432,7 @@ function useCodeMirrorScope(view: EditorView) {
         setAutoComplete({
           enabled: autoComplete,
           projectFeatures: projectFeaturesRef.current,
+          referencesSearchMode: settingsRef.current.referencesSearchMode,
         })
       )
     })
@@ -457,6 +460,10 @@ function useCodeMirrorScope(view: EditorView) {
       view.dispatch(setMathPreview(mathPreview))
     })
   }, [view, mathPreview])
+
+  useEffect(() => {
+    settingsRef.current.referencesSearchMode = referencesSearchMode
+  }, [referencesSearchMode])
 
   const emitSyncToPdf = useScopeEventEmitter('cursor:editor:syncToPdf')
 
