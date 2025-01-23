@@ -64,6 +64,11 @@ const currencies = [
   'USD',
 ]
 
+/**
+ * This is duplicated in:
+ *   - services/web/app/src/Features/Subscription/SubscriptionHelper.js
+ *   - services/web/modules/subscriptions/frontend/js/pages/plans-new-design/group-member-picker/group-plan-pricing.js
+ */
 function roundUpToNearest5Cents(number) {
   return Math.ceil(number * 20) / 20
 }
