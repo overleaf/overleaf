@@ -57,7 +57,6 @@ describe('HistoryStoreManager', function () {
     }
 
     this.request = sinon.stub()
-    this.request.get = sinon.stub()
 
     this.logger = {
       debug: sinon.stub(),
@@ -382,6 +381,9 @@ describe('HistoryStoreManager', function () {
       this.fileStream = {}
       this.hash = 'random-hash'
       this.LocalFileWriter.bufferOnDisk.callsArgWith(4, null, this.hash)
+      this.FetchUtils.fetchNothing.rejects(
+        new RequestFailedError('', {}, { status: 404 })
+      )
       this.FetchUtils.fetchStream.resolves(this.fileStream)
     })
 
@@ -443,7 +445,7 @@ describe('HistoryStoreManager', function () {
       })
 
       it('should not request the file from the filestore', function () {
-        expect(this.request.get).to.not.have.been.called
+        expect(this.FetchUtils.fetchStream).to.not.have.been.called
       })
     })
 
@@ -503,6 +505,7 @@ describe('HistoryStoreManager', function () {
       })
       describe('when history-v1 confirms that the blob exists', function () {
         beforeEach(function (done) {
+          this.FetchUtils.fetchNothing.resolves()
           this.HistoryStoreManager.createBlobForUpdate(
             this.projectId,
             this.historyId,

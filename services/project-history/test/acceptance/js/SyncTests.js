@@ -4,8 +4,10 @@ import { expect } from 'chai'
 import request from 'request'
 import assert from 'node:assert'
 import mongodb from 'mongodb-legacy'
+import logger from '@overleaf/logger'
 import * as ProjectHistoryClient from './helpers/ProjectHistoryClient.js'
 import * as ProjectHistoryApp from './helpers/ProjectHistoryApp.js'
+import sinon from 'sinon'
 const { ObjectId } = mongodb
 
 const EMPTY_FILE_HASH = 'e69de29bb2d1d6434b8b29ae775ad8c2e48c5391'
@@ -16,6 +18,15 @@ const MockWeb = () => nock('http://127.0.0.1:3000')
 
 describe('Syncing with web and doc-updater', function () {
   const historyId = new ObjectId().toString()
+  let loggerWarn, loggerError
+  beforeEach(function () {
+    loggerWarn = sinon.spy(logger, 'warn')
+    loggerError = sinon.spy(logger, 'error')
+  })
+  afterEach(function () {
+    loggerWarn.restore()
+    loggerError.restore()
+  })
 
   beforeEach(function (done) {
     this.timestamp = new Date()
@@ -202,7 +213,113 @@ describe('Syncing with web and doc-updater', function () {
           MockFileStore()
             .get(`/project/${this.project_id}/file/${this.file_id}`)
             .reply(200, fileContents)
+          const headBlob = MockHistoryStore()
+            .head(`/api/projects/${historyId}/blobs/${fileHash}`)
+            .reply(404)
+          const createBlob = MockHistoryStore()
+            .put(`/api/projects/${historyId}/blobs/${fileHash}`, fileContents)
+            .reply(201)
 
+          const addFile = MockHistoryStore()
+            .post(`/api/projects/${historyId}/legacy_changes`, body => {
+              expect(body).to.deep.equal([
+                {
+                  v2Authors: [],
+                  authors: [],
+                  timestamp: this.timestamp.toJSON(),
+                  operations: [
+                    {
+                      pathname: 'test.png',
+                      file: {
+                        hash: fileHash,
+                      },
+                    },
+                  ],
+                  origin: { kind: 'test-origin' },
+                },
+              ])
+              return true
+            })
+            .query({ end_version: 0 })
+            .reply(204)
+
+          async.series(
+            [
+              cb => {
+                ProjectHistoryClient.resyncHistory(this.project_id, cb)
+              },
+              cb => {
+                const update = {
+                  projectHistoryId: historyId,
+                  resyncProjectStructure: {
+                    docs: [],
+                    files: [
+                      {
+                        file: this.file_id,
+                        path: '/test.png',
+                        _hash: fileHash,
+                        url: `http://127.0.0.1:3009/project/${this.project_id}/file/${this.file_id}`,
+                      },
+                      { path: '/persistedFile' },
+                    ],
+                  },
+                  meta: {
+                    ts: this.timestamp,
+                  },
+                }
+                ProjectHistoryClient.pushRawUpdate(this.project_id, update, cb)
+              },
+              cb => {
+                ProjectHistoryClient.flushProject(this.project_id, cb)
+              },
+            ],
+            error => {
+              if (error) {
+                throw error
+              }
+              assert(!loggerWarn.called, 'no warning logged on 404')
+              assert(
+                headBlob.isDone(),
+                'HEAD /api/projects/:historyId/blobs/:hash should have been called'
+              )
+              assert(
+                createBlob.isDone(),
+                '/api/projects/:historyId/blobs/:hash should have been called'
+              )
+              assert(
+                addFile.isDone(),
+                `/api/projects/${historyId}/changes should have been called`
+              )
+              done()
+            }
+          )
+        })
+        it('should skip HEAD on blob without hash', function (done) {
+          MockHistoryStore()
+            .get(`/api/projects/${historyId}/latest/history`)
+            .reply(200, {
+              chunk: {
+                history: {
+                  snapshot: {
+                    files: {
+                      persistedFile: { hash: EMPTY_FILE_HASH, byteLength: 0 },
+                    },
+                  },
+                  changes: [],
+                },
+                startVersion: 0,
+              },
+            })
+
+          const fileContents = Buffer.from([1, 2, 3])
+          const fileHash = 'aed2973e4b8a7ff1b30ff5c4751e5a2b38989e74'
+
+          MockFileStore()
+            .get(`/project/${this.project_id}/file/${this.file_id}`)
+            .reply(200, fileContents)
+          const headBlob = MockHistoryStore()
+            .head(`/api/projects/${historyId}/blobs/undefined`)
+            .reply(500)
           const createBlob = MockHistoryStore()
             .put(`/api/projects/${historyId}/blobs/${fileHash}`, fileContents)
             .reply(201)
@@ -263,9 +380,238 @@ describe('Syncing with web and doc-updater', function () {
               if (error) {
                 throw error
               }
+              assert(!loggerWarn.called, 'no warning logged on 404')
+              assert(
+                !headBlob.isDone(),
+                'HEAD /api/projects/:historyId/blobs/:hash should have been skipped'
+              )
               assert(
                 createBlob.isDone(),
                 '/api/projects/:historyId/blobs/:hash should have been called'
+              )
+              assert(
+                addFile.isDone(),
+                `/api/projects/${historyId}/changes should have been called`
+              )
+              done()
+            }
+          )
+        })
+        it('should record error when checking blob fails with 500', function (done) {
+          MockHistoryStore()
+            .get(`/api/projects/${historyId}/latest/history`)
+            .reply(200, {
+              chunk: {
+                history: {
+                  snapshot: {
+                    files: {
+                      persistedFile: { hash: EMPTY_FILE_HASH, byteLength: 0 },
+                    },
+                  },
+                  changes: [],
+                },
+                startVersion: 0,
+              },
+            })
+
+          const fileContents = Buffer.from([1, 2, 3])
+          const fileHash = 'aed2973e4b8a7ff1b30ff5c4751e5a2b38989e74'
+
+          MockFileStore()
+            .get(`/project/${this.project_id}/file/${this.file_id}`)
+            .reply(200, fileContents)
+          const headBlob = MockHistoryStore()
+            .head(`/api/projects/${historyId}/blobs/${fileHash}`)
+            .reply(500)
+          const createBlob = MockHistoryStore()
+            .put(`/api/projects/${historyId}/blobs/${fileHash}`, fileContents)
+            .reply(201)
+
+          const addFile = MockHistoryStore()
+            .post(`/api/projects/${historyId}/legacy_changes`, body => {
+              expect(body).to.deep.equal([
+                {
+                  v2Authors: [],
+                  authors: [],
+                  timestamp: this.timestamp.toJSON(),
+                  operations: [
+                    {
+                      pathname: 'test.png',
+                      file: {
+                        hash: fileHash,
+                      },
+                    },
+                  ],
+                  origin: { kind: 'test-origin' },
+                },
+              ])
+              return true
+            })
+            .query({ end_version: 0 })
+            .reply(204)
+
+          async.series(
+            [
+              cb => {
+                ProjectHistoryClient.resyncHistory(this.project_id, cb)
+              },
+              cb => {
+                const update = {
+                  projectHistoryId: historyId,
+                  resyncProjectStructure: {
+                    docs: [],
+                    files: [
+                      {
+                        file: this.file_id,
+                        path: '/test.png',
+                        _hash: fileHash,
+                        url: `http://127.0.0.1:3009/project/${this.project_id}/file/${this.file_id}`,
+                      },
+                      { path: '/persistedFile' },
+                    ],
+                  },
+                  meta: {
+                    ts: this.timestamp,
+                  },
+                }
+                ProjectHistoryClient.pushRawUpdate(this.project_id, update, cb)
+              },
+              cb => {
+                ProjectHistoryClient.flushProject(
+                  this.project_id,
+                  {
+                    allowErrors: true,
+                  },
+                  (err, res) => {
+                    if (err) return cb(err)
+                    assert(res.statusCode === 500, 'resync should have failed')
+                    cb()
+                  }
+                )
+              },
+            ],
+            error => {
+              if (error) {
+                throw error
+              }
+              assert(
+                loggerError.calledWithMatch(
+                  sinon.match.any,
+                  'error checking whether blob exists'
+                ),
+                'error logged on 500'
+              )
+              assert(
+                headBlob.isDone(),
+                'HEAD /api/projects/:historyId/blobs/:hash should have been called'
+              )
+              assert(
+                !createBlob.isDone(),
+                '/api/projects/:historyId/blobs/:hash should have been skipped'
+              )
+              assert(
+                !addFile.isDone(),
+                `/api/projects/${historyId}/changes should have been skipped`
+              )
+              done()
+            }
+          )
+        })
+        it('should skip blob write when blob exists', function (done) {
+          MockHistoryStore()
+            .get(`/api/projects/${historyId}/latest/history`)
+            .reply(200, {
+              chunk: {
+                history: {
+                  snapshot: {
+                    files: {
+                      persistedFile: { hash: EMPTY_FILE_HASH, byteLength: 0 },
+                    },
+                  },
+                  changes: [],
+                },
+                startVersion: 0,
+              },
+            })
+
+          const fileContents = Buffer.from([1, 2, 3])
+          const fileHash = 'aed2973e4b8a7ff1b30ff5c4751e5a2b38989e74'
+
+          MockFileStore()
+            .get(`/project/${this.project_id}/file/${this.file_id}`)
+            .reply(200, fileContents)
+          const headBlob = MockHistoryStore()
+            .head(`/api/projects/${historyId}/blobs/${fileHash}`)
+            .reply(200)
+          const createBlob = MockHistoryStore()
+            .put(`/api/projects/${historyId}/blobs/${fileHash}`, fileContents)
+            .reply(201)
+
+          const addFile = MockHistoryStore()
+            .post(`/api/projects/${historyId}/legacy_changes`, body => {
+              expect(body).to.deep.equal([
+                {
+                  v2Authors: [],
+                  authors: [],
+                  timestamp: this.timestamp.toJSON(),
+                  operations: [
+                    {
+                      pathname: 'test.png',
+                      file: {
+                        hash: fileHash,
+                      },
+                    },
+                  ],
+                  origin: { kind: 'test-origin' },
+                },
+              ])
+              return true
+            })
+            .query({ end_version: 0 })
+            .reply(204)
+
+          async.series(
+            [
+              cb => {
+                ProjectHistoryClient.resyncHistory(this.project_id, cb)
+              },
+              cb => {
+                const update = {
+                  projectHistoryId: historyId,
+                  resyncProjectStructure: {
+                    docs: [],
+                    files: [
+                      {
+                        file: this.file_id,
+                        path: '/test.png',
+                        _hash: fileHash,
+                        url: `http://127.0.0.1:3009/project/${this.project_id}/file/${this.file_id}`,
+                      },
+                      { path: '/persistedFile' },
+                    ],
+                  },
+                  meta: {
+                    ts: this.timestamp,
+                  },
+                }
+                ProjectHistoryClient.pushRawUpdate(this.project_id, update, cb)
+              },
+              cb => {
+                ProjectHistoryClient.flushProject(this.project_id, cb)
+              },
+            ],
+            error => {
+              if (error) {
+                throw error
+              }
+              assert(!loggerWarn.called, 'no warning logged on 404')
+              assert(
+                headBlob.isDone(),
+                'HEAD /api/projects/:historyId/blobs/:hash should have been called'
+              )
+              assert(
+                !createBlob.isDone(),
+                '/api/projects/:historyId/blobs/:hash should have been skipped'
               )
               assert(
                 addFile.isDone(),

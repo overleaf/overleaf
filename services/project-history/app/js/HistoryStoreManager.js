@@ -247,6 +247,7 @@ function createBlobFromString(historyId, data, fileId, callback) {
 }
 
 function _checkBlobExists(historyId, hash, callback) {
+  if (!hash) return callback(null, false)
   const url = `${Settings.overleaf.history.host}/projects/${historyId}/blobs/${hash}`
   fetchNothing(url, {
     method: 'HEAD',
@@ -256,7 +257,7 @@ function _checkBlobExists(historyId, hash, callback) {
       callback(null, true)
     })
     .catch(err => {
-      if (err instanceof RequestFailedError) {
+      if (err instanceof RequestFailedError && err.response.status === 404) {
         return callback(null, false)
       }
       callback(OError.tag(err), false)
@@ -337,11 +338,14 @@ export function createBlobForUpdate(projectId, historyId, update, callback) {
     )
     _checkBlobExists(historyId, update.hash, (err, blobExists) => {
       if (err) {
-        logger.warn(
-          { err, projectId, fileId, update },
-          'error checking whether blob exists, reading from filestore'
+        return callback(
+          new OError(
+            'error checking whether blob exists',
+            { projectId, historyId, update },
+            err
+          )
         )
-      } else if (update.createdBlob && blobExists) {
+      } else if (blobExists) {
         logger.debug(
           { projectId, fileId, update },
           'Skipping blob creation as it has already been created'
