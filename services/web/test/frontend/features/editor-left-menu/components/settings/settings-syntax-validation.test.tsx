@@ -1,8 +1,7 @@
-import { screen, within } from '@testing-library/dom'
+import { screen, within, render } from '@testing-library/react'
 import { expect } from 'chai'
 import fetchMock from 'fetch-mock'
 import SettingsSyntaxValidation from '../../../../../../frontend/js/features/editor-left-menu/components/settings/settings-syntax-validation'
-import { render } from '@testing-library/react'
 import { EditorProviders } from '../../../../helpers/editor-providers'
 import { EditorLeftMenuProvider } from '@/features/editor-left-menu/components/editor-left-menu-context'
 

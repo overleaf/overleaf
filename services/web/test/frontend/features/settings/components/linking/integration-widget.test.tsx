@@ -1,6 +1,6 @@
 import { expect } from 'chai'
 import sinon from 'sinon'
-import { screen, fireEvent, render, waitFor } from '@testing-library/react'
+import { screen, fireEvent, render } from '@testing-library/react'
 import { IntegrationLinkingWidget } from '../../../../../../frontend/js/features/settings/components/linking/integration-widget'
 import * as eventTracking from '@/infrastructure/event-tracking'
 
@@ -104,9 +104,7 @@ describe('<IntegrationLinkingWidgetTest/>', function () {
         hidden: false,
       })
       fireEvent.click(cancelBtn)
-      await waitFor(() =>
-        screen.getByRole('button', { name: 'Cancel', hidden: true })
-      )
+      await screen.findByRole('button', { name: 'Cancel', hidden: true })
     })
   })
 })

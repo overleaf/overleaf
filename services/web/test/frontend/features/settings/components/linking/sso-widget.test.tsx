@@ -61,9 +61,7 @@ describe('<SSOLinkingWidget />', function () {
         hidden: false,
       })
       fireEvent.click(cancelBtn)
-      await waitFor(() =>
-        screen.getByRole('button', { name: 'Cancel', hidden: true })
-      )
+      await screen.findByRole('button', { name: 'Cancel', hidden: true })
       expect(unlinkFunction).not.to.have.been.called
     })
   })
@@ -119,13 +117,11 @@ describe('<SSOLinkingWidget />', function () {
     })
 
     it('should display an error message ', async function () {
-      await waitFor(() =>
-        screen.getByText('Something went wrong. Please try again.')
-      )
+      await screen.findByText('Something went wrong. Please try again.')
     })
 
     it('should display the unlink button ', async function () {
-      await waitFor(() => screen.getByRole('button', { name: 'Unlink' }))
+      await screen.findByRole('button', { name: 'Unlink' })
     })
   })
 })

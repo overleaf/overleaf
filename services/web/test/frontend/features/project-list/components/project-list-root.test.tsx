@@ -1138,7 +1138,7 @@ describe('<ProjectListRoot />', function () {
 
         const yourProjectFilter = screen.getAllByText('Your Projects')[0]
         fireEvent.click(yourProjectFilter)
-        screen.findByText(copiedProjectName)
+        await screen.findByText(copiedProjectName)
       })
     })
 

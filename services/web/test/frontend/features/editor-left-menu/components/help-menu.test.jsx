@@ -1,4 +1,4 @@
-import { screen } from '@testing-library/dom'
+import { screen } from '@testing-library/react'
 import { expect } from 'chai'
 import fetchMock from 'fetch-mock'
 import HelpMenu from '../../../../../frontend/js/features/editor-left-menu/components/help-menu'

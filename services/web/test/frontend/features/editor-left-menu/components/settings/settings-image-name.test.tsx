@@ -1,10 +1,9 @@
-import { screen, within } from '@testing-library/dom'
+import { screen, within, render } from '@testing-library/react'
 import { expect } from 'chai'
 import fetchMock from 'fetch-mock'
 import SettingsImageName from '../../../../../../frontend/js/features/editor-left-menu/components/settings/settings-image-name'
 import type { AllowedImageName } from '../../../../../../types/project-settings'
 import { EditorLeftMenuProvider } from '@/features/editor-left-menu/components/editor-left-menu-context'
-import { render } from '@testing-library/react'
 import { EditorProviders } from '../../../../helpers/editor-providers'
 
 describe('<SettingsImageName />', function () {

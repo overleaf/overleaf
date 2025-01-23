@@ -1,10 +1,9 @@
-import { fireEvent, screen } from '@testing-library/dom'
+import { fireEvent, screen, waitFor } from '@testing-library/react'
 import fetchMock from 'fetch-mock'
 import sinon from 'sinon'
 import { expect } from 'chai'
 import ActionsCopyProject from '../../../../../frontend/js/features/editor-left-menu/components/actions-copy-project'
 import { renderWithEditorContext } from '../../../helpers/render-with-context'
-import { waitFor } from '@testing-library/react'
 import * as useLocationModule from '../../../../../frontend/js/shared/hooks/use-location'
 
 describe('<ActionsCopyProject />', function () {

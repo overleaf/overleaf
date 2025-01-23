@@ -92,7 +92,7 @@ describe('email actions - make primary', function () {
         name: /make primary/i,
       })) as HTMLButtonElement
 
-      userEvent.hover(button.parentElement!)
+      await userEvent.hover(button.parentElement!)
 
       await screen.findByText(
         /Please confirm your affiliation before making this the primary/i
@@ -109,7 +109,7 @@ describe('email actions - make primary', function () {
         name: /make primary/i,
       })) as HTMLButtonElement
 
-      userEvent.hover(button.parentElement!)
+      await userEvent.hover(button.parentElement!)
 
       await screen.findByText('Make this the primary email, used to log in', {
         exact: false,
@@ -150,7 +150,7 @@ describe('email actions - make primary', function () {
         name: /make primary/i,
       })) as HTMLButtonElement[]
 
-      userEvent.hover(buttons[1].parentElement!)
+      await userEvent.hover(buttons[1].parentElement!)
 
       await screen.findByText(
         'Please confirm your email by linking to your institutional account before making it the primary email',

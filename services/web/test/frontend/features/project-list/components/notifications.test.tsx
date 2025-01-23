@@ -137,8 +137,6 @@ describe('<UserNotifications />', function () {
 
       expect(joinBtn.disabled).to.be.true
 
-      screen.debug()
-
       await waitForElementToBeRemoved(() => screen.getByText('Loading'))
 
       expect(acceptMock.called()).to.be.true
