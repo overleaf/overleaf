@@ -22,6 +22,7 @@ describe('HistoryStoreManager', function () {
       },
       apis: {
         filestore: {
+          enabled: true,
           url: 'http://filestore.overleaf.production',
         },
       },
@@ -421,6 +422,30 @@ describe('HistoryStoreManager', function () {
 
       it('should call the callback with the blob', function () {
         expect(this.actualHash).to.equal(this.hash)
+      })
+    })
+
+    describe('with filestore disabled', function () {
+      beforeEach(function (done) {
+        this.settings.apis.filestore.enabled = false
+        this.file_id = '012345678901234567890123'
+        this.update = {
+          file: true,
+          url: `http://filestore.other.cloud.provider/project/${this.projectId}/file/${this.file_id}`,
+          hash: this.hash,
+        }
+        this.HistoryStoreManager.createBlobForUpdate(
+          this.projectId,
+          this.historyId,
+          this.update,
+          err => {
+            expect(err).to.match(/blocking filestore read/)
+            done()
+          }
+        )
+      })
+      it('should not request the file', function () {
+        expect(this.FetchUtils.fetchStream).to.not.have.been.called
       })
     })
 

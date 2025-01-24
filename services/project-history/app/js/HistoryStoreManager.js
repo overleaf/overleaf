@@ -363,6 +363,9 @@ export function createBlobForUpdate(projectId, historyId, update, callback) {
           new OError('no filestore URL provided and blob was not created')
         )
       }
+      if (!Settings.apis.filestore.enabled) {
+        return callback(new OError('blocking filestore read', { update }))
+      }
 
       fetchStream(filestoreURL, {
         signal: AbortSignal.timeout(HTTP_REQUEST_TIMEOUT),

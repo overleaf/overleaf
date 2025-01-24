@@ -27,6 +27,7 @@ module.exports = {
       url: `http://${process.env.DOCSTORE_HOST || '127.0.0.1'}:3016`,
     },
     filestore: {
+      enabled: process.env.FILESTORE_ENABLED !== 'false',
       url: `http://${process.env.FILESTORE_HOST || '127.0.0.1'}:3009`,
     },
     web: {
