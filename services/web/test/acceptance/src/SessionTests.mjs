@@ -536,7 +536,7 @@ describe('Sessions', function () {
       await tryWithValidationToken(await getOtherUsersValidationToken())
     })
     it('should ignore overwrites in app code', async function () {
-      const otherUsersValidationToken = getOtherUsersValidationToken()
+      const otherUsersValidationToken = await getOtherUsersValidationToken()
 
       const user = new User()
       await user.login()
