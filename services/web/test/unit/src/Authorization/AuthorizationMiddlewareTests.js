@@ -25,8 +25,8 @@ describe('AuthorizationMiddleware', function () {
         canUserReadProject: sinon.stub(),
         canUserWriteProjectSettings: sinon.stub(),
         canUserWriteProjectContent: sinon.stub(),
+        canUserSendOrReopenComment: sinon.stub(),
         canUserDeleteOrResolveThread: sinon.stub(),
-        canUserSendComment: sinon.stub(),
         canUserAdminProject: sinon.stub(),
         canUserRenameProject: sinon.stub(),
         isUserSiteAdmin: sinon.stub(),
@@ -86,8 +86,11 @@ describe('AuthorizationMiddleware', function () {
     )
   })
 
-  describe('ensureUserCanSendComment', function () {
-    testMiddleware('ensureUserCanSendComment', 'canUserSendComment')
+  describe('ensureUserCanSendOrReopenComment', function () {
+    testMiddleware(
+      'ensureUserCanSendOrReopenComment',
+      'canUserSendOrReopenComment'
+    )
   })
 
   describe('ensureUserCanDeleteOrResolveThread', function () {

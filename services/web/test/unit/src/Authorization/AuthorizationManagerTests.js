@@ -453,7 +453,7 @@ describe('AuthorizationManager', function () {
     tokenReadOnly: true,
   })
 
-  testPermission('canUserSendComment', {
+  testPermission('canUserSendOrReopenComment', {
     siteAdmin: true,
     owner: true,
     readAndWrite: true,

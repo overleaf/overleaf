@@ -273,7 +273,7 @@ async function canUserDeleteOrResolveThread(
   return comment.metadata.user_id === userId
 }
 
-async function canUserSendComment(userId, projectId, token) {
+async function canUserSendOrReopenComment(userId, projectId, token) {
   const privilegeLevel = await getPrivilegeLevelForProject(
     userId,
     projectId,
@@ -289,8 +289,8 @@ async function canUserSendComment(userId, projectId, token) {
 module.exports = {
   canUserReadProject: callbackify(canUserReadProject),
   canUserWriteProjectContent: callbackify(canUserWriteProjectContent),
+  canUserSendOrReopenComment: callbackify(canUserSendOrReopenComment),
   canUserDeleteOrResolveThread: callbackify(canUserDeleteOrResolveThread),
-  canUserSendComment: callbackify(canUserSendComment),
   canUserWriteProjectSettings: callbackify(canUserWriteProjectSettings),
   canUserRenameProject: callbackify(canUserRenameProject),
   canUserAdminProject: callbackify(canUserAdminProject),
@@ -301,8 +301,8 @@ module.exports = {
   promises: {
     canUserReadProject,
     canUserWriteProjectContent,
+    canUserSendOrReopenComment,
     canUserDeleteOrResolveThread,
-    canUserSendComment,
     canUserWriteProjectSettings,
     canUserRenameProject,
     canUserAdminProject,

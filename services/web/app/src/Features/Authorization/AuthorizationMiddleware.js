@@ -132,22 +132,29 @@ async function ensureUserCanDeleteOrResolveThread(req, res, next) {
   return HttpErrorHandler.forbidden(req, res)
 }
 
-async function ensureUserCanSendComment(req, res, next) {
+async function ensureUserCanSendOrReopenComment(req, res, next) {
   const projectId = _getProjectId(req)
   const userId = _getUserId(req)
   const token = TokenAccessHandler.getRequestToken(req, projectId)
 
-  const canSendComment = await AuthorizationManager.promises.canUserSendComment(
-    userId,
-    projectId,
-    token
-  )
-  if (canSendComment) {
-    logger.debug({ userId, projectId }, 'allowing user to send a comment')
+  const canSendOrReopenComment =
+    await AuthorizationManager.promises.canUserSendOrReopenComment(
+      userId,
+      projectId,
+      token
+    )
+  if (canSendOrReopenComment) {
+    logger.debug(
+      { userId, projectId },
+      'allowing user to send or reopen a comment'
+    )
     return next()
   }
 
-  logger.debug({ userId, projectId }, 'denying user to send a comment')
+  logger.debug(
+    { userId, projectId },
+    'denying user to send or reopen a comment'
+  )
   return HttpErrorHandler.forbidden(req, res)
 }
 
@@ -270,10 +277,12 @@ module.exports = {
   ensureUserCanWriteProjectSettings: expressify(
     ensureUserCanWriteProjectSettings
   ),
+  ensureUserCanSendOrReopenComment: expressify(
+    ensureUserCanSendOrReopenComment
+  ),
   ensureUserCanDeleteOrResolveThread: expressify(
     ensureUserCanDeleteOrResolveThread
   ),
-  ensureUserCanSendComment: expressify(ensureUserCanSendComment),
   ensureUserCanWriteProjectContent: expressify(
     ensureUserCanWriteProjectContent
   ),
