@@ -111,7 +111,7 @@ export default function FileViewHeader({ file }: FileViewHeaderProps) {
       <textarea
         // eslint-disable-next-line jsx-a11y/no-autofocus
         autoFocus
-        aria-hidden="true"
+        aria-label="Invisible element to manage focus and prevent unintended behavior"
         tabIndex={-1}
         style={{ position: 'absolute', left: '-9999px' }}
       />
