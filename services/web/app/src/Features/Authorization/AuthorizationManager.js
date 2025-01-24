@@ -191,19 +191,6 @@ async function canUserReadProject(userId, projectId, token) {
   ].includes(privilegeLevel)
 }
 
-async function canUserReviewProjectContent(userId, projectId, token) {
-  const privilegeLevel = await getPrivilegeLevelForProject(
-    userId,
-    projectId,
-    token
-  )
-  return [
-    PrivilegeLevels.OWNER,
-    PrivilegeLevels.READ_AND_WRITE,
-    PrivilegeLevels.REVIEW,
-  ].includes(privilegeLevel)
-}
-
 async function canUserWriteProjectContent(userId, projectId, token) {
   const privilegeLevel = await getPrivilegeLevelForProject(
     userId,
@@ -302,7 +289,6 @@ async function canUserSendComment(userId, projectId, token) {
 module.exports = {
   canUserReadProject: callbackify(canUserReadProject),
   canUserWriteProjectContent: callbackify(canUserWriteProjectContent),
-  canUserReviewProjectContent: callbackify(canUserReviewProjectContent),
   canUserDeleteOrResolveThread: callbackify(canUserDeleteOrResolveThread),
   canUserSendComment: callbackify(canUserSendComment),
   canUserWriteProjectSettings: callbackify(canUserWriteProjectSettings),
@@ -315,7 +301,6 @@ module.exports = {
   promises: {
     canUserReadProject,
     canUserWriteProjectContent,
-    canUserReviewProjectContent,
     canUserDeleteOrResolveThread,
     canUserSendComment,
     canUserWriteProjectSettings,

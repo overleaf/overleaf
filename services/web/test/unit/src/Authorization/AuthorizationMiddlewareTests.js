@@ -29,7 +29,6 @@ describe('AuthorizationMiddleware', function () {
         canUserSendComment: sinon.stub(),
         canUserAdminProject: sinon.stub(),
         canUserRenameProject: sinon.stub(),
-        canUserReviewProjectContent: sinon.stub(),
         isUserSiteAdmin: sinon.stub(),
         isRestrictedUserForProject: sinon.stub(),
       },

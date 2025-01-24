@@ -453,15 +453,6 @@ describe('AuthorizationManager', function () {
     tokenReadOnly: true,
   })
 
-  testPermission('canUserReviewProjectContent', {
-    siteAdmin: true,
-    owner: true,
-    readAndWrite: true,
-    review: true,
-    publicReadAndWrite: true,
-    tokenReadAndWrite: true,
-  })
-
   testPermission('canUserSendComment', {
     siteAdmin: true,
     owner: true,
