@@ -106,7 +106,7 @@ export function flushOldOps(options, callback) {
                 return flushIfOld(projectId, cutoffTime, function (err) {
                   if (err != null) {
                     logger.warn(
-                      { projectId, flushErr: err },
+                      { projectId, err },
                       'error flushing old project'
                     )
                   }
