@@ -5,7 +5,7 @@ filestore
 --env-add=ENABLE_CONVERSIONS="true",USE_PROM_METRICS="true",AWS_S3_USER_FILES_STORAGE_CLASS=REDUCED_REDUNDANCY,AWS_S3_USER_FILES_BUCKET_NAME=fake-user-files,AWS_S3_USER_FILES_DEK_BUCKET_NAME=fake-user-files-dek,AWS_S3_TEMPLATE_FILES_BUCKET_NAME=fake-template-files,GCS_USER_FILES_BUCKET_NAME=fake-gcs-user-files,GCS_TEMPLATE_FILES_BUCKET_NAME=fake-gcs-template-files
 --env-pass-through=
 --esmock-loader=False
---node-version=20.18.0
+--node-version=20.18.2
 --public-repo=True
 --script-version=4.5.0
 --test-acceptance-shards=SHARD_01_,SHARD_02_,SHARD_03_
