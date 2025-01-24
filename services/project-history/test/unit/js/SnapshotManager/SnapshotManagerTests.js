@@ -723,10 +723,10 @@ Four five six\
               },
             },
             {
-              // 'er th'
+              // 'er the la'
               range: {
                 pos: 28,
-                length: 5,
+                length: 9,
               },
               tracking: {
                 type: 'delete',
@@ -754,10 +754,23 @@ Four five six\
                   pos: 26,
                   length: 4,
                 },
+                // 'lazy'
+                {
+                  pos: 35,
+                  length: 4,
+                },
               ],
               resolved: false,
             },
             { id: 'comment-2', ranges: [], resolved: true },
+            {
+              id: 'comment-3',
+              ranges: [
+                // 'q'
+                { pos: 4, length: 1 },
+              ],
+              resolved: true,
+            },
           ],
         })
         this.data = await this.SnapshotManager.promises.getRangesSnapshot(
@@ -769,36 +782,29 @@ Four five six\
 
       it('should move the comment to the start of the tracked delete and remove overlapping text', function () {
         expect(this.data.comments[0].op.p).to.eq(2)
-        expect(this.data.comments[0].op.c).to.eq('ck')
-      })
-
-      it('should remove overlapping text in middle of comment', function () {
-        expect(this.data.comments[1].op.p).to.eq(5)
-        expect(this.data.comments[1].op.c).to.eq('bown')
-      })
-
-      it('should remove overlapping text at end of comment', function () {
-        expect(this.data.comments[2].op.p).to.eq(20)
-        expect(this.data.comments[2].op.c).to.eq('ov')
+        expect(this.data.comments[0].op.c).to.eq('ck bown fox jumps ovzy')
       })
 
       it('should put resolved status in op', function () {
         expect(this.data.comments[0].op.resolved).to.be.false
-        expect(this.data.comments[1].op.resolved).to.be.false
-        expect(this.data.comments[2].op.resolved).to.be.false
-        expect(this.data.comments[3].op.resolved).to.be.true
+        expect(this.data.comments[1].op.resolved).to.be.true
+        expect(this.data.comments[2].op.resolved).to.be.true
       })
 
       it('should include thread id', function () {
         expect(this.data.comments[0].op.t).to.eq('comment-1')
-        expect(this.data.comments[1].op.t).to.eq('comment-1')
-        expect(this.data.comments[2].op.t).to.eq('comment-1')
-        expect(this.data.comments[3].op.t).to.eq('comment-2')
+        expect(this.data.comments[1].op.t).to.eq('comment-2')
+        expect(this.data.comments[2].op.t).to.eq('comment-3')
       })
 
-      it('should translated detached comment to zero length op', function () {
-        expect(this.data.comments[3].op.p).to.eq(0)
-        expect(this.data.comments[3].op.c).to.eq('')
+      it('should translate detached comment to zero length op', function () {
+        expect(this.data.comments[1].op.p).to.eq(0)
+        expect(this.data.comments[1].op.c).to.eq('')
+      })
+
+      it('should position a comment entirely in a tracked delete next to the tracked delete', function () {
+        expect(this.data.comments[2].op.p).to.eq(2)
+        expect(this.data.comments[2].op.c).to.eq('')
       })
     })
 
@@ -936,43 +942,21 @@ Four five six\
           comments: [
             {
               op: {
-                c: '',
+                c: 'brown fox jumps over the ',
                 p: 4,
                 t: 'comment-1',
                 resolved: false,
               },
+              id: 'comment-1',
             },
             {
               op: {
-                c: 'brown',
-                p: 4,
-                t: 'comment-1',
-                resolved: false,
-              },
-            },
-            {
-              op: {
-                c: '',
-                p: 29,
-                t: 'comment-1',
-                resolved: false,
-              },
-            },
-            {
-              op: {
-                c: 'the',
+                c: 'the brown fox jumps over the',
                 p: 0,
                 t: 'comment-2',
                 resolved: true,
               },
-            },
-            {
-              op: {
-                c: 'the',
-                p: 25,
-                t: 'comment-2',
-                resolved: true,
-              },
+              id: 'comment-2',
             },
           ],
         })

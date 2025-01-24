@@ -124,7 +124,6 @@ async function getRangesSnapshot(projectId, version, pathname) {
   )
   const docUpdaterCompatibleComments = []
   for (const comment of comments) {
-    trackedDeletionOffset = 0
     let trackedDeletionIndex = 0
     if (comment.ranges.length === 0) {
       // Translate detached comments into zero length comments at position 0
@@ -138,69 +137,60 @@ async function getRangesSnapshot(projectId, version, pathname) {
       })
       continue
     }
-    for (const commentRange of comment.ranges) {
-      let commentRangeContent = ''
-      let offsetFromOverlappingRangeAtStart = 0
-      while (
-        trackedDeletionIndex < trackedDeletions.length &&
-        trackedDeletions[trackedDeletionIndex].range.start <
-          commentRange.start &&
-        trackedDeletions[trackedDeletionIndex].range.end <= commentRange.start
-      ) {
-        // Skip over tracked deletions that are before the current comment range
-        trackedDeletionOffset +=
-          trackedDeletions[trackedDeletionIndex].range.length
-        trackedDeletionIndex++
+
+    // Consider a multiple range comment as a single comment that joins all its
+    // ranges
+    const commentStart = comment.ranges[0].start
+    const commentEnd = comment.ranges[comment.ranges.length - 1].end
+
+    let commentContent = ''
+    // Docupdater position
+    let position = commentStart
+    while (trackedDeletions[trackedDeletionIndex]?.range.end <= commentStart) {
+      // Skip over tracked deletions that are before the current comment range
+      position -= trackedDeletions[trackedDeletionIndex].range.length
+      trackedDeletionIndex++
+    }
+
+    if (trackedDeletions[trackedDeletionIndex]?.range.start < commentStart) {
+      // There's overlap with a tracked deletion, move the position left and
+      // truncate the overlap
+      position -=
+        commentStart - trackedDeletions[trackedDeletionIndex].range.start
+    }
+
+    // Cursor in the history content
+    let cursor = commentStart
+    while (cursor < commentEnd) {
+      const trackedDeletion = trackedDeletions[trackedDeletionIndex]
+      if (!trackedDeletion || trackedDeletion.range.start >= commentEnd) {
+        // We've run out of relevant tracked changes
+        commentContent += content.slice(cursor, commentEnd)
+        break
+      }
+      if (trackedDeletion.range.start > cursor) {
+        // There's a gap between the current cursor and the tracked deletion
+        commentContent += content.slice(cursor, trackedDeletion.range.start)
       }
 
-      if (
-        trackedDeletions[trackedDeletionIndex]?.range.start < commentRange.start
-      ) {
-        // There's overlap with a tracked deletion, move the position left and
-        // truncate the overlap
-        offsetFromOverlappingRangeAtStart =
-          commentRange.start -
-          trackedDeletions[trackedDeletionIndex].range.start
-      }
-
-      // The position of the comment in the document after tracked deletions
-      const position =
-        commentRange.start -
-        trackedDeletionOffset -
-        offsetFromOverlappingRangeAtStart
-
-      let cursor = commentRange.start
-      while (cursor < commentRange.end) {
-        const trackedDeletion = trackedDeletions[trackedDeletionIndex]
-        if (
-          !trackedDeletion ||
-          trackedDeletion.range.start >= commentRange.end
-        ) {
-          // We've run out of relevant tracked changes
-          commentRangeContent += content.slice(cursor, commentRange.end)
-          break
-        }
-        if (trackedDeletion.range.start > cursor) {
-          // There's a gap between the current cursor and the tracked deletion
-          commentRangeContent += content.slice(
-            cursor,
-            trackedDeletion.range.start
-          )
-        }
+      if (trackedDeletion.range.end <= commentEnd) {
         // Skip to the end of the tracked delete
         cursor = trackedDeletion.range.end
         trackedDeletionIndex++
-        trackedDeletionOffset += trackedDeletion.range.length
+      } else {
+        // We're done with that comment
+        break
       }
-      docUpdaterCompatibleComments.push({
-        op: {
-          p: position,
-          c: commentRangeContent,
-          t: comment.id,
-          resolved: comment.resolved,
-        },
-      })
     }
+    docUpdaterCompatibleComments.push({
+      op: {
+        p: position,
+        c: commentContent,
+        t: comment.id,
+        resolved: comment.resolved,
+      },
+      id: comment.id,
+    })
   }
 
   return {
