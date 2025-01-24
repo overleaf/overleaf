@@ -1,3 +1,4 @@
+import _ from 'lodash'
 import async from 'async'
 import logger from '@overleaf/logger'
 import OError from '@overleaf/o-error'
@@ -37,6 +38,7 @@ export function createBlobsForUpdates(
     let attempts = 0
     // Since we may be creating O(1000) blobs in an update, allow for the
     // occasional failure to prevent the whole update failing.
+    let lastErr
     async.retry(
       {
         times: RETRY_ATTEMPTS,
@@ -46,14 +48,28 @@ export function createBlobsForUpdates(
         attempts++
         if (attempts > 1) {
           logger.error(
-            { projectId, doc: update.doc, file: update.file, attempts },
+            {
+              err: lastErr,
+              projectId,
+              historyId,
+              update: _.pick(
+                update,
+                'doc',
+                'file',
+                'hash',
+                'createdBlob',
+                'url'
+              ),
+              attempts,
+            },
             'previous createBlob attempt failed, retrying'
           )
         }
         // extend the lock for each file because large files may take a long time
         extendLock(err => {
           if (err) {
-            return _cb(OError.tag(err))
+            lastErr = OError.tag(err)
+            return _cb(lastErr)
           }
           HistoryStoreManager.createBlobForUpdate(
             projectId,
@@ -61,12 +77,12 @@ export function createBlobsForUpdates(
             update,
             (err, hashes) => {
               if (err) {
-                OError.tag(err, 'retry: error creating blob', {
+                lastErr = OError.tag(err, 'retry: error creating blob', {
                   projectId,
                   doc: update.doc,
                   file: update.file,
                 })
-                _cb(err)
+                _cb(lastErr)
               } else {
                 _cb(null, hashes)
               }
