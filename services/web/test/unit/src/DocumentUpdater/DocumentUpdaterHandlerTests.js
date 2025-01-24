@@ -28,6 +28,7 @@ describe('DocumentUpdaterHandler', function () {
           url: 'http://project_history.example.com',
         },
       },
+      moduleImportSequence: [],
     }
     this.source = 'dropbox'
 
@@ -1510,6 +1511,89 @@ describe('DocumentUpdaterHandler', function () {
           )
         })
       })
+
+      describe('with filestore disabled', function () {
+        beforeEach(function () {
+          this.settings.disableFilestore = true
+        })
+        it('should add files without URL and with createdBlob', function (done) {
+          this.fileId = new ObjectId()
+          this.changes = {
+            newFiles: [
+              {
+                path: '/bar',
+                url: 'filestore.example.com/file',
+                file: { _id: this.fileId, hash: '12345' },
+              },
+            ],
+            newProject: { version: this.version },
+          }
+
+          const updates = [
+            {
+              type: 'add-file',
+              id: this.fileId.toString(),
+              pathname: '/bar',
+              docLines: undefined,
+              historyRangesSupport: false,
+              url: undefined,
+              hash: '12345',
+              ranges: undefined,
+              createdBlob: true,
+              metadata: undefined,
+            },
+          ]
+
+          this.handler.updateProjectStructure(
+            this.project_id,
+            this.projectHistoryId,
+            this.user_id,
+            this.changes,
+            this.source,
+            () => {
+              this.request.should.have.been.calledWith({
+                url: this.url,
+                method: 'POST',
+                json: {
+                  updates,
+                  userId: this.user_id,
+                  version: this.version,
+                  projectHistoryId: this.projectHistoryId,
+                  source: this.source,
+                },
+                timeout: 30 * 1000,
+              })
+              done()
+            }
+          )
+        })
+        it('should flag files without hash', function (done) {
+          this.fileId = new ObjectId()
+          this.changes = {
+            newFiles: [
+              {
+                path: '/bar',
+                url: 'filestore.example.com/file',
+                file: { _id: this.fileId },
+              },
+            ],
+            newProject: { version: this.version },
+          }
+
+          this.handler.updateProjectStructure(
+            this.project_id,
+            this.projectHistoryId,
+            this.user_id,
+            this.changes,
+            this.source,
+            err => {
+              err.should.match(/found file with missing hash/)
+              this.request.should.not.have.been.called
+              done()
+            }
+          )
+        })
+      })
     })
   })
 
@@ -1607,6 +1691,7 @@ describe('DocumentUpdaterHandler', function () {
                   _hash: '42',
                   path: '1.png',
                   url: `http://filestore/project/${projectId}/file/${fileId1}`,
+                  createdBlob: false,
                   metadata: undefined,
                 },
                 {
@@ -1614,6 +1699,7 @@ describe('DocumentUpdaterHandler', function () {
                   _hash: '1337',
                   path: '1.bib',
                   url: `http://filestore/project/${projectId}/file/${fileId2}`,
+                  createdBlob: false,
                   metadata: {
                     importedAt: fileCreated2,
                     provider: 'references-provider',
@@ -1624,6 +1710,7 @@ describe('DocumentUpdaterHandler', function () {
                   _hash: '21',
                   path: 'bar.txt',
                   url: `http://filestore/project/${projectId}/file/${fileId3}`,
+                  createdBlob: false,
                   metadata: {
                     importedAt: fileCreated3,
                     provider: 'project_output_file',
@@ -1640,6 +1727,158 @@ describe('DocumentUpdaterHandler', function () {
           done()
         }
       )
+    })
+    describe('with filestore disabled', function () {
+      beforeEach(function () {
+        this.settings.disableFilestore = true
+      })
+      it('should add files without URL', function (done) {
+        const fileId1 = new ObjectId()
+        const fileId2 = new ObjectId()
+        const fileId3 = new ObjectId()
+        const fileCreated2 = new Date()
+        const fileCreated3 = new Date()
+        const otherProjectId = new ObjectId().toString()
+        const files = [
+          { file: { _id: fileId1, hash: '42' }, path: '1.png' },
+          {
+            file: {
+              _id: fileId2,
+              hash: '1337',
+              created: fileCreated2,
+              linkedFileData: {
+                provider: 'references-provider',
+              },
+            },
+            path: '1.bib',
+          },
+          {
+            file: {
+              _id: fileId3,
+              hash: '21',
+              created: fileCreated3,
+              linkedFileData: {
+                provider: 'project_output_file',
+                build_id: '1234-abc',
+                clsiServerId: 'server-1',
+                source_project_id: otherProjectId,
+                source_output_file_path: 'foo/bar.txt',
+              },
+            },
+            path: 'bar.txt',
+          },
+        ]
+        const docs = []
+        this.request.yields(null, { statusCode: 200 })
+        const projectId = new ObjectId()
+        const projectHistoryId = 99
+        this.handler.resyncProjectHistory(
+          projectId,
+          projectHistoryId,
+          docs,
+          files,
+          {},
+          () => {
+            this.request.should.have.been.calledWith({
+              url: `${this.settings.apis.documentupdater.url}/project/${projectId}/history/resync`,
+              method: 'POST',
+              json: {
+                docs: [],
+                files: [
+                  {
+                    file: fileId1,
+                    _hash: '42',
+                    path: '1.png',
+                    url: undefined,
+                    createdBlob: true,
+                    metadata: undefined,
+                  },
+                  {
+                    file: fileId2,
+                    _hash: '1337',
+                    path: '1.bib',
+                    url: undefined,
+                    createdBlob: true,
+                    metadata: {
+                      importedAt: fileCreated2,
+                      provider: 'references-provider',
+                    },
+                  },
+                  {
+                    file: fileId3,
+                    _hash: '21',
+                    path: 'bar.txt',
+                    url: undefined,
+                    createdBlob: true,
+                    metadata: {
+                      importedAt: fileCreated3,
+                      provider: 'project_output_file',
+                      source_project_id: otherProjectId,
+                      source_output_file_path: 'foo/bar.txt',
+                      // build_id and clsiServerId are omitted
+                    },
+                  },
+                ],
+                projectHistoryId,
+              },
+              timeout: 6 * 60 * 1000,
+            })
+            done()
+          }
+        )
+      })
+      it('should flag files with missing hashes', function (done) {
+        const fileId1 = new ObjectId()
+        const fileId2 = new ObjectId()
+        const fileId3 = new ObjectId()
+        const fileCreated2 = new Date()
+        const fileCreated3 = new Date()
+        const otherProjectId = new ObjectId().toString()
+        const files = [
+          { file: { _id: fileId1, hash: '42' }, path: '1.png' },
+          {
+            file: {
+              _id: fileId2,
+              created: fileCreated2,
+              linkedFileData: {
+                provider: 'references-provider',
+              },
+            },
+            path: '1.bib',
+          },
+          {
+            file: {
+              _id: fileId3,
+              hash: '21',
+              created: fileCreated3,
+              linkedFileData: {
+                provider: 'project_output_file',
+                build_id: '1234-abc',
+                clsiServerId: 'server-1',
+                source_project_id: otherProjectId,
+                source_output_file_path: 'foo/bar.txt',
+              },
+            },
+            path: 'bar.txt',
+          },
+        ]
+        const docs = []
+        this.request.yields(null, { statusCode: 200 })
+        const projectId = new ObjectId()
+        const projectHistoryId = 99
+        this.handler.resyncProjectHistory(
+          projectId,
+          projectHistoryId,
+          docs,
+          files,
+          {},
+          err => {
+            err.should.match(/found file with missing hash/)
+            this.request.should.not.have.been.called
+            done()
+          }
+        )
+      })
     })
   })
 

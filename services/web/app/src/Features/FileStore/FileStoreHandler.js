@@ -45,7 +45,10 @@ const FileStoreHandler = {
         FileStoreHandler.RETRY_ATTEMPTS,
         cb =>
           HistoryManager.uploadBlobFromDisk(historyId, hash, size, fsPath, cb),
-        error => callback(error, true)
+        error => {
+          if (error) return callback(error, false)
+          callback(null, true)
+        }
       )
     } else {
       callback(null, false)

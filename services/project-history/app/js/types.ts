@@ -210,7 +210,7 @@ export type Doc = {
 
 export type File = {
   file: string
-  url: string
+  url?: string
   path: string
   _hash: string
   metadata?: LinkedFileData
