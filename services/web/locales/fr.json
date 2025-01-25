@@ -342,6 +342,7 @@
   "delete_projects": "Supprimer les projets",
   "delete_tag": "Supprimer l’étiquette",
   "delete_token": "Supprimer le jeton",
+  "delete_user": "Supprimer l’utilisateur·rice",
   "delete_your_account": "Supprimer votre compte",
   "deleted_at": "Supprimé le",
   "deleted_by_on": "Supprimé par __name__ le __date__",
