@@ -11,6 +11,8 @@ const OauthAuthorizationCodeSchema = new Schema(
     redirectUri: String,
     scope: String,
     user_id: { type: ObjectId, ref: 'User' },
+    codeChallenge: String,
+    codeChallengeMethod: String,
   },
   {
     collection: 'oauthAuthorizationCodes',
