@@ -195,6 +195,22 @@ async function accountSuspended(req, res) {
   })
 }
 
+async function reconfirmAccountPage(req, res) {
+  const pageData = {
+    reconfirm_email: req.session.reconfirm_email,
+  }
+  const { variant } = await SplitTestHandler.promises.getAssignment(
+    req,
+    res,
+    'auth-pages-bs5'
+  )
+
+  const template =
+    variant === 'enabled' ? 'user/reconfirm-bs5' : 'user/reconfirm'
+
+  res.render(template, pageData)
+}
+
 const UserPagesController = {
   accountSuspended: expressify(accountSuspended),
 
@@ -239,13 +255,7 @@ const UserPagesController = {
     res.render('user/one_time_login')
   },
 
-  renderReconfirmAccountPage(req, res) {
-    const pageData = {
-      reconfirm_email: req.session.reconfirm_email,
-    }
-    // when a user must reconfirm their account
-    res.render('user/reconfirm', pageData)
-  },
+  renderReconfirmAccountPage: expressify(reconfirmAccountPage),
 
   settingsPage: expressify(settingsPage),
 
