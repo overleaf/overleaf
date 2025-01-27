@@ -218,8 +218,11 @@ async function sendCorrectiveEvent(userId, event, subscription) {
   }
 }
 
+/**
+ * @param {Array<ObjectId>} groupIds
+ * @return {Promise<*>}
+ */
 async function fetchBigQueryMembershipStatuses(groupIds) {
-  const joinedGroupIds = groupIds.map(id => `"${id}"`).join(',')
   const query = `\
     WITH user_memberships AS (
       SELECT
@@ -227,9 +230,9 @@ async function fetchBigQueryMembershipStatuses(groupIds) {
         COALESCE(user_aliases.user_id, ugm.user_id) AS user_id,
         is_member,
         ugm.created_at
-      FROM analytics.user_group_memberships ugm
-      LEFT JOIN analytics.user_aliases ON ugm.user_id = user_aliases.analytics_id
-      WHERE ugm.group_id IN (${joinedGroupIds})
+      FROM INT_user_group_memberships ugm
+      LEFT JOIN INT_user_aliases user_aliases ON ugm.user_id = user_aliases.analytics_id
+      WHERE ugm.group_id IN UNNEST(@groupIds)
     ),
     ordered_status AS (
       SELECT *,
@@ -240,7 +243,9 @@ async function fetchBigQueryMembershipStatuses(groupIds) {
     WHERE row_number = 1;
   `
 
-  return GoogleBigQueryHelper.query(query)
+  return await GoogleBigQueryHelper.query(query, {
+    groupIds: groupIds.map(id => id.toString()),
+  })
 }
 
 const setup = () => {
