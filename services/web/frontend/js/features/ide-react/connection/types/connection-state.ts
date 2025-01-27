@@ -18,3 +18,18 @@ export type ConnectionState = {
   lastConnectionAttempt: number
   error: '' | ConnectionError
 }
+
+export type ExternalHeartbeat = {
+  currentStart: number
+  lastSuccess: number
+  lastLatency: number
+}
+
+export type SocketDebuggingInfo = {
+  client_id?: string
+  publicId?: string
+  transport?: string
+  lastUserActivity: number
+  connectionState: ConnectionState
+  externalHeartbeat: ExternalHeartbeat
+}

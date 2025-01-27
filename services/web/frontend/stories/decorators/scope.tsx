@@ -166,9 +166,8 @@ export const ScopeDecorator = (
 }
 
 const ConnectionProvider: FC = ({ children }) => {
-  const [value] = useState(() => ({
-    socket: window._ide.socket as Socket,
-    connectionState: {
+  const [value] = useState(() => {
+    const connectionState: ConnectionState = {
       readyState: WebSocket.OPEN,
       forceDisconnected: false,
       inactiveDisconnect: false,
@@ -176,14 +175,30 @@ const ConnectionProvider: FC = ({ children }) => {
       forcedDisconnectDelay: 0,
       lastConnectionAttempt: 0,
       error: '',
-    } as ConnectionState,
-    isConnected: true,
-    isStillReconnecting: false,
-    secondsUntilReconnect: () => 0,
-    tryReconnectNow: () => {},
-    registerUserActivity: () => {},
-    disconnect: () => {},
-  }))
+    }
+    return {
+      socket: window._ide.socket as Socket,
+      connectionState,
+      isConnected: true,
+      isStillReconnecting: false,
+      secondsUntilReconnect: () => 0,
+      tryReconnectNow: () => {},
+      registerUserActivity: () => {},
+      disconnect: () => {},
+      getSocketDebuggingInfo: () => ({
+        client_id: 'fakeClientId',
+        transport: 'fakeTransport',
+        publicId: 'fakePublicId',
+        lastUserActivity: 0,
+        connectionState,
+        externalHeartbeat: {
+          currentStart: 0,
+          lastSuccess: 0,
+          lastLatency: 0,
+        },
+      }),
+    }
+  })
 
   return (
     <ConnectionContext.Provider value={value}>

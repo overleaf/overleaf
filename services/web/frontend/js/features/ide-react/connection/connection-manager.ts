@@ -1,8 +1,14 @@
-import { ConnectionError, ConnectionState } from './types/connection-state'
+import {
+  ConnectionError,
+  ConnectionState,
+  ExternalHeartbeat,
+  SocketDebuggingInfo,
+} from './types/connection-state'
 import SocketIoShim from '../../../ide/connection/SocketIoShim'
 import getMeta from '../../../utils/meta'
 import { Socket } from '@/features/ide-react/connection/types/socket'
 import { debugConsole } from '@/utils/debugging'
+import { isSplitTestEnabled } from '@/utils/splitTestUtils'
 
 const ONE_HOUR_IN_MS = 1000 * 60 * 60
 const TWO_MINUTES_IN_MS = 2 * 60 * 1000
@@ -17,6 +23,8 @@ const RECONNECT_GRACEFULLY_RETRY_INTERVAL_MS = 5000
 const MAX_RECONNECT_GRACEFULLY_INTERVAL_MS = 45 * 1000
 
 const MAX_RETRY_CONNECT = 5
+
+const externalSocketHeartbeat = isSplitTestEnabled('external-socket-heartbeat')
 
 const initialState: ConnectionState = {
   readyState: WebSocket.CLOSED,
@@ -43,6 +51,12 @@ export class ConnectionManager extends EventTarget {
   private reconnectCountdownInterval = 0
   readonly socket: Socket
   private userIsLeavingPage = false
+  private externalHeartbeatInterval?: number
+  private externalHeartbeat: ExternalHeartbeat = {
+    currentStart: 0,
+    lastSuccess: 0,
+    lastLatency: 0,
+  }
 
   constructor() {
     super()
@@ -61,14 +75,18 @@ export class ConnectionManager extends EventTarget {
       getMeta('ol-wsUrl') || '/socket.io',
       window.origin
     )
+    const query = new URLSearchParams({
+      projectId: getMeta('ol-project_id'),
+    })
+    if (externalSocketHeartbeat) {
+      query.set('esh', '1')
+    }
     const socket = SocketIoShim.connect(parsedURL.origin, {
       resource: parsedURL.pathname.slice(1),
       'auto connect': false,
       'connect timeout': 30 * 1000,
       'force new connection': true,
-      query: new URLSearchParams({
-        projectId: getMeta('ol-project_id'),
-      }).toString(),
+      query: query.toString(),
       reconnect: false,
     }) as unknown as Socket
     this.socket = socket
@@ -86,6 +104,7 @@ export class ConnectionManager extends EventTarget {
       return
     }
 
+    socket.on('connect', () => this.onConnect())
     socket.on('disconnect', () => this.onDisconnect())
     socket.on('error', () => this.onConnectError())
     socket.on('connect_failed', () => this.onConnectError())
@@ -110,6 +129,17 @@ export class ConnectionManager extends EventTarget {
     this.lastUserActivity = performance.now()
     this.userIsLeavingPage = false
     this.ensureIsConnected()
+  }
+
+  getSocketDebuggingInfo(): SocketDebuggingInfo {
+    return {
+      client_id: this.socket.socket?.sessionid,
+      transport: this.socket.socket?.transport?.name,
+      publicId: this.socket.publicId,
+      lastUserActivity: this.lastUserActivity,
+      connectionState: this.state,
+      externalHeartbeat: this.externalHeartbeat,
+    }
   }
 
   private changeState(state: ConnectionState) {
@@ -198,8 +228,24 @@ export class ConnectionManager extends EventTarget {
     }
   }
 
+  private onConnect() {
+    if (externalSocketHeartbeat) {
+      if (this.externalHeartbeatInterval) {
+        window.clearInterval(this.externalHeartbeatInterval)
+      }
+      this.externalHeartbeatInterval = window.setInterval(
+        () => this.sendExternalHeartbeat(),
+        15_000
+      )
+    }
+  }
+
   private onDisconnect() {
     this.connectionAttempt = null
+    if (this.externalHeartbeatInterval) {
+      window.clearInterval(this.externalHeartbeatInterval)
+    }
+    this.externalHeartbeat.currentStart = 0
     this.changeState({
       ...this.state,
       readyState: WebSocket.CLOSED,
@@ -400,5 +446,21 @@ export class ConnectionManager extends EventTarget {
     } else {
       this.tryReconnect()
     }
+  }
+
+  private sendExternalHeartbeat() {
+    const t0 = performance.now()
+    this.socket.emit('debug.getHostname', () => {
+      if (this.externalHeartbeat.currentStart !== t0) {
+        return
+      }
+      const t1 = performance.now()
+      this.externalHeartbeat = {
+        currentStart: 0,
+        lastSuccess: t1,
+        lastLatency: t1 - t0,
+      }
+    })
+    this.externalHeartbeat.currentStart = t0
   }
 }

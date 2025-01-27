@@ -100,7 +100,7 @@ export const IdeReactProvider: FC = ({ children }) => {
   // been called
   const [projectJoined, setProjectJoined] = useState(false)
 
-  const { socket } = useConnectionContext()
+  const { socket, getSocketDebuggingInfo } = useConnectionContext()
 
   const reportError = useCallback(
     (error: any, meta?: Record<string, any>) => {
@@ -108,11 +108,12 @@ export const IdeReactProvider: FC = ({ children }) => {
         ...meta,
         user_id: getMeta('ol-user_id'),
         project_id: projectId,
-        client_id: socket.socket?.sessionid,
-        transport: socket.socket?.transport?.name,
         client_now: new Date(),
+        performance_now: performance.now(),
         release,
         client_load: LOADED_AT,
+        spellCheckLanguage: scopeStore.get('project.spellCheckLanguage'),
+        ...getSocketDebuggingInfo(),
       }
 
       const errorObj: Record<string, any> = {}
@@ -130,7 +131,7 @@ export const IdeReactProvider: FC = ({ children }) => {
         },
       })
     },
-    [socket.socket, release, projectId]
+    [release, projectId, getSocketDebuggingInfo, scopeStore]
   )
 
   // Populate scope values when joining project, then fire project:joined event

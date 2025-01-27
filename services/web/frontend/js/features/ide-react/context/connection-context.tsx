@@ -7,7 +7,10 @@ import {
   useCallback,
   useMemo,
 } from 'react'
-import { ConnectionState } from '../connection/types/connection-state'
+import {
+  ConnectionState,
+  SocketDebuggingInfo,
+} from '../connection/types/connection-state'
 import {
   ConnectionManager,
   StateChangeEvent,
@@ -25,6 +28,7 @@ type ConnectionContextValue = {
   tryReconnectNow: () => void
   registerUserActivity: () => void
   disconnect: () => void
+  getSocketDebuggingInfo: () => SocketDebuggingInfo
 }
 
 export const ConnectionContext = createContext<
@@ -75,6 +79,11 @@ export const ConnectionProvider: FC = ({ children }) => {
     connectionManager.disconnect()
   }, [connectionManager])
 
+  const getSocketDebuggingInfo = useCallback(
+    () => connectionManager.getSocketDebuggingInfo(),
+    [connectionManager]
+  )
+
   // Reload the page on force disconnect. Doing this in React-land means that we
   // can use useLocation(), which provides mockable location methods
   useEffect(() => {
@@ -103,6 +112,7 @@ export const ConnectionProvider: FC = ({ children }) => {
       tryReconnectNow,
       registerUserActivity,
       disconnect,
+      getSocketDebuggingInfo,
     }),
     [
       connectionManager.socket,
@@ -113,6 +123,7 @@ export const ConnectionProvider: FC = ({ children }) => {
       secondsUntilReconnect,
       tryReconnectNow,
       disconnect,
+      getSocketDebuggingInfo,
     ]
   )
 
