@@ -54,6 +54,9 @@ export type User = {
     autoCreatedAccount: boolean
     firstAutoLoad: boolean
   }
+  aiErrorAssistant?: {
+    enabled: boolean
+  }
   featureUsage?: FeatureUsage
 }
 

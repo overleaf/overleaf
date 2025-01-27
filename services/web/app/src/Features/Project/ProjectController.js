@@ -364,7 +364,7 @@ const _ProjectController = {
           user: (async () => {
             const user = await User.findById(
               userId,
-              'email first_name last_name referal_id signUpDate featureSwitches features featuresEpoch refProviders alphaProgram betaProgram isAdmin ace labsProgram completedTutorials writefull'
+              'email first_name last_name referal_id signUpDate featureSwitches features featuresEpoch refProviders alphaProgram betaProgram isAdmin ace labsProgram completedTutorials writefull aiErrorAssistant'
             ).exec()
             // Handle case of deleted user
             if (!user) {
@@ -675,11 +675,14 @@ const _ProjectController = {
         subscription && !subscription.recurlySubscription_id
       const hasManuallyCollectedSubscription =
         subscription?.collectionMethod === 'manual'
+      const cannotPurchaseAddons =
+        hasNonRecurlySubscription || hasManuallyCollectedSubscription
+      const assistantDisabled = user.aiErrorAssistant?.enabled === false // the assistant has been manually disabled by the user
       const canUseErrorAssistant =
         user.features?.aiErrorAssistant ||
         (splitTestAssignments['ai-add-on']?.variant === 'enabled' &&
-          !hasNonRecurlySubscription &&
-          !hasManuallyCollectedSubscription)
+          !cannotPurchaseAddons &&
+          !assistantDisabled)
 
       let featureUsage = {}
 

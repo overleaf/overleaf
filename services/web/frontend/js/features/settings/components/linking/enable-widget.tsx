@@ -80,16 +80,22 @@ type ActionButtonProps = {
   handleUnlinkClick: () => void
   handleLinkClick: () => void
   disabled?: boolean
+  linkText?: string
+  unlinkText?: string
 }
 
-function ActionButton({
+export function ActionButton({
   linked,
   handleUnlinkClick,
   handleLinkClick,
   hasFeature,
   disabled,
+  linkText,
+  unlinkText,
 }: ActionButtonProps) {
   const { t } = useTranslation()
+  const linkingText = linkText || t('turn_on')
+  const unlinkingText = unlinkText || t('turn_off')
   if (!hasFeature) {
     return (
       <OLButton
@@ -107,7 +113,7 @@ function ActionButton({
         onClick={handleUnlinkClick}
         disabled={disabled}
       >
-        {t('turn_off')}
+        {unlinkingText}
       </OLButton>
     )
   } else {
@@ -117,7 +123,7 @@ function ActionButton({
         disabled={disabled}
         onClick={handleLinkClick}
       >
-        {t('turn_on')}
+        {linkingText}
       </OLButton>
     )
   }

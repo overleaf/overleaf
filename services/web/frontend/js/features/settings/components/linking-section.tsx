@@ -91,7 +91,7 @@ function LinkingSection() {
       {haslangFeedbackLinkingWidgets ? (
         <>
           <h3 id="language-feedback" className="text-capitalize">
-            {t('language_feedback')}
+            {t('ai_features')}
           </h3>
           <div className="settings-widgets-container">
             {langFeedbackLinkingWidgets.map(

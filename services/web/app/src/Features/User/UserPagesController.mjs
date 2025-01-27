@@ -153,6 +153,9 @@ async function settingsPage(req, res) {
       writefull: {
         enabled: Boolean(user.writefull?.enabled),
       },
+      aiErrorAssistant: {
+        enabled: Boolean(user.aiErrorAssistant?.enabled),
+      },
     },
     hasPassword: !!user.hashedPassword,
     shouldAllowEditingDetails,
