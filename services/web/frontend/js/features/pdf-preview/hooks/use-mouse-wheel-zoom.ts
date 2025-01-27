@@ -16,6 +16,15 @@ export default function useMouseWheelZoom(
 ) {
   const isZoomingRef = useRef(false)
 
+  // To avoid accidental pdf when pressing CMD/CTRL when the pdf scroll still has
+  // momentum, we only zoom if CMD/CTRL is pressed before the scroll starts. These refs
+  // keep track of if the pdf is currently scrolling.
+  // https://github.com/overleaf/internal/issues/20772
+  const isScrollingRef = useRef(false)
+  const isScrollingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null
+  )
+
   const performZoom = useCallback(
     (event: WheelEvent, pdfJsWrapper: PDFJSWrapper) => {
       // First, we calculate and set the new scale
@@ -61,7 +70,7 @@ export default function useMouseWheelZoom(
   useEffect(() => {
     if (pdfJsWrapper) {
       const wheelListener = (event: WheelEvent) => {
-        if (event.metaKey || event.ctrlKey) {
+        if ((event.metaKey || event.ctrlKey) && !isScrollingRef.current) {
           event.preventDefault()
 
           if (!isZoomingRef.current) {
@@ -73,6 +82,15 @@ export default function useMouseWheelZoom(
               isZoomingRef.current = false
             }, 5)
           }
+        } else {
+          isScrollingRef.current = true
+          if (isScrollingTimeoutRef.current) {
+            clearTimeout(isScrollingTimeoutRef.current)
+          }
+
+          isScrollingTimeoutRef.current = setTimeout(() => {
+            isScrollingRef.current = false
+          }, 100)
         }
       }
 
