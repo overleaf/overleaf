@@ -165,6 +165,9 @@ const baseTheme = EditorView.baseTheme({
   '.cm-diagnostic:last-of-type .ol-cm-diagnostic-actions': {
     marginBottom: '4px',
   },
+  '.cm-vim-panel input': {
+    color: 'inherit',
+  },
 })
 
 /**
