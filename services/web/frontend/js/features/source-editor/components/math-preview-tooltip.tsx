@@ -29,7 +29,6 @@ import {
   Dropdown as BS3Dropdown,
   MenuItem as BS3MenuItem,
 } from 'react-bootstrap'
-import BetaBadgeIcon from '@/shared/components/beta-badge-icon'
 
 const MathPreviewTooltipContainer: FC = () => {
   const state = useCodeMirrorStateContext()
@@ -96,8 +95,6 @@ const MathPreviewTooltip: FC<{ mathContent: HTMLDivElement }> = ({
     <>
       <div className="ol-cm-math-tooltip">
         <span ref={mathRef} />
-        <CustomSplitTestBadge />
-
         <BootstrapVersionSwitcher
           bs5={
             <Dropdown align="end">
@@ -208,20 +205,6 @@ const MathPreviewTooltip: FC<{ mathContent: HTMLDivElement }> = ({
         </OLModal>
       )}
     </>
-  )
-}
-
-// Temporary SplitTest badge for just this component that always shows
-// as in beta and doesn't have a tooltip
-const CustomSplitTestBadge: FC = () => {
-  return (
-    <a
-      href="https://forms.gle/uDVGSqnBBJQ8fUPt5"
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      <BetaBadgeIcon phase="beta" />
-    </a>
   )
 }
 
