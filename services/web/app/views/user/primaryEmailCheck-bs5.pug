@@ -1,0 +1,38 @@
+extends ../layout-website-redesign-bootstrap-5
+
+block content
+	main#main-content
+		.auth-aux-container
+			img.w-50.d-block(src=buildImgPath("ol-brand/overleaf.svg") alt=settings.appName)
+			h1.h3.mb-3 #{translate("keep_your_account_safe")}
+			div(data-ol-multi-submit)
+				p.small.mb-4
+					| !{translate("primary_email_check_question", { email: getUserEmail() }, ["strong"])}
+				form(
+					data-ol-async-form
+					action="/user/emails/primary-email-check"
+					method="POST"
+				)
+					input(name='_csrf', type='hidden', value=csrfToken)
+					+formMessages()
+
+					button.btn.btn-primary.w-100.mb-3(
+						type='submit'
+						data-ol-disabled-inflight
+					)
+						span(data-ol-inflight="idle") #{translate("yes_that_is_correct")}
+						span(hidden data-ol-inflight="pending") #{translate("confirming")}…
+
+				a.btn.btn-secondary.w-100.mb-4(
+					href="/user/settings#add-email"
+					data-ol-slow-link
+					event-tracking="primary-email-check-change-email"
+					event-tracking-mb="true"
+					event-tracking-trigger="click"
+				)
+					span(data-ol-inflight="idle") #{translate("no_update_email")}
+					span(hidden data-ol-inflight="pending") #{translate("redirecting")}…  
+				p.small.mb-2
+					|  #{translate("keep_your_email_updated")}
+				p.small
+					|  !{translate("learn_more_about_emails", {}, [{name: 'a', attrs: {href: '/learn/how-to/Keeping_your_account_secure', 'event-tracking': 'primary-email-check-learn-more', 'event-tracking-mb': 'true', 'event-tracking-trigger': 'click' }}])}
