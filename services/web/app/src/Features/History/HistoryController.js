@@ -2,7 +2,6 @@ let HistoryController
 const OError = require('@overleaf/o-error')
 const async = require('async')
 const logger = require('@overleaf/logger')
-const metrics = require('@overleaf/metrics')
 const request = require('request')
 const settings = require('@overleaf/settings')
 const SessionManager = require('../Authentication/SessionManager')
@@ -12,13 +11,20 @@ const Errors = require('../Errors/Errors')
 const HistoryManager = require('./HistoryManager')
 const ProjectDetailsHandler = require('../Project/ProjectDetailsHandler')
 const ProjectEntityUpdateHandler = require('../Project/ProjectEntityUpdateHandler')
-const ProjectLocator = require('../Project/ProjectLocator')
 const RestoreManager = require('./RestoreManager')
 const { pipeline } = require('stream')
 const Stream = require('stream')
 const { prepareZipAttachment } = require('../../infrastructure/Response')
 const Features = require('../../infrastructure/Features')
 const { expressify } = require('@overleaf/promise-utils')
+
+// Number of seconds after which the browser should send a request to revalidate
+// blobs
+const REVALIDATE_BLOB_AFTER_SECONDS = 86400 // 1 day
+
+// Number of seconds during which the browser can serve a stale response while
+// revalidating
+const STALE_WHILE_REVALIDATE_SECONDS = 365 * 86400 // 1 year
 
 async function getBlob(req, res) {
   await requestBlob('GET', req, res)
@@ -30,6 +36,13 @@ async function headBlob(req, res) {
 
 async function requestBlob(method, req, res) {
   const { project_id: projectId, hash } = req.params
+
+  // Handle conditional GET request
+  if (req.get('If-None-Match') === hash) {
+    setBlobCacheHeaders(res, hash)
+    return res.status(304).end()
+  }
+
   const range = req.get('Range')
   let url, stream, source, contentLength
   try {
@@ -47,12 +60,9 @@ async function requestBlob(method, req, res) {
   }
   res.appendHeader('X-Served-By', source)
 
-  // allow the browser to cache these immutable files
-  // note: both "private" and "max-age" appear to be required for caching
-  res.setHeader('Cache-Control', 'private, max-age=3600')
-
   if (contentLength) res.setHeader('Content-Length', contentLength) // set on HEAD
   res.setHeader('Content-Type', 'application/octet-stream')
+  setBlobCacheHeaders(res, hash)
 
   try {
     await Stream.promises.pipeline(stream, res)
@@ -66,41 +76,21 @@ async function requestBlob(method, req, res) {
   }
 }
 
+function setBlobCacheHeaders(res, etag) {
+  // Blobs are immutable, so they can in principle be cached indefinitely. Here,
+  // we ask the browser to cache them for some time, but then check back
+  // regularly in case they changed (even though they shouldn't). This is a
+  // precaution in case a bug makes us send bad data through that endpoint.
+  res.set(
+    'Cache-Control',
+    `private, max-age=${REVALIDATE_BLOB_AFTER_SECONDS}, stale-while-revalidate=${STALE_WHILE_REVALIDATE_SECONDS}`
+  )
+  res.set('ETag', etag)
+}
+
 module.exports = HistoryController = {
   getBlob: expressify(getBlob),
   headBlob: expressify(headBlob),
-
-  /** Middleware to translate fileId requests to use the blob API.
-   *
-   *  e.g. incoming requests to /project/:project_id/file/:file_id are
-   *  internally redirected to /project/:project_id/blob/:hash if the file
-   *  has a hash.
-   * */
-  fileToBlobRedirectMiddleware(req, res, next) {
-    if (!Features.hasFeature('project-history-blobs')) {
-      return next()
-    }
-    const projectId = req.params.Project_id
-    const fileId = req.params.File_id
-    ProjectLocator.findElement(
-      { project_id: projectId, element_id: fileId, type: 'file' },
-      (err, file) => {
-        if (err) {
-          return next(err)
-        }
-        metrics.inc('fileToBlobRedirectMiddleware', 1, {
-          method: req.method,
-          status: Boolean(file?.hash),
-        })
-        if (file?.hash) {
-          req.url = `/project/${projectId}/blob/${file.hash}`
-          next('route') // redirect to blob route
-        } else {
-          next() // continue with file route
-        }
-      }
-    )
-  },
 
   proxyToHistoryApi(req, res, next) {
     const userId = SessionManager.getLoggedInUserId(req.session)

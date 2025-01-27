@@ -31,7 +31,6 @@ import HealthCheckController from './Features/HealthCheck/HealthCheckController.
 import ProjectDownloadsController from './Features/Downloads/ProjectDownloadsController.mjs'
 import FileStoreController from './Features/FileStore/FileStoreController.mjs'
 import DocumentUpdaterController from './Features/DocumentUpdater/DocumentUpdaterController.mjs'
-import HistoryController from './Features/History/HistoryController.js'
 import HistoryRouter from './Features/History/HistoryRouter.mjs'
 import ExportsController from './Features/Exports/ExportsController.mjs'
 import PasswordResetRouter from './Features/PasswordReset/PasswordResetRouter.mjs'
@@ -279,6 +278,7 @@ async function initialize(webRouter, privateApiRouter, publicApiRouter) {
   TemplatesRouter.apply(webRouter)
   UserMembershipRouter.apply(webRouter)
   TokenAccessRouter.apply(webRouter)
+  HistoryRouter.apply(webRouter, privateApiRouter)
 
   await Modules.applyRouter(webRouter, privateApiRouter, publicApiRouter)
 
@@ -533,18 +533,13 @@ async function initialize(webRouter, privateApiRouter, publicApiRouter) {
   webRouter.head(
     '/Project/:Project_id/file/:File_id',
     AuthorizationMiddleware.ensureUserCanReadProject,
-    HistoryController.fileToBlobRedirectMiddleware,
     FileStoreController.getFileHead
   )
   webRouter.get(
     '/Project/:Project_id/file/:File_id',
     AuthorizationMiddleware.ensureUserCanReadProject,
-    HistoryController.fileToBlobRedirectMiddleware,
     FileStoreController.getFile
   )
-
-  // Has to be applied after any route using fileToBlobRedirectMiddleware
-  HistoryRouter.apply(webRouter, privateApiRouter)
 
   webRouter.get(
     '/Project/:Project_id/doc/:Doc_id/download', // "download" suffix to avoid conflict with private API route at doc/:doc_id

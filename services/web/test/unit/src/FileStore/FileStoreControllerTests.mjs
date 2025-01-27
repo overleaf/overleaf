@@ -21,6 +21,7 @@ describe('FileStoreController', function () {
     }
     this.ProjectLocator = { promises: { findElement: sinon.stub() } }
     this.Stream = { pipeline: sinon.stub().resolves() }
+    this.HistoryManager = {}
     this.controller = await esmock.strict(MODULE_PATH, {
       'node:stream/promises': this.Stream,
       '@overleaf/settings': this.settings,
@@ -28,6 +29,8 @@ describe('FileStoreController', function () {
         this.ProjectLocator,
       '../../../../app/src/Features/FileStore/FileStoreHandler':
         this.FileStoreHandler,
+      '../../../../app/src/Features/History/HistoryManager':
+        this.HistoryManager,
     })
     this.stream = {}
     this.projectId = '2k3j1lk3j21lk3j'

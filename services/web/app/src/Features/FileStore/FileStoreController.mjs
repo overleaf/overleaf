@@ -3,9 +3,12 @@
 import { pipeline } from 'node:stream/promises'
 import logger from '@overleaf/logger'
 import { expressify } from '@overleaf/promise-utils'
+import Metrics from '@overleaf/metrics'
 import FileStoreHandler from './FileStoreHandler.js'
 import ProjectLocator from '../Project/ProjectLocator.js'
+import HistoryManager from '../History/HistoryManager.js'
 import Errors from '../Errors/Errors.js'
+import Features from '../../infrastructure/Features.js'
 import { preparePlainTextResponse } from '../../infrastructure/Response.js'
 
 async function getFile(req, res) {
@@ -44,15 +47,50 @@ async function getFile(req, res) {
     }
   }
 
-  const stream = await FileStoreHandler.promises.getFileStream(
-    projectId,
-    fileId,
-    queryString
-  )
+  // This metric has this name because it used to be recorded in a middleware.
+  // It tracks how many files have a hash and can be served by the history
+  // system.
+  Metrics.inc('fileToBlobRedirectMiddleware', 1, {
+    method: 'GET',
+    status: Boolean(file?.hash),
+  })
+
+  let stream, contentLength
+  try {
+    if (Features.hasFeature('project-history-blobs') && file?.hash) {
+      // Get the file from history
+      ;({ stream, contentLength } =
+        await HistoryManager.promises.requestBlobWithFallback(
+          projectId,
+          file.hash,
+          fileId
+        ))
+    } else {
+      // The file-hash is missing. Fall back to filestore.
+      stream = await FileStoreHandler.promises.getFileStream(
+        projectId,
+        fileId,
+        queryString
+      )
+    }
+  } catch (err) {
+    if (err instanceof Errors.NotFoundError) {
+      return res.status(404).end()
+    } else {
+      logger.err(
+        { err, projectId, fileId, queryString },
+        'error finding element for downloading file'
+      )
+      return res.status(500).end()
+    }
+  }
 
   // mobile safari will try to render html files, prevent this
   if (isMobileSafari(userAgent) && isHtml(file)) {
     preparePlainTextResponse(res)
+  }
+  if (contentLength) {
+    res.setHeader('Content-Length', contentLength)
   }
   res.setContentDisposition('attachment', { filename: file.name })
   // allow the browser to cache these immutable files
@@ -77,11 +115,17 @@ async function getFileHead(req, res) {
   const projectId = req.params.Project_id
   const fileId = req.params.File_id
 
-  let fileSize
+  let file
   try {
-    fileSize = await FileStoreHandler.promises.getFileSize(projectId, fileId)
+    file = await ProjectLocator.promises.findElement({
+      project_id: projectId,
+      element_id: fileId,
+      type: 'file',
+    })
   } catch (err) {
     if (err instanceof Errors.NotFoundError) {
+      // res.sendStatus() sends a description of the status as body.
+      // Using res.status().end() avoids sending that fake body.
       return res.status(404).end()
     } else {
       // Instead of using the global error handler, we send an empty response in
@@ -92,6 +136,37 @@ async function getFileHead(req, res) {
         { err, projectId, fileId },
         'error finding element for downloading file'
       )
+      return res.status(500).end()
+    }
+  }
+
+  // This metric has this name because it used to be recorded in a middleware.
+  // It tracks how many files have a hash and can be served by the history
+  // system.
+  Metrics.inc('fileToBlobRedirectMiddleware', 1, {
+    method: 'HEAD',
+    status: Boolean(file?.hash),
+  })
+
+  let fileSize
+  try {
+    if (Features.hasFeature('project-history-blobs') && file?.hash) {
+      const { contentLength } =
+        await HistoryManager.promises.requestBlobWithFallback(
+          projectId,
+          file.hash,
+          fileId,
+          'HEAD'
+        )
+      fileSize = contentLength
+    } else {
+      fileSize = await FileStoreHandler.promises.getFileSize(projectId, fileId)
+    }
+  } catch (err) {
+    if (err instanceof Errors.NotFoundError) {
+      return res.status(404).end()
+    } else {
+      logger.err({ err, projectId, fileId }, 'error obtaining file size')
       return res.status(500).end()
     }
   }

@@ -146,12 +146,34 @@ describe('HistoryTests', function () {
           expect(body).to.equal(fileContent)
           await expectHistoryV1Hit()
         })
+        it('should set cache headers', async function () {
+          const { response } = await user.doRequest('GET', fileURL)
+          expect(response.headers['cache-control']).to.equal(
+            'private, max-age=86400, stale-while-revalidate=31536000'
+          )
+          expect(response.headers.etag).to.equal(fileHash)
+        })
+        it('should return a 304 when revalidating', async function () {
+          const { response, body } = await user.doRequest('GET', {
+            url: fileURL,
+            headers: { 'If-None-Match': fileHash },
+          })
+          expect(response.statusCode).to.equal(304)
+          expect(response.headers.etag).to.equal(fileHash)
+          expect(body).to.equal('')
+        })
       }
       it('should return 404 without fallback', async function () {
         MockV1HistoryApi.reset()
         const { response } = await user.doRequest('GET', fileURL)
         expect(response.statusCode).to.equal(404)
         await expectNoIncrement()
+      })
+      it('should not set cache headers on 404', async function () {
+        MockV1HistoryApi.reset()
+        const { response } = await user.doRequest('GET', fileURL)
+        expect(response.headers).not.to.have.property('cache-control')
+        expect(response.headers).not.to.have.property('etag')
       })
       it('should fetch the file size from filestore when missing in history-v1', async function () {
         MockV1HistoryApi.reset()
