@@ -17,7 +17,6 @@ declare global {
         removeListener: (event: string, listener: any) => void
       }
     }
-    _reportCM6Perf: () => void
     MathJax: Record<string, any>
     crypto: {
       randomUUID: () => string

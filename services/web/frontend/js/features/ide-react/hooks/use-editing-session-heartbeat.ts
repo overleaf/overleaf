@@ -1,7 +1,6 @@
 import { useIdeReactContext } from '@/features/ide-react/context/ide-react-context'
 import { useEditorManagerContext } from '@/features/ide-react/context/editor-manager-context'
 import { EditorType } from '@/features/ide-react/editor/types/editor-type'
-import { reportCM6Perf } from '@/infrastructure/cm6-performance'
 import { putJSON } from '@/infrastructure/fetch-json'
 import { debugConsole } from '@/utils/debugging'
 import moment from 'moment'
@@ -10,23 +9,9 @@ import useEventListener from '@/shared/hooks/use-event-listener'
 import useDomEventListener from '@/shared/hooks/use-dom-event-listener'
 
 function createEditingSessionHeartbeatData(editorType: EditorType) {
-  const segmentation: Record<string, unknown> = {
+  return {
     editorType,
   }
-  const cm6PerfData = reportCM6Perf()
-
-  // Ignore if no typing has happened
-  if (cm6PerfData.numberOfEntries > 0) {
-    for (const [key, value] of Object.entries(cm6PerfData)) {
-      const segmentationPropName =
-        'cm6Perf' + key.charAt(0).toUpperCase() + key.slice(1)
-      if (value !== null) {
-        segmentation[segmentationPropName] = value
-      }
-    }
-  }
-
-  return segmentation
 }
 
 function sendEditingSessionHeartbeat(

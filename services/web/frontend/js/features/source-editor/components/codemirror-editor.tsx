@@ -7,7 +7,6 @@ import CodeMirrorSearch from './codemirror-search'
 import { CodeMirrorToolbar } from './codemirror-toolbar'
 import { CodemirrorOutline } from './codemirror-outline'
 import { CodeMirrorCommandTooltip } from './codemirror-command-tooltip'
-import { dispatchTimer } from '../../../infrastructure/cm6-performance'
 import importOverleafModules from '../../../../macros/import-overleaf-module.macro'
 import { FigureModal } from './figure-modal/figure-modal'
 import { ReviewPanelProviders } from '@/features/review-panel-new/context/review-panel-providers'
@@ -45,20 +44,16 @@ function CodeMirrorEditor() {
   // create the view using the initial state and intercept transactions
   const viewRef = useRef<EditorView | null>(null)
   if (viewRef.current === null) {
-    const timer = dispatchTimer()
-
     // @ts-ignore (disable EditContext-based editing until stable)
     EditorView.EDIT_CONTEXT = false
 
     const view = new EditorView({
       state,
       dispatchTransactions: trs => {
-        timer.start(trs)
         view.update(trs)
         if (isMounted.current) {
           setState(view.state)
         }
-        timer.end(trs, view)
       },
     })
     viewRef.current = view
