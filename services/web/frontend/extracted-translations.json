@@ -776,6 +776,7 @@
   "invalid_filename": "",
   "invalid_password_contains_email": "",
   "invalid_password_too_similar": "",
+  "invalid_regular_expression": "",
   "invalid_request": "",
   "invite": "",
   "invite_expired": "",
