@@ -5,6 +5,10 @@ mixin notificationIcon(type)
 		span.material-symbols(aria-hidden="true") info
 	else if type === 'success'
 		span.material-symbols(aria-hidden="true") check_circle
+	else if type === 'error'
+		span.material-symbols(aria-hidden="true") error
+	else if type === 'warning'
+		span.material-symbols(aria-hidden="true") warning
 
 
 mixin notification(options)
@@ -24,7 +28,7 @@ mixin notification(options)
 				if title
 					p
 						b #{title}
-				| #{content}
+				| !{content}
 			//- TODO: handle action
 			//- if action
 			//- 	.notification-cta

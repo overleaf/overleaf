@@ -60,6 +60,11 @@ describe('PasswordResetController', function () {
         removeReconfirmFlag: sinon.stub().resolves(),
       },
     }
+    this.SplitTestHandler = {
+      promises: {
+        getAssignment: sinon.stub().resolves('default'),
+      },
+    }
     this.PasswordResetController = await esmock.strict(MODULE_PATH, {
       '@overleaf/settings': this.settings,
       '../../../../app/src/Features/PasswordReset/PasswordResetHandler':
@@ -81,6 +86,8 @@ describe('PasswordResetController', function () {
       '../../../../app/src/Features/User/UserSessionsManager':
         this.UserSessionsManager,
       '../../../../app/src/Features/User/UserUpdater': this.UserUpdater,
+      '../../../../app/src/Features/SplitTests/SplitTestHandler':
+        this.SplitTestHandler,
     })
   })
 

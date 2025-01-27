@@ -1,0 +1,24 @@
+.auth-aux-logo {
+  position: absolute;
+  top: var(--spacing-06);
+  left: var(--spacing-06);
+
+  img {
+    height: 40px;
+  }
+}
+
+.auth-aux-container {
+  padding-top: calc($header-height + $spacing-11);
+  max-width: 320px;
+  min-height: 100vh;
+  margin-left: auto;
+  margin-right: auto;
+
+  .recaptcha-branding {
+    @include body-xs;
+
+    padding: 0;
+    text-align: left;
+  }
+}

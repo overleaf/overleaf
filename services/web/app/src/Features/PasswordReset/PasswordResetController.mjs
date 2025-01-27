@@ -8,6 +8,7 @@ import UserSessionsManager from '../User/UserSessionsManager.js'
 import OError from '@overleaf/o-error'
 import EmailsHelper from '../Helpers/EmailHelper.js'
 import { expressify } from '@overleaf/promise-utils'
+import SplitTestHandler from '../SplitTests/SplitTestHandler.js'
 
 async function setNewUserPassword(req, res, next) {
   let user
@@ -191,19 +192,29 @@ async function renderSetPasswordForm(req, res, next) {
   })
 }
 
-export default {
-  renderRequestResetForm(req, res) {
-    const errorQuery = req.query.error
-    let error = null
-    if (errorQuery === 'token_expired') {
-      error = 'password_reset_token_expired'
-    }
-    res.render('user/passwordReset', {
-      title: 'reset_password',
-      error,
-    })
-  },
+async function renderRequestResetForm(req, res) {
+  const errorQuery = req.query.error
+  let error = null
+  if (errorQuery === 'token_expired') {
+    error = 'password_reset_token_expired'
+  }
+  const { variant } = await SplitTestHandler.promises.getAssignment(
+    req,
+    res,
+    'auth-pages-bs5'
+  )
 
+  const template =
+    variant === 'enabled' ? 'user/passwordReset-bs5' : 'user/passwordReset'
+
+  res.render(template, {
+    title: 'reset_password',
+    error,
+  })
+}
+
+export default {
+  renderRequestResetForm: expressify(renderRequestResetForm),
   requestReset: expressify(requestReset),
   renderSetPasswordForm: expressify(renderSetPasswordForm),
   setNewUserPassword: expressify(setNewUserPassword),
