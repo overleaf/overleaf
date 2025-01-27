@@ -1,8 +1,6 @@
 import { useEffect } from 'react'
-import { useTranslation } from 'react-i18next'
 import classNames from 'classnames'
 
-import Icon from '../../../shared/components/icon'
 import {
   useFileTreeSelectable,
   useSelectableEntity,
@@ -12,11 +10,10 @@ import { useDroppable } from '../contexts/file-tree-draggable'
 import FileTreeItemInner from './file-tree-item/file-tree-item-inner'
 import FileTreeFolderList from './file-tree-folder-list'
 import usePersistedState from '../../../shared/hooks/use-persisted-state'
-import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
-import MaterialIcon from '@/shared/components/material-icon'
 import { Folder } from '../../../../../types/folder'
 import { Doc } from '../../../../../types/doc'
 import { FileRef } from '../../../../../types/file-ref'
+import FileTreeFolderIcons from './file-tree-folder-icons'
 
 function FileTreeFolder({
   name,
@@ -31,8 +28,6 @@ function FileTreeFolder({
   docs: Doc[]
   files: FileRef[]
 }) {
-  const { t } = useTranslation()
-
   const { isSelected, props: selectableEntityProps } = useSelectableEntity(
     id,
     'folder'
@@ -58,47 +53,6 @@ function FileTreeFolder({
   const { isOver: isOverRoot, dropRef: dropRefRoot } = useDroppable(id)
   const { isOver: isOverList, dropRef: dropRefList } = useDroppable(id)
 
-  const icons = (
-    <BootstrapVersionSwitcher
-      bs3={
-        <>
-          <button
-            onClick={handleExpandCollapseClick}
-            aria-label={expanded ? t('collapse') : t('expand')}
-          >
-            <Icon
-              type={expanded ? 'angle-down' : 'angle-right'}
-              fw
-              className="file-tree-expand-icon"
-            />
-          </button>
-          <Icon
-            type={expanded ? 'folder-open' : 'folder'}
-            fw
-            className="file-tree-folder-icon"
-          />
-        </>
-      }
-      bs5={
-        <>
-          <button
-            onClick={handleExpandCollapseClick}
-            aria-label={expanded ? t('collapse') : t('expand')}
-          >
-            <MaterialIcon
-              type={expanded ? 'expand_more' : 'chevron_right'}
-              className="file-tree-expand-icon"
-            />
-          </button>
-          <MaterialIcon
-            type={expanded ? 'folder_open' : 'folder'}
-            className="file-tree-folder-icon"
-          />
-        </>
-      }
-    />
-  )
-
   return (
     <>
       <li
@@ -119,7 +73,12 @@ function FileTreeFolder({
           name={name}
           type="folder"
           isSelected={isSelected}
-          icons={icons}
+          icons={
+            <FileTreeFolderIcons
+              expanded={expanded}
+              onExpandCollapseClick={handleExpandCollapseClick}
+            />
+          }
         />
       </li>
       {expanded ? (

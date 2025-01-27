@@ -372,7 +372,7 @@ describe('<FileTreeRoot/>', function () {
 
       cy.findByRole('treeitem', { name: 'abcdef.tex' }).then($itemEl => {
         cy.findByTestId('file-tree-list-root').then($rootEl => {
-          expect($itemEl.get(0).parentNode).to.equal($rootEl.get(0))
+          expect($itemEl.get(0).parentNode?.parentNode).to.equal($rootEl.get(0))
         })
       })
     })

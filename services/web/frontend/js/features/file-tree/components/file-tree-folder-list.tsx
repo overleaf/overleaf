@@ -32,39 +32,47 @@ function FileTreeFolderList({
 
   return (
     <ul
-      className={classNames('list-unstyled', classes.root)}
+      className={classNames(
+        'list-unstyled',
+        'file-tree-folder-list',
+        classes.root
+      )}
       role="tree"
       ref={dropRef}
       data-testid={dataTestId}
     >
-      {folders.sort(compareFunction).map(folder => {
-        return (
-          <FileTreeFolder
-            key={folder._id}
-            name={folder.name}
-            id={folder._id}
-            folders={folder.folders}
-            docs={folder.docs}
-            files={folder.fileRefs}
-          />
-        )
-      })}
-      {docsAndFiles.sort(compareFunction).map(doc => {
-        if ('isFile' in doc) {
+      <div className="file-tree-folder-list-inner">
+        {folders.sort(compareFunction).map(folder => {
           return (
-            <FileTreeDoc
-              key={doc._id}
-              name={doc.name}
-              id={doc._id}
-              isFile={doc.isFile}
-              isLinkedFile={doc.linkedFileData && !!doc.linkedFileData.provider}
+            <FileTreeFolder
+              key={folder._id}
+              name={folder.name}
+              id={folder._id}
+              folders={folder.folders}
+              docs={folder.docs}
+              files={folder.fileRefs}
             />
           )
-        }
+        })}
+        {docsAndFiles.sort(compareFunction).map(doc => {
+          if ('isFile' in doc) {
+            return (
+              <FileTreeDoc
+                key={doc._id}
+                name={doc.name}
+                id={doc._id}
+                isFile={doc.isFile}
+                isLinkedFile={
+                  doc.linkedFileData && !!doc.linkedFileData.provider
+                }
+              />
+            )
+          }
 
-        return <FileTreeDoc key={doc._id} name={doc.name} id={doc._id} />
-      })}
-      {children}
+          return <FileTreeDoc key={doc._id} name={doc.name} id={doc._id} />
+        })}
+        {children}
+      </div>
     </ul>
   )
 }

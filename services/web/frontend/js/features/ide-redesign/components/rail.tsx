@@ -5,6 +5,7 @@ import MaterialIcon, {
 } from '@/shared/components/material-icon'
 import { Panel } from 'react-resizable-panels'
 import { useLayoutContext } from '@/shared/context/layout-context'
+import { FileTree } from '@/features/ide-react/components/file-tree'
 
 type RailElement = {
   icon: AvailableUnfilledIcon
@@ -26,7 +27,12 @@ const RAIL_TABS: RailElement[] = [
   {
     key: 'file-tree',
     icon: 'description',
-    component: <>File tree</>,
+    component: (
+      <>
+        {/* TODO: add panel for file outline */}
+        <FileTree />
+      </>
+    ),
   },
   {
     key: 'integrations',
@@ -127,11 +133,11 @@ const RailTab = ({
 }) => {
   return (
     <NavLink eventKey={eventKey} className="ide-rail-tab-link">
-      <MaterialIcon
-        className="ide-rail-tab-link-icon"
-        type={icon}
-        unfilled={!active}
-      />
+      {active ? (
+        <MaterialIcon className="ide-rail-tab-link-icon" type={icon} />
+      ) : (
+        <MaterialIcon className="ide-rail-tab-link-icon" type={icon} unfilled />
+      )}
     </NavLink>
   )
 }
