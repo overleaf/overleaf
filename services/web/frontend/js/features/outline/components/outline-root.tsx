@@ -1,9 +1,16 @@
-import PropTypes from 'prop-types'
 import { useTranslation } from 'react-i18next'
-
 import OutlineList from './outline-list'
+import { OutlineItemData } from '@/features/ide-react/types/outline'
 
-function OutlineRoot({ outline, jumpToLine, highlightedLine }) {
+function OutlineRoot({
+  outline,
+  jumpToLine,
+  highlightedLine,
+}: {
+  outline: OutlineItemData[]
+  jumpToLine: (line: number, syncToPdf: boolean) => void
+  highlightedLine?: number
+}) {
   const { t } = useTranslation()
 
   return (
@@ -31,12 +38,6 @@ function OutlineRoot({ outline, jumpToLine, highlightedLine }) {
       )}
     </div>
   )
-}
-
-OutlineRoot.propTypes = {
-  outline: PropTypes.array.isRequired,
-  jumpToLine: PropTypes.func.isRequired,
-  highlightedLine: PropTypes.number,
 }
 
 export default OutlineRoot

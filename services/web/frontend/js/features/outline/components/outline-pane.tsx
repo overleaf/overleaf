@@ -4,10 +4,11 @@ import classNames from 'classnames'
 import OutlineRoot from './outline-root'
 import withErrorBoundary from '../../../infrastructure/error-boundary'
 import { OutlineToggleButton } from '@/features/outline/components/outline-toggle-button'
+import { OutlineItemData } from '@/features/ide-react/types/outline'
 
 const OutlinePane = React.memo<{
   isTexFile: boolean
-  outline: any[]
+  outline: OutlineItemData[]
   jumpToLine(line: number): void
   onToggle(value: boolean): void
   eventTracking: any

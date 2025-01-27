@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef, memo } from 'react'
-import PropTypes from 'prop-types'
 import scrollIntoViewIfNeeded from 'scroll-into-view-if-needed'
 import classNames from 'classnames'
 import OutlineList from './outline-list'
 import { OutlineItemToggleButton } from '@/features/outline/components/outline-item-toggle-button'
+import { OutlineItemData } from '@/features/ide-react/types/outline'
 
 const OutlineItem = memo(function OutlineItem({
   outlineItem,
@@ -11,10 +11,16 @@ const OutlineItem = memo(function OutlineItem({
   highlightedLine,
   matchesHighlightedLine,
   containsHighlightedLine,
+}: {
+  outlineItem: OutlineItemData
+  jumpToLine: (line: number, syncToPdf: boolean) => void
+  highlightedLine?: number | null
+  matchesHighlightedLine?: boolean
+  containsHighlightedLine?: boolean
 }) {
   const [expanded, setExpanded] = useState(true)
-  const titleElementRef = useRef()
-  const isHighlightedRef = useRef(false)
+  const titleElementRef = useRef<HTMLButtonElement>(null)
+  const isHighlightedRef = useRef<boolean>(false)
 
   const mainItemClasses = classNames('outline-item', {
     'outline-item-no-children': !outlineItem.children,
@@ -27,16 +33,16 @@ const OutlineItem = memo(function OutlineItem({
     'outline-item-link-highlight': isHighlighted,
   })
 
-  function handleOutlineItemLinkClick(event) {
+  function handleOutlineItemLinkClick(event: React.MouseEvent) {
     const syncToPdf = event.detail === 2 // double-click = sync to PDF
     jumpToLine(outlineItem.line, syncToPdf)
   }
 
   useEffect(() => {
     const wasHighlighted = isHighlightedRef.current
-    isHighlightedRef.current = isHighlighted
+    isHighlightedRef.current = !!isHighlighted
 
-    if (!wasHighlighted && isHighlighted) {
+    if (!wasHighlighted && isHighlighted && titleElementRef.current) {
       scrollIntoViewIfNeeded(titleElementRef.current, {
         scrollMode: 'if-needed',
         block: 'center',
@@ -88,21 +94,5 @@ const OutlineItem = memo(function OutlineItem({
     </li>
   )
 })
-
-OutlineItem.propTypes = {
-  outlineItem: PropTypes.exact({
-    line: PropTypes.number.isRequired,
-    title: PropTypes.string.isRequired,
-    level: PropTypes.number,
-    children: PropTypes.array,
-    // Used for caching in CM6
-    from: PropTypes.number,
-    to: PropTypes.number,
-  }).isRequired,
-  jumpToLine: PropTypes.func.isRequired,
-  highlightedLine: PropTypes.number,
-  matchesHighlightedLine: PropTypes.bool,
-  containsHighlightedLine: PropTypes.bool,
-}
 
 export default OutlineItem

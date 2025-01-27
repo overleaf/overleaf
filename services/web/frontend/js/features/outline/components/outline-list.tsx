@@ -1,9 +1,9 @@
-import PropTypes from 'prop-types'
 import classNames from 'classnames'
 import OutlineItem from './outline-item'
 import { memo } from 'react'
+import { OutlineItemData } from '@/features/ide-react/types/outline'
 
-function getChildrenLines(children) {
+function getChildrenLines(children?: OutlineItemData[]): number[] {
   return (children || [])
     .map(child => {
       return getChildrenLines(child.children).concat(child.line)
@@ -17,6 +17,12 @@ const OutlineList = memo(function OutlineList({
   isRoot,
   highlightedLine,
   containsHighlightedLine,
+}: {
+  outline: OutlineItemData[]
+  jumpToLine: (line: number, syncToPdf: boolean) => void
+  isRoot?: boolean
+  highlightedLine?: number | null
+  containsHighlightedLine?: boolean
 }) {
   const listClasses = classNames('outline-item-list', {
     'outline-item-list-root': isRoot,
@@ -27,6 +33,8 @@ const OutlineList = memo(function OutlineList({
         const matchesHighlightedLine =
           containsHighlightedLine && highlightedLine === outlineItem.line
         const itemContainsHighlightedLine =
+          highlightedLine !== undefined &&
+          highlightedLine !== null &&
           containsHighlightedLine &&
           getChildrenLines(outlineItem.children).includes(highlightedLine)
 
@@ -52,13 +60,5 @@ const OutlineList = memo(function OutlineList({
     </ul>
   )
 })
-
-OutlineList.propTypes = {
-  outline: PropTypes.array.isRequired,
-  jumpToLine: PropTypes.func.isRequired,
-  isRoot: PropTypes.bool,
-  highlightedLine: PropTypes.number,
-  containsHighlightedLine: PropTypes.bool,
-}
 
 export default OutlineList
