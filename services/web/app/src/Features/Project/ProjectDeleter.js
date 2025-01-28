@@ -90,7 +90,7 @@ async function expireDeletedProjectsAfterDuration() {
       'deleterData.deletedAt': {
         $lt: new Date(moment().subtract(EXPIRE_PROJECTS_AFTER_DAYS, 'days')),
       },
-      project: { $ne: null },
+      project: { $type: 'object' },
     },
     { 'deleterData.deletedProjectId': 1 }
   )

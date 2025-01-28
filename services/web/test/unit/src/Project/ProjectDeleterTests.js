@@ -397,7 +397,7 @@ describe('ProjectDeleter', function () {
             $lt: new Date(moment().subtract(90, 'days')),
           },
           project: {
-            $ne: null,
+            $type: 'object',
           },
         })
         .chain('exec')
