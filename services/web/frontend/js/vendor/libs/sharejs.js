@@ -1,6 +1,7 @@
 import { generateSHA1Hash } from '../../shared/utils/sha1'
 import { debugging, debugConsole } from '@/utils/debugging'
 import getMeta from '@/utils/meta'
+import { postJSON } from '@/infrastructure/fetch-json'
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
@@ -1086,11 +1087,42 @@ export const { Doc } = (() => {
           }
           return this._closeCallback = null;
         } else if (msg.op === null && error === 'Op already submitted') {
+          // Overleaf: note that this branch is never reached, as `error` is always undefined
+
           // We've tried to resend an op to the server, which has already been received successfully. Do nothing.
           // The op will be confirmed normally when we get the op itself was echoed back from the server
           // (handled below).
 
         } else if (msg.op === undefined && msg.v !== undefined || msg.op && Array.from(this.inflightSubmittedIds).includes(msg.meta.source)) {
+          // Overleaf: avoid clearing inflightOp on repeated acknowledgement of operations on the same version
+          if (!msg.error) {
+            if (msg.op === undefined && msg.v !== undefined) {
+              if (msg.v < this.version) {
+                postJSON('/error/client', {
+                  body: {
+                    error: {
+                      message: 'out-of-order-ack-ignored'
+                    },
+                    meta: { msg, version: this.version }
+                  }
+                })
+                // return // TODO: enable this
+              }
+            } else {
+              if (msg.v < this.version) {
+                postJSON('/error/client', {
+                  body: {
+                    error: {
+                      message: 'out-of-order-self-op-ignored'
+                    },
+                    meta: { msg: { v: msg.v }, version: this.version }
+                  }
+                })
+                // return // TODO: enable this?
+              }
+            }
+          }
+
           // Our inflight op has been acknowledged.
           var callback = void 0;
           var oldInflightOp = this.inflightOp;
