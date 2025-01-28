@@ -75,23 +75,23 @@ describe('<PasswordSection />', function () {
     }) as HTMLButtonElement
     expect(button.disabled).to.be.true
 
-    fireEvent.change(screen.getByLabelText('Current Password'), {
+    fireEvent.change(screen.getByLabelText('Current password'), {
       target: { value: 'foobar' },
     })
     expect(button.disabled).to.be.true
 
-    fireEvent.change(screen.getByLabelText('New Password'), {
+    fireEvent.change(screen.getByLabelText('New password'), {
       target: { value: 'barbaz' },
     })
     expect(button.disabled).to.be.true
 
-    fireEvent.change(screen.getByLabelText('Confirm New Password'), {
+    fireEvent.change(screen.getByLabelText('Confirm new password'), {
       target: { value: 'bar' },
     })
     screen.getByText('Doesn’t match')
     expect(button.disabled).to.be.true
 
-    fireEvent.change(screen.getByLabelText('Confirm New Password'), {
+    fireEvent.change(screen.getByLabelText('Confirm new password'), {
       target: { value: 'barbaz' },
     })
     expect(button.disabled).to.be.false
@@ -106,13 +106,13 @@ describe('<PasswordSection />', function () {
     render(<PasswordSection />)
 
     const currentPasswordInput = screen.getByLabelText(
-      'Current Password'
+      'Current password'
     ) as HTMLInputElement
     const newPassword1Input = screen.getByLabelText(
-      'New Password'
+      'New password'
     ) as HTMLInputElement
     const newPassword2Input = screen.getByLabelText(
-      'Confirm New Password'
+      'Confirm new password'
     ) as HTMLInputElement
 
     expect(newPassword1Input.minLength).to.equal(3)
@@ -196,13 +196,13 @@ describe('<PasswordSection />', function () {
 })
 
 function submitValidForm() {
-  fireEvent.change(screen.getByLabelText('Current Password'), {
+  fireEvent.change(screen.getByLabelText('Current password'), {
     target: { value: 'foobar' },
   })
-  fireEvent.change(screen.getByLabelText('New Password'), {
+  fireEvent.change(screen.getByLabelText('New password'), {
     target: { value: 'barbaz' },
   })
-  fireEvent.change(screen.getByLabelText('Confirm New Password'), {
+  fireEvent.change(screen.getByLabelText('Confirm new password'), {
     target: { value: 'barbaz' },
   })
   fireEvent.click(
