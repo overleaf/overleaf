@@ -21,7 +21,7 @@ import { debugConsole } from '@/utils/debugging'
 import { IdeEvents } from '@/features/ide-react/create-ide-event-emitter'
 import { getHueForUserId } from '@/shared/utils/colors'
 
-type OnlineUser = {
+export type OnlineUser = {
   id: string
   user_id: string
   email: string

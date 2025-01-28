@@ -54,11 +54,11 @@
   height: 100%;
   padding: var(--spacing-02);
   background: var(--ide-rail-background);
+  border-right: 1px solid var(--border-divider);
 }
 
 .ide-rail-content {
   height: 100%;
-  border: 1px solid var(--border-divider);
 }
 
 .ide-rail-tabs-nav {

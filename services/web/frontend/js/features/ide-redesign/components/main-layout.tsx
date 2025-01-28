@@ -4,11 +4,12 @@ import { HorizontalResizeHandle } from '@/features/ide-react/components/resize/h
 import PdfPreview from '@/features/pdf-preview/components/pdf-preview'
 import { Editor } from './editor'
 import { RailLayout } from './rail'
+import { Toolbar } from './toolbar/toolbar'
 
 export default function MainLayout() {
   return (
     <div className="ide-redesign-main">
-      <div className="ide-skeleton-block">Toolbar</div>
+      <Toolbar />
       <div className="ide-redesign-body">
         <PanelGroup
           autoSaveId="ide-redesign-outer-layout"

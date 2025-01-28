@@ -1,0 +1,113 @@
+@use 'sass:math';
+
+:root {
+  --toolbar-home-button-hover-background: var(--neutral-20);
+}
+
+.ide-redesign-toolbar {
+  $toolbar-height: 48px;
+  $home-button-size: 36px;
+  $ol-icon-height: 24px;
+  $home-icon-font-size: 24px;
+
+  border-bottom: 1px solid var(--border-divider);
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  box-sizing: border-box;
+  height: $toolbar-height;
+
+  .ide-redesign-toolbar-menu {
+    display: flex;
+    gap: var(--spacing-05);
+  }
+
+  .ide-redesign-toolbar-home-button {
+    width: $home-button-size;
+    height: $home-button-size;
+    margin: math.div($toolbar-height - $home-button-size, 2);
+  }
+
+  .ide-redesign-toolbar-home-link {
+    display: flex;
+    height: 100%;
+    width: 100%;
+    justify-content: center;
+    flex-direction: column;
+    text-align: center;
+    border-radius: 100%;
+
+    .toolbar-ol-home-button {
+      display: none;
+      font-size: $home-icon-font-size;
+    }
+
+    .toolbar-ol-logo {
+      margin: 0 auto;
+      height: $ol-icon-height;
+      width: auto;
+    }
+
+    &:hover {
+      background-color: var(--toolbar-home-button-hover-background);
+
+      .toolbar-ol-home-button {
+        display: block;
+      }
+
+      .toolbar-ol-logo {
+        display: none;
+      }
+    }
+  }
+
+  .ide-redesign-toolbar-dropdown-toggle-subdued {
+    $height: 32px;
+
+    border: none;
+    border-radius: var(--border-radius-base);
+    padding: var(--spacing-02);
+    height: $height;
+    font-size: var(--font-size-03);
+    line-height: var(--line-height-03);
+    font-weight: 400;
+    box-sizing: border-box;
+    margin: math.div($toolbar-height - $height, 2) 0;
+
+    &.dropdown-toggle::after {
+      display: none;
+    }
+
+    .material-symbols {
+      vertical-align: middle;
+    }
+  }
+}
+
+.ide-redesign-toolbar-menu-bar {
+  display: flex;
+  justify-content: flex-start;
+  height: 100%;
+  gap: var(--spacing-05);
+}
+
+.ide-redesign-toolbar-actions {
+  display: flex;
+  gap: var(--spacing-06);
+  padding: 0 var(--spacing-05);
+}
+
+.ide-redesign-toolbar-button-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.ide-redesign-toolbar-button-subdued {
+  color: var(--neutral-90);
+  text-decoration: none;
+}
+
+.ide-redesign-online-users {
+  display: flex;
+}
