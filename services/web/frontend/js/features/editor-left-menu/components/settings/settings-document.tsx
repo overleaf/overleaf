@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { isValidTeXFile } from '../../../../main/is-valid-tex-file'
-import { useEditorContext } from '../../../../shared/context/editor-context'
+import { usePermissionsContext } from '@/features/ide-react/context/permissions-context'
 import { useProjectSettingsContext } from '../../context/project-settings-context'
 import SettingsMenuSelect from './settings-menu-select'
 import type { Option } from './settings-menu-select'
@@ -9,7 +9,7 @@ import { useFileTreeData } from '@/shared/context/file-tree-data-context'
 
 export default function SettingsDocument() {
   const { t } = useTranslation()
-  const { permissionsLevel } = useEditorContext()
+  const { write } = usePermissionsContext()
   const { docs } = useFileTreeData()
   const { rootDocId, setRootDocId } = useProjectSettingsContext()
 
@@ -39,7 +39,7 @@ export default function SettingsDocument() {
     <SettingsMenuSelect
       onChange={setRootDocId}
       value={rootDocId ?? ''}
-      disabled={permissionsLevel === 'readOnly'}
+      disabled={!write}
       options={validDocsOptions}
       label={t('main_document')}
       name="rootDocId"
