@@ -6,6 +6,7 @@ const PlansLocator = require('./PlansLocator')
 const SubscriptionHelper = require('./SubscriptionHelper')
 
 const AI_ADD_ON_CODE = 'assistant'
+const MEMBERS_LIMIT_ADD_ON_CODE = 'additional-license'
 const STANDALONE_AI_ADD_ON_CODES = ['assistant', 'assistant-annual']
 
 class RecurlySubscription {
@@ -24,6 +25,7 @@ class RecurlySubscription {
    * @param {number} props.total
    * @param {Date} props.periodStart
    * @param {Date} props.periodEnd
+   * @param {Date} props.createdAt
    * @param {RecurlySubscriptionChange} [props.pendingChange]
    */
   constructor(props) {
@@ -40,6 +42,7 @@ class RecurlySubscription {
     this.total = props.total
     this.periodStart = props.periodStart
     this.periodEnd = props.periodEnd
+    this.createdAt = props.createdAt
     this.pendingChange = props.pendingChange ?? null
   }
 
@@ -129,12 +132,13 @@ class RecurlySubscription {
    *
    * @param {string} code
    * @param {number} [quantity]
+   * @param {number} [unitPrice]
    * @return {RecurlySubscriptionChangeRequest} - the change request to send to
    * Recurly
    *
    * @throws {DuplicateAddOnError} if the add-on is already present on the subscription
    */
-  getRequestForAddOnPurchase(code, quantity = 1) {
+  getRequestForAddOnPurchase(code, quantity = 1, unitPrice) {
     if (this.hasAddOn(code)) {
       throw new DuplicateAddOnError('Subscription already has add-on', {
         subscriptionId: this.id,
@@ -143,7 +147,9 @@ class RecurlySubscription {
     }
 
     const addOnUpdates = this.addOns.map(addOn => addOn.toAddOnUpdate())
-    addOnUpdates.push(new RecurlySubscriptionAddOnUpdate({ code, quantity }))
+    addOnUpdates.push(
+      new RecurlySubscriptionAddOnUpdate({ code, quantity, unitPrice })
+    )
     return new RecurlySubscriptionChangeRequest({
       subscription: this,
       timeframe: 'now',
@@ -431,6 +437,7 @@ function isStandaloneAiAddOnPlanCode(planCode) {
 
 module.exports = {
   AI_ADD_ON_CODE,
+  MEMBERS_LIMIT_ADD_ON_CODE,
   RecurlySubscription,
   RecurlySubscriptionAddOn,
   RecurlySubscriptionChange,

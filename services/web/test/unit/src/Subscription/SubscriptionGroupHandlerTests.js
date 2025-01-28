@@ -15,9 +15,12 @@ describe('SubscriptionGroupHandler', function () {
     this.subscription_id = '31DSd1123D'
     this.adding = 1
     this.paymentMethod = { cardType: 'Visa', lastFour: '1111' }
+    this.RecurlyEntities = {
+      MEMBERS_LIMIT_ADD_ON_CODE: 'additional-license',
+    }
     this.localPlanInSettings = {
-      membersLimit: 2,
-      membersLimitAddOn: 'additional-license',
+      membersLimit: 5,
+      membersLimitAddOn: this.RecurlyEntities.MEMBERS_LIMIT_ADD_ON_CODE,
     }
 
     this.subscription = {
@@ -37,12 +40,21 @@ describe('SubscriptionGroupHandler', function () {
       id: 123,
       addOns: [
         {
-          code: 'additional-license',
+          code: this.RecurlyEntities.MEMBERS_LIMIT_ADD_ON_CODE,
           quantity: 1,
         },
       ],
       getRequestForAddOnUpdate: sinon.stub().returns(this.changeRequest),
       getRequestForGroupPlanUpgrade: sinon.stub().returns(this.changeRequest),
+      getRequestForAddOnPurchase: sinon.stub().returns(this.changeRequest),
+      getRequestForFlexibleLicensingGroupPlanUpgrade: sinon
+        .stub()
+        .returns(this.changeRequest),
+      createdAt: '2025-01-01T00:00:00Z',
+      currency: 'USD',
+      hasAddOn(code) {
+        return this.addOns.some(addOn => addOn.code === code)
+      },
     }
 
     this.SubscriptionLocator = {
@@ -81,7 +93,7 @@ describe('SubscriptionGroupHandler', function () {
     this.previewSubscriptionChange = {
       nextAddOns: [
         {
-          code: 'additional-license',
+          code: this.RecurlyEntities.MEMBERS_LIMIT_ADD_ON_CODE,
           quantity: this.recurlySubscription.addOns[0].quantity + this.adding,
         },
       ],
@@ -115,6 +127,19 @@ describe('SubscriptionGroupHandler', function () {
       },
     }
 
+    this.GroupPlansData = {
+      enterprise: {
+        collaborator: {
+          USD: {
+            5: {
+              price_in_cents: 10000,
+              additional_license_legacy_price_in_cents: 5000,
+            },
+          },
+        },
+      },
+    }
+
     this.Handler = SandboxedModule.require(modulePath, {
       requires: {
         './SubscriptionUpdater': this.SubscriptionUpdater,
@@ -126,7 +151,9 @@ describe('SubscriptionGroupHandler', function () {
         },
         './RecurlyClient': this.RecurlyClient,
         './PlansLocator': this.PlansLocator,
+        './RecurlyEntities': this.RecurlyEntities,
         '../Authentication/SessionManager': this.SessionManager,
+        './GroupPlansData': this.GroupPlansData,
       },
     })
   })
@@ -274,8 +301,8 @@ describe('SubscriptionGroupHandler', function () {
       expect(data).to.deep.equal({
         subscription: { groupPlan: true },
         plan: {
-          membersLimit: 2,
-          membersLimitAddOn: 'additional-license',
+          membersLimit: 5,
+          membersLimitAddOn: this.RecurlyEntities.MEMBERS_LIMIT_ADD_ON_CODE,
           canUseFlexibleLicensing: true,
         },
         recurlySubscription: this.recurlySubscription,
@@ -293,60 +320,169 @@ describe('SubscriptionGroupHandler', function () {
       })
     })
 
-    afterEach(function () {
-      this.recurlySubscription.getRequestForAddOnUpdate
-        .calledWith(
-          'additional-license',
-          this.recurlySubscription.addOns[0].quantity + this.adding
+    describe('has "additional-license" add-on', function () {
+      beforeEach(function () {
+        this.recurlySubscription.addOns = [
+          {
+            code: this.RecurlyEntities.MEMBERS_LIMIT_ADD_ON_CODE,
+            quantity: 6,
+          },
+        ]
+        this.prevQuantity = this.recurlySubscription.addOns[0].quantity
+        this.previewSubscriptionChange.nextAddOns = [
+          {
+            code: this.RecurlyEntities.MEMBERS_LIMIT_ADD_ON_CODE,
+            quantity: this.prevQuantity + this.adding,
+          },
+        ]
+      })
+
+      afterEach(function () {
+        sinon.assert.notCalled(
+          this.recurlySubscription.getRequestForAddOnPurchase
         )
-        .should.equal(true)
-    })
 
-    describe('previewAddSeatsSubscriptionChange', function () {
-      it('should return the subscription change preview', async function () {
-        const preview =
-          await this.Handler.promises.previewAddSeatsSubscriptionChange(
-            this.req
-          )
-
-        this.RecurlyClient.promises.getPaymentMethod
-          .calledWith(this.user_id)
-          .should.equal(true)
-        this.RecurlyClient.promises.previewSubscriptionChange
-          .calledWith(this.changeRequest)
-          .should.equal(true)
-        this.SubscriptionController.makeChangePreview
+        this.recurlySubscription.getRequestForAddOnUpdate
           .calledWith(
-            {
-              type: 'add-on-update',
-              addOn: {
-                code: 'additional-license',
-                quantity:
-                  this.recurlySubscription.addOns[0].quantity + this.adding,
-                prevQuantity: this.adding,
-              },
-            },
-            this.previewSubscriptionChange,
-            this.paymentMethod
+            this.RecurlyEntities.MEMBERS_LIMIT_ADD_ON_CODE,
+            this.recurlySubscription.addOns[0].quantity + this.adding
           )
           .should.equal(true)
-        preview.should.equal(this.changePreview)
+      })
+
+      describe('previewAddSeatsSubscriptionChange', function () {
+        it('should return the subscription change preview', async function () {
+          const preview =
+            await this.Handler.promises.previewAddSeatsSubscriptionChange(
+              this.req
+            )
+          this.RecurlyClient.promises.getPaymentMethod
+            .calledWith(this.user_id)
+            .should.equal(true)
+          this.RecurlyClient.promises.previewSubscriptionChange
+            .calledWith(this.changeRequest)
+            .should.equal(true)
+          this.SubscriptionController.makeChangePreview
+            .calledWith(
+              {
+                type: 'add-on-update',
+                addOn: {
+                  code: this.RecurlyEntities.MEMBERS_LIMIT_ADD_ON_CODE,
+                  quantity:
+                    this.previewSubscriptionChange.nextAddOns[0].quantity,
+                  prevQuantity: this.prevQuantity,
+                },
+              },
+              this.previewSubscriptionChange,
+              this.paymentMethod
+            )
+            .should.equal(true)
+          preview.should.equal(this.changePreview)
+        })
+      })
+
+      describe('createAddSeatsSubscriptionChange', function () {
+        it('should change the subscription', async function () {
+          const result =
+            await this.Handler.promises.createAddSeatsSubscriptionChange(
+              this.req
+            )
+
+          this.RecurlyClient.promises.applySubscriptionChangeRequest
+            .calledWith(this.changeRequest)
+            .should.equal(true)
+          this.SubscriptionHandler.promises.syncSubscription
+            .calledWith({ uuid: this.recurlySubscription.id }, this.user_id)
+            .should.equal(true)
+          expect(result).to.deep.equal({
+            adding: this.req.body.adding,
+          })
+        })
       })
     })
 
-    describe('createAddSeatsSubscriptionChange', function () {
-      it('should change the subscription', async function () {
-        const result =
-          await this.Handler.promises.createAddSeatsSubscriptionChange(this.req)
+    describe('has no "additional-license" add-on', function () {
+      beforeEach(function () {
+        this.recurlySubscription.addOns = []
+        this.prevQuantity = this.recurlySubscription.addOns[0]?.quantity ?? 0
+        this.previewSubscriptionChange.nextAddOns = [
+          {
+            code: this.RecurlyEntities.MEMBERS_LIMIT_ADD_ON_CODE,
+            quantity: this.prevQuantity + this.adding,
+          },
+        ]
+        this.PlansLocator.findLocalPlanInSettings = sinon.stub().returns({
+          ...this.localPlanInSettings,
+          planCode: 'group_collaborator_5_enterprise',
+          canUseFlexibleLicensing: true,
+        })
+      })
 
-        this.RecurlyClient.promises.applySubscriptionChangeRequest
-          .calledWith(this.changeRequest)
-          .should.equal(true)
-        this.SubscriptionHandler.promises.syncSubscription
-          .calledWith({ uuid: this.recurlySubscription.id }, this.user_id)
-          .should.equal(true)
-        expect(result).to.deep.equal({
-          adding: this.req.body.adding,
+      afterEach(function () {
+        sinon.assert.notCalled(
+          this.recurlySubscription.getRequestForAddOnUpdate
+        )
+      })
+
+      describe('previewAddSeatsSubscriptionChange', function () {
+        let preview
+
+        afterEach(function () {
+          this.RecurlyClient.promises.getPaymentMethod
+            .calledWith(this.user_id)
+            .should.equal(true)
+          this.RecurlyClient.promises.previewSubscriptionChange
+            .calledWith(this.changeRequest)
+            .should.equal(true)
+          this.SubscriptionController.makeChangePreview
+            .calledWith(
+              {
+                type: 'add-on-update',
+                addOn: {
+                  code: this.RecurlyEntities.MEMBERS_LIMIT_ADD_ON_CODE,
+                  quantity:
+                    this.previewSubscriptionChange.nextAddOns[0].quantity,
+                  prevQuantity: this.prevQuantity,
+                },
+              },
+              this.previewSubscriptionChange,
+              this.paymentMethod
+            )
+            .should.equal(true)
+          preview.should.equal(this.changePreview)
+        })
+
+        it('should return the subscription change preview with legacy add-on price', async function () {
+          this.recurlySubscription.createdAt = '2025-01-01T00:00:00Z'
+
+          preview =
+            await this.Handler.promises.previewAddSeatsSubscriptionChange(
+              this.req
+            )
+          this.recurlySubscription.getRequestForAddOnPurchase
+            .calledWithExactly(
+              this.RecurlyEntities.MEMBERS_LIMIT_ADD_ON_CODE,
+              this.adding,
+              this.GroupPlansData.enterprise.collaborator.USD[5]
+                .additional_license_legacy_price_in_cents / 100
+            )
+            .should.equal(true)
+        })
+
+        it('should return the subscription change preview with non-legacy add-on price', async function () {
+          this.recurlySubscription.createdAt = '2030-01-01T00:00:00Z'
+
+          preview =
+            await this.Handler.promises.previewAddSeatsSubscriptionChange(
+              this.req
+            )
+          this.recurlySubscription.getRequestForAddOnPurchase
+            .calledWithExactly(
+              this.RecurlyEntities.MEMBERS_LIMIT_ADD_ON_CODE,
+              this.adding,
+              undefined
+            )
+            .should.equal(true)
         })
       })
     })
@@ -358,16 +494,32 @@ describe('SubscriptionGroupHandler', function () {
         this.Handler.promises.ensureFlexibleLicensingEnabled({
           canUseFlexibleLicensing: false,
         })
-      ).to.be.rejectedWith('The group plan does not support flexible licencing')
+      ).to.be.rejectedWith('The group plan does not support flexible licensing')
+    })
+
+    it('should not throw if the subscription can use flexible licensing', async function () {
+      await expect(
+        this.Handler.promises.ensureFlexibleLicensingEnabled({
+          canUseFlexibleLicensing: true,
+        })
+      ).to.not.be.rejected
     })
   })
 
-  it('should not throw if the subscription can use flexible licensing', async function () {
-    await expect(
-      this.Handler.promises.ensureFlexibleLicensingEnabled({
-        canUseFlexibleLicensing: true,
-      })
-    ).to.not.be.rejected
+  describe('ensureAddSeatsEnabled', function () {
+    it('should throw if the subscription can not use the "add seats" feature', async function () {
+      await expect(
+        this.Handler.promises.ensureAddSeatsEnabled({})
+      ).to.be.rejectedWith('The group plan does not support adding seats')
+    })
+
+    it('should not throw if the subscription can use the "add seats" feature', async function () {
+      await expect(
+        this.Handler.promises.ensureAddSeatsEnabled({
+          membersLimitAddOn: this.RecurlyEntities.MEMBERS_LIMIT_ADD_ON_CODE,
+        })
+      ).to.not.be.rejected
+    })
   })
 
   describe('upgradeGroupPlan', function () {

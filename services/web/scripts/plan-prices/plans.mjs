@@ -135,6 +135,16 @@ function generateGroupPlans(workSheetJSON) {
   )
 
   const sizes = ['2', '3', '4', '5', '10', '20', '50']
+  const additionalLicenseAddOnLegacyPricesFilePath = path.resolve(
+    __dirname,
+    'additional-license-add-on-legacy-prices.json'
+  )
+  const additionalLicenseAddOnLegacyPricesFile = fs.readFileSync(
+    additionalLicenseAddOnLegacyPricesFilePath
+  )
+  const additionalLicenseAddOnLegacyPrices = JSON.parse(
+    additionalLicenseAddOnLegacyPricesFile
+  )
 
   const result = {}
   for (const type1 of ['educational', 'enterprise']) {
@@ -151,6 +161,15 @@ function generateGroupPlans(workSheetJSON) {
 
           result[type1][type2][currency][size] = {
             price_in_cents: plan[currency] * 100,
+          }
+
+          const additionalLicenseAddOnLegacyPrice =
+            additionalLicenseAddOnLegacyPrices[type1][type2][size]?.[currency]
+          if (additionalLicenseAddOnLegacyPrice) {
+            Object.assign(result[type1][type2][currency][size], {
+              additional_license_legacy_price_in_cents:
+                additionalLicenseAddOnLegacyPrice * 100,
+            })
           }
         }
       }

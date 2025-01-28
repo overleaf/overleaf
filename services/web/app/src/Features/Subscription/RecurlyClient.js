@@ -247,7 +247,8 @@ function subscriptionFromApi(apiSubscription) {
     apiSubscription.total == null ||
     apiSubscription.currency == null ||
     apiSubscription.currentPeriodStartedAt == null ||
-    apiSubscription.currentPeriodEndsAt == null
+    apiSubscription.currentPeriodEndsAt == null ||
+    apiSubscription.createdAt == null
   ) {
     throw new OError('Invalid Recurly subscription', {
       subscription: apiSubscription,
@@ -268,6 +269,7 @@ function subscriptionFromApi(apiSubscription) {
     currency: apiSubscription.currency,
     periodStart: apiSubscription.currentPeriodStartedAt,
     periodEnd: apiSubscription.currentPeriodEndsAt,
+    createdAt: apiSubscription.createdAt,
   })
 
   if (apiSubscription.pendingChange != null) {

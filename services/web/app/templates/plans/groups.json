@@ -12,16 +12,20 @@
           "price_in_cents": 110000
         },
         "5": {
-          "price_in_cents": 137500
+          "price_in_cents": 137500,
+          "additional_license_legacy_price_in_cents": 32100
         },
         "10": {
-          "price_in_cents": 275000
+          "price_in_cents": 275000,
+          "additional_license_legacy_price_in_cents": 17900
         },
         "20": {
-          "price_in_cents": 550000
+          "price_in_cents": 550000,
+          "additional_license_legacy_price_in_cents": 16500
         },
         "50": {
-          "price_in_cents": 1375000
+          "price_in_cents": 1375000,
+          "additional_license_legacy_price_in_cents": 15100
         }
       },
       "BRL": {
@@ -35,16 +39,20 @@
           "price_in_cents": 239600
         },
         "5": {
-          "price_in_cents": 299500
+          "price_in_cents": 299500,
+          "additional_license_legacy_price_in_cents": 69900
         },
         "10": {
-          "price_in_cents": 599000
+          "price_in_cents": 599000,
+          "additional_license_legacy_price_in_cents": 38900
         },
         "20": {
-          "price_in_cents": 1198000
+          "price_in_cents": 1198000,
+          "additional_license_legacy_price_in_cents": 35900
         },
         "50": {
-          "price_in_cents": 2995000
+          "price_in_cents": 2995000,
+          "additional_license_legacy_price_in_cents": 32900
         }
       },
       "CAD": {
@@ -58,16 +66,20 @@
           "price_in_cents": 107600
         },
         "5": {
-          "price_in_cents": 134500
+          "price_in_cents": 134500,
+          "additional_license_legacy_price_in_cents": 31400
         },
         "10": {
-          "price_in_cents": 269000
+          "price_in_cents": 269000,
+          "additional_license_legacy_price_in_cents": 17500
         },
         "20": {
-          "price_in_cents": 538000
+          "price_in_cents": 538000,
+          "additional_license_legacy_price_in_cents": 16100
         },
         "50": {
-          "price_in_cents": 1345000
+          "price_in_cents": 1345000,
+          "additional_license_legacy_price_in_cents": 14800
         }
       },
       "CHF": {
@@ -81,16 +93,20 @@
           "price_in_cents": 95600
         },
         "5": {
-          "price_in_cents": 119500
+          "price_in_cents": 119500,
+          "additional_license_legacy_price_in_cents": 27900
         },
         "10": {
-          "price_in_cents": 239000
+          "price_in_cents": 239000,
+          "additional_license_legacy_price_in_cents": 15500
         },
         "20": {
-          "price_in_cents": 478000
+          "price_in_cents": 478000,
+          "additional_license_legacy_price_in_cents": 14300
         },
         "50": {
-          "price_in_cents": 1195000
+          "price_in_cents": 1195000,
+          "additional_license_legacy_price_in_cents": 13100
         }
       },
       "CLP": {
@@ -104,16 +120,20 @@
           "price_in_cents": 57837600
         },
         "5": {
-          "price_in_cents": 72297000
+          "price_in_cents": 72297000,
+          "additional_license_legacy_price_in_cents": 16869300
         },
         "10": {
-          "price_in_cents": 144594000
+          "price_in_cents": 144594000,
+          "additional_license_legacy_price_in_cents": 9398600
         },
         "20": {
-          "price_in_cents": 289188000
+          "price_in_cents": 289188000,
+          "additional_license_legacy_price_in_cents": 8675600
         },
         "50": {
-          "price_in_cents": 722970000
+          "price_in_cents": 722970000,
+          "additional_license_legacy_price_in_cents": 7952600
         }
       },
       "COP": {
@@ -127,16 +147,20 @@
           "price_in_cents": 189576000
         },
         "5": {
-          "price_in_cents": 236970000
+          "price_in_cents": 236970000,
+          "additional_license_legacy_price_in_cents": 55293000
         },
         "10": {
-          "price_in_cents": 473940000
+          "price_in_cents": 473940000,
+          "additional_license_legacy_price_in_cents": 30806100
         },
         "20": {
-          "price_in_cents": 947880000
+          "price_in_cents": 947880000,
+          "additional_license_legacy_price_in_cents": 28436400
         },
         "50": {
-          "price_in_cents": 2000000000
+          "price_in_cents": 2000000000,
+          "additional_license_legacy_price_in_cents": 26066700
         }
       },
       "DKK": {
@@ -150,16 +174,20 @@
           "price_in_cents": 570800
         },
         "5": {
-          "price_in_cents": 713500
+          "price_in_cents": 713500,
+          "additional_license_legacy_price_in_cents": 166500
         },
         "10": {
-          "price_in_cents": 1427000
+          "price_in_cents": 1427000,
+          "additional_license_legacy_price_in_cents": 92700
         },
         "20": {
-          "price_in_cents": 2854000
+          "price_in_cents": 2854000,
+          "additional_license_legacy_price_in_cents": 85600
         },
         "50": {
-          "price_in_cents": 7135000
+          "price_in_cents": 7135000,
+          "additional_license_legacy_price_in_cents": 78500
         }
       },
       "EUR": {
@@ -173,16 +201,20 @@
           "price_in_cents": 88400
         },
         "5": {
-          "price_in_cents": 110500
+          "price_in_cents": 110500,
+          "additional_license_legacy_price_in_cents": 25800
         },
         "10": {
-          "price_in_cents": 221000
+          "price_in_cents": 221000,
+          "additional_license_legacy_price_in_cents": 14300
         },
         "20": {
-          "price_in_cents": 442000
+          "price_in_cents": 442000,
+          "additional_license_legacy_price_in_cents": 13200
         },
         "50": {
-          "price_in_cents": 1105000
+          "price_in_cents": 1105000,
+          "additional_license_legacy_price_in_cents": 12100
         }
       },
       "GBP": {
@@ -196,16 +228,20 @@
           "price_in_cents": 76400
         },
         "5": {
-          "price_in_cents": 95500
+          "price_in_cents": 95500,
+          "additional_license_legacy_price_in_cents": 22300
         },
         "10": {
-          "price_in_cents": 191000
+          "price_in_cents": 191000,
+          "additional_license_legacy_price_in_cents": 12400
         },
         "20": {
-          "price_in_cents": 382000
+          "price_in_cents": 382000,
+          "additional_license_legacy_price_in_cents": 11400
         },
         "50": {
-          "price_in_cents": 955000
+          "price_in_cents": 955000,
+          "additional_license_legacy_price_in_cents": 10500
         }
       },
       "INR": {
@@ -219,16 +255,20 @@
           "price_in_cents": 2303600
         },
         "5": {
-          "price_in_cents": 2879500
+          "price_in_cents": 2879500,
+          "additional_license_legacy_price_in_cents": 671900
         },
         "10": {
-          "price_in_cents": 5759000
+          "price_in_cents": 5759000,
+          "additional_license_legacy_price_in_cents": 374300
         },
         "20": {
-          "price_in_cents": 11518000
+          "price_in_cents": 11518000,
+          "additional_license_legacy_price_in_cents": 345500
         },
         "50": {
-          "price_in_cents": 28795000
+          "price_in_cents": 28795000,
+          "additional_license_legacy_price_in_cents": 316700
         }
       },
       "MXN": {
@@ -242,16 +282,20 @@
           "price_in_cents": 1415600
         },
         "5": {
-          "price_in_cents": 1769500
+          "price_in_cents": 1769500,
+          "additional_license_legacy_price_in_cents": 412900
         },
         "10": {
-          "price_in_cents": 3539000
+          "price_in_cents": 3539000,
+          "additional_license_legacy_price_in_cents": 230000
         },
         "20": {
-          "price_in_cents": 7078000
+          "price_in_cents": 7078000,
+          "additional_license_legacy_price_in_cents": 212300
         },
         "50": {
-          "price_in_cents": 17695000
+          "price_in_cents": 17695000,
+          "additional_license_legacy_price_in_cents": 194600
         }
       },
       "NOK": {
@@ -265,16 +309,20 @@
           "price_in_cents": 688400
         },
         "5": {
-          "price_in_cents": 860500
+          "price_in_cents": 860500,
+          "additional_license_legacy_price_in_cents": 200800
         },
         "10": {
-          "price_in_cents": 1721000
+          "price_in_cents": 1721000,
+          "additional_license_legacy_price_in_cents": 111800
         },
         "20": {
-          "price_in_cents": 3442000
+          "price_in_cents": 3442000,
+          "additional_license_legacy_price_in_cents": 103200
         },
         "50": {
-          "price_in_cents": 8605000
+          "price_in_cents": 8605000,
+          "additional_license_legacy_price_in_cents": 94600
         }
       },
       "NZD": {
@@ -288,16 +336,20 @@
           "price_in_cents": 110000
         },
         "5": {
-          "price_in_cents": 137500
+          "price_in_cents": 137500,
+          "additional_license_legacy_price_in_cents": 32100
         },
         "10": {
-          "price_in_cents": 275000
+          "price_in_cents": 275000,
+          "additional_license_legacy_price_in_cents": 17900
         },
         "20": {
-          "price_in_cents": 550000
+          "price_in_cents": 550000,
+          "additional_license_legacy_price_in_cents": 16500
         },
         "50": {
-          "price_in_cents": 1375000
+          "price_in_cents": 1375000,
+          "additional_license_legacy_price_in_cents": 15100
         }
       },
       "PEN": {
@@ -311,16 +363,20 @@
           "price_in_cents": 230000
         },
         "5": {
-          "price_in_cents": 287500
+          "price_in_cents": 287500,
+          "additional_license_legacy_price_in_cents": 67100
         },
         "10": {
-          "price_in_cents": 575000
+          "price_in_cents": 575000,
+          "additional_license_legacy_price_in_cents": 37400
         },
         "20": {
-          "price_in_cents": 1150000
+          "price_in_cents": 1150000,
+          "additional_license_legacy_price_in_cents": 34500
         },
         "50": {
-          "price_in_cents": 2875000
+          "price_in_cents": 2875000,
+          "additional_license_legacy_price_in_cents": 31600
         }
       },
       "SEK": {
@@ -334,16 +390,20 @@
           "price_in_cents": 688400
         },
         "5": {
-          "price_in_cents": 860500
+          "price_in_cents": 860500,
+          "additional_license_legacy_price_in_cents": 200800
         },
         "10": {
-          "price_in_cents": 1721000
+          "price_in_cents": 1721000,
+          "additional_license_legacy_price_in_cents": 111800
         },
         "20": {
-          "price_in_cents": 3442000
+          "price_in_cents": 3442000,
+          "additional_license_legacy_price_in_cents": 103200
         },
         "50": {
-          "price_in_cents": 8605000
+          "price_in_cents": 8605000,
+          "additional_license_legacy_price_in_cents": 94600
         }
       },
       "SGD": {
@@ -357,16 +417,20 @@
           "price_in_cents": 124400
         },
         "5": {
-          "price_in_cents": 155500
+          "price_in_cents": 155500,
+          "additional_license_legacy_price_in_cents": 36300
         },
         "10": {
-          "price_in_cents": 311000
+          "price_in_cents": 311000,
+          "additional_license_legacy_price_in_cents": 20200
         },
         "20": {
-          "price_in_cents": 622000
+          "price_in_cents": 622000,
+          "additional_license_legacy_price_in_cents": 18600
         },
         "50": {
-          "price_in_cents": 1555000
+          "price_in_cents": 1555000,
+          "additional_license_legacy_price_in_cents": 17100
         }
       },
       "USD": {
@@ -380,16 +444,20 @@
           "price_in_cents": 95600
         },
         "5": {
-          "price_in_cents": 119500
+          "price_in_cents": 119500,
+          "additional_license_legacy_price_in_cents": 27900
         },
         "10": {
-          "price_in_cents": 239000
+          "price_in_cents": 239000,
+          "additional_license_legacy_price_in_cents": 15500
         },
         "20": {
-          "price_in_cents": 478000
+          "price_in_cents": 478000,
+          "additional_license_legacy_price_in_cents": 14300
         },
         "50": {
-          "price_in_cents": 1195000
+          "price_in_cents": 1195000,
+          "additional_license_legacy_price_in_cents": 13100
         }
       }
     },
@@ -405,16 +473,20 @@
           "price_in_cents": 57200
         },
         "5": {
-          "price_in_cents": 71500
+          "price_in_cents": 71500,
+          "additional_license_legacy_price_in_cents": 16700
         },
         "10": {
-          "price_in_cents": 143000
+          "price_in_cents": 143000,
+          "additional_license_legacy_price_in_cents": 9300
         },
         "20": {
-          "price_in_cents": 286000
+          "price_in_cents": 286000,
+          "additional_license_legacy_price_in_cents": 8600
         },
         "50": {
-          "price_in_cents": 715000
+          "price_in_cents": 715000,
+          "additional_license_legacy_price_in_cents": 7800
         }
       },
       "BRL": {
@@ -428,16 +500,20 @@
           "price_in_cents": 119600
         },
         "5": {
-          "price_in_cents": 149500
+          "price_in_cents": 149500,
+          "additional_license_legacy_price_in_cents": 34900
         },
         "10": {
-          "price_in_cents": 299000
+          "price_in_cents": 299000,
+          "additional_license_legacy_price_in_cents": 19400
         },
         "20": {
-          "price_in_cents": 598000
+          "price_in_cents": 598000,
+          "additional_license_legacy_price_in_cents": 17900
         },
         "50": {
-          "price_in_cents": 1495000
+          "price_in_cents": 1495000,
+          "additional_license_legacy_price_in_cents": 16400
         }
       },
       "CAD": {
@@ -451,16 +527,20 @@
           "price_in_cents": 54800
         },
         "5": {
-          "price_in_cents": 68500
+          "price_in_cents": 68500,
+          "additional_license_legacy_price_in_cents": 16000
         },
         "10": {
-          "price_in_cents": 137000
+          "price_in_cents": 137000,
+          "additional_license_legacy_price_in_cents": 8900
         },
         "20": {
-          "price_in_cents": 274000
+          "price_in_cents": 274000,
+          "additional_license_legacy_price_in_cents": 8200
         },
         "50": {
-          "price_in_cents": 685000
+          "price_in_cents": 685000,
+          "additional_license_legacy_price_in_cents": 7500
         }
       },
       "CHF": {
@@ -474,16 +554,20 @@
           "price_in_cents": 47600
         },
         "5": {
-          "price_in_cents": 59500
+          "price_in_cents": 59500,
+          "additional_license_legacy_price_in_cents": 13900
         },
         "10": {
-          "price_in_cents": 119000
+          "price_in_cents": 119000,
+          "additional_license_legacy_price_in_cents": 7700
         },
         "20": {
-          "price_in_cents": 238000
+          "price_in_cents": 238000,
+          "additional_license_legacy_price_in_cents": 7100
         },
         "50": {
-          "price_in_cents": 595000
+          "price_in_cents": 595000,
+          "additional_license_legacy_price_in_cents": 6500
         }
       },
       "CLP": {
@@ -497,16 +581,20 @@
           "price_in_cents": 26637600
         },
         "5": {
-          "price_in_cents": 33297000
+          "price_in_cents": 33297000,
+          "additional_license_legacy_price_in_cents": 7769300
         },
         "10": {
-          "price_in_cents": 66594000
+          "price_in_cents": 66594000,
+          "additional_license_legacy_price_in_cents": 4328600
         },
         "20": {
-          "price_in_cents": 133188000
+          "price_in_cents": 133188000,
+          "additional_license_legacy_price_in_cents": 3995600
         },
         "50": {
-          "price_in_cents": 332970000
+          "price_in_cents": 332970000,
+          "additional_license_legacy_price_in_cents": 3662600
         }
       },
       "COP": {
@@ -520,16 +608,20 @@
           "price_in_cents": 93576000
         },
         "5": {
-          "price_in_cents": 116970000
+          "price_in_cents": 116970000,
+          "additional_license_legacy_price_in_cents": 27293000
         },
         "10": {
-          "price_in_cents": 233940000
+          "price_in_cents": 233940000,
+          "additional_license_legacy_price_in_cents": 15206100
         },
         "20": {
-          "price_in_cents": 467880000
+          "price_in_cents": 467880000,
+          "additional_license_legacy_price_in_cents": 14036400
         },
         "50": {
-          "price_in_cents": 1169700000
+          "price_in_cents": 1169700000,
+          "additional_license_legacy_price_in_cents": 12866700
         }
       },
       "DKK": {
@@ -543,16 +635,20 @@
           "price_in_cents": 287600
         },
         "5": {
-          "price_in_cents": 359500
+          "price_in_cents": 359500,
+          "additional_license_legacy_price_in_cents": 83900
         },
         "10": {
-          "price_in_cents": 719000
+          "price_in_cents": 719000,
+          "additional_license_legacy_price_in_cents": 46700
         },
         "20": {
-          "price_in_cents": 1438000
+          "price_in_cents": 1438000,
+          "additional_license_legacy_price_in_cents": 43100
         },
         "50": {
-          "price_in_cents": 3595000
+          "price_in_cents": 3595000,
+          "additional_license_legacy_price_in_cents": 39500
         }
       },
       "EUR": {
@@ -566,16 +662,20 @@
           "price_in_cents": 42800
         },
         "5": {
-          "price_in_cents": 53500
+          "price_in_cents": 53500,
+          "additional_license_legacy_price_in_cents": 12500
         },
         "10": {
-          "price_in_cents": 107000
+          "price_in_cents": 107000,
+          "additional_license_legacy_price_in_cents": 6900
         },
         "20": {
-          "price_in_cents": 214000
+          "price_in_cents": 214000,
+          "additional_license_legacy_price_in_cents": 6400
         },
         "50": {
-          "price_in_cents": 535000
+          "price_in_cents": 535000,
+          "additional_license_legacy_price_in_cents": 5900
         }
       },
       "GBP": {
@@ -589,16 +689,20 @@
           "price_in_cents": 38000
         },
         "5": {
-          "price_in_cents": 47500
+          "price_in_cents": 47500,
+          "additional_license_legacy_price_in_cents": 11100
         },
         "10": {
-          "price_in_cents": 95000
+          "price_in_cents": 95000,
+          "additional_license_legacy_price_in_cents": 6200
         },
         "20": {
-          "price_in_cents": 190000
+          "price_in_cents": 190000,
+          "additional_license_legacy_price_in_cents": 5700
         },
         "50": {
-          "price_in_cents": 475000
+          "price_in_cents": 475000,
+          "additional_license_legacy_price_in_cents": 5200
         }
       },
       "INR": {
@@ -612,16 +716,20 @@
           "price_in_cents": 1103600
         },
         "5": {
-          "price_in_cents": 1379500
+          "price_in_cents": 1379500,
+          "additional_license_legacy_price_in_cents": 321900
         },
         "10": {
-          "price_in_cents": 2759000
+          "price_in_cents": 2759000,
+          "additional_license_legacy_price_in_cents": 179300
         },
         "20": {
-          "price_in_cents": 5518000
+          "price_in_cents": 5518000,
+          "additional_license_legacy_price_in_cents": 165500
         },
         "50": {
-          "price_in_cents": 13795000
+          "price_in_cents": 13795000,
+          "additional_license_legacy_price_in_cents": 151700
         }
       },
       "MXN": {
@@ -635,16 +743,20 @@
           "price_in_cents": 695600
         },
         "5": {
-          "price_in_cents": 869500
+          "price_in_cents": 869500,
+          "additional_license_legacy_price_in_cents": 202900
         },
         "10": {
-          "price_in_cents": 1739000
+          "price_in_cents": 1739000,
+          "additional_license_legacy_price_in_cents": 113000
         },
         "20": {
-          "price_in_cents": 3478000
+          "price_in_cents": 3478000,
+          "additional_license_legacy_price_in_cents": 104300
         },
         "50": {
-          "price_in_cents": 8695000
+          "price_in_cents": 8695000,
+          "additional_license_legacy_price_in_cents": 95600
         }
       },
       "NOK": {
@@ -658,16 +770,20 @@
           "price_in_cents": 347600
         },
         "5": {
-          "price_in_cents": 434500
+          "price_in_cents": 434500,
+          "additional_license_legacy_price_in_cents": 101400
         },
         "10": {
-          "price_in_cents": 869000
+          "price_in_cents": 869000,
+          "additional_license_legacy_price_in_cents": 56500
         },
         "20": {
-          "price_in_cents": 1738000
+          "price_in_cents": 1738000,
+          "additional_license_legacy_price_in_cents": 52100
         },
         "50": {
-          "price_in_cents": 4345000
+          "price_in_cents": 4345000,
+          "additional_license_legacy_price_in_cents": 47800
         }
       },
       "NZD": {
@@ -681,16 +797,20 @@
           "price_in_cents": 57200
         },
         "5": {
-          "price_in_cents": 71500
+          "price_in_cents": 71500,
+          "additional_license_legacy_price_in_cents": 16700
         },
         "10": {
-          "price_in_cents": 143000
+          "price_in_cents": 143000,
+          "additional_license_legacy_price_in_cents": 9300
         },
         "20": {
-          "price_in_cents": 286000
+          "price_in_cents": 286000,
+          "additional_license_legacy_price_in_cents": 8600
         },
         "50": {
-          "price_in_cents": 715000
+          "price_in_cents": 715000,
+          "additional_license_legacy_price_in_cents": 7800
         }
       },
       "PEN": {
@@ -704,16 +824,20 @@
           "price_in_cents": 110000
         },
         "5": {
-          "price_in_cents": 137500
+          "price_in_cents": 137500,
+          "additional_license_legacy_price_in_cents": 32100
         },
         "10": {
-          "price_in_cents": 275000
+          "price_in_cents": 275000,
+          "additional_license_legacy_price_in_cents": 17900
         },
         "20": {
-          "price_in_cents": 550000
+          "price_in_cents": 550000,
+          "additional_license_legacy_price_in_cents": 16500
         },
         "50": {
-          "price_in_cents": 1375000
+          "price_in_cents": 1375000,
+          "additional_license_legacy_price_in_cents": 15100
         }
       },
       "SEK": {
@@ -727,16 +851,20 @@
           "price_in_cents": 347600
         },
         "5": {
-          "price_in_cents": 434500
+          "price_in_cents": 434500,
+          "additional_license_legacy_price_in_cents": 101400
         },
         "10": {
-          "price_in_cents": 869000
+          "price_in_cents": 869000,
+          "additional_license_legacy_price_in_cents": 56500
         },
         "20": {
-          "price_in_cents": 1738000
+          "price_in_cents": 1738000,
+          "additional_license_legacy_price_in_cents": 52100
         },
         "50": {
-          "price_in_cents": 4345000
+          "price_in_cents": 4345000,
+          "additional_license_legacy_price_in_cents": 47800
         }
       },
       "SGD": {
@@ -750,16 +878,20 @@
           "price_in_cents": 62000
         },
         "5": {
-          "price_in_cents": 77500
+          "price_in_cents": 77500,
+          "additional_license_legacy_price_in_cents": 18100
         },
         "10": {
-          "price_in_cents": 155000
+          "price_in_cents": 155000,
+          "additional_license_legacy_price_in_cents": 10100
         },
         "20": {
-          "price_in_cents": 310000
+          "price_in_cents": 310000,
+          "additional_license_legacy_price_in_cents": 9300
         },
         "50": {
-          "price_in_cents": 775000
+          "price_in_cents": 775000,
+          "additional_license_legacy_price_in_cents": 8500
         }
       },
       "USD": {
@@ -773,16 +905,20 @@
           "price_in_cents": 47600
         },
         "5": {
-          "price_in_cents": 59500
+          "price_in_cents": 59500,
+          "additional_license_legacy_price_in_cents": 13900
         },
         "10": {
-          "price_in_cents": 119000
+          "price_in_cents": 119000,
+          "additional_license_legacy_price_in_cents": 7700
         },
         "20": {
-          "price_in_cents": 238000
+          "price_in_cents": 238000,
+          "additional_license_legacy_price_in_cents": 7100
         },
         "50": {
-          "price_in_cents": 595000
+          "price_in_cents": 595000,
+          "additional_license_legacy_price_in_cents": 6500
         }
       }
     }
@@ -800,16 +936,20 @@
           "price_in_cents": 183600
         },
         "5": {
-          "price_in_cents": 229500
+          "price_in_cents": 229500,
+          "additional_license_legacy_price_in_cents": 32100
         },
         "10": {
-          "price_in_cents": 459000
+          "price_in_cents": 459000,
+          "additional_license_legacy_price_in_cents": 29800
         },
         "20": {
-          "price_in_cents": 918000
+          "price_in_cents": 918000,
+          "additional_license_legacy_price_in_cents": 27500
         },
         "50": {
-          "price_in_cents": 2295000
+          "price_in_cents": 2295000,
+          "additional_license_legacy_price_in_cents": 25200
         }
       },
       "BRL": {
@@ -823,16 +963,20 @@
           "price_in_cents": 399600
         },
         "5": {
-          "price_in_cents": 499500
+          "price_in_cents": 499500,
+          "additional_license_legacy_price_in_cents": 69900
         },
         "10": {
-          "price_in_cents": 999000
+          "price_in_cents": 999000,
+          "additional_license_legacy_price_in_cents": 64900
         },
         "20": {
-          "price_in_cents": 1998000
+          "price_in_cents": 1998000,
+          "additional_license_legacy_price_in_cents": 59900
         },
         "50": {
-          "price_in_cents": 4995000
+          "price_in_cents": 4995000,
+          "additional_license_legacy_price_in_cents": 54900
         }
       },
       "CAD": {
@@ -846,16 +990,20 @@
           "price_in_cents": 179600
         },
         "5": {
-          "price_in_cents": 224500
+          "price_in_cents": 224500,
+          "additional_license_legacy_price_in_cents": 31400
         },
         "10": {
-          "price_in_cents": 449000
+          "price_in_cents": 449000,
+          "additional_license_legacy_price_in_cents": 29100
         },
         "20": {
-          "price_in_cents": 898000
+          "price_in_cents": 898000,
+          "additional_license_legacy_price_in_cents": 26900
         },
         "50": {
-          "price_in_cents": 2245000
+          "price_in_cents": 2245000,
+          "additional_license_legacy_price_in_cents": 24600
         }
       },
       "CHF": {
@@ -869,16 +1017,20 @@
           "price_in_cents": 159600
         },
         "5": {
-          "price_in_cents": 199500
+          "price_in_cents": 199500,
+          "additional_license_legacy_price_in_cents": 49900
         },
         "10": {
-          "price_in_cents": 399000
+          "price_in_cents": 399000,
+          "additional_license_legacy_price_in_cents": 25900
         },
         "20": {
-          "price_in_cents": 798000
+          "price_in_cents": 798000,
+          "additional_license_legacy_price_in_cents": 23900
         },
         "50": {
-          "price_in_cents": 1995000
+          "price_in_cents": 1995000,
+          "additional_license_legacy_price_in_cents": 21900
         }
       },
       "CLP": {
@@ -892,16 +1044,20 @@
           "price_in_cents": 96396000
         },
         "5": {
-          "price_in_cents": 120495000
+          "price_in_cents": 120495000,
+          "additional_license_legacy_price_in_cents": 16869300
         },
         "10": {
-          "price_in_cents": 240990000
+          "price_in_cents": 240990000,
+          "additional_license_legacy_price_in_cents": 15664300
         },
         "20": {
-          "price_in_cents": 481980000
+          "price_in_cents": 481980000,
+          "additional_license_legacy_price_in_cents": 14459400
         },
         "50": {
-          "price_in_cents": 1204950000
+          "price_in_cents": 1204950000,
+          "additional_license_legacy_price_in_cents": 13254400
         }
       },
       "COP": {
@@ -915,16 +1071,20 @@
           "price_in_cents": 315960000
         },
         "5": {
-          "price_in_cents": 394950000
+          "price_in_cents": 394950000,
+          "additional_license_legacy_price_in_cents": 55293000
         },
         "10": {
-          "price_in_cents": 789900000
+          "price_in_cents": 789900000,
+          "additional_license_legacy_price_in_cents": 51343500
         },
         "20": {
-          "price_in_cents": 1579800000
+          "price_in_cents": 1579800000,
+          "additional_license_legacy_price_in_cents": 47394000
         },
         "50": {
-          "price_in_cents": 2000000000
+          "price_in_cents": 2000000000,
+          "additional_license_legacy_price_in_cents": 40000000
         }
       },
       "DKK": {
@@ -938,16 +1098,20 @@
           "price_in_cents": 951600
         },
         "5": {
-          "price_in_cents": 1189500
+          "price_in_cents": 1189500,
+          "additional_license_legacy_price_in_cents": 166500
         },
         "10": {
-          "price_in_cents": 2379000
+          "price_in_cents": 2379000,
+          "additional_license_legacy_price_in_cents": 154600
         },
         "20": {
-          "price_in_cents": 4758000
+          "price_in_cents": 4758000,
+          "additional_license_legacy_price_in_cents": 142700
         },
         "50": {
-          "price_in_cents": 11895000
+          "price_in_cents": 11895000,
+          "additional_license_legacy_price_in_cents": 130800
         }
       },
       "EUR": {
@@ -961,16 +1125,20 @@
           "price_in_cents": 147600
         },
         "5": {
-          "price_in_cents": 184500
+          "price_in_cents": 184500,
+          "additional_license_legacy_price_in_cents": 25800
         },
         "10": {
-          "price_in_cents": 369000
+          "price_in_cents": 369000,
+          "additional_license_legacy_price_in_cents": 23900
         },
         "20": {
-          "price_in_cents": 738000
+          "price_in_cents": 738000,
+          "additional_license_legacy_price_in_cents": 22100
         },
         "50": {
-          "price_in_cents": 1845000
+          "price_in_cents": 1845000,
+          "additional_license_legacy_price_in_cents": 20200
         }
       },
       "GBP": {
@@ -984,16 +1152,20 @@
           "price_in_cents": 127600
         },
         "5": {
-          "price_in_cents": 159500
+          "price_in_cents": 159500,
+          "additional_license_legacy_price_in_cents": 22300
         },
         "10": {
-          "price_in_cents": 319000
+          "price_in_cents": 319000,
+          "additional_license_legacy_price_in_cents": 20700
         },
         "20": {
-          "price_in_cents": 638000
+          "price_in_cents": 638000,
+          "additional_license_legacy_price_in_cents": 19100
         },
         "50": {
-          "price_in_cents": 1595000
+          "price_in_cents": 1595000,
+          "additional_license_legacy_price_in_cents": 17500
         }
       },
       "INR": {
@@ -1007,16 +1179,20 @@
           "price_in_cents": 3839600
         },
         "5": {
-          "price_in_cents": 4799500
+          "price_in_cents": 4799500,
+          "additional_license_legacy_price_in_cents": 671900
         },
         "10": {
-          "price_in_cents": 9599000
+          "price_in_cents": 9599000,
+          "additional_license_legacy_price_in_cents": 623900
         },
         "20": {
-          "price_in_cents": 19198000
+          "price_in_cents": 19198000,
+          "additional_license_legacy_price_in_cents": 575900
         },
         "50": {
-          "price_in_cents": 47995000
+          "price_in_cents": 47995000,
+          "additional_license_legacy_price_in_cents": 527900
         }
       },
       "MXN": {
@@ -1030,16 +1206,20 @@
           "price_in_cents": 2359600
         },
         "5": {
-          "price_in_cents": 2949500
+          "price_in_cents": 2949500,
+          "additional_license_legacy_price_in_cents": 412900
         },
         "10": {
-          "price_in_cents": 5899000
+          "price_in_cents": 5899000,
+          "additional_license_legacy_price_in_cents": 383400
         },
         "20": {
-          "price_in_cents": 11798000
+          "price_in_cents": 11798000,
+          "additional_license_legacy_price_in_cents": 353900
         },
         "50": {
-          "price_in_cents": 29495000
+          "price_in_cents": 29495000,
+          "additional_license_legacy_price_in_cents": 324400
         }
       },
       "NOK": {
@@ -1053,16 +1233,20 @@
           "price_in_cents": 1147600
         },
         "5": {
-          "price_in_cents": 1434500
+          "price_in_cents": 1434500,
+          "additional_license_legacy_price_in_cents": 200800
         },
         "10": {
-          "price_in_cents": 2869000
+          "price_in_cents": 2869000,
+          "additional_license_legacy_price_in_cents": 186400
         },
         "20": {
-          "price_in_cents": 5738000
+          "price_in_cents": 5738000,
+          "additional_license_legacy_price_in_cents": 172100
         },
         "50": {
-          "price_in_cents": 14345000
+          "price_in_cents": 14345000,
+          "additional_license_legacy_price_in_cents": 157700
         }
       },
       "NZD": {
@@ -1076,16 +1260,20 @@
           "price_in_cents": 183600
         },
         "5": {
-          "price_in_cents": 229500
+          "price_in_cents": 229500,
+          "additional_license_legacy_price_in_cents": 32100
         },
         "10": {
-          "price_in_cents": 459000
+          "price_in_cents": 459000,
+          "additional_license_legacy_price_in_cents": 29800
         },
         "20": {
-          "price_in_cents": 918000
+          "price_in_cents": 918000,
+          "additional_license_legacy_price_in_cents": 27500
         },
         "50": {
-          "price_in_cents": 2295000
+          "price_in_cents": 2295000,
+          "additional_license_legacy_price_in_cents": 25200
         }
       },
       "PEN": {
@@ -1099,16 +1287,20 @@
           "price_in_cents": 383600
         },
         "5": {
-          "price_in_cents": 479500
+          "price_in_cents": 479500,
+          "additional_license_legacy_price_in_cents": 67100
         },
         "10": {
-          "price_in_cents": 959000
+          "price_in_cents": 959000,
+          "additional_license_legacy_price_in_cents": 62300
         },
         "20": {
-          "price_in_cents": 1918000
+          "price_in_cents": 1918000,
+          "additional_license_legacy_price_in_cents": 57500
         },
         "50": {
-          "price_in_cents": 4795000
+          "price_in_cents": 4795000,
+          "additional_license_legacy_price_in_cents": 52700
         }
       },
       "SEK": {
@@ -1122,16 +1314,20 @@
           "price_in_cents": 1147600
         },
         "5": {
-          "price_in_cents": 1434500
+          "price_in_cents": 1434500,
+          "additional_license_legacy_price_in_cents": 200800
         },
         "10": {
-          "price_in_cents": 2869000
+          "price_in_cents": 2869000,
+          "additional_license_legacy_price_in_cents": 186400
         },
         "20": {
-          "price_in_cents": 5738000
+          "price_in_cents": 5738000,
+          "additional_license_legacy_price_in_cents": 172100
         },
         "50": {
-          "price_in_cents": 14345000
+          "price_in_cents": 14345000,
+          "additional_license_legacy_price_in_cents": 157700
         }
       },
       "SGD": {
@@ -1145,16 +1341,20 @@
           "price_in_cents": 207600
         },
         "5": {
-          "price_in_cents": 259500
+          "price_in_cents": 259500,
+          "additional_license_legacy_price_in_cents": 36300
         },
         "10": {
-          "price_in_cents": 519000
+          "price_in_cents": 519000,
+          "additional_license_legacy_price_in_cents": 33700
         },
         "20": {
-          "price_in_cents": 1038000
+          "price_in_cents": 1038000,
+          "additional_license_legacy_price_in_cents": 31100
         },
         "50": {
-          "price_in_cents": 2595000
+          "price_in_cents": 2595000,
+          "additional_license_legacy_price_in_cents": 28500
         }
       },
       "USD": {
@@ -1168,16 +1368,20 @@
           "price_in_cents": 159600
         },
         "5": {
-          "price_in_cents": 199500
+          "price_in_cents": 199500,
+          "additional_license_legacy_price_in_cents": 27900
         },
         "10": {
-          "price_in_cents": 399000
+          "price_in_cents": 399000,
+          "additional_license_legacy_price_in_cents": 25900
         },
         "20": {
-          "price_in_cents": 798000
+          "price_in_cents": 798000,
+          "additional_license_legacy_price_in_cents": 23900
         },
         "50": {
-          "price_in_cents": 1995000
+          "price_in_cents": 1995000,
+          "additional_license_legacy_price_in_cents": 21900
         }
       }
     },
@@ -1193,16 +1397,20 @@
           "price_in_cents": 95600
         },
         "5": {
-          "price_in_cents": 119500
+          "price_in_cents": 119500,
+          "additional_license_legacy_price_in_cents": 16700
         },
         "10": {
-          "price_in_cents": 239000
+          "price_in_cents": 239000,
+          "additional_license_legacy_price_in_cents": 15500
         },
         "20": {
-          "price_in_cents": 478000
+          "price_in_cents": 478000,
+          "additional_license_legacy_price_in_cents": 14300
         },
         "50": {
-          "price_in_cents": 1195000
+          "price_in_cents": 1195000,
+          "additional_license_legacy_price_in_cents": 13100
         }
       },
       "BRL": {
@@ -1216,16 +1424,20 @@
           "price_in_cents": 199600
         },
         "5": {
-          "price_in_cents": 249500
+          "price_in_cents": 249500,
+          "additional_license_legacy_price_in_cents": 34900
         },
         "10": {
-          "price_in_cents": 499000
+          "price_in_cents": 499000,
+          "additional_license_legacy_price_in_cents": 32400
         },
         "20": {
-          "price_in_cents": 998000
+          "price_in_cents": 998000,
+          "additional_license_legacy_price_in_cents": 29900
         },
         "50": {
-          "price_in_cents": 2495000
+          "price_in_cents": 2495000,
+          "additional_license_legacy_price_in_cents": 27400
         }
       },
       "CAD": {
@@ -1239,16 +1451,20 @@
           "price_in_cents": 91600
         },
         "5": {
-          "price_in_cents": 114500
+          "price_in_cents": 114500,
+          "additional_license_legacy_price_in_cents": 16000
         },
         "10": {
-          "price_in_cents": 229000
+          "price_in_cents": 229000,
+          "additional_license_legacy_price_in_cents": 14800
         },
         "20": {
-          "price_in_cents": 458000
+          "price_in_cents": 458000,
+          "additional_license_legacy_price_in_cents": 13700
         },
         "50": {
-          "price_in_cents": 1145000
+          "price_in_cents": 1145000,
+          "additional_license_legacy_price_in_cents": 12500
         }
       },
       "CHF": {
@@ -1262,16 +1478,20 @@
           "price_in_cents": 79600
         },
         "5": {
-          "price_in_cents": 99500
+          "price_in_cents": 99500,
+          "additional_license_legacy_price_in_cents": 13900
         },
         "10": {
-          "price_in_cents": 199000
+          "price_in_cents": 199000,
+          "additional_license_legacy_price_in_cents": 12900
         },
         "20": {
-          "price_in_cents": 398000
+          "price_in_cents": 398000,
+          "additional_license_legacy_price_in_cents": 11900
         },
         "50": {
-          "price_in_cents": 995000
+          "price_in_cents": 995000,
+          "additional_license_legacy_price_in_cents": 10900
         }
       },
       "CLP": {
@@ -1285,16 +1505,20 @@
           "price_in_cents": 44396000
         },
         "5": {
-          "price_in_cents": 55495000
+          "price_in_cents": 55495000,
+          "additional_license_legacy_price_in_cents": 7769300
         },
         "10": {
-          "price_in_cents": 110990000
+          "price_in_cents": 110990000,
+          "additional_license_legacy_price_in_cents": 7214300
         },
         "20": {
-          "price_in_cents": 221980000
+          "price_in_cents": 221980000,
+          "additional_license_legacy_price_in_cents": 6659400
         },
         "50": {
-          "price_in_cents": 554950000
+          "price_in_cents": 554950000,
+          "additional_license_legacy_price_in_cents": 6104400
         }
       },
       "COP": {
@@ -1308,16 +1532,20 @@
           "price_in_cents": 155960000
         },
         "5": {
-          "price_in_cents": 194950000
+          "price_in_cents": 194950000,
+          "additional_license_legacy_price_in_cents": 27293000
         },
         "10": {
-          "price_in_cents": 389900000
+          "price_in_cents": 389900000,
+          "additional_license_legacy_price_in_cents": 25343500
         },
         "20": {
-          "price_in_cents": 779800000
+          "price_in_cents": 779800000,
+          "additional_license_legacy_price_in_cents": 23394000
         },
         "50": {
-          "price_in_cents": 1949500000
+          "price_in_cents": 1949500000,
+          "additional_license_legacy_price_in_cents": 21444500
         }
       },
       "DKK": {
@@ -1331,16 +1559,20 @@
           "price_in_cents": 479600
         },
         "5": {
-          "price_in_cents": 599500
+          "price_in_cents": 599500,
+          "additional_license_legacy_price_in_cents": 83900
         },
         "10": {
-          "price_in_cents": 1199000
+          "price_in_cents": 1199000,
+          "additional_license_legacy_price_in_cents": 77900
         },
         "20": {
-          "price_in_cents": 2398000
+          "price_in_cents": 2398000,
+          "additional_license_legacy_price_in_cents": 71900
         },
         "50": {
-          "price_in_cents": 5995000
+          "price_in_cents": 5995000,
+          "additional_license_legacy_price_in_cents": 65900
         }
       },
       "EUR": {
@@ -1354,16 +1586,20 @@
           "price_in_cents": 71600
         },
         "5": {
-          "price_in_cents": 89500
+          "price_in_cents": 89500,
+          "additional_license_legacy_price_in_cents": 12500
         },
         "10": {
-          "price_in_cents": 179000
+          "price_in_cents": 179000,
+          "additional_license_legacy_price_in_cents": 11600
         },
         "20": {
-          "price_in_cents": 358000
+          "price_in_cents": 358000,
+          "additional_license_legacy_price_in_cents": 10700
         },
         "50": {
-          "price_in_cents": 895000
+          "price_in_cents": 895000,
+          "additional_license_legacy_price_in_cents": 9800
         }
       },
       "GBP": {
@@ -1377,16 +1613,20 @@
           "price_in_cents": 63600
         },
         "5": {
-          "price_in_cents": 79500
+          "price_in_cents": 79500,
+          "additional_license_legacy_price_in_cents": 11100
         },
         "10": {
-          "price_in_cents": 159000
+          "price_in_cents": 159000,
+          "additional_license_legacy_price_in_cents": 10300
         },
         "20": {
-          "price_in_cents": 318000
+          "price_in_cents": 318000,
+          "additional_license_legacy_price_in_cents": 9500
         },
         "50": {
-          "price_in_cents": 795000
+          "price_in_cents": 795000,
+          "additional_license_legacy_price_in_cents": 8700
         }
       },
       "INR": {
@@ -1400,16 +1640,20 @@
           "price_in_cents": 1839600
         },
         "5": {
-          "price_in_cents": 2299500
+          "price_in_cents": 2299500,
+          "additional_license_legacy_price_in_cents": 321900
         },
         "10": {
-          "price_in_cents": 4599000
+          "price_in_cents": 4599000,
+          "additional_license_legacy_price_in_cents": 298900
         },
         "20": {
-          "price_in_cents": 9198000
+          "price_in_cents": 9198000,
+          "additional_license_legacy_price_in_cents": 275900
         },
         "50": {
-          "price_in_cents": 22995000
+          "price_in_cents": 22995000,
+          "additional_license_legacy_price_in_cents": 252900
         }
       },
       "MXN": {
@@ -1423,16 +1667,20 @@
           "price_in_cents": 1159600
         },
         "5": {
-          "price_in_cents": 1449500
+          "price_in_cents": 1449500,
+          "additional_license_legacy_price_in_cents": 202900
         },
         "10": {
-          "price_in_cents": 2899000
+          "price_in_cents": 2899000,
+          "additional_license_legacy_price_in_cents": 188400
         },
         "20": {
-          "price_in_cents": 5798000
+          "price_in_cents": 5798000,
+          "additional_license_legacy_price_in_cents": 173900
         },
         "50": {
-          "price_in_cents": 14495000
+          "price_in_cents": 14495000,
+          "additional_license_legacy_price_in_cents": 159400
         }
       },
       "NOK": {
@@ -1446,16 +1694,20 @@
           "price_in_cents": 579600
         },
         "5": {
-          "price_in_cents": 724500
+          "price_in_cents": 724500,
+          "additional_license_legacy_price_in_cents": 101400
         },
         "10": {
-          "price_in_cents": 1449000
+          "price_in_cents": 1449000,
+          "additional_license_legacy_price_in_cents": 94100
         },
         "20": {
-          "price_in_cents": 2898000
+          "price_in_cents": 2898000,
+          "additional_license_legacy_price_in_cents": 86900
         },
         "50": {
-          "price_in_cents": 7245000
+          "price_in_cents": 7245000,
+          "additional_license_legacy_price_in_cents": 79600
         }
       },
       "NZD": {
@@ -1469,16 +1721,20 @@
           "price_in_cents": 95600
         },
         "5": {
-          "price_in_cents": 119500
+          "price_in_cents": 119500,
+          "additional_license_legacy_price_in_cents": 16700
         },
         "10": {
-          "price_in_cents": 239000
+          "price_in_cents": 239000,
+          "additional_license_legacy_price_in_cents": 15500
         },
         "20": {
-          "price_in_cents": 478000
+          "price_in_cents": 478000,
+          "additional_license_legacy_price_in_cents": 14300
         },
         "50": {
-          "price_in_cents": 1195000
+          "price_in_cents": 1195000,
+          "additional_license_legacy_price_in_cents": 13100
         }
       },
       "PEN": {
@@ -1492,16 +1748,20 @@
           "price_in_cents": 183600
         },
         "5": {
-          "price_in_cents": 229500
+          "price_in_cents": 229500,
+          "additional_license_legacy_price_in_cents": 32100
         },
         "10": {
-          "price_in_cents": 459000
+          "price_in_cents": 459000,
+          "additional_license_legacy_price_in_cents": 29800
         },
         "20": {
-          "price_in_cents": 918000
+          "price_in_cents": 918000,
+          "additional_license_legacy_price_in_cents": 27500
         },
         "50": {
-          "price_in_cents": 2295000
+          "price_in_cents": 2295000,
+          "additional_license_legacy_price_in_cents": 25200
         }
       },
       "SEK": {
@@ -1515,16 +1775,20 @@
           "price_in_cents": 579600
         },
         "5": {
-          "price_in_cents": 724500
+          "price_in_cents": 724500,
+          "additional_license_legacy_price_in_cents": 101400
         },
         "10": {
-          "price_in_cents": 1449000
+          "price_in_cents": 1449000,
+          "additional_license_legacy_price_in_cents": 94100
         },
         "20": {
-          "price_in_cents": 2898000
+          "price_in_cents": 2898000,
+          "additional_license_legacy_price_in_cents": 86900
         },
         "50": {
-          "price_in_cents": 7245000
+          "price_in_cents": 7245000,
+          "additional_license_legacy_price_in_cents": 79600
         }
       },
       "SGD": {
@@ -1538,16 +1802,20 @@
           "price_in_cents": 103600
         },
         "5": {
-          "price_in_cents": 129500
+          "price_in_cents": 129500,
+          "additional_license_legacy_price_in_cents": 18100
         },
         "10": {
-          "price_in_cents": 259000
+          "price_in_cents": 259000,
+          "additional_license_legacy_price_in_cents": 16800
         },
         "20": {
-          "price_in_cents": 518000
+          "price_in_cents": 518000,
+          "additional_license_legacy_price_in_cents": 15500
         },
         "50": {
-          "price_in_cents": 1295000
+          "price_in_cents": 1295000,
+          "additional_license_legacy_price_in_cents": 14200
         }
       },
       "USD": {
@@ -1561,16 +1829,20 @@
           "price_in_cents": 79600
         },
         "5": {
-          "price_in_cents": 99500
+          "price_in_cents": 99500,
+          "additional_license_legacy_price_in_cents": 13900
         },
         "10": {
-          "price_in_cents": 199000
+          "price_in_cents": 199000,
+          "additional_license_legacy_price_in_cents": 12900
         },
         "20": {
-          "price_in_cents": 398000
+          "price_in_cents": 398000,
+          "additional_license_legacy_price_in_cents": 11900
         },
         "50": {
-          "price_in_cents": 995000
+          "price_in_cents": 995000,
+          "additional_license_legacy_price_in_cents": 10900
         }
       }
     }

@@ -7,6 +7,8 @@ const SessionManager = require('../Authentication/SessionManager')
 const RecurlyClient = require('./RecurlyClient')
 const PlansLocator = require('./PlansLocator')
 const SubscriptionHandler = require('./SubscriptionHandler')
+const GroupPlansData = require('./GroupPlansData')
+const { MEMBERS_LIMIT_ADD_ON_CODE } = require('./RecurlyEntities')
 
 async function removeUserFromGroup(subscriptionId, userIdToRemove) {
   await SubscriptionUpdater.promises.removeUserFromGroup(
@@ -57,7 +59,13 @@ async function _replaceInArray(model, property, oldValue, newValue) {
 
 async function ensureFlexibleLicensingEnabled(plan) {
   if (!plan?.canUseFlexibleLicensing) {
-    throw new Error('The group plan does not support flexible licencing')
+    throw new Error('The group plan does not support flexible licensing')
+  }
+}
+
+async function ensureAddSeatsEnabled(plan) {
+  if (!plan?.membersLimitAddOn) {
+    throw new Error('The group plan does not support adding seats')
   }
 }
 
@@ -88,29 +96,60 @@ async function _addSeatsSubscriptionChange(req) {
   const { recurlySubscription, plan } =
     await getUsersGroupSubscriptionDetails(req)
   await ensureFlexibleLicensingEnabled(plan)
+  await ensureAddSeatsEnabled(plan)
   const userId = SessionManager.getLoggedInUserId(req.session)
   const currentAddonQuantity =
     recurlySubscription.addOns.find(
-      addOn => addOn.code === plan.membersLimitAddOn
+      addOn => addOn.code === MEMBERS_LIMIT_ADD_ON_CODE
     )?.quantity ?? 0
   // Keeps only the new total quantity of addon
   const nextAddonQuantity = currentAddonQuantity + adding
-  const changeRequest = recurlySubscription.getRequestForAddOnUpdate(
-    plan.membersLimitAddOn,
-    nextAddonQuantity
-  )
+
+  let changeRequest
+  if (recurlySubscription.hasAddOn(MEMBERS_LIMIT_ADD_ON_CODE)) {
+    // Not providing a custom price as once the subscription is locked
+    // to an add-on at a given price, it will use it for subsequent payments
+    changeRequest = recurlySubscription.getRequestForAddOnUpdate(
+      MEMBERS_LIMIT_ADD_ON_CODE,
+      nextAddonQuantity
+    )
+  } else {
+    let unitPrice
+    const newPlanPricesAppliedAt = new Date('2025-01-08T14:00:00Z')
+    const isLegacyPriceApplicable =
+      new Date(recurlySubscription.createdAt) < newPlanPricesAppliedAt
+
+    if (isLegacyPriceApplicable) {
+      const pattern =
+        /^group_(collaborator|professional)_(5|10|20|50)_(educational|enterprise)$/
+      const [, planCode, size, usage] = plan.planCode.match(pattern)
+      const currency = recurlySubscription.currency
+      const legacyPriceInCents =
+        GroupPlansData[usage][planCode][currency][size]
+          .additional_license_legacy_price_in_cents
+
+      if (legacyPriceInCents > 0) {
+        unitPrice = legacyPriceInCents / 100
+      }
+    }
+
+    changeRequest = recurlySubscription.getRequestForAddOnPurchase(
+      MEMBERS_LIMIT_ADD_ON_CODE,
+      nextAddonQuantity,
+      unitPrice
+    )
+  }
 
   return {
     changeRequest,
     userId,
     currentAddonQuantity,
     recurlySubscription,
-    plan,
   }
 }
 
 async function previewAddSeatsSubscriptionChange(req) {
-  const { changeRequest, userId, currentAddonQuantity, plan } =
+  const { changeRequest, userId, currentAddonQuantity } =
     await _addSeatsSubscriptionChange(req)
   const paymentMethod = await RecurlyClient.promises.getPaymentMethod(userId)
   const subscriptionChange =
@@ -120,9 +159,9 @@ async function previewAddSeatsSubscriptionChange(req) {
       {
         type: 'add-on-update',
         addOn: {
-          code: plan.membersLimitAddOn,
+          code: MEMBERS_LIMIT_ADD_ON_CODE,
           quantity: subscriptionChange.nextAddOns.find(
-            addon => addon.code === plan.membersLimitAddOn
+            addon => addon.code === MEMBERS_LIMIT_ADD_ON_CODE
           ).quantity,
           prevQuantity: currentAddonQuantity,
         },
@@ -216,6 +255,7 @@ module.exports = {
   removeUserFromGroup: callbackify(removeUserFromGroup),
   replaceUserReferencesInGroups: callbackify(replaceUserReferencesInGroups),
   ensureFlexibleLicensingEnabled: callbackify(ensureFlexibleLicensingEnabled),
+  ensureAddSeatsEnabled: callbackify(ensureAddSeatsEnabled),
   getTotalConfirmedUsersInGroup: callbackify(getTotalConfirmedUsersInGroup),
   isUserPartOfGroup: callbackify(isUserPartOfGroup),
   getGroupPlanUpgradePreview: callbackify(getGroupPlanUpgradePreview),
@@ -224,6 +264,7 @@ module.exports = {
     removeUserFromGroup,
     replaceUserReferencesInGroups,
     ensureFlexibleLicensingEnabled,
+    ensureAddSeatsEnabled,
     getTotalConfirmedUsersInGroup,
     isUserPartOfGroup,
     getUsersGroupSubscriptionDetails,

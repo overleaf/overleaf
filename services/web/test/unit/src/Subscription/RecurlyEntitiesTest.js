@@ -185,6 +185,38 @@ describe('RecurlyEntities', function () {
           )
         })
 
+        it('returns a change request with quantity and unit price specified', function () {
+          const {
+            RecurlySubscriptionChangeRequest,
+            RecurlySubscriptionAddOnUpdate,
+          } = this.RecurlyEntities
+          const quantity = 5
+          const unitPrice = 10
+          const changeRequest = this.subscription.getRequestForAddOnPurchase(
+            'another-add-on',
+            quantity,
+            unitPrice
+          )
+          expect(changeRequest).to.deep.equal(
+            new RecurlySubscriptionChangeRequest({
+              subscription: this.subscription,
+              timeframe: 'now',
+              addOnUpdates: [
+                new RecurlySubscriptionAddOnUpdate({
+                  code: this.addOn.code,
+                  quantity: this.addOn.quantity,
+                  unitPrice: this.addOn.unitPrice,
+                }),
+                new RecurlySubscriptionAddOnUpdate({
+                  code: 'another-add-on',
+                  quantity,
+                  unitPrice,
+                }),
+              ],
+            })
+          )
+        })
+
         it('throws a DuplicateAddOnError if the subscription already has the add-on', function () {
           expect(() =>
             this.subscription.getRequestForAddOnPurchase(this.addOn.code)
@@ -346,6 +378,7 @@ describe('RecurlyEntities', function () {
           total: 11.5,
           periodStart: new Date(),
           periodEnd: new Date(),
+          createdAt: new Date(),
         })
         const change = new RecurlySubscriptionChange({
           subscription,
