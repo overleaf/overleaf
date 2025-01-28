@@ -114,10 +114,18 @@ function CostSummary({ subscriptionChange, totalLicenses }: CostSummaryProps) {
             </div>
             <div>
               {t(
-                'after_that_well_bill_you_x_annually_on_date_unless_you_cancel',
+                'after_that_well_bill_you_x_total_y_subtotal_z_tax_annually_on_date_unless_you_cancel',
                 {
-                  subtotal: formatCurrency(
+                  totalAmount: formatCurrency(
                     subscriptionChange.nextInvoice.total,
+                    subscriptionChange.currency
+                  ),
+                  subtotalAmount: formatCurrency(
+                    subscriptionChange.nextInvoice.subtotal,
+                    subscriptionChange.currency
+                  ),
+                  taxAmount: formatCurrency(
+                    subscriptionChange.nextInvoice.tax.amount,
                     subscriptionChange.currency
                   ),
                   date: formatTime(

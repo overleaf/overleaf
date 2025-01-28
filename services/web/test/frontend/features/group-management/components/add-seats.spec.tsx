@@ -246,6 +246,7 @@ describe('<AddSeats />', function () {
             subtotal: 895,
             tax: {
               rate: 0.2,
+              amount: 105,
             },
             total: 1000,
           },
@@ -300,7 +301,7 @@ describe('<AddSeats />', function () {
             /we’ll charge you now for the cost of your additional users based on the remaining months of your current subscription/i
           )
           cy.findByText(
-            /after that, we’ll bill you \$1,000.00 \+ applicable taxes annually on December 1, unless you cancel/i
+            /after that, we’ll bill you \$1,000\.00 \(\$895\.00 \+ \$105\.00 tax\) annually on December 1, unless you cancel/i
           )
         })
       })

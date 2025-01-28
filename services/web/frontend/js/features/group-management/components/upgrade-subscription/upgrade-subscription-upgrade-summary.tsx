@@ -72,13 +72,24 @@ function UpgradeSummary({ subscriptionChange }: UpgradeSummaryProps) {
           )}
         </div>
         <div>
-          {t('after_that_well_bill_you_x_annually_on_date_unless_you_cancel', {
-            subtotal: formatCurrency(
-              subscriptionChange.nextInvoice.subtotal,
-              subscriptionChange.currency
-            ),
-            date: formatTime(subscriptionChange.nextInvoice.date, 'MMMM D'),
-          })}
+          {t(
+            'after_that_well_bill_you_x_total_y_subtotal_z_tax_annually_on_date_unless_you_cancel',
+            {
+              totalAmount: formatCurrency(
+                subscriptionChange.nextInvoice.total,
+                subscriptionChange.currency
+              ),
+              subtotalAmount: formatCurrency(
+                subscriptionChange.nextInvoice.subtotal,
+                subscriptionChange.currency
+              ),
+              taxAmount: formatCurrency(
+                subscriptionChange.nextInvoice.tax.amount,
+                subscriptionChange.currency
+              ),
+              date: formatTime(subscriptionChange.nextInvoice.date, 'MMMM D'),
+            }
+          )}
         </div>
       </Card.Body>
     </Card>
