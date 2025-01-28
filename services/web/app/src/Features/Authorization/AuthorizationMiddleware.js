@@ -132,32 +132,6 @@ async function ensureUserCanDeleteOrResolveThread(req, res, next) {
   return HttpErrorHandler.forbidden(req, res)
 }
 
-async function ensureUserCanSendOrReopenComment(req, res, next) {
-  const projectId = _getProjectId(req)
-  const userId = _getUserId(req)
-  const token = TokenAccessHandler.getRequestToken(req, projectId)
-
-  const canSendOrReopenComment =
-    await AuthorizationManager.promises.canUserSendOrReopenComment(
-      userId,
-      projectId,
-      token
-    )
-  if (canSendOrReopenComment) {
-    logger.debug(
-      { userId, projectId },
-      'allowing user to send or reopen a comment'
-    )
-    return next()
-  }
-
-  logger.debug(
-    { userId, projectId },
-    'denying user to send or reopen a comment'
-  )
-  return HttpErrorHandler.forbidden(req, res)
-}
-
 async function ensureUserCanWriteProjectContent(req, res, next) {
   const projectId = _getProjectId(req)
   const userId = _getUserId(req)
@@ -180,6 +154,32 @@ async function ensureUserCanWriteProjectContent(req, res, next) {
     'denying user write access to project settings'
   )
   HttpErrorHandler.forbidden(req, res)
+}
+
+async function ensureUserCanWriteOrReviewProjectContent(req, res, next) {
+  const projectId = _getProjectId(req)
+  const userId = _getUserId(req)
+  const token = TokenAccessHandler.getRequestToken(req, projectId)
+
+  const canWriteOrReviewProjectContent =
+    await AuthorizationManager.promises.canUserWriteOrReviewProjectContent(
+      userId,
+      projectId,
+      token
+    )
+  if (canWriteOrReviewProjectContent) {
+    logger.debug(
+      { userId, projectId },
+      'allowing user write or review access to project content'
+    )
+    return next()
+  }
+
+  logger.debug(
+    { userId, projectId },
+    'denying user write or review access to project content'
+  )
+  return HttpErrorHandler.forbidden(req, res)
 }
 
 async function ensureUserCanAdminProject(req, res, next) {
@@ -277,14 +277,14 @@ module.exports = {
   ensureUserCanWriteProjectSettings: expressify(
     ensureUserCanWriteProjectSettings
   ),
-  ensureUserCanSendOrReopenComment: expressify(
-    ensureUserCanSendOrReopenComment
-  ),
   ensureUserCanDeleteOrResolveThread: expressify(
     ensureUserCanDeleteOrResolveThread
   ),
   ensureUserCanWriteProjectContent: expressify(
     ensureUserCanWriteProjectContent
+  ),
+  ensureUserCanWriteOrReviewProjectContent: expressify(
+    ensureUserCanWriteOrReviewProjectContent
   ),
   ensureUserCanAdminProject: expressify(ensureUserCanAdminProject),
   ensureUserIsSiteAdmin: expressify(ensureUserIsSiteAdmin),

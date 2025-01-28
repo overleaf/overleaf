@@ -138,12 +138,12 @@ function apply(webRouter, privateApiRouter) {
   )
   webRouter.post(
     '/project/:Project_id/labels',
-    AuthorizationMiddleware.ensureUserCanWriteProjectContent,
+    AuthorizationMiddleware.ensureUserCanWriteOrReviewProjectContent,
     HistoryController.createLabel
   )
   webRouter.delete(
     '/project/:Project_id/labels/:label_id',
-    AuthorizationMiddleware.ensureUserCanWriteProjectContent,
+    AuthorizationMiddleware.ensureUserCanWriteOrReviewProjectContent,
     HistoryController.deleteLabel
   )
 

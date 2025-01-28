@@ -202,6 +202,19 @@ async function canUserWriteProjectContent(userId, projectId, token) {
   )
 }
 
+async function canUserWriteOrReviewProjectContent(userId, projectId, token) {
+  const privilegeLevel = await getPrivilegeLevelForProject(
+    userId,
+    projectId,
+    token
+  )
+  return (
+    privilegeLevel === PrivilegeLevels.OWNER ||
+    privilegeLevel === PrivilegeLevels.READ_AND_WRITE ||
+    privilegeLevel === PrivilegeLevels.REVIEW
+  )
+}
+
 async function canUserWriteProjectSettings(userId, projectId, token) {
   const privilegeLevel = await getPrivilegeLevelForProject(
     userId,
@@ -273,23 +286,12 @@ async function canUserDeleteOrResolveThread(
   return comment.metadata.user_id === userId
 }
 
-async function canUserSendOrReopenComment(userId, projectId, token) {
-  const privilegeLevel = await getPrivilegeLevelForProject(
-    userId,
-    projectId,
-    token
-  )
-  return (
-    privilegeLevel === PrivilegeLevels.OWNER ||
-    privilegeLevel === PrivilegeLevels.READ_AND_WRITE ||
-    privilegeLevel === PrivilegeLevels.REVIEW
-  )
-}
-
 module.exports = {
   canUserReadProject: callbackify(canUserReadProject),
   canUserWriteProjectContent: callbackify(canUserWriteProjectContent),
-  canUserSendOrReopenComment: callbackify(canUserSendOrReopenComment),
+  canUserWriteOrReviewProjectContent: callbackify(
+    canUserWriteOrReviewProjectContent
+  ),
   canUserDeleteOrResolveThread: callbackify(canUserDeleteOrResolveThread),
   canUserWriteProjectSettings: callbackify(canUserWriteProjectSettings),
   canUserRenameProject: callbackify(canUserRenameProject),
@@ -301,7 +303,7 @@ module.exports = {
   promises: {
     canUserReadProject,
     canUserWriteProjectContent,
-    canUserSendOrReopenComment,
+    canUserWriteOrReviewProjectContent,
     canUserDeleteOrResolveThread,
     canUserWriteProjectSettings,
     canUserRenameProject,
