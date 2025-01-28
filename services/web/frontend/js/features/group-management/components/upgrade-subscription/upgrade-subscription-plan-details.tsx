@@ -5,7 +5,7 @@ import { Card, Row, Col } from 'react-bootstrap-5'
 import MaterialIcon from '@/shared/components/material-icon'
 import { formatCurrency } from '@/shared/utils/currency'
 
-const LICENSE_ADD_ON = 'additional-license'
+export const LICENSE_ADD_ON = 'additional-license'
 
 function UpgradeSubscriptionPlanDetails() {
   const { t } = useTranslation()
