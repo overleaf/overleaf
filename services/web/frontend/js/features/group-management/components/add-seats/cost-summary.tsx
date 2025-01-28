@@ -18,6 +18,7 @@ type CostSummaryProps = {
 
 function CostSummary({ subscriptionChange, totalLicenses }: CostSummaryProps) {
   const { t } = useTranslation()
+  const factor = 100
 
   return (
     <Card
@@ -79,7 +80,10 @@ function CostSummary({ subscriptionChange, totalLicenses }: CostSummaryProps) {
                 >
                   <span className="me-auto">
                     {t('sales_tax')} &middot;{' '}
-                    {subscriptionChange.nextInvoice.tax.rate * 100}%
+                    {Math.round(
+                      subscriptionChange.nextInvoice.tax.rate * 100 * factor
+                    ) / factor}
+                    %
                   </span>
                   <span data-testid="price">
                     {formatCurrency(
