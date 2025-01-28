@@ -863,7 +863,7 @@
   "group_managed_by_group_administrator": "User accounts in this group are managed by the group administrator.",
   "group_plan_admins_can_easily_add_and_remove_users_from_a_group": "Group plan admins can easily add and remove users from a group. For site-wide plans, users are automatically upgraded when they register or add their email address to Overleaf (domain-based enrollment or SSO).",
   "group_plan_tooltip": "You are on the __plan__ plan as a member of a group subscription. Click to find out how to make the most of your Overleaf premium features.",
-  "group_plan_upgrade_description": "You’re on the <0>__currentPlan__</0> plan and you’re upgrading to the <0>__nextPlan__</0> plan. If you’re interested in a site-wide Overleaf Commons plan please <1>get in touch</1>.",
+  "group_plan_upgrade_description": "You’re on the <0>__currentPlan__</0> plan and you’re upgrading to the <0>__nextPlan__</0> plan. If you’re interested in a site-wide Overleaf Commons plan, please <1>get in touch</1>.",
   "group_plan_with_name_tooltip": "You are on the __plan__ plan as a member of a group subscription, __groupName__. Click to find out how to make the most of your Overleaf premium features.",
   "group_professional": "Group Professional",
   "group_sso_configuration_idp_metadata": "The information you provide here comes from your Identity Provider (IdP). This is often referred to as its <0>SAML metadata</0>. You can add this manually or click <1>Import IdP metadata</1> to import an XML file.",

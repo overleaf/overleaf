@@ -42,9 +42,7 @@ describe('SubscriptionGroupHandler', function () {
         },
       ],
       getRequestForAddOnUpdate: sinon.stub().returns(this.changeRequest),
-      getRequestForFlexibleLicensingGroupPlanUpgrade: sinon
-        .stub()
-        .returns(this.changeRequest),
+      getRequestForGroupPlanUpgrade: sinon.stub().returns(this.changeRequest),
     }
 
     this.SubscriptionLocator = {
@@ -108,7 +106,7 @@ describe('SubscriptionGroupHandler', function () {
     }
 
     this.PlansLocator = {
-      findLocalPlanInSettings: sinon.stub(this.localPlanInSettings),
+      findLocalPlanInSettings: sinon.stub().returns(this.localPlanInSettings),
     }
 
     this.SubscriptionHandler = {
@@ -373,7 +371,7 @@ describe('SubscriptionGroupHandler', function () {
   })
 
   describe('upgradeGroupPlan', function () {
-    it('should upgrade the subscription', async function () {
+    it('should upgrade the subscription for flexible licensing group plans', async function () {
       this.SubscriptionLocator.promises.getUsersSubscription = sinon
         .stub()
         .resolves({ groupPlan: true, planCode: 'group_collaborator' })
@@ -386,10 +384,35 @@ describe('SubscriptionGroupHandler', function () {
         .should.equal(true)
     })
 
-    it('should fail the upgrade if not eligible', async function () {
+    it('should upgrade the subscription for legacy group plans', async function () {
+      this.SubscriptionLocator.promises.getUsersSubscription = sinon
+        .stub()
+        .resolves({
+          groupPlan: true,
+          planCode: 'group_collaborator_10_educational',
+        })
+      await this.Handler.promises.upgradeGroupPlan(this.user_id)
+      this.RecurlyClient.promises.applySubscriptionChangeRequest
+        .calledWith(this.changeRequest)
+        .should.equal(true)
+      this.SubscriptionHandler.promises.syncSubscription
+        .calledWith({ uuid: this.changeRequest.subscription.id }, this.user_id)
+        .should.equal(true)
+    })
+
+    it('should fail the upgrade if is professional already', async function () {
       this.SubscriptionLocator.promises.getUsersSubscription = sinon
         .stub()
         .resolves({ groupPlan: true, planCode: 'group_professional' })
+      await expect(
+        this.Handler.promises.upgradeGroupPlan(this.user_id)
+      ).to.be.rejectedWith('Not eligible for group plan upgrade')
+    })
+
+    it('should fail the upgrade if not group plan', async function () {
+      this.SubscriptionLocator.promises.getUsersSubscription = sinon
+        .stub()
+        .resolves({ groupPlan: false, planCode: 'test_plan_code' })
       await expect(
         this.Handler.promises.upgradeGroupPlan(this.user_id)
       ).to.be.rejectedWith('Not eligible for group plan upgrade')

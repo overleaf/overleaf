@@ -221,22 +221,35 @@ class RecurlySubscription {
    * Upgrade group plan with the plan code provided
    *
    * @param {string} newPlanCode
+   * @param {number} membersLimit
    * @return {RecurlySubscriptionChangeRequest}
    */
-  getRequestForFlexibleLicensingGroupPlanUpgrade(newPlanCode) {
+  getRequestForGroupPlanUpgrade(newPlanCode, membersLimit) {
     // Ensure all the existing add-ons are added to the new plan
-    const existingAddOns = this.addOns.map(
-      addOn =>
-        new RecurlySubscriptionAddOnUpdate({
-          code: addOn.code,
-          quantity: addOn.quantity,
-        })
+    // Except for the additional license, which will be added below
+    const addOns = this.addOns
+      .filter(addOn => addOn.code !== 'additional-license')
+      .map(
+        addOn =>
+          new RecurlySubscriptionAddOnUpdate({
+            code: addOn.code,
+            quantity: addOn.quantity,
+          })
+      )
+
+    // Get the number of licenses from the membersLimit field in the Subscription model
+    // This is necessary because legacy group plans do not fully use add-ons to represent seats
+    addOns.push(
+      new RecurlySubscriptionAddOnUpdate({
+        code: 'additional-license',
+        quantity: membersLimit,
+      })
     )
 
     return new RecurlySubscriptionChangeRequest({
       subscription: this,
       timeframe: 'now',
-      addOnUpdates: existingAddOns,
+      addOnUpdates: addOns,
       planCode: newPlanCode,
     })
   }

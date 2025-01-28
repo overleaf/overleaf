@@ -8,11 +8,6 @@ const RecurlyClient = require('./RecurlyClient')
 const PlansLocator = require('./PlansLocator')
 const SubscriptionHandler = require('./SubscriptionHandler')
 
-const PLAN_UPGRADE_MAP = {
-  group_collaborator: 'group_professional',
-  group_collaborator_educational: 'group_professional_educational',
-}
-
 async function removeUserFromGroup(subscriptionId, userIdToRemove) {
   await SubscriptionUpdater.promises.removeUserFromGroup(
     subscriptionId,
@@ -152,11 +147,16 @@ async function createAddSeatsSubscriptionChange(req) {
 }
 
 async function _getUpgradeTargetPlanCodeMaybeThrow(subscription) {
-  if (!Object.keys(PLAN_UPGRADE_MAP).includes(subscription.planCode)) {
+  if (
+    subscription.planCode.includes('professional') ||
+    !subscription.groupPlan
+  ) {
     throw new Error('Not eligible for group plan upgrade')
   }
 
-  return PLAN_UPGRADE_MAP[subscription.planCode]
+  return subscription.planCode.includes('educational')
+    ? 'group_professional_educational'
+    : 'group_professional'
 }
 
 async function _getGroupPlanUpgradeChangeRequest(ownerId) {
@@ -168,9 +168,22 @@ async function _getGroupPlanUpgradeChangeRequest(ownerId) {
   const recurlySubscription = await RecurlyClient.promises.getSubscription(
     olSubscription.recurlySubscription_id
   )
-  return recurlySubscription.getRequestForFlexibleLicensingGroupPlanUpgrade(
-    newPlanCode
+  return recurlySubscription.getRequestForGroupPlanUpgrade(
+    newPlanCode,
+    olSubscription.membersLimit
   )
+}
+
+function _getPlanNameForDisplay(subscription) {
+  if (/^group_collaborator_\d+_enterprise$/.test(subscription.planCode)) {
+    return 'Overleaf Standard Group'
+  }
+
+  if (/^group_collaborator_\d+_educational$/.test(subscription.planCode)) {
+    return 'Overleaf Standard Group Educational'
+  }
+
+  return subscription.planName
 }
 
 async function getGroupPlanUpgradePreview(ownerId) {
@@ -182,7 +195,7 @@ async function getGroupPlanUpgradePreview(ownerId) {
     {
       type: 'group-plan-upgrade',
       prevPlan: {
-        name: subscriptionChange.subscription.planName,
+        name: _getPlanNameForDisplay(subscriptionChange.subscription),
       },
     },
     subscriptionChange,
