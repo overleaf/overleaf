@@ -5,6 +5,7 @@ import { useProjectSettingsContext } from '../../context/project-settings-contex
 import SettingsMenuSelect from './settings-menu-select'
 import type { Optgroup } from './settings-menu-select'
 import { useEditorContext } from '@/shared/context/editor-context'
+import { supportsWebAssembly } from '@/utils/wasm'
 
 export default function SettingsSpellCheckLanguage() {
   const { t } = useTranslation()
@@ -30,12 +31,12 @@ export default function SettingsSpellCheckLanguage() {
   return (
     <SettingsMenuSelect
       onChange={setSpellCheckLanguage}
-      value={spellCheckLanguage}
+      value={supportsWebAssembly() ? spellCheckLanguage : ''}
       options={[{ value: '', label: t('off') }]}
       optgroup={optgroup}
       label={t('spell_check')}
       name="spellCheckLanguage"
-      disabled={permissionsLevel === 'readOnly'}
+      disabled={permissionsLevel === 'readOnly' || !supportsWebAssembly()}
     />
   )
 }

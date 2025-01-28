@@ -4,12 +4,13 @@ import { globalIgnoredWords } from '@/features/dictionary/ignored-words'
 import { HunspellManager } from '@/features/source-editor/hunspell/HunspellManager'
 import { debugConsole } from '@/utils/debugging'
 import { learnedWords } from '@/features/source-editor/extensions/spelling/learned-words'
+import { supportsWebAssembly } from '@/utils/wasm'
 
 export const useHunspell = (spellCheckLanguage: string | null) => {
   const [hunspellManager, setHunspellManager] = useState<HunspellManager>()
 
   useEffect(() => {
-    if (spellCheckLanguage) {
+    if (spellCheckLanguage && supportsWebAssembly()) {
       const lang = (getMeta('ol-languages') ?? []).find(
         item => item.code === spellCheckLanguage
       )
