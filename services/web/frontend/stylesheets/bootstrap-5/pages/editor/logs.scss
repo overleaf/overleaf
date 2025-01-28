@@ -6,6 +6,10 @@
   --logs-pane-bg: var(--bg-light-secondary);
 }
 
+.ide-redesign-main {
+  --logs-pane-bg: #fff;
+}
+
 .logs-pane {
   position: absolute;
   inset: 0;

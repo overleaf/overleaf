@@ -6,11 +6,13 @@ import MaterialIcon, {
 import { Panel } from 'react-resizable-panels'
 import { useLayoutContext } from '@/shared/context/layout-context'
 import { FileTree } from '@/features/ide-react/components/file-tree'
+import { ErrorIndicator, ErrorPane } from './errors'
 
 type RailElement = {
   icon: AvailableUnfilledIcon
   key: string
   component: ReactElement
+  indicator?: ReactElement
 }
 
 type RailActionLink = { key: string; icon: AvailableUnfilledIcon; href: string }
@@ -52,7 +54,8 @@ const RAIL_TABS: RailElement[] = [
   {
     key: 'errors',
     icon: 'report',
-    component: <>Errors</>,
+    component: <ErrorPane />,
+    indicator: <ErrorIndicator />,
   },
 ]
 
@@ -87,12 +90,13 @@ export const RailLayout = () => {
           defaultActiveKey={RAIL_TABS[0]?.key}
           className="d-flex flex-column ide-rail-tabs-nav"
         >
-          {RAIL_TABS.map(({ icon, key }) => (
+          {RAIL_TABS.map(({ icon, key, indicator }) => (
             <RailTab
               active={selectedTab === key}
               key={key}
               eventKey={key}
               icon={icon}
+              indicator={indicator}
             />
           ))}
           <div className="flex-grow-1" />
@@ -126,10 +130,12 @@ const RailTab = ({
   icon,
   eventKey,
   active,
+  indicator,
 }: {
   icon: AvailableUnfilledIcon
   eventKey: string
   active: boolean
+  indicator?: ReactElement
 }) => {
   return (
     <NavLink eventKey={eventKey} className="ide-rail-tab-link">
@@ -138,6 +144,7 @@ const RailTab = ({
       ) : (
         <MaterialIcon className="ide-rail-tab-link-icon" type={icon} unfilled />
       )}
+      {indicator}
     </NavLink>
   )
 }

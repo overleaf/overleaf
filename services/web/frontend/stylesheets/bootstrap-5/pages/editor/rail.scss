@@ -48,6 +48,12 @@
       background-color: var(--ide-rail-link-active-indicator-background);
     }
   }
+
+  .badge {
+    position: absolute;
+    top: var(--spacing-02);
+    right: var(--spacing-02);
+  }
 }
 
 .ide-rail {
@@ -59,6 +65,16 @@
 
 .ide-rail-content {
   height: 100%;
+
+  .logs-pane {
+    top: 0;
+  }
+
+  .tab-content {
+    height: 100%;
+    width: 100%;
+    position: relative;
+  }
 }
 
 .ide-rail-tabs-nav {

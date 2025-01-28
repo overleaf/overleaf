@@ -14,8 +14,9 @@ import PdfCodeCheckFailedNotice from './pdf-code-check-failed-notice'
 import { useDetachCompileContext as useCompileContext } from '../../../shared/context/detach-compile-context'
 import PdfLogEntry from './pdf-log-entry'
 import { usePdfPreviewContext } from '@/features/pdf-preview/components/pdf-preview-provider'
+import PropTypes from 'prop-types'
 
-function PdfLogsViewer() {
+function PdfLogsViewer({ alwaysVisible = false }) {
   const {
     codeCheckFailed,
     error,
@@ -34,7 +35,7 @@ function PdfLogsViewer() {
   return (
     <div
       className={classnames('logs-pane', {
-        hidden: !showLogs && !loadingError,
+        hidden: !showLogs && !alwaysVisible && !loadingError,
       })}
     >
       <div className="logs-pane-content">
@@ -78,6 +79,10 @@ function PdfLogsViewer() {
       </div>
     </div>
   )
+}
+
+PdfLogsViewer.propTypes = {
+  alwaysVisible: PropTypes.bool,
 }
 
 export default withErrorBoundary(memo(PdfLogsViewer), () => (
