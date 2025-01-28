@@ -10,7 +10,7 @@ import {
   DropdownToggle,
 } from '@/features/ui/components/bootstrap-5/dropdown-menu'
 import Icon from '../../../shared/components/icon'
-import { getHueForUserId } from '../../../shared/utils/colors'
+import { getBackgroundColorForUserId } from '@/shared/utils/colors'
 import ControlledDropdown from '../../../shared/components/controlled-dropdown'
 import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
 import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
@@ -107,7 +107,7 @@ OnlineUsersWidget.propTypes = {
 }
 
 function UserIcon({ user, showName, onClick }) {
-  const backgroundColor = `hsl(${getHueForUserId(user.user_id)}, 70%, 50%)`
+  const backgroundColor = getBackgroundColorForUserId(user.user_id)
 
   function handleOnClick() {
     onClick?.(user)

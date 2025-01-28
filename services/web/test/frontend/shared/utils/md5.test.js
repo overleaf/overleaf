@@ -1,6 +1,6 @@
 import { expect } from 'chai'
 
-import { generateMD5Hash } from '../../../../frontend/js/shared/utils/md5'
+import { generateMD5Hash } from '@/shared/utils/md5'
 
 describe('md5', function () {
   describe('generateSHA1Hash', function () {

@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next'
-import { getUserColor } from '../../utils/history-details'
 import { LoadedUpdate } from '../../services/types/update'
 import UserNameWithColoredBadge from './user-name-with-colored-badge'
+import { getBackgroundColorForUserId } from '@/shared/utils/colors'
 
 type MetadataUsersListProps = {
   currentUserId: string
@@ -28,7 +28,7 @@ function MetadataUsersList({
         <li>
           <span
             className="history-version-user-badge-color"
-            style={{ backgroundColor: getUserColor() }}
+            style={{ backgroundColor: getBackgroundColorForUserId() }}
           />
           {origin?.kind === 'history-resync' ||
           origin?.kind === 'history-migration'

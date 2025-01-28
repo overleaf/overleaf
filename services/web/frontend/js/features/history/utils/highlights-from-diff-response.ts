@@ -1,8 +1,8 @@
 import moment from 'moment/moment'
-import ColorManager from '../../../ide/colors/ColorManager'
 import { DocDiffChunk, Highlight } from '../services/types/doc'
 import { TFunction } from 'i18next'
 import displayNameForUser from './display-name-for-user'
+import { getHueForUserId } from '@/shared/utils/colors'
 
 export function highlightsFromDiffResponse(
   chunks: DocDiffChunk[],
@@ -37,7 +37,7 @@ export function highlightsFromDiffResponse(
           // There doesn't seem to be a convenient way to make this translatable
           label: t('added_by_on', { name, date }),
           range,
-          hue: ColorManager.getHueForUserId(user?.id),
+          hue: getHueForUserId(user?.id),
         })
       } else if (isDeletion) {
         highlights.push({
@@ -45,7 +45,7 @@ export function highlightsFromDiffResponse(
           // There doesn't seem to be a convenient way to make this translatable
           label: t('deleted_by_on', { name, date }),
           range,
-          hue: ColorManager.getHueForUserId(user?.id),
+          hue: getHueForUserId(user?.id),
         })
       }
     }

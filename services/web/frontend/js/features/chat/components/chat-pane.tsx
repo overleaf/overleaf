@@ -94,7 +94,6 @@ const ChatPane = React.memo(function ChatPane() {
             {shouldDisplayPlaceholder && <Placeholder />}
             <MessageList
               messages={messages}
-              userId={user.id}
               resetUnreadMessages={markMessagesAsRead}
             />
           </Suspense>

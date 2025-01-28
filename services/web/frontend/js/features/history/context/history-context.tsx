@@ -17,7 +17,6 @@ import { isFileRenamed } from '../utils/file-diff'
 import { loadLabels } from '../utils/label'
 import { autoSelectFile } from '../utils/auto-select-file'
 import usePersistedState from '../../../shared/hooks/use-persisted-state'
-import ColorManager from '../../../ide/colors/ColorManager'
 import moment from 'moment'
 import { cloneDeep } from 'lodash'
 import {
@@ -28,6 +27,7 @@ import {
 import { Selection } from '../services/types/selection'
 import { useErrorHandler } from 'react-error-boundary'
 import { getUpdateForVersion } from '../utils/history-details'
+import { getHueForUserId } from '@/shared/utils/colors'
 
 // Allow testing of infinite scrolling by providing query string parameters to
 // limit the number of updates returned in a batch and apply a delay
@@ -120,7 +120,7 @@ function useHistory() {
       for (const [index, update] of loadedUpdates.entries()) {
         for (const user of update.meta.users) {
           if (user) {
-            user.hue = ColorManager.getHueForUserId(user.id)
+            user.hue = getHueForUserId(user.id)
           }
         }
         if (

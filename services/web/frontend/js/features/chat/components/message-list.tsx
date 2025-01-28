@@ -1,7 +1,7 @@
 import moment from 'moment'
 import Message from './message'
-import { UserId } from '../../../../../types/user'
 import type { Message as MessageType } from '@/features/chat/context/chat-context'
+import { useUserContext } from '@/shared/context/user-context'
 
 const FIVE_MINUTES = 5 * 60 * 1000
 
@@ -16,14 +16,11 @@ function formatTimestamp(date: moment.MomentInput) {
 interface MessageListProps {
   messages: MessageType[]
   resetUnreadMessages(...args: unknown[]): unknown
-  userId: UserId | null
 }
 
-function MessageList({
-  messages,
-  resetUnreadMessages,
-  userId,
-}: MessageListProps) {
+function MessageList({ messages, resetUnreadMessages }: MessageListProps) {
+  const user = useUserContext()
+
   function shouldRenderDate(messageIndex: number) {
     if (messageIndex === 0) {
       return true
@@ -61,7 +58,10 @@ function MessageList({
               </time>
             </div>
           )}
-          <Message message={message} userId={userId} />
+          <Message
+            message={message}
+            fromSelf={message.user ? message.user.id === user.id : false}
+          />
         </li>
       ))}
     </ul>

@@ -1,14 +1,6 @@
-import ColorManager from '../../../ide/colors/ColorManager'
-import { Nullable } from '../../../../../types/utils'
 import { User } from '../services/types/shared'
 import { LoadedUpdate, ProjectOp, Version } from '../services/types/update'
 import { Selection } from '../services/types/selection'
-
-export const getUserColor = (user?: Nullable<{ id: string }>) => {
-  const hue = ColorManager.getHueForUserId(user?.id) || 100
-
-  return `hsl(${hue}, 70%, 50%)`
-}
 
 export const formatUserName = (user: User) => {
   let name = [user.first_name, user.last_name]

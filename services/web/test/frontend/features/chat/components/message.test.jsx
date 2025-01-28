@@ -26,7 +26,7 @@ describe('<Message />', function () {
       user: currentUser,
     }
 
-    render(<Message userId={currentUser.id} message={message} />)
+    render(<Message message={message} fromSelf />)
 
     screen.getByText('a message')
   })
@@ -37,7 +37,7 @@ describe('<Message />', function () {
       user: currentUser,
     }
 
-    render(<Message userId={currentUser.id} message={message} />)
+    render(<Message message={message} fromSelf />)
 
     screen.getByText('a message')
     screen.getByText('another message')
@@ -51,7 +51,7 @@ describe('<Message />', function () {
       user: currentUser,
     }
 
-    render(<Message userId={currentUser.id} message={message} />)
+    render(<Message message={message} fromSelf />)
 
     screen.getByRole('link', { name: 'https://overleaf.com' })
   })
@@ -63,7 +63,7 @@ describe('<Message />', function () {
     }
 
     it('does not render the user name nor the email', function () {
-      render(<Message userId={currentUser.id} message={message} />)
+      render(<Message message={message} fromSelf />)
 
       expect(screen.queryByText(currentUser.first_name)).to.not.exist
       expect(screen.queryByText(currentUser.email)).to.not.exist
@@ -82,7 +82,7 @@ describe('<Message />', function () {
     }
 
     it('should render the other user name', function () {
-      render(<Message userId={currentUser.id} message={message} />)
+      render(<Message message={message} />)
 
       screen.getByText(otherUser.first_name)
     })
@@ -96,7 +96,7 @@ describe('<Message />', function () {
         },
       }
 
-      render(<Message userId={currentUser.id} message={msg} />)
+      render(<Message message={msg} />)
 
       expect(screen.queryByText(otherUser.first_name)).to.not.exist
       screen.getByText(msg.user.email)

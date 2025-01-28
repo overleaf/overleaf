@@ -25,7 +25,6 @@ import {
 } from '@/features/ide-react/context/editor-manager-context'
 import { debugConsole } from '@/utils/debugging'
 import { deleteJSON, getJSON, postJSON } from '@/infrastructure/fetch-json'
-import ColorManager from '@/ide/colors/ColorManager'
 import RangesTracker from '@overleaf/ranges-tracker'
 import type * as ReviewPanel from '@/features/source-editor/context/review-panel/types/review-panel-state'
 import {
@@ -66,6 +65,7 @@ import {
 import { RangesTrackerWithResolvedThreadIds } from '@/features/ide-react/editor/document-container'
 import getMeta from '@/utils/meta'
 import { useEditorContext } from '@/shared/context/editor-context'
+import { getHueForUserId } from '@/shared/utils/colors'
 
 const dispatchReviewPanelEvent = (type: string, payload?: any) => {
   window.dispatchEvent(
@@ -86,7 +86,7 @@ const formatUser = (user: any): any => {
       email: null,
       name: 'Anonymous',
       isSelf: false,
-      hue: ColorManager.ANONYMOUS_HUE,
+      hue: getHueForUserId(),
       avatar_text: 'A',
     }
   }
@@ -108,7 +108,7 @@ const formatUser = (user: any): any => {
     email: user.email,
     name,
     isSelf,
-    hue: ColorManager.getHueForUserId(id),
+    hue: getHueForUserId(id),
     avatar_text: [user.first_name, user.last_name]
       .filter(n => n != null)
       .map(n => n[0])

@@ -1,42 +1,40 @@
-import { getHueForUserId } from '../../../shared/utils/colors'
+import { getHueForUserId } from '@/shared/utils/colors'
 import MessageContent from './message-content'
 import type { Message as MessageType } from '@/features/chat/context/chat-context'
 import { User } from '../../../../../types/user'
 
 interface MessageProps {
   message: MessageType
-  userId: string | null
+  fromSelf: boolean
 }
 
-function Message({ message, userId }: MessageProps) {
-  function hue(user?: User) {
-    return user ? getHueForUserId(user.id, userId) : 0
+function hue(user?: User) {
+  return user ? getHueForUserId(user.id) : 0
+}
+
+function getMessageStyle(user?: User) {
+  return {
+    borderColor: `hsl(${hue(user)}, 85%, 40%)`,
+    backgroundColor: `hsl(${hue(user)}, 85%, 40%`,
   }
+}
 
-  function getMessageStyle(user?: User) {
-    return {
-      borderColor: `hsl(${hue(user)}, 85%, 40%)`,
-      backgroundColor: `hsl(${hue(user)}, 85%, 40%`,
-    }
+function getArrowStyle(user?: User) {
+  return {
+    borderColor: `hsl(${hue(user)}, 85%, 40%)`,
   }
+}
 
-  function getArrowStyle(user?: User) {
-    return {
-      borderColor: `hsl(${hue(user)}, 85%, 40%)`,
-    }
-  }
-
-  const isMessageFromSelf = message.user ? message.user.id === userId : false
-
+function Message({ message, fromSelf }: MessageProps) {
   return (
     <div className="message-wrapper">
-      {!isMessageFromSelf && message.user.id && (
+      {!fromSelf && (
         <div className="name">
           <span>{message.user.first_name || message.user.email}</span>
         </div>
       )}
       <div className="message" style={getMessageStyle(message.user)}>
-        {!isMessageFromSelf && (
+        {!fromSelf && (
           <div className="arrow" style={getArrowStyle(message.user)} />
         )}
         <div className="message-content">

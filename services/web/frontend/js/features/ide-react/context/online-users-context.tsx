@@ -11,7 +11,6 @@ import { ReactScopeValueStore } from '@/features/ide-react/scope-value-store/rea
 import { useIdeReactContext } from '@/features/ide-react/context/ide-react-context'
 import { useConnectionContext } from '@/features/ide-react/context/connection-context'
 import useScopeValue from '@/shared/hooks/use-scope-value'
-import ColorManager from '@/ide/colors/ColorManager'
 import { CursorPosition } from '@/features/ide-react/types/cursor-position'
 import { omit } from 'lodash'
 import { Doc } from '../../../../../types/doc'
@@ -20,6 +19,7 @@ import { findDocEntityById } from '@/features/ide-react/util/find-doc-entity-by-
 import useSocketListener from '@/features/ide-react/hooks/use-socket-listener'
 import { debugConsole } from '@/utils/debugging'
 import { IdeEvents } from '@/features/ide-react/create-ide-event-emitter'
+import { getHueForUserId } from '@/shared/utils/colors'
 
 type OnlineUser = {
   id: string
@@ -139,7 +139,7 @@ export const OnlineUsersProvider: FC = ({ children }) => {
             row: user.row,
             column: user.column,
           },
-          hue: ColorManager.getHueForUserId(user.user_id),
+          hue: getHueForUserId(user.user_id),
         })
       }
 

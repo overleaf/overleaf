@@ -8,9 +8,9 @@
  * See http://pajhome.org.uk/crypt/md5 for more info.
  */
 
-export function generateMD5Hash(inputString) {
+export function generateMD5Hash(inputString: string): string {
   const hc = '0123456789abcdef'
-  function rh(n) {
+  function rh(n: number) {
     let j
     let s = ''
     for (j = 0; j <= 3; j++)
@@ -18,30 +18,69 @@ export function generateMD5Hash(inputString) {
         hc.charAt((n >> (j * 8 + 4)) & 0x0f) + hc.charAt((n >> (j * 8)) & 0x0f)
     return s
   }
-  function ad(x, y) {
+  function ad(x: number, y: number) {
     const l = (x & 0xffff) + (y & 0xffff)
     const m = (x >> 16) + (y >> 16) + (l >> 16)
     return (m << 16) | (l & 0xffff)
   }
-  function rl(n, c) {
+  function rl(n: number, c: number) {
     return (n << c) | (n >>> (32 - c))
   }
-  function cm(q, a, b, x, s, t) {
+  function cm(
+    q: number,
+    a: number,
+    b: number,
+    x: number,
+    s: number,
+    t: number
+  ) {
     return ad(rl(ad(ad(a, q), ad(x, t)), s), b)
   }
-  function ff(a, b, c, d, x, s, t) {
+  function ff(
+    a: number,
+    b: number,
+    c: number,
+    d: number,
+    x: number,
+    s: number,
+    t: number
+  ) {
     return cm((b & c) | (~b & d), a, b, x, s, t)
   }
-  function gg(a, b, c, d, x, s, t) {
+  function gg(
+    a: number,
+    b: number,
+    c: number,
+    d: number,
+    x: number,
+    s: number,
+    t: number
+  ) {
     return cm((b & d) | (c & ~d), a, b, x, s, t)
   }
-  function hh(a, b, c, d, x, s, t) {
+  function hh(
+    a: number,
+    b: number,
+    c: number,
+    d: number,
+    x: number,
+    s: number,
+    t: number
+  ) {
     return cm(b ^ c ^ d, a, b, x, s, t)
   }
-  function ii(a, b, c, d, x, s, t) {
+  function ii(
+    a: number,
+    b: number,
+    c: number,
+    d: number,
+    x: number,
+    s: number,
+    t: number
+  ) {
     return cm(c ^ (b | ~d), a, b, x, s, t)
   }
-  function sb(x) {
+  function sb(x: string) {
     let i
     const nblk = ((x.length + 8) >> 6) + 1
     const blks = new Array(nblk * 16)

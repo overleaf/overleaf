@@ -4,6 +4,7 @@ import { screen, render, fireEvent } from '@testing-library/react'
 
 import MessageList from '../../../../../frontend/js/features/chat/components/message-list'
 import { stubMathJax, tearDownMathJaxStubs } from './stubs'
+import { UserProvider } from '@/shared/context/user-context'
 
 describe('<MessageList />', function () {
   const currentUser = {
@@ -37,13 +38,25 @@ describe('<MessageList />', function () {
     tearDownMathJaxStubs()
   })
 
+  let olUser
+  beforeEach(function () {
+    olUser = window.metaAttributesCache.get('ol-user')
+    window.metaAttributesCache.set('ol-user', currentUser)
+  })
+
+  afterEach(function () {
+    window.metaAttributesCache.set('ol-user', olUser)
+  })
+
   it('renders multiple messages', function () {
     render(
-      <MessageList
-        userId={currentUser.id}
-        messages={createMessages()}
-        resetUnreadMessages={() => {}}
-      />
+      <UserProvider>
+        <MessageList
+          userId={currentUser.id}
+          messages={createMessages()}
+          resetUnreadMessages={() => {}}
+        />
+      </UserProvider>
     )
 
     screen.getByText('a message')
@@ -56,11 +69,13 @@ describe('<MessageList />', function () {
     msgs[1].timestamp = new Date(2019, 6, 3, 4, 27).getTime()
 
     render(
-      <MessageList
-        userId={currentUser.id}
-        messages={msgs}
-        resetUnreadMessages={() => {}}
-      />
+      <UserProvider>
+        <MessageList
+          userId={currentUser.id}
+          messages={msgs}
+          resetUnreadMessages={() => {}}
+        />
+      </UserProvider>
     )
 
     screen.getByText('4:23 am Wed, 3rd Jul 19')
@@ -73,11 +88,13 @@ describe('<MessageList />', function () {
     msgs[1].timestamp = new Date(2019, 6, 3, 4, 31).getTime()
 
     render(
-      <MessageList
-        userId={currentUser.id}
-        messages={msgs}
-        resetUnreadMessages={() => {}}
-      />
+      <UserProvider>
+        <MessageList
+          userId={currentUser.id}
+          messages={msgs}
+          resetUnreadMessages={() => {}}
+        />
+      </UserProvider>
     )
 
     screen.getByText('4:23 am Wed, 3rd Jul 19')
@@ -87,11 +104,13 @@ describe('<MessageList />', function () {
   it('resets the number of unread messages after clicking on the input', function () {
     const resetUnreadMessages = sinon.stub()
     render(
-      <MessageList
-        userId={currentUser.id}
-        messages={createMessages()}
-        resetUnreadMessages={resetUnreadMessages}
-      />
+      <UserProvider>
+        <MessageList
+          userId={currentUser.id}
+          messages={createMessages()}
+          resetUnreadMessages={resetUnreadMessages}
+        />
+      </UserProvider>
     )
 
     fireEvent.click(screen.getByRole('list'))

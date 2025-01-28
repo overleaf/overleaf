@@ -1,7 +1,8 @@
 import { useTranslation } from 'react-i18next'
-import { formatUserName, getUserColor } from '../../utils/history-details'
+import { formatUserName } from '../../utils/history-details'
 import { User } from '../../services/types/shared'
 import { Nullable } from '../../../../../../types/utils'
+import { getBackgroundColorForUserId } from '@/shared/utils/colors'
 
 type UserNameWithColoredBadgeProps = {
   currentUserId: string
@@ -29,7 +30,7 @@ function UserNameWithColoredBadge({
     <>
       <span
         className="history-version-user-badge-color"
-        style={{ backgroundColor: getUserColor(user) }}
+        style={{ backgroundColor: getBackgroundColorForUserId(user?.id) }}
       />
       <span className="history-version-user-badge-text">{userName}</span>
     </>
