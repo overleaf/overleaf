@@ -69,4 +69,6 @@ export type PaymentContextValue = {
   updateCountry: (country: PricingFormState['country']) => void
   userCanNotStartRequestedTrial: boolean
   showStudentConfirmation: boolean
+  studentConfirmationChecked: boolean
+  setStudentConfirmationChecked: React.Dispatch<React.SetStateAction<boolean>>
 }
