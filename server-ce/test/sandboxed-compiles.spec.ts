@@ -46,7 +46,7 @@ describe('SandboxedCompiles', function () {
         .findByText('2023')
         .parent()
         .select('2022')
-      cy.get('#left-menu-modal').click()
+      cy.get('.left-menu-modal-backdrop').click()
 
       cy.log('Trigger compile with other TeX Live version')
       recompile()
@@ -187,7 +187,7 @@ describe('SandboxedCompiles', function () {
         .findByText('pdfLaTeX')
         .parent()
         .select('XeLaTeX')
-      cy.get('#left-menu-modal').click()
+      cy.get('.left-menu-modal-backdrop').click()
 
       cy.log('Trigger compile with other compiler')
       recompile()

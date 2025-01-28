@@ -64,7 +64,7 @@ describe('Templates', () => {
         .get('textarea')
         .type(description)
       cy.findByText('Publish').click()
-      cy.findByText('Publishing…').should('be.disabled')
+      cy.findByText('Publishing…').parent().should('be.disabled')
       cy.findByText('Publish').should('not.exist')
       cy.findByText('Unpublish', { timeout: 10_000 })
       cy.findByText('Republish')

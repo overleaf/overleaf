@@ -107,7 +107,7 @@ describe('editor', () => {
       cy.intercept('POST', '**/track_changes').as('enableTrackChanges')
       cy.findByText('Everyone')
         .parent()
-        .within(() => cy.get('.input-switch').click())
+        .within(() => cy.get('.form-check-input').click())
       cy.wait('@enableTrackChanges')
 
       login('collaborator@example.com')
@@ -146,7 +146,7 @@ describe('editor', () => {
       cy.intercept('POST', '**/track_changes').as('enableTrackChanges')
       cy.findByText('Everyone')
         .parent()
-        .within(() => cy.get('.input-switch').click())
+        .within(() => cy.get('.form-check-input').click())
       cy.wait('@enableTrackChanges')
 
       login('collaborator@example.com')

@@ -82,7 +82,7 @@ describe('git-bridge', function () {
       cy.get('header').findByText('Menu').click()
       cy.findByText('Sync')
       cy.findByText('Git').click()
-      cy.findByRole('dialog').within(() => {
+      cy.findByTestId('git-bridge-modal').within(() => {
         cy.get('@projectId').then(id => {
           cy.get('code').contains(
             `git clone http://git@${gitBridgePublicHost}/git/${id}`
@@ -98,7 +98,7 @@ describe('git-bridge', function () {
       cy.url().then(url => cy.visit(url))
       cy.get('header').findByText('Menu').click()
       cy.findByText('Git').click()
-      cy.findByRole('dialog').within(() => {
+      cy.findByTestId('git-bridge-modal').within(() => {
         cy.get('@projectId').then(id => {
           cy.get('code').contains(
             `git clone http://git@${gitBridgePublicHost}/git/${id}`
@@ -186,7 +186,7 @@ describe('git-bridge', function () {
       cy.findByText('Sync')
       cy.findByText('Git').click()
       cy.get('@projectId').then(projectId => {
-        cy.findByRole('dialog').within(() => {
+        cy.findByTestId('git-bridge-modal').within(() => {
           cy.get('code').contains(
             `git clone http://git@${gitBridgePublicHost}/git/${projectId}`
           )
@@ -202,7 +202,7 @@ describe('git-bridge', function () {
             // close Git modal
             cy.findAllByText('Close').last().click()
             // close editor menu
-            cy.get('#left-menu-modal').click()
+            cy.get('.left-menu-modal-backdrop').click()
 
             const fs = new LightningFS('fs')
             const dir = `/${projectId}`

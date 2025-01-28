@@ -59,7 +59,7 @@ describe('Upgrading', function () {
         recompile()
         cy.get('header').findByText('Menu').click()
         cy.findByText('Source').click()
-        cy.get('#left-menu-modal').click()
+        cy.get('.left-menu-modal-backdrop').click({ force: true })
       }
 
       cy.log('Check compile and history')
