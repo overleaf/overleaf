@@ -134,14 +134,17 @@ const dispatchSelectionAndScroll = (
 export const setCursorLineAndScroll = (
   view: EditorView,
   lineNumber: number,
-  columnNumber = 0
+  columnNumber = 0,
+  selectionLength?: number
 ) => {
   // TODO: map the position through any changes since the previous compile?
 
   let selectionRange
   try {
     const pos = findValidPosition(view.state.doc, lineNumber, columnNumber)
-    selectionRange = EditorSelection.cursor(pos)
+    selectionRange = selectionLength
+      ? EditorSelection.range(pos, pos + selectionLength)
+      : EditorSelection.cursor(pos)
   } catch (error) {
     // ignore invalid cursor position
     debugConsole.debug('invalid cursor position', error)

@@ -468,8 +468,8 @@ function useCodeMirrorScope(view: EditorView) {
   const emitSyncToPdf = useScopeEventEmitter('cursor:editor:syncToPdf')
 
   const handleGoToLine = useCallback(
-    (event, lineNumber, columnNumber, syncToPdf) => {
-      setCursorLineAndScroll(view, lineNumber, columnNumber)
+    (event, lineNumber, columnNumber, syncToPdf, selectionLength) => {
+      setCursorLineAndScroll(view, lineNumber, columnNumber, selectionLength)
       if (syncToPdf) {
         emitSyncToPdf()
       }

@@ -246,7 +246,8 @@ export const EditorManagerProvider: FC = ({ children }) => {
       goToLineEmitter(
         options.gotoLine,
         options.gotoColumn ?? 0,
-        options.syncToPdf ?? false
+        options.syncToPdf ?? false,
+        options.selectionLength
       )
     },
     [goToLineEmitter]
