@@ -872,7 +872,9 @@ function useReviewPanelState(): ReviewPanel.ReviewPanelState {
         return { ...prevState, [threadId]: thread }
       })
       setResolvedThreadIds(prevState => ({ ...prevState, [threadId]: true }))
-      dispatchReviewPanelEvent('comment:resolve_threads', [threadId])
+      setTimeout(() => {
+        dispatchReviewPanelEvent('comment:resolve_threads', [threadId])
+      })
     },
     [getThread]
   )
@@ -916,7 +918,9 @@ function useReviewPanelState(): ReviewPanel.ReviewPanelState {
       setResolvedThreadIds(({ [threadId]: _, ...resolvedThreadIds }) => {
         return resolvedThreadIds
       })
-      dispatchReviewPanelEvent('comment:unresolve_thread', threadId)
+      setTimeout(() => {
+        dispatchReviewPanelEvent('comment:unresolve_thread', threadId)
+      })
     },
     [getThread]
   )
