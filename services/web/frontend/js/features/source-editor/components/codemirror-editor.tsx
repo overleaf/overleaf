@@ -39,7 +39,6 @@ function CodeMirrorEditor() {
   const isMounted = useIsMounted()
 
   const newReviewPanel = useFeatureFlag('review-panel-redesign')
-  const enableMathPreview = useFeatureFlag('math-preview')
 
   // create the view using the initial state and intercept transactions
   const viewRef = useRef<EditorView | null>(null)
@@ -75,7 +74,7 @@ function CodeMirrorEditor() {
           )}
           <CodeMirrorCommandTooltip />
 
-          {enableMathPreview && <MathPreviewTooltip />}
+          <MathPreviewTooltip />
           {newReviewPanel && <ReviewTooltipMenu />}
           <ReviewPanelMigration />
 

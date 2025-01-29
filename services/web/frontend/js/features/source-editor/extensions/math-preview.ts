@@ -22,7 +22,6 @@ import {
 } from '../utils/tree-operations/math'
 import { documentCommands } from '../languages/latex/document-commands'
 import { debugConsole } from '@/utils/debugging'
-import { isSplitTestEnabled } from '@/utils/splitTestUtils'
 import { nodeHasError } from '../utils/tree-operations/common'
 import { documentEnvironments } from '../languages/latex/document-environments'
 
@@ -30,10 +29,6 @@ const REPOSITION_EVENT = 'editor:repositionMathTooltips'
 const HIDE_TOOLTIP_EVENT = 'editor:hideMathTooltip'
 
 export const mathPreview = (enabled: boolean): Extension => {
-  if (!isSplitTestEnabled('math-preview')) {
-    return []
-  }
-
   return mathPreviewConf.of(
     enabled ? [mathPreviewTheme, mathPreviewStateField] : []
   )

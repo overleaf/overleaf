@@ -335,7 +335,6 @@ const _ProjectController = {
       'compile-log-events',
       'external-socket-heartbeat',
       'full-project-search',
-      'math-preview',
       'null-test-share-modal',
       'paywall-cta',
       'pdf-caching-cached-url-lookup',
