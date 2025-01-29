@@ -26,8 +26,8 @@ export const ReviewPanelChange = memo<{
   docId: string
   hoverRanges?: boolean
   hovered?: boolean
-  onEnter?: () => void
-  onLeave?: () => void
+  onEnter?: (changeId: string) => void
+  onLeave?: (changeId: string) => void
 }>(
   ({
     change,
@@ -88,14 +88,14 @@ export const ReviewPanelChange = memo<{
         docId={docId}
         hoverRanges={hoverRanges}
         disabled={accepting}
-        onEnterEntryIndicator={onEnter}
-        onLeaveEntryIndicator={onLeave}
+        onEnterEntryIndicator={onEnter && (() => onEnter(change.id))}
+        onLeaveEntryIndicator={onLeave && (() => onLeave(change.id))}
         entryIndicator="edit"
       >
         <div
           className="review-panel-entry-content"
-          onMouseEnter={onEnter}
-          onMouseLeave={onLeave}
+          onMouseEnter={onEnter && (() => onEnter(change.id))}
+          onMouseLeave={onLeave && (() => onLeave(change.id))}
         >
           <div className="review-panel-entry-header">
             <div>

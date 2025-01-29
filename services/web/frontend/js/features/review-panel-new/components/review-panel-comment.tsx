@@ -20,8 +20,8 @@ export const ReviewPanelComment = memo<{
   docId: string
   top?: number
   hoverRanges?: boolean
-  onEnter?: () => void
-  onLeave?: () => void
+  onEnter?: (changeId: string) => void
+  onLeave?: (changeId: string) => void
   hovered?: boolean
 }>(({ comment, top, hovered, onEnter, onLeave, docId, hoverRanges }) => {
   const threads = useThreadsContext()
@@ -142,8 +142,8 @@ export const ReviewPanelComment = memo<{
       position={comment.op.p}
       hoverRanges={hoverRanges}
       disabled={processing}
-      onEnterEntryIndicator={onEnter}
-      onLeaveEntryIndicator={onLeave}
+      onEnterEntryIndicator={onEnter && (() => onEnter(comment.id))}
+      onLeaveEntryIndicator={onLeave && (() => onLeave(comment.id))}
       entryIndicator="comment"
     >
       <ReviewPanelCommentContent

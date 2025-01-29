@@ -320,8 +320,8 @@ const ReviewPanelCurrentFile: FC = () => {
                 top={positions.get(change.id)}
                 aggregate={aggregatedRanges.aggregates.get(change.id)}
                 hovered={hoveredEntry === change.id}
-                onEnter={() => handleEntryEnter(change.id)}
-                onLeave={() => handleEntryLeave(change.id)}
+                onEnter={handleEntryEnter}
+                onLeave={handleEntryLeave}
               />
             )
         )}
@@ -335,8 +335,8 @@ const ReviewPanelCurrentFile: FC = () => {
                 comment={comment}
                 top={positions.get(comment.id)}
                 hovered={hoveredEntry === comment.id}
-                onEnter={() => handleEntryEnter(comment.id)}
-                onLeave={() => handleEntryLeave(comment.id)}
+                onEnter={handleEntryEnter}
+                onLeave={handleEntryLeave}
               />
             )
         )}
