@@ -84,6 +84,7 @@ export type HistoryUpdate = {
     pathname?: string
     doc_length?: number
     history_doc_length?: number
+    doc_hash?: string
     tc?: boolean
     user_id?: string
   }

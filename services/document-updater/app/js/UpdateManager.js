@@ -14,7 +14,7 @@ const DocumentManager = require('./DocumentManager')
 const RangesManager = require('./RangesManager')
 const SnapshotManager = require('./SnapshotManager')
 const Profiler = require('./Profiler')
-const { isInsert, isDelete, getDocLength } = require('./Utils')
+const { isInsert, isDelete, getDocLength, computeDocHash } = require('./Utils')
 
 /**
  * @import { DeleteOp, InsertOp, Op, Ranges, Update, HistoryUpdate } from "./types"
@@ -162,6 +162,7 @@ const UpdateManager = {
         projectHistoryId,
         lines,
         ranges,
+        updatedDocLines,
         historyRangesSupport
       )
 
@@ -290,8 +291,9 @@ const UpdateManager = {
    * @param {HistoryUpdate[]} updates
    * @param {string} pathname
    * @param {string} projectHistoryId
-   * @param {string[]} lines
-   * @param {Ranges} ranges
+   * @param {string[]} lines - document lines before updates were applied
+   * @param {Ranges} ranges - ranges before updates were applied
+   * @param {string[]} newLines - document lines after updates were applied
    * @param {boolean} historyRangesSupport
    */
   _adjustHistoryUpdatesMetadata(
@@ -300,6 +302,7 @@ const UpdateManager = {
     projectHistoryId,
     lines,
     ranges,
+    newLines,
     historyRangesSupport
   ) {
     let docLength = getDocLength(lines)
@@ -362,6 +365,12 @@ const UpdateManager = {
         // Prevent project-history from processing tracked changes
         delete update.meta.tc
       }
+    }
+
+    if (historyRangesSupport && updates.length > 0) {
+      const lastUpdate = updates[updates.length - 1]
+      lastUpdate.meta ??= {}
+      lastUpdate.meta.doc_hash = computeDocHash(newLines)
     }
   },
 }

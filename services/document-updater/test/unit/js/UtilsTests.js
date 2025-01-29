@@ -1,5 +1,6 @@
 // @ts-check
 
+const { createHash } = require('node:crypto')
 const { expect } = require('chai')
 const Utils = require('../../../app/js/Utils')
 
@@ -24,4 +25,30 @@ describe('Utils', function () {
       expect(result).to.equal('the quick brown fox jumps over the lazy dog')
     })
   })
+
+  describe('computeDocHash', function () {
+    it('computes the hash for an empty doc', function () {
+      const actual = Utils.computeDocHash([])
+      const expected = stringHash('')
+      expect(actual).to.equal(expected)
+    })
+
+    it('computes the hash for a single-line doc', function () {
+      const actual = Utils.computeDocHash(['hello'])
+      const expected = stringHash('hello')
+      expect(actual).to.equal(expected)
+    })
+
+    it('computes the hash for a multiline doc', function () {
+      const actual = Utils.computeDocHash(['hello', 'there', 'world'])
+      const expected = stringHash('hello\nthere\nworld')
+      expect(actual).to.equal(expected)
+    })
+  })
 })
+
+function stringHash(s) {
+  const hash = createHash('sha1')
+  hash.update(s)
+  return hash.digest('hex')
+}

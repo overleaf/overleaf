@@ -1,4 +1,5 @@
 // @ts-check
+const { createHash } = require('node:crypto')
 const _ = require('lodash')
 
 /**
@@ -80,6 +81,27 @@ function addTrackedDeletesToContent(content, trackedChanges) {
 }
 
 /**
+ * Compute the content hash for a doc
+ *
+ * This hash is sent to the history to validate updates.
+ *
+ * @param {string[]} lines
+ * @return {string} the doc hash
+ */
+function computeDocHash(lines) {
+  const hash = createHash('sha1')
+  if (lines.length > 0) {
+    for (const line of lines.slice(0, lines.length - 1)) {
+      hash.update(line)
+      hash.update('\n')
+    }
+    // The last line doesn't end with a newline
+    hash.update(lines[lines.length - 1])
+  }
+  return hash.digest('hex')
+}
+
+/**
  * checks if the given originOrSource should be treated as a source or origin
  * TODO: remove this hack and remove all "source" references
  */
@@ -102,5 +124,6 @@ module.exports = {
   isComment,
   addTrackedDeletesToContent,
   getDocLength,
+  computeDocHash,
   extractOriginOrSource,
 }
