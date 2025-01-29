@@ -29,7 +29,8 @@
           margin-right: 0;
         }
 
-        a {
+        a,
+        button {
           border: 0;
           border-radius: 0;
           color: var(--neutral-70);
@@ -60,7 +61,8 @@
         }
       }
 
-      li > a.active {
+      li > a.active,
+      li > button.active {
         background-color: transparent !important;
         border: 0 !important;
         border-bottom: 3px solid var(--green-50) !important;
