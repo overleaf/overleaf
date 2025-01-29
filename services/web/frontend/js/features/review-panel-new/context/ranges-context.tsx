@@ -21,6 +21,7 @@ import { postJSON } from '@/infrastructure/fetch-json'
 import { useIdeReactContext } from '@/features/ide-react/context/ide-react-context'
 import { useConnectionContext } from '@/features/ide-react/context/connection-context'
 import useSocketListener from '@/features/ide-react/hooks/use-socket-listener'
+import { throttle } from 'lodash'
 
 export type Ranges = {
   docId: string
@@ -97,11 +98,15 @@ export const RangesProvider: FC = ({ children }) => {
 
   useEffect(() => {
     if (currentDoc) {
-      const listener = () => {
-        window.setTimeout(() => {
-          setRanges(buildRanges(currentDoc))
-        })
-      }
+      const listener = throttle(
+        () => {
+          window.setTimeout(() => {
+            setRanges(buildRanges(currentDoc))
+          })
+        },
+        500,
+        { leading: true, trailing: true }
+      )
 
       // currentDoc.on('ranges:clear.cm6', listener)
       currentDoc.on('ranges:redraw.cm6', listener)
