@@ -141,6 +141,7 @@ export const LayoutProvider: FC = ({ children }) => {
         event.key === 'f'
       ) {
         if (isSplitTestEnabled('full-project-search')) {
+          event.preventDefault()
           setProjectSearchIsOpen(true)
         }
       }
