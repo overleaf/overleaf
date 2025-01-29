@@ -1,0 +1,33 @@
+--- services/web/app/views/layout/thin-footer-bootstrap-5.pug
++++ services/web/app/views/layout/thin-footer-bootstrap-5.pug
+@@ -7,7 +7,7 @@ footer.site-footer
+ 				if !settings.nav.hide_powered_by
+ 					li
+ 						//- year of Server Pro release, static
+-						| © 2024
++						| © 2025
+ 						|
+ 						a(href='https://www.overleaf.com/for/enterprises') Powered by Overleaf
+
+--- services/web/app/views/layout/thin-footer.pug
++++ services/web/app/views/layout/thin-footer.pug
+@@ -9,7 +9,7 @@ footer.site-footer
+ 				else if !settings.nav.hide_powered_by
+ 					li
+ 						//- year of Server Pro release, static
+-						| © 2024
++						| © 2025
+ 						|
+ 						a(href='https://www.overleaf.com/for/enterprises') Powered by Overleaf
+
+--- services/web/frontend/js/features/ui/components/bootstrap-5/footer/thin-footer.tsx
++++ services/web/frontend/js/features/ui/components/bootstrap-5/footer/thin-footer.tsx
+@@ -60,7 +60,7 @@ function ThinFooter({
+             {showPoweredBy ? (
+               <>
+                 <li>
+-                  {/* year of Server Pro release, static */}© 2024{' '}
++                  {/* year of Server Pro release, static */}© 2025{' '}
+                   <a href="https://www.overleaf.com/for/enterprises">
+                     Powered by Overleaf
+                   </a>
