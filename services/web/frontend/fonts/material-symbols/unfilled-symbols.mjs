@@ -9,6 +9,7 @@ export default /** @type {const} */ ([
   'forum',
   'help',
   'image',
+  'info',
   'integration_instructions',
   'picture_as_pdf',
   'rate_review',

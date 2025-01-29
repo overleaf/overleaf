@@ -10,7 +10,8 @@ import CompileTimeWarningUpgradePrompt from './compile-time-warning-upgrade-prom
 import { PdfPreviewProvider } from './pdf-preview-provider'
 import importOverleafModules from '../../../../macros/import-overleaf-module.macro'
 import { useFeatureFlag } from '@/shared/context/split-test-context'
-import PdfPreviewHybridToolbarNew from '@/features/ide-redesign/components/pdf-preview-hybrid-toolbar'
+import PdfPreviewHybridToolbarNew from '@/features/ide-redesign/components/pdf-preview/pdf-preview-hybrid-toolbar'
+import PdfErrorState from '@/features/ide-redesign/components/pdf-preview/pdf-error-state'
 
 const pdfPreviewPromotions = importOverleafModules('pdfPreviewPromotions') as {
   import: { default: ElementType }
@@ -45,7 +46,7 @@ function PdfPreviewPane() {
             <PdfViewer />
           </div>
         </Suspense>
-        <PdfLogsViewer />
+        {newEditor ? <PdfErrorState /> : <PdfLogsViewer />}
       </PdfPreviewProvider>
     </div>
   )

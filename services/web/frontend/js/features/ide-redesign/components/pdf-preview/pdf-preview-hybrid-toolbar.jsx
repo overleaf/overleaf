@@ -1,7 +1,6 @@
 import { memo } from 'react'
 import OlButtonToolbar from '@/features/ui/components/ol/ol-button-toolbar'
 import PdfCompileButton from './pdf-compile-button'
-import PdfHybridLogsButton from '@/features/pdf-preview/components/pdf-hybrid-logs-button'
 import PdfHybridDownloadButton from '@/features/pdf-preview/components/pdf-hybrid-download-button'
 
 function PdfPreviewHybridToolbar() {
@@ -10,7 +9,6 @@ function PdfPreviewHybridToolbar() {
     <OlButtonToolbar className="toolbar toolbar-pdf toolbar-pdf-hybrid">
       <div className="toolbar-pdf-left">
         <PdfCompileButton />
-        <PdfHybridLogsButton />
         <PdfHybridDownloadButton />
       </div>
       <div className="toolbar-pdf-right">

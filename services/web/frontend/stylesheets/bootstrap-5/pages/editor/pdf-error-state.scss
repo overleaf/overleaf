@@ -1,0 +1,76 @@
+.pdf-error-state {
+  position: absolute;
+  inset: var(--toolbar-small-height) 0 0 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-06);
+  background-color: var(--pdf-bg);
+}
+
+.pdf-error-state-top-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-06);
+  padding: 0 var(--spacing-09) var(--spacing-09) var(--spacing-09);
+}
+
+.pdf-error-state-warning-icon {
+  background-color: var(--bg-danger-03);
+  color: var(--content-danger);
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 100%;
+
+  .material-symbols {
+    font-size: 32px;
+  }
+}
+
+.pdf-error-state-text {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-02);
+}
+
+.pdf-error-state-label {
+  font-size: var(--font-size-02);
+  font-weight: 600;
+  margin-bottom: 0;
+}
+
+.pdf-error-state-description {
+  color: var(--content-secondary);
+  font-size: var(--font-size-02);
+  margin-bottom: 0;
+}
+
+.pdf-error-state-info-box {
+  background-color: var(--bg-light-primary);
+  padding: var(--spacing-06);
+  border: 1px solid var(--border-divider);
+  border-radius: var(--border-radius-base);
+}
+
+.pdf-error-state-info-box-title {
+  font-size: var(--font-size-02);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-02);
+  margin-bottom: var(--spacing-04);
+}
+
+.pdf-error-state-info-box-text {
+  font-size: var(--font-size-02);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-02);
+  margin-bottom: 0;
+}

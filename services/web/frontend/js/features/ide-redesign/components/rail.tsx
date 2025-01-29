@@ -1,4 +1,4 @@
-import { ReactElement, useCallback, useMemo, useState } from 'react'
+import { ReactElement, useCallback, useMemo } from 'react'
 import { Nav, NavLink, Tab, TabContainer } from 'react-bootstrap-5'
 import MaterialIcon, {
   AvailableUnfilledIcon,
@@ -6,11 +6,12 @@ import MaterialIcon, {
 import { Panel } from 'react-resizable-panels'
 import { useLayoutContext } from '@/shared/context/layout-context'
 import { ErrorIndicator, ErrorPane } from './errors'
+import { RailTabKey, useRailTabContext } from '../contexts/rail-tab-context'
 import FileTreeOutlinePanel from './file-tree-outline-panel'
 
 type RailElement = {
   icon: AvailableUnfilledIcon
-  key: string
+  key: RailTabKey
   component: ReactElement
   indicator?: ReactElement
 }
@@ -24,8 +25,6 @@ type RailActionButton = {
 type RailAction = RailActionLink | RailActionButton
 
 const RAIL_TABS: RailElement[] = [
-  // NOTE: The file tree **MUST** be the first (i.e. default) tab in the list
-  //       since the file tree is responsible for opening the initial document.
   {
     key: 'file-tree',
     icon: 'description',
@@ -55,9 +54,8 @@ const RAIL_TABS: RailElement[] = [
 ]
 
 export const RailLayout = () => {
-  const [selectedTab, setSelectedTab] = useState<string | undefined>(
-    RAIL_TABS[0]?.key
-  )
+  const { selectedTab, setSelectedTab } = useRailTabContext()
+
   const { setLeftMenuShown } = useLayoutContext()
   const railActions: RailAction[] = useMemo(
     () => [
@@ -76,13 +74,16 @@ export const RailLayout = () => {
       mountOnEnter // Only render when necessary (so that we can lazy load tab content)
       unmountOnExit={false} // TODO: Should we unmount the tabs when they're not used?
       transition={false}
-      defaultActiveKey={selectedTab}
-      onSelect={useCallback(key => setSelectedTab(key ?? undefined), [])}
+      activeKey={selectedTab}
+      onSelect={useCallback(
+        key => setSelectedTab(key ?? undefined),
+        [setSelectedTab]
+      )}
       id="ide-rail-tabs"
     >
       <div className="ide-rail">
         <Nav
-          defaultActiveKey={RAIL_TABS[0]?.key}
+          activeKey={selectedTab}
           className="d-flex flex-column ide-rail-tabs-nav"
         >
           {RAIL_TABS.map(({ icon, key, indicator }) => (

@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { memo } from 'react'
-import { useDetachCompileContext as useCompileContext } from '../../../shared/context/detach-compile-context'
+import { useDetachCompileContext as useCompileContext } from '../../../../shared/context/detach-compile-context'
 import OLButton from '@/features/ui/components/ol/ol-button'
 import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
 import MaterialIcon from '@/shared/components/material-icon'
