@@ -1106,7 +1106,7 @@ export const { Doc } = (() => {
                     meta: { msg, version: this.version }
                   }
                 })
-                // return // TODO: enable this
+                return
               }
             } else {
               if (msg.v < this.version) {
