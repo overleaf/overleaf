@@ -5,8 +5,8 @@ import MaterialIcon, {
 } from '@/shared/components/material-icon'
 import { Panel } from 'react-resizable-panels'
 import { useLayoutContext } from '@/shared/context/layout-context'
-import { FileTree } from '@/features/ide-react/components/file-tree'
 import { ErrorIndicator, ErrorPane } from './errors'
+import FileTreeOutlinePanel from './file-tree-outline-panel'
 
 type RailElement = {
   icon: AvailableUnfilledIcon
@@ -29,12 +29,7 @@ const RAIL_TABS: RailElement[] = [
   {
     key: 'file-tree',
     icon: 'description',
-    component: (
-      <>
-        {/* TODO: add panel for file outline */}
-        <FileTree />
-      </>
-    ),
+    component: <FileTreeOutlinePanel />,
   },
   {
     key: 'integrations',

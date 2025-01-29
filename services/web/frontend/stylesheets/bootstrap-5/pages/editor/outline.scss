@@ -7,6 +7,7 @@
   --outline-container-color-bg: var(--bg-dark-tertiary);
   --outline-content-color: var(--content-primary-dark);
   --outline-item-highlight-color: var(--neutral-60);
+  --outline-item-carat-color: var(--content-disabled);
 }
 
 @include theme('light') {
@@ -18,6 +19,81 @@
   --outline-container-color-bg: var(--bg-light-primary);
   --outline-content-color: var(--content-secondary);
   --outline-item-highlight-color: var(--bg-light-secondary);
+  --outline-item-carat-color: var(--content-disabled);
+}
+
+// TODO ide-redesign-cleanup: Replace the existing styling with these overrides.
+.ide-redesign-main {
+  --outline-bg-color: var(--bg-light-primary);
+  --outline-item-hover-bg: var(--bg-light-secondary);
+  --outline-header-hover-bg: var(--bg-light-secondary);
+  --outline-content-color: var(--content-primary);
+  --outline-item-highlight-color: var(--bg-light-secondary);
+  --outline-item-carat-color: var(--content-primary);
+  --outline-line-guide-color: color-mix(
+    in srgb,
+    var(--border-primary) 24%,
+    transparent
+  );
+  --outline-container-color-bg: var(--bg-light-primary);
+
+  .outline-pane {
+    padding: 4px;
+  }
+
+  .outline-header {
+    border: none;
+    height: unset;
+  }
+
+  .outline-header-expand-collapse-btn {
+    border-radius: var(--border-radius-base);
+    padding: var(--spacing-02);
+  }
+
+  .outline-header-name {
+    font-weight: unset;
+  }
+
+  .outline-carat-icon {
+    font-size: unset;
+  }
+
+  .outline-body {
+    padding-right: 0;
+  }
+
+  .outline-item-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-02);
+    margin-top: var(--spacing-02);
+
+    &::before {
+      left: var(--spacing-06);
+    }
+  }
+
+  .outline-item-list-root {
+    &::before {
+      content: none;
+    }
+  }
+
+  .outline-item-expand-collapse-btn {
+    display: flex;
+    align-items: center;
+    padding: var(--spacing-02);
+  }
+
+  .outline-item-no-children {
+    padding-left: 0;
+  }
+
+  .outline-item-link {
+    flex-grow: 1;
+    padding: var(--spacing-02);
+  }
 }
 
 .outline-container {
@@ -182,7 +258,7 @@
   vertical-align: inherit;
   position: relative;
   z-index: 1;
-  color: var(--content-disabled);
+  color: var(--outline-item-carat-color);
   margin-right: calc(var(--spacing-03) * -1);
   border-radius: var(--border-radius-base);
 
