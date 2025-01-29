@@ -12,7 +12,9 @@ export default function useSubmittableTextInput(
     (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
       if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey && !e.metaKey) {
         e.preventDefault()
-        handleSubmit(content, setContent)
+        if (content.trim().length > 0) {
+          handleSubmit(content, setContent)
+        }
       }
     },
     [content, handleSubmit]
