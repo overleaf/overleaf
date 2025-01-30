@@ -44,4 +44,25 @@ describe('showDowngradeOption', function () {
       showDowngradeOption('collaborator', false, '2000-02-16T17:59:07.000Z')
     ).to.be.true
   })
+  it('returns false when on a monthly collaborator plan with a pending pause', function () {
+    expect(
+      showDowngradeOption(
+        'collaborator',
+        false,
+        null,
+        '2030-01-01T12:00:00.000Z'
+      )
+    ).to.be.false
+  })
+  it('returns false when on a monthly collaborator plan with an active pause', function () {
+    expect(
+      showDowngradeOption(
+        'collaborator',
+        false,
+        null,
+        '2030-01-01T12:00:00.000Z',
+        5
+      )
+    ).to.be.false
+  })
 })
