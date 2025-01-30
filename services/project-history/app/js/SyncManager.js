@@ -530,9 +530,10 @@ class SyncUpdateExpander {
         this.files[update.pathname] = File.fromString('')
       } else {
         update.file = entity.file
-        update.url = entity.url
-        update.hash = entity._hash
-        update.metadata = entity.metadata
+        if (entity.url) update.url = entity.url
+        if (entity._hash) update.hash = entity._hash
+        if (entity.createdBlob) update.createdBlob = entity.createdBlob
+        if (entity.metadata) update.metadata = entity.metadata
       }
 
       this.expandedUpdates.push(update)
@@ -619,10 +620,11 @@ class SyncUpdateExpander {
           ts: update.meta.ts,
         },
         file: entity.file,
-        url: entity.url,
-        hash: entity._hash,
-        metadata: entity.metadata,
       }
+      if (entity.url) addUpdate.url = entity.url
+      if (entity._hash) addUpdate.hash = entity._hash
+      if (entity.createdBlob) addUpdate.createdBlob = entity.createdBlob
+      if (entity.metadata) addUpdate.metadata = entity.metadata
       this.expandedUpdates.push(addUpdate)
       Metrics.inc('project_history_resync_operation', 1, {
         status: 'update binary file contents',

@@ -622,6 +622,110 @@ describe('Syncing with web and doc-updater', function () {
             }
           )
         })
+        it('should add file w/o url', function (done) {
+          MockHistoryStore()
+            .get(`/api/projects/${historyId}/latest/history`)
+            .reply(200, {
+              chunk: {
+                history: {
+                  snapshot: {
+                    files: {
+                      persistedFile: { hash: EMPTY_FILE_HASH, byteLength: 0 },
+                    },
+                  },
+                  changes: [],
+                },
+                startVersion: 0,
+              },
+            })
+
+          const fileContents = Buffer.from([1, 2, 3])
+          const fileHash = 'aed2973e4b8a7ff1b30ff5c4751e5a2b38989e74'
+
+          MockFileStore()
+            .get(`/project/${this.project_id}/file/${this.file_id}`)
+            .reply(200, fileContents)
+          const headBlob = MockHistoryStore()
+            .head(`/api/projects/${historyId}/blobs/${fileHash}`)
+            .reply(200)
+          const createBlob = MockHistoryStore()
+            .put(`/api/projects/${historyId}/blobs/${fileHash}`, fileContents)
+            .reply(201)
+
+          const addFile = MockHistoryStore()
+            .post(`/api/projects/${historyId}/legacy_changes`, body => {
+              expect(body).to.deep.equal([
+                {
+                  v2Authors: [],
+                  authors: [],
+                  timestamp: this.timestamp.toJSON(),
+                  operations: [
+                    {
+                      pathname: 'test.png',
+                      file: {
+                        hash: fileHash,
+                      },
+                    },
+                  ],
+                  origin: { kind: 'test-origin' },
+                },
+              ])
+              return true
+            })
+            .query({ end_version: 0 })
+            .reply(204)
+
+          async.series(
+            [
+              cb => {
+                ProjectHistoryClient.resyncHistory(this.project_id, cb)
+              },
+              cb => {
+                const update = {
+                  projectHistoryId: historyId,
+                  resyncProjectStructure: {
+                    docs: [],
+                    files: [
+                      {
+                        file: this.file_id,
+                        path: '/test.png',
+                        _hash: fileHash,
+                        createdBlob: true,
+                      },
+                      { path: '/persistedFile' },
+                    ],
+                  },
+                  meta: {
+                    ts: this.timestamp,
+                  },
+                }
+                ProjectHistoryClient.pushRawUpdate(this.project_id, update, cb)
+              },
+              cb => {
+                ProjectHistoryClient.flushProject(this.project_id, cb)
+              },
+            ],
+            error => {
+              if (error) {
+                throw error
+              }
+              assert(!loggerWarn.called, 'no warning logged on 404')
+              assert(
+                headBlob.isDone(),
+                'HEAD /api/projects/:historyId/blobs/:hash should have been called'
+              )
+              assert(
+                !createBlob.isDone(),
+                '/api/projects/:historyId/blobs/:hash should have been skipped'
+              )
+              assert(
+                addFile.isDone(),
+                `/api/projects/${historyId}/changes should have been called`
+              )
+              done()
+            }
+          )
+        })
         describe('with filestore disabled', function () {
           before(function () {
             Settings.apis.filestore.enabled = false
@@ -757,6 +861,124 @@ describe('Syncing with web and doc-updater', function () {
               }
             )
           })
+        })
+      })
+
+      describe('when a file hash mismatches', function () {
+        it('should remove and re-add file w/o url', function (done) {
+          MockHistoryStore()
+            .get(`/api/projects/${historyId}/latest/history`)
+            .reply(200, {
+              chunk: {
+                history: {
+                  snapshot: {
+                    files: {
+                      'test.png': { hash: EMPTY_FILE_HASH, byteLength: 0 },
+                    },
+                  },
+                  changes: [],
+                },
+                startVersion: 0,
+              },
+            })
+
+          const fileContents = Buffer.from([1, 2, 3])
+          const fileHash = 'aed2973e4b8a7ff1b30ff5c4751e5a2b38989e74'
+
+          MockFileStore()
+            .get(`/project/${this.project_id}/file/${this.file_id}`)
+            .reply(200, fileContents)
+          const headBlob = MockHistoryStore()
+            .head(`/api/projects/${historyId}/blobs/${fileHash}`)
+            .reply(200)
+          const createBlob = MockHistoryStore()
+            .put(`/api/projects/${historyId}/blobs/${fileHash}`, fileContents)
+            .reply(201)
+
+          const addFile = MockHistoryStore()
+            .post(`/api/projects/${historyId}/legacy_changes`, body => {
+              expect(body).to.deep.equal([
+                {
+                  v2Authors: [],
+                  authors: [],
+                  timestamp: this.timestamp.toJSON(),
+                  operations: [
+                    {
+                      pathname: 'test.png',
+                      newPathname: '',
+                    },
+                  ],
+                  origin: { kind: 'test-origin' },
+                },
+                {
+                  v2Authors: [],
+                  authors: [],
+                  timestamp: this.timestamp.toJSON(),
+                  operations: [
+                    {
+                      pathname: 'test.png',
+                      file: {
+                        hash: fileHash,
+                      },
+                    },
+                  ],
+                  origin: { kind: 'test-origin' },
+                },
+              ])
+              return true
+            })
+            .query({ end_version: 0 })
+            .reply(204)
+
+          async.series(
+            [
+              cb => {
+                ProjectHistoryClient.resyncHistory(this.project_id, cb)
+              },
+              cb => {
+                const update = {
+                  projectHistoryId: historyId,
+                  resyncProjectStructure: {
+                    docs: [],
+                    files: [
+                      {
+                        file: this.file_id,
+                        path: '/test.png',
+                        _hash: fileHash,
+                        createdBlob: true,
+                      },
+                    ],
+                  },
+                  meta: {
+                    ts: this.timestamp,
+                  },
+                }
+                ProjectHistoryClient.pushRawUpdate(this.project_id, update, cb)
+              },
+              cb => {
+                ProjectHistoryClient.flushProject(this.project_id, cb)
+              },
+            ],
+            error => {
+              if (error) {
+                throw error
+              }
+              assert(!loggerWarn.called, 'no warning logged on 404')
+              assert(
+                headBlob.isDone(),
+                'HEAD /api/projects/:historyId/blobs/:hash should have been called'
+              )
+              assert(
+                !createBlob.isDone(),
+                '/api/projects/:historyId/blobs/:hash should have been skipped'
+              )
+              assert(
+                addFile.isDone(),
+                `/api/projects/${historyId}/changes should have been called`
+              )
+              done()
+            }
+          )
         })
       })
 

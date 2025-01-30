@@ -631,7 +631,43 @@ describe('SyncManager', function () {
             file: newFile.file,
             url: newFile.url,
             hash: 'hash-42',
-            metadata: undefined,
+            meta: {
+              resync: true,
+              ts: TIMESTAMP,
+              origin: { kind: 'history-resync' },
+            },
+          },
+        ])
+        expect(this.extendLock).to.have.been.called
+      })
+
+      it('queues file additions for missing regular files w/o url', async function () {
+        const newFile = {
+          path: '2.png',
+          file: {},
+          _hash: 'hash-42',
+          createdBlob: true,
+        }
+        const updates = [
+          resyncProjectStructureUpdate(
+            [this.persistedDoc],
+            [this.persistedFile, newFile]
+          ),
+        ]
+        const expandedUpdates =
+          await this.SyncManager.promises.expandSyncUpdates(
+            this.projectId,
+            this.historyId,
+            updates,
+            this.extendLock
+          )
+
+        expect(expandedUpdates).to.deep.equal([
+          {
+            pathname: newFile.path,
+            file: newFile.file,
+            hash: 'hash-42',
+            createdBlob: true,
             meta: {
               resync: true,
               ts: TIMESTAMP,
@@ -757,7 +793,6 @@ describe('SyncManager', function () {
             file: fileWichWasADoc.file,
             url: fileWichWasADoc.url,
             hash: 'other-hash',
-            metadata: undefined,
             meta: {
               resync: true,
               ts: TIMESTAMP,
@@ -1035,7 +1070,52 @@ describe('SyncManager', function () {
             file: persistedFileWithNewContent.file,
             url: persistedFileWithNewContent.url,
             hash: 'anotherhashvalue',
-            metadata: undefined,
+            meta: {
+              resync: true,
+              ts: TIMESTAMP,
+              origin: { kind: 'history-resync' },
+            },
+          },
+        ])
+        expect(this.extendLock).to.have.been.called
+      })
+
+      it('removes and re-adds binary files w/o url if they do not have same hash', async function () {
+        const persistedFileWithNewContent = {
+          _hash: 'anotherhashvalue',
+          hello: 'world',
+          path: '1.png',
+          createdBlob: true,
+        }
+        const updates = [
+          resyncProjectStructureUpdate(
+            [this.persistedDoc],
+            [persistedFileWithNewContent]
+          ),
+        ]
+        const expandedUpdates =
+          await this.SyncManager.promises.expandSyncUpdates(
+            this.projectId,
+            this.historyId,
+            updates,
+            this.extendLock
+          )
+
+        expect(expandedUpdates).to.deep.equal([
+          {
+            pathname: persistedFileWithNewContent.path,
+            new_pathname: '',
+            meta: {
+              resync: true,
+              ts: TIMESTAMP,
+              origin: { kind: 'history-resync' },
+            },
+          },
+          {
+            pathname: persistedFileWithNewContent.path,
+            file: persistedFileWithNewContent.file,
+            hash: 'anotherhashvalue',
+            createdBlob: true,
             meta: {
               resync: true,
               ts: TIMESTAMP,

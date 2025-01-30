@@ -212,7 +212,8 @@ export type File = {
   file: string
   url?: string
   path: string
-  _hash: string
+  _hash?: string
+  createdBlob?: boolean
   metadata?: LinkedFileData
 }
 
