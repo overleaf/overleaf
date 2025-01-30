@@ -198,6 +198,20 @@ async function pauseSubscription(req, res, next) {
   )
   try {
     await SubscriptionHandler.promises.pauseSubscription(user, pauseCycles)
+
+    const { subscription } =
+      await LimitationsManager.promises.userHasSubscription(user)
+
+    AnalyticsManager.recordEventForUserInBackground(
+      user._id,
+      'subscription-pause-scheduled',
+      {
+        pause_length: pauseCycles,
+        plan_code: subscription?.planCode,
+        subscriptionId: subscription?.id,
+      }
+    )
+
     return res.sendStatus(200)
   } catch (err) {
     if (err instanceof Error) {

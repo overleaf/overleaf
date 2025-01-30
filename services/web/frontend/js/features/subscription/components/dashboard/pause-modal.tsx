@@ -66,6 +66,7 @@ export default function PauseSubscriptionModal() {
       const newUrl = new URL(location.toString())
       newUrl.searchParams.set('flash', 'paused')
       window.history.replaceState(null, '', newUrl)
+
       location.reload()
     } catch (err) {
       debugConsole.error('error pausing subscription', err)

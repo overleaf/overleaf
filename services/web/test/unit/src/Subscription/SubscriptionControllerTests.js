@@ -172,6 +172,7 @@ describe('SubscriptionController', function () {
         './Errors': SubscriptionErrors,
         '../Analytics/AnalyticsManager': (this.AnalyticsManager = {
           recordEventForUser: sinon.stub(),
+          recordEventForUserInBackground: sinon.stub(),
           recordEventForSession: sinon.stub(),
           setUserPropertyForUser: sinon.stub(),
         }),
