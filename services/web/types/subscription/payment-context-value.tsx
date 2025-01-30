@@ -30,9 +30,6 @@ export type PaymentContextValue = {
   >
   plan: Plan
   planCode: string
-  setPlanCode: React.Dispatch<
-    React.SetStateAction<PaymentContextValue['planCode']>
-  >
   planName: string
   planOffersFreeTrial: boolean
   pricing: React.MutableRefObject<SubscriptionPricingInstanceCustom | undefined>
@@ -73,4 +70,5 @@ export type PaymentContextValue = {
   setStudentConfirmationChecked: React.Dispatch<
     React.SetStateAction<PaymentContextValue['studentConfirmationChecked']>
   >
+  updatePlan: (newPlanCode: string) => void
 }
