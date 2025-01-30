@@ -178,9 +178,18 @@ async function skipUpdatesDuringSync(projectId, updates) {
   return { updates: filteredUpdates, syncState }
 }
 
+/**
+ * @param {string} projectId
+ * @param {string} projectHistoryId
+ * @param {{chunk: import('overleaf-editor-core/lib/types.js').RawChunk}} mostRecentChunk
+ * @param {Array<Update>} updates
+ * @param {() => Promise<void>} extendLock
+ * @return {Promise<Array<Update>>}
+ */
 async function expandSyncUpdates(
   projectId,
   projectHistoryId,
+  mostRecentChunk,
   updates,
   extendLock
 ) {
@@ -195,10 +204,11 @@ async function expandSyncUpdates(
   const syncState = await _getResyncState(projectId)
 
   // compute the current snapshot from the most recent chunk
-  const snapshotFiles = await SnapshotManager.promises.getLatestSnapshotFiles(
-    projectId,
-    projectHistoryId
-  )
+  const snapshotFiles =
+    await SnapshotManager.promises.getLatestSnapshotFilesForChunk(
+      projectHistoryId,
+      mostRecentChunk
+    )
 
   // check if snapshot files are valid
   const invalidFiles = _.pickBy(
@@ -1102,15 +1112,31 @@ const skipUpdatesDuringSyncCb = callbackifyMultiResult(skipUpdatesDuringSync, [
   'updates',
   'syncState',
 ])
+
+/**
+ * @param {string} projectId
+ * @param {string} projectHistoryId
+ * @param {{chunk: import('overleaf-editor-core/lib/types.js').RawChunk}} mostRecentChunk
+ * @param {Array<Update>} updates
+ * @param {() => void} extendLock
+ * @param {(err: Error | null, updates?: Array<Update>) => void} callback
+ */
 const expandSyncUpdatesCb = (
   projectId,
   projectHistoryId,
+  mostRecentChunk,
   updates,
   extendLock,
   callback
 ) => {
   const extendLockPromises = promisify(extendLock)
-  expandSyncUpdates(projectId, projectHistoryId, updates, extendLockPromises)
+  expandSyncUpdates(
+    projectId,
+    projectHistoryId,
+    mostRecentChunk,
+    updates,
+    extendLockPromises
+  )
     .then(result => {
       callback(null, result)
     })

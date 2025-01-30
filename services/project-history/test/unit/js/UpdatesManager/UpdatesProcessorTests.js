@@ -289,10 +289,14 @@ describe('UpdatesProcessor', function () {
       this.newSyncState = { resyncProjectStructure: false }
 
       this.extendLock = sinon.stub().yields()
+      this.mostRecentChunk = 'fake-chunk'
 
       this.HistoryStoreManager.getMostRecentVersion.yields(
         null,
-        this.mostRecentVersionInfo
+        this.mostRecentVersionInfo,
+        null,
+        '_lastChange',
+        this.mostRecentChunk
       )
       this.SyncManager.skipUpdatesDuringSync.yields(
         null,
@@ -300,7 +304,7 @@ describe('UpdatesProcessor', function () {
         this.newSyncState
       )
       this.SyncManager.expandSyncUpdates.callsArgWith(
-        4,
+        5,
         null,
         this.expandedUpdates
       )
@@ -345,6 +349,7 @@ describe('UpdatesProcessor', function () {
         return this.SyncManager.expandSyncUpdates.should.have.been.calledWith(
           this.project_id,
           this.ol_project_id,
+          this.mostRecentChunk,
           this.filteredUpdates,
           this.extendLock
         )

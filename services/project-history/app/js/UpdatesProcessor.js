@@ -362,7 +362,13 @@ export function _processUpdates(
       _getMostRecentVersionWithDebug(
         projectId,
         projectHistoryId,
-        (error, baseVersion, projectStructureAndDocVersions) => {
+        (
+          error,
+          baseVersion,
+          projectStructureAndDocVersions,
+          _lastChange,
+          mostRecentChunk
+        ) => {
           if (projectStructureAndDocVersions == null) {
             projectStructureAndDocVersions = { project: null, docs: {} }
           }
@@ -377,6 +383,7 @@ export function _processUpdates(
                 SyncManager.expandSyncUpdates(
                   projectId,
                   projectHistoryId,
+                  mostRecentChunk,
                   filteredUpdates,
                   extendLock,
                   cb

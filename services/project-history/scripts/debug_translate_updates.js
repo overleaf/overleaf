@@ -25,6 +25,7 @@ function expandResyncProjectStructure(chunk, update) {
   SyncManager.expandSyncUpdates(
     projectId,
     99999, // dummy history id
+    chunk,
     [update],
     cb => cb(), // extend lock
     (err, result) => {

@@ -277,8 +277,26 @@ async function _getSnapshotAtVersion(projectId, version) {
   return snapshot
 }
 
+/**
+ * @param {string} projectId
+ * @param {string} historyId
+ * @return {Promise<Record<string, import('overleaf-editor-core').File>>}
+ */
 async function getLatestSnapshotFiles(projectId, historyId) {
-  const { snapshot } = await getLatestSnapshot(projectId, historyId)
+  const data = await HistoryStoreManager.promises.getMostRecentChunk(
+    projectId,
+    historyId
+  )
+  return await getLatestSnapshotFilesForChunk(historyId, data)
+}
+
+/**
+ * @param {string} historyId
+ * @param {{chunk: import('overleaf-editor-core/lib/types.js').RawChunk}} chunk
+ * @return {Promise<Record<string, import('overleaf-editor-core').File>>}
+ */
+async function getLatestSnapshotFilesForChunk(historyId, chunk) {
+  const { snapshot } = getLatestSnapshotFromChunk(chunk)
   const snapshotFiles = await snapshot.loadFiles(
     'lazy',
     HistoryStoreManager.getBlobStore(historyId)
@@ -286,11 +304,24 @@ async function getLatestSnapshotFiles(projectId, historyId) {
   return snapshotFiles
 }
 
+/**
+ * @param {string} projectId
+ * @param {string} historyId
+ * @return {Promise<{version: number, snapshot: import('overleaf-editor-core').Snapshot}>}
+ */
 async function getLatestSnapshot(projectId, historyId) {
   const data = await HistoryStoreManager.promises.getMostRecentChunk(
     projectId,
     historyId
   )
+  return getLatestSnapshotFromChunk(data)
+}
+
+/**
+ * @param {{chunk: import('overleaf-editor-core/lib/types.js').RawChunk}} data
+ * @return {{version: number, snapshot: import('overleaf-editor-core').Snapshot}}
+ */
+function getLatestSnapshotFromChunk(data) {
   if (data == null || data.chunk == null) {
     throw new OError('undefined chunk')
   }
@@ -397,11 +428,15 @@ const getFileSnapshotStreamCb = callbackify(getFileSnapshotStream)
 const getProjectSnapshotCb = callbackify(getProjectSnapshot)
 const getLatestSnapshotCb = callbackify(getLatestSnapshot)
 const getLatestSnapshotFilesCb = callbackify(getLatestSnapshotFiles)
+const getLatestSnapshotFilesForChunkCb = callbackify(
+  getLatestSnapshotFilesForChunk
+)
 const getRangesSnapshotCb = callbackify(getRangesSnapshot)
 const getFileMetadataSnapshotCb = callbackify(getFileMetadataSnapshot)
 const getPathsAtVersionCb = callbackify(getPathsAtVersion)
 
 export {
+  getLatestSnapshotFromChunk,
   getChangesSinceCb as getChangesSince,
   getChangesInChunkSinceCb as getChangesInChunkSince,
   getFileSnapshotStreamCb as getFileSnapshotStream,
@@ -409,6 +444,7 @@ export {
   getFileMetadataSnapshotCb as getFileMetadataSnapshot,
   getLatestSnapshotCb as getLatestSnapshot,
   getLatestSnapshotFilesCb as getLatestSnapshotFiles,
+  getLatestSnapshotFilesForChunkCb as getLatestSnapshotFilesForChunk,
   getRangesSnapshotCb as getRangesSnapshot,
   getPathsAtVersionCb as getPathsAtVersion,
 }
@@ -420,6 +456,7 @@ export const promises = {
   getProjectSnapshot,
   getLatestSnapshot,
   getLatestSnapshotFiles,
+  getLatestSnapshotFilesForChunk,
   getRangesSnapshot,
   getPathsAtVersion,
   getFileMetadataSnapshot,

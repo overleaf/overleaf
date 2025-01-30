@@ -78,7 +78,8 @@ export function getMostRecentVersion(projectId, historyId, callback) {
           err1 || err2,
           mostRecentVersion,
           projectStructureAndDocVersions,
-          lastChange
+          lastChange,
+          chunk
         )
       })
     )
@@ -572,6 +573,7 @@ function _requestHistoryService(options, callback) {
 }
 
 export const promises = {
+  /** @type {(projectId: string, historyId: string) => Promise<{chunk: import('overleaf-editor-core/lib/types.js').RawChunk}>} */
   getMostRecentChunk: promisify(getMostRecentChunk),
   getChunkAtVersion: promisify(getChunkAtVersion),
   getMostRecentVersion: promisify(getMostRecentVersion),

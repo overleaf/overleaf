@@ -114,7 +114,7 @@ describe('SyncManager', function () {
 
     this.SnapshotManager = {
       promises: {
-        getLatestSnapshotFiles: sinon.stub(),
+        getLatestSnapshotFilesForChunk: sinon.stub(),
       },
     }
 
@@ -492,6 +492,7 @@ describe('SyncManager', function () {
         _hash: 'abcde',
       }
       this.loadedSnapshotDoc = File.fromString(this.persistedDocContent)
+      this.mostRecentChunk = 'fake chunk'
       this.fileMap = {
         'main.tex': {
           isEditable: sinon.stub().returns(true),
@@ -517,7 +518,7 @@ describe('SyncManager', function () {
         .returns('another.tex')
       this.UpdateTranslator._convertPathname.withArgs('1.png').returns('1.png')
       this.UpdateTranslator._convertPathname.withArgs('2.png').returns('2.png')
-      this.SnapshotManager.promises.getLatestSnapshotFiles.resolves(
+      this.SnapshotManager.promises.getLatestSnapshotFilesForChunk.resolves(
         this.fileMap
       )
     })
@@ -527,13 +528,14 @@ describe('SyncManager', function () {
       const expandedUpdates = await this.SyncManager.promises.expandSyncUpdates(
         this.projectId,
         this.historyId,
+        this.mostRecentChunk,
         updates,
         this.extendLock
       )
 
       expect(expandedUpdates).to.equal(updates)
-      expect(this.SnapshotManager.promises.getLatestSnapshotFiles).to.not.have
-        .been.called
+      expect(this.SnapshotManager.promises.getLatestSnapshotFilesForChunk).to
+        .not.have.been.called
       expect(this.extendLock).to.not.have.been.called
     })
 
@@ -549,6 +551,7 @@ describe('SyncManager', function () {
           await this.SyncManager.promises.expandSyncUpdates(
             this.projectId,
             this.historyId,
+            this.mostRecentChunk,
             updates,
             this.extendLock
           )
@@ -562,6 +565,7 @@ describe('SyncManager', function () {
           await this.SyncManager.promises.expandSyncUpdates(
             this.projectId,
             this.historyId,
+            this.mostRecentChunk,
             updates,
             this.extendLock
           )
@@ -586,6 +590,7 @@ describe('SyncManager', function () {
           await this.SyncManager.promises.expandSyncUpdates(
             this.projectId,
             this.historyId,
+            this.mostRecentChunk,
             updates,
             this.extendLock
           )
@@ -621,6 +626,7 @@ describe('SyncManager', function () {
           await this.SyncManager.promises.expandSyncUpdates(
             this.projectId,
             this.historyId,
+            this.mostRecentChunk,
             updates,
             this.extendLock
           )
@@ -658,6 +664,7 @@ describe('SyncManager', function () {
           await this.SyncManager.promises.expandSyncUpdates(
             this.projectId,
             this.historyId,
+            this.mostRecentChunk,
             updates,
             this.extendLock
           )
@@ -699,6 +706,7 @@ describe('SyncManager', function () {
           await this.SyncManager.promises.expandSyncUpdates(
             this.projectId,
             this.historyId,
+            this.mostRecentChunk,
             updates,
             this.extendLock
           )
@@ -738,6 +746,7 @@ describe('SyncManager', function () {
           await this.SyncManager.promises.expandSyncUpdates(
             this.projectId,
             this.historyId,
+            this.mostRecentChunk,
             updates,
             this.extendLock
           )
@@ -774,6 +783,7 @@ describe('SyncManager', function () {
           await this.SyncManager.promises.expandSyncUpdates(
             this.projectId,
             this.historyId,
+            this.mostRecentChunk,
             updates,
             this.extendLock
           )
@@ -824,6 +834,7 @@ describe('SyncManager', function () {
           await this.SyncManager.promises.expandSyncUpdates(
             this.projectId,
             this.historyId,
+            this.mostRecentChunk,
             updates,
             this.extendLock
           )
@@ -875,6 +886,7 @@ describe('SyncManager', function () {
           await this.SyncManager.promises.expandSyncUpdates(
             this.projectId,
             this.historyId,
+            this.mostRecentChunk,
             updates,
             this.extendLock
           )
@@ -921,6 +933,7 @@ describe('SyncManager', function () {
           await this.SyncManager.promises.expandSyncUpdates(
             this.projectId,
             this.historyId,
+            this.mostRecentChunk,
             updates,
             this.extendLock
           )
@@ -964,6 +977,7 @@ describe('SyncManager', function () {
           await this.SyncManager.promises.expandSyncUpdates(
             this.projectId,
             this.historyId,
+            this.mostRecentChunk,
             updates,
             this.extendLock
           )
@@ -998,6 +1012,7 @@ describe('SyncManager', function () {
           await this.SyncManager.promises.expandSyncUpdates(
             this.projectId,
             this.historyId,
+            this.mostRecentChunk,
             updates,
             this.extendLock
           )
@@ -1026,6 +1041,7 @@ describe('SyncManager', function () {
           await this.SyncManager.promises.expandSyncUpdates(
             this.projectId,
             this.historyId,
+            this.mostRecentChunk,
             updates,
             this.extendLock
           )
@@ -1051,6 +1067,7 @@ describe('SyncManager', function () {
           await this.SyncManager.promises.expandSyncUpdates(
             this.projectId,
             this.historyId,
+            this.mostRecentChunk,
             updates,
             this.extendLock
           )
@@ -1097,6 +1114,7 @@ describe('SyncManager', function () {
           await this.SyncManager.promises.expandSyncUpdates(
             this.projectId,
             this.historyId,
+            this.mostRecentChunk,
             updates,
             this.extendLock
           )
@@ -1139,6 +1157,7 @@ describe('SyncManager', function () {
           await this.SyncManager.promises.expandSyncUpdates(
             this.projectId,
             this.historyId,
+            this.mostRecentChunk,
             updates,
             this.extendLock
           )
@@ -1163,6 +1182,7 @@ describe('SyncManager', function () {
           this.SyncManager.promises.expandSyncUpdates(
             this.projectId,
             this.historyId,
+            this.mostRecentChunk,
             updates,
             this.extendLock
           )
@@ -1176,6 +1196,7 @@ describe('SyncManager', function () {
           this.SyncManager.promises.expandSyncUpdates(
             this.projectId,
             this.historyId,
+            this.mostRecentChunk,
             updates,
             this.extendLock
           )
@@ -1195,6 +1216,7 @@ describe('SyncManager', function () {
           await this.SyncManager.promises.expandSyncUpdates(
             this.projectId,
             this.historyId,
+            this.mostRecentChunk,
             updates,
             this.extendLock
           )
@@ -1221,6 +1243,7 @@ describe('SyncManager', function () {
           await this.SyncManager.promises.expandSyncUpdates(
             this.projectId,
             this.historyId,
+            this.mostRecentChunk,
             updates,
             this.extendLock
           )
@@ -1259,6 +1282,7 @@ describe('SyncManager', function () {
           await this.SyncManager.promises.expandSyncUpdates(
             this.projectId,
             this.historyId,
+            this.mostRecentChunk,
             updates,
             this.extendLock
           )
@@ -1303,6 +1327,7 @@ describe('SyncManager', function () {
           await this.SyncManager.promises.expandSyncUpdates(
             this.projectId,
             this.historyId,
+            this.mostRecentChunk,
             updates,
             this.extendLock
           )
@@ -1328,6 +1353,7 @@ describe('SyncManager', function () {
           await this.SyncManager.promises.expandSyncUpdates(
             this.projectId,
             this.historyId,
+            this.mostRecentChunk,
             updates,
             this.extendLock
           )
@@ -1364,6 +1390,7 @@ describe('SyncManager', function () {
             await this.SyncManager.promises.expandSyncUpdates(
               this.projectId,
               this.historyId,
+              this.mostRecentChunk,
               updates,
               this.extendLock
             )
@@ -1418,6 +1445,7 @@ describe('SyncManager', function () {
           await this.SyncManager.promises.expandSyncUpdates(
             this.projectId,
             this.historyId,
+            this.mostRecentChunk,
             updates,
             this.extendLock
           )
@@ -1440,6 +1468,7 @@ describe('SyncManager', function () {
           await this.SyncManager.promises.expandSyncUpdates(
             this.projectId,
             this.historyId,
+            this.mostRecentChunk,
             updates,
             this.extendLock
           )
@@ -1483,6 +1512,7 @@ describe('SyncManager', function () {
           await this.SyncManager.promises.expandSyncUpdates(
             this.projectId,
             this.historyId,
+            this.mostRecentChunk,
             updates,
             this.extendLock
           )
@@ -1517,6 +1547,7 @@ describe('SyncManager', function () {
           await this.SyncManager.promises.expandSyncUpdates(
             this.projectId,
             this.historyId,
+            this.mostRecentChunk,
             updates,
             this.extendLock
           )
@@ -1560,6 +1591,7 @@ describe('SyncManager', function () {
           await this.SyncManager.promises.expandSyncUpdates(
             this.projectId,
             this.historyId,
+            this.mostRecentChunk,
             updates,
             this.extendLock
           )
@@ -1614,6 +1646,7 @@ describe('SyncManager', function () {
           await this.SyncManager.promises.expandSyncUpdates(
             this.projectId,
             this.historyId,
+            this.mostRecentChunk,
             updates,
             this.extendLock
           )
@@ -1643,6 +1676,7 @@ describe('SyncManager', function () {
           await this.SyncManager.promises.expandSyncUpdates(
             this.projectId,
             this.historyId,
+            this.mostRecentChunk,
             updates,
             this.extendLock
           )
@@ -1733,6 +1767,7 @@ describe('SyncManager', function () {
           await this.SyncManager.promises.expandSyncUpdates(
             this.projectId,
             this.historyId,
+            this.mostRecentChunk,
             updates,
             this.extendLock
           )
@@ -1754,6 +1789,7 @@ describe('SyncManager', function () {
           await this.SyncManager.promises.expandSyncUpdates(
             this.projectId,
             this.historyId,
+            this.mostRecentChunk,
             updates,
             this.extendLock
           )
@@ -1795,6 +1831,7 @@ describe('SyncManager', function () {
           await this.SyncManager.promises.expandSyncUpdates(
             this.projectId,
             this.historyId,
+            this.mostRecentChunk,
             updates,
             this.extendLock
           )
@@ -1836,6 +1873,7 @@ describe('SyncManager', function () {
           await this.SyncManager.promises.expandSyncUpdates(
             this.projectId,
             this.historyId,
+            this.mostRecentChunk,
             updates,
             this.extendLock
           )
@@ -1911,6 +1949,7 @@ describe('SyncManager', function () {
           await this.SyncManager.promises.expandSyncUpdates(
             this.projectId,
             this.historyId,
+            this.mostRecentChunk,
             updates,
             this.extendLock
           )

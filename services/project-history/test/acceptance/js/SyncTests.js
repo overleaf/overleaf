@@ -53,16 +53,6 @@ describe('Syncing with web and doc-updater', function () {
             },
           },
         })
-      MockHistoryStore()
-        .get(`/api/projects/${historyId}/latest/history`)
-        .reply(200, {
-          chunk: {
-            startVersion: 0,
-            history: {
-              changes: [],
-            },
-          },
-        })
       ProjectHistoryClient.initializeProject(historyId, done)
     })
   })

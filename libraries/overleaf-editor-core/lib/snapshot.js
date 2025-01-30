@@ -224,7 +224,7 @@ class Snapshot {
    *
    * @param {string} kind see {File#load}
    * @param {ReadonlyBlobStore} blobStore
-   * @return {Promise<Object>} an object where keys are the pathnames and
+   * @return {Promise<Record<string, File>>} an object where keys are the pathnames and
    * values are the files in the snapshot
    */
   async loadFiles(kind, blobStore) {
