@@ -155,6 +155,12 @@ async function addWithConfirmationCode(req, res) {
 
   const userId = SessionManager.getLoggedInUserId(req.session)
   const email = EmailHelper.parseEmail(req.body.email)
+  const affiliationOptions = {
+    university: req.body.university,
+    role: req.body.role,
+    department: req.body.department,
+  }
+
   if (!email) {
     return res.sendStatus(422)
   }
@@ -195,6 +201,7 @@ async function addWithConfirmationCode(req, res) {
       email,
       confirmCode,
       confirmCodeExpiresTimestamp,
+      affiliationOptions,
     }
 
     return res.sendStatus(200)
@@ -291,7 +298,7 @@ async function checkSecondaryEmailConfirmationCode(req, res) {
     await UserUpdater.promises.addEmailAddress(
       userId,
       req.session.pendingSecondaryEmail.email,
-      {},
+      req.session.pendingSecondaryEmail.affiliationOptions,
       {
         initiatorId: user._id,
         ipAddress: req.ip,
@@ -301,7 +308,7 @@ async function checkSecondaryEmailConfirmationCode(req, res) {
     await UserUpdater.promises.confirmEmail(
       userId,
       req.session.pendingSecondaryEmail.email,
-      {}
+      req.session.pendingSecondaryEmail.affiliationOptions
     )
 
     delete req.session.pendingSecondaryEmail

@@ -60,6 +60,19 @@ function resetFetchMock() {
   fetchMock.get('express:/institutions/domains', [])
 }
 
+async function confirmCodeForEmail(email: string) {
+  screen.getByText(`Enter the 6-digit confirmation code sent to ${email}.`)
+  const inputCode = screen.getByLabelText(/6-digit confirmation code/i)
+  fireEvent.change(inputCode, { target: { value: '123456' } })
+  const submitCodeBtn = screen.getByRole<HTMLButtonElement>('button', {
+    name: 'Confirm',
+  })
+  fireEvent.click(submitCodeBtn)
+  await waitForElementToBeRemoved(() =>
+    screen.getByRole('button', { name: /confirming/i })
+  )
+}
+
 describe('<EmailsSection />', function () {
   beforeEach(function () {
     Object.assign(getMeta('ol-ExposedSettings'), {
@@ -181,7 +194,8 @@ describe('<EmailsSection />', function () {
     resetFetchMock()
     fetchMock
       .get('/user/emails?ensureAffiliation=true', [userEmailData])
-      .post('/user/emails', 200)
+      .post('/user/emails/secondary', 200)
+      .post('/user/emails/confirm-secondary', 200)
 
     fireEvent.click(addAnotherEmailBtn)
     const input = screen.getByLabelText(/email/i)
@@ -206,6 +220,7 @@ describe('<EmailsSection />', function () {
       })
     )
 
+    await confirmCodeForEmail(userEmailData.email)
     screen.getByText(userEmailData.email)
   })
 
@@ -222,7 +237,7 @@ describe('<EmailsSection />', function () {
     resetFetchMock()
     fetchMock
       .get('/user/emails?ensureAffiliation=true', [])
-      .post('/user/emails', 400)
+      .post('/user/emails/secondary', 400)
 
     fireEvent.click(addAnotherEmailBtn)
     const input = screen.getByLabelText(/email/i)
@@ -340,7 +355,8 @@ describe('<EmailsSection />', function () {
 
     fetchMock
       .get('/user/emails?ensureAffiliation=true', [userEmailDataCopy])
-      .post(/\/user\/emails/, 200)
+      .post('/user/emails/secondary', 200)
+      .post('/user/emails/confirm-secondary', 200)
 
     await userEvent.click(
       screen.getByRole('button', {
@@ -359,8 +375,12 @@ describe('<EmailsSection />', function () {
       department: customDepartment,
     })
 
-    screen.getByText(userEmailData.email)
-    screen.getByText(userEmailData.affiliation.institution.name)
+    screen.getByText(
+      `Enter the 6-digit confirmation code sent to ${userEmailData.email}.`
+    )
+
+    await confirmCodeForEmail(userEmailData.email)
+
     screen.getByText(userEmailData.affiliation.role!, { exact: false })
     screen.getByText(customDepartment, { exact: false })
   })
@@ -485,13 +505,16 @@ describe('<EmailsSection />', function () {
 
     fetchMock
       .get('/user/emails?ensureAffiliation=true', [userEmailDataCopy])
-      .post(/\/user\/emails/, 200)
+      .post('/user/emails/secondary', 200)
+      .post('/user/emails/confirm-secondary', 200)
 
     await userEvent.click(
       screen.getByRole('button', {
         name: /add new email/i,
       })
     )
+
+    await confirmCodeForEmail(userEmailData.email)
 
     const [[, request]] = fetchMock.calls(/\/user\/emails/)
 
@@ -635,7 +658,8 @@ describe('<EmailsSection />', function () {
 
     fetchMock
       .get('/user/emails?ensureAffiliation=true', [userEmailDataCopy])
-      .post('/user/emails', 200)
+      .post('/user/emails/secondary', 200)
+      .post('/user/emails/confirm-secondary', 200)
 
     await userEvent.type(
       screen.getByRole('textbox', { name: /role/i }),
@@ -650,6 +674,8 @@ describe('<EmailsSection />', function () {
         name: /add new email/i,
       })
     )
+
+    await confirmCodeForEmail('user@autocomplete.edu')
 
     await fetchMock.flush(true)
     fetchMock.reset()

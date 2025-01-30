@@ -2,13 +2,13 @@ import { postJSON } from '@/infrastructure/fetch-json'
 import useWaitForI18n from '@/shared/hooks/use-wait-for-i18n'
 import Notification from '@/shared/components/notification'
 import getMeta from '@/utils/meta'
-import { FormEvent, useState } from 'react'
-import { Button } from 'react-bootstrap'
+import { FormEvent, MouseEventHandler, useState } from 'react'
 import { Trans, useTranslation } from 'react-i18next'
 import LoadingSpinner from '@/shared/components/loading-spinner'
 import MaterialIcon from '@/shared/components/material-icon'
 import { sendMB } from '@/infrastructure/event-tracking'
-import { Interstitial } from '@/shared/components/interstitial'
+import OLFormLabel from '@/features/ui/components/ol/ol-form-label'
+import OLButton from '@/features/ui/components/ol/ol-button'
 
 type Feedback = {
   type: 'input' | 'alert'
@@ -20,8 +20,12 @@ type ConfirmEmailFormProps = {
   confirmationEndpoint: string
   flow: string
   resendEndpoint: string
-  successMessage: React.ReactNode
-  successButtonText: string
+  successMessage?: React.ReactNode
+  successButtonText?: string
+  email?: string
+  onSuccessfulConfirmation?: () => void
+  interstitial: boolean
+  onCancel?: () => void
 }
 
 export function ConfirmEmailForm({
@@ -30,6 +34,10 @@ export function ConfirmEmailForm({
   resendEndpoint,
   successMessage,
   successButtonText,
+  email = getMeta('ol-email'),
+  onSuccessfulConfirmation,
+  interstitial,
+  onCancel,
 }: ConfirmEmailFormProps) {
   const { t } = useTranslation()
   const [confirmationCode, setConfirmationCode] = useState('')
@@ -37,7 +45,6 @@ export function ConfirmEmailForm({
   const [isConfirming, setIsConfirming] = useState(false)
   const [isResending, setIsResending] = useState(false)
   const [successRedirectPath, setSuccessRedirectPath] = useState('')
-  const email = getMeta('ol-email')
   const { isReady } = useWaitForI18n()
 
   const errorHandler = (err: any, actionType?: string) => {
@@ -78,33 +85,31 @@ export function ConfirmEmailForm({
     }
   }
 
-  const submitHandler = (e: FormEvent<HTMLFormElement>) => {
+  const submitHandler = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setIsConfirming(true)
     setFeedback(null)
-
-    postJSON(confirmationEndpoint, {
-      body: {
-        code: confirmationCode,
-      },
-    })
-      .then(data => {
-        setSuccessRedirectPath(data?.redir || '/')
-      })
-      .catch(err => {
-        errorHandler(err, 'confirm')
-      })
-      .finally(() => {
-        setIsConfirming(false)
-      })
-
     sendMB('email-verification-click', {
       button: 'verify',
       flow,
     })
+    try {
+      const data = await postJSON(confirmationEndpoint, {
+        body: { code: confirmationCode },
+      })
+      if (onSuccessfulConfirmation) {
+        onSuccessfulConfirmation()
+      } else {
+        setSuccessRedirectPath(data?.redir || '/')
+      }
+    } catch (err) {
+      errorHandler(err, 'confirm')
+    } finally {
+      setIsConfirming(false)
+    }
   }
 
-  const resendHandler = (e: FormEvent<Button>) => {
+  const resendHandler: MouseEventHandler<HTMLButtonElement> = () => {
     setIsResending(true)
     setFeedback(null)
 
@@ -138,14 +143,10 @@ export function ConfirmEmailForm({
   }
 
   if (!isReady) {
-    return (
-      <Interstitial className="confirm-email" showLogo>
-        <LoadingSpinner />
-      </Interstitial>
-    )
+    return <LoadingSpinner />
   }
 
-  if (successRedirectPath) {
+  if (successRedirectPath && successButtonText && successMessage) {
     return (
       <ConfirmEmailSuccessfullForm
         successMessage={successMessage}
@@ -156,8 +157,12 @@ export function ConfirmEmailForm({
   }
 
   return (
-    <Interstitial className="confirm-email" showLogo>
-      <form onSubmit={submitHandler} onInvalid={invalidFormHandler}>
+    <form
+      onSubmit={submitHandler}
+      onInvalid={invalidFormHandler}
+      className="confirm-email-form"
+    >
+      <div className="confirm-email-form-inner">
         {feedback?.type === 'alert' && (
           <Notification
             ariaLive="polite"
@@ -167,10 +172,17 @@ export function ConfirmEmailForm({
           />
         )}
 
-        <h1 className="h3 interstitial-header">{t('confirm_your_email')}</h1>
+        {interstitial ? (
+          <h1 className="h3 interstitial-header">{t('confirm_your_email')}</h1>
+        ) : (
+          <h5 className="h5">{t('confirm_your_email')}</h5>
+        )}
 
-        <p className="small">{t('enter_the_confirmation_code', { email })}</p>
+        <OLFormLabel htmlFor="one-time-code">
+          {t('enter_the_confirmation_code', { email })}
+        </OLFormLabel>
         <input
+          id="one-time-code"
           className="form-control"
           placeholder={t('enter_6_digit_code')}
           inputMode="numeric"
@@ -194,39 +206,53 @@ export function ConfirmEmailForm({
         </div>
 
         <div className="form-actions">
-          <Button
-            disabled={isConfirming || isResending}
+          <OLButton
+            disabled={isResending}
             type="submit"
-            bsStyle={null}
-            className="btn-primary"
+            isLoading={isConfirming}
+            bs3Props={{
+              loading: isConfirming ? (
+                <>
+                  {t('confirming')}
+                  <span>&hellip;</span>
+                </>
+              ) : (
+                t('confirm')
+              ),
+            }}
           >
-            {isConfirming ? (
-              <>
-                {t('confirming')}
-                <span>&hellip;</span>
-              </>
-            ) : (
-              t('confirm')
-            )}
-          </Button>
-          <Button
-            disabled={isConfirming || isResending}
+            {t('confirm')}
+          </OLButton>
+          <OLButton
+            variant="secondary"
+            disabled={isConfirming}
             onClick={resendHandler}
-            bsStyle={null}
-            className="btn-secondary"
+            isLoading={isResending}
+            bs3Props={{
+              loading: isResending ? (
+                <>
+                  {t('resending_confirmation_code')}
+                  <span>&hellip;</span>
+                </>
+              ) : (
+                t('resend_confirmation_code')
+              ),
+            }}
           >
-            {isResending ? (
-              <>
-                {t('resending_confirmation_code')}
-                <span>&hellip;</span>
-              </>
-            ) : (
-              t('resend_confirmation_code')
-            )}
-          </Button>
+            {t('resend_confirmation_code')}
+          </OLButton>
+          {onCancel && (
+            <OLButton
+              variant="danger-ghost"
+              disabled={isConfirming || isResending}
+              onClick={onCancel}
+            >
+              {t('cancel')}
+            </OLButton>
+          )}
         </div>
-      </form>
-    </Interstitial>
+      </div>
+    </form>
   )
 }
 
@@ -245,17 +271,15 @@ function ConfirmEmailSuccessfullForm({
   }
 
   return (
-    <Interstitial className="confirm-email" showLogo>
-      <form onSubmit={submitHandler}>
-        <div aria-live="polite">{successMessage}</div>
+    <form onSubmit={submitHandler}>
+      <div aria-live="polite">{successMessage}</div>
 
-        <div className="form-actions">
-          <Button type="submit" bsStyle={null} className="btn-primary">
-            {successButtonText}
-          </Button>
-        </div>
-      </form>
-    </Interstitial>
+      <div className="form-actions">
+        <OLButton type="submit" variant="primary">
+          {successButtonText}
+        </OLButton>
+      </div>
+    </form>
   )
 }
 
