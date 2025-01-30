@@ -149,7 +149,8 @@ async function projectListPage(req, res, next) {
       // TODO use helper function
       if (!user.enrollment?.managedBy) {
         groupSubscriptionsPendingEnrollment = subscriptions.filter(
-          subscription => subscription.groupPlan && subscription.groupPolicy
+          subscription =>
+            subscription.groupPlan && subscription.managedUsersEnabled
         )
       }
     } catch (error) {

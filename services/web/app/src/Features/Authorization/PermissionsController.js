@@ -8,6 +8,7 @@ const {
 const { assertUserPermissions } = require('./PermissionsManager').promises
 const Modules = require('../../infrastructure/Modules')
 const { expressify } = require('@overleaf/promise-utils')
+const Features = require('../../infrastructure/Features')
 
 /**
  * Function that returns middleware to add an `assertPermission` function to the request object to check if the user has a specific capability.
@@ -80,6 +81,9 @@ function requirePermission(...requiredCapabilities) {
     throw new Error('invalid required capabilities')
   }
   const doRequest = async function (req, res, next) {
+    if (!Features.hasFeature('saas')) {
+      return next()
+    }
     if (!req.user) {
       return next(new Error('no user'))
     }

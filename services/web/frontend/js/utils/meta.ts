@@ -27,6 +27,7 @@ import { GetProjectsResponseBody } from '../../../types/project/dashboard/api'
 import { Tag } from '../../../app/src/Features/Tags/types'
 import { Institution } from '../../../types/institution'
 import {
+  GroupPolicy,
   ManagedGroupSubscription,
   MemberGroupSubscription,
 } from '../../../types/subscription/dashboard/subscription'
@@ -99,6 +100,7 @@ export interface Meta {
   'ol-groupId': string
   'ol-groupName': string
   'ol-groupPlans': GroupPlans
+  'ol-groupPolicy': GroupPolicy
   'ol-groupSSOActive': boolean
   'ol-groupSSOTestResult': GroupSSOTestResult
   'ol-groupSettingsEnabledFor': string[]

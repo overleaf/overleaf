@@ -801,7 +801,8 @@ const _ProjectController = {
           isTokenMember,
           isInvitedMember
         ),
-        chatEnabled: Features.hasFeature('chat'),
+        chatEnabled:
+          Features.hasFeature('chat') && req.capabilitySet.has('chat'),
         projectHistoryBlobsEnabled: Features.hasFeature(
           'project-history-blobs'
         ),

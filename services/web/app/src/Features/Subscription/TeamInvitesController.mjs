@@ -96,7 +96,7 @@ async function viewInvite(req, res, next) {
       personalSubscription.recurlySubscription_id &&
       personalSubscription.recurlySubscription_id !== ''
 
-    if (subscription?.groupPolicy) {
+    if (subscription?.managedUsersEnabled) {
       if (!subscription.populated('groupPolicy')) {
         // eslint-disable-next-line no-restricted-syntax
         await subscription.populate('groupPolicy')

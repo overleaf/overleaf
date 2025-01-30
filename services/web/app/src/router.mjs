@@ -1059,12 +1059,14 @@ async function initialize(webRouter, privateApiRouter, publicApiRouter) {
       '/project/:project_id/messages',
       AuthorizationMiddleware.blockRestrictedUserFromProject,
       AuthorizationMiddleware.ensureUserCanReadProject,
+      PermissionsController.requirePermission('chat'),
       ChatController.getMessages
     )
     webRouter.post(
       '/project/:project_id/messages',
       AuthorizationMiddleware.blockRestrictedUserFromProject,
       AuthorizationMiddleware.ensureUserCanReadProject,
+      PermissionsController.requirePermission('chat'),
       RateLimiterMiddleware.rateLimit(rateLimiters.sendChatMessage),
       ChatController.sendMessage
     )

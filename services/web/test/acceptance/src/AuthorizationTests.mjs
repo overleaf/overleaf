@@ -678,6 +678,11 @@ describe('Authorization', function () {
     })
 
     it('should allow an anonymous user chat messages access', function (done) {
+      // chat access for anonymous users is a CE/SP-only feature, although currently broken
+      // https://github.com/overleaf/internal/issues/10944
+      if (Features.hasFeature('saas')) {
+        this.skip()
+      }
       expectChatAccess(this.anon, this.projectId, done)
     })
 

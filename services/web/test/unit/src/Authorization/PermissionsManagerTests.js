@@ -64,6 +64,48 @@ describe('PermissionsManager', function () {
     ]
   })
 
+  describe('validatePolicies', function () {
+    it('accepts empty object', function () {
+      expect(() => this.PermissionsManager.validatePolicies({})).not.to.throw
+    })
+
+    it('accepts object with registered policies', function () {
+      expect(() =>
+        this.PermissionsManager.validatePolicies({
+          openPolicy: true,
+          restrictivePolicy: false,
+        })
+      ).not.to.throw
+    })
+
+    it('accepts object with policies containing non-boolean values', function () {
+      expect(() =>
+        this.PermissionsManager.validatePolicies({
+          openPolicy: 1,
+        })
+      ).to.throw('policy value must be a boolean: openPolicy = 1')
+      expect(() =>
+        this.PermissionsManager.validatePolicies({
+          openPolicy: undefined,
+        })
+      ).to.throw('policy value must be a boolean: openPolicy = undefined')
+      expect(() =>
+        this.PermissionsManager.validatePolicies({
+          openPolicy: null,
+        })
+      ).to.throw('policy value must be a boolean: openPolicy = null')
+    })
+
+    it('throws error on object with policies that are not registered', function () {
+      expect(() =>
+        this.PermissionsManager.validatePolicies({
+          openPolicy: true,
+          unregisteredPolicy: false,
+        })
+      ).to.throw('unknown policy: unregisteredPolicy')
+    })
+  })
+
   describe('hasPermission', function () {
     describe('when no policies apply to the user', function () {
       it('should return true if default permission is true', function () {

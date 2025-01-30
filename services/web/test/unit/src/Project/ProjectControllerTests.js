@@ -1132,6 +1132,40 @@ describe('ProjectController', function () {
         })
       })
     })
+
+    describe('chatEnabled flag', function () {
+      it('should be set to false when the feature is disabled', function (done) {
+        this.Features.hasFeature = sinon.stub().withArgs('chat').returns(false)
+
+        this.res.render = (pageName, opts) => {
+          expect(opts.chatEnabled).to.be.false
+          done()
+        }
+        this.ProjectController.loadEditor(this.req, this.res)
+      })
+
+      it('should be set to false when the feature is enabled but the capability is not available', function (done) {
+        this.Features.hasFeature = sinon.stub().withArgs('chat').returns(false)
+        this.req.capabilitySet = new Set()
+
+        this.res.render = (pageName, opts) => {
+          expect(opts.chatEnabled).to.be.false
+          done()
+        }
+        this.ProjectController.loadEditor(this.req, this.res)
+      })
+
+      it('should be set to true when the feature is enabled and the capability is available', function (done) {
+        this.Features.hasFeature = sinon.stub().withArgs('chat').returns(true)
+        this.req.capabilitySet = new Set(['chat'])
+
+        this.res.render = (pageName, opts) => {
+          expect(opts.chatEnabled).to.be.true
+          done()
+        }
+        this.ProjectController.loadEditor(this.req, this.res)
+      })
+    })
   })
 
   describe('userProjectsJson', function () {

@@ -31,10 +31,12 @@ const SubscriptionLocator = {
       .exec()
   },
 
-  async getMemberSubscriptions(userOrId) {
+  async getMemberSubscriptions(userOrId, populate = []) {
     const userId = SubscriptionLocator._getUserId(userOrId)
+    // eslint-disable-next-line no-restricted-syntax
     return await Subscription.find({ member_ids: userId })
       .populate('admin_id', 'email')
+      .populate(populate)
       .exec()
   },
 
