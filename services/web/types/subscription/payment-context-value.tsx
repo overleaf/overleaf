@@ -70,5 +70,7 @@ export type PaymentContextValue = {
   userCanNotStartRequestedTrial: boolean
   showStudentConfirmation: boolean
   studentConfirmationChecked: boolean
-  setStudentConfirmationChecked: React.Dispatch<React.SetStateAction<boolean>>
+  setStudentConfirmationChecked: React.Dispatch<
+    React.SetStateAction<PaymentContextValue['studentConfirmationChecked']>
+  >
 }
