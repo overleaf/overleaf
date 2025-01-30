@@ -140,7 +140,10 @@ function parentPath(path) {
  */
 async function fixRootFolder(projectId) {
   const result = await db.projects.updateOne(
-    { _id: projectId, rootFolder: [] },
+    {
+      _id: new ObjectId(projectId),
+      rootFolder: { $size: 0 },
+    },
     {
       $set: {
         rootFolder: [
@@ -163,7 +166,7 @@ async function fixRootFolder(projectId) {
  */
 async function removeNulls(projectId, path) {
   const result = await db.projects.updateOne(
-    { _id: projectId, [path]: { $type: 'array' } },
+    { _id: new ObjectId(projectId), [path]: { $type: 'array' } },
     { $pull: { [path]: null } }
   )
   return result.modifiedCount
@@ -174,7 +177,7 @@ async function removeNulls(projectId, path) {
  */
 async function fixArray(projectId, path) {
   const result = await db.projects.updateOne(
-    { _id: projectId, [path]: { $not: { $type: 'array' } } },
+    { _id: new ObjectId(projectId), [path]: { $not: { $type: 'array' } } },
     { $set: { [path]: [] } }
   )
   return result.modifiedCount
@@ -185,7 +188,7 @@ async function fixArray(projectId, path) {
  */
 async function fixFolderId(projectId, path) {
   const result = await db.projects.updateOne(
-    { _id: projectId, [path]: { $exists: false } },
+    { _id: new ObjectId(projectId), [path]: { $exists: false } },
     { $set: { [path]: new ObjectId() } }
   )
   return result.modifiedCount
@@ -196,7 +199,7 @@ async function fixFolderId(projectId, path) {
  */
 async function removeElementsWithoutIds(projectId, path) {
   const result = await db.projects.updateOne(
-    { _id: projectId, [path]: { $type: 'array' } },
+    { _id: new ObjectId(projectId), [path]: { $type: 'array' } },
     { $pull: { [path]: { _id: null } } }
   )
   return result.modifiedCount
@@ -207,15 +210,16 @@ async function removeElementsWithoutIds(projectId, path) {
  */
 async function fixName(projectId, path) {
   const project = await db.projects.findOne(
-    { _id: projectId },
+    { _id: new ObjectId(projectId) },
     { projection: { rootFolder: 1 } }
   )
   const arrayPath = parentPath(parentPath(path))
   const array = ProjectLocator.findElementByMongoPath(project, arrayPath)
   const existingNames = new Set(array.map(x => x.name))
-  const name = findUniqueName(existingNames)
+  const name =
+    path === 'rootFolder.0.name' ? 'rootFolder' : findUniqueName(existingNames)
   const result = await db.projects.updateOne(
-    { _id: projectId, [path]: { $in: [null, ''] } },
+    { _id: new ObjectId(projectId), [path]: { $in: [null, ''] } },
     { $set: { [path]: name } }
   )
   return result.modifiedCount
