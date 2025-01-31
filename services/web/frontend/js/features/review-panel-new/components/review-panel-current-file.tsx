@@ -201,13 +201,13 @@ const ReviewPanelCurrentFile: FC = () => {
         continue
       }
 
-      const { from, to } = cursor
+      const { from, to, value } = cursor
 
       entries.push({
         id,
         from,
         to,
-        value: cursor.value,
+        threadId: value.spec.id,
         top: positions.get(id),
       })
 
@@ -297,14 +297,14 @@ const ReviewPanelCurrentFile: FC = () => {
 
       <div ref={handleContainer}>
         {addCommentEntries.map(entry => {
-          const { id, from, to, value, top } = entry
+          const { id, from, to, threadId, top } = entry
           return (
             <ReviewPanelAddComment
               docId={ranges!.docId}
               key={id}
               from={from}
               to={to}
-              value={value}
+              threadId={threadId}
               top={top}
             />
           )

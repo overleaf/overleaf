@@ -1,4 +1,4 @@
-import { FC, FormEventHandler, useCallback, useState, useRef } from 'react'
+import { FormEventHandler, useCallback, useState, useRef, memo } from 'react'
 import {
   useCodeMirrorStateContext,
   useCodeMirrorViewContext,
@@ -11,18 +11,17 @@ import useSubmittableTextInput from '../hooks/use-submittable-text-input'
 import AutoExpandingTextArea from '@/shared/components/auto-expanding-text-area'
 import { ReviewPanelEntry } from './review-panel-entry'
 import { ThreadId } from '../../../../../types/review-panel/review-panel'
-import { Decoration } from '@codemirror/view'
 import { useModalsContext } from '@/features/ide-react/context/modals-context'
 import { debugConsole } from '@/utils/debugging'
 import OLButton from '@/features/ui/components/ol/ol-button'
 
-export const ReviewPanelAddComment: FC<{
+export const ReviewPanelAddComment = memo<{
   docId: string
   from: number
   to: number
-  value: Decoration
+  threadId: string
   top: number | undefined
-}> = ({ from, to, value, top, docId }) => {
+}>(function ReviewPanelAddComment({ from, to, threadId, top, docId }) {
   const { t } = useTranslation()
   const view = useCodeMirrorViewContext()
   const state = useCodeMirrorStateContext()
@@ -32,9 +31,9 @@ export const ReviewPanelAddComment: FC<{
 
   const handleClose = useCallback(() => {
     view.dispatch({
-      effects: removeNewCommentRangeEffect.of(value),
+      effects: removeNewCommentRangeEffect.of(threadId),
     })
-  }, [view, value])
+  }, [view, threadId])
 
   const submitForm = useCallback(
     async message => {
@@ -127,7 +126,7 @@ export const ReviewPanelAddComment: FC<{
       op={{
         p: from,
         c: state.sliceDoc(from, to),
-        t: value.spec.id as ThreadId,
+        t: threadId as ThreadId,
       }}
       selectLineOnFocus={false}
       disabled={submitting}
@@ -169,4 +168,4 @@ export const ReviewPanelAddComment: FC<{
       </form>
     </ReviewPanelEntry>
   )
-}
+})

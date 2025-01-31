@@ -19,7 +19,7 @@ import { v4 as uuid } from 'uuid'
 
 export const addNewCommentRangeEffect = StateEffect.define<Range<Decoration>>()
 
-export const removeNewCommentRangeEffect = StateEffect.define<Decoration>()
+export const removeNewCommentRangeEffect = StateEffect.define<string>()
 
 export const textSelectedEffect = StateEffect.define<null>()
 
@@ -103,11 +103,10 @@ export const reviewTooltipStateField = StateField.define<{
 
     for (const effect of tr.effects) {
       if (effect.is(removeNewCommentRangeEffect)) {
-        const rangeToRemove = effect.value
+        const threadId = effect.value
         addCommentRanges = addCommentRanges.update({
-          // eslint-disable-next-line no-unused-vars
-          filter: (from, to, value) => {
-            return value.spec.id !== rangeToRemove.spec.id
+          filter: (_from, _to, value) => {
+            return value.spec.id !== threadId
           },
         })
       }
