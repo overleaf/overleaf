@@ -32,6 +32,7 @@ import { reviewTooltipStateField } from '@/features/source-editor/extensions/rev
 import ReviewPanelMoreCommentsButton from './review-panel-more-comments-button'
 import useMoreCommments from '../hooks/use-more-comments'
 import { Decoration } from '@codemirror/view'
+import { debounce } from 'lodash'
 
 type AggregatedRanges = {
   changes: Change<EditOperation>[]
@@ -116,6 +117,19 @@ const ReviewPanelCurrentFile: FC = () => {
     false
   )?.addCommentRanges
 
+  const setUpdatedPositions = useMemo(
+    () =>
+      debounce(() => {
+        setPositions(new Map(positionsRef.current))
+        window.setTimeout(() => {
+          containerRef.current?.dispatchEvent(
+            new Event('review-panel:position')
+          )
+        })
+      }, 50),
+    []
+  )
+
   const positionsMeasureRequest = useCallback(() => {
     if (aggregatedRanges) {
       view.requestMeasure({
@@ -166,16 +180,11 @@ const ReviewPanelCurrentFile: FC = () => {
           }
         },
         write() {
-          setPositions(new Map(positionsRef.current))
-          window.setTimeout(() => {
-            containerRef.current?.dispatchEvent(
-              new Event('review-panel:position')
-            )
-          })
+          setUpdatedPositions()
         },
       })
     }
-  }, [view, aggregatedRanges, addCommentRanges])
+  }, [view, aggregatedRanges, addCommentRanges, setUpdatedPositions])
 
   useEffect(positionsMeasureRequest, [positionsMeasureRequest])
   useEventListener('editor:geometry-change', positionsMeasureRequest)
