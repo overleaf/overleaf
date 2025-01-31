@@ -1,4 +1,4 @@
-import { memo, useCallback } from 'react'
+import { memo, useCallback, useState } from 'react'
 import { Change, CommentOperation } from '../../../../../types/change'
 import { ReviewPanelMessage } from './review-panel-message'
 import { useTranslation } from 'react-i18next'
@@ -38,10 +38,24 @@ export const ReviewPanelCommentContent = memo<{
     const { t } = useTranslation()
     const threads = useThreadsContext()
     const permissions = usePermissionsContext()
+    const [submitting, setSubmitting] = useState(false)
 
     const handleSubmit = useCallback(
-      (content, setContent) => onReply?.(content).then(() => setContent('')),
-      [onReply]
+      (content, setContent) => {
+        if (!onReply || submitting) {
+          return
+        }
+
+        setSubmitting(true)
+        onReply(content)
+          .then(() => {
+            setContent('')
+          })
+          .finally(() => {
+            setSubmitting(false)
+          })
+      },
+      [onReply, submitting]
     )
 
     const { handleChange, handleKeyPress, content } =
