@@ -241,7 +241,7 @@ const ReviewPanelCurrentFile: FC = () => {
     if (containerRef.current && docId) {
       const positioningRes = positionItems(
         containerRef.current,
-        previousFocusedItem.current.get(docId) || 0,
+        previousFocusedItem.current.get(docId),
         docId
       )
 

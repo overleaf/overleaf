@@ -8,7 +8,7 @@ const GAP_BETWEEN_ENTRIES = 4
 export const positionItems = debounce(
   (
     element: HTMLDivElement,
-    previousFocusedItemIndex: number,
+    previousFocusedItemIndex: number | undefined,
     docId: string
   ) => {
     const items = Array.from(
@@ -22,16 +22,8 @@ export const positionItems = debounce(
     }
 
     let activeItemIndex = items.findIndex(item =>
-      item.classList.contains('review-panel-entry-action')
+      item.classList.contains('review-panel-entry-selected')
     )
-
-    if (activeItemIndex === -1) {
-      // if there is no action available
-      // check if there is manually selected entry
-      activeItemIndex = items.findIndex(item =>
-        item.classList.contains('review-panel-entry-selected')
-      )
-    }
 
     if (activeItemIndex === -1) {
       // if entry was not selected manually
@@ -42,7 +34,7 @@ export const positionItems = debounce(
     }
 
     if (activeItemIndex === -1) {
-      activeItemIndex = previousFocusedItemIndex
+      activeItemIndex = previousFocusedItemIndex || 0
     }
 
     const activeItem = items[activeItemIndex]
