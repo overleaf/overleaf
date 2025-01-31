@@ -15,6 +15,8 @@ import { useDetachCompileContext as useCompileContext } from '../../../shared/co
 import PdfLogEntry from './pdf-log-entry'
 import { usePdfPreviewContext } from '@/features/pdf-preview/components/pdf-preview-provider'
 import PropTypes from 'prop-types'
+import TimeoutUpgradePaywallPrompt from './timeout-upgrade-paywall-prompt'
+import getMeta from '@/utils/meta'
 
 function PdfLogsViewer({ alwaysVisible = false }) {
   const {
@@ -32,6 +34,10 @@ function PdfLogsViewer({ alwaysVisible = false }) {
 
   const { t } = useTranslation()
 
+  const isPaywallChangeCompileTimeoutEnabled = getMeta(
+    'ol-isPaywallChangeCompileTimeoutEnabled'
+  )
+
   return (
     <div
       className={classnames('logs-pane', {
@@ -46,7 +52,11 @@ function PdfLogsViewer({ alwaysVisible = false }) {
         {loadingError && <PdfPreviewError error="pdf-viewer-loading-error" />}
 
         {hasShortCompileTimeout && error === 'timedout' ? (
-          <TimeoutUpgradePromptNew />
+          isPaywallChangeCompileTimeoutEnabled ? (
+            <TimeoutUpgradePaywallPrompt />
+          ) : (
+            <TimeoutUpgradePromptNew />
+          )
         ) : (
           <>{error && <PdfPreviewError error={error} />}</>
         )}

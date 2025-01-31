@@ -355,6 +355,7 @@ const _ProjectController = {
       'reviewer-role',
       'papers-integration',
       'editor-redesign',
+      'paywall-change-compile-timeout',
     ].filter(Boolean)
 
     const getUserValues = async userId =>
@@ -845,6 +846,9 @@ const _ProjectController = {
         isReviewerRoleEnabled:
           reviewerRoleAssignment?.variant === 'enabled' ||
           Object.keys(project.reviewer_refs || {}).length > 0,
+        isPaywallChangeCompileTimeoutEnabled:
+          splitTestAssignments['paywall-change-compile-timeout']?.variant ===
+          'enabled',
       })
       timer.done()
     } catch (err) {
