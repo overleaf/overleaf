@@ -10,10 +10,7 @@ import {
 import { HistoryProvider } from '../../../../../frontend/js/features/history/context/history-context'
 import { updates } from '../fixtures/updates'
 import { labels } from '../fixtures/labels'
-import {
-  formatTime,
-  relativeDate,
-} from '../../../../../frontend/js/features/utils/format-date'
+import { formatTime, relativeDate } from '@/features/utils/format-date'
 
 const mountWithEditorProviders = (
   component: React.ReactNode,

@@ -1,7 +1,7 @@
 import { memo, useCallback } from 'react'
 import { UpdateRange, Version } from '../../services/types/update'
 import TagTooltip from './tag-tooltip'
-import { formatTimeBasedOnYear } from '../../../utils/format-date'
+import { FormatTimeBasedOnYear } from '@/shared/components/format-time-based-on-year'
 import HistoryDropdown from './dropdown/history-dropdown'
 import HistoryVersionDetails from './history-version-details'
 import { LoadedLabel } from '../../services/types/label'
@@ -145,7 +145,7 @@ function LabelListItem({
                 data-testid="history-version-metadata-time"
               >
                 {t('last_edit')}{' '}
-                {formatTimeBasedOnYear(label.lastUpdatedTimestamp)}
+                <FormatTimeBasedOnYear date={label.lastUpdatedTimestamp} />
               </time>
             )}
           </div>

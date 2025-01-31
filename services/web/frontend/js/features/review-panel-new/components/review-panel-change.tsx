@@ -10,7 +10,7 @@ import classnames from 'classnames'
 import { usePermissionsContext } from '@/features/ide-react/context/permissions-context'
 import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
 import MaterialIcon from '@/shared/components/material-icon'
-import { formatTimeBasedOnYear } from '@/features/utils/format-date'
+import { FormatTimeBasedOnYear } from '@/shared/components/format-time-based-on-year'
 import { useChangesUsersContext } from '../context/changes-users-context'
 import { ReviewPanelChangeUser } from './review-panel-change-user'
 import { ReviewPanelEntry } from './review-panel-entry'
@@ -100,9 +100,11 @@ export const ReviewPanelChange = memo<{
           <div className="review-panel-entry-header">
             <div>
               <ReviewPanelChangeUser change={change} />
-              <div className="review-panel-entry-time">
-                {formatTimeBasedOnYear(change.metadata?.ts)}
-              </div>
+              {change.metadata?.ts && (
+                <div className="review-panel-entry-time">
+                  <FormatTimeBasedOnYear date={change.metadata.ts} />
+                </div>
+              )}
             </div>
             {editable && (
               <div className="review-panel-entry-actions">

@@ -11,15 +11,15 @@ moment.updateLocale('en', {
   },
 })
 
-export function formatTime(date, format = 'h:mm a') {
+export function formatTime(date: moment.MomentInput, format = 'h:mm a') {
   return moment(date).format(format)
 }
 
-export function relativeDate(date) {
+export function relativeDate(date: moment.MomentInput) {
   return moment(date).calendar()
 }
 
-export function formatTimeBasedOnYear(date) {
+export function formatTimeBasedOnYear(date: moment.MomentInput) {
   const currentDate = moment()
 
   return currentDate.diff(date, 'years') > 0

@@ -1,5 +1,5 @@
 import { FC } from 'react'
-import { formatTimeBasedOnYear } from '@/features/utils/format-date'
+import { FormatTimeBasedOnYear } from '@/shared/components/format-time-based-on-year'
 import { ReviewPanelResolvedCommentThread } from '../../../../../types/review-panel/comment-thread'
 import { useTranslation } from 'react-i18next'
 import ReviewPanelEntryUser from './review-panel-entry-user'
@@ -15,7 +15,7 @@ const ReviewPanelResolvedMessage: FC<{
         <div>
           <ReviewPanelEntryUser user={thread.resolved_by_user} />
           <div className="review-panel-entry-time">
-            {formatTimeBasedOnYear(thread.resolved_at)}
+            <FormatTimeBasedOnYear date={thread.resolved_at} />
           </div>
         </div>
       </div>

@@ -4,7 +4,7 @@ import {
   ReviewPanelCommentThreadMessage,
 } from '../../../../../types/review-panel/review-panel'
 import { useTranslation } from 'react-i18next'
-import { formatTimeBasedOnYear } from '@/features/utils/format-date'
+import { FormatTimeBasedOnYear } from '@/shared/components/format-time-based-on-year'
 import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
 import MaterialIcon from '@/shared/components/material-icon'
 import AutoExpandingTextArea from '@/shared/components/auto-expanding-text-area'
@@ -64,7 +64,7 @@ export const ReviewPanelMessage: FC<{
         <div>
           <ReviewPanelEntryUser user={message.user} />
           <div className="review-panel-entry-time">
-            {formatTimeBasedOnYear(message.timestamp)}
+            <FormatTimeBasedOnYear date={message.timestamp} />
           </div>
         </div>
 
