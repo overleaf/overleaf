@@ -347,7 +347,7 @@ export class ConnectionManager extends EventTarget {
     return true
   }
 
-  disconnect() {
+  private disconnect() {
     this.changeState({
       ...this.state,
       readyState: WebSocket.CLOSED,

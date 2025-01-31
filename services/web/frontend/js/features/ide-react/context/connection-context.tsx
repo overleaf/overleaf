@@ -8,6 +8,7 @@ import {
   useMemo,
 } from 'react'
 import {
+  ConnectionError,
   ConnectionState,
   SocketDebuggingInfo,
 } from '../connection/types/connection-state'
@@ -27,7 +28,7 @@ type ConnectionContextValue = {
   secondsUntilReconnect: () => number
   tryReconnectNow: () => void
   registerUserActivity: () => void
-  disconnect: () => void
+  closeConnection: (err: ConnectionError) => void
   getSocketDebuggingInfo: () => SocketDebuggingInfo
 }
 
@@ -75,9 +76,10 @@ export const ConnectionProvider: FC = ({ children }) => {
     [connectionManager]
   )
 
-  const disconnect = useCallback(() => {
-    connectionManager.disconnect()
-  }, [connectionManager])
+  const closeConnection = useCallback(
+    (err: ConnectionError) => connectionManager.close(err),
+    [connectionManager]
+  )
 
   const getSocketDebuggingInfo = useCallback(
     () => connectionManager.getSocketDebuggingInfo(),
@@ -87,7 +89,11 @@ export const ConnectionProvider: FC = ({ children }) => {
   // Reload the page on force disconnect. Doing this in React-land means that we
   // can use useLocation(), which provides mockable location methods
   useEffect(() => {
-    if (connectionState.forceDisconnected) {
+    if (
+      connectionState.forceDisconnected &&
+      // keep editor open when out of sync
+      connectionState.error !== 'out-of-sync'
+    ) {
       const timer = window.setTimeout(
         () => location.reload(),
         connectionState.forcedDisconnectDelay * 1000
@@ -99,6 +105,7 @@ export const ConnectionProvider: FC = ({ children }) => {
   }, [
     connectionState.forceDisconnected,
     connectionState.forcedDisconnectDelay,
+    connectionState.error,
     location,
   ])
 
@@ -111,7 +118,7 @@ export const ConnectionProvider: FC = ({ children }) => {
       secondsUntilReconnect,
       tryReconnectNow,
       registerUserActivity,
-      disconnect,
+      closeConnection,
       getSocketDebuggingInfo,
     }),
     [
@@ -122,7 +129,7 @@ export const ConnectionProvider: FC = ({ children }) => {
       registerUserActivity,
       secondsUntilReconnect,
       tryReconnectNow,
-      disconnect,
+      closeConnection,
       getSocketDebuggingInfo,
     ]
   )

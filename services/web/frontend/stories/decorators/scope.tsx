@@ -184,7 +184,7 @@ const ConnectionProvider: FC = ({ children }) => {
       secondsUntilReconnect: () => 0,
       tryReconnectNow: () => {},
       registerUserActivity: () => {},
-      disconnect: () => {},
+      closeConnection: () => {},
       getSocketDebuggingInfo: () => ({
         client_id: 'fakeClientId',
         transport: 'fakeTransport',

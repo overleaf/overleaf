@@ -15,10 +15,14 @@ function ForceDisconnected() {
   const [show, setShow] = useState(false)
 
   useEffect(() => {
-    if (connectionState.forceDisconnected) {
+    if (
+      connectionState.forceDisconnected &&
+      // out of sync has its own modal
+      connectionState.error !== 'out-of-sync'
+    ) {
       setShow(true)
     }
-  }, [connectionState.forceDisconnected])
+  }, [connectionState.forceDisconnected, connectionState.error])
 
   useEffect(() => {
     if (connectionState.forceDisconnected) {

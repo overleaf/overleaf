@@ -98,7 +98,7 @@ export const EditorManagerProvider: FC = ({ children }) => {
   const { projectId } = useIdeReactContext()
   const { reportError, eventEmitter, eventLog } = useIdeReactContext()
   const { setOutOfSync } = useEditorContext()
-  const { socket, disconnect, connectionState } = useConnectionContext()
+  const { socket, closeConnection, connectionState } = useConnectionContext()
   const { view, setView } = useLayoutContext()
   const { showGenericMessageModal, genericModalVisible, showOutOfSyncModal } =
     useModalsContext()
@@ -580,7 +580,7 @@ export const EditorManagerProvider: FC = ({ children }) => {
         // Do not re-join after re-connecting.
         document.leaveAndCleanUp()
 
-        disconnect()
+        closeConnection('out-of-sync')
         reportError(error, meta)
 
         // Tell the user about the error state.
@@ -605,7 +605,7 @@ export const EditorManagerProvider: FC = ({ children }) => {
       }
     }
   }, [
-    disconnect,
+    closeConnection,
     docError,
     docTooLongErrorShown,
     eventEmitter,

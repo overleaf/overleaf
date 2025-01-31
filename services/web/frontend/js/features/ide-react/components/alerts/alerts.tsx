@@ -27,7 +27,9 @@ export function Alerts() {
 
   return createPortal(
     <>
-      {connectionState.forceDisconnected ? (
+      {connectionState.forceDisconnected &&
+      // hide "disconnected" banner when displaying out of sync modal
+      connectionState.error !== 'out-of-sync' ? (
         <OLNotification
           type="error"
           content={<strong>{t('disconnected')}</strong>}
