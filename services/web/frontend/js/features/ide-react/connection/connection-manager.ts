@@ -80,6 +80,7 @@ export class ConnectionManager extends EventTarget {
     })
     if (externalSocketHeartbeat) {
       query.set('esh', '1')
+      query.set('ssp', '1') // with server-side ping
     }
     const socket = SocketIoShim.connect(parsedURL.origin, {
       resource: parsedURL.pathname.slice(1),
@@ -112,6 +113,9 @@ export class ConnectionManager extends EventTarget {
     socket.on('connectionRejected', err => this.onConnectionRejected(err))
     socket.on('reconnectGracefully', () => this.onReconnectGracefully())
     socket.on('forceDisconnect', (_, delay) => this.onForceDisconnect(delay))
+    socket.on('serverPing', (counter, timestamp) =>
+      this.sendPingResponse(counter, timestamp)
+    )
 
     this.tryReconnect()
   }
@@ -462,5 +466,9 @@ export class ConnectionManager extends EventTarget {
       }
     })
     this.externalHeartbeat.currentStart = t0
+  }
+
+  private sendPingResponse(counter?: number, timestamp?: number) {
+    this.socket.emit('clientPong', counter, timestamp)
   }
 }

@@ -11,6 +11,8 @@ const { UnexpectedArgumentsError } = require('./Errors')
 const Joi = require('joi')
 
 const HOSTNAME = require('node:os').hostname()
+const SERVER_PING_INTERVAL = 15000
+const SERVER_PING_LATENCY_THRESHOLD = 5000
 
 const JOI_OBJECT_ID = Joi.string()
   .required()
@@ -172,6 +174,8 @@ module.exports = Router = {
         }
         return
       }
+      const useServerPing =
+        !!client.handshake?.query?.esh && !!client.handshake?.query?.ssp
       const isDebugging = !!client.handshake?.query?.debugging
       const projectId = client.handshake?.query?.projectId
 
@@ -230,6 +234,64 @@ module.exports = Router = {
         const anonymousAccessToken = session?.anonTokenAccess?.[projectId]
         user = { _id: 'anonymous-user', anonymousAccessToken }
       }
+
+      let pingTimestamp
+      let pingId = -1
+      let pongId = -1
+      const pingTimer = useServerPing
+        ? setInterval(function () {
+            if (pongId !== pingId) {
+              logger.warn(
+                {
+                  publicId: client.publicId,
+                  clientId: client.id,
+                  pingId,
+                  pongId,
+                  lastPingTimestamp: pingTimestamp,
+                },
+                'no client response to last ping'
+              )
+            }
+            pingTimestamp = Date.now()
+            client.emit('serverPing', ++pingId, pingTimestamp)
+          }, SERVER_PING_INTERVAL)
+        : null
+      client.on('clientPong', function (receivedPingId, sentTimestamp) {
+        pongId = receivedPingId
+        const receivedTimestamp = Date.now()
+        if (receivedPingId !== pingId) {
+          logger.warn(
+            {
+              publicId: client.publicId,
+              clientId: client.id,
+              receivedPingId,
+              pingId,
+              sentTimestamp,
+              receivedTimestamp,
+              latency: receivedTimestamp - sentTimestamp,
+              lastPingTimestamp: pingTimestamp,
+            },
+            'received pong with wrong counter'
+          )
+        } else if (
+          receivedTimestamp - sentTimestamp >
+          SERVER_PING_LATENCY_THRESHOLD
+        ) {
+          logger.warn(
+            {
+              publicId: client.publicId,
+              clientId: client.id,
+              receivedPingId,
+              pingId,
+              sentTimestamp,
+              receivedTimestamp,
+              latency: receivedTimestamp - sentTimestamp,
+              lastPingTimestamp: pingTimestamp,
+            },
+            'received pong with high latency'
+          )
+        }
+      })
 
       if (settings.exposeHostname) {
         client.on('debug.getHostname', function (callback) {
@@ -299,6 +361,8 @@ module.exports = Router = {
             { duration, publicId: client.publicId, clientId: client.id },
             'debug client disconnected'
           )
+        } else {
+          clearInterval(pingTimer)
         }
 
         WebsocketController.leaveProject(io, client, function (err) {
