@@ -252,6 +252,7 @@ function chunkFromRecord(record) {
     id: record._id.toString(),
     startVersion: record.startVersion,
     endVersion: record.endVersion,
+    endTimestamp: record.endTimestamp,
   }
 }
 

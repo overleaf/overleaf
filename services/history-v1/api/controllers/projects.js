@@ -86,6 +86,25 @@ async function getLatestHistory(req, res, next) {
   }
 }
 
+async function getLatestHistoryRaw(req, res, next) {
+  const projectId = req.swagger.params.project_id.value
+  try {
+    const { startVersion, endVersion, endTimestamp } =
+      await chunkStore.loadLatestRaw(projectId)
+    res.json({
+      startVersion,
+      endVersion,
+      endTimestamp,
+    })
+  } catch (err) {
+    if (err instanceof Chunk.NotFoundError) {
+      render.notFound(res)
+    } else {
+      throw err
+    }
+  }
+}
+
 async function getHistory(req, res, next) {
   const projectId = req.swagger.params.project_id.value
   const version = req.swagger.params.version.value
@@ -314,6 +333,7 @@ module.exports = {
   getLatestHashedContent: expressify(getLatestHashedContent),
   getLatestPersistedHistory: expressify(getLatestHistory),
   getLatestHistory: expressify(getLatestHistory),
+  getLatestHistoryRaw: expressify(getLatestHistoryRaw),
   getHistory: expressify(getHistory),
   getHistoryBefore: expressify(getHistoryBefore),
   getZip: expressify(getZip),

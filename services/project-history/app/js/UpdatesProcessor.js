@@ -60,6 +60,46 @@ export function getRawUpdates(projectId, batchSize, callback) {
   })
 }
 
+// Trigger resync and start processing under lock to avoid other operations to
+// flush the resync updates.
+export function startResyncAndProcessUpdatesUnderLock(
+  projectId,
+  opts,
+  callback
+) {
+  const startTimeMs = Date.now()
+  LockManager.runWithLock(
+    keys.projectHistoryLock({ project_id: projectId }),
+    (extendLock, releaseLock) => {
+      SyncManager.startResyncWithoutLock(projectId, opts, err => {
+        if (err) return callback(OError.tag(err))
+        extendLock(err => {
+          if (err) return callback(OError.tag(err))
+          _countAndProcessUpdates(
+            projectId,
+            extendLock,
+            REDIS_READ_BATCH_SIZE,
+            releaseLock
+          )
+        })
+      })
+    },
+    (error, queueSize) => {
+      if (error) {
+        OError.tag(error)
+      }
+      ErrorRecorder.record(projectId, queueSize, error, callback)
+      if (queueSize > 0) {
+        const duration = (Date.now() - startTimeMs) / 1000
+        Metrics.historyFlushDurationSeconds.observe(duration)
+        Metrics.historyFlushQueueSize.observe(queueSize)
+      }
+      // clear the timestamp in the background if the queue is now empty
+      RedisManager.clearDanglingFirstOpTimestamp(projectId, () => {})
+    }
+  )
+}
+
 // Process all updates for a project, only check project-level information once
 export function processUpdatesForProject(projectId, callback) {
   const startTimeMs = Date.now()
@@ -631,5 +671,10 @@ function _sanitizeUpdate(update) {
 }
 
 export const promises = {
+  /** @type {(projectId: string) => Promise<number>} */
   processUpdatesForProject: promisify(processUpdatesForProject),
+  /** @type {(projectId: string, opts: any) => Promise<number>} */
+  startResyncAndProcessUpdatesUnderLock: promisify(
+    startResyncAndProcessUpdatesUnderLock
+  ),
 }

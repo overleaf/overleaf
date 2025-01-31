@@ -82,21 +82,31 @@ async function lazyLoadHistoryFiles(history, batchBlobStore) {
  * Load the latest Chunk stored for a project, including blob metadata.
  *
  * @param {string} projectId
- * @return {Promise.<Chunk>}
+ * @return {Promise<{id: string, startVersion: number, endVersion: number, endTimestamp: Date}>}
  */
-async function loadLatest(projectId) {
+async function loadLatestRaw(projectId) {
   assert.projectId(projectId, 'bad projectId')
 
   const backend = getBackend(projectId)
-  const blobStore = new BlobStore(projectId)
-  const batchBlobStore = new BatchBlobStore(blobStore)
   const chunkRecord = await backend.getLatestChunk(projectId)
   if (chunkRecord == null) {
     throw new Chunk.NotFoundError(projectId)
   }
+  return chunkRecord
+}
 
+/**
+ * Load the latest Chunk stored for a project, including blob metadata.
+ *
+ * @param {string} projectId
+ * @return {Promise.<Chunk>}
+ */
+async function loadLatest(projectId) {
+  const chunkRecord = await loadLatestRaw(projectId)
   const rawHistory = await historyStore.loadRaw(projectId, chunkRecord.id)
   const history = History.fromRaw(rawHistory)
+  const blobStore = new BlobStore(projectId)
+  const batchBlobStore = new BatchBlobStore(blobStore)
   await lazyLoadHistoryFiles(history, batchBlobStore)
   return new Chunk(history, chunkRecord.startVersion)
 }
@@ -318,6 +328,7 @@ module.exports = {
   getBackend,
   initializeProject,
   loadLatest,
+  loadLatestRaw,
   loadAtVersion,
   loadAtTimestamp,
   create,

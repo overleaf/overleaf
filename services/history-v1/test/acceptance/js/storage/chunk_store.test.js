@@ -69,6 +69,15 @@ describe('chunkStore', function () {
           await chunkStore.update(projectId, oldEndVersion, chunk)
         })
 
+        it('records the correct metadata in db', async function () {
+          const raw = await chunkStore.loadLatestRaw(projectId)
+          expect(raw).to.deep.include({
+            startVersion: 0,
+            endVersion: 2,
+            endTimestamp: lastChangeTimestamp,
+          })
+        })
+
         it('records the correct timestamp', async function () {
           const chunk = await chunkStore.loadLatest(projectId)
           expect(chunk.getEndTimestamp()).to.deep.equal(lastChangeTimestamp)

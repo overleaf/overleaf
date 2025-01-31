@@ -81,6 +81,7 @@ function chunkFromRecord(record) {
     id: record.id,
     startVersion: record.start_version,
     endVersion: record.end_version,
+    endTimestamp: record.end_timestamp,
   }
 }
 

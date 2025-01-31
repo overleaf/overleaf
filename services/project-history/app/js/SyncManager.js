@@ -53,7 +53,7 @@ async function startResync(projectId, options = {}) {
     await LockManager.promises.runWithLock(
       keys.projectHistoryLock({ project_id: projectId }),
       async extendLock => {
-        await _startResyncWithoutLock(projectId, options)
+        await startResyncWithoutLock(projectId, options)
       }
     )
   } catch (error) {
@@ -76,7 +76,7 @@ async function startHardResync(projectId, options = {}) {
         await clearResyncState(projectId)
         await RedisManager.promises.clearFirstOpTimestamp(projectId)
         await RedisManager.promises.destroyDocUpdatesQueue(projectId)
-        await _startResyncWithoutLock(projectId, options)
+        await startResyncWithoutLock(projectId, options)
       }
     )
   } catch (error) {
@@ -86,7 +86,8 @@ async function startHardResync(projectId, options = {}) {
   }
 }
 
-async function _startResyncWithoutLock(projectId, options) {
+// The caller must hold the lock and should record any errors via the ErrorRecorder.
+async function startResyncWithoutLock(projectId, options) {
   await ErrorRecorder.promises.recordSyncStart(projectId)
 
   const syncState = await _getResyncState(projectId)
@@ -156,6 +157,29 @@ async function setResyncState(projectId, syncState) {
 async function clearResyncState(projectId) {
   await db.projectHistorySyncState.deleteOne({
     project_id: new ObjectId(projectId.toString()),
+  })
+}
+
+/**
+ * @param {string} projectId
+ * @param {Date} date
+ * @return {Promise<void>}
+ */
+async function clearResyncStateIfAllAfter(projectId, date) {
+  const rawSyncState = await db.projectHistorySyncState.findOne({
+    project_id: new ObjectId(projectId.toString()),
+  })
+  if (!rawSyncState) return // already cleared
+  const state = SyncState.fromRaw(projectId, rawSyncState)
+  if (state.isSyncOngoing()) return // new sync started
+  for (const { timestamp } of rawSyncState.history) {
+    if (timestamp < date) return // preserve old resync states
+  }
+  // expiresAt is cleared when starting a sync and bumped when making changes.
+  // Use expiresAt as read to ensure we only clear the confirmed state.
+  await db.projectHistorySyncState.deleteOne({
+    project_id: new ObjectId(projectId.toString()),
+    expiresAt: rawSyncState.expiresAt,
   })
 }
 
@@ -1132,6 +1156,7 @@ function trackingDirectivesEqual(a, b) {
 // EXPORTS
 
 const startResyncCb = callbackify(startResync)
+const startResyncWithoutLockCb = callbackify(startResyncWithoutLock)
 const startHardResyncCb = callbackify(startHardResync)
 const setResyncStateCb = callbackify(setResyncState)
 const clearResyncStateCb = callbackify(clearResyncState)
@@ -1174,6 +1199,7 @@ const expandSyncUpdatesCb = (
 
 export {
   startResyncCb as startResync,
+  startResyncWithoutLockCb as startResyncWithoutLock,
   startHardResyncCb as startHardResync,
   setResyncStateCb as setResyncState,
   clearResyncStateCb as clearResyncState,
@@ -1183,9 +1209,11 @@ export {
 
 export const promises = {
   startResync,
+  startResyncWithoutLock,
   startHardResync,
   setResyncState,
   clearResyncState,
+  clearResyncStateIfAllAfter,
   skipUpdatesDuringSync,
   expandSyncUpdates,
 }

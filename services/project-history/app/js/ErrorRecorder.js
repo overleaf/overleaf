@@ -83,6 +83,10 @@ async function recordSyncStart(projectId) {
   )
 }
 
+/**
+ * @param projectId
+ * @return {Promise<{error: string, forceDebug?: boolean}|null>}
+ */
 async function getFailureRecord(projectId) {
   return await db.projectHistoryFailures.findOne({ project_id: projectId })
 }

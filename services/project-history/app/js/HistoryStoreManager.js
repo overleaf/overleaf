@@ -17,6 +17,7 @@ import * as Errors from './Errors.js'
 import * as LocalFileWriter from './LocalFileWriter.js'
 import * as HashManager from './HashManager.js'
 import * as HistoryBlobTranslator from './HistoryBlobTranslator.js'
+import { promisifyMultiResult } from '@overleaf/promise-utils'
 
 const HTTP_REQUEST_TIMEOUT = Settings.overleaf.history.requestTimeout
 
@@ -83,6 +84,28 @@ export function getMostRecentVersion(projectId, historyId, callback) {
         )
       })
     )
+  })
+}
+
+/**
+ * @param {string} projectId
+ * @param {string} historyId
+ * @param {(error: Error, rawChunk?: { startVersion: number, endVersion: number, endTimestamp: Date}) => void} callback
+ */
+export function getMostRecentVersionRaw(projectId, historyId, callback) {
+  const path = `projects/${historyId}/latest/history/raw`
+  logger.debug(
+    { projectId, historyId },
+    'getting raw chunk from history service'
+  )
+  _requestHistoryService({ path, json: true }, (err, body) => {
+    if (err) return callback(OError.tag(err))
+    const { startVersion, endVersion, endTimestamp } = body
+    callback(null, {
+      startVersion,
+      endVersion,
+      endTimestamp: new Date(endTimestamp),
+    })
   })
 }
 
@@ -576,7 +599,13 @@ export const promises = {
   /** @type {(projectId: string, historyId: string) => Promise<{chunk: import('overleaf-editor-core/lib/types.js').RawChunk}>} */
   getMostRecentChunk: promisify(getMostRecentChunk),
   getChunkAtVersion: promisify(getChunkAtVersion),
-  getMostRecentVersion: promisify(getMostRecentVersion),
+  getMostRecentVersion: promisifyMultiResult(getMostRecentVersion, [
+    'version',
+    'projectStructureAndDocVersions',
+    'lastChange',
+    'mostRecentChunk',
+  ]),
+  getMostRecentVersionRaw: promisify(getMostRecentVersionRaw),
   getProjectBlob: promisify(getProjectBlob),
   getProjectBlobStream: promisify(getProjectBlobStream),
   sendChanges: promisify(sendChanges),

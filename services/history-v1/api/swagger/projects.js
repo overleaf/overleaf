@@ -321,6 +321,37 @@ exports.paths = {
       },
     },
   },
+  '/projects/{project_id}/latest/history/raw': {
+    get: {
+      'x-swagger-router-controller': 'projects',
+      operationId: 'getLatestHistoryRaw',
+      tags: ['Project'],
+      description: 'Get the metadata of latest sequence of changes.',
+      parameters: [
+        {
+          name: 'project_id',
+          in: 'path',
+          description: 'project id',
+          required: true,
+          type: 'string',
+        },
+      ],
+      responses: {
+        200: {
+          description: 'Success',
+          schema: {
+            $ref: '#/definitions/ChunkResponseRaw',
+          },
+        },
+        404: {
+          description: 'Not Found',
+          schema: {
+            $ref: '#/definitions/Error',
+          },
+        },
+      },
+    },
+  },
   '/projects/{project_id}/latest/persistedHistory': {
     get: {
       'x-swagger-router-controller': 'projects',

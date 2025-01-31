@@ -84,6 +84,19 @@ module.exports = {
         },
       },
     },
+    ChunkResponseRaw: {
+      properties: {
+        startVersion: {
+          type: 'number',
+        },
+        endVersion: {
+          type: 'number',
+        },
+        endTimestamp: {
+          type: 'string',
+        },
+      },
+    },
     History: {
       properties: {
         snapshot: {
