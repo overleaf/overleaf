@@ -8,7 +8,7 @@ import logger from '@overleaf/logger'
 import Metrics from '@overleaf/metrics'
 import OError from '@overleaf/o-error'
 import { File, Range } from 'overleaf-editor-core'
-import { SyncError } from './Errors.js'
+import { NeedFullProjectStructureResyncError, SyncError } from './Errors.js'
 import { db, ObjectId } from './mongodb.js'
 import * as SnapshotManager from './SnapshotManager.js'
 import * as LockManager from './LockManager.js'
@@ -99,6 +99,9 @@ async function _startResyncWithoutLock(projectId, options) {
   const webOpts = {}
   if (options.historyRangesMigration) {
     webOpts.historyRangesMigration = options.historyRangesMigration
+  }
+  if (options.resyncProjectStructureOnly) {
+    webOpts.resyncProjectStructureOnly = options.resyncProjectStructureOnly
   }
   await WebApiManager.promises.requestResync(projectId, webOpts)
   await setResyncState(projectId, syncState)
@@ -281,8 +284,10 @@ class SyncState {
         })
       }
 
-      for (const doc of update.resyncProjectStructure.docs) {
-        this.startDocContentSync(doc.path)
+      if (!update.resyncProjectStructureOnly) {
+        for (const doc of update.resyncProjectStructure.docs) {
+          this.startDocContentSync(doc.path)
+        }
       }
 
       this.stopProjectStructureSync()
@@ -475,6 +480,28 @@ class SyncUpdateExpander {
         persistedBinaryFiles
       )
       this.queueSetMetadataOpsForLinkedFiles(update)
+
+      if (update.resyncProjectStructureOnly) {
+        const docPaths = new Set()
+        for (const entity of update.resyncProjectStructure.docs) {
+          const path = UpdateTranslator._convertPathname(entity.path)
+          docPaths.add(path)
+        }
+        for (const expandedUpdate of this.expandedUpdates) {
+          if (docPaths.has(expandedUpdate.pathname)) {
+            // Clear the resync state and queue entry, we need to start over.
+            this.expandedUpdates = []
+            await clearResyncState(this.projectId)
+            await RedisManager.promises.deleteAppliedDocUpdate(
+              this.projectId,
+              update
+            )
+            throw new NeedFullProjectStructureResyncError(
+              'aborting partial resync: touched doc'
+            )
+          }
+        }
+      }
     } else if ('resyncDocContent' in update) {
       logger.debug(
         { projectId: this.projectId, update },

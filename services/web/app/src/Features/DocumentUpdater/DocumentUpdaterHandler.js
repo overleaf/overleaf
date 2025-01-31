@@ -302,6 +302,9 @@ function resyncProjectHistory(
   if (opts.historyRangesMigration) {
     body.historyRangesMigration = opts.historyRangesMigration
   }
+  if (opts.resyncProjectStructureOnly) {
+    body.resyncProjectStructureOnly = opts.resyncProjectStructureOnly
+  }
   _makeRequest(
     {
       path: `/project/${projectId}/history/resync`,

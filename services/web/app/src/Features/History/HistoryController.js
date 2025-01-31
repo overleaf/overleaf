@@ -148,6 +148,9 @@ module.exports = HistoryController = {
     if (historyRangesMigration) {
       opts.historyRangesMigration = historyRangesMigration
     }
+    if (req.body.resyncProjectStructureOnly) {
+      opts.resyncProjectStructureOnly = req.body.resyncProjectStructureOnly
+    }
     ProjectEntityUpdateHandler.resyncProjectHistory(
       projectId,
       opts,

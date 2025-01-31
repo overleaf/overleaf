@@ -217,34 +217,75 @@ describe('HistoryManager', function () {
         .stub()
         .yields()
       this.DocumentManager.resyncDocContentsWithLock = sinon.stub().yields()
-      this.HistoryManager.resyncProjectHistory(
-        this.project_id,
-        this.projectHistoryId,
-        this.docs,
-        this.files,
-        this.callback
-      )
     })
 
-    it('should queue a project structure reync', function () {
-      this.ProjectHistoryRedisManager.queueResyncProjectStructure
-        .calledWith(
+    describe('full sync', function () {
+      beforeEach(function () {
+        this.HistoryManager.resyncProjectHistory(
           this.project_id,
           this.projectHistoryId,
           this.docs,
-          this.files
+          this.files,
+          {},
+          this.callback
         )
-        .should.equal(true)
+      })
+
+      it('should queue a project structure reync', function () {
+        this.ProjectHistoryRedisManager.queueResyncProjectStructure
+          .calledWith(
+            this.project_id,
+            this.projectHistoryId,
+            this.docs,
+            this.files
+          )
+          .should.equal(true)
+      })
+
+      it('should queue doc content reyncs', function () {
+        this.DocumentManager.resyncDocContentsWithLock
+          .calledWith(this.project_id, this.docs[0].doc, this.docs[0].path)
+          .should.equal(true)
+      })
+
+      it('should call the callback', function () {
+        this.callback.called.should.equal(true)
+      })
     })
 
-    it('should queue doc content reyncs', function () {
-      this.DocumentManager.resyncDocContentsWithLock
-        .calledWith(this.project_id, this.docs[0].doc, this.docs[0].path)
-        .should.equal(true)
-    })
+    describe('resyncProjectStructureOnly=true', function () {
+      beforeEach(function () {
+        this.HistoryManager.resyncProjectHistory(
+          this.project_id,
+          this.projectHistoryId,
+          this.docs,
+          this.files,
+          { resyncProjectStructureOnly: true },
+          this.callback
+        )
+      })
 
-    it('should call the callback', function () {
-      this.callback.called.should.equal(true)
+      it('should queue a project structure reync', function () {
+        this.ProjectHistoryRedisManager.queueResyncProjectStructure
+          .calledWith(
+            this.project_id,
+            this.projectHistoryId,
+            this.docs,
+            this.files,
+            { resyncProjectStructureOnly: true }
+          )
+          .should.equal(true)
+      })
+
+      it('should not queue doc content reyncs', function () {
+        this.DocumentManager.resyncDocContentsWithLock.called.should.equal(
+          false
+        )
+      })
+
+      it('should call the callback', function () {
+        this.callback.called.should.equal(true)
+      })
     })
   })
 })

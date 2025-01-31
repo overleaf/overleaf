@@ -9,6 +9,7 @@ import Settings from '@overleaf/settings'
 import * as ProjectHistoryClient from './helpers/ProjectHistoryClient.js'
 import * as ProjectHistoryApp from './helpers/ProjectHistoryApp.js'
 import sinon from 'sinon'
+import { getFailure } from './helpers/ProjectHistoryClient.js'
 const { ObjectId } = mongodb
 
 const EMPTY_FILE_HASH = 'e69de29bb2d1d6434b8b29ae775ad8c2e48c5391'
@@ -1309,6 +1310,228 @@ describe('Syncing with web and doc-updater', function () {
               assert(
                 addComment.isDone(),
                 `/api/projects/${historyId}/changes should have been called`
+              )
+              done()
+            }
+          )
+        })
+      })
+
+      describe('resyncProjectStructureOnly', function () {
+        it('should handle structure only updates', function (done) {
+          const fileHash = 'aed2973e4b8a7ff1b30ff5c4751e5a2b38989e74'
+
+          MockHistoryStore()
+            .get(`/api/projects/${historyId}/latest/history`)
+            .reply(200, {
+              chunk: {
+                history: {
+                  snapshot: {
+                    files: {
+                      'main.tex': {
+                        hash: '0a207c060e61f3b88eaee0a8cd0696f46fb155eb',
+                        stringLength: 3,
+                      },
+                    },
+                  },
+                  changes: [],
+                },
+                startVersion: 0,
+              },
+            })
+
+          const docContentRequest = MockHistoryStore()
+            .get(
+              `/api/projects/${historyId}/blobs/0a207c060e61f3b88eaee0a8cd0696f46fb155eb`
+            )
+            .reply(200, 'a\nb')
+          MockHistoryStore()
+            .head(`/api/projects/${historyId}/blobs/${fileHash}`)
+            .reply(200)
+          const addFile = MockHistoryStore()
+            .post(`/api/projects/${historyId}/legacy_changes`, body => {
+              expect(body).to.deep.equal([
+                {
+                  v2Authors: [],
+                  authors: [],
+                  timestamp: this.timestamp.toJSON(),
+                  operations: [
+                    {
+                      pathname: 'test.png',
+                      file: {
+                        hash: fileHash,
+                      },
+                    },
+                  ],
+                  origin: { kind: 'test-origin' },
+                },
+              ])
+              return true
+            })
+            .query({ end_version: 0 })
+            .reply(204)
+
+          // allow a 2nd resync
+          MockWeb()
+            .post(`/project/${this.project_id}/history/resync`)
+            .reply(204)
+
+          async.series(
+            [
+              cb => {
+                ProjectHistoryClient.resyncHistory(this.project_id, cb)
+              },
+              cb => {
+                const update = {
+                  projectHistoryId: historyId,
+                  resyncProjectStructureOnly: true,
+                  resyncProjectStructure: {
+                    docs: [{ path: '/main.tex' }],
+                    files: [
+                      {
+                        file: this.file_id,
+                        path: '/test.png',
+                        _hash: fileHash,
+                        createdBlob: true,
+                      },
+                    ],
+                  },
+                  meta: {
+                    ts: this.timestamp,
+                  },
+                }
+                ProjectHistoryClient.pushRawUpdate(this.project_id, update, cb)
+              },
+              cb => {
+                ProjectHistoryClient.flushProject(this.project_id, cb)
+              },
+              cb => {
+                // fails when previous resync did not finish
+                ProjectHistoryClient.resyncHistory(this.project_id, cb)
+              },
+            ],
+            error => {
+              if (error) {
+                throw error
+              }
+              assert(
+                addFile.isDone(),
+                `/api/projects/${historyId}/changes should have been called`
+              )
+              assert(
+                !docContentRequest.isDone(),
+                'should not have requested doc content'
+              )
+              done()
+            }
+          )
+        })
+        it('should reject partial resync on docs', function (done) {
+          const fileHash = 'aed2973e4b8a7ff1b30ff5c4751e5a2b38989e74'
+
+          MockHistoryStore()
+            .get(`/api/projects/${historyId}/latest/history`)
+            .reply(200, {
+              chunk: {
+                history: {
+                  snapshot: {
+                    files: {
+                      'main.tex': {
+                        hash: '0a207c060e61f3b88eaee0a8cd0696f46fb155eb',
+                        stringLength: 3,
+                      },
+                    },
+                  },
+                  changes: [],
+                },
+                startVersion: 0,
+              },
+            })
+
+          const docContentRequest = MockHistoryStore()
+            .get(
+              `/api/projects/${historyId}/blobs/0a207c060e61f3b88eaee0a8cd0696f46fb155eb`
+            )
+            .reply(200, 'a\nb')
+          MockHistoryStore()
+            .head(`/api/projects/${historyId}/blobs/${fileHash}`)
+            .reply(200)
+          const addFile = MockHistoryStore()
+            .post(`/api/projects/${historyId}/legacy_changes`)
+            .query({ end_version: 0 })
+            .reply(204)
+
+          // allow a 2nd resync
+          MockWeb()
+            .post(`/project/${this.project_id}/history/resync`)
+            .reply(204)
+
+          async.series(
+            [
+              cb => {
+                ProjectHistoryClient.resyncHistory(this.project_id, cb)
+              },
+              cb => {
+                const update = {
+                  projectHistoryId: historyId,
+                  resyncProjectStructureOnly: true,
+                  resyncProjectStructure: {
+                    docs: [{ path: '/main-renamed.tex' }],
+                    files: [
+                      {
+                        file: this.file_id,
+                        path: '/test.png',
+                        _hash: fileHash,
+                        createdBlob: true,
+                      },
+                    ],
+                  },
+                  meta: {
+                    ts: this.timestamp,
+                  },
+                }
+                ProjectHistoryClient.pushRawUpdate(this.project_id, update, cb)
+              },
+              cb => {
+                ProjectHistoryClient.flushProject(
+                  this.project_id,
+                  { allowErrors: true },
+                  (err, res) => {
+                    if (err) return cb(err)
+                    expect(res.statusCode).to.equal(500)
+                    expect(loggerError).to.have.been.calledWith(
+                      sinon.match({
+                        err: {
+                          name: 'NeedFullProjectStructureResyncError',
+                          message: 'aborting partial resync: touched doc',
+                        },
+                      })
+                    )
+
+                    getFailure(this.project_id, (err, failure) => {
+                      if (err) return cb(err)
+                      expect(failure).to.include({
+                        error:
+                          'NeedFullProjectStructureResyncError: aborting partial resync: touched doc',
+                      })
+                      cb()
+                    })
+                  }
+                )
+              },
+              cb => {
+                // fails when previous resync did not finish
+                ProjectHistoryClient.resyncHistory(this.project_id, cb)
+              },
+            ],
+            error => {
+              if (error) {
+                throw error
+              }
+              assert(!addFile.isDone(), 'should not have persisted changes')
+              assert(
+                !docContentRequest.isDone(),
+                'should not have requested doc content'
               )
               done()
             }

@@ -94,6 +94,9 @@ export type ResyncProjectStructureUpdate = {
   meta: {
     ts: string
   }
+  // optional fields for resyncProjectStructureOnly=true
+  resyncProjectStructureOnly?: boolean
+  _raw: string
 }
 
 export type ResyncDocContentUpdate = {

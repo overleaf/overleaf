@@ -8,3 +8,4 @@ export class InconsistentChunkError extends OError {}
 export class UpdateWithUnknownFormatError extends OError {}
 export class UnexpectedOpTypeError extends OError {}
 export class TooManyRequestsError extends OError {}
+export class NeedFullProjectStructureResyncError extends OError {}

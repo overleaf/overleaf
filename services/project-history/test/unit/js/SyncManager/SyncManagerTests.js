@@ -411,6 +411,39 @@ describe('SyncManager', function () {
         })
       })
 
+      it('records docs to resync when resyncProjectStructureOnly=true is not set', async function () {
+        const updates = [this.projectStructureSyncUpdate]
+        const { updates: filteredUpdates, syncState } =
+          await this.SyncManager.promises.skipUpdatesDuringSync(
+            this.projectId,
+            updates
+          )
+
+        expect(filteredUpdates).to.deep.equal([this.projectStructureSyncUpdate])
+        expect(syncState.toRaw()).to.deep.equal({
+          resyncProjectStructure: false,
+          resyncDocContents: ['new.tex'],
+          origin: { kind: 'history-resync' },
+        })
+      })
+
+      it('records no docs to resync with resyncProjectStructureOnly=true', async function () {
+        this.projectStructureSyncUpdate.resyncProjectStructureOnly = true
+        const updates = [this.projectStructureSyncUpdate]
+        const { updates: filteredUpdates, syncState } =
+          await this.SyncManager.promises.skipUpdatesDuringSync(
+            this.projectId,
+            updates
+          )
+
+        expect(filteredUpdates).to.deep.equal([this.projectStructureSyncUpdate])
+        expect(syncState.toRaw()).to.deep.equal({
+          resyncProjectStructure: false,
+          resyncDocContents: [],
+          origin: { kind: 'history-resync' },
+        })
+      })
+
       it('allow project structure updates after project structure sync update', async function () {
         const updates = [this.projectStructureSyncUpdate, this.renameUpdate]
         const { updates: filteredUpdates, syncState } =

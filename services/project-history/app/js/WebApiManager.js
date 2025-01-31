@@ -39,6 +39,9 @@ async function requestResync(projectId, opts = {}) {
     if (opts.historyRangesMigration) {
       body.historyRangesMigration = opts.historyRangesMigration
     }
+    if (opts.resyncProjectStructureOnly) {
+      body.resyncProjectStructureOnly = opts.resyncProjectStructureOnly
+    }
     await fetchNothing(
       `${Settings.apis.web.url}/project/${projectId}/history/resync`,
       {

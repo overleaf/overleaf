@@ -330,6 +330,10 @@ export function setFailure(failureEntry, callback) {
   )
 }
 
+export function getFailure(projectId, callback) {
+  db.projectHistoryFailures.findOne({ project_id: projectId }, callback)
+}
+
 export function transferLabelOwnership(fromUser, toUser, callback) {
   request.post(
     {

@@ -106,10 +106,12 @@ const HistoryManager = {
       projectHistoryId,
       docs,
       files,
+      opts,
       function (error) {
         if (error) {
           return callback(error)
         }
+        if (opts.resyncProjectStructureOnly) return callback()
         const DocumentManager = require('./DocumentManager')
         const resyncDoc = (doc, cb) => {
           DocumentManager.resyncDocContentsWithLock(

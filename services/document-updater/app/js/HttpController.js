@@ -433,7 +433,13 @@ function updateProject(req, res, next) {
 
 function resyncProjectHistory(req, res, next) {
   const projectId = req.params.project_id
-  const { projectHistoryId, docs, files, historyRangesMigration } = req.body
+  const {
+    projectHistoryId,
+    docs,
+    files,
+    historyRangesMigration,
+    resyncProjectStructureOnly,
+  } = req.body
 
   logger.debug(
     { projectId, docs, files },
@@ -443,6 +449,9 @@ function resyncProjectHistory(req, res, next) {
   const opts = {}
   if (historyRangesMigration) {
     opts.historyRangesMigration = historyRangesMigration
+  }
+  if (resyncProjectStructureOnly) {
+    opts.resyncProjectStructureOnly = resyncProjectStructureOnly
   }
 
   HistoryManager.resyncProjectHistory(
