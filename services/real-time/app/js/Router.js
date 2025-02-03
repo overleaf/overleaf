@@ -235,6 +235,14 @@ module.exports = Router = {
         user = { _id: 'anonymous-user', anonymousAccessToken }
       }
 
+      const connectionDetails = {
+        userId: user._id,
+        projectId,
+        remoteIp: client.remoteIp,
+        publicId: client.publicId,
+        clientId: client.id,
+      }
+
       let pingTimestamp
       let pingId = -1
       let pongId = -1
@@ -243,8 +251,7 @@ module.exports = Router = {
             if (pongId !== pingId) {
               logger.warn(
                 {
-                  publicId: client.publicId,
-                  clientId: client.id,
+                  ...connectionDetails,
                   pingId,
                   pongId,
                   lastPingTimestamp: pingTimestamp,
@@ -262,8 +269,7 @@ module.exports = Router = {
         if (receivedPingId !== pingId) {
           logger.warn(
             {
-              publicId: client.publicId,
-              clientId: client.id,
+              ...connectionDetails,
               receivedPingId,
               pingId,
               sentTimestamp,
@@ -279,8 +285,7 @@ module.exports = Router = {
         ) {
           logger.warn(
             {
-              publicId: client.publicId,
-              clientId: client.id,
+              ...connectionDetails,
               receivedPingId,
               pingId,
               sentTimestamp,
