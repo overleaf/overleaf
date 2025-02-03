@@ -208,7 +208,7 @@ async function pauseSubscription(req, res, next) {
       {
         pause_length: pauseCycles,
         plan_code: subscription?.planCode,
-        subscriptionId: subscription?.id,
+        subscriptionId: subscription?.recurlySubscription_id,
       }
     )
 
