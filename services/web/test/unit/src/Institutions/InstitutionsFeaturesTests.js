@@ -21,7 +21,9 @@ const modulePath = require('path').join(
 
 describe('InstitutionsFeatures', function () {
   beforeEach(function () {
-    this.UserGetter = { getUserFullEmails: sinon.stub() }
+    this.UserGetter = {
+      promises: { getUserFullEmails: sinon.stub().resolves([]) },
+    }
     this.PlansLocator = { findLocalPlanInSettings: sinon.stub() }
     this.institutionPlanCode = 'institution_plan_code'
     this.InstitutionsFeatures = SandboxedModule.require(modulePath, {
@@ -33,13 +35,14 @@ describe('InstitutionsFeatures', function () {
         },
       },
     })
-
+    this.emailDataWithLicense = [{ emailHasInstitutionLicence: true }]
+    this.emailDataWithoutLicense = [{ emailHasInstitutionLicence: false }]
     return (this.userId = '12345abcde')
   })
 
   describe('hasLicence', function () {
     it('should handle error', function (done) {
-      this.UserGetter.getUserFullEmails.yields(new Error('Nope'))
+      this.UserGetter.promises.getUserFullEmails.rejects(new Error('Nope'))
       return this.InstitutionsFeatures.hasLicence(
         this.userId,
         (error, hasLicence) => {
@@ -50,8 +53,9 @@ describe('InstitutionsFeatures', function () {
     })
 
     it('should return false if user has no paid affiliations', function (done) {
-      const emailData = [{ emailHasInstitutionLicence: false }]
-      this.UserGetter.getUserFullEmails.yields(null, emailData)
+      this.UserGetter.promises.getUserFullEmails.resolves(
+        this.emailDataWithoutLicense
+      )
       return this.InstitutionsFeatures.hasLicence(
         this.userId,
         (error, hasLicence) => {
@@ -67,7 +71,7 @@ describe('InstitutionsFeatures', function () {
         { emailHasInstitutionLicence: true },
         { emailHasInstitutionLicence: false },
       ]
-      this.UserGetter.getUserFullEmails.yields(null, emailData)
+      this.UserGetter.promises.getUserFullEmails.resolves(emailData)
       return this.InstitutionsFeatures.hasLicence(
         this.userId,
         (error, hasLicence) => {
@@ -81,7 +85,6 @@ describe('InstitutionsFeatures', function () {
 
   describe('getInstitutionsFeatures', function () {
     beforeEach(function () {
-      this.InstitutionsFeatures.getInstitutionsPlan = sinon.stub()
       this.testFeatures = { features: { institution: 'all' } }
       return this.PlansLocator.findLocalPlanInSettings
         .withArgs(this.institutionPlanCode)
@@ -89,7 +92,7 @@ describe('InstitutionsFeatures', function () {
     })
 
     it('should handle error', function (done) {
-      this.InstitutionsFeatures.getInstitutionsPlan.yields(new Error('Nope'))
+      this.UserGetter.promises.getUserFullEmails.rejects(new Error('Nope'))
       return this.InstitutionsFeatures.getInstitutionsFeatures(
         this.userId,
         (error, features) => {
@@ -100,7 +103,9 @@ describe('InstitutionsFeatures', function () {
     })
 
     it('should return no feaures if user has no plan code', function (done) {
-      this.InstitutionsFeatures.getInstitutionsPlan.yields(null, null)
+      this.UserGetter.promises.getUserFullEmails.resolves(
+        this.emailDataWithoutLicense
+      )
       return this.InstitutionsFeatures.getInstitutionsFeatures(
         this.userId,
         (error, features) => {
@@ -112,9 +117,8 @@ describe('InstitutionsFeatures', function () {
     })
 
     it('should return feaures if user has affiliations plan code', function (done) {
-      this.InstitutionsFeatures.getInstitutionsPlan.yields(
-        null,
-        this.institutionPlanCode
+      this.UserGetter.promises.getUserFullEmails.resolves(
+        this.emailDataWithLicense
       )
       return this.InstitutionsFeatures.getInstitutionsFeatures(
         this.userId,
@@ -128,12 +132,8 @@ describe('InstitutionsFeatures', function () {
   })
 
   describe('getInstitutionsPlan', function () {
-    beforeEach(function () {
-      return (this.InstitutionsFeatures.hasLicence = sinon.stub())
-    })
-
     it('should handle error', function (done) {
-      this.InstitutionsFeatures.hasLicence.yields(new Error('Nope'))
+      this.UserGetter.promises.getUserFullEmails.rejects(new Error('Nope'))
       return this.InstitutionsFeatures.getInstitutionsPlan(
         this.userId,
         error => {
@@ -144,7 +144,9 @@ describe('InstitutionsFeatures', function () {
     })
 
     it('should return no plan if user has no licence', function (done) {
-      this.InstitutionsFeatures.hasLicence.yields(null, false)
+      this.UserGetter.promises.getUserFullEmails.resolves(
+        this.emailDataWithoutLicense
+      )
       return this.InstitutionsFeatures.getInstitutionsPlan(
         this.userId,
         (error, plan) => {
@@ -156,7 +158,9 @@ describe('InstitutionsFeatures', function () {
     })
 
     it('should return plan if user has licence', function (done) {
-      this.InstitutionsFeatures.hasLicence.yields(null, true)
+      this.UserGetter.promises.getUserFullEmails.resolves(
+        this.emailDataWithLicense
+      )
       return this.InstitutionsFeatures.getInstitutionsPlan(
         this.userId,
         (error, plan) => {

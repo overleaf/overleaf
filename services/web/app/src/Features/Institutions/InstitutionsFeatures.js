@@ -1,49 +1,32 @@
-let InstitutionsFeatures
+const { callbackifyAll } = require('@overleaf/promise-utils')
 const UserGetter = require('../User/UserGetter')
 const PlansLocator = require('../Subscription/PlansLocator')
 const Settings = require('@overleaf/settings')
-const { promisifyAll } = require('@overleaf/promise-utils')
 
-module.exports = InstitutionsFeatures = {
-  getInstitutionsFeatures(userId, callback) {
-    InstitutionsFeatures.getInstitutionsPlan(
-      userId,
-      function (error, planCode) {
-        if (error) {
-          return callback(error)
-        }
-        const plan = planCode && PlansLocator.findLocalPlanInSettings(planCode)
-        const features = plan && plan.features
-        callback(null, features || {})
-      }
-    )
-  },
-
-  getInstitutionsPlan(userId, callback) {
-    InstitutionsFeatures.hasLicence(userId, function (error, hasLicence) {
-      if (error) {
-        return callback(error)
-      }
-      if (!hasLicence) {
-        return callback(null, null)
-      }
-      callback(null, Settings.institutionPlanCode)
-    })
-  },
-
-  hasLicence(userId, callback) {
-    UserGetter.getUserFullEmails(userId, function (error, emailsData) {
-      if (error) {
-        return callback(error)
-      }
-
-      const hasLicence = emailsData.some(
-        emailData => emailData.emailHasInstitutionLicence
-      )
-
-      callback(null, hasLicence)
-    })
-  },
+async function getInstitutionsFeatures(userId) {
+  const planCode = await getInstitutionsPlan(userId)
+  const plan = planCode && PlansLocator.findLocalPlanInSettings(planCode)
+  const features = plan && plan.features
+  return features || {}
 }
 
-module.exports.promises = promisifyAll(module.exports)
+async function getInstitutionsPlan(userId) {
+  if (await hasLicence(userId)) {
+    return Settings.institutionPlanCode
+  }
+  return null
+}
+
+async function hasLicence(userId) {
+  const emailsData = await UserGetter.promises.getUserFullEmails(userId)
+  return emailsData.some(emailData => emailData.emailHasInstitutionLicence)
+}
+const InstitutionsFeatures = {
+  getInstitutionsFeatures,
+  getInstitutionsPlan,
+  hasLicence,
+}
+module.exports = {
+  promises: InstitutionsFeatures,
+  ...callbackifyAll(InstitutionsFeatures),
+}
