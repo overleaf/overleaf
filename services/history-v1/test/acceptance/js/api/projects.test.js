@@ -138,6 +138,23 @@ describe('project controller', function () {
         testFiles.STRING_AB_HASH
       )
     })
+    describe('getLatestHistoryRaw', function () {
+      it('should handles read', async function () {
+        const projectId = fixtures.docs.initializedProject.id
+        const response =
+          await testServer.pseudoJwtBasicAuthClient.apis.Project.getLatestHistoryRaw(
+            {
+              project_id: projectId,
+              readOnly: 'true',
+            }
+          )
+        expect(response.body).to.deep.equal({
+          startVersion: 0,
+          endVersion: 1,
+          endTimestamp: '2032-01-01T00:00:00.000Z',
+        })
+      })
+    })
   })
 
   describe('deleteProject', function () {

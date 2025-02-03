@@ -1,18 +1,23 @@
 const { Chunk } = require('overleaf-editor-core')
 const assert = require('../assert')
 const knex = require('../knex')
+const knexReadOnly = require('../knex_read_only')
 const { ChunkVersionConflictError } = require('./errors')
 
 const DUPLICATE_KEY_ERROR_CODE = '23505'
 
 /**
  * Get the latest chunk's metadata from the database
+ * @param {string} projectId
+ * @param {Object} [opts]
+ * @param {boolean} [opts.readOnly]
  */
-async function getLatestChunk(projectId) {
+async function getLatestChunk(projectId, opts = {}) {
   projectId = parseInt(projectId, 10)
   assert.integer(projectId, 'bad projectId')
+  const { readOnly = false } = opts
 
-  const record = await knex('chunks')
+  const record = await (readOnly ? knexReadOnly : knex)('chunks')
     .where('doc_id', projectId)
     .orderBy('end_version', 'desc')
     .first()

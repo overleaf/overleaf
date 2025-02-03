@@ -72,6 +72,8 @@ services:
       POSTGRES_USER: overleaf
       POSTGRES_PASSWORD: overleaf
       POSTGRES_DB: overleaf-history-v1-test
+    volumes:
+      - ./test/acceptance/pg-init/:/docker-entrypoint-initdb.d/
     healthcheck:
       test: pg_isready --quiet
       interval: 1s

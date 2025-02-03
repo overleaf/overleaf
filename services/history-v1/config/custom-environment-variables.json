@@ -1,5 +1,6 @@
 {
   "databaseUrl": "HISTORY_CONNECTION_STRING",
+  "databaseUrlReadOnly": "HISTORY_FOLLOWER_CONNECTION_STRING",
   "herokuDatabaseUrl": "DATABASE_URL",
   "databasePoolMin": "DATABASE_POOL_MIN",
   "databasePoolMax": "DATABASE_POOL_MAX",

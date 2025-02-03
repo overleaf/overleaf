@@ -335,6 +335,13 @@ exports.paths = {
           required: true,
           type: 'string',
         },
+        {
+          name: 'readOnly',
+          in: 'query',
+          description: 'use read only database connection',
+          required: false,
+          type: 'boolean',
+        },
       ],
       responses: {
         200: {

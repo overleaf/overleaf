@@ -88,9 +88,10 @@ async function getLatestHistory(req, res, next) {
 
 async function getLatestHistoryRaw(req, res, next) {
   const projectId = req.swagger.params.project_id.value
+  const readOnly = req.swagger.params.readOnly.value
   try {
     const { startVersion, endVersion, endTimestamp } =
-      await chunkStore.loadLatestRaw(projectId)
+      await chunkStore.loadLatestRaw(projectId, { readOnly })
     res.json({
       startVersion,
       endVersion,

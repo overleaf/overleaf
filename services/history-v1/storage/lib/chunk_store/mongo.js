@@ -1,4 +1,4 @@
-const { ObjectId } = require('mongodb')
+const { ObjectId, ReadPreference } = require('mongodb')
 const { Chunk } = require('overleaf-editor-core')
 const OError = require('@overleaf/o-error')
 const assert = require('../assert')
@@ -9,13 +9,22 @@ const DUPLICATE_KEY_ERROR_CODE = 11000
 
 /**
  * Get the latest chunk's metadata from the database
+ * @param {string} projectId
+ * @param {Object} [opts]
+ * @param {boolean} [opts.readOnly]
  */
-async function getLatestChunk(projectId) {
+async function getLatestChunk(projectId, opts = {}) {
   assert.mongoId(projectId, 'bad projectId')
+  const { readOnly = false } = opts
 
   const record = await mongodb.chunks.findOne(
     { projectId: new ObjectId(projectId), state: 'active' },
-    { sort: { startVersion: -1 } }
+    {
+      sort: { startVersion: -1 },
+      readPreference: readOnly
+        ? ReadPreference.secondaryPreferred
+        : ReadPreference.primary,
+    }
   )
   if (record == null) {
     return null

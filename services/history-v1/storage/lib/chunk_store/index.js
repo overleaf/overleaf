@@ -82,13 +82,15 @@ async function lazyLoadHistoryFiles(history, batchBlobStore) {
  * Load the latest Chunk stored for a project, including blob metadata.
  *
  * @param {string} projectId
+ * @param {Object} [opts]
+ * @param {boolean} [opts.readOnly]
  * @return {Promise<{id: string, startVersion: number, endVersion: number, endTimestamp: Date}>}
  */
-async function loadLatestRaw(projectId) {
+async function loadLatestRaw(projectId, opts) {
   assert.projectId(projectId, 'bad projectId')
 
   const backend = getBackend(projectId)
-  const chunkRecord = await backend.getLatestChunk(projectId)
+  const chunkRecord = await backend.getLatestChunk(projectId, opts)
   if (chunkRecord == null) {
     throw new Chunk.NotFoundError(projectId)
   }

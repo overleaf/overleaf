@@ -117,7 +117,8 @@ function checkFileTreeNeedsResync(folder) {
 async function getLastEndTimestamp(projectId, historyId) {
   const raw = await HistoryStoreManager.promises.getMostRecentVersionRaw(
     projectId,
-    historyId
+    historyId,
+    { readOnly: true }
   )
   if (!raw) throw new Error('bug: history not initialized')
   return raw.endTimestamp

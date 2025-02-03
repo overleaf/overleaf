@@ -90,15 +90,18 @@ export function getMostRecentVersion(projectId, historyId, callback) {
 /**
  * @param {string} projectId
  * @param {string} historyId
+ * @param {Object} opts
+ * @param {boolean} [opts.readOnly]
  * @param {(error: Error, rawChunk?: { startVersion: number, endVersion: number, endTimestamp: Date}) => void} callback
  */
-export function getMostRecentVersionRaw(projectId, historyId, callback) {
+export function getMostRecentVersionRaw(projectId, historyId, opts, callback) {
   const path = `projects/${historyId}/latest/history/raw`
   logger.debug(
     { projectId, historyId },
     'getting raw chunk from history service'
   )
-  _requestHistoryService({ path, json: true }, (err, body) => {
+  const qs = opts.readOnly ? { readOnly: true } : {}
+  _requestHistoryService({ path, json: true, qs }, (err, body) => {
     if (err) return callback(OError.tag(err))
     const { startVersion, endVersion, endTimestamp } = body
     callback(null, {
