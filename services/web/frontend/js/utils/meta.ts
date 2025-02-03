@@ -153,6 +153,7 @@ export interface Meta {
   'ol-notifications': NotificationType[]
   'ol-notificationsInstitution': InstitutionType[]
   'ol-oauthProviders': OAuthProviders
+  'ol-odcRole': string
   'ol-overallThemes': OverallThemeMeta[]
   'ol-passwordStrengthOptions': PasswordStrengthOptions
   'ol-personalAccessTokens': AccessToken[] | undefined

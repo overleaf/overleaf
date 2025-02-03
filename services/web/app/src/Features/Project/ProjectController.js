@@ -411,6 +411,13 @@ const _ProjectController = {
             logger.error({ err, userId })
             return null
           }),
+          odcRole: OnboardingDataCollectionManager.getOnboardingDataValue(
+            userId,
+            'role'
+          ).catch(err => {
+            logger.error({ err, userId })
+            return null
+          }),
         })
       )
     const splitTestAssignments = {}
@@ -464,6 +471,7 @@ const _ProjectController = {
         isTokenMember,
         isInvitedMember,
         usedLatex,
+        odcRole,
       } = userValues
 
       const brandVariation = project?.brandVariationId
@@ -815,6 +823,12 @@ const _ProjectController = {
           splitTestAssignments['default-visual-for-beginners']?.variant ===
           'enabled'
             ? usedLatex
+            : null,
+        odcRole:
+          // only use the ODC role value if the split test is enabled
+          splitTestAssignments['paywall-change-compile-timeout']?.variant ===
+          'enabled'
+            ? odcRole
             : null,
         isSaas: Features.hasFeature('saas'),
         shouldLoadHotjar: splitTestAssignments.hotjar?.variant === 'enabled',
