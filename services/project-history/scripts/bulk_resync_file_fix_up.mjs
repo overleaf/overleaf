@@ -36,8 +36,9 @@ const FILESTORE_SOFT_DELETE_START = new Date('2024-12-19T00:00:00Z')
 const FILESTORE_READ_OFF = new Date('2025-01-24T15:00:00Z')
 
 const argv = minimist(process.argv.slice(2), {
-  string: ['logs'],
+  string: ['logs', 'log-latency'],
 })
+const LOG_LATENCY = argv['log-latency'] === 'true'
 
 let gracefulShutdownInitiated = false
 
@@ -188,7 +189,9 @@ async function processProject(projectId, historyId) {
   try {
     await tryProcessProject(projectId, historyId)
     const latency = performance.now() - t0
-    logger.info({ projectId, historyId, latency }, 'processed project')
+    if (LOG_LATENCY) {
+      logger.info({ projectId, historyId, latency }, 'processed project')
+    }
     STATS.success++
   } catch (err) {
     logger.err({ err, projectId, historyId }, 'failed to process project')
