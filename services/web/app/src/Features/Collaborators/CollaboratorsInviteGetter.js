@@ -15,12 +15,6 @@ async function getAllInvites(projectId) {
   return invites
 }
 
-async function getInviteCount(projectId) {
-  logger.debug({ projectId }, 'counting invites for project')
-  const count = await ProjectInvite.countDocuments({ projectId }).exec()
-  return count
-}
-
 async function getEditInviteCount(projectId) {
   logger.debug({ projectId }, 'counting edit invites for project')
   const count = await ProjectInvite.countDocuments({
@@ -48,7 +42,6 @@ async function getInviteByToken(projectId, tokenString) {
 module.exports = {
   promises: {
     getAllInvites,
-    getInviteCount,
     getEditInviteCount,
     getInviteByToken,
   },

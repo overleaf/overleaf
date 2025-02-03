@@ -169,24 +169,6 @@ const TokenAccessHandler = {
     ).exec()
   },
 
-  async addReadAndWriteUserToProject(userId, projectId) {
-    userId = new ObjectId(userId.toString())
-    projectId = new ObjectId(projectId.toString())
-    Analytics.recordEventForUserInBackground(userId, 'project-joined', {
-      mode: 'read-write',
-      projectId: projectId.toString(),
-    })
-
-    return await Project.updateOne(
-      {
-        _id: projectId,
-      },
-      {
-        $addToSet: { tokenAccessReadAndWrite_refs: userId },
-      }
-    ).exec()
-  },
-
   async removeReadAndWriteUserFromProject(userId, projectId) {
     userId = new ObjectId(userId.toString())
     projectId = new ObjectId(projectId.toString())

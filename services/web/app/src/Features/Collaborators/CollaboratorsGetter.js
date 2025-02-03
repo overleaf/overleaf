@@ -22,7 +22,6 @@ module.exports = {
     getInvitedMembersWithPrivilegeLevelsFromFields
   ),
   getMemberIdPrivilegeLevel: callbackify(getMemberIdPrivilegeLevel),
-  getInvitedCollaboratorCount: callbackify(getInvitedCollaboratorCount),
   getProjectsUserIsMemberOf: callbackify(getProjectsUserIsMemberOf),
   dangerouslyGetAllProjectsUserIsMemberOf: callbackify(
     dangerouslyGetAllProjectsUserIsMemberOf
@@ -38,7 +37,6 @@ module.exports = {
     getInvitedMembersWithPrivilegeLevels,
     getInvitedMembersWithPrivilegeLevelsFromFields,
     getMemberIdPrivilegeLevel,
-    getInvitedCollaboratorCount,
     getInvitedEditCollaboratorCount,
     getInvitedPendingEditorCount,
     getProjectsUserIsMemberOf,
@@ -124,11 +122,6 @@ async function getMemberIdPrivilegeLevel(userId, projectId) {
     }
   }
   return PrivilegeLevels.NONE
-}
-
-async function getInvitedCollaboratorCount(projectId) {
-  const count = await _getInvitedMemberCount(projectId)
-  return count - 1 // Don't count project owner
 }
 
 async function getInvitedEditCollaboratorCount(projectId) {
@@ -313,11 +306,6 @@ async function userIsReadWriteTokenMember(userId, projectId) {
     }
   ).exec()
   return project != null
-}
-
-async function _getInvitedMemberCount(projectId) {
-  const members = await getMemberIdsWithPrivilegeLevels(projectId)
-  return members.filter(m => m.source !== Sources.TOKEN).length
 }
 
 function _getMemberIdsWithPrivilegeLevelsFromFields(

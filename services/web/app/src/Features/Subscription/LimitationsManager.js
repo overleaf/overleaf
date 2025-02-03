@@ -38,18 +38,6 @@ async function canAcceptEditCollaboratorInvite(projectId) {
   return currentEditors + 1 <= allowedNumber
 }
 
-async function canAddXCollaborators(projectId, numberOfNewCollaborators) {
-  const allowedNumber = await allowedNumberOfCollaboratorsInProject(projectId)
-  if (allowedNumber < 0) {
-    return true // -1 means unlimited
-  }
-  const currentNumber =
-    await CollaboratorsGetter.promises.getInvitedCollaboratorCount(projectId)
-  const inviteCount =
-    await CollaboratorsInvitesGetter.promises.getInviteCount(projectId)
-  return currentNumber + inviteCount + numberOfNewCollaborators <= allowedNumber
-}
-
 async function canAddXEditCollaborators(
   projectId,
   numberOfNewEditCollaborators
@@ -133,7 +121,6 @@ const LimitationsManager = {
   allowedNumberOfCollaboratorsForUser: callbackify(
     allowedNumberOfCollaboratorsForUser
   ),
-  canAddXCollaborators: callbackify(canAddXCollaborators),
   canAddXEditCollaborators: callbackify(canAddXEditCollaborators),
   hasPaidSubscription: callbackifyMultiResult(hasPaidSubscription, [
     'hasPaidSubscription',
@@ -162,7 +149,6 @@ const LimitationsManager = {
     allowedNumberOfCollaboratorsInProject,
     allowedNumberOfCollaboratorsForUser,
     canAcceptEditCollaboratorInvite,
-    canAddXCollaborators,
     canAddXEditCollaborators,
     hasPaidSubscription,
     userHasSubscriptionOrIsGroupMember,

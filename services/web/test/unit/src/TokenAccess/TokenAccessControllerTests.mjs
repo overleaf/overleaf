@@ -44,7 +44,6 @@ describe('TokenAccessController', function () {
       makeTokenUrl: sinon.stub().returns('/'),
       grantSessionTokenAccess: sinon.stub(),
       promises: {
-        addReadAndWriteUserToProject: sinon.stub().resolves(),
         addReadOnlyUserToProject: sinon.stub().resolves(),
         getProjectByToken: sinon.stub().resolves(this.project),
         getV1DocPublishedInfo: sinon.stub().resolves({ allow: true }),

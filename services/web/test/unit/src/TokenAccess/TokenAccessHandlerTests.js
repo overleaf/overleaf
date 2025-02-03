@@ -152,54 +152,6 @@ describe('TokenAccessHandler', function () {
     })
   })
 
-  describe('addReadAndWriteUserToProject', function () {
-    beforeEach(function () {
-      this.Project.updateOne = sinon
-        .stub()
-        .returns({ exec: sinon.stub().resolves(null) })
-    })
-
-    it('should call Project.updateOne', async function () {
-      await this.TokenAccessHandler.promises.addReadAndWriteUserToProject(
-        this.userId,
-        this.projectId
-      )
-
-      expect(this.Project.updateOne.callCount).to.equal(1)
-      expect(
-        this.Project.updateOne.calledWith({
-          _id: this.projectId,
-        })
-      ).to.equal(true)
-      expect(this.Project.updateOne.lastCall.args[1].$addToSet).to.have.keys(
-        'tokenAccessReadAndWrite_refs'
-      )
-      sinon.assert.calledWith(
-        this.Analytics.recordEventForUserInBackground,
-        this.userId,
-        'project-joined',
-        { mode: 'read-write', projectId: this.projectId.toString() }
-      )
-    })
-
-    describe('when Project.updateOne produces an error', function () {
-      beforeEach(function () {
-        this.Project.updateOne = sinon
-          .stub()
-          .returns({ exec: sinon.stub().rejects(new Error('woops')) })
-      })
-
-      it('should produce an error', async function () {
-        await expect(
-          this.TokenAccessHandler.promises.addReadAndWriteUserToProject(
-            this.userId,
-            this.projectId
-          )
-        ).to.be.rejected
-      })
-    })
-  })
-
   describe('removeReadAndWriteUserFromProject', function () {
     beforeEach(function () {
       this.Project.updateOne = sinon

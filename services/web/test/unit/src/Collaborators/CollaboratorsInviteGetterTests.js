@@ -63,36 +63,6 @@ describe('CollaboratorsInviteGetter', function () {
     }
   })
 
-  describe('getInviteCount', function () {
-    beforeEach(function () {
-      this.ProjectInvite.countDocuments.returns({
-        exec: sinon.stub().resolves(2),
-      })
-      this.call = async () => {
-        return await this.CollaboratorsInviteGetter.promises.getInviteCount(
-          this.projectId
-        )
-      }
-    })
-
-    it('should produce the count of documents', async function () {
-      const count = await this.call()
-      expect(count).to.equal(2)
-    })
-
-    describe('when model.countDocuments produces an error', function () {
-      beforeEach(function () {
-        this.ProjectInvite.countDocuments.returns({
-          exec: sinon.stub().rejects(new Error('woops')),
-        })
-      })
-
-      it('should produce an error', async function () {
-        await expect(this.call()).to.be.rejectedWith(Error)
-      })
-    })
-  })
-
   describe('getEditInviteCount', function () {
     beforeEach(function () {
       this.ProjectInvite.countDocuments.returns({

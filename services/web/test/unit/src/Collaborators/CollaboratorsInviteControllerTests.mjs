@@ -59,7 +59,6 @@ describe('CollaboratorsInviteController', function () {
     this.LimitationsManager = {
       promises: {
         allowedNumberOfCollaboratorsForUser: sinon.stub(),
-        canAddXCollaborators: sinon.stub().resolves(true),
         canAddXEditCollaborators: sinon.stub().resolves(true),
       },
     }
@@ -589,8 +588,8 @@ describe('CollaboratorsInviteController', function () {
         })
       })
 
-      it('should not have called canAddXCollaborators', function () {
-        this.LimitationsManager.promises.canAddXCollaborators.callCount.should.equal(
+      it('should not have called canAddXEditCollaborators', function () {
+        this.LimitationsManager.promises.canAddXEditCollaborators.callCount.should.equal(
           0
         )
       })
