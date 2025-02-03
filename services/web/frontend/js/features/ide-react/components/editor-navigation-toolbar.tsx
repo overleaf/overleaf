@@ -3,9 +3,9 @@ import { useOnlineUsersContext } from '@/features/ide-react/context/online-users
 import { useEditorManagerContext } from '@/features/ide-react/context/editor-manager-context'
 import * as eventTracking from '@/infrastructure/event-tracking'
 import EditorNavigationToolbarRoot from '@/features/editor-navigation-toolbar/components/editor-navigation-toolbar-root'
-import ShareProjectModal from '@/features/share-project-modal/components/restricted-link-sharing/share-project-modal'
-import EditorOverLimitModal from '@/features/share-project-modal/components/restricted-link-sharing/editor-over-limit-modal'
-import ViewOnlyAccessModal from '@/features/share-project-modal/components/restricted-link-sharing/view-only-access-modal'
+import ShareProjectModal from '@/features/share-project-modal/components/share-project-modal'
+import EditorOverLimitModal from '@/features/share-project-modal/components/editor-over-limit-modal'
+import ViewOnlyAccessModal from '@/features/share-project-modal/components/view-only-access-modal'
 
 function EditorNavigationToolbar() {
   const [showShareModal, setShowShareModal] = useState(false)

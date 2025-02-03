@@ -1,14 +1,9 @@
 import { expect } from 'chai'
 import sinon from 'sinon'
-import {
-  screen,
-  fireEvent,
-  render,
-  waitFor,
-  waitForElementToBeRemoved,
-} from '@testing-library/react'
+import { screen, fireEvent, render, waitFor } from '@testing-library/react'
 import fetchMock from 'fetch-mock'
 import userEvent from '@testing-library/user-event'
+import * as bootstrapUtils from '@/features/utils/bootstrap-5'
 
 import ShareProjectModal from '../../../../../frontend/js/features/share-project-modal/components/share-project-modal'
 import {
@@ -21,6 +16,15 @@ import {
   USER_ID,
 } from '../../../helpers/editor-providers'
 import * as useLocationModule from '../../../../../frontend/js/shared/hooks/use-location'
+
+async function changePrivilegeLevel(screen, { current, next }) {
+  const select = screen.getByDisplayValue(current)
+  await fireEvent.click(select)
+  const option = screen.getByRole('option', {
+    name: next,
+  })
+  await fireEvent.click(option)
+}
 
 describe('<ShareProjectModal/>', function () {
   const project = {
@@ -91,6 +95,9 @@ describe('<ShareProjectModal/>', function () {
       replace: sinon.stub(),
       reload: sinon.stub(),
     })
+    this.isBootstrap5Stub = sinon
+      .stub(bootstrapUtils, 'isBootstrap5')
+      .returns(true)
     fetchMock.get('/user/contacts', { contacts })
     window.metaAttributesCache.set('ol-user', { allowedFreeTrial: true })
     window.metaAttributesCache.set('ol-showUpgradePrompt', true)
@@ -98,6 +105,7 @@ describe('<ShareProjectModal/>', function () {
 
   afterEach(function () {
     this.locationStub.restore()
+    this.isBootstrap5Stub.restore()
     fetchMock.restore()
     cleanUpContext()
   })
@@ -134,9 +142,7 @@ describe('<ShareProjectModal/>', function () {
       scope: { project: { ...project, publicAccesLevel: 'private' } },
     })
 
-    await screen.findByText(
-      'Link sharing is off, only invited users can view this project.'
-    )
+    await screen.findByText('Link sharing is off')
     await screen.findByRole('button', { name: 'Turn on link sharing' })
 
     expect(screen.queryByText('Anyone with this link can view this project')).to
@@ -196,7 +202,7 @@ describe('<ShareProjectModal/>', function () {
     await screen.findByRole('button', { name: 'Make Private' })
   })
 
-  it('hides actions from non-project-owners', async function () {
+  it('displays actions for project-owners', async function () {
     const invites = [
       {
         _id: 'invited-author',
@@ -222,8 +228,17 @@ describe('<ShareProjectModal/>', function () {
 
     await screen.findByRole('button', { name: 'Turn off link sharing' })
     await screen.findByRole('button', { name: 'Resend' })
+  })
 
-    // render as non-project-owner, link sharing on: actions should be missing and message should be present
+  it('hides actions from non-project-owners when link sharing on', async function () {
+    const invites = [
+      {
+        _id: 'invited-author',
+        email: 'invited-author@example.com',
+        privileges: 'readAndWrite',
+      },
+    ]
+
     render(
       <EditorProviders
         scope={{
@@ -251,8 +266,17 @@ describe('<ShareProjectModal/>', function () {
     expect(screen.queryByRole('button', { name: 'Turn on link sharing' })).to.be
       .null
     expect(screen.queryByRole('button', { name: 'Resend' })).to.be.null
+  })
 
-    // render as non-project-owner, link sharing off: actions should be missing and message should be present
+  it('hides actions from non-project-owners when link sharing off', async function () {
+    const invites = [
+      {
+        _id: 'invited-author',
+        email: 'invited-author@example.com',
+        privileges: 'readAndWrite',
+      },
+    ]
+
     render(
       <EditorProviders
         scope={{
@@ -342,6 +366,7 @@ describe('<ShareProjectModal/>', function () {
 
     const projectOwnerEmail = USER_EMAIL
 
+    await screen.findByText(projectOwnerEmail)
     expect(screen.queryAllByText(projectOwnerEmail)).to.have.length(1)
     expect(screen.queryAllByText('member-author@example.com')).to.have.length(1)
     expect(screen.queryAllByText('member-viewer@example.com')).to.have.length(1)
@@ -455,14 +480,12 @@ describe('<ShareProjectModal/>', function () {
       name: 'Close',
     })
 
-    expect(screen.queryAllByText('member-viewer@example.com')).to.have.length(1)
+    expect(
+      await screen.findAllByText('member-viewer@example.com')
+    ).to.have.length(1)
 
-    const select = screen.getByDisplayValue('Read only')
-    await fireEvent.change(select, { target: { value: 'readAndWrite' } })
+    await changePrivilegeLevel(screen, { current: 'Viewer', next: 'Editor' })
 
-    const changeButton = screen.getByRole('button', { name: 'Change' })
-
-    fireEvent.click(changeButton)
     await waitFor(() => expect(closeButton.disabled).to.be.true)
 
     const { body } = fetchMock.lastOptions()
@@ -493,22 +516,23 @@ describe('<ShareProjectModal/>', function () {
       },
     })
 
-    expect(screen.queryAllByText('member-viewer@example.com')).to.have.length(1)
+    expect(
+      await screen.findAllByText('member-viewer@example.com')
+    ).to.have.length(1)
 
-    const removeButton = screen.getByRole('button', {
-      name: 'Remove collaborator',
+    await changePrivilegeLevel(screen, {
+      current: 'Viewer',
+      next: 'Remove access',
     })
-
+    const removeButton = screen.getByRole('button', {
+      name: 'Change',
+    })
     fireEvent.click(removeButton)
 
     const url = fetchMock.lastUrl()
     expect(url).to.equal('/project/test-project/users/member-viewer')
 
     expect(fetchMock.done()).to.be.true
-
-    await waitForElementToBeRemoved(() =>
-      screen.queryByText('member-viewer@example.com')
-    )
   })
 
   it('changes member privileges to owner with confirmation', async function () {
@@ -532,13 +556,13 @@ describe('<ShareProjectModal/>', function () {
       },
     })
 
+    await screen.findByText('member-viewer@example.com')
     expect(screen.queryAllByText('member-viewer@example.com')).to.have.length(1)
 
-    const select = screen.getByDisplayValue('Read only')
-    fireEvent.change(select, { target: { value: 'owner' } })
-
-    const changeButton = screen.getByRole('button', { name: 'Change' })
-    await fireEvent.click(changeButton)
+    await changePrivilegeLevel(screen, {
+      current: 'Viewer',
+      next: 'Make owner',
+    })
 
     screen.getByText((_, node) => {
       return (
@@ -569,9 +593,7 @@ describe('<ShareProjectModal/>', function () {
       },
     })
 
-    const [inputElement] = await screen.findAllByLabelText(
-      'Share with your collaborators'
-    )
+    const [inputElement] = await screen.findAllByLabelText('Add people')
 
     // loading contacts
     await waitFor(() => {
@@ -618,7 +640,7 @@ describe('<ShareProjectModal/>', function () {
     const privilegesElement = screen.getByDisplayValue('Can edit')
     fireEvent.change(privilegesElement, { target: { value: 'readOnly' } })
 
-    const submitButton = screen.getByRole('button', { name: 'Share' })
+    const submitButton = screen.getByRole('button', { name: 'Invite' })
     await userEvent.click(submitButton)
 
     let calls
@@ -667,10 +689,13 @@ describe('<ShareProjectModal/>', function () {
       },
     })
 
-    expect(screen.queryByLabelText('Share with your collaborators')).to.be.null
+    await screen.findByText('Add more editors')
+    expect(screen.getByRole('option', { name: 'Can edit' }).disabled).to.be.true
+    expect(screen.getByRole('option', { name: 'Can view' }).disabled).to.be
+      .false
 
     screen.getByText(
-      /You need to upgrade your account to add more collaborators/
+      /Upgrade to add more editors and access collaboration features like track changes and full project history/
     )
   })
 
@@ -689,11 +714,9 @@ describe('<ShareProjectModal/>', function () {
       expect(fetchMock.called('express:/user/contacts')).to.be.true
     })
 
-    const [inputElement] = await screen.findAllByLabelText(
-      'Share with your collaborators'
-    )
+    const [inputElement] = await screen.findAllByLabelText('Add people')
 
-    const submitButton = screen.getByRole('button', { name: 'Share' })
+    const submitButton = screen.getByRole('button', { name: 'Invite' })
 
     const respondWithError = async function (errorReason) {
       fireEvent.focus(inputElement)
@@ -748,9 +771,7 @@ describe('<ShareProjectModal/>', function () {
       },
     })
 
-    await screen.findByText(
-      'Link sharing is off, only invited users can view this project.'
-    )
+    await screen.findByText('Link sharing is off')
 
     const enableButton = await screen.findByRole('button', {
       name: 'Turn on link sharing',
@@ -791,9 +812,7 @@ describe('<ShareProjectModal/>', function () {
     })
     // watchCallbacks.project({ ...project, publicAccesLevel: 'private' })
 
-    await screen.findByText(
-      'Link sharing is off, only invited users can view this project.'
-    )
+    await screen.findByText('Link sharing is off')
   })
 
   it('avoids selecting unmatched contact', async function () {
@@ -801,9 +820,7 @@ describe('<ShareProjectModal/>', function () {
       scope: { project },
     })
 
-    const [inputElement] = await screen.findAllByLabelText(
-      'Share with your collaborators'
-    )
+    const [inputElement] = await screen.findAllByLabelText('Add people')
 
     // Wait for contacts to load
     await waitFor(() => {
@@ -838,7 +855,7 @@ describe('<ShareProjectModal/>', function () {
     // Pressing Tab should add the entered item
     fireEvent.keyDown(inputElement, { key: 'Tab', code: 'Tab' })
     await waitFor(() => {
-      expect(screen.getAllByRole('button', { name: 'Remove' })).to.have.length(
+      expect(screen.getAllByRole('button', { name: /Remove/ })).to.have.length(
         1
       )
     })
@@ -846,7 +863,7 @@ describe('<ShareProjectModal/>', function () {
     // Blurring the input should not add another contact
     fireEvent.blur(inputElement)
     await waitFor(() => {
-      expect(screen.getAllByRole('button', { name: 'Remove' })).to.have.length(
+      expect(screen.getAllByRole('button', { name: /Remove/ })).to.have.length(
         1
       )
     })
@@ -857,9 +874,7 @@ describe('<ShareProjectModal/>', function () {
       scope: { project },
     })
 
-    const [inputElement] = await screen.findAllByLabelText(
-      'Share with your collaborators'
-    )
+    const [inputElement] = await screen.findAllByLabelText('Add people')
 
     // Wait for contacts to load
     await waitFor(() => {
@@ -876,14 +891,14 @@ describe('<ShareProjectModal/>', function () {
     })
 
     // No items should be added yet
-    expect(screen.queryByRole('button', { name: 'Remove' })).to.be.null
+    expect(screen.queryByRole('button', { name: /Remove/ })).to.be.null
 
     // Click anywhere on the form to blur the input
     await userEvent.click(screen.getByRole('dialog'))
 
     // The contact should be added
     await waitFor(() => {
-      expect(screen.getAllByRole('button', { name: 'Remove' })).to.have.length(
+      expect(screen.getAllByRole('button', { name: /Remove/ })).to.have.length(
         1
       )
     })
@@ -894,9 +909,7 @@ describe('<ShareProjectModal/>', function () {
       scope: { project },
     })
 
-    const [inputElement] = await screen.findAllByLabelText(
-      'Share with your collaborators'
-    )
+    const [inputElement] = await screen.findAllByLabelText('Add people')
 
     // Wait for contacts to load
     await waitFor(() => {
@@ -919,7 +932,7 @@ describe('<ShareProjectModal/>', function () {
 
     // The contact should be added
     await waitFor(() => {
-      expect(screen.getAllByRole('button', { name: 'Remove' })).to.have.length(
+      expect(screen.getAllByRole('button', { name: /Remove/ })).to.have.length(
         1
       )
     })
@@ -930,9 +943,7 @@ describe('<ShareProjectModal/>', function () {
       scope: { project },
     })
 
-    const [inputElement] = await screen.findAllByLabelText(
-      'Share with your collaborators'
-    )
+    const [inputElement] = await screen.findAllByLabelText('Add people')
 
     // Wait for contacts to load
     await waitFor(() => {
@@ -954,10 +965,10 @@ describe('<ShareProjectModal/>', function () {
     await userEvent.click(screen.getByRole('dialog'))
 
     // Remove the just-added collaborator
-    await userEvent.click(screen.getByRole('button', { name: 'Remove' }))
+    await userEvent.click(screen.getByRole('button', { name: /Remove/ }))
 
     // Remove button should now be gone
-    expect(screen.queryByRole('button', { name: 'Remove' })).to.be.null
+    expect(screen.queryByRole('button', { name: /Remove/ })).to.be.null
 
     // Add the same collaborator again
     await userEvent.type(inputElement, 'pto')
@@ -975,7 +986,7 @@ describe('<ShareProjectModal/>', function () {
 
     // The contact should be added
     await waitFor(() => {
-      expect(screen.getAllByRole('button', { name: 'Remove' })).to.have.length(
+      expect(screen.getAllByRole('button', { name: /Remove/ })).to.have.length(
         1
       )
     })

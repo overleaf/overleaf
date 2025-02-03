@@ -1,104 +1,74 @@
-import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useUserContext } from '../../../shared/context/user-context'
+import Notification from '@/shared/components/notification'
 import { upgradePlan } from '@/main/account-upgrade'
-import StartFreeTrialButton from '../../../shared/components/start-free-trial-button'
-import Icon from '../../../shared/components/icon'
-import { useFeatureFlag } from '../../../shared/context/split-test-context'
-import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
-import MaterialIcon from '@/shared/components/material-icon'
+import { linkSharingEnforcementDate } from '../utils/link-sharing'
+import { useProjectContext } from '@/shared/context/project-context'
+import { useUserContext } from '@/shared/context/user-context'
+import { sendMB } from '@/infrastructure/event-tracking'
+import StartFreeTrialButton from '@/shared/components/start-free-trial-button'
 import OLButton from '@/features/ui/components/ol/ol-button'
 
 export default function AddCollaboratorsUpgrade() {
   const { t } = useTranslation()
+  const { features } = useProjectContext()
   const user = useUserContext()
-
-  const [startedFreeTrial, setStartedFreeTrial] = useState(false)
-  const hasNewPaywallCta = useFeatureFlag('paywall-cta')
 
   return (
     <div className="add-collaborators-upgrade">
-      <p className="text-center">
-        {t('need_to_upgrade_for_more_collabs')}. {t('also')}:
-      </p>
-      <ul className="list-unstyled">
-        <li>
-          <BootstrapVersionSwitcher
-            bs3={<Icon type="check" />}
-            bs5={<MaterialIcon type="check" className="align-text-bottom" />}
-          />
-          &nbsp;
-          {t('unlimited_projects')}
-        </li>
-        <li>
-          <BootstrapVersionSwitcher
-            bs3={<Icon type="check" />}
-            bs5={<MaterialIcon type="check" className="align-text-bottom" />}
-          />
-          &nbsp;
-          {t('collabs_per_proj', {
-            collabcount: 'Multiple',
-          })}
-        </li>
-        <li>
-          <BootstrapVersionSwitcher
-            bs3={<Icon type="check" />}
-            bs5={<MaterialIcon type="check" className="align-text-bottom" />}
-          />
-          &nbsp;
-          {t('full_doc_history')}
-        </li>
-        <li>
-          <BootstrapVersionSwitcher
-            bs3={<Icon type="check" />}
-            bs5={<MaterialIcon type="check" className="align-text-bottom" />}
-          />
-          &nbsp;
-          {t('sync_to_dropbox')}
-        </li>
-        <li>
-          <BootstrapVersionSwitcher
-            bs3={<Icon type="check" />}
-            bs5={<MaterialIcon type="check" className="align-text-bottom" />}
-          />
-          &nbsp;
-          {t('sync_to_github')}
-        </li>
-        <li>
-          <BootstrapVersionSwitcher
-            bs3={<Icon type="check" />}
-            bs5={<MaterialIcon type="check" className="align-text-bottom" />}
-          />
-          &nbsp;
-          {t('compile_larger_projects')}
-        </li>
-      </ul>
-      <p className="text-center row-spaced-thin">
-        {user.allowedFreeTrial ? (
-          <StartFreeTrialButton
-            buttonProps={{ variant: 'primary' }}
-            handleClick={() => setStartedFreeTrial(true)}
-            source="project-sharing"
-          >
-            {hasNewPaywallCta
-              ? t('add_more_collaborators')
-              : t('start_free_trial')}
-          </StartFreeTrialButton>
-        ) : (
-          <OLButton
-            variant="primary"
-            onClick={() => {
-              upgradePlan('project-sharing')
-              setStartedFreeTrial(true)
-            }}
-          >
-            {t('upgrade')}
-          </OLButton>
-        )}
-      </p>
-      {startedFreeTrial && (
-        <p className="small">{t('refresh_page_after_starting_free_trial')}</p>
-      )}
+      <Notification
+        isActionBelowContent
+        type="warning"
+        title={t('editor_limit_exceeded_in_this_project')}
+        content={
+          <p>
+            {t('your_plan_is_limited_to_n_editors', {
+              count: features.collaborators,
+            })}{' '}
+            {t('from_enforcement_date', {
+              enforcementDate: linkSharingEnforcementDate,
+            })}
+          </p>
+        }
+        action={
+          <div className="upgrade-actions">
+            {user.allowedFreeTrial ? (
+              <StartFreeTrialButton
+                buttonProps={{ variant: 'secondary', size: 'sm' }}
+                source="project-sharing"
+                variant="exceeds"
+              >
+                {t('upgrade')}
+              </StartFreeTrialButton>
+            ) : (
+              <OLButton
+                variant="secondary"
+                size="sm"
+                onClick={() => {
+                  upgradePlan('project-sharing')
+                }}
+              >
+                {t('upgrade')}
+              </OLButton>
+            )}
+            <OLButton
+              variant="link"
+              size="sm"
+              href="https://www.overleaf.com/blog/changes-to-project-sharing"
+              target="_blank"
+              rel="noreferrer"
+              onClick={() => {
+                sendMB('paywall-info-click', {
+                  'paywall-type': 'project-sharing',
+                  content: 'blog',
+                  variant: 'exceeds',
+                })
+              }}
+            >
+              {t('read_more')}
+            </OLButton>
+          </div>
+        }
+      />
     </div>
   )
 }

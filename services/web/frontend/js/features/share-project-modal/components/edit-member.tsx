@@ -3,14 +3,14 @@ import PropTypes from 'prop-types'
 import { useTranslation } from 'react-i18next'
 import { useShareProjectContext } from './share-project-modal'
 import TransferOwnershipModal from './transfer-ownership-modal'
-import { removeMemberFromProject, updateMember } from '../../utils/api'
+import { removeMemberFromProject, updateMember } from '../utils/api'
 import Icon from '@/shared/components/icon'
 import { useProjectContext } from '@/shared/context/project-context'
 import { sendMB } from '@/infrastructure/event-tracking'
 import { Select } from '@/shared/components/select'
 import type { ProjectContextMember } from '@/shared/context/types/project-context'
 import { PermissionsLevel } from '@/features/ide-react/types/permissions'
-import { linkSharingEnforcementDate } from '../../utils/link-sharing'
+import { linkSharingEnforcementDate } from '../utils/link-sharing'
 import OLButton from '@/features/ui/components/ol/ol-button'
 import OLFormGroup from '@/features/ui/components/ol/ol-form-group'
 import OLCol from '@/features/ui/components/ol/ol-col'
@@ -128,7 +128,9 @@ export default function EditMember({
       id="share-project-form"
       onSubmit={e => {
         e.preventDefault()
-        commitPrivilegeChange(privileges)
+        if (privilegeChangePending) {
+          commitPrivilegeChange(privileges)
+        }
       }}
     >
       <OLFormGroup

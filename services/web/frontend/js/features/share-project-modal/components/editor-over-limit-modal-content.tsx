@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { linkSharingEnforcementDate } from '../../utils/link-sharing'
+import { linkSharingEnforcementDate } from '../utils/link-sharing'
 import { sendMB } from '@/infrastructure/event-tracking'
 import OLButton from '@/features/ui/components/ol/ol-button'
 import {

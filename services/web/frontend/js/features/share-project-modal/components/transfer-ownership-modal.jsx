@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import { Trans, useTranslation } from 'react-i18next'
 import PropTypes from 'prop-types'
-import Icon from '../../../shared/components/icon'
+import Icon from '@/shared/components/icon'
 import { transferProjectOwnership } from '../utils/api'
-import { useProjectContext } from '../../../shared/context/project-context'
-import { useLocation } from '../../../shared/hooks/use-location'
+import { useProjectContext } from '@/shared/context/project-context'
+import { useLocation } from '@/shared/hooks/use-location'
 import OLModal, {
   OLModalBody,
   OLModalFooter,

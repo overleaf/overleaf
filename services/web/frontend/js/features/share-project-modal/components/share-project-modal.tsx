@@ -6,13 +6,15 @@ import React, {
   useState,
 } from 'react'
 import ShareProjectModalContent from './share-project-modal-content'
-import { useProjectContext } from '../../../shared/context/project-context'
-import { useSplitTestContext } from '../../../shared/context/split-test-context'
-import { sendMB } from '../../../infrastructure/event-tracking'
-import { Project } from '../../../../../types/project'
+import { useProjectContext } from '@/shared/context/project-context'
+import { useSplitTestContext } from '@/shared/context/split-test-context'
+import { sendMB } from '@/infrastructure/event-tracking'
+import { ProjectContextUpdateValue } from '@/shared/context/types/project-context'
+import { useEditorContext } from '@/shared/context/editor-context'
+import customLocalStorage from '@/infrastructure/local-storage'
 
 type ShareProjectContextValue = {
-  updateProject: (project: Project) => void
+  updateProject: (project: ProjectContextUpdateValue) => void
   monitorRequest: <T extends Promise<unknown>>(request: () => T) => T
   inFlight: boolean
   setInFlight: React.Dispatch<
@@ -23,6 +25,8 @@ type ShareProjectContextValue = {
     React.SetStateAction<ShareProjectContextValue['error']>
   >
 }
+
+const SHOW_MODAL_COOLDOWN_PERIOD = 24 * 60 * 60 * 1000 // 24 hours
 
 const ShareProjectContext = createContext<ShareProjectContextValue | undefined>(
   undefined
@@ -43,12 +47,14 @@ export function useShareProjectContext() {
 type ShareProjectModalProps = {
   handleHide: () => void
   show: boolean
+  handleOpen: () => void
   animation?: boolean
 }
 
 const ShareProjectModal = React.memo(function ShareProjectModal({
   handleHide,
   show,
+  handleOpen,
   animation = true,
 }: ShareProjectModalProps) {
   const [inFlight, setInFlight] =
@@ -56,8 +62,41 @@ const ShareProjectModal = React.memo(function ShareProjectModal({
   const [error, setError] = useState<ShareProjectContextValue['error']>()
 
   const project = useProjectContext()
+  const { isProjectOwner } = useEditorContext()
 
   const { splitTestVariants } = useSplitTestContext()
+
+  // show the new share modal if project owner
+  // is over collaborator limit or has pending editors (once every 24 hours)
+  useEffect(() => {
+    const hasExceededCollaboratorLimit = () => {
+      if (!isProjectOwner || !project.features) {
+        return false
+      }
+
+      if (project.features.collaborators === -1) {
+        return false
+      }
+      return (
+        project.members.filter(member => member.privileges === 'readAndWrite')
+          .length > (project.features.collaborators ?? 1) ||
+        project.members.some(member => member.pendingEditor)
+      )
+    }
+
+    if (hasExceededCollaboratorLimit()) {
+      const localStorageKey = `last-shown-share-modal.${project._id}`
+      const lastShownShareModalTime =
+        customLocalStorage.getItem(localStorageKey)
+      if (
+        !lastShownShareModalTime ||
+        lastShownShareModalTime + SHOW_MODAL_COOLDOWN_PERIOD < Date.now()
+      ) {
+        handleOpen()
+        customLocalStorage.setItem(localStorageKey, Date.now())
+      }
+    }
+  }, [project, isProjectOwner, handleOpen])
 
   // send tracking event when the modal is opened
   useEffect(() => {

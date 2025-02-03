@@ -5,7 +5,7 @@ import { matchSorter } from 'match-sorter'
 import { useCombobox } from 'downshift'
 import classnames from 'classnames'
 
-import Icon from '../../../shared/components/icon'
+import Icon from '@/shared/components/icon'
 import MaterialIcon from '@/shared/components/material-icon'
 import Tag from '@/features/ui/components/bootstrap-5/tag'
 import { DropdownItem } from '@/features/ui/components/bootstrap-5/dropdown-menu'
@@ -155,11 +155,13 @@ export default function SelectCollaborators({
   }, [reset, isOpen, filteredOptions.length])
 
   return (
-    <div className="tags-input">
+    <div className="tags-input tags-new">
       {/* eslint-disable-next-line jsx-a11y/label-has-for */}
       <label className="small" {...getLabelProps()}>
-        {t('share_with_your_collabs')}
-        &nbsp;
+        <strong>
+          {t('add_people')}
+          &nbsp;
+        </strong>
         {loading && (
           <BootstrapVersionSwitcher
             bs3={<Icon type="refresh" spin />}
@@ -212,6 +214,7 @@ export default function SelectCollaborators({
                 onChange: e => {
                   setInputValue(e.target.value)
                 },
+                onClick: () => focusInput,
                 onKeyDown: event => {
                   switch (event.key) {
                     case 'Enter':

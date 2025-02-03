@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import Icon from '../../../shared/components/icon'
+import Icon from '@/shared/components/icon'
 import { useEditorContext } from '@/shared/context/editor-context'
 import { lazy, Suspense } from 'react'
 import { FullSizeLoadingSpinner } from '@/shared/components/loading-spinner'
@@ -50,7 +50,7 @@ export default function ShareProjectModalContent({
         <OLModalTitle>{t('share_project')}</OLModalTitle>
       </OLModalHeader>
 
-      <OLModalBody className="modal-body-share">
+      <OLModalBody className="modal-body-share modal-link-share-new">
         <div className="container-fluid">
           <Suspense fallback={<FullSizeLoadingSpinner minHeight="15rem" />}>
             {isRestrictedTokenMember ? (

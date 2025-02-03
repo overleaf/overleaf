@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { useProjectContext } from '@/shared/context/project-context'
 import Notification from '@/shared/components/notification'
-import { PublicAccessLevel } from '../../../../../../types/public-access-level'
+import { PublicAccessLevel } from '../../../../../types/public-access-level'
 import { useEditorContext } from '@/shared/context/editor-context'
 import OLRow from '@/features/ui/components/ol/ol-row'
 import OLCol from '@/features/ui/components/ol/ol-col'

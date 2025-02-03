@@ -1,12 +1,12 @@
 import { useCallback } from 'react'
 import PropTypes from 'prop-types'
 import { useShareProjectContext } from './share-project-modal'
-import Icon from '../../../shared/components/icon'
+import Icon from '@/shared/components/icon'
 import { useTranslation } from 'react-i18next'
 import MemberPrivileges from './member-privileges'
 import { resendInvite, revokeInvite } from '../utils/api'
-import { useProjectContext } from '../../../shared/context/project-context'
-import { sendMB } from '../../../infrastructure/event-tracking'
+import { useProjectContext } from '@/shared/context/project-context'
+import { sendMB } from '@/infrastructure/event-tracking'
 import OLRow from '@/features/ui/components/ol/ol-row'
 import OLCol from '@/features/ui/components/ol/ol-col'
 import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
@@ -20,9 +20,8 @@ export default function Invite({ invite, isProjectOwner }) {
   const { t } = useTranslation()
   return (
     <OLRow className="project-invite">
-      <OLCol xs={7}>
+      <OLCol xs={8}>
         <div>{invite.email}</div>
-
         <div className="small">
           {t('invite_not_accepted')}
           .&nbsp;
@@ -30,12 +29,12 @@ export default function Invite({ invite, isProjectOwner }) {
         </div>
       </OLCol>
 
-      <OLCol xs={3} className="text-start">
+      <OLCol xs={3} className="text-end">
         <MemberPrivileges privileges={invite.privileges} />
       </OLCol>
 
       {isProjectOwner && (
-        <OLCol xs={2} className="text-center">
+        <OLCol xs={1} className="text-center">
           <RevokeInvite invite={invite} />
         </OLCol>
       )}
