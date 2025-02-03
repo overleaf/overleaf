@@ -12,6 +12,7 @@ describe('UpdateCompressor', function () {
     this.user_id = 'user-id-1'
     this.other_user_id = 'user-id-2'
     this.doc_id = 'mock-doc-id'
+    this.doc_hash = 'doc-hash'
     this.ts1 = Date.now()
     this.ts2 = Date.now() + 1000
   })
@@ -247,6 +248,50 @@ describe('UpdateCompressor', function () {
         },
       ])
     })
+
+    it('should set the doc hash on the last split update only', function () {
+      const meta = {
+        ts: this.ts1,
+        user_id: this.user_id,
+      }
+      expect(
+        this.UpdateCompressor.convertToSingleOpUpdates([
+          {
+            op: [
+              { p: 0, i: 'foo' },
+              { p: 6, i: 'bar' },
+            ],
+            meta: { ...meta, doc_hash: 'hash1' },
+            v: 42,
+          },
+          {
+            op: [{ p: 10, i: 'baz' }],
+            meta: { ...meta, doc_hash: 'hash2' },
+            v: 43,
+          },
+          {
+            op: [
+              { p: 0, d: 'foo' },
+              { p: 20, i: 'quux' },
+              { p: 3, d: 'bar' },
+            ],
+            meta: { ...meta, doc_hash: 'hash3' },
+            v: 44,
+          },
+        ])
+      ).to.deep.equal([
+        { op: { p: 0, i: 'foo' }, meta, v: 42 },
+        { op: { p: 6, i: 'bar' }, meta: { ...meta, doc_hash: 'hash1' }, v: 42 },
+        {
+          op: { p: 10, i: 'baz' },
+          meta: { ...meta, doc_hash: 'hash2' },
+          v: 43,
+        },
+        { op: { p: 0, d: 'foo' }, meta, v: 44 },
+        { op: { p: 20, i: 'quux' }, meta, v: 44 },
+        { op: { p: 3, d: 'bar' }, meta: { ...meta, doc_hash: 'hash3' }, v: 44 },
+      ])
+    })
   })
 
   describe('concatUpdatesWithSameVersion', function () {
@@ -373,6 +418,48 @@ describe('UpdateCompressor', function () {
           new_pathname: 'new.tex',
           meta: { ts: this.ts1, user_id: this.user_id },
           v: 42,
+        },
+      ])
+    })
+
+    it("should keep the doc hash only when it's on the last update", function () {
+      const meta = { ts: this.ts1, user_id: this.user_id }
+      const baseUpdate = { doc: this.doc_id, pathname: 'main.tex', meta }
+      const updates = [
+        { ...baseUpdate, op: { p: 0, i: 'foo' }, v: 1 },
+        {
+          ...baseUpdate,
+          op: { p: 10, i: 'bar' },
+          meta: { ...meta, doc_hash: 'hash1' },
+          v: 1,
+        },
+        {
+          ...baseUpdate,
+          op: { p: 20, i: 'baz' },
+          meta: { ...meta, doc_hash: 'hash2' },
+          v: 2,
+        },
+        { ...baseUpdate, op: { p: 30, i: 'quux' }, v: 2 },
+      ]
+      expect(
+        this.UpdateCompressor.concatUpdatesWithSameVersion(updates)
+      ).to.deep.equal([
+        {
+          ...baseUpdate,
+          op: [
+            { p: 0, i: 'foo' },
+            { p: 10, i: 'bar' },
+          ],
+          meta: { ...meta, doc_hash: 'hash1' },
+          v: 1,
+        },
+        {
+          ...baseUpdate,
+          op: [
+            { p: 20, i: 'baz' },
+            { p: 30, i: 'quux' },
+          ],
+          v: 2,
         },
       ])
     })
@@ -1433,6 +1520,48 @@ describe('UpdateCompressor', function () {
               source: 'upload',
             },
             v: 46,
+          },
+        ])
+      })
+    })
+
+    describe('doc hash', function () {
+      it("should keep the doc hash if it's on the last update", function () {
+        const meta = { ts: this.ts1, user_id: this.user_id }
+        expect(
+          this.UpdateCompressor.compressUpdates([
+            { op: { p: 3, i: 'foo' }, meta, v: 42 },
+            {
+              op: { p: 6, i: 'bar' },
+              meta: { ...meta, doc_hash: 'hash1' },
+              v: 43,
+            },
+          ])
+        ).to.deep.equal([
+          {
+            op: { p: 3, i: 'foobar' },
+            meta: { ...meta, doc_hash: 'hash1' },
+            v: 43,
+          },
+        ])
+      })
+
+      it("should not keep the doc hash if it's not on the last update", function () {
+        const meta = { ts: this.ts1, user_id: this.user_id }
+        expect(
+          this.UpdateCompressor.compressUpdates([
+            {
+              op: { p: 3, i: 'foo' },
+              meta: { ...meta, doc_hash: 'hash1' },
+              v: 42,
+            },
+            { op: { p: 6, i: 'bar' }, meta, v: 43 },
+          ])
+        ).to.deep.equal([
+          {
+            op: { p: 3, i: 'foobar' },
+            meta,
+            v: 43,
           },
         ])
       })

@@ -35,6 +35,7 @@ export type TextUpdate = {
   meta: UpdateMeta & {
     pathname: string
     doc_length: number
+    doc_hash?: string
     history_doc_length?: number
   }
 }

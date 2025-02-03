@@ -29,10 +29,15 @@ const cloneWithOp = function (update, op) {
   return update
 }
 const mergeUpdatesWithOp = function (firstUpdate, secondUpdate, op) {
-  // We want to take doc_length and ts from the firstUpdate, v from the second
+  // We want to take doc_length and ts from the firstUpdate, v and doc_hash from the second
   const update = cloneWithOp(firstUpdate, op)
   if (secondUpdate.v != null) {
     update.v = secondUpdate.v
+  }
+  if (secondUpdate.meta.doc_hash != null) {
+    update.meta.doc_hash = secondUpdate.meta.doc_hash
+  } else {
+    delete update.meta.doc_hash
   }
   return update
 }
@@ -112,8 +117,11 @@ export function convertToSingleOpUpdates(updates) {
     if (docLength === -1) {
       docLength = 0
     }
+    const docHash = update.meta.doc_hash
     for (const op of ops) {
       const splitUpdate = cloneWithOp(update, op)
+      // Only the last update will keep the doc_hash property
+      delete splitUpdate.meta.doc_hash
       if (docLength != null) {
         splitUpdate.meta.doc_length = docLength
         docLength = adjustLengthByOp(docLength, op, {
@@ -122,6 +130,9 @@ export function convertToSingleOpUpdates(updates) {
         delete splitUpdate.meta.history_doc_length
       }
       splitUpdates.push(splitUpdate)
+    }
+    if (docHash != null && splitUpdates.length > 0) {
+      splitUpdates[splitUpdates.length - 1].meta.doc_hash = docHash
     }
   }
   return splitUpdates
@@ -153,6 +164,11 @@ export function concatUpdatesWithSameVersion(updates) {
         lastUpdate.pathname === update.pathname
       ) {
         lastUpdate.op = lastUpdate.op.concat(update.op)
+        if (update.meta.doc_hash == null) {
+          delete lastUpdate.meta.doc_hash
+        } else {
+          lastUpdate.meta.doc_hash = update.meta.doc_hash
+        }
       } else {
         concattedUpdates.push(update)
       }

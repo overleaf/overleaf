@@ -132,6 +132,7 @@ export type RawScanOp = RawInsertOp | RawRemoveOp | RawRetainOp
 
 export type RawTextOperation = {
   textOperation: RawScanOp[]
+  contentHash?: string
 }
 
 export type RawAddCommentOperation = {

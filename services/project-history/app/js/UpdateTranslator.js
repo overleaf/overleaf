@@ -70,6 +70,12 @@ function _convertToChange(projectId, updateWithBlob) {
     for (const op of update.op) {
       builder.addOp(op, update)
     }
+    // add doc hash if present
+    if (update.meta.doc_hash != null) {
+      // This will commit the text operation that the builder is currently
+      // building and set the contentHash property.
+      builder.commitTextOperation({ contentHash: update.meta.doc_hash })
+    }
     operations = builder.finish()
     // add doc version information if present
     if (update.v != null) {
@@ -285,8 +291,8 @@ class OperationsBuilder {
     const pos = Math.min(op.hpos ?? op.p, this.docLength)
 
     if (isComment(op)) {
-      // Close the current text operation
-      this.pushTextOperation()
+      // Commit the current text operation
+      this.commitTextOperation()
 
       // Add a comment operation
       const commentLength = op.hlen ?? op.c.length
@@ -307,7 +313,7 @@ class OperationsBuilder {
     }
 
     if (pos < this.cursor) {
-      this.pushTextOperation()
+      this.commitTextOperation()
       // At this point, this.cursor === 0 and we can continue
     }
 
@@ -450,23 +456,32 @@ class OperationsBuilder {
     this.docLength -= length
   }
 
-  pushTextOperation() {
-    if (this.textOperation.length > 0)
-      if (this.cursor < this.docLength) {
-        this.retain(this.docLength - this.cursor)
-      }
+  /**
+   * Finalize the current text operation and push it to the queue
+   *
+   * @param {object} [opts]
+   * @param {string} [opts.contentHash]
+   */
+  commitTextOperation(opts = {}) {
+    if (this.textOperation.length > 0 && this.cursor < this.docLength) {
+      this.retain(this.docLength - this.cursor)
+    }
     if (this.textOperation.length > 0) {
-      this.operations.push({
+      const operation = {
         pathname: this.pathname,
         textOperation: this.textOperation,
-      })
+      }
+      if (opts.contentHash != null) {
+        operation.contentHash = opts.contentHash
+      }
+      this.operations.push(operation)
       this.textOperation = []
     }
     this.cursor = 0
   }
 
   finish() {
-    this.pushTextOperation()
+    this.commitTextOperation()
     return this.operations
   }
 }

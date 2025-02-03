@@ -56,18 +56,34 @@ class TextOperation extends EditOperation {
 
   constructor() {
     super()
-    // When an operation is applied to an input string, you can think of this as
-    // if an imaginary cursor runs over the entire string and skips over some
-    // parts, removes some parts and inserts characters at some positions. These
-    // actions (skip/remove/insert) are stored as an array in the "ops" property.
-    /** @type {ScanOp[]} */
+
+    /**
+     * When an operation is applied to an input string, you can think of this as
+     * if an imaginary cursor runs over the entire string and skips over some
+     * parts, removes some parts and inserts characters at some positions. These
+     * actions (skip/remove/insert) are stored as an array in the "ops" property.
+     * @type {ScanOp[]}
+     */
     this.ops = []
-    // An operation's baseLength is the length of every string the operation
-    // can be applied to.
+
+    /**
+     * An operation's baseLength is the length of every string the operation
+     * can be applied to.
+     */
     this.baseLength = 0
-    // The targetLength is the length of every string that results from applying
-    // the operation on a valid input string.
+
+    /**
+     * The targetLength is the length of every string that results from applying
+     * the operation on a valid input string.
+     */
     this.targetLength = 0
+
+    /**
+     * The expected content hash after this operation is applied
+     *
+     * @type {string | null}
+     */
+    this.contentHash = null
   }
 
   /**
@@ -223,7 +239,12 @@ class TextOperation extends EditOperation {
    * @returns {RawTextOperation}
    */
   toJSON() {
-    return { textOperation: this.ops.map(op => op.toJSON()) }
+    /** @type {RawTextOperation} */
+    const json = { textOperation: this.ops.map(op => op.toJSON()) }
+    if (this.contentHash != null) {
+      json.contentHash = this.contentHash
+    }
+    return json
   }
 
   /**
@@ -231,7 +252,7 @@ class TextOperation extends EditOperation {
    * @param {RawTextOperation} obj
    * @returns {TextOperation}
    */
-  static fromJSON = function ({ textOperation: ops }) {
+  static fromJSON = function ({ textOperation: ops, contentHash }) {
     const o = new TextOperation()
     for (const op of ops) {
       if (isRetain(op)) {
@@ -249,6 +270,9 @@ class TextOperation extends EditOperation {
       } else {
         throw new UnprocessableError('unknown operation: ' + JSON.stringify(op))
       }
+    }
+    if (contentHash != null) {
+      o.contentHash = contentHash
     }
     return o
   }
