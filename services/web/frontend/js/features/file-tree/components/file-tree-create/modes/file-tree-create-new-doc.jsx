@@ -5,9 +5,6 @@ import { useFileTreeCreateName } from '../../../contexts/file-tree-create-name'
 import { useFileTreeCreateForm } from '../../../contexts/file-tree-create-form'
 import * as eventTracking from '../../../../../infrastructure/event-tracking'
 import ErrorMessage from '../error-message'
-import importOverleafModules from '../../../../../../macros/import-overleaf-module.macro'
-
-const newFilePromotionComponents = importOverleafModules('newFilePromotions')
 
 export default function FileTreeCreateNewDoc() {
   const { name, validName } = useFileTreeCreateName()
@@ -36,11 +33,6 @@ export default function FileTreeCreateNewDoc() {
     <form noValidate id="create-file" onSubmit={handleSubmit}>
       <FileTreeCreateNameInput focusName error={error} inFlight={inFlight} />
       {error && <ErrorMessage error={error} />}
-      {newFilePromotionComponents.map(
-        ({ import: { default: Component }, path }) => (
-          <Component key={path} />
-        )
-      )}
     </form>
   )
 }

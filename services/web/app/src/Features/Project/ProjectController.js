@@ -331,7 +331,6 @@ const _ProjectController = {
     }
 
     const splitTests = [
-      !anonymous && 'bib-file-tpr-prompt',
       'compile-log-events',
       'external-socket-heartbeat',
       'full-project-search',
