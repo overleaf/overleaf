@@ -25,6 +25,7 @@ export function CancelSubscriptionButton() {
       subscription.recurly.remainingPauseCycles &&
       subscription.recurly.remainingPauseCycles > 0)
   const planIsEligibleForPause =
+    !subscription.pendingPlan &&
     !subscription.groupPlan &&
     !isInTrial &&
     !subscription.planCode.includes('ann') &&
