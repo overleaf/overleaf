@@ -40,6 +40,23 @@ RUN_LINTING_CI = docker run --rm --volume $(MONOREPO)/.editorconfig:/overleaf/.e
 # Same but from the top of the monorepo
 RUN_LINTING_MONOREPO = docker run --rm -v $(MONOREPO):$(MONOREPO) -w $(MONOREPO) node:20.18.2 npm run --silent
 
+SHELLCHECK_OPTS = \
+	--shell=bash \
+	--external-sources
+SHELLCHECK_COLOR := $(if $(CI),--color=never,--color)
+
+shellcheck:
+	find . -type f -name "*.sh" -print0 | xargs -0 -r docker run --rm -v $(HERE):/mnt -w /mnt \
+		koalaman/shellcheck:stable $(SHELLCHECK_OPTS) $(SHELLCHECK_COLOR)
+
+shellcheck_fix:
+	@for file in $$(find . -type f -name "*.sh"); do \
+		diff=$$(docker run --rm -v $(HERE):/mnt -w /mnt koalaman/shellcheck:stable $(SHELLCHECK_OPTS) --format=diff "$$file" 2>/dev/null); \
+		if [ -n "$$diff" ] && ! echo "$$diff" | patch -p1 >/dev/null 2>&1; then echo "\033[31m$$file\033[0m"; \
+		elif [ -n "$$diff" ]; then echo "$$file"; \
+		else echo "\033[2m$$file\033[0m"; fi \
+	done
+
 format:
 	$(RUN_LINTING) format
 
@@ -64,7 +81,7 @@ typecheck:
 typecheck_ci:
 	$(RUN_LINTING_CI) types:check
 
-test: format lint typecheck test_unit test_acceptance
+test: format lint typecheck shellcheck test_unit test_acceptance
 
 test_unit:
 ifneq (,$(wildcard test/unit))
@@ -132,6 +149,7 @@ publish:
 	lint lint_fix \
 	build_types typecheck \
 	lint_ci format_ci typecheck_ci \
+	shellcheck shellcheck_fix \
 	test test_clean test_unit test_unit_clean \
 	test_acceptance test_acceptance_debug test_acceptance_pre_run \
 	test_acceptance_run test_acceptance_run_debug test_acceptance_clean \
