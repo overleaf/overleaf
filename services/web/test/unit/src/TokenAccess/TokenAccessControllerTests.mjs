@@ -192,10 +192,22 @@ describe('TokenAccessController', function () {
   })
 
   describe('grantTokenAccessReadAndWrite', function () {
-    describe('normal case', function () {
+    beforeEach(function () {
+      this.LimitationsManager.promises.canAcceptEditCollaboratorInvite.resolves(
+        true
+      )
+    })
+
+    describe('normal case (edit slot available)', function () {
       beforeEach(function (done) {
+        this.LimitationsManager.promises.canAcceptEditCollaboratorInvite.resolves(
+          true
+        )
         this.req.params = { token: this.token }
-        this.req.body = { confirmedByUser: true, tokenHashPrefix: '#prefix' }
+        this.req.body = {
+          confirmedByUser: true,
+          tokenHashPrefix: '#prefix',
+        }
         this.res.callback = done
         this.TokenAccessController.grantTokenAccessReadAndWrite(
           this.req,
@@ -204,10 +216,15 @@ describe('TokenAccessController', function () {
         )
       })
 
-      it('grants read and write access', function () {
+      it('adds the user as a read and write invited member', function () {
         expect(
-          this.TokenAccessHandler.promises.addReadAndWriteUserToProject
-        ).to.have.been.calledWith(this.user._id, this.project._id)
+          this.CollaboratorsHandler.promises.addUserIdToProject
+        ).to.have.been.calledWith(
+          this.project._id,
+          undefined,
+          this.user._id,
+          PrivilegeLevels.READ_AND_WRITE
+        )
       })
 
       it('writes a project audit log', function () {
@@ -215,10 +232,29 @@ describe('TokenAccessController', function () {
           this.ProjectAuditLogHandler.promises.addEntry
         ).to.have.been.calledWith(
           this.project._id,
-          'join-via-token',
+          'accept-via-link-sharing',
           this.user._id,
           this.req.ip,
           { privileges: 'readAndWrite' }
+        )
+      })
+
+      it('records a project-joined event for the user', function () {
+        expect(
+          this.AnalyticsManager.recordEventForUserInBackground
+        ).to.have.been.calledWith(this.user._id, 'project-joined', {
+          mode: 'read-write',
+          projectId: this.project._id.toString(),
+        })
+      })
+
+      it('emits a project membership changed event', function () {
+        expect(
+          this.EditorRealTimeController.emitToRoom
+        ).to.have.been.calledWith(
+          this.project._id,
+          'project:membership:changed',
+          { members: true, invites: true }
         )
       })
 
@@ -235,262 +271,78 @@ describe('TokenAccessController', function () {
       })
     })
 
-    describe('when project owner in link-sharing-warning split test', function () {
-      beforeEach(function () {
-        this.SplitTestHandler.promises.getAssignmentForUser.callsFake(
-          async (userId, test) => {
-            if (test === 'link-sharing-warning') {
-              return { variant: 'active' }
-            }
-          }
+    describe('when there are no edit collaborator slots available', function () {
+      beforeEach(function (done) {
+        this.LimitationsManager.promises.canAcceptEditCollaboratorInvite.resolves(
+          false
         )
-      })
-
-      it('tells the ui to show the link-sharing-warning variant', async function () {
         this.req.params = { token: this.token }
-        this.req.body = { tokenHashPrefix: '#prefix' }
-        await this.TokenAccessController.grantTokenAccessReadAndWrite(
+        this.req.body = {
+          confirmedByUser: true,
+          tokenHashPrefix: '#prefix',
+        }
+        this.res.callback = done
+        this.TokenAccessController.grantTokenAccessReadAndWrite(
           this.req,
-          {
-            json: content => {
-              expect(content).to.deep.equal({
-                requireAccept: {
-                  linkSharingChanges: true,
-                  projectName: this.project.name,
-                },
-              })
-            },
-          }
+          this.res,
+          done
         )
       })
 
-      describe('normal case', function () {
-        beforeEach(function (done) {
-          this.req.params = { token: this.token }
-          this.req.body = { confirmedByUser: true, tokenHashPrefix: '#prefix' }
-          this.res.callback = done
-          this.TokenAccessController.grantTokenAccessReadAndWrite(
-            this.req,
-            this.res,
-            done
-          )
-        })
+      it('adds the user as a read only invited member instead (pendingEditor)', function () {
+        expect(
+          this.CollaboratorsHandler.promises.addUserIdToProject
+        ).to.have.been.calledWith(
+          this.project._id,
+          undefined,
+          this.user._id,
+          PrivilegeLevels.READ_ONLY,
+          { pendingEditor: true }
+        )
+      })
 
-        it('adds the user as a read and write invited member', function () {
-          expect(
-            this.CollaboratorsHandler.promises.addUserIdToProject
-          ).to.have.been.calledWith(
-            this.project._id,
-            undefined,
-            this.user._id,
-            PrivilegeLevels.READ_AND_WRITE
-          )
-        })
+      it('writes a project audit log', function () {
+        expect(
+          this.ProjectAuditLogHandler.promises.addEntry
+        ).to.have.been.calledWith(
+          this.project._id,
+          'accept-via-link-sharing',
+          this.user._id,
+          this.req.ip,
+          { privileges: 'readOnly', pendingEditor: true }
+        )
+      })
 
-        it('writes a project audit log', function () {
-          expect(
-            this.ProjectAuditLogHandler.promises.addEntry
-          ).to.have.been.calledWith(
-            this.project._id,
-            'accept-via-link-sharing',
-            this.user._id,
-            this.req.ip,
-            { privileges: 'readAndWrite' }
-          )
-        })
-
-        it('records a project-joined event for the user', function () {
-          expect(
-            this.AnalyticsManager.recordEventForUserInBackground
-          ).to.have.been.calledWith(this.user._id, 'project-joined', {
-            mode: 'read-write',
-            projectId: this.project._id.toString(),
-          })
-        })
-
-        it('emits a project membership changed event', function () {
-          expect(
-            this.EditorRealTimeController.emitToRoom
-          ).to.have.been.calledWith(
-            this.project._id,
-            'project:membership:changed',
-            { members: true, invites: true }
-          )
-        })
-
-        it('checks token hash', function () {
-          expect(
-            this.TokenAccessHandler.checkTokenHashPrefix
-          ).to.have.been.calledWith(
-            this.token,
-            '#prefix',
-            'readAndWrite',
-            this.user._id,
-            { projectId: this.project._id, action: 'continue' }
-          )
+      it('records a project-joined event for the user', function () {
+        expect(
+          this.AnalyticsManager.recordEventForUserInBackground
+        ).to.have.been.calledWith(this.user._id, 'project-joined', {
+          mode: 'read-only',
+          projectId: this.project._id.toString(),
+          pendingEditor: true,
         })
       })
 
-      describe('when the project owner is in the link-sharing-enforcement split test', function () {
-        beforeEach(function () {
-          this.SplitTestHandler.promises.getAssignmentForUser.callsFake(
-            async (userId, test) => {
-              if (test === 'link-sharing-warning') {
-                return { variant: 'active' }
-              } else if (test === 'link-sharing-enforcement') {
-                return { variant: 'active' }
-              }
-            }
-          )
-        })
+      it('emits a project membership changed event', function () {
+        expect(
+          this.EditorRealTimeController.emitToRoom
+        ).to.have.been.calledWith(
+          this.project._id,
+          'project:membership:changed',
+          { members: true, invites: true }
+        )
+      })
 
-        describe('normal case (edit slot available)', function () {
-          beforeEach(function (done) {
-            this.LimitationsManager.promises.canAcceptEditCollaboratorInvite.resolves(
-              true
-            )
-            this.req.params = { token: this.token }
-            this.req.body = {
-              confirmedByUser: true,
-              tokenHashPrefix: '#prefix',
-            }
-            this.res.callback = done
-            this.TokenAccessController.grantTokenAccessReadAndWrite(
-              this.req,
-              this.res,
-              done
-            )
-          })
-
-          it('adds the user as a read and write invited member', function () {
-            expect(
-              this.CollaboratorsHandler.promises.addUserIdToProject
-            ).to.have.been.calledWith(
-              this.project._id,
-              undefined,
-              this.user._id,
-              PrivilegeLevels.READ_AND_WRITE
-            )
-          })
-
-          it('writes a project audit log', function () {
-            expect(
-              this.ProjectAuditLogHandler.promises.addEntry
-            ).to.have.been.calledWith(
-              this.project._id,
-              'accept-via-link-sharing',
-              this.user._id,
-              this.req.ip,
-              { privileges: 'readAndWrite' }
-            )
-          })
-
-          it('records a project-joined event for the user', function () {
-            expect(
-              this.AnalyticsManager.recordEventForUserInBackground
-            ).to.have.been.calledWith(this.user._id, 'project-joined', {
-              mode: 'read-write',
-              projectId: this.project._id.toString(),
-            })
-          })
-
-          it('emits a project membership changed event', function () {
-            expect(
-              this.EditorRealTimeController.emitToRoom
-            ).to.have.been.calledWith(
-              this.project._id,
-              'project:membership:changed',
-              { members: true, invites: true }
-            )
-          })
-
-          it('checks token hash', function () {
-            expect(
-              this.TokenAccessHandler.checkTokenHashPrefix
-            ).to.have.been.calledWith(
-              this.token,
-              '#prefix',
-              'readAndWrite',
-              this.user._id,
-              { projectId: this.project._id, action: 'continue' }
-            )
-          })
-        })
-
-        describe('when there are no edit collaborator slots available', function () {
-          beforeEach(function (done) {
-            this.LimitationsManager.promises.canAcceptEditCollaboratorInvite.resolves(
-              false
-            )
-            this.req.params = { token: this.token }
-            this.req.body = {
-              confirmedByUser: true,
-              tokenHashPrefix: '#prefix',
-            }
-            this.res.callback = done
-            this.TokenAccessController.grantTokenAccessReadAndWrite(
-              this.req,
-              this.res,
-              done
-            )
-          })
-
-          it('adds the user as a read only invited member instead (pendingEditor)', function () {
-            expect(
-              this.CollaboratorsHandler.promises.addUserIdToProject
-            ).to.have.been.calledWith(
-              this.project._id,
-              undefined,
-              this.user._id,
-              PrivilegeLevels.READ_ONLY,
-              { pendingEditor: true }
-            )
-          })
-
-          it('writes a project audit log', function () {
-            expect(
-              this.ProjectAuditLogHandler.promises.addEntry
-            ).to.have.been.calledWith(
-              this.project._id,
-              'accept-via-link-sharing',
-              this.user._id,
-              this.req.ip,
-              { privileges: 'readOnly', pendingEditor: true }
-            )
-          })
-
-          it('records a project-joined event for the user', function () {
-            expect(
-              this.AnalyticsManager.recordEventForUserInBackground
-            ).to.have.been.calledWith(this.user._id, 'project-joined', {
-              mode: 'read-only',
-              projectId: this.project._id.toString(),
-              pendingEditor: true,
-            })
-          })
-
-          it('emits a project membership changed event', function () {
-            expect(
-              this.EditorRealTimeController.emitToRoom
-            ).to.have.been.calledWith(
-              this.project._id,
-              'project:membership:changed',
-              { members: true, invites: true }
-            )
-          })
-
-          it('checks token hash', function () {
-            expect(
-              this.TokenAccessHandler.checkTokenHashPrefix
-            ).to.have.been.calledWith(
-              this.token,
-              '#prefix',
-              'readAndWrite',
-              this.user._id,
-              { projectId: this.project._id, action: 'continue' }
-            )
-          })
-        })
+      it('checks token hash', function () {
+        expect(
+          this.TokenAccessHandler.checkTokenHashPrefix
+        ).to.have.been.calledWith(
+          this.token,
+          '#prefix',
+          'readAndWrite',
+          this.user._id,
+          { projectId: this.project._id, action: 'continue' }
+        )
       })
     })
 
@@ -507,9 +359,16 @@ describe('TokenAccessController', function () {
         )
       })
 
-      it("doesn't write a project audit log", function () {
-        expect(this.ProjectAuditLogHandler.promises.addEntry).to.not.have.been
-          .called
+      it('writes a project audit log', function () {
+        expect(
+          this.ProjectAuditLogHandler.promises.addEntry
+        ).to.have.been.calledWith(
+          this.project._id,
+          'accept-via-link-sharing',
+          this.user._id,
+          this.req.ip,
+          { privileges: 'readAndWrite' }
+        )
       })
 
       it('checks token hash', function () {
@@ -537,10 +396,15 @@ describe('TokenAccessController', function () {
         )
       })
 
-      it('grants read and write access', function () {
+      it('adds the user as a read and write invited member', function () {
         expect(
-          this.TokenAccessHandler.promises.addReadAndWriteUserToProject
-        ).to.have.been.calledWith(this.user._id, this.project._id)
+          this.CollaboratorsHandler.promises.addUserIdToProject
+        ).to.have.been.calledWith(
+          this.project._id,
+          undefined,
+          this.user._id,
+          PrivilegeLevels.READ_AND_WRITE
+        )
       })
 
       it('checks the hash prefix', function () {
@@ -820,8 +684,13 @@ describe('TokenAccessController', function () {
           .resolves(projectFromInternalStaff)
         this.res.callback = () => {
           expect(
-            this.TokenAccessHandler.promises.addReadAndWriteUserToProject
-          ).to.have.been.calledWith(admin._id, projectFromInternalStaff._id)
+            this.CollaboratorsHandler.promises.addUserIdToProject
+          ).to.have.been.calledWith(
+            projectFromInternalStaff._id,
+            undefined,
+            admin._id,
+            PrivilegeLevels.READ_AND_WRITE
+          )
         }
         this.TokenAccessController.grantTokenAccessReadAndWrite(
           this.req,
@@ -1151,138 +1020,77 @@ describe('TokenAccessController', function () {
       this.req.params = { Project_id: this.project._id }
     })
 
-    describe('read only invited viewer gaining edit access via link sharing', function () {
-      beforeEach(function (done) {
-        this.CollaboratorsGetter.promises.isUserInvitedMemberOfProject.resolves(
+    describe('when there are collaborator slots available', function () {
+      beforeEach(function () {
+        this.LimitationsManager.promises.canAcceptEditCollaboratorInvite.resolves(
           true
         )
-        this.res.callback = done
-        this.TokenAccessController.moveReadWriteToCollaborators(
-          this.req,
-          this.res,
-          done
-        )
       })
 
-      it('sets the privilege level to read and write for the invited viewer', function () {
-        expect(
-          this.CollaboratorsHandler.promises.setCollaboratorPrivilegeLevel
-        ).to.have.been.calledWith(
-          this.project._id,
-          this.user._id,
-          PrivilegeLevels.READ_AND_WRITE
-        )
-        expect(this.res.sendStatus).to.have.been.calledWith(204)
-      })
-    })
-    describe('previously joined token access user moving to named collaborator', function () {
-      beforeEach(function (done) {
-        this.CollaboratorsGetter.promises.isUserInvitedMemberOfProject.resolves(
-          false
-        )
-        this.res.callback = done
-        this.TokenAccessController.moveReadWriteToCollaborators(
-          this.req,
-          this.res,
-          done
-        )
-      })
-
-      it('sets the privilege level to read and write for the invited viewer', function () {
-        expect(
-          this.TokenAccessHandler.promises.removeReadAndWriteUserFromProject
-        ).to.have.been.calledWith(this.user._id, this.project._id)
-        expect(
-          this.CollaboratorsHandler.promises.addUserIdToProject
-        ).to.have.been.calledWith(
-          this.project._id,
-          undefined,
-          this.user._id,
-          PrivilegeLevels.READ_AND_WRITE
-        )
-        expect(this.res.sendStatus).to.have.been.calledWith(204)
-      })
-    })
-
-    describe('when link-sharing-enforcement test is active', function () {
-      beforeEach(function () {
-        this.SplitTestHandler.promises.getAssignmentForUser.resolves({
-          variant: 'active',
-        })
-      })
-
-      describe('when there are collaborator slots available', function () {
-        beforeEach(function () {
-          this.LimitationsManager.promises.canAcceptEditCollaboratorInvite.resolves(
-            true
-          )
-        })
-
-        describe('previously joined token access user moving to named collaborator', function () {
-          beforeEach(function (done) {
-            this.CollaboratorsGetter.promises.isUserInvitedMemberOfProject.resolves(
-              false
-            )
-            this.res.callback = done
-            this.TokenAccessController.moveReadWriteToCollaborators(
-              this.req,
-              this.res,
-              done
-            )
-          })
-
-          it('sets the privilege level to read and write for the invited viewer', function () {
-            expect(
-              this.TokenAccessHandler.promises.removeReadAndWriteUserFromProject
-            ).to.have.been.calledWith(this.user._id, this.project._id)
-            expect(
-              this.CollaboratorsHandler.promises.addUserIdToProject
-            ).to.have.been.calledWith(
-              this.project._id,
-              undefined,
-              this.user._id,
-              PrivilegeLevels.READ_AND_WRITE
-            )
-            expect(this.res.sendStatus).to.have.been.calledWith(204)
-          })
-        })
-      })
-
-      describe('when there are no edit collaborator slots available', function () {
-        beforeEach(function () {
-          this.LimitationsManager.promises.canAcceptEditCollaboratorInvite.resolves(
+      describe('previously joined token access user moving to named collaborator', function () {
+        beforeEach(function (done) {
+          this.CollaboratorsGetter.promises.isUserInvitedMemberOfProject.resolves(
             false
           )
+          this.res.callback = done
+          this.TokenAccessController.moveReadWriteToCollaborators(
+            this.req,
+            this.res,
+            done
+          )
         })
 
-        describe('previously joined token access user moving to named collaborator', function () {
-          beforeEach(function (done) {
-            this.CollaboratorsGetter.promises.isUserInvitedMemberOfProject.resolves(
-              false
-            )
-            this.res.callback = done
-            this.TokenAccessController.moveReadWriteToCollaborators(
-              this.req,
-              this.res,
-              done
-            )
-          })
+        it('sets the privilege level to read and write for the invited viewer', function () {
+          expect(
+            this.TokenAccessHandler.promises.removeReadAndWriteUserFromProject
+          ).to.have.been.calledWith(this.user._id, this.project._id)
+          expect(
+            this.CollaboratorsHandler.promises.addUserIdToProject
+          ).to.have.been.calledWith(
+            this.project._id,
+            undefined,
+            this.user._id,
+            PrivilegeLevels.READ_AND_WRITE
+          )
+          expect(this.res.sendStatus).to.have.been.calledWith(204)
+        })
+      })
+    })
 
-          it('sets the privilege level to read only for the invited viewer (pendingEditor)', function () {
-            expect(
-              this.TokenAccessHandler.promises.removeReadAndWriteUserFromProject
-            ).to.have.been.calledWith(this.user._id, this.project._id)
-            expect(
-              this.CollaboratorsHandler.promises.addUserIdToProject
-            ).to.have.been.calledWith(
-              this.project._id,
-              undefined,
-              this.user._id,
-              PrivilegeLevels.READ_ONLY,
-              { pendingEditor: true }
-            )
-            expect(this.res.sendStatus).to.have.been.calledWith(204)
-          })
+    describe('when there are no edit collaborator slots available', function () {
+      beforeEach(function () {
+        this.LimitationsManager.promises.canAcceptEditCollaboratorInvite.resolves(
+          false
+        )
+      })
+
+      describe('previously joined token access user moving to named collaborator', function () {
+        beforeEach(function (done) {
+          this.CollaboratorsGetter.promises.isUserInvitedMemberOfProject.resolves(
+            false
+          )
+          this.res.callback = done
+          this.TokenAccessController.moveReadWriteToCollaborators(
+            this.req,
+            this.res,
+            done
+          )
+        })
+
+        it('sets the privilege level to read only for the invited viewer (pendingEditor)', function () {
+          expect(
+            this.TokenAccessHandler.promises.removeReadAndWriteUserFromProject
+          ).to.have.been.calledWith(this.user._id, this.project._id)
+          expect(
+            this.CollaboratorsHandler.promises.addUserIdToProject
+          ).to.have.been.calledWith(
+            this.project._id,
+            undefined,
+            this.user._id,
+            PrivilegeLevels.READ_ONLY,
+            { pendingEditor: true }
+          )
+          expect(this.res.sendStatus).to.have.been.calledWith(204)
         })
       })
     })

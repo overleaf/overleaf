@@ -136,8 +136,6 @@ export interface Meta {
   'ol-learnedWords': string[]
   'ol-legacyEditorThemes': string[]
   'ol-licenseQuantity': number | undefined
-  'ol-linkSharingEnforcement': boolean
-  'ol-linkSharingWarning': boolean
   'ol-loadingText': string
   'ol-managedGroupSubscriptions': ManagedGroupSubscription[]
   'ol-managedInstitutions': ManagedInstitution[]

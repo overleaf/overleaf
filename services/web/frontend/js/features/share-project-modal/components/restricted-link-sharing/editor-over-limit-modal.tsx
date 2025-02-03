@@ -16,7 +16,6 @@ const EditorOverLimitModal = () => {
     setShow(false)
   }
 
-  // split test: link-sharing-warning
   // show the over-limit warning if user
   // is editor on a project over
   // collaborator limit (once every 24 hours)

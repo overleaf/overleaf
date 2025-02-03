@@ -99,13 +99,9 @@ function TokenAccessRoot() {
 
   // We don't want the full-size div and back link(?) on
   // the new page, but we do this so the original page
-  // doesn't change. When tearing down we can clean up
-  // the DOM in the main return
-  if (
-    mode === 'requireAccept' &&
-    requireAcceptData &&
-    requireAcceptData.linkSharingChanges
-  ) {
+  // doesn't change.
+  // TODO: clean up the DOM in the main return
+  if (mode === 'requireAccept' && requireAcceptData) {
     return (
       <RequireAcceptScreen
         requireAcceptData={requireAcceptData}
@@ -136,13 +132,6 @@ function TokenAccessRoot() {
 
       {V1ImportDataScreen && mode === 'v1Import' && v1ImportData && (
         <V1ImportDataScreen v1ImportData={v1ImportData} />
-      )}
-
-      {mode === 'requireAccept' && requireAcceptData && (
-        <RequireAcceptScreen
-          requireAcceptData={requireAcceptData}
-          sendPostRequest={sendPostRequest}
-        />
       )}
     </div>
   )

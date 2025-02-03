@@ -17,7 +17,6 @@ const ViewOnlyAccessModal = () => {
     setShow(false)
   }
 
-  // split test: link-sharing-enforcement
   // show the view-only access modal if
   // is editor on a project over
   // collaborator limit (once every week)

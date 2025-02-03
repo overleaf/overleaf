@@ -492,6 +492,9 @@ describe('CollaboratorsInviteHandler', function () {
       this.CollaboratorsHandler.promises.addUserIdToProject.resolves()
       this.CollaboratorsInviteHandler.promises._tryCancelInviteNotification =
         sinon.stub().resolves()
+      this.LimitationsManager.promises.canAcceptEditCollaboratorInvite.resolves(
+        true
+      )
       this.ProjectInvite.deleteOne.returns({ exec: sinon.stub().resolves() })
       this.call = async () => {
         await this.CollaboratorsInviteHandler.promises.acceptInvite(
@@ -503,11 +506,8 @@ describe('CollaboratorsInviteHandler', function () {
     })
 
     describe('when all goes well', function () {
-      it('should have called CollaboratorsHandler.addUserIdToProject', async function () {
+      it('should add readAndWrite invitees to the project as normal', async function () {
         await this.call()
-        this.CollaboratorsHandler.promises.addUserIdToProject.callCount.should.equal(
-          1
-        )
         this.CollaboratorsHandler.promises.addUserIdToProject.should.have.been.calledWith(
           this.projectId,
           this.sendingUserId,
@@ -546,55 +546,29 @@ describe('CollaboratorsInviteHandler', function () {
       })
     })
 
-    describe('when link-sharing-enforcement is active', function () {
+    describe('when the project has no more edit collaborator slots', function () {
       beforeEach(function () {
-        this.SplitTestHandler.promises.getAssignmentForUser.resolves({
-          variant: 'active',
-        })
+        this.LimitationsManager.promises.canAcceptEditCollaboratorInvite.resolves(
+          false
+        )
       })
 
-      describe('when the project has no more edit collaborator slots', function () {
-        beforeEach(function () {
-          this.LimitationsManager.promises.canAcceptEditCollaboratorInvite.resolves(
-            false
-          )
-        })
-
-        it('should add readAndWrite invitees to the project as readOnly (pendingEditor) users', async function () {
-          await this.call()
-          this.ProjectAuditLogHandler.promises.addEntry.should.have.been.calledWith(
-            this.projectId,
-            'editor-moved-to-pending',
-            null,
-            null,
-            { userId: this.userId.toString() }
-          )
-          this.CollaboratorsHandler.promises.addUserIdToProject.should.have.been.calledWith(
-            this.projectId,
-            this.sendingUserId,
-            this.userId,
-            'readOnly',
-            { pendingEditor: true }
-          )
-        })
-      })
-
-      describe('when the project has available edit collaborator slots', function () {
-        beforeEach(function () {
-          this.LimitationsManager.promises.canAcceptEditCollaboratorInvite.resolves(
-            true
-          )
-        })
-
-        it('should add readAndWrite invitees to the project as normal', async function () {
-          await this.call()
-          this.CollaboratorsHandler.promises.addUserIdToProject.should.have.been.calledWith(
-            this.projectId,
-            this.sendingUserId,
-            this.userId,
-            this.fakeInvite.privileges
-          )
-        })
+      it('should add readAndWrite invitees to the project as readOnly (pendingEditor) users', async function () {
+        await this.call()
+        this.ProjectAuditLogHandler.promises.addEntry.should.have.been.calledWith(
+          this.projectId,
+          'editor-moved-to-pending',
+          null,
+          null,
+          { userId: this.userId.toString() }
+        )
+        this.CollaboratorsHandler.promises.addUserIdToProject.should.have.been.calledWith(
+          this.projectId,
+          this.sendingUserId,
+          this.userId,
+          'readOnly',
+          { pendingEditor: true }
+        )
       })
     })
 

@@ -66,7 +66,6 @@ const ShareProjectModal = React.memo(function ShareProjectModal({
 
   const { splitTestVariants } = useSplitTestContext()
 
-  // split test: link-sharing-warning
   // show the new share modal if project owner
   // is over collaborator limit or has pending editors (once every 24 hours)
   useEffect(() => {

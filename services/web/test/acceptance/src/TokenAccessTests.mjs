@@ -5,8 +5,6 @@ import request from './helpers/request.js'
 import settings from '@overleaf/settings'
 import { db } from '../../../app/src/infrastructure/mongodb.js'
 import expectErrorResponse from './helpers/expectErrorResponse.mjs'
-import SplitTestHandler from '../../../app/src/Features/SplitTests/SplitTestHandler.js'
-import sinon from 'sinon'
 
 const tryEditorAccess = (user, projectId, test, callback) =>
   async.series(
@@ -107,23 +105,6 @@ const tryReadOnlyTokenAccept = (
 ) => {
   _doTryTokenAccept(
     `/read/${token}`,
-    user,
-    token,
-    testPageLoad,
-    testFormPost,
-    callback
-  )
-}
-
-const tryReadAndWriteTokenAccept = (
-  user,
-  token,
-  testPageLoad,
-  testFormPost,
-  callback
-) => {
-  _doTryTokenAccept(
-    `/${token}`,
     user,
     token,
     testPageLoad,
@@ -831,700 +812,190 @@ describe('TokenAccess', function () {
     })
   })
 
-  describe('read-and-write token', function () {
+  describe('anonymous read-and-write token, disabled (feature is deprecated)', function () {
     beforeEach(function (done) {
-      this.projectName = `token-rw-test${Math.random()}`
-      this.owner.createProject(this.projectName, (err, projectId) => {
-        if (err != null) {
-          return done(err)
-        }
-        this.projectId = projectId
-        this.owner.makeTokenBased(this.projectId, err => {
+      this.owner.createProject(
+        `token-anon-rw-test${Math.random()}`,
+        (err, projectId) => {
           if (err != null) {
             return done(err)
           }
-          this.owner.getProject(this.projectId, (err, project) => {
+          this.projectId = projectId
+          this.owner.makeTokenBased(this.projectId, err => {
             if (err != null) {
               return done(err)
             }
-            this.tokens = project.tokens
-            done()
+            this.owner.getProject(this.projectId, (err, project) => {
+              if (err != null) {
+                return done(err)
+              }
+              this.tokens = project.tokens
+              done()
+            })
           })
-        })
-      })
+        }
+      )
     })
 
-    it('should allow the user to access project via read-and-write token url', function (done) {
+    it('should not allow the user to access read-and-write token', function (done) {
       async.series(
         [
-          // deny access before the token is used
           cb =>
             tryEditorAccess(
-              this.other1,
+              this.anon,
               this.projectId,
               expectErrorResponse.restricted.html,
               cb
             ),
-          // try token
           cb =>
             tryReadAndWriteTokenAccess(
-              this.other1,
+              this.anon,
               this.tokens.readAndWrite,
               (response, body) => {
                 expect(response.statusCode).to.equal(200)
               },
               (response, body) => {
                 expect(response.statusCode).to.equal(200)
-                expect(body.requireAccept.projectName).to.equal(
-                  this.projectName
-                )
+                expect(body).to.deep.equal({
+                  redirect: '/restricted',
+                  anonWriteAccessDenied: true,
+                })
               },
               cb
             ),
-          // deny access before the token is accepted
+          cb =>
+            tryAnonContentAccess(
+              this.anon,
+              this.projectId,
+              this.tokens.readAndWrite,
+              (response, body) => {
+                expect(response.statusCode).to.equal(403)
+                expect(body).to.equal('Forbidden')
+              },
+              cb
+            ),
+          cb =>
+            this.anon.login((err, response, body) => {
+              expect(err).to.not.exist
+              expect(response.statusCode).to.equal(200)
+              expect(body.redir).to.equal(`/${this.tokens.readAndWrite}`)
+              cb()
+            }),
+        ],
+        done
+      )
+    })
+
+    it('should deny access to access tokens', function (done) {
+      tryFetchProjectTokens(this.anon, this.projectId, (error, response) => {
+        expect(error).to.equal(null)
+        expect(response.statusCode).to.equal(403)
+        done()
+      })
+    })
+
+    it('should require login if project does not exist', function (done) {
+      async.series(
+        [
+          // delete project
+          cb => {
+            this.owner.deleteProject(this.projectId, cb)
+          },
+          cb =>
+            tryReadAndWriteTokenAccess(
+              this.anon,
+              this.tokens.readAndWrite,
+              (response, body) => {
+                expect(response.statusCode).to.equal(200)
+              },
+              (response, body) => {
+                expect(response.statusCode).to.equal(200)
+                expect(body).to.deep.equal({
+                  redirect: '/restricted',
+                  anonWriteAccessDenied: true,
+                })
+              },
+              cb
+            ),
+          cb =>
+            this.anon.login((err, response, body) => {
+              expect(err).to.not.exist
+              expect(response.statusCode).to.equal(200)
+              expect(body.redir).to.equal(`/${this.tokens.readAndWrite}`)
+              cb()
+            }),
+        ],
+        done
+      )
+    })
+
+    it('should save URL hash in redirect', function (done) {
+      const urlFragment = '#123456'
+      const tokenWithUrlFragment = `${this.tokens.readAndWrite}${urlFragment}`
+
+      async.series(
+        [
           cb =>
             tryEditorAccess(
-              this.other1,
+              this.anon,
               this.projectId,
               expectErrorResponse.restricted.html,
               cb
             ),
-          // accept token
           cb =>
-            tryReadAndWriteTokenAccept(
-              this.other1,
-              this.tokens.readAndWrite,
-              (response, body) => {
-                expect(response.statusCode).to.equal(200)
-              },
-              (response, body) => {
-                expect(response.statusCode).to.equal(200)
-                expect(body.redirect).to.equal(`/project/${this.projectId}`)
-                expect(body.tokenAccessGranted).to.equal('readAndWrite')
-              },
-              cb
-            ),
-          cb =>
-            tryEditorAccess(
-              this.other1,
-              this.projectId,
-              (response, body) => {
-                expect(response.statusCode).to.equal(200)
-              },
-              cb
-            ),
-          cb =>
-            tryContentAccess(
-              this.other1,
-              this.projectId,
-              (response, body) => {
-                expect(body.privilegeLevel).to.equal('readAndWrite')
-                expect(body.isRestrictedUser).to.equal(false)
-                expect(body.isTokenMember).to.equal(true)
-                expect(body.isInvitedMember).to.equal(false)
-                expect(body.project.owner).to.have.all.keys(
-                  '_id',
-                  'email',
-                  'first_name',
-                  'last_name',
-                  'privileges',
-                  'signUpDate'
-                )
-              },
-              cb
-            ),
-        ],
-        done
-      )
-    })
-
-    it('fetching access tokens returns an empty object', function (done) {
-      async.series(
-        [
-          cb =>
-            tryReadAndWriteTokenAccept(
-              this.other1,
-              this.tokens.readAndWrite,
-              (response, body) => {
-                expect(response.statusCode).to.equal(200)
-              },
-              (response, body) => {
-                expect(response.statusCode).to.equal(200)
-                expect(body.redirect).to.equal(`/project/${this.projectId}`)
-                expect(body.tokenAccessGranted).to.equal('readAndWrite')
-              },
-              cb
-            ),
-          cb => {
-            tryFetchProjectTokens(
-              this.other1,
-              this.projectId,
-              (error, response, body) => {
-                expect(error).to.equal(null)
-                expect(response.statusCode).to.equal(200)
-                expect(body).to.deep.equal({})
-                cb()
-              }
-            )
-          },
-        ],
-        done
-      )
-    })
-
-    describe('upgrading from a read-only token', function () {
-      beforeEach(function (done) {
-        this.owner.createProject(
-          `token-rw-upgrade-test${Math.random()}`,
-          (err, projectId) => {
-            if (err != null) {
-              return done(err)
-            }
-            this.projectId = projectId
-            this.owner.makeTokenBased(this.projectId, err => {
-              if (err != null) {
-                return done(err)
-              }
-              this.owner.getProject(this.projectId, (err, project) => {
-                if (err != null) {
-                  return done(err)
+            this.anon.request.get(
+              tokenWithUrlFragment,
+              (err, response, body) => {
+                if (err) {
+                  return cb(err)
                 }
-                this.tokens = project.tokens
-                done()
-              })
-            })
-          }
-        )
-      })
+                expect(response.statusCode).to.equal(200)
 
-      it('should allow user to access project via read-only, then upgrade to read-write', function (done) {
-        async.series(
-          [
-            // deny access before the token is used
-            cb =>
-              tryEditorAccess(
-                this.other1,
-                this.projectId,
-                expectErrorResponse.restricted.html,
-                cb
-              ),
-            cb => {
-              // use read-only token
-              tryReadOnlyTokenAccept(
-                this.other1,
-                this.tokens.readOnly,
-                (response, body) => {
-                  expect(response.statusCode).to.equal(200)
-                },
-                (response, body) => {
-                  expect(response.statusCode).to.equal(200)
-                  expect(body.redirect).to.equal(`/project/${this.projectId}`)
-                  expect(body.tokenAccessGranted).to.equal('readOnly')
-                },
-                cb
-              )
-            },
-            cb => {
-              tryEditorAccess(
-                this.other1,
-                this.projectId,
-                (response, body) => {
-                  expect(response.statusCode).to.equal(200)
-                },
-                cb
-              )
-            },
-            cb => {
-              // allow content access read-only
-              tryContentAccess(
-                this.other1,
-                this.projectId,
-                (response, body) => {
-                  expect(body.privilegeLevel).to.equal('readOnly')
-                  expect(body.isRestrictedUser).to.equal(true)
-                  expect(body.isTokenMember).to.equal(true)
-                  expect(body.isInvitedMember).to.equal(false)
-                  expect(body.project.owner).to.have.keys('_id')
-                  expect(body.project.owner).to.not.have.any.keys(
-                    'email',
-                    'first_name',
-                    'last_name'
-                  )
-                },
-                cb
-              )
-            },
-            //
-            // Then switch to read-write token
-            //
-            cb =>
-              tryReadAndWriteTokenAccept(
-                this.other1,
-                this.tokens.readAndWrite,
-                (response, body) => {
-                  expect(response.statusCode).to.equal(200)
-                },
-                (response, body) => {
-                  expect(response.statusCode).to.equal(200)
-                  expect(body.redirect).to.equal(`/project/${this.projectId}`)
-                  expect(body.tokenAccessGranted).to.equal('readAndWrite')
-                },
-                cb
-              ),
-            cb =>
-              tryEditorAccess(
-                this.other1,
-                this.projectId,
-                (response, body) => {
-                  expect(response.statusCode).to.equal(200)
-                },
-                cb
-              ),
-            cb =>
-              tryContentAccess(
-                this.other1,
-                this.projectId,
-                (response, body) => {
-                  expect(body.privilegeLevel).to.equal('readAndWrite')
-                  expect(body.isRestrictedUser).to.equal(false)
-                  expect(body.isTokenMember).to.equal(true)
-                  expect(body.isInvitedMember).to.equal(false)
-                  expect(body.project.owner).to.have.all.keys(
-                    '_id',
-                    'email',
-                    'first_name',
-                    'last_name',
-                    'privileges',
-                    'signUpDate'
-                  )
-                },
-                cb
-              ),
-          ],
-          done
-        )
-      })
-    })
-
-    describe('made private again', function () {
-      beforeEach(function (done) {
-        this.owner.makePrivate(this.projectId, () => setTimeout(done, 1000))
-      })
-
-      it('should deny access to project', function (done) {
-        async.series(
-          [
-            cb => {
-              tryEditorAccess(
-                this.other1,
-                this.projectId,
-                (response, body) => {},
-                cb
-              )
-            },
-            cb => {
-              tryReadAndWriteTokenAccess(
-                this.other1,
-                this.tokens.readAndWrite,
-                (response, body) => {
-                  expect(response.statusCode).to.equal(200)
-                },
-                (response, body) => {
-                  expect(response.statusCode).to.equal(404)
-                },
-                cb
-              )
-            },
-            cb => {
-              tryEditorAccess(
-                this.other1,
-                this.projectId,
-                expectErrorResponse.restricted.html,
-                cb
-              )
-            },
-            cb => {
-              tryContentAccess(
-                this.other1,
-                this.projectId,
-                (response, body) => {
-                  expect(response.statusCode).to.equal(403)
-                  expect(body).to.equal('Forbidden')
-                },
-                cb
-              )
-            },
-          ],
-          done
-        )
-      })
-
-      it('should deny access to access tokens', function (done) {
-        tryFetchProjectTokens(
-          this.other1,
-          this.projectId,
-          (error, response) => {
-            expect(error).to.equal(null)
-            expect(response.statusCode).to.equal(403)
-            done()
-          }
-        )
-      })
+                this.anon.request.post(
+                  `${this.tokens.readAndWrite}/grant`,
+                  {
+                    json: {
+                      token: this.tokens.readAndWrite,
+                      tokenHashPrefix: urlFragment,
+                    },
+                  },
+                  (err, response, body) => {
+                    if (err) {
+                      return cb(err)
+                    }
+                    expect(response.statusCode).to.equal(200)
+                    expect(body).to.deep.equal({
+                      redirect: '/restricted',
+                      anonWriteAccessDenied: true,
+                    })
+                    cb()
+                  }
+                )
+              }
+            ),
+          cb =>
+            tryAnonContentAccess(
+              this.anon,
+              this.projectId,
+              this.tokens.readAndWrite,
+              (response, body) => {
+                expect(response.statusCode).to.equal(403)
+                expect(body).to.equal('Forbidden')
+              },
+              cb
+            ),
+          cb =>
+            this.anon.login((err, response, body) => {
+              expect(err).to.not.exist
+              expect(response.statusCode).to.equal(200)
+              expect(body.redir).to.equal(`/${tokenWithUrlFragment}`)
+              cb()
+            }),
+        ],
+        done
+      )
     })
   })
-
-  if (!settings.allowAnonymousReadAndWriteSharing) {
-    describe('anonymous read-and-write token, disabled', function () {
-      beforeEach(function (done) {
-        this.owner.createProject(
-          `token-anon-rw-test${Math.random()}`,
-          (err, projectId) => {
-            if (err != null) {
-              return done(err)
-            }
-            this.projectId = projectId
-            this.owner.makeTokenBased(this.projectId, err => {
-              if (err != null) {
-                return done(err)
-              }
-              this.owner.getProject(this.projectId, (err, project) => {
-                if (err != null) {
-                  return done(err)
-                }
-                this.tokens = project.tokens
-                done()
-              })
-            })
-          }
-        )
-      })
-
-      it('should not allow the user to access read-and-write token', function (done) {
-        async.series(
-          [
-            cb =>
-              tryEditorAccess(
-                this.anon,
-                this.projectId,
-                expectErrorResponse.restricted.html,
-                cb
-              ),
-            cb =>
-              tryReadAndWriteTokenAccess(
-                this.anon,
-                this.tokens.readAndWrite,
-                (response, body) => {
-                  expect(response.statusCode).to.equal(200)
-                },
-                (response, body) => {
-                  expect(response.statusCode).to.equal(200)
-                  expect(body).to.deep.equal({
-                    redirect: '/restricted',
-                    anonWriteAccessDenied: true,
-                  })
-                },
-                cb
-              ),
-            cb =>
-              tryAnonContentAccess(
-                this.anon,
-                this.projectId,
-                this.tokens.readAndWrite,
-                (response, body) => {
-                  expect(response.statusCode).to.equal(403)
-                  expect(body).to.equal('Forbidden')
-                },
-                cb
-              ),
-            cb =>
-              this.anon.login((err, response, body) => {
-                expect(err).to.not.exist
-                expect(response.statusCode).to.equal(200)
-                expect(body.redir).to.equal(`/${this.tokens.readAndWrite}`)
-                cb()
-              }),
-          ],
-          done
-        )
-      })
-
-      it('should deny access to access tokens', function (done) {
-        tryFetchProjectTokens(this.anon, this.projectId, (error, response) => {
-          expect(error).to.equal(null)
-          expect(response.statusCode).to.equal(403)
-          done()
-        })
-      })
-
-      it('should require login if project does not exist', function (done) {
-        async.series(
-          [
-            // delete project
-            cb => {
-              this.owner.deleteProject(this.projectId, cb)
-            },
-            cb =>
-              tryReadAndWriteTokenAccess(
-                this.anon,
-                this.tokens.readAndWrite,
-                (response, body) => {
-                  expect(response.statusCode).to.equal(200)
-                },
-                (response, body) => {
-                  expect(response.statusCode).to.equal(200)
-                  expect(body).to.deep.equal({
-                    redirect: '/restricted',
-                    anonWriteAccessDenied: true,
-                  })
-                },
-                cb
-              ),
-            cb =>
-              this.anon.login((err, response, body) => {
-                expect(err).to.not.exist
-                expect(response.statusCode).to.equal(200)
-                expect(body.redir).to.equal(`/${this.tokens.readAndWrite}`)
-                cb()
-              }),
-          ],
-          done
-        )
-      })
-
-      it('should save URL hash in redirect', function (done) {
-        const urlFragment = '#123456'
-        const tokenWithUrlFragment = `${this.tokens.readAndWrite}${urlFragment}`
-
-        async.series(
-          [
-            cb =>
-              tryEditorAccess(
-                this.anon,
-                this.projectId,
-                expectErrorResponse.restricted.html,
-                cb
-              ),
-            cb =>
-              this.anon.request.get(
-                tokenWithUrlFragment,
-                (err, response, body) => {
-                  if (err) {
-                    return cb(err)
-                  }
-                  expect(response.statusCode).to.equal(200)
-
-                  this.anon.request.post(
-                    `${this.tokens.readAndWrite}/grant`,
-                    {
-                      json: {
-                        token: this.tokens.readAndWrite,
-                        tokenHashPrefix: urlFragment,
-                      },
-                    },
-                    (err, response, body) => {
-                      if (err) {
-                        return cb(err)
-                      }
-                      expect(response.statusCode).to.equal(200)
-                      expect(body).to.deep.equal({
-                        redirect: '/restricted',
-                        anonWriteAccessDenied: true,
-                      })
-                      cb()
-                    }
-                  )
-                }
-              ),
-            cb =>
-              tryAnonContentAccess(
-                this.anon,
-                this.projectId,
-                this.tokens.readAndWrite,
-                (response, body) => {
-                  expect(response.statusCode).to.equal(403)
-                  expect(body).to.equal('Forbidden')
-                },
-                cb
-              ),
-            cb =>
-              this.anon.login((err, response, body) => {
-                expect(err).to.not.exist
-                expect(response.statusCode).to.equal(200)
-                expect(body.redir).to.equal(`/${tokenWithUrlFragment}`)
-                cb()
-              }),
-          ],
-          done
-        )
-      })
-    })
-  } else {
-    describe('anonymous read-and-write token, enabled', function () {
-      beforeEach(function (done) {
-        this.owner.createProject(
-          `token-anon-rw-test${Math.random()}`,
-          (err, projectId) => {
-            if (err != null) {
-              return done(err)
-            }
-            this.projectId = projectId
-            this.owner.makeTokenBased(this.projectId, err => {
-              if (err != null) {
-                return done(err)
-              }
-              this.owner.getProject(this.projectId, (err, project) => {
-                if (err != null) {
-                  return done(err)
-                }
-                this.tokens = project.tokens
-                done()
-              })
-            })
-          }
-        )
-      })
-
-      it('should allow the user to access project via read-and-write token url', function (done) {
-        async.series(
-          [
-            cb =>
-              tryEditorAccess(
-                this.anon,
-                this.projectId,
-                expectErrorResponse.restricted.html,
-                cb
-              ),
-            cb =>
-              tryReadAndWriteTokenAccess(
-                this.anon,
-                this.tokens.readAndWrite,
-                (response, body) => {
-                  expect(response.statusCode).to.equal(200)
-                },
-                (response, body) => {
-                  expect(response.statusCode).to.equal(200)
-                  expect(body.redirect).to.equal(`/project/${this.projectId}`)
-                  expect(body.grantAnonymousAccess).to.equal('readAndWrite')
-                },
-                cb
-              ),
-            cb =>
-              tryEditorAccess(
-                this.anon,
-                this.projectId,
-                (response, body) => {
-                  expect(response.statusCode).to.equal(200)
-                },
-                cb
-              ),
-            cb =>
-              tryAnonContentAccess(
-                this.anon,
-                this.projectId,
-                this.tokens.readAndWrite,
-                (response, body) => {
-                  expect(body.privilegeLevel).to.equal('readAndWrite')
-                },
-                cb
-              ),
-          ],
-          done
-        )
-      })
-
-      describe('made private again', function () {
-        beforeEach(function (done) {
-          this.owner.makePrivate(this.projectId, () => setTimeout(done, 1000))
-        })
-
-        it('should not allow the user to access read-and-write token', function (done) {
-          async.series(
-            [
-              cb =>
-                tryEditorAccess(
-                  this.anon,
-                  this.projectId,
-                  expectErrorResponse.restricted.html,
-                  cb
-                ),
-              cb =>
-                tryReadAndWriteTokenAccess(
-                  this.anon,
-                  this.tokens.readAndWrite,
-                  (response, body) => {
-                    expect(response.statusCode).to.equal(200)
-                  },
-                  (response, body) => {
-                    expect(response.statusCode).to.equal(404)
-                  },
-                  cb
-                ),
-              cb =>
-                tryEditorAccess(
-                  this.anon,
-                  this.projectId,
-                  expectErrorResponse.restricted.html,
-                  cb
-                ),
-              cb =>
-                tryAnonContentAccess(
-                  this.anon,
-                  this.projectId,
-                  this.tokens.readAndWrite,
-                  (response, body) => {
-                    expect(response.statusCode).to.equal(403)
-                    expect(body).to.equal('Forbidden')
-                  },
-                  cb
-                ),
-            ],
-            done
-          )
-        })
-
-        it('should deny access to access tokens', function (done) {
-          tryFetchProjectTokens(
-            this.anon,
-            this.projectId,
-            (error, response) => {
-              expect(error).to.equal(null)
-              expect(response.statusCode).to.equal(403)
-              done()
-            }
-          )
-        })
-      })
-
-      it('should 404 if project does not exist', function (done) {
-        async.series(
-          [
-            // delete project
-            cb => {
-              this.owner.deleteProject(this.projectId, cb)
-            },
-            cb =>
-              tryReadAndWriteTokenAccess(
-                this.anon,
-                this.tokens.readAndWrite,
-                (response, body) => {
-                  expect(response.statusCode).to.equal(200)
-                },
-                (response, body) => {
-                  expect(response.statusCode).to.equal(200)
-                  expect(body).to.deep.equal({
-                    v1Import: {
-                      status: 'mustLogin',
-                    },
-                  })
-                },
-                cb
-              ),
-          ],
-          done
-        )
-      })
-    })
-  }
 
   describe('private overleaf project', function () {
     beforeEach(function (done) {
@@ -1826,19 +1297,7 @@ describe('TokenAccess', function () {
     })
   })
 
-  describe('link sharing changes', function () {
-    beforeEach(function () {
-      this.getAssignmentForUser = sinon.stub(
-        SplitTestHandler.promises,
-        'getAssignmentForUser'
-      )
-      this.getAssignmentForUser.resolves({ variant: 'default' })
-    })
-
-    afterEach(function () {
-      this.getAssignmentForUser.restore()
-    })
-
+  describe('sharing updates consent page for read-and-write token deprecation', function () {
     describe('not a member of the project', function () {
       beforeEach(function (done) {
         this.projectName = `token-link-sharing-changes${Math.random()}`
@@ -1895,216 +1354,6 @@ describe('TokenAccess', function () {
       })
     })
 
-    describe('read and write token member of project', function () {
-      beforeEach(function (done) {
-        this.projectName = `token-link-sharing-changes${Math.random()}`
-        this.owner.createProject(this.projectName, (err, projectId) => {
-          if (err != null) {
-            return done(err)
-          }
-          this.projectId = projectId
-          this.owner.makeTokenBased(this.projectId, err => {
-            if (err != null) {
-              return done(err)
-            }
-            this.owner.getProject(this.projectId, (err, project) => {
-              if (err != null) {
-                return done(err)
-              }
-              this.tokens = project.tokens
-              // must do token accept before split test enabled
-              // otherwise would be automatically added to named collaborators
-              tryReadAndWriteTokenAccept(
-                this.other1,
-                this.tokens.readAndWrite,
-                (response, body) => {
-                  expect(response.statusCode).to.equal(200)
-                },
-                (response, body) => {
-                  expect(response.statusCode).to.equal(200)
-                  expect(body.redirect).to.equal(`/project/${this.projectId}`)
-                  expect(body.tokenAccessGranted).to.equal('readAndWrite')
-                },
-                done
-              )
-            })
-          })
-        })
-      })
-
-      describe('link sharing changes test not active', function () {
-        it('should redirect to project, same permissions as before', function (done) {
-          async.series(
-            [
-              cb => {
-                trySharingUpdatesPage(
-                  this.other1,
-                  this.projectId,
-                  expectRedirectToProject,
-                  cb
-                )
-              },
-              cb => {
-                trySharingUpdatesJoin(
-                  this.other1,
-                  this.projectId,
-                  expectRedirectToProject,
-                  cb
-                )
-              },
-              cb => {
-                trySharingUpdatesView(
-                  this.other1,
-                  this.projectId,
-                  expectRedirectToProject,
-                  cb
-                )
-              },
-              cb => {
-                tryContentAccess(
-                  this.other1,
-                  this.projectId,
-                  (response, body) => {
-                    expect(body.privilegeLevel).to.equal('readAndWrite')
-                    expect(body.isRestrictedUser).to.equal(false)
-                    expect(body.isTokenMember).to.equal(true)
-                    expect(body.isInvitedMember).to.equal(false)
-                    expect(body.project.owner).to.have.all.keys(
-                      '_id',
-                      'email',
-                      'first_name',
-                      'last_name',
-                      'privileges',
-                      'signUpDate'
-                    )
-                  },
-                  cb
-                )
-              },
-              cb => {
-                tryEditorAccess(
-                  this.other1,
-                  this.projectId,
-                  (response, body) => {
-                    expect(response.statusCode).to.equal(200)
-                  },
-                  cb
-                )
-              },
-            ],
-            done
-          )
-        })
-      })
-
-      describe('link sharing changes test is active', function () {
-        beforeEach(function () {
-          this.getAssignmentForUser.resolves({ variant: 'active' })
-        })
-        it('should show sharing updates page', function (done) {
-          trySharingUpdatesPage(
-            this.other1,
-            this.projectId,
-            (response, body) => {
-              expect(response.statusCode).to.equal(200)
-            },
-            done
-          )
-        })
-
-        it('should allow join to named collaborator', function (done) {
-          async.series(
-            [
-              cb => {
-                trySharingUpdatesJoin(
-                  this.other1,
-                  this.projectId,
-                  (response, body) => {
-                    expect(response.statusCode).to.equal(204)
-                  },
-                  cb
-                )
-              },
-              cb => {
-                tryContentAccess(
-                  this.other1,
-                  this.projectId,
-                  (response, body) => {
-                    expect(body.privilegeLevel).to.equal('readAndWrite')
-                    expect(body.isRestrictedUser).to.equal(false)
-                    expect(body.isTokenMember).to.equal(false)
-                    expect(body.isInvitedMember).to.equal(true) // now collaborator
-                    expect(body.project.owner).to.have.all.keys(
-                      '_id',
-                      'email',
-                      'first_name',
-                      'last_name',
-                      'privileges',
-                      'signUpDate'
-                    )
-                  },
-                  cb
-                )
-              },
-              cb => {
-                tryEditorAccess(
-                  this.other1,
-                  this.projectId,
-                  (response, body) => {
-                    expect(response.statusCode).to.equal(200)
-                  },
-                  cb
-                )
-              },
-            ],
-            done
-          )
-        })
-
-        it('should allow move to anonymous viewer', function (done) {
-          async.series(
-            [
-              cb => {
-                trySharingUpdatesView(
-                  this.other1,
-                  this.projectId,
-                  (response, body) => {
-                    expect(response.statusCode).to.equal(204)
-                  },
-                  cb
-                )
-              },
-              cb => {
-                tryContentAccess(
-                  this.other1,
-                  this.projectId,
-                  (response, body) => {
-                    expect(body.privilegeLevel).to.equal('readOnly')
-                    expect(body.isRestrictedUser).to.equal(true)
-                    expect(body.isTokenMember).to.equal(true)
-                    expect(body.isInvitedMember).to.equal(false)
-                    expect(body.project.owner).to.have.keys('_id')
-                  },
-                  cb
-                )
-              },
-              cb => {
-                tryEditorAccess(
-                  this.other1,
-                  this.projectId,
-                  (response, body) => {
-                    expect(response.statusCode).to.equal(200)
-                  },
-                  cb
-                )
-              },
-            ],
-            done
-          )
-        })
-      })
-    })
-
     describe('read-only token member of project', function () {
       beforeEach(function (done) {
         this.projectName = `token-link-sharing-changes${Math.random()}`
@@ -2140,72 +1389,66 @@ describe('TokenAccess', function () {
         })
       })
 
-      describe('link sharing changes test is active', function () {
-        beforeEach(function () {
-          this.getAssignmentForUser.resolves({ variant: 'active' })
-        })
-
-        it('should redirect to project, same view permissions as before', function (done) {
-          async.series(
-            [
-              cb => {
-                trySharingUpdatesPage(
-                  this.other1,
-                  this.projectId,
-                  expectRedirectToProject,
-                  cb
-                )
-              },
-              cb => {
-                trySharingUpdatesJoin(
-                  this.other1,
-                  this.projectId,
-                  expectRedirectToProject,
-                  cb
-                )
-              },
-              cb => {
-                trySharingUpdatesView(
-                  this.other1,
-                  this.projectId,
-                  expectRedirectToProject,
-                  cb
-                )
-              },
-              cb => {
-                // allow content access read-only
-                tryContentAccess(
-                  this.other1,
-                  this.projectId,
-                  (response, body) => {
-                    expect(body.privilegeLevel).to.equal('readOnly')
-                    expect(body.isRestrictedUser).to.equal(true)
-                    expect(body.isTokenMember).to.equal(true)
-                    expect(body.isInvitedMember).to.equal(false)
-                    expect(body.project.owner).to.have.keys('_id')
-                    expect(body.project.owner).to.not.have.any.keys(
-                      'email',
-                      'first_name',
-                      'last_name'
-                    )
-                  },
-                  cb
-                )
-              },
-              cb => {
-                tryEditorAccess(
-                  this.other1,
-                  this.projectId,
-                  (response, body) => {
-                    expect(response.statusCode).to.equal(200)
-                  },
-                  cb
-                )
-              },
-            ],
-            done
-          )
-        })
+      it('should redirect to project', function (done) {
+        async.series(
+          [
+            cb => {
+              trySharingUpdatesPage(
+                this.other1,
+                this.projectId,
+                expectRedirectToProject,
+                cb
+              )
+            },
+            cb => {
+              trySharingUpdatesJoin(
+                this.other1,
+                this.projectId,
+                expectRedirectToProject,
+                cb
+              )
+            },
+            cb => {
+              trySharingUpdatesView(
+                this.other1,
+                this.projectId,
+                expectRedirectToProject,
+                cb
+              )
+            },
+            cb => {
+              // allow content access read-only
+              tryContentAccess(
+                this.other1,
+                this.projectId,
+                (response, body) => {
+                  expect(body.privilegeLevel).to.equal('readOnly')
+                  expect(body.isRestrictedUser).to.equal(true)
+                  expect(body.isTokenMember).to.equal(true)
+                  expect(body.isInvitedMember).to.equal(false)
+                  expect(body.project.owner).to.have.keys('_id')
+                  expect(body.project.owner).to.not.have.any.keys(
+                    'email',
+                    'first_name',
+                    'last_name'
+                  )
+                },
+                cb
+              )
+            },
+            cb => {
+              tryEditorAccess(
+                this.other1,
+                this.projectId,
+                (response, body) => {
+                  expect(response.statusCode).to.equal(200)
+                },
+                cb
+              )
+            },
+          ],
+          done
+        )
       })
     })
   })

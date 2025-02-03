@@ -485,52 +485,32 @@ const _ProjectController = {
           anonRequestToken
         )
 
-      const [
-        linkSharingChanges,
-        linkSharingEnforcement,
-        reviewerRoleAssignment,
-      ] = await Promise.all([
-        SplitTestHandler.promises.getAssignmentForUser(
-          project.owner_ref,
-          'link-sharing-warning'
-        ),
-        SplitTestHandler.promises.getAssignmentForUser(
-          project.owner_ref,
-          'link-sharing-enforcement'
-        ),
-        SplitTestHandler.promises.getAssignmentForUser(
+      const reviewerRoleAssignment =
+        await SplitTestHandler.promises.getAssignmentForUser(
           project.owner_ref,
           'reviewer-role'
-        ),
-      ])
+        )
 
-      if (linkSharingChanges?.variant === 'active') {
-        if (linkSharingEnforcement?.variant === 'active') {
-          await Modules.promises.hooks.fire(
-            'enforceCollaboratorLimit',
+      await Modules.promises.hooks.fire('enforceCollaboratorLimit', projectId)
+      if (isTokenMember) {
+        // Check explicitly that the user is in read write token refs, while this could be inferred
+        // from the privilege level, the privilege level of token members might later be restricted
+        const isReadWriteTokenMember =
+          await CollaboratorsGetter.promises.userIsReadWriteTokenMember(
+            userId,
             projectId
           )
-        }
-        if (isTokenMember) {
-          // Check explicitly that the user is in read write token refs, while this could be inferred
-          // from the privilege level, the privilege level of token members might later be restricted
-          const isReadWriteTokenMember =
-            await CollaboratorsGetter.promises.userIsReadWriteTokenMember(
+        if (isReadWriteTokenMember) {
+          // Check for an edge case where a user is both in read write token access refs but also
+          // an invited read write member. Ensure they are not redirected to the sharing updates page
+          // We could also delete the token access ref if the user is already a member of the project
+          const isInvitedReadWriteMember =
+            await CollaboratorsGetter.promises.isUserInvitedReadWriteMemberOfProject(
               userId,
               projectId
             )
-          if (isReadWriteTokenMember) {
-            // Check for an edge case where a user is both in read write token access refs but also
-            // an invited read write member. Ensure they are not redirected to the sharing updates page
-            // We could also delete the token access ref if the user is already a member of the project
-            const isInvitedReadWriteMember =
-              await CollaboratorsGetter.promises.isUserInvitedReadWriteMemberOfProject(
-                userId,
-                projectId
-              )
-            if (!isInvitedReadWriteMember) {
-              return res.redirect(`/project/${projectId}/sharing-updates`)
-            }
+          if (!isInvitedReadWriteMember) {
+            return res.redirect(`/project/${projectId}/sharing-updates`)
           }
         }
       }
@@ -589,9 +569,6 @@ const _ProjectController = {
         const exceedAtLimit = planLimit > -1 && namedEditors >= planLimit
         const projectOpenedSegmentation = {
           projectId: project._id,
-          // temporary link sharing segmentation:
-          linkSharingWarning: linkSharingChanges?.variant,
-          linkSharingEnforcement: linkSharingEnforcement?.variant,
           namedEditors,
           pendingEditors,
           tokenEditors: project.tokenAccessReadAndWrite_refs?.length || 0,
@@ -833,8 +810,6 @@ const _ProjectController = {
         useOpenTelemetry: Settings.useOpenTelemetryClient,
         hasTrackChangesFeature: Features.hasFeature('track-changes'),
         projectTags,
-        linkSharingWarning: linkSharingChanges?.variant === 'active',
-        linkSharingEnforcement: linkSharingEnforcement?.variant === 'active',
         usedLatex:
           // only use the usedLatex value if the split test is enabled
           splitTestAssignments['default-visual-for-beginners']?.variant ===

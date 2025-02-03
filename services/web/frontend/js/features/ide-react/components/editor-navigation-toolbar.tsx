@@ -3,11 +3,9 @@ import { useOnlineUsersContext } from '@/features/ide-react/context/online-users
 import { useEditorManagerContext } from '@/features/ide-react/context/editor-manager-context'
 import * as eventTracking from '@/infrastructure/event-tracking'
 import EditorNavigationToolbarRoot from '@/features/editor-navigation-toolbar/components/editor-navigation-toolbar-root'
-import NewShareProjectModal from '@/features/share-project-modal/components/restricted-link-sharing/share-project-modal'
-import ShareProjectModal from '@/features/share-project-modal/components/share-project-modal'
+import ShareProjectModal from '@/features/share-project-modal/components/restricted-link-sharing/share-project-modal'
 import EditorOverLimitModal from '@/features/share-project-modal/components/restricted-link-sharing/editor-over-limit-modal'
 import ViewOnlyAccessModal from '@/features/share-project-modal/components/restricted-link-sharing/view-only-access-modal'
-import getMeta from '@/utils/meta'
 
 function EditorNavigationToolbar() {
   const [showShareModal, setShowShareModal] = useState(false)
@@ -23,8 +21,6 @@ function EditorNavigationToolbar() {
     setShowShareModal(false)
   }, [])
 
-  const showNewShareModal = getMeta('ol-linkSharingWarning')
-
   return (
     <>
       <EditorNavigationToolbarRoot
@@ -32,22 +28,13 @@ function EditorNavigationToolbar() {
         openDoc={openDoc}
         openShareProjectModal={handleOpenShareModal}
       />
-      {showNewShareModal ? (
-        <>
-          <EditorOverLimitModal />
-          <ViewOnlyAccessModal />
-          <NewShareProjectModal
-            show={showShareModal}
-            handleOpen={handleOpenShareModal}
-            handleHide={handleHideShareModal}
-          />
-        </>
-      ) : (
-        <ShareProjectModal
-          show={showShareModal}
-          handleHide={handleHideShareModal}
-        />
-      )}
+      <EditorOverLimitModal />
+      <ViewOnlyAccessModal />
+      <ShareProjectModal
+        show={showShareModal}
+        handleOpen={handleOpenShareModal}
+        handleHide={handleHideShareModal}
+      />
     </>
   )
 }

@@ -9,7 +9,6 @@ import UserGetter from '../User/UserGetter.js'
 import ProjectGetter from '../Project/ProjectGetter.js'
 import NotificationsBuilder from '../Notifications/NotificationsBuilder.js'
 import PrivilegeLevels from '../Authorization/PrivilegeLevels.js'
-import SplitTestHandler from '../SplitTests/SplitTestHandler.js'
 import LimitationsManager from '../Subscription/LimitationsManager.js'
 import ProjectAuditLogHandler from '../Project/ProjectAuditLogHandler.js'
 import _ from 'lodash'
@@ -148,14 +147,8 @@ const CollaboratorsInviteHandler = {
     const project = await ProjectGetter.promises.getProject(projectId, {
       owner_ref: 1,
     })
-    const linkSharingEnforcement =
-      await SplitTestHandler.promises.getAssignmentForUser(
-        project.owner_ref,
-        'link-sharing-enforcement'
-      )
     const pendingEditor =
       invite.privileges === PrivilegeLevels.READ_AND_WRITE &&
-      linkSharingEnforcement?.variant === 'active' &&
       !(await LimitationsManager.promises.canAcceptEditCollaboratorInvite(
         project._id
       ))

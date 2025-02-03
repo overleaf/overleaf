@@ -8,7 +8,6 @@ import { expressify } from '@overleaf/promise-utils'
 import AuthorizationManager from '../Authorization/AuthorizationManager.js'
 import PrivilegeLevels from '../Authorization/PrivilegeLevels.js'
 import ProjectAuditLogHandler from '../Project/ProjectAuditLogHandler.js'
-import SplitTestHandler from '../SplitTests/SplitTestHandler.js'
 import CollaboratorsInviteHandler from '../Collaborators/CollaboratorsInviteHandler.mjs'
 import CollaboratorsHandler from '../Collaborators/CollaboratorsHandler.js'
 import EditorRealTimeController from '../Editor/EditorRealTimeController.js'
@@ -317,108 +316,60 @@ async function grantTokenAccessReadAndWrite(req, res, next) {
       return next(new Errors.NotFoundError())
     }
 
-    const linkSharingChanges =
-      await SplitTestHandler.promises.getAssignmentForUser(
-        project.owner_ref,
-        'link-sharing-warning'
-      )
-
-    if (linkSharingChanges?.variant === 'active') {
-      if (!confirmedByUser) {
-        return res.json({
-          requireAccept: {
-            linkSharingChanges: true,
-            projectName: project.name,
-          },
-        })
-      }
-
-      const linkSharingEnforcement =
-        await SplitTestHandler.promises.getAssignmentForUser(
-          project.owner_ref,
-          'link-sharing-enforcement'
-        )
-      const pendingEditor =
-        linkSharingEnforcement?.variant === 'active' &&
-        !(await LimitationsManager.promises.canAcceptEditCollaboratorInvite(
-          project._id
-        ))
-      await ProjectAuditLogHandler.promises.addEntry(
-        project._id,
-        'accept-via-link-sharing',
-        userId,
-        req.ip,
-        {
-          privileges: pendingEditor ? 'readOnly' : 'readAndWrite',
-          ...(pendingEditor && { pendingEditor: true }),
-        }
-      )
-      AnalyticsManager.recordEventForUserInBackground(
-        userId,
-        'project-joined',
-        {
-          mode: pendingEditor ? 'read-only' : 'read-write',
-          projectId: project._id.toString(),
-          ...(pendingEditor && { pendingEditor: true }),
-        }
-      )
-      await CollaboratorsHandler.promises.addUserIdToProject(
-        project._id,
-        undefined,
-        userId,
-        pendingEditor
-          ? PrivilegeLevels.READ_ONLY
-          : PrivilegeLevels.READ_AND_WRITE,
-        { pendingEditor }
-      )
-
-      // remove pending invite and notification
-      const userEmails =
-        await UserGetter.promises.getUserConfirmedEmails(userId)
-      await CollaboratorsInviteHandler.promises.revokeInviteForUser(
-        project._id,
-        userEmails
-      )
-      // Should be a noop if the user is already a member,
-      // and would redirect transparently into the project.
-      EditorRealTimeController.emitToRoom(
-        project._id,
-        'project:membership:changed',
-        { members: true, invites: true }
-      )
-
+    if (!confirmedByUser) {
       return res.json({
-        redirect: `/project/${project._id}`,
-      })
-    } else {
-      if (!confirmedByUser) {
-        return res.json({
-          requireAccept: {
-            projectName: project.name,
-          },
-        })
-      }
-
-      if (!project.tokenAccessReadAndWrite_refs.some(id => id.equals(userId))) {
-        await ProjectAuditLogHandler.promises.addEntry(
-          project._id,
-          'join-via-token',
-          userId,
-          req.ip,
-          { privileges: 'readAndWrite' }
-        )
-      }
-
-      await TokenAccessHandler.promises.addReadAndWriteUserToProject(
-        userId,
-        project._id
-      )
-
-      return res.json({
-        redirect: `/project/${project._id}`,
-        tokenAccessGranted: tokenType,
+        requireAccept: {
+          projectName: project.name,
+        },
       })
     }
+
+    const pendingEditor =
+      !(await LimitationsManager.promises.canAcceptEditCollaboratorInvite(
+        project._id
+      ))
+    await ProjectAuditLogHandler.promises.addEntry(
+      project._id,
+      'accept-via-link-sharing',
+      userId,
+      req.ip,
+      {
+        privileges: pendingEditor ? 'readOnly' : 'readAndWrite',
+        ...(pendingEditor && { pendingEditor: true }),
+      }
+    )
+    AnalyticsManager.recordEventForUserInBackground(userId, 'project-joined', {
+      mode: pendingEditor ? 'read-only' : 'read-write',
+      projectId: project._id.toString(),
+      ...(pendingEditor && { pendingEditor: true }),
+    })
+    await CollaboratorsHandler.promises.addUserIdToProject(
+      project._id,
+      undefined,
+      userId,
+      pendingEditor
+        ? PrivilegeLevels.READ_ONLY
+        : PrivilegeLevels.READ_AND_WRITE,
+      { pendingEditor }
+    )
+
+    // remove pending invite and notification
+    const userEmails = await UserGetter.promises.getUserConfirmedEmails(userId)
+    await CollaboratorsInviteHandler.promises.revokeInviteForUser(
+      project._id,
+      userEmails
+    )
+    // Should be a noop if the user is already a member,
+    // and would redirect transparently into the project.
+    EditorRealTimeController.emitToRoom(
+      project._id,
+      'project:membership:changed',
+      { members: true, invites: true }
+    )
+
+    return res.json({
+      redirect: `/project/${project._id}`,
+    })
   } catch (err) {
     return next(
       OError.tag(
@@ -516,14 +467,6 @@ async function ensureUserCanUseSharingUpdatesConsentPage(req, res, next) {
   if (!project) {
     throw new Errors.NotFoundError()
   }
-  const linkSharingChanges =
-    await SplitTestHandler.promises.getAssignmentForUser(
-      project.owner_ref,
-      'link-sharing-warning'
-    )
-  if (linkSharingChanges?.variant !== 'active') {
-    return AsyncFormHelper.redirect(req, res, `/project/${projectId}`)
-  }
   const isReadWriteTokenMember =
     await CollaboratorsGetter.promises.userIsReadWriteTokenMember(
       userId,
@@ -567,13 +510,7 @@ async function moveReadWriteToCollaborators(req, res, next) {
       userId,
       projectId
     )
-  const linkSharingEnforcement =
-    await SplitTestHandler.promises.getAssignmentForUser(
-      project.owner_ref,
-      'link-sharing-enforcement'
-    )
   const pendingEditor =
-    linkSharingEnforcement?.variant === 'active' &&
     !(await LimitationsManager.promises.canAcceptEditCollaboratorInvite(
       project._id
     ))
