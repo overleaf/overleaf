@@ -734,6 +734,14 @@ const _ProjectController = {
           ? 'project/ide-react-detached'
           : 'project/ide-react'
 
+      let chatEnabled
+      if (Features.hasFeature('saas')) {
+        chatEnabled =
+          Features.hasFeature('chat') && req.capabilitySet.has('chat')
+      } else {
+        chatEnabled = Features.hasFeature('chat')
+      }
+
       res.render(template, {
         title: project.name,
         priority_title: true,
@@ -787,8 +795,7 @@ const _ProjectController = {
           isTokenMember,
           isInvitedMember
         ),
-        chatEnabled:
-          Features.hasFeature('chat') && req.capabilitySet.has('chat'),
+        chatEnabled,
         projectHistoryBlobsEnabled: Features.hasFeature(
           'project-history-blobs'
         ),
