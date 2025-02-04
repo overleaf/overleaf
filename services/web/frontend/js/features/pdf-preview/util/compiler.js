@@ -5,6 +5,7 @@ import { debounce } from 'lodash'
 import { trackPdfDownload } from './metrics'
 import { enablePdfCaching } from './pdf-caching-flags'
 import { debugConsole } from '@/utils/debugging'
+import { signalWithTimeout } from '@/utils/abort-signal'
 
 const AUTO_COMPILE_MAX_WAIT = 5000
 // We add a 2 second debounce to sending user changes to server if they aren't
@@ -86,17 +87,9 @@ export default class DocumentCompiler {
     }
 
     try {
-      if (
-        typeof AbortSignal.any === 'function' &&
-        typeof AbortSignal.timeout === 'function'
-      ) {
-        await this.openDocs.awaitBufferedOps(
-          AbortSignal.any([
-            this.signal,
-            AbortSignal.timeout(PENDING_OP_MAX_WAIT),
-          ])
-        )
-      }
+      await this.openDocs.awaitBufferedOps(
+        signalWithTimeout(this.signal, PENDING_OP_MAX_WAIT)
+      )
 
       // reset values
       this.setChangedAt(0) // TODO: wait for doc:saved?
