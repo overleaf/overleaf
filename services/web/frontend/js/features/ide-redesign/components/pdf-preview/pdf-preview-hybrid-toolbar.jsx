@@ -1,6 +1,6 @@
 import { memo } from 'react'
 import OlButtonToolbar from '@/features/ui/components/ol/ol-button-toolbar'
-import PdfCompileButton from './pdf-compile-button'
+import PdfCompileButton from '@/features/pdf-preview/components/pdf-compile-button'
 import PdfHybridDownloadButton from '@/features/pdf-preview/components/pdf-hybrid-download-button'
 
 function PdfPreviewHybridToolbar() {
