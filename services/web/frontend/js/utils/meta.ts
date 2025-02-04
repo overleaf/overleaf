@@ -63,6 +63,7 @@ export interface Meta {
 
   // dynamic keys based on permissions
   'ol-canUseFlexibleLicensing': boolean
+  'ol-canUseFlexibleLicensingForConsolidatedPlans': boolean
   'ol-cannot-add-secondary-email': boolean
   'ol-cannot-change-password': boolean
   'ol-cannot-delete-own-account': boolean
