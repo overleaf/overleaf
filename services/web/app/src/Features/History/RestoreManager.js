@@ -199,6 +199,37 @@ const RestoreManager = {
         projectId,
         newRanges.comments.map(({ op: { t } }) => t)
       )
+
+    // Resolve/reopen threads in chat service to match what is in history
+    for (const commentRange of newRanges.comments) {
+      const threadData = newCommentThreadData[commentRange.op.t]
+      if (!threadData) {
+        // comment thread was deleted
+        continue
+      }
+
+      if (commentRange.op.resolved && threadData.resolved == null) {
+        // The history snapshot stores the comment's resolved property as a boolean,
+        // but it does not include information about who resolved the comment or the timestamp.
+        // Until this is fixed, we will resolve the thread with the current user and the current timestamp.
+        await ChatApiHandler.promises.resolveThread(
+          projectId,
+          commentRange.op.t,
+          userId
+        )
+        threadData.resolved = true
+        threadData.resolved_by_user_id = userId
+        threadData.resolved_at = new Date().toISOString()
+      } else if (!commentRange.op.resolved && threadData.resolved != null) {
+        await ChatApiHandler.promises.reopenThread(projectId, commentRange.op.t)
+        delete threadData.resolved
+        delete threadData.resolved_by_user_id
+        delete threadData.resolved_at
+      }
+      // remove the resolved property from the comment range as the chat service is synced at this point
+      delete commentRange.op.resolved
+    }
+
     await ChatManager.promises.injectUserInfoIntoThreads(newCommentThreadData)
 
     // Only keep restored comment ranges that point to a valid thread.
