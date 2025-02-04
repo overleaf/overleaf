@@ -427,6 +427,9 @@ export const EditorManagerProvider: FC = ({ children }) => {
   const openDoc = useCallback(
     async (doc: Doc, options: OpenDocOptions = {}) => {
       debugConsole.log(`[openDoc] Opening ${doc._id}`)
+
+      const { promise, resolve, reject } = Promise.withResolvers<Doc>()
+
       if (view === 'editor') {
         // store position of previous doc before switching docs
         eventEmitter.emit('store-doc-position')
@@ -458,6 +461,8 @@ export const EditorManagerProvider: FC = ({ children }) => {
             eventEmitter.emit('editor:gotoOffset', options)
           })
         }
+
+        resolve(doc)
       }
 
       // If we already have the document open, or are opening the document, we can return at this point.
@@ -493,7 +498,10 @@ export const EditorManagerProvider: FC = ({ children }) => {
           t('error_opening_document'),
           t('error_opening_document_detail')
         )
+        reject(error)
       }
+
+      return promise
     },
     [
       eventEmitter,
