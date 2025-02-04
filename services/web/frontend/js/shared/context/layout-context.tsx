@@ -24,7 +24,7 @@ import { isMac } from '@/shared/utils/os'
 export type IdeLayout = 'sideBySide' | 'flat'
 export type IdeView = 'editor' | 'file' | 'pdf' | 'history'
 
-type LayoutContextValue = {
+export type LayoutContextValue = {
   reattach: () => void
   detach: () => void
   detachIsLinked: boolean

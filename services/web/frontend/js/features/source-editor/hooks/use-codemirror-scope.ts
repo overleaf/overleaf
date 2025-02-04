@@ -476,7 +476,7 @@ function useCodeMirrorScope(view: EditorView) {
           view,
           options.gotoLine,
           options.gotoColumn,
-          options.selectionLength
+          options.selectText
         )
         if (options.syncToPdf) {
           emitSyncToPdf()

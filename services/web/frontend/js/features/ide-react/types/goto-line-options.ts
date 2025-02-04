@@ -1,6 +1,6 @@
 export interface GotoLineOptions {
   gotoLine: number
   gotoColumn?: number
-  selectionLength?: number
+  selectText?: string
   syncToPdf?: boolean
 }

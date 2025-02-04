@@ -131,20 +131,32 @@ const dispatchSelectionAndScroll = (
   })
 }
 
+const selectTextIfExists = (doc: Text, pos: number, selectText: string) => {
+  const selectionLength = pos + selectText.length
+  const text = doc.sliceString(pos, selectionLength)
+  return text === selectText
+    ? EditorSelection.range(pos, selectionLength)
+    : EditorSelection.cursor(doc.lineAt(pos).from)
+}
+
 export const setCursorLineAndScroll = (
   view: EditorView,
   lineNumber: number,
   columnNumber = 0,
-  selectionLength?: number
+  selectText?: string
 ) => {
   // TODO: map the position through any changes since the previous compile?
 
   let selectionRange
   try {
-    const pos = findValidPosition(view.state.doc, lineNumber, columnNumber)
-    selectionRange = selectionLength
-      ? EditorSelection.range(pos, pos + selectionLength)
-      : EditorSelection.cursor(pos)
+    const { doc } = view.state
+    const pos = findValidPosition(doc, lineNumber, columnNumber)
+    dispatchSelectionAndScroll(
+      view,
+      selectText
+        ? selectTextIfExists(doc, pos, selectText)
+        : EditorSelection.cursor(pos)
+    )
   } catch (error) {
     // ignore invalid cursor position
     debugConsole.debug('invalid cursor position', error)
