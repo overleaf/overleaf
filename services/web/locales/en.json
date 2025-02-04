@@ -1821,6 +1821,7 @@
   "saml_login_identity_not_found_error": "Sorry, we were not able to find an Overleaf account set up for single sign-on with this identity provider.",
   "saml_metadata": "Overleaf SAML Metadata",
   "saml_missing_signature_error": "Sorry, the information received from your identity provider is not signed (both response and assertion signatures are required).  Please contact your administrator for more information.",
+  "saml_missing_user_attribute": "There was a problem with your Single Sign-on authentication. Your organization did not provide the required information to complete authentication. Please contact your administrator for more information.",
   "saml_response": "SAML Response",
   "save": "Save",
   "save_20_percent": "save 20%",

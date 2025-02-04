@@ -138,6 +138,24 @@ class SAMLMissingSignatureError extends SAMLAuthenticationError {
   }
 }
 
+class SAMLInvalidUserIdentifierError extends SAMLAuthenticationError {
+  get i18nKey() {
+    return 'saml_authentication_required_error'
+  }
+}
+
+class SAMLInvalidUserAttributeError extends SAMLAuthenticationError {
+  get i18nKey() {
+    return 'saml_authentication_required_error'
+  }
+}
+
+class SAMLMissingUserIdentifierError extends SAMLAuthenticationError {
+  get i18nKey() {
+    return 'saml_missing_user_attribute'
+  }
+}
+
 class SAMLInvalidResponseError extends SAMLAuthenticationError {}
 
 class SAMLResponseAlreadyProcessedError extends SAMLInvalidResponseError {
@@ -305,7 +323,10 @@ module.exports = {
   SAMLGroupSSOLoginIdentityMismatchError,
   SAMLGroupSSOLoginIdentityNotFoundError,
   SAMLGroupSSODisabledError,
+  SAMLInvalidUserAttributeError,
+  SAMLInvalidUserIdentifierError,
   SAMLInvalidSignatureError,
+  SAMLMissingUserIdentifierError,
   SAMLMissingSignatureError,
   SAMLInvalidResponseError,
   SAMLLoginFailureError,
