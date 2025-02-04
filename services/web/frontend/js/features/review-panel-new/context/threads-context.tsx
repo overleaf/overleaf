@@ -211,6 +211,34 @@ export const ThreadsProvider: FC = ({ children }) => {
     }, [])
   )
 
+  useSocketListener(
+    socket,
+    'new-comment-threads',
+    useCallback(threads => {
+      setData(prevState => {
+        const newThreads = { ...prevState }
+        for (const threadId of Object.keys(threads)) {
+          const thread = threads[threadId]
+          const newThreadData: ReviewPanelCommentThread = {
+            messages: [],
+            resolved: thread.resolved,
+            resolved_at: thread.resolved_at,
+            resolved_by_user_id: thread.resolved_by_user_id,
+            resolved_by_user: thread.resolved_by_user,
+          }
+          for (const message of thread.messages) {
+            newThreadData.messages.push({
+              ...message,
+              timestamp: new Date(message.timestamp),
+            })
+          }
+          newThreads[threadId as ThreadId] = newThreadData
+        }
+        return newThreads
+      })
+    }, [])
+  )
+
   const actions = useMemo(
     () => ({
       async addComment(pos: number, text: string, content: string) {
