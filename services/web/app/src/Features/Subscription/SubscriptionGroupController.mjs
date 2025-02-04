@@ -123,9 +123,10 @@ async function _removeUserFromGroup(
  */
 async function addSeatsToGroupSubscription(req, res) {
   try {
+    const userId = SessionManager.getLoggedInUserId(req.session)
     const { subscription, plan } =
       await SubscriptionGroupHandler.promises.getUsersGroupSubscriptionDetails(
-        req
+        userId
       )
     await SubscriptionGroupHandler.promises.ensureFlexibleLicensingEnabled(plan)
 
@@ -151,9 +152,11 @@ async function addSeatsToGroupSubscription(req, res) {
  */
 async function previewAddSeatsSubscriptionChange(req, res) {
   try {
+    const userId = SessionManager.getLoggedInUserId(req.session)
     const preview =
       await SubscriptionGroupHandler.promises.previewAddSeatsSubscriptionChange(
-        req
+        userId,
+        req.body.adding
       )
 
     res.json(preview)
@@ -173,9 +176,11 @@ async function previewAddSeatsSubscriptionChange(req, res) {
  */
 async function createAddSeatsSubscriptionChange(req, res) {
   try {
+    const userId = SessionManager.getLoggedInUserId(req.session)
     const create =
       await SubscriptionGroupHandler.promises.createAddSeatsSubscriptionChange(
-        req
+        userId,
+        req.body.adding
       )
 
     res.json(create)

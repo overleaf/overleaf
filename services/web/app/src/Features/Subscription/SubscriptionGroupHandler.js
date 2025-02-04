@@ -3,7 +3,6 @@ const SubscriptionUpdater = require('./SubscriptionUpdater')
 const SubscriptionLocator = require('./SubscriptionLocator')
 const SubscriptionController = require('./SubscriptionController')
 const { Subscription } = require('../../models/Subscription')
-const SessionManager = require('../Authentication/SessionManager')
 const RecurlyClient = require('./RecurlyClient')
 const PlansLocator = require('./PlansLocator')
 const SubscriptionHandler = require('./SubscriptionHandler')
@@ -63,10 +62,13 @@ async function ensureFlexibleLicensingEnabled(plan) {
   }
 }
 
-async function getUsersGroupSubscriptionDetails(req) {
-  const userId = SessionManager.getLoggedInUserId(req.session)
+async function getUsersGroupSubscriptionDetails(userId) {
   const subscription =
     await SubscriptionLocator.promises.getUsersSubscription(userId)
+
+  if (!subscription) {
+    throw new Error('No subscription was found')
+  }
 
   if (!subscription.groupPlan) {
     throw new Error('User subscription is not a group plan')
@@ -85,12 +87,10 @@ async function getUsersGroupSubscriptionDetails(req) {
   }
 }
 
-async function _addSeatsSubscriptionChange(req) {
-  const adding = req.body.adding
+async function _addSeatsSubscriptionChange(userId, adding) {
   const { recurlySubscription, plan } =
-    await getUsersGroupSubscriptionDetails(req)
+    await getUsersGroupSubscriptionDetails(userId)
   await ensureFlexibleLicensingEnabled(plan)
-  const userId = SessionManager.getLoggedInUserId(req.session)
   const currentAddonQuantity =
     recurlySubscription.addOns.find(
       addOn => addOn.code === MEMBERS_LIMIT_ADD_ON_CODE
@@ -135,15 +135,14 @@ async function _addSeatsSubscriptionChange(req) {
 
   return {
     changeRequest,
-    userId,
     currentAddonQuantity,
     recurlySubscription,
   }
 }
 
-async function previewAddSeatsSubscriptionChange(req) {
-  const { changeRequest, userId, currentAddonQuantity } =
-    await _addSeatsSubscriptionChange(req)
+async function previewAddSeatsSubscriptionChange(userId, adding) {
+  const { changeRequest, currentAddonQuantity } =
+    await _addSeatsSubscriptionChange(userId, adding)
   const paymentMethod = await RecurlyClient.promises.getPaymentMethod(userId)
   const subscriptionChange =
     await RecurlyClient.promises.previewSubscriptionChange(changeRequest)
@@ -166,16 +165,16 @@ async function previewAddSeatsSubscriptionChange(req) {
   return subscriptionChangePreview
 }
 
-async function createAddSeatsSubscriptionChange(req) {
-  const { changeRequest, userId, recurlySubscription } =
-    await _addSeatsSubscriptionChange(req)
+async function createAddSeatsSubscriptionChange(userId, adding) {
+  const { changeRequest, recurlySubscription } =
+    await _addSeatsSubscriptionChange(userId, adding)
   await RecurlyClient.promises.applySubscriptionChangeRequest(changeRequest)
   await SubscriptionHandler.promises.syncSubscription(
     { uuid: recurlySubscription.id },
     userId
   )
 
-  return { adding: req.body.adding }
+  return { adding }
 }
 
 async function _getUpgradeTargetPlanCodeMaybeThrow(subscription) {

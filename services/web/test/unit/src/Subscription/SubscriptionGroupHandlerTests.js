@@ -290,13 +290,15 @@ describe('SubscriptionGroupHandler', function () {
         .resolves({ groupPlan: false })
 
       await expect(
-        this.Handler.promises.getUsersGroupSubscriptionDetails(this.req)
+        this.Handler.promises.getUsersGroupSubscriptionDetails(
+          this.adminUser_id
+        )
       ).to.be.rejectedWith('User subscription is not a group plan')
     })
 
     it('should return users group subscription details', async function () {
       const data = await this.Handler.promises.getUsersGroupSubscriptionDetails(
-        this.req
+        this.adminUser_id
       )
 
       expect(data).to.deep.equal({
@@ -355,10 +357,11 @@ describe('SubscriptionGroupHandler', function () {
         it('should return the subscription change preview', async function () {
           const preview =
             await this.Handler.promises.previewAddSeatsSubscriptionChange(
-              this.req
+              this.adminUser_id,
+              this.adding
             )
           this.RecurlyClient.promises.getPaymentMethod
-            .calledWith(this.user_id)
+            .calledWith(this.adminUser_id)
             .should.equal(true)
           this.RecurlyClient.promises.previewSubscriptionChange
             .calledWith(this.changeRequest)
@@ -386,14 +389,18 @@ describe('SubscriptionGroupHandler', function () {
         it('should change the subscription', async function () {
           const result =
             await this.Handler.promises.createAddSeatsSubscriptionChange(
-              this.req
+              this.adminUser_id,
+              this.adding
             )
 
           this.RecurlyClient.promises.applySubscriptionChangeRequest
             .calledWith(this.changeRequest)
             .should.equal(true)
           this.SubscriptionHandler.promises.syncSubscription
-            .calledWith({ uuid: this.recurlySubscription.id }, this.user_id)
+            .calledWith(
+              { uuid: this.recurlySubscription.id },
+              this.adminUser_id
+            )
             .should.equal(true)
           expect(result).to.deep.equal({
             adding: this.req.body.adding,
@@ -430,7 +437,7 @@ describe('SubscriptionGroupHandler', function () {
 
         afterEach(function () {
           this.RecurlyClient.promises.getPaymentMethod
-            .calledWith(this.user_id)
+            .calledWith(this.adminUser_id)
             .should.equal(true)
           this.RecurlyClient.promises.previewSubscriptionChange
             .calledWith(this.changeRequest)
@@ -458,7 +465,8 @@ describe('SubscriptionGroupHandler', function () {
 
           preview =
             await this.Handler.promises.previewAddSeatsSubscriptionChange(
-              this.req
+              this.adminUser_id,
+              this.adding
             )
           this.recurlySubscription.getRequestForAddOnPurchase
             .calledWithExactly(
@@ -475,7 +483,8 @@ describe('SubscriptionGroupHandler', function () {
 
           preview =
             await this.Handler.promises.previewAddSeatsSubscriptionChange(
-              this.req
+              this.adminUser_id,
+              this.adding
             )
           this.recurlySubscription.getRequestForAddOnPurchase
             .calledWithExactly(

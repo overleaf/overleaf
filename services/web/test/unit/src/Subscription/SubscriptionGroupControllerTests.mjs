@@ -331,7 +331,7 @@ describe('SubscriptionGroupController', function () {
       const res = {
         render: (page, props) => {
           this.SubscriptionGroupHandler.promises.getUsersGroupSubscriptionDetails
-            .calledWith(this.req)
+            .calledWith(this.req.session.user._id)
             .should.equal(true)
           this.SubscriptionGroupHandler.promises.ensureFlexibleLicensingEnabled
             .calledWith(this.plan)
@@ -379,10 +379,12 @@ describe('SubscriptionGroupController', function () {
 
   describe('previewAddSeatsSubscriptionChange', function () {
     it('should preview "add seats" change', function (done) {
+      this.req.body = { adding: 2 }
+
       const res = {
         json: data => {
           this.SubscriptionGroupHandler.promises.previewAddSeatsSubscriptionChange
-            .calledWith(this.req)
+            .calledWith(this.req.session.user._id, this.req.body.adding)
             .should.equal(true)
           data.should.deep.equal(this.previewSubscriptionChangeData)
           done()
@@ -414,10 +416,12 @@ describe('SubscriptionGroupController', function () {
 
   describe('createAddSeatsSubscriptionChange', function () {
     it('should apply "add seats" change', function (done) {
+      this.req.body = { adding: 2 }
+
       const res = {
         json: data => {
           this.SubscriptionGroupHandler.promises.createAddSeatsSubscriptionChange
-            .calledWith(this.req)
+            .calledWith(this.req.session.user._id, this.req.body.adding)
             .should.equal(true)
           data.should.deep.equal(this.createSubscriptionChangeData)
           done()
