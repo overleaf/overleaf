@@ -27,6 +27,7 @@ export type RecurlyAddOn = {
   add_on_code: string
   quantity: number
   unit_amount_in_cents: number
+  displayPrice: string
 }
 
 export type PendingRecurlyPlan = {

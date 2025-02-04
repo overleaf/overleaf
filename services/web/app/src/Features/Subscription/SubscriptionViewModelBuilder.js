@@ -2,7 +2,10 @@
 const Settings = require('@overleaf/settings')
 const RecurlyWrapper = require('./RecurlyWrapper')
 const PlansLocator = require('./PlansLocator')
-const { isStandaloneAiAddOnPlanCode } = require('./RecurlyEntities')
+const {
+  isStandaloneAiAddOnPlanCode,
+  MEMBERS_LIMIT_ADD_ON_CODE,
+} = require('./RecurlyEntities')
 const SubscriptionFormatters = require('./SubscriptionFormatters')
 const SubscriptionLocator = require('./SubscriptionLocator')
 const SubscriptionUpdater = require('./SubscriptionUpdater')
@@ -240,6 +243,51 @@ async function buildUsersSubscriptionViewModel(user, locale = 'en') {
     delete personalSubscription.recurly
   }
 
+  function getPlanOnlyDisplayPrice(
+    totalPlanPriceInCents,
+    taxRate,
+    addOns = []
+  ) {
+    // The MEMBERS_LIMIT_ADD_ON_CODE is considered as part of the new plan model
+    const allAddOnsPriceInCentsExceptAdditionalLicensePrice = addOns.reduce(
+      (prev, curr) => {
+        return curr.add_on_code !== MEMBERS_LIMIT_ADD_ON_CODE
+          ? curr.quantity * curr.unit_amount_in_cents + prev
+          : prev
+      },
+      0
+    )
+    const allAddOnsTotalPriceInCentsExceptAdditionalLicensePrice =
+      allAddOnsPriceInCentsExceptAdditionalLicensePrice +
+      allAddOnsPriceInCentsExceptAdditionalLicensePrice * taxRate
+
+    return SubscriptionFormatters.formatPriceLocalized(
+      totalPlanPriceInCents -
+        allAddOnsTotalPriceInCentsExceptAdditionalLicensePrice,
+      recurlySubscription.currency,
+      locale
+    )
+  }
+
+  function getAddOnDisplayPricesWithoutAdditionalLicense(taxRate, addOns = []) {
+    return addOns.reduce((prev, curr) => {
+      if (curr.add_on_code !== MEMBERS_LIMIT_ADD_ON_CODE) {
+        const priceInCents = curr.quantity * curr.unit_amount_in_cents
+        const totalPriceInCents = priceInCents + priceInCents * taxRate
+
+        if (totalPriceInCents > 0) {
+          prev[curr.add_on_code] = SubscriptionFormatters.formatPriceLocalized(
+            totalPriceInCents,
+            recurlySubscription.currency,
+            locale
+          )
+        }
+      }
+
+      return prev
+    }, {})
+  }
+
   if (personalSubscription && recurlySubscription) {
     const tax = recurlySubscription.tax_in_cents || 0
     // Some plans allow adding more seats than the base plan provides.
@@ -248,6 +296,9 @@ async function buildUsersSubscriptionViewModel(user, locale = 'en') {
     let addOnPrice = 0
     let additionalLicenses = 0
     const addOns = recurlySubscription.subscription_add_ons || []
+    const taxRate = recurlySubscription.tax_rate
+      ? parseFloat(recurlySubscription.tax_rate._)
+      : 0
     addOns.forEach(addOn => {
       addOnPrice += addOn.quantity * addOn.unit_amount_in_cents
       if (addOn.add_on_code === plan.membersLimitAddOn) {
@@ -257,9 +308,7 @@ async function buildUsersSubscriptionViewModel(user, locale = 'en') {
     const totalLicenses = (plan.membersLimit || 0) + additionalLicenses
     personalSubscription.recurly = {
       tax,
-      taxRate: recurlySubscription.tax_rate
-        ? parseFloat(recurlySubscription.tax_rate._)
-        : 0,
+      taxRate,
       billingDetailsLink: buildHostedLink('billing-details'),
       accountManagementLink: buildHostedLink('account-management'),
       additionalLicenses,
@@ -311,12 +360,14 @@ async function buildUsersSubscriptionViewModel(user, locale = 'en') {
       const pendingSubscriptionTax =
         personalSubscription.recurly.taxRate *
         recurlySubscription.pending_subscription.unit_amount_in_cents
+      const totalPriceInCents =
+        recurlySubscription.pending_subscription.unit_amount_in_cents +
+        pendingAddOnPrice +
+        pendingAddOnTax +
+        pendingSubscriptionTax
       personalSubscription.recurly.displayPrice =
         SubscriptionFormatters.formatPriceLocalized(
-          recurlySubscription.pending_subscription.unit_amount_in_cents +
-            pendingAddOnPrice +
-            pendingAddOnTax +
-            pendingSubscriptionTax,
+          totalPriceInCents,
           recurlySubscription.currency,
           locale
         )
@@ -326,6 +377,17 @@ async function buildUsersSubscriptionViewModel(user, locale = 'en') {
           recurlySubscription.currency,
           locale
         )
+      personalSubscription.recurly.planOnlyDisplayPrice =
+        getPlanOnlyDisplayPrice(
+          totalPriceInCents,
+          taxRate,
+          recurlySubscription.pending_subscription.subscription_add_ons
+        )
+      personalSubscription.recurly.addOnDisplayPricesWithoutAdditionalLicense =
+        getAddOnDisplayPricesWithoutAdditionalLicense(
+          taxRate,
+          recurlySubscription.pending_subscription.subscription_add_ons
+        )
       const pendingTotalLicenses =
         (pendingPlan.membersLimit || 0) + pendingAdditionalLicenses
       personalSubscription.recurly.pendingAdditionalLicenses =
@@ -333,12 +395,18 @@ async function buildUsersSubscriptionViewModel(user, locale = 'en') {
       personalSubscription.recurly.pendingTotalLicenses = pendingTotalLicenses
       personalSubscription.pendingPlan = pendingPlan
     } else {
+      const totalPriceInCents =
+        recurlySubscription.unit_amount_in_cents + addOnPrice + tax
       personalSubscription.recurly.displayPrice =
         SubscriptionFormatters.formatPriceLocalized(
-          recurlySubscription.unit_amount_in_cents + addOnPrice + tax,
+          totalPriceInCents,
           recurlySubscription.currency,
           locale
         )
+      personalSubscription.recurly.planOnlyDisplayPrice =
+        getPlanOnlyDisplayPrice(totalPriceInCents, taxRate, addOns)
+      personalSubscription.recurly.addOnDisplayPricesWithoutAdditionalLicense =
+        getAddOnDisplayPricesWithoutAdditionalLicense(taxRate, addOns)
     }
   }
 

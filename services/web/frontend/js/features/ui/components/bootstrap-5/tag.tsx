@@ -38,13 +38,19 @@ const Tag = forwardRef<HTMLElement, TagProps>(
         {contentProps?.onClick ? (
           <button
             type="button"
-            className="badge-tag-content badge-tag-content-btn"
             {...contentProps}
+            className={classnames(
+              'badge-tag-content badge-tag-content-btn',
+              contentProps.className
+            )}
           >
             {content}
           </button>
         ) : (
-          <span className="badge-tag-content" {...contentProps}>
+          <span
+            {...contentProps}
+            className={classnames('badge-tag-content', contentProps?.className)}
+          >
             {content}
           </span>
         )}

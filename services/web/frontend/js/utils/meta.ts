@@ -104,6 +104,7 @@ export interface Meta {
   'ol-groupPolicy': GroupPolicy
   'ol-groupSSOActive': boolean
   'ol-groupSSOTestResult': GroupSSOTestResult
+  'ol-groupSettingsAdvertisedFor': string[]
   'ol-groupSettingsEnabledFor': string[]
   'ol-groupSize': number
   'ol-groupSsoSetupSuccess': boolean

@@ -425,6 +425,7 @@ function isStandaloneAiAddOnPlanCode(planCode) {
 module.exports = {
   AI_ADD_ON_CODE,
   MEMBERS_LIMIT_ADD_ON_CODE,
+  STANDALONE_AI_ADD_ON_CODES,
   RecurlySubscription,
   RecurlySubscriptionAddOn,
   RecurlySubscriptionChange,

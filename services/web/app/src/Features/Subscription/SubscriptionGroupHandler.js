@@ -62,6 +62,12 @@ async function ensureFlexibleLicensingEnabled(plan) {
   }
 }
 
+async function ensureSubscriptionIsActive(subscription) {
+  if (subscription?.recurlyStatus?.state !== 'active') {
+    throw new Error('The subscription is not active')
+  }
+}
+
 async function getUsersGroupSubscriptionDetails(userId) {
   const subscription =
     await SubscriptionLocator.promises.getUsersSubscription(userId)
@@ -89,9 +95,10 @@ async function getUsersGroupSubscriptionDetails(userId) {
 }
 
 async function _addSeatsSubscriptionChange(userId, adding) {
-  const { recurlySubscription, plan } =
+  const { subscription, recurlySubscription, plan } =
     await getUsersGroupSubscriptionDetails(userId)
   await ensureFlexibleLicensingEnabled(plan)
+  await ensureSubscriptionIsActive(subscription)
   const currentAddonQuantity =
     recurlySubscription.addOns.find(
       addOn => addOn.code === MEMBERS_LIMIT_ADD_ON_CODE
@@ -193,6 +200,8 @@ async function _getGroupPlanUpgradeChangeRequest(ownerId) {
   const olSubscription =
     await SubscriptionLocator.promises.getUsersSubscription(ownerId)
 
+  await ensureSubscriptionIsActive(olSubscription)
+
   const newPlanCode = await _getUpgradeTargetPlanCodeMaybeThrow(olSubscription)
   const recurlySubscription = await RecurlyClient.promises.getSubscription(
     olSubscription.recurlySubscription_id
@@ -234,6 +243,7 @@ module.exports = {
   removeUserFromGroup: callbackify(removeUserFromGroup),
   replaceUserReferencesInGroups: callbackify(replaceUserReferencesInGroups),
   ensureFlexibleLicensingEnabled: callbackify(ensureFlexibleLicensingEnabled),
+  ensureSubscriptionIsActive: callbackify(ensureSubscriptionIsActive),
   getTotalConfirmedUsersInGroup: callbackify(getTotalConfirmedUsersInGroup),
   isUserPartOfGroup: callbackify(isUserPartOfGroup),
   getGroupPlanUpgradePreview: callbackify(getGroupPlanUpgradePreview),
@@ -242,6 +252,7 @@ module.exports = {
     removeUserFromGroup,
     replaceUserReferencesInGroups,
     ensureFlexibleLicensingEnabled,
+    ensureSubscriptionIsActive,
     getTotalConfirmedUsersInGroup,
     isUserPartOfGroup,
     getUsersGroupSubscriptionDetails,

@@ -1,6 +1,6 @@
 import { CurrencyCode } from '../currency'
 import { Nullable } from '../../utils'
-import { Plan, AddOn } from '../plan'
+import { Plan, AddOn, RecurlyAddOn } from '../plan'
 import { User } from '../../user'
 
 type SubscriptionState = 'active' | 'canceled' | 'expired' | 'paused'
@@ -16,6 +16,7 @@ type Recurly = {
   billingDetailsLink: string
   accountManagementLink: string
   additionalLicenses: number
+  addOns: RecurlyAddOn[]
   totalLicenses: number
   nextPaymentDueAt: string
   nextPaymentDueDate: string
@@ -42,6 +43,8 @@ type Recurly = {
     }
   }
   displayPrice: string
+  planOnlyDisplayPrice: string
+  addOnDisplayPricesWithoutAdditionalLicense: Record<string, string>
   currentPlanDisplayPrice?: string
   pendingAdditionalLicenses?: number
   pendingTotalLicenses?: number

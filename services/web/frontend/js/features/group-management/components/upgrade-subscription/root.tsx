@@ -1,5 +1,5 @@
 import useWaitForI18n from '../../../../shared/hooks/use-wait-for-i18n'
-import AddSeats from '@/features/group-management/components/add-seats/add-seats'
+import UpgradeSubscription from '@/features/group-management/components/upgrade-subscription/upgrade-subscription'
 
 function Root() {
   const { isReady } = useWaitForI18n()
@@ -8,7 +8,7 @@ function Root() {
     return null
   }
 
-  return <AddSeats />
+  return <UpgradeSubscription />
 }
 
 export default Root

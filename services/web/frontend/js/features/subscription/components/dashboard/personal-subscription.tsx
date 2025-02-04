@@ -3,12 +3,14 @@ import { RecurlySubscription } from '../../../../../../types/subscription/dashbo
 import { ActiveSubscription } from './states/active/active'
 import { ActiveAiAddonSubscription } from './states/active/active-ai-addon'
 import { PausedSubscription } from './states/active/paused'
+import { ActiveSubscriptionNew } from '@/features/subscription/components/dashboard/states/active/active-new'
 import { CanceledSubscription } from './states/canceled'
 import { ExpiredSubscription } from './states/expired'
 import { useSubscriptionDashboardContext } from '../../context/subscription-dashboard-context'
 import PersonalSubscriptionRecurlySyncEmail from './personal-subscription-recurly-sync-email'
 import OLNotification from '@/features/ui/components/ol/ol-notification'
 import { isStandaloneAiPlanCode, AI_ADD_ON_CODE } from '../../data/add-on-codes'
+import { useFeatureFlag } from '@/shared/context/split-test-context'
 
 function PastDueSubscriptionAlert({
   subscription,
@@ -42,6 +44,7 @@ function PersonalSubscriptionStates({
 }) {
   const { t } = useTranslation()
   const state = subscription?.recurly.state
+  const isFlexibleGroupLicensing = useFeatureFlag('flexible-group-licensing')
 
   const hasAiAddon = subscription?.addOns?.some(
     addOn => addOn.addOnCode === AI_ADD_ON_CODE
@@ -50,7 +53,10 @@ function PersonalSubscriptionStates({
   const onAiStandalonePlan = isStandaloneAiPlanCode(subscription.planCode)
   const planHasAi = onAiStandalonePlan || hasAiAddon
 
-  if (state === 'active' && planHasAi) {
+  if (state === 'active' && isFlexibleGroupLicensing) {
+    // This version handles subscriptions with and without addons
+    return <ActiveSubscriptionNew subscription={subscription} />
+  } else if (state === 'active' && planHasAi) {
     return <ActiveAiAddonSubscription subscription={subscription} />
   } else if (state === 'active') {
     return <ActiveSubscription subscription={subscription} />

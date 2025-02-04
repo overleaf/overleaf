@@ -32,7 +32,7 @@ function BS3RowLink({ href, heading, subtext, icon }: RowLinkProps) {
 function BS5RowLink({ href, heading, subtext, icon }: RowLinkProps) {
   return (
     <li className="list-group-item row-link">
-      <a href={href}>
+      <a href={href} className="row-link-inner">
         <MaterialIcon type={icon} className="p-2 p-md-3" />
         <div className="flex-grow-1">
           <strong>{heading}</strong>

@@ -1,8 +1,8 @@
 import '../base'
 import ReactDOM from 'react-dom'
-import UpgradeSubscription from '@/features/group-management/components/upgrade-subscription/upgrade-subscription'
+import Root from '@/features/group-management/components/upgrade-subscription/root'
 
 const element = document.getElementById('upgrade-group-subscription-root')
 if (element) {
-  ReactDOM.render(<UpgradeSubscription />, element)
+  ReactDOM.render(<Root />, element)
 }

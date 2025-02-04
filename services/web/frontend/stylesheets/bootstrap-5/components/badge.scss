@@ -78,6 +78,11 @@ $max-width: 160px;
   padding-right: var(--bs-badge-padding-x);
   border-top-left-radius: inherit;
   border-bottom-left-radius: inherit;
+
+  &:last-child {
+    border-top-right-radius: inherit;
+    border-bottom-right-radius: inherit;
+  }
 }
 
 .badge-tag-content-btn {

@@ -54,6 +54,9 @@ export const annualActiveSubscription: RecurlySubscription = {
       has_past_due_invoice: { _: 'false', $: { type: 'boolean' } },
     },
     displayPrice: '$199.00',
+    planOnlyDisplayPrice: '',
+    addOns: [],
+    addOnDisplayPricesWithoutAdditionalLicense: {},
   },
 }
 
@@ -96,6 +99,9 @@ export const annualActiveSubscriptionEuro: RecurlySubscription = {
       has_past_due_invoice: { _: 'false', $: { type: 'boolean' } },
     },
     displayPrice: '€221.96',
+    planOnlyDisplayPrice: '',
+    addOns: [],
+    addOnDisplayPricesWithoutAdditionalLicense: {},
   },
 }
 
@@ -137,6 +143,9 @@ export const annualActiveSubscriptionPro: RecurlySubscription = {
       has_past_due_invoice: { _: 'false', $: { type: 'boolean' } },
     },
     displayPrice: '$42.00',
+    planOnlyDisplayPrice: '',
+    addOns: [],
+    addOnDisplayPricesWithoutAdditionalLicense: {},
   },
 }
 
@@ -179,6 +188,9 @@ export const pastDueExpiredSubscription: RecurlySubscription = {
       has_past_due_invoice: { _: 'true', $: { type: 'boolean' } },
     },
     displayPrice: '$199.00',
+    planOnlyDisplayPrice: '',
+    addOns: [],
+    addOnDisplayPricesWithoutAdditionalLicense: {},
   },
 }
 
@@ -221,6 +233,9 @@ export const canceledSubscription: RecurlySubscription = {
       has_past_due_invoice: { _: 'false', $: { type: 'boolean' } },
     },
     displayPrice: '$199.00',
+    planOnlyDisplayPrice: '',
+    addOns: [],
+    addOnDisplayPricesWithoutAdditionalLicense: {},
   },
 }
 
@@ -263,6 +278,9 @@ export const pendingSubscriptionChange: RecurlySubscription = {
       has_past_due_invoice: { _: 'false', $: { type: 'boolean' } },
     },
     displayPrice: '$199.00',
+    planOnlyDisplayPrice: '',
+    addOns: [],
+    addOnDisplayPricesWithoutAdditionalLicense: {},
   },
   pendingPlan: {
     planCode: 'professional-annual',
@@ -316,6 +334,9 @@ export const groupActiveSubscription: GroupSubscription = {
       has_past_due_invoice: { _: 'false', $: { type: 'boolean' } },
     },
     displayPrice: '$1290.00',
+    planOnlyDisplayPrice: '',
+    addOns: [],
+    addOnDisplayPricesWithoutAdditionalLicense: {},
   },
 }
 
@@ -376,6 +397,9 @@ export const groupActiveSubscriptionWithPendingLicenseChange: GroupSubscription 
       currentPlanDisplayPrice: '$2709.00',
       pendingAdditionalLicenses: 13,
       pendingTotalLicenses: 23,
+      planOnlyDisplayPrice: '',
+      addOns: [],
+      addOnDisplayPricesWithoutAdditionalLicense: {},
     },
     pendingPlan: {
       planCode: 'group_collaborator_10_enterprise',
@@ -438,6 +462,9 @@ export const trialSubscription: RecurlySubscription = {
       },
     },
     displayPrice: '$14.00',
+    planOnlyDisplayPrice: '',
+    addOns: [],
+    addOnDisplayPricesWithoutAdditionalLicense: {},
   },
 }
 
@@ -511,6 +538,9 @@ export const trialCollaboratorSubscription: RecurlySubscription = {
       },
     },
     displayPrice: '$21.00',
+    planOnlyDisplayPrice: '',
+    addOns: [],
+    addOnDisplayPricesWithoutAdditionalLicense: {},
   },
 }
 
@@ -552,5 +582,8 @@ export const monthlyActiveCollaborator: RecurlySubscription = {
       has_past_due_invoice: { _: 'false', $: { type: 'boolean' } },
     },
     displayPrice: '$21.00',
+    planOnlyDisplayPrice: '',
+    addOns: [],
+    addOnDisplayPricesWithoutAdditionalLicense: {},
   },
 }

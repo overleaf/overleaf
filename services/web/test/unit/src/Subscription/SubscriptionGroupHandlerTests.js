@@ -59,7 +59,12 @@ describe('SubscriptionGroupHandler', function () {
 
     this.SubscriptionLocator = {
       promises: {
-        getUsersSubscription: sinon.stub().resolves({ groupPlan: true }),
+        getUsersSubscription: sinon.stub().resolves({
+          groupPlan: true,
+          recurlyStatus: {
+            state: 'active',
+          },
+        }),
         getSubscriptionByMemberIdAndId: sinon.stub(),
         getSubscription: sinon.stub().resolves(this.subscription),
       },
@@ -303,7 +308,12 @@ describe('SubscriptionGroupHandler', function () {
 
       expect(data).to.deep.equal({
         userId: this.adminUser_id,
-        subscription: { groupPlan: true },
+        subscription: {
+          groupPlan: true,
+          recurlyStatus: {
+            state: 'active',
+          },
+        },
         plan: {
           membersLimit: 5,
           membersLimitAddOn: this.RecurlyEntities.MEMBERS_LIMIT_ADD_ON_CODE,
@@ -517,11 +527,33 @@ describe('SubscriptionGroupHandler', function () {
     })
   })
 
+  describe('ensureSubscriptionIsActive', function () {
+    it('should throw if the subscription is not active', async function () {
+      await expect(
+        this.Handler.promises.ensureSubscriptionIsActive({})
+      ).to.be.rejectedWith('The subscription is not active')
+    })
+
+    it('should not throw if the subscription is active', async function () {
+      await expect(
+        this.Handler.promises.ensureSubscriptionIsActive({
+          recurlyStatus: { state: 'active' },
+        })
+      ).to.not.be.rejected
+    })
+  })
+
   describe('upgradeGroupPlan', function () {
     it('should upgrade the subscription for flexible licensing group plans', async function () {
       this.SubscriptionLocator.promises.getUsersSubscription = sinon
         .stub()
-        .resolves({ groupPlan: true, planCode: 'group_collaborator' })
+        .resolves({
+          groupPlan: true,
+          recurlyStatus: {
+            state: 'active',
+          },
+          planCode: 'group_collaborator',
+        })
       await this.Handler.promises.upgradeGroupPlan(this.user_id)
       this.recurlySubscription.getRequestForGroupPlanUpgrade
         .calledWith('group_professional')
@@ -539,6 +571,9 @@ describe('SubscriptionGroupHandler', function () {
         .stub()
         .resolves({
           groupPlan: true,
+          recurlyStatus: {
+            state: 'active',
+          },
           planCode: 'group_collaborator_10_educational',
         })
       await this.Handler.promises.upgradeGroupPlan(this.user_id)
@@ -556,7 +591,13 @@ describe('SubscriptionGroupHandler', function () {
     it('should fail the upgrade if is professional already', async function () {
       this.SubscriptionLocator.promises.getUsersSubscription = sinon
         .stub()
-        .resolves({ groupPlan: true, planCode: 'group_professional' })
+        .resolves({
+          groupPlan: true,
+          recurlyStatus: {
+            state: 'active',
+          },
+          planCode: 'group_professional',
+        })
       await expect(
         this.Handler.promises.upgradeGroupPlan(this.user_id)
       ).to.be.rejectedWith('Not eligible for group plan upgrade')
@@ -565,7 +606,13 @@ describe('SubscriptionGroupHandler', function () {
     it('should fail the upgrade if not group plan', async function () {
       this.SubscriptionLocator.promises.getUsersSubscription = sinon
         .stub()
-        .resolves({ groupPlan: false, planCode: 'test_plan_code' })
+        .resolves({
+          groupPlan: false,
+          recurlyStatus: {
+            state: 'active',
+          },
+          planCode: 'test_plan_code',
+        })
       await expect(
         this.Handler.promises.upgradeGroupPlan(this.user_id)
       ).to.be.rejectedWith('Not eligible for group plan upgrade')
@@ -576,7 +623,13 @@ describe('SubscriptionGroupHandler', function () {
     it('should generate preview for subscription upgrade', async function () {
       this.SubscriptionLocator.promises.getUsersSubscription = sinon
         .stub()
-        .resolves({ groupPlan: true, planCode: 'group_collaborator' })
+        .resolves({
+          groupPlan: true,
+          recurlyStatus: {
+            state: 'active',
+          },
+          planCode: 'group_collaborator',
+        })
       const result = await this.Handler.promises.getGroupPlanUpgradePreview(
         this.user_id
       )

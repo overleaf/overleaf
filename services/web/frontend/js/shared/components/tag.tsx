@@ -28,7 +28,14 @@ function Tag({
 
   return (
     <span className={classnames('badge-tag-bs3', className)} {...rest}>
-      <span className="badge-tag-bs3-content-wrapper">
+      <span
+        {...contentProps}
+        className={classnames(
+          'badge-tag-bs3-content-wrapper',
+          { clickable: Boolean(contentProps?.onClick) },
+          contentProps?.className
+        )}
+      >
         {prepend && <span className="badge-tag-bs3-prepend">{prepend}</span>}
         <span className="badge-tag-bs3-content">{children}</span>
       </span>

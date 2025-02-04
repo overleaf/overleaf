@@ -15,7 +15,7 @@
     border: 0;
     padding: 0;
 
-    a {
+    .row-link-inner {
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -23,7 +23,9 @@
       text-decoration: none;
       color: var(--neutral-90);
       width: 100%;
+    }
 
+    a.row-link-inner {
       &:hover {
         background-color: var(--neutral-10);
       }
@@ -434,6 +436,51 @@
 
     .button-content {
       color: var(--link-web);
+    }
+  }
+}
+
+.add-on-card {
+  display: flex;
+  align-items: center;
+  padding: var(--spacing-05);
+  gap: var(--spacing-05);
+  border: 1px solid var(--border-divider);
+  border-radius: var(--border-radius-base);
+
+  .add-on-card-icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .add-on-card-content {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .heading {
+    @include body-base;
+
+    font-weight: 600;
+  }
+
+  .description {
+    color: var(--content-secondary);
+  }
+
+  .highlight {
+    color: var(--content-primary);
+  }
+
+  .add-on-options-toggle {
+    padding: var(--spacing-04);
+    font-size: 0;
+    line-height: 1;
+    border: none;
+    border-radius: 50%;
+
+    &::after {
+      content: none;
     }
   }
 }

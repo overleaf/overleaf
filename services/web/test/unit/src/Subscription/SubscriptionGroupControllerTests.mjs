@@ -56,6 +56,7 @@ describe('SubscriptionGroupController', function () {
           .stub()
           .resolves(this.createSubscriptionChangeData),
         ensureFlexibleLicensingEnabled: sinon.stub().resolves(),
+        ensureSubscriptionIsActive: sinon.stub().resolves(),
         getGroupPlanUpgradePreview: sinon
           .stub()
           .resolves(this.previewSubscriptionChangeData),
@@ -347,6 +348,9 @@ describe('SubscriptionGroupController', function () {
           this.SubscriptionGroupHandler.promises.ensureFlexibleLicensingEnabled
             .calledWith(this.plan)
             .should.equal(true)
+          this.SubscriptionGroupHandler.promises.ensureSubscriptionIsActive
+            .calledWith(this.subscription)
+            .should.equal(true)
           page.should.equal('subscriptions/add-seats')
           props.subscriptionId.should.equal(this.subscriptionId)
           props.groupName.should.equal(this.subscription.teamName)
@@ -397,6 +401,21 @@ describe('SubscriptionGroupController', function () {
           url.should.equal(
             '/user/subscription/group/missing-billing-information'
           )
+          done()
+        },
+      }
+
+      this.Controller.addSeatsToGroupSubscription(this.req, res)
+    })
+
+    it('should redirect to subscription page when subscription is not active', function (done) {
+      this.SubscriptionGroupHandler.promises.ensureSubscriptionIsActive = sinon
+        .stub()
+        .rejects()
+
+      const res = {
+        redirect: url => {
+          url.should.equal('/user/subscription')
           done()
         },
       }

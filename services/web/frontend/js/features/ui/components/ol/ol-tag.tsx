@@ -21,6 +21,7 @@ const OLTag = forwardRef<HTMLElement, OLTagProps>((props: OLTagProps, ref) => {
     onBlur: rest.onBlur,
     onMouseOver: rest.onMouseOver,
     onMouseOut: rest.onMouseOut,
+    contentProps: rest.contentProps,
     ...getAriaAndDataProps(rest),
     ...bs3Props,
   }

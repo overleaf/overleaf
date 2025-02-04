@@ -133,6 +133,9 @@ async function addSeatsToGroupSubscription(req, res) {
     await SubscriptionGroupHandler.promises.ensureFlexibleLicensingEnabled(plan)
     // Check if the user has missing billing details
     await RecurlyClient.promises.getPaymentMethod(userId)
+    await SubscriptionGroupHandler.promises.ensureSubscriptionIsActive(
+      subscription
+    )
 
     res.render('subscriptions/add-seats', {
       subscriptionId: subscription._id,

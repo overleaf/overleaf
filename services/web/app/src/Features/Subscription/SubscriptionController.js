@@ -61,6 +61,13 @@ async function userSubscriptionPage(req, res) {
     'bootstrap-5-subscription'
   )
 
+  const { variant: flexibleLicensingVariant } =
+    await SplitTestHandler.promises.getAssignment(
+      req,
+      res,
+      'flexible-group-licensing'
+    )
+
   const results =
     await SubscriptionViewModelBuilder.promises.buildUsersSubscriptionViewModel(
       user,
@@ -124,6 +131,42 @@ async function userSubscriptionPage(req, res) {
     )
   }
 
+  let groupSettingsAdvertisedFor
+  try {
+    const managedGroups = await async.filter(
+      managedGroupSubscriptions || [],
+      async subscription => {
+        const managedUsersResults = await Modules.promises.hooks.fire(
+          'hasManagedUsersFeatureOnNonProfessionalPlan',
+          subscription
+        )
+        const groupSSOResults = await Modules.promises.hooks.fire(
+          'hasGroupSSOFeatureOnNonProfessionalPlan',
+          subscription
+        )
+        const isGroupAdmin =
+          (subscription.admin_id._id || subscription.admin_id).toString() ===
+          user._id.toString()
+        const plan = PlansLocator.findLocalPlanInSettings(subscription.planCode)
+        return (
+          (managedUsersResults?.[0] === true ||
+            groupSSOResults?.[0] === true) &&
+          isGroupAdmin &&
+          flexibleLicensingVariant === 'enabled' &&
+          plan?.canUseFlexibleLicensing
+        )
+      }
+    )
+    groupSettingsAdvertisedFor = managedGroups.map(subscription =>
+      subscription._id.toString()
+    )
+  } catch (error) {
+    logger.error(
+      { err: error },
+      'Failed to list groups with group settings enabled for advertising'
+    )
+  }
+
   const data = {
     title: 'your_subscription',
     plans: plansData?.plans,
@@ -138,7 +181,10 @@ async function userSubscriptionPage(req, res) {
     managedInstitutions,
     managedPublishers,
     currentInstitutionsWithLicence,
+    canUseFlexibleLicensing:
+      personalSubscription?.plan?.canUseFlexibleLicensing,
     groupPlans: groupPlansDataForDash,
+    groupSettingsAdvertisedFor,
     groupSettingsEnabledFor,
     isManagedAccount: !!req.managedBy,
     userRestrictions: Array.from(req.userRestrictions || []),
