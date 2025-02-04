@@ -8,12 +8,15 @@ import { useLayoutContext } from '@/shared/context/layout-context'
 import { ErrorIndicator, ErrorPane } from './errors'
 import { RailTabKey, useRailTabContext } from '../contexts/rail-tab-context'
 import FileTreeOutlinePanel from './file-tree-outline-panel'
+import { ChatIndicator, ChatPane } from './chat'
+import getMeta from '@/utils/meta'
 
 type RailElement = {
   icon: AvailableUnfilledIcon
   key: RailTabKey
   component: ReactElement
   indicator?: ReactElement
+  hide?: boolean
 }
 
 type RailActionLink = { key: string; icon: AvailableUnfilledIcon; href: string }
@@ -43,7 +46,9 @@ const RAIL_TABS: RailElement[] = [
   {
     key: 'chat',
     icon: 'forum',
-    component: <>Chat</>,
+    component: <ChatPane />,
+    indicator: <ChatIndicator />,
+    hide: !getMeta('ol-chatEnabled'),
   },
   {
     key: 'errors',
@@ -86,15 +91,17 @@ export const RailLayout = () => {
           activeKey={selectedTab}
           className="d-flex flex-column ide-rail-tabs-nav"
         >
-          {RAIL_TABS.map(({ icon, key, indicator }) => (
-            <RailTab
-              active={selectedTab === key}
-              key={key}
-              eventKey={key}
-              icon={icon}
-              indicator={indicator}
-            />
-          ))}
+          {RAIL_TABS.filter(({ hide }) => !hide).map(
+            ({ icon, key, indicator }) => (
+              <RailTab
+                active={selectedTab === key}
+                key={key}
+                eventKey={key}
+                icon={icon}
+                indicator={indicator}
+              />
+            )
+          )}
           <div className="flex-grow-1" />
           {railActions?.map(action => (
             <RailActionElement key={action.key} action={action} />
@@ -110,7 +117,7 @@ export const RailLayout = () => {
       >
         <div className="ide-rail-content">
           <Tab.Content>
-            {RAIL_TABS.map(({ key, component }) => (
+            {RAIL_TABS.filter(({ hide }) => !hide).map(({ key, component }) => (
               <Tab.Pane eventKey={key} key={key}>
                 {component}
               </Tab.Pane>
