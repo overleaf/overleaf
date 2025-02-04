@@ -13,6 +13,8 @@ import ErrorController from '../Errors/ErrorController.js'
 import UserGetter from '../User/UserGetter.js'
 import { Subscription } from '../../models/Subscription.js'
 import { isProfessionalGroupPlan } from './PlansHelper.mjs'
+import { MissingBillingInfoError } from './Errors.js'
+import RecurlyClient from './RecurlyClient.js'
 
 /**
  * @import { Subscription } from "../../../../types/subscription/dashboard/subscription.js"
@@ -129,6 +131,8 @@ async function addSeatsToGroupSubscription(req, res) {
         userId
       )
     await SubscriptionGroupHandler.promises.ensureFlexibleLicensingEnabled(plan)
+    // Check if the user has missing billing details
+    await RecurlyClient.promises.getPaymentMethod(userId)
 
     res.render('subscriptions/add-seats', {
       subscriptionId: subscription._id,
@@ -141,6 +145,13 @@ async function addSeatsToGroupSubscription(req, res) {
       { error },
       'error while getting users group subscription details'
     )
+
+    if (error instanceof MissingBillingInfoError) {
+      return res.redirect(
+        '/user/subscription/group/missing-billing-information'
+      )
+    }
+
     return res.redirect('/user/subscription')
   }
 }
@@ -247,6 +258,13 @@ async function subscriptionUpgradePage(req, res) {
     })
   } catch (error) {
     logger.err({ error }, 'error loading upgrade subscription page')
+
+    if (error instanceof MissingBillingInfoError) {
+      return res.redirect(
+        '/user/subscription/group/missing-billing-information'
+      )
+    }
+
     return res.redirect('/user/subscription')
   }
 }
@@ -259,6 +277,24 @@ async function upgradeSubscription(req, res) {
   } catch (error) {
     logger.err({ error }, 'error trying to upgrade subscription')
     return res.sendStatus(500)
+  }
+}
+
+async function missingBillingInformation(req, res) {
+  try {
+    const userId = SessionManager.getLoggedInUserId(req.session)
+    const subscription =
+      await SubscriptionLocator.promises.getUsersSubscription(userId)
+
+    res.render('subscriptions/missing-billing-information', {
+      groupName: subscription.teamName,
+    })
+  } catch (error) {
+    logger.err(
+      { error },
+      'error trying to render missing billing information page'
+    )
+    return res.render('/user/subscription')
   }
 }
 
@@ -276,4 +312,5 @@ export default {
   ),
   subscriptionUpgradePage: expressify(subscriptionUpgradePage),
   upgradeSubscription: expressify(upgradeSubscription),
+  missingBillingInformation: expressify(missingBillingInformation),
 }

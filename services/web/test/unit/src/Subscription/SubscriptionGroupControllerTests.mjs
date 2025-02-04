@@ -103,7 +103,13 @@ describe('SubscriptionGroupController', function () {
       },
     }
 
-    this.RecurlyClient = {}
+    this.paymentMethod = { cardType: 'Visa', lastFour: '1111' }
+
+    this.RecurlyClient = {
+      promises: {
+        getPaymentMethod: sinon.stub().resolves(this.paymentMethod),
+      },
+    }
 
     this.SubscriptionController = {}
 
@@ -111,6 +117,10 @@ describe('SubscriptionGroupController', function () {
 
     this.PlansHelper = {
       isProfessionalGroupPlan: sinon.stub().returns(false),
+    }
+
+    this.Errors = {
+      MissingBillingInfoError: class MissingBillingInfoError extends Error {},
     }
 
     this.Controller = await esmock.strict(modulePath, {
@@ -135,6 +145,7 @@ describe('SubscriptionGroupController', function () {
       '../../../../app/src/Features/Subscription/RecurlyClient':
         this.RecurlyClient,
       '../../../../app/src/Features/Subscription/PlansHelper': this.PlansHelper,
+      '../../../../app/src/Features/Subscription/Errors': this.Errors,
       '../../../../app/src/models/Subscription': this.SubscriptionModel,
       '@overleaf/logger': {
         err: sinon.stub(),
@@ -375,6 +386,23 @@ describe('SubscriptionGroupController', function () {
 
       this.Controller.addSeatsToGroupSubscription(this.req, res)
     })
+
+    it('should redirect to missing billing information page when billing information is missing', function (done) {
+      this.RecurlyClient.promises.getPaymentMethod = sinon
+        .stub()
+        .throws(new this.Errors.MissingBillingInfoError())
+
+      const res = {
+        redirect: url => {
+          url.should.equal(
+            '/user/subscription/group/missing-billing-information'
+          )
+          done()
+        },
+      }
+
+      this.Controller.addSeatsToGroupSubscription(this.req, res)
+    })
   })
 
   describe('previewAddSeatsSubscriptionChange', function () {
@@ -539,6 +567,21 @@ describe('SubscriptionGroupController', function () {
       this.SubscriptionGroupHandler.promises.getGroupPlanUpgradePreview = sinon
         .stub()
         .rejects()
+
+      const res = {
+        redirect: url => {
+          url.should.equal('/user/subscription')
+          done()
+        },
+      }
+
+      this.Controller.subscriptionUpgradePage(this.req, res)
+    })
+
+    it('should redirect to missing billing information page when billing information is missing', function (done) {
+      this.RecurlyClient.promises.getPaymentMethod = sinon
+        .stub()
+        .throws(new this.Errors.MissingBillingInfoError())
 
       const res = {
         redirect: url => {

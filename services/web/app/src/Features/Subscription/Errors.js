@@ -14,8 +14,11 @@ class DuplicateAddOnError extends OError {}
 
 class AddOnNotPresentError extends OError {}
 
+class MissingBillingInfoError extends OError {}
+
 module.exports = {
   RecurlyTransactionError,
   DuplicateAddOnError,
   AddOnNotPresentError,
+  MissingBillingInfoError,
 }

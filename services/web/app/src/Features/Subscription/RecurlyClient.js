@@ -16,6 +16,7 @@ const {
   RecurlyPlan,
   RecurlyImmediateCharge,
 } = require('./RecurlyEntities')
+const { MissingBillingInfoError } = require('./Errors')
 
 /**
  * @import { RecurlySubscriptionChangeRequest } from './RecurlyEntities'
@@ -193,7 +194,19 @@ async function resumeSubscriptionByUuid(subscriptionUuid) {
  * @return {Promise<PaymentMethod>}
  */
 async function getPaymentMethod(userId) {
-  const billingInfo = await client.getBillingInfo(`code-${userId}`)
+  let billingInfo
+
+  try {
+    billingInfo = await client.getBillingInfo(`code-${userId}`)
+  } catch (error) {
+    if (error instanceof recurly.errors.NotFoundError) {
+      throw new MissingBillingInfoError('This account has no billing info', {
+        userId,
+      })
+    }
+    throw error
+  }
+
   return paymentMethodFromApi(billingInfo)
 }
 

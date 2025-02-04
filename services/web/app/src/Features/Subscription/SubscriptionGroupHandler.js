@@ -81,6 +81,7 @@ async function getUsersGroupSubscriptionDetails(userId) {
   )
 
   return {
+    userId,
     subscription,
     recurlySubscription,
     plan,

@@ -302,6 +302,7 @@ describe('SubscriptionGroupHandler', function () {
       )
 
       expect(data).to.deep.equal({
+        userId: this.adminUser_id,
         subscription: { groupPlan: true },
         plan: {
           membersLimit: 5,

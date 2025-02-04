@@ -99,6 +99,7 @@ describe('RecurlyClient', function () {
     let client
     this.client = client = {
       getAccount: sinon.stub(),
+      getBillingInfo: sinon.stub(),
       listAccountSubscriptions: sinon.stub(),
       previewSubscriptionChange: sinon.stub(),
     }
@@ -107,6 +108,9 @@ describe('RecurlyClient', function () {
       Client: function () {
         return client
       },
+    }
+    this.Errors = {
+      MissingBillingInfoError: class MissingBillingInfoError extends Error {},
     }
 
     return (this.RecurlyClient = SandboxedModule.require(MODULE_PATH, {
@@ -124,6 +128,7 @@ describe('RecurlyClient', function () {
           debug: sinon.stub(),
         },
         '../User/UserGetter': this.UserGetter,
+        './Errors': this.Errors,
       },
     }))
   })
@@ -461,6 +466,24 @@ describe('RecurlyClient', function () {
         expect(immediateCharge.tax).to.be.equal(16.2)
         expect(immediateCharge.total).to.be.equal(96.2)
       })
+    })
+  })
+
+  describe('getPaymentMethod', function () {
+    it('should throw MissingBillingInfoError', async function () {
+      this.client.getBillingInfo = sinon
+        .stub()
+        .throws(new recurly.errors.NotFoundError())
+      await expect(
+        this.RecurlyClient.promises.getPaymentMethod(this.user._id)
+      ).to.be.rejectedWith(this.Errors.MissingBillingInfoError)
+    })
+
+    it('should rethrow errors different than MissingBillingInfoError', async function () {
+      this.client.getBillingInfo = sinon.stub().throws(new Error())
+      await expect(
+        this.RecurlyClient.promises.getPaymentMethod(this.user._id)
+      ).to.be.rejectedWith(Error)
     })
   })
 })
