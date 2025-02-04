@@ -467,28 +467,35 @@ function useCodeMirrorScope(view: EditorView) {
 
   const emitSyncToPdf = useScopeEventEmitter('cursor:editor:syncToPdf')
 
-  const handleGoToLine = useCallback(
-    (event, lineNumber, columnNumber, syncToPdf, selectionLength) => {
-      setCursorLineAndScroll(view, lineNumber, columnNumber, selectionLength)
-      if (syncToPdf) {
-        emitSyncToPdf()
-      }
-    },
-    [emitSyncToPdf, view]
-  )
-
   // select and scroll to position on editor:gotoLine event (from synctex)
-  useScopeEventListener('editor:gotoLine', handleGoToLine)
-
-  const handleGoToOffset = useCallback(
-    (event, offset) => {
-      setCursorPositionAndScroll(view, offset)
-    },
-    [view]
+  useScopeEventListener(
+    'editor:gotoLine',
+    useCallback(
+      (_event, options) => {
+        setCursorLineAndScroll(
+          view,
+          options.gotoLine,
+          options.gotoColumn,
+          options.selectionLength
+        )
+        if (options.syncToPdf) {
+          emitSyncToPdf()
+        }
+      },
+      [emitSyncToPdf, view]
+    )
   )
 
   // select and scroll to position on editor:gotoOffset event (from review panel)
-  useScopeEventListener('editor:gotoOffset', handleGoToOffset)
+  useScopeEventListener(
+    'editor:gotoOffset',
+    useCallback(
+      (_event, options) => {
+        setCursorPositionAndScroll(view, options.gotoOffset)
+      },
+      [view]
+    )
+  )
 
   // dispatch 'cursor:editor:update' to Angular scope (for synctex and realtime)
   const dispatchCursorUpdate = useScopeEventEmitter('cursor:editor:update')

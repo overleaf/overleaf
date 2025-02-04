@@ -309,11 +309,12 @@ function PdfSynctexControls() {
     cursorPositionRef.current = cursorPosition
   }, [cursorPosition])
 
-  const handleSyncToPdf = useCallback(() => {
-    syncToPdf(cursorPositionRef.current)
-  }, [syncToPdf])
-
-  useScopeEventListener('cursor:editor:syncToPdf', handleSyncToPdf)
+  useScopeEventListener(
+    'cursor:editor:syncToPdf',
+    useCallback(() => {
+      syncToPdf(cursorPositionRef.current)
+    }, [syncToPdf])
+  )
 
   const _syncToCode = useCallback(
     (position, visualOffset = 0) => {

@@ -2,6 +2,7 @@ import { Project } from '../../../../types/project'
 import { PermissionsLevel } from '@/features/ide-react/types/permissions'
 import { ShareJsDoc } from '@/features/ide-react/editor/share-js-doc'
 import { GotoLineOptions } from '@/features/ide-react/types/goto-line-options'
+import { GotoOffsetOptions } from '@/features/ide-react/context/editor-manager-context'
 import { CursorPosition } from '@/features/ide-react/types/cursor-position'
 import { FileTreeFindResult } from '@/features/ide-react/types/file-tree'
 
@@ -13,12 +14,12 @@ export type IdeEvents = {
   'doc:opened': []
   'ide:opAcknowledged': [{ doc_id: string; op: any }]
   'store-doc-position': []
-  'editor:gotoOffset': [gotoOffset: number]
+  'editor:gotoOffset': [options: GotoOffsetOptions]
   'editor:gotoLine': [options: GotoLineOptions]
   'cursor:editor:update': [position: CursorPosition]
   'outline-toggled': [isOpen: boolean]
   'cursor:editor:syncToPdf': []
-  'scroll:editor:update': []
+  'scroll:editor:update': [middleVisibleLine?: number]
   'comment:start_adding': []
   'history:toggle': []
   'entity:deleted': [entity: FileTreeFindResult]

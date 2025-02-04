@@ -33,7 +33,7 @@ import { Update } from '@/features/history/services/types/update'
 import { useDebugDiffTracker } from '../hooks/use-debug-diff-tracker'
 import { useEditorContext } from '@/shared/context/editor-context'
 
-interface GotoOffsetOptions {
+export interface GotoOffsetOptions {
   gotoOffset: number
 }
 
@@ -243,12 +243,7 @@ export const EditorManagerProvider: FC = ({ children }) => {
 
   const jumpToLine = useCallback(
     (options: GotoLineOptions) => {
-      goToLineEmitter(
-        options.gotoLine,
-        options.gotoColumn ?? 0,
-        options.syncToPdf ?? false,
-        options.selectionLength
-      )
+      goToLineEmitter(options)
     },
     [goToLineEmitter]
   )
@@ -460,7 +455,7 @@ export const EditorManagerProvider: FC = ({ children }) => {
           }
         } else if (hasGotoOffset(options)) {
           window.setTimeout(() => {
-            eventEmitter.emit('editor:gotoOffset', options.gotoOffset)
+            eventEmitter.emit('editor:gotoOffset', options)
           })
         }
       }

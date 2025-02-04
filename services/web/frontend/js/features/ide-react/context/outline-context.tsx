@@ -102,7 +102,11 @@ export const OutlineProvider: FC = ({ children }) => {
   const jumpToLine = useCallback(
     (lineNumber: number, syncToPdf: boolean) => {
       setIgnoreNextScroll(true)
-      goToLineEmitter(lineNumber, 0, syncToPdf)
+      goToLineEmitter({
+        gotoLine: lineNumber,
+        gotoColumn: 0,
+        syncToPdf,
+      })
       eventTracking.sendMB('outline-jump-to-line')
     },
     [goToLineEmitter]
