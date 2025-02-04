@@ -13,6 +13,7 @@ import {
   Range,
   SelectionRange,
   EditorState,
+  Transaction,
 } from '@codemirror/state'
 import { isSplitTestEnabled } from '@/utils/splitTestUtils'
 import { v4 as uuid } from 'uuid'
@@ -119,14 +120,29 @@ export const reviewTooltipStateField = StateField.define<{
       }
     }
 
-    const isMouseDown = tr.state.field(mouseDownStateField)
-    if (!isMouseDown && !tr.state.selection.main.empty) {
-      tooltip = buildTooltip(tr.state)
-    } else if (tooltip && tr.state.selection.main.empty) {
-      tooltip = null
+    if (tr.state.selection.main.empty) {
+      return { tooltip: null, addCommentRanges }
     }
 
-    return { tooltip, addCommentRanges }
+    if (
+      !tr.effects.some(effect => effect.is(mouseUpEffect)) &&
+      tr.annotation(Transaction.userEvent) !== 'select' &&
+      tr.annotation(Transaction.userEvent) !== 'select.pointer'
+    ) {
+      if (tr.selection) {
+        // selection was changed, remove the tooltip
+        return { tooltip: null, addCommentRanges }
+      }
+      // for any other update, we keep the tooltip because it could be created in previous transaction
+      // and we are still waiting for "mouse up" event to show it
+      return { tooltip, addCommentRanges }
+    }
+
+    const isMouseDown = tr.state.field(mouseDownStateField)
+    // if "isMouseDown" is true, tooltip will be created but still hidden
+    // the reason why we cant just create the tooltip on mouse up is because transaction.userEvent is empty at that point
+
+    return { tooltip: buildTooltip(tr.state, isMouseDown), addCommentRanges }
   },
 
   provide: field => [
@@ -135,7 +151,7 @@ export const reviewTooltipStateField = StateField.define<{
   ],
 })
 
-function buildTooltip(state: EditorState): Tooltip | null {
+function buildTooltip(state: EditorState, hidden: boolean): Tooltip | null {
   const lineAtFrom = state.doc.lineAt(state.selection.main.from)
   const lineAtTo = state.doc.lineAt(state.selection.main.to)
   const multiLineSelection = lineAtFrom.number !== lineAtTo.number
@@ -151,19 +167,24 @@ function buildTooltip(state: EditorState): Tooltip | null {
   return {
     pos,
     above: state.selection.main.head !== state.selection.main.to,
-    create: createReviewTooltipView,
+    create: hidden
+      ? createHiddenReviewTooltipView
+      : createVisibleReviewTooltipView,
   }
 }
 
-const createReviewTooltipView = (): TooltipView => {
+const createReviewTooltipView = (hidden: boolean): TooltipView => {
   const dom = document.createElement('div')
   dom.className = 'review-tooltip-menu-container'
+  dom.style.display = hidden ? 'none' : 'block'
   return {
     dom,
     overlap: true,
     offset: { x: 0, y: 8 },
   }
 }
+const createHiddenReviewTooltipView = () => createReviewTooltipView(true)
+const createVisibleReviewTooltipView = () => createReviewTooltipView(false)
 
 /**
  * Styles for the tooltip

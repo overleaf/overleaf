@@ -1,8 +1,6 @@
 import {
   CSSProperties,
-  Dispatch,
   FC,
-  SetStateAction,
   useCallback,
   useEffect,
   useMemo,
@@ -35,6 +33,7 @@ import { useModalsContext } from '@/features/ide-react/context/modals-context'
 import { numberOfChangesInSelection } from '../utils/changes-in-selection'
 import { useEditorManagerContext } from '@/features/ide-react/context/editor-manager-context'
 import classNames from 'classnames'
+import useEventListener from '@/shared/hooks/use-event-listener'
 
 const TRACK_CHANGES_ON_WIDGET_HEIGHT = 25
 const CM_LINE_RIGHT_PADDING = 2
@@ -45,6 +44,8 @@ const ReviewTooltipMenu: FC = () => {
   const view = useCodeMirrorViewContext()
   const isViewer = useViewerPermissions()
   const [show, setShow] = useState(true)
+  const { setView } = useReviewPanelViewActionsContext()
+  const { setReviewPanelOpen } = useLayoutContext()
 
   const tooltipState = state.field(reviewTooltipStateField, false)?.tooltip
   const previousTooltipState = usePreviousValue(tooltipState)
@@ -54,37 +55,6 @@ const ReviewTooltipMenu: FC = () => {
       setShow(true)
     }
   }, [tooltipState, previousTooltipState])
-
-  if (isViewer || !show || !tooltipState) {
-    return null
-  }
-
-  const tooltipView = getTooltip(view, tooltipState)
-
-  if (!tooltipView) {
-    return null
-  }
-
-  return ReactDOM.createPortal(
-    <ReviewTooltipMenuContent setShow={setShow} />,
-    tooltipView.dom
-  )
-}
-
-const ReviewTooltipMenuContent: FC<{
-  setShow: Dispatch<SetStateAction<boolean>>
-}> = ({ setShow }) => {
-  const { t } = useTranslation()
-  const view = useCodeMirrorViewContext()
-  const state = useCodeMirrorStateContext()
-  const { setReviewPanelOpen, reviewPanelOpen } = useLayoutContext()
-  const { setView } = useReviewPanelViewActionsContext()
-  const ranges = useRangesContext()
-  const { acceptChanges, rejectChanges } = useRangesActionsContext()
-  const { showGenericConfirmModal } = useModalsContext()
-  const { wantTrackChanges } = useEditorManagerContext()
-  const [tooltipStyle, setTooltipStyle] = useState<CSSProperties | undefined>()
-  const [visible, setVisible] = useState(false)
 
   const addComment = useCallback(() => {
     setReviewPanelOpen(true)
@@ -102,12 +72,37 @@ const ReviewTooltipMenuContent: FC<{
     setShow(false)
   }, [setReviewPanelOpen, setView, setShow, view, state.selection.main])
 
-  useEffect(() => {
-    window.addEventListener('add-new-review-comment', addComment)
-    return () => {
-      window.removeEventListener('add-new-review-comment', addComment)
-    }
-  }, [addComment])
+  useEventListener('add-new-review-comment', addComment)
+
+  if (isViewer || !show || !tooltipState) {
+    return null
+  }
+
+  const tooltipView = getTooltip(view, tooltipState)
+
+  if (!tooltipView) {
+    return null
+  }
+
+  return ReactDOM.createPortal(
+    <ReviewTooltipMenuContent onAddComment={addComment} />,
+    tooltipView.dom
+  )
+}
+
+const ReviewTooltipMenuContent: FC<{ onAddComment: () => void }> = ({
+  onAddComment,
+}) => {
+  const { t } = useTranslation()
+  const view = useCodeMirrorViewContext()
+  const state = useCodeMirrorStateContext()
+  const { reviewPanelOpen } = useLayoutContext()
+  const ranges = useRangesContext()
+  const { acceptChanges, rejectChanges } = useRangesActionsContext()
+  const { showGenericConfirmModal } = useModalsContext()
+  const { wantTrackChanges } = useEditorManagerContext()
+  const [tooltipStyle, setTooltipStyle] = useState<CSSProperties | undefined>()
+  const [visible, setVisible] = useState(false)
 
   const changeIdsInSelection = useMemo(() => {
     return (ranges?.changes ?? [])
@@ -219,7 +214,7 @@ const ReviewTooltipMenuContent: FC<{
     >
       <button
         className="review-tooltip-menu-button review-tooltip-add-comment-button"
-        onClick={addComment}
+        onClick={onAddComment}
       >
         <MaterialIcon type="chat" />
         {t('add_comment')}
