@@ -178,7 +178,7 @@ export function useFileTreeData() {
 
 export const FileTreeDataProvider: FC = ({ children }) => {
   const [project] = useScopeValue<Project>('project')
-  const [openDocId] = useScopeValue('editor.open_doc_id')
+  const [currentDocumentId] = useScopeValue('editor.open_doc_id')
   const [, setOpenDocName] = useScopeValueSetterOnly('editor.open_doc_name')
   const [permissionsLevel] = useScopeValue('permissionsLevel')
   const { fileTreeFromHistory, snapshot, snapshotVersion } =
@@ -267,11 +267,11 @@ export const FileTreeDataProvider: FC = ({ children }) => {
         newName,
         id,
       })
-      if (id === openDocId) {
+      if (id === currentDocumentId) {
         setOpenDocName(newName)
       }
     },
-    [openDocId, setOpenDocName]
+    [currentDocumentId, setOpenDocName]
   )
 
   const dispatchDelete = useCallback((id: string) => {

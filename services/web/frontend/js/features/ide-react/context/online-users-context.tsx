@@ -76,7 +76,7 @@ const OnlineUsersContext = createContext<OnlineUsersContextValue | undefined>(
 export const OnlineUsersProvider: FC = ({ children }) => {
   const { eventEmitter } = useIdeReactContext()
   const { socket } = useConnectionContext()
-  const [openDocId] = useScopeValue<string | null>('editor.open_doc_id')
+  const [currentDocumentId] = useScopeValue<string | null>('editor.open_doc_id')
   const { fileTreeData } = useFileTreeData()
 
   const [onlineUsers, setOnlineUsers] =
@@ -235,14 +235,14 @@ export const OnlineUsersProvider: FC = ({ children }) => {
       socket.emit('clientTracking.updatePosition', {
         row: currentPosition?.row,
         column: currentPosition?.column,
-        doc_id: openDocId,
+        doc_id: currentDocumentId,
       })
     }, cursorUpdateInterval)
 
     return () => {
       window.clearTimeout(timer)
     }
-  }, [currentPosition, cursorUpdateInterval, openDocId, socket])
+  }, [currentPosition, cursorUpdateInterval, currentDocumentId, socket])
 
   const handleClientUpdated = useCallback(
     (client: OnlineUser) => {

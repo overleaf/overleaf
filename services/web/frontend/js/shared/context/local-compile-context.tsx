@@ -115,7 +115,7 @@ export const LocalCompileProvider: FC = ({ children }) => {
   const ide = useIdeContext()
 
   const { hasPremiumCompile, isProjectOwner } = useEditorContext()
-  const { openDocId, openDocs } = useEditorManagerContext()
+  const { openDocWithId, openDocs } = useEditorManagerContext()
 
   const { _id: projectId, rootDocId } = useProjectContext()
 
@@ -620,14 +620,14 @@ export const LocalCompileProvider: FC = ({ children }) => {
       const result = findEntityByPath(entry.file)
 
       if (result && result.type === 'doc') {
-        openDocId(result.entity._id, {
+        openDocWithId(result.entity._id, {
           gotoLine: entry.line ?? undefined,
           gotoColumn: entry.column ?? undefined,
           keepCurrentView,
         })
       }
     },
-    [findEntityByPath, openDocId]
+    [findEntityByPath, openDocWithId]
   )
 
   // clear the cache then run a compile, triggered by a menu item

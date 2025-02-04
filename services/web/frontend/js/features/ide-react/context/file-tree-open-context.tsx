@@ -39,11 +39,8 @@ const FileTreeOpenContext = createContext<
 export const FileTreeOpenProvider: FC = ({ children }) => {
   const { rootDocId, owner } = useProjectContext()
   const { eventEmitter, projectJoined } = useIdeReactContext()
-  const {
-    openDocId: openDocWithId,
-    currentDocumentId: openDocId,
-    openInitialDoc,
-  } = useEditorManagerContext()
+  const { openDocWithId, currentDocumentId, openInitialDoc } =
+    useEditorManagerContext()
   const { selectEntity } = useSelectFileTreeEntity()
   const [, setOpenFile] = useScopeValue<BinaryFile | null>('openFile')
   const [openEntity, setOpenEntity] = useState<
@@ -107,14 +104,14 @@ export const FileTreeOpenProvider: FC = ({ children }) => {
     (entity: FileTreeFindResult) => {
       eventEmitter.emit('entity:deleted', entity)
       // Select the root document if the current document was deleted
-      if (entity.entity._id === openDocId) {
+      if (entity.entity._id === currentDocumentId) {
         openDocWithId(rootDocId!)
       }
     },
-    [eventEmitter, openDocId, openDocWithId, rootDocId]
+    [eventEmitter, currentDocumentId, openDocWithId, rootDocId]
   )
 
-  // Synchronize the file tree when openDoc or openDocId is called on the editor
+  // Synchronize the file tree when openDoc or openDocWithId is called on the editor
   // manager context from elsewhere. If the file tree does change, it will
   // trigger the onSelect handler in this component, which will update the local
   // state.

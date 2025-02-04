@@ -36,7 +36,7 @@ describe('<PdfLogsEntries/>', function () {
 
   const EditorManagerProvider: FC = ({ children }) => {
     const value = {
-      openDocId: cy.spy().as('openDocId'),
+      openDocWithId: cy.spy().as('openDocWithId'),
       // @ts-ignore
       openDocs: new OpenDocuments(),
     } as unknown as EditorManager
@@ -96,7 +96,7 @@ describe('<PdfLogsEntries/>', function () {
     }).click()
 
     cy.get('@findEntityByPath').should('have.been.calledOnceWith', 'main.tex')
-    cy.get('@openDocId').should(
+    cy.get('@openDocWithId').should(
       'have.been.calledOnceWith',
       fakeFindEntityResult.entity._id,
       {
@@ -136,7 +136,7 @@ describe('<PdfLogsEntries/>', function () {
     })
 
     cy.get('@findEntityByPath').should('have.been.calledOnce')
-    cy.get('@openDocId').should(
+    cy.get('@openDocWithId').should(
       'have.been.calledOnceWith',
       fakeFindEntityResult.entity._id,
       {
@@ -168,7 +168,7 @@ describe('<PdfLogsEntries/>', function () {
     }).click()
 
     cy.get('@findEntityByPath').should('not.have.been.called')
-    cy.get('@openDocId').should('not.have.been.called')
+    cy.get('@openDocWithId').should('not.have.been.called')
     cy.get('@postDetachMessage').should('have.been.calledWith', {
       role: 'detached',
       event: 'action-sync-to-entry',

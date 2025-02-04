@@ -45,7 +45,7 @@ export const ReviewPanelEntry: FC<{
 }) => {
   const state = useCodeMirrorStateContext()
   const view = useCodeMirrorViewContext()
-  const { openDocId, getCurrentDocId } = useEditorManagerContext()
+  const { openDocWithId, getCurrentDocumentId } = useEditorManagerContext()
   const [selected, setSelected] = useState(false)
   const [focused, setFocused] = useState(false)
   const [textareaFocused, setTextareaFocused] = useState(false)
@@ -89,8 +89,8 @@ export const ReviewPanelEntry: FC<{
         return
       }
 
-      if (getCurrentDocId() !== docId) {
-        openDocId(docId, { gotoOffset: position, keepCurrentView: true })
+      if (getCurrentDocumentId() !== docId) {
+        openDocWithId(docId, { gotoOffset: position, keepCurrentView: true })
       } else {
         setTimeout(() =>
           view.dispatch({
@@ -101,12 +101,12 @@ export const ReviewPanelEntry: FC<{
       }
     },
     [
-      getCurrentDocId,
+      getCurrentDocumentId,
       docId,
       selectLineOnFocus,
       view,
       position,
-      openDocId,
+      openDocWithId,
       reviewPanelOpen,
     ]
   )

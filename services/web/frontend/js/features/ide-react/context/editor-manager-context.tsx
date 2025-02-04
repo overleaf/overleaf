@@ -51,10 +51,10 @@ export type EditorManager = {
   currentDocument: DocumentContainer
   currentDocumentId: DocId | null
   getCurrentDocValue: () => string | null
-  getCurrentDocId: () => DocId | null
+  getCurrentDocumentId: () => DocId | null
   startIgnoringExternalUpdates: () => void
   stopIgnoringExternalUpdates: () => void
-  openDocId: (docId: string, options?: OpenDocOptions) => void
+  openDocWithId: (docId: string, options?: OpenDocOptions) => void
   openDoc: (document: Doc, options?: OpenDocOptions) => void
   openDocs: OpenDocuments
   openInitialDoc: (docId: string) => void
@@ -109,7 +109,7 @@ export const EditorManagerProvider: FC = ({ children }) => {
   const [showVisual] = useScopeValue<boolean>('editor.showVisual')
   const [currentDocument, setCurrentDocument] =
     useScopeValue<DocumentContainer>('editor.sharejs_doc')
-  const [openDocId, setOpenDocId] = useScopeValue<DocId | null>(
+  const [currentDocumentId, setCurrentDocumentId] = useScopeValue<DocId | null>(
     'editor.open_doc_id'
   )
   const [, setOpenDocName] = useScopeValue<string | null>(
@@ -191,14 +191,14 @@ export const EditorManagerProvider: FC = ({ children }) => {
       )
   )
 
-  const openDocIdStorageKey = `doc.open_id.${projectId}`
+  const currentDocumentIdStorageKey = `doc.open_id.${projectId}`
 
   // Persist the open document ID to local storage
   useEffect(() => {
-    if (openDocId) {
-      customLocalStorage.setItem(openDocIdStorageKey, openDocId)
+    if (currentDocumentId) {
+      customLocalStorage.setItem(currentDocumentIdStorageKey, currentDocumentId)
     }
-  }, [openDocId, openDocIdStorageKey])
+  }, [currentDocumentId, currentDocumentIdStorageKey])
 
   const editorOpenDocEpochRef = useRef(0)
 
@@ -230,7 +230,10 @@ export const EditorManagerProvider: FC = ({ children }) => {
     return currentDocument?.getSnapshot() ?? null
   }, [currentDocument])
 
-  const getCurrentDocId = useCallback(() => openDocId, [openDocId])
+  const getCurrentDocumentId = useCallback(
+    () => currentDocumentId,
+    [currentDocumentId]
+  )
 
   const startIgnoringExternalUpdates = useCallback(
     () => setIgnoringExternalUpdates(true),
@@ -379,9 +382,9 @@ export const EditorManagerProvider: FC = ({ children }) => {
       //     between leaving and joining the same document
       //  - when the current one has pending ops that need flushing, to avoid
       //     race conditions from cleanup
-      const currentDocId = currentDocument?.doc_id
+      const currentDocumentId = currentDocument?.doc_id
       const hasBufferedOps = currentDocument?.hasBufferedOps()
-      const changingDoc = currentDocument && currentDocId !== doc._id
+      const changingDoc = currentDocument && currentDocumentId !== doc._id
       if (changingDoc || hasBufferedOps) {
         debugConsole.log('[openNewDocument] Leaving existing open doc...')
 
@@ -401,7 +404,7 @@ export const EditorManagerProvider: FC = ({ children }) => {
           await currentDocument.leaveAndCleanUpPromise()
         } catch (error) {
           debugConsole.log(
-            `[openNewDocument] error leaving doc ${currentDocId}`,
+            `[openNewDocument] error leaving doc ${currentDocumentId}`,
             error
           )
           throw error
@@ -419,10 +422,10 @@ export const EditorManagerProvider: FC = ({ children }) => {
     [attachErrorHandlerToDocument, doOpenNewDocument, currentDocument]
   )
 
-  const openDocIdRef = useRef(openDocId)
+  const currentDocumentIdRef = useRef(currentDocumentId)
   useEffect(() => {
-    openDocIdRef.current = openDocId
-  }, [openDocId])
+    currentDocumentIdRef.current = currentDocumentId
+  }, [currentDocumentId])
 
   const openDoc = useCallback(
     async (doc: Doc, options: OpenDocOptions = {}) => {
@@ -468,14 +471,14 @@ export const EditorManagerProvider: FC = ({ children }) => {
       // If we already have the document open, or are opening the document, we can return at this point.
       // Note: only use forceReopen:true to override this when the document is
       // out of sync and needs to be reloaded from the server.
-      if (doc._id === openDocIdRef.current && !options.forceReopen) {
+      if (doc._id === currentDocumentIdRef.current && !options.forceReopen) {
         done(false)
         return
       }
 
       // We're now either opening a new document or reloading a broken one.
-      openDocIdRef.current = doc._id as DocId
-      setOpenDocId(doc._id as DocId)
+      currentDocumentIdRef.current = doc._id as DocId
+      setCurrentDocumentId(doc._id as DocId)
       setOpenDocName(doc.name)
       setOpening(true)
 
@@ -507,7 +510,7 @@ export const EditorManagerProvider: FC = ({ children }) => {
       jumpToLine,
       openNewDocument,
       setCurrentDocument,
-      setOpenDocId,
+      setCurrentDocumentId,
       setOpenDocName,
       setOpening,
       setView,
@@ -532,12 +535,12 @@ export const EditorManagerProvider: FC = ({ children }) => {
   const openInitialDoc = useCallback(
     (fallbackDocId: string) => {
       const docId =
-        customLocalStorage.getItem(openDocIdStorageKey) || fallbackDocId
+        customLocalStorage.getItem(currentDocumentIdStorageKey) || fallbackDocId
       if (docId) {
         openDocWithId(docId)
       }
     },
-    [openDocIdStorageKey, openDocWithId]
+    [currentDocumentIdStorageKey, openDocWithId]
   )
 
   useEffect(() => {
@@ -662,12 +665,12 @@ export const EditorManagerProvider: FC = ({ children }) => {
       getEditorType,
       showSymbolPalette,
       currentDocument,
-      currentDocumentId: openDocId,
+      currentDocumentId,
       getCurrentDocValue,
-      getCurrentDocId,
+      getCurrentDocumentId,
       startIgnoringExternalUpdates,
       stopIgnoringExternalUpdates,
-      openDocId: openDocWithId,
+      openDocWithId,
       openDoc,
       openDocs,
       openInitialDoc,
@@ -680,9 +683,9 @@ export const EditorManagerProvider: FC = ({ children }) => {
       getEditorType,
       showSymbolPalette,
       currentDocument,
-      openDocId,
+      currentDocumentId,
       getCurrentDocValue,
-      getCurrentDocId,
+      getCurrentDocumentId,
       startIgnoringExternalUpdates,
       stopIgnoringExternalUpdates,
       openDocWithId,

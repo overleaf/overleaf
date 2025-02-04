@@ -55,7 +55,7 @@ export const getMockIde = () => {
     },
     editorManager: {
       openDoc: () => {},
-      getCurrentDocId: () => {},
+      getCurrentDocumentId: () => {},
     },
   }
 }

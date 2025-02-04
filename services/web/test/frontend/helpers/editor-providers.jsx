@@ -72,7 +72,7 @@ export function EditorProviders({
     getPreviewByPath: path => ({ url: path, extension: 'png' }),
   },
   editorManager = {
-    getCurrentDocId: () => 'foo',
+    getCurrentDocumentId: () => 'foo',
     getCurrentDocValue: () => {},
     openDoc: sinon.stub(),
   },

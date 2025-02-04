@@ -138,7 +138,7 @@ function useReviewPanelState(): ReviewPanel.ReviewPanelState {
   } = project
   const { isRestrictedTokenMember } = useEditorContext()
   const {
-    openDocId,
+    openDocWithId,
     currentDocument,
     currentDocumentId,
     wantTrackChanges,
@@ -845,9 +845,9 @@ function useReviewPanelState(): ReviewPanel.ReviewPanelState {
 
   const gotoEntry = useCallback(
     (docId: DocId, entryOffset: number) => {
-      openDocId(docId, { gotoOffset: entryOffset })
+      openDocWithId(docId, { gotoOffset: entryOffset })
     },
-    [openDocId]
+    [openDocWithId]
   )
 
   const view = reviewPanelOpen ? subView : 'mini'

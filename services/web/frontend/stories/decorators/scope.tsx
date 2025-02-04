@@ -103,7 +103,7 @@ const initialize = () => {
       new SocketIOMock()
     ) as unknown as Socket,
     editorManager: {
-      getCurrentDocId: () => 'foo',
+      getCurrentDocumentId: () => 'foo',
       openDoc: (id: string, options: unknown) => {
         console.log('open doc', id, options)
       },

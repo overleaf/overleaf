@@ -190,7 +190,7 @@ function PdfSynctexControls() {
 
   const [cursorPosition, setCursorPosition] = useState(() => {
     const position = localStorage.getItem(
-      `doc.position.${ide.editorManager.getCurrentDocId()}`
+      `doc.position.${ide.editorManager.getCurrentDocumentId()}`
     )
     return position ? position.cursorPosition : null
   })
@@ -216,7 +216,7 @@ function PdfSynctexControls() {
   const [, setSynctexError] = useScopeValue('sync_tex_error')
 
   const getCurrentFilePath = useCallback(() => {
-    const docId = ide.editorManager.getCurrentDocId()
+    const docId = ide.editorManager.getCurrentDocumentId()
     let path = pathInFolder(docId)
 
     // If the root file is folder/main.tex, then synctex sees the path as folder/./main.tex
@@ -238,7 +238,7 @@ function PdfSynctexControls() {
           return
         }
 
-        ide.editorManager.openDocId(doc._id, {
+        ide.editorManager.openDocWithId(doc._id, {
           gotoLine: line,
         })
       } else {

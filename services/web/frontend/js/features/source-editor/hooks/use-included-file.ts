@@ -12,7 +12,7 @@ import {
 export const useIncludedFile = (argumentType: string) => {
   const state = useCodeMirrorStateContext()
   const { findEntityByPath } = useFileTreePathContext()
-  const { openDocId } = useEditorManagerContext()
+  const { openDocWithId } = useEditorManagerContext()
 
   const openIncludedFile = useCallback(() => {
     const name = readIncludedPath(state, argumentType)
@@ -21,12 +21,12 @@ export const useIncludedFile = (argumentType: string) => {
       for (const extension of ['.tex', '']) {
         const result = findEntityByPath(`${name}${extension}`)
         if (result) {
-          return openDocId(result.entity._id)
+          return openDocWithId(result.entity._id)
         }
       }
       // TODO: handle file not found
     }
-  }, [argumentType, findEntityByPath, openDocId, state])
+  }, [argumentType, findEntityByPath, openDocWithId, state])
 
   return { openIncludedFile }
 }

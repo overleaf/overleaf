@@ -42,7 +42,7 @@ export function useRestoreDeletedFile() {
         // Once Angular is gone, these can be replaced with calls to context
         // methods
         if (restoredFileMetadata.type === 'doc') {
-          ide.editorManager.openDocId(id)
+          ide.editorManager.openDocWithId(id)
         } else {
           ide.binaryFilesManager.openFileWithId(id)
         }
