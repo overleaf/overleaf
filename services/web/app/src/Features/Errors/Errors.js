@@ -209,6 +209,8 @@ class SAMLSessionDataMissing extends BackwardCompatibleError {
   }
 }
 
+class SAMLProviderRequesterError extends SAMLAuthenticationError {}
+
 class ThirdPartyIdentityExistsError extends BackwardCompatibleError {
   constructor(arg) {
     super(arg)
@@ -328,6 +330,7 @@ module.exports = {
   SAMLInvalidSignatureError,
   SAMLMissingUserIdentifierError,
   SAMLMissingSignatureError,
+  SAMLProviderRequesterError,
   SAMLInvalidResponseError,
   SAMLLoginFailureError,
   SAMLEmailNotRecognizedError,
