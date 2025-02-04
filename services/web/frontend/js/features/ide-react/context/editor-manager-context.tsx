@@ -482,7 +482,6 @@ export const EditorManagerProvider: FC = ({ children }) => {
       try {
         const document = await openNewDocument(doc)
         syncTrackChangesState(document)
-        eventEmitter.emit('doc:opened')
         setOpening(false)
         setCurrentDocument(document)
         done(true)

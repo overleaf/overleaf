@@ -11,7 +11,6 @@ export type IdeEvents = {
   'document:closed': [doc: ShareJsDoc]
   'doc:changed': [{ doc_id: string }]
   'doc:saved': [{ doc_id: string }]
-  'doc:opened': []
   'ide:opAcknowledged': [{ doc_id: string; op: any }]
   'store-doc-position': []
   'editor:gotoOffset': [options: GotoOffsetOptions]
