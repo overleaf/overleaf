@@ -154,6 +154,30 @@ async function confirmCreate(projectId, chunk, chunkId, mongoOpts = {}) {
 }
 
 /**
+ * Write the metadata to the project record
+ */
+async function updateProjectRecord(projectId, chunk, mongoOpts = {}) {
+  // record the end version against the project
+  await mongodb.projects.updateOne(
+    {
+      'overleaf.history.id': projectId, // string for Object ids, number for postgres ids
+    },
+    {
+      // always store the latest end version and timestamp for the chunk
+      $max: {
+        'overleaf.history.currentEndVersion': chunk.getEndVersion(),
+        'overleaf.history.currentEndTimestamp': chunk.getEndTimestamp(),
+        'overleaf.history.updatedAt': new Date(),
+      },
+      // store the first pending change timestamp for the chunk, this will
+      // be cleared every time a backup is completed.
+      $min: { 'overleaf.backup.pendingChangeAt': chunk.getEndTimestamp() },
+    },
+    mongoOpts
+  )
+}
+
+/**
  * Record that a chunk was replaced by a new one.
  */
 async function confirmUpdate(projectId, oldChunkId, newChunk, newChunkId) {
@@ -167,6 +191,7 @@ async function confirmUpdate(projectId, oldChunkId, newChunk, newChunkId) {
     await session.withTransaction(async () => {
       await deleteChunk(projectId, oldChunkId, { session })
       await confirmCreate(projectId, newChunk, newChunkId, { session })
+      await updateProjectRecord(projectId, newChunk, { session })
     })
   } finally {
     await session.endSession()
@@ -273,6 +298,7 @@ module.exports = {
   insertPendingChunk,
   confirmCreate,
   confirmUpdate,
+  updateProjectRecord,
   deleteChunk,
   deleteProjectChunks,
   getOldChunksBatch,

@@ -3,6 +3,7 @@ const assert = require('../assert')
 const knex = require('../knex')
 const knexReadOnly = require('../knex_read_only')
 const { ChunkVersionConflictError } = require('./errors')
+const { updateProjectRecord } = require('./mongo')
 
 const DUPLICATE_KEY_ERROR_CODE = '23505'
 
@@ -150,6 +151,7 @@ async function confirmUpdate(projectId, oldChunkId, newChunk, newChunkId) {
       _deletePendingChunk(tx, projectId, newChunkId),
       _insertChunk(tx, projectId, newChunk, newChunkId),
     ])
+    await updateProjectRecord(projectId, newChunk)
   })
 }
 
