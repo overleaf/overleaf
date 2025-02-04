@@ -186,9 +186,7 @@ async function _getUpgradeTargetPlanCodeMaybeThrow(subscription) {
     throw new Error('Not eligible for group plan upgrade')
   }
 
-  return subscription.planCode.includes('educational')
-    ? 'group_professional_educational'
-    : 'group_professional'
+  return subscription.planCode.replace('collaborator', 'professional')
 }
 
 async function _getGroupPlanUpgradeChangeRequest(ownerId) {
@@ -196,26 +194,11 @@ async function _getGroupPlanUpgradeChangeRequest(ownerId) {
     await SubscriptionLocator.promises.getUsersSubscription(ownerId)
 
   const newPlanCode = await _getUpgradeTargetPlanCodeMaybeThrow(olSubscription)
-
   const recurlySubscription = await RecurlyClient.promises.getSubscription(
     olSubscription.recurlySubscription_id
   )
-  return recurlySubscription.getRequestForGroupPlanUpgrade(
-    newPlanCode,
-    olSubscription.membersLimit
-  )
-}
 
-function _getPlanNameForDisplay(subscription) {
-  if (/^group_collaborator_\d+_enterprise$/.test(subscription.planCode)) {
-    return 'Overleaf Standard Group'
-  }
-
-  if (/^group_collaborator_\d+_educational$/.test(subscription.planCode)) {
-    return 'Overleaf Standard Group Educational'
-  }
-
-  return subscription.planName
+  return recurlySubscription.getRequestForGroupPlanUpgrade(newPlanCode)
 }
 
 async function getGroupPlanUpgradePreview(ownerId) {
@@ -227,7 +210,10 @@ async function getGroupPlanUpgradePreview(ownerId) {
     {
       type: 'group-plan-upgrade',
       prevPlan: {
-        name: _getPlanNameForDisplay(subscriptionChange.subscription),
+        name: SubscriptionController.getPlanNameForDisplay(
+          subscriptionChange.subscription.planName,
+          subscriptionChange.subscription.planCode
+        ),
       },
     },
     subscriptionChange,

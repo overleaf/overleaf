@@ -684,6 +684,31 @@ async function getLatamCountryBannerDetails(req, res) {
 }
 
 /**
+ * There are two sets of group plans: legacy plans and consolidated plans,
+ * and their naming conventions differ.
+ * This helper method computes the name of legacy group plans to ensure
+ * consistency with the naming of consolidated group plans.
+ *
+ * @param {string} planName
+ * @param {string} planCode
+ * @return {string}
+ */
+
+function getPlanNameForDisplay(planName, planCode) {
+  const match = planCode.match(
+    /^group_(collaborator|professional)_\d+_(enterprise|educational)$/
+  )
+
+  if (!match) return planName
+
+  const [, type, category] = match
+  const prefix = type === 'collaborator' ? 'Standard' : 'Professional'
+  const suffix = category === 'educational' ? ' Educational' : ''
+
+  return `Overleaf ${prefix} Group${suffix}`
+}
+
+/**
  * Build a subscription change preview for display purposes
  *
  * @param {SubscriptionChangeDescription} subscriptionChangeDescription A description of the change for the frontend
@@ -711,7 +736,10 @@ function makeChangePreview(
     nextInvoice: {
       date: subscription.periodEnd.toISOString(),
       plan: {
-        name: subscriptionChange.nextPlanName,
+        name: getPlanNameForDisplay(
+          subscriptionChange.nextPlanName,
+          subscriptionChange.nextPlanCode
+        ),
         amount: subscriptionChange.nextPlanPrice,
       },
       addOns: subscriptionChange.nextAddOns.map(addOn => ({
@@ -755,4 +783,5 @@ module.exports = {
   makeChangePreview,
   getRecommendedCurrency,
   getLatamCountryBannerDetails,
+  getPlanNameForDisplay,
 }

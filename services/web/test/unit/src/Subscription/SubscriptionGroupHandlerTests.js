@@ -71,6 +71,7 @@ describe('SubscriptionGroupHandler', function () {
 
     this.SubscriptionController = {
       makeChangePreview: sinon.stub().resolves(this.changePreview),
+      getPlanNameForDisplay: sinon.stub().resolves(),
     }
 
     this.SubscriptionUpdater = {
@@ -512,6 +513,9 @@ describe('SubscriptionGroupHandler', function () {
         .stub()
         .resolves({ groupPlan: true, planCode: 'group_collaborator' })
       await this.Handler.promises.upgradeGroupPlan(this.user_id)
+      this.recurlySubscription.getRequestForGroupPlanUpgrade
+        .calledWith('group_professional')
+        .should.equal(true)
       this.RecurlyClient.promises.applySubscriptionChangeRequest
         .calledWith(this.changeRequest)
         .should.equal(true)
@@ -528,6 +532,9 @@ describe('SubscriptionGroupHandler', function () {
           planCode: 'group_collaborator_10_educational',
         })
       await this.Handler.promises.upgradeGroupPlan(this.user_id)
+      this.recurlySubscription.getRequestForGroupPlanUpgrade
+        .calledWith('group_professional_10_educational')
+        .should.equal(true)
       this.RecurlyClient.promises.applySubscriptionChangeRequest
         .calledWith(this.changeRequest)
         .should.equal(true)

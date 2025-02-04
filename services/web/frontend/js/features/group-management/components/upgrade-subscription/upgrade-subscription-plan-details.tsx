@@ -10,14 +10,22 @@ export const LICENSE_ADD_ON = 'additional-license'
 function UpgradeSubscriptionPlanDetails() {
   const { t } = useTranslation()
   const preview = getMeta('ol-subscriptionChangePreview')
+  const totalLicenses = getMeta('ol-totalLicenses')
 
-  const licenseUnitPrice = useMemo(
-    () =>
-      preview.nextInvoice.addOns.filter(
-        addOn => addOn.code === LICENSE_ADD_ON
-      )[0].unitAmount,
-    [preview]
-  )
+  const licenseUnitPrice = useMemo(() => {
+    const additionalLicenseAddOn = preview.nextInvoice.addOns.filter(
+      addOn => addOn.code === LICENSE_ADD_ON
+    )
+    // Legacy plans might not have additional-license add-on.
+    // Hence we need to compute unit price
+    return additionalLicenseAddOn.length > 0
+      ? additionalLicenseAddOn[0].unitAmount
+      : preview.nextInvoice.plan.amount / totalLicenses
+  }, [
+    preview.nextInvoice.addOns,
+    preview.nextInvoice.plan.amount,
+    totalLicenses,
+  ])
 
   return (
     <Card

@@ -280,18 +280,12 @@ describe('RecurlyEntities', function () {
 
       describe('getRequestForGroupPlanUpgrade()', function () {
         it('returns a correct change request', function () {
-          const changeRequest = this.subscription.getRequestForGroupPlanUpgrade(
-            'test_plan_code',
-            10
-          )
+          const changeRequest =
+            this.subscription.getRequestForGroupPlanUpgrade('test_plan_code')
           const addOns = [
             new RecurlySubscriptionAddOnUpdate({
               code: 'add-on-code',
               quantity: 1,
-            }),
-            new RecurlySubscriptionAddOnUpdate({
-              code: 'additional-license',
-              quantity: 10,
             }),
           ]
           expect(changeRequest).to.deep.equal(
