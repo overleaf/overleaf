@@ -1,0 +1,23 @@
+.interstitial {
+  max-width: 400px;
+  padding: var(--spacing-08);
+  margin: 0 auto;
+  background: var(--bg-light-primary);
+  display: flex;
+  flex-direction: column;
+
+  .logo {
+    width: 130px;
+    margin: 0 auto;
+    margin-bottom: var(--spacing-08);
+  }
+
+  .btn {
+    width: 100%;
+  }
+
+  .interstitial-header {
+    margin-top: 0;
+    margin-bottom: var(--spacing-02);
+  }
+}
