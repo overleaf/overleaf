@@ -56,7 +56,6 @@ describe('SubscriptionGroupController', function () {
           .stub()
           .resolves(this.createSubscriptionChangeData),
         ensureFlexibleLicensingEnabled: sinon.stub().resolves(),
-        ensureAddSeatsEnabled: sinon.stub().resolves(),
         getGroupPlanUpgradePreview: sinon
           .stub()
           .resolves(this.previewSubscriptionChangeData),
@@ -337,9 +336,6 @@ describe('SubscriptionGroupController', function () {
           this.SubscriptionGroupHandler.promises.ensureFlexibleLicensingEnabled
             .calledWith(this.plan)
             .should.equal(true)
-          this.SubscriptionGroupHandler.promises.ensureAddSeatsEnabled
-            .calledWith(this.plan)
-            .should.equal(true)
           page.should.equal('subscriptions/add-seats')
           props.subscriptionId.should.equal(this.subscriptionId)
           props.groupName.should.equal(this.subscription.teamName)
@@ -369,21 +365,6 @@ describe('SubscriptionGroupController', function () {
     it('should redirect to subscription page when flexible licensing is not enabled', function (done) {
       this.SubscriptionGroupHandler.promises.ensureFlexibleLicensingEnabled =
         sinon.stub().rejects()
-
-      const res = {
-        redirect: url => {
-          url.should.equal('/user/subscription')
-          done()
-        },
-      }
-
-      this.Controller.addSeatsToGroupSubscription(this.req, res)
-    })
-
-    it('should redirect to subscription page when "add seats" is not enabled', function (done) {
-      this.SubscriptionGroupHandler.promises.ensureAddSeatsEnabled = sinon
-        .stub()
-        .rejects()
 
       const res = {
         redirect: url => {

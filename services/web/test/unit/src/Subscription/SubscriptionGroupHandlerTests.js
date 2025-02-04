@@ -506,22 +506,6 @@ describe('SubscriptionGroupHandler', function () {
     })
   })
 
-  describe('ensureAddSeatsEnabled', function () {
-    it('should throw if the subscription can not use the "add seats" feature', async function () {
-      await expect(
-        this.Handler.promises.ensureAddSeatsEnabled({})
-      ).to.be.rejectedWith('The group plan does not support adding seats')
-    })
-
-    it('should not throw if the subscription can use the "add seats" feature', async function () {
-      await expect(
-        this.Handler.promises.ensureAddSeatsEnabled({
-          membersLimitAddOn: this.RecurlyEntities.MEMBERS_LIMIT_ADD_ON_CODE,
-        })
-      ).to.not.be.rejected
-    })
-  })
-
   describe('upgradeGroupPlan', function () {
     it('should upgrade the subscription for flexible licensing group plans', async function () {
       this.SubscriptionLocator.promises.getUsersSubscription = sinon

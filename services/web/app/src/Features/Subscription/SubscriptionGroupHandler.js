@@ -63,12 +63,6 @@ async function ensureFlexibleLicensingEnabled(plan) {
   }
 }
 
-async function ensureAddSeatsEnabled(plan) {
-  if (!plan?.membersLimitAddOn) {
-    throw new Error('The group plan does not support adding seats')
-  }
-}
-
 async function getUsersGroupSubscriptionDetails(req) {
   const userId = SessionManager.getLoggedInUserId(req.session)
   const subscription =
@@ -96,7 +90,6 @@ async function _addSeatsSubscriptionChange(req) {
   const { recurlySubscription, plan } =
     await getUsersGroupSubscriptionDetails(req)
   await ensureFlexibleLicensingEnabled(plan)
-  await ensureAddSeatsEnabled(plan)
   const userId = SessionManager.getLoggedInUserId(req.session)
   const currentAddonQuantity =
     recurlySubscription.addOns.find(
@@ -121,7 +114,7 @@ async function _addSeatsSubscriptionChange(req) {
 
     if (isLegacyPriceApplicable) {
       const pattern =
-        /^group_(collaborator|professional)_(5|10|20|50)_(educational|enterprise)$/
+        /^group_(collaborator|professional)_(2|3|4|5|10|20|50)_(educational|enterprise)$/
       const [, planCode, size, usage] = plan.planCode.match(pattern)
       const currency = recurlySubscription.currency
       const legacyPriceInCents =
@@ -255,7 +248,6 @@ module.exports = {
   removeUserFromGroup: callbackify(removeUserFromGroup),
   replaceUserReferencesInGroups: callbackify(replaceUserReferencesInGroups),
   ensureFlexibleLicensingEnabled: callbackify(ensureFlexibleLicensingEnabled),
-  ensureAddSeatsEnabled: callbackify(ensureAddSeatsEnabled),
   getTotalConfirmedUsersInGroup: callbackify(getTotalConfirmedUsersInGroup),
   isUserPartOfGroup: callbackify(isUserPartOfGroup),
   getGroupPlanUpgradePreview: callbackify(getGroupPlanUpgradePreview),
@@ -264,7 +256,6 @@ module.exports = {
     removeUserFromGroup,
     replaceUserReferencesInGroups,
     ensureFlexibleLicensingEnabled,
-    ensureAddSeatsEnabled,
     getTotalConfirmedUsersInGroup,
     isUserPartOfGroup,
     getUsersGroupSubscriptionDetails,

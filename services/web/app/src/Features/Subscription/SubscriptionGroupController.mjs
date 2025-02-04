@@ -128,7 +128,6 @@ async function addSeatsToGroupSubscription(req, res) {
         req
       )
     await SubscriptionGroupHandler.promises.ensureFlexibleLicensingEnabled(plan)
-    await SubscriptionGroupHandler.promises.ensureAddSeatsEnabled(plan)
 
     res.render('subscriptions/add-seats', {
       subscriptionId: subscription._id,
