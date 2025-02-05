@@ -34,6 +34,7 @@
     "lodash": "^4.17.19",
     "mongodb": "6.12.0",
     "overleaf-editor-core": "*",
+    "p-limit": "^6.2.0",
     "pg": "^8.7.1",
     "pg-query-stream": "^4.2.4",
     "swagger-tools": "^0.10.4",
