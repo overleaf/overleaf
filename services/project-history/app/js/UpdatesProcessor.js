@@ -269,17 +269,12 @@ export function _getHistoryId(projectId, updates, callback) {
         idFromUpdates = update.projectHistoryId.toString()
       } else if (idFromUpdates !== update.projectHistoryId.toString()) {
         metrics.inc('updates.batches.project-history-id.inconsistent-update')
-        logger.warn(
-          {
+        return callback(
+          new OError('inconsistent project history id between updates', {
             projectId,
-            updates,
             idFromUpdates,
             currentId: update.projectHistoryId,
-          },
-          'inconsistent project history id between updates'
-        )
-        return callback(
-          new OError('inconsistent project history id between updates')
+          })
         )
       }
     }
@@ -340,15 +335,11 @@ function _handleOpsOutOfOrderError(projectId, projectHistoryId, err, ...rest) {
     // Bypass ops-out-of-order errors in the stored chunk when in forceDebug mode
     if (failureRecord != null && failureRecord.forceDebug === true) {
       logger.warn(
-        { projectId, projectHistoryId },
+        { err, projectId, projectHistoryId },
         'ops out of order in chunk, forced continue'
       )
       callback(null, ...results) // return results without error
     } else {
-      logger.warn(
-        { projectId, projectHistoryId },
-        'ops out of order in chunk, returning error'
-      )
       callback(err, ...results)
     }
   })

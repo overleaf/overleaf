@@ -22,7 +22,7 @@ class NonUniquePathnameError extends PathnameError {
    * @param {string[]} pathnames
    */
   constructor(pathnames) {
-    super('pathnames are not unique: ' + pathnames, { pathnames })
+    super('pathnames are not unique', { pathnames })
     this.pathnames = pathnames
   }
 }
@@ -30,9 +30,13 @@ class NonUniquePathnameError extends PathnameError {
 class BadPathnameError extends PathnameError {
   /**
    * @param {string} pathname
+   * @param {string} reason
    */
-  constructor(pathname) {
-    super(pathname + ' is not a valid pathname', { pathname })
+  constructor(pathname, reason) {
+    if (pathname.length > 10) {
+      pathname = pathname.slice(0, 5) + '...' + pathname.slice(-5)
+    }
+    super('invalid pathname', { reason, pathname })
     this.pathname = pathname
   }
 }
@@ -42,7 +46,7 @@ class PathnameConflictError extends PathnameError {
    * @param {string} pathname
    */
   constructor(pathname) {
-    super(`pathname '${pathname}' conflicts with another file`, { pathname })
+    super('pathname conflicts with another file', { pathname })
     this.pathname = pathname
   }
 }
@@ -52,7 +56,7 @@ class FileNotFoundError extends PathnameError {
    * @param {string} pathname
    */
   constructor(pathname) {
-    super(`file ${pathname} does not exist`, { pathname })
+    super('file does not exist', { pathname })
     this.pathname = pathname
   }
 }
@@ -315,8 +319,9 @@ function checkPathnamesAreUnique(files) {
  */
 function checkPathname(pathname) {
   assert.nonEmptyString(pathname, 'bad pathname')
-  if (safePathname.isClean(pathname)) return
-  throw new FileMap.BadPathnameError(pathname)
+  const [isClean, reason] = safePathname.isCleanDebug(pathname)
+  if (isClean) return
+  throw new FileMap.BadPathnameError(pathname, reason)
 }
 
 /**

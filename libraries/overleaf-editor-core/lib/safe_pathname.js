@@ -64,17 +64,57 @@ function cleanPart(filename) {
  * @return {String}
  */
 exports.clean = function (pathname) {
+  return exports.cleanDebug(pathname)[0]
+}
+
+/**
+ * See clean
+ * @param {string} pathname
+ * @return {[string,string]}
+ */
+exports.cleanDebug = function (pathname) {
+  let prev = pathname
+  let reason = ''
+
+  /**
+   * @param {string} label
+   */
+  function recordReasonIfChanged(label) {
+    if (pathname === prev) return
+    if (reason) reason += ','
+    reason += label
+    prev = pathname
+  }
   pathname = path.normalize(pathname)
-  pathname = pathname.replace(/\\/g, '/') // workaround for IE
-  pathname = pathname.replace(/\/+/g, '/') // no multiple slashes
-  pathname = pathname.replace(/^(\/.*)$/, '_$1') // no leading /
-  pathname = pathname.replace(/^(.+)\/$/, '$1') // no trailing /
-  pathname = pathname.replace(/^ *(.*)$/, '$1') // no leading spaces
-  pathname = pathname.replace(/^(.*[^ ]) *$/, '$1') // no trailing spaces
+  recordReasonIfChanged('normalize')
+
+  pathname = pathname.replace(/\\/g, '/')
+  recordReasonIfChanged('workaround for IE')
+
+  pathname = pathname.replace(/\/+/g, '/')
+  recordReasonIfChanged('no multiple slashes')
+
+  pathname = pathname.replace(/^(\/.*)$/, '_$1')
+  recordReasonIfChanged('no leading /')
+
+  pathname = pathname.replace(/^(.+)\/$/, '$1')
+  recordReasonIfChanged('no trailing /')
+
+  pathname = pathname.replace(/^ *(.*)$/, '$1')
+  recordReasonIfChanged('no leading spaces')
+
+  pathname = pathname.replace(/^(.*[^ ]) *$/, '$1')
+  recordReasonIfChanged('no trailing spaces')
+
   if (pathname.length === 0) pathname = '_'
+  recordReasonIfChanged('empty')
+
   pathname = pathname.split('/').map(cleanPart).join('/')
+  recordReasonIfChanged('cleanPart')
+
   pathname = pathname.replace(BLOCKED_FILE_RX, '@$1')
-  return pathname
+  recordReasonIfChanged('BLOCKED_FILE_RX')
+  return [pathname, reason]
 }
 
 /**
@@ -84,9 +124,19 @@ exports.clean = function (pathname) {
  * @return {Boolean}
  */
 exports.isClean = function pathnameIsClean(pathname) {
-  return (
-    exports.clean(pathname) === pathname &&
-    pathname.length <= MAX_PATH &&
-    pathname.length > 0
-  )
+  return exports.isCleanDebug(pathname)[0]
+}
+
+/**
+ * A pathname is clean (see clean) and not too long.
+ *
+ * @param {string} pathname
+ * @return {[boolean,string]}
+ */
+exports.isCleanDebug = function (pathname) {
+  if (pathname.length > MAX_PATH) return [false, 'MAX_PATH']
+  if (pathname.length === 0) return [false, 'empty']
+  const [cleanPathname, reason] = exports.cleanDebug(pathname)
+  if (cleanPathname !== pathname) return [false, reason]
+  return [true, '']
 }

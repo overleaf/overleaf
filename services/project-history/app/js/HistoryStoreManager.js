@@ -122,7 +122,8 @@ function _requestChunk(options, callback) {
       chunk.chunk == null ||
       chunk.chunk.startVersion == null
     ) {
-      return callback(new OError('unexpected response'))
+      const { path } = options
+      return callback(new OError('unexpected response', { path }))
     }
     callback(null, chunk)
   })
@@ -130,28 +131,36 @@ function _requestChunk(options, callback) {
 
 function _getLatestProjectVersion(projectId, chunk, callback) {
   // find the initial project version
-  let projectVersion =
-    chunk.chunk.history.snapshot && chunk.chunk.history.snapshot.projectVersion
-  // keep track of any errors
+  const projectVersionInSnapshot = chunk.chunk.history.snapshot?.projectVersion
+  let projectVersion = projectVersionInSnapshot
+  const chunkStartVersion = chunk.chunk.startVersion
+  // keep track of any first error
   let error = null
   // iterate over the changes in chunk to find the most recent project version
-  for (const change of chunk.chunk.history.changes || []) {
-    if (change.projectVersion != null) {
+  for (const [changeIdx, change] of (
+    chunk.chunk.history.changes || []
+  ).entries()) {
+    const projectVersionInChange = change.projectVersion
+    if (projectVersionInChange != null) {
       if (
         projectVersion != null &&
-        Versions.lt(change.projectVersion, projectVersion)
+        Versions.lt(projectVersionInChange, projectVersion)
       ) {
-        logger.warn(
-          { projectId, chunk, projectVersion, change },
-          'project structure version out of order in chunk'
-        )
         if (!error) {
           error = new Errors.OpsOutOfOrderError(
-            'project structure version out of order'
+            'project structure version out of order',
+            {
+              projectId,
+              chunkStartVersion,
+              projectVersionInSnapshot,
+              changeIdx,
+              projectVersion,
+              projectVersionInChange,
+            }
           )
         }
       } else {
-        projectVersion = change.projectVersion
+        projectVersion = projectVersionInChange
       }
     }
   }
@@ -177,16 +186,16 @@ function _getLatestV2DocVersions(projectId, chunk, callback) {
           v2DocVersions[docId].v != null &&
           Versions.lt(v, v2DocVersions[docId].v)
         ) {
-          logger.warn(
-            {
-              projectId,
-              docId,
-              changeVersion: docInfo,
-              previousVersion: v2DocVersions[docId],
-            },
-            'doc version out of order in chunk'
-          )
           if (!error) {
+            logger.warn(
+              {
+                projectId,
+                docId,
+                changeVersion: docInfo,
+                previousVersion: v2DocVersions[docId],
+              },
+              'doc version out of order in chunk'
+            )
             error = new Errors.OpsOutOfOrderError('doc version out of order')
           }
         } else {
@@ -250,7 +259,6 @@ export function sendChanges(
           statusCode: error.statusCode,
           body: error.body,
         })
-        logger.warn({ error, projectId, historyId, endVersion }, error.message)
         return callback(error)
       }
       callback()
@@ -592,7 +600,6 @@ function _requestHistoryService(options, callback) {
         `history store a non-success status code: ${res.statusCode}`,
         { method, url, qs, statusCode: res.statusCode }
       )
-      logger.warn({ err: error }, error.message)
       callback(error)
     }
   })
