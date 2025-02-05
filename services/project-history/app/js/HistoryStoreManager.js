@@ -250,7 +250,7 @@ export function sendChanges(
           statusCode: error.statusCode,
           body: error.body,
         })
-        logger.warn(error)
+        logger.warn({ error, projectId, historyId, endVersion }, error.message)
         return callback(error)
       }
       callback()

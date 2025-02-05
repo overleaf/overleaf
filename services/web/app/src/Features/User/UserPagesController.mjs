@@ -79,7 +79,8 @@ async function settingsPage(req, res) {
     )
     personalAccessTokens = results?.[0] ?? []
   } catch (error) {
-    logger.error(OError.tag(error))
+    const err = OError.tag(error, 'listPersonalAccessTokens hook failed')
+    logger.error({ err, userId }, err.message)
   }
 
   let currentManagedUserAdminEmail

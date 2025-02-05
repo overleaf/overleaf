@@ -57,7 +57,7 @@ async function refreshFeatures(userId, reason) {
     try {
       await Modules.promises.hooks.fire('removeDropbox', userId, reason)
     } catch (err) {
-      logger.error(err)
+      logger.error({ err, userId }, 'removeDropbox hook failed')
     }
   }
 
@@ -66,7 +66,7 @@ async function refreshFeatures(userId, reason) {
     try {
       await Modules.promises.hooks.fire('removeGithub', userId, reason)
     } catch (err) {
-      logger.error(err)
+      logger.error({ err, userId }, 'removeGithub hook failed')
     }
   }
 

@@ -59,7 +59,7 @@ exports.importChanges = function importChanges(req, res, next) {
   try {
     changes = rawChanges.map(Change.fromRaw)
   } catch (err) {
-    logger.error(err)
+    logger.error({ err, projectId }, err.message)
     return render.unprocessableEntity(res)
   }
 
@@ -129,7 +129,7 @@ exports.importChanges = function importChanges(req, res, next) {
       ) {
         // If we failed to apply operations, that's probably because they were
         // invalid.
-        logger.error(err)
+        logger.error({ err, projectId }, err.message)
         render.unprocessableEntity(res)
       } else if (err instanceof Chunk.NotFoundError) {
         render.notFound(res)

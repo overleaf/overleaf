@@ -66,7 +66,7 @@ function start() {
       await EmailHandler.promises.sendEmail(emailType, opts)
     } catch (e) {
       const error = OError.tag(e, 'failed to send deferred email')
-      logger.warn(error)
+      logger.warn({ error, emailType }, error.message)
       throw error
     }
   })
@@ -84,7 +84,7 @@ function start() {
         e,
         'failed to send scheduled Group SSO account linking reminder'
       )
-      logger.warn(error)
+      logger.warn({ error, userId, subscriptionId }, error.message)
       throw error
     }
   })

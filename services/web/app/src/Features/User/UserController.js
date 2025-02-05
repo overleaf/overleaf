@@ -266,7 +266,8 @@ async function tryDeleteUser(req, res, next) {
       errorData.info.public = {
         error: 'SubscriptionAdminDeletionError',
       }
-      logger.warn(OError.tag(err, errorData.message, errorData.info))
+      const error = OError.tag(err, errorData.message, errorData.info)
+      logger.warn({ error, req }, error.message)
       return HttpErrorHandler.unprocessableEntity(
         req,
         res,

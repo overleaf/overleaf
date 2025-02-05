@@ -29,7 +29,6 @@ export function check(callback) {
             OError.tag(err, 'error checking lock for health check', {
               project_id: projectId,
             })
-            logger.err(err)
             return cb(err)
           } else if ((res != null ? res.statusCode : undefined) !== 200) {
             return cb(new Error(`status code not 200, it's ${res.statusCode}`))
@@ -46,7 +45,6 @@ export function check(callback) {
             OError.tag(err, 'error flushing for health check', {
               project_id: projectId,
             })
-            logger.err(err)
             return cb(err)
           } else if ((res != null ? res.statusCode : undefined) !== 204) {
             return cb(new Error(`status code not 204, it's ${res.statusCode}`))
@@ -63,7 +61,6 @@ export function check(callback) {
             OError.tag(err, 'error getting updates for health check', {
               project_id: projectId,
             })
-            logger.err(err)
             return cb(err)
           } else if ((res != null ? res.statusCode : undefined) !== 200) {
             return cb(new Error(`status code not 200, it's ${res.statusCode}`))

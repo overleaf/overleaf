@@ -100,7 +100,8 @@ async function createNewUser(attributes, options = {}) {
         await UserDeleter.promises.deleteMongoUser(user._id)
         throw OError.tag(error)
       } else {
-        logger.error(OError.tag(error))
+        const err = OError.tag(error, 'adding affiliations failed')
+        logger.error({ err, userId: user._id }, err.message)
       }
     }
   }

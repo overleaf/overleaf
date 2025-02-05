@@ -84,16 +84,17 @@ function setupErrorHandling() {
 
   // Handle Swagger errors.
   app.use(function (err, req, res, next) {
+    const projectId = req.swagger?.params?.project_id?.value
     if (res.headersSent) {
       return next(err)
     }
 
     if (err.code === 'SCHEMA_VALIDATION_FAILED') {
-      logger.error(err)
+      logger.error({ err, projectId }, err.message)
       return res.status(HTTPStatus.UNPROCESSABLE_ENTITY).json(err.results)
     }
     if (err.code === 'INVALID_TYPE' || err.code === 'PATTERN') {
-      logger.error(err)
+      logger.error({ err, projectId }, err.message)
       return res.status(HTTPStatus.UNPROCESSABLE_ENTITY).json({
         message: 'invalid type: ' + err.paramName,
       })
@@ -112,7 +113,8 @@ function setupErrorHandling() {
   })
 
   app.use(function (err, req, res, next) {
-    logger.error(err)
+    const projectId = req.swagger?.params?.project_id?.value
+    logger.error({ err, projectId }, err.message)
 
     if (res.headersSent) {
       return next(err)
