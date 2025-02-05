@@ -121,9 +121,12 @@ const RestoreManager = {
       pathname
     )
 
+    // Look for metadata indicating a linked file.
+    const isFileMetadata = metadata && 'provider' in metadata
+
     logger.debug({ metadata }, 'metadata from history')
 
-    if (importInfo.type === 'file' || metadata) {
+    if (importInfo.type === 'file' || isFileMetadata) {
       const newFile = await EditorController.promises.upsertFile(
         projectId,
         parentFolderId,

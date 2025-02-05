@@ -500,14 +500,10 @@ describe('RestoreManager', function () {
       })
     })
 
-    describe('reverting a document with metadata', function () {
-      beforeEach(async function () {
-        this.pathname = 'foo.tex'
+    describe('reverting a file or document with metadata', function () {
+      beforeEach(function () {
         this.ProjectLocator.promises.findElementByPath = sinon.stub().rejects()
         this.EditorController.promises.addDocWithRanges = sinon.stub()
-        this.FileSystemImportManager.promises.importFile = sinon
-          .stub()
-          .resolves({ type: 'doc', lines: ['foo', 'bar', 'baz'] })
         this.RestoreManager.promises._getUpdatesFromHistory = sinon
           .stub()
           .resolves([
@@ -517,110 +513,179 @@ describe('RestoreManager', function () {
         this.EditorController.promises.upsertFile = sinon
           .stub()
           .resolves({ _id: 'mock-file-id', type: 'file' })
-        this.RestoreManager.promises._getMetadataFromHistory = sinon
+        this.RestoreManager.promises._getRangesFromHistory = sinon
           .stub()
-          .resolves({ metadata: { foo: 'bar' } })
-        this.result = await this.RestoreManager.promises.revertFile(
-          this.user_id,
-          this.project_id,
-          this.version,
-          this.pathname
-        )
-      })
-
-      it('should revert it as a file', function () {
-        expect(this.result).to.deep.equal({ _id: 'mock-file-id', type: 'file' })
-      })
-
-      it('should upload to the project as a file', function () {
-        expect(
-          this.EditorController.promises.upsertFile
-        ).to.have.been.calledWith(
-          this.project_id,
-          'mock-folder-id',
-          'foo.tex',
-          this.fsPath,
-          { foo: 'bar' },
-          {
-            kind: 'file-restore',
-            path: this.pathname,
-            version: this.version,
-            timestamp: new Date(this.endTs).toISOString(),
-          },
-          this.user_id
-        )
-      })
-
-      it('should not look up ranges', function () {
-        expect(this.RestoreManager.promises._getRangesFromHistory).to.not.have
-          .been.called
-      })
-
-      it('should not try to add a file', function () {
-        expect(this.EditorController.promises.addDocWithRanges).to.not.have.been
-          .called
-      })
-    })
-
-    describe('reverting a file with metadata', function () {
-      beforeEach(async function () {
-        this.pathname = 'foo.png'
-        this.ProjectLocator.promises.findElementByPath = sinon.stub().rejects()
-        this.EditorController.promises.addDocWithRanges = sinon.stub()
-        this.FileSystemImportManager.promises.importFile = sinon
+          .resolves({
+            changes: [],
+            comments: [],
+          })
+        this.EditorController.promises.addDocWithRanges = sinon
           .stub()
-          .resolves({ type: 'file' })
-        this.RestoreManager.promises._getUpdatesFromHistory = sinon
+          .resolves((this.addedFile = { _id: 'mock-doc-id', type: 'doc' }))
+
+        this.DocstoreManager.promises.getAllRanges = sinon.stub().resolves([])
+        this.ChatApiHandler.promises.generateThreadData = sinon
           .stub()
-          .resolves([
-            { toV: this.version, meta: { end_ts: (this.endTs = new Date()) } },
-          ])
-
-        this.EditorController.promises.upsertFile = sinon
+          .resolves({})
+        this.ChatManager.promises.injectUserInfoIntoThreads = sinon
           .stub()
-          .resolves({ _id: 'mock-file-id', type: 'file' })
-        this.RestoreManager.promises._getMetadataFromHistory = sinon
-          .stub()
-          .resolves({ metadata: { foo: 'bar' } })
-        this.result = await this.RestoreManager.promises.revertFile(
-          this.user_id,
-          this.project_id,
-          this.version,
-          this.pathname
-        )
+          .resolves({})
+        this.EditorRealTimeController.emitToRoom = sinon.stub()
       })
 
-      it('should revert it as a file', function () {
-        expect(this.result).to.deep.equal({ _id: 'mock-file-id', type: 'file' })
+      describe('when reverting a linked file', function () {
+        beforeEach(async function () {
+          this.pathname = 'foo.png'
+          this.FileSystemImportManager.promises.importFile = sinon
+            .stub()
+            .resolves({ type: 'file' })
+          this.RestoreManager.promises._getMetadataFromHistory = sinon
+            .stub()
+            .resolves({ metadata: { provider: 'bar' } })
+          this.result = await this.RestoreManager.promises.revertFile(
+            this.user_id,
+            this.project_id,
+            this.version,
+            this.pathname
+          )
+        })
+
+        it('should revert it as a file', function () {
+          expect(this.result).to.deep.equal({
+            _id: 'mock-file-id',
+            type: 'file',
+          })
+        })
+
+        it('should upload to the project as a file', function () {
+          expect(
+            this.EditorController.promises.upsertFile
+          ).to.have.been.calledWith(
+            this.project_id,
+            'mock-folder-id',
+            'foo.png',
+            this.fsPath,
+            { provider: 'bar' },
+            {
+              kind: 'file-restore',
+              path: this.pathname,
+              version: this.version,
+              timestamp: new Date(this.endTs).toISOString(),
+            },
+            this.user_id
+          )
+        })
+
+        it('should not look up ranges', function () {
+          expect(this.RestoreManager.promises._getRangesFromHistory).to.not.have
+            .been.called
+        })
+
+        it('should not try to add a document', function () {
+          expect(this.EditorController.promises.addDocWithRanges).to.not.have
+            .been.called
+        })
       })
 
-      it('should upload to the project as a file', function () {
-        expect(
-          this.EditorController.promises.upsertFile
-        ).to.have.been.calledWith(
-          this.project_id,
-          'mock-folder-id',
-          'foo.png',
-          this.fsPath,
-          { foo: 'bar' },
-          {
-            kind: 'file-restore',
-            path: this.pathname,
-            version: this.version,
-            timestamp: new Date(this.endTs).toISOString(),
-          },
-          this.user_id
-        )
+      describe('when reverting a linked document with provider', function () {
+        beforeEach(async function () {
+          this.pathname = 'foo.tex'
+          this.FileSystemImportManager.promises.importFile = sinon
+            .stub()
+            .resolves({ type: 'doc', lines: ['foo', 'bar', 'baz'] })
+          this.RestoreManager.promises._getMetadataFromHistory = sinon
+            .stub()
+            .resolves({ metadata: { provider: 'bar' } })
+          this.result = await this.RestoreManager.promises.revertFile(
+            this.user_id,
+            this.project_id,
+            this.version,
+            this.pathname
+          )
+        })
+
+        it('should revert it as a file', function () {
+          expect(this.result).to.deep.equal({
+            _id: 'mock-file-id',
+            type: 'file',
+          })
+        })
+
+        it('should upload to the project as a file', function () {
+          expect(
+            this.EditorController.promises.upsertFile
+          ).to.have.been.calledWith(
+            this.project_id,
+            'mock-folder-id',
+            'foo.tex',
+            this.fsPath,
+            { provider: 'bar' },
+            {
+              kind: 'file-restore',
+              path: this.pathname,
+              version: this.version,
+              timestamp: new Date(this.endTs).toISOString(),
+            },
+            this.user_id
+          )
+        })
+
+        it('should not look up ranges', function () {
+          expect(this.RestoreManager.promises._getRangesFromHistory).to.not.have
+            .been.called
+        })
+
+        it('should not try to add a document', function () {
+          expect(this.EditorController.promises.addDocWithRanges).to.not.have
+            .been.called
+        })
       })
 
-      it('should not look up ranges', function () {
-        expect(this.RestoreManager.promises._getRangesFromHistory).to.not.have
-          .been.called
-      })
+      describe('when reverting a linked document with { main: true }', function () {
+        beforeEach(async function () {
+          this.pathname = 'foo.tex'
+          this.FileSystemImportManager.promises.importFile = sinon
+            .stub()
+            .resolves({ type: 'doc', lines: ['foo', 'bar', 'baz'] })
+          this.RestoreManager.promises._getMetadataFromHistory = sinon
+            .stub()
+            .resolves({ metadata: { main: true } })
+          this.result = await this.RestoreManager.promises.revertFile(
+            this.user_id,
+            this.project_id,
+            this.version,
+            this.pathname
+          )
+        })
 
-      it('should not try to add a file', function () {
-        expect(this.EditorController.promises.addDocWithRanges).to.not.have.been
-          .called
+        it('should revert it as a document', function () {
+          expect(this.result).to.deep.equal({
+            _id: 'mock-doc-id',
+            type: 'doc',
+          })
+        })
+
+        it('should not upload to the project as a file', function () {
+          expect(this.EditorController.promises.upsertFile).to.not.have.been
+            .called
+        })
+
+        it('should look up ranges', function () {
+          expect(this.RestoreManager.promises._getRangesFromHistory).to.have
+            .been.called
+        })
+
+        it('should add the document', function () {
+          expect(
+            this.EditorController.promises.addDocWithRanges
+          ).to.have.been.calledWith(
+            this.project_id,
+            this.folder_id,
+            'foo.tex',
+            ['foo', 'bar', 'baz'],
+            { changes: [], comments: [] }
+          )
+        })
       })
     })
 
