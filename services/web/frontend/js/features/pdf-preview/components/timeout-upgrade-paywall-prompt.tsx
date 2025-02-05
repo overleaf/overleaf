@@ -1,16 +1,16 @@
 import getMeta from '@/utils/meta'
-import {
-  studentRoles,
-  StudentRole,
-} from '../../../../../modules/onboarding/frontend/js/components/data/roles'
 import { useMemo } from 'react'
+
+const studentRoles = [
+  'High-school student',
+  'Undergraduate student',
+  "Master's student (e.g. MSc, MA)",
+  'Doctoral student (e.g. PhD, MD, EngD)',
+]
 
 function TimeoutUpgradePaywallPrompt() {
   const odcRole = getMeta('ol-odcRole')
-  const isStudent = useMemo(
-    () => studentRoles.includes(odcRole as StudentRole),
-    [odcRole]
-  )
+  const isStudent = useMemo(() => studentRoles.includes(odcRole), [odcRole])
 
   return (
     <div>
