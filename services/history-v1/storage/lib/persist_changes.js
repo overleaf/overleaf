@@ -1,8 +1,8 @@
-/** @module */
+// @ts-check
+
 'use strict'
 
 const _ = require('lodash')
-const BPromise = require('bluebird')
 
 const core = require('overleaf-editor-core')
 const Chunk = core.Chunk
@@ -48,17 +48,12 @@ Timer.prototype.elapsed = function () {
  *    endVersion may be better suited to the metadata record.
  *
  * @param {string} projectId
- * @param {Array.<Change>} allChanges
+ * @param {core.Change[]} allChanges
  * @param {Object} limits
  * @param {number} clientEndVersion
  * @return {Promise.<Object?>}
  */
-module.exports = function persistChanges(
-  projectId,
-  allChanges,
-  limits,
-  clientEndVersion
-) {
+async function persistChanges(projectId, allChanges, limits, clientEndVersion) {
   assert.projectId(projectId)
   assert.array(allChanges)
   assert.maybe.object(limits)
@@ -104,41 +99,42 @@ module.exports = function persistChanges(
     return changesPushed
   }
 
-  function extendLastChunkIfPossible() {
-    return chunkStore.loadLatest(projectId).then(function (latestChunk) {
-      currentChunk = latestChunk
-      originalEndVersion = latestChunk.getEndVersion()
-      if (originalEndVersion !== clientEndVersion) {
-        throw new Chunk.ConflictingEndVersion(
-          clientEndVersion,
-          originalEndVersion
-        )
-      }
+  async function extendLastChunkIfPossible() {
+    const latestChunk = await chunkStore.loadLatest(projectId)
 
-      currentSnapshot = latestChunk.getSnapshot().clone()
-      const timer = new Timer()
-      currentSnapshot.applyAll(latestChunk.getChanges())
+    currentChunk = latestChunk
+    originalEndVersion = latestChunk.getEndVersion()
+    if (originalEndVersion !== clientEndVersion) {
+      throw new Chunk.ConflictingEndVersion(
+        clientEndVersion,
+        originalEndVersion
+      )
+    }
 
-      if (!fillChunk(currentChunk, changesToPersist)) return
-      checkElapsedTime(timer)
+    currentSnapshot = latestChunk.getSnapshot().clone()
+    const timer = new Timer()
+    currentSnapshot.applyAll(latestChunk.getChanges())
 
-      return chunkStore.update(projectId, originalEndVersion, currentChunk)
-    })
+    if (!fillChunk(currentChunk, changesToPersist)) return
+    checkElapsedTime(timer)
+
+    await chunkStore.update(projectId, originalEndVersion, currentChunk)
   }
 
-  function createNewChunksAsNeeded() {
-    if (changesToPersist.length === 0) return
-
-    const endVersion = currentChunk.getEndVersion()
-    const history = new History(currentSnapshot.clone(), [])
-    const chunk = new Chunk(history, endVersion)
-    const timer = new Timer()
-    if (fillChunk(chunk, changesToPersist)) {
-      checkElapsedTime(timer)
-      currentChunk = chunk
-      return chunkStore.create(projectId, chunk).then(createNewChunksAsNeeded)
+  async function createNewChunksAsNeeded() {
+    while (changesToPersist.length > 0) {
+      const endVersion = currentChunk.getEndVersion()
+      const history = new History(currentSnapshot.clone(), [])
+      const chunk = new Chunk(history, endVersion)
+      const timer = new Timer()
+      if (fillChunk(chunk, changesToPersist)) {
+        checkElapsedTime(timer)
+        currentChunk = chunk
+        await chunkStore.create(projectId, chunk)
+      } else {
+        throw new Error('failed to fill empty chunk')
+      }
     }
-    throw new Error('failed to fill empty chunk')
   }
 
   function isOlderThanMinChangeTimestamp(change) {
@@ -157,15 +153,18 @@ module.exports = function persistChanges(
   if (anyTooOld || tooManyChanges || tooManyBytes) {
     changesToPersist = oldChanges
     const numberOfChangesToPersist = oldChanges.length
-    return extendLastChunkIfPossible()
-      .then(createNewChunksAsNeeded)
-      .then(function () {
-        return {
-          numberOfChangesPersisted: numberOfChangesToPersist,
-          originalEndVersion,
-          currentChunk,
-        }
-      })
+
+    await extendLastChunkIfPossible()
+    await createNewChunksAsNeeded()
+
+    return {
+      numberOfChangesPersisted: numberOfChangesToPersist,
+      originalEndVersion,
+      currentChunk,
+    }
+  } else {
+    return null
   }
-  return BPromise.resolve(null)
 }
+
+module.exports = persistChanges

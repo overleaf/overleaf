@@ -153,7 +153,7 @@ async function loadAtTimestamp(projectId, timestamp) {
 /**
  * Store the chunk and insert corresponding records in the database.
  *
- * @param {number} projectId
+ * @param {string} projectId
  * @param {Chunk} chunk
  * @return {Promise.<number>} for the chunkId of the inserted chunk
  */
@@ -192,7 +192,7 @@ async function uploadChunk(projectId, chunk) {
  * Extend the project's history by replacing the latest chunk with a new
  * chunk.
  *
- * @param {number} projectId
+ * @param {string} projectId
  * @param {number} oldEndVersion
  * @param {Chunk} newChunk
  * @return {Promise}
@@ -212,7 +212,7 @@ async function update(projectId, oldEndVersion, newChunk) {
 /**
  * Find the chunk ID for a given version of a project.
  *
- * @param {number} projectId
+ * @param {string} projectId
  * @param {number} version
  * @return {Promise.<number>}
  */

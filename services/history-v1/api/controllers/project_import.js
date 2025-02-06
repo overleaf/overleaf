@@ -1,6 +1,9 @@
+// @ts-check
+
 'use strict'
 
-const BPromise = require('bluebird')
+const { expressify } = require('@overleaf/promise-utils')
+
 const HTTPStatus = require('http-status')
 
 const core = require('overleaf-editor-core')
@@ -22,7 +25,7 @@ const persistChanges = storage.persistChanges
 
 const render = require('./render')
 
-exports.importSnapshot = function importSnapshot(req, res, next) {
+async function importSnapshot(req, res) {
   const projectId = req.swagger.params.project_id.value
   const rawSnapshot = req.swagger.params.snapshot.value
 
@@ -34,21 +37,21 @@ exports.importSnapshot = function importSnapshot(req, res, next) {
     return render.unprocessableEntity(res)
   }
 
-  return chunkStore
-    .initializeProject(projectId, snapshot)
-    .then(function (projectId) {
-      res.status(HTTPStatus.OK).json({ projectId })
-    })
-    .catch(err => {
-      if (err instanceof chunkStore.AlreadyInitialized) {
-        render.conflict(res)
-      } else {
-        next(err)
-      }
-    })
+  let historyId
+  try {
+    historyId = await chunkStore.initializeProject(projectId, snapshot)
+  } catch (err) {
+    if (err instanceof chunkStore.AlreadyInitialized) {
+      return render.conflict(res)
+    } else {
+      throw err
+    }
+  }
+
+  res.status(HTTPStatus.OK).json({ projectId: historyId })
 }
 
-exports.importChanges = function importChanges(req, res, next) {
+async function importChanges(req, res, next) {
   const projectId = req.swagger.params.project_id.value
   const rawChanges = req.swagger.params.changes.value
   const endVersion = req.swagger.params.end_version.value
@@ -59,7 +62,7 @@ exports.importChanges = function importChanges(req, res, next) {
   try {
     changes = rawChanges.map(Change.fromRaw)
   } catch (err) {
-    logger.error({ err, projectId }, err.message)
+    logger.warn({ err, projectId }, 'failed to parse changes')
     return render.unprocessableEntity(res)
   }
 
@@ -76,65 +79,61 @@ exports.importChanges = function importChanges(req, res, next) {
   const batchBlobStore = new BatchBlobStore(blobStore)
   const hashCheckBlobStore = new HashCheckBlobStore(blobStore)
 
-  function loadFiles() {
+  async function loadFiles() {
     const blobHashes = new Set()
-    changes.forEach(function findBlobHashesToPreload(change) {
+    for (const change of changes) {
+      // This populates the set blobHashes with blobs referred to in the change
       change.findBlobHashes(blobHashes)
-    })
-
-    function lazyLoadChangeFiles(change) {
-      return change.loadFiles('lazy', batchBlobStore)
     }
 
-    return batchBlobStore
-      .preload(Array.from(blobHashes))
-      .then(function lazyLoadChangeFilesWithBatching() {
-        return BPromise.each(changes, lazyLoadChangeFiles)
-      })
+    await batchBlobStore.preload(Array.from(blobHashes))
+
+    for (const change of changes) {
+      await change.loadFiles('lazy', batchBlobStore)
+    }
   }
 
-  function buildResultSnapshot(resultChunk) {
-    return BPromise.resolve(
-      resultChunk || chunkStore.loadLatest(projectId)
-    ).then(function (chunk) {
-      const snapshot = chunk.getSnapshot()
-      snapshot.applyAll(chunk.getChanges())
-      return snapshot.store(hashCheckBlobStore)
-    })
+  async function buildResultSnapshot(resultChunk) {
+    const chunk = resultChunk || (await chunkStore.loadLatest(projectId))
+    const snapshot = chunk.getSnapshot()
+    snapshot.applyAll(chunk.getChanges())
+    const rawSnapshot = await snapshot.store(hashCheckBlobStore)
+    return rawSnapshot
   }
 
-  return loadFiles()
-    .then(function () {
-      return persistChanges(projectId, changes, limits, endVersion)
-    })
-    .then(function (result) {
-      if (returnSnapshot === 'none') {
-        res.status(HTTPStatus.CREATED).json({})
-      } else {
-        return buildResultSnapshot(result && result.currentChunk).then(
-          function (rawSnapshot) {
-            res.status(HTTPStatus.CREATED).json(rawSnapshot)
-          }
-        )
-      }
-    })
-    .catch(err => {
-      if (
-        err instanceof Chunk.ConflictingEndVersion ||
-        err instanceof TextOperation.UnprocessableError ||
-        err instanceof File.NotEditableError ||
-        err instanceof FileMap.PathnameError ||
-        err instanceof Snapshot.EditMissingFileError ||
-        err instanceof chunkStore.ChunkVersionConflictError
-      ) {
-        // If we failed to apply operations, that's probably because they were
-        // invalid.
-        logger.error({ err, projectId }, err.message)
-        render.unprocessableEntity(res)
-      } else if (err instanceof Chunk.NotFoundError) {
-        render.notFound(res)
-      } else {
-        next(err)
-      }
-    })
+  await loadFiles()
+
+  let result
+  try {
+    result = await persistChanges(projectId, changes, limits, endVersion)
+  } catch (err) {
+    if (
+      err instanceof Chunk.ConflictingEndVersion ||
+      err instanceof TextOperation.UnprocessableError ||
+      err instanceof File.NotEditableError ||
+      err instanceof FileMap.PathnameError ||
+      err instanceof Snapshot.EditMissingFileError ||
+      err instanceof chunkStore.ChunkVersionConflictError
+    ) {
+      // If we failed to apply operations, that's probably because they were
+      // invalid.
+      logger.warn({ err, projectId, endVersion }, 'changes rejected by history')
+      return render.unprocessableEntity(res)
+    } else if (err instanceof Chunk.NotFoundError) {
+      logger.warn({ err, projectId }, 'chunk not found')
+      return render.notFound(res)
+    } else {
+      throw err
+    }
+  }
+
+  if (returnSnapshot === 'none') {
+    res.status(HTTPStatus.CREATED).json({})
+  } else {
+    const rawSnapshot = await buildResultSnapshot(result && result.currentChunk)
+    res.status(HTTPStatus.CREATED).json(rawSnapshot)
+  }
 }
+
+exports.importSnapshot = expressify(importSnapshot)
+exports.importChanges = expressify(importChanges)
