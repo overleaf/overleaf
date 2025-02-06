@@ -14,8 +14,7 @@ function setup(videoEl) {
   }
 
   const DELAY_BEFORE_REPLAY = 15 * 1000
-  // 0.7 will enable the autoplay on the desktop main homepage video for users
-  // with the `new-design-registration` variant
+  // 0.7 will enable the autoplay on the desktop main homepage video for all users
   const INTERSECTION_THRESHOLD = 0.7
 
   let videoIsVisible

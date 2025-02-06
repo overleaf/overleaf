@@ -6,7 +6,6 @@ import ErrorController from '../Errors/ErrorController.js'
 import SessionManager from '../Authentication/SessionManager.js'
 import { expressify } from '@overleaf/promise-utils'
 import logger from '@overleaf/logger'
-import SplitTestHandler from '../SplitTests/SplitTestHandler.js'
 
 const __dirname = new URL('.', import.meta.url).pathname
 
@@ -32,18 +31,7 @@ async function home(req, res) {
       page: req.path,
     })
 
-    const homeVariant = await SplitTestHandler.promises.getAssignment(
-      req,
-      res,
-      'bs5-homepage'
-    )
-    const isBS5page = homeVariant.variant === 'enabled'
-
-    if (isBS5page) {
-      res.render('external/home/index')
-    } else {
-      res.render('external/home/bootstrap3/index')
-    }
+    res.render('external/home/index')
   } else {
     res.redirect('/login')
   }
