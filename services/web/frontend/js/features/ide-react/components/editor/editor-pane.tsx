@@ -19,17 +19,11 @@ const SymbolPalettePane = lazy(
 export const EditorPane: FC = () => {
   const [editor] = useScopeValue<EditorScopeValue>('editor')
   const { selectedEntityCount, openEntity } = useFileTreeOpenContext()
-  const { currentDocumentId } = useEditorManagerContext()
+  const { currentDocumentId, isLoading } = useEditorManagerContext()
 
   if (!currentDocumentId) {
     return null
   }
-
-  const isLoading = Boolean(
-    (!editor.sharejs_doc || editor.opening) &&
-      !editor.error_state &&
-      editor.open_doc_id
-  )
 
   return (
     <div

@@ -9,14 +9,15 @@ import {
   EditorSwitchBeginnerTooltip,
   codeEditorModePrompt,
 } from './editor-switch-beginner-tooltip'
+import { useEditorManagerContext } from '@/features/ide-react/context/editor-manager-context'
 
 function EditorSwitch() {
   const { t } = useTranslation()
   const [visual, setVisual] = useScopeValue('editor.showVisual')
-  const [docName] = useScopeValue('editor.open_doc_name')
   const [codeEditorOpened] = useScopeValue('editor.codeEditorOpened')
+  const { openDocName } = useEditorManagerContext()
 
-  const richTextAvailable = isValidTeXFile(docName)
+  const richTextAvailable = openDocName ? isValidTeXFile(openDocName) : false
   const { completeTutorial } = useTutorial(codeEditorModePrompt, {
     location: 'logs',
     name: codeEditorModePrompt,

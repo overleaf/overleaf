@@ -54,7 +54,7 @@ interface OpenDocOptions
 export type EditorManager = {
   getEditorType: () => EditorType | null
   showSymbolPalette: boolean
-  currentDocument: DocumentContainer
+  currentDocument: DocumentContainer | null
   currentDocumentId: DocId | null
   getCurrentDocValue: () => string | null
   getCurrentDocumentId: () => DocId | null
@@ -65,6 +65,10 @@ export type EditorManager = {
   openDocs: OpenDocuments
   openFileWithId: (fileId: string) => void
   openInitialDoc: (docId: string) => void
+  openDocName: string | null
+  setOpenDocName: (openDocName: string) => void
+  isLoading: boolean
+  trackChanges: boolean
   jumpToLine: (options: GotoLineOptions) => void
   wantTrackChanges: boolean
   setWantTrackChanges: React.Dispatch<
@@ -102,8 +106,7 @@ export const EditorManagerContext = createContext<EditorManager | undefined>(
 export const EditorManagerProvider: FC = ({ children }) => {
   const { t } = useTranslation()
   const { scopeStore } = useIdeContext()
-  const { projectId } = useIdeReactContext()
-  const { reportError, eventEmitter } = useIdeReactContext()
+  const { reportError, eventEmitter, projectId } = useIdeReactContext()
   const { setOutOfSync } = useEditorContext()
   const { socket, closeConnection, connectionState } = useConnectionContext()
   const { view, setView } = useLayoutContext()
@@ -115,16 +118,19 @@ export const EditorManagerProvider: FC = ({ children }) => {
   )
   const [showVisual] = useScopeValue<boolean>('editor.showVisual')
   const [currentDocument, setCurrentDocument] =
-    useScopeValue<DocumentContainer>('editor.sharejs_doc')
+    useScopeValue<DocumentContainer | null>('editor.sharejs_doc')
   const [currentDocumentId, setCurrentDocumentId] = useScopeValue<DocId | null>(
     'editor.open_doc_id'
   )
-  const [, setOpenDocName] = useScopeValue<string | null>(
+  const [openDocName, setOpenDocName] = useScopeValue<string | null>(
     'editor.open_doc_name'
   )
-  const [, setOpening] = useScopeValue<boolean>('editor.opening')
-  const [, setIsInErrorState] = useScopeValue<boolean>('editor.error_state')
-  const [, setTrackChanges] = useScopeValue<boolean>('editor.trackChanges')
+  const [opening, setOpening] = useScopeValue<boolean>('editor.opening')
+  const [errorState, setIsInErrorState] =
+    useScopeValue<boolean>('editor.error_state')
+  const [trackChanges, setTrackChanges] = useScopeValue<boolean>(
+    'editor.trackChanges'
+  )
   const [wantTrackChanges, setWantTrackChanges] = useScopeValue<boolean>(
     'editor.wantTrackChanges'
   )
@@ -385,7 +391,7 @@ export const EditorManagerProvider: FC = ({ children }) => {
       //  - when the current one has pending ops that need flushing, to avoid
       //     race conditions from cleanup
       const currentDocumentId = currentDocument?.doc_id
-      const hasBufferedOps = currentDocument?.hasBufferedOps()
+      const hasBufferedOps = currentDocument && currentDocument.hasBufferedOps()
       const changingDoc = currentDocument && currentDocumentId !== doc._id
       if (changingDoc || hasBufferedOps) {
         debugConsole.log('[openNewDocument] Leaving existing open doc...')
@@ -679,13 +685,20 @@ export const EditorManagerProvider: FC = ({ children }) => {
   // Watch for changes in wantTrackChanges
   const previousWantTrackChangesRef = useRef(wantTrackChanges)
   useEffect(() => {
-    if (wantTrackChanges !== previousWantTrackChangesRef.current) {
+    if (
+      currentDocument &&
+      wantTrackChanges !== previousWantTrackChangesRef.current
+    ) {
       previousWantTrackChangesRef.current = wantTrackChanges
       syncTrackChangesState(currentDocument)
     }
   }, [currentDocument, syncTrackChangesState, wantTrackChanges])
 
-  const value = useMemo(
+  const isLoading = Boolean(
+    (!currentDocument || opening) && !errorState && currentDocumentId
+  )
+
+  const value: EditorManager = useMemo(
     () => ({
       getEditorType,
       showSymbolPalette,
@@ -698,6 +711,10 @@ export const EditorManagerProvider: FC = ({ children }) => {
       openDocWithId,
       openDoc,
       openDocs,
+      openDocName,
+      setOpenDocName,
+      trackChanges,
+      isLoading,
       openFileWithId,
       openInitialDoc,
       jumpToLine,
@@ -719,6 +736,10 @@ export const EditorManagerProvider: FC = ({ children }) => {
       openDocs,
       openFileWithId,
       openInitialDoc,
+      openDocName,
+      setOpenDocName,
+      trackChanges,
+      isLoading,
       jumpToLine,
       wantTrackChanges,
       setWantTrackChanges,

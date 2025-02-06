@@ -7,7 +7,6 @@ import {
   useMemo,
   useState,
 } from 'react'
-import useScopeValue from '@/shared/hooks/use-scope-value'
 import { DocumentContainer } from '@/features/ide-react/editor/document-container'
 import {
   Change,
@@ -22,6 +21,7 @@ import { useIdeReactContext } from '@/features/ide-react/context/ide-react-conte
 import { useConnectionContext } from '@/features/ide-react/context/connection-context'
 import useSocketListener from '@/features/ide-react/hooks/use-socket-listener'
 import { throttle } from 'lodash'
+import { useEditorManagerContext } from '@/features/ide-react/context/editor-manager-context'
 
 export type Ranges = {
   docId: string
@@ -37,8 +37,8 @@ type RangesActions = {
   rejectChanges: (...ids: string[]) => void
 }
 
-const buildRanges = (currentDoc: DocumentContainer | null) => {
-  const ranges = currentDoc?.ranges
+const buildRanges = (currentDocument: DocumentContainer | null) => {
+  const ranges = currentDocument?.ranges
 
   if (!ranges) {
     return undefined
@@ -73,7 +73,7 @@ const buildRanges = (currentDoc: DocumentContainer | null) => {
             changed.comments.has(comment.id) ? { ...comment } : comment
           )
         : ranges.comments,
-    docId: currentDoc.doc_id,
+    docId: currentDocument.doc_id,
     total: ranges.changes.length + ranges.comments.length,
   }
 }
@@ -83,46 +83,44 @@ const RangesActionsContext = createContext<RangesActions | undefined>(undefined)
 export const RangesProvider: FC = ({ children }) => {
   const view = useCodeMirrorViewContext()
   const { projectId } = useIdeReactContext()
-  const [currentDoc] = useScopeValue<DocumentContainer | null>(
-    'editor.sharejs_doc'
-  )
+  const { currentDocument } = useEditorManagerContext()
   const { socket } = useConnectionContext()
   const [ranges, setRanges] = useState<Ranges | undefined>(() =>
-    buildRanges(currentDoc)
+    buildRanges(currentDocument)
   )
 
   // rebuild the ranges when the current doc changes
   useEffect(() => {
-    setRanges(buildRanges(currentDoc))
-  }, [currentDoc])
+    setRanges(buildRanges(currentDocument))
+  }, [currentDocument])
 
   useEffect(() => {
-    if (currentDoc) {
+    if (currentDocument) {
       const listener = throttle(
         () => {
           window.setTimeout(() => {
-            setRanges(buildRanges(currentDoc))
+            setRanges(buildRanges(currentDocument))
           })
         },
         500,
         { leading: true, trailing: true }
       )
 
-      // currentDoc.on('ranges:clear.cm6', listener)
-      currentDoc.on('ranges:redraw.cm6', listener)
-      currentDoc.on('ranges:dirty.cm6', listener)
+      // currentDocument.on('ranges:clear.cm6', listener)
+      currentDocument.on('ranges:redraw.cm6', listener)
+      currentDocument.on('ranges:dirty.cm6', listener)
 
       return () => {
-        // currentDoc.off('ranges:clear.cm6')
-        currentDoc.off('ranges:redraw.cm6')
-        currentDoc.off('ranges:dirty.cm6')
+        // currentDocument.off('ranges:clear.cm6')
+        currentDocument.off('ranges:redraw.cm6')
+        currentDocument.off('ranges:dirty.cm6')
       }
     }
-  }, [currentDoc])
+  }, [currentDocument])
 
   // TODO: move this into DocumentContainer?
   useEffect(() => {
-    if (currentDoc) {
+    if (currentDocument) {
       const regenerateTrackChangesId = (doc: DocumentContainer) => {
         if (doc.ranges) {
           const inflight = doc.ranges.getIdSeed()
@@ -132,51 +130,51 @@ export const RangesProvider: FC = ({ children }) => {
         }
       }
 
-      currentDoc.on('flipped_pending_to_inflight', () =>
-        regenerateTrackChangesId(currentDoc)
+      currentDocument.on('flipped_pending_to_inflight', () =>
+        regenerateTrackChangesId(currentDocument)
       )
 
-      regenerateTrackChangesId(currentDoc)
+      regenerateTrackChangesId(currentDocument)
 
       return () => {
-        currentDoc.off('flipped_pending_to_inflight')
+        currentDocument.off('flipped_pending_to_inflight')
       }
     }
-  }, [currentDoc])
+  }, [currentDocument])
 
   useSocketListener(
     socket,
     'accept-changes',
     useCallback(
       (docId: string, entryIds: string[]) => {
-        if (currentDoc?.ranges) {
-          if (docId === currentDoc.doc_id) {
-            currentDoc.ranges.removeChangeIds(entryIds)
-            setRanges(buildRanges(currentDoc))
+        if (currentDocument?.ranges) {
+          if (docId === currentDocument.doc_id) {
+            currentDocument.ranges.removeChangeIds(entryIds)
+            setRanges(buildRanges(currentDocument))
           }
         }
       },
-      [currentDoc]
+      [currentDocument]
     )
   )
 
   const actions = useMemo(
     () => ({
       async acceptChanges(...ids: string[]) {
-        if (currentDoc?.ranges) {
-          const url = `/project/${projectId}/doc/${currentDoc.doc_id}/changes/accept`
+        if (currentDocument?.ranges) {
+          const url = `/project/${projectId}/doc/${currentDocument.doc_id}/changes/accept`
           await postJSON(url, { body: { change_ids: ids } })
-          currentDoc.ranges.removeChangeIds(ids)
-          setRanges(buildRanges(currentDoc))
+          currentDocument.ranges.removeChangeIds(ids)
+          setRanges(buildRanges(currentDocument))
         }
       },
       rejectChanges(...ids: string[]) {
-        if (currentDoc?.ranges) {
-          view.dispatch(rejectChanges(view.state, currentDoc.ranges, ids))
+        if (currentDocument?.ranges) {
+          view.dispatch(rejectChanges(view.state, currentDocument.ranges, ids))
         }
       },
     }),
-    [currentDoc, projectId, view]
+    [currentDocument, projectId, view]
   )
 
   return (

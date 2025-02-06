@@ -34,7 +34,6 @@ export const EditorContext = createContext<
         submitBtnHtml?: string
       }
       hasPremiumCompile?: boolean
-      loading?: boolean
       renameProject: (newName: string) => void
       setPermissionsLevel: (permissionsLevel: PermissionsLevel) => void
       showSymbolPalette?: boolean
@@ -84,7 +83,6 @@ export const EditorProvider: FC = ({ children }) => {
     )
   }, [])
 
-  const [loading] = useScopeValue('state.loading')
   const [projectName, setProjectName] = useScopeValue('project.name')
   const [permissionsLevel, setPermissionsLevel] =
     useScopeValue('permissionsLevel')
@@ -188,7 +186,6 @@ export const EditorProvider: FC = ({ children }) => {
     () => ({
       cobranding,
       hasPremiumCompile: features?.compileGroup === 'priority',
-      loading,
       renameProject,
       permissionsLevel: outOfSync ? 'readOnly' : permissionsLevel,
       setPermissionsLevel,
@@ -215,7 +212,6 @@ export const EditorProvider: FC = ({ children }) => {
       features?.compileGroup,
       owner,
       userId,
-      loading,
       renameProject,
       permissionsLevel,
       setPermissionsLevel,

@@ -49,7 +49,7 @@ async function tryGetDiffSize(
 
 export const useDebugDiffTracker = (
   projectId: string,
-  currentDocument: DocumentContainer
+  currentDocument: DocumentContainer | null
 ) => {
   const debugCurrentDocument = useRef<DocumentContainer | null>(null)
   const debugProjectId = useRef<string | null>(null)

@@ -495,11 +495,13 @@ function useReviewPanelState(): ReviewPanel.ReviewPanelState {
 
   const regenerateTrackChangesId = useCallback(
     (doc: typeof currentDocument) => {
-      const currentChangeTracker = getChangeTracker(doc.doc_id as DocId)
-      const oldId = currentChangeTracker.getIdSeed()
-      const newId = RangesTracker.generateIdSeed()
-      currentChangeTracker.setIdSeed(newId)
-      doc.setTrackChangesIdSeeds({ pending: newId, inflight: oldId })
+      if (doc) {
+        const currentChangeTracker = getChangeTracker(doc.doc_id as DocId)
+        const oldId = currentChangeTracker.getIdSeed()
+        const newId = RangesTracker.generateIdSeed()
+        currentChangeTracker.setIdSeed(newId)
+        doc.setTrackChangesIdSeeds({ pending: newId, inflight: oldId })
+      }
     },
     [getChangeTracker]
   )

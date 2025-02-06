@@ -6,10 +6,6 @@ export function populateEditorScope(
   store: ReactScopeValueStore,
   projectId: string
 ) {
-  // This value is not used in the React code. It's just here to prevent errors
-  // from EditorProvider
-  store.set('state.loading', false)
-
   store.set('project.name', null)
 
   store.set('editor', {

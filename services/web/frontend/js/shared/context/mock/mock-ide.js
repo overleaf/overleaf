@@ -32,7 +32,6 @@ export const getMockIde = () => {
           email: '',
         },
       },
-      state: { loading: false },
       permissionsLevel: 'readOnly',
       editor: {
         sharejs_doc: null,

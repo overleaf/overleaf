@@ -11,10 +11,10 @@ import {
 import useScopeEventEmitter from '@/shared/hooks/use-scope-event-emitter'
 import useEventListener from '@/shared/hooks/use-event-listener'
 import * as eventTracking from '@/infrastructure/event-tracking'
-import useScopeValue from '@/shared/hooks/use-scope-value'
 import { isValidTeXFile } from '@/main/is-valid-tex-file'
 import localStorage from '@/infrastructure/local-storage'
 import { useProjectContext } from '@/shared/context/project-context'
+import { useEditorManagerContext } from '@/features/ide-react/context/editor-manager-context'
 
 export type PartialFlatOutline = {
   level: number
@@ -118,10 +118,10 @@ export const OutlineProvider: FC = ({ children }) => {
     [flatOutline, currentlyHighlightedLine]
   )
 
-  const [docName] = useScopeValue<string | null>('editor.open_doc_name')
+  const { openDocName } = useEditorManagerContext()
   const isTexFile = useMemo(
-    () => (docName ? isValidTeXFile(docName) : false),
-    [docName]
+    () => (openDocName ? isValidTeXFile(openDocName) : false),
+    [openDocName]
   )
 
   const { _id: projectId } = useProjectContext()

@@ -112,7 +112,7 @@ export const LocalCompileContext = createContext<CompileContext | undefined>(
 
 export const LocalCompileProvider: FC = ({ children }) => {
   const { hasPremiumCompile, isProjectOwner } = useEditorContext()
-  const { openDocWithId, openDocs } = useEditorManagerContext()
+  const { openDocWithId, openDocs, currentDocument } = useEditorManagerContext()
 
   const { _id: projectId, rootDocId } = useProjectContext()
 
@@ -248,9 +248,6 @@ export const LocalCompileProvider: FC = ({ children }) => {
     true
   )
 
-  // the Document currently open in the editor
-  const [currentDoc] = useScopeValue('editor.sharejs_doc')
-
   // whether the editor linter found errors
   const [hasLintingError, setHasLintingError] = useScopeValue('hasLintingError')
 
@@ -302,8 +299,8 @@ export const LocalCompileProvider: FC = ({ children }) => {
 
   // keep currentDoc in sync with the compiler
   useEffect(() => {
-    compiler.currentDoc = currentDoc
-  }, [compiler, currentDoc])
+    compiler.currentDoc = currentDocument
+  }, [compiler, currentDocument])
 
   // keep the project rootDocId in sync with the compiler
   useEffect(() => {
@@ -330,11 +327,11 @@ export const LocalCompileProvider: FC = ({ children }) => {
 
   // always compile the PDF once after opening the project, after the doc has loaded
   useEffect(() => {
-    if (!compiledOnce && currentDoc) {
+    if (!compiledOnce && currentDocument) {
       setCompiledOnce(true)
       compiler.compile({ isAutoCompileOnLoad: true })
     }
-  }, [compiledOnce, currentDoc, compiler])
+  }, [compiledOnce, currentDocument, compiler])
 
   useEffect(() => {
     setHasShortCompileTimeout(
