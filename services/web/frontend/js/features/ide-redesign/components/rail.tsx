@@ -10,6 +10,11 @@ import { RailTabKey, useRailTabContext } from '../contexts/rail-tab-context'
 import FileTreeOutlinePanel from './file-tree-outline-panel'
 import { ChatIndicator, ChatPane } from './chat'
 import getMeta from '@/utils/meta'
+import { HorizontalResizeHandle } from '@/features/ide-react/components/resize/horizontal-resize-handle'
+import { HorizontalToggler } from '@/features/ide-react/components/resize/horizontal-toggler'
+import { useRail } from '../hooks/use-rail'
+import { useTranslation } from 'react-i18next'
+import classNames from 'classnames'
 
 type RailElement = {
   icon: AvailableUnfilledIcon
@@ -59,6 +64,15 @@ const RAIL_TABS: RailElement[] = [
 ]
 
 export const RailLayout = () => {
+  const { t } = useTranslation()
+  const {
+    isOpen,
+    setIsOpen,
+    panelRef,
+    handlePaneCollapse,
+    handlePaneExpand,
+    togglePane,
+  } = useRail()
   const { selectedTab, setSelectedTab } = useRailTabContext()
 
   const { setLeftMenuShown } = useLayoutContext()
@@ -74,16 +88,26 @@ export const RailLayout = () => {
     [setLeftMenuShown]
   )
 
+  const onTabSelect = useCallback(
+    (key: string | null) => {
+      if (key === selectedTab) {
+        togglePane()
+      } else {
+        // Change the selected tab and make sure it's open
+        setSelectedTab((key ?? 'file-tree') as RailTabKey)
+        setIsOpen(true)
+      }
+    },
+    [setSelectedTab, selectedTab, setIsOpen, togglePane]
+  )
+
   return (
     <TabContainer
       mountOnEnter // Only render when necessary (so that we can lazy load tab content)
       unmountOnExit={false} // TODO: Should we unmount the tabs when they're not used?
       transition={false}
       activeKey={selectedTab}
-      onSelect={useCallback(
-        key => setSelectedTab(key ?? undefined),
-        [setSelectedTab]
-      )}
+      onSelect={onTabSelect}
       id="ide-rail-tabs"
     >
       <div className="ide-rail">
@@ -94,7 +118,7 @@ export const RailLayout = () => {
           {RAIL_TABS.filter(({ hide }) => !hide).map(
             ({ icon, key, indicator }) => (
               <RailTab
-                active={selectedTab === key}
+                open={isOpen && selectedTab === key}
                 key={key}
                 eventKey={key}
                 icon={icon}
@@ -114,6 +138,10 @@ export const RailLayout = () => {
         defaultSize={15}
         minSize={5}
         maxSize={80}
+        ref={panelRef}
+        collapsible
+        onCollapse={handlePaneCollapse}
+        onExpand={handlePaneExpand}
       >
         <div className="ide-rail-content">
           <Tab.Content>
@@ -125,6 +153,20 @@ export const RailLayout = () => {
           </Tab.Content>
         </div>
       </Panel>
+      <HorizontalResizeHandle
+        resizable
+        hitAreaMargins={{ coarse: 0, fine: 0 }}
+        onDoubleClick={togglePane}
+      >
+        <HorizontalToggler
+          id="ide-redesign-sidebar-panel"
+          togglerType="west"
+          isOpen={isOpen}
+          setIsOpen={setIsOpen}
+          tooltipWhenOpen={t('tooltip_hide_panel')}
+          tooltipWhenClosed={t('tooltip_show_panel')}
+        />
+      </HorizontalResizeHandle>
     </TabContainer>
   )
 }
@@ -132,17 +174,22 @@ export const RailLayout = () => {
 const RailTab = ({
   icon,
   eventKey,
-  active,
+  open,
   indicator,
 }: {
   icon: AvailableUnfilledIcon
   eventKey: string
-  active: boolean
+  open: boolean
   indicator?: ReactElement
 }) => {
   return (
-    <NavLink eventKey={eventKey} className="ide-rail-tab-link">
-      {active ? (
+    <NavLink
+      eventKey={eventKey}
+      className={classNames('ide-rail-tab-link', {
+        'open-rail': open,
+      })}
+    >
+      {open ? (
         <MaterialIcon className="ide-rail-tab-link-icon" type={icon} />
       ) : (
         <MaterialIcon className="ide-rail-tab-link-icon" type={icon} unfilled />
