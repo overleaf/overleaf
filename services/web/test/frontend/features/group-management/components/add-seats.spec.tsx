@@ -333,9 +333,9 @@ describe('<AddSeats />', function () {
           makeRequest(204, this.adding.toString())
           cy.findByTestId('title').should(
             'contain.text',
-            'You’ve added more users'
+            'You’ve added more user(s)'
           )
-          cy.findByText(/you’ve added more users to your subscription/i)
+          cy.findByText(/you’ve added more user\(s\) to your subscription/i)
           cy.findByRole('link', { name: /invite people/i }).should(
             'have.attr',
             'href',
