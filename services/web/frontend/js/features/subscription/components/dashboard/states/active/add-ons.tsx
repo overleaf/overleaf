@@ -123,6 +123,7 @@ function AddOns({
                           onClick={() => handleCancelClick(code)}
                           as="button"
                           tabIndex={-1}
+                          variant="danger"
                         >
                           {t('cancel')}
                         </OLDropdownMenuItem>
