@@ -124,6 +124,15 @@ describe('InstitutionsGetter', function () {
         },
       },
     ]
+    this.fullEmailCollection = [
+      this.licencedAffiliation,
+      this.licencedAffiliation,
+      this.licencedAffiliationPastReconfirmation,
+      this.confirmedAffiliation,
+      this.confirmedAffiliationPastReconfirmation,
+      this.unconfirmedDomainLicensedAffiliation,
+      this.unconfirmedEmailLicensedAffiliation,
+    ]
   })
 
   describe('getCurrentInstitutionIds', function () {
@@ -158,16 +167,32 @@ describe('InstitutionsGetter', function () {
     })
   })
 
+  describe('getCurrentAndPastAffiliationIds', function () {
+    it('filters unconfirmed affiliations, preserves those past reconfirmation, and returns only 1 result per institution', async function () {
+      this.UserGetter.promises.getUserFullEmails.resolves(
+        this.fullEmailCollection
+      )
+      const institutions =
+        await this.InstitutionsGetter.promises.getCurrentAndPastAffiliationIds(
+          this.userId
+        )
+      expect(institutions).to.deep.equal([777, 888, 456, 135])
+    })
+    it('handles empty response', async function () {
+      this.UserGetter.promises.getUserFullEmails.resolves([])
+      const institutions =
+        await this.InstitutionsGetter.promises.getCurrentInstitutionIds(
+          this.userId
+        )
+      expect(institutions).to.deep.equal([])
+    })
+  })
+
   describe('getCurrentInstitutionsWithLicence', function () {
     it('returns one result per institution and filters out affiliations without license', async function () {
-      this.UserGetter.promises.getUserFullEmails.resolves([
-        this.licencedAffiliation,
-        this.licencedAffiliation,
-        this.licencedAffiliationPastReconfirmation,
-        this.confirmedAffiliation,
-        this.unconfirmedDomainLicensedAffiliation,
-        this.unconfirmedEmailLicensedAffiliation,
-      ])
+      this.UserGetter.promises.getUserFullEmails.resolves(
+        this.fullEmailCollection
+      )
       const institutions =
         await this.InstitutionsGetter.promises.getCurrentInstitutionsWithLicence(
           this.userId

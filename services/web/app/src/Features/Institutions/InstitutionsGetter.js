@@ -18,6 +18,19 @@ async function getCurrentAffiliations(userId) {
     .map(emailData => emailData.affiliation)
 }
 
+async function getCurrentAndPastAffiliationIds(userId) {
+  let fullEmails = await UserGetter.promises.getUserFullEmails(userId)
+  // current are those confirmed and not with lapsed reconfirmations
+  fullEmails = fullEmails
+    .filter(
+      emailData =>
+        emailData.confirmedAt && emailData.affiliation?.institution?.confirmed
+    )
+    .map(emailData => emailData.affiliation.institution.id)
+  // remove dupes
+  return [...new Set(fullEmails)]
+}
+
 async function getCurrentInstitutionIds(userId) {
   // current are those confirmed and not with lapsed reconfirmations
   // only 1 record returned per current institutionId
@@ -81,6 +94,7 @@ InstitutionsGetter.promises = {
   getCurrentAffiliations,
   getCurrentInstitutionIds,
   getCurrentInstitutionsWithLicence,
+  getCurrentAndPastAffiliationIds,
   getManagedInstitutions: promisify(InstitutionsGetter.getManagedInstitutions),
 }
 
