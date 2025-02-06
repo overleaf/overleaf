@@ -179,6 +179,7 @@ const staticTheme = EditorView.theme({
   '&': {
     height: '100%',
     textRendering: 'optimizeSpeed',
+    fontVariantNumeric: 'slashed-zero',
   },
   // remove the outline from the focused editor
   '&.cm-editor.cm-focused:not(:focus-visible)': {
