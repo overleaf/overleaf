@@ -12,7 +12,6 @@ import {
 import { IdeEventEmitter } from '@/features/ide-react/create-ide-event-emitter'
 import { ReactScopeEventEmitter } from '@/features/ide-react/scope-event-emitter/react-scope-event-emitter'
 import { ConnectionContext } from '@/features/ide-react/context/connection-context'
-import { EventLog } from '@/features/ide-react/editor/event-log'
 import { ReactContextRoot } from '@/features/ide-react/context/react-context-root'
 
 // these constants can be imported in tests instead of
@@ -179,7 +178,6 @@ const IdeReactProvider = ({ children }) => {
   const [ideReactContextValue] = useState(() => ({
     projectId: PROJECT_ID,
     eventEmitter: new IdeEventEmitter(),
-    eventLog: new EventLog(),
     startedFreeTrial,
     setStartedFreeTrial,
     reportError: () => {},

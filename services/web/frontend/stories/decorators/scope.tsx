@@ -18,7 +18,6 @@ import {
 import { IdeEventEmitter } from '@/features/ide-react/create-ide-event-emitter'
 import { ReactScopeEventEmitter } from '@/features/ide-react/scope-event-emitter/react-scope-event-emitter'
 import { ConnectionContext } from '@/features/ide-react/context/connection-context'
-import { EventLog } from '@/features/ide-react/editor/event-log'
 import { Socket } from '@/features/ide-react/connection/types/socket'
 import { ConnectionState } from '@/features/ide-react/connection/types/connection-state'
 import { ReactContextRoot } from '@/features/ide-react/context/react-context-root'
@@ -214,7 +213,6 @@ const IdeReactProvider: FC = ({ children }) => {
   const [ideReactContextValue] = useState(() => ({
     projectId,
     eventEmitter: new IdeEventEmitter(),
-    eventLog: new EventLog(),
     startedFreeTrial,
     setStartedFreeTrial,
     reportError: () => {},

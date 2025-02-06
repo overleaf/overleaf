@@ -7,7 +7,6 @@ import { Socket } from '@/features/ide-react/connection/types/socket'
 import { debugConsole } from '@/utils/debugging'
 import { decodeUtf8 } from '@/utils/decode-utf8'
 import { IdeEventEmitter } from '@/features/ide-react/create-ide-event-emitter'
-import { EventLog } from '@/features/ide-react/editor/event-log'
 import EditorWatchdogManager from '@/features/ide-react/connection/editor-watchdog-manager'
 import {
   Message,
@@ -55,8 +54,7 @@ export class ShareJsDoc extends EventEmitter {
     version: number,
     readonly socket: Socket,
     private readonly globalEditorWatchdogManager: EditorWatchdogManager,
-    private readonly eventEmitter: IdeEventEmitter,
-    private readonly eventLog: EventLog
+    private readonly eventEmitter: IdeEventEmitter
   ) {
     super()
     this.type = 'text'
@@ -133,9 +131,6 @@ export class ShareJsDoc extends EventEmitter {
     if (doc.snapshot.indexOf('\r') === -1) {
       return
     }
-    this.eventLog.pushEvent('remove-carriage-return-char', {
-      doc_id: this.doc_id,
-    })
     let nextPos
     while ((nextPos = doc.snapshot.indexOf('\r')) !== -1) {
       debugConsole.log('[ShareJsDoc] remove-carriage-return-char', nextPos)

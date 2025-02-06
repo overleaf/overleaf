@@ -96,7 +96,7 @@ export const EditorManagerProvider: FC = ({ children }) => {
   const { t } = useTranslation()
   const ide = useIdeContext()
   const { projectId } = useIdeReactContext()
-  const { reportError, eventEmitter, eventLog } = useIdeReactContext()
+  const { reportError, eventEmitter } = useIdeReactContext()
   const { setOutOfSync } = useEditorContext()
   const { socket, closeConnection, connectionState } = useConnectionContext()
   const { view, setView } = useLayoutContext()
@@ -182,13 +182,7 @@ export const EditorManagerProvider: FC = ({ children }) => {
   }, [genericModalVisible])
 
   const [openDocs] = useState(
-    () =>
-      new OpenDocuments(
-        socket,
-        globalEditorWatchdogManager,
-        eventEmitter,
-        eventLog
-      )
+    () => new OpenDocuments(socket, globalEditorWatchdogManager, eventEmitter)
   )
 
   const currentDocumentIdStorageKey = `doc.open_id.${projectId}`

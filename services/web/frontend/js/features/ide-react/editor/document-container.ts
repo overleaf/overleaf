@@ -7,7 +7,6 @@ import { debugConsole } from '@/utils/debugging'
 import { Socket } from '@/features/ide-react/connection/types/socket'
 import { IdeEventEmitter } from '@/features/ide-react/create-ide-event-emitter'
 import { EditorFacade } from '@/features/source-editor/extensions/realtime'
-import { EventLog } from '@/features/ide-react/editor/event-log'
 import EditorWatchdogManager from '@/features/ide-react/connection/editor-watchdog-manager'
 import EventEmitter from '@/utils/EventEmitter'
 import {
@@ -25,7 +24,6 @@ import { decodeUtf8 } from '@/utils/decode-utf8'
 import {
   ShareJsOperation,
   TrackChangesIdSeeds,
-  Version,
 } from '@/features/ide-react/editor/types/document'
 import { ThreadId } from '../../../../../types/review-panel/review-panel'
 import getMeta from '@/utils/meta'
@@ -113,7 +111,6 @@ export class DocumentContainer extends EventEmitter {
     readonly socket: Socket,
     private readonly globalEditorWatchdogManager: EditorWatchdogManager,
     private readonly ideEventEmitter: IdeEventEmitter,
-    private readonly eventLog: EventLog,
     private readonly detachDoc: (docId: string, doc: DocumentContainer) => void
   ) {
     super()
@@ -387,18 +384,7 @@ export class DocumentContainer extends EventEmitter {
   }
 
   private onUpdateApplied(update: Update) {
-    this.eventLog.pushEvent('received-update', {
-      doc_id: this.doc_id,
-      remote_doc_id: update?.doc,
-      wantToBeJoined: this.wantToBeJoined,
-      update,
-      hasDoc: !!this.doc,
-    })
-
     if (update?.doc === this.doc_id && this.doc != null) {
-      this.eventLog.pushEvent('received-update:processing', {
-        update,
-      })
       // FIXME: change this back to processUpdateFromServer when redis fixed
       this.doc.processUpdateFromServerInOrder(update)
 
@@ -419,7 +405,6 @@ export class DocumentContainer extends EventEmitter {
 
   private onReconnect = () => {
     debugConsole.log('[onReconnect] reconnected (joined project)')
-    this.eventLog.pushEvent('reconnected:afterJoinProject')
 
     this.connected = true
     if (this.wantToBeJoined || this.doc?.hasBufferedOps()) {
@@ -449,10 +434,6 @@ export class DocumentContainer extends EventEmitter {
 
   private joinDoc(callback?: JoinCallback) {
     if (this.doc) {
-      this.eventLog.pushEvent('joinDoc:existing', {
-        doc_id: this.doc_id,
-        version: this.doc.getVersion(),
-      })
       return this.socket.emit(
         'joinDoc',
         this.doc_id,
@@ -471,9 +452,6 @@ export class DocumentContainer extends EventEmitter {
         }
       )
     } else {
-      this.eventLog.pushEvent('joinDoc:new', {
-        doc_id: this.doc_id,
-      })
       this.socket.emit(
         'joinDoc',
         this.doc_id,
@@ -484,18 +462,13 @@ export class DocumentContainer extends EventEmitter {
             return
           }
           this.joined = true
-          this.eventLog.pushEvent('joinDoc:inited', {
-            doc_id: this.doc_id,
-            version,
-          })
           this.doc = new ShareJsDoc(
             this.doc_id,
             docLines,
             version,
             this.socket,
             this.globalEditorWatchdogManager,
-            this.ideEventEmitter,
-            this.eventLog
+            this.ideEventEmitter
           )
           this.decodeRanges(ranges)
           this.ranges = new RangesTracker(ranges?.changes, ranges?.comments)
@@ -534,9 +507,6 @@ export class DocumentContainer extends EventEmitter {
   }
 
   private leaveDoc(callback?: LeaveCallback) {
-    this.eventLog.pushEvent('leaveDoc', {
-      doc_id: this.doc_id,
-    })
     debugConsole.log('[leaveDoc] Sending leaveDoc request')
     this.socket.emit('leaveDoc', this.doc_id, error => {
       if (error) {
@@ -577,25 +547,15 @@ export class DocumentContainer extends EventEmitter {
       this.onError(error, meta)
     )
     this.doc.on('externalUpdate', (update: Update) => {
-      this.eventLog.pushEvent('externalUpdate', { doc_id: this.doc_id })
       return this.trigger('externalUpdate', update)
     })
     this.doc.on('remoteop', (...ops: AnyOperation[]) => {
-      this.eventLog.pushEvent('remoteop', { doc_id: this.doc_id })
       return this.trigger('remoteop', ...ops)
     })
     this.doc.on('op:sent', (op: AnyOperation) => {
-      this.eventLog.pushEvent('op:sent', {
-        doc_id: this.doc_id,
-        op,
-      })
       return this.trigger('op:sent')
     })
     this.doc.on('op:acknowledged', (op: AnyOperation) => {
-      this.eventLog.pushEvent('op:acknowledged', {
-        doc_id: this.doc_id,
-        op,
-      })
       this.ideEventEmitter.emit('ide:opAcknowledged', {
         doc_id: this.doc_id,
         op,
@@ -603,24 +563,9 @@ export class DocumentContainer extends EventEmitter {
       return this.trigger('op:acknowledged')
     })
     this.doc.on('op:timeout', (op: AnyOperation) => {
-      this.eventLog.pushEvent('op:timeout', {
-        doc_id: this.doc_id,
-        op,
-      })
       this.trigger('op:timeout')
       return this.onError(new Error('op timed out'))
     })
-    this.doc.on(
-      'flush',
-      (inflightOp: AnyOperation, pendingOp: AnyOperation, version: Version) => {
-        return this.eventLog.pushEvent('flush', {
-          doc_id: this.doc_id,
-          inflightOp,
-          pendingOp,
-          v: version,
-        })
-      }
-    )
 
     let docChangedTimeout: number | null = null
     this.doc.on(

@@ -20,7 +20,6 @@ import { useConnectionContext } from '@/features/ide-react/context/connection-co
 import { getMockIde } from '@/shared/context/mock/mock-ide'
 import { populateEditorScope } from '@/features/ide-react/scope-adapters/editor-manager-context-adapter'
 import { postJSON } from '@/infrastructure/fetch-json'
-import { EventLog } from '@/features/ide-react/editor/event-log'
 import { populateOnlineUsersScope } from '@/features/ide-react/context/online-users-context'
 import { ReactScopeEventEmitter } from '@/features/ide-react/scope-event-emitter/react-scope-event-emitter'
 import getMeta from '@/utils/meta'
@@ -30,7 +29,6 @@ const LOADED_AT = new Date()
 type IdeReactContextValue = {
   projectId: string
   eventEmitter: IdeEventEmitter
-  eventLog: EventLog
   startedFreeTrial: boolean
   setStartedFreeTrial: React.Dispatch<
     React.SetStateAction<IdeReactContextValue['startedFreeTrial']>
@@ -92,7 +90,6 @@ export const IdeReactProvider: FC = ({ children }) => {
   const [scopeEventEmitter] = useState(
     () => new ReactScopeEventEmitter(eventEmitter)
   )
-  const [eventLog] = useState(() => new EventLog())
   const [startedFreeTrial, setStartedFreeTrial] = useState(false)
   const release = getMeta('ol-ExposedSettings')?.sentryRelease ?? null
 
@@ -175,21 +172,13 @@ export const IdeReactProvider: FC = ({ children }) => {
   const value = useMemo(
     () => ({
       eventEmitter,
-      eventLog,
       startedFreeTrial,
       setStartedFreeTrial,
       projectId,
       reportError,
       projectJoined,
     }),
-    [
-      eventEmitter,
-      eventLog,
-      projectId,
-      projectJoined,
-      reportError,
-      startedFreeTrial,
-    ]
+    [eventEmitter, projectId, projectJoined, reportError, startedFreeTrial]
   )
 
   return (

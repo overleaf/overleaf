@@ -4,7 +4,6 @@ import { DocumentContainer } from '@/features/ide-react/editor/document-containe
 import { debugConsole } from '@/utils/debugging'
 import { Socket } from '@/features/ide-react/connection/types/socket'
 import { IdeEventEmitter } from '@/features/ide-react/create-ide-event-emitter'
-import { EventLog } from '@/features/ide-react/editor/event-log'
 import EditorWatchdogManager from '@/features/ide-react/connection/editor-watchdog-manager'
 
 export class OpenDocuments {
@@ -14,8 +13,7 @@ export class OpenDocuments {
   constructor(
     private readonly socket: Socket,
     private readonly globalEditorWatchdogManager: EditorWatchdogManager,
-    private readonly events: IdeEventEmitter,
-    private readonly eventLog: EventLog
+    private readonly events: IdeEventEmitter
   ) {}
 
   getDocument(docId: string) {
@@ -49,7 +47,6 @@ export class OpenDocuments {
       this.socket,
       this.globalEditorWatchdogManager,
       this.events,
-      this.eventLog,
       this.detachDoc.bind(this)
     )
     this.openDocs.set(docId, doc)
