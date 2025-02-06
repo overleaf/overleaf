@@ -261,12 +261,6 @@ describe('back_fill_file_hash script', function () {
   }
 
   beforeEach(cleanup.everything)
-  beforeEach('cleanup s3 buckets', async function () {
-    await backupPersistor.deleteDirectory(deksBucket, '')
-    await backupPersistor.deleteDirectory(projectBlobsBucket, '')
-    expect(await listS3Bucket(deksBucket)).to.have.length(0)
-    expect(await listS3Bucket(projectBlobsBucket)).to.have.length(0)
-  })
 
   beforeEach('populate mongo', async function () {
     await globalBlobs.insertMany([

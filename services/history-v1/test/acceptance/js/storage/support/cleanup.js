@@ -1,6 +1,7 @@
 const config = require('config')
 
 const { knex, persistor, mongodb } = require('../../../../../storage')
+const { S3Persistor } = require('@overleaf/object-persistor/src/S3Persistor')
 
 const POSTGRES_TABLES = [
   'chunks',
@@ -55,16 +56,39 @@ async function clearBucket(name) {
   await persistor.deleteDirectory(name, '')
 }
 
+let s3PersistorForBackupCleanup
+
+async function cleanupBackup() {
+  // The backupPersistor refuses to delete short prefixes. Use a low-level S3 persistor.
+  if (!s3PersistorForBackupCleanup) {
+    const { backupPersistor } = await import(
+      '../../../../../storage/lib/backupPersistor.mjs'
+    )
+    s3PersistorForBackupCleanup = new S3Persistor(backupPersistor.settings)
+  }
+  await Promise.all(
+    Object.values(config.get('backupStore')).map(name =>
+      s3PersistorForBackupCleanup.deleteDirectory(name, '')
+    )
+  )
+}
+
 async function cleanupEverything() {
   // Set the timeout when called in a Mocha test. This function is also called
   // in benchmarks where it is not passed a Mocha context.
   this.timeout?.(5000)
-  await Promise.all([cleanupPostgres(), cleanupMongo(), cleanupPersistor()])
+  await Promise.all([
+    cleanupPostgres(),
+    cleanupMongo(),
+    cleanupPersistor(),
+    cleanupBackup(),
+  ])
 }
 
 module.exports = {
   postgres: cleanupPostgres,
   mongo: cleanupMongo,
   persistor: cleanupPersistor,
+  backup: cleanupBackup,
   everything: cleanupEverything,
 }

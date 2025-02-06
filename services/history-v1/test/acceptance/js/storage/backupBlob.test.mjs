@@ -18,6 +18,7 @@ import {
   projectBlobsBucket,
 } from '../../../../storage/lib/backupPersistor.mjs'
 import { WritableBuffer } from '@overleaf/stream-utils'
+import cleanup from './support/cleanup.js'
 
 async function listS3BucketRaw(bucket) {
   const client = backupPersistor._getClientForBucket(bucket)
@@ -55,14 +56,7 @@ describe('backupBlob', function () {
     }
   })
 
-  beforeEach(async function () {
-    await backupPersistor.deleteDirectory(projectBlobsBucket, '')
-    expect(await listS3Bucket(projectBlobsBucket)).to.have.length(0)
-  })
-
-  beforeEach('cleanup mongo', async function () {
-    await backedUpBlobs.deleteMany({})
-  })
+  beforeEach(cleanup.everything)
 
   describe('when the blob is already backed up', function () {
     let blob

@@ -4,6 +4,7 @@ import Path from 'node:path'
 import _ from 'lodash'
 import config from 'config'
 import { SecretManagerServiceClient } from '@google-cloud/secret-manager'
+import OError from '@overleaf/o-error'
 import {
   PerProjectEncryptedS3Persistor,
   RootKeyEncryptionKey,
@@ -55,17 +56,24 @@ if (DELETION_ONLY) {
   getRawRootKeyEncryptionKeys = () => new Promise(_resolve => {})
 }
 
+const PROJECT_FOLDER_REGEX =
+  /^\d{3}\/\d{3}\/\d{3,}\/|[0-9a-f]{3}\/[0-9a-f]{3}\/[0-9a-f]{18}\/$/
+
 /**
  * @param {string} bucketName
  * @param {string} path
  * @return {string}
  */
-function pathToProjectFolder(bucketName, path) {
+export function pathToProjectFolder(bucketName, path) {
   switch (bucketName) {
     case deksBucket:
     case chunksBucket:
     case projectBlobsBucket:
-      return Path.join(...path.split('/').slice(0, 3)) + '/'
+      const projectFolder = Path.join(...path.split('/').slice(0, 3)) + '/'
+      if (!PROJECT_FOLDER_REGEX.test(projectFolder)) {
+        throw new OError('invalid project folder', { bucketName, path })
+      }
+      return projectFolder
     default:
       throw new Error(`${bucketName} does not store per-project files`)
   }

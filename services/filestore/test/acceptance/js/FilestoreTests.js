@@ -1305,10 +1305,38 @@ describe('Filestore', function () {
         })
 
         describe('deleteDirectory', function () {
-          let checkGET2
+          let checkGET1, checkGET2
           beforeEach('create files', async function () {
-            await createRandomContent(fileUrl1, '1')
+            checkGET1 = await createRandomContent(fileUrl1, '1')
             checkGET2 = await createRandomContent(fileUrl2, '2')
+          })
+          it('should refuse to delete top-level prefix', async function () {
+            await expect(
+              app.persistor.deleteDirectory(
+                Settings.filestore.stores.user_files,
+                projectId.slice(0, 3)
+              )
+            ).to.be.rejectedWith('not a project-folder')
+            expect(
+              await app.persistor.checkIfObjectExists(
+                Settings.filestore.stores.user_files,
+                fileKey1
+              )
+            ).to.equal(true)
+            await checkGET1()
+            expect(
+              await app.persistor.checkIfObjectExists(
+                Settings.filestore.stores.user_files,
+                fileKey2
+              )
+            ).to.equal(true)
+            expect(
+              await app.persistor.getDataEncryptionKeySize(
+                Settings.filestore.stores.user_files,
+                fileKey2
+              )
+            ).to.equal(32)
+            await checkGET2()
           })
           it('should delete sub-folder and keep DEK', async function () {
             await app.persistor.deleteDirectory(

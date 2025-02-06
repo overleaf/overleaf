@@ -98,12 +98,6 @@ describe('backupDeletion', function () {
     const projectIdWithChunks = new ObjectId('000000000000000000000005')
     const projectIdNoHistoryId = new ObjectId('000000000000000000000006')
 
-    beforeEach('cleanup s3 buckets', async function () {
-      await backupPersistor.deleteDirectory(deksBucket, '')
-      await backupPersistor.deleteDirectory(chunksBucket, '')
-      await backupPersistor.deleteDirectory(projectBlobsBucket, '')
-    })
-
     beforeEach('populate mongo', async function () {
       await deletedProjectsCollection.insertMany([
         {
