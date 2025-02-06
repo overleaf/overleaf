@@ -38,6 +38,9 @@ async function manageGroupMembers(req, res, next) {
   )
 
   const plan = PlansLocator.findLocalPlanInSettings(subscription.planCode)
+  const userId = SessionManager.getLoggedInUserId(req.session)
+  const isAdmin = subscription.admin_id.toString() === userId
+  const canUseAddSeatsFeature = plan?.canUseFlexibleLicensing && isAdmin
 
   res.render('user_membership/group-members-react', {
     name: entityName,
@@ -47,6 +50,7 @@ async function manageGroupMembers(req, res, next) {
     managedUsersActive: subscription.managedUsersEnabled,
     groupSSOActive: ssoConfig?.enabled,
     canUseFlexibleLicensing: plan?.canUseFlexibleLicensing,
+    canUseAddSeatsFeature,
   })
 }
 

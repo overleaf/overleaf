@@ -23,6 +23,7 @@ describe('UserMembershipController', function () {
     this.newUser = { _id: 'mock-new-user-id', email: 'new-user-email@foo.bar' }
     this.subscription = {
       _id: 'mock-subscription-id',
+      admin_id: 'mock-admin-id',
       fetchV1Data: callback => callback(null, this.subscription),
     }
     this.institution = {

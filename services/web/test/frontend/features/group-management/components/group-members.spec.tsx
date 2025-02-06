@@ -488,6 +488,7 @@ describe('GroupMembers', function () {
           'flexible-group-licensing': 'enabled',
         })
         win.metaAttributesCache.set('ol-canUseFlexibleLicensing', true)
+        win.metaAttributesCache.set('ol-canUseAddSeatsFeature', true)
       })
     })
 
@@ -532,6 +533,26 @@ describe('GroupMembers', function () {
       cy.findByTestId('group-size-details').contains(
         'You have 1 user and your plan supports up to 10. Add more users.'
       )
+    })
+
+    it('renders the group members page without "add more users" link when not admin', function () {
+      cy.window().then(win => {
+        win.metaAttributesCache.set('ol-users', [this.JOHN_DOE])
+        win.metaAttributesCache.set('ol-canUseAddSeatsFeature', false)
+      })
+
+      cy.mount(
+        <SplitTestProvider>
+          <GroupMembersProvider>
+            <GroupMembers />
+          </GroupMembersProvider>
+        </SplitTestProvider>
+      )
+
+      cy.findByTestId('group-size-details').within(() => {
+        cy.findByText(/you have \d+ user and your plan supports up to \d+/i)
+        cy.findByText(/add more users/i).should('not.exist')
+      })
     })
   })
 })

@@ -32,6 +32,7 @@ export default function GroupMembers() {
   const groupName = getMeta('ol-groupName')
   const groupSize = getMeta('ol-groupSize')
   const canUseFlexibleLicensing = getMeta('ol-canUseFlexibleLicensing')
+  const canUseAddSeatsFeature = getMeta('ol-canUseAddSeatsFeature')
   const isFlexibleGroupLicensing =
     canUseFlexibleLicensing && isFlexibleGroupLicensingFeatureFlagEnabled
 
@@ -64,13 +65,18 @@ export default function GroupMembers() {
                   addedUsersSize: users.length,
                   groupSize,
                 })}
-          </strong>{' '}
-          <a
-            href="/user/subscription/group/add-users"
-            rel="noreferrer noopener"
-          >
-            {t('add_more_users')}.
-          </a>
+          </strong>
+          {canUseAddSeatsFeature && (
+            <>
+              {' '}
+              <a
+                href="/user/subscription/group/add-users"
+                rel="noreferrer noopener"
+              >
+                {t('add_more_users')}.
+              </a>
+            </>
+          )}
         </small>
       )
     }
