@@ -361,6 +361,7 @@ export const EditorManagerProvider: FC = ({ children }) => {
             )
             newDocument.leaveAndCleanUp()
             reject(new Error('another document was loaded'))
+            return
           }
           bindToDocumentEvents(doc, newDocument)
           resolve(newDocument)
