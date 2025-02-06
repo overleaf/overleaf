@@ -23,6 +23,7 @@ import {
 import getMeta from '@/utils/meta'
 import classnames from 'classnames'
 import SubscriptionRemainder from '@/features/subscription/components/dashboard/states/active/subscription-remainder'
+import { sendMB } from '../../../../../../infrastructure/event-tracking'
 
 export function ActiveSubscriptionNew({
   subscription,
@@ -282,13 +283,20 @@ function FlexibleGroupLicensingActions({
           <OLButton
             variant="secondary"
             href="/user/subscription/group/upgrade-subscription"
+            onClick={() =>
+              sendMB('flex-upgrade', { location: 'upgrade-plan-button' })
+            }
           >
             {t('upgrade_plan')}
           </OLButton>{' '}
         </>
       )}
       {subscription.plan.membersLimitAddOn === 'additional-license' && (
-        <OLButton variant="secondary" href="/user/subscription/group/add-users">
+        <OLButton
+          variant="secondary"
+          href="/user/subscription/group/add-users"
+          onClick={() => sendMB('flex-add-users')}
+        >
           {t('add_more_users')}
         </OLButton>
       )}

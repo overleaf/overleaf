@@ -11,6 +11,7 @@ import UpgradeSummary, {
   SubscriptionChange,
 } from './upgrade-subscription-upgrade-summary'
 import { debugConsole } from '@/utils/debugging'
+import { sendMB } from '../../../../infrastructure/event-tracking'
 
 function UpgradeSubscription() {
   const { t } = useTranslation()
@@ -18,9 +19,17 @@ function UpgradeSubscription() {
   const preview = getMeta('ol-subscriptionChangePreview') as SubscriptionChange
   const { isError, runAsync, isSuccess, isLoading } = useAsync()
   const onSubmit = () => {
-    runAsync(postJSON('/user/subscription/group/upgrade-subscription')).catch(
-      debugConsole.error
-    )
+    sendMB('flex-upgrade-form', {
+      action: 'click-upgrade-button',
+    })
+    runAsync(postJSON('/user/subscription/group/upgrade-subscription'))
+      .then(() => {
+        sendMB('flex-upgrade-success')
+      })
+      .catch(() => {
+        debugConsole.error()
+        sendMB('flex-upgrade-error')
+      })
   }
 
   if (isSuccess) {
@@ -42,8 +51,17 @@ function UpgradeSubscription() {
         content={
           <Trans
             i18nKey="it_looks_like_that_didnt_work_you_can_try_again_or_get_in_touch"
-            // eslint-disable-next-line jsx-a11y/anchor-has-content, react/jsx-key
-            components={[<a href="/contact" />]}
+            components={[
+              // eslint-disable-next-line jsx-a11y/anchor-has-content, react/jsx-key
+              <a
+                href="/contact"
+                onClick={() => {
+                  sendMB('flex-upgrade-form', {
+                    action: 'click-get-in-touch-link',
+                  })
+                }}
+              />,
+            ]}
           />
         }
       />
@@ -96,6 +114,7 @@ function UpgradeSubscription() {
                 <a
                   href="/user/subscription/group/add-users"
                   className="me-auto"
+                  onClick={() => sendMB('flex-add-users')}
                 >
                   {t('add_more_users_to_my_plan')}
                 </a>
@@ -103,6 +122,11 @@ function UpgradeSubscription() {
                   href="/user/subscription"
                   variant="secondary"
                   disabled={isLoading}
+                  onClick={() => {
+                    sendMB('flex-upgrade-form', {
+                      action: 'click-cancel-button',
+                    })
+                  }}
                 >
                   {t('cancel')}
                 </Button>

@@ -7,12 +7,16 @@ import OLTag from '@/features/ui/components/ol/ol-tag'
 import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
 import { bsVersion } from '@/features/utils/bootstrap-5'
 import { ManagedGroupSubscription } from '../../../../../../types/subscription/dashboard/subscription'
+import { sendMB } from '../../../../infrastructure/event-tracking'
 
 function AvailableWithGroupProfessionalBadge() {
   const { t } = useTranslation()
   const location = useLocation()
 
   const handleUpgradeClick = () => {
+    sendMB('flex-upgrade', {
+      location: 'ad-badge',
+    })
     location.assign('/user/subscription/group/upgrade-subscription')
   }
 

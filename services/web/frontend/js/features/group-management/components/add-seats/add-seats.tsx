@@ -28,6 +28,7 @@ import {
   SubscriptionChangePreview,
 } from '../../../../../../types/subscription/subscription-change-preview'
 import { MergeAndOverride } from '../../../../../../types/utils'
+import { sendMB } from '../../../../infrastructure/event-tracking'
 
 export const MAX_NUMBER_OF_USERS = 50
 
@@ -85,6 +86,17 @@ function AddSeats() {
     [runAsyncCostSummary]
   )
 
+  const debouncedTrackUserEnterSeatNumberEvent = useMemo(
+    () =>
+      debounce((value: number) => {
+        sendMB('flex-add-users-form', {
+          action: 'enter-seat-number',
+          seatNumber: value,
+        })
+      }, 500),
+    []
+  )
+
   const validateSeats = async (value: string | undefined) => {
     try {
       await addSeatsValidationSchema.validate(value)
@@ -109,6 +121,7 @@ function AddSeats() {
 
     if (isValidSeatsNumber) {
       const seats = Number(value)
+      debouncedTrackUserEnterSeatNumberEvent(seats)
 
       if (seats > MAX_NUMBER_OF_USERS) {
         debouncedCostSummaryRequest.cancel()
@@ -117,6 +130,7 @@ function AddSeats() {
         debouncedCostSummaryRequest(seats, controller.signal)
       }
     } else {
+      debouncedTrackUserEnterSeatNumberEvent.cancel()
       debouncedCostSummaryRequest.cancel()
     }
 
@@ -138,6 +152,9 @@ function AddSeats() {
     }
 
     if (shouldContactSales) {
+      sendMB('flex-add-users-form', {
+        action: 'click-send-request-button',
+      })
       const post = postJSON(
         '/user/subscription/group/add-users/sales-contact-form',
         {
@@ -149,11 +166,21 @@ function AddSeats() {
       )
       runAsyncSendMailToSales(post).catch(debugConsole.error)
     } else {
+      sendMB('flex-add-users-form', {
+        action: 'click-add-user-button',
+      })
       const post = postJSON('/user/subscription/group/add-users/create', {
         signal: addSeatsSignal,
         body: { adding: Number(rawSeats) },
       })
-      runAsyncAddSeats(post).catch(debugConsole.error)
+      runAsyncAddSeats(post)
+        .then(() => {
+          sendMB('flex-add-users-success')
+        })
+        .catch(() => {
+          debugConsole.error()
+          sendMB('flex-add-users-error')
+        })
     }
   }
 
@@ -259,8 +286,17 @@ function AddSeats() {
                   <div>
                     <Trans
                       i18nKey="if_you_want_to_reduce_the_number_of_users_please_contact_support"
-                      // eslint-disable-next-line jsx-a11y/anchor-has-content, react/jsx-key
-                      components={[<a href="/contact" />]}
+                      components={[
+                        // eslint-disable-next-line jsx-a11y/anchor-has-content, react/jsx-key
+                        <a
+                          href="/contact"
+                          onClick={() => {
+                            sendMB('flex-add-users-form', {
+                              action: 'click-contact-customer-support-link',
+                            })
+                          }}
+                        />,
+                      ]}
                     />
                   </div>
                 </div>
@@ -313,11 +349,22 @@ function AddSeats() {
                       href="/user/subscription/group/upgrade-subscription"
                       rel="noreferrer noopener"
                       className="me-auto"
+                      onClick={() => {
+                        sendMB('flex-upgrade')
+                      }}
                     >
                       {t('upgrade_my_plan')}
                     </a>
                   )}
-                  <Button variant="secondary" href="/user/subscription">
+                  <Button
+                    variant="secondary"
+                    href="/user/subscription"
+                    onClick={() =>
+                      sendMB('flex-add-users-form', {
+                        action: 'click-cancel-button',
+                      })
+                    }
+                  >
                     {t('cancel')}
                   </Button>
                   <Button

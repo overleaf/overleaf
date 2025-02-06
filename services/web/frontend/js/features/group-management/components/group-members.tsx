@@ -8,6 +8,7 @@ import { useGroupMembersContext } from '../context/group-members-context'
 import ErrorAlert from './error-alert'
 import MembersList from './members-table/members-list'
 import { useFeatureFlag } from '@/shared/context/split-test-context'
+import { sendMB } from '../../../infrastructure/event-tracking'
 
 export default function GroupMembers() {
   const { isReady } = useWaitForI18n()
@@ -72,6 +73,7 @@ export default function GroupMembers() {
               <a
                 href="/user/subscription/group/add-users"
                 rel="noreferrer noopener"
+                onClick={() => sendMB('flex-add-users')}
               >
                 {t('add_more_users')}.
               </a>
