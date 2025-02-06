@@ -57,6 +57,7 @@ describe('SubscriptionGroupController', function () {
           .resolves(this.createSubscriptionChangeData),
         ensureFlexibleLicensingEnabled: sinon.stub().resolves(),
         ensureSubscriptionIsActive: sinon.stub().resolves(),
+        ensureSubscriptionCollectionMethodIsNotManual: sinon.stub().resolves(),
         getGroupPlanUpgradePreview: sinon
           .stub()
           .resolves(this.previewSubscriptionChangeData),
@@ -109,6 +110,7 @@ describe('SubscriptionGroupController', function () {
     this.RecurlyClient = {
       promises: {
         getPaymentMethod: sinon.stub().resolves(this.paymentMethod),
+        // getSubscription: sinon.stub().resolves(this.subscription),
       },
     }
 
@@ -122,6 +124,7 @@ describe('SubscriptionGroupController', function () {
 
     this.Errors = {
       MissingBillingInfoError: class MissingBillingInfoError extends Error {},
+      ManuallyCollectedError: class ManuallyCollectedError extends Error {},
     }
 
     this.Controller = await esmock.strict(modulePath, {
@@ -408,6 +411,22 @@ describe('SubscriptionGroupController', function () {
       this.Controller.addSeatsToGroupSubscription(this.req, res)
     })
 
+    it('should redirect to manually collected subscription error page when collection method is manual', function (done) {
+      this.SubscriptionGroupHandler.promises.ensureSubscriptionCollectionMethodIsNotManual =
+        sinon.stub().throws(new this.Errors.ManuallyCollectedError())
+
+      const res = {
+        redirect: url => {
+          url.should.equal(
+            '/user/subscription/group/manually-collected-subscription'
+          )
+          done()
+        },
+      }
+
+      this.Controller.addSeatsToGroupSubscription(this.req, res)
+    })
+
     it('should redirect to subscription page when subscription is not active', function (done) {
       this.SubscriptionGroupHandler.promises.ensureSubscriptionIsActive = sinon
         .stub()
@@ -598,13 +617,32 @@ describe('SubscriptionGroupController', function () {
     })
 
     it('should redirect to missing billing information page when billing information is missing', function (done) {
-      this.RecurlyClient.promises.getPaymentMethod = sinon
+      this.SubscriptionGroupHandler.promises.getGroupPlanUpgradePreview = sinon
         .stub()
         .throws(new this.Errors.MissingBillingInfoError())
 
       const res = {
         redirect: url => {
-          url.should.equal('/user/subscription')
+          url.should.equal(
+            '/user/subscription/group/missing-billing-information'
+          )
+          done()
+        },
+      }
+
+      this.Controller.subscriptionUpgradePage(this.req, res)
+    })
+
+    it('should redirect to manually collected subscription error page when collection method is manual', function (done) {
+      this.SubscriptionGroupHandler.promises.getGroupPlanUpgradePreview = sinon
+        .stub()
+        .throws(new this.Errors.ManuallyCollectedError())
+
+      const res = {
+        redirect: url => {
+          url.should.equal(
+            '/user/subscription/group/manually-collected-subscription'
+          )
           done()
         },
       }

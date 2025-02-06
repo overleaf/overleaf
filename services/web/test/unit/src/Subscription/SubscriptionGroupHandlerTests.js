@@ -543,6 +543,28 @@ describe('SubscriptionGroupHandler', function () {
     })
   })
 
+  describe('ensureSubscriptionCollectionMethodIsNotManual', function () {
+    it('should throw if the subscription is manually collected', async function () {
+      await expect(
+        this.Handler.promises.ensureSubscriptionCollectionMethodIsNotManual({
+          get isCollectionMethodManual() {
+            return true
+          },
+        })
+      ).to.be.rejectedWith('This subscription is being collected manually')
+    })
+
+    it('should not throw if the subscription is automatically collected', async function () {
+      await expect(
+        this.Handler.promises.ensureSubscriptionCollectionMethodIsNotManual({
+          get isCollectionMethodManual() {
+            return false
+          },
+        })
+      ).to.not.be.rejected
+    })
+  })
+
   describe('upgradeGroupPlan', function () {
     it('should upgrade the subscription for flexible licensing group plans', async function () {
       this.SubscriptionLocator.promises.getUsersSubscription = sinon

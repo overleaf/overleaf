@@ -26,6 +26,7 @@ class RecurlySubscription {
    * @param {Date} props.periodStart
    * @param {Date} props.periodEnd
    * @param {Date} props.createdAt
+   * @param {string} props.collectionMethod
    * @param {RecurlySubscriptionChange} [props.pendingChange]
    */
   constructor(props) {
@@ -43,6 +44,7 @@ class RecurlySubscription {
     this.periodStart = props.periodStart
     this.periodEnd = props.periodEnd
     this.createdAt = props.createdAt
+    this.collectionMethod = props.collectionMethod
     this.pendingChange = props.pendingChange ?? null
   }
 
@@ -245,6 +247,15 @@ class RecurlySubscription {
       addOnUpdates: addOns,
       planCode: newPlanCode,
     })
+  }
+
+  /**
+   * Returns whether this subscription is manually collected
+   *
+   * @return {boolean}
+   */
+  get isCollectionMethodManual() {
+    return this.collectionMethod === 'manual'
   }
 }
 

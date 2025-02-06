@@ -51,6 +51,7 @@ describe('RecurlyClient', function () {
       periodStart: new Date(),
       periodEnd: new Date(),
       createdAt: new Date(),
+      collectionMethod: 'automatic',
     })
 
     this.recurlySubscription = {
@@ -81,6 +82,7 @@ describe('RecurlyClient', function () {
       currentPeriodStartedAt: this.subscription.periodStart,
       currentPeriodEndsAt: this.subscription.periodEnd,
       createdAt: this.subscription.createdAt,
+      collectionMethod: this.subscription.collectionMethod,
     }
 
     this.recurlySubscriptionChange = new recurly.SubscriptionChange()

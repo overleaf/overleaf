@@ -13,7 +13,7 @@ import ErrorController from '../Errors/ErrorController.js'
 import UserGetter from '../User/UserGetter.js'
 import { Subscription } from '../../models/Subscription.js'
 import { isProfessionalGroupPlan } from './PlansHelper.mjs'
-import { MissingBillingInfoError } from './Errors.js'
+import { MissingBillingInfoError, ManuallyCollectedError } from './Errors.js'
 import RecurlyClient from './RecurlyClient.js'
 
 /**
@@ -126,11 +126,14 @@ async function _removeUserFromGroup(
 async function addSeatsToGroupSubscription(req, res) {
   try {
     const userId = SessionManager.getLoggedInUserId(req.session)
-    const { subscription, plan } =
+    const { subscription, recurlySubscription, plan } =
       await SubscriptionGroupHandler.promises.getUsersGroupSubscriptionDetails(
         userId
       )
     await SubscriptionGroupHandler.promises.ensureFlexibleLicensingEnabled(plan)
+    await SubscriptionGroupHandler.promises.ensureSubscriptionCollectionMethodIsNotManual(
+      recurlySubscription
+    )
     // Check if the user has missing billing details
     await RecurlyClient.promises.getPaymentMethod(userId)
     await SubscriptionGroupHandler.promises.ensureSubscriptionIsActive(
@@ -152,6 +155,12 @@ async function addSeatsToGroupSubscription(req, res) {
     if (error instanceof MissingBillingInfoError) {
       return res.redirect(
         '/user/subscription/group/missing-billing-information'
+      )
+    }
+
+    if (error instanceof ManuallyCollectedError) {
+      return res.redirect(
+        '/user/subscription/group/manually-collected-subscription'
       )
     }
 
@@ -268,6 +277,12 @@ async function subscriptionUpgradePage(req, res) {
       )
     }
 
+    if (error instanceof ManuallyCollectedError) {
+      return res.redirect(
+        '/user/subscription/group/manually-collected-subscription'
+      )
+    }
+
     return res.redirect('/user/subscription')
   }
 }
@@ -301,6 +316,24 @@ async function missingBillingInformation(req, res) {
   }
 }
 
+async function manuallyCollectedSubscription(req, res) {
+  try {
+    const userId = SessionManager.getLoggedInUserId(req.session)
+    const subscription =
+      await SubscriptionLocator.promises.getUsersSubscription(userId)
+
+    res.render('subscriptions/manually-collected-subscription', {
+      groupName: subscription.teamName,
+    })
+  } catch (error) {
+    logger.err(
+      { error },
+      'error trying to render manually collected subscription page'
+    )
+    return res.render('/user/subscription')
+  }
+}
+
 export default {
   removeUserFromGroup: expressify(removeUserFromGroup),
   removeSelfFromGroup: expressify(removeSelfFromGroup),
@@ -316,4 +349,5 @@ export default {
   subscriptionUpgradePage: expressify(subscriptionUpgradePage),
   upgradeSubscription: expressify(upgradeSubscription),
   missingBillingInformation: expressify(missingBillingInformation),
+  manuallyCollectedSubscription: expressify(manuallyCollectedSubscription),
 }

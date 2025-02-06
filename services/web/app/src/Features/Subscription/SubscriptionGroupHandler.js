@@ -8,6 +8,7 @@ const PlansLocator = require('./PlansLocator')
 const SubscriptionHandler = require('./SubscriptionHandler')
 const GroupPlansData = require('./GroupPlansData')
 const { MEMBERS_LIMIT_ADD_ON_CODE } = require('./RecurlyEntities')
+const { ManuallyCollectedError } = require('./Errors')
 
 async function removeUserFromGroup(subscriptionId, userIdToRemove) {
   await SubscriptionUpdater.promises.removeUserFromGroup(
@@ -68,6 +69,19 @@ async function ensureSubscriptionIsActive(subscription) {
   }
 }
 
+async function ensureSubscriptionCollectionMethodIsNotManual(
+  recurlySubscription
+) {
+  if (recurlySubscription.isCollectionMethodManual) {
+    throw new ManuallyCollectedError(
+      'This subscription is being collected manually',
+      {
+        recurlySubscription_id: recurlySubscription.id,
+      }
+    )
+  }
+}
+
 async function getUsersGroupSubscriptionDetails(userId) {
   const subscription =
     await SubscriptionLocator.promises.getUsersSubscription(userId)
@@ -99,6 +113,8 @@ async function _addSeatsSubscriptionChange(userId, adding) {
     await getUsersGroupSubscriptionDetails(userId)
   await ensureFlexibleLicensingEnabled(plan)
   await ensureSubscriptionIsActive(subscription)
+  await ensureSubscriptionCollectionMethodIsNotManual(recurlySubscription)
+
   const currentAddonQuantity =
     recurlySubscription.addOns.find(
       addOn => addOn.code === MEMBERS_LIMIT_ADD_ON_CODE
@@ -207,6 +223,8 @@ async function _getGroupPlanUpgradeChangeRequest(ownerId) {
     olSubscription.recurlySubscription_id
   )
 
+  await ensureSubscriptionCollectionMethodIsNotManual(recurlySubscription)
+
   return recurlySubscription.getRequestForGroupPlanUpgrade(newPlanCode)
 }
 
@@ -244,6 +262,9 @@ module.exports = {
   replaceUserReferencesInGroups: callbackify(replaceUserReferencesInGroups),
   ensureFlexibleLicensingEnabled: callbackify(ensureFlexibleLicensingEnabled),
   ensureSubscriptionIsActive: callbackify(ensureSubscriptionIsActive),
+  ensureSubscriptionCollectionMethodIsNotManual: callbackify(
+    ensureSubscriptionCollectionMethodIsNotManual
+  ),
   getTotalConfirmedUsersInGroup: callbackify(getTotalConfirmedUsersInGroup),
   isUserPartOfGroup: callbackify(isUserPartOfGroup),
   getGroupPlanUpgradePreview: callbackify(getGroupPlanUpgradePreview),
@@ -253,6 +274,7 @@ module.exports = {
     replaceUserReferencesInGroups,
     ensureFlexibleLicensingEnabled,
     ensureSubscriptionIsActive,
+    ensureSubscriptionCollectionMethodIsNotManual,
     getTotalConfirmedUsersInGroup,
     isUserPartOfGroup,
     getUsersGroupSubscriptionDetails,

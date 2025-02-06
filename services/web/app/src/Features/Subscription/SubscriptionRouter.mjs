@@ -127,6 +127,14 @@ export default {
       SubscriptionGroupController.missingBillingInformation
     )
 
+    webRouter.get(
+      '/user/subscription/group/manually-collected-subscription',
+      AuthenticationController.requireLogin(),
+      RateLimiterMiddleware.rateLimit(subscriptionRateLimiter),
+      SubscriptionGroupController.flexibleLicensingSplitTest,
+      SubscriptionGroupController.manuallyCollectedSubscription
+    )
+
     // Team invites
     webRouter.get(
       '/subscription/invites/:token/',
