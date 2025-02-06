@@ -35,6 +35,63 @@
   --file-tree-item-dragging-preview-bg: #{rgb($bg-light-secondary, 0.6)};
   --file-tree-item-dragging-preview-colour: #{rgb($content-primary, 0.6)};
 
+  .file-tree-outline-panel-group {
+    background-color: var(--file-tree-bg);
+  }
+
+  .file-tree-toolbar {
+    display: flex;
+    justify-content: space-between;
+    height: 28px;
+    margin: var(--spacing-02);
+  }
+
+  .file-tree-panel {
+    min-height: 36px;
+  }
+
+  .file-tree-panel-collapsed {
+    max-height: 36px;
+  }
+
+  .file-tree-expand-collapse-button {
+    border-radius: var(--border-radius-base);
+    color: var(--outline-content-color);
+    display: flex;
+    align-items: center;
+    background-color: transparent;
+    border: 0;
+    padding: 0 var(--spacing-02);
+    flex-grow: 1;
+
+    &:hover {
+      background-color: var(--file-tree-item-hover-bg);
+    }
+
+    h4 {
+      font-size: var(--font-size-02);
+      margin: 0;
+      font-weight: normal;
+    }
+  }
+
+  .file-tree-toolbar-action-buttons {
+    display: flex;
+  }
+
+  .file-tree-toolbar-action-button {
+    padding: var(--spacing-02);
+    border-radius: var(--border-radius-full);
+
+    &:hover {
+      background-color: var(--file-tree-item-hover-bg);
+    }
+
+    .material-symbols {
+      font-size: 16px;
+    }
+  }
+
   .file-tree {
     background-color: var(--file-tree-bg);
   }
@@ -47,6 +104,7 @@
     border-left: 1px solid
       color-mix(in srgb, var(--border-primary) 24%, transparent);
     margin-left: 14px !important;
+    margin-top: 0;
 
     &.file-tree-list {
       border-left: none;

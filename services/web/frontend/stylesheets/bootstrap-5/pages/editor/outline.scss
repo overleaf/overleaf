@@ -37,6 +37,10 @@
   );
   --outline-container-color-bg: var(--bg-light-primary);
 
+  .file-outline-panel {
+    min-height: 36px;
+  }
+
   .outline-pane {
     padding: 4px;
   }

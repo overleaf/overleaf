@@ -30,6 +30,8 @@ const FileTreeOpenContext = createContext<
       handleFileTreeInit: () => void
       handleFileTreeSelect: (selectedEntities: FileTreeFindResult[]) => void
       handleFileTreeDelete: (entity: FileTreeFindResult) => void
+      fileTreeExpanded: boolean
+      toggleFileTreeExpanded: () => void
     }
   | undefined
 >(undefined)
@@ -45,6 +47,13 @@ export const FileTreeOpenProvider: FC = ({ children }) => {
   >(null)
   const [selectedEntityCount, setSelectedEntityCount] = useState(0)
   const [fileTreeReady, setFileTreeReady] = useState(false)
+
+  // NOTE: Only used in editor redesign
+  const [fileTreeExpanded, setFileTreeExpanded] = useState(true)
+
+  const toggleFileTreeExpanded = useCallback(() => {
+    setFileTreeExpanded(prev => !prev)
+  }, [])
 
   const handleFileTreeInit = useCallback(() => {
     setFileTreeReady(true)
@@ -129,6 +138,8 @@ export const FileTreeOpenProvider: FC = ({ children }) => {
       handleFileTreeInit,
       handleFileTreeSelect,
       handleFileTreeDelete,
+      fileTreeExpanded,
+      toggleFileTreeExpanded,
     }
   }, [
     handleFileTreeDelete,
@@ -136,6 +147,8 @@ export const FileTreeOpenProvider: FC = ({ children }) => {
     handleFileTreeSelect,
     openEntity,
     selectedEntityCount,
+    fileTreeExpanded,
+    toggleFileTreeExpanded,
   ])
 
   return (
