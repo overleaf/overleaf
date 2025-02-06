@@ -1,0 +1,13 @@
+.menu-bar-toggle {
+  border: none;
+  border-radius: var(--border-radius-base);
+  padding: var(--spacing-02);
+  font-size: var(--font-size-03);
+  line-height: var(--line-height-03);
+  font-weight: 400;
+  box-sizing: border-box;
+
+  &.dropdown-toggle::after {
+    display: none;
+  }
+}

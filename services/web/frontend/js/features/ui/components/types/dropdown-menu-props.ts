@@ -57,6 +57,7 @@ export type DropdownToggleProps = PropsWithChildren<{
   size?: 'sm' | 'lg' | undefined
   tabIndex?: number
   'aria-label'?: string
+  onMouseEnter?: React.MouseEventHandler
 }>
 
 export type DropdownMenuProps = PropsWithChildren<{
@@ -66,6 +67,7 @@ export type DropdownMenuProps = PropsWithChildren<{
   className?: string
   flip?: boolean
   id?: string
+  renderOnMount?: boolean
 }>
 
 export type DropdownDividerProps = PropsWithChildren<{
