@@ -101,7 +101,7 @@ describe('Project creation and compilation', function () {
     cy.findByText('Share').click()
     cy.findByRole('dialog').within(() => {
       cy.get('input').type('collaborator@example.com,')
-      cy.findByText('Share').click({ force: true })
+      cy.findByText('Invite').click({ force: true })
     })
 
     cy.visit('/project')

@@ -27,7 +27,7 @@ export function createProject(
 function shareProjectByEmail(
   projectName: string,
   email: string,
-  level: 'Read only' | 'Can edit'
+  level: 'Can view' | 'Can edit'
 ) {
   cy.visit('/project')
   cy.findByText(projectName).click()
@@ -37,14 +37,14 @@ function shareProjectByEmail(
     cy.get('input')
       .parents('form')
       .within(() => cy.findByText('Can edit').parent().select(level))
-    cy.findByText('Share').click({ force: true })
+    cy.findByText('Invite').click({ force: true })
   })
 }
 
 export function shareProjectByEmailAndAcceptInviteViaDash(
   projectName: string,
   email: string,
-  level: 'Read only' | 'Can edit'
+  level: 'Can view' | 'Can edit'
 ) {
   shareProjectByEmail(projectName, email, level)
 
@@ -61,7 +61,7 @@ export function shareProjectByEmailAndAcceptInviteViaDash(
 export function shareProjectByEmailAndAcceptInviteViaEmail(
   projectName: string,
   email: string,
-  level: 'Read only' | 'Can edit'
+  level: 'Can view' | 'Can edit'
 ) {
   shareProjectByEmail(projectName, email, level)
 

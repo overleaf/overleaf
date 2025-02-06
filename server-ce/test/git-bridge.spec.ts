@@ -148,7 +148,7 @@ describe('git-bridge', function () {
         shareProjectByEmailAndAcceptInviteViaDash(
           projectName,
           'collaborator-ro@example.com',
-          'Read only'
+          'Can view'
         )
         maybeClearAllTokens()
         cy.visit('/project')
@@ -162,7 +162,7 @@ describe('git-bridge', function () {
           maybeClearAllTokens()
           cy.visit(linkSharingReadAndWrite)
           cy.findByText(projectName) // wait for lazy loading
-          cy.findByText('Join Project').click()
+          cy.findByText('OK, join project').click()
           checkGitAccess('readAndWrite')
         })
       })
@@ -173,7 +173,7 @@ describe('git-bridge', function () {
           maybeClearAllTokens()
           cy.visit(linkSharingReadOnly)
           cy.findByText(projectName) // wait for lazy loading
-          cy.findByText('Join Project').click()
+          cy.findByText('OK, join project').click()
           checkGitAccess('readOnly')
         })
       })

@@ -152,11 +152,7 @@ describe('Project Sharing', function () {
 
     beforeEach(function () {
       login('user@example.com')
-      shareProjectByEmailAndAcceptInviteViaEmail(
-        projectName,
-        email,
-        'Read only'
-      )
+      shareProjectByEmailAndAcceptInviteViaEmail(projectName, email, 'Can view')
     })
 
     it('should grant the collaborator read access', () => {
@@ -173,7 +169,7 @@ describe('Project Sharing', function () {
 
     beforeWithReRunOnTestRetry(function () {
       login('user@example.com')
-      shareProjectByEmailAndAcceptInviteViaDash(projectName, email, 'Read only')
+      shareProjectByEmailAndAcceptInviteViaDash(projectName, email, 'Can view')
     })
 
     it('should grant the collaborator read access', () => {
@@ -214,7 +210,7 @@ describe('Project Sharing', function () {
           login(email)
           cy.visit(linkSharingReadOnly)
           cy.findByText(projectName) // wait for lazy loading
-          cy.findByText('Join Project').click()
+          cy.findByText('OK, join project').click()
           expectRestrictedReadOnlyAccess()
           expectProjectDashboardEntry()
         })
@@ -228,7 +224,7 @@ describe('Project Sharing', function () {
           login(email)
           cy.visit(linkSharingReadAndWrite)
           cy.findByText(projectName) // wait for lazy loading
-          cy.findByText('Join Project').click()
+          cy.findByText('OK, join project').click()
           expectReadAndWriteAccess()
           expectEditAuthoredAs('You')
           expectProjectDashboardEntry()

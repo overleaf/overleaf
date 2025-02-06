@@ -86,7 +86,7 @@ describe('editor', () => {
               const linkSharingReadAndWrite = el.text()
               login('collaborator@example.com')
               cy.visit(linkSharingReadAndWrite)
-              cy.get('button').contains('Join Project').click()
+              cy.get('button').contains('OK, join project').click()
               cy.log(
                 'navigate to project dashboard to avoid cross session requests from editor'
               )
