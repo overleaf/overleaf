@@ -180,6 +180,10 @@ async function persistChanges(projectId, allChanges, limits, clientEndVersion) {
             actualHash,
           })
         }
+
+        // Remove the content hash from the change before storing it in the chunk.
+        // It was only useful for validation.
+        editOperation.contentHash = null
       }
     }
   }
