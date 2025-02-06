@@ -100,6 +100,9 @@ class Change {
     )
   }
 
+  /**
+   * @return {Operation[]}
+   */
   getOperations() {
     return this.operations
   }
@@ -248,6 +251,24 @@ class Change {
    * @param {boolean} [opts.strict] - Do not ignore recoverable errors
    */
   applyTo(snapshot, opts = {}) {
+    // eslint-disable-next-line no-unused-vars
+    for (const operation of this.iterativelyApplyTo(snapshot, opts)) {
+      // Nothing to do: we're just consuming the iterator for the side effects
+    }
+  }
+
+  /**
+   * Generator that applies this change to a snapshot and yields each
+   * operation after it has been applied.
+   *
+   * Recoverable errors (caused by historical bad data) are ignored unless
+   * opts.strict is true
+   *
+   * @param {Snapshot} snapshot modified in place
+   * @param {object} opts
+   * @param {boolean} [opts.strict] - Do not ignore recoverable errors
+   */
+  *iterativelyApplyTo(snapshot, opts = {}) {
     assert.object(snapshot, 'bad snapshot')
 
     for (const operation of this.operations) {
@@ -261,6 +282,7 @@ class Change {
           throw err
         }
       }
+      yield operation
     }
 
     // update project version if present in change
