@@ -2,7 +2,6 @@ import '../../../helpers/bootstrap-5'
 import AddSeats, {
   MAX_NUMBER_OF_USERS,
 } from '@/features/group-management/components/add-seats/add-seats'
-import { SplitTestProvider } from '@/shared/context/split-test-context'
 
 describe('<AddSeats />', function () {
   beforeEach(function () {
@@ -15,11 +14,7 @@ describe('<AddSeats />', function () {
       win.metaAttributesCache.set('ol-isProfessional', false)
     })
 
-    cy.mount(
-      <SplitTestProvider>
-        <AddSeats />
-      </SplitTestProvider>
-    )
+    cy.mount(<AddSeats />)
 
     cy.findByRole('button', { name: /add users/i })
     cy.findByTestId('add-more-users-group-form')
@@ -88,11 +83,7 @@ describe('<AddSeats />', function () {
         win.metaAttributesCache.set('ol-isProfessional', true)
       })
 
-      cy.mount(
-        <SplitTestProvider>
-          <AddSeats />
-        </SplitTestProvider>
-      )
+      cy.mount(<AddSeats />)
 
       cy.findByRole('link', { name: /upgrade my plan/i }).should('not.exist')
     })
@@ -216,12 +207,6 @@ describe('<AddSeats />', function () {
     describe('entered less than the maximum allowed number of users', function () {
       beforeEach(function () {
         this.adding = 1
-
-        cy.findByRole('button', { name: /add users/i }).as('addUsersBtn')
-        cy.findByRole('button', { name: /send request/i }).should('not.exist')
-      })
-
-      it('renders the preview data', function () {
         this.body = {
           change: {
             type: 'add-on-update',
@@ -236,6 +221,7 @@ describe('<AddSeats />', function () {
             subtotal: 100,
             tax: 20,
             total: 120,
+            discount: 0,
           },
           nextInvoice: {
             date: '2025-12-01T00:00:00.000Z',
@@ -252,6 +238,11 @@ describe('<AddSeats />', function () {
           },
         }
 
+        cy.findByRole('button', { name: /add users/i }).as('addUsersBtn')
+        cy.findByRole('button', { name: /send request/i }).should('not.exist')
+      })
+
+      it('renders the preview data', function () {
         cy.intercept('POST', '/user/subscription/group/add-users/preview', {
           statusCode: 200,
           body: this.body,
@@ -289,6 +280,8 @@ describe('<AddSeats />', function () {
             )
           })
 
+          cy.findByTestId('discount').should('not.exist')
+
           cy.findByTestId('total').within(() => {
             cy.findByText(/total due today/i)
             cy.findByTestId('price').should(
@@ -302,6 +295,26 @@ describe('<AddSeats />', function () {
           )
           cy.findByText(
             /after that, we’ll bill you \$1,000\.00 \(\$895\.00 \+ \$105\.00 tax\) annually on December 1, unless you cancel/i
+          )
+        })
+      })
+
+      it('renders the preview data with discount', function () {
+        this.body.immediateCharge.discount = 50
+
+        cy.intercept('POST', '/user/subscription/group/add-users/preview', {
+          statusCode: 200,
+          body: this.body,
+        }).as('addUsersRequest')
+        cy.get('@input').type(this.adding.toString())
+
+        cy.findByTestId('cost-summary').within(() => {
+          cy.findByTestId('discount').within(() => {
+            cy.findByText(`($${this.body.immediateCharge.discount}.00)`)
+          })
+
+          cy.findByText(
+            /This does not include your current discounts, which will be applied automatically before your next payment/i
           )
         })
       })

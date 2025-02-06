@@ -1,8 +1,15 @@
 import '../../../helpers/bootstrap-5'
 import UpgradeSubscription from '@/features/group-management/components/upgrade-subscription/upgrade-subscription'
-import { SplitTestProvider } from '@/shared/context/split-test-context'
+import { SubscriptionChangePreview } from '../../../../../types/subscription/subscription-change-preview'
 
 describe('<UpgradeSubscription />', function () {
+  const resetPreviewAndRemount = (preview: SubscriptionChangePreview) => {
+    cy.window().then(win => {
+      win.metaAttributesCache.set('ol-subscriptionChangePreview', preview)
+    })
+
+    cy.mount(<UpgradeSubscription />)
+  }
   beforeEach(function () {
     this.totalLicenses = 2
     this.preview = {
@@ -11,7 +18,12 @@ describe('<UpgradeSubscription />', function () {
         prevPlan: { name: 'Overleaf Standard Group' },
       },
       currency: 'USD',
-      immediateCharge: { subtotal: 353.99, tax: 70.8, total: 424.79 },
+      immediateCharge: {
+        subtotal: 353.99,
+        tax: 70.8,
+        total: 424.79,
+        discount: 0,
+      },
       paymentMethod: 'Visa **** 1111',
       nextPlan: { annual: true },
       nextInvoice: {
@@ -35,14 +47,8 @@ describe('<UpgradeSubscription />', function () {
     cy.window().then(win => {
       win.metaAttributesCache.set('ol-groupName', 'My Awesome Team')
       win.metaAttributesCache.set('ol-totalLicenses', this.totalLicenses)
-      win.metaAttributesCache.set('ol-subscriptionChangePreview', this.preview)
     })
-
-    cy.mount(
-      <SplitTestProvider>
-        <UpgradeSubscription />
-      </SplitTestProvider>
-    )
+    resetPreviewAndRemount(this.preview)
   })
 
   it('shows the group name', function () {
@@ -92,6 +98,31 @@ describe('<UpgradeSubscription />', function () {
       })
       cy.findByTestId('total').within(() => {
         cy.findByText('$424.79')
+      })
+      cy.findByTestId('discount').should('not.exist')
+    })
+
+    it('shows subtotal, discount, tax and total price', function () {
+      resetPreviewAndRemount({
+        ...this.preview,
+        immediateCharge: {
+          subtotal: 353.99,
+          tax: 70.8,
+          total: 424.79,
+          discount: 50,
+        },
+      })
+      cy.findByTestId('subtotal').within(() => {
+        cy.findByText('$353.99')
+      })
+      cy.findByTestId('tax').within(() => {
+        cy.findByText('$70.80')
+      })
+      cy.findByTestId('total').within(() => {
+        cy.findByText('$424.79')
+      })
+      cy.findByTestId('discount').within(() => {
+        cy.findByText('($50.00)')
       })
     })
 

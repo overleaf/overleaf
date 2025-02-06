@@ -9,6 +9,7 @@ export type SubscriptionChangePreview = {
     subtotal: number
     tax: number
     total: number
+    discount: number
   }
   nextInvoice: {
     date: string

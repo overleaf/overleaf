@@ -45,6 +45,19 @@ function UpgradeSummary({ subscriptionChange }: UpgradeSummaryProps) {
                 )}
               </span>
             </ListGroup.Item>
+            {subscriptionChange.immediateCharge.discount !== 0 && (
+              <ListGroup.Item className="bg-transparent border-0 px-0 gap-3 card-description-secondary">
+                <span className="me-auto">{t('discount')}</span>
+                <span data-testid="discount">
+                  (
+                  {formatCurrency(
+                    subscriptionChange.immediateCharge.discount,
+                    subscriptionChange.currency
+                  )}
+                  )
+                </span>
+              </ListGroup.Item>
+            )}
             <ListGroup.Item className="bg-transparent border-0 px-0 gap-3 card-description-secondary">
               <span className="me-auto">{t('sales_tax')}</span>
               <span data-testid="tax">
@@ -90,6 +103,8 @@ function UpgradeSummary({ subscriptionChange }: UpgradeSummaryProps) {
               date: formatTime(subscriptionChange.nextInvoice.date, 'MMMM D'),
             }
           )}
+          {subscriptionChange.immediateCharge.discount !== 0 &&
+            ` ${t('coupons_not_included')}.`}
         </div>
       </Card.Body>
     </Card>

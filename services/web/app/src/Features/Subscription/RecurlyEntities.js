@@ -341,7 +341,7 @@ class RecurlySubscriptionChange {
     this.nextAddOns = props.nextAddOns
     this.immediateCharge =
       props.immediateCharge ??
-      new RecurlyImmediateCharge({ subtotal: 0, tax: 0, total: 0 })
+      new RecurlyImmediateCharge({ subtotal: 0, tax: 0, total: 0, discount: 0 })
 
     this.subtotal = this.nextPlanPrice
     for (const addOn of this.nextAddOns) {
@@ -386,11 +386,13 @@ class RecurlyImmediateCharge {
    * @param {number} props.subtotal
    * @param {number} props.tax
    * @param {number} props.total
+   * @param {number} props.discount
    */
   constructor(props) {
     this.subtotal = props.subtotal
     this.tax = props.tax
     this.total = props.total
+    this.discount = props.discount
   }
 }
 

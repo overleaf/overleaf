@@ -366,6 +366,8 @@ function computeImmediateCharge(subscriptionChange) {
     subscriptionChange.invoiceCollection?.chargeInvoice?.subtotal ?? 0
   let tax = subscriptionChange.invoiceCollection?.chargeInvoice?.tax ?? 0
   let total = subscriptionChange.invoiceCollection?.chargeInvoice?.total ?? 0
+  let discount =
+    subscriptionChange.invoiceCollection?.chargeInvoice?.discount ?? 0
   for (const creditInvoice of subscriptionChange.invoiceCollection
     ?.creditInvoices ?? []) {
     // The credit invoice numbers are already negative
@@ -373,12 +375,13 @@ function computeImmediateCharge(subscriptionChange) {
     total = roundToTwoDecimal(total + (creditInvoice.total ?? 0))
     // Tax rate can be different in credit invoice if a user relocates
     tax = roundToTwoDecimal(tax + (creditInvoice.tax ?? 0))
+    discount = roundToTwoDecimal(discount + (creditInvoice.discount ?? 0))
   }
-
   return new RecurlyImmediateCharge({
     subtotal,
     total,
     tax,
+    discount,
   })
 }
 
