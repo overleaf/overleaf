@@ -138,7 +138,7 @@ export const LayoutProvider: FC = ({ children }) => {
       if (
         (isMac ? event.metaKey : event.ctrlKey) &&
         event.shiftKey &&
-        event.key === 'f'
+        event.code === 'KeyF'
       ) {
         if (isSplitTestEnabled('full-project-search')) {
           event.preventDefault()
