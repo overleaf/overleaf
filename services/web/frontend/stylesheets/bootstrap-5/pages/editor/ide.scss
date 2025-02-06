@@ -74,6 +74,7 @@ $editor-toggler-bg-dark-color: color.adjust(
 
 .ide-react-main {
   flex: 1;
+  overflow-y: hidden;
   display: flex;
   flex-direction: column;
 
