@@ -75,14 +75,14 @@
     font-size: var(--font-size-03);
 
     .select-wrapper {
-      width: 100px;
       margin-left: auto;
 
       .select-trigger {
-        padding: 0 var(--spacing-05);
         color: var(--neutral-70);
         border: none;
         background-color: transparent;
+        text-align: right;
+        padding-right: 30px;
 
         &:focus {
           box-shadow: none;
