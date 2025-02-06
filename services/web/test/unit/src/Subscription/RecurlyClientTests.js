@@ -50,7 +50,6 @@ describe('RecurlyClient', function () {
       total: 16.5,
       periodStart: new Date(),
       periodEnd: new Date(),
-      createdAt: new Date(),
       collectionMethod: 'automatic',
     })
 
@@ -81,7 +80,6 @@ describe('RecurlyClient', function () {
       currency: this.subscription.currency,
       currentPeriodStartedAt: this.subscription.periodStart,
       currentPeriodEndsAt: this.subscription.periodEnd,
-      createdAt: this.subscription.createdAt,
       collectionMethod: this.subscription.collectionMethod,
     }
 

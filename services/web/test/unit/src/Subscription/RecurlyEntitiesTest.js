@@ -372,7 +372,6 @@ describe('RecurlyEntities', function () {
           total: 11.5,
           periodStart: new Date(),
           periodEnd: new Date(),
-          createdAt: new Date(),
           collectionMethod: 'automatic',
         })
         const change = new RecurlySubscriptionChange({

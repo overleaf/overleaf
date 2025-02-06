@@ -25,7 +25,6 @@ class RecurlySubscription {
    * @param {number} props.total
    * @param {Date} props.periodStart
    * @param {Date} props.periodEnd
-   * @param {Date} props.createdAt
    * @param {string} props.collectionMethod
    * @param {RecurlySubscriptionChange} [props.pendingChange]
    */
@@ -43,7 +42,6 @@ class RecurlySubscription {
     this.total = props.total
     this.periodStart = props.periodStart
     this.periodEnd = props.periodEnd
-    this.createdAt = props.createdAt
     this.collectionMethod = props.collectionMethod
     this.pendingChange = props.pendingChange ?? null
   }

@@ -132,22 +132,21 @@ async function _addSeatsSubscriptionChange(userId, adding) {
     )
   } else {
     let unitPrice
-    const newPlanPricesAppliedAt = new Date('2025-01-08T14:00:00Z')
-    const isLegacyPriceApplicable =
-      new Date(recurlySubscription.createdAt) < newPlanPricesAppliedAt
+    const pattern =
+      /^group_(collaborator|professional)_(2|3|4|5|10|20|50)_(educational|enterprise)$/
+    const [, planCode, size, usage] = plan.planCode.match(pattern)
+    const currency = recurlySubscription.currency
+    const planPriceInCents =
+      GroupPlansData[usage][planCode][currency][size].price_in_cents
+    const legacyUnitPriceInCents =
+      GroupPlansData[usage][planCode][currency][size]
+        .additional_license_legacy_price_in_cents
 
-    if (isLegacyPriceApplicable) {
-      const pattern =
-        /^group_(collaborator|professional)_(2|3|4|5|10|20|50)_(educational|enterprise)$/
-      const [, planCode, size, usage] = plan.planCode.match(pattern)
-      const currency = recurlySubscription.currency
-      const legacyPriceInCents =
-        GroupPlansData[usage][planCode][currency][size]
-          .additional_license_legacy_price_in_cents
-
-      if (legacyPriceInCents > 0) {
-        unitPrice = legacyPriceInCents / 100
-      }
+    if (
+      planPriceInCents / 100 > recurlySubscription.planPrice &&
+      legacyUnitPriceInCents > 0
+    ) {
+      unitPrice = legacyUnitPriceInCents / 100
     }
 
     changeRequest = recurlySubscription.getRequestForAddOnPurchase(

@@ -50,7 +50,6 @@ describe('SubscriptionGroupHandler', function () {
       getRequestForFlexibleLicensingGroupPlanUpgrade: sinon
         .stub()
         .returns(this.changeRequest),
-      createdAt: '2025-01-01T00:00:00Z',
       currency: 'USD',
       hasAddOn(code) {
         return this.addOns.some(addOn => addOn.code === code)
@@ -472,7 +471,10 @@ describe('SubscriptionGroupHandler', function () {
         })
 
         it('should return the subscription change preview with legacy add-on price', async function () {
-          this.recurlySubscription.createdAt = '2025-01-01T00:00:00Z'
+          this.recurlySubscription.planPrice =
+            this.GroupPlansData.enterprise.collaborator.USD[5].price_in_cents /
+              100 -
+            1
 
           preview =
             await this.Handler.promises.previewAddSeatsSubscriptionChange(
@@ -490,7 +492,9 @@ describe('SubscriptionGroupHandler', function () {
         })
 
         it('should return the subscription change preview with non-legacy add-on price', async function () {
-          this.recurlySubscription.createdAt = '2030-01-01T00:00:00Z'
+          this.recurlySubscription.planPrice =
+            this.GroupPlansData.enterprise.collaborator.USD[5].price_in_cents /
+            100
 
           preview =
             await this.Handler.promises.previewAddSeatsSubscriptionChange(
