@@ -4,6 +4,12 @@ import { useTranslation } from 'react-i18next'
 import { ToolbarMenuBar } from './menu-bar'
 import { ToolbarProjectTitle } from './project-title'
 import { OnlineUsers } from './online-users'
+import ShareProjectButton from './share-project-button'
+import importOverleafModules from '../../../../../macros/import-overleaf-module.macro'
+import { useEditorContext } from '@/shared/context/editor-context'
+
+const [publishModalModules] = importOverleafModules('publishModal')
+const SubmitProjectButton = publishModalModules?.import.NewPublishToolbarButton
 
 export const Toolbar = () => {
   return (
@@ -35,7 +41,12 @@ const ToolbarMenus = () => {
 }
 
 const ToolbarButtons = () => {
-  const { t } = useTranslation()
+  const { permissionsLevel } = useEditorContext()
+
+  const shouldDisplaySubmitButton =
+    (permissionsLevel === 'owner' || permissionsLevel === 'readAndWrite') &&
+    SubmitProjectButton
+
   return (
     <div className="ide-redesign-toolbar-actions">
       <OnlineUsers />
@@ -46,23 +57,8 @@ const ToolbarButtons = () => {
           leadingIcon={<MaterialIcon type="history" />}
         />
       </div>
-      <div className="ide-redesign-toolbar-button-container">
-        <OLButton
-          variant="link"
-          className="ide-redesign-toolbar-button-subdued"
-          leadingIcon={<MaterialIcon type="send" />}
-        >
-          {t('submit_title')}
-        </OLButton>
-      </div>
-      <div className="ide-redesign-toolbar-button-container">
-        <OLButton
-          variant="primary"
-          leadingIcon={<MaterialIcon type="person_add" />}
-        >
-          {t('share')}
-        </OLButton>
-      </div>
+      {shouldDisplaySubmitButton && <SubmitProjectButton />}
+      <ShareProjectButton />
     </div>
   )
 }
