@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types'
 import { useTranslation } from 'react-i18next'
-import { useIdeContext } from '../../../shared/context/ide-context'
-import { useProjectContext } from '../../../shared/context/project-context'
+import { useProjectContext } from '@/shared/context/project-context'
+import { useLocalCompileContext } from '@/shared/context/local-compile-context'
 import { useWordCount } from '../hooks/use-word-count'
 import {
   OLModalBody,
@@ -20,7 +20,7 @@ import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/boots
 // NOTE: this component is only mounted when the modal is open
 export default function WordCountModalContent({ handleHide }) {
   const { _id: projectId } = useProjectContext()
-  const { clsiServerId } = useIdeContext()
+  const { clsiServerId } = useLocalCompileContext()
   const { t } = useTranslation()
   const { data, error, loading } = useWordCount(projectId, clsiServerId)
 

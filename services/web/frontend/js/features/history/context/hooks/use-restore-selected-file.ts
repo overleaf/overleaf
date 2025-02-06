@@ -1,4 +1,3 @@
-import { useIdeContext } from '../../../../shared/context/ide-context'
 import { useLayoutContext } from '../../../../shared/context/layout-context'
 import { restoreFileToVersion } from '../../services/api'
 import { isFileRemoved } from '../../utils/file-diff'
@@ -9,6 +8,7 @@ import { useFileTreeData } from '@/shared/context/file-tree-data-context'
 import { findInTree } from '@/features/file-tree/util/find-in-tree'
 import { useCallback, useEffect, useState } from 'react'
 import { RestoreFileResponse } from '../../services/types/restore-file'
+import { useEditorManagerContext } from '@/features/ide-react/context/editor-manager-context'
 
 const RESTORE_FILE_TIMEOUT = 3000
 
@@ -22,8 +22,8 @@ type RestoreState =
 
 export function useRestoreSelectedFile() {
   const { projectId } = useHistoryContext()
-  const ide = useIdeContext()
   const { setView } = useLayoutContext()
+  const { openDocWithId, openFileWithId } = useEditorManagerContext()
   const handleError = useErrorHandler()
   const { fileTreeData } = useFileTreeData()
   const [state, setState] = useState<RestoreState>('idle')
@@ -40,12 +40,10 @@ export function useRestoreSelectedFile() {
         const { _id: id } = result.entity
         setView('editor')
 
-        // Once Angular is gone, these can be replaced with calls to context
-        // methods
         if (restoredFileMetadata.type === 'doc') {
-          ide.editorManager.openDocWithId(id)
+          openDocWithId(id)
         } else {
-          ide.binaryFilesManager.openFileWithId(id)
+          openFileWithId(id)
         }
       }
     }
@@ -53,8 +51,8 @@ export function useRestoreSelectedFile() {
     state,
     fileTreeData,
     restoredFileMetadata,
-    ide.editorManager,
-    ide.binaryFilesManager,
+    openDocWithId,
+    openFileWithId,
     setView,
   ])
 

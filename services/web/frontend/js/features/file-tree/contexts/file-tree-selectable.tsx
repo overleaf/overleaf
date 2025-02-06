@@ -22,6 +22,7 @@ import { fileCollator } from '@/features/file-tree/util/file-collator'
 import { Folder } from '../../../../../types/folder'
 import { FileTreeEntity } from '../../../../../types/file-tree-entity'
 import { isMac } from '@/shared/utils/os'
+import useEventListener from '@/shared/hooks/use-event-listener'
 
 const FileTreeSelectableContext = createContext<
   | {
@@ -188,18 +189,22 @@ export const FileTreeSelectableProvider: FC<{
     setSelectedEntities,
   ])
 
-  useEffect(() => {
-    // listen for `editor.openDoc` and selected that doc
-    function handleOpenDoc(ev: any) {
-      const found = findInTree(fileTreeData, ev.detail)
-      if (!found) return
+  // Synchronize the file tree when openFileWithId or openDocWithId is called on the editor
+  // manager context from elsewhere. If the file tree does change, it will
+  // trigger the onSelect handler in this component, which will update the local
+  // state.
+  useEventListener(
+    'entity:opened',
+    useCallback(
+      (event: CustomEvent<string>) => {
+        const found = findInTree(fileTreeData, event.detail)
+        if (!found) return
 
-      dispatch({ type: ACTION_TYPES.SELECT, id: found.entity._id })
-    }
-
-    window.addEventListener('editor.openDoc', handleOpenDoc)
-    return () => window.removeEventListener('editor.openDoc', handleOpenDoc)
-  }, [fileTreeData])
+        dispatch({ type: ACTION_TYPES.SELECT, id: found.entity._id })
+      },
+      [fileTreeData]
+    )
+  )
 
   const select = useCallback(id => {
     dispatch({ type: ACTION_TYPES.SELECT, id })

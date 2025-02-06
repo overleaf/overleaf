@@ -21,7 +21,10 @@ import { useLayoutContext } from '@/shared/context/layout-context'
 import { GotoLineOptions } from '@/features/ide-react/types/goto-line-options'
 import { Doc } from '../../../../../types/doc'
 import { useFileTreeData } from '@/shared/context/file-tree-data-context'
-import { findDocEntityById } from '@/features/ide-react/util/find-doc-entity-by-id'
+import {
+  findDocEntityById,
+  findFileRefEntityById,
+} from '@/features/ide-react/util/find-doc-entity-by-id'
 import useScopeEventEmitter from '@/shared/hooks/use-scope-event-emitter'
 import { useModalsContext } from '@/features/ide-react/context/modals-context'
 import { useTranslation } from 'react-i18next'
@@ -32,6 +35,9 @@ import { DocId } from '../../../../../types/project-settings'
 import { Update } from '@/features/history/services/types/update'
 import { useDebugDiffTracker } from '../hooks/use-debug-diff-tracker'
 import { useEditorContext } from '@/shared/context/editor-context'
+import useScopeValueSetterOnly from '@/shared/hooks/use-scope-value-setter-only'
+import { BinaryFile } from '@/features/file-view/types/binary-file'
+import { convertFileRefToBinaryFile } from '@/features/ide-react/util/file-view'
 
 export interface GotoOffsetOptions {
   gotoOffset: number
@@ -57,6 +63,7 @@ export type EditorManager = {
   openDocWithId: (docId: string, options?: OpenDocOptions) => void
   openDoc: (document: Doc, options?: OpenDocOptions) => void
   openDocs: OpenDocuments
+  openFileWithId: (fileId: string) => void
   openInitialDoc: (docId: string) => void
   jumpToLine: (options: GotoLineOptions) => void
   wantTrackChanges: boolean
@@ -94,7 +101,7 @@ export const EditorManagerContext = createContext<EditorManager | undefined>(
 
 export const EditorManagerProvider: FC = ({ children }) => {
   const { t } = useTranslation()
-  const ide = useIdeContext()
+  const { scopeStore } = useIdeContext()
   const { projectId } = useIdeReactContext()
   const { reportError, eventEmitter } = useIdeReactContext()
   const { setOutOfSync } = useEditorContext()
@@ -203,14 +210,14 @@ export const EditorManagerProvider: FC = ({ children }) => {
   // implementation in EditorManager interacts with Angular scope to update
   // the layout. Once Angular is gone, this can become a context method.
   useEffect(() => {
-    ide.scopeStore.set('editor.toggleSymbolPalette', () => {
+    scopeStore.set('editor.toggleSymbolPalette', () => {
       setShowSymbolPalette(show => {
         const newValue = !show
         sendMB(newValue ? 'symbol-palette-show' : 'symbol-palette-hide')
         return newValue
       })
     })
-  }, [ide.scopeStore, setShowSymbolPalette])
+  }, [scopeStore, setShowSymbolPalette])
 
   const getEditorType = useCallback((): EditorType | null => {
     if (!currentDocument) {
@@ -443,6 +450,11 @@ export const EditorManagerProvider: FC = ({ children }) => {
             detail: { isNewDoc, docId: doc._id },
           })
         )
+        window.dispatchEvent(
+          new CustomEvent('entity:opened', {
+            detail: doc._id,
+          })
+        )
         if (hasGotoLine(options)) {
           window.setTimeout(() => jumpToLine(options))
 
@@ -525,6 +537,24 @@ export const EditorManagerProvider: FC = ({ children }) => {
       openDoc(doc, options)
     },
     [fileTreeData, openDoc]
+  )
+
+  const [, setOpenFile] = useScopeValueSetterOnly<BinaryFile | null>('openFile')
+
+  const openFileWithId = useCallback(
+    (fileRefId: string) => {
+      const fileRef = findFileRefEntityById(fileTreeData, fileRefId)
+      if (!fileRef) {
+        return
+      }
+      setOpenFile(convertFileRefToBinaryFile(fileRef))
+      window.dispatchEvent(
+        new CustomEvent('entity:opened', {
+          detail: fileRef._id,
+        })
+      )
+    },
+    [fileTreeData, setOpenFile]
   )
 
   const openInitialDoc = useCallback(
@@ -655,7 +685,7 @@ export const EditorManagerProvider: FC = ({ children }) => {
     }
   }, [currentDocument, syncTrackChangesState, wantTrackChanges])
 
-  const editorManager = useMemo(
+  const value = useMemo(
     () => ({
       getEditorType,
       showSymbolPalette,
@@ -668,6 +698,7 @@ export const EditorManagerProvider: FC = ({ children }) => {
       openDocWithId,
       openDoc,
       openDocs,
+      openFileWithId,
       openInitialDoc,
       jumpToLine,
       wantTrackChanges,
@@ -686,6 +717,7 @@ export const EditorManagerProvider: FC = ({ children }) => {
       openDocWithId,
       openDoc,
       openDocs,
+      openFileWithId,
       openInitialDoc,
       jumpToLine,
       wantTrackChanges,
@@ -694,12 +726,8 @@ export const EditorManagerProvider: FC = ({ children }) => {
     ]
   )
 
-  // Expose editorManager via ide object because some React code relies on it,
-  // for now
-  ide.editorManager = editorManager
-
   return (
-    <EditorManagerContext.Provider value={editorManager}>
+    <EditorManagerContext.Provider value={value}>
       {children}
     </EditorManagerContext.Provider>
   )

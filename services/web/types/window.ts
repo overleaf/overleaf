@@ -1,6 +1,7 @@
 import 'recurly__recurly-js'
 import { ScopeValueStore } from './ide/scope-value-store'
 import { MetaAttributesCache } from '@/utils/meta'
+import { Socket } from '@/features/ide-react/connection/types/socket'
 
 declare global {
   // eslint-disable-next-line no-unused-vars
@@ -12,10 +13,7 @@ declare global {
           logEntryAnnotations: Record<string, unknown>
         }
       }
-      socket: {
-        on: (event: string, listener: any) => void
-        removeListener: (event: string, listener: any) => void
-      }
+      socket: Socket
     }
     MathJax: Record<string, any>
     crypto: {

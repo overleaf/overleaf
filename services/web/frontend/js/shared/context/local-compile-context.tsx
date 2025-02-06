@@ -28,7 +28,6 @@ import {
   handleLogFiles,
   handleOutputFiles,
 } from '../../features/pdf-preview/util/output-files'
-import { useIdeContext } from './ide-context'
 import { useProjectContext } from './project-context'
 import { useEditorContext } from './editor-context'
 import { buildFileList } from '../../features/pdf-preview/util/file-list'
@@ -112,8 +111,6 @@ export const LocalCompileContext = createContext<CompileContext | undefined>(
 )
 
 export const LocalCompileProvider: FC = ({ children }) => {
-  const ide = useIdeContext()
-
   const { hasPremiumCompile, isProjectOwner } = useEditorContext()
   const { openDocWithId, openDocs } = useEditorManagerContext()
 
@@ -530,7 +527,6 @@ export const LocalCompileProvider: FC = ({ children }) => {
     }
   }, [
     data,
-    ide,
     alphaProgram,
     labsProgram,
     features,

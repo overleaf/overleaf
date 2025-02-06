@@ -4,7 +4,7 @@ import useScopeValue from '../../../shared/hooks/use-scope-value'
 import type { ProjectSettings } from '../utils/api'
 
 export default function useProjectWideSettingsSocketListener() {
-  const ide = useIdeContext()
+  const { socket } = useIdeContext()
 
   const [project, setProject] = useScopeValue<ProjectSettings | undefined>(
     'project'
@@ -41,18 +41,18 @@ export default function useProjectWideSettingsSocketListener() {
     // data is not available on initial mounting
     const dataAvailable = !!project
 
-    if (dataAvailable && ide?.socket) {
-      ide.socket.on('compilerUpdated', setCompiler)
-      ide.socket.on('imageNameUpdated', setImageName)
-      ide.socket.on('spellCheckLanguageUpdated', setSpellCheckLanguage)
+    if (dataAvailable && socket) {
+      socket.on('compilerUpdated', setCompiler)
+      socket.on('imageNameUpdated', setImageName)
+      socket.on('spellCheckLanguageUpdated', setSpellCheckLanguage)
       return () => {
-        ide.socket.removeListener('compilerUpdated', setCompiler)
-        ide.socket.removeListener('imageNameUpdated', setImageName)
-        ide.socket.removeListener(
+        socket.removeListener('compilerUpdated', setCompiler)
+        socket.removeListener('imageNameUpdated', setImageName)
+        socket.removeListener(
           'spellCheckLanguageUpdated',
           setSpellCheckLanguage
         )
       }
     }
-  }, [ide?.socket, project, setCompiler, setImageName, setSpellCheckLanguage])
+  }, [socket, project, setCompiler, setImageName, setSpellCheckLanguage])
 }

@@ -11,8 +11,7 @@ import {
 import { useProjectContext } from '@/shared/context/project-context'
 import { useIdeReactContext } from '@/features/ide-react/context/ide-react-context'
 import { useEditorManagerContext } from '@/features/ide-react/context/editor-manager-context'
-import { useSelectFileTreeEntity } from '@/features/ide-react/hooks/use-select-file-tree-entity'
-import useScopeValue from '@/shared/hooks/use-scope-value'
+import useScopeValueSetterOnly from '@/shared/hooks/use-scope-value-setter-only'
 import { BinaryFile } from '@/features/file-view/types/binary-file'
 import {
   FileTreeDocumentFindResult,
@@ -23,7 +22,6 @@ import { debugConsole } from '@/utils/debugging'
 import { convertFileRefToBinaryFile } from '@/features/ide-react/util/file-view'
 import { sendMB } from '@/infrastructure/event-tracking'
 import { FileRef } from '../../../../../types/file-ref'
-import useEventListener from '@/shared/hooks/use-event-listener'
 
 const FileTreeOpenContext = createContext<
   | {
@@ -41,8 +39,7 @@ export const FileTreeOpenProvider: FC = ({ children }) => {
   const { eventEmitter, projectJoined } = useIdeReactContext()
   const { openDocWithId, currentDocumentId, openInitialDoc } =
     useEditorManagerContext()
-  const { selectEntity } = useSelectFileTreeEntity()
-  const [, setOpenFile] = useScopeValue<BinaryFile | null>('openFile')
+  const [, setOpenFile] = useScopeValueSetterOnly<BinaryFile | null>('openFile')
   const [openEntity, setOpenEntity] = useState<
     FileTreeDocumentFindResult | FileTreeFileRefFindResult | null
   >(null)
@@ -109,20 +106,6 @@ export const FileTreeOpenProvider: FC = ({ children }) => {
       }
     },
     [eventEmitter, currentDocumentId, openDocWithId, rootDocId]
-  )
-
-  // Synchronize the file tree when openDoc or openDocWithId is called on the editor
-  // manager context from elsewhere. If the file tree does change, it will
-  // trigger the onSelect handler in this component, which will update the local
-  // state.
-  useEventListener(
-    'doc:after-opened',
-    useCallback(
-      (event: CustomEvent<{ docId: string }>) => {
-        selectEntity(event.detail.docId)
-      },
-      [selectEntity]
-    )
   )
 
   // Open a document once the file tree and project are ready

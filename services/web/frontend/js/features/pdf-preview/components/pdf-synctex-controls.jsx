@@ -1,7 +1,6 @@
 import classNames from 'classnames'
 import { memo, useCallback, useEffect, useState, useRef } from 'react'
 import PropTypes from 'prop-types'
-import { useIdeContext } from '../../../shared/context/ide-context'
 import { useProjectContext } from '../../../shared/context/project-context'
 import { getJSON } from '../../../infrastructure/fetch-json'
 import { useDetachCompileContext as useCompileContext } from '../../../shared/context/detach-compile-context'
@@ -25,6 +24,7 @@ import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/boots
 import MaterialIcon from '@/shared/components/material-icon'
 import { Spinner } from 'react-bootstrap-5'
 import { bsVersion } from '@/features/utils/bootstrap-5'
+import { useEditorManagerContext } from '@/features/ide-react/context/editor-manager-context'
 
 function GoToCodeButton({
   position,
@@ -170,8 +170,6 @@ function GoToPdfButton({
 }
 
 function PdfSynctexControls() {
-  const ide = useIdeContext()
-
   const { _id: projectId, rootDocId } = useProjectContext()
 
   const { detachRole } = useLayoutContext()
@@ -187,10 +185,11 @@ function PdfSynctexControls() {
 
   const { selectedEntities } = useFileTreeData()
   const { findEntityByPath, dirname, pathInFolder } = useFileTreePathContext()
+  const { getCurrentDocumentId, openDocWithId } = useEditorManagerContext()
 
   const [cursorPosition, setCursorPosition] = useState(() => {
     const position = localStorage.getItem(
-      `doc.position.${ide.editorManager.getCurrentDocumentId()}`
+      `doc.position.${getCurrentDocumentId()}`
     )
     return position ? position.cursorPosition : null
   })
@@ -203,7 +202,7 @@ function PdfSynctexControls() {
     const listener = event => setCursorPosition(event.detail)
     window.addEventListener('cursor:editor:update', listener)
     return () => window.removeEventListener('cursor:editor:update', listener)
-  }, [ide])
+  }, [])
 
   const [syncToPdfInFlight, setSyncToPdfInFlight] = useState(false)
   const [syncToCodeInFlight, setSyncToCodeInFlight] = useDetachState(
@@ -216,7 +215,7 @@ function PdfSynctexControls() {
   const [, setSynctexError] = useScopeValue('sync_tex_error')
 
   const getCurrentFilePath = useCallback(() => {
-    const docId = ide.editorManager.getCurrentDocumentId()
+    const docId = getCurrentDocumentId()
     let path = pathInFolder(docId)
 
     // If the root file is folder/main.tex, then synctex sees the path as folder/./main.tex
@@ -227,7 +226,7 @@ function PdfSynctexControls() {
     }
 
     return path
-  }, [dirname, ide.editorManager, pathInFolder, rootDocId])
+  }, [dirname, getCurrentDocumentId, pathInFolder, rootDocId])
 
   const goToCodeLine = useCallback(
     (file, line) => {
@@ -238,7 +237,7 @@ function PdfSynctexControls() {
           return
         }
 
-        ide.editorManager.openDocWithId(doc._id, {
+        openDocWithId(doc._id, {
           gotoLine: line,
         })
       } else {
@@ -251,7 +250,7 @@ function PdfSynctexControls() {
         }, 4000)
       }
     },
-    [findEntityByPath, ide.editorManager, isMounted, setSynctexError]
+    [findEntityByPath, openDocWithId, isMounted, setSynctexError]
   )
 
   const goToPdfLocation = useCallback(

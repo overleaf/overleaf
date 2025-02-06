@@ -101,12 +101,6 @@ const initialize = () => {
     socket: new SocketIOShim.SocketShimNoop(
       new SocketIOMock()
     ) as unknown as Socket,
-    editorManager: {
-      getCurrentDocumentId: () => 'foo',
-      openDoc: (id: string, options: unknown) => {
-        console.log('open doc', id, options)
-      },
-    },
   }
 
   // window.metaAttributesCache is reset in preview.tsx

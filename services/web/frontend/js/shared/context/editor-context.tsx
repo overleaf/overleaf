@@ -60,7 +60,7 @@ export const EditorContext = createContext<
 >(undefined)
 
 export const EditorProvider: FC = ({ children }) => {
-  const ide = useIdeContext()
+  const { socket } = useIdeContext()
   const { id: userId, featureUsage } = useUserContext()
   const { role } = useDetachContext()
   const { showGenericMessageModal } = useModalsContext()
@@ -127,12 +127,11 @@ export const EditorProvider: FC = ({ children }) => {
   )
 
   useEffect(() => {
-    if (ide?.socket) {
-      ide.socket.on('projectNameUpdated', setProjectName)
-      return () =>
-        ide.socket.removeListener('projectNameUpdated', setProjectName)
+    if (socket) {
+      socket.on('projectNameUpdated', setProjectName)
+      return () => socket.removeListener('projectNameUpdated', setProjectName)
     }
-  }, [ide?.socket, setProjectName])
+  }, [socket, setProjectName])
 
   const renameProject = useCallback(
     (newName: string) => {

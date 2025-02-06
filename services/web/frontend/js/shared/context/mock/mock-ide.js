@@ -53,9 +53,5 @@ export const getMockIde = () => {
       settings: { syntaxValidation: false, pdfViewer: 'pdfjs' },
       hasLintingError: false,
     },
-    editorManager: {
-      openDoc: () => {},
-      getCurrentDocumentId: () => {},
-    },
   }
 }
