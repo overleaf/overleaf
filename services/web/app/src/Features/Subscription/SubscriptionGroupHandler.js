@@ -143,8 +143,12 @@ async function _addSeatsSubscriptionChange(userId, adding) {
         .additional_license_legacy_price_in_cents
 
     if (
-      planPriceInCents / 100 > recurlySubscription.planPrice &&
-      legacyUnitPriceInCents > 0
+      _shouldUseLegacyPricing(
+        recurlySubscription.planPrice,
+        planPriceInCents / 100,
+        usage,
+        size
+      )
     ) {
       unitPrice = legacyUnitPriceInCents / 100
     }
@@ -161,6 +165,23 @@ async function _addSeatsSubscriptionChange(userId, adding) {
     currentAddonQuantity,
     recurlySubscription,
   }
+}
+
+function _shouldUseLegacyPricing(
+  actualPlanPrice,
+  currentPlanPrice,
+  usage,
+  size
+) {
+  // For small educational groups (5 or fewer members)
+  // 2025 pricing is cheaper than legacy pricing
+  if (size <= 5 && usage === 'educational') {
+    return currentPlanPrice < actualPlanPrice
+  }
+
+  // For all other scenarios
+  // 2025 pricing is more expensive than legacy pricing
+  return currentPlanPrice > actualPlanPrice
 }
 
 async function previewAddSeatsSubscriptionChange(userId, adding) {

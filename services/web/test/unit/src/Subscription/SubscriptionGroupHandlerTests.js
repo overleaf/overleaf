@@ -143,6 +143,16 @@ describe('SubscriptionGroupHandler', function () {
           },
         },
       },
+      educational: {
+        collaborator: {
+          USD: {
+            5: {
+              price_in_cents: 10000,
+              additional_license_legacy_price_in_cents: 5000,
+            },
+          },
+        },
+      },
     }
 
     this.Handler = SandboxedModule.require(modulePath, {
@@ -492,6 +502,56 @@ describe('SubscriptionGroupHandler', function () {
         })
 
         it('should return the subscription change preview with non-legacy add-on price', async function () {
+          this.recurlySubscription.planPrice =
+            this.GroupPlansData.enterprise.collaborator.USD[5].price_in_cents /
+            100
+
+          preview =
+            await this.Handler.promises.previewAddSeatsSubscriptionChange(
+              this.adminUser_id,
+              this.adding
+            )
+          this.recurlySubscription.getRequestForAddOnPurchase
+            .calledWithExactly(
+              this.RecurlyEntities.MEMBERS_LIMIT_ADD_ON_CODE,
+              this.adding,
+              undefined
+            )
+            .should.equal(true)
+        })
+
+        it('should return the subscription change preview with legacy add-on price for small educational group', async function () {
+          this.PlansLocator.findLocalPlanInSettings = sinon.stub().returns({
+            ...this.localPlanInSettings,
+            planCode: 'group_collaborator_5_educational',
+            canUseFlexibleLicensing: true,
+          })
+          this.recurlySubscription.planPrice =
+            this.GroupPlansData.enterprise.collaborator.USD[5].price_in_cents /
+              100 +
+            1
+
+          preview =
+            await this.Handler.promises.previewAddSeatsSubscriptionChange(
+              this.adminUser_id,
+              this.adding
+            )
+          this.recurlySubscription.getRequestForAddOnPurchase
+            .calledWithExactly(
+              this.RecurlyEntities.MEMBERS_LIMIT_ADD_ON_CODE,
+              this.adding,
+              this.GroupPlansData.enterprise.collaborator.USD[5]
+                .additional_license_legacy_price_in_cents / 100
+            )
+            .should.equal(true)
+        })
+
+        it('should return the subscription change preview with non-legacy add-on price for small educational group', async function () {
+          this.PlansLocator.findLocalPlanInSettings = sinon.stub().returns({
+            ...this.localPlanInSettings,
+            planCode: 'group_collaborator_5_educational',
+            canUseFlexibleLicensing: true,
+          })
           this.recurlySubscription.planPrice =
             this.GroupPlansData.enterprise.collaborator.USD[5].price_in_cents /
             100
