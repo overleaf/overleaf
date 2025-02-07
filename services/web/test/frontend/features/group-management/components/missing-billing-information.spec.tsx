@@ -23,7 +23,11 @@ describe('<MissingBillingInformation />', function () {
       ).within(() => {
         cy.findByRole('link', {
           name: /update your billing information/i,
-        }).should('have.attr', 'href', '/user/subscription')
+        }).should(
+          'have.attr',
+          'href',
+          '/user/subscription/recurly/billing-details'
+        )
         cy.findByRole('link', { name: /get in touch/i }).should(
           'have.attr',
           'href',

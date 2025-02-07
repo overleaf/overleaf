@@ -15,7 +15,10 @@ function MissingBillingInformation() {
             i18nKey="it_looks_like_your_payment_details_are_missing_please_update_your_billing_information"
             components={[
               // eslint-disable-next-line jsx-a11y/anchor-has-content, react/jsx-key
-              <a href="/user/subscription" rel="noreferrer noopener" />,
+              <a
+                href="/user/subscription/recurly/billing-details"
+                rel="noreferrer noopener"
+              />,
               // eslint-disable-next-line jsx-a11y/anchor-has-content, react/jsx-key
               <a href="/contact" rel="noreferrer noopener" />,
             ]}
