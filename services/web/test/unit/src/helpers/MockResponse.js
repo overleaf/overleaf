@@ -139,6 +139,14 @@ class MockResponse {
     this.header(header, value)
   }
 
+  appendHeader(header, value) {
+    if (this.headers[header]) {
+      this.headers[header] += `, ${value}`
+    } else {
+      this.headers[header] = value
+    }
+  }
+
   setTimeout(timout) {
     this.timout = timout
   }

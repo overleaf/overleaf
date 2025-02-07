@@ -26,7 +26,7 @@ const fileContent = fs.readFileSync(
 )
 
 describe('HistoryTests', function () {
-  let user, projectId, fileId, fileHash, fileURL, fileURLWithFallback
+  let user, projectId, fileId, fileHash, fileURL, blobURL, blobURLWithFallback
   let historySource, filestoreSource
 
   async function getSourceMetric(source) {
@@ -48,8 +48,9 @@ describe('HistoryTests', function () {
         '2pixel.png',
         'image/png'
       ))
-    fileURL = `/project/${projectId}/blob/${fileHash}`
-    fileURLWithFallback = `${fileURL}?fallback=${fileId}`
+    fileURL = `/project/${projectId}/file/${fileId}`
+    blobURL = `/project/${projectId}/blob/${fileHash}`
+    blobURLWithFallback = `${blobURL}?fallback=${fileId}`
     historySource = await getSourceMetric('history-v1')
     filestoreSource = await getSourceMetric('filestore')
   })
@@ -108,7 +109,7 @@ describe('HistoryTests', function () {
     describe('HEAD', function () {
       if (Features.hasFeature('project-history-blobs')) {
         it('should fetch the file size from history-v1', async function () {
-          const { response } = await user.doRequest('HEAD', fileURL)
+          const { response } = await user.doRequest('HEAD', blobURL)
           expect(response.statusCode).to.equal(200)
           expect(response.headers['x-served-by']).to.include('history-v1')
           expect(response.headers['content-length']).to.equal('3694')
@@ -117,13 +118,13 @@ describe('HistoryTests', function () {
       }
       it('should return 404 without fallback', async function () {
         MockV1HistoryApi.reset()
-        const { response } = await user.doRequest('HEAD', fileURL)
+        const { response } = await user.doRequest('HEAD', blobURL)
         expect(response.statusCode).to.equal(404)
         await expectNoIncrement()
       })
       it('should fetch the file size from filestore when missing in history-v1', async function () {
         MockV1HistoryApi.reset()
-        const { response } = await user.doRequest('HEAD', fileURLWithFallback)
+        const { response } = await user.doRequest('HEAD', blobURLWithFallback)
         expect(response.statusCode).to.equal(200)
         expect(response.headers['x-served-by']).to.include('filestore')
         expect(response.headers['content-length']).to.equal('3694')
@@ -132,9 +133,95 @@ describe('HistoryTests', function () {
       it('should return 404 with both files missing', async function () {
         MockFilestoreApi.reset()
         MockV1HistoryApi.reset()
-        const { response } = await user.doRequest('HEAD', fileURLWithFallback)
+        const { response } = await user.doRequest('HEAD', blobURLWithFallback)
         expect(response.statusCode).to.equal(404)
         await expectNoIncrement()
+      })
+    })
+    describe('GET', function () {
+      if (Features.hasFeature('project-history-blobs')) {
+        it('should fetch the file from history-v1', async function () {
+          const { response, body } = await user.doRequest('GET', blobURL)
+          expect(response.statusCode).to.equal(200)
+          expect(response.headers['x-served-by']).to.include('history-v1')
+          expect(body).to.equal(fileContent)
+          await expectHistoryV1Hit()
+        })
+        it('should set cache headers', async function () {
+          const { response } = await user.doRequest('GET', blobURL)
+          expect(response.headers['cache-control']).to.equal(
+            'private, max-age=86400, stale-while-revalidate=31536000'
+          )
+          expect(response.headers.etag).to.equal(fileHash)
+        })
+        it('should return a 304 when revalidating', async function () {
+          const { response, body } = await user.doRequest('GET', {
+            url: blobURL,
+            headers: { 'If-None-Match': fileHash },
+          })
+          expect(response.statusCode).to.equal(304)
+          expect(response.headers.etag).to.equal(fileHash)
+          expect(body).to.equal('')
+        })
+      }
+      it('should return 404 without fallback', async function () {
+        MockV1HistoryApi.reset()
+        const { response } = await user.doRequest('GET', blobURL)
+        expect(response.statusCode).to.equal(404)
+        await expectNoIncrement()
+      })
+      it('should not set cache headers on 404', async function () {
+        MockV1HistoryApi.reset()
+        const { response } = await user.doRequest('GET', blobURL)
+        expect(response.statusCode).to.equal(404)
+        expect(response.headers).not.to.have.property('cache-control')
+        expect(response.headers).not.to.have.property('etag')
+      })
+      it('should fetch the file size from filestore when missing in history-v1', async function () {
+        MockV1HistoryApi.reset()
+        const { response, body } = await user.doRequest(
+          'GET',
+          blobURLWithFallback
+        )
+        expect(response.statusCode).to.equal(200)
+        expect(response.headers['x-served-by']).to.include('filestore')
+        expect(body).to.equal(fileContent)
+        await expectFilestoreHit()
+      })
+      it('should return 404 with both files missing', async function () {
+        MockFilestoreApi.reset()
+        MockV1HistoryApi.reset()
+        const { response } = await user.doRequest('GET', blobURLWithFallback)
+        expect(response.statusCode).to.equal(404)
+        await expectNoIncrement()
+      })
+    })
+  })
+
+  // Legacy endpoint that is powered by history-v1 in SaaS
+  describe('/project/:projectId/file/:fileId', function () {
+    describe('HEAD', function () {
+      if (Features.hasFeature('project-history-blobs')) {
+        it('should fetch the file size from history-v1', async function () {
+          const { response } = await user.doRequest('HEAD', fileURL)
+          expect(response.statusCode).to.equal(200)
+          expect(response.headers['x-served-by']).to.include('history-v1')
+          expect(response.headers['content-length']).to.equal('3694')
+          await expectHistoryV1Hit()
+        })
+      }
+      it('should fetch the file size from filestore when missing in history-v1', async function () {
+        MockV1HistoryApi.reset()
+        const { response } = await user.doRequest('HEAD', blobURLWithFallback)
+        expect(response.statusCode).to.equal(200)
+        expect(response.headers['x-served-by']).to.include('filestore')
+        expect(response.headers['content-length']).to.equal('3694')
+      })
+      it('should return 404 with both files missing', async function () {
+        MockFilestoreApi.reset()
+        MockV1HistoryApi.reset()
+        const { response } = await user.doRequest('HEAD', blobURLWithFallback)
+        expect(response.statusCode).to.equal(404)
       })
     })
     describe('GET', function () {
@@ -146,52 +233,36 @@ describe('HistoryTests', function () {
           expect(body).to.equal(fileContent)
           await expectHistoryV1Hit()
         })
-        it('should set cache headers', async function () {
-          const { response } = await user.doRequest('GET', fileURL)
-          expect(response.headers['cache-control']).to.equal(
-            'private, max-age=86400, stale-while-revalidate=31536000'
-          )
-          expect(response.headers.etag).to.equal(fileHash)
-        })
-        it('should return a 304 when revalidating', async function () {
-          const { response, body } = await user.doRequest('GET', {
-            url: fileURL,
-            headers: { 'If-None-Match': fileHash },
-          })
-          expect(response.statusCode).to.equal(304)
-          expect(response.headers.etag).to.equal(fileHash)
-          expect(body).to.equal('')
-        })
       }
-      it('should return 404 without fallback', async function () {
-        MockV1HistoryApi.reset()
+      it('should set cache headers', async function () {
         const { response } = await user.doRequest('GET', fileURL)
-        expect(response.statusCode).to.equal(404)
-        await expectNoIncrement()
+        expect(response.headers['cache-control']).to.equal(
+          'private, max-age=3600'
+        )
       })
       it('should not set cache headers on 404', async function () {
         MockV1HistoryApi.reset()
+        MockFilestoreApi.reset()
+        // The legacy filestore downloads are not properly handling 404s, so delete the file from the file-tree to trigger the 404. All the filestore code will be removed soon.
+        await user.doRequest('DELETE', fileURL)
+
         const { response } = await user.doRequest('GET', fileURL)
+        expect(response.statusCode).to.equal(404)
         expect(response.headers).not.to.have.property('cache-control')
         expect(response.headers).not.to.have.property('etag')
       })
       it('should fetch the file size from filestore when missing in history-v1', async function () {
         MockV1HistoryApi.reset()
-        const { response, body } = await user.doRequest(
-          'GET',
-          fileURLWithFallback
-        )
+        const { response, body } = await user.doRequest('GET', fileURL)
         expect(response.statusCode).to.equal(200)
         expect(response.headers['x-served-by']).to.include('filestore')
         expect(body).to.equal(fileContent)
-        await expectFilestoreHit()
       })
       it('should return 404 with both files missing', async function () {
         MockFilestoreApi.reset()
         MockV1HistoryApi.reset()
-        const { response } = await user.doRequest('GET', fileURLWithFallback)
+        const { response } = await user.doRequest('GET', fileURL)
         expect(response.statusCode).to.equal(404)
-        await expectNoIncrement()
       })
     })
   })

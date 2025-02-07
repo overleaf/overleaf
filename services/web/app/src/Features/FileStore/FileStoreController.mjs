@@ -20,11 +20,11 @@ async function getFile(req, res) {
 
   let file
   try {
-    file = await ProjectLocator.promises.findElement({
+    ;({ element: file } = await ProjectLocator.promises.findElement({
       project_id: projectId,
       element_id: fileId,
       type: 'file',
-    })
+    }))
   } catch (err) {
     if (err instanceof Errors.NotFoundError) {
       logger.warn(
@@ -55,11 +55,11 @@ async function getFile(req, res) {
     status: Boolean(file?.hash),
   })
 
-  let stream, contentLength
+  let source, stream, contentLength
   try {
     if (Features.hasFeature('project-history-blobs') && file?.hash) {
       // Get the file from history
-      ;({ stream, contentLength } =
+      ;({ source, stream, contentLength } =
         await HistoryManager.promises.requestBlobWithFallback(
           projectId,
           file.hash,
@@ -72,6 +72,7 @@ async function getFile(req, res) {
         fileId,
         queryString
       )
+      source = 'filestore'
     }
   } catch (err) {
     if (err instanceof Errors.NotFoundError) {
@@ -96,6 +97,7 @@ async function getFile(req, res) {
   // allow the browser to cache these immutable files
   // note: both "private" and "max-age" appear to be required for caching
   res.setHeader('Cache-Control', 'private, max-age=3600')
+  res.appendHeader('X-Served-By', source)
   try {
     await pipeline(stream, res)
   } catch (err) {
@@ -117,11 +119,11 @@ async function getFileHead(req, res) {
 
   let file
   try {
-    file = await ProjectLocator.promises.findElement({
+    ;({ element: file } = await ProjectLocator.promises.findElement({
       project_id: projectId,
       element_id: fileId,
       type: 'file',
-    })
+    }))
   } catch (err) {
     if (err instanceof Errors.NotFoundError) {
       // res.sendStatus() sends a description of the status as body.
@@ -148,19 +150,19 @@ async function getFileHead(req, res) {
     status: Boolean(file?.hash),
   })
 
-  let fileSize
+  let fileSize, source
   try {
     if (Features.hasFeature('project-history-blobs') && file?.hash) {
-      const { contentLength } =
+      ;({ source, contentLength: fileSize } =
         await HistoryManager.promises.requestBlobWithFallback(
           projectId,
           file.hash,
           fileId,
           'HEAD'
-        )
-      fileSize = contentLength
+        ))
     } else {
       fileSize = await FileStoreHandler.promises.getFileSize(projectId, fileId)
+      source = 'filestore'
     }
   } catch (err) {
     if (err instanceof Errors.NotFoundError) {
@@ -172,6 +174,7 @@ async function getFileHead(req, res) {
   }
 
   res.setHeader('Content-Length', fileSize)
+  res.appendHeader('X-Served-By', source)
   res.status(200).end()
 }
 

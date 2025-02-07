@@ -9,6 +9,7 @@ const MODULE_PATH =
 
 const expectedFileHeaders = {
   'Cache-Control': 'private, max-age=3600',
+  'X-Served-By': 'filestore',
 }
 
 describe('FileStoreController', function () {
@@ -56,7 +57,7 @@ describe('FileStoreController', function () {
   describe('getFile', function () {
     beforeEach(function () {
       this.FileStoreHandler.promises.getFileStream.resolves(this.stream)
-      this.ProjectLocator.promises.findElement.resolves(this.file)
+      this.ProjectLocator.promises.findElement.resolves({ element: this.file })
     })
 
     it('should call the file store handler with the project_id file_id and any query string', async function () {
@@ -193,6 +194,10 @@ describe('FileStoreController', function () {
   })
 
   describe('getFileHead', function () {
+    beforeEach(function () {
+      this.ProjectLocator.promises.findElement.resolves({ element: this.file })
+    })
+
     it('reports the file size', function (done) {
       const expectedFileSize = 99393
       this.FileStoreHandler.promises.getFileSize.rejects(
