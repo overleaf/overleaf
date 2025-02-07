@@ -173,7 +173,7 @@ export function ActiveSubscriptionNew({
         <p className="mb-1">
           {isLegacyPlan && subscription.recurly.additionalLicenses > 0 ? (
             <Trans
-              i18nKey="supports_up_to_x_users_incl_y_additional_licenses"
+              i18nKey="plus_x_additional_licenses_for_a_total_of_y_users"
               values={{
                 count: subscription.recurly.totalLicenses,
                 additionalLicenses: subscription.recurly.additionalLicenses,
