@@ -1565,6 +1565,27 @@ describe('UpdateCompressor', function () {
           },
         ])
       })
+
+      it('special case for delete + insert triggering diff', function () {
+        const meta = { ts: this.ts1, user_id: this.user_id, doc_length: 10 }
+        expect(
+          this.UpdateCompressor.compressUpdates([
+            { op: { p: 3, d: 'foo' }, meta, v: 42 },
+            {
+              op: { p: 3, i: 'bar' },
+              meta: { ...meta, doc_hash: 'hash1' },
+              v: 43,
+            },
+          ])
+        ).to.deep.equal([
+          { op: { p: 3, d: 'foo' }, meta, v: 43 },
+          {
+            op: { p: 3, i: 'bar' },
+            meta: { ...meta, doc_length: 7, doc_hash: 'hash1' },
+            v: 43,
+          },
+        ])
+      })
     })
   })
 })

@@ -397,9 +397,16 @@ function _concatTwoUpdates(firstUpdate, secondUpdate) {
           // Make sure that commentIds metadata is propagated to inserts
           op.commentIds = secondOp.commentIds
         }
-        return mergeUpdatesWithOp(firstUpdate, secondUpdate, op)
+        const update = mergeUpdatesWithOp(firstUpdate, secondUpdate, op)
+        // Set the doc hash only on the last update
+        delete update.meta.doc_hash
+        return update
       }
     )
+    const docHash = secondUpdate.meta.doc_hash
+    if (docHash != null && diffUpdates.length > 0) {
+      diffUpdates[diffUpdates.length - 1].meta.doc_hash = docHash
+    }
 
     // Doing a diff like this loses track of the doc lengths for each
     // update, so recalculate them
