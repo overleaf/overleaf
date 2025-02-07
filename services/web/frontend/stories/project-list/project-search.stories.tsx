@@ -2,7 +2,6 @@ import SearchForm from '../../js/features/project-list/components/search-form'
 import { ProjectListProvider } from '../../js/features/project-list/context/project-list-context'
 import useFetchMock from '../hooks/use-fetch-mock'
 import { projectsData } from '../../../test/frontend/features/project-list/fixtures/projects-data'
-import { bsVersionDecorator } from '../../../.storybook/utils/with-bootstrap-switcher'
 
 export const Search = (args: any) => {
   useFetchMock(fetchMock => {
@@ -25,7 +24,7 @@ export default {
   args: {
     inputValue: '',
   },
-  argTypes: {
-    ...bsVersionDecorator.argTypes,
+  parameters: {
+    bootstrap5: true,
   },
 }

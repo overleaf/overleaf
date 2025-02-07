@@ -13,7 +13,6 @@ import {
   setReconfirmAffiliationMeta,
   setReconfirmationMeta,
 } from './helpers/emails'
-import { bsVersionDecorator } from '../../../.storybook/utils/with-bootstrap-switcher'
 import { useMeta } from '../hooks/use-meta'
 
 export const ProjectInvite = (args: any) => {
@@ -344,7 +343,7 @@ export const ReconfirmedAffiliationSuccess = (args: any) => {
 export default {
   title: 'Project List / Notifications',
   component: UserNotifications,
-  argTypes: {
-    ...bsVersionDecorator.argTypes,
+  parameters: {
+    bootstrap5: true,
   },
 }

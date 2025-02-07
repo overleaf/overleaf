@@ -1,5 +1,4 @@
 import CurrentPlanWidget from '../../js/features/project-list/components/current-plan-widget/current-plan-widget'
-import { bsVersionDecorator } from '../../../.storybook/utils/with-bootstrap-switcher'
 
 export const FreePlan = (args: any) => {
   window.metaAttributesCache.set('ol-usersBestSubscription', {
@@ -53,10 +52,27 @@ export const PaidPlanActive = (args: any) => {
   return <CurrentPlanWidget {...args} />
 }
 
+export const PausedPlan = (args: any) => {
+  window.metaAttributesCache.set('ol-usersBestSubscription', {
+    type: 'individual',
+    plan: {
+      name: 'Individual',
+    },
+    subscription: {
+      name: 'Example Name',
+      recurlyStatus: {
+        state: 'paused',
+      },
+    },
+  })
+
+  return <CurrentPlanWidget {...args} />
+}
+
 export default {
   title: 'Project List / Current Plan Widget',
   component: CurrentPlanWidget,
-  argTypes: {
-    ...bsVersionDecorator.argTypes,
+  parameters: {
+    bootstrap5: true,
   },
 }

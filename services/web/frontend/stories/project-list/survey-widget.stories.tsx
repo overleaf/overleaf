@@ -1,5 +1,4 @@
 import SurveyWidget from '../../js/features/project-list/components/survey-widget'
-import { bsVersionDecorator } from '../../../.storybook/utils/with-bootstrap-switcher'
 
 export const Survey = (args: any) => {
   localStorage.clear()
@@ -29,7 +28,7 @@ export const EmptySurvey = (args: any) => {
 export default {
   title: 'Project List / Survey Widget',
   component: SurveyWidget,
-  argTypes: {
-    ...bsVersionDecorator.argTypes,
+  parameters: {
+    bootstrap5: true,
   },
 }
