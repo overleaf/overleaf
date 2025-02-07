@@ -51,7 +51,8 @@ async function deleteProjectBackup(projectId) {
     throw new NotReadyToDelete('refusing to delete non-expired project')
   }
 
-  const historyId = deletedProject.deleterData.deletedProjectOverleafHistoryId
+  const historyId =
+    deletedProject.deleterData.deletedProjectOverleafHistoryId?.toString()
   if (!historyId) {
     throw new NotReadyToDelete(
       'refusing to delete project with unknown historyId'
