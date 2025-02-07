@@ -130,6 +130,12 @@ const FileStoreHandler = {
 
     const fileRef = new File(fileArgs)
     const fileId = fileRef._id
+    const url = FileStoreHandler._buildUrl(projectId, fileId)
+
+    if (!Features.hasFeature('filestore')) {
+      return callbackOnce(null, { url, fileRef })
+    }
+
     const readStream = fs.createReadStream(fsPath)
     readStream.on('error', function (err) {
       logger.warn(
@@ -139,7 +145,6 @@ const FileStoreHandler = {
       callbackOnce(err)
     })
     readStream.on('open', function () {
-      const url = FileStoreHandler._buildUrl(projectId, fileId)
       const opts = {
         method: 'post',
         uri: url,

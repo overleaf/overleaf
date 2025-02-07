@@ -187,22 +187,33 @@ describe('ProjectStructureChanges', function () {
 
   const cases = [
     {
-      label: 'with filestore disabled',
+      label: 'with filestore disabled and project-history-blobs enabled',
       disableFilestore: true,
+      enableProjectHistoryBlobs: true,
     },
     {
-      label: 'with filestore enabled',
+      label: 'with filestore enabled and project-history-blobs enabled',
       disableFilestore: false,
+      enableProjectHistoryBlobs: true,
+    },
+    {
+      label: 'with filestore enabled and project-history-blobs disabled',
+      disableFilestore: false,
+      enableProjectHistoryBlobs: false,
     },
   ]
-  for (const { label, disableFilestore } of cases) {
+  for (const { label, disableFilestore, enableProjectHistoryBlobs } of cases) {
     describe(label, function () {
-      const previousSetting = Settings.disableFilestore
+      const previousDisableFilestore = Settings.disableFilestore
+      const previousEnableProjectHistoryBlobs =
+        Settings.enableProjectHistoryBlobs
       beforeEach(function () {
         Settings.disableFilestore = disableFilestore
+        Settings.enableProjectHistoryBlobs = enableProjectHistoryBlobs
       })
       afterEach(function () {
-        Settings.disableFilestore = previousSetting
+        Settings.disableFilestore = previousDisableFilestore
+        Settings.enableProjectHistoryBlobs = previousEnableProjectHistoryBlobs
       })
 
       describe('creating a project from the example template', function () {

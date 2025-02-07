@@ -7,15 +7,18 @@ import User from './helpers/User.mjs'
 import UserHelper from './helpers/UserHelper.mjs'
 import MockDocstoreApiClass from './mocks/MockDocstoreApi.mjs'
 import MockFilestoreApiClass from './mocks/MockFilestoreApi.mjs'
+import MockV1HistoryApiClass from './mocks/MockV1HistoryApi.mjs'
 import { fileURLToPath } from 'node:url'
+import Features from '../../../app/src/infrastructure/Features.js'
 
-let MockDocstoreApi, MockFilestoreApi
+let MockDocstoreApi, MockFilestoreApi, MockV1HistoryApi
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url))
 
 before(function () {
   MockDocstoreApi = MockDocstoreApiClass.instance()
   MockFilestoreApi = MockFilestoreApiClass.instance()
+  MockV1HistoryApi = MockV1HistoryApiClass.instance()
 })
 
 describe('ProjectDuplicateNames', function () {
@@ -80,10 +83,19 @@ describe('ProjectDuplicateNames', function () {
       expect(Object.keys(docs).length).to.equal(2)
     })
 
-    it('should create one file in the filestore', function () {
-      const files = MockFilestoreApi.files[this.example_project_id]
-      expect(Object.keys(files).length).to.equal(1)
-    })
+    if (Features.hasFeature('project-history-blobs')) {
+      it('should create one file in the history-v1', function () {
+        const files =
+          MockV1HistoryApi.blobs[this.project.overleaf.history.id.toString()]
+        expect(Object.keys(files).length).to.equal(1)
+      })
+    }
+    if (Features.hasFeature('filestore')) {
+      it('should create one file in the filestore', function () {
+        const files = MockFilestoreApi.files[this.example_project_id]
+        expect(Object.keys(files).length).to.equal(1)
+      })
+    }
 
     describe('for an existing doc', function () {
       describe('trying to add a doc with the same name', function () {

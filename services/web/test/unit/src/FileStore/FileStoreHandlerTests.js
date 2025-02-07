@@ -190,91 +190,174 @@ describe('FileStoreHandler', function () {
       })
     })
 
-    it('should create read stream', function (done) {
-      this.fs.createReadStream.returns({
-        pipe() {},
-        on(type, cb) {
-          if (type === 'open') {
-            cb()
-          }
-        },
+    describe('when filestore feature is enabled', function () {
+      beforeEach(function () {
+        this.Features.hasFeature.withArgs('filestore').returns(true)
       })
-      this.handler.uploadFileFromDisk(
-        this.projectId,
-        this.fileArgs,
-        this.fsPath,
-        () => {
-          this.fs.createReadStream.calledWith(this.fsPath).should.equal(true)
-          done()
-        }
-      )
-    })
+      it('should create read stream', function (done) {
+        this.fs.createReadStream.returns({
+          pipe() {},
+          on(type, cb) {
+            if (type === 'open') {
+              cb()
+            }
+          },
+        })
+        this.handler.uploadFileFromDisk(
+          this.projectId,
+          this.fileArgs,
+          this.fsPath,
+          () => {
+            this.fs.createReadStream.calledWith(this.fsPath).should.equal(true)
+            done()
+          }
+        )
+      })
 
-    it('should pipe the read stream to request', function (done) {
-      this.request.returns(this.writeStream)
-      this.fs.createReadStream.returns({
-        on(type, cb) {
-          if (type === 'open') {
-            cb()
-          }
-        },
-        pipe: o => {
-          this.writeStream.should.equal(o)
-          done()
-        },
+      it('should pipe the read stream to request', function (done) {
+        this.request.returns(this.writeStream)
+        this.fs.createReadStream.returns({
+          on(type, cb) {
+            if (type === 'open') {
+              cb()
+            }
+          },
+          pipe: o => {
+            this.writeStream.should.equal(o)
+            done()
+          },
+        })
+        this.handler.uploadFileFromDisk(
+          this.projectId,
+          this.fileArgs,
+          this.fsPath,
+          () => {}
+        )
       })
-      this.handler.uploadFileFromDisk(
-        this.projectId,
-        this.fileArgs,
-        this.fsPath,
-        () => {}
-      )
-    })
 
-    it('should pass the correct options to request', function (done) {
-      const fileUrl = this.getFileUrl(this.projectId, this.fileId)
-      this.fs.createReadStream.returns({
-        pipe() {},
-        on(type, cb) {
-          if (type === 'open') {
-            cb()
+      it('should pass the correct options to request', function (done) {
+        const fileUrl = this.getFileUrl(this.projectId, this.fileId)
+        this.fs.createReadStream.returns({
+          pipe() {},
+          on(type, cb) {
+            if (type === 'open') {
+              cb()
+            }
+          },
+        })
+        this.handler.uploadFileFromDisk(
+          this.projectId,
+          this.fileArgs,
+          this.fsPath,
+          () => {
+            this.request.args[0][0].method.should.equal('post')
+            this.request.args[0][0].uri.should.equal(fileUrl)
+            done()
           }
-        },
+        )
       })
-      this.handler.uploadFileFromDisk(
-        this.projectId,
-        this.fileArgs,
-        this.fsPath,
-        () => {
-          this.request.args[0][0].method.should.equal('post')
-          this.request.args[0][0].uri.should.equal(fileUrl)
-          done()
-        }
-      )
-    })
 
-    it('should callback with the url and fileRef', function (done) {
-      const fileUrl = this.getFileUrl(this.projectId, this.fileId)
-      this.fs.createReadStream.returns({
-        pipe() {},
-        on(type, cb) {
-          if (type === 'open') {
-            cb()
+      it('should callback with the url and fileRef', function (done) {
+        const fileUrl = this.getFileUrl(this.projectId, this.fileId)
+        this.fs.createReadStream.returns({
+          pipe() {},
+          on(type, cb) {
+            if (type === 'open') {
+              cb()
+            }
+          },
+        })
+        this.handler.uploadFileFromDisk(
+          this.projectId,
+          this.fileArgs,
+          this.fsPath,
+          (err, url, fileRef) => {
+            expect(err).to.not.exist
+            expect(url).to.equal(fileUrl)
+            expect(fileRef._id).to.equal(this.fileId)
+            expect(fileRef.hash).to.equal(this.hashValue)
+            done()
           }
-        },
+        )
       })
-      this.handler.uploadFileFromDisk(
-        this.projectId,
-        this.fileArgs,
-        this.fsPath,
-        (err, url, fileRef) => {
-          expect(err).to.not.exist
-          expect(url).to.equal(fileUrl)
-          expect(fileRef._id).to.equal(this.fileId)
-          expect(fileRef.hash).to.equal(this.hashValue)
-          done()
-        }
-      )
+      describe('when upload to filestore fails', function () {
+        beforeEach(function () {
+          this.writeStream.on = function (type, fn) {
+            if (type === 'response') {
+              fn({ statusCode: 500 })
+            }
+          }
+        })
+
+        it('should callback with an error', function (done) {
+          this.fs.createReadStream.callCount = 0
+          this.fs.createReadStream.returns({
+            pipe() {},
+            on(type, cb) {
+              if (type === 'open') {
+                cb()
+              }
+            },
+          })
+          this.handler.uploadFileFromDisk(
+            this.projectId,
+            this.fileArgs,
+            this.fsPath,
+            err => {
+              expect(err).to.exist
+              expect(err).to.be.instanceof(Error)
+              expect(this.fs.createReadStream.callCount).to.equal(
+                this.handler.RETRY_ATTEMPTS
+              )
+              done()
+            }
+          )
+        })
+      })
+    })
+    describe('when filestore feature is disabled', function () {
+      beforeEach(function () {
+        this.Features.hasFeature.withArgs('filestore').returns(false)
+      })
+      it('should not open file handle', function (done) {
+        this.handler.uploadFileFromDisk(
+          this.projectId,
+          this.fileArgs,
+          this.fsPath,
+          () => {
+            expect(this.fs.createReadStream).to.not.have.been.called
+            done()
+          }
+        )
+      })
+
+      it('should not talk to filestore', function (done) {
+        this.handler.uploadFileFromDisk(
+          this.projectId,
+          this.fileArgs,
+          this.fsPath,
+          () => {
+            expect(this.request).to.not.have.been.called
+            done()
+          }
+        )
+      })
+
+      it('should callback with the url and fileRef', function (done) {
+        const fileUrl = this.getFileUrl(this.projectId, this.fileId)
+        this.handler.uploadFileFromDisk(
+          this.projectId,
+          this.fileArgs,
+          this.fsPath,
+          (err, url, fileRef) => {
+            expect(err).to.not.exist
+            expect(url).to.equal(fileUrl)
+            expect(fileRef._id).to.equal(this.fileId)
+            expect(fileRef.hash).to.equal(this.hashValue)
+            done()
+          }
+        )
+      })
     })
 
     describe('symlink', function () {
@@ -307,41 +390,6 @@ describe('FileStoreHandler', function () {
           this.fsPath,
           () => {
             this.fs.createReadStream.called.should.equal(false)
-            done()
-          }
-        )
-      })
-    })
-
-    describe('when upload fails', function () {
-      beforeEach(function () {
-        this.writeStream.on = function (type, fn) {
-          if (type === 'response') {
-            fn({ statusCode: 500 })
-          }
-        }
-      })
-
-      it('should callback with an error', function (done) {
-        this.fs.createReadStream.callCount = 0
-        this.fs.createReadStream.returns({
-          pipe() {},
-          on(type, cb) {
-            if (type === 'open') {
-              cb()
-            }
-          },
-        })
-        this.handler.uploadFileFromDisk(
-          this.projectId,
-          this.fileArgs,
-          this.fsPath,
-          err => {
-            expect(err).to.exist
-            expect(err).to.be.instanceof(Error)
-            expect(this.fs.createReadStream.callCount).to.equal(
-              this.handler.RETRY_ATTEMPTS
-            )
             done()
           }
         )

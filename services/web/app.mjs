@@ -18,6 +18,7 @@ import mongoose from './app/src/infrastructure/Mongoose.js'
 import { triggerGracefulShutdown } from './app/src/infrastructure/GracefulShutdown.js'
 import FileWriter from './app/src/infrastructure/FileWriter.js'
 import { fileURLToPath } from 'node:url'
+import Features from './app/src/infrastructure/Features.js'
 
 logger.initialize(process.env.METRICS_APP_NAME || 'web')
 logger.logger.serializers.user = Serializers.user
@@ -47,6 +48,15 @@ if (Settings.catchErrors) {
 
 // Create ./data/dumpFolder if needed
 FileWriter.ensureDumpFolderExists()
+
+if (
+  !Features.hasFeature('project-history-blobs') &&
+  !Features.hasFeature('filestore')
+) {
+  throw new Error(
+    'invalid config: must enable either project-history-blobs (Settings.enableProjectHistoryBlobs=true) or enable filestore (Settings.disableFilestore=false)'
+  )
+}
 
 const port = Settings.port || Settings.internal.web.port || 3000
 const host = Settings.internal.web.host || '127.0.0.1'

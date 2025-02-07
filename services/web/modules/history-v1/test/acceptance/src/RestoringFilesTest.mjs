@@ -8,8 +8,10 @@ import User from '../../../../../test/acceptance/src/helpers/User.mjs'
 import MockProjectHistoryApiClass from '../../../../../test/acceptance/src/mocks/MockProjectHistoryApi.mjs'
 import MockDocstoreApiClass from '../../../../../test/acceptance/src/mocks/MockDocstoreApi.mjs'
 import MockFilestoreApiClass from '../../../../../test/acceptance/src/mocks/MockFilestoreApi.mjs'
+import MockV1HistoryApiClass from '../../../../../test/acceptance/src/mocks/MockV1HistoryApi.mjs'
+import Features from '../../../../../app/src/infrastructure/Features.js'
 
-let MockProjectHistoryApi, MockDocstoreApi, MockFilestoreApi
+let MockProjectHistoryApi, MockDocstoreApi, MockFilestoreApi, MockV1HistoryApi
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url))
 
@@ -17,6 +19,7 @@ before(function () {
   MockProjectHistoryApi = MockProjectHistoryApiClass.instance()
   MockDocstoreApi = MockDocstoreApiClass.instance()
   MockFilestoreApi = MockFilestoreApiClass.instance()
+  MockV1HistoryApi = MockV1HistoryApiClass.instance()
 })
 
 describe('RestoringFiles', function () {
@@ -118,20 +121,41 @@ describe('RestoringFiles', function () {
         )
       })
 
-      it('should have created a file', function (done) {
-        this.owner.getProject(this.project_id, (error, project) => {
-          if (error) {
-            throw error
-          }
-          let file = _.find(
-            project.rootFolder[0].fileRefs,
-            file => file.name === 'image.png'
-          )
-          file = MockFilestoreApi.getFile(this.project_id, file._id)
-          expect(file).to.deep.equal(this.pngData)
-          done()
+      if (Features.hasFeature('project-history-blobs')) {
+        it('should have created a file in history-v1', function (done) {
+          this.owner.getProject(this.project_id, (error, project) => {
+            if (error) {
+              throw error
+            }
+            let file = _.find(
+              project.rootFolder[0].fileRefs,
+              file => file.name === 'image.png'
+            )
+            file =
+              MockV1HistoryApi.blobs[project.overleaf.history.id.toString()][
+                file.hash
+              ]
+            expect(file).to.deep.equal(Buffer.from(this.pngData))
+            done()
+          })
         })
-      })
+      }
+      if (Features.hasFeature('filestore')) {
+        it('should have created a file in filestore', function (done) {
+          this.owner.getProject(this.project_id, (error, project) => {
+            if (error) {
+              throw error
+            }
+            let file = _.find(
+              project.rootFolder[0].fileRefs,
+              file => file.name === 'image.png'
+            )
+            file = MockFilestoreApi.getFile(this.project_id, file._id)
+            expect(file).to.deep.equal(this.pngData)
+            done()
+          })
+        })
+      }
     })
 
     describe('restoring to a directory that exists', function () {
