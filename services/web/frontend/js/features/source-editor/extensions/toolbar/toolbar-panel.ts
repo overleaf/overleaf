@@ -249,9 +249,6 @@ const toolbarTheme = EditorView.theme({
       },
     },
   },
-  '&.overall-theme-dark .ol-cm-toolbar-table-grid-popover': {
-    color: '#fff',
-  },
   '&.overall-theme-dark .ol-cm-toolbar-table-grid': {
     '& td.active': {
       outlineColor: 'white',
@@ -288,6 +285,7 @@ const toolbarTheme = EditorView.theme({
     borderRadius: '4px',
     backgroundColor: 'var(--editor-toolbar-bg)',
     pointerEvents: 'all',
+    color: 'var(--toolbar-btn-color)',
   },
   '.ol-cm-toolbar-button-menu-popover-unstyled': {
     maxWidth: 'unset',
