@@ -45,7 +45,7 @@ clean:
 	-COMPOSE_PROJECT_NAME=acceptance_modules_merged_saas_4_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down --rmi local
 	-COMPOSE_PROJECT_NAME=acceptance_modules_merged_server_ce_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down --rmi local
 	-COMPOSE_PROJECT_NAME=acceptance_modules_merged_server_pro_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down --rmi local
-	-COMPOSE_PROJECT_NAME=frontend_test_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down --rmi local
+	-COMPOSE_PROJECT_NAME=test_frontend_ct_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down --rmi local
 	-COMPOSE_PROJECT_NAME=tar_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down --rmi local
 
 clean_ci:
@@ -120,39 +120,38 @@ test_unit_module:
 #
 
 test_frontend:
-	COMPOSE_PROJECT_NAME=frontend_test_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down -v -t 0
 	COMPOSE_PROJECT_NAME=frontend_test_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) run --rm test_frontend
 	COMPOSE_PROJECT_NAME=frontend_test_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down -v -t 0
 
 #
 # Frontend component tests in Cypress
 #
-
-test_frontend_ct:
-	COMPOSE_PROJECT_NAME=frontend_test_ct_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down -v -t 0
-	COMPOSE_PROJECT_NAME=frontend_test_ct_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) run --rm test_frontend_ct
-	COMPOSE_PROJECT_NAME=frontend_test_ct_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down -v -t 0
+# Local development: use $ make test_frontend_ct
+#
+TEST_FRONTEND_CT_VARIANTS = \
+	test_frontend_ct \
+	test_frontend_ct_core \
+	test_frontend_ct_modules \
+	test_frontend_ct_editor \
 
 # Note: The below cypress targets are for CI only
-build_test_frontend_ct:
-	COMPOSE_PROJECT_NAME=frontend_test_ct_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) build test_frontend_ct
-	# Note: The 2nd build should use the cache from the 1st build.
-	COMPOSE_PROJECT_NAME=frontend_test_ct_editor_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) build test_frontend_ct
+build_test_frontend_ct: $(TEST_FRONTEND_CT_VARIANTS:=/build)
+$(TEST_FRONTEND_CT_VARIANTS:=/build): %/build:
+	COMPOSE_PROJECT_NAME=$*_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) build test_frontend_ct
 
 test_frontend_ct_core: export CYPRESS_RESULTS=./cypress/results/core
-test_frontend_ct_core: export CYPRESS_SPEC_PATTERN=./{test,modules/**/test}/frontend/**/*.spec.{js,jsx,ts,tsx}
+test_frontend_ct_core: export CYPRESS_SPEC_PATTERN=./test/frontend/**/*.spec.{js,jsx,ts,tsx}
 test_frontend_ct_core: export CYPRESS_EXCLUDE_SPEC_PATTERN=./test/frontend/features/source-editor/**/*.spec.{js,jsx,ts,tsx}
-test_frontend_ct_core:
-	COMPOSE_PROJECT_NAME=frontend_test_ct_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down -v -t 0
-	COMPOSE_PROJECT_NAME=frontend_test_ct_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) run --rm test_frontend_ct
-	COMPOSE_PROJECT_NAME=frontend_test_ct_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down -v -t 0
+
+test_frontend_ct_modules: export CYPRESS_RESULTS=./cypress/results/modules
+test_frontend_ct_modules: export CYPRESS_SPEC_PATTERN=./modules/**/test/frontend/**/*.spec.{js,jsx,ts,tsx}
 
 test_frontend_ct_editor: export CYPRESS_RESULTS=./cypress/results/editor
 test_frontend_ct_editor: export CYPRESS_SPEC_PATTERN=./test/frontend/features/source-editor/**/*.spec.{js,jsx,ts,tsx}
-test_frontend_ct_editor:
-	COMPOSE_PROJECT_NAME=frontend_test_ct_editor_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down -v -t 0
-	COMPOSE_PROJECT_NAME=frontend_test_ct_editor_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) run --rm test_frontend_ct
-	COMPOSE_PROJECT_NAME=frontend_test_ct_editor_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down -v -t 0
+
+$(TEST_FRONTEND_CT_VARIANTS):
+	COMPOSE_PROJECT_NAME=$@_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) run --rm test_frontend_ct
+	COMPOSE_PROJECT_NAME=$@_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down -v -t 0
 
 #
 # Acceptance tests
