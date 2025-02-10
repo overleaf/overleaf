@@ -1617,6 +1617,7 @@
   "progress_bar_percentage": "Progress bar from 0 to 100%",
   "project": "project",
   "project_approaching_file_limit": "This project is approaching the file limit",
+  "project_failed_to_compile": "Your project failed to compile",
   "project_figure_modal": "Project",
   "project_files": "Project files",
   "project_flagged_too_many_compiles": "This project has been flagged for compiling too often. The limit will be lifted shortly.",

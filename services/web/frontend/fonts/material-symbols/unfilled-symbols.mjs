@@ -21,4 +21,5 @@ export default /** @type {const} */ ([
   'table_chart',
   'upload_file',
   'web_asset',
+  'error',
 ])

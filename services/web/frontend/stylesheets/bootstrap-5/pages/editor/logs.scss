@@ -209,3 +209,58 @@
     text-align: left;
   }
 }
+
+// As part of compile time paywall redesign, we are only migrating the necessary classes needed for the split test
+// Other classes should be migrated too as a part of website redesign project later on.
+
+.timeout-upgrade-paywall-prompt {
+  display: flex;
+  flex-direction: column;
+  gap: 10px; // adding this value to match existing spacing in logs pane, there is no variable for 10px
+}
+
+.website-redesign {
+  .log-entry-header {
+    @include heading-sm;
+
+    font-weight: 600;
+    padding: var(--spacing-05) var(--spacing-06);
+  }
+
+  .log-entry-content {
+    padding: 0;
+  }
+
+  .log-entry-formatted-content {
+    @include body-sm;
+
+    padding: var(--spacing-06);
+    color: var(--neutral-70);
+
+    a,
+    .btn-inline-link {
+      color: var(--blue-50);
+    }
+  }
+
+  .log-entry-cta-container {
+    padding-top: var(--spacing-06);
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .log-entry-header-error {
+    background-color: var(--red-10);
+
+    .log-entry-header-title {
+      @include heading-sm;
+
+      color: var(--red-50);
+    }
+  }
+
+  .log-entry-header-raw {
+    background-color: var(--neutral-60);
+    padding: var(--spacing-04) var(--spacing-06);
+  }
+}
