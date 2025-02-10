@@ -17,6 +17,8 @@ services:
       BASE_CONFIG:
       OVERLEAF_CONFIG:
       MOCHA_GREP: ${MOCHA_GREP}
+      LOG_LEVEL: ${LOG_LEVEL:-}
+      NODE_ENV: test
       NODE_OPTIONS: "--unhandled-rejections=strict"
     command: npm run --silent test:unit:app
     user: node
@@ -36,6 +38,7 @@ services:
       BASE_CONFIG:
       OVERLEAF_CONFIG:
       MOCHA_GREP: ${MOCHA_GREP}
+      LOG_LEVEL: ${LOG_LEVEL:-}
       MONGO_SERVER_SELECTION_TIMEOUT: 600000
       MONGO_SOCKET_TIMEOUT: 300000
       # OVERLEAF_ALLOW_ANONYMOUS_READ_AND_WRITE_SHARING: 'true'

@@ -17,6 +17,7 @@ services:
     environment:
       BASE_CONFIG:
       OVERLEAF_CONFIG:
+      NODE_ENV: test
       NODE_OPTIONS: "--unhandled-rejections=strict"
     depends_on:
       - mongo

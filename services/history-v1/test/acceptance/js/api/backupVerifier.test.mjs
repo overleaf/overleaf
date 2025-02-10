@@ -40,7 +40,10 @@ async function verifyBlobScript(historyId, hash) {
       {
         encoding: 'utf-8',
         timeout: 5_000,
-        env: process.env,
+        env: {
+          ...process.env,
+          LOG_LEVEL: 'warn',
+        },
       }
     )
     return { status: 0, stdout: result.stdout }

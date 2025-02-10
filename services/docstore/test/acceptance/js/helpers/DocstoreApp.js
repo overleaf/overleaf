@@ -1,5 +1,4 @@
 const app = require('../../../../app')
-require('@overleaf/logger').logger.level('error')
 const settings = require('@overleaf/settings')
 
 module.exports = {

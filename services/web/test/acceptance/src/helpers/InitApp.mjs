@@ -2,7 +2,6 @@ import App from '../../../../app.mjs'
 import QueueWorkers from '../../../../app/src/infrastructure/QueueWorkers.js'
 import MongoHelper from './MongoHelper.mjs'
 import RedisHelper from './RedisHelper.mjs'
-import logger from '@overleaf/logger'
 import Settings from '@overleaf/settings'
 import MockReCAPTCHAApi from '../mocks/MockReCaptchaApi.mjs'
 import { gracefulShutdown } from '../../../../app/src/infrastructure/GracefulShutdown.js'
@@ -13,8 +12,6 @@ import SplitTestSessionHandler from '../../../../app/src/Features/SplitTests/Spl
 import Modules from '../../../../app/src/infrastructure/Modules.js'
 
 const app = Server.app
-
-logger.logger.level('error')
 
 MongoHelper.initialize()
 RedisHelper.initialize()

@@ -9,8 +9,6 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 import { app } from '../../../../app/js/server.js'
-import logger from '@overleaf/logger'
-logger.logger.level('error')
 
 let running = false
 let initing = false

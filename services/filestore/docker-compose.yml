@@ -17,6 +17,7 @@ services:
     working_dir: /overleaf/services/filestore
     environment:
       MOCHA_GREP: ${MOCHA_GREP}
+      LOG_LEVEL: ${LOG_LEVEL:-}
       NODE_ENV: test
       NODE_OPTIONS: "--unhandled-rejections=strict"
     command: npm run --silent test:unit
@@ -47,7 +48,7 @@ services:
       GCS_PROJECT_ID: fake
       STORAGE_EMULATOR_HOST: http://gcs:9090/storage/v1
       MOCHA_GREP: ${MOCHA_GREP}
-      LOG_LEVEL: ERROR
+      LOG_LEVEL: ${LOG_LEVEL:-}
       NODE_ENV: test
       NODE_OPTIONS: "--unhandled-rejections=strict"
       ENABLE_CONVERSIONS: "true"

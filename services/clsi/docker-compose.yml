@@ -17,6 +17,7 @@ services:
     working_dir: /overleaf/services/clsi
     environment:
       MOCHA_GREP: ${MOCHA_GREP}
+      LOG_LEVEL: ${LOG_LEVEL:-}
       NODE_ENV: test
       NODE_OPTIONS: "--unhandled-rejections=strict"
     command: npm run --silent test:unit
@@ -37,7 +38,7 @@ services:
       MONGO_HOST: mongo
       POSTGRES_HOST: postgres
       MOCHA_GREP: ${MOCHA_GREP}
-      LOG_LEVEL: ERROR
+      LOG_LEVEL: ${LOG_LEVEL:-}
       NODE_ENV: test
       NODE_OPTIONS: "--unhandled-rejections=strict"
       ENABLE_PDF_CACHING: "true"

@@ -19,6 +19,10 @@ function run(cmd) {
   // Pipe stdin from /dev/null, store stdout, pipe stderr to /dev/null.
   return execSync(cmd, {
     stdio: ['ignore', 'pipe', 'pipe'],
+    env: {
+      ...process.env,
+      LOG_LEVEL: 'warn',
+    },
   }).toString()
 }
 

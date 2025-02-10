@@ -9,7 +9,6 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const app = require('../../../../app')
-require('@overleaf/logger').logger.level('fatal')
 
 module.exports = {
   running: false,
