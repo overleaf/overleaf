@@ -19,6 +19,7 @@ import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/boots
 import { bsVersion } from '@/features/utils/bootstrap-5'
 import classnames from 'classnames'
 import getMeta from '@/utils/meta'
+import { useUserContext } from '@/shared/context/user-context'
 
 type PermissionsOption = PermissionsLevel | 'removeAccess' | 'downgraded'
 
@@ -55,10 +56,17 @@ export default function EditMember({
 
   const { updateProject, monitorRequest } = useShareProjectContext()
   const { _id: projectId, members, invites } = useProjectContext()
+  const user = useUserContext()
 
   // Immediately commit this change if it's lower impact (eg. editor > viewer)
   // but show a confirmation button for removing access
   function handlePrivilegeChange(newPrivileges: PermissionsOption) {
+    sendMB('collaborator-role-change', {
+      previousMode: member.privileges,
+      newMode: newPrivileges,
+      ownerId: user.id,
+    })
+
     setPrivileges(newPrivileges)
     if (newPrivileges !== 'removeAccess') {
       commitPrivilegeChange(newPrivileges)

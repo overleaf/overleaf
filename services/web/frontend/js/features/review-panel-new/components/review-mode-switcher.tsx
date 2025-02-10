@@ -15,8 +15,10 @@ import { useUserContext } from '@/shared/context/user-context'
 import { useTranslation } from 'react-i18next'
 import { usePermissionsContext } from '@/features/ide-react/context/permissions-context'
 import usePersistedState from '@/shared/hooks/use-persisted-state'
+import { sendMB } from '@/infrastructure/event-tracking'
+import { useEditorContext } from '@/shared/context/editor-context'
 
-type Mode = 'viewing' | 'reviewing' | 'editing'
+type Mode = 'view' | 'review' | 'edit'
 
 const useCurrentMode = (): Mode => {
   const trackChanges = useTrackChangesStateContext()
@@ -27,12 +29,12 @@ const useCurrentMode = (): Mode => {
   const { write, trackedWrite } = usePermissionsContext()
 
   if (write && !trackChangesForCurrentUser) {
-    return 'editing'
+    return 'edit'
   } else if (trackedWrite) {
-    return 'reviewing'
+    return 'review'
   }
 
-  return 'viewing'
+  return 'view'
 }
 
 function ReviewModeSwitcher() {
@@ -40,6 +42,7 @@ function ReviewModeSwitcher() {
   const { saveTrackChangesForCurrentUser } =
     useTrackChangesStateActionsContext()
   const mode = useCurrentMode()
+  const { permissionsLevel } = useEditorContext()
 
   const { write, trackedWrite } = usePermissionsContext()
   const showViewOption = !trackedWrite
@@ -55,33 +58,48 @@ function ReviewModeSwitcher() {
           <OLDropdownMenuItem
             disabled={!write}
             onClick={() => {
+              sendMB('editing-mode-change', {
+                role: permissionsLevel,
+                previousMode: mode,
+                newMode: 'edit',
+              })
               saveTrackChangesForCurrentUser(false)
             }}
             description={t('can_edit_content')}
             leadingIcon="edit"
-            active={write && mode === 'editing'}
+            active={write && mode === 'edit'}
           >
             {t('editing')}
           </OLDropdownMenuItem>
           <OLDropdownMenuItem
             disabled={!trackedWrite}
             onClick={() => {
+              sendMB('editing-mode-change', {
+                role: permissionsLevel,
+                previousMode: mode,
+                newMode: 'review',
+              })
               saveTrackChangesForCurrentUser(true)
             }}
             description={t('can_add_tracked_changes_and_comments')}
             leadingIcon="rate_review"
-            active={trackedWrite && mode === 'reviewing'}
+            active={trackedWrite && mode === 'review'}
           >
             {t('reviewing')}
           </OLDropdownMenuItem>
           {showViewOption && (
             <OLDropdownMenuItem
               onClick={() => {
+                sendMB('editing-mode-change', {
+                  role: permissionsLevel,
+                  previousMode: mode,
+                  newMode: 'view',
+                })
                 saveTrackChangesForCurrentUser(true)
               }}
               description={t('can_view_content')}
               leadingIcon="visibility"
-              active={mode === 'viewing'}
+              active={mode === 'view'}
             >
               {t('viewing')}
             </OLDropdownMenuItem>
@@ -99,7 +117,7 @@ const ModeSwitcherToggleButton = forwardRef<
   const { t } = useTranslation()
   const mode = useCurrentMode()
 
-  if (mode === 'editing') {
+  if (mode === 'edit') {
     return (
       <ModeSwitcherToggleButtonContent
         ref={ref}
@@ -110,7 +128,7 @@ const ModeSwitcherToggleButton = forwardRef<
         ariaExpanded={ariaExpanded}
       />
     )
-  } else if (mode === 'reviewing') {
+  } else if (mode === 'review') {
     return (
       <ModeSwitcherToggleButtonContent
         ref={ref}
