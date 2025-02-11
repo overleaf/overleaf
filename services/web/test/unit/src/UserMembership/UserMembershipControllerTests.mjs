@@ -81,6 +81,11 @@ describe('UserMembershipController', function () {
       },
       getAssignment: sinon.stub().yields(null, { variant: 'default' }),
     }
+    this.RecurlyClient = {
+      promises: {
+        getSubscription: sinon.stub().resolves({}),
+      },
+    }
     this.UserMembershipController = await esmock.strict(modulePath, {
       '../../../../app/src/Features/UserMembership/UserMembershipErrors': {
         UserIsManagerError,
@@ -93,6 +98,8 @@ describe('UserMembershipController', function () {
         this.SplitTestHandler,
       '../../../../app/src/Features/UserMembership/UserMembershipHandler':
         this.UserMembershipHandler,
+      '../../../../app/src/Features/Subscription/RecurlyClient':
+        this.RecurlyClient,
       '@overleaf/settings': this.Settings,
       '../../../../app/src/models/SSOConfig': { SSOConfig: this.SSOConfig },
     })

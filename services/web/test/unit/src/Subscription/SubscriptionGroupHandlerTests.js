@@ -629,6 +629,22 @@ describe('SubscriptionGroupHandler', function () {
     })
   })
 
+  describe('ensureSubscriptionHasNoPendingChanges', function () {
+    it('should throw if the subscription has pending change', async function () {
+      await expect(
+        this.Handler.promises.ensureSubscriptionHasNoPendingChanges({
+          pendingChange: {},
+        })
+      ).to.be.rejectedWith('This subscription has a pending change')
+    })
+
+    it('should not throw if the subscription has no pending change', async function () {
+      await expect(
+        this.Handler.promises.ensureSubscriptionHasNoPendingChanges({})
+      ).to.not.be.rejected
+    })
+  })
+
   describe('upgradeGroupPlan', function () {
     it('should upgrade the subscription for flexible licensing group plans', async function () {
       this.SubscriptionLocator.promises.getUsersSubscription = sinon

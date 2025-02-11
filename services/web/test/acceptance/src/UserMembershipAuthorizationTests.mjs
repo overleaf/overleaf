@@ -4,11 +4,18 @@ import User from './helpers/User.mjs'
 import Institution from './helpers/Institution.mjs'
 import Subscription from './helpers/Subscription.mjs'
 import Publisher from './helpers/Publisher.mjs'
+import sinon from 'sinon'
+import RecurlyClient from '../../../app/src/Features/Subscription/RecurlyClient.js'
 
 describe('UserMembershipAuthorization', function () {
   beforeEach(function (done) {
     this.user = new User()
+    sinon.stub(RecurlyClient.promises, 'getSubscription').resolves({})
     async.series([this.user.ensureUserExists.bind(this.user)], done)
+  })
+
+  afterEach(function () {
+    RecurlyClient.promises.getSubscription.restore()
   })
 
   describe('group', function () {

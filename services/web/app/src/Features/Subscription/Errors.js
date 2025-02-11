@@ -18,10 +18,13 @@ class MissingBillingInfoError extends OError {}
 
 class ManuallyCollectedError extends OError {}
 
+class PendingChangeError extends OError {}
+
 module.exports = {
   RecurlyTransactionError,
   DuplicateAddOnError,
   AddOnNotPresentError,
   MissingBillingInfoError,
   ManuallyCollectedError,
+  PendingChangeError,
 }
