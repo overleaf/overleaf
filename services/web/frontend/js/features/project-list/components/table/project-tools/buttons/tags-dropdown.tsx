@@ -111,11 +111,15 @@ function TagsDropdown() {
                   )
                 }
               >
-                <span
-                  className="badge-tag-circle align-self-center ms-0"
-                  style={{ backgroundColor: getTagColor(tag) }}
-                />
-                <span className="text-truncate">{tag.name}</span>
+                <div className="badge-tag-content">
+                  <span className="badge-prepend">
+                    <i
+                      className="badge-tag-circle align-self-center ms-0"
+                      style={{ backgroundColor: getTagColor(tag) }}
+                    />
+                  </span>
+                  <span className="text-truncate">{tag.name}</span>
+                </div>
               </DropdownItem>
             </li>
           ))}
