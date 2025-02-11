@@ -66,14 +66,15 @@ nav.navbar.navbar-default.navbar-main
 								if canDisplaySurveyMenu
 									li
 										a(href="/admin/survey") Manage Surveys
+										a(href="/admin/institutions") Manage Institutional Policies
 
 					// loop over header_extras
 					each item in nav.header_extras
 						-
 							if ((item.only_when_logged_in && getSessionUser())
-											|| (item.only_when_logged_out && (!getSessionUser()))
-											|| (!item.only_when_logged_out && !item.only_when_logged_in && !item.only_content_pages)
-											|| (item.only_content_pages && (typeof(suppressNavContentLinks) == "undefined" || !suppressNavContentLinks))
+								|| (item.only_when_logged_out && (!getSessionUser()))
+								|| (!item.only_when_logged_out && !item.only_when_logged_in && !item.only_content_pages)
+								|| (item.only_content_pages && (typeof(suppressNavContentLinks) == "undefined" || !suppressNavContentLinks))
 							){
 								var showNavItem = true
 							} else {
@@ -187,5 +188,5 @@ nav.navbar.navbar-default.navbar-main
 								li.divider.hidden-xs.hidden-sm
 								li
 									form(method="POST" action="/logout")
-										input(name='_csrf', type='hidden', value=csrfToken)
+										input(name='_csrf' type='hidden', value=csrfToken)
 										button.btn-link.text-left.dropdown-menu-button #{translate('log_out')}

@@ -66,14 +66,15 @@ nav.navbar.navbar-default.navbar-main.navbar-expand-lg(class={
 									+dropdown-menu-link-item()(href="/admin/split-test") Manage Feature Flags
 								if canDisplaySurveyMenu
 									+dropdown-menu-link-item()(href="/admin/survey") Manage Surveys
+									+dropdown-menu-link-item()(href="/admin/institutions") Manage Institutional Policies
 
 					// loop over header_extras
 					each item in nav.header_extras
 						-
 							if ((item.only_when_logged_in && getSessionUser())
-											|| (item.only_when_logged_out && (!getSessionUser()))
-											|| (!item.only_when_logged_out && !item.only_when_logged_in && !item.only_content_pages)
-											|| (item.only_content_pages && (typeof suppressNavContentLinks === "undefined" || !suppressNavContentLinks))
+								|| (item.only_when_logged_out && (!getSessionUser()))
+								|| (!item.only_when_logged_out && !item.only_when_logged_in && !item.only_content_pages)
+								|| (item.only_content_pages && (typeof suppressNavContentLinks === "undefined" || !suppressNavContentLinks))
 							){
 								var showNavItem = true
 							} else {
@@ -195,4 +196,4 @@ nav.navbar.navbar-default.navbar-main.navbar-expand-lg(class={
 										action="/logout",
 										id="logOutForm"
 									)
-										input(name='_csrf', type='hidden', value=csrfToken)
+										input(name='_csrf' type='hidden', value=csrfToken)
