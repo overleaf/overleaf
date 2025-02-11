@@ -24,6 +24,14 @@ import getMeta from '@/utils/meta'
 import classnames from 'classnames'
 import SubscriptionRemainder from '@/features/subscription/components/dashboard/states/active/subscription-remainder'
 import { sendMB } from '../../../../../../infrastructure/event-tracking'
+import PauseSubscriptionModal from '@/features/subscription/components/dashboard/pause-modal'
+import LoadingSpinner from '@/shared/components/loading-spinner'
+import { postJSON } from '@/infrastructure/fetch-json'
+import { debugConsole } from '@/utils/debugging'
+import useAsync from '@/shared/hooks/use-async'
+import { useLocation } from '@/shared/hooks/use-location'
+import { FlashMessage } from '@/features/subscription/components/dashboard/states/active/flash-message'
+import Notification from '@/shared/components/notification'
 
 export function ActiveSubscriptionNew({
   subscription,
@@ -37,7 +45,10 @@ export function ActiveSubscriptionNew({
     showCancellation,
     institutionMemberships,
     memberGroupSubscriptions,
+    getFormattedRenewalDate,
   } = useSubscriptionDashboardContext()
+  const cancelPauseReq = useAsync()
+  const { isError: isErrorPause } = cancelPauseReq
 
   if (showCancellation) return <CancelSubscription />
 
@@ -68,6 +79,11 @@ export function ActiveSubscriptionNew({
       setModalIdShown('cancel-ai-add-on')
     }
   }
+  const hasPendingPause = Boolean(
+    subscription.recurly.state === 'active' &&
+      subscription.recurly.remainingPauseCycles &&
+      subscription.recurly.remainingPauseCycles > 0
+  )
 
   const isLegacyPlan =
     subscription.recurly.totalLicenses !==
@@ -75,6 +91,16 @@ export function ActiveSubscriptionNew({
 
   return (
     <>
+      <div className="notification-list">
+        <FlashMessage />
+
+        {isErrorPause && (
+          <Notification
+            type="error"
+            content={t('generic_something_went_wrong')}
+          />
+        )}
+      </div>
       <h2 className={classnames('h3', bsVersion({ bs5: 'fw-bold' }))}>
         {t('billing')}
       </h2>
@@ -193,6 +219,27 @@ export function ActiveSubscriptionNew({
           )}
         </p>
       )}
+      {hasPendingPause && (
+        <>
+          <p>
+            <Trans
+              i18nKey="your_subscription_will_pause_on"
+              values={{
+                planName: subscription.plan.name,
+                pauseDate: subscription.recurly.nextPaymentDueAt,
+                reactivationDate: getFormattedRenewalDate(),
+              }}
+              shouldUnescape
+              tOptions={{ interpolation: { escapeValue: true } }}
+              components={[
+                // eslint-disable-next-line react/jsx-key
+                <strong />,
+              ]}
+            />
+          </p>
+          <p>{t('you_can_still_use_your_premium_features')}</p>
+        </>
+      )}
       {!onStandalonePlan && (
         <p className="mb-1">
           {subscription.plan.annual
@@ -209,6 +256,8 @@ export function ActiveSubscriptionNew({
           subscription={subscription}
           onStandalonePlan={onStandalonePlan}
           handlePlanChange={handlePlanChange}
+          hasPendingPause={hasPendingPause}
+          cancelPauseReq={cancelPauseReq}
         />
       )}
       <hr />
@@ -223,6 +272,7 @@ export function ActiveSubscriptionNew({
       <KeepCurrentPlanModal />
       <ChangeToGroupModal />
       <CancelAiAddOnModal />
+      <PauseSubscriptionModal />
     </>
   )
 }
@@ -231,17 +281,36 @@ type PlanActionsProps = {
   subscription: RecurlySubscription
   onStandalonePlan: boolean
   handlePlanChange: () => void
+  hasPendingPause: boolean
+  cancelPauseReq: ReturnType<typeof useAsync>
 }
 
 function PlanActions({
   subscription,
   onStandalonePlan,
   handlePlanChange,
+  hasPendingPause,
+  cancelPauseReq,
 }: PlanActionsProps) {
   const { t } = useTranslation()
   const isSubscriptionEligibleForFlexibleGroupLicensing = getMeta(
     'ol-canUseFlexibleLicensing'
   )
+  const location = useLocation()
+  const { runAsync: runAsyncCancelPause, isLoading: isLoadingCancelPause } =
+    cancelPauseReq
+
+  const handleCancelPendingPauseClick = async () => {
+    try {
+      await runAsyncCancelPause(postJSON('/user/subscription/pause/0'))
+      const newUrl = new URL(location.toString())
+      newUrl.searchParams.set('flash', 'unpaused')
+      window.history.replaceState(null, '', newUrl)
+      location.reload()
+    } catch (e) {
+      debugConsole.error(e)
+    }
+  }
 
   return (
     <div className="mt-3">
@@ -249,12 +318,26 @@ function PlanActions({
         <FlexibleGroupLicensingActions subscription={subscription} />
       ) : (
         <>
-          {subscription.recurly.account.has_past_due_invoice._ !== 'true' && (
-            <OLButton variant="secondary" onClick={handlePlanChange}>
-              {t('upgrade_plan')}
-            </OLButton>
-          )}
+          {!hasPendingPause &&
+            subscription.recurly.account.has_past_due_invoice._ !== 'true' && (
+              <OLButton variant="secondary" onClick={handlePlanChange}>
+                {t('upgrade_plan')}
+              </OLButton>
+            )}
         </>
+      )}
+      {hasPendingPause && (
+        <OLButton
+          variant="primary"
+          onClick={handleCancelPendingPauseClick}
+          disabled={isLoadingCancelPause}
+        >
+          {isLoadingCancelPause ? (
+            <LoadingSpinner />
+          ) : (
+            t('unpause_subscription')
+          )}
+        </OLButton>
       )}
       {!onStandalonePlan && (
         <>
