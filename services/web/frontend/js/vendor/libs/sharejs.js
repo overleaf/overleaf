@@ -699,6 +699,7 @@ export const { Doc } = (() => {
         // TODO: This flag is temporary. It is only necessary while we change
         // the behaviour of tracked delete rejections in RangesTracker
         op.orderedRejections = true;
+        op.fixedRemoveChange = true;
       }
       op = [op];
 

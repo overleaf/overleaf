@@ -145,11 +145,7 @@ class RangesTracker {
   }
 
   removeChangeId(changeId) {
-    const change = this.getChange(changeId)
-    if (change == null) {
-      return
-    }
-    this._removeChange(change)
+    this.removeChangeIds([changeId])
   }
 
   removeChangeIds(ids) {
@@ -310,6 +306,7 @@ class RangesTracker {
     const opLength = op.i.length
     const opEnd = op.p + opLength
     const undoing = !!op.u
+    const fixedRemoveChange = op.fixedRemoveChange
 
     let alreadyMerged = false
     let previousChange = null
@@ -477,7 +474,11 @@ class RangesTracker {
     }
 
     for (change of removeChanges) {
-      this._removeChange(change)
+      if (fixedRemoveChange) {
+        this._removeChange(change)
+      } else {
+        this._brokenRemoveChange(change)
+      }
     }
 
     for (change of movedChanges) {
@@ -490,6 +491,7 @@ class RangesTracker {
     const opLength = op.d.length
     const opEnd = op.p + opLength
     const removeChanges = []
+    const fixedRemoveChange = op.fixedRemoveChange
     let movedChanges = []
 
     // We might end up modifying our delete op if it merges with existing deletes, or cancels out
@@ -617,7 +619,11 @@ class RangesTracker {
         movedChanges.push(change)
         op.d = '' // stop it being added
       } else {
-        this._removeChange(change)
+        if (fixedRemoveChange) {
+          this._removeChange(change)
+        } else {
+          this._brokenRemoveChange(change)
+        }
       }
     }
 
@@ -633,7 +639,11 @@ class RangesTracker {
       const results = this._scanAndMergeAdjacentUpdates()
       movedChanges = movedChanges.concat(results.movedChanges)
       for (const change of results.removeChanges) {
-        this._removeChange(change)
+        if (fixedRemoveChange) {
+          this._removeChange(change)
+        } else {
+          this._brokenRemoveChange(change)
+        }
         movedChanges = movedChanges.filter(c => c !== change)
       }
     }
@@ -673,6 +683,11 @@ class RangesTracker {
   }
 
   _removeChange(change) {
+    this.changes = this.changes.filter(c => c !== change)
+    this._markAsDirty(change, 'change', 'removed')
+  }
+
+  _brokenRemoveChange(change) {
     this.changes = this.changes.filter(c => c.id !== change.id)
     this._markAsDirty(change, 'change', 'removed')
   }
