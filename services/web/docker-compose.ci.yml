@@ -54,14 +54,7 @@ services:
       NODE_OPTIONS: "--unhandled-rejections=strict"
 
   test_frontend_ct:
-    build:
-      context: .
-      dockerfile: ./Dockerfile.frontend_ct
-      args:
-        PROJECT_NAME: $PROJECT_NAME
-        BRANCH_NAME: $BRANCH_NAME
-        BUILD_NUMBER: $BUILD_NUMBER
-        CYPRESS_IMAGE: $CYPRESS_IMAGE
+    image: $CYPRESS_IMAGE
     working_dir: /overleaf/services/web
     entrypoint: bash
     environment:
@@ -69,6 +62,7 @@ services:
       CYPRESS_EXCLUDE_SPEC_PATTERN: ${CYPRESS_EXCLUDE_SPEC_PATTERN:-}
     volumes:
       - ${CYPRESS_RESULTS:-./cypress/results}:/overleaf/services/web/cypress/results/
+      - /dev/shm/overleaf:/overleaf
     command:
       - "-c"
       - "if npm run cypress:run-ct; then exit 0; else mkdir -p ./cypress/results && touch ./cypress/results/.cypress_fail; fi;"

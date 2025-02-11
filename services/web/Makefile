@@ -135,9 +135,8 @@ TEST_FRONTEND_CT_VARIANTS = \
 	test_frontend_ct_editor \
 
 # Note: The below cypress targets are for CI only
-build_test_frontend_ct: $(TEST_FRONTEND_CT_VARIANTS:=/build)
-$(TEST_FRONTEND_CT_VARIANTS:=/build): %/build:
-	COMPOSE_PROJECT_NAME=$*_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) build test_frontend_ct
+build_test_frontend_ct:
+	docker run --rm --volume /dev/shm:/dev/shm --user root $(IMAGE_CI) bash -ec 'tar -cC / overleaf | tar -xC /dev/shm'
 
 test_frontend_ct_core: export CYPRESS_RESULTS=./cypress/results/core
 test_frontend_ct_core: export CYPRESS_SPEC_PATTERN=./test/frontend/**/*.spec.{js,jsx,ts,tsx}
