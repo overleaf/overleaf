@@ -312,7 +312,7 @@ function PlanActions({
           {!hasPendingPause &&
             subscription.recurly.account.has_past_due_invoice._ !== 'true' && (
               <OLButton variant="secondary" onClick={handlePlanChange}>
-                {t('upgrade_plan')}
+                {t('change_plan')}
               </OLButton>
             )}
         </>
