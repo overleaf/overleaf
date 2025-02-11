@@ -55,10 +55,17 @@ if [[ "$BRANCH_NAME" == "main" ]] || [[ "$BRANCH_NAME" == "staging-main" ]]; the
   bin/compress_assets
 
   upload_into_bucket "$CDN_STAG" &&
-    verify_upload_into_bucket "$CDN_STAG" || exit 3
+    verify_upload_into_bucket "$CDN_STAG" || exit 3 &
+  pid_staging=$! # record pid of the detached process "upload && verify || exit 3")
+
+  pid_production=
   # Only upload to production CDN if branch is
   if [[ "$BRANCH_NAME" == "main" ]]; then
     upload_into_bucket "$CDN_PROD" &&
-      verify_upload_into_bucket "$CDN_PROD" || exit 3
+      verify_upload_into_bucket "$CDN_PROD" || exit 4 &
+    pid_production=$! # record pid of the detached process "upload && verify || exit 4")
   fi
+
+  wait "$pid_staging" # wait for staging upload to finish, wait(1) will exit if the upload failed
+  wait "$pid_production" # wait for production upload to finish (if started), wait(1) will exit if the upload failed
 fi
