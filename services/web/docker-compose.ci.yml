@@ -56,16 +56,16 @@ services:
   test_frontend_ct:
     image: $CYPRESS_IMAGE
     working_dir: /overleaf/services/web
-    entrypoint: bash
     environment:
       CYPRESS_SPEC_PATTERN: ${CYPRESS_SPEC_PATTERN:-}
       CYPRESS_EXCLUDE_SPEC_PATTERN: ${CYPRESS_EXCLUDE_SPEC_PATTERN:-}
     volumes:
       - ${CYPRESS_RESULTS:-./cypress/results}:/overleaf/services/web/cypress/results/
       - /dev/shm/overleaf:/overleaf
+    entrypoint: npm
     command:
-      - "-c"
-      - "if npm run cypress:run-ct; then exit 0; else mkdir -p ./cypress/results && touch ./cypress/results/.cypress_fail; fi;"
+      - "run"
+      - "cypress:run-ct"
 
   tar:
     image: ci/$PROJECT_NAME:$BRANCH_NAME-$BUILD_NUMBER-webpack

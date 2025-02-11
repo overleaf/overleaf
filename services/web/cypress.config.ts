@@ -3,7 +3,7 @@ import { webpackConfig } from './cypress/support/webpack.cypress'
 
 export default defineConfig({
   fixturesFolder: 'cypress/fixtures',
-  video: !!process.env.CI,
+  video: process.env.CYPRESS_VIDEO === 'true',
   screenshotsFolder: 'cypress/results',
   videosFolder: 'cypress/results',
   viewportHeight: 800,
