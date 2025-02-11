@@ -2567,6 +2567,7 @@
   "your_account_is_managed_by_admin_cant_join_additional_group": "Your __appName__ account is managed by your current group admin (__admin__). This means you can’t join additional group subscriptions. <0>Read more about Managed Users.</0>",
   "your_account_is_managed_by_your_group_admin": "Your account is managed by your group admin. You can’t change or delete your email address.",
   "your_account_is_suspended": "Your account is suspended",
+  "your_add_on_has_been_cancelled_and_will_remain_active_until_your_billing_cycle_ends_on": "Your add-on has been cancelled and will remain active until your billing cycle ends on __nextBillingDate__",
   "your_affiliation_is_confirmed": "Your <0>__institutionName__</0> affiliation is confirmed.",
   "your_browser_does_not_support_this_feature": "Sorry, your browser doesn’t support this feature. Please update your browser to its latest version.",
   "your_compile_timed_out": "Your compile timed out",
