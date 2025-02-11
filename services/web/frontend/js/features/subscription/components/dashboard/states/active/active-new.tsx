@@ -4,6 +4,7 @@ import { useSubscriptionDashboardContext } from '../../../../context/subscriptio
 import { RecurlySubscription } from '../../../../../../../../types/subscription/dashboard/subscription'
 import { CancelSubscriptionButton } from './cancel-subscription-button'
 import { CancelSubscription } from './cancel-plan/cancel-subscription'
+import { PendingPlanChange } from './pending-plan-change'
 import { TrialEnding } from './trial-ending'
 import { ChangePlanModal } from './change-plan/modals/change-plan-modal'
 import { ConfirmChangePlanModal } from './change-plan/modals/confirm-change-plan-modal'
@@ -175,6 +176,14 @@ export function ActiveSubscriptionNew({
       <h3 className={classnames('h5 mt-0 mb-1', bsVersion({ bs5: 'fw-bold' }))}>
         {planName}
       </h3>
+      <p className="mb-1">
+        {subscription.pendingPlan && (
+          <>
+            {' '}
+            <PendingPlanChange subscription={subscription} />
+          </>
+        )}
+      </p>
       {subscription.pendingPlan &&
         subscription.pendingPlan.name !== subscription.plan.name && (
           <p className="mb-1">{t('want_change_to_apply_before_plan_end')}</p>
@@ -186,7 +195,7 @@ export function ActiveSubscriptionNew({
             className="mb-1"
           />
         )}
-      {subscription.recurly.totalLicenses > 0 && (
+      {!subscription.pendingPlan && subscription.recurly.totalLicenses > 0 && (
         <p className="mb-1">
           {isLegacyPlan && subscription.recurly.additionalLicenses > 0 ? (
             <Trans
@@ -346,11 +355,6 @@ function FlexibleGroupLicensingActions({
   subscription: RecurlySubscription
 }) {
   const { t } = useTranslation()
-
-  if (subscription.pendingPlan) {
-    return null
-  }
-
   const isProfessionalPlan = subscription.planCode
     .toLowerCase()
     .includes('professional')

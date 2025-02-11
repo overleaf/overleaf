@@ -134,9 +134,6 @@ async function addSeatsToGroupSubscription(req, res) {
     await SubscriptionGroupHandler.promises.ensureSubscriptionCollectionMethodIsNotManual(
       recurlySubscription
     )
-    await SubscriptionGroupHandler.promises.ensureSubscriptionHasNoPendingChanges(
-      recurlySubscription
-    )
     // Check if the user has missing billing details
     await RecurlyClient.promises.getPaymentMethod(userId)
     await SubscriptionGroupHandler.promises.ensureSubscriptionIsActive(
