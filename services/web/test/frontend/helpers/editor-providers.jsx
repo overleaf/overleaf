@@ -51,6 +51,7 @@ export function EditorProviders({
   features = {
     referencesSearch: true,
   },
+  projectFeatures = features,
   permissionsLevel = 'owner',
   children,
   rootFolder = [
@@ -104,7 +105,7 @@ export function EditorProviders({
         _id: projectId,
         name: PROJECT_NAME,
         owner: projectOwner,
-        features,
+        features: projectFeatures,
         rootDoc_id: rootDocId,
         rootFolder,
       },
