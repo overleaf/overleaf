@@ -130,23 +130,33 @@ test_frontend:
 #
 TEST_FRONTEND_CT_VARIANTS = \
 	test_frontend_ct \
-	test_frontend_ct_core \
+	test_frontend_ct_core_other \
+	test_frontend_ct_core_features \
 	test_frontend_ct_modules \
-	test_frontend_ct_editor \
+	test_frontend_ct_editor_other \
+	test_frontend_ct_editor_visual \
 
 # Note: The below cypress targets are for CI only
 build_test_frontend_ct:
 	docker run --rm --volume /dev/shm:/dev/shm --user root $(IMAGE_CI) bash -ec 'tar -cC / overleaf | tar -xC /dev/shm'
 
-test_frontend_ct_core: export CYPRESS_RESULTS=./cypress/results/core
-test_frontend_ct_core: export CYPRESS_SPEC_PATTERN=./test/frontend/**/*.spec.{js,jsx,ts,tsx}
-test_frontend_ct_core: export CYPRESS_EXCLUDE_SPEC_PATTERN=./test/frontend/features/source-editor/**/*.spec.{js,jsx,ts,tsx}
+test_frontend_ct_core_other: export CYPRESS_RESULTS=./cypress/results/core
+test_frontend_ct_core_other: export CYPRESS_SPEC_PATTERN=./test/frontend/**/*.spec.{js,jsx,ts,tsx}
+test_frontend_ct_core_other: export CYPRESS_EXCLUDE_SPEC_PATTERN=./test/frontend/features/**/*.spec.{js,jsx,ts,tsx}
+
+test_frontend_ct_core_features: export CYPRESS_RESULTS=./cypress/results/core
+test_frontend_ct_core_features: export CYPRESS_SPEC_PATTERN=./test/frontend/features/**/*.spec.{js,jsx,ts,tsx}
+test_frontend_ct_core_features: export CYPRESS_EXCLUDE_SPEC_PATTERN=./test/frontend/features/source-editor/**/*.spec.{js,jsx,ts,tsx}
 
 test_frontend_ct_modules: export CYPRESS_RESULTS=./cypress/results/modules
 test_frontend_ct_modules: export CYPRESS_SPEC_PATTERN=./modules/**/test/frontend/**/*.spec.{js,jsx,ts,tsx}
 
-test_frontend_ct_editor: export CYPRESS_RESULTS=./cypress/results/editor
-test_frontend_ct_editor: export CYPRESS_SPEC_PATTERN=./test/frontend/features/source-editor/**/*.spec.{js,jsx,ts,tsx}
+test_frontend_ct_editor_other: export CYPRESS_RESULTS=./cypress/results/editor_other
+test_frontend_ct_editor_other: export CYPRESS_SPEC_PATTERN=./test/frontend/features/source-editor/**/*.spec.{js,jsx,ts,tsx}
+test_frontend_ct_editor_other: export CYPRESS_EXCLUDE_SPEC_PATTERN=./test/frontend/features/source-editor/components/codemirror-editor-visual*.spec.{js,jsx,ts,tsx}
+
+test_frontend_ct_editor_visual: export CYPRESS_RESULTS=./cypress/results/editor_visual
+test_frontend_ct_editor_visual: export CYPRESS_SPEC_PATTERN=./test/frontend/features/source-editor/components/codemirror-editor-visual*.spec.{js,jsx,ts,tsx}
 
 $(TEST_FRONTEND_CT_VARIANTS):
 	COMPOSE_PROJECT_NAME=$@_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) run --rm test_frontend_ct
