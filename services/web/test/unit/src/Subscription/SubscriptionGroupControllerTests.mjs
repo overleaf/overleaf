@@ -58,6 +58,7 @@ describe('SubscriptionGroupController', function () {
         ensureFlexibleLicensingEnabled: sinon.stub().resolves(),
         ensureSubscriptionIsActive: sinon.stub().resolves(),
         ensureSubscriptionCollectionMethodIsNotManual: sinon.stub().resolves(),
+        ensureSubscriptionHasNoPendingChanges: sinon.stub().resolves(),
         getGroupPlanUpgradePreview: sinon
           .stub()
           .resolves(this.previewSubscriptionChangeData),
@@ -125,6 +126,7 @@ describe('SubscriptionGroupController', function () {
     this.Errors = {
       MissingBillingInfoError: class MissingBillingInfoError extends Error {},
       ManuallyCollectedError: class ManuallyCollectedError extends Error {},
+      PendingChangeError: class PendingChangeError extends Error {},
     }
 
     this.Controller = await esmock.strict(modulePath, {
@@ -420,6 +422,20 @@ describe('SubscriptionGroupController', function () {
           url.should.equal(
             '/user/subscription/group/manually-collected-subscription'
           )
+          done()
+        },
+      }
+
+      this.Controller.addSeatsToGroupSubscription(this.req, res)
+    })
+
+    it('should redirect to subscription page when there is a pending change', function (done) {
+      this.SubscriptionGroupHandler.promises.ensureSubscriptionHasNoPendingChanges =
+        sinon.stub().throws(new this.Errors.PendingChangeError())
+
+      const res = {
+        redirect: url => {
+          url.should.equal('/user/subscription')
           done()
         },
       }

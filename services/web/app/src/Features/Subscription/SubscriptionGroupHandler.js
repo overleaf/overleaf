@@ -8,7 +8,7 @@ const PlansLocator = require('./PlansLocator')
 const SubscriptionHandler = require('./SubscriptionHandler')
 const GroupPlansData = require('./GroupPlansData')
 const { MEMBERS_LIMIT_ADD_ON_CODE } = require('./RecurlyEntities')
-const { ManuallyCollectedError } = require('./Errors')
+const { ManuallyCollectedError, PendingChangeError } = require('./Errors')
 
 async function removeUserFromGroup(subscriptionId, userIdToRemove) {
   await SubscriptionUpdater.promises.removeUserFromGroup(
@@ -82,6 +82,14 @@ async function ensureSubscriptionCollectionMethodIsNotManual(
   }
 }
 
+async function ensureSubscriptionHasNoPendingChanges(recurlySubscription) {
+  if (recurlySubscription.pendingChange) {
+    throw new PendingChangeError('This subscription has a pending change', {
+      recurlySubscription_id: recurlySubscription.id,
+    })
+  }
+}
+
 async function getUsersGroupSubscriptionDetails(userId) {
   const subscription =
     await SubscriptionLocator.promises.getUsersSubscription(userId)
@@ -114,6 +122,7 @@ async function _addSeatsSubscriptionChange(userId, adding) {
   await ensureFlexibleLicensingEnabled(plan)
   await ensureSubscriptionIsActive(subscription)
   await ensureSubscriptionCollectionMethodIsNotManual(recurlySubscription)
+  await ensureSubscriptionHasNoPendingChanges(recurlySubscription)
 
   const currentAddonQuantity =
     recurlySubscription.addOns.find(
@@ -244,6 +253,7 @@ async function _getGroupPlanUpgradeChangeRequest(ownerId) {
   )
 
   await ensureSubscriptionCollectionMethodIsNotManual(recurlySubscription)
+  await ensureSubscriptionHasNoPendingChanges(recurlySubscription)
 
   return recurlySubscription.getRequestForGroupPlanUpgrade(newPlanCode)
 }
@@ -285,6 +295,9 @@ module.exports = {
   ensureSubscriptionCollectionMethodIsNotManual: callbackify(
     ensureSubscriptionCollectionMethodIsNotManual
   ),
+  ensureSubscriptionHasNoPendingChanges: callbackify(
+    ensureSubscriptionHasNoPendingChanges
+  ),
   getTotalConfirmedUsersInGroup: callbackify(getTotalConfirmedUsersInGroup),
   isUserPartOfGroup: callbackify(isUserPartOfGroup),
   getGroupPlanUpgradePreview: callbackify(getGroupPlanUpgradePreview),
@@ -295,6 +308,7 @@ module.exports = {
     ensureFlexibleLicensingEnabled,
     ensureSubscriptionIsActive,
     ensureSubscriptionCollectionMethodIsNotManual,
+    ensureSubscriptionHasNoPendingChanges,
     getTotalConfirmedUsersInGroup,
     isUserPartOfGroup,
     getUsersGroupSubscriptionDetails,
