@@ -240,7 +240,7 @@ class User {
   }
 
   setExtraAttributes(user) {
-    if ((user != null ? user._id : undefined) == null) {
+    if (!user?._id) {
       throw new Error('User does not exist')
     }
     this.id = user._id.toString()
@@ -412,6 +412,7 @@ class User {
   }
 
   ensureUserExists(callback) {
+    if (this._id) return callback() // already exists
     const filter = { email: this.email }
     const options = { upsert: true, new: true, setDefaultsOnInsert: true }
 
