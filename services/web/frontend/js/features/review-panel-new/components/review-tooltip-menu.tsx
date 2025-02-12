@@ -34,9 +34,12 @@ import { numberOfChangesInSelection } from '../utils/changes-in-selection'
 import { useEditorManagerContext } from '@/features/ide-react/context/editor-manager-context'
 import classNames from 'classnames'
 import useEventListener from '@/shared/hooks/use-event-listener'
+import getMeta from '@/utils/meta'
 
+const isReviewerRoleEnabled = getMeta('ol-isReviewerRoleEnabled')
 const TRACK_CHANGES_ON_WIDGET_HEIGHT = 25
-const CM_LINE_RIGHT_PADDING = 2
+const EDIT_MODE_SWITCH_WIDGET_HEIGHT = 40
+const CM_LINE_RIGHT_PADDING = isReviewerRoleEnabled ? 8 : 2
 const TOOLTIP_SHOW_DELAY = 120
 
 const ReviewTooltipMenu: FC = () => {
@@ -177,10 +180,12 @@ const ReviewTooltipMenuContent: FC<{ onAddComment: () => void }> = ({
           return
         }
 
-        const widgetOffset =
-          wantTrackChanges && !reviewPanelOpen
-            ? TRACK_CHANGES_ON_WIDGET_HEIGHT
-            : 0
+        let widgetOffset = 0
+        if (isReviewerRoleEnabled) {
+          widgetOffset = EDIT_MODE_SWITCH_WIDGET_HEIGHT
+        } else if (wantTrackChanges && !reviewPanelOpen) {
+          widgetOffset = TRACK_CHANGES_ON_WIDGET_HEIGHT
+        }
 
         return {
           position: 'fixed' as const,
