@@ -5,6 +5,7 @@ import java.io.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import org.apache.commons.compress.archivers.ArchiveEntry;
+import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
@@ -147,7 +148,7 @@ public class Tar {
       throws IOException {
     Preconditions.checkArgument(dir.isDirectory());
     String name = base.relativize(Paths.get(dir.getAbsolutePath())).toString();
-    ArchiveEntry entry = tout.createArchiveEntry(dir, name);
+    TarArchiveEntry entry = tout.createArchiveEntry(dir, name);
     tout.putArchiveEntry(entry);
     tout.closeArchiveEntry();
     for (File f : dir.listFiles()) {
@@ -160,7 +161,7 @@ public class Tar {
     Preconditions.checkArgument(file.isFile(), "given file" + " is not file: %s", file);
     checkFileSize(file.length());
     String name = base.relativize(Paths.get(file.getAbsolutePath())).toString();
-    ArchiveEntry entry = tout.createArchiveEntry(file, name);
+    TarArchiveEntry entry = tout.createArchiveEntry(file, name);
     tout.putArchiveEntry(entry);
     try (InputStream in = new FileInputStream(file)) {
       IOUtils.copy(in, tout);

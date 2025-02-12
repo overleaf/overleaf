@@ -29,11 +29,6 @@ RUN apk add --update --no-cache bash git sqlite procps htop net-tools jemalloc u
 
 ENV LD_PRELOAD=/usr/lib/libjemalloc.so.2
 
-# Install Google Cloud Profiler agent
-RUN mkdir -p /opt/cprof && \
-  wget -q -O- https://storage.googleapis.com/cloud-profiler/java/latest/profiler_java_agent.tar.gz \
-  | tar xzv -C /opt/cprof
-
 RUN adduser -D node
 
 COPY --from=builder /git-bridge.jar /
