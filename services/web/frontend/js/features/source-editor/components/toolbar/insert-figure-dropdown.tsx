@@ -10,10 +10,13 @@ import { emitToolbarEvent } from '../../extensions/toolbar/utils/analytics'
 import { useCodeMirrorViewContext } from '../codemirror-context'
 import { insertFigure } from '../../extensions/toolbar/commands'
 import getMeta from '@/utils/meta'
+import { usePermissionsContext } from '@/features/ide-react/context/permissions-context'
+import { ToolbarButton } from './toolbar-button'
 
 export const InsertFigureDropdown = memo(function InsertFigureDropdown() {
   const { t } = useTranslation()
   const view = useCodeMirrorViewContext()
+  const { write } = usePermissionsContext()
   const openFigureModal = useCallback(
     (source: FigureModalSource, sourceName: string) => {
       emitToolbarEvent(view, `toolbar-figure-modal-${sourceName}`)
@@ -30,6 +33,20 @@ export const InsertFigureDropdown = memo(function InsertFigureDropdown() {
     hasLinkedProjectOutputFileFeature,
     hasLinkUrlFeature,
   } = getMeta('ol-ExposedSettings')
+
+  if (!write) {
+    return (
+      <ToolbarButton
+        id="toolbar-figure"
+        label={t('toolbar_insert_figure')}
+        command={() =>
+          openFigureModal(FigureModalSource.FILE_TREE, 'current-project')
+        }
+        icon="add_photo_alternate"
+      />
+    )
+  }
+
   return (
     <ToolbarButtonMenu
       id="toolbar-figure"
