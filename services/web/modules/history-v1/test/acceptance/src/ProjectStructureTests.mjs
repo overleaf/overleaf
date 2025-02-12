@@ -927,19 +927,14 @@ describe('ProjectStructureChanges', function () {
               throw error
             }
             exampleProjectId = projectId
-            fs.mkdir(Settings.path.dumpFolder, { recursive: true }, error => {
+            ProjectGetter.getProject(exampleProjectId, (error, project) => {
               if (error) {
                 throw error
               }
-              ProjectGetter.getProject(exampleProjectId, (error, project) => {
-                if (error) {
-                  throw error
-                }
-                MockDocUpdaterApi.reset()
-                rootFolderId = project.rootFolder[0]._id.toString()
-                oldVersion = project.version
-                done()
-              })
+              MockDocUpdaterApi.reset()
+              rootFolderId = project.rootFolder[0]._id.toString()
+              oldVersion = project.version
+              done()
             })
           })
         })
