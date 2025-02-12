@@ -12,7 +12,7 @@ function shouldPlanChangeAtTermEnd(oldPlan, newPlan) {
 /**
  * This is duplicated in:
  *   - services/web/scripts/plan-prices/plans.mjs
- *   - services/web/modules/subscriptions/frontend/js/pages/plans-new-design/group-member-picker/group-plan-pricing.js
+ *   - services/web/modules/subscriptions/frontend/js/pages/plans/group-member-picker/group-plan-pricing.js
  * @param {number} number
  * @returns {number}
  */
