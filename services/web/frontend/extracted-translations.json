@@ -962,6 +962,8 @@
   "mendeley_reference_loading_error_expired": "",
   "mendeley_reference_loading_error_forbidden": "",
   "mendeley_sync_description": "",
+  "mendeley_upgrade_prompt_content": "",
+  "mendeley_upgrade_prompt_title": "",
   "menu": "",
   "merge_cells": "",
   "message_received": "",
@@ -1108,6 +1110,8 @@
   "papers_reference_loading_error_expired": "",
   "papers_reference_loading_error_forbidden": "",
   "papers_sync_description": "",
+  "papers_upgrade_prompt_content": "",
+  "papers_upgrade_prompt_title": "",
   "partial_outline_warning": "",
   "password": "",
   "password_managed_externally": "",
@@ -2065,5 +2069,7 @@
   "zotero_reference_loading_error": "",
   "zotero_reference_loading_error_expired": "",
   "zotero_reference_loading_error_forbidden": "",
-  "zotero_sync_description": ""
+  "zotero_sync_description": "",
+  "zotero_upgrade_prompt_content": "",
+  "zotero_upgrade_prompt_title": ""
 }

@@ -1279,6 +1279,8 @@
   "mendeley_reference_loading_error_expired": "Mendeley token expired, please re-link your account",
   "mendeley_reference_loading_error_forbidden": "Could not load references from Mendeley, please re-link your account and try again",
   "mendeley_sync_description": "With the Mendeley integration you can import your references from Mendeley into your __appName__ projects.",
+  "mendeley_upgrade_prompt_content": "Link your Mendeley account to search and add your references from Mendeley directly in your project—they’ll automatically be added to your .bib file. Or import them as a file into your __appName__ projects.",
+  "mendeley_upgrade_prompt_title": "Cite from Mendeley",
   "menu": "Menu",
   "merge": "Merge",
   "merge_cells": "Merge cells",
@@ -1486,6 +1488,8 @@
   "papers_reference_loading_error_expired": "Papers token expired, please re-link your account",
   "papers_reference_loading_error_forbidden": "Could not load references from Papers, please re-link your account and try again",
   "papers_sync_description": "With the Papers integration you can import your references from Papers into your __appName__ projects.",
+  "papers_upgrade_prompt_content": "Link your Papers account to search and add your references from Papers directly in your project—they’ll automatically be added to your .bib file. Or import them as a file into your __appName__ projects.",
+  "papers_upgrade_prompt_title": "Cite from Papers",
   "partial_outline_warning": "The File outline is out of date. It will update itself as you edit the document",
   "password": "Password",
   "password_cant_be_the_same_as_current_one": "Password can’t be the same as current one",
@@ -2635,5 +2639,7 @@
   "zotero_reference_loading_error": "Error, could not load references from Zotero",
   "zotero_reference_loading_error_expired": "Zotero token expired, please re-link your account",
   "zotero_reference_loading_error_forbidden": "Could not load references from Zotero, please re-link your account and try again",
-  "zotero_sync_description": "With the Zotero integration you can import your references from Zotero into your __appName__ projects."
+  "zotero_sync_description": "With the Zotero integration you can import your references from Zotero into your __appName__ projects.",
+  "zotero_upgrade_prompt_content": "Link your Zotero account to search and add your references from Zotero directly in your project—they’ll automatically be added to your .bib file. Or import them as a file into your __appName__ projects.",
+  "zotero_upgrade_prompt_title": "Cite from Zotero"
 }
