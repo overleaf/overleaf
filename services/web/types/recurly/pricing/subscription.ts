@@ -5,7 +5,7 @@ import {
   Tax,
 } from 'recurly__recurly-js'
 
-interface Plan {
+export interface Plan {
   code: string
   name: string
   period: {
