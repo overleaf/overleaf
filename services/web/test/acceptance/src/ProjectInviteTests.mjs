@@ -327,20 +327,13 @@ describe('ProjectInviteTests', function () {
 
     Async.series(
       [
+        cb => this.sendingUser.ensureUserExists(cb),
+        cb => this.sendingUser.upgradeFeatures({ collaborators: 10 }, cb),
         cb => this.sendingUser.login(cb),
-        cb => this.sendingUser.setFeatures({ collaborators: 10 }, cb),
         cb =>
           this.sendingUser.mongoUpdate(
             {
               $set: { first_name: OWNER_NAME },
-            },
-            cb
-          ),
-        cb =>
-          this.sendingUser.setFeaturesOverride(
-            {
-              note: 'ProjectInviteTests acceptance tests',
-              features: { collaborators: 10 },
             },
             cb
           ),

@@ -437,6 +437,23 @@ class User {
     )
   }
 
+  // Update and persist feature upgrade. Downgrades will be flaky!
+  upgradeFeatures(features, callback) {
+    this.setFeatures(features, err => {
+      if (err) return callback(err)
+      // Persist the feature update, otherwise the next feature refresh will reset them.
+      this.setFeaturesOverride(
+        {
+          createdAt: new Date(),
+          note: 'Some note',
+          features,
+        },
+        callback
+      )
+    })
+  }
+
+  // Low-level. Temporary feature change. A feature refresh might reset them, e.g. "some time" after logging in.
   setFeatures(features, callback) {
     const update = {}
     for (const key in features) {
@@ -448,7 +465,11 @@ class User {
       .catch(callback)
   }
 
+  // Low-level. Permanent feature change. Feature overrides are not applied right away. A feature refresh might populate them "some time" after login/changing subscriptions.
   setFeaturesOverride(featuresOverride, callback) {
+    if (!featuresOverride?.features) {
+      throw new Error('bad featuresOverride schema')
+    }
     const update = { $push: { featuresOverrides: featuresOverride } }
     UserModel.updateOne({ _id: this.id }, update)
       .then((...args) => callback(null, ...args))
@@ -542,7 +563,7 @@ class User {
     this.mongoUpdate(update, callback)
   }
 
-  upgradeFeatures(callback) {
+  upgradeSomeFeatures(callback) {
     const features = {
       collaborators: -1, // Infinite
       versioning: true,

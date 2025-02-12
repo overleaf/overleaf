@@ -52,7 +52,7 @@ describe('ProjectFeatures', function () {
 
     describe('with an upgraded account', function () {
       beforeEach(function (done) {
-        return this.owner.upgradeFeatures(done)
+        return this.owner.upgradeSomeFeatures(done)
       })
       after(function (done) {
         return this.owner.defaultFeatures(done)
