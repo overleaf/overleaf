@@ -78,6 +78,14 @@
     );
   }
 
+  &.btn-info-ghost {
+    @include ol-button-variant(
+      $color: var(--blue-50),
+      $background: transparent,
+      $hover-background: var(--neutral-10)
+    );
+  }
+
   &.btn-premium {
     @include ol-button-variant(
       $color: var(--content-primary-dark),

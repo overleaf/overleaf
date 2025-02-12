@@ -104,7 +104,9 @@
   .btn-borderless(@blue-50, @btn-info-ghost-bg, @blue-10);
 }
 // Background Ghost appear as neutral-90 (matching our text colour) with no border
-.btn-bg-ghost {
+// .btn-ghost is backported from bs5
+.btn-bg-ghost,
+.btn-ghost {
   .btn-borderless(@neutral-90, @btn-info-ghost-bg, @neutral-10);
 }
 // Inline button to fit text, without link styling.

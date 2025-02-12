@@ -1,0 +1,130 @@
+.onboarding-data-collection-wrapper {
+  max-width: 730px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  .d-block,
+  .select-wrapper {
+    label {
+      font-size: 14px; // override DownshiftInput and Select component label size
+    }
+
+    .select-items {
+      max-height: 150px;
+    }
+
+    .select-trigger {
+      border: 1px solid var(--neutral-60);
+      color: var(--neutral-60);
+    }
+  }
+
+  p {
+    font-size: 16px;
+    margin-bottom: var(--spacing-06);
+  }
+
+  .logo {
+    width: 130px;
+    margin: 0 auto;
+  }
+
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-08);
+
+    .group-horizontal {
+      display: flex;
+      justify-content: stretch;
+      gap: var(--spacing-08);
+
+      @include media-breakpoint-down(md) {
+        flex-direction: column;
+        gap: 0;
+      }
+
+      .form-group {
+        flex-grow: 1;
+      }
+    }
+
+    .form-actions {
+      display: flex;
+      justify-content: space-between;
+
+      > div {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-04);
+
+        button.btn-info-ghost {
+          color: var(--neutral-90);
+        }
+      }
+    }
+  }
+}
+
+.onboarding-data-collection-form {
+  background: var(--bg-light-primary);
+  padding: var(--spacing-08);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-08);
+}
+
+.onboarding-question-title {
+  font-size: 20px;
+  border-bottom: none;
+  margin-bottom: var(--spacing-08);
+}
+
+.onboarding-step-2 {
+  .form-check {
+    margin: 0;
+
+    p {
+      margin-bottom: 0;
+    }
+
+    label {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-04);
+
+      input {
+        margin-right: var(--spacing-02);
+      }
+    }
+  }
+}
+
+.onboarding-collapse-button {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  color: var(--blue-50);
+  user-select: none;
+}
+
+.onboarding-collapse-button,
+.onboarding-privacy-extended {
+  @include media-breakpoint-down(md) {
+    padding: 0 var(--spacing-08);
+  }
+}
+
+.onboarding-data-collection-form-margin {
+  @include media-breakpoint-down(md) {
+    margin-bottom: 100px;
+  }
+}
+
+.compromised-password-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-05);
+}

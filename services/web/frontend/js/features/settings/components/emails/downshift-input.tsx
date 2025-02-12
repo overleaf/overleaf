@@ -6,6 +6,7 @@ import { bsVersion } from '@/features/utils/bootstrap-5'
 import OLFormControl from '@/features/ui/components/ol/ol-form-control'
 import { DropdownItem } from '@/features/ui/components/bootstrap-5/dropdown-menu'
 import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
+import OLFormLabel from '@/features/ui/components/ol/ol-form-label'
 
 type DownshiftInputProps = {
   highlightMatches?: boolean
@@ -95,7 +96,7 @@ function Downshift({
     >
       <div {...getComboboxProps()}>
         {/* eslint-disable-next-line jsx-a11y/label-has-for */}
-        <label
+        <OLFormLabel
           {...getLabelProps()}
           className={
             showLabel
@@ -104,7 +105,7 @@ function Downshift({
           }
         >
           {label}
-        </label>
+        </OLFormLabel>
         <OLFormControl
           {...getInputProps({
             onChange: (event: React.ChangeEvent<HTMLInputElement>) => {
