@@ -10,6 +10,8 @@ services:
       context: ../..
       dockerfile: services/web/Dockerfile
     image: ci/$PROJECT_NAME:$BRANCH_NAME-$BUILD_NUMBER
+    logging:
+      driver: local
     user: node
     command: npm run test:unit:app
     working_dir: /overleaf/services/web
@@ -27,6 +29,8 @@ services:
       context: ../..
       dockerfile: services/web/Dockerfile
     image: ci/$PROJECT_NAME:$BRANCH_NAME-$BUILD_NUMBER
+    logging:
+      driver: local
     working_dir: /overleaf/services/web
     env_file: docker-compose.common.env
     environment:
@@ -47,6 +51,8 @@ services:
       context: ../..
       dockerfile: services/web/Dockerfile
     image: ci/$PROJECT_NAME:$BRANCH_NAME-$BUILD_NUMBER
+    logging:
+      driver: local
     user: node
     working_dir: /overleaf/services/web
     command: npm run test:frontend
@@ -55,6 +61,8 @@ services:
 
   test_frontend_ct:
     image: cypress/included:13.13.2
+    logging:
+      driver: local
     working_dir: /overleaf/services/web
     environment:
       CYPRESS_SPEC_PATTERN: ${CYPRESS_SPEC_PATTERN:-}
@@ -79,6 +87,8 @@ services:
 
   mongo:
     image: mongo:6.0.13
+    logging:
+      driver: none
     command: --replSet overleaf
     volumes:
       - ./docker/mongodb-init-replica-set.js:/docker-entrypoint-initdb.d/mongodb-init-replica-set.js
@@ -92,6 +102,8 @@ services:
 
   ldap:
     image: rroemhild/test-openldap:1.1
+    logging:
+      driver: none
     # Workaround large memory allocation (using the max-open-files-limit as socket buffer scale).
     # REF: https://github.com/moby/moby/issues/8231#issuecomment-63877553
     # REF: https://github.com/moby/moby/issues/8231#issuecomment-63871343
@@ -102,6 +114,8 @@ services:
 
   saml:
       image: us-east1-docker.pkg.dev/overleaf-ops/ol-docker/saml-test
+      logging:
+        driver: none
       environment:
           SAML_BASE_URL_PATH: 'http://saml/simplesaml/'
           SAML_TEST_SP_ENTITY_ID: 'overleaf-test-saml'
