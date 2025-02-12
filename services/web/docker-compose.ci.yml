@@ -54,7 +54,7 @@ services:
       NODE_OPTIONS: "--unhandled-rejections=strict"
 
   test_frontend_ct:
-    image: $CYPRESS_IMAGE
+    image: cypress/included:13.13.2
     working_dir: /overleaf/services/web
     environment:
       CYPRESS_SPEC_PATTERN: ${CYPRESS_SPEC_PATTERN:-}
