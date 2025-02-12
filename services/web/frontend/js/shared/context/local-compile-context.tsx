@@ -42,6 +42,7 @@ import {
   PdfScrollPosition,
   usePdfScrollPosition,
 } from '@/shared/hooks/use-pdf-scroll-position'
+import { PdfFileDataList } from '@/features/pdf-preview/util/types'
 
 type PdfFile = Record<string, any>
 
@@ -54,7 +55,7 @@ export type CompileContext = {
   deliveryLatencies: Record<string, any>
   draft: boolean
   error?: string
-  fileList?: Record<string, any>
+  fileList?: PdfFileDataList
   hasChanges: boolean
   hasShortCompileTimeout: boolean
   highlights?: Record<string, any>[]
@@ -208,7 +209,7 @@ export const LocalCompileProvider: FC = ({ children }) => {
   const [error, setError] = useState<string>()
 
   // the list of files that can be downloaded
-  const [fileList, setFileList] = useState<Record<string, any[]>>()
+  const [fileList, setFileList] = useState<PdfFileDataList>()
 
   // the raw contents of the log file
   const [rawLog, setRawLog] = useState<string>()

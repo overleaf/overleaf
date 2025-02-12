@@ -1,11 +1,16 @@
-import PropTypes from 'prop-types'
 import {
   packageSuggestionsForCommands,
   packageSuggestionsForEnvironments,
 } from './HumanReadableLogsPackageSuggestions'
 import getMeta from '@/utils/meta'
 
-function WikiLink({ url, children }) {
+function WikiLink({
+  url,
+  children,
+}: {
+  url: string
+  children: React.ReactNode
+}) {
   if (getMeta('ol-wikiEnabled')) {
     return (
       <a href={url} target="_blank" rel="noopener">
@@ -17,12 +22,12 @@ function WikiLink({ url, children }) {
   }
 }
 
-WikiLink.propTypes = {
-  url: PropTypes.string.isRequired,
-  children: PropTypes.node.isRequired,
+type LogHint = {
+  extraInfoURL?: string | null
+  formattedContent: (details?: string[]) => React.ReactNode
 }
 
-const hints = {
+const hints: { [ruleId: string]: LogHint } = {
   hint_misplaced_alignment_tab_character: {
     extraInfoURL:
       'https://www.overleaf.com/learn/Errors/Misplaced_alignment_tab_character_%26',

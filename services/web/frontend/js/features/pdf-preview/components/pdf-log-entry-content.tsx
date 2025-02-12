@@ -1,9 +1,15 @@
 import { useTranslation } from 'react-i18next'
 import PdfLogEntryRawContent from './pdf-log-entry-raw-content'
-import PropTypes from 'prop-types'
 import importOverleafModules from '../../../../macros/import-overleaf-module.macro'
+import { LogEntry } from '../util/types'
+import { ElementType } from 'react'
 
-const pdfLogEntryComponents = importOverleafModules('pdfLogEntryComponents')
+const pdfLogEntryComponents = importOverleafModules(
+  'pdfLogEntryComponents'
+) as {
+  import: { default: ElementType }
+  path: string
+}[]
 
 export default function PdfLogEntryContent({
   rawContent,
@@ -11,6 +17,12 @@ export default function PdfLogEntryContent({
   extraInfoURL,
   index,
   logEntry,
+}: {
+  rawContent?: string
+  formattedContent?: React.ReactNode
+  extraInfoURL?: string | null
+  index?: number
+  logEntry?: LogEntry
 }) {
   const { t } = useTranslation()
 
@@ -40,12 +52,4 @@ export default function PdfLogEntryContent({
       )}
     </div>
   )
-}
-
-PdfLogEntryContent.propTypes = {
-  rawContent: PropTypes.string,
-  formattedContent: PropTypes.node,
-  extraInfoURL: PropTypes.string,
-  index: PropTypes.number,
-  logEntry: PropTypes.any,
 }

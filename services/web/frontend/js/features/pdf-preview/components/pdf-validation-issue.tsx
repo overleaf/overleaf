@@ -1,14 +1,8 @@
 import { memo } from 'react'
 import { useTranslation } from 'react-i18next'
-import PropTypes from 'prop-types'
 import PdfLogEntry from './pdf-log-entry'
 
-PdfValidationIssue.propTypes = {
-  name: PropTypes.string.isRequired,
-  issue: PropTypes.any,
-}
-
-function PdfValidationIssue({ issue, name }) {
+function PdfValidationIssue({ issue, name }: { issue: any; name: string }) {
   const { t } = useTranslation()
 
   switch (name) {
@@ -20,12 +14,14 @@ function PdfValidationIssue({ issue, name }) {
             <>
               <div>{t('project_too_large_please_reduce')}</div>
               <ul className="list-no-margin-bottom">
-                {issue.resources.map(resource => (
-                  <li key={resource.path}>
-                    {resource.path} &mdash; {resource.kbSize}
-                    kb
-                  </li>
-                ))}
+                {issue.resources.map(
+                  (resource: { path: string; kbSize: number }) => (
+                    <li key={resource.path}>
+                      {resource.path} &mdash; {resource.kbSize}
+                      kb
+                    </li>
+                  )
+                )}
               </ul>
             </>
           }
@@ -42,7 +38,7 @@ function PdfValidationIssue({ issue, name }) {
             <>
               <div>{t('following_paths_conflict')}</div>
               <ul className="list-no-margin-bottom">
-                {issue.map(detail => (
+                {issue.map((detail: { path: string }) => (
                   <li key={detail.path}>/{detail.path}</li>
                 ))}
               </ul>

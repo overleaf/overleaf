@@ -1,8 +1,11 @@
-import PropTypes from 'prop-types'
 import { Trans, useTranslation } from 'react-i18next'
 import { ErrorBoundaryFallback } from '../../../shared/components/error-boundary-fallback'
 
-function PdfPreviewErrorBoundaryFallback({ type }) {
+function PdfPreviewErrorBoundaryFallback({
+  type,
+}: {
+  type: 'preview' | 'pdf' | 'logs'
+}) {
   const { t } = useTranslation()
 
   const showInfoLink = (
@@ -45,10 +48,6 @@ function PdfPreviewErrorBoundaryFallback({ type }) {
         </ErrorBoundaryFallback>
       )
   }
-}
-
-PdfPreviewErrorBoundaryFallback.propTypes = {
-  type: PropTypes.oneOf(['preview', 'pdf', 'logs']).isRequired,
 }
 
 export default PdfPreviewErrorBoundaryFallback

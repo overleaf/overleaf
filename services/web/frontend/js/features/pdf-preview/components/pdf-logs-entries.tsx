@@ -1,16 +1,27 @@
-import { memo } from 'react'
-import PropTypes from 'prop-types'
+import { ElementType, memo } from 'react'
 import { useTranslation } from 'react-i18next'
 import PreviewLogsPaneMaxEntries from '../../preview/components/preview-logs-pane-max-entries'
 import PdfLogEntry from './pdf-log-entry'
 import { useDetachCompileContext } from '../../../shared/context/detach-compile-context'
 import importOverleafModules from '../../../../macros/import-overleaf-module.macro'
+import { LogEntry } from '../util/types'
 
 const LOG_PREVIEW_LIMIT = 100
 
-const pdfLogEntriesComponents = importOverleafModules('pdfLogEntriesComponents')
+const pdfLogEntriesComponents = importOverleafModules(
+  'pdfLogEntriesComponents'
+) as {
+  import: { default: ElementType }
+  path: string
+}[]
 
-function PdfLogsEntries({ entries, hasErrors }) {
+function PdfLogsEntries({
+  entries,
+  hasErrors,
+}: {
+  entries: LogEntry[]
+  hasErrors?: boolean
+}) {
   const { t } = useTranslation()
   const { syncToEntry } = useDetachCompileContext()
   const logEntries = entries.slice(0, LOG_PREVIEW_LIMIT)
@@ -56,10 +67,6 @@ function PdfLogsEntries({ entries, hasErrors }) {
       ))}
     </>
   )
-}
-PdfLogsEntries.propTypes = {
-  entries: PropTypes.arrayOf(PropTypes.object),
-  hasErrors: PropTypes.bool,
 }
 
 export default memo(PdfLogsEntries)

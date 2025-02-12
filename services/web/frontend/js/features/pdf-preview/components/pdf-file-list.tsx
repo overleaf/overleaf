@@ -1,22 +1,22 @@
 import { MenuItem as BS3MenuItem } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
 import { memo } from 'react'
-import PropTypes from 'prop-types'
 import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
 import {
   DropdownDivider,
   DropdownHeader,
   DropdownItem,
 } from '@/features/ui/components/bootstrap-5/dropdown-menu'
+import { PdfFileData, PdfFileDataList } from '../util/types'
 
-function PdfFileList({ fileList }) {
+function PdfFileList({ fileList }: { fileList: PdfFileDataList }) {
   const { t } = useTranslation()
 
   if (!fileList) {
     return null
   }
 
-  function basename(file) {
+  function basename(file: PdfFileData) {
     return file.path.split('/').pop()
   }
 
@@ -94,40 +94,22 @@ function PdfFileList({ fileList }) {
             </li>
           ))}
 
-          {fileList.archive?.fileCount > 0 && (
-            <li role="menuitem">
-              <DropdownItem
-                role="link"
-                download={basename(fileList.archive)}
-                href={fileList.archive.url}
-              >
-                {t('download_all')} ({fileList.archive.fileCount})
-              </DropdownItem>
-            </li>
-          )}
+          {fileList.archive?.fileCount !== undefined &&
+            fileList.archive?.fileCount > 0 && (
+              <li role="menuitem">
+                <DropdownItem
+                  role="link"
+                  download={basename(fileList.archive)}
+                  href={fileList.archive.url}
+                >
+                  {t('download_all')} ({fileList.archive.fileCount})
+                </DropdownItem>
+              </li>
+            )}
         </>
       }
     />
   )
-}
-
-const FilesArray = PropTypes.arrayOf(
-  PropTypes.shape({
-    path: PropTypes.string.isRequired,
-    url: PropTypes.string.isRequired,
-  })
-)
-
-PdfFileList.propTypes = {
-  fileList: PropTypes.shape({
-    top: FilesArray,
-    other: FilesArray,
-    archive: PropTypes.shape({
-      path: PropTypes.string.isRequired,
-      url: PropTypes.string.isRequired,
-      fileCount: PropTypes.number.isRequired,
-    }),
-  }),
 }
 
 export default memo(PdfFileList)

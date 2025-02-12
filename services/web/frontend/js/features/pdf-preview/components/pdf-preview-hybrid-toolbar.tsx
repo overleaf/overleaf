@@ -18,18 +18,18 @@ const ORPHAN_UI_TIMEOUT_MS = 5000
 function PdfPreviewHybridToolbar() {
   const { detachRole, detachIsLinked } = useLayoutContext()
 
-  const uiTimeoutRef = useRef()
+  const uiTimeoutRef = useRef<number>()
   const [orphanPdfTabAfterDelay, setOrphanPdfTabAfterDelay] = useState(false)
 
   const orphanPdfTab = !detachIsLinked && detachRole === 'detached'
 
   useEffect(() => {
     if (uiTimeoutRef.current) {
-      clearTimeout(uiTimeoutRef.current)
+      window.clearTimeout(uiTimeoutRef.current)
     }
 
     if (orphanPdfTab) {
-      uiTimeoutRef.current = setTimeout(() => {
+      uiTimeoutRef.current = window.setTimeout(() => {
         setOrphanPdfTabAfterDelay(true)
       }, ORPHAN_UI_TIMEOUT_MS)
     } else {

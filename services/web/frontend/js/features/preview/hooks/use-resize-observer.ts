@@ -1,7 +1,11 @@
-import { useLayoutEffect, useRef, useCallback } from 'react'
+import { useLayoutEffect, useRef, useCallback, RefObject } from 'react'
 
-function useResizeObserver(observedElement, observedData, callback) {
-  const resizeObserver = useRef()
+function useResizeObserver(
+  observedElement: RefObject<HTMLElement>,
+  observedData: any,
+  callback: (observedElement: ResizeObserverEntry) => void
+) {
+  const resizeObserver = useRef<ResizeObserver>()
 
   const observe = useCallback(() => {
     resizeObserver.current = new ResizeObserver(function (elementsObserved) {
@@ -9,15 +13,17 @@ function useResizeObserver(observedElement, observedData, callback) {
     })
   }, [callback])
 
-  function unobserve(observedCurrent) {
-    resizeObserver.current.unobserve(observedCurrent)
+  function unobserve(observedCurrent: HTMLElement) {
+    if (resizeObserver.current) {
+      resizeObserver.current.unobserve(observedCurrent)
+    }
   }
 
   useLayoutEffect(() => {
     if ('ResizeObserver' in window) {
       const observedCurrent = observedElement && observedElement.current
       if (observedCurrent) {
-        observe(observedElement.current)
+        observe()
       }
 
       if (resizeObserver.current && observedCurrent) {

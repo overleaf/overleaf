@@ -14,11 +14,10 @@ import PdfCodeCheckFailedNotice from './pdf-code-check-failed-notice'
 import { useDetachCompileContext as useCompileContext } from '../../../shared/context/detach-compile-context'
 import PdfLogEntry from './pdf-log-entry'
 import { usePdfPreviewContext } from '@/features/pdf-preview/components/pdf-preview-provider'
-import PropTypes from 'prop-types'
 import TimeoutUpgradePaywallPrompt from './timeout-upgrade-paywall-prompt'
 import getMeta from '@/utils/meta'
 
-function PdfLogsViewer({ alwaysVisible = false }) {
+function PdfLogsViewer({ alwaysVisible = false }: { alwaysVisible?: boolean }) {
   const {
     codeCheckFailed,
     error,
@@ -89,10 +88,6 @@ function PdfLogsViewer({ alwaysVisible = false }) {
       </div>
     </div>
   )
-}
-
-PdfLogsViewer.propTypes = {
-  alwaysVisible: PropTypes.bool,
 }
 
 export default withErrorBoundary(memo(PdfLogsViewer), () => (

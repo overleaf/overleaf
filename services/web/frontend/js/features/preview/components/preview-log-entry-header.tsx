@@ -1,6 +1,5 @@
-import PropTypes from 'prop-types'
 import classNames from 'classnames'
-import { useState, useRef } from 'react'
+import { useState, useRef, MouseEventHandler } from 'react'
 import { useTranslation } from 'react-i18next'
 import useResizeObserver from '../hooks/use-resize-observer'
 import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
@@ -8,6 +7,7 @@ import Icon from '../../../shared/components/icon'
 import OLButton from '@/features/ui/components/ol/ol-button'
 import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
 import MaterialIcon from '@/shared/components/material-icon'
+import { ErrorLevel, SourceLocation } from '@/features/pdf-preview/util/types'
 
 function PreviewLogEntryHeader({
   sourceLocation,
@@ -19,9 +19,19 @@ function PreviewLogEntryHeader({
   showCloseButton = false,
   onSourceLocationClick,
   onClose,
+}: {
+  headerTitle: string | React.ReactNode
+  level: ErrorLevel
+  headerIcon?: React.ReactElement
+  logType?: string
+  sourceLocation?: SourceLocation
+  showSourceLocationLink?: boolean
+  showCloseButton?: boolean
+  onSourceLocationClick?: MouseEventHandler<HTMLButtonElement>
+  onClose?: () => void
 }) {
   const { t } = useTranslation()
-  const logLocationSpanRef = useRef()
+  const logLocationSpanRef = useRef<HTMLSpanElement>(null)
   const [locationSpanOverflown, setLocationSpanOverflown] = useState(false)
 
   useResizeObserver(
@@ -52,7 +62,7 @@ function PreviewLogEntryHeader({
     location: file + (line ? `, ${line}` : ''),
   })
 
-  function checkLocationSpanOverflow(observedElement) {
+  function checkLocationSpanOverflow(observedElement: ResizeObserverEntry) {
     const spanEl = observedElement.target
     const isOverflowing = spanEl.scrollWidth > spanEl.clientWidth
     setLocationSpanOverflown(isOverflowing)
@@ -104,7 +114,7 @@ function PreviewLogEntryHeader({
         <div className="log-entry-header-icon-container">{headerIcon}</div>
       ) : null}
       <h3 className="log-entry-header-title">{headerTitleText}</h3>
-      {locationSpanOverflown && locationLinkText ? (
+      {locationSpanOverflown && locationLinkText && locationLink ? (
         <OLTooltip
           id={locationLinkText}
           description={locationLinkText}
@@ -128,25 +138,6 @@ function PreviewLogEntryHeader({
       ) : null}
     </header>
   )
-}
-
-PreviewLogEntryHeader.propTypes = {
-  sourceLocation: PropTypes.shape({
-    file: PropTypes.string,
-    // `line should be either a number or null (i.e. not required), but currently sometimes we get
-    // an empty string (from BibTeX errors), which is why we're using `any` here. We should revert
-    // to PropTypes.number (not required) once we fix that.
-    line: PropTypes.any,
-    column: PropTypes.any,
-  }),
-  level: PropTypes.string.isRequired,
-  headerTitle: PropTypes.oneOfType([PropTypes.string, PropTypes.node]),
-  headerIcon: PropTypes.element,
-  logType: PropTypes.string,
-  showSourceLocationLink: PropTypes.bool,
-  showCloseButton: PropTypes.bool,
-  onSourceLocationClick: PropTypes.func,
-  onClose: PropTypes.func,
 }
 
 export default PreviewLogEntryHeader

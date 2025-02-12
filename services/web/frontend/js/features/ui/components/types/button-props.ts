@@ -34,4 +34,5 @@ export type ButtonProps = {
     | 'premium'
     | 'premium-secondary'
     | 'link'
+    | 'info'
 }

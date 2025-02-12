@@ -1,11 +1,11 @@
-import PropTypes from 'prop-types'
 import classNames from 'classnames'
-import { memo, useCallback } from 'react'
+import { memo, MouseEventHandler, useCallback } from 'react'
 import PreviewLogEntryHeader from '../../preview/components/preview-log-entry-header'
 import PdfLogEntryContent from './pdf-log-entry-content'
 import HumanReadableLogsHints from '../../../ide/human-readable-logs/HumanReadableLogsHints'
 import { sendMB } from '@/infrastructure/event-tracking'
 import getMeta from '@/utils/meta'
+import { ErrorLevel, LogEntry, SourceLocation } from '../util/types'
 
 function PdfLogEntry({
   ruleId,
@@ -19,7 +19,7 @@ function PdfLogEntry({
   sourceLocation,
   showSourceLocationLink = true,
   showCloseButton = false,
-  entryAriaLabel = null,
+  entryAriaLabel = undefined,
   customClass,
   contentDetails,
   onSourceLocationClick,
@@ -27,6 +27,26 @@ function PdfLogEntry({
   index,
   logEntry,
   id,
+}: {
+  headerTitle: string | React.ReactNode
+  level: ErrorLevel
+  ruleId?: string
+  headerIcon?: React.ReactElement
+  rawContent?: string
+  logType?: string
+  formattedContent?: React.ReactNode
+  extraInfoURL?: string | null
+  sourceLocation?: SourceLocation
+  showSourceLocationLink?: boolean
+  showCloseButton?: boolean
+  entryAriaLabel?: string
+  customClass?: string
+  contentDetails?: string[]
+  onSourceLocationClick?: (sourceLocation: SourceLocation) => void
+  onClose?: () => void
+  index?: number
+  logEntry?: LogEntry
+  id?: string
 }) {
   const showAiErrorAssistant = getMeta('ol-showAiErrorAssistant')
 
@@ -36,17 +56,22 @@ function PdfLogEntry({
     extraInfoURL = hint.extraInfoURL
   }
 
-  const handleLogEntryLinkClick = useCallback(
-    event => {
-      event.preventDefault()
-      onSourceLocationClick(sourceLocation)
+  const handleLogEntryLinkClick: MouseEventHandler<HTMLButtonElement> =
+    useCallback(
+      event => {
+        event.preventDefault()
 
-      const parts = sourceLocation?.file?.split('.')
-      const extension = parts?.length > 1 ? parts.pop() : ''
-      sendMB('log-entry-link-click', { level, ruleId, extension })
-    },
-    [level, onSourceLocationClick, ruleId, sourceLocation]
-  )
+        if (onSourceLocationClick && sourceLocation) {
+          onSourceLocationClick(sourceLocation)
+
+          const parts = sourceLocation?.file?.split('.')
+          const extension =
+            parts?.length && parts?.length > 1 ? parts.pop() : ''
+          sendMB('log-entry-link-click', { level, ruleId, extension })
+        }
+      },
+      [level, onSourceLocationClick, ruleId, sourceLocation]
+    )
 
   return (
     <div
@@ -78,35 +103,6 @@ function PdfLogEntry({
       )}
     </div>
   )
-}
-
-PdfLogEntry.propTypes = {
-  ruleId: PropTypes.string,
-  sourceLocation: PreviewLogEntryHeader.propTypes.sourceLocation,
-  headerTitle: PreviewLogEntryHeader.propTypes.headerTitle,
-  headerIcon: PropTypes.element,
-  rawContent: PropTypes.string,
-  logType: PropTypes.string,
-  formattedContent: PropTypes.node,
-  extraInfoURL: PropTypes.string,
-  level: PropTypes.oneOf([
-    'error',
-    'warning',
-    'info',
-    'typesetting',
-    'raw',
-    'success',
-  ]).isRequired,
-  customClass: PropTypes.string,
-  showSourceLocationLink: PropTypes.bool,
-  showCloseButton: PropTypes.bool,
-  entryAriaLabel: PropTypes.string,
-  contentDetails: PropTypes.arrayOf(PropTypes.string),
-  onSourceLocationClick: PropTypes.func,
-  onClose: PropTypes.func,
-  index: PropTypes.number,
-  logEntry: PropTypes.any,
-  id: PropTypes.string,
 }
 
 export default memo(PdfLogEntry)

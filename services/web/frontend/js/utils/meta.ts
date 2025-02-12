@@ -126,6 +126,7 @@ export interface Meta {
   'ol-inviterName': string
   'ol-isExternalAuthenticationSystemUsed': boolean
   'ol-isManagedAccount': boolean
+  'ol-isPaywallChangeCompileTimeoutEnabled': boolean
   'ol-isProfessional': boolean
   'ol-isRegisteredViaGoogle': boolean
   'ol-isRestrictedTokenMember': boolean

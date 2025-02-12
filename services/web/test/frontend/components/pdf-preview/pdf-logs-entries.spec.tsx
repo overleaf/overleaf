@@ -11,6 +11,7 @@ import {
 } from '@/features/ide-react/context/editor-manager-context'
 import { EditorView } from '@codemirror/view'
 import { OpenDocuments } from '@/features/ide-react/editor/open-documents'
+import { LogEntry } from '@/features/pdf-preview/util/types'
 
 describe('<PdfLogsEntries/>', function () {
   const fakeFindEntityResult: FindResult = {
@@ -48,7 +49,7 @@ describe('<PdfLogsEntries/>', function () {
     )
   }
 
-  const logEntries = [
+  const logEntries: LogEntry[] = [
     {
       file: 'main.tex',
       line: 9,

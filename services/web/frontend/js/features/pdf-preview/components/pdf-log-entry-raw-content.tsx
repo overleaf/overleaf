@@ -4,11 +4,13 @@ import { useTranslation } from 'react-i18next'
 import classNames from 'classnames'
 import OLButton from '@/features/ui/components/ol/ol-button'
 import Icon from '../../../shared/components/icon'
-import PropTypes from 'prop-types'
 
 export default function PdfLogEntryRawContent({
   rawContent,
   collapsedSize = 0,
+}: {
+  rawContent: string
+  collapsedSize?: number
 }) {
   const [expanded, setExpanded] = useState(false)
   const [needsExpander, setNeedsExpander] = useState(true)
@@ -67,9 +69,4 @@ export default function PdfLogEntryRawContent({
       )}
     </div>
   )
-}
-
-PdfLogEntryRawContent.propTypes = {
-  rawContent: PropTypes.string.isRequired,
-  collapsedSize: PropTypes.number,
 }

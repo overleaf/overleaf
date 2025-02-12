@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types'
 import { useTranslation, Trans } from 'react-i18next'
 import { memo, useCallback } from 'react'
 import OLButton from '@/features/ui/components/ol/ol-button'
@@ -7,7 +6,7 @@ import { useDetachCompileContext as useCompileContext } from '../../../shared/co
 import { useStopOnFirstError } from '../../../shared/hooks/use-stop-on-first-error'
 import getMeta from '../../../utils/meta'
 
-function PdfPreviewError({ error }) {
+function PdfPreviewError({ error }: { error: string }) {
   const { t } = useTranslation()
 
   const { startCompile } = useCompileContext()
@@ -216,13 +215,17 @@ function PdfPreviewError({ error }) {
   }
 }
 
-PdfPreviewError.propTypes = {
-  error: PropTypes.string.isRequired,
-}
-
 export default memo(PdfPreviewError)
 
-function ErrorLogEntry({ title, headerIcon, children }) {
+function ErrorLogEntry({
+  title,
+  headerIcon,
+  children,
+}: {
+  title: string
+  headerIcon?: React.ReactElement
+  children: React.ReactNode
+}) {
   const { t } = useTranslation()
 
   return (
@@ -234,11 +237,6 @@ function ErrorLogEntry({ title, headerIcon, children }) {
       level="error"
     />
   )
-}
-ErrorLogEntry.propTypes = {
-  title: PropTypes.string.isRequired,
-  headerIcon: PropTypes.element,
-  children: PropTypes.any.isRequired,
 }
 
 function TimedOutLogEntry() {
@@ -307,4 +305,3 @@ function TimedOutLogEntry() {
     </ErrorLogEntry>
   )
 }
-TimedOutLogEntry.propTypes = {}

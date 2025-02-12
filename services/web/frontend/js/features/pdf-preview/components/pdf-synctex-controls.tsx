@@ -1,6 +1,5 @@
 import classNames from 'classnames'
 import { memo, useCallback, useEffect, useState, useRef } from 'react'
-import PropTypes from 'prop-types'
 import { useProjectContext } from '../../../shared/context/project-context'
 import { getJSON } from '../../../infrastructure/fetch-json'
 import { useDetachCompileContext as useCompileContext } from '../../../shared/context/detach-compile-context'
@@ -25,12 +24,20 @@ import MaterialIcon from '@/shared/components/material-icon'
 import { Spinner } from 'react-bootstrap-5'
 import { bsVersion } from '@/features/utils/bootstrap-5'
 import { useEditorManagerContext } from '@/features/ide-react/context/editor-manager-context'
+import useEventListener from '@/shared/hooks/use-event-listener'
+import { PdfScrollPosition } from '@/shared/hooks/use-pdf-scroll-position'
+import { CursorPosition } from '@/features/ide-react/types/cursor-position'
 
 function GoToCodeButton({
   position,
   syncToCode,
   syncToCodeInFlight,
   isDetachLayout,
+}: {
+  position: PdfScrollPosition
+  syncToCode: (position: PdfScrollPosition, visualOffset?: number) => void
+  syncToCodeInFlight: boolean
+  isDetachLayout?: boolean
 }) {
   const { t } = useTranslation()
   const tooltipPlacement = isDetachLayout ? 'bottom' : 'right'
@@ -89,7 +96,7 @@ function GoToCodeButton({
         className={buttonClasses}
         aria-label={t('go_to_pdf_location_in_code')}
         bs3Props={{
-          bsSize: 'xs',
+          bsSize: 'xsmall',
         }}
       >
         {buttonIcon}
@@ -105,6 +112,12 @@ function GoToPdfButton({
   syncToPdfInFlight,
   isDetachLayout,
   hasSingleSelectedDoc,
+}: {
+  cursorPosition: CursorPosition | null
+  syncToPdf: (cursorPosition: CursorPosition | null) => void
+  syncToPdfInFlight: boolean
+  hasSingleSelectedDoc: boolean
+  isDetachLayout?: boolean
 }) {
   const { t } = useTranslation()
   const tooltipPlacement = isDetachLayout ? 'bottom' : 'right'
@@ -159,7 +172,7 @@ function GoToPdfButton({
         className={buttonClasses}
         aria-label={t('go_to_code_location_in_pdf')}
         bs3Props={{
-          bsSize: 'xs',
+          bsSize: 'xsmall',
         }}
       >
         {buttonIcon}
@@ -187,22 +200,24 @@ function PdfSynctexControls() {
   const { findEntityByPath, dirname, pathInFolder } = useFileTreePathContext()
   const { getCurrentDocumentId, openDocWithId } = useEditorManagerContext()
 
-  const [cursorPosition, setCursorPosition] = useState(() => {
-    const position = localStorage.getItem(
-      `doc.position.${getCurrentDocumentId()}`
-    )
-    return position ? position.cursorPosition : null
-  })
+  const [cursorPosition, setCursorPosition] = useState<CursorPosition | null>(
+    () => {
+      const position = localStorage.getItem(
+        `doc.position.${getCurrentDocumentId()}`
+      )
+      return position ? position.cursorPosition : null
+    }
+  )
 
   const isMounted = useIsMounted()
 
   const { signal } = useAbortController()
 
-  useEffect(() => {
-    const listener = event => setCursorPosition(event.detail)
-    window.addEventListener('cursor:editor:update', listener)
-    return () => window.removeEventListener('cursor:editor:update', listener)
-  }, [])
+  const editorUpdateListener = useCallback(
+    event => setCursorPosition(event.detail),
+    []
+  )
+  useEventListener('cursor:editor:update', editorUpdateListener)
 
   const [syncToPdfInFlight, setSyncToPdfInFlight] = useState(false)
   const [syncToCodeInFlight, setSyncToCodeInFlight] = useDetachState(
@@ -216,7 +231,16 @@ function PdfSynctexControls() {
 
   const getCurrentFilePath = useCallback(() => {
     const docId = getCurrentDocumentId()
+
+    if (!docId || !rootDocId) {
+      return null
+    }
+
     let path = pathInFolder(docId)
+
+    if (!path) {
+      return null
+    }
 
     // If the root file is folder/main.tex, then synctex sees the path as folder/./main.tex
     const rootDocDirname = dirname(rootDocId)
@@ -286,8 +310,10 @@ function PdfSynctexControls() {
 
   const syncToPdf = useCallback(
     cursorPosition => {
+      const file = getCurrentFilePath()
+
       const params = new URLSearchParams({
-        file: getCurrentFilePath(),
+        file: file ?? '',
         line: cursorPosition.row + 1,
         column: cursorPosition.column,
       }).toString()
@@ -377,13 +403,11 @@ function PdfSynctexControls() {
     'detacher'
   )
 
-  useEffect(() => {
-    const listener = event => syncToCode(event.detail)
-    window.addEventListener('synctex:sync-to-position', listener)
-    return () => {
-      window.removeEventListener('synctex:sync-to-position', listener)
-    }
-  }, [syncToCode])
+  const syncToPositionListener = useCallback(
+    event => syncToCode(event.detail),
+    [syncToCode]
+  )
+  useEventListener('synctex:sync-to-position', syncToPositionListener)
 
   const [hasSingleSelectedDoc, setHasSingleSelectedDoc] = useDetachState(
     'has-single-selected-doc',
@@ -458,18 +482,3 @@ function PdfSynctexControls() {
 }
 
 export default memo(PdfSynctexControls)
-
-GoToCodeButton.propTypes = {
-  isDetachLayout: PropTypes.bool,
-  position: PropTypes.object.isRequired,
-  syncToCode: PropTypes.func.isRequired,
-  syncToCodeInFlight: PropTypes.bool.isRequired,
-}
-
-GoToPdfButton.propTypes = {
-  cursorPosition: PropTypes.object,
-  isDetachLayout: PropTypes.bool,
-  syncToPdf: PropTypes.func.isRequired,
-  syncToPdfInFlight: PropTypes.bool.isRequired,
-  hasSingleSelectedDoc: PropTypes.bool.isRequired,
-}

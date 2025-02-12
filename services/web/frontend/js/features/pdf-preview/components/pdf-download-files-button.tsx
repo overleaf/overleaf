@@ -17,6 +17,10 @@ function PdfDownloadFilesButton() {
 
   const { t } = useTranslation()
 
+  if (!fileList) {
+    return null
+  }
+
   return (
     <BootstrapVersionSwitcher
       bs3={
@@ -42,7 +46,6 @@ function PdfDownloadFilesButton() {
           <DropdownToggle
             id="dropdown-files-logs-pane"
             variant="secondary"
-            title={t('other_logs_and_files')}
             size="sm"
             disabled={compiling || !fileList}
           >
