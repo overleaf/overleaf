@@ -325,7 +325,7 @@ class RangesTracker {
           movedChanges.push(change)
         } else if (opStart === changeStart) {
           if (
-            !(op.orderedRejections && alreadyMerged) &&
+            !alreadyMerged &&
             undoing &&
             change.op.d.length >= op.i.length &&
             change.op.d.slice(0, op.i.length) === op.i
@@ -342,13 +342,11 @@ class RangesTracker {
             }
             alreadyMerged = true
 
-            if (op.orderedRejections) {
-              // Any tracked delete that came before this tracked delete
-              // rejection was moved after the incoming insert. Move them back
-              // so that they appear before the tracked delete rejection.
-              for (const trackedDelete of trackedDeletesAtOpPosition) {
-                trackedDelete.op.p -= opLength
-              }
+            // Any tracked delete that came before this tracked delete
+            // rejection was moved after the incoming insert. Move them back
+            // so that they appear before the tracked delete rejection.
+            for (const trackedDelete of trackedDeletesAtOpPosition) {
+              trackedDelete.op.p -= opLength
             }
           } else {
             // We're not rejecting that tracked delete. Move it after the
@@ -656,8 +654,6 @@ class RangesTracker {
   _addOp(op, metadata) {
     // Don't take a reference to the existing op since we'll modify this in place with future changes
     op = this._clone(op)
-    // TODO: Remove this when the orderedRejections transition is over
-    delete op.orderedRejections
     const change = {
       id: this.newId(),
       op,
