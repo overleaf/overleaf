@@ -45,6 +45,8 @@ services:
       - mongo
       - saml
       - ldap
+    tmpfs:
+      - /overleaf/services/web/data
 
   test_frontend:
     build:
