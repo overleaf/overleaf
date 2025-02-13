@@ -5,7 +5,6 @@ import { useDetachCompileContext } from '@/shared/context/detach-compile-context
 import StartFreeTrialButton from '@/shared/components/start-free-trial-button'
 import { useFeatureFlag } from '@/shared/context/split-test-context'
 import MaterialIcon from '@/shared/components/material-icon'
-import OLButton from '@/features/ui/components/ol/ol-button'
 import { useStopOnFirstError } from '@/shared/hooks/use-stop-on-first-error'
 import PdfLogEntry from './pdf-log-entry'
 
@@ -66,10 +65,18 @@ const CompileTimeout = memo(function CompileTimeout({
       formattedContent={
         getMeta('ol-ExposedSettings').enableSubscriptions && (
           <>
-            <p>
-              {isProjectOwner
-                ? t('your_project_exceeded_compile_timeout_limit_on_free_plan')
-                : t('this_project_exceeded_compile_timeout_limit_on_free_plan')}
+            <p className="compile-timeout-message">
+              {isProjectOwner ? (
+                <div>
+                  <p>{t('your_project_need_more_time_to_compile')}</p>
+                  <p>{t('upgrade_to_unlock_more_time')}</p>
+                </div>
+              ) : (
+                <div>
+                  <p>{t('this_project_need_more_time_to_compile')}</p>
+                  <p>{t('upgrade_to_unlock_more_time')}</p>
+                </div>
+              )}
             </p>
 
             {isProjectOwner === false && (
@@ -119,23 +126,12 @@ const PreventTimeoutHelpMessage = memo(function PreventTimeoutHelpMessage({
 
   return (
     <PdfLogEntry
-      headerTitle={t('reasons_for_compile_timeouts')}
+      headerTitle={t('other_causes_of_compile_timeouts')}
       formattedContent={
         <>
-          <p>{t('common_causes_of_compile_timeouts_include')}:</p>
           <ul>
             <li>
-              <Trans
-                i18nKey="large_or_high-resolution_images_taking_too_long"
-                components={[
-                  // eslint-disable-next-line jsx-a11y/anchor-has-content, react/jsx-key
-                  <a
-                    href="/learn/how-to/Optimising_very_large_image_files"
-                    rel="noopener noreferrer"
-                    target="_blank"
-                  />,
-                ]}
-              />
+              {t('large_or_high_resolution_images_taking_too_long_to_process')}
             </li>
             <li>
               <Trans
@@ -153,18 +149,12 @@ const PreventTimeoutHelpMessage = memo(function PreventTimeoutHelpMessage({
                 <>
                   {' '}
                   <Trans
-                    i18nKey="enable_stop_on_first_error_under_recompile_dropdown_menu"
+                    i18nKey="enable_stop_on_first_error_under_recompile_dropdown_menu_v2"
                     components={[
                       // eslint-disable-next-line react/jsx-key
-                      <OLButton
-                        variant="link"
-                        className="btn-inline-link fw-bold"
-                        size="sm"
-                        onClick={handleEnableStopOnFirstErrorClick}
-                        bs3Props={{ bsSize: 'xsmall' }}
-                      />,
+                      <strong className="log-bold-text" />,
                       // eslint-disable-next-line react/jsx-key
-                      <strong />,
+                      <strong className="log-bold-text" />,
                     ]}
                   />{' '}
                 </>
@@ -173,7 +163,7 @@ const PreventTimeoutHelpMessage = memo(function PreventTimeoutHelpMessage({
           </ul>
           <p className="mb-0">
             <Trans
-              i18nKey="learn_more_about_other_causes_of_compile_timeouts"
+              i18nKey="learn_more_about_compile_timeouts"
               components={[
                 // eslint-disable-next-line jsx-a11y/anchor-has-content, react/jsx-key
                 <a
