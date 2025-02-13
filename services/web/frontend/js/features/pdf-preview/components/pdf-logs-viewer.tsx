@@ -27,6 +27,7 @@ function PdfLogsViewer({ alwaysVisible = false }: { alwaysVisible?: boolean }) {
     validationIssues,
     showLogs,
     stoppedOnFirstError,
+    isProjectOwner,
   } = useCompileContext()
 
   const { loadingError } = usePdfPreviewContext()
@@ -36,6 +37,9 @@ function PdfLogsViewer({ alwaysVisible = false }: { alwaysVisible?: boolean }) {
   const isPaywallChangeCompileTimeoutEnabled = getMeta(
     'ol-isPaywallChangeCompileTimeoutEnabled'
   )
+
+  const isCompileTimeoutPaywallDisplay =
+    isProjectOwner && isPaywallChangeCompileTimeoutEnabled
 
   return (
     <div
@@ -51,7 +55,7 @@ function PdfLogsViewer({ alwaysVisible = false }: { alwaysVisible?: boolean }) {
         {loadingError && <PdfPreviewError error="pdf-viewer-loading-error" />}
 
         {hasShortCompileTimeout && error === 'timedout' ? (
-          isPaywallChangeCompileTimeoutEnabled ? (
+          isCompileTimeoutPaywallDisplay ? (
             <TimeoutUpgradePaywallPrompt />
           ) : (
             <TimeoutUpgradePromptNew />
