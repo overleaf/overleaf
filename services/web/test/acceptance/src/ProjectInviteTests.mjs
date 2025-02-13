@@ -361,6 +361,60 @@ describe('ProjectInviteTests', function () {
         )
       })
 
+      it('should fail if email is not a string', function (done) {
+        this.sendingUser.getCsrfToken(err => {
+          if (err) {
+            return done(err)
+          }
+          this.sendingUser.request.post(
+            {
+              uri: `/project/${this.projectId}/invite`,
+              json: {
+                email: {},
+                privileges: 'readAndWrite',
+              },
+            },
+            (err, response, body) => {
+              if (err) {
+                return done(err)
+              }
+              expect(response.statusCode).to.equal(400)
+              expect(response.body.validation.body.message).to.equal(
+                '"email" must be a string'
+              )
+              done()
+            }
+          )
+        })
+      })
+
+      it('should fail on invalid privileges', function (done) {
+        this.sendingUser.getCsrfToken(err => {
+          if (err) {
+            return done(err)
+          }
+          this.sendingUser.request.post(
+            {
+              uri: `/project/${this.projectId}/invite`,
+              json: {
+                email: this.email,
+                privileges: 'invalid-privilege',
+              },
+            },
+            (err, response, body) => {
+              if (err) {
+                return done(err)
+              }
+              expect(response.statusCode).to.equal(400)
+              expect(response.body.validation.body.message).to.equal(
+                '"privileges" must be one of [readOnly, readAndWrite, review]'
+              )
+              done()
+            }
+          )
+        })
+      })
+
       it('should allow the project owner to create and remove invites', function (done) {
         Async.series(
           [

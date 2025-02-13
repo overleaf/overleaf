@@ -103,6 +103,18 @@ export default {
       }),
       CaptchaMiddleware.validateCaptcha('invite'),
       AuthenticationController.requireLogin(),
+      validate({
+        body: Joi.object({
+          email: Joi.string().required(),
+          privileges: Joi.string()
+            .valid(
+              PrivilegeLevels.READ_ONLY,
+              PrivilegeLevels.READ_AND_WRITE,
+              PrivilegeLevels.REVIEW
+            )
+            .required(),
+        }),
+      }),
       AuthorizationMiddleware.ensureUserCanAdminProject,
       CollaboratorsInviteController.inviteToProject
     )
