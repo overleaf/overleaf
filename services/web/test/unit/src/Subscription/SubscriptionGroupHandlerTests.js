@@ -594,7 +594,7 @@ describe('SubscriptionGroupHandler', function () {
   describe('ensureSubscriptionIsActive', function () {
     it('should throw if the subscription is not active', async function () {
       await expect(
-        this.Handler.promises.ensureSubscriptionIsActive({})
+        this.Handler.promises.ensureSubscriptionIsActive(this.subscription)
       ).to.be.rejectedWith('The subscription is not active')
     })
 

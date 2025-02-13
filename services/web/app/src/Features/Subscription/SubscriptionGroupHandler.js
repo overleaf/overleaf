@@ -8,7 +8,11 @@ const PlansLocator = require('./PlansLocator')
 const SubscriptionHandler = require('./SubscriptionHandler')
 const GroupPlansData = require('./GroupPlansData')
 const { MEMBERS_LIMIT_ADD_ON_CODE } = require('./RecurlyEntities')
-const { ManuallyCollectedError, PendingChangeError } = require('./Errors')
+const {
+  ManuallyCollectedError,
+  PendingChangeError,
+  InactiveError,
+} = require('./Errors')
 
 async function removeUserFromGroup(subscriptionId, userIdToRemove) {
   await SubscriptionUpdater.promises.removeUserFromGroup(
@@ -65,7 +69,9 @@ async function ensureFlexibleLicensingEnabled(plan) {
 
 async function ensureSubscriptionIsActive(subscription) {
   if (subscription?.recurlyStatus?.state !== 'active') {
-    throw new Error('The subscription is not active')
+    throw new InactiveError('The subscription is not active', {
+      subscriptionId: subscription._id.toString(),
+    })
   }
 }
 

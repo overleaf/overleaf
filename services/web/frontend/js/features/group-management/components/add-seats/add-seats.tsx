@@ -27,10 +27,15 @@ import {
   AddOnUpdate,
   SubscriptionChangePreview,
 } from '../../../../../../types/subscription/subscription-change-preview'
-import { MergeAndOverride } from '../../../../../../types/utils'
+import { MergeAndOverride, Nullable } from '../../../../../../types/utils'
 import { sendMB } from '../../../../infrastructure/event-tracking'
 
 export const MAX_NUMBER_OF_USERS = 50
+
+type CostSummaryData = MergeAndOverride<
+  SubscriptionChangePreview,
+  { change: AddOnUpdate }
+>
 
 function AddSeats() {
   const { t } = useTranslation()
@@ -45,12 +50,11 @@ function AddSeats() {
   const { signal: contactSalesSignal } = useAbortController()
   const {
     isLoading: isLoadingCostSummary,
+    isError: isErrorCostSummary,
     runAsync: runAsyncCostSummary,
     data: costSummaryData,
     reset: resetCostSummaryData,
-  } = useAsync<
-    MergeAndOverride<SubscriptionChangePreview, { change: AddOnUpdate }>
-  >()
+  } = useAsync<CostSummaryData>()
   const {
     isLoading: isAddingSeats,
     isError: isErrorAddingSeats,
@@ -319,30 +323,13 @@ function AddSeats() {
                     )}
                   </FormGroup>
                 </div>
-                {isLoadingCostSummary ? (
-                  <LoadingSpinner className="ms-auto me-auto" />
-                ) : shouldContactSales ? (
-                  <div>
-                    <Notification
-                      content={
-                        <Trans
-                          i18nKey="if_you_want_more_than_x_users_on_your_plan_we_need_to_add_them_for_you"
-                          // eslint-disable-next-line react/jsx-key
-                          components={[<b />]}
-                          values={{ count: 50 }}
-                          shouldUnescape
-                          tOptions={{ interpolation: { escapeValue: true } }}
-                        />
-                      }
-                      type="info"
-                    />
-                  </div>
-                ) : (
-                  <CostSummary
-                    subscriptionChange={costSummaryData}
-                    totalLicenses={totalLicenses}
-                  />
-                )}
+                <CostSummarySection
+                  isLoadingCostSummary={isLoadingCostSummary}
+                  isErrorCostSummary={isErrorCostSummary}
+                  shouldContactSales={shouldContactSales}
+                  costSummaryData={costSummaryData}
+                  totalLicenses={totalLicenses}
+                />
                 <div className="d-flex align-items-center justify-content-end gap-2">
                   {!isProfessional && (
                     <a
@@ -386,6 +373,59 @@ function AddSeats() {
         </Col>
       </Row>
     </div>
+  )
+}
+
+type CostSummarySectionProps = {
+  isLoadingCostSummary: boolean
+  isErrorCostSummary: boolean
+  shouldContactSales: boolean
+  costSummaryData: Nullable<CostSummaryData>
+  totalLicenses: number
+}
+
+function CostSummarySection({
+  isLoadingCostSummary,
+  isErrorCostSummary,
+  shouldContactSales,
+  costSummaryData,
+  totalLicenses,
+}: CostSummarySectionProps) {
+  const { t } = useTranslation()
+
+  if (isLoadingCostSummary) {
+    return <LoadingSpinner className="ms-auto me-auto" />
+  }
+
+  if (shouldContactSales) {
+    return (
+      <Notification
+        content={
+          <Trans
+            i18nKey="if_you_want_more_than_x_users_on_your_plan_we_need_to_add_them_for_you"
+            // eslint-disable-next-line react/jsx-key
+            components={[<b />]}
+            values={{ count: 50 }}
+            shouldUnescape
+            tOptions={{ interpolation: { escapeValue: true } }}
+          />
+        }
+        type="info"
+      />
+    )
+  }
+
+  if (isErrorCostSummary) {
+    return (
+      <Notification type="error" content={t('generic_something_went_wrong')} />
+    )
+  }
+
+  return (
+    <CostSummary
+      subscriptionChange={costSummaryData}
+      totalLicenses={totalLicenses}
+    />
   )
 }
 

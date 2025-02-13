@@ -13,7 +13,12 @@ import ErrorController from '../Errors/ErrorController.js'
 import UserGetter from '../User/UserGetter.js'
 import { Subscription } from '../../models/Subscription.js'
 import { isProfessionalGroupPlan } from './PlansHelper.mjs'
-import { MissingBillingInfoError, ManuallyCollectedError } from './Errors.js'
+import {
+  MissingBillingInfoError,
+  ManuallyCollectedError,
+  PendingChangeError,
+  InactiveError,
+} from './Errors.js'
 import RecurlyClient from './RecurlyClient.js'
 
 /**
@@ -150,11 +155,6 @@ async function addSeatsToGroupSubscription(req, res) {
       isProfessional: isProfessionalGroupPlan(subscription),
     })
   } catch (error) {
-    logger.err(
-      { error },
-      'error while getting users group subscription details'
-    )
-
     if (error instanceof MissingBillingInfoError) {
       return res.redirect(
         '/user/subscription/group/missing-billing-information'
@@ -166,6 +166,15 @@ async function addSeatsToGroupSubscription(req, res) {
         '/user/subscription/group/manually-collected-subscription'
       )
     }
+
+    if (error instanceof PendingChangeError || error instanceof InactiveError) {
+      return res.redirect('/user/subscription')
+    }
+
+    logger.err(
+      { error },
+      'error while getting users group subscription details'
+    )
 
     return res.redirect('/user/subscription')
   }
@@ -187,11 +196,21 @@ async function previewAddSeatsSubscriptionChange(req, res) {
 
     res.json(preview)
   } catch (error) {
+    if (
+      error instanceof MissingBillingInfoError ||
+      error instanceof ManuallyCollectedError ||
+      error instanceof PendingChangeError ||
+      error instanceof InactiveError
+    ) {
+      return res.status(422).end()
+    }
+
     logger.err(
       { error },
       'error trying to preview "add seats" subscription change'
     )
-    return res.status(400).end()
+
+    return res.status(500).end()
   }
 }
 
@@ -211,11 +230,21 @@ async function createAddSeatsSubscriptionChange(req, res) {
 
     res.json(create)
   } catch (error) {
+    if (
+      error instanceof MissingBillingInfoError ||
+      error instanceof ManuallyCollectedError ||
+      error instanceof PendingChangeError ||
+      error instanceof InactiveError
+    ) {
+      return res.status(422).end()
+    }
+
     logger.err(
       { error },
       'error trying to create "add seats" subscription change'
     )
-    return res.status(400).end()
+
+    return res.status(500).end()
   }
 }
 
@@ -272,8 +301,6 @@ async function subscriptionUpgradePage(req, res) {
       groupName: olSubscription.teamName,
     })
   } catch (error) {
-    logger.err({ error }, 'error loading upgrade subscription page')
-
     if (error instanceof MissingBillingInfoError) {
       return res.redirect(
         '/user/subscription/group/missing-billing-information'
@@ -285,6 +312,12 @@ async function subscriptionUpgradePage(req, res) {
         '/user/subscription/group/manually-collected-subscription'
       )
     }
+
+    if (error instanceof PendingChangeError || error instanceof InactiveError) {
+      return res.redirect('/user/subscription')
+    }
+
+    logger.err({ error }, 'error loading upgrade subscription page')
 
     return res.redirect('/user/subscription')
   }

@@ -124,9 +124,10 @@ describe('SubscriptionGroupController', function () {
     }
 
     this.Errors = {
-      MissingBillingInfoError: class MissingBillingInfoError extends Error {},
-      ManuallyCollectedError: class ManuallyCollectedError extends Error {},
-      PendingChangeError: class PendingChangeError extends Error {},
+      MissingBillingInfoError: class extends Error {},
+      ManuallyCollectedError: class extends Error {},
+      PendingChangeError: class extends Error {},
+      InactiveError: class extends Error {},
     }
 
     this.Controller = await esmock.strict(modulePath, {
@@ -482,7 +483,7 @@ describe('SubscriptionGroupController', function () {
 
       const res = {
         status: statusCode => {
-          statusCode.should.equal(400)
+          statusCode.should.equal(500)
 
           return {
             end: () => {
@@ -519,7 +520,7 @@ describe('SubscriptionGroupController', function () {
 
       const res = {
         status: statusCode => {
-          statusCode.should.equal(400)
+          statusCode.should.equal(500)
 
           return {
             end: () => {

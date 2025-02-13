@@ -110,7 +110,7 @@ describe('RecurlyClient', function () {
       },
     }
     this.Errors = {
-      MissingBillingInfoError: class MissingBillingInfoError extends Error {},
+      MissingBillingInfoError: class extends Error {},
     }
 
     return (this.RecurlyClient = SandboxedModule.require(MODULE_PATH, {
