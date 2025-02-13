@@ -12,11 +12,14 @@ const studentRoles = [
 // We can display TimeoutMessageAfterPaywallDismissal after the user has dismissed the paywall. That logic can be implemented in this file or somewhere else?
 function TimeoutUpgradePaywallPrompt() {
   const odcRole = getMeta('ol-odcRole')
+  const planPrices = getMeta('ol-paywallPlans')
   const isStudent = useMemo(() => studentRoles.includes(odcRole), [odcRole])
 
   return (
     <div>
       <p>Current user is {!isStudent && 'not'} a student.</p>
+      <p>Student plan: {planPrices.student} per month</p>
+      <p>Standard plan: {planPrices.collaborator} per month</p>
       <TimeoutMessageAfterPaywallDismissal />
     </div>
   )

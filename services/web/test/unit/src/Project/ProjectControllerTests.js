@@ -62,6 +62,11 @@ describe('ProjectController', function () {
         getUsersSubscription: sinon.stub().resolves(),
       },
     }
+    this.SubscriptionController = {
+      promises: {
+        getRecommendedCurrency: sinon.stub().resolves({ currency: 'USD' }),
+      },
+    }
     this.LimitationsManager = {
       hasPaidSubscription: sinon.stub(),
       promises: {
@@ -231,6 +236,7 @@ describe('ProjectController', function () {
         '../User/UserController': this.UserController,
         './ProjectHelper': this.ProjectHelper,
         '../Subscription/SubscriptionLocator': this.SubscriptionLocator,
+        '../Subscription/SubscriptionController': this.SubscriptionController,
         '../Subscription/LimitationsManager': this.LimitationsManager,
         '../Tags/TagsHandler': this.TagsHandler,
         '../../models/User': { User: this.UserModel },

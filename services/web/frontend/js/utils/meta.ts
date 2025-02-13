@@ -160,6 +160,7 @@ export interface Meta {
   'ol-odcRole': string
   'ol-overallThemes': OverallThemeMeta[]
   'ol-passwordStrengthOptions': PasswordStrengthOptions
+  'ol-paywallPlans': { [key: string]: string }
   'ol-personalAccessTokens': AccessToken[] | undefined
   'ol-plan': Plan
   'ol-planCode': string

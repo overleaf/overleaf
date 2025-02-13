@@ -49,6 +49,8 @@ const UserGetter = require('../User/UserGetter')
 const {
   isStandaloneAiAddOnPlanCode,
 } = require('../Subscription/RecurlyEntities')
+const SubscriptionController = require('../Subscription/SubscriptionController.js')
+const { formatCurrency } = require('../../util/currency')
 
 /**
  * @import { GetProjectsRequest, GetProjectsResponse, Project } from "./types"
@@ -741,6 +743,14 @@ const _ProjectController = {
         chatEnabled = Features.hasFeature('chat')
       }
 
+      const isPaywallChangeCompileTimeoutEnabled =
+        splitTestAssignments['paywall-change-compile-timeout']?.variant ===
+        'enabled'
+
+      const paywallPlans =
+        isPaywallChangeCompileTimeoutEnabled &&
+        (await ProjectController._getPaywallPlansPrices(req, res))
+
       res.render(template, {
         title: project.name,
         priority_title: true,
@@ -841,15 +851,40 @@ const _ProjectController = {
         isReviewerRoleEnabled:
           reviewerRoleAssignment?.variant === 'enabled' ||
           Object.keys(project.reviewer_refs || {}).length > 0,
-        isPaywallChangeCompileTimeoutEnabled:
-          splitTestAssignments['paywall-change-compile-timeout']?.variant ===
-          'enabled',
+        isPaywallChangeCompileTimeoutEnabled,
+        paywallPlans,
       })
       timer.done()
     } catch (err) {
       OError.tag(err, 'error getting details for project page')
       return next(err)
     }
+  },
+
+  async _getPaywallPlansPrices(
+    req,
+    res,
+    paywallPlans = ['collaborator', 'student']
+  ) {
+    const plansData = {}
+
+    const locale = req.i18n.language
+    const { currency } = await SubscriptionController.getRecommendedCurrency(
+      req,
+      res
+    )
+
+    paywallPlans.forEach(plan => {
+      const planPrice = Settings.localizedPlanPricing[currency][plan].monthly
+      const formattedPlanPrice = formatCurrency(
+        planPrice,
+        currency,
+        locale,
+        true
+      )
+      plansData[plan] = formattedPlanPrice
+    })
+    return plansData
   },
 
   async _refreshFeatures(req, user) {
@@ -1154,6 +1189,7 @@ const ProjectController = {
   _injectProjectUsers: _ProjectController._injectProjectUsers,
   _isInPercentageRollout: _ProjectController._isInPercentageRollout,
   _refreshFeatures: _ProjectController._refreshFeatures,
+  _getPaywallPlansPrices: _ProjectController._getPaywallPlansPrices,
 }
 
 module.exports = ProjectController
