@@ -1,0 +1,77 @@
+.upgrade-prompt {
+  border-radius: var(--border-radius-base);
+  box-shadow: 0 4px 6px 0 #1e25301f;
+  padding: var(--spacing-06);
+
+  .row {
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  .upgrade-prompt-title {
+    font-weight: 600;
+  }
+
+  .upgrade-prompt-summary {
+    margin-bottom: var(--spacing-10);
+  }
+
+  .upgrade-prompt-card {
+    display: flex;
+    flex-direction: column;
+    border-radius: var(--border-radius-medium);
+    padding: var(--spacing-09);
+    height: 100%;
+    font-size: var(--font-size-02);
+
+    h3 {
+      margin: 0;
+      font-weight: 600;
+    }
+  }
+
+  .upgrade-prompt-card-premium {
+    border: 2px solid transparent;
+    background:
+      linear-gradient(white, white) padding-box,
+      var(--premium-gradient) border-box;
+  }
+
+  .upgrade-prompt-card-free {
+    border: 2px solid var(--border-divider);
+  }
+
+  .upgrade-prompt-price {
+    margin-bottom: var(--spacing-05);
+  }
+
+  .upgrade-prompt-price-number {
+    @include heading-xl;
+
+    font-weight: 600;
+  }
+
+  .upgrade-prompt-list {
+    margin-bottom: var(--spacing-08);
+
+    & .material-symbols {
+      vertical-align: bottom;
+    }
+
+    & li:not(:last-of-type) {
+      margin-bottom: var(--spacing-05);
+    }
+  }
+
+  .upgrade-prompt-all-plans {
+    @include body-xs;
+
+    margin-top: var(--spacing-07);
+    margin-bottom: 0;
+
+    & .material-symbols {
+      vertical-align: bottom;
+      font-size: var(--font-size-02);
+    }
+  }
+}
