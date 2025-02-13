@@ -52,12 +52,12 @@ USER node
 # the webpack image has deps+src+webpack artifacts
 FROM dev AS webpack
 USER root
-RUN OVERLEAF_CONFIG=/overleaf/services/web/config/settings.webpack.js npm run webpack:production
+RUN OVERLEAF_CONFIG=/overleaf/services/web/config/settings.webpack.js nice npm run webpack:production
 
 
 # intermediate image for removing source maps ahead of copying into final production image
 FROM webpack AS webpack-no-sourcemaps
-RUN find /overleaf/services/web/public -name '*.js.map' -delete
+RUN nice find /overleaf/services/web/public -name '*.js.map' -delete
 
 
 # copy source code and precompile pug images
@@ -65,7 +65,7 @@ FROM deps-prod AS pug
 COPY services/web /overleaf/services/web
 # Omit Server Pro/CE specific scripts from SaaS image
 RUN rm /overleaf/services/web/modules/server-ce-scripts -rf
-RUN OVERLEAF_CONFIG=/overleaf/services/web/config/settings.overrides.saas.js npm run precompile-pug
+RUN OVERLEAF_CONFIG=/overleaf/services/web/config/settings.overrides.saas.js nice npm run precompile-pug
 
 
 # the web image with only production dependencies but no webpack production build, for development
