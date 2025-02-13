@@ -151,6 +151,7 @@ async function confirmCreate(projectId, chunk, chunkId, mongoOpts = {}) {
   if (result.matchedCount === 0) {
     throw new OError('pending chunk not found', { projectId, chunkId })
   }
+  await updateProjectRecord(projectId, chunk, mongoOpts)
 }
 
 /**
@@ -171,7 +172,10 @@ async function updateProjectRecord(projectId, chunk, mongoOpts = {}) {
       },
       // store the first pending change timestamp for the chunk, this will
       // be cleared every time a backup is completed.
-      $min: { 'overleaf.backup.pendingChangeAt': chunk.getEndTimestamp() },
+      $min: {
+        'overleaf.backup.pendingChangeAt':
+          chunk.getEndTimestamp() || new Date(),
+      },
     },
     mongoOpts
   )
@@ -191,7 +195,6 @@ async function confirmUpdate(projectId, oldChunkId, newChunk, newChunkId) {
     await session.withTransaction(async () => {
       await deleteChunk(projectId, oldChunkId, { session })
       await confirmCreate(projectId, newChunk, newChunkId, { session })
-      await updateProjectRecord(projectId, newChunk, { session })
     })
   } finally {
     await session.endSession()

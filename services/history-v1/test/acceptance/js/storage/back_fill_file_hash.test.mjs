@@ -12,7 +12,8 @@ import {
 import cleanup from './support/cleanup.js'
 import testProjects from '../api/support/test_projects.js'
 import { execFile } from 'node:child_process'
-import { expect } from 'chai'
+import chai, { expect } from 'chai'
+import chaiExclude from 'chai-exclude'
 import config from 'config'
 import ObjectPersistor from '@overleaf/object-persistor'
 import { WritableBuffer } from '@overleaf/stream-utils'
@@ -26,6 +27,7 @@ import {
   makeProjectKey,
 } from '../../../../storage/lib/blob_store/index.js'
 
+chai.use(chaiExclude)
 const TIMEOUT = 20 * 1_000
 
 const { deksBucket } = config.get('backupStore')
@@ -660,116 +662,129 @@ describe('back_fill_file_hash script', function () {
       return !hasHash // only files without hash processed
     })
     it('should update mongo', async function () {
-      expect(await projectsCollection.find({}).toArray()).to.deep.equal([
-        {
-          _id: projectId0,
-          rootFolder: [
-            {
-              fileRefs: [
-                { _id: fileId8, hash: gitBlobHash(fileId8) },
-                { _id: fileId0, hash: gitBlobHash(fileId0) },
-                { _id: fileId6, hash: gitBlobHash(fileId6) },
-                { _id: fileId7, hash: hashFile7 },
-              ],
-              folders: [{ fileRefs: [], folders: [] }],
-            },
-          ],
-          overleaf: { history: { id: historyId0 } },
-        },
-        {
-          _id: projectId1,
-          rootFolder: [
-            {
-              fileRefs: [{ _id: fileId1, hash: gitBlobHash(fileId1) }],
-              folders: [
-                {
-                  fileRefs: [],
-                  folders: [
-                    {
-                      fileRefs: [{ _id: fileId1, hash: gitBlobHash(fileId1) }],
-                      folders: [],
-                    },
-                  ],
-                },
-              ],
-            },
-          ],
-          overleaf: { history: { id: historyId1 } },
-        },
-        {
-          _id: projectId2,
-          rootFolder: [
-            {
-              fileRefs: [],
-              folders: [
-                {
-                  fileRefs: [],
-                  folders: [
-                    {
-                      fileRefs: [{ _id: fileId2, hash: gitBlobHash(fileId2) }],
-                      folders: [],
-                    },
-                  ],
-                },
-              ],
-            },
-          ],
-          overleaf: { history: { id: historyId2 } },
-        },
-        {
-          _id: projectId3,
-          rootFolder: [
-            {
-              fileRefs: [],
-              folders: [
-                {
-                  fileRefs: [],
-                  folders: [
-                    {
-                      fileRefs: [{ _id: fileId3, hash: gitBlobHash(fileId3) }],
-                      folders: [],
-                    },
-                  ],
-                },
-              ],
-            },
-          ],
-          overleaf: { history: { id: historyId3 } },
-        },
-        {
-          _id: projectIdNoHistory,
-          rootFolder: [{ fileRefs: [], folders: [] }],
-          overleaf: { history: { conversionFailed: true } },
-        },
-        {
-          _id: projectIdNoOverleaf,
-          rootFolder: [{ fileRefs: [], folders: [] }],
-        },
-        {
-          _id: projectIdBadFileTree0,
-          overleaf: { history: { id: historyIdBadFileTree0 } },
-        },
-        {
-          _id: projectIdBadFileTree1,
-          rootFolder: [],
-          overleaf: { history: { id: historyIdBadFileTree1 } },
-        },
-        {
-          _id: projectIdBadFileTree2,
-          rootFolder: [{ fileRefs: [{ _id: null }] }],
-          overleaf: { history: { id: historyIdBadFileTree2 } },
-        },
-        {
-          _id: projectIdBadFileTree3,
-          rootFolder: [
-            {
-              folders: [null, { folders: {}, fileRefs: 13 }],
-              fileRefs: [{ _id: fileId9, hash: gitBlobHash(fileId9) }],
-            },
-          ],
-          overleaf: { history: { id: historyIdBadFileTree3 } },
-        },
-      ])
+      expect(await projectsCollection.find({}).toArray())
+        .excludingEvery([
+          'currentEndTimestamp',
+          'currentEndVersion',
+          'updatedAt',
+          'backup',
+        ])
+        .to.deep.equal([
+          {
+            _id: projectId0,
+            rootFolder: [
+              {
+                fileRefs: [
+                  { _id: fileId8, hash: gitBlobHash(fileId8) },
+                  { _id: fileId0, hash: gitBlobHash(fileId0) },
+                  { _id: fileId6, hash: gitBlobHash(fileId6) },
+                  { _id: fileId7, hash: hashFile7 },
+                ],
+                folders: [{ fileRefs: [], folders: [] }],
+              },
+            ],
+            overleaf: { history: { id: historyId0 } },
+          },
+          {
+            _id: projectId1,
+            rootFolder: [
+              {
+                fileRefs: [{ _id: fileId1, hash: gitBlobHash(fileId1) }],
+                folders: [
+                  {
+                    fileRefs: [],
+                    folders: [
+                      {
+                        fileRefs: [
+                          { _id: fileId1, hash: gitBlobHash(fileId1) },
+                        ],
+                        folders: [],
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+            overleaf: { history: { id: historyId1 } },
+          },
+          {
+            _id: projectId2,
+            rootFolder: [
+              {
+                fileRefs: [],
+                folders: [
+                  {
+                    fileRefs: [],
+                    folders: [
+                      {
+                        fileRefs: [
+                          { _id: fileId2, hash: gitBlobHash(fileId2) },
+                        ],
+                        folders: [],
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+            overleaf: { history: { id: historyId2 } },
+          },
+          {
+            _id: projectId3,
+            rootFolder: [
+              {
+                fileRefs: [],
+                folders: [
+                  {
+                    fileRefs: [],
+                    folders: [
+                      {
+                        fileRefs: [
+                          { _id: fileId3, hash: gitBlobHash(fileId3) },
+                        ],
+                        folders: [],
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+            overleaf: { history: { id: historyId3 } },
+          },
+          {
+            _id: projectIdNoHistory,
+            rootFolder: [{ fileRefs: [], folders: [] }],
+            overleaf: { history: { conversionFailed: true } },
+          },
+          {
+            _id: projectIdNoOverleaf,
+            rootFolder: [{ fileRefs: [], folders: [] }],
+          },
+          {
+            _id: projectIdBadFileTree0,
+            overleaf: { history: { id: historyIdBadFileTree0 } },
+          },
+          {
+            _id: projectIdBadFileTree1,
+            rootFolder: [],
+            overleaf: { history: { id: historyIdBadFileTree1 } },
+          },
+          {
+            _id: projectIdBadFileTree2,
+            rootFolder: [{ fileRefs: [{ _id: null }] }],
+            overleaf: { history: { id: historyIdBadFileTree2 } },
+          },
+          {
+            _id: projectIdBadFileTree3,
+            rootFolder: [
+              {
+                folders: [null, { folders: {}, fileRefs: 13 }],
+                fileRefs: [{ _id: fileId9, hash: gitBlobHash(fileId9) }],
+              },
+            ],
+            overleaf: { history: { id: historyIdBadFileTree3 } },
+          },
+        ])
       expect(await deletedProjectsCollection.find({}).toArray()).to.deep.equal([
         {
           _id: deleteProjectsRecordId0,

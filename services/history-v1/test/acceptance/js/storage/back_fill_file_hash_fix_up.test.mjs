@@ -8,7 +8,8 @@ import { backedUpBlobs, blobs, db } from '../../../../storage/lib/mongodb.js'
 import cleanup from './support/cleanup.js'
 import testProjects from '../api/support/test_projects.js'
 import { execFile } from 'node:child_process'
-import { expect } from 'chai'
+import chai, { expect } from 'chai'
+import chaiExclude from 'chai-exclude'
 import config from 'config'
 import { WritableBuffer } from '@overleaf/stream-utils'
 import {
@@ -21,6 +22,8 @@ import {
   makeProjectKey,
 } from '../../../../storage/lib/blob_store/index.js'
 import ObjectPersistor from '@overleaf/object-persistor'
+
+chai.use(chaiExclude)
 
 const TIMEOUT = 20 * 1_000
 
@@ -604,91 +607,98 @@ describe('back_fill_file_hash_fix_up script', function () {
     expect(line).to.include(gitBlobHash(fileIdBlobExistsInGCSCorrupted))
   })
   it('should update mongo', async function () {
-    expect(await projectsCollection.find({}).toArray()).to.deep.equal([
-      {
-        _id: projectId0,
-        rootFolder: [
-          {
-            fileRefs: [
-              // Removed
-              // { _id: fileIdMissing0 },
-              // Removed
-              // { _id: fileIdMissing2 },
-              // Added hash
-              {
-                _id: fileIdHashMissing0,
-                hash: gitBlobHash(fileIdHashMissing0),
-              },
-              // Added hash
-              {
-                _id: fileIdHashMissing1,
-                hash: gitBlobHash(fileIdHashMissing1),
-              },
-              // No change, should warn about the find.
-              {
-                _id: fileIdWithDifferentHashFound,
-                hash: gitBlobHash(fileIdInGoodState),
-              },
-              // No change, should warn about the need to restore.
-              {
-                _id: fileIdWithDifferentHashRestore,
-                hash: gitBlobHash(fileIdMissing0),
-              },
-            ],
-            folders: [
-              {
-                docs: [],
-              },
-              null,
-              {
-                fileRefs: [
-                  null,
-                  // No change
-                  {
-                    _id: fileIdInGoodState,
-                    hash: gitBlobHash(fileIdInGoodState),
-                  },
-                  // Updated hash
-                  {
-                    _id: fileIdWithDifferentHashNotFound0,
-                    hash: gitBlobHash(fileIdWithDifferentHashNotFound0),
-                  },
-                  // Updated hash
-                  {
-                    _id: fileIdRestoreFromFilestore0,
-                    hash: gitBlobHash(fileIdRestoreFromFilestore0),
-                  },
-                  // Added hash
-                  {
-                    _id: fileIdRestoreFromFilestore1,
-                    hash: gitBlobHash(fileIdRestoreFromFilestore1),
-                  },
-                  // No change, blob created
-                  {
-                    _id: fileIdBlobExistsInGCS0,
-                    hash: gitBlobHash(fileIdBlobExistsInGCS0),
-                  },
-                  // No change, flagged
-                  {
-                    _id: fileIdBlobExistsInGCSCorrupted,
-                    hash: gitBlobHash(fileIdBlobExistsInGCSCorrupted),
-                  },
-                  // Added hash
-                  {
-                    _id: fileIdBlobExistsInGCS1,
-                    hash: gitBlobHash(fileIdBlobExistsInGCS1),
-                  },
-                ],
-                folders: [],
-              },
-            ],
-          },
-        ],
-        overleaf: { history: { id: historyId0 } },
-        // Incremented when removing file/updating hash
-        version: 8,
-      },
-    ])
+    expect(await projectsCollection.find({}).toArray())
+      .excludingEvery([
+        'currentEndTimestamp',
+        'currentEndVersion',
+        'updatedAt',
+        'backup',
+      ])
+      .to.deep.equal([
+        {
+          _id: projectId0,
+          rootFolder: [
+            {
+              fileRefs: [
+                // Removed
+                // { _id: fileIdMissing0 },
+                // Removed
+                // { _id: fileIdMissing2 },
+                // Added hash
+                {
+                  _id: fileIdHashMissing0,
+                  hash: gitBlobHash(fileIdHashMissing0),
+                },
+                // Added hash
+                {
+                  _id: fileIdHashMissing1,
+                  hash: gitBlobHash(fileIdHashMissing1),
+                },
+                // No change, should warn about the find.
+                {
+                  _id: fileIdWithDifferentHashFound,
+                  hash: gitBlobHash(fileIdInGoodState),
+                },
+                // No change, should warn about the need to restore.
+                {
+                  _id: fileIdWithDifferentHashRestore,
+                  hash: gitBlobHash(fileIdMissing0),
+                },
+              ],
+              folders: [
+                {
+                  docs: [],
+                },
+                null,
+                {
+                  fileRefs: [
+                    null,
+                    // No change
+                    {
+                      _id: fileIdInGoodState,
+                      hash: gitBlobHash(fileIdInGoodState),
+                    },
+                    // Updated hash
+                    {
+                      _id: fileIdWithDifferentHashNotFound0,
+                      hash: gitBlobHash(fileIdWithDifferentHashNotFound0),
+                    },
+                    // Updated hash
+                    {
+                      _id: fileIdRestoreFromFilestore0,
+                      hash: gitBlobHash(fileIdRestoreFromFilestore0),
+                    },
+                    // Added hash
+                    {
+                      _id: fileIdRestoreFromFilestore1,
+                      hash: gitBlobHash(fileIdRestoreFromFilestore1),
+                    },
+                    // No change, blob created
+                    {
+                      _id: fileIdBlobExistsInGCS0,
+                      hash: gitBlobHash(fileIdBlobExistsInGCS0),
+                    },
+                    // No change, flagged
+                    {
+                      _id: fileIdBlobExistsInGCSCorrupted,
+                      hash: gitBlobHash(fileIdBlobExistsInGCSCorrupted),
+                    },
+                    // Added hash
+                    {
+                      _id: fileIdBlobExistsInGCS1,
+                      hash: gitBlobHash(fileIdBlobExistsInGCS1),
+                    },
+                  ],
+                  folders: [],
+                },
+              ],
+            },
+          ],
+          overleaf: { history: { id: historyId0 } },
+          // Incremented when removing file/updating hash
+          version: 8,
+        },
+      ])
     expect(await deletedProjectsCollection.find({}).toArray()).to.deep.equal([
       {
         _id: deleteProjectsRecordId0,

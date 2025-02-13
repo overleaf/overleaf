@@ -135,6 +135,7 @@ async function confirmCreate(projectId, chunk, chunkId) {
       _deletePendingChunk(tx, projectId, chunkId),
       _insertChunk(tx, projectId, chunk, chunkId),
     ])
+    await updateProjectRecord(projectId, chunk)
   })
 }
 
