@@ -59,7 +59,7 @@ function UpgradeSummary({ subscriptionChange }: UpgradeSummaryProps) {
               </ListGroup.Item>
             )}
             <ListGroup.Item className="bg-transparent border-0 px-0 gap-3 card-description-secondary">
-              <span className="me-auto">{t('sales_tax')}</span>
+              <span className="me-auto">{t('vat')}</span>
               <span data-testid="tax">
                 {formatCurrency(
                   subscriptionChange.immediateCharge.tax,

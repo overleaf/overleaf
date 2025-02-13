@@ -1819,7 +1819,6 @@
   "ro": "Romanian",
   "role": "Role",
   "ru": "Russian",
-  "sales_tax": "Sales tax",
   "saml": "SAML",
   "saml_auth_error": "Sorry, your identity provider responded with an error.  Please contact your administrator for more information.",
   "saml_authentication_required_error": "Other login methods have been disabled by your group administrator. Please use your group SSO login.",

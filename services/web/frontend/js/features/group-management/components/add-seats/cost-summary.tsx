@@ -92,7 +92,7 @@ function CostSummary({ subscriptionChange, totalLicenses }: CostSummaryProps) {
                   data-testid="tax"
                 >
                   <span className="me-auto">
-                    {t('sales_tax')} &middot;{' '}
+                    {t('vat')} &middot;{' '}
                     {Math.round(
                       subscriptionChange.nextInvoice.tax.rate * 100 * factor
                     ) / factor}

@@ -269,10 +269,7 @@ describe('<AddSeats />', function () {
 
           cy.findByTestId('tax').within(() => {
             cy.findByText(
-              new RegExp(
-                `sales tax · ${this.body.nextInvoice.tax.rate * 100}%`,
-                'i'
-              )
+              new RegExp(`VAT · ${this.body.nextInvoice.tax.rate * 100}%`, 'i')
             )
             cy.findByTestId('price').should(
               'have.text',
