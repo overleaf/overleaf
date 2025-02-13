@@ -185,7 +185,7 @@ module.exports = {
               // bring up more workers after they timed out
               poolRespawn: true,
               // limit concurrency (one per entrypoint and let the small includes queue up)
-              workers: 6,
+              workers: process.env.NODE_ENV === 'test' ? 1 : 6,
             },
           },
           // Compiles the Less syntax to CSS
