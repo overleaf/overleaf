@@ -173,10 +173,10 @@ export default function AddCollaborators({ readOnly }) {
             <option disabled={readOnly} value="readAndWrite">
               {t('can_edit')}
             </option>
-            <option value="readOnly">{t('can_view')}</option>
             {getMeta('ol-isReviewerRoleEnabled') && (
               <option value="review">{t('can_review')}</option>
             )}
+            <option value="readOnly">{t('can_view')}</option>
           </OLFormSelect>
           <span>&nbsp;&nbsp;</span>
           <ClickableElementEnhancer
