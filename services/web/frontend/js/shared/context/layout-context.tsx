@@ -20,6 +20,7 @@ import useScopeEventEmitter from '@/shared/hooks/use-scope-event-emitter'
 import useEventListener from '@/shared/hooks/use-event-listener'
 import { isSplitTestEnabled } from '@/utils/splitTestUtils'
 import { isMac } from '@/shared/utils/os'
+import { sendSearchEvent } from '@/features/event-tracking/search-events'
 
 export type IdeLayout = 'sideBySide' | 'flat'
 export type IdeView = 'editor' | 'file' | 'pdf' | 'history'
@@ -142,6 +143,10 @@ export const LayoutProvider: FC = ({ children }) => {
       ) {
         if (isSplitTestEnabled('full-project-search')) {
           event.preventDefault()
+          sendSearchEvent('search-open', {
+            searchType: 'full-project',
+            method: 'keyboard',
+          })
           setProjectSearchIsOpen(true)
         }
       }

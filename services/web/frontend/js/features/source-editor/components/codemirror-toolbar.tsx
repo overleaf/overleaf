@@ -4,11 +4,8 @@ import {
   useCodeMirrorStateContext,
   useCodeMirrorViewContext,
 } from './codemirror-context'
-import { searchPanelOpen } from '@codemirror/search'
 import { useResizeObserver } from '@/shared/hooks/use-resize-observer'
-import { ToolbarButton } from './toolbar/toolbar-button'
 import { ToolbarItems } from './toolbar/toolbar-items'
-import * as commands from '../extensions/toolbar/commands'
 import { ToolbarOverflow } from './toolbar/overflow'
 import useDropdown from '../../../shared/hooks/use-dropdown'
 import { getPanel } from '@codemirror/view'
@@ -21,8 +18,8 @@ import { isVisual } from '../extensions/visual/visual'
 import { language } from '@codemirror/language'
 import { minimumListDepthForSelection } from '../utils/tree-operations/ancestors'
 import { debugConsole } from '@/utils/debugging'
-import { bsVersion } from '@/features/utils/bootstrap-5'
 import { useTranslation } from 'react-i18next'
+import { ToggleSearchButton } from '@/features/source-editor/components/toolbar/toggle-search-button'
 
 export const CodeMirrorToolbar = () => {
   const view = useCodeMirrorViewContext()
@@ -173,14 +170,7 @@ const Toolbar = memo(function Toolbar() {
         className="ol-cm-toolbar-button-group ol-cm-toolbar-end"
         ref={handleButtons}
       >
-        <ToolbarButton
-          id="toolbar-toggle-search"
-          label="Toggle Search"
-          command={commands.toggleSearch}
-          active={searchPanelOpen(state)}
-          icon={bsVersion({ bs5: 'search', bs3: 'search' })}
-        />
-
+        <ToggleSearchButton state={state} />
         <SwitchToPDFButton />
         <DetacherSynctexControl />
         <DetachCompileButtonWrapper />

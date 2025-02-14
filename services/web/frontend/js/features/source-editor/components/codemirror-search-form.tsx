@@ -29,6 +29,7 @@ import { useUserSettingsContext } from '@/shared/context/user-settings-context'
 import { getStoredSelection, setStoredSelection } from '../extensions/search'
 import { debounce } from 'lodash'
 import { EditorSelection, EditorState } from '@codemirror/state'
+import { sendSearchEvent } from '@/features/event-tracking/search-events'
 
 const MATCH_COUNT_DEBOUNCE_WAIT = 100 // the amount of ms to wait before counting matches
 const MAX_MATCH_COUNT = 999 // the maximum number of matches to count
@@ -197,6 +198,11 @@ const CodeMirrorSearchForm: FC = () => {
         case 'Enter':
           event.preventDefault()
           replaceNext(view)
+          sendSearchEvent('search-replace-click', {
+            searchType: 'document',
+            action: 'replace',
+            method: 'keyboard',
+          })
           break
 
         case 'Tab': {
@@ -459,7 +465,14 @@ const CodeMirrorSearchForm: FC = () => {
             <OLButton
               variant="secondary"
               size="sm"
-              onClick={() => replaceNext(view)}
+              onClick={() => {
+                sendSearchEvent('search-replace-click', {
+                  searchType: 'document',
+                  action: 'replace',
+                  method: 'button',
+                })
+                replaceNext(view)
+              }}
             >
               {t('search_replace')}
             </OLButton>
@@ -467,7 +480,14 @@ const CodeMirrorSearchForm: FC = () => {
             <OLButton
               variant="secondary"
               size="sm"
-              onClick={() => replaceAll(view)}
+              onClick={() => {
+                sendSearchEvent('search-replace-click', {
+                  searchType: 'document',
+                  action: 'replace-all',
+                  method: 'button',
+                })
+                replaceAll(view)
+              }}
             >
               {t('search_replace_all')}
             </OLButton>

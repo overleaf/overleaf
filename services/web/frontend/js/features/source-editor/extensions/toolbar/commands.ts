@@ -20,6 +20,7 @@ import { snippet } from '@codemirror/autocomplete'
 import { snippets } from './snippets'
 import { minimumListDepthForSelection } from '../../utils/tree-operations/ancestors'
 import { isVisual } from '../visual/visual'
+import { sendSearchEvent } from '@/features/event-tracking/search-events'
 
 export const toggleBold = toggleRanges('\\textbf')
 export const toggleItalic = toggleRanges('\\textit')
@@ -151,6 +152,12 @@ export const toggleSearch: Command = view => {
   if (searchPanelOpen(view.state)) {
     closeSearchPanel(view)
   } else {
+    sendSearchEvent('search-open', {
+      searchType: 'document',
+      method: 'button',
+      location: 'toolbar',
+      mode: isVisual(view) ? 'visual' : 'source',
+    })
     openSearchPanel(view)
   }
   return true

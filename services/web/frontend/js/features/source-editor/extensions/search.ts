@@ -9,17 +9,26 @@ import {
   highlightSelectionMatches,
   togglePanel,
 } from '@codemirror/search'
-import { Decoration, EditorView, keymap, ViewPlugin } from '@codemirror/view'
+import {
+  Decoration,
+  EditorView,
+  KeyBinding,
+  keymap,
+  ViewPlugin,
+} from '@codemirror/view'
 import {
   Annotation,
   Compartment,
   EditorSelection,
   EditorState,
+  Prec,
   SelectionRange,
   StateEffect,
   StateField,
   TransactionSpec,
 } from '@codemirror/state'
+import { sendSearchEvent } from '@/features/event-tracking/search-events'
+import { isVisual } from '@/features/source-editor/extensions/visual/visual'
 
 const restoreSearchQueryAnnotation = Annotation.define<boolean>()
 
@@ -122,6 +131,25 @@ const scrollToMatch = (range: SelectionRange, view: EditorView) => {
   })
 }
 
+const searchEventKeymap: KeyBinding[] = [
+  // record an event when the search panel is opened using the keyboard shortcut
+  {
+    key: 'Mod-f',
+    preventDefault: true,
+    scope: 'editor search-panel',
+    run(view) {
+      if (!searchPanelOpen(view.state)) {
+        sendSearchEvent('search-open', {
+          searchType: 'document',
+          method: 'keyboard',
+          mode: isVisual(view) ? 'visual' : 'source',
+        })
+      }
+      return false // continue with the regular search shortcut
+    },
+  },
+]
+
 /**
  * A collection of extensions related to the search feature.
  */
@@ -129,6 +157,9 @@ export const search = () => {
   let open = false
 
   return [
+    // keymap for search events
+    Prec.high(keymap.of(searchEventKeymap)),
+
     // keymap for search
     keymap.of(searchKeymap),
 
