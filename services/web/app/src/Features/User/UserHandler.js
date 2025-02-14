@@ -15,12 +15,10 @@ function populateTeamInvites(user, callback) {
 async function countActiveUsers() {
   const oneYearAgo = new Date()
   oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1)
-  return await db.users
-    .find(
-      { lastActive: { $gte: oneYearAgo } },
-      { readPreference: READ_PREFERENCE_SECONDARY }
-    )
-    .count()
+  return await db.users.countDocuments(
+    { lastActive: { $gte: oneYearAgo } },
+    { readPreference: READ_PREFERENCE_SECONDARY }
+  )
 }
 
 module.exports = {

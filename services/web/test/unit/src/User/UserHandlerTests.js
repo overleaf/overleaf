@@ -17,9 +17,7 @@ describe('UserHandler', function () {
 
     this.db = {
       users: {
-        find: sinon.stub().returns({
-          count: sinon.stub().resolves(2),
-        }),
+        countDocuments: sinon.stub().resolves(2),
       },
     }
 
