@@ -1,0 +1,119 @@
+.labs-opt-in-wrapper {
+  color: var(--neutral-60);
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    color: var(--content-primary);
+  }
+
+  #experiments-container {
+    .title-row {
+      display: flex;
+    }
+
+    .labs-experiment-widget-container {
+      border: 1px solid var(--border-divider);
+    }
+  }
+
+  .labs-icon {
+    background-color: var(--green-50);
+    color: var(--white);
+    border-radius: 20%;
+    vertical-align: text-bottom;
+  }
+
+  p {
+    font-size: var(--font-size-02);
+    color: var(--content-secondary);
+  }
+
+  strong {
+    font-size: var(--font-size-02);
+  }
+
+  .labs-experiment-widget-container {
+    --image-size: 40px;
+    --image-padding: var(--spacing-01);
+
+    display: grid;
+    grid-template-columns: var(--image-size) 1fr auto;
+    gap: var(--spacing-07);
+    align-items: center;
+    padding: var(--spacing-05);
+
+    > div {
+      display: flex;
+      flex-direction: column;
+      padding-right: var(--spacing-07);
+
+      &:last-child {
+        padding-right: 0;
+      }
+    }
+
+    .experiment-logo-container {
+      padding: var(--image-padding);
+    }
+
+    img {
+      width: calc(var(--image-size) - var(--image-padding) * 2);
+      height: calc(var(--image-size) - var(--image-padding) * 2);
+    }
+
+    .title-row {
+      margin: 0;
+      margin-bottom: var(--spacing-04);
+
+      > h3 {
+        margin: 0;
+        margin-right: var(--spacing-04);
+      }
+
+      .badge {
+        line-height: var(--line-height-02);
+      }
+    }
+
+    p {
+      margin-bottom: var(--spacing-04);
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+
+    &.disabled-experiment {
+      grid-template-columns: var(--image-size) 3fr 1fr auto;
+
+      .disabled-explanation {
+        color: var(--content-secondary);
+      }
+
+      h3,
+      p {
+        color: var(--content-disabled);
+      }
+    }
+  }
+
+  @media (width < 768px) {
+    .labs-experiment-widget-container {
+      grid-template-columns: 1fr;
+    }
+  }
+}
+
+.disabled-experiment {
+  .ai-error-assistant-avatar {
+    filter: grayscale(0.6);
+  }
+}
+
+.labs-opt-in {
+  .form-group {
+    margin-top: var(--spacing-06);
+  }
+}

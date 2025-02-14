@@ -63,7 +63,7 @@ export function LabsExperimentWidget({
     <div
       className={`labs-experiment-widget-container ${disabled ? 'disabled-experiment' : ''}`}
     >
-      <div className="p-2">{logo}</div>
+      <div className="experiment-logo-container">{logo}</div>
       <div className="description-container">
         <div className="title-row">
           <h3 className="h4">{title}</h3>
