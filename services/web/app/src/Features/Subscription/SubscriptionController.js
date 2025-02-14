@@ -53,14 +53,6 @@ async function userSubscriptionPage(req, res) {
 
   await SplitTestHandler.promises.getAssignment(req, res, 'pause-subscription')
 
-  // Populates splitTestVariants with a value for the split test name and allows
-  // Pug to read it
-  await SplitTestHandler.promises.getAssignment(
-    req,
-    res,
-    'bootstrap-5-subscription'
-  )
-
   const { variant: flexibleLicensingVariant } =
     await SplitTestHandler.promises.getAssignment(
       req,
@@ -206,12 +198,6 @@ async function successfulSubscription(req, res) {
   if (!personalSubscription) {
     res.redirect('/user/subscription/plans')
   } else {
-    await SplitTestHandler.promises.getAssignment(
-      req,
-      res,
-      'bootstrap-5-subscription'
-    )
-
     res.render('subscriptions/successful-subscription-react', {
       title: 'thank_you',
       personalSubscription,
@@ -305,11 +291,6 @@ function cancelSubscription(req, res, next) {
  * @returns {Promise<void>}
  */
 async function canceledSubscription(req, res, next) {
-  await SplitTestHandler.promises.getAssignment(
-    req,
-    res,
-    'bootstrap-5-subscription'
-  )
   return res.render('subscriptions/canceled-subscription-react', {
     title: 'subscription_canceled',
     user: SessionManager.getSessionUser(req.session),
