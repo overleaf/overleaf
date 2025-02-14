@@ -76,7 +76,7 @@ export function UpgradePrompt({
         <p className="upgrade-prompt-summary">{summary}</p>
       </OLRow>
       <OLRow className="g-3">
-        <OLCol md={6}>
+        <OLCol md={6} className="upgrade-prompt-card-container">
           <div className="g-0 upgrade-prompt-card upgrade-prompt-card-premium">
             <OLRow className="justify-content-between">
               <OLCol>
@@ -117,7 +117,7 @@ export function UpgradePrompt({
             </OLRow>
           </div>
         </OLCol>
-        <OLCol md={6}>
+        <OLCol md={6} className="upgrade-prompt-card-container">
           <div className="g-0 upgrade-prompt-card upgrade-prompt-card-free">
             <OLRow>
               <h3>{t('free')}</h3>

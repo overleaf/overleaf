@@ -2,6 +2,14 @@
   border-radius: var(--border-radius-base);
   box-shadow: 0 4px 6px 0 #1e25301f;
   padding: var(--spacing-06);
+  background-color: var(--white);
+  container: inline-size; // Defines the parent as a container
+
+  .upgrade-prompt-card-container {
+    @container (max-width: 700px) {
+      width: 100%;
+    }
+  }
 
   .row {
     margin-left: 0;
