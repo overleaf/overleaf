@@ -1247,7 +1247,7 @@
   "x_price_for_first_month": "<0>__price__</0> pour votre premier mois",
   "x_price_for_first_year": "<0>__price__</0> pour votre première année",
   "x_price_per_month": "<0>__price__</0> par mois",
-  "x_price_per_year": "<0>__price__</0> par an",
+  "x_price_per_year": "__price__ par an",
   "year": "année",
   "you": "Vous",
   "you_can_now_log_in_sso": "Vous pouvez maintenant vous connecter via votre établissement pour potentiellement bénéficier de <0>fonctionnalités professionnelles __appName__ gratuites</0> !",

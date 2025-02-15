@@ -1384,7 +1384,7 @@
   "x_price_for_first_year": "<0>__price__</0> für dein erstes Jahr",
   "x_price_for_y_months": "<0>__price__</0> für deine ersten __discountMonths__ Monate",
   "x_price_per_month": "<0>__price__</0> pro Monat",
-  "x_price_per_year": "<0>__price__</0> pro Jahr",
+  "x_price_per_year": "__price__ pro Jahr",
   "year": "Jahr",
   "yes_that_is_correct": "Ja, das ist richtig",
   "you_can_now_log_in_sso": "Du kannst dich jetzt über deine Institution anmelden und möglicherweise <0>kostenlose __appName__ „Professionell“-Funktionen</0> erhalten!",
