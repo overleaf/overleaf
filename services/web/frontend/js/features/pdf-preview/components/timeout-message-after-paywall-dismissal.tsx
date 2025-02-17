@@ -1,11 +1,12 @@
 import getMeta from '@/utils/meta'
 import { Trans, useTranslation } from 'react-i18next'
-import { memo, useCallback } from 'react'
+import { memo, useCallback, useEffect } from 'react'
 import { useDetachCompileContext } from '@/shared/context/detach-compile-context'
 import StartFreeTrialButton from '@/shared/components/start-free-trial-button'
 import { useFeatureFlag } from '@/shared/context/split-test-context'
 import MaterialIcon from '@/shared/components/material-icon'
 import { useStopOnFirstError } from '@/shared/hooks/use-stop-on-first-error'
+import * as eventTracking from '@/infrastructure/event-tracking'
 import PdfLogEntry from './pdf-log-entry'
 
 function TimeoutMessageAfterPaywallDismissal() {
@@ -51,6 +52,20 @@ const CompileTimeout = memo(function CompileTimeout({
 
   const hasNewPaywallCta = useFeatureFlag('paywall-cta')
 
+  useEffect(() => {
+    eventTracking.sendMB('paywall-prompt', {
+      'paywall-type': 'compile-timeout',
+      'paywall-version': 'secondary',
+    })
+  }, [])
+
+  function onPaywallClick() {
+    eventTracking.sendMB('paywall-click', {
+      'paywall-type': 'compile-timeout',
+      'paywall-version': 'secondary',
+    })
+  }
+
   return (
     <PdfLogEntry
       headerTitle={t('project_failed_to_compile')}
@@ -94,6 +109,7 @@ const CompileTimeout = memo(function CompileTimeout({
                 <StartFreeTrialButton
                   source="compile-timeout"
                   buttonProps={{ variant: 'secondary' }}
+                  handleClick={onPaywallClick}
                 >
                   {hasNewPaywallCta
                     ? t('get_more_compile_time')

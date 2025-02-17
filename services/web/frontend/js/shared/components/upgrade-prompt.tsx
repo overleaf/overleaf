@@ -25,17 +25,20 @@ function IconListItem({ icon, children }: IconListItemProps) {
 
 type PlansLinkProps = {
   itmCampaign: string
+  onClick?: React.MouseEventHandler<HTMLAnchorElement>
 }
 function PlansLink({
   children,
   itmCampaign,
+  onClick,
 }: PropsWithChildren<PlansLinkProps>) {
   return (
     <a
       key="compare_plans_link"
-      href={`/user/subscription/plans&itm-campaign=${itmCampaign}`}
+      href={`/user/subscription/plans?itm-campaign=${itmCampaign}`}
       target="_blank"
       rel="noreferrer"
+      onClick={onClick}
     >
       {children}
       <MaterialIcon type="open_in_new" />
@@ -50,6 +53,8 @@ type UpgradePromptProps = {
   planPricing: { student: string; standard: string }
   itmCampaign: string
   isStudent?: boolean
+  onClickInfoLink?: React.MouseEventHandler<HTMLAnchorElement>
+  onClickPaywall?: React.MouseEventHandler<HTMLAnchorElement>
 }
 
 export function UpgradePrompt({
@@ -59,6 +64,8 @@ export function UpgradePrompt({
   planPricing,
   itmCampaign,
   isStudent = false,
+  onClickInfoLink,
+  onClickPaywall,
 }: UpgradePromptProps) {
   const { t } = useTranslation()
   const planPrice = isStudent ? planPricing.student : planPricing.standard
@@ -111,6 +118,7 @@ export function UpgradePrompt({
               <a
                 className="btn btn-premium"
                 href={`/user/subscription/new?planCode=${planCode}&itm-campaign=${itmCampaign}`}
+                onClick={onClickPaywall}
               >
                 {t('try_for_free')}
               </a>
@@ -155,7 +163,9 @@ export function UpgradePrompt({
           {/* eslint-disable react/jsx-key */}
           <Trans
             i18nKey="compare_all_plans"
-            components={[<PlansLink itmCampaign={itmCampaign} />]}
+            components={[
+              <PlansLink onClick={onClickInfoLink} itmCampaign={itmCampaign} />,
+            ]}
           />
           {/* eslint-disable react/jsx-key */}
         </p>

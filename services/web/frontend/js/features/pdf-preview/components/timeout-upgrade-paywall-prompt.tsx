@@ -1,5 +1,6 @@
+import { useEffect, useMemo, useState } from 'react'
 import getMeta from '@/utils/meta'
-import { useMemo, useState } from 'react'
+import * as eventTracking from '@/infrastructure/event-tracking'
 import TimeoutMessageAfterPaywallDismissal from './timeout-message-after-paywall-dismissal'
 import { UpgradePrompt } from '@/shared/components/upgrade-prompt'
 
@@ -10,6 +11,11 @@ const studentRoles = [
   'Doctoral student (e.g. PhD, MD, EngD)',
 ]
 
+type Segmentation = Record<
+  string,
+  string | number | boolean | undefined | unknown | any
+>
+
 function TimeoutUpgradePaywallPrompt() {
   const odcRole = getMeta('ol-odcRole')
   const planPrices = getMeta('ol-paywallPlans')
@@ -17,9 +23,34 @@ function TimeoutUpgradePaywallPrompt() {
 
   const [isPaywallDismissed, setIsPaywallDismissed] = useState<boolean>(false)
 
+  function sendPaywallEvent(event: string, segmentation?: Segmentation) {
+    eventTracking.sendMB(event, {
+      'paywall-type': 'compile-timeout',
+      'paywall-version': 'primary',
+      ...segmentation,
+    })
+  }
+
   function onClose() {
+    sendPaywallEvent('paywall-dismiss')
     setIsPaywallDismissed(true)
   }
+
+  function onClickInfoLink() {
+    sendPaywallEvent('paywall-info-click', { content: 'plans' })
+  }
+
+  function onClickPaywall() {
+    sendPaywallEvent('paywall-click', {
+      plan: isStudent ? 'student' : 'collaborator',
+    })
+  }
+
+  useEffect(() => {
+    sendPaywallEvent('paywall-prompt', {
+      plan: isStudent ? 'student' : 'collaborator',
+    })
+  }, [isStudent])
 
   return (
     <div>
@@ -32,8 +63,10 @@ function TimeoutUpgradePaywallPrompt() {
             student: planPrices?.student,
             standard: planPrices?.collaborator,
           }}
-          itmCampaign="storybook"
+          itmCampaign="compile-timeout"
           isStudent={isStudent}
+          onClickInfoLink={onClickInfoLink}
+          onClickPaywall={onClickPaywall}
         />
       ) : (
         <TimeoutMessageAfterPaywallDismissal />
