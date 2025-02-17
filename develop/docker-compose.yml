@@ -88,7 +88,7 @@ services:
         - history-v1-buckets:/buckets
 
   mongo:
-    image: mongo:5
+    image: mongo:6.0
     command: --replSet overleaf
     ports:
       - "127.0.0.1:27017:27017" # for debugging
