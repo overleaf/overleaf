@@ -409,6 +409,31 @@ describe('UserEmailsController', function () {
           }
         )
       })
+
+      it('sends a security alert email', async function () {
+        this.req.session.pendingSecondaryEmail = {
+          confirmCode: '123456',
+          email: this.newEmail,
+          confirmCodeExpiresTimestamp: new Date(Math.max),
+          affiliationOptions: {},
+        }
+        this.req.body.code = '123456'
+
+        await this.UserEmailsController.checkSecondaryEmailConfirmationCode(
+          this.req,
+          {
+            json: sinon.stub().resolves(),
+          }
+        )
+
+        const emailCall = this.EmailHandler.promises.sendEmail.getCall(0)
+        expect(emailCall.args[0]).to.equal('securityAlert')
+        expect(emailCall.args[1].to).to.equal(this.user.email)
+        expect(emailCall.args[1].actionDescribed).to.contain(
+          'a secondary email address'
+        )
+        expect(emailCall.args[1].message[0]).to.contain(this.newEmail)
+      })
     })
 
     describe('with an invalid confirmation code', function () {

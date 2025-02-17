@@ -252,12 +252,12 @@ async function checkSecondaryEmailConfirmationCode(req, res) {
     })
   }
 
+  const newSecondaryEmail = req.session.pendingSecondaryEmail.email
+
   try {
-    await checkSecondaryConfirmCodeRateLimiter.consume(
-      req.session.pendingSecondaryEmail.email,
-      1,
-      { method: 'email' }
-    )
+    await checkSecondaryConfirmCodeRateLimiter.consume(newSecondaryEmail, 1, {
+      method: 'email',
+    })
   } catch (err) {
     if (err?.remainingPoints === 0) {
       return res.sendStatus(429)
@@ -290,14 +290,14 @@ async function checkSecondaryEmailConfirmationCode(req, res) {
       'add-email-via-code',
       userId,
       req.ip,
-      {
-        newSecondaryEmail: req.session.pendingSecondaryEmail.email,
-      }
+      { newSecondaryEmail }
     )
+
+    await _sendSecurityAlertEmail(user, newSecondaryEmail)
 
     await UserUpdater.promises.addEmailAddress(
       userId,
-      req.session.pendingSecondaryEmail.email,
+      newSecondaryEmail,
       req.session.pendingSecondaryEmail.affiliationOptions,
       {
         initiatorId: user._id,
@@ -307,7 +307,7 @@ async function checkSecondaryEmailConfirmationCode(req, res) {
 
     await UserUpdater.promises.confirmEmail(
       userId,
-      req.session.pendingSecondaryEmail.email,
+      newSecondaryEmail,
       req.session.pendingSecondaryEmail.affiliationOptions
     )
 
