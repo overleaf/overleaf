@@ -130,6 +130,9 @@ export default function EditMember({
     )
   }
 
+  const confirmRemoval =
+    privileges !== member.privileges && privilegeChangePending
+
   return (
     <form
       className={bsVersion({ bs3: 'form-horizontal' })}
@@ -166,7 +169,7 @@ export default function EditMember({
                   }
                   className={
                     shouldWarnMember() || member.pendingEditor
-                      ? 'text-warning'
+                      ? 'project-member-warning'
                       : undefined
                   }
                 />
@@ -188,32 +191,37 @@ export default function EditMember({
           </div>
         </OLCol>
 
-        <OLCol xs={2}>
-          {privileges !== member.privileges && privilegeChangePending && (
+        <OLCol xs={5} className="project-member-actions">
+          {confirmRemoval && (
             <ChangePrivilegesActions
               handleReset={() => setPrivileges(member.privileges)}
             />
           )}
-        </OLCol>
 
-        <OLCol xs={3} className="project-member-select">
-          {hasBeenDowngraded && (
-            <BootstrapVersionSwitcher
-              bs3={<Icon type="warning" fw />}
-              bs5={<MaterialIcon type="warning" className="text-warning" />}
+          <div className="project-member-select">
+            {hasBeenDowngraded && !confirmRemoval && (
+              <BootstrapVersionSwitcher
+                bs3={<Icon type="warning" fw />}
+                bs5={
+                  <MaterialIcon
+                    type="warning"
+                    className="project-member-warning"
+                  />
+                }
+              />
+            )}
+
+            <SelectPrivilege
+              value={privileges}
+              handleChange={value => {
+                if (value) {
+                  handlePrivilegeChange(value.key)
+                }
+              }}
+              hasBeenDowngraded={hasBeenDowngraded && !confirmRemoval}
+              canAddCollaborators={canAddCollaborators}
             />
-          )}
-
-          <SelectPrivilege
-            value={privileges}
-            handleChange={value => {
-              if (value) {
-                handlePrivilegeChange(value.key)
-              }
-            }}
-            hasBeenDowngraded={hasBeenDowngraded}
-            canAddCollaborators={canAddCollaborators}
-          />
+          </div>
         </OLCol>
       </OLFormGroup>
     </form>

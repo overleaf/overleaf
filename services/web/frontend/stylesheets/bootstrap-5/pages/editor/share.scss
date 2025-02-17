@@ -106,6 +106,10 @@
         font-size: $font-size-sm;
       }
     }
+
+    .project-member-warning {
+      color: var(--content-warning-dark);
+    }
   }
 
   .project-member .text-left,
@@ -165,7 +169,7 @@
   outline: none;
 }
 
-.modal-link-share-new {
+.modal-link-share {
   .invite-controls {
     padding: 0;
     background-color: transparent;
@@ -180,9 +184,19 @@
     margin-bottom: calc(var(--line-height-03) / 2);
   }
 
+  .project-member-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 0;
+  }
+
   .project-member-select {
     display: flex;
     align-items: center;
-    padding: 0;
+
+    .select-wrapper {
+      max-width: 175px;
+    }
   }
 }

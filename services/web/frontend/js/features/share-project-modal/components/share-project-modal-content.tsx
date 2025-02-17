@@ -50,7 +50,7 @@ export default function ShareProjectModalContent({
         <OLModalTitle>{t('share_project')}</OLModalTitle>
       </OLModalHeader>
 
-      <OLModalBody className="modal-body-share modal-link-share-new">
+      <OLModalBody className="modal-body-share modal-link-share">
         <div className="container-fluid">
           <Suspense fallback={<FullSizeLoadingSpinner minHeight="15rem" />}>
             {isRestrictedTokenMember ? (
