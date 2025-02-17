@@ -111,7 +111,7 @@ services:
           # This override is not needed when running the setup after starting up mongo.
           - mongo:127.0.0.1
         healthcheck:
-            test: echo 'db.stats().ok' | mongo localhost:27017/test --quiet
+            test: echo 'db.stats().ok' | mongosh localhost:27017/test --quiet
             interval: 10s
             timeout: 10s
             retries: 5
