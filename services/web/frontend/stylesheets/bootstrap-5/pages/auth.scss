@@ -26,17 +26,16 @@
 .login-overleaf-logo-container {
   display: block;
   padding: var(--spacing-06);
-
-  .login-overleaf-logo {
-    height: 40px; // TODO: CHange this to variable
-    width: 34.5px;
-  }
+  text-align: center;
+  padding-top: var(--spacing-13);
+  padding-bottom: var(--spacing-09);
 }
 
 .login-register-hr-text-container {
   line-height: 1;
   position: relative;
   padding: var(--spacing-08) 0;
+  font-size: var(--font-size-02);
 
   &::before {
     content: '';
@@ -58,12 +57,22 @@
 .sso-auth-login-container {
   max-width: 400px;
   margin: 0 auto;
+  padding: 0 var(--spacing-06);
 
   h1 {
-    font-size: var(--font-size-06);
+    font-size: var(--font-size-07);
+    line-height: var(--line-height-06);
   }
 
   .login-register-text {
     font-size: var(--font-size-02);
+  }
+
+  .email-label {
+    padding-top: var(--spacing-06);
+  }
+
+  .login-register-other-links {
+    padding-top: var(--spacing-09);
   }
 }
