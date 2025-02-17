@@ -1223,6 +1223,7 @@
   "login_to_accept_invitation": "Log in to accept invitation",
   "login_to_overleaf": "Log in to Overleaf",
   "login_with_service": "Log in with __service__",
+  "login_with_sso": "Log in to Overleaf with SSO",
   "logs_and_output_files": "Logs and output files",
   "longer_compile_timeout": "Longer <0>compile timeout</0>",
   "longer_compile_timeout_on_faster_servers": "Longer compile timeout on faster servers",

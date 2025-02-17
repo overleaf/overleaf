@@ -22,3 +22,48 @@
     text-align: left;
   }
 }
+
+.login-overleaf-logo-container {
+  display: block;
+  padding: var(--spacing-06);
+
+  .login-overleaf-logo {
+    height: 40px; // TODO: CHange this to variable
+    width: 34.5px;
+  }
+}
+
+.login-register-hr-text-container {
+  line-height: 1;
+  position: relative;
+  padding: var(--spacing-08) 0;
+
+  &::before {
+    content: '';
+    position: absolute;
+    height: 1px;
+    background-color: var(--neutral-20);
+    top: 50%;
+    left: 0;
+    right: 0;
+  }
+}
+
+.login-register-hr-text {
+  position: relative;
+  background-color: #fff;
+  padding: 0 var(--spacing-05);
+}
+
+.sso-auth-login-container {
+  max-width: 400px;
+  margin: 0 auto;
+
+  h1 {
+    font-size: var(--font-size-06);
+  }
+
+  .login-register-text {
+    font-size: var(--font-size-02);
+  }
+}
