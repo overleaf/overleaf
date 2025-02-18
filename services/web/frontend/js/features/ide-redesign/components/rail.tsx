@@ -112,10 +112,7 @@ export const RailLayout = () => {
       id="ide-rail-tabs"
     >
       <div className="ide-rail">
-        <Nav
-          activeKey={selectedTab}
-          className="d-flex flex-column ide-rail-tabs-nav"
-        >
+        <Nav activeKey={selectedTab} className="ide-rail-tabs-nav">
           {RAIL_TABS.filter(({ hide }) => !hide).map(
             ({ icon, key, indicator }) => (
               <RailTab

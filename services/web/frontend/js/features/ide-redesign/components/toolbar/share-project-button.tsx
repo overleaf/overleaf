@@ -23,6 +23,7 @@ export default function ShareProjectButton() {
     <>
       <div className="ide-redesign-toolbar-button-container">
         <OLButton
+          size="sm"
           variant="primary"
           leadingIcon={<MaterialIcon type="person_add" />}
           onClick={handleOpenShareModal}

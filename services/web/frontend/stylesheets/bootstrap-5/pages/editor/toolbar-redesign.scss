@@ -5,8 +5,8 @@
 }
 
 .ide-redesign-toolbar {
-  $toolbar-height: 48px;
-  $home-button-size: 36px;
+  $toolbar-height: 40px;
+  $home-button-size: 32px;
   $ol-icon-height: 24px;
   $home-icon-font-size: 24px;
 
@@ -62,14 +62,14 @@
   }
 
   .ide-redesign-toolbar-dropdown-toggle-subdued {
-    $height: 32px;
+    $height: 28px;
 
     border: none;
     border-radius: var(--border-radius-base);
     padding: var(--spacing-02);
     height: $height;
-    font-size: var(--font-size-03);
-    line-height: var(--line-height-03);
+    font-size: var(--font-size-02);
+    line-height: var(--line-height-02);
     font-weight: 400;
     box-sizing: border-box;
     margin: math.div($toolbar-height - $height, 2) 0;
@@ -93,7 +93,7 @@
 
 .ide-redesign-toolbar-actions {
   display: flex;
-  gap: var(--spacing-06);
+  gap: var(--spacing-04);
   padding: 0 var(--spacing-05);
 }
 

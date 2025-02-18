@@ -52,7 +52,8 @@ const ToolbarButtons = () => {
       <OnlineUsers />
       <div className="ide-redesign-toolbar-button-container">
         <OLButton
-          variant="link"
+          size="sm"
+          variant="ghost"
           className="ide-redesign-toolbar-button-subdued"
           leadingIcon={<MaterialIcon type="history" />}
         />
