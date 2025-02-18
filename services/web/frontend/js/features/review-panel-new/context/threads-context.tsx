@@ -38,6 +38,7 @@ type ThreadsActions = {
     content: string
   ) => Promise<void>
   deleteMessage: (threadId: ThreadId, commentId: CommentId) => Promise<void>
+  deleteOwnMessage: (threadId: ThreadId, commentId: CommentId) => Promise<void>
 }
 
 const ThreadsActionsContext = createContext<ThreadsActions | undefined>(
@@ -286,6 +287,11 @@ export const ThreadsProvider: FC = ({ children }) => {
       async deleteMessage(threadId: ThreadId, commentId: CommentId) {
         await deleteJSON(
           `/project/${projectId}/thread/${threadId}/messages/${commentId}`
+        )
+      },
+      async deleteOwnMessage(threadId: ThreadId, commentId: CommentId) {
+        await deleteJSON(
+          `/project/${projectId}/thread/${threadId}/own-messages/${commentId}`
         )
       },
     }),

@@ -74,6 +74,10 @@ export async function deleteMessage(context) {
   return await callMessageHttpController(context, _deleteMessage)
 }
 
+export async function deleteUserMessage(context) {
+  return await callMessageHttpController(context, _deleteUserMessage)
+}
+
 export async function getResolvedThreadIds(context) {
   return await callMessageHttpController(context, _getResolvedThreadIds)
 }
@@ -187,6 +191,13 @@ const _deleteMessage = async (req, res) => {
   logger.debug({ projectId, threadId, messageId }, 'deleting message')
   const room = await ThreadManager.findOrCreateThread(projectId, threadId)
   await MessageManager.deleteMessage(room._id, messageId)
+  res.status(204)
+}
+
+const _deleteUserMessage = async (req, res) => {
+  const { projectId, threadId, userId, messageId } = req.params
+  const room = await ThreadManager.findOrCreateThread(projectId, threadId)
+  await MessageManager.deleteUserMessage(userId, room._id, messageId)
   res.status(204)
 }
 

@@ -12,6 +12,7 @@ import {
   ThreadId,
 } from '../../../../../types/review-panel/review-panel'
 import { useModalsContext } from '@/features/ide-react/context/modals-context'
+import { usePermissionsContext } from '@/features/ide-react/context/permissions-context'
 import { useTranslation } from 'react-i18next'
 import { debugConsole } from '@/utils/debugging'
 
@@ -29,11 +30,13 @@ export const ReviewPanelComment = memo<{
     resolveThread,
     editMessage,
     deleteMessage,
+    deleteOwnMessage,
     deleteThread,
     addMessage,
   } = useThreadsActionsContext()
   const { showGenericMessageModal } = useModalsContext()
   const { t } = useTranslation()
+  const permissions = usePermissionsContext()
 
   const [processing, setProcessing] = useState(false)
 
@@ -74,7 +77,13 @@ export const ReviewPanelComment = memo<{
     async (commentId: CommentId) => {
       setProcessing(true)
       try {
-        await deleteMessage(comment.op.t, commentId)
+        if (permissions.write) {
+          // Owners and editors can delete any message
+          await deleteMessage(comment.op.t, commentId)
+        } else {
+          // Reviewers can only delete their own messages
+          await deleteOwnMessage(comment.op.t, commentId)
+        }
       } catch (err) {
         debugConsole.error(err)
         showGenericMessageModal(
@@ -85,7 +94,14 @@ export const ReviewPanelComment = memo<{
         setProcessing(false)
       }
     },
-    [comment.op.t, deleteMessage, showGenericMessageModal, t]
+    [
+      comment.op.t,
+      deleteMessage,
+      deleteOwnMessage,
+      showGenericMessageModal,
+      t,
+      permissions.write,
+    ]
   )
 
   const handleDeleteThread = useCallback(

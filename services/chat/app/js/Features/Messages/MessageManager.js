@@ -77,6 +77,14 @@ export async function deleteMessage(roomId, messageId) {
   await db.messages.deleteOne(query)
 }
 
+export async function deleteUserMessage(userId, roomId, messageId) {
+  await db.messages.deleteOne({
+    _id: new ObjectId(messageId),
+    user_id: new ObjectId(userId),
+    room_id: new ObjectId(roomId),
+  })
+}
+
 function _ensureIdsAreObjectIds(query) {
   if (query.user_id && !(query.user_id instanceof ObjectId)) {
     query.user_id = new ObjectId(query.user_id)

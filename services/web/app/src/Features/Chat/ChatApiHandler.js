@@ -90,6 +90,15 @@ async function deleteMessage(projectId, threadId, messageId) {
   )
 }
 
+async function deleteUserMessage(projectId, threadId, userId, messageId) {
+  await fetchNothing(
+    chatApiUrl(
+      `/project/${projectId}/thread/${threadId}/user/${userId}/messages/${messageId}`
+    ),
+    { method: 'DELETE' }
+  )
+}
+
 async function getResolvedThreadIds(projectId) {
   const body = await fetchJson(
     chatApiUrl(`/project/${projectId}/resolved-thread-ids`)
@@ -134,6 +143,7 @@ module.exports = {
   deleteThread: callbackify(deleteThread),
   editMessage: callbackify(editMessage),
   deleteMessage: callbackify(deleteMessage),
+  deleteUserMessage: callbackify(deleteUserMessage),
   getResolvedThreadIds: callbackify(getResolvedThreadIds),
   duplicateCommentThreads: callbackify(duplicateCommentThreads),
   generateThreadData: callbackify(generateThreadData),
@@ -148,6 +158,7 @@ module.exports = {
     deleteThread,
     editMessage,
     deleteMessage,
+    deleteUserMessage,
     getResolvedThreadIds,
     duplicateCommentThreads,
     generateThreadData,

@@ -177,6 +177,34 @@ paths:
         '204':
           description: No Content
       description: 'Delete message with Message ID provided, from the Thread with ThreadID and ProjectID provided'
+  '/project/{projectId}/thread/{threadId}/user/{userId}/messages/{messageId}':
+    parameters:
+      - schema:
+          type: string
+        name: projectId
+        in: path
+        required: true
+      - schema:
+          type: string
+        name: threadId
+        in: path
+        required: true
+      - schema:
+          type: string
+        name: userId
+        in: path
+        required: true
+      - schema:
+          type: string
+        name: messageId
+        in: path
+        required: true
+    delete:
+      summary: Delete message written by a given user
+      operationId: deleteUserMessage
+      responses:
+        '204':
+          description: No Content
   '/project/{projectId}/thread/{threadId}/resolve':
     parameters:
       - schema:
