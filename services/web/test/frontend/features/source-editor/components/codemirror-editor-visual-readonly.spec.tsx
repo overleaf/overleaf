@@ -31,6 +31,7 @@ const PermissionsProvider: FC = ({ children }) => (
       trackedWrite: false,
       write: false,
       admin: false,
+      labelVersion: false,
     }}
   >
     {children}

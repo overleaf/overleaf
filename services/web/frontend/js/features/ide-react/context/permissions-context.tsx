@@ -21,6 +21,7 @@ const permissionsMap: DeepReadonly<Record<PermissionsLevel, Permissions>> = {
     trackedWrite: false,
     write: false,
     admin: false,
+    labelVersion: false,
   },
   review: {
     read: true,
@@ -28,6 +29,7 @@ const permissionsMap: DeepReadonly<Record<PermissionsLevel, Permissions>> = {
     trackedWrite: true,
     write: false,
     admin: false,
+    labelVersion: true,
   },
   readAndWrite: {
     read: true,
@@ -35,6 +37,7 @@ const permissionsMap: DeepReadonly<Record<PermissionsLevel, Permissions>> = {
     trackedWrite: true,
     write: true,
     admin: false,
+    labelVersion: true,
   },
   owner: {
     read: true,
@@ -42,6 +45,7 @@ const permissionsMap: DeepReadonly<Record<PermissionsLevel, Permissions>> = {
     trackedWrite: true,
     write: true,
     admin: true,
+    labelVersion: true,
   },
 }
 

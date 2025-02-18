@@ -23,21 +23,23 @@ function HistoryDropdownContent({
     closeDropdownForItem(version, 'moreOptions')
   }, [closeDropdownForItem, version])
 
-  const { write } = usePermissionsContext()
+  const permissions = usePermissionsContext()
 
   return (
     <>
-      <AddLabel
-        projectId={projectId}
-        version={version}
-        closeDropdown={closeDropdown}
-      />
+      {permissions.labelVersion && (
+        <AddLabel
+          projectId={projectId}
+          version={version}
+          closeDropdown={closeDropdown}
+        />
+      )}
       <Download
         projectId={projectId}
         version={version}
         closeDropdown={closeDropdown}
       />
-      {write && (
+      {permissions.write && (
         <RestoreProject
           projectId={projectId}
           version={version}

@@ -4,6 +4,7 @@ export type Permissions = {
   trackedWrite: boolean
   write: boolean
   admin: boolean
+  labelVersion: boolean
 }
 
 export type PermissionsLevel = 'owner' | 'readAndWrite' | 'review' | 'readOnly'
