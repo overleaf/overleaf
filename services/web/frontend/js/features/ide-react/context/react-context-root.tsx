@@ -17,7 +17,7 @@ import { OnlineUsersProvider } from '@/features/ide-react/context/online-users-c
 import { OutlineProvider } from '@/features/ide-react/context/outline-context'
 import { PermissionsProvider } from '@/features/ide-react/context/permissions-context'
 import { ProjectProvider } from '@/shared/context/project-context'
-import { RailTabProvider } from '@/features/ide-redesign/contexts/rail-tab-context'
+import { RailProvider } from '@/features/ide-redesign/contexts/rail-context'
 import { ProjectSettingsProvider } from '@/features/editor-left-menu/context/project-settings-context'
 import { ReferencesProvider } from '@/features/ide-react/context/references-context'
 import { SnapshotProvider } from '@/features/ide-react/context/snapshot-context'
@@ -49,7 +49,7 @@ export const ReactContextRoot: FC<{ providers?: Record<string, FC> }> = ({
     PermissionsProvider,
     ProjectProvider,
     ProjectSettingsProvider,
-    RailTabProvider,
+    RailProvider,
     ReferencesProvider,
     SnapshotProvider,
     SplitTestProvider,
@@ -83,9 +83,9 @@ export const ReactContextRoot: FC<{ providers?: Record<string, FC> }> = ({
                                               <Providers.OnlineUsersProvider>
                                                 <Providers.MetadataProvider>
                                                   <Providers.OutlineProvider>
-                                                    <Providers.RailTabProvider>
+                                                    <Providers.RailProvider>
                                                       {children}
-                                                    </Providers.RailTabProvider>
+                                                    </Providers.RailProvider>
                                                   </Providers.OutlineProvider>
                                                 </Providers.MetadataProvider>
                                               </Providers.OnlineUsersProvider>

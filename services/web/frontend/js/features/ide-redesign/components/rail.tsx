@@ -6,15 +6,15 @@ import MaterialIcon, {
 import { Panel } from 'react-resizable-panels'
 import { useLayoutContext } from '@/shared/context/layout-context'
 import { ErrorIndicator, ErrorPane } from './errors'
-import { RailTabKey, useRailTabContext } from '../contexts/rail-tab-context'
+import { RailTabKey, useRailContext } from '../contexts/rail-context'
 import FileTreeOutlinePanel from './file-tree-outline-panel'
 import { ChatIndicator, ChatPane } from './chat'
 import getMeta from '@/utils/meta'
 import { HorizontalResizeHandle } from '@/features/ide-react/components/resize/horizontal-resize-handle'
 import { HorizontalToggler } from '@/features/ide-react/components/resize/horizontal-toggler'
-import { useRail } from '../hooks/use-rail'
 import { useTranslation } from 'react-i18next'
 import classNames from 'classnames'
+import IntegrationsPanel from './integrations-panel/integrations-panel'
 
 type RailElement = {
   icon: AvailableUnfilledIcon
@@ -41,7 +41,7 @@ const RAIL_TABS: RailElement[] = [
   {
     key: 'integrations',
     icon: 'integration_instructions',
-    component: <>Integrations</>,
+    component: <IntegrationsPanel />,
   },
   {
     key: 'review-panel',
@@ -66,14 +66,15 @@ const RAIL_TABS: RailElement[] = [
 export const RailLayout = () => {
   const { t } = useTranslation()
   const {
+    selectedTab,
+    setSelectedTab,
     isOpen,
     setIsOpen,
     panelRef,
     handlePaneCollapse,
     handlePaneExpand,
     togglePane,
-  } = useRail()
-  const { selectedTab, setSelectedTab } = useRailTabContext()
+  } = useRailContext()
 
   const { setLeftMenuShown } = useLayoutContext()
   const railActions: RailAction[] = useMemo(

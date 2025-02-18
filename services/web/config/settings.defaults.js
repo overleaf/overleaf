@@ -983,6 +983,7 @@ module.exports = {
     toastGenerators: [],
     editorSidebarComponents: [],
     fileTreeToolbarComponents: [],
+    integrationPanelComponents: [],
   },
 
   moduleImportSequence: [

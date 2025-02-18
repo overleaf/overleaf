@@ -1,7 +1,7 @@
 import OLButton from '@/features/ui/components/ol/ol-button'
 import MaterialIcon from '@/shared/components/material-icon'
 import { useTranslation } from 'react-i18next'
-import { useRailTabContext } from '../../contexts/rail-tab-context'
+import { useRailContext } from '../../contexts/rail-context'
 import { usePdfPreviewContext } from '@/features/pdf-preview/components/pdf-preview-provider'
 import { useDetachCompileContext as useCompileContext } from '@/shared/context/detach-compile-context'
 import { useFeatureFlag } from '@/shared/context/split-test-context'
@@ -11,7 +11,7 @@ function PdfErrorState() {
   // TODO ide-redesign-cleanup: rename showLogs to something else and check usages
   const { showLogs } = useCompileContext()
   const { t } = useTranslation()
-  const { setSelectedTab: setSelectedRailTab } = useRailTabContext()
+  const { setSelectedTab: setSelectedRailTab } = useRailContext()
   const newEditor = useFeatureFlag('editor-redesign')
 
   if (!newEditor || (!loadingError && !showLogs)) {
