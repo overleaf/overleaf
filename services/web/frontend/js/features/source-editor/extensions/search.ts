@@ -314,6 +314,7 @@ const searchFormTheme = EditorView.theme({
     gridTemplateColumns: 'auto auto',
     gridTemplateRows: 'auto auto',
     gap: 'var(--ol-cm-search-form-gap)',
+    flex: 1,
   },
   '@container (max-width: 450px)': {
     '.ol-cm-search-controls': {
@@ -335,7 +336,7 @@ const searchFormTheme = EditorView.theme({
     borderRadius: '20px',
     background: 'white',
     width: '100%',
-    maxWidth: '25em',
+    maxWidth: '50em',
     display: 'inline-flex',
     alignItems: 'center',
     '& input[type="text"]': {
