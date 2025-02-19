@@ -18,6 +18,8 @@ const permissionsMap: DeepReadonly<Record<PermissionsLevel, Permissions>> = {
   readOnly: {
     read: true,
     comment: true,
+    resolveOwnComments: false,
+    resolveAllComments: false,
     trackedWrite: false,
     write: false,
     admin: false,
@@ -26,6 +28,8 @@ const permissionsMap: DeepReadonly<Record<PermissionsLevel, Permissions>> = {
   review: {
     read: true,
     comment: true,
+    resolveOwnComments: true,
+    resolveAllComments: false,
     trackedWrite: true,
     write: false,
     admin: false,
@@ -34,6 +38,8 @@ const permissionsMap: DeepReadonly<Record<PermissionsLevel, Permissions>> = {
   readAndWrite: {
     read: true,
     comment: true,
+    resolveOwnComments: true,
+    resolveAllComments: true,
     trackedWrite: true,
     write: true,
     admin: false,
@@ -42,6 +48,8 @@ const permissionsMap: DeepReadonly<Record<PermissionsLevel, Permissions>> = {
   owner: {
     read: true,
     comment: true,
+    resolveOwnComments: true,
+    resolveAllComments: true,
     trackedWrite: true,
     write: true,
     admin: true,

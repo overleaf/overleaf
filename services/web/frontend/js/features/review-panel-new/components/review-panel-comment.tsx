@@ -77,10 +77,10 @@ export const ReviewPanelComment = memo<{
     async (commentId: CommentId) => {
       setProcessing(true)
       try {
-        if (permissions.write) {
+        if (permissions.resolveAllComments) {
           // Owners and editors can delete any message
           await deleteMessage(comment.op.t, commentId)
-        } else {
+        } else if (permissions.resolveOwnComments) {
           // Reviewers can only delete their own messages
           await deleteOwnMessage(comment.op.t, commentId)
         }
@@ -100,7 +100,8 @@ export const ReviewPanelComment = memo<{
       deleteOwnMessage,
       showGenericMessageModal,
       t,
-      permissions.write,
+      permissions.resolveOwnComments,
+      permissions.resolveAllComments,
     ]
   )
 

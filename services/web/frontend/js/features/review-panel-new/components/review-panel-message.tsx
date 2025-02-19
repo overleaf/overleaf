@@ -37,12 +37,14 @@ export const ReviewPanelMessage: FC<{
   const [deleting, setDeleting] = useState(false)
   const [content, setContent] = useState(message.content)
   const user = useUserContext()
-  const { write, trackedWrite } = usePermissionsContext()
+  const permissions = usePermissionsContext()
 
   const isCommentAuthor = user.id === message.user.id
   const canEdit = isCommentAuthor
-  const canResolve = write || (trackedWrite && isCommentAuthor)
-  const canDelete = write || (trackedWrite && isCommentAuthor)
+  const canResolve =
+    permissions.resolveAllComments ||
+    (permissions.resolveOwnComments && isCommentAuthor)
+  const canDelete = canResolve
 
   const handleEditOption = useCallback(() => setEditing(true), [])
   const showDeleteModal = useCallback(() => setDeleting(true), [])
