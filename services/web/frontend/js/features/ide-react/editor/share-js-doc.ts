@@ -23,8 +23,7 @@ const SINGLE_USER_FLUSH_DELAY = 2000
 const MULTI_USER_FLUSH_DELAY = 500
 const INFLIGHT_OP_TIMEOUT = 5000 // Retry sending ops after 5 seconds without an ack
 const WAIT_FOR_CONNECTION_TIMEOUT = 500
-const FATAL_OP_TIMEOUT = 45000
-const RECENT_ACK_LIMIT = 2 * SINGLE_USER_FLUSH_DELAY
+const FATAL_OP_TIMEOUT = 30000
 
 type Update = Record<string, any>
 
@@ -43,9 +42,7 @@ export class ShareJsDoc extends EventEmitter {
   // @ts-ignore
   _doc: Doc
   private editorWatchdogManager: EditorWatchdogManager
-  private lastAcked: number | null = null
-  private pendingOpCreatedAt: number | null = null
-  private inflightOpCreatedAt: number | null = null
+  private lastAcked: Date | null = null
   private queuedMessageTimer: number | null = null
   private queuedMessages: Message[] = []
   private detachEditorWatchdogManager: (() => void) | null = null
@@ -93,19 +90,13 @@ export class ShareJsDoc extends EventEmitter {
     })
     this._doc.setFlushDelay(SINGLE_USER_FLUSH_DELAY)
     this._doc.on('change', (...args: any[]) => {
-      if (!this.pendingOpCreatedAt) {
-        debugConsole.log('set pendingOpCreatedAt', new Date())
-        this.pendingOpCreatedAt = performance.now()
-      }
       return this.trigger('change', ...args)
     })
     this.editorWatchdogManager = new EditorWatchdogManager({
       parent: globalEditorWatchdogManager,
     })
     this._doc.on('acknowledge', () => {
-      this.lastAcked = performance.now() // note time of last ack from server for an op we sent
-      this.inflightOpCreatedAt = null
-      debugConsole.log('unset inflightOpCreatedAt')
+      this.lastAcked = new Date() // note time of last ack from server for an op we sent
       this.editorWatchdogManager.onAck() // keep track of last ack globally
       return this.trigger('acknowledge')
     })
@@ -116,10 +107,6 @@ export class ShareJsDoc extends EventEmitter {
       return this.trigger('remoteop', ...args)
     })
     this._doc.on('flipped_pending_to_inflight', () => {
-      this.inflightOpCreatedAt = this.pendingOpCreatedAt
-      debugConsole.log('set inflightOpCreatedAt from pendingOpCreatedAt')
-      this.pendingOpCreatedAt = null
-      debugConsole.log('unset pendingOpCreatedAt')
       return this.trigger('flipped_pending_to_inflight')
     })
     this._doc.on('saved', () => {
@@ -293,7 +280,7 @@ export class ShareJsDoc extends EventEmitter {
     this.connection.id = this.socket.publicId
     this._doc.autoOpen = false
     this._doc._connectionStateChanged(state)
-    this.lastAcked = null // reset the last ack time when connection changes
+    return (this.lastAcked = null) // reset the last ack time when connection changes
   }
 
   hasBufferedOps() {
@@ -312,12 +299,8 @@ export class ShareJsDoc extends EventEmitter {
     // check if we have received an ack recently (within a factor of two of the single user flush delay)
     return (
       this.lastAcked !== null &&
-      performance.now() - this.lastAcked < RECENT_ACK_LIMIT
+      Date.now() - this.lastAcked.getTime() < 2 * SINGLE_USER_FLUSH_DELAY
     )
-  }
-
-  getInflightOpCreatedAt() {
-    return this.inflightOpCreatedAt
   }
 
   private attachEditorWatchdogManager(editor: EditorFacade) {
