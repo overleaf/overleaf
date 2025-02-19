@@ -182,6 +182,10 @@ export class DocumentContainer extends EventEmitter {
     return this.doc?.getRecentAck()
   }
 
+  getInflightOpCreatedAt() {
+    return this.doc?.getInflightOpCreatedAt()
+  }
+
   hasBufferedOps() {
     return this.doc?.hasBufferedOps()
   }
@@ -354,7 +358,7 @@ export class DocumentContainer extends EventEmitter {
       pendingOpSize < MAX_PENDING_OP_SIZE
     ) {
       // There is an op waiting to go to server but it is small and
-      // within the flushDelay, this is OK for now.
+      // within the recent ack limit, this is OK for now.
       saved = true
       debugConsole.log(
         '[pollSavedStatus] pending op (small with recent ack) assume ok',
