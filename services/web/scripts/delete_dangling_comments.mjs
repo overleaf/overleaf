@@ -51,7 +51,7 @@ async function processProject(projectId) {
 
 async function processDoc(projectId, doc, threadIds) {
   let commentsDeleted = 0
-  for (const comment of doc.ranges.comments ?? []) {
+  for (const comment of doc.ranges?.comments ?? []) {
     const threadId = comment.op.t
     if (!threadIds.has(threadId)) {
       if (OPTS.commit) {
