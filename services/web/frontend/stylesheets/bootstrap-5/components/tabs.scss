@@ -68,6 +68,11 @@
         border-bottom: 3px solid var(--green-50) !important;
         color: var(--neutral-90) !important;
       }
+
+      &.align-left {
+        margin-left: 0;
+        margin-right: 0;
+      }
     }
   }
 
