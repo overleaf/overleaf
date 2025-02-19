@@ -1,7 +1,5 @@
 import { useLayoutContext } from '../../../shared/context/layout-context'
 import { FullSizeLoadingSpinner } from '../../../shared/components/loading-spinner'
-import { ErrorBoundaryFallback } from '../../../shared/components/error-boundary-fallback'
-import withErrorBoundary from '../../../infrastructure/error-boundary'
 import { lazy, Suspense } from 'react'
 
 const HistoryRoot = lazy(
@@ -22,4 +20,4 @@ function HistoryContainer() {
   )
 }
 
-export default withErrorBoundary(HistoryContainer, ErrorBoundaryFallback)
+export default HistoryContainer
