@@ -3,8 +3,7 @@ import { useEditorManagerContext } from '@/features/ide-react/context/editor-man
 import { EditorType } from '@/features/ide-react/editor/types/editor-type'
 import { putJSON } from '@/infrastructure/fetch-json'
 import { debugConsole } from '@/utils/debugging'
-import moment from 'moment'
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import useEventListener from '@/shared/hooks/use-event-listener'
 import useDomEventListener from '@/shared/hooks/use-dom-event-listener'
 
@@ -28,9 +27,18 @@ export function useEditingSessionHeartbeat() {
   const { getEditorType } = useEditorManagerContext()
 
   // Keep track of how many heartbeats we've sent so that we can calculate how
-  // long wait until the next one
-  const [heartbeatsSent, setHeartbeatsSent] = useState(0)
-  const [nextHeartbeatAt, setNextHeartbeatAt] = useState(() => new Date())
+  // long to wait until the next one
+  const heartBeatsSentRef = useRef(0)
+
+  const heartBeatSentRecentlyRef = useRef(false)
+
+  const heartBeatResetTimerRef = useRef<number>()
+
+  useEffect(() => {
+    return () => {
+      window.clearTimeout(heartBeatResetTimerRef.current)
+    }
+  }, [])
 
   const editingSessionHeartbeat = useCallback(() => {
     debugConsole.log('[Event] heartbeat trigger')
@@ -38,15 +46,18 @@ export function useEditingSessionHeartbeat() {
     const editorType = getEditorType()
     if (editorType === null) return
 
-    // If the next heartbeat is in the future, stop
-    if (nextHeartbeatAt > new Date()) return
+    // Heartbeat already sent recently
+    if (heartBeatSentRecentlyRef.current) return
+
+    heartBeatSentRecentlyRef.current = true
 
     const segmentation = createEditingSessionHeartbeatData(editorType)
 
     debugConsole.log('[Event] send heartbeat request', segmentation)
     sendEditingSessionHeartbeat(projectId, segmentation)
 
-    setHeartbeatsSent(heartbeatsSent => heartbeatsSent + 1)
+    const heartbeatsSent = heartBeatsSentRef.current
+    heartBeatsSentRef.current++
 
     // Send two first heartbeats at 0 and 30s then increase the backoff time
     // 1min per call until we reach 5 min
@@ -57,8 +68,10 @@ export function useEditingSessionHeartbeat() {
           ? (heartbeatsSent - 2) * 60
           : 300
 
-    setNextHeartbeatAt(moment().add(backoffSecs, 'seconds').toDate())
-  }, [getEditorType, heartbeatsSent, nextHeartbeatAt, projectId])
+    heartBeatResetTimerRef.current = window.setTimeout(() => {
+      heartBeatSentRecentlyRef.current = false
+    }, backoffSecs * 1000)
+  }, [getEditorType, projectId])
 
   // Hook the heartbeat up to editor events
   useEventListener('cursor:editor:update', editingSessionHeartbeat)
