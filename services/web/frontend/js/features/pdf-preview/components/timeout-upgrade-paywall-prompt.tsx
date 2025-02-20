@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { Dispatch, SetStateAction, useEffect, useMemo, useState } from 'react'
 import getMeta from '@/utils/meta'
 import * as eventTracking from '@/infrastructure/event-tracking'
 import TimeoutMessageAfterPaywallDismissal from './timeout-message-after-paywall-dismissal'
@@ -16,7 +16,13 @@ type Segmentation = Record<
   string | number | boolean | undefined | unknown | any
 >
 
-function TimeoutUpgradePaywallPrompt() {
+interface TimeoutUpgradePaywallPromptProps {
+  setIsShowingPrimary: Dispatch<SetStateAction<boolean>>
+}
+
+function TimeoutUpgradePaywallPrompt({
+  setIsShowingPrimary,
+}: TimeoutUpgradePaywallPromptProps) {
   const odcRole = getMeta('ol-odcRole')
   const planPrices = getMeta('ol-paywallPlans')
   const isStudent = useMemo(() => studentRoles.includes(odcRole), [odcRole])
@@ -34,6 +40,7 @@ function TimeoutUpgradePaywallPrompt() {
   function onClose() {
     sendPaywallEvent('paywall-dismiss')
     setIsPaywallDismissed(true)
+    setIsShowingPrimary(false)
   }
 
   function onClickInfoLink() {
@@ -50,7 +57,8 @@ function TimeoutUpgradePaywallPrompt() {
     sendPaywallEvent('paywall-prompt', {
       plan: isStudent ? 'student' : 'collaborator',
     })
-  }, [isStudent])
+    setIsShowingPrimary(true)
+  }, [isStudent, setIsShowingPrimary])
 
   return (
     <div>

@@ -35,7 +35,7 @@ function PlansLink({
   return (
     <a
       key="compare_plans_link"
-      href={`/user/subscription/plans?itm-campaign=${itmCampaign}`}
+      href={`/user/subscription/choose-your-plan?itm-campaign=${itmCampaign}`}
       target="_blank"
       rel="noreferrer"
       onClick={onClick}
@@ -107,7 +107,7 @@ export function UpgradePrompt({
                   {t('12x_more_compile_time')}
                 </IconListItem>
                 <IconListItem icon="group_add">
-                  {t('10_editors_per_project')}
+                  {t('collabs_per_proj', { collabcount: isStudent ? 6 : 10 })}
                 </IconListItem>
                 <IconListItem icon="history">
                   {t('unlimited_document_history')}
@@ -119,6 +119,8 @@ export function UpgradePrompt({
                 className="btn btn-premium"
                 href={`/user/subscription/new?planCode=${planCode}&itm-campaign=${itmCampaign}`}
                 onClick={onClickPaywall}
+                target="_blank"
+                rel="noreferrer"
               >
                 {t('try_for_free')}
               </a>
@@ -143,7 +145,7 @@ export function UpgradePrompt({
                   {t('basic_compile_time')}
                 </IconListItem>
                 <IconListItem icon="person">
-                  {t('one_editor_per_project')}
+                  {t('collabs_per_proj_single', { collabcount: 1 })}
                 </IconListItem>
                 <IconListItem icon="history_off">
                   {t('limited_document_history')}

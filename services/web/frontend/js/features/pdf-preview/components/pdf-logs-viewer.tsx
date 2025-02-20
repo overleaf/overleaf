@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { memo } from 'react'
+import { memo, useState } from 'react'
 import classnames from 'classnames'
 import PdfValidationIssue from './pdf-validation-issue'
 import StopOnFirstErrorPrompt from './stop-on-first-error-prompt'
@@ -34,6 +34,10 @@ function PdfLogsViewer({ alwaysVisible = false }: { alwaysVisible?: boolean }) {
 
   const { t } = useTranslation()
 
+  const [
+    isShowingPrimaryCompileTimeoutPaywall,
+    setIsShowingPrimaryCompileTimeoutPaywall,
+  ] = useState(false)
   const isPaywallChangeCompileTimeoutEnabled = getMeta(
     'ol-isPaywallChangeCompileTimeoutEnabled'
   )
@@ -56,7 +60,9 @@ function PdfLogsViewer({ alwaysVisible = false }: { alwaysVisible?: boolean }) {
 
         {hasShortCompileTimeout && error === 'timedout' ? (
           isCompileTimeoutPaywallDisplay ? (
-            <TimeoutUpgradePaywallPrompt />
+            <TimeoutUpgradePaywallPrompt
+              setIsShowingPrimary={setIsShowingPrimaryCompileTimeoutPaywall}
+            />
           ) : (
             <TimeoutUpgradePromptNew />
           )
@@ -85,10 +91,12 @@ function PdfLogsViewer({ alwaysVisible = false }: { alwaysVisible?: boolean }) {
           />
         )}
 
-        <div className="logs-pane-actions">
-          <PdfClearCacheButton />
-          <PdfDownloadFilesButton />
-        </div>
+        {!isShowingPrimaryCompileTimeoutPaywall && (
+          <div className="logs-pane-actions">
+            <PdfClearCacheButton />
+            <PdfDownloadFilesButton />
+          </div>
+        )}
       </div>
     </div>
   )
