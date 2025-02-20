@@ -73,12 +73,18 @@ describe('CollaboratorsInviteHandler', function () {
       },
       addEntryInBackground: sinon.stub(),
     }
+    this.logger = {
+      debug: sinon.stub(),
+      warn: sinon.stub(),
+      err: sinon.stub(),
+    }
 
     this.CollaboratorsInviteHandler = await esmock.strict(MODULE_PATH, {
       '@overleaf/settings': this.settings,
       '../../../../app/src/models/ProjectInvite.js': {
         ProjectInvite: this.ProjectInvite,
       },
+      '@overleaf/logger': this.logger,
       '../../../../app/src/Features/Collaborators/CollaboratorsEmailHandler.mjs':
         this.CollaboratorsEmailHandler,
       '../../../../app/src/Features/Collaborators/CollaboratorsHandler.js':
@@ -244,15 +250,9 @@ describe('CollaboratorsInviteHandler', function () {
           sinon.stub().rejects(new Error('woops'))
       })
 
-      it('should produce an error', async function () {
-        await expect(this.call()).to.be.rejectedWith(Error)
-      })
-
-      it('should not call _trySendInviteNotification', async function () {
-        await expect(this.call()).to.be.rejected
-        this.CollaboratorsInviteHandler.promises._trySendInviteNotification.callCount.should.equal(
-          0
-        )
+      it('should not produce an error', async function () {
+        await expect(this.call()).to.be.fulfilled
+        expect(this.logger.err).to.be.calledOnce
       })
     })
 
@@ -262,8 +262,9 @@ describe('CollaboratorsInviteHandler', function () {
           sinon.stub().rejects(new Error('woops'))
       })
 
-      it('should produce an error', async function () {
-        await expect(this.call()).to.be.rejectedWith(Error)
+      it('should not produce an error', async function () {
+        await expect(this.call()).to.be.fulfilled
+        expect(this.logger.err).to.be.calledOnce
       })
     })
   })

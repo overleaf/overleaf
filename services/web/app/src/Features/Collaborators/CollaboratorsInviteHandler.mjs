@@ -46,21 +46,28 @@ const CollaboratorsInviteHandler = {
   },
 
   async _sendMessages(projectId, sendingUser, invite) {
+    const { email } = invite
     logger.debug(
-      { projectId, inviteId: invite._id },
+      { projectId, email, inviteId: invite._id },
       'sending notification and email for invite'
     )
-    await CollaboratorsEmailHandler.promises.notifyUserOfProjectInvite(
-      projectId,
-      invite.email,
-      invite,
-      sendingUser
-    )
-    await CollaboratorsInviteHandler._trySendInviteNotification(
-      projectId,
-      sendingUser,
-      invite
-    )
+    const notificationJob =
+      CollaboratorsInviteHandler._trySendInviteNotification(
+        projectId,
+        sendingUser,
+        invite
+      ).catch(err => {
+        logger.err(
+          { err, projectId, email },
+          'error sending notification for invite'
+        )
+      })
+    CollaboratorsEmailHandler.promises
+      .notifyUserOfProjectInvite(projectId, invite.email, invite, sendingUser)
+      .catch(err => {
+        logger.err({ err, projectId, email }, 'error sending email for invite')
+      })
+    await notificationJob
   },
 
   async inviteToProject(projectId, sendingUser, email, privileges) {
@@ -80,12 +87,10 @@ const CollaboratorsInviteHandler = {
     invite = await invite.save()
     invite = invite.toObject()
 
-    // Send email and notification in background
-    CollaboratorsInviteHandler._sendMessages(projectId, sendingUser, {
+    // Send notification and email
+    await CollaboratorsInviteHandler._sendMessages(projectId, sendingUser, {
       ...invite,
       token,
-    }).catch(err => {
-      logger.err({ err, projectId, email }, 'error sending messages for invite')
     })
 
     return _.pick(invite, ['_id', 'email', 'privileges'])

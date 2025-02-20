@@ -38,6 +38,7 @@ function shareProjectByEmail(
       .parents('form')
       .within(() => cy.findByText('Can edit').parent().select(level))
     cy.findByText('Invite').click({ force: true })
+    cy.findByText('Invite not yet accepted.')
   })
 }
 
