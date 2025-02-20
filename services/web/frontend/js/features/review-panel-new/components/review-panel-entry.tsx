@@ -13,7 +13,6 @@ import {
 import { useEditorManagerContext } from '@/features/ide-react/context/editor-manager-context'
 import { useLayoutContext } from '@/shared/context/layout-context'
 import { EditorSelection } from '@codemirror/state'
-import { EditorView } from '@codemirror/view'
 import MaterialIcon from '@/shared/components/material-icon'
 import { OFFSET_FOR_ENTRIES_ABOVE } from '../utils/position-items'
 
@@ -92,12 +91,19 @@ export const ReviewPanelEntry: FC<{
       if (getCurrentDocumentId() !== docId) {
         openDocWithId(docId, { gotoOffset: position, keepCurrentView: true })
       } else {
-        setTimeout(() =>
+        setTimeout(() => {
           view.dispatch({
             selection: EditorSelection.cursor(position),
-            effects: EditorView.scrollIntoView(position, { y: 'center' }),
           })
-        )
+
+          // scroll to line (centered)
+          const blockInfo = view.lineBlockAt(position)
+          const editorHeight = view.scrollDOM.getBoundingClientRect().height
+          view.scrollDOM.scrollTo({
+            top: blockInfo.top - editorHeight / 2 + blockInfo.height,
+            behavior: 'smooth',
+          })
+        })
       }
     },
     [
