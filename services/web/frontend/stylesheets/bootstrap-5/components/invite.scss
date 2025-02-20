@@ -6,3 +6,20 @@
     line-height: var(--line-height-06);
   }
 }
+
+.sharing-updates {
+  h1 {
+    // heading-sm
+    font-size: var(--font-size-05);
+    line-height: var(--line-height-04);
+    color: var(--content-primary);
+  }
+
+  p {
+    color: var(--content-secondary);
+  }
+
+  small {
+    font-size: var(--font-size-02);
+  }
+}
