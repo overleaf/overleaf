@@ -576,7 +576,21 @@ const _ProjectController = {
         const namedEditors = project.collaberator_refs?.length || 0
         const pendingEditors = project.pendingEditor_refs?.length || 0
         const exceedAtLimit = planLimit > -1 && namedEditors >= planLimit
+
+        let editMode = 'edit'
+        if (privilegeLevel === PrivilegeLevels.READ_ONLY) {
+          editMode = 'view'
+        } else if (
+          project.track_changes === true ||
+          project.track_changes?.[userId] === true
+        ) {
+          editMode = 'review'
+        }
+
         const projectOpenedSegmentation = {
+          role: privilegeLevel,
+          editMode,
+          ownerId: project.owner_ref,
           projectId: project._id,
           namedEditors,
           pendingEditors,
