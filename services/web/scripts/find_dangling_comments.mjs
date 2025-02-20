@@ -6,6 +6,8 @@ import {
   ObjectId,
   READ_PREFERENCE_SECONDARY,
 } from '../app/src/infrastructure/mongodb.js'
+import DocstoreManager from '../app/src/Features/Docstore/DocstoreManager.js'
+import { NotFoundError } from '../app/src/Features/Errors/Errors.js'
 
 const OPTS = parseArgs()
 
@@ -47,7 +49,7 @@ async function main() {
       )
       projectsFound += 1
     }
-    if (projectsProcessed % 100000 === 0) {
+    if (projectsProcessed % 10000 === 0) {
       console.log(
         `${projectsProcessed} projects processed - Last project: ${projectId}`
       )
@@ -60,7 +62,7 @@ async function* fetchThreadIdsByProject() {
   const clauses = []
   clauses.push({
     deleted: { $ne: true },
-    'ranges.comments.0': { $exists: true },
+    $or: [{ 'ranges.comments.0': { $exists: true } }, { inS3: true }],
   })
   if (OPTS.minProjectId != null) {
     clauses.push({ project_id: { $gte: new ObjectId(OPTS.minProjectId) } })
@@ -72,7 +74,7 @@ async function* fetchThreadIdsByProject() {
     { $and: clauses },
     {
       sort: { project_id: 1 },
-      projection: { project_id: 1, 'ranges.comments': 1 },
+      projection: { project_id: 1, 'ranges.comments': 1, inS3: 1 },
       readPreference: READ_PREFERENCE_SECONDARY,
     }
   )
@@ -87,7 +89,27 @@ async function* fetchThreadIdsByProject() {
 
     projectId = doc.project_id
 
-    for (const comment of doc.ranges.comments) {
+    let comments = []
+    if (doc.inS3) {
+      try {
+        const archivedDoc = await DocstoreManager.promises.getDoc(
+          projectId,
+          doc._id,
+          { peek: true }
+        )
+        comments = archivedDoc.ranges?.comments ?? []
+      } catch (err) {
+        if (err instanceof NotFoundError) {
+          console.warn(`Doc ${doc._id} in project ${projectId} not found`)
+        } else {
+          throw err
+        }
+      }
+    } else {
+      comments = doc.ranges?.comments
+    }
+
+    for (const comment of comments) {
       threadIds.add(comment.op.t.toString())
     }
   }
