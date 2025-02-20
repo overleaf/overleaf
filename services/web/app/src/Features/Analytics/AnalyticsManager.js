@@ -147,15 +147,13 @@ function setUserPropertyForSessionInBackground(session, property, value) {
 }
 
 /**
+ * @typedef {(import('./types').AccountMapping)} AccountMapping
+ */
+
+/**
  * Register mapping between two accounts.
  *
- * @param {object} payload - The event payload to send to Analytics
- * @param {string} payload.source - The type of account linked from
- * @param {string} payload.sourceId - The ID of the account linked from
- * @param {string} payload.target - The type of account linked to
- * @param {string} payload.targetId - The ID of the account linked to
- * @param {Date} payload.createdAt - The date the mapping was created
- * @property
+ * @param {AccountMapping} payload - The event payload to send to Analytics
  */
 function registerAccountMapping({
   source,

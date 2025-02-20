@@ -148,6 +148,7 @@ describe('SubscriptionUpdater', function () {
     this.AnalyticsManager = {
       recordEventForUserInBackground: sinon.stub().resolves(),
       setUserPropertyForUserInBackground: sinon.stub(),
+      registerAccountMapping: sinon.stub(),
     }
 
     this.Features = {
@@ -175,6 +176,9 @@ describe('SubscriptionUpdater', function () {
           DeletedSubscription: this.DeletedSubscription,
         },
         '../Analytics/AnalyticsManager': this.AnalyticsManager,
+        '../Analytics/AccountMappingHelper': (this.AccountMappingHelper = {
+          generateSubscriptionToRecurlyMapping: sinon.stub(),
+        }),
         '../../infrastructure/Features': this.Features,
         '../User/UserAuditLogHandler': this.UserAuditLogHandler,
       },
@@ -278,6 +282,41 @@ describe('SubscriptionUpdater', function () {
       expect(
         this.FeaturesUpdater.promises.scheduleRefreshFeatures
       ).to.have.been.calledWith(this.adminUser._id)
+    })
+
+    it('should send a recurly account mapping event', async function () {
+      const createdAt = new Date().toISOString()
+      this.AccountMappingHelper.generateSubscriptionToRecurlyMapping.returns({
+        source: 'recurly',
+        sourceEntity: 'subscription',
+        sourceEntityId: this.recurlySubscription.uuid,
+        target: 'v2',
+        targetEntity: 'subscription',
+        targetEntityId: this.subscription._id,
+        createdAt,
+      })
+      await this.SubscriptionUpdater.promises.updateSubscriptionFromRecurly(
+        this.recurlySubscription,
+        this.subscription,
+        {}
+      )
+      expect(
+        this.AccountMappingHelper.generateSubscriptionToRecurlyMapping
+      ).to.have.been.calledWith(
+        this.subscription._id,
+        this.recurlySubscription.uuid
+      )
+      expect(
+        this.AnalyticsManager.registerAccountMapping
+      ).to.have.been.calledWith({
+        source: 'recurly',
+        sourceEntity: 'subscription',
+        sourceEntityId: this.recurlySubscription.uuid,
+        target: 'v2',
+        targetEntity: 'subscription',
+        targetEntityId: this.subscription._id,
+        createdAt,
+      })
     })
 
     it('should remove the subscription when expired', async function () {

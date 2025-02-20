@@ -10,6 +10,7 @@ const { DeletedSubscription } = require('../../models/DeletedSubscription')
 const logger = require('@overleaf/logger')
 const Features = require('../../infrastructure/Features')
 const UserAuditLogHandler = require('../User/UserAuditLogHandler')
+const AccountMappingHelper = require('../Analytics/AccountMappingHelper')
 const { SSOConfig } = require('../../models/SSOConfig')
 
 /**
@@ -345,6 +346,16 @@ async function updateSubscriptionFromRecurly(
     }
   }
   await subscription.save()
+
+  const accountMapping =
+    AccountMappingHelper.generateSubscriptionToRecurlyMapping(
+      subscription._id,
+      subscription.recurlySubscription_id
+    )
+  if (accountMapping) {
+    AnalyticsManager.registerAccountMapping(accountMapping)
+  }
+
   await _scheduleRefreshFeatures(subscription)
 }
 
