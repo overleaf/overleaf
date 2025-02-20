@@ -64,7 +64,9 @@ export const ReviewPanelAddComment = memo<{
 
   const handleBlur = useCallback(() => {
     if (content === '') {
-      handleClose()
+      window.setTimeout(() => {
+        handleClose()
+      })
     }
   }, [content, handleClose])
 
