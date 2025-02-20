@@ -335,6 +335,10 @@ if (process.env.OVERLEAF_LOGIN_SUPPORT_TEXT != null) {
   settings.nav.login_support_text = process.env.OVERLEAF_LOGIN_SUPPORT_TEXT
 }
 
+if (process.env.OVERLEAF_LOGIN_SUPPORT_TITLE != null) {
+  settings.nav.login_support_title = process.env.OVERLEAF_LOGIN_SUPPORT_TITLE
+}
+
 // Sending Email
 // -------------
 //

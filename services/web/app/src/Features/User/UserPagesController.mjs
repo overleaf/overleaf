@@ -241,7 +241,7 @@ const UserPagesController = {
       AuthenticationController.setRedirectInSession(req, req.query.redir)
     }
     res.render('user/login', {
-      title: 'login',
+      title: Settings.nav?.login_support_title || 'login',
       login_support_text: Settings.nav?.login_support_text,
     })
   },
