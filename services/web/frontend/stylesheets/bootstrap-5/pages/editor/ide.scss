@@ -45,6 +45,18 @@ $editor-toggler-bg-dark-color: color.adjust(
   }
 }
 
+.ide-redesign-main {
+  .ide-panel-group-resizing {
+    background-color: var(--white);
+
+    // Hide panel contents while resizing
+    .ide-redesign-editor-content,
+    .pdf {
+      display: none !important;
+    }
+  }
+}
+
 .global-alerts {
   height: 0;
   margin-top: var(--spacing-01);

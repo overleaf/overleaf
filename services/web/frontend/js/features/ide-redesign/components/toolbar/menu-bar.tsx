@@ -3,6 +3,7 @@ import { MenuBar } from '@/shared/components/menu-bar/menu-bar'
 import { MenuBarDropdown } from '@/shared/components/menu-bar/menu-bar-dropdown'
 import { MenuBarOption } from '@/shared/components/menu-bar/menu-bar-option'
 import { useTranslation } from 'react-i18next'
+import ChangeLayoutOptions from './change-layout-options'
 
 export const ToolbarMenuBar = () => {
   const { t } = useTranslation()
@@ -36,7 +37,7 @@ export const ToolbarMenuBar = () => {
         id="view"
         className="ide-redesign-toolbar-dropdown-toggle-subdued"
       >
-        <MenuBarOption title="PDF only" />
+        <ChangeLayoutOptions />
       </MenuBarDropdown>
       <MenuBarDropdown
         title={t('insert')}

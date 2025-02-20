@@ -8,6 +8,7 @@ import ShareProjectButton from './share-project-button'
 import importOverleafModules from '../../../../../macros/import-overleaf-module.macro'
 import { useEditorContext } from '@/shared/context/editor-context'
 import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
+import ChangeLayoutButton from './change-layout-button'
 
 const [publishModalModules] = importOverleafModules('publishModal')
 const SubmitProjectButton = publishModalModules?.import.NewPublishToolbarButton
@@ -66,6 +67,7 @@ const ToolbarButtons = () => {
           />
         </OLTooltip>
       </div>
+      <ChangeLayoutButton />
       {shouldDisplaySubmitButton && <SubmitProjectButton />}
       <ShareProjectButton />
     </div>

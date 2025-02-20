@@ -18,6 +18,7 @@ export default /** @type {const} */ ([
   'rate_review',
   'report',
   'settings',
+  'space_dashboard',
   'table_chart',
   'upload_file',
   'web_asset',
