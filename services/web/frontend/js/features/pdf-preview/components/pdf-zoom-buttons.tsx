@@ -10,8 +10,8 @@ type PdfZoomButtonsProps = {
 function PdfZoomButtons({ setZoom }: PdfZoomButtonsProps) {
   const { t } = useTranslation()
 
-  const zoomInShortcut = isMac ? '⌘+' : 'Ctrl++'
-  const zoomOutShortcut = isMac ? '⌘-' : 'Ctrl+-'
+  const zoomInShortcut = isMac ? '⌘+' : 'Ctrl +'
+  const zoomOutShortcut = isMac ? '⌘-' : 'Ctrl -'
 
   return (
     <OLButtonGroup className="pdfjs-toolbar-buttons">
