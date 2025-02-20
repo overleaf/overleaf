@@ -31,6 +31,8 @@ export const IdeProvider: FC<{
    *   - `settings.theme`
    *   - `settings.keybindings`
    *   - `settings.fontSize`
+   *   - `settings.fontFamily`
+   *   - `settings.lineHeight`
    */
   useEffect(() => {
     window.overleaf = {
