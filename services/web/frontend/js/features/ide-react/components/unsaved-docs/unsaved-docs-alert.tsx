@@ -3,13 +3,15 @@ import { useFileTreePathContext } from '@/features/file-tree/contexts/file-tree-
 import { useTranslation } from 'react-i18next'
 import OLNotification from '@/features/ui/components/ol/ol-notification'
 
+const MAX_UNSAVED_ALERT_SECONDS = 15
+
 export const UnsavedDocsAlert: FC<{ unsavedDocs: Map<string, number> }> = ({
   unsavedDocs,
 }) => (
   <>
     {[...unsavedDocs.entries()].map(
       ([docId, seconds]) =>
-        seconds > 8 && (
+        seconds >= MAX_UNSAVED_ALERT_SECONDS && (
           <UnsavedDocAlert key={docId} docId={docId} seconds={seconds} />
         )
     )}

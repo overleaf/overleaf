@@ -83,14 +83,14 @@ export class OpenDocuments {
     }
   }
 
-  unsavedDocIds() {
-    const ids = []
-    for (const [docId, doc] of this.openDocs) {
+  unsavedDocs() {
+    const docs = []
+    for (const doc of this.openDocs.values()) {
       if (!doc.pollSavedStatus()) {
-        ids.push(docId)
+        docs.push(doc)
       }
     }
-    return ids
+    return docs
   }
 
   async awaitBufferedOps(signal: AbortSignal) {

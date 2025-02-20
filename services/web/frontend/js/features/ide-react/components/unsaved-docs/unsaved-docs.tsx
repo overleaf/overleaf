@@ -2,13 +2,13 @@ import { useEditorManagerContext } from '@/features/ide-react/context/editor-man
 import { useEditorContext } from '@/shared/context/editor-context'
 import { FC, useCallback, useEffect, useRef, useState } from 'react'
 import { PermissionsLevel } from '@/features/ide-react/types/permissions'
-import { UnsavedDocsLockedModal } from '@/features/ide-react/components/unsaved-docs/unsaved-docs-locked-modal'
+import { UnsavedDocsLockedAlert } from '@/features/ide-react/components/unsaved-docs/unsaved-docs-locked-alert'
 import { UnsavedDocsAlert } from '@/features/ide-react/components/unsaved-docs/unsaved-docs-alert'
 import useEventListener from '@/shared/hooks/use-event-listener'
 import { createPortal } from 'react-dom'
 import { useGlobalAlertsContainer } from '@/features/ide-react/context/global-alerts-context'
 
-const MAX_UNSAVED_SECONDS = 15 // lock the editor after this time if unsaved
+const MAX_UNSAVED_SECONDS = 30 // lock the editor after this time if unsaved
 
 export const UnsavedDocs: FC = () => {
   const { openDocs, debugTimers } = useEditorManagerContext()
@@ -19,9 +19,6 @@ export const UnsavedDocs: FC = () => {
 
   // always contains the latest value
   const previousUnsavedDocsRef = useRef(unsavedDocs)
-  useEffect(() => {
-    previousUnsavedDocsRef.current = unsavedDocs
-  }, [unsavedDocs])
 
   // always contains the latest value
   const permissionsLevelRef = useRef(permissionsLevel)
@@ -50,12 +47,17 @@ export const UnsavedDocs: FC = () => {
       debugTimers.current.CheckUnsavedDocs = Date.now()
       const unsavedDocs = new Map()
 
-      const unsavedDocIds = openDocs.unsavedDocIds()
+      const docs = openDocs.unsavedDocs()
 
-      for (const docId of unsavedDocIds) {
-        const unsavedSeconds =
-          (previousUnsavedDocsRef.current.get(docId) ?? 0) + 1
-        unsavedDocs.set(docId, unsavedSeconds)
+      for (const doc of docs) {
+        const oldestOpCreatedAt =
+          doc.getInflightOpCreatedAt() ?? doc.getPendingOpCreatedAt()
+        if (oldestOpCreatedAt) {
+          const unsavedSeconds = Math.floor(
+            (performance.now() - oldestOpCreatedAt) / 1000
+          )
+          unsavedDocs.set(doc.doc_id, unsavedSeconds)
+        }
       }
 
       // avoid setting the unsavedDocs state to a new empty Map every second
@@ -100,11 +102,16 @@ export const UnsavedDocs: FC = () => {
     }
   }, [unsavedDocs])
 
+  if (!globalAlertsContainer) {
+    return null
+  }
+
   return (
     <>
-      {isLocked && <UnsavedDocsLockedModal />}
+      {isLocked &&
+        createPortal(<UnsavedDocsLockedAlert />, globalAlertsContainer)}
+
       {unsavedDocs.size > 0 &&
-        globalAlertsContainer &&
         createPortal(
           <UnsavedDocsAlert unsavedDocs={unsavedDocs} />,
           globalAlertsContainer
