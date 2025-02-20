@@ -67,5 +67,7 @@ if [[ "$BRANCH_NAME" == "main" ]] || [[ "$BRANCH_NAME" == "staging-main" ]]; the
   fi
 
   wait "$pid_staging" # wait for staging upload to finish, wait(1) will exit if the upload failed
-  wait "$pid_production" # wait for production upload to finish (if started), wait(1) will exit if the upload failed
+  if [[ -n "$pid_production" ]]; then
+    wait "$pid_production" # wait for production upload to finish (if started), wait(1) will exit if the upload failed
+  fi
 fi
