@@ -82,5 +82,12 @@
   "clusterWorkers": "CLUSTER_WORKERS",
   "maxFileUploadSize": "MAX_FILE_UPLOAD_SIZE",
   "httpsOnly": "HTTPS_ONLY",
-  "httpRequestTimeout": "HTTP_REQUEST_TIMEOUT"
+  "httpRequestTimeout": "HTTP_REQUEST_TIMEOUT",
+  "redis": {
+    "queue": {
+      "host": "REDIS_HOST",
+      "password": "REDIS_PASSWORD",
+      "port": "REDIS_PORT"
+    }
+  }
 }

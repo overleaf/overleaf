@@ -36,6 +36,9 @@ services:
     working_dir: /overleaf/services/history-v1
     environment:
       ELASTIC_SEARCH_DSN: es:9200
+      REDIS_HOST: redis
+      QUEUES_REDIS_HOST: redis
+      ANALYTICS_QUEUES_REDIS_HOST: redis
       MONGO_HOST: mongo
       POSTGRES_HOST: postgres
       AWS_S3_ENDPOINT: https://minio:9000
@@ -55,6 +58,8 @@ services:
     depends_on:
       mongo:
         condition: service_healthy
+      redis:
+        condition: service_healthy
       postgres:
         condition: service_healthy
       certs:
@@ -66,6 +71,13 @@ services:
       gcs:
         condition: service_healthy
     command: npm run --silent test:acceptance
+
+  redis:
+    image: redis
+    healthcheck:
+      test: ping=$$(redis-cli ping) && [ "$$ping" = 'PONG' ]
+      interval: 1s
+      retries: 20
 
   mongo:
     image: mongo:6.0.13
