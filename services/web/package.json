@@ -114,7 +114,7 @@
     "ejs": "^3.1.10",
     "email-addresses": "^5.0.0",
     "eventsource-parser": "^1.1.2",
-    "express": "^4.21.0",
+    "express": "^4.21.2",
     "express-bearer-token": "^2.4.0",
     "express-http-proxy": "^1.6.0",
     "express-session": "^1.17.1",
