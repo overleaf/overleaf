@@ -26,6 +26,9 @@
     "typescript": "^5.5.4"
   },
   "overrides": {
+    "cross-env": {
+      "cross-spawn": "^7.0.6"
+    },
     "fetch-mock": {
       "path-to-regexp": "3.3.0"
     },
