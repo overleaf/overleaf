@@ -37,6 +37,10 @@ module.exports = {
       report_load: process.env.LOAD_BALANCER_AGENT_REPORT_LOAD !== 'false',
       load_port: 3048,
       local_port: 3049,
+      allow_maintenance:
+        (
+          process.env.LOAD_BALANCER_AGENT_ALLOW_MAINTENANCE ?? ''
+        ).toLowerCase() !== 'false',
     },
   },
   apis: {
