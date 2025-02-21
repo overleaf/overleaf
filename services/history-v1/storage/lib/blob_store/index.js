@@ -355,6 +355,9 @@ class BlobStore {
         nonGlobalHashes.push(hash)
       }
     }
+    if (nonGlobalHashes.length === 0) {
+      return blobs // to avoid unnecessary database lookup
+    }
     const projectBlobs = await this.backend.findBlobs(
       this.projectId,
       nonGlobalHashes

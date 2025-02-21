@@ -5,8 +5,14 @@ import {
   makeBlobForFile,
   getStringLengthOfFile,
   makeProjectKey,
+  BlobStore,
 } from '../../../../storage/lib/blob_store/index.js'
-import { backupBlob } from '../../../../storage/lib/backupBlob.mjs'
+import { Blob } from 'overleaf-editor-core'
+import { insertBlob } from '../../../../storage/lib/blob_store/mongo.js'
+import {
+  backupBlob,
+  downloadBlobToDir,
+} from '../../../../storage/lib/backupBlob.mjs'
 import fs from 'node:fs'
 import path from 'node:path'
 import os from 'node:os'
@@ -201,4 +207,72 @@ describe('backupBlob', function () {
       })
     })
   }
+})
+
+describe('downloadBlobToDir', function () {
+  let tmpDirDownload
+  const historyId = 'abc123def456abc789def123'
+
+  before(async function () {
+    tmpDirDownload = await fs.promises.mkdtemp(
+      path.join(os.tmpdir(), 'downloadBlobTest-')
+    )
+  })
+
+  after(async function () {
+    await fs.promises.rm(tmpDirDownload, { recursive: true, force: true })
+  })
+
+  it('should download the blob successfully', async function () {
+    const data = 'hello world'
+    // Use putString instead of writing a source file and using makeBlobForFile
+    const blobStore = new BlobStore(historyId)
+    const blob = await blobStore.putString(data)
+
+    // Now call downloadBlobToDir which will use blobStore.getStream internally
+    const downloadedFilePath = await downloadBlobToDir(
+      historyId,
+      blob,
+      tmpDirDownload
+    )
+    const contents = await fs.promises.readFile(downloadedFilePath, 'utf8')
+    expect(contents).to.equal(data)
+  })
+
+  it('should delete the file on error (if file already exists)', async function () {
+    const data = 'data that will not be written'
+    const blobStore = new BlobStore(historyId)
+    const blob = await blobStore.putString(data)
+    const hash = blob.getHash()
+    const fileName = `${historyId}-${hash}`
+
+    // Pre-create the destination file to trigger a failure due to an existing file
+    const downloadedFilePath = path.join(tmpDirDownload, fileName)
+    await fs.promises.writeFile(downloadedFilePath, 'preexisting content')
+
+    try {
+      await downloadBlobToDir(historyId, blob, tmpDirDownload)
+      expect.fail('should not reach here')
+    } catch (error) {
+      // Check that the file was deleted
+      await expect(fs.promises.access(downloadedFilePath)).to.be.rejected
+    }
+  })
+
+  it('should not leave an empty file if download fails', async function () {
+    // Create a blob with a hash that does not exist in the blob store
+    const hash = '0000000000000000000000000000000000000000'
+    const blob = new Blob(hash, 12, 12)
+    await insertBlob(historyId, blob)
+    const fileName = `${historyId}-${hash}`
+    try {
+      await downloadBlobToDir(historyId, blob, tmpDirDownload)
+      expect.fail('should not reach here')
+    } catch (error) {
+      expect(error).to.be.instanceOf(Blob.NotFoundError)
+      const downloadedFilePath = path.join(tmpDirDownload, fileName)
+      // Check that the file was deleted
+      await expect(fs.promises.access(downloadedFilePath)).to.be.rejected
+    }
+  })
 })

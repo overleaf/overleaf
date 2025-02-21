@@ -326,6 +326,88 @@ describe('chunkStore', function () {
             )
           })
         })
+
+        describe('when iterating the chunks with getProjectChunksFromVersion', function () {
+          // The first chunk has startVersion:0 and endVersion:2
+          for (let startVersion = 0; startVersion <= 2; startVersion++) {
+            it(`returns all chunk records when starting from version ${startVersion}`, async function () {
+              const chunkRecords = []
+              for await (const chunk of chunkStore.getProjectChunksFromVersion(
+                projectId,
+                startVersion
+              )) {
+                chunkRecords.push(chunk)
+              }
+              const expectedChunks = [firstChunk, secondChunk, thirdChunk]
+              expect(chunkRecords).to.have.length(expectedChunks.length)
+              chunkRecords.forEach((chunkRecord, index) => {
+                expect(chunkRecord.startVersion).to.deep.equal(
+                  expectedChunks[index].getStartVersion()
+                )
+                expect(chunkRecord.endVersion).to.deep.equal(
+                  expectedChunks[index].getEndVersion()
+                )
+              })
+            })
+          }
+
+          // The second chunk has startVersion:2 and endVersion:4
+          for (let startVersion = 3; startVersion <= 4; startVersion++) {
+            it(`returns two chunk records when starting from version ${startVersion}`, async function () {
+              const chunkRecords = []
+              for await (const chunk of chunkStore.getProjectChunksFromVersion(
+                projectId,
+                startVersion
+              )) {
+                chunkRecords.push(chunk)
+              }
+              const expectedChunks = [secondChunk, thirdChunk]
+              expect(chunkRecords).to.have.length(expectedChunks.length)
+              chunkRecords.forEach((chunkRecord, index) => {
+                expect(chunkRecord.startVersion).to.deep.equal(
+                  expectedChunks[index].getStartVersion()
+                )
+                expect(chunkRecord.endVersion).to.deep.equal(
+                  expectedChunks[index].getEndVersion()
+                )
+              })
+            })
+          }
+
+          // The third chunk has startVersion:4 and endVersion:5
+          for (let startVersion = 5; startVersion <= 5; startVersion++) {
+            it(`returns one chunk record when starting from version ${startVersion}`, async function () {
+              const chunkRecords = []
+              for await (const chunk of chunkStore.getProjectChunksFromVersion(
+                projectId,
+                startVersion
+              )) {
+                chunkRecords.push(chunk)
+              }
+              const expectedChunks = [thirdChunk]
+              expect(chunkRecords).to.have.length(expectedChunks.length)
+              chunkRecords.forEach((chunkRecord, index) => {
+                expect(chunkRecord.startVersion).to.deep.equal(
+                  expectedChunks[index].getStartVersion()
+                )
+                expect(chunkRecord.endVersion).to.deep.equal(
+                  expectedChunks[index].getEndVersion()
+                )
+              })
+            })
+          }
+
+          it('returns no chunk records when starting from a version after the last chunk', async function () {
+            const chunkRecords = []
+            for await (const chunk of chunkStore.getProjectChunksFromVersion(
+              projectId,
+              6
+            )) {
+              chunkRecords.push(chunk)
+            }
+            expect(chunkRecords).to.have.length(0)
+          })
+        })
       })
 
       describe('when saving to object storage fails', function () {

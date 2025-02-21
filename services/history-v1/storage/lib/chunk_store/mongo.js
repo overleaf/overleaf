@@ -100,6 +100,21 @@ async function getProjectChunkIds(projectId) {
 }
 
 /**
+ * Get all of a projects chunks directly
+ */
+async function getProjectChunks(projectId) {
+  assert.mongoId(projectId, 'bad projectId')
+
+  const cursor = mongodb.chunks
+    .find(
+      { projectId: new ObjectId(projectId), state: 'active' },
+      { projection: { state: 0 } }
+    )
+    .sort({ startVersion: 1 })
+  return await cursor.map(chunkFromRecord).toArray()
+}
+
+/**
  * Insert a pending chunk before sending it to object storage.
  */
 async function insertPendingChunk(projectId, chunk) {
@@ -298,6 +313,7 @@ module.exports = {
   getChunkForVersion,
   getChunkForTimestamp,
   getProjectChunkIds,
+  getProjectChunks,
   insertPendingChunk,
   confirmCreate,
   confirmUpdate,

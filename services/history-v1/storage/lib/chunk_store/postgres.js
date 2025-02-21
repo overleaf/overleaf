@@ -103,6 +103,20 @@ async function getProjectChunkIds(projectId) {
 }
 
 /**
+ * Get all of a projects chunks directly
+ */
+async function getProjectChunks(projectId) {
+  assert.postgresId(projectId, `bad projectId ${projectId}`)
+  projectId = parseInt(projectId, 10)
+
+  const records = await knex('chunks')
+    .select()
+    .where('doc_id', projectId)
+    .orderBy('end_version')
+  return records.map(chunkFromRecord)
+}
+
+/**
  * Insert a pending chunk before sending it to object storage.
  */
 async function insertPendingChunk(projectId, chunk) {
@@ -269,6 +283,7 @@ module.exports = {
   getChunkForVersion,
   getChunkForTimestamp,
   getProjectChunkIds,
+  getProjectChunks,
   insertPendingChunk,
   confirmCreate,
   confirmUpdate,

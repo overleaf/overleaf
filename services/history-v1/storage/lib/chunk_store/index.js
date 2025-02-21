@@ -223,12 +223,81 @@ async function getChunkIdForVersion(projectId, version) {
 }
 
 /**
+ * Find the chunk metadata for a given version of a project.
+ *
+ * @param {string} projectId
+ * @param {number} version
+ * @return {Promise.<{id: string|number, startVersion: number, endVersion: number}>}
+ */
+async function getChunkMetadataForVersion(projectId, version) {
+  const backend = getBackend(projectId)
+  const chunkRecord = await backend.getChunkForVersion(projectId, version)
+  return chunkRecord
+}
+
+/**
  * Get all of a project's chunk ids
  */
 async function getProjectChunkIds(projectId) {
   const backend = getBackend(projectId)
   const chunkIds = await backend.getProjectChunkIds(projectId)
   return chunkIds
+}
+
+/**
+ * Get all of a projects chunks directly
+ */
+async function getProjectChunks(projectId) {
+  const backend = getBackend(projectId)
+  const chunkIds = await backend.getProjectChunks(projectId)
+  return chunkIds
+}
+
+/**
+ * Load the chunk for a given chunk record, including blob metadata.
+ */
+async function loadByChunkRecord(projectId, chunkRecord) {
+  const blobStore = new BlobStore(projectId)
+  const batchBlobStore = new BatchBlobStore(blobStore)
+  const { raw: rawHistory, buffer: chunkBuffer } =
+    await historyStore.loadRawWithBuffer(projectId, chunkRecord.id)
+  const history = History.fromRaw(rawHistory)
+  await lazyLoadHistoryFiles(history, batchBlobStore)
+  return {
+    chunk: new Chunk(history, chunkRecord.endVersion - history.countChanges()),
+    chunkBuffer,
+  }
+}
+
+/**
+ * Asynchronously retrieves project chunks starting from a specific version.
+ *
+ * This generator function yields chunk records for a given project starting from the specified version (inclusive).
+ * It continues to fetch and yield subsequent chunk records until the end version of the latest chunk metadata is reached.
+ * If you want to fetch all the chunks *after* a version V, call this function with V+1.
+ *
+ * @param {string} projectId - The ID of the project.
+ * @param {number} version - The starting version to retrieve chunks from.
+ * @returns {AsyncGenerator<Object, void, undefined>} An async generator that yields chunk records.
+ */
+async function* getProjectChunksFromVersion(projectId, version) {
+  const backend = getBackend(projectId)
+  const latestChunkMetadata = await loadLatestRaw(projectId)
+  if (!latestChunkMetadata || version > latestChunkMetadata.endVersion) {
+    return
+  }
+  let chunkRecord = await backend.getChunkForVersion(projectId, version)
+  while (chunkRecord != null) {
+    yield chunkRecord
+    if (chunkRecord.endVersion >= latestChunkMetadata.endVersion) {
+      break
+    } else {
+      chunkRecord = await backend.getChunkForVersion(
+        projectId,
+        chunkRecord.endVersion + 1
+      )
+    }
+  }
 }
 
 /**
@@ -333,11 +402,15 @@ module.exports = {
   loadLatestRaw,
   loadAtVersion,
   loadAtTimestamp,
+  loadByChunkRecord,
   create,
   update,
   destroy,
   getChunkIdForVersion,
+  getChunkMetadataForVersion,
   getProjectChunkIds,
+  getProjectChunks,
+  getProjectChunksFromVersion,
   deleteProjectChunks,
   deleteOldChunks,
   AlreadyInitialized,

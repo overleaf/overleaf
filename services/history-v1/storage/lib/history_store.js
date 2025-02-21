@@ -21,6 +21,7 @@ const streams = require('./streams')
 const Chunk = core.Chunk
 
 const gzip = promisify(zlib.gzip)
+const gunzip = promisify(zlib.gunzip)
 
 class LoadError extends OError {
   /**
@@ -111,6 +112,32 @@ class HistoryStore {
       throw new LoadError(projectId, chunkId, err)
     } finally {
       logger.debug({ projectId, chunkId }, 'loadRaw finished')
+    }
+  }
+
+  async loadRawWithBuffer(projectId, chunkId) {
+    assert.projectId(projectId, 'bad projectId')
+    assert.chunkId(chunkId, 'bad chunkId')
+
+    const key = getKey(projectId, chunkId)
+
+    logger.debug({ projectId, chunkId }, 'loadBuffer started')
+    try {
+      const buf = await streams.readStreamToBuffer(
+        await this.#persistor.getObjectStream(this.#bucket, key)
+      )
+      const unzipped = await gunzip(buf)
+      return {
+        buffer: buf,
+        raw: JSON.parse(unzipped.toString('utf-8')),
+      }
+    } catch (err) {
+      if (err instanceof objectPersistor.Errors.NotFoundError) {
+        throw new Chunk.NotPersistedError(projectId)
+      }
+      throw new LoadError(projectId, chunkId, err)
+    } finally {
+      logger.debug({ projectId, chunkId }, 'loadBuffer finished')
     }
   }
 
