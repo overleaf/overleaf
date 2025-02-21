@@ -127,7 +127,7 @@
   "ai_based_language_tools": "AI-based language tools tailored to research writing",
   "ai_can_make_mistakes": "AI can make mistakes. Review fixes before you apply them.",
   "ai_features": "AI features",
-  "ai_feedback_do_you_have_any_thoughts_or_suggestions": "Do you have any thoughts or suggestions for improving this feature?",
+  "ai_feedback_please_provide_more_detail": "Please provide more detail about what was wrong (optional)",
   "ai_feedback_tell_us_what_was_wrong_so_we_can_improve": "Tell us what was wrong so we can improve.",
   "ai_feedback_the_answer_was_too_long": "The answer was too long",
   "ai_feedback_the_answer_wasnt_detailed_enough": "The answer wasn’t detailed enough",
