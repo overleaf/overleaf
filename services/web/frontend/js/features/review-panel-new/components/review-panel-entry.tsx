@@ -51,12 +51,13 @@ export const ReviewPanelEntry: FC<{
   const { setReviewPanelOpen, reviewPanelOpen } = useLayoutContext()
   const highlighted = isSelectionWithinOp(op, state.selection.main)
   const entryRef = useRef<HTMLDivElement>(null)
+  const mousePressedRef = useRef(false)
 
   const openReviewPanel = useCallback(() => {
     setReviewPanelOpen(true)
   }, [setReviewPanelOpen])
 
-  const focusHandler = useCallback(
+  const selectEntry = useCallback(
     event => {
       setFocused(true)
 
@@ -77,9 +78,15 @@ export const ReviewPanelEntry: FC<{
           (entryRef.current?.offsetHeight || 0)
 
         if (entryBottom > OFFSET_FOR_ENTRIES_ABOVE) {
+          // if the entry textarea is visible, no need to select the entry
+          // so that it doesn't scroll out of view as user types
           setTextareaFocused(true)
           return
         }
+      }
+
+      if (mousePressedRef.current) {
+        return
       }
 
       setSelected(true)
@@ -131,8 +138,19 @@ export const ReviewPanelEntry: FC<{
   return (
     <div
       ref={entryRef}
-      onFocus={focusHandler}
+      onMouseDown={() => {
+        mousePressedRef.current = true
+      }}
+      onMouseUp={event => {
+        mousePressedRef.current = false
+        const isTextSelected = Boolean(window.getSelection()?.toString())
+        if (!isTextSelected && !selected) {
+          selectEntry(event)
+        }
+      }}
+      onFocus={selectEntry}
       onBlur={() => {
+        mousePressedRef.current = false
         setSelected(false)
         setFocused(false)
         setTextareaFocused(false)
