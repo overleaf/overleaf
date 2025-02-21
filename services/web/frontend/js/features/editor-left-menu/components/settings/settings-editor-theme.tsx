@@ -21,7 +21,6 @@ export default function SettingsEditorTheme() {
     const dividerOption: Option = {
       value: '-',
       label: '—————————————————',
-      ariaHidden: 'true',
       disabled: true,
     }
 
