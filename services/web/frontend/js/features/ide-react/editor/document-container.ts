@@ -18,6 +18,7 @@ import {
 import {
   isCommentOperation,
   isDeleteOperation,
+  isEditOperation,
   isInsertOperation,
 } from '@/utils/operations'
 import { decodeUtf8 } from '@/utils/decode-utf8'
@@ -584,10 +585,14 @@ export class DocumentContainer extends EventEmitter {
           window.clearTimeout(docChangedTimeout)
         }
         docChangedTimeout = window.setTimeout(() => {
-          window.dispatchEvent(
-            new CustomEvent('doc:changed', { detail: { id: this.doc_id } })
-          )
-          this.ideEventEmitter.emit('doc:changed', { doc_id: this.doc_id })
+          if (ops.some(isEditOperation)) {
+            window.dispatchEvent(
+              new CustomEvent('doc:changed', { detail: { id: this.doc_id } })
+            )
+            this.ideEventEmitter.emit('doc:changed', {
+              doc_id: this.doc_id,
+            })
+          }
         }, 50)
       }
     )

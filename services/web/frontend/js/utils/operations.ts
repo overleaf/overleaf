@@ -15,6 +15,9 @@ export const isCommentOperation = (op: Operation): op is CommentOperation =>
 export const isDeleteOperation = (op: Operation): op is DeleteOperation =>
   'd' in op
 
+export const isEditOperation = (op: Operation): op is EditOperation =>
+  isInsertOperation(op) || isDeleteOperation(op)
+
 export const isInsertChange = (
   change: Change<EditOperation>
 ): change is Change<InsertOperation> => isInsertOperation(change.op)
