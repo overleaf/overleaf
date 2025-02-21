@@ -5,6 +5,7 @@ import classnames from 'classnames'
 import OLButton from '@/features/ui/components/ol/ol-button'
 import { useTranslation } from 'react-i18next'
 import { X } from '@phosphor-icons/react'
+import { useHideDsSurvey } from '@/features/project-list/components/use-is-ds-nav'
 
 export function SurveyWidgetDsNav() {
   const { t } = useTranslation()
@@ -13,12 +14,19 @@ export function SurveyWidgetDsNav() {
     `dismissed-${survey?.name}`,
     false
   )
+  const hideDsSurvey = useHideDsSurvey()
 
   const dismissSurvey = useCallback(() => {
     setDismissedSurvey(true)
   }, [setDismissedSurvey])
 
   if (!survey?.name || dismissedSurvey) {
+    return null
+  }
+
+  // Hide the survey for users who have sidebar-navigation-ui-update:
+  // They've had it for months. We don't need their feedback anymore
+  if (hideDsSurvey && survey?.name === 'ds-nav') {
     return null
   }
 

@@ -42,7 +42,7 @@ describe('<TagsList />', function () {
 
   it('displays the tags list', function () {
     const header = screen.getByTestId('organize-projects')
-    expect(header.textContent).to.equal('Organize Projects')
+    expect(header.textContent).to.equal('Organize Tags')
 
     screen.getByRole('button', {
       name: 'New Tag',

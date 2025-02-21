@@ -20,7 +20,7 @@ import ProjectListDefault from '@/features/project-list/components/project-list-
 import { ProjectListDsNav } from '@/features/project-list/components/project-list-ds-nav'
 import {
   DsNavStyleProvider,
-  useIsDsNav,
+  hasDsNav,
 } from '@/features/project-list/components/use-is-ds-nav'
 
 function ProjectListRoot() {
@@ -81,8 +81,6 @@ function ProjectListPageContent() {
   }, [])
 
   const { t } = useTranslation()
-
-  const hasDsNav = useIsDsNav()
 
   if (isLoading) {
     const loadingComponent = (
