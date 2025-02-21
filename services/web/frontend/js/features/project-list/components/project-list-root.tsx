@@ -16,12 +16,8 @@ import getMeta from '@/utils/meta'
 import DefaultNavbar from '@/features/ui/components/bootstrap-5/navbar/default-navbar'
 import Footer from '@/features/ui/components/bootstrap-5/footer/footer'
 import WelcomePageContent from '@/features/project-list/components/welcome-page-content'
-import ProjectListDefault from '@/features/project-list/components/project-list-default'
 import { ProjectListDsNav } from '@/features/project-list/components/project-list-ds-nav'
-import {
-  DsNavStyleProvider,
-  useIsDsNav,
-} from '@/features/project-list/components/use-is-ds-nav'
+import { DsNavStyleProvider } from '@/features/project-list/components/use-is-ds-nav'
 
 function ProjectListRoot() {
   const { isReady } = useWaitForI18n()
@@ -82,22 +78,8 @@ function ProjectListPageContent() {
 
   const { t } = useTranslation()
 
-  const hasDsNav = useIsDsNav()
-
   if (isLoading) {
-    const loadingComponent = (
-      <LoadingBranded loadProgress={loadProgress} label={t('loading')} />
-    )
-
-    if (hasDsNav) {
-      return loadingComponent
-    } else {
-      return (
-        <DefaultNavbarAndFooter>
-          <div className="loading-container">{loadingComponent}</div>
-        </DefaultNavbarAndFooter>
-      )
-    }
+    return <LoadingBranded loadProgress={loadProgress} label={t('loading')} />
   }
 
   if (totalProjectsCount === 0) {
@@ -106,17 +88,11 @@ function ProjectListPageContent() {
         <WelcomePageContent />
       </DefaultPageContentWrapper>
     )
-  } else if (hasDsNav) {
+  } else {
     return (
       <DsNavStyleProvider>
         <ProjectListDsNav />
       </DsNavStyleProvider>
-    )
-  } else {
-    return (
-      <DefaultPageContentWrapper>
-        <ProjectListDefault />
-      </DefaultPageContentWrapper>
     )
   }
 }
