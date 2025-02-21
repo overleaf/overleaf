@@ -14,7 +14,7 @@ import {
   DropdownMenu,
   DropdownToggle,
 } from '@/features/ui/components/bootstrap-5/dropdown-menu'
-import { hasDsNav } from '@/features/project-list/components/use-is-ds-nav'
+import { useIsDsNav } from '@/features/project-list/components/use-is-ds-nav'
 
 export default function TagsList() {
   const { t } = useTranslation()
@@ -35,6 +35,7 @@ export default function TagsList() {
     DeleteTagModal,
   } = useTag()
 
+  const isDsNav = useIsDsNav()
   return (
     <>
       <li
@@ -42,11 +43,11 @@ export default function TagsList() {
         aria-hidden="true"
         data-testid="organize-projects"
       >
-        {hasDsNav ? t('organize_tags') : t('organize_projects')}
+        {isDsNav ? t('organize_tags') : t('organize_projects')}
       </li>
       <li className="tag">
         <button type="button" className="tag-name" onClick={openCreateTagModal}>
-          {hasDsNav ? (
+          {isDsNav ? (
             <Plus weight="bold" />
           ) : (
             <MaterialIcon type="add" className="tag-list-icon" />
@@ -73,7 +74,7 @@ export default function TagsList() {
                   color: getTagColor(tag),
                 }}
               >
-                {hasDsNav ? (
+                {isDsNav ? (
                   <TagSimple weight="fill" className="tag-list-icon" />
                 ) : (
                   <MaterialIcon type="label" className="tag-list-icon" />
@@ -93,7 +94,7 @@ export default function TagsList() {
                 id={`${tag._id}-dropdown-toggle`}
                 data-testid="tag-dropdown-toggle"
               >
-                {hasDsNav && <DotsThreeVertical weight="bold" />}
+                {isDsNav && <DotsThreeVertical weight="bold" />}
               </DropdownToggle>
               <DropdownMenu className="dropdown-menu-sm-width">
                 <DropdownItem

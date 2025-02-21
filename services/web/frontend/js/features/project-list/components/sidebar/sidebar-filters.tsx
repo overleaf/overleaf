@@ -5,7 +5,7 @@ import {
 } from '../../context/project-list-context'
 import TagsList from './tags-list'
 import ProjectsFilterMenu from '../projects-filter-menu'
-import { hasDsNav } from '@/features/project-list/components/use-is-ds-nav'
+import { useIsDsNav } from '@/features/project-list/components/use-is-ds-nav'
 
 type SidebarFilterProps = {
   filter: Filter
@@ -30,6 +30,7 @@ export function SidebarFilter({ filter, text }: SidebarFilterProps) {
 
 export default function SidebarFilters() {
   const { t } = useTranslation()
+  const hasDsNav = useIsDsNav()
 
   return (
     <ul className="list-unstyled project-list-filters">
