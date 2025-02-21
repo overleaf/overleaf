@@ -44,8 +44,9 @@ prefetch_custom_compose_pull:
 
 prefetch_custom: prefetch_custom_texlive
 prefetch_custom_texlive:
-	echo -n "$$ALL_TEX_LIVE_DOCKER_IMAGES" | xargs -d, -I% \
-	sh -exc 'tag=%; re_tag=quay.io/sharelatex/$${tag#*/*/}; docker pull $$tag; docker tag $$tag $$re_tag'
+	echo -n "$$ALL_TEX_LIVE_DOCKER_IMAGES" | tr ',' '\0' | xargs -0 -I% \
+  sh -exc 'tag=%; re_tag=quay.io/sharelatex/$${tag#*/*/}; docker pull $$tag; docker tag $$tag $$re_tag'
+
 
 prefetch_custom: prefetch_old
 prefetch_old:
