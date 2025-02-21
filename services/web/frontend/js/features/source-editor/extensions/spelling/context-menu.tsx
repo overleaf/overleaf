@@ -1,9 +1,4 @@
-import {
-  StateField,
-  StateEffect,
-  EditorSelection,
-  Prec,
-} from '@codemirror/state'
+import { StateField, StateEffect, Prec } from '@codemirror/state'
 import { EditorView, showTooltip, Tooltip, keymap } from '@codemirror/view'
 import { Word, Mark, getMarkAtPosition } from './spellchecker'
 import { debugConsole } from '@/utils/debugging'
@@ -57,7 +52,7 @@ const handleContextMenuEvent = (event: MouseEvent, view: EditorView) => {
     return
   }
 
-  const { from, to, value } = targetMark
+  const { value } = targetMark
 
   const targetWord = value.spec.word
   if (!targetWord) {
@@ -72,7 +67,6 @@ const handleContextMenuEvent = (event: MouseEvent, view: EditorView) => {
   openingUntil = Date.now() + 100
 
   view.dispatch({
-    selection: EditorSelection.range(from, to),
     effects: showSpellingMenu.of({
       mark: targetMark,
       word: targetWord,
@@ -88,7 +82,6 @@ const handleShortcutEvent = (view: EditorView) => {
   }
 
   view.dispatch({
-    selection: EditorSelection.range(targetMark.from, targetMark.to),
     effects: showSpellingMenu.of({
       mark: targetMark,
       word: targetMark.value.spec.word,
