@@ -13,7 +13,7 @@ const OPTS = parseArgs()
 
 function parseArgs() {
   const args = minimist(process.argv.slice(2), {
-    string: ['min-project-id', 'max-project-id'],
+    string: ['min-project-id', 'max-project-id', 'project-modified-since'],
     boolean: ['help'],
   })
 
@@ -25,6 +25,9 @@ function parseArgs() {
   return {
     minProjectId: args['min-project-id'] ?? null,
     maxProjectId: args['max-project-id'] ?? null,
+    projectModifiedSince: args['project-modified-since']
+      ? new Date(args['project-modified-since'])
+      : null,
   }
 }
 
@@ -33,15 +36,18 @@ function usage() {
 
 Options:
 
-    --min-project-id    Start scanning at this project id
-    --max-project-id    Stop scanning at this project id`)
+    --min-project-id          Start scanning at this project id
+    --max-project-id          Stop scanning at this project id
+    --project-modified-since  Only consider projects that were modified after the given date
+                              Example: 2020-01-01`)
 }
 
 async function main() {
   let projectsProcessed = 0
   let projectsFound = 0
-  for await (const { projectId, threadIds } of fetchThreadIdsByProject()) {
+  for await (const projectId of fetchProjectIds()) {
     projectsProcessed += 1
+    const threadIds = await fetchThreadIds(projectId)
     const danglingThreadIds = await findDanglingThreadIds(projectId, threadIds)
     if (danglingThreadIds.length > 0) {
       console.log(
@@ -49,7 +55,7 @@ async function main() {
       )
       projectsFound += 1
     }
-    if (projectsProcessed % 10000 === 0) {
+    if (projectsProcessed % 1000 === 0) {
       console.log(
         `${projectsProcessed} projects processed - Last project: ${projectId}`
       )
@@ -58,37 +64,45 @@ async function main() {
   console.log(`${projectsFound} projects with dangling comments found`)
 }
 
-async function* fetchThreadIdsByProject() {
+function fetchProjectIds() {
   const clauses = []
-  clauses.push({
-    deleted: { $ne: true },
-    $or: [{ 'ranges.comments.0': { $exists: true } }, { inS3: true }],
-  })
+
   if (OPTS.minProjectId != null) {
     clauses.push({ project_id: { $gte: new ObjectId(OPTS.minProjectId) } })
   }
+
   if (OPTS.maxProjectId != null) {
     clauses.push({ project_id: { $lte: new ObjectId(OPTS.maxProjectId) } })
   }
+
+  if (OPTS.projectModifiedSince) {
+    clauses.push({ lastUpdated: { $gte: OPTS.projectModifiedSince } })
+  }
+
+  const query = clauses.length > 0 ? { $and: clauses } : {}
+  return db.projects
+    .find(query, {
+      projection: { _id: 1 },
+      readPreference: READ_PREFERENCE_SECONDARY,
+    })
+    .map(x => x._id.toString())
+}
+
+async function fetchThreadIds(projectId) {
   const docs = db.docs.find(
-    { $and: clauses },
     {
-      sort: { project_id: 1 },
-      projection: { project_id: 1, 'ranges.comments': 1, inS3: 1 },
+      project_id: new ObjectId(projectId),
+      deleted: { $ne: true },
+      $or: [{ 'ranges.comments.0': { $exists: true } }, { inS3: true }],
+    },
+    {
+      projection: { 'ranges.comments': 1, inS3: 1 },
       readPreference: READ_PREFERENCE_SECONDARY,
     }
   )
-  let projectId
-  let threadIds = new Set()
+
+  const threadIds = new Set()
   for await (const doc of docs) {
-    if (projectId !== doc.project_id) {
-      yield { projectId, threadIds }
-      projectId = doc.project_id
-      threadIds = new Set()
-    }
-
-    projectId = doc.project_id
-
     let comments = []
     if (doc.inS3) {
       try {
@@ -113,8 +127,11 @@ async function* fetchThreadIdsByProject() {
       threadIds.add(comment.op.t.toString())
     }
   }
-  yield { projectId, threadIds }
-} /**
+
+  return threadIds
+}
+
+/**
  * @param {string} projectId
  * @param {Set<string>} threadIds
  */
