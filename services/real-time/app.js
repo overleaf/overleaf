@@ -262,7 +262,11 @@ if (Settings.shutdownDrainTimeWindow) {
           'EPIPE',
           'ECONNRESET',
           'ERR_STREAM_WRITE_AFTER_END',
-        ].includes(error.code)
+        ].includes(error.code) ||
+        // socket.io error handler sending on polling connection again.
+        (error.code === 'ERR_HTTP_HEADERS_SENT' &&
+          error.stack &&
+          error.stack.includes('Transport.error'))
       ) {
         Metrics.inc('disconnected_write', 1, { status: error.code })
         return logger.warn(
