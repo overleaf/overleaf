@@ -152,14 +152,8 @@ function SidebarDsNav() {
             </>
           )}
         </div>
-        <div className="ds-nav-ds-link">
-          <a
-            target="_blank"
-            href="https://www.digital-science.com/"
-            rel="noopener"
-          >
-            Digital Science
-          </a>
+        <div className="ds-nav-ds-name">
+          <span>Digital Science</span>
         </div>
       </div>
       <div

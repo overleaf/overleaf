@@ -304,14 +304,12 @@
     }
   }
 
-  .ds-nav-ds-link {
+  .ds-nav-ds-name {
     margin-bottom: var(--spacing-05);
 
-    a {
-      color: var(--content-secondary) !important;
+    span {
       text-transform: uppercase;
       font-weight: bold;
-      text-decoration: none;
 
       @include body-xs;
     }
