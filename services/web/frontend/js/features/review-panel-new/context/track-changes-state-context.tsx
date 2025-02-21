@@ -17,6 +17,7 @@ import { postJSON } from '@/infrastructure/fetch-json'
 import useEventListener from '@/shared/hooks/use-event-listener'
 import { ProjectContextValue } from '@/shared/context/types/project-context'
 import { usePermissionsContext } from '@/features/ide-react/context/permissions-context'
+import getMeta from '@/utils/meta'
 
 export type TrackChangesState = {
   onForEveryone: boolean
@@ -96,13 +97,22 @@ export const TrackChangesStateProvider: FC = ({ children }) => {
   const saveTrackChangesForCurrentUser = useCallback(
     async (trackChanges: boolean) => {
       if (user.id) {
-        saveTrackChanges({
-          on_for: {
-            ...onForMembers,
-            [user.id]: trackChanges,
-          },
-          on_for_guests: onForGuests,
-        })
+        if (getMeta('ol-isReviewerRoleEnabled')) {
+          saveTrackChanges({
+            on_for: {
+              ...onForMembers,
+              [user.id]: trackChanges,
+            },
+          })
+        } else {
+          saveTrackChanges({
+            on_for: {
+              ...onForMembers,
+              [user.id]: trackChanges,
+            },
+            on_for_guests: onForGuests,
+          })
+        }
       }
     },
     [onForMembers, onForGuests, user.id, saveTrackChanges]
@@ -126,13 +136,22 @@ export const TrackChangesStateProvider: FC = ({ children }) => {
         !onForEveryone
       ) {
         const value = onForMembers[user.id]
-        actions.saveTrackChanges({
-          on_for: {
-            ...onForMembers,
-            [user.id]: !value,
-          },
-          on_for_guests: onForGuests,
-        })
+        if (getMeta('ol-isReviewerRoleEnabled')) {
+          actions.saveTrackChanges({
+            on_for: {
+              ...onForMembers,
+              [user.id]: !value,
+            },
+          })
+        } else {
+          actions.saveTrackChanges({
+            on_for: {
+              ...onForMembers,
+              [user.id]: !value,
+            },
+            on_for_guests: onForGuests,
+          })
+        }
       }
     }, [
       actions,

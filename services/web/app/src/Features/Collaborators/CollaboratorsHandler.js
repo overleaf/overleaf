@@ -25,6 +25,7 @@ module.exports = {
     addUserIdToProject,
     transferProjects,
     setCollaboratorPrivilegeLevel,
+    convertTrackChangesToExplicitFormat,
   },
 }
 
