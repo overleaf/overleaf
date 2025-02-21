@@ -544,6 +544,73 @@ async function remove(req, res) {
   res.sendStatus(200)
 }
 
+async function setDefault(req, res, next) {
+  const userId = SessionManager.getLoggedInUserId(req.session)
+  const email = EmailHelper.parseEmail(req.body.email)
+
+  if (!email) {
+    return res.sendStatus(422)
+  }
+
+  const { emails, email: oldDefault } = await UserGetter.promises.getUser(
+    userId,
+    { email: 1, emails: 1 }
+  )
+  const primaryEmailData = emails?.find(email => email.email === oldDefault)
+  const deleteOldEmail =
+    req.query['delete-unconfirmed-primary'] !== undefined &&
+    primaryEmailData &&
+    !primaryEmailData.confirmedAt
+
+  const auditLog = {
+    initiatorId: userId,
+    ipAddress: req.ip,
+  }
+  try {
+    await UserUpdater.promises.setDefaultEmailAddress(
+      userId,
+      email,
+      false,
+      auditLog,
+      true,
+      deleteOldEmail
+    )
+  } catch (err) {
+    return UserEmailsController._handleEmailError(err, req, res, next)
+  }
+  SessionManager.setInSessionUser(req.session, { email })
+  const user = SessionManager.getSessionUser(req.session)
+  try {
+    await UserSessionsManager.promises.removeSessionsFromRedis(
+      user,
+      req.sessionID // remove all sessions except the current session
+    )
+  } catch (err) {
+    logger.warn(
+      { err },
+      'failed revoking secondary sessions after changing default email'
+    )
+  }
+  if (
+    req.query['delete-unconfirmed-primary'] !== undefined &&
+    primaryEmailData &&
+    !primaryEmailData.confirmedAt
+  ) {
+    await UserUpdater.promises.removeEmailAddress(
+      userId,
+      primaryEmailData.email,
+      {
+        initiatorId: userId,
+        ipAddress: req.ip,
+        extraInfo: {
+          info: 'removed unconfirmed email after setting new primary',
+        },
+      }
+    )
+  }
+  res.sendStatus(200)
+}
+
 const UserEmailsController = {
   list(req, res, next) {
     const userId = SessionManager.getLoggedInUserId(req.session)
@@ -566,43 +633,7 @@ const UserEmailsController = {
 
   remove: expressify(remove),
 
-  setDefault(req, res, next) {
-    const userId = SessionManager.getLoggedInUserId(req.session)
-    const email = EmailHelper.parseEmail(req.body.email)
-    if (!email) {
-      return res.sendStatus(422)
-    }
-    const auditLog = {
-      initiatorId: userId,
-      ipAddress: req.ip,
-    }
-    UserUpdater.setDefaultEmailAddress(
-      userId,
-      email,
-      false,
-      auditLog,
-      true,
-      err => {
-        if (err) {
-          return UserEmailsController._handleEmailError(err, req, res, next)
-        }
-        SessionManager.setInSessionUser(req.session, { email })
-        const user = SessionManager.getSessionUser(req.session)
-        UserSessionsManager.removeSessionsFromRedis(
-          user,
-          req.sessionID, // remove all sessions except the current session
-          err => {
-            if (err)
-              logger.warn(
-                { err },
-                'failed revoking secondary sessions after changing default email'
-              )
-          }
-        )
-        res.sendStatus(200)
-      }
-    )
-  },
+  setDefault: expressify(setDefault),
 
   endorse(req, res, next) {
     const userId = SessionManager.getLoggedInUserId(req.session)

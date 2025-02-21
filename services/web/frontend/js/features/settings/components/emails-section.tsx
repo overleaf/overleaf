@@ -21,6 +21,7 @@ function EmailsSectionContent() {
     isInitializingSuccess,
   } = useUserEmailsContext()
   const userEmails = Object.values(userEmailsData.byId)
+  const primary = userEmails.find(userEmail => userEmail.default)
 
   // Only show the "add email" button if the user has permission to add a secondary email
   const hideAddSecondaryEmail = getMeta('ol-cannot-add-secondary-email')
@@ -55,7 +56,7 @@ function EmailsSectionContent() {
           <>
             {userEmails?.map(userEmail => (
               <Fragment key={userEmail.email}>
-                <EmailsRow userEmailData={userEmail} />
+                <EmailsRow userEmailData={userEmail} primary={primary} />
                 <div className="horizontal-divider" />
               </Fragment>
             ))}

@@ -8,9 +8,10 @@ import { UserEmailData } from '../../../../../../types/user-email'
 
 type ActionsProps = {
   userEmailData: UserEmailData
+  primary?: UserEmailData
 }
 
-function Actions({ userEmailData }: ActionsProps) {
+function Actions({ userEmailData, primary }: ActionsProps) {
   const { t } = useTranslation()
   const { setLoading: setUserEmailsContextLoading } = useUserEmailsContext()
   const makePrimaryAsync = useAsync()
@@ -42,6 +43,7 @@ function Actions({ userEmailData }: ActionsProps) {
     <>
       <MakePrimary
         userEmailData={userEmailData}
+        primary={primary}
         makePrimaryAsync={makePrimaryAsync}
       />{' '}
       <Remove

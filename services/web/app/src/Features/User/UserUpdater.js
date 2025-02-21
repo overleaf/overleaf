@@ -20,7 +20,13 @@ const _ = require('lodash')
 const Modules = require('../../infrastructure/Modules')
 const UserSessionsManager = require('./UserSessionsManager')
 
-async function _sendSecurityAlertPrimaryEmailChanged(userId, oldEmail, email) {
+async function _sendSecurityAlertPrimaryEmailChanged(
+  userId,
+  oldEmail,
+  email,
+  deleteOldEmail
+) {
+  // here
   // Send email to the following:
   // - the old primary
   // - the new primary
@@ -31,6 +37,11 @@ async function _sendSecurityAlertPrimaryEmailChanged(userId, oldEmail, email) {
   const emailOptions = {
     actionDescribed: `the primary email address on your account was changed to ${email}`,
     action: 'change of primary email address',
+    message: deleteOldEmail
+      ? [
+          `We also removed the previous primary email ${oldEmail} from the account.`,
+        ]
+      : [],
   }
 
   async function sendToRecipients(recipients) {
@@ -161,7 +172,8 @@ async function setDefaultEmailAddress(
   email,
   allowUnconfirmed,
   auditLog,
-  sendSecurityAlert
+  sendSecurityAlert,
+  deleteOldEmail = false
 ) {
   email = EmailHelper.parseEmail(email)
   if (email == null) {
@@ -212,11 +224,14 @@ async function setDefaultEmailAddress(
 
   if (sendSecurityAlert) {
     // no need to wait, errors are logged and not passed back
-    _sendSecurityAlertPrimaryEmailChanged(userId, oldEmail, email).catch(
-      err => {
-        logger.error({ err }, 'failed to send security alert email')
-      }
-    )
+    _sendSecurityAlertPrimaryEmailChanged(
+      userId,
+      oldEmail,
+      email,
+      deleteOldEmail
+    ).catch(err => {
+      logger.error({ err }, 'failed to send security alert email')
+    })
   }
 
   try {

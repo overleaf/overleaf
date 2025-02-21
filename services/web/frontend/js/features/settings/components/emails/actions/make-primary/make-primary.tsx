@@ -42,13 +42,19 @@ const getDescription = (
 
 type MakePrimaryProps = {
   userEmailData: UserEmailData
+  primary?: UserEmailData
   makePrimaryAsync: UseAsyncReturnType
 }
 
-function MakePrimary({ userEmailData, makePrimaryAsync }: MakePrimaryProps) {
+function MakePrimary({
+  userEmailData,
+  primary,
+  makePrimaryAsync,
+}: MakePrimaryProps) {
   const [show, setShow] = useState(false)
   const { t } = useTranslation()
-  const { state, makePrimary } = useUserEmailsContext()
+  const { state, makePrimary, deleteEmail, resetLeaversSurveyExpiration } =
+    useUserEmailsContext()
 
   const handleShowModal = () => setShow(true)
   const handleHideModal = () => setShow(false)
@@ -57,7 +63,10 @@ function MakePrimary({ userEmailData, makePrimaryAsync }: MakePrimaryProps) {
 
     makePrimaryAsync
       .runAsync(
-        postJSON('/user/emails/default', {
+        // 'delete-unconfirmed-primary' is a temporary parameter here to keep backward compatibility.
+        // So users with the old version of the frontend don't get their primary email deleted unexpectedly.
+        // https://github.com/overleaf/internal/issues/23536
+        postJSON('/user/emails/default?delete-unconfirmed-primary', {
           body: {
             email: userEmailData.email,
           },
@@ -65,6 +74,10 @@ function MakePrimary({ userEmailData, makePrimaryAsync }: MakePrimaryProps) {
       )
       .then(() => {
         makePrimary(userEmailData.email)
+        if (primary && !primary.confirmedAt) {
+          deleteEmail(primary.email)
+          resetLeaversSurveyExpiration(primary)
+        }
       })
       .catch(() => {})
   }
@@ -107,6 +120,7 @@ function MakePrimary({ userEmailData, makePrimaryAsync }: MakePrimaryProps) {
       <ConfirmationModal
         email={userEmailData.email}
         isConfirmDisabled={isConfirmDisabled}
+        primary={primary}
         show={show}
         onHide={handleHideModal}
         onConfirm={handleSetDefaultUserEmail}

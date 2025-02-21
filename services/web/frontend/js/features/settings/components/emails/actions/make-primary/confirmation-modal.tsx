@@ -8,6 +8,7 @@ import OLModal, {
   OLModalHeader,
   OLModalTitle,
 } from '@/features/ui/components/ol/ol-modal'
+import { type UserEmailData } from '../../../../../../../../types/user-email'
 
 type ConfirmationModalProps = MergeAndOverride<
   React.ComponentProps<typeof AccessibleModal>,
@@ -16,6 +17,7 @@ type ConfirmationModalProps = MergeAndOverride<
     isConfirmDisabled: boolean
     onConfirm: () => void
     onHide: () => void
+    primary?: UserEmailData
   }
 >
 
@@ -25,6 +27,7 @@ function ConfirmationModal({
   show,
   onConfirm,
   onHide,
+  primary,
 }: ConfirmationModalProps) {
   const { t } = useTranslation()
 
@@ -33,7 +36,7 @@ function ConfirmationModal({
       <OLModalHeader closeButton>
         <OLModalTitle>{t('confirm_primary_email_change')}</OLModalTitle>
       </OLModalHeader>
-      <OLModalBody>
+      <OLModalBody className="pb-0">
         <p>
           <Trans
             i18nKey="do_you_want_to_change_your_primary_email_address_to"
@@ -43,7 +46,18 @@ function ConfirmationModal({
             tOptions={{ interpolation: { escapeValue: true } }}
           />
         </p>
-        <p className="mb-0">{t('log_in_with_primary_email_address')}</p>
+        <p>{t('log_in_with_primary_email_address')}</p>
+        {primary && !primary.confirmedAt && (
+          <p>
+            <Trans
+              i18nKey="this_will_remove_primary_email"
+              components={{ b: <b /> }}
+              values={{ email: primary.email }}
+              shouldUnescape
+              tOptions={{ interpolation: { escapeValue: true } }}
+            />
+          </p>
+        )}
       </OLModalBody>
       <OLModalFooter>
         <OLButton variant="secondary" onClick={onHide}>
@@ -54,7 +68,7 @@ function ConfirmationModal({
           disabled={isConfirmDisabled}
           onClick={onConfirm}
         >
-          {t('confirm')}
+          {t('change_primary_email')}
         </OLButton>
       </OLModalFooter>
     </OLModal>
