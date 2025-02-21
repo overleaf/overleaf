@@ -14,9 +14,11 @@ import { useChatPane } from '@/features/ide-react/hooks/use-chat-pane'
 import { EditorAndPdf } from '@/features/ide-react/components/editor-and-pdf'
 import HistoryContainer from '@/features/ide-react/components/history-container'
 import getMeta from '@/utils/meta'
+import { useEditorContext } from '@/shared/context/editor-context'
 
 export const MainLayout: FC = () => {
   const { view } = useLayoutContext()
+  const { isRestrictedTokenMember } = useEditorContext()
 
   const {
     isOpen: sidebarIsOpen,
@@ -39,7 +41,7 @@ export const MainLayout: FC = () => {
     handlePaneExpand: handleChatExpand,
   } = useChatPane()
 
-  const chatEnabled = getMeta('ol-chatEnabled')
+  const chatEnabled = getMeta('ol-chatEnabled') && !isRestrictedTokenMember
 
   const { t } = useTranslation()
 
