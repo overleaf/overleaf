@@ -1,4 +1,5 @@
 import { useCallback } from 'react'
+import { useSplitTestContext } from '@/shared/context/split-test-context'
 import { sendMB } from '@/infrastructure/event-tracking'
 
 export type ExtraSegmentations = {
@@ -38,11 +39,16 @@ export type ExtraSegmentations = {
 }
 
 export const useSendProjectListMB = () => {
+  const { splitTestVariants } = useSplitTestContext()
+  const hasDsNav = splitTestVariants['sidebar-navigation-ui-update'] as
+    | 'default'
+    | 'active'
   return useCallback(
     <T extends keyof ExtraSegmentations>(
       event: T,
       payload: ExtraSegmentations[T]
-    ) => sendMB(event, payload),
-    []
+    ) =>
+      sendMB(event, { ...payload, 'sidebar-navigation-ui-update': hasDsNav }),
+    [hasDsNav]
   )
 }

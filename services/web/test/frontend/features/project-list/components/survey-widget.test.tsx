@@ -1,9 +1,8 @@
 import { expect } from 'chai'
 import { fireEvent, render, screen } from '@testing-library/react'
-import { SurveyWidgetDsNav } from '../../../../../frontend/js/features/project-list/components/survey-widget-ds-nav'
-import { SplitTestProvider } from '@/shared/context/split-test-context'
+import SurveyWidget from '../../../../../frontend/js/features/project-list/components/survey-widget'
 
-describe('<SurveyWidgetDsNav />', function () {
+describe('<SurveyWidget />', function () {
   beforeEach(function () {
     this.name = 'my-survey'
     this.preText = 'To help shape the future of Overleaf'
@@ -22,11 +21,7 @@ describe('<SurveyWidgetDsNav />', function () {
         url: this.url,
       })
 
-      render(
-        <SplitTestProvider>
-          <SurveyWidgetDsNav />
-        </SplitTestProvider>
-      )
+      render(<SurveyWidget />)
     })
 
     it('shows text and link', function () {
@@ -34,10 +29,9 @@ describe('<SurveyWidgetDsNav />', function () {
       expect(dismissed).to.equal(null)
 
       screen.getByText(this.preText)
-      screen.getByText(this.linkText)
 
       const link = screen.getByRole('link', {
-        name: 'Take survey',
+        name: this.linkText,
       }) as HTMLAnchorElement
       expect(link.href).to.equal(this.url)
     })
@@ -69,11 +63,7 @@ describe('<SurveyWidgetDsNav />', function () {
       })
       localStorage.setItem('dismissed-my-survey', 'true')
 
-      render(
-        <SplitTestProvider>
-          <SurveyWidgetDsNav />
-        </SplitTestProvider>
-      )
+      render(<SurveyWidget />)
     })
 
     it('nothing is displayed', function () {
@@ -87,11 +77,7 @@ describe('<SurveyWidgetDsNav />', function () {
 
   describe('survey widget is not shown when no survey is configured', function () {
     beforeEach(function () {
-      render(
-        <SplitTestProvider>
-          <SurveyWidgetDsNav />
-        </SplitTestProvider>
-      )
+      render(<SurveyWidget />)
     })
 
     it('nothing is displayed', function () {

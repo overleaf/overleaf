@@ -1,6 +1,7 @@
 import { sortBy } from 'lodash'
 import { useTranslation } from 'react-i18next'
 import { DotsThreeVertical, Plus, TagSimple } from '@phosphor-icons/react'
+import MaterialIcon from '../../../../shared/components/material-icon'
 import {
   UNCATEGORIZED_KEY,
   useProjectListContext,
@@ -13,6 +14,7 @@ import {
   DropdownMenu,
   DropdownToggle,
 } from '@/features/ui/components/bootstrap-5/dropdown-menu'
+import { useIsDsNav } from '@/features/project-list/components/use-is-ds-nav'
 
 export default function TagsList() {
   const { t } = useTranslation()
@@ -33,6 +35,7 @@ export default function TagsList() {
     DeleteTagModal,
   } = useTag()
 
+  const isDsNav = useIsDsNav()
   return (
     <>
       <li
@@ -40,11 +43,15 @@ export default function TagsList() {
         aria-hidden="true"
         data-testid="organize-projects"
       >
-        {t('organize_tags')}
+        {isDsNav ? t('organize_tags') : t('organize_projects')}
       </li>
       <li className="tag">
         <button type="button" className="tag-name" onClick={openCreateTagModal}>
-          <Plus weight="bold" />
+          {isDsNav ? (
+            <Plus weight="bold" />
+          ) : (
+            <MaterialIcon type="add" className="tag-list-icon" />
+          )}
 
           <span className="name">{t('new_tag')}</span>
         </button>
@@ -67,7 +74,11 @@ export default function TagsList() {
                   color: getTagColor(tag),
                 }}
               >
-                <TagSimple weight="fill" className="tag-list-icon" />
+                {isDsNav ? (
+                  <TagSimple weight="fill" className="tag-list-icon" />
+                ) : (
+                  <MaterialIcon type="label" className="tag-list-icon" />
+                )}
               </span>
               <span className="name">
                 {tag.name}{' '}
@@ -83,7 +94,7 @@ export default function TagsList() {
                 id={`${tag._id}-dropdown-toggle`}
                 data-testid="tag-dropdown-toggle"
               >
-                <DotsThreeVertical weight="bold" />
+                {isDsNav && <DotsThreeVertical weight="bold" />}
               </DropdownToggle>
               <DropdownMenu className="dropdown-menu-sm-width">
                 <DropdownItem
