@@ -379,12 +379,12 @@
 
     .dash-cell-name {
       hyphens: auto;
+      width: 50%;
       word-break: break-word;
     }
 
     .dash-cell-owner {
       width: 20%;
-      word-break: break-word;
     }
 
     .dash-cell-date {
@@ -420,11 +420,11 @@
 
     @include media-breakpoint-up(sm) {
       .dash-cell-checkbox {
-        width: 25px;
+        width: 4%;
       }
 
       .dash-cell-name {
-        width: calc(54% - 25px);
+        width: 50%;
       }
 
       .dash-cell-owner {
@@ -442,11 +442,11 @@
 
     @include media-breakpoint-up(md) {
       .dash-cell-checkbox {
-        width: 25px;
+        width: 4%;
       }
 
       .dash-cell-name {
-        width: calc(48% - 25px);
+        width: 44%;
       }
 
       .dash-cell-owner {
@@ -469,11 +469,11 @@
 
     @include media-breakpoint-up(lg) {
       .dash-cell-checkbox {
-        width: 25px;
+        width: 3%;
       }
 
       .dash-cell-name {
-        width: calc(49% - 25px);
+        width: 46%;
       }
 
       .dash-cell-owner {
@@ -497,11 +497,11 @@
 
     @include media-breakpoint-up(xl) {
       .dash-cell-checkbox {
-        width: 25px;
+        width: 3%;
       }
 
       .dash-cell-name {
-        width: calc(49% - 25px);
+        width: 46%;
       }
 
       .dash-cell-owner {
@@ -519,11 +519,11 @@
 
     @include media-breakpoint-up(xxl) {
       .dash-cell-checkbox {
-        width: 25px;
+        width: 2%;
       }
 
       .dash-cell-name {
-        width: calc(51% - 25px);
+        width: 49%;
       }
 
       .dash-cell-owner {
