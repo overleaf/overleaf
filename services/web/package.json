@@ -67,7 +67,7 @@
   "browserslist": [
     "defaults and supports woff2",
     "last 1 year",
-    "safari > 13"
+    "safari > 14"
   ],
   "dependencies": {
     "@contentful/rich-text-html-renderer": "^16.0.2",

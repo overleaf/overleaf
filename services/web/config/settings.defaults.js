@@ -1007,7 +1007,7 @@ module.exports = {
 
   unsupportedBrowsers: {
     ie: '<=11',
-    safari: '<=13',
+    safari: '<=14',
   },
 
   // ID of the IEEE brand in the rails app

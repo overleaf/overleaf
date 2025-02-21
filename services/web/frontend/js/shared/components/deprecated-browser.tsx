@@ -6,7 +6,7 @@ import Bowser from 'bowser'
 export const isDeprecatedBrowser = () => {
   const parser = Bowser.getParser(window.navigator.userAgent)
   return parser.satisfies({
-    safari: '~14',
+    safari: '~15',
   })
 }
 
