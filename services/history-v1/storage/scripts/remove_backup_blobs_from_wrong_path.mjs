@@ -18,11 +18,10 @@ import { backupPersistor, projectBlobsBucket } from '../lib/backupPersistor.mjs'
 import { makeProjectKey } from '../lib/blob_store/index.js'
 import fs from 'node:fs'
 import assert from '../lib/assert.js'
-import { client, projects } from '../lib/mongodb.js'
-import { ObjectId } from 'mongodb'
+import { client } from '../lib/mongodb.js'
 import { verifyBlobs } from '../lib/backupVerifier.mjs'
 import { setTimeout } from 'node:timers/promises'
-import check from 'check-types'
+import { getHistoryId } from '../lib/backup_store/index.js'
 
 const argsSchema = [
   {
@@ -39,6 +38,10 @@ const argsSchema = [
   },
   {
     name: 'force',
+    type: Boolean,
+  },
+  {
+    name: 'verbose',
     type: Boolean,
   },
 ]
@@ -115,7 +118,7 @@ async function* readCSV(path, hasHeader) {
 
 function usage() {
   console.info(
-    'Usage: remove_blobs_from_backup.mjs --input <path> [--commit] [--header] [--force]'
+    'Usage: remove_blobs_from_backup.mjs --input <path> [--commit] [--header] [--force] [--verbose]'
   )
 }
 
@@ -123,27 +126,6 @@ if (!args.input) {
   console.error('--input was missing')
   usage()
   await gracefulClose(1)
-}
-
-/**
- * Taken from backup store (in PR currently), will switch to using that when it lands.
- *
- * @param {string} projectId
- * @return {Promise<string>}
- */
-async function getHistoryId(projectId) {
-  const project = await projects.findOne(
-    { _id: new ObjectId(projectId) },
-    {
-      projection: {
-        'overleaf.history.id': 1,
-      },
-    }
-  )
-  if (!project) {
-    throw new Error('Project not found')
-  }
-  return project.overleaf.history.id
 }
 
 /**
@@ -172,6 +154,9 @@ async function canDeleteBlob(projectId, hash) {
   try {
     historyId = await getHistoryId(projectId)
   } catch (error) {
+    if (args.verbose) {
+      console.error(error)
+    }
     throw new Error(`No history ID found for project ${projectId}, skipping`)
   }
   if (historyId === projectId) {
@@ -187,8 +172,11 @@ async function canDeleteBlob(projectId, hash) {
   )
 
   try {
-    await verifyBlobs(historyId, [hash])
+    await verifyBlobs(`${historyId}`, [hash])
   } catch (error) {
+    if (args.verbose) {
+      console.error(error)
+    }
     throw new Error(
       `Blob ${hash} is not backed up for project ${projectId} - use --force to delete anyway`
     )
