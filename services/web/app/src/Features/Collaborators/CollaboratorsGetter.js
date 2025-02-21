@@ -96,7 +96,8 @@ async function getInvitedMembersWithPrivilegeLevels(projectId) {
 async function getInvitedMembersWithPrivilegeLevelsFromFields(
   ownerId,
   collaboratorIds,
-  readOnlyIds
+  readOnlyIds,
+  reviewerIds
 ) {
   const members = _getMemberIdsWithPrivilegeLevelsFromFields(
     ownerId,
@@ -104,7 +105,9 @@ async function getInvitedMembersWithPrivilegeLevelsFromFields(
     readOnlyIds,
     [],
     [],
-    null
+    null,
+    [],
+    reviewerIds
   )
   return _loadMembers(members)
 }
