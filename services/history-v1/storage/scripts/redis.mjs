@@ -3,7 +3,10 @@ import config from 'config'
 
 const redisOptions = config.get('redis.queue')
 
-console.log('REDIS CONFIG', redisOptions)
+console.log('REDIS CONFIG', {
+  ...redisOptions,
+  password: '*'.repeat(redisOptions.password.length),
+})
 const rclient = redis.createClient(redisOptions)
 
 try {
