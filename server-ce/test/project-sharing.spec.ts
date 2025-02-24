@@ -4,6 +4,9 @@ import { ensureUserExists, login } from './helpers/login'
 import {
   createProject,
   enableLinkSharing,
+  openProjectByName,
+  openProjectViaLinkSharingAsAnon,
+  openProjectViaLinkSharingAsUser,
   shareProjectByEmailAndAcceptInviteViaDash,
   shareProjectByEmailAndAcceptInviteViaEmail,
 } from './helpers/project'
@@ -31,7 +34,6 @@ describe('Project Sharing', function () {
 
   function setupTestProject() {
     login('user@example.com')
-    cy.visit('/project')
     createProject(projectName)
 
     // Add chat message
@@ -156,8 +158,7 @@ describe('Project Sharing', function () {
     })
 
     it('should grant the collaborator read access', () => {
-      cy.visit('/project')
-      cy.findByText(projectName).click()
+      openProjectByName(projectName)
       expectFullReadOnlyAccess()
       expectProjectDashboardEntry()
     })
@@ -174,8 +175,7 @@ describe('Project Sharing', function () {
 
     it('should grant the collaborator read access', () => {
       login(email)
-      cy.visit('/project')
-      cy.findByText(projectName).click()
+      openProjectByName(projectName)
       expectFullReadOnlyAccess()
       expectProjectDashboardEntry()
     })
@@ -192,8 +192,7 @@ describe('Project Sharing', function () {
 
     it('should grant the collaborator write access', () => {
       login(email)
-      cy.visit('/project')
-      cy.findByText(projectName).click()
+      openProjectByName(projectName)
       expectReadAndWriteAccess()
       expectEditAuthoredAs('You')
       expectProjectDashboardEntry()
@@ -208,9 +207,11 @@ describe('Project Sharing', function () {
 
         it('should grant restricted read access', () => {
           login(email)
-          cy.visit(linkSharingReadOnly)
-          cy.findByText(projectName) // wait for lazy loading
-          cy.findByText('OK, join project').click()
+          openProjectViaLinkSharingAsUser(
+            linkSharingReadOnly,
+            projectName,
+            email
+          )
           expectRestrictedReadOnlyAccess()
           expectProjectDashboardEntry()
         })
@@ -222,9 +223,11 @@ describe('Project Sharing', function () {
 
         it('should grant full write access', () => {
           login(email)
-          cy.visit(linkSharingReadAndWrite)
-          cy.findByText(projectName) // wait for lazy loading
-          cy.findByText('OK, join project').click()
+          openProjectViaLinkSharingAsUser(
+            linkSharingReadAndWrite,
+            projectName,
+            email
+          )
           expectReadAndWriteAccess()
           expectEditAuthoredAs('You')
           expectProjectDashboardEntry()
@@ -268,7 +271,7 @@ describe('Project Sharing', function () {
           withDataDir: true,
         })
         it('should grant read access with read link', () => {
-          cy.visit(linkSharingReadOnly)
+          openProjectViaLinkSharingAsAnon(linkSharingReadOnly)
           expectRestrictedReadOnlyAccess()
         })
 
@@ -288,12 +291,12 @@ describe('Project Sharing', function () {
         })
 
         it('should grant read access with read link', () => {
-          cy.visit(linkSharingReadOnly)
+          openProjectViaLinkSharingAsAnon(linkSharingReadOnly)
           expectRestrictedReadOnlyAccess()
         })
 
         it('should grant write access with write link', () => {
-          cy.visit(linkSharingReadAndWrite)
+          openProjectViaLinkSharingAsAnon(linkSharingReadAndWrite)
           expectReadAndWriteAccess()
           expectEditAuthoredAs('Anonymous')
         })

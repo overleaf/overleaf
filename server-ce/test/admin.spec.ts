@@ -127,9 +127,7 @@ describe('admin panel', function () {
       testProjectName = `project-${uuid()}`
       deletedProjectName = `deleted-project-${uuid()}`
       login(user1)
-      cy.visit('/project')
       createProject(testProjectName).then(id => (testProjectId = id))
-      cy.visit('/project')
       createProject(deletedProjectName).then(id => (projectToDeleteId = id))
     })
 

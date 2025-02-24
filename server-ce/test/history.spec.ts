@@ -40,7 +40,6 @@ describe('History', function () {
   const CLASS_DELETION = 'ol-cm-deletion-marker'
 
   it('should support labels, comparison and download', () => {
-    cy.visit('/project')
     createProject('labels')
     const recompile = throttledRecompile()
 

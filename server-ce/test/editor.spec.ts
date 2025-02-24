@@ -13,7 +13,6 @@ describe('editor', () => {
     const fileName = 'test.tex'
     const word = createRandomLetterString()
     login('user@example.com')
-    cy.visit('/project')
     createProject('test-project')
 
     cy.log('create new project file')
@@ -214,7 +213,7 @@ describe('editor', () => {
       projectName = `project-${uuid()}`
       login('user@example.com')
       cy.visit(`/project`)
-      createProject(projectName, { type: 'Example Project' })
+      createProject(projectName)
       cy.get('button').contains('New file').click({ force: true })
     })
 

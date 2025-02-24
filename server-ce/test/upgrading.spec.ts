@@ -1,7 +1,7 @@
 import { ensureUserExists, login } from './helpers/login'
 import { isExcludedBySharding, startWith } from './helpers/config'
 import { dockerCompose, runScript } from './helpers/hostAdminClient'
-import { createProject } from './helpers/project'
+import { createProject, openProjectByName } from './helpers/project'
 import { throttledRecompile } from './helpers/compile'
 import { v4 as uuid } from 'uuid'
 
@@ -38,8 +38,6 @@ describe('Upgrading', function () {
     before(() => {
       cy.log('Populate old instance')
       login(USER)
-
-      cy.visit('/project')
       createProject(PROJECT_NAME, {
         newProjectButtonMatcher: startOptions.newProjectButtonMatcher,
       })
@@ -115,8 +113,7 @@ describe('Upgrading', function () {
     })
 
     it('should open the old project', () => {
-      cy.visit('/project')
-      cy.findByText(PROJECT_NAME).click()
+      openProjectByName(PROJECT_NAME)
 
       cy.url().should('match', /\/project\/[a-fA-F0-9]{24}/)
       cy.findByRole('navigation').within(() => {

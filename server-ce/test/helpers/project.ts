@@ -11,6 +11,11 @@ export function createProject(
     newProjectButtonMatcher?: RegExp
   } = {}
 ): Cypress.Chainable<string> {
+  cy.url().then(url => {
+    if (!url.endsWith('/project')) {
+      cy.visit('/project')
+    }
+  })
   cy.findAllByRole('button').contains(newProjectButtonMatcher).click()
   // FIXME: This should only look in the left menu
   cy.findAllByText(type).first().click()
@@ -18,10 +23,47 @@ export function createProject(
     cy.get('input').type(name)
     cy.findByText('Create').click()
   })
+  cy.url().should('match', /\/project\/[a-fA-F0-9]{24}/)
+  waitForMainDocToLoad()
   return cy
     .url()
     .should('match', /\/project\/[a-fA-F0-9]{24}/)
     .then(url => url.split('/').pop())
+}
+
+export function openProjectByName(projectName: string) {
+  cy.visit('/project')
+  cy.findByText(projectName).click()
+  waitForMainDocToLoad()
+}
+
+export function openProjectViaLinkSharingAsAnon(url: string) {
+  cy.visit(url)
+  waitForMainDocToLoad()
+}
+
+export function openProjectViaLinkSharingAsUser(
+  url: string,
+  projectName: string,
+  email: string
+) {
+  cy.visit(url)
+  cy.findByText(projectName) // wait for lazy loading
+  cy.findByText(email)
+  cy.findByText('OK, join project').click()
+  waitForMainDocToLoad()
+}
+
+export function openProjectViaInviteNotification(projectName: string) {
+  cy.visit('/project')
+  cy.findByText(projectName)
+    .parent()
+    .parent()
+    .within(() => {
+      cy.findByText('Join Project').click()
+    })
+  cy.findByText('Open Project').click()
+  cy.url().should('match', /\/project\/[a-fA-F0-9]{24}/)
 }
 
 function shareProjectByEmail(
@@ -29,8 +71,7 @@ function shareProjectByEmail(
   email: string,
   level: 'Can view' | 'Can edit'
 ) {
-  cy.visit('/project')
-  cy.findByText(projectName).click()
+  openProjectByName(projectName)
   cy.findByText('Share').click()
   cy.findByRole('dialog').within(() => {
     cy.get('input').type(`${email},`)
@@ -50,13 +91,7 @@ export function shareProjectByEmailAndAcceptInviteViaDash(
   shareProjectByEmail(projectName, email, level)
 
   login(email)
-  cy.visit('/project')
-  cy.findByText(new RegExp(projectName))
-    .parent()
-    .parent()
-    .within(() => {
-      cy.findByText('Join Project').click()
-    })
+  openProjectViaInviteNotification(projectName)
 }
 
 export function shareProjectByEmailAndAcceptInviteViaEmail(
@@ -86,6 +121,8 @@ export function enableLinkSharing() {
   let linkSharingReadOnly: string
   let linkSharingReadAndWrite: string
 
+  waitForMainDocToLoad()
+
   cy.findByText('Share').click()
   cy.findByText('Turn on link sharing').click()
   cy.findByText('Anyone with this link can view this project')
@@ -104,4 +141,9 @@ export function enableLinkSharing() {
   return cy.then(() => {
     return { linkSharingReadOnly, linkSharingReadAndWrite }
   })
+}
+
+export function waitForMainDocToLoad() {
+  cy.log('Wait for main doc to load; it will steal the focus after loading')
+  cy.get('.cm-content').should('contain.text', 'Introduction')
 }

@@ -1,5 +1,8 @@
 import { ensureUserExists, login } from './helpers/login'
-import { createProject } from './helpers/project'
+import {
+  createProject,
+  openProjectViaInviteNotification,
+} from './helpers/project'
 import { isExcludedBySharding, startWith } from './helpers/config'
 import { throttledRecompile } from './helpers/compile'
 
@@ -11,10 +14,7 @@ describe('Project creation and compilation', function () {
 
   it('users can create project and compile it', function () {
     login('user@example.com')
-    cy.visit('/project')
-    // this is the first project created, the welcome screen is displayed instead of the project list
     createProject('test-project')
-    cy.url().should('match', /\/project\/[a-fA-F0-9]{24}/)
     const recompile = throttledRecompile()
     cy.findByText('\\maketitle').parent().click()
     cy.findByText('\\maketitle').parent().type('\n\\section{{}Test Section}')
@@ -26,8 +26,8 @@ describe('Project creation and compilation', function () {
     const fileName = `test-${Date.now()}.md`
     const markdownContent = '# Markdown title'
     login('user@example.com')
-    cy.visit('/project')
     createProject('test-project')
+
     // FIXME: Add aria-label maybe? or at least data-test-id
     cy.findByText('New file').click({ force: true })
     cy.findByRole('dialog').within(() => {
@@ -50,12 +50,9 @@ describe('Project creation and compilation', function () {
     const targetProjectName = `${sourceProjectName}-target`
     login('user@example.com')
 
-    cy.visit('/project')
     createProject(sourceProjectName, { type: 'Example Project' }).as(
       'sourceProjectId'
     )
-
-    cy.visit('/project')
     createProject(targetProjectName)
 
     // link the image from `projectName` into this project
@@ -80,13 +77,9 @@ describe('Project creation and compilation', function () {
     const sourceProjectName = `test-project-${Date.now()}`
     const targetProjectName = `${sourceProjectName}-target`
     login('user@example.com')
-
-    cy.visit('/project')
     createProject(sourceProjectName, { type: 'Example Project' }).as(
       'sourceProjectId'
     )
-
-    cy.visit('/project')
     createProject(targetProjectName).as('targetProjectId')
 
     // link the image from `projectName` into this project
@@ -110,15 +103,7 @@ describe('Project creation and compilation', function () {
     cy.findByText('Log Out').click()
 
     login('collaborator@example.com')
-    cy.visit('/project')
-    cy.findByText(targetProjectName)
-      .parent()
-      .parent()
-      .within(() => {
-        cy.findByText('Join Project').click()
-      })
-    cy.findByText('Open Project').click()
-    cy.url().should('match', /\/project\/[a-fA-F0-9]{24}/)
+    openProjectViaInviteNotification(targetProjectName)
     cy.get('@targetProjectId').then(targetProjectId => {
       cy.url().should('include', targetProjectId)
     })

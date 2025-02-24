@@ -29,7 +29,6 @@ describe('SandboxedCompiles', function () {
     })
 
     it('should offer TexLive images and switch the compiler', function () {
-      cy.visit('/project')
       createProject('sandboxed')
       const recompile = throttledRecompile()
       cy.log('wait for compile')
@@ -66,7 +65,6 @@ describe('SandboxedCompiles', function () {
       let projectName: string
       beforeEach(function () {
         projectName = `Project ${uuid()}`
-        cy.visit('/project')
         createProject(projectName)
         const recompile = throttledRecompile()
         cy.findByText('\\maketitle').parent().click()
@@ -154,7 +152,6 @@ describe('SandboxedCompiles', function () {
   function checkRecompilesAfterErrors() {
     it('recompiles even if there are Latex errors', function () {
       login('user@example.com')
-      cy.visit('/project')
       createProject('test-project')
       const recompile = throttledRecompile()
       cy.findByText('\\maketitle').parent().click()
@@ -170,7 +167,6 @@ describe('SandboxedCompiles', function () {
 
   function checkXeTeX() {
     it('should be able to use XeLaTeX', function () {
-      cy.visit('/project')
       createProject('XeLaTeX')
       const recompile = throttledRecompile()
       cy.log('wait for compile')
@@ -204,7 +200,6 @@ describe('SandboxedCompiles', function () {
     })
 
     it('should not offer TexLive images and use default compiler', function () {
-      cy.visit('/project')
       createProject('sandboxed')
       cy.log('wait for compile')
       cy.get('.pdf-viewer').should('contain.text', 'sandboxed')

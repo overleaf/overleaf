@@ -4,6 +4,8 @@ import { ensureUserExists, login } from './helpers/login'
 import {
   createProject,
   enableLinkSharing,
+  openProjectByName,
+  openProjectViaLinkSharingAsUser,
   shareProjectByEmailAndAcceptInviteViaDash,
 } from './helpers/project'
 
@@ -77,7 +79,6 @@ describe('git-bridge', function () {
 
     it('should render the git-bridge UI in the editor', function () {
       maybeClearAllTokens()
-      cy.visit('/project')
       createProject('git').as('projectId')
       cy.get('header').findByText('Menu').click()
       cy.findByText('Sync')
@@ -120,15 +121,13 @@ describe('git-bridge', function () {
 
       let projectName: string
       beforeEach(() => {
-        cy.visit('/project')
         projectName = uuid()
         createProject(projectName).as('projectId')
       })
 
       it('should expose r/w interface to owner', () => {
         maybeClearAllTokens()
-        cy.visit('/project')
-        cy.findByText(projectName).click()
+        openProjectByName(projectName)
         checkGitAccess('readAndWrite')
       })
 
@@ -139,8 +138,7 @@ describe('git-bridge', function () {
           'Can edit'
         )
         maybeClearAllTokens()
-        cy.visit('/project')
-        cy.findByText(projectName).click()
+        openProjectByName(projectName)
         checkGitAccess('readAndWrite')
       })
 
@@ -151,29 +149,34 @@ describe('git-bridge', function () {
           'Can view'
         )
         maybeClearAllTokens()
-        cy.visit('/project')
-        cy.findByText(projectName).click()
+        openProjectByName(projectName)
         checkGitAccess('readOnly')
       })
 
       it('should expose r/w interface to link-sharing r/w collaborator', () => {
         enableLinkSharing().then(({ linkSharingReadAndWrite }) => {
-          login('collaborator-link-rw@example.com')
+          const email = 'collaborator-link-rw@example.com'
+          login(email)
           maybeClearAllTokens()
-          cy.visit(linkSharingReadAndWrite)
-          cy.findByText(projectName) // wait for lazy loading
-          cy.findByText('OK, join project').click()
+          openProjectViaLinkSharingAsUser(
+            linkSharingReadAndWrite,
+            projectName,
+            email
+          )
           checkGitAccess('readAndWrite')
         })
       })
 
       it('should expose r/o interface to link-sharing r/o collaborator', () => {
         enableLinkSharing().then(({ linkSharingReadOnly }) => {
-          login('collaborator-link-ro@example.com')
+          const email = 'collaborator-link-ro@example.com'
+          login(email)
           maybeClearAllTokens()
-          cy.visit(linkSharingReadOnly)
-          cy.findByText(projectName) // wait for lazy loading
-          cy.findByText('OK, join project').click()
+          openProjectViaLinkSharingAsUser(
+            linkSharingReadOnly,
+            projectName,
+            email
+          )
           checkGitAccess('readOnly')
         })
       })
@@ -363,7 +366,6 @@ Hello world
     })
     it('should not render the git-bridge UI in the editor', function () {
       login('user@example.com')
-      cy.visit('/project')
       createProject('maybe git')
       cy.get('header').findByText('Menu').click()
       cy.findByText('Word Count') // wait for lazy loading

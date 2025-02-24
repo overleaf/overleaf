@@ -32,7 +32,6 @@ describe('Project List', () => {
 
     before(() => {
       login(REGULAR_USER)
-      cy.visit('/project')
       createProject(projectName, { type: 'Example Project' })
     })
 
@@ -90,7 +89,6 @@ describe('Project List', () => {
       cy.log('create a separate project to filter')
       const nonTaggedProjectName = `project-${uuid()}`
       login(REGULAR_USER)
-      cy.visit('/project')
       createProject(nonTaggedProjectName)
       cy.visit('/project')
 

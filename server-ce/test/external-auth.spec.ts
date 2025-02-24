@@ -32,6 +32,9 @@ describe('SAML', () => {
       cy.get('button[type="submit"]').click()
     })
 
+    cy.log('wait for login to finish')
+    cy.url().should('contain', '/project')
+
     createProject('via SAML')
   })
 })
@@ -61,6 +64,9 @@ describe('LDAP', () => {
     cy.get('input[name="login"]').type('fry')
     cy.get('input[name="password"]').type('fry')
     cy.get('button[type="submit"]').click()
+
+    cy.log('wait for login to finish')
+    cy.url().should('contain', '/project')
 
     createProject('via LDAP')
   })

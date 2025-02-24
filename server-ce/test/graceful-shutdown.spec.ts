@@ -31,8 +31,6 @@ describe('GracefulShutdown', function () {
   it('should display banner and flush changes out of redis', () => {
     bringServerProBackUp()
     login(USER)
-
-    cy.visit('/project')
     createProject(PROJECT_NAME).then(id => {
       projectId = id
     })
