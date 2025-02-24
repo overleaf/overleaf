@@ -54,6 +54,16 @@ let CONCURRENCY = 4
 let BATCH_CONCURRENCY = 1
 let BLOB_LIMITER = pLimit(CONCURRENCY)
 
+let gracefulShutdownInitiated = false
+
+process.on('SIGINT', handleSignal)
+process.on('SIGTERM', handleSignal)
+
+function handleSignal() {
+  gracefulShutdownInitiated = true
+  console.warn('graceful shutdown initiated, draining queue')
+}
+
 async function retry(fn, times, delayMs) {
   let attempts = times
   while (attempts > 0) {
@@ -621,6 +631,9 @@ async function initializeProjects(options) {
   const limiter = pLimit(BATCH_CONCURRENCY)
 
   async function processBatch(batch) {
+    if (gracefulShutdownInitiated) {
+      throw new Error('graceful shutdown')
+    }
     const batchOperations = batch.map(project =>
       limiter(backupProject, project._id.toHexString(), options)
     )
@@ -651,6 +664,10 @@ async function initializeProjects(options) {
 async function backupPendingProjects(options) {
   const intervalMs = options.interval * 1000
   for await (const project of listPendingBackups(intervalMs)) {
+    if (gracefulShutdownInitiated) {
+      console.warn('graceful shutdown: stopping pending project backups')
+      break
+    }
     const projectId = project._id.toHexString()
     console.log(`Backing up pending project with ID: ${projectId}`)
     await backupProject(projectId, options)
@@ -838,6 +855,9 @@ async function compareAllProjects(options) {
   let totalProjects = 0
 
   async function processBatch(batch) {
+    if (gracefulShutdownInitiated) {
+      throw new Error('graceful shutdown')
+    }
     const batchOperations = batch.map(project =>
       limiter(async () => {
         const projectId = project._id.toHexString()
@@ -911,7 +931,9 @@ async function main() {
 
 main()
   .then(() => {
-    console.log('Completed')
+    console.log(
+      gracefulShutdownInitiated ? 'Exited - graceful shutdown' : 'Completed'
+    )
   })
   .catch(err => {
     console.error('Error backing up project:', err)
