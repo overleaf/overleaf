@@ -12,6 +12,10 @@ switch (process.argv.pop()) {
       console.log('pushd', `services/${service.name}`)
       switch (service.name) {
         case 'web':
+          // precompile pug in background
+          console.log('npm run precompile-pug &')
+          console.log('pug_precompile=$!')
+
           // Avoid downloading of cypress
           console.log('export CYPRESS_INSTALL_BINARY=0')
 
@@ -21,8 +25,9 @@ switch (process.argv.pop()) {
           console.log('npm run webpack:production')
           // uninstall webpack and frontend dependencies
           console.log('npm install --omit=dev')
-          // precompile pug
-          console.log('npm run precompile-pug')
+
+          // Wait for pug precompile to finish
+          console.log('wait "$pug_precompile"')
           break
         default:
           console.log(`echo ${service.name} does not require a compilation`)
