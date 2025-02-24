@@ -12,12 +12,19 @@ import {
   makeProjectKey,
 } from '../lib/blob_store/index.js'
 import { TextDecoder } from 'node:util'
-import { backupPersistor, projectBlobsBucket } from '../lib/backupPersistor.mjs'
+import {
+  backupPersistor,
+  chunksBucket,
+  projectBlobsBucket,
+} from '../lib/backupPersistor.mjs'
 import fs from 'node:fs'
 import { pipeline } from 'node:stream/promises'
 import os from 'node:os'
 import path from 'node:path'
 import { createHash } from 'node:crypto'
+import projectKey from '../lib/project_key.js'
+import { createGunzip } from 'node:zlib'
+import { text } from 'node:stream/consumers'
 
 const optionDefinitions = [
   { name: 'historyId', alias: 'p', type: String },
@@ -27,19 +34,51 @@ const optionDefinitions = [
   { name: 'keep', alias: 'k', type: Boolean },
 ]
 
+function makeChunkKey(projectId, startVersion) {
+  return path.join(projectKey.format(projectId), projectKey.pad(startVersion))
+}
+
 async function listChunks(historyId) {
   for await (const chunkRecord of getProjectChunksFromVersion(historyId, 0)) {
     console.log('Chunk record:', chunkRecord)
   }
 }
 
-async function displayChunk(historyId, version) {
-  await loadGlobalBlobs()
+async function fetchChunkLocal(historyId, version) {
   const chunkRecord = await getChunkMetadataForVersion(historyId, version)
   const chunk = await loadAtVersion(historyId, version)
-  console.log('Chunk record', chunkRecord)
-  console.log('Start version', chunk.getStartVersion())
-  console.log('Number of changes', chunk.getChanges().length)
+  return { key: version, chunk, metadata: chunkRecord, source: 'local storage' }
+}
+
+async function fetchChunkRemote(historyId, version) {
+  const chunkRecord = await getChunkMetadataForVersion(historyId, version)
+  const startVersion = chunkRecord.startVersion
+  const key = makeChunkKey(historyId, startVersion)
+  const backupPersistorForProject = await backupPersistor.forProject(
+    chunksBucket,
+    key
+  )
+  const backupChunkStream = await backupPersistorForProject.getObjectStream(
+    chunksBucket,
+    key
+  )
+  const backupStr = await text(backupChunkStream.pipe(createGunzip()))
+  return {
+    key,
+    chunk: JSON.parse(backupStr),
+    metadata: chunkRecord,
+    source: 'remote backup',
+  }
+}
+
+async function displayChunk(historyId, version, options) {
+  const { key, chunk, metadata, source } = await (options.remote
+    ? fetchChunkRemote(historyId, version)
+    : fetchChunkLocal(historyId, version))
+  console.log('Source:', source)
+  console.log('Chunk record', metadata)
+  console.log('Key', key)
+  // console.log('Number of changes', chunk.getChanges().length)
   console.log(JSON.stringify(chunk))
 }
 
@@ -189,8 +228,9 @@ async function main() {
     console.error('Error: --historyId is required.')
     process.exit(1)
   }
+  await loadGlobalBlobs()
   if (version != null) {
-    await displayChunk(historyId, version)
+    await displayChunk(historyId, version, { remote })
   } else if (blob != null) {
     await displayBlob(historyId, blob, { remote, keep })
   } else {
