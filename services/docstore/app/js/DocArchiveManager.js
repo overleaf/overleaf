@@ -8,6 +8,7 @@ const { ReadableString } = require('@overleaf/stream-utils')
 const RangeManager = require('./RangeManager')
 const PersistorManager = require('./PersistorManager')
 const pMap = require('p-map')
+const { streamToBuffer } = require('./StreamToBuffer').promises
 const { BSON } = require('mongodb-legacy')
 
 const PARALLEL_JOBS = Settings.parallelArchiveJobs
@@ -136,7 +137,7 @@ async function getDoc(projectId, docId) {
     key
   )
   stream.resume()
-  const buffer = await _streamToBuffer(projectId, docId, stream)
+  const buffer = await streamToBuffer(projectId, docId, stream)
   const md5 = crypto.createHash('md5').update(buffer).digest('hex')
   if (sourceMd5 !== md5) {
     throw new Errors.Md5MismatchError('md5 mismatch when downloading doc', {
@@ -185,34 +186,6 @@ async function destroyProject(projectId) {
     )
   }
   await Promise.all(tasks)
-}
-
-async function _streamToBuffer(projectId, docId, stream) {
-  const chunks = []
-  let size = 0
-  let logged = false
-  const logIfTooLarge = finishedReading => {
-    if (size <= Settings.max_doc_length) return
-    // Log progress once and then again at the end.
-    if (logged && !finishedReading) return
-    logger.warn(
-      { projectId, docId, size, finishedReading },
-      'potentially large doc pulled down from gcs'
-    )
-    logged = true
-  }
-  return await new Promise((resolve, reject) => {
-    stream.on('data', chunk => {
-      size += chunk.byteLength
-      logIfTooLarge(false)
-      chunks.push(chunk)
-    })
-    stream.on('error', reject)
-    stream.on('end', () => {
-      logIfTooLarge(true)
-      resolve(Buffer.concat(chunks))
-    })
-  })
 }
 
 function _deserializeArchivedDoc(buffer) {

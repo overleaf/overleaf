@@ -74,9 +74,7 @@ module.exports = OutputFileOptimiser = {
     logger.debug({ args }, 'running qpdf command')
 
     const timer = new Metrics.Timer('qpdf')
-    const proc = spawn('qpdf', args)
-    let stdout = ''
-    proc.stdout.setEncoding('utf8').on('data', chunk => (stdout += chunk))
+    const proc = spawn('qpdf', args, { stdio: 'ignore' })
     callback = _.once(callback) // avoid double call back for error and close event
     proc.on('error', function (err) {
       logger.warn({ err, args }, 'qpdf failed')

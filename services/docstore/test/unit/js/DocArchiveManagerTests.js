@@ -4,6 +4,7 @@ const modulePath = '../../../app/js/DocArchiveManager.js'
 const SandboxedModule = require('sandboxed-module')
 const { ObjectId } = require('mongodb-legacy')
 const Errors = require('../../../app/js/Errors')
+const StreamToBuffer = require('../../../app/js/StreamToBuffer').promises
 
 describe('DocArchiveManager', function () {
   let DocArchiveManager,
@@ -22,7 +23,8 @@ describe('DocArchiveManager', function () {
     md5Sum,
     projectId,
     readStream,
-    stream
+    stream,
+    streamToBuffer
 
   beforeEach(function () {
     md5Sum = 'decafbad'
@@ -154,6 +156,26 @@ describe('DocArchiveManager', function () {
       },
     }
 
+    // Wrap streamToBuffer so that we can pass in something that it expects (in
+    // this case, a Promise) rather than a stubbed stream object
+    streamToBuffer = {
+      promises: {
+        streamToBuffer: async () => {
+          const inputStream = new Promise(resolve => {
+            stream.on('data', data => resolve(data))
+          })
+
+          const value = await StreamToBuffer.streamToBuffer(
+            'testProjectId',
+            'testDocId',
+            inputStream
+          )
+
+          return value
+        },
+      },
+    }
+
     DocArchiveManager = SandboxedModule.require(modulePath, {
       requires: {
         '@overleaf/settings': Settings,
@@ -163,6 +185,7 @@ describe('DocArchiveManager', function () {
         './RangeManager': RangeManager,
         './PersistorManager': PersistorManager,
         './Errors': Errors,
+        './StreamToBuffer': streamToBuffer,
       },
     })
   })
