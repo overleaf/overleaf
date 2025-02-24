@@ -1,10 +1,13 @@
 import { createContext, type FC, type ReactNode, useContext } from 'react'
 import { useSplitTestContext } from '@/shared/context/split-test-context'
+import getMeta from '@/utils/meta'
+
+export const hasDsNav = () => getMeta('ol-ExposedSettings').isOverleaf
 
 /**
  * This hook returns whether the user has the split-test assignment 'sidebar-navigation-ui-update'
  */
-export const useIsDsNav = () => {
+export const useHideDsSurvey = () => {
   const { splitTestVariants } = useSplitTestContext()
   return splitTestVariants['sidebar-navigation-ui-update'] === 'active'
 }
