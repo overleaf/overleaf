@@ -22,7 +22,10 @@ const JOIN_PROJECT_RATE_LIMITED_DELAY = 15 * 1000
 const RECONNECT_GRACEFULLY_RETRY_INTERVAL_MS = 5000
 const MAX_RECONNECT_GRACEFULLY_INTERVAL_MS = 45 * 1000
 
+const BEFORE_RECONNECT = 'beforeReconnect'
+
 const MAX_RETRY_CONNECT = 5
+const RETRY_WEBSOCKET = 3
 
 const externalSocketHeartbeat = isSplitTestEnabled('external-socket-heartbeat')
 
@@ -49,6 +52,7 @@ export class ConnectionManager extends EventTarget {
   private protocolVersion = -1
   private readonly idleDisconnectInterval: number
   private reconnectCountdownInterval = 0
+  private websocketFailureCount = 0
   readonly socket: Socket
   private userIsLeavingPage = false
   private externalHeartbeatInterval?: number
@@ -69,6 +73,10 @@ export class ConnectionManager extends EventTarget {
     window.addEventListener('online', () => this.onOnline())
     window.addEventListener('beforeunload', () => {
       this.userIsLeavingPage = true
+      if (this.socket.socket.transport?.name === 'xhr-polling') {
+        // Websockets will close automatically.
+        this.socket.socket.disconnect()
+      }
     })
 
     const parsedURL = new URL(
@@ -106,7 +114,7 @@ export class ConnectionManager extends EventTarget {
     }
 
     socket.on('connect', () => this.onConnect())
-    socket.on('disconnect', () => this.onDisconnect())
+    socket.on('disconnect', (reason: string) => this.onDisconnect(reason))
     socket.on('error', () => this.onConnectError())
     socket.on('connect_failed', () => this.onConnectError())
     socket.on('joinProjectResponse', body => this.onJoinProjectResponse(body))
@@ -210,6 +218,9 @@ export class ConnectionManager extends EventTarget {
   }
 
   private onConnectError() {
+    if (this.socket.socket.transport?.name === 'websocket') {
+      this.websocketFailureCount++
+    }
     if (this.connectionAttempt === null) return // ignore errors once connected.
     if (this.connectionAttempt++ < MAX_RETRY_CONNECT) {
       setTimeout(
@@ -242,9 +253,12 @@ export class ConnectionManager extends EventTarget {
         15_000
       )
     }
+    // Reset on success regardless of transport. We want to upgrade back to websocket on reconnect.
+    this.websocketFailureCount = 0
   }
 
-  private onDisconnect() {
+  private onDisconnect(reason: string) {
+    if (reason === BEFORE_RECONNECT) return // triggered from reconnect, ignore.
     this.connectionAttempt = null
     if (this.externalHeartbeatInterval) {
       window.clearInterval(this.externalHeartbeatInterval)
@@ -406,6 +420,15 @@ export class ConnectionManager extends EventTarget {
     })
 
     this.addReconnectListeners()
+    this.socket.socket.transports = ['xhr-polling']
+    if (this.websocketFailureCount < RETRY_WEBSOCKET) {
+      this.socket.socket.transports.unshift('websocket')
+    }
+    if (this.socket.socket.connecting || this.socket.socket.connected) {
+      // Ensure the old transport has been cleaned up.
+      // Socket.disconnect() does not accept a parameter. Go one level deeper.
+      this.socket.socket.onDisconnect(BEFORE_RECONNECT)
+    }
     this.socket.socket.connect()
   }
 

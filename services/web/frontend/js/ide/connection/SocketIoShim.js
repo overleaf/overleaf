@@ -15,6 +15,7 @@ class SocketShimBase {
 const transparentMethods = [
   'connect',
   'disconnect',
+  'onDisconnect',
   'emit',
   'on',
   'removeListener',

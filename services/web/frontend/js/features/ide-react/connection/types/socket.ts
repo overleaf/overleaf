@@ -22,11 +22,15 @@ export type Socket = {
   ): void
   socket: {
     connected: boolean
+    connecting: boolean
     connect(): void
+    onDisconnect(reason: string): void
+    disconnect(): void
     sessionid: string
     transport?: {
       name: string
     }
+    transports: string[]
   }
   disconnect(): void
 }
