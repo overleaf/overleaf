@@ -175,7 +175,10 @@ module.exports = Router = {
         return
       }
       const useServerPing =
-        !!client.handshake?.query?.esh && !!client.handshake?.query?.ssp
+        !!client.handshake?.query?.esh &&
+        !!client.handshake?.query?.ssp &&
+        // No server ping with long-polling transports.
+        client.transport === 'websocket'
       const isDebugging = !!client.handshake?.query?.debugging
       const projectId = client.handshake?.query?.projectId
 

@@ -248,10 +248,13 @@ export class ConnectionManager extends EventTarget {
       if (this.externalHeartbeatInterval) {
         window.clearInterval(this.externalHeartbeatInterval)
       }
-      this.externalHeartbeatInterval = window.setInterval(
-        () => this.sendExternalHeartbeat(),
-        15_000
-      )
+      if (this.socket.socket.transport?.name === 'websocket') {
+        // Do not enable external heartbeat on polling transports.
+        this.externalHeartbeatInterval = window.setInterval(
+          () => this.sendExternalHeartbeat(),
+          15_000
+        )
+      }
     }
     // Reset on success regardless of transport. We want to upgrade back to websocket on reconnect.
     this.websocketFailureCount = 0
