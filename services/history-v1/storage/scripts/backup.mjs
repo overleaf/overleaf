@@ -763,7 +763,7 @@ async function compareBackups(projectId, options) {
         }
       } catch (err) {
         if (err instanceof NotFoundError) {
-          console.log(`✗ Chunk ${chunk.id} not found in backup`)
+          console.log(`✗ Chunk ${chunk.id} not found in backup`, err.cause)
           totalChunksNotFound++
           errors.push({ chunkId: chunk.id, error: `Chunk not found` })
         } else {
@@ -809,7 +809,7 @@ async function compareBackups(projectId, options) {
           }
         } catch (err) {
           if (err instanceof NotFoundError) {
-            console.log(`  ✗ Blob ${blob.hash} not found in backup`)
+            console.log(`  ✗ Blob ${blob.hash} not found in backup`, err.cause)
             totalBlobsNotFound++
             errors.push({
               chunkId: chunk.id,
