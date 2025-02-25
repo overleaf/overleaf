@@ -107,7 +107,14 @@ module.exports = {
       },
       plugins: ['unicorn'],
       rules: {
-        'import/no-unresolved': 'error',
+        'import/no-unresolved': [
+          'error',
+          {
+            // eslint-plugin-import does not support exports directive in package.json
+            // https://github.com/import-js/eslint-plugin-import/issues/1810
+            ignore: ['^p-queue$'],
+          },
+        ],
         'import/extensions': [
           'error',
           'ignorePackages',
