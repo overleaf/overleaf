@@ -1,4 +1,9 @@
-import { StateField, StateEffect, Prec, EditorSelection } from '@codemirror/state'
+import {
+  StateField,
+  StateEffect,
+  Prec,
+  EditorSelection,
+} from '@codemirror/state'
 import { EditorView, showTooltip, Tooltip, keymap } from '@codemirror/view'
 import { Word, Mark, getMarkAtPosition } from './spellchecker'
 import { debugConsole } from '@/utils/debugging'
