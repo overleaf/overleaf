@@ -76,3 +76,18 @@
     margin: 0 var(--spacing-04);
   }
 }
+
+#user-info-page {
+  .confirmed-email-color,
+  .trusted-email-color {
+    color: var(--green-60);
+  }
+
+  .unconfirmed-email-color {
+    color: var(--red-50);
+  }
+
+  .untrusted-email-color {
+    color: var(--yellow-50);
+  }
+}
