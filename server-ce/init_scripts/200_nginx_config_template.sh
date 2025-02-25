@@ -26,6 +26,7 @@ if [ -f "${nginx_template_file}" ]; then
   # Note the single-quotes, they are important.
   # This is a pass-list of env-vars that envsubst
   # should operate on.
+  # shellcheck disable=SC2016
   envsubst '
     ${NGINX_KEEPALIVE_TIMEOUT}
     ${NGINX_WORKER_CONNECTIONS}

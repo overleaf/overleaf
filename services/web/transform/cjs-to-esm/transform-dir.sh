@@ -12,7 +12,7 @@ while true; do
   if [ -z "$FILES" ]; then
     break
   fi
-  node transform/cjs-to-esm/cjs-to-esm.mjs $FILES
+  node transform/cjs-to-esm/cjs-to-esm.mjs "$FILES"
 done
 
 make format_fix > /dev/null

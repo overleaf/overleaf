@@ -43,13 +43,14 @@ SHELLCHECK_OPTS = \
 	--shell=bash \
 	--external-sources
 SHELLCHECK_COLOR := $(if $(CI),--color=never,--color)
+SHELLCHECK_FILES := { git ls-files "*.sh" -z; git grep -Plz "\A\#\!.*bash"; } | sort -zu
 
 shellcheck:
-	find . -type f -name "*.sh" -print0 | xargs -0 -r docker run --rm -v $(HERE):/mnt -w /mnt \
+	@$(SHELLCHECK_FILES) | xargs -0 -r docker run --rm -v $(HERE):/mnt -w /mnt \
 		koalaman/shellcheck:stable $(SHELLCHECK_OPTS) $(SHELLCHECK_COLOR)
 
 shellcheck_fix:
-	@for file in $$(find . -type f -name "*.sh"); do \
+	@$(SHELLCHECK_FILES) | while IFS= read -r -d '' file; do \
 		diff=$$(docker run --rm -v $(HERE):/mnt -w /mnt koalaman/shellcheck:stable $(SHELLCHECK_OPTS) --format=diff "$$file" 2>/dev/null); \
 		if [ -n "$$diff" ] && ! echo "$$diff" | patch -p1 >/dev/null 2>&1; then echo "\033[31m$$file\033[0m"; \
 		elif [ -n "$$diff" ]; then echo "$$file"; \

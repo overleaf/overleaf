@@ -4,7 +4,7 @@ set -e
 
 # Ensure all locales used in the frontend are tracked
 OUTPUT=data/dumpFolder/i18next-scanner
-trap "rm -rf $OUTPUT" EXIT
+trap 'rm -rf "$OUTPUT"' EXIT
 npx i18next-scanner --output "$OUTPUT"
 ACTUAL=frontend/extracted-translations.json
 EXPECTED="$OUTPUT/frontend/extracted-translations.json"

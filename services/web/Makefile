@@ -4,6 +4,7 @@ BUILD_NUMBER ?= local
 BRANCH_NAME ?= $(shell git rev-parse --abbrev-ref HEAD)
 PROJECT_NAME = web
 BUILD_DIR_NAME = $(shell pwd | xargs basename | tr -cd '[a-zA-Z0-9_.\-]')
+PWD = $(shell pwd)
 
 export OVERLEAF_CONFIG ?= /overleaf/services/web/test/acceptance/config/settings.test.saas.js
 export BASE_CONFIG ?= ${OVERLEAF_CONFIG}
@@ -448,6 +449,24 @@ format_styles_fix:
 format_in_docker:
 	$(RUN_LINT_FORMAT) make format -j2 --output-sync
 
+SHELLCHECK_OPTS = \
+	--shell=bash \
+	--external-sources
+SHELLCHECK_COLOR := $(if $(CI),--color=never,--color)
+SHELLCHECK_FILES := { git ls-files "*.sh" -z; git grep -Plz "\A\#\!.*bash"; } | sort -zu
+
+shellcheck:
+	@$(SHELLCHECK_FILES) | xargs -0 -r docker run --rm -v $(PWD):/mnt -w /mnt \
+		koalaman/shellcheck:stable $(SHELLCHECK_OPTS) $(SHELLCHECK_COLOR)
+
+shellcheck_fix:
+	@$(SHELLCHECK_FILES) | while IFS= read -r -d '' file; do \
+		diff=$$(docker run --rm -v $(PWD):/mnt -w /mnt koalaman/shellcheck:stable $(SHELLCHECK_OPTS) --format=diff "$$file" 2>/dev/null); \
+		if [ -n "$$diff" ] && ! echo "$$diff" | patch -p1 >/dev/null 2>&1; then echo "\033[31m$$file\033[0m"; \
+		elif [ -n "$$diff" ]; then echo "$$file"; \
+		else echo "\033[2m$$file\033[0m"; fi \
+	done
+
 #
 # Build & publish
 #
@@ -548,4 +567,5 @@ $(MODULE_TARGETS):
 	test_unit_modules test_unit_module test_frontend \
 	test_acceptance test_acceptance_app test_acceptance_modules \
 	test_acceptance_module ci format format_fix lint \
+	shellcheck shellcheck_fix \
 	build publish tar

@@ -20,6 +20,7 @@ fi
 # -x              Python regex for excluding files from the sync
 if [[ "$text_extension" == "-" || $(find /tmp/public -type f -name "*$text_extension" | wc -l) != "0" ]]; then
   # Potentially skip upload of non-compressed .js/.css files.
+  # shellcheck disable=SC2086
   gsutil \
     -h "Cache-Control:public, max-age=31536000" \
     ${content_type_options} \
@@ -31,6 +32,8 @@ if [[ "$text_extension" == "-" || $(find /tmp/public -type f -name "*$text_exten
     "/tmp/public/" \
     "${bucket}/public/"
 fi
+
+# shellcheck disable=SC2086
 gsutil \
   -h "Cache-Control:public, max-age=31536000" \
   -h "Content-Encoding:gzip" \

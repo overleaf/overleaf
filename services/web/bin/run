@@ -1,8 +1,8 @@
 #!/bin/bash
 
 pushd ..
-bin/run $*
+bin/run "$*"
 RV=$?
-popd
+popd || exit 1
 
 exit $RV

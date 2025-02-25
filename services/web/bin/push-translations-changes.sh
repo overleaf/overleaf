@@ -7,7 +7,7 @@ WEB_DIR=$(dirname "$SCRIPT_DIR")
 
 cd "$WEB_DIR"
 
-if [[ `git status --porcelain=2 locales/` ]]; then
+if [[ $(git status --porcelain=2 locales/) ]]; then
   git add locales/*
   git commit -m "auto update translation"
   # Switch the cloudbuild clone from https to ssh authentication.

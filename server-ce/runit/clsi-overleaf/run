@@ -11,7 +11,7 @@ fi
 if [ -e '/var/run/docker.sock' ]; then
   echo ">> Setting permissions on docker socket"
   DOCKER_GROUP=$(stat -c '%g' /var/run/docker.sock)
-  groupadd --non-unique --gid ${DOCKER_GROUP} dockeronhost
+  groupadd --non-unique --gid "${DOCKER_GROUP}" dockeronhost
   usermod -aG dockeronhost www-data
 fi
 
