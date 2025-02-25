@@ -84,13 +84,13 @@ const chooseEventHandler = () => {
   }
 
   // Store and use the previous click event, as the "dblclick" event can have the wrong position
-  let lastClickEvent: MouseEvent
+  let lastClickEvent: MouseEvent | null = null
 
   return EditorView.domEventHandlers({
     click(evt, view) {
       if (evt.detail === 1) {
         lastClickEvent = evt
-      } else if (evt.detail === 2) {
+      } else if (evt.detail === 2 && lastClickEvent) {
         return handleDoubleClick(lastClickEvent, view)
       }
     },
