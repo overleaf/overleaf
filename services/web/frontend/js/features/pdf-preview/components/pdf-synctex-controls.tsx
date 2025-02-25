@@ -27,6 +27,7 @@ import { useEditorManagerContext } from '@/features/ide-react/context/editor-man
 import useEventListener from '@/shared/hooks/use-event-listener'
 import { PdfScrollPosition } from '@/shared/hooks/use-pdf-scroll-position'
 import { CursorPosition } from '@/features/ide-react/types/cursor-position'
+import { isValidTeXFile } from '@/main/is-valid-tex-file'
 
 function GoToCodeButton({
   position,
@@ -111,12 +112,12 @@ function GoToPdfButton({
   syncToPdf,
   syncToPdfInFlight,
   isDetachLayout,
-  hasSingleSelectedDoc,
+  canSyncToPdf,
 }: {
   cursorPosition: CursorPosition | null
   syncToPdf: (cursorPosition: CursorPosition | null) => void
   syncToPdfInFlight: boolean
-  hasSingleSelectedDoc: boolean
+  canSyncToPdf: boolean
   isDetachLayout?: boolean
 }) {
   const { t } = useTranslation()
@@ -168,7 +169,7 @@ function GoToPdfButton({
         variant="secondary"
         size="sm"
         onClick={() => syncToPdf(cursorPosition)}
-        disabled={syncToPdfInFlight || !cursorPosition || !hasSingleSelectedDoc}
+        disabled={syncToPdfInFlight || !canSyncToPdf}
         className={buttonClasses}
         aria-label={t('go_to_code_location_in_pdf')}
         bs3Props={{
@@ -198,7 +199,8 @@ function PdfSynctexControls() {
 
   const { selectedEntities } = useFileTreeData()
   const { findEntityByPath, dirname, pathInFolder } = useFileTreePathContext()
-  const { getCurrentDocumentId, openDocWithId } = useEditorManagerContext()
+  const { getCurrentDocumentId, openDocWithId, openDocName } =
+    useEditorManagerContext()
 
   const [cursorPosition, setCursorPosition] = useState<CursorPosition | null>(
     () => {
@@ -438,6 +440,12 @@ function PdfSynctexControls() {
     return null
   }
 
+  const canSyncToPdf: boolean =
+    hasSingleSelectedDoc &&
+    cursorPosition &&
+    openDocName &&
+    isValidTeXFile(openDocName)
+
   if (detachRole === 'detacher') {
     return (
       <>
@@ -446,7 +454,7 @@ function PdfSynctexControls() {
           syncToPdf={syncToPdf}
           syncToPdfInFlight={syncToPdfInFlight}
           isDetachLayout
-          hasSingleSelectedDoc={hasSingleSelectedDoc}
+          canSyncToPdf={canSyncToPdf}
         />
       </>
     )
@@ -468,7 +476,7 @@ function PdfSynctexControls() {
           cursorPosition={cursorPosition}
           syncToPdf={syncToPdf}
           syncToPdfInFlight={syncToPdfInFlight}
-          hasSingleSelectedDoc={hasSingleSelectedDoc}
+          canSyncToPdf={canSyncToPdf}
         />
 
         <GoToCodeButton
