@@ -48,7 +48,7 @@ export const ReviewPanelEntry: FC<{
   const [selected, setSelected] = useState(false)
   const [focused, setFocused] = useState(false)
   const [textareaFocused, setTextareaFocused] = useState(false)
-  const { setReviewPanelOpen, reviewPanelOpen } = useLayoutContext()
+  const { setReviewPanelOpen } = useLayoutContext()
   const highlighted = isSelectionWithinOp(op, state.selection.main)
   const entryRef = useRef<HTMLDivElement>(null)
   const mousePressedRef = useRef(false)
@@ -60,17 +60,6 @@ export const ReviewPanelEntry: FC<{
   const selectEntry = useCallback(
     event => {
       setFocused(true)
-
-      if (
-        event.target instanceof HTMLButtonElement ||
-        event.target instanceof HTMLLinkElement ||
-        event.target instanceof HTMLAnchorElement ||
-        (event.target instanceof HTMLTextAreaElement && !reviewPanelOpen)
-      ) {
-        // Ignore focus events on certain elements so as to not affect
-        // their behavior
-        return
-      }
 
       if (event.target instanceof HTMLTextAreaElement) {
         const entryBottom =
@@ -120,7 +109,6 @@ export const ReviewPanelEntry: FC<{
       view,
       position,
       openDocWithId,
-      reviewPanelOpen,
     ]
   )
 

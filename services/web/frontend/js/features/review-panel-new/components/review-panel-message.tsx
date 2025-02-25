@@ -14,6 +14,7 @@ import ReviewPanelDeleteCommentModal from './review-panel-delete-comment-modal'
 import { useUserContext } from '@/shared/context/user-context'
 import ReviewPanelEntryUser from './review-panel-entry-user'
 import { usePermissionsContext } from '@/features/ide-react/context/permissions-context'
+import { PreventSelectingEntry } from './review-panel-prevent-selecting'
 
 export const ReviewPanelMessage: FC<{
   message: ReviewPanelCommentThreadMessage
@@ -72,35 +73,39 @@ export const ReviewPanelMessage: FC<{
 
         <div className="review-panel-entry-actions">
           {!editing && !isReply && !isThreadResolved && canResolve && (
-            <OLTooltip
-              id="resolve-thread"
-              overlayProps={{ placement: 'bottom' }}
-              description={t('resolve_comment')}
-              tooltipProps={{ className: 'review-panel-tooltip' }}
-            >
-              <button
-                type="button"
-                tabIndex={0}
-                className="btn"
-                onClick={onResolve}
+            <PreventSelectingEntry>
+              <OLTooltip
+                id="resolve-thread"
+                overlayProps={{ placement: 'bottom' }}
+                description={t('resolve_comment')}
+                tooltipProps={{ className: 'review-panel-tooltip' }}
               >
-                <MaterialIcon
-                  type="check"
-                  className="review-panel-entry-actions-icon"
-                  accessibilityLabel={t('resolve_comment')}
-                />
-              </button>
-            </OLTooltip>
+                <button
+                  type="button"
+                  tabIndex={0}
+                  className="btn"
+                  onClick={onResolve}
+                >
+                  <MaterialIcon
+                    type="check"
+                    className="review-panel-entry-actions-icon"
+                    accessibilityLabel={t('resolve_comment')}
+                  />
+                </button>
+              </OLTooltip>
+            </PreventSelectingEntry>
           )}
 
           {!editing && !isThreadResolved && (
-            <ReviewPanelCommentOptions
-              canDelete={canDelete}
-              canEdit={canEdit}
-              onEdit={handleEditOption}
-              onDelete={showDeleteModal}
-              id={message.id}
-            />
+            <PreventSelectingEntry>
+              <ReviewPanelCommentOptions
+                canDelete={canDelete}
+                canEdit={canEdit}
+                onEdit={handleEditOption}
+                onDelete={showDeleteModal}
+                id={message.id}
+              />
+            </PreventSelectingEntry>
           )}
         </div>
       </div>

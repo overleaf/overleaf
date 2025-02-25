@@ -17,6 +17,7 @@ import { ReviewPanelEntry } from './review-panel-entry'
 import { useModalsContext } from '@/features/ide-react/context/modals-context'
 import { ExpandableContent } from './review-panel-expandable-content'
 import { useUserContext } from '@/shared/context/user-context'
+import { PreventSelectingEntry } from './review-panel-prevent-selecting'
 
 export const ReviewPanelChange = memo<{
   change: Change<EditOperation>
@@ -109,52 +110,56 @@ export const ReviewPanelChange = memo<{
             {editable && (
               <div className="review-panel-entry-actions">
                 {permissions.write && (
-                  <OLTooltip
-                    id="accept-change"
-                    overlayProps={{ placement: 'bottom' }}
-                    description={t('accept_change')}
-                    tooltipProps={{ className: 'review-panel-tooltip' }}
-                  >
-                    <button
-                      type="button"
-                      className="btn"
-                      onClick={acceptHandler}
-                      tabIndex={0}
+                  <PreventSelectingEntry>
+                    <OLTooltip
+                      id="accept-change"
+                      overlayProps={{ placement: 'bottom' }}
+                      description={t('accept_change')}
+                      tooltipProps={{ className: 'review-panel-tooltip' }}
                     >
-                      <MaterialIcon
-                        type="check"
-                        className="review-panel-entry-actions-icon"
-                        accessibilityLabel={t('accept_change')}
-                      />
-                    </button>
-                  </OLTooltip>
+                      <button
+                        type="button"
+                        className="btn"
+                        onClick={acceptHandler}
+                        tabIndex={0}
+                      >
+                        <MaterialIcon
+                          type="check"
+                          className="review-panel-entry-actions-icon"
+                          accessibilityLabel={t('accept_change')}
+                        />
+                      </button>
+                    </OLTooltip>
+                  </PreventSelectingEntry>
                 )}
 
                 {(permissions.write ||
                   (permissions.trackedWrite && isChangeAuthor)) && (
-                  <OLTooltip
-                    id="reject-change"
-                    description={t('reject_change')}
-                    overlayProps={{ placement: 'bottom' }}
-                    tooltipProps={{ className: 'review-panel-tooltip' }}
-                  >
-                    <button
-                      tabIndex={0}
-                      type="button"
-                      className="btn"
-                      onClick={() =>
-                        aggregate
-                          ? rejectChanges(change.id, aggregate.id)
-                          : rejectChanges(change.id)
-                      }
+                  <PreventSelectingEntry>
+                    <OLTooltip
+                      id="reject-change"
+                      description={t('reject_change')}
+                      overlayProps={{ placement: 'bottom' }}
+                      tooltipProps={{ className: 'review-panel-tooltip' }}
                     >
-                      <MaterialIcon
-                        className="review-panel-entry-actions-icon"
-                        accessibilityLabel={t('reject_change')}
-                        type="close"
-                      />
-                    </button>
-                  </OLTooltip>
+                      <button
+                        tabIndex={0}
+                        type="button"
+                        className="btn"
+                        onClick={() =>
+                          aggregate
+                            ? rejectChanges(change.id, aggregate.id)
+                            : rejectChanges(change.id)
+                        }
+                      >
+                        <MaterialIcon
+                          className="review-panel-entry-actions-icon"
+                          accessibilityLabel={t('reject_change')}
+                          type="close"
+                        />
+                      </button>
+                    </OLTooltip>
+                  </PreventSelectingEntry>
                 )}
               </div>
             )}
