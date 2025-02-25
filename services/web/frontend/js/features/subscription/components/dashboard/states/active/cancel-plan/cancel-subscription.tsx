@@ -38,10 +38,7 @@ function ConfirmCancelSubscriptionButton({
       isLoading={isLoading}
       disabled={disabled}
       onClick={onClick}
-      className={showNoThanks ? 'btn-inline-link' : undefined}
-      bs3Props={{
-        loading: isLoading ? t('processing_uppercase') + '…' : text,
-      }}
+      variant={showNoThanks ? 'link' : undefined}
     >
       {text}
     </OLButton>
