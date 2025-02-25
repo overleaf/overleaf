@@ -18,6 +18,7 @@ const CONNECTION_ERROR_RECONNECT_DELAY = 1000
 const USER_ACTIVITY_RECONNECT_NOW_DELAY = 1000
 const USER_ACTIVITY_RECONNECT_DELAY = 5000
 const JOIN_PROJECT_RATE_LIMITED_DELAY = 15 * 1000
+const BACK_OFF_RECONNECT_OFFLINE = 5000
 
 const RECONNECT_GRACEFULLY_RETRY_INTERVAL_MS = 5000
 const MAX_RECONNECT_GRACEFULLY_INTERVAL_MS = 45 * 1000
@@ -115,8 +116,8 @@ export class ConnectionManager extends EventTarget {
 
     socket.on('connect', () => this.onConnect())
     socket.on('disconnect', (reason: string) => this.onDisconnect(reason))
-    socket.on('error', () => this.onConnectError())
-    socket.on('connect_failed', () => this.onConnectError())
+    socket.on('error', err => this.onConnectError(err))
+    socket.on('connect_failed', err => this.onConnectError(err))
     socket.on('joinProjectResponse', body => this.onJoinProjectResponse(body))
     socket.on('connectionRejected', err => this.onConnectionRejected(err))
     socket.on('reconnectGracefully', () => this.onReconnectGracefully())
@@ -217,8 +218,12 @@ export class ConnectionManager extends EventTarget {
     }
   }
 
-  private onConnectError() {
-    if (this.socket.socket.transport?.name === 'websocket') {
+  private onConnectError(err: any) {
+    if (
+      this.socket.socket.transport?.name === 'websocket' &&
+      err instanceof Event &&
+      err.target instanceof WebSocket
+    ) {
       this.websocketFailureCount++
     }
     if (this.connectionAttempt === null) return // ignore errors once connected.
@@ -227,10 +232,12 @@ export class ConnectionManager extends EventTarget {
         () => {
           if (this.canReconnect()) this.socket.socket.connect()
         },
-        // add jitter to spread reconnects
-        this.connectionAttempt *
-          (1 + Math.random()) *
-          CONNECTION_ERROR_RECONNECT_DELAY
+        // slow down when potentially offline
+        (navigator.onLine ? 0 : BACK_OFF_RECONNECT_OFFLINE) +
+          // add jitter to spread reconnects
+          this.connectionAttempt *
+            (1 + Math.random()) *
+            CONNECTION_ERROR_RECONNECT_DELAY
       )
     } else {
       if (!this.switchToWsFallbackIfPossible()) {
@@ -438,7 +445,10 @@ export class ConnectionManager extends EventTarget {
   private addReconnectListeners() {
     const handleFailure = () => {
       removeSocketListeners()
-      this.startAutoReconnectCountdown(0)
+      this.startAutoReconnectCountdown(
+        // slow down when potentially offline
+        navigator.onLine ? 0 : BACK_OFF_RECONNECT_OFFLINE
+      )
     }
     const handleSuccess = () => {
       removeSocketListeners()
