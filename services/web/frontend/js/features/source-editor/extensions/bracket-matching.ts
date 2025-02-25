@@ -10,6 +10,7 @@ import {
   SelectionRange,
   type Range,
 } from '@codemirror/state'
+import browser from '@/features/source-editor/extensions/browser'
 
 const matchingMark = Decoration.mark({ class: 'cm-matchingBracket' })
 const nonmatchingMark = Decoration.mark({ class: 'cm-nonmatchingBracket' })
@@ -68,74 +69,97 @@ const matchedAdjacent = (match: MatchResult): match is AdjacentMatchResult =>
  * A custom extension which handles double-click events on a matched bracket
  * and extends the selection to cover the contents of the bracket pair.
  */
-export const bracketSelection = (): Extension[] => [
-  EditorView.domEventHandlers({
-    dblclick: (evt, view) => {
-      const pos = view.posAtCoords({
-        x: evt.pageX,
-        y: evt.pageY,
-      })
-      if (!pos) return false
+export const bracketSelection = (): Extension => {
+  return [chooseEventHandler(), matchingBracketTheme]
+}
 
-      const search = (direction: Direction, position: number) => {
-        const match = matchBrackets(view.state, position, direction, {
-          // Only look at data in the syntax tree, don't scan the text
-          maxScanDistance: 0,
-        })
-        if (match?.matched && match.end) {
-          return EditorSelection.range(
-            Math.min(match.start.from, match.end.from),
-            Math.max(match.end.to, match.start.to)
-          )
-        }
-        return false
-      }
+const chooseEventHandler = () => {
+  // Safari doesn't always fire the second "click" event, so use dblclick instead
+  if (browser.safari) {
+    return [
+      EditorView.domEventHandlers({
+        dblclick: handleDoubleClick,
+      }),
+    ]
+  }
 
-      const dispatchSelection = (range: SelectionRange) => {
-        view.dispatch({
-          selection: range,
-        })
-        return true
-      }
-      // 1. Look forwards, from the character *behind* the cursor
-      const forwardsExcludingBrackets = search(FORWARDS, pos - 1)
-      if (forwardsExcludingBrackets) {
-        return dispatchSelection(
-          EditorSelection.range(
-            forwardsExcludingBrackets.from + 1,
-            forwardsExcludingBrackets.to - 1
-          )
-        )
-      }
+  // Store and use the previous click event, as the "dblclick" event can have the wrong position
+  let lastClickEvent: MouseEvent
 
-      // 2. Look forwards, from the character *in front of* the cursor
-      const forwardsIncludingBrackets = search(FORWARDS, pos)
-      if (forwardsIncludingBrackets) {
-        return dispatchSelection(forwardsIncludingBrackets)
+  return EditorView.domEventHandlers({
+    click(evt, view) {
+      if (evt.detail === 1) {
+        lastClickEvent = evt
+      } else if (evt.detail === 2) {
+        return handleDoubleClick(lastClickEvent, view)
       }
-
-      // 3. Look backwards, from the character *behind* the cursor
-      const backwardsIncludingBrackets = search(BACKWARDS, pos)
-      if (backwardsIncludingBrackets) {
-        return dispatchSelection(backwardsIncludingBrackets)
-      }
-
-      // 4. Look backwards, from the character *in front of* the cursor
-      const backwardsExcludingBrackets = search(BACKWARDS, pos + 1)
-      if (backwardsExcludingBrackets) {
-        return dispatchSelection(
-          EditorSelection.range(
-            backwardsExcludingBrackets.from + 1,
-            backwardsExcludingBrackets.to - 1
-          )
-        )
-      }
-
-      return false
     },
-  }),
-  matchingBracketTheme,
-]
+  })
+}
+
+const handleDoubleClick = (evt: MouseEvent, view: EditorView) => {
+  const pos = view.posAtCoords({
+    x: evt.pageX,
+    y: evt.pageY,
+  })
+  if (!pos) return false
+
+  const search = (direction: Direction, position: number) => {
+    const match = matchBrackets(view.state, position, direction, {
+      // Only look at data in the syntax tree, don't scan the text
+      maxScanDistance: 0,
+    })
+    if (match?.matched && match.end) {
+      return EditorSelection.range(
+        Math.min(match.start.from, match.end.from),
+        Math.max(match.end.to, match.start.to)
+      )
+    }
+    return false
+  }
+
+  const dispatchSelection = (range: SelectionRange) => {
+    view.dispatch({
+      selection: range,
+    })
+    return true
+  }
+  // 1. Look forwards, from the character *behind* the cursor
+  const forwardsExcludingBrackets = search(FORWARDS, pos - 1)
+  if (forwardsExcludingBrackets) {
+    return dispatchSelection(
+      EditorSelection.range(
+        forwardsExcludingBrackets.from + 1,
+        forwardsExcludingBrackets.to - 1
+      )
+    )
+  }
+
+  // 2. Look forwards, from the character *in front of* the cursor
+  const forwardsIncludingBrackets = search(FORWARDS, pos)
+  if (forwardsIncludingBrackets) {
+    return dispatchSelection(forwardsIncludingBrackets)
+  }
+
+  // 3. Look backwards, from the character *behind* the cursor
+  const backwardsIncludingBrackets = search(BACKWARDS, pos)
+  if (backwardsIncludingBrackets) {
+    return dispatchSelection(backwardsIncludingBrackets)
+  }
+
+  // 4. Look backwards, from the character *in front of* the cursor
+  const backwardsExcludingBrackets = search(BACKWARDS, pos + 1)
+  if (backwardsExcludingBrackets) {
+    return dispatchSelection(
+      EditorSelection.range(
+        backwardsExcludingBrackets.from + 1,
+        backwardsExcludingBrackets.to - 1
+      )
+    )
+  }
+
+  return false
+}
 
 const matchingBracketTheme = EditorView.baseTheme({
   '.cm-matchingBracket': {
