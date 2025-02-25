@@ -1,4 +1,4 @@
-import { StateField, StateEffect, Prec } from '@codemirror/state'
+import { StateField, StateEffect, Prec, EditorSelection } from '@codemirror/state'
 import { EditorView, showTooltip, Tooltip, keymap } from '@codemirror/view'
 import { Word, Mark, getMarkAtPosition } from './spellchecker'
 import { debugConsole } from '@/utils/debugging'
@@ -169,6 +169,16 @@ const createSpellingSuggestionList = (word: Word) => (view: EditorView) => {
           }
         }}
         handleLearnWord={() => {
+          const tooltip = view.state.field(spellingMenuField)
+          if (tooltip) {
+            window.setTimeout(() => {
+              view.dispatch({
+                selection: EditorSelection.cursor(tooltip.end ?? tooltip.pos),
+              })
+            })
+          }
+          view.focus()
+
           postJSON('/spelling/learn', {
             body: {
               word: word.text,
@@ -201,9 +211,16 @@ const createSpellingSuggestionList = (word: Word) => (view: EditorView) => {
           }
 
           window.setTimeout(() => {
+            const changes = view.state.changes([
+              { from: tooltip.pos, to: tooltip.end, insert: text },
+            ])
+
             view.dispatch({
-              changes: [{ from: tooltip.pos, to: tooltip.end, insert: text }],
+              changes,
               effects: [hideSpellingMenu.of(null)],
+              selection: EditorSelection.cursor(tooltip.end ?? tooltip.pos).map(
+                changes
+              ),
             })
           })
           view.focus()
