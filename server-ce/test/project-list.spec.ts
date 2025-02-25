@@ -32,7 +32,7 @@ describe('Project List', () => {
 
     before(() => {
       login(REGULAR_USER)
-      createProject(projectName, { type: 'Example Project' })
+      createProject(projectName, { type: 'Example Project', open: false })
     })
 
     it('Can download project sources', () => {
@@ -89,8 +89,7 @@ describe('Project List', () => {
       cy.log('create a separate project to filter')
       const nonTaggedProjectName = `project-${uuid()}`
       login(REGULAR_USER)
-      createProject(nonTaggedProjectName)
-      cy.visit('/project')
+      createProject(nonTaggedProjectName, { open: false })
 
       cy.log('select project')
       cy.get(`[aria-label="Select ${projectName}"]`).click()

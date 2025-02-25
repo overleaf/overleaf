@@ -50,9 +50,10 @@ describe('Project creation and compilation', function () {
     const targetProjectName = `${sourceProjectName}-target`
     login('user@example.com')
 
-    createProject(sourceProjectName, { type: 'Example Project' }).as(
-      'sourceProjectId'
-    )
+    createProject(sourceProjectName, {
+      type: 'Example Project',
+      open: false,
+    }).as('sourceProjectId')
     createProject(targetProjectName)
 
     // link the image from `projectName` into this project
@@ -77,9 +78,10 @@ describe('Project creation and compilation', function () {
     const sourceProjectName = `test-project-${Date.now()}`
     const targetProjectName = `${sourceProjectName}-target`
     login('user@example.com')
-    createProject(sourceProjectName, { type: 'Example Project' }).as(
-      'sourceProjectId'
-    )
+    createProject(sourceProjectName, {
+      type: 'Example Project',
+      open: false,
+    }).as('sourceProjectId')
     createProject(targetProjectName).as('targetProjectId')
 
     // link the image from `projectName` into this project

@@ -158,7 +158,6 @@ describe('Project Sharing', function () {
     })
 
     it('should grant the collaborator read access', () => {
-      openProjectByName(projectName)
       expectFullReadOnlyAccess()
       expectProjectDashboardEntry()
     })

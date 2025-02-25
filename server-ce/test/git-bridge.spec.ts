@@ -122,7 +122,7 @@ describe('git-bridge', function () {
       let projectName: string
       beforeEach(() => {
         projectName = uuid()
-        createProject(projectName).as('projectId')
+        createProject(projectName, { open: false }).as('projectId')
       })
 
       it('should expose r/w interface to owner', () => {
@@ -154,6 +154,7 @@ describe('git-bridge', function () {
       })
 
       it('should expose r/w interface to link-sharing r/w collaborator', () => {
+        openProjectByName(projectName)
         enableLinkSharing().then(({ linkSharingReadAndWrite }) => {
           const email = 'collaborator-link-rw@example.com'
           login(email)
@@ -168,6 +169,7 @@ describe('git-bridge', function () {
       })
 
       it('should expose r/o interface to link-sharing r/o collaborator', () => {
+        openProjectByName(projectName)
         enableLinkSharing().then(({ linkSharingReadOnly }) => {
           const email = 'collaborator-link-ro@example.com'
           login(email)

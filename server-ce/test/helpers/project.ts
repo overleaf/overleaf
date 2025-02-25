@@ -1,14 +1,17 @@
 import { login } from './login'
 import { openEmail } from './email'
+import { v4 as uuid } from 'uuid'
 
 export function createProject(
   name: string,
   {
     type = 'Blank Project',
     newProjectButtonMatcher = /new project/i,
+    open = true,
   }: {
     type?: 'Blank Project' | 'Example Project'
     newProjectButtonMatcher?: RegExp
+    open?: boolean
   } = {}
 ): Cypress.Chainable<string> {
   cy.url().then(url => {
@@ -16,6 +19,22 @@ export function createProject(
       cy.visit('/project')
     }
   })
+  const interceptId = uuid()
+  let projectId = ''
+  if (!open) {
+    cy.then(() => {
+      // Register intercept just before creating the project, otherwise we might
+      // intercept a request from a prior createProject invocation.
+      cy.intercept(
+        { method: 'GET', url: /\/project\/[a-fA-F0-9]{24}$/, times: 1 },
+        req => {
+          projectId = req.url.split('/').pop()!
+          // Redirect back to the project dashboard, effectively reload the page.
+          req.redirect('/project')
+        }
+      ).as(interceptId)
+    })
+  }
   cy.findAllByRole('button').contains(newProjectButtonMatcher).click()
   // FIXME: This should only look in the left menu
   cy.findAllByText(type).first().click()
@@ -23,12 +42,18 @@ export function createProject(
     cy.get('input').type(name)
     cy.findByText('Create').click()
   })
-  cy.url().should('match', /\/project\/[a-fA-F0-9]{24}/)
-  waitForMainDocToLoad()
-  return cy
-    .url()
-    .should('match', /\/project\/[a-fA-F0-9]{24}/)
-    .then(url => url.split('/').pop())
+  if (open) {
+    cy.url().should('match', /\/project\/[a-fA-F0-9]{24}/)
+    waitForMainDocToLoad()
+    return cy
+      .url()
+      .should('match', /\/project\/[a-fA-F0-9]{24}/)
+      .then(url => url.split('/').pop())
+  } else {
+    const alias = `@${interceptId}` // IDEs do not like computed values in cy.wait().
+    cy.wait(alias)
+    return cy.then(() => projectId)
+  }
 }
 
 export function openProjectByName(projectName: string) {
@@ -64,6 +89,7 @@ export function openProjectViaInviteNotification(projectName: string) {
     })
   cy.findByText('Open Project').click()
   cy.url().should('match', /\/project\/[a-fA-F0-9]{24}/)
+  waitForMainDocToLoad()
 }
 
 function shareProjectByEmail(
@@ -74,8 +100,8 @@ function shareProjectByEmail(
   openProjectByName(projectName)
   cy.findByText('Share').click()
   cy.findByRole('dialog').within(() => {
-    cy.get('input').type(`${email},`)
-    cy.get('input')
+    cy.findByLabelText('Add people', { selector: 'input' }).type(`${email},`)
+    cy.findByLabelText('Add people', { selector: 'input' })
       .parents('form')
       .within(() => cy.findByText('Can edit').parent().select(level))
     cy.findByText('Invite').click({ force: true })
@@ -115,6 +141,7 @@ export function shareProjectByEmailAndAcceptInviteViaEmail(
   cy.findByText(/user would like you to join/)
   cy.contains(new RegExp(`You are accepting this invite as ${email}`))
   cy.findByText('Join Project').click()
+  waitForMainDocToLoad()
 }
 
 export function enableLinkSharing() {

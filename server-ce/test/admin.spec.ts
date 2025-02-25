@@ -127,8 +127,12 @@ describe('admin panel', function () {
       testProjectName = `project-${uuid()}`
       deletedProjectName = `deleted-project-${uuid()}`
       login(user1)
-      createProject(testProjectName).then(id => (testProjectId = id))
-      createProject(deletedProjectName).then(id => (projectToDeleteId = id))
+      createProject(testProjectName, { open: false }).then(
+        id => (testProjectId = id)
+      )
+      createProject(deletedProjectName, { open: false }).then(
+        id => (projectToDeleteId = id)
+      )
     })
 
     describe('manage site', () => {
