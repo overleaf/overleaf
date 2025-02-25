@@ -29,6 +29,12 @@
       th[scope='row'] {
         font-weight: normal;
       }
+
+      th {
+        .form-label {
+          font-weight: normal;
+        }
+      }
     }
   }
 }
