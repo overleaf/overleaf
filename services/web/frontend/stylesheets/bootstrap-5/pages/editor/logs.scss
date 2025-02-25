@@ -129,6 +129,7 @@
     color: var(--content-primary-dark);
     border-width: 0;
     max-width: 33%;
+    flex-shrink: 0;
     text-decoration: none; // needed for the "close button"
     padding: 0 var(--spacing-03);
 
