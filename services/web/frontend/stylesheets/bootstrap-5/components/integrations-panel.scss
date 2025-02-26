@@ -3,19 +3,6 @@
   height: 100%;
 }
 
-.integrations-panel-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: var(--spacing-03) var(--spacing-04);
-}
-
-.integrations-panel-title {
-  font-size: var(--font-size-02);
-  color: var(--content-primary);
-  margin-bottom: 0;
-}
-
 .integrations-panel-card-button {
   all: unset;
   background-color: var(--white);

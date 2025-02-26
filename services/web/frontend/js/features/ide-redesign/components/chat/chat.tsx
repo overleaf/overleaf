@@ -9,8 +9,10 @@ import MaterialIcon from '@/shared/components/material-icon'
 import { useUserContext } from '@/shared/context/user-context'
 import { lazy, Suspense, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
+import classNames from 'classnames'
+import { RailPanelHeader } from '../rail'
 
-const MessageList = lazy(() => import('../../chat/components/message-list'))
+const MessageList = lazy(() => import('../../../chat/components/message-list'))
 
 export const ChatIndicator = () => {
   const { unreadMessageCount } = useChatContext()
@@ -24,7 +26,6 @@ const Loading = () => <FullSizeLoadingSpinner delay={500} className="pt-4" />
 
 export const ChatPane = () => {
   const { t } = useTranslation()
-
   const user = useUserContext()
   const {
     status,
@@ -65,44 +66,55 @@ export const ChatPane = () => {
   }
 
   return (
-    <aside className="chat">
-      <InfiniteScroll
-        atEnd={atEnd}
-        className="messages"
-        fetchData={loadMoreMessages}
-        isLoading={status === 'pending'}
-        itemCount={messageContentCount}
-      >
-        <div>
-          <h2 className="visually-hidden">{t('chat')}</h2>
-          <Suspense fallback={<Loading />}>
-            {status === 'pending' && <Loading />}
-            {shouldDisplayPlaceholder && <Placeholder />}
-            <MessageList
-              messages={messages}
-              resetUnreadMessages={markMessagesAsRead}
-            />
-          </Suspense>
-        </div>
-      </InfiniteScroll>
-      <MessageInput
-        resetUnreadMessages={markMessagesAsRead}
-        sendMessage={sendMessage}
-      />
-    </aside>
+    <div className="chat-panel">
+      <RailPanelHeader title={t('collaborator_chat')} />
+      <div className="chat-wrapper">
+        <aside className="chat">
+          <InfiniteScroll
+            atEnd={atEnd}
+            className="messages"
+            fetchData={loadMoreMessages}
+            isLoading={status === 'pending'}
+            itemCount={messageContentCount}
+          >
+            <div className={classNames({ 'h-100': shouldDisplayPlaceholder })}>
+              <h2 className="visually-hidden">{t('chat')}</h2>
+              <Suspense fallback={<Loading />}>
+                {status === 'pending' && <Loading />}
+                {shouldDisplayPlaceholder && <Placeholder />}
+                <MessageList
+                  messages={messages}
+                  resetUnreadMessages={markMessagesAsRead}
+                  newDesign
+                />
+              </Suspense>
+            </div>
+          </InfiniteScroll>
+          <MessageInput
+            resetUnreadMessages={markMessagesAsRead}
+            sendMessage={sendMessage}
+          />
+        </aside>
+      </div>
+    </div>
   )
 }
 
 function Placeholder() {
   const { t } = useTranslation()
   return (
-    <>
-      <div className="no-messages text-center small">{t('no_messages')}</div>
-      <div className="first-message text-center">
-        {t('send_first_message')}
-        <br />
-        <MaterialIcon type="arrow_downward" />
+    <div className="chat-empty-state-placeholder">
+      <div>
+        <span className="chat-empty-state-icon">
+          <MaterialIcon type="forum" />
+        </span>
       </div>
-    </>
+      <div>
+        <div className="chat-empty-state-title">{t('no_messages_yet')}</div>
+        <div className="chat-empty-state-body">
+          {t('start_the_conversation_by_saying_hello_or_sharing_an_update')}
+        </div>
+      </div>
+    </div>
   )
 }

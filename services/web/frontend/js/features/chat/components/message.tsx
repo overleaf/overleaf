@@ -3,7 +3,7 @@ import MessageContent from './message-content'
 import type { Message as MessageType } from '@/features/chat/context/chat-context'
 import { User } from '../../../../../types/user'
 
-interface MessageProps {
+export interface MessageProps {
   message: MessageType
   fromSelf: boolean
 }

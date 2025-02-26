@@ -1,4 +1,4 @@
-import { ReactElement, useCallback, useMemo } from 'react'
+import { FC, ReactElement, useCallback, useMemo } from 'react'
 import { Nav, NavLink, Tab, TabContainer } from 'react-bootstrap-5'
 import MaterialIcon, {
   AvailableUnfilledIcon,
@@ -8,13 +8,14 @@ import { useLayoutContext } from '@/shared/context/layout-context'
 import { ErrorIndicator, ErrorPane } from './errors'
 import { RailTabKey, useRailContext } from '../contexts/rail-context'
 import FileTreeOutlinePanel from './file-tree-outline-panel'
-import { ChatIndicator, ChatPane } from './chat'
+import { ChatIndicator, ChatPane } from './chat/chat'
 import getMeta from '@/utils/meta'
 import { HorizontalResizeHandle } from '@/features/ide-react/components/resize/horizontal-resize-handle'
 import { HorizontalToggler } from '@/features/ide-react/components/resize/horizontal-toggler'
 import { useTranslation } from 'react-i18next'
 import classNames from 'classnames'
 import IntegrationsPanel from './integrations-panel/integrations-panel'
+import OLButton from '@/features/ui/components/ol/ol-button'
 
 type RailElement = {
   icon: AvailableUnfilledIcon
@@ -233,4 +234,16 @@ const RailActionElement = ({ action }: { action: RailAction }) => {
       </button>
     )
   }
+}
+
+export const RailPanelHeader: FC<{ title: string }> = ({ title }) => {
+  const { handlePaneCollapse } = useRailContext()
+  return (
+    <header className="rail-panel-header">
+      <h4 className="rail-panel-title">{title}</h4>
+      <OLButton onClick={handlePaneCollapse} variant="ghost" size="sm">
+        <MaterialIcon type="close" />
+      </OLButton>
+    </header>
+  )
 }
