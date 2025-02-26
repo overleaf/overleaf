@@ -8,15 +8,20 @@
 }
 
 .managed-users-list {
+  vertical-align: middle;
+
   .security-state-invite-pending {
-    color: @text-muted;
+    color: var(--content-disabled);
   }
+
   .security-state-managed {
-    color: @green;
+    color: var(--content-positive);
   }
+
   .security-state-not-managed {
-    color: @red;
+    color: var(--content-danger);
   }
+
   .managed-user-row {
     overflow-wrap: break-word;
   }
@@ -25,84 +30,23 @@
     display: flex;
     justify-content: space-between;
   }
-  .managed-user-actions {
-    button.dropdown-toggle {
-      color: @text-color;
-      padding-left: 1em;
-      padding-right: 1em;
-    }
-    .managed-user-dropdown-menu {
-      width: 300px;
-
-      li > button {
-        &:hover {
-          background-color: @gray-lightest;
-        }
-      }
-      .delete-user-action {
-        button {
-          color: @red;
-        }
-      }
-    }
-  }
-  .managed-user-menu-item-button {
-    padding: 12px 20px;
-    position: relative;
-    width: 100%;
-    border: none;
-    box-shadow: none;
-    background: inherit;
-    color: @ol-blue-gray-5;
-    text-align: left;
-    &[disabled] {
-      background-color: @gray-lighter;
-    }
-  }
 }
 
 .managed-users-table {
   width: 100%;
   table-layout: fixed;
 
-  tr {
-    border-bottom: 1px solid @structured-list-border-color;
-  }
-
-  th,
-  td {
-    padding: (@line-height-computed / 4) @line-height-computed / 2;
-    vertical-align: top;
-  }
-
-  thead {
-    tr:hover {
-      background-color: transparent;
-    }
-  }
-
-  tbody {
-    tr:last-child {
-      border-bottom: 0 none;
-    }
-    tr:hover {
-      background-color: #f6f7f9;
-    }
-  }
-
-  @media (min-width: @screen-xs) {
+  @include media-breakpoint-up(sm) {
     .cell-checkbox {
       width: 5%;
     }
 
     .cell-email {
-      width: 50%;
+      width: 30%;
     }
 
-    &.group-sso-active {
-      .cell-email {
-        width: 37%;
-      }
+    &.group-sso-active .cell-email {
+      width: 29%;
     }
 
     .cell-name {
@@ -122,13 +66,14 @@
     }
 
     .cell-dropdown {
-      width: 6%;
-      min-width: 25px;
+      width: 26%;
+      min-width: 36px;
+      text-align: right;
     }
 
     &.managed-users-active {
       .cell-email {
-        width: 35%;
+        width: 30%;
       }
 
       &.group-sso-active {
@@ -137,7 +82,7 @@
         }
 
         .cell-email {
-          width: 29%;
+          width: 37%;
         }
 
         .cell-last-active {
@@ -151,17 +96,17 @@
     }
   }
 
-  @media (min-width: @screen-lg) {
+  @include media-breakpoint-up(xl) {
     .cell-checkbox {
       width: 5%;
     }
 
     .cell-email {
-      width: 55%;
+      width: 41%;
     }
 
     &.group-sso-active .cell-email {
-      width: 45%;
+      width: 41%;
     }
 
     .cell-name {
@@ -181,13 +126,14 @@
     }
 
     .cell-dropdown {
-      width: 5%;
-      min-width: 25px;
+      width: 19%;
+      min-width: 36px;
+      text-align: right;
     }
 
     &.managed-users-active {
       .cell-email {
-        width: 42%;
+        width: 41%;
       }
 
       &.group-sso-active {
@@ -212,9 +158,4 @@
     position: relative;
     top: 4px;
   }
-}
-
-.badge-group-settings {
-  align-self: center;
-  padding: 0 16px;
 }

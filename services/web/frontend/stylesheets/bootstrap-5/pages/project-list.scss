@@ -570,12 +570,6 @@
         right: var(--spacing-04);
         padding: 0 !important;
       }
-
-      .dropdown-table-button-toggle {
-        @include action-button;
-
-        padding: var(--spacing-04);
-      }
     }
   }
 }

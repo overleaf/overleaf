@@ -41,6 +41,10 @@ function NotificationScrolledTo({ ...props }: NotificationProps) {
 
   notificationProps.className = `${notificationProps.className} notification-with-scroll-margin`
 
-  return <Notification {...notificationProps} />
+  return (
+    <div className="notification-list">
+      <Notification {...notificationProps} />
+    </div>
+  )
 }
 export default NotificationScrolledTo

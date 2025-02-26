@@ -1,7 +1,5 @@
 import React, { useCallback, useState } from 'react'
-import { Button, Col, Form, FormControl, Row } from 'react-bootstrap'
 import { Trans, useTranslation } from 'react-i18next'
-import MaterialIcon from '../../../shared/components/material-icon'
 import useWaitForI18n from '../../../shared/hooks/use-wait-for-i18n'
 import getMeta from '../../../utils/meta'
 import { useGroupMembersContext } from '../context/group-members-context'
@@ -9,6 +7,13 @@ import ErrorAlert from './error-alert'
 import MembersList from './members-table/members-list'
 import { useFeatureFlag } from '@/shared/context/split-test-context'
 import { sendMB } from '../../../infrastructure/event-tracking'
+import BackButton from '@/features/group-management/components/back-button'
+import OLRow from '@/features/ui/components/ol/ol-row'
+import OLCol from '@/features/ui/components/ol/ol-col'
+import OLCard from '@/features/ui/components/ol/ol-card'
+import OLButton from '@/features/ui/components/ol/ol-button'
+import OLFormControl from '@/features/ui/components/ol/ol-form-control'
+import OLFormText from '@/features/ui/components/ol/ol-form-text'
 
 export default function GroupMembers() {
   const { isReady } = useWaitForI18n()
@@ -48,7 +53,7 @@ export default function GroupMembers() {
     return null
   }
 
-  const onAddMembersSubmit = (e: React.FormEvent<Form>) => {
+  const onAddMembersSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     addMembers(emailString)
   }
@@ -98,36 +103,37 @@ export default function GroupMembers() {
 
   return (
     <div className="container">
-      <Row>
-        <Col md={10} mdOffset={1}>
-          <h1>
-            <a href="/user/subscription" className="back-btn">
-              <MaterialIcon
-                type="arrow_back"
-                accessibilityLabel={t('back_to_subscription')}
-              />
-            </a>{' '}
-            {groupName || t('group_subscription')}
-          </h1>
-          <div className="card">
-            <div className="page-header">
+      <OLRow>
+        <OLCol lg={{ span: 10, offset: 1 }}>
+          <div className="group-heading" data-testid="group-heading">
+            <BackButton
+              href="/user/subscription"
+              accessibilityLabel={t('back_to_subscription')}
+            />
+            <h1 className="heading">{groupName || t('group_subscription')}</h1>
+          </div>
+          <OLCard>
+            <div
+              className="page-header mb-4"
+              data-testid="page-header-members-details"
+            >
               <div className="pull-right">
                 {selectedUsers.length === 0 && groupSizeDetails()}
                 {removeMemberLoading ? (
-                  <Button bsStyle="danger" disabled>
+                  <OLButton variant="danger" disabled>
                     {t('removing')}&hellip;
-                  </Button>
+                  </OLButton>
                 ) : (
                   <>
                     {selectedUsers.length > 0 && (
-                      <Button bsStyle="danger" onClick={removeMembers}>
+                      <OLButton variant="danger" onClick={removeMembers}>
                         {t('remove_from_group')}
-                      </Button>
+                      </OLButton>
                     )}
                   </>
                 )}
               </div>
-              <h3>{t('members_management')}</h3>
+              <h2 className="h3 mt-0">{t('members_management')}</h2>
             </div>
             <div className="row-spaced-small">
               <ErrorAlert error={removeMemberError} />
@@ -145,58 +151,67 @@ export default function GroupMembers() {
                     : t('add_more_members')}
                 </p>
                 <ErrorAlert error={inviteError} />
-                <Form horizontal onSubmit={onAddMembersSubmit} className="form">
-                  <Row>
-                    <Col xs={6}>
-                      <FormControl
+                <form onSubmit={onAddMembersSubmit}>
+                  <OLRow>
+                    <OLCol xs={6}>
+                      <OLFormControl
                         type="input"
                         placeholder="jane@example.com, joe@example.com"
                         aria-describedby="add-members-description"
                         value={emailString}
                         onChange={handleEmailsChange}
                       />
-                    </Col>
-                    <Col xs={4}>
-                      {inviteMemberLoading ? (
-                        <Button bsStyle="primary" disabled>
-                          {isFlexibleGroupLicensing
-                            ? t('inviting')
-                            : t('adding')}
-                          &hellip;
-                        </Button>
-                      ) : (
-                        <Button bsStyle="primary" onClick={onAddMembersSubmit}>
-                          {isFlexibleGroupLicensing ? t('invite') : t('add')}
-                        </Button>
-                      )}
-                    </Col>
-                    <Col xs={2}>
+                    </OLCol>
+                    <OLCol xs={4}>
+                      <OLButton
+                        variant="primary"
+                        onClick={onAddMembersSubmit}
+                        isLoading={inviteMemberLoading}
+                        bs3Props={{
+                          loading: inviteMemberLoading ? (
+                            <>
+                              {isFlexibleGroupLicensing
+                                ? t('inviting')
+                                : t('adding')}
+                              &hellip;
+                            </>
+                          ) : isFlexibleGroupLicensing ? (
+                            t('invite')
+                          ) : (
+                            t('add')
+                          ),
+                        }}
+                      >
+                        {isFlexibleGroupLicensing ? t('invite') : t('add')}
+                      </OLButton>
+                    </OLCol>
+                    <OLCol xs={2}>
                       <a href={paths.exportMembers}>{t('export_csv')}</a>
-                    </Col>
-                  </Row>
-                  <Row>
-                    <Col xs={8}>
-                      <span className="help-block">
+                    </OLCol>
+                  </OLRow>
+                  <OLRow>
+                    <OLCol xs={8}>
+                      <OLFormText bs3Props={{ className: 'help-block' }}>
                         {t('add_comma_separated_emails_help')}
-                      </span>
-                    </Col>
-                  </Row>
-                </Form>
+                      </OLFormText>
+                    </OLCol>
+                  </OLRow>
+                </form>
               </div>
             )}
             {users.length >= groupSize && users.length > 0 && (
               <>
                 <ErrorAlert error={inviteError} />
-                <Row>
-                  <Col xs={2} xsOffset={10}>
+                <OLRow>
+                  <OLCol xs={{ span: 2, offset: 10 }}>
                     <a href={paths.exportMembers}>{t('export_csv')}</a>
-                  </Col>
-                </Row>
+                  </OLCol>
+                </OLRow>
               </>
             )}
-          </div>
-        </Col>
-      </Row>
+          </OLCard>
+        </OLCol>
+      </OLRow>
     </div>
   )
 }

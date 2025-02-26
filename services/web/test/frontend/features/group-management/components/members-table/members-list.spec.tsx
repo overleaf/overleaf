@@ -50,46 +50,74 @@ describe('MembersList', function () {
         win.metaAttributesCache.set('ol-groupSSOActive', false)
       })
       mountManagedUsersList()
-      cy.get('#managed-users-list-headers').should('exist')
 
       // Select-all checkbox
-      cy.get('#managed-users-list-headers .select-all').should('exist')
-
-      cy.get('#managed-users-list-headers').contains('Email')
-      cy.get('#managed-users-list-headers').contains('Name')
-      cy.get('#managed-users-list-headers').contains('Last Active')
-      cy.get('#managed-users-list-headers')
-        .contains('Security')
-        .should('not.exist')
+      cy.findByTestId('managed-users-table').within(() => {
+        cy.findByTestId('select-all-checkbox')
+      })
+      cy.findByTestId('managed-users-table').should('contain.text', 'Email')
+      cy.findByTestId('managed-users-table').should('contain.text', 'Name')
+      cy.findByTestId('managed-users-table').should(
+        'contain.text',
+        'Last Active'
+      )
+      cy.findByTestId('managed-users-table').should(
+        'not.contain.text',
+        'Security'
+      )
     })
     it('should render the table headers with SSO Column', function () {
       cy.window().then(win => {
         win.metaAttributesCache.set('ol-groupSSOActive', true)
       })
       mountManagedUsersList()
-      cy.get('#managed-users-list-headers').should('exist')
 
       // Select-all checkbox
-      cy.get('#managed-users-list-headers .select-all').should('exist')
+      cy.findByTestId('managed-users-table').within(() => {
+        cy.findByTestId('select-all-checkbox')
+      })
 
-      cy.get('#managed-users-list-headers').contains('Email')
-      cy.get('#managed-users-list-headers').contains('Name')
-      cy.get('#managed-users-list-headers').contains('Last Active')
-      cy.get('#managed-users-list-headers').contains('Security')
+      cy.findByTestId('managed-users-table').should('contain.text', 'Email')
+      cy.findByTestId('managed-users-table').should('contain.text', 'Name')
+      cy.findByTestId('managed-users-table').should(
+        'contain.text',
+        'Last Active'
+      )
+      cy.findByTestId('managed-users-table').should('contain.text', 'Security')
     })
 
     it('should render the list of users', function () {
-      cy.get('.managed-users-list')
-        .find('.managed-user-row')
-        .should('have.length', 2)
+      cy.findByTestId('managed-users-table')
+        .find('tbody')
+        .within(() => {
+          cy.findAllByRole('row').should('have.length', 2)
+        })
       // First user
-      cy.get('.managed-users-list').contains(users[0].email)
-      cy.get('.managed-users-list').contains(users[0].first_name)
-      cy.get('.managed-users-list').contains(users[0].last_name)
+      cy.findByTestId('managed-users-table').should(
+        'contain.text',
+        users[0].email
+      )
+      cy.findByTestId('managed-users-table').should(
+        'contain.text',
+        users[0].first_name
+      )
+      cy.findByTestId('managed-users-table').should(
+        'contain.text',
+        users[0].last_name
+      )
       // Second user
-      cy.get('.managed-users-list').contains(users[1].email)
-      cy.get('.managed-users-list').contains(users[1].first_name)
-      cy.get('.managed-users-list').contains(users[1].last_name)
+      cy.findByTestId('managed-users-table').should(
+        'contain.text',
+        users[1].email
+      )
+      cy.findByTestId('managed-users-table').should(
+        'contain.text',
+        users[1].first_name
+      )
+      cy.findByTestId('managed-users-table').should(
+        'contain.text',
+        users[1].last_name
+      )
     })
   })
 
@@ -106,10 +134,17 @@ describe('MembersList', function () {
     })
 
     it('should render the list, with a "no members" message', function () {
-      cy.get('.managed-users-list').contains('No members')
-      cy.get('.managed-users-list')
-        .find('.managed-user-row')
-        .should('have.length', 0)
+      cy.findByTestId('managed-users-table').should(
+        'contain.text',
+        'No members'
+      )
+      cy.findByTestId('managed-users-table')
+        .find('tbody')
+        .within(() => {
+          cy.findAllByRole('row')
+            .should('have.length', 1)
+            .and('contain.text', 'No members')
+        })
     })
   })
 
@@ -188,27 +223,32 @@ describe('MembersList', function () {
     describe('unlinking user', function () {
       beforeEach(function () {
         mountManagedUsersList()
-        cy.get('ul.managed-users-list table > tbody').within(() => {
-          cy.get('tr:nth-child(3)').within(() => {
-            cy.get('.sr-only').contains('SSO active')
-            cy.get('.action-btn').click()
-            cy.findByTestId('unlink-user-action').click()
+        cy.findByTestId('managed-users-table')
+          .find('tbody')
+          .within(() => {
+            cy.get('tr:nth-child(3)').within(() => {
+              cy.findByText('SSO active')
+              cy.findByRole('button', { name: /actions/i }).click()
+              cy.findByTestId('unlink-user-action').click()
+            })
           })
-        })
       })
 
       it('should show successs notification and update the user row after unlinking', function () {
-        cy.get('.modal').within(() => {
-          cy.get('.btn-danger').click()
+        cy.findByRole('dialog').within(() => {
+          cy.findByRole('button', { name: /unlink user/i }).click()
         })
-        cy.get('.notification').contains(
+        cy.findByRole('alert').should(
+          'contain.text',
           `SSO reauthentication request has been sent to ${USER_LINKED.email}`
         )
-        cy.get('ul.managed-users-list table > tbody').within(() => {
-          cy.get('tr:nth-child(3)').within(() => {
-            cy.get('.sr-only').contains('SSO not active')
+        cy.findByTestId('managed-users-table')
+          .find('tbody')
+          .within(() => {
+            cy.get('tr:nth-child(3)').within(() => {
+              cy.findByText('SSO not active')
+            })
           })
-        })
       })
     })
 
@@ -222,57 +262,67 @@ describe('MembersList', function () {
 
       describe('when user is not managed', function () {
         beforeEach(function () {
-          cy.get('ul.managed-users-list table > tbody').within(() => {
-            cy.get('tr:nth-child(3)').within(() => {
-              cy.get('.sr-only').contains('SSO active')
-              cy.get('.sr-only').contains('Not managed')
-              cy.get('.action-btn').click()
-              cy.findByTestId('unlink-user-action').click()
+          cy.findByTestId('managed-users-table')
+            .find('tbody')
+            .within(() => {
+              cy.get('tr:nth-child(3)').within(() => {
+                cy.findByText('SSO active')
+                cy.findByText('Not managed')
+                cy.findByRole('button', { name: /actions/i }).click()
+                cy.findByTestId('unlink-user-action').click()
+              })
             })
-          })
         })
 
         it('should show successs notification and update the user row after unlinking', function () {
-          cy.get('.modal').within(() => {
-            cy.get('.btn-danger').click()
+          cy.findByRole('dialog').within(() => {
+            cy.findByRole('button', { name: /unlink user/i }).click()
           })
-          cy.get('.notification').contains(
+          cy.findByRole('alert').should(
+            'contain.text',
             `SSO reauthentication request has been sent to ${USER_LINKED.email}`
           )
-          cy.get('ul.managed-users-list table > tbody').within(() => {
-            cy.get('tr:nth-child(3)').within(() => {
-              cy.get('.sr-only').contains('SSO not active')
-              cy.get('.sr-only').contains('Not managed')
+          cy.findByTestId('managed-users-table')
+            .find('tbody')
+            .within(() => {
+              cy.get('tr:nth-child(3)').within(() => {
+                cy.findByText('SSO not active')
+                cy.findByText('Not managed')
+              })
             })
-          })
         })
       })
 
       describe('when user is managed', function () {
         beforeEach(function () {
-          cy.get('ul.managed-users-list table > tbody').within(() => {
-            cy.get('tr:nth-child(4)').within(() => {
-              cy.get('.sr-only').contains('SSO active')
-              cy.get('.sr-only').contains('Managed')
-              cy.get('.action-btn').click()
-              cy.findByTestId('unlink-user-action').click()
+          cy.findByTestId('managed-users-table')
+            .find('tbody')
+            .within(() => {
+              cy.get('tr:nth-child(4)').within(() => {
+                cy.findByText('SSO active')
+                cy.findAllByText('Managed')
+                cy.findByRole('button', { name: /actions/i }).click()
+                cy.findByTestId('unlink-user-action').click()
+              })
             })
-          })
         })
 
         it('should show successs notification and update the user row after unlinking', function () {
-          cy.get('.modal').within(() => {
-            cy.get('.btn-danger').click()
+          cy.findByRole('dialog').within(() => {
+            cy.findByRole('button', { name: /unlink user/i }).click()
           })
-          cy.get('.notification').contains(
+          cy.findByRole('alert').should(
+            'contain.text',
             `SSO reauthentication request has been sent to ${USER_LINKED_AND_MANAGED.email}`
           )
-          cy.get('ul.managed-users-list table > tbody').within(() => {
-            cy.get('tr:nth-child(4)').within(() => {
-              cy.get('.sr-only').contains('SSO not active')
-              cy.get('.sr-only').contains('Managed')
+          cy.findByTestId('managed-users-table')
+            .find('tbody')
+            .within(() => {
+              cy.get('tr:nth-child(4)').within(() => {
+                cy.findByText('SSO not active')
+                cy.findAllByText('Managed')
+              })
             })
-          })
         })
       })
     })

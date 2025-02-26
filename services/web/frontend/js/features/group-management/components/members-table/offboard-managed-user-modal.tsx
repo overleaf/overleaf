@@ -1,14 +1,4 @@
 import { User } from '../../../../../../types/group-management/user'
-import {
-  Alert,
-  Button,
-  ControlLabel,
-  Form,
-  FormControl,
-  FormGroup,
-  Modal,
-} from 'react-bootstrap'
-import AccessibleModal from '@/shared/components/accessible-modal'
 import Icon from '@/shared/components/icon'
 import { useState } from 'react'
 import useAsync from '@/shared/hooks/use-async'
@@ -16,6 +6,18 @@ import { useTranslation } from 'react-i18next'
 import { useLocation } from '@/shared/hooks/use-location'
 import { FetchError, postJSON } from '@/infrastructure/fetch-json'
 import { debugConsole } from '@/utils/debugging'
+import OLModal, {
+  OLModalBody,
+  OLModalFooter,
+  OLModalHeader,
+  OLModalTitle,
+} from '@/features/ui/components/ol/ol-modal'
+import OLFormGroup from '@/features/ui/components/ol/ol-form-group'
+import OLButton from '@/features/ui/components/ol/ol-button'
+import OLNotification from '@/features/ui/components/ol/ol-notification'
+import OLFormControl from '@/features/ui/components/ol/ol-form-control'
+import OLFormLabel from '@/features/ui/components/ol/ol-form-label'
+import OLFormSelect from '@/features/ui/components/ol/ol-form-select'
 
 type OffboardManagedUserModalProps = {
   user: User
@@ -69,12 +71,12 @@ export default function OffboardManagedUserModal({
   }
 
   return (
-    <AccessibleModal id={`delete-user-modal-${user._id}`} show onHide={onClose}>
-      <Form id="delete-user-form" onSubmit={handleDeleteUserSubmit}>
-        <Modal.Header>
-          <Modal.Title>{t('delete_user')}</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
+    <OLModal id={`delete-user-modal-${user._id}`} show onHide={onClose}>
+      <form id="delete-user-form" onSubmit={handleDeleteUserSubmit}>
+        <OLModalHeader>
+          <OLModalTitle>{t('delete_user')}</OLModalTitle>
+        </OLModalHeader>
+        <OLModalBody>
           <p>
             {t('about_to_delete_user_preamble', {
               userName: userFullName,
@@ -95,21 +97,14 @@ export default function OffboardManagedUserModal({
           </p>
           <strong>{t('transfer_this_users_projects')}</strong>
           <p>{t('transfer_this_users_projects_description')}</p>
-          <FormGroup>
-            <ControlLabel htmlFor="recipient-select-input">
-              {t('select_a_new_owner_for_projects')}
-            </ControlLabel>
-            <FormControl
-              id="recipient-select-input"
-              className="form-control"
-              componentClass="select"
+          <OLFormGroup controlId="recipient-select-input">
+            <OLFormLabel>{t('select_a_new_owner_for_projects')}</OLFormLabel>
+            <OLFormSelect
               aria-label={t('select_user')}
               required
               placeholder={t('choose_from_group_members')}
               value={selectedRecipientId || ''}
-              onChange={(e: React.ChangeEvent<HTMLFormElement & FormControl>) =>
-                setSelectedRecipientId(e.target.value)
-              }
+              onChange={e => setSelectedRecipientId(e.target.value)}
             >
               <option hidden disabled value="">
                 {t('choose_from_group_members')}
@@ -119,47 +114,50 @@ export default function OffboardManagedUserModal({
                   {member.email}
                 </option>
               ))}
-            </FormControl>
-          </FormGroup>
+            </OLFormSelect>
+          </OLFormGroup>
           <p>
             <span>{t('all_projects_will_be_transferred_immediately')}</span>
           </p>
-          <FormGroup>
-            <ControlLabel htmlFor="supplied-email-input">
+          <OLFormGroup controlId="supplied-email-input">
+            <OLFormLabel>
               {t('confirm_delete_user_type_email_address', {
                 userName: userFullName,
               })}
-            </ControlLabel>
-            <FormControl
-              id="supplied-email-input"
+            </OLFormLabel>
+            <OLFormControl
               type="email"
               aria-label={t('email')}
-              onChange={(e: React.ChangeEvent<HTMLFormElement & FormControl>) =>
-                setSuppliedEmail(e.target.value)
-              }
+              onChange={e => setSuppliedEmail(e.target.value)}
             />
-          </FormGroup>
-          {error && <Alert bsStyle="danger">{error}</Alert>}
-        </Modal.Body>
-        <Modal.Footer>
-          <FormGroup>
-            <Button onClick={onClose}>{t('cancel')}</Button>
-            <Button
-              type="submit"
-              bsStyle="danger"
-              disabled={isLoading || isSuccess || !shouldEnableDeleteUserButton}
-            >
-              {isLoading ? (
+          </OLFormGroup>
+          {error && (
+            <OLNotification type="error" content={error} className="mb-0" />
+          )}
+        </OLModalBody>
+        <OLModalFooter>
+          <OLButton variant="secondary" onClick={onClose}>
+            {t('cancel')}
+          </OLButton>
+          <OLButton
+            type="submit"
+            variant="danger"
+            disabled={isLoading || isSuccess || !shouldEnableDeleteUserButton}
+            isLoading={isLoading}
+            bs3Props={{
+              loading: isLoading ? (
                 <>
                   <Icon type="refresh" fw spin /> {t('deleting')}…
                 </>
               ) : (
                 t('delete_user')
-              )}
-            </Button>
-          </FormGroup>
-        </Modal.Footer>
-      </Form>
-    </AccessibleModal>
+              ),
+            }}
+          >
+            {t('delete_user')}
+          </OLButton>
+        </OLModalFooter>
+      </form>
+    </OLModal>
   )
 }

@@ -296,7 +296,8 @@
   gap: var(--spacing-04);
   margin-bottom: var(--spacing-06);
 
-  h2 {
+  h2,
+  .heading {
     @include heading-lg;
 
     margin: 0;

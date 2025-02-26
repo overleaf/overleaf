@@ -1,6 +1,7 @@
 import Table from '@/features/ui/components/bootstrap-5/table'
 import { Table as BS3Table } from 'react-bootstrap'
 import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
+import { getAriaAndDataProps } from '@/features/utils/bootstrap-5'
 
 type OLFormProps = React.ComponentProps<typeof Table> & {
   bs3Props?: React.ComponentProps<typeof BS3Table>
@@ -11,10 +12,12 @@ function OLTable(props: OLFormProps) {
 
   const bs3FormProps: React.ComponentProps<typeof BS3Table> = {
     bsClass: rest.className,
+    id: rest.id,
     condensed: rest.size === 'sm',
     children: rest.children,
     responsive:
       typeof rest.responsive !== 'string' ? rest.responsive : undefined,
+    ...getAriaAndDataProps(rest),
     ...bs3Props,
   }
 

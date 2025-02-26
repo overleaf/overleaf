@@ -37,6 +37,14 @@
       }
     }
   }
+
+  .dropdown {
+    .dropdown-table-button-toggle {
+      @include action-button;
+
+      padding: var(--spacing-04);
+    }
+  }
 }
 
 .table-container-bordered {

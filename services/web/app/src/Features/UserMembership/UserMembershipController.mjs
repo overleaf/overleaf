@@ -38,6 +38,8 @@ async function manageGroupMembers(req, res, next) {
     'flexible-group-licensing'
   )
 
+  await SplitTestHandler.promises.getAssignment(req, res, 'bootstrap-5-groups')
+
   const plan = PlansLocator.findLocalPlanInSettings(subscription.planCode)
   const userId = SessionManager.getLoggedInUserId(req.session)
   const isAdmin = subscription.admin_id.toString() === userId

@@ -2,6 +2,10 @@ extends ../layout-marketing
 
 block entrypointVar
 	- entrypoint = 'pages/user/subscription/group-management/group-members'
+		
+block vars
+	- bootstrap5PageStatus = 'enabled' // One of 'disabled', 'enabled', and 'queryStringOnly'
+	- bootstrap5PageSplitTest = 'bootstrap-5-groups'
 
 block append meta
 	meta(name="ol-users", data-type="json", content=users)
