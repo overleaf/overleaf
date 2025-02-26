@@ -536,7 +536,14 @@ templates.groupSSOReauthenticate = ctaTemplate({
     ]
   },
   secondaryMessage(opts) {
-    return [``]
+    if (!opts.isManagedUser) {
+      return ['']
+    } else {
+      const passwordResetUrl = `${settings.siteUrl}/user/password/reset`
+      return [
+        `If you’re not currently logged in to Overleaf, you'll need to <a href="${passwordResetUrl}">set a new password</a> to reauthenticate.`,
+      ]
+    }
   },
   ctaURL(opts) {
     return opts.authenticateWithSSO
