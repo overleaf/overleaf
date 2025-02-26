@@ -448,6 +448,7 @@ describe('SAMLIdentityManager', function () {
             providerId: '1',
             providerName: 'Overleaf University',
             userIdAttribute: 'uniqueId',
+            externalUserId: 'externalUserId',
           }
         )
       })

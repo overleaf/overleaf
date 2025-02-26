@@ -95,6 +95,7 @@ async function _addIdentifier(
     providerId,
     providerName,
     userIdAttribute,
+    externalUserId,
   }
 
   await _addAuditLogEntry(
