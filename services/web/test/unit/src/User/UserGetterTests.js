@@ -382,8 +382,7 @@ describe('UserGetter', function () {
             }
           )
         })
-        // eslint-disable-next-line mocha/no-skipped-tests
-        it.skip('should not flag affiliations outside of notification period', function (done) {
+        it('should not flag affiliations outside of notification period', function (done) {
           const { maxConfirmationMonths } = institutionNonSSO
           const confirmed1 = new Date()
           const lastDayToReconfirm1 = moment(confirmed1)
@@ -391,8 +390,8 @@ describe('UserGetter', function () {
             .toDate()
           const confirmed2 = moment()
             .subtract(maxConfirmationMonths, 'months')
-            .add(15, 'days')
-            .toDate() // expires in 15 days
+            .add(30, 'days')
+            .toDate() // expires in 30 days and reconfirmNotificationDays is set to 14
           const lastDayToReconfirm2 = moment(confirmed2)
             .add(maxConfirmationMonths, 'months')
             .toDate()
