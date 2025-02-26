@@ -946,6 +946,50 @@ describe('UserGetter', function () {
         )
       })
 
+      it('should flag to show notification if v2 shows as reconfirmation upcoming but v1 does not', function (done) {
+        const email = 'abc123@test.com'
+        const { maxConfirmationMonths } = institutionNonSSO
+
+        const datePastReconfirmation = moment()
+          .subtract(maxConfirmationMonths, 'months')
+          .add(3, 'day')
+          .toDate()
+
+        const dateNotPastReconfirmation = moment().add(1, 'month').toDate()
+
+        const affiliationsData = [
+          {
+            email,
+            licence: 'free',
+            institution: institutionNonSSO,
+            last_day_to_reconfirm: dateNotPastReconfirmation,
+          },
+        ]
+        const user = {
+          _id: '12390i',
+          email,
+          emails: [
+            {
+              email,
+              confirmedAt: datePastReconfirmation,
+              default: true,
+            },
+          ],
+        }
+        this.getUserAffiliations.resolves(affiliationsData)
+        this.UserGetter.promises.getUser = sinon.stub().resolves(user)
+        this.UserGetter.getUserFullEmails(
+          this.fakeUser._id,
+          (error, fullEmails) => {
+            expect(error).to.not.exist
+            expect(
+              fullEmails[0].affiliation.inReconfirmNotificationPeriod
+            ).to.equal(true)
+            done()
+          }
+        )
+      })
+
       describe('cachedLastDayToReconfirm', function () {
         const email = 'abc123@test.com'
         const confirmedAt = new Date('2019-07-11T18:25:01.639Z')
