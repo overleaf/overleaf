@@ -71,6 +71,12 @@ class NotInV2Error extends BackwardCompatibleError {}
 
 class SLInV2Error extends BackwardCompatibleError {}
 
+class SAMLCommonsUnavailable extends OError {
+  get i18nKey() {
+    return 'saml_commons_unavailable'
+  }
+}
+
 class SAMLIdentityExistsError extends OError {
   get i18nKey() {
     return 'institution_account_tried_to_add_already_registered'
@@ -316,6 +322,7 @@ module.exports = {
   OutputFileFetchFailedError,
   SAMLAssertionAudienceMismatch,
   SAMLAuthenticationRequiredError,
+  SAMLCommonsUnavailable,
   SAMLIdentityExistsError,
   SAMLAlreadyLinkedError,
   SAMLEmailNotAffiliatedError,
