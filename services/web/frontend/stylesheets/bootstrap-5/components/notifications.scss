@@ -40,7 +40,7 @@
 
     &:hover,
     &:focus {
-      background-color: rgb(var(--neutral-90) 0.08);
+      background-color: rgba($neutral-90, 0.08);
       color: var(--content-secondary);
     }
   }
@@ -124,7 +124,7 @@
 
       &:hover,
       &:focus {
-        background-color: rgb(var(--neutral-90) 0.08);
+        background-color: rgba($neutral-90, 0.08);
         color: var(--content-secondary);
       }
     }
