@@ -30,7 +30,7 @@ const HIDE_TOOLTIP_EVENT = 'editor:hideMathTooltip'
 
 export const mathPreview = (enabled: boolean): Extension => {
   return mathPreviewConf.of(
-    enabled ? [mathPreviewTheme, mathPreviewStateField] : []
+    enabled ? [mathPreviewTheme, mathPreviewStateField] : [mathPreviewTheme]
   )
 }
 
