@@ -1,6 +1,7 @@
 .DS_Store
 .git/
 services/git-bridge
+server-ce/server-ce
 server-ce/test
 
 # omit scripts with extra dependencies
