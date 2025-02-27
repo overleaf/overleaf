@@ -30,7 +30,7 @@ import {
 import { MergeAndOverride, Nullable } from '../../../../../../types/utils'
 import { sendMB } from '../../../../infrastructure/event-tracking'
 
-export const MAX_NUMBER_OF_USERS = 50
+export const MAX_NUMBER_OF_USERS = 20
 
 type CostSummaryData = MergeAndOverride<
   SubscriptionChangePreview,
@@ -405,7 +405,7 @@ function CostSummarySection({
             i18nKey="if_you_want_more_than_x_users_on_your_plan_we_need_to_add_them_for_you"
             // eslint-disable-next-line react/jsx-key
             components={[<b />]}
-            values={{ count: 50 }}
+            values={{ count: MAX_NUMBER_OF_USERS }}
             shouldUnescape
             tOptions={{ interpolation: { escapeValue: true } }}
           />

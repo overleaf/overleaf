@@ -18,7 +18,7 @@ const subscriptionRateLimiter = new RateLimiter('subscription', {
   duration: 60,
 })
 
-const MAX_NUMBER_OF_USERS = 50
+const MAX_NUMBER_OF_USERS = 20
 
 const addSeatsValidateSchema = {
   body: Joi.object({
