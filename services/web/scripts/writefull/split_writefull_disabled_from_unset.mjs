@@ -1,20 +1,11 @@
-import { db } from '../app/src/infrastructure/mongodb.js'
+import { db } from '../../app/src/infrastructure/mongodb.js'
 import { batchedUpdate } from '@overleaf/mongo-utils/batchedUpdate.js'
 import mongodb from 'mongodb-legacy'
 import fs from 'node:fs'
 import { fileURLToPath } from 'node:url'
+import { chunkArray } from '../helpers/chunkArray.mjs'
 
 const { ObjectId } = mongodb
-const CHUNK_SIZE = 1000
-
-// Function to chunk the array
-function chunkArray(array, size) {
-  const result = []
-  for (let i = 0; i < array.length; i += size) {
-    result.push(array.slice(i, i + size))
-  }
-  return result
-}
 
 async function main() {
   // search for file of users who already explicitly opted out first
@@ -32,7 +23,7 @@ async function main() {
     { $set: { 'writefull.enabled': null } }
   )
 
-  const chunks = chunkArray(optedOutList, CHUNK_SIZE)
+  const chunks = chunkArray(optedOutList)
 
   // then reset any explicit false back to being false
   // Iterate over each chunk and perform the query
