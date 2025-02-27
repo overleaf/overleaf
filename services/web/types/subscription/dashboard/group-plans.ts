@@ -4,5 +4,4 @@ export type GroupPlans = {
     code: string
   }[]
   sizes: string[]
-  sizesForHighDenominationCurrencies: string[]
 }

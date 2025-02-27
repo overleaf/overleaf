@@ -155,15 +155,9 @@ export function ChangeToGroupModal() {
     !groupPlans ||
     !groupPlans.plans ||
     !groupPlans.sizes ||
-    !groupPlans.sizesForHighDenominationCurrencies ||
     !groupPlanToChangeToCode
   )
     return null
-
-  const isUsingCOP = personalSubscription.recurly?.currency === 'COP'
-  const groupPlanSizes = isUsingCOP
-    ? groupPlans.sizesForHighDenominationCurrencies
-    : groupPlans.sizes
 
   return (
     <>
@@ -247,7 +241,7 @@ export function ChangeToGroupModal() {
                       value={groupPlanToChangeToSize}
                       onChange={e => setGroupPlanToChangeToSize(e.target.value)}
                     >
-                      {groupPlanSizes.map(size => (
+                      {groupPlans.sizes.map(size => (
                         <option key={`size-option-${size}`}>{size}</option>
                       ))}
                     </OLFormSelect>
@@ -358,7 +352,7 @@ export function ChangeToGroupModal() {
               onClick={showContactModal}
             >
               {t('need_more_than_x_licenses', {
-                x: isUsingCOP ? 20 : 50,
+                x: 20,
               })}{' '}
               {t('please_get_in_touch')}
             </OLButton>

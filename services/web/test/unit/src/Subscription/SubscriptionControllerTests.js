@@ -99,7 +99,6 @@ describe('SubscriptionController', function () {
           },
         ],
         sizes: ['42'],
-        sizesForHighDenominationCurrencies: ['42'],
         usages: [{ code: 'foo', display: 'Foo' }],
       },
       apis: {

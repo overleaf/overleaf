@@ -387,7 +387,7 @@ describe('<ChangePlanModal />', function () {
       within(modal).getByRole('button', { name: 'Upgrade now' })
 
       within(modal).getByRole('button', {
-        name: 'Need more than 50 licenses? Please get in touch',
+        name: 'Need more than 20 licenses? Please get in touch',
       })
     })
 

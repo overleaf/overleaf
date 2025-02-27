@@ -226,8 +226,7 @@ export const groupPlans: GroupPlans = {
       code: 'professional',
     },
   ],
-  sizes: ['2', '3', '4', '5', '10', '20', '50'],
-  sizesForHighDenominationCurrencies: ['2', '3', '4', '5', '10', '20'],
+  sizes: ['2', '3', '4', '5', '10', '20'],
 }
 
 export const groupPriceByUsageTypeAndSize = {
@@ -252,9 +251,6 @@ export const groupPriceByUsageTypeAndSize = {
         '20': {
           price_in_cents: 264000,
         },
-        '50': {
-          price_in_cents: 605000,
-        },
       },
       USD: {
         '2': {
@@ -274,9 +270,6 @@ export const groupPriceByUsageTypeAndSize = {
         },
         '20': {
           price_in_cents: 286000,
-        },
-        '50': {
-          price_in_cents: 655000,
         },
       },
     },
@@ -300,9 +293,6 @@ export const groupPriceByUsageTypeAndSize = {
         '20': {
           price_in_cents: 128000,
         },
-        '50': {
-          price_in_cents: 295000,
-        },
       },
       USD: {
         '2': {
@@ -322,9 +312,6 @@ export const groupPriceByUsageTypeAndSize = {
         },
         '20': {
           price_in_cents: 142000,
-        },
-        '50': {
-          price_in_cents: 325000,
         },
       },
     },
@@ -350,9 +337,6 @@ export const groupPriceByUsageTypeAndSize = {
         '20': {
           price_in_cents: 442000,
         },
-        '50': {
-          price_in_cents: 1010000,
-        },
       },
       USD: {
         '2': {
@@ -372,9 +356,6 @@ export const groupPriceByUsageTypeAndSize = {
         },
         '20': {
           price_in_cents: 478000,
-        },
-        '50': {
-          price_in_cents: 1095000,
         },
       },
     },
@@ -398,9 +379,6 @@ export const groupPriceByUsageTypeAndSize = {
         '20': {
           price_in_cents: 214000,
         },
-        '50': {
-          price_in_cents: 490000,
-        },
       },
       USD: {
         '2': {
@@ -420,9 +398,6 @@ export const groupPriceByUsageTypeAndSize = {
         },
         '20': {
           price_in_cents: 238000,
-        },
-        '50': {
-          price_in_cents: 545000,
         },
       },
     },
