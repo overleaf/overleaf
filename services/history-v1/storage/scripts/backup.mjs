@@ -47,12 +47,25 @@ EventEmitter.defaultMaxListeners = 20
 
 logger.initialize('history-v1-backup')
 
+// Settings shared between command-line and module usage
 let DRY_RUN = false
 let RETRY_LIMIT = 3
 const RETRY_DELAY = 1000
 let CONCURRENCY = 4
 let BATCH_CONCURRENCY = 1
 let BLOB_LIMITER = pLimit(CONCURRENCY)
+
+/**
+ * Configure backup settings
+ * @param {Object} options Backup configuration options
+ */
+export function configureBackup(options = {}) {
+  DRY_RUN = options.dryRun || false
+  RETRY_LIMIT = options.retries || 3
+  CONCURRENCY = options.concurrency || 1
+  BATCH_CONCURRENCY = options.batchConcurrency || 1
+  BLOB_LIMITER = pLimit(CONCURRENCY)
+}
 
 let gracefulShutdownInitiated = false
 
@@ -483,7 +496,7 @@ function makeChunkKey(projectId, startVersion) {
   return path.join(projectKey.format(projectId), projectKey.pad(startVersion))
 }
 
-async function backupProject(projectId, options) {
+export async function backupProject(projectId, options) {
   // FIXME: flush the project first!
   // Let's assume the the flush happens externally and triggers this backup
   const backupStartTime = new Date()
@@ -627,7 +640,7 @@ function convertToISODate(dateStr) {
   return new Date(dateStr + 'T00:00:00.000Z').toISOString()
 }
 
-async function initializeProjects(options) {
+export async function initializeProjects(options) {
   const limiter = pLimit(BATCH_CONCURRENCY)
 
   async function processBatch(batch) {
@@ -929,31 +942,34 @@ async function main() {
   }
 }
 
-main()
-  .then(() => {
-    console.log(
-      gracefulShutdownInitiated ? 'Exited - graceful shutdown' : 'Completed'
-    )
-  })
-  .catch(err => {
-    console.error('Error backing up project:', err)
-    process.exit(1)
-  })
-  .finally(() => {
-    knex
-      .destroy()
-      .then(() => {
-        console.log('Postgres connection closed')
-      })
-      .catch(err => {
-        console.error('Error closing Postgres connection:', err)
-      })
-    client
-      .close()
-      .then(() => {
-        console.log('MongoDB connection closed')
-      })
-      .catch(err => {
-        console.error('Error closing MongoDB connection:', err)
-      })
-  })
+// Only run command-line interface when script is run directly
+if (import.meta.url === `file://${process.argv[1]}`) {
+  main()
+    .then(() => {
+      console.log(
+        gracefulShutdownInitiated ? 'Exited - graceful shutdown' : 'Completed'
+      )
+    })
+    .catch(err => {
+      console.error('Error backing up project:', err)
+      process.exit(1)
+    })
+    .finally(() => {
+      knex
+        .destroy()
+        .then(() => {
+          console.log('Postgres connection closed')
+        })
+        .catch(err => {
+          console.error('Error closing Postgres connection:', err)
+        })
+      client
+        .close()
+        .then(() => {
+          console.log('MongoDB connection closed')
+        })
+        .catch(err => {
+          console.error('Error closing MongoDB connection:', err)
+        })
+    })
+}

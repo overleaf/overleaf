@@ -21,12 +21,22 @@ const backupQueue = new Queue('backup', {
 const optionDefinitions = [
   { name: 'clean', type: Boolean },
   { name: 'status', type: Boolean },
-  { name: 'add', type: String, multiple: true },
+  {
+    name: 'add',
+    type: String,
+    multiple: true,
+    description: 'Project IDs or date range in YYYY-MM-DD:YYYY-MM-DD format',
+  },
   { name: 'monitor', type: Boolean },
 ]
 
 // Parse command line arguments
 const options = commandLineArgs(optionDefinitions)
+
+// Helper to validate date format
+function isValidDateFormat(dateStr) {
+  return /^\d{4}-\d{2}-\d{2}$/.test(dateStr)
+}
 
 // Setup queue event listeners
 function setupMonitoring() {
@@ -81,6 +91,23 @@ function setupMonitoring() {
   })
 }
 
+async function addDateRangeJob(input) {
+  const [startDate, endDate] = input.split(':')
+  if (!isValidDateFormat(startDate) || !isValidDateFormat(endDate)) {
+    console.error(
+      `Invalid date format for "${input}". Use YYYY-MM-DD:YYYY-MM-DD`
+    )
+    return
+  }
+  const job = await backupQueue.add(
+    { startDate, endDate },
+    { jobId: `backup-${startDate}-to-${endDate}` }
+  )
+  console.log(
+    `Added date range backup job: ${startDate} to ${endDate}, job ID: ${job.id}`
+  )
+}
+
 // Main execution block
 async function run() {
   const optionCount = [
@@ -107,19 +134,31 @@ async function run() {
     const counts = await backupQueue.getJobCounts()
     console.log('Current queue state:', JSON.stringify(counts))
   } else if (options.add) {
-    const projectIds = Array.isArray(options.add) ? options.add : [options.add]
-    for (const projectId of projectIds) {
-      const job = await backupQueue.add({ projectId }, { jobId: projectId })
-      console.log(`Added job for project: ${projectId}, job ID: ${job.id}`)
+    const inputs = Array.isArray(options.add) ? options.add : [options.add]
+    for (const input of inputs) {
+      if (input.includes(':')) {
+        // Handle date range format
+        await addDateRangeJob(input)
+      } else {
+        // Handle project ID format
+        const job = await backupQueue.add(
+          { projectId: input },
+          { jobId: input }
+        )
+        console.log(`Added job for project: ${input}, job ID: ${job.id}`)
+      }
     }
   } else if (options.monitor) {
     setupMonitoring()
   } else {
     console.log('Usage:')
-    console.log('  --clean              Clean up completed and failed jobs')
-    console.log('  --status             Show current job counts')
-    console.log('  --add [projectId]    Add a job for the specified projectId')
-    console.log('  --monitor            Monitor queue events')
+    console.log('  --clean   Clean up completed and failed jobs')
+    console.log('  --status  Show current job counts')
+    console.log('  --add [projectId] Add a job for the specified projectId')
+    console.log(
+      '  --add [YYYY-MM-DD:YYYY-MM-DD] Add a job for the specified date range'
+    )
+    console.log('  --monitor Monitor queue events')
   }
 }
 

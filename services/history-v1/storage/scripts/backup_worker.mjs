@@ -2,10 +2,18 @@ import Queue from 'bull'
 import logger from '@overleaf/logger'
 import config from 'config'
 import metrics from '@overleaf/metrics'
+import {
+  backupProject,
+  initializeProjects,
+  configureBackup,
+} from './backup.mjs'
 
 const CONCURRENCY = 10
 const redisOptions = config.get('redis.queue')
 const TIME_BUCKETS = [10, 100, 500, 1000, 5000, 10000, 30000, 60000]
+
+// Configure backup settings to match worker concurrency
+configureBackup({ concurrency: 5, batchConcurrency: 5 })
 
 // Create a Bull queue named 'backup'
 const backupQueue = new Queue('backup', {
@@ -37,18 +45,45 @@ backupQueue.on('error', error => {
 
 // Process jobs
 backupQueue.process(CONCURRENCY, async job => {
-  const { projectId } = job.data
+  const { projectId, startDate, endDate } = job.data
+
+  if (projectId) {
+    return await runBackup(projectId)
+  } else if (startDate && endDate) {
+    return await runInit(startDate, endDate)
+  } else {
+    throw new Error('invalid job data')
+  }
+})
+
+async function runBackup(projectId) {
   const timer = new metrics.Timer(
     'backup_worker_job_duration',
     1,
     {},
     TIME_BUCKETS
   )
-  logger.info({ projectId }, 'processing backup for project')
-  await new Promise(resolve => setTimeout(resolve, 5000 + Math.random() * 5000))
-  timer.done()
-  return `backup completed ${projectId}`
-})
+  try {
+    logger.info({ projectId }, 'processing backup for project')
+    await backupProject(projectId, {})
+    timer.done()
+    return `backup completed ${projectId}`
+  } catch (err) {
+    logger.error({ projectId, err }, 'backup failed')
+    throw err // Re-throw to mark job as failed
+  }
+}
+
+async function runInit(startDate, endDate) {
+  try {
+    logger.info({ startDate, endDate }, 'initializing projects')
+    await initializeProjects({ 'start-date': startDate, 'end-date': endDate })
+    return `initialization completed ${startDate} - ${endDate}`
+  } catch (err) {
+    logger.error({ startDate, endDate, err }, 'initialization failed')
+    throw err
+  }
+}
 
 export async function drainQueue() {
   logger.info({ queue: backupQueue.name }, 'pausing queue')
