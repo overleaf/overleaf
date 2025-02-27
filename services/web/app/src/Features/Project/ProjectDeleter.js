@@ -244,6 +244,7 @@ async function deleteProject(projectId, options = {}) {
       deletedProjectOwnerId: project.owner_ref,
       deletedProjectCollaboratorIds: project.collaberator_refs,
       deletedProjectReadOnlyIds: project.readOnly_refs,
+      deletedProjectReviewerIds: project.reviewer_refs,
       deletedProjectReadWriteTokenAccessIds:
         project.tokenAccessReadAndWrite_refs,
       deletedProjectOverleafId: project.overleaf

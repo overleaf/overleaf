@@ -12,6 +12,7 @@ const DeleterDataSchema = new Schema({
   deletedProjectOwnerId: { type: ObjectId, ref: 'User' },
   deletedProjectCollaboratorIds: [{ type: ObjectId, ref: 'User' }],
   deletedProjectReadOnlyIds: [{ type: ObjectId, ref: 'User' }],
+  deletedProjectReviewerIds: [{ type: ObjectId, ref: 'User' }],
   deletedProjectReadWriteTokenAccessIds: [{ type: ObjectId, ref: 'User' }],
   deletedProjectReadOnlyTokenAccessIds: [{ type: ObjectId, ref: 'User' }],
   deletedProjectReadWriteToken: { type: String },

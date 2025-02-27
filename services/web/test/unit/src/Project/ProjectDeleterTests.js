@@ -279,6 +279,7 @@ describe('ProjectDeleter', function () {
         deletedProjectOwnerId: this.project.owner_ref,
         deletedProjectCollaboratorIds: this.project.collaberator_refs,
         deletedProjectReadOnlyIds: this.project.readOnly_refs,
+        deletedProjectReviewerIds: this.project.reviewer_refs,
         deletedProjectReadWriteTokenAccessIds:
           this.project.tokenAccessReadAndWrite_refs,
         deletedProjectReadOnlyTokenAccessIds:
@@ -828,6 +829,7 @@ function dummyProject() {
     rootFolder: [],
     collaberator_refs: [new ObjectId(), new ObjectId()],
     readOnly_refs: [new ObjectId(), new ObjectId()],
+    reviewer_refs: [new ObjectId()],
     tokenAccessReadAndWrite_refs: [new ObjectId(), new ObjectId()],
     tokenAccessReadOnly_refs: [new ObjectId(), new ObjectId()],
     owner_ref: new ObjectId(),
