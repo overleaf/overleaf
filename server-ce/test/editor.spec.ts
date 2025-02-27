@@ -1,7 +1,17 @@
-import { createProject } from './helpers/project'
+import {
+  createNewFile,
+  createProject,
+  enableLinkSharing,
+  openFile,
+  openProjectById,
+  openProjectViaLinkSharingAsUser,
+  toggleTrackChanges,
+} from './helpers/project'
 import { isExcludedBySharding, startWith } from './helpers/config'
 import { ensureUserExists, login } from './helpers/login'
 import { v4 as uuid } from 'uuid'
+import { beforeWithReRunOnTestRetry } from './helpers/beforeWithReRunOnTestRetry'
+import { prepareWaitForNextCompileSlot } from './helpers/compile'
 
 describe('editor', () => {
   if (isExcludedBySharding('PRO_DEFAULT_1')) return
@@ -9,24 +19,32 @@ describe('editor', () => {
   ensureUserExists({ email: 'user@example.com' })
   ensureUserExists({ email: 'collaborator@example.com' })
 
-  it('word dictionary and spelling', () => {
-    const fileName = 'test.tex'
-    const word = createRandomLetterString()
+  let projectName: string
+  let projectId: string
+  let recompile: () => void
+  let waitForCompileRateLimitCoolOff: (fn: () => void) => void
+  beforeWithReRunOnTestRetry(function () {
+    projectName = `project-${uuid()}`
     login('user@example.com')
-    createProject('test-project')
+    createProject(projectName, { type: 'Example Project', open: false }).then(
+      id => (projectId = id)
+    )
+    ;({ recompile, waitForCompileRateLimitCoolOff } =
+      prepareWaitForNextCompileSlot())
+  })
 
-    cy.log('create new project file')
-    cy.get('button').contains('New file').click({ force: true })
-    cy.findByRole('dialog').within(() => {
-      cy.get('input').clear()
-      cy.get('input').type(fileName)
-      cy.findByText('Create').click()
+  beforeEach(() => {
+    login('user@example.com')
+    waitForCompileRateLimitCoolOff(() => {
+      openProjectById(projectId)
     })
-    cy.findByText(fileName).click()
+  })
+
+  it('word dictionary and spelling', () => {
+    createNewFile()
+    const word = createRandomLetterString()
 
     cy.log('edit project file')
-    // wait until we've switched to the newly created empty file
-    cy.get('.cm-line').should('have.length', 1)
     cy.get('.cm-line').type(word)
 
     cy.get('.ol-cm-spelling-error').should('exist')
@@ -44,7 +62,7 @@ describe('editor', () => {
     cy.log('remove word from dictionary')
     cy.get('button').contains('Menu').click()
     cy.get('button').contains('Edit').click()
-    cy.get('[id="dictionary-modal"').within(() => {
+    cy.get('[id="dictionary-modal"]').within(() => {
       cy.findByText(word)
         .parent()
         .within(() => cy.get('button').click())
@@ -64,92 +82,93 @@ describe('editor', () => {
   })
 
   describe('collaboration', () => {
-    let projectId: string
+    beforeWithReRunOnTestRetry(function () {
+      enableLinkSharing().then(({ linkSharingReadAndWrite }) => {
+        const email = 'collaborator@example.com'
+        login(email)
+        openProjectViaLinkSharingAsUser(
+          linkSharingReadAndWrite,
+          projectName,
+          email
+        )
+      })
 
-    beforeEach(() => {
       login('user@example.com')
-      cy.visit(`/project`)
-      createProject('test-editor', { type: 'Example Project' }).then(
-        (id: string) => {
-          projectId = id
-
-          cy.log('make project shareable')
-          cy.findByText('Share').click()
-          cy.findByText('Turn on link sharing').click()
-
-          cy.log('accept project invitation')
-          cy.findByText('Anyone with this link can edit this project')
-            .next()
-            .should('contain.text', 'http://') // wait for the link to appear
-            .then(el => {
-              const linkSharingReadAndWrite = el.text()
-              login('collaborator@example.com')
-              cy.visit(linkSharingReadAndWrite)
-              cy.get('button').contains('OK, join project').click()
-              cy.log(
-                'navigate to project dashboard to avoid cross session requests from editor'
-              )
-              cy.visit('/project')
-            })
-
-          login('user@example.com')
-          cy.visit(`/project/${projectId}`)
-        }
-      )
+      waitForCompileRateLimitCoolOff(() => {
+        openProjectById(projectId)
+      })
     })
 
     it('track-changes', () => {
-      cy.log('enable track-changes for everyone')
-      cy.findByText('Review').click()
-      cy.get('.review-panel-toolbar-collapse-button').click() // make track-changes switches visible
+      cy.log('disable track-changes before populating doc')
+      toggleTrackChanges(false)
 
-      cy.intercept('POST', '**/track_changes').as('enableTrackChanges')
-      cy.findByText('Everyone')
-        .parent()
-        .within(() => cy.get('.form-check-input').click())
-      cy.wait('@enableTrackChanges')
+      const fileName = createNewFile()
+      const oldContent = 'oldContent'
+      cy.get('.cm-line').type(`static\n${oldContent}`)
+
+      cy.log('recompile to force flush')
+      recompile()
+
+      cy.log('enable track-changes for everyone')
+      toggleTrackChanges(true)
 
       login('collaborator@example.com')
-      cy.visit(`/project/${projectId}`)
+      waitForCompileRateLimitCoolOff(() => {
+        openProjectById(projectId)
+      })
+      openFile(fileName, 'static')
 
       cy.log('make changes in main file')
       // cy.type() "clicks" in the center of the selected element before typing. This "click" discards the text as selected by the dblclick.
       // Go down to the lower level event based typing, the frontend tests in web use similar events.
       cy.get('.cm-editor').as('editor')
-      cy.get('@editor').findByText('\\maketitle').dblclick()
+      cy.get('@editor').findByText(oldContent).dblclick()
       cy.get('@editor').trigger('keydown', { key: 'Delete' })
       cy.get('@editor').trigger('keydown', { key: 'Enter' })
       cy.get('@editor').trigger('keydown', { key: 'Enter' })
 
       cy.log('recompile to force flush')
-      cy.findByText('Recompile').click()
+      recompile()
 
       login('user@example.com')
-      cy.visit(`/project/${projectId}`)
+      waitForCompileRateLimitCoolOff(() => {
+        openProjectById(projectId)
+      })
+      openFile(fileName, 'static')
 
       cy.log('reject changes')
       cy.findByText('Review').click()
-      cy.get('.cm-content').should('not.contain.text', '\\maketitle')
+      cy.get('.cm-content').should('not.contain.text', oldContent)
       cy.findByText('Reject').click({ force: true })
+      cy.findByText('Review').click()
 
       cy.log('verify the changes are applied')
-      cy.get('.cm-content').should('contain.text', '\\maketitle')
+      cy.get('.cm-content').should('contain.text', oldContent)
+
+      cy.log('disable track-changes for everyone again')
+      toggleTrackChanges(false)
     })
 
     it('track-changes rich text', () => {
-      cy.log('enable track-changes for everyone')
-      cy.findByText('Visual Editor').click()
-      cy.findByText('Review').click()
-      cy.get('.review-panel-toolbar-collapse-button').click() // make track-changes switches visible
+      cy.log('disable track-changes before populating doc')
+      toggleTrackChanges(false)
 
-      cy.intercept('POST', '**/track_changes').as('enableTrackChanges')
-      cy.findByText('Everyone')
-        .parent()
-        .within(() => cy.get('.form-check-input').click())
-      cy.wait('@enableTrackChanges')
+      const fileName = createNewFile()
+      const oldContent = 'oldContent'
+      cy.get('.cm-line').type(`static\n\\section{{}${oldContent}}`)
+
+      cy.log('recompile to force flush')
+      recompile()
+
+      cy.log('enable track-changes for everyone')
+      toggleTrackChanges(true)
 
       login('collaborator@example.com')
-      cy.visit(`/project/${projectId}`)
+      waitForCompileRateLimitCoolOff(() => {
+        openProjectById(projectId)
+      })
+      openFile(fileName, 'static')
 
       cy.log('enable visual editor and make changes in main file')
       cy.findByText('Visual Editor').click()
@@ -157,35 +176,36 @@ describe('editor', () => {
       // cy.type() "clicks" in the center of the selected element before typing. This "click" discards the text as selected by the dblclick.
       // Go down to the lower level event based typing, the frontend tests in web use similar events.
       cy.get('.cm-editor').as('editor')
-      cy.get('@editor').contains('Introduction').dblclick()
+      cy.get('@editor').contains(oldContent).dblclick()
       cy.get('@editor').trigger('keydown', { key: 'Delete' })
       cy.get('@editor').trigger('keydown', { key: 'Enter' })
       cy.get('@editor').trigger('keydown', { key: 'Enter' })
 
       cy.log('recompile to force flush')
-      cy.findByText('Recompile').click()
+      recompile()
 
       login('user@example.com')
-      cy.visit(`/project/${projectId}`)
+      waitForCompileRateLimitCoolOff(() => {
+        openProjectById(projectId)
+      })
+      openFile(fileName, 'static')
 
       cy.log('reject changes')
       cy.findByText('Review').click()
-      cy.get('.cm-content').should('not.contain.text', 'Introduction')
+      cy.get('.cm-content').should('not.contain.text', oldContent)
       cy.findAllByText('Reject').first().click({ force: true })
+      cy.findByText('Review').click()
 
       cy.log('verify the changes are applied in the visual editor')
       cy.findByText('Visual Editor').click()
-      cy.get('.cm-content').should('contain.text', 'Introduction')
+      cy.get('.cm-content').should('contain.text', oldContent)
+
+      cy.log('disable track-changes for everyone again')
+      toggleTrackChanges(false)
     })
   })
 
   describe('editor', () => {
-    beforeEach(() => {
-      login('user@example.com')
-      cy.visit(`/project`)
-      createProject(`project-${uuid()}`, { type: 'Example Project' })
-    })
-
     it('renders jpg', () => {
       cy.findByTestId('file-tree').findByText('frog.jpg').click()
       cy.get('[alt="frog.jpg"]')
@@ -195,39 +215,41 @@ describe('editor', () => {
     })
 
     it('symbol palette', () => {
+      createNewFile()
+
       cy.get('button[aria-label="Toggle Symbol Palette"]').click({
         force: true,
       })
       cy.get('button').contains('𝜉').click()
       cy.get('.cm-content').should('contain.text', '\\xi')
+
+      cy.log('recompile to force flush and avoid "unsaved changes" prompt')
+      recompile()
     })
   })
 
   describe('add new file to project', () => {
-    let projectName: string
-
     beforeEach(() => {
-      projectName = `project-${uuid()}`
-      login('user@example.com')
-      cy.visit(`/project`)
-      createProject(projectName)
       cy.get('button').contains('New file').click({ force: true })
     })
 
     it('can upload file', () => {
+      const name = `${uuid()}.txt`
+      const content = `Test File Content ${name}`
       cy.get('button').contains('Upload').click({ force: true })
       cy.get('input[type=file]')
         .first()
         .selectFile(
           {
-            contents: Cypress.Buffer.from('Test File Content'),
-            fileName: 'file.txt',
+            contents: Cypress.Buffer.from(content),
+            fileName: name,
             lastModified: Date.now(),
           },
           { force: true }
         )
-      cy.findByTestId('file-tree').findByText('file.txt').click({ force: true })
-      cy.findByText('Test File Content')
+      // force: The file-tree pane is too narrow to display the full name.
+      cy.findByTestId('file-tree').findByText(name).click({ force: true })
+      cy.findByText(content)
     })
 
     it('should not display import from URL', () => {
@@ -236,13 +258,7 @@ describe('editor', () => {
   })
 
   describe('left menu', () => {
-    let projectName: string
-
     beforeEach(() => {
-      projectName = `project-${uuid()}`
-      login('user@example.com')
-      cy.visit(`/project`)
-      createProject(projectName, { type: 'Example Project' })
       cy.get('button').contains('Menu').click()
     })
 
@@ -288,13 +304,6 @@ describe('editor', () => {
   })
 
   describe('layout selector', () => {
-    let projectId: string
-    beforeEach(() => {
-      login('user@example.com')
-      cy.visit(`/project`)
-      createProject(`project-${uuid()}`, { type: 'Example Project' })
-    })
-
     it('show editor only and switch between editor and pdf', () => {
       cy.get('.pdf-viewer').should('be.visible')
       cy.get('.cm-editor').should('be.visible')

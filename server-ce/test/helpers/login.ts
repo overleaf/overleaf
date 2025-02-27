@@ -68,7 +68,8 @@ export function login(username: string, password = DEFAULT_PASSWORD) {
     {
       cacheAcrossSpecs: true,
       async validate() {
-        cy.request({ url: '/project', followRedirect: false }).then(
+        // Hit a cheap endpoint that is behind AuthenticationController.requireLogin().
+        cy.request({ url: '/user/personal_info', followRedirect: false }).then(
           response => {
             expect(response.status).to.equal(200)
           }

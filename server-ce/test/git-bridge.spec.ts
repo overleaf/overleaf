@@ -22,7 +22,12 @@ describe('git-bridge', function () {
     V1_HISTORY_URL: 'http://sharelatex:3100/api',
   }
 
-  const gitBridgePublicHost = new URL(Cypress.config().baseUrl!).host
+  function gitURL(projectId: string) {
+    const url = new URL(Cypress.config().baseUrl!)
+    url.username = 'git'
+    url.pathname = `/git/${projectId}`
+    return url
+  }
 
   describe('enabled in Server Pro', function () {
     if (isExcludedBySharding('PRO_CUSTOM_1')) return
@@ -85,9 +90,7 @@ describe('git-bridge', function () {
       cy.findByText('Git').click()
       cy.findByTestId('git-bridge-modal').within(() => {
         cy.get('@projectId').then(id => {
-          cy.get('code').contains(
-            `git clone http://git@${gitBridgePublicHost}/git/${id}`
-          )
+          cy.get('code').contains(`git clone ${gitURL(id.toString())}`)
         })
         cy.findByRole('button', {
           name: 'Generate token',
@@ -101,9 +104,7 @@ describe('git-bridge', function () {
       cy.findByText('Git').click()
       cy.findByTestId('git-bridge-modal').within(() => {
         cy.get('@projectId').then(id => {
-          cy.get('code').contains(
-            `git clone http://git@${gitBridgePublicHost}/git/${id}`
-          )
+          cy.get('code').contains(`git clone ${gitURL(id.toString())}`)
         })
         cy.findByText('Generate token').should('not.exist')
         cy.findByText(/generate a new one in Account Settings/)
@@ -192,9 +193,7 @@ describe('git-bridge', function () {
       cy.findByText('Git').click()
       cy.get('@projectId').then(projectId => {
         cy.findByTestId('git-bridge-modal').within(() => {
-          cy.get('code').contains(
-            `git clone http://git@${gitBridgePublicHost}/git/${projectId}`
-          )
+          cy.get('code').contains(`git clone ${gitURL(projectId.toString())}`)
         })
         cy.findByRole('button', {
           name: 'Generate token',
@@ -234,9 +233,11 @@ describe('git-bridge', function () {
               dir,
               fs,
             }
+            const url = gitURL(projectId.toString())
+            url.username = '' // basic auth is specified separately.
             const httpOptions = {
               http,
-              url: `http://sharelatex/git/${projectId}`,
+              url: url.toString(),
               headers: {
                 Authorization: `Basic ${Buffer.from(`git:${token}`).toString('base64')}`,
               },

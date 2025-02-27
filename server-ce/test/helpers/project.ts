@@ -62,6 +62,11 @@ export function openProjectByName(projectName: string) {
   waitForMainDocToLoad()
 }
 
+export function openProjectById(projectId: string) {
+  cy.visit(`/project/${projectId}`)
+  waitForMainDocToLoad()
+}
+
 export function openProjectViaLinkSharingAsAnon(url: string) {
   cy.visit(url)
   waitForMainDocToLoad()
@@ -74,7 +79,7 @@ export function openProjectViaLinkSharingAsUser(
 ) {
   cy.visit(url)
   cy.findByText(projectName) // wait for lazy loading
-  cy.findByText(email)
+  cy.contains(`as ${email}`)
   cy.findByText('OK, join project').click()
   waitForMainDocToLoad()
 }
@@ -147,6 +152,7 @@ export function shareProjectByEmailAndAcceptInviteViaEmail(
 export function enableLinkSharing() {
   let linkSharingReadOnly: string
   let linkSharingReadAndWrite: string
+  const origin = new URL(Cypress.config().baseUrl!).origin
 
   waitForMainDocToLoad()
 
@@ -154,13 +160,13 @@ export function enableLinkSharing() {
   cy.findByText('Turn on link sharing').click()
   cy.findByText('Anyone with this link can view this project')
     .next()
-    .should('contain.text', 'http://sharelatex/')
+    .should('contain.text', origin + '/read')
     .then(el => {
       linkSharingReadOnly = el.text()
     })
   cy.findByText('Anyone with this link can edit this project')
     .next()
-    .should('contain.text', 'http://sharelatex/')
+    .should('contain.text', origin + '/')
     .then(el => {
       linkSharingReadAndWrite = el.text()
     })
@@ -173,4 +179,63 @@ export function enableLinkSharing() {
 export function waitForMainDocToLoad() {
   cy.log('Wait for main doc to load; it will steal the focus after loading')
   cy.get('.cm-content').should('contain.text', 'Introduction')
+}
+
+export function openFile(fileName: string, waitFor: string) {
+  // force: The file-tree pane is too narrow to display the full name.
+  cy.findByTestId('file-tree').findByText(fileName).click({ force: true })
+  cy.findByText(waitFor)
+}
+
+export function createNewFile() {
+  const fileName = `${uuid()}.tex`
+
+  cy.log('create new project file')
+  cy.get('button').contains('New file').click({ force: true })
+  cy.findByRole('dialog').within(() => {
+    cy.get('input').clear()
+    cy.get('input').type(fileName)
+    cy.findByText('Create').click()
+  })
+  // force: The file-tree pane is too narrow to display the full name.
+  cy.findByTestId('file-tree').findByText(fileName).click({ force: true })
+
+  // wait until we've switched to the newly created empty file
+  cy.get('.cm-line').should('have.length', 1)
+
+  return fileName
+}
+
+export function toggleTrackChanges(state: boolean) {
+  cy.findByText('Review').click()
+  cy.get('.rp-tc-state-collapse').then(el => {
+    // TODO: simplify this in the frontend?
+    if (el.hasClass('rp-tc-state-collapse-on')) {
+      // make track-changes switches visible
+      cy.get('.rp-tc-state-collapse').click()
+    }
+  })
+
+  cy.findByText('Everyone')
+    .parent()
+    .within(() => {
+      cy.get('.form-check-input').then(el => {
+        if (el.prop('checked') === state) return
+
+        const id = uuid()
+        const alias = `@${id}`
+        cy.intercept({
+          method: 'POST',
+          url: '**/track_changes',
+          times: 1,
+        }).as(id)
+        if (state) {
+          cy.get('.form-check-input').check()
+        } else {
+          cy.get('.form-check-input').uncheck()
+        }
+        cy.wait(alias)
+      })
+    })
+  cy.findByText('Review').click()
 }
