@@ -157,9 +157,7 @@ export const LayoutProvider: FC = ({ children }) => {
   const [pdfLayout, setPdfLayout] = useScopeValue<IdeLayout>('ui.pdfLayout')
 
   // whether stylesheet on theme is loading
-  const [loadingStyleSheet, setLoadingStyleSheet] = useScopeValue<boolean>(
-    'ui.loadingStyleSheet'
-  )
+  const [loadingStyleSheet, setLoadingStyleSheet] = useState(false)
 
   const changeLayout = useCallback(
     (newLayout: IdeLayout, newView: IdeView = 'editor') => {

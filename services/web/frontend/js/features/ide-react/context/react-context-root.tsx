@@ -73,8 +73,8 @@ export const ReactContextRoot: FC<{ providers?: Record<string, FC> }> = ({
                           <Providers.DetachProvider>
                             <Providers.EditorProvider>
                               <Providers.PermissionsProvider>
-                                <Providers.ProjectSettingsProvider>
-                                  <Providers.LayoutProvider>
+                                <Providers.LayoutProvider>
+                                  <Providers.ProjectSettingsProvider>
                                     <Providers.EditorManagerProvider>
                                       <Providers.LocalCompileProvider>
                                         <Providers.DetachCompileProvider>
@@ -94,8 +94,8 @@ export const ReactContextRoot: FC<{ providers?: Record<string, FC> }> = ({
                                         </Providers.DetachCompileProvider>
                                       </Providers.LocalCompileProvider>
                                     </Providers.EditorManagerProvider>
-                                  </Providers.LayoutProvider>
-                                </Providers.ProjectSettingsProvider>
+                                  </Providers.ProjectSettingsProvider>
+                                </Providers.LayoutProvider>
                               </Providers.PermissionsProvider>
                             </Providers.EditorProvider>
                           </Providers.DetachProvider>

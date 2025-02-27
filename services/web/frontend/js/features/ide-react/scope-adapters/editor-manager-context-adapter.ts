@@ -1,6 +1,20 @@
 import { ReactScopeValueStore } from '@/features/ide-react/scope-value-store/react-scope-value-store'
 import customLocalStorage from '@/infrastructure/local-storage'
 import getMeta from '@/utils/meta'
+import { DocumentContainer } from '@/features/ide-react/editor/document-container'
+
+export type EditorScopeValue = {
+  showSymbolPalette: false
+  toggleSymbolPalette: () => void
+  sharejs_doc: DocumentContainer | null
+  open_doc_id: string | null
+  open_doc_name: string | null
+  opening: boolean
+  trackChanges: boolean
+  wantTrackChanges: boolean
+  showVisual: boolean
+  error_state: boolean
+}
 
 export function populateEditorScope(
   store: ReactScopeValueStore,
@@ -8,7 +22,7 @@ export function populateEditorScope(
 ) {
   store.set('project.name', null)
 
-  store.set('editor', {
+  const editor: Omit<EditorScopeValue, 'showVisual'> = {
     showSymbolPalette: false,
     toggleSymbolPalette: () => {},
     sharejs_doc: null,
@@ -17,10 +31,10 @@ export function populateEditorScope(
     opening: true,
     trackChanges: false,
     wantTrackChanges: false,
-    // No Ace here
-    newSourceEditor: true,
     error_state: false,
-  })
+  }
+  store.set('editor', editor)
+
   store.persisted(
     'editor.showVisual',
     getMeta('ol-usedLatex') === 'never' || showVisualFallbackValue(projectId),

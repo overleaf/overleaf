@@ -126,7 +126,7 @@ function createHighlightTooltip(pos: number, highlight: Highlight) {
     create: () => {
       const dom = document.createElement('div')
       dom.classList.add('ol-cm-highlight-tooltip')
-      dom.style.setProperty('--hue', highlight.hue.toString())
+      dom.style.setProperty('--hue', String(highlight.hue))
       dom.textContent = highlight.label
 
       return { dom }

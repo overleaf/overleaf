@@ -11,5 +11,4 @@ export default function populateLayoutScope(store: ReactScopeValueStore) {
   store.set('ui.leftMenuShown', false)
   store.set('ui.miniReviewPanelVisible', false)
   store.set('ui.pdfLayout', 'sideBySide')
-  store.set('ui.loadingStyleSheet', false)
 }

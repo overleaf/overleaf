@@ -1,8 +1,6 @@
 import { LoadingPane } from '@/features/ide-react/components/editor/loading-pane'
-import {
-  EditorScopeValue,
-  useEditorManagerContext,
-} from '@/features/ide-react/context/editor-manager-context'
+import { useEditorManagerContext } from '@/features/ide-react/context/editor-manager-context'
+import { EditorScopeValue } from '@/features/ide-react/scope-adapters/editor-manager-context-adapter'
 import { useFileTreeOpenContext } from '@/features/ide-react/context/file-tree-open-context'
 import useScopeValue from '@/shared/hooks/use-scope-value'
 import classNames from 'classnames'

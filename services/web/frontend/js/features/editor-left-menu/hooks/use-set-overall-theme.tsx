@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
 import _ from 'lodash'
-import useScopeValue from '../../../shared/hooks/use-scope-value'
 import type { OverallThemeMeta } from '../../../../../types/project-settings'
 import { saveUserSettings } from '../utils/api'
 import { UserSettings } from '../../../../../types/user-settings'
@@ -8,12 +7,12 @@ import { useUserSettingsContext } from '@/shared/context/user-settings-context'
 import getMeta from '@/utils/meta'
 import { isBootstrap5 } from '@/features/utils/bootstrap-5'
 import { isIEEEBranded } from '@/utils/is-ieee-branded'
+import { useLayoutContext } from '@/shared/context/layout-context'
 
 export default function useSetOverallTheme() {
   const [chosenTheme, setChosenTheme] = useState<OverallThemeMeta | null>(null)
-  const [loadingStyleSheet, setLoadingStyleSheet] = useScopeValue<boolean>(
-    'ui.loadingStyleSheet'
-  )
+
+  const { loadingStyleSheet, setLoadingStyleSheet } = useLayoutContext()
 
   const { userSettings, setUserSettings } = useUserSettingsContext()
   const { overallTheme } = userSettings

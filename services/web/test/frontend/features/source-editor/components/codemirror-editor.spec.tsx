@@ -7,6 +7,8 @@ import { docId } from '../helpers/mock-doc'
 import { activeEditorLine } from '../helpers/active-editor-line'
 import { TestContainer } from '../helpers/test-container'
 import customLocalStorage from '@/infrastructure/local-storage'
+import { OnlineUsersContext } from '@/features/ide-react/context/online-users-context'
+import { FC } from 'react'
 
 describe('<CodeMirrorEditor/>', { scrollBehavior: false }, function () {
   beforeEach(function () {
@@ -190,29 +192,42 @@ describe('<CodeMirrorEditor/>', { scrollBehavior: false }, function () {
   it('renders cursor highlights', function () {
     const scope = mockScope()
 
-    scope.onlineUserCursorHighlights = {
-      [docId]: [
-        {
-          label: 'Test User',
-          cursor: { row: 10, column: 5 },
-          hue: 150,
-        },
-        {
-          label: 'Another User',
-          cursor: { row: 7, column: 2 },
-          hue: 50,
-        },
-        {
-          label: 'Starter User',
-          cursor: { row: 0, column: 0 },
-          hue: 0,
-        },
-      ],
+    const value = {
+      onlineUsers: {},
+      onlineUserCursorHighlights: {
+        [docId]: [
+          {
+            label: 'Test User',
+            cursor: { row: 10, column: 5 },
+            hue: 150,
+          },
+          {
+            label: 'Another User',
+            cursor: { row: 7, column: 2 },
+            hue: 50,
+          },
+          {
+            label: 'Starter User',
+            cursor: { row: 0, column: 0 },
+            hue: 0,
+          },
+        ],
+      },
+      onlineUsersArray: [],
+      onlineUsersCount: 3,
+    }
+
+    const OnlineUsersProvider: FC = ({ children }) => {
+      return (
+        <OnlineUsersContext.Provider value={value}>
+          {children}
+        </OnlineUsersContext.Provider>
+      )
     }
 
     cy.mount(
       <TestContainer>
-        <EditorProviders scope={scope}>
+        <EditorProviders scope={scope} providers={{ OnlineUsersProvider }}>
           <CodeMirrorEditor />
         </EditorProviders>
       </TestContainer>

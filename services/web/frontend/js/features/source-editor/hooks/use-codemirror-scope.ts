@@ -60,6 +60,7 @@ import { isBootstrap5 } from '@/features/utils/bootstrap-5'
 import { Permissions } from '@/features/ide-react/types/permissions'
 import { lineHeights } from '@/shared/utils/styles'
 import { useEditorManagerContext } from '@/features/ide-react/context/editor-manager-context'
+import { useOnlineUsersContext } from '@/features/ide-react/context/online-users-context'
 
 function useCodeMirrorScope(view: EditorView) {
   const { fileTreeData } = useFileTreeData()
@@ -94,9 +95,7 @@ function useCodeMirrorScope(view: EditorView) {
     referencesSearchMode,
   } = userSettings
 
-  const [cursorHighlights] = useScopeValue<Record<string, Highlight[]>>(
-    'onlineUserCursorHighlights'
-  )
+  const { onlineUserCursorHighlights } = useOnlineUsersContext()
 
   let [spellCheckLanguage] = useScopeValue<string>('project.spellCheckLanguage')
   // spell check is off when read-only
@@ -558,14 +557,14 @@ function useCodeMirrorScope(view: EditorView) {
   })
 
   useEffect(() => {
-    if (cursorHighlights && currentDocument) {
-      const items = cursorHighlights[currentDocument.doc_id]
+    if (onlineUserCursorHighlights && currentDocument) {
+      const items = onlineUserCursorHighlights[currentDocument.doc_id]
       highlightsRef.current.cursorHighlights = items
       window.setTimeout(() => {
         view.dispatch(setCursorHighlights(items))
       })
     }
-  }, [view, cursorHighlights, currentDocument])
+  }, [view, onlineUserCursorHighlights, currentDocument])
 
   useEventListener(
     'editor:focus',

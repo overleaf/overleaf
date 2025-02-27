@@ -7,10 +7,8 @@ import {
   useMemo,
   useState,
 } from 'react'
-import { ReactScopeValueStore } from '@/features/ide-react/scope-value-store/react-scope-value-store'
 import { useIdeReactContext } from '@/features/ide-react/context/ide-react-context'
 import { useConnectionContext } from '@/features/ide-react/context/connection-context'
-import useScopeValue from '@/shared/hooks/use-scope-value'
 import { CursorPosition } from '@/features/ide-react/types/cursor-position'
 import { omit } from 'lodash'
 import { Doc } from '../../../../../types/doc'
@@ -63,16 +61,9 @@ type OnlineUsersContextValue = {
   onlineUsersCount: number
 }
 
-export function populateOnlineUsersScope(store: ReactScopeValueStore) {
-  store.set('onlineUsers', {})
-  store.set('onlineUserCursorHighlights', {})
-  store.set('onlineUsersArray', [])
-  store.set('onlineUsersCount', 0)
-}
-
-const OnlineUsersContext = createContext<OnlineUsersContextValue | undefined>(
-  undefined
-)
+export const OnlineUsersContext = createContext<
+  OnlineUsersContextValue | undefined
+>(undefined)
 
 export const OnlineUsersProvider: FC = ({ children }) => {
   const { eventEmitter } = useIdeReactContext()
@@ -80,20 +71,12 @@ export const OnlineUsersProvider: FC = ({ children }) => {
   const { currentDocumentId } = useEditorManagerContext()
   const { fileTreeData } = useFileTreeData()
 
-  const [onlineUsers, setOnlineUsers] =
-    useScopeValue<OnlineUsersContextValue['onlineUsers']>('onlineUsers')
-  const [onlineUserCursorHighlights, setOnlineUserCursorHighlights] =
-    useScopeValue<OnlineUsersContextValue['onlineUserCursorHighlights']>(
-      'onlineUserCursorHighlights'
-    )
-  const [onlineUsersArray, setOnlineUsersArray] =
-    useScopeValue<OnlineUsersContextValue['onlineUsersArray']>(
-      'onlineUsersArray'
-    )
-  const [onlineUsersCount, setOnlineUsersCount] =
-    useScopeValue<OnlineUsersContextValue['onlineUsersCount']>(
-      'onlineUsersCount'
-    )
+  const [onlineUsers, setOnlineUsers] = useState<Record<string, OnlineUser>>({})
+  const [onlineUserCursorHighlights, setOnlineUserCursorHighlights] = useState<
+    Record<string, CursorHighlight[]>
+  >({})
+  const [onlineUsersArray, setOnlineUsersArray] = useState<OnlineUser[]>([])
+  const [onlineUsersCount, setOnlineUsersCount] = useState(0)
 
   const [currentPosition, setCurrentPosition] = useState<CursorPosition | null>(
     null

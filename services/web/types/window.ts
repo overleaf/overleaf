@@ -16,9 +16,6 @@ declare global {
       socket: Socket
     }
     MathJax: Record<string, any>
-    crypto: {
-      randomUUID: () => string
-    }
     // For react-google-recaptcha
     recaptchaOptions?: {
       enterprise?: boolean

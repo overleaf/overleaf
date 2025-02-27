@@ -85,20 +85,6 @@ function hasGotoOffset(options: OpenDocOptions): options is GotoOffsetOptions {
   return typeof options.gotoOffset === 'number'
 }
 
-export type EditorScopeValue = {
-  showSymbolPalette: false
-  toggleSymbolPalette: () => void
-  sharejs_doc: DocumentContainer | null
-  open_doc_id: string | null
-  open_doc_name: string | null
-  opening: boolean
-  trackChanges: boolean
-  wantTrackChanges: boolean
-  showVisual: boolean
-  newSourceEditor: boolean
-  error_state: boolean
-}
-
 export const EditorManagerContext = createContext<EditorManager | undefined>(
   undefined
 )

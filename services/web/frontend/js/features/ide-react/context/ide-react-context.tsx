@@ -20,7 +20,6 @@ import { useConnectionContext } from '@/features/ide-react/context/connection-co
 import { getMockIde } from '@/shared/context/mock/mock-ide'
 import { populateEditorScope } from '@/features/ide-react/scope-adapters/editor-manager-context-adapter'
 import { postJSON } from '@/infrastructure/fetch-json'
-import { populateOnlineUsersScope } from '@/features/ide-react/context/online-users-context'
 import { ReactScopeEventEmitter } from '@/features/ide-react/scope-event-emitter/react-scope-event-emitter'
 import getMeta from '@/utils/meta'
 
@@ -74,7 +73,6 @@ export function createReactScopeValueStore(projectId: string) {
   populateLayoutScope(scopeStore)
   populateProjectScope(scopeStore)
   populatePdfScope(scopeStore)
-  populateOnlineUsersScope(scopeStore)
   populateReviewPanelScope(scopeStore)
 
   scopeStore.allowNonExistentPath('hasLintingError')

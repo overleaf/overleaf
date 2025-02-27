@@ -2,10 +2,8 @@ import { Panel, PanelGroup } from 'react-resizable-panels'
 import React, { FC, lazy, Suspense } from 'react'
 import useScopeValue from '@/shared/hooks/use-scope-value'
 import SourceEditor from '@/features/source-editor/components/source-editor'
-import {
-  EditorScopeValue,
-  useEditorManagerContext,
-} from '@/features/ide-react/context/editor-manager-context'
+import { useEditorManagerContext } from '@/features/ide-react/context/editor-manager-context'
+import { EditorScopeValue } from '@/features/ide-react/scope-adapters/editor-manager-context-adapter'
 import classNames from 'classnames'
 import { LoadingPane } from '@/features/ide-react/components/editor/loading-pane'
 import { FullSizeLoadingSpinner } from '@/shared/components/loading-spinner'

@@ -1,5 +1,5 @@
 export type Highlight = {
   cursor: { row: number; column: number }
-  hue: string
+  hue: number
   label: string
 }
