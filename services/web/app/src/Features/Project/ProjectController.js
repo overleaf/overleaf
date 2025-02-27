@@ -647,11 +647,12 @@ const _ProjectController = {
       if (userId && Features.hasFeature('saas')) {
         try {
           // exit early if the user couldnt use ai anyways, since permissions checks are expensive
-          const canEditProject =
+          const canUserWriteOrReviewProjectContent =
             privilegeLevel === PrivilegeLevels.READ_AND_WRITE ||
-            privilegeLevel === PrivilegeLevels.OWNER
+            privilegeLevel === PrivilegeLevels.OWNER ||
+            privilegeLevel === PrivilegeLevels.REVIEW
 
-          if (canEditProject) {
+          if (canUserWriteOrReviewProjectContent) {
             // check permissions for user and project owner, to see if they allow AI on the project
             const permissionsResults = await Modules.promises.hooks.fire(
               'projectAllowsCapability',
