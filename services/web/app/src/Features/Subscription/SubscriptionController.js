@@ -46,8 +46,6 @@ function formatGroupPlansDataForDash() {
 async function userSubscriptionPage(req, res) {
   const user = SessionManager.getSessionUser(req.session)
 
-  await SplitTestHandler.promises.getAssignment(req, res, 'ai-add-on')
-
   await SplitTestHandler.promises.getAssignment(req, res, 'pause-subscription')
 
   const { variant: flexibleLicensingVariant } =
