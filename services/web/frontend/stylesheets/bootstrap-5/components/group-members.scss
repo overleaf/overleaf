@@ -71,6 +71,10 @@
       text-align: right;
     }
 
+    .cell-accepted-invite {
+      width: 17%;
+    }
+
     &.managed-users-active {
       .cell-email {
         width: 30%;
@@ -129,6 +133,10 @@
       width: 19%;
       min-width: 36px;
       text-align: right;
+    }
+
+    .cell-accepted-invite {
+      width: 17%;
     }
 
     &.managed-users-active {

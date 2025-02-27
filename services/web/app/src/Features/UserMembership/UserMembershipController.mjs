@@ -120,6 +120,8 @@ async function _renderManagersPage(req, res, next, template) {
     entityConfig
   )
 
+  await SplitTestHandler.promises.getAssignment(req, res, 'bootstrap-5-groups')
+
   res.render(template, {
     name: entityName,
     users,

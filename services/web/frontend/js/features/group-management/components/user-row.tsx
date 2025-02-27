@@ -1,8 +1,11 @@
 import moment from 'moment'
 import { useCallback } from 'react'
-import { Col, Row } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
 import { User } from '../../../../../types/group-management/user'
+import OLFormCheckbox from '@/features/ui/components/ol/ol-form-checkbox'
+import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
+import Icon from '@/shared/components/icon'
+import MaterialIcon from '@/shared/components/material-icon'
 
 type GroupMemberRowProps = {
   user: User
@@ -31,52 +34,75 @@ export default function UserRow({
   )
 
   return (
-    <li key={`user-${user.email}`}>
-      <Row>
-        <Col xs={4}>
-          <label htmlFor={`select-user-${user.email}`} className="sr-only">
-            {t('select_user')}
-          </label>
-          <input
-            className="select-item"
-            id={`select-user-${user.email}`}
-            type="checkbox"
-            autoComplete="off"
-            checked={selected}
-            onChange={e => handleSelectUser(e, user)}
+    <tr key={`user-${user.email}`} className="managed-user-row">
+      <td className="cell-checkbox">
+        <BootstrapVersionSwitcher
+          bs3={
+            <input
+              className="select-item"
+              type="checkbox"
+              autoComplete="off"
+              checked={selected}
+              onChange={e => handleSelectUser(e, user)}
+              aria-label={t('select_user')}
+              data-testid="select-single-checkbox"
+            />
+          }
+          bs5={
+            <OLFormCheckbox
+              autoComplete="off"
+              checked={selected}
+              onChange={e => handleSelectUser(e, user)}
+              aria-label={t('select_user')}
+              data-testid="select-single-checkbox"
+            />
+          }
+        />
+      </td>
+      <td>{user.email}</td>
+      <td className="cell-name">
+        {user.first_name} {user.last_name}
+      </td>
+      <td className="cell-last-active">
+        {user.last_active_at
+          ? moment(user.last_active_at).format('Do MMM YYYY')
+          : 'N/A'}
+      </td>
+      <td className="cell-accepted-invite">
+        {user.invite ? (
+          <BootstrapVersionSwitcher
+            bs3={
+              <Icon
+                type="times"
+                accessibilityLabel={t('invite_not_accepted')}
+              />
+            }
+            bs5={
+              <MaterialIcon
+                type="clear"
+                accessibilityLabel={t('invite_not_accepted')}
+              />
+            }
           />
-          <span>{user.email}</span>
-        </Col>
-        <Col xs={4}>
-          {user.first_name} {user.last_name}
-        </Col>
-        <Col xs={2}>
-          {user.last_active_at
-            ? moment(user.last_active_at).format('Do MMM YYYY')
-            : 'N/A'}
-        </Col>
-        <Col xs={2}>
-          {user.invite ? (
-            <>
-              <i
-                className="fa fa-times"
-                aria-hidden="true"
-                aria-label={t('invite_not_accepted')}
+        ) : (
+          <BootstrapVersionSwitcher
+            bs3={
+              <Icon
+                type="check"
+                className="text-success"
+                accessibilityLabel={t('accepted_invite')}
               />
-              <span className="sr-only">{t('invite_not_accepted')}</span>
-            </>
-          ) : (
-            <>
-              <i
-                className="fa fa-check text-success"
-                aria-hidden="true"
-                aria-label={t('accepted_invite')}
+            }
+            bs5={
+              <MaterialIcon
+                type="check"
+                className="text-success"
+                accessibilityLabel={t('accepted_invite')}
               />
-              <span className="sr-only">{t('accepted_invite')}</span>
-            </>
-          )}
-        </Col>
-      </Row>
-    </li>
+            }
+          />
+        )}
+      </td>
+    </tr>
   )
 }
