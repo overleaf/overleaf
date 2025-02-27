@@ -30,27 +30,29 @@ export default function SelectAllCheckbox() {
   }
 
   return (
-    <BootstrapVersionSwitcher
-      bs3={
-        <input
-          className="select-all"
-          type="checkbox"
-          autoComplete="off"
-          onChange={handleSelectAllNonManagedClick}
-          checked={selectedUsers.length === nonManagedUsers.length}
-          aria-label={t('select_all')}
-          data-testid="select-all-checkbox"
-        />
-      }
-      bs5={
-        <OLFormCheckbox
-          autoComplete="off"
-          onChange={handleSelectAllNonManagedClick}
-          checked={selectedUsers.length === nonManagedUsers.length}
-          aria-label={t('select_all')}
-          data-testid="select-all-checkbox"
-        />
-      }
-    />
+    <th className="cell-checkbox">
+      <BootstrapVersionSwitcher
+        bs3={
+          <input
+            className="select-all"
+            type="checkbox"
+            autoComplete="off"
+            onChange={handleSelectAllNonManagedClick}
+            checked={selectedUsers.length === nonManagedUsers.length}
+            aria-label={t('select_all')}
+            data-testid="select-all-checkbox"
+          />
+        }
+        bs5={
+          <OLFormCheckbox
+            autoComplete="off"
+            onChange={handleSelectAllNonManagedClick}
+            checked={selectedUsers.length === nonManagedUsers.length}
+            aria-label={t('select_all')}
+            data-testid="select-all-checkbox"
+          />
+        }
+      />
+    </th>
   )
 }

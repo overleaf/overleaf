@@ -54,9 +54,7 @@ export default function MembersList({ groupId }: ManagedUsersListProps) {
       >
         <thead>
           <tr>
-            <th className="cell-checkbox">
-              <SelectAllCheckbox />
-            </th>
+            <SelectAllCheckbox />
             <th className="cell-email">{t('email')}</th>
             <th className="cell-name">{t('name')}</th>
             <th className="cell-last-active">
