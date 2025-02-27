@@ -220,26 +220,6 @@ export async function verifyProject(historyId, endTimestamp) {
 
 export class BackupCorruptedError extends OError {}
 export class BackupRPOViolationError extends OError {}
-
-const HEALTH_CHECK_PROJECTS = JSON.parse(config.get('healthCheckProjects'))
-export async function healthCheck() {
-  if (!Array.isArray(HEALTH_CHECK_PROJECTS)) {
-    throw new Error('expected healthCheckProjects to be an array')
-  }
-  if (HEALTH_CHECK_PROJECTS.length !== 2) {
-    throw new Error('expected 2 healthCheckProjects')
-  }
-  if (!HEALTH_CHECK_PROJECTS.some(id => id.length === 24)) {
-    throw new Error('expected mongo id in healthCheckProjects')
-  }
-  if (!HEALTH_CHECK_PROJECTS.some(id => id.length < 24)) {
-    throw new Error('expected postgres id in healthCheckProjects')
-  }
-
-  for (const historyId of HEALTH_CHECK_PROJECTS) {
-    await verifyProjectWithErrorContext(historyId)
-  }
-}
 export class BackupCorruptedMissingBlobError extends BackupCorruptedError {}
 export class BackupCorruptedInvalidBlobError extends BackupCorruptedError {}
 export class BackupRPOViolationChunkNotBackedUpError extends OError {}
