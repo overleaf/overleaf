@@ -20,7 +20,7 @@
     "@types/check-types": "^7.3.7",
     "@types/path-browserify": "^1.0.2",
     "chai": "^3.3.0",
-    "mocha": "^10.2.0",
+    "mocha": "^11.1.0",
     "sinon": "^9.2.4",
     "typescript": "^5.0.4"
   },

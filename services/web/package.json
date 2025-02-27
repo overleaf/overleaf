@@ -322,7 +322,7 @@
     "mensch": "^0.3.4",
     "micromark": "^4.0.0",
     "mini-css-extract-plugin": "^2.7.6",
-    "mocha": "^10.2.0",
+    "mocha": "^11.1.0",
     "mocha-each": "^2.0.1",
     "mock-fs": "^5.1.2",
     "nock": "^13.5.6",
