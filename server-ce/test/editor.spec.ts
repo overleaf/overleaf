@@ -40,45 +40,56 @@ describe('editor', () => {
     })
   })
 
-  it('word dictionary and spelling', () => {
-    createNewFile()
-    const word = createRandomLetterString()
+  describe('spelling', function () {
+    function changeSpellCheckLanguageTo(lng: string) {
+      cy.log(`change project language to '${lng}'`)
+      cy.get('button').contains('Menu').click()
+      cy.get('select[id=settings-menu-spellCheckLanguage]').select(lng)
+      cy.get('[id="left-menu"]').type('{esc}') // close left menu
+    }
 
-    cy.log('edit project file')
-    cy.get('.cm-line').type(word)
-
-    cy.get('.ol-cm-spelling-error').should('exist')
-
-    cy.log('change project language')
-    cy.get('button').contains('Menu').click()
-    cy.get('select[id=settings-menu-spellCheckLanguage]').select('Spanish')
-    cy.get('[id="left-menu"]').type('{esc}') // close left menu
-
-    cy.log('add word to dictionary')
-    cy.get('.ol-cm-spelling-error').contains(word).rightclick()
-    cy.findByText('Add to Dictionary').click()
-    cy.get('.ol-cm-spelling-error').should('not.exist')
-
-    cy.log('remove word from dictionary')
-    cy.get('button').contains('Menu').click()
-    cy.get('button').contains('Edit').click()
-    cy.get('[id="dictionary-modal"]').within(() => {
-      cy.findByText(word)
-        .parent()
-        .within(() => cy.get('button').click())
-
-      // the modal has 2 close buttons, this ensures the one with the visible label is
-      // clicked, otherwise it would need `force: true`
-      cy.get('.btn').contains('Close').click()
+    afterEach(function () {
+      changeSpellCheckLanguageTo('Off')
     })
 
-    cy.log('close left panel')
-    cy.get('[id="left-menu"]').type('{esc}')
+    it('word dictionary and spelling', () => {
+      changeSpellCheckLanguageTo('English (American)')
+      createNewFile()
+      const word = createRandomLetterString()
 
-    cy.log('rewrite word to force spelling error')
-    cy.get('.cm-line').type('{selectAll}{del}' + word + '{enter}')
+      cy.log('edit project file')
+      cy.get('.cm-line').type(word)
 
-    cy.get('.ol-cm-spelling-error').should('contain.text', word)
+      cy.get('.ol-cm-spelling-error').should('exist')
+
+      changeSpellCheckLanguageTo('Spanish')
+
+      cy.log('add word to dictionary')
+      cy.get('.ol-cm-spelling-error').contains(word).rightclick()
+      cy.findByText('Add to Dictionary').click()
+      cy.get('.ol-cm-spelling-error').should('not.exist')
+
+      cy.log('remove word from dictionary')
+      cy.get('button').contains('Menu').click()
+      cy.get('button').contains('Edit').click()
+      cy.get('[id="dictionary-modal"]').within(() => {
+        cy.findByText(word)
+          .parent()
+          .within(() => cy.get('button').click())
+
+        // the modal has 2 close buttons, this ensures the one with the visible label is
+        // clicked, otherwise it would need `force: true`
+        cy.get('.btn').contains('Close').click()
+      })
+
+      cy.log('close left panel')
+      cy.get('[id="left-menu"]').type('{esc}')
+
+      cy.log('rewrite word to force spelling error')
+      cy.get('.cm-line').type('{selectAll}{del}' + word + '{enter}')
+
+      cy.get('.ol-cm-spelling-error').should('contain.text', word)
+    })
   })
 
   describe('collaboration', () => {
@@ -105,7 +116,7 @@ describe('editor', () => {
 
       const fileName = createNewFile()
       const oldContent = 'oldContent'
-      cy.get('.cm-line').type(`static\n${oldContent}`)
+      cy.get('.cm-line').type(`${oldContent}\n\nstatic`)
 
       cy.log('recompile to force flush')
       recompile()
@@ -143,6 +154,9 @@ describe('editor', () => {
       cy.findByText('Reject').click({ force: true })
       cy.findByText('Review').click()
 
+      cy.log('recompile to force flush')
+      recompile()
+
       cy.log('verify the changes are applied')
       cy.get('.cm-content').should('contain.text', oldContent)
 
@@ -156,7 +170,7 @@ describe('editor', () => {
 
       const fileName = createNewFile()
       const oldContent = 'oldContent'
-      cy.get('.cm-line').type(`static\n\\section{{}${oldContent}}`)
+      cy.get('.cm-line').type(`\\section{{}${oldContent}}\n\nstatic`)
 
       cy.log('recompile to force flush')
       recompile()
@@ -168,15 +182,15 @@ describe('editor', () => {
       waitForCompileRateLimitCoolOff(() => {
         openProjectById(projectId)
       })
-      openFile(fileName, 'static')
-
       cy.log('enable visual editor and make changes in main file')
       cy.findByText('Visual Editor').click()
+
+      openFile(fileName, 'static')
 
       // cy.type() "clicks" in the center of the selected element before typing. This "click" discards the text as selected by the dblclick.
       // Go down to the lower level event based typing, the frontend tests in web use similar events.
       cy.get('.cm-editor').as('editor')
-      cy.get('@editor').contains(oldContent).dblclick()
+      cy.get('@editor').findByText(oldContent).dblclick()
       cy.get('@editor').trigger('keydown', { key: 'Delete' })
       cy.get('@editor').trigger('keydown', { key: 'Enter' })
       cy.get('@editor').trigger('keydown', { key: 'Enter' })
@@ -195,6 +209,9 @@ describe('editor', () => {
       cy.get('.cm-content').should('not.contain.text', oldContent)
       cy.findAllByText('Reject').first().click({ force: true })
       cy.findByText('Review').click()
+
+      cy.log('recompile to force flush')
+      recompile()
 
       cy.log('verify the changes are applied in the visual editor')
       cy.findByText('Visual Editor').click()

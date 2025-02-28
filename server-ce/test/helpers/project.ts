@@ -184,6 +184,9 @@ export function waitForMainDocToLoad() {
 export function openFile(fileName: string, waitFor: string) {
   // force: The file-tree pane is too narrow to display the full name.
   cy.findByTestId('file-tree').findByText(fileName).click({ force: true })
+
+  // wait until we've switched to the selected file
+  cy.findByText('Loading…').should('not.exist')
   cy.findByText(waitFor)
 }
 
@@ -201,6 +204,7 @@ export function createNewFile() {
   cy.findByTestId('file-tree').findByText(fileName).click({ force: true })
 
   // wait until we've switched to the newly created empty file
+  cy.findByText('Loading…').should('not.exist')
   cy.get('.cm-line').should('have.length', 1)
 
   return fileName
