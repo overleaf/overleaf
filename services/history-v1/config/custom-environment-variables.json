@@ -85,9 +85,9 @@
   "httpRequestTimeout": "HTTP_REQUEST_TIMEOUT",
   "redis": {
     "queue": {
-      "host": "REDIS_HOST",
-      "password": "REDIS_PASSWORD",
-      "port": "REDIS_PORT"
+      "host": "QUEUES_REDIS_HOST",
+      "password": "QUEUES_REDIS_PASSWORD",
+      "port": "QUEUES_REDIS_PORT"
     }
   }
 }
