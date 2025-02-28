@@ -28,6 +28,7 @@ export const ReviewPanelResolvedThread: FC<{
   const canDelete =
     permissions.resolveAllComments ||
     (permissions.resolveOwnComments && isCommentAuthor)
+  const canReopen = permissions.comment
 
   const handleReopenThread = useCallback(async () => {
     setProcessing(true)
@@ -80,15 +81,21 @@ export const ReviewPanelResolvedThread: FC<{
           />
         </div>
         <div className="review-panel-resolved-comment-buttons">
-          <OLTooltip
-            id="reopen-thread"
-            overlayProps={{ placement: 'bottom' }}
-            description={t('reopen')}
-          >
-            <button type="button" className="btn" onClick={handleReopenThread}>
-              <MaterialIcon type="refresh" accessibilityLabel={t('reopen')} />
-            </button>
-          </OLTooltip>
+          {canReopen && (
+            <OLTooltip
+              id="reopen-thread"
+              overlayProps={{ placement: 'bottom' }}
+              description={t('reopen')}
+            >
+              <button
+                type="button"
+                className="btn"
+                onClick={handleReopenThread}
+              >
+                <MaterialIcon type="refresh" accessibilityLabel={t('reopen')} />
+              </button>
+            </OLTooltip>
+          )}
           {canDelete && (
             <OLTooltip
               id="delete-thread"
