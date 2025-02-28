@@ -90,6 +90,7 @@ public class ConfigTest {
             + "  \"bindIp\": \"127.0.0.1\",\n"
             + "  \"idleTimeout\": 30000,\n"
             + "  \"rootGitDirectory\": \"/var/wlgb/git\",\n"
+            + "  \"allowedCorsOrigins\": [],\n"
             + "  \"apiBaseURL\": \"http://127.0.0.1:60000/api/v0/\",\n"
             + "  \"postbackURL\": \"http://127.0.0.1/\",\n"
             + "  \"serviceName\": \"Overleaf\",\n"

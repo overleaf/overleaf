@@ -3,6 +3,7 @@
     "bindIp": "127.0.0.1",
     "idleTimeout": 30000,
     "rootGitDirectory": "/tmp/wlgb",
+    "allowedCorsOrigins": "https://localhost",
     "apiBaseUrl": "https://localhost/api/v0",
     "postbackBaseUrl": "https://localhost",
     "serviceName": "Overleaf",

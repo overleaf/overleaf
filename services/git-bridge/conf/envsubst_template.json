@@ -3,6 +3,7 @@
   "bindIp": "${GIT_BRIDGE_BIND_IP:-0.0.0.0}",
   "idleTimeout": ${GIT_BRIDGE_IDLE_TIMEOUT:-30000},
   "rootGitDirectory": "${GIT_BRIDGE_ROOT_DIR:-/tmp/wlgb}",
+  "allowedCorsOrigins": "${GIT_BRIDGE_ALLOWED_CORS_ORIGINS:-https://localhost}",
   "apiBaseUrl": "${GIT_BRIDGE_API_BASE_URL:-https://localhost/api/v0}",
   "postbackBaseUrl": "${GIT_BRIDGE_POSTBACK_BASE_URL:-https://localhost}",
   "serviceName": "${GIT_BRIDGE_SERVICE_NAME:-Overleaf}",

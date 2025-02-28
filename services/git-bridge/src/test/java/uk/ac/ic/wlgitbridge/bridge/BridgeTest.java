@@ -50,7 +50,7 @@ public class BridgeTest {
     gcJob = mock(GcJob.class);
     bridge =
         new Bridge(
-            new Config(0, "", 0, "", "", "", "", null, false, null, null, null, 0),
+            new Config(0, "", 0, "", null, "", "", "", null, false, null, null, null, 0),
             lock,
             repoStore,
             dbStore,

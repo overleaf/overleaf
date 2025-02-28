@@ -110,6 +110,7 @@ public class GitBridgeServer {
     this.jettyServer.addConnector(connector);
 
     HandlerCollection handlers = new HandlerList();
+    handlers.addHandler(new CORSHandler(config.getAllowedCorsOrigins()));
     handlers.addHandler(initApiHandler());
     handlers.addHandler(initBaseHandler());
     handlers.addHandler(initGitHandler(config, repoStore, snapshotApi));

@@ -465,8 +465,12 @@ public class WLGitBridgeIntegrationTest {
 
   @After
   public void tearDown() {
-    server.stop();
-    wlgb.stop();
+    if (server != null) {
+      server.stop();
+    }
+    if (wlgb != null) {
+      wlgb.stop();
+    }
   }
 
   private void gitConfig(File dir) throws IOException, InterruptedException {
@@ -1391,6 +1395,80 @@ public class WLGitBridgeIntegrationTest {
     assertTrue(f.exists());
   }
 
+  @Test
+  public void noCors() throws IOException, ExecutionException, InterruptedException {
+
+    int gitBridgePort = 33893;
+    int mockServerPort = 3893;
+
+    server = new MockSnapshotServer(mockServerPort, getResource("/canServePushedFiles").toFile());
+    server.start();
+    server.setState(states.get("canServePushedFiles").get("state"));
+
+    wlgb = new GitBridgeApp(new String[] {makeConfigFile(gitBridgePort, mockServerPort)});
+    wlgb.run();
+
+    String url = "http://127.0.0.1:" + gitBridgePort + "/status";
+    Response response = asyncHttpClient().prepareGet(url).execute().get();
+    assertEquals(200, response.getStatusCode());
+    assertEquals("ok\n", response.getResponseBody());
+    assertNull(response.getHeader("Access-Control-Allow-Origin"));
+  }
+
+  @Test
+  public void cors() throws IOException, ExecutionException, InterruptedException {
+
+    int gitBridgePort = 33894;
+    int mockServerPort = 3894;
+
+    server = new MockSnapshotServer(mockServerPort, getResource("/canServePushedFiles").toFile());
+    server.start();
+    server.setState(states.get("canServePushedFiles").get("state"));
+
+    wlgb = new GitBridgeApp(new String[] {makeConfigFile(gitBridgePort, mockServerPort)});
+    wlgb.run();
+
+    String url = "http://127.0.0.1:" + gitBridgePort + "/status";
+
+    // Success
+    Response response =
+        asyncHttpClient()
+            .prepareOptions(url)
+            .setHeader("Origin", "https://localhost")
+            .execute()
+            .get();
+    assertEquals(200, response.getStatusCode());
+    assertEquals("", response.getResponseBody());
+    assertEquals("https://localhost", response.getHeader("Access-Control-Allow-Origin"));
+
+    response =
+        asyncHttpClient().prepareGet(url).setHeader("Origin", "https://localhost").execute().get();
+    assertEquals(200, response.getStatusCode());
+    assertEquals("ok\n", response.getResponseBody());
+    assertEquals("https://localhost", response.getHeader("Access-Control-Allow-Origin"));
+
+    // Deny
+    response =
+        asyncHttpClient()
+            .prepareOptions(url)
+            .setHeader("Origin", "https://not-localhost")
+            .execute()
+            .get();
+    assertEquals(403, response.getStatusCode());
+    assertEquals("", response.getResponseBody());
+    assertNull(response.getHeader("Access-Control-Allow-Origin"));
+
+    response =
+        asyncHttpClient()
+            .prepareGet(url)
+            .setHeader("Origin", "https://not-localhost")
+            .execute()
+            .get();
+    assertEquals(200, response.getStatusCode());
+    assertEquals("ok\n", response.getResponseBody());
+    assertNull(response.getHeader("Access-Control-Allow-Origin"));
+  }
+
   private String makeConfigFile(int port, int apiPort) throws IOException {
     return makeConfigFile(port, apiPort, null);
   }
@@ -1409,6 +1487,7 @@ public class WLGitBridgeIntegrationTest {
             + "    \"rootGitDirectory\": \""
             + wlgb.getAbsolutePath()
             + "\",\n"
+            + "    \"allowedCorsOrigins\": \"https://localhost\",\n"
             + "    \"apiBaseUrl\": \"http://127.0.0.1:"
             + apiPort
             + "/api/v0\",\n"

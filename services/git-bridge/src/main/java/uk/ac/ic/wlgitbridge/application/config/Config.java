@@ -26,6 +26,7 @@ public class Config implements JSONSource {
         config.bindIp,
         config.idleTimeout,
         config.rootGitDirectory,
+        config.allowedCorsOrigins,
         config.apiBaseURL,
         config.postbackURL,
         config.serviceName,
@@ -41,6 +42,7 @@ public class Config implements JSONSource {
   private String bindIp;
   private int idleTimeout;
   private String rootGitDirectory;
+  private String[] allowedCorsOrigins;
   private String apiBaseURL;
   private String postbackURL;
   private String serviceName;
@@ -64,6 +66,7 @@ public class Config implements JSONSource {
       String bindIp,
       int idleTimeout,
       String rootGitDirectory,
+      String[] allowedCorsOrigins,
       String apiBaseURL,
       String postbackURL,
       String serviceName,
@@ -77,6 +80,7 @@ public class Config implements JSONSource {
     this.bindIp = bindIp;
     this.idleTimeout = idleTimeout;
     this.rootGitDirectory = rootGitDirectory;
+    this.allowedCorsOrigins = allowedCorsOrigins;
     this.apiBaseURL = apiBaseURL;
     this.postbackURL = postbackURL;
     this.serviceName = serviceName;
@@ -101,6 +105,13 @@ public class Config implements JSONSource {
     }
     this.apiBaseURL = apiBaseURL;
     serviceName = getElement(configObject, "serviceName").getAsString();
+    final String rawAllowedCorsOrigins =
+        getOptionalString(configObject, "allowedCorsOrigins").trim();
+    if (rawAllowedCorsOrigins.isEmpty()) {
+      allowedCorsOrigins = new String[] {};
+    } else {
+      allowedCorsOrigins = rawAllowedCorsOrigins.split(",");
+    }
     postbackURL = getElement(configObject, "postbackBaseUrl").getAsString();
     if (!postbackURL.endsWith("/")) {
       postbackURL += "/";
@@ -137,6 +148,10 @@ public class Config implements JSONSource {
 
   public int getSqliteHeapLimitBytes() {
     return this.sqliteHeapLimitBytes;
+  }
+
+  public String[] getAllowedCorsOrigins() {
+    return allowedCorsOrigins;
   }
 
   public String getAPIBaseURL() {
