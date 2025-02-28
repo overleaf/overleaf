@@ -43,6 +43,15 @@ import { text } from 'node:stream/consumers'
 import { fromStream as blobHashFromStream } from '../lib/blob_hash.js'
 import { NotFoundError } from '@overleaf/object-persistor/src/Errors.js'
 
+// Create a singleton promise that loads global blobs once
+let globalBlobsPromise = null
+function ensureGlobalBlobsLoaded() {
+  if (!globalBlobsPromise) {
+    globalBlobsPromise = loadGlobalBlobs()
+  }
+  return globalBlobsPromise
+}
+
 EventEmitter.defaultMaxListeners = 20
 
 logger.initialize('history-v1-backup')
@@ -497,6 +506,7 @@ function makeChunkKey(projectId, startVersion) {
 }
 
 export async function backupProject(projectId, options) {
+  await ensureGlobalBlobsLoaded()
   // FIXME: flush the project first!
   // Let's assume the the flush happens externally and triggers this backup
   const backupStartTime = new Date()
@@ -641,6 +651,7 @@ function convertToISODate(dateStr) {
 }
 
 export async function initializeProjects(options) {
+  await ensureGlobalBlobsLoaded()
   const limiter = pLimit(BATCH_CONCURRENCY)
 
   async function processBatch(batch) {
@@ -920,7 +931,7 @@ async function compareAllProjects(options) {
 
 async function main() {
   const options = handleOptions()
-  await loadGlobalBlobs()
+  await ensureGlobalBlobsLoaded()
   const projectId = options.projectId
 
   if (options.status) {
