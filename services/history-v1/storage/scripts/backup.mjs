@@ -164,7 +164,7 @@ async function backupSingleBlob(projectId, historyId, blob, tmpDir, persistor) {
     )
     return
   }
-  logger.info({ blob, historyId }, 'backing up blob')
+  logger.debug({ blob, historyId }, 'backing up blob')
   const blobPath = await downloadWithRetry(historyId, blob, tmpDir)
   await backupWithRetry(historyId, blob, blobPath, persistor)
 }
@@ -208,7 +208,7 @@ async function backupChunk(
     return
   }
   const key = makeChunkKey(historyId, chunkToBackup.startVersion)
-  logger.info({ chunkRecord, historyId, projectId, key }, 'backing up chunk')
+  logger.debug({ chunkRecord, historyId, projectId, key }, 'backing up chunk')
   const md5 = Crypto.createHash('md5').update(chunkBuffer)
   await chunkBackupPersistorForProject.sendStream(
     chunksBucket,
@@ -238,7 +238,7 @@ async function updateBackupStatus(
     )
     return
   }
-  logger.info(
+  logger.debug(
     { projectId, chunkRecord, startOfBackupTime },
     'setting backupVersion and lastBackedUpTimestamp'
   )
@@ -522,7 +522,7 @@ export async function backupProject(projectId, options) {
   } = await analyseBackupStatus(projectId)
 
   if (upToDate) {
-    logger.info(
+    logger.debug(
       {
         projectId,
         historyId,
@@ -558,7 +558,7 @@ export async function backupProject(projectId, options) {
     return
   }
 
-  logger.info(
+  logger.debug(
     {
       projectId,
       historyId,
