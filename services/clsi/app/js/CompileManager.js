@@ -313,24 +313,16 @@ async function _saveOutputFiles({
   )
   const outputDir = getOutputDir(request.project_id, request.user_id)
 
-  let { outputFiles, allEntries } =
+  const { outputFiles: rawOutputFiles, allEntries } =
     await OutputFileFinder.promises.findOutputFiles(resourceList, compileDir)
 
-  let buildId
-
-  try {
-    const saveResult = await OutputCacheManager.promises.saveOutputFiles(
+  const { buildId, outputFiles } =
+    await OutputCacheManager.promises.saveOutputFiles(
       { request, stats, timings },
-      outputFiles,
+      rawOutputFiles,
       compileDir,
       outputDir
     )
-    buildId = saveResult.buildId
-    outputFiles = saveResult.outputFiles
-  } catch (err) {
-    const { project_id: projectId, user_id: userId } = request
-    logger.err({ projectId, userId, err }, 'failed to save output files')
-  }
 
   timings.output = timer.done()
   return { outputFiles, allEntries, buildId }

@@ -245,7 +245,7 @@ module.exports = OutputCacheManager = {
           { err, directory: cacheDir },
           'error creating cache directory'
         )
-        callback(err, outputFiles)
+        callback(err)
       } else {
         // copy all the output files into the new cache directory
         const results = []
@@ -263,7 +263,6 @@ module.exports = OutputCacheManager = {
               return cb()
             }
             // copy other files into cache directory if valid
-            const newFile = _.clone(file)
             const src = Path.join(compileDir, file.path)
             const dst = Path.join(cacheDir, file.path)
             OutputCacheManager._checkIfShouldCopy(
@@ -279,8 +278,8 @@ module.exports = OutputCacheManager = {
                   if (err) {
                     return cb(err)
                   }
-                  newFile.build = buildId // attach a build id if we cached the file
-                  results.push(newFile)
+                  file.build = buildId
+                  results.push(file)
                   cb()
                 })
               }
@@ -288,8 +287,7 @@ module.exports = OutputCacheManager = {
           },
           function (err) {
             if (err) {
-              // pass back the original files if we encountered *any* error
-              callback(err, outputFiles)
+              callback(err)
               // clean up the directory we just created
               fs.rm(cacheDir, { force: true, recursive: true }, function (err) {
                 if (err) {
@@ -301,7 +299,7 @@ module.exports = OutputCacheManager = {
               })
             } else {
               // pass back the list of new files in the cache
-              callback(err, results)
+              callback(null, results)
               // let file expiry run in the background, expire all previous files if per-user
               cleanupDirectory(outputDir, {
                 keep: buildId,

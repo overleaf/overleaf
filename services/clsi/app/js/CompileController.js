@@ -117,8 +117,7 @@ function compile(req, res, next) {
                 url:
                   `${Settings.apis.clsi.url}/project/${request.project_id}` +
                   (request.user_id != null ? `/user/${request.user_id}` : '') +
-                  (file.build != null ? `/build/${file.build}` : '') +
-                  `/output/${file.path}`,
+                  `/build/${file.build}/output/${file.path}`,
                 ...file,
               })),
             },

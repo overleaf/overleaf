@@ -58,8 +58,22 @@ Hello world
       )
     })
 
-    return it('should return a failure status', function () {
+    it('should return a failure status', function () {
       return this.body.compile.status.should.equal('failure')
+    })
+
+    it('should return output files', function () {
+      // NOTE: No output.pdf file.
+      this.body.compile.outputFiles
+        .map(f => f.path)
+        .should.deep.equal([
+          'output.aux',
+          'output.fdb_latexmk',
+          'output.fls',
+          'output.log',
+          'output.stderr',
+          'output.stdout',
+        ])
     })
   })
 
@@ -80,8 +94,23 @@ Hello world
       })
     })
 
-    return it('should return a failure status', function () {
+    it('should return a failure status', function () {
       return this.body.compile.status.should.equal('failure')
+    })
+
+    it('should return output files', function () {
+      // NOTE: No output.pdf file.
+      this.body.compile.outputFiles
+        .map(f => f.path)
+        .should.deep.equal([
+          'output.aux',
+          'output.fdb_latexmk',
+          'output.fls',
+          'output.log',
+          'output.pdfxref',
+          'output.stderr',
+          'output.stdout',
+        ])
     })
   })
 })
