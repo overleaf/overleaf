@@ -53,6 +53,7 @@ import { DefaultNavbarMetadata } from '@/features/ui/components/types/default-na
 import { FooterMetadata } from '@/features/ui/components/types/footer-metadata'
 export interface Meta {
   'ol-ExposedSettings': ExposedSettings
+  'ol-addonPrices': Record<string, { annual: string; monthly: string }>
   'ol-allInReconfirmNotificationPeriods': UserEmailData[]
   'ol-allowedExperiments': string[]
   'ol-allowedImageNames': AllowedImageName[]

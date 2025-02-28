@@ -45,7 +45,10 @@ meta(name="ol-isPaywallChangeCompileTimeoutEnabled" data-type="boolean" content=
 if(isPaywallChangeCompileTimeoutEnabled)
 	//- expose plans info to show prices in paywall-change-compile-timeout test 
 	meta(name="ol-paywallPlans", data-type="json" content=paywallPlans)
-
+if(isOverleafAssistBundleEnabled)
+	//- expose plans info to show prices in paywall-change-compile-timeout test 
+	meta(name="ol-addonPrices", data-type="json" content=addonPrices)
+	meta(name="ol-planCode", data-type="string" content=planCode)
 // translations for the loading page, before i18n has loaded in the client
 meta(name="ol-loadingText", data-type="string" content=translate("loading"))
 meta(name="ol-translationIoNotLoaded", data-type="string" content=translate("could_not_connect_to_websocket_server"))
