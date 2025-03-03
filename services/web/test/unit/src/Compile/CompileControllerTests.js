@@ -794,7 +794,13 @@ describe('CompileController', function () {
           project_id: this.projectId,
         },
       }
-      this.CompileManager.compile.callsArgWith(3)
+      this.downloadPath = `/project/${this.projectId}/build/123/output/output.pdf`
+      this.CompileManager.compile.callsArgWith(3, null, 'success', [
+        {
+          path: 'output.pdf',
+          url: this.downloadPath,
+        },
+      ])
       this.CompileController.proxyToClsi = sinon.stub()
       this.res = { send: () => {}, sendStatus: sinon.stub() }
     })
@@ -811,7 +817,7 @@ describe('CompileController', function () {
         this.CompileController.proxyToClsi,
         this.projectId,
         'output-file',
-        `/project/${this.projectId}/output/output.pdf`,
+        this.downloadPath,
         {},
         this.req,
         this.res
@@ -821,7 +827,7 @@ describe('CompileController', function () {
         .calledWith(
           this.projectId,
           'output-file',
-          `/project/${this.projectId}/output/output.pdf`,
+          this.downloadPath,
           {},
           this.req,
           this.res
@@ -832,6 +838,13 @@ describe('CompileController', function () {
 
     it('should not download anything on compilation failures', function () {
       this.CompileManager.compile.yields(new Error('failed'))
+      this.CompileController.compileAndDownloadPdf(this.req, this.res)
+      this.res.sendStatus.should.have.been.calledWith(500)
+      this.CompileController.proxyToClsi.should.not.have.been.called
+    })
+
+    it('should not download anything on missing pdf', function () {
+      this.CompileManager.compile.yields(null, 'success', [])
       this.CompileController.compileAndDownloadPdf(this.req, this.res)
       this.res.sendStatus.should.have.been.calledWith(500)
       this.CompileController.proxyToClsi.should.not.have.been.called

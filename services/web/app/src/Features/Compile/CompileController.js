@@ -387,7 +387,7 @@ module.exports = CompileController = {
   compileAndDownloadPdf(req, res, next) {
     const projectId = req.params.project_id
     // pass userId as null, since templates are an "anonymous" compile
-    CompileManager.compile(projectId, null, {}, function (err) {
+    CompileManager.compile(projectId, null, {}, (err, _status, outputFiles) => {
       if (err) {
         logger.err(
           { err, projectId },
@@ -396,11 +396,19 @@ module.exports = CompileController = {
         res.sendStatus(500)
         return
       }
-      const url = `/project/${projectId}/output/output.pdf`
+      const pdf = outputFiles.find(f => f.path === 'output.pdf')
+      if (!pdf) {
+        logger.warn(
+          { projectId },
+          'something went wrong compile and downloading pdf: no pdf'
+        )
+        res.sendStatus(500)
+        return
+      }
       CompileController.proxyToClsi(
         projectId,
         'output-file',
-        url,
+        pdf.url,
         {},
         req,
         res,
