@@ -82,16 +82,7 @@ io.configure(function () {
   // See http://answers.dotcloud.com/question/578/problem-with-websocket-over-ssl-in-safari-with
   io.set('match origin protocol', true)
 
-  // gzip uses a Node 0.8.x method of calling the gzip program which
-  // doesn't work with 0.6.x
-  // io.enable('browser client gzip')
-  io.set('transports', [
-    'websocket',
-    'flashsocket',
-    'htmlfile',
-    'xhr-polling',
-    'jsonp-polling',
-  ])
+  io.set('transports', ['websocket', 'xhr-polling'])
 })
 
 // Serve socket.io.js client file from imported dist folder
