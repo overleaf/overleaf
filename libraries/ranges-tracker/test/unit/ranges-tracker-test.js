@@ -40,7 +40,7 @@ describe('RangesTracker', function () {
     })
 
     it("deleting one tracked insert doesn't delete the others", function () {
-      this.rangesTracker.applyOp({ p: 20, d: 'two', fixedRemoveChange: true })
+      this.rangesTracker.applyOp({ p: 20, d: 'two' })
       expect(this.rangesTracker.changes).to.deep.equal([
         this.changes[0],
         this.changes[2],
@@ -64,7 +64,6 @@ describe('RangesTracker', function () {
       this.rangesTracker.applyOp({
         p: 15,
         d: '567890123456789012345',
-        fixedRemoveChange: true,
       })
       expect(this.rangesTracker.changes.map(c => c.op)).to.deep.equal([
         { p: 10, d: 'one' },
@@ -77,7 +76,6 @@ describe('RangesTracker', function () {
       this.rangesTracker.applyOp({
         p: 20,
         d: '0123456789',
-        fixedRemoveChange: true,
       })
       expect(this.rangesTracker.changes.map(c => c.op)).to.deep.equal([
         { p: 10, d: 'one' },
@@ -91,7 +89,6 @@ describe('RangesTracker', function () {
         p: 20,
         i: 'two',
         u: true,
-        fixedRemoveChange: true,
       })
       expect(this.rangesTracker.changes.map(c => c.op)).to.deep.equal([
         { p: 10, d: 'one' },
@@ -105,19 +102,16 @@ describe('RangesTracker', function () {
         p: 10,
         i: 'one',
         u: true,
-        fixedRemoveChange: true,
       })
       this.rangesTracker.applyOp({
         p: 23,
         i: 'two',
         u: true,
-        fixedRemoveChange: true,
       })
       this.rangesTracker.applyOp({
         p: 36,
         i: 'three',
         u: true,
-        fixedRemoveChange: true,
       })
       expect(this.rangesTracker.changes.map(c => c.op)).to.deep.equal([])
     })
