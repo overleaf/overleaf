@@ -960,6 +960,7 @@ module.exports = {
     sourceEditorCompletionSources: [],
     sourceEditorSymbolPalette: [],
     sourceEditorToolbarComponents: [],
+    mainEditorLayoutModals: [],
     langFeedbackLinkingWidgets: [],
     labsExperiments: [],
     integrationLinkingWidgets: [],

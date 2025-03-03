@@ -1,5 +1,5 @@
 import { Panel, PanelGroup } from 'react-resizable-panels'
-import { FC } from 'react'
+import { ElementType, FC } from 'react'
 import { HorizontalResizeHandle } from '../resize/horizontal-resize-handle'
 import classNames from 'classnames'
 import { useLayoutContext } from '@/shared/context/layout-context'
@@ -15,6 +15,12 @@ import { EditorAndPdf } from '@/features/ide-react/components/editor-and-pdf'
 import HistoryContainer from '@/features/ide-react/components/history-container'
 import getMeta from '@/utils/meta'
 import { useEditorContext } from '@/shared/context/editor-context'
+import importOverleafModules from '../../../../../macros/import-overleaf-module.macro'
+
+const mainEditorLayoutModalsModules: Array<{
+  import: { default: ElementType }
+  path: string
+}> = importOverleafModules('mainEditorLayoutModals')
 
 export const MainLayout: FC = () => {
   const { view } = useLayoutContext()
@@ -124,6 +130,11 @@ export const MainLayout: FC = () => {
           </Panel>
         </PanelGroup>
       </div>
+      {mainEditorLayoutModalsModules.map(
+        ({ import: { default: Component }, path }) => (
+          <Component key={path} />
+        )
+      )}
     </div>
   )
 }
