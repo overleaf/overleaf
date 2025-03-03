@@ -25,7 +25,6 @@ import { useEditorManagerContext } from '@/features/ide-react/context/editor-man
 
 export type Ranges = {
   docId: string
-  total: number
   changes: Change<EditOperation>[]
   comments: Change<CommentOperation>[]
 }
@@ -74,7 +73,6 @@ const buildRanges = (currentDocument: DocumentContainer | null) => {
           )
         : ranges.comments,
     docId: currentDocument.doc_id,
-    total: ranges.changes.length + ranges.comments.length,
   }
 }
 
