@@ -117,7 +117,7 @@ async function tokenAccessPage(req, res, next) {
     await SplitTestHandler.promises.getAssignment(
       req,
       res,
-      'misc-b2c-pages-bs5'
+      'bs5-misc-pages-b2c'
     )
     res.render('project/token/access-react', {
       postUrl: makePostUrl(token),

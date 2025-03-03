@@ -423,7 +423,7 @@ async function confirmSecondaryEmailPage(req, res) {
 
   // Populates splitTestVariants with a value for the split test name and allows
   // Pug to read it
-  await SplitTestHandler.promises.getAssignment(req, res, 'misc-b2c-pages-bs5')
+  await SplitTestHandler.promises.getAssignment(req, res, 'bs5-misc-pages-b2c')
 
   AnalyticsManager.recordEventForUserInBackground(
     userId,
