@@ -653,15 +653,39 @@ function convertToISODate(dateStr) {
 export async function initializeProjects(options) {
   await ensureGlobalBlobsLoaded()
   const limiter = pLimit(BATCH_CONCURRENCY)
+  let totalErrors = 0
+  let totalProjects = 0
+  async function backupProjectWithErrorLogging(projectId) {
+    try {
+      await backupProject(projectId, options)
+    } catch (err) {
+      logger.error({ projectId, err }, 'error backing up project')
+      throw err
+    }
+  }
 
   async function processBatch(batch) {
     if (gracefulShutdownInitiated) {
       throw new Error('graceful shutdown')
     }
     const batchOperations = batch.map(project =>
-      limiter(backupProject, project._id.toHexString(), options)
+      limiter(backupProjectWithErrorLogging, project._id.toHexString())
     )
-    await Promise.allSettled(batchOperations)
+    const results = await Promise.allSettled(batchOperations)
+    const errors = results.filter(result => result.status === 'rejected').length
+    if (errors > 0) {
+      logger.error(
+        {
+          errors,
+          batchSize: batch.length,
+          batchStart: batch[0]._id.toHexString(),
+          batchEnd: batch[batch.length - 1]._id.toHexString(),
+        },
+        'errors in batch'
+      )
+    }
+    totalErrors += errors
+    totalProjects += batch.length
   }
 
   const query = {
@@ -683,6 +707,8 @@ export async function initializeProjects(options) {
       BATCH_RANGE_END: convertToISODate(options['end-date']),
     }
   )
+
+  return { errors: totalErrors, projects: totalProjects }
 }
 
 async function backupPendingProjects(options) {
