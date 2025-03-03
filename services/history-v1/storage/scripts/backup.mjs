@@ -63,6 +63,7 @@ const RETRY_DELAY = 1000
 let CONCURRENCY = 4
 let BATCH_CONCURRENCY = 1
 let BLOB_LIMITER = pLimit(CONCURRENCY)
+let USE_SECONDARY = false
 
 /**
  * Configure backup settings
@@ -74,6 +75,7 @@ export function configureBackup(options = {}) {
   CONCURRENCY = options.concurrency || 1
   BATCH_CONCURRENCY = options.batchConcurrency || 1
   BLOB_LIMITER = pLimit(CONCURRENCY)
+  USE_SECONDARY = options.useSecondary || false
 }
 
 let gracefulShutdownInitiated = false
@@ -331,6 +333,11 @@ const optionDefinitions = [
     description: 'End date for initialization (ISO format)',
   },
   {
+    name: 'use-secondary',
+    type: Boolean,
+    description: 'Use secondary read preference for backup status',
+  },
+  {
     name: 'compare',
     alias: 'C',
     type: Boolean,
@@ -387,6 +394,10 @@ function handleOptions() {
     process.exit(1)
   }
 
+  if (options['use-secondary']) {
+    USE_SECONDARY = true
+  }
+
   if (
     options.compare &&
     !options.projectId &&
@@ -416,7 +427,9 @@ async function analyseBackupStatus(projectId) {
     await getBackupStatus(projectId)
   // TODO: when we have confidence that the latestChunkMetadata always matches
   // the values from the backupStatus we can skip loading it here
-  const latestChunkMetadata = await loadLatestRaw(historyId)
+  const latestChunkMetadata = await loadLatestRaw(historyId, {
+    readOnly: Boolean(USE_SECONDARY),
+  })
   if (
     currentEndVersion &&
     currentEndVersion !== latestChunkMetadata.endVersion
@@ -506,6 +519,9 @@ function makeChunkKey(projectId, startVersion) {
 }
 
 export async function backupProject(projectId, options) {
+  if (gracefulShutdownInitiated) {
+    return
+  }
   await ensureGlobalBlobsLoaded()
   // FIXME: flush the project first!
   // Let's assume the the flush happens externally and triggers this backup
