@@ -234,7 +234,6 @@ export interface Meta {
   'ol-usersBestSubscription': ProjectDashboardSubscription | undefined
   'ol-usersEmail': string | undefined
   'ol-validationStatus': ValidationStatus
-  'ol-websiteRedesignPlansVariant': 'default' | 'light-design' | 'new-design'
   'ol-wikiEnabled': boolean
   'ol-writefullCssUrl': string
   'ol-writefullEnabled': boolean
