@@ -1,5 +1,5 @@
 import useWaitForI18n from '@/shared/hooks/use-wait-for-i18n'
-import { Button } from 'react-bootstrap'
+import OLButton from '@/features/ui/components/ol/ol-button'
 import { Trans, useTranslation } from 'react-i18next'
 import { Interstitial } from '@/shared/components/interstitial'
 
@@ -31,9 +31,9 @@ export function CompromisedPasswordCard() {
         />
       </p>
 
-      <Button className="btn-primary" href="/user/settings">
+      <OLButton className="btn-primary" href="/user/settings">
         {t('change_password_in_account_settings')}
-      </Button>
+      </OLButton>
     </Interstitial>
   )
 }
