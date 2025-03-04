@@ -3,8 +3,6 @@ const { merge } = require('webpack-merge')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin')
 
-process.env.REACT_REFRESH = '1'
-
 const base = require('./webpack.config')
 
 // if WEBPACK_ENTRYPOINTS is defined, remove any entrypoints that aren't included
@@ -57,13 +55,14 @@ module.exports = merge(base, {
       filename: 'stylesheets/[name].css',
     }),
 
-    new ReactRefreshWebpackPlugin({
-      exclude: [
-        /node_modules/, // default
-        /source-editor/, // avoid crashing the source editor
-      ],
-      overlay: false,
-    }),
+    process.env.REACT_REFRESH_ENABLED === 'true' &&
+      new ReactRefreshWebpackPlugin({
+        exclude: [
+          /node_modules/, // default
+          /source-editor/, // avoid crashing the source editor
+        ],
+        overlay: false,
+      }),
 
     // Disable React DevTools if DISABLE_REACT_DEVTOOLS is set to "true"
     process.env.DISABLE_REACT_DEVTOOLS === 'true' &&

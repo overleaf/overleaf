@@ -143,7 +143,8 @@ module.exports = {
               cacheDirectory: true,
               configFile: path.join(__dirname, './babel.config.json'),
               plugins: [
-                process.env.REACT_REFRESH && 'react-refresh/babel',
+                process.env.REACT_REFRESH_ENABLED === 'true' &&
+                  'react-refresh/babel',
               ].filter(Boolean),
             },
           },
