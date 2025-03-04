@@ -10,9 +10,11 @@ import { usePdfPane } from '@/features/ide-react/hooks/use-pdf-pane'
 import { useLayoutContext } from '@/shared/context/layout-context'
 import { useState } from 'react'
 import EditorPanel from './editor-panel'
+import { useRailContext } from '../contexts/rail-context'
 
 export default function MainLayout() {
   const [resizing, setResizing] = useState(false)
+  const { resizing: railResizing } = useRailContext()
   const {
     togglePdfPane,
     handlePdfPaneExpand,
@@ -36,7 +38,7 @@ export default function MainLayout() {
           autoSaveId="ide-redesign-outer-layout"
           direction="horizontal"
           className={classNames('ide-redesign-inner', {
-            'ide-panel-group-resizing': resizing,
+            'ide-panel-group-resizing': resizing || railResizing,
           })}
         >
           <RailLayout />
@@ -44,7 +46,6 @@ export default function MainLayout() {
             id="ide-redesign-editor-panel"
             order={1}
             className={classNames({
-              'ide-panel-group-resizing': resizing,
               hidden: !editorIsOpen,
             })}
             minSize={5}

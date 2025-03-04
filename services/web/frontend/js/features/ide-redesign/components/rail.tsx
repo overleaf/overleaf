@@ -75,6 +75,7 @@ export const RailLayout = () => {
     handlePaneCollapse,
     handlePaneExpand,
     togglePane,
+    setResizing,
   } = useRailContext()
 
   const { setLeftMenuShown } = useLayoutContext()
@@ -156,6 +157,7 @@ export const RailLayout = () => {
         resizable
         hitAreaMargins={{ coarse: 0, fine: 0 }}
         onDoubleClick={togglePane}
+        onDragging={setResizing}
       >
         <HorizontalToggler
           id="ide-redesign-sidebar-panel"
