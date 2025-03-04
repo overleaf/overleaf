@@ -7,9 +7,11 @@
 }
 
 .ide-settings-tab-content {
-  padding: var(--spacing-06) var(--spacing-08);
   max-height: 75%;
-  height: 400px;
+  height: 500px;
+  width: 100%;
+  padding: 0 var(--spacing-06);
+  overflow: auto;
 }
 
 .ide-settings-tab-subtitle {
@@ -42,4 +44,43 @@
 
 .ide-settings-modal-body {
   padding: 0;
+}
+
+.ide-settings-section {
+  .ide-setting:not(:last-child) {
+    border-bottom: 1px solid var(--border-divider);
+  }
+}
+
+.ide-settings-section-title {
+  color: var(--content-secondary);
+  font-size: var(--font-size-01);
+  line-height: var(--line-height-01);
+  margin-top: var(--spacing-06);
+  margin-bottom: var(--spacing-03);
+}
+
+.ide-setting {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-06) 0;
+}
+
+.ide-dropdown-setting {
+  width: 120px;
+}
+
+.ide-dropdown-setting-wide {
+  width: 160px;
+}
+
+.ide-setting-title {
+  color: var(--content-primary);
+  font-size: var(--font-size-02);
+}
+
+.ide-setting-description {
+  color: var(--content-secondary);
+  font-size: var(--font-size-02);
 }
