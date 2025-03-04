@@ -3,4 +3,5 @@
   src: url('./OpenDyslexicMono-Regular.woff2') format('woff2');
   font-style: normal;
   font-weight: normal;
+  ascent-override: 100%;
 }
