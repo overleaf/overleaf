@@ -209,7 +209,7 @@
     "@overleaf/dictionaries": "https://github.com/overleaf/dictionaries/archive/refs/tags/v0.0.3.tar.gz",
     "@overleaf/ranges-tracker": "*",
     "@overleaf/stream-utils": "*",
-    "@pmmmwh/react-refresh-webpack-plugin": "^0.5.11",
+    "@pmmmwh/react-refresh-webpack-plugin": "^0.5.15",
     "@pollyjs/adapter-node-http": "^6.0.6",
     "@pollyjs/core": "^6.0.6",
     "@pollyjs/persister-fs": "^6.0.6",
@@ -371,7 +371,7 @@
     "webpack": "^5.98.0",
     "webpack-assets-manifest": "^5.2.1",
     "webpack-cli": "^5.1.4",
-    "webpack-dev-server": "^5.0.4",
+    "webpack-dev-server": "^5.2.0",
     "webpack-merge": "^5.10.0",
     "yup": "^0.32.11"
   },
