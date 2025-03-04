@@ -1,15 +1,35 @@
+:root {
+  --integrations-panel-bg: var(--bg-dark-primary);
+  --integrations-panel-color: var(--content-primary-dark);
+  --integrations-panel-description-color: var(--content-secondary-dark);
+  --integrations-panel-card-border: var(--border-divider-dark);
+  --integrations-panel-card-button-hover-background: var(--bg-dark-secondary);
+  --integrations-panel-card-button-background: var(--bg-dark-primary);
+}
+
+@include theme('light') {
+  --integrations-panel-bg: var(--white);
+  --integrations-panel-color: var(--content-primary);
+  --integrations-panel-description-color: var(--content-secondary);
+  --integrations-panel-card-border: var(--border-divider);
+  --integrations-panel-card-button-hover-background: var(--bg-light-secondary);
+  --integrations-panel-card-button-background: var(--white);
+}
+
 .integrations-panel {
-  background-color: var(--white);
+  background-color: var(--integrations-panel-bg);
   height: 100%;
 }
 
 .integrations-panel-card-button {
   all: unset;
-  background-color: var(--white);
+  background-color: var(--integrations-panel-card-button-background);
   width: 100%;
 
   &:hover {
-    background-color: var(--bg-light-secondary) !important;
+    background-color: var(
+      --integrations-panel-card-button-hover-background
+    ) !important;
   }
 }
 
@@ -18,7 +38,7 @@
   margin: 0 var(--spacing-04);
   padding: var(--spacing-04) 0;
   gap: var(--spacing-04);
-  border-bottom: 1px solid var(--border-divider);
+  border-bottom: 1px solid var(--integrations-panel-card-border);
 }
 
 .integrations-panel-card-header {
@@ -43,17 +63,17 @@
 }
 
 .integrations-panel-card-premium-badge {
-  color: var(--content-primary);
+  color: var(--integrations-panel-color);
   font-weight: 600;
 }
 
 .integrations-panel-card-title {
   font-size: var(--font-size-02);
-  color: var(--content-primary);
+  color: var(--integrations-panel-color);
 }
 
 .integrations-panel-card-description {
   font-size: var(--font-size-01);
-  color: var(--content-secondary);
+  color: var(--integrations-panel-description-color);
   margin-bottom: 0;
 }

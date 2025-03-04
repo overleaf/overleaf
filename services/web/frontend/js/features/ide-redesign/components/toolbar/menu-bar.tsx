@@ -15,7 +15,7 @@ export const ToolbarMenuBar = () => {
       <MenuBarDropdown
         title={t('file')}
         id="file"
-        className="ide-redesign-toolbar-dropdown-toggle-subdued"
+        className="ide-redesign-toolbar-dropdown-toggle-subdued ide-redesign-toolbar-button-subdued"
       >
         <MenuBarOption title="New File" />
         <MenuBarOption title="New Project" />
@@ -23,7 +23,7 @@ export const ToolbarMenuBar = () => {
       <MenuBarDropdown
         title={t('edit')}
         id="edit"
-        className="ide-redesign-toolbar-dropdown-toggle-subdued"
+        className="ide-redesign-toolbar-dropdown-toggle-subdued ide-redesign-toolbar-button-subdued"
       >
         <MenuBarOption title="Undo" />
         <MenuBarOption title="Redo" />
@@ -35,14 +35,14 @@ export const ToolbarMenuBar = () => {
       <MenuBarDropdown
         title={t('view')}
         id="view"
-        className="ide-redesign-toolbar-dropdown-toggle-subdued"
+        className="ide-redesign-toolbar-dropdown-toggle-subdued ide-redesign-toolbar-button-subdued"
       >
         <ChangeLayoutOptions />
       </MenuBarDropdown>
       <MenuBarDropdown
         title={t('insert')}
         id="insert"
-        className="ide-redesign-toolbar-dropdown-toggle-subdued"
+        className="ide-redesign-toolbar-dropdown-toggle-subdued ide-redesign-toolbar-button-subdued"
       >
         <MenuBarOption title="Insert figure" />
         <MenuBarOption title="Insert table" />
@@ -52,14 +52,14 @@ export const ToolbarMenuBar = () => {
       <MenuBarDropdown
         title={t('format')}
         id="format"
-        className="ide-redesign-toolbar-dropdown-toggle-subdued"
+        className="ide-redesign-toolbar-dropdown-toggle-subdued ide-redesign-toolbar-button-subdued"
       >
         <MenuBarOption title="Bold text" />
       </MenuBarDropdown>
       <MenuBarDropdown
         title={t('help')}
         id="help"
-        className="ide-redesign-toolbar-dropdown-toggle-subdued"
+        className="ide-redesign-toolbar-dropdown-toggle-subdued ide-redesign-toolbar-button-subdued"
       >
         <MenuBarOption title="Keyboard shortcuts" />
         <MenuBarOption title="Documentation" />

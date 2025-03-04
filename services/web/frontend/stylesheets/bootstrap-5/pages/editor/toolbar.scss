@@ -24,6 +24,19 @@
   --editor-toolbar-bg: var(--neutral-80);
 }
 
+.ide-redesign-main {
+  --toolbar-alt-bg-color: var(--bg-dark-secondary);
+  --toolbar-btn-color: var(--content-primary-dark);
+  --toolbar-btn-hover-bg-color: var(--neutral-80);
+  --toolbar-btn-hover-color: var(--white);
+  --editor-toolbar-bg: var(--bg-dark-primary);
+  --toolbar-filetree-bg-color: var(--neutral-80);
+
+  .toolbar {
+    border-bottom: none;
+  }
+}
+
 @include theme('light') {
   --toolbar-border-color: var(--neutral-20);
   --toolbar-header-bg-color: var(--white);
@@ -43,18 +56,14 @@
   --editor-header-logo-background: url(../../../../../public/img/ol-brand/overleaf-o.svg)
     center / contain no-repeat;
   --editor-toolbar-bg: var(--white);
-}
 
-.ide-redesign-main {
-  --toolbar-alt-bg-color: var(--bg-light-secondary);
-  --toolbar-btn-color: var(--content-primary);
-  --toolbar-btn-hover-bg-color: var(--neutral-80);
-  --toolbar-btn-hover-color: var(--white);
-  --editor-toolbar-bg: var(--white);
-  --toolbar-filetree-bg-color: var(--white);
-
-  .toolbar {
-    border-bottom: none;
+  .ide-redesign-main {
+    --toolbar-alt-bg-color: var(--bg-light-secondary);
+    --toolbar-btn-color: var(--content-primary);
+    --toolbar-btn-hover-bg-color: var(--neutral-80);
+    --toolbar-btn-hover-color: var(--white);
+    --editor-toolbar-bg: var(--white);
+    --toolbar-filetree-bg-color: var(--white);
   }
 }
 

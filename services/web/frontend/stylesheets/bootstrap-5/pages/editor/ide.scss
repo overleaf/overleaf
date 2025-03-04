@@ -13,6 +13,10 @@ $editor-toggler-bg-dark-color: color.adjust(
 @include theme('light') {
   --editor-toggler-bg-color: var(--content-disabled);
   --editor-resizer-bg-color: var(--bg-light-tertiary);
+
+  .ide-redesign-main {
+    --editor-resizer-bg-color: var(--bg-light-tertiary);
+  }
 }
 
 #ide-root {
@@ -46,6 +50,8 @@ $editor-toggler-bg-dark-color: color.adjust(
 }
 
 .ide-redesign-main {
+  --editor-resizer-bg-color: var(--bg-dark-tertiary);
+
   .ide-panel-group-resizing {
     background-color: var(--white);
 

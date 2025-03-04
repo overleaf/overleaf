@@ -17,7 +17,6 @@ const LayoutDropdownToggleButton = forwardRef<
   return (
     <OLButton
       size="sm"
-      variant="ghost"
       className="ide-redesign-toolbar-button-subdued"
       ref={ref}
       onClick={onClick}

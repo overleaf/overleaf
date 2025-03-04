@@ -11,6 +11,18 @@
   --chat-message-name-color: var(--white);
 }
 
+.ide-redesign-main {
+  --chat-bg: var(--bg-dark-primary);
+  --chat-color: var(--content-primary);
+  --chat-instructions-color: var(--content-primary-dark);
+  --chat-new-message-bg: var(--bg-dark-primary);
+  --chat-new-message-textarea-color: var(--content-primary-dark);
+  --chat-new-message-textarea-bg: var(--bg-dark-primary);
+  --chat-message-date-color: var(--content-secondary-dark);
+  --chat-message-name-color: var(--content-secondary-dark);
+  --chat-date-align: center;
+}
+
 @include theme('light') {
   --chat-bg: var(--white);
   --chat-color: var(--neutral-70);
@@ -22,20 +34,20 @@
   --chat-new-message-border: var(--editor-border-color);
   --chat-message-date-color: var(--neutral-70);
   --chat-message-name-color: var(--neutral-70);
-}
 
-.ide-redesign-main {
-  --chat-bg: var(--white);
-  --chat-color: var(--neutral-70);
-  --chat-instructions-color: var(--neutral-70);
-  --chat-new-message-bg: var(--white);
-  --chat-new-message-textarea-color: var(--neutral-90);
-  --chat-new-message-textarea-bg: var(--white);
-  --chat-new-message-textarea-border: var(--editor-border-color);
-  --chat-new-message-border: var(--white);
-  --chat-message-date-color: var(--neutral-70);
-  --chat-message-name-color: var(--neutral-70);
-  --chat-date-align: center;
+  .ide-redesign-main {
+    --chat-bg: var(--white);
+    --chat-color: var(--neutral-70);
+    --chat-instructions-color: var(--neutral-70);
+    --chat-new-message-bg: var(--neutral-10);
+    --chat-new-message-textarea-color: var(--neutral-90);
+    --chat-new-message-textarea-bg: var(--white);
+    --chat-new-message-textarea-border: var(--editor-border-color);
+    --chat-new-message-border: var(--white);
+    --chat-message-date-color: var(--neutral-70);
+    --chat-message-name-color: var(--neutral-70);
+    --chat-date-align: center;
+  }
 }
 
 .chat {

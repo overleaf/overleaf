@@ -6,7 +6,8 @@
   --outline-line-guide-color: var(--border-primary);
   --outline-container-color-bg: var(--bg-dark-tertiary);
   --outline-content-color: var(--content-primary-dark);
-  --outline-item-highlight-color: var(--neutral-60);
+  --outline-item-highlight-bg: var(--neutral-60);
+  --outline-item-highlight-color: var(--content-primary-dark);
   --outline-item-carat-color: var(--content-disabled);
 }
 
@@ -18,24 +19,39 @@
   --outline-line-guide-color: var(--border-disabled);
   --outline-container-color-bg: var(--bg-light-primary);
   --outline-content-color: var(--content-secondary);
-  --outline-item-highlight-color: var(--bg-light-secondary);
+  --outline-item-highlight-bg: var(--bg-light-secondary);
+  --outline-item-highlight-color: var(--content-secondary);
   --outline-item-carat-color: var(--content-disabled);
+
+  .ide-redesign-main {
+    --outline-bg-color: var(--bg-light-primary);
+    --outline-item-hover-bg: var(--bg-light-secondary);
+    --outline-header-hover-bg: var(--bg-light-secondary);
+    --outline-content-color: var(--content-primary);
+    --outline-item-highlight-bg: var(--bg-light-secondary);
+    --outline-item-highlight-color: var(--content-primary);
+    --outline-item-carat-color: var(--content-primary);
+    --outline-line-guide-color: color-mix(
+      in srgb,
+      var(--border-primary) 24%,
+      transparent
+    );
+    --outline-container-color-bg: var(--bg-light-primary);
+  }
 }
 
 // TODO ide-redesign-cleanup: Replace the existing styling with these overrides.
 .ide-redesign-main {
-  --outline-bg-color: var(--bg-light-primary);
-  --outline-item-hover-bg: var(--bg-light-secondary);
-  --outline-header-hover-bg: var(--bg-light-secondary);
-  --outline-content-color: var(--content-primary);
-  --outline-item-highlight-color: var(--bg-light-secondary);
-  --outline-item-carat-color: var(--content-primary);
-  --outline-line-guide-color: color-mix(
-    in srgb,
-    var(--border-primary) 24%,
-    transparent
-  );
-  --outline-container-color-bg: var(--bg-light-primary);
+  --outline-bg-color: var(--bg-dark-primary);
+  --outline-border-color: var(--border-disabled-dark);
+  --outline-header-hover-bg: var(--bg-dark-primary);
+  --outline-item-hover-bg: var(--bg-dark-secondary);
+  --outline-line-guide-color: var(--border-primary);
+  --outline-container-color-bg: var(--bg-dark-primary);
+  --outline-content-color: var(--content-primary-dark);
+  --outline-item-highlight-bg: var(--green-70);
+  --outline-item-highlight-color: var(--green-10);
+  --outline-item-carat-color: var(--content-disabled);
 
   .file-outline-panel {
     min-height: 36px;
@@ -298,7 +314,8 @@
 }
 
 .outline-item-link-highlight {
-  background-color: var(--outline-item-highlight-color);
+  background-color: var(--outline-item-highlight-bg);
+  color: var(--outline-item-highlight-color);
 }
 
 .outline-caret-icon {

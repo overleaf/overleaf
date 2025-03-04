@@ -6,6 +6,10 @@
 
 @include theme('light') {
   --pdf-toolbar-btn-hover-color: var(--neutral-10);
+
+  .ide-redesign-main {
+    --pdf-bg: var(--neutral-10);
+  }
 }
 
 .pdf .toolbar.toolbar-pdf {
@@ -155,6 +159,8 @@
 }
 
 .ide-redesign-main {
+  --pdf-bg: var(--bg-dark-secondary);
+
   .pdf-viewer {
     .pdfjs-viewer {
       .page {

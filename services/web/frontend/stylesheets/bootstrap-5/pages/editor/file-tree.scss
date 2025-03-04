@@ -20,20 +20,35 @@
   --file-tree-item-dragging-bg: #{rgb($bg-light-tertiary, 0.9)};
   --file-tree-item-dragging-color: var(--content-secondary);
   --file-tree-item-dragging-preview-colour: var(--bg-light-primary);
+
+  .ide-redesign-main {
+    --file-tree-item-hover-bg: var(--bg-light-secondary);
+    --file-tree-item-selected-bg: var(--bg-dark-primary);
+    --file-tree-item-selected-color: var(--white);
+    --file-tree-item-color: var(--content-primary);
+    --file-tree-bg: var(--white);
+    --file-tree-icon-colour: var(--content-primary);
+    --file-tree-item-dragging-bg: #{rgb($bg-dark-primary, 0.9)};
+    --file-tree-item-dragging-color: var(--white);
+    --file-tree-item-dragging-preview-bg: #{rgb($bg-light-secondary, 0.6)};
+    --file-tree-item-dragging-preview-colour: #{rgb($content-primary, 0.6)};
+    --file-tree-expand-button-color: var(--content-primary);
+  }
 }
 
 // TODO ide-redesign-cleanup: Replace the existing styling with these overrides.
 .ide-redesign-main {
-  --file-tree-item-hover-bg: var(--bg-light-secondary);
-  --file-tree-item-selected-bg: var(--bg-dark-primary);
-  --file-tree-item-selected-color: var(--white);
-  --file-tree-item-color: var(--content-primary);
-  --file-tree-bg: var(--white);
-  --file-tree-icon-colour: var(--content-primary);
-  --file-tree-item-dragging-bg: #{rgb($bg-dark-primary, 0.9)};
-  --file-tree-item-dragging-color: var(--white);
-  --file-tree-item-dragging-preview-bg: #{rgb($bg-light-secondary, 0.6)};
-  --file-tree-item-dragging-preview-colour: #{rgb($content-primary, 0.6)};
+  --file-tree-item-hover-bg: var(--bg-dark-secondary);
+  --file-tree-item-selected-bg: var(--green-70);
+  --file-tree-item-selected-color: var(--green-10);
+  --file-tree-item-color: var(--content-primary-dark);
+  --file-tree-bg: var(--bg-dark-primary);
+  --file-tree-icon-colour: var(--content-primary-dark);
+  --file-tree-item-dragging-bg: #{rgb($bg-light-primary, 0.9)};
+  --file-tree-item-dragging-color: var(--content-secondary);
+  --file-tree-item-dragging-preview-bg: var(--bg-light-primary);
+  --file-tree-item-dragging-preview-colour: var(--bg-light-primary);
+  --file-tree-expand-button-color: var(--content-primary-dark);
 
   .file-tree-outline-panel-group {
     background-color: var(--file-tree-bg);
@@ -56,7 +71,7 @@
 
   .file-tree-expand-collapse-button {
     border-radius: var(--border-radius-base);
-    color: var(--outline-content-color);
+    color: var(--file-tree-expand-button-color);
     display: flex;
     align-items: center;
     background-color: transparent;
@@ -69,6 +84,7 @@
     }
 
     h4 {
+      color: var(--file-tree-expand-button-color);
       font-size: var(--font-size-02);
       margin: 0;
       font-weight: normal;
@@ -80,11 +96,16 @@
   }
 
   .file-tree-toolbar-action-button {
+    color: var(--file-tree-expand-button-color);
     padding: var(--spacing-02);
     border-radius: var(--border-radius-full);
 
     &:hover {
       background-color: var(--file-tree-item-hover-bg);
+    }
+
+    &:active {
+      color: var(--file-tree-expand-button-color);
     }
 
     .material-symbols {

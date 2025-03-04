@@ -16,8 +16,7 @@ export const ToolbarProjectTitle = () => {
     <Dropdown align="start">
       <DropdownToggle
         id="project-title-options"
-        className="ide-redesign-toolbar-dropdown-toggle-subdued fw-bold"
-        variant="secondary"
+        className="ide-redesign-toolbar-dropdown-toggle-subdued fw-bold  ide-redesign-toolbar-button-subdued"
       >
         {name}
         <MaterialIcon

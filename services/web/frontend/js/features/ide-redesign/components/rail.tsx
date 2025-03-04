@@ -241,7 +241,11 @@ export const RailPanelHeader: FC<{ title: string }> = ({ title }) => {
   return (
     <header className="rail-panel-header">
       <h4 className="rail-panel-title">{title}</h4>
-      <OLButton onClick={handlePaneCollapse} variant="ghost" size="sm">
+      <OLButton
+        onClick={handlePaneCollapse}
+        className="rail-panel-header-button-subdued"
+        size="sm"
+      >
         <MaterialIcon type="close" />
       </OLButton>
     </header>

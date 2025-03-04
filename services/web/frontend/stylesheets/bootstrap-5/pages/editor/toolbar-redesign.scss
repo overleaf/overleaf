@@ -1,7 +1,23 @@
 @use 'sass:math';
 
 :root {
-  --toolbar-home-button-hover-background: var(--neutral-20);
+  --redesign-toolbar-home-button-hover-background: var(--bg-dark-secondary);
+  --redesign-toolbar-border-divider: var(--border-divider-dark);
+  --redesign-toolbar-background: var(--bg-dark-primary);
+  --redesign-toolbar-home-link-color: var(--content-primary-dark);
+  --redesign-toolbar-logo-url: url('../../../../../public/img/ol-brand/overleaf-o-white.svg');
+  --redesign-subdued-button-color: var(--content-primary-dark);
+  --redesign-subdued-button-hover-background: var(--bg-dark-tertiary);
+}
+
+@include theme('light') {
+  --redesign-toolbar-home-button-hover-background: var(--neutral-20);
+  --redesign-toolbar-border-divider: var(--border-divider);
+  --redesign-toolbar-background: var(--bg-light-primary);
+  --redesign-toolbar-home-link-color: var(--content-primary);
+  --redesign-toolbar-logo-url: url('../../../../../public/img/ol-brand/overleaf-o-dark.svg');
+  --redesign-subdued-button-color: var(--content-primary);
+  --redesign-subdued-button-hover-background: var(--bg-light-tertiary);
 }
 
 .ide-redesign-toolbar {
@@ -10,7 +26,8 @@
   $ol-icon-height: 24px;
   $home-icon-font-size: 24px;
 
-  border-bottom: 1px solid var(--border-divider);
+  border-bottom: 1px solid var(--redesign-toolbar-border-divider);
+  background-color: var(--redesign-toolbar-background);
   display: flex;
   flex-direction: row;
   justify-content: space-between;
@@ -28,6 +45,19 @@
     margin: math.div($toolbar-height - $home-button-size, 2);
   }
 
+  .ide-redesign-toolbar-button-subdued {
+    @include ol-button-variant(
+      var(--redesign-subdued-button-color),
+      transparent,
+      transparent,
+      var(--redesign-subdued-button-hover-background),
+      transparent,
+      true
+    );
+
+    text-decoration: none;
+  }
+
   .ide-redesign-toolbar-home-link {
     display: flex;
     height: 100%;
@@ -36,6 +66,7 @@
     flex-direction: column;
     text-align: center;
     border-radius: 100%;
+    color: var(--redesign-toolbar-home-link-color);
 
     .toolbar-ol-home-button {
       display: none;
@@ -44,12 +75,17 @@
 
     .toolbar-ol-logo {
       margin: 0 auto;
+      display: block;
+      width: $ol-icon-height;
       height: $ol-icon-height;
-      width: auto;
+      background-image: var(--redesign-toolbar-logo-url);
+      background-position: center;
+      background-repeat: no-repeat;
+      background-size: contain;
     }
 
     &:hover {
-      background-color: var(--toolbar-home-button-hover-background);
+      background-color: var(--redesign-toolbar-home-button-hover-background);
 
       .toolbar-ol-home-button {
         display: block;
@@ -101,11 +137,6 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-}
-
-.ide-redesign-toolbar-button-subdued {
-  color: var(--neutral-90);
-  text-decoration: none;
 }
 
 .ide-redesign-online-users {

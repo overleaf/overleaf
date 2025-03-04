@@ -2,12 +2,16 @@
   --logs-pane-bg: var(--bg-dark-secondary);
 }
 
-@include theme('light') {
-  --logs-pane-bg: var(--bg-light-secondary);
+.ide-redesign-main {
+  --logs-pane-bg: var(--bg-dark-primary);
 }
 
-.ide-redesign-main {
-  --logs-pane-bg: #fff;
+@include theme('light') {
+  --logs-pane-bg: var(--bg-light-secondary);
+
+  .ide-redesign-main {
+    --logs-pane-bg: #fff;
+  }
 }
 
 .logs-pane {
@@ -151,6 +155,7 @@
     }
 
     background-color: var(--bg-light-primary);
+    color: var(--content-primary);
     padding: var(--spacing-04);
   }
 

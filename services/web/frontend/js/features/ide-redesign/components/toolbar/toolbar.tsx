@@ -29,11 +29,7 @@ const ToolbarMenus = () => {
     <div className="ide-redesign-toolbar-menu">
       <div className="ide-redesign-toolbar-home-button">
         <a href="/project" className="ide-redesign-toolbar-home-link">
-          <img
-            className="toolbar-ol-logo"
-            src="/img/ol-brand/overleaf-o-dark.svg"
-            alt={t('overleaf_logo')}
-          />
+          <span className="toolbar-ol-logo" aria-label={t('overleaf_logo')} />
           <MaterialIcon type="home" className="toolbar-ol-home-button" />
         </a>
       </div>

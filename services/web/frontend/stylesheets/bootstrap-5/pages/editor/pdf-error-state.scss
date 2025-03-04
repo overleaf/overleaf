@@ -1,3 +1,19 @@
+:root {
+  --pdf-error-state-info-box-color: var(--content-primary-dark);
+  --pdf-error-state-info-box-background: var(--bg-dark-primary);
+  --pdf-error-state-info-box-border: var(--border-divider-dark);
+  --pdf-error-state-label-color: var(--content-primary-dark);
+  --pdf-error-state-description-color: var(--content-secondary-dark);
+}
+
+@include theme('light') {
+  --pdf-error-state-info-box-color: var(--content-primary);
+  --pdf-error-state-info-box-background: var(--bg-light-primary);
+  --pdf-error-state-info-box-border: var(--border-divider);
+  --pdf-error-state-label-color: var(--content-primary);
+  --pdf-error-state-description-color: var(--content-secondary);
+}
+
 .pdf-error-state {
   position: absolute;
   inset: var(--toolbar-small-height) 0 0 0;
@@ -41,20 +57,22 @@
 
 .pdf-error-state-label {
   font-size: var(--font-size-02);
+  color: var(--pdf-error-state-label-color);
   font-weight: 600;
   margin-bottom: 0;
 }
 
 .pdf-error-state-description {
-  color: var(--content-secondary);
+  color: var(--pdf-error-state-description-color);
   font-size: var(--font-size-02);
   margin-bottom: 0;
 }
 
 .pdf-error-state-info-box {
-  background-color: var(--bg-light-primary);
+  background-color: var(--pdf-error-state-info-box-background);
+  color: var(--pdf-error-state-info-box-color);
   padding: var(--spacing-06);
-  border: 1px solid var(--border-divider);
+  border: 1px solid var(--pdf-error-state-info-box-border);
   border-radius: var(--border-radius-base);
 }
 
