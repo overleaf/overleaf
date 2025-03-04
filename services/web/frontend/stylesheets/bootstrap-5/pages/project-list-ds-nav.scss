@@ -213,8 +213,10 @@
             display: none;
           }
 
-          &:hover {
-            background-color: var(--neutral-20) !important;
+          &:hover,
+          &:active,
+          &[aria-expanded='true'] {
+            background-color: var(--neutral-20);
           }
         }
       }
