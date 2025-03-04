@@ -1,67 +1,72 @@
-extends ../../../../../app/views/layout-marketing
+extends ../../../../../app/views/layout-website-redesign-bootstrap-5
 
 block content
 	main.content.content-alt#main-content
 		.container
-			.row
-				.col-md-6.col-md-offset-3.col-lg-4.col-lg-offset-4
-					.alert.alert-success #{translate("nearly_activated")}
-			.row
-				.col-md-6.col-md-offset-3.col-lg-4.col-lg-offset-4
-					.card
-						.page-header
-							h1 #{translate("please_set_a_password")}
-						form(
-							data-ol-async-form
-							name="activationForm",
-							action="/user/password/set",
-							method="POST",
+			div.col-lg-6.col-xl-4.m-auto
+				.notification-list
+					.notification.notification-type-success(aria-live="off" role="alert")
+						.notification-content-and-cta
+							.notification-icon
+								span.material-symbols(aria-hidden="true")
+									| check_circle
+							.notification-content
+								p
+									| #{translate("nearly_activated")}
+
+				h1.h3 #{translate("please_set_a_password")}
+
+				form(
+					data-ol-async-form
+					name="activationForm",
+					action="/user/password/set",
+					method="POST",
+				)
+					+formMessages()
+
+					+customFormMessage('token-expired', 'danger')
+						| #{translate("activation_token_expired")}
+
+					+customFormMessage('invalid-password', 'danger')
+						| #{translate('invalid_password')}
+
+					input(name='_csrf', type='hidden', value=csrfToken)
+					input(
+						type="hidden",
+						name="passwordResetToken",
+						value=token
+					)
+
+					.form-group
+						label(for='emailField') #{translate("email")}
+						input.form-control#emailField(
+							aria-label="email",
+							type='email',
+							name='email',
+							placeholder="email@example.com",
+							autocomplete="username"
+							value=email
+							required,
+							disabled
 						)
-							+formMessages()
-
-							+customFormMessage('token-expired', 'danger')
-								| #{translate("activation_token_expired")}
-
-							+customFormMessage('invalid-password', 'danger')
-								| #{translate('invalid_password')}
-
-							input(name='_csrf', type='hidden', value=csrfToken)
-							input(
-								type="hidden",
-								name="passwordResetToken",
-								value=token
-							)
-
-							.form-group
-								label(for='email') #{translate("email")}
-								input.form-control(
-									aria-label="email",
-									type='email',
-									name='email',
-									placeholder="email@example.com",
-									autocomplete="username"
-									value=email
-									required,
-									readonly
-								)
-							.form-group
-								label(for='password') #{translate("password")}
-								input.form-control#passwordField(
-									type='password',
-									name='password',
-									placeholder="********",
-									autocomplete="new-password",
-									autofocus,
-									required,
-									minlength=settings.passwordStrengthOptions.length.min
-								)
-							.actions
-								button.btn.btn-primary(
-									type='submit',
-									data-ol-disabled-inflight
-									aria-label=translate('activate')
-								)
-									span(data-ol-inflight="idle")
-										| #{translate('activate')}
-									span(hidden data-ol-inflight="pending")
-										| #{translate('activating')}…
+					.form-group
+						label(for='passwordField') #{translate("password")}
+						input.form-control#passwordField(
+							type='password',
+							name='password',
+							placeholder="********",
+							autocomplete="new-password",
+							autofocus,
+							required,
+							minlength=settings.passwordStrengthOptions.length.min
+						)
+					.actions
+						button.btn.btn-primary(
+							type='submit',
+							data-ol-disabled-inflight
+							aria-label=translate('activate')
+						)
+							span(data-ol-inflight="idle")
+								| #{translate('activate')}
+							span(hidden data-ol-inflight="pending")
+								| #{translate('activating')}…
