@@ -50,18 +50,18 @@ export const ReviewPanelResolvedThreadsMenu: FC = () => {
       return []
     }
 
-    const resolvedThreads = []
+    const allResolvedThreads = []
     for (const [id, thread] of Object.entries(threads)) {
       if (thread.resolved) {
-        resolvedThreads.push({ thread, id })
+        allResolvedThreads.push({ thread, id })
       }
     }
-    resolvedThreads.sort((a, b) => {
+    allResolvedThreads.sort((a, b) => {
       return Date.parse(b.thread.resolved_at) - Date.parse(a.thread.resolved_at)
     })
 
-    return resolvedThreads
-  }, [threads])
+    return allResolvedThreads.filter(thread => allComments.has(thread.id))
+  }, [threads, allComments])
 
   if (loading) {
     return <LoadingSpinner className="ms-auto me-auto" />
