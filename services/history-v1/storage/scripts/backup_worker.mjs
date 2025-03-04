@@ -13,7 +13,7 @@ const redisOptions = config.get('redis.queue')
 const TIME_BUCKETS = [10, 100, 500, 1000, 5000, 10000, 30000, 60000]
 
 // Configure backup settings to match worker concurrency
-configureBackup({ concurrency: 50, batchConcurrency: 3, useSecondary: true })
+configureBackup({ concurrency: 50, batchConcurrency: 3 })
 
 // Create a Bull queue named 'backup'
 const backupQueue = new Queue('backup', {

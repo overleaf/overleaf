@@ -593,6 +593,7 @@ export async function backupProject(projectId, options) {
   )
 
   let previousBackedUpVersion = lastBackedUpVersion
+  const backupVersions = [previousBackedUpVersion]
 
   for await (const {
     blobsToBackup,
@@ -624,14 +625,23 @@ export async function backupProject(projectId, options) {
     )
 
     // persist the backup status in mongo for the current chunk
-    await updateBackupStatus(
-      projectId,
-      previousBackedUpVersion,
-      chunkRecord,
-      backupStartTime
-    )
+    try {
+      await updateBackupStatus(
+        projectId,
+        previousBackedUpVersion,
+        chunkRecord,
+        backupStartTime
+      )
+    } catch (err) {
+      logger.error(
+        { projectId, chunkRecord, err, backupVersions },
+        'error updating backup status'
+      )
+      throw err
+    }
 
     previousBackedUpVersion = chunkRecord.endVersion
+    backupVersions.push(previousBackedUpVersion)
 
     await cleanBackedUpBlobs(projectId, blobsToBackup)
   }

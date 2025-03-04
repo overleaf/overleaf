@@ -1,5 +1,6 @@
 const { Binary, ObjectId } = require('mongodb')
 const { projects, backedUpBlobs } = require('../mongodb')
+const OError = require('@overleaf/o-error')
 
 // List projects with pending backups older than the specified interval
 function listPendingBackups(timeIntervalMs = 0) {
@@ -79,7 +80,12 @@ async function setBackupVersion(
     }
   )
   if (result.matchedCount === 0 || result.modifiedCount === 0) {
-    throw new Error('Failed to update backup version')
+    throw new OError('Failed to update backup version', {
+      previousBackedUpVersion,
+      currentBackedUpVersion,
+      currentBackedUpAt,
+      result,
+    })
   }
 }
 
