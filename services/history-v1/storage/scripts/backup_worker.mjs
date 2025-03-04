@@ -19,7 +19,9 @@ configureBackup({ concurrency: 50, batchConcurrency: 3, useSecondary: true })
 const backupQueue = new Queue('backup', {
   redis: redisOptions,
   settings: {
-    stalledInterval: 0, // don't check for stalled jobs
+    lockDuration: 15 * 60 * 1000, // 15 minutes
+    lockRenewTime: 60 * 1000, // 1 minute
+    maxStalledCount: 0, // mark stalled jobs as failed
   },
 })
 
@@ -44,6 +46,22 @@ backupQueue.on('waiting', jobId => {
 
 backupQueue.on('error', error => {
   logger.error({ error }, 'queue error')
+})
+
+backupQueue.on('stalled', job => {
+  logger.error({ job }, 'job has stalled')
+})
+
+backupQueue.on('lock-extension-failed', (job, err) => {
+  logger.error({ job, err }, 'lock extension failed')
+})
+
+backupQueue.on('paused', () => {
+  logger.info('queue paused')
+})
+
+backupQueue.on('resumed', () => {
+  logger.info('queue resumed')
 })
 
 // Process jobs
