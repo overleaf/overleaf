@@ -204,3 +204,8 @@
     color: $color;
   }
 }
+
+@mixin input-disabled-styles {
+  background-color: $input-disabled-bg;
+  border-color: $input-disabled-border-color;
+}

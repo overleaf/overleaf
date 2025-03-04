@@ -24,11 +24,6 @@
   }
 
   &:disabled {
-    @mixin input-disabled-styles {
-      background-color: $input-disabled-bg;
-      border-color: $input-disabled-border-color;
-    }
-
     @include input-disabled-styles;
 
     &[type='checkbox']:indeterminate {
@@ -70,6 +65,15 @@
     &::placeholder {
       color: var(--content-disabled);
     }
+  }
+}
+
+// Fake disabled checkbox style
+.readonly-disabled-checkbox input.form-check-input {
+  @include input-disabled-styles;
+
+  &:hover:not(:disabled):checked {
+    @include input-disabled-styles;
   }
 }
 
