@@ -94,9 +94,20 @@ export const ReviewPanelEntry: FC<{
 
           // scroll to line (centered)
           const blockInfo = view.lineBlockAt(position)
+          const coordsAtPos = view.coordsAtPos(position)
+          const coordsAtLineStart = view.coordsAtPos(blockInfo.from)
+          let wrappedLineOffset = 0
+          if (coordsAtPos !== null && coordsAtLineStart !== null) {
+            wrappedLineOffset = coordsAtPos.top - coordsAtLineStart.top
+          }
+
           const editorHeight = view.scrollDOM.getBoundingClientRect().height
           view.scrollDOM.scrollTo({
-            top: blockInfo.top - editorHeight / 2 + blockInfo.height,
+            top:
+              blockInfo.top -
+              editorHeight / 2 +
+              view.defaultLineHeight +
+              wrappedLineOffset,
             behavior: 'smooth',
           })
         })
