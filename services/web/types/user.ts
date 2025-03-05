@@ -58,6 +58,9 @@ export type User = {
     enabled: boolean
   }
   featureUsage?: FeatureUsage
+  planCode?: string
+  isMemberOfGroupSubscription?: boolean
+  hasInstitutionLicence?: boolean
 }
 
 export type LoggedOutUser = {

@@ -772,6 +772,11 @@ const _ProjectController = {
         isOverleafAssistBundleEnabled &&
         (await ProjectController._getAddonPrices(req, res))
 
+      let planCode = subscription?.planCode
+      if (!planCode && !userInNonIndividualSub) {
+        planCode = 'free'
+      }
+
       res.render(template, {
         title: project.name,
         priority_title: true,
@@ -801,6 +806,9 @@ const _ProjectController = {
           labsProgram: user.labsProgram,
           inactiveTutorials: TutorialHandler.getInactiveTutorials(user),
           isAdmin: hasAdminAccess(user),
+          planCode,
+          isMemberOfGroupSubscription: userIsMemberOfGroupSubscription,
+          hasInstitutionLicence: userHasInstitutionLicence,
         },
         userSettings: {
           mode: user.ace.mode,
@@ -876,7 +884,6 @@ const _ProjectController = {
         isOverleafAssistBundleEnabled,
         paywallPlans,
         addonPrices,
-        planCode: subscription?.planCode,
       })
       timer.done()
     } catch (err) {
