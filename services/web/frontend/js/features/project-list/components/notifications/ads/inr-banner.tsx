@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import bannerImage from '../../../images/inr-banner.png'
 import usePersistedState from '../../../../../shared/hooks/use-persisted-state'
 import * as eventTracking from '../../../../../infrastructure/event-tracking'
 import OLModal, {
@@ -94,7 +95,7 @@ export default function INRBanner() {
         <p>
           <img
             alt={t('inr_discount_modal_title')}
-            src="/img/subscriptions/inr-discount-modal.png"
+            src={bannerImage}
             style={{
               width: '100%',
             }}

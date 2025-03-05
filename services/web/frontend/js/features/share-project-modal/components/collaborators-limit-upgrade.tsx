@@ -4,6 +4,7 @@ import { upgradePlan } from '@/main/account-upgrade'
 import { useUserContext } from '@/shared/context/user-context'
 import StartFreeTrialButton from '@/shared/components/start-free-trial-button'
 import OLButton from '@/features/ui/components/ol/ol-button'
+import addMoreEditorsImage from '../images/add-more-editors.svg'
 
 export default function CollaboratorsLimitUpgrade() {
   const { t } = useTranslation()
@@ -13,13 +14,7 @@ export default function CollaboratorsLimitUpgrade() {
     <div className="invite-warning">
       <Notification
         type="info"
-        customIcon={
-          <img
-            src="/img/share-modal/add-more-editors.svg"
-            alt=""
-            aria-hidden="true"
-          />
-        }
+        customIcon={<img src={addMoreEditorsImage} alt="" aria-hidden="true" />}
         title={t('add_more_editors')}
         content={
           <p>

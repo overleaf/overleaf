@@ -247,8 +247,8 @@ module.exports = {
         },
       },
       {
-        // Load images (static files)
-        test: /\.(svg|gif|png|jpg|pdf)$/,
+        // Load images and videos (static files)
+        test: /\.(svg|gif|png|jpg|pdf|mp4)$/,
         type: 'asset/resource',
         generator: {
           filename: 'images/[name]-[contenthash][ext]',

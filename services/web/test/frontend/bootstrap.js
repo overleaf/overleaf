@@ -1,6 +1,6 @@
 // Run babel on tests to allow support for import/export statements in Node
 require('@babel/register')({
-  extensions: ['.ts', '.tsx', '.js', '.jsx', '.mjs', '.svg'],
+  extensions: ['.ts', '.tsx', '.js', '.jsx', '.mjs'],
   plugins: [['module-resolver', { alias: { '^@/(.+)': './frontend/js/\\1' } }]],
 })
 
@@ -85,9 +85,12 @@ globalThis.fetch =
   window.fetch =
     (url, ...options) => fetch(new URL(url, 'http://127.0.0.1'), ...options)
 
-// ignore CSS/LESS files
+// ignore style/image files
 const { addHook } = require('pirates')
-addHook(() => '', { exts: ['.css', '.less'], ignoreNodeModules: false })
+addHook(() => '', {
+  exts: ['.css', '.less', '.svg', '.png', '.gif', '.mp4'],
+  ignoreNodeModules: false,
+})
 
 globalThis.HTMLElement.prototype.scrollIntoView = () => {}
 

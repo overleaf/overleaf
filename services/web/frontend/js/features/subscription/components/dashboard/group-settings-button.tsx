@@ -8,6 +8,7 @@ import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/boots
 import { bsVersion } from '@/features/utils/bootstrap-5'
 import { ManagedGroupSubscription } from '../../../../../../types/subscription/dashboard/subscription'
 import { sendMB } from '../../../../infrastructure/event-tracking'
+import starIcon from '../../images/star-gradient.svg'
 
 function AvailableWithGroupProfessionalBadge() {
   const { t } = useTranslation()
@@ -22,13 +23,7 @@ function AvailableWithGroupProfessionalBadge() {
 
   return (
     <OLTag
-      prepend={
-        <img
-          aria-hidden="true"
-          src="/img/material-icons/star-gradient.svg"
-          alt=""
-        />
-      }
+      prepend={<img aria-hidden="true" src={starIcon} alt="" />}
       contentProps={{
         className: bsVersion({ bs5: 'mw-100' }),
         onClick: handleUpgradeClick,

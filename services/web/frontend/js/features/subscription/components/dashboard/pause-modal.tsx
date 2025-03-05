@@ -13,7 +13,7 @@ import Button from '@/features/ui/components/bootstrap-5/button'
 import { Stack } from 'react-bootstrap-5'
 import { debugConsole } from '@/utils/debugging'
 import * as eventTracking from '../../../../infrastructure/event-tracking'
-import PauseDuck from './pause-duck.svg'
+import PauseDuck from '../../images/pause-duck.svg'
 import GenericErrorAlert from './generic-error-alert'
 import { RecurlySubscription } from '../../../../../../types/subscription/dashboard/subscription'
 

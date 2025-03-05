@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import bannerImage from '../../../images/brl-banner.png'
 import usePersistedState from '../../../../../shared/hooks/use-persisted-state'
 import * as eventTracking from '../../../../../infrastructure/event-tracking'
 import OLModal, {
@@ -96,7 +97,7 @@ export default function BRLBanner() {
         <p>
           <img
             alt={t('latam_discount_modal_title')}
-            src="/img/subscriptions/blr-discount-modal.png"
+            src={bannerImage}
             style={{
               width: '100%',
             }}

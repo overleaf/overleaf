@@ -11,6 +11,7 @@ import {
   DropdownMenu,
   DropdownToggle,
 } from '@/features/ui/components/bootstrap-5/dropdown-menu'
+import createNewProjectImage from '../../images/create-a-new-project.svg'
 
 const CustomDropdownToggle = forwardRef<
   HTMLButtonElement,
@@ -40,7 +41,7 @@ const CustomDropdownToggle = forwardRef<
       <span>{t('create_a_new_project')}</span>
       <img
         className="welcome-message-card-img"
-        src="/img/welcome-page/create-a-new-project.svg"
+        src={createNewProjectImage}
         aria-hidden="true"
         alt=""
       />

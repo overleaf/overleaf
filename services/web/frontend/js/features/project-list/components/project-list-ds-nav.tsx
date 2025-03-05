@@ -19,6 +19,7 @@ import DefaultNavbar from '@/features/ui/components/bootstrap-5/navbar/default-n
 import FatFooter from '@/features/ui/components/bootstrap-5/footer/fat-footer'
 import SidebarDsNav from '@/features/project-list/components/sidebar/sidebar-ds-nav'
 import SystemMessages from '@/shared/components/system-messages'
+import overleafLogo from '@/shared/svgs/overleaf-a-ds-solution-mallard.svg'
 
 export function ProjectListDsNav() {
   const navbarProps = getMeta('ol-navbar')
@@ -53,11 +54,7 @@ export function ProjectListDsNav() {
 
   return (
     <div className="project-ds-nav-page website-redesign">
-      <DefaultNavbar
-        {...navbarProps}
-        customLogo="/img/ol-brand/overleaf-a-ds-solution-mallard.svg"
-        showCloseIcon
-      />
+      <DefaultNavbar {...navbarProps} customLogo={overleafLogo} showCloseIcon />
       <main className="project-list-wrapper">
         <SidebarDsNav />
         <div className="project-ds-nav-content-and-messages">

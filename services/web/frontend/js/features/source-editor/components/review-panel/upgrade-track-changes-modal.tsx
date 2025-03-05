@@ -2,6 +2,8 @@ import { useTranslation } from 'react-i18next'
 import Icon from '../../../../shared/components/icon'
 import { useProjectContext } from '../../../../shared/context/project-context'
 import { useUserContext } from '../../../../shared/context/user-context'
+import teaserVideo from '../../images/teaser-track-changes.mp4'
+import teaserImage from '../../images/teaser-track-changes.gif'
 import { startFreeTrial, upgradePlan } from '@/main/account-upgrade'
 import { memo } from 'react'
 import { useFeatureFlag } from '@/shared/context/split-test-context'
@@ -41,12 +43,9 @@ function UpgradeTrackChangesModal({
         <div className="teaser-video-container">
           {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
           <video className="teaser-video" autoPlay loop>
-            <source
-              src="/img/teasers/track-changes/teaser-track-changes.mp4"
-              type="video/mp4"
-            />
+            <source src={teaserVideo} type="video/mp4" />
             <img
-              src="/img/teasers/track-changes/teaser-track-changes.gif"
+              src={teaserImage}
               alt={t('demonstrating_track_changes_feature')}
             />
           </video>
