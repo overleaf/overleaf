@@ -218,7 +218,7 @@ async function initialize(webRouter, privateApiRouter, publicApiRouter) {
   webRouter.post(
     '/login',
     RateLimiterMiddleware.rateLimit(overleafLoginRateLimiter), // rate limit IP (20 / 60s)
-    RateLimiterMiddleware.loginRateLimitEmail, // rate limit email (10 / 120s)
+    RateLimiterMiddleware.loginRateLimitEmail(), // rate limit email (10 / 120s)
     CaptchaMiddleware.validateCaptcha('login'),
     AuthenticationController.passportLogin
   )
@@ -243,7 +243,7 @@ async function initialize(webRouter, privateApiRouter, publicApiRouter) {
     webRouter.post(
       '/login/legacy',
       RateLimiterMiddleware.rateLimit(overleafLoginRateLimiter), // rate limit IP (20 / 60s)
-      RateLimiterMiddleware.loginRateLimitEmail, // rate limit email (10 / 120s)
+      RateLimiterMiddleware.loginRateLimitEmail(), // rate limit email (10 / 120s)
       CaptchaMiddleware.validateCaptcha('login'),
       AuthenticationController.passportLogin
     )
