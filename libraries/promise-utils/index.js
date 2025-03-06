@@ -13,6 +13,7 @@ module.exports = {
   expressify,
   expressifyErrorHandler,
   promiseMapWithLimit,
+  promiseMapSettledWithLimit,
 }
 
 /**
@@ -263,4 +264,20 @@ function expressifyErrorHandler(fn) {
 async function promiseMapWithLimit(concurrency, array, fn) {
   const limit = pLimit(concurrency)
   return await Promise.all(array.map(x => limit(() => fn(x))))
+}
+
+/**
+ * Map values in `array` with the async function `fn`
+ *
+ * Limit the number of unresolved promises to `concurrency`.
+ *
+ * @template T, U
+ * @param {number} concurrency
+ * @param {Array<T>} array
+ * @param {(T) => Promise<U>} fn
+ * @return {Promise<Array<PromiseSettledResult<U>>>}
+ */
+function promiseMapSettledWithLimit(concurrency, array, fn) {
+  const limit = pLimit(concurrency)
+  return Promise.allSettled(array.map(x => limit(() => fn(x))))
 }
