@@ -9,6 +9,7 @@ import knex from '../lib/knex.js'
 import { client } from '../lib/mongodb.js'
 import { setTimeout } from 'node:timers/promises'
 import logger from '@overleaf/logger'
+import { loadGlobalBlobs } from '../lib/blob_store/index.js'
 
 logger.logger.level('fatal')
 
@@ -137,8 +138,6 @@ const { projectVerifier, verbose } = options
 
 if (verbose) {
   logger.logger.level('debug')
-} else {
-  logger.logger.level('error')
 }
 
 /**
@@ -167,6 +166,8 @@ function displayStats(stats) {
     }
   }
 }
+
+await loadGlobalBlobs()
 
 try {
   const stats = await projectVerifier()
