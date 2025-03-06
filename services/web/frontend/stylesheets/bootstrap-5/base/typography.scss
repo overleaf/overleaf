@@ -63,11 +63,14 @@ h6,
 
 // Peformatted text, sample output, code, keyboard input elements
 // E.g.: Git authentication token
+pre {
+  @include body-base;
+}
+
 code,
 kbd,
-pre,
 samp {
-  @include body-base;
+  font-size: 1em;
 }
 
 .list-style-check-green {
