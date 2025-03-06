@@ -159,6 +159,13 @@ module.exports = {
         },
       },
       {
+        test: /\.txt$/,
+        type: 'asset/source',
+        generator: {
+          filename: 'js/[name]-[contenthash][ext]',
+        },
+      },
+      {
         // Pass Less files through less-loader/css-loader/mini-css-extract-
         // plugin (note: run in reverse order)
         test: /\.less$/,

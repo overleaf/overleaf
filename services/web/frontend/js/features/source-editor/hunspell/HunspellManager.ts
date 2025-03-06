@@ -149,7 +149,7 @@ export class HunspellManager {
       this.hunspellWorker.postMessage({
         type: 'init',
         lang: this.language,
-        learnedWords: this.learnedWords, // TODO: add words
+        learnedWords: this.learnedWords,
         baseAssetPath: this.baseAssetPath,
         dictionariesRoot: this.dictionariesRoot,
       })

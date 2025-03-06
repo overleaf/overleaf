@@ -1,5 +1,6 @@
 import Hunspell from './wasm/hunspell'
 import hunspellWasmPath from './wasm/hunspell.wasm'
+import { buildAdditionalDictionary } from './wordlists/dictionary-additions'
 
 type SpellChecker = {
   spell(words: string[]): { index: number }[]
@@ -52,6 +53,7 @@ const createSpellChecker = async ({
     'number',
     'number',
   ])
+  const addDic = cwrap('Hunspell_add_dic', 'number', ['number', 'number'])
   const addWord = cwrap('Hunspell_add', 'number', ['number', 'number'])
   const removeWord = cwrap('Hunspell_remove', 'number', ['number', 'number'])
   const freeList = cwrap('Hunspell_free_list', 'number', [
@@ -81,11 +83,13 @@ const createSpellChecker = async ({
   const affPtr = stringToNewUTF8('/dictionaries/index.aff')
   const spellPtr = create(affPtr, dicPtr)
 
-  for (const word of learnedWords) {
-    const wordPtr = stringToNewUTF8(word)
-    addWord(spellPtr, wordPtr)
-    _free(wordPtr)
-  }
+  FS.writeFile(
+    '/dictionaries/extra.dic',
+    await buildAdditionalDictionary(lang, learnedWords)
+  )
+  const extraDicPtr = stringToNewUTF8('/dictionaries/extra.dic')
+  addDic(spellPtr, extraDicPtr)
+  _free(extraDicPtr)
 
   const spellChecker: SpellChecker = {
     spell(words) {

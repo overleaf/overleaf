@@ -26,6 +26,12 @@ declare class Hunspell {
   ): (spellPtr: number, suggestionListPtr: number, wordPtr: number) => number
 
   cwrap(
+    method: 'Hunspell_add_dic',
+    output: string,
+    input: string[]
+  ): (spellPtr: number, wordPtr: number) => number
+
+  cwrap(
     method: 'Hunspell_add',
     output: string,
     input: string[]
