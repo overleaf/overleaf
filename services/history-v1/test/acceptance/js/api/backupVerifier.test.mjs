@@ -247,9 +247,7 @@ describe('backupVerifier', function () {
       })
       it('should emit an error message referring to a missing chunk', async function () {
         const stderr = response.stderr
-        expect(stderr).to.include('NotFoundError: no such file')
-        expect(stderr).to.include("bucketName: 'overleaf-test-history-chunks'")
-        expect(stderr).to.include("key: '340/000/000000000000000000/000000000'")
+        expect(stderr).to.include('BackupRPOViolationChunkNotBackedUpError')
       })
     })
     describe('when a project blob is not backed up', function () {
@@ -268,7 +266,9 @@ describe('backupVerifier', function () {
       })
 
       it('includes a BackupCorruptedError in stderr', function () {
-        expect(response.stderr).to.include('BackupCorruptedError: missing blob')
+        expect(response.stderr).to.include(
+          'BackupCorruptedMissingBlobError: missing blob'
+        )
       })
     })
   })

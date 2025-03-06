@@ -80,17 +80,23 @@ export async function verifyBlobs(historyId, hashes, projectCache) {
       })
     } catch (err) {
       if (err instanceof NotFoundError) {
-        throw new BackupCorruptedError('missing blob', { path, hash })
+        throw new BackupCorruptedMissingBlobError('missing blob', {
+          path,
+          hash,
+        })
       }
       throw err
     }
     const backupHash = await blobHash.fromStream(blob.getByteLength(), stream)
     if (backupHash !== hash) {
-      throw new BackupCorruptedError('hash mismatch for backed up blob', {
-        path,
-        hash,
-        backupHash,
-      })
+      throw new BackupCorruptedInvalidBlobError(
+        'hash mismatch for backed up blob',
+        {
+          path,
+          hash,
+          backupHash,
+        }
+      )
     }
   }
 }
@@ -173,7 +179,7 @@ export async function verifyProject(historyId, endTimestamp) {
         )
       } catch (err) {
         if (err instanceof Chunk.NotPersistedError) {
-          throw new BackupRPOViolationError(
+          throw new BackupRPOViolationChunkNotBackedUpError(
             'BackupRPOviolation: chunk not backed up',
             chunk
           )
@@ -236,3 +242,6 @@ export async function healthCheck() {
     await verifyBlob(historyId, hash)
   }
 }
+export class BackupCorruptedMissingBlobError extends BackupCorruptedError {}
+export class BackupCorruptedInvalidBlobError extends BackupCorruptedError {}
+export class BackupRPOViolationChunkNotBackedUpError extends OError {}
