@@ -15,8 +15,6 @@ import ExtendTrialButton from './extend-trial-button'
 import { useLocation } from '../../../../../../../shared/hooks/use-location'
 import { debugConsole } from '@/utils/debugging'
 import OLButton from '@/features/ui/components/ol/ol-button'
-import moment from 'moment'
-import OLNotification from '@/features/ui/components/ol/ol-notification'
 
 const planCodeToDowngradeTo = 'paid-personal'
 
@@ -172,12 +170,6 @@ export function CancelSubscription() {
     return <LoadingSpinner />
   }
 
-  const startDate = moment.utc(personalSubscription.recurly.account.created_at)
-  const pricingChangeEffectiveDate = moment.utc('2025-01-08T12:00:00Z')
-  const displayPricingWarning =
-    personalSubscription.plan.groupPlan &&
-    startDate.isBefore(pricingChangeEffectiveDate)
-
   async function handleCancelSubscription() {
     try {
       await runAsyncCancel(postJSON(cancelSubscriptionUrl))
@@ -191,19 +183,6 @@ export function CancelSubscription() {
 
   return (
     <>
-      {displayPricingWarning && (
-        <OLNotification
-          type="warning"
-          content={
-            <>
-              <h2 className="pricing-warning-heading">
-                {t('cancel_group_price_warning_heading')}
-              </h2>
-              <p>{t('cancel_group_price_warning')}</p>
-            </>
-          }
-        />
-      )}
       <div className="text-center">
         <p>
           <strong>{t('wed_love_you_to_stay')}</strong>

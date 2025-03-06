@@ -322,7 +322,7 @@ describe('<ChangePlanModal />', function () {
     const standardPlanCollaboratorText = '10 collaborators per project'
     const professionalPlanCollaboratorText = 'Unlimited collaborators'
     const educationInputLabel =
-      '40% educational discountI confirm this subscription is for educational purposes (applies to students or faculty using Overleaf for teaching)'
+      'Get a total of 40% off for groups using Overleaf for teaching'
 
     let modal: HTMLElement
     async function openModal() {
@@ -368,15 +368,14 @@ describe('<ChangePlanModal />', function () {
       expect(sizeSelect.value).to.equal('10')
       const sizeOption = within(sizeSelect).getAllByRole('option')
       expect(sizeOption.length).to.equal(groupPlans.sizes.length)
-      within(modal).getByText('40% educational discount')
+      within(modal).getByText(
+        'Get a total of 40% off for groups using Overleaf for teaching'
+      )
 
       const educationalCheckbox = within(modal).getByRole(
         'checkbox'
       ) as HTMLInputElement
       expect(educationalCheckbox.checked).to.be.false
-      within(modal).getByText(
-        'I confirm this subscription is for educational purposes (applies to students or faculty using Overleaf for teaching)'
-      )
 
       within(modal).getByText(
         'Your new subscription will be billed immediately to your current payment method.'
