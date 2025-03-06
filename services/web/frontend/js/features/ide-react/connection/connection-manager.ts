@@ -122,8 +122,15 @@ export class ConnectionManager extends EventTarget {
     socket.on('connectionRejected', err => this.onConnectionRejected(err))
     socket.on('reconnectGracefully', () => this.onReconnectGracefully())
     socket.on('forceDisconnect', (_, delay) => this.onForceDisconnect(delay))
-    socket.on('serverPing', (counter, timestamp) =>
-      this.sendPingResponse(counter, timestamp)
+    socket.on(
+      'serverPing',
+      (counter, timestamp, serverTransport, serverSessionId) =>
+        this.sendPingResponse(
+          counter,
+          timestamp,
+          serverTransport,
+          serverSessionId
+        )
     )
 
     this.tryReconnect()
@@ -504,7 +511,22 @@ export class ConnectionManager extends EventTarget {
     this.externalHeartbeat.currentStart = t0
   }
 
-  private sendPingResponse(counter?: number, timestamp?: number) {
-    this.socket.emit('clientPong', counter, timestamp)
+  private sendPingResponse(
+    counter?: number,
+    timestamp?: number,
+    serverTransport?: string,
+    serverSessionId?: string
+  ) {
+    const clientTransport = this.socket.socket.transport?.name
+    const clientSessionId = this.socket.socket.sessionid
+    this.socket.emit(
+      'clientPong',
+      counter,
+      timestamp,
+      serverTransport,
+      serverSessionId,
+      clientTransport,
+      clientSessionId
+    )
   }
 }

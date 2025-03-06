@@ -263,43 +263,66 @@ module.exports = Router = {
               )
             }
             pingTimestamp = Date.now()
-            client.emit('serverPing', ++pingId, pingTimestamp)
+            client.emit(
+              'serverPing',
+              ++pingId,
+              pingTimestamp,
+              client.transport,
+              client.id
+            )
           }, SERVER_PING_INTERVAL)
         : null
-      client.on('clientPong', function (receivedPingId, sentTimestamp) {
-        pongId = receivedPingId
-        const receivedTimestamp = Date.now()
-        if (receivedPingId !== pingId) {
-          logger.warn(
-            {
-              ...connectionDetails,
-              receivedPingId,
-              pingId,
-              sentTimestamp,
-              receivedTimestamp,
-              latency: receivedTimestamp - sentTimestamp,
-              lastPingTimestamp: pingTimestamp,
-            },
-            'received pong with wrong counter'
-          )
-        } else if (
-          receivedTimestamp - sentTimestamp >
-          SERVER_PING_LATENCY_THRESHOLD
+      client.on(
+        'clientPong',
+        function (
+          receivedPingId,
+          sentTimestamp,
+          serverTransport,
+          serverSessionId,
+          clientTransport,
+          clientSessionId
         ) {
-          logger.warn(
-            {
-              ...connectionDetails,
-              receivedPingId,
-              pingId,
-              sentTimestamp,
-              receivedTimestamp,
-              latency: receivedTimestamp - sentTimestamp,
-              lastPingTimestamp: pingTimestamp,
-            },
-            'received pong with high latency'
-          )
+          pongId = receivedPingId
+          const receivedTimestamp = Date.now()
+          if (
+            receivedPingId !== pingId ||
+            (serverSessionId && serverSessionId !== clientSessionId)
+          ) {
+            logger.warn(
+              {
+                ...connectionDetails,
+                receivedPingId,
+                pingId,
+                sentTimestamp,
+                receivedTimestamp,
+                latency: receivedTimestamp - sentTimestamp,
+                lastPingTimestamp: pingTimestamp,
+                serverTransport,
+                serverSessionId,
+                clientTransport,
+                clientSessionId,
+              },
+              'received pong with wrong counter'
+            )
+          } else if (
+            receivedTimestamp - sentTimestamp >
+            SERVER_PING_LATENCY_THRESHOLD
+          ) {
+            logger.warn(
+              {
+                ...connectionDetails,
+                receivedPingId,
+                pingId,
+                sentTimestamp,
+                receivedTimestamp,
+                latency: receivedTimestamp - sentTimestamp,
+                lastPingTimestamp: pingTimestamp,
+              },
+              'received pong with high latency'
+            )
+          }
         }
-      })
+      )
 
       if (settings.exposeHostname) {
         client.on('debug.getHostname', function (callback) {
