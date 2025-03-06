@@ -12,7 +12,9 @@ import { merge, cloneDeep } from 'lodash'
 import {
   professionalUserData,
   unconfirmedUserData,
+  untrustedUserData,
   unconfirmedCommonsUserData,
+  confirmedUserData,
 } from '../../settings/fixtures/test-user-email-data'
 import {
   notificationDropboxDuplicateProjectNames,
@@ -24,7 +26,9 @@ import {
 } from '../fixtures/notifications-data'
 import Common from '../../../../../frontend/js/features/project-list/components/notifications/groups/common'
 import Institution from '../../../../../frontend/js/features/project-list/components/notifications/groups/institution'
-import ConfirmEmail from '../../../../../frontend/js/features/project-list/components/notifications/groups/confirm-email'
+import ConfirmEmail, {
+  getEmailDeletionDate,
+} from '../../../../../frontend/js/features/project-list/components/notifications/groups/confirm-email'
 import ReconfirmationInfo from '../../../../../frontend/js/features/project-list/components/notifications/groups/affiliation/reconfirmation-info'
 import { ProjectListProvider } from '../../../../../frontend/js/features/project-list/context/project-list-context'
 import { SplitTestProvider } from '@/shared/context/split-test-context'
@@ -597,40 +601,142 @@ describe('<UserNotifications />', function () {
     })
   })
 
+  describe('getEmailDeletionDate', function () {
+    beforeEach(async function () {
+      window.metaAttributesCache.set('ol-userEmails', [
+        confirmedUserData,
+        untrustedUserData,
+      ])
+      this.clock = sinon.useFakeTimers(new Date('2025-07-01').getTime())
+    })
+
+    afterEach(function () {
+      this.clock.restore()
+    })
+
+    it('returns deletion date for unconfirmed email within notification window', function () {
+      window.metaAttributesCache.set('ol-userEmails', [unconfirmedUserData])
+      const signUpDate = '2022-01-01' // Before cutoff '2025-03-03'
+      const emailDeletionDate = getEmailDeletionDate(
+        unconfirmedUserData,
+        signUpDate
+      )
+      expect(emailDeletionDate).to.equal(
+        new Date('2025-09-03').toLocaleDateString()
+      )
+    })
+
+    it('returns false for primary email', function () {
+      const primaryUserData = { ...unconfirmedUserData, default: true }
+      const signUpDate = '2022-01-01'
+      const emailDeletionDate = getEmailDeletionDate(
+        primaryUserData,
+        signUpDate
+      )
+      expect(emailDeletionDate).to.be.false
+    })
+
+    it('returns false for already confirmed email', function () {
+      window.metaAttributesCache.set('ol-userEmails', [confirmedUserData])
+      const signUpDate = '2022-01-01'
+      const emailDeletionDate = getEmailDeletionDate(
+        confirmedUserData,
+        signUpDate
+      )
+      expect(emailDeletionDate).to.be.false
+    })
+  })
+
   describe('<ConfirmEmail/>', function () {
     beforeEach(async function () {
       Object.assign(getMeta('ol-ExposedSettings'), {
         emailConfirmationDisabled: false,
       })
-      window.metaAttributesCache.set('ol-userEmails', [unconfirmedUserData])
+      window.metaAttributesCache.set('ol-userEmails', [
+        confirmedUserData,
+        untrustedUserData,
+      ])
       window.metaAttributesCache.set(
         'ol-usersBestSubscription',
         freeSubscription
       )
+      window.metaAttributesCache.set('ol-user', {
+        signUpDate: new Date('2024-01-01').toISOString(),
+      })
+      this.clock = sinon.useFakeTimers(new Date('2025-07-01').getTime())
     })
 
     afterEach(function () {
       fetchMock.reset()
+      this.clock.restore()
     })
 
-    it('sends successfully', async function () {
+    function testUnconfirmedNotification(
+      userEmails: any[],
+      isPrimary: boolean
+    ) {
+      it(`sends unconfirmed notification email successfully when email is ${isPrimary ? 'primary' : 'secondary'}`, async function () {
+        window.metaAttributesCache.set('ol-userEmails', userEmails)
+
+        renderWithinProjectListProvider(ConfirmEmail)
+        await fetchMock.flush(true)
+        fetchMock.post('/user/emails/resend_confirmation', 200)
+
+        const email = userEmails[0].email
+        const notificationBody = screen.getByTestId('pro-notification-body')
+
+        if (isPrimary) {
+          expect(notificationBody.textContent).to.contain(
+            `Please confirm your primary email address ${email} by clicking on the link in the confirmation email.`
+          )
+        } else {
+          expect(notificationBody.textContent).to.contain(
+            `Please confirm your secondary email address ${email} by clicking on the link in the confirmation email.`
+          )
+        }
+
+        const resendButton = screen.getByRole('button', { name: /resend/i })
+        fireEvent.click(resendButton)
+
+        await waitForElementToBeRemoved(() =>
+          screen.getByRole('button', { name: /resend/i })
+        )
+
+        expect(fetchMock.called()).to.be.true
+        expect(screen.queryByRole('alert')).to.be.null
+      })
+    }
+
+    testUnconfirmedNotification(
+      [{ email: 'baz@overleaf.com', default: true }],
+      true
+    )
+
+    testUnconfirmedNotification(
+      [{ email: 'baz@overleaf.com', default: false }],
+      false
+    )
+
+    it('sends untrusted notification email successfully', async function () {
+      window.metaAttributesCache.set('ol-userEmails', [untrustedUserData])
+
       renderWithinProjectListProvider(ConfirmEmail)
       await fetchMock.flush(true)
       fetchMock.post('/user/emails/resend_confirmation', 200)
 
-      const email = unconfirmedUserData.email
-      const notificationBody = screen.getByTestId('pro-notification-body')
+      const email = untrustedUserData.email
+      const notificationBody = screen.getByTestId(
+        'not-trusted-notification-body'
+      )
       expect(notificationBody.textContent).to.contain(
-        `Please confirm your email ${email} by clicking on the link in the confirmation email`
+        `To enhance the security of your Overleaf account, please reconfirm your secondary email address ${email}.`
       )
 
       const resendButton = screen.getByRole('button', { name: /resend/i })
       fireEvent.click(resendButton)
 
-      expect(screen.queryByRole('button', { name: /resend/i })).to.be.null
-
       await waitForElementToBeRemoved(() =>
-        screen.getByText(/resending confirmation email/i)
+        screen.getByRole('button', { name: /resend/i })
       )
 
       expect(fetchMock.called()).to.be.true
@@ -638,15 +744,21 @@ describe('<UserNotifications />', function () {
     })
 
     it('fails to send', async function () {
+      window.metaAttributesCache.set('ol-userEmails', [unconfirmedUserData])
+
       renderWithinProjectListProvider(ConfirmEmail)
       await fetchMock.flush(true)
       fetchMock.post('/user/emails/resend_confirmation', 500)
 
-      const resendButton = screen.getByRole('button', { name: /resend/i })
+      const resendButtons = screen.getAllByRole('button', { name: /resend/i })
+      const resendButton = resendButtons[0]
       fireEvent.click(resendButton)
+      const notificationBody = screen.getByTestId('pro-notification-body')
 
       await waitForElementToBeRemoved(() =>
-        screen.getByText(/resending confirmation email/i)
+        within(notificationBody).getByTestId(
+          'loading-resending-confirmation-email'
+        )
       )
 
       expect(fetchMock.called()).to.be.true
@@ -689,9 +801,16 @@ describe('<UserNotifications />', function () {
         const notificationBody = within(alert).getByTestId(
           'pro-notification-body'
         )
-        expect(notificationBody.textContent).to.contain(
-          `Please confirm your email ${email} by clicking on the link in the confirmation email`
-        )
+        const isPrimary = unconfirmedCommonsUserData.default
+        if (isPrimary) {
+          expect(notificationBody.textContent).to.contain(
+            `Please confirm your primary email address ${email} by clicking on the link in the confirmation email`
+          )
+        } else {
+          expect(notificationBody.textContent).to.contain(
+            `Please confirm your secondary email address ${email} by clicking on the link in the confirmation email`
+          )
+        }
       })
     }
   })

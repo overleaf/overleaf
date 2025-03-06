@@ -12,6 +12,11 @@ export const unconfirmedUserData: UserEmailData = {
   default: false,
 }
 
+export const untrustedUserData = {
+  ...confirmedUserData,
+  lastConfirmedAt: '2024-01-01T10:59:44.139Z',
+}
+
 export const professionalUserData: UserEmailData & {
   affiliation: Affiliation
 } = {
@@ -112,6 +117,7 @@ export const ssoUserData: UserEmailData = {
 export const fakeUsersData = [
   { ...confirmedUserData },
   { ...unconfirmedUserData },
+  { ...untrustedUserData },
   { ...professionalUserData },
   { ...unconfirmedCommonsUserData },
 ]

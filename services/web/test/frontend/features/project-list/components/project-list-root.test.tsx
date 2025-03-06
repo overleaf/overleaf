@@ -92,7 +92,7 @@ describe('<ProjectListRoot />', function () {
     it('the email confirmation alert is not displayed', async function () {
       expect(
         screen.queryByText(
-          'Please confirm your email test@overleaf.com by clicking on the link in the confirmation email'
+          'Please confirm your primary email address test@overleaf.com by clicking on the link in the confirmation email.'
         )
       ).to.be.null
     })
@@ -1139,14 +1139,6 @@ describe('<ProjectListRoot />', function () {
         const yourProjectFilter = screen.getAllByText('Your Projects')[0]
         fireEvent.click(yourProjectFilter)
         await screen.findByText(copiedProjectName)
-      })
-    })
-
-    describe('notifications', function () {
-      it('email confirmation alert is displayed', async function () {
-        screen.getByText(
-          'Please confirm your email test@overleaf.com by clicking on the link in the confirmation email'
-        )
       })
     })
   })
