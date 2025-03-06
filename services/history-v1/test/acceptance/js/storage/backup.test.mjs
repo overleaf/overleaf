@@ -585,6 +585,40 @@ describe('backup script', function () {
         expect(JSON.parse(chunkContent)).to.deep.equal(rawHistory)
       }
     })
+
+    it('should throw an error if downloading a blob fails', async function () {
+      const blobStore = new BlobStore(historyId)
+      const blob = await blobStore.putFile(
+        testFiles.path('null_characters.txt')
+      )
+      const change = new Change(
+        [Operation.addFile('broken-file', File.fromHash(blob.getHash()))],
+        new Date(),
+        []
+      )
+      // Persist all changes
+      await persistChanges(historyId, [change], limitsToPersistImmediately, 53)
+
+      // Delete the blob from the underlying storage to simulate a failure
+      const bucket = config.get('blobStore.projectBucket')
+      const key = makeProjectKey(historyId, blob.getHash())
+      await persistor.deleteObject(bucket, key)
+
+      // Run backup script - it should fail because the blob is missing
+      let result
+      try {
+        result = await runBackupScript(['--projectId', projectId])
+        expect.fail('Backup script should have failed')
+      } catch (err) {
+        expect(err).to.exist
+        expect(result).to.not.exist
+      }
+
+      // Verify that backup did not complete
+      const newBackupStatus = await getBackupStatus(projectId)
+      expect(newBackupStatus.backupStatus.lastBackedUpVersion).to.equal(50) // backup fails on final chunk
+      expect(newBackupStatus.currentEndVersion).to.equal(54) // backup is incomplete due to missing blob
+    })
   })
 })
 
@@ -617,8 +651,7 @@ async function runBackupScript(args) {
     result = { stdout, stderr, status: code }
   }
   if (result.status !== 0) {
-    console.log(result)
+    throw new Error('backup failed')
   }
-  expect(result.status).to.equal(0)
   return result
 }

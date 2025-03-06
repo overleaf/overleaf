@@ -184,7 +184,8 @@ async function backupBlobs(projectId, historyId, blobs, limiter, persistor) {
       limiter(backupSingleBlob, projectId, historyId, blob, tmpDir, persistor)
     )
 
-    await Promise.allSettled(blobBackupOperations)
+    // Reject if any blob backup fails
+    await Promise.all(blobBackupOperations)
   } finally {
     if (tmpDir) {
       await fs.rm(tmpDir, { recursive: true, force: true })
