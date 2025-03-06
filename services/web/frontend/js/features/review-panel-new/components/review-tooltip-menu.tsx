@@ -60,20 +60,24 @@ const ReviewTooltipMenu: FC = () => {
   }, [tooltipState, previousTooltipState])
 
   const addComment = useCallback(() => {
+    const { main } = view.state.selection
+    if (main.empty) {
+      return
+    }
+
     setReviewPanelOpen(true)
     setView('cur_file')
 
-    const commentPos = state.selection.main.anchor
-    const effects = isCursorNearViewportEdge(view, commentPos)
+    const effects = isCursorNearViewportEdge(view, main.anchor)
       ? [
-          buildAddNewCommentRangeEffect(state.selection.main),
-          EditorView.scrollIntoView(commentPos, { y: 'center' }),
+          buildAddNewCommentRangeEffect(main),
+          EditorView.scrollIntoView(main.anchor, { y: 'center' }),
         ]
-      : [buildAddNewCommentRangeEffect(state.selection.main)]
+      : [buildAddNewCommentRangeEffect(main)]
 
     view.dispatch({ effects })
     setShow(false)
-  }, [setReviewPanelOpen, setView, setShow, view, state.selection.main])
+  }, [setReviewPanelOpen, setView, setShow, view])
 
   useEventListener('add-new-review-comment', addComment)
 
@@ -120,7 +124,10 @@ const ReviewTooltipMenuContent: FC<{ onAddComment: () => void }> = ({
   }, [ranges, state.selection.main])
 
   const acceptChangesHandler = useCallback(() => {
-    const nChanges = numberOfChangesInSelection(ranges, state.selection.main)
+    const nChanges = numberOfChangesInSelection(
+      ranges,
+      view.state.selection.main
+    )
     showGenericConfirmModal({
       message: t('confirm_accept_selected_changes', { count: nChanges }),
       title: t('accept_selected_changes'),
@@ -134,12 +141,15 @@ const ReviewTooltipMenuContent: FC<{ onAddComment: () => void }> = ({
     changeIdsInSelection,
     ranges,
     showGenericConfirmModal,
-    state.selection.main,
+    view,
     t,
   ])
 
   const rejectChangesHandler = useCallback(() => {
-    const nChanges = numberOfChangesInSelection(ranges, state.selection.main)
+    const nChanges = numberOfChangesInSelection(
+      ranges,
+      view.state.selection.main
+    )
     showGenericConfirmModal({
       message: t('confirm_reject_selected_changes', { count: nChanges }),
       title: t('reject_selected_changes'),
@@ -152,7 +162,7 @@ const ReviewTooltipMenuContent: FC<{ onAddComment: () => void }> = ({
     showGenericConfirmModal,
     t,
     ranges,
-    state.selection.main,
+    view,
     rejectChanges,
     changeIdsInSelection,
   ])
