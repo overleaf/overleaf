@@ -128,10 +128,17 @@ async function _sendSubscriptionStartedEvent(userId, eventData) {
 
   if (isTrial) {
     await SubscriptionEmailHandler.sendTrialOnboardingEmail(userId, planCode)
-    await SplitTestHandler.promises.getAssignmentForUser(
+    const cioAssignment = await SplitTestHandler.promises.getAssignmentForUser(
       userId,
       'customer-io-trial-conversion'
     )
+    if (cioAssignment.variant === 'enabled') {
+      AnalyticsManager.setUserPropertyForUserInBackground(
+        userId,
+        'customer-io-integration',
+        true
+      )
+    }
   }
 }
 

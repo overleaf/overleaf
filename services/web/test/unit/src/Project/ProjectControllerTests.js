@@ -182,6 +182,7 @@ describe('ProjectController', function () {
       promises: {
         getAssignment: sinon.stub().resolves({ variant: 'default' }),
         getAssignmentForUser: sinon.stub().resolves({ variant: 'default' }),
+        hasUserBeenAssignedToVariant: sinon.stub().resolves(false),
       },
       getAssignment: sinon.stub().yields(null, { variant: 'default' }),
     }

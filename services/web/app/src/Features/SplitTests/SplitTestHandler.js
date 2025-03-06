@@ -128,9 +128,96 @@ async function getAssignmentForUser(
 }
 
 /**
+ * Returns true if user has already been explicitly assigned to a variant.
+ * This will be false if the user **would** be assigned when calling getAssignment but hasn't yet.
+ *
+ * @param req express request
+ * @param {string} userId the user ID
+ * @param {string} splitTestName the unique name of the split test
+ * @param {string} variant variant name to check
+ * @param {boolean} ignoreVersion users explicitly assigned to a previous version should be treated as if assigned to latest version
+ */
+async function hasUserBeenAssignedToVariant(
+  req,
+  userId,
+  splitTestName,
+  variant,
+  ignoreVersion = false
+) {
+  try {
+    const { session, query = {} } = req
+
+    const splitTest = await _getSplitTest(splitTestName)
+    const currentVersion = SplitTestUtils.getCurrentVersion(splitTest)
+
+    // Check the query string for an override, ignoring an invalid value
+    const queryVariant = query[splitTestName]
+    if (queryVariant === variant) {
+      const variants = await _getVariantNames(splitTestName)
+      if (variants.includes(queryVariant)) {
+        return true
+      }
+    }
+
+    // Allow dev toolbar and session cache to override assignment from DB
+    if (Settings.devToolbar.enabled) {
+      const override = session?.splitTestOverrides?.[splitTestName]
+      if (override === variant) {
+        return true
+      }
+    }
+
+    const canUseSessionCache = session && SessionManager.isUserLoggedIn(session)
+    if (canUseSessionCache) {
+      const cachedVariant = SplitTestSessionHandler.getCachedVariant(
+        session,
+        splitTestName,
+        currentVersion
+      )
+      if (cachedVariant === variant) {
+        return true
+      }
+    }
+
+    // get variant from db, including explicit assignments from previous versions if requested
+    const assignments = await getActiveAssignmentsForUser(
+      userId,
+      true,
+      ignoreVersion
+    )
+    const testAssignment = assignments[splitTestName]
+
+    if (!testAssignment || !testAssignment.assignedAt) {
+      return false
+    }
+
+    // if variant matches and we can use cache, we should persist it in cache
+    if (testAssignment.variantName === variant && testAssignment.assignedAt) {
+      if (canUseSessionCache) {
+        SplitTestSessionHandler.setVariantInCache({
+          session,
+          splitTestName,
+          currentVersion,
+          selectedVariantName: variant,
+          activeForUser: true,
+        })
+      }
+      return true
+    }
+  } catch (error) {
+    logger.error({ err: error }, 'Failed to get split test assignment for user')
+    return false
+  }
+}
+
+/**
  * Get a mapping of the active split test assignments for the given user
  */
-async function getActiveAssignmentsForUser(userId, removeArchived = false) {
+async function getActiveAssignmentsForUser(
+  userId,
+  removeArchived = false,
+  ignoreVersion = false
+) {
   if (!Features.hasFeature('saas')) {
     return {}
   }
@@ -156,9 +243,14 @@ async function getActiveAssignmentsForUser(userId, removeArchived = false) {
       }
       const userAssignments = user.splitTests?.[splitTest.name]
       if (Array.isArray(userAssignments)) {
-        const userAssignment = userAssignments.find(
-          x => x.versionNumber === versionNumber
-        )
+        let userAssignment
+        if (!ignoreVersion) {
+          userAssignment = userAssignments.find(
+            x => x.versionNumber === versionNumber
+          )
+        } else {
+          userAssignment = userAssignments[0]
+        }
         if (userAssignment) {
           assignment.assignedAt = userAssignment.assignedAt
         }
@@ -578,6 +670,7 @@ module.exports = {
   getAssignmentForUser: callbackify(getAssignmentForUser),
   getOneTimeAssignment: callbackify(getOneTimeAssignment),
   getActiveAssignmentsForUser: callbackify(getActiveAssignmentsForUser),
+  hasUserBeenAssignedToVariant: callbackify(hasUserBeenAssignedToVariant),
   setOverrideInSession,
   clearOverridesInSession,
   promises: {
@@ -585,5 +678,6 @@ module.exports = {
     getAssignmentForUser,
     getOneTimeAssignment,
     getActiveAssignmentsForUser,
+    hasUserBeenAssignedToVariant,
   },
 }

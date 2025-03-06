@@ -84,6 +84,7 @@ export interface Meta {
   'ol-currentInstitutionsWithLicence': Institution[]
   'ol-currentManagedUserAdminEmail': string
   'ol-currentUrl': string
+  'ol-customerIoEnabled': boolean
   'ol-debugPdfDetach': boolean
   'ol-detachRole': 'detached' | 'detacher' | ''
   'ol-dictionariesRoot': 'string'

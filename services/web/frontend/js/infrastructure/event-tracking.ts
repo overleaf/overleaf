@@ -47,6 +47,10 @@ export function sendMB(key: string, segmentation: Segmentation = {}) {
     segmentation.page = window.location.pathname
   }
 
+  if (getMeta('ol-customerIoEnabled')) {
+    segmentation['customerio-integration'] = 'enabled'
+  }
+
   sendBeacon(key, segmentation)
 
   if (typeof window.gtag !== 'function') return

@@ -768,6 +768,15 @@ const _ProjectController = {
         isPaywallChangeCompileTimeoutEnabled &&
         (await ProjectController._getPaywallPlansPrices(req, res))
 
+      const customerIoEnabled =
+        await SplitTestHandler.promises.hasUserBeenAssignedToVariant(
+          req,
+          userId,
+          'customer-io-trial-conversion',
+          'enabled',
+          true
+        )
+
       const addonPrices =
         isOverleafAssistBundleEnabled &&
         (await ProjectController._getAddonPrices(req, res))
@@ -883,6 +892,7 @@ const _ProjectController = {
         isPaywallChangeCompileTimeoutEnabled,
         isOverleafAssistBundleEnabled,
         paywallPlans,
+        customerIoEnabled,
         addonPrices,
       })
       timer.done()
