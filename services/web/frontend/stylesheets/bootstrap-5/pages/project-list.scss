@@ -592,6 +592,8 @@ ul.project-list-filters {
     color: var(--neutral-60);
     white-space: pre-line;
 
+    @include body-base;
+
     button.uppy-Dashboard-browse {
       @extend .btn;
       @extend .btn-lg;
