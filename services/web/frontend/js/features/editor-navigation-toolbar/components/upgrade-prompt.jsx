@@ -1,8 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import * as eventTracking from '../../../infrastructure/event-tracking'
 import OLButton from '@/features/ui/components/ol/ol-button'
-import { bsVersion } from '@/features/utils/bootstrap-5'
-import classnames from 'classnames'
 
 function UpgradePrompt() {
   const { t } = useTranslation()
@@ -16,10 +14,7 @@ function UpgradePrompt() {
     <OLButton
       variant="primary"
       size="sm"
-      className={classnames(
-        'toolbar-header-upgrade-prompt',
-        bsVersion({ bs3: 'btn-xs' })
-      )}
+      className="toolbar-header-upgrade-prompt"
       href="/user/subscription/plans?itm_referrer=editor-header-upgrade-prompt"
       target="_blank"
       onClick={handleClick}

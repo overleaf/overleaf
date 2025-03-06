@@ -3,7 +3,6 @@ import {
   ModalContentDecorator,
 } from '../modal-decorators'
 import { FileTreeModalCreateFileFooterContent } from '../../../js/features/file-tree/components/file-tree-create/file-tree-modal-create-file-footer'
-import { bsVersionDecorator } from '../../../../.storybook/utils/with-bootstrap-switcher'
 
 export const Valid = args => <FileTreeModalCreateFileFooterContent {...args} />
 
@@ -58,7 +57,6 @@ export default {
   },
   argTypes: {
     cancel: { action: 'cancel' },
-    ...bsVersionDecorator.argTypes,
   },
   decorators: [ModalFooterDecorator, ModalContentDecorator],
 }

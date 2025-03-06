@@ -1,3 +1,4 @@
+import '../../../../helpers/bootstrap-3'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { ReactElement } from 'react'
 import sinon from 'sinon'

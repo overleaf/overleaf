@@ -1,4 +1,3 @@
-import '../../../helpers/bootstrap-3'
 import OutlineItem from '../../../../../frontend/js/features/outline/components/outline-item'
 
 describe('<OutlineItem />', function () {

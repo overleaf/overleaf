@@ -1,4 +1,3 @@
-import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
 import OLFormGroup from '@/features/ui/components/ol/ol-form-group'
 import OLFormLabel from '@/features/ui/components/ol/ol-form-label'
 import OLFormSelect from '@/features/ui/components/ol/ol-form-select'
@@ -81,23 +80,14 @@ export default function SettingsMenuSelect<T extends PossibleValue = string>({
     >
       <OLFormLabel>{label}</OLFormLabel>
       {loading ? (
-        <BootstrapVersionSwitcher
-          bs3={
-            <p className="loading pull-right">
-              <i className="fa fa-fw fa-spin fa-refresh" />
-            </p>
-          }
-          bs5={
-            <p className="mb-0">
-              <Spinner
-                animation="border"
-                aria-hidden="true"
-                size="sm"
-                role="status"
-              />
-            </p>
-          }
-        />
+        <p className="mb-0">
+          <Spinner
+            animation="border"
+            aria-hidden="true"
+            size="sm"
+            role="status"
+          />
+        </p>
       ) : (
         <OLFormSelect
           size="sm"

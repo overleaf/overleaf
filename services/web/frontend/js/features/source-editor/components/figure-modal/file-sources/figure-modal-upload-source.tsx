@@ -9,7 +9,6 @@ import { Uppy, type UppyFile } from '@uppy/core'
 import XHRUpload from '@uppy/xhr-upload'
 import { refreshProjectMetadata } from '../../../../file-tree/util/api'
 import { useProjectContext } from '../../../../../shared/context/project-context'
-import Icon from '../../../../../shared/components/icon'
 import classNames from 'classnames'
 import { FileRelocator } from '../file-relocator'
 import { useTranslation } from 'react-i18next'
@@ -18,9 +17,7 @@ import { waitForFileTreeUpdate } from '../../../extensions/figure-modal'
 import getMeta from '@/utils/meta'
 import OLFormGroup from '@/features/ui/components/ol/ol-form-group'
 import OLButton from '@/features/ui/components/ol/ol-button'
-import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
 import MaterialIcon from '@/shared/components/material-icon'
-import { isBootstrap5 } from '@/features/utils/bootstrap-5'
 import OLSpinner from '@/features/ui/components/ol/ol-spinner'
 
 /* eslint-disable no-unused-vars */
@@ -277,13 +274,13 @@ export const FileContainer: FC<{
   let icon = ''
   switch (status) {
     case FileUploadStatus.ERROR:
-      icon = isBootstrap5() ? 'cancel' : 'times-circle'
+      icon = 'cancel'
       break
     case FileUploadStatus.SUCCESS:
-      icon = isBootstrap5() ? 'check_circle' : 'check-circle'
+      icon = 'check_circle'
       break
     case FileUploadStatus.NOT_ATTEMPTED:
-      icon = isBootstrap5() ? 'imagesmode' : 'picture-o'
+      icon = 'imagesmode'
       break
   }
 
@@ -299,10 +296,7 @@ export const FileContainer: FC<{
           {status === FileUploadStatus.UPLOADING ? (
             <OLSpinner size="sm" />
           ) : (
-            <BootstrapVersionSwitcher
-              bs3={<Icon type={icon} className="file-icon" />}
-              bs5={<MaterialIcon type={icon} className="align-text-bottom" />}
-            />
+            <MaterialIcon type={icon} className="align-text-bottom" />
           )}
         </span>
         <div className="file-info">
@@ -317,12 +311,7 @@ export const FileContainer: FC<{
           aria-label={t('remove_or_replace_figure')}
           onClick={() => onDelete && onDelete()}
         >
-          <BootstrapVersionSwitcher
-            bs3={
-              <Icon fw type="times-circle" className="file-action file-icon" />
-            }
-            bs5={<MaterialIcon type="cancel" />}
-          />
+          <MaterialIcon type="cancel" />
         </OLButton>
       </div>
     </div>

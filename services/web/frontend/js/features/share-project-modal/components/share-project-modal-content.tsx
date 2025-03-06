@@ -1,5 +1,4 @@
 import { useTranslation } from 'react-i18next'
-import Icon from '@/shared/components/icon'
 import { useEditorContext } from '@/shared/context/editor-context'
 import { lazy, Suspense } from 'react'
 import { FullSizeLoadingSpinner } from '@/shared/components/loading-spinner'
@@ -12,8 +11,6 @@ import OLModal, {
 } from '@/features/ui/components/ol/ol-modal'
 import OLNotification from '@/features/ui/components/ol/ol-notification'
 import OLButton from '@/features/ui/components/ol/ol-button'
-import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
-import { bsVersion } from '@/features/utils/bootstrap-5'
 import { Spinner } from 'react-bootstrap-5'
 
 const ReadOnlyTokenLink = lazy(() =>
@@ -70,18 +67,13 @@ export default function ShareProjectModalContent({
       </OLModalBody>
 
       <OLModalFooter>
-        <div className={bsVersion({ bs3: 'pull-left', bs5: 'me-auto' })}>
+        <div className="me-auto">
           {inFlight && (
-            <BootstrapVersionSwitcher
-              bs3={<Icon type="refresh" spin />}
-              bs5={
-                <Spinner
-                  animation="border"
-                  aria-hidden="true"
-                  size="sm"
-                  role="status"
-                />
-              }
+            <Spinner
+              animation="border"
+              aria-hidden="true"
+              size="sm"
+              role="status"
             />
           )}
         </div>

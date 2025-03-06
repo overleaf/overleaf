@@ -1,8 +1,6 @@
 import { useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import Icon from '../../../../shared/components/icon'
 import { useFileTreeMainContext } from '../../contexts/file-tree-main'
-import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
 import MaterialIcon from '@/shared/components/material-icon'
 
 function FileTreeItemMenu({ id, name }: { id: string; name: string }) {
@@ -36,10 +34,7 @@ function FileTreeItemMenu({ id, name }: { id: string; name: string }) {
         aria-expanded={isMenuOpen}
         aria-label={t('open_action_menu', { name })}
       >
-        <BootstrapVersionSwitcher
-          bs3={<Icon type="ellipsis-v" accessibilityLabel={t('menu')} />}
-          bs5={<MaterialIcon type="more_vert" accessibilityLabel={t('menu')} />}
-        />
+        <MaterialIcon type="more_vert" accessibilityLabel={t('menu')} />
       </button>
     </div>
   )

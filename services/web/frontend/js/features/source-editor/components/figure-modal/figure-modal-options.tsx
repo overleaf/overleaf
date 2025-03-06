@@ -1,5 +1,4 @@
 import { FC } from 'react'
-import Icon from '@/shared/components/icon'
 import {
   useFigureModalContext,
   useFigureModalExistingFigureContext,
@@ -12,8 +11,6 @@ import OLFormText from '@/features/ui/components/ol/ol-form-text'
 import OLToggleButtonGroup from '@/features/ui/components/ol/ol-toggle-button-group'
 import OLToggleButton from '@/features/ui/components/ol/ol-toggle-button'
 import MaterialIcon from '@/shared/components/material-icon'
-import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
-import { bsVersion } from '@/features/utils/bootstrap-5'
 
 export const FigureModalFigureOptions: FC = () => {
   const { t } = useTranslation()
@@ -26,10 +23,8 @@ export const FigureModalFigureOptions: FC = () => {
       <OLFormGroup>
         <OLFormCheckbox
           id="figure-modal-caption"
-          data-cy="include-caption-option"
           defaultChecked={includeCaption}
           onChange={event => dispatch({ includeCaption: event.target.checked })}
-          className={bsVersion({ bs3: 'figure-modal-checkbox-input' })}
           label={t('include_caption')}
         />
       </OLFormGroup>
@@ -39,15 +34,16 @@ export const FigureModalFigureOptions: FC = () => {
           data-cy="include-label-option"
           defaultChecked={includeLabel}
           onChange={event => dispatch({ includeLabel: event.target.checked })}
-          className={bsVersion({ bs3: 'figure-modal-checkbox-input' })}
           label={
             <span className="figure-modal-label-content">
               {t('include_label')}
-              <OLFormText className={bsVersion({ bs3: 'mt-1 text-muted' })}>
-                {t(
-                  'used_when_referring_to_the_figure_elsewhere_in_the_document'
-                )}
-              </OLFormText>
+              <span aria-hidden="true">
+                <OLFormText>
+                  {t(
+                    'used_when_referring_to_the_figure_elsewhere_in_the_document'
+                  )}
+                </OLFormText>
+              </span>
             </span>
           }
         />
@@ -63,15 +59,7 @@ export const FigureModalFigureOptions: FC = () => {
                 overlayProps={{ delay: 0, placement: 'top' }}
               >
                 <span>
-                  <BootstrapVersionSwitcher
-                    bs3={<Icon type="exclamation-triangle" fw />}
-                    bs5={
-                      <MaterialIcon
-                        type="warning"
-                        className="align-text-bottom"
-                      />
-                    }
-                  />
+                  <MaterialIcon type="warning" className="align-text-bottom" />
                 </span>
               </OLTooltip>
             ) : (
@@ -83,12 +71,7 @@ export const FigureModalFigureOptions: FC = () => {
                 overlayProps={{ delay: 0, placement: 'bottom' }}
               >
                 <span>
-                  <BootstrapVersionSwitcher
-                    bs3={<Icon type="question-circle" fw />}
-                    bs5={
-                      <MaterialIcon type="help" className="align-text-bottom" />
-                    }
-                  />
+                  <MaterialIcon type="help" className="align-text-bottom" />
                 </span>
               </OLTooltip>
             )}

@@ -1,4 +1,3 @@
-import '../../helpers/bootstrap-3'
 import TokenAccessPage from '@/features/token-access/components/token-access-root'
 import { location } from '@/shared/components/location'
 

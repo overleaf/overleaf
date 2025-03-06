@@ -1,4 +1,3 @@
-import '../../../../helpers/bootstrap-3'
 import FileTreeitemInner from '../../../../../../frontend/js/features/file-tree/components/file-tree-item/file-tree-item-inner'
 import FileTreeContextMenu from '../../../../../../frontend/js/features/file-tree/components/file-tree-context-menu'
 import { EditorProviders } from '../../../../helpers/editor-providers'

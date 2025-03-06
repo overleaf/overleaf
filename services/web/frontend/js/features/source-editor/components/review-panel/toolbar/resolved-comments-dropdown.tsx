@@ -1,6 +1,5 @@
 import { useTranslation } from 'react-i18next'
 import { useState, useMemo, useCallback } from 'react'
-import Icon from '../../../../../shared/components/icon'
 import ResolvedCommentsScroller from './resolved-comments-scroller'
 import classnames from 'classnames'
 import {
@@ -18,7 +17,6 @@ import { useFileTreeData } from '@/shared/context/file-tree-data-context'
 import LoadingSpinner from '@/shared/components/loading-spinner'
 import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
 import MaterialIcon from '@/shared/components/material-icon'
-import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
 
 export interface FilteredResolvedComments
   extends ReviewPanelResolvedCommentThread {
@@ -110,10 +108,7 @@ function ResolvedCommentsDropdown() {
           onClick={handleResolvedCommentsClick}
           aria-label={t('resolved_comments')}
         >
-          <BootstrapVersionSwitcher
-            bs3={<Icon type="inbox" />}
-            bs5={<MaterialIcon type="inbox" />}
-          />
+          <MaterialIcon type="inbox" />
         </button>
       </OLTooltip>
 

@@ -4,9 +4,7 @@ import { useTranslation } from 'react-i18next'
 import HistoryFileTreeItem from './history-file-tree-item'
 import HistoryFileTreeFolderList from './history-file-tree-folder-list'
 
-import Icon from '../../../../shared/components/icon'
 import type { HistoryDoc, HistoryFileTree } from '../../utils/file-tree'
-import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
 import MaterialIcon from '@/shared/components/material-icon'
 
 type HistoryFileTreeFolderProps = {
@@ -43,46 +41,22 @@ function HistoryFileTreeFolder({
   })
 
   const icons = (
-    <BootstrapVersionSwitcher
-      bs3={
-        <>
-          <button
-            onClick={() => setExpanded(!expanded)}
-            aria-label={expanded ? t('collapse') : t('expand')}
-            className="history-file-tree-folder-button"
-          >
-            <Icon
-              type={expanded ? 'angle-down' : 'angle-right'}
-              fw
-              className="file-tree-expand-icon"
-            />
-          </button>
-          <Icon
-            type={expanded ? 'folder-open' : 'folder'}
-            fw
-            className="file-tree-folder-icon"
-          />
-        </>
-      }
-      bs5={
-        <>
-          <button
-            onClick={() => setExpanded(!expanded)}
-            aria-label={expanded ? t('collapse') : t('expand')}
-            className="history-file-tree-folder-button"
-          >
-            <MaterialIcon
-              type={expanded ? 'expand_more' : 'chevron_right'}
-              className="file-tree-expand-icon"
-            />
-          </button>
-          <MaterialIcon
-            type={expanded ? 'folder_open' : 'folder'}
-            className="file-tree-folder-icon"
-          />
-        </>
-      }
-    />
+    <>
+      <button
+        onClick={() => setExpanded(!expanded)}
+        aria-label={expanded ? t('collapse') : t('expand')}
+        className="history-file-tree-folder-button"
+      >
+        <MaterialIcon
+          type={expanded ? 'expand_more' : 'chevron_right'}
+          className="file-tree-expand-icon"
+        />
+      </button>
+      <MaterialIcon
+        type={expanded ? 'folder_open' : 'folder'}
+        className="file-tree-folder-icon"
+      />
+    </>
   )
 
   return (

@@ -25,7 +25,6 @@ function PdfPreviewError({ error }: { error: string }) {
                   <OLButton
                     variant="info"
                     size="sm"
-                    bs3Props={{ bsSize: 'xsmall' }}
                     onClick={() => startCompile()}
                   />,
                 ]}
@@ -284,7 +283,6 @@ function TimedOutLogEntry() {
                   <OLButton
                     variant="info"
                     size="sm"
-                    bs3Props={{ bsSize: 'xsmall' }}
                     onClick={handleEnableStopOnFirstErrorClick}
                   />,
                 ]}

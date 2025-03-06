@@ -51,7 +51,6 @@ export const RestoreProjectModal = ({
           onClick={onRestore}
           disabled={isRestoring}
           isLoading={isRestoring}
-          bs3Props={{ loading: isRestoring ? t('restoring') : t('restore') }}
         >
           {t('restore')}
         </OLButton>

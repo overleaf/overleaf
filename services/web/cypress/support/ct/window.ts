@@ -10,6 +10,7 @@ export function resetMeta() {
     hasLinkedProjectOutputFileFeature: true,
     hasLinkUrlFeature: true,
   })
+  window.metaAttributesCache.set('ol-bootstrapVersion', 5)
 }
 
 // Populate meta for top-level access in modules on import

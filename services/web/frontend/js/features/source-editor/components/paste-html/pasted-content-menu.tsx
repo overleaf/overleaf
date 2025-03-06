@@ -14,7 +14,6 @@ import { PastedContent } from '../../extensions/visual/pasted-content'
 import useEventListener from '../../../../shared/hooks/use-event-listener'
 import { FeedbackBadge } from '@/shared/components/feedback-badge'
 import { sendMB } from '@/infrastructure/event-tracking'
-import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
 import MaterialIcon from '@/shared/components/material-icon'
 import OLOverlay from '@/features/ui/components/ol/ol-overlay'
 import OLPopover from '@/features/ui/components/ol/ol-popover'
@@ -101,20 +100,8 @@ export const PastedContentMenu: FC<{
         onClick={() => setMenuOpen(isOpen => !isOpen)}
         style={{ userSelect: 'none' }}
       >
-        <BootstrapVersionSwitcher
-          bs3={
-            <>
-              <Icon type="clipboard" fw />
-              <Icon type="caret-down" fw />
-            </>
-          }
-          bs5={
-            <>
-              <MaterialIcon type="content_copy" />
-              <MaterialIcon type="expand_more" />
-            </>
-          }
-        />
+        <MaterialIcon type="content_copy" />
+        <MaterialIcon type="expand_more" />
       </button>
 
       {menuOpen && (

@@ -2,11 +2,9 @@ import { useTranslation } from 'react-i18next'
 import { useDetachCompileContext as useCompileContext } from '../../../shared/context/detach-compile-context'
 import { useProjectContext } from '@/shared/context/project-context'
 import { sendMB, isSmallDevice } from '@/infrastructure/event-tracking'
-import Icon from '@/shared/components/icon'
 import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
 import OLButton from '@/features/ui/components/ol/ol-button'
 import MaterialIcon from '@/shared/components/material-icon'
-import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
 
 function PdfHybridDownloadButton() {
   const { pdfDownloadUrl } = useCompileContext()
@@ -51,10 +49,7 @@ function PdfHybridDownloadButton() {
         style={{ pointerEvents: 'auto' }}
         aria-label={t('download_pdf')}
       >
-        <BootstrapVersionSwitcher
-          bs3={<Icon type="download" fw />}
-          bs5={<MaterialIcon type="download" />}
-        />
+        <MaterialIcon type="download" />
       </OLButton>
     </OLTooltip>
   )

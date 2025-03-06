@@ -11,7 +11,6 @@ import importOverleafModules from '../../../../../macros/import-overleaf-module.
 import { lazy, Suspense } from 'react'
 import { FullSizeLoadingSpinner } from '@/shared/components/loading-spinner'
 import getMeta from '@/utils/meta'
-import { bsVersion } from '@/features/utils/bootstrap-5'
 
 const createFileModeModules = importOverleafModules('createFileModes')
 
@@ -40,7 +39,7 @@ export default function FileTreeModalCreateFileBody() {
             <ul className="list-unstyled">
               <FileTreeModalCreateFileMode
                 mode="doc"
-                icon={bsVersion({ bs5: 'description', bs3: 'file' })}
+                icon="description"
                 label={t('new_file')}
               />
 
@@ -54,7 +53,7 @@ export default function FileTreeModalCreateFileBody() {
                 hasLinkedProjectOutputFileFeature) && (
                 <FileTreeModalCreateFileMode
                   mode="project"
-                  icon={bsVersion({ bs5: 'folder_open', bs3: 'folder-open' })}
+                  icon="folder_open"
                   label={t('from_another_project')}
                 />
               )}

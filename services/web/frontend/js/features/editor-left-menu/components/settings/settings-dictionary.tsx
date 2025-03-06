@@ -17,7 +17,6 @@ export default function SettingsDictionary() {
         variant="secondary"
         size="sm"
         onClick={() => setShowModal(true)}
-        bs3Props={{ bsSize: 'xsmall' }}
       >
         {t('edit')}
       </OLButton>

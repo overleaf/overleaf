@@ -1,6 +1,5 @@
 import MaterialIcon from '@/shared/components/material-icon'
 import unfilledIconTypes from '../../../../frontend/fonts/material-symbols/unfilled-symbols.mjs'
-import '../../helpers/bootstrap-3'
 
 const FONT_SIZE = 40
 

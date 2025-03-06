@@ -1,4 +1,3 @@
-import '../../../helpers/bootstrap-3'
 import OutlineRoot from '../../../../../frontend/js/features/outline/components/outline-root'
 
 describe('<OutlineRoot />', function () {

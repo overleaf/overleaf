@@ -38,10 +38,6 @@ function ToolbarRestoreFileToVersionButton({
         size="sm"
         isLoading={isLoading}
         onClick={() => setShowConfirmModal(true)}
-        bs3Props={{
-          bsSize: 'xsmall',
-          loading: isLoading ? `${t('restoring')}…` : t('restore_file_version'),
-        }}
       >
         {t('restore_file_version')}
       </OLButton>

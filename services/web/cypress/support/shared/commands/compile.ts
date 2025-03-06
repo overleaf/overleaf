@@ -84,11 +84,7 @@ export const waitForCompile = ({ prefix = 'compile', pdf = false } = {}) => {
 }
 
 export const interceptDeferredCompile = (beforeResponse?: () => void) => {
-  let resolveDeferredCompile: (value?: unknown) => void
-
-  const promise = new Promise(resolve => {
-    resolveDeferredCompile = resolve
-  })
+  const { promise, resolve } = Promise.withResolvers<void>()
 
   cy.intercept(
     { method: 'POST', url: '/project/*/compile*', times: 1 },
@@ -148,6 +144,5 @@ export const interceptDeferredCompile = (beforeResponse?: () => void) => {
     { fixture: 'build/output.blg' }
   ).as(`compile-blg`)
 
-  // @ts-ignore
-  return cy.wrap(resolveDeferredCompile)
+  return cy.wrap(resolve)
 }

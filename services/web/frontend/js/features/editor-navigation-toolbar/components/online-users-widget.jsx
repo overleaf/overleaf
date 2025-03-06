@@ -1,7 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import { useTranslation } from 'react-i18next'
-import { Dropdown as BS3Dropdown, MenuItem } from 'react-bootstrap'
 import {
   Dropdown,
   DropdownHeader,
@@ -9,11 +8,8 @@ import {
   DropdownMenu,
   DropdownToggle,
 } from '@/features/ui/components/bootstrap-5/dropdown-menu'
-import Icon from '../../../shared/components/icon'
 import { getBackgroundColorForUserId } from '@/shared/utils/colors'
-import ControlledDropdown from '../../../shared/components/controlled-dropdown'
 import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
-import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
 import MaterialIcon from '@/shared/components/material-icon'
 
 function OnlineUsersWidget({ onlineUsers, goToUser }) {
@@ -23,57 +19,28 @@ function OnlineUsersWidget({ onlineUsers, goToUser }) {
 
   if (shouldDisplayDropdown) {
     return (
-      <BootstrapVersionSwitcher
-        bs3={
-          <ControlledDropdown
-            id="online-users"
-            className="online-users"
-            pullRight
-          >
-            <DropDownToggleButton
-              bsRole="toggle"
-              onlineUserCount={onlineUsers.length}
-            />
-            <BS3Dropdown.Menu>
-              <MenuItem header>{t('connected_users')}</MenuItem>
-              {onlineUsers.map((user, index) => (
-                <MenuItem
-                  as="button"
-                  key={`${user.user_id}_${index}`}
-                  eventKey={user}
-                  onSelect={goToUser}
-                >
-                  <UserIcon user={user} showName />
-                </MenuItem>
-              ))}
-            </BS3Dropdown.Menu>
-          </ControlledDropdown>
-        }
-        bs5={
-          <Dropdown id="online-users" className="online-users" align="end">
-            <DropdownToggle
-              as={DropDownToggleButton}
-              onlineUserCount={onlineUsers.length}
-            />
-            <DropdownMenu>
-              <DropdownHeader aria-hidden="true">
-                {t('connected_users')}
-              </DropdownHeader>
-              {onlineUsers.map((user, index) => (
-                <li role="none" key={`${user.user_id}_${index}`}>
-                  <DropdownItem
-                    as="button"
-                    tabIndex={-1}
-                    onClick={() => goToUser(user)}
-                  >
-                    <UserIcon user={user} showName />
-                  </DropdownItem>
-                </li>
-              ))}
-            </DropdownMenu>
-          </Dropdown>
-        }
-      />
+      <Dropdown id="online-users" className="online-users" align="end">
+        <DropdownToggle
+          as={DropDownToggleButton}
+          onlineUserCount={onlineUsers.length}
+        />
+        <DropdownMenu>
+          <DropdownHeader aria-hidden="true">
+            {t('connected_users')}
+          </DropdownHeader>
+          {onlineUsers.map((user, index) => (
+            <li role="none" key={`${user.user_id}_${index}`}>
+              <DropdownItem
+                as="button"
+                tabIndex={-1}
+                onClick={() => goToUser(user)}
+              >
+                <UserIcon user={user} showName />
+              </DropdownItem>
+            </li>
+          ))}
+        </DropdownMenu>
+      </Dropdown>
     )
   } else {
     return (
@@ -150,10 +117,7 @@ const DropDownToggleButton = React.forwardRef((props, ref) => {
         ref={ref}
       >
         <strong>{props.onlineUserCount}</strong>&nbsp;
-        <BootstrapVersionSwitcher
-          bs3={<Icon type="users" fw />}
-          bs5={<MaterialIcon type="groups" />}
-        />
+        <MaterialIcon type="groups" />
       </button>
     </OLTooltip>
   )

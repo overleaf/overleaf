@@ -1,10 +1,8 @@
 import classnames from 'classnames'
 import PropTypes from 'prop-types'
-import Icon from '../../../../shared/components/icon'
 import { useFileTreeActionable } from '../../contexts/file-tree-actionable'
 import * as eventTracking from '../../../../infrastructure/event-tracking'
 import OLButton from '@/features/ui/components/ol/ol-button'
-import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
 import MaterialIcon from '@/shared/components/material-icon'
 
 export default function FileTreeModalCreateFileMode({ mode, icon, label }) {
@@ -22,10 +20,7 @@ export default function FileTreeModalCreateFileMode({ mode, icon, label }) {
         onClick={handleClick}
         className="modal-new-file-mode"
       >
-        <BootstrapVersionSwitcher
-          bs3={<Icon type={icon} fw />}
-          bs5={<MaterialIcon type={icon} />}
-        />
+        <MaterialIcon type={icon} />
         &nbsp;
         {label}
       </OLButton>

@@ -83,12 +83,7 @@ function FileTreeModalCreateFolder() {
 
       <OLModalFooter>
         {inFlight ? (
-          <OLButton
-            variant="primary"
-            disabled
-            isLoading={inFlight}
-            bs3Props={{ loading: `${t('creating')}…` }}
-          />
+          <OLButton variant="primary" disabled isLoading={inFlight} />
         ) : (
           <>
             <OLButton variant="secondary" onClick={handleHide}>

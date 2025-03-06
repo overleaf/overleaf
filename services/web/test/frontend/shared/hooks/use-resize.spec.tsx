@@ -1,4 +1,3 @@
-import '../../helpers/bootstrap-3'
 import {
   usePersistedResize,
   useResize,

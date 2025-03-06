@@ -126,8 +126,8 @@ const preview: Preview = {
       // render stories in iframes, to isolate modals
       inlineStories: false,
     },
-    // Default to Bootstrap 3 styles
-    bootstrap5: false,
+    // Default to Bootstrap 5 styles
+    bootstrap5: true,
   },
   globalTypes: {
     theme: {
@@ -166,10 +166,10 @@ const preview: Preview = {
       const { bootstrap3Style, bootstrap5Style } = context.loaded
       const bootstrapVersion = Number(
         context.args[bootstrapVersionArg] ||
-          (context.parameters.bootstrap5 ? 5 : 3)
+          (context.parameters.bootstrap5 === false ? 3 : 5)
       ) as 3 | 5
       const activeStyle =
-        bootstrapVersion === 5 ? bootstrap5Style : bootstrap3Style
+        bootstrapVersion === 3 ? bootstrap3Style : bootstrap5Style
 
       resetMeta(bootstrapVersion)
 

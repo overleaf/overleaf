@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next'
 import { useShareProjectContext } from './share-project-modal'
 import TransferOwnershipModal from './transfer-ownership-modal'
 import { removeMemberFromProject, updateMember } from '../utils/api'
-import Icon from '@/shared/components/icon'
 import { useProjectContext } from '@/shared/context/project-context'
 import { sendMB } from '@/infrastructure/event-tracking'
 import { Select } from '@/shared/components/select'
@@ -15,9 +14,6 @@ import OLButton from '@/features/ui/components/ol/ol-button'
 import OLFormGroup from '@/features/ui/components/ol/ol-form-group'
 import OLCol from '@/features/ui/components/ol/ol-col'
 import MaterialIcon from '@/shared/components/material-icon'
-import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
-import { bsVersion } from '@/features/utils/bootstrap-5'
-import classnames from 'classnames'
 import getMeta from '@/utils/meta'
 import { useUserContext } from '@/shared/context/user-context'
 
@@ -135,7 +131,6 @@ export default function EditMember({
 
   return (
     <form
-      className={bsVersion({ bs3: 'form-horizontal' })}
       id="share-project-form"
       onSubmit={e => {
         e.preventDefault()
@@ -144,35 +139,19 @@ export default function EditMember({
         }
       }}
     >
-      <OLFormGroup
-        className={classnames('project-member', bsVersion({ bs5: 'row' }))}
-      >
+      <OLFormGroup className="project-member row">
         <OLCol xs={7}>
           <div className="project-member-email-icon">
-            <BootstrapVersionSwitcher
-              bs3={
-                <Icon
-                  type={
-                    shouldWarnMember() || member.pendingEditor
-                      ? 'warning'
-                      : 'user'
-                  }
-                  fw
-                />
+            <MaterialIcon
+              type={
+                shouldWarnMember() || member.pendingEditor
+                  ? 'warning'
+                  : 'person'
               }
-              bs5={
-                <MaterialIcon
-                  type={
-                    shouldWarnMember() || member.pendingEditor
-                      ? 'warning'
-                      : 'person'
-                  }
-                  className={
-                    shouldWarnMember() || member.pendingEditor
-                      ? 'project-member-warning'
-                      : undefined
-                  }
-                />
+              className={
+                shouldWarnMember() || member.pendingEditor
+                  ? 'project-member-warning'
+                  : undefined
               }
             />
             <div className="email-warning">
@@ -200,15 +179,7 @@ export default function EditMember({
 
           <div className="project-member-select">
             {hasBeenDowngraded && !confirmRemoval && (
-              <BootstrapVersionSwitcher
-                bs3={<Icon type="warning" fw />}
-                bs5={
-                  <MaterialIcon
-                    type="warning"
-                    className="project-member-warning"
-                  />
-                }
-              />
+              <MaterialIcon type="warning" className="project-member-warning" />
             )}
 
             <SelectPrivilege

@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next'
 import ToggleWidget from './toggle-widget'
 import BulkActions from '../entries/bulk-actions-entry/bulk-actions'
 import AddCommentButton from '../add-comment-button'
-import Icon from '../../../../../shared/components/icon'
 import {
   useReviewPanelUpdaterFnsContext,
   useReviewPanelValueContext,
@@ -16,7 +15,6 @@ import useScopeEventListener from '@/shared/hooks/use-scope-event-listener'
 import { memo, useCallback } from 'react'
 import { useLayoutContext } from '@/shared/context/layout-context'
 import classnames from 'classnames'
-import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
 import MaterialIcon from '@/shared/components/material-icon'
 
 function EditorWidgets() {
@@ -73,18 +71,12 @@ function EditorWidgets() {
           {nChanges > 1 && permissions.write && (
             <>
               <BulkActions.Button onClick={handleShowBulkAcceptDialog}>
-                <BootstrapVersionSwitcher
-                  bs3={<Icon type="check" />}
-                  bs5={<MaterialIcon type="check" />}
-                />
+                <MaterialIcon type="check" />
                 &nbsp;
                 {t('accept_all')} ({nChanges})
               </BulkActions.Button>
               <BulkActions.Button onClick={handleShowBulkRejectDialog}>
-                <BootstrapVersionSwitcher
-                  bs3={<Icon type="times" />}
-                  bs5={<MaterialIcon type="close" />}
-                />
+                <MaterialIcon type="close" />
                 &nbsp;
                 {t('reject_all')} ({nChanges})
               </BulkActions.Button>
@@ -95,10 +87,7 @@ function EditorWidgets() {
             !isRestrictedTokenMember &&
             currentDocEntries?.['add-comment'] && (
               <AddCommentButton onClick={handleAddNewCommentClick}>
-                <BootstrapVersionSwitcher
-                  bs3={<Icon type="comment" />}
-                  bs5={<MaterialIcon type="mode_comment" />}
-                />
+                <MaterialIcon type="mode_comment" />
                 &nbsp;
                 {t('add_comment')}
               </AddCommentButton>

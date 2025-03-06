@@ -1,8 +1,6 @@
 import { useTranslation } from 'react-i18next'
-import Icon from '../../../shared/components/icon'
 import * as eventTracking from '../../../infrastructure/event-tracking'
 import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
-import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
 import MaterialIcon from '@/shared/components/material-icon'
 
 function BackToProjectsButton() {
@@ -23,21 +21,10 @@ function BackToProjectsButton() {
             eventTracking.sendMB('navigation-clicked-home')
           }}
         >
-          <BootstrapVersionSwitcher
-            bs3={
-              <Icon
-                type="home"
-                fw
-                accessibilityLabel={t('back_to_your_projects')}
-              />
-            }
-            bs5={
-              <MaterialIcon
-                type="home"
-                className="align-text-bottom"
-                accessibilityLabel={t('back_to_your_projects')}
-              />
-            }
+          <MaterialIcon
+            type="home"
+            className="align-text-bottom"
+            accessibilityLabel={t('back_to_your_projects')}
           />
         </a>
       </div>

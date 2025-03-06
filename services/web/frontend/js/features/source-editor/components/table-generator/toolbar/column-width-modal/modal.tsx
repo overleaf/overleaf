@@ -16,7 +16,6 @@ import { setColumnWidth } from '../commands'
 import { UNITS, WidthSelection, WidthUnit } from './column-width'
 import { useCodeMirrorViewContext } from '../../../codemirror-context'
 import { CopyToClipboard } from '@/shared/components/copy-to-clipboard'
-import Icon from '@/shared/components/icon'
 import OLModal, {
   OLModalBody,
   OLModalFooter,
@@ -31,9 +30,7 @@ import OLFormControl from '@/features/ui/components/ol/ol-form-control'
 import OLCol from '@/features/ui/components/ol/ol-col'
 import OLRow from '@/features/ui/components/ol/ol-row'
 import OLForm from '@/features/ui/components/ol/ol-form'
-import { bsVersion } from '@/features/utils/bootstrap-5'
 import MaterialIcon from '@/shared/components/material-icon'
-import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
 
 type UnitDescription = { label: string; tooltip?: string } | undefined
 
@@ -145,7 +142,7 @@ const ColumnWidthModalBody = () => {
       </OLModalHeader>
       <OLModalBody>
         <OLForm id="table-generator-width-form" onSubmit={onSubmit}>
-          <OLRow className={bsVersion({ bs5: 'g-3' })}>
+          <OLRow className="g-3">
             <OLCol lg={8}>
               <OLFormGroup
                 controlId="column-width-modal-width"
@@ -188,12 +185,7 @@ const ColumnWidthModalBody = () => {
                   overlayProps={{ delay: 0, placement: 'top' }}
                 >
                   <span>
-                    <BootstrapVersionSwitcher
-                      bs3={<Icon type="question-circle" />}
-                      bs5={
-                        <MaterialIcon type="help" className="align-middle" />
-                      }
-                    />
+                    <MaterialIcon type="help" className="align-middle" />
                   </span>
                 </OLTooltip>
               )}

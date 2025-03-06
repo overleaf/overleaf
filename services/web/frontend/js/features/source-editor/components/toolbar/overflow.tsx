@@ -1,12 +1,9 @@
 import { FC, useRef } from 'react'
 import classnames from 'classnames'
-import Icon from '../../../../shared/components/icon'
 import MaterialIcon from '@/shared/components/material-icon'
-import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
 import { useCodeMirrorViewContext } from '../codemirror-context'
 import OLOverlay from '@/features/ui/components/ol/ol-overlay'
 import OLPopover from '@/features/ui/components/ol/ol-popover'
-import { bsVersion } from '@/features/utils/bootstrap-5'
 
 export const ToolbarOverflow: FC<{
   overflowed: boolean
@@ -20,7 +17,6 @@ export const ToolbarOverflow: FC<{
   const className = classnames(
     'ol-cm-toolbar-button',
     'ol-cm-toolbar-overflow-toggle',
-    bsVersion({ bs3: 'btn' }),
     {
       'ol-cm-toolbar-overflow-toggle-visible': overflowed,
     }
@@ -42,10 +38,7 @@ export const ToolbarOverflow: FC<{
           setOverflowOpen(!overflowOpen)
         }}
       >
-        <BootstrapVersionSwitcher
-          bs3={<Icon type="ellipsis-h" fw />}
-          bs5={<MaterialIcon type="more_horiz" />}
-        />
+        <MaterialIcon type="more_horiz" />
       </button>
 
       <OLOverlay

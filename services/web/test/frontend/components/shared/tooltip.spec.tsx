@@ -1,4 +1,3 @@
-import '../../helpers/bootstrap-3'
 import Tooltip from '../../../../frontend/js/shared/components/tooltip'
 
 describe('<Tooltip />', function () {

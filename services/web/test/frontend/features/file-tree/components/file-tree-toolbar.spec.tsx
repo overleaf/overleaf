@@ -1,4 +1,3 @@
-import '../../../helpers/bootstrap-3'
 import FileTreeToolbar from '../../../../../frontend/js/features/file-tree/components/file-tree-toolbar'
 import { EditorProviders } from '../../../helpers/editor-providers'
 import { FileTreeProvider } from '../helpers/file-tree-provider'

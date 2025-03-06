@@ -1,4 +1,3 @@
-import '../../helpers/bootstrap-3'
 import { useRecaptcha } from '@/shared/hooks/use-recaptcha'
 import * as ReactGoogleRecaptcha from 'react-google-recaptcha'
 

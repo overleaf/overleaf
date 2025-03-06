@@ -1,4 +1,3 @@
-import { isBootstrap5 } from '@/features/utils/bootstrap-5'
 import { AvailableUnfilledIcon } from '@/shared/components/material-icon'
 
 // TODO ide-redesign-cleanup: Make this the default export and remove the legacy version
@@ -27,12 +26,12 @@ export default function iconTypeFromName(name: string): string {
   if (ext && ['png', 'pdf', 'jpg', 'jpeg', 'gif'].includes(ext)) {
     return 'image'
   } else if (ext && ['csv', 'xls', 'xlsx'].includes(ext)) {
-    return isBootstrap5() ? 'table_chart' : 'table'
+    return 'table_chart'
   } else if (ext && ['py', 'r'].includes(ext)) {
-    return isBootstrap5() ? 'code' : 'file-text'
+    return 'code'
   } else if (ext && ['bib'].includes(ext)) {
-    return isBootstrap5() ? 'menu_book' : 'book'
+    return 'menu_book'
   } else {
-    return isBootstrap5() ? 'description' : 'file'
+    return 'description'
   }
 }

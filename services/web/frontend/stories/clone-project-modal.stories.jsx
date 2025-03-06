@@ -1,7 +1,6 @@
 import useFetchMock from './hooks/use-fetch-mock'
 import CloneProjectModal from '../js/features/clone-project-modal/components/clone-project-modal'
 import { ScopeDecorator } from './decorators/scope'
-import { bsVersionDecorator } from '../../.storybook/utils/with-bootstrap-switcher'
 
 export const Success = args => {
   useFetchMock(fetchMock => {
@@ -57,7 +56,6 @@ export default {
     handleHide: { action: 'close modal' },
     openProject: { action: 'open project' },
     handleAfterCloned: { action: 'after cloned' },
-    ...bsVersionDecorator.argTypes,
   },
   decorators: [ScopeDecorator],
 }

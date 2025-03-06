@@ -5,7 +5,6 @@ import EntryCallout from './entry-callout'
 import EntryActions from './entry-actions'
 import Comment from './comment'
 import AutoExpandingTextArea from '../../../../../shared/components/auto-expanding-text-area'
-import Icon from '../../../../../shared/components/icon'
 import { useReviewPanelUpdaterFnsContext } from '../../../context/review-panel/review-panel-context'
 import classnames from 'classnames'
 import { ThreadId } from '../../../../../../../types/review-panel/review-panel'
@@ -17,7 +16,6 @@ import useIndicatorHover from '../hooks/use-indicator-hover'
 import EntryIndicator from './entry-indicator'
 import { useEntryClick } from '@/features/source-editor/components/review-panel/hooks/use-entry-click'
 import MaterialIcon from '@/shared/components/material-icon'
-import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
 import LoadingSpinner from '@/shared/components/loading-spinner'
 
 type CommentEntryProps = {
@@ -123,10 +121,7 @@ function CommentEntry({
           onMouseEnter={handleIndicatorMouseEnter}
           onClick={handleIndicatorClick}
         >
-          <BootstrapVersionSwitcher
-            bs3={<Icon type="comment" />}
-            bs5={<MaterialIcon type="mode_comment" />}
-          />
+          <MaterialIcon type="mode_comment" />
         </EntryIndicator>
         <div
           className={classnames('rp-entry', 'rp-entry-comment', {
@@ -167,10 +162,7 @@ function CommentEntry({
           <EntryActions>
             {permissions.comment && permissions.write && (
               <EntryActions.Button onClick={handleAnimateAndCallOnResolve}>
-                <BootstrapVersionSwitcher
-                  bs3={<Icon type="inbox" />}
-                  bs5={<MaterialIcon type="inbox" />}
-                />
+                <MaterialIcon type="inbox" />
                 &nbsp;{t('resolve')}
               </EntryActions.Button>
             )}
@@ -179,10 +171,7 @@ function CommentEntry({
                 onClick={handleOnReply}
                 disabled={!replyContent.length}
               >
-                <BootstrapVersionSwitcher
-                  bs3={<Icon type="reply" />}
-                  bs5={<MaterialIcon type="reply" />}
-                />
+                <MaterialIcon type="reply" />
                 &nbsp;{t('reply')}
               </EntryActions.Button>
             )}

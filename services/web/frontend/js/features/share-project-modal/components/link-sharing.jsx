@@ -1,7 +1,6 @@
 import { useCallback, useState, useEffect } from 'react'
 import PropTypes from 'prop-types'
 import { useTranslation } from 'react-i18next'
-import Icon from '@/shared/components/icon'
 import { useShareProjectContext } from './share-project-modal'
 import { setProjectAccessLevel } from '../utils/api'
 import { CopyToClipboard } from '@/shared/components/copy-to-clipboard'
@@ -17,7 +16,6 @@ import OLRow from '@/features/ui/components/ol/ol-row'
 import OLCol from '@/features/ui/components/ol/ol-col'
 import OLButton from '@/features/ui/components/ol/ol-button'
 import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
-import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
 import MaterialIcon from '@/shared/components/material-icon'
 
 export default function LinkSharing() {
@@ -161,13 +159,8 @@ function TokenBasedSharing({
           className="btn-chevron align-middle"
           onClick={() => setShowLinks(!showLinks)}
         >
-          <BootstrapVersionSwitcher
-            bs3={<Icon type={showLinks ? 'chevron-up' : 'chevron-down'} fw />}
-            bs5={
-              <MaterialIcon
-                type={showLinks ? 'keyboard_arrow_up' : 'keyboard_arrow_down'}
-              />
-            }
+          <MaterialIcon
+            type={showLinks ? 'keyboard_arrow_up' : 'keyboard_arrow_down'}
           />
         </OLButton>
       </OLCol>
@@ -315,10 +308,7 @@ function LinkSharingInfo() {
         target="_blank"
         rel="noopener"
       >
-        <BootstrapVersionSwitcher
-          bs3={<Icon type="question-circle" />}
-          bs5={<MaterialIcon type="help" className="align-middle" />}
-        />
+        <MaterialIcon type="help" className="align-middle" />
       </a>
     </OLTooltip>
   )

@@ -79,7 +79,7 @@ describe('<FileViewHeader/>', function () {
     it('exists', function () {
       renderWithEditorContext(<FileViewHeader file={urlFile} />)
 
-      screen.getByText('Download', { exact: false })
+      screen.getByText('Download')
     })
   })
 

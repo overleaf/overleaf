@@ -7,7 +7,6 @@ import useFetchMock from '../../hooks/use-fetch-mock'
 import { ScopeDecorator } from '../../decorators/scope'
 import { useScope } from '../../hooks/use-scope'
 import getMeta from '@/utils/meta'
-import { bsVersionDecorator } from '../../../../.storybook/utils/with-bootstrap-switcher'
 
 export const MinimalFeatures = args => {
   useFetchMock(mockCreateFileModalFetch)
@@ -91,7 +90,4 @@ export default {
   title: 'Editor / Modals / Create File',
   component: FileTreeModalCreateFile,
   decorators: [ScopeDecorator],
-  argTypes: {
-    ...bsVersionDecorator.argTypes,
-  },
 }

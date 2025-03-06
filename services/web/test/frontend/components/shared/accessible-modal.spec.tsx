@@ -1,4 +1,3 @@
-import '../../helpers/bootstrap-3'
 import { Modal } from 'react-bootstrap'
 import AccessibleModal from '../../../../frontend/js/shared/components/accessible-modal'
 

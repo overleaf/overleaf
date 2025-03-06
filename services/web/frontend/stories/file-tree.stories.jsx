@@ -6,7 +6,6 @@ import useFetchMock from './hooks/use-fetch-mock'
 import { ScopeDecorator } from './decorators/scope'
 import { useScope } from './hooks/use-scope'
 import { useIdeContext } from '@/shared/context/ide-context'
-import { bsVersionDecorator } from '../../.storybook/utils/with-bootstrap-switcher'
 
 const MOCK_DELAY = 2000
 
@@ -164,7 +163,6 @@ export default {
   argTypes: {
     onInit: { action: 'onInit' },
     onSelect: { action: 'onSelect' },
-    ...bsVersionDecorator.argTypes,
   },
   decorators: [
     ScopeDecorator,

@@ -55,12 +55,7 @@ function FileTreeModalDelete() {
 
       <OLModalFooter>
         {inFlight ? (
-          <OLButton
-            variant="danger"
-            disabled
-            isLoading
-            bs3Props={{ loading: `${t('deleting')}…` }}
-          />
+          <OLButton variant="danger" disabled isLoading />
         ) : (
           <>
             <OLButton variant="secondary" onClick={handleHide}>

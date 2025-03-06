@@ -1,6 +1,5 @@
 import { memo, useState } from 'react'
 import { Trans } from 'react-i18next'
-import Icon from '../../../../../shared/components/icon'
 import TrackChangesMenu from '@/features/source-editor/components/review-panel/toolbar/track-changes-menu'
 import UpgradeTrackChangesModal from '../upgrade-track-changes-modal'
 import { useProjectContext } from '../../../../../shared/context/project-context'
@@ -10,7 +9,6 @@ import {
 } from '../../../context/review-panel/review-panel-context'
 import { send, sendMB } from '../../../../../infrastructure/event-tracking'
 import classnames from 'classnames'
-import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
 import MaterialIcon from '@/shared/components/material-icon'
 
 const sendAnalytics = () => {
@@ -57,10 +55,7 @@ function ToggleMenu() {
               'rp-tc-state-collapse-on': shouldCollapse,
             })}
           >
-            <BootstrapVersionSwitcher
-              bs3={<Icon type="angle-down" />}
-              bs5={<MaterialIcon type="expand_more" />}
-            />
+            <MaterialIcon type="expand_more" />
           </span>
         </button>
       </span>

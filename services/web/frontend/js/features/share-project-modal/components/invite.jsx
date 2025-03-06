@@ -1,7 +1,6 @@
 import { useCallback } from 'react'
 import PropTypes from 'prop-types'
 import { useShareProjectContext } from './share-project-modal'
-import Icon from '@/shared/components/icon'
 import { useTranslation } from 'react-i18next'
 import MemberPrivileges from './member-privileges'
 import { resendInvite, revokeInvite } from '../utils/api'
@@ -12,9 +11,6 @@ import OLCol from '@/features/ui/components/ol/ol-col'
 import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
 import OLButton from '@/features/ui/components/ol/ol-button'
 import MaterialIcon from '@/shared/components/material-icon'
-import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
-import { bsVersion } from '@/features/utils/bootstrap-5'
-import classnames from 'classnames'
 
 export default function Invite({ invite, isProjectOwner }) {
   const { t } = useTranslation()
@@ -123,15 +119,9 @@ function RevokeInvite({ invite }) {
         variant="link"
         onClick={handleClick}
         aria-label={t('revoke')}
-        className={classnames(
-          'btn-inline-link',
-          bsVersion({ bs5: 'text-decoration-none' })
-        )}
+        className="btn-inline-link text-decoration-none"
       >
-        <BootstrapVersionSwitcher
-          bs3={<Icon type="times" />}
-          bs5={<MaterialIcon type="clear" />}
-        />
+        <MaterialIcon type="clear" />
       </OLButton>
     </OLTooltip>
   )

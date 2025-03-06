@@ -22,7 +22,6 @@ import { CompareVersionDropdownContentAllHistory } from './dropdown/compare-vers
 import FileRestoreChange from './file-restore-change'
 import HistoryResyncChange from './history-resync-change'
 import ProjectRestoreChange from './project-restore-change'
-import { bsVersion } from '@/features/utils/bootstrap-5'
 
 type HistoryVersionProps = {
   update: LoadedUpdate
@@ -124,10 +123,7 @@ function HistoryVersion({
           )}
 
           {selectionState !== 'selected' && !faded ? (
-            <div
-              data-testid="compare-icon-version"
-              className={bsVersion({ bs3: 'pull-right', bs5: 'float-end' })}
-            >
+            <div data-testid="compare-icon-version" className="float-end">
               {selectionState !== 'withinSelected' ? (
                 <CompareItems
                   updateRange={updateRange}

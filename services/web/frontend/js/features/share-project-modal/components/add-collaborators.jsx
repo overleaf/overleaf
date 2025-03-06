@@ -166,9 +166,6 @@ export default function AddCollaborators({ readOnly }) {
             className="privileges"
             value={privileges}
             onChange={event => setPrivileges(event.target.value)}
-            bs3Props={{
-              bsSize: 'sm',
-            }}
           >
             <option disabled={readOnly} value="readAndWrite">
               {t('can_edit')}

@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { Trans, useTranslation } from 'react-i18next'
 import PropTypes from 'prop-types'
-import Icon from '@/shared/components/icon'
 import { transferProjectOwnership } from '../utils/api'
 import { useProjectContext } from '@/shared/context/project-context'
 import { useLocation } from '@/shared/hooks/use-location'
@@ -13,8 +12,6 @@ import OLModal, {
 } from '@/features/ui/components/ol/ol-modal'
 import OLNotification from '@/features/ui/components/ol/ol-notification'
 import OLButton from '@/features/ui/components/ol/ol-button'
-import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
-import { bsVersion } from '@/features/utils/bootstrap-5'
 import { Spinner } from 'react-bootstrap-5'
 
 export default function TransferOwnershipModal({ member, cancel }) {
@@ -65,18 +62,13 @@ export default function TransferOwnershipModal({ member, cancel }) {
         )}
       </OLModalBody>
       <OLModalFooter>
-        <div className={bsVersion({ bs3: 'pull-left', bs5: 'me-auto' })}>
+        <div className="me-auto">
           {inflight && (
-            <BootstrapVersionSwitcher
-              bs3={<Icon type="refresh" spin />}
-              bs5={
-                <Spinner
-                  animation="border"
-                  aria-hidden="true"
-                  size="sm"
-                  role="status"
-                />
-              }
+            <Spinner
+              animation="border"
+              aria-hidden="true"
+              size="sm"
+              role="status"
             />
           )}
         </div>

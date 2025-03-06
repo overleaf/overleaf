@@ -1,7 +1,6 @@
 import useFetchMock from './hooks/use-fetch-mock'
 import WordCountModal from '../js/features/word-count-modal/components/word-count-modal'
 import { ScopeDecorator } from './decorators/scope'
-import { bsVersionDecorator } from '../../.storybook/utils/with-bootstrap-switcher'
 
 const counts = {
   headers: 4,
@@ -59,7 +58,6 @@ export default {
   },
   argTypes: {
     handleHide: { action: 'close modal' },
-    ...bsVersionDecorator.argTypes,
   },
   decorators: [ScopeDecorator],
 }

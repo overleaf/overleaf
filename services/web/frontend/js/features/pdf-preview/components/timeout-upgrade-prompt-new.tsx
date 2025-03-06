@@ -177,7 +177,6 @@ const PreventTimeoutHelpMessage = memo(function PreventTimeoutHelpMessage({
                         className="btn-inline-link fw-bold"
                         size="sm"
                         onClick={handleEnableStopOnFirstErrorClick}
-                        bs3Props={{ bsSize: 'xsmall' }}
                       />,
                       // eslint-disable-next-line react/jsx-key
                       <strong />,

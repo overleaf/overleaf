@@ -4,7 +4,6 @@ import { useScope } from './hooks/use-scope'
 import { ScopeDecorator } from './decorators/scope'
 import { contacts } from './fixtures/contacts'
 import { project } from './fixtures/project'
-import { bsVersionDecorator } from '../../.storybook/utils/with-bootstrap-switcher'
 
 export const LinkSharingOff = args => {
   useFetchMock(setupFetchMock)
@@ -142,7 +141,6 @@ export default {
   },
   argTypes: {
     handleHide: { action: 'hide' },
-    ...bsVersionDecorator.argTypes,
   },
   decorators: [ScopeDecorator],
 }

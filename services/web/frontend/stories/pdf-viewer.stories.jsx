@@ -10,15 +10,11 @@ import {
 import { useEffect, Suspense } from 'react'
 import { ScopeDecorator } from './decorators/scope'
 import { PdfPreviewProvider } from '@/features/pdf-preview/components/pdf-preview-provider'
-import { bsVersionDecorator } from '../../.storybook/utils/with-bootstrap-switcher'
 
 export default {
   title: 'Editor / PDF Viewer',
   component: PdfViewer,
   decorators: [ScopeDecorator],
-  argTypes: {
-    ...bsVersionDecorator.argTypes,
-  },
 }
 
 export const Interactive = () => {

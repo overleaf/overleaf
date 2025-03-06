@@ -10,11 +10,11 @@ export const bsVersionDecorator: Meta = {
       control: { type: 'inline-radio' },
       options: ['3', '5'],
       table: {
-        defaultValue: { summary: '3' },
+        defaultValue: { summary: '5' },
       },
     },
   },
   args: {
-    [bootstrapVersionArg]: '3',
+    [bootstrapVersionArg]: '5',
   },
 }

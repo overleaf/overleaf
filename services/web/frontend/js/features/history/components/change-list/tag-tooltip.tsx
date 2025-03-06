@@ -122,11 +122,6 @@ const ChangeTag = forwardRef<HTMLElement, TagProps>(
                 disabled={isLoading}
                 isLoading={isLoading}
                 onClick={localDeleteHandler}
-                bs3Props={{
-                  loading: isLoading
-                    ? t('history_deleting_label')
-                    : t('history_delete_label'),
-                }}
               >
                 {t('history_delete_label')}
               </OLButton>

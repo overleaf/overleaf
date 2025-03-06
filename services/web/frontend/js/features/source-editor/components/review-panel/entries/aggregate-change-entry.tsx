@@ -3,7 +3,6 @@ import { memo, useState } from 'react'
 import EntryContainer from './entry-container'
 import EntryCallout from './entry-callout'
 import EntryActions from './entry-actions'
-import Icon from '../../../../../shared/components/icon'
 import { useReviewPanelUpdaterFnsContext } from '../../../context/review-panel/review-panel-context'
 import { formatTime } from '../../../../utils/format-date'
 import classnames from 'classnames'
@@ -12,7 +11,6 @@ import { BaseChangeEntryProps } from '../types/base-change-entry-props'
 import useIndicatorHover from '../hooks/use-indicator-hover'
 import EntryIndicator from './entry-indicator'
 import { useEntryClick } from '@/features/source-editor/components/review-panel/hooks/use-entry-click'
-import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
 import MaterialIcon from '@/shared/components/material-icon'
 
 interface AggregateChangeEntryProps extends BaseChangeEntryProps {
@@ -82,10 +80,7 @@ function AggregateChangeEntry({
         onMouseEnter={handleIndicatorMouseEnter}
         onClick={handleIndicatorClick}
       >
-        <BootstrapVersionSwitcher
-          bs3={<Icon type="pencil" />}
-          bs5={<MaterialIcon type="edit" />}
-        />
+        <MaterialIcon type="edit" />
       </EntryIndicator>
       <div
         className={classnames('rp-entry', 'rp-entry-aggregate', {
@@ -94,10 +89,7 @@ function AggregateChangeEntry({
       >
         <div className="rp-entry-body">
           <div className="rp-entry-action-icon">
-            <BootstrapVersionSwitcher
-              bs3={<Icon type="pencil" />}
-              bs5={<MaterialIcon type="edit" />}
-            />
+            <MaterialIcon type="edit" />
           </div>
           <div className="rp-entry-details">
             <div className="rp-entry-description">
@@ -147,17 +139,11 @@ function AggregateChangeEntry({
         {permissions.write && (
           <EntryActions>
             <EntryActions.Button onClick={() => rejectChanges(entryIds)}>
-              <BootstrapVersionSwitcher
-                bs3={<Icon type="times" />}
-                bs5={<MaterialIcon type="close" />}
-              />
+              <MaterialIcon type="close" />
               &nbsp;{t('reject')}
             </EntryActions.Button>
             <EntryActions.Button onClick={() => acceptChanges(entryIds)}>
-              <BootstrapVersionSwitcher
-                bs3={<Icon type="check" />}
-                bs5={<MaterialIcon type="check" />}
-              />
+              <MaterialIcon type="check" />
               &nbsp;{t('accept')}
             </EntryActions.Button>
           </EntryActions>

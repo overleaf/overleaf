@@ -1,4 +1,3 @@
-import '../../helpers/bootstrap-3'
 import { useCallback, FormEvent } from 'react'
 import { Button, Form, FormControl } from 'react-bootstrap'
 import {
@@ -63,17 +62,17 @@ describe('<Select />', function () {
     it('renders default text', function () {
       render({ defaultText: 'Choose an item' })
       cy.findByTestId('spinner').should('not.exist')
-      cy.findByText('Choose an item')
+      cy.findByRole('textbox', { name: 'Choose an item' })
     })
 
     it('renders default item', function () {
       render({ defaultItem: testData[2] })
-      cy.findByText('Demo item 3')
+      cy.findByRole('textbox', { name: 'Demo item 3' })
     })
 
     it('default item takes precedence over default text', function () {
       render({ defaultText: 'Choose an item', defaultItem: testData[2] })
-      cy.findByText('Demo item 3')
+      cy.findByRole('textbox', { name: 'Demo item 3' })
     })
 
     it('renders label', function () {
@@ -82,8 +81,8 @@ describe('<Select />', function () {
         label: 'test label',
         optionalLabel: false,
       })
-      cy.findByText('test label')
-      cy.findByText('(Optional)').should('not.exist')
+      cy.findByRole('textbox', { name: 'test label' })
+      cy.findByRole('textbox', { name: '(Optional)' }).should('not.exist')
     })
 
     it('renders optional label', function () {
@@ -92,8 +91,7 @@ describe('<Select />', function () {
         label: 'test label',
         optionalLabel: true,
       })
-      cy.findByText('test label')
-      cy.findByText('(Optional)')
+      cy.findByRole('textbox', { name: 'test label (Optional)' })
     })
 
     it('renders a spinner while loading when there is a label', function () {
@@ -117,11 +115,11 @@ describe('<Select />', function () {
   describe('items rendering', function () {
     it('renders all items', function () {
       render({ defaultText: 'Choose an item' })
-      cy.findByText('Choose an item').click()
+      cy.findByRole('textbox', { name: 'Choose an item' }).click()
 
-      cy.findByText('Demo item 1')
-      cy.findByText('Demo item 2')
-      cy.findByText('Demo item 3')
+      cy.findByRole('option', { name: 'Demo item 1' })
+      cy.findByRole('option', { name: 'Demo item 2' })
+      cy.findByRole('option', { name: 'Demo item 3' })
     })
 
     it('renders subtitles', function () {
@@ -129,37 +127,38 @@ describe('<Select />', function () {
         defaultText: 'Choose an item',
         itemToSubtitle: x => String(x?.sub),
       })
-      cy.findByText('Choose an item').click()
+      cy.findByRole('textbox', { name: 'Choose an item' }).click()
 
-      cy.findByText('Subtitle 1')
-      cy.findByText('Subtitle 2')
-      cy.findByText('Subtitle 3')
+      cy.findByRole('option', { name: 'Demo item 1 Subtitle 1' })
+      cy.findByRole('option', { name: 'Demo item 2 Subtitle 2' })
+      cy.findByRole('option', { name: 'Demo item 3 Subtitle 3' })
     })
   })
 
   describe('item selection', function () {
     it('cannot select an item when disabled', function () {
       render({ defaultText: 'Choose an item', disabled: true })
-      cy.findByText('Choose an item').click()
-
-      cy.findByText('Demo item 1').should('not.exist')
-      cy.findByText('Demo item 2').should('not.exist')
-      cy.findByText('Demo item 3').should('not.exist')
-      cy.findByText('Choose an item')
+      cy.findByRole('textbox', { name: 'Choose an item' }).click({
+        force: true,
+      })
+      cy.findByRole('option', { name: 'Demo item 1' }).should('not.exist')
+      cy.findByRole('option', { name: 'Demo item 2' }).should('not.exist')
+      cy.findByRole('option', { name: 'Demo item 3' }).should('not.exist')
+      cy.findByRole('textbox', { name: 'Choose an item' })
     })
 
     it('renders only the selected item after selection', function () {
       render({ defaultText: 'Choose an item' })
-      cy.findByText('Choose an item').click()
+      cy.findByRole('textbox', { name: 'Choose an item' }).click()
 
-      cy.findByText('Demo item 1')
-      cy.findByText('Demo item 2')
-      cy.findByText('Demo item 3').click()
+      cy.findByRole('option', { name: 'Demo item 1' })
+      cy.findByRole('option', { name: 'Demo item 2' })
+      cy.findByRole('option', { name: 'Demo item 3' }).click()
 
-      cy.findByText('Choose an item').should('not.exist')
-      cy.findByText('Demo item 1').should('not.exist')
-      cy.findByText('Demo item 2').should('not.exist')
-      cy.findByText('Demo item 3')
+      cy.findByRole('textbox', { name: 'Choose an item' }).should('not.exist')
+      cy.findByRole('option', { name: 'Demo item 1' }).should('not.exist')
+      cy.findByRole('option', { name: 'Demo item 2' }).should('not.exist')
+      cy.findByRole('textbox', { name: 'Demo item 3' })
     })
 
     it('invokes callback after selection', function () {
@@ -169,8 +168,8 @@ describe('<Select />', function () {
         defaultText: 'Choose an item',
         onSelectedItemChanged: selectionHandler,
       })
-      cy.findByText('Choose an item').click()
-      cy.findByText('Demo item 2').click()
+      cy.findByRole('textbox', { name: 'Choose an item' }).click()
+      cy.findByRole('option', { name: 'Demo item 2' }).click()
 
       cy.get('@selectionHandler').should(
         'have.been.calledOnceWith',
@@ -194,7 +193,7 @@ describe('<Select />', function () {
       const submitHandler = cy.stub().as('submitHandler')
       render({ defaultItem: testData[1], onSubmit: submitHandler })
 
-      cy.findByText('Demo item 2').click() // open dropdown
+      cy.findByRole('textbox', { name: 'Demo item 2' }).click() // open dropdown
       cy.findByText('Demo item 3').click() // choose a different item
 
       cy.findByText('submit').click()
@@ -261,8 +260,8 @@ describe('<Select />', function () {
         </div>
       )
 
-      cy.findByText('Demo item 1').click() // open dropdown
-      cy.findByText('Demo item 3').click() // choose a different item
+      cy.findByRole('textbox', { name: 'Demo item 1' }).click() // open dropdown
+      cy.findByRole('option', { name: 'Demo item 3' }).click() // choose a different item
 
       cy.findByText('submit').click()
       cy.get('@submitHandler').should('have.been.calledOnceWith', {
@@ -274,9 +273,12 @@ describe('<Select />', function () {
   describe('keyboard navigation', function () {
     it('can select an item using the keyboard', function () {
       render({ defaultText: 'Choose an item' })
-      cy.findByText('Choose an item').type('{Enter}{downArrow}{Enter}')
-      cy.findByText('Demo item 1').should('exist')
-      cy.findByText('Demo item 2').should('not.exist')
+      cy.findByRole('textbox', { name: 'Choose an item' }).type(
+        '{Enter}{downArrow}{Enter}',
+        { force: true }
+      )
+      cy.findByRole('textbox', { name: 'Demo item 1' }).should('exist')
+      cy.findByRole('option', { name: 'Demo item 2' }).should('not.exist')
     })
   })
 
@@ -286,22 +288,22 @@ describe('<Select />', function () {
         defaultText: 'Choose an item',
         selectedIcon: true,
       })
-      cy.findByText('Choose an item').click()
-      cy.findByText('Demo item 1').click()
-      cy.findByText('Demo item 1').click()
+      cy.findByRole('textbox', { name: 'Choose an item' }).click()
+      cy.findByRole('option', { name: 'Demo item 1' }).click()
+      cy.findByRole('textbox', { name: 'Demo item 1' }).click()
 
-      cy.get('.fa-check').should('exist')
+      cy.findByText('check').should('exist')
     })
     it('renders no selected icon if the prop is not set', function () {
       render({
         defaultText: 'Choose an item',
         selectedIcon: false,
       })
-      cy.findByText('Choose an item').click()
-      cy.findByText('Demo item 1').click()
-      cy.findByText('Demo item 1').click()
+      cy.findByRole('textbox', { name: 'Choose an item' }).click()
+      cy.findByRole('option', { name: 'Demo item 1' }).click()
+      cy.findByRole('textbox', { name: 'Demo item 1' }).click()
 
-      cy.get('.fa-check').should('not.exist')
+      cy.findByText('check').should('exist')
     })
   })
 
@@ -311,13 +313,13 @@ describe('<Select />', function () {
         defaultText: 'Choose an item',
         itemToDisabled: x => x?.key === 2,
       })
-      cy.findByText('Choose an item').click()
-      cy.findByText('Demo item 2').click()
+      cy.findByRole('textbox', { name: 'Choose an item' }).click()
+      cy.findByRole('option', { name: 'Demo item 2' }).click({ force: true })
       // still showing other list items
-      cy.findByText('Demo item 3').should('exist')
-      cy.findByText('Demo item 1').click()
+      cy.findByRole('option', { name: 'Demo item 3' }).should('exist')
+      cy.findByRole('option', { name: 'Demo item 1' }).click()
       // clicking an enabled item dismisses the list
-      cy.findByText('Demo item 3').should('not.exist')
+      cy.findByRole('option', { name: 'Demo item 3' }).should('not.exist')
     })
   })
 
@@ -327,7 +329,7 @@ describe('<Select />', function () {
         defaultText: 'Choose an item',
         selected: testData[1],
       })
-      cy.findByText('Demo item 2').should('exist')
+      cy.findByRole('textbox', { name: 'Demo item 2' }).should('exist')
     })
 
     it('should show default text when selected is null', function () {
@@ -335,7 +337,7 @@ describe('<Select />', function () {
         selected: null,
         defaultText: 'Choose an item',
       })
-      cy.findByText('Choose an item').should('exist')
+      cy.findByRole('textbox', { name: 'Choose an item' }).should('exist')
     })
   })
 })

@@ -3,9 +3,7 @@ import { useState, useRef, MouseEventHandler } from 'react'
 import { useTranslation } from 'react-i18next'
 import useResizeObserver from '../hooks/use-resize-observer'
 import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
-import Icon from '../../../shared/components/icon'
 import OLButton from '@/features/ui/components/ol/ol-button'
-import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
 import MaterialIcon from '@/shared/components/material-icon'
 import { ErrorLevel, SourceLocation } from '@/features/pdf-preview/util/types'
 
@@ -91,15 +89,7 @@ function PreviewLogEntryHeader({
       aria-label={headerLogLocationTitle}
       onClick={onSourceLocationClick}
     >
-      <BootstrapVersionSwitcher
-        bs3={
-          <>
-            <Icon type="chain" />
-            &nbsp;
-          </>
-        }
-        bs5={<MaterialIcon type="link" />}
-      />
+      <MaterialIcon type="link" />
       <span ref={logLocationSpanRef} className="log-entry-header-link-location">
         {`\u202A${locationLinkText}\u202C`}
       </span>

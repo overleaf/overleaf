@@ -1,6 +1,4 @@
 import { ToolbarButtonMenu } from './button-menu'
-import Icon from '@/shared/components/icon'
-import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
 import MaterialIcon from '@/shared/components/material-icon'
 import OLListGroupItem from '@/features/ui/components/ol/ol-list-group-item'
 import { memo, useCallback } from 'react'
@@ -51,12 +49,7 @@ export const InsertFigureDropdown = memo(function InsertFigureDropdown() {
     <ToolbarButtonMenu
       id="toolbar-figure"
       label={t('toolbar_insert_figure')}
-      icon={
-        <BootstrapVersionSwitcher
-          bs3={<Icon fw type="picture-o" />}
-          bs5={<MaterialIcon type="add_photo_alternate" />}
-        />
-      }
+      icon={<MaterialIcon type="add_photo_alternate" />}
       altCommand={insertFigure}
     >
       <OLListGroupItem
@@ -64,10 +57,7 @@ export const InsertFigureDropdown = memo(function InsertFigureDropdown() {
           openFigureModal(FigureModalSource.FILE_UPLOAD, 'file-upload')
         }
       >
-        <BootstrapVersionSwitcher
-          bs3={<Icon type="upload" fw />}
-          bs5={<MaterialIcon type="upload" />}
-        />
+        <MaterialIcon type="upload" />
         {t('upload_from_computer')}
       </OLListGroupItem>
       <OLListGroupItem
@@ -75,10 +65,7 @@ export const InsertFigureDropdown = memo(function InsertFigureDropdown() {
           openFigureModal(FigureModalSource.FILE_TREE, 'current-project')
         }
       >
-        <BootstrapVersionSwitcher
-          bs3={<Icon type="archive" fw />}
-          bs5={<MaterialIcon type="inbox" />}
-        />
+        <MaterialIcon type="inbox" />
         {t('from_project_files')}
       </OLListGroupItem>
       {(hasLinkedProjectFileFeature || hasLinkedProjectOutputFileFeature) && (
@@ -87,10 +74,7 @@ export const InsertFigureDropdown = memo(function InsertFigureDropdown() {
             openFigureModal(FigureModalSource.OTHER_PROJECT, 'other-project')
           }
         >
-          <BootstrapVersionSwitcher
-            bs3={<Icon type="folder-open" fw />}
-            bs5={<MaterialIcon type="folder_open" />}
-          />
+          <MaterialIcon type="folder_open" />
           {t('from_another_project')}
         </OLListGroupItem>
       )}
@@ -100,10 +84,7 @@ export const InsertFigureDropdown = memo(function InsertFigureDropdown() {
             openFigureModal(FigureModalSource.FROM_URL, 'from-url')
           }
         >
-          <BootstrapVersionSwitcher
-            bs3={<Icon type="globe" fw />}
-            bs5={<MaterialIcon type="public" />}
-          />
+          <MaterialIcon type="public" />
           {t('from_url')}
         </OLListGroupItem>
       )}

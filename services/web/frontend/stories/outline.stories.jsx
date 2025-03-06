@@ -1,6 +1,5 @@
 import OutlinePane from '../js/features/outline/components/outline-pane'
 import { ScopeDecorator } from './decorators/scope'
-import { bsVersionDecorator } from '../../.storybook/utils/with-bootstrap-switcher'
 
 export const Basic = args => <OutlinePane {...args} />
 Basic.args = {
@@ -52,7 +51,6 @@ export default {
     jumpToLine: { action: 'jumpToLine' },
     onToggle: { action: 'onToggle' },
     toggleExpanded: { action: 'toggleExpanded' },
-    ...bsVersionDecorator.argTypes,
   },
   args: {
     isTexFile: true,

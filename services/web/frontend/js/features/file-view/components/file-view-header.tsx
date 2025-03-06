@@ -1,7 +1,6 @@
 import { useState, type ElementType } from 'react'
 import { Trans, useTranslation } from 'react-i18next'
 
-import Icon from '../../../shared/components/icon'
 import { formatTime, relativeDate } from '../../utils/format-date'
 import { fileUrl } from '../../utils/fileUrl'
 import { useFileTreeData } from '@/shared/context/file-tree-data-context'
@@ -14,7 +13,6 @@ import { BinaryFile, hasProvider, LinkedFile } from '../types/binary-file'
 import FileViewRefreshButton from './file-view-refresh-button'
 import FileViewRefreshError from './file-view-refresh-error'
 import MaterialIcon from '@/shared/components/material-icon'
-import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
 import OLButton from '@/features/ui/components/ol/ol-button'
 
 const tprFileViewInfo = importOverleafModules('tprFileViewInfo') as {
@@ -87,10 +85,7 @@ export default function FileViewHeader({ file }: FileViewHeaderProps) {
           download={file.name}
           href={fileUrl(projectId, file.id, file.hash)}
         >
-          <BootstrapVersionSwitcher
-            bs3={<Icon type="download" fw />}
-            bs5={<MaterialIcon type="download" className="align-middle" />}
-          />{' '}
+          <MaterialIcon type="download" className="align-middle" />{' '}
           <span>{t('download')}</span>
         </OLButton>
       </div>

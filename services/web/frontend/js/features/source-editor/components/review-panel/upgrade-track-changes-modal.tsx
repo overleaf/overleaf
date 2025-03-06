@@ -1,5 +1,4 @@
 import { useTranslation } from 'react-i18next'
-import Icon from '../../../../shared/components/icon'
 import { useProjectContext } from '../../../../shared/context/project-context'
 import { useUserContext } from '../../../../shared/context/user-context'
 import teaserVideo from '../../images/teaser-track-changes.mp4'
@@ -16,7 +15,6 @@ import OLModal, {
 import OLButton from '@/features/ui/components/ol/ol-button'
 import OLRow from '@/features/ui/components/ol/ol-row'
 import OLCol from '@/features/ui/components/ol/ol-col'
-import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
 import MaterialIcon from '@/shared/components/material-icon'
 
 type UpgradeTrackChangesModalProps = {
@@ -62,15 +60,7 @@ function UpgradeTrackChangesModal({
                 t('accept_or_reject_each_changes_individually'),
               ].map(translation => (
                 <li key={translation}>
-                  <BootstrapVersionSwitcher
-                    bs3={<Icon type="check" />}
-                    bs5={
-                      <MaterialIcon
-                        type="check"
-                        className="align-text-bottom"
-                      />
-                    }
-                  />
+                  <MaterialIcon type="check" className="align-text-bottom" />
                   &nbsp;{translation}
                 </li>
               ))}

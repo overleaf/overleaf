@@ -21,10 +21,6 @@ export default function ToolbarRestoreFileButton({
       className="history-react-toolbar-restore-file-button"
       isLoading={isLoading}
       onClick={() => restoreDeletedFile(selection)}
-      bs3Props={{
-        bsSize: 'xsmall',
-        loading: isLoading ? `${t('restoring')}…` : t('restore_file'),
-      }}
     >
       {t('restore_file')}
     </OLButton>

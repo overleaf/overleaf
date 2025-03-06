@@ -23,12 +23,6 @@ import { mathPreviewStateField } from '../extensions/math-preview'
 import { getTooltip } from '@codemirror/view'
 import ReactDOM from 'react-dom'
 import OLDropdownMenuItem from '@/features/ui/components/ol/ol-dropdown-menu-item'
-import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
-import ControlledDropdown from '@/shared/components/controlled-dropdown'
-import {
-  Dropdown as BS3Dropdown,
-  MenuItem as BS3MenuItem,
-} from 'react-bootstrap'
 
 const MathPreviewTooltipContainer: FC = () => {
   const state = useCodeMirrorStateContext()
@@ -95,88 +89,39 @@ const MathPreviewTooltip: FC<{ mathContent: HTMLDivElement }> = ({
     <>
       <div className="ol-cm-math-tooltip">
         <span ref={mathRef} />
-        <BootstrapVersionSwitcher
-          bs5={
-            <Dropdown align="end">
-              <DropdownToggle
-                id="some-id"
-                className="math-tooltip-options-toggle"
-                variant="secondary"
-                size="sm"
-              >
-                <MaterialIcon
-                  type="more_vert"
-                  accessibilityLabel={t('more_options')}
-                />
-              </DropdownToggle>
-              <DropdownMenu flip={false}>
-                <OLDropdownMenuItem
-                  onClick={onHide}
-                  description={t('temporarily_hides_the_preview')}
-                  trailingIcon={
-                    <span className="math-tooltip-options-keyboard-shortcut">
-                      Esc
-                    </span>
-                  }
-                >
-                  {t('hide')}
-                </OLDropdownMenuItem>
-                <OLDropdownMenuItem
-                  onClick={openDisableModal}
-                  description={t('permanently_disables_the_preview')}
-                >
-                  {t('disable')}
-                </OLDropdownMenuItem>
-              </DropdownMenu>
-            </Dropdown>
-          }
-          bs3={
-            <ControlledDropdown id="math-preview-tooltip-options" pullRight>
-              <BS3Dropdown.Toggle
-                noCaret
-                bsSize="small"
-                bsStyle={null}
-                className="math-tooltip-options-toggle"
-              >
-                <MaterialIcon
-                  type="more_vert"
-                  accessibilityLabel={t('more_options')}
-                />
-              </BS3Dropdown.Toggle>
-              <BS3Dropdown.Menu className="math-preview-tooltip-menu">
-                <BS3MenuItem
-                  className="math-preview-tooltip-option"
-                  onClick={onHide}
-                >
-                  <div className="math-preview-tooltip-option-content">
-                    <div className="math-preview-tooltip-option-label">
-                      {t('hide')}
-                    </div>
-                    <div className="math-preview-tooltip-option-description">
-                      {t('temporarily_hides_the_preview')}
-                    </div>
-                  </div>
-                  <div className="math-preview-tooltip-option-shortcut">
-                    Esc
-                  </div>
-                </BS3MenuItem>
-                <BS3MenuItem
-                  className="math-preview-tooltip-option"
-                  onClick={openDisableModal}
-                >
-                  <div className="math-preview-tooltip-option-content">
-                    <div className="math-preview-tooltip-option-label">
-                      {t('disable')}
-                    </div>
-                    <div className="math-preview-tooltip-option-description">
-                      {t('permanently_disables_the_preview')}
-                    </div>
-                  </div>
-                </BS3MenuItem>
-              </BS3Dropdown.Menu>
-            </ControlledDropdown>
-          }
-        />
+
+        <Dropdown align="end">
+          <DropdownToggle
+            id="some-id"
+            className="math-tooltip-options-toggle"
+            variant="secondary"
+            size="sm"
+          >
+            <MaterialIcon
+              type="more_vert"
+              accessibilityLabel={t('more_options')}
+            />
+          </DropdownToggle>
+          <DropdownMenu flip={false}>
+            <OLDropdownMenuItem
+              onClick={onHide}
+              description={t('temporarily_hides_the_preview')}
+              trailingIcon={
+                <span className="math-tooltip-options-keyboard-shortcut">
+                  Esc
+                </span>
+              }
+            >
+              {t('hide')}
+            </OLDropdownMenuItem>
+            <OLDropdownMenuItem
+              onClick={openDisableModal}
+              description={t('permanently_disables_the_preview')}
+            >
+              {t('disable')}
+            </OLDropdownMenuItem>
+          </DropdownMenu>
+        </Dropdown>
       </div>
 
       {showDisableModal && (

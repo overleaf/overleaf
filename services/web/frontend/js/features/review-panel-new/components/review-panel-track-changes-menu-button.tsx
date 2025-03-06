@@ -1,8 +1,6 @@
 import { FC, memo, useState } from 'react'
 import { Trans } from 'react-i18next'
 import { useEditorManagerContext } from '@/features/ide-react/context/editor-manager-context'
-import Icon from '@/shared/components/icon'
-import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
 import MaterialIcon from '@/shared/components/material-icon'
 import { useProjectContext } from '@/shared/context/project-context'
 import UpgradeTrackChangesModal from '@/features/source-editor/components/review-panel/upgrade-track-changes-modal'
@@ -51,14 +49,7 @@ const ReviewPanelTrackChangesMenuButton: FC<{
             components={{ strong: <strong /> }}
           />
         )}
-        <BootstrapVersionSwitcher
-          bs3={<Icon type={menuExpanded ? 'angle-down' : 'angle-right'} />}
-          bs5={
-            <MaterialIcon
-              type={menuExpanded ? 'expand_more' : 'chevron_right'}
-            />
-          }
-        />
+        <MaterialIcon type={menuExpanded ? 'expand_more' : 'chevron_right'} />
       </button>
 
       <UpgradeTrackChangesModal show={showModal} setShow={setShowModal} />

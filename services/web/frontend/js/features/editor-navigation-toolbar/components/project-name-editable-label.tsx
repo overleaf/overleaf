@@ -1,11 +1,9 @@
 import { useEffect, useState, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import classNames from 'classnames'
-import Icon from '../../../shared/components/icon'
 import OLFormControl from '@/features/ui/components/ol/ol-form-control'
 import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
 import MaterialIcon from '@/shared/components/material-icon'
-import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
 
 type ProjectNameEditableLabelProps = {
   projectName: string
@@ -90,10 +88,7 @@ function ProjectNameEditableLabel({
         >
           {/* eslint-disable-next-line jsx-a11y/anchor-is-valid, jsx-a11y/click-events-have-key-events, jsx-a11y/interactive-supports-focus */}
           <a className="rename" role="button" onClick={startRenaming}>
-            <BootstrapVersionSwitcher
-              bs3={<Icon type="pencil" fw />}
-              bs5={<MaterialIcon type="edit" className="align-text-bottom" />}
-            />
+            <MaterialIcon type="edit" className="align-text-bottom" />
           </a>
         </OLTooltip>
       )}

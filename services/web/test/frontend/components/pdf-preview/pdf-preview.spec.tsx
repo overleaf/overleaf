@@ -1,4 +1,3 @@
-import '../../helpers/bootstrap-3'
 import localStorage from '@/infrastructure/local-storage'
 import PdfPreview from '../../../../frontend/js/features/pdf-preview/components/pdf-preview'
 import { EditorProviders } from '../../helpers/editor-providers'
@@ -154,7 +153,7 @@ describe('<PdfPreview/>', function () {
       cy.findByRole('button', { name: 'Recompile' }).click()
       cy.findByRole('button', { name: 'Compiling…' })
         .should('be.disabled')
-        .then(resolveDeferredCompile)
+        .then(() => resolveDeferredCompile())
 
       cy.waitForCompile()
       cy.findByRole('button', { name: 'Recompile' }).should('not.be.disabled')
@@ -441,9 +440,14 @@ describe('<PdfPreview/>', function () {
         'not.be.disabled'
       )
 
-      cy.intercept('DELETE', '/project/*/output*', {
-        statusCode: 204,
-        delay: 100,
+      const { promise, resolve } = Promise.withResolvers<void>()
+
+      cy.intercept('DELETE', '/project/*/output*', req => {
+        return promise
+          .then(() => Cypress.Promise.delay(100))
+          .then(() => {
+            req.reply({ statusCode: 204 })
+          })
       }).as('clear-cache')
 
       // click the button
@@ -451,6 +455,9 @@ describe('<PdfPreview/>', function () {
       cy.findByRole('button', { name: 'Clear cached files' }).should(
         'be.disabled'
       )
+      cy.then(() => {
+        resolve()
+      })
       cy.wait('@clear-cache')
       cy.findByRole('button', { name: 'Clear cached files' }).should(
         'not.be.disabled'
@@ -473,6 +480,7 @@ describe('<PdfPreview/>', function () {
       cy.findByRole('button', { name: 'Recompile' }).click()
       cy.waitForCompile({ pdf: true })
       cy.interceptCompile('recompile')
+
       cy.intercept('DELETE', '/project/*/output*', {
         statusCode: 204,
         delay: 100,
@@ -485,23 +493,28 @@ describe('<PdfPreview/>', function () {
         'not.be.disabled'
       )
 
-      // TODO: open the menu?
-      cy.findByRole('menuitem', {
-        name: 'Recompile from scratch',
-        hidden: true,
-      }).trigger('click', { force: true })
+      cy.interceptDeferredCompile().then(resolveDeferredCompile => {
+        cy.findByRole('button', { name: 'Toggle compile options menu' }).click()
 
-      cy.findByRole('button', { name: 'Clear cached files' }).should(
-        'be.disabled'
-      )
+        cy.findByRole('menuitem', {
+          name: 'Recompile from scratch',
+        }).trigger('click')
 
-      cy.findByRole('button', { name: 'Compiling…' })
-      cy.wait('@clear-cache')
+        cy.findByRole('button', { name: 'Clear cached files' }).should(
+          'be.disabled'
+        )
 
-      // wait for recompile from scratch to finish
-      cy.waitForCompile({ pdf: true, prefix: 'recompile' })
+        cy.wait('@clear-cache')
 
-      cy.findByRole('button', { name: 'Recompile' })
+        cy.findByRole('button', { name: 'Compiling…' }).then(() =>
+          resolveDeferredCompile()
+        )
+
+        // wait for recompile from scratch to finish
+        cy.waitForCompile({ pdf: true })
+
+        cy.findByRole('button', { name: 'Recompile' })
+      })
     })
   })
 

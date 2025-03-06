@@ -5,14 +5,12 @@ import EntryCallout from './entry-callout'
 import EntryActions from './entry-actions'
 import AutoExpandingTextArea from '../../../../../shared/components/auto-expanding-text-area'
 import AddCommentButton from '../add-comment-button'
-import Icon from '../../../../../shared/components/icon'
 import {
   useReviewPanelUpdaterFnsContext,
   useReviewPanelValueContext,
 } from '../../../context/review-panel/review-panel-context'
 import classnames from 'classnames'
 import MaterialIcon from '@/shared/components/material-icon'
-import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
 import LoadingSpinner from '@/shared/components/loading-spinner'
 
 function AddCommentEntry() {
@@ -138,10 +136,7 @@ function AddCommentEntry() {
                 className="rp-entry-button-cancel"
                 onClick={handleCancelNewComment}
               >
-                <BootstrapVersionSwitcher
-                  bs3={<Icon type="times" />}
-                  bs5={<MaterialIcon type="close" />}
-                />
+                <MaterialIcon type="close" />
                 &nbsp;
                 {t('cancel')}
               </EntryActions.Button>
@@ -149,10 +144,7 @@ function AddCommentEntry() {
                 onClick={handleSubmitNewComment}
                 disabled={isSubmitting || !content.length}
               >
-                <BootstrapVersionSwitcher
-                  bs3={<Icon type="comment" />}
-                  bs5={<MaterialIcon type="mode_comment" />}
-                />
+                <MaterialIcon type="mode_comment" />
                 &nbsp;
                 {t('comment')}
               </EntryActions.Button>
@@ -160,10 +152,7 @@ function AddCommentEntry() {
           </>
         ) : (
           <AddCommentButton onClick={handleStartNewComment}>
-            <BootstrapVersionSwitcher
-              bs3={<Icon type="comment" />}
-              bs5={<MaterialIcon type="mode_comment" />}
-            />
+            <MaterialIcon type="mode_comment" />
             &nbsp;
             {t('add_comment')}
           </AddCommentButton>

@@ -4,7 +4,6 @@ import PdfCompileButton from '@/features/pdf-preview/components/pdf-compile-butt
 import { ScopeDecorator } from '../decorators/scope'
 import { CompileContext } from '@/shared/context/local-compile-context'
 import { DetachCompileContext } from '@/shared/context/detach-compile-context'
-import { bsVersionDecorator } from '../../../.storybook/utils/with-bootstrap-switcher'
 
 export const CompileButton: FC<CompileContext> = (props: CompileContext) => (
   <DetachCompileContext.Provider value={props}>
@@ -34,7 +33,6 @@ const meta: Meta<typeof CompileButton> = {
   // @ts-ignore
   decorators: [ScopeDecorator],
   argTypes: {
-    ...bsVersionDecorator.argTypes,
     startCompile: { action: 'startCompile' },
     setAutoCompile: { action: 'setAutoCompile' },
     setCompiling: { action: 'setCompiling' },

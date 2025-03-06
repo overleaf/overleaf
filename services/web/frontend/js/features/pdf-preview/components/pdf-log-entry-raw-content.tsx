@@ -49,10 +49,6 @@ export default function PdfLogEntryRawContent({
           <OLButton
             variant="secondary"
             size="sm"
-            bs3Props={{
-              bsSize: 'xsmall',
-              className: 'log-entry-btn-expand-collapse',
-            }}
             onClick={() => setExpanded(value => !value)}
           >
             {expanded ? (

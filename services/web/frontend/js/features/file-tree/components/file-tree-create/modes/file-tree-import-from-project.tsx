@@ -5,7 +5,6 @@ import {
   useMemo,
   FormEventHandler,
 } from 'react'
-import Icon from '../../../../../shared/components/icon'
 import FileTreeCreateNameInput from '../file-tree-create-name-input'
 import { useTranslation } from 'react-i18next'
 import { useUserProjects } from '../../../hooks/use-user-projects'
@@ -25,7 +24,6 @@ import OLFormGroup from '@/features/ui/components/ol/ol-form-group'
 import OLFormLabel from '@/features/ui/components/ol/ol-form-label'
 import OLForm from '@/features/ui/components/ol/ol-form'
 import OLFormSelect from '@/features/ui/components/ol/ol-form-select'
-import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
 import { Spinner } from 'react-bootstrap-5'
 
 export default function FileTreeImportFromProject() {
@@ -216,16 +214,11 @@ function SelectProject({
       {loading && (
         <span>
           &nbsp;
-          <BootstrapVersionSwitcher
-            bs3={<Icon type="spinner" spin />}
-            bs5={
-              <Spinner
-                animation="border"
-                aria-hidden="true"
-                size="sm"
-                role="status"
-              />
-            }
+          <Spinner
+            animation="border"
+            aria-hidden="true"
+            size="sm"
+            role="status"
           />
         </span>
       )}
@@ -287,16 +280,11 @@ function SelectProjectOutputFile({
       {loading && (
         <span>
           &nbsp;
-          <BootstrapVersionSwitcher
-            bs3={<Icon type="spinner" spin />}
-            bs5={
-              <Spinner
-                animation="border"
-                aria-hidden="true"
-                size="sm"
-                role="status"
-              />
-            }
+          <Spinner
+            animation="border"
+            aria-hidden="true"
+            size="sm"
+            role="status"
           />
         </span>
       )}
@@ -351,16 +339,11 @@ function SelectProjectEntity({
       {loading && (
         <span>
           &nbsp;
-          <BootstrapVersionSwitcher
-            bs3={<Icon type="spinner" spin />}
-            bs5={
-              <Spinner
-                animation="border"
-                aria-hidden="true"
-                size="sm"
-                role="status"
-              />
-            }
+          <Spinner
+            animation="border"
+            aria-hidden="true"
+            size="sm"
+            role="status"
           />
         </span>
       )}

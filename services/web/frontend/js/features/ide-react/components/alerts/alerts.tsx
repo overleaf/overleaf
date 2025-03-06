@@ -61,7 +61,6 @@ export function Alerts() {
               id="synctex-more-info-button"
               variant="secondary"
               size="sm"
-              bs3Props={{ className: 'alert-link-as-btn pull-right' }}
             >
               {t('more_info')}
             </OLButton>

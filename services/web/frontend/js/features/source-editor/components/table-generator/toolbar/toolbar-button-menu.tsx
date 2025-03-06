@@ -6,7 +6,6 @@ import OLPopover from '@/features/ui/components/ol/ol-popover'
 import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
 import MaterialIcon from '../../../../../shared/components/material-icon'
 import { useTabularContext } from '../contexts/tabular-context'
-import { bsVersion } from '@/features/utils/bootstrap-5'
 
 export const ToolbarButtonMenu: FC<{
   id: string
@@ -68,7 +67,7 @@ export const ToolbarButtonMenu: FC<{
           onClick={() => {
             onToggle(false)
           }}
-          className={bsVersion({ bs5: 'd-block' })}
+          className="d-block"
         >
           {children}
         </OLListGroup>

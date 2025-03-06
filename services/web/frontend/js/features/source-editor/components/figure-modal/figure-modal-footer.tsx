@@ -2,15 +2,11 @@ import {
   FigureModalSource,
   useFigureModalContext,
 } from './figure-modal-context'
-import Icon from '../../../../shared/components/icon'
 import { FC } from 'react'
 import { useTranslation } from 'react-i18next'
 import { sendMB } from '../../../../infrastructure/event-tracking'
 import OLButton from '@/features/ui/components/ol/ol-button'
-import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
 import MaterialIcon from '@/shared/components/material-icon'
-import { bsVersion } from '@/features/utils/bootstrap-5'
-import classnames from 'classnames'
 
 export const FigureModalFooter: FC<{
   onInsert: () => void
@@ -26,7 +22,6 @@ export const FigureModalFooter: FC<{
         {t('cancel')}
       </OLButton>
       <FigureModalAction onInsert={onInsert} onDelete={onDelete} />
-      <BootstrapVersionSwitcher bs3={<div className="clearfix" />} />
     </>
   )
 }
@@ -38,23 +33,12 @@ const HelpToggle = () => {
     return (
       <OLButton
         variant="link"
-        className={classnames(
-          'figure-modal-help-link',
-          bsVersion({ bs3: 'pull-left', bs5: 'me-auto' })
-        )}
+        className="figure-modal-help-link me-auto"
         onClick={() => dispatch({ helpShown: false })}
       >
-        <BootstrapVersionSwitcher
-          bs3={<Icon type="arrow-left" fw />}
-          bs5={
-            <span>
-              <MaterialIcon
-                type="arrow_left_alt"
-                className="align-text-bottom"
-              />
-            </span>
-          }
-        />{' '}
+        <span>
+          <MaterialIcon type="arrow_left_alt" className="align-text-bottom" />
+        </span>{' '}
         {t('back')}
       </OLButton>
     )
@@ -62,20 +46,12 @@ const HelpToggle = () => {
   return (
     <OLButton
       variant="link"
-      className={classnames(
-        'figure-modal-help-link',
-        bsVersion({ bs3: 'pull-left', bs5: 'me-auto' })
-      )}
+      className="figure-modal-help-link me-auto"
       onClick={() => dispatch({ helpShown: true })}
     >
-      <BootstrapVersionSwitcher
-        bs3={<Icon type="question-circle" fw />}
-        bs5={
-          <span>
-            <MaterialIcon type="help" className="align-text-bottom" />
-          </span>
-        }
-      />{' '}
+      <span>
+        <MaterialIcon type="help" className="align-text-bottom" />
+      </span>{' '}
       {t('help')}
     </OLButton>
   )

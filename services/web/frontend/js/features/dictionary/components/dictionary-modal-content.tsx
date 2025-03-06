@@ -13,7 +13,6 @@ import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
 import OLNotification from '@/features/ui/components/ol/ol-notification'
 import OLButton from '@/features/ui/components/ol/ol-button'
 import OLIconButton from '@/features/ui/components/ol/ol-icon-button'
-import { bsVersion } from '@/features/utils/bootstrap-5'
 import { learnedWords as initialLearnedWords } from '@/features/source-editor/extensions/spelling/learned-words'
 
 type DictionaryModalContentProps = {
@@ -79,13 +78,7 @@ export default function DictionaryModalContent({
                     variant="danger"
                     size="sm"
                     onClick={() => handleRemove(learnedWord)}
-                    bs3Props={{ bsSize: 'xsmall' }}
-                    icon={
-                      bsVersion({
-                        bs5: 'delete',
-                        bs3: 'trash-o',
-                      }) as string
-                    }
+                    icon="delete"
                     accessibilityLabel={t('edit_dictionary_remove')}
                   />
                 </OLTooltip>

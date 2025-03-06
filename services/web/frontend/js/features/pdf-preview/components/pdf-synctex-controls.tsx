@@ -5,7 +5,6 @@ import { getJSON } from '../../../infrastructure/fetch-json'
 import { useDetachCompileContext as useCompileContext } from '../../../shared/context/detach-compile-context'
 import { useLayoutContext } from '../../../shared/context/layout-context'
 import useScopeValue from '../../../shared/hooks/use-scope-value'
-import Icon from '../../../shared/components/icon'
 import { useTranslation } from 'react-i18next'
 import useIsMounted from '../../../shared/hooks/use-is-mounted'
 import useAbortController from '../../../shared/hooks/use-abort-controller'
@@ -19,10 +18,8 @@ import { debugConsole } from '@/utils/debugging'
 import { useFileTreePathContext } from '@/features/file-tree/contexts/file-tree-path'
 import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
 import OLButton from '@/features/ui/components/ol/ol-button'
-import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
 import MaterialIcon from '@/shared/components/material-icon'
 import { Spinner } from 'react-bootstrap-5'
-import { bsVersion } from '@/features/utils/bootstrap-5'
 import { useEditorManagerContext } from '@/features/ide-react/context/editor-manager-context'
 import useEventListener from '@/shared/hooks/use-event-listener'
 import { PdfScrollPosition } from '@/shared/hooks/use-pdf-scroll-position'
@@ -49,29 +46,11 @@ function GoToCodeButton({
   let buttonIcon = null
   if (syncToCodeInFlight) {
     buttonIcon = (
-      <BootstrapVersionSwitcher
-        bs3={<Icon type="refresh" spin className="synctex-spin-icon" />}
-        bs5={
-          <Spinner
-            animation="border"
-            aria-hidden="true"
-            size="sm"
-            role="status"
-          />
-        }
-      />
+      <Spinner animation="border" aria-hidden="true" size="sm" role="status" />
     )
   } else if (!isDetachLayout) {
     buttonIcon = (
-      <BootstrapVersionSwitcher
-        bs3={<Icon type="arrow-left" className="synctex-control-icon" />}
-        bs5={
-          <MaterialIcon
-            type="arrow_left_alt"
-            className="synctex-control-icon"
-          />
-        }
-      />
+      <MaterialIcon type="arrow_left_alt" className="synctex-control-icon" />
     )
   }
 
@@ -96,9 +75,6 @@ function GoToCodeButton({
         disabled={syncToCodeInFlight}
         className={buttonClasses}
         aria-label={t('go_to_pdf_location_in_code')}
-        bs3Props={{
-          bsSize: 'xsmall',
-        }}
       >
         {buttonIcon}
         {isDetachLayout ? <span>&nbsp;{t('show_in_code')}</span> : ''}
@@ -122,40 +98,18 @@ function GoToPdfButton({
 }) {
   const { t } = useTranslation()
   const tooltipPlacement = isDetachLayout ? 'bottom' : 'right'
-  const buttonClasses = classNames(
-    'synctex-control',
-    bsVersion({ bs3: 'toolbar-btn-secondary' }),
-    {
-      'detach-synctex-control': !!isDetachLayout,
-    }
-  )
+  const buttonClasses = classNames('synctex-control', {
+    'detach-synctex-control': !!isDetachLayout,
+  })
 
   let buttonIcon = null
   if (syncToPdfInFlight) {
     buttonIcon = (
-      <BootstrapVersionSwitcher
-        bs3={<Icon type="refresh" spin className="synctex-spin-icon" />}
-        bs5={
-          <Spinner
-            animation="border"
-            aria-hidden="true"
-            size="sm"
-            role="status"
-          />
-        }
-      />
+      <Spinner animation="border" aria-hidden="true" size="sm" role="status" />
     )
   } else if (!isDetachLayout) {
     buttonIcon = (
-      <BootstrapVersionSwitcher
-        bs3={<Icon type="arrow-right" className="synctex-control-icon" />}
-        bs5={
-          <MaterialIcon
-            type="arrow_right_alt"
-            className="synctex-control-icon"
-          />
-        }
-      />
+      <MaterialIcon type="arrow_right_alt" className="synctex-control-icon" />
     )
   }
 
@@ -172,9 +126,6 @@ function GoToPdfButton({
         disabled={syncToPdfInFlight || !canSyncToPdf}
         className={buttonClasses}
         aria-label={t('go_to_code_location_in_pdf')}
-        bs3Props={{
-          bsSize: 'xsmall',
-        }}
       >
         {buttonIcon}
         {isDetachLayout ? <span>&nbsp;{t('show_in_pdf')}</span> : ''}

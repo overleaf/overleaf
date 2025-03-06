@@ -1,4 +1,3 @@
-import '../../../helpers/bootstrap-3'
 import { EditorProviders } from '../../../helpers/editor-providers'
 import CodemirrorEditor from '../../../../../frontend/js/features/source-editor/components/codemirror-editor'
 import { mockScope } from '../helpers/mock-scope'
@@ -96,7 +95,7 @@ describe('<CodeMirrorEditor/> toolbar in Rich Text mode', function () {
     selectAll()
 
     clickToolbarButton('Insert Math')
-    clickToolbarButton('Insert Inline Math')
+    cy.findByRole('button', { name: 'Insert Inline Math' }).click()
     cy.get('.cm-content').should('have.text', '\\(2+3=5\\)')
   })
 
@@ -105,7 +104,7 @@ describe('<CodeMirrorEditor/> toolbar in Rich Text mode', function () {
     selectAll()
 
     clickToolbarButton('Insert Math')
-    clickToolbarButton('Insert Display Math')
+    cy.findByRole('button', { name: 'Insert Display Math' }).click()
     cy.get('.cm-content').should('have.text', '\\[2+3=5\\]')
   })
 
@@ -225,7 +224,7 @@ describe('<CodeMirrorEditor/> toolbar in Rich Text mode', function () {
 
     cy.get('.cm-line').eq(2).click()
 
-    clickToolbarButton('Increase Indent')
+    cy.findByRole('button', { name: 'Increase Indent' }).click()
 
     // expose the markup
     cy.get('.cm-line').eq(1).type('{rightArrow}')
@@ -283,7 +282,7 @@ describe('<CodeMirrorEditor/> toolbar in Rich Text mode', function () {
 
     cy.get('.cm-line').eq(2).click()
 
-    clickToolbarButton('Increase Indent')
+    cy.findByRole('button', { name: 'Increase Indent' }).click()
 
     // expose the markup
     cy.get('.cm-line').eq(1).type('{rightArrow}')

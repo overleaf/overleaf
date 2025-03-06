@@ -1,5 +1,4 @@
 import { EditorView } from '@codemirror/view'
-import { isBootstrap5 } from '@/features/utils/bootstrap-5'
 
 export const tableGeneratorTheme = EditorView.baseTheme({
   '&dark .table-generator': {
@@ -349,7 +348,7 @@ export const tableGeneratorTheme = EditorView.baseTheme({
     gap: '6px',
     'align-items': 'flex-start',
     'max-width': '240px',
-    'font-family': isBootstrap5() ? 'var(--bs-body-font-family)' : 'Lato',
+    'font-family': 'var(--bs-body-font-family)',
 
     '& .info-icon': {
       flex: ' 0 0 24px',
@@ -370,7 +369,7 @@ export const tableGeneratorTheme = EditorView.baseTheme({
     display: 'flex',
     'align-items': 'center',
     'justify-content': 'space-between',
-    'font-family': isBootstrap5() ? 'var(--bs-body-font-family)' : 'Lato',
+    'font-family': 'var(--bs-body-font-family)',
     height: '36px',
 
     '&:not(:first-child)': {
@@ -417,7 +416,7 @@ export const tableGeneratorTheme = EditorView.baseTheme({
       'column-gap': '8px',
       'align-self': 'stretch',
       padding: '12px 8px',
-      'font-family': isBootstrap5() ? 'var(--bs-body-font-family)' : 'Lato',
+      'font-family': 'var(--bs-body-font-family)',
 
       '& .table-generator-button-label': {
         'align-self': 'stretch',
@@ -483,7 +482,7 @@ export const tableGeneratorTheme = EditorView.baseTheme({
   '.ol-cm-environment-table.table-generator-error-container, .ol-cm-environment-table.ol-cm-tabular':
     {
       background: 'rgba(125, 125, 125, 0.05)',
-      'font-family': isBootstrap5() ? 'var(--bs-body-font-family)' : 'Lato',
+      'font-family': 'var(--bs-body-font-family)',
     },
 
   '.table-generator-filler-row': {

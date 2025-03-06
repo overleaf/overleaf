@@ -2,7 +2,6 @@ import { useHistoryContext } from '../../../../context/history-context'
 import { UpdateRange } from '../../../../services/types/update'
 import { ReactNode } from 'react'
 import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
-import { bsVersion } from '@/features/utils/bootstrap-5'
 
 type CompareProps = {
   comparisonRange: UpdateRange
@@ -38,9 +37,7 @@ function Compare({
       overlayProps={{ placement: 'left' }}
     >
       <button className="history-compare-btn" onClick={handleCompareVersion}>
-        <span className={bsVersion({ bs3: 'sr-only', bs5: 'visually-hidden' })}>
-          {toolTipDescription}
-        </span>
+        <span className="visually-hidden">{toolTipDescription}</span>
         {icon}
       </button>
     </OLTooltip>

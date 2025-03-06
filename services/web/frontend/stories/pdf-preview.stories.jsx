@@ -22,12 +22,10 @@ import {
 import { cloneDeep } from 'lodash'
 import { ScopeDecorator } from './decorators/scope'
 import { PdfPreviewProvider } from '@/features/pdf-preview/components/pdf-preview-provider'
-import { bsVersionDecorator } from '../../.storybook/utils/with-bootstrap-switcher'
 import {
   Dropdown,
   DropdownMenu,
 } from '@/features/ui/components/bootstrap-5/dropdown-menu'
-import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
 
 export default {
   title: 'Editor / PDF Preview',
@@ -38,9 +36,6 @@ export default {
     PdfPreviewError,
   },
   decorators: [ScopeDecorator],
-  argTypes: {
-    ...bsVersionDecorator.argTypes,
-  },
 }
 
 export const Interactive = () => {
@@ -326,22 +321,11 @@ export const FileList = () => {
   }, [])
 
   return (
-    <BootstrapVersionSwitcher
-      bs3={
-        <div className="dropdown open">
-          <div className="dropdown-menu">
-            <PdfFileList fileList={fileList} />
-          </div>
-        </div>
-      }
-      bs5={
-        <Dropdown>
-          <DropdownMenu id="dropdown-files-logs-pane-list" show>
-            <PdfFileList fileList={fileList} />
-          </DropdownMenu>
-        </Dropdown>
-      }
-    />
+    <Dropdown>
+      <DropdownMenu id="dropdown-files-logs-pane-list" show>
+        <PdfFileList fileList={fileList} />
+      </DropdownMenu>
+    </Dropdown>
   )
 }
 

@@ -1,6 +1,4 @@
 import { PropsWithChildren } from 'react'
-import Icon from '../../../shared/components/icon'
-import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
 import MaterialIcon from '@/shared/components/material-icon'
 
 type Props = {
@@ -26,12 +24,7 @@ function LeftMenuButtonIcon({
   if (svgIcon) {
     return <div className="material-symbols">{svgIcon}</div>
   } else if (icon) {
-    return (
-      <BootstrapVersionSwitcher
-        bs3={<Icon type={icon.type} fw={icon.fw ?? false} />}
-        bs5={<MaterialIcon type={icon.type} />}
-      />
-    )
+    return <MaterialIcon type={icon.type} />
   } else return null
 }
 

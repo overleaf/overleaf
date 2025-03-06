@@ -1,4 +1,3 @@
-import '../../../helpers/bootstrap-3'
 import CodemirrorEditor from '../../../../../frontend/js/features/source-editor/components/codemirror-editor'
 import { EditorProviders } from '../../../helpers/editor-providers'
 import { mockScope, rootFolderId } from '../helpers/mock-scope'
@@ -112,9 +111,9 @@ describe('<FigureModal />', function () {
     })
 
     it('Enables insert button when choosing file', function () {
-      cy.findByText('Insert figure').should('be.disabled')
+      cy.findByRole('button', { name: 'Insert figure' }).should('be.disabled')
       chooseFileFromComputer()
-      cy.findByText('Insert figure').should('be.enabled')
+      cy.findByRole('button', { name: 'Insert figure' }).should('be.enabled')
     })
   })
 
@@ -127,7 +126,7 @@ describe('<FigureModal />', function () {
     })
 
     it('Lists files from project', function () {
-      cy.findByText('Select image from project files').click()
+      cy.findByRole('textbox', { name: 'Image file' }).click()
       cy.findByRole('listbox')
         .children()
         .should('have.length', 2)
@@ -137,20 +136,20 @@ describe('<FigureModal />', function () {
     })
 
     it('Enables insert button when choosing file', function () {
-      cy.findByText('Insert figure').should('be.disabled')
-      cy.findByText('Select image from project files').click()
+      cy.findByRole('button', { name: 'Insert figure' }).should('be.disabled')
+      cy.findByRole('textbox', { name: 'Image file' }).click()
       cy.findByRole('listbox').within(() => {
         cy.findByText('frog.jpg').click()
       })
-      cy.findByText('Insert figure').should('be.enabled')
+      cy.findByRole('button', { name: 'Insert figure' }).should('be.enabled')
     })
 
     it('Inserts file when pressing insert button', function () {
-      cy.findByText('Select image from project files').click()
+      cy.findByRole('textbox', { name: 'Image file' }).click()
       cy.findByRole('listbox').within(() => {
         cy.findByText('frog.jpg').click()
       })
-      cy.findByText('Insert figure').click()
+      cy.findByRole('button', { name: 'Insert figure' }).click()
       cy.get('.cm-content').should(
         'have.text',
         '\\begin{figure}    \\centering    \\caption{Enter Caption}    🏷fig:enter-label\\end{figure}'
@@ -165,22 +164,21 @@ describe('<FigureModal />', function () {
       cy.interceptLinkedFile()
       clickToolbarButton('Insert Figure')
       cy.findByRole('menu').within(() => {
-        cy.findByText('From another project').click()
+        cy.findByRole('button', { name: 'From another project' }).click()
       })
-      cy.findByText('Select a project').parent().as('project-dropdown')
-      cy.findByText('Select a file').parent().as('file-dropdown')
+      cy.findByRole('textbox', { name: 'Project' }).as('project-dropdown')
+      cy.findByRole('textbox', { name: 'Image file' }).as('file-dropdown')
     })
 
     it('List projects and files in projects', function () {
-      cy.findByText('Insert figure').should('be.disabled')
-      cy.get('@file-dropdown').should('have.class', 'disabled')
+      cy.findByRole('button', { name: 'Insert figure' }).should('be.disabled')
+      cy.get('@file-dropdown').should('be.disabled')
       cy.get('@project-dropdown').click()
-      cy.findByRole('listbox').as('project-select')
-      cy.get('@project-select').children().should('have.length', 2)
-      cy.get('@project-select').within(() => {
-        cy.findByText('My first project').click()
+      cy.findByRole('listbox').within(() => {
+        cy.findAllByRole('option').should('have.length', 2)
+        cy.findByRole('option', { name: 'My first project' }).click()
       })
-      cy.get('@file-dropdown').should('not.have.class', 'disabled')
+      cy.get('@file-dropdown').should('be.enabled')
       cy.get('@file-dropdown').click()
       cy.findByRole('listbox').as('file-select')
       cy.get('@file-select').children().should('have.length', 2)
@@ -189,26 +187,26 @@ describe('<FigureModal />', function () {
       cy.get('@file-select').within(() => {
         cy.findByText('frog.jpg').click()
       })
-      cy.findByText('Insert figure').should('be.enabled')
+      cy.findByRole('button', { name: 'Insert figure' }).should('be.enabled')
     })
 
     it('Enables insert button when choosing file', function () {
-      cy.findByText('Insert figure').should('be.disabled')
+      cy.findByRole('button', { name: 'Insert figure' }).should('be.disabled')
       cy.get('@project-dropdown').click()
       cy.findByRole('listbox').within(() => {
-        cy.findByText('My first project').click()
+        cy.findByRole('option', { name: 'My first project' }).click()
       })
       cy.get('@file-dropdown').click()
       cy.findByRole('listbox').within(() => {
-        cy.findByText('frog.jpg').click()
+        cy.findByRole('option', { name: 'frog.jpg' }).click()
       })
-      cy.findByText('Insert figure').should('be.enabled')
+      cy.findByRole('button', { name: 'Insert figure' }).should('be.enabled')
     })
 
     it('Creates linked file when pressing insert', function () {
       cy.get('@project-dropdown').click()
       cy.findByRole('listbox').within(() => {
-        cy.findByText('My first project').click()
+        cy.findByRole('option', { name: 'My first project' }).click()
       })
       cy.get('@file-dropdown').click()
       cy.findByRole('listbox').within(() => {
@@ -234,13 +232,12 @@ describe('<FigureModal />', function () {
     it('Creates linked output file when pressing insert', function () {
       cy.get('@project-dropdown').click()
       cy.findByRole('listbox').within(() => {
-        cy.findByText('My first project').click()
+        cy.findByRole('option', { name: 'My first project' }).click()
       })
-      cy.findByText('select from output files').click()
-      cy.findByText('Select an output file').parent().as('output-file-dropdown')
-      cy.get('@output-file-dropdown').click()
+      cy.findByRole('button', { name: 'select from output files' }).click()
+      cy.findByRole('textbox', { name: 'Output file' }).click()
       cy.findByRole('listbox').within(() => {
-        cy.findByText('output.pdf').click()
+        cy.findByRole('option', { name: 'output.pdf' }).click()
       })
       cy.findByText('Insert figure').click()
       cy.get('@linked-file-request').should('have.been.calledWithMatch', {
@@ -301,9 +298,9 @@ describe('<FigureModal />', function () {
       cy.findByRole('menu').within(() => {
         cy.findByText('From another project').click()
       })
-      cy.findByText('Select a project').click()
+      cy.findByRole('textbox', { name: 'Project' }).click()
       cy.findByRole('listbox').within(() => {
-        cy.findByText('My first project').click()
+        cy.findByRole('option', { name: 'My first project' }).click()
       })
     }
     function expectNoOutputSwitch() {
@@ -325,9 +322,9 @@ describe('<FigureModal />', function () {
       })
       expectNoOutputSwitch()
       it('should show output file selector', function () {
-        cy.findByText('Select an output file').click()
+        cy.findByRole('textbox', { name: 'Output file' }).click()
         cy.findByRole('listbox').within(() => {
-          cy.findByText('output.pdf').click()
+          cy.findByRole('option', { name: 'output.pdf' }).click()
         })
       })
     })
@@ -344,9 +341,9 @@ describe('<FigureModal />', function () {
       expectNoOutputSwitch()
 
       it('should show source file selector', function () {
-        cy.findByText('Select a file').click()
+        cy.findByRole('textbox', { name: 'Image file' }).click()
         cy.findByRole('listbox').within(() => {
-          cy.findByText('frog.jpg').click()
+          cy.findByRole('option', { name: 'frog.jpg' }).click()
         })
       })
     })
@@ -363,8 +360,10 @@ describe('<FigureModal />', function () {
         'relocated-file-name-input'
       )
       cy.findByLabelText('Image URL').as('image-url-input')
-      cy.get('[data-cy="include-label-option"]').as('include-label-checkbox')
-      cy.get('[data-cy="include-caption-option"]').as(
+      cy.findByRole('checkbox', { name: 'Include label' }).as(
+        'include-label-checkbox'
+      )
+      cy.findByRole('checkbox', { name: 'Include caption' }).as(
         'include-caption-checkbox'
       )
     })
@@ -377,14 +376,14 @@ describe('<FigureModal />', function () {
     })
 
     it('Enables insert button when name and url is available', function () {
-      cy.findByText('Insert figure').should('be.disabled')
+      cy.findByRole('button', { name: 'Insert figure' }).should('be.disabled')
       cy.get('@image-url-input').type('https://my-fake-website.com/frog.jpg')
-      cy.findByText('Insert figure').should('be.enabled')
+      cy.findByRole('button', { name: 'Insert figure' }).should('be.enabled')
     })
 
     it('Adds linked file when pressing insert', function () {
       cy.get('@image-url-input').type('https://my-fake-website.com/frog.jpg')
-      cy.findByText('Insert figure').click()
+      cy.findByRole('button', { name: 'Insert figure' }).click()
 
       cy.get('@linked-file-request').should('have.been.calledWithMatch', {
         body: {
@@ -403,7 +402,7 @@ describe('<FigureModal />', function () {
 
     it('Selects the caption when the figure is inserted with a caption', function () {
       cy.get('@image-url-input').type('https://my-fake-website.com/frog.jpg')
-      cy.findByText('Insert figure').click()
+      cy.findByRole('button', { name: 'Insert figure' }).click()
 
       cy.get('@linked-file-request').should('have.been.calledWithMatch', {
         body: {
@@ -430,7 +429,7 @@ describe('<FigureModal />', function () {
     it('Selects the label when the figure is inserted without a caption', function () {
       cy.get('@image-url-input').type('https://my-fake-website.com/frog.jpg')
       cy.get('@include-caption-checkbox').uncheck()
-      cy.findByText('Insert figure').click()
+      cy.findByRole('button', { name: 'Insert figure' }).click()
 
       cy.get('@linked-file-request').should('have.been.calledWithMatch', {
         body: {
@@ -459,7 +458,7 @@ describe('<FigureModal />', function () {
       cy.get('@include-caption-checkbox').uncheck()
       cy.get('@include-label-checkbox').uncheck()
 
-      cy.findByText('Insert figure').click()
+      cy.findByRole('button', { name: 'Insert figure' }).click()
 
       cy.get('@linked-file-request').should('have.been.calledWithMatch', {
         body: {
@@ -496,8 +495,10 @@ describe('<FigureModal />', function () {
         { delay: 0 }
       )
       cy.get('[aria-label="Edit figure"]').click()
-      cy.get('[data-cy="include-caption-option"]').should('be.checked')
-      cy.get('[data-cy="include-label-option"]').should('be.checked')
+      cy.findByRole('checkbox', { name: 'Include caption' }).should(
+        'be.checked'
+      )
+      cy.findByRole('checkbox', { name: 'Include label' }).should('be.checked')
     })
 
     it('Parses existing width', function () {
@@ -524,8 +525,10 @@ describe('<FigureModal />', function () {
         { delay: 0 }
       )
       cy.get('[aria-label="Edit figure"]').click()
-      cy.get('[data-cy="include-label-option"]').click()
-      cy.get('[data-cy="include-label-option"]').should('not.be.checked')
+      cy.findByRole('checkbox', { name: 'Include label' }).click()
+      cy.findByRole('checkbox', { name: 'Include label' }).should(
+        'not.be.checked'
+      )
       cy.findByText('Done').click()
       cy.get('.cm-content').should(
         'have.text',
@@ -544,8 +547,10 @@ describe('<FigureModal />', function () {
         { delay: 0 }
       )
       cy.get('[aria-label="Edit figure"]').click()
-      cy.get('[data-cy="include-caption-option"]').click()
-      cy.get('[data-cy="include-caption-option"]').should('not.be.checked')
+      cy.findByRole('checkbox', { name: 'Include caption' }).click()
+      cy.findByRole('checkbox', { name: 'Include caption' }).should(
+        'not.be.checked'
+      )
       cy.findByText('Done').click()
       cy.get('.cm-content').should(
         'have.text',
@@ -566,7 +571,7 @@ text below`,
         { delay: 0 }
       )
       cy.get('[aria-label="Edit figure"]').click()
-      cy.get('[aria-label="Remove or replace figure"]').click()
+      cy.findByRole('button', { name: 'Remove or replace figure' }).click()
       cy.findByText('Delete figure').click()
       cy.get('.cm-content').should('have.text', 'text abovetext below')
     })

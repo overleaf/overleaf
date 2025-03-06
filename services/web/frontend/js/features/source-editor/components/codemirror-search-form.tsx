@@ -17,13 +17,11 @@ import {
 } from '@codemirror/search'
 import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
 import OLButton from '@/features/ui/components/ol/ol-button'
-import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
 import MaterialIcon from '@/shared/components/material-icon'
 import OLButtonGroup from '@/features/ui/components/ol/ol-button-group'
 import OLFormControl from '@/features/ui/components/ol/ol-form-control'
 import OLCloseButton from '@/features/ui/components/ol/ol-close-button'
 import { useTranslation } from 'react-i18next'
-import Icon from '../../../shared/components/icon'
 import classnames from 'classnames'
 import { useUserSettingsContext } from '@/shared/context/user-settings-context'
 import { getStoredSelection, setStoredSelection } from '../extensions/search'
@@ -328,10 +326,7 @@ const CodeMirrorSearchForm: FC = () => {
               htmlFor={withinSelectionId}
               aria-label={t('search_within_selection')}
             >
-              <BootstrapVersionSwitcher
-                bs3={<Icon type="align-left" fw />}
-                bs5={<MaterialIcon type="format_align_left" />}
-              />
+              <MaterialIcon type="format_align_left" />
             </label>
           </OLTooltip>
         </span>
@@ -411,20 +406,9 @@ const CodeMirrorSearchForm: FC = () => {
               size="sm"
               onClick={() => findPrevious(view)}
             >
-              <BootstrapVersionSwitcher
-                bs3={
-                  <Icon
-                    type="chevron-up"
-                    fw
-                    accessibilityLabel={t('search_previous')}
-                  />
-                }
-                bs5={
-                  <MaterialIcon
-                    type="keyboard_arrow_up"
-                    accessibilityLabel={t('search_previous')}
-                  />
-                }
+              <MaterialIcon
+                type="keyboard_arrow_up"
+                accessibilityLabel={t('search_previous')}
               />
             </OLButton>
 
@@ -433,20 +417,9 @@ const CodeMirrorSearchForm: FC = () => {
               size="sm"
               onClick={() => findNext(view)}
             >
-              <BootstrapVersionSwitcher
-                bs3={
-                  <Icon
-                    type="chevron-down"
-                    fw
-                    accessibilityLabel={t('search_next')}
-                  />
-                }
-                bs5={
-                  <MaterialIcon
-                    type="keyboard_arrow_down"
-                    accessibilityLabel={t('search_next')}
-                  />
-                }
+              <MaterialIcon
+                type="keyboard_arrow_down"
+                accessibilityLabel={t('search_next')}
               />
             </OLButton>
           </OLButtonGroup>

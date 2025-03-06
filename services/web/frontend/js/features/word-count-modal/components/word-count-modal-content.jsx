@@ -13,9 +13,7 @@ import OLNotification from '@/features/ui/components/ol/ol-notification'
 import OLRow from '@/features/ui/components/ol/ol-row'
 import OLCol from '@/features/ui/components/ol/ol-col'
 import OLButton from '@/features/ui/components/ol/ol-button'
-import Icon from '@/shared/components/icon'
 import { Spinner } from 'react-bootstrap-5'
-import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
 
 // NOTE: this component is only mounted when the modal is open
 export default function WordCountModalContent({ handleHide }) {
@@ -33,16 +31,11 @@ export default function WordCountModalContent({ handleHide }) {
       <OLModalBody>
         {loading && !error && (
           <div className="loading">
-            <BootstrapVersionSwitcher
-              bs3={<Icon type="refresh" spin fw />}
-              bs5={
-                <Spinner
-                  animation="border"
-                  aria-hidden="true"
-                  size="sm"
-                  role="status"
-                />
-              }
+            <Spinner
+              animation="border"
+              aria-hidden="true"
+              size="sm"
+              role="status"
             />
             &nbsp;
             {t('loading')}…

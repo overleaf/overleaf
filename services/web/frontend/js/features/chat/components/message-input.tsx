@@ -1,5 +1,4 @@
 import { useTranslation } from 'react-i18next'
-import { bsVersion } from '@/features/utils/bootstrap-5'
 
 type MessageInputProps = {
   resetUnreadMessages: () => void
@@ -27,10 +26,7 @@ function MessageInput({ resetUnreadMessages, sendMessage }: MessageInputProps) {
 
   return (
     <form className="new-message">
-      <label
-        htmlFor="chat-input"
-        className={bsVersion({ bs3: 'sr-only', bs5: 'visually-hidden' })}
-      >
+      <label htmlFor="chat-input" className="visually-hidden">
         {t('your_message_to_collaborators')}
       </label>
       <textarea

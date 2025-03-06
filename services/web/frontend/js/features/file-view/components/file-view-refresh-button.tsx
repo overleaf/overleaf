@@ -6,7 +6,6 @@ import {
   useState,
 } from 'react'
 import { useTranslation } from 'react-i18next'
-import Icon from '@/shared/components/icon'
 import { postJSON } from '@/infrastructure/fetch-json'
 import { useProjectContext } from '@/shared/context/project-context'
 import type { BinaryFile } from '../types/binary-file'
@@ -103,14 +102,7 @@ function FileViewRefreshButtonDefault({
       onClick={() => refreshFile(null)}
       disabled={refreshing}
       isLoading={refreshing}
-      bs3Props={{
-        loading: (
-          <>
-            <Icon type="refresh" spin={refreshing} fw />{' '}
-            <span>{refreshing ? `${t('refreshing')}…` : t('refresh')}</span>
-          </>
-        ),
-      }}
+      loadingLabel={t('refreshing')}
     >
       {t('refresh')}
     </OLButton>

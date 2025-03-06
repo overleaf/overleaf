@@ -1,6 +1,5 @@
 import { LayoutDropdownButtonUi } from '@/features/editor-navigation-toolbar/components/layout-dropdown-button'
 import { Meta } from '@storybook/react'
-import { bsVersionDecorator } from '../../../.storybook/utils/with-bootstrap-switcher'
 import { ComponentProps } from 'react'
 
 export const LayoutDropdown = (
@@ -29,7 +28,6 @@ const meta: Meta<typeof LayoutDropdownButtonUi> = {
       control: 'select',
       options: ['sideBySide', 'flat'],
     },
-    ...bsVersionDecorator.argTypes,
   },
   parameters: { actions: { argTypesRegex: '^handle.*' } },
 }

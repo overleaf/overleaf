@@ -21,7 +21,6 @@ import {
 import { useTranslation } from 'react-i18next'
 import { inlineBackground } from '../../../source-editor/extensions/inline-background'
 import OLButton from '@/features/ui/components/ol/ol-button'
-import { bsVersion } from '@/features/utils/bootstrap-5'
 
 function extensions(themeOptions: Options): Extension[] {
   return [
@@ -134,7 +133,7 @@ function DocumentDiffViewer({
       {before > 0 ? (
         <OLButton
           variant="secondary"
-          leadingIcon={bsVersion({ bs3: 'arrow-up', bs5: 'arrow_upward' })}
+          leadingIcon="arrow_upward"
           onClick={scrollToPrevious}
           className="previous-highlight-button"
         >
@@ -144,7 +143,7 @@ function DocumentDiffViewer({
       {after > 0 ? (
         <OLButton
           variant="secondary"
-          leadingIcon={bsVersion({ bs3: 'arrow-down', bs5: 'arrow_downward' })}
+          leadingIcon="arrow_downward"
           onClick={scrollToNext}
           className="next-highlight-button"
         >

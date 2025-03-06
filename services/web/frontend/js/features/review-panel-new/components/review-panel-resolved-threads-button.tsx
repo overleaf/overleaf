@@ -1,11 +1,9 @@
 import React, { FC, useRef, useState } from 'react'
-import Icon from '@/shared/components/icon'
 import OLOverlay from '@/features/ui/components/ol/ol-overlay'
 import OLPopover from '@/features/ui/components/ol/ol-popover'
 import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
 import { ReviewPanelResolvedThreadsMenu } from './review-panel-resolved-threads-menu'
 import { useTranslation } from 'react-i18next'
-import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
 import MaterialIcon from '@/shared/components/material-icon'
 import getMeta from '@/utils/meta'
 
@@ -30,10 +28,7 @@ export const ReviewPanelResolvedThreadsButton: FC = () => {
           ref={buttonRef}
           onClick={() => setExpanded(true)}
         >
-          <BootstrapVersionSwitcher
-            bs3={<Icon type="inbox" fw />}
-            bs5={<MaterialIcon type="inbox" />}
-          />
+          <MaterialIcon type="inbox" />
         </button>
       </OLTooltip>
       {expanded && (

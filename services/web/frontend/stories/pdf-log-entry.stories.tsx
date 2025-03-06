@@ -1,6 +1,5 @@
 import PdfLogEntry from '@/features/pdf-preview/components/pdf-log-entry'
 import type { Meta, StoryObj } from '@storybook/react'
-import { bsVersionDecorator } from '../../.storybook/utils/with-bootstrap-switcher'
 import { ruleIds } from '@/ide/human-readable-logs/HumanReadableLogsHints'
 import { ScopeDecorator } from './decorators/scope'
 import { useMeta } from './hooks/use-meta'
@@ -52,7 +51,6 @@ const meta: Meta<typeof PdfLogEntry> = {
   decorators: [ScopeDecorator],
   argTypes: {
     ruleId: { control: 'select', options: [...ruleIds, 'other'] },
-    ...bsVersionDecorator.argTypes,
   },
   args: fakeArgs,
 }

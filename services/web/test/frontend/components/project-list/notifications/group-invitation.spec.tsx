@@ -1,4 +1,3 @@
-import '../../../helpers/bootstrap-3'
 import GroupInvitationNotification from '@/features/project-list/components/notifications/groups/group-invitation/group-invitation'
 import { NotificationGroupInvitation } from '../../../../../types/project/dashboard/notification'
 

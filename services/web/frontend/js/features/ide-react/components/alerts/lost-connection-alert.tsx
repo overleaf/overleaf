@@ -40,7 +40,6 @@ export function LostConnectionAlert({
           onClick={() => tryReconnectNow()}
           size="sm"
           variant="secondary"
-          bs3Props={{ className: 'pull-right' }}
         >
           {t('try_now')}
         </OLButton>

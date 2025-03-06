@@ -5,6 +5,7 @@ import './shared/commands'
 import './shared/exceptions'
 import './ct/commands'
 import './ct/codemirror'
+import '../../test/frontend/helpers/bootstrap-5'
 
 beforeEach(function () {
   resetMeta()

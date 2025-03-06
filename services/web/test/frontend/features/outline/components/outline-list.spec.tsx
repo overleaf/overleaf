@@ -1,4 +1,3 @@
-import '../../../helpers/bootstrap-3'
 import OutlineList from '../../../../../frontend/js/features/outline/components/outline-list'
 
 describe('<OutlineList />', function () {

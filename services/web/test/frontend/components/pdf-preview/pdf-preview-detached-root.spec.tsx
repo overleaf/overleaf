@@ -1,4 +1,3 @@
-import '../../helpers/bootstrap-3'
 import PdfPreviewDetachedRoot from '../../../../frontend/js/features/pdf-preview/components/pdf-preview-detached-root'
 import { detachChannel, testDetachChannel } from '../../helpers/detach-channel'
 

@@ -1,4 +1,3 @@
-import '../../../helpers/bootstrap-3'
 import { Folder } from '../../../../../types/folder'
 import { docId, mockDocContent } from '../helpers/mock-doc'
 import { mockScope } from '../helpers/mock-scope'

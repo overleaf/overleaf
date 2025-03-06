@@ -1,6 +1,5 @@
 // Needed since eslint gets confused by mocha-each
 /* eslint-disable mocha/prefer-arrow-callback */
-import '../../../helpers/bootstrap-3'
 import { EditorProviders } from '../../../helpers/editor-providers'
 import CodemirrorEditor from '../../../../../frontend/js/features/source-editor/components/codemirror-editor'
 import { mockScope } from '../helpers/mock-scope'
@@ -110,6 +109,7 @@ describe('<CodeMirrorEditor/> Table editor', function () {
 
     cy.interceptMathJax()
     cy.interceptCompile('compile', Number.MAX_SAFE_INTEGER)
+    cy.intercept('/project/*/doc/*/metadata', { body: {} })
     window.metaAttributesCache.set('ol-preventCompileOnLoad', true)
   })
 
@@ -525,7 +525,10 @@ cell 3 & cell 4 \\\\
           .should('be.focused')
           .type('20')
         // Change the unit to inches
-        cy.get('@modal').findAllByLabelText('Length unit').first().click()
+        cy.get('@modal')
+          .findAllByLabelText(/Length unit/)
+          .first()
+          .click()
         cy.get('@modal')
           .findByRole('listbox')
           .as('dropdown')
@@ -564,9 +567,9 @@ cell 3 & cell 4 \\\\
             .as('modal')
             .should('be.visible')
           cy.get('@modal')
-            .findAllByLabelText('Length unit')
+            .findAllByLabelText(/Length unit/)
             .first()
-            .should('have.text', expectedUnit)
+            .should('have.value', expectedUnit)
           cy.get('@modal').findByText('Cancel').click()
         }
       )
