@@ -274,6 +274,9 @@ const FileStoreHandler = {
   },
 
   deleteProject(projectId, callback) {
+    if (!Features.hasFeature('filestore')) {
+      return callback() // if filestore is not in use, we don't need to delete anything
+    }
     request(
       {
         method: 'delete',

@@ -421,27 +421,44 @@ describe('FileStoreHandler', function () {
   })
 
   describe('deleteProject', function () {
-    it('should send a delete request to filestore api', function (done) {
-      const projectUrl = this.getProjectUrl(this.projectId)
-      this.request.callsArgWith(1, null)
+    describe('when filestore is enabled', function () {
+      beforeEach(function () {
+        this.Features.hasFeature.withArgs('filestore').returns(true)
+      })
+      it('should send a delete request to filestore api', function (done) {
+        const projectUrl = this.getProjectUrl(this.projectId)
+        this.request.callsArgWith(1, null)
 
-      this.handler.deleteProject(this.projectId, err => {
-        assert.equal(err, undefined)
-        this.request.args[0][0].method.should.equal('delete')
-        this.request.args[0][0].uri.should.equal(projectUrl)
-        done()
+        this.handler.deleteProject(this.projectId, err => {
+          assert.equal(err, undefined)
+          this.request.args[0][0].method.should.equal('delete')
+          this.request.args[0][0].uri.should.equal(projectUrl)
+          done()
+        })
+      })
+
+      it('should wrap the error if there is one', function (done) {
+        const error = new Error('my error')
+        this.request.callsArgWith(1, error)
+        this.handler.deleteProject(this.projectId, err => {
+          expect(OError.getFullStack(err)).to.match(
+            /something went wrong deleting a project in filestore/
+          )
+          expect(OError.getFullStack(err)).to.match(/my error/)
+          done()
+        })
       })
     })
-
-    it('should wrap the error if there is one', function (done) {
-      const error = new Error('my error')
-      this.request.callsArgWith(1, error)
-      this.handler.deleteProject(this.projectId, err => {
-        expect(OError.getFullStack(err)).to.match(
-          /something went wrong deleting a project in filestore/
-        )
-        expect(OError.getFullStack(err)).to.match(/my error/)
-        done()
+    describe('when filestore is disabled', function () {
+      beforeEach(function () {
+        this.Features.hasFeature.withArgs('filestore').returns(false)
+      })
+      it('should not send a delete request to filestore api', function (done) {
+        this.handler.deleteProject(this.projectId, err => {
+          assert.equal(err, undefined)
+          this.request.called.should.equal(false)
+          done()
+        })
       })
     })
   })

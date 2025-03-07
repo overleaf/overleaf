@@ -391,7 +391,7 @@ describe('Deleting a project', function () {
         )
       })
 
-      it('Should destroy the files', function (done) {
+      it('Should destroy the files if filestore is in use', function (done) {
         expect(MockFilestoreApi.files[this.projectId.toString()]).to.exist
 
         request.post(
@@ -406,9 +406,13 @@ describe('Deleting a project', function () {
           (error, res) => {
             expect(error).not.to.exist
             expect(res.statusCode).to.equal(200)
-
-            expect(MockFilestoreApi.files[this.projectId.toString()]).not.to
-              .exist
+            if (Features.hasFeature('filestore')) {
+              expect(MockFilestoreApi.files[this.projectId.toString()]).not.to
+                .exist
+            } else {
+              // don't touch files in filestore if it's not in use
+              expect(MockFilestoreApi.files[this.projectId.toString()]).to.exist
+            }
             done()
           }
         )
