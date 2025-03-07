@@ -25,6 +25,7 @@ type ConfirmEmailFormProps = {
   email?: string
   onSuccessfulConfirmation?: () => void
   interstitial: boolean
+  isModal?: boolean
   onCancel?: () => void
 }
 
@@ -37,6 +38,7 @@ export function ConfirmEmailForm({
   email = getMeta('ol-email'),
   onSuccessfulConfirmation,
   interstitial,
+  isModal,
   onCancel,
 }: ConfirmEmailFormProps) {
   const { t } = useTranslation()
@@ -156,6 +158,13 @@ export function ConfirmEmailForm({
     )
   }
 
+  let intro = <h5 className="h5">{t('confirm_your_email')}</h5>
+  if (isModal) intro = <h5 className="h5">{t('we_sent_code')}</h5>
+  if (interstitial)
+    intro = (
+      <h1 className="h3 interstitial-header">{t('confirm_your_email')}</h1>
+    )
+
   return (
     <form
       onSubmit={submitHandler}
@@ -172,14 +181,12 @@ export function ConfirmEmailForm({
           />
         )}
 
-        {interstitial ? (
-          <h1 className="h3 interstitial-header">{t('confirm_your_email')}</h1>
-        ) : (
-          <h5 className="h5">{t('confirm_your_email')}</h5>
-        )}
+        {intro}
 
         <OLFormLabel htmlFor="one-time-code">
-          {t('enter_the_confirmation_code', { email })}
+          {isModal
+            ? t('enter_the_code', { email })
+            : t('enter_the_confirmation_code', { email })}
         </OLFormLabel>
         <input
           id="one-time-code"

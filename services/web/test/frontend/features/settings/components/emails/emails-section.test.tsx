@@ -81,7 +81,7 @@ describe('<EmailsSection />', function () {
     fetchMock.get('/user/emails?ensureAffiliation=true', [unconfirmedUserData])
     render(<EmailsSection />)
 
-    await screen.findByText(/please check your inbox/i)
+    await screen.findByText(/unconfirmed/i)
   })
 
   it('hides confirmation status for confirmed users', async function () {
@@ -96,7 +96,7 @@ describe('<EmailsSection />', function () {
     fetchMock.get('/user/emails?ensureAffiliation=true', [unconfirmedUserData])
     render(<EmailsSection />)
 
-    await screen.findByRole('button', { name: /resend confirmation email/i })
+    await screen.findByRole('button', { name: /resend confirmation code/i })
   })
 
   it('renders professional label', async function () {
@@ -115,16 +115,16 @@ describe('<EmailsSection />', function () {
     render(<EmailsSection />)
     await waitForElementToBeRemoved(() => screen.getByText(/loading/i))
 
-    fetchMock.post('/user/emails/resend_confirmation', 200)
+    fetchMock.post('/user/emails/send-confirmation-code', 200)
 
     const button = screen.getByRole('button', {
-      name: /resend confirmation email/i,
+      name: /resend confirmation code/i,
     })
     fireEvent.click(button)
 
     expect(
       screen.queryByRole('button', {
-        name: /resend confirmation email/i,
+        name: /resend confirmation code/i,
       })
     ).to.be.null
 
@@ -135,7 +135,7 @@ describe('<EmailsSection />', function () {
     ).to.be.null
 
     await screen.findByRole('button', {
-      name: /resend confirmation email/i,
+      name: /resend confirmation code/i,
     })
   })
 
@@ -145,22 +145,19 @@ describe('<EmailsSection />', function () {
     render(<EmailsSection />)
     await waitForElementToBeRemoved(() => screen.getByText(/loading/i))
 
-    fetchMock.post('/user/emails/resend_confirmation', 503)
+    fetchMock.post('/user/emails/send-confirmation-code', 503)
 
     const button = screen.getByRole('button', {
-      name: /resend confirmation email/i,
+      name: /resend confirmation code/i,
     })
     fireEvent.click(button)
 
-    expect(
-      screen.queryByRole('button', {
-        name: /resend confirmation email/i,
-      })
-    ).to.be.null
+    expect(screen.queryByRole('button', { name: /resend confirmation code/i }))
+      .to.be.null
 
     await waitForElementToBeRemoved(() => screen.getByText(/sending/i))
 
     screen.getByText(/sorry, something went wrong/i)
-    screen.getByRole('button', { name: /resend confirmation email/i })
+    screen.getByRole('button', { name: /resend confirmation code/i })
   })
 })

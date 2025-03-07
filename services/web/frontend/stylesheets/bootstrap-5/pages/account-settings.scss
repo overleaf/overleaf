@@ -204,8 +204,9 @@
   }
 }
 
-#settings-page-root {
-  .confirm-email-form {
+#settings-page-root,
+#action-project-modal {
+  &#settings-page-root .confirm-email-form {
     background: var(--bg-light-secondary);
   }
 

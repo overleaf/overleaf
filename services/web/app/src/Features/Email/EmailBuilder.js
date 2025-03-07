@@ -257,12 +257,12 @@ templates.confirmCode = NoCTAEmailTemplate({
     return 'Confirm your email address'
   },
   message(opts, isPlainText) {
-    const msg = opts.isSecondary
-      ? ['Use this 6-digit code to confirm your email address.']
-      : [
+    const msg = opts.welcomeUser
+      ? [
           `Welcome to Overleaf! We're so glad you joined us.`,
           'Use this 6-digit confirmation code to finish your setup.',
         ]
+      : ['Use this 6-digit code to confirm your email address.']
 
     if (isPlainText && opts.confirmCode) {
       msg.push(opts.confirmCode)

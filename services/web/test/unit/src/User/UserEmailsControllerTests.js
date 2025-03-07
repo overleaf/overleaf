@@ -311,7 +311,7 @@ describe('UserEmailsController', function () {
           assertCalledWith(
             this.UserEmailsConfirmationHandler.promises.sendConfirmationCode,
             this.newEmail,
-            true
+            false
           )
           done()
         },
@@ -360,7 +360,7 @@ describe('UserEmailsController', function () {
     })
   })
 
-  describe('checkSecondaryEmailConfirmationCode', function () {
+  describe('checkNewSecondaryEmailConfirmationCode', function () {
     beforeEach(function () {
       this.newEmail = 'new_email@baz.com'
       this.req.session.pendingSecondaryEmail = {
@@ -378,7 +378,7 @@ describe('UserEmailsController', function () {
       })
 
       it('adds the email', function (done) {
-        this.UserEmailsController.checkSecondaryEmailConfirmationCode(
+        this.UserEmailsController.checkNewSecondaryEmailConfirmationCode(
           this.req,
           {
             json: () => {
@@ -399,7 +399,7 @@ describe('UserEmailsController', function () {
       })
 
       it('redirects to /project', function (done) {
-        this.UserEmailsController.checkSecondaryEmailConfirmationCode(
+        this.UserEmailsController.checkNewSecondaryEmailConfirmationCode(
           this.req,
           {
             json: ({ redir }) => {
@@ -419,7 +419,7 @@ describe('UserEmailsController', function () {
         }
         this.req.body.code = '123456'
 
-        await this.UserEmailsController.checkSecondaryEmailConfirmationCode(
+        await this.UserEmailsController.checkNewSecondaryEmailConfirmationCode(
           this.req,
           {
             json: sinon.stub().resolves(),
@@ -444,7 +444,7 @@ describe('UserEmailsController', function () {
       })
 
       it('does not add the email', function (done) {
-        this.UserEmailsController.checkSecondaryEmailConfirmationCode(
+        this.UserEmailsController.checkNewSecondaryEmailConfirmationCode(
           this.req,
           {
             status: () => {
@@ -458,7 +458,7 @@ describe('UserEmailsController', function () {
       })
 
       it('responds with a 403', function (done) {
-        this.UserEmailsController.checkSecondaryEmailConfirmationCode(
+        this.UserEmailsController.checkNewSecondaryEmailConfirmationCode(
           this.req,
           {
             status: code => {
@@ -472,7 +472,7 @@ describe('UserEmailsController', function () {
     })
   })
 
-  describe('resendSecondaryEmailConfirmationCode', function () {
+  describe('resendNewSecondaryEmailConfirmationCode', function () {
     beforeEach(function () {
       this.newEmail = 'new_email@baz.com'
       this.req.session.pendingSecondaryEmail = {
@@ -489,18 +489,21 @@ describe('UserEmailsController', function () {
     })
 
     it('should send the email', function (done) {
-      this.UserEmailsController.resendSecondaryEmailConfirmationCode(this.req, {
-        status: code => {
-          code.should.equal(200)
-          assertCalledWith(
-            this.UserEmailsConfirmationHandler.promises.sendConfirmationCode,
-            this.newEmail,
-            true
-          )
-          done()
-          return { json: this.next }
-        },
-      })
+      this.UserEmailsController.resendNewSecondaryEmailConfirmationCode(
+        this.req,
+        {
+          status: code => {
+            code.should.equal(200)
+            assertCalledWith(
+              this.UserEmailsConfirmationHandler.promises.sendConfirmationCode,
+              this.newEmail,
+              false
+            )
+            done()
+            return { json: this.next }
+          },
+        }
+      )
     })
   })
 
@@ -904,6 +907,303 @@ describe('UserEmailsController', function () {
         ).to.not.have.been.called
         expect(this.res.sendStatus.lastCall.args[0]).to.equal(422)
       })
+    })
+  })
+
+  describe('sendExistingSecondaryEmailConfirmationCode', function () {
+    beforeEach(function () {
+      this.email = 'existing-email@example.com'
+      this.req.body.email = this.email
+      this.EmailHelper.parseEmail.returns(this.email)
+      this.UserGetter.promises.getUserByAnyEmail.resolves({
+        _id: this.user._id,
+        email: this.email,
+      })
+      this.UserEmailsConfirmationHandler.promises.sendConfirmationCode = sinon
+        .stub()
+        .resolves({
+          confirmCode: '123456',
+          confirmCodeExpiresTimestamp: new Date(),
+        })
+    })
+
+    it('should send confirmation code for existing email', async function () {
+      await this.UserEmailsController.sendExistingSecondaryEmailConfirmationCode(
+        this.req,
+        {
+          sendStatus: code => {
+            code.should.equal(204)
+            assertCalledWith(
+              this.UserEmailsConfirmationHandler.promises.sendConfirmationCode,
+              this.email,
+              false
+            )
+          },
+        }
+      )
+    })
+
+    it('should store confirmation code in session', async function () {
+      const confirmCode = '123456'
+      const confirmCodeExpiresTimestamp = new Date()
+      this.UserEmailsConfirmationHandler.promises.sendConfirmationCode.resolves(
+        { confirmCode, confirmCodeExpiresTimestamp }
+      )
+      await this.UserEmailsController.sendExistingSecondaryEmailConfirmationCode(
+        this.req,
+        { sendStatus: sinon.stub() }
+      )
+      expect(this.req.session.pendingExistingEmail).to.deep.equal({
+        email: this.email,
+        confirmCode,
+        confirmCodeExpiresTimestamp,
+        affiliationOptions: undefined,
+      })
+    })
+
+    it('should handle invalid email', async function () {
+      this.EmailHelper.parseEmail.returns(null)
+      await this.UserEmailsController.sendExistingSecondaryEmailConfirmationCode(
+        this.req,
+        {
+          sendStatus: code => {
+            code.should.equal(400)
+            assertNotCalled(
+              this.UserEmailsConfirmationHandler.promises.sendConfirmationCode
+            )
+          },
+        }
+      )
+    })
+
+    it('should handle email not belonging to user', async function () {
+      this.UserGetter.promises.getUserByAnyEmail.resolves({
+        _id: 'another-user-id',
+      })
+      await this.UserEmailsController.sendExistingSecondaryEmailConfirmationCode(
+        this.req,
+        {
+          sendStatus: code => {
+            code.should.equal(422)
+            assertNotCalled(
+              this.UserEmailsConfirmationHandler.promises.sendConfirmationCode
+            )
+          },
+        }
+      )
+    })
+  })
+
+  describe('checkExistingEmailConfirmationCode', function () {
+    beforeEach(function () {
+      this.email = 'existing-email@example.com'
+      this.req.session.pendingExistingEmail = {
+        confirmCode: '123456',
+        email: this.email,
+        confirmCodeExpiresTimestamp: new Date(Math.max),
+      }
+      this.UserUpdater.promises.confirmEmail.resolves()
+      this.res = {
+        json: sinon.stub(),
+        status: sinon.stub().returns({ json: sinon.stub() }),
+      }
+    })
+
+    describe('with a valid confirmation code', function () {
+      beforeEach(function () {
+        this.req.body = { code: '123456' }
+      })
+
+      it('confirms the email', async function () {
+        await this.UserEmailsController.checkExistingEmailConfirmationCode(
+          this.req,
+          {
+            json: () => {
+              assertCalledWith(
+                this.UserUpdater.promises.confirmEmail,
+                this.user._id,
+                this.email
+              )
+            },
+          }
+        )
+      })
+
+      it('adds audit log entry', async function () {
+        await this.UserEmailsController.checkExistingEmailConfirmationCode(
+          this.req,
+          { json: sinon.stub() }
+        )
+        assertCalledWith(
+          this.UserAuditLogHandler.promises.addEntry,
+          this.user._id,
+          'confirm-email-via-code',
+          this.user._id,
+          this.req.ip,
+          { email: this.email }
+        )
+      })
+
+      it('records analytics event', async function () {
+        await this.UserEmailsController.checkExistingEmailConfirmationCode(
+          this.req,
+          { json: sinon.stub() }
+        )
+        assertCalledWith(
+          this.AnalyticsManager.recordEventForUserInBackground,
+          this.user._id,
+          'email-verified',
+          {
+            provider: 'email',
+            verification_type: 'token',
+            isPrimary: this.user.email === this.email,
+          }
+        )
+      })
+
+      it('removes pendingExistingEmail from session', async function () {
+        await this.UserEmailsController.checkExistingEmailConfirmationCode(
+          this.req,
+          { json: sinon.stub() }
+        )
+
+        expect(this.req.session.pendingExistingEmail).to.be.undefined
+      })
+    })
+
+    describe('with an invalid confirmation code', function () {
+      beforeEach(function () {
+        this.req.body = { code: '999999' }
+      })
+
+      it('does not confirm the email', async function () {
+        await this.UserEmailsController.checkExistingEmailConfirmationCode(
+          this.req,
+          {
+            status: () => {
+              assertNotCalled(this.UserUpdater.promises.confirmEmail)
+              return { json: this.next }
+            },
+          }
+        )
+      })
+
+      it('responds with a 403', async function () {
+        await this.UserEmailsController.checkExistingEmailConfirmationCode(
+          this.req,
+          {
+            status: code => {
+              code.should.equal(403)
+              return { json: this.next }
+            },
+          }
+        )
+      })
+    })
+
+    describe('with an expired confirmation code', function () {
+      beforeEach(function () {
+        this.req.session.pendingExistingEmail.confirmCodeExpiresTimestamp =
+          new Date(0)
+        this.req.body = { code: '123456' }
+      })
+
+      it('responds with a 403', async function () {
+        await this.UserEmailsController.checkExistingEmailConfirmationCode(
+          this.req,
+          {
+            status: code => {
+              code.should.equal(403)
+              return { json: this.next }
+            },
+          }
+        )
+      })
+    })
+  })
+
+  describe('resendExistingSecondaryEmailConfirmationCode', function () {
+    beforeEach(function () {
+      this.email = 'existing-email@example.com'
+      this.req.session.pendingExistingEmail = {
+        confirmCode: '123456',
+        email: this.email,
+        confirmCodeExpiresTimestamp: new Date(Math.max),
+      }
+      this.res.status = sinon.stub().returns({ json: sinon.stub() })
+      this.UserEmailsConfirmationHandler.promises.sendConfirmationCode = sinon
+        .stub()
+        .resolves({
+          confirmCode: '654321',
+          confirmCodeExpiresTimestamp: new Date(),
+        })
+    })
+
+    it('should resend confirmation code', async function () {
+      await this.UserEmailsController.resendExistingSecondaryEmailConfirmationCode(
+        this.req,
+        {
+          status: code => {
+            code.should.equal(200)
+            assertCalledWith(
+              this.UserEmailsConfirmationHandler.promises.sendConfirmationCode,
+              this.email,
+              false
+            )
+            return { json: sinon.stub() }
+          },
+        }
+      )
+    })
+
+    it('should update session with new code', async function () {
+      const newCode = '654321'
+      const newExpiryTime = new Date()
+      this.UserEmailsConfirmationHandler.promises.sendConfirmationCode.resolves(
+        {
+          confirmCode: newCode,
+          confirmCodeExpiresTimestamp: newExpiryTime,
+        }
+      )
+      await this.UserEmailsController.resendExistingSecondaryEmailConfirmationCode(
+        this.req,
+        { status: () => ({ json: sinon.stub() }) }
+      )
+      expect(this.req.session.pendingExistingEmail.confirmCode).to.equal(
+        newCode
+      )
+      expect(
+        this.req.session.pendingExistingEmail.confirmCodeExpiresTimestamp
+      ).to.equal(newExpiryTime)
+    })
+
+    it('should add audit log entry', async function () {
+      await this.UserEmailsController.resendExistingSecondaryEmailConfirmationCode(
+        this.req,
+        { status: () => ({ json: sinon.stub() }) }
+      )
+
+      assertCalledWith(
+        this.UserAuditLogHandler.promises.addEntry,
+        this.user._id,
+        'resend-confirm-email-code',
+        this.user._id,
+        this.req.ip,
+        { email: this.email }
+      )
+    })
+
+    it('should handle rate limiting', async function () {
+      this.rateLimiter.consume.rejects({ remainingPoints: 0 })
+      await this.UserEmailsController.resendExistingSecondaryEmailConfirmationCode(
+        this.req,
+        {
+          status: code => {
+            code.should.equal(429)
+            return { json: sinon.stub() }
+          },
+        }
+      )
     })
   })
 })
