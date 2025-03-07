@@ -1,0 +1,3263 @@
+%%
+%% Copyright (C) 2008-2012, 2015-2016 by:
+%% Josef Kleber
+%% <josef.kleber@gmx.de>
+%%
+%% This file may be distributed and/or modified under the conditions of
+%% the LaTeX Project Public License, either version 1.3 of this license
+%% or (at your option) any later version.  The latest version of this
+%% license is in:
+%%
+%%    http://www.latex-project.org/lppl.txt
+%%
+%% and version 1.3 or later is part of all distributions of LaTeX version
+%% 2003/12/01 or later.
+%%
+%% This work has the LPPL maintenance status "maintained".
+%%
+%% The Current Maintainer of this work is Josef Kleber.
+%%
+%% This work consists of all files listed in manifest.txt.
+%%
+%
+\ProvidesPackage{pdfcomment}[2018/11/01 pdfcomment.sty v2.4a - Josef Kleber (C) 2008-2012, 2015-2016, 2018]%
+%
+\RequirePackage{xkeyval}%
+%
+% default values for global package options
+\gdef\pc@goptd@subject{}%
+\gdef\pc@goptd@color{0 0 1}%
+\gdef\pc@goptd@author{}%
+\gdef\pc@goptd@deadline{}%
+\gdef\pc@goptd@icon{Comment}%
+\gdef\pc@goptd@open{false}%
+\gdef\pc@goptd@hspace{0pt}%
+\gdef\pc@goptd@voffset{0pt}%
+\gdef\pc@goptd@hoffset{0pt}%
+\gdef\pc@goptd@width{0pt}%
+\gdef\pc@goptd@height{0pt}%
+\gdef\pc@goptd@depth{0pt}%
+\gdef\pc@goptd@opacity{1.0}%
+\gdef\pc@goptd@markup{Highlight}%
+\gdef\pc@goptd@font{Helv}%
+\gdef\pc@goptd@fontsize{12bp}%
+\gdef\pc@goptd@fontcolor{0.0 0.0 0.0}%
+\gdef\pc@goptd@justification{0}%
+\gdef\pc@goptd@borderstyle{S}%
+\gdef\pc@goptd@linewidth{1bp}%
+\gdef\pc@goptd@dashstyle{3 3}%
+\gdef\pc@goptd@bse{S}%
+\gdef\pc@goptd@bsei{1}%
+\gdef\pc@goptd@type{freetext}%
+\gdef\pc@goptd@lineend{/OpenArrow}%
+\gdef\pc@goptd@linebegin{/None}%
+\gdef\pc@goptd@icolor{1 1 0}%
+\gdef\pc@goptd@line{50 50 300 600}%
+\gdef\pc@goptd@caption{inline}%
+\gdef\pc@goptd@captionhoffset{0pt}%
+\gdef\pc@goptd@captionvoffset{0pt}%
+\gdef\pc@goptd@linesep{0.5cm}%
+\gdef\pc@goptd@disable{false}%
+\gdef\pc@goptd@id{}%
+\gdef\pc@goptd@date{}%
+\gdef\pc@goptd@timezone{+00'00'}%
+\gdef\pc@goptd@dvipdfmx{true}%
+\gdef\pc@goptd@printSOfinal{true}%
+%
+% values for global package options
+\gdef\pc@gopt@subject{}%
+\gdef\pc@gopt@color{}%
+\gdef\pc@gopt@author{}%
+\gdef\pc@gopt@deadline{}%
+\gdef\pc@gopt@icon{}%
+\gdef\pc@gopt@open{}%
+\gdef\pc@gopt@hspace{}%
+\gdef\pc@gopt@voffset{}%
+\gdef\pc@gopt@hoffset{}%
+\gdef\pc@gopt@width{}%
+\gdef\pc@gopt@height{}%
+\gdef\pc@gopt@depth{}%
+\gdef\pc@gopt@opacity{}%
+\gdef\pc@gopt@markup{}%
+\gdef\pc@gopt@font{}%
+\gdef\pc@gopt@fontsize{}%
+\gdef\pc@gopt@fontcolor{}%
+\gdef\pc@gopt@justification{}%
+\gdef\pc@gopt@borderstyle{}%
+\gdef\pc@gopt@linewidth{}%
+\gdef\pc@gopt@dashstyle{}%
+\gdef\pc@gopt@bse{}%
+\gdef\pc@gopt@bsei{}%
+\gdef\pc@gopt@type{}%
+\gdef\pc@gopt@lineend{}%
+\gdef\pc@gopt@linebegin{}%
+\gdef\pc@gopt@icolor{}%
+\gdef\pc@gopt@line{}%
+\gdef\pc@gopt@caption{}%
+\gdef\pc@gopt@captionhoffset{}%
+\gdef\pc@gopt@captionvoffset{}%
+\gdef\pc@gopt@linesep{}%
+\gdef\pc@gopt@disable{}%
+\gdef\pc@gopt@id{}%
+\gdef\pc@gopt@date{}%
+\gdef\pc@gopt@timezone{}%
+\gdef\pc@gopt@printSOfinal{}%
+%
+% values for local command options
+\gdef\pc@lopt@subject{}%
+\gdef\pc@lopt@color{}%
+\gdef\pc@lopt@author{}%
+\gdef\pc@lopt@deadline{}%
+\gdef\pc@lopt@icon{}%
+\gdef\pc@lopt@open{}%
+\gdef\pc@lopt@hspace{}%
+\gdef\pc@lopt@voffset{}%
+\gdef\pc@lopt@hoffset{}%
+\gdef\pc@lopt@width{}%
+\gdef\pc@lopt@height{}%
+\gdef\pc@lopt@depth{}%
+\gdef\pc@lopt@opacity{}%
+\gdef\pc@lopt@markup{}%
+\gdef\pc@lopt@font{}%
+\gdef\pc@lopt@fontsize{}%
+\gdef\pc@lopt@fontcolor{}%
+\gdef\pc@lopt@justification{}%
+\gdef\pc@lopt@borderstyle{}%
+\gdef\pc@lopt@linewidth{}%
+\gdef\pc@lopt@dashstyle{}%
+\gdef\pc@lopt@bse{}%
+\gdef\pc@lopt@bsei{}%
+\gdef\pc@lopt@type{}%
+\gdef\pc@lopt@lineend{}%
+\gdef\pc@lopt@linebegin{}%
+\gdef\pc@lopt@icolor{}%
+\gdef\pc@lopt@line{}%
+\gdef\pc@lopt@caption{}%
+\gdef\pc@lopt@captionhoffset{}%
+\gdef\pc@lopt@captionvoffset{}%
+\gdef\pc@lopt@linesep{}%
+\gdef\pc@lopt@mathstyle{}%
+\gdef\pc@lopt@disable{}%
+\gdef\pc@lopt@id{}%
+\gdef\pc@lopt@date{}%
+\gdef\pc@lopt@replyto{}%
+\gdef\pc@lopt@timezone{}%
+\gdef\pc@lopt@printSOfinal{}%
+%
+\gdef\pc@lopt@c{}%
+\gdef\pc@lopt@ic{}%
+\gdef\pc@lopt@cdate{}%
+\gdef\pc@lopt@l{}%
+\gdef\pc@lopt@le{}%
+\gdef\pc@lopt@cap{}%
+\gdef\pc@lopt@cp{}%
+\gdef\pc@lopt@co{}%
+%
+\newif\ifpc@gopt@dvipdfmx\pc@gopt@dvipdfmxfalse%
+\newif\ifpc@gopt@xelatex\pc@gopt@xelatexfalse%
+\newif\ifpc@gopt@final\pc@gopt@finalfalse%
+\newif\ifpc@lopt@disable\pc@lopt@disablefalse%
+\newif\ifpc@gopt@disable\pc@gopt@disablefalse%
+\newif\ifpc@opt@unskip\pc@opt@unskiptrue%
+\newif\ifpc@annot@samepage\pc@annot@samepagetrue%
+\newif\ifpc@annot@secondpage\pc@annot@secondpagefalse%
+\newif\ifpc@afterpage\pc@afterpagefalse%
+\newif\ifpc@ignorespaces\pc@ignorespacesfalse%
+\newif\ifpc@local\pc@localfalse%
+\newif\ifpc@firstcolumn\pc@firstcolumntrue%
+\newif\ifpc@Sfirstcolumn\pc@Sfirstcolumntrue%
+\newif\ifpc@Efirstcolumn\pc@Efirstcolumntrue%
+%
+\newcounter{pc@count@i}%
+\newcounter{pc@count@ii}%
+\newcounter{pc@count@iii}%
+\newcounter{pc@count@iv}%
+%
+\newbox\pc@mathannot@box%
+\newbox\pc@nullbox%
+%
+\newlength{\pc@dima}%
+\newlength{\pc@dimb}%
+%
+\newlength{\pc@Sposx}%
+\newlength{\pc@Sposy}%
+\newlength{\pc@Eposx}%
+\newlength{\pc@Eposy}%
+\newlength{\pc@column}%
+\newlength{\pc@box@width}%
+\newlength{\pc@box@height}%
+\newlength{\pc@box@depth}%
+%
+\newcommand{\pc@x@one}{}%
+\newcommand{\pc@x@two}{}%
+\newcommand{\pc@x@three}{}%
+\newcommand{\pc@x@four}{}%
+\newcommand{\pc@y@one}{}%
+\newcommand{\pc@y@two}{}%
+\newcommand{\pc@y@three}{}%
+\newcommand{\pc@y@four}{}%
+%
+\newcommand{\pc@x@left@text}{}%
+\newcommand{\pc@x@right@text}{}%
+\newcommand{\pc@y@top@text}{}%
+\newcommand{\pc@y@bottom@text}{}%
+%
+\gdef\pc@version{}%
+\gdef\pc@collect@PDFOBJID{}%
+%
+\newcommand{\pc@raggedleftmarginnote}{\centering}%
+\newcommand{\pc@raggedrightmarginnote}{\centering}%
+%
+\newcommand{\lpcname}{List of pdfcomments}%
+\gdef\pc@lpc@format{\pc@lopt@author\ - \pc@lopt@subject}%
+\gdef\pc@lopt@liststyle{AuthorSubject}%
+%
+\define@key{pdfcomment.sty}{avatar}[]%
+{% thanks to Ulrike Fischer Msg-Id: <rba0oaiflbjf.dlg@nililand.de>
+  \edef\pc@edef@avatar{pc@avatar@#1}%
+  \@ifundefined{\pc@edef@avatar}%
+  {%
+    \PackageWarning{pdfcomment}{Unknown avatar #1\MessageBreak%
+                                skip assignment}%
+  }%
+  {%
+    \edef\pc@gopt@loadavatar{\noexpand\setkeys{pdfcomment.sty}{\csname pc@avatar@#1\endcsname}}%
+    \pc@gopt@loadavatar%
+  }%
+}%
+%
+\newcommand\pc@define@key@avatar[1]%
+{%
+  \define@key{#1}{avatar}[]%
+  {%
+    \edef\pc@edef@avatar{pc@avatar@##1}%
+    \@ifundefined{\pc@edef@avatar}%
+    {%
+      \PackageWarning{#1}{Unknown avatar ##1\MessageBreak%
+                          skip assignment}%
+    }%
+    {%
+      \edef\pc@lopt@loadavatar{\noexpand\setkeys{#1}{\csname pc@avatar@##1\endcsname}}%
+      \pc@lopt@loadavatar%
+    }%
+  }%
+}%
+%
+\pc@define@key@avatar{pdfcomment}%
+\pc@define@key@avatar{pdfmargincomment}%
+\pc@define@key@avatar{pdffreetextcomment}%
+\pc@define@key@avatar{pdfmarkupcomment}%
+\pc@define@key@avatar{pdfsquarecomment}%
+\pc@define@key@avatar{pdfcirclecomment}%
+\pc@define@key@avatar{pdflinecomment}%
+\pc@define@key@avatar{pdfsidelinecomment}%
+\pc@define@key@avatar{pdfreply}%
+\pc@define@key@avatar{pdftooltip}%
+%
+\define@key{pdfcomment.sty}{style}[]%
+{%
+  \edef\pc@edef@style{pc@style@#1}%
+  \@ifundefined{\pc@edef@style}%
+  {%
+    \PackageWarning{pdfcomment}{Unknown style #1\MessageBreak%
+                                skip assignment}%
+  }%
+  {%
+    \edef\pc@gopt@loadstyle{\noexpand\setkeys{pdfcomment.sty}{\csname pc@style@#1\endcsname}}%
+    \pc@gopt@loadstyle%
+  }%
+}%
+%
+\newcommand\pc@define@key@style[1]%
+{%
+  \define@key{#1}{style}[]%
+  {%
+    \edef\pc@edef@style{pc@style@##1}%
+    \@ifundefined{\pc@edef@style}%
+    {%
+      \PackageWarning{#1}{Unknown style ##1\MessageBreak%
+                          skip assignment}%
+    }%
+    {%
+      \edef\pc@lopt@loadstyle{\noexpand\setkeys{#1}{\csname pc@style@##1\endcsname}}%
+      \pc@lopt@loadstyle%
+    }%
+  }%
+}%
+%
+\pc@define@key@style{pdfcomment}%
+\pc@define@key@style{pdfmargincomment}%
+\pc@define@key@style{pdffreetextcomment}%
+\pc@define@key@style{pdfmarkupcomment}%
+\pc@define@key@style{pdfsquarecomment}%
+\pc@define@key@style{pdfcirclecomment}%
+\pc@define@key@style{pdflinecomment}%
+\pc@define@key@style{pdfsidelinecomment}%
+\pc@define@key@style{pdfreply}%
+\pc@define@key@style{pdftooltip}%
+%
+\define@key{pdfcomment.sty}{subject}[\pc@goptd@subject]%
+{%
+  \gdef\pc@gopt@subject{#1}%
+}%
+%
+\newcommand\pc@define@key@subject[1]%
+{%
+  \define@key{#1}{subject}[\pc@gopt@subject]%
+  {%
+    \gdef\pc@lopt@subject{##1}%
+  }%
+}%
+%
+\pc@define@key@subject{pdfcomment}%
+\pc@define@key@subject{pdfmargincomment}%
+\pc@define@key@subject{pdffreetextcomment}%
+\pc@define@key@subject{pdfmarkupcomment}%
+\pc@define@key@subject{pdfsquarecomment}%
+\pc@define@key@subject{pdfcirclecomment}%
+\pc@define@key@subject{pdflinecomment}%
+\pc@define@key@subject{pdfsidelinecomment}%
+\pc@define@key@subject{pdfreply}%
+\pc@define@key@subject{pdftooltip}%
+%
+\define@key{pdfcomment.sty}{color}[\pc@goptd@color]%
+{%
+  \gdef\pc@gopt@color{#1}%
+}%
+%
+\newcommand\pc@define@key@color[1]%
+{%
+  \define@key{#1}{color}[\pc@gopt@color]%
+  {%
+    \gdef\pc@lopt@color{##1}%
+  }%
+}%
+%
+\pc@define@key@color{pdfcomment}%
+\pc@define@key@color{pdfmargincomment}%
+\pc@define@key@color{pdffreetextcomment}%
+\pc@define@key@color{pdfmarkupcomment}%
+\pc@define@key@color{pdfsquarecomment}%
+\pc@define@key@color{pdfcirclecomment}%
+\pc@define@key@color{pdflinecomment}%
+\pc@define@key@color{pdfsidelinecomment}%
+\pc@define@key@color{pdfreply}%
+\pc@define@key@color{pdftooltip}%
+%
+\define@key{pdfcomment.sty}{author}[\pc@goptd@author]%
+{%
+  \gdef\pc@gopt@author{#1}%
+}%
+%
+\newcommand\pc@define@key@author[1]%
+{%
+  \define@key{#1}{author}[\pc@gopt@author]%
+  {%
+    \gdef\pc@lopt@author{##1}%
+  }%
+}%
+%
+\pc@define@key@author{pdfcomment}%
+\pc@define@key@author{pdfmargincomment}%
+\pc@define@key@author{pdffreetextcomment}%
+\pc@define@key@author{pdfmarkupcomment}%
+\pc@define@key@author{pdfsquarecomment}%
+\pc@define@key@author{pdfcirclecomment}%
+\pc@define@key@author{pdflinecomment}%
+\pc@define@key@author{pdfsidelinecomment}%
+\pc@define@key@author{pdfreply}%
+\pc@define@key@author{pdftooltip}%
+%
+\define@key{pdfcomment.sty}{deadline}[\pc@goptd@deadline]%
+{%
+  \gdef\pc@gopt@deadline{#1}%
+}%
+%
+\newcommand\pc@define@key@deadline[1]%
+{%
+  \define@key{#1}{deadline}[\pc@gopt@deadline]%
+  {%
+    \gdef\pc@lopt@deadline{##1}%
+  }%
+}%
+%
+\pc@define@key@deadline{pdfcomment}%
+\pc@define@key@deadline{pdfmargincomment}%
+\pc@define@key@deadline{pdffreetextcomment}%
+\pc@define@key@deadline{pdfmarkupcomment}%
+\pc@define@key@deadline{pdfsquarecomment}%
+\pc@define@key@deadline{pdfcirclecomment}%
+\pc@define@key@deadline{pdflinecomment}%
+\pc@define@key@deadline{pdfsidelinecomment}%
+\pc@define@key@deadline{pdfreply}%
+\pc@define@key@deadline{pdftooltip}%
+%
+\define@key{pdfcomment.sty}{icon}[\pc@goptd@icon]%
+{%
+  \gdef\pc@gopt@icon{#1}%
+}%
+%
+\newcommand\pc@define@key@icon[1]%
+{%
+  \define@key{#1}{icon}[\pc@gopt@icon]%
+  {%
+    \gdef\pc@lopt@icon{##1}%
+  }%
+}%
+%
+\pc@define@key@icon{pdfcomment}%
+\pc@define@key@icon{pdfmargincomment}%
+\pc@define@key@icon{pdffreetextcomment}%
+\pc@define@key@icon{pdfmarkupcomment}%
+\pc@define@key@icon{pdfsquarecomment}%
+\pc@define@key@icon{pdfcirclecomment}%
+\pc@define@key@icon{pdflinecomment}%
+\pc@define@key@icon{pdfsidelinecomment}%
+\pc@define@key@icon{pdfreply}%
+\pc@define@key@icon{pdftooltip}%
+%
+\define@choicekey*{pdfcomment.sty}{open}[\pc@gopt@open\nr]{true,false}[false]%
+{%
+  \ifcase\nr\relax%
+    \gdef\pc@gopt@open{true}%
+  \or%
+    \gdef\pc@gopt@open{false}%
+  \fi%
+}%
+%
+\newcommand\pc@define@key@open[1]%
+{%
+  \define@choicekey*{#1}{open}[\pc@lopt@open\nr]{true,false}[true]%
+  {%
+    \ifcase\nr\relax%
+      \gdef\pc@lopt@open{true}%
+    \or%
+      \gdef\pc@lopt@open{false}%
+    \fi%
+  }%
+}%
+%
+\pc@define@key@open{pdfcomment}%
+\pc@define@key@open{pdfmargincomment}%
+\pc@define@key@open{pdffreetextcomment}%
+\pc@define@key@open{pdfmarkupcomment}%
+\pc@define@key@open{pdfsquarecomment}%
+\pc@define@key@open{pdfcirclecomment}%
+\pc@define@key@open{pdflinecomment}%
+\pc@define@key@open{pdfsidelinecomment}%
+\pc@define@key@open{pdfreply}%
+\pc@define@key@open{pdftooltip}%
+%
+\define@key{pdfcomment.sty}{hspace}[\pc@goptd@hspace]%
+{%
+  \gdef\pc@gopt@hspace{#1}%
+}%
+%
+\newcommand\pc@define@key@hspace[1]%
+{%
+  \define@key{#1}{hspace}[\pc@gopt@hspace]%
+  {%
+    \gdef\pc@lopt@hspace{##1}%
+  }%
+}%
+%
+\pc@define@key@hspace{pdfcomment}%
+\pc@define@key@hspace{pdfmargincomment}%
+\pc@define@key@hspace{pdffreetextcomment}%
+\pc@define@key@hspace{pdfmarkupcomment}%
+\pc@define@key@hspace{pdfsquarecomment}%
+\pc@define@key@hspace{pdfcirclecomment}%
+\pc@define@key@hspace{pdflinecomment}%
+\pc@define@key@hspace{pdfsidelinecomment}%
+\pc@define@key@hspace{pdfreply}%
+\pc@define@key@hspace{pdftooltip}%
+%
+\define@key{pdfcomment.sty}{voffset}[\pc@goptd@voffset]%
+{%
+  \gdef\pc@gopt@voffset{#1}%
+}%
+%
+\newcommand\pc@define@key@voffset[1]%
+{%
+  \define@key{#1}{voffset}[\pc@gopt@voffset]%
+  {%
+    \gdef\pc@lopt@voffset{##1}%
+  }%
+}%
+%
+\pc@define@key@voffset{pdfcomment}%
+\pc@define@key@voffset{pdfmargincomment}%
+\pc@define@key@voffset{pdffreetextcomment}%
+\pc@define@key@voffset{pdfmarkupcomment}%
+\pc@define@key@voffset{pdfsquarecomment}%
+\pc@define@key@voffset{pdfcirclecomment}%
+\pc@define@key@voffset{pdflinecomment}%
+\pc@define@key@voffset{pdfsidelinecomment}%
+\pc@define@key@voffset{pdfreply}%
+\pc@define@key@voffset{pdftooltip}%
+%
+\define@key{pdfcomment.sty}{hoffset}[\pc@goptd@hoffset]%
+{%
+  \gdef\pc@gopt@hoffset{#1}%
+}%
+%
+\newcommand\pc@define@key@hoffset[1]%
+{%
+  \define@key{#1}{hoffset}[\pc@gopt@hoffset]%
+  {%
+    \gdef\pc@lopt@hoffset{##1}%
+  }%
+}%
+%
+\pc@define@key@hoffset{pdfcomment}%
+\pc@define@key@hoffset{pdfmargincomment}%
+\pc@define@key@hoffset{pdffreetextcomment}%
+\pc@define@key@hoffset{pdfmarkupcomment}%
+\pc@define@key@hoffset{pdfsquarecomment}%
+\pc@define@key@hoffset{pdfcirclecomment}%
+\pc@define@key@hoffset{pdflinecomment}%
+\pc@define@key@hoffset{pdfsidelinecomment}%
+\pc@define@key@hoffset{pdfreply}%
+\pc@define@key@hoffset{pdftooltip}%
+%
+\define@key{pdfcomment.sty}{width}[\pc@goptd@width]%
+{%
+  \gdef\pc@gopt@width{#1}%
+}%
+%
+\newcommand\pc@define@key@width[1]%
+{%
+  \define@key{#1}{width}[\pc@gopt@width]%
+  {%
+    \gdef\pc@lopt@width{##1}%
+  }%
+}%
+%
+\pc@define@key@width{pdfcomment}%
+\pc@define@key@width{pdfmargincomment}%
+\pc@define@key@width{pdffreetextcomment}%
+\pc@define@key@width{pdfmarkupcomment}%
+\pc@define@key@width{pdfsquarecomment}%
+\pc@define@key@width{pdfcirclecomment}%
+\pc@define@key@width{pdflinecomment}%
+\pc@define@key@width{pdfsidelinecomment}%
+\pc@define@key@width{pdfreply}%
+\pc@define@key@width{pdftooltip}%
+%
+\define@key{pdfcomment.sty}{height}[\pc@goptd@height]%
+{%
+  \gdef\pc@gopt@height{#1}%
+}%
+%
+\newcommand\pc@define@key@height[1]%
+{%
+  \define@key{#1}{height}[\pc@gopt@height]%
+  {%
+    \gdef\pc@lopt@height{##1}%
+  }%
+}%
+%
+\pc@define@key@height{pdfcomment}%
+\pc@define@key@height{pdfmargincomment}%
+\pc@define@key@height{pdffreetextcomment}%
+\pc@define@key@height{pdfmarkupcomment}%
+\pc@define@key@height{pdfsquarecomment}%
+\pc@define@key@height{pdfcirclecomment}%
+\pc@define@key@height{pdflinecomment}%
+\pc@define@key@height{pdfsidelinecomment}%
+\pc@define@key@height{pdfreply}%
+\pc@define@key@height{pdftooltip}%
+%
+\define@key{pdfcomment.sty}{depth}[\pc@goptd@depth]%
+{%
+  \gdef\pc@gopt@depth{#1}%
+}%
+%
+\newcommand\pc@define@key@depth[1]%
+{%
+  \define@key{#1}{depth}[\pc@gopt@depth]%
+  {%
+    \gdef\pc@lopt@depth{##1}%
+  }%
+}%
+%
+\pc@define@key@depth{pdfcomment}%
+\pc@define@key@depth{pdfmargincomment}%
+\pc@define@key@depth{pdffreetextcomment}%
+\pc@define@key@depth{pdfmarkupcomment}%
+\pc@define@key@depth{pdfsquarecomment}%
+\pc@define@key@depth{pdfcirclecomment}%
+\pc@define@key@depth{pdflinecomment}%
+\pc@define@key@depth{pdfsidelinecomment}%
+\pc@define@key@depth{pdfreply}%
+\pc@define@key@depth{pdftooltip}%
+%
+\define@key{pdfcomment.sty}{opacity}[\pc@goptd@opacity]%
+{%
+  \gdef\pc@gopt@opacity{#1}%
+}%
+%
+\newcommand\pc@define@key@opacity[1]%
+{%
+  \define@key{#1}{opacity}[\pc@gopt@opacity]%
+  {%
+    \gdef\pc@lopt@opacity{##1}%
+  }%
+}%
+%
+\pc@define@key@opacity{pdfcomment}%
+\pc@define@key@opacity{pdfmargincomment}%
+\pc@define@key@opacity{pdffreetextcomment}%
+\pc@define@key@opacity{pdfmarkupcomment}%
+\pc@define@key@opacity{pdfsquarecomment}%
+\pc@define@key@opacity{pdfcirclecomment}%
+\pc@define@key@opacity{pdflinecomment}%
+\pc@define@key@opacity{pdfsidelinecomment}%
+\pc@define@key@opacity{pdfreply}%
+\pc@define@key@opacity{pdftooltip}%
+%
+\define@key{pdfcomment.sty}{markup}[\pc@goptd@markup]%
+{%
+  \gdef\pc@gopt@markup{#1}%
+}%
+%
+\newcommand\pc@define@key@markup[1]%
+{%
+  \define@key{#1}{markup}[\pc@gopt@markup]%
+  {%
+    \gdef\pc@lopt@markup{##1}%
+  }%
+}%
+%
+\pc@define@key@markup{pdfcomment}%
+\pc@define@key@markup{pdfmargincomment}%
+\pc@define@key@markup{pdffreetextcomment}%
+\pc@define@key@markup{pdfmarkupcomment}%
+\pc@define@key@markup{pdfsquarecomment}%
+\pc@define@key@markup{pdfcirclecomment}%
+\pc@define@key@markup{pdflinecomment}%
+\pc@define@key@markup{pdfsidelinecomment}%
+\pc@define@key@markup{pdfreply}%
+\pc@define@key@markup{pdftooltip}%
+%
+\define@key{pdfcomment.sty}{font}[\pc@goptd@font]%
+{%
+  \gdef\pc@gopt@font{#1}%
+}%
+%
+\newcommand\pc@define@key@font[1]%
+{%
+  \define@key{#1}{font}[\pc@gopt@font]%
+  {%
+    \gdef\pc@lopt@font{##1}%
+  }%
+}%
+%
+\pc@define@key@font{pdfcomment}%
+\pc@define@key@font{pdfmargincomment}%
+\pc@define@key@font{pdffreetextcomment}%
+\pc@define@key@font{pdfmarkupcomment}%
+\pc@define@key@font{pdfsquarecomment}%
+\pc@define@key@font{pdfcirclecomment}%
+\pc@define@key@font{pdflinecomment}%
+\pc@define@key@font{pdfsidelinecomment}%
+\pc@define@key@font{pdfreply}%
+\pc@define@key@font{pdftooltip}%
+%
+\define@key{pdfcomment.sty}{fontsize}[\pc@goptd@fontsize]%
+{%
+  \gdef\pc@gopt@fontsize{\pc@pttobp{#1}}%
+}%
+%
+\newcommand\pc@define@key@fontsize[1]%
+{%
+  \define@key{#1}{fontsize}[\pc@gopt@fontsize]%
+  {%
+    \gdef\pc@lopt@fontsize{\pc@pttobp{##1}}%
+  }%
+}%
+%
+\pc@define@key@fontsize{pdfcomment}%
+\pc@define@key@fontsize{pdfmargincomment}%
+\pc@define@key@fontsize{pdffreetextcomment}%
+\pc@define@key@fontsize{pdfmarkupcomment}%
+\pc@define@key@fontsize{pdfsquarecomment}%
+\pc@define@key@fontsize{pdfcirclecomment}%
+\pc@define@key@fontsize{pdflinecomment}%
+\pc@define@key@fontsize{pdfsidelinecomment}%
+\pc@define@key@fontsize{pdfreply}%
+\pc@define@key@fontsize{pdftooltip}%
+%
+\define@key{pdfcomment.sty}{fontcolor}[\pc@goptd@fontcolor]%
+{%
+  \gdef\pc@gopt@fontcolor{#1}%
+}%
+%
+\newcommand\pc@define@key@fontcolor[1]%
+{%
+  \define@key{#1}{fontcolor}[\pc@gopt@fontcolor]%
+  {%
+    \gdef\pc@lopt@fontcolor{##1}%
+  }%
+}%
+%
+\pc@define@key@fontcolor{pdfcomment}%
+\pc@define@key@fontcolor{pdfmargincomment}%
+\pc@define@key@fontcolor{pdffreetextcomment}%
+\pc@define@key@fontcolor{pdfmarkupcomment}%
+\pc@define@key@fontcolor{pdfsquarecomment}%
+\pc@define@key@fontcolor{pdfcirclecomment}%
+\pc@define@key@fontcolor{pdflinecomment}%
+\pc@define@key@fontcolor{pdfsidelinecomment}%
+\pc@define@key@fontcolor{pdfreply}%
+\pc@define@key@fontcolor{pdftooltip}%
+%
+\define@choicekey*{pdfcomment.sty}{justification}[\pc@gopt@justification\nr]{left,center,right}[left]%
+{%
+  \ifcase\nr\relax%
+    \gdef\pc@gopt@justification{0}%
+  \or%
+    \gdef\pc@gopt@justification{1}%
+  \or%
+    \gdef\pc@gopt@justification{2}%
+  \fi%
+}%
+%
+\newcommand\pc@define@key@justification[1]%
+{%
+  \define@choicekey*{#1}{justification}[\pc@lopt@justification\nr]{left,center,right}[left]%
+  {%
+    \ifcase\nr\relax%
+      \gdef\pc@lopt@justification{0}%
+    \or%
+      \gdef\pc@lopt@justification{1}%
+    \or%
+      \gdef\pc@lopt@justification{2}%
+    \fi%
+  }%
+}%
+%
+\pc@define@key@justification{pdfcomment}%
+\pc@define@key@justification{pdfmargincomment}%
+\pc@define@key@justification{pdffreetextcomment}%
+\pc@define@key@justification{pdfmarkupcomment}%
+\pc@define@key@justification{pdfsquarecomment}%
+\pc@define@key@justification{pdfcirclecomment}%
+\pc@define@key@justification{pdflinecomment}%
+\pc@define@key@justification{pdfsidelinecomment}%
+\pc@define@key@justification{pdfreply}%
+\pc@define@key@justification{pdftooltip}%
+%
+\define@choicekey*{pdfcomment.sty}{borderstyle}[\pc@gopt@borderstyle\nr]{solid,dashed}[solid]%
+{%
+  \ifcase\nr\relax%
+    \gdef\pc@gopt@borderstyle{S}%
+  \or%
+    \gdef\pc@gopt@borderstyle{D}%
+  \fi%
+}%
+%
+\newcommand\pc@define@key@borderstyle[1]%
+{%
+  \define@choicekey*{#1}{borderstyle}[\pc@lopt@borderstyle\nr]{solid,dashed}[solid]%
+  {%
+    \ifcase\nr\relax%
+      \gdef\pc@lopt@borderstyle{S}%
+    \or%
+      \gdef\pc@lopt@borderstyle{D}%
+    \fi%
+  }%
+}%
+%
+\pc@define@key@borderstyle{pdfcomment}%
+\pc@define@key@borderstyle{pdfmargincomment}%
+\pc@define@key@borderstyle{pdffreetextcomment}%
+\pc@define@key@borderstyle{pdfmarkupcomment}%
+\pc@define@key@borderstyle{pdfsquarecomment}%
+\pc@define@key@borderstyle{pdfcirclecomment}%
+\pc@define@key@borderstyle{pdflinecomment}%
+\pc@define@key@borderstyle{pdfsidelinecomment}%
+\pc@define@key@borderstyle{pdfreply}%
+\pc@define@key@borderstyle{pdftooltip}%
+%
+\define@key{pdfcomment.sty}{dashstyle}[\pc@goptd@dashstyle]%
+{%
+  \gdef\pc@gopt@dashstyle{#1}%
+}%
+%
+\newcommand\pc@define@key@dashstyle[1]%
+{%
+  \define@key{#1}{dashstyle}[\pc@gopt@dashstyle]%
+  {%
+    \gdef\pc@lopt@dashstyle{##1}%
+  }%
+}%
+%
+\pc@define@key@dashstyle{pdfcomment}%
+\pc@define@key@dashstyle{pdfmargincomment}%
+\pc@define@key@dashstyle{pdffreetextcomment}%
+\pc@define@key@dashstyle{pdfmarkupcomment}%
+\pc@define@key@dashstyle{pdfsquarecomment}%
+\pc@define@key@dashstyle{pdfcirclecomment}%
+\pc@define@key@dashstyle{pdflinecomment}%
+\pc@define@key@dashstyle{pdfsidelinecomment}%
+\pc@define@key@dashstyle{pdfreply}%
+\pc@define@key@dashstyle{pdftooltip}%
+%
+\define@key{pdfcomment.sty}{linewidth}[\pc@goptd@linewidth]%
+{%
+  \gdef\pc@gopt@linewidth{\pc@pttobp{#1}}%
+}%
+%
+\newcommand\pc@define@key@linewidth[1]%
+{%
+  \define@key{#1}{linewidth}[\pc@gopt@linewidth]%
+  {%
+    \gdef\pc@lopt@linewidth{\pc@pttobp{##1}}%
+  }%
+}%
+%
+\pc@define@key@linewidth{pdfcomment}%
+\pc@define@key@linewidth{pdfmargincomment}%
+\pc@define@key@linewidth{pdffreetextcomment}%
+\pc@define@key@linewidth{pdfmarkupcomment}%
+\pc@define@key@linewidth{pdfsquarecomment}%
+\pc@define@key@linewidth{pdfcirclecomment}%
+\pc@define@key@linewidth{pdflinecomment}%
+\pc@define@key@linewidth{pdfsidelinecomment}%
+\pc@define@key@linewidth{pdfreply}%
+\pc@define@key@linewidth{pdftooltip}%
+%
+\define@choicekey*{pdfcomment.sty}{bse}[\pc@gopt@bse\nr]{none,cloudy}[none]%
+{%
+  \ifcase\nr\relax%
+    \gdef\pc@gopt@bse{S}%
+  \or%
+    \gdef\pc@gopt@bse{C}%
+  \fi%
+}%
+%
+\newcommand\pc@define@key@bse[1]%
+{%
+  \define@choicekey*{#1}{bse}[\pc@lopt@bse\nr]{none,cloudy}[none]%
+  {%
+    \ifcase\nr\relax%
+      \gdef\pc@lopt@bse{S}%
+    \or%
+      \gdef\pc@lopt@bse{C}%
+    \fi%
+  }%
+}%
+%
+\pc@define@key@bse{pdfcomment}%
+\pc@define@key@bse{pdfmargincomment}%
+\pc@define@key@bse{pdffreetextcomment}%
+\pc@define@key@bse{pdfmarkupcomment}%
+\pc@define@key@bse{pdfsquarecomment}%
+\pc@define@key@bse{pdfcirclecomment}%
+\pc@define@key@bse{pdflinecomment}%
+\pc@define@key@bse{pdfsidelinecomment}%
+\pc@define@key@bse{pdfreply}%
+\pc@define@key@bse{pdftooltip}%
+%
+\define@key{pdfcomment.sty}{bsei}[\pc@goptd@bsei]%
+{%
+  \gdef\pc@gopt@bsei{#1}%
+}%
+%
+\newcommand\pc@define@key@bsei[1]%
+{%
+  \define@key{#1}{bsei}[\pc@gopt@bsei]%
+  {%
+    \gdef\pc@lopt@bsei{##1}%
+  }%
+}%
+%
+\pc@define@key@bsei{pdfcomment}%
+\pc@define@key@bsei{pdfmargincomment}%
+\pc@define@key@bsei{pdffreetextcomment}%
+\pc@define@key@bsei{pdfmarkupcomment}%
+\pc@define@key@bsei{pdfsquarecomment}%
+\pc@define@key@bsei{pdfcirclecomment}%
+\pc@define@key@bsei{pdflinecomment}%
+\pc@define@key@bsei{pdfsidelinecomment}%
+\pc@define@key@bsei{pdfreply}%
+\pc@define@key@bsei{pdftooltip}%
+%
+\define@choicekey*{pdfcomment.sty}{type}[\pc@gopt@type\nr]{freetext,callout,typewriter,line,polyline,polygon}[freetext]%
+{%
+  \ifcase\nr\relax%
+    \gdef\pc@gopt@type{}%
+  \or%
+    \gdef\pc@gopt@type{/IT /FreeTextCallout}%
+  \or%
+    \gdef\pc@gopt@type{/IT /FreeTextTypewriter}%
+  \or%
+    \gdef\pc@lopt@type{Line}%
+  \or%
+    \gdef\pc@lopt@type{PolyLine}%
+  \or%
+    \gdef\pc@lopt@type{Polygon}%
+  \fi%
+}%
+%
+\newcommand\pc@define@key@type[1]%
+{%
+  \define@choicekey*{#1}{type}[\pc@lopt@type\nr]{freetext,callout,typewriter,line,polyline,polygon}[freetext]%
+  {%
+    \ifcase\nr\relax%
+      \gdef\pc@lopt@type{}%
+    \or%
+      \gdef\pc@lopt@type{/IT /FreeTextCallout}%
+    \or%
+      \gdef\pc@lopt@type{/IT /FreeTextTypewriter}%
+    \or%
+      \gdef\pc@lopt@type{Line}%
+    \or%
+      \gdef\pc@lopt@type{PolyLine}%
+    \or%
+      \gdef\pc@lopt@type{Polygon}%
+    \fi%
+  }%
+}%
+%
+\pc@define@key@type{pdfcomment}%
+\pc@define@key@type{pdfmargincomment}%
+\pc@define@key@type{pdffreetextcomment}%
+\pc@define@key@type{pdfmarkupcomment}%
+\pc@define@key@type{pdfsquarecomment}%
+\pc@define@key@type{pdfcirclecomment}%
+\pc@define@key@type{pdflinecomment}%
+\pc@define@key@type{pdfsidelinecomment}%
+\pc@define@key@type{pdfreply}%
+\pc@define@key@type{pdftooltip}%
+%
+\define@key{pdfcomment.sty}{lineend}[\pc@goptd@lineend]%
+{%
+  \gdef\pc@gopt@lineend{#1}%
+}%
+%
+\newcommand\pc@define@key@lineend[1]%
+{%
+  \define@key{#1}{lineend}[\pc@gopt@lineend]%
+  {%
+    \gdef\pc@lopt@lineend{##1}%
+  }%
+}%
+%
+\pc@define@key@lineend{pdfcomment}%
+\pc@define@key@lineend{pdfmargincomment}%
+\pc@define@key@lineend{pdffreetextcomment}%
+\pc@define@key@lineend{pdfmarkupcomment}%
+\pc@define@key@lineend{pdfsquarecomment}%
+\pc@define@key@lineend{pdfcirclecomment}%
+\pc@define@key@lineend{pdflinecomment}%
+\pc@define@key@lineend{pdfsidelinecomment}%
+\pc@define@key@lineend{pdfreply}%
+\pc@define@key@lineend{pdftooltip}%
+%
+\define@key{pdfcomment.sty}{linebegin}[\pc@goptd@linebegin]%
+{%
+  \gdef\pc@gopt@linebegin{#1}%
+}%
+%
+\newcommand\pc@define@key@linebegin[1]%
+{%
+  \define@key{#1}{linebegin}[\pc@gopt@linebegin]%
+  {%
+    \gdef\pc@lopt@linebegin{##1}%
+  }%
+}%
+%
+\pc@define@key@linebegin{pdfcomment}%
+\pc@define@key@linebegin{pdfmargincomment}%
+\pc@define@key@linebegin{pdffreetextcomment}%
+\pc@define@key@linebegin{pdfmarkupcomment}%
+\pc@define@key@linebegin{pdfsquarecomment}%
+\pc@define@key@linebegin{pdfcirclecomment}%
+\pc@define@key@linebegin{pdflinecomment}%
+\pc@define@key@linebegin{pdfsidelinecomment}%
+\pc@define@key@linebegin{pdfreply}%
+\pc@define@key@linebegin{pdftooltip}%
+%
+\define@key{pdfcomment.sty}{icolor}[\pc@goptd@icolor]%
+{%
+  \gdef\pc@gopt@icolor{#1}%
+}%
+%
+\newcommand\pc@define@key@icolor[1]%
+{%
+  \define@key{#1}{icolor}[\pc@gopt@icolor]%
+  {%
+    \gdef\pc@lopt@icolor{##1}%
+  }%
+}%
+%
+\pc@define@key@icolor{pdfcomment}%
+\pc@define@key@icolor{pdfmargincomment}%
+\pc@define@key@icolor{pdffreetextcomment}%
+\pc@define@key@icolor{pdfmarkupcomment}%
+\pc@define@key@icolor{pdfsquarecomment}%
+\pc@define@key@icolor{pdfcirclecomment}%
+\pc@define@key@icolor{pdflinecomment}%
+\pc@define@key@icolor{pdfsidelinecomment}%
+\pc@define@key@icolor{pdfreply}%
+\pc@define@key@icolor{pdftooltip}%
+%
+\define@choicekey*{pdfcomment.sty}{caption}[\pc@gopt@caption\nr]{none,inline,top}[inline]%
+{%
+  \ifcase\nr\relax%
+    \gdef\pc@gopt@caption{none}%
+  \or%
+    \gdef\pc@gopt@caption{Inline}%
+  \or%
+    \gdef\pc@gopt@caption{Top}%
+  \fi%
+}%
+%
+\newcommand\pc@define@key@caption[1]%
+{%
+  \define@choicekey*{#1}{caption}[\pc@lopt@caption\nr]{none,inline,top}[inline]%
+  {%
+    \ifcase\nr\relax%
+      \gdef\pc@lopt@caption{none}%
+    \or%
+      \gdef\pc@lopt@caption{Inline}%
+    \or%
+      \gdef\pc@lopt@caption{Top}%
+    \fi%
+  }%
+}%
+%
+\pc@define@key@caption{pdfcomment}%
+\pc@define@key@caption{pdfmargincomment}%
+\pc@define@key@caption{pdffreetextcomment}%
+\pc@define@key@caption{pdfmarkupcomment}%
+\pc@define@key@caption{pdfsquarecomment}%
+\pc@define@key@caption{pdfcirclecomment}%
+\pc@define@key@caption{pdflinecomment}%
+\pc@define@key@caption{pdfsidelinecomment}%
+\pc@define@key@caption{pdfreply}%
+\pc@define@key@caption{pdftooltip}%
+%
+\define@key{pdfcomment.sty}{line}[\pc@goptd@line]%
+{%
+  \gdef\pc@gopt@line{#1}%
+}%
+%
+\newcommand\pc@define@key@line[1]%
+{%
+  \define@key{#1}{line}[\pc@gopt@line]%
+  {%
+    \gdef\pc@lopt@line{##1}%
+  }%
+}%
+%
+\pc@define@key@line{pdfcomment}%
+\pc@define@key@line{pdfmargincomment}%
+\pc@define@key@line{pdffreetextcomment}%
+\pc@define@key@line{pdfmarkupcomment}%
+\pc@define@key@line{pdfsquarecomment}%
+\pc@define@key@line{pdfcirclecomment}%
+\pc@define@key@line{pdflinecomment}%
+\pc@define@key@line{pdfsidelinecomment}%
+\pc@define@key@line{pdfreply}%
+\pc@define@key@line{pdftooltip}%
+%
+\define@key{pdfcomment.sty}{captionhoffset}[\pc@goptd@captionhoffset]%
+{%
+  \gdef\pc@gopt@captionhoffset{\pc@pttobp{#1}}%
+}%
+%
+\newcommand\pc@define@key@captionhoffset[1]%
+{%
+  \define@key{#1}{captionhoffset}[\pc@gopt@captionhoffset]%
+  {%
+    \gdef\pc@lopt@captionhoffset{\pc@pttobp{##1}}%
+  }%
+}%
+%
+\pc@define@key@captionhoffset{pdfcomment}%
+\pc@define@key@captionhoffset{pdfmargincomment}%
+\pc@define@key@captionhoffset{pdffreetextcomment}%
+\pc@define@key@captionhoffset{pdfmarkupcomment}%
+\pc@define@key@captionhoffset{pdfsquarecomment}%
+\pc@define@key@captionhoffset{pdfcirclecomment}%
+\pc@define@key@captionhoffset{pdflinecomment}%
+\pc@define@key@captionhoffset{pdfsidelinecomment}%
+\pc@define@key@captionhoffset{pdfreply}%
+\pc@define@key@captionhoffset{pdftooltip}%
+%
+\define@key{pdfcomment.sty}{captionvoffset}[\pc@goptd@captionvoffset]%
+{%
+  \gdef\pc@gopt@captionvoffset{\pc@pttobp{#1}}%
+}%
+%
+\newcommand\pc@define@key@captionvoffset[1]%
+{%
+  \define@key{#1}{captionvoffset}[\pc@gopt@captionvoffset]%
+  {%
+    \gdef\pc@lopt@captionvoffset{\pc@pttobp{##1}}%
+  }%
+}%
+%
+\pc@define@key@captionvoffset{pdfcomment}%
+\pc@define@key@captionvoffset{pdfmargincomment}%
+\pc@define@key@captionvoffset{pdffreetextcomment}%
+\pc@define@key@captionvoffset{pdfmarkupcomment}%
+\pc@define@key@captionvoffset{pdfsquarecomment}%
+\pc@define@key@captionvoffset{pdfcirclecomment}%
+\pc@define@key@captionvoffset{pdflinecomment}%
+\pc@define@key@captionvoffset{pdfsidelinecomment}%
+\pc@define@key@captionvoffset{pdfreply}%
+\pc@define@key@captionvoffset{pdftooltip}%
+%
+\define@key{pdfcomment.sty}{linesep}[\pc@goptd@linesep]%
+{%
+  \gdef\pc@gopt@linesep{\pc@pttobp{#1}}%
+}%
+%
+\newcommand\pc@define@key@linesep[1]%
+{%
+  \define@key{#1}{linesep}[\pc@gopt@linesep]%
+  {%
+    \gdef\pc@lopt@linesep{\pc@pttobp{##1}}%
+  }%
+}%
+%
+\pc@define@key@linesep{pdfcomment}%
+\pc@define@key@linesep{pdfmargincomment}%
+\pc@define@key@linesep{pdffreetextcomment}%
+\pc@define@key@linesep{pdfmarkupcomment}%
+\pc@define@key@linesep{pdfsquarecomment}%
+\pc@define@key@linesep{pdfcirclecomment}%
+\pc@define@key@linesep{pdflinecomment}%
+\pc@define@key@linesep{pdfsidelinecomment}%
+\pc@define@key@linesep{pdfreply}%
+\pc@define@key@linesep{pdftooltip}%
+%
+\define@choicekey*{pdfcomment.sty}{disable}[\pc@gopt@disable\nr]{true,false}[true]%
+{%
+  \ifcase\nr\relax%
+    \global\pc@gopt@disabletrue%
+  \or%
+    \global\pc@gopt@disablefalse%
+  \fi%
+}%
+%
+\newcommand\pc@define@key@disable[1]%
+{%
+  \define@choicekey*{#1}{disable}[\pc@lopt@disable\nr]{true,false}[true]%
+  {%
+    \ifcase\nr\relax%
+      \global\pc@lopt@disabletrue%
+    \or%
+      \global\pc@lopt@disablefalse%
+    \fi%
+  }%
+}%
+%
+\pc@define@key@disable{pdfcomment}%
+\pc@define@key@disable{pdfmargincomment}%
+\pc@define@key@disable{pdffreetextcomment}%
+\pc@define@key@disable{pdfmarkupcomment}%
+\pc@define@key@disable{pdfsquarecomment}%
+\pc@define@key@disable{pdfcirclecomment}%
+\pc@define@key@disable{pdflinecomment}%
+\pc@define@key@disable{pdfsidelinecomment}%
+\pc@define@key@disable{pdfreply}%
+\pc@define@key@disable{pdftooltip}%
+%
+\newcommand\pc@define@key@id[1]%
+{%
+  \define@key{#1}{id}[]%
+  {%
+    \gdef\pc@lopt@id{##1}%
+  }%
+}%
+%
+\pc@define@key@id{pdfcomment}%
+\pc@define@key@id{pdfmargincomment}%
+\pc@define@key@id{pdffreetextcomment}%
+\pc@define@key@id{pdfmarkupcomment}%
+\pc@define@key@id{pdfsquarecomment}%
+\pc@define@key@id{pdfcirclecomment}%
+\pc@define@key@id{pdflinecomment}%
+\pc@define@key@id{pdfsidelinecomment}%
+\pc@define@key@id{pdfreply}%
+\pc@define@key@id{pdftooltip}%
+%
+\define@key{pdfcomment.sty}{date}[\pc@goptd@date]%
+{%
+  \gdef\pc@gopt@date{#1}%
+}%
+%
+\newcommand\pc@define@key@date[1]%
+{%
+  \define@key{#1}{date}[\pc@gopt@date]%
+  {%
+    \gdef\pc@lopt@date{##1}%
+  }%
+}%
+%
+\pc@define@key@date{pdfcomment}%
+\pc@define@key@date{pdfmargincomment}%
+\pc@define@key@date{pdffreetextcomment}%
+\pc@define@key@date{pdfmarkupcomment}%
+\pc@define@key@date{pdfsquarecomment}%
+\pc@define@key@date{pdfcirclecomment}%
+\pc@define@key@date{pdflinecomment}%
+\pc@define@key@date{pdfsidelinecomment}%
+\pc@define@key@date{pdfreply}%
+\pc@define@key@date{pdftooltip}%
+%
+\define@key{pdfcomment.sty}{timezone}[\pc@goptd@timezone]%
+{%
+  \gdef\pc@gopt@timezone{#1}%
+}%
+%
+\newcommand\pc@define@key@timezone[1]%
+{%
+  \define@key{#1}{timezone}[\pc@gopt@timezone]%
+  {%
+    \gdef\pc@lopt@timezone{##1}%
+  }%
+}%
+%
+\pc@define@key@timezone{pdfcomment}%
+\pc@define@key@timezone{pdfmargincomment}%
+\pc@define@key@timezone{pdffreetextcomment}%
+\pc@define@key@timezone{pdfmarkupcomment}%
+\pc@define@key@timezone{pdfsquarecomment}%
+\pc@define@key@timezone{pdfcirclecomment}%
+\pc@define@key@timezone{pdflinecomment}%
+\pc@define@key@timezone{pdfsidelinecomment}%
+\pc@define@key@timezone{pdfreply}%
+\pc@define@key@timezone{pdftooltip}%
+%
+\define@choicekey*{pdfcomment.sty}{printSOfinal}[\pc@gpSOf\nr]{true,false}[true]%
+{%
+  \ifcase\nr\relax%
+    \gdef\pc@gopt@printSOfinal{true}%
+  \or%
+    \gdef\pc@gopt@printSOfinal{false}%
+  \fi%
+}%
+%
+\newcommand\pc@define@key@printSOfinal[1]%
+{%
+  \define@choicekey*{#1}{printSOfinal}[\pc@lpSOf\nr]{true,false}[true]%
+  {%
+    \ifcase\nr\relax%
+      \gdef\pc@lopt@printSOfinal{true}%
+    \or%
+      \gdef\pc@lopt@printSOfinal{false}%
+    \fi%
+  }%
+}%
+%
+\pc@define@key@printSOfinal{pdfcomment}%
+\pc@define@key@printSOfinal{pdfmargincomment}%
+\pc@define@key@printSOfinal{pdffreetextcomment}%
+\pc@define@key@printSOfinal{pdfmarkupcomment}%
+\pc@define@key@printSOfinal{pdfsquarecomment}%
+\pc@define@key@printSOfinal{pdfcirclecomment}%
+\pc@define@key@printSOfinal{pdflinecomment}%
+\pc@define@key@printSOfinal{pdfsidelinecomment}%
+\pc@define@key@printSOfinal{pdfreply}%
+\pc@define@key@printSOfinal{pdftooltip}%
+%
+\define@key{pdfcomment.sty}{dvipdfmx}[\pc@goptd@dvipdfmx]%
+{%
+  \expandafter\global\csname pc@gopt@dvipdfmx#1\endcsname%
+}%
+%
+\define@key{pdfcomment.sty}{final}[]%
+{%
+  \global\pc@gopt@finaltrue%
+}%
+%
+\define@key{pdfcomment.sty}{draft}[]%
+{%
+  \global\pc@gopt@finalfalse%
+}%
+%
+\define@choicekey{pdfcomment.sty}{version}[\pc@version\nr]{1,2}[2]%
+{%
+  \ifcase\nr\relax%
+    \global\pc@opt@unskipfalse%
+  \or%
+    \global\pc@opt@unskiptrue%
+  \fi%
+}%
+%
+\define@key{pdfmarkupcomment}{mathstyle}%
+{%
+  \gdef\pc@lopt@mathstyle{#1}%
+}%
+%
+\define@key{pdftooltip}{mathstyle}%
+{%
+  \gdef\pc@lopt@mathstyle{#1}%
+}%
+%
+\define@key{pdfreply}{replyto}%
+{%
+  \gdef\pc@lopt@replyto{#1}%
+}%
+%
+\define@choicekey*{pdfcommentsetup}{local}[\pc@local\nr]{true,false}[true]%
+{%
+  \ifcase\nr\relax%
+    \global\pc@localtrue%
+  \or%
+    \global\pc@localfalse%
+  \fi%
+}%
+%
+\define@key{listofpdfcomments}{liststyle}[AuthorSubject]%
+{%
+  \gdef\pc@lopt@liststyle{#1}%
+}%
+%
+\define@key{listofpdfcomments}{heading}[\lpcname]%
+{%
+  \renewcommand{\lpcname}{#1}%
+}%
+%
+\ExecuteOptionsX{subject,color,author,deadline,icon,open,hspace,voffset,hoffset,width,height,depth,opacity,markup,font,fontsize,fontcolor,justification,borderstyle,linewidth,dashstyle,bse,bsei,type,lineend,linebegin,icolor,line,caption,captionhoffset,captionvoffset,linesep,version,date,timezone,printSOfinal}%
+%
+\ProcessOptionsX\relax%
+%
+\RequirePackage{etoolbox}%
+% luatex v0.85+ ???
+\ifdef\pdffeedback
+{%
+  \RequirePackage{luatex85}%
+  \RequirePackage{datetime2}[2016/06/04]%
+}%
+{%
+  \RequirePackage{datetime2}%
+}%
+\RequirePackage{zref-savepos}[2007/04/22]%
+\zref@require@unique%
+\RequirePackage{refcount}%
+\RequirePackage{ifthen}%
+\RequirePackage{calc}%
+\RequirePackage{marginnote}%
+\RequirePackage{ifpdf}%
+\RequirePackage{ifluatex}%
+\RequirePackage{soulpos}%
+%
+%hyperref setup
+\ifpdf%
+  \ifluatex%
+    \@ifpackageloaded{hyperref}%
+    {%
+      \hypersetup{luatex}%
+    }%
+    {%
+      \RequirePackage[luatex,pdfencoding=auto]{hyperref}[2016/05/18]%
+    }%
+  \else%
+    \@ifpackageloaded{hyperref}%
+    {%
+      \hypersetup{pdftex}%
+    }%
+    {%
+      \RequirePackage[pdftex,pdfencoding=auto]{hyperref}[2007/06/12]%
+    }%
+  \fi%
+\else%
+  % to avoid problems with different default page size in
+  % pdflatex (dvi mode) and dvipdfmx/dvips
+  \pdfpageheight=\paperheight%
+  \pdfpagewidth=\paperwidth%
+  %auto-set dvipdfmx driver in case of xetex
+  \expandafter\ifx\csname XeTeXrevision\endcsname\relax%
+    \ifpc@gopt@dvipdfmx%
+      \@ifpackageloaded{hyperref}%
+      {%
+        \hypersetup{dvipdfmx}%
+      }%
+      {%
+        \RequirePackage[dvipdfmx,pdfencoding=auto]{hyperref}[2007/06/12]%
+      }%
+    \else%
+      \@ifpackageloaded{hyperref}%
+      {%
+        \hypersetup{dvips}%
+      }%
+      {%
+        \RequirePackage[dvips,pdfencoding=auto]{hyperref}[2007/06/12]%
+      }%
+    \fi%
+  \else%
+    \global\pc@gopt@dvipdfmxtrue%
+    \global\pc@gopt@xelatextrue%
+    \@ifpackageloaded{hyperref}%
+    {%
+      \hypersetup{xetex}%
+    }%
+    {%
+      \RequirePackage[xetex,pdfencoding=auto]{hyperref}[2007/06/12]%
+    }%
+  \fi%
+\fi%
+%
+% Using the options draft, final and dvipdfmx in \pdfcommentsetup makes absolutely no sense!
+% Therefore, they are switched off at "\AtBeginDocument"
+% and a warning is issued by xkeyval.sty, if used.
+\AtBeginDocument%
+{%
+  \disable@keys{pdfcomment.sty}{draft}%
+  \disable@keys{pdfcomment.sty}{final}%
+  \disable@keys{pdfcomment.sty}{dvipdfmx}%
+  \disable@keys{pdfcomment.sty}{version}%
+}%
+\newcommand{\pdfcomment}[2][]%
+{%
+  \ifhmode\ifpc@opt@unskip\unskip\fi\fi%
+  \ifvmode\leavevmode\fi%
+  % Copy all global options to local options
+  \pc@copy@gopt@lopt%
+  % Change local options if specified
+  \setkeys{pdfcomment}{#1}%
+  % Encode Contents, Author and Subject to pdf encodings (PD or PU) with hyperref's \pdfstringdef
+  % and transform color input to pdf color
+  \pc@encode@PDF{#2}%
+  \ifthenelse{\equal{\pc@lopt@color}{}}%
+  {%
+    \gdef\pc@lopt@c{}%
+  }%
+  {%
+    \gdef\pc@lopt@c{/C [\pc@hyenc@color]}%
+  }%
+  \ifthenelse{\equal{\pc@lopt@date}{}}%
+  {%
+    \gdef\pc@lopt@cdate{/CreationDate (\pc@pdfdate@auto)\space/M (\pc@pdfdate@auto)}%
+  }%
+  {%
+    \gdef\pc@lopt@cdate{/CreationDate (\pc@lopt@date)\space/M (\pc@lopt@date)}%
+  }%
+  \ifpc@gopt@final\else%
+    \ifpc@lopt@disable\else%
+      \hspace*{0pt}%
+      \pc@create@lpc%
+      % typeset text annotation (see: PDF Reference)
+      \ifpdf%
+        \vbox%
+        {%
+          \hsize=0pt%
+          \noindent%
+          \vspace{\pc@lopt@voffset}%
+          \hbox to 0pt%
+          {%
+            \vsize=0pt%
+            \hskip\pc@lopt@hoffset%
+            \pdfannot width \normalbaselineskip height \normalbaselineskip depth 0pt%
+            {%
+              /Subtype /Text%
+              \pc@annot@text%
+            }%
+            \ifthenelse{\equal{\pc@lopt@id}{}}%
+            {}%
+            {%
+              \xdef\pc@collect@PDFOBJID{\pc@collect@PDFOBJID,\the\pdflastannot}%
+              \pc@save@PDFOBJID{\pc@lopt@id}%
+            }%
+            \hss%
+          }%
+        }%
+      \else%
+        \ifpc@gopt@dvipdfmx%
+          \vbox%
+          {%
+            \hsize=0pt%
+            \noindent%
+            \vspace{\pc@lopt@voffset}%
+            \hbox to 0pt%
+            {%
+              \vsize=0pt%
+              \hskip\pc@lopt@hoffset%
+              \special{pdf: ann width \the\normalbaselineskip\space height \the\normalbaselineskip\space depth 0pt%
+                <<%
+                  /Subtype /Text%
+                  \pc@annot@text%
+                >>%
+              }%
+              \hss%
+            }%
+          }%
+        \else%
+          \vbox%
+          {%
+            \hsize=0pt%
+            \noindent%
+            \vspace{\pc@lopt@voffset}%
+            \hbox to 0pt%
+            {%
+              \vsize=0pt%
+              \hskip\pc@lopt@hoffset%
+              \pdfmark[\rule{\normalbaselineskip}{0pt}\rule{0pt}{\normalbaselineskip}]%
+              {%
+                pdfmark=/ANN,%
+                Subtype=/Text,%
+                Raw={\pc@annot@text}%
+              }%
+              \hss%
+            }%
+          }%
+        \fi%
+      \fi%
+      \hspace{\pc@lopt@hspace}%
+    \fi%
+  \fi%
+}%
+%
+\newcommand{\pdfmargincomment}[2][]%
+{%
+  \ifhmode\ifpc@opt@unskip\unskip\fi\fi%
+  \ifvmode\leavevmode\fi%
+  % Copy all global options to local options
+  \pc@copy@gopt@lopt%
+  % Change local options if specified
+  \setkeys{pdfmargincomment}{#1}%
+  % Encode Contents, Author and Subject to pdf encodings (PD or PU) with hyperref's \pdfstringdef
+  % and transform color input to pdf color
+  \pc@encode@PDF{#2}%
+  \ifthenelse{\equal{\pc@lopt@color}{}}%
+  {%
+    \gdef\pc@lopt@c{}%
+  }%
+  {%
+    \gdef\pc@lopt@c{/C [\pc@hyenc@color]}%
+  }%
+  \ifthenelse{\equal{\pc@lopt@date}{}}%
+  {%
+    \gdef\pc@lopt@cdate{/CreationDate (\pc@pdfdate@auto)\space/M (\pc@pdfdate@auto)}%
+  }%
+  {%
+    \gdef\pc@lopt@cdate{/CreationDate (\pc@lopt@date)\space/M (\pc@lopt@date)}%
+  }%
+  \ifpc@gopt@final\else%
+    \ifpc@lopt@disable\else%
+      \hspace*{0pt}%
+      \pc@create@lpc%
+      \begingroup%
+      % center marginnotes!
+        \renewcommand{\raggedleftmarginnote}{\pc@raggedleftmarginnote}%
+        \renewcommand{\raggedrightmarginnote}{\pc@raggedrightmarginnote}%
+        % typeset text annotation (see: PDF Reference)
+        \marginnote%
+        {%
+          \ifpdf%
+            \vbox%
+            {%
+              \hsize=0pt%
+              \noindent%
+              \vspace{\pc@lopt@voffset}%
+              \hbox to 0pt%
+              {%
+                \vsize=0pt%
+                \hskip\pc@lopt@hoffset%
+                \pdfannot width \normalbaselineskip height \normalbaselineskip depth 0pt%
+                {%
+                  /Subtype /Text%
+                  \pc@annot@text%
+                }%
+                \ifthenelse{\equal{\pc@lopt@id}{}}%
+                {}%
+                {%
+                  \xdef\pc@collect@PDFOBJID{\pc@collect@PDFOBJID,\the\pdflastannot}%
+                  \pc@save@PDFOBJID{\pc@lopt@id}%
+                }%
+                \hss%
+              }%
+            }%
+          \else%
+            \ifpc@gopt@dvipdfmx%
+              \vbox%
+              {%
+                \hsize=0pt%
+                \noindent%
+                \vspace{\pc@lopt@voffset}%
+                \hbox to 0pt%
+                {%
+                  \vsize=0pt%
+                  \hskip\pc@lopt@hoffset%
+                  \special{pdf: ann width \the\normalbaselineskip\space height \the\normalbaselineskip\space depth 0pt%
+                    <<%
+                      /Subtype /Text%
+                      \pc@annot@text%
+                    >>%
+                  }%
+                  \hss%
+                }%
+              }%
+            \else%
+              \vbox%
+              {%
+                \hsize=0pt%
+                \noindent%
+                \vspace{\pc@lopt@voffset}%
+                \hbox to 0pt%
+                {%
+                  \vsize=0pt%
+                  \hskip\pc@lopt@hoffset%
+                  \pdfmark[\rule{\normalbaselineskip}{0pt}\rule{0pt}{\normalbaselineskip}]%
+                  {%
+                    pdfmark=/ANN,%
+                    Subtype=/Text,%
+                    Raw={\pc@annot@text}%
+                  }%
+                  \hss%
+                }%
+              }%
+            \fi%
+          \fi%
+          \hspace{\pc@lopt@hspace}%
+        }%
+      \endgroup%
+    \fi%
+  \fi%
+}%
+%
+\newcommand{\pdffreetextcomment}[2][]%
+{%
+  \ifhmode\ifpc@opt@unskip\unskip\fi\fi%
+  \ifvmode\leavevmode\fi%
+  % Copy all global options to local options
+  \pc@copy@gopt@lopt%
+  % Change local options if specified
+  \setkeys{pdffreetextcomment}{#1}%
+  % Encode Contents, Author and Subject to pdf encodings (PD or PU) with hyperref's \pdfstringdef
+  % and transform color input to pdf color
+  \pc@encode@PDF{#2}%
+  \ifthenelse{\equal{\pc@lopt@type}{/IT /FreeTextTypewriter}}%
+  {%
+    \gdef\pc@lopt@c{}%
+    \gdef\pc@lopt@linewidth{0}%
+  }%
+  {%
+    \gdef\pc@lopt@c{/C [\pc@hyenc@color]}%
+  }%
+  \ifthenelse{\equal{\pc@lopt@color}{}}%
+  {%
+    \gdef\pc@lopt@c{}%
+  }%
+  {}%
+  \ifthenelse{\equal{\pc@lopt@date}{}}%
+  {%
+    \gdef\pc@lopt@cdate{/CreationDate (\pc@pdfdate@auto)\space/M (\pc@pdfdate@auto)}%
+  }%
+  {%
+    \gdef\pc@lopt@cdate{/CreationDate (\pc@lopt@date)\space/M (\pc@lopt@date)}%
+  }%
+  %create options for \pdfannot
+  \pc@create@pdfannotopt%
+  \ifpc@gopt@final\else%
+    \ifpc@lopt@disable\else%
+      \hspace*{0pt}%
+      % typeset freetext annotation (see: PDF Reference)
+      \ifpdf%
+        \vbox to 0pt%
+        {%
+          \hsize=0pt%
+          \noindent%
+          \vskip-\pc@lopt@voffset%
+          \hbox to 0pt%
+          {%
+            \vsize=0pt%
+            \hskip\pc@lopt@hoffset%
+            \pc@create@lpc%
+            \expandafter\pdfannot \pc@pdfannotopt%
+            {%
+            /Subtype /FreeText%
+            \pc@annot@freetext%
+            }%
+            \ifthenelse{\equal{\pc@lopt@id}{}}%
+            {}%
+            {%
+              \xdef\pc@collect@PDFOBJID{\pc@collect@PDFOBJID,\the\pdflastannot}%
+              \pc@save@PDFOBJID{\pc@lopt@id}%
+            }%
+          \hss%
+          }%
+        \vss%
+        }%
+      \else%
+        \ifpc@gopt@dvipdfmx%
+          \vbox to 0pt%
+          {%
+            \hsize=0pt%
+            \noindent%
+            \vskip-\pc@lopt@voffset%
+            \hbox to 0pt%
+            {%
+              \vsize=0pt%
+              \hskip\pc@lopt@hoffset%
+              \pc@create@lpc%
+              \special{pdf: ann \pc@pdfannotopt%
+                <<%
+                  /Subtype /FreeText%
+                  \pc@annot@freetext%
+                >>%
+              }%
+              \hss%
+            }%
+            \vss%
+          }%
+        \else%
+          \vbox to 0pt%
+          {%
+            \hsize=0pt%
+            \noindent%
+            \vskip-\pc@lopt@voffset%
+            % add extra \vskip box height because of different reference point
+            \vskip-\pc@lopt@height%
+            \hbox to 0pt%
+            {%
+              \vsize=0pt%
+              \hskip\pc@lopt@hoffset%
+              \pc@create@lpc%
+              %create dimensions of annotation
+              \pdfmark[\rule{0pt}{\pc@lopt@height}\rule{\pc@lopt@width}{0pt}]%
+              {%
+                pdfmark=/ANN,%
+                Subtype=/FreeText,%
+                Raw={\pc@annot@freetext}%
+              }%
+              \hss%
+            }%
+            \vss%
+          }%
+        \fi%
+      \fi%
+    \fi%
+  \fi%
+}%
+%
+\newcommand{\pdfsquarecomment}[2][]%
+{%
+  \ifhmode\ifpc@opt@unskip\unskip\fi\fi%
+  \ifvmode\leavevmode\fi%
+  % Copy all global options to local options
+  \pc@copy@gopt@lopt%
+  % Change local options if specified
+  \setkeys{pdfsquarecomment}{#1}%
+  % Encode Contents, Author and Subject to pdf encodings (PD or PU) with hyperref's \pdfstringdef
+  % and transform color input to pdf color
+  \pc@encode@PDF{#2}%
+  \ifthenelse{\equal{\pc@lopt@color}{}}%
+  {%
+    \gdef\pc@lopt@c{}%
+  }%
+  {%
+    \gdef\pc@lopt@c{/C [\pc@hyenc@color]}%
+  }%
+  \ifthenelse{\equal{\pc@lopt@icolor}{}}%
+  {%
+    \gdef\pc@lopt@ic{}%
+  }%
+  {%
+    \gdef\pc@lopt@ic{/IC [\pc@hyenc@icolor]}%
+  }%
+  \ifthenelse{\equal{\pc@lopt@date}{}}%
+  {%
+    \gdef\pc@lopt@cdate{/CreationDate (\pc@pdfdate@auto)\space/M (\pc@pdfdate@auto)}%
+  }%
+  {%
+    \gdef\pc@lopt@cdate{/CreationDate (\pc@lopt@date)\space/M (\pc@lopt@date)}%
+  }%
+  %create options for \pdfannot
+  \pc@create@pdfannotopt%
+  \ifpc@gopt@final\else%
+    \ifpc@lopt@disable\else%
+      \hspace*{0pt}%
+      % typeset square annotation (see: PDF Reference)
+      \ifpdf%
+        \vbox to 0pt%
+        {%
+          \hsize=0pt%
+          \noindent%
+          \vskip-\pc@lopt@voffset%
+          \hbox to 0pt%
+          {%
+            \vsize=0pt%
+            \hskip\pc@lopt@hoffset%
+            \pc@create@lpc%
+            \expandafter\pdfannot \pc@pdfannotopt%
+            {%
+              /Subtype /Square\space%
+              \pc@annot@square%
+            }%
+            \ifthenelse{\equal{\pc@lopt@id}{}}%
+            {}%
+            {%
+              \xdef\pc@collect@PDFOBJID{\pc@collect@PDFOBJID,\the\pdflastannot}%
+              \pc@save@PDFOBJID{\pc@lopt@id}%
+            }%
+            \hss%
+          }%
+          \vss%
+        }%
+      \else%
+        \ifpc@gopt@dvipdfmx%
+          \vbox to 0pt%
+          {%
+            \hsize=0pt%
+            \noindent%
+            \vskip-\pc@lopt@voffset%
+            \hbox to 0pt%
+            {%
+              \vsize=0pt%
+              \hskip\pc@lopt@hoffset%
+              \pc@create@lpc%
+              \special{pdf: ann \pc@pdfannotopt%
+                <<%
+                  /Subtype /Square\space%
+                  \pc@annot@square%
+                >>%
+              }%
+              \hss%
+            }%
+            \vss%
+          }%
+        \else%
+          \vbox to 0pt%
+          {%
+            \hsize=0pt%
+            \noindent%
+            \vskip-\pc@lopt@voffset%
+            % add extra \vskip box height because of different reference point
+            \vskip-\pc@lopt@height%
+            \hbox to 0pt%
+            {%
+              \vsize=0pt%
+              \hskip\pc@lopt@hoffset%
+              \pc@create@lpc%
+              %create dimensions of annotation
+              \pdfmark[\rule{0pt}{\pc@lopt@height}\rule{\pc@lopt@width}{0pt}]%
+              {%
+                pdfmark=/ANN,%
+                Subtype=/Square,%
+                Raw={\pc@annot@square}%
+              }%
+              \hss%
+            }%
+            \vss%
+          }%
+        \fi%
+      \fi%
+    \fi%
+  \fi%
+}%
+%
+\newcommand{\pdfcirclecomment}[2][]%
+{%
+  \ifhmode\ifpc@opt@unskip\unskip\fi\fi%
+  \ifvmode\leavevmode\fi%
+  % Copy all global options to local options
+  \pc@copy@gopt@lopt%
+  % Change local options if specified
+  \setkeys{pdfcirclecomment}{#1}%
+  % Encode Contents, Author and Subject to pdf encodings (PD or PU) with hyperref's \pdfstringdef
+  % and transform color input to pdf color
+  \pc@encode@PDF{#2}%
+  \ifthenelse{\equal{\pc@lopt@color}{}}%
+  {%
+    \gdef\pc@lopt@c{}%
+  }%
+  {%
+    \gdef\pc@lopt@c{/C [\pc@hyenc@color]}%
+  }%
+  \ifthenelse{\equal{\pc@lopt@icolor}{}}%
+  {%
+    \gdef\pc@lopt@ic{}%
+  }%
+  {%
+    \gdef\pc@lopt@ic{/IC [\pc@hyenc@icolor]}%
+  }%
+  \ifthenelse{\equal{\pc@lopt@date}{}}%
+  {%
+    \gdef\pc@lopt@cdate{/CreationDate (\pc@pdfdate@auto)\space/M (\pc@pdfdate@auto)}%
+  }%
+  {%
+    \gdef\pc@lopt@cdate{/CreationDate (\pc@lopt@date)\space/M (\pc@lopt@date)}%
+  }%
+  %create options for \pdfannot
+  \pc@create@pdfannotopt%
+  \ifpc@gopt@final\else%
+    \ifpc@lopt@disable\else%
+      \hspace*{0pt}%
+      % typeset circle annotation (see: PDF Reference)
+      \ifpdf%
+        \vbox to 0pt%
+        {%
+          \hsize=0pt%
+          \noindent%
+          \vskip-\pc@lopt@voffset%
+          \hbox to 0pt%
+          {%
+            \vsize=0pt%
+            \hskip\pc@lopt@hoffset%
+            \pc@create@lpc%
+            \expandafter\pdfannot \pc@pdfannotopt%
+            {%
+              /Subtype /Circle\space%
+              % circle and square annatations differ only in /Subtype, so ...
+              \pc@annot@square%
+            }%
+            \ifthenelse{\equal{\pc@lopt@id}{}}%
+            {}%
+            {%
+              \xdef\pc@collect@PDFOBJID{\pc@collect@PDFOBJID,\the\pdflastannot}%
+              \pc@save@PDFOBJID{\pc@lopt@id}%
+            }%
+            \hss%
+          }%
+          \vss%
+        }%
+      \else%
+        \ifpc@gopt@dvipdfmx%
+          \vbox to 0pt%
+          {%
+            \hsize=0pt%
+            \noindent%
+            \vskip-\pc@lopt@voffset%
+            \hbox to 0pt%
+            {%
+              \vsize=0pt%
+              \hskip\pc@lopt@hoffset%
+              \pc@create@lpc%
+              \special{pdf: ann \pc@pdfannotopt%
+                <<%
+                  /Subtype /Circle\space%
+                  \pc@annot@square%
+                >>%
+              }%
+              \hss%
+            }%
+            \vss%
+          }%
+        \else%
+          \vbox to 0pt%
+          {%
+            \hsize=0pt%
+            \noindent%
+            \vskip-\pc@lopt@voffset%
+            % add extra \vskip box height because of different reference point
+            \vskip-\pc@lopt@height%
+            \hbox to 0pt%
+            {%
+              \vsize=0pt%
+              \hskip\pc@lopt@hoffset%
+              \pc@create@lpc%
+              %create dimensions of annotation
+              \pdfmark[\rule{0pt}{\pc@lopt@height}\rule{\pc@lopt@width}{0pt}]%
+              {%
+                pdfmark=/ANN,%
+                Subtype=/Circle,%
+                Raw={\pc@annot@square}%
+              }%
+              \hss%
+            }%
+            \vss%
+          }%
+        \fi%
+      \fi%
+    \fi%
+  \fi%
+}%
+%
+\newcommand{\pdflinecomment}[2][]%
+{%
+  \ifhmode\ifpc@opt@unskip\unskip\fi\fi%
+  \ifvmode\leavevmode\fi%
+  % Copy all global options to local options
+  \pc@copy@gopt@lopt%
+  % Change local options if specified
+  \setkeys{pdflinecomment}{#1}%
+  % Encode Contents, Author and Subject to pdf encodings (PD or PU) with hyperref's \pdfstringdef
+  % and transform color input to pdf color
+  \pc@encode@PDF{#2}%
+  \ifthenelse{\equal{\pc@lopt@color}{}}%
+  {%
+    \gdef\pc@lopt@c{}%
+  }%
+  {%
+    \gdef\pc@lopt@c{/C [\pc@hyenc@color]}%
+  }%
+  \ifthenelse{\equal{\pc@lopt@icolor}{}}%
+  {%
+    \gdef\pc@lopt@ic{}%
+  }%
+  {%
+    \gdef\pc@lopt@ic{/IC [\pc@hyenc@icolor]}%
+  }%
+  \ifthenelse{\equal{\pc@lopt@date}{}}%
+  {%
+    \gdef\pc@lopt@cdate{/CreationDate (\pc@pdfdate@auto)\space/M (\pc@pdfdate@auto)}%
+  }%
+  {%
+    \gdef\pc@lopt@cdate{/CreationDate (\pc@lopt@date)\space/M (\pc@lopt@date)}%
+  }%
+  \gdef\pc@lopt@le{/LE [\pc@lopt@linebegin\space\pc@lopt@lineend]}%
+  \ifthenelse{\equal{\pc@lopt@type}{Line}}%
+  {%
+    \ifthenelse{\equal{\pc@lopt@caption}{none}}%
+    {%
+      \gdef\pc@lopt@cap{/Cap false}%
+      \gdef\pc@lopt@cp{}%
+    }%
+    {%
+      \gdef\pc@lopt@cap{/Cap true}%
+      \gdef\pc@lopt@cp{/CP /\pc@lopt@caption}%
+    }%
+    \gdef\pc@lopt@l{/L [\pc@lopt@line]}%
+    \gdef\pc@lopt@co{/CO [\pc@lopt@captionhoffset\space \pc@lopt@captionvoffset]}%
+  }%
+  {%
+    \gdef\pc@lopt@l{/Vertices [\pc@lopt@line]}%
+    \gdef\pc@lopt@cap{}%
+    \gdef\pc@lopt@cp{}%
+    \gdef\pc@lopt@co{}%
+  }%
+  %create options for \pdfannot
+  \pc@create@pdfannotopt%
+  \ifpc@gopt@final\else%
+    \ifpc@lopt@disable\else%
+      \hspace*{0pt}%
+      \pc@create@lpc%
+      % typeset line annotation (see: PDF Reference)
+      \ifpdf%
+        \vbox to 0pt%
+        {%
+          \hsize=0pt%
+          \noindent%
+          \hbox to 0pt%
+          {%
+            \vsize=0pt%
+            \expandafter\pdfannot \pc@pdfannotopt%
+            {%
+              /Subtype /\pc@lopt@type\space%
+              \pc@annot@line%
+            }%
+            \ifthenelse{\equal{\pc@lopt@id}{}}%
+            {}%
+            {%
+              \xdef\pc@collect@PDFOBJID{\pc@collect@PDFOBJID,\the\pdflastannot}%
+              \pc@save@PDFOBJID{\pc@lopt@id}%
+            }%
+            \hss%
+          }%
+          \vss%
+        }%
+      \else%
+        \ifpc@gopt@dvipdfmx%
+          \vbox to 0pt%
+          {%
+            \hsize=0pt%
+            \noindent%
+            \hbox to 0pt%
+            {%
+              \vsize=0pt%
+              \special{pdf: ann \pc@pdfannotopt%
+                <<%
+                  /Subtype /\pc@lopt@type\space%
+                  \pc@annot@line%
+                >>%
+              }%
+              \hss%
+            }%
+            \vss%
+          }%
+        \else%
+          \vbox to 0pt%
+          {%
+            \hsize=0pt%
+            \noindent%
+            \hbox to 0pt%
+            {%
+              \vsize=0pt%
+              %create dimensions of annotation
+              \pdfmark[\rule{0pt}{\pc@lopt@height}\rule{\pc@lopt@width}{0pt}]%
+              {%
+                pdfmark=/ANN,%
+                Subtype=/\pc@lopt@type,%
+                Raw={\pc@annot@line}%
+              }%
+              \hss%
+            }%
+            \vss%
+          }%
+        \fi%
+      \fi%
+    \fi%
+  \fi%
+}%
+%
+\newcommand{\pdfmarkupcomment}[3][]%
+{%
+  \leavevmode%
+  % Copy all global options to local options
+  \pc@copy@gopt@lopt%
+  % Change local options if specified
+  \setkeys{pdfmarkupcomment}{#1}%
+  \ifthenelse{\equal{\pc@lopt@date}{}}%
+  {%
+    \gdef\pc@lopt@cdate{/CreationDate (\pc@pdfdate@auto)\space/M (\pc@pdfdate@auto)}%
+  }%
+  {%
+    \gdef\pc@lopt@cdate{/CreationDate (\pc@lopt@date)\space/M (\pc@lopt@date)}%
+  }%
+  \ifmmode%
+    \zsavepos{pdfcomment:\thezref@unique}%
+    \zref@refused{pdfcomment:\thezref@unique}%
+    \setlength{\pc@Sposx}{\zposx{pdfcomment:\thezref@unique}sp}%
+    \setlength{\pc@Sposy}{\zposy{pdfcomment:\thezref@unique}sp}%
+    \stepcounter{zref@unique}%
+    \setlength{\pc@Eposx}{\zposx{pdfcomment:\thezref@unique}sp}%
+    \setlength{\pc@Eposy}{\zposy{pdfcomment:\thezref@unique}sp}%
+    \ifpc@gopt@final\else%
+      \ifpc@lopt@disable\else%
+        %changed \pc@encode@PDF, \pdfstringdef does not work in math mode
+        \marginnote{\pc@encode@PDF@math{#3}}%
+        \HyColor@XZeroOneThreeFour{\pc@lopt@color}{\pc@hyenc@color}{pdfcomment}{color}%
+        \HyColor@XZeroOneThreeFour{\pc@lopt@fontcolor}{\pc@hyenc@fontcolor}{pdfcomment}{color}%
+        \HyColor@XZeroOneThreeFour{\pc@lopt@icolor}{\pc@hyenc@icolor}{pdfcomment}{color}%
+        \settowidth{\pc@box@width}{$\pc@lopt@mathstyle#2$}%
+        \settoheight{\pc@box@height}{$\pc@lopt@mathstyle#2$}%
+        \settodepth{\pc@box@depth}{$\pc@lopt@mathstyle#2$}%
+        \setbox\pc@mathannot@box=\hbox to\pc@box@width%
+        {%
+          \vrule height\pc@box@height depth\pc@box@depth width\z@%
+          \hfill%
+          \pc@annot@calc@pos@math%
+          \xdef\pc@annot@quadpoints{\pc@x@one\space\pc@y@one\space\pc@x@two\space\pc@y@two\space\pc@x@three\space\pc@y@three\space\pc@x@four\space\pc@y@four}%
+          \ifpdf%
+            \pc@annot@markup@pdf%
+          \else%
+            \ifpc@gopt@dvipdfmx%
+              \pc@annot@markup@dvipdfmx%
+            \else%
+              \pc@annot@markup@dvips%
+            \fi%
+          \fi%
+        }%
+        \ifthenelse{\equal{\pc@lopt@id}{}}%
+        {}%
+        {\xdef\pc@collect@PDFOBJID{\pc@collect@PDFOBJID,\the\pdflastannot}}%
+        \wd\pc@mathannot@box\z@%
+        \ht\pc@mathannot@box\z@%
+        \dp\pc@mathannot@box\z@%
+        \box\pc@mathannot@box%
+        \nobreak%
+      \fi%
+    \fi%
+    \ifpc@gopt@final%
+      \ifthenelse{\equal{\pc@lopt@markup}{StrikeOut}}%
+      {%
+        \ifthenelse{\equal{\pc@lopt@printSOfinal}{true}}%
+        {#2\global\pc@ignorespacesfalse}%
+        {\global\pc@ignorespacestrue}%
+      }%
+      {%
+        #2\global\pc@ignorespacesfalse%
+      }%
+    \else%
+      \ifpc@lopt@disable%
+        \ifthenelse{\equal{\pc@lopt@markup}{StrikeOut}}%
+        {%
+          \ifthenelse{\equal{\pc@lopt@printSOfinal}{true}}%
+          {#2\global\pc@ignorespacesfalse}%
+          {\global\pc@ignorespacestrue}%
+        }%
+        {%
+          #2\global\pc@ignorespacesfalse%
+        }%
+      \else%
+        #2\global\pc@ignorespacesfalse%
+      \fi%
+    \fi%
+    \zsavepos{pdfcomment:\thezref@unique}%
+    \zref@refused{pdfcomment:\thezref@unique}%
+    \stepcounter{zref@unique}%
+  \else%
+    \pc@encode@PDF{#3}%
+    \settoheight{\pc@box@height}{#2}%
+    \ifthenelse{\equal{\pc@lopt@markup}{Underline}}%
+    {%
+      \settodepth{\pc@box@depth}{Tq}%
+    }%
+    {%
+      \settodepth{\pc@box@depth}{#2}%
+    }%
+    \def\SOUL@preamble%
+    {%
+      \def\ulp@skern{0pt}%
+      \def\ulp@ekern{0pt}%
+      \def\ulp@sgap{0pt}%
+      \def\ulp@egap{0pt}%
+      \def\ulp@pos{\z@}%
+      \def\ulp@draw{\pc@soul@markup}%
+      \ulp@preamble%
+    }%
+    \let\SOUL@postamble\ulp@postamble%
+    \let\SOUL@everyspace\ulp@everyspace%
+    \let\SOUL@everyhyphen\ulp@everyhyphen%
+    \let\SOUL@everyexhyphen\ulp@everyexhyphen%
+    \let\SOUL@everysyllable\@empty%
+    \def\SOUL@everytoken{\the\SOUL@token}%
+    \ifpc@gopt@final%
+      \ifthenelse{\equal{\pc@lopt@markup}{StrikeOut}}%
+      {%
+        \ifthenelse{\equal{\pc@lopt@printSOfinal}{true}}%
+        {\SOUL@{#2}\global\pc@ignorespacesfalse}%
+        {\global\pc@ignorespacestrue}%
+      }%
+      {%
+        #2\global\pc@ignorespacesfalse%
+      }%
+    \else%
+      \ifpc@lopt@disable%
+        \ifthenelse{\equal{\pc@lopt@markup}{StrikeOut}}%
+        {%
+          \ifthenelse{\equal{\pc@lopt@printSOfinal}{true}}%
+          {#2\global\pc@ignorespacesfalse}%
+          {\global\pc@ignorespacestrue}%
+        }%
+        {%
+          #2\global\pc@ignorespacesfalse%
+        }%
+      \else%
+        \SOUL@{#2}\global\pc@ignorespacesfalse%
+      \fi%
+    \fi%
+  \fi%
+  \ifpc@gopt@final\else%
+    \ifpc@lopt@disable\else%
+      \pc@create@lpc%
+    \fi%
+  \fi%
+  %only local!
+  \gdef\pc@lopt@mathstyle{}%
+  %
+  \ifthenelse{\equal{\pc@lopt@id}{}}%
+  {}%
+  {\pc@save@PDFOBJID{\pc@lopt@id}}%
+  \ifpc@ignorespaces%
+    \ignorespaces%
+  \fi%
+}%
+%
+\newenvironment{pdfsidelinecomment}[2][]%
+{%
+  \ifhmode\ifpc@opt@unskip\unskip\fi\fi%
+  \ifvmode\leavevmode\fi%
+  % Copy all global options to local options
+  \pc@copy@gopt@lopt%
+  % Change local options if specified
+  \setkeys{pdfsidelinecomment}{#1}%
+  % Encode Contents, Author and Subject to pdf encodings (PD or PU) with hyperref's \pdfstringdef
+  % and transform color input to pdf color
+  \pc@encode@PDF{#2}%
+  \gdef\pc@lopt@type{Line}%
+  \ifthenelse{\equal{\pc@lopt@color}{}}%
+  {%
+    \gdef\pc@lopt@c{}%
+  }%
+  {%
+    \gdef\pc@lopt@c{/C [\pc@hyenc@color]}%
+  }%
+  \ifthenelse{\equal{\pc@lopt@icolor}{}}%
+  {%
+    \gdef\pc@lopt@ic{}%
+  }%
+  {%
+    \gdef\pc@lopt@ic{/IC [\pc@hyenc@icolor]}%
+  }%
+  \ifthenelse{\equal{\pc@lopt@date}{}}%
+  {%
+    \gdef\pc@lopt@cdate{/CreationDate (\pc@pdfdate@auto)\space/M (\pc@pdfdate@auto)}%
+  }%
+  {%
+    \gdef\pc@lopt@cdate{/CreationDate (\pc@lopt@date)\space/M (\pc@lopt@date)}%
+  }%
+  \gdef\pc@lopt@le{/LE [\pc@lopt@linebegin\space\pc@lopt@lineend]}%
+  \ifthenelse{\equal{\pc@lopt@type}{Line}}%
+  {%
+    \ifthenelse{\equal{\pc@lopt@caption}{none}}%
+    {%
+      \gdef\pc@lopt@cap{/Cap false}%
+      \gdef\pc@lopt@cp{}%
+    }%
+    {%
+      \gdef\pc@lopt@cap{/Cap true}%
+      \gdef\pc@lopt@cp{/CP /\pc@lopt@caption}%
+    }%
+    \gdef\pc@lopt@l{/L [\pc@lopt@line]}%
+    \gdef\pc@lopt@co{/CO [\pc@lopt@captionhoffset\space \pc@lopt@captionvoffset]}%
+  }%
+  {%
+    \gdef\pc@lopt@l{/Vertices [\pc@lopt@line]}%
+    \gdef\pc@lopt@cap{}%
+    \gdef\pc@lopt@cp{}%
+    \gdef\pc@lopt@co{}%
+  }%
+  \zsavepos{pdfcomment:slc:\thepc@count@iv}%
+  \zref@refused{pdfcomment:slc:\thepc@count@iv}%
+  \setlength{\pc@Sposx}{\zposx{pdfcomment:slc:\thepc@count@iv}sp}%
+  \setlength{\pc@Sposy}{\zposy{pdfcomment:slc:\thepc@count@iv}sp}%
+  \stepcounter{pc@count@iv}%
+  \setlength{\pc@Eposx}{\zposx{pdfcomment:slc:\thepc@count@iv}sp}%
+  \setlength{\pc@Eposy}{\zposy{pdfcomment:slc:\thepc@count@iv}sp}%
+  \settoheight{\pc@box@height}{Tq}%
+  \settoheight{\pc@box@depth}{Tq}%
+  \stepcounter{pc@count@i}%
+  \label{pdfcomment:pageS:\thepc@count@i}%
+  \refused{pdfcomment:pageS:\thepc@count@i}%
+  \gdef\pc@pS{\getpagerefnumber{pdfcomment:pageS:\thepc@count@i}}%
+  \gdef\pc@pE{\getpagerefnumber{pdfcomment:pageE:\thepc@count@i}}%
+  \ifthenelse{\equal{\pc@pS}{\pc@pE}}%
+  {\global\pc@annot@samepagetrue}%
+  {\global\pc@annot@samepagefalse}%
+  \global\pc@firstcolumntrue%
+  \pc@calc@textblockpos%
+  \setlength{\pc@column}{\pc@x@right@text bp}%
+  \addtolength{\pc@column}{3pt}%
+  \ifnum\pc@Sposx<\pc@column%
+    \global\pc@Sfirstcolumntrue%
+  \else%
+    \global\pc@Sfirstcolumnfalse%
+  \fi%
+  \ifnum\pc@Eposx<\pc@column%
+    \global\pc@Efirstcolumntrue%
+  \else%
+    \global\pc@Efirstcolumnfalse%
+  \fi%
+  \ifpc@annot@samepage\else%
+    \ifpc@gopt@final\else%
+      \ifpc@lopt@disable\else%
+      % 1st part of annotation on 1st page
+        \if@twocolumn%
+          \ifpc@Sfirstcolumn%
+            \PackageError{pdfcomment}{%
+            \string\pdfsidelinecomment\space supports only one\MessageBreak%
+            column or page break in twocolumn mode!!\MessageBreak%
+            Your comment is too long!}%
+          \else%
+          % start in second column
+            \global\pc@annot@secondpagefalse%
+            \pc@calc@sidelinepos%
+            \renewcommand{\pc@y@two}{\pc@y@bottom@text}%
+            \gdef\pc@lopt@line{\pc@x@two\space\pc@y@one\space\pc@x@two\space\pc@y@two}%
+            \gdef\pc@lopt@le{/LE [\pc@lopt@linebegin\space/None]}%
+            \marginnote{\pc@create@lpc\pc@create@annot@sideline}%
+          \fi%
+        \else%
+          \global\pc@annot@secondpagefalse%
+          \pc@calc@sidelinepos%
+          \renewcommand{\pc@y@two}{\pc@y@bottom@text}%
+          \gdef\pc@lopt@line{\pc@x@two\space\pc@y@one\space\pc@x@two\space\pc@y@two}%
+          \gdef\pc@lopt@le{/LE [\pc@lopt@linebegin\space/None]}%
+          \marginnote{\pc@create@lpc\pc@create@annot@sideline}%
+          \gdef\pc@lopt@line{\pc@x@one\space\pc@y@two\space\pc@x@one\space\pc@y@one}%
+          \gdef\pc@lopt@le{/LE [/None\space\pc@lopt@linebegin]}%
+          \marginnote{\pc@create@annot@sideline}%
+        \fi%
+      \fi%
+    \fi%
+  \fi%
+}%
+{%
+  \zsavepos{pdfcomment:slc:\thepc@count@iv}%
+  \zref@refused{pdfcomment:slc:\thepc@count@iv}%
+  \label{pdfcomment:pageE:\thepc@count@i}%
+  \refused{pdfcomment:pageE:\thepc@count@i}%
+  \stepcounter{pc@count@iv}%
+  \ifpc@gopt@final\else%
+    \ifpc@lopt@disable\else%
+      \ifpc@annot@samepage%
+        % annot complete on one page
+        \if@twocolumn%
+          \ifpc@Sfirstcolumn%
+            \ifpc@Efirstcolumn%
+              % complete in first column
+              \global\pc@firstcolumntrue%
+              \pc@calc@sidelinepos%
+              \gdef\pc@lopt@line{\pc@x@one\space\pc@y@two\space\pc@x@one\space\pc@y@one}%
+              \gdef\pc@lopt@le{/LE [\pc@lopt@lineend\space\pc@lopt@linebegin]}%
+              \marginnote{\pc@create@lpc\pc@create@annot@sideline}%
+            \else%
+              % column break
+              \global\pc@firstcolumntrue%
+              \pc@calc@sidelinepos%
+              \renewcommand{\pc@y@two}{\pc@y@bottom@text}%
+              \gdef\pc@lopt@line{\pc@x@one\space\pc@y@two\space\pc@x@one\space\pc@y@one}%
+              \gdef\pc@lopt@le{/LE [/None\space\pc@lopt@linebegin]}%
+              \marginnote{\pc@create@lpc\pc@create@annot@sideline}%
+              \global\pc@firstcolumnfalse%
+              \pc@calc@sidelinepos%
+              \renewcommand{\pc@y@one}{\pc@y@top@text}%
+              \gdef\pc@lopt@line{\pc@x@two\space\pc@y@one\space\pc@x@two\space\pc@y@two}%
+              \gdef\pc@lopt@le{/LE [/None\space\pc@lopt@lineend]}%
+              \marginnote{\pc@create@annot@sideline}%
+            \fi%
+          \else%
+            \ifpc@Efirstcolumn%
+              % not possible 
+            \else%
+              % complete in seconds column
+              \global\pc@firstcolumnfalse%
+              \pc@calc@sidelinepos%
+              \gdef\pc@lopt@line{\pc@x@two\space\pc@y@one\space\pc@x@two\space\pc@y@two}%
+              \gdef\pc@lopt@le{/LE [\pc@lopt@linebegin\space\pc@lopt@lineend]}%
+              \marginnote{\pc@create@lpc\pc@create@annot@sideline}%
+            \fi%
+          \fi%
+        \else%
+          \pc@calc@sidelinepos%
+          \gdef\pc@lopt@line{\pc@x@two\space\pc@y@one\space\pc@x@two\space\pc@y@two}%
+          \gdef\pc@lopt@le{/LE [\pc@lopt@linebegin\space\pc@lopt@lineend]}%
+          \marginnote{\pc@create@lpc\pc@create@annot@sideline}%
+          \gdef\pc@lopt@line{\pc@x@one\space\pc@y@two\space\pc@x@one\space\pc@y@one}%
+          \gdef\pc@lopt@le{/LE [\pc@lopt@lineend\space\pc@lopt@linebegin]}%
+          \marginnote{\pc@create@annot@sideline}%
+        \fi%
+      \else%
+        % 2nd part of annotation on 2nd page
+        \if@twocolumn%
+          \ifpc@Efirstcolumn%
+          % end in first column
+            \global\pc@firstcolumntrue%
+            \global\pc@annot@secondpagetrue%
+            \pc@calc@sidelinepos%
+            \renewcommand{\pc@y@one}{\pc@y@top@text}%
+            \gdef\pc@lopt@line{\pc@x@one\space\pc@y@two\space\pc@x@one\space\pc@y@one}%
+            \gdef\pc@lopt@le{/LE [\pc@lopt@lineend\space/None]}%
+            \marginnote{\pc@create@annot@sideline}%
+          \else%
+            \PackageError{pdfcomment}{%
+            \string\pdfsidelinecomment\space supports only one\MessageBreak%
+            column or page break in twocolumn mode!\MessageBreak%
+            Your comment is too long!}%
+          \fi%
+        \else%
+          \global\pc@annot@secondpagetrue%
+          \pc@calc@sidelinepos%
+          \renewcommand{\pc@y@one}{\pc@y@top@text}%
+          \gdef\pc@lopt@line{\pc@x@two\space\pc@y@one\space\pc@x@two\space\pc@y@two}%
+          \gdef\pc@lopt@le{/LE [/None\space\pc@lopt@lineend]}%
+          \marginnote{\pc@create@annot@sideline}%
+          \gdef\pc@lopt@line{\pc@x@one\space\pc@y@two\space\pc@x@one\space\pc@y@one}%
+          \gdef\pc@lopt@le{/LE [\pc@lopt@lineend\space/None]}%
+          \marginnote{\pc@create@annot@sideline}%
+        \fi%
+      \fi%
+    \fi%
+  \fi%
+  \ifthenelse{\equal{\pc@lopt@id}{}}%
+  {}%
+  {\pc@save@PDFOBJID{\pc@lopt@id}}%
+}%
+%
+\newcommand{\pdfreply}[2][]%
+{%
+  \ifhmode\ifpc@opt@unskip\unskip\fi\fi%
+  \ifvmode\leavevmode\fi%
+  % Copy all global options to local options
+  \pc@copy@gopt@lopt%
+  % Change local options if specified
+  \setkeys{pdfreply}{#1}%
+  % Encode Contents, Author and Subject to pdf encodings (PD or PU) with hyperref's \pdfstringdef
+  % and transform color input to pdf color
+  \pc@encode@PDF{#2}%
+  \ifthenelse{\equal{\pc@lopt@color}{}}%
+  {%
+    \gdef\pc@lopt@c{}%
+  }%
+  {%
+    \gdef\pc@lopt@c{/C [\pc@hyenc@color]}%
+  }%
+  \ifthenelse{\equal{\pc@lopt@date}{}}%
+  {%
+    \gdef\pc@lopt@cdate{/CreationDate (\pc@pdfdate@auto)\space/M (\pc@pdfdate@auto)}%
+  }%
+  {%
+    \gdef\pc@lopt@cdate{/CreationDate (\pc@lopt@date)\space/M (\pc@lopt@date)}%
+  }%
+  \ifpc@gopt@final\else%
+    \ifpc@lopt@disable\else%
+      \hspace*{0pt}%
+      %\pc@create@lpc%
+      % typeset text annotation (see: PDF Reference)
+      \xdef\pc@zref@PDFOBJID{\pc@get@PDFOBJID{\pc@lopt@replyto}}%
+      \global\pc@afterpagefalse%
+      \ifpdf%
+        \@for\pc@for@PDFOBJID:={\pc@zref@PDFOBJID}\do%
+        {%
+          \ifthenelse{\equal{\pc@for@PDFOBJID}{A}}%
+          {%
+            \global\pc@afterpagetrue%
+            \xdef\pc@collect@PDFOBJID{\pc@collect@PDFOBJID,A}%
+          }%
+          {%
+            \ifthenelse{\equal{\pc@for@PDFOBJID}{S}}%
+            {}%
+            {%
+              \edef\pc@irt{/IRT \pc@for@PDFOBJID\space 0 R\space}%
+              \vbox%
+              {%
+                \hsize=0pt%
+                \noindent%
+                \vspace{\pc@lopt@voffset}%
+                \hbox to 0pt%
+                {%
+                  \vsize=0pt%
+                  \hskip\pc@lopt@hoffset%
+                  \pdfannot width 0pt height \normalbaselineskip depth 0pt%
+                  {%
+                    /Subtype /Text%
+                      \pc@lopt@c\space%
+                    \pc@lopt@cdate\space%
+                    /T (\pc@pdfenc@author)\space%
+                    /Subj (\pc@pdfenc@subject)\space%
+                    /Contents (\pc@pdfenc@contents)\space%
+                    \pc@irt%%
+                    /F 4\space%
+                  }%
+                  \ifthenelse{\equal{\pc@lopt@id}{}}%
+                  {}%
+                  {\xdef\pc@collect@PDFOBJID{\pc@collect@PDFOBJID,\the\pdflastannot}}%
+                  \hss%
+                }%
+              }%
+            }%
+          }%
+        }%
+        \ifthenelse{\equal{\pc@lopt@id}{}}%
+        {}%
+        {\pc@save@PDFOBJID{\pc@lopt@id}}%
+      \else%
+        \ifpc@gopt@dvipdfmx%
+          \PackageError{pdfcomment}{%
+            \string\pdfreply\space is only supported by pdfTeX!\MessageBreak%
+            Please use pdf(la)tex instead}%
+        \else%
+          \PackageError{pdfcomment}{%
+            \string\pdfreply\space is only supported by pdfTeX!\MessageBreak%
+            Please use pdf(la)tex instead}%
+        \fi%
+      \fi%
+    \fi%
+  \fi%
+}%
+%
+\newcommand{\pdftooltip}[3][]%
+{%
+  \leavevmode%
+  % Copy all global options to local options
+  \pc@copy@gopt@lopt%
+  % Change local options if specified
+  \setkeys{pdftooltip}{#1}%
+  \ifmmode%
+    \setbox\pc@nullbox=\hbox{\pc@encode@PDF@math{#3}}%
+    \ifpc@lopt@disable%
+      #2%
+    \else%
+      \settowidth{\pc@box@width}{$\pc@lopt@mathstyle#2$}%
+      \settoheight{\pc@box@height}{$\pc@lopt@mathstyle#2$}%
+      \settodepth{\pc@box@depth}{$\pc@lopt@mathstyle#2$}%
+      \ifpdf%
+        \pdfannot width \the\pc@box@width height \the\pc@box@height depth \the\pc@box@depth%
+        {%
+          /Subtype /Widget\space%
+          \pc@annot@tooltip%
+        }%
+        #2%
+      \else%
+        \ifpc@gopt@dvipdfmx%
+          \special{pdf: ann width \the\pc@box@width\space height \the\pc@box@height\space depth \the\pc@box@depth%
+            <<%
+              /Subtype /Widget\space%
+              \pc@annot@tooltip%
+            >>%
+          }%
+          #2%
+        \else%
+          \pdfmark[\pc@lopt@mathstyle#2]%
+          {%
+            pdfmark=/ANN,%
+            Subtype=/Widget,%
+            Raw={\pc@annot@tooltip}%
+          }%
+        \fi%
+      \fi%
+    \fi%
+  \else%
+    \expandafter\pc@encode@PDF{#3}%
+    \ifpc@lopt@disable%
+      #2%
+    \else%
+      \hspace*{0pt}%
+      \settowidth{\pc@box@width}{#2}%
+      \settoheight{\pc@box@height}{#2}%
+      \settodepth{\pc@box@depth}{#2}%
+      \ifpdf%
+        \pdfannot width \the\pc@box@width height \the\pc@box@height depth \the\pc@box@depth%
+        {%
+          /Subtype /Widget\space%
+          \pc@annot@tooltip%
+        }%
+        #2%
+      \else%
+        \ifpc@gopt@dvipdfmx%
+          \special{pdf: ann width \the\pc@box@width\space height \the\pc@box@height\space depth \the\pc@box@depth%
+            <<%
+              /Subtype /Widget\space%
+              \pc@annot@tooltip%
+            >>%
+          }%
+          #2%
+        \else%
+          \pdfmark[#2]%
+          {%
+            pdfmark=/ANN,%
+            Subtype=/Widget,%
+            Raw={\pc@annot@tooltip}%
+          }%
+        \fi%
+      \fi%
+    \fi%
+  \fi%
+  \stepcounter{zref@unique}%
+  %only local!
+  \gdef\pc@lopt@mathstyle{}%
+}%
+%
+% reset global options
+\newcommand{\pdfcommentsetup}[2][]%
+{%
+  \setkeys{pdfcommentsetup}{#1}%
+  \ifpc@local%
+    \edef\pc@local@gd{\the\globaldefs}%
+    \globaldefs=-1%
+  \fi%
+  % Change global options if specified
+  \setkeys{pdfcomment.sty}{#2}%
+  \ifpc@local%
+    \globaldefs=\pc@local@gd%
+  \fi%
+  \global\pc@localfalse%
+}%
+%
+% define predefined set of options (Avatar)
+\newcommand{\defineavatar}[2]%
+{%
+  \expandafter\gdef\csname pc@avatar@#1\endcsname{#2}%
+}%
+%
+% define predefined set of options (Style)
+\newcommand{\definestyle}[2]%
+{%
+  \expandafter\gdef\csname pc@style@#1\endcsname{#2}%
+}%
+%
+\newcommand\l@lpcsec{\@dottedtocline{1}{0em}{0em}}%
+%
+% define predefined set of liststyles
+\newcommand{\defineliststyle}[2]%
+{%
+  \expandafter\gdef\csname pc@liststyle@#1\endcsname{#2}%
+}%
+%
+\newcommand{\setliststyle}[1]%
+{%
+  \gdef\pc@lopt@liststyle{#1}%
+  \edef\pc@edef@liststyle{pc@liststyle@#1}%
+  \@ifundefined{\pc@edef@liststyle}%
+  {%
+    \setliststyle{AuthorSubject}%
+    \PackageWarning{pdfcomment}{Unknown liststyle #1\MessageBreak%
+                                in command setliststyle\MessageBreak%
+                                Using liststyle AuthorSubject instead!}%
+  }%
+  {%
+    \expandafter\gdef\expandafter\pc@lpc@format{\expandafter\csname \pc@edef@liststyle\endcsname}%
+  }%
+}%
+%
+\defineliststyle{AuthorSubject}{\pc@lopt@author\ - \pc@lopt@subject}%
+\defineliststyle{AuthorSubjectDeadline}{\pc@lopt@author\ - \pc@lopt@subject\ (\pc@lopt@deadline)}%
+\defineliststyle{SubjectAuthorComment}{\pc@lopt@subject\ (\pc@lopt@author): \pc@lopt@comment}%
+\defineliststyle{SubjectAuthorCommentDeadline}{\pc@lopt@subject\ (\pc@lopt@author): \pc@lopt@comment\ (\pc@lopt@deadline)}%
+\defineliststyle{AuthorComment}{\pc@lopt@author: \pc@lopt@comment}%
+\defineliststyle{AuthorCommentDeadline}{\pc@lopt@author: \pc@lopt@comment\ (\pc@lopt@deadline)}%
+\defineliststyle{SubjectComment}{\pc@lopt@subject: \pc@lopt@comment}%
+\defineliststyle{SubjectCommentDeadline}{\pc@lopt@subject: \pc@lopt@comment\ (\pc@lopt@deadline)}%
+\defineliststyle{Comment}{\pc@lopt@comment}%
+\defineliststyle{CommentDeadline}{\pc@lopt@comment\ (\pc@lopt@deadline)}%
+%
+\newcommand{\listofpdfcomments}[1][]%
+{%
+  \setkeys{listofpdfcomments}{#1}%
+  \edef\pc@edef@liststyle{pc@liststyle@\pc@lopt@liststyle}%
+  \@ifundefined{\pc@edef@liststyle}%
+  {%
+    \PackageWarning{pdfcomment}{Unknown liststyle \pc@lopt@liststyle\MessageBreak%
+                                in command listofpdfcomments\MessageBreak%
+                                Using liststyle=AuthorSubject instead!}%
+    \setliststyle{AuthorSubject}%
+  }%
+  {%
+    \expandafter\gdef\expandafter\pc@lpc@format{\expandafter\csname \pc@edef@liststyle\endcsname}%
+  }%
+  \ifpc@gopt@final\else%
+    \setboolean{@restonecol}{false}%
+    \ifthenelse{\boolean{@twocolumn}}%
+      {\setboolean{@restonecol}{true}\onecolumn}%
+      {}%
+    \@ifundefined{chapter}%
+      {\section*{\lpcname\@mkboth{\lpcname}{\lpcname}}\addcontentsline{toc}{section}{\lpcname{}}}%
+      {\chapter*{\lpcname\@mkboth{\lpcname}{\lpcname}}\addcontentsline{toc}{chapter}{\lpcname{}}}%
+    {%
+      \setlength{\parindent}{0pt}%
+      \@starttoc{lpc}%
+    }%
+    \ifthenelse{\boolean{@restonecol}}%
+      {\twocolumn}%
+      {}%
+  \fi%
+}%
+%
+\zref@newlist{pdfcomment}%
+\zref@newprop{PCPDFOBJID}{\pc@collect@PDFOBJID}%
+\zref@addprop{pdfcomment}{PCPDFOBJID}%
+%
+\newcommand*{\pc@save@PDFOBJID}[1]%
+{%
+  \zref@labelbylist{#1}{pdfcomment}%
+}%
+\newcommand*{\pc@get@PDFOBJID}[1]%
+{%
+  \zref@extract{#1}{PCPDFOBJID}%
+}%
+%
+\newcommand{\pc@create@lpc}%
+{%
+  \phantomsection%
+  \addcontentsline{lpc}{lpcsec}{\protect\numberline{}\pc@lpc@format}%
+}%
+%
+\newcommand{\pc@copy@gopt@lopt}%
+{%
+  \gdef\pc@lopt@subject{\pc@gopt@subject}%
+  \gdef\pc@lopt@color{\pc@gopt@color}%
+  \gdef\pc@lopt@author{\pc@gopt@author}%
+  \gdef\pc@lopt@deadline{\pc@gopt@deadline}%
+  \gdef\pc@lopt@icon{\pc@gopt@icon}%
+  \gdef\pc@lopt@open{\pc@gopt@open}%
+  \gdef\pc@lopt@hspace{\pc@gopt@hspace}%
+  \gdef\pc@lopt@voffset{\pc@gopt@voffset}%
+  \gdef\pc@lopt@hoffset{\pc@gopt@hoffset}%
+  \gdef\pc@lopt@width{\pc@gopt@width}%
+  \gdef\pc@lopt@height{\pc@gopt@height}%
+  \gdef\pc@lopt@depth{\pc@gopt@depth}%
+  \gdef\pc@lopt@opacity{\pc@gopt@opacity}%
+  \gdef\pc@lopt@markup{\pc@gopt@markup}%
+  \gdef\pc@lopt@font{\pc@gopt@font}%
+  \gdef\pc@lopt@fontsize{\pc@gopt@fontsize}%
+  \gdef\pc@lopt@fontcolor{\pc@gopt@fontcolor}%
+  \gdef\pc@lopt@justification{\pc@gopt@justification}%
+  \gdef\pc@lopt@borderstyle{\pc@gopt@borderstyle}%
+  \gdef\pc@lopt@linewidth{\pc@gopt@linewidth}%
+  \gdef\pc@lopt@dashstyle{\pc@gopt@dashstyle}%
+  \gdef\pc@lopt@bse{\pc@gopt@bse}%
+  \gdef\pc@lopt@bsei{\pc@gopt@bsei}%
+  \gdef\pc@lopt@type{\pc@gopt@type}%
+  \gdef\pc@lopt@lineend{\pc@gopt@lineend}%
+  \gdef\pc@lopt@linebegin{\pc@gopt@linebegin}%
+  \gdef\pc@lopt@icolor{\pc@gopt@icolor}%
+  \gdef\pc@lopt@line{\pc@gopt@line}%
+  \gdef\pc@lopt@caption{\pc@gopt@caption}%
+  \gdef\pc@lopt@captionhoffset{\pc@gopt@captionhoffset}%
+  \gdef\pc@lopt@captionvoffset{\pc@gopt@captionvoffset}%
+  \gdef\pc@lopt@linesep{\pc@gopt@linesep}%
+  \gdef\pc@lopt@date{\pc@gopt@date}%
+  \gdef\pc@lopt@timezone{\pc@gopt@timezone}%
+  \gdef\pc@lopt@id{}%
+  \gdef\pc@collect@PDFOBJID{S}%
+  \global\pc@lopt@disablefalse%
+  \gdef\pc@lopt@printSOfinal{\pc@gopt@printSOfinal}%
+  \ifpc@gopt@disable%
+    \global\pc@lopt@disabletrue%
+  \else%
+    \global\pc@lopt@disablefalse%
+  \fi%
+}%
+%
+\newcommand{\pc@encode@PDF}[1]%
+{%
+  \gdef\pc@lopt@comment{#1}%
+  \ifthenelse{\equal{\pc@lopt@deadline}{}}%
+  {%
+    \gdef\pc@comment@deadline{\pc@lopt@comment}%
+    \pdfstringdef\pc@pdfenc@contents{\pc@comment@deadline}%
+  }%
+  {%
+    \gdef\pc@comment@deadline{\pc@lopt@comment\textCR(\pc@lopt@deadline)}%
+    \pdfstringdef\pc@pdfenc@contents{\pc@comment@deadline}%
+  }%
+  \pdfstringdef\pc@pdfenc@author{\pc@lopt@author}%
+  \pdfstringdef\pc@pdfenc@subject{\pc@lopt@subject}%
+  \HyColor@XZeroOneThreeFour{\pc@lopt@color}{\pc@hyenc@color}{pdfcomment}{color}%
+  \HyColor@XZeroOneThreeFour{\pc@lopt@fontcolor}{\pc@hyenc@fontcolor}{pdfcomment}{color}%
+  \HyColor@XZeroOneThreeFour{\pc@lopt@icolor}{\pc@hyenc@icolor}{pdfcomment}{color}%
+}%
+%
+\newcommand{\pc@encode@PDF@math}[1]%
+{%
+  \gdef\pc@lopt@comment{#1}%
+  \ifthenelse{\equal{\pc@lopt@deadline}{}}%
+  {%
+    \gdef\pc@comment@deadline{\pc@lopt@comment}%
+    \pdfstringdef\pc@pdfenc@contents{\pc@comment@deadline}%
+  }%
+  {%
+    \gdef\pc@comment@deadline{\pc@lopt@comment\textCR(\pc@lopt@deadline)}%
+    \pdfstringdef\pc@pdfenc@contents{\pc@comment@deadline}%
+  }%
+  \pdfstringdef\pc@pdfenc@author{\pc@lopt@author}%
+  \pdfstringdef\pc@pdfenc@subject{\pc@lopt@subject}%
+}%
+%
+\newcommand{\pc@annot@text}%
+{%
+  \pc@lopt@c\space%
+  \pc@lopt@cdate\space%
+  /CA \pc@lopt@opacity\space%
+  /T (\pc@pdfenc@author)\space%
+  /Subj (\pc@pdfenc@subject)\space%
+  /Name /\pc@lopt@icon\space%
+  /Contents (\pc@pdfenc@contents)\space%
+  /Open \pc@lopt@open\space%
+  /F 4\space%
+}%
+%
+\newcommand{\pc@annot@freetext}%
+{%
+  \pc@lopt@c\space%
+  \pc@lopt@cdate\space%
+  /DA (/\pc@lopt@font\space \pc@lopt@fontsize\space Tf\space \pc@hyenc@fontcolor\space rg)\space%
+  /CA \pc@lopt@opacity\space%
+  /T (\pc@pdfenc@author)\space%
+  /Subj (\pc@pdfenc@subject)\space%
+  /Contents (\pc@pdfenc@contents)\space%
+  /F 4\space%
+  /Q \pc@lopt@justification\space%
+  /BS\space%
+  <<\space%
+    /W \pc@lopt@linewidth\space%
+    /S /\pc@lopt@borderstyle\space%
+    /D [\pc@lopt@dashstyle]\space%
+  >>\space%
+  /BE\space%
+  <<\space%
+    /S /\pc@lopt@bse\space%
+    /I \pc@lopt@bsei\space%
+  >>\space%
+  \pc@lopt@type\space%
+  /CL [\pc@lopt@line]\space%
+  /LE \pc@lopt@lineend\space%
+}%
+%
+\newcommand{\pc@annot@square}%
+{%
+  \pc@lopt@c\space%
+  \pc@lopt@ic\space%
+  \pc@lopt@cdate\space%
+  /CA \pc@lopt@opacity\space%
+  /T (\pc@pdfenc@author)\space%
+  /Subj (\pc@pdfenc@subject)\space%
+  /Contents (\pc@pdfenc@contents)\space%
+  /F 4\space%
+  /BS\space%
+  <<\space%
+    /W \pc@lopt@linewidth\space%
+    /S /\pc@lopt@borderstyle\space%
+    /D [\pc@lopt@dashstyle]\space%
+  >>\space%
+  /BE\space%
+  <<\space%
+    /S /\pc@lopt@bse\space%
+    /I \pc@lopt@bsei\space%
+  >>\space%
+}%
+%
+\newcommand{\pc@annot@line}%
+{%
+  \pc@lopt@c\space%
+  \pc@lopt@ic\space%
+  \pc@lopt@cdate\space%
+  /CA \pc@lopt@opacity\space%
+  /T (\pc@pdfenc@author)\space%
+  /Subj (\pc@pdfenc@subject)\space%
+  /Contents (\pc@pdfenc@contents)\space%
+  \pc@lopt@l\space%
+  \pc@lopt@le\space%
+  \pc@lopt@cap\space%
+  \pc@lopt@cp\space%
+  \pc@lopt@co\space%
+  /F 4\space%
+  /BS\space%
+  <<\space%
+    /W \pc@lopt@linewidth\space%
+    /S /\pc@lopt@borderstyle\space%
+    /D [\pc@lopt@dashstyle]\space%
+  >>\space%
+  /BE\space%
+  <<\space%
+    /S /\pc@lopt@bse\space%
+    /I \pc@lopt@bsei\space%
+  >>\space%
+}%
+%
+\newcommand{\pc@annot@markup@pdf}%
+{%
+  \pdfannot width 0pt height 0pt depth 0pt%
+  {%
+    /Subtype /\pc@lopt@markup\space%
+    /C [\pc@hyenc@color]\space%
+    \pc@lopt@cdate\space%
+    /CA \pc@lopt@opacity\space%
+    /T (\pc@pdfenc@author)\space%
+    /Subj (\pc@pdfenc@subject)\space%
+    /Contents (\pc@pdfenc@contents)\space%
+    /Open \pc@lopt@open\space%
+    /QuadPoints [\pc@annot@quadpoints]\space%
+    /F 4\space%
+  }%
+}%
+%
+\newcommand{\pc@annot@markup@dvipdfmx}%
+{%
+  \special{pdf: ann width 0pt height 0pt depth 0pt%
+    <<\space%
+      /Subtype /\pc@lopt@markup\space%
+      /C [\pc@hyenc@color]\space%
+      \pc@lopt@cdate\space%
+      /CA \pc@lopt@opacity\space%
+      /T (\pc@pdfenc@author)\space%
+      /Subj (\pc@pdfenc@subject)\space%
+      /Contents (\pc@pdfenc@contents)\space%
+      /Open \pc@lopt@open\space%
+      /QuadPoints [\pc@annot@quadpoints]\space%
+      /F 4\space%
+    >>\space%
+  }%
+}%
+%
+\newcommand{\pc@annot@markup@dvips}%
+{%
+  \pdfmark[\rule{0pt}{0pt}]%
+  {%
+    pdfmark=/ANN,%
+    Subtype=/\pc@lopt@markup,%
+    Raw={%
+      /C [\pc@hyenc@color]\space%
+      \pc@lopt@cdate\space%
+      /CA \pc@lopt@opacity\space%
+      /T (\pc@pdfenc@author)\space%
+      /Subj (\pc@pdfenc@subject)\space%
+      /Contents (\pc@pdfenc@contents)\space%
+      /Open \pc@lopt@open\space%
+      /QuadPoints [\pc@annot@quadpoints]\space%
+      /F 4\space%
+    }%
+  }%
+}%
+%
+\newcommand{\pc@annot@tooltip}%
+{%
+  /TU (\pc@pdfenc@contents)\space%
+  /T (tooltip \thezref@unique)\space%
+  /C [ ]\space%
+  /FT/Btn\space%
+  /F 768\space%
+  /Ff 65536\space%
+  /H/N\space%
+  /BS << /W 0 >>\space%
+}%
+%
+\newcommand{\pc@create@pdfannotopt}%
+{%
+  \gdef\pc@pdfannotopt{}%
+  \ifx\pc@lopt@width\@empty%
+  \else%
+    \expandafter\gdef\expandafter\pc@pdfannotopt\expandafter{\pc@pdfannotopt width \pc@lopt@width\space}%
+  \fi%
+  \ifx\pc@lopt@height\@empty%
+  \else%
+    \expandafter\gdef\expandafter\pc@pdfannotopt\expandafter{\pc@pdfannotopt height \pc@lopt@height\space}%
+  \fi%
+  \ifx\pc@lopt@depth\@empty%
+  \else%
+    \expandafter\gdef\expandafter\pc@pdfannotopt\expandafter{\pc@pdfannotopt depth \pc@lopt@depth\space}%
+  \fi%
+}%
+%
+% thanks to Heiko Oberdiek Msg-Id: <go1hi9$g1s$1@news.belwue.de>
+\newcommand{\pc@pttobp}[1]%
+{%
+  \strip@pt\dimexpr .996264\dimexpr #1\relax\relax%
+}%
+%
+\newcommand*{\pc@pdfdate@auto}%
+{%
+  \ifpc@gopt@xelatex
+    D:\@dtm@currentyear%
+    \DTMtwodigits{\@dtm@currentmonth}%
+    \DTMtwodigits{\@dtm@currentday}%
+    \DTMtwodigits{\@dtm@currenthour}%
+    \DTMtwodigits{\@dtm@currentminute}%
+    \DTMtwodigits{\@dtm@currentsecond}%
+    \pc@lopt@timezone%
+  \else%
+    D:\@dtm@currentyear%
+    \DTMtwodigits{\@dtm@currentmonth}%
+    \DTMtwodigits{\@dtm@currentday}%
+    \DTMtwodigits{\@dtm@currenthour}%
+    \DTMtwodigits{\@dtm@currentminute}%
+    \DTMtwodigits{\@dtm@currentsecond}%
+    \ifnum\@dtm@currenttimezonehour<0\else+\fi\DTMtwodigits{\@dtm@currenttimezonehour}%
+    \DTMtwodigits{\@dtm@currenttimezoneminute}%
+  \fi%
+}%
+%
+\newcommand{\pc@annot@calc@pos}%
+{%
+  \renewcommand{\pc@x@one}{\pc@pttobp{\pc@Sposx}}%
+  \renewcommand{\pc@x@two}{\pc@pttobp{\pc@Eposx}}%
+  \renewcommand{\pc@x@three}{\pc@pttobp{\pc@Sposx}}%
+  \renewcommand{\pc@x@four}{\pc@pttobp{\pc@Eposx}}%
+  \renewcommand{\pc@y@one}{\pc@pttobp{\dimexpr \pc@Sposy + \pc@box@height + 1pt\relax}}%
+  \renewcommand{\pc@y@two}{\pc@pttobp{\dimexpr \pc@Eposy + \pc@box@height + 1pt\relax}}%
+  \renewcommand{\pc@y@three}{\pc@pttobp{\dimexpr \pc@Sposy - \pc@box@depth - 1pt\relax}}%
+  \renewcommand{\pc@y@four}{\pc@pttobp{\dimexpr \pc@Eposy - \pc@box@depth - 1pt\relax}}%
+  \setlength{\pc@dima}{\dimexpr \pc@Sposy - \pc@box@depth - 1pt\relax}%
+  \setlength{\pc@dimb}{\dimexpr \pc@Eposy - \pc@box@depth - 1pt\relax}%
+}%
+%
+\newcommand{\pc@annot@calc@pos@math}%
+{%
+  \renewcommand{\pc@x@one}{\pc@pttobp{\pc@Sposx}}%
+  \renewcommand{\pc@x@two}{\pc@pttobp{\dimexpr \pc@Sposx + \pc@box@width\relax}}%
+  \renewcommand{\pc@x@three}{\pc@pttobp{\pc@Sposx}}%
+  \renewcommand{\pc@x@four}{\pc@pttobp{\dimexpr \pc@Sposx + \pc@box@width\relax}}%
+  \renewcommand{\pc@y@one}{\pc@pttobp{\dimexpr \pc@Sposy + \pc@box@height + 1pt\relax}}%
+  \renewcommand{\pc@y@two}{\pc@pttobp{\dimexpr \pc@Sposy + \pc@box@height + 1pt\relax}}%
+  \renewcommand{\pc@y@three}{\pc@pttobp{\dimexpr \pc@Sposy - \pc@box@depth - 1pt\relax}}%
+  \renewcommand{\pc@y@four}{\pc@pttobp{\dimexpr \pc@Sposy - \pc@box@depth - 1pt\relax}}%
+  \setlength{\pc@dima}{\dimexpr \pc@Sposy - \pc@box@depth - 1pt\relax}%
+  \setlength{\pc@dimb}{\dimexpr \pc@Eposy - \pc@box@depth - 1pt\relax}%
+}%
+%
+\newcommand{\pc@create@annot@sideline}%
+{%
+%create options for \pdfannot
+  \pc@create@pdfannotopt%
+  \ifpc@gopt@final\else%
+    % typeset line annotation (see: PDF Reference)
+    \ifpdf%
+      \vbox to 0pt%
+      {%
+        \hsize=0pt%
+        \noindent%
+        \hbox to 0pt%
+        {%
+          \vsize=0pt%
+          \expandafter\pdfannot \pc@pdfannotopt%
+          {%
+          /Subtype /Line\space%
+          \pc@annot@line%
+          }%
+          \hss%
+        }%
+        \vss%
+      }%
+      \ifpc@annot@samepage%
+        \ifthenelse{\equal{\pc@lopt@id}{}}%
+        {}%
+        {\xdef\pc@collect@PDFOBJID{\pc@collect@PDFOBJID,\the\pdflastannot}}%
+      \else%
+        \ifpc@annot@secondpage%
+          \ifthenelse{\equal{\pc@lopt@id}{}}%
+          {}%
+          {\xdef\pc@collect@PDFOBJID{\pc@collect@PDFOBJID,\the\pdflastannot}}%
+        \else%
+        \fi%
+      \fi%
+    \else%
+      \ifpc@gopt@dvipdfmx%
+        \vbox to 0pt%
+        {%
+          \hsize=0pt%
+          \noindent%
+          \hbox to 0pt%
+          {%
+            \vsize=0pt%
+            \special{pdf: ann \pc@pdfannotopt%
+              <<%
+                /Subtype /Line\space%
+                \pc@annot@line%
+              >>%
+            }%
+            \hss%
+          }%
+          \vss%
+        }%
+      \else%
+        \vbox to 0pt%
+        {%
+          \hsize=0pt%
+          \noindent%
+          \hbox to 0pt%
+          {%
+            \vsize=0pt%
+            %create dimensions of annotation
+            \pdfmark[\rule{0pt}{\pc@lopt@height}\rule{\pc@lopt@width}{0pt}]%
+            {%
+              pdfmark=/ANN,%
+              Subtype=/Line,%
+              Raw={\pc@annot@line}%
+            }%
+            \hss%
+          }%
+          \vss%
+        }%
+      \fi%
+    \fi%
+  \fi%
+}%
+%
+\newcommand{\pc@annot@complete}%
+{%
+  \renewcommand{\pc@x@one}{\pc@pttobp{\pc@Sposx}}%
+  \renewcommand{\pc@x@two}{\pc@pttobp{\pc@Eposx}}%
+  \renewcommand{\pc@x@three}{\pc@pttobp{\pc@Sposx}}%
+  \renewcommand{\pc@x@four}{\pc@pttobp{\pc@Eposx}}%
+  \renewcommand{\pc@y@one}{\pc@pttobp{\dimexpr \pc@Sposy + \pc@box@height + 1pt\relax}}%
+  \renewcommand{\pc@y@two}{\pc@pttobp{\dimexpr \pc@Eposy + \pc@box@height + 1pt\relax}}%
+  \renewcommand{\pc@y@three}{\pc@pttobp{\dimexpr \pc@Sposy - \pc@box@depth - 1pt\relax}}%
+  \renewcommand{\pc@y@four}{\pc@pttobp{\dimexpr \pc@Eposy - \pc@box@depth - 1pt\relax}}%
+  \xdef\pc@annot@quadpoints{\pc@x@one\space\pc@y@one\space\pc@x@two\space\pc@y@two\space\pc@x@three\space\pc@y@three\space\pc@x@four\space\pc@y@four}%
+  \ifpdf%
+    \pc@annot@markup@pdf%
+    \ifthenelse{\equal{\pc@lopt@id}{}}%
+    {}%
+    {\xdef\pc@collect@PDFOBJID{\pc@collect@PDFOBJID,\the\pdflastannot}}%
+  \else%
+    \ifpc@gopt@dvipdfmx%
+      \pc@annot@markup@dvipdfmx%
+    \else%
+      \pc@annot@markup@dvips%
+    \fi%
+  \fi%
+}%
+%
+\newcommand*{\pc@soul@markup}%
+{%
+  \stepcounter{pc@count@iii}%
+  \zsavepos{pdfcomment_soul_markup:\thepc@count@iii}%
+  \zref@refused{pdfcomment_soul_markup:\thepc@count@iii}%
+  \setlength{\pc@Sposx}{\zposx{pdfcomment_soul_markup:\thepc@count@iii}sp}%
+  \setlength{\pc@Sposy}{\zposy{pdfcomment_soul_markup:\thepc@count@iii}sp}%
+  \ifthenelse{\equal{\pc@lopt@markup}{StrikeOut}}%
+  {%
+    \addtolength{\pc@Sposy}{1pt}%
+  }%
+  {}%
+  \setlength{\pc@Eposx}{\pc@Sposx}%
+  \addtolength{\pc@Eposx}{\ulwidth}%
+  \setlength{\pc@Eposy}{\pc@Sposy}%
+  \pc@annot@complete%
+}%
+%
+\newcommand{\pc@calc@textblockpos}%
+{%
+  \if@twoside%
+    \stepcounter{pc@count@ii}%
+    \label{pdfcomment:ts:page:\thepc@count@ii}%
+    \refused{pdfcomment:ts:page:\thepc@count@ii}%
+    \ifodd\getpagerefnumber{pdfcomment:ts:page:\thepc@count@ii}%
+      \if@twocolumn%
+        \ifpc@firstcolumn%
+          \renewcommand{\pc@x@left@text}{\pc@pttobp{\dimexpr \dimexpr 1in\relax + \hoffset + \oddsidemargin\relax}}%
+          \renewcommand{\pc@x@right@text}{\pc@pttobp{\dimexpr \dimexpr 1in\relax + \hoffset + \oddsidemargin + \columnwidth\relax}}%
+        \else%
+          \renewcommand{\pc@x@left@text}{\pc@pttobp{\dimexpr \dimexpr 1in\relax + \hoffset + \oddsidemargin + \textwidth - \columnwidth\relax}}%
+          \renewcommand{\pc@x@right@text}{\pc@pttobp{\dimexpr \dimexpr 1in\relax + \hoffset + \oddsidemargin + \textwidth\relax}}%
+        \fi%
+      \else%
+        \renewcommand{\pc@x@left@text}{\pc@pttobp{\dimexpr \dimexpr 1in\relax + \hoffset + \oddsidemargin\relax}}%
+        \renewcommand{\pc@x@right@text}{\pc@pttobp{\dimexpr \dimexpr 1in\relax + \hoffset + \oddsidemargin + \textwidth\relax}}%
+      \fi%
+    \else%
+      \if@twocolumn%
+        \ifpc@firstcolumn%
+          \renewcommand{\pc@x@left@text}{\pc@pttobp{\dimexpr \dimexpr 1in\relax + \hoffset + \evensidemargin \relax}}%
+          \renewcommand{\pc@x@right@text}{\pc@pttobp{\dimexpr \dimexpr 1in\relax + \hoffset + \evensidemargin + \columnwidth\relax}}%
+        \else%
+          \renewcommand{\pc@x@left@text}{\pc@pttobp{\dimexpr \dimexpr 1in\relax + \hoffset + \evensidemargin + \textwidth - \columnwidth \relax}}%
+          \renewcommand{\pc@x@right@text}{\pc@pttobp{\dimexpr \dimexpr 1in\relax + \hoffset + \evensidemargin + \textwidth\relax}}%
+        \fi%
+      \else%
+        \renewcommand{\pc@x@left@text}{\pc@pttobp{\dimexpr \dimexpr 1in\relax + \hoffset + \evensidemargin \relax}}%
+        \renewcommand{\pc@x@right@text}{\pc@pttobp{\dimexpr \dimexpr 1in\relax + \hoffset + \evensidemargin + \textwidth\relax}}%
+      \fi%
+    \fi%
+  \else%
+    \if@twocolumn%
+      \ifpc@firstcolumn%
+        \renewcommand{\pc@x@left@text}{\pc@pttobp{\dimexpr \dimexpr 1in\relax + \hoffset + \oddsidemargin \relax}}%
+        \renewcommand{\pc@x@right@text}{\pc@pttobp{\dimexpr \dimexpr 1in\relax + \hoffset + \oddsidemargin + \columnwidth\relax}}%
+      \else%
+        \renewcommand{\pc@x@left@text}{\pc@pttobp{\dimexpr \dimexpr 1in\relax + \hoffset + \oddsidemargin + \textwidth - \columnwidth\relax}}%
+        \renewcommand{\pc@x@right@text}{\pc@pttobp{\dimexpr \dimexpr 1in\relax + \hoffset + \oddsidemargin + \textwidth\relax}}%
+      \fi%
+    \else%
+      \renewcommand{\pc@x@left@text}{\pc@pttobp{\dimexpr \dimexpr 1in\relax + \hoffset + \oddsidemargin \relax}}%
+      \renewcommand{\pc@x@right@text}{\pc@pttobp{\dimexpr \dimexpr 1in\relax + \hoffset + \oddsidemargin + \textwidth\relax}}%
+    \fi%
+  \fi%
+  \renewcommand{\pc@y@top@text}{\pc@pttobp{\dimexpr \paperheight - \dimexpr 1in\relax - \voffset - \topmargin - \headheight - \headsep\relax}}%
+  \renewcommand{\pc@y@bottom@text}{\pc@pttobp{\dimexpr \paperheight - \dimexpr 1in\relax - \voffset - \topmargin - \headheight - \headsep - \textheight\relax}}%
+}%
+%
+\newcommand{\pc@calc@sidelinepos}%
+{%
+  \if@twoside%
+    \stepcounter{pc@count@ii}%
+    \label{pdfcomment:ts:page:\thepc@count@ii}%
+    \refused{pdfcomment:ts:page:\thepc@count@ii}%
+    \ifodd\getpagerefnumber{pdfcomment:ts:page:\thepc@count@ii}%
+      \renewcommand{\pc@x@one}{\pc@pttobp{\dimexpr \dimexpr 1in\relax + \hoffset + \oddsidemargin - \dimexpr \pc@lopt@linesep bp \relax\relax}}%
+      \renewcommand{\pc@x@two}{\pc@pttobp{\dimexpr \dimexpr 1in\relax + \hoffset + \oddsidemargin + \textwidth + \dimexpr \pc@lopt@linesep bp \relax\relax}}%
+    \else%
+      \renewcommand{\pc@x@one}{\pc@pttobp{\dimexpr \dimexpr 1in\relax + \hoffset + \evensidemargin - \dimexpr \pc@lopt@linesep bp \relax\relax}}%
+      \renewcommand{\pc@x@two}{\pc@pttobp{\dimexpr \dimexpr 1in\relax + \hoffset + \evensidemargin + \textwidth + \dimexpr \pc@lopt@linesep bp \relax\relax}}%
+    \fi%
+  \else%
+    \renewcommand{\pc@x@one}{\pc@pttobp{\dimexpr \dimexpr 1in\relax + \hoffset + \oddsidemargin - \dimexpr \pc@lopt@linesep bp \relax\relax}}%
+    \renewcommand{\pc@x@two}{\pc@pttobp{\dimexpr \dimexpr 1in\relax + \hoffset + \oddsidemargin + \textwidth + \dimexpr \pc@lopt@linesep bp \relax\relax}}%
+  \fi%
+  \renewcommand{\pc@y@one}{\pc@pttobp{\dimexpr \pc@Sposy + \pc@box@height + 1pt\relax}}%
+  \renewcommand{\pc@y@two}{\pc@pttobp{\dimexpr \pc@Eposy - \pc@box@depth - 1pt\relax}}%
+  \renewcommand{\pc@y@top@text}{\pc@pttobp{\dimexpr \paperheight - \dimexpr 1in\relax - \voffset - \topmargin - \headheight - \headsep\relax}}%
+  \renewcommand{\pc@y@bottom@text}{\pc@pttobp{\dimexpr \paperheight - \dimexpr 1in\relax - \voffset - \topmargin - \headheight - \headsep - \textheight\relax}}%
+}%
+%
+%
+\endinput%
