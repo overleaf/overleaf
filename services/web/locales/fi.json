@@ -226,7 +226,6 @@
   "project_last_published_at": "Projektisi julkaistiin viimeksi",
   "project_name": "Projektin nimi",
   "project_not_linked_to_github": "Tämä projekti ei ole linkitetty GitHub-repositoryyn. Voit luoda sille repositoryn GitHubissa:",
-  "project_synced_with_git_repo_at": "Tämä projekti synkronoitiin GitHub-repositoryyn kohteessa",
   "project_too_large": "Projekti liian suuri",
   "project_too_large_please_reduce": "Tässä projektissa on liikaa tekstiä, yritä ja vähennä sitä.",
   "projects": "Projektit",

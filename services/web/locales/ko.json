@@ -380,7 +380,6 @@
   "project_last_published_at": "프로젝트 마지막 게시일:",
   "project_name": "프로젝트 이름",
   "project_not_linked_to_github": "이 프로젝트는 GitHub 저장소에 연결되어있지 않습니다. GitHub에 프로젝트를위한 저장소를 만드실 수 있습니다:",
-  "project_synced_with_git_repo_at": "이 프로젝트는 다음 위치에 GitHub 저장소와 동기화 됩니다:",
   "project_too_large": "프로젝트가 너무 큽니다",
   "project_too_large_please_reduce": "이 프로젝트는 글자가 너무 많습니다. 글자수를 줄여주세요.",
   "project_url": "관련 프로젝트 URL",

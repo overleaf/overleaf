@@ -254,7 +254,6 @@
   "project_last_published_at": "Il tuo progetto è stato pubblicato l’ultima volta alle",
   "project_name": "Nome Progetto",
   "project_not_linked_to_github": "Questo progetto non è collegato ad un repository GitHub. Puoi creare un repository apposito in GitHub:",
-  "project_synced_with_git_repo_at": "Questo progetto è sincronizzato con il repository GitHub a",
   "project_too_large": "Progetto troppo grande",
   "project_too_large_please_reduce": "Questo progetto contiene troppo testo, per favore prova a ridurlo.",
   "projects": "Progetti",

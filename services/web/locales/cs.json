@@ -218,7 +218,6 @@
   "project_not_linked_to_github": "Tento projekt není spojen s GitHub repozitářem. Můžete pro něj GitHub repozitář vytvořit:",
   "project_ownership_transfer_confirmation_1": "Opravdu chcete změnit majitele projektu <1>__project__</1> na uživatele <0>__user__</0>?",
   "project_ownership_transfer_confirmation_2": "Tuto akci nebudete moci vrátit. Nový majitel bude o změně informován, a bude moci změnit přístupová práva, včetně možnosti zamezit Vám v přístupu.",
-  "project_synced_with_git_repo_at": "Tento projekt je synchronizován s GitHub repozitářem v",
   "projects": "Projekty",
   "pt": "Portugalština",
   "public": "Veřejné",

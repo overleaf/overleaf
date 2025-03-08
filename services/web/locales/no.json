@@ -261,7 +261,6 @@
   "project_last_published_at": "Ditt prosjekt ble sist publisert",
   "project_name": "Prosjektnavn",
   "project_not_linked_to_github": "Dette prosjektet er ikke koblet til et GitHub-repository. Du kan lage et repository for det i GitHub:",
-  "project_synced_with_git_repo_at": "Dette prosjektet er synkronisert med GitHub-repositoriet på",
   "project_too_large": "Prosjektet er for stort",
   "project_too_large_please_reduce": "Prosjektet har for mye tekst. Vennligst reduser størrelsen.",
   "project_url": "Prosjekt URL",

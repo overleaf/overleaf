@@ -319,7 +319,6 @@
   "project_last_published_at": "В последний раз проект был опубликован",
   "project_name": "Название проекта",
   "project_not_linked_to_github": "Этот проект не связан ни с одним проектом на GitHub. Вы можете создать для него проект на GitHub:",
-  "project_synced_with_git_repo_at": "Проект синхронизирован с GitHub в",
   "project_too_large": "Проект слишком большой",
   "project_too_large_please_reduce": "В этом проекте слишком много текста. Пожалуйста, попробуйте уменьшить количество.",
   "project_url": "URL проекта",
