@@ -121,6 +121,14 @@ export default function HotkeysModal({
               combination={`${ctrl} + I`}
               description={t('hotkey_italic_text')}
             />
+            {/**
+             * Inserted the command below for the color picker
+             * using hotkey_bold_text to see if it inserted bold
+             */}
+            <Hotkey
+              combination={`${ctrl} + j`}
+              description={t('hotkey_bold_text')}
+            />
           </OLCol>
         </OLRow>
 
@@ -209,6 +217,11 @@ HotkeysModal.propTypes = {
   trackChangesVisible: PropTypes.bool,
 }
 
+/**
+ * This is the component to generate a hotkey
+ * It passes in the command combination and the
+ * description of the command
+ */
 function Hotkey({ combination, description }) {
   return (
     <div className="hotkey" data-test-selector="hotkey">
