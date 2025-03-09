@@ -5,9 +5,13 @@ import {
   matchingAncestor,
 } from '@/features/source-editor/utils/tree-operations/ancestors'
 
+
+//Added formating command of slant text
 export type FormattingCommand = '\\textbf' | '\\textit' | '\\textsl'
 export type FormattingNodeType = string | number
 
+
+//paired command with name of command
 export const formattingCommandMap: Record<
   FormattingCommand,
   FormattingNodeType

@@ -15,6 +15,11 @@ import { bsVersion } from '@/features/utils/bootstrap-5'
 import { isSplitTestEnabled } from '@/utils/splitTestUtils'
 import { isMac } from '@/shared/utils/os'
 
+/**
+ * This component serves as the toolbar above the latex editor
+ * This component groups together various buttons with functionality
+ */
+
 export const ToolbarItems: FC<{
   state: EditorState
   overflowed?: Set<string>
@@ -93,6 +98,7 @@ export const ToolbarItems: FC<{
               {/**
                * Found location of where to insert an item into the toolbar
                * Need to change to be able to add a text color change
+               * Currentlty inserts the command to slant text
                */}
               <ToolbarButton
                 id="toolbar-format-italic"
