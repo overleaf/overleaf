@@ -97,8 +97,8 @@ export const ToolbarItems: FC<{
               <ToolbarButton
                 id="toolbar-format-italic"
                 label={t('toolbar_format_italic')}
-                command={commands.toggleItalic}
-                active={isActive('\\textit')}
+                command={commands.toggleSlant}
+                active={isActive('\\textsl')}
                 icon={bsVersion({ bs5: 'format_italic', bs3: 'italic' })}
                 shortcut={isMac ? '⌘I' : 'Ctrl+I'}
               />

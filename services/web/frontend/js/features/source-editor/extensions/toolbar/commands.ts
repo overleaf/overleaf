@@ -24,6 +24,7 @@ import { sendSearchEvent } from '@/features/event-tracking/search-events'
 
 export const toggleBold = toggleRanges('\\textbf')
 export const toggleItalic = toggleRanges('\\textit')
+export const toggleSlant = toggleRanges('\\textsl')
 
 // TODO: apply as a snippet?
 // TODO: read URL from clipboard?
