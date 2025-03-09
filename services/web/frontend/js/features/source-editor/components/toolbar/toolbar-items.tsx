@@ -90,6 +90,18 @@ export const ToolbarItems: FC<{
                 icon={bsVersion({ bs5: 'format_italic', bs3: 'italic' })}
                 shortcut={isMac ? '⌘I' : 'Ctrl+I'}
               />
+              {/**
+               * Found location of where to insert an item into the toolbar
+               * Need to change to be able to add a text color change
+               */}
+              <ToolbarButton
+                id="toolbar-format-italic"
+                label={t('toolbar_format_italic')}
+                command={commands.toggleItalic}
+                active={isActive('\\textit')}
+                icon={bsVersion({ bs5: 'format_italic', bs3: 'italic' })}
+                shortcut={isMac ? '⌘I' : 'Ctrl+I'}
+              />
             </div>
           )}
           {showGroup('group-math') && (
