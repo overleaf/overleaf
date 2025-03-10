@@ -95,9 +95,7 @@ async function expireDeletedUsersAfterDuration() {
     'deleterData.deletedAt': {
       $lt: new Date(moment().subtract(DURATION, 'days')),
     },
-    user: {
-      $ne: null,
-    },
+    user: { $type: 'object' },
   }).exec()
 
   if (deletedUsers.length === 0) {

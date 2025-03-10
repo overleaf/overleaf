@@ -553,7 +553,7 @@ describe('UserDeleter', function () {
             $lt: new Date(moment().subtract(90, 'days')),
           },
           user: {
-            $ne: null,
+            $type: 'object',
           },
         })
         .chain('exec')
