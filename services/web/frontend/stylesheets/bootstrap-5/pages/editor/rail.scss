@@ -133,3 +133,11 @@
   gap: var(--spacing-02);
   width: 40px;
 }
+
+.ide-rail-tab-dropdown {
+  border: 0;
+
+  &.dropdown-toggle::after {
+    display: none;
+  }
+}

@@ -1110,6 +1110,7 @@
   "keep_your_account_safe_add_another_email": "Keep your account safe and make sure you don’t lose access to it by adding another email address.",
   "keep_your_email_updated": "Keep your email updated so that you don’t lose access to your account and data.",
   "keybindings": "Keybindings",
+  "keyboard_shortcuts": "Keyboard shortcuts",
   "knowledge_base": "knowledge base",
   "ko": "Korean",
   "labels_help_you_to_easily_reference_your_figures": "Labels help you to easily reference your figures throughout your document. To reference a figure within the text, reference the label using the <0>\\ref{...}</0> command. This makes it easy to reference figures without needing to manually remember the figure numbering. <1>Learn more</1>",

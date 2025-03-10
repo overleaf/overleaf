@@ -19,6 +19,8 @@ export type RailTabKey =
   | 'chat'
   | 'errors'
 
+export type RailModalKey = 'keyboard-shortcuts' | 'contact-us'
+
 const RailContext = createContext<
   | {
       selectedTab: RailTabKey
@@ -31,6 +33,8 @@ const RailContext = createContext<
       handlePaneCollapse: () => void
       resizing: boolean
       setResizing: Dispatch<SetStateAction<boolean>>
+      activeModal: RailModalKey | null
+      setActiveModal: Dispatch<SetStateAction<RailModalKey | null>>
     }
   | undefined
 >(undefined)
@@ -38,6 +42,14 @@ const RailContext = createContext<
 export const RailProvider: FC = ({ children }) => {
   const [isOpen, setIsOpen] = useState(true)
   const [resizing, setResizing] = useState(false)
+  const [activeModal, setActiveModalInternal] = useState<RailModalKey | null>(
+    null
+  )
+  const setActiveModal: Dispatch<SetStateAction<RailModalKey | null>> =
+    useCallback(modalKey => {
+      setActiveModalInternal(modalKey)
+    }, [])
+
   const panelRef = useRef<ImperativePanelHandle>(null)
   useCollapsiblePanel(isOpen, panelRef)
 
@@ -69,6 +81,8 @@ export const RailProvider: FC = ({ children }) => {
       handlePaneCollapse,
       resizing,
       setResizing,
+      activeModal,
+      setActiveModal,
     }),
     [
       selectedTab,
@@ -81,6 +95,8 @@ export const RailProvider: FC = ({ children }) => {
       handlePaneCollapse,
       resizing,
       setResizing,
+      activeModal,
+      setActiveModal,
     ]
   )
 

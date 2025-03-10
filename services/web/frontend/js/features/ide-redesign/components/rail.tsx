@@ -6,7 +6,11 @@ import MaterialIcon, {
 import { Panel } from 'react-resizable-panels'
 import { useLayoutContext } from '@/shared/context/layout-context'
 import { ErrorIndicator, ErrorPane } from './errors'
-import { RailTabKey, useRailContext } from '../contexts/rail-context'
+import {
+  RailModalKey,
+  RailTabKey,
+  useRailContext,
+} from '../contexts/rail-context'
 import FileTreeOutlinePanel from './file-tree-outline-panel'
 import { ChatIndicator, ChatPane } from './chat/chat'
 import getMeta from '@/utils/meta'
@@ -16,6 +20,15 @@ import { useTranslation } from 'react-i18next'
 import classNames from 'classnames'
 import IntegrationsPanel from './integrations-panel/integrations-panel'
 import OLButton from '@/features/ui/components/ol/ol-button'
+import {
+  Dropdown,
+  DropdownDivider,
+  DropdownItem,
+  DropdownMenu,
+  DropdownToggle,
+} from '@/features/ui/components/bootstrap-5/dropdown-menu'
+import { RailHelpShowHotkeysModal } from './help/keyboard-shortcuts'
+import { RailHelpContactUsModal } from './help/contact-us'
 
 type RailElement = {
   icon: AvailableUnfilledIcon
@@ -25,13 +38,17 @@ type RailElement = {
   hide?: boolean
 }
 
-type RailActionLink = { key: string; icon: AvailableUnfilledIcon; href: string }
 type RailActionButton = {
   key: string
   icon: AvailableUnfilledIcon
   action: () => void
 }
-type RailAction = RailActionLink | RailActionButton
+type RailDropdown = {
+  key: string
+  icon: AvailableUnfilledIcon
+  dropdown: ReactElement
+}
+type RailAction = RailDropdown | RailActionButton
 
 const RAIL_TABS: RailElement[] = [
   {
@@ -64,9 +81,24 @@ const RAIL_TABS: RailElement[] = [
   },
 ]
 
+const RAIL_MODALS: {
+  key: RailModalKey
+  modalComponentFunction: FC<{ show: boolean }>
+}[] = [
+  {
+    key: 'keyboard-shortcuts',
+    modalComponentFunction: RailHelpShowHotkeysModal,
+  },
+  {
+    key: 'contact-us',
+    modalComponentFunction: RailHelpContactUsModal,
+  },
+]
+
 export const RailLayout = () => {
   const { t } = useTranslation()
   const {
+    activeModal,
     selectedTab,
     setSelectedTab,
     isOpen,
@@ -77,11 +109,14 @@ export const RailLayout = () => {
     togglePane,
     setResizing,
   } = useRailContext()
-
   const { setLeftMenuShown } = useLayoutContext()
   const railActions: RailAction[] = useMemo(
     () => [
-      { key: 'support', icon: 'help', href: '/learn' },
+      {
+        key: 'support',
+        icon: 'help',
+        dropdown: <RailHelpDropdown />,
+      },
       {
         key: 'settings',
         icon: 'settings',
@@ -96,6 +131,12 @@ export const RailLayout = () => {
       if (key === selectedTab) {
         togglePane()
       } else {
+        // HACK: Apparently the onSelect event is triggered with href attributes
+        // from DropdownItems
+        if (!RAIL_TABS.some(tab => !tab.hide && tab.key === key)) {
+          // Attempting to open a non-existent tab
+          return
+        }
         // Change the selected tab and make sure it's open
         setSelectedTab((key ?? 'file-tree') as RailTabKey)
         setIsOpen(true)
@@ -168,6 +209,9 @@ export const RailLayout = () => {
           tooltipWhenClosed={t('tooltip_show_panel')}
         />
       </HorizontalResizeHandle>
+      {RAIL_MODALS.map(({ key, modalComponentFunction: Component }) => (
+        <Component key={key} show={activeModal === key} />
+      ))}
     </TabContainer>
   )
 }
@@ -214,16 +258,18 @@ const RailActionElement = ({ action }: { action: RailAction }) => {
     }
   }, [action])
 
-  if ('href' in action) {
+  if ('dropdown' in action) {
     return (
-      <a
-        href={action.href}
-        target="_blank"
-        rel="noopener"
-        className="ide-rail-tab-link"
-      >
-        {icon}
-      </a>
+      <Dropdown align="end" drop="end">
+        <DropdownToggle
+          id="rail-help-dropdown-btn"
+          className="ide-rail-tab-link ide-rail-tab-button ide-rail-tab-dropdown"
+          as="button"
+        >
+          {icon}
+        </DropdownToggle>
+        {action.dropdown}
+      </Dropdown>
     )
   } else {
     return (
@@ -251,5 +297,46 @@ export const RailPanelHeader: FC<{ title: string }> = ({ title }) => {
         <MaterialIcon type="close" />
       </OLButton>
     </header>
+  )
+}
+
+const RailHelpDropdown = () => {
+  const showSupport = getMeta('ol-showSupport')
+  const { t } = useTranslation()
+  const { setActiveModal } = useRailContext()
+  const openKeyboardShortcutsModal = useCallback(() => {
+    setActiveModal('keyboard-shortcuts')
+  }, [setActiveModal])
+  const openContactUsModal = useCallback(() => {
+    setActiveModal('contact-us')
+  }, [setActiveModal])
+  return (
+    <DropdownMenu>
+      <DropdownItem onClick={openKeyboardShortcutsModal}>
+        {t('keyboard_shortcuts')}
+      </DropdownItem>
+      <DropdownItem
+        href="/learn"
+        role="menuitem"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        {t('documentation')}
+      </DropdownItem>
+      <DropdownDivider />
+      {showSupport && (
+        <DropdownItem onClick={openContactUsModal}>
+          {t('contact_us')}
+        </DropdownItem>
+      )}
+      <DropdownItem
+        href="https://forms.gle/soyVStc5qDx9na1Z6"
+        role="menuitem"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        {t('give_feedback')}
+      </DropdownItem>
+    </DropdownMenu>
   )
 }
