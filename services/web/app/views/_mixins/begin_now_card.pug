@@ -13,7 +13,7 @@ mixin begin_now_card()
 						span.text-green-bright {
 						span now
 						span.text-green-bright }
-				p #{translate("discover_why_people_worldwide_trust_overleaf", {count: 18})}
+				p #{translate("discover_why_over_people_worldwide_trust_overleaf", {count: settings.userCountInMillions})}
 				p.card-links
 					if !isUserLoggedIn
 						a.btn.btn-primary.card-link(
