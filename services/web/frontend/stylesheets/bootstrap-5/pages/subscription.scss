@@ -499,3 +499,15 @@
     }
   }
 }
+
+.payment-summary-card {
+  @extend .card-gray;
+
+  border-radius: var(--border-radius-large);
+
+  h3 {
+    margin-top: 0;
+    margin-bottom: var(--spacing-08);
+    font-weight: 600;
+  }
+}
