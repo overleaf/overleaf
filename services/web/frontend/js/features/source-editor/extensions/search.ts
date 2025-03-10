@@ -303,7 +303,7 @@ const searchFormTheme = EditorView.theme({
       padding: 'var(--spacing-03) var(--spacing-05)',
     },
   },
-  '&.bootstrap-5 .ol-cm-search-form': {
+  '&.ol-cm-search-form': {
     '--ol-cm-search-form-gap': 'var(--spacing-05)',
     '--ol-cm-search-form-button-margin': 'var(--spacing-02)',
     '--input-border': 'var(--border-primary)',

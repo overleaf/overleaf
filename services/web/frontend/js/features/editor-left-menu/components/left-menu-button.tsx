@@ -3,10 +3,7 @@ import MaterialIcon from '@/shared/components/material-icon'
 
 type Props = {
   onClick?: () => void
-  icon?: {
-    type: string
-    fw?: boolean
-  }
+  icon?: string
   svgIcon?: React.ReactElement | null
   disabled?: boolean
   disabledAccesibilityText?: string
@@ -19,12 +16,12 @@ function LeftMenuButtonIcon({
   icon,
 }: {
   svgIcon?: React.ReactElement | null
-  icon?: { type: string; fw?: boolean }
+  icon?: string
 }) {
   if (svgIcon) {
     return <div className="material-symbols">{svgIcon}</div>
   } else if (icon) {
-    return <MaterialIcon type={icon.type} />
+    return <MaterialIcon type={icon} />
   } else return null
 }
 

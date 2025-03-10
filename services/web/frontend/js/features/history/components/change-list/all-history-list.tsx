@@ -181,7 +181,6 @@ function AllHistoryList() {
         onHide={hidePopover}
         // using scrollerRef to position the popover in the middle of the viewport
         target={scrollerRef.current}
-        // Only used in Bootstrap 5. In Bootstrap 3 this is done with CSS.
         popperConfig={{
           modifiers: [
             {

@@ -12,16 +12,6 @@ export function bsVersion({ bs5, bs3 }: { bs5?: unknown; bs3?: unknown }) {
   return isBootstrap5() ? bs5 : bs3
 }
 
-export const bsVersionIcon = ({
-  bs5,
-  bs3,
-}: {
-  bs5?: { type: string }
-  bs3?: { type: string; fw?: boolean }
-}) => {
-  return isBootstrap5() ? bs5 : bs3
-}
-
 // get all `aria-*` and `data-*` attributes
 export const getAriaAndDataProps = (obj: Record<string, unknown>) => {
   return Object.entries(obj).reduce(

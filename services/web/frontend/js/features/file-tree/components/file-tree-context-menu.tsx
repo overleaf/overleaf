@@ -1,6 +1,5 @@
 import React, { useEffect, useRef } from 'react'
 import ReactDOM from 'react-dom'
-import { Dropdown as BS3Dropdown } from 'react-bootstrap'
 import {
   Dropdown,
   DropdownMenu,
@@ -48,7 +47,7 @@ function FileTreeContextMenu() {
 
   // A11y - Close the context menu when the user presses the Tab key
   // Focus should move to the next element in the filetree
-  function handleKeyDown(event: React.KeyboardEvent<BS3Dropdown | Element>) {
+  function handleKeyDown(event: React.KeyboardEvent<Element>) {
     if (event.key === 'Tab') {
       close()
     }

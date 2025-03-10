@@ -19,7 +19,6 @@ type Options = {
   fontFamily: FontFamily
   lineHeight: LineHeight
   overallTheme: OverallTheme
-  bootstrapVersion: 3 | 5
 }
 
 export const theme = (options: Options) => [
@@ -60,7 +59,6 @@ const createThemeFromOptions = ({
   fontFamily = 'monaco',
   lineHeight = 'normal',
   overallTheme = '',
-  bootstrapVersion = 3,
 }: Options) => {
   // Theme styles that depend on settings.
   const styles = userStyles({ fontSize, fontFamily, lineHeight })
@@ -68,8 +66,7 @@ const createThemeFromOptions = ({
   return [
     EditorView.editorAttributes.of({
       class: classNames(
-        overallTheme === '' ? 'overall-theme-dark' : 'overall-theme-light',
-        'bootstrap-' + bootstrapVersion
+        overallTheme === '' ? 'overall-theme-dark' : 'overall-theme-light'
       ),
       style: Object.entries({
         '--font-size': styles.fontSize,

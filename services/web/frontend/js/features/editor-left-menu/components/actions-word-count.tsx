@@ -4,7 +4,6 @@ import { useDetachCompileContext as useCompileContext } from '../../../shared/co
 import WordCountModal from '../../word-count-modal/components/word-count-modal'
 import LeftMenuButton from './left-menu-button'
 import * as eventTracking from '../../../infrastructure/event-tracking'
-import { bsVersionIcon } from '@/features/utils/bootstrap-5'
 import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
 
 export default function ActionsWordCount() {
@@ -20,13 +19,7 @@ export default function ActionsWordCount() {
   return (
     <>
       {pdfUrl ? (
-        <LeftMenuButton
-          onClick={handleShowModal}
-          icon={bsVersionIcon({
-            bs5: { type: 'match_case' },
-            bs3: { type: 'eye', fw: true },
-          })}
-        >
+        <LeftMenuButton onClick={handleShowModal} icon="match_case">
           {t('word_count')}
         </LeftMenuButton>
       ) : (
@@ -40,10 +33,7 @@ export default function ActionsWordCount() {
           {/* OverlayTrigger won't fire unless the child is a non-react html element (e.g div, span) */}
           <div>
             <LeftMenuButton
-              icon={bsVersionIcon({
-                bs5: { type: 'match_case' },
-                bs3: { type: 'eye', fw: true },
-              })}
+              icon="match_case"
               disabled
               disabledAccesibilityText={t(
                 'please_compile_pdf_before_word_count'

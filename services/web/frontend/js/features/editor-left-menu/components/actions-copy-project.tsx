@@ -4,7 +4,6 @@ import EditorCloneProjectModalWrapper from '../../clone-project-modal/components
 import LeftMenuButton from './left-menu-button'
 import { useLocation } from '../../../shared/hooks/use-location'
 import * as eventTracking from '../../../infrastructure/event-tracking'
-import { bsVersionIcon } from '@/features/utils/bootstrap-5'
 
 type ProjectCopyResponse = {
   project_id: string
@@ -29,13 +28,7 @@ export default function ActionsCopyProject() {
 
   return (
     <>
-      <LeftMenuButton
-        onClick={handleShowModal}
-        icon={bsVersionIcon({
-          bs5: { type: 'file_copy' },
-          bs3: { type: 'copy', fw: true },
-        })}
-      >
+      <LeftMenuButton onClick={handleShowModal} icon="file_copy">
         {t('copy_project')}
       </LeftMenuButton>
       <EditorCloneProjectModalWrapper

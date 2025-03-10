@@ -3,7 +3,6 @@ import { useCallback } from 'react'
 import * as eventTracking from '../../../infrastructure/event-tracking'
 import { useContactUsModal } from '../../../shared/hooks/use-contact-us-modal'
 import LeftMenuButton from './left-menu-button'
-import { bsVersionIcon } from '@/features/utils/bootstrap-5'
 
 export default function HelpContactUs() {
   const { modal, showModal } = useContactUsModal()
@@ -16,13 +15,7 @@ export default function HelpContactUs() {
 
   return (
     <>
-      <LeftMenuButton
-        onClick={showModalWithAnalytics}
-        icon={bsVersionIcon({
-          bs5: { type: 'contact_support' },
-          bs3: { type: 'question', fw: true },
-        })}
-      >
+      <LeftMenuButton onClick={showModalWithAnalytics} icon="contact_support">
         {t('contact_us')}
       </LeftMenuButton>
       {modal}

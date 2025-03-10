@@ -1,5 +1,4 @@
 import { useTranslation } from 'react-i18next'
-import { FormControl } from 'react-bootstrap'
 import * as eventTracking from '../../../infrastructure/event-tracking'
 import classnames from 'classnames'
 import { Tag } from '../../../../../app/src/Features/Tags/types'
@@ -59,7 +58,7 @@ function SearchForm({
 
   const handleChange = (
     e: React.ChangeEvent<
-      HTMLInputElement & Omit<FormControl, keyof HTMLInputElement>
+      HTMLInputElement & Omit<typeof OLFormControl, keyof HTMLInputElement>
     >
   ) => {
     eventTracking.sendMB('project-list-page-interaction', {
