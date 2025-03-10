@@ -23,6 +23,7 @@
       }
     }
   },
+  "backupRPOInMS": "360000",
   "chunkStore": {
     "historyStoreConcurrency": "4"
   },

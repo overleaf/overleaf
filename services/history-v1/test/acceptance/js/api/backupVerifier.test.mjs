@@ -6,22 +6,62 @@ import { expect } from 'chai'
 import testProjects from './support/test_projects.js'
 import {
   backupPersistor,
+  chunksBucket,
   projectBlobsBucket,
 } from '../../../../storage/lib/backupPersistor.mjs'
 import {
   BlobStore,
   makeProjectKey,
 } from '../../../../storage/lib/blob_store/index.js'
-import Stream from 'stream'
+import Stream from 'node:stream'
 import * as zlib from 'node:zlib'
 import { promisify } from 'node:util'
 import { execFile } from 'node:child_process'
 import { NotFoundError } from '@overleaf/object-persistor/src/Errors.js'
+import { chunkStore } from '../../../../storage/index.js'
+import { Change, File, Operation } from 'overleaf-editor-core'
+import Crypto from 'node:crypto'
+import path from 'node:path'
+import projectKey from '../../../../storage/lib/project_key.js'
+import { historyStore } from '../../../../storage/lib/history_store.js'
 
 /**
  * @typedef {import("node-fetch").Response} Response
  * @typedef {import("overleaf-editor-core").Blob} Blob
  */
+
+async function verifyProjectScript(historyId) {
+  try {
+    const result = await promisify(execFile)(
+      process.argv0,
+      ['storage/scripts/verify_project.mjs', `--historyId=${historyId}`],
+      {
+        encoding: 'utf-8',
+        timeout: 5_000,
+        env: {
+          ...process.env,
+          LOG_LEVEL: 'warn',
+        },
+      }
+    )
+    return { status: 0, stdout: result.stdout, stderr: result.stderr }
+  } catch (err) {
+    if (
+      err &&
+      typeof err === 'object' &&
+      'stdout' in err &&
+      'code' in err &&
+      'stderr' in err
+    ) {
+      return {
+        stdout: typeof err.stdout === 'string' ? err.stdout : '',
+        status: typeof err.code === 'number' ? err.code : -1,
+        stderr: typeof err.stdout === 'string' ? err.stderr : '',
+      }
+    }
+    throw err
+  }
+}
 
 /**
  * @param {string} historyId
@@ -69,22 +109,84 @@ async function verifyBlobHTTP(historyId, hash) {
   )
 }
 
+async function backupChunk(historyId) {
+  const newChunk = await chunkStore.loadLatestRaw(historyId)
+  const { buffer: chunkBuffer } = await historyStore.loadRawWithBuffer(
+    historyId,
+    newChunk.id
+  )
+  const md5 = Crypto.createHash('md5').update(chunkBuffer)
+  await backupPersistor.sendStream(
+    chunksBucket,
+    path.join(
+      projectKey.format(historyId),
+      projectKey.pad(newChunk.startVersion)
+    ),
+    Stream.Readable.from([chunkBuffer]),
+    {
+      contentType: 'application/json',
+      contentEncoding: 'gzip',
+      contentLength: chunkBuffer.byteLength,
+      sourceMd5: md5.digest('hex'),
+    }
+  )
+}
+
+const FIFTEEN_MINUTES_IN_MS = 900_000
+
+async function addFileInNewChunk(
+  fileContents,
+  filePath,
+  historyId,
+  { creationDate = new Date() }
+) {
+  const chunk = await chunkStore.loadLatest(historyId)
+  const operation = Operation.addFile(
+    `${historyId}.txt`,
+    File.fromString(fileContents)
+  )
+  const changes = [new Change([operation], creationDate, [])]
+  chunk.pushChanges(changes)
+  await chunkStore.update(historyId, 0, chunk)
+}
+
 /**
  * @param {string} historyId
+ * @param {Object} [backup]
  * @return {Promise<string>}
  */
-async function prepareProjectAndBlob(historyId) {
+async function prepareProjectAndBlob(
+  historyId,
+  { shouldBackupBlob, shouldBackupChunk, shouldCreateChunk } = {
+    shouldBackupBlob: true,
+    shouldBackupChunk: true,
+    shouldCreateChunk: true,
+  }
+) {
   await testProjects.createEmptyProject(historyId)
   const blobStore = new BlobStore(historyId)
-  const blob = await blobStore.putString(historyId)
-  const gzipped = zlib.gzipSync(Buffer.from(historyId))
-  await backupPersistor.sendStream(
-    projectBlobsBucket,
-    makeProjectKey(historyId, blob.getHash()),
-    Stream.Readable.from([gzipped]),
-    { contentLength: gzipped.byteLength, contentEncoding: 'gzip' }
-  )
-  await checkDEKExists(historyId)
+  const fileContents = historyId
+  const blob = await blobStore.putString(fileContents)
+  if (shouldCreateChunk) {
+    await addFileInNewChunk(fileContents, `${historyId}.txt`, historyId, {
+      creationDate: new Date(new Date().getTime() - FIFTEEN_MINUTES_IN_MS),
+    })
+  }
+
+  if (shouldBackupBlob) {
+    const gzipped = zlib.gzipSync(Buffer.from(historyId))
+    await backupPersistor.sendStream(
+      projectBlobsBucket,
+      makeProjectKey(historyId, blob.getHash()),
+      Stream.Readable.from([gzipped]),
+      { contentLength: gzipped.byteLength, contentEncoding: 'gzip' }
+    )
+    await checkDEKExists(historyId)
+  }
+  if (shouldCreateChunk && shouldBackupChunk) {
+    await backupChunk(historyId)
+  }
+
   return blob.getHash()
 }
 
@@ -122,6 +224,53 @@ describe('backupVerifier', function () {
   it('renders 200 on /health_check', async function () {
     const response = await fetch(testServer.testUrl('/health_check'))
     expect(response.status).to.equal(200)
+  })
+  describe('storage/scripts/verify_project.mjs', function () {
+    describe('when the project is appropriately backed up', function () {
+      it('should return 0', async function () {
+        const response = await verifyProjectScript(historyIdPostgres)
+        expect(response.status).to.equal(0)
+      })
+    })
+    describe('when the project chunk is not backed up', function () {
+      let response
+      beforeEach(async function () {
+        await prepareProjectAndBlob('000000000000000000000043', {
+          shouldBackupChunk: false,
+          shouldBackupBlob: true,
+          shouldCreateChunk: true,
+        })
+        response = await verifyProjectScript('000000000000000000000043')
+      })
+      it('should return 1', async function () {
+        expect(response.status).to.equal(1)
+      })
+      it('should emit an error message referring to a missing chunk', async function () {
+        const stderr = response.stderr
+        expect(stderr).to.include('NotFoundError: no such file')
+        expect(stderr).to.include("bucketName: 'overleaf-test-history-chunks'")
+        expect(stderr).to.include("key: '340/000/000000000000000000/000000000'")
+      })
+    })
+    describe('when a project blob is not backed up', function () {
+      let response
+      beforeEach(async function () {
+        await prepareProjectAndBlob('43', {
+          shouldBackupChunk: true,
+          shouldBackupBlob: false,
+          shouldCreateChunk: true,
+        })
+        response = await verifyProjectScript('43')
+      })
+
+      it('should return 1', function () {
+        expect(response.status).to.equal(1)
+      })
+
+      it('includes a BackupCorruptedError in stderr', function () {
+        expect(response.stderr).to.include('BackupCorruptedError: missing blob')
+      })
+    })
   })
   describe('storage/scripts/verify_backup_blob.mjs', function () {
     it('throws and does not create DEK if missing', async function () {

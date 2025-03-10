@@ -47,6 +47,59 @@ async function getChunkForVersion(projectId, version) {
 }
 
 /**
+ * Get the metadata for the chunk that contains the given version.
+ */
+async function getFirstChunkBeforeTimestamp(projectId, timestamp) {
+  assert.date(timestamp, 'bad timestamp')
+
+  const recordActive = await getChunkForVersion(projectId, 0)
+  // projectId must be valid if getChunkForVersion did not throw
+  projectId = parseInt(projectId, 10)
+  if (recordActive && recordActive.endTimestamp <= timestamp) {
+    return recordActive
+  }
+
+  // fallback to deleted chunk
+  const recordDeleted = await knex('old_chunks')
+    .where('doc_id', projectId)
+    .where('start_version', '=', 0)
+    .where('end_timestamp', '<=', timestamp)
+    .orderBy('end_version', 'desc')
+    .first()
+  if (recordDeleted) {
+    return chunkFromRecord(recordDeleted)
+  }
+  throw new Chunk.BeforeTimestampNotFoundError(projectId, timestamp)
+}
+
+/**
+ * Get the metadata for the chunk that contains the version that was current at
+ * the given timestamp.
+ */
+async function getLastActiveChunkBeforeTimestamp(projectId, timestamp) {
+  assert.date(timestamp, 'bad timestamp')
+  assert.postgresId(projectId, 'bad projectId')
+  projectId = parseInt(projectId, 10)
+
+  const query = knex('chunks')
+    .where('doc_id', projectId)
+    .where(function () {
+      this.where('end_timestamp', '<=', timestamp).orWhere(
+        'end_timestamp',
+        null
+      )
+    })
+    .orderBy('end_version', 'desc', 'last')
+
+  const record = await query.first()
+
+  if (!record) {
+    throw new Chunk.BeforeTimestampNotFoundError(projectId, timestamp)
+  }
+  return chunkFromRecord(record)
+}
+
+/**
  * Get the metadata for the chunk that contains the version that was current at
  * the given timestamp.
  */
@@ -280,6 +333,8 @@ async function generateProjectId() {
 
 module.exports = {
   getLatestChunk,
+  getFirstChunkBeforeTimestamp,
+  getLastActiveChunkBeforeTimestamp,
   getChunkForVersion,
   getChunkForTimestamp,
   getProjectChunkIds,
