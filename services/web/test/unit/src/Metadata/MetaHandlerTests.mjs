@@ -19,6 +19,8 @@ describe('MetaHandler', function () {
       '\\label{ccc}%bar', // ccc should be in the returned labels
       '\\label{ddd} % bar', // ddd should be in the returned labels
       '\\label{ e,f,g }', // e,f,g should be in the returned labels
+      '\\begin{lstlisting}[label=foo, caption={Test}]', // foo should be in the returned labels
+      '\\begin{lstlisting}[label={lst:foo},caption={Test}]', // lst:foo should be in the returned labels
     ]
 
     this.docs = {
@@ -85,7 +87,7 @@ describe('MetaHandler', function () {
       )
 
       expect(result).to.deep.equal({
-        labels: ['aaa', 'ccc', 'ddd', 'e,f,g'],
+        labels: ['aaa', 'ccc', 'ddd', 'e,f,g', 'foo', 'lst:foo'],
         packages: {
           foo: this.packageMapping.foo,
           baz: this.packageMapping.baz,

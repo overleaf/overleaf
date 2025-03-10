@@ -2,6 +2,7 @@ import { EditorView } from '@codemirror/view'
 import { Transaction, Text } from '@codemirror/state'
 
 const metadataChangeRe = /\\(documentclass|usepackage|RequirePackage|label)\b/
+const optionChangeRe = /\b(label)=/
 
 export const metadata = () => [
   // trigger metadata reload if edited line contains metadata-related commands
@@ -26,7 +27,7 @@ export const metadata = () => [
             const toLine = doc.lineAt(to).number
 
             for (const line of doc.iterLines(fromLine, toLine + 1)) {
-              if (metadataChangeRe.test(line)) {
+              if (metadataChangeRe.test(line) || optionChangeRe.test(line)) {
                 needsMetadataUpdate = true
                 return
               }
