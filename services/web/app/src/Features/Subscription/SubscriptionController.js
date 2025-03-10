@@ -48,6 +48,14 @@ async function userSubscriptionPage(req, res) {
 
   await SplitTestHandler.promises.getAssignment(req, res, 'pause-subscription')
 
+  const groupPricingDiscount = await SplitTestHandler.promises.getAssignment(
+    req,
+    res,
+    'group-discount-10'
+  )
+
+  const showGroupDiscount = groupPricingDiscount.variant === 'enabled'
+
   const { variant: flexibleLicensingVariant } =
     await SplitTestHandler.promises.getAssignment(
       req,
@@ -167,6 +175,7 @@ async function userSubscriptionPage(req, res) {
     managedGroupSubscriptions,
     managedInstitutions,
     managedPublishers,
+    showGroupDiscount,
     currentInstitutionsWithLicence,
     canUseFlexibleLicensing:
       personalSubscription?.plan?.canUseFlexibleLicensing,

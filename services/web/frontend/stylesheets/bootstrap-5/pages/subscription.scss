@@ -37,6 +37,13 @@
  *  MODALS
  */
 
+.group-subscription-modal-title-discount {
+  @include body-base;
+
+  margin-top: var(--spacing-02);
+  margin-bottom: unset;
+}
+
 .group-subscription-modal {
   .circle {
     font-size: var(--font-size-06);

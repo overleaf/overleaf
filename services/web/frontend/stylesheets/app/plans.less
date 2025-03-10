@@ -165,6 +165,22 @@
           outline: 0;
         }
 
+        .group-discount-bubble {
+          padding: var(--spacing-01) var(--spacing-04);
+          background-color: var(--green-10);
+          color: var(--green-50);
+          border-radius: var(--border-radius-full-new);
+          font-family: 'DM Mono', monospace;
+          font-feature-settings: 'ss05';
+          font-size: var(--font-size-01);
+          line-height: var(--line-height-01);
+          font-weight: 500;
+
+          @media (max-width: @screen-xs-max) {
+            display: none;
+          }
+        }
+
         @media (max-width: @screen-xs-max) {
           font-size: var(--font-size-02);
           line-height: var(--line-height-02);

@@ -118,6 +118,7 @@ export function ChangeToGroupModal() {
   const { modal: contactModal, showModal: showContactModal } =
     useContactUsModal({ autofillProjectUrl: false })
   const groupPlans = getMeta('ol-groupPlans')
+  const showGroupDiscount = getMeta('ol-showGroupDiscount')
   const personalSubscription = getMeta('ol-subscription') as RecurlySubscription
   const [error, setError] = useState(false)
   const [inflight, setInflight] = useState(false)
@@ -172,6 +173,11 @@ export function ChangeToGroupModal() {
         <OLModalHeader closeButton>
           <OLModalTitle className="lh-sm">
             {t('customize_your_group_subscription')}
+            {showGroupDiscount && (
+              <p className="group-subscription-modal-title-discount">
+                {t('save_x_or_more', { percentage: '10%' })}
+              </p>
+            )}
           </OLModalTitle>
         </OLModalHeader>
 
@@ -259,20 +265,9 @@ export function ChangeToGroupModal() {
                         setGroupPlanToChangeToUsage('enterprise')
                       }
                     }}
-                    label={
-                      <Trans
-                        i18nKey="license_for_educational_purposes_confirmation"
-                        values={{ percent: educationalPercentDiscount }}
-                        shouldUnescape
-                        tOptions={{ interpolation: { escapeValue: true } }}
-                        components={[
-                          /* eslint-disable-next-line react/jsx-key */
-                          <strong />,
-                          /* eslint-disable-next-line react/jsx-key */
-                          <br />,
-                        ]}
-                      />
-                    }
+                    label={t(
+                      'apply_educational_discount_description_with_group_discount'
+                    )}
                   />
                 </form>
               </div>
