@@ -103,10 +103,10 @@ export const ToolbarItems: FC<{
               <ToolbarButton
                 id="toolbar-format-italic"
                 label={t('toolbar_format_italic')}
-                command={commands.toggleSlant}
-                active={isActive('\\textsl')}
-                icon={bsVersion({ bs5: 'format_italic', bs3: 'italic' })}
-                shortcut={isMac ? '⌘I' : 'Ctrl+I'}
+                command={commands.toggleColor}
+                active={isActive('\\textcolor')}
+                icon={bsVersion({ bs5: 'format_color_text', bs3: 'text_color' })}
+                shortcut={isMac ? '⌘T' : 'Ctrl+T'}
               />
             </div>
           )}

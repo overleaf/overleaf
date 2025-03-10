@@ -7,7 +7,7 @@ import {
 
 
 //Added formating command of slant text
-export type FormattingCommand = '\\textbf' | '\\textit' | '\\textsl'
+export type FormattingCommand = '\\textbf' | '\\textit' | '\\textsl' | '\\textcolor'
 export type FormattingNodeType = string | number
 
 
@@ -19,6 +19,7 @@ export const formattingCommandMap: Record<
   '\\textbf': 'TextBoldCommand',
   '\\textit': 'TextItalicCommand',
   '\\textsl': 'TextSlantCommand',
+  '\\textcolor': 'TextColorCommand',
 }
 
 export const withinFormattingCommand = (state: EditorState) => {
