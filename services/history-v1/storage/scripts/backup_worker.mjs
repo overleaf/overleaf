@@ -86,14 +86,14 @@ async function runBackup(projectId) {
   )
   try {
     logger.info({ projectId }, 'processing backup for project')
-    const { errors, completed } = await backupProject(projectId, {})
-    metrics.inc('backup_worker_project', completed - errors, {
+    await backupProject(projectId, {})
+    metrics.inc('backup_worker_project', 1, {
       status: 'success',
     })
-    metrics.inc('backup_worker_project', errors, { status: 'failed' })
     timer.done()
-    return `backup completed ${projectId} (${errors} failed in ${completed} projects)`
+    return `backup completed ${projectId}`
   } catch (err) {
+    metrics.inc('backup_worker_project', 1, { status: 'failed' })
     logger.error({ projectId, err }, 'backup failed')
     throw err // Re-throw to mark job as failed
   }

@@ -3,8 +3,18 @@ const { projects, backedUpBlobs } = require('../mongodb')
 const OError = require('@overleaf/o-error')
 
 // List projects with pending backups older than the specified interval
-function listPendingBackups(timeIntervalMs = 0) {
+function listPendingBackups(timeIntervalMs = 0, limit = null) {
   const cutoffTime = new Date(Date.now() - timeIntervalMs)
+  const options = {
+    projection: { 'overleaf.backup.pendingChangeAt': 1 },
+    sort: { 'overleaf.backup.pendingChangeAt': 1 },
+  }
+
+  // Apply limit if provided
+  if (limit) {
+    options.limit = limit
+  }
+
   const cursor = projects.find(
     {
       'overleaf.backup.pendingChangeAt': {
@@ -12,10 +22,7 @@ function listPendingBackups(timeIntervalMs = 0) {
         $lt: cutoffTime,
       },
     },
-    {
-      projection: { 'overleaf.backup': 1, 'overleaf.history': 1 },
-      sort: { 'overleaf.backup.pendingChangeAt': 1 },
-    }
+    options
   )
   return cursor
 }
