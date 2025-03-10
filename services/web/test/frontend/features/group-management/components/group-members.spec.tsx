@@ -64,7 +64,7 @@ describe('GroupMembers', function () {
         'You have added 2 of 10 available members'
       )
 
-      cy.findByTestId('managed-users-table')
+      cy.findByTestId('managed-entities-table')
         .find('tbody')
         .within(() => {
           cy.get('tr:nth-child(1)').within(() => {
@@ -100,7 +100,7 @@ describe('GroupMembers', function () {
       cy.get('.form-control').type('someone.else@test.com')
       cy.get('.add-more-members-form button').click()
 
-      cy.findByTestId('managed-users-table')
+      cy.findByTestId('managed-entities-table')
         .find('tbody')
         .within(() => {
           cy.get('tr:nth-child(3)').within(() => {
@@ -130,7 +130,7 @@ describe('GroupMembers', function () {
     })
 
     it('checks the select all checkbox', function () {
-      cy.findByTestId('managed-users-table')
+      cy.findByTestId('managed-entities-table')
         .find('tbody')
         .within(() => {
           cy.get('tr:nth-child(1)').within(() => {
@@ -143,7 +143,7 @@ describe('GroupMembers', function () {
 
       cy.get('.select-all').click()
 
-      cy.findByTestId('managed-users-table')
+      cy.findByTestId('managed-entities-table')
         .find('tbody')
         .within(() => {
           cy.get('tr:nth-child(1)').within(() => {
@@ -160,7 +160,7 @@ describe('GroupMembers', function () {
         statusCode: 200,
       })
 
-      cy.findByTestId('managed-users-table')
+      cy.findByTestId('managed-entities-table')
         .find('tbody')
         .within(() => {
           cy.get('tr:nth-child(1)').within(() => {
@@ -171,7 +171,7 @@ describe('GroupMembers', function () {
       cy.get('button').contains('Remove from group').click()
 
       cy.get('small').contains('You have added 1 of 10 available members')
-      cy.findByTestId('managed-users-table')
+      cy.findByTestId('managed-entities-table')
         .find('tbody')
         .within(() => {
           cy.get('tr:nth-child(1)').within(() => {
@@ -188,7 +188,7 @@ describe('GroupMembers', function () {
         statusCode: 500,
       })
 
-      cy.findByTestId('managed-users-table')
+      cy.findByTestId('managed-entities-table')
         .find('tbody')
         .within(() => {
           cy.get('tr:nth-child(1)').within(() => {
@@ -257,7 +257,7 @@ describe('GroupMembers', function () {
       cy.get('h1').contains('My Awesome Team')
       cy.get('small').contains('You have added 3 of 10 available members')
 
-      cy.findByTestId('managed-users-table')
+      cy.findByTestId('managed-entities-table')
         .find('tbody')
         .within(() => {
           cy.get('tr:nth-child(1)').within(() => {
@@ -304,7 +304,7 @@ describe('GroupMembers', function () {
       cy.get('.form-control').type('someone.else@test.com')
       cy.get('.add-more-members-form button').click()
 
-      cy.findByTestId('managed-users-table')
+      cy.findByTestId('managed-entities-table')
         .find('tbody')
         .within(() => {
           cy.get('tr:nth-child(4)').within(() => {
@@ -336,7 +336,7 @@ describe('GroupMembers', function () {
     })
 
     it('checks the select all checkbox', function () {
-      cy.findByTestId('managed-users-table')
+      cy.findByTestId('managed-entities-table')
         .find('tbody')
         .within(() => {
           cy.get('tr:nth-child(1)').within(() => {
@@ -349,7 +349,7 @@ describe('GroupMembers', function () {
 
       cy.get('.select-all').click()
 
-      cy.findByTestId('managed-users-table')
+      cy.findByTestId('managed-entities-table')
         .find('tbody')
         .within(() => {
           cy.get('tr:nth-child(1)').within(() => {
@@ -368,7 +368,7 @@ describe('GroupMembers', function () {
         statusCode: 200,
       })
 
-      cy.findByTestId('managed-users-table')
+      cy.findByTestId('managed-entities-table')
         .find('tbody')
         .within(() => {
           cy.get('tr:nth-child(1)').within(() => {
@@ -379,7 +379,7 @@ describe('GroupMembers', function () {
       cy.get('button').contains('Remove from group').click()
 
       cy.get('small').contains('You have added 2 of 10 available members')
-      cy.findByTestId('managed-users-table')
+      cy.findByTestId('managed-entities-table')
         .find('tbody')
         .within(() => {
           cy.get('tr:nth-child(1)').within(() => {
@@ -395,7 +395,7 @@ describe('GroupMembers', function () {
         statusCode: 200,
       })
 
-      cy.findByTestId('managed-users-table')
+      cy.findByTestId('managed-entities-table')
         .find('tbody')
         .within(() => {
           // no checkbox should be shown for 'Claire Jennings', a managed user
@@ -410,7 +410,7 @@ describe('GroupMembers', function () {
         statusCode: 500,
       })
 
-      cy.findByTestId('managed-users-table')
+      cy.findByTestId('managed-entities-table')
         .find('tbody')
         .within(() => {
           cy.get('tr:nth-child(1)').within(() => {
@@ -480,7 +480,7 @@ describe('GroupMembers', function () {
     })
 
     it('should display the Security column', function () {
-      cy.findByTestId('managed-users-table')
+      cy.findByTestId('managed-entities-table')
         .find('tbody')
         .within(() => {
           cy.get('tr:nth-child(2)').within(() => {

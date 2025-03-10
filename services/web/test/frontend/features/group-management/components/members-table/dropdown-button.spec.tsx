@@ -7,7 +7,7 @@ import { User } from '../../../../../../types/group-management/user'
 
 function Wrapper({ children }: PropsWithChildren<Record<string, unknown>>) {
   return (
-    <ul className="managed-users-list">
+    <ul className="managed-entities-list">
       <span
         className="managed-users-actions"
         style={{ display: 'flex', width: '100%', justifyContent: 'flex-end' }}

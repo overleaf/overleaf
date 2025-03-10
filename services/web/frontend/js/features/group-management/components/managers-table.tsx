@@ -174,8 +174,10 @@ export function ManagersTable({
             <div className="row-spaced-small">
               <ErrorAlert error={removeMemberError} />
               <OLTable
-                className="managed-users-table managed-users-list structured-list"
-                data-testid="managed-users-table"
+                className="managed-entities-table managed-entities-list structured-list"
+                container={false}
+                hover
+                data-testid="managed-entities-table"
               >
                 <thead>
                   <tr>

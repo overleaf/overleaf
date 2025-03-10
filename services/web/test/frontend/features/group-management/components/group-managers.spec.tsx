@@ -37,7 +37,7 @@ describe('group managers', function () {
   it('renders the group management page', function () {
     cy.findByRole('heading', { name: /my awesome team/i, level: 1 })
 
-    cy.findByTestId('managed-users-table')
+    cy.findByTestId('managed-entities-table')
       .find('tbody')
       .within(() => {
         cy.get('tr:nth-child(1)').within(() => {
@@ -72,7 +72,7 @@ describe('group managers', function () {
       cy.findByRole('button').click()
     })
 
-    cy.findByTestId('managed-users-table')
+    cy.findByTestId('managed-entities-table')
       .find('tbody')
       .within(() => {
         cy.get('tr:nth-child(3)').within(() => {
@@ -101,7 +101,7 @@ describe('group managers', function () {
   })
 
   it('checks the select all checkbox', function () {
-    cy.findByTestId('managed-users-table')
+    cy.findByTestId('managed-entities-table')
       .find('tbody')
       .within(() => {
         cy.get('tr:nth-child(1)').within(() => {
@@ -112,13 +112,13 @@ describe('group managers', function () {
         })
       })
 
-    cy.findByTestId('managed-users-table')
+    cy.findByTestId('managed-entities-table')
       .find('thead')
       .within(() => {
         cy.findByLabelText(/select all/i).check()
       })
 
-    cy.findByTestId('managed-users-table')
+    cy.findByTestId('managed-entities-table')
       .find('tbody')
       .within(() => {
         cy.get('tr:nth-child(1)').within(() => {
@@ -135,7 +135,7 @@ describe('group managers', function () {
       statusCode: 200,
     })
 
-    cy.findByTestId('managed-users-table')
+    cy.findByTestId('managed-entities-table')
       .find('tbody')
       .within(() => {
         cy.get('tr:nth-child(1)').within(() => {
@@ -145,7 +145,7 @@ describe('group managers', function () {
 
     cy.findByRole('button', { name: /remove manager/i }).click()
 
-    cy.findByTestId('managed-users-table')
+    cy.findByTestId('managed-entities-table')
       .find('tbody')
       .within(() => {
         cy.get('tr:nth-child(1)').within(() => {
@@ -162,7 +162,7 @@ describe('group managers', function () {
       statusCode: 500,
     })
 
-    cy.findByTestId('managed-users-table')
+    cy.findByTestId('managed-entities-table')
       .find('tbody')
       .within(() => {
         cy.get('tr:nth-child(1)').within(() => {

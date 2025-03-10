@@ -35,7 +35,7 @@ export default function MemberRow({
   const groupSSOActive = getMeta('ol-groupSSOActive')
 
   return (
-    <tr className="managed-user-row">
+    <tr className="managed-entity-row">
       <SelectUserCheckbox user={user} />
       <td
         className={classnames('cell-email', {

@@ -40,9 +40,9 @@ export default function MembersList({ groupId }: ManagedUsersListProps) {
       )}
       <OLTable
         className={classNames(
-          'managed-users-table',
+          'managed-entities-table',
           'structured-list',
-          'managed-users-list',
+          'managed-entities-list',
           {
             'managed-users-active': managedUsersActive,
             'group-sso-active': groupSSOActive,
@@ -50,7 +50,7 @@ export default function MembersList({ groupId }: ManagedUsersListProps) {
         )}
         container={false}
         hover
-        data-testid="managed-users-table"
+        data-testid="managed-entities-table"
       >
         <thead>
           <tr>

@@ -37,7 +37,7 @@ describe('publisher managers', function () {
   it('renders the publisher management page', function () {
     cy.findByRole('heading', { name: /my awesome publisher/i, level: 1 })
 
-    cy.findByTestId('managed-users-table')
+    cy.findByTestId('managed-entities-table')
       .find('tbody')
       .within(() => {
         cy.get('tr:nth-child(1)').within(() => {
@@ -72,7 +72,7 @@ describe('publisher managers', function () {
       cy.findByRole('button').click()
     })
 
-    cy.findByTestId('managed-users-table')
+    cy.findByTestId('managed-entities-table')
       .find('tbody')
       .within(() => {
         cy.get('tr:nth-child(3)').within(() => {
@@ -101,7 +101,7 @@ describe('publisher managers', function () {
   })
 
   it('checks the select all checkbox', function () {
-    cy.findByTestId('managed-users-table')
+    cy.findByTestId('managed-entities-table')
       .find('tbody')
       .within(() => {
         cy.get('tr:nth-child(1)').within(() => {
@@ -114,7 +114,7 @@ describe('publisher managers', function () {
 
     cy.get('.select-all').click()
 
-    cy.findByTestId('managed-users-table')
+    cy.findByTestId('managed-entities-table')
       .find('tbody')
       .within(() => {
         cy.get('tr:nth-child(1)').within(() => {
@@ -131,7 +131,7 @@ describe('publisher managers', function () {
       statusCode: 200,
     })
 
-    cy.findByTestId('managed-users-table')
+    cy.findByTestId('managed-entities-table')
       .find('tbody')
       .within(() => {
         cy.get('tr:nth-child(1)').within(() => {
@@ -141,7 +141,7 @@ describe('publisher managers', function () {
 
     cy.findByRole('button', { name: 'Remove manager' }).click()
 
-    cy.findByTestId('managed-users-table')
+    cy.findByTestId('managed-entities-table')
       .find('tbody')
       .within(() => {
         cy.get('tr:nth-child(1)').within(() => {
@@ -158,7 +158,7 @@ describe('publisher managers', function () {
       statusCode: 500,
     })
 
-    cy.findByTestId('managed-users-table')
+    cy.findByTestId('managed-entities-table')
       .find('tbody')
       .within(() => {
         cy.get('tr:nth-child(1)').within(() => {

@@ -52,16 +52,16 @@ describe('MembersList', function () {
       mountManagedUsersList()
 
       // Select-all checkbox
-      cy.findByTestId('managed-users-table').within(() => {
+      cy.findByTestId('managed-entities-table').within(() => {
         cy.findByTestId('select-all-checkbox')
       })
-      cy.findByTestId('managed-users-table').should('contain.text', 'Email')
-      cy.findByTestId('managed-users-table').should('contain.text', 'Name')
-      cy.findByTestId('managed-users-table').should(
+      cy.findByTestId('managed-entities-table').should('contain.text', 'Email')
+      cy.findByTestId('managed-entities-table').should('contain.text', 'Name')
+      cy.findByTestId('managed-entities-table').should(
         'contain.text',
         'Last Active'
       )
-      cy.findByTestId('managed-users-table').should(
+      cy.findByTestId('managed-entities-table').should(
         'not.contain.text',
         'Security'
       )
@@ -73,48 +73,51 @@ describe('MembersList', function () {
       mountManagedUsersList()
 
       // Select-all checkbox
-      cy.findByTestId('managed-users-table').within(() => {
+      cy.findByTestId('managed-entities-table').within(() => {
         cy.findByTestId('select-all-checkbox')
       })
 
-      cy.findByTestId('managed-users-table').should('contain.text', 'Email')
-      cy.findByTestId('managed-users-table').should('contain.text', 'Name')
-      cy.findByTestId('managed-users-table').should(
+      cy.findByTestId('managed-entities-table').should('contain.text', 'Email')
+      cy.findByTestId('managed-entities-table').should('contain.text', 'Name')
+      cy.findByTestId('managed-entities-table').should(
         'contain.text',
         'Last Active'
       )
-      cy.findByTestId('managed-users-table').should('contain.text', 'Security')
+      cy.findByTestId('managed-entities-table').should(
+        'contain.text',
+        'Security'
+      )
     })
 
     it('should render the list of users', function () {
-      cy.findByTestId('managed-users-table')
+      cy.findByTestId('managed-entities-table')
         .find('tbody')
         .within(() => {
           cy.findAllByRole('row').should('have.length', 2)
         })
       // First user
-      cy.findByTestId('managed-users-table').should(
+      cy.findByTestId('managed-entities-table').should(
         'contain.text',
         users[0].email
       )
-      cy.findByTestId('managed-users-table').should(
+      cy.findByTestId('managed-entities-table').should(
         'contain.text',
         users[0].first_name
       )
-      cy.findByTestId('managed-users-table').should(
+      cy.findByTestId('managed-entities-table').should(
         'contain.text',
         users[0].last_name
       )
       // Second user
-      cy.findByTestId('managed-users-table').should(
+      cy.findByTestId('managed-entities-table').should(
         'contain.text',
         users[1].email
       )
-      cy.findByTestId('managed-users-table').should(
+      cy.findByTestId('managed-entities-table').should(
         'contain.text',
         users[1].first_name
       )
-      cy.findByTestId('managed-users-table').should(
+      cy.findByTestId('managed-entities-table').should(
         'contain.text',
         users[1].last_name
       )
@@ -134,11 +137,11 @@ describe('MembersList', function () {
     })
 
     it('should render the list, with a "no members" message', function () {
-      cy.findByTestId('managed-users-table').should(
+      cy.findByTestId('managed-entities-table').should(
         'contain.text',
         'No members'
       )
-      cy.findByTestId('managed-users-table')
+      cy.findByTestId('managed-entities-table')
         .find('tbody')
         .within(() => {
           cy.findAllByRole('row')
@@ -223,7 +226,7 @@ describe('MembersList', function () {
     describe('unlinking user', function () {
       beforeEach(function () {
         mountManagedUsersList()
-        cy.findByTestId('managed-users-table')
+        cy.findByTestId('managed-entities-table')
           .find('tbody')
           .within(() => {
             cy.get('tr:nth-child(3)').within(() => {
@@ -242,7 +245,7 @@ describe('MembersList', function () {
           'contain.text',
           `SSO reauthentication request has been sent to ${USER_LINKED.email}`
         )
-        cy.findByTestId('managed-users-table')
+        cy.findByTestId('managed-entities-table')
           .find('tbody')
           .within(() => {
             cy.get('tr:nth-child(3)').within(() => {
@@ -262,7 +265,7 @@ describe('MembersList', function () {
 
       describe('when user is not managed', function () {
         beforeEach(function () {
-          cy.findByTestId('managed-users-table')
+          cy.findByTestId('managed-entities-table')
             .find('tbody')
             .within(() => {
               cy.get('tr:nth-child(3)').within(() => {
@@ -282,7 +285,7 @@ describe('MembersList', function () {
             'contain.text',
             `SSO reauthentication request has been sent to ${USER_LINKED.email}`
           )
-          cy.findByTestId('managed-users-table')
+          cy.findByTestId('managed-entities-table')
             .find('tbody')
             .within(() => {
               cy.get('tr:nth-child(3)').within(() => {
@@ -295,7 +298,7 @@ describe('MembersList', function () {
 
       describe('when user is managed', function () {
         beforeEach(function () {
-          cy.findByTestId('managed-users-table')
+          cy.findByTestId('managed-entities-table')
             .find('tbody')
             .within(() => {
               cy.get('tr:nth-child(4)').within(() => {
@@ -315,7 +318,7 @@ describe('MembersList', function () {
             'contain.text',
             `SSO reauthentication request has been sent to ${USER_LINKED_AND_MANAGED.email}`
           )
-          cy.findByTestId('managed-users-table')
+          cy.findByTestId('managed-entities-table')
             .find('tbody')
             .within(() => {
               cy.get('tr:nth-child(4)').within(() => {

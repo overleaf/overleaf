@@ -34,7 +34,7 @@ export default function UserRow({
   )
 
   return (
-    <tr key={`user-${user.email}`} className="managed-user-row">
+    <tr key={`user-${user.email}`} className="managed-entity-row">
       <td className="cell-checkbox">
         <BootstrapVersionSwitcher
           bs3={
