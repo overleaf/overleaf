@@ -18,6 +18,7 @@ import {
   CodeMirrorViewContext,
 } from './codemirror-context'
 import MathPreviewTooltip from './math-preview-tooltip'
+import Breadcrumbs from '@/features/ide-redesign/components/breadcrumbs'
 
 // TODO: remove this when definitely no longer used
 export * from './codemirror-context'
@@ -39,6 +40,7 @@ function CodeMirrorEditor() {
   const isMounted = useIsMounted()
 
   const newReviewPanel = useFeatureFlag('review-panel-redesign')
+  const newEditor = useFeatureFlag('editor-redesign')
 
   // create the view using the initial state and intercept transactions
   const viewRef = useRef<EditorView | null>(null)
@@ -72,6 +74,7 @@ function CodeMirrorEditor() {
               <Component key={path} />
             )
           )}
+          {newEditor && <Breadcrumbs />}
           <CodeMirrorCommandTooltip />
 
           <MathPreviewTooltip />

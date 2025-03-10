@@ -45,6 +45,7 @@ import { shortcuts } from './shortcuts'
 import { effectListeners } from './effect-listeners'
 import { highlightSpecialChars } from './highlight-special-chars'
 import { toolbarPanel } from './toolbar/toolbar-panel'
+import { breadcrumbPanel } from './breadcrumbs-panel'
 import { geometryChangeEvent } from './geometry-change-event'
 import { docName } from './doc-name'
 import { fileTreeItemDrop } from './file-tree-item-drop'
@@ -151,6 +152,7 @@ export const createExtensions = (options: Record<string, any>): Extension[] => [
   mathPreview(options.settings.mathPreview),
   reviewTooltip(),
   toolbarPanel(),
+  breadcrumbPanel(),
   verticalOverflow(),
   highlightActiveLine(options.visual.visual),
   // The built-in extension that highlights the active line in the gutter.

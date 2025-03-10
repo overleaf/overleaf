@@ -2,14 +2,7 @@ import classNames from 'classnames'
 import OutlineItem from './outline-item'
 import { memo } from 'react'
 import { OutlineItemData } from '@/features/ide-react/types/outline'
-
-function getChildrenLines(children?: OutlineItemData[]): number[] {
-  return (children || [])
-    .map(child => {
-      return getChildrenLines(child.children).concat(child.line)
-    })
-    .flat()
-}
+import getChildrenLines from '../util/get-children-lines'
 
 const OutlineList = memo(function OutlineList({
   outline,
