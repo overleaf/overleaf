@@ -23,14 +23,14 @@ describe('TpdsController', function () {
     this.TpdsUpdateHandler = {
       promises: {
         newUpdate: sinon.stub().resolves(this.metadata),
-        deleteUpdate: sinon.stub().resolves(),
+        deleteUpdate: sinon.stub().resolves(this.metadata.entityId),
         createFolder: sinon.stub().resolves(),
       },
     }
     this.UpdateMerger = {
       promises: {
-        mergeUpdate: sinon.stub().resolves(this.file),
-        deleteUpdate: sinon.stub().resolves(),
+        mergeUpdate: sinon.stub().resolves(this.metadata),
+        deleteUpdate: sinon.stub().resolves(this.metadata.entityId),
       },
     }
     this.NotificationsBuilder = {
@@ -377,7 +377,7 @@ describe('TpdsController', function () {
   })
 
   describe('updateProjectContents', function () {
-    beforeEach(function (done) {
+    beforeEach(async function () {
       this.req = {
         params: {
           0: (this.path = 'chapters/main.tex'),
@@ -390,34 +390,38 @@ describe('TpdsController', function () {
           'x-update-source': (this.source = 'github'),
         },
       }
+
       this.res = {
-        sendStatus: sinon.stub().callsFake(() => {
-          done()
-        }),
+        json: sinon.stub(),
+        sendStatus: sinon.stub(),
       }
 
-      this.TpdsController.updateProjectContents(this.req, this.res, this.next)
+      await this.TpdsController.promises.updateProjectContents(
+        this.req,
+        this.res
+      )
     })
 
     it('should merge the update', function () {
-      this.UpdateMerger.promises.mergeUpdate
-        .calledWith(
-          null,
-          this.project_id,
-          `/${this.path}`,
-          this.req,
-          this.source
-        )
-        .should.equal(true)
+      this.UpdateMerger.promises.mergeUpdate.should.be.calledWith(
+        null,
+        this.project_id,
+        `/${this.path}`,
+        this.req,
+        this.source
+      )
     })
 
     it('should return a success', function () {
-      this.res.sendStatus.calledWith(200).should.equal(true)
+      this.res.json.should.be.calledWith({
+        entityId: this.metadata.entityId.toString(),
+        rev: this.metadata.rev,
+      })
     })
   })
 
   describe('deleteProjectContents', function () {
-    beforeEach(function (done) {
+    beforeEach(async function () {
       this.req = {
         params: {
           0: (this.path = 'chapters/main.tex'),
@@ -431,22 +435,29 @@ describe('TpdsController', function () {
         },
       }
       this.res = {
-        sendStatus: sinon.stub().callsFake(() => {
-          done()
-        }),
+        sendStatus: sinon.stub(),
+        json: sinon.stub(),
       }
 
-      this.TpdsController.deleteProjectContents(this.req, this.res, this.next)
+      await this.TpdsController.promises.deleteProjectContents(
+        this.req,
+        this.res
+      )
     })
 
     it('should delete the file', function () {
-      this.UpdateMerger.promises.deleteUpdate
-        .calledWith(null, this.project_id, `/${this.path}`, this.source)
-        .should.equal(true)
+      this.UpdateMerger.promises.deleteUpdate.should.be.calledWith(
+        null,
+        this.project_id,
+        `/${this.path}`,
+        this.source
+      )
     })
 
     it('should return a success', function () {
-      this.res.sendStatus.calledWith(200).should.equal(true)
+      this.res.json.should.be.calledWith({
+        entityId: this.metadata.entityId,
+      })
     })
   })
 

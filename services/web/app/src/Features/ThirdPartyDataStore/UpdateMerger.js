@@ -12,15 +12,15 @@ const { pipeline } = require('stream/promises')
 
 async function mergeUpdate(userId, projectId, path, updateRequest, source) {
   const fsPath = await writeUpdateToDisk(projectId, updateRequest)
+
   try {
-    const metadata = await _mergeUpdate(userId, projectId, path, fsPath, source)
-    return metadata
+    // note: important to await here so file reading finishes before cleaning up below
+    return await _mergeUpdate(userId, projectId, path, fsPath, source)
   } finally {
-    try {
-      await fsPromises.unlink(fsPath)
-    } catch (err) {
+    // note: not awaited or thrown
+    fsPromises.unlink(fsPath).catch(err => {
       logger.err({ err, projectId, fsPath }, 'error deleting file')
-    }
+    })
   }
 }
 
@@ -128,7 +128,7 @@ async function _mergeUpdate(userId, projectId, path, fsPath, source) {
 
 async function deleteUpdate(userId, projectId, path, source) {
   try {
-    await EditorController.promises.deleteEntityWithPath(
+    return await EditorController.promises.deleteEntityWithPath(
       projectId,
       path,
       source,

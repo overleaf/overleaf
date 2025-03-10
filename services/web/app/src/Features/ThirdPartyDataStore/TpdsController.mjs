@@ -138,36 +138,50 @@ async function updateFolder(req, res) {
 // .gitignore, etc because people are generally more explicit with the files
 // they want in git.
 
-async function updateProjectContents(req, res, next) {
+async function updateProjectContents(req, res) {
   const projectId = req.params.project_id
   const path = `/${req.params[0]}` // UpdateMerger expects leading slash
   const source = req.headers['x-update-source'] || 'unknown'
 
   try {
-    await UpdateMerger.promises.mergeUpdate(null, projectId, path, req, source)
+    const metadata = await UpdateMerger.promises.mergeUpdate(
+      null,
+      projectId,
+      path,
+      req,
+      source
+    )
+    res.json({
+      entityId: metadata.entityId.toString(),
+      rev: metadata.rev,
+    })
   } catch (error) {
     if (
       error instanceof Errors.InvalidNameError ||
       error instanceof Errors.DuplicateNameError
     ) {
-      return res.sendStatus(422)
+      res.sendStatus(422)
     } else {
       throw error
     }
   }
-  res.sendStatus(200)
 }
 
-async function deleteProjectContents(req, res, next) {
+async function deleteProjectContents(req, res) {
   const projectId = req.params.project_id
   const path = `/${req.params[0]}` // UpdateMerger expects leading slash
   const source = req.headers['x-update-source'] || 'unknown'
 
-  await UpdateMerger.promises.deleteUpdate(null, projectId, path, source)
-  res.sendStatus(200)
+  const entityId = await UpdateMerger.promises.deleteUpdate(
+    null,
+    projectId,
+    path,
+    source
+  )
+  res.json({ entityId })
 }
 
-async function getQueues(req, res, next) {
+async function getQueues(req, res) {
   const userId = SessionManager.getLoggedInUserId(req.session)
   res.json(await TpdsQueueManager.promises.getQueues(userId))
 }
@@ -205,6 +219,11 @@ export default {
   updateProjectContents: expressify(updateProjectContents),
   deleteProjectContents: expressify(deleteProjectContents),
   getQueues: expressify(getQueues),
+
+  promises: {
+    deleteProjectContents,
+    updateProjectContents,
+  },
 
   // for tests only
   parseParams,
