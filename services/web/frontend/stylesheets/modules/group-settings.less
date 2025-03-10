@@ -1,15 +1,15 @@
-h2.group-settings-title {
+h3.group-settings-title {
   margin-bottom: 5px;
   font-size: @font-size-large;
 }
 
-h3.group-settings-title {
+h4.group-settings-title {
   margin-bottom: 0;
   font-size: @font-size-base;
 }
 
-h2.group-settings-title,
-h3.group-settings-title {
+h3.group-settings-title,
+h4.group-settings-title {
   font-family: Lato, sans-serif;
   line-height: 28px;
   font-weight: bold;
@@ -124,6 +124,7 @@ h3.group-settings-title {
   .sso-config-info-header {
     display: flex;
     justify-content: space-between;
+    align-items: center;
     gap: @margin-xs;
     padding: 0 @padding-base-horizontal 15px @padding-base-horizontal;
     border-bottom: 1px solid @neutral-20;
@@ -134,7 +135,6 @@ h3.group-settings-title {
       font-size: @font-size-small;
       border-radius: 4px;
       padding: 2px 4px;
-      margin-top: 4px;
       flex-shrink: 0;
 
       &.status-label-valid {
@@ -150,9 +150,8 @@ h3.group-settings-title {
   }
 
   .sso-config-options-buttons {
-    button:not(:last-child) {
-      margin-right: 8px;
-    }
+    display: flex;
+    gap: 8px;
   }
 
   .sso-config-info-section {
@@ -208,8 +207,8 @@ h3.group-settings-title {
 }
 
 .sso-config-modal-content {
-  .sso-config-interstitial-title,
-  .sso-config-test-result-title {
+  .sso-config-interstitial-title {
+    margin-top: 25px;
     font-family: Lato, sans-serif;
     font-size: 20px;
     font-weight: bold;
@@ -244,13 +243,6 @@ h3.group-settings-title {
       background-color: @red-10;
       color: @red-50;
     }
-  }
-
-  .sso-config-test-result-title {
-    font-family: Lato, sans-serif;
-    font-size: 20px;
-    font-weight: bold;
-    text-align: center;
   }
 
   .has-feedback {
@@ -388,8 +380,4 @@ h3.group-settings-title {
     flex-grow: 1;
     flex-shrink: 0;
   }
-}
-
-.btn-import-metadata {
-  margin-left: 8px;
 }

@@ -30,3 +30,287 @@
     color: var(--yellow-50);
   }
 }
+
+.managed-users-enabled {
+  color: var(--content-positive);
+
+  .icon {
+    vertical-align: text-bottom;
+  }
+}
+
+h3.group-settings-title {
+  margin-bottom: var(--spacing-03);
+
+  @include heading-sm;
+}
+
+h4.group-settings-title {
+  margin-bottom: 0;
+  font-size: var(--font-size-03);
+  line-height: var(--line-height-04);
+}
+
+h3.group-settings-title,
+h4.group-settings-title {
+  font-weight: bold;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 0;
+}
+
+.group-settings-sso {
+  .group-settings-sso-row {
+    margin-top: var(--spacing-07);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    .group-settings-sso-action-col {
+      margin-left: var(--spacing-06);
+    }
+  }
+}
+
+.below-settings-section {
+  border-top: 1px solid var(--border-disabled);
+  padding-top: var(--spacing-08);
+  margin-top: var(--spacing-08);
+}
+
+.sso-config-info {
+  padding: var(--spacing-05) 0;
+  border-radius: var(--border-radius-base);
+
+  .sso-config-info-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--spacing-03);
+    padding: 0 var(--spacing-06) var(--spacing-06) var(--spacing-06);
+    border-bottom: 1px solid var(--border-disabled);
+    margin-bottom: var(--spacing-06);
+    flex-wrap: wrap;
+  }
+
+  .sso-config-options-buttons {
+    display: flex;
+    gap: var(--spacing-04);
+  }
+
+  .sso-config-info-section {
+    margin-bottom: var(--spacing-07);
+    padding: 0 var(--spacing-06);
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  .sso-config-info-label {
+    font-size: var(--font-size-02);
+    font-weight: bold;
+
+    .certificate-status {
+      font-weight: normal;
+
+      .material-symbols {
+        vertical-align: top;
+      }
+
+      &.certificate-valid {
+        color: var(--content-positive);
+      }
+
+      &.certificate-expiring-soon {
+        color: var(--content-warning);
+      }
+
+      &.certificate-expired {
+        color: var(--content-danger);
+      }
+    }
+  }
+
+  .sso-config-info-label-optional {
+    font-weight: normal;
+  }
+
+  .sso-config-info-content {
+    color: var(--content-primary);
+    word-break: break-word;
+  }
+
+  .sso-config-info-content-empty {
+    color: var(--neutral-60);
+  }
+
+  p {
+    margin-bottom: var(--spacing-03);
+  }
+}
+
+.sso-config-modal-content {
+  .sso-config-interstitial-title {
+    font-size: var(--font-size-05);
+    font-weight: bold;
+    text-align: center;
+  }
+
+  .sso-config-modal-icon-wrapper {
+    text-align: center;
+    margin-top: var(--spacing-04);
+
+    .sso-config-interstitial-icon,
+    .sso-config-test-result-icon,
+    .sso-config-test-error-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 80px;
+      height: 80px;
+      font-size: var(--font-size-08);
+      border-radius: 50%;
+      gap: var(--spacing-04);
+    }
+
+    .sso-config-interstitial-icon {
+      background-color: var(--bg-light-secondary);
+    }
+
+    .sso-config-test-result-icon {
+      background-color: var(--bg-accent-03);
+      color: var(--content-positive);
+    }
+
+    .sso-config-test-error-icon {
+      background-color: var(--bg-danger-03);
+      color: var(--content-danger);
+    }
+  }
+
+  .payload-content {
+    padding: var(
+      --spacing-06
+    ); // vertical padding added by elements within notification
+
+    width: 100%;
+    border-radius: $border-radius-base;
+    color: var(--content-primary);
+    border: 1px solid var(--border-disabled);
+
+    .saml-response-xml-wrapper {
+      margin-top: var(--spacing-06);
+      overflow: hidden;
+      background-color: var(--bg-light-secondary);
+      border-radius: var(--border-radius-base);
+
+      .saml-response-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: var(--font-size-03);
+        line-height: 56px;
+        font-weight: bold;
+        padding: 0 var(--spacing-06);
+        border-bottom: 1px solid var(--border-disabled);
+      }
+
+      .saml-response-footer {
+        text-align: center;
+        line-height: 56px;
+        position: sticky;
+        bottom: 0;
+        background: linear-gradient(
+          360deg,
+          $neutral-10 0%,
+          rgb(244 245 246 / 0%) 835.48%
+        );
+      }
+
+      .saml-response-xml {
+        @include font-mono;
+
+        white-space: pre-wrap;
+        font-size: var(--font-size-02);
+        word-break: break-word;
+        padding: var(--spacing-06) var(--spacing-06) 0 var(--spacing-06);
+        height: 100px;
+        min-height: 100px;
+
+        &.view-more {
+          height: auto;
+        }
+      }
+
+      .expand-viewer {
+        .material-symbols {
+          font-size: 24px;
+        }
+      }
+    }
+
+    .payload-content-user-info-item {
+      margin-bottom: var(--spacing-03);
+      display: inline-block;
+      width: 100%;
+      overflow-wrap: break-word;
+    }
+  }
+}
+
+.certificate-wrapper {
+  .certificate-delete {
+    vertical-align: middle;
+  }
+
+  .view-more {
+    vertical-align: middle;
+    padding: 0;
+  }
+}
+
+.certificate-truncated {
+  display: flex;
+  align-items: center;
+
+  .view-more {
+    flex-grow: 0;
+    flex-shrink: 0;
+    margin-left: var(--spacing-06);
+  }
+
+  .certificate {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    display: inline-block;
+    flex-grow: 4;
+  }
+}
+
+.certificate {
+  font-family: Courier, monospace;
+}
+
+.certificate-delete {
+  text-decoration: none;
+}
+
+.certificate-full .certificate {
+  word-break: break-all;
+  display: block;
+}
+
+.certificate-form-row {
+  display: flex;
+
+  .certificate-input {
+    flex-grow: 11;
+  }
+
+  .certificate-delete {
+    flex-grow: 1;
+    flex-shrink: 0;
+  }
+}

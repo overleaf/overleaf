@@ -62,6 +62,7 @@ const OLFormControl: BsPrefixRefForwardingComponent<
     onFocus: rest.onFocus as BS3FormControlProps['onFocus'],
     onBlur: rest.onBlur as BS3FormControlProps['onBlur'],
     onInvalid: rest.onInvalid as BS3FormControlProps['onInvalid'],
+    onPaste: rest.onPaste as BS3FormControlProps['onPaste'],
     prepend: rest.prepend,
     size: rest.htmlSize,
     'main-field': rest['main-field'],
