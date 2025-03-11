@@ -126,8 +126,8 @@ export default function HotkeysModal({
              * using hotkey_bold_text to see if it inserted bold
              */}
             <Hotkey
-              combination={`${ctrl} + J`}
-              description={t('hotkey_bold_text')}
+              combination={`${ctrl} + T`}
+              description={t('hotkey_color_text')}
             />
           </OLCol>
         </OLRow>
