@@ -122,6 +122,7 @@ async function transferOwnership(req, res, next) {
       {
         allowTransferToNonCollaborators: hasAdminAccess(sessionUser),
         sessionUserId: new ObjectId(sessionUser._id),
+        ipAddress: req.ip,
       }
     )
     res.sendStatus(204)

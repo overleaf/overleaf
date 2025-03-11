@@ -261,10 +261,11 @@ describe('OwnershipTransferHandler', function () {
 
     it('should write an entry in the audit log', async function () {
       const sessionUserId = new ObjectId()
+      const ipAddress = '1.2.3.4'
       await this.handler.promises.transferOwnership(
         this.project._id,
         this.collaborator._id,
-        { sessionUserId }
+        { sessionUserId, ipAddress }
       )
       expect(
         this.ProjectAuditLogHandler.promises.addEntry
@@ -272,7 +273,7 @@ describe('OwnershipTransferHandler', function () {
         this.project._id,
         'transfer-ownership',
         sessionUserId,
-        '', // IP address
+        ipAddress,
         {
           previousOwnerId: this.user._id,
           newOwnerId: this.collaborator._id,
