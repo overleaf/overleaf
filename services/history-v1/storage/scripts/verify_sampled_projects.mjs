@@ -14,7 +14,7 @@ import { loadGlobalBlobs } from '../lib/blob_store/index.js'
 logger.logger.level('fatal')
 
 const usageMessage = [
-  'Usage: node verify_range.mjs [--startDate <start>] [--endDate <end>] [--nProjects <n>] [--verbose] [--usage] [--writeMetrics] [--concurrency <n>] [--strategy <range|random>]',
+  'Usage: node verify_sampled_projects.mjs [--startDate <start>] [--endDate <end>] [--nProjects <n>] [--verbose] [--usage] [--writeMetrics] [--concurrency <n>] [--strategy <range|random>]',
   'strategy: defaults to "range"; startDate and endDate are required for "range" strategy',
 ].join('\n')
 
