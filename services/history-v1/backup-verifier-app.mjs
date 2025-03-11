@@ -4,6 +4,7 @@ import '@overleaf/metrics/initialize.js'
 import http from 'node:http'
 import { fileURLToPath } from 'node:url'
 import { promisify } from 'node:util'
+import { setTimeout } from 'node:timers/promises'
 import express from 'express'
 import logger from '@overleaf/logger'
 import Metrics from '@overleaf/metrics'
@@ -81,5 +82,12 @@ export async function startApp(port) {
 // Run this if we're called directly
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const PORT = parseInt(process.env.PORT || '3102', 10)
-  await startApp(PORT)
+  try {
+    await startApp(PORT)
+  } catch (error) {
+    logger.error({ error }, 'error starting app')
+    await mongodb.client.close()
+    await setTimeout(100)
+    process.exit(1)
+  }
 }
