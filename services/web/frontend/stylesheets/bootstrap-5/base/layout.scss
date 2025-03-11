@@ -22,6 +22,10 @@ body {
   .thin-footer & {
     min-height: calc(100vh - #{$thin-footer-height});
   }
+
+  .container-top-padded {
+    padding-top: var(--spacing-16);
+  }
 }
 
 .content-alt {
