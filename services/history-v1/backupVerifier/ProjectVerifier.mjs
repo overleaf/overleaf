@@ -40,31 +40,13 @@ export function setWriteMetrics(writeMetrics) {
  * @param {string} historyId
  */
 function handleVerificationError(error, historyId) {
-  let errorType = 'unknown'
-  // Additional detail for verbose/development
-  if (error instanceof Error) {
-    if (error instanceof BackupCorruptedInvalidBlobError) {
-      errorType = 'invalid-blob'
-    } else if (error instanceof BackupCorruptedMissingBlobError) {
-      errorType = 'missing-blob'
-    } else if (error instanceof BackupCorruptedError) {
-      errorType = 'backup-corrupted-unknown'
-    } else if (error instanceof BackupRPOViolationChunkNotBackedUpError) {
-      errorType = 'rpo-violation-chunk-not-backed-up'
-    } else if (error instanceof BackupRPOViolationError) {
-      errorType = 'rpo-violation'
-    }
-  }
-
-  logger.error(
-    { errorType, historyId, error },
-    'error verifying project backup'
-  )
+  const name = error instanceof Error ? error.name : 'UnknownError'
+  logger.error({ historyId, error, name }, 'error verifying project backup')
 
   WRITE_METRICS &&
-    metrics.inc(METRICS.backup_project_verification_failed, 1, { errorType })
+    metrics.inc(METRICS.backup_project_verification_failed, 1, { name })
 
-  return errorType
+  return name
 }
 
 /**
