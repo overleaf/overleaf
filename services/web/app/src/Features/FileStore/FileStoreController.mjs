@@ -67,12 +67,6 @@ async function getFile(req, res) {
         ))
     } else {
       // The file-hash is missing. Fall back to filestore.
-      if (!Features.hasFeature('filestore')) {
-        logger.warn(
-          { file, fileId, projectId },
-          'filestore feature is disabled but we will attempt to fetch the file from filestore'
-        )
-      }
       stream = await FileStoreHandler.promises.getFileStream(
         projectId,
         fileId,

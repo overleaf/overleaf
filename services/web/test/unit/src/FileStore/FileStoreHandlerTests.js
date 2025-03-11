@@ -464,66 +464,34 @@ describe('FileStoreHandler', function () {
   })
 
   describe('getFileStream', function () {
-    beforeEach(function () {
-      this.query = {}
-      this.request.returns(this.readStream)
-    })
-
-    it('should get the stream with the correct params', function (done) {
-      const fileUrl = this.getFileUrl(this.projectId, this.fileId)
-      this.handler.getFileStream(
-        this.projectId,
-        this.fileId,
-        this.query,
-        (err, stream) => {
-          if (err) {
-            return done(err)
-          }
-          this.request.args[0][0].method.should.equal('get')
-          this.request.args[0][0].uri.should.equal(
-            fileUrl + '?from=getFileStream'
-          )
-          done()
-        }
-      )
-    })
-
-    it('should get stream from request', function (done) {
-      this.handler.getFileStream(
-        this.projectId,
-        this.fileId,
-        this.query,
-        (err, stream) => {
-          if (err) {
-            return done(err)
-          }
-          stream.should.equal(this.readStream)
-          done()
-        }
-      )
-    })
-
-    it('should add an error handler', function (done) {
-      this.handler.getFileStream(
-        this.projectId,
-        this.fileId,
-        this.query,
-        (err, stream) => {
-          if (err) {
-            return done(err)
-          }
-          stream.on.calledWith('error').should.equal(true)
-          done()
-        }
-      )
-    })
-
-    describe('when range is specified in query', function () {
+    describe('when filestore is disabled', function () {
       beforeEach(function () {
-        this.query = { range: '0-10' }
+        this.Features.hasFeature.withArgs('filestore').returns(false)
       })
 
-      it('should add a range header', function (done) {
+      it('should callback with a NotFoundError', function (done) {
+        this.handler.getFileStream(this.projectId, this.fileId, {}, err => {
+          expect(err).to.be.instanceof(Errors.NotFoundError)
+          done()
+        })
+      })
+
+      it('should not call request', function (done) {
+        this.handler.getFileStream(this.projectId, this.fileId, {}, () => {
+          this.request.called.should.equal(false)
+          done()
+        })
+      })
+    })
+    describe('when filestore is enabled', function () {
+      beforeEach(function () {
+        this.query = {}
+        this.request.returns(this.readStream)
+        this.Features.hasFeature.withArgs('filestore').returns(true)
+      })
+
+      it('should get the stream with the correct params', function (done) {
+        const fileUrl = this.getFileUrl(this.projectId, this.fileId)
         this.handler.getFileStream(
           this.projectId,
           this.fileId,
@@ -532,36 +500,90 @@ describe('FileStoreHandler', function () {
             if (err) {
               return done(err)
             }
-            this.request.callCount.should.equal(1)
-            const { headers } = this.request.firstCall.args[0]
-            expect(headers).to.have.keys('range')
-            expect(headers.range).to.equal('bytes=0-10')
+            this.request.args[0][0].method.should.equal('get')
+            this.request.args[0][0].uri.should.equal(
+              fileUrl + '?from=getFileStream'
+            )
             done()
           }
         )
       })
 
-      describe('when range is invalid', function () {
-        ;['0-', '-100', 'one-two', 'nonsense'].forEach(r => {
-          beforeEach(function () {
-            this.query = { range: `${r}` }
-          })
+      it('should get stream from request', function (done) {
+        this.handler.getFileStream(
+          this.projectId,
+          this.fileId,
+          this.query,
+          (err, stream) => {
+            if (err) {
+              return done(err)
+            }
+            stream.should.equal(this.readStream)
+            done()
+          }
+        )
+      })
 
-          it(`should not add a range header for '${r}'`, function (done) {
-            this.handler.getFileStream(
-              this.projectId,
-              this.fileId,
-              this.query,
-              (err, stream) => {
-                if (err) {
-                  return done(err)
-                }
-                this.request.callCount.should.equal(1)
-                const { headers } = this.request.firstCall.args[0]
-                expect(headers).to.not.have.keys('range')
-                done()
+      it('should add an error handler', function (done) {
+        this.handler.getFileStream(
+          this.projectId,
+          this.fileId,
+          this.query,
+          (err, stream) => {
+            if (err) {
+              return done(err)
+            }
+            stream.on.calledWith('error').should.equal(true)
+            done()
+          }
+        )
+      })
+
+      describe('when range is specified in query', function () {
+        beforeEach(function () {
+          this.query = { range: '0-10' }
+        })
+
+        it('should add a range header', function (done) {
+          this.handler.getFileStream(
+            this.projectId,
+            this.fileId,
+            this.query,
+            (err, stream) => {
+              if (err) {
+                return done(err)
               }
-            )
+              this.request.callCount.should.equal(1)
+              const { headers } = this.request.firstCall.args[0]
+              expect(headers).to.have.keys('range')
+              expect(headers.range).to.equal('bytes=0-10')
+              done()
+            }
+          )
+        })
+
+        describe('when range is invalid', function () {
+          ;['0-', '-100', 'one-two', 'nonsense'].forEach(r => {
+            beforeEach(function () {
+              this.query = { range: `${r}` }
+            })
+
+            it(`should not add a range header for '${r}'`, function (done) {
+              this.handler.getFileStream(
+                this.projectId,
+                this.fileId,
+                this.query,
+                (err, stream) => {
+                  if (err) {
+                    return done(err)
+                  }
+                  this.request.callCount.should.equal(1)
+                  const { headers } = this.request.firstCall.args[0]
+                  expect(headers).to.not.have.keys('range')
+                  done()
+                }
+              )
+            })
           })
         })
       })

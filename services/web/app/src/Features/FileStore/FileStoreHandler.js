@@ -204,6 +204,12 @@ const FileStoreHandler = {
   },
 
   getFileStream(projectId, fileId, query, callback) {
+    if (!Features.hasFeature('filestore')) {
+      return callback(
+        new Errors.NotFoundError('filestore is disabled, file not found')
+      )
+    }
+
     let queryString = '?from=getFileStream'
     if (query != null && query.format != null) {
       queryString += `&format=${query.format}`
