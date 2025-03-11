@@ -27,12 +27,12 @@ const backupQueue = new Queue('backup', {
 
 // Log queue events
 backupQueue.on('active', job => {
-  logger.info({ job }, 'job  is now active')
+  logger.debug({ job }, 'job is now active')
 })
 
 backupQueue.on('completed', (job, result) => {
   metrics.inc('backup_worker_job', 1, { status: 'completed' })
-  logger.info({ job, result }, 'job completed')
+  logger.debug({ job, result }, 'job completed')
 })
 
 backupQueue.on('failed', (job, err) => {
@@ -41,7 +41,7 @@ backupQueue.on('failed', (job, err) => {
 })
 
 backupQueue.on('waiting', jobId => {
-  logger.info({ jobId }, 'job is waiting')
+  logger.debug({ jobId }, 'job is waiting')
 })
 
 backupQueue.on('error', error => {
@@ -85,7 +85,7 @@ async function runBackup(projectId) {
     TIME_BUCKETS
   )
   try {
-    logger.info({ projectId }, 'processing backup for project')
+    logger.debug({ projectId }, 'processing backup for project')
     await backupProject(projectId, {})
     metrics.inc('backup_worker_project', 1, {
       status: 'success',

@@ -33,13 +33,13 @@ const optionDefinitions = [
     name: 'queue-pending',
     type: Number,
     description:
-      'Find projects with pending changes older than N minutes and add them to the queue',
+      'Find projects with pending changes older than N seconds and add them to the queue',
   },
   {
     name: 'show-pending',
     type: Number,
     description:
-      'Show count of pending projects older than N minutes without adding to queue',
+      'Show count of pending projects older than N seconds without adding to queue',
   },
   {
     name: 'limit',
@@ -79,25 +79,20 @@ function isValidDateFormat(dateStr) {
 function validatePendingTime(option, value) {
   if (typeof value !== 'number' || value <= 0) {
     console.error(
-      `Error: --${option} requires a positive numeric TIME argument in minutes`
+      `Error: --${option} requires a positive numeric TIME argument in seconds`
     )
-    console.error(`Example: --${option} 60`)
+    console.error(`Example: --${option} 3600`)
     process.exit(1)
   }
   return value
 }
 
-// Helper to calculate minutes since a given date
-function minutesSince(date) {
-  const now = new Date()
-  const diffMs = now - date
-  return Math.floor(diffMs / (1000 * 60))
-}
-
 // Helper to format the pending time display
 function formatPendingTime(timestamp) {
-  const minutes = minutesSince(timestamp)
-  return `${timestamp.toISOString()} (${minutes} minutes ago)`
+  const now = new Date()
+  const diffMs = now - timestamp
+  const seconds = Math.floor(diffMs / 1000)
+  return `${timestamp.toISOString()} (${seconds} seconds ago)`
 }
 
 // Helper to add a job to the queue, checking for duplicates
@@ -189,17 +184,17 @@ async function addDateRangeJob(input) {
   )
 }
 
-// Process pending projects with changes older than the specified minutes
+// Process pending projects with changes older than the specified seconds
 async function processPendingProjects(
-  minutes,
+  age,
   showOnly,
   limit,
   verbose,
   jobOpts = {}
 ) {
-  const timeIntervalMs = minutes * 60 * 1000
+  const timeIntervalMs = age * 1000
   console.log(
-    `Finding projects with pending changes older than ${minutes} minutes${showOnly ? ' (count only)' : ''}`
+    `Finding projects with pending changes older than ${age} seconds${showOnly ? ' (count only)' : ''}`
   )
 
   let count = 0
@@ -308,26 +303,17 @@ async function run() {
   } else if (options.monitor) {
     setupMonitoring()
   } else if (options['queue-pending'] !== undefined) {
-    const minutes = validatePendingTime(
-      'queue-pending',
-      options['queue-pending']
-    )
-    await processPendingProjects(
-      minutes,
-      false,
-      options.limit,
-      options.verbose,
-      {
-        attempts: options.attempts,
-        backoff: {
-          type: 'exponential',
-          delay: options['backoff-delay'],
-        },
-      }
-    )
+    const age = validatePendingTime('queue-pending', options['queue-pending'])
+    await processPendingProjects(age, false, options.limit, options.verbose, {
+      attempts: options.attempts,
+      backoff: {
+        type: 'exponential',
+        delay: options['backoff-delay'],
+      },
+    })
   } else if (options['show-pending'] !== undefined) {
-    const minutes = validatePendingTime('show-pending', options['show-pending'])
-    await processPendingProjects(minutes, true, options.limit, options.verbose)
+    const age = validatePendingTime('show-pending', options['show-pending'])
+    await processPendingProjects(age, true, options.limit, options.verbose)
   } else {
     console.log('Usage:')
     console.log('  --clean               Clean up completed and failed jobs')
@@ -338,10 +324,10 @@ async function run() {
     )
     console.log('  --monitor             Monitor queue events')
     console.log(
-      '  --queue-pending TIME  Find projects with changes older than TIME minutes and add them to the queue'
+      '  --queue-pending TIME  Find projects with changes older than TIME seconds and add them to the queue'
     )
     console.log(
-      '  --show-pending TIME   Show count of pending projects older than TIME minutes'
+      '  --show-pending TIME   Show count of pending projects older than TIME seconds'
     )
     console.log('  --limit N             Limit the number of jobs to be added')
     console.log(

@@ -38,10 +38,10 @@ app.use((err, req, res, next) => {
 })
 
 async function triggerGracefulShutdown(server, signal) {
-  logger.warn({ signal }, 'graceful shutdown: started shutdown sequence')
+  logger.info({ signal }, 'graceful shutdown: started shutdown sequence')
   await drainQueue()
   server.close(function () {
-    logger.warn({ signal }, 'graceful shutdown: closed server')
+    logger.info({ signal }, 'graceful shutdown: closed server')
     setTimeout(() => {
       process.exit(0)
     }, 1000)

@@ -89,7 +89,7 @@ process.on('SIGTERM', handleSignal)
 
 function handleSignal() {
   gracefulShutdownInitiated = true
-  console.warn('graceful shutdown initiated, draining queue')
+  logger.info({}, 'graceful shutdown initiated, draining queue')
 }
 
 async function retry(fn, times, delayMs) {
