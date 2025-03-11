@@ -21,6 +21,7 @@ import { deleteJSON, getJSON, postJSON } from '@/infrastructure/fetch-json'
 import RangesTracker from '@overleaf/ranges-tracker'
 import { CommentOperation } from '../../../../../types/change'
 import { useEditorManagerContext } from '@/features/ide-react/context/editor-manager-context'
+import { useEditorContext } from '@/shared/context/editor-context'
 
 export type Threads = Record<ThreadId, ReviewPanelCommentThread>
 
@@ -48,12 +49,17 @@ const ThreadsActionsContext = createContext<ThreadsActions | undefined>(
 export const ThreadsProvider: FC = ({ children }) => {
   const { _id: projectId } = useProjectContext()
   const { currentDocument } = useEditorManagerContext()
+  const { isRestrictedTokenMember } = useEditorContext()
 
   // const [error, setError] = useState<Error>()
   const [data, setData] = useState<Threads>()
 
   // load the initial threads data
   useEffect(() => {
+    if (isRestrictedTokenMember) {
+      return
+    }
+
     const abortController = new AbortController()
 
     getJSON(`/project/${projectId}/threads`, {
@@ -64,7 +70,7 @@ export const ThreadsProvider: FC = ({ children }) => {
     // .catch(error => {
     //   setError(error)
     // })
-  }, [projectId])
+  }, [projectId, isRestrictedTokenMember])
 
   const { socket } = useConnectionContext()
 

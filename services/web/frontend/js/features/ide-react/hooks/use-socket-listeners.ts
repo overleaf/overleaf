@@ -12,12 +12,14 @@ import { debugConsole } from '@/utils/debugging'
 import { useCallback } from 'react'
 import { PublicAccessLevel } from '../../../../../types/public-access-level'
 import { useLocation } from '@/shared/hooks/use-location'
+import { useEditorContext } from '@/shared/context/editor-context'
 
 function useSocketListeners() {
   const { t } = useTranslation()
   const { socket } = useConnectionContext()
   const { projectId } = useIdeReactContext()
   const { showGenericMessageModal } = useModalsContext()
+  const { permissionsLevel } = useEditorContext()
   const [, setPublicAccessLevel] = useScopeValue('project.publicAccesLevel')
   const [, setProjectMembers] = useScopeValue('project.members')
   const [, setProjectInvites] = useScopeValue('project.invites')
@@ -91,7 +93,7 @@ function useSocketListeners() {
             })
         }
 
-        if (data.invites) {
+        if (data.invites && permissionsLevel === 'owner') {
           listProjectInvites(projectId)
             .then(({ invites }) => {
               if (invites) {
@@ -103,7 +105,7 @@ function useSocketListeners() {
             })
         }
       },
-      [projectId, setProjectInvites, setProjectMembers]
+      [projectId, setProjectInvites, setProjectMembers, permissionsLevel]
     )
   )
 }

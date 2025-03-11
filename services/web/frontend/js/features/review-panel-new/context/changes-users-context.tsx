@@ -9,6 +9,7 @@ import {
 import { getJSON } from '@/infrastructure/fetch-json'
 import { useProjectContext } from '@/shared/context/project-context'
 import { UserId } from '../../../../../types/user'
+import { useEditorContext } from '@/shared/context/editor-context'
 
 export type ChangesUser = {
   id: UserId
@@ -25,14 +26,19 @@ export const ChangesUsersContext = createContext<ChangesUsers | undefined>(
 
 export const ChangesUsersProvider: FC = ({ children }) => {
   const { _id: projectId, members, owner } = useProjectContext()
+  const { isRestrictedTokenMember } = useEditorContext()
 
   const [changesUsers, setChangesUsers] = useState<ChangesUsers>()
 
   useEffect(() => {
+    if (isRestrictedTokenMember) {
+      return
+    }
+
     getJSON<ChangesUser[]>(`/project/${projectId}/changes/users`).then(data =>
       setChangesUsers(new Map(data.map(item => [item.id, item])))
     )
-  }, [projectId])
+  }, [projectId, isRestrictedTokenMember])
 
   // add the project owner and members to the changes users data
   const value = useMemo(() => {
