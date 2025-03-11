@@ -16,7 +16,6 @@ invalidateBabelCacheIfNeeded()
 
 // Generate a hash of entry points, including modules
 const entryPoints = {
-  tracing: './frontend/js/tracing.js',
   'bootstrap-3': './frontend/js/bootstrap-3.ts',
   'bootstrap-5': './frontend/js/bootstrap-5.ts',
   devToolbar: './frontend/js/dev-toolbar.ts',

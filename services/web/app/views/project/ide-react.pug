@@ -26,6 +26,4 @@ block append meta
 	include editor/_meta
 
 block prepend foot-scripts
-	each file in (useOpenTelemetry ? entrypointScripts("tracing") : [])
-		script(type="text/javascript", nonce=scriptNonce, src=file, defer=deferScripts)
 	script(type="text/javascript", nonce=scriptNonce, src=(wsUrl || '/socket.io') + '/socket.io.js', defer=deferScripts)

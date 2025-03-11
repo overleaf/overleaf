@@ -869,7 +869,6 @@ const _ProjectController = {
         metadata: { viewport: false },
         showUpgradePrompt,
         fixedSizeDocument: true,
-        useOpenTelemetry: Settings.useOpenTelemetryClient,
         hasTrackChangesFeature: Features.hasFeature('track-changes'),
         projectTags,
         usedLatex:
