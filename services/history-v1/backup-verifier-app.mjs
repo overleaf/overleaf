@@ -7,9 +7,9 @@ import { promisify } from 'node:util'
 import express from 'express'
 import logger from '@overleaf/logger'
 import Metrics from '@overleaf/metrics'
-import { healthCheck } from './backupVerifier/healthCheck.mjs'
 import {
   BackupCorruptedError,
+  healthCheck,
   verifyBlob,
 } from './storage/lib/backupVerifier.mjs'
 import { mongodb } from './storage/index.js'
