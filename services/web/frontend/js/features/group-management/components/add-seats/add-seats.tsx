@@ -20,7 +20,7 @@ import CostSummary from '@/features/group-management/components/add-seats/cost-s
 import RequestStatus from '@/features/group-management/components/request-status'
 import useAsync from '@/shared/hooks/use-async'
 import getMeta from '@/utils/meta'
-import { postJSON } from '@/infrastructure/fetch-json'
+import { FetchError, postJSON } from '@/infrastructure/fetch-json'
 import { debugConsole } from '@/utils/debugging'
 import * as yup from 'yup'
 import {
@@ -54,7 +54,8 @@ function AddSeats() {
     runAsync: runAsyncCostSummary,
     data: costSummaryData,
     reset: resetCostSummaryData,
-  } = useAsync<CostSummaryData>()
+    error: errorCostSummary,
+  } = useAsync<CostSummaryData, FetchError>()
   const {
     isLoading: isAddingSeats,
     isError: isErrorAddingSeats,
@@ -326,6 +327,7 @@ function AddSeats() {
                 <CostSummarySection
                   isLoadingCostSummary={isLoadingCostSummary}
                   isErrorCostSummary={isErrorCostSummary}
+                  errorCostSummary={errorCostSummary}
                   shouldContactSales={shouldContactSales}
                   costSummaryData={costSummaryData}
                   totalLicenses={totalLicenses}
@@ -379,6 +381,7 @@ function AddSeats() {
 type CostSummarySectionProps = {
   isLoadingCostSummary: boolean
   isErrorCostSummary: boolean
+  errorCostSummary: Nullable<FetchError>
   shouldContactSales: boolean
   costSummaryData: Nullable<CostSummaryData>
   totalLicenses: number
@@ -387,6 +390,7 @@ type CostSummarySectionProps = {
 function CostSummarySection({
   isLoadingCostSummary,
   isErrorCostSummary,
+  errorCostSummary,
   shouldContactSales,
   costSummaryData,
   totalLicenses,
@@ -416,6 +420,24 @@ function CostSummarySection({
   }
 
   if (isErrorCostSummary) {
+    if (errorCostSummary?.data?.code === 'subtotal_limit_exceeded') {
+      return (
+        <Notification
+          type="error"
+          content={
+            <Trans
+              i18nKey="sorry_there_was_an_issue_adding_x_users_to_your_subscription"
+              // eslint-disable-next-line react/jsx-key, jsx-a11y/anchor-has-content
+              components={[<a href="/contact" rel="noreferrer noopener" />]}
+              values={{ count: errorCostSummary?.data?.adding }}
+              shouldUnescape
+              tOptions={{ interpolation: { escapeValue: true } }}
+            />
+          }
+        />
+      )
+    }
+
     return (
       <Notification type="error" content={t('generic_something_went_wrong')} />
     )

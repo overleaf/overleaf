@@ -16,7 +16,10 @@ const {
   RecurlyPlan,
   RecurlyImmediateCharge,
 } = require('./RecurlyEntities')
-const { MissingBillingInfoError } = require('./Errors')
+const {
+  MissingBillingInfoError,
+  SubtotalLimitExceededError,
+} = require('./Errors')
 
 /**
  * @import { RecurlySubscriptionChangeRequest } from './RecurlyEntities'
@@ -116,14 +119,37 @@ async function getSubscriptionForUser(userId) {
  */
 async function applySubscriptionChangeRequest(changeRequest) {
   const body = subscriptionChangeRequestToApi(changeRequest)
-  const change = await client.createSubscriptionChange(
-    `uuid-${changeRequest.subscription.id}`,
-    body
-  )
-  logger.debug(
-    { subscriptionId: changeRequest.subscription.id, changeId: change.id },
-    'created subscription change'
-  )
+
+  try {
+    const change = await client.createSubscriptionChange(
+      `uuid-${changeRequest.subscription.id}`,
+      body
+    )
+    logger.debug(
+      { subscriptionId: changeRequest.subscription.id, changeId: change.id },
+      'created subscription change'
+    )
+  } catch (err) {
+    if (err instanceof recurly.errors.ValidationError) {
+      /**
+       * @type {{params?: { param?: string }[] | null}}
+       */
+      const validationError = err
+      if (
+        validationError.params?.some(
+          p => p.param === 'subtotal_amount_in_cents'
+        )
+      ) {
+        throw new SubtotalLimitExceededError(
+          'Subtotal amount in cents exceeded error',
+          {
+            subscriptionId: changeRequest.subscription.id,
+          }
+        )
+      }
+    }
+    throw err
+  }
 }
 
 /**
@@ -134,14 +160,38 @@ async function applySubscriptionChangeRequest(changeRequest) {
  */
 async function previewSubscriptionChange(changeRequest) {
   const body = subscriptionChangeRequestToApi(changeRequest)
-  const subscriptionChange = await client.previewSubscriptionChange(
-    `uuid-${changeRequest.subscription.id}`,
-    body
-  )
-  return subscriptionChangeFromApi(
-    changeRequest.subscription,
-    subscriptionChange
-  )
+
+  try {
+    const subscriptionChange = await client.previewSubscriptionChange(
+      `uuid-${changeRequest.subscription.id}`,
+      body
+    )
+
+    return subscriptionChangeFromApi(
+      changeRequest.subscription,
+      subscriptionChange
+    )
+  } catch (err) {
+    if (err instanceof recurly.errors.ValidationError) {
+      /**
+       * @type {{params?: { param?: string }[] | null}}
+       */
+      const validationError = err
+      if (
+        validationError.params?.some(
+          p => p.param === 'subtotal_amount_in_cents'
+        )
+      ) {
+        throw new SubtotalLimitExceededError(
+          'Subtotal amount in cents exceeded error',
+          {
+            subscriptionId: changeRequest.subscription.id,
+          }
+        )
+      }
+    }
+    throw err
+  }
 }
 
 async function removeSubscriptionChange(subscriptionId) {

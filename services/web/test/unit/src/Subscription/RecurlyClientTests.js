@@ -111,6 +111,7 @@ describe('RecurlyClient', function () {
     }
     this.Errors = {
       MissingBillingInfoError: class extends Error {},
+      SubtotalLimitExceededError: class extends Error {},
     }
 
     return (this.RecurlyClient = SandboxedModule.require(MODULE_PATH, {
@@ -308,6 +309,32 @@ describe('RecurlyClient', function () {
         })
       ).to.eventually.be.rejectedWith(Error)
     })
+
+    it('should throw SubtotalLimitExceededError', async function () {
+      class ValidationError extends recurly.errors.ValidationError {
+        constructor() {
+          super()
+          this.params = [{ param: 'subtotal_amount_in_cents' }]
+        }
+      }
+      this.client.createSubscriptionChange = sinon
+        .stub()
+        .throws(new ValidationError())
+      await expect(
+        this.RecurlyClient.promises.applySubscriptionChangeRequest({
+          subscription: this.subscription,
+        })
+      ).to.be.rejectedWith(this.Errors.SubtotalLimitExceededError)
+    })
+
+    it('should rethrow errors different than SubtotalLimitExceededError', async function () {
+      this.client.createSubscriptionChange = sinon.stub().throws(new Error())
+      await expect(
+        this.RecurlyClient.promises.applySubscriptionChangeRequest({
+          subscription: this.subscription,
+        })
+      ).to.be.rejectedWith(Error)
+    })
   })
 
   describe('removeSubscriptionChange', function () {
@@ -466,6 +493,40 @@ describe('RecurlyClient', function () {
         expect(immediateCharge.tax).to.be.equal(16.2)
         expect(immediateCharge.total).to.be.equal(96.2)
       })
+    })
+
+    it('should throw SubtotalLimitExceededError', async function () {
+      class ValidationError extends recurly.errors.ValidationError {
+        constructor() {
+          super()
+          this.params = [{ param: 'subtotal_amount_in_cents' }]
+        }
+      }
+      this.client.previewSubscriptionChange = sinon
+        .stub()
+        .throws(new ValidationError())
+      await expect(
+        this.RecurlyClient.promises.previewSubscriptionChange(
+          new RecurlySubscriptionChangeRequest({
+            subscription: this.subscription,
+            timeframe: 'now',
+            planCode: 'new-plan',
+          })
+        )
+      ).to.be.rejectedWith(this.Errors.SubtotalLimitExceededError)
+    })
+
+    it('should rethrow errors different than SubtotalLimitExceededError', async function () {
+      this.client.previewSubscriptionChange = sinon.stub().throws(new Error())
+      await expect(
+        this.RecurlyClient.promises.previewSubscriptionChange(
+          new RecurlySubscriptionChangeRequest({
+            subscription: this.subscription,
+            timeframe: 'now',
+            planCode: 'new-plan',
+          })
+        )
+      ).to.be.rejectedWith(Error)
     })
   })
 

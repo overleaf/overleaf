@@ -22,6 +22,8 @@ class PendingChangeError extends OError {}
 
 class InactiveError extends OError {}
 
+class SubtotalLimitExceededError extends OError {}
+
 module.exports = {
   RecurlyTransactionError,
   DuplicateAddOnError,
@@ -30,4 +32,5 @@ module.exports = {
   ManuallyCollectedError,
   PendingChangeError,
   InactiveError,
+  SubtotalLimitExceededError,
 }

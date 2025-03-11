@@ -2016,6 +2016,8 @@
   "sorry_it_looks_like_that_didnt_work_this_time": "Sorry! It looks like that didn’t work this time. Please try again.",
   "sorry_something_went_wrong_opening_the_document_please_try_again": "Sorry, an unexpected error occurred when trying to open this content on Overleaf. Please try again.",
   "sorry_there_are_no_experiments": "Sorry, there are no experiments currently running in Overleaf Labs.",
+  "sorry_there_was_an_issue_adding_x_users_to_your_subscription": "Sorry, there was an issue adding __count__ users to your subscription. Please <0>contact our Support team</0> for help.",
+  "sorry_there_was_an_issue_upgrading_your_subscription": "Sorry, there was an issue upgrading your subscription. Please <0>contact our Support team</0> for help.",
   "sorry_this_account_has_been_suspended": "Sorry, this account has been suspended.",
   "sorry_your_table_cant_be_displayed_at_the_moment": "Sorry, your table can’t be displayed at the moment.",
   "sorry_your_token_expired": "Sorry, your token expired",

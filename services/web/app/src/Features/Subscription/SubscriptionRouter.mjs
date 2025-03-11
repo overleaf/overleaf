@@ -135,6 +135,14 @@ export default {
       SubscriptionGroupController.manuallyCollectedSubscription
     )
 
+    webRouter.get(
+      '/user/subscription/group/subtotal-limit-exceeded',
+      AuthenticationController.requireLogin(),
+      RateLimiterMiddleware.rateLimit(subscriptionRateLimiter),
+      SubscriptionGroupController.flexibleLicensingSplitTest,
+      SubscriptionGroupController.subtotalLimitExceeded
+    )
+
     // Team invites
     webRouter.get(
       '/subscription/invites/:token/',
