@@ -17,6 +17,12 @@ export const shortcuts = () => {
         preventDefault: true,
         run: toggleRanges('\\textit'),
       },
+      {
+        key: 'Ctrl-;',
+        mac: 'Mod-;',
+        preventDefault: true,
+        run: toggleRanges('\\textcolor'),
+      },
     ])
   )
 }
