@@ -15,6 +15,7 @@ import {
 import { mongodb } from './storage/index.js'
 import { expressify } from '@overleaf/promise-utils'
 import { Blob } from 'overleaf-editor-core'
+import { loadGlobalBlobs } from './storage/lib/blob_store/index.js'
 
 const app = express()
 
@@ -70,6 +71,7 @@ app.use((err, req, res, next) => {
  */
 export async function startApp(port) {
   await mongodb.client.connect()
+  await loadGlobalBlobs()
   await healthCheck()
   const server = http.createServer(app)
   await promisify(server.listen.bind(server, port))()
