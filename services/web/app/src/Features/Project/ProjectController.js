@@ -15,6 +15,7 @@ const metrics = require('@overleaf/metrics')
 const { User } = require('../../models/User')
 const SubscriptionLocator = require('../Subscription/SubscriptionLocator')
 const LimitationsManager = require('../Subscription/LimitationsManager')
+const FeaturesHelper = require('../Subscription/FeaturesHelper')
 const Settings = require('@overleaf/settings')
 const AuthorizationManager = require('../Authorization/AuthorizationManager')
 const InactiveProjectManager = require('../InactiveData/InactiveProjectManager')
@@ -760,6 +761,20 @@ const _ProjectController = {
       const isOverleafAssistBundleEnabled =
         splitTestAssignments['overleaf-assist-bundle']?.variant === 'enabled'
 
+      let fullFeatureSet = user?.features
+      if (!anonymous) {
+        // generate users feature set including features added, or overriden via modules
+        const moduleFeatures =
+          (await Modules.promises.hooks.fire(
+            'getModuleProvidedFeatures',
+            userId
+          )) || []
+        fullFeatureSet = FeaturesHelper.computeFeatureSet([
+          user.features,
+          ...moduleFeatures,
+        ])
+      }
+
       const isPaywallChangeCompileTimeoutEnabled =
         splitTestAssignments['paywall-change-compile-timeout']?.variant ===
         'enabled'
@@ -802,7 +817,7 @@ const _ProjectController = {
           allowedFreeTrial,
           hasRecurlySubscription: subscription?.recurlySubscription_id != null,
           featureSwitches: user.featureSwitches,
-          features: user.features,
+          features: fullFeatureSet,
           featureUsage,
           refProviders: _.mapValues(user.refProviders, Boolean),
           writefull: {

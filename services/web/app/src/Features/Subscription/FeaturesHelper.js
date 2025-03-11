@@ -2,6 +2,13 @@ const _ = require('lodash')
 const Settings = require('@overleaf/settings')
 
 /**
+ * merges an array of feature sets to produce a final feature set
+ */
+function computeFeatureSet(featureSets) {
+  return featureSets.reduce(mergeFeatures, {})
+}
+
+/**
  * Merge feature sets coming from different sources
  */
 function mergeFeatures(featuresA, featuresB) {
@@ -108,6 +115,7 @@ function getMatchedFeatureSet(features) {
 
 module.exports = {
   mergeFeatures,
+  computeFeatureSet,
   isFeatureSetBetter,
   compareFeatures,
   getMatchedFeatureSet,

@@ -88,6 +88,34 @@ describe('FeaturesHelper', function () {
     })
   })
 
+  describe('computeFeatureSet', function () {
+    it('should handle only one featureSet', function () {
+      expect(
+        this.FeaturesHelper.computeFeatureSet([
+          { github: true, feat1: true, feat2: false },
+        ])
+      ).to.deep.equal({ github: true, feat1: true, feat2: false })
+    })
+    it('should handle an empty array of featureSets', function () {
+      expect(this.FeaturesHelper.computeFeatureSet([])).to.deep.equal({})
+    })
+
+    it('should handle 3+ featureSets', function () {
+      const featureSets = [
+        { github: true, feat1: false, feat2: false },
+        { github: false, feat1: true, feat2: false, feat3: false },
+        { github: false, feat1: false, feat2: true, feat4: true },
+      ]
+      expect(this.FeaturesHelper.computeFeatureSet(featureSets)).to.deep.equal({
+        github: true,
+        feat1: true,
+        feat2: true,
+        feat3: false,
+        feat4: true,
+      })
+    })
+  })
+
   describe('isFeatureSetBetter', function () {
     it('simple comparisons', function () {
       const result1 = this.FeaturesHelper.isFeatureSetBetter(
