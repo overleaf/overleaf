@@ -121,14 +121,6 @@ export default function HotkeysModal({
               combination={`${ctrl} + I`}
               description={t('hotkey_italic_text')}
             />
-            {/**
-             * Inserted the command below for the color picker
-             * using hotkey_bold_text to see if it inserted bold
-             */}
-            <Hotkey
-              combination={`${ctrl} + T`}
-              description={t('hotkey_color_text')}
-            />
           </OLCol>
         </OLRow>
 

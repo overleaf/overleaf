@@ -96,9 +96,9 @@ export const ToolbarItems: FC<{
                 shortcut={isMac ? '⌘I' : 'Ctrl+I'}
               />
               {/**
-               * Found location of where to insert an item into the toolbar
-               * Need to change to be able to add a text color change
-               * Currentlty inserts the command to slant text
+               * Insert format color option into toolbar
+               * Uses same styling as italic button but 
+               * with different functions
                */}
               <ToolbarButton
                 id="toolbar-format-italic"
@@ -106,7 +106,7 @@ export const ToolbarItems: FC<{
                 command={commands.toggleColor}
                 active={isActive('\\textcolor')}
                 icon={bsVersion({ bs5: 'format_color_text', bs3: 'text_color' })}
-                shortcut={isMac ? '⌘T' : 'Ctrl+T'}
+                shortcut={isMac ? '⌘;' : 'Ctrl+;'}
               />
             </div>
           )}
