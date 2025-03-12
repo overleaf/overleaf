@@ -1,18 +1,12 @@
 // @ts-check
-import {
-  BackupCorruptedError,
-  BackupCorruptedInvalidBlobError,
-  BackupCorruptedMissingBlobError,
-  BackupRPOViolationChunkNotBackedUpError,
-  BackupRPOViolationError,
-  verifyProjectWithErrorContext,
-} from '../storage/lib/backupVerifier.mjs'
+import { verifyProjectWithErrorContext } from '../storage/lib/backupVerifier.mjs'
 import { promiseMapSettledWithLimit } from '@overleaf/promise-utils'
 import logger from '@overleaf/logger'
 import metrics from '@overleaf/metrics'
 import {
   getSampleProjectsCursor,
-  selectProjectsInDateRange,
+  getProjectsCreatedInDateRangeCursor,
+  getProjectsUpdatedInDateRangeCursor,
 } from './ProjectSampler.mjs'
 import OError from '@overleaf/o-error'
 
@@ -71,43 +65,14 @@ function splitJobs(startDate, endDate, interval) {
 
 /**
  *
- * @param {Array<string>} historyIds
- * @return {Promise<VerificationJobStatus>}
+ * @param historyIdCursor
+ * @return {Promise<{verified: number, total: number, errorTypes: *[], hasFailure: boolean}>}
  */
-async function verifyProjects(historyIds) {
-  let verified = 0
-  const errorTypes = []
-  for (const historyId of historyIds) {
-    try {
-      await verifyProjectWithErrorContext(historyId)
-      logger.debug({ historyId }, 'verified project backup successfully')
-      WRITE_METRICS &&
-        metrics.inc(METRICS.backup_project_verification_succeeded)
-      verified++
-    } catch (error) {
-      errorTypes.push(handleVerificationError(error, historyId))
-    }
-  }
-  return {
-    verified,
-    errorTypes,
-    hasFailure: errorTypes.length > 0,
-    total: historyIds.length,
-  }
-}
-
-/**
- *
- * @param {number} nProjectsToSample
- * @return {Promise<VerificationJobStatus>}
- */
-export async function verifyRandomProjectSample(nProjectsToSample) {
-  const historyIds = await getSampleProjectsCursor(nProjectsToSample)
-
+async function verifyProjectsFromCursor(historyIdCursor) {
   const errorTypes = []
   let verified = 0
   let total = 0
-  for await (const historyId of historyIds) {
+  for await (const historyId of historyIdCursor) {
     total++
     try {
       await verifyProjectWithErrorContext(historyId)
@@ -128,6 +93,16 @@ export async function verifyRandomProjectSample(nProjectsToSample) {
 }
 
 /**
+ *
+ * @param {number} nProjectsToSample
+ * @return {Promise<VerificationJobStatus>}
+ */
+export async function verifyRandomProjectSample(nProjectsToSample) {
+  const historyIds = await getSampleProjectsCursor(nProjectsToSample)
+  return await verifyProjectsFromCursor(historyIds)
+}
+
+/**
  * Samples projects with history IDs between the specified dates and verifies them.
  *
  * @param {Date} startDate
@@ -137,42 +112,28 @@ export async function verifyRandomProjectSample(nProjectsToSample) {
  */
 async function verifyRange(startDate, endDate, projectsPerRange) {
   logger.info({ startDate, endDate }, 'verifying range')
-  const historyIds = await selectProjectsInDateRange(
-    startDate,
-    endDate,
-    projectsPerRange
+
+  const results = await verifyProjectsFromCursor(
+    getProjectsCreatedInDateRangeCursor(startDate, endDate, projectsPerRange)
   )
-  if (historyIds.length === 0) {
+
+  if (results.total === 0) {
     logger.debug(
       { start: startDate, end: endDate },
       'No projects found in range'
     )
-    return {
-      startDate,
-      endDate,
-      verified: 0,
-      total: 0,
-      hasFailure: false,
-      errorTypes: [],
-    }
   }
-  logger.debug(
-    { startDate, endDate, total: historyIds.length },
-    'Verifying projects in range'
-  )
-
-  const { errorTypes, hasFailure, verified } = await verifyProjects(historyIds)
 
   const jobStatus = {
-    verified,
-    total: historyIds.length,
-    hasFailure,
+    ...results,
     startDate,
     endDate,
-    errorTypes,
   }
 
-  logger.debug(jobStatus, 'verified range')
+  logger.debug(
+    { ...jobStatus, errorTypes: Array.from(new Set(jobStatus.errorTypes)) },
+    'Verified range'
+  )
   return jobStatus
 }
 
@@ -200,7 +161,7 @@ async function verifyRange(startDate, endDate, projectsPerRange) {
  * @param {VerifyDateRangeOptions} options
  * @return {Promise<VerificationJobStatus>}
  */
-export async function verifyProjectsInDateRange({
+export async function verifyProjectsCreatedInDateRange({
   concurrency = 0,
   projectsPerRange = 10,
   startDate,
@@ -251,4 +212,45 @@ export async function verifyProjectsInDateRange({
       errorTypes: [],
     }
   )
+}
+
+/**
+ * Verifies that projects that have recently gone out of RPO have been updated.
+ *
+ * @param {Date} startDate
+ * @param {Date} endDate
+ * @param {number} nProjects
+ * @return {Promise<VerificationJobStatus>}
+ */
+export async function verifyProjectsUpdatedInDateRange(
+  startDate,
+  endDate,
+  nProjects
+) {
+  logger.debug(
+    { startDate, endDate, nProjects },
+    'Sampling projects updated in date range'
+  )
+  const results = await verifyProjectsFromCursor(
+    getProjectsUpdatedInDateRangeCursor(startDate, endDate, nProjects)
+  )
+
+  if (results.total === 0) {
+    logger.debug(
+      { start: startDate, end: endDate },
+      'No projects updated recently'
+    )
+  }
+
+  const jobStatus = {
+    ...results,
+    startDate,
+    endDate,
+  }
+
+  logger.debug(
+    { ...jobStatus, errorTypes: Array.from(new Set(jobStatus.errorTypes)) },
+    'Verified recently updated projects'
+  )
+  return jobStatus
 }

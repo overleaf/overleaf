@@ -1,5 +1,4 @@
 // @ts-check
-import config from 'config'
 import OError from '@overleaf/o-error'
 import chunkStore from '../lib/chunk_store/index.js'
 import {
@@ -16,8 +15,7 @@ import path from 'node:path'
 import projectKey from './project_key.js'
 import streams from './streams.js'
 import objectPersistor from '@overleaf/object-persistor'
-
-const RPO = parseInt(config.get('backupRPOInMS'), 10)
+import { RPO } from '../../backupVerifier/utils.mjs'
 
 /**
  * @typedef {import("@overleaf/object-persistor/src/PerProjectEncryptedS3Persistor.js").CachedPerProjectEncryptedS3Persistor} CachedPerProjectEncryptedS3Persistor

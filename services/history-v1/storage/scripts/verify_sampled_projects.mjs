@@ -2,14 +2,16 @@
 import commandLineArgs from 'command-line-args'
 import {
   setWriteMetrics,
-  verifyProjectsInDateRange,
+  verifyProjectsCreatedInDateRange,
   verifyRandomProjectSample,
+  verifyProjectsUpdatedInDateRange,
 } from '../../backupVerifier/ProjectVerifier.mjs'
 import knex from '../lib/knex.js'
 import { client } from '../lib/mongodb.js'
 import { setTimeout } from 'node:timers/promises'
 import logger from '@overleaf/logger'
 import { loadGlobalBlobs } from '../lib/blob_store/index.js'
+import { getDatesBeforeRPO } from '../../backupVerifier/utils.mjs'
 
 logger.logger.level('fatal')
 
@@ -75,7 +77,7 @@ function getOptions() {
     process.exit(0)
   }
 
-  if (!['range', 'random'].includes(strategy)) {
+  if (!['range', 'random', 'recent'].includes(strategy)) {
     throw new Error(`Invalid strategy: ${strategy}`)
   }
 
@@ -87,6 +89,18 @@ function getOptions() {
       return {
         verbose,
         projectVerifier: () => verifyRandomProjectSample(nProjects),
+      }
+    case 'recent':
+      return {
+        verbose,
+        projectVerifier: async () => {
+          const { startDate, endDate } = getDatesBeforeRPO(3 * 3600)
+          return await verifyProjectsUpdatedInDateRange(
+            startDate,
+            endDate,
+            nProjects
+          )
+        },
       }
     case 'range':
     default: {
@@ -109,7 +123,7 @@ function getOptions() {
       STATS.ranges = 0
       return {
         projectVerifier: () =>
-          verifyProjectsInDateRange({
+          verifyProjectsCreatedInDateRange({
             startDate: new Date(start),
             endDate: new Date(end),
             projectsPerRange: nProjects,
