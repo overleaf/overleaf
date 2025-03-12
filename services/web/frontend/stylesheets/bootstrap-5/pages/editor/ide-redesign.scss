@@ -2,15 +2,18 @@
   --ide-redesign-background: var(--bg-dark-primary);
   --ide-redesign-color: var(--content-primary-dark);
   --ide-redesign-resizing-background: var(--bg-dark-primary);
+  --ide-redesign-color-scheme: dark;
 }
 
 @include theme('light') {
   --ide-redesign-background: var(--bg-light-primary);
   --ide-redesign-color: var(--content-primary);
   --ide-redesign-resizing-background: var(--white);
+  --ide-redesign-color-scheme: light;
 }
 
 .ide-redesign-body {
+  color-scheme: var(--ide-redesign-color-scheme);
   display: flex;
   flex-grow: 1;
   background-color: var(--ide-redesign-background);
