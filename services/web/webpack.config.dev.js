@@ -85,6 +85,7 @@ module.exports = merge(base, {
       devServer.app.get('/status', (req, res) => res.send('webpack is up'))
       return middlewares
     },
+    compress: false,
   },
 
   // Customise output to the (node) console
