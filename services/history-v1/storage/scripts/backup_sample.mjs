@@ -32,34 +32,18 @@ async function takeSample(sampleSize) {
       [
         { $sample: { size: sampleSize } },
         {
-          $project: {
-            _id: 0,
-            hasBackup: {
-              $ifNull: ['$overleaf.backup.lastBackedUpVersion', false],
-            },
-          },
+          $match: { 'overleaf.backup.lastBackedUpVersion': { $exists: true } },
         },
         {
-          $group: {
-            _id: null,
-            totalSampled: { $sum: 1 },
-            backedUp: {
-              $sum: {
-                $cond: ['$hasBackup', 1, 0],
-              },
-            },
-          },
+          $count: 'total',
         },
       ],
       { readPreference: READ_PREFERENCE_SECONDARY }
     )
     .toArray()
 
-  if (results.length === 0) {
-    return { totalSampled: 0, backedUp: 0 }
-  }
-
-  return results[0]
+  const count = results[0]?.total || 0
+  return { totalSampled: sampleSize, backedUp: count }
 }
 
 function calculateStatistics(
@@ -67,7 +51,7 @@ function calculateStatistics(
   cumulativeBackedUp,
   totalPopulation
 ) {
-  const proportion = cumulativeBackedUp / cumulativeSampled
+  const proportion = Math.max(1, cumulativeBackedUp) / cumulativeSampled
 
   // Standard error with finite population correction
   const fpc = Math.sqrt(
