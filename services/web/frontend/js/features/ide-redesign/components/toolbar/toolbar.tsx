@@ -1,4 +1,3 @@
-import OLButton from '@/features/ui/components/ol/ol-button'
 import MaterialIcon from '@/shared/components/material-icon'
 import { useTranslation } from 'react-i18next'
 import { ToolbarMenuBar } from './menu-bar'
@@ -7,8 +6,8 @@ import { OnlineUsers } from './online-users'
 import ShareProjectButton from './share-project-button'
 import importOverleafModules from '../../../../../macros/import-overleaf-module.macro'
 import { useEditorContext } from '@/shared/context/editor-context'
-import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
 import ChangeLayoutButton from './change-layout-button'
+import ShowHistoryButton from './show-history-button'
 
 const [publishModalModules] = importOverleafModules('publishModal')
 const SubmitProjectButton = publishModalModules?.import.NewPublishToolbarButton
@@ -40,7 +39,6 @@ const ToolbarMenus = () => {
 
 const ToolbarButtons = () => {
   const { permissionsLevel } = useEditorContext()
-  const { t } = useTranslation()
 
   const shouldDisplaySubmitButton =
     (permissionsLevel === 'owner' || permissionsLevel === 'readAndWrite') &&
@@ -49,20 +47,7 @@ const ToolbarButtons = () => {
   return (
     <div className="ide-redesign-toolbar-actions">
       <OnlineUsers />
-      <div className="ide-redesign-toolbar-button-container">
-        <OLTooltip
-          id="tooltip-open-history"
-          description={t('history')}
-          overlayProps={{ delay: 0, placement: 'bottom' }}
-        >
-          <OLButton
-            size="sm"
-            variant="ghost"
-            className="ide-redesign-toolbar-button-subdued"
-            leadingIcon={<MaterialIcon type="history" />}
-          />
-        </OLTooltip>
-      </div>
+      <ShowHistoryButton />
       <ChangeLayoutButton />
       {shouldDisplaySubmitButton && <SubmitProjectButton />}
       <ShareProjectButton />

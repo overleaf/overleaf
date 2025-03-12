@@ -29,6 +29,7 @@ import {
 } from '@/features/ui/components/bootstrap-5/dropdown-menu'
 import { RailHelpShowHotkeysModal } from './help/keyboard-shortcuts'
 import { RailHelpContactUsModal } from './help/contact-us'
+import { HistorySidebar } from '@/features/ide-react/components/history-sidebar'
 
 type RailElement = {
   icon: AvailableUnfilledIcon
@@ -109,7 +110,11 @@ export const RailLayout = () => {
     togglePane,
     setResizing,
   } = useRailContext()
-  const { setLeftMenuShown } = useLayoutContext()
+
+  const { view, setLeftMenuShown } = useLayoutContext()
+
+  const isHistoryView = view === 'history'
+
   const railActions: RailAction[] = useMemo(
     () => [
       {
@@ -154,7 +159,7 @@ export const RailLayout = () => {
       onSelect={onTabSelect}
       id="ide-rail-tabs"
     >
-      <div className="ide-rail">
+      <div className={classNames('ide-rail', { hidden: isHistoryView })}>
         <Nav activeKey={selectedTab} className="ide-rail-tabs-nav">
           {RAIL_TABS.filter(({ hide }) => !hide).map(
             ({ icon, key, indicator }) => (
@@ -184,7 +189,10 @@ export const RailLayout = () => {
         onCollapse={handlePaneCollapse}
         onExpand={handlePaneExpand}
       >
-        <div className="ide-rail-content">
+        {isHistoryView && <HistorySidebar />}
+        <div
+          className={classNames('ide-rail-content', { hidden: isHistoryView })}
+        >
           <Tab.Content>
             {RAIL_TABS.filter(({ hide }) => !hide).map(({ key, component }) => (
               <Tab.Pane eventKey={key} key={key}>
