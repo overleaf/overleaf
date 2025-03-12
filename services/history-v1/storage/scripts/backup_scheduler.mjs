@@ -214,7 +214,7 @@ async function processPendingProjects(
     } else if (!showOnly) {
       const { job, added } = await addJobWithCheck(
         backupQueue,
-        { projectId },
+        { projectId, pendingChangeAt: pendingAt.getTime() },
         { ...jobOpts, jobId: projectId }
       )
 

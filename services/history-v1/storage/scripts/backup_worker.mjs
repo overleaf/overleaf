@@ -10,7 +10,10 @@ import {
 
 const CONCURRENCY = 15
 const redisOptions = config.get('redis.queue')
-const TIME_BUCKETS = [10, 100, 500, 1000, 5000, 10000, 30000, 60000]
+const JOB_TIME_BUCKETS = [10, 100, 500, 1000, 5000, 10000, 30000, 60000] // milliseconds
+const LAG_TIME_BUCKETS_HRS = [
+  0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.75, 2, 3, 4, 5, 6,
+] // hours
 
 // Configure backup settings to match worker concurrency
 configureBackup({ concurrency: 50, useSecondary: true })
@@ -69,7 +72,7 @@ backupQueue.process(CONCURRENCY, async job => {
   const { projectId, startDate, endDate } = job.data
 
   if (projectId) {
-    return await runBackup(projectId)
+    return await runBackup(projectId, job.data)
   } else if (startDate && endDate) {
     return await runInit(startDate, endDate)
   } else {
@@ -77,12 +80,14 @@ backupQueue.process(CONCURRENCY, async job => {
   }
 })
 
-async function runBackup(projectId) {
+async function runBackup(projectId, data) {
+  const { pendingChangeAt } = data
+  // record the time it takes to run the backup job
   const timer = new metrics.Timer(
     'backup_worker_job_duration',
     1,
     {},
-    TIME_BUCKETS
+    JOB_TIME_BUCKETS
   )
   try {
     logger.debug({ projectId }, 'processing backup for project')
@@ -91,6 +96,14 @@ async function runBackup(projectId) {
       status: 'success',
     })
     timer.done()
+    // record the replication lag (time from change to backup)
+    if (pendingChangeAt) {
+      metrics.histogram(
+        'backup_worker_replication_lag_in_hours',
+        (Date.now() - pendingChangeAt) / (3600 * 1000),
+        LAG_TIME_BUCKETS_HRS
+      )
+    }
     return `backup completed ${projectId}`
   } catch (err) {
     metrics.inc('backup_worker_project', 1, { status: 'failed' })
