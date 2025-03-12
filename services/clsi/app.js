@@ -309,6 +309,10 @@ const loadTcpServer = net.createServer(function (socket) {
     } else {
       // Ready will cancel the maint state.
       socket.write(`up, ready, ${Math.max(freeLoadPercentage, 1)}%\n`, 'ASCII')
+      if (freeLoadPercentage <= 0) {
+        // This metric records how often we would have gone into maintenance mode.
+        Metrics.inc('clsi-prevented-maint')
+      }
     }
     socket.end()
   } else {
