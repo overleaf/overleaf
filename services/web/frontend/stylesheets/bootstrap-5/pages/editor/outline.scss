@@ -8,6 +8,7 @@
   --outline-content-color: var(--content-primary-dark);
   --outline-item-highlight-bg: var(--neutral-60);
   --outline-item-highlight-color: var(--content-primary-dark);
+  --outline-item-highlight-font-weight: normal;
   --outline-item-carat-color: var(--content-disabled);
 }
 
@@ -21,6 +22,7 @@
   --outline-content-color: var(--content-secondary);
   --outline-item-highlight-bg: var(--bg-light-secondary);
   --outline-item-highlight-color: var(--content-secondary);
+  --outline-item-highlight-font-weight: normal;
   --outline-item-carat-color: var(--content-disabled);
 
   .ide-redesign-main {
@@ -28,8 +30,9 @@
     --outline-item-hover-bg: var(--bg-light-secondary);
     --outline-header-hover-bg: var(--bg-light-secondary);
     --outline-content-color: var(--content-primary);
-    --outline-item-highlight-bg: var(--bg-light-secondary);
-    --outline-item-highlight-color: var(--content-primary);
+    --outline-item-highlight-bg: var(--bg-accent-03);
+    --outline-item-highlight-color: var(--green-70);
+    --outline-item-highlight-font-weight: bold;
     --outline-item-carat-color: var(--content-primary);
     --outline-line-guide-color: color-mix(
       in srgb,
@@ -51,6 +54,7 @@
   --outline-content-color: var(--content-primary-dark);
   --outline-item-highlight-bg: var(--green-70);
   --outline-item-highlight-color: var(--green-10);
+  --outline-item-highlight-font-weight: bold;
   --outline-item-carat-color: var(--content-disabled);
 
   .file-outline-panel {
@@ -316,6 +320,7 @@
 .outline-item-link-highlight {
   background-color: var(--outline-item-highlight-bg);
   color: var(--outline-item-highlight-color);
+  font-weight: var(--outline-item-highlight-font-weight);
 }
 
 .outline-caret-icon {

@@ -37,8 +37,9 @@
   }
 
   &.active {
-    color: #fff;
-    background-color: var(--neutral-90);
+    color: var(--green-70);
+    background-color: var(--bg-accent-03);
+    font-weight: bold;
   }
 }
 
