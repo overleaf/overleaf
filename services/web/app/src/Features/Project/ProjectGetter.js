@@ -152,6 +152,17 @@ const ProjectGetter = {
       'deleterData.deletedProjectOwnerId': userId,
     }).exec()
   },
+
+  async getHistoryId(projectId) {
+    const project = await this.getProject(projectId, {
+      'overleaf.history.id': 1,
+    })
+    const historyId = project?.overleaf?.history?.id
+    if (!historyId) {
+      throw new OError('project does not have a history id', { projectId })
+    }
+    return historyId
+  },
 }
 
 module.exports = {
