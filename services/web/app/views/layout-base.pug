@@ -21,7 +21,7 @@ html(
 	head
 		include ./_metadata.pug
 
-		- const bootstrapVersion = bootstrap5PageStatus !== 'disabled' && (bootstrap5Override || (bootstrap5PageStatus === 'enabled' && (bootstrap5PageSplitTest === '' || splitTestVariants[bootstrap5PageSplitTest] === 'enabled'))) ? 5 : 3
+		- const bootstrapVersion = bootstrap5PageStatus !== 'disabled' && (bootstrap5Override || bootstrap5PageSplitTest === '' || splitTestVariants[bootstrap5PageSplitTest] === 'enabled') ? 5 : 3
 	
 		//- Stylesheet
 		link(rel='stylesheet', href=buildCssPath(getCssThemeModifier(userSettings, brandVariation, enableIeeeBranding), bootstrapVersion), id="main-stylesheet")

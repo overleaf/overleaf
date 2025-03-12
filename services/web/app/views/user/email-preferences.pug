@@ -1,6 +1,9 @@
 extends ../layout-marketing
 include ../_mixins/back_to_btns
 
+block vars
+	- bootstrap5PageStatus = 'disabled'
+
 block content
 	main.content.content-alt#main-content
 		.container

@@ -1,6 +1,9 @@
 extends ../layout-marketing
 include ../_mixins/recaptcha
 
+block vars
+	- bootstrap5PageStatus = 'disabled'
+
 block content
 	- var email = reconfirm_email ? reconfirm_email : ""
 	- var showCaptcha = settings.recaptcha && settings.recaptcha.siteKey && !(settings.recaptcha.disabled && settings.recaptcha.disabled.passwordReset)
