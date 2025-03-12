@@ -30,7 +30,7 @@ import {
   projectBlobsBucket,
 } from '../lib/backupPersistor.mjs'
 import { backupGenerator } from '../lib/backupGenerator.mjs'
-import { promises as fs } from 'node:fs'
+import { promises as fs, createWriteStream } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import projectKey from '../lib/project_key.js'
@@ -327,6 +327,7 @@ const optionDefinitions = [
     type: Boolean,
     description: 'Initialize backups for all projects.',
   },
+  { name: 'output', alias: 'o', type: String, description: 'Output file' },
   {
     name: 'start-date',
     type: String,
@@ -686,13 +687,14 @@ export async function initializeProjects(options) {
   let totalProjects = 0
 
   const query = {
-    'overleaf.history.id': { $exists: true },
-    'overleaf.backup.lastBackedUpVersion': { $exists: false },
-    'overleaf.backup.pendingChangeAt': { $exists: false },
-    _id: {
+    'overleaf.backup.lastBackedUpVersion': { $in: [null] },
+  }
+
+  if (options['start-date'] && options['end-date']) {
+    query._id = {
       $gte: objectIdFromInput(convertToISODate(options['start-date'])),
       $lt: objectIdFromInput(convertToISODate(options['end-date'])),
-    },
+    }
   }
 
   const cursor = client
@@ -702,6 +704,18 @@ export async function initializeProjects(options) {
       projection: { _id: 1 },
       readPreference: READ_PREFERENCE_SECONDARY,
     })
+
+  if (options.output) {
+    console.log("Writing project IDs to file: '" + options.output + "'")
+    const output = createWriteStream(options.output)
+    for await (const project of cursor) {
+      output.write(project._id.toHexString() + '\n')
+      totalProjects++
+    }
+    output.end()
+    console.log('Wrote ' + totalProjects + ' project IDs to file')
+    return
+  }
 
   for await (const project of cursor) {
     if (gracefulShutdownInitiated) {
