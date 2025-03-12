@@ -47,6 +47,12 @@ const optionDefinitions = [
     description: 'Limit the number of jobs to be added',
   },
   {
+    name: 'interval',
+    type: Number,
+    description: 'Time in seconds to spread jobs over (default: 300)',
+    defaultValue: 300,
+  },
+  {
     name: 'backoff-delay',
     type: Number,
     description:
@@ -190,6 +196,7 @@ async function processPendingProjects(
   showOnly,
   limit,
   verbose,
+  jobInterval,
   jobOpts = {}
 ) {
   const timeIntervalMs = age * 1000
@@ -212,10 +219,11 @@ async function processPendingProjects(
         `Project: ${projectId} (pending since: ${formatPendingTime(pendingAt)})`
       )
     } else if (!showOnly) {
+      const delay = Math.floor(Math.random() * jobInterval * 1000) // add random delay to avoid all jobs running simultaneously
       const { job, added } = await addJobWithCheck(
         backupQueue,
         { projectId, pendingChangeAt: pendingAt.getTime() },
-        { ...jobOpts, jobId: projectId }
+        { ...jobOpts, delay, jobId: projectId }
       )
 
       if (added) {
@@ -304,13 +312,20 @@ async function run() {
     setupMonitoring()
   } else if (options['queue-pending'] !== undefined) {
     const age = validatePendingTime('queue-pending', options['queue-pending'])
-    await processPendingProjects(age, false, options.limit, options.verbose, {
-      attempts: options.attempts,
-      backoff: {
-        type: 'exponential',
-        delay: options['backoff-delay'],
-      },
-    })
+    await processPendingProjects(
+      age,
+      false,
+      options.limit,
+      options.verbose,
+      options.interval,
+      {
+        attempts: options.attempts,
+        backoff: {
+          type: 'exponential',
+          delay: options['backoff-delay'],
+        },
+      }
+    )
   } else if (options['show-pending'] !== undefined) {
     const age = validatePendingTime('show-pending', options['show-pending'])
     await processPendingProjects(age, true, options.limit, options.verbose)
@@ -330,6 +345,9 @@ async function run() {
       '  --show-pending TIME   Show count of pending projects older than TIME seconds'
     )
     console.log('  --limit N             Limit the number of jobs to be added')
+    console.log(
+      '  --interval TIME       Time interval in seconds to spread jobs over'
+    )
     console.log(
       '  --backoff-delay TIME  Backoff delay in milliseconds for failed jobs (default: 1000)'
     )
