@@ -5,6 +5,8 @@
   --integrations-panel-card-border: var(--border-divider-dark);
   --integrations-panel-card-button-hover-background: var(--bg-dark-secondary);
   --integrations-panel-card-button-background: var(--bg-dark-primary);
+  --integrations-panel-badge-color: var(--content-primary);
+  --integrations-panel-badge-background: var(--bg-light-tertiary);
 }
 
 @include theme('light') {
@@ -14,6 +16,8 @@
   --integrations-panel-card-border: var(--border-divider);
   --integrations-panel-card-button-hover-background: var(--bg-light-secondary);
   --integrations-panel-card-button-background: var(--white);
+  --integrations-panel-badge-color: var(--content-primary);
+  --integrations-panel-badge-background: var(--bg-light-tertiary);
 }
 
 .integrations-panel {
@@ -62,8 +66,9 @@
   flex: 1;
 }
 
-.integrations-panel-card-premium-badge {
-  color: var(--integrations-panel-color);
+.integrations-panel-card-premium-badge.badge {
+  color: var(--integrations-panel-badge-color);
+  background-color: var(--integrations-panel-badge-background) !important;
   font-weight: 600;
 }
 
