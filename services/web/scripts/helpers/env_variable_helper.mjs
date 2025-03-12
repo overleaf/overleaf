@@ -19,8 +19,9 @@ export function ensureMongoTimeout(timeoutInMS) {
  * @returns {void}
  */
 export function ensureRunningOnMongoSecondaryWithTimeout(timeoutInMS) {
+  const timeout = parseInt(process.env.MONGO_SOCKET_TIMEOUT, 10) || 0
   if (
-    process.env.MONGO_SOCKET_TIMEOUT !== timeoutInMS.toString() ||
+    timeout < timeoutInMS ||
     process.env.MONGO_CONNECTION_STRING !==
       process.env.READ_ONLY_MONGO_CONNECTION_STRING
   ) {
