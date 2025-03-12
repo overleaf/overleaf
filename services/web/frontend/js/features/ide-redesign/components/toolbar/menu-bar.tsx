@@ -1,6 +1,12 @@
-import { DropdownDivider } from '@/features/ui/components/bootstrap-5/dropdown-menu'
+import {
+  DropdownDivider,
+  DropdownHeader,
+} from '@/features/ui/components/bootstrap-5/dropdown-menu'
 import { MenuBar } from '@/shared/components/menu-bar/menu-bar'
-import { MenuBarDropdown } from '@/shared/components/menu-bar/menu-bar-dropdown'
+import {
+  MenuBarDropdown,
+  NestedMenuBarDropdown,
+} from '@/shared/components/menu-bar/menu-bar-dropdown'
 import { MenuBarOption } from '@/shared/components/menu-bar/menu-bar-option'
 import { useTranslation } from 'react-i18next'
 import ChangeLayoutOptions from './change-layout-options'
@@ -17,8 +23,16 @@ export const ToolbarMenuBar = () => {
         id="file"
         className="ide-redesign-toolbar-dropdown-toggle-subdued ide-redesign-toolbar-button-subdued"
       >
-        <MenuBarOption title="New File" />
-        <MenuBarOption title="New Project" />
+        <MenuBarOption title="New file" />
+        <MenuBarOption title="New folder" />
+        <MenuBarOption title="Upload file" />
+        <DropdownDivider />
+        <MenuBarOption title="Show version history" />
+        <DropdownDivider />
+        <MenuBarOption title="Download as source (.zip)" />
+        <MenuBarOption title="Download as PDF" />
+        <DropdownDivider />
+        <MenuBarOption title="New project" />
       </MenuBarDropdown>
       <MenuBarDropdown
         title={t('edit')}
@@ -30,7 +44,11 @@ export const ToolbarMenuBar = () => {
         <DropdownDivider />
         <MenuBarOption title="Cut" />
         <MenuBarOption title="Copy" />
-        <MenuBarOption title="Pate" />
+        <MenuBarOption title="Paste" />
+        <MenuBarOption title="Paste without formatting" />
+        <DropdownDivider />
+        <MenuBarOption title="Find" />
+        <MenuBarOption title="Select all" />
       </MenuBarDropdown>
       <MenuBarDropdown
         title={t('view')}
@@ -38,23 +56,61 @@ export const ToolbarMenuBar = () => {
         className="ide-redesign-toolbar-dropdown-toggle-subdued ide-redesign-toolbar-button-subdued"
       >
         <ChangeLayoutOptions />
+        <DropdownHeader>Editor settings</DropdownHeader>
+        <MenuBarOption title="Show breadcrumbs" />
+        <MenuBarOption title="Show equation preview" />
+        <DropdownHeader>PDF preview</DropdownHeader>
+        <MenuBarOption title="Presentation mode" />
+        <MenuBarOption title="Zoom in" />
+        <MenuBarOption title="Zoom out" />
+        <MenuBarOption title="Fit to width" />
+        <MenuBarOption title="Fit to height" />
       </MenuBarDropdown>
       <MenuBarDropdown
         title={t('insert')}
         id="insert"
         className="ide-redesign-toolbar-dropdown-toggle-subdued ide-redesign-toolbar-button-subdued"
       >
-        <MenuBarOption title="Insert figure" />
-        <MenuBarOption title="Insert table" />
-        <MenuBarOption title="Insert link" />
-        <MenuBarOption title="Add comment" />
+        <NestedMenuBarDropdown title="Math" id="math">
+          <MenuBarOption title="Generate from text or image" />
+          <DropdownDivider />
+          <MenuBarOption title="Inline math" />
+          <MenuBarOption title="Display math" />
+        </NestedMenuBarDropdown>
+        <MenuBarOption title="Symbol" />
+        <NestedMenuBarDropdown title="Figure" id="figure">
+          <MenuBarOption title="Upload from computer" />
+          <MenuBarOption title="From project files" />
+          <MenuBarOption title="From another project" />
+          <MenuBarOption title="From URL" />
+        </NestedMenuBarDropdown>
+        <MenuBarOption title="Table" />
+        <MenuBarOption title="Citation" />
+        <MenuBarOption title="Link" />
+        <MenuBarOption title="Cross-reference" />
+        <DropdownDivider />
+        <MenuBarOption title="Comment" />
       </MenuBarDropdown>
       <MenuBarDropdown
         title={t('format')}
         id="format"
         className="ide-redesign-toolbar-dropdown-toggle-subdued ide-redesign-toolbar-button-subdued"
       >
-        <MenuBarOption title="Bold text" />
+        <MenuBarOption title="Bold" />
+        <MenuBarOption title="Italics" />
+        <DropdownDivider />
+        <MenuBarOption title="Bullet list" />
+        <MenuBarOption title="Numbered list" />
+        <MenuBarOption title="Increase indentation" />
+        <MenuBarOption title="Decrease indentation" />
+        <DropdownDivider />
+        <DropdownHeader>Paragraph styles</DropdownHeader>
+        <MenuBarOption title="Normal text" />
+        <MenuBarOption title="Section" />
+        <MenuBarOption title="Subsection" />
+        <MenuBarOption title="Subsubsection" />
+        <MenuBarOption title="Paragraph" />
+        <MenuBarOption title="Subparagraph" />
       </MenuBarDropdown>
       <MenuBarDropdown
         title={t('help')}

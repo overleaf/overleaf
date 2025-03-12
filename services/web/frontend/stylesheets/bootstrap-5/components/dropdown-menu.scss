@@ -72,7 +72,8 @@ $dropdown-item-min-height: 36px;
   }
 
   &:hover:not(.active),
-  &:focus:not(.active) {
+  &:focus:not(.active),
+  &.nested-dropdown-toggle-shown {
     background-color: var(--bg-light-secondary);
     cursor: pointer;
     text-decoration: none;
@@ -210,4 +211,13 @@ $dropdown-item-min-height: 36px;
     line-height: 20px;
     text-align: center;
   }
+}
+
+.nested-dropdown-toggle {
+  &::after {
+    content: none !important;
+  }
+
+  display: flex;
+  justify-content: space-between;
 }

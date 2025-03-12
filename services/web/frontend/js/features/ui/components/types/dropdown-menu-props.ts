@@ -36,6 +36,7 @@ export type DropdownItemProps = PropsWithChildren<{
   href?: string
   leadingIcon?: string | React.ReactNode
   onClick?: React.MouseEventHandler
+  onMouseEnter?: React.MouseEventHandler
   trailingIcon?: string | React.ReactNode
   variant?: 'default' | 'danger'
   className?: string
