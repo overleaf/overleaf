@@ -12,50 +12,68 @@ const HAS_PROJECTS_WITHOUT_HISTORY =
  * @param {Date} start
  * @param {Date} end
  * @param {number} N
- * @return {Promise<Array<string>>}
+ * @yields {string}
  */
-export async function selectProjectsInDateRange(start, end, N) {
-  let projects = await projectsCollection
-    .aggregate([
-      {
-        $match: {
-          _id: {
-            $gt: objectIdFromDate(start),
-            $lte: objectIdFromDate(end),
-          },
+export async function* getProjectsCreatedInDateRangeCursor(start, end, N) {
+  yield* getSampleProjectsCursor(N, [
+    {
+      $match: {
+        _id: {
+          $gt: objectIdFromDate(start),
+          $lte: objectIdFromDate(end),
         },
       },
-      { $sample: { size: N } },
-      { $project: { 'overleaf.history.id': 1 } },
-    ])
-    .toArray()
-  if (HAS_PROJECTS_WITHOUT_HISTORY) {
-    projects = projects.filter(p => Boolean(p.overleaf?.history?.id))
-    if (projects.length === 0) {
-      // Very unlucky sample. Try again.
-      return await selectProjectsInDateRange(start, end, N)
-    }
-  }
-  return projects.map(p => p.overleaf.history.id.toString())
+    },
+  ])
 }
 
-export async function* getSampleProjectsCursor(N) {
+export async function* getProjectsUpdatedInDateRangeCursor(start, end, N) {
+  yield* getSampleProjectsCursor(N, [
+    {
+      $match: {
+        'overleaf.history.updatedAt': {
+          $gt: start,
+          $lte: end,
+        },
+      },
+    },
+  ])
+}
+
+/**
+ * @typedef {import('mongodb').Document} Document
+ */
+
+/**
+ *
+ * @generator
+ * @param {number} N
+ * @param {Array<Document>} preSampleAggregationStages
+ * @yields {string}
+ */
+export async function* getSampleProjectsCursor(
+  N,
+  preSampleAggregationStages = []
+) {
   const cursor = projectsCollection.aggregate([
+    ...preSampleAggregationStages,
     { $sample: { size: N } },
     { $project: { 'overleaf.history.id': 1 } },
   ])
 
   let validProjects = 0
+  let hasInvalidProject = false
 
   for await (const project of cursor) {
-    if (HAS_PROJECTS_WITHOUT_HISTORY) {
+    if (HAS_PROJECTS_WITHOUT_HISTORY && !project.overleaf?.history?.id) {
+      hasInvalidProject = true
       continue
     }
     validProjects++
     yield project.overleaf.history.id.toString()
   }
 
-  if (validProjects === 0) {
-    yield* getSampleProjectsCursor(N)
+  if (validProjects === 0 && hasInvalidProject) {
+    yield* getSampleProjectsCursor(N, preSampleAggregationStages)
   }
 }
