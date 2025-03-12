@@ -32,7 +32,7 @@
   --editor-toolbar-bg: var(--bg-dark-primary);
   --toolbar-filetree-bg-color: var(--neutral-80);
 
-  .toolbar {
+  .cm-panels-top {
     border-bottom: none;
   }
 }
@@ -64,10 +64,6 @@
     --toolbar-btn-hover-color: var(--white);
     --editor-toolbar-bg: var(--white);
     --toolbar-filetree-bg-color: var(--white);
-  }
-
-  .cm-panels-top {
-    border-bottom: none;
 
     .ol-cm-toolbar-portal {
       border-bottom: 1px solid #ddd;
