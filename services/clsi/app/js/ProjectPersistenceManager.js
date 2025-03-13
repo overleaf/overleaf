@@ -13,6 +13,7 @@ const CompileManager = require('./CompileManager')
 const async = require('async')
 const logger = require('@overleaf/logger')
 const oneDay = 24 * 60 * 60 * 1000
+const Metrics = require('@overleaf/metrics')
 const Settings = require('@overleaf/settings')
 const diskusage = require('diskusage')
 const { callbackify } = require('node:util')
@@ -31,7 +32,11 @@ async function refreshExpiryTimeout() {
   for (const path of paths) {
     try {
       const stats = await diskusage.check(path)
-      const lowDisk = stats.available / stats.total < 0.1
+      const diskAvailablePercent = (stats.available / stats.total) * 100
+      Metrics.gauge('disk_available_percent', diskAvailablePercent, 1, {
+        path,
+      })
+      const lowDisk = diskAvailablePercent < 10
 
       const lowerExpiry = ProjectPersistenceManager.EXPIRY_TIMEOUT * 0.9
       if (lowDisk && Settings.project_cache_length_ms / 2 < lowerExpiry) {

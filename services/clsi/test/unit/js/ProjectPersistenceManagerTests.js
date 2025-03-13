@@ -23,6 +23,7 @@ describe('ProjectPersistenceManager', function () {
   beforeEach(function () {
     this.ProjectPersistenceManager = SandboxedModule.require(modulePath, {
       requires: {
+        '@overleaf/metrics': (this.Metrics = { gauge: sinon.stub() }),
         './UrlCache': (this.UrlCache = {}),
         './CompileManager': (this.CompileManager = {}),
         diskusage: (this.diskusage = { check: sinon.stub() }),
@@ -49,6 +50,10 @@ describe('ProjectPersistenceManager', function () {
       })
 
       this.ProjectPersistenceManager.refreshExpiryTimeout(() => {
+        this.Metrics.gauge.should.have.been.calledWith(
+          'disk_available_percent',
+          40
+        )
         this.ProjectPersistenceManager.EXPIRY_TIMEOUT.should.equal(
           this.settings.project_cache_length_ms
         )
@@ -63,6 +68,10 @@ describe('ProjectPersistenceManager', function () {
       })
 
       this.ProjectPersistenceManager.refreshExpiryTimeout(() => {
+        this.Metrics.gauge.should.have.been.calledWith(
+          'disk_available_percent',
+          5
+        )
         this.ProjectPersistenceManager.EXPIRY_TIMEOUT.should.equal(900)
         done()
       })
@@ -75,6 +84,10 @@ describe('ProjectPersistenceManager', function () {
       })
       this.ProjectPersistenceManager.EXPIRY_TIMEOUT = 500
       this.ProjectPersistenceManager.refreshExpiryTimeout(() => {
+        this.Metrics.gauge.should.have.been.calledWith(
+          'disk_available_percent',
+          5
+        )
         this.ProjectPersistenceManager.EXPIRY_TIMEOUT.should.equal(500)
         done()
       })
