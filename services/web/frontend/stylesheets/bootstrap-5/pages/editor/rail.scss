@@ -2,8 +2,8 @@
   --ide-rail-background: var(--bg-dark-primary);
   --ide-rail-color: var(--content-primary-dark);
   --ide-rail-link-background: var(--bg-dark-primary);
-  --ide-rail-link-active-background: var(--bg-dark-secondary);
-  --ide-rail-link-active-indicator-background: var(--white);
+  --ide-rail-link-active-color: var(--green-10);
+  --ide-rail-link-active-background: var(--green-70);
   --ide-rail-border-colour: var(--border-divider-dark);
   --ide-rail-header-subdued-button-color: var(--content-primary-dark);
   --ide-rail-header-subdued-button-hover-background: var(--bg-dark-tertiary);
@@ -11,10 +11,10 @@
 
 @include theme('light') {
   --ide-rail-background: #fff;
-  --ide-rail-color: var(--neutral-90);
+  --ide-rail-color: var(--content-primary);
   --ide-rail-link-background: #fff;
-  --ide-rail-link-active-background: var(--neutral-10);
-  --ide-rail-link-active-indicator-background: var(--neutral-90);
+  --ide-rail-link-active-color: var(--green-70);
+  --ide-rail-link-active-background: var(--bg-accent-03);
   --ide-rail-border-colour: var(--border-divider);
   --ide-rail-header-subdued-button-color: var(--content-primary);
   --ide-rail-header-subdued-button-hover-background: var(--bg-light-tertiary);
@@ -64,7 +64,8 @@
   overflow-y: hidden;
 
   &:hover,
-  &:visited {
+  &:visited,
+  &:focus {
     color: var(--ide-rail-color);
   }
 
@@ -74,7 +75,7 @@
   }
 
   &.open-rail {
-    color: var(--ide-rail-color);
+    color: var(--ide-rail-link-active-color);
     background-color: var(--ide-rail-link-active-background);
 
     &::after {
@@ -88,9 +89,8 @@
       box-sizing: border-box;
       width: 24px;
       height: $indicator-height * 2;
-      border: $indicator-height solid
-        var(--ide-rail-link-active-indicator-background);
-      background-color: var(--ide-rail-link-active-indicator-background);
+      border: $indicator-height solid var(--ide-rail-link-active-color);
+      background-color: var(--ide-rail-link-active-color);
     }
   }
 
