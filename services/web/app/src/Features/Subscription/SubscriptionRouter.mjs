@@ -183,12 +183,6 @@ export default {
       RateLimiterMiddleware.rateLimit(subscriptionRateLimiter),
       SubscriptionController.previewSubscription
     )
-    webRouter.post(
-      '/user/subscription/update',
-      AuthenticationController.requireLogin(),
-      RateLimiterMiddleware.rateLimit(subscriptionRateLimiter),
-      SubscriptionController.updateSubscription
-    )
     webRouter.get(
       '/user/subscription/addon/:addOnCode/add',
       AuthenticationController.requireLogin(),

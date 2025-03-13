@@ -175,9 +175,9 @@ describe('SubscriptionController', function () {
           recordEventForSession: sinon.stub(),
           setUserPropertyForUser: sinon.stub(),
         }),
-        '../../infrastructure/Modules': {
+        '../../infrastructure/Modules': (this.Modules = {
           promises: { hooks: { fire: sinon.stub().resolves() } },
-        },
+        }),
         '../../infrastructure/Features': this.Features,
         '../../util/currency': (this.currency = {
           formatCurrency: sinon.stub(),
@@ -290,32 +290,6 @@ describe('SubscriptionController', function () {
 
     it('should load an empty list of groups with settings available', function () {
       expect(this.data.groupSettingsEnabledFor).to.deep.equal([])
-    })
-  })
-
-  describe('updateSubscription via post', function () {
-    beforeEach(function (done) {
-      this.res = {
-        redirect() {
-          done()
-        },
-      }
-      sinon.spy(this.res, 'redirect')
-      this.plan_code = '1234'
-      this.req.body.plan_code = this.plan_code
-      this.SubscriptionController.updateSubscription(this.req, this.res)
-    })
-
-    it('should send the user and subscriptionId to the handler', function (done) {
-      this.SubscriptionHandler.updateSubscription
-        .calledWith(this.user, this.plan_code)
-        .should.equal(true)
-      done()
-    })
-
-    it('should redurect to the subscription page', function (done) {
-      this.res.redirect.calledWith('/user/subscription').should.equal(true)
-      done()
     })
   })
 

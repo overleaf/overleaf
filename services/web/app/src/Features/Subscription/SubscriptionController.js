@@ -458,30 +458,6 @@ async function previewSubscription(req, res, next) {
   res.render('subscriptions/preview-change', { changePreview })
 }
 
-function updateSubscription(req, res, next) {
-  const origin = req && req.query ? req.query.origin : null
-  const user = SessionManager.getSessionUser(req.session)
-  const planCode = req.body.plan_code
-  if (planCode == null) {
-    const err = new Error('plan_code is not defined')
-    logger.warn(
-      { userId: user._id, err, planCode, origin, body: req.body },
-      '[Subscription] error in updateSubscription form'
-    )
-    return next(err)
-  }
-  logger.debug({ planCode, userId: user._id }, 'updating subscription')
-  SubscriptionHandler.updateSubscription(user, planCode, null, function (err) {
-    if (err) {
-      OError.tag(err, 'something went wrong updating subscription', {
-        user_id: user._id,
-      })
-      return next(err)
-    }
-    res.redirect('/user/subscription')
-  })
-}
-
 function cancelPendingSubscriptionChange(req, res, next) {
   const user = SessionManager.getSessionUser(req.session)
   logger.debug({ userId: user._id }, 'canceling pending subscription change')
@@ -799,7 +775,6 @@ module.exports = {
   canceledSubscription: expressify(canceledSubscription),
   cancelV1Subscription,
   previewSubscription: expressify(previewSubscription),
-  updateSubscription,
   cancelPendingSubscriptionChange,
   updateAccountEmailAddress,
   reactivateSubscription,
