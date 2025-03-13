@@ -17,6 +17,11 @@ import { mongodb } from './storage/index.js'
 import { expressify } from '@overleaf/promise-utils'
 import { Blob } from 'overleaf-editor-core'
 import { loadGlobalBlobs } from './storage/lib/blob_store/index.js'
+import { EventEmitter } from 'node:events'
+import {
+  loopRandomProjects,
+  setWriteMetrics,
+} from './backupVerifier/ProjectVerifier.mjs'
 
 const app = express()
 
@@ -49,6 +54,7 @@ app.get(
 )
 
 app.get('/status', (req, res) => {
+  logger.info({}, 'status check')
   res.send('history-v1-backup-verifier is up')
 })
 
@@ -66,6 +72,23 @@ app.use((err, req, res, next) => {
   next(err)
 })
 
+const shutdownEmitter = new EventEmitter()
+
+shutdownEmitter.once('shutdown', async code => {
+  logger.info({}, 'shutting down')
+  await mongodb.client.close()
+  await setTimeout(100)
+  process.exit(code)
+})
+
+process.on('SIGTERM', () => {
+  shutdownEmitter.emit('shutdown', 0)
+})
+
+process.on('SIGINT', () => {
+  shutdownEmitter.emit('shutdown', 0)
+})
+
 /**
  * @param {number} port
  * @return {Promise<http.Server>}
@@ -76,8 +99,11 @@ export async function startApp(port) {
   await healthCheck()
   const server = http.createServer(app)
   await promisify(server.listen.bind(server, port))()
+  loopRandomProjects(shutdownEmitter)
   return server
 }
+
+setWriteMetrics(true)
 
 // Run this if we're called directly
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
@@ -85,9 +111,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   try {
     await startApp(PORT)
   } catch (error) {
+    shutdownEmitter.emit('shutdown', 1)
     logger.error({ error }, 'error starting app')
-    await mongodb.client.close()
-    await setTimeout(100)
-    process.exit(1)
   }
 }

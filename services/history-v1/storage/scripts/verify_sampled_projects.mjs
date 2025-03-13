@@ -12,6 +12,8 @@ import { setTimeout } from 'node:timers/promises'
 import logger from '@overleaf/logger'
 import { loadGlobalBlobs } from '../lib/blob_store/index.js'
 import { getDatesBeforeRPO } from '../../backupVerifier/utils.mjs'
+import { EventEmitter } from 'node:events'
+import { mongodb } from '../index.js'
 
 logger.logger.level('fatal')
 
@@ -39,7 +41,7 @@ const STATS = {
 
 /**
  * @typedef {Object} CLIOptions
- * @property {() => Promise<VerificationJobStatus>} projectVerifier
+ * @property {(signal: EventEmitter) => Promise<VerificationJobStatus>} projectVerifier
  * @property {boolean} verbose
  */
 
@@ -88,17 +90,18 @@ function getOptions() {
       console.log('Verifying random projects')
       return {
         verbose,
-        projectVerifier: () => verifyRandomProjectSample(nProjects),
+        projectVerifier: signal => verifyRandomProjectSample(nProjects, signal),
       }
     case 'recent':
       return {
         verbose,
-        projectVerifier: async () => {
+        projectVerifier: async signal => {
           const { startDate, endDate } = getDatesBeforeRPO(3 * 3600)
           return await verifyProjectsUpdatedInDateRange(
             startDate,
             endDate,
-            nProjects
+            nProjects,
+            signal
           )
         },
       }
@@ -122,12 +125,13 @@ function getOptions() {
       }
       STATS.ranges = 0
       return {
-        projectVerifier: () =>
+        projectVerifier: signal =>
           verifyProjectsCreatedInDateRange({
             startDate: new Date(start),
             endDate: new Date(end),
             projectsPerRange: nProjects,
             concurrency,
+            signal,
           }),
         verbose,
       }
@@ -181,10 +185,24 @@ function displayStats(stats) {
   }
 }
 
+const shutdownEmitter = new EventEmitter()
+
+shutdownEmitter.on('shutdown', async () => {
+  await gracefulShutdown()
+})
+
+process.on('SIGTERM', () => {
+  shutdownEmitter.emit('shutdown')
+})
+
+process.on('SIGINT', () => {
+  shutdownEmitter.emit('shutdown')
+})
+
 await loadGlobalBlobs()
 
 try {
-  const stats = await projectVerifier()
+  const stats = await projectVerifier(shutdownEmitter)
   displayStats(stats)
   console.log(`completed`)
 } catch (error) {

@@ -9,6 +9,7 @@ import {
   getProjectsUpdatedInDateRangeCursor,
 } from './ProjectSampler.mjs'
 import OError from '@overleaf/o-error'
+import { setTimeout } from 'node:timers/promises'
 
 const MS_PER_30_DAYS = 30 * 24 * 60 * 60 * 1000
 
@@ -19,6 +20,10 @@ const METRICS = {
 }
 
 let WRITE_METRICS = false
+
+/**
+ * @typedef {import('node:events').EventEmitter} EventEmitter
+ */
 
 /**
  * Allows writing metrics to be enabled or disabled.
@@ -65,14 +70,24 @@ function splitJobs(startDate, endDate, interval) {
 
 /**
  *
- * @param historyIdCursor
+ * @param {AsyncGenerator<string>} historyIdCursor
+ * @param {EventEmitter} [eventEmitter]
  * @return {Promise<{verified: number, total: number, errorTypes: *[], hasFailure: boolean}>}
  */
-async function verifyProjectsFromCursor(historyIdCursor) {
+async function verifyProjectsFromCursor(historyIdCursor, eventEmitter) {
   const errorTypes = []
   let verified = 0
   let total = 0
+  let receivedShutdownSignal = false
+  if (eventEmitter) {
+    eventEmitter.once('shutdown', () => {
+      receivedShutdownSignal = true
+    })
+  }
   for await (const historyId of historyIdCursor) {
+    if (receivedShutdownSignal) {
+      break
+    }
     total++
     try {
       await verifyProjectWithErrorContext(historyId)
@@ -81,7 +96,8 @@ async function verifyProjectsFromCursor(historyIdCursor) {
         metrics.inc(METRICS.backup_project_verification_succeeded)
       verified++
     } catch (error) {
-      errorTypes.push(handleVerificationError(error, historyId))
+      const errorType = handleVerificationError(error, historyId)
+      errorTypes.push(errorType)
     }
   }
   return {
@@ -95,11 +111,12 @@ async function verifyProjectsFromCursor(historyIdCursor) {
 /**
  *
  * @param {number} nProjectsToSample
+ * @param {EventEmitter} [signal]
  * @return {Promise<VerificationJobStatus>}
  */
-export async function verifyRandomProjectSample(nProjectsToSample) {
+export async function verifyRandomProjectSample(nProjectsToSample, signal) {
   const historyIds = await getSampleProjectsCursor(nProjectsToSample)
-  return await verifyProjectsFromCursor(historyIds)
+  return await verifyProjectsFromCursor(historyIds, signal)
 }
 
 /**
@@ -108,13 +125,15 @@ export async function verifyRandomProjectSample(nProjectsToSample) {
  * @param {Date} startDate
  * @param {Date} endDate
  * @param {number} projectsPerRange
+ * @param {EventEmitter} [signal]
  * @return {Promise<VerificationJobStatus>}
  */
-async function verifyRange(startDate, endDate, projectsPerRange) {
+async function verifyRange(startDate, endDate, projectsPerRange, signal) {
   logger.info({ startDate, endDate }, 'verifying range')
 
   const results = await verifyProjectsFromCursor(
-    getProjectsCreatedInDateRangeCursor(startDate, endDate, projectsPerRange)
+    getProjectsCreatedInDateRangeCursor(startDate, endDate, projectsPerRange),
+    signal
   )
 
   if (results.total === 0) {
@@ -154,6 +173,7 @@ async function verifyRange(startDate, endDate, projectsPerRange) {
  * @property {number} [interval]
  * @property {number} [projectsPerRange]
  * @property {number} [concurrency]
+ * @property {EventEmitter} [signal]
  */
 
 /**
@@ -167,6 +187,7 @@ export async function verifyProjectsCreatedInDateRange({
   startDate,
   endDate,
   interval = MS_PER_30_DAYS,
+  signal,
 }) {
   const jobs = splitJobs(startDate, endDate, interval)
   if (jobs.length === 0) {
@@ -180,7 +201,7 @@ export async function verifyProjectsCreatedInDateRange({
     concurrency,
     jobs,
     ({ startDate, endDate }) =>
-      verifyRange(startDate, endDate, projectsPerRange)
+      verifyRange(startDate, endDate, projectsPerRange, signal)
   )
   return settlements.reduce(
     /**
@@ -220,19 +241,22 @@ export async function verifyProjectsCreatedInDateRange({
  * @param {Date} startDate
  * @param {Date} endDate
  * @param {number} nProjects
+ * @param {EventEmitter} [signal]
  * @return {Promise<VerificationJobStatus>}
  */
 export async function verifyProjectsUpdatedInDateRange(
   startDate,
   endDate,
-  nProjects
+  nProjects,
+  signal
 ) {
   logger.debug(
     { startDate, endDate, nProjects },
     'Sampling projects updated in date range'
   )
   const results = await verifyProjectsFromCursor(
-    getProjectsUpdatedInDateRangeCursor(startDate, endDate, nProjects)
+    getProjectsUpdatedInDateRangeCursor(startDate, endDate, nProjects),
+    signal
   )
 
   if (results.total === 0) {
@@ -253,4 +277,30 @@ export async function verifyProjectsUpdatedInDateRange(
     'Verified recently updated projects'
   )
   return jobStatus
+}
+
+/**
+ *
+ * @param {EventEmitter} signal
+ * @return {void}
+ */
+export function loopRandomProjects(signal) {
+  let shutdown = false
+  signal.on('shutdown', function () {
+    shutdown = true
+  })
+  async function loop() {
+    do {
+      try {
+        const result = await verifyRandomProjectSample(100, signal)
+        logger.debug({ result }, 'verified random project sample')
+      } catch (error) {
+        logger.error({ error }, 'error verifying random project sample')
+      }
+
+      await setTimeout(300_000)
+      // eslint-disable-next-line no-unmodified-loop-condition
+    } while (!shutdown)
+  }
+  loop()
 }
