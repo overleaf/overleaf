@@ -204,9 +204,9 @@ describe('SandboxedCompiles', function () {
       cy.log('wait for compile')
       cy.get('.pdf-viewer').should('contain.text', 'sandboxed')
 
-      cy.log('Check which compiler version was used, expect 2024')
+      cy.log('Check which compiler version was used, expect 2025')
       cy.get('[aria-label="View logs"]').click()
-      cy.findByText(/This is pdfTeX, Version .+ \(TeX Live 2024\) /)
+      cy.findByText(/This is pdfTeX, Version .+ \(TeX Live 2025\) /)
 
       cy.log('Check that there is no TeX Live version toggle')
       cy.get('header').findByText('Menu').click()
