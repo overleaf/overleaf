@@ -142,3 +142,10 @@
 .ide-redesign-online-users {
   display: flex;
 }
+
+.ide-redesign-toolbar-editable-project-name {
+  text-align: center;
+  width: 100%;
+  max-width: 400px;
+  margin: var(--spacing-02) 0;
+}

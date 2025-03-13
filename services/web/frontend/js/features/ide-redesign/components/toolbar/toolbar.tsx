@@ -4,13 +4,8 @@ import { ToolbarMenuBar } from './menu-bar'
 import { ToolbarProjectTitle } from './project-title'
 import { OnlineUsers } from './online-users'
 import ShareProjectButton from './share-project-button'
-import importOverleafModules from '../../../../../macros/import-overleaf-module.macro'
-import { useEditorContext } from '@/shared/context/editor-context'
 import ChangeLayoutButton from './change-layout-button'
 import ShowHistoryButton from './show-history-button'
-
-const [publishModalModules] = importOverleafModules('publishModal')
-const SubmitProjectButton = publishModalModules?.import.NewPublishToolbarButton
 
 export const Toolbar = () => {
   return (
@@ -38,18 +33,11 @@ const ToolbarMenus = () => {
 }
 
 const ToolbarButtons = () => {
-  const { permissionsLevel } = useEditorContext()
-
-  const shouldDisplaySubmitButton =
-    (permissionsLevel === 'owner' || permissionsLevel === 'readAndWrite') &&
-    SubmitProjectButton
-
   return (
     <div className="ide-redesign-toolbar-actions">
       <OnlineUsers />
       <ShowHistoryButton />
       <ChangeLayoutButton />
-      {shouldDisplaySubmitButton && <SubmitProjectButton />}
       <ShareProjectButton />
     </div>
   )
