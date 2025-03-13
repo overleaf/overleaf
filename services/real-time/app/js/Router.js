@@ -216,18 +216,6 @@ module.exports = Router = {
       })
       metrics.gauge('socket-io.clients', io.sockets.clients().length)
 
-      const info = {
-        session,
-        publicId: client.publicId,
-        clientId: client.id,
-        isDebugging,
-      }
-      if (isDebugging) {
-        logger.info(info, 'client connected')
-      } else {
-        logger.debug(info, 'client connected')
-      }
-
       let user
       if (session && session.passport && session.passport.user) {
         ;({ user } = session.passport)
@@ -236,6 +224,20 @@ module.exports = Router = {
       } else {
         const anonymousAccessToken = session?.anonTokenAccess?.[projectId]
         user = { _id: 'anonymous-user', anonymousAccessToken }
+      }
+
+      const info = {
+        userId: user._id,
+        projectId,
+        transport: client.transport,
+        publicId: client.publicId,
+        clientId: client.id,
+        isDebugging,
+      }
+      if (isDebugging) {
+        logger.info(info, 'client connected')
+      } else {
+        logger.debug(info, 'client connected')
       }
 
       const connectionDetails = {
