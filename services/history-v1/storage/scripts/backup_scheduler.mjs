@@ -2,7 +2,10 @@ import Queue from 'bull'
 import config from 'config'
 import commandLineArgs from 'command-line-args'
 import logger from '@overleaf/logger'
-import { listPendingBackups } from '../lib/backup_store/index.js'
+import {
+  listPendingBackups,
+  getBackupStatus,
+} from '../lib/backup_store/index.js'
 
 logger.initialize('backup-queue')
 
@@ -66,6 +69,12 @@ const optionDefinitions = [
     defaultValue: 3,
   },
   {
+    name: 'warn-threshold',
+    type: Number,
+    description: 'Warn about any project exceeding this pending age',
+    defaultValue: 2 * 3600, // 2 hours
+  },
+  {
     name: 'verbose',
     alias: 'v',
     type: Boolean,
@@ -75,6 +84,7 @@ const optionDefinitions = [
 
 // Parse command line arguments
 const options = commandLineArgs(optionDefinitions)
+const WARN_THRESHOLD = options['warn-threshold']
 
 // Helper to validate date format
 function isValidDateFormat(dateStr) {
@@ -209,11 +219,27 @@ async function processPendingProjects(
   let existingCount = 0
   // Pass the limit directly to MongoDB query for better performance
   const pendingCursor = listPendingBackups(timeIntervalMs, limit)
-
+  const changeTimes = []
   for await (const project of pendingCursor) {
     const projectId = project._id.toHexString()
     const pendingAt = project.overleaf?.backup?.pendingChangeAt
-
+    if (pendingAt) {
+      changeTimes.push(pendingAt)
+      const pendingAge = Math.floor((Date.now() - pendingAt.getTime()) / 1000)
+      if (pendingAge > WARN_THRESHOLD) {
+        const backupStatus = await getBackupStatus(projectId)
+        logger.warn(
+          {
+            projectId,
+            pendingAt,
+            pendingAge,
+            backupStatus,
+            warnThreshold: WARN_THRESHOLD,
+          },
+          `pending change exceeds rpo warning threshold`
+        )
+      }
+    }
     if (showOnly && verbose) {
       console.log(
         `Project: ${projectId} (pending since: ${formatPendingTime(pendingAt)})`
@@ -252,6 +278,10 @@ async function processPendingProjects(
     }
   }
 
+  const oldestChange = changeTimes.reduce((min, time) =>
+    time < min ? time : min
+  )
+
   if (showOnly) {
     console.log(
       `Found ${count} projects with pending changes (not added to queue)`
@@ -260,6 +290,7 @@ async function processPendingProjects(
     console.log(`Found ${count} projects with pending changes:`)
     console.log(`  ${addedCount} jobs added to queue`)
     console.log(`  ${existingCount} jobs already existed in queue`)
+    console.log(`  Oldest pending change: ${formatPendingTime(oldestChange)}`)
   }
 }
 

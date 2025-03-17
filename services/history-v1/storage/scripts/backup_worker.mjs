@@ -9,6 +9,7 @@ import {
 } from './backup.mjs'
 
 const CONCURRENCY = 15
+const WARN_THRESHOLD = 2 * 60 * 60 * 1000 // warn if projects are older than this
 const redisOptions = config.get('redis.queue')
 const JOB_TIME_BUCKETS = [10, 100, 500, 1000, 5000, 10000, 30000, 60000] // milliseconds
 const LAG_TIME_BUCKETS_HRS = [
@@ -72,7 +73,7 @@ backupQueue.process(CONCURRENCY, async job => {
   const { projectId, startDate, endDate } = job.data
 
   if (projectId) {
-    return await runBackup(projectId, job.data)
+    return await runBackup(projectId, job.data, job)
   } else if (startDate && endDate) {
     return await runInit(startDate, endDate)
   } else {
@@ -80,7 +81,7 @@ backupQueue.process(CONCURRENCY, async job => {
   }
 })
 
-async function runBackup(projectId, data) {
+async function runBackup(projectId, data, job) {
   const { pendingChangeAt } = data
   // record the time it takes to run the backup job
   const timer = new metrics.Timer(
@@ -89,6 +90,13 @@ async function runBackup(projectId, data) {
     {},
     JOB_TIME_BUCKETS
   )
+  const pendingAge = Date.now() - pendingChangeAt
+  if (pendingAge > WARN_THRESHOLD) {
+    logger.warn(
+      { projectId, pendingAge, job },
+      'project has been pending for a long time'
+    )
+  }
   try {
     logger.debug({ projectId }, 'processing backup for project')
     await backupProject(projectId, {})
