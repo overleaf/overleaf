@@ -604,9 +604,7 @@ export function deleteProject(req, res, next) {
           if (err) {
             return next(err)
           }
-          // The third parameter to the following call is the error. Calling it
-          // with null will remove any failure record for this project.
-          ErrorRecorder.record(projectId, 0, null, err => {
+          ErrorRecorder.clearError(projectId, err => {
             if (err) {
               return next(err)
             }

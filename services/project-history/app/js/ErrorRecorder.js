@@ -1,54 +1,57 @@
+// @ts-check
+
 import { callbackify } from 'node:util'
 import logger from '@overleaf/logger'
 import metrics from '@overleaf/metrics'
+import OError from '@overleaf/o-error'
 import { db } from './mongodb.js'
 
+/**
+ * @import { ProjectHistoryFailure } from './mongo-types'
+ */
+
+/**
+ * @param {string} projectId
+ * @param {number} queueSize
+ * @param {Error} error
+ * @return {Promise<ProjectHistoryFailure>} the failure record
+ */
 async function record(projectId, queueSize, error) {
-  if (error != null) {
-    const errorRecord = {
-      queueSize,
-      error: error.toString(),
-      stack: error.stack,
-      ts: new Date(),
-    }
-    logger.debug(
-      { projectId, errorRecord },
-      'recording failed attempt to process updates'
-    )
-    try {
-      await db.projectHistoryFailures.updateOne(
-        { project_id: projectId },
-        {
-          $set: errorRecord,
-          $inc: { attempts: 1 },
-          $push: {
-            history: {
-              $each: [errorRecord],
-              $position: 0,
-              $slice: 10,
-            },
-          }, // only keep recent failures
-        },
-        { upsert: true }
-      )
-    } catch (mongoError) {
-      logger.error(
-        { projectId, mongoError },
-        'failed to change project statues in mongo'
-      )
-    }
-    throw error
-  } else {
-    try {
-      await db.projectHistoryFailures.deleteOne({ project_id: projectId })
-    } catch (mongoError) {
-      logger.error(
-        { projectId, mongoError },
-        'failed to change project statues in mongo'
-      )
-    }
-    return queueSize
+  const errorRecord = {
+    queueSize,
+    error: error.toString(),
+    stack: error.stack ?? '',
+    ts: new Date(),
   }
+  logger.debug(
+    { projectId, errorRecord },
+    'recording failed attempt to process updates'
+  )
+  const result = await db.projectHistoryFailures.findOneAndUpdate(
+    { project_id: projectId },
+    {
+      $set: errorRecord,
+      $inc: { attempts: 1 },
+      $push: {
+        history: {
+          $each: [errorRecord],
+          $position: 0,
+          // only keep recent failures
+          $slice: 10,
+        },
+      },
+    },
+    { upsert: true, returnDocument: 'after', includeResultMetadata: true }
+  )
+  if (result.value == null) {
+    // Since we upsert, the result should always have a value
+    throw new OError('no value returned when recording an error', { projectId })
+  }
+  return result.value
+}
+
+async function clearError(projectId) {
+  await db.projectHistoryFailures.deleteOne({ project_id: projectId })
 }
 
 async function setForceDebug(projectId, state) {
@@ -85,7 +88,6 @@ async function recordSyncStart(projectId) {
 
 /**
  * @param projectId
- * @return {Promise<{error: string, forceDebug?: boolean}|null>}
  */
 async function getFailureRecord(projectId) {
   return await db.projectHistoryFailures.findOne({ project_id: projectId })
@@ -238,6 +240,7 @@ const getFailureRecordCb = callbackify(getFailureRecord)
 const getFailuresCb = callbackify(getFailures)
 const getLastFailureCb = callbackify(getLastFailure)
 const recordCb = callbackify(record)
+const clearErrorCb = callbackify(clearError)
 const recordSyncStartCb = callbackify(recordSyncStart)
 const setForceDebugCb = callbackify(setForceDebug)
 
@@ -247,6 +250,7 @@ export {
   getLastFailureCb as getLastFailure,
   getFailuresCb as getFailures,
   recordCb as record,
+  clearErrorCb as clearError,
   recordSyncStartCb as recordSyncStart,
   setForceDebugCb as setForceDebug,
 }
@@ -257,6 +261,7 @@ export const promises = {
   getLastFailure,
   getFailures,
   record,
+  clearError,
   recordSyncStart,
   setForceDebug,
 }

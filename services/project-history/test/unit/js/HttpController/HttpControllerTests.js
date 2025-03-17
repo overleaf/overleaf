@@ -40,7 +40,7 @@ describe('HttpController', function () {
       clearCachedHistoryId: sinon.stub().yields(),
     }
     this.ErrorRecorder = {
-      record: sinon.stub().yields(),
+      clearError: sinon.stub().yields(),
     }
     this.LabelsManager = {
       createLabel: sinon.stub(),
@@ -567,11 +567,7 @@ describe('HttpController', function () {
     })
 
     it('should clear any failure record', function () {
-      this.ErrorRecorder.record.should.have.been.calledWith(
-        this.projectId,
-        0,
-        null
-      )
+      this.ErrorRecorder.clearError.should.have.been.calledWith(this.projectId)
     })
   })
 })

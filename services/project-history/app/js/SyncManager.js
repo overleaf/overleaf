@@ -58,10 +58,8 @@ async function startResync(projectId, options = {}) {
     )
   } catch (error) {
     // record error in starting sync ("sync ongoing")
-    try {
+    if (error instanceof Error) {
       await ErrorRecorder.promises.record(projectId, -1, error)
-    } catch (err) {
-      // swallow any error thrown by ErrorRecorder.record()
     }
     throw error
   }
@@ -81,7 +79,9 @@ async function startHardResync(projectId, options = {}) {
     )
   } catch (error) {
     // record error in starting sync ("sync ongoing")
-    await ErrorRecorder.promises.record(projectId, -1, error)
+    if (error instanceof Error) {
+      await ErrorRecorder.promises.record(projectId, -1, error)
+    }
     throw error
   }
 }

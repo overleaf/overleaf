@@ -1,5 +1,4 @@
 import sinon from 'sinon'
-import { expect } from 'chai'
 import { strict as esmock } from 'esmock'
 import tk from 'timekeeper'
 
@@ -12,7 +11,9 @@ describe('ErrorRecorder', function () {
     this.db = {
       projectHistoryFailures: {
         deleteOne: sinon.stub().resolves(),
-        updateOne: sinon.stub().resolves(),
+        findOneAndUpdate: sinon
+          .stub()
+          .resolves({ value: { failure: 'record' } }),
       },
     }
     this.mongodb = { db: this.db }
@@ -31,75 +32,65 @@ describe('ErrorRecorder', function () {
   })
 
   describe('record', function () {
-    describe('with an error', function () {
-      beforeEach(async function () {
-        this.error = new Error('something bad')
-        await expect(
-          this.ErrorRecorder.promises.record(
-            this.project_id,
-            this.queueSize,
-            this.error
-          )
-        ).to.be.rejected
-      })
-
-      it('should record the error to mongo', function () {
-        this.db.projectHistoryFailures.updateOne
-          .calledWithMatch(
-            {
-              project_id: this.project_id,
-            },
-            {
-              $set: {
-                queueSize: this.queueSize,
-                error: this.error.toString(),
-                stack: this.error.stack,
-                ts: this.now,
-              },
-              $inc: {
-                attempts: 1,
-              },
-              $push: {
-                history: {
-                  $each: [
-                    {
-                      queueSize: this.queueSize,
-                      error: this.error.toString(),
-                      stack: this.error.stack,
-                      ts: this.now,
-                    },
-                  ],
-                  $position: 0,
-                  $slice: 10,
-                },
-              },
-            },
-            {
-              upsert: true,
-            }
-          )
-          .should.equal(true)
-      })
+    beforeEach(async function () {
+      this.error = new Error('something bad')
+      await this.ErrorRecorder.promises.record(
+        this.project_id,
+        this.queueSize,
+        this.error
+      )
     })
 
-    describe('without an error', function () {
-      beforeEach(async function () {
-        this.result = await this.ErrorRecorder.promises.record(
-          this.project_id,
-          this.queueSize,
-          this.error
+    it('should record the error to mongo', function () {
+      this.db.projectHistoryFailures.findOneAndUpdate
+        .calledWithMatch(
+          {
+            project_id: this.project_id,
+          },
+          {
+            $set: {
+              queueSize: this.queueSize,
+              error: this.error.toString(),
+              stack: this.error.stack,
+              ts: this.now,
+            },
+            $inc: {
+              attempts: 1,
+            },
+            $push: {
+              history: {
+                $each: [
+                  {
+                    queueSize: this.queueSize,
+                    error: this.error.toString(),
+                    stack: this.error.stack,
+                    ts: this.now,
+                  },
+                ],
+                $position: 0,
+                $slice: 10,
+              },
+            },
+          },
+          {
+            upsert: true,
+          }
         )
-      })
+        .should.equal(true)
+    })
+  })
 
-      it('should remove any error from mongo', function () {
-        this.db.projectHistoryFailures.deleteOne
-          .calledWithMatch({ project_id: this.project_id })
-          .should.equal(true)
-      })
+  describe('clearError', function () {
+    beforeEach(async function () {
+      this.result = await this.ErrorRecorder.promises.clearError(
+        this.project_id
+      )
+    })
 
-      it('should return the queue size', function () {
-        expect(this.result).to.equal(this.queueSize)
-      })
+    it('should remove any error from mongo', function () {
+      this.db.projectHistoryFailures.deleteOne
+        .calledWithMatch({ project_id: this.project_id })
+        .should.equal(true)
     })
   })
 })

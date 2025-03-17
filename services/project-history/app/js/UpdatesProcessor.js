@@ -16,6 +16,7 @@ import * as SyncManager from './SyncManager.js'
 import * as Versions from './Versions.js'
 import * as Errors from './Errors.js'
 import * as Metrics from './Metrics.js'
+import * as RetryManager from './RetryManager.js'
 import { Profiler } from './Profiler.js'
 
 const keys = Settings.redis.lock.key_schema
@@ -84,11 +85,29 @@ export function startResyncAndProcessUpdatesUnderLock(
         })
       })
     },
-    (error, queueSize) => {
-      if (error) {
-        OError.tag(error)
+    (flushError, queueSize) => {
+      if (flushError) {
+        OError.tag(flushError)
+        ErrorRecorder.record(projectId, queueSize, flushError, recordError => {
+          if (recordError) {
+            logger.error(
+              { err: recordError, projectId },
+              'failed to record error'
+            )
+          }
+          callback(flushError)
+        })
+      } else {
+        ErrorRecorder.clearError(projectId, clearError => {
+          if (clearError) {
+            logger.error(
+              { err: clearError, projectId },
+              'failed to clear error'
+            )
+          }
+          callback()
+        })
       }
-      ErrorRecorder.record(projectId, queueSize, error, callback)
       if (queueSize > 0) {
         const duration = (Date.now() - startTimeMs) / 1000
         Metrics.historyFlushDurationSeconds.observe(duration)
@@ -113,11 +132,44 @@ export function processUpdatesForProject(projectId, callback) {
         releaseLock
       )
     },
-    (error, queueSize) => {
-      if (error) {
-        OError.tag(error)
+    (flushError, queueSize) => {
+      if (flushError) {
+        OError.tag(flushError)
+        ErrorRecorder.record(
+          projectId,
+          queueSize,
+          flushError,
+          (recordError, failure) => {
+            if (recordError) {
+              logger.error(
+                { err: recordError, projectId },
+                'failed to record error'
+              )
+              callback(recordError)
+            } else if (
+              RetryManager.isFirstFailure(failure) &&
+              RetryManager.isHardFailure(failure)
+            ) {
+              // This is the first failed flush since the last successful flush.
+              // Immediately attempt a resync.
+              logger.warn({ projectId }, 'Flush failed, attempting resync')
+              resyncProject(projectId, callback)
+            } else {
+              callback(flushError)
+            }
+          }
+        )
+      } else {
+        ErrorRecorder.clearError(projectId, clearError => {
+          if (clearError) {
+            logger.error(
+              { err: clearError, projectId },
+              'failed to clear error'
+            )
+          }
+          callback()
+        })
       }
-      ErrorRecorder.record(projectId, queueSize, error, callback)
       if (queueSize > 0) {
         const duration = (Date.now() - startTimeMs) / 1000
         Metrics.historyFlushDurationSeconds.observe(duration)
@@ -127,6 +179,57 @@ export function processUpdatesForProject(projectId, callback) {
       RedisManager.clearDanglingFirstOpTimestamp(projectId, () => {})
     }
   )
+}
+
+export function resyncProject(projectId, callback) {
+  SyncManager.startHardResync(projectId, {}, error => {
+    if (error != null) {
+      return callback(OError.tag(error))
+    }
+    // Flush the sync operations; this will not loop indefinitely
+    // because any failure won't be the first failure anymore.
+    LockManager.runWithLock(
+      keys.projectHistoryLock({ project_id: projectId }),
+      (extendLock, releaseLock) => {
+        _countAndProcessUpdates(
+          projectId,
+          extendLock,
+          REDIS_READ_BATCH_SIZE,
+          releaseLock
+        )
+      },
+      (flushError, queueSize) => {
+        if (flushError) {
+          ErrorRecorder.record(
+            projectId,
+            queueSize,
+            flushError,
+            (recordError, failure) => {
+              if (OError.tag(recordError)) {
+                logger.error(
+                  { err: recordError, projectId },
+                  'failed to record error'
+                )
+                callback(OError.tag(recordError))
+              } else {
+                callback(OError.tag(flushError))
+              }
+            }
+          )
+        } else {
+          ErrorRecorder.clearError(projectId, clearError => {
+            if (clearError) {
+              logger.error(
+                { err: clearError, projectId },
+                'failed to clear error'
+              )
+            }
+            callback()
+          })
+        }
+      }
+    )
+  })
 }
 
 export function processUpdatesForProjectUsingBisect(
@@ -144,21 +247,29 @@ export function processUpdatesForProjectUsingBisect(
         releaseLock
       )
     },
-    (error, queueSize) => {
+    (flushError, queueSize) => {
       if (amountToProcess === 0 || queueSize === 0) {
         // no further processing possible
-        if (error != null) {
+        if (flushError != null) {
           ErrorRecorder.record(
             projectId,
             queueSize,
-            OError.tag(error),
-            callback
+            OError.tag(flushError),
+            recordError => {
+              if (recordError) {
+                logger.error(
+                  { err: recordError, projectId },
+                  'failed to record error'
+                )
+              }
+              callback(flushError)
+            }
           )
         } else {
           callback()
         }
       } else {
-        if (error != null) {
+        if (flushError != null) {
           // decrease the batch size when we hit an error
           processUpdatesForProjectUsingBisect(
             projectId,
@@ -187,13 +298,31 @@ export function processSingleUpdateForProject(projectId, callback) {
     ) => {
       _countAndProcessUpdates(projectId, extendLock, 1, releaseLock)
     },
-    (
-      error,
-      queueSize // no need to clear the flush marker when single stepping
-    ) => {
+    (flushError, queueSize) => {
+      // no need to clear the flush marker when single stepping
       // it will be cleared up on the next background flush if
       // the queue is empty
-      ErrorRecorder.record(projectId, queueSize, error, callback)
+      if (flushError) {
+        ErrorRecorder.record(projectId, queueSize, flushError, recordError => {
+          if (recordError) {
+            logger.error(
+              { err: recordError, projectId },
+              'failed to record error'
+            )
+          }
+          callback(flushError)
+        })
+      } else {
+        ErrorRecorder.clearError(projectId, clearError => {
+          if (clearError) {
+            logger.error(
+              { err: clearError, projectId },
+              'failed to clear error'
+            )
+          }
+          callback()
+        })
+      }
     }
   )
 }

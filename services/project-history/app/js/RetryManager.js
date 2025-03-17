@@ -73,11 +73,11 @@ function isTemporaryFailure(failure) {
   return TEMPORARY_FAILURES.includes(failure.error)
 }
 
-function isHardFailure(failure) {
+export function isHardFailure(failure) {
   return HARD_FAILURES.includes(failure.error)
 }
 
-function isFirstFailure(failure) {
+export function isFirstFailure(failure) {
   return failure.attempts <= 1
 }
 
@@ -147,7 +147,7 @@ async function resyncProject(projectId, options = {}) {
   try {
     if (!/^[0-9a-f]{24}$/.test(projectId)) {
       logger.debug({ projectId }, 'clearing bad project id')
-      await ErrorRecorder.promises.record(projectId, 0, null)
+      await ErrorRecorder.promises.clearError(projectId)
       return
     }
 
