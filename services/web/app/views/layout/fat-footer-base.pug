@@ -11,12 +11,22 @@
 				include language-picker
 	.fat-footer-base-section.fat-footer-base-social
 		.fat-footer-base-item
-			a.fat-footer-social(href="https://twitter.com/overleaf")
-				i.fa.fa-twitter-square(aria-hidden="true")
-				.sr-only #{translate("app_on_x", {social: "Twitter"})}
-			a.fat-footer-social(href="https://www.facebook.com/overleaf.editor")
-				i.fa.fa-facebook-square(aria-hidden="true")
-				.sr-only #{translate("app_on_x", {social: "Facebook"})}
-			a.fat-footer-social(href="https://www.linkedin.com/company/writelatex-limited")
-				i.fa.fa-linkedin-square(aria-hidden="true")
-				.sr-only #{translate("app_on_x", {social: "LinkedIn"})}
+			a.fat-footer-social.x-logo(href="https://x.com/overleaf")
+				svg(xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1227" height="25")
+					path(d="M714.163 519.284L1160.89 0H1055.03L667.137 450.887L357.328 0H0L468.492 681.821L0 1226.37H105.866L515.491 750.218L842.672 1226.37H1200L714.137 519.284H714.163ZM569.165 687.828L521.697 619.934L144.011 79.6944H306.615L611.412 515.685L658.88 583.579L1055.08 1150.3H892.476L569.165 687.854V687.828Z")
+				span.visually-hidden #{translate("app_on_x", {social: "X"})}
+			a.fat-footer-social.facebook-logo(href="https://www.facebook.com/overleaf.editor")
+				svg(xmlns="http://www.w3.org/2000/svg" viewBox="0 0 666.66668 666.66717" height="25")
+					defs
+						clipPath(id="a" clipPathUnits="userSpaceOnUse")
+							path(d="M0 700h700V0H0Z")
+					g(clip-path="url(#a)" transform="matrix(1.33333 0 0 -1.33333 -133.333 800)")
+						path.background(d="M0 0c0 138.071-111.929 250-250 250S-500 138.071-500 0c0-117.245 80.715-215.622 189.606-242.638v166.242h-51.552V0h51.552v32.919c0 85.092 38.508 124.532 122.048 124.532 15.838 0 43.167-3.105 54.347-6.211V81.986c-5.901.621-16.149.932-28.882.932-40.993 0-56.832-15.528-56.832-55.9V0h81.659l-14.028-76.396h-67.631v-171.773C-95.927-233.218 0-127.818 0 0" fill="#0866ff" transform="translate(600 350)")
+						path.text(d="m0 0 14.029 76.396H-67.63v27.019c0 40.372 15.838 55.899 56.831 55.899 12.733 0 22.981-.31 28.882-.931v69.253c-11.18 3.106-38.509 6.212-54.347 6.212-83.539 0-122.048-39.441-122.048-124.533V76.396h-51.552V0h51.552v-166.242a250.559 250.559 0 0 1 60.394-7.362c10.254 0 20.358.632 30.288 1.831V0Z" fill="#fff" transform="translate(447.918 273.604)")
+				span.visually-hidden #{translate("app_on_x", {social: "Facebook"})}
+			a.fat-footer-social.linkedin-logo(href="https://www.linkedin.com/company/writelatex-limited")
+				svg(xmlns="http://www.w3.org/2000/svg" viewBox="0 0 72 72" height="25")
+					g(fill="none" fill-rule="evenodd")
+						path.background(fill="#0B66C3" d="M8 72h56a8 8 0 0 0 8-8V8a8 8 0 0 0-8-8H8a8 8 0 0 0-8 8v56a8 8 0 0 0 8 8")
+						path.text(fill="#FFF" d="M62 62H51.316V43.802c0-4.99-1.896-7.777-5.845-7.777-4.296 0-6.54 2.901-6.54 7.777V62H28.632V27.333H38.93v4.67s3.096-5.729 10.453-5.729c7.353 0 12.617 4.49 12.617 13.777zM16.35 22.794c-3.508 0-6.35-2.864-6.35-6.397C10 12.864 12.842 10 16.35 10c3.507 0 6.347 2.864 6.347 6.397 0 3.533-2.84 6.397-6.348 6.397ZM11.032 62h10.736V27.333H11.033V62")
+				span.visually-hidden #{translate("app_on_x", {social: "LinkedIn"})}

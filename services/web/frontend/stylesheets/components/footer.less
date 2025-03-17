@@ -131,6 +131,31 @@ footer.site-footer {
         }
       }
     }
+
+    .fat-footer-social {
+      &.x-logo svg path {
+        fill: @ol-blue-gray-1;
+      }
+
+      &.facebook-logo svg,
+      &.linkedin-logo svg {
+        path.background {
+          fill: @ol-blue-gray-1;
+        }
+      }
+
+      &.facebook-logo svg {
+        path.text {
+          fill: transparent;
+        }
+      }
+
+      &.linkedin-logo svg {
+        path.text {
+          fill: @ol-blue-gray-6;
+        }
+      }
+    }
   }
 
   .fat-footer-base-item {
@@ -323,6 +348,33 @@ footer.site-footer {
 
     .fat-footer-base {
       color: @neutral-90;
+    }
+
+    // This is duplication of fill colours in the SVGs themselves. This could be avoided by using :has() but that's not
+    // supported in older versions of browsers and these logos need to be correct.
+    .fat-footer-social {
+      &.x-logo svg path {
+        fill: #0f1419;
+      }
+
+      &.facebook-logo svg,
+      &.linkedin-logo svg {
+        path.text {
+          fill: #fff;
+        }
+      }
+
+      &.facebook-logo svg {
+        path.background {
+          fill: #0866ff;
+        }
+      }
+
+      &.linkedin-logo svg {
+        path.background {
+          fill: #0b66c3;
+        }
+      }
     }
   }
 

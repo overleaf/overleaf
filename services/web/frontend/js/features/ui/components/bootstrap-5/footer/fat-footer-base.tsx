@@ -1,7 +1,10 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import LanguagePicker from '../language-picker'
-import Icon from '@/shared/components/icon'
+import FacebookLogo from '@/shared/svgs/facebook-logo'
+import LinkedInLogo from '@/shared/svgs/linkedin-logo'
+import XLogo from '@/shared/svgs/x-logo'
+import classNames from 'classnames'
 
 type FooterLinkProps = {
   href: string
@@ -10,7 +13,8 @@ type FooterLinkProps = {
 
 type SocialMediaLinkProps = {
   href: string
-  icon: string
+  icon: React.ReactNode
+  className: string
   accessibilityLabel: string
 }
 
@@ -39,18 +43,21 @@ function FatFooterBase() {
       <div className="fat-footer-base-section fat-footer-base-social">
         <div className="fat-footer-base-item">
           <SocialMediaLink
-            href="https://twitter.com/overleaf"
-            icon="twitter-square"
-            accessibilityLabel={t('app_on_x', { social: 'Twitter' })}
+            href="https://x.com/overleaf"
+            icon={<XLogo />}
+            className="x-logo"
+            accessibilityLabel={t('app_on_x', { social: 'X' })}
           />
           <SocialMediaLink
             href="https://www.facebook.com/overleaf.editor"
-            icon="facebook-square"
+            icon={<FacebookLogo />}
+            className="facebook-logo"
             accessibilityLabel={t('app_on_x', { social: 'Facebook' })}
           />
           <SocialMediaLink
             href="https://www.linkedin.com/company/writelatex-limited"
-            icon="linkedin-square"
+            icon={<LinkedInLogo />}
+            className="linkedin-logo"
             accessibilityLabel={t('app_on_x', { social: 'LinkedIn' })}
           />
         </div>
@@ -70,15 +77,13 @@ function FooterBaseLink({ href, children }: FooterLinkProps) {
 function SocialMediaLink({
   href,
   icon,
+  className,
   accessibilityLabel,
 }: SocialMediaLinkProps) {
   return (
-    <a className="fat-footer-social" href={href}>
-      <Icon
-        type={icon}
-        className="fa"
-        accessibilityLabel={accessibilityLabel}
-      />
+    <a className={classNames('fat-footer-social', className)} href={href}>
+      {icon}
+      <span className="visually-hidden">{accessibilityLabel}</span>
     </a>
   )
 }

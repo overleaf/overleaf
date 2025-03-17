@@ -126,16 +126,18 @@ footer.site-footer {
 }
 
 .fat-footer {
-  --link-color: var(--content-secondary-dark);
-  --link-hover-color: var(--content-secondary-dark);
-  --link-visited-color: var(--content-secondary-dark);
+  --footer-text-color: var(--content-secondary-dark);
+  --footer-background-color: var(--bg-dark-primary);
+  --link-color: var(--footer-text-color);
+  --link-hover-color: var(--footer-text-color);
+  --link-visited-color: var(--footer-text-color);
   --link-text-decoration: none;
   --link-hover-text-decoration: underline;
 
   container-name: fatfooter;
   container-type: inline-size;
-  background: var(--bg-dark-primary);
-  color: var(--content-secondary-dark);
+  background: var(--footer-background-color);
+  color: var(--footer-text-color);
   display: flex;
   flex-direction: column;
 
@@ -168,7 +170,7 @@ footer.site-footer {
   }
 
   .footer-section-heading {
-    color: var(--content-secondary-dark);
+    color: var(--footer-text-color);
 
     @include heading-sm;
 
@@ -195,7 +197,7 @@ footer.site-footer {
     @include body-sm;
 
     #language-picker-toggle {
-      color: var(--content-secondary-dark);
+      color: var(--footer-text-color);
     }
 
     .fat-footer-base-meta a:not(.dropdown-toggle) {
@@ -212,6 +214,31 @@ footer.site-footer {
   .fat-footer-base-item {
     display: flex;
     white-space: nowrap;
+  }
+
+  .fat-footer-social {
+    &.x-logo svg path {
+      fill: var(--footer-text-color);
+    }
+
+    &.facebook-logo svg,
+    &.linkedin-logo svg {
+      path.background {
+        fill: var(--footer-text-color);
+      }
+    }
+
+    &.facebook-logo svg {
+      path.text {
+        fill: transparent;
+      }
+    }
+
+    &.linkedin-logo svg {
+      path.text {
+        fill: var(--footer-background-color);
+      }
+    }
   }
 
   @include footer-container-down(md) {
@@ -261,10 +288,6 @@ footer.site-footer {
         margin-top: var(--spacing-00);
       }
 
-      .fat-footer-social {
-        @include heading-lg;
-      }
-
       .fat-footer-base-copyright {
         order: 2;
       }
@@ -310,9 +333,7 @@ footer.site-footer {
       }
 
       .fat-footer-social {
-        margin: var(--spacing-07) var(--spacing-02);
-
-        @include heading-lg;
+        margin: var(--spacing-07) var(--spacing-03);
       }
     }
   }
@@ -379,6 +400,8 @@ footer.site-footer {
 
 .website-redesign-fat-footer,
 .website-redesign .fat-footer {
+  --footer-text-color: var(--content-primary);
+
   .fat-footer-container {
     @include footer-container-down(sm) {
       margin: var(--spacing-11) 0;
@@ -386,16 +409,7 @@ footer.site-footer {
   }
 
   &.fat-footer {
-    --link-color: var(--content-primary);
-    --link-hover-color: var(--content-primary);
-    --link-visited-color: var(--content-primary);
-
     background: var(--content-primary-dark);
-    color: var(--content-primary);
-
-    .footer-section-heading {
-      color: var(--content-primary);
-    }
 
     h2 {
       font-weight: 400;
@@ -406,6 +420,33 @@ footer.site-footer {
 
       #language-picker-toggle {
         color: inherit;
+      }
+    }
+
+    // This is duplication of fill colours in the SVGs themselves. This could be fixed by using :has() but that's not
+    // supported in older versions of browsers and these logos need to be correct.
+    .fat-footer-social {
+      &.x-logo svg path {
+        fill: #0f1419;
+      }
+
+      &.facebook-logo svg,
+      &.linkedin-logo svg {
+        path.text {
+          fill: #fff;
+        }
+      }
+
+      &.facebook-logo svg {
+        path.background {
+          fill: #0866ff;
+        }
+      }
+
+      &.linkedin-logo svg {
+        path.background {
+          fill: #0b66c3;
+        }
       }
     }
   }
