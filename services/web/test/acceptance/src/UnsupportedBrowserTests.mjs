@@ -18,6 +18,10 @@ const unsupportedUserAgents = new Map([
     'Safari 14',
     'Mozilla/5.0 (Macintosh; Intel Mac OS X 11_5_2) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.1.2 Safari/605.1.15',
   ],
+  [
+    'Firefox 78',
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 11.1; rv:78.0) Gecko/20100101 Firefox/78.0',
+  ],
 ])
 
 const supportedUserAgents = new Map([
@@ -28,6 +32,10 @@ const supportedUserAgents = new Map([
   [
     'Chrome 121',
     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+  ],
+  [
+    'Firefox 79',
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.16; rv:79.0) Gecko/20100101 Firefox/79.0',
   ],
   [
     'Firefox 122',
