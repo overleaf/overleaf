@@ -95,6 +95,19 @@ async function fetchNothing(url, opts = {}) {
  * @throws {RequestFailedError} if the response has a non redirect status code or missing Location header
  */
 async function fetchRedirect(url, opts = {}) {
+  const { location } = await fetchRedirectWithResponse(url, opts)
+  return location
+}
+
+/**
+ * Make a request and extract the redirect from the response.
+ *
+ * @param {string | URL} url - request URL
+ * @param {object} opts - fetch options
+ * @return {Promise<{location: string, response: Response}>}
+ * @throws {RequestFailedError} if the response has a non redirect status code or missing Location header
+ */
+async function fetchRedirectWithResponse(url, opts = {}) {
   const { fetchOpts } = parseOpts(opts)
   fetchOpts.redirect = 'manual'
   const response = await performRequest(url, fetchOpts)
@@ -112,7 +125,7 @@ async function fetchRedirect(url, opts = {}) {
     )
   }
   await discardResponseBody(response)
-  return location
+  return { location, response }
 }
 
 /**
