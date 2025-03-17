@@ -103,7 +103,7 @@ module.exports = OutputCacheManager = {
   BUILD_REGEX: /^[0-9a-f]+(-[0-9a-f]+)?$/,
   CONTENT_REGEX: /^[0-9a-f]+(-[0-9a-f]+)?$/,
   CACHE_LIMIT: 2, // maximum number of cache directories
-  CACHE_AGE: 60 * 60 * 1000, // up to one hour old
+  CACHE_AGE: 90 * 60 * 1000, // up to 90 minutes old
 
   init,
   queueDirOperation: callbackify(queueDirOperation),
