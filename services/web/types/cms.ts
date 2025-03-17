@@ -5,8 +5,11 @@ export type IconElementSticker =
   | 'sticker | cog-pen | grey'
   | 'sticker | collaborate | purple'
   | 'sticker | collaborate | yellow'
+  | 'sticker | curly-braces | purple'
+  | 'sticker | cursors | red'
   | 'sticker | data | grey'
   | 'sticker | formatting | green'
+  | 'sticker | globe | green'
   | 'sticker | house-tree | grey | large'
   | 'sticker | hub | tangerine'
   | 'sticker | lock | grey | medium'
@@ -15,9 +18,11 @@ export type IconElementSticker =
   | 'sticker | pen | purple'
   | 'sticker | pen | tangerine'
   | 'sticker | pi | tangerine'
+  | 'sticker | rocket | yellow'
   | 'sticker | rocket | yellow | medium'
   | 'sticker | support | tangerine'
   | 'sticker | support | yellow'
+  | 'sticker | waving-hand | purple | medium'
 
 export type IconElement = IconElementSticker
 export type IconStyle = 'Green circle' | 'Large purple text' | 'Default'
