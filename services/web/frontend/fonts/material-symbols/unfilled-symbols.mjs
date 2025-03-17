@@ -9,6 +9,7 @@ export default /** @type {const} */ ([
   'code',
   'create_new_folder',
   'description',
+  'experiment',
   'forum',
   'help',
   'image',

@@ -98,6 +98,7 @@ const UserSchema = new Schema(
       lineHeight: { type: String },
       mathPreview: { type: Boolean, default: true },
       referencesSearchMode: { type: String, default: 'advanced' }, // 'advanced' or 'simple'
+      enableNewEditor: { type: Boolean },
     },
     features: {
       collaborators: {

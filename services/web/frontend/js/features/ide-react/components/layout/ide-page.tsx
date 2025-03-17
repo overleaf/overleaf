@@ -10,7 +10,7 @@ import { useHasLintingError } from '@/features/ide-react/hooks/use-has-linting-e
 import { Modals } from '@/features/ide-react/components/modals/modals'
 import { GlobalAlertsProvider } from '@/features/ide-react/context/global-alerts-context'
 import { GlobalToasts } from '../global-toasts'
-import { useFeatureFlag } from '@/shared/context/split-test-context'
+import { useIsNewEditorEnabled } from '@/features/ide-redesign/utils/new-editor-utils'
 
 const MainLayoutNew = lazy(
   () => import('@/features/ide-redesign/components/main-layout')
@@ -26,7 +26,7 @@ export default function IdePage() {
   useRegisterUserActivity() // record activity and ensure connection when user is active
   useHasLintingError() // pass editor:lint hasLintingError to the compiler
 
-  const newEditor = useFeatureFlag('editor-redesign')
+  const newEditor = useIsNewEditorEnabled()
 
   return (
     <GlobalAlertsProvider>

@@ -10,9 +10,18 @@ import {
 import { MenuBarOption } from '@/shared/components/menu-bar/menu-bar-option'
 import { useTranslation } from 'react-i18next'
 import ChangeLayoutOptions from './change-layout-options'
+import { MouseEventHandler, useCallback } from 'react'
+import { useIdeRedesignSwitcherContext } from '@/features/ide-react/context/ide-redesign-switcher-context'
+import { useSwitchEnableNewEditorState } from '../../hooks/use-switch-enable-new-editor-state'
+import MaterialIcon from '@/shared/components/material-icon'
+import OLSpinner from '@/features/ui/components/ol/ol-spinner'
 
 export const ToolbarMenuBar = () => {
   const { t } = useTranslation()
+  const { setShowSwitcherModal } = useIdeRedesignSwitcherContext()
+  const openEditorRedesignSwitcherModal = useCallback(() => {
+    setShowSwitcherModal(true)
+  }, [setShowSwitcherModal])
   return (
     <MenuBar
       className="ide-redesign-toolbar-menu-bar"
@@ -122,7 +131,41 @@ export const ToolbarMenuBar = () => {
         <DropdownDivider />
         <MenuBarOption title="Contact us" />
         <MenuBarOption title="Give feedback" />
+        <DropdownDivider />
+        <SwitchToOldEditorMenuBarOption />
+        <MenuBarOption
+          title="What's new?"
+          onClick={openEditorRedesignSwitcherModal}
+        />
       </MenuBarDropdown>
     </MenuBar>
+  )
+}
+
+const SwitchToOldEditorMenuBarOption = () => {
+  const { loading, error, setEditorRedesignStatus } =
+    useSwitchEnableNewEditorState()
+
+  const disable: MouseEventHandler = useCallback(
+    event => {
+      // Don't close the dropdown
+      event.stopPropagation()
+      setEditorRedesignStatus(false)
+    },
+    [setEditorRedesignStatus]
+  )
+  let icon = null
+  if (loading) {
+    icon = <OLSpinner size="sm" />
+  } else if (error) {
+    icon = <MaterialIcon type="error" title={error} className="text-danger" />
+  }
+  return (
+    <MenuBarOption
+      title="Switch to old editor"
+      onClick={disable}
+      disabled={loading}
+      trailingIcon={icon}
+    />
   )
 }

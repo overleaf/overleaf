@@ -6,6 +6,7 @@ import { OnlineUsers } from './online-users'
 import ShareProjectButton from './share-project-button'
 import ChangeLayoutButton from './change-layout-button'
 import ShowHistoryButton from './show-history-button'
+import { LabsActions } from './labs-actions'
 
 export const Toolbar = () => {
   return (
@@ -35,6 +36,7 @@ const ToolbarMenus = () => {
 const ToolbarButtons = () => {
   return (
     <div className="ide-redesign-toolbar-actions">
+      <LabsActions />
       <OnlineUsers />
       <ShowHistoryButton />
       <ChangeLayoutButton />

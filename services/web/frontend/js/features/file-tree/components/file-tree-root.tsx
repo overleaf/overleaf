@@ -19,7 +19,7 @@ import FileTreeInner from './file-tree-inner'
 import { useDragLayer } from 'react-dnd'
 import classnames from 'classnames'
 import { pathInFolder } from '@/features/file-tree/util/path'
-import { useFeatureFlag } from '@/shared/context/split-test-context'
+import { useIsNewEditorEnabled } from '@/features/ide-redesign/utils/new-editor-utils'
 
 const FileTreeRoot = React.memo<{
   onSelect: () => void
@@ -43,7 +43,7 @@ const FileTreeRoot = React.memo<{
   const { _id: projectId } = useProjectContext()
   const { fileTreeData } = useFileTreeData()
   const isReady = Boolean(projectId && fileTreeData)
-  const newEditor = useFeatureFlag('editor-redesign')
+  const newEditor = useIsNewEditorEnabled()
 
   useEffect(() => {
     if (fileTreeContainer) {

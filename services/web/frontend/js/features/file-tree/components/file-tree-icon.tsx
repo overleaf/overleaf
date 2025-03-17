@@ -4,7 +4,7 @@ import iconTypeFromName, {
 } from '../util/icon-type-from-name'
 import classnames from 'classnames'
 import MaterialIcon from '@/shared/components/material-icon'
-import { useFeatureFlag } from '@/shared/context/split-test-context'
+import { useIsNewEditorEnabled } from '@/features/ide-redesign/utils/new-editor-utils'
 
 function FileTreeIcon({
   isLinkedFile,
@@ -19,7 +19,7 @@ function FileTreeIcon({
     'linked-file-icon': isLinkedFile,
   })
 
-  const newEditor = useFeatureFlag('editor-redesign')
+  const newEditor = useIsNewEditorEnabled()
 
   if (newEditor) {
     return (

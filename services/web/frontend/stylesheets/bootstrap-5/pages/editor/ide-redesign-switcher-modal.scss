@@ -1,0 +1,24 @@
+.ide-redesign-switcher-modal .modal-content {
+  color: var(--content-primary);
+  font-size: var(--font-size-03);
+  line-height: var(--line-height-03);
+
+  p {
+    margin-bottom: 0;
+  }
+
+  .ide-redesign-switcher-modal-whats-new {
+    background-color: var(--bg-light-secondary);
+    border: 1px solid var(--border-divider);
+    padding: var(--spacing-05);
+    margin: var(--spacing-05) 0;
+  }
+
+  .ide-redesign-switcher-modal-leave-text {
+    color: var(--content-secondary);
+
+    a {
+      color: var(--link-ui);
+    }
+  }
+}

@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { useRailContext } from '../../contexts/rail-context'
 import { usePdfPreviewContext } from '@/features/pdf-preview/components/pdf-preview-provider'
 import { useDetachCompileContext as useCompileContext } from '@/shared/context/detach-compile-context'
-import { useFeatureFlag } from '@/shared/context/split-test-context'
+import { useIsNewEditorEnabled } from '../../utils/new-editor-utils'
 
 function PdfErrorState() {
   const { loadingError } = usePdfPreviewContext()
@@ -12,7 +12,7 @@ function PdfErrorState() {
   const { showLogs } = useCompileContext()
   const { t } = useTranslation()
   const { setSelectedTab: setSelectedRailTab } = useRailContext()
-  const newEditor = useFeatureFlag('editor-redesign')
+  const newEditor = useIsNewEditorEnabled()
 
   if (!newEditor || (!loadingError && !showLogs)) {
     return null

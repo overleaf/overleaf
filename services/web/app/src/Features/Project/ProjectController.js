@@ -847,6 +847,7 @@ const _ProjectController = {
           overallTheme: user.ace.overallTheme,
           mathPreview: user.ace.mathPreview,
           referencesSearchMode: user.ace.referencesSearchMode,
+          enableNewEditor: user.ace.enableNewEditor ?? true,
         },
         privilegeLevel,
         anonymous,

@@ -27,6 +27,7 @@ const defaultSettings: UserSettings = {
   lineHeight: 'normal',
   mathPreview: true,
   referencesSearchMode: 'advanced',
+  enableNewEditor: true,
 }
 
 type UserSettingsContextValue = {

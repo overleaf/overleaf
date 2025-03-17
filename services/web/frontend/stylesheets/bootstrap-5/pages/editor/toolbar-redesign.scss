@@ -8,6 +8,7 @@
   --redesign-toolbar-logo-url: url('../../../../../public/img/ol-brand/overleaf-o-white.svg');
   --redesign-subdued-button-color: var(--content-primary-dark);
   --redesign-subdued-button-hover-background: var(--bg-dark-tertiary);
+  --redesign-toolbar-feedback-link-color: var(--link-ui-dark);
 }
 
 @include theme('light') {
@@ -18,6 +19,7 @@
   --redesign-toolbar-logo-url: url('../../../../../public/img/ol-brand/overleaf-o-dark.svg');
   --redesign-subdued-button-color: var(--content-primary);
   --redesign-subdued-button-hover-background: var(--bg-light-tertiary);
+  --redesign-toolbar-feedback-link-color: var(--link-ui);
 }
 
 .ide-redesign-toolbar {
@@ -148,4 +150,23 @@
   width: 100%;
   max-width: 400px;
   margin: var(--spacing-02) 0;
+}
+
+.ide-redesign-toolbar-labs-feedback-link {
+  &,
+  &:hover,
+  &:visited {
+    color: var(--redesign-toolbar-feedback-link-color);
+  }
+}
+
+.ide-redesign-labs-button.btn.btn-info {
+  @include ol-button-variant(
+    var(--content-positive),
+    var(--bg-accent-03),
+    var(--green-40),
+    var(--bg-accent-03),
+    var(--green-40),
+    false
+  );
 }

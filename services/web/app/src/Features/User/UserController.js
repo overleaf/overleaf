@@ -392,6 +392,9 @@ async function updateUserSettings(req, res, next) {
       req.body.referencesSearchMode === 'simple' ? 'simple' : 'advanced'
     user.ace.referencesSearchMode = mode
   }
+  if (req.body.enableNewEditor != null) {
+    user.ace.enableNewEditor = Boolean(req.body.enableNewEditor)
+  }
   await user.save()
 
   const newEmail = req.body.email?.trim().toLowerCase()

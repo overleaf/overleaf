@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import MaterialIcon from '@/shared/components/material-icon'
-import { useFeatureFlag } from '@/shared/context/split-test-context'
+import { useIsNewEditorEnabled } from '@/features/ide-redesign/utils/new-editor-utils'
 
 function FileTreeFolderIcons({
   expanded,
@@ -10,8 +10,7 @@ function FileTreeFolderIcons({
   onExpandCollapseClick: () => void
 }) {
   const { t } = useTranslation()
-
-  const newEditor = useFeatureFlag('editor-redesign')
+  const newEditor = useIsNewEditorEnabled()
 
   if (newEditor) {
     return (

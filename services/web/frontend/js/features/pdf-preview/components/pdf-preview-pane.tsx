@@ -8,16 +8,16 @@ import { useDetachCompileContext as useCompileContext } from '../../../shared/co
 import { PdfPreviewMessages } from './pdf-preview-messages'
 import CompileTimeWarningUpgradePrompt from './compile-time-warning-upgrade-prompt'
 import { PdfPreviewProvider } from './pdf-preview-provider'
-import { useFeatureFlag } from '@/shared/context/split-test-context'
 import PdfPreviewHybridToolbarNew from '@/features/ide-redesign/components/pdf-preview/pdf-preview-hybrid-toolbar'
 import PdfErrorState from '@/features/ide-redesign/components/pdf-preview/pdf-error-state'
+import { useIsNewEditorEnabled } from '@/features/ide-redesign/utils/new-editor-utils'
 
 function PdfPreviewPane() {
   const { pdfUrl, hasShortCompileTimeout } = useCompileContext()
   const classes = classNames('pdf', 'full-size', {
     'pdf-empty': !pdfUrl,
   })
-  const newEditor = useFeatureFlag('editor-redesign')
+  const newEditor = useIsNewEditorEnabled()
 
   return (
     <div className={classes}>

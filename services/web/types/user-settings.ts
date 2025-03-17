@@ -16,4 +16,5 @@ export type UserSettings = {
   lineHeight: LineHeight
   mathPreview: boolean
   referencesSearchMode: 'advanced' | 'simple'
+  enableNewEditor: boolean
 }

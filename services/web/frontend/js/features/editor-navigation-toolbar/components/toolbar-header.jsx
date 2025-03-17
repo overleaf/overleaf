@@ -16,6 +16,8 @@ import importOverleafModules from '../../../../macros/import-overleaf-module.mac
 import BackToEditorButton from './back-to-editor-button'
 import getMeta from '@/utils/meta'
 import { isSplitTestEnabled } from '@/utils/splitTestUtils'
+import { canUseNewEditor } from '@/features/ide-redesign/utils/new-editor-utils'
+import TryNewEditorButton from '../try-new-editor-button'
 
 const [publishModalModules] = importOverleafModules('publishModal')
 const PublishButton = publishModalModules?.import.default
@@ -87,6 +89,8 @@ const ToolbarHeader = React.memo(function ToolbarHeader({
       />
 
       <div className="toolbar-right">
+        {canUseNewEditor() && <TryNewEditorButton />}
+
         <OnlineUsersWidget onlineUsers={onlineUsers} goToUser={goToUser} />
 
         {historyIsOpen ? (
