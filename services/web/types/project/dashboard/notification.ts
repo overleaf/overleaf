@@ -110,5 +110,6 @@ export type GroupsAndEnterpriseBannerVariant =
 export const USGovBannerVariants = [
   'government-purchasing',
   'small-business-reseller',
+  'fedramp',
 ] as const
 export type USGovBannerVariant = (typeof USGovBannerVariants)[number]

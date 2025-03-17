@@ -692,7 +692,7 @@ describe('ProjectListController', function () {
 
           this.UserGetter.promises.getUserFullEmails.resolves(emails)
           this.Modules.promises.hooks.fire
-            .withArgs('getUSGovBanner', emails, false, false)
+            .withArgs('getUSGovBanner', emails, false, [])
             .resolves([
               {
                 showUSGovBanner: true,

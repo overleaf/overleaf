@@ -350,7 +350,7 @@ async function projectListPage(req, res, next) {
     'getUSGovBanner',
     userEmails,
     hasPaidAffiliation,
-    inactiveTutorials.includes('us-gov-banner')
+    inactiveTutorials
   )
 
   const usGovBanner = (usGovBannerHooksResponse &&

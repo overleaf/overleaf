@@ -11,6 +11,7 @@ const VALID_KEYS = [
   'code-editor-mode-prompt',
   'history-restore-promo',
   'us-gov-banner',
+  'us-gov-banner-fedramp',
 ]
 
 async function completeTutorial(req, res, next) {
