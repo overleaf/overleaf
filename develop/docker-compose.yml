@@ -94,6 +94,14 @@ services:
       - "127.0.0.1:27017:27017" # for debugging
     volumes:
       - mongo-data:/data/db
+      - ../bin/shared/mongodb-init-replica-set.js:/docker-entrypoint-initdb.d/mongodb-init-replica-set.js
+    environment:
+      MONGO_INITDB_DATABASE: sharelatex
+    extra_hosts:
+      # Required when using the automatic database setup for initializing the
+      # replica set. This override is not needed when running the setup after
+      # starting up mongo.
+      - mongo:127.0.0.1
 
   notifications:
     build:

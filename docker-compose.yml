@@ -103,7 +103,7 @@ services:
         command: '--replSet overleaf'
         volumes:
             - ~/mongo_data:/data/db
-            - ./server-ce/mongodb-init-replica-set.js:/docker-entrypoint-initdb.d/mongodb-init-replica-set.js
+            - ./bin/shared/mongodb-init-replica-set.js:/docker-entrypoint-initdb.d/mongodb-init-replica-set.js
         environment:
           MONGO_INITDB_DATABASE: sharelatex
         extra_hosts:

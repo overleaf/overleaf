@@ -90,7 +90,7 @@ services:
     image: mongo:6.0.13
     command: --replSet overleaf
     volumes:
-      - ./docker/mongodb-init-replica-set.js:/docker-entrypoint-initdb.d/mongodb-init-replica-set.js
+      - ../../bin/shared/mongodb-init-replica-set.js:/docker-entrypoint-initdb.d/mongodb-init-replica-set.js
     environment:
       MONGO_INITDB_DATABASE: sharelatex
     extra_hosts:

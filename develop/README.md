@@ -11,12 +11,6 @@ bin/build
 > [!NOTE]
 > If Docker is running out of RAM while building the services in parallel, create a `.env` file in this directory containing `COMPOSE_PARALLEL_LIMIT=1`.
 
-Next, initialize the database:
-
-```shell
-bin/init
-```
-
 Then start the services:
 
 ```shell

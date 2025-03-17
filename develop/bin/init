@@ -1,6 +1,0 @@
-#!/usr/bin/env bash
-
-docker compose up --detach mongo
-curl --max-time 10 --retry 5 --retry-delay 5 --retry-all-errors --silent --output /dev/null localhost:27017
-docker compose exec mongo mongosh --eval "rs.initiate({ _id: 'overleaf', members: [{ _id: 0, host: 'mongo:27017' }] })"
-docker compose down mongo
