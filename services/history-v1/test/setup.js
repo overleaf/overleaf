@@ -10,10 +10,12 @@ require('mongodb').ObjectId.cacheHexString = true
 chai.use(chaiAsPromised)
 
 async function setupPostgresDatabase() {
+  this.timeout(60_000)
   await knex.migrate.latest()
 }
 
 async function setupMongoDatabase() {
+  this.timeout(60_000)
   await mongodb.db.collection('projectHistoryChunks').createIndexes([
     {
       key: { projectId: 1, startVersion: 1 },
@@ -30,6 +32,7 @@ async function setupMongoDatabase() {
 }
 
 async function createGcsBuckets() {
+  this.timeout(60_000)
   for (const bucket of [
     config.get('blobStore.globalBucket'),
     config.get('blobStore.projectBucket'),
