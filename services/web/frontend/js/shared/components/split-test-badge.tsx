@@ -1,10 +1,8 @@
 import { useSplitTestContext } from '../context/split-test-context'
 import BetaBadge from './beta-badge'
-import { OverlayTriggerProps } from 'react-bootstrap'
 
 type TooltipProps = {
   id?: string
-  placement?: OverlayTriggerProps['placement']
   className?: string
 }
 

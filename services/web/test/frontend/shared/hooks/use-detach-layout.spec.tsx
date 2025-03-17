@@ -1,7 +1,10 @@
 import useDetachLayout from '../../../../frontend/js/shared/hooks/use-detach-layout'
 import { detachChannel, testDetachChannel } from '../../helpers/detach-channel'
 import { EditorProviders } from '../../helpers/editor-providers'
-import { Button, Checkbox, ControlLabel, FormGroup } from 'react-bootstrap'
+import OLFormGroup from '@/features/ui/components/ol/ol-form-group'
+import OLFormCheckbox from '@/features/ui/components/ol/ol-form-checkbox'
+import OLFormLabel from '@/features/ui/components/ol/ol-form-label'
+import OLButton from '@/features/ui/components/ol/ol-button'
 
 const DetachLayoutTest = () => {
   const { role, reattach, detach, isLinked, isLinking, isRedundant } =
@@ -12,24 +15,29 @@ const DetachLayoutTest = () => {
       <legend>
         role: <span id="role">{role || 'none'}</span>
       </legend>
-      <FormGroup>
-        <Checkbox id="isLinked" inline checked={isLinked} readOnly />
-        <ControlLabel>linked</ControlLabel>
-      </FormGroup>
-      <FormGroup>
-        <Checkbox id="isLinking" inline checked={isLinking} readOnly />
-        <ControlLabel>linking</ControlLabel>
-      </FormGroup>
-      <FormGroup>
-        <Checkbox id="isRedundant" inline checked={isRedundant} readOnly />
-        <ControlLabel>redundant</ControlLabel>
-      </FormGroup>
-      <Button id="reattach" onClick={reattach}>
+      <OLFormGroup>
+        <OLFormCheckbox id="isLinked" inline checked={isLinked} readOnly />
+        <OLFormLabel>linked</OLFormLabel>
+      </OLFormGroup>
+      <OLFormGroup>
+        <OLFormCheckbox id="isLinking" inline checked={isLinking} readOnly />
+        <OLFormLabel>linking</OLFormLabel>
+      </OLFormGroup>
+      <OLFormGroup>
+        <OLFormCheckbox
+          id="isRedundant"
+          inline
+          checked={isRedundant}
+          readOnly
+        />
+        <OLFormLabel>redundant</OLFormLabel>
+      </OLFormGroup>
+      <OLButton id="reattach" onClick={reattach}>
         reattach
-      </Button>
-      <Button id="detach" onClick={detach}>
+      </OLButton>
+      <OLButton id="detach" onClick={detach}>
         detach
-      </Button>
+      </OLButton>
     </fieldset>
   )
 }

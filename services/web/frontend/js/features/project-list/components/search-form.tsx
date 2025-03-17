@@ -56,11 +56,9 @@ function SearchForm({
   }
   const placeholder = `${placeholderMessage}…`
 
-  const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement & Omit<typeof OLFormControl, keyof HTMLInputElement>
-    >
-  ) => {
+  const handleChange: React.ComponentProps<
+    typeof OLFormControl
+  >['onChange'] = e => {
     eventTracking.sendMB('project-list-page-interaction', {
       action: 'search',
       isSmallDevice,

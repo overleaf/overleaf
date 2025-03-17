@@ -3,9 +3,9 @@ import OLModal, {
   OLModalBody,
   OLModalFooter,
   OLModalHeader,
+  OLModalTitle,
 } from '@/features/ui/components/ol/ol-modal'
 import Notification from '@/shared/components/notification'
-import { Modal } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
 
 type LeaveProjectModalProps = {
@@ -29,7 +29,7 @@ function LeaveProjectModal({
       backdrop="static"
     >
       <OLModalHeader closeButton>
-        <Modal.Title>{t('leave_project')}</Modal.Title>
+        <OLModalTitle>{t('leave_project')}</OLModalTitle>
       </OLModalHeader>
       <OLModalBody>
         <p>{t('about_to_leave_project')}</p>

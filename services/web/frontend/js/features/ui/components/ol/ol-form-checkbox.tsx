@@ -36,6 +36,7 @@ function OLFormCheckbox(props: OLFormCheckboxProps) {
     children: rest.label,
     checked: rest.checked,
     value: rest.value,
+    id: rest.id,
     name: rest.name,
     required: rest.required,
     readOnly: rest.readOnly,
