@@ -199,7 +199,13 @@ async function insertPendingChunk(projectId, chunk) {
 /**
  * Record that a new chunk was created.
  */
-async function confirmCreate(projectId, chunk, chunkId, mongoOpts = {}) {
+async function confirmCreate(
+  projectId,
+  chunk,
+  chunkId,
+  earliestChangeTimestamp,
+  mongoOpts = {}
+) {
   assert.mongoId(projectId, 'bad projectId')
   assert.instance(chunk, Chunk, 'bad chunk')
   assert.mongoId(chunkId, 'bad chunkId')
@@ -228,13 +234,23 @@ async function confirmCreate(projectId, chunk, chunkId, mongoOpts = {}) {
   if (result.matchedCount === 0) {
     throw new OError('pending chunk not found', { projectId, chunkId })
   }
-  await updateProjectRecord(projectId, chunk, mongoOpts)
+  await updateProjectRecord(
+    projectId,
+    chunk,
+    earliestChangeTimestamp,
+    mongoOpts
+  )
 }
 
 /**
  * Write the metadata to the project record
  */
-async function updateProjectRecord(projectId, chunk, mongoOpts = {}) {
+async function updateProjectRecord(
+  projectId,
+  chunk,
+  earliestChangeTimestamp,
+  mongoOpts = {}
+) {
   // record the end version against the project
   await mongodb.projects.updateOne(
     {
@@ -251,7 +267,7 @@ async function updateProjectRecord(projectId, chunk, mongoOpts = {}) {
       // be cleared every time a backup is completed.
       $min: {
         'overleaf.backup.pendingChangeAt':
-          chunk.getEndTimestamp() || new Date(),
+          earliestChangeTimestamp || chunk.getEndTimestamp() || new Date(),
       },
     },
     mongoOpts
@@ -261,7 +277,13 @@ async function updateProjectRecord(projectId, chunk, mongoOpts = {}) {
 /**
  * Record that a chunk was replaced by a new one.
  */
-async function confirmUpdate(projectId, oldChunkId, newChunk, newChunkId) {
+async function confirmUpdate(
+  projectId,
+  oldChunkId,
+  newChunk,
+  newChunkId,
+  earliestChangeTimestamp
+) {
   assert.mongoId(projectId, 'bad projectId')
   assert.mongoId(oldChunkId, 'bad oldChunkId')
   assert.instance(newChunk, Chunk, 'bad newChunk')
@@ -271,7 +293,13 @@ async function confirmUpdate(projectId, oldChunkId, newChunk, newChunkId) {
   try {
     await session.withTransaction(async () => {
       await deleteChunk(projectId, oldChunkId, { session })
-      await confirmCreate(projectId, newChunk, newChunkId, { session })
+      await confirmCreate(
+        projectId,
+        newChunk,
+        newChunkId,
+        earliestChangeTimestamp,
+        { session }
+      )
     })
   } finally {
     await session.endSession()

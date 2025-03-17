@@ -65,6 +65,9 @@ async function persistChanges(projectId, allChanges, limits, clientEndVersion) {
 
   const blobStore = new BlobStore(projectId)
 
+  const earliestChangeTimestamp =
+    allChanges.length > 0 ? allChanges[0].getTimestamp() : null
+
   let currentChunk
 
   /**
@@ -220,7 +223,12 @@ async function persistChanges(projectId, allChanges, limits, clientEndVersion) {
 
     checkElapsedTime(timer)
 
-    await chunkStore.update(projectId, originalEndVersion, currentChunk)
+    await chunkStore.update(
+      projectId,
+      originalEndVersion,
+      currentChunk,
+      earliestChangeTimestamp
+    )
   }
 
   async function createNewChunksAsNeeded() {
@@ -234,7 +242,7 @@ async function persistChanges(projectId, allChanges, limits, clientEndVersion) {
       if (changesPushed) {
         checkElapsedTime(timer)
         currentChunk = chunk
-        await chunkStore.create(projectId, chunk)
+        await chunkStore.create(projectId, chunk, earliestChangeTimestamp)
       } else {
         throw new Error('failed to fill empty chunk')
       }

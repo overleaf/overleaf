@@ -58,12 +58,42 @@ describe('chunkStore', function () {
         expect(chunk.getEndTimestamp()).not.to.exist
       })
 
+      describe('creating a chunk', async function () {
+        const pendingChangeTimestamp = new Date('2014-01-01T00:00:00')
+        const lastChangeTimestamp = new Date('2015-01-01T00:00:00')
+        beforeEach(async function () {
+          const chunk = makeChunk(
+            [
+              makeChange(
+                Operation.addFile('main.tex', File.fromString('abc')),
+                lastChangeTimestamp
+              ),
+            ],
+            1
+          )
+          await chunkStore.create(projectId, chunk, pendingChangeTimestamp)
+        })
+        it('creates a chunk and inserts the pending change timestamp', async function () {
+          const project = await projects.findOne({
+            _id: new ObjectId(projectRecord.insertedId),
+          })
+          expect(project.overleaf.history.currentEndVersion).to.equal(2)
+          expect(project.overleaf.history.currentEndTimestamp).to.deep.equal(
+            lastChangeTimestamp
+          )
+          expect(project.overleaf.backup.pendingChangeAt).to.deep.equal(
+            pendingChangeTimestamp
+          )
+        })
+      })
+
       describe('adding and editing a blank file', function () {
         const testPathname = 'foo.txt'
         const testTextOperation = TextOperation.fromJSON({
           textOperation: ['a'],
         }) // insert an a
         let lastChangeTimestamp
+        const pendingChangeTimestamp = new Date()
 
         beforeEach(async function () {
           const chunk = await chunkStore.loadLatest(projectId)
@@ -74,7 +104,12 @@ describe('chunkStore', function () {
           ]
           lastChangeTimestamp = changes[1].getTimestamp()
           chunk.pushChanges(changes)
-          await chunkStore.update(projectId, oldEndVersion, chunk)
+          await chunkStore.update(
+            projectId,
+            oldEndVersion,
+            chunk,
+            pendingChangeTimestamp
+          )
         })
 
         it('records the correct metadata in db readOnly=false', async function () {
@@ -132,13 +167,14 @@ describe('chunkStore', function () {
             lastChangeTimestamp
           )
           expect(project.overleaf.backup.pendingChangeAt).to.deep.equal(
-            lastChangeTimestamp
+            pendingChangeTimestamp
           )
         })
       })
 
       describe('multiple chunks', async function () {
         // Two chunks are 1 year apart
+        const pendingChangeTimestamp = new Date('2014-01-01T00:00:00')
         const firstChunkTimestamp = new Date('2015-01-01T00:00:00')
         const secondChunkTimestamp = new Date('2016-01-01T00:00:00')
         const thirdChunkTimestamp = new Date('2017-01-01T00:00:00')
@@ -158,7 +194,12 @@ describe('chunkStore', function () {
             ],
             0
           )
-          await chunkStore.update(projectId, 0, firstChunk)
+          await chunkStore.update(
+            projectId,
+            0,
+            firstChunk,
+            pendingChangeTimestamp
+          )
           firstChunk = await chunkStore.loadLatest(projectId)
 
           secondChunk = makeChunk(
@@ -268,7 +309,7 @@ describe('chunkStore', function () {
             _id: new ObjectId(projectRecord.insertedId),
           })
           expect(project.overleaf.backup.pendingChangeAt).to.deep.equal(
-            firstChunkTimestamp
+            pendingChangeTimestamp
           )
         })
 
@@ -322,7 +363,7 @@ describe('chunkStore', function () {
               _id: new ObjectId(projectRecord.insertedId),
             })
             expect(project.overleaf.backup.pendingChangeAt).to.deep.equal(
-              firstChunkTimestamp
+              pendingChangeTimestamp
             )
           })
         })

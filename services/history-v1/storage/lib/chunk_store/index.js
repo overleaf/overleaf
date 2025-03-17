@@ -155,15 +155,22 @@ async function loadAtTimestamp(projectId, timestamp) {
  *
  * @param {string} projectId
  * @param {Chunk} chunk
+ * @param {Date} [earliestChangeTimestamp]
  * @return {Promise.<number>} for the chunkId of the inserted chunk
  */
-async function create(projectId, chunk) {
+async function create(projectId, chunk, earliestChangeTimestamp) {
   assert.projectId(projectId, 'bad projectId')
   assert.instance(chunk, Chunk, 'bad chunk')
+  assert.maybe.date(earliestChangeTimestamp, 'bad timestamp')
 
   const backend = getBackend(projectId)
   const chunkId = await uploadChunk(projectId, chunk)
-  await backend.confirmCreate(projectId, chunk, chunkId)
+  await backend.confirmCreate(
+    projectId,
+    chunk,
+    chunkId,
+    earliestChangeTimestamp
+  )
 }
 
 /**
@@ -195,18 +202,31 @@ async function uploadChunk(projectId, chunk) {
  * @param {string} projectId
  * @param {number} oldEndVersion
  * @param {Chunk} newChunk
+ * @param {Date} [earliestChangeTimestamp]
  * @return {Promise}
  */
-async function update(projectId, oldEndVersion, newChunk) {
+async function update(
+  projectId,
+  oldEndVersion,
+  newChunk,
+  earliestChangeTimestamp
+) {
   assert.projectId(projectId, 'bad projectId')
   assert.integer(oldEndVersion, 'bad oldEndVersion')
   assert.instance(newChunk, Chunk, 'bad newChunk')
+  assert.maybe.date(earliestChangeTimestamp, 'bad timestamp')
 
   const backend = getBackend(projectId)
   const oldChunkId = await getChunkIdForVersion(projectId, oldEndVersion)
   const newChunkId = await uploadChunk(projectId, newChunk)
 
-  await backend.confirmUpdate(projectId, oldChunkId, newChunk, newChunkId)
+  await backend.confirmUpdate(
+    projectId,
+    oldChunkId,
+    newChunk,
+    newChunkId,
+    earliestChangeTimestamp
+  )
 }
 
 /**
