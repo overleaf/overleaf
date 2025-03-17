@@ -415,6 +415,16 @@ class CachedPerProjectEncryptedS3Persistor {
   }
 
   /**
+   *
+   * @param {string} bucketName
+   * @param {string} path
+   * @return {Promise<number>}
+   */
+  async getObjectSize(bucketName, path) {
+    return await this.#parent.getObjectSize(bucketName, path)
+  }
+
+  /**
    * @param {string} bucketName
    * @param {string} path
    * @param {NodeJS.ReadableStream} sourceStream
