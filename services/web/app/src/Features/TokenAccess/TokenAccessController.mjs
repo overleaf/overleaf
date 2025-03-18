@@ -347,7 +347,12 @@ async function grantTokenAccessReadAndWrite(req, res, next) {
       }
     )
     AnalyticsManager.recordEventForUserInBackground(userId, 'project-joined', {
-      mode: pendingEditor ? 'read-only' : 'read-write',
+      role: pendingEditor
+        ? PrivilegeLevels.READ_ONLY
+        : PrivilegeLevels.READ_AND_WRITE,
+      ownerId: project.owner_ref.toString(),
+      source: 'link-sharing',
+      mode: pendingEditor ? 'view' : 'edit',
       projectId: project._id.toString(),
       ...(pendingEditor && { pendingEditor: true }),
     })
@@ -450,7 +455,8 @@ async function grantTokenAccessReadOnly(req, res, next) {
 
     await TokenAccessHandler.promises.addReadOnlyUserToProject(
       userId,
-      project._id
+      project._id,
+      project.owner_ref
     )
 
     return res.json({

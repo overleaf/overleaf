@@ -18,6 +18,7 @@ describe('TokenAccessController', function () {
     this.user = { _id: new ObjectId() }
     this.project = {
       _id: new ObjectId(),
+      owner_ref: this.user._id,
       name: 'test',
       tokenAccessReadAndWrite_refs: [],
       tokenAccessReadOnly_refs: [],
@@ -242,8 +243,11 @@ describe('TokenAccessController', function () {
         expect(
           this.AnalyticsManager.recordEventForUserInBackground
         ).to.have.been.calledWith(this.user._id, 'project-joined', {
-          mode: 'read-write',
+          mode: 'edit',
           projectId: this.project._id.toString(),
+          ownerId: this.project.owner_ref.toString(),
+          role: PrivilegeLevels.READ_AND_WRITE,
+          source: 'link-sharing',
         })
       })
 
@@ -316,9 +320,12 @@ describe('TokenAccessController', function () {
         expect(
           this.AnalyticsManager.recordEventForUserInBackground
         ).to.have.been.calledWith(this.user._id, 'project-joined', {
-          mode: 'read-only',
+          mode: 'view',
           projectId: this.project._id.toString(),
           pendingEditor: true,
+          ownerId: this.project.owner_ref.toString(),
+          role: PrivilegeLevels.READ_ONLY,
+          source: 'link-sharing',
         })
       })
 
@@ -754,7 +761,11 @@ describe('TokenAccessController', function () {
       it('grants read-only access', function () {
         expect(
           this.TokenAccessHandler.promises.addReadOnlyUserToProject
-        ).to.have.been.calledWith(this.user._id, this.project._id)
+        ).to.have.been.calledWith(
+          this.user._id,
+          this.project._id,
+          this.project.owner_ref
+        )
       })
 
       it('writes a project audit log', function () {

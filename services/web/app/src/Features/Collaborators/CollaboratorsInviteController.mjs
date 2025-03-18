@@ -359,11 +359,22 @@ async function acceptInvite(req, res) {
     'project:membership:changed',
     { invites: true, members: true }
   )
+
+  let editMode = 'edit'
+  if (invite.privileges === PrivilegeLevels.REVIEW) {
+    editMode = 'review'
+  } else if (invite.privileges === PrivilegeLevels.READ_ONLY) {
+    editMode = 'view'
+  }
   AnalyticsManager.recordEventForUserInBackground(
     currentUser._id,
-    'project-invite-accept',
+    'project-joined',
     {
       projectId,
+      ownerId: invite.sendingUserId, // only owner can invite others
+      mode: editMode,
+      role: invite.privileges,
+      source: 'email-invite',
     }
   )
 

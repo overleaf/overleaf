@@ -7,6 +7,7 @@ const modulePath = path.join(
 )
 const { expect } = require('chai')
 const { ObjectId } = require('mongodb-legacy')
+const PrivilegeLevels = require('../../../../app/src/Features/Authorization/PrivilegeLevels')
 
 describe('TokenAccessHandler', function () {
   beforeEach(function () {
@@ -115,7 +116,8 @@ describe('TokenAccessHandler', function () {
     it('should call Project.updateOne', async function () {
       await this.TokenAccessHandler.promises.addReadOnlyUserToProject(
         this.userId,
-        this.projectId
+        this.projectId,
+        this.project.owner_ref
       )
       expect(this.Project.updateOne.callCount).to.equal(1)
       expect(
@@ -130,7 +132,13 @@ describe('TokenAccessHandler', function () {
         this.Analytics.recordEventForUserInBackground,
         this.userId,
         'project-joined',
-        { mode: 'read-only', projectId: this.projectId.toString() }
+        {
+          mode: 'view',
+          role: PrivilegeLevels.READ_ONLY,
+          projectId: this.projectId.toString(),
+          ownerId: this.project.owner_ref.toString(),
+          source: 'link-sharing',
+        }
       )
     })
 

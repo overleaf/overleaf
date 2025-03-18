@@ -151,12 +151,15 @@ const TokenAccessHandler = {
     throw new Error('invalid token type')
   },
 
-  async addReadOnlyUserToProject(userId, projectId) {
+  async addReadOnlyUserToProject(userId, projectId, ownerId) {
     userId = new ObjectId(userId.toString())
     projectId = new ObjectId(projectId.toString())
     Analytics.recordEventForUserInBackground(userId, 'project-joined', {
-      mode: 'read-only',
+      role: PrivilegeLevels.READ_ONLY,
       projectId: projectId.toString(),
+      source: 'link-sharing',
+      ownerId: ownerId.toString(),
+      mode: 'view',
     })
 
     return await Project.updateOne(
