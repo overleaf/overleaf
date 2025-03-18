@@ -98,10 +98,9 @@ module.exports = OutputCacheManager = {
   CONTENT_SUBDIR: 'content',
   CACHE_SUBDIR: 'generated-files',
   ARCHIVE_SUBDIR: 'archived-logs',
-  // build id is HEXDATE-HEXRANDOM from Date.now()and RandomBytes
-  // for backwards compatibility, make the randombytes part optional
-  BUILD_REGEX: /^[0-9a-f]+(-[0-9a-f]+)?$/,
-  CONTENT_REGEX: /^[0-9a-f]+(-[0-9a-f]+)?$/,
+  // build id is HEXDATE-HEXRANDOM from Date.now() and RandomBytes
+  BUILD_REGEX: /^[0-9a-f]+-[0-9a-f]+$/,
+  CONTENT_REGEX: /^[0-9a-f]+-[0-9a-f]+$/,
   CACHE_LIMIT: 2, // maximum number of cache directories
   CACHE_AGE: 90 * 60 * 1000, // up to 90 minutes old
 
@@ -137,7 +136,11 @@ module.exports = OutputCacheManager = {
     outputDir,
     callback
   ) {
-    OutputCacheManager.generateBuildId(function (err, buildId) {
+    const getBuildId = cb => {
+      if (request.buildId) return cb(null, request.buildId)
+      OutputCacheManager.generateBuildId(cb)
+    }
+    getBuildId(function (err, buildId) {
       if (err) {
         return callback(err)
       }

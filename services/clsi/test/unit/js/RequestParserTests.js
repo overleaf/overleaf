@@ -30,6 +30,7 @@ describe('RequestParser', function () {
     this.RequestParser = SandboxedModule.require(modulePath, {
       requires: {
         '@overleaf/settings': (this.settings = {}),
+        './OutputCacheManager': { BUILD_REGEX: /^[0-9a-f]+-[0-9a-f]+$/ },
       },
     })
   })
@@ -269,6 +270,37 @@ describe('RequestParser', function () {
           message:
             'resource modified date could not be understood: ' +
             this.validResource.modified,
+        })
+        .should.equal(true)
+    })
+  })
+
+  describe('with a valid buildId', function () {
+    beforeEach(function (done) {
+      this.validRequest.compile.options.buildId = '195a4869176-a4ad60bee7bf35e4'
+      this.RequestParser.parse(this.validRequest, (error, data) => {
+        if (error) return done(error)
+        this.data = data
+        done()
+      })
+    })
+
+    it('should return an error', function () {
+      this.data.buildId.should.equal('195a4869176-a4ad60bee7bf35e4')
+    })
+  })
+
+  describe('with a bad buildId', function () {
+    beforeEach(function () {
+      this.validRequest.compile.options.buildId = 'foo/bar'
+      this.RequestParser.parse(this.validRequest, this.callback)
+    })
+
+    it('should return an error', function () {
+      this.callback
+        .calledWithMatch({
+          message:
+            'buildId attribute does not match regex /^[0-9a-f]+-[0-9a-f]+$/',
         })
         .should.equal(true)
     })

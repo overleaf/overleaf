@@ -21,6 +21,7 @@ describe('LockManager', function () {
           compileConcurrencyLimit: 5,
         }),
         './Errors': (this.Erros = Errors),
+        './RequestParser': { MAX_TIMEOUT: 600 },
       },
     })
   })

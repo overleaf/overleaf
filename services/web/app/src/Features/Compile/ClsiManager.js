@@ -765,6 +765,7 @@ function _finaliseRequest(projectId, options, project, docs, files) {
   return {
     compile: {
       options: {
+        buildId: options.buildId,
         compiler: project.compiler,
         timeout: options.timeout,
         imageName: project.imageName,

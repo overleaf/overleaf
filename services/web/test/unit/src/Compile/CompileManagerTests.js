@@ -122,6 +122,7 @@ describe('CompileManager', function () {
           .calledWith(this.project_id, this.user_id, {
             timeout: this.limits.timeout,
             compileGroup: 'standard',
+            buildId: sinon.match(/[a-f0-9]+-[a-f0-9]+/),
           })
           .should.equal(true)
       })

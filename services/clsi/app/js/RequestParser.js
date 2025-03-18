@@ -1,4 +1,5 @@
 const settings = require('@overleaf/settings')
+const OutputCacheManager = require('./OutputCacheManager')
 
 const VALID_COMPILERS = ['pdflatex', 'latex', 'xelatex', 'lualatex']
 const MAX_TIMEOUT = 600
@@ -135,6 +136,11 @@ function parse(body, callback) {
       }
     )
     response.rootResourcePath = _checkPath(rootResourcePath)
+
+    response.buildId = _parseAttribute('buildId', compile.options.buildId, {
+      type: 'string',
+      regex: OutputCacheManager.BUILD_REGEX,
+    })
   } catch (error1) {
     const error = error1
     return callback(error)
@@ -197,6 +203,13 @@ function _parseAttribute(name, attribute, options) {
       // eslint-disable-next-line valid-typeof
       if (typeof attribute !== options.type) {
         throw new Error(`${name} attribute should be a ${options.type}`)
+      }
+    }
+    if (options.type === 'string' && options.regex instanceof RegExp) {
+      if (!options.regex.test(attribute)) {
+        throw new Error(
+          `${name} attribute does not match regex ${options.regex}`
+        )
       }
     }
   } else {

@@ -16,7 +16,7 @@ const modulePath = require('node:path').join(
   '../../../app/js/DockerLockManager'
 )
 
-describe('LockManager', function () {
+describe('DockerLockManager', function () {
   beforeEach(function () {
     return (this.LockManager = SandboxedModule.require(modulePath, {
       requires: {
