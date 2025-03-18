@@ -1,12 +1,6 @@
 import { useTranslation } from 'react-i18next'
-import {
-  Dropdown as BS3Dropdown,
-  MenuItem as BS3MenuItem,
-} from 'react-bootstrap'
 import { Dropdown, DropdownMenu, DropdownToggle } from 'react-bootstrap-5'
 import OLDropdownMenuItem from '@/features/ui/components/ol/ol-dropdown-menu-item'
-import ControlledDropdown from '@/shared/components/controlled-dropdown'
-import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
 import MaterialIcon from '@/shared/components/material-icon'
 import {
   ADD_ON_NAME,
@@ -15,8 +9,6 @@ import {
   AI_STANDALONE_PLAN_CODE,
 } from '@/features/subscription/data/add-on-codes'
 import sparkle from '@/shared/svgs/sparkle.svg'
-import { bsVersion } from '@/features/utils/bootstrap-5'
-import classnames from 'classnames'
 import { RecurlySubscription } from '../../../../../../../../types/subscription/dashboard/subscription'
 import { LICENSE_ADD_ON } from '@/features/group-management/components/upgrade-subscription/upgrade-subscription-plan-details'
 
@@ -78,51 +70,28 @@ function AddOn({
       </div>
       {!pendingCancellation && (
         <div className="ms-auto">
-          <BootstrapVersionSwitcher
-            bs3={
-              <ControlledDropdown id="add-ons-actions" pullRight>
-                <BS3Dropdown.Toggle
-                  noCaret
-                  bsStyle={null}
-                  className="add-on-options-toggle btn-secondary"
-                >
-                  <MaterialIcon
-                    type="more_vert"
-                    accessibilityLabel={t('more_options')}
-                  />
-                </BS3Dropdown.Toggle>
-                <BS3Dropdown.Menu>
-                  <BS3MenuItem onClick={() => handleCancelClick(addOnCode)}>
-                    {t('cancel')}
-                  </BS3MenuItem>
-                </BS3Dropdown.Menu>
-              </ControlledDropdown>
-            }
-            bs5={
-              <Dropdown align="end">
-                <DropdownToggle
-                  id="add-on-dropdown-toggle"
-                  className="add-on-options-toggle"
-                  variant="secondary"
-                >
-                  <MaterialIcon
-                    type="more_vert"
-                    accessibilityLabel={t('more_options')}
-                  />
-                </DropdownToggle>
-                <DropdownMenu flip={false}>
-                  <OLDropdownMenuItem
-                    onClick={() => handleCancelClick(addOnCode)}
-                    as="button"
-                    tabIndex={-1}
-                    variant="danger"
-                  >
-                    {t('cancel')}
-                  </OLDropdownMenuItem>
-                </DropdownMenu>
-              </Dropdown>
-            }
-          />
+          <Dropdown align="end">
+            <DropdownToggle
+              id="add-on-dropdown-toggle"
+              className="add-on-options-toggle"
+              variant="secondary"
+            >
+              <MaterialIcon
+                type="more_vert"
+                accessibilityLabel={t('more_options')}
+              />
+            </DropdownToggle>
+            <DropdownMenu flip={false}>
+              <OLDropdownMenuItem
+                onClick={() => handleCancelClick(addOnCode)}
+                as="button"
+                tabIndex={-1}
+                variant="danger"
+              >
+                {t('cancel')}
+              </OLDropdownMenuItem>
+            </DropdownMenu>
+          </Dropdown>
         </div>
       )}
     </div>
@@ -146,9 +115,7 @@ function AddOns({
 
   return (
     <>
-      <h2 className={classnames('h3', bsVersion({ bs5: 'fw-bold' }))}>
-        {t('add_ons')}
-      </h2>
+      <h2 className="h3 fw-bold">{t('add_ons')}</h2>
       {addOnsToDisplay && addOnsToDisplay.length > 0 ? (
         addOnsToDisplay.map(addOn => (
           <AddOn
