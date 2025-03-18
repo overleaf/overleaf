@@ -1,0 +1,16 @@
+.add-secondary-email {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-05);
+
+  .add-secondary-email-error {
+    display: flex;
+    gap: var(--spacing-03);
+    padding: var(--spacing-02);
+  }
+
+  .add-secondary-email-learn-more {
+    margin-top: var(--spacing-05);
+    margin-bottom: 0;
+  }
+}

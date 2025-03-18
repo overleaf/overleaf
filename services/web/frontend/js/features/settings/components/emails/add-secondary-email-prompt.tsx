@@ -1,6 +1,6 @@
 import { Interstitial } from '@/shared/components/interstitial'
 import useWaitForI18n from '@/shared/hooks/use-wait-for-i18n'
-import { Button } from 'react-bootstrap'
+import OLButton from '@/features/ui/components/ol/ol-button'
 import { Trans, useTranslation } from 'react-i18next'
 import EmailInput from './add-email/input'
 import { useState } from 'react'
@@ -92,22 +92,12 @@ export function AddSecondaryEmailPrompt() {
             {error && <ErrorMessage error={error} />}
           </div>
 
-          <Button
-            bsStyle={null}
-            disabled={isSubmitting}
-            className="btn-primary"
-            type="submit"
-          >
+          <OLButton disabled={isSubmitting} variant="primary" type="submit">
             {isSubmitting ? <>{t('adding')}&hellip;</> : t('add_email_address')}
-          </Button>
-          <Button
-            bsStyle={null}
-            disabled={isSubmitting}
-            className="btn-secondary"
-            href="/project"
-          >
+          </OLButton>
+          <OLButton disabled={isSubmitting} variant="secondary" href="/project">
             {t('not_now')}
-          </Button>
+          </OLButton>
           <p className="add-secondary-email-learn-more">
             <Trans
               i18nKey="learn_more_about_account"

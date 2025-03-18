@@ -511,6 +511,8 @@ async function addSecondaryEmailPage(req, res) {
     'add-secondary-email-page-displayed'
   )
 
+  await SplitTestHandler.promises.getAssignment(req, res, 'bs5-misc-pages-b2c')
+
   res.render('user/addSecondaryEmail')
 }
 
