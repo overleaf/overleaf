@@ -298,6 +298,26 @@ async function getFirstOpTimestamp(projectId) {
   return firstOpTimestamp
 }
 
+async function getFirstOpTimestamps(projectIds) {
+  const keys = projectIds.map(projectId =>
+    Keys.projectHistoryFirstOpTimestamp({ project_id: projectId })
+  )
+  const results = await rclient.mget(keys)
+  const timestamps = results.map(result => {
+    // convert stored time back to a numeric timestamp
+    const timestamp = parseInt(result, 10)
+
+    // check for invalid timestamp
+    if (isNaN(timestamp)) {
+      return null
+    }
+
+    // convert numeric timestamp to a date object
+    return new Date(timestamp)
+  })
+  return timestamps
+}
+
 async function clearFirstOpTimestamp(projectId) {
   const key = Keys.projectHistoryFirstOpTimestamp({ project_id: projectId })
   await rclient.del(key)
@@ -357,6 +377,7 @@ const getProjectIdsWithHistoryOpsCountCb = callbackify(
 )
 const setFirstOpTimestampCb = callbackify(setFirstOpTimestamp)
 const getFirstOpTimestampCb = callbackify(getFirstOpTimestamp)
+const getFirstOpTimestampsCb = callbackify(getFirstOpTimestamps)
 const clearFirstOpTimestampCb = callbackify(clearFirstOpTimestamp)
 const getProjectIdsWithFirstOpTimestampsCb = callbackify(
   getProjectIdsWithFirstOpTimestamps
@@ -394,6 +415,7 @@ export {
   getProjectIdsWithHistoryOpsCountCb as getProjectIdsWithHistoryOpsCount,
   setFirstOpTimestampCb as setFirstOpTimestamp,
   getFirstOpTimestampCb as getFirstOpTimestamp,
+  getFirstOpTimestampsCb as getFirstOpTimestamps,
   clearFirstOpTimestampCb as clearFirstOpTimestamp,
   getProjectIdsWithFirstOpTimestampsCb as getProjectIdsWithFirstOpTimestamps,
   clearDanglingFirstOpTimestampCb as clearDanglingFirstOpTimestamp,
@@ -413,6 +435,7 @@ export const promises = {
   getProjectIdsWithHistoryOpsCount,
   setFirstOpTimestamp,
   getFirstOpTimestamp,
+  getFirstOpTimestamps,
   clearFirstOpTimestamp,
   getProjectIdsWithFirstOpTimestamps,
   clearDanglingFirstOpTimestamp,

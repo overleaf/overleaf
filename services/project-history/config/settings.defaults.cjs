@@ -41,6 +41,9 @@ module.exports = {
         10
       ),
     },
+    project_history: {
+      url: `http://${process.env.PROJECT_HISTORY_HOST || '127.0.0.1'}:3054`,
+    },
   },
   redis: {
     lock: {
