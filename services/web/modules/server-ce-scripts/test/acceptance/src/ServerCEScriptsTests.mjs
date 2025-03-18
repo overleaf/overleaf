@@ -640,7 +640,7 @@ describe('ServerCEScripts', function () {
           }),
           [
             `'project.imageName' is not set for some projects`,
-            `Set SKIP_TEX_LIVE_CHECK=true in config/variables.env, restart the instance and run 'bin/run-script scripts/backfill_project_image_name.js' to initialise TexLive image in existing projects`,
+            `Set SKIP_TEX_LIVE_CHECK=true in config/variables.env, restart the instance and run 'bin/run-script scripts/backfill_project_image_name.mjs' to initialise TexLive image in existing projects`,
           ]
         )
       })
@@ -660,7 +660,7 @@ describe('ServerCEScripts', function () {
           }),
           [
             `'project.imageName' is not set for some projects`,
-            `Set SKIP_TEX_LIVE_CHECK=true in config/variables.env, restart the instance and run 'bin/run-script scripts/backfill_project_image_name.js' to initialise TexLive image in existing projects`,
+            `Set SKIP_TEX_LIVE_CHECK=true in config/variables.env, restart the instance and run 'bin/run-script scripts/backfill_project_image_name.mjs' to initialise TexLive image in existing projects`,
           ]
         )
       })

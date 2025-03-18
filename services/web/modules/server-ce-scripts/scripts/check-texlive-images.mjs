@@ -10,7 +10,7 @@ async function readImagesInUse() {
   if (!images || images.length === 0 || images.includes(null)) {
     console.error(`'project.imageName' is not set for some projects`)
     console.error(
-      `Set SKIP_TEX_LIVE_CHECK=true in config/variables.env, restart the instance and run 'bin/run-script scripts/backfill_project_image_name.js' to initialise TexLive image in existing projects.`
+      `Set SKIP_TEX_LIVE_CHECK=true in config/variables.env, restart the instance and run 'bin/run-script scripts/backfill_project_image_name.mjs' to initialise TexLive image in existing projects.`
     )
     console.error(
       `After running the script, remove SKIP_TEX_LIVE_CHECK from config/variables.env and restart the instance.`
