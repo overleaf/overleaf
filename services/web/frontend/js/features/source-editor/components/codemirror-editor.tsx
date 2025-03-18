@@ -19,6 +19,7 @@ import {
 } from './codemirror-context'
 import MathPreviewTooltip from './math-preview-tooltip'
 import Breadcrumbs from '@/features/ide-redesign/components/breadcrumbs'
+import { useIsNewEditorEnabled } from '@/features/ide-redesign/utils/new-editor-utils'
 
 // TODO: remove this when definitely no longer used
 export * from './codemirror-context'
@@ -40,7 +41,7 @@ function CodeMirrorEditor() {
   const isMounted = useIsMounted()
 
   const newReviewPanel = useFeatureFlag('review-panel-redesign')
-  const newEditor = useFeatureFlag('editor-redesign')
+  const newEditor = useIsNewEditorEnabled()
 
   // create the view using the initial state and intercept transactions
   const viewRef = useRef<EditorView | null>(null)
