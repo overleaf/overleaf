@@ -73,6 +73,7 @@
     "services/third-party-datastore",
     "services/third-party-references",
     "services/tpdsworker",
-    "services/web"
+    "services/web",
+    "tools/saas-e2e"
   ]
 }

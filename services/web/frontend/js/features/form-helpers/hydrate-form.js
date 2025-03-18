@@ -90,7 +90,11 @@ function formSubmitHelper(formEl) {
 
 async function validateCaptcha(formEl) {
   let captchaResponse
-  if (formEl.hasAttribute('captcha')) {
+  if (
+    formEl.hasAttribute('captcha') &&
+    // Disable captcha for E2E tests in dev-env.
+    !(process.env.NODE_ENV === 'development' && window.Cypress)
+  ) {
     if (
       formEl.getAttribute('action') === '/login' &&
       (await canSkipCaptcha(new FormData(formEl).get('email')))

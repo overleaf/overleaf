@@ -21,6 +21,9 @@ export function ReCaptcha2({
   if (site && recaptchaDisabled[site]) {
     return null
   }
+  if (process.env.NODE_ENV === 'development' && window.Cypress) {
+    return null // Disable captcha for E2E tests in dev-env.
+  }
   return (
     <ReCAPTCHA
       ref={recaptchaRef}
