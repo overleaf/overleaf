@@ -200,73 +200,22 @@ module.exports = ResourceWriter = {
     return OutputFileFinder.findOutputFiles(
       resources,
       basePath,
-      function (error, outputFiles, allFiles) {
+      (error, outputFiles, allFiles) => {
         if (error != null) {
           return callback(error)
         }
 
         const jobs = []
-        for (const file of Array.from(outputFiles || [])) {
-          ;(function (file) {
-            const { path } = file
-            let shouldDelete = true
-            if (
-              path.match(/^output\./) ||
-              path.match(/\.aux$/) ||
-              path.match(/^cache\//)
-            ) {
-              // knitr cache
-              shouldDelete = false
-            }
-            if (path.match(/^output-.*/)) {
-              // Tikz cached figures (default case)
-              shouldDelete = false
-            }
-            if (path.match(/\.(pdf|dpth|md5)$/)) {
-              // Tikz cached figures (by extension)
-              shouldDelete = false
-            }
-            if (
-              path.match(/\.(pygtex|pygstyle)$/) ||
-              path.match(/(^|\/)_minted-[^\/]+\//)
-            ) {
-              // minted files/directory
-              shouldDelete = false
-            }
-            if (
-              path.match(/\.md\.tex$/) ||
-              path.match(/(^|\/)_markdown_[^\/]+\//)
-            ) {
-              // markdown files/directory
-              shouldDelete = false
-            }
-            if (path.match(/-eps-converted-to\.pdf$/)) {
-              // Epstopdf generated files
-              shouldDelete = false
-            }
-            if (
-              path === 'output.pdf' ||
-              path === 'output.dvi' ||
-              path === 'output.log' ||
-              path === 'output.xdv' ||
-              path === 'output.stdout' ||
-              path === 'output.stderr'
-            ) {
-              shouldDelete = true
-            }
-            if (path === 'output.tex') {
-              // created by TikzManager if present in output files
-              shouldDelete = true
-            }
-            if (shouldDelete) {
-              return jobs.push(callback =>
-                ResourceWriter._deleteFileIfNotDirectory(
-                  Path.join(basePath, path),
-                  callback
-                )
+        for (const { path } of outputFiles || []) {
+          const shouldDelete = ResourceWriter.isExtraneousFile(path)
+          if (shouldDelete) {
+            jobs.push(callback =>
+              ResourceWriter._deleteFileIfNotDirectory(
+                Path.join(basePath, path),
+                callback
               )
-            }
-          })(file)
+            )
+          }
         }
 
         return async.series(jobs, function (error) {
@@ -277,6 +226,58 @@ module.exports = ResourceWriter = {
         })
       }
     )
+  },
+
+  isExtraneousFile(path) {
+    let shouldDelete = true
+    if (
+      path.match(/^output\./) ||
+      path.match(/\.aux$/) ||
+      path.match(/^cache\//)
+    ) {
+      // knitr cache
+      shouldDelete = false
+    }
+    if (path.match(/^output-.*/)) {
+      // Tikz cached figures (default case)
+      shouldDelete = false
+    }
+    if (path.match(/\.(pdf|dpth|md5)$/)) {
+      // Tikz cached figures (by extension)
+      shouldDelete = false
+    }
+    if (
+      path.match(/\.(pygtex|pygstyle)$/) ||
+      path.match(/(^|\/)_minted-[^\/]+\//)
+    ) {
+      // minted files/directory
+      shouldDelete = false
+    }
+    if (path.match(/\.md\.tex$/) || path.match(/(^|\/)_markdown_[^\/]+\//)) {
+      // markdown files/directory
+      shouldDelete = false
+    }
+    if (path.match(/-eps-converted-to\.pdf$/)) {
+      // Epstopdf generated files
+      shouldDelete = false
+    }
+    if (
+      path === 'output.synctex.gz' ||
+      path === 'output.pdfxref' ||
+      path === 'output.pdf' ||
+      path === 'output.dvi' ||
+      path === 'output.log' ||
+      path === 'output.xdv' ||
+      path === 'output.stdout' ||
+      path === 'output.stderr'
+    ) {
+      shouldDelete = true
+    }
+    if (path === 'output.tex') {
+      // created by TikzManager if present in output files
+      shouldDelete = true
+    }
+    return shouldDelete
   },
 
   _deleteFileIfNotDirectory(path, callback) {

@@ -107,7 +107,6 @@ Hello world
           'output.fdb_latexmk',
           'output.fls',
           'output.log',
-          'output.pdfxref',
           'output.stderr',
           'output.stdout',
         ])
