@@ -383,7 +383,8 @@ export const LocalCompileProvider: FC = ({ children }) => {
         const outputFiles = new Map()
 
         for (const outputFile of data.outputFiles) {
-          outputFiles.set(outputFile.path, outputFile)
+          // Use a shadow-copy, we will update it in place and append to .url.
+          outputFiles.set(outputFile.path, { ...outputFile })
         }
 
         // set the PDF context
