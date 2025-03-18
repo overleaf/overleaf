@@ -129,6 +129,22 @@ function getProjectDocsAndFlushIfOld(req, res, next) {
   )
 }
 
+function getProjectLastUpdatedAt(req, res, next) {
+  const projectId = req.params.project_id
+  ProjectManager.getProjectDocsTimestamps(projectId, (err, timestamps) => {
+    if (err) return next(err)
+
+    // Filter out nulls. This can happen when
+    // - docs get flushed between the listing and getting the individual docs ts
+    // - a doc flush failed half way (doc keys removed, project tracking not updated)
+    timestamps = timestamps.filter(ts => !!ts)
+
+    timestamps = timestamps.map(ts => parseInt(ts, 10))
+    timestamps.sort((a, b) => (a > b ? 1 : -1))
+    res.json({ lastUpdatedAt: timestamps.pop() })
+  })
+}
+
 function clearProjectState(req, res, next) {
   const projectId = req.params.project_id
   const timer = new Metrics.Timer('http.clearProjectState')
@@ -521,6 +537,7 @@ module.exports = {
   getDoc,
   peekDoc,
   getProjectDocsAndFlushIfOld,
+  getProjectLastUpdatedAt,
   clearProjectState,
   appendToDoc,
   setDoc,

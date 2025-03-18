@@ -11,6 +11,22 @@ const ProjectGetter = require('../Project/ProjectGetter')
 const FileStoreHandler = require('../FileStore/FileStoreHandler')
 const Features = require('../../infrastructure/Features')
 
+function getProjectLastUpdatedAt(projectId, callback) {
+  _makeRequest(
+    {
+      path: `/project/${projectId}/last_updated_at`,
+      method: 'GET',
+      json: true,
+    },
+    projectId,
+    'project.redis.last_updated_at',
+    (err, body) => {
+      if (err || !body?.lastUpdatedAt) return callback(err, null)
+      callback(null, new Date(body.lastUpdatedAt))
+    }
+  )
+}
+
 /**
  * @param {string} projectId
  */
@@ -597,6 +613,7 @@ module.exports = {
   deleteDoc,
   getComment,
   getDocument,
+  getProjectLastUpdatedAt,
   setDocument,
   appendToDocument,
   getProjectDocsIfMatch,
@@ -624,6 +641,7 @@ module.exports = {
     ]),
     setDocument: promisify(setDocument),
     getProjectDocsIfMatch: promisify(getProjectDocsIfMatch),
+    getProjectLastUpdatedAt: promisify(getProjectLastUpdatedAt),
     clearProjectState: promisify(clearProjectState),
     acceptChanges: promisify(acceptChanges),
     resolveThread: promisify(resolveThread),

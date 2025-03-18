@@ -119,6 +119,18 @@ module.exports = DocUpdaterClient = {
     )
   },
 
+  getProjectLastUpdatedAt(projectId, callback) {
+    request.get(
+      `http://127.0.0.1:3003/project/${projectId}/last_updated_at`,
+      (error, res, body) => {
+        if (body != null && res.statusCode >= 200 && res.statusCode < 300) {
+          body = JSON.parse(body)
+        }
+        callback(error, res, body)
+      }
+    )
+  },
+
   preloadDoc(projectId, docId, callback) {
     DocUpdaterClient.getDoc(projectId, docId, callback)
   },

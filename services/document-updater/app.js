@@ -147,6 +147,10 @@ app.post(
   '/project/:project_id/get_and_flush_if_old',
   HttpController.getProjectDocsAndFlushIfOld
 )
+app.get(
+  '/project/:project_id/last_updated_at',
+  HttpController.getProjectLastUpdatedAt
+)
 app.post('/project/:project_id/clearState', HttpController.clearProjectState)
 app.post('/project/:project_id/doc/:doc_id', HttpController.setDoc)
 app.post('/project/:project_id/doc/:doc_id/append', HttpController.appendToDoc)

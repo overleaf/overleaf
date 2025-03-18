@@ -109,11 +109,40 @@ describe('Applying updates to a doc', function () {
       )
     })
 
+    it('should yield last updated time', function (done) {
+      DocUpdaterClient.getProjectLastUpdatedAt(
+        this.project_id,
+        (error, res, body) => {
+          if (error != null) {
+            throw error
+          }
+          res.statusCode.should.equal(200)
+          body.lastUpdatedAt.should.be.within(this.startTime, Date.now())
+          done()
+        }
+      )
+    })
+
+    it('should yield no last updated time for another project', function (done) {
+      DocUpdaterClient.getProjectLastUpdatedAt(
+        DocUpdaterClient.randomId(),
+        (error, res, body) => {
+          if (error != null) {
+            throw error
+          }
+          res.statusCode.should.equal(200)
+          body.should.deep.equal({})
+          done()
+        }
+      )
+    })
+
     describe('when sending another update', function () {
       before(function (done) {
-        this.timeout = 10000
-        this.second_update = Object.create(this.update)
+        this.timeout(10000)
+        this.second_update = Object.assign({}, this.update)
         this.second_update.v = this.version + 1
+        this.secondStartTime = Date.now()
         DocUpdaterClient.sendUpdate(
           this.project_id,
           this.doc_id,
@@ -123,6 +152,24 @@ describe('Applying updates to a doc', function () {
               throw error
             }
             setTimeout(done, 200)
+          }
+        )
+      })
+
+      it('should update the doc', function (done) {
+        DocUpdaterClient.getDoc(
+          this.project_id,
+          this.doc_id,
+          (error, res, doc) => {
+            if (error) done(error)
+            doc.lines.should.deep.equal([
+              'one',
+              'one and a half',
+              'one and a half',
+              'two',
+              'three',
+            ])
+            done()
           }
         )
       })
@@ -138,6 +185,23 @@ describe('Applying updates to a doc', function () {
             }
             result = parseInt(result, 10)
             result.should.equal(this.firstOpTimestamp)
+            done()
+          }
+        )
+      })
+
+      it('should yield last updated time', function (done) {
+        DocUpdaterClient.getProjectLastUpdatedAt(
+          this.project_id,
+          (error, res, body) => {
+            if (error != null) {
+              throw error
+            }
+            res.statusCode.should.equal(200)
+            body.lastUpdatedAt.should.be.within(
+              this.secondStartTime,
+              Date.now()
+            )
             done()
           }
         )
