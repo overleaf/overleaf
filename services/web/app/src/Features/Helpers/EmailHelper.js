@@ -11,7 +11,7 @@ function getDomain(email) {
 }
 
 function parseEmail(email, parseRfcAddress = false) {
-  if (email == null) {
+  if (typeof email !== 'string' || !email) {
     return null
   }
 

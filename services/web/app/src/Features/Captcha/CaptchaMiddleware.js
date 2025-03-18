@@ -6,6 +6,7 @@ const OError = require('@overleaf/o-error')
 const DeviceHistory = require('./DeviceHistory')
 const AuthenticationController = require('../Authentication/AuthenticationController')
 const { expressify } = require('@overleaf/promise-utils')
+const EmailsHelper = require('../Helpers/EmailHelper')
 
 function respondInvalidCaptcha(req, res) {
   res.status(400).json({
@@ -41,9 +42,11 @@ async function canSkipCaptcha(req, res) {
 
 function validateCaptcha(action) {
   return expressify(async function (req, res, next) {
+    const email = EmailsHelper.parseEmail(req.body?.email)
     const trustedUser =
-      req.body?.email &&
-      Settings.recaptcha.trustedUsers.includes(req.body.email)
+      email &&
+      (Settings.recaptcha.trustedUsers.includes(email) ||
+        Settings.recaptcha.trustedUsersRegex?.test(email))
     if (!Settings.recaptcha?.siteKey || Settings.recaptcha.disabled[action]) {
       if (action === 'login') {
         AuthenticationController.setAuditInfo(req, { captcha: 'disabled' })
@@ -51,15 +54,17 @@ function validateCaptcha(action) {
       Metrics.inc('captcha', 1, { path: action, status: 'disabled' })
       return next()
     }
-    if (trustedUser && action === 'login') {
-      AuthenticationController.setAuditInfo(req, { captcha: 'trusted' })
+    if (trustedUser) {
+      if (action === 'login') {
+        AuthenticationController.setAuditInfo(req, { captcha: 'trusted' })
+      }
       Metrics.inc('captcha', 1, { path: action, status: 'trusted' })
       return next()
     }
     const reCaptchaResponse = req.body['g-recaptcha-response']
     if (action === 'login') {
       await initializeDeviceHistory(req)
-      const fromKnownDevice = req.deviceHistory.has(req.body?.email)
+      const fromKnownDevice = req.deviceHistory.has(email)
       AuthenticationController.setAuditInfo(req, { fromKnownDevice })
       if (!reCaptchaResponse && fromKnownDevice) {
         // The user has previously logged in from this device, which required

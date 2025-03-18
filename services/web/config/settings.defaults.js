@@ -779,6 +779,10 @@ module.exports = {
       .split(',')
       .map(x => x.trim())
       .filter(x => x !== ''),
+    trustedUsersRegex: process.env.CAPTCHA_TRUSTED_USERS_REGEX
+      ? // Enforce matching of the entire input.
+        new RegExp(`^${process.env.CAPTCHA_TRUSTED_USERS_REGEX}$`)
+      : null,
     disabled: {
       invite: true,
       login: true,

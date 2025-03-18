@@ -18,6 +18,24 @@ describe('EmailHelper', function () {
     expect(parseEmail(address, true)).to.equal(expected)
   })
 
+  it('should return null for garbage input', function () {
+    const cases = [
+      undefined,
+      null,
+      '',
+      42,
+      ['test@example.com'],
+      {},
+      { length: 42 },
+      { trim: true, match: true },
+      { toString: true },
+    ]
+    for (const input of cases) {
+      expect(parseEmail(input)).to.equal(null, input)
+      expect(parseEmail(input, true)).to.equal(null, input)
+    }
+  })
+
   it('should return null for an invalid single email', function () {
     const address = 'testexample.com'
     expect(parseEmail(address)).to.equal(null)
