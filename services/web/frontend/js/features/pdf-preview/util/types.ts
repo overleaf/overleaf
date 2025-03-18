@@ -1,4 +1,5 @@
 import React from 'react'
+import { CompileOutputFile } from '../../../../../types/compile'
 
 export type LogEntry = {
   raw: string
@@ -31,8 +32,8 @@ export type SourceLocation = {
   column?: number
 }
 
-export type PdfFileData = { path: string; url: string }
-type PdfFileArchiveData = { path: string; url: string; fileCount: number }
+export type PdfFileData = CompileOutputFile
+type PdfFileArchiveData = CompileOutputFile & { fileCount: number }
 
 export type PdfFileDataList = {
   top: PdfFileData[]

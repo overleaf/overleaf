@@ -7,7 +7,7 @@ const { NotFoundError } = require('./Errors')
 const logger = require('@overleaf/logger')
 
 // NOTE: Updating this list requires a corresponding change in
-// * services/web/frontend/js/features/pdf-preview/util/file-list.js
+// * services/web/frontend/js/features/pdf-preview/util/file-list.ts
 const ignoreFiles = ['output.fls', 'output.fdb_latexmk']
 
 function getContentDir(projectId, userId) {

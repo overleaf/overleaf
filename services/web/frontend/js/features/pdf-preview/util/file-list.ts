@@ -1,15 +1,19 @@
+import {
+  CompileOutputFile,
+  CompileResponseData,
+} from '../../../../../types/compile'
+import { PdfFileDataList } from '@/features/pdf-preview/util/types'
+
 const topFileTypes = ['bbl', 'gls', 'ind']
 // NOTE: Updating this list requires a corresponding change in
 // * services/clsi/app/js/OutputFileArchiveManager.js
 const ignoreFiles = ['output.fls', 'output.fdb_latexmk']
 
-export const buildFileList = (
-  outputFiles,
-  clsiServerId,
-  compileGroup,
-  outputFilesArchive
-) => {
-  const files = { top: [], other: [] }
+export function buildFileList(
+  outputFiles: Map<string, CompileOutputFile>,
+  { clsiServerId, compileGroup, outputFilesArchive }: CompileResponseData
+): PdfFileDataList {
+  const files: PdfFileDataList = { top: [], other: [] }
 
   if (outputFiles) {
     const params = new URLSearchParams()
