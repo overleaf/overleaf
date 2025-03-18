@@ -310,6 +310,7 @@ module.exports = {
   fetchStreamWithResponse,
   fetchNothing,
   fetchRedirect,
+  fetchRedirectWithResponse,
   fetchString,
   fetchStringWithResponse,
   RequestFailedError,
