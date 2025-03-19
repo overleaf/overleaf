@@ -24,6 +24,7 @@ class PromisifiedSubscription {
     this.features = options.features
     this.ssoConfig = options.ssoConfig
     this.groupPolicy = options.groupPolicy
+    this.addOns = options.addOns
   }
 
   async ensureExists() {
