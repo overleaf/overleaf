@@ -141,7 +141,9 @@ describe('<UserNotifications />', function () {
 
       expect(joinBtn.disabled).to.be.true
 
-      await waitForElementToBeRemoved(() => screen.getByText('Loading'))
+      await waitForElementToBeRemoved(() =>
+        screen.getByRole('button', { name: /joining/i })
+      )
 
       expect(acceptMock.called()).to.be.true
       screen.getByText(/joined/i)
@@ -185,7 +187,7 @@ describe('<UserNotifications />', function () {
       fireEvent.click(joinBtn)
 
       await waitForElementToBeRemoved(() =>
-        screen.getByRole('button', { name: /loading/i })
+        screen.getByRole('button', { name: /joining/i })
       )
 
       expect(fetchMock.called()).to.be.true

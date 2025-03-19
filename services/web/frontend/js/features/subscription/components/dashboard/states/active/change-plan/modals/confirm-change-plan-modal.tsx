@@ -110,6 +110,7 @@ export function ConfirmChangePlanModal() {
           variant="primary"
           disabled={inflight}
           isLoading={inflight}
+          loadingLabel={t('processing_uppercase') + '…'}
           onClick={handleConfirmChange}
           bs3Props={{
             loading: inflight

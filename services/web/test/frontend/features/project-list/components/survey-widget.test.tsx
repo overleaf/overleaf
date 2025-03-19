@@ -36,7 +36,7 @@ describe('<SurveyWidgetDsNav />', function () {
       screen.getByText(this.preText)
       screen.getByText(this.linkText)
 
-      const link = screen.getByRole('link', {
+      const link = screen.getByRole('button', {
         name: 'Take survey',
       }) as HTMLAnchorElement
       expect(link.href).to.equal(this.url)
@@ -51,7 +51,7 @@ describe('<SurveyWidgetDsNav />', function () {
       const text = screen.queryByText(this.preText)
       expect(text).to.be.null
 
-      const link = screen.queryByRole('link')
+      const link = screen.queryByRole('button')
       expect(link).to.be.null
 
       const dismissed = localStorage.getItem('dismissed-my-survey')
@@ -80,7 +80,7 @@ describe('<SurveyWidgetDsNav />', function () {
       const text = screen.queryByText(this.preText)
       expect(text).to.be.null
 
-      const link = screen.queryByRole('link')
+      const link = screen.queryByRole('button')
       expect(link).to.be.null
     })
   })
@@ -98,7 +98,7 @@ describe('<SurveyWidgetDsNav />', function () {
       const text = screen.queryByText(this.preText)
       expect(text).to.be.null
 
-      const link = screen.queryByRole('link')
+      const link = screen.queryByRole('button')
       expect(link).to.be.null
     })
   })

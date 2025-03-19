@@ -1,4 +1,10 @@
-import { fireEvent, screen, waitFor, within } from '@testing-library/react'
+import {
+  fireEvent,
+  screen,
+  waitFor,
+  waitForElementToBeRemoved,
+  within,
+} from '@testing-library/react'
 import { expect } from 'chai'
 import fetchMock from 'fetch-mock'
 import sinon from 'sinon'
@@ -157,7 +163,9 @@ describe('<ProjectListRoot />', function () {
           const archiveButton = within(actionsToolbar).getByLabelText('Archive')
           fireEvent.click(archiveButton)
 
-          const confirmBtn = screen.getByText('Confirm') as HTMLButtonElement
+          const confirmBtn = screen.getByRole('button', {
+            name: 'Confirm',
+          }) as HTMLButtonElement
           fireEvent.click(confirmBtn)
           expect(confirmBtn.disabled).to.be.true
 
@@ -187,7 +195,9 @@ describe('<ProjectListRoot />', function () {
           const archiveButton = within(actionsToolbar).getByLabelText('Trash')
           fireEvent.click(archiveButton)
 
-          const confirmBtn = screen.getByText('Confirm') as HTMLButtonElement
+          const confirmBtn = screen.getByRole('button', {
+            name: 'Confirm',
+          }) as HTMLButtonElement
           fireEvent.click(confirmBtn)
           expect(confirmBtn.disabled).to.be.true
 
@@ -266,14 +276,15 @@ describe('<ProjectListRoot />', function () {
             status: 200,
           })
 
-          const unarchiveButton =
-            within(actionsToolbar).getByText<HTMLButtonElement>('Restore')
+          const unarchiveButton = within(actionsToolbar).getByRole('button', {
+            name: 'Restore',
+          })
           fireEvent.click(unarchiveButton)
 
           await fetchMock.flush(true)
           expect(fetchMock.done()).to.be.true
 
-          screen.getByText('No projects')
+          await screen.findByText('No projects')
         })
 
         it('only unarchive the selected projects', async function () {
@@ -340,7 +351,7 @@ describe('<ProjectListRoot />', function () {
           await fetchMock.flush(true)
           expect(fetchMock.done()).to.be.true
 
-          screen.getByText('No projects')
+          await screen.findByText('No projects')
         })
 
         it('only untrashes the selected projects', async function () {
@@ -369,7 +380,9 @@ describe('<ProjectListRoot />', function () {
             within(actionsToolbar).getByLabelText<HTMLButtonElement>('Archive')
           fireEvent.click(archiveButton)
 
-          const confirmButton = screen.getByText<HTMLButtonElement>('Confirm')
+          const confirmButton = screen.getByRole('button', {
+            name: 'Confirm',
+          }) as HTMLButtonElement
           fireEvent.click(confirmButton)
           expect(confirmButton.disabled).to.be.true
 
@@ -427,7 +440,9 @@ describe('<ProjectListRoot />', function () {
           })
           fireEvent.click(leaveButton)
 
-          const confirmButton = screen.getByText<HTMLButtonElement>('Confirm')
+          const confirmButton = screen.getByRole('button', {
+            name: 'Confirm',
+          }) as HTMLButtonElement
           fireEvent.click(confirmButton)
           expect(confirmButton.disabled).to.be.true
 
@@ -484,7 +499,9 @@ describe('<ProjectListRoot />', function () {
           })
           fireEvent.click(deleteButton)
 
-          const confirmButton = screen.getByText<HTMLButtonElement>('Confirm')
+          const confirmButton = screen.getByRole('button', {
+            name: 'Confirm',
+          }) as HTMLButtonElement
           fireEvent.click(confirmButton)
           expect(confirmButton.disabled).to.be.true
 
@@ -550,7 +567,9 @@ describe('<ProjectListRoot />', function () {
           })
           fireEvent.click(deleteLeaveButton)
 
-          const confirmButton = screen.getByText<HTMLButtonElement>('Confirm')
+          const confirmButton = screen.getByRole('button', {
+            name: 'Confirm',
+          }) as HTMLButtonElement
           fireEvent.click(confirmButton)
           expect(confirmButton.disabled).to.be.true
 
@@ -616,7 +635,11 @@ describe('<ProjectListRoot />', function () {
           const trashBtns = screen.getAllByRole('button', { name: 'Trash' })
           for (const [index, trashBtn] of trashBtns.entries()) {
             fireEvent.click(trashBtn)
-            fireEvent.click(screen.getByText<HTMLButtonElement>('Confirm'))
+            fireEvent.click(
+              screen.getByRole('button', {
+                name: 'Confirm',
+              })
+            )
             await waitFor(() => {
               expect(
                 trashProjectMock.called(
@@ -843,8 +866,9 @@ describe('<ProjectListRoot />', function () {
             )
 
             // same name
-            let confirmButton =
-              within(modal).getByText<HTMLButtonElement>('Rename')
+            let confirmButton = within(modal).getByRole('button', {
+              name: 'Rename',
+            }) as HTMLButtonElement
             expect(confirmButton.disabled).to.be.true
 
             // no name
@@ -852,7 +876,9 @@ describe('<ProjectListRoot />', function () {
             fireEvent.change(input, {
               target: { value: '' },
             })
-            confirmButton = within(modal).getByText<HTMLButtonElement>('Rename')
+            confirmButton = within(modal).getByRole('button', {
+              name: 'Rename',
+            }) as HTMLButtonElement
             expect(confirmButton.disabled).to.be.true
           })
 
@@ -887,8 +913,9 @@ describe('<ProjectListRoot />', function () {
               target: { value: newProjectName },
             })
 
-            const confirmButton =
-              within(modal).getByText<HTMLButtonElement>('Rename')
+            const confirmButton = within(modal).getByRole('button', {
+              name: 'Rename',
+            }) as HTMLButtonElement
             expect(confirmButton.disabled).to.be.false
             fireEvent.click(confirmButton)
 
@@ -1033,7 +1060,7 @@ describe('<ProjectListRoot />', function () {
           selectedMatchesDisplayed(2)
         })
 
-        it('shows correct list after closing modal, changing selecting, and reopening modal', async function () {
+        it('shows correct list after closing modal, changing selection, and reopening modal', async function () {
           selectedMatchesDisplayed(2)
 
           const modal = screen.getAllByRole('dialog', { hidden: false })[0]
@@ -1041,7 +1068,10 @@ describe('<ProjectListRoot />', function () {
             name: 'Cancel',
           })
           fireEvent.click(cancelButton)
-          expect(screen.queryByRole('dialog', { hidden: false })).to.be.null
+
+          await waitForElementToBeRemoved(
+            screen.getByRole('dialog', { hidden: false })
+          )
 
           await screen.findAllByRole('checkbox')
           fireEvent.click(allCheckboxes[3])

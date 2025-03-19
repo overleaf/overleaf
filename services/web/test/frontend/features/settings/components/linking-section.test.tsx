@@ -78,7 +78,7 @@ describe('<LinkingSection />', function () {
     )
     const helpLink = screen.getByRole('link', { name: 'Learn more' })
     expect(helpLink.getAttribute('href')).to.equal('/blog/434')
-    const linkButton = screen.getByRole('link', { name: 'Link' })
+    const linkButton = screen.getByRole('button', { name: 'Link' })
     expect(linkButton.getAttribute('href')).to.equal('/auth/orcid?intent=link')
   })
 

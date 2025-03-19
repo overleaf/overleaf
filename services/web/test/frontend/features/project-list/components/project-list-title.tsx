@@ -4,6 +4,9 @@ import { Tag } from '../../../../../app/src/Features/Tags/types'
 import ProjectListTitle from '../../../../../frontend/js/features/project-list/components/title/project-list-title'
 
 describe('<ProjectListTitle />', function () {
+  beforeEach(function () {
+    window.metaAttributesCache.set('ol-bootstrapVersion', 5)
+  })
   type TestCase = {
     filter: Filter
     selectedTag: Tag | undefined

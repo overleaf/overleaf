@@ -41,13 +41,13 @@ describe('<CurrentPlanWidget />', function () {
       render(<CurrentPlanWidget />)
     })
 
-    it('shows text and tooltip on mouseover', function () {
+    it('shows text and tooltip on mouseover', async function () {
       const link = screen.getByRole('link', {
         name: /plan is paused/i,
       })
       fireEvent.mouseOver(link)
 
-      screen.getByRole('tooltip', { name: pausedTooltipMessage })
+      await screen.findByRole('tooltip', { name: pausedTooltipMessage })
     })
   })
 
@@ -60,17 +60,17 @@ describe('<CurrentPlanWidget />', function () {
       render(<CurrentPlanWidget />)
     })
 
-    it('shows text and tooltip on mouseover', function () {
+    it('shows text and tooltip on mouseover', async function () {
       const link = screen.getByRole('link', {
         name: /you’re on the free plan/i,
       })
       fireEvent.mouseOver(link)
 
-      screen.getByRole('tooltip', { name: freePlanTooltipMessage })
+      await screen.findByRole('tooltip', { name: freePlanTooltipMessage })
     })
 
     it('clicks on upgrade button', function () {
-      const upgradeLink = screen.getByRole('link', { name: /upgrade/i })
+      const upgradeLink = screen.getByRole('button', { name: /upgrade/i })
       fireEvent.click(upgradeLink)
       expect(sendMBSpy).to.be.calledOnce
       expect(sendMBSpy).calledWith('upgrade-button-click', {
@@ -156,7 +156,7 @@ describe('<CurrentPlanWidget />', function () {
         })
       })
 
-      it('shows text and tooltip on mouseover', function () {
+      it('shows text and tooltip on mouseover', async function () {
         render(<CurrentPlanWidget />)
 
         const link = screen.getByRole('link', {
@@ -164,10 +164,10 @@ describe('<CurrentPlanWidget />', function () {
         })
         fireEvent.mouseOver(link)
 
-        screen.getByRole('tooltip', {
+        await screen.findByRole('tooltip', {
           name: new RegExp(`on the ${subscription.plan.name}`, 'i'),
         })
-        screen.getByRole('tooltip', { name: paidPlanTooltipMessage })
+        await screen.findByRole('tooltip', { name: paidPlanTooltipMessage })
       })
     })
 
@@ -189,7 +189,7 @@ describe('<CurrentPlanWidget />', function () {
         })
       })
 
-      it('shows text and tooltip on mouseover (without subscription team name)', function () {
+      it('shows text and tooltip on mouseover (without subscription team name)', async function () {
         render(<CurrentPlanWidget />)
 
         const link = screen.getByRole('link', {
@@ -198,16 +198,16 @@ describe('<CurrentPlanWidget />', function () {
         fireEvent.mouseOver(link)
 
         expect(subscription.subscription.teamName).to.be.undefined
-        screen.getByRole('tooltip', {
+        await screen.findByRole('tooltip', {
           name: new RegExp(
             `on the ${subscription.plan.name} plan as a member of a group subscription`,
             'i'
           ),
         })
-        screen.getByRole('tooltip', { name: paidPlanTooltipMessage })
+        await screen.findByRole('tooltip', { name: paidPlanTooltipMessage })
       })
 
-      it('shows text and tooltip on mouseover (with subscription team name)', function () {
+      it('shows text and tooltip on mouseover (with subscription team name)', async function () {
         const newSubscription = {
           ...subscription,
           subscription: {
@@ -227,18 +227,18 @@ describe('<CurrentPlanWidget />', function () {
         })
         fireEvent.mouseOver(link)
 
-        screen.getByRole('tooltip', {
+        await screen.findByRole('tooltip', {
           name: new RegExp(
             `on the ${newSubscription.plan.name} plan as a member of a group subscription, ${newSubscription.subscription.teamName}`,
             'i'
           ),
         })
-        screen.getByRole('tooltip', { name: paidPlanTooltipMessage })
+        await screen.findByRole('tooltip', { name: paidPlanTooltipMessage })
       })
     })
 
     describe('commons', function () {
-      it('shows text and tooltip on mouseover', function () {
+      it('shows text and tooltip on mouseover', async function () {
         const subscription = {
           type: 'commons',
           plan: {
@@ -260,13 +260,13 @@ describe('<CurrentPlanWidget />', function () {
         })
         fireEvent.mouseOver(link)
 
-        screen.getByRole('tooltip', {
+        await screen.findByRole('tooltip', {
           name: new RegExp(
             `on the ${subscription.plan.name} plan because of your affiliation with ${subscription.subscription.name}`,
             'i'
           ),
         })
-        screen.getByRole('tooltip', { name: paidPlanTooltipMessage })
+        await screen.findByRole('tooltip', { name: paidPlanTooltipMessage })
       })
     })
   })

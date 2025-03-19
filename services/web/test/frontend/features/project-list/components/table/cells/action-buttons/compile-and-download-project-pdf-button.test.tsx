@@ -32,10 +32,10 @@ describe('<CompileAndDownloadProjectPDFButton />', function () {
     sendMBSpy.restore()
   })
 
-  it('renders tooltip for button', function () {
+  it('renders tooltip for button', async function () {
     const btn = screen.getByRole('button', { name: 'Download PDF' })
     fireEvent.mouseOver(btn)
-    screen.getByRole('tooltip', { name: 'Download PDF' })
+    await screen.findByRole('tooltip', { name: 'Download PDF' })
   })
 
   it('downloads the project PDF when clicked', async function () {

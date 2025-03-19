@@ -19,7 +19,7 @@ describe('<SettingsDictionary />', function () {
     const button = screen.getByText('Edit')
     fireEvent.click(button)
 
-    const modal = screen.getAllByRole('dialog')[0]
+    const modal = screen.getByTestId('dictionary-modal')
 
     within(modal).getByRole('heading', { name: 'Edit Dictionary' })
     within(modal).getByText('Your custom dictionary is empty.')
@@ -28,6 +28,6 @@ describe('<SettingsDictionary />', function () {
       name: 'Close',
     })
     fireEvent.click(closeButton)
-    expect(screen.queryByRole('dialog')).to.be.null
+    expect(screen.getByTestId('dictionary-modal')).to.not.be.null
   })
 })

@@ -91,6 +91,7 @@ export function KeepCurrentPlanModal() {
           variant="primary"
           disabled={inflight}
           isLoading={inflight}
+          loadingLabel={t('processing_uppercase') + '…'}
           onClick={confirmCancelPendingPlanChange}
           bs3Props={{
             loading: inflight

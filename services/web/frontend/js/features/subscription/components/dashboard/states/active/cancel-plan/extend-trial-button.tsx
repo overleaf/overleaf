@@ -33,6 +33,7 @@ export default function ExtendTrialButton({
       onClick={handleExtendTrial}
       disabled={isButtonDisabled}
       isLoading={isLoading}
+      loadingLabel={t('processing_uppercase') + '…'}
       bs3Props={{
         loading: isLoading ? t('processing_uppercase') + '…' : buttonText,
       }}

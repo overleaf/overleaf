@@ -50,6 +50,7 @@ function PersonalSubscriptionRecurlySyncEmail() {
                   type="submit"
                   disabled={isLoading}
                   isLoading={isLoading}
+                  loadingLabel={t('updating')}
                   bs3Props={{
                     loading: isLoading ? t('updating') + '…' : t('update'),
                   }}

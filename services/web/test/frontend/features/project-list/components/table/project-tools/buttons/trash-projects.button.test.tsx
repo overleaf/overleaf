@@ -10,11 +10,11 @@ describe('<TrashProjectsButton />', function () {
     resetProjectListContextFetch()
   })
 
-  it('renders tooltip for button', function () {
+  it('renders tooltip for button', async function () {
     renderWithProjectListContext(<TrashProjectsButton />)
     const btn = screen.getByRole('button', { name: 'Trash' })
     fireEvent.mouseOver(btn)
-    screen.getByRole('tooltip', { name: 'Trash' })
+    await screen.findByRole('tooltip', { name: 'Trash' })
   })
 
   it('opens the modal when clicked', function () {

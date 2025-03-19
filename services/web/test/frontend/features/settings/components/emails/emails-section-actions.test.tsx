@@ -172,11 +172,7 @@ describe('email actions - make primary', function () {
       fireEvent.click(
         withinModal.getByRole('button', { name: 'Change primary email' })
       )
-      expect(screen.queryByRole('dialog')).to.be.null
-
-      await waitForElementToBeRemoved(() =>
-        screen.getByRole('button', { name: /Processing/i, hidden: true })
-      )
+      await waitForElementToBeRemoved(() => screen.getByRole('dialog'))
     }
 
     it('shows confirmation modal and closes it', async function () {
@@ -201,13 +197,14 @@ describe('email actions - make primary', function () {
       withinModal.getByRole('button', { name: 'Change primary email' })
 
       fireEvent.click(withinModal.getByRole('button', { name: /cancel/i }))
-      expect(screen.queryByRole('dialog')).to.be.null
+
+      await waitForElementToBeRemoved(screen.getByRole('dialog'))
     })
 
     it('shows loader and removes button', async function () {
       fetchMock
         .get('/user/emails?ensureAffiliation=true', [userEmailData])
-        .post('/user/emails/default?delete-primary-unconfirmed', 200)
+        .post('/user/emails/default?delete-unconfirmed-primary', 200)
       render(<EmailsSection />)
 
       await confirmPrimaryEmail()
@@ -223,7 +220,7 @@ describe('email actions - make primary', function () {
     it('shows error', async function () {
       fetchMock
         .get('/user/emails?ensureAffiliation=true', [userEmailData])
-        .post('/user/emails/default?delete-primary-unconfirmed', 503)
+        .post('/user/emails/default?delete-unconfirmed-primary', 503)
       render(<EmailsSection />)
 
       await confirmPrimaryEmail()

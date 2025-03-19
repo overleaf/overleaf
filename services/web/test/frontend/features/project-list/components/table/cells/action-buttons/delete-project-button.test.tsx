@@ -17,14 +17,14 @@ describe('<DeleteProjectButton />', function () {
     resetProjectListContextFetch()
   })
 
-  it('renders tooltip for button', function () {
+  it('renders tooltip for button', async function () {
     window.metaAttributesCache.set('ol-user_id', trashedProject.owner?.id)
     renderWithProjectListContext(
       <DeleteProjectButtonTooltip project={trashedProject} />
     )
     const btn = screen.getByRole('button', { name: 'Delete' })
     fireEvent.mouseOver(btn)
-    screen.getByRole('tooltip', { name: 'Delete' })
+    await screen.findByRole('tooltip', { name: 'Delete' })
   })
 
   it('does not render button when trashed and not owner', function () {
@@ -61,7 +61,9 @@ describe('<DeleteProjectButton />', function () {
     screen.getByText('Delete Projects')
     screen.getByText('You are about to delete the following projects:')
     screen.getByText('This action cannot be undone.')
-    const confirmBtn = screen.getByText('Confirm') as HTMLButtonElement
+    const confirmBtn = screen.getByRole('button', {
+      name: 'Confirm',
+    }) as HTMLButtonElement
     fireEvent.click(confirmBtn)
     expect(confirmBtn.disabled).to.be.true
 

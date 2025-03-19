@@ -18,13 +18,13 @@ describe('<LeaveProjectButtton />', function () {
     resetProjectListContextFetch()
   })
 
-  it('renders tooltip for button', function () {
+  it('renders tooltip for button', async function () {
     renderWithProjectListContext(
       <LeaveProjectButtonTooltip project={trashedAndNotOwnedProject} />
     )
     const btn = screen.getByRole('button', { name: 'Leave' })
     fireEvent.mouseOver(btn)
-    screen.getByRole('tooltip', { name: 'Leave' })
+    await screen.findByRole('tooltip', { name: 'Leave' })
   })
 
   it('does not render button when owner', function () {
@@ -67,7 +67,9 @@ describe('<LeaveProjectButtton />', function () {
     screen.getByText('Leave Projects')
     screen.getByText('You are about to leave the following projects:')
     screen.getByText('This action cannot be undone.')
-    const confirmBtn = screen.getByText('Confirm') as HTMLButtonElement
+    const confirmBtn = screen.getByRole('button', {
+      name: 'Confirm',
+    }) as HTMLButtonElement
     fireEvent.click(confirmBtn)
     expect(confirmBtn.disabled).to.be.true
 

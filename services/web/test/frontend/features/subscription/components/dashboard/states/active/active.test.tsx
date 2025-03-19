@@ -323,7 +323,7 @@ describe('<ActiveSubscription />', function () {
       fireEvent.click(button)
 
       const cancelButton = screen.getByRole('button', {
-        name: 'Loading',
+        name: 'Processing…',
       }) as HTMLButtonElement
       expect(cancelButton.disabled).to.be.true
 
@@ -368,7 +368,7 @@ describe('<ActiveSubscription />', function () {
           name: cancelButtonText,
         })
         screen.getByRole('button', {
-          name: 'Loading',
+          name: 'Processing…',
         })
       })
 
@@ -385,7 +385,7 @@ describe('<ActiveSubscription />', function () {
         expect(buttons[0].getAttribute('disabled')).to.equal('')
         expect(buttons[1].getAttribute('disabled')).to.equal('')
         screen.getByRole('button', {
-          name: 'Loading',
+          name: 'Processing…',
         })
         screen.getByRole('button', {
           name: extendTrialButtonText,
@@ -456,7 +456,7 @@ describe('<ActiveSubscription />', function () {
           name: cancelButtonText,
         })
         screen.getByRole('button', {
-          name: 'Loading',
+          name: 'Processing…',
         })
       })
 
@@ -473,7 +473,7 @@ describe('<ActiveSubscription />', function () {
         expect(buttons[0].getAttribute('disabled')).to.equal('')
         expect(buttons[1].getAttribute('disabled')).to.equal('')
         screen.getByRole('button', {
-          name: 'Loading',
+          name: 'Processing…',
         })
         screen.getByRole('button', {
           name: downgradeButtonText,

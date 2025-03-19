@@ -203,6 +203,7 @@ function PasswordForm() {
           variant="primary"
           disabled={!isFormValid}
           isLoading={isLoading}
+          loadingLabel={`${t('saving')}…`}
           bs3Props={{
             loading: isLoading ? `${t('saving')}…` : t('change'),
           }}

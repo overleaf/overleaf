@@ -3,7 +3,7 @@ import { expect } from 'chai'
 import { SSOAlert } from '../../../../../../frontend/js/features/settings/components/emails/sso-alert'
 
 describe('<SSOAlert/>', function () {
-  describe('when thereis no institutional linking information', function () {
+  describe('when there is no institutional linking information', function () {
     it('should be empty', function () {
       render(<SSOAlert />)
       expect(screen.queryByRole('alert')).to.be.null
@@ -49,11 +49,11 @@ describe('<SSOAlert/>', function () {
       )
       render(<SSOAlert />)
       const closeButtons = screen.getAllByRole('button', {
-        name: 'Close alert',
+        name: 'Close',
       })
       fireEvent.click(closeButtons[0])
       fireEvent.click(closeButtons[1])
-      expect(screen.queryByRole('button', { name: 'Close alert' })).to.be.null
+      expect(screen.queryByRole('button', { name: 'Close' })).to.be.null
     })
   })
 
@@ -87,10 +87,10 @@ describe('<SSOAlert/>', function () {
     it('the alert should be closeable', function () {
       render(<SSOAlert />)
       const closeButton = screen.getByRole('button', {
-        name: 'Close alert',
+        name: 'Close',
       })
       fireEvent.click(closeButton)
-      expect(screen.queryByRole('button', { name: 'Close alert' })).to.be.null
+      expect(screen.queryByRole('button', { name: 'Close' })).to.be.null
     })
   })
 })

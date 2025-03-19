@@ -96,6 +96,7 @@ function CommonNotification({ notification }: CommonNotificationProps) {
               <OLButton
                 variant="secondary"
                 isLoading={isLoading}
+                loadingLabel={t('joining')}
                 disabled={isLoading}
                 onClick={() => handleAcceptInvite(notification)}
               >

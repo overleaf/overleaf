@@ -15,6 +15,7 @@ function DictionaryModal({ show, handleHide }: DictionaryModalProps) {
       show={show}
       onHide={handleHide}
       id="dictionary-modal"
+      data-testid="dictionary-modal"
       size="sm"
     >
       <DictionaryModalContent handleHide={handleHide} />

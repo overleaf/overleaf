@@ -145,6 +145,7 @@ function InstitutionAndRole({ userEmailData }: InstitutionAndRoleProps) {
               type="submit"
               disabled={!role || !department}
               isLoading={isLoading}
+              loadingLabel={t('saving')}
               bs3Props={{
                 loading: isLoading
                   ? `${t('saving')}…`

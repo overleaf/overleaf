@@ -10,11 +10,11 @@ describe('<ArchiveProjectsButton />', function () {
     resetProjectListContextFetch()
   })
 
-  it('renders tooltip for button', function () {
+  it('renders tooltip for button', async function () {
     renderWithProjectListContext(<ArchiveProjectsButton />)
     const btn = screen.getByRole('button', { name: 'Archive' })
     fireEvent.mouseOver(btn)
-    screen.getByRole('tooltip', { name: 'Archive' })
+    await screen.findByRole('tooltip', { name: 'Archive' })
   })
 
   it('opens the modal when clicked', function () {

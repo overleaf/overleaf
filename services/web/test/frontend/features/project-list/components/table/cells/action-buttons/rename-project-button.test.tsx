@@ -51,7 +51,9 @@ describe('<RenameProjectButton />', function () {
     const btn = screen.getByRole('button')
     fireEvent.click(btn)
     screen.getByText('Rename Project')
-    const confirmBtn = screen.getByText('Rename') as HTMLButtonElement
+    const confirmBtn = screen.getByRole('button', {
+      name: 'Rename',
+    }) as HTMLButtonElement
     expect(confirmBtn.disabled).to.be.true
     const nameInput = screen.getByDisplayValue(ownedProject.name)
     fireEvent.change(nameInput, { target: { value: 'new name' } })

@@ -32,7 +32,9 @@ describe('<ProjectsActionModal />', function () {
         showModal
       />
     )
-    const confirmBtn = screen.getByText('Confirm') as HTMLButtonElement
+    const confirmBtn = screen.getByRole('button', {
+      name: 'Confirm',
+    }) as HTMLButtonElement
     fireEvent.click(confirmBtn)
     expect(confirmBtn.disabled).to.be.true
     // verify action handled

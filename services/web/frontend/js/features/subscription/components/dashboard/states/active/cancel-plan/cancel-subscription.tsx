@@ -34,6 +34,7 @@ function ConfirmCancelSubscriptionButton({
   return (
     <OLButton
       isLoading={isLoading}
+      loadingLabel={t('processing_uppercase') + '…'}
       disabled={disabled}
       onClick={onClick}
       variant={showNoThanks ? 'link' : undefined}

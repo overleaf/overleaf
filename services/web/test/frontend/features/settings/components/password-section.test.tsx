@@ -145,7 +145,7 @@ describe('<PasswordSection />', function () {
     render(<PasswordSection />)
     submitValidForm()
 
-    await screen.findByText('Saving…')
+    await screen.findByRole('button', { name: 'Saving…' })
 
     finishUpdateCall({
       status: 200,

@@ -69,7 +69,7 @@ async function confirmCodeForEmail(email: string) {
   })
   fireEvent.click(submitCodeBtn)
   await waitForElementToBeRemoved(() =>
-    screen.getByRole('button', { name: /confirming/i })
+    screen.getByRole('button', { name: /Loading/i })
   )
 }
 
@@ -216,7 +216,7 @@ describe('<EmailsSection />', function () {
 
     await waitForElementToBeRemoved(() =>
       screen.getByRole('button', {
-        name: /add new email/i,
+        name: /Loading/i,
       })
     )
 

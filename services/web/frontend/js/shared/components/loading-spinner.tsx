@@ -25,6 +25,12 @@ function LoadingSpinner({
   const [show, setShow] = useState(false)
 
   useEffect(() => {
+    // Ensure that spinner is displayed immediately if delay is 0
+    if (delay === 0) {
+      setShow(true)
+      return
+    }
+
     const timer = setTimeout(() => {
       setShow(true)
     }, delay)

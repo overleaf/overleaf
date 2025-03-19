@@ -26,11 +26,11 @@ describe('<OnlineUsersWidget />', function () {
       screen.getByText('a')
     })
 
-    it('displays user name in a tooltip', function () {
+    it('displays user name in a tooltip', async function () {
       render(<OnlineUsersWidget {...defaultProps} />)
       const icon = screen.getByText('t')
       fireEvent.mouseOver(icon)
-      screen.getByRole('tooltip', { name: 'test_user' })
+      await screen.findByRole('tooltip', { name: 'test_user' })
     })
 
     it('calls "goToUser" when the user initial is clicked', function () {

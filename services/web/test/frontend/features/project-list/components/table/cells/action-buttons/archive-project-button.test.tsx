@@ -16,13 +16,13 @@ describe('<ArchiveProjectButton />', function () {
     resetProjectListContextFetch()
   })
 
-  it('renders tooltip for button', function () {
+  it('renders tooltip for button', async function () {
     renderWithProjectListContext(
       <ArchiveProjectButtonTooltip project={archiveableProject} />
     )
     const btn = screen.getByRole('button', { name: 'Archive' })
     fireEvent.mouseOver(btn)
-    screen.getByRole('tooltip', { name: 'Archive' })
+    await screen.findByRole('tooltip', { name: 'Archive' })
   })
 
   it('opens the modal when clicked', function () {
@@ -59,7 +59,9 @@ describe('<ArchiveProjectButton />', function () {
     screen.getByText('Archive Projects')
     screen.getByText('You are about to archive the following projects:')
     screen.getByText('Archiving projects won’t affect your collaborators.')
-    const confirmBtn = screen.getByText('Confirm') as HTMLButtonElement
+    const confirmBtn = screen.getByRole('button', {
+      name: 'Confirm',
+    }) as HTMLButtonElement
     fireEvent.click(confirmBtn)
     expect(confirmBtn.disabled).to.be.true
 

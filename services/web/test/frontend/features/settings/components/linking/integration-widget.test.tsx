@@ -1,6 +1,6 @@
 import { expect } from 'chai'
 import sinon from 'sinon'
-import { screen, fireEvent, render } from '@testing-library/react'
+import { screen, fireEvent, render, within } from '@testing-library/react'
 import { IntegrationLinkingWidget } from '../../../../../../frontend/js/features/settings/components/linking/integration-widget'
 import * as eventTracking from '@/infrastructure/event-tracking'
 
@@ -32,7 +32,7 @@ describe('<IntegrationLinkingWidgetTest/>', function () {
     })
 
     it('should render an upgrade link and track clicks', function () {
-      const upgradeLink = screen.getByRole('link', { name: 'Upgrade' })
+      const upgradeLink = screen.getByRole('button', { name: 'Upgrade' })
       expect(upgradeLink.getAttribute('href')).to.equal(
         '/user/subscription/plans'
       )
@@ -51,7 +51,7 @@ describe('<IntegrationLinkingWidgetTest/>', function () {
 
     it('should render a link to initiate integration linking', function () {
       expect(
-        screen.getByRole('link', { name: 'Link' }).getAttribute('href')
+        screen.getByRole('button', { name: 'Link' }).getAttribute('href')
       ).to.equal('/link')
     })
 
@@ -90,10 +90,11 @@ describe('<IntegrationLinkingWidgetTest/>', function () {
 
     it('should open a modal with a link to confirm integration unlinking', function () {
       fireEvent.click(screen.getByRole('button', { name: 'Unlink' }))
-      screen.getByText('confirm unlink')
-      screen.getByText('you will be unlinked')
-      screen.getByRole('button', { name: 'Cancel' })
-      screen.getByRole('button', { name: 'Unlink' })
+      const withinModal = within(screen.getByRole('dialog'))
+      withinModal.getByText('confirm unlink')
+      withinModal.getByText('you will be unlinked')
+      withinModal.getByRole('button', { name: 'Cancel' })
+      withinModal.getByRole('button', { name: 'Unlink' })
     })
 
     it('should cancel unlinking when clicking "cancel" in the confirmation modal', async function () {

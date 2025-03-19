@@ -134,7 +134,7 @@ describe('<EmailsSection />', function () {
       screen.queryByText(/an error has occurred while performing your request/i)
     ).to.be.null
 
-    await screen.findByRole('button', {
+    await screen.findAllByRole('button', {
       name: /resend confirmation code/i,
     })
   })

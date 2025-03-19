@@ -332,6 +332,7 @@ export function ChangeToGroupModal() {
               }
               onClick={upgrade}
               isLoading={inflight}
+              loadingLabel={t('processing_uppercase') + '…'}
               bs3Props={{
                 loading: inflight
                   ? t('processing_uppercase') + '…'

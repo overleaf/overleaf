@@ -10,10 +10,10 @@ describe('<DownloadProjectsButton />', function () {
     resetProjectListContextFetch()
   })
 
-  it('renders tooltip for button', function () {
+  it('renders tooltip for button', async function () {
     renderWithProjectListContext(<DownloadProjectsButton />)
     const btn = screen.getByRole('button', { name: 'Download' })
     fireEvent.mouseOver(btn)
-    screen.getByRole('tooltip', { name: 'Download' })
+    await screen.findByRole('tooltip', { name: 'Download' })
   })
 })
