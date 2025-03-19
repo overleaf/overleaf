@@ -11,7 +11,7 @@ const rateLimiters = {
     duration: 60,
   }),
   fileUpload: new RateLimiter('file-upload', {
-    points: 200,
+    points: 500,
     duration: 60 * 15,
   }),
 }
