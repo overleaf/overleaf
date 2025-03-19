@@ -44,7 +44,7 @@ export const ReviewPanelResolvedThreadsButton: FC = () => {
         >
           <OLPopover
             id="popover-resolved-threads"
-            className="review-panel-resolved-comments review-panel-new"
+            className="review-panel-resolved-comments"
           >
             <ReviewPanelResolvedThreadsMenu />
           </OLPopover>

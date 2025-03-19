@@ -17,7 +17,7 @@ const ReviewPanel: FC<{ mini?: boolean }> = ({ mini = false }) => {
 
   const style = useReviewPanelStyles(mini)
 
-  const className = classnames('review-panel-new', 'review-panel-container', {
+  const className = classnames('review-panel-container', {
     'review-panel-mini': mini,
     'review-panel-subview-overview': activeSubView === 'overview',
   })
