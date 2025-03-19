@@ -74,7 +74,7 @@ app.use((err, req, res, next) => {
 const shutdownEmitter = new EventEmitter()
 
 shutdownEmitter.once('shutdown', async code => {
-  logger.info({}, 'shutting down')
+  logger.info({ code }, 'shutting down')
   await mongodb.client.close()
   await setTimeout(100)
   process.exit(code)
