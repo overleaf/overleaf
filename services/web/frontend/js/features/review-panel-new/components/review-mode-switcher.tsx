@@ -1,4 +1,4 @@
-import { forwardRef, memo, MouseEventHandler } from 'react'
+import { forwardRef, memo, MouseEventHandler, useState } from 'react'
 import {
   Dropdown,
   DropdownMenu,
@@ -17,6 +17,8 @@ import { usePermissionsContext } from '@/features/ide-react/context/permissions-
 import usePersistedState from '@/shared/hooks/use-persisted-state'
 import { sendMB } from '@/infrastructure/event-tracking'
 import { useEditorContext } from '@/shared/context/editor-context'
+import { useProjectContext } from '@/shared/context/project-context'
+import UpgradeTrackChangesModal from '@/features/source-editor/components/review-panel/upgrade-track-changes-modal'
 
 type Mode = 'view' | 'review' | 'edit'
 
@@ -26,15 +28,17 @@ const useCurrentMode = (): Mode => {
   const trackChangesForCurrentUser =
     trackChanges?.onForEveryone ||
     (user && user.id && trackChanges?.onForMembers[user.id])
-  const { write, trackedWrite } = usePermissionsContext()
+  const { permissionsLevel } = useEditorContext()
 
-  if (write && !trackChangesForCurrentUser) {
-    return 'edit'
-  } else if (trackedWrite) {
+  if (permissionsLevel === 'readOnly') {
+    return 'view'
+  } else if (permissionsLevel === 'review') {
     return 'review'
+  } else if (trackChangesForCurrentUser) {
+    return 'review'
+  } else {
+    return 'edit'
   }
-
-  return 'view'
 }
 
 function ReviewModeSwitcher() {
@@ -43,9 +47,10 @@ function ReviewModeSwitcher() {
     useTrackChangesStateActionsContext()
   const mode = useCurrentMode()
   const { permissionsLevel } = useEditorContext()
-
   const { write, trackedWrite } = usePermissionsContext()
-  const showViewOption = !trackedWrite
+  const project = useProjectContext()
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false)
+  const showViewOption = permissionsLevel === 'readOnly'
 
   return (
     <div className="review-mode-switcher-container">
@@ -58,6 +63,9 @@ function ReviewModeSwitcher() {
           <OLDropdownMenuItem
             disabled={!write}
             onClick={() => {
+              if (mode === 'edit') {
+                return
+              }
               sendMB('editing-mode-change', {
                 role: permissionsLevel,
                 previousMode: mode,
@@ -72,16 +80,27 @@ function ReviewModeSwitcher() {
             {t('editing')}
           </OLDropdownMenuItem>
           <OLDropdownMenuItem
-            disabled={!trackedWrite}
+            disabled={permissionsLevel === 'readOnly'}
             onClick={() => {
-              sendMB('editing-mode-change', {
-                role: permissionsLevel,
-                previousMode: mode,
-                newMode: 'review',
-              })
-              saveTrackChangesForCurrentUser(true)
+              if (mode === 'review') {
+                return
+              }
+              if (!project.features.trackChanges) {
+                setShowUpgradeModal(true)
+              } else {
+                sendMB('editing-mode-change', {
+                  role: permissionsLevel,
+                  previousMode: mode,
+                  newMode: 'review',
+                })
+                saveTrackChangesForCurrentUser(true)
+              }
             }}
-            description={t('can_add_tracked_changes_and_comments')}
+            description={
+              permissionsLevel === 'review' && !trackedWrite
+                ? t('comment_only')
+                : t('edits_become_suggestions')
+            }
             leadingIcon="rate_review"
             active={trackedWrite && mode === 'review'}
           >
@@ -89,14 +108,6 @@ function ReviewModeSwitcher() {
           </OLDropdownMenuItem>
           {showViewOption && (
             <OLDropdownMenuItem
-              onClick={() => {
-                sendMB('editing-mode-change', {
-                  role: permissionsLevel,
-                  previousMode: mode,
-                  newMode: 'view',
-                })
-                saveTrackChangesForCurrentUser(true)
-              }}
               description={t('can_view_content')}
               leadingIcon="visibility"
               active={mode === 'view'}
@@ -106,6 +117,10 @@ function ReviewModeSwitcher() {
           )}
         </DropdownMenu>
       </Dropdown>
+      <UpgradeTrackChangesModal
+        show={showUpgradeModal}
+        setShow={setShowUpgradeModal}
+      />
     </div>
   )
 }
