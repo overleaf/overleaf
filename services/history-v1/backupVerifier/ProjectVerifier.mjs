@@ -72,9 +72,14 @@ function splitJobs(startDate, endDate, interval) {
  *
  * @param {AsyncGenerator<string>} historyIdCursor
  * @param {EventEmitter} [eventEmitter]
+ * @param {number} [delay] - Allows a delay between each verification
  * @return {Promise<{verified: number, total: number, errorTypes: *[], hasFailure: boolean}>}
  */
-async function verifyProjectsFromCursor(historyIdCursor, eventEmitter) {
+async function verifyProjectsFromCursor(
+  historyIdCursor,
+  eventEmitter,
+  delay = 0
+) {
   const errorTypes = []
   let verified = 0
   let total = 0
@@ -99,6 +104,9 @@ async function verifyProjectsFromCursor(historyIdCursor, eventEmitter) {
       const errorType = handleVerificationError(error, historyId)
       errorTypes.push(errorType)
     }
+    if (delay > 0) {
+      await setTimeout(delay)
+    }
   }
   return {
     verified,
@@ -112,11 +120,16 @@ async function verifyProjectsFromCursor(historyIdCursor, eventEmitter) {
  *
  * @param {number} nProjectsToSample
  * @param {EventEmitter} [signal]
+ * @param {number} [delay]
  * @return {Promise<VerificationJobStatus>}
  */
-export async function verifyRandomProjectSample(nProjectsToSample, signal) {
+export async function verifyRandomProjectSample(
+  nProjectsToSample,
+  signal,
+  delay = 0
+) {
   const historyIds = await getSampleProjectsCursor(nProjectsToSample)
-  return await verifyProjectsFromCursor(historyIds, signal)
+  return await verifyProjectsFromCursor(historyIds, signal, delay)
 }
 
 /**
@@ -292,13 +305,11 @@ export function loopRandomProjects(signal) {
   async function loop() {
     do {
       try {
-        const result = await verifyRandomProjectSample(100, signal)
+        const result = await verifyRandomProjectSample(100, signal, 2_000)
         logger.debug({ result }, 'verified random project sample')
       } catch (error) {
         logger.error({ error }, 'error verifying random project sample')
       }
-
-      await setTimeout(300_000)
       // eslint-disable-next-line no-unmodified-loop-condition
     } while (!shutdown)
   }
