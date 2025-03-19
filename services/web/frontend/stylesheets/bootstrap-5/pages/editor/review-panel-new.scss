@@ -1,5 +1,16 @@
 @use 'sass:color';
 
+$rp-border-grey: #d9d9d9;
+$rp-type-blue: #6b7797;
+$rp-type-darkgrey: #3f3f3f;
+
+:root {
+  --rp-base-font-size: var(--font-size-01);
+  --rp-border-grey: #{$rp-border-grey};
+  --rp-type-blue: #{$rp-type-blue};
+  --rp-type-darkgrey: #{$rp-type-darkgrey};
+}
+
 .review-panel-new {
   &.review-panel-container {
     height: 100%;
@@ -182,11 +193,39 @@
 
   // TODO: Update this when we move the track changes menu to the new design
   .rp-tc-state {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    overflow: hidden;
+    list-style: none;
+    padding: 0 var(--spacing-03);
+    margin: 0;
+    border-bottom: 1px solid var(--rp-border-grey);
+    text-align: left;
     background-color: var(--white);
     max-height: calc(
       100vh - var(--review-panel-top) - var(--review-panel-header-height)
     );
     overflow-y: auto;
+
+    .rp-tc-state-item {
+      display: flex;
+      align-items: center;
+      padding: var(--spacing-02) 0;
+
+      &:last-of-type {
+        padding-bottom: var(--spacing-03);
+      }
+    }
+
+    .rp-tc-state-item-name {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      flex-grow: 1;
+      font-weight: 600;
+    }
   }
 
   .review-panel-tools {
@@ -216,7 +255,7 @@
     &:hover,
     &:focus {
       text-decoration: none;
-      color: $rp-type-blue;
+      color: var(--rp-type-blue);
     }
   }
 
@@ -703,7 +742,7 @@
   display: block;
   padding: 5px 10px;
   background-color: rgb(240 240 240 / 90%);
-  color: $rp-type-blue;
+  color: var(--rp-type-blue);
   text-align: center;
   border-bottom-left-radius: 3px;
   white-space: nowrap;
@@ -724,7 +763,7 @@
     outline: 0;
     text-decoration: none;
     background-color: rgb(240 240 240 / 100%);
-    color: $rp-type-blue;
+    color: var(--rp-type-blue);
   }
 }
 

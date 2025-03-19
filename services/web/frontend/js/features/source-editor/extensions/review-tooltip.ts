@@ -15,7 +15,6 @@ import {
   EditorState,
   Transaction,
 } from '@codemirror/state'
-import { isSplitTestEnabled } from '@/utils/splitTestUtils'
 import { v4 as uuid } from 'uuid'
 
 export const addNewCommentRangeEffect = StateEffect.define<Range<Decoration>>()
@@ -57,10 +56,6 @@ export const buildAddNewCommentRangeEffect = (range: SelectionRange) => {
 }
 
 export const reviewTooltip = (): Extension => {
-  if (!isSplitTestEnabled('review-panel-redesign')) {
-    return []
-  }
-
   let mouseUpListener: null | (() => void) = null
   const disableMouseUpListener = () => {
     if (mouseUpListener) {

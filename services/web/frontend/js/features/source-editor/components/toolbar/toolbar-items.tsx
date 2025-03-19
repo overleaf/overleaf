@@ -11,7 +11,6 @@ import { useTranslation } from 'react-i18next'
 import { MathDropdown } from './math-dropdown'
 import { TableInserterDropdown } from './table-inserter-dropdown'
 import { withinFormattingCommand } from '@/features/source-editor/utils/tree-operations/formatting'
-import { isSplitTestEnabled } from '@/utils/splitTestUtils'
 import { isMac } from '@/shared/utils/os'
 
 export const ToolbarItems: FC<{
@@ -123,15 +122,13 @@ export const ToolbarItems: FC<{
                 command={commands.wrapInHref}
                 icon="add_link"
               />
-              {isSplitTestEnabled('review-panel-redesign') && (
-                <ToolbarButton
-                  id="toolbar-add-comment"
-                  label={t('add_comment')}
-                  disabled={state.selection.main.empty}
-                  command={commands.addComment}
-                  icon="add_comment"
-                />
-              )}
+              <ToolbarButton
+                id="toolbar-add-comment"
+                label={t('add_comment')}
+                disabled={state.selection.main.empty}
+                command={commands.addComment}
+                icon="add_comment"
+              />
               <ToolbarButton
                 id="toolbar-ref"
                 label={t('toolbar_insert_cross_reference')}

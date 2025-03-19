@@ -1,5 +1,5 @@
 import { FC } from 'react'
-import TrackChangesToggle from '@/features/source-editor/components/review-panel/toolbar/track-changes-toggle'
+import TrackChangesToggle from '@/features/review-panel-new/components/track-changes-toggle'
 import { useProjectContext } from '@/shared/context/project-context'
 import { usePermissionsContext } from '@/features/ide-react/context/permissions-context'
 import { useTranslation } from 'react-i18next'

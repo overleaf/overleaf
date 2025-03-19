@@ -30,11 +30,6 @@ import { setAutoComplete } from '../extensions/auto-complete'
 import { usePhrases } from './use-phrases'
 import { setPhrases } from '../extensions/phrases'
 import { setSpellCheckLanguage } from '../extensions/spelling'
-import {
-  createChangeManager,
-  dispatchEditorEvent,
-  reviewPanelToggled,
-} from '../extensions/changes/change-manager'
 import { setKeybindings } from '../extensions/keybindings'
 import { Highlight } from '../../../../../types/highlight'
 import { EditorView } from '@codemirror/view'
@@ -46,7 +41,6 @@ import { setDocName } from '@/features/source-editor/extensions/doc-name'
 import { isValidTeXFile } from '@/main/is-valid-tex-file'
 import { captureException } from '@/infrastructure/error-reporter'
 import grammarlyExtensionPresent from '@/shared/utils/grammarly'
-import { useLayoutContext } from '@/shared/context/layout-context'
 import { debugConsole } from '@/utils/debugging'
 import { useMetadataContext } from '@/features/ide-react/context/metadata-context'
 import { useUserContext } from '@/shared/context/user-context'
@@ -57,7 +51,6 @@ import { updateRanges } from '@/features/source-editor/extensions/ranges'
 import { useThreadsContext } from '@/features/review-panel-new/context/threads-context'
 import { useHunspell } from '@/features/source-editor/hooks/use-hunspell'
 import { Permissions } from '@/features/ide-react/types/permissions'
-import { lineHeights } from '@/shared/utils/styles'
 import { useEditorManagerContext } from '@/features/ide-react/context/editor-manager-context'
 import { useOnlineUsersContext } from '@/features/ide-react/context/online-users-context'
 
@@ -71,12 +64,9 @@ function useCodeMirrorScope(view: EditorView) {
   const { logEntryAnnotations, editedSinceCompileStarted, compiling } =
     useCompileContext()
 
-  const { reviewPanelOpen, miniReviewPanelVisible } = useLayoutContext()
   const { currentDocument, openDocName, trackChanges } =
     useEditorManagerContext()
   const metadata = useMetadataContext()
-
-  const [loadingThreads] = useScopeValue<boolean>('loadingThreads')
 
   const { id: userId } = useUserContext()
   const { userSettings } = useUserSettingsContext()
@@ -166,7 +156,6 @@ function useCodeMirrorScope(view: EditorView) {
   const currentDocRef = useRef({
     currentDocument,
     trackChanges,
-    loadingThreads,
   })
 
   useEffect(() => {
@@ -186,10 +175,6 @@ function useCodeMirrorScope(view: EditorView) {
   const docNameRef = useRef(openDocName)
 
   useEffect(() => {
-    currentDocRef.current.loadingThreads = loadingThreads
-  }, [view, loadingThreads])
-
-  useEffect(() => {
     currentDocRef.current.trackChanges = trackChanges
 
     if (currentDocument) {
@@ -200,12 +185,6 @@ function useCodeMirrorScope(view: EditorView) {
       }
     }
   }, [userId, currentDocument, trackChanges])
-
-  useEffect(() => {
-    if (lineHeight && fontSize) {
-      dispatchEditorEvent('line-height', lineHeights[lineHeight] * fontSize)
-    }
-  }, [lineHeight, fontSize])
 
   const spellingRef = useRef({
     spellCheckLanguage,
@@ -323,7 +302,6 @@ function useCodeMirrorScope(view: EditorView) {
           spelling: spellingRef.current,
           visual: visualRef.current,
           projectFeatures: projectFeaturesRef.current,
-          changeManager: createChangeManager(view, currentDocument),
           handleError,
           handleException,
         }),
@@ -568,12 +546,6 @@ function useCodeMirrorScope(view: EditorView) {
       view.focus()
     }, [view])
   )
-
-  useEffect(() => {
-    window.setTimeout(() => {
-      view.dispatch(reviewPanelToggled())
-    })
-  }, [reviewPanelOpen, miniReviewPanelVisible, view])
 }
 
 export default useCodeMirrorScope

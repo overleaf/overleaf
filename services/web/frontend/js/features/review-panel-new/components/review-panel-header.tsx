@@ -20,7 +20,6 @@ const ReviewPanelHeader: FC = () => {
       <PanelHeading
         title={t('review')}
         handleClose={() => setReviewPanelOpen(false)}
-        splitTestName="review-panel-redesign"
       >
         {isReviewerRoleEnabled && <ReviewPanelResolvedThreadsButton />}
       </PanelHeading>

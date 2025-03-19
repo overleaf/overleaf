@@ -345,7 +345,6 @@ const _ProjectController = {
       'pdf-caching-prefetching',
       'revert-file',
       'revert-project',
-      'review-panel-redesign',
       !anonymous && 'ro-mirror-on-client',
       'track-pdf-download',
       !anonymous && 'writefull-oauth-promotion',

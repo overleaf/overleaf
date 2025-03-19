@@ -5,10 +5,10 @@ describe('i18n', function () {
     it('translates a plain string', function () {
       const Test = () => {
         const { t } = useTranslation()
-        return <div>{t('accept')}</div>
+        return <div>{t('accept_change')}</div>
       }
       cy.mount(<Test />)
-      cy.findByText('Accept')
+      cy.findByText('Accept change')
     })
 
     it('uses defaultValues', function () {

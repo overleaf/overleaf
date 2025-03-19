@@ -10,6 +10,8 @@ import { getJSON } from '@/infrastructure/fetch-json'
 import { useProjectContext } from '@/shared/context/project-context'
 import { UserId } from '../../../../../types/user'
 import { useEditorContext } from '@/shared/context/editor-context'
+import { debugConsole } from '@/utils/debugging'
+import { captureException } from '@/infrastructure/error-reporter'
 
 export type ChangesUser = {
   id: UserId
@@ -35,9 +37,12 @@ export const ChangesUsersProvider: FC = ({ children }) => {
       return
     }
 
-    getJSON<ChangesUser[]>(`/project/${projectId}/changes/users`).then(data =>
-      setChangesUsers(new Map(data.map(item => [item.id, item])))
-    )
+    getJSON<ChangesUser[]>(`/project/${projectId}/changes/users`)
+      .then(data => setChangesUsers(new Map(data.map(item => [item.id, item]))))
+      .catch(error => {
+        debugConsole.error(error)
+        captureException(error)
+      })
   }, [projectId, isRestrictedTokenMember])
 
   // add the project owner and members to the changes users data

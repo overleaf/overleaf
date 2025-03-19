@@ -10,18 +10,20 @@ import {
 import { useProjectContext } from '@/shared/context/project-context'
 import {
   CommentId,
+  ReviewPanelCommentThreadMessage,
   ThreadId,
 } from '../../../../../types/review-panel/review-panel'
 import { ReviewPanelCommentThread } from '../../../../../types/review-panel/comment-thread'
 import { useConnectionContext } from '@/features/ide-react/context/connection-context'
 import useSocketListener from '@/features/ide-react/hooks/use-socket-listener'
-import { ReviewPanelCommentThreadMessageApi } from '../../../../../types/review-panel/api'
 import { UserId } from '../../../../../types/user'
 import { deleteJSON, getJSON, postJSON } from '@/infrastructure/fetch-json'
 import RangesTracker from '@overleaf/ranges-tracker'
 import { CommentOperation } from '../../../../../types/change'
 import { useEditorManagerContext } from '@/features/ide-react/context/editor-manager-context'
 import { useEditorContext } from '@/shared/context/editor-context'
+import { debugConsole } from '@/utils/debugging'
+import { captureException } from '@/infrastructure/error-reporter'
 
 export type Threads = Record<ThreadId, ReviewPanelCommentThread>
 
@@ -64,12 +66,15 @@ export const ThreadsProvider: FC = ({ children }) => {
 
     getJSON(`/project/${projectId}/threads`, {
       signal: abortController.signal,
-    }).then(data => {
-      setData(data)
     })
-    // .catch(error => {
-    //   setError(error)
-    // })
+      .then(data => {
+        setData(data)
+      })
+      .catch(error => {
+        debugConsole.error(error)
+        captureException(error)
+        // setError(error)
+      })
   }, [projectId, isRestrictedTokenMember])
 
   const { socket } = useConnectionContext()
@@ -78,7 +83,10 @@ export const ThreadsProvider: FC = ({ children }) => {
     socket,
     'new-comment',
     useCallback(
-      (threadId: ThreadId, comment: ReviewPanelCommentThreadMessageApi) => {
+      (
+        threadId: ThreadId,
+        comment: ReviewPanelCommentThreadMessage & { timestamp: number }
+      ) => {
         setData(value => {
           if (value) {
             const { submitting, ...thread } = value[threadId] ?? {

@@ -9,7 +9,6 @@ import React, {
 } from 'react'
 import { ReactScopeValueStore } from '@/features/ide-react/scope-value-store/react-scope-value-store'
 import populateLayoutScope from '@/features/ide-react/scope-adapters/layout-context-adapter'
-import populateReviewPanelScope from '@/features/ide-react/scope-adapters/review-panel-context-adapter'
 import { IdeProvider } from '@/shared/context/ide-context'
 import {
   createIdeEventEmitter,
@@ -73,10 +72,8 @@ export function createReactScopeValueStore(projectId: string) {
   populateLayoutScope(scopeStore)
   populateProjectScope(scopeStore)
   populatePdfScope(scopeStore)
-  populateReviewPanelScope(scopeStore)
 
   scopeStore.allowNonExistentPath('hasLintingError')
-  scopeStore.allowNonExistentPath('loadingThreads')
 
   return scopeStore
 }

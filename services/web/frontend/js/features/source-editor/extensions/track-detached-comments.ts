@@ -14,8 +14,6 @@ import {
 } from './changes/comments'
 import { invertedEffects } from '@codemirror/commands'
 import { DocumentContainer } from '@/features/ide-react/editor/document-container'
-import { isSplitTestEnabled } from '@/utils/splitTestUtils'
-import { buildChangeMarkers } from './track-changes'
 
 const restoreDetachedCommentsEffect = StateEffect.define<RangeSet<any>>({
   map: (value, mapping) => {
@@ -90,11 +88,6 @@ export const trackDetachedComments = ({
         if (effect.is(restoreDetachedCommentsEffect)) {
           // send the comments to the ShareJS doc
           restoreDetachedComments(currentDoc, transaction, effect.value)
-
-          if (isSplitTestEnabled('review-panel-redesign')) {
-            // return a transaction spec to rebuild the change markers
-            return buildChangeMarkers()
-          }
         }
       }
       return null

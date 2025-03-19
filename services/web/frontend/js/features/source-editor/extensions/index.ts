@@ -23,7 +23,6 @@ import { autoPair } from './auto-pair'
 import { phrases } from './phrases'
 import { spelling } from './spelling'
 import { symbolPalette } from './symbol-palette'
-import { trackChanges } from './track-changes'
 import { search } from './search'
 import { filterCharacters } from './filter-characters'
 import { keybindings } from './keybindings'
@@ -50,7 +49,6 @@ import { geometryChangeEvent } from './geometry-change-event'
 import { docName } from './doc-name'
 import { fileTreeItemDrop } from './file-tree-item-drop'
 import { mathPreview } from './math-preview'
-import { isSplitTestEnabled } from '@/utils/splitTestUtils'
 import { ranges } from './ranges'
 import { trackDetachedComments } from './track-detached-comments'
 import { reviewTooltip } from './review-tooltip'
@@ -144,9 +142,7 @@ export const createExtensions = (options: Record<string, any>): Extension[] => [
   // NOTE: `emptyLineFiller` needs to be before `trackChanges`,
   // so the decorations are added in the correct order.
   emptyLineFiller(),
-  isSplitTestEnabled('review-panel-redesign')
-    ? ranges()
-    : trackChanges(options.currentDoc, options.changeManager),
+  ranges(),
   trackDetachedComments(options.currentDoc),
   visual(options.visual),
   mathPreview(options.settings.mathPreview),

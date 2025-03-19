@@ -3,7 +3,7 @@ import { Trans } from 'react-i18next'
 import { useEditorManagerContext } from '@/features/ide-react/context/editor-manager-context'
 import MaterialIcon from '@/shared/components/material-icon'
 import { useProjectContext } from '@/shared/context/project-context'
-import UpgradeTrackChangesModal from '@/features/source-editor/components/review-panel/upgrade-track-changes-modal'
+import UpgradeTrackChangesModal from '@/features/review-panel-new/components/upgrade-track-changes-modal'
 import { send, sendMB } from '@/infrastructure/event-tracking'
 
 const sendAnalytics = () => {

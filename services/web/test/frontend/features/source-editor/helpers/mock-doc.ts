@@ -79,11 +79,26 @@ export const mockDoc = (content = defaultContent) => {
       getIdSeed: () => '123',
       setIdSeed: () => {},
       getTrackedDeletesLength: () => 0,
+      getDirtyState: () => ({
+        comment: {
+          moved: {},
+          removed: {},
+          added: {},
+        },
+        change: {
+          moved: {},
+          removed: {},
+          added: {},
+        },
+      }),
+      resetDirtyState: () => {},
     },
     setTrackChangesIdSeeds: () => {},
     getTrackingChanges: () => true,
     setTrackingChanges: () => {},
     getInflightOp: () => null,
     getPendingOp: () => null,
+    hasBufferedOps: () => false,
+    leaveAndCleanUpPromise: () => false,
   }
 }

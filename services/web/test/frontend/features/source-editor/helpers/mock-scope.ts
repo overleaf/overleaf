@@ -35,7 +35,12 @@ export const mockScope = (content?: string) => {
             {
               _id: figuresFolderId,
               name: 'figures',
-              docs: [],
+              docs: [
+                {
+                  _id: 'fake-nested-doc-id',
+                  name: 'foo.tex',
+                },
+              ],
               folders: [],
               fileRefs: [
                 {
@@ -65,15 +70,8 @@ export const mockScope = (content?: string) => {
       trackedWrite: true,
       write: true,
     },
-    reviewPanel: {
-      subView: 'cur_file',
-      formattedProjectMembers: {},
-      fullTCStateCollapsed: true,
-      entries: {},
-      resolvedComments: {},
-    },
     ui: {
-      reviewPanelOpen: true,
+      reviewPanelOpen: false,
     },
     toggleReviewPanel: cy.stub(),
     toggleTrackChangesForEveryone: cy.stub(),
