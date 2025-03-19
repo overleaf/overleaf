@@ -113,6 +113,7 @@ module.exports = ProjectRootDocManager = {
             if (err != null) {
               return callback(err)
             }
+            let firstFileInRootFolder
             let doc = null
 
             return async.until(
@@ -130,16 +131,26 @@ module.exports = ProjectRootDocManager = {
                     if (DocumentHelper.contentHasDocumentclass(content)) {
                       doc = { path: file, content }
                     }
-                    return cb(null)
+
+                    if (!firstFileInRootFolder && !file.includes('/')) {
+                      firstFileInRootFolder = { path: file, content }
+                    }
+                    cb(null)
                   }
                 )
               },
-              err =>
-                callback(
-                  err,
-                  doc != null ? doc.path : undefined,
-                  doc != null ? doc.content : undefined
-                )
+              err => {
+                if (err) {
+                  return callback(err)
+                }
+
+                // if no doc was found, use the first file in the root folder as the main doc
+                if (!doc && firstFileInRootFolder) {
+                  doc = firstFileInRootFolder
+                }
+
+                callback(null, doc?.path, doc?.content)
+              }
             )
           }
         ),

@@ -212,7 +212,7 @@ describe('ProjectRootDocManager', function () {
           '/foo',
           (error, path) => {
             expect(error).not.to.exist
-            expect(path).not.to.exist
+            expect(path).to.equal('a.tex')
             sinon.assert.callOrder(
               this.fs.readFile.withArgs('/foo/a.tex'),
               this.fs.readFile.withArgs('/foo/b.tex'),
@@ -230,7 +230,7 @@ describe('ProjectRootDocManager', function () {
           '/foo',
           (error, path) => {
             expect(error).not.to.exist
-            expect(path).not.to.exist
+            expect(path).to.equal('c.tex')
             sinon.assert.callOrder(
               this.fs.readFile.withArgs('/foo/c.tex'),
               this.fs.readFile.withArgs('/foo/a.tex'),
@@ -274,6 +274,58 @@ describe('ProjectRootDocManager', function () {
       })
     })
 
+    describe('when main.tex does not contain a line starting with \\documentclass', function () {
+      beforeEach(function () {
+        this.fs.readFile.withArgs('/foo/a.tex').callsArgWith(2, null, 'foo')
+        this.fs.readFile.withArgs('/foo/main.tex').callsArgWith(2, null, 'foo')
+        this.fs.readFile.withArgs('/foo/z.tex').callsArgWith(2, null, 'foo')
+        this.fs.readFile
+          .withArgs('/foo/nested/chapter1a.tex')
+          .callsArgWith(2, null, 'foo')
+      })
+
+      it('returns the first .tex file from the root folder', function (done) {
+        this.globbyFiles.splice(
+          0,
+          this.globbyFiles.length,
+          'a.tex',
+          'z.tex',
+          'nested/chapter1a.tex'
+        )
+
+        this.ProjectRootDocManager.findRootDocFileFromDirectory(
+          '/foo',
+          (error, path, content) => {
+            expect(error).not.to.exist
+            expect(path).to.equal('a.tex')
+            expect(content).to.equal('foo')
+            return done()
+          }
+        )
+      })
+
+      it('returns main.tex file from the root folder', function (done) {
+        this.globbyFiles.splice(
+          0,
+          this.globbyFiles.length,
+          'a.tex',
+          'z.tex',
+          'main.tex',
+          'nested/chapter1a.tex'
+        )
+
+        this.ProjectRootDocManager.findRootDocFileFromDirectory(
+          '/foo',
+          (error, path, content) => {
+            expect(error).not.to.exist
+            expect(path).to.equal('main.tex')
+            expect(content).to.equal('foo')
+            return done()
+          }
+        )
+      })
+    })
+
     describe('when a.tex contains a documentclass', function () {
       beforeEach(function () {
         return this.fs.readFile
@@ -307,13 +359,11 @@ describe('ProjectRootDocManager', function () {
     })
 
     describe('when there is no documentclass', function () {
-      it('returns null with no error', function (done) {
+      it('returns with no error', function (done) {
         return this.ProjectRootDocManager.findRootDocFileFromDirectory(
           '/foo',
-          (error, path, content) => {
+          error => {
             expect(error).not.to.exist
-            expect(path).not.to.exist
-            expect(content).not.to.exist
             return done()
           }
         )
