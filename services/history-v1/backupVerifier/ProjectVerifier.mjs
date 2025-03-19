@@ -13,11 +13,16 @@ import { setTimeout } from 'node:timers/promises'
 
 const MS_PER_30_DAYS = 30 * 24 * 60 * 60 * 1000
 
-const METRICS = {
-  backup_project_verification_failed: 'backup_project_verification_failed',
-  backup_project_verification_succeeded:
-    'backup_project_verification_succeeded',
-}
+const failureCounter = new metrics.prom.Counter({
+  name: 'backup_project_verification_failed',
+  help: 'Number of projects that failed verification',
+  labelNames: ['name'],
+})
+
+const successCounter = new metrics.prom.Counter({
+  name: 'backup_project_verification_succeeded',
+  help: 'Number of projects that succeeded verification',
+})
 
 let WRITE_METRICS = false
 
@@ -42,8 +47,7 @@ function handleVerificationError(error, historyId) {
   const name = error instanceof Error ? error.name : 'UnknownError'
   logger.error({ historyId, error, name }, 'error verifying project backup')
 
-  WRITE_METRICS &&
-    metrics.inc(METRICS.backup_project_verification_failed, 1, { name })
+  WRITE_METRICS && failureCounter.inc({ name })
 
   return name
 }
@@ -97,8 +101,7 @@ async function verifyProjectsFromCursor(
     try {
       await verifyProjectWithErrorContext(historyId)
       logger.debug({ historyId }, 'verified project backup successfully')
-      WRITE_METRICS &&
-        metrics.inc(METRICS.backup_project_verification_succeeded)
+      WRITE_METRICS && successCounter.inc()
       verified++
     } catch (error) {
       const errorType = handleVerificationError(error, historyId)
