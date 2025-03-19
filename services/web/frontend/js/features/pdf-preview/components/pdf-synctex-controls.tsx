@@ -1,5 +1,5 @@
 import classNames from 'classnames'
-import { memo, useCallback, useEffect, useState, useRef } from 'react'
+import { memo, useCallback, useEffect, useState, useRef, useMemo } from 'react'
 import { useProjectContext } from '../../../shared/context/project-context'
 import { getJSON } from '../../../infrastructure/fetch-json'
 import { useDetachCompileContext as useCompileContext } from '../../../shared/context/detach-compile-context'
@@ -22,23 +22,21 @@ import MaterialIcon from '@/shared/components/material-icon'
 import { Spinner } from 'react-bootstrap-5'
 import { useEditorManagerContext } from '@/features/ide-react/context/editor-manager-context'
 import useEventListener from '@/shared/hooks/use-event-listener'
-import { PdfScrollPosition } from '@/shared/hooks/use-pdf-scroll-position'
 import { CursorPosition } from '@/features/ide-react/types/cursor-position'
 import { isValidTeXFile } from '@/main/is-valid-tex-file'
+import { PdfScrollPosition } from '@/shared/hooks/use-pdf-scroll-position'
+import { Placement } from 'react-bootstrap-5/types'
 
-function GoToCodeButton({
-  position,
+const GoToCodeButton = memo(function GoToCodeButton({
   syncToCode,
   syncToCodeInFlight,
   isDetachLayout,
 }: {
-  position: PdfScrollPosition
-  syncToCode: (position: PdfScrollPosition, visualOffset?: number) => void
+  syncToCode: ({ visualOffset }: { visualOffset: number }) => void
   syncToCodeInFlight: boolean
   isDetachLayout?: boolean
 }) {
   const { t } = useTranslation()
-  const tooltipPlacement = isDetachLayout ? 'bottom' : 'right'
   const buttonClasses = classNames('synctex-control', {
     'detach-synctex-control': !!isDetachLayout,
   })
@@ -54,19 +52,26 @@ function GoToCodeButton({
     )
   }
 
-  const syncToCodeWithButton = () => {
+  const syncToCodeWithButton = useCallback(() => {
     eventTracking.sendMB('jump-to-location', {
       direction: 'pdf-location-in-code',
       method: 'arrow',
     })
-    syncToCode(position, 72)
-  }
+    syncToCode({ visualOffset: 72 })
+  }, [syncToCode])
+
+  const overlayProps = useMemo(
+    () => ({
+      placement: (isDetachLayout ? 'bottom' : 'right') as Placement,
+    }),
+    [isDetachLayout]
+  )
 
   return (
     <OLTooltip
       id="sync-to-code"
       description={t('go_to_pdf_location_in_code')}
-      overlayProps={{ placement: tooltipPlacement }}
+      overlayProps={overlayProps}
     >
       <OLButton
         variant="secondary"
@@ -81,17 +86,15 @@ function GoToCodeButton({
       </OLButton>
     </OLTooltip>
   )
-}
+})
 
-function GoToPdfButton({
-  cursorPosition,
+const GoToPdfButton = memo(function GoToPdfButton({
   syncToPdf,
   syncToPdfInFlight,
   isDetachLayout,
   canSyncToPdf,
 }: {
-  cursorPosition: CursorPosition | null
-  syncToPdf: (cursorPosition: CursorPosition | null) => void
+  syncToPdf: () => void
   syncToPdfInFlight: boolean
   canSyncToPdf: boolean
   isDetachLayout?: boolean
@@ -122,7 +125,7 @@ function GoToPdfButton({
       <OLButton
         variant="secondary"
         size="sm"
-        onClick={() => syncToPdf(cursorPosition)}
+        onClick={syncToPdf}
         disabled={syncToPdfInFlight || !canSyncToPdf}
         className={buttonClasses}
         aria-label={t('go_to_code_location_in_pdf')}
@@ -132,7 +135,7 @@ function GoToPdfButton({
       </OLButton>
     </OLTooltip>
   )
-}
+})
 
 function PdfSynctexControls() {
   const { _id: projectId, rootDocId } = useProjectContext()
@@ -166,11 +169,10 @@ function PdfSynctexControls() {
 
   const { signal } = useAbortController()
 
-  const editorUpdateListener = useCallback(
-    event => setCursorPosition(event.detail),
-    []
+  useEventListener(
+    'cursor:editor:update',
+    useCallback(event => setCursorPosition(event.detail), [])
   )
-  useEventListener('cursor:editor:update', editorUpdateListener)
 
   const [syncToPdfInFlight, setSyncToPdfInFlight] = useState(false)
   const [syncToCodeInFlight, setSyncToCodeInFlight] = useDetachState(
@@ -261,14 +263,22 @@ function PdfSynctexControls() {
     ]
   )
 
-  const syncToPdf = useCallback(
-    cursorPosition => {
-      const file = getCurrentFilePath()
+  const cursorPositionRef = useRef(cursorPosition)
+
+  useEffect(() => {
+    cursorPositionRef.current = cursorPosition
+  }, [cursorPosition])
+
+  const syncToPdf = useCallback(() => {
+    const file = getCurrentFilePath()
+
+    if (cursorPositionRef.current) {
+      const { row, column } = cursorPositionRef.current
 
       const params = new URLSearchParams({
         file: file ?? '',
-        line: cursorPosition.row + 1,
-        column: cursorPosition.column,
+        line: String(row + 1),
+        column: String(column),
       }).toString()
 
       eventTracking.sendMB('jump-to-location', {
@@ -277,25 +287,33 @@ function PdfSynctexControls() {
       })
 
       goToPdfLocation(params)
-    },
-    [getCurrentFilePath, goToPdfLocation]
-  )
-
-  const cursorPositionRef = useRef(cursorPosition)
-
-  useEffect(() => {
-    cursorPositionRef.current = cursorPosition
-  }, [cursorPosition])
+    }
+  }, [getCurrentFilePath, goToPdfLocation])
 
   useScopeEventListener(
     'cursor:editor:syncToPdf',
     useCallback(() => {
-      syncToPdf(cursorPositionRef.current)
+      syncToPdf()
     }, [syncToPdf])
   )
 
+  const positionRef = useRef(position)
+  useEffect(() => {
+    positionRef.current = position
+  }, [position])
+
   const _syncToCode = useCallback(
-    (position, visualOffset = 0) => {
+    ({
+      position = positionRef.current,
+      visualOffset = 0,
+    }: {
+      position?: PdfScrollPosition
+      visualOffset?: number
+    }) => {
+      if (!position) {
+        return
+      }
+
       setSyncToCodeInFlight(true)
       // FIXME: this actually works better if it's halfway across the
       // page (or the visible part of the page). Synctex doesn't
@@ -356,11 +374,10 @@ function PdfSynctexControls() {
     'detacher'
   )
 
-  const syncToPositionListener = useCallback(
-    event => syncToCode(event.detail),
-    [syncToCode]
+  useEventListener(
+    'synctex:sync-to-position',
+    useCallback(event => syncToCode({ position: event.detail }), [syncToCode])
   )
-  useEventListener('synctex:sync-to-position', syncToPositionListener)
 
   const [hasSingleSelectedDoc, setHasSingleSelectedDoc] = useDetachState(
     'has-single-selected-doc',
@@ -399,39 +416,31 @@ function PdfSynctexControls() {
 
   if (detachRole === 'detacher') {
     return (
-      <>
-        <GoToPdfButton
-          cursorPosition={cursorPosition}
-          syncToPdf={syncToPdf}
-          syncToPdfInFlight={syncToPdfInFlight}
-          isDetachLayout
-          canSyncToPdf={canSyncToPdf}
-        />
-      </>
+      <GoToPdfButton
+        syncToPdf={syncToPdf}
+        syncToPdfInFlight={syncToPdfInFlight}
+        isDetachLayout
+        canSyncToPdf={canSyncToPdf}
+      />
     )
   } else if (detachRole === 'detached') {
     return (
-      <>
-        <GoToCodeButton
-          position={position}
-          syncToCode={syncToCode}
-          syncToCodeInFlight={syncToCodeInFlight}
-          isDetachLayout
-        />
-      </>
+      <GoToCodeButton
+        syncToCode={syncToCode}
+        syncToCodeInFlight={syncToCodeInFlight}
+        isDetachLayout
+      />
     )
   } else {
     return (
       <>
         <GoToPdfButton
-          cursorPosition={cursorPosition}
           syncToPdf={syncToPdf}
           syncToPdfInFlight={syncToPdfInFlight}
           canSyncToPdf={canSyncToPdf}
         />
 
         <GoToCodeButton
-          position={position}
           syncToCode={syncToCode}
           syncToCodeInFlight={syncToCodeInFlight}
         />

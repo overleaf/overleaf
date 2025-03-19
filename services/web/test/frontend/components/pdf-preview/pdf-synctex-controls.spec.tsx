@@ -376,7 +376,7 @@ describe('<PdfSynctexControls/>', function () {
         role: 'detached',
         event: 'action-sync-to-code',
         data: {
-          args: [mockPosition, 72],
+          args: [{ visualOffset: 72 }],
         },
       })
     })
