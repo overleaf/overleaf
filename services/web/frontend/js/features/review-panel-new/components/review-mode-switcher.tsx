@@ -18,7 +18,7 @@ import usePersistedState from '@/shared/hooks/use-persisted-state'
 import { sendMB } from '@/infrastructure/event-tracking'
 import { useEditorContext } from '@/shared/context/editor-context'
 import { useProjectContext } from '@/shared/context/project-context'
-import UpgradeTrackChangesModal from '@/features/source-editor/components/review-panel/upgrade-track-changes-modal'
+import UpgradeTrackChangesModal from './upgrade-track-changes-modal'
 
 type Mode = 'view' | 'review' | 'edit'
 
