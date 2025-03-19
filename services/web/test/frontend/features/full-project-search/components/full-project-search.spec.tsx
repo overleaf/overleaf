@@ -1,4 +1,3 @@
-import '../../../helpers/bootstrap-5'
 import { EditorProviders } from '../../../helpers/editor-providers'
 import FullProjectSearch from '../../../../../modules/full-project-search/frontend/js/components/full-project-search'
 import {

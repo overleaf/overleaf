@@ -1,4 +1,3 @@
-import '../../../helpers/bootstrap-5'
 import SubtotalLimitExceeded from '@/features/group-management/components/subtotal-limit-exceeded'
 
 describe('<SubtotalLimitExceeded />', function () {

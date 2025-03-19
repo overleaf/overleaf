@@ -1,4 +1,3 @@
-import '../../../helpers/bootstrap-5'
 import AddSeats, {
   MAX_NUMBER_OF_USERS,
 } from '@/features/group-management/components/add-seats/add-seats'

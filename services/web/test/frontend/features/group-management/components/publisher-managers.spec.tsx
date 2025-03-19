@@ -1,4 +1,3 @@
-import '../../../helpers/bootstrap-3'
 import PublisherManagers from '@/features/group-management/components/publisher-managers'
 
 const JOHN_DOE = {
@@ -112,7 +111,7 @@ describe('publisher managers', function () {
         })
       })
 
-    cy.get('.select-all').click()
+    cy.findByTestId('select-all-checkbox').click()
 
     cy.findByTestId('managed-entities-table')
       .find('tbody')

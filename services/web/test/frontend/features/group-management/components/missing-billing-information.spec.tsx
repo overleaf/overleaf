@@ -1,4 +1,3 @@
-import '../../../helpers/bootstrap-5'
 import { SplitTestProvider } from '@/shared/context/split-test-context'
 import MissingBillingInformation from '@/features/group-management/components/missing-billing-information'
 

@@ -1,4 +1,3 @@
-import '../../../helpers/bootstrap-3'
 import GroupManagers from '@/features/group-management/components/group-managers'
 
 const JOHN_DOE = {

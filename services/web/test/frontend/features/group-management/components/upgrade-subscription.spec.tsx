@@ -1,4 +1,3 @@
-import '../../../helpers/bootstrap-5'
 import UpgradeSubscription from '@/features/group-management/components/upgrade-subscription/upgrade-subscription'
 import { SubscriptionChangePreview } from '../../../../../types/subscription/subscription-change-preview'
 

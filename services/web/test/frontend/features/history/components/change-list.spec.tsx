@@ -1,4 +1,3 @@
-import '../../../helpers/bootstrap-5'
 import { useState } from 'react'
 import ToggleSwitch from '../../../../../frontend/js/features/history/components/change-list/toggle-switch'
 import ChangeList from '../../../../../frontend/js/features/history/components/change-list/change-list'
