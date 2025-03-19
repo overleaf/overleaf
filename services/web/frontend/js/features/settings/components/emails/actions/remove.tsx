@@ -7,7 +7,6 @@ import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
 import OLIconButton, {
   OLIconButtonProps,
 } from '@/features/ui/components/ol/ol-icon-button'
-import { bsVersion } from '@/features/utils/bootstrap-5'
 import getMeta from '@/utils/meta'
 
 type DeleteButtonProps = Pick<
@@ -26,8 +25,7 @@ function DeleteButton({ disabled, isLoading, onClick }: DeleteButtonProps) {
       size="sm"
       onClick={onClick}
       accessibilityLabel={t('remove') || ''}
-      icon={bsVersion({ bs5: 'delete', bs3: 'trash' })}
-      bs3Props={{ fw: true }}
+      icon="delete"
     />
   )
 }

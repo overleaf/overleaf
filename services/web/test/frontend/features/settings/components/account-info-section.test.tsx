@@ -90,7 +90,7 @@ describe('<AccountInfoSection />', function () {
         name: 'Update',
       })
     )
-    await screen.findByRole('button', { name: 'Loading' })
+    await screen.findByRole('button', { name: /saving/i })
 
     finishUpdateCall(200)
     await screen.findByRole('button', {

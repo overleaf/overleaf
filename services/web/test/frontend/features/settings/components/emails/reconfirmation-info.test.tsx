@@ -161,7 +161,7 @@ describe('<ReconfirmationInfo/>', function () {
         // commented out as it's already gone by this point
         // await screen.findByText(/Sending/)
         expect(fetchMock.called()).to.be.true
-        await waitForElementToBeRemoved(() => screen.getByText(/Sending/))
+        await waitForElementToBeRemoved(() => screen.getByText('Sending…'))
         await screen.findByRole('button', {
           name: 'Resend confirmation email',
         })

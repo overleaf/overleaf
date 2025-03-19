@@ -2,7 +2,6 @@ import useFetchMock from '../hooks/use-fetch-mock'
 import LeaveModal from '../../js/features/settings/components/leave/modal'
 import LeaveSection from '../../js/features/settings/components/leave-section'
 import { setDefaultMeta, defaultSetupMocks } from './helpers/leave'
-import { bsVersionDecorator } from '../../../.storybook/utils/with-bootstrap-switcher'
 
 export const Section = args => {
   useFetchMock(defaultSetupMocks)
@@ -68,6 +67,5 @@ export default {
   },
   argTypes: {
     handleClose: { action: 'handleClose' },
-    ...bsVersionDecorator.argTypes,
   },
 }

@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { useTranslation, Trans } from 'react-i18next'
-import Icon from '../../../../shared/components/icon'
 import getMeta from '../../../../utils/meta'
 import OLNotification from '@/features/ui/components/ol/ol-notification'
 
@@ -35,15 +34,6 @@ export function SSOAlert() {
         }
         isDismissible
         onDismiss={handleErrorClosed}
-        bs3Props={{
-          icon: (
-            <Icon
-              type="exclamation-triangle"
-              accessibilityLabel={t('generic_something_went_wrong')}
-            />
-          ),
-          className: 'mb-0 text-center',
-        }}
       />
     ) : null
   }
@@ -83,9 +73,6 @@ export function SSOAlert() {
           }
           isDismissible
           onDismiss={handleInfoClosed}
-          bs3Props={{
-            className: 'mb-0 text-center',
-          }}
         />
       )}
       {!warningClosed && institutionEmailNonCanonical && (
@@ -102,16 +89,6 @@ export function SSOAlert() {
           }
           isDismissible
           onDismiss={handleWarningClosed}
-          bs3Props={{
-            icon: (
-              <Icon
-                type="exclamation-triangle"
-                accessibilityLabel={t('generic_something_went_wrong')}
-                fw
-              />
-            ),
-            className: 'text-center',
-          }}
         />
       )}
     </>

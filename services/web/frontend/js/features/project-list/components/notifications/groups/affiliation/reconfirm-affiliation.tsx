@@ -87,6 +87,7 @@ function ReconfirmAffiliation({
             className="btn-inline-link"
             disabled={isLoading}
             isLoading={isLoading}
+            loadingLabel={t('sending') + '…'}
           >
             {t('resend_confirmation_email')}
           </OLButton>

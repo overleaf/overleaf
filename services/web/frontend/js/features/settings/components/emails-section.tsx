@@ -8,8 +8,8 @@ import {
 import EmailsHeader from './emails/header'
 import EmailsRow from './emails/row'
 import AddEmail from './emails/add-email'
-import Icon from '../../../shared/components/icon'
 import OLNotification from '@/features/ui/components/ol/ol-notification'
+import OLSpinner from '@/features/ui/components/ol/ol-spinner'
 import { LeaversSurveyAlert } from './leavers-survey-alert'
 
 function EmailsSectionContent() {
@@ -28,7 +28,7 @@ function EmailsSectionContent() {
 
   return (
     <>
-      <h3>{t('emails_and_affiliations_title')}</h3>
+      <h2 className="h3">{t('emails_and_affiliations_title')}</h2>
       <p className="small">{t('emails_and_affiliations_explanation')}</p>
       <p className="small">
         <Trans
@@ -49,7 +49,7 @@ function EmailsSectionContent() {
         {isInitializing ? (
           <div className="affiliations-table-row-highlighted">
             <div className="affiliations-table-cell text-center">
-              <Icon type="refresh" fw spin /> {t('loading')}...
+              <OLSpinner size="sm" /> {t('loading')}...
             </div>
           </div>
         ) : (
@@ -68,10 +68,6 @@ function EmailsSectionContent() {
           <OLNotification
             type="error"
             content={t('error_performing_request')}
-            bs3Props={{
-              icon: <Icon type="exclamation-triangle" fw />,
-              className: 'text-center',
-            }}
           />
         )}
       </>

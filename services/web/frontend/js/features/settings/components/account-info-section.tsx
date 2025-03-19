@@ -12,7 +12,7 @@ import OLNotification from '@/features/ui/components/ol/ol-notification'
 import OLFormGroup from '@/features/ui/components/ol/ol-form-group'
 import OLFormLabel from '@/features/ui/components/ol/ol-form-label'
 import OLFormControl from '@/features/ui/components/ol/ol-form-control'
-import FormText from '@/features/ui/components/bootstrap-5/form/form-text'
+import OLFormText from '@/features/ui/components/ol/ol-form-text'
 
 function AccountInfoSection() {
   const { t } = useTranslation()
@@ -127,9 +127,7 @@ function AccountInfoSection() {
               form="account-info-form"
               disabled={!isFormValid}
               isLoading={isLoading}
-              bs3Props={{
-                loading: isLoading ? `${t('saving')}…` : t('update'),
-              }}
+              loadingLabel={t('saving') + '…'}
             >
               {t('update')}
             </OLButton>
@@ -196,7 +194,7 @@ function ReadOrWriteFormGroup({
         onInvalid={handleInvalid}
       />
       {validationMessage && (
-        <FormText type="error">{validationMessage}</FormText>
+        <OLFormText type="error">{validationMessage}</OLFormText>
       )}
     </OLFormGroup>
   )

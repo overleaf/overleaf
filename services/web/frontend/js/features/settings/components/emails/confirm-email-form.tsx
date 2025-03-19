@@ -217,16 +217,7 @@ export function ConfirmEmailForm({
             disabled={isResending}
             type="submit"
             isLoading={isConfirming}
-            bs3Props={{
-              loading: isConfirming ? (
-                <>
-                  {t('confirming')}
-                  <span>&hellip;</span>
-                </>
-              ) : (
-                t('confirm')
-              ),
-            }}
+            loadingLabel={t('confirming')}
           >
             {t('confirm')}
           </OLButton>
@@ -235,16 +226,7 @@ export function ConfirmEmailForm({
             disabled={isConfirming}
             onClick={resendHandler}
             isLoading={isResending}
-            bs3Props={{
-              loading: isResending ? (
-                <>
-                  {t('resending_confirmation_code')}
-                  <span>&hellip;</span>
-                </>
-              ) : (
-                t('resend_confirmation_code')
-              ),
-            }}
+            loadingLabel={t('resending_confirmation_code')}
           >
             {t('resend_confirmation_code')}
           </OLButton>

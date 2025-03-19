@@ -6,7 +6,6 @@ import { SSOProvider } from '../../js/features/settings/context/sso-context'
 import { ScopeDecorator } from '../decorators/scope'
 import { useEffect } from 'react'
 import { useMeta } from '../hooks/use-meta'
-import { bsVersionDecorator } from '../../../.storybook/utils/with-bootstrap-switcher'
 
 const MOCK_DELAY = 1000
 
@@ -94,7 +93,4 @@ export default {
   title: 'Account Settings / Linking',
   component: LinkingSection,
   decorators: [ScopeDecorator],
-  argTypes: {
-    ...bsVersionDecorator.argTypes,
-  },
 }

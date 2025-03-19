@@ -195,7 +195,7 @@ describe('user role and institution', function () {
       screen.getByRole('button', { name: /saving/i })
     )
 
-    screen.getByText(roleValue, { exact: false })
-    screen.getByText(departmentValue, { exact: false })
+    await screen.findByText(roleValue, { exact: false })
+    await screen.findByText(departmentValue, { exact: false })
   })
 })

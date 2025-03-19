@@ -17,13 +17,7 @@ function LeaveModal({ isOpen, handleClose }: LeaveModalProps) {
   }, [handleClose, inFlight])
 
   return (
-    <OLModal
-      animation
-      show={isOpen}
-      onHide={handleHide}
-      id="leave-modal"
-      bs3Props={{ backdrop: 'static' }}
-    >
+    <OLModal animation show={isOpen} onHide={handleHide} id="leave-modal">
       <LeaveModalContent
         handleHide={handleHide}
         inFlight={inFlight}

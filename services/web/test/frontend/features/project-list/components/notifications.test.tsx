@@ -875,7 +875,7 @@ describe('<UserNotifications />', function () {
       fireEvent.click(
         screen.getByRole('button', { name: /resend confirmation email/i })
       )
-      await waitForElementToBeRemoved(() => screen.getByText('Loading'))
+      await waitForElementToBeRemoved(() => screen.getByText('Sending…'))
       expect(sendReconfirmationMock.calls()).to.have.lengthOf(2)
     })
 

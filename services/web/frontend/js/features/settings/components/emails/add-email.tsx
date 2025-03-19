@@ -18,7 +18,6 @@ import getMeta from '../../../../utils/meta'
 import { ReCaptcha2 } from '../../../../shared/components/recaptcha-2'
 import { useRecaptcha } from '../../../../shared/hooks/use-recaptcha'
 import OLCol from '@/features/ui/components/ol/ol-col'
-import { bsVersion } from '@/features/utils/bootstrap-5'
 import { ConfirmEmailForm } from '@/features/settings/components/emails/confirm-email-form'
 
 function AddEmail() {
@@ -153,10 +152,7 @@ function AddEmail() {
 
   const InputComponent = (
     <>
-      <label
-        htmlFor="affiliations-email"
-        className={bsVersion({ bs5: 'visually-hidden', bs3: 'sr-only' })}
-      >
+      <label htmlFor="affiliations-email" className="visually-hidden">
         {t('email')}
       </label>
       <Input
