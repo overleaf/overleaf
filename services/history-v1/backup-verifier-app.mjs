@@ -54,7 +54,6 @@ app.get(
 )
 
 app.get('/status', (req, res) => {
-  logger.info({}, 'status check')
   res.send('history-v1-backup-verifier is up')
 })
 
