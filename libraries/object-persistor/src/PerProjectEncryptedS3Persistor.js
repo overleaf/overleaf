@@ -34,6 +34,10 @@ const AES256_KEY_LENGTH = 32
  */
 
 /**
+ * @typedef {import('./types').ListDirectoryResult} ListDirectoryResult
+ */
+
+/**
  * Helper function to make TS happy when accessing error properties
  * AWSError is not an actual class, so we cannot use instanceof.
  * @param {any} err
@@ -391,9 +395,9 @@ class PerProjectEncryptedS3Persistor extends S3Persistor {
  * A general "cache" for project keys is another alternative. For now, use a helper class.
  */
 class CachedPerProjectEncryptedS3Persistor {
-  /** @type SSECOptions */
+  /** @type SSECOptions  */
   #projectKeyOptions
-  /** @type PerProjectEncryptedS3Persistor */
+  /** @type PerProjectEncryptedS3Persistor  */
   #parent
 
   /**
@@ -422,6 +426,16 @@ class CachedPerProjectEncryptedS3Persistor {
    */
   async getObjectSize(bucketName, path) {
     return await this.#parent.getObjectSize(bucketName, path)
+  }
+
+  /**
+   *
+   * @param {string} bucketName
+   * @param {string} path
+   * @return {Promise<ListDirectoryResult>}
+   */
+  async listDirectory(bucketName, path) {
+    return await this.#parent.listDirectory(bucketName, path)
   }
 
   /**

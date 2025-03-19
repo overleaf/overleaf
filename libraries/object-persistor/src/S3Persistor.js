@@ -21,6 +21,18 @@ const { WriteError, ReadError, NotFoundError } = require('./Errors')
 const zlib = require('node:zlib')
 
 /**
+ * @typedef {import('aws-sdk/clients/s3').ListObjectsV2Output} ListObjectsV2Output
+ */
+
+/**
+ * @typedef {import('aws-sdk/clients/s3').Object} S3Object
+ */
+
+/**
+ * @typedef {import('./types').ListDirectoryResult} ListDirectoryResult
+ */
+
+/**
  * Wrapper with private fields to avoid revealing them on console, JSON.stringify or similar.
  */
 class SSECOptions {
@@ -266,26 +278,12 @@ class S3Persistor extends AbstractPersistor {
    * @return {Promise<void>}
    */
   async deleteDirectory(bucketName, key, continuationToken) {
-    let response
-    const options = { Bucket: bucketName, Prefix: key }
-    if (continuationToken) {
-      options.ContinuationToken = continuationToken
-    }
-
-    try {
-      response = await this._getClientForBucket(bucketName)
-        .listObjectsV2(options)
-        .promise()
-    } catch (err) {
-      throw PersistorHelper.wrapError(
-        err,
-        'failed to list objects in S3',
-        { bucketName, key },
-        ReadError
-      )
-    }
-
-    const objects = response.Contents?.map(item => ({ Key: item.Key || '' }))
+    const { contents, response } = await this.listDirectory(
+      bucketName,
+      key,
+      continuationToken
+    )
+    const objects = contents.map(item => ({ Key: item.Key || '' }))
     if (objects?.length) {
       try {
         await this._getClientForBucket(bucketName)
@@ -314,6 +312,36 @@ class S3Persistor extends AbstractPersistor {
         response.NextContinuationToken
       )
     }
+  }
+
+  /**
+   *
+   * @param {string} bucketName
+   * @param {string} key
+   * @param {string} [continuationToken]
+   * @return {Promise<ListDirectoryResult>}
+   */
+  async listDirectory(bucketName, key, continuationToken) {
+    let response
+    const options = { Bucket: bucketName, Prefix: key }
+    if (continuationToken) {
+      options.ContinuationToken = continuationToken
+    }
+
+    try {
+      response = await this._getClientForBucket(bucketName)
+        .listObjectsV2(options)
+        .promise()
+    } catch (err) {
+      throw PersistorHelper.wrapError(
+        err,
+        'failed to list objects in S3',
+        { bucketName, key },
+        ReadError
+      )
+    }
+
+    return { contents: response.Contents ?? [], response }
   }
 
   /**
