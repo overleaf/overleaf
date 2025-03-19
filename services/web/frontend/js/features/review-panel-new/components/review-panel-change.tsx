@@ -74,6 +74,7 @@ export const ReviewPanelChange = memo<{
     }
 
     const isChangeAuthor = change.metadata?.user_id === user.id
+    const aggregateChange = aggregate && /\S/.test(aggregate.op.d)
 
     return (
       <ReviewPanelEntry
@@ -168,7 +169,7 @@ export const ReviewPanelChange = memo<{
           <div className="review-panel-change-body">
             {'i' in change.op && (
               <>
-                {aggregate ? (
+                {aggregateChange ? (
                   <MaterialIcon
                     className="review-panel-entry-icon review-panel-entry-change-icon review-panel-entry-icon-changed"
                     type="edit"
@@ -180,7 +181,7 @@ export const ReviewPanelChange = memo<{
                   />
                 )}
 
-                {aggregate ? (
+                {aggregateChange ? (
                   <span>
                     {t('aggregate_changed')}:{' '}
                     <del className="review-panel-content-highlight">
