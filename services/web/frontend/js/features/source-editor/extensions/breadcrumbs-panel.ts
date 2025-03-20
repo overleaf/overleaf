@@ -1,4 +1,5 @@
-import { isSplitTestEnabled } from '@/utils/splitTestUtils'
+import { canUseNewEditor } from '@/features/ide-redesign/utils/new-editor-utils'
+import { Compartment, Extension, TransactionSpec } from '@codemirror/state'
 import { EditorView, showPanel } from '@codemirror/view'
 
 export function createBreadcrumbsPanel() {
@@ -37,13 +38,24 @@ const breadcrumbsTheme = EditorView.baseTheme({
   },
 })
 
+const breadcrumbsConf = new Compartment()
+
+const breadcrumbsEnabled: Extension = [
+  showPanel.of(createBreadcrumbsPanel),
+  breadcrumbsTheme,
+]
+const breadcrumbsDisabled: Extension = []
+
+export const setBreadcrumbsEnabled = (enabled: boolean): TransactionSpec => ({
+  effects: breadcrumbsConf.reconfigure(
+    enabled ? breadcrumbsEnabled : breadcrumbsDisabled
+  ),
+})
+
 /**
  * A panel which contains the editor breadcrumbs
  */
-export const breadcrumbPanel = () => {
-  if (!isSplitTestEnabled('editor-redesign')) {
-    return []
-  }
-
-  return [showPanel.of(createBreadcrumbsPanel), breadcrumbsTheme]
+export const breadcrumbPanel = (enableNewEditor: boolean) => {
+  const enabled = canUseNewEditor() && enableNewEditor
+  return breadcrumbsConf.of(enabled ? breadcrumbsEnabled : breadcrumbsDisabled)
 }
