@@ -19,7 +19,7 @@ export type RailTabKey =
   | 'chat'
   | 'errors'
 
-export type RailModalKey = 'keyboard-shortcuts' | 'contact-us'
+export type RailModalKey = 'keyboard-shortcuts' | 'contact-us' | 'dictionary'
 
 const RailContext = createContext<
   | {

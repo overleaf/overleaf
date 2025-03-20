@@ -1,11 +1,11 @@
 export default function Setting({
   label,
-  description,
   controlId,
   children,
+  description = undefined,
 }: {
   label: string
-  description: string
+  description: string | undefined
   controlId: string
   children: React.ReactNode
 }) {
@@ -15,7 +15,9 @@ export default function Setting({
         <label htmlFor={controlId} className="ide-setting-title">
           {label}
         </label>
-        <div className="ide-setting-description">{description}</div>
+        {description && (
+          <div className="ide-setting-description">{description}</div>
+        )}
       </div>
       {children}
     </div>

@@ -48,24 +48,26 @@
 }
 
 .ide-settings-section {
-  .ide-setting:not(:last-child) {
-    border-bottom: 1px solid var(--border-divider);
-  }
+  padding-top: var(--spacing-06);
+  padding-bottom: var(--spacing-05);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-05);
 }
 
 .ide-settings-section-title {
   color: var(--content-secondary);
   font-size: var(--font-size-01);
   line-height: var(--line-height-01);
-  margin-top: var(--spacing-06);
-  margin-bottom: var(--spacing-03);
+  padding-bottom: var(--spacing-06);
+  border-bottom: 1px solid var(--border-divider);
 }
 
 .ide-setting {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: var(--spacing-06) 0;
+  min-height: 48px;
 }
 
 .ide-dropdown-setting {

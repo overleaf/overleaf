@@ -988,6 +988,7 @@ module.exports = {
     editorSidebarComponents: [],
     fileTreeToolbarComponents: [],
     integrationPanelComponents: [],
+    referenceSearchSetting: [],
   },
 
   moduleImportSequence: [

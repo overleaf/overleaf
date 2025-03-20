@@ -4,7 +4,7 @@ import Setting from './setting'
 import classNames from 'classnames'
 import { Spinner } from 'react-bootstrap-5'
 
-type PossibleValue = string | number
+type PossibleValue = string | number | boolean
 
 export type Option<T extends PossibleValue = string> = {
   value: T
@@ -21,9 +21,12 @@ export type Optgroup<T extends PossibleValue = string> = {
 type SettingsMenuSelectProps<T extends PossibleValue = string> = {
   id: string
   label: string
-  description: string
   options: Array<Option<T>>
   onChange: (val: T) => void
+  description?: string
+  // TODO: We can remove optgroup when the spellcheck setting is
+  // split into 2 and no longer uses it.
+  optgroup?: Optgroup<T>
   value?: T
   disabled?: boolean
   width?: 'default' | 'wide'
@@ -33,10 +36,11 @@ type SettingsMenuSelectProps<T extends PossibleValue = string> = {
 export default function DropdownSetting<T extends PossibleValue = string>({
   id,
   label,
-  description,
   options,
   onChange,
   value,
+  optgroup,
+  description = undefined,
   disabled = false,
   width = 'default',
   loading = false,
@@ -45,7 +49,9 @@ export default function DropdownSetting<T extends PossibleValue = string>({
     event => {
       const selectedValue = event.target.value
       let onChangeValue: PossibleValue = selectedValue
-      if (typeof value === 'number') {
+      if (typeof value === 'boolean') {
+        onChangeValue = selectedValue === 'true'
+      } else if (typeof value === 'number') {
         onChangeValue = parseInt(selectedValue, 10)
       }
       onChange(onChangeValue as T)
@@ -83,6 +89,18 @@ export default function DropdownSetting<T extends PossibleValue = string>({
               {option.label}
             </option>
           ))}
+          {optgroup ? (
+            <optgroup label={optgroup.label}>
+              {optgroup.options.map(option => (
+                <option
+                  value={option.value.toString()}
+                  key={option.value.toString()}
+                >
+                  {option.label}
+                </option>
+              ))}
+            </optgroup>
+          ) : null}
         </OLFormSelect>
       )}
     </Setting>

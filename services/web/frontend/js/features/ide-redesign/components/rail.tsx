@@ -30,6 +30,7 @@ import {
 import { RailHelpShowHotkeysModal } from './help/keyboard-shortcuts'
 import { RailHelpContactUsModal } from './help/contact-us'
 import { HistorySidebar } from '@/features/ide-react/components/history-sidebar'
+import DictionarySettingsModal from './settings/editor-settings/dictionary-settings-modal'
 
 type RailElement = {
   icon: AvailableUnfilledIcon
@@ -93,6 +94,10 @@ const RAIL_MODALS: {
   {
     key: 'contact-us',
     modalComponentFunction: RailHelpContactUsModal,
+  },
+  {
+    key: 'dictionary',
+    modalComponentFunction: DictionarySettingsModal,
   },
 ]
 

@@ -10,7 +10,7 @@ export default function MathPreviewSetting() {
     <ToggleSetting
       id="mathPreview"
       label={t('equation_preview')}
-      description={t('enables_a_real_time_equation_preview_in_the_editor')}
+      description={t('show_live_equation_previews_while_typing')}
       checked={mathPreview}
       onChange={setMathPreview}
     />

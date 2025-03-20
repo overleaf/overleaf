@@ -37,7 +37,7 @@ export default function EditorThemeSetting() {
     <DropdownSetting
       id="editorTheme"
       label={t('editor_theme')}
-      description={t('changes_the_color_scheme_of_the_code_editor')}
+      description={t('the_code_editor_color_scheme')}
       options={options}
       onChange={setEditorTheme}
       value={editorTheme}

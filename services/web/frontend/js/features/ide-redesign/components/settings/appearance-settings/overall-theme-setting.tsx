@@ -35,7 +35,7 @@ export default function OverallThemeSetting() {
     <DropdownSetting
       id="overallTheme"
       label={t('overall_theme')}
-      description={t('controls_the_theme_of_the_application_interface')}
+      description={t('the_overleaf_color_scheme')}
       options={options}
       onChange={setOverallTheme}
       value={overallTheme}

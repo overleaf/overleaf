@@ -12,6 +12,7 @@ import {
 import { useTranslation } from 'react-i18next'
 import EditorSettings from './editor-settings/editor-settings'
 import AppearanceSettings from './appearance-settings/appearance-settings'
+import CompilerSettings from './compiler-settings/compiler-settings'
 
 export type SettingsEntry = SettingsLink | SettingsTab
 
@@ -34,22 +35,16 @@ export const SettingsModalBody = () => {
   const settingsTabs: SettingsEntry[] = useMemo(
     () => [
       {
-        key: 'general',
-        title: t('general'),
-        icon: 'settings',
-        component: <div>General</div>,
-      },
-      {
         key: 'editor',
         title: t('editor'),
         icon: 'code',
         component: <EditorSettings />,
       },
       {
-        key: 'pdf',
-        title: t('pdf'),
+        key: 'compiler',
+        title: t('compiler'),
         icon: 'picture_as_pdf',
-        component: <div>PDF</div>,
+        component: <CompilerSettings />,
       },
       {
         key: 'appearance',

@@ -11,7 +11,7 @@ export default function AutoCloseBracketsSetting() {
     <ToggleSetting
       id="autoPairDelimiters"
       label={t('auto_close_brackets')}
-      description={t('automatically_inserts_closing_brackets_and_parentheses')}
+      description={t('automatically_insert_closing_brackets_and_parentheses')}
       checked={autoPairDelimiters}
       onChange={setAutoPairDelimiters}
     />
