@@ -213,7 +213,7 @@ describe('persistChanges', function () {
       expect(result.numberOfChangesPersisted).to.equal(1)
     })
 
-    it('acccepts a change with an invalid hash (only logs for now)', async function () {
+    it('rejects a change with an invalid hash', async function () {
       const limitsToPersistImmediately = {
         minChangeTimestamp: farFuture,
         maxChangeTimestamp: farFuture,
@@ -235,13 +235,9 @@ describe('persistChanges', function () {
       )
       const changes = [change]
 
-      const result = await persistChanges(
-        projectId,
-        changes,
-        limitsToPersistImmediately,
-        0
-      )
-      expect(result.numberOfChangesPersisted).to.equal(1)
+      await expect(
+        persistChanges(projectId, changes, limitsToPersistImmediately, 0)
+      ).to.be.rejectedWith(storage.InvalidChangeError)
     })
   })
 })

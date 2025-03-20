@@ -15,3 +15,6 @@ exports.zipStore = require('./lib/zip_store')
 const { BlobStore, loadGlobalBlobs } = require('./lib/blob_store')
 exports.BlobStore = BlobStore
 exports.loadGlobalBlobs = loadGlobalBlobs
+
+const { InvalidChangeError } = require('./lib/errors')
+exports.InvalidChangeError = InvalidChangeError

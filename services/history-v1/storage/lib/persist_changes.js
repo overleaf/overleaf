@@ -81,12 +81,6 @@ async function persistChanges(projectId, allChanges, limits, clientEndVersion) {
   let originalEndVersion
   let changesToPersist
 
-  /**
-   * It's only useful to log validation errors once per flush. When we enforce
-   * content hash validation, it will stop the flush right away anyway.
-   */
-  let validationErrorLogged = false
-
   limits = limits || {}
   _.defaults(limits, {
     changeBucketMinutes: 60,
@@ -131,22 +125,7 @@ async function persistChanges(projectId, allChanges, limits, clientEndVersion) {
       for (const operation of change.iterativelyApplyTo(currentSnapshot, {
         strict: true,
       })) {
-        try {
-          await validateContentHash(operation)
-        } catch (err) {
-          // Temporary: skip validation errors
-          if (err instanceof InvalidChangeError) {
-            if (!validationErrorLogged) {
-              logger.warn(
-                { err, projectId },
-                'content snapshot mismatch (ignored)'
-              )
-              validationErrorLogged = true
-            }
-          } else {
-            throw err
-          }
-        }
+        await validateContentHash(operation)
       }
 
       chunk.pushChanges([change])

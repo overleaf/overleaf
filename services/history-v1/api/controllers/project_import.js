@@ -22,6 +22,7 @@ const BlobStore = storage.BlobStore
 const chunkStore = storage.chunkStore
 const HashCheckBlobStore = storage.HashCheckBlobStore
 const persistChanges = storage.persistChanges
+const InvalidChangeError = storage.InvalidChangeError
 
 const render = require('./render')
 
@@ -113,7 +114,8 @@ async function importChanges(req, res, next) {
       err instanceof File.NotEditableError ||
       err instanceof FileMap.PathnameError ||
       err instanceof Snapshot.EditMissingFileError ||
-      err instanceof chunkStore.ChunkVersionConflictError
+      err instanceof chunkStore.ChunkVersionConflictError ||
+      err instanceof InvalidChangeError
     ) {
       // If we failed to apply operations, that's probably because they were
       // invalid.
