@@ -168,7 +168,12 @@ export default {
     // recurly callback
     publicApiRouter.post(
       '/user/subscription/callback',
-      RateLimiterMiddleware.rateLimit(subscriptionRateLimiter),
+      RateLimiterMiddleware.rateLimit(
+        new RateLimiter('recurly-callback', {
+          points: 200,
+          duration: 60,
+        })
+      ),
       AuthenticationController.requireBasicAuth({
         [Settings.apis.recurly.webhookUser]: Settings.apis.recurly.webhookPass,
       }),
