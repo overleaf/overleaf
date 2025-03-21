@@ -14,7 +14,6 @@ import { hasAdminAccess } from '../Helpers/AdminAuthorizationHelper.js'
 import TokenAccessHandler from '../TokenAccess/TokenAccessHandler.js'
 import ProjectAuditLogHandler from '../Project/ProjectAuditLogHandler.js'
 import LimitationsManager from '../Subscription/LimitationsManager.js'
-import PrivilegeLevels from '../Authorization/PrivilegeLevels.js'
 
 const ObjectId = mongodb.ObjectId
 
@@ -80,17 +79,20 @@ async function setCollaboratorInfo(req, res, next) {
     const userId = req.params.user_id
     const { privilegeLevel } = req.body
 
-    if (privilegeLevel !== PrivilegeLevels.READ_ONLY) {
-      const allowed =
-        await LimitationsManager.promises.canAddXEditCollaborators(projectId, 1)
-      if (!allowed) {
-        return HttpErrorHandler.forbidden(
-          req,
-          res,
-          'edit collaborator limit reached'
-        )
-      }
+    const allowed =
+      await LimitationsManager.promises.canChangeCollaboratorPrivilegeLevel(
+        projectId,
+        userId,
+        privilegeLevel
+      )
+    if (!allowed) {
+      return HttpErrorHandler.forbidden(
+        req,
+        res,
+        'edit collaborator limit reached'
+      )
     }
+
     await CollaboratorsHandler.promises.setCollaboratorPrivilegeLevel(
       projectId,
       userId,

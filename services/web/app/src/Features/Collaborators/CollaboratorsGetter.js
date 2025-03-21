@@ -128,12 +128,13 @@ async function getMemberIdPrivilegeLevel(userId, projectId) {
 }
 
 async function getInvitedEditCollaboratorCount(projectId) {
-  // Only counts invited members with readAndWrite privilege
+  // Counts invited members with editor or reviewer roles
   const members = await getMemberIdsWithPrivilegeLevels(projectId)
   return members.filter(
     m =>
       m.source === Sources.INVITE &&
-      m.privilegeLevel === PrivilegeLevels.READ_AND_WRITE
+      (m.privilegeLevel === PrivilegeLevels.READ_AND_WRITE ||
+        m.privilegeLevel === PrivilegeLevels.REVIEW)
   ).length
 }
 

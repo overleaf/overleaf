@@ -76,6 +76,7 @@ describe('CollaboratorsController', function () {
     this.LimitationsManager = {
       promises: {
         canAddXEditCollaborators: sinon.stub().resolves(),
+        canChangeCollaboratorPrivilegeLevel: sinon.stub().resolves(true),
       },
     }
 
@@ -310,18 +311,17 @@ describe('CollaboratorsController', function () {
       })
 
       describe('when owner can add new edit collaborators', function () {
-        beforeEach(function () {
-          this.LimitationsManager.promises.canAddXEditCollaborators.resolves(
-            true
-          )
-        })
-
         it('should set privilege level after checking collaborators can be added', function (done) {
           this.res.sendStatus = status => {
             expect(status).to.equal(204)
             expect(
-              this.LimitationsManager.promises.canAddXEditCollaborators
-            ).to.have.been.calledWith(this.projectId, 1)
+              this.LimitationsManager.promises
+                .canChangeCollaboratorPrivilegeLevel
+            ).to.have.been.calledWith(
+              this.projectId,
+              this.user._id,
+              'readAndWrite'
+            )
             done()
           }
           this.CollaboratorsController.setCollaboratorInfo(this.req, this.res)
@@ -330,7 +330,7 @@ describe('CollaboratorsController', function () {
 
       describe('when owner cannot add edit collaborators', function () {
         beforeEach(function () {
-          this.LimitationsManager.promises.canAddXEditCollaborators.resolves(
+          this.LimitationsManager.promises.canChangeCollaboratorPrivilegeLevel.resolves(
             false
           )
         })
@@ -340,8 +340,13 @@ describe('CollaboratorsController', function () {
             expect(req).to.equal(this.req)
             expect(res).to.equal(this.res)
             expect(
-              this.LimitationsManager.promises.canAddXEditCollaborators
-            ).to.have.been.calledWith(this.projectId, 1)
+              this.LimitationsManager.promises
+                .canChangeCollaboratorPrivilegeLevel
+            ).to.have.been.calledWith(
+              this.projectId,
+              this.user._id,
+              'readAndWrite'
+            )
             expect(
               this.CollaboratorsHandler.promises.setCollaboratorPrivilegeLevel
             ).to.not.have.been.called
