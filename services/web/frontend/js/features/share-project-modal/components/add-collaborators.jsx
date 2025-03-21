@@ -52,7 +52,7 @@ export default function AddCollaborators({ readOnly }) {
   const { reset, selectedItems } = multipleSelectionProps
 
   useEffect(() => {
-    if (readOnly && privileges === 'readAndWrite') {
+    if (readOnly && privileges !== 'readOnly') {
       setPrivileges('readOnly')
     }
   }, [privileges, readOnly])
@@ -171,7 +171,9 @@ export default function AddCollaborators({ readOnly }) {
               {t('can_edit')}
             </option>
             {getMeta('ol-isReviewerRoleEnabled') && (
-              <option value="review">{t('can_review')}</option>
+              <option disabled={readOnly} value="review">
+                {t('can_review')}
+              </option>
             )}
             <option value="readOnly">{t('can_view')}</option>
           </OLFormSelect>

@@ -16,6 +16,7 @@ import OLCol from '@/features/ui/components/ol/ol-col'
 import MaterialIcon from '@/shared/components/material-icon'
 import getMeta from '@/utils/meta'
 import { useUserContext } from '@/shared/context/user-context'
+import { isSplitTestEnabled } from '@/utils/splitTestUtils'
 
 type PermissionsOption = PermissionsLevel | 'removeAccess' | 'downgraded'
 
@@ -249,28 +250,41 @@ function SelectPrivilege({
   }
 
   function getPrivilegeSubtitle(privilege: PermissionsOption) {
-    if (!hasBeenDowngraded) {
-      return !canAddCollaborators &&
-        privilege === 'readAndWrite' &&
-        value !== 'readAndWrite'
-        ? t('limited_to_n_editors_per_project', {
-            count: features.collaborators,
-          })
-        : ''
+    if (!['readAndWrite', 'review'].includes(privilege)) {
+      return ''
     }
 
-    return privilege === 'readAndWrite'
-      ? t('limited_to_n_editors', {
+    if (hasBeenDowngraded) {
+      if (isSplitTestEnabled('reviewer-role')) {
+        return t('limited_to_n_editors_or_reviewers', {
           count: features.collaborators,
         })
-      : ''
+      } else {
+        return t('limited_to_n_editors', { count: features.collaborators })
+      }
+    } else if (
+      !canAddCollaborators &&
+      !['readAndWrite', 'review'].includes(value)
+    ) {
+      if (isSplitTestEnabled('reviewer-role')) {
+        return t('limited_to_n_editors_or_reviewers_per_project', {
+          count: features.collaborators,
+        })
+      } else {
+        return t('limited_to_n_editors_per_project', {
+          count: features.collaborators,
+        })
+      }
+    } else {
+      return ''
+    }
   }
 
   function isPrivilegeDisabled(privilege: PermissionsOption) {
     return (
       !canAddCollaborators &&
-      privilege === 'readAndWrite' &&
-      (hasBeenDowngraded || value !== 'readAndWrite')
+      ['readAndWrite', 'review'].includes(privilege) &&
+      (hasBeenDowngraded || !['readAndWrite', 'review'].includes(value))
     )
   }
 

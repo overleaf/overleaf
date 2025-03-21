@@ -101,6 +101,7 @@ describe('<ShareProjectModal/>', function () {
     fetchMock.get('/user/contacts', { contacts })
     window.metaAttributesCache.set('ol-user', { allowedFreeTrial: true })
     window.metaAttributesCache.set('ol-showUpgradePrompt', true)
+    window.metaAttributesCache.set('ol-isReviewerRoleEnabled', true)
   })
 
   afterEach(function () {
@@ -691,6 +692,39 @@ describe('<ShareProjectModal/>', function () {
 
     await screen.findByText('Add more editors')
     expect(screen.getByRole('option', { name: 'Can edit' }).disabled).to.be.true
+    expect(screen.getByRole('option', { name: 'Can review' }).disabled).to.be
+      .true
+    expect(screen.getByRole('option', { name: 'Can view' }).disabled).to.be
+      .false
+
+    screen.getByText(
+      /Upgrade to add more editors and access collaboration features like track changes and full project history/
+    )
+  })
+
+  it('counts reviewers towards the collaborator limit', async function () {
+    renderWithEditorContext(<ShareProjectModal {...modalProps} />, {
+      scope: {
+        project: {
+          ...project,
+          features: {
+            collaborators: 1,
+          },
+          members: [
+            {
+              _id: 'reviewer-id',
+              email: 'reviewer@example.com',
+              privileges: 'review',
+            },
+          ],
+        },
+      },
+    })
+
+    await screen.findByText('Add more editors')
+    expect(screen.getByRole('option', { name: 'Can edit' }).disabled).to.be.true
+    expect(screen.getByRole('option', { name: 'Can review' }).disabled).to.be
+      .true
     expect(screen.getByRole('option', { name: 'Can view' }).disabled).to.be
       .false
 

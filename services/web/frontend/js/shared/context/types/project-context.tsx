@@ -4,7 +4,7 @@ import { ProjectSnapshot } from '@/infrastructure/project-snapshot'
 
 export type ProjectContextMember = {
   _id: UserId
-  privileges: 'readOnly' | 'readAndWrite'
+  privileges: 'readOnly' | 'readAndWrite' | 'review'
   email: string
   first_name: string
   last_name: string

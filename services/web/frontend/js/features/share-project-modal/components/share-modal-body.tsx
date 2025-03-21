@@ -27,11 +27,11 @@ export default function ShareModalBody() {
     }
 
     const editorInvites = invites.filter(
-      invite => invite.privileges === 'readAndWrite'
+      invite => invite.privileges !== 'readOnly'
     ).length
 
     return (
-      members.filter(member => member.privileges === 'readAndWrite').length +
+      members.filter(member => member.privileges !== 'readOnly').length +
         editorInvites <
       (features.collaborators ?? 1)
     )
@@ -67,7 +67,7 @@ export default function ShareModalBody() {
     }
 
     return (
-      members.filter(member => member.privileges === 'readAndWrite').length >
+      members.filter(member => member.privileges !== 'readOnly').length >
       (features.collaborators ?? 1)
     )
   }, [features, isProjectOwner, members])
