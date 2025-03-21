@@ -58,8 +58,7 @@ export type EditorManager = {
   currentDocumentId: DocId | null
   getCurrentDocValue: () => string | null
   getCurrentDocumentId: () => DocId | null
-  startIgnoringExternalUpdates: () => void
-  stopIgnoringExternalUpdates: () => void
+  setIgnoringExternalUpdates: (value: boolean) => void
   openDocWithId: (docId: string, options?: OpenDocOptions) => void
   openDoc: (document: Doc, options?: OpenDocOptions) => void
   openDocs: OpenDocuments
@@ -228,25 +227,12 @@ export const EditorManagerProvider: FC = ({ children }) => {
     [currentDocumentId]
   )
 
-  const startIgnoringExternalUpdates = useCallback(
-    () => setIgnoringExternalUpdates(true),
-    []
-  )
-  const stopIgnoringExternalUpdates = useCallback(
-    () => setIgnoringExternalUpdates(false),
-    []
-  )
-
   const jumpToLine = useCallback(
     (options: GotoLineOptions) => {
       goToLineEmitter(options)
     },
     [goToLineEmitter]
   )
-
-  const unbindFromDocumentEvents = (document: DocumentContainer) => {
-    document.off()
-  }
 
   const attachErrorHandlerToDocument = useCallback(
     (doc: Doc, document: DocumentContainer) => {
@@ -264,12 +250,17 @@ export const EditorManagerProvider: FC = ({ children }) => {
     []
   )
 
+  const ignoringExternalUpdatesRef = useRef<boolean>(ignoringExternalUpdates)
+  useEffect(() => {
+    ignoringExternalUpdatesRef.current = ignoringExternalUpdates
+  }, [ignoringExternalUpdates])
+
   const bindToDocumentEvents = useCallback(
     (doc: Doc, document: DocumentContainer) => {
       attachErrorHandlerToDocument(doc, document)
 
       document.on('externalUpdate', (update: Update) => {
-        if (ignoringExternalUpdates) {
+        if (ignoringExternalUpdatesRef.current) {
           return
         }
         if (
@@ -290,12 +281,7 @@ export const EditorManagerProvider: FC = ({ children }) => {
         )
       })
     },
-    [
-      attachErrorHandlerToDocument,
-      ignoringExternalUpdates,
-      showGenericMessageModal,
-      t,
-    ]
+    [attachErrorHandlerToDocument, showGenericMessageModal, t]
   )
 
   const syncTimeoutRef = useRef<number | null>(null)
@@ -383,7 +369,7 @@ export const EditorManagerProvider: FC = ({ children }) => {
         debugConsole.log('[openNewDocument] Leaving existing open doc...')
 
         // Do not trigger any UI changes from remote operations
-        unbindFromDocumentEvents(currentDocument)
+        currentDocument.off()
 
         // Keep listening for out-of-sync and similar errors.
         attachErrorHandlerToDocument(doc, currentDocument)
@@ -692,8 +678,7 @@ export const EditorManagerProvider: FC = ({ children }) => {
       currentDocumentId,
       getCurrentDocValue,
       getCurrentDocumentId,
-      startIgnoringExternalUpdates,
-      stopIgnoringExternalUpdates,
+      setIgnoringExternalUpdates,
       openDocWithId,
       openDoc,
       openDocs,
@@ -715,8 +700,7 @@ export const EditorManagerProvider: FC = ({ children }) => {
       currentDocumentId,
       getCurrentDocValue,
       getCurrentDocumentId,
-      startIgnoringExternalUpdates,
-      stopIgnoringExternalUpdates,
+      setIgnoringExternalUpdates,
       openDocWithId,
       openDoc,
       openDocs,

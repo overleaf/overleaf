@@ -21,7 +21,7 @@ import useEventListener from '@/shared/hooks/use-event-listener'
 export const ReferencesContext = createContext<
   | {
       referenceKeys: Set<string>
-      indexAllReferences: (shouldBroadcast: boolean) => void
+      indexAllReferences: (shouldBroadcast: boolean) => Promise<void>
     }
   | undefined
 >(undefined)
@@ -38,8 +38,8 @@ export const ReferencesProvider: FC = ({ children }) => {
   >({})
 
   const indexAllReferences = useCallback(
-    (shouldBroadcast: boolean) => {
-      postJSON(`/project/${projectId}/references/indexAll`, {
+    async (shouldBroadcast: boolean) => {
+      return postJSON(`/project/${projectId}/references/indexAll`, {
         body: {
           shouldBroadcast,
         },

@@ -4,7 +4,6 @@ import OLSpinner, {
   OLSpinnerSize,
 } from '@/features/ui/components/ol/ol-spinner'
 import { isBootstrap5 } from '@/features/utils/bootstrap-5'
-import { setTimeout } from '@/utils/window'
 import classNames from 'classnames'
 
 function LoadingSpinner({
@@ -31,7 +30,7 @@ function LoadingSpinner({
       return
     }
 
-    const timer = setTimeout(() => {
+    const timer = window.setTimeout(() => {
       setShow(true)
     }, delay)
 
