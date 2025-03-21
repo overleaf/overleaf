@@ -31,8 +31,8 @@ export default function CompilerSetting() {
 
   return (
     <DropdownSetting
-      id="imageName"
-      label={t('tex_live_version')}
+      id="compiler"
+      label={t('compiler')}
       description={t('the_latex_engine_used_for_compiling')}
       disabled={!write}
       options={OPTIONS}

@@ -31,8 +31,8 @@ export default function ImageNameSetting() {
 
   return (
     <DropdownSetting
-      id="compiler"
-      label={t('compiler')}
+      id="imageName"
+      label={t('tex_live_version')}
       description={t('the_version_of_tex_live_used_for_compiling')}
       disabled={!write}
       options={options}
