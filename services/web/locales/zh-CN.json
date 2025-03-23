@@ -292,7 +292,6 @@
   "column_width_is_custom_click_to_resize": "列宽为默认值，单击以调整大小",
   "column_width_is_x_click_to_resize": "列宽为 __width__。 单击以调整大小",
   "comment": "评论",
-  "commit": "提交",
   "common": "通用",
   "common_causes_of_compile_timeouts_include": "常见的导致编译超时的原因包括",
   "commons_plan_tooltip": "由于您与 __institution__ 的隶属关系，您加入了 __plan__ 计划。 单击以了解如何充分利用 Overleaf 高级功能。",

@@ -90,7 +90,6 @@
   "collaborator": "Совместная работа",
   "collabs_per_proj": "Максимальное число соавторов на проект: __collabcount__",
   "comment": "Комментарии",
-  "commit": "Фиксировать",
   "common": "Общие",
   "compile_larger_projects": "Компиляция больших проектов",
   "compile_mode": "Режим компиляции",

@@ -232,7 +232,6 @@
   "collaborator": "Colaborador",
   "collabs_per_proj": "__collabcount__ colaboradores por proyecto",
   "comment": "Comentar",
-  "commit": "Commit",
   "common": "Común",
   "compile_error_entry_description": "Un error ha impedido la compilación de este proyecto",
   "compile_error_handling": "Tratamiento de errores de compilación",
