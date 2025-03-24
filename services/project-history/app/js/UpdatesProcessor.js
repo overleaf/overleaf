@@ -205,7 +205,7 @@ export function resyncProject(projectId, callback) {
             queueSize,
             flushError,
             (recordError, failure) => {
-              if (OError.tag(recordError)) {
+              if (recordError) {
                 logger.error(
                   { err: recordError, projectId },
                   'failed to record error'
