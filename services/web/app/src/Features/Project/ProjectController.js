@@ -868,6 +868,8 @@ const _ProjectController = {
         editorThemes: THEME_LIST,
         legacyEditorThemes: LEGACY_THEME_LIST,
         maxDocLength: Settings.max_doc_length,
+        maxReconnectGracefullyIntervalMs:
+          Settings.maxReconnectGracefullyIntervalMs,
         brandVariation,
         allowedImageNames,
         gitBridgePublicBaseUrl: Settings.gitBridgePublicBaseUrl,

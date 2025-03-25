@@ -660,6 +660,11 @@ module.exports = {
   gracefulShutdownDelayInMs:
     parseInt(process.env.GRACEFUL_SHUTDOWN_DELAY_SECONDS ?? '5', 10) * seconds,
 
+  maxReconnectGracefullyIntervalMs: parseInt(
+    process.env.MAX_RECONNECT_GRACEFULLY_INTERVAL_MS ?? '30000',
+    10
+  ),
+
   // Expose the hostname in the `X-Served-By` response header
   exposeHostname: process.env.EXPOSE_HOSTNAME === 'true',
 

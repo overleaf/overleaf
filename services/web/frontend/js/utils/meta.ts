@@ -151,6 +151,7 @@ export interface Meta {
   'ol-managers': MinimalUser[]
   'ol-mathJaxPath': string
   'ol-maxDocLength': number
+  'ol-maxReconnectGracefullyIntervalMs': number
   'ol-memberGroupSubscriptions': MemberGroupSubscription[]
   'ol-memberOfSSOEnabledGroups': GroupSSOLinkingStatus[]
   'ol-members': MinimalUser[]
