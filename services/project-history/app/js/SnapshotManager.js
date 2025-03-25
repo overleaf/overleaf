@@ -73,7 +73,11 @@ async function getRangesSnapshot(projectId, version, pathname) {
     })
   }
   if (!file.isEditable()) {
-    throw new Error('File is not editable')
+    // A binary file has no tracked changes or comments
+    return {
+      changes: [],
+      comments: [],
+    }
   }
   const historyId = await WebApiManager.promises.getHistoryId(projectId)
   await file.load('eager', HistoryStoreManager.getBlobStore(historyId))
