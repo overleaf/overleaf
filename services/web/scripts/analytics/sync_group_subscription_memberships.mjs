@@ -8,7 +8,7 @@ import mongodb from 'mongodb-legacy'
 
 const { ObjectId } = mongodb
 
-let FETCH_LIMIT, COMMIT, VERBOSE
+let BATCH_SIZE, COMMIT, VERBOSE
 
 async function main() {
   console.log('## Syncing group subscription memberships...')
@@ -29,18 +29,25 @@ async function main() {
 }
 
 async function checkActiveSubscriptions() {
-  let totalSubscriptionsChecked = 0
   let subscriptions
   const processedSubscriptionIds = new Set()
+
+  const cursor = Subscription.find(
+    { groupPlan: true },
+    { recurlySubscription_id: 1, member_ids: 1 }
+  )
+    .sort('_id')
+    .cursor()
+
   do {
-    subscriptions = await Subscription.find(
-      { groupPlan: true },
-      { recurlySubscription_id: 1, member_ids: 1 }
-    )
-      .sort('_id')
-      .skip(totalSubscriptionsChecked)
-      .limit(FETCH_LIMIT)
-      .lean()
+    subscriptions = []
+    while (subscriptions.length <= BATCH_SIZE) {
+      const next = await cursor.next()
+      if (!next) {
+        break
+      }
+      subscriptions.push(next)
+    }
 
     if (subscriptions.length) {
       const groupIds = subscriptions.map(sub => sub._id)
@@ -61,25 +68,28 @@ async function checkActiveSubscriptions() {
           processedSubscriptionIds.add(subscriptionId)
         }
       }
-      totalSubscriptionsChecked += subscriptions.length
     }
   } while (subscriptions.length > 0)
 }
 
 async function checkDeletedSubscriptions() {
-  let totalDeletedSubscriptionsChecked = 0
   let deletedSubscriptions
   const processedSubscriptionIds = new Set()
+
+  const cursor = DeletedSubscription.find(
+    { 'subscription.groupPlan': true },
+    { subscription: 1 }
+  ).cursor()
+
   do {
-    deletedSubscriptions = (
-      await DeletedSubscription.find(
-        { 'subscription.groupPlan': true },
-        { subscription: 1 }
-      )
-        .sort('deletedAt')
-        .skip(totalDeletedSubscriptionsChecked)
-        .limit(FETCH_LIMIT)
-    ).map(sub => sub.toObject().subscription)
+    deletedSubscriptions = []
+    while (deletedSubscriptions.length <= BATCH_SIZE) {
+      const next = await cursor.next()
+      if (!next) {
+        break
+      }
+      deletedSubscriptions.push(next.toObject().subscription)
+    }
 
     if (deletedSubscriptions.length) {
       const groupIds = deletedSubscriptions.map(sub => sub._id.toString())
@@ -101,7 +111,6 @@ async function checkDeletedSubscriptions() {
           processedSubscriptionIds.add(subscriptionId)
         }
       }
-      totalDeletedSubscriptionsChecked += deletedSubscriptions.length
     }
   } while (deletedSubscriptions.length > 0)
 }
@@ -250,7 +259,7 @@ async function fetchBigQueryMembershipStatuses(groupIds) {
 
 const setup = () => {
   const argv = minimist(process.argv.slice(2))
-  FETCH_LIMIT = argv.fetch ? argv.fetch : 100
+  BATCH_SIZE = argv.batchSize ? parseInt(argv.batchSize, 10) : 100
   COMMIT = argv.commit !== undefined
   VERBOSE = argv.debug !== undefined
   if (!COMMIT) {
