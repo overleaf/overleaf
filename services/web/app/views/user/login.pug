@@ -10,8 +10,8 @@ block content
 				.col-md-6.col-md-offset-3.col-lg-4.col-lg-offset-4
 					.card
 						.page-header
-							if title
-								h1 !{title}
+							if login_support_title
+								h1 !{login_support_title}
 							else
 								h1 #{translate("log_in")}					
 						form(data-ol-async-form, name="loginForm", action='/login', method="POST")

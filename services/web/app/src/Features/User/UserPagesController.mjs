@@ -238,6 +238,7 @@ const UserPagesController = {
     }
     res.render('user/login', {
       title: Settings.nav?.login_support_title || 'login',
+      login_support_title: Settings.nav?.login_support_title,
       login_support_text: Settings.nav?.login_support_text,
     })
   },
