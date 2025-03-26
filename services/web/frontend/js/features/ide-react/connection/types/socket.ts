@@ -34,7 +34,6 @@ export type Socket = {
     connected: boolean
     connecting: boolean
     connect(): void
-    onDisconnect(reason: string): void
     disconnect(): void
     sessionid: string
     transport?: {
@@ -43,4 +42,5 @@ export type Socket = {
     transports: string[]
   }
   disconnect(): void
+  forceDisconnectWithoutEvent(): void
 }

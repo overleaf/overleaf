@@ -11,11 +11,12 @@ class SocketShimBase {
   constructor(socket) {
     this._socket = socket
   }
+
+  forceDisconnectWithoutEvent() {}
 }
 const transparentMethods = [
   'connect',
   'disconnect',
-  'onDisconnect',
   'emit',
   'on',
   'removeListener',
@@ -64,6 +65,62 @@ class SocketShimV0 extends SocketShimBase {
   constructor(socket) {
     super(socket)
     this.socket = this._socket.socket
+    const self = this
+    Object.defineProperty(this.socket, 'transport', {
+      get() {
+        return self._transport
+      },
+      set(v) {
+        self.forceDisconnectWithoutEvent()
+        self._transport = v
+      },
+    })
+  }
+
+  forceDisconnectWithoutEvent() {
+    clearTimeout(this.socket.heartbeatTimeoutTimer)
+    if (this._transport) this.forceCloseTransport(this._transport)
+  }
+
+  forceCloseTransport(transport) {
+    transport.clearTimeouts()
+    if (transport instanceof io.Transport.websocket) {
+      // retry closing
+      transport.websocket.onopen = transport.websocket.onmessage = () =>
+        transport.websocket.close()
+      // mute close/error handler
+      transport.websocket.onclose = transport.websocket.onerror = () => {}
+      // disconnect
+      try {
+        transport.websocket.close()
+      } catch {}
+    } else if (transport instanceof io.Transport['xhr-polling']) {
+      // mute data/close handler and block new polling GET requests
+      transport.onData = transport.onClose = transport.get = () => {}
+      // abort pending long-polling/POST request
+      for (const xhr of [transport.xhr, transport.sendXHR]) {
+        if (!xhr) continue // not pending
+        // mute xhr callbacks
+        xhr.onreadystatechange = xhr.onload = xhr.onerror = () => {}
+        try {
+          xhr.abort()
+        } catch {}
+      }
+      transport.xhr = transport.sendXHR = null
+      // Mark long-polling client as disconnected to avoid "ghost" connected client.
+      fetch(transport.prepareUrl() + '/?disconnect=1', {
+        // Let the request continue after navigating away from or reloading the page.
+        keepalive: true,
+      })
+        // Avoid leaving a dangling response on the wire.
+        .then(res => res.text())
+        .catch(() => {})
+    } else {
+      try {
+        transport.close()
+      } catch {}
+      debugConsole.warn('unexpected socket.io transport', transport)
+    }
   }
 }
 

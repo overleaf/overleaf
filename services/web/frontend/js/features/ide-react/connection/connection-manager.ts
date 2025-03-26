@@ -25,8 +25,6 @@ const MAX_RECONNECT_GRACEFULLY_INTERVAL_MS = getMeta(
   'ol-maxReconnectGracefullyIntervalMs'
 )
 
-const BEFORE_RECONNECT = 'beforeReconnect'
-
 const MAX_RETRY_CONNECT = 5
 const RETRY_WEBSOCKET = 3
 
@@ -117,7 +115,7 @@ export class ConnectionManager extends EventTarget {
     }
 
     socket.on('connect', () => this.onConnect())
-    socket.on('disconnect', (reason: string) => this.onDisconnect(reason))
+    socket.on('disconnect', () => this.onDisconnect())
     socket.on('error', err => this.onConnectError(err))
     socket.on('connect_failed', err => this.onConnectError(err))
     socket.on('joinProjectResponse', body => this.onJoinProjectResponse(body))
@@ -276,8 +274,7 @@ export class ConnectionManager extends EventTarget {
     this.websocketFailureCount = 0
   }
 
-  private onDisconnect(reason: string) {
-    if (reason === BEFORE_RECONNECT) return // triggered from reconnect, ignore.
+  private onDisconnect() {
     this.connectionAttempt = null
     if (this.externalHeartbeatInterval) {
       window.clearInterval(this.externalHeartbeatInterval)
@@ -446,7 +443,7 @@ export class ConnectionManager extends EventTarget {
     if (this.socket.socket.connecting || this.socket.socket.connected) {
       // Ensure the old transport has been cleaned up.
       // Socket.disconnect() does not accept a parameter. Go one level deeper.
-      this.socket.socket.onDisconnect(BEFORE_RECONNECT)
+      this.socket.forceDisconnectWithoutEvent()
     }
     this.socket.socket.connect()
   }
