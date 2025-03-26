@@ -18,6 +18,7 @@ const toolbarState = StateField.define<boolean>({
 export function createToolbarPanel() {
   const dom = document.createElement('div')
   dom.classList.add('ol-cm-toolbar-portal')
+  dom.id = 'ol-cm-toolbar-portal'
   return { dom, top: true }
 }
 
