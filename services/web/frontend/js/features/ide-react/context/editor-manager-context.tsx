@@ -634,13 +634,6 @@ export const EditorManagerProvider: FC = ({ children }) => {
   )
 
   useEventListener(
-    'flush-changes',
-    useCallback(() => {
-      openDocs.flushAll()
-    }, [openDocs])
-  )
-
-  useEventListener(
     'blur',
     useCallback(() => {
       openDocs.flushAll()
