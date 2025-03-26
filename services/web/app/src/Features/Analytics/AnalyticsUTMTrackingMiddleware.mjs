@@ -53,6 +53,17 @@ function recordUTMTags() {
   }
 }
 
+const processCustomTagsMiddleware = (req, res, next) => {
+  if (req.query['custom-utm'] && req.query['utm-redirect']) {
+    return res.redirect(
+      req.query['utm-redirect'] + `?custom_utm=${req.query['custom-utm']}`
+    )
+  }
+}
+
+const processCustomTags = () => recordCustomTagsMiddleware
+
 export default {
   recordUTMTags,
+  processCustomTags,
 }
