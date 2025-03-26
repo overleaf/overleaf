@@ -1,5 +1,10 @@
 import config from 'config'
 import { verifyProjectWithErrorContext } from '../storage/lib/backupVerifier.mjs'
+import {
+  measureNeverBackedUpProjects,
+  measurePendingChangesBeforeTime,
+} from './ProjectMetrics.mjs'
+import { getEndDateForRPO, RPO } from './utils.mjs'
 
 /** @type {Array<string>} */
 const HEALTH_CHECK_PROJECTS = JSON.parse(config.get('healthCheckProjects'))
@@ -21,4 +26,7 @@ export async function healthCheck() {
   for (const historyId of HEALTH_CHECK_PROJECTS) {
     await verifyProjectWithErrorContext(historyId)
   }
+
+  await measurePendingChangesBeforeTime(getEndDateForRPO())
+  await measureNeverBackedUpProjects(RPO)
 }
