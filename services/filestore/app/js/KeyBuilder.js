@@ -20,10 +20,10 @@ function addCachingToKey(key, opts) {
     key = `${key}format-${opts.format}`
   }
   if (opts.style && !opts.format) {
-    key = `${key}style-${opts.style}`
+    key = key + 'style-' + opts.style
   }
   if (opts.style && opts.format) {
-    key = `${key}format-${opts.format}-style-${opts.style}`
+    key += `format-${opts.format}-style-${opts.style}`
   }
 
   return key
