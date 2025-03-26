@@ -12,6 +12,13 @@ export function objectIdFromDate(time) {
 }
 
 /**
+ * @return {Date}
+ */
+export function getEndDateForRPO() {
+  return new Date(Date.now() - RPO)
+}
+
+/**
  * Creates a startDate, endDate pair that checks a period of time before the RPO horizon
  *
  * @param {number} offset - How many seconds we should check

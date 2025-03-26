@@ -15,18 +15,11 @@ import path from 'node:path'
 import projectKey from './project_key.js'
 import streams from './streams.js'
 import objectPersistor from '@overleaf/object-persistor'
-import { RPO } from '../../backupVerifier/utils.mjs'
+import { getEndDateForRPO } from '../../backupVerifier/utils.mjs'
 
 /**
  * @typedef {import("@overleaf/object-persistor/src/PerProjectEncryptedS3Persistor.js").CachedPerProjectEncryptedS3Persistor} CachedPerProjectEncryptedS3Persistor
  */
-
-/**
- * @return {Date}
- */
-export function getEndDateForRPO() {
-  return new Date(Date.now() - RPO)
-}
 
 /**
  * @param {string} historyId
