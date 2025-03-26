@@ -10,6 +10,8 @@ import { ReCaptcha2 } from '../../../../shared/components/recaptcha-2'
 import { useRecaptcha } from '../../../../shared/hooks/use-recaptcha'
 
 import { postJSON } from '../../../../infrastructure/fetch-json'
+import RecaptchaConditions from '@/shared/components/recaptcha-conditions'
+import getMeta from '@/utils/meta'
 
 type AddSecondaryEmailError = {
   name: string
@@ -109,6 +111,11 @@ export function AddSecondaryEmailPrompt() {
           </p>
         </form>
       </Interstitial>
+      {!getMeta('ol-ExposedSettings').recaptchaDisabled?.addEmail && (
+        <div className="mt-5">
+          <RecaptchaConditions />
+        </div>
+      )}
     </>
   )
 }
