@@ -102,6 +102,10 @@ const Features = {
         throw new Error(`unknown feature: ${feature}`)
     }
   },
+
+  featureHasHyphen(feat) {
+    return feat.includes('-')
+  },
 }
 
 module.exports = Features
