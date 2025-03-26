@@ -212,11 +212,11 @@ export function createNewFile() {
 
 export function toggleTrackChanges(state: boolean) {
   cy.findByText('Review').click()
-  cy.get('.rp-tc-state-collapse').then(el => {
-    // TODO: simplify this in the frontend?
-    if (el.hasClass('rp-tc-state-collapse-on')) {
-      // make track-changes switches visible
-      cy.get('.rp-tc-state-collapse').click()
+  cy.get('.track-changes-menu-button').then(el => {
+    // when the menu is expanded renders the `expand_more` icon,
+    // and the `chevron_right` icon when it's collapsed
+    if (!el.text().includes('expand_more')) {
+      el.click()
     }
   })
 
@@ -241,5 +241,5 @@ export function toggleTrackChanges(state: boolean) {
         cy.wait(alias)
       })
     })
-  cy.findByText('Review').click()
+  cy.contains('.toolbar-item', 'Review').click()
 }

@@ -149,10 +149,10 @@ describe('editor', () => {
       openFile(fileName, 'static')
 
       cy.log('reject changes')
-      cy.findByText('Review').click()
+      cy.contains('.toolbar-item', 'Review').click()
       cy.get('.cm-content').should('not.contain.text', oldContent)
-      cy.findByText('Reject').click({ force: true })
-      cy.findByText('Review').click()
+      cy.findByText('Reject change').click({ force: true })
+      cy.contains('.toolbar-item', 'Review').click()
 
       cy.log('recompile to force flush')
       recompile()
@@ -205,10 +205,10 @@ describe('editor', () => {
       openFile(fileName, 'static')
 
       cy.log('reject changes')
-      cy.findByText('Review').click()
+      cy.contains('.toolbar-item', 'Review').click()
       cy.get('.cm-content').should('not.contain.text', oldContent)
-      cy.findAllByText('Reject').first().click({ force: true })
-      cy.findByText('Review').click()
+      cy.findAllByText('Reject change').first().click({ force: true })
+      cy.contains('.toolbar-item', 'Review').click()
 
       cy.log('recompile to force flush')
       recompile()
