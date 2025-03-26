@@ -200,6 +200,14 @@
   }
 }
 
+#settings-page-root {
+  .recaptcha-branding {
+    font-size: var(--font-size-01);
+    text-align: left;
+    padding: 0 0 var(--spacing-04);
+  }
+}
+
 #settings-page-root,
 #action-project-modal {
   &#settings-page-root .confirm-email-form {

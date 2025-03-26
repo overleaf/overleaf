@@ -19,6 +19,7 @@ import { ReCaptcha2 } from '../../../../shared/components/recaptcha-2'
 import { useRecaptcha } from '../../../../shared/hooks/use-recaptcha'
 import OLCol from '@/features/ui/components/ol/ol-col'
 import { ConfirmEmailForm } from '@/features/settings/components/emails/confirm-email-form'
+import RecaptchaConditions from '@/shared/components/recaptcha-conditions'
 
 function AddEmail() {
   const { t } = useTranslation()
@@ -161,6 +162,15 @@ function AddEmail() {
       />
     </>
   )
+  const recaptchaConditions = (
+    <OLCol>
+      <Cell>
+        <div className="affiliations-table-cell-tabbed">
+          <RecaptchaConditions />
+        </div>
+      </Cell>
+    </OLCol>
+  )
 
   if (!isValidEmail(newEmail)) {
     return (
@@ -180,6 +190,7 @@ function AddEmail() {
               <AddNewEmailBtn email={newEmail} disabled />
             </Cell>
           </OLCol>
+          {recaptchaConditions}
         </Layout>
       </form>
     )
@@ -237,6 +248,7 @@ function AddEmail() {
             </Cell>
           </OLCol>
         )}
+        {recaptchaConditions}
       </Layout>
     </form>
   )
