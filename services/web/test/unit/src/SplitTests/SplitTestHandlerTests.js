@@ -55,11 +55,16 @@ describe('SplitTestHandler', function () {
     }
     this.SplitTestSessionHandler = {
       collectSessionStats: sinon.stub(),
+      getCachedVariant: sinon.stub(),
+      setVariantInCache: sinon.stub(),
     }
     this.SplitTestUserGetter = {
       promises: {
         getUser: sinon.stub().resolves(null),
       },
+    }
+    this.SessionManager = {
+      isUserLoggedIn: sinon.stub().returns(false),
     }
 
     this.SplitTestHandler = SandboxedModule.require(MODULE_PATH, {
@@ -72,6 +77,7 @@ describe('SplitTestHandler', function () {
         './LocalsHelper': this.LocalsHelper,
         './SplitTestSessionHandler': this.SplitTestSessionHandler,
         './SplitTestUserGetter': this.SplitTestUserGetter,
+        '../Authentication/SessionManager': this.SessionManager,
         '@overleaf/settings': this.Settings,
       },
     })
@@ -105,6 +111,7 @@ describe('SplitTestHandler', function () {
         },
       }
       this.SplitTestUserGetter.promises.getUser.resolves(this.user)
+      this.SessionManager.isUserLoggedIn.returns(true)
       this.assignments =
         await this.SplitTestHandler.promises.getActiveAssignmentsForUser(
           this.user._id
