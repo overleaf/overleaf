@@ -5,6 +5,7 @@ const DocumentUpdaterHandler = require('../DocumentUpdater/DocumentUpdaterHandle
 const ProjectGetter = require('../Project/ProjectGetter')
 const ProjectUpdateHandler = require('../Project/ProjectUpdateHandler')
 const { Project } = require('../../models/Project')
+const { ObjectId } = require('mongodb-legacy')
 const Modules = require('../../infrastructure/Modules')
 const { READ_PREFERENCE_SECONDARY } = require('../../infrastructure/mongodb')
 const { callbackifyAll } = require('@overleaf/promise-utils')
@@ -61,6 +62,8 @@ const InactiveProjectManager = {
       projects = await Project.find({
         lastOpened: { $not: { $gt: oldProjectDate } },
       })
+        .where('_id')
+        .lt(ObjectId.createFromTime(oldProjectDate / 1000))
         .where('active')
         .equals(true)
         .select('_id')
