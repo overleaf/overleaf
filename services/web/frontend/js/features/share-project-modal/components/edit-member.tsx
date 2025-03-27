@@ -73,7 +73,10 @@ export default function EditMember({
   }
 
   function shouldWarnMember() {
-    return hasExceededCollaboratorLimit && privileges === 'readAndWrite'
+    return (
+      hasExceededCollaboratorLimit &&
+      ['readAndWrite', 'review'].includes(privileges)
+    )
   }
 
   function commitPrivilegeChange(newPrivileges: PermissionsOption) {
@@ -145,12 +148,16 @@ export default function EditMember({
           <div className="project-member-email-icon">
             <MaterialIcon
               type={
-                shouldWarnMember() || member.pendingEditor
+                shouldWarnMember() ||
+                member.pendingEditor ||
+                member.pendingReviewer
                   ? 'warning'
                   : 'person'
               }
               className={
-                shouldWarnMember() || member.pendingEditor
+                shouldWarnMember() ||
+                member.pendingEditor ||
+                member.pendingReviewer
                   ? 'project-member-warning'
                   : undefined
               }
@@ -159,6 +166,11 @@ export default function EditMember({
               {member.email}
               {member.pendingEditor && (
                 <div className="subtitle">{t('view_only_downgraded')}</div>
+              )}
+              {member.pendingReviewer && (
+                <div className="subtitle">
+                  {t('view_only_reviewer_downgraded')}
+                </div>
               )}
               {shouldWarnMember() && (
                 <div className="subtitle">

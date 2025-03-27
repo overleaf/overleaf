@@ -9,6 +9,7 @@ export type ProjectContextMember = {
   first_name: string
   last_name: string
   pendingEditor?: boolean
+  pendingReviewer?: boolean
 }
 
 export type ProjectContextValue = {

@@ -561,7 +561,7 @@ describe('CollaboratorsInviteHandler', function () {
           'editor-moved-to-pending',
           null,
           null,
-          { userId: this.userId.toString() }
+          { userId: this.userId.toString(), role: 'editor' }
         )
         this.CollaboratorsHandler.promises.addUserIdToProject.should.have.been.calledWith(
           this.projectId,

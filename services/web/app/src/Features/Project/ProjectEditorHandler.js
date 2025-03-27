@@ -107,6 +107,7 @@ module.exports = ProjectEditorHandler = {
       privileges: member.privilegeLevel,
       signUpDate: user.signUpDate,
       pendingEditor: member.pendingEditor,
+      pendingReviewer: member.pendingReviewer,
     }
   },
 

@@ -84,9 +84,8 @@ async function canChangeCollaboratorPrivilegeLevel(
       projectId
     )
   if (
-    [PrivilegeLevels.READ_AND_WRITE, PrivilegeLevels.REVIEW].includes(
-      currentPrivilegeLevel
-    )
+    currentPrivilegeLevel === PrivilegeLevels.READ_AND_WRITE ||
+    currentPrivilegeLevel === PrivilegeLevels.REVIEW
   ) {
     // Current collaborator already takes a slot, so changing the privilege
     // level won't increase the collaborator count

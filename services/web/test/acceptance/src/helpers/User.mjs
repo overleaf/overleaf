@@ -992,6 +992,10 @@ class User {
       updateOp = {
         $addToSet: { readOnly_refs: user._id, pendingEditor_refs: user._id },
       }
+    } else if (privileges === 'pendingReviewer') {
+      updateOp = {
+        $addToSet: { readOnly_refs: user._id, pendingReviewer_refs: user._id },
+      }
     } else if (privileges === 'review') {
       updateOp = {
         $addToSet: { reviewer_refs: user._id },

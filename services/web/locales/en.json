@@ -2522,6 +2522,7 @@
   "view_more": "View more",
   "view_only_access": "View-only access",
   "view_only_downgraded": "View only. Upgrade to restore edit access.",
+  "view_only_reviewer_downgraded": "View only. Upgrade to restore review access.",
   "view_options": "View options",
   "view_pdf": "View PDF",
   "view_source": "View Source",

@@ -41,6 +41,7 @@ const ProjectSchema = new Schema(
     reviewer_refs: [{ type: ObjectId, ref: 'User' }],
     readOnly_refs: [{ type: ObjectId, ref: 'User' }],
     pendingEditor_refs: [{ type: ObjectId, ref: 'User' }],
+    pendingReviewer_refs: [{ type: ObjectId, ref: 'User' }],
     rootDoc_id: { type: ObjectId },
     rootFolder: [FolderSchema],
     mainBibliographyDoc_id: { type: ObjectId },

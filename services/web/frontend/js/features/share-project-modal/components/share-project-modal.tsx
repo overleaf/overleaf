@@ -78,9 +78,12 @@ const ShareProjectModal = React.memo(function ShareProjectModal({
         return false
       }
       return (
-        project.members.filter(member => member.privileges === 'readAndWrite')
-          .length > (project.features.collaborators ?? 1) ||
-        project.members.some(member => member.pendingEditor)
+        project.members.filter(member =>
+          ['readAndWrite', 'review'].includes(member.privileges)
+        ).length > (project.features.collaborators ?? 1) ||
+        project.members.some(
+          member => member.pendingEditor || member.pendingReviewer
+        )
       )
     }
 

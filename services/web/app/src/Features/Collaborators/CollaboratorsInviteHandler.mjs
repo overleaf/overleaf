@@ -152,33 +152,52 @@ const CollaboratorsInviteHandler = {
     const project = await ProjectGetter.promises.getProject(projectId, {
       owner_ref: 1,
     })
-    const pendingEditor =
-      invite.privileges === PrivilegeLevels.READ_AND_WRITE &&
-      !(await LimitationsManager.promises.canAcceptEditCollaboratorInvite(
-        project._id
-      ))
-    if (pendingEditor) {
-      logger.debug(
-        { projectId, userId: user._id },
-        'no collaborator slots available, user added as read only (pending editor)'
+
+    let privilegeLevel = invite.privileges
+    const opts = {}
+    if (
+      [PrivilegeLevels.READ_AND_WRITE, PrivilegeLevels.REVIEW].includes(
+        invite.privileges
       )
-      await ProjectAuditLogHandler.promises.addEntry(
-        projectId,
-        'editor-moved-to-pending', // controller already logged accept-invite
-        null,
-        null,
-        {
-          userId: user._id.toString(),
+    ) {
+      const allowed =
+        await LimitationsManager.promises.canAcceptEditCollaboratorInvite(
+          project._id
+        )
+      if (!allowed) {
+        privilegeLevel = PrivilegeLevels.READ_ONLY
+        if (invite.privileges === PrivilegeLevels.READ_AND_WRITE) {
+          opts.pendingEditor = true
+        } else if (invite.privileges === PrivilegeLevels.REVIEW) {
+          opts.pendingReviewer = true
         }
-      )
+
+        logger.debug(
+          { projectId, userId: user._id, privileges: invite.privileges },
+          'no collaborator slots available, user added as read only (pending editor)'
+        )
+        await ProjectAuditLogHandler.promises.addEntry(
+          projectId,
+          'editor-moved-to-pending', // controller already logged accept-invite
+          null,
+          null,
+          {
+            userId: user._id.toString(),
+            role:
+              invite.privileges === PrivilegeLevels.REVIEW
+                ? 'reviewer'
+                : 'editor',
+          }
+        )
+      }
     }
 
     await CollaboratorsHandler.promises.addUserIdToProject(
       projectId,
       invite.sendingUserId,
       user._id,
-      pendingEditor ? PrivilegeLevels.READ_ONLY : invite.privileges,
-      { pendingEditor }
+      privilegeLevel,
+      opts
     )
 
     // Remove invite

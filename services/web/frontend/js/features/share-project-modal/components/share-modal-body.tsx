@@ -41,8 +41,10 @@ export default function ShareModalBody() {
   // for moving between warning and info notification states etc.
   const somePendingEditorsResolved = useMemo(() => {
     return (
-      members.some(member => member.privileges === 'readAndWrite') &&
-      members.some(member => member.pendingEditor)
+      members.some(member =>
+        ['readAndWrite', 'review'].includes(member.privileges)
+      ) &&
+      members.some(member => member.pendingEditor || member.pendingReviewer)
     )
   }, [members])
 
@@ -54,7 +56,9 @@ export default function ShareModalBody() {
     if (features.collaborators === -1) {
       return false
     }
-    return members.some(member => member.pendingEditor)
+    return members.some(
+      member => member.pendingEditor || member.pendingReviewer
+    )
   }, [features, isProjectOwner, members])
 
   const hasExceededCollaboratorLimit = useMemo(() => {
@@ -76,8 +80,13 @@ export default function ShareModalBody() {
     return [
       ...members.filter(member => member.privileges === 'readAndWrite'),
       ...members.filter(member => member.pendingEditor),
+      ...members.filter(member => member.privileges === 'review'),
+      ...members.filter(member => member.pendingReviewer),
       ...members.filter(
-        member => !member.pendingEditor && member.privileges !== 'readAndWrite'
+        member =>
+          !member.pendingEditor &&
+          !member.pendingReviewer &&
+          !['readAndWrite', 'review'].includes(member.privileges)
       ),
     ]
   }, [members])
@@ -104,7 +113,9 @@ export default function ShareModalBody() {
             key={member._id}
             member={member}
             hasExceededCollaboratorLimit={hasExceededCollaboratorLimit}
-            hasBeenDowngraded={member.pendingEditor ?? false}
+            hasBeenDowngraded={Boolean(
+              member.pendingEditor || member.pendingReviewer
+            )}
             canAddCollaborators={canAddCollaborators}
           />
         ) : (
