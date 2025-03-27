@@ -1816,6 +1816,7 @@
   "resolve_comment_error_message": "There was an error resolving the comment. Please try again in a few moments.",
   "resolve_comment_error_title": "Resolve Comment Error",
   "resolved_comments": "Resolved comments",
+  "resources": "Resources",
   "restore": "Restore",
   "restore_file": "Restore file",
   "restore_file_confirmation_message": "Your current file will restore to the version from __date__ at __time__.",
