@@ -21,15 +21,13 @@ export async function measurePendingChangesBeforeTime(beforeTime) {
 
 /**
  *
- * @param {number} graceSeconds - Number of seconds projects are allowed before they must be backed up.
+ * @param {Date} graceTime
  * @return {Promise<void>}
  */
-export async function measureNeverBackedUpProjects(graceSeconds) {
-  const now = new Date()
-  const startOfGracePeriod = new Date(now - graceSeconds * 1000)
+export async function measureNeverBackedUpProjects(graceTime) {
   const neverBackedUpCount = await projectsCollection.countDocuments({
     'overleaf.backup.lastBackedUpVersion': null,
-    _id: { $lt: objectIdFromDate(startOfGracePeriod) },
+    _id: { $lt: objectIdFromDate(graceTime) },
   })
   Metrics.gauge('backup_verification_never_backed_up', neverBackedUpCount)
 }

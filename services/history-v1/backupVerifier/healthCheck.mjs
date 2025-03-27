@@ -27,6 +27,6 @@ export async function healthCheck() {
     await verifyProjectWithErrorContext(historyId)
   }
 
-  await measurePendingChangesBeforeTime(getEndDateForRPO())
-  await measureNeverBackedUpProjects(RPO)
+  await measurePendingChangesBeforeTime(getEndDateForRPO(2))
+  await measureNeverBackedUpProjects(getEndDateForRPO(2))
 }

@@ -12,10 +12,11 @@ export function objectIdFromDate(time) {
 }
 
 /**
+ * @param {number} [factor] - Multiply RPO by this factor, default is 1
  * @return {Date}
  */
-export function getEndDateForRPO() {
-  return new Date(Date.now() - RPO)
+export function getEndDateForRPO(factor = 1) {
+  return new Date(Date.now() - RPO * factor)
 }
 
 /**
