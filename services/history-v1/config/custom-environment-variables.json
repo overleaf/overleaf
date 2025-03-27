@@ -66,6 +66,7 @@
   },
   "healthCheckBlobs": "HEALTH_CHECK_BLOBS",
   "healthCheckProjects": "HEALTH_CHECK_PROJECTS",
+  "backupRPOInMS": "BACKUP_RPO_IN_MS",
   "minSoftDeletionPeriodDays": "MIN_SOFT_DELETION_PERIOD_DAYS",
   "mongo": {
     "uri": "MONGO_CONNECTION_STRING"
