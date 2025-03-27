@@ -3,7 +3,6 @@ import { Trans, useTranslation } from 'react-i18next'
 import { memo, useCallback, useEffect } from 'react'
 import { useDetachCompileContext } from '@/shared/context/detach-compile-context'
 import StartFreeTrialButton from '@/shared/components/start-free-trial-button'
-import { useFeatureFlag } from '@/shared/context/split-test-context'
 import MaterialIcon from '@/shared/components/material-icon'
 import { useStopOnFirstError } from '@/shared/hooks/use-stop-on-first-error'
 import * as eventTracking from '@/infrastructure/event-tracking'
@@ -49,8 +48,6 @@ const CompileTimeout = memo(function CompileTimeout({
   isProjectOwner,
 }: CompileTimeoutProps) {
   const { t } = useTranslation()
-
-  const hasNewPaywallCta = useFeatureFlag('paywall-cta')
 
   useEffect(() => {
     eventTracking.sendMB('paywall-prompt', {
@@ -111,9 +108,7 @@ const CompileTimeout = memo(function CompileTimeout({
                   buttonProps={{ variant: 'secondary' }}
                   handleClick={onPaywallClick}
                 >
-                  {hasNewPaywallCta
-                    ? t('get_more_compile_time')
-                    : t('try_for_free')}
+                  {t('try_for_free')}
                 </StartFreeTrialButton>
               </div>
             )}
