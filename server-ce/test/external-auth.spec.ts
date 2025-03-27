@@ -59,7 +59,7 @@ describe('LDAP', () => {
 
   it('login', () => {
     cy.visit('/')
-    cy.findByText('Login LDAP')
+    cy.findByText('Log in LDAP')
 
     cy.get('input[name="login"]').type('fry')
     cy.get('input[name="password"]').type('fry')
