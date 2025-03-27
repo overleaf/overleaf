@@ -7,10 +7,16 @@ import { setTimeout } from 'node:timers/promises'
 import {
   archiveLatestChunk,
   archiveRawProject,
+  BackupPersistorError,
 } from '../lib/backupArchiver.mjs'
 import knex from '../lib/knex.js'
 import { client } from '../lib/mongodb.js'
 import archiver from 'archiver'
+import Events from 'node:events'
+import { Chunk } from 'overleaf-editor-core'
+
+// Silence warning.
+Events.setMaxListeners(20)
 
 const SUPPORTED_MODES = ['raw', 'latest']
 
@@ -26,7 +32,8 @@ async function shutdown(code = 0) {
   if (outputFile) {
     outputFile.close()
   }
-  await Promise.all([knex.destroy(), client.close()])
+  await knex.destroy()
+  await client.close()
   await setTimeout(1000)
   process.exit(code)
 }
@@ -73,7 +80,7 @@ try {
       { name: 'help', type: Boolean },
     ]))
 } catch (err) {
-  console.error(err.message)
+  console.error(err instanceof Error ? err.message : err)
   help = true
 }
 
@@ -144,7 +151,9 @@ archive.on(
    */
   function (progress) {
     if (verbose) {
-      console.log(`${progress.entries.processed} / ${progress.entries.total}`)
+      console.log(
+        `${progress.entries.processed} processed out of ${progress.entries.total}`
+      )
     }
   }
 )
@@ -169,7 +178,7 @@ archive.on(
    * @param {ArchiverError} warning
    */
   function (warning) {
-    console.warn(`Warning writing archive: ${warning.message}`)
+    console.warn(`Warning encountered when writing archive: ${warning.message}`)
   }
 )
 
