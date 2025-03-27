@@ -959,7 +959,7 @@ export const { Doc } = (() => {
         // Its important that these event handlers are called with oldSnapshot.
         // The reason is that the OT type APIs might need to access the snapshots to
         // determine information about the received op.
-        this.emit('change', docOp, oldSnapshot, msg);
+        this.emit('change', docOp, oldSnapshot, msg, isRemote);
         if (isRemote) {
           return this.emit('remoteop', docOp, oldSnapshot, msg);
         }

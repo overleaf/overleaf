@@ -93,7 +93,8 @@ export class ShareJsDoc extends EventEmitter {
     })
     this._doc.setFlushDelay(SINGLE_USER_FLUSH_DELAY)
     this._doc.on('change', (...args: any[]) => {
-      if (!this.pendingOpCreatedAt) {
+      const isRemote = args[3]
+      if (!isRemote && !this.pendingOpCreatedAt) {
         debugConsole.log('set pendingOpCreatedAt', new Date())
         this.pendingOpCreatedAt = performance.now()
       }
