@@ -36,6 +36,7 @@
   },
   "healthCheckBlobs": "[\"42/f70d7bba4ae1f07682e0358bd7a2068094fc023b\",\"000000000000000000000042/98d5521fe746bc2d11761edab5d0829bee286009\"]",
   "healthCheckProjects": "[\"42\",\"000000000000000000000042\"]",
+  "backupRPOInMS": "360000",
   "maxDeleteKeys": "3",
   "useDeleteObjects": "false",
   "mongo": {
