@@ -409,15 +409,6 @@ async function projectListPage(req, res, next) {
     logger.error({ err: error }, 'Failed to get individual subscription')
   }
 
-  try {
-    await SplitTestHandler.promises.getAssignment(req, res, 'paywall-cta')
-  } catch (error) {
-    logger.error(
-      { err: error },
-      'failed to get "paywall-cta" split test assignment'
-    )
-  }
-
   // Get the user's assignment for the DS unified nav split test, which
   // populates splitTestVariants with a value for the split test name and allows
   // Pug to send it to the browser

@@ -6,7 +6,6 @@ import PdfLogEntry from './pdf-log-entry'
 import { useStopOnFirstError } from '../../../shared/hooks/use-stop-on-first-error'
 import OLButton from '@/features/ui/components/ol/ol-button'
 import * as eventTracking from '../../../infrastructure/event-tracking'
-import { useFeatureFlag } from '@/shared/context/split-test-context'
 import getMeta from '@/utils/meta'
 
 function TimeoutUpgradePromptNew() {
@@ -50,8 +49,6 @@ const CompileTimeout = memo(function CompileTimeout({
 }: CompileTimeoutProps) {
   const { t } = useTranslation()
 
-  const hasNewPaywallCta = useFeatureFlag('paywall-cta')
-
   return (
     <PdfLogEntry
       headerTitle={t('your_compile_timed_out')}
@@ -86,9 +83,7 @@ const CompileTimeout = memo(function CompileTimeout({
                   source="compile-timeout"
                   buttonProps={{ variant: 'primary', className: 'w-100' }}
                 >
-                  {hasNewPaywallCta
-                    ? t('get_more_compile_time')
-                    : t('start_a_free_trial')}
+                  {t('start_a_free_trial')}
                 </StartFreeTrialButton>
               </p>
             )}

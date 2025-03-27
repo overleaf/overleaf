@@ -338,7 +338,6 @@ const _ProjectController = {
       'external-socket-heartbeat',
       'full-project-search',
       'null-test-share-modal',
-      'paywall-cta',
       'pdf-caching-cached-url-lookup',
       'pdf-caching-mode',
       'pdf-caching-prefetch-large',

@@ -2,14 +2,11 @@ import Notification from '@/shared/components/notification'
 import StartFreeTrialButton from '@/shared/components/start-free-trial-button'
 import { useTranslation } from 'react-i18next'
 import { FC } from 'react'
-import { useFeatureFlag } from '@/shared/context/split-test-context'
 
 export const CompileTimeWarningUpgradePromptInner: FC<{
   handleDismissWarning: () => void
 }> = ({ handleDismissWarning }) => {
   const { t } = useTranslation()
-
-  const hasNewPaywallCta = useFeatureFlag('paywall-cta')
 
   return (
     <Notification
@@ -21,9 +18,7 @@ export const CompileTimeWarningUpgradePromptInner: FC<{
             variant: 'secondary',
           }}
         >
-          {hasNewPaywallCta
-            ? t('get_more_compile_time')
-            : t('start_free_trial_without_exclamation')}
+          {t('start_free_trial_without_exclamation')}
         </StartFreeTrialButton>
       }
       ariaLive="polite"

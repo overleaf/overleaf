@@ -5,7 +5,6 @@ import teaserVideo from '../images/teaser-track-changes.mp4'
 import teaserImage from '../images/teaser-track-changes.gif'
 import { startFreeTrial, upgradePlan } from '@/main/account-upgrade'
 import { memo } from 'react'
-import { useFeatureFlag } from '@/shared/context/split-test-context'
 import OLModal, {
   OLModalBody,
   OLModalFooter,
@@ -29,8 +28,6 @@ function UpgradeTrackChangesModal({
   const { t } = useTranslation()
   const project = useProjectContext()
   const user = useUserContext()
-
-  const hasNewPaywallCta = useFeatureFlag('paywall-cta')
 
   return (
     <OLModal show={show} onHide={() => setShow(false)}>
@@ -78,9 +75,7 @@ function UpgradeTrackChangesModal({
                   variant="primary"
                   onClick={() => startFreeTrial('track-changes')}
                 >
-                  {hasNewPaywallCta
-                    ? t('get_track_changes')
-                    : t('try_it_for_free')}
+                  {t('try_it_for_free')}
                 </OLButton>
               ) : (
                 <OLButton
