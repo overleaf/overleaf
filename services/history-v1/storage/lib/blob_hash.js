@@ -63,7 +63,7 @@ exports.fromString = function blobHashFromString(string) {
  * Compute the git blob hash for the content of a file
  *
  * @param  {string} filePath
- * @return {string} hexadecimal SHA-1 hash
+ * @return {Promise<string>} hexadecimal SHA-1 hash
  */
 exports.fromFile = function blobHashFromFile(pathname) {
   assert.string(pathname, 'blobHash: bad pathname')
