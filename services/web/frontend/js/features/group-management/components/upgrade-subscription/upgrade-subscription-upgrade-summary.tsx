@@ -36,7 +36,7 @@ function UpgradeSummary({ subscriptionChange }: UpgradeSummaryProps) {
             <ListGroup.Item className="bg-transparent border-0 px-0 gap-3 card-description-secondary">
               <span className="me-auto">
                 {subscriptionChange.nextInvoice.plan.name} x {totalLicenses}{' '}
-                {t('users')}
+                {t('licenses')}
               </span>
               <span data-testid="subtotal">
                 {formatCurrency(

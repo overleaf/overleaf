@@ -258,7 +258,7 @@ describe('<AddSeats />', function () {
 
           cy.findByTestId('plan').within(() => {
             cy.findByText(
-              `${this.body.nextInvoice.plan.name} x ${this.adding} Seats`
+              `${this.body.nextInvoice.plan.name} x ${this.adding} Licenses`
             )
             cy.findByTestId('price').should(
               'have.text',

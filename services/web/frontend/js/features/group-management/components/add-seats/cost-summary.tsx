@@ -65,7 +65,7 @@ function CostSummary({ subscriptionChange, totalLicenses }: CostSummaryProps) {
                     {subscriptionChange.nextInvoice.plan.name} x{' '}
                     {subscriptionChange.change.addOn.quantity -
                       subscriptionChange.change.addOn.prevQuantity}{' '}
-                    {t('seats')}
+                    {t('licenses')}
                   </span>
                   <span data-testid="price">
                     {formatCurrency(
