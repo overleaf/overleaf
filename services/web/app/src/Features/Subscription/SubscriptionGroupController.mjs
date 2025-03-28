@@ -8,8 +8,6 @@ import SessionManager from '../Authentication/SessionManager.js'
 import UserAuditLogHandler from '../User/UserAuditLogHandler.js'
 import { expressify } from '@overleaf/promise-utils'
 import Modules from '../../infrastructure/Modules.js'
-import SplitTestHandler from '../SplitTests/SplitTestHandler.js'
-import ErrorController from '../Errors/ErrorController.js'
 import UserGetter from '../User/UserGetter.js'
 import { Subscription } from '../../models/Subscription.js'
 import { isProfessionalGroupPlan } from './PlansHelper.mjs'
@@ -288,20 +286,6 @@ async function submitForm(req, res) {
   res.sendStatus(204)
 }
 
-async function flexibleLicensingSplitTest(req, res, next) {
-  const { variant } = await SplitTestHandler.promises.getAssignment(
-    req,
-    res,
-    'flexible-group-licensing'
-  )
-
-  if (variant !== 'enabled') {
-    return ErrorController.notFound(req, res)
-  }
-
-  next()
-}
-
 async function subscriptionUpgradePage(req, res) {
   try {
     const userId = SessionManager.getLoggedInUserId(req.session)
@@ -409,7 +393,6 @@ export default {
   removeSelfFromGroup: expressify(removeSelfFromGroup),
   addSeatsToGroupSubscription: expressify(addSeatsToGroupSubscription),
   submitForm: expressify(submitForm),
-  flexibleLicensingSplitTest: expressify(flexibleLicensingSplitTest),
   previewAddSeatsSubscriptionChange: expressify(
     previewAddSeatsSubscriptionChange
   ),

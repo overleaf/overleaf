@@ -615,33 +615,6 @@ describe('SubscriptionGroupController', function () {
     })
   })
 
-  describe('flexibleLicensingSplitTest', function () {
-    it('passes when the variant is "enabled"', function (done) {
-      const res = sinon.stub()
-      const next = () => {
-        this.ErrorController.notFound.notCalled.should.equal(true)
-        done()
-      }
-      this.SplitTestHandler.promises.getAssignment.resolves({
-        variant: 'enabled',
-      })
-      this.Controller.flexibleLicensingSplitTest(this.req, res, next, done)
-    })
-
-    it('returns error page when the variant is "default"', function (done) {
-      const res = sinon.stub()
-      const next = sinon.stub()
-      this.ErrorController.notFound = sinon.stub().callsFake(() => {
-        next.notCalled.should.equal(true)
-        done()
-      })
-      this.SplitTestHandler.promises.getAssignment.resolves({
-        variant: 'default',
-      })
-      this.Controller.flexibleLicensingSplitTest(this.req, res, next, done)
-    })
-  })
-
   describe('subscriptionUpgradePage', function () {
     it('should render "subscription upgrade" page', function (done) {
       const olSubscription = { membersLimit: 1, teamName: 'test team' }

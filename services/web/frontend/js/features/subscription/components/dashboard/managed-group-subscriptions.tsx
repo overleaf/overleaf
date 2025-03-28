@@ -8,7 +8,6 @@ import { useSubscriptionDashboardContext } from '../../context/subscription-dash
 import { RowLink } from './row-link'
 import { ManagedGroupSubscription } from '../../../../../../types/subscription/dashboard/subscription'
 import { bsVersion } from '@/features/utils/bootstrap-5'
-import { useFeatureFlag } from '@/shared/context/split-test-context'
 import classnames from 'classnames'
 
 function ManagedGroupAdministrator({
@@ -91,7 +90,6 @@ function ManagedGroupAdministrator({
 export default function ManagedGroupSubscriptions() {
   const { t } = useTranslation()
   const { managedGroupSubscriptions } = useSubscriptionDashboardContext()
-  const isFlexibleGroupLicensing = useFeatureFlag('flexible-group-licensing')
 
   if (!managedGroupSubscriptions) {
     return null
@@ -115,21 +113,13 @@ export default function ManagedGroupSubscriptions() {
             <ul className="list-group p-0">
               <RowLink
                 href={`/manage/groups/${subscription._id}/members`}
-                heading={
-                  isFlexibleGroupLicensing
-                    ? t('group_members')
-                    : t('manage_members')
-                }
+                heading={t('group_members')}
                 subtext={t('manage_group_members_subtext')}
                 icon="groups"
               />
               <RowLink
                 href={`/manage/groups/${subscription._id}/managers`}
-                heading={
-                  isFlexibleGroupLicensing
-                    ? t('group_managers')
-                    : t('manage_group_managers')
-                }
+                heading={t('group_managers')}
                 subtext={t('manage_managers_subtext')}
                 icon="manage_accounts"
               />
@@ -141,11 +131,7 @@ export default function ManagedGroupSubscriptions() {
               )}
               <RowLink
                 href={`/metrics/groups/${subscription._id}`}
-                heading={
-                  isFlexibleGroupLicensing
-                    ? t('usage_metrics')
-                    : t('view_metrics')
-                }
+                heading={t('usage_metrics')}
                 subtext={t('view_metrics_group_subtext')}
                 icon="insights"
               />

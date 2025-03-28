@@ -31,11 +31,8 @@ describe('<SubscriptionDashboard />', function () {
       })
     })
 
-    it('renders the "Get the most out of your" subscription text', function () {
-      screen.getByText(
-        'Get the most out of your Overleaf subscription by checking out',
-        { exact: false }
-      )
+    it('renders the "Get the most from your subscription" text', function () {
+      screen.getByText(/get the most from your Overleaf subscription/i)
     })
   })
 

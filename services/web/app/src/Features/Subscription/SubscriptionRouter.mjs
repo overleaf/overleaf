@@ -73,7 +73,6 @@ export default {
       '/user/subscription/group/add-users',
       AuthenticationController.requireLogin(),
       RateLimiterMiddleware.rateLimit(subscriptionRateLimiter),
-      SubscriptionGroupController.flexibleLicensingSplitTest,
       SubscriptionGroupController.addSeatsToGroupSubscription
     )
 
@@ -108,7 +107,6 @@ export default {
       '/user/subscription/group/upgrade-subscription',
       AuthenticationController.requireLogin(),
       RateLimiterMiddleware.rateLimit(subscriptionRateLimiter),
-      SubscriptionGroupController.flexibleLicensingSplitTest,
       SubscriptionGroupController.subscriptionUpgradePage
     )
 
@@ -123,7 +121,6 @@ export default {
       '/user/subscription/group/missing-billing-information',
       AuthenticationController.requireLogin(),
       RateLimiterMiddleware.rateLimit(subscriptionRateLimiter),
-      SubscriptionGroupController.flexibleLicensingSplitTest,
       SubscriptionGroupController.missingBillingInformation
     )
 
@@ -131,7 +128,6 @@ export default {
       '/user/subscription/group/manually-collected-subscription',
       AuthenticationController.requireLogin(),
       RateLimiterMiddleware.rateLimit(subscriptionRateLimiter),
-      SubscriptionGroupController.flexibleLicensingSplitTest,
       SubscriptionGroupController.manuallyCollectedSubscription
     )
 
@@ -139,7 +135,6 @@ export default {
       '/user/subscription/group/subtotal-limit-exceeded',
       AuthenticationController.requireLogin(),
       RateLimiterMiddleware.rateLimit(subscriptionRateLimiter),
-      SubscriptionGroupController.flexibleLicensingSplitTest,
       SubscriptionGroupController.subtotalLimitExceeded
     )
 

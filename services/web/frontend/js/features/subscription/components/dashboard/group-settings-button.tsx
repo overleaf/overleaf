@@ -1,6 +1,5 @@
 import { RowLink } from '@/features/subscription/components/dashboard/row-link'
 import { useTranslation } from 'react-i18next'
-import { useFeatureFlag } from '@/shared/context/split-test-context'
 import { useLocation } from '@/shared/hooks/use-location'
 import MaterialIcon from '@/shared/components/material-icon'
 import OLTag from '@/features/ui/components/ol/ol-tag'
@@ -36,13 +35,10 @@ function AvailableWithGroupProfessionalBadge() {
 
 function useGroupSettingsButton(subscription: ManagedGroupSubscription) {
   const { t } = useTranslation()
-  const isFlexibleGroupLicensing = useFeatureFlag('flexible-group-licensing')
   const subscriptionHasManagedUsers =
     subscription.features?.managedUsers === true
   const subscriptionHasGroupSSO = subscription.features?.groupSSO === true
-  const heading = isFlexibleGroupLicensing
-    ? t('group_settings')
-    : t('manage_group_settings')
+  const heading = t('group_settings')
 
   let groupSettingRowSubText = ''
   if (subscriptionHasGroupSSO && subscriptionHasManagedUsers) {

@@ -1,7 +1,6 @@
 import GroupMembers from '@/features/group-management/components/group-members'
 import { GroupMembersProvider } from '@/features/group-management/context/group-members-context'
 import { User } from '../../../../../types/group-management/user'
-import { SplitTestProvider } from '@/shared/context/split-test-context'
 
 const GROUP_ID = '777fff777fff'
 const PATHS = {
@@ -14,11 +13,9 @@ const PATHS = {
 describe('GroupMembers', function () {
   function mountGroupMembersProvider() {
     cy.mount(
-      <SplitTestProvider>
-        <GroupMembersProvider>
-          <GroupMembers />
-        </GroupMembersProvider>
-      </SplitTestProvider>
+      <GroupMembersProvider>
+        <GroupMembers />
+      </GroupMembersProvider>
     )
   }
 
@@ -49,11 +46,9 @@ describe('GroupMembers', function () {
       })
 
       cy.mount(
-        <SplitTestProvider>
-          <GroupMembersProvider>
-            <GroupMembers />
-          </GroupMembersProvider>
-        </SplitTestProvider>
+        <GroupMembersProvider>
+          <GroupMembers />
+        </GroupMembersProvider>
       )
     })
 
@@ -517,9 +512,6 @@ describe('GroupMembers', function () {
         win.metaAttributesCache.set('ol-groupId', GROUP_ID)
         win.metaAttributesCache.set('ol-groupName', 'My Awesome Team')
         win.metaAttributesCache.set('ol-groupSize', 10)
-        win.metaAttributesCache.set('ol-splitTestVariants', {
-          'flexible-group-licensing': 'enabled',
-        })
         win.metaAttributesCache.set('ol-canUseFlexibleLicensing', true)
         win.metaAttributesCache.set('ol-canUseAddSeatsFeature', true)
       })
@@ -534,11 +526,9 @@ describe('GroupMembers', function () {
       })
 
       cy.mount(
-        <SplitTestProvider>
-          <GroupMembersProvider>
-            <GroupMembers />
-          </GroupMembersProvider>
-        </SplitTestProvider>
+        <GroupMembersProvider>
+          <GroupMembers />
+        </GroupMembersProvider>
       )
 
       cy.findByTestId('group-size-details').contains(
@@ -556,11 +546,9 @@ describe('GroupMembers', function () {
       })
 
       cy.mount(
-        <SplitTestProvider>
-          <GroupMembersProvider>
-            <GroupMembers />
-          </GroupMembersProvider>
-        </SplitTestProvider>
+        <GroupMembersProvider>
+          <GroupMembers />
+        </GroupMembersProvider>
       )
 
       cy.findByTestId('group-size-details').contains(
@@ -575,11 +563,9 @@ describe('GroupMembers', function () {
       })
 
       cy.mount(
-        <SplitTestProvider>
-          <GroupMembersProvider>
-            <GroupMembers />
-          </GroupMembersProvider>
-        </SplitTestProvider>
+        <GroupMembersProvider>
+          <GroupMembers />
+        </GroupMembersProvider>
       )
 
       cy.findByTestId('group-size-details').within(() => {

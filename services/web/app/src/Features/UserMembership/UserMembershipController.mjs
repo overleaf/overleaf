@@ -32,12 +32,6 @@ async function manageGroupMembers(req, res, next) {
   )
   const ssoConfig = await SSOConfig.findById(subscription.ssoConfig).exec()
 
-  await SplitTestHandler.promises.getAssignment(
-    req,
-    res,
-    'flexible-group-licensing'
-  )
-
   await SplitTestHandler.promises.getAssignment(req, res, 'bootstrap-5-groups')
 
   const plan = PlansLocator.findLocalPlanInSettings(subscription.planCode)

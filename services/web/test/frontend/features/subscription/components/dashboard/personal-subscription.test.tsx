@@ -72,7 +72,7 @@ describe('<PersonalSubscription />', function () {
         ],
       })
 
-      screen.getByText('You are currently subscribed to the', { exact: false })
+      screen.getByRole('heading', { name: /billing/i })
     })
 
     it('renders the canceled dash', function () {

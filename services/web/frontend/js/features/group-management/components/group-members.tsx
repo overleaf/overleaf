@@ -5,7 +5,6 @@ import getMeta from '../../../utils/meta'
 import { useGroupMembersContext } from '../context/group-members-context'
 import ErrorAlert from './error-alert'
 import MembersList from './members-table/members-list'
-import { useFeatureFlag } from '@/shared/context/split-test-context'
 import { sendMB } from '../../../infrastructure/event-tracking'
 import BackButton from '@/features/group-management/components/back-button'
 import OLRow from '@/features/ui/components/ol/ol-row'
@@ -30,17 +29,12 @@ export default function GroupMembers() {
     paths,
   } = useGroupMembersContext()
   const [emailString, setEmailString] = useState<string>('')
-  const isFlexibleGroupLicensingFeatureFlagEnabled = useFeatureFlag(
-    'flexible-group-licensing'
-  )
 
   const groupId = getMeta('ol-groupId')
   const groupName = getMeta('ol-groupName')
   const groupSize = getMeta('ol-groupSize')
   const canUseFlexibleLicensing = getMeta('ol-canUseFlexibleLicensing')
   const canUseAddSeatsFeature = getMeta('ol-canUseAddSeatsFeature')
-  const isFlexibleGroupLicensing =
-    canUseFlexibleLicensing && isFlexibleGroupLicensingFeatureFlagEnabled
 
   const handleEmailsChange = useCallback(
     e => {
@@ -59,7 +53,7 @@ export default function GroupMembers() {
   }
 
   const groupSizeDetails = () => {
-    if (isFlexibleGroupLicensing) {
+    if (canUseFlexibleLicensing) {
       return (
         <small data-testid="group-size-details">
           <strong>
@@ -145,11 +139,7 @@ export default function GroupMembers() {
                 className="add-more-members-form"
                 data-testid="add-more-members-form"
               >
-                <p className="small">
-                  {isFlexibleGroupLicensing
-                    ? t('invite_more_members')
-                    : t('add_more_members')}
-                </p>
+                <p className="small">{t('invite_more_members')}</p>
                 <ErrorAlert error={inviteError} />
                 <form onSubmit={onAddMembersSubmit}>
                   <OLRow>
@@ -170,19 +160,15 @@ export default function GroupMembers() {
                         bs3Props={{
                           loading: inviteMemberLoading ? (
                             <>
-                              {isFlexibleGroupLicensing
-                                ? t('inviting')
-                                : t('adding')}
+                              {t('inviting')}
                               &hellip;
                             </>
-                          ) : isFlexibleGroupLicensing ? (
-                            t('invite')
                           ) : (
-                            t('add')
+                            t('invite')
                           ),
                         }}
                       >
-                        {isFlexibleGroupLicensing ? t('invite') : t('add')}
+                        {t('invite')}
                       </OLButton>
                     </OLCol>
                     <OLCol xs={2}>

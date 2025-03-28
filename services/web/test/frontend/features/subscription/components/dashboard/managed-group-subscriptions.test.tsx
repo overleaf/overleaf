@@ -190,7 +190,7 @@ describe('<ManagedGroupSubscriptions />', function () {
         },
       ],
     })
-    await screen.findAllByText('Manage group settings')
+    await screen.findAllByText('Group settings')
     await screen.findAllByText('Configure and manage SSO and Managed Users')
   })
 
@@ -207,7 +207,7 @@ describe('<ManagedGroupSubscriptions />', function () {
         },
       ],
     })
-    await screen.findAllByText('Manage group settings')
+    await screen.findAllByText('Group settings')
     await screen.findAllByText('Turn on Managed Users')
     expect(screen.queryByText('Configure and manage SSO and Managed Users')).to
       .not.exist
@@ -227,7 +227,7 @@ describe('<ManagedGroupSubscriptions />', function () {
         },
       ],
     })
-    await screen.findAllByText('Manage group settings')
+    await screen.findAllByText('Group settings')
     await screen.findAllByText('Configure and manage SSO')
     expect(screen.queryByText('Turn on Managed Users')).to.not.exist
     expect(screen.queryByText('Configure and manage SSO and Managed Users')).to

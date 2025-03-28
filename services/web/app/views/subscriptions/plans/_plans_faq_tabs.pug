@@ -165,56 +165,15 @@ mixin overleafGroupPlans()
 			.collapse(id="overleafGroupPlansQ3")
 				.custom-accordion-body
 					| The educational discount for group subscriptions is for students or faculty who are using Overleaf primarily for teaching. 
-		if canUseFlexibleLicensing
-			.custom-accordion-item
-				button.custom-accordion-header.collapsed(type="button" data-toggle="collapse" data-target="#overleafGroupPlansQ4" aria-expanded="false" aria-controls="overleafGroupPlansQ4")
-					| How do I add more licenses to my group subscription, and what will it cost?
-					span.custom-accordion-icon
-						i.material-symbols.material-symbols-outlined(aria-hidden="true") keyboard_arrow_down
-				.collapse(id="overleafGroupPlansQ4")
-					.custom-accordion-body
-						div 
-							| You can add up to 20 licenses using the 
-							a.inline-green-link(
-								target="_blank"
-								href="/user/subscription"
-								event-tracking="plans-page-click"
-								event-tracking-mb="true"
-								event-tracking-trigger="click"
-								event-segmentation={ button: 'contact', location: 'faq' }
-							)
-								span subscription management page
-							|  accessed by going to Account > 
-							a.inline-green-link(
-								target="_blank"
-								href="/user/subscription"
-								event-tracking="plans-page-click"
-								event-tracking-mb="true"
-								event-tracking-trigger="click"
-								event-segmentation={ button: 'contact', location: 'faq' }
-							)
-								span Subscription
-							|  when logged into Overleaf. The cost per license will be prorated at the current per license rate, and will end with your existing renewal date.
-						div.mt-2 
-							| If you need more than 20 licenses added to your subscription, please 
-							a.inline-green-link(
-								target="_blank"
-								href="/for/contact-sales"
-								event-tracking="plans-page-click"
-								event-tracking-mb="true"
-								event-tracking-trigger="click"
-								event-segmentation={ button: 'contact', location: 'faq' }
-							)
-								span contact the Sales team
-							| .
-			.custom-accordion-item
-				button.custom-accordion-header.collapsed(type="button" data-toggle="collapse" data-target="#overleafGroupPlansQ5" aria-expanded="false" aria-controls="overleafGroupPlansQ5")
-					| How do I upgrade my plan from Group Standard to Group Professional?
-					span.custom-accordion-icon
-						i.material-symbols.material-symbols-outlined(aria-hidden="true") keyboard_arrow_down
-				.collapse(id="overleafGroupPlansQ5")
-					.custom-accordion-body
-						| You can upgrade your plan from Group Standard to Group Professional on the 
+		.custom-accordion-item
+			button.custom-accordion-header.collapsed(type="button" data-toggle="collapse" data-target="#overleafGroupPlansQ4" aria-expanded="false" aria-controls="overleafGroupPlansQ4")
+				| How do I add more licenses to my group subscription, and what will it cost?
+				span.custom-accordion-icon
+					i.material-symbols.material-symbols-outlined(aria-hidden="true") keyboard_arrow_down
+			.collapse(id="overleafGroupPlansQ4")
+				.custom-accordion-body
+					div 
+						| You can add up to 20 licenses using the 
 						a.inline-green-link(
 							target="_blank"
 							href="/user/subscription"
@@ -224,15 +183,44 @@ mixin overleafGroupPlans()
 							event-segmentation={ button: 'contact', location: 'faq' }
 						)
 							span subscription management page
-						| .	
-		else
-			.custom-accordion-item
-				button.custom-accordion-header.collapsed(type="button" data-toggle="collapse" data-target="#overleafGroupPlansQ4" aria-expanded="false" aria-controls="overleafGroupPlansQ4")
-					| Can I add more users to my group subscription at a later date?
-					span.custom-accordion-icon
-						i.material-symbols.material-symbols-outlined(aria-hidden="true") keyboard_arrow_down
-				.collapse(id="overleafGroupPlansQ4")
-					.custom-accordion-body
-						| Yes. To add more users to your subscription you’ll need to 
-						button.btn-link.inline-green-link(data-ol-open-contact-form-modal="general")
-							span #{translate("contact_us")}
+						|  accessed by going to Account > 
+						a.inline-green-link(
+							target="_blank"
+							href="/user/subscription"
+							event-tracking="plans-page-click"
+							event-tracking-mb="true"
+							event-tracking-trigger="click"
+							event-segmentation={ button: 'contact', location: 'faq' }
+						)
+							span Subscription
+						|  when logged into Overleaf. The cost per license will be prorated at the current per license rate, and will end with your existing renewal date.
+					div.mt-2 
+						| If you need more than 20 licenses added to your subscription, please 
+						a.inline-green-link(
+							target="_blank"
+							href="/for/contact-sales"
+							event-tracking="plans-page-click"
+							event-tracking-mb="true"
+							event-tracking-trigger="click"
+							event-segmentation={ button: 'contact', location: 'faq' }
+						)
+							span contact the Sales team
+						| .
+		.custom-accordion-item
+			button.custom-accordion-header.collapsed(type="button" data-toggle="collapse" data-target="#overleafGroupPlansQ5" aria-expanded="false" aria-controls="overleafGroupPlansQ5")
+				| How do I upgrade my plan from Group Standard to Group Professional?
+				span.custom-accordion-icon
+					i.material-symbols.material-symbols-outlined(aria-hidden="true") keyboard_arrow_down
+			.collapse(id="overleafGroupPlansQ5")
+				.custom-accordion-body
+					| You can upgrade your plan from Group Standard to Group Professional on the 
+					a.inline-green-link(
+						target="_blank"
+						href="/user/subscription"
+						event-tracking="plans-page-click"
+						event-tracking-mb="true"
+						event-tracking-trigger="click"
+						event-segmentation={ button: 'contact', location: 'faq' }
+					)
+						span subscription management page
+					| .

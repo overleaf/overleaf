@@ -56,13 +56,6 @@ async function userSubscriptionPage(req, res) {
 
   const showGroupDiscount = groupPricingDiscount.variant === 'enabled'
 
-  const { variant: flexibleLicensingVariant } =
-    await SplitTestHandler.promises.getAssignment(
-      req,
-      res,
-      'flexible-group-licensing'
-    )
-
   const results =
     await SubscriptionViewModelBuilder.promises.buildUsersSubscriptionViewModel(
       user,
@@ -147,7 +140,6 @@ async function userSubscriptionPage(req, res) {
           (managedUsersResults?.[0] === true ||
             groupSSOResults?.[0] === true) &&
           isGroupAdmin &&
-          flexibleLicensingVariant === 'enabled' &&
           plan?.canUseFlexibleLicensing
         )
       }
