@@ -27,7 +27,7 @@ function UpgradeSummary({ subscriptionChange }: UpgradeSummaryProps) {
       <Card.Body className="d-grid gap-2 p-3">
         <div>
           <div className="fw-bold">{t('upgrade_summary')}</div>
-          {t('you_have_x_users_on_your_subscription', {
+          {t('you_have_x_licenses_on_your_subscription', {
             groupSize: totalLicenses,
           })}
         </div>

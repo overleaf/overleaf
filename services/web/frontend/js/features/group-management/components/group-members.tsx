@@ -58,10 +58,10 @@ export default function GroupMembers() {
         <small data-testid="group-size-details">
           <strong>
             {users.length === 1
-              ? t('you_have_1_user_and_your_plan_supports_up_to_y', {
+              ? t('you_have_1_license_and_your_plan_supports_up_to_y', {
                   groupSize,
                 })
-              : t('you_have_x_users_and_your_plan_supports_up_to_y', {
+              : t('you_have_x_licenses_and_your_plan_supports_up_to_y', {
                   addedUsersSize: users.length,
                   groupSize,
                 })}
@@ -74,7 +74,7 @@ export default function GroupMembers() {
                 rel="noreferrer noopener"
                 onClick={() => sendMB('flex-add-users')}
               >
-                {t('add_more_users')}.
+                {t('add_more_licenses')}.
               </a>
             </>
           )}

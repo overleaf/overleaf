@@ -30,7 +30,7 @@ function CostSummary({ subscriptionChange, totalLicenses }: CostSummaryProps) {
           <div className="fw-bold">{t('cost_summary')}</div>
           {subscriptionChange ? (
             <Trans
-              i18nKey="youre_adding_x_users_to_your_plan_giving_you_a_total_of_y_users"
+              i18nKey="youre_adding_x_licenses_to_your_plan_giving_you_a_total_of_y_licenses"
               components={[
                 <b />, // eslint-disable-line react/jsx-key
                 <b />, // eslint-disable-line react/jsx-key
@@ -49,7 +49,7 @@ function CostSummary({ subscriptionChange, totalLicenses }: CostSummaryProps) {
             />
           ) : (
             t(
-              'enter_the_number_of_users_youd_like_to_add_to_see_the_cost_breakdown'
+              'enter_the_number_of_licenses_youd_like_to_add_to_see_the_cost_breakdown'
             )
           )}
         </div>
@@ -122,7 +122,7 @@ function CostSummary({ subscriptionChange, totalLicenses }: CostSummaryProps) {
             </div>
             <div>
               {t(
-                'we_will_charge_you_now_for_the_cost_of_your_additional_users_based_on_remaining_months'
+                'we_will_charge_you_now_for_the_cost_of_your_additional_licenses_based_on_remaining_months'
               )}
             </div>
             <div>

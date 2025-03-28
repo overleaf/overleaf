@@ -190,7 +190,7 @@ export function ActiveSubscriptionNew({
         <p className="mb-1">
           {isLegacyPlan && subscription.recurly.additionalLicenses > 0 ? (
             <Trans
-              i18nKey="plus_x_additional_licenses_for_a_total_of_y_users"
+              i18nKey="plus_x_additional_licenses_for_a_total_of_y_licenses"
               values={{
                 count: subscription.recurly.totalLicenses,
                 additionalLicenses: subscription.recurly.additionalLicenses,
@@ -201,7 +201,7 @@ export function ActiveSubscriptionNew({
             />
           ) : (
             <Trans
-              i18nKey="supports_up_to_x_users"
+              i18nKey="supports_up_to_x_licenses"
               values={{ count: subscription.recurly.totalLicenses }}
               shouldUnescape
               tOptions={{ interpolation: { escapeValue: true } }}
@@ -376,7 +376,7 @@ function FlexibleGroupLicensingActions({
           href="/user/subscription/group/add-users"
           onClick={() => sendMB('flex-add-users')}
         >
-          {t('add_more_users')}
+          {t('add_more_licenses')}
         </OLButton>
       )}
     </>

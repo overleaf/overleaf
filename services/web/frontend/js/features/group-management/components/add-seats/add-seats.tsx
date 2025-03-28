@@ -226,10 +226,10 @@ function AddSeats() {
       <RequestStatus
         variant="primary"
         icon="check_circle"
-        title={t('youve_added_more_users')}
+        title={t('youve_added_more_licenses')}
         content={
           <Trans
-            i18nKey="youve_added_x_more_users_to_your_subscription_invite_people"
+            i18nKey="youve_added_x_more_licenses_to_your_subscription_invite_people"
             components={[
               // eslint-disable-next-line jsx-a11y/anchor-has-content, react/jsx-key
               <a
@@ -281,16 +281,16 @@ function AddSeats() {
               >
                 <div className="d-grid gap-1">
                   <h4 className="fw-bold m-0 card-description-secondary">
-                    {t('add_more_users')}
+                    {t('add_more_licenses')}
                   </h4>
                   <div>
-                    {t('your_current_plan_supports_up_to_x_users', {
+                    {t('your_current_plan_supports_up_to_x_licenses', {
                       users: totalLicenses,
                     })}
                   </div>
                   <div>
                     <Trans
-                      i18nKey="if_you_want_to_reduce_the_number_of_users_please_contact_support"
+                      i18nKey="if_you_want_to_reduce_the_number_of_licenses_please_contact_support"
                       components={[
                         // eslint-disable-next-line jsx-a11y/anchor-has-content, react/jsx-key
                         <a
@@ -308,7 +308,7 @@ function AddSeats() {
                 <div>
                   <FormGroup controlId="number-of-users-input">
                     <FormLabel>
-                      {t('how_many_users_do_you_want_to_add')}
+                      {t('how_many_licenses_do_you_want_to_add')}
                     </FormLabel>
                     <FormControl
                       type="text"
@@ -366,7 +366,7 @@ function AddSeats() {
                     }
                     isLoading={isAddingSeats || isSendingMailToSales}
                   >
-                    {shouldContactSales ? t('send_request') : t('add_users')}
+                    {shouldContactSales ? t('send_request') : t('add_licenses')}
                   </Button>
                 </div>
               </form>
@@ -406,7 +406,7 @@ function CostSummarySection({
       <Notification
         content={
           <Trans
-            i18nKey="if_you_want_more_than_x_users_on_your_plan_we_need_to_add_them_for_you"
+            i18nKey="if_you_want_more_than_x_licenses_on_your_plan_we_need_to_add_them_for_you"
             // eslint-disable-next-line react/jsx-key
             components={[<b />]}
             values={{ count: MAX_NUMBER_OF_USERS }}

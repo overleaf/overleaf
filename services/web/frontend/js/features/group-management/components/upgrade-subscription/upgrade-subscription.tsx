@@ -116,7 +116,7 @@ function UpgradeSubscription() {
                   className="me-auto"
                   onClick={() => sendMB('flex-add-users')}
                 >
-                  {t('add_more_users_to_my_plan')}
+                  {t('add_more_licenses_to_my_plan')}
                 </a>
                 <Button
                   href="/user/subscription"

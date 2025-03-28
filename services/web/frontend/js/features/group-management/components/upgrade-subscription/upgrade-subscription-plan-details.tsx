@@ -48,7 +48,7 @@ function UpgradeSubscriptionPlanDetails() {
             </span>
           </Col>
           <Col className="d-flex flex-column justify-content-center">
-            <div className="per-user-price-text">{t('per_user')}</div>
+            <div className="per-user-price-text">{t('per_license')}</div>
             <div className="per-user-price-text">{t('billed_yearly')}</div>
           </Col>
         </Row>
