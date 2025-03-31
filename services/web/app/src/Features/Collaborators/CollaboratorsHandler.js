@@ -33,6 +33,12 @@ async function removeUserFromProject(projectId, userId) {
   try {
     const project = await Project.findOne({ _id: projectId }).exec()
 
+    // Temporary workaround for the case where pendingReviewer_refs is null
+    await Project.updateOne(
+      { _id: projectId, pendingReviewer_refs: { $type: 'null' } },
+      { $set: { pendingReviewer_refs: [] } }
+    ).exec()
+
     // Deal with the old type of boolean value for archived
     // In order to clear it
     if (typeof project.archived === 'boolean') {

@@ -104,6 +104,18 @@ describe('CollaboratorsHandler', function () {
           .withArgs(
             {
               _id: this.project._id,
+              pendingReviewer_refs: { $type: 'null' },
+            },
+            {
+              $set: { pendingReviewer_refs: [] },
+            }
+          )
+          .chain('exec')
+          .resolves()
+        this.ProjectMock.expects('updateOne')
+          .withArgs(
+            {
+              _id: this.project._id,
             },
             {
               $pull: {
@@ -146,6 +158,18 @@ describe('CollaboratorsHandler', function () {
           .withArgs(
             {
               _id: this.oldArchivedProject._id,
+              pendingReviewer_refs: { $type: 'null' },
+            },
+            {
+              $set: { pendingReviewer_refs: [] },
+            }
+          )
+          .chain('exec')
+          .resolves()
+        this.ProjectMock.expects('updateOne')
+          .withArgs(
+            {
+              _id: this.oldArchivedProject._id,
             },
             {
               $set: {
@@ -182,6 +206,18 @@ describe('CollaboratorsHandler', function () {
       })
 
       it('should remove the user from mongo', async function () {
+        this.ProjectMock.expects('updateOne')
+          .withArgs(
+            {
+              _id: this.archivedProject._id,
+              pendingReviewer_refs: { $type: 'null' },
+            },
+            {
+              $set: { pendingReviewer_refs: [] },
+            }
+          )
+          .chain('exec')
+          .resolves()
         this.ProjectMock.expects('updateOne')
           .withArgs(
             {
@@ -469,6 +505,18 @@ describe('CollaboratorsHandler', function () {
           .chain('exec')
           .resolves({ _id: projectId })
 
+        this.ProjectMock.expects('updateOne')
+          .withArgs(
+            {
+              _id: projectId,
+              pendingReviewer_refs: { $type: 'null' },
+            },
+            {
+              $set: { pendingReviewer_refs: [] },
+            }
+          )
+          .chain('exec')
+          .resolves()
         this.ProjectMock.expects('updateOne')
           .withArgs(
             {
