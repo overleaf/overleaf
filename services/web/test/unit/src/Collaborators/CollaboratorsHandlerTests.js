@@ -116,6 +116,18 @@ describe('CollaboratorsHandler', function () {
           .withArgs(
             {
               _id: this.project._id,
+              readOnly_refs: { $type: 'null' },
+            },
+            {
+              $set: { readOnly_refs: [] },
+            }
+          )
+          .chain('exec')
+          .resolves()
+        this.ProjectMock.expects('updateOne')
+          .withArgs(
+            {
+              _id: this.project._id,
             },
             {
               $pull: {
@@ -170,6 +182,18 @@ describe('CollaboratorsHandler', function () {
           .withArgs(
             {
               _id: this.oldArchivedProject._id,
+              readOnly_refs: { $type: 'null' },
+            },
+            {
+              $set: { readOnly_refs: [] },
+            }
+          )
+          .chain('exec')
+          .resolves()
+        this.ProjectMock.expects('updateOne')
+          .withArgs(
+            {
+              _id: this.oldArchivedProject._id,
             },
             {
               $set: {
@@ -214,6 +238,18 @@ describe('CollaboratorsHandler', function () {
             },
             {
               $set: { pendingReviewer_refs: [] },
+            }
+          )
+          .chain('exec')
+          .resolves()
+        this.ProjectMock.expects('updateOne')
+          .withArgs(
+            {
+              _id: this.archivedProject._id,
+              readOnly_refs: { $type: 'null' },
+            },
+            {
+              $set: { readOnly_refs: [] },
             }
           )
           .chain('exec')
@@ -513,6 +549,18 @@ describe('CollaboratorsHandler', function () {
             },
             {
               $set: { pendingReviewer_refs: [] },
+            }
+          )
+          .chain('exec')
+          .resolves()
+        this.ProjectMock.expects('updateOne')
+          .withArgs(
+            {
+              _id: projectId,
+              readOnly_refs: { $type: 'null' },
+            },
+            {
+              $set: { readOnly_refs: [] },
             }
           )
           .chain('exec')
