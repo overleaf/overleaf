@@ -1,12 +1,10 @@
 import {
-  useState,
   type ComponentProps,
   useCallback,
   type Dispatch,
   type SetStateAction,
 } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Dropdown as BS3Dropdown, MenuItem } from 'react-bootstrap'
 import {
   Dropdown,
   DropdownItem,
@@ -16,11 +14,9 @@ import {
 import { User } from '../../../../../../types/group-management/user'
 import useAsync from '@/shared/hooks/use-async'
 import { type FetchError, postJSON } from '@/infrastructure/fetch-json'
-import Icon from '@/shared/components/icon'
 import { GroupUserAlert } from '../../utils/types'
 import { useGroupMembersContext } from '../../context/group-members-context'
 import getMeta from '@/utils/meta'
-import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
 import MaterialIcon from '@/shared/components/material-icon'
 import DropdownListItem from '@/features/ui/components/bootstrap-5/dropdown-list-item'
 import { Spinner } from 'react-bootstrap-5'
@@ -46,7 +42,6 @@ export default function DropdownButton({
 }: ManagedUserDropdownButtonProps) {
   const { t } = useTranslation()
   const { removeMember } = useGroupMembersContext()
-  const [isOpened, setIsOpened] = useState(false)
   const {
     runAsync: runResendManagedUserInviteAsync,
     isLoading: isResendingManagedUserInvite,
@@ -82,7 +77,6 @@ export default function DropdownButton({
             variant: 'resendManagedUserInviteSuccess',
             email: user.email,
           })
-          setIsOpened(false)
         }
       } catch (err) {
         if ((err as FetchError)?.response?.status === 429) {
@@ -96,8 +90,6 @@ export default function DropdownButton({
             email: user.email,
           })
         }
-
-        setIsOpened(false)
       }
     },
     [setGroupUserAlert, groupId, runResendManagedUserInviteAsync]
@@ -115,7 +107,6 @@ export default function DropdownButton({
             variant: 'resendSSOLinkInviteSuccess',
             email: user.email,
           })
-          setIsOpened(false)
         }
       } catch (err) {
         if ((err as FetchError)?.response?.status === 429) {
@@ -129,8 +120,6 @@ export default function DropdownButton({
             email: user.email,
           })
         }
-
-        setIsOpened(false)
       }
     },
     [setGroupUserAlert, groupId, runResendLinkSSOInviteAsync]
@@ -151,7 +140,6 @@ export default function DropdownButton({
           variant: 'resendGroupInviteSuccess',
           email: user.email,
         })
-        setIsOpened(false)
       } catch (err) {
         if ((err as FetchError)?.response?.status === 429) {
           setGroupUserAlert({
@@ -164,8 +152,6 @@ export default function DropdownButton({
             email: user.email,
           })
         }
-
-        setIsOpened(false)
       }
     },
     [setGroupUserAlert, groupId, runResendGroupInviteAsync]
@@ -270,65 +256,29 @@ export default function DropdownButton({
 
   if (buttons.length === 0) {
     buttons.push(
-      <BootstrapVersionSwitcher
-        bs3={
-          <MenuItem
-            key="no-actions-available"
-            data-testid="no-actions-available"
-          >
-            <span className="text-muted">{t('no_actions')}</span>
-          </MenuItem>
-        }
-        bs5={
-          <DropdownListItem>
-            <DropdownItem
-              as="button"
-              tabIndex={-1}
-              data-testid="no-actions-available"
-              disabled
-            >
-              {t('no_actions')}
-            </DropdownItem>
-          </DropdownListItem>
-        }
-      />
+      <DropdownListItem>
+        <DropdownItem
+          as="button"
+          tabIndex={-1}
+          data-testid="no-actions-available"
+          disabled
+        >
+          {t('no_actions')}
+        </DropdownItem>
+      </DropdownListItem>
     )
   }
 
   return (
-    <BootstrapVersionSwitcher
-      bs3={
-        <div className="managed-user-actions">
-          <BS3Dropdown
-            id={`managed-user-dropdown-${user.email}`}
-            open={isOpened}
-            onToggle={open => setIsOpened(open)}
-          >
-            <BS3Dropdown.Toggle
-              bsStyle={null}
-              className="btn btn-link action-btn"
-              noCaret
-            >
-              <Icon type="ellipsis-v" accessibilityLabel={t('actions')} />
-            </BS3Dropdown.Toggle>
-            <BS3Dropdown.Menu className="dropdown-menu-right managed-user-dropdown-menu">
-              {buttons}
-            </BS3Dropdown.Menu>
-          </BS3Dropdown>
-        </div>
-      }
-      bs5={
-        <Dropdown align="end">
-          <DropdownToggle
-            id={`managed-user-dropdown-${user.email}`}
-            bsPrefix="dropdown-table-button-toggle"
-          >
-            <MaterialIcon type="more_vert" accessibilityLabel={t('actions')} />
-          </DropdownToggle>
-          <DropdownMenu flip={false}>{buttons}</DropdownMenu>
-        </Dropdown>
-      }
-    />
+    <Dropdown align="end">
+      <DropdownToggle
+        id={`managed-user-dropdown-${user.email}`}
+        bsPrefix="dropdown-table-button-toggle"
+      >
+        <MaterialIcon type="more_vert" accessibilityLabel={t('actions')} />
+      </DropdownToggle>
+      <DropdownMenu flip={false}>{buttons}</DropdownMenu>
+    </Dropdown>
   )
 }
 
@@ -347,42 +297,26 @@ function MenuItemButton({
   'data-testid': dataTestId,
 }: MenuItemButtonProps) {
   return (
-    <BootstrapVersionSwitcher
-      bs3={
-        <li role="presentation" className={className}>
-          <button
-            className="managed-user-menu-item-button"
-            role="menuitem"
-            onClick={onClick}
-            data-testid={dataTestId}
-          >
-            {children}
-          </button>
-        </li>
-      }
-      bs5={
-        <DropdownListItem>
-          <DropdownItem
-            as="button"
-            tabIndex={-1}
-            onClick={onClick}
-            leadingIcon={
-              isLoading ? (
-                <Spinner
-                  animation="border"
-                  aria-hidden="true"
-                  size="sm"
-                  role="status"
-                />
-              ) : null
-            }
-            data-testid={dataTestId}
-            variant={variant}
-          >
-            {children}
-          </DropdownItem>
-        </DropdownListItem>
-      }
-    />
+    <DropdownListItem>
+      <DropdownItem
+        as="button"
+        tabIndex={-1}
+        onClick={onClick}
+        leadingIcon={
+          isLoading ? (
+            <Spinner
+              animation="border"
+              aria-hidden="true"
+              size="sm"
+              role="status"
+            />
+          ) : null
+        }
+        data-testid={dataTestId}
+        variant={variant}
+      >
+        {children}
+      </DropdownItem>
+    </DropdownListItem>
   )
 }

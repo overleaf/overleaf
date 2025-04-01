@@ -3,7 +3,6 @@ import type { User } from '../../../../../../types/group-management/user'
 import { useGroupMembersContext } from '../../context/group-members-context'
 import { useCallback } from 'react'
 import OLFormCheckbox from '@/features/ui/components/ol/ol-form-checkbox'
-import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
 
 type ManagedUsersSelectUserCheckboxProps = {
   user: User
@@ -43,27 +42,12 @@ export default function SelectUserCheckbox({
     <td className="cell-checkbox">
       {/* the next check will hide the `checkbox` but still show the `th` */}
       {user.enrollment?.managedBy ? null : (
-        <BootstrapVersionSwitcher
-          bs3={
-            <input
-              className="select-item"
-              type="checkbox"
-              autoComplete="off"
-              checked={selected}
-              onChange={e => handleSelectUser(e, user)}
-              aria-label={t('select_user')}
-              data-testid="select-single-checkbox"
-            />
-          }
-          bs5={
-            <OLFormCheckbox
-              autoComplete="off"
-              checked={selected}
-              onChange={e => handleSelectUser(e, user)}
-              aria-label={t('select_user')}
-              data-testid="select-single-checkbox"
-            />
-          }
+        <OLFormCheckbox
+          autoComplete="off"
+          checked={selected}
+          onChange={e => handleSelectUser(e, user)}
+          aria-label={t('select_user')}
+          data-testid="select-single-checkbox"
         />
       )}
     </td>

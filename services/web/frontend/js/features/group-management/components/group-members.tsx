@@ -157,16 +157,6 @@ export default function GroupMembers() {
                         variant="primary"
                         onClick={onAddMembersSubmit}
                         isLoading={inviteMemberLoading}
-                        bs3Props={{
-                          loading: inviteMemberLoading ? (
-                            <>
-                              {t('inviting')}
-                              &hellip;
-                            </>
-                          ) : (
-                            t('invite')
-                          ),
-                        }}
                       >
                         {t('invite')}
                       </OLButton>
@@ -177,7 +167,7 @@ export default function GroupMembers() {
                   </OLRow>
                   <OLRow>
                     <OLCol xs={8}>
-                      <OLFormText bs3Props={{ className: 'help-block' }}>
+                      <OLFormText>
                         {t('add_comma_separated_emails_help')}
                       </OLFormText>
                     </OLCol>

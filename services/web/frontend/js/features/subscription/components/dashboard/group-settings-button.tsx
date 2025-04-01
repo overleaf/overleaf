@@ -92,7 +92,7 @@ export function GroupSettingsButtonWithAdBadge({
             <div className="heading">{heading}</div>
             <div className="subtext">{groupSettingRowSubText}</div>
           </div>
-          <span className="badge-group-settings">
+          <span>
             <AvailableWithGroupProfessionalBadge />
           </span>
         </div>

@@ -1,5 +1,4 @@
 import { User } from '../../../../../../types/group-management/user'
-import Icon from '@/shared/components/icon'
 import { useState } from 'react'
 import useAsync from '@/shared/hooks/use-async'
 import { useTranslation } from 'react-i18next'
@@ -144,15 +143,6 @@ export default function OffboardManagedUserModal({
             variant="danger"
             disabled={isLoading || isSuccess || !shouldEnableDeleteUserButton}
             isLoading={isLoading}
-            bs3Props={{
-              loading: isLoading ? (
-                <>
-                  <Icon type="refresh" fw spin /> {t('deleting')}…
-                </>
-              ) : (
-                t('delete_user')
-              ),
-            }}
           >
             {t('delete_user')}
           </OLButton>

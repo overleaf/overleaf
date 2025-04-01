@@ -11,7 +11,6 @@ import {
 import { SSOConfig } from '../../models/SSOConfig.js'
 import { Parser as CSVParser } from 'json2csv'
 import { expressify } from '@overleaf/promise-utils'
-import SplitTestHandler from '../SplitTests/SplitTestHandler.js'
 import PlansLocator from '../Subscription/PlansLocator.js'
 import RecurlyClient from '../Subscription/RecurlyClient.js'
 
@@ -31,9 +30,6 @@ async function manageGroupMembers(req, res, next) {
     entityConfig
   )
   const ssoConfig = await SSOConfig.findById(subscription.ssoConfig).exec()
-
-  await SplitTestHandler.promises.getAssignment(req, res, 'bootstrap-5-groups')
-
   const plan = PlansLocator.findLocalPlanInSettings(subscription.planCode)
   const userId = SessionManager.getLoggedInUserId(req.session)
   const isAdmin = subscription.admin_id.toString() === userId
@@ -113,8 +109,6 @@ async function _renderManagersPage(req, res, next, template) {
     entityWithV1Data,
     entityConfig
   )
-
-  await SplitTestHandler.promises.getAssignment(req, res, 'bootstrap-5-groups')
 
   res.render(template, {
     name: entityName,
