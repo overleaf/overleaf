@@ -480,10 +480,6 @@ async function confirmSecondaryEmailPage(req, res) {
     return res.redirect(redirectURL)
   }
 
-  // Populates splitTestVariants with a value for the split test name and allows
-  // Pug to read it
-  await SplitTestHandler.promises.getAssignment(req, res, 'bs5-misc-pages-b2c')
-
   AnalyticsManager.recordEventForUserInBackground(
     userId,
     'confirm-secondary-email-page-displayed'
@@ -510,8 +506,6 @@ async function addSecondaryEmailPage(req, res) {
     userId,
     'add-secondary-email-page-displayed'
   )
-
-  await SplitTestHandler.promises.getAssignment(req, res, 'bs5-misc-pages-b2c')
 
   res.render('user/addSecondaryEmail')
 }

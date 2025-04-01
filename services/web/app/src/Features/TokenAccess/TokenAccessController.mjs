@@ -20,7 +20,6 @@ import { getSafeAdminDomainRedirect } from '../Helpers/UrlHelper.js'
 import UserGetter from '../User/UserGetter.js'
 import Settings from '@overleaf/settings'
 import LimitationsManager from '../Subscription/LimitationsManager.js'
-import SplitTestHandler from '../SplitTests/SplitTestHandler.js'
 
 const orderedPrivilegeLevels = [
   PrivilegeLevels.NONE,
@@ -112,13 +111,6 @@ async function tokenAccessPage(req, res, next) {
       }
     }
 
-    // Populates splitTestVariants with a value for the split test name and allows
-    // Pug to read it
-    await SplitTestHandler.promises.getAssignment(
-      req,
-      res,
-      'bs5-misc-pages-b2c'
-    )
     res.render('project/token/access-react', {
       postUrl: makePostUrl(token),
     })
