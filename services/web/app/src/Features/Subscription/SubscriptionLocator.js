@@ -2,6 +2,10 @@ const { callbackifyAll } = require('@overleaf/promise-utils')
 const { Subscription } = require('../../models/Subscription')
 const { DeletedSubscription } = require('../../models/DeletedSubscription')
 const logger = require('@overleaf/logger')
+const {
+  AI_ADD_ON_CODE,
+  isStandaloneAiAddOnPlanCode,
+} = require('./RecurlyEntities')
 require('./GroupPlansData') // make sure dynamic group plans are loaded
 
 const SubscriptionLocator = {
@@ -112,6 +116,15 @@ const SubscriptionLocator = {
     return await DeletedSubscription.findOne({
       'subscription._id': subscriptionId,
     }).exec()
+  },
+
+  async hasAiAssist(userOrId) {
+    const userId = SubscriptionLocator._getUserId(userOrId)
+    const subscription = await Subscription.findOne({ admin_id: userId }).exec()
+    return Boolean(
+      isStandaloneAiAddOnPlanCode(subscription?.planCode) ||
+        subscription?.addOns?.some(addOn => addOn.code === AI_ADD_ON_CODE)
+    )
   },
 
   _getUserId(userOrId) {
