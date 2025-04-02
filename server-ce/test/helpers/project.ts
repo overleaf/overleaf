@@ -100,7 +100,7 @@ export function openProjectViaInviteNotification(projectName: string) {
 function shareProjectByEmail(
   projectName: string,
   email: string,
-  level: 'Can view' | 'Can edit'
+  level: 'Viewer' | 'Editor'
 ) {
   openProjectByName(projectName)
   cy.findByText('Share').click()
@@ -108,7 +108,13 @@ function shareProjectByEmail(
     cy.findByLabelText('Add people', { selector: 'input' }).type(`${email},`)
     cy.findByLabelText('Add people', { selector: 'input' })
       .parents('form')
-      .within(() => cy.findByText('Can edit').parent().select(level))
+      .within(() => {
+        cy.findByTestId('add-collaborator-select')
+          .click()
+          .then(() => {
+            cy.findByText(level).click()
+          })
+      })
     cy.findByText('Invite').click({ force: true })
     cy.findByText('Invite not yet accepted.')
   })
@@ -117,7 +123,7 @@ function shareProjectByEmail(
 export function shareProjectByEmailAndAcceptInviteViaDash(
   projectName: string,
   email: string,
-  level: 'Can view' | 'Can edit'
+  level: 'Viewer' | 'Editor'
 ) {
   shareProjectByEmail(projectName, email, level)
 
@@ -128,7 +134,7 @@ export function shareProjectByEmailAndAcceptInviteViaDash(
 export function shareProjectByEmailAndAcceptInviteViaEmail(
   projectName: string,
   email: string,
-  level: 'Can view' | 'Can edit'
+  level: 'Viewer' | 'Editor'
 ) {
   shareProjectByEmail(projectName, email, level)
 

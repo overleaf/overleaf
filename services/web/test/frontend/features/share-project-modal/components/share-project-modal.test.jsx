@@ -638,8 +638,9 @@ describe('<ShareProjectModal/>', function () {
       },
     })
 
-    const privilegesElement = screen.getByDisplayValue('Can edit')
-    fireEvent.change(privilegesElement, { target: { value: 'readOnly' } })
+    const user = userEvent.setup()
+    await user.click(screen.getByTestId('add-collaborator-select'))
+    await user.click(screen.getByText('Viewer'))
 
     const submitButton = screen.getByRole('button', { name: 'Invite' })
     await userEvent.click(submitButton)
@@ -691,11 +692,16 @@ describe('<ShareProjectModal/>', function () {
     })
 
     await screen.findByText('Add more editors')
-    expect(screen.getByRole('option', { name: 'Can edit' }).disabled).to.be.true
-    expect(screen.getByRole('option', { name: 'Can review' }).disabled).to.be
-      .true
-    expect(screen.getByRole('option', { name: 'Can view' }).disabled).to.be
-      .false
+
+    const user = userEvent.setup()
+    await user.click(screen.getByTestId('add-collaborator-select'))
+    const editorOption = screen.getByText('Editor').closest('button')
+    const reviewerOption = screen.getByText('Reviewer').closest('button')
+    const viewerOption = screen.getByText('Viewer').closest('button')
+
+    expect(editorOption.classList.contains('disabled')).to.be.true
+    expect(reviewerOption.classList.contains('disabled')).to.be.false
+    expect(viewerOption.classList.contains('disabled')).to.be.false
 
     screen.getByText(
       /Upgrade to add more editors and access collaboration features like track changes and full project history/
@@ -722,11 +728,17 @@ describe('<ShareProjectModal/>', function () {
     })
 
     await screen.findByText('Add more editors')
-    expect(screen.getByRole('option', { name: 'Can edit' }).disabled).to.be.true
-    expect(screen.getByRole('option', { name: 'Can review' }).disabled).to.be
-      .true
-    expect(screen.getByRole('option', { name: 'Can view' }).disabled).to.be
-      .false
+
+    const user = userEvent.setup()
+    await user.click(screen.getByTestId('add-collaborator-select'))
+
+    const editorOption = screen.getByText('Editor').closest('button')
+    const reviewerOption = screen.getByText('Reviewer').closest('button')
+    const viewerOption = screen.getByText('Viewer').closest('button')
+
+    expect(editorOption.classList.contains('disabled')).to.be.true
+    expect(reviewerOption.classList.contains('disabled')).to.be.false
+    expect(viewerOption.classList.contains('disabled')).to.be.false
 
     screen.getByText(
       /Upgrade to add more editors and access collaboration features like track changes and full project history/

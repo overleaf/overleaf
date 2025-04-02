@@ -12,7 +12,7 @@ import ClickableElementEnhancer from '@/shared/components/clickable-element-enha
 import PropTypes from 'prop-types'
 import OLForm from '@/features/ui/components/ol/ol-form'
 import OLFormGroup from '@/features/ui/components/ol/ol-form-group'
-import OLFormSelect from '@/features/ui/components/ol/ol-form-select'
+import { Select } from '@/shared/components/select'
 import OLButton from '@/features/ui/components/ol/ol-button'
 import getMeta from '@/utils/meta'
 
@@ -27,7 +27,7 @@ export default function AddCollaborators({ readOnly }) {
 
   const { updateProject, setInFlight, setError } = useShareProjectContext()
 
-  const { _id: projectId, members, invites } = useProjectContext()
+  const { _id: projectId, members, invites, features } = useProjectContext()
 
   const currentMemberEmails = useMemo(
     () => (members || []).map(member => member.email).sort(),
@@ -149,6 +149,32 @@ export default function AddCollaborators({ readOnly }) {
     updateProject,
   ])
 
+  const privilegeOptions = useMemo(() => {
+    const options = [
+      {
+        key: 'readAndWrite',
+        label: t('editor'),
+      },
+    ]
+
+    if (getMeta('ol-isReviewerRoleEnabled')) {
+      options.push({
+        key: 'review',
+        label: t('reviewer'),
+        description: !features.trackChanges
+          ? t('comment_only_upgrade_for_track_changes')
+          : null,
+      })
+    }
+
+    options.push({
+      key: 'readOnly',
+      label: t('viewer'),
+    })
+
+    return options
+  }, [features.trackChanges, t])
+
   return (
     <OLForm className="add-collabs">
       <OLFormGroup>
@@ -161,23 +187,19 @@ export default function AddCollaborators({ readOnly }) {
       </OLFormGroup>
 
       <OLFormGroup>
-        <div className="pull-right">
-          <OLFormSelect
-            className="privileges"
-            value={privileges}
-            onChange={event => setPrivileges(event.target.value)}
-          >
-            <option disabled={readOnly} value="readAndWrite">
-              {t('can_edit')}
-            </option>
-            {getMeta('ol-isReviewerRoleEnabled') && (
-              <option disabled={readOnly} value="review">
-                {t('can_review')}
-              </option>
+        <div className="pull-right add-collaborator-controls">
+          <Select
+            dataTestId="add-collaborator-select"
+            items={privilegeOptions}
+            itemToKey={item => item.key}
+            itemToString={item => item.label}
+            itemToSubtitle={item => item.description || ''}
+            itemToDisabled={item => readOnly && item.key === 'readAndWrite'}
+            selected={privilegeOptions.find(
+              option => option.key === privileges
             )}
-            <option value="readOnly">{t('can_view')}</option>
-          </OLFormSelect>
-          <span>&nbsp;&nbsp;</span>
+            onSelectedItemChanged={item => setPrivileges(item.key)}
+          />
           <ClickableElementEnhancer
             as={OLButton}
             onClick={handleSubmit}

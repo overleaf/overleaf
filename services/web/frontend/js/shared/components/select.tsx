@@ -52,6 +52,8 @@ export type SelectProps<T> = {
   loading?: boolean
   // Show a checkmark next to the selected item
   selectedIcon?: boolean
+  // testId for the input element
+  dataTestId?: string
 }
 
 export const Select = <T,>({
@@ -70,6 +72,7 @@ export const Select = <T,>({
   optionalLabel = false,
   loading = false,
   selectedIcon = false,
+  dataTestId,
 }: SelectProps<T>) => {
   const [selectedItem, setSelectedItem] = useState<T | undefined | null>(
     defaultItem
@@ -247,6 +250,7 @@ export const Select = <T,>({
             </Form.Label>
           ) : null}
           <FormControl
+            data-testid={dataTestId}
             {...getToggleButtonProps({
               disabled,
               onKeyDown,

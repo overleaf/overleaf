@@ -188,6 +188,7 @@ export default function SelectCollaborators({
           ))}
 
           <input
+            data-testid="collaborator-email-input"
             {...getInputProps(
               getDropdownProps({
                 className: classnames('input', {

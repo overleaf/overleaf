@@ -136,7 +136,7 @@ describe('git-bridge', function () {
         shareProjectByEmailAndAcceptInviteViaDash(
           projectName,
           'collaborator-rw@example.com',
-          'Can edit'
+          'Editor'
         )
         maybeClearAllTokens()
         openProjectByName(projectName)
@@ -147,7 +147,7 @@ describe('git-bridge', function () {
         shareProjectByEmailAndAcceptInviteViaDash(
           projectName,
           'collaborator-ro@example.com',
-          'Can view'
+          'Viewer'
         )
         maybeClearAllTokens()
         openProjectByName(projectName)

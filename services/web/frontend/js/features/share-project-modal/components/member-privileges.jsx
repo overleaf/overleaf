@@ -6,13 +6,13 @@ export default function MemberPrivileges({ privileges }) {
 
   switch (privileges) {
     case 'readAndWrite':
-      return t('can_edit')
+      return t('editor')
 
     case 'readOnly':
-      return t('read_only')
+      return t('viewer')
 
     case 'review':
-      return t('can_review')
+      return t('reviewer')
 
     default:
       return null

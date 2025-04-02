@@ -154,7 +154,7 @@ describe('Project Sharing', function () {
 
     beforeEach(function () {
       login('user@example.com')
-      shareProjectByEmailAndAcceptInviteViaEmail(projectName, email, 'Can view')
+      shareProjectByEmailAndAcceptInviteViaEmail(projectName, email, 'Viewer')
     })
 
     it('should grant the collaborator read access', () => {
@@ -169,7 +169,7 @@ describe('Project Sharing', function () {
 
     beforeWithReRunOnTestRetry(function () {
       login('user@example.com')
-      shareProjectByEmailAndAcceptInviteViaDash(projectName, email, 'Can view')
+      shareProjectByEmailAndAcceptInviteViaDash(projectName, email, 'Viewer')
     })
 
     it('should grant the collaborator read access', () => {
@@ -186,7 +186,7 @@ describe('Project Sharing', function () {
 
     beforeWithReRunOnTestRetry(function () {
       login('user@example.com')
-      shareProjectByEmailAndAcceptInviteViaDash(projectName, email, 'Can edit')
+      shareProjectByEmailAndAcceptInviteViaDash(projectName, email, 'Editor')
     })
 
     it('should grant the collaborator write access', () => {
