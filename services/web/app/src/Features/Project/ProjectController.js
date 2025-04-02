@@ -576,19 +576,19 @@ const _ProjectController = {
         const pendingEditors = project.pendingEditor_refs?.length || 0
         const exceedAtLimit = planLimit > -1 && namedEditors >= planLimit
 
-        let editMode = 'edit'
+        let mode = 'edit'
         if (privilegeLevel === PrivilegeLevels.READ_ONLY) {
-          editMode = 'view'
+          mode = 'view'
         } else if (
           project.track_changes === true ||
           project.track_changes?.[userId] === true
         ) {
-          editMode = 'review'
+          mode = 'review'
         }
 
         const projectOpenedSegmentation = {
           role: privilegeLevel,
-          editMode,
+          mode,
           ownerId: project.owner_ref,
           projectId: project._id,
           namedEditors,
