@@ -15,7 +15,7 @@ describe('<AddSeats />', function () {
 
     cy.mount(<AddSeats />)
 
-    cy.findByRole('button', { name: /add licenses/i })
+    cy.findByRole('button', { name: /buy licenses/i })
     cy.findByTestId('add-more-users-group-form')
   })
 
@@ -35,8 +35,8 @@ describe('<AddSeats />', function () {
     })
   })
 
-  it('shows the "Add more licenses" label', function () {
-    cy.findByText(/add more licenses/i)
+  it('shows the "Buy more licenses" label', function () {
+    cy.findByText(/buy more licenses/i)
   })
 
   it('shows the maximum supported users', function () {
@@ -90,7 +90,7 @@ describe('<AddSeats />', function () {
 
   describe('cost summary', function () {
     beforeEach(function () {
-      cy.findByLabelText(/how many licenses do you want to add/i).as('input')
+      cy.findByLabelText(/how many licenses do you want to buy/i).as('input')
     })
 
     it('shows the title', function () {
@@ -139,7 +139,7 @@ describe('<AddSeats />', function () {
         this.numberOfUsersExceedingMaxLimit = MAX_NUMBER_OF_USERS + 1
 
         cy.get('@input').type(this.numberOfUsersExceedingMaxLimit.toString())
-        cy.findByRole('button', { name: /add licenses/i }).should('not.exist')
+        cy.findByRole('button', { name: /buy licenses/i }).should('not.exist')
         cy.findByRole('button', { name: /send request/i }).as('sendRequestBtn')
       })
 
@@ -237,7 +237,7 @@ describe('<AddSeats />', function () {
           },
         }
 
-        cy.findByRole('button', { name: /add licenses/i }).as('addUsersBtn')
+        cy.findByRole('button', { name: /buy licenses/i }).as('addUsersBtn')
         cy.findByRole('button', { name: /send request/i }).should('not.exist')
       })
 

@@ -376,7 +376,7 @@ function FlexibleGroupLicensingActions({
           href="/user/subscription/group/add-users"
           onClick={() => sendMB('flex-add-users')}
         >
-          {t('add_more_licenses')}
+          {t('buy_more_licenses')}
         </OLButton>
       )}
     </>

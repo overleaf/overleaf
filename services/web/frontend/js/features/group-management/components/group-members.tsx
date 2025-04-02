@@ -74,7 +74,7 @@ export default function GroupMembers() {
                 rel="noreferrer noopener"
                 onClick={() => sendMB('flex-add-users')}
               >
-                {t('add_more_licenses')}.
+                {t('buy_more_licenses')}.
               </a>
             </>
           )}

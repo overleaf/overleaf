@@ -532,7 +532,7 @@ describe('GroupMembers', function () {
       )
 
       cy.findByTestId('group-size-details').contains(
-        'You have 2 licenses and your plan supports up to 10. Add more licenses.'
+        'You have 2 licenses and your plan supports up to 10. Buy more licenses.'
       )
       cy.findByTestId('add-more-members-form').within(() => {
         cy.contains('Invite more members')
@@ -552,11 +552,11 @@ describe('GroupMembers', function () {
       )
 
       cy.findByTestId('group-size-details').contains(
-        'You have 1 license and your plan supports up to 10. Add more licenses.'
+        'You have 1 license and your plan supports up to 10. Buy more licenses.'
       )
     })
 
-    it('renders the group members page without "add more licenses" link when not admin', function () {
+    it('renders the group members page without "buy more licenses" link when not admin', function () {
       cy.window().then(win => {
         win.metaAttributesCache.set('ol-users', [this.JOHN_DOE])
         win.metaAttributesCache.set('ol-canUseAddSeatsFeature', false)
@@ -570,7 +570,7 @@ describe('GroupMembers', function () {
 
       cy.findByTestId('group-size-details').within(() => {
         cy.findByText(/you have \d+ license and your plan supports up to \d+/i)
-        cy.findByText(/add more licenses/i).should('not.exist')
+        cy.findByText(/buy more licenses/i).should('not.exist')
       })
     })
   })

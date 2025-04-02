@@ -281,7 +281,7 @@ function AddSeats() {
               >
                 <div className="d-grid gap-1">
                   <h4 className="fw-bold m-0 card-description-secondary">
-                    {t('add_more_licenses')}
+                    {t('buy_more_licenses')}
                   </h4>
                   <div>
                     {t('your_current_plan_supports_up_to_x_licenses', {
@@ -308,7 +308,7 @@ function AddSeats() {
                 <div>
                   <FormGroup controlId="number-of-users-input">
                     <FormLabel>
-                      {t('how_many_licenses_do_you_want_to_add')}
+                      {t('how_many_licenses_do_you_want_to_buy')}
                     </FormLabel>
                     <FormControl
                       type="text"
@@ -366,7 +366,7 @@ function AddSeats() {
                     }
                     isLoading={isAddingSeats || isSendingMailToSales}
                   >
-                    {shouldContactSales ? t('send_request') : t('add_licenses')}
+                    {shouldContactSales ? t('send_request') : t('buy_licenses')}
                   </Button>
                 </div>
               </form>
