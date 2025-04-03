@@ -23,6 +23,10 @@
   }
 }
 
+.auth-aux-new-password ~ .notification {
+  margin-top: var(--spacing-04);
+}
+
 .login-overleaf-logo-container {
   display: block;
   padding: var(--spacing-06);
