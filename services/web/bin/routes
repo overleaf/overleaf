@@ -39,9 +39,9 @@ const routerCall = callExpression => {
     (routerName === 'app' || routerName.match('^.*[rR]outer$'))
   ) {
     return {
-      routerName: routerName,
+      routerName,
       method: property.name,
-      args: args,
+      args,
     }
   } else {
     return null
@@ -55,27 +55,30 @@ const formatMethodCall = expression => {
 const parseAndPrintRoutesSync = path => {
   const content = fs.readFileSync(path)
   // Walk the AST (Abstract Syntax Tree)
-  acornWalk.simple(acorn.parse(content), {
-    // We only care about call expression ( like `a.b()` )
-    CallExpression(node) {
-      const call = routerCall(node)
-      if (call) {
-        const firstArg = _.first(call.args)
-        try {
-          print(
-            `  ${formatRouterName(call.routerName)}\t .${call.method} \t: ${
-              firstArg.value
-            } => ${call.args.slice(1).map(formatMethodCall).join(' => ')}`
-          )
-        } catch (e) {
-          print('>> Error')
-          print(e)
-          print(JSON.stringify(call))
-          process.exit(1)
+  acornWalk.simple(
+    acorn.parse(content, { sourceType: 'module', ecmaVersion: 2020 }),
+    {
+      // We only care about call expression ( like `a.b()` )
+      CallExpression(node) {
+        const call = routerCall(node)
+        if (call) {
+          const firstArg = _.first(call.args)
+          try {
+            print(
+              `  ${formatRouterName(call.routerName)}\t .${call.method} \t: ${
+                firstArg.value
+              } => ${call.args.slice(1).map(formatMethodCall).join(' => ')}`
+            )
+          } catch (e) {
+            print('>> Error')
+            print(e)
+            print(JSON.stringify(call))
+            process.exit(1)
+          }
         }
-      }
-    },
-  })
+      },
+    }
+  )
 }
 
 const routerNameMapping = {
@@ -101,7 +104,7 @@ const main = () => {
   }
 
   // Find all routers
-  glob('*[rR]outer.js', { matchBase: true }, (err, files) => {
+  glob('*[rR]outer.*js', { matchBase: true }, (err, files) => {
     if (err) {
       console.error(err)
       process.exit(1)
