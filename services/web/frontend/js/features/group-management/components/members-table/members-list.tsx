@@ -83,7 +83,7 @@ export default function MembersList({ groupId }: ManagedUsersListProps) {
         <tbody>
           {users.length === 0 && (
             <tr>
-              <td className="text-center" colSpan={5}>
+              <td className="text-center" colSpan={4}>
                 <small>{t('no_members')}</small>
               </td>
             </tr>
