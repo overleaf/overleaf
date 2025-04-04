@@ -8,6 +8,7 @@ import MaterialIcon, {
 } from '@/shared/components/material-icon'
 import React from 'react'
 import useCollapsibleFileTree from '../hooks/use-collapsible-file-tree'
+import { useCommandProvider } from '@/features/ide-react/hooks/use-command-provider'
 
 function FileTreeToolbar() {
   const { t } = useTranslation()
@@ -44,6 +45,39 @@ function FileTreeActionButtons() {
     startCreatingDocOrFile,
     startUploadingDocOrFile,
   } = useFileTreeActionable()
+  useCommandProvider(() => {
+    if (!canCreate || fileTreeReadOnly) return
+    return [
+      {
+        label: t('new_file'),
+        id: 'new_file',
+        handler: ({ location }) => {
+          eventTracking.sendMB('new-file-click', { location })
+          startCreatingDocOrFile()
+        },
+      },
+      {
+        label: t('new_folder'),
+        id: 'new_folder',
+        handler: startCreatingFolder,
+      },
+      {
+        label: t('upload_file'),
+        id: 'upload_file',
+        handler: ({ location }) => {
+          eventTracking.sendMB('upload-click', { location })
+          startUploadingDocOrFile()
+        },
+      },
+    ]
+  }, [
+    canCreate,
+    fileTreeReadOnly,
+    startCreatingDocOrFile,
+    t,
+    startCreatingFolder,
+    startUploadingDocOrFile,
+  ])
 
   if (!canCreate || fileTreeReadOnly) return null
 

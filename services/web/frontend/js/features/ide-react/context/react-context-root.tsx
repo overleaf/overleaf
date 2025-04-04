@@ -25,6 +25,7 @@ import { SplitTestProvider } from '@/shared/context/split-test-context'
 import { UserProvider } from '@/shared/context/user-context'
 import { UserSettingsProvider } from '@/shared/context/user-settings-context'
 import { IdeRedesignSwitcherProvider } from './ide-redesign-switcher-context'
+import { CommandRegistryProvider } from './command-registry-context'
 
 export const ReactContextRoot: FC<{ providers?: Record<string, FC> }> = ({
   children,
@@ -57,6 +58,7 @@ export const ReactContextRoot: FC<{ providers?: Record<string, FC> }> = ({
     UserProvider,
     UserSettingsProvider,
     IdeRedesignSwitcherProvider,
+    CommandRegistryProvider,
     ...providers,
   }
 
@@ -87,7 +89,9 @@ export const ReactContextRoot: FC<{ providers?: Record<string, FC> }> = ({
                                                   <Providers.OutlineProvider>
                                                     <Providers.RailProvider>
                                                       <Providers.IdeRedesignSwitcherProvider>
-                                                        {children}
+                                                        <Providers.CommandRegistryProvider>
+                                                          {children}
+                                                        </Providers.CommandRegistryProvider>
                                                       </Providers.IdeRedesignSwitcherProvider>
                                                     </Providers.RailProvider>
                                                   </Providers.OutlineProvider>

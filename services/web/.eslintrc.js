@@ -39,6 +39,12 @@ module.exports = {
       'error',
       { functions: false, classes: false, variables: false },
     ],
+    'react-hooks/exhaustive-deps': [
+      'warn',
+      {
+        additionalHooks: '(useCommandProvider)',
+      },
+    ],
   },
   overrides: [
     // NOTE: changing paths may require updating them in the Makefile too.

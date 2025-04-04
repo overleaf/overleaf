@@ -1,3 +1,4 @@
+import { useCommandProvider } from '@/features/ide-react/hooks/use-command-provider'
 import OLDropdownMenuItem from '@/features/ui/components/ol/ol-dropdown-menu-item'
 import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
 import { isSmallDevice, sendMB } from '@/infrastructure/event-tracking'
@@ -16,6 +17,17 @@ export const DownloadProjectZip = () => {
       isSmallDevice,
     })
   }, [projectId])
+
+  useCommandProvider(
+    () => [
+      {
+        id: 'download-as-source-zip',
+        href: `/project/${projectId}/download/zip`,
+        label: t('download_as_source_zip'),
+      },
+    ],
+    [t, projectId]
+  )
 
   return (
     <OLDropdownMenuItem
@@ -40,6 +52,25 @@ export const DownloadProjectPDF = () => {
       isSmallDevice,
     })
   }, [projectId])
+
+  useCommandProvider(
+    () => [
+      {
+        id: 'download-pdf',
+        disabled: !pdfUrl,
+        href: pdfDownloadUrl || pdfUrl,
+        handler: ({ location }) => {
+          sendMB('download-pdf-button-click', {
+            projectId,
+            location,
+            isSmallDevice,
+          })
+        },
+        label: t('download_as_pdf'),
+      },
+    ],
+    [t, pdfUrl, projectId, pdfDownloadUrl]
+  )
 
   const button = (
     <OLDropdownMenuItem

@@ -10,11 +10,14 @@ import {
 import { MenuBarOption } from '@/shared/components/menu-bar/menu-bar-option'
 import { useTranslation } from 'react-i18next'
 import ChangeLayoutOptions from './change-layout-options'
-import { MouseEventHandler, useCallback } from 'react'
+import { MouseEventHandler, useCallback, useMemo } from 'react'
 import { useIdeRedesignSwitcherContext } from '@/features/ide-react/context/ide-redesign-switcher-context'
 import { useSwitchEnableNewEditorState } from '../../hooks/use-switch-enable-new-editor-state'
 import MaterialIcon from '@/shared/components/material-icon'
 import OLSpinner from '@/features/ui/components/ol/ol-spinner'
+import { useLayoutContext } from '@/shared/context/layout-context'
+import { useCommandProvider } from '@/features/ide-react/hooks/use-command-provider'
+import CommandDropdown, { MenuStructure } from './command-dropdown'
 
 export const ToolbarMenuBar = () => {
   const { t } = useTranslation()
@@ -22,27 +25,41 @@ export const ToolbarMenuBar = () => {
   const openEditorRedesignSwitcherModal = useCallback(() => {
     setShowSwitcherModal(true)
   }, [setShowSwitcherModal])
+  const { setView, view } = useLayoutContext()
+
+  useCommandProvider(
+    () => [
+      {
+        label: t('show_version_history'),
+        handler: () => {
+          setView(view === 'history' ? 'editor' : 'history')
+        },
+        id: 'show_version_history',
+      },
+    ],
+    [t, setView, view]
+  )
+  const fileMenuStructure: MenuStructure = useMemo(
+    () => [
+      {
+        id: 'file-file-tree',
+        children: ['new_file', 'new_folder', 'upload_file'],
+      },
+      { id: 'file-history', children: ['show_version_history'] },
+      {
+        id: 'file-download',
+        children: ['download-as-source-zip', 'download-pdf'],
+      },
+    ],
+    []
+  )
+
   return (
     <MenuBar
       className="ide-redesign-toolbar-menu-bar"
       id="toolbar-menu-bar-item"
     >
-      <MenuBarDropdown
-        title={t('file')}
-        id="file"
-        className="ide-redesign-toolbar-dropdown-toggle-subdued ide-redesign-toolbar-button-subdued"
-      >
-        <MenuBarOption title="New file" />
-        <MenuBarOption title="New folder" />
-        <MenuBarOption title="Upload file" />
-        <DropdownDivider />
-        <MenuBarOption title="Show version history" />
-        <DropdownDivider />
-        <MenuBarOption title="Download as source (.zip)" />
-        <MenuBarOption title="Download as PDF" />
-        <DropdownDivider />
-        <MenuBarOption title="New project" />
-      </MenuBarDropdown>
+      <CommandDropdown menu={fileMenuStructure} title={t('file')} id="file" />
       <MenuBarDropdown
         title={t('edit')}
         id="edit"
