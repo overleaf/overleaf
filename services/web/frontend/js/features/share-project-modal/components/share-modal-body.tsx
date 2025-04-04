@@ -117,6 +117,9 @@ export default function ShareModalBody() {
               member.pendingEditor || member.pendingReviewer
             )}
             canAddCollaborators={canAddCollaborators}
+            isReviewerOnFreeProject={
+              member.privileges === 'review' && !features.trackChanges
+            }
           />
         ) : (
           <ViewMember key={member._id} member={member} />

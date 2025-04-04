@@ -700,7 +700,7 @@ describe('<ShareProjectModal/>', function () {
     const viewerOption = screen.getByText('Viewer').closest('button')
 
     expect(editorOption.classList.contains('disabled')).to.be.true
-    expect(reviewerOption.classList.contains('disabled')).to.be.false
+    expect(reviewerOption.classList.contains('disabled')).to.be.true
     expect(viewerOption.classList.contains('disabled')).to.be.false
 
     screen.getByText(
@@ -737,7 +737,7 @@ describe('<ShareProjectModal/>', function () {
     const viewerOption = screen.getByText('Viewer').closest('button')
 
     expect(editorOption.classList.contains('disabled')).to.be.true
-    expect(reviewerOption.classList.contains('disabled')).to.be.false
+    expect(reviewerOption.classList.contains('disabled')).to.be.true
     expect(viewerOption.classList.contains('disabled')).to.be.false
 
     screen.getByText(

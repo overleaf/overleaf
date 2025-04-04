@@ -267,6 +267,7 @@
   "comment": "",
   "comment_only": "",
   "comment_only_upgrade_for_track_changes": "",
+  "comment_only_upgrade_to_enable_track_changes": "",
   "common": "",
   "common_causes_of_compile_timeouts_include": "",
   "commons_plan_tooltip": "",

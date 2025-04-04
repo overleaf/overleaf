@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import PropTypes from 'prop-types'
-import { useTranslation } from 'react-i18next'
+import { Trans, useTranslation } from 'react-i18next'
 import { useShareProjectContext } from './share-project-modal'
 import TransferOwnershipModal from './transfer-ownership-modal'
 import { removeMemberFromProject, updateMember } from '../utils/api'
@@ -17,6 +17,7 @@ import MaterialIcon from '@/shared/components/material-icon'
 import getMeta from '@/utils/meta'
 import { useUserContext } from '@/shared/context/user-context'
 import { isSplitTestEnabled } from '@/utils/splitTestUtils'
+import { upgradePlan } from '@/main/account-upgrade'
 
 type PermissionsOption = PermissionsLevel | 'removeAccess' | 'downgraded'
 
@@ -25,6 +26,7 @@ type EditMemberProps = {
   hasExceededCollaboratorLimit: boolean
   hasBeenDowngraded: boolean
   canAddCollaborators: boolean
+  isReviewerOnFreeProject?: boolean
 }
 
 type Privilege = {
@@ -37,6 +39,7 @@ export default function EditMember({
   hasExceededCollaboratorLimit,
   hasBeenDowngraded,
   canAddCollaborators,
+  isReviewerOnFreeProject,
 }: EditMemberProps) {
   const [privileges, setPrivileges] = useState<PermissionsOption>(
     member.privileges
@@ -144,7 +147,7 @@ export default function EditMember({
       }}
     >
       <OLFormGroup className="project-member row">
-        <OLCol xs={7}>
+        <OLCol xs={8}>
           <div className="project-member-email-icon">
             <MaterialIcon
               type={
@@ -179,11 +182,26 @@ export default function EditMember({
                   })}
                 </div>
               )}
+              {isReviewerOnFreeProject && (
+                <div className="small">
+                  <Trans
+                    i18nKey="comment_only_upgrade_to_enable_track_changes"
+                    components={[
+                      // eslint-disable-next-line react/jsx-key
+                      <OLButton
+                        variant="link"
+                        className="btn-inline-link"
+                        onClick={() => upgradePlan('track-changes')}
+                      />,
+                    ]}
+                  />
+                </div>
+              )}
             </div>
           </div>
         </OLCol>
 
-        <OLCol xs={5} className="project-member-actions">
+        <OLCol xs={4} className="project-member-actions">
           {confirmRemoval && (
             <ChangePrivilegesActions
               handleReset={() => setPrivileges(member.privileges)}

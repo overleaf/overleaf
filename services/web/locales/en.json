@@ -348,6 +348,7 @@
   "comment": "Comment",
   "comment_only": "Comment only",
   "comment_only_upgrade_for_track_changes": "Comment only. Upgrade for track changes.",
+  "comment_only_upgrade_to_enable_track_changes": "Comment only. <0>Upgrade</0> to enable track changes.",
   "common": "Common",
   "common_causes_of_compile_timeouts_include": "Common causes of compile timeouts include",
   "commons_plan_tooltip": "You’re on the __plan__ plan because of your affiliation with __institution__. Click to find out how to make the most of your Overleaf premium features.",

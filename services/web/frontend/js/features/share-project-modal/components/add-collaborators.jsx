@@ -194,7 +194,7 @@ export default function AddCollaborators({ readOnly }) {
             itemToKey={item => item.key}
             itemToString={item => item.label}
             itemToSubtitle={item => item.description || ''}
-            itemToDisabled={item => readOnly && item.key === 'readAndWrite'}
+            itemToDisabled={item => readOnly && item.key !== 'readOnly'}
             selected={privilegeOptions.find(
               option => option.key === privileges
             )}
