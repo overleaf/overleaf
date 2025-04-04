@@ -3,7 +3,7 @@ import { Trans } from 'react-i18next'
 import { useEditorManagerContext } from '@/features/ide-react/context/editor-manager-context'
 import MaterialIcon from '@/shared/components/material-icon'
 import { useProjectContext } from '@/shared/context/project-context'
-import UpgradeTrackChangesModal from '@/features/review-panel-new/components/upgrade-track-changes-modal'
+import UpgradeTrackChangesModalLegacy from './upgrade-track-changes-modal-legacy'
 import { send, sendMB } from '@/infrastructure/event-tracking'
 
 const sendAnalytics = () => {
@@ -52,7 +52,7 @@ const ReviewPanelTrackChangesMenuButton: FC<{
         <MaterialIcon type={menuExpanded ? 'expand_more' : 'chevron_right'} />
       </button>
 
-      <UpgradeTrackChangesModal show={showModal} setShow={setShowModal} />
+      <UpgradeTrackChangesModalLegacy show={showModal} setShow={setShowModal} />
     </>
   )
 }

@@ -21,7 +21,7 @@ type UpgradeTrackChangesModalProps = {
   setShow: React.Dispatch<React.SetStateAction<boolean>>
 }
 
-function UpgradeTrackChangesModal({
+function UpgradeTrackChangesModalLegacy({
   show,
   setShow,
 }: UpgradeTrackChangesModalProps) {
@@ -32,9 +32,9 @@ function UpgradeTrackChangesModal({
   return (
     <OLModal show={show} onHide={() => setShow(false)}>
       <OLModalHeader closeButton>
-        <OLModalTitle>{t('upgrade_to_review')}</OLModalTitle>
+        <OLModalTitle>{t('upgrade_to_track_changes')}</OLModalTitle>
       </OLModalHeader>
-      <OLModalBody className="upgrade-track-changes-modal">
+      <OLModalBody>
         <div className="teaser-video-container">
           {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
           <video className="teaser-video" autoPlay loop>
@@ -45,36 +45,41 @@ function UpgradeTrackChangesModal({
             />
           </video>
         </div>
-        <h4 className="teaser-title">{t('get_real_time_track_changes')}</h4>
+        <h4 className="teaser-title">
+          {t('see_changes_in_your_documents_live')}
+        </h4>
         <OLRow>
           <OLCol lg={{ span: 10, offset: 1 }}>
             <ul className="list-unstyled">
               {[
-                t('see_suggestions_from_collaborators'),
-                t('accept_or_reject_individual_edits'),
-                t('access_all_premium_features'),
+                t('track_any_change_in_real_time'),
+                t('review_your_peers_work'),
+                t('accept_or_reject_each_changes_individually'),
               ].map(translation => (
                 <li key={translation}>
-                  <MaterialIcon type="check" className="check-icon" />
-                  <span>{translation}</span>
+                  <MaterialIcon type="check" className="align-text-bottom" />
+                  &nbsp;{translation}
                 </li>
               ))}
             </ul>
           </OLCol>
         </OLRow>
+        <p className="small">
+          {t('already_subscribed_try_refreshing_the_page')}
+        </p>
         {project.owner && (
           <div className="text-center">
             {project.owner._id === user.id ? (
               user.allowedFreeTrial ? (
                 <OLButton
-                  variant="premium"
+                  variant="primary"
                   onClick={() => startFreeTrial('track-changes')}
                 >
                   {t('try_it_for_free')}
                 </OLButton>
               ) : (
                 <OLButton
-                  variant="premium"
+                  variant="primary"
                   onClick={() => upgradePlan('project-sharing')}
                 >
                   {t('upgrade')}
@@ -101,4 +106,4 @@ function UpgradeTrackChangesModal({
   )
 }
 
-export default memo(UpgradeTrackChangesModal)
+export default memo(UpgradeTrackChangesModalLegacy)
