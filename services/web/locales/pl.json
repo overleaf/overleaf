@@ -216,6 +216,7 @@
   "update_account_info": "Zaktualizuj informacje o koncie",
   "update_dropbox_settings": "Zaktualizuj ustawienia Dropbox",
   "upload": "Wyślij plik",
+  "upload_file": "Wyślij plik",
   "upload_project": "Wyślij projekt",
   "upload_zipped_project": "Wyślij projekt w pliku ZIP",
   "user_wants_you_to_see_project": "__username__ chce, żebyś zobaczył __projectname__",

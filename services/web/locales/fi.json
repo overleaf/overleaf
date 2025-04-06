@@ -329,6 +329,7 @@
   "upgrade": "Päivitä",
   "upgrade_now": "Päivitä Nyt",
   "upload": "Siirrä",
+  "upload_file": "Vie tiedosto",
   "upload_project": "Siirrä projekti palvelimelle",
   "upload_zipped_project": "Vie pakattu projekti",
   "user_wants_you_to_see_project": "__username__ haluaisi katsoa projektiasi __projectname__",

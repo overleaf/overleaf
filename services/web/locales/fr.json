@@ -1192,6 +1192,7 @@
   "upgrade_to_track_changes": "Mettez à niveau pour suivre les modifications",
   "upload": "Importer",
   "upload_failed": "Échec du téléversement",
+  "upload_file": "Importer un fichier",
   "upload_project": "Importer un projet",
   "upload_zipped_project": "Importer un projet zippé",
   "url_to_fetch_the_file_from": "Récupérer le fichier depuis l’URL",

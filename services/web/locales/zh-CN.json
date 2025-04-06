@@ -2093,6 +2093,7 @@
   "upgrade_to_track_changes": "升级以记录文档修改历史",
   "upload": "上传",
   "upload_failed": "上传失败",
+  "upload_file": "上传文件",
   "upload_from_computer": "从电脑本地上传",
   "upload_project": "上传项目",
   "upload_zipped_project": "上传项目的压缩包",

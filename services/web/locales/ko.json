@@ -549,6 +549,7 @@
   "upgrade_to_get_feature": "__feature__와 다음 기능 사용을 위해 업그레이드:",
   "upgrade_to_track_changes": "변경 내용 추적을 위해 업그레이드",
   "upload": "업로드",
+  "upload_file": "파일 업로드",
   "upload_project": "프로젝트 업로드",
   "upload_zipped_project": "압축된 프로젝트 업로드",
   "user_wants_you_to_see_project": "__username__ 님이  __projectname__에 참여하길 원합니다",

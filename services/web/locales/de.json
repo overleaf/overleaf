@@ -1319,6 +1319,7 @@
   "upgrade_to_track_changes": "Upgrade, um Änderungen verfolgen zu können",
   "upload": "Hochladen",
   "upload_failed": "Hochladen fehlgeschlagen",
+  "upload_file": "Datei hochladen",
   "upload_project": "Projekt hochladen",
   "upload_zipped_project": "Projekt als ZIP hochladen",
   "url_to_fetch_the_file_from": "URL, von der die Datei abgerufen werden soll",

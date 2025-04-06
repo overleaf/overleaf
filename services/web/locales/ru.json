@@ -449,6 +449,7 @@
   "upgrade": "Сменить тариф",
   "upgrade_now": "Сменить тариф",
   "upload": "Загрузить",
+  "upload_file": "Загрузить файл",
   "upload_project": "Загрузить проект",
   "upload_zipped_project": "Загрузить архив проекта (*.zip)",
   "user_wants_you_to_see_project": "__username__ приглашает вас к просмотру проекта __projectname__",
