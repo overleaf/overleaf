@@ -6,7 +6,7 @@ html(
 	class=(fixedSizeDocument ? 'fixed-size-document' : undefined)
 )
 	- metadata = metadata || {}
-	- let bootstrap5PageStatus = 'disabled' // One of 'disabled', 'enabled', and 'queryStringOnly'
+	- let bootstrap5PageStatus = 'enabled' // One of 'disabled' and 'enabled'
 	- let bootstrap5PageSplitTest = '' // Limits Bootstrap 5 usage on this page to users with an assignment of "enabled" for the specified split test. If left empty and bootstrap5PageStatus is "enabled", the page always uses Bootstrap 5.
 	- let isWebsiteRedesign = false
 	- let isApplicationPage = false
