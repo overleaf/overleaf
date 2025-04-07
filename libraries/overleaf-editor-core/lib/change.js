@@ -13,7 +13,7 @@ const V2DocVersions = require('./v2_doc_versions')
 
 /**
  * @import Author from "./author"
- * @import { BlobStore, RawChange } from "./types"
+ * @import { BlobStore, RawChange, ReadonlyBlobStore } from "./types"
  */
 
 /**
@@ -219,7 +219,7 @@ class Change {
    * If this Change contains any File objects, load them.
    *
    * @param {string} kind see {File#load}
-   * @param {BlobStore} blobStore
+   * @param {ReadonlyBlobStore} blobStore
    * @return {Promise<void>}
    */
   async loadFiles(kind, blobStore) {
