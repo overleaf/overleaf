@@ -307,14 +307,6 @@ const UserPagesController = {
   },
 
   async compromisedPasswordPage(req, res) {
-    // Populates splitTestVariants with a value for the split test name and allows
-    // Pug to read it
-    await SplitTestHandler.promises.getAssignment(
-      req,
-      res,
-      'bs5-misc-pages-platform'
-    )
-
     res.render('user/compromised_password')
   },
 
