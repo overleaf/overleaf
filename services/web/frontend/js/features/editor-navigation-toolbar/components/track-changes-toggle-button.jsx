@@ -25,6 +25,7 @@ function TrackChangesToggleButton({
         <MaterialIcon type="rate_review" className="align-middle" />
         <p className="toolbar-label">{t('review')}</p>
       </button>
+      <div id="toolbar-cio-review" className="toolbar-cio-tooltip" />
     </div>
   )
 }

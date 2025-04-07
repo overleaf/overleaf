@@ -11,6 +11,7 @@ function ShareProjectButton({ onClick }) {
         <MaterialIcon type="group_add" className="align-middle" />
         <p className="toolbar-label">{t('share')}</p>
       </button>
+      <div id="toolbar-cio-share" className="toolbar-cio-tooltip" />
     </div>
   )
 }

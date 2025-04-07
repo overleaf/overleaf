@@ -11,6 +11,7 @@ function HistoryToggleButton({ onClick }) {
         <MaterialIcon type="history" className="align-middle" />
         <p className="toolbar-label">{t('history')}</p>
       </button>
+      <div id="toolbar-cio-history" className="toolbar-cio-tooltip" />
     </div>
   )
 }

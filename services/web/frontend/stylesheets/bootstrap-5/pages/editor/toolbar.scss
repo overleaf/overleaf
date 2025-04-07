@@ -248,6 +248,23 @@
 
   .toolbar-item {
     display: flex;
+    justify-content: center;
+  }
+
+  .toolbar-cio-tooltip {
+    position: absolute;
+    top: var(--toolbar-height);
+    width: 391px;
+  }
+
+  #toolbar-cio-history {
+    @include media-breakpoint-down(lg) {
+      right: 10px;
+
+      /* The iframe a message renders in isn't aware of the page width, so we
+         make it 1px narrower to enable max-width media queries */
+      width: 390px;
+    }
   }
 }
 
