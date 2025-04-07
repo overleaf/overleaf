@@ -1,3 +1,15 @@
+:root {
+  --panel-heading-color: var(--content-primary);
+  --panel-heading-button-hover-color: var(--bg-light-tertiary);
+
+  @include theme('default') {
+    .ide-redesign-main {
+      --panel-heading-color: var(--content-primary-dark);
+      --panel-heading-button-hover-color: var(--bg-dark-tertiary);
+    }
+  }
+}
+
 .panel-heading {
   display: flex;
   align-items: center;
@@ -21,11 +33,11 @@
   align-items: center;
   border: none;
   background-color: transparent;
-  color: var(--content-primary);
+  color: var(--panel-heading-color);
   padding: var(--spacing-01);
 
   &:hover,
   &:focus {
-    background-color: var(--neutral-20);
+    background-color: var(--panel-heading-button-hover-color);
   }
 }

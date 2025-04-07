@@ -2,13 +2,34 @@
 
 $rp-border-grey: #d9d9d9;
 $rp-type-blue: #6b7797;
-$rp-type-darkgrey: #3f3f3f;
 
 :root {
   --rp-base-font-size: var(--font-size-01);
   --rp-border-grey: #{$rp-border-grey};
   --rp-type-blue: #{$rp-type-blue};
-  --rp-type-darkgrey: #{$rp-type-darkgrey};
+  --review-panel-bg-color: var(--bg-light-secondary);
+  --review-panel-color: var(--content-primary);
+  --review-panel-color-secondary: var(--content-secondary);
+  --review-panel-header-bg-color: var(--bg-light-primary);
+  --review-panel-footer-bg-color: var(--bg-light-primary);
+  --review-panel-entry-bg-color: var(--bg-light-primary);
+  --review-panel-empty-state-bg-color: var(--bg-light-primary);
+  --review-panel-button-hover-bg-color: var(--bg-light-tertiary);
+  --review-panel-border-color: var(--border-divider);
+
+  @include theme('default') {
+    .ide-redesign-main {
+      --review-panel-bg-color: var(--bg-dark-secondary);
+      --review-panel-color: var(--content-primary-dark);
+      --review-panel-color-secondary: var(--content-secondary-dark);
+      --review-panel-header-bg-color: var(--bg-dark-primary);
+      --review-panel-footer-bg-color: var(--bg-dark-primary);
+      --review-panel-entry-bg-color: var(--bg-dark-primary);
+      --review-panel-empty-state-bg-color: var(--bg-dark-primary);
+      --review-panel-button-hover-bg-color: var(--bg-dark-tertiary);
+      --review-panel-border-color: var(--border-divider-dark);
+    }
+  }
 }
 
 .review-panel-container {
@@ -20,9 +41,9 @@ $rp-type-darkgrey: #3f3f3f;
 .review-panel-inner {
   z-index: 6;
   flex-shrink: 0;
-  background-color: var(--neutral-10);
-  border-left: 1px solid var(--border-divider);
-  color: var(--content-primary);
+  background-color: var(--review-panel-bg-color);
+  border-left: 1px solid var(--review-panel-border-color);
+  color: var(--review-panel-color);
   font-family: $font-family-base;
   line-height: $line-height-base;
   font-size: var(--font-size-01);
@@ -37,9 +58,9 @@ $rp-type-darkgrey: #3f3f3f;
 }
 
 .review-panel-entry {
-  background-color: var(--white);
+  background-color: var(--review-panel-entry-bg-color);
   border-radius: var(--border-radius-base);
-  border: 1px solid var(--neutral-20);
+  border: 1px solid var(--review-panel-border-color);
   padding: var(--spacing-04);
   width: calc(100% - var(--spacing-04));
   margin-left: var(--spacing-02);
@@ -85,7 +106,7 @@ $rp-type-darkgrey: #3f3f3f;
   margin-bottom: var(--spacing-01);
 
   .review-panel-entry-user {
-    color: $content-primary;
+    color: var(--review-panel-color);
     font-size: 110%;
     max-width: 150px;
     white-space: nowrap;
@@ -93,7 +114,7 @@ $rp-type-darkgrey: #3f3f3f;
   }
 
   .review-panel-entry-time {
-    color: var(--content-secondary);
+    color: var(--review-panel-color-secondary);
   }
 
   .review-panel-entry-actions {
@@ -103,6 +124,7 @@ $rp-type-darkgrey: #3f3f3f;
 
     .btn {
       background-color: transparent;
+      color: var(--review-panel-color);
       border-width: 0;
       padding: 0;
       height: 24px;
@@ -110,8 +132,8 @@ $rp-type-darkgrey: #3f3f3f;
 
       &:hover,
       &:focus {
-        background-color: var(--neutral-20);
-        color: var(--content-primary);
+        background-color: var(--review-panel-button-hover-bg-color);
+        color: var(--review-panel-color);
       }
     }
 
@@ -137,13 +159,13 @@ $rp-type-darkgrey: #3f3f3f;
 .review-panel-change-body {
   display: flex;
   align-items: flex-start;
-  color: var(--content-secondary);
+  color: var(--review-panel-color-secondary);
   gap: var(--spacing-02);
   overflow-wrap: anywhere;
 }
 
 .review-panel-content-highlight {
-  color: var(--content-primary);
+  color: var(--review-panel-color);
   text-decoration: none;
 }
 
@@ -184,8 +206,8 @@ del.review-panel-content-highlight {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  border-bottom: 1px solid var(--rp-border-grey);
-  background-color: white;
+  border-bottom: 1px solid var(--review-panel-border-color);
+  background-color: var(--review-panel-header-bg-color);
   text-align: center;
   z-index: 4;
 }
@@ -263,13 +285,13 @@ del.review-panel-content-highlight {
   align-items: center;
   border: none;
   background-color: transparent;
-  color: var(--content-primary);
+  color: var(--review-panel-color);
   padding: var(--spacing-01);
   border-radius: 100%;
 
   &:hover,
   &:focus {
-    background-color: var(--neutral-20);
+    background-color: var(--review-panel-button-hover-bg-color);
   }
 }
 
@@ -413,7 +435,7 @@ del.review-panel-content-highlight {
 
 .review-panel-comment-body {
   font-size: var(--font-size-02);
-  color: var(--content-primary);
+  color: var(--review-panel-color);
   overflow-wrap: anywhere;
   white-space: pre-wrap;
 }
@@ -446,8 +468,8 @@ del.review-panel-content-highlight {
   border-radius: var(--border-radius-base);
   border: solid 1px var(--neutral-60);
   resize: vertical;
-  color: var(--rp-type-darkgrey);
-  background-color: var(--white);
+  color: var(--review-panel-color-secondary);
+  background-color: var(--review-panel-entry-bg-color);
   height: 25px;
   min-height: 25px;
   overflow-x: hidden;
@@ -487,7 +509,7 @@ del.review-panel-content-highlight {
 .review-panel-empty-state-comment-icon {
   width: 80px;
   height: 80px;
-  background-color: white;
+  background-color: var(--review-panel-empty-state-bg-color);
   border-radius: 100%;
   display: flex;
   align-items: center;
@@ -515,7 +537,7 @@ del.review-panel-content-highlight {
 }
 
 .review-panel-overfile-divider {
-  border-bottom: 1px solid var(--border-divider);
+  border-bottom: 1px solid var(--review-panel-border-color);
   margin: var(--spacing-01) 0;
 }
 
@@ -534,8 +556,8 @@ del.review-panel-content-highlight {
   bottom: 0;
   width: var(--review-panel-width);
   z-index: 2;
-  background-color: white;
-  border-top: 1px solid var(--rp-border-grey);
+  background-color: var(--review-panel-footer-bg-color);
+  border-top: 1px solid var(--review-panel-border-color);
   display: flex;
 
   .review-panel-tab {
@@ -548,17 +570,17 @@ del.review-panel-content-highlight {
     border: 0;
     border-top: solid 3px transparent;
     background: none;
-    color: var(--content-secondary);
+    color: var(--review-panel-color-secondary);
     font-size: var(--font-size-02);
 
     &:hover,
     &:focus {
       text-decoration: none;
-      color: var(--content-primary);
+      color: var(--review-panel-color);
     }
 
     &-active {
-      color: var(--content-primary);
+      color: var(--review-panel-color);
       border-top: solid 3px var(--bg-accent-01);
     }
   }
@@ -578,11 +600,12 @@ del.review-panel-content-highlight {
 
 .review-panel-add-comment-cancel-button {
   background-color: transparent;
+  color: var(--review-panel-color);
 
   &:hover,
   &:focus {
-    background-color: var(--neutral-20);
-    color: var(--content-primary);
+    background-color: var(--review-panel-button-hover-bg-color);
+    color: var(--review-panel-color);
   }
 }
 
@@ -638,14 +661,14 @@ del.review-panel-content-highlight {
     left: 0;
     top: 0;
     display: flex;
-    color: var(--content-secondary);
+    color: var(--review-panel-color-secondary);
     cursor: pointer;
   }
 
   .review-panel-entry-content {
     display: none;
-    background: var(--white);
-    border: 1px solid var(--rp-border-grey);
+    background: var(--review-panel-entry-bg-color);
+    border: 1px solid var(--review-panel-border-color);
     border-radius: var(--border-radius-base);
     width: 200px;
     padding: var(--spacing-02);
