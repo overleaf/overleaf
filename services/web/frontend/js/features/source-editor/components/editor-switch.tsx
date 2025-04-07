@@ -1,4 +1,4 @@
-import { ChangeEvent, FC, memo, useCallback } from 'react'
+import { ChangeEvent, FC, memo, useCallback, useRef } from 'react'
 import useScopeValue from '@/shared/hooks/use-scope-value'
 import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
 import useTutorial from '@/shared/hooks/promotions/use-tutorial'
@@ -6,9 +6,9 @@ import { sendMB } from '../../../infrastructure/event-tracking'
 import { isValidTeXFile } from '../../../main/is-valid-tex-file'
 import { useTranslation } from 'react-i18next'
 import {
-  EditorSwitchBeginnerTooltip,
+  EditorSwitchBeginnerPopover,
   codeEditorModePrompt,
-} from './editor-switch-beginner-tooltip'
+} from './editor-switch-beginner-popover'
 import { useEditorManagerContext } from '@/features/ide-react/context/editor-manager-context'
 
 function EditorSwitch() {
@@ -16,6 +16,8 @@ function EditorSwitch() {
   const [visual, setVisual] = useScopeValue('editor.showVisual')
   const [codeEditorOpened] = useScopeValue('editor.codeEditorOpened')
   const { openDocName } = useEditorManagerContext()
+
+  const codeEditorRef = useRef<HTMLLabelElement>(null)
 
   const richTextAvailable = openDocName ? isValidTeXFile(openDocName) : false
   const { completeTutorial } = useTutorial(codeEditorModePrompt, {
@@ -62,11 +64,15 @@ function EditorSwitch() {
           checked={!richTextAvailable || !visual}
           onChange={handleChange}
         />
-        <EditorSwitchBeginnerTooltip>
-          <label htmlFor="editor-switch-cm6" className="toggle-switch-label">
+        <EditorSwitchBeginnerPopover targetRef={codeEditorRef}>
+          <label
+            ref={codeEditorRef}
+            htmlFor="editor-switch-cm6"
+            className="toggle-switch-label"
+          >
             <span>{t('code_editor')}</span>
           </label>
-        </EditorSwitchBeginnerTooltip>
+        </EditorSwitchBeginnerPopover>
 
         <RichTextToggle
           checked={richTextAvailable && visual}
