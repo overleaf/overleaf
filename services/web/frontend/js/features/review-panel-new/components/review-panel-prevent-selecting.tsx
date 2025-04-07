@@ -1,5 +1,7 @@
-const stopPropagation = (e: React.FocusEvent | React.MouseEvent) =>
+const stopPropagation = (e: React.FocusEvent | React.MouseEvent) => {
   e.stopPropagation()
+  e.preventDefault()
+}
 
 export const PreventSelectingEntry = ({
   children,
@@ -8,7 +10,11 @@ export const PreventSelectingEntry = ({
 }) => {
   return (
     // eslint-disable-next-line jsx-a11y/no-static-element-interactions
-    <div onFocus={stopPropagation} onMouseUp={stopPropagation}>
+    <div
+      onMouseDown={stopPropagation}
+      onFocus={stopPropagation}
+      onMouseUp={stopPropagation}
+    >
       {children}
     </div>
   )
