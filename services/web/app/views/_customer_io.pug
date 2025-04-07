@@ -1,0 +1,26 @@
+if(customerIoEnabled && ExposedSettings.cioWriteKey && ExposedSettings.cioSiteId)
+	script(type="text/javascript", id="cio-loader", nonce=scriptNonce, data-cio-write-key=ExposedSettings.cioWriteKey, data-cio-site-id=ExposedSettings.cioSiteId, data-session-analytics-id=getSessionAnalyticsId(), data-user-id=getLoggedInUserId()).
+		var cioSettings = document.querySelector('#cio-loader').dataset;
+		var analyticsId = cioSettings.sessionAnalyticsId;
+		var siteId = cioSettings.cioSiteId;
+		var writeKey = cioSettings.cioWriteKey;
+		var userId = cioSettings.userId;
+
+		!function(){var i="cioanalytics", analytics=(window[i]=window[i]||[]);if(!analytics.initialize)if(analytics.invoked)window.console&&console.error&&console.error("Snippet included twice.");else{analytics.invoked=!0;analytics.methods=["trackSubmit","trackClick","trackLink","trackForm","pageview","identify","reset","group","track","ready","alias","debug","page","once","off","on","addSourceMiddleware","addIntegrationMiddleware","setAnonymousId","addDestinationMiddleware"];analytics.factory=function(e){return function(){var t=Array.prototype.slice.call(arguments);t.unshift(e);analytics.push(t);return analytics}};for(var e=0;e<analytics.methods.length;e++){var key=analytics.methods[e];analytics[key]=analytics.factory(key)}analytics.load=function(key,e){var t=document.createElement("script");t.type="text/javascript";t.async=!0;t.setAttribute('data-global-customerio-analytics-key', i);t.src="https://cdp.customer.io/v1/analytics-js/snippet/" + key + "/analytics.min.js";var n=document.getElementsByTagName("script")[0];n.parentNode.insertBefore(t,n);analytics._writeKey=key;analytics._loadOptions=e};analytics.SNIPPET_VERSION="4.15.3";
+			analytics.load(
+				writeKey, 
+				{
+					disableClientPersistence: true,
+					"integrations": {
+						"Customer.io In-App Plugin": {
+							siteId
+						}
+					}
+				}
+			);
+			if (analyticsId) {
+				analytics.setAnonymousId(analyticsId);
+			};
+			// If userId is undefined, identify sends only the anonymousId (aka analyticsId)
+			analytics.identify(userId);
+		}}();

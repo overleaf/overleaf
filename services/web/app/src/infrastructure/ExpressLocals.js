@@ -429,6 +429,8 @@ module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
       wikiEnabled: Settings.overleaf != null || Settings.proxyLearn,
       templatesEnabled:
         Settings.overleaf != null || Settings.templates?.user_id != null,
+      cioWriteKey: Settings.analytics?.cio?.writeKey,
+      cioSiteId: Settings.analytics?.cio?.siteId,
     }
     next()
   })
