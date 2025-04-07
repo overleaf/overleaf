@@ -2,8 +2,12 @@
 
 import logger from '@overleaf/logger'
 import commandLineArgs from 'command-line-args'
-import { History } from 'overleaf-editor-core'
-import { getProjectChunks, loadLatestRaw } from '../lib/chunk_store/index.js'
+import { Chunk, History, Snapshot } from 'overleaf-editor-core'
+import {
+  getProjectChunks,
+  loadLatestRaw,
+  create,
+} from '../lib/chunk_store/index.js'
 import { client } from '../lib/mongodb.js'
 import knex from '../lib/knex.js'
 import { historyStore } from '../lib/history_store.js'
@@ -322,6 +326,11 @@ const optionDefinitions = [
     defaultValue: 3600,
   },
   {
+    name: 'fix',
+    type: Number,
+    description: 'Fix projects without chunks',
+  },
+  {
     name: 'init',
     alias: 'I',
     type: Boolean,
@@ -367,6 +376,7 @@ function handleOptions() {
     !options.list &&
     !options.pending &&
     !options.init &&
+    !(options.fix >= 0) &&
     !(options.compare && options['start-date'] && options['end-date'])
 
   if (projectIdRequired && !options.projectId) {
@@ -681,6 +691,54 @@ function convertToISODate(dateStr) {
   return new Date(dateStr + 'T00:00:00.000Z').toISOString()
 }
 
+export async function fixProjectsWithoutChunks(options) {
+  const limit = options.fix || 1
+  const query = {
+    'overleaf.history.id': { $exists: true },
+    'overleaf.backup.lastBackedUpVersion': { $in: [null] },
+  }
+  const cursor = client
+    .db()
+    .collection('projects')
+    .find(query, {
+      projection: { _id: 1, 'overleaf.history.id': 1 },
+      readPreference: READ_PREFERENCE_SECONDARY,
+    })
+    .limit(limit)
+  for await (const project of cursor) {
+    const historyId = project.overleaf.history.id.toString()
+    const chunks = await getProjectChunks(historyId)
+    if (chunks.length > 0) {
+      continue
+    }
+    if (DRY_RUN) {
+      console.log(
+        'Would create new chunk for Project ID:',
+        project._id.toHexString(),
+        'History ID:',
+        historyId,
+        'Chunks:',
+        chunks
+      )
+    } else {
+      console.log(
+        'Creating new chunk for Project ID:',
+        project._id.toHexString(),
+        'History ID:',
+        historyId,
+        'Chunks:',
+        chunks
+      )
+      const snapshot = new Snapshot()
+      const history = new History(snapshot, [])
+      const chunk = new Chunk(history, 0)
+      await create(historyId, chunk)
+      const newChunks = await getProjectChunks(historyId)
+      console.log('New chunk:', newChunks)
+    }
+  }
+}
+
 export async function initializeProjects(options) {
   await ensureGlobalBlobsLoaded()
   let totalErrors = 0
@@ -983,11 +1041,12 @@ async function main() {
   const options = handleOptions()
   await ensureGlobalBlobsLoaded()
   const projectId = options.projectId
-
   if (options.status) {
     await displayBackupStatus(projectId)
   } else if (options.list) {
     await displayPendingBackups(options)
+  } else if (options.fix !== undefined) {
+    await fixProjectsWithoutChunks(options)
   } else if (options.pending) {
     await backupPendingProjects(options)
   } else if (options.init) {
