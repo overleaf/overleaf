@@ -222,7 +222,7 @@ const testCases = [
       msg: 'bad file-tree path',
     })),
     expectFixStdout:
-      '"gracefulShutdownInitiated":false,"processedLines":4,"success":3,"alreadyProcessed":1,"hash":0,"failed":0,"unmatched":0',
+      '"gracefulShutdownInitiated":false,"processedLines":4,"success":1,"alreadyProcessed":3,"hash":0,"failed":0,"unmatched":0',
     expectProject: updatedProject => {
       expect(updatedProject).to.deep.equal({
         _id: projectId,
@@ -495,7 +495,7 @@ const testCases = [
       msg: 'bad file-tree path',
     })),
     expectFixStdout:
-      '"gracefulShutdownInitiated":false,"processedLines":9,"success":6,"alreadyProcessed":3,"hash":0,"failed":0,"unmatched":0',
+      '"gracefulShutdownInitiated":false,"processedLines":9,"success":4,"alreadyProcessed":5,"hash":0,"failed":0,"unmatched":0',
     expectProject: updatedProject => {
       expect(updatedProject).to.deep.equal({
         _id: projectId,
@@ -503,22 +503,138 @@ const testCases = [
           {
             _id: rootFolderId,
             name: 'rootFolder',
-            // FIXME: The 3 arrays should only contain 1 item: the well-formed item with the name 'untitled'.
+            folders: [{ ...wellFormedFolder('f02'), name: 'untitled' }],
+            docs: [{ ...wellFormedDoc('d02'), name: 'untitled' }],
+            fileRefs: [{ ...wellFormedFileRef('fr02'), name: 'untitled' }],
+          },
+        ],
+      })
+    },
+  },
+  {
+    name: 'bug: shifted arrays in filetree folder',
+    project: {
+      _id: projectId,
+      rootFolder: [
+        {
+          _id: rootFolderId,
+          name: 'rootFolder',
+          folders: [
+            null,
+            null,
+            {
+              ...wellFormedFolder('f02'),
+              name: 'folder 1',
+              folders: [null, null, { ...wellFormedFolder('f022') }],
+              docs: [null, null, { ...wellFormedDoc('d022'), name: null }],
+              fileRefs: [
+                null,
+                null,
+                { ...wellFormedFileRef('fr022'), name: null },
+              ],
+            },
+          ],
+
+          docs: [],
+          fileRefs: [],
+        },
+      ],
+    },
+    expectFind: [
+      {
+        _id: rootFolderId.toString(),
+        path: 'rootFolder.0.folders.0',
+        reason: 'bad folder',
+      },
+      {
+        _id: rootFolderId.toString(),
+        path: 'rootFolder.0.folders.1',
+        reason: 'bad folder',
+      },
+      {
+        _id: strId('f02'),
+        path: 'rootFolder.0.folders.2.folders.0',
+        reason: 'bad folder',
+      },
+      {
+        _id: strId('f02'),
+        path: 'rootFolder.0.folders.2.folders.1',
+        reason: 'bad folder',
+      },
+      {
+        _id: strId('f02'),
+        path: 'rootFolder.0.folders.2.docs.0',
+        reason: 'bad doc',
+      },
+      {
+        _id: strId('f02'),
+        path: 'rootFolder.0.folders.2.docs.1',
+        reason: 'bad doc',
+      },
+      {
+        _id: strId('d022'),
+        path: 'rootFolder.0.folders.2.docs.2.name',
+        reason: 'bad doc name',
+      },
+      {
+        _id: strId('f02'),
+        path: 'rootFolder.0.folders.2.fileRefs.0',
+        reason: 'bad file',
+      },
+      {
+        _id: strId('f02'),
+        path: 'rootFolder.0.folders.2.fileRefs.1',
+        reason: 'bad file',
+      },
+      {
+        _id: strId('fr022'),
+        path: 'rootFolder.0.folders.2.fileRefs.2.name',
+        reason: 'bad file name',
+      },
+    ].map(entry => ({
+      ...entry,
+      projectId: projectId.toString(),
+      msg: 'bad file-tree path',
+    })),
+    expectFixStdout:
+      '"gracefulShutdownInitiated":false,"processedLines":10,"success":4,"alreadyProcessed":6,"hash":0,"failed":0,"unmatched":0',
+    expectProject: updatedProject => {
+      expect(updatedProject).to.deep.equal({
+        _id: projectId,
+        rootFolder: [
+          {
+            _id: rootFolderId,
+            name: 'rootFolder',
             folders: [
-              { ...wellFormedFolder('f02'), name: null },
-              null,
-              { name: 'untitled' },
+              {
+                ...wellFormedFolder('f02'),
+                name: 'folder 1',
+                docs: [
+                  {
+                    ...wellFormedDoc('d022'),
+                    name: 'untitled',
+                  },
+                ],
+                fileRefs: [
+                  {
+                    ...wellFormedFileRef('fr022'),
+                    // FIXME: Make the names unique across different file types
+                    name: 'untitled',
+                  },
+                ],
+                folders: [
+                  {
+                    ...wellFormedFolder('f022'),
+                    name: 'f022',
+                    folders: [],
+                    docs: [],
+                    fileRefs: [],
+                  },
+                ],
+              },
             ],
-            docs: [
-              { ...wellFormedDoc('d02'), name: null },
-              null,
-              { name: 'untitled' },
-            ],
-            fileRefs: [
-              { ...wellFormedFileRef('fr02'), name: null },
-              null,
-              { name: 'untitled' },
-            ],
+            docs: [],
+            fileRefs: [],
           },
         ],
       })

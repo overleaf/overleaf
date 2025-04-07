@@ -7,6 +7,28 @@ const Errors = require('../Errors/Errors')
 const { promisifyMultiResult } = require('@overleaf/promise-utils')
 const { iterablePaths } = require('./IterablePath')
 
+/**
+ * @param project
+ * @param predicate
+ * @returns {{path: string, value: *}}
+ */
+function findDeep(project, predicate) {
+  function find(value, path) {
+    if (predicate(value)) {
+      return { value, path: path.join('.') }
+    }
+    if (typeof value === 'object' && value !== null) {
+      for (const [childKey, childVal] of Object.entries(value)) {
+        const found = find(childVal, [...path, childKey])
+        if (found) {
+          return found
+        }
+      }
+    }
+  }
+  return find(project.rootFolder, ['rootFolder'])
+}
+
 function findElement(options, _callback) {
   // The search algorithm below potentially invokes the callback multiple
   // times.
@@ -308,6 +330,7 @@ module.exports = {
   findElementByPath,
   findRootDoc,
   findElementByMongoPath,
+  findDeep,
   promises: {
     findElement: promisifyMultiResult(findElement, [
       'element',
