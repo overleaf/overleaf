@@ -88,14 +88,17 @@ app.get('/status', (req, res) => res.send('docstore is alive'))
 
 app.use(handleValidationErrors())
 app.use(function (error, req, res, next) {
-  logger.error({ err: error, req }, 'request errored')
   if (error instanceof Errors.NotFoundError) {
+    logger.warn({ req }, 'not found')
     res.sendStatus(404)
   } else if (error instanceof Errors.DocModifiedError) {
+    logger.warn({ req }, 'conflict: doc modified')
     res.sendStatus(409)
   } else if (error instanceof Errors.DocVersionDecrementedError) {
+    logger.warn({ req }, 'conflict: doc version decremented')
     res.sendStatus(409)
   } else {
+    logger.error({ err: error, req }, 'request errored')
     res.status(500).send('Oops, something went wrong')
   }
 })
