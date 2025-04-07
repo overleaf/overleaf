@@ -579,7 +579,6 @@ module.exports = Router = {
             if (err) {
               Router._handleError(callback, err, client, 'applyOtUpdate', {
                 doc_id: docId,
-                update,
               })
             } else {
               callback()
