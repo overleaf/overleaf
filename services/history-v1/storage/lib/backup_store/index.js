@@ -27,6 +27,29 @@ function listPendingBackups(timeIntervalMs = 0, limit = null) {
   return cursor
 }
 
+// List projects that have never been backed up and are older than the specified interval
+function listUninitializedBackups(timeIntervalMs = 0, limit = null) {
+  const cutoffTimeInSeconds = (Date.now() - timeIntervalMs) / 1000
+  const options = {
+    projection: { _id: 1 },
+    sort: { _id: 1 },
+  }
+  // Apply limit if provided
+  if (limit) {
+    options.limit = limit
+  }
+  const cursor = projects.find(
+    {
+      'overleaf.backup.lastBackedUpVersion': null,
+      _id: {
+        $lt: ObjectId.createFromTime(cutoffTimeInSeconds),
+      },
+    },
+    options
+  )
+  return cursor
+}
+
 // Retrieve the history ID for a given project without giving direct access to the
 // projects collection.
 
@@ -183,6 +206,7 @@ module.exports = {
   updateCurrentMetadataIfNotSet,
   updatePendingChangeTimestamp,
   listPendingBackups,
+  listUninitializedBackups,
   getBackedUpBlobHashes,
   unsetBackedUpBlobHashes,
 }

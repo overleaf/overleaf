@@ -4,6 +4,7 @@ import commandLineArgs from 'command-line-args'
 import logger from '@overleaf/logger'
 import {
   listPendingBackups,
+  listUninitializedBackups,
   getBackupStatus,
 } from '../lib/backup_store/index.js'
 
@@ -200,6 +201,18 @@ async function addDateRangeJob(input) {
   )
 }
 
+// Helper to list pending and uninitialized backups
+// This function combines the two cursors into a single generator
+// to yield projects from both lists
+async function* pendingCursor(timeIntervalMs, limit) {
+  for await (const project of listPendingBackups(timeIntervalMs, limit)) {
+    yield project
+  }
+  for await (const project of listUninitializedBackups(timeIntervalMs, limit)) {
+    yield project
+  }
+}
+
 // Process pending projects with changes older than the specified seconds
 async function processPendingProjects(
   age,
@@ -218,11 +231,11 @@ async function processPendingProjects(
   let addedCount = 0
   let existingCount = 0
   // Pass the limit directly to MongoDB query for better performance
-  const pendingCursor = listPendingBackups(timeIntervalMs, limit)
   const changeTimes = []
-  for await (const project of pendingCursor) {
+  for await (const project of pendingCursor(timeIntervalMs, limit)) {
     const projectId = project._id.toHexString()
-    const pendingAt = project.overleaf?.backup?.pendingChangeAt
+    const pendingAt =
+      project.overleaf?.backup?.pendingChangeAt || project._id.getTimestamp()
     if (pendingAt) {
       changeTimes.push(pendingAt)
       const pendingAge = Math.floor((Date.now() - pendingAt.getTime()) / 1000)
