@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { User } from '../../../../../../types/group-management/user'
 import { useGroupMembersContext } from '../../context/group-members-context'
@@ -28,6 +28,14 @@ export default function MembersList({ groupId }: ManagedUsersListProps) {
   const { users } = useGroupMembersContext()
   const managedUsersActive = getMeta('ol-managedUsersActive')
   const groupSSOActive = getMeta('ol-groupSSOActive')
+  const tHeadRowRef = useRef<HTMLTableRowElement>(null)
+  const [colSpan, setColSpan] = useState(0)
+
+  useEffect(() => {
+    if (tHeadRowRef.current) {
+      setColSpan(tHeadRowRef.current.querySelectorAll('th').length)
+    }
+  }, [])
 
   return (
     <div>
@@ -53,7 +61,7 @@ export default function MembersList({ groupId }: ManagedUsersListProps) {
         data-testid="managed-entities-table"
       >
         <thead>
-          <tr>
+          <tr ref={tHeadRowRef}>
             <SelectAllCheckbox />
             <th className="cell-email">{t('email')}</th>
             <th className="cell-name">{t('name')}</th>
@@ -83,7 +91,7 @@ export default function MembersList({ groupId }: ManagedUsersListProps) {
         <tbody>
           {users.length === 0 && (
             <tr>
-              <td className="text-center" colSpan={4}>
+              <td className="text-center" colSpan={colSpan}>
                 <small>{t('no_members')}</small>
               </td>
             </tr>
