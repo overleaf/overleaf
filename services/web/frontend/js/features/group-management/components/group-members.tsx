@@ -157,6 +157,7 @@ export default function GroupMembers() {
                         variant="primary"
                         onClick={onAddMembersSubmit}
                         isLoading={inviteMemberLoading}
+                        loadingLabel={t('inviting')}
                       >
                         {t('invite')}
                       </OLButton>

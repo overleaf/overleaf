@@ -142,6 +142,7 @@ export default function OffboardManagedUserModal({
             type="submit"
             variant="danger"
             disabled={isLoading || isSuccess || !shouldEnableDeleteUserButton}
+            loadingLabel={t('deleting')}
             isLoading={isLoading}
           >
             {t('delete_user')}
