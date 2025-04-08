@@ -30,12 +30,18 @@ describe('ConnectedUsersManager', function () {
             connectedUser({ project_id: projectId, client_id: clientId }) {
               return `connected_user:${projectId}:${clientId}`
             },
+            projectNotEmptySince({ projectId }) {
+              return `projectNotEmptySince:{${projectId}}`
+            },
           },
         },
       },
     }
     this.rClient = {
       auth() {},
+      getdel: sinon.stub(),
+      scard: sinon.stub(),
+      set: sinon.stub(),
       setex: sinon.stub(),
       sadd: sinon.stub(),
       get: sinon.stub(),
@@ -51,10 +57,15 @@ describe('ConnectedUsersManager', function () {
       },
     }
     tk.freeze(new Date())
+    this.Metrics = {
+      inc: sinon.stub(),
+      histogram: sinon.stub(),
+    }
 
     this.ConnectedUsersManager = SandboxedModule.require(modulePath, {
       requires: {
         '@overleaf/settings': this.settings,
+        '@overleaf/metrics': this.Metrics,
         '@overleaf/redis-wrapper': {
           createClient: () => {
             return this.rClient
@@ -83,7 +94,7 @@ describe('ConnectedUsersManager', function () {
 
   describe('updateUserPosition', function () {
     beforeEach(function () {
-      return this.rClient.exec.callsArgWith(0)
+      this.rClient.exec.yields(null, [1, 1])
     })
 
     it('should set a key with the date and give it a ttl', function (done) {
@@ -240,7 +251,7 @@ describe('ConnectedUsersManager', function () {
       )
     })
 
-    return it('should set the cursor position when provided', function (done) {
+    it('should set the cursor position when provided', function (done) {
       return this.ConnectedUsersManager.updateUserPosition(
         this.project_id,
         this.client_id,
@@ -259,11 +270,72 @@ describe('ConnectedUsersManager', function () {
         }
       )
     })
+
+    describe('editing_session_mode', function () {
+      const cases = {
+        'should bump the metric when connecting to empty room': {
+          nConnectedClients: 1,
+          cursorData: null,
+          labels: {
+            mode: 'connect',
+            status: 'single',
+          },
+        },
+        'should bump the metric when connecting to non-empty room': {
+          nConnectedClients: 2,
+          cursorData: null,
+          labels: {
+            mode: 'connect',
+            status: 'multi',
+          },
+        },
+        'should bump the metric when updating in empty room': {
+          nConnectedClients: 1,
+          cursorData: { row: 42 },
+          labels: {
+            mode: 'update',
+            status: 'single',
+          },
+        },
+        'should bump the metric when updating in non-empty room': {
+          nConnectedClients: 2,
+          cursorData: { row: 42 },
+          labels: {
+            mode: 'update',
+            status: 'multi',
+          },
+        },
+      }
+
+      for (const [
+        name,
+        { nConnectedClients, cursorData, labels },
+      ] of Object.entries(cases)) {
+        it(name, function (done) {
+          this.rClient.exec.yields(null, [1, nConnectedClients])
+          this.ConnectedUsersManager.updateUserPosition(
+            this.project_id,
+            this.client_id,
+            this.user,
+            cursorData,
+            err => {
+              if (err) return done(err)
+              expect(this.Metrics.inc).to.have.been.calledWith(
+                'editing_session_mode',
+                1,
+                labels
+              )
+              done()
+            }
+          )
+        })
+      }
+    })
   })
 
   describe('markUserAsDisconnected', function () {
     beforeEach(function () {
-      return this.rClient.exec.callsArgWith(0)
+      this.rClient.exec.yields(null, [1, 0])
     })
 
     it('should remove the user from the set', function (done) {
@@ -294,7 +366,7 @@ describe('ConnectedUsersManager', function () {
       )
     })
 
-    return it('should add a ttl to the connected user set so it stays clean', function (done) {
+    it('should add a ttl to the connected user set so it stays clean', function (done) {
       return this.ConnectedUsersManager.markUserAsDisconnected(
         this.project_id,
         this.client_id,
@@ -309,6 +381,163 @@ describe('ConnectedUsersManager', function () {
           return done()
         }
       )
+    })
+
+    describe('editing_session_mode', function () {
+      const cases = {
+        'should bump the metric when disconnecting from now empty room': {
+          nConnectedClients: 0,
+          labels: {
+            mode: 'disconnect',
+            status: 'empty',
+          },
+        },
+        'should bump the metric when disconnecting from now single room': {
+          nConnectedClients: 1,
+          labels: {
+            mode: 'disconnect',
+            status: 'single',
+          },
+        },
+        'should bump the metric when disconnecting from now multi room': {
+          nConnectedClients: 2,
+          labels: {
+            mode: 'disconnect',
+            status: 'multi',
+          },
+        },
+      }
+
+      for (const [name, { nConnectedClients, labels }] of Object.entries(
+        cases
+      )) {
+        it(name, function (done) {
+          this.rClient.exec.yields(null, [1, nConnectedClients])
+          this.ConnectedUsersManager.markUserAsDisconnected(
+            this.project_id,
+            this.client_id,
+            err => {
+              if (err) return done(err)
+              expect(this.Metrics.inc).to.have.been.calledWith(
+                'editing_session_mode',
+                1,
+                labels
+              )
+              done()
+            }
+          )
+        })
+      }
+    })
+
+    describe('projectNotEmptySince', function () {
+      it('should clear the projectNotEmptySince key when empty and skip metric if not set', function (done) {
+        this.rClient.exec.yields(null, [1, 0])
+        this.rClient.getdel.yields(null, '')
+        this.ConnectedUsersManager.markUserAsDisconnected(
+          this.project_id,
+          this.client_id,
+          err => {
+            if (err) return done(err)
+            expect(this.rClient.getdel).to.have.been.calledWith(
+              `projectNotEmptySince:{${this.project_id}}`
+            )
+            expect(this.Metrics.histogram).to.not.have.been.called
+            done()
+          }
+        )
+      })
+      it('should clear the projectNotEmptySince key when empty and record metric if set', function (done) {
+        this.rClient.exec.yields(null, [1, 0])
+        tk.freeze(1_234_000)
+        this.rClient.getdel.yields(null, '1230')
+        this.ConnectedUsersManager.markUserAsDisconnected(
+          this.project_id,
+          this.client_id,
+          err => {
+            if (err) return done(err)
+            expect(this.rClient.getdel).to.have.been.calledWith(
+              `projectNotEmptySince:{${this.project_id}}`
+            )
+            expect(this.Metrics.histogram).to.have.been.calledWith(
+              'project_not_empty_since',
+              4,
+              sinon.match.any,
+              { status: 'empty' }
+            )
+            done()
+          }
+        )
+      })
+      it('should set projectNotEmptySince key when single and skip metric if not set before', function (done) {
+        this.rClient.exec.yields(null, [1, 1])
+        tk.freeze(1_233_001) // should ceil up
+        this.rClient.set.yields(null, '')
+        this.ConnectedUsersManager.markUserAsDisconnected(
+          this.project_id,
+          this.client_id,
+          err => {
+            if (err) return done(err)
+            expect(this.rClient.set).to.have.been.calledWith(
+              `projectNotEmptySince:{${this.project_id}}`,
+              '1234',
+              'NX',
+              'GET',
+              'EX',
+              31 * 24 * 60 * 60
+            )
+            expect(this.Metrics.histogram).to.not.have.been.called
+            done()
+          }
+        )
+      })
+      const cases = {
+        'should set projectNotEmptySince key when single and record metric if set before':
+          {
+            nConnectedClients: 1,
+            labels: {
+              status: 'single',
+            },
+          },
+        'should set projectNotEmptySince key when multi and record metric if set before':
+          {
+            nConnectedClients: 2,
+            labels: {
+              status: 'multi',
+            },
+          },
+      }
+      for (const [name, { nConnectedClients, labels }] of Object.entries(
+        cases
+      )) {
+        it(name, function (done) {
+          this.rClient.exec.yields(null, [1, nConnectedClients])
+          tk.freeze(1_235_000)
+          this.rClient.set.yields(null, '1230')
+          this.ConnectedUsersManager.markUserAsDisconnected(
+            this.project_id,
+            this.client_id,
+            err => {
+              if (err) return done(err)
+              expect(this.rClient.set).to.have.been.calledWith(
+                `projectNotEmptySince:{${this.project_id}}`,
+                '1235',
+                'NX',
+                'GET',
+                'EX',
+                31 * 24 * 60 * 60
+              )
+              expect(this.Metrics.histogram).to.have.been.calledWith(
+                'project_not_empty_since',
+                5,
+                sinon.match.any,
+                labels
+              )
+              done()
+            }
+          )
+        })
+      }
     })
   })
 

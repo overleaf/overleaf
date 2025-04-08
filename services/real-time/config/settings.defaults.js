@@ -38,6 +38,9 @@ const settings = {
         connectedUser({ project_id, client_id }) {
           return `connected_user:{${project_id}}:${client_id}`
         },
+        projectNotEmptySince({ projectId }) {
+          return `projectNotEmptySince:{${projectId}}`
+        },
       },
       maxRetriesPerRequest: parseInt(
         process.env.REAL_TIME_REDIS_MAX_RETRIES_PER_REQUEST ||
