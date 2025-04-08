@@ -21,6 +21,7 @@ export class SpellChecker {
   private waitingForParser = false
   private firstCheckPending = false
   private trackedChanges: ChangeSet
+  private destroyed = false
   private readonly segmenter?: Intl.Segmenter
 
   // eslint-disable-next-line no-useless-constructor
@@ -60,6 +61,7 @@ export class SpellChecker {
 
   destroy() {
     this._clearPendingSpellCheck()
+    this.destroyed = true
   }
 
   _abortRequest() {
@@ -260,10 +262,22 @@ export class SpellChecker {
   }
 
   spellCheckAsap(view: EditorView) {
+    if (this.destroyed) {
+      debugConsole.warn(
+        'spellCheckAsap called after spellchecker was destroyed. Ignoring.'
+      )
+      return
+    }
     this._asyncSpellCheck(view, 0)
   }
 
   scheduleSpellCheck(view: EditorView) {
+    if (this.destroyed) {
+      debugConsole.warn(
+        'scheduleSpellCheck called after spellchecker was destroyed. Ignoring.'
+      )
+      return
+    }
     this._asyncSpellCheck(view, 1000)
   }
 
