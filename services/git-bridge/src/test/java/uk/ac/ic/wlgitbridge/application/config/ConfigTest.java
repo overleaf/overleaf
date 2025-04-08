@@ -23,11 +23,7 @@ public class ConfigTest {
                 + "    \"apiBaseUrl\": \"http://127.0.0.1:60000/api/v0\",\n"
                 + "    \"postbackBaseUrl\": \"http://127.0.0.1\",\n"
                 + "    \"serviceName\": \"Overleaf\",\n"
-                + "    \"oauth2\": {\n"
-                + "        \"oauth2ClientID\": \"clientID\",\n"
-                + "        \"oauth2ClientSecret\": \"oauth2 client secret\",\n"
-                + "        \"oauth2Server\": \"https://www.overleaf.com\"\n"
-                + "    }\n"
+                + "    \"oauth2Server\": \"https://www.overleaf.com\"\n"
                 + "}\n");
     Config config = new Config(reader);
     assertEquals(80, config.getPort());
@@ -35,10 +31,7 @@ public class ConfigTest {
     assertEquals("http://127.0.0.1:60000/api/v0/", config.getAPIBaseURL());
     assertEquals("http://127.0.0.1/", config.getPostbackURL());
     assertEquals("Overleaf", config.getServiceName());
-    assertTrue(config.isUsingOauth2());
-    assertEquals("clientID", config.getOauth2().getOauth2ClientID());
-    assertEquals("oauth2 client secret", config.getOauth2().getOauth2ClientSecret());
-    assertEquals("https://www.overleaf.com", config.getOauth2().getOauth2Server());
+    assertEquals("https://www.overleaf.com", config.getOauth2Server());
   }
 
   @Test(expected = AssertionError.class)
@@ -53,7 +46,7 @@ public class ConfigTest {
                 + "    \"apiBaseUrl\": \"http://127.0.0.1:60000/api/v0\",\n"
                 + "    \"postbackBaseUrl\": \"http://127.0.0.1\",\n"
                 + "    \"serviceName\": \"Overleaf\",\n"
-                + "    \"oauth2\": null\n"
+                + "    \"oauth2Server\": null\n"
                 + "}\n");
     Config config = new Config(reader);
     assertEquals(80, config.getPort());
@@ -61,8 +54,7 @@ public class ConfigTest {
     assertEquals("http://127.0.0.1:60000/api/v0/", config.getAPIBaseURL());
     assertEquals("http://127.0.0.1/", config.getPostbackURL());
     assertEquals("Overleaf", config.getServiceName());
-    assertFalse(config.isUsingOauth2());
-    config.getOauth2();
+    assertNull(config.getOauth2Server());
   }
 
   @Test
@@ -77,11 +69,7 @@ public class ConfigTest {
                 + "    \"apiBaseUrl\": \"http://127.0.0.1:60000/api/v0\",\n"
                 + "    \"postbackBaseUrl\": \"http://127.0.0.1\",\n"
                 + "    \"serviceName\": \"Overleaf\",\n"
-                + "    \"oauth2\": {\n"
-                + "        \"oauth2ClientID\": \"my oauth2 client id\",\n"
-                + "        \"oauth2ClientSecret\": \"my oauth2 client secret\",\n"
-                + "        \"oauth2Server\": \"https://www.overleaf.com\"\n"
-                + "    }\n"
+                + "    \"oauth2Server\": \"https://www.overleaf.com\"\n"
                 + "}\n");
     Config config = new Config(reader);
     String expected =
@@ -94,11 +82,7 @@ public class ConfigTest {
             + "  \"apiBaseURL\": \"http://127.0.0.1:60000/api/v0/\",\n"
             + "  \"postbackURL\": \"http://127.0.0.1/\",\n"
             + "  \"serviceName\": \"Overleaf\",\n"
-            + "  \"oauth2\": {\n"
-            + "    \"oauth2ClientID\": \"<oauth2ClientID>\",\n"
-            + "    \"oauth2ClientSecret\": \"<oauth2ClientSecret>\",\n"
-            + "    \"oauth2Server\": \"https://www.overleaf.com\"\n"
-            + "  },\n"
+            + "  \"oauth2Server\": \"https://www.overleaf.com\",\n"
             + "  \"userPasswordEnabled\": false,\n"
             + "  \"repoStore\": null,\n"
             + "  \"swapStore\": null,\n"

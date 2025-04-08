@@ -7,11 +7,7 @@
     "apiBaseUrl": "https://localhost/api/v0",
     "postbackBaseUrl": "https://localhost",
     "serviceName": "Overleaf",
-    "oauth2": {
-        "oauth2ClientID": "asdf",
-        "oauth2ClientSecret": "asdf",
-        "oauth2Server": "https://localhost"
-    },
+    "oauth2Server": "https://localhost",
     "repoStore": {
         "maxFileNum": 2000,
         "maxFileSize": 52428800

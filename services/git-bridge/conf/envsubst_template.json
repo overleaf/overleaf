@@ -7,11 +7,7 @@
   "apiBaseUrl": "${GIT_BRIDGE_API_BASE_URL:-https://localhost/api/v0}",
   "postbackBaseUrl": "${GIT_BRIDGE_POSTBACK_BASE_URL:-https://localhost}",
   "serviceName": "${GIT_BRIDGE_SERVICE_NAME:-Overleaf}",
-  "oauth2": {
-    "oauth2ClientID": "${GIT_BRIDGE_OAUTH2_CLIENT_ID}",
-    "oauth2ClientSecret": "${GIT_BRIDGE_OAUTH2_CLIENT_SECRET}",
-    "oauth2Server": "${GIT_BRIDGE_OAUTH2_SERVER:-https://localhost}"
-  },
+  "oauth2Server": "${GIT_BRIDGE_OAUTH2_SERVER:-https://localhost}",
   "userPasswordEnabled": ${GIT_BRIDGE_USER_PASSWORD_ENABLED:-false},
   "repoStore": {
     "maxFileNum": ${GIT_BRIDGE_REPOSTORE_MAX_FILE_NUM:-2000},

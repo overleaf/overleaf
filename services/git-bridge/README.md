@@ -76,12 +76,10 @@ The configuration file is in `.json` format.
         "postbackBaseUrl" (string): the postback url,
         "serviceName" (string): current name of writeLaTeX
                                 in case it ever changes,
-        "oauth2" (object): { null or missing if oauth2 shouldn't be used
-            "oauth2ClientID" (string): oauth2 client ID,
-            "oauth2ClientSecret" (string): oauth2 client secret,
-            "oauth2Server" (string): oauth2 server,
-                                     with protocol and
-                                     without trailing slash
+        "oauth2Server" (string): oauth2 server,
+                                 with protocol and
+                                 without trailing slash,
+                                 null or missing if oauth2 shouldn't be used
         },
         "repoStore" (object, optional): { configure the repo store
             "maxFileSize" (long, optional): maximum size of a file, inclusive

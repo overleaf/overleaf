@@ -1495,13 +1495,9 @@ public class WLGitBridgeIntegrationTest {
             + port
             + "\",\n"
             + "    \"serviceName\": \"Overleaf\",\n"
-            + "    \"oauth2\": {\n"
-            + "        \"oauth2ClientID\": \"clientID\",\n"
-            + "        \"oauth2ClientSecret\": \"oauth2 client secret\",\n"
-            + "        \"oauth2Server\": \"http://127.0.0.1:"
+            + "    \"oauth2Server\": \"http://127.0.0.1:"
             + apiPort
-            + "\"\n"
-            + "    }";
+            + "\"";
     if (swapCfg != null) {
       cfgStr +=
           ",\n"
@@ -1524,7 +1520,6 @@ public class WLGitBridgeIntegrationTest {
               + ",\n"
               + "        \"intervalMillis\": "
               + swapCfg.getIntervalMillis()
-              + "\n"
               + "    }\n";
     }
     cfgStr += "}\n";

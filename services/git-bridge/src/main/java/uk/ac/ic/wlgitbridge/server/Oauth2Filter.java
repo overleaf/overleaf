@@ -13,7 +13,6 @@ import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.codec.binary.Base64;
-import uk.ac.ic.wlgitbridge.application.config.Oauth2;
 import uk.ac.ic.wlgitbridge.bridge.snapshot.SnapshotApi;
 import uk.ac.ic.wlgitbridge.util.Instance;
 import uk.ac.ic.wlgitbridge.util.Log;
@@ -28,13 +27,13 @@ public class Oauth2Filter implements Filter {
 
   private final SnapshotApi snapshotApi;
 
-  private final Oauth2 oauth2;
+  private final String oauth2Server;
 
   private final boolean isUserPasswordEnabled;
 
-  public Oauth2Filter(SnapshotApi snapshotApi, Oauth2 oauth2, boolean isUserPasswordEnabled) {
+  public Oauth2Filter(SnapshotApi snapshotApi, String oauth2Server, boolean isUserPasswordEnabled) {
     this.snapshotApi = snapshotApi;
-    this.oauth2 = oauth2;
+    this.oauth2Server = oauth2Server;
     this.isUserPasswordEnabled = isUserPasswordEnabled;
   }
 
@@ -108,7 +107,7 @@ public class Oauth2Filter implements Filter {
       // fail later (for example, in the unlikely event that the token
       // expired between the two requests). In that case, JGit will
       // return a 401 without a custom error message.
-      int statusCode = checkAccessToken(oauth2, password, getClientIp(request));
+      int statusCode = checkAccessToken(this.oauth2Server, password, getClientIp(request));
       if (statusCode == 429) {
         handleRateLimit(projectId, username, request, response);
         return;
@@ -238,10 +237,9 @@ public class Oauth2Filter implements Filter {
             "your Overleaf Account Settings."));
   }
 
-  private int checkAccessToken(Oauth2 oauth2, String accessToken, String clientIp)
+  private int checkAccessToken(String oauth2Server, String accessToken, String clientIp)
       throws IOException {
-    GenericUrl url =
-        new GenericUrl(oauth2.getOauth2Server() + "/oauth/token/info?client_ip=" + clientIp);
+    GenericUrl url = new GenericUrl(oauth2Server + "/oauth/token/info?client_ip=" + clientIp);
     HttpRequest request = Instance.httpRequestFactory.buildGetRequest(url);
     HttpHeaders headers = new HttpHeaders();
     headers.setAuthorization("Bearer " + accessToken);

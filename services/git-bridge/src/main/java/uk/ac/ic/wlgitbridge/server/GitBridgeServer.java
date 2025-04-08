@@ -151,9 +151,9 @@ public class GitBridgeServer {
       throws ServletException {
     final ServletContextHandler servletContextHandler =
         new ServletContextHandler(ServletContextHandler.SESSIONS);
-    if (config.isUsingOauth2()) {
+    if (config.getOauth2Server() != null) {
       Filter filter =
-          new Oauth2Filter(snapshotApi, config.getOauth2(), config.isUserPasswordEnabled());
+          new Oauth2Filter(snapshotApi, config.getOauth2Server(), config.isUserPasswordEnabled());
       servletContextHandler.addFilter(
           new FilterHolder(filter), "/*", EnumSet.of(DispatcherType.REQUEST));
     }
