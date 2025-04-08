@@ -22,10 +22,6 @@
 @table-4-column-width: 25%;
 @table-5-column-width: 20%;
 
-@plans-m-a-new-switch-height: 20px;
-
-@plans-m-a-switch-padding: 2px;
-
 .plans-new-design {
   padding-top: var(--header-height);
 
@@ -1197,80 +1193,6 @@
     th,
     td {
       width: @table-5-column-width;
-    }
-  }
-}
-
-/// Toggle for monthly/annual toggle for period-toggle-improvements test
-/// Based on toggle in light-touch-redesign
-.monthly-annual-switch {
-  color: var(--neutral-90);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  margin-top: var(--spacing-09);
-  margin-bottom: var(--spacing-13);
-
-  .plans-new-discount-label {
-    margin-left: var(--spacing-04);
-    color: var(--green-50);
-  }
-
-  @media (max-width: @screen-xs-max) {
-    margin-top: var(--spacing-08);
-    margin-bottom: var(--spacing-08);
-  }
-
-  label {
-    position: relative;
-    display: inline-block;
-    width: 34px;
-    height: @plans-m-a-new-switch-height;
-    margin-right: var(--spacing-05);
-    margin-bottom: 0;
-
-    input {
-      opacity: 0;
-      width: 0;
-      height: 0;
-    }
-
-    input + span {
-      background-color: var(--neutral-70);
-    }
-
-    input:checked + span {
-      background-color: var(--green-50);
-    }
-
-    input:checked + span::before {
-      transform: translateX(14px);
-    }
-
-    span {
-      position: absolute;
-      cursor: pointer;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      transition: 0.4s;
-      border-radius: @plans-m-a-new-switch-height;
-
-      &::before {
-        position: absolute;
-        content: '';
-        height: @plans-m-a-new-switch-height - @plans-m-a-switch-padding -
-          @plans-m-a-switch-padding;
-        width: @plans-m-a-new-switch-height - @plans-m-a-switch-padding -
-          @plans-m-a-switch-padding;
-        left: @plans-m-a-switch-padding;
-        bottom: @plans-m-a-switch-padding;
-        background-color: @white;
-        transition: 0.4s;
-        border-radius: 50%;
-      }
     }
   }
 }
