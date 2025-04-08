@@ -99,10 +99,18 @@ function getAllDocPathsFromProject(project) {
   return docPath
 }
 
-async function getDoc(projectId, docId) {
+/**
+ *
+ * @param {string} projectId
+ * @param {string} docId
+ * @param {{peek?: boolean, include_deleted?: boolean}} options
+ * @return {Promise<{lines: *, rev: *, version: *, ranges: *}>}
+ */
+async function getDoc(projectId, docId, options = {}) {
   const { lines, rev, version, ranges } = await DocstoreManager.promises.getDoc(
     projectId,
-    docId
+    docId,
+    options
   )
   return { lines, rev, version, ranges }
 }
