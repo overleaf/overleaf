@@ -448,7 +448,7 @@ describe('ConnectedUsersManager', function () {
         )
       })
       it('should clear the projectNotEmptySince key when empty and record metric if set', function (done) {
-        this.rClient.exec.yields(null, [1, 0])
+        this.rClient.exec.onFirstCall().yields(null, [1, 0])
         tk.freeze(1_234_000)
         this.rClient.getdel.yields(null, '1230')
         this.ConnectedUsersManager.markUserAsDisconnected(
@@ -470,9 +470,9 @@ describe('ConnectedUsersManager', function () {
         )
       })
       it('should set projectNotEmptySince key when single and skip metric if not set before', function (done) {
-        this.rClient.exec.yields(null, [1, 1])
+        this.rClient.exec.onFirstCall().yields(null, [1, 1])
         tk.freeze(1_233_001) // should ceil up
-        this.rClient.set.yields(null, '')
+        this.rClient.exec.onSecondCall().yields(null, [''])
         this.ConnectedUsersManager.markUserAsDisconnected(
           this.project_id,
           this.client_id,
@@ -482,7 +482,6 @@ describe('ConnectedUsersManager', function () {
               `projectNotEmptySince:{${this.project_id}}`,
               '1234',
               'NX',
-              'GET',
               'EX',
               31 * 24 * 60 * 60
             )
@@ -511,9 +510,9 @@ describe('ConnectedUsersManager', function () {
         cases
       )) {
         it(name, function (done) {
-          this.rClient.exec.yields(null, [1, nConnectedClients])
+          this.rClient.exec.onFirstCall().yields(null, [1, nConnectedClients])
           tk.freeze(1_235_000)
-          this.rClient.set.yields(null, '1230')
+          this.rClient.exec.onSecondCall().yields(null, ['1230'])
           this.ConnectedUsersManager.markUserAsDisconnected(
             this.project_id,
             this.client_id,
@@ -523,7 +522,6 @@ describe('ConnectedUsersManager', function () {
                 `projectNotEmptySince:{${this.project_id}}`,
                 '1235',
                 'NX',
-                'GET',
                 'EX',
                 31 * 24 * 60 * 60
               )

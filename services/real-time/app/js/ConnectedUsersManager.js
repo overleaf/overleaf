@@ -158,24 +158,26 @@ module.exports = {
       } else {
         // Only populate projectNotEmptySince when more clients remain connected.
         const nowInSeconds = Math.ceil(Date.now() / 1000).toString()
-        rclient.set(
+        // We can go back to SET GET after upgrading to redis 7.0+
+        const multi = rclient.multi()
+        multi.get(Keys.projectNotEmptySince({ projectId }))
+        multi.set(
           Keys.projectNotEmptySince({ projectId }),
           nowInSeconds,
           'NX',
-          'GET',
           'EX',
-          31 * ONE_DAY_IN_S,
-          (err, res) => {
-            if (err) {
-              logger.warn(
-                { err, projectId },
-                'could not set/collect projectNotEmptySince'
-              )
-            } else if (res) {
-              recordProjectNotEmptySinceMetric(res, status)
-            }
-          }
+          31 * ONE_DAY_IN_S
         )
+        multi.exec((err, res) => {
+          if (err) {
+            logger.warn(
+              { err, projectId },
+              'could not get/set projectNotEmptySince'
+            )
+          } else if (res[0]) {
+            recordProjectNotEmptySinceMetric(res[0], status)
+          }
+        })
       }
       callback(err)
     })
