@@ -88,7 +88,7 @@ module.exports = {
       }
       const [, nConnectedClients] = res
       Metrics.inc('editing_session_mode', 1, {
-        mode: cursorData ? 'update' : 'connect',
+        method: cursorData ? 'update' : 'connect',
         status: nConnectedClients === 1 ? 'single' : 'multi',
       })
       callback(err)
@@ -141,7 +141,7 @@ module.exports = {
             ? 'single'
             : 'multi'
       Metrics.inc('editing_session_mode', 1, {
-        mode: 'disconnect',
+        method: 'disconnect',
         status,
       })
       if (status === 'empty') {

@@ -277,7 +277,7 @@ describe('ConnectedUsersManager', function () {
           nConnectedClients: 1,
           cursorData: null,
           labels: {
-            mode: 'connect',
+            method: 'connect',
             status: 'single',
           },
         },
@@ -285,7 +285,7 @@ describe('ConnectedUsersManager', function () {
           nConnectedClients: 2,
           cursorData: null,
           labels: {
-            mode: 'connect',
+            method: 'connect',
             status: 'multi',
           },
         },
@@ -293,7 +293,7 @@ describe('ConnectedUsersManager', function () {
           nConnectedClients: 1,
           cursorData: { row: 42 },
           labels: {
-            mode: 'update',
+            method: 'update',
             status: 'single',
           },
         },
@@ -301,7 +301,7 @@ describe('ConnectedUsersManager', function () {
           nConnectedClients: 2,
           cursorData: { row: 42 },
           labels: {
-            mode: 'update',
+            method: 'update',
             status: 'multi',
           },
         },
@@ -388,21 +388,21 @@ describe('ConnectedUsersManager', function () {
         'should bump the metric when disconnecting from now empty room': {
           nConnectedClients: 0,
           labels: {
-            mode: 'disconnect',
+            method: 'disconnect',
             status: 'empty',
           },
         },
         'should bump the metric when disconnecting from now single room': {
           nConnectedClients: 1,
           labels: {
-            mode: 'disconnect',
+            method: 'disconnect',
             status: 'single',
           },
         },
         'should bump the metric when disconnecting from now multi room': {
           nConnectedClients: 2,
           labels: {
-            mode: 'disconnect',
+            method: 'disconnect',
             status: 'multi',
           },
         },
