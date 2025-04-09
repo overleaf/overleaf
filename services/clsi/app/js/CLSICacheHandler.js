@@ -1,3 +1,4 @@
+const crypto = require('node:crypto')
 const fs = require('node:fs')
 const Path = require('node:path')
 const { pipeline } = require('node:stream/promises')
@@ -71,6 +72,7 @@ function notifyCLSICacheAboutBuild({
         f =>
           f.path === 'output.pdf' ||
           f.path === 'output.log' ||
+          f.path === 'output.synctex.gz' ||
           f.path.endsWith('.blg')
       )
       .map(f => {
@@ -110,9 +112,7 @@ async function buildTarball({ projectId, userId, buildId, outputFiles }) {
     buildId
   )
 
-  const files = outputFiles.filter(
-    f => f.path === 'output.synctex.gz' || !isExtraneousFile(f.path)
-  )
+  const files = outputFiles.filter(f => !isExtraneousFile(f.path))
   if (files.length > MAX_ENTRIES_IN_OUTPUT_TAR) {
     Metrics.inc('clsi_cache_build_too_many_entries')
     throw new Error('too many output files for output.tar.gz')
@@ -139,56 +139,77 @@ async function buildTarball({ projectId, userId, buildId, outputFiles }) {
 /**
  * @param {string} projectId
  * @param {string} userId
- * @param {string} compileDir
- * @return {Promise<boolean>}
- */
-async function downloadLatestCompileCache(projectId, userId, compileDir) {
-  return await _downloadCompileCache(
-    `${Settings.apis.clsiCache.url}/project/${projectId}/${
-      userId ? `user/${userId}/` : ''
-    }latest/output/output.tar.gz`,
-    compileDir,
-    'tar'
-  )
-}
-
-/**
- * @param {string} projectId
- * @param {string} userId
  * @param {string} editorId
  * @param {string} buildId
- * @param {string} compileDir
+ * @param {string} outputDir
  * @return {Promise<boolean>}
  */
-async function downloadOldCompileCache(
+async function downloadOutputDotSynctexFromCompileCache(
   projectId,
   userId,
   editorId,
   buildId,
-  compileDir
+  outputDir
 ) {
-  return await _downloadCompileCache(
-    `${Settings.apis.clsiCache.url}/project/${projectId}/${
-      userId ? `user/${userId}/` : ''
-    }build/${editorId}-${buildId}/search/output/output.tar.gz`,
-    compileDir,
-    'synctex'
-  )
-}
-
-/**
- * @param {string} url
- * @param {string} compileDir
- * @param {string} method
- * @return {Promise<boolean>}
- */
-async function _downloadCompileCache(url, compileDir, method) {
   if (!Settings.apis.clsiCache.enabled) return false
 
   const timer = new Metrics.Timer(
     'clsi_cache_download',
     1,
-    { status: 'success', method },
+    { method: 'synctex' },
+    TIMING_BUCKETS
+  )
+  let stream
+  try {
+    stream = await fetchStream(
+      `${Settings.apis.clsiCache.url}/project/${projectId}/${
+        userId ? `user/${userId}/` : ''
+      }build/${editorId}-${buildId}/search/output/output.synctex.gz`,
+      {
+        method: 'GET',
+        signal: AbortSignal.timeout(10_000),
+      }
+    )
+  } catch (err) {
+    if (err instanceof RequestFailedError && err.response.status === 404) {
+      timer.done({ status: 'not-found' })
+      return false
+    }
+    timer.done({ status: 'error' })
+    throw err
+  }
+  await fs.promises.mkdir(outputDir, { recursive: true })
+  const dst = Path.join(outputDir, 'output.synctex.gz')
+  const tmp = dst + crypto.randomUUID()
+  try {
+    await pipeline(stream, fs.createWriteStream(tmp))
+    await fs.promises.rename(tmp, dst)
+  } catch (err) {
+    try {
+      await fs.promises.unlink(tmp)
+    } catch {}
+    throw err
+  }
+  timer.done({ status: 'success' })
+  return true
+}
+
+/**
+ * @param {string} projectId
+ * @param {string} userId
+ * @param {string} compileDir
+ * @return {Promise<boolean>}
+ */
+async function downloadLatestCompileCache(projectId, userId, compileDir) {
+  if (!Settings.apis.clsiCache.enabled) return false
+
+  const url = `${Settings.apis.clsiCache.url}/project/${projectId}/${
+    userId ? `user/${userId}/` : ''
+  }latest/output/output.tar.gz`
+  const timer = new Metrics.Timer(
+    'clsi_cache_download',
+    1,
+    { method: 'tar' },
     TIMING_BUCKETS
   )
   let stream
@@ -199,12 +220,10 @@ async function _downloadCompileCache(url, compileDir, method) {
     })
   } catch (err) {
     if (err instanceof RequestFailedError && err.response.status === 404) {
-      timer.labels.status = 'not-found'
-      timer.done()
+      timer.done({ status: 'not-found' })
       return false
     }
-    timer.labels.status = 'error'
-    timer.done()
+    timer.done({ status: 'error' })
     throw err
   }
   let n = 0
@@ -224,7 +243,6 @@ async function _downloadCompileCache(url, compileDir, method) {
             {
               url,
               compileDir,
-              method,
             },
             'too many entries in tar-ball from clsi-cache'
           )
@@ -234,7 +252,6 @@ async function _downloadCompileCache(url, compileDir, method) {
             {
               url,
               compileDir,
-              method,
               entryType: header.type,
             },
             'unexpected entry in tar-ball from clsi-cache'
@@ -245,12 +262,12 @@ async function _downloadCompileCache(url, compileDir, method) {
     })
   )
   Metrics.count('clsi_cache_download_entries', n)
-  timer.done()
+  timer.done({ status: 'success' })
   return !abort
 }
 
 module.exports = {
   notifyCLSICacheAboutBuild,
   downloadLatestCompileCache,
-  downloadOldCompileCache,
+  downloadOutputDotSynctexFromCompileCache,
 }

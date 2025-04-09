@@ -20,6 +20,7 @@ The CLSI can be configured through the following environment variables:
 * `CATCH_ERRORS` - Set to `true` to log uncaught exceptions
 * `COMPILE_GROUP_DOCKER_CONFIGS` - JSON string of Docker configs for compile groups
 * `COMPILES_HOST_DIR` - Working directory for LaTeX compiles
+* `OUTPUT_HOST_DIR` - Output directory for LaTeX compiles
 * `COMPILE_SIZE_LIMIT` - Sets the body-parser [limit](https://github.com/expressjs/body-parser#limit)
 * `DOCKER_RUNNER` - Set to true to use sibling containers
 * `DOCKER_RUNTIME` -

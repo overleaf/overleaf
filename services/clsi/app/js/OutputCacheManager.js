@@ -83,6 +83,13 @@ async function cleanupDirectory(dir, options) {
   })
 }
 
+/**
+ * @template T
+ *
+ * @param {string} dir
+ * @param {() => Promise<T>} fn
+ * @return {Promise<T>}
+ */
 async function queueDirOperation(dir, fn) {
   const pending = PENDING_PROJECT_ACTIONS.get(dir) || Promise.resolve()
   const p = pending.then(fn, fn).finally(() => {
@@ -677,4 +684,5 @@ OutputCacheManager.promises = {
   saveOutputFilesInBuildDir: promisify(
     OutputCacheManager.saveOutputFilesInBuildDir
   ),
+  queueDirOperation,
 }

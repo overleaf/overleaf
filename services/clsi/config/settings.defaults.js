@@ -131,6 +131,7 @@ if (process.env.DOCKER_RUNNER) {
     const defaultCompileGroupConfig = {
       wordcount: { 'HostConfig.AutoRemove': true },
       synctex: { 'HostConfig.AutoRemove': true },
+      'synctex-output': { 'HostConfig.AutoRemove': true },
     }
     module.exports.clsi.docker.compileGroupConfig = Object.assign(
       defaultCompileGroupConfig,
@@ -175,5 +176,8 @@ if (process.env.DOCKER_RUNNER) {
 
   module.exports.path.synctexBaseDir = () => '/compile'
 
-  module.exports.path.sandboxedCompilesHostDir = process.env.COMPILES_HOST_DIR
+  module.exports.path.sandboxedCompilesHostDirCompiles =
+    process.env.COMPILES_HOST_DIR
+  module.exports.path.sandboxedCompilesHostDirOutput =
+    process.env.OUTPUT_HOST_DIR
 }

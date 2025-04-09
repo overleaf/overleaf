@@ -6,20 +6,11 @@ const dockerode = new Docker()
 const crypto = require('node:crypto')
 const async = require('async')
 const LockManager = require('./DockerLockManager')
-const fs = require('node:fs')
 const Path = require('node:path')
 const _ = require('lodash')
 
 const ONE_HOUR_IN_MS = 60 * 60 * 1000
 logger.debug('using docker runner')
-
-function usingSiblingContainers() {
-  return (
-    Settings != null &&
-    Settings.path != null &&
-    Settings.path.sandboxedCompilesHostDir != null
-  )
-}
 
 let containerMonitorTimeout
 let containerMonitorInterval
@@ -35,24 +26,6 @@ const DockerRunner = {
     compileGroup,
     callback
   ) {
-    if (usingSiblingContainers()) {
-      const _newPath = Settings.path.sandboxedCompilesHostDir
-      logger.debug(
-        { path: _newPath },
-        'altering bind path for sibling containers'
-      )
-      // Server Pro, example:
-      //   '/var/lib/overleaf/data/compiles/<project-id>'
-      //   ... becomes ...
-      //   '/opt/overleaf_data/data/compiles/<project-id>'
-      directory = Path.join(
-        Settings.path.sandboxedCompilesHostDir,
-        Path.basename(directory)
-      )
-    }
-
-    const volumes = { [directory]: '/compile' }
-
     command = command.map(arg =>
       arg.toString().replace('$COMPILE_DIR', '/compile')
     )
@@ -72,7 +45,32 @@ const DockerRunner = {
       image = `${Settings.texliveImageNameOveride}/${img[2]}`
     }
 
-    if (compileGroup === 'synctex' || compileGroup === 'wordcount') {
+    if (compileGroup === 'synctex-output') {
+      // In: directory = '/overleaf/services/clsi/output/projectId-userId/generated-files/buildId'
+      //             directory.split('/').slice(-3) === 'projectId-userId/generated-files/buildId'
+      //  sandboxedCompilesHostDirOutput = '/host/output'
+      // Out:                  directory = '/host/output/projectId-userId/generated-files/buildId'
+      directory = Path.join(
+        Settings.path.sandboxedCompilesHostDirOutput,
+        ...directory.split('/').slice(-3)
+      )
+    } else {
+      // In:   directory = '/overleaf/services/clsi/compiles/projectId-userId'
+      //                       Path.basename(directory) === 'projectId-userId'
+      //  sandboxedCompilesHostDirCompiles = '/host/compiles'
+      // Out:                    directory = '/host/compiles/projectId-userId'
+      directory = Path.join(
+        Settings.path.sandboxedCompilesHostDirCompiles,
+        Path.basename(directory)
+      )
+    }
+
+    const volumes = { [directory]: '/compile' }
+    if (
+      compileGroup === 'synctex' ||
+      compileGroup === 'synctex-output' ||
+      compileGroup === 'wordcount'
+    ) {
       volumes[directory] += ':ro'
     }
 
@@ -309,50 +307,17 @@ const DockerRunner = {
     LockManager.runWithLock(
       options.name,
       releaseLock =>
-        // Check that volumes exist before starting the container.
-        // When a container is started with volume pointing to a
-        // non-existent directory then docker creates the directory but
-        // with root ownership.
-        DockerRunner._checkVolumes(options, volumes, err => {
-          if (err != null) {
-            return releaseLock(err)
-          }
-          DockerRunner._startContainer(
-            options,
-            volumes,
-            attachStreamHandler,
-            releaseLock
-          )
-        }),
-
+        DockerRunner._startContainer(
+          options,
+          volumes,
+          attachStreamHandler,
+          releaseLock
+        ),
       callback
     )
   },
 
   // Check that volumes exist and are directories
-  _checkVolumes(options, volumes, callback) {
-    if (usingSiblingContainers()) {
-      // Server Pro, with sibling-containers active, skip checks
-      return callback(null)
-    }
-
-    const checkVolume = (path, cb) =>
-      fs.stat(path, (err, stats) => {
-        if (err != null) {
-          return cb(err)
-        }
-        if (!stats.isDirectory()) {
-          return cb(new Error('not a directory'))
-        }
-        cb()
-      })
-    const jobs = []
-    for (const vol in volumes) {
-      jobs.push(cb => checkVolume(vol, cb))
-    }
-    async.series(jobs, callback)
-  },
-
   _startContainer(options, volumes, attachStreamHandler, callback) {
     callback = _.once(callback)
     const { name } = options
@@ -616,6 +581,10 @@ const DockerRunner = {
       clearInterval(containerMonitorInterval)
       containerMonitorInterval = undefined
     }
+  },
+
+  canRunSyncTeXInOutputDir() {
+    return Boolean(Settings.path.sandboxedCompilesHostDirOutput)
   },
 }
 

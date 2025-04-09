@@ -49,5 +49,6 @@ services:
       TEXLIVE_IMAGE_USER: "tex"
       DOCKER_RUNNER: "true"
       COMPILES_HOST_DIR: $PWD/compiles
+      OUTPUT_HOST_DIR: $PWD/output
     command: npm run --silent test:acceptance
 

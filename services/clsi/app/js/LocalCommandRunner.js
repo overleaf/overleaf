@@ -99,6 +99,10 @@ module.exports = CommandRunner = {
     }
     return callback()
   },
+
+  canRunSyncTeXInOutputDir() {
+    return true
+  },
 }
 
 module.exports.promises = {

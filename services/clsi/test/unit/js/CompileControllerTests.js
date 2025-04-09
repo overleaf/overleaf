@@ -33,7 +33,7 @@ describe('CompileController', function () {
         './CLSICacheHandler': {
           notifyCLSICacheAboutBuild: sinon.stub(),
           downloadLatestCompileCache: sinon.stub().resolves(),
-          downloadOldCompileCache: sinon.stub().resolves(),
+          downloadOutputDotSynctexFromCompileCache: sinon.stub().resolves(),
         },
         './Errors': (this.Erros = Errors),
       },

@@ -29,6 +29,7 @@ services:
       - DOCKER_RUNNER=true
       - TEXLIVE_IMAGE=texlive-full # docker build texlive -t texlive-full
       - COMPILES_HOST_DIR=${PWD}/compiles
+      - OUTPUT_HOST_DIR=${PWD}/output
     user: root
     volumes:
       - ${PWD}/compiles:/overleaf/services/clsi/compiles

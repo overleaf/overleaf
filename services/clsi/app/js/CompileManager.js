@@ -21,7 +21,7 @@ const { emitPdfStats } = require('./ContentCacheMetrics')
 const SynctexOutputParser = require('./SynctexOutputParser')
 const {
   downloadLatestCompileCache,
-  downloadOldCompileCache,
+  downloadOutputDotSynctexFromCompileCache,
 } = require('./CLSICacheHandler')
 
 const COMPILE_TIME_BUCKETS = [
@@ -509,58 +509,72 @@ async function _runSynctex(projectId, userId, command, opts) {
     throw new Errors.InvalidParameter('invalid buildId')
   }
 
-  const directory = getCompileDir(projectId, userId)
+  const outputDir = getOutputDir(projectId, userId)
+  const runInOutputDir = buildId && CommandRunner.canRunSyncTeXInOutputDir()
+
+  const directory = runInOutputDir
+    ? Path.join(outputDir, OutputCacheManager.CACHE_SUBDIR, buildId)
+    : getCompileDir(projectId, userId)
   const timeout = 60 * 1000 // increased to allow for large projects
   const compileName = getCompileName(projectId, userId)
-  const compileGroup = 'synctex'
+  const compileGroup = runInOutputDir ? 'synctex-output' : 'synctex'
   const defaultImageName =
     Settings.clsi && Settings.clsi.docker && Settings.clsi.docker.image
-  try {
-    await _checkFileExists(directory, 'output.synctex.gz')
-  } catch (err) {
-    if (
-      err instanceof Errors.NotFoundError &&
-      compileFromClsiCache &&
-      editorId &&
-      buildId
-    ) {
+  // eslint-disable-next-line @typescript-eslint/return-await
+  return await OutputCacheManager.promises.queueDirOperation(
+    outputDir,
+    /**
+     * @return {Promise<string>}
+     */
+    async () => {
       try {
-        await downloadOldCompileCache(
+        await _checkFileExists(directory, 'output.synctex.gz')
+      } catch (err) {
+        if (
+          err instanceof Errors.NotFoundError &&
+          compileFromClsiCache &&
+          editorId &&
+          buildId
+        ) {
+          try {
+            await downloadOutputDotSynctexFromCompileCache(
+              projectId,
+              userId,
+              editorId,
+              buildId,
+              directory
+            )
+          } catch (err) {
+            logger.warn(
+              { err, projectId, userId, editorId, buildId },
+              'failed to download output.synctex.gz from clsi-cache'
+            )
+          }
+          await _checkFileExists(directory, 'output.synctex.gz')
+        } else {
+          throw err
+        }
+      }
+      try {
+        const output = await CommandRunner.promises.run(
+          compileName,
+          command,
+          directory,
+          imageName || defaultImageName,
+          timeout,
+          {},
+          compileGroup
+        )
+        return output.stdout
+      } catch (error) {
+        throw OError.tag(error, 'error running synctex', {
+          command,
           projectId,
           userId,
-          editorId,
-          buildId,
-          directory
-        )
-      } catch (err) {
-        logger.warn(
-          { err, projectId, userId, editorId, buildId },
-          'failed to populate compile dir for synctex using old output'
-        )
+        })
       }
-      await _checkFileExists(directory, 'output.synctex.gz')
-    } else {
-      throw err
     }
-  }
-  try {
-    const output = await CommandRunner.promises.run(
-      compileName,
-      command,
-      directory,
-      imageName || defaultImageName,
-      timeout,
-      {},
-      compileGroup
-    )
-    return output.stdout
-  } catch (error) {
-    throw OError.tag(error, 'error running synctex', {
-      command,
-      projectId,
-      userId,
-    })
-  }
+  )
 }
 
 async function wordcount(projectId, userId, filename, image) {

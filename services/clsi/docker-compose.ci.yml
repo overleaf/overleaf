@@ -31,6 +31,7 @@ services:
       TEXLIVE_IMAGE_USER: "tex"
       DOCKER_RUNNER: "true"
       COMPILES_HOST_DIR: $PWD/compiles
+      OUTPUT_HOST_DIR: $PWD/output
     volumes:
       - ./compiles:/overleaf/services/clsi/compiles
       - /var/run/docker.sock:/var/run/docker.sock

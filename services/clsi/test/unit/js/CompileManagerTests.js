@@ -62,6 +62,7 @@ describe('CompileManager', function () {
     }
     this.OutputCacheManager = {
       promises: {
+        queueDirOperation: sinon.stub().callsArg(1),
         saveOutputFiles: sinon
           .stub()
           .resolves({ outputFiles: this.buildFiles, buildId: this.buildId }),
@@ -163,7 +164,7 @@ describe('CompileManager', function () {
         './CLSICacheHandler': {
           notifyCLSICacheAboutBuild: sinon.stub(),
           downloadLatestCompileCache: sinon.stub().resolves(),
-          downloadOldCompileCache: sinon.stub().resolves(),
+          downloadOutputDotSynctexFromCompileCache: sinon.stub().resolves(),
         },
       },
     })

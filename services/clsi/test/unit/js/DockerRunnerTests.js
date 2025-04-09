@@ -76,8 +76,11 @@ describe('DockerRunner', function () {
     this.env = {}
     this.callback = sinon.stub()
     this.project_id = 'project-id-123'
-    this.volumes = { '/local/compile/directory': '/compile' }
+    this.volumes = { '/some/host/dir/compiles/directory': '/compile' }
     this.Settings.clsi.docker.image = this.defaultImage = 'default-image'
+    this.Settings.path.sandboxedCompilesHostDirCompiles =
+      '/some/host/dir/compiles'
+    this.Settings.path.sandboxedCompilesHostDirOutput = '/some/host/dir/output'
     this.compileGroup = 'compile-group'
     return (this.Settings.clsi.docker.env = { PATH: 'mock-path' })
   })
@@ -151,9 +154,8 @@ describe('DockerRunner', function () {
       })
     })
 
-    describe('when path.sandboxedCompilesHostDir is set', function () {
+    describe('standard compile', function () {
       beforeEach(function () {
-        this.Settings.path.sandboxedCompilesHostDir = '/some/host/dir/compiles'
         this.directory = '/var/lib/overleaf/data/compiles/xyz'
         this.DockerRunner._runAndWaitForContainer = sinon
           .stub()
@@ -180,6 +182,99 @@ describe('DockerRunner', function () {
 
       return it('should call the callback', function () {
         return this.callback.calledWith(null, this.output).should.equal(true)
+      })
+    })
+
+    describe('synctex-output', function () {
+      beforeEach(function () {
+        this.directory = '/var/lib/overleaf/data/output/xyz/generated-files/id'
+        this.DockerRunner._runAndWaitForContainer = sinon
+          .stub()
+          .callsArgWith(3, null, (this.output = 'mock-output'))
+        this.DockerRunner.run(
+          this.project_id,
+          this.command,
+          this.directory,
+          this.image,
+          this.timeout,
+          this.env,
+          'synctex-output',
+          this.callback
+        )
+      })
+
+      it('should re-write the bind directory and set ro flag', function () {
+        const volumes =
+          this.DockerRunner._runAndWaitForContainer.lastCall.args[1]
+        expect(volumes).to.deep.equal({
+          '/some/host/dir/output/xyz/generated-files/id': '/compile:ro',
+        })
+      })
+
+      it('should call the callback', function () {
+        this.callback.calledWith(null, this.output).should.equal(true)
+      })
+    })
+
+    describe('synctex', function () {
+      beforeEach(function () {
+        this.directory = '/var/lib/overleaf/data/compile/xyz'
+        this.DockerRunner._runAndWaitForContainer = sinon
+          .stub()
+          .callsArgWith(3, null, (this.output = 'mock-output'))
+        this.DockerRunner.run(
+          this.project_id,
+          this.command,
+          this.directory,
+          this.image,
+          this.timeout,
+          this.env,
+          'synctex',
+          this.callback
+        )
+      })
+
+      it('should re-write the bind directory', function () {
+        const volumes =
+          this.DockerRunner._runAndWaitForContainer.lastCall.args[1]
+        expect(volumes).to.deep.equal({
+          '/some/host/dir/compiles/xyz': '/compile:ro',
+        })
+      })
+
+      it('should call the callback', function () {
+        this.callback.calledWith(null, this.output).should.equal(true)
+      })
+    })
+
+    describe('wordcount', function () {
+      beforeEach(function () {
+        this.directory = '/var/lib/overleaf/data/compile/xyz'
+        this.DockerRunner._runAndWaitForContainer = sinon
+          .stub()
+          .callsArgWith(3, null, (this.output = 'mock-output'))
+        this.DockerRunner.run(
+          this.project_id,
+          this.command,
+          this.directory,
+          this.image,
+          this.timeout,
+          this.env,
+          'wordcount',
+          this.callback
+        )
+      })
+
+      it('should re-write the bind directory', function () {
+        const volumes =
+          this.DockerRunner._runAndWaitForContainer.lastCall.args[1]
+        expect(volumes).to.deep.equal({
+          '/some/host/dir/compiles/xyz': '/compile:ro',
+        })
+      })
+
+      it('should call the callback', function () {
+        this.callback.calledWith(null, this.output).should.equal(true)
       })
     })
 
@@ -390,7 +485,7 @@ describe('DockerRunner', function () {
         const options =
           this.DockerRunner._runAndWaitForContainer.lastCall.args[0]
         return expect(options.HostConfig).to.deep.include({
-          Binds: ['/local/compile/directory:/compile:rw'],
+          Binds: ['/some/host/dir/compiles/directory:/compile:rw'],
           LogConfig: { Type: 'none', Config: {} },
           CapDrop: 'ALL',
           SecurityOpt: ['no-new-privileges'],
@@ -559,82 +654,6 @@ describe('DockerRunner', function () {
       return it('should call the callback  and stream handler without an error', function () {
         this.attachStreamHandler.called.should.equal(true)
         return this.callback.called.should.equal(true)
-      })
-    })
-
-    describe('when a volume does not exist', function () {
-      beforeEach(function () {
-        this.fs.stat = sinon.stub().yields(new Error('no such path'))
-        return this.DockerRunner.startContainer(
-          this.options,
-          this.volumes,
-          this.attachStreamHandler,
-          this.callback
-        )
-      })
-
-      it('should not try to create the container', function () {
-        return this.createContainer.called.should.equal(false)
-      })
-
-      it('should call the callback with an error', function () {
-        this.callback.calledWith(sinon.match(Error)).should.equal(true)
-      })
-    })
-
-    describe('when a volume exists but is not a directory', function () {
-      beforeEach(function () {
-        this.fs.stat = sinon.stub().yields(null, {
-          isDirectory() {
-            return false
-          },
-        })
-        return this.DockerRunner.startContainer(
-          this.options,
-          this.volumes,
-          this.attachStreamHandler,
-          this.callback
-        )
-      })
-
-      it('should not try to create the container', function () {
-        return this.createContainer.called.should.equal(false)
-      })
-
-      it('should call the callback with an error', function () {
-        this.callback.calledWith(sinon.match(Error)).should.equal(true)
-      })
-    })
-
-    describe('when a volume does not exist, but sibling-containers are used', function () {
-      beforeEach(function () {
-        this.fs.stat = sinon.stub().yields(new Error('no such path'))
-        this.Settings.path.sandboxedCompilesHostDir = '/some/path'
-        this.container.start = sinon.stub().yields()
-        return this.DockerRunner.startContainer(
-          this.options,
-          this.volumes,
-          () => {},
-          this.callback
-        )
-      })
-
-      afterEach(function () {
-        return delete this.Settings.path.sandboxedCompilesHostDir
-      })
-
-      it('should start the container with the given name', function () {
-        this.getContainer.calledWith(this.options.name).should.equal(true)
-        return this.container.start.called.should.equal(true)
-      })
-
-      it('should not try to create the container', function () {
-        return this.createContainer.called.should.equal(false)
-      })
-
-      return it('should call the callback', function () {
-        this.callback.called.should.equal(true)
-        return this.callback.calledWith(new Error()).should.equal(false)
       })
     })
 

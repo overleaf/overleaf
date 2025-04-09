@@ -15,6 +15,7 @@ function validateFilename(filename) {
       'output.blg',
       'output.log',
       'output.pdf',
+      'output.synctex.gz',
       'output.overleaf.json',
       'output.tar.gz',
     ].includes(filename) ||
