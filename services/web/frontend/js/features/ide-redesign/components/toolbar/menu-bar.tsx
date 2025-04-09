@@ -14,7 +14,13 @@ import MaterialIcon from '@/shared/components/material-icon'
 import OLSpinner from '@/features/ui/components/ol/ol-spinner'
 import { useLayoutContext } from '@/shared/context/layout-context'
 import { useCommandProvider } from '@/features/ide-react/hooks/use-command-provider'
-import CommandDropdown, { MenuStructure } from './command-dropdown'
+import CommandDropdown, {
+  CommandSection,
+  MenuSectionStructure,
+  MenuStructure,
+} from './command-dropdown'
+import { useUserSettingsContext } from '@/shared/context/user-settings-context'
+import { useRailContext } from '../../contexts/rail-context'
 
 export const ToolbarMenuBar = () => {
   const { t } = useTranslation()
@@ -132,6 +138,42 @@ export const ToolbarMenuBar = () => {
     [t]
   )
 
+  const pdfControlsMenuSectionStructure: MenuSectionStructure = useMemo(
+    () => ({
+      title: t('pdf_preview'),
+      id: 'pdf-controls',
+      children: [
+        'view-pdf-presentation-mode',
+        'view-pdf-zoom-in',
+        'view-pdf-zoom-out',
+        'view-pdf-fit-width',
+        'view-pdf-fit-height',
+      ],
+    }),
+    [t]
+  )
+
+  const {
+    userSettings: { mathPreview },
+    setUserSettings,
+  } = useUserSettingsContext()
+
+  const toggleMathPreview = useCallback(() => {
+    setUserSettings(prev => {
+      return {
+        ...prev,
+        mathPreview: !prev.mathPreview,
+      }
+    })
+  }, [setUserSettings])
+
+  const { setActiveModal } = useRailContext()
+  const openKeyboardShortcutsModal = useCallback(() => {
+    setActiveModal('keyboard-shortcuts')
+  }, [setActiveModal])
+  const openContactUsModal = useCallback(() => {
+    setActiveModal('contact-us')
+  }, [setActiveModal])
   return (
     <MenuBar
       className="ide-redesign-toolbar-menu-bar"
@@ -151,14 +193,12 @@ export const ToolbarMenuBar = () => {
       >
         <ChangeLayoutOptions />
         <DropdownHeader>Editor settings</DropdownHeader>
-        <MenuBarOption title="Show breadcrumbs" />
-        <MenuBarOption title="Show equation preview" />
-        <DropdownHeader>PDF preview</DropdownHeader>
-        <MenuBarOption title="Presentation mode" />
-        <MenuBarOption title="Zoom in" />
-        <MenuBarOption title="Zoom out" />
-        <MenuBarOption title="Fit to width" />
-        <MenuBarOption title="Fit to height" />
+        <MenuBarOption
+          title={t('show_equation_preview')}
+          trailingIcon={mathPreview ? 'check' : undefined}
+          onClick={toggleMathPreview}
+        />
+        <CommandSection section={pdfControlsMenuSectionStructure} />
       </MenuBarDropdown>
       <CommandDropdown
         menu={formatMenuStructure}
@@ -170,11 +210,24 @@ export const ToolbarMenuBar = () => {
         id="help"
         className="ide-redesign-toolbar-dropdown-toggle-subdued ide-redesign-toolbar-button-subdued"
       >
-        <MenuBarOption title="Keyboard shortcuts" />
-        <MenuBarOption title="Documentation" />
+        <MenuBarOption
+          title={t('keyboard_shortcuts')}
+          onClick={openKeyboardShortcutsModal}
+        />
+        <MenuBarOption
+          title={t('documentation')}
+          href="/learn"
+          target="_blank"
+          rel="noopener noreferrer"
+        />
         <DropdownDivider />
-        <MenuBarOption title="Contact us" />
-        <MenuBarOption title="Give feedback" />
+        <MenuBarOption title={t('contact_us')} onClick={openContactUsModal} />
+        <MenuBarOption
+          title={t('give_feedback')}
+          href="https://forms.gle/soyVStc5qDx9na1Z6"
+          target="_blank"
+          rel="noopener noreferrer"
+        />
         <DropdownDivider />
         <SwitchToOldEditorMenuBarOption />
         <MenuBarOption

@@ -9,6 +9,8 @@ type MenuBarOptionProps = {
   disabled?: boolean
   trailingIcon?: ReactNode
   href?: string
+  target?: string
+  rel?: string
 }
 
 export const MenuBarOption = ({
@@ -17,6 +19,8 @@ export const MenuBarOption = ({
   href,
   disabled,
   trailingIcon,
+  target,
+  rel,
 }: MenuBarOptionProps) => {
   const { setSelected } = useNestableDropdown()
   return (
@@ -27,6 +31,8 @@ export const MenuBarOption = ({
         disabled={disabled}
         trailingIcon={trailingIcon}
         href={href}
+        rel={rel}
+        target={target}
       >
         {title}
       </DropdownItem>

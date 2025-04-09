@@ -6,6 +6,8 @@ import PdfZoomDropdown from './pdf-zoom-dropdown'
 import { useResizeObserver } from '@/shared/hooks/use-resize-observer'
 import PdfViewerControlsMenuButton from './pdf-viewer-controls-menu-button'
 import { useDetachCompileContext as useCompileContext } from '../../../shared/context/detach-compile-context'
+import { useCommandProvider } from '@/features/ide-react/hooks/use-command-provider'
+import { useTranslation } from 'react-i18next'
 
 type PdfViewerControlsToolbarProps = {
   requestPresentationMode: () => void
@@ -26,6 +28,7 @@ function PdfViewerControlsToolbar({
   totalPages,
   pdfContainer,
 }: PdfViewerControlsToolbarProps) {
+  const { t } = useTranslation()
   const { showLogs } = useCompileContext()
 
   const toolbarControlsElement = document.querySelector('#toolbar-pdf-controls')
@@ -40,6 +43,37 @@ function PdfViewerControlsToolbar({
   )
 
   const { elementRef: pdfControlsRef } = useResizeObserver(handleResize)
+
+  useCommandProvider(
+    () => [
+      {
+        id: 'view-pdf-presentation-mode',
+        label: t('presentation_mode'),
+        handler: requestPresentationMode,
+      },
+      {
+        id: 'view-pdf-zoom-in',
+        label: t('zoom_in'),
+        handler: () => setZoom('zoom-in'),
+      },
+      {
+        id: 'view-pdf-zoom-out',
+        label: t('zoom_out'),
+        handler: () => setZoom('zoom-out'),
+      },
+      {
+        id: 'view-pdf-fit-width',
+        label: t('fit_to_width'),
+        handler: () => setZoom('page-width'),
+      },
+      {
+        id: 'view-pdf-fit-height',
+        label: t('fit_to_height'),
+        handler: () => setZoom('page-height'),
+      },
+    ],
+    [t, requestPresentationMode, setZoom]
+  )
 
   if (!toolbarControlsElement) {
     return null
