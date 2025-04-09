@@ -89,6 +89,16 @@
       "host": "QUEUES_REDIS_HOST",
       "password": "QUEUES_REDIS_PASSWORD",
       "port": "QUEUES_REDIS_PORT"
+    },
+    "history": {
+      "host": "HISTORY_REDIS_HOST",
+      "password": "HISTORY_REDIS_PASSWORD",
+      "port": "HISTORY_REDIS_PORT"
+    },
+    "lock": {
+      "host": "REDIS_HOST",
+      "password": "REDIS_PASSWORD",
+      "port": "REDIS_PORT"
     }
   }
 }
