@@ -1,3 +1,4 @@
+const _ = require('lodash')
 const {
   fetchNothing,
   fetchRedirectWithResponse,
@@ -23,6 +24,13 @@ function validateFilename(filename) {
   }
 }
 
+/**
+ * Clear the cache on all clsi-cache instances.
+ *
+ * @param projectId
+ * @param userId
+ * @return {Promise<void>}
+ */
 async function clearCache(projectId, userId) {
   let path = `/project/${projectId}`
   if (userId) {
@@ -46,6 +54,45 @@ async function clearCache(projectId, userId) {
   )
 }
 
+/**
+ * Get an output file from a specific build.
+ *
+ * @param projectId
+ * @param userId
+ * @param buildId
+ * @param filename
+ * @param signal
+ * @return {Promise<{size: number, zone: string, location: string, lastModified: Date, allFiles: string[]}>}
+ */
+async function getOutputFile(
+  projectId,
+  userId,
+  buildId,
+  filename,
+  signal = AbortSignal.timeout(15_000)
+) {
+  validateFilename(filename)
+  if (!/^[a-f0-9-]+$/.test(buildId)) {
+    throw new InvalidNameError('bad buildId')
+  }
+
+  let path = `/project/${projectId}`
+  if (userId) {
+    path += `/user/${userId}`
+  }
+  path += `/build/${buildId}/search/output/${filename}`
+  return getRedirectWithFallback(projectId, userId, path, signal)
+}
+
+/**
+ * Get an output file from the most recent build.
+ *
+ * @param projectId
+ * @param userId
+ * @param filename
+ * @param signal
+ * @return {Promise<{size: number, zone: string, location: string, lastModified: Date, allFiles: string[]}>}
+ */
 async function getLatestOutputFile(
   projectId,
   userId,
@@ -59,8 +106,34 @@ async function getLatestOutputFile(
     path += `/user/${userId}`
   }
   path += `/latest/output/${filename}`
+  return getRedirectWithFallback(projectId, userId, path, signal)
+}
 
-  for (const { url, zone } of Settings.apis.clsiCache.instances) {
+/**
+ * Request the given path from any of the clsi-cache instances.
+ *
+ * Some of them might be down temporarily. Try the next one until we receive a redirect or 404.
+ *
+ * This function is similar to the Coordinator in the clsi-cache, notable differences:
+ * - all the logic for sorting builds is in clsi-cache (re-used by clsi and web)
+ * - fan-out (1 client performs lookup on many clsi-cache instances) is "central" in clsi-cache, resulting in better connection re-use
+ * - we only cross the k8s cluster boundary via an internal GCLB once ($$$)
+ *
+ * @param projectId
+ * @param userId
+ * @param path
+ * @param signal
+ * @return {Promise<{size: number, zone: string, location: string, lastModified: Date, allFiles: string[]}>}
+ */
+async function getRedirectWithFallback(
+  projectId,
+  userId,
+  path,
+  signal = AbortSignal.timeout(15_000)
+) {
+  // Avoid hitting the same instance first all the time.
+  const instances = _.shuffle(Settings.apis.clsiCache.instances)
+  for (const { url, zone } of instances) {
     const u = new URL(url)
     u.pathname = path
     try {
@@ -92,6 +165,21 @@ async function getLatestOutputFile(
   throw new NotFoundError('nothing cached yet')
 }
 
+/**
+ * Populate the clsi-cache for the given project/user with the provided source
+ *
+ * This is either another project, or a template (id+version).
+ *
+ * @param projectId
+ * @param userId
+ * @param sourceProjectId
+ * @param templateId
+ * @param templateVersionId
+ * @param lastUpdated
+ * @param zone
+ * @param signal
+ * @return {Promise<void>}
+ */
 async function prepareCacheSource(
   projectId,
   userId,
@@ -122,6 +210,7 @@ async function prepareCacheSource(
 
 module.exports = {
   clearCache,
+  getOutputFile,
   getLatestOutputFile,
   prepareCacheSource,
 }

@@ -24,7 +24,11 @@ function PdfFileList({ fileList }: { fileList: PdfFileDataList }) {
 
       {fileList.top.map(file => (
         <li key={file.path} role="menuitem">
-          <DropdownItem role="link" download={basename(file)} href={file.url}>
+          <DropdownItem
+            role="link"
+            download={basename(file)}
+            href={file.downloadURL || file.url}
+          >
             {file.path}
           </DropdownItem>
         </li>
@@ -36,7 +40,11 @@ function PdfFileList({ fileList }: { fileList: PdfFileDataList }) {
 
       {fileList.other.map(file => (
         <li key={file.path} role="menuitem">
-          <DropdownItem role="link" download={basename(file)} href={file.url}>
+          <DropdownItem
+            role="link"
+            download={basename(file)}
+            href={file.downloadURL || file.url}
+          >
             {file.path}
           </DropdownItem>
         </li>

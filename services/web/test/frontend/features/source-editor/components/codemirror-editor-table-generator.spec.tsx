@@ -108,7 +108,7 @@ describe('<CodeMirrorEditor/> Table editor', function () {
     cy.interceptEvents()
 
     cy.interceptMathJax()
-    cy.interceptCompile('compile', Number.MAX_SAFE_INTEGER)
+    cy.interceptCompile({ prefix: 'compile', times: Number.MAX_SAFE_INTEGER })
     cy.intercept('/project/*/doc/*/metadata', { body: {} })
     window.metaAttributesCache.set('ol-preventCompileOnLoad', true)
   })

@@ -29,6 +29,7 @@ const projectFallback = {
 
 export const ProjectProvider: FC = ({ children }) => {
   const [project] = useScopeValue('project')
+  const joinedOnce = !!project
 
   const {
     _id,
@@ -69,6 +70,7 @@ export const ProjectProvider: FC = ({ children }) => {
       trackChangesState,
       mainBibliographyDocId,
       projectSnapshot,
+      joinedOnce,
     }
   }, [
     _id,
@@ -84,6 +86,7 @@ export const ProjectProvider: FC = ({ children }) => {
     trackChangesState,
     mainBibliographyDocId,
     projectSnapshot,
+    joinedOnce,
   ])
 
   return (

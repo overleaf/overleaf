@@ -21,6 +21,28 @@ const CHUNK_USAGE_THRESHOLD_CACHED = 42
 // 42 * 0.7^11 < 1, aka we keep stale entries around for 11 compiles.
 const CHUNK_USAGE_STALE_DECAY_RATE = 0.7
 
+let cacheFlag = 'default'
+// Work around a Chrome bug: https://issues.chromium.org/issues/40542704
+// Multiple simultaneous requests to same URL with Range header cause failure (block backend returns ERR_CACHE_OPERATION_NOT_SUPPORTED)
+const CACHE_NO_STORE = 'no-store'
+
+/**
+ * @param {string} url
+ * @param {RequestInit} init
+ */
+async function fetchWithCacheFallback(url, init) {
+  try {
+    return await fetch(url, init)
+  } catch (err) {
+    if (init.headers?.has('Range') && init.cache !== CACHE_NO_STORE) {
+      cacheFlag = CACHE_NO_STORE
+      init.cache = CACHE_NO_STORE
+      return await fetch(url, init)
+    }
+    throw err
+  }
+}
+
 /**
  * @param {Object} file
  */
@@ -470,21 +492,30 @@ export function checkChunkResponse(response, estimatedSize, init) {
   }
 }
 
+function getDynamicChunkInit({ file, start, end, signal }) {
+  // Avoid making range request when downloading the PDF file in full.
+  const isFullFile = start === 0 && end === file.size
+  return {
+    cache: cacheFlag,
+    headers: new Headers(
+      isFullFile ? {} : { Range: `bytes=${start}-${end - 1}` }
+    ),
+    signal,
+  }
+}
+
 /**
  *
+ * @param {Object} file
  * @param {string} url
  * @param {number} start
  * @param {number} end
  * @param {AbortSignal} abortSignal
  */
-export async function fallbackRequest({ url, start, end, abortSignal }) {
+export async function fallbackRequest({ file, url, start, end, abortSignal }) {
   try {
-    const init = {
-      cache: 'no-store',
-      headers: { Range: `bytes=${start}-${end - 1}` },
-      signal: abortSignal,
-    }
-    const response = await fetch(url, init)
+    const init = getDynamicChunkInit({ file, start, end, signal: abortSignal })
+    const response = await fetchWithCacheFallback(url, init)
     checkChunkResponse(response, end - start, init)
     return await response.arrayBuffer()
   } catch (e) {
@@ -494,6 +525,7 @@ export async function fallbackRequest({ url, start, end, abortSignal }) {
 
 /**
  *
+ * @param {Object} file
  * @param {string} url
  * @param {number} start
  * @param {number} end
@@ -501,10 +533,24 @@ export async function fallbackRequest({ url, start, end, abortSignal }) {
  * @param {Uint8Array} actual
  * @param {AbortSignal} abortSignal
  */
-async function verifyRange({ url, start, end, metrics, actual, abortSignal }) {
+async function verifyRange({
+  file,
+  url,
+  start,
+  end,
+  metrics,
+  actual,
+  abortSignal,
+}) {
   let expectedRaw
   try {
-    expectedRaw = await fallbackRequest({ url, start, end, abortSignal })
+    expectedRaw = await fallbackRequest({
+      file,
+      url,
+      start,
+      end,
+      abortSignal,
+    })
   } catch (error) {
     throw OError.tag(error, 'cannot verify range', { url, start, end })
   }
@@ -541,9 +587,11 @@ function skipPrefetched(chunks, prefetched, start, end) {
  * @param {Object|Object[]} chunk
  * @param {string} url
  * @param {RequestInit} init
- * @param {Map<string, string>} cachedUrls
+ * @param {Map<string, {url:string,init:RequestInit}>} cachedUrls
  * @param {Object} metrics
  * @param {boolean} cachedUrlLookupEnabled
+ * @param {string} fallbackToCacheURL
+ * @param {Object} file
  */
 async function fetchChunk({
   chunk,
@@ -552,18 +600,21 @@ async function fetchChunk({
   cachedUrls,
   metrics,
   cachedUrlLookupEnabled,
+  fallbackToCacheURL,
+  file,
 }) {
   const estimatedSize = Array.isArray(chunk)
     ? estimateSizeOfMultipartResponse(chunk)
     : chunk.end - chunk.start
 
   const oldUrl = cachedUrls.get(chunk.hash)
-  if (cachedUrlLookupEnabled && chunk.hash && oldUrl && oldUrl !== url) {
+  if (cachedUrlLookupEnabled && chunk.hash && oldUrl && oldUrl.url !== url) {
     // When the clsi server id changes, the content id changes too and as a
     //  result all the browser cache keys (aka urls) get invalidated.
     // We memorize the previous browser cache keys in `cachedUrls`.
     try {
-      const response = await fetch(oldUrl, init)
+      oldUrl.init.signal = init.signal
+      const response = await fetchWithCacheFallback(oldUrl.url, oldUrl.init)
       if (response.status === 200) {
         checkChunkResponse(response, estimatedSize, init)
         metrics.oldUrlHitCount += 1
@@ -577,10 +628,46 @@ async function fetchChunk({
     } catch (e) {
       // Fallback to the latest url.
     }
+    cachedUrls.delete(chunk.hash) // clear cached state
   }
-  const response = await fetch(url, init)
-  checkChunkResponse(response, estimatedSize, init)
-  if (chunk.hash) cachedUrls.set(chunk.hash, url)
+  let response
+  try {
+    response = await fetchWithCacheFallback(url, init)
+    checkChunkResponse(response, estimatedSize, init)
+    if (chunk.hash) {
+      delete init.signal // omit the signal from the cache
+      cachedUrls.set(chunk.hash, { url, init })
+    }
+  } catch (err1) {
+    if (chunk.hash) {
+      cachedUrls.delete(chunk.hash)
+    }
+    const isMissing = response?.status === 404 || response?.status === 416
+    const hasOthersCached = cachedUrls.size > 0
+    if (isMissing && hasOthersCached) {
+      // Only try downloading chunks that were cached previously
+      file.ranges = file.ranges.filter(r => cachedUrls.has(r.hash))
+      // Try harder at fetching the chunk, fallback to cache
+      url = fallbackToCacheURL
+      if (chunk.hash) {
+        init = getDynamicChunkInit({
+          file,
+          // skip object id prefix
+          start: chunk.start + chunk.objectId.byteLength,
+          end: chunk.end,
+          signal: init.signal,
+        })
+      }
+      try {
+        response = await fetchWithCacheFallback(url, init)
+        checkChunkResponse(response, estimatedSize, init)
+      } catch (err2) {
+        throw err1
+      }
+    } else {
+      throw err1
+    }
+  }
   return response
 }
 
@@ -720,6 +807,7 @@ class Timer {
  * @param {number} start
  * @param {number} end
  * @param {Object} file
+ * @param {queryForChunks} start
  * @param {Object} metrics
  * @param {Map} usageScore
  * @param {Map} cachedUrls
@@ -728,12 +816,14 @@ class Timer {
  * @param {boolean} prefetchLargeEnabled
  * @param {boolean} tryOldCachedUrlEnabled
  * @param {AbortSignal} abortSignal
+ * @param {string} fallbackToCacheURL
  */
 export async function fetchRange({
   url,
   start,
   end,
   file,
+  queryForChunks,
   metrics,
   usageScore,
   cachedUrls,
@@ -742,6 +832,7 @@ export async function fetchRange({
   prefetchLargeEnabled,
   cachedUrlLookupEnabled,
   abortSignal,
+  fallbackToCacheURL,
 }) {
   const timer = new Timer()
   timer.startBlockingCompute()
@@ -793,7 +884,7 @@ export async function fetchRange({
       fetchedCount: 1,
       fetchedBytes: size,
     })
-    return fallbackRequest({ url, start, end, abortSignal })
+    return fallbackRequest({ file, url, start, end, abortSignal })
   }
 
   if (prefetchingEnabled) {
@@ -819,8 +910,8 @@ export async function fetchRange({
         chunk: dynamicChunks[0],
         url,
         init: {
-          cache: 'no-store',
-          headers: { Range: `bytes=${byteRanges}` },
+          cache: cacheFlag,
+          headers: new Headers({ Range: `bytes=${byteRanges}` }),
         },
       })
       break
@@ -833,8 +924,10 @@ export async function fetchRange({
           chunk,
           url,
           init: {
-            cache: 'no-store',
-            headers: { Range: `bytes=${chunk.start}-${chunk.end - 1}` },
+            cache: cacheFlag,
+            headers: new Headers({
+              Range: `bytes=${chunk.start}-${chunk.end - 1}`,
+            }),
           },
         })
       })
@@ -844,17 +937,12 @@ export async function fetchRange({
         chunk: dynamicChunks,
         url,
         init: {
-          cache: 'no-store',
-          headers: { Range: `bytes=${byteRanges}` },
+          cache: cacheFlag,
+          headers: new Headers({ Range: `bytes=${byteRanges}` }),
         },
       })
   }
 
-  const params = new URL(url).searchParams
-  // drop no needed params
-  params.delete('enable_pdf_caching')
-  params.delete('verify_chunks')
-  const query = params.toString()
   // The schema of `url` is https://domain/project/:id/user/:id/build/... for
   //  authenticated and https://domain/project/:id/build/... for
   //  unauthenticated users. Cut it before /build/.
@@ -863,7 +951,7 @@ export async function fetchRange({
   const requests = chunks
     .map(chunk => ({
       chunk,
-      url: `${perUserPrefix}/content/${file.contentId}/${chunk.hash}?${query}`,
+      url: `${perUserPrefix}/content/${file.contentId}/${chunk.hash}?${queryForChunks}`,
       init: {},
     }))
     .concat(coalescedDynamicChunks)
@@ -886,6 +974,8 @@ export async function fetchRange({
           cachedUrls,
           metrics,
           cachedUrlLookupEnabled,
+          fallbackToCacheURL,
+          file,
         })
         timer.startBlockingCompute()
         const boundary = getMultipartBoundary(response, chunk)

@@ -23,7 +23,7 @@ describe('<PdfJSViewer/>', function () {
       <EditorProviders scope={scope}>
         <PdfPreviewProvider>
           <div className="pdf-viewer">
-            <PdfJsViewer url="/build/123/output.pdf" />
+            <PdfJsViewer url="/build/123/output.pdf?clsiserverid=foo" />
           </div>
         </PdfPreviewProvider>
       </EditorProviders>
@@ -68,7 +68,7 @@ describe('<PdfJSViewer/>', function () {
       <EditorProviders scope={scope}>
         <PdfPreviewProvider>
           <div className="pdf-viewer">
-            <PdfJsViewer url="/build/123/output.pdf" />
+            <PdfJsViewer url="/build/123/output.pdf?clsiserverid=foo" />
           </div>
         </PdfPreviewProvider>
       </EditorProviders>
@@ -88,7 +88,7 @@ describe('<PdfJSViewer/>', function () {
       <EditorProviders scope={scope}>
         <PdfPreviewProvider>
           <div className="pdf-viewer">
-            <PdfJsViewer url="/build/123/output.pdf" />
+            <PdfJsViewer url="/build/123/output.pdf?clsiserverid=foo" />
           </div>
         </PdfPreviewProvider>
       </EditorProviders>

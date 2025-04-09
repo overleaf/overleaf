@@ -38,12 +38,14 @@ import { useFileTreePathContext } from '@/features/file-tree/contexts/file-tree-
 import { useUserSettingsContext } from '@/shared/context/user-settings-context'
 import { useFeatureFlag } from '@/shared/context/split-test-context'
 import { useEditorManagerContext } from '@/features/ide-react/context/editor-manager-context'
+import { getJSON } from '@/infrastructure/fetch-json'
 import { CompileResponseData } from '../../../../types/compile'
 import {
   PdfScrollPosition,
   usePdfScrollPosition,
 } from '@/shared/hooks/use-pdf-scroll-position'
 import { PdfFileDataList } from '@/features/pdf-preview/util/types'
+import { isSplitTestEnabled } from '@/utils/splitTestUtils'
 
 type PdfFile = Record<string, any>
 
@@ -116,7 +118,7 @@ export const LocalCompileProvider: FC = ({ children }) => {
   const { hasPremiumCompile, isProjectOwner } = useEditorContext()
   const { openDocWithId, openDocs, currentDocument } = useEditorManagerContext()
 
-  const { _id: projectId, rootDocId } = useProjectContext()
+  const { _id: projectId, rootDocId, joinedOnce } = useProjectContext()
 
   const { pdfPreviewOpen } = useLayoutContext()
 
@@ -186,6 +188,12 @@ export const LocalCompileProvider: FC = ({ children }) => {
 
   // whether the project has been compiled yet
   const [compiledOnce, setCompiledOnce] = useState(false)
+  // fetch initial compile response from cache
+  const [initialCompileFromCache, setInitialCompileFromCache] = useState(
+    isSplitTestEnabled('initial-compile-from-clsi-cache')
+  )
+  // Compile triggered while fetching the initial compile from cache
+  const upgradeInitialCompileFromCacheRef = useRef(false)
 
   // whether the cache is being cleared
   const [clearingCache, setClearingCache] = useState(false)
@@ -327,13 +335,43 @@ export const LocalCompileProvider: FC = ({ children }) => {
     setEditedSinceCompileStarted(changedAt > 0)
   }, [setEditedSinceCompileStarted, changedAt])
 
+  // try to fetch the last compile result after opening the project, potentially before joining the project.
+  useEffect(() => {
+    if (initialCompileFromCache) {
+      setInitialCompileFromCache(false)
+      setCompiling(true)
+      setCompiledOnce(true)
+      getJSON(`/project/${projectId}/output/cached/output.overleaf.json`)
+        .then((data: any) => {
+          setCompiling(false)
+          setData({
+            ...data,
+            options: compiler.defaultOptions,
+          })
+          if (upgradeInitialCompileFromCacheRef.current) {
+            compilingRef.current = false
+            compiler.compile() // trigger regular compile
+          }
+        })
+        .catch(() => {
+          setCompiling(false)
+          if (upgradeInitialCompileFromCacheRef.current) {
+            compilingRef.current = false
+            compiler.compile() // trigger regular compile
+          } else {
+            setCompiledOnce(false) // trigger auto compile
+          }
+        })
+    }
+  }, [projectId, initialCompileFromCache, compiler])
+
   // always compile the PDF once after opening the project, after the doc has loaded
   useEffect(() => {
-    if (!compiledOnce && currentDocument) {
+    if (!compiledOnce && currentDocument && !initialCompileFromCache) {
       setCompiledOnce(true)
       compiler.compile({ isAutoCompileOnLoad: true })
     }
-  }, [compiledOnce, currentDocument, compiler])
+  }, [compiledOnce, currentDocument, initialCompileFromCache, compiler])
 
   useEffect(() => {
     setHasShortCompileTimeout(
@@ -370,6 +408,7 @@ export const LocalCompileProvider: FC = ({ children }) => {
   // note: this should _only_ run when `data` changes,
   // the other dependencies must all be static
   useEffect(() => {
+    if (!joinedOnce) return // wait for joinProject, it populates the premium flags.
     const abortController = new AbortController()
 
     const recordedActions = recordedActionsRef.current
@@ -519,6 +558,7 @@ export const LocalCompileProvider: FC = ({ children }) => {
       abortController.abort()
     }
   }, [
+    joinedOnce,
     data,
     alphaProgram,
     labsProgram,
@@ -579,9 +619,10 @@ export const LocalCompileProvider: FC = ({ children }) => {
   // start a compile manually
   const startCompile = useCallback(
     options => {
+      upgradeInitialCompileFromCacheRef.current = true
       compiler.compile(options)
     },
-    [compiler]
+    [compiler, upgradeInitialCompileFromCacheRef]
   )
 
   // stop a compile manually

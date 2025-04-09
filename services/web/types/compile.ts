@@ -1,6 +1,7 @@
 export type CompileOutputFile = {
   path: string
   url: string
+  downloadURL?: string
   type: string
   build: string
   ranges?: {

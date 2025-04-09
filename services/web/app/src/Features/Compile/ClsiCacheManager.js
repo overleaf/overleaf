@@ -4,15 +4,26 @@ const DocumentUpdaterHandler = require('../DocumentUpdater/DocumentUpdaterHandle
 const ProjectGetter = require('../Project/ProjectGetter')
 const SplitTestHandler = require('../SplitTests/SplitTestHandler')
 
+/**
+ * Get the most recent build and metadata
+ *
+ * Internal: internal metadata; External: fine to send to user as-is.
+ *
+ * @param projectId
+ * @param userId
+ * @param filename
+ * @param signal
+ * @return {Promise<{internal: {zone: string, location: string}, external: {isUpToDate: boolean, lastUpdated: Date, size: number, allFiles: string[]}}>}
+ */
 async function getLatestBuildFromCache(projectId, userId, filename, signal) {
   const [
     { location, lastModified: lastCompiled, zone, size, allFiles },
     lastUpdatedInRedis,
-    { lastUpdated: lastUpdatedInMongo, name: projectName },
+    { lastUpdated: lastUpdatedInMongo },
   ] = await Promise.all([
     ClsiCacheHandler.getLatestOutputFile(projectId, userId, filename, signal),
     DocumentUpdaterHandler.promises.getProjectLastUpdatedAt(projectId),
-    ProjectGetter.promises.getProject(projectId, { lastUpdated: 1, name: 1 }),
+    ProjectGetter.promises.getProject(projectId, { lastUpdated: 1 }),
   ])
 
   const lastUpdated =
@@ -25,7 +36,6 @@ async function getLatestBuildFromCache(projectId, userId, filename, signal) {
     internal: {
       location,
       zone,
-      projectName,
     },
     external: {
       isUpToDate,
@@ -36,6 +46,16 @@ async function getLatestBuildFromCache(projectId, userId, filename, signal) {
   }
 }
 
+/**
+ * Collect metadata and prepare the clsi-cache for the given project.
+ *
+ * @param projectId
+ * @param userId
+ * @param sourceProjectId
+ * @param templateId
+ * @param templateVersionId
+ * @return {Promise<void>}
+ */
 async function prepareClsiCache(
   projectId,
   userId,

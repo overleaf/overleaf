@@ -57,7 +57,7 @@ async function getPdfCachingMinChunkSize(req, res) {
   return parseInt(variant, 10)
 }
 
-const getSplitTestOptions = callbackify(async function (req, res) {
+async function _getSplitTestOptions(req, res) {
   // Use the query flags from the editor request for overriding the split test.
   let query = {}
   try {
@@ -122,7 +122,8 @@ const getSplitTestOptions = callbackify(async function (req, res) {
     enablePdfCaching,
     pdfCachingMinChunkSize,
   }
-})
+}
+const getSplitTestOptionsCb = callbackify(_getSplitTestOptions)
 
 module.exports = CompileController = {
   compile(req, res, next) {
@@ -161,7 +162,7 @@ module.exports = CompileController = {
       options.incrementalCompilesEnabled = true
     }
 
-    getSplitTestOptions(req, res, (err, splitTestOptions) => {
+    getSplitTestOptionsCb(req, res, (err, splitTestOptions) => {
       if (err) return next(err)
       let {
         compileFromClsiCache,
@@ -305,25 +306,20 @@ module.exports = CompileController = {
     )
   },
 
-  _compileAsUser(req, callback) {
-    // callback with userId if per-user, undefined otherwise
-    if (!Settings.disablePerUserCompiles) {
-      const userId = SessionManager.getLoggedInUserId(req.session)
-      callback(null, userId)
-    } else {
-      callback()
-    }
-  }, // do a per-project compile, not per-user
+  _getSplitTestOptions,
 
-  _downloadAsUser(req, callback) {
-    // callback with userId if per-user, undefined otherwise
+  _getUserIdForCompile(req) {
     if (!Settings.disablePerUserCompiles) {
-      const userId = SessionManager.getLoggedInUserId(req.session)
-      callback(null, userId)
-    } else {
-      callback()
+      return SessionManager.getLoggedInUserId(req.session)
     }
-  }, // do a per-project compile, not per-user
+    return null
+  },
+  _compileAsUser(req, callback) {
+    callback(null, CompileController._getUserIdForCompile(req))
+  },
+  _downloadAsUser(req, callback) {
+    callback(null, CompileController._getUserIdForCompile(req))
+  },
 
   downloadPdf(req, res, next) {
     Metrics.inc('pdf-downloads')
@@ -549,7 +545,7 @@ module.exports = CompileController = {
       getImageNameForProject(projectId, (error, imageName) => {
         if (error) return next(error)
 
-        getSplitTestOptions(req, res, (error, splitTestOptions) => {
+        getSplitTestOptionsCb(req, res, (error, splitTestOptions) => {
           if (error) return next(error)
           const { compileFromClsiCache } = splitTestOptions
 
@@ -597,7 +593,7 @@ module.exports = CompileController = {
       getImageNameForProject(projectId, (error, imageName) => {
         if (error) return next(error)
 
-        getSplitTestOptions(req, res, (error, splitTestOptions) => {
+        getSplitTestOptionsCb(req, res, (error, splitTestOptions) => {
           if (error) return next(error)
           const { compileFromClsiCache } = splitTestOptions
 

@@ -338,6 +338,8 @@ const _ProjectController = {
       'external-socket-heartbeat',
       'full-project-search',
       'null-test-share-modal',
+      'fall-back-to-clsi-cache',
+      'initial-compile-from-clsi-cache',
       'pdf-caching-cached-url-lookup',
       'pdf-caching-mode',
       'pdf-caching-prefetch-large',

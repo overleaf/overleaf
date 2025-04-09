@@ -49,6 +49,7 @@ export type ProjectContextValue = {
   }[]
   trackChangesState: boolean | Record<UserId | '__guests__', boolean>
   projectSnapshot: ProjectSnapshot
+  joinedOnce: boolean
 }
 
 export type ProjectContextUpdateValue = Partial<ProjectContextValue>

@@ -34,12 +34,15 @@ describe('<PdfPreview/>', function () {
       'ol-compilesUserContentDomain',
       'https://compiles-user.dev-overleaf.com'
     )
+    window.metaAttributesCache.set('ol-splitTestVariants', {
+      'initial-compile-from-clsi-cache': 'enabled',
+    })
     cy.interceptEvents()
   })
 
   it('renders the PDF preview', function () {
     window.metaAttributesCache.set('ol-preventCompileOnLoad', false)
-    cy.interceptCompile('compile')
+    cy.interceptCompile()
 
     const scope = mockScope()
 
@@ -55,6 +58,58 @@ describe('<PdfPreview/>', function () {
     cy.waitForCompile({ pdf: true })
 
     cy.findByRole('button', { name: 'Recompile' })
+  })
+
+  it('uses the cache when available', function () {
+    cy.interceptCompile({ prefix: 'compile', times: 1, cached: true })
+
+    const scope = mockScope()
+
+    cy.mount(
+      <EditorProviders scope={scope}>
+        <div className="pdf-viewer">
+          <PdfPreview />
+        </div>
+      </EditorProviders>
+    )
+
+    // wait for "compile from cache on load" to finish
+    cy.waitForCompile({ pdf: true, cached: true })
+
+    cy.contains('Your Paper')
+  })
+
+  it('uses the cache when available then compiles', function () {
+    cy.interceptCompile({ prefix: 'compile', times: 1, cached: true })
+
+    const scope = mockScope()
+
+    cy.mount(
+      <EditorProviders scope={scope}>
+        <div className="pdf-viewer">
+          <PdfPreview />
+        </div>
+      </EditorProviders>
+    )
+
+    // wait for "compile from cache on load" to finish
+    cy.waitForCompile({ pdf: true, cached: true })
+    cy.contains('Your Paper')
+
+    // Then trigger a new compile
+    cy.interceptCompile({
+      prefix: 'recompile',
+      times: 1,
+      cached: false,
+      outputPDFFixture: 'output-2.pdf',
+    })
+
+    // press the Recompile button => compile
+    cy.findByRole('button', { name: 'Recompile' }).click()
+
+    // wait for compile to finish
+    cy.waitForCompile({ prefix: 'recompile', pdf: true })
+    cy.contains('Modern Authoring Tools for Science')
   })
 
   it('runs a compile when the Recompile button is pressed', function () {
@@ -479,7 +534,7 @@ describe('<PdfPreview/>', function () {
 
       cy.findByRole('button', { name: 'Recompile' }).click()
       cy.waitForCompile({ pdf: true })
-      cy.interceptCompile('recompile')
+      cy.interceptCompile({ prefix: 'recompile' })
 
       cy.intercept('DELETE', '/project/*/output*', {
         statusCode: 204,

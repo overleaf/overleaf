@@ -11,14 +11,21 @@ const ignoreFiles = ['output.fls', 'output.fdb_latexmk']
 
 export function buildFileList(
   outputFiles: Map<string, CompileOutputFile>,
-  { clsiServerId, compileGroup, outputFilesArchive }: CompileResponseData
+  {
+    clsiServerId,
+    compileGroup,
+    outputFilesArchive,
+    fromCache = false,
+  }: CompileResponseData
 ): PdfFileDataList {
   const files: PdfFileDataList = { top: [], other: [] }
 
   if (outputFiles) {
     const params = new URLSearchParams()
 
-    if (clsiServerId) {
+    if (fromCache) {
+      params.set('clsiserverid', 'cache')
+    } else if (clsiServerId) {
       params.set('clsiserverid', clsiServerId)
     }
     if (compileGroup) {

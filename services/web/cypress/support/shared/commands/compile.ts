@@ -43,23 +43,60 @@ const outputFiles = () => {
   ]
 }
 
-export const interceptCompile = (prefix = 'compile', times = 1) => {
-  cy.intercept(
-    { method: 'POST', pathname: '/project/*/compile', times },
-    {
-      body: {
-        status: 'success',
-        clsiServerId: 'foo',
-        compileGroup: 'priority',
-        pdfDownloadDomain: 'https://clsi.test-overleaf.com',
-        outputFiles: outputFiles(),
-      },
-    }
-  ).as(`${prefix}`)
+export const interceptCompile = ({
+  prefix = 'compile',
+  times = 1,
+  cached = false,
+  outputPDFFixture = 'output.pdf',
+} = {}) => {
+  if (cached) {
+    cy.intercept(
+      { pathname: '/project/*/output/cached/output.overleaf.json', times },
+      {
+        body: {
+          fromCache: true,
+          status: 'success',
+          clsiServerId: 'foo',
+          compileGroup: 'priority',
+          pdfDownloadDomain: 'https://clsi.test-overleaf.com',
+          outputFiles: outputFiles(),
+        },
+      }
+    ).as(`${prefix}-cached`)
+    cy.intercept(
+      { method: 'POST', pathname: '/project/*/compile', times },
+      {
+        body: {
+          status: 'unavailable',
+          clsiServerId: 'foo',
+          compileGroup: 'priority',
+          pdfDownloadDomain: 'https://clsi.test-overleaf.com',
+          outputFiles: [],
+        },
+      }
+    ).as(`${prefix}`)
+  } else {
+    cy.intercept(
+      { pathname: '/project/*/output/cached/output.overleaf.json', times },
+      { statusCode: 404 }
+    ).as(`${prefix}-cached`)
+    cy.intercept(
+      { method: 'POST', pathname: '/project/*/compile', times },
+      {
+        body: {
+          status: 'success',
+          clsiServerId: 'foo',
+          compileGroup: 'priority',
+          pdfDownloadDomain: 'https://clsi.test-overleaf.com',
+          outputFiles: outputFiles(),
+        },
+      }
+    ).as(`${prefix}`)
+  }
 
   cy.intercept(
     { pathname: '/build/*/output.pdf', times },
-    { fixture: 'build/output.pdf,null' }
+    { fixture: `build/${outputPDFFixture},null` }
   ).as(`${prefix}-pdf`)
 
   cy.intercept(
@@ -73,12 +110,26 @@ export const interceptCompile = (prefix = 'compile', times = 1) => {
   ).as(`${prefix}-blg`)
 }
 
-export const waitForCompile = ({ prefix = 'compile', pdf = false } = {}) => {
-  cy.wait(`@${prefix}`)
+export const waitForCompile = ({
+  prefix = 'compile',
+  pdf = false,
+  cached = false,
+} = {}) => {
+  if (cached) {
+    cy.wait(`@${prefix}-cached`)
+  } else {
+    cy.wait(`@${prefix}`)
+  }
   cy.wait(`@${prefix}-log`)
+    .its('request.query.clsiserverid')
+    .should('eq', cached ? 'cache' : 'foo') // straight from cache if cached
   cy.wait(`@${prefix}-blg`)
+    .its('request.query.clsiserverid')
+    .should('eq', cached ? 'cache' : 'foo') // straight from cache if cached
   if (pdf) {
     cy.wait(`@${prefix}-pdf`)
+      .its('request.query.clsiserverid')
+      .should('eq', 'foo') // always from VM first
   }
   return cy.wrap(null)
 }

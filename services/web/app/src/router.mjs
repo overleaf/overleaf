@@ -66,6 +66,7 @@ import _ from 'lodash'
 import { plainTextResponse } from './infrastructure/Response.js'
 import PublicAccessLevels from './Features/Authorization/PublicAccessLevels.js'
 import SocketDiagnostics from './Features/SocketDiagnostics/SocketDiagnostics.mjs'
+import ClsiCacheController from './Features/Compile/ClsiCacheController.js'
 const ClsiCookieManager = ClsiCookieManagerFactory(
   Settings.apis.clsi != null ? Settings.apis.clsi.backendGroupName : undefined
 )
@@ -623,6 +624,18 @@ async function initialize(webRouter, privateApiRouter, publicApiRouter) {
     },
     AuthorizationMiddleware.ensureUserCanReadProject,
     CompileController.downloadPdf
+  )
+
+  webRouter.get(
+    '/project/:Project_id/output/cached/output.overleaf.json',
+    AuthorizationMiddleware.ensureUserCanReadProject,
+    ClsiCacheController.getLatestBuildFromCache
+  )
+
+  webRouter.get(
+    '/download/project/:Project_id/build/:buildId/output/cached/:filename',
+    AuthorizationMiddleware.ensureUserCanReadProject,
+    ClsiCacheController.downloadFromCache
   )
 
   // PDF Download button for specific build
