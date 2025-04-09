@@ -24,10 +24,12 @@ export type AddOn = {
 
 // add-ons directly accessed through recurly
 export type RecurlyAddOn = {
-  add_on_code: string
+  code: string
+  name: string
   quantity: number
-  unit_amount_in_cents: number
-  displayPrice: string
+  unitPrice: number
+  amount?: number
+  displayPrice?: string
 }
 
 export type PendingRecurlyPlan = {

@@ -1,6 +1,13 @@
 const SandboxedModule = require('sandboxed-module')
 const sinon = require('sinon')
 const { assert } = require('chai')
+const {
+  RecurlyAccount,
+  RecurlySubscription,
+  RecurlySubscriptionAddOn,
+  RecurlySubscriptionChange,
+} = require('../../../../app/src/Features/Subscription/RecurlyEntities')
+
 const modulePath =
   '../../../../app/src/Features/Subscription/SubscriptionViewModelBuilder'
 
@@ -26,6 +33,29 @@ describe('SubscriptionViewModelBuilder', function () {
         state: 'active',
       },
     }
+    this.recurlySubscription = new RecurlySubscription({
+      id: this.recurlySubscription_id,
+      userId: this.user._id,
+      currency: 'EUR',
+      planCode: 'plan-code',
+      planName: 'plan-name',
+      planPrice: 13,
+      addOns: [
+        new RecurlySubscriptionAddOn({
+          code: 'addon-code',
+          name: 'addon name',
+          quantity: 1,
+          unitPrice: 2,
+        }),
+      ],
+      subtotal: 15,
+      taxRate: 0.1,
+      taxAmount: 1.5,
+      total: 16.5,
+      periodStart: new Date('2025-01-20T12:00:00.000Z'),
+      periodEnd: new Date('2025-02-20T12:00:00.000Z'),
+      collectionMethod: 'automatic',
+    })
 
     this.individualCustomSubscription = {
       planCode: this.planCode,
@@ -42,6 +72,8 @@ describe('SubscriptionViewModelBuilder', function () {
     this.groupPlan = {
       planCode: this.groupPlanCode,
       features: this.groupPlanFeatures,
+      membersLimit: 4,
+      membersLimitAddOn: 'additional-license',
     }
     this.groupSubscription = {
       planCode: this.groupPlanCode,
@@ -75,17 +107,28 @@ describe('SubscriptionViewModelBuilder', function () {
         getUsersSubscription: sinon.stub().resolves(),
         getMemberSubscriptions: sinon.stub().resolves(),
       },
+      getUsersSubscription: sinon.stub().yields(),
+      getMemberSubscriptions: sinon.stub().yields(null, []),
+      getManagedGroupSubscriptions: sinon.stub().yields(null, []),
       findLocalPlanInSettings: sinon.stub(),
     }
     this.InstitutionsGetter = {
       promises: {
         getCurrentInstitutionsWithLicence: sinon.stub().resolves(),
       },
+      getCurrentInstitutionsWithLicence: sinon.stub().yields(null, []),
+      getManagedInstitutions: sinon.stub().yields(null, []),
     }
     this.InstitutionsManager = {
       promises: {
         fetchV1Data: sinon.stub().resolves(),
       },
+    }
+    this.PublishersGetter = {
+      promises: {
+        fetchV1Data: sinon.stub().resolves(),
+      },
+      getManagedPublishers: sinon.stub().yields(null, []),
     }
     this.RecurlyWrapper = {
       promises: {
@@ -100,6 +143,9 @@ describe('SubscriptionViewModelBuilder', function () {
     this.PlansLocator = {
       findLocalPlanInSettings: sinon.stub(),
     }
+    this.PaymentService = {
+      getPaymentFromRecord: sinon.stub().yields(),
+    }
     this.SubscriptionViewModelBuilder = SandboxedModule.require(modulePath, {
       requires: {
         '@overleaf/settings': this.Settings,
@@ -109,9 +155,9 @@ describe('SubscriptionViewModelBuilder', function () {
         './RecurlyWrapper': this.RecurlyWrapper,
         './SubscriptionUpdater': this.SubscriptionUpdater,
         './PlansLocator': this.PlansLocator,
+        './PaymentService': this.PaymentService,
         './V1SubscriptionManager': {},
-        './SubscriptionFormatters': {},
-        '../Publishers/PublishersGetter': {},
+        '../Publishers/PublishersGetter': this.PublishersGetter,
         './SubscriptionHelper': {},
       },
     })
@@ -309,152 +355,270 @@ describe('SubscriptionViewModelBuilder', function () {
         plan: this.commonsPlan,
       })
     })
+
+    describe('with multiple subscriptions', function () {
+      beforeEach(function () {
+        this.SubscriptionLocator.promises.getUsersSubscription
+          .withArgs(this.user)
+          .resolves(this.individualSubscription)
+        this.SubscriptionLocator.promises.getMemberSubscriptions
+          .withArgs(this.user)
+          .resolves([this.groupSubscription])
+        this.InstitutionsGetter.promises.getCurrentInstitutionsWithLicence
+          .withArgs(this.user._id)
+          .resolves([this.commonsSubscription])
+      })
+
+      it('should return individual when the individual subscription has the best feature set', async function () {
+        this.commonsPlan.features = {
+          compileGroup: 'standard',
+          collaborators: 1,
+          compileTimeout: 60,
+        }
+
+        const usersBestSubscription =
+          await this.SubscriptionViewModelBuilder.promises.getBestSubscription(
+            this.user
+          )
+
+        assert.deepEqual(usersBestSubscription, {
+          type: 'individual',
+          subscription: this.individualSubscription,
+          plan: this.plan,
+          remainingTrialDays: -1,
+        })
+      })
+
+      it('should return group when the group subscription has the best feature set', async function () {
+        this.plan.features = {
+          compileGroup: 'standard',
+          collaborators: 1,
+          compileTimeout: 60,
+        }
+        this.commonsPlan.features = {
+          compileGroup: 'standard',
+          collaborators: 1,
+          compileTimeout: 60,
+        }
+
+        const usersBestSubscription =
+          await this.SubscriptionViewModelBuilder.promises.getBestSubscription(
+            this.user
+          )
+
+        assert.deepEqual(usersBestSubscription, {
+          type: 'group',
+          subscription: {},
+          plan: this.groupPlan,
+          remainingTrialDays: -1,
+        })
+      })
+
+      it('should return commons when the commons affiliation has the best feature set', async function () {
+        this.plan.features = {
+          compileGroup: 'priority',
+          collaborators: 5,
+          compileTimeout: 240,
+        }
+        this.groupPlan.features = {
+          compileGroup: 'standard',
+          collaborators: 1,
+          compileTimeout: 60,
+        }
+        this.commonsPlan.features = {
+          compileGroup: 'priority',
+          collaborators: -1,
+          compileTimeout: 240,
+        }
+
+        const usersBestSubscription =
+          await this.SubscriptionViewModelBuilder.promises.getBestSubscription(
+            this.user
+          )
+
+        assert.deepEqual(usersBestSubscription, {
+          type: 'commons',
+          subscription: this.commonsSubscription,
+          plan: this.commonsPlan,
+        })
+      })
+
+      it('should return individual with equal feature sets', async function () {
+        this.plan.features = {
+          compileGroup: 'priority',
+          collaborators: -1,
+          compileTimeout: 240,
+        }
+        this.groupPlan.features = {
+          compileGroup: 'priority',
+          collaborators: -1,
+          compileTimeout: 240,
+        }
+        this.commonsPlan.features = {
+          compileGroup: 'priority',
+          collaborators: -1,
+          compileTimeout: 240,
+        }
+
+        const usersBestSubscription =
+          await this.SubscriptionViewModelBuilder.promises.getBestSubscription(
+            this.user
+          )
+
+        assert.deepEqual(usersBestSubscription, {
+          type: 'individual',
+          subscription: this.individualSubscription,
+          plan: this.plan,
+          remainingTrialDays: -1,
+        })
+      })
+
+      it('should return group over commons with equal feature sets', async function () {
+        this.plan.features = {
+          compileGroup: 'standard',
+          collaborators: 1,
+          compileTimeout: 60,
+        }
+        this.groupPlan.features = {
+          compileGroup: 'priority',
+          collaborators: -1,
+          compileTimeout: 240,
+        }
+        this.commonsPlan.features = {
+          compileGroup: 'priority',
+          collaborators: -1,
+          compileTimeout: 240,
+        }
+
+        const usersBestSubscription =
+          await this.SubscriptionViewModelBuilder.promises.getBestSubscription(
+            this.user
+          )
+
+        assert.deepEqual(usersBestSubscription, {
+          type: 'group',
+          subscription: {},
+          plan: this.groupPlan,
+          remainingTrialDays: -1,
+        })
+      })
+    })
   })
 
-  describe('with multiple subscriptions', function () {
-    beforeEach(function () {
-      this.SubscriptionLocator.promises.getUsersSubscription
-        .withArgs(this.user)
-        .resolves(this.individualSubscription)
-      this.SubscriptionLocator.promises.getMemberSubscriptions
-        .withArgs(this.user)
-        .resolves([this.groupSubscription])
-      this.InstitutionsGetter.promises.getCurrentInstitutionsWithLicence
-        .withArgs(this.user._id)
-        .resolves([this.commonsSubscription])
-    })
-
-    it('should return individual when the individual subscription has the best feature set', async function () {
-      this.commonsPlan.features = {
-        compileGroup: 'standard',
-        collaborators: 1,
-        compileTimeout: 60,
-      }
-
-      const usersBestSubscription =
-        await this.SubscriptionViewModelBuilder.promises.getBestSubscription(
-          this.user
+  describe('buildUsersSubscriptionViewModel', function () {
+    describe('with a recurly subscription', function () {
+      it('adds recurly data to the personal subscription', async function () {
+        this.SubscriptionLocator.getUsersSubscription.yields(
+          null,
+          this.individualSubscription
         )
-
-      assert.deepEqual(usersBestSubscription, {
-        type: 'individual',
-        subscription: this.individualSubscription,
-        plan: this.plan,
-        remainingTrialDays: -1,
+        this.PaymentService.getPaymentFromRecord.yields(null, {
+          subscription: this.recurlySubscription,
+          account: new RecurlyAccount({
+            email: 'example@example.com',
+            hasPastDueInvoice: false,
+          }),
+          coupons: [],
+        })
+        const result =
+          await this.SubscriptionViewModelBuilder.promises.buildUsersSubscriptionViewModel(
+            this.user
+          )
+        assert.deepEqual(result.personalSubscription.recurly, {
+          tax: 1.5,
+          taxRate: 0.1,
+          billingDetailsLink: '/user/subscription/recurly/billing-details',
+          accountManagementLink:
+            '/user/subscription/recurly/account-management',
+          additionalLicenses: 0,
+          addOns: [
+            {
+              code: 'addon-code',
+              name: 'addon name',
+              quantity: 1,
+              unitPrice: 2,
+              preTaxTotal: 2,
+            },
+          ],
+          totalLicenses: 0,
+          nextPaymentDueAt: 'February 20th, 2025 12:00 PM UTC',
+          nextPaymentDueDate: 'February 20th, 2025',
+          currency: 'EUR',
+          state: 'active',
+          trialEndsAtFormatted: null,
+          trialEndsAt: null,
+          activeCoupons: [],
+          accountEmail: 'example@example.com',
+          hasPastDueInvoice: false,
+          pausedAt: null,
+          remainingPauseCycles: null,
+          displayPrice: '€16.50',
+          planOnlyDisplayPrice: '€14.30',
+          addOnDisplayPricesWithoutAdditionalLicense: {
+            'addon-code': '€2.20',
+          },
+        })
       })
-    })
 
-    it('should return group when the group subscription has the best feature set', async function () {
-      this.plan.features = {
-        compileGroup: 'standard',
-        collaborators: 1,
-        compileTimeout: 60,
-      }
-      this.commonsPlan.features = {
-        compileGroup: 'standard',
-        collaborators: 1,
-        compileTimeout: 60,
-      }
-
-      const usersBestSubscription =
-        await this.SubscriptionViewModelBuilder.promises.getBestSubscription(
-          this.user
+      it('includes pending changes', async function () {
+        this.SubscriptionLocator.getUsersSubscription.yields(
+          null,
+          this.individualSubscription
         )
-
-      assert.deepEqual(usersBestSubscription, {
-        type: 'group',
-        subscription: {},
-        plan: this.groupPlan,
-        remainingTrialDays: -1,
-      })
-    })
-
-    it('should return commons when the commons affiliation has the best feature set', async function () {
-      this.plan.features = {
-        compileGroup: 'priority',
-        collaborators: 5,
-        compileTimeout: 240,
-      }
-      this.groupPlan.features = {
-        compileGroup: 'standard',
-        collaborators: 1,
-        compileTimeout: 60,
-      }
-      this.commonsPlan.features = {
-        compileGroup: 'priority',
-        collaborators: -1,
-        compileTimeout: 240,
-      }
-
-      const usersBestSubscription =
-        await this.SubscriptionViewModelBuilder.promises.getBestSubscription(
-          this.user
+        this.recurlySubscription.pendingChange = new RecurlySubscriptionChange({
+          subscription: this.recurlySubscription,
+          nextPlanCode: this.groupPlanCode,
+          nextPlanName: 'Group Collaborator (Annual) 4 licenses',
+          nextPlanPrice: 1400,
+          nextAddOns: [
+            new RecurlySubscriptionAddOn({
+              code: 'additional-license',
+              name: 'additional license',
+              quantity: 8,
+              unitPrice: 24.4,
+            }),
+            new RecurlySubscriptionAddOn({
+              code: 'addon-code',
+              name: 'addon name',
+              quantity: 1,
+              unitPrice: 2,
+            }),
+          ],
+        })
+        this.PaymentService.getPaymentFromRecord.yields(null, {
+          subscription: this.recurlySubscription,
+          account: {},
+          coupons: [],
+        })
+        const result =
+          await this.SubscriptionViewModelBuilder.promises.buildUsersSubscriptionViewModel(
+            this.user
+          )
+        assert.equal(
+          result.personalSubscription.recurly.displayPrice,
+          '€1,756.92'
         )
-
-      assert.deepEqual(usersBestSubscription, {
-        type: 'commons',
-        subscription: this.commonsSubscription,
-        plan: this.commonsPlan,
-      })
-    })
-
-    it('should return individual with equal feature sets', async function () {
-      this.plan.features = {
-        compileGroup: 'priority',
-        collaborators: -1,
-        compileTimeout: 240,
-      }
-      this.groupPlan.features = {
-        compileGroup: 'priority',
-        collaborators: -1,
-        compileTimeout: 240,
-      }
-      this.commonsPlan.features = {
-        compileGroup: 'priority',
-        collaborators: -1,
-        compileTimeout: 240,
-      }
-
-      const usersBestSubscription =
-        await this.SubscriptionViewModelBuilder.promises.getBestSubscription(
-          this.user
+        assert.equal(
+          result.personalSubscription.recurly.currentPlanDisplayPrice,
+          '€16.50'
         )
-
-      assert.deepEqual(usersBestSubscription, {
-        type: 'individual',
-        subscription: this.individualSubscription,
-        plan: this.plan,
-        remainingTrialDays: -1,
-      })
-    })
-
-    it('should return group over commons with equal feature sets', async function () {
-      this.plan.features = {
-        compileGroup: 'standard',
-        collaborators: 1,
-        compileTimeout: 60,
-      }
-      this.groupPlan.features = {
-        compileGroup: 'priority',
-        collaborators: -1,
-        compileTimeout: 240,
-      }
-      this.commonsPlan.features = {
-        compileGroup: 'priority',
-        collaborators: -1,
-        compileTimeout: 240,
-      }
-
-      const usersBestSubscription =
-        await this.SubscriptionViewModelBuilder.promises.getBestSubscription(
-          this.user
+        assert.equal(
+          result.personalSubscription.recurly.planOnlyDisplayPrice,
+          '€1,754.72'
         )
-
-      assert.deepEqual(usersBestSubscription, {
-        type: 'group',
-        subscription: {},
-        plan: this.groupPlan,
-        remainingTrialDays: -1,
+        assert.deepEqual(
+          result.personalSubscription.recurly
+            .addOnDisplayPricesWithoutAdditionalLicense,
+          { 'addon-code': '€2.20' }
+        )
+        assert.equal(
+          result.personalSubscription.recurly.pendingAdditionalLicenses,
+          8
+        )
+        assert.equal(
+          result.personalSubscription.recurly.pendingTotalLicenses,
+          12
+        )
       })
     })
   })

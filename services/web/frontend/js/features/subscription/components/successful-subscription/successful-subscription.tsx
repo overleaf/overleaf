@@ -37,7 +37,7 @@ function SuccessfulSubscription() {
               type="success"
               content={
                 <>
-                  {subscription.recurly.trial_ends_at && (
+                  {subscription.recurly.trialEndsAt && (
                     <>
                       <p>
                         <Trans

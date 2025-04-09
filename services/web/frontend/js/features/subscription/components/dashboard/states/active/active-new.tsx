@@ -171,7 +171,7 @@ export function ActiveSubscriptionNew({
         subscription.pendingPlan.name !== subscription.plan.name && (
           <p className="mb-1">{t('want_change_to_apply_before_plan_end')}</p>
         )}
-      {isInFreeTrial(subscription.recurly.trial_ends_at) &&
+      {isInFreeTrial(subscription.recurly.trialEndsAt) &&
         subscription.recurly.trialEndsAtFormatted && (
           <TrialEnding
             trialEndsAtFormatted={subscription.recurly.trialEndsAtFormatted}
@@ -301,12 +301,11 @@ function PlanActions({
         <FlexibleGroupLicensingActions subscription={subscription} />
       ) : (
         <>
-          {!hasPendingPause &&
-            subscription.recurly.account.has_past_due_invoice._ !== 'true' && (
-              <OLButton variant="secondary" onClick={handlePlanChange}>
-                {t('change_plan')}
-              </OLButton>
-            )}
+          {!hasPendingPause && !subscription.recurly.hasPastDueInvoice && (
+            <OLButton variant="secondary" onClick={handlePlanChange}>
+              {t('change_plan')}
+            </OLButton>
+          )}
         </>
       )}
       {hasPendingPause && (

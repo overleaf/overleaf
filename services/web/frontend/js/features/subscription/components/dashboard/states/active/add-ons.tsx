@@ -126,7 +126,7 @@ function AddOns({
             pendingCancellation={
               subscription.pendingPlan !== undefined &&
               (subscription.pendingPlan.addOns ?? []).every(
-                pendingAddOn => pendingAddOn.addOnCode !== addOn.addOnCode
+                pendingAddOn => pendingAddOn.code !== addOn.addOnCode
               )
             }
             displayPrice={addOnsDisplayPrices[addOn.addOnCode]}

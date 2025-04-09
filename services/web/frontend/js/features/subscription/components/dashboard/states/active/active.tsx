@@ -108,7 +108,7 @@ export function ActiveSubscription({
         {!recurlyLoadError &&
           !subscription.groupPlan &&
           !hasPendingPause &&
-          subscription.recurly.account.has_past_due_invoice._ !== 'true' && (
+          !subscription.recurly.hasPastDueInvoice && (
             <>
               {' '}
               <OLButton
@@ -128,7 +128,7 @@ export function ActiveSubscription({
       {(!subscription.pendingPlan ||
         subscription.pendingPlan.name === subscription.plan.name) &&
         subscription.plan.groupPlan && <ContactSupportToChangeGroupPlan />}
-      {isInFreeTrial(subscription.recurly.trial_ends_at) &&
+      {isInFreeTrial(subscription.recurly.trialEndsAt) &&
         subscription.recurly.trialEndsAtFormatted && (
           <TrialEnding
             trialEndsAtFormatted={subscription.recurly.trialEndsAtFormatted}

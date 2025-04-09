@@ -208,7 +208,7 @@ describe('<PersonalSubscription />', function () {
       /your billing email address is currently/i
     ).textContent
     expect(billingText).to.contain(
-      `Your billing email address is currently ${annualActiveSubscription.recurly.account.email}.` +
+      `Your billing email address is currently ${annualActiveSubscription.recurly.accountEmail}.` +
         ` If needed you can update your billing address to ${usersEmail}`
     )
 

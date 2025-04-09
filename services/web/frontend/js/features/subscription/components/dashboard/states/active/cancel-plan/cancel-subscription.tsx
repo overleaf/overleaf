@@ -160,7 +160,7 @@ export function CancelSubscription() {
   const showDowngrade = showDowngradeOption(
     personalSubscription.plan.planCode,
     personalSubscription.plan.groupPlan,
-    personalSubscription.recurly.trial_ends_at,
+    personalSubscription.recurly.trialEndsAt,
     personalSubscription.recurly.pausedAt,
     personalSubscription.recurly.remainingPauseCycles
   )

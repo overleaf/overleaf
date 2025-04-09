@@ -1,6 +1,6 @@
 import { CurrencyCode } from '../currency'
 import { Nullable } from '../../utils'
-import { Plan, AddOn, RecurlyAddOn } from '../plan'
+import { Plan, AddOn, RecurlyAddOn, PendingRecurlyPlan } from '../plan'
 import { User } from '../../user'
 
 type SubscriptionState = 'active' | 'canceled' | 'expired' | 'paused'
@@ -8,6 +8,12 @@ type SubscriptionState = 'active' | 'canceled' | 'expired' | 'paused'
 // when puchasing a new add-on in recurly, we only need to provide the code
 export type PurchasingAddOnCode = {
   code: string
+}
+
+type RecurlyCoupon = {
+  code: string
+  name: string
+  description: string
 }
 
 type Recurly = {
@@ -23,25 +29,10 @@ type Recurly = {
   currency: CurrencyCode
   state?: SubscriptionState
   trialEndsAtFormatted: Nullable<string>
-  trial_ends_at: Nullable<string>
-  activeCoupons: any[] // TODO: confirm type in array
-  account: {
-    email: string
-    created_at: string
-    // data via Recurly API
-    has_canceled_subscription: {
-      _: 'false' | 'true'
-      $: {
-        type: 'boolean'
-      }
-    }
-    has_past_due_invoice: {
-      _: 'false' | 'true'
-      $: {
-        type: 'boolean'
-      }
-    }
-  }
+  trialEndsAt: Nullable<string>
+  activeCoupons: RecurlyCoupon[]
+  accountEmail: string
+  hasPastDueInvoice: boolean
   displayPrice: string
   planOnlyDisplayPrice: string
   addOnDisplayPricesWithoutAdditionalLicense: Record<string, string>
@@ -69,7 +60,7 @@ export type Subscription = {
   planCode: string
   recurlySubscription_id: string
   plan: Plan
-  pendingPlan?: Plan
+  pendingPlan?: PendingRecurlyPlan
   addOns?: AddOn[]
 }
 

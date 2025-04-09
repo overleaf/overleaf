@@ -14,6 +14,8 @@ const {
   CreditCardPaymentMethod,
   RecurlyAddOn,
   RecurlyPlan,
+  RecurlyCoupon,
+  RecurlyAccount,
   RecurlyImmediateCharge,
 } = require('./RecurlyEntities')
 const {
@@ -31,13 +33,21 @@ const recurlyApiKey = recurlySettings ? recurlySettings.apiKey : undefined
 
 const client = new recurly.Client(recurlyApiKey)
 
+/**
+ * Get account for a given user
+ *
+ * @param {string} userId
+ * @return {Promise<RecurlyAccount | null>}
+ */
 async function getAccountForUserId(userId) {
   try {
-    return await client.getAccount(`code-${userId}`)
+    const account = await client.getAccount(`code-${userId}`)
+    return accountFromApi(account)
   } catch (err) {
     if (err instanceof recurly.errors.NotFoundError) {
       // An expected error, we don't need to handle it, just return nothing
       logger.debug({ userId }, 'no recurly account found for user')
+      return null
     } else {
       throw err
     }
@@ -60,6 +70,34 @@ async function createAccountForUserId(userId) {
   const account = await client.createAccount(accountCreate)
   logger.debug({ userId, account }, 'created recurly account')
   return account
+}
+
+/**
+ * Get active coupons for a given user
+ *
+ * @param {string} userId
+ * @return {Promise<RecurlyCoupon[]>}
+ */
+async function getActiveCouponsForUserId(userId) {
+  try {
+    const redemptions = await client.listActiveCouponRedemptions(
+      `code-${userId}`
+    )
+
+    const coupons = []
+    for await (const redemption of redemptions.each()) {
+      coupons.push(couponFromApi(redemption))
+    }
+
+    return coupons
+  } catch (err) {
+    // An expected error if no coupons have been redeemed
+    if (err instanceof recurly.errors.NotFoundError) {
+      return []
+    } else {
+      throw err
+    }
+  }
 }
 
 /**
@@ -292,6 +330,44 @@ function subscriptionIsCanceledOrExpired(subscription) {
 }
 
 /**
+ * Build a RecurlyAccount from Recurly API data
+ *
+ * @param {recurly.Account} apiAccount
+ * @return {RecurlyAccount}
+ */
+function accountFromApi(apiAccount) {
+  if (apiAccount.code == null || apiAccount.email == null) {
+    throw new OError('Invalid Recurly account', {
+      account: apiAccount,
+    })
+  }
+  return new RecurlyAccount({
+    code: apiAccount.code,
+    email: apiAccount.email,
+    hasPastDueInvoice: apiAccount.hasPastDueInvoice ?? false,
+  })
+}
+
+/**
+ * Build a RecurlyCoupon from Recurly API data
+ *
+ * @param {recurly.CouponRedemption} apiRedemption
+ * @return {RecurlyCoupon}
+ */
+function couponFromApi(apiRedemption) {
+  if (apiRedemption.coupon == null || apiRedemption.coupon.code == null) {
+    throw new OError('Invalid Recurly coupon', {
+      coupon: apiRedemption,
+    })
+  }
+  return new RecurlyCoupon({
+    code: apiRedemption.coupon.code,
+    name: apiRedemption.coupon.name ?? '',
+    description: apiRedemption.coupon.hostedPageDescription ?? '',
+  })
+}
+
+/**
  * Build a RecurlySubscription from Recurly API data
  *
  * @param {recurly.Subscription} apiSubscription
@@ -333,6 +409,11 @@ function subscriptionFromApi(apiSubscription) {
     periodStart: apiSubscription.currentPeriodStartedAt,
     periodEnd: apiSubscription.currentPeriodEndsAt,
     collectionMethod: apiSubscription.collectionMethod,
+    service: 'recurly',
+    state: apiSubscription.state ?? 'active',
+    trialPeriodEnd: apiSubscription.trialEndsAt,
+    pausePeriodStart: apiSubscription.pausedAt,
+    remainingPauseCycles: apiSubscription.remainingPauseCycles,
   })
 
   if (apiSubscription.pendingChange != null) {
@@ -525,6 +606,7 @@ module.exports = {
 
   getAccountForUserId: callbackify(getAccountForUserId),
   createAccountForUserId: callbackify(createAccountForUserId),
+  getActiveCouponsForUserId: callbackify(getActiveCouponsForUserId),
   getSubscription: callbackify(getSubscription),
   getSubscriptionForUser: callbackify(getSubscriptionForUser),
   previewSubscriptionChange: callbackify(previewSubscriptionChange),
@@ -545,6 +627,7 @@ module.exports = {
     getSubscriptionForUser,
     getAccountForUserId,
     createAccountForUserId,
+    getActiveCouponsForUserId,
     previewSubscriptionChange,
     applySubscriptionChangeRequest,
     removeSubscriptionChange,

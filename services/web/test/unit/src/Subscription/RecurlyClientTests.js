@@ -6,6 +6,8 @@ const {
   RecurlySubscription,
   RecurlySubscriptionChangeRequest,
   RecurlySubscriptionAddOnUpdate,
+  RecurlyAccount,
+  RecurlyCoupon,
 } = require('../../../../app/src/Features/Subscription/RecurlyEntities')
 
 const MODULE_PATH = '../../../../app/src/Features/Subscription/RecurlyClient'
@@ -26,7 +28,10 @@ describe('RecurlyClient', function () {
     this.user = { _id: '123456', email: 'joe@example.com', first_name: 'Joe' }
     this.subscriptionChange = { id: 'subscription-change-123' }
     this.recurlyAccount = new recurly.Account()
-    Object.assign(this.recurlyAccount, { code: this.user._id })
+    Object.assign(this.recurlyAccount, {
+      code: this.user._id,
+      email: this.user.email,
+    })
 
     this.subscriptionAddOn = {
       code: 'addon-code',
@@ -101,6 +106,7 @@ describe('RecurlyClient', function () {
       getAccount: sinon.stub(),
       getBillingInfo: sinon.stub(),
       listAccountSubscriptions: sinon.stub(),
+      listActiveCouponRedemptions: sinon.stub(),
       previewSubscriptionChange: sinon.stub(),
     }
     this.recurly = {
@@ -147,20 +153,24 @@ describe('RecurlyClient', function () {
   describe('getAccountForUserId', function () {
     it('should return an Account if one exists', async function () {
       this.client.getAccount = sinon.stub().resolves(this.recurlyAccount)
-      await expect(
-        this.RecurlyClient.promises.getAccountForUserId(this.user._id)
+      const account = await this.RecurlyClient.promises.getAccountForUserId(
+        this.user._id
       )
-        .to.eventually.be.an.instanceOf(recurly.Account)
-        .that.has.property('code', this.user._id)
+      const expectedAccount = new RecurlyAccount({
+        code: this.user._id,
+        email: this.user.email,
+        hasPastDueInvoice: false,
+      })
+      expect(account).to.deep.equal(expectedAccount)
     })
 
-    it('should return nothing if no account found', async function () {
+    it('should return null if no account found', async function () {
       this.client.getAccount = sinon
         .stub()
         .throws(new recurly.errors.NotFoundError())
-      expect(
-        this.RecurlyClient.promises.getAccountForUserId('nonsense')
-      ).to.eventually.equal(undefined)
+      const account =
+        await this.RecurlyClient.promises.getAccountForUserId('nonsense')
+      expect(account).to.equal(null)
     })
 
     it('should re-throw caught errors', async function () {
@@ -185,6 +195,59 @@ describe('RecurlyClient', function () {
       this.client.createAccount = sinon.stub().throws()
       await expect(
         this.RecurlyClient.promises.createAccountForUserId(this.user._id)
+      ).to.eventually.be.rejectedWith(Error)
+    })
+  })
+
+  describe('getActiveCouponsForUserId', function () {
+    it('should return an empty array if no coupons returned', async function () {
+      this.client.listActiveCouponRedemptions.returns({
+        each: async function* () {},
+      })
+      const coupons =
+        await this.RecurlyClient.promises.getActiveCouponsForUserId('some-user')
+      expect(coupons).to.deep.equal([])
+    })
+
+    it('should return a coupons returned by recurly', async function () {
+      const recurlyCoupon = {
+        coupon: {
+          code: 'coupon-code',
+          name: 'Coupon Name',
+          hostedPageDescription: 'hosted page description',
+          invoiceDescription: 'invoice description',
+        },
+      }
+      this.client.listActiveCouponRedemptions.returns({
+        each: async function* () {
+          yield recurlyCoupon
+        },
+      })
+      const coupons =
+        await this.RecurlyClient.promises.getActiveCouponsForUserId('some-user')
+      const expectedCoupons = [
+        new RecurlyCoupon({
+          code: 'coupon-code',
+          name: 'Coupon Name',
+          description: 'hosted page description',
+        }),
+      ]
+      expect(coupons).to.deep.equal(expectedCoupons)
+    })
+
+    it('should not throw for Recurly not found error', async function () {
+      this.client.listActiveCouponRedemptions = sinon
+        .stub()
+        .throws(new recurly.errors.NotFoundError())
+      const coupons =
+        await this.RecurlyClient.promises.getActiveCouponsForUserId('some-user')
+      expect(coupons).to.deep.equal([])
+    })
+
+    it('should throw any other API errors', async function () {
+      this.client.listActiveCouponRedemptions = sinon.stub().throws()
+      await expect(
+        this.RecurlyClient.promises.getActiveCouponsForUserId('some-user')
       ).to.eventually.be.rejectedWith(Error)
     })
   })

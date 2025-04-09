@@ -18,7 +18,7 @@ export function PendingPlanChange({
 
   const pendingAiAddonCancellation =
     hasAiAddon &&
-    !pendingPlan.addOns?.some(addOn => addOn.add_on_code === AI_ADD_ON_CODE)
+    !pendingPlan.addOns?.some(addOn => addOn.code === AI_ADD_ON_CODE)
 
   const pendingAdditionalLicenses =
     (subscription.recurly.pendingAdditionalLicenses &&

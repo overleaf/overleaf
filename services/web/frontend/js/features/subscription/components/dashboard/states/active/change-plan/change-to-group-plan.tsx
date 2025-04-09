@@ -10,7 +10,7 @@ export function ChangeToGroupPlan() {
   const { handleOpenModal, personalSubscription } =
     useSubscriptionDashboardContext()
 
-  // TODO: Better way to get RecurlySubscription/trial_ends_at
+  // TODO: Better way to get RecurlySubscription/trialEndsAt
   const subscription =
     personalSubscription && 'recurly' in personalSubscription
       ? (personalSubscription as RecurlySubscription)
@@ -25,7 +25,7 @@ export function ChangeToGroupPlan() {
       <h2 style={{ marginTop: 0 }}>{t('looking_multiple_licenses')}</h2>
       <p style={{ margin: 0 }}>{t('reduce_costs_group_licenses')}</p>
       <br />
-      {isInFreeTrial(subscription?.recurly?.trial_ends_at) ? (
+      {isInFreeTrial(subscription?.recurly?.trialEndsAt) ? (
         <>
           <OLTooltip
             id="disabled-change-to-group-plan"

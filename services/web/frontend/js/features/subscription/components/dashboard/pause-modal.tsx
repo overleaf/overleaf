@@ -40,8 +40,8 @@ export default function PauseSubscriptionModal() {
       plan_code: subscription?.planCode,
       is_trial:
         subscription?.recurly.trialEndsAtFormatted &&
-        subscription?.recurly.trial_ends_at &&
-        new Date(subscription.recurly.trial_ends_at).getTime() > Date.now(),
+        subscription?.recurly.trialEndsAt &&
+        new Date(subscription.recurly.trialEndsAt).getTime() > Date.now(),
     })
     setShowCancellation(true)
   }

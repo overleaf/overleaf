@@ -547,27 +547,6 @@ const promises = {
 
   updateAccountEmailAddress,
 
-  async getAccountActiveCoupons(accountId) {
-    const { body } = await RecurlyWrapper.promises.apiRequest({
-      url: `accounts/${accountId}/redemptions`,
-    })
-
-    const redemptions = await RecurlyWrapper.promises._parseRedemptionsXml(body)
-
-    const activeRedemptions = redemptions.filter(
-      redemption => redemption.state === 'active'
-    )
-    const couponCodes = activeRedemptions.map(
-      redemption => redemption.coupon_code
-    )
-
-    return await Promise.all(
-      couponCodes.map(couponCode =>
-        RecurlyWrapper.promises.getCoupon(couponCode)
-      )
-    )
-  },
-
   async getCoupon(couponCode) {
     const opts = { url: `coupons/${couponCode}` }
     const { body } = await RecurlyWrapper.promises.apiRequest(opts)
@@ -904,7 +883,6 @@ const RecurlyWrapper = {
   _buildXml,
   _parseXml: callbackify(promises._parseXml),
   createFixedAmountCoupon: callbackify(promises.createFixedAmountCoupon),
-  getAccountActiveCoupons: callbackify(promises.getAccountActiveCoupons),
   getBillingInfo: callbackify(promises.getBillingInfo),
   getPaginatedEndpoint: callbackify(promises.getPaginatedEndpoint),
   getSubscription: callbackify(promises.getSubscription),

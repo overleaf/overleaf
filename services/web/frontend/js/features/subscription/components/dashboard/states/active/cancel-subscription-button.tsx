@@ -17,8 +17,8 @@ export function CancelSubscriptionButton() {
   const subscription = personalSubscription as RecurlySubscription
   const isInTrial =
     subscription?.recurly.trialEndsAtFormatted &&
-    subscription?.recurly.trial_ends_at &&
-    new Date(subscription.recurly.trial_ends_at).getTime() > Date.now()
+    subscription?.recurly.trialEndsAt &&
+    new Date(subscription.recurly.trialEndsAt).getTime() > Date.now()
   const hasPendingOrActivePause =
     subscription.recurly.state === 'paused' ||
     (subscription.recurly.state === 'active' &&

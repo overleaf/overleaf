@@ -75,8 +75,7 @@ function PersonalSubscription() {
 
   return (
     <>
-      {personalSubscription.recurly.account.has_past_due_invoice._ ===
-        'true' && (
+      {personalSubscription.recurly.hasPastDueInvoice && (
         <PastDueSubscriptionAlert subscription={personalSubscription} />
       )}
       <PersonalSubscriptionStates

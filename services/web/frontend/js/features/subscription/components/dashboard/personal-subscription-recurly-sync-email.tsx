@@ -20,7 +20,7 @@ function PersonalSubscriptionRecurlySyncEmail() {
 
   if (!personalSubscription || !('recurly' in personalSubscription)) return null
 
-  const recurlyEmail = personalSubscription.recurly.account.email
+  const recurlyEmail = personalSubscription.recurly.accountEmail
 
   if (!userEmail || recurlyEmail === userEmail) return null
 

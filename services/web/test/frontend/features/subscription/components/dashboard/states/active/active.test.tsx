@@ -110,7 +110,7 @@ describe('<ActiveSubscription />', function () {
       JSON.parse(JSON.stringify(annualActiveSubscription))
     )
 
-    activePastDueSubscription.recurly.account.has_past_due_invoice._ = 'true'
+    activePastDueSubscription.recurly.hasPastDueInvoice = true
 
     renderActiveSubscription(activePastDueSubscription)
 
@@ -179,6 +179,8 @@ describe('<ActiveSubscription />', function () {
     subscriptionWithActiveCoupons.recurly.activeCoupons = [
       {
         name: 'fake coupon name',
+        code: 'fake-coupon',
+        description: '',
       },
     ]
     renderActiveSubscription(subscriptionWithActiveCoupons)
