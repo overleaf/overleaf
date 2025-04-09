@@ -35,6 +35,7 @@
   justify-content: space-between;
   box-sizing: border-box;
   height: $toolbar-height;
+  padding: 0 var(--spacing-02);
 
   .ide-redesign-toolbar-menu {
     display: flex;
@@ -44,7 +45,7 @@
   .ide-redesign-toolbar-home-button {
     width: $home-button-size;
     height: $home-button-size;
-    margin: math.div($toolbar-height - $home-button-size, 2);
+    margin: math.div($toolbar-height - $home-button-size, 2) 0;
   }
 
   .ide-redesign-toolbar-button-subdued {
@@ -132,7 +133,7 @@
 .ide-redesign-toolbar-actions {
   display: flex;
   gap: var(--spacing-04);
-  padding: 0 var(--spacing-05);
+  padding-left: var(--spacing-05);
 }
 
 .ide-redesign-toolbar-button-container {

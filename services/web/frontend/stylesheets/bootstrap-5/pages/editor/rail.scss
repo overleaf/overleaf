@@ -106,6 +106,7 @@
   padding: var(--spacing-02);
   background: var(--ide-rail-background);
   border-right: 1px solid var(--ide-rail-border-colour);
+  width: 40px;
 }
 
 .ide-rail-content {
@@ -131,7 +132,6 @@
   display: flex;
   flex-direction: column;
   gap: var(--spacing-02);
-  width: 40px;
 }
 
 .ide-rail-tab-dropdown {
