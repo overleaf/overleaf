@@ -107,7 +107,12 @@ function populateSectionOrGroup<
     children: children
       .map(child => {
         if (typeof child !== 'string') {
-          return populateSectionOrGroup(child, registry)
+          const populatedChild = populateSectionOrGroup(child, registry)
+          if (populatedChild.children.length === 0) {
+            // Skip empty groups
+            return undefined
+          }
+          return populatedChild
         }
         const command = registry.get(child)
         if (command) {
