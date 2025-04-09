@@ -3,6 +3,7 @@ const OutputCacheManager = require('./OutputCacheManager')
 
 const VALID_COMPILERS = ['pdflatex', 'latex', 'xelatex', 'lualatex']
 const MAX_TIMEOUT = 600
+const EDITOR_ID_REGEX = /^[a-f0-9-]{36}$/ // UUID
 
 function parse(body, callback) {
   const response = {}
@@ -28,12 +29,24 @@ function parse(body, callback) {
         default: '',
         type: 'string',
       }),
+      // Will be populated later. Must always be populated for prom library.
+      compile: 'initial',
     }
     response.compiler = _parseAttribute('compiler', compile.options.compiler, {
       validValues: VALID_COMPILERS,
       default: 'pdflatex',
       type: 'string',
     })
+    response.compileFromClsiCache = _parseAttribute(
+      'compileFromClsiCache',
+      compile.options.compileFromClsiCache,
+      { default: false, type: 'boolean' }
+    )
+    response.populateClsiCache = _parseAttribute(
+      'populateClsiCache',
+      compile.options.populateClsiCache,
+      { default: false, type: 'boolean' }
+    )
     response.enablePdfCaching = _parseAttribute(
       'enablePdfCaching',
       compile.options.enablePdfCaching,
@@ -137,6 +150,10 @@ function parse(body, callback) {
     )
     response.rootResourcePath = _checkPath(rootResourcePath)
 
+    response.editorId = _parseAttribute('editorId', compile.options.editorId, {
+      type: 'string',
+      regex: EDITOR_ID_REGEX,
+    })
     response.buildId = _parseAttribute('buildId', compile.options.buildId, {
       type: 'string',
       regex: OutputCacheManager.BUILD_REGEX,

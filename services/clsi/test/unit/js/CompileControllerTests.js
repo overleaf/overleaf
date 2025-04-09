@@ -1,53 +1,10 @@
 const SandboxedModule = require('sandboxed-module')
 const sinon = require('sinon')
-const { expect } = require('chai')
 const modulePath = require('node:path').join(
   __dirname,
   '../../../app/js/CompileController'
 )
 const Errors = require('../../../app/js/Errors')
-
-function tryImageNameValidation(method, imageNameField) {
-  describe('when allowedImages is set', function () {
-    beforeEach(function () {
-      this.Settings.clsi = { docker: {} }
-      this.Settings.clsi.docker.allowedImages = [
-        'repo/image:tag1',
-        'repo/image:tag2',
-      ]
-      this.res.send = sinon.stub()
-      this.res.status = sinon.stub().returns({ send: this.res.send })
-
-      this.CompileManager[method].reset()
-    })
-
-    describe('with an invalid image', function () {
-      beforeEach(function () {
-        this.req.query[imageNameField] = 'something/evil:1337'
-        this.CompileController[method](this.req, this.res, this.next)
-      })
-      it('should return a 400', function () {
-        expect(this.res.status.calledWith(400)).to.equal(true)
-      })
-      it('should not run the query', function () {
-        expect(this.CompileManager[method].called).to.equal(false)
-      })
-    })
-
-    describe('with a valid image', function () {
-      beforeEach(function () {
-        this.req.query[imageNameField] = 'repo/image:tag1'
-        this.CompileController[method](this.req, this.res, this.next)
-      })
-      it('should not return a 400', function () {
-        expect(this.res.status.calledWith(400)).to.equal(false)
-      })
-      it('should run the query', function () {
-        expect(this.CompileManager[method].called).to.equal(true)
-      })
-    })
-  })
-}
 
 describe('CompileController', function () {
   beforeEach(function () {
@@ -61,6 +18,11 @@ describe('CompileController', function () {
             clsi: {
               url: 'http://clsi.example.com',
               outputUrlPrefix: '/zone/b',
+              downloadHost: 'http://localhost:3013',
+            },
+            clsiCache: {
+              enabled: false,
+              url: 'http://localhost:3044',
             },
           },
         }),
@@ -68,6 +30,11 @@ describe('CompileController', function () {
           Timer: sinon.stub().returns({ done: sinon.stub() }),
         },
         './ProjectPersistenceManager': (this.ProjectPersistenceManager = {}),
+        './CLSICacheHandler': {
+          notifyCLSICacheAboutBuild: sinon.stub(),
+          downloadLatestCompileCache: sinon.stub().resolves(),
+          downloadOldCompileCache: sinon.stub().resolves(),
+        },
         './Errors': (this.Erros = Errors),
       },
     })
@@ -439,8 +406,6 @@ describe('CompileController', function () {
         })
         .should.equal(true)
     })
-
-    tryImageNameValidation('syncFromCode', 'imageName')
   })
 
   describe('syncFromPdf', function () {
@@ -476,8 +441,6 @@ describe('CompileController', function () {
         })
         .should.equal(true)
     })
-
-    tryImageNameValidation('syncFromPdf', 'imageName')
   })
 
   describe('wordcount', function () {
@@ -511,7 +474,5 @@ describe('CompileController', function () {
         })
         .should.equal(true)
     })
-
-    tryImageNameValidation('wordcount', 'image')
   })
 })

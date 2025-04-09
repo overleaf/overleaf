@@ -2,7 +2,7 @@ import { isMainFile } from './editor-files'
 import getMeta from '../../../utils/meta'
 import { deleteJSON, postJSON } from '../../../infrastructure/fetch-json'
 import { debounce } from 'lodash'
-import { trackPdfDownload } from './metrics'
+import { EDITOR_SESSION_ID, trackPdfDownload } from './metrics'
 import { enablePdfCaching } from './pdf-caching-flags'
 import { debugConsole } from '@/utils/debugging'
 import { signalWithTimeout } from '@/utils/abort-signal'
@@ -109,6 +109,7 @@ export default class DocumentCompiler {
         // if there was previously a server error
         incrementalCompilesEnabled: !this.error,
         stopOnFirstError: options.stopOnFirstError,
+        editorId: EDITOR_SESSION_ID,
       }
 
       const data = await postJSON(

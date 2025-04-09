@@ -4,6 +4,7 @@ import { enablePdfCaching } from './pdf-caching-flags'
 import { debugConsole } from '@/utils/debugging'
 import { dirname, findEntityByPath } from '@/features/file-tree/util/path'
 import '@/utils/readable-stream-async-iterator-polyfill'
+import { EDITOR_SESSION_ID } from '@/features/pdf-preview/util/metrics'
 
 // Warnings that may disappear after a second LaTeX pass
 const TRANSIENT_WARNING_REGEX = /^(Reference|Citation).+undefined on input line/
@@ -14,6 +15,8 @@ const MAX_BIB_LOG_SIZE_PER_FILE = MAX_LOG_SIZE
 export function handleOutputFiles(outputFiles, projectId, data) {
   const outputFile = outputFiles.get('output.pdf')
   if (!outputFile) return null
+
+  outputFile.editorId = outputFile.editorId || EDITOR_SESSION_ID
 
   // build the URL for viewing the PDF in the preview UI
   const params = new URLSearchParams({

@@ -160,6 +160,11 @@ describe('CompileManager', function () {
         './LockManager': this.LockManager,
         './SynctexOutputParser': this.SynctexOutputParser,
         'fs/promises': this.fsPromises,
+        './CLSICacheHandler': {
+          notifyCLSICacheAboutBuild: sinon.stub(),
+          downloadLatestCompileCache: sinon.stub().resolves(),
+          downloadOldCompileCache: sinon.stub().resolves(),
+        },
       },
     })
   })
@@ -177,6 +182,11 @@ describe('CompileManager', function () {
         flags: (this.flags = ['-file-line-error']),
         compileGroup: (this.compileGroup = 'compile-group'),
         stopOnFirstError: false,
+        metricsOpts: {
+          path: 'clsi-perf',
+          method: 'minimal',
+          compile: 'initial',
+        },
       }
       this.env = {
         OVERLEAF_PROJECT_ID: this.projectId,
@@ -455,7 +465,7 @@ describe('CompileManager', function () {
             this.filename,
             this.line,
             this.column,
-            customImageName
+            { imageName: customImageName }
           )
         })
 
@@ -497,7 +507,7 @@ describe('CompileManager', function () {
             this.page,
             this.h,
             this.v,
-            ''
+            { imageName: '' }
           )
         })
 
@@ -532,7 +542,7 @@ describe('CompileManager', function () {
             this.page,
             this.h,
             this.v,
-            customImageName
+            { imageName: customImageName }
           )
         })
 

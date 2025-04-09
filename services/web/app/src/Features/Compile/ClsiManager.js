@@ -25,6 +25,7 @@ const ClsiFormatChecker = require('./ClsiFormatChecker')
 const DocumentUpdaterHandler = require('../DocumentUpdater/DocumentUpdaterHandler')
 const Metrics = require('@overleaf/metrics')
 const Errors = require('../Errors/Errors')
+const ClsiCacheHandler = require('./ClsiCacheHandler')
 const { getBlobLocation } = require('../History/HistoryManager')
 
 const VALID_COMPILERS = ['pdflatex', 'latex', 'xelatex', 'lualatex']
@@ -148,6 +149,13 @@ async function deleteAuxFiles(projectId, userId, options, clsiserverid) {
       clsiserverid
     )
   } finally {
+    // always clear the clsi-cache
+    try {
+      await ClsiCacheHandler.clearCache(projectId, userId)
+    } catch (err) {
+      logger.warn({ err, projectId, userId }, 'purge clsi-cache failed')
+    }
+
     // always clear the project state from the docupdater, even if there
     // was a problem with the request to the clsi
     try {
@@ -766,6 +774,7 @@ function _finaliseRequest(projectId, options, project, docs, files) {
     compile: {
       options: {
         buildId: options.buildId,
+        editorId: options.editorId,
         compiler: project.compiler,
         timeout: options.timeout,
         imageName: project.imageName,
@@ -775,6 +784,8 @@ function _finaliseRequest(projectId, options, project, docs, files) {
         syncType: options.syncType,
         syncState: options.syncState,
         compileGroup: options.compileGroup,
+        compileFromClsiCache: options.compileFromClsiCache,
+        populateClsiCache: options.populateClsiCache,
         enablePdfCaching:
           (Settings.enablePdfCaching && options.enablePdfCaching) || false,
         pdfCachingMinChunkSize: options.pdfCachingMinChunkSize,

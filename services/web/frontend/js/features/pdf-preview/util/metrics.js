@@ -8,7 +8,7 @@ import { debugConsole } from '@/utils/debugging'
 const VERSION = 9
 
 // editing session id
-const EDITOR_SESSION_ID = uuid()
+export const EDITOR_SESSION_ID = uuid()
 
 const pdfCachingMetrics = {
   viewerId: EDITOR_SESSION_ID,

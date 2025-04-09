@@ -21,6 +21,7 @@ const TpdsProjectFlusher = require('../ThirdPartyDataStore/TpdsProjectFlusher')
 const _ = require('lodash')
 const TagsHandler = require('../Tags/TagsHandler')
 const Features = require('../../infrastructure/Features')
+const ClsiCacheManager = require('../Compile/ClsiCacheManager')
 
 module.exports = {
   duplicate: callbackify(duplicate),
@@ -35,6 +36,7 @@ async function duplicate(owner, originalProjectId, newProjectName, tags = []) {
     originalProjectId,
     {
       compiler: true,
+      imageName: true,
       rootFolder: true,
       rootDoc_id: true,
       fromV1TemplateId: true,
@@ -72,6 +74,21 @@ async function duplicate(owner, originalProjectId, newProjectName, tags = []) {
     newProjectName,
     { segmentation }
   )
+
+  let prepareClsiCacheInBackground = Promise.resolve()
+  if (originalProject.imageName === newProject.imageName) {
+    // Populate the clsi-cache unless the TeXLive release has changed.
+    prepareClsiCacheInBackground = ClsiCacheManager.prepareClsiCache(
+      newProject._id,
+      owner._id,
+      { sourceProjectId: originalProjectId }
+    ).catch(err => {
+      logger.warn(
+        { err, originalProjectId, projectId: newProject._id },
+        'failed to prepare clsi-cache for cloned project'
+      )
+    })
+  }
 
   try {
     await ProjectOptionsHandler.promises.setCompiler(
@@ -119,6 +136,10 @@ async function duplicate(owner, originalProjectId, newProjectName, tags = []) {
       newProjectId: newProject._id,
     })
   }
+
+  try {
+    await prepareClsiCacheInBackground
+  } catch {}
 
   return newProject
 }

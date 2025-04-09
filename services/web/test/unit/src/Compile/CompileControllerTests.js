@@ -244,9 +244,12 @@ describe('CompileController', function () {
           this.user_id,
           {
             isAutoCompile: false,
+            compileFromClsiCache: false,
+            populateClsiCache: false,
             enablePdfCaching: false,
             fileLineErrors: false,
             stopOnFirstError: false,
+            editorId: undefined,
           }
         )
       })
@@ -284,9 +287,12 @@ describe('CompileController', function () {
           this.user_id,
           {
             isAutoCompile: true,
+            compileFromClsiCache: false,
+            populateClsiCache: false,
             enablePdfCaching: false,
             fileLineErrors: false,
             stopOnFirstError: false,
+            editorId: undefined,
           }
         )
       })
@@ -305,10 +311,37 @@ describe('CompileController', function () {
           this.user_id,
           {
             isAutoCompile: false,
+            compileFromClsiCache: false,
+            populateClsiCache: false,
             enablePdfCaching: false,
             draft: true,
             fileLineErrors: false,
             stopOnFirstError: false,
+            editorId: undefined,
+          }
+        )
+      })
+    })
+
+    describe('with an editor id', function () {
+      beforeEach(function (done) {
+        this.res.callback = done
+        this.req.body = { editorId: 'the-editor-id' }
+        this.CompileController.compile(this.req, this.res, this.next)
+      })
+
+      it('should pass the editor id to the compiler', function () {
+        this.CompileManager.compile.should.have.been.calledWith(
+          this.projectId,
+          this.user_id,
+          {
+            isAutoCompile: false,
+            compileFromClsiCache: false,
+            populateClsiCache: false,
+            enablePdfCaching: false,
+            fileLineErrors: false,
+            stopOnFirstError: false,
+            editorId: 'the-editor-id',
           }
         )
       })
@@ -542,14 +575,16 @@ describe('CompileController', function () {
     })
   })
   describe('proxySyncCode', function () {
-    let file, line, column, imageName
+    let file, line, column, imageName, editorId, buildId
 
     beforeEach(function (done) {
       this.req.params = { Project_id: this.projectId }
       file = 'main.tex'
       line = String(Date.now())
       column = String(Date.now() + 1)
-      this.req.query = { file, line, column }
+      editorId = '172977cb-361e-4854-a4dc-a71cf11512e5'
+      buildId = '195b4a3f9e7-03e5be430a9e7796'
+      this.req.query = { file, line, column, editorId, buildId }
 
       imageName = 'foo/bar:tag-0'
       this.ProjectGetter.getProject = sinon.stub().yields(null, { imageName })
@@ -566,7 +601,15 @@ describe('CompileController', function () {
         this.projectId,
         'sync-to-code',
         `/project/${this.projectId}/user/${this.user_id}/sync/code`,
-        { file, line, column, imageName },
+        {
+          file,
+          line,
+          column,
+          imageName,
+          editorId,
+          buildId,
+          compileFromClsiCache: false,
+        },
         this.req,
         this.res,
         this.next
@@ -575,14 +618,16 @@ describe('CompileController', function () {
   })
 
   describe('proxySyncPdf', function () {
-    let page, h, v, imageName
+    let page, h, v, imageName, editorId, buildId
 
     beforeEach(function (done) {
       this.req.params = { Project_id: this.projectId }
       page = String(Date.now())
       h = String(Math.random())
       v = String(Math.random())
-      this.req.query = { page, h, v }
+      editorId = '172977cb-361e-4854-a4dc-a71cf11512e5'
+      buildId = '195b4a3f9e7-03e5be430a9e7796'
+      this.req.query = { page, h, v, editorId, buildId }
 
       imageName = 'foo/bar:tag-1'
       this.ProjectGetter.getProject = sinon.stub().yields(null, { imageName })
@@ -599,7 +644,15 @@ describe('CompileController', function () {
         this.projectId,
         'sync-to-pdf',
         `/project/${this.projectId}/user/${this.user_id}/sync/pdf`,
-        { page, h, v, imageName },
+        {
+          page,
+          h,
+          v,
+          imageName,
+          editorId,
+          buildId,
+          compileFromClsiCache: false,
+        },
         this.req,
         this.res,
         this.next

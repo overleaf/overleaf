@@ -242,6 +242,9 @@ module.exports = {
       submissionBackendClass:
         process.env.CLSI_SUBMISSION_BACKEND_CLASS || 'n2d',
     },
+    clsiCache: {
+      instances: JSON.parse(process.env.CLSI_CACHE_INSTANCES || '[]'),
+    },
     project_history: {
       sendProjectStructureOps: true,
       url: `http://${process.env.PROJECT_HISTORY_HOST || '127.0.0.1'}:3054`,

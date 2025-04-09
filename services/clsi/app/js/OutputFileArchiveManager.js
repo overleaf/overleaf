@@ -93,8 +93,11 @@ module.exports = {
       )
 
       return outputFiles.filter(
-        // Ignore the pdf and also ignore the files ignored by the frontend.
-        ({ path }) => path !== 'output.pdf' && !ignoreFiles.includes(path)
+        // Ignore the pdf, clsi-cache tar-ball and also ignore the files ignored by the frontend.
+        ({ path }) =>
+          path !== 'output.pdf' &&
+          path !== 'output.tar.gz' &&
+          !ignoreFiles.includes(path)
       )
     } catch (error) {
       if (

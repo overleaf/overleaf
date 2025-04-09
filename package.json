@@ -55,6 +55,7 @@
     "services/analytics",
     "services/chat",
     "services/clsi",
+    "services/clsi-cache",
     "services/clsi-perf",
     "services/contacts",
     "services/docstore",

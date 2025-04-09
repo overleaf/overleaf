@@ -121,6 +121,9 @@ describe('TemplatesManager', function () {
         fs: this.fs,
         '../../models/Project': { Project: this.Project },
         'stream/promises': { pipeline: this.pipeline },
+        '../Compile/ClsiCacheManager': {
+          prepareClsiCache: sinon.stub().rejects(new Error('ignore this')),
+        },
       },
     }).promises
     return (this.zipUrl =

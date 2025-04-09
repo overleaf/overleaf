@@ -144,6 +144,7 @@ function PdfSynctexControls() {
 
   const {
     clsiServerId,
+    pdfFile,
     pdfUrl,
     pdfViewer,
     position,
@@ -239,6 +240,8 @@ function PdfSynctexControls() {
       if (clsiServerId) {
         params += `&clsiserverid=${clsiServerId}`
       }
+      if (pdfFile?.editorId) params += `&editorId=${pdfFile.editorId}`
+      if (pdfFile?.build) params += `&buildId=${pdfFile.build}`
 
       getJSON(`/project/${projectId}/sync/code?${params}`, { signal })
         .then(data => {
@@ -253,6 +256,7 @@ function PdfSynctexControls() {
         })
     },
     [
+      pdfFile,
       clsiServerId,
       isMounted,
       projectId,
@@ -344,6 +348,8 @@ function PdfSynctexControls() {
       if (clsiServerId) {
         params.set('clsiserverid', clsiServerId)
       }
+      if (pdfFile?.editorId) params.set('editorId', pdfFile.editorId)
+      if (pdfFile?.build) params.set('buildId', pdfFile.build)
 
       getJSON(`/project/${projectId}/sync/pdf?${params}`, { signal })
         .then(data => {
@@ -358,6 +364,7 @@ function PdfSynctexControls() {
         })
     },
     [
+      pdfFile,
       clsiServerId,
       projectId,
       signal,

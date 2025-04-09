@@ -245,6 +245,9 @@ describe('ProjectDuplicator', function () {
         '../Tags/TagsHandler': this.TagsHandler,
         '../History/HistoryManager': this.HistoryManager,
         '../../infrastructure/Features': this.Features,
+        '../Compile/ClsiCacheManager': {
+          prepareClsiCache: sinon.stub().rejects(new Error('ignore this')),
+        },
       },
     })
   })

@@ -1,10 +1,12 @@
 const Path = require('node:path')
 const http = require('node:http')
 const https = require('node:https')
+const os = require('node:os')
 
 http.globalAgent.keepAlive = false
 https.globalAgent.keepAlive = false
 const isPreEmptible = process.env.PREEMPTIBLE === 'TRUE'
+const CLSI_SERVER_ID = os.hostname().replace('-ctr', '')
 
 module.exports = {
   compileSizeLimit: process.env.COMPILE_SIZE_LIMIT || '7mb',
@@ -48,11 +50,19 @@ module.exports = {
       url: `http://${process.env.CLSI_HOST || '127.0.0.1'}:3013`,
       // External url prefix for output files, e.g. for requests via load-balancers.
       outputUrlPrefix: `${process.env.ZONE ? `/zone/${process.env.ZONE}` : ''}`,
+      clsiServerId: process.env.CLSI_SERVER_ID || CLSI_SERVER_ID,
+
+      downloadHost: process.env.DOWNLOAD_HOST || 'http://localhost:3013',
     },
     clsiPerf: {
       host: `${process.env.CLSI_PERF_HOST || '127.0.0.1'}:${
         process.env.CLSI_PERF_PORT || '3043'
       }`,
+    },
+    clsiCache: {
+      enabled: !!process.env.CLSI_CACHE_HOST,
+      url: `http://${process.env.CLSI_CACHE_HOST}:3044`,
+      downloadURL: `http://${process.env.CLSI_CACHE_NGINX_HOST || process.env.CLSI_CACHE_HOST}:8080`,
     },
   },
 

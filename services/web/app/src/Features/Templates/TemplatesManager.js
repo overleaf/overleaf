@@ -17,6 +17,7 @@ const settings = require('@overleaf/settings')
 const crypto = require('crypto')
 const Errors = require('../Errors/Errors')
 const { pipeline } = require('stream/promises')
+const ClsiCacheManager = require('../Compile/ClsiCacheManager')
 
 const TemplatesManager = {
   async createProjectFromV1Template(
@@ -63,6 +64,17 @@ const TemplatesManager = {
           attributes
         )
 
+      const prepareClsiCacheInBackground = ClsiCacheManager.prepareClsiCache(
+        project._id,
+        userId,
+        { templateId, templateVersionId }
+      ).catch(err => {
+        logger.warn(
+          { err, templateId, templateVersionId, projectId: project._id },
+          'failed to prepare clsi-cache from template'
+        )
+      })
+
       await TemplatesManager._setCompiler(project._id, compiler)
       await TemplatesManager._setImage(project._id, imageName)
       await TemplatesManager._setMainFile(project._id, mainFile)
@@ -73,6 +85,8 @@ const TemplatesManager = {
         fromV1TemplateVersionId: templateVersionId,
       }
       await Project.updateOne({ _id: project._id }, update, {})
+
+      await prepareClsiCacheInBackground
 
       return project
     } finally {

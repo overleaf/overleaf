@@ -66,11 +66,31 @@ const getSplitTestOptions = callbackify(async function (req, res) {
   } catch (e) {}
   const editorReq = { ...req, query }
 
+  // Lookup the clsi-cache flag in the backend.
+  // We may need to turn off the feature on a short notice, without requiring
+  //  all users to reload their editor page to disable the feature.
+  const { variant: compileFromClsiCacheVariant } =
+    await SplitTestHandler.promises.getAssignment(
+      editorReq,
+      res,
+      'compile-from-clsi-cache'
+    )
+  const compileFromClsiCache = compileFromClsiCacheVariant === 'enabled'
+  const { variant: populateClsiCacheVariant } =
+    await SplitTestHandler.promises.getAssignment(
+      editorReq,
+      res,
+      'populate-clsi-cache'
+    )
+  const populateClsiCache = populateClsiCacheVariant === 'enabled'
+
   const pdfDownloadDomain = Settings.pdfDownloadDomain
 
   if (!req.query.enable_pdf_caching) {
     // The frontend does not want to do pdf caching.
     return {
+      compileFromClsiCache,
+      populateClsiCache,
       pdfDownloadDomain,
       enablePdfCaching: false,
     }
@@ -88,12 +108,16 @@ const getSplitTestOptions = callbackify(async function (req, res) {
   if (!enablePdfCaching) {
     // Skip the lookup of the chunk size when caching is not enabled.
     return {
+      compileFromClsiCache,
+      populateClsiCache,
       pdfDownloadDomain,
       enablePdfCaching: false,
     }
   }
   const pdfCachingMinChunkSize = await getPdfCachingMinChunkSize(editorReq, res)
   return {
+    compileFromClsiCache,
+    populateClsiCache,
     pdfDownloadDomain,
     enablePdfCaching,
     pdfCachingMinChunkSize,
@@ -112,6 +136,7 @@ module.exports = CompileController = {
       isAutoCompile,
       fileLineErrors,
       stopOnFirstError,
+      editorId: req.body.editorId,
     }
 
     if (req.body.rootDoc_id) {
@@ -138,8 +163,15 @@ module.exports = CompileController = {
 
     getSplitTestOptions(req, res, (err, splitTestOptions) => {
       if (err) return next(err)
-      let { enablePdfCaching, pdfCachingMinChunkSize, pdfDownloadDomain } =
-        splitTestOptions
+      let {
+        compileFromClsiCache,
+        populateClsiCache,
+        enablePdfCaching,
+        pdfCachingMinChunkSize,
+        pdfDownloadDomain,
+      } = splitTestOptions
+      options.compileFromClsiCache = compileFromClsiCache
+      options.populateClsiCache = populateClsiCache
       options.enablePdfCaching = enablePdfCaching
       if (enablePdfCaching) {
         options.pdfCachingMinChunkSize = pdfCachingMinChunkSize
@@ -193,6 +225,8 @@ module.exports = CompileController = {
                 timeout: limits.timeout === 60 ? 'short' : 'long',
                 server: clsiServerId?.includes('-c2d-') ? 'faster' : 'normal',
                 isAutoCompile,
+                isInitialCompile: stats.isInitialCompile === 1,
+                restoredClsiCache: stats.restoredClsiCache === 1,
                 stopOnFirstError,
               }
             )
@@ -497,7 +531,7 @@ module.exports = CompileController = {
 
   proxySyncPdf(req, res, next) {
     const projectId = req.params.Project_id
-    const { page, h, v } = req.query
+    const { page, h, v, editorId, buildId } = req.query
     if (!page?.match(/^\d+$/)) {
       return next(new Error('invalid page parameter'))
     }
@@ -515,23 +549,29 @@ module.exports = CompileController = {
       getImageNameForProject(projectId, (error, imageName) => {
         if (error) return next(error)
 
-        const url = CompileController._getUrl(projectId, userId, 'sync/pdf')
-        CompileController.proxyToClsi(
-          projectId,
-          'sync-to-pdf',
-          url,
-          { page, h, v, imageName },
-          req,
-          res,
-          next
-        )
+        getSplitTestOptions(req, res, (error, splitTestOptions) => {
+          if (error) return next(error)
+          const { compileFromClsiCache } = splitTestOptions
+
+          const url = CompileController._getUrl(projectId, userId, 'sync/pdf')
+
+          CompileController.proxyToClsi(
+            projectId,
+            'sync-to-pdf',
+            url,
+            { page, h, v, imageName, editorId, buildId, compileFromClsiCache },
+            req,
+            res,
+            next
+          )
+        })
       })
     })
   },
 
   proxySyncCode(req, res, next) {
     const projectId = req.params.Project_id
-    const { file, line, column } = req.query
+    const { file, line, column, editorId, buildId } = req.query
     if (file == null) {
       return next(new Error('missing file parameter'))
     }
@@ -557,16 +597,29 @@ module.exports = CompileController = {
       getImageNameForProject(projectId, (error, imageName) => {
         if (error) return next(error)
 
-        const url = CompileController._getUrl(projectId, userId, 'sync/code')
-        CompileController.proxyToClsi(
-          projectId,
-          'sync-to-code',
-          url,
-          { file, line, column, imageName },
-          req,
-          res,
-          next
-        )
+        getSplitTestOptions(req, res, (error, splitTestOptions) => {
+          if (error) return next(error)
+          const { compileFromClsiCache } = splitTestOptions
+
+          const url = CompileController._getUrl(projectId, userId, 'sync/code')
+          CompileController.proxyToClsi(
+            projectId,
+            'sync-to-code',
+            url,
+            {
+              file,
+              line,
+              column,
+              imageName,
+              editorId,
+              buildId,
+              compileFromClsiCache,
+            },
+            req,
+            res,
+            next
+          )
+        })
       })
     })
   },

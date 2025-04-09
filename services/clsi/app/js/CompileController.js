@@ -5,6 +5,7 @@ const Metrics = require('./Metrics')
 const ProjectPersistenceManager = require('./ProjectPersistenceManager')
 const logger = require('@overleaf/logger')
 const Errors = require('./Errors')
+const { notifyCLSICacheAboutBuild } = require('./CLSICacheHandler')
 
 let lastSuccessfulCompileTimestamp = 0
 
@@ -104,6 +105,21 @@ function compile(req, res, next) {
             buildId = error.buildId
           }
 
+          if (
+            status === 'success' &&
+            request.editorId &&
+            request.populateClsiCache
+          ) {
+            notifyCLSICacheAboutBuild({
+              projectId: request.project_id,
+              userId: request.user_id,
+              buildId: outputFiles[0].build,
+              editorId: request.editorId,
+              outputFiles,
+              compileGroup: request.compileGroup,
+            })
+          }
+
           timer.done()
           res.status(code || 200).send({
             compile: {
@@ -153,24 +169,19 @@ function clearCache(req, res, next) {
 }
 
 function syncFromCode(req, res, next) {
-  const { file } = req.query
+  const { file, editorId, buildId, compileFromClsiCache } = req.query
   const line = parseInt(req.query.line, 10)
   const column = parseInt(req.query.column, 10)
   const { imageName } = req.query
   const projectId = req.params.project_id
   const userId = req.params.user_id
-
-  if (imageName && !_isImageNameAllowed(imageName)) {
-    return res.status(400).send('invalid image')
-  }
-
   CompileManager.syncFromCode(
     projectId,
     userId,
     file,
     line,
     column,
-    imageName,
+    { imageName, editorId, buildId, compileFromClsiCache },
     function (error, pdfPositions) {
       if (error) {
         return next(error)
@@ -186,20 +197,16 @@ function syncFromPdf(req, res, next) {
   const page = parseInt(req.query.page, 10)
   const h = parseFloat(req.query.h)
   const v = parseFloat(req.query.v)
-  const { imageName } = req.query
+  const { imageName, editorId, buildId, compileFromClsiCache } = req.query
   const projectId = req.params.project_id
   const userId = req.params.user_id
-
-  if (imageName && !_isImageNameAllowed(imageName)) {
-    return res.status(400).send('invalid image')
-  }
   CompileManager.syncFromPdf(
     projectId,
     userId,
     page,
     h,
     v,
-    imageName,
+    { imageName, editorId, buildId, compileFromClsiCache },
     function (error, codePositions) {
       if (error) {
         return next(error)
@@ -216,9 +223,6 @@ function wordcount(req, res, next) {
   const projectId = req.params.project_id
   const userId = req.params.user_id
   const { image } = req.query
-  if (image && !_isImageNameAllowed(image)) {
-    return res.status(400).send('invalid image')
-  }
   logger.debug({ image, file, projectId }, 'word count request')
 
   CompileManager.wordcount(
@@ -239,12 +243,6 @@ function wordcount(req, res, next) {
 
 function status(req, res, next) {
   res.send('OK')
-}
-
-function _isImageNameAllowed(imageName) {
-  const ALLOWED_IMAGES =
-    Settings.clsi && Settings.clsi.docker && Settings.clsi.docker.allowedImages
-  return !ALLOWED_IMAGES || ALLOWED_IMAGES.includes(imageName)
 }
 
 module.exports = {

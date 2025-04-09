@@ -262,6 +262,7 @@ module.exports = ResourceWriter = {
       shouldDelete = false
     }
     if (
+      path === 'output.tar.gz' ||
       path === 'output.synctex.gz' ||
       path === 'output.pdfxref' ||
       path === 'output.pdf' ||

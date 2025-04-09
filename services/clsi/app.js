@@ -258,6 +258,8 @@ app.use(function (error, req, res, next) {
   if (error instanceof Errors.NotFoundError) {
     logger.debug({ err: error, url: req.url }, 'not found error')
     res.sendStatus(404)
+  } else if (error instanceof Errors.InvalidParameter) {
+    res.status(400).send(error.message)
   } else if (error.code === 'EPIPE') {
     // inspect container returns EPIPE when shutting down
     res.sendStatus(503) // send 503 Unavailable response
