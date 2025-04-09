@@ -31,57 +31,30 @@ import { RailHelpShowHotkeysModal } from './help/keyboard-shortcuts'
 import { RailHelpContactUsModal } from './help/contact-us'
 import { HistorySidebar } from '@/features/ide-react/components/history-sidebar'
 import DictionarySettingsModal from './settings/editor-settings/dictionary-settings-modal'
+import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
 
 type RailElement = {
   icon: AvailableUnfilledIcon
   key: RailTabKey
   component: ReactElement
   indicator?: ReactElement
+  title: string
   hide?: boolean
 }
 
 type RailActionButton = {
   key: string
   icon: AvailableUnfilledIcon
+  title: string
   action: () => void
 }
 type RailDropdown = {
   key: string
   icon: AvailableUnfilledIcon
+  title: string
   dropdown: ReactElement
 }
 type RailAction = RailDropdown | RailActionButton
-
-const RAIL_TABS: RailElement[] = [
-  {
-    key: 'file-tree',
-    icon: 'description',
-    component: <FileTreeOutlinePanel />,
-  },
-  {
-    key: 'integrations',
-    icon: 'integration_instructions',
-    component: <IntegrationsPanel />,
-  },
-  {
-    key: 'review-panel',
-    icon: 'rate_review',
-    component: <>Review panel</>,
-  },
-  {
-    key: 'chat',
-    icon: 'forum',
-    component: <ChatPane />,
-    indicator: <ChatIndicator />,
-    hide: !getMeta('ol-chatEnabled'),
-  },
-  {
-    key: 'errors',
-    icon: 'report',
-    component: <ErrorPane />,
-    indicator: <ErrorIndicator />,
-  },
-]
 
 const RAIL_MODALS: {
   key: RailModalKey
@@ -120,20 +93,61 @@ export const RailLayout = () => {
 
   const isHistoryView = view === 'history'
 
+  const railTabs: RailElement[] = useMemo(
+    () => [
+      {
+        key: 'file-tree',
+        icon: 'description',
+        title: t('file_tree'),
+        component: <FileTreeOutlinePanel />,
+      },
+      {
+        key: 'integrations',
+        icon: 'integration_instructions',
+        title: t('integrations'),
+        component: <IntegrationsPanel />,
+      },
+      {
+        key: 'review-panel',
+        icon: 'rate_review',
+        title: t('review_panel'),
+        component: <>Review panel</>,
+      },
+      {
+        key: 'chat',
+        icon: 'forum',
+        component: <ChatPane />,
+        indicator: <ChatIndicator />,
+        title: t('chat'),
+        hide: !getMeta('ol-chatEnabled'),
+      },
+      {
+        key: 'errors',
+        icon: 'report',
+        title: t('error_log'),
+        component: <ErrorPane />,
+        indicator: <ErrorIndicator />,
+      },
+    ],
+    [t]
+  )
+
   const railActions: RailAction[] = useMemo(
     () => [
       {
         key: 'support',
         icon: 'help',
+        title: t('help'),
         dropdown: <RailHelpDropdown />,
       },
       {
         key: 'settings',
         icon: 'settings',
+        title: t('settings'),
         action: () => setLeftMenuShown(true),
       },
     ],
-    [setLeftMenuShown]
+    [setLeftMenuShown, t]
   )
 
   const onTabSelect = useCallback(
@@ -143,7 +157,7 @@ export const RailLayout = () => {
       } else {
         // HACK: Apparently the onSelect event is triggered with href attributes
         // from DropdownItems
-        if (!RAIL_TABS.some(tab => !tab.hide && tab.key === key)) {
+        if (!railTabs.some(tab => !tab.hide && tab.key === key)) {
           // Attempting to open a non-existent tab
           return
         }
@@ -152,7 +166,7 @@ export const RailLayout = () => {
         setIsOpen(true)
       }
     },
-    [setSelectedTab, selectedTab, setIsOpen, togglePane]
+    [setSelectedTab, selectedTab, setIsOpen, togglePane, railTabs]
   )
 
   return (
@@ -166,17 +180,18 @@ export const RailLayout = () => {
     >
       <div className={classNames('ide-rail', { hidden: isHistoryView })}>
         <Nav activeKey={selectedTab} className="ide-rail-tabs-nav">
-          {RAIL_TABS.filter(({ hide }) => !hide).map(
-            ({ icon, key, indicator }) => (
+          {railTabs
+            .filter(({ hide }) => !hide)
+            .map(({ icon, key, indicator, title }) => (
               <RailTab
                 open={isOpen && selectedTab === key}
                 key={key}
                 eventKey={key}
                 icon={icon}
                 indicator={indicator}
+                title={title}
               />
-            )
-          )}
+            ))}
           <div className="flex-grow-1" />
           {railActions?.map(action => (
             <RailActionElement key={action.key} action={action} />
@@ -199,11 +214,13 @@ export const RailLayout = () => {
           className={classNames('ide-rail-content', { hidden: isHistoryView })}
         >
           <Tab.Content>
-            {RAIL_TABS.filter(({ hide }) => !hide).map(({ key, component }) => (
-              <Tab.Pane eventKey={key} key={key}>
-                {component}
-              </Tab.Pane>
-            ))}
+            {railTabs
+              .filter(({ hide }) => !hide)
+              .map(({ key, component }) => (
+                <Tab.Pane eventKey={key} key={key}>
+                  {component}
+                </Tab.Pane>
+              ))}
           </Tab.Content>
         </div>
       </Panel>
@@ -234,26 +251,38 @@ const RailTab = ({
   eventKey,
   open,
   indicator,
+  title,
 }: {
   icon: AvailableUnfilledIcon
   eventKey: string
   open: boolean
   indicator?: ReactElement
+  title: string
 }) => {
   return (
-    <NavLink
-      eventKey={eventKey}
-      className={classNames('ide-rail-tab-link', {
-        'open-rail': open,
-      })}
+    <OLTooltip
+      id={`rail-tab-tooltip-${eventKey}`}
+      description={title}
+      overlayProps={{ delay: 0, placement: 'right' }}
     >
-      {open ? (
-        <MaterialIcon className="ide-rail-tab-link-icon" type={icon} />
-      ) : (
-        <MaterialIcon className="ide-rail-tab-link-icon" type={icon} unfilled />
-      )}
-      {indicator}
-    </NavLink>
+      <NavLink
+        eventKey={eventKey}
+        className={classNames('ide-rail-tab-link', {
+          'open-rail': open,
+        })}
+      >
+        {open ? (
+          <MaterialIcon className="ide-rail-tab-link-icon" type={icon} />
+        ) : (
+          <MaterialIcon
+            className="ide-rail-tab-link-icon"
+            type={icon}
+            unfilled
+          />
+        )}
+        {indicator}
+      </NavLink>
+    </OLTooltip>
   )
 }
 
@@ -274,25 +303,39 @@ const RailActionElement = ({ action }: { action: RailAction }) => {
   if ('dropdown' in action) {
     return (
       <Dropdown align="end" drop="end">
-        <DropdownToggle
-          id="rail-help-dropdown-btn"
-          className="ide-rail-tab-link ide-rail-tab-button ide-rail-tab-dropdown"
-          as="button"
+        <OLTooltip
+          id={`rail-dropdown-tooltip-${action.key}`}
+          description={action.title}
+          overlayProps={{ delay: 0, placement: 'right' }}
         >
-          {icon}
-        </DropdownToggle>
+          <span>
+            <DropdownToggle
+              id="rail-help-dropdown-btn"
+              className="ide-rail-tab-link ide-rail-tab-button ide-rail-tab-dropdown"
+              as="button"
+            >
+              {icon}
+            </DropdownToggle>
+          </span>
+        </OLTooltip>
         {action.dropdown}
       </Dropdown>
     )
   } else {
     return (
-      <button
-        onClick={onActionClick}
-        className="ide-rail-tab-link ide-rail-tab-button"
-        type="button"
+      <OLTooltip
+        id={`rail-tab-tooltip-${action.key}`}
+        description={action.title}
+        overlayProps={{ delay: 0, placement: 'right' }}
       >
-        {icon}
-      </button>
+        <button
+          onClick={onActionClick}
+          className="ide-rail-tab-link ide-rail-tab-button"
+          type="button"
+        >
+          {icon}
+        </button>
+      </OLTooltip>
     )
   }
 }
