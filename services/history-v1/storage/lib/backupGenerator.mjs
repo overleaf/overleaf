@@ -2,11 +2,7 @@
  * Provides a generator function to back up project chunks and blobs.
  */
 
-import {
-  getProjectChunksFromVersion,
-  loadAtVersion,
-  loadByChunkRecord,
-} from './chunk_store/index.js'
+import chunkStore from './chunk_store/index.js'
 
 import {
   GLOBAL_BLOBS, // NOTE:  must call loadGlobalBlobs() before using this
@@ -33,7 +29,10 @@ async function lookBehindForSeenBlobs(
   ) {
     // the snapshot in this chunk has not been backed up
     // so we find the set of backed up blobs from the previous chunk
-    const previousChunk = await loadAtVersion(projectId, lastBackedUpVersion)
+    const previousChunk = await chunkStore.loadAtVersion(
+      projectId,
+      lastBackedUpVersion
+    )
     const previousChunkHistory = previousChunk.getHistory()
     previousChunkHistory.findBlobHashes(seenBlobs)
   }
@@ -115,13 +114,13 @@ export async function* backupGenerator(projectId, lastBackedUpVersion) {
     lastBackedUpVersion >= 0 ? lastBackedUpVersion + 1 : 0
   let isStartingChunk = true
   let currentBackedUpVersion = lastBackedUpVersion
-  const chunkRecordIterator = getProjectChunksFromVersion(
+  const chunkRecordIterator = chunkStore.getProjectChunksFromVersion(
     projectId,
     firstPendingVersion
   )
 
   for await (const chunkRecord of chunkRecordIterator) {
-    const { chunk, chunkBuffer } = await loadByChunkRecord(
+    const { chunk, chunkBuffer } = await chunkStore.loadByChunkRecord(
       projectId,
       chunkRecord
     )
