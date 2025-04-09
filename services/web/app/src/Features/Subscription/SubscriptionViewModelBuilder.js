@@ -23,8 +23,8 @@ const {
   V1ConnectionError,
 } = require('../Errors/Errors')
 const FeaturesHelper = require('./FeaturesHelper')
-const PaymentService = require('./PaymentService')
 const { formatCurrency } = require('../../util/currency')
+const Modules = require('../../infrastructure/Modules')
 
 /**
  * @import { Subscription } from "../../../../types/project/dashboard/subscription"
@@ -82,16 +82,16 @@ async function buildUsersSubscriptionViewModel(user, locale = 'en') {
     currentInstitutionsWithLicence,
     managedInstitutions,
     managedPublishers,
-    paymentRecord,
+    fetchedPaymentRecord,
     plan,
   } = await async.auto({
     personalSubscription(cb) {
       SubscriptionLocator.getUsersSubscription(user, cb)
     },
-    paymentRecord: [
+    fetchedPaymentRecord: [
       'personalSubscription',
       ({ personalSubscription }, cb) => {
-        PaymentService.getPaymentFromRecord(personalSubscription, cb)
+        Modules.hooks.fire('getPaymentFromRecord', personalSubscription, cb)
       },
     ],
     plan: [
@@ -137,6 +137,8 @@ async function buildUsersSubscriptionViewModel(user, locale = 'en') {
       PublishersGetter.getManagedPublishers(user._id, cb)
     },
   })
+
+  const paymentRecord = fetchedPaymentRecord && fetchedPaymentRecord[0]
 
   if (memberGroupSubscriptions == null) {
     memberGroupSubscriptions = []

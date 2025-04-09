@@ -143,9 +143,6 @@ describe('SubscriptionViewModelBuilder', function () {
     this.PlansLocator = {
       findLocalPlanInSettings: sinon.stub(),
     }
-    this.PaymentService = {
-      getPaymentFromRecord: sinon.stub().yields(),
-    }
     this.SubscriptionViewModelBuilder = SandboxedModule.require(modulePath, {
       requires: {
         '@overleaf/settings': this.Settings,
@@ -155,7 +152,11 @@ describe('SubscriptionViewModelBuilder', function () {
         './RecurlyWrapper': this.RecurlyWrapper,
         './SubscriptionUpdater': this.SubscriptionUpdater,
         './PlansLocator': this.PlansLocator,
-        './PaymentService': this.PaymentService,
+        '../../infrastructure/Modules': (this.Modules = {
+          hooks: {
+            fire: sinon.stub().yields(null, []),
+          },
+        }),
         './V1SubscriptionManager': {},
         '../Publishers/PublishersGetter': this.PublishersGetter,
         './SubscriptionHelper': {},
@@ -512,14 +513,18 @@ describe('SubscriptionViewModelBuilder', function () {
           null,
           this.individualSubscription
         )
-        this.PaymentService.getPaymentFromRecord.yields(null, {
-          subscription: this.paymentRecord,
-          account: new PaymentProviderAccount({
-            email: 'example@example.com',
-            hasPastDueInvoice: false,
-          }),
-          coupons: [],
-        })
+        this.Modules.hooks.fire
+          .withArgs('getPaymentFromRecord', this.individualSubscription)
+          .yields(null, [
+            {
+              subscription: this.paymentRecord,
+              account: new PaymentProviderAccount({
+                email: 'example@example.com',
+                hasPastDueInvoice: false,
+              }),
+              coupons: [],
+            },
+          ])
         const result =
           await this.SubscriptionViewModelBuilder.promises.buildUsersSubscriptionViewModel(
             this.user
@@ -585,11 +590,15 @@ describe('SubscriptionViewModelBuilder', function () {
               }),
             ],
           })
-        this.PaymentService.getPaymentFromRecord.yields(null, {
-          subscription: this.paymentRecord,
-          account: {},
-          coupons: [],
-        })
+        this.Modules.hooks.fire
+          .withArgs('getPaymentFromRecord', this.individualSubscription)
+          .yields(null, [
+            {
+              subscription: this.paymentRecord,
+              account: {},
+              coupons: [],
+            },
+          ])
         const result =
           await this.SubscriptionViewModelBuilder.promises.buildUsersSubscriptionViewModel(
             this.user
