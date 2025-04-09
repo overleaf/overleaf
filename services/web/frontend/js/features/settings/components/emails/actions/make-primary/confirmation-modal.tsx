@@ -1,5 +1,4 @@
 import { useTranslation, Trans } from 'react-i18next'
-import AccessibleModal from '../../../../../../shared/components/accessible-modal'
 import { MergeAndOverride } from '../../../../../../../../types/utils'
 import OLButton from '@/features/ui/components/ol/ol-button'
 import OLModal, {
@@ -11,7 +10,7 @@ import OLModal, {
 import { type UserEmailData } from '../../../../../../../../types/user-email'
 
 type ConfirmationModalProps = MergeAndOverride<
-  React.ComponentProps<typeof AccessibleModal>,
+  React.ComponentProps<typeof OLModal>,
   {
     email: string
     isConfirmDisabled: boolean

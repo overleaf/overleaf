@@ -26,7 +26,4 @@ export const Add = (args: any) => {
 export default {
   title: 'Project List / Affiliation',
   component: AddAffiliation,
-  parameters: {
-    bootstrap5: true,
-  },
 }

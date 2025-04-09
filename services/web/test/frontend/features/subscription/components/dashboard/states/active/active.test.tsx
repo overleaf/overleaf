@@ -11,7 +11,7 @@ import {
   trialCollaboratorSubscription,
   trialSubscription,
 } from '../../../../fixtures/subscriptions'
-import sinon, { type SinonStub } from 'sinon'
+import sinon from 'sinon'
 import { cleanUpContext } from '../../../../helpers/render-with-subscription-dash-context'
 import { renderActiveSubscription } from '../../../../helpers/render-active-subscription'
 import { cloneDeep } from 'lodash'
@@ -23,19 +23,9 @@ import {
 } from '@/features/subscription/data/subscription-url'
 import * as useLocationModule from '../../../../../../../../frontend/js/shared/hooks/use-location'
 import { MetaTag } from '@/utils/meta'
-import * as bootstrapUtils from '@/features/utils/bootstrap-5'
 
 describe('<ActiveSubscription />', function () {
   let sendMBSpy: sinon.SinonSpy
-  let isBootstrap5Stub: SinonStub
-
-  before(function () {
-    isBootstrap5Stub = sinon.stub(bootstrapUtils, 'isBootstrap5').returns(true)
-  })
-
-  after(function () {
-    isBootstrap5Stub.restore()
-  })
 
   beforeEach(function () {
     sendMBSpy = sinon.spy(eventTracking, 'sendMB')

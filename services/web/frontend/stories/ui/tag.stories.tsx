@@ -3,11 +3,8 @@ import Tag from '@/features/ui/components/bootstrap-5/tag'
 import type { Meta, StoryObj } from '@storybook/react'
 
 const meta: Meta<typeof Tag> = {
-  title: 'Shared / Components / Tag / Bootstrap 5',
+  title: 'Shared / Components / Tag',
   component: Tag,
-  parameters: {
-    bootstrap5: true,
-  },
   args: {
     children: 'Tag',
   },

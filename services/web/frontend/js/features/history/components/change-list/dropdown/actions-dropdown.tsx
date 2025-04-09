@@ -3,26 +3,20 @@ import {
   Dropdown,
   DropdownMenu,
 } from '@/features/ui/components/bootstrap-5/dropdown-menu'
-import BS5DropdownToggleWithTooltip from '@/features/ui/components/bootstrap-5/dropdown-toggle-with-tooltip'
+import DropdownToggleWithTooltip from '@/features/ui/components/bootstrap-5/dropdown-toggle-with-tooltip'
 
 type ActionDropdownProps = {
   id: string
   children: React.ReactNode
-  parentSelector?: string
   isOpened: boolean
   iconTag: ReactNode
   toolTipDescription: string
   setIsOpened: (isOpened: boolean) => void
 }
 
-function BS5ActionsDropdown({
-  id,
-  children,
-  isOpened,
-  iconTag,
-  setIsOpened,
-  toolTipDescription,
-}: Omit<ActionDropdownProps, 'parentSelector'>) {
+function ActionsDropdown(props: ActionDropdownProps) {
+  const { id, children, isOpened, iconTag, setIsOpened, toolTipDescription } =
+    props
   return (
     <Dropdown
       align="end"
@@ -30,7 +24,7 @@ function BS5ActionsDropdown({
       show={isOpened}
       onToggle={open => setIsOpened(open)}
     >
-      <BS5DropdownToggleWithTooltip
+      <DropdownToggleWithTooltip
         id={`history-version-dropdown-${id}`}
         className="history-version-dropdown-menu-btn"
         aria-label={toolTipDescription}
@@ -39,16 +33,12 @@ function BS5ActionsDropdown({
         tooltipProps={{ hidden: isOpened }}
       >
         {iconTag}
-      </BS5DropdownToggleWithTooltip>
+      </DropdownToggleWithTooltip>
       <DropdownMenu className="history-version-dropdown-menu">
         {children}
       </DropdownMenu>
     </Dropdown>
   )
-}
-
-function ActionsDropdown(props: ActionDropdownProps) {
-  return <BS5ActionsDropdown {...props} />
 }
 
 export default ActionsDropdown

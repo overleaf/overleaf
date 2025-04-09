@@ -93,11 +93,6 @@ export function KeepCurrentPlanModal() {
           isLoading={inflight}
           loadingLabel={t('processing_uppercase') + '…'}
           onClick={confirmCancelPendingPlanChange}
-          bs3Props={{
-            loading: inflight
-              ? t('processing_uppercase') + '…'
-              : t('revert_pending_plan_change'),
-          }}
         >
           {t('revert_pending_plan_change')}
         </OLButton>

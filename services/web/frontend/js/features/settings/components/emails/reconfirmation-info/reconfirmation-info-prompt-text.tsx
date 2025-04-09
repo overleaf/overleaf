@@ -4,19 +4,16 @@ import { Institution } from '../../../../../../../types/institution'
 type ReconfirmationInfoPromptTextProps = {
   primary: boolean
   institutionName: Institution['name']
-  icon?: React.ReactElement // BS3 only
 }
 
 function ReconfirmationInfoPromptText({
   primary,
   institutionName,
-  icon,
 }: ReconfirmationInfoPromptTextProps) {
   const { t } = useTranslation()
 
   return (
     <>
-      {icon}
       <Trans
         i18nKey="are_you_still_at"
         values={{

@@ -22,9 +22,7 @@ import OLFormCheckbox from '@/features/ui/components/ol/ol-form-checkbox'
 import { useContactUsModal } from '@/shared/hooks/use-contact-us-modal'
 import { UserProvider } from '@/shared/context/user-context'
 import OLButton from '@/features/ui/components/ol/ol-button'
-import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
 import OLNotification from '@/features/ui/components/ol/ol-notification'
-import { bsVersion } from '@/features/utils/bootstrap-5'
 
 const educationalPercentDiscount = 40
 
@@ -78,8 +76,6 @@ function GroupPrice({
               price: groupPlanToChangeToPrice?.totalForDisplay,
             })}
       </span>
-
-      <BootstrapVersionSwitcher bs3={<br />} />
 
       <span className="circle-subtext">
         <span aria-hidden>
@@ -221,10 +217,7 @@ export function ChangeToGroupModal() {
                   <fieldset className="form-group">
                     <legend className="legend-as-label">{t('plan')}</legend>
                     {groupPlans.plans.map(option => (
-                      <div
-                        className={bsVersion({ bs3: 'radio' })}
-                        key={option.code}
-                      >
+                      <div key={option.code}>
                         <OLFormCheckbox
                           type="radio"
                           name="plan-code"
@@ -333,11 +326,6 @@ export function ChangeToGroupModal() {
               onClick={upgrade}
               isLoading={inflight}
               loadingLabel={t('processing_uppercase') + '…'}
-              bs3Props={{
-                loading: inflight
-                  ? t('processing_uppercase') + '…'
-                  : t('upgrade_now'),
-              }}
             >
               {t('upgrade_now')}
             </OLButton>

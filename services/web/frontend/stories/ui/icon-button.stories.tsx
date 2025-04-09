@@ -11,7 +11,7 @@ export const Icon = (args: Args) => {
 }
 
 const meta: Meta<typeof IconButton> = {
-  title: 'Shared / Components / Bootstrap 5 / IconButton',
+  title: 'Shared / Components / IconButton',
   component: IconButton,
   args: {
     disabled: false,
@@ -34,9 +34,6 @@ const meta: Meta<typeof IconButton> = {
         'premium',
       ],
     },
-  },
-  parameters: {
-    bootstrap5: true,
   },
 }
 

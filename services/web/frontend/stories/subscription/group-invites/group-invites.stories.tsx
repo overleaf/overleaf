@@ -2,7 +2,6 @@ import GroupInvites from '@/features/subscription/components/group-invites/group
 import type { TeamInvite } from '../../../../types/team-invite'
 import { useMeta } from '../../hooks/use-meta'
 import { ScopeDecorator } from '../../decorators/scope'
-import { bsVersionDecorator } from '../../../../.storybook/utils/with-bootstrap-switcher'
 
 export const GroupInvitesDefault = () => {
   const teamInvites: TeamInvite[] = [
@@ -40,7 +39,6 @@ export default {
   argTypes: {
     handleHide: { action: 'close modal' },
     onDisableSSO: { action: 'callback' },
-    ...bsVersionDecorator.argTypes,
   },
   decorators: [ScopeDecorator],
 }

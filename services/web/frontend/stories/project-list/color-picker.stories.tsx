@@ -12,7 +12,4 @@ export const Select = (args: any) => {
 export default {
   title: 'Project List / Color Picker',
   component: ColorPicker,
-  parameters: {
-    bootstrap5: true,
-  },
 }

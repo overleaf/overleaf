@@ -4,11 +4,8 @@ import type { Meta, StoryObj } from '@storybook/react'
 import classnames from 'classnames'
 
 const meta: Meta<typeof Badge> = {
-  title: 'Shared / Components / Badge / Bootstrap 5',
+  title: 'Shared / Components / Badge',
   component: Badge,
-  parameters: {
-    bootstrap5: true,
-  },
   args: {
     children: 'Badge',
   },

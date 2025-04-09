@@ -4,8 +4,6 @@ import moment from 'moment/moment'
 import fetchMock from 'fetch-mock'
 import { Project } from '../../../../../../../types/project/dashboard/api'
 import { ProjectListRootInner } from '@/features/project-list/components/project-list-root'
-import * as bootstrapUtils from '@/features/utils/bootstrap-5'
-import sinon, { type SinonStub } from 'sinon'
 
 const users = {
   picard: {
@@ -48,15 +46,6 @@ const projects: Project[] = [
 ]
 
 describe('<ProjectTools />', function () {
-  let isBootstrap5Stub: SinonStub
-
-  before(function () {
-    isBootstrap5Stub = sinon.stub(bootstrapUtils, 'isBootstrap5').returns(true)
-  })
-
-  after(function () {
-    isBootstrap5Stub.restore()
-  })
   beforeEach(function () {
     window.metaAttributesCache.set('ol-user', {})
     window.metaAttributesCache.set('ol-prefetchedProjectsBlob', {

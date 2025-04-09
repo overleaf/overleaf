@@ -72,7 +72,4 @@ export const PausedPlan = (args: any) => {
 export default {
   title: 'Project List / Current Plan Widget',
   component: CurrentPlanWidget,
-  parameters: {
-    bootstrap5: true,
-  },
 }

@@ -2,7 +2,6 @@ export function resetMeta() {
   window.metaAttributesCache = new Map()
   window.metaAttributesCache.set('ol-projectHistoryBlobsEnabled', true)
   window.metaAttributesCache.set('ol-i18n', { currentLangCode: 'en' })
-  window.metaAttributesCache.set('ol-bootstrapVersion', 5)
   window.metaAttributesCache.set('ol-ExposedSettings', {
     appName: 'Overleaf',
     maxEntitiesPerProject: 10,

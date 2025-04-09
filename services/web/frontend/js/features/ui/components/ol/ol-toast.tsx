@@ -7,8 +7,6 @@ import {
 import { useTranslation } from 'react-i18next'
 import MaterialIcon from '../../../../shared/components/material-icon'
 import { ReactNode, useCallback, useState } from 'react'
-import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
-import { Toast as BS3Toast } from '../bootstrap-3/toast'
 
 export type OLToastProps = {
   type: NotificationType
@@ -78,29 +76,14 @@ export const OLToast = ({
     </div>
   )
   return (
-    <BootstrapVersionSwitcher
-      bs5={
-        <BS5Toast
-          onClose={handleClose}
-          autohide={autoHide}
-          onExited={handleOnHidden}
-          delay={delay}
-          show={show}
-        >
-          {toastElement}
-        </BS5Toast>
-      }
-      bs3={
-        <BS3Toast
-          onClose={handleClose}
-          autohide={autoHide}
-          delay={delay}
-          onExited={handleOnHidden}
-          show={show}
-        >
-          {toastElement}
-        </BS3Toast>
-      }
-    />
+    <BS5Toast
+      onClose={handleClose}
+      autohide={autoHide}
+      onExited={handleOnHidden}
+      delay={delay}
+      show={show}
+    >
+      {toastElement}
+    </BS5Toast>
   )
 }

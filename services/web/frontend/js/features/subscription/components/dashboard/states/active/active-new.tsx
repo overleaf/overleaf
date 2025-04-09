@@ -12,7 +12,6 @@ import { ChangeToGroupModal } from './change-plan/modals/change-to-group-modal'
 import { CancelAiAddOnModal } from '@/features/subscription/components/dashboard/states/active/change-plan/modals/cancel-ai-add-on-modal'
 import OLButton from '@/features/ui/components/ol/ol-button'
 import isInFreeTrial from '../../../../util/is-in-free-trial'
-import { bsVersion } from '@/features/utils/bootstrap-5'
 import AddOns from '@/features/subscription/components/dashboard/states/active/add-ons'
 import {
   AI_ADD_ON_CODE,
@@ -20,7 +19,6 @@ import {
   isStandaloneAiPlanCode,
 } from '@/features/subscription/data/add-on-codes'
 import getMeta from '@/utils/meta'
-import classnames from 'classnames'
 import SubscriptionRemainder from '@/features/subscription/components/dashboard/states/active/subscription-remainder'
 import { sendMB } from '../../../../../../infrastructure/event-tracking'
 import PauseSubscriptionModal from '@/features/subscription/components/dashboard/pause-modal'
@@ -100,9 +98,7 @@ export function ActiveSubscriptionNew({
           />
         )}
       </div>
-      <h2 className={classnames('h3', bsVersion({ bs5: 'fw-bold' }))}>
-        {t('billing')}
-      </h2>
+      <h2 className="h3 fw-bold">{t('billing')}</h2>
       <p className="mb-1">
         {subscription.plan.annual ? (
           <Trans
@@ -169,12 +165,8 @@ export function ActiveSubscriptionNew({
         )}
       </div>
       <hr />
-      <h2 className={classnames('h3', bsVersion({ bs5: 'fw-bold' }))}>
-        {t('plan')}
-      </h2>
-      <h3 className={classnames('h5 mt-0 mb-1', bsVersion({ bs5: 'fw-bold' }))}>
-        {planName}
-      </h3>
+      <h2 className="h3 fw-bold">{t('plan')}</h2>
+      <h3 className="h5 mt-0 mb-1 fw-bold">{planName}</h3>
       {subscription.pendingPlan &&
         subscription.pendingPlan.name !== subscription.plan.name && (
           <p className="mb-1">{t('want_change_to_apply_before_plan_end')}</p>

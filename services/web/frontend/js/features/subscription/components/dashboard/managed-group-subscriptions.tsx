@@ -7,8 +7,6 @@ import { Trans, useTranslation } from 'react-i18next'
 import { useSubscriptionDashboardContext } from '../../context/subscription-dashboard-context'
 import { RowLink } from './row-link'
 import { ManagedGroupSubscription } from '../../../../../../types/subscription/dashboard/subscription'
-import { bsVersion } from '@/features/utils/bootstrap-5'
-import classnames from 'classnames'
 
 function ManagedGroupAdministrator({
   subscription,
@@ -104,9 +102,7 @@ export default function ManagedGroupSubscriptions() {
       {managedGroupSubscriptions.map(subscription => {
         return (
           <div key={`managed-group-${subscription._id}`}>
-            <h2 className={classnames('h3', bsVersion({ bs5: 'fw-bold' }))}>
-              {t('group_management')}
-            </h2>
+            <h2 className="h3 fw-bold">{t('group_management')}</h2>
             <p>
               <ManagedGroupAdministrator subscription={subscription} />
             </p>

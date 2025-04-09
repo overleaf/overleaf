@@ -3,7 +3,6 @@ import sinon from 'sinon'
 import { screen, fireEvent, render, waitFor } from '@testing-library/react'
 import fetchMock from 'fetch-mock'
 import userEvent from '@testing-library/user-event'
-import * as bootstrapUtils from '@/features/utils/bootstrap-5'
 
 import ShareProjectModal from '../../../../../frontend/js/features/share-project-modal/components/share-project-modal'
 import {
@@ -95,9 +94,6 @@ describe('<ShareProjectModal/>', function () {
       replace: sinon.stub(),
       reload: sinon.stub(),
     })
-    this.isBootstrap5Stub = sinon
-      .stub(bootstrapUtils, 'isBootstrap5')
-      .returns(true)
     fetchMock.get('/user/contacts', { contacts })
     window.metaAttributesCache.set('ol-user', { allowedFreeTrial: true })
     window.metaAttributesCache.set('ol-showUpgradePrompt', true)
@@ -106,7 +102,6 @@ describe('<ShareProjectModal/>', function () {
 
   afterEach(function () {
     this.locationStub.restore()
-    this.isBootstrap5Stub.restore()
     fetchMock.restore()
     cleanUpContext()
   })

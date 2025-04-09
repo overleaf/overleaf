@@ -107,11 +107,6 @@ export function CancelAiAddOnModal() {
           isLoading={inflight}
           loadingLabel={t('processing_uppercase') + '…'}
           onClick={handleConfirmChange}
-          bs3Props={{
-            loading: inflight
-              ? t('processing_uppercase') + '…'
-              : t('cancel_add_on'),
-          }}
         >
           {t('cancel_add_on')}
         </OLButton>

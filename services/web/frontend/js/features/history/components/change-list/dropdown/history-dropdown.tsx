@@ -25,7 +25,6 @@ function HistoryDropdown({
       iconTag={
         <MaterialIcon type="more_vert" accessibilityLabel={t('more_actions')} />
       }
-      parentSelector="[data-history-version-list-container]"
     >
       {children}
     </ActionsDropdown>

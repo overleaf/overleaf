@@ -14,7 +14,6 @@ import { MetaTag } from '@/utils/meta'
 
 const pauseSubscriptionSplitTestMeta: MetaTag[] = [
   { name: 'ol-splitTestVariants', value: { 'pause-subscription': 'enabled' } },
-  { name: 'ol-bootstrapVersion', value: 5 },
 ]
 
 function renderSubscriptionWithPauseSupport(

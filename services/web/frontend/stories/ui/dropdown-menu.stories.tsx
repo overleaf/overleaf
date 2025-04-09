@@ -219,7 +219,7 @@ export const TrailingIcon = (args: Args) => {
 }
 
 const meta: Meta<typeof DropdownMenu> = {
-  title: 'Shared / Components / Bootstrap 5 / DropdownMenu',
+  title: 'Shared / Components / DropdownMenu',
   component: DropdownMenu,
   argTypes: {
     disabled: {
@@ -230,9 +230,6 @@ const meta: Meta<typeof DropdownMenu> = {
         disable: true,
       },
     },
-  },
-  parameters: {
-    bootstrap5: true,
   },
 }
 

@@ -41,9 +41,6 @@ export default function DowngradePlanButton({
       disabled={isButtonDisabled}
       isLoading={isLoading}
       loadingLabel={t('processing_uppercase') + '…'}
-      bs3Props={{
-        loading: isLoading ? t('processing_uppercase') + '…' : buttonText,
-      }}
     >
       {buttonText}
     </OLButton>

@@ -3,7 +3,6 @@ import { useEffect, useState } from 'react'
 import OLSpinner, {
   OLSpinnerSize,
 } from '@/features/ui/components/ol/ol-spinner'
-import { isBootstrap5 } from '@/features/utils/bootstrap-5'
 import classNames from 'classnames'
 
 function LoadingSpinner({
@@ -43,12 +42,14 @@ function LoadingSpinner({
     return null
   }
 
-  const extraClasses = isBootstrap5()
-    ? [align === 'left' ? 'align-items-start' : 'align-items-center']
-    : null
-
   return (
-    <div className={classNames('loading', className, extraClasses)}>
+    <div
+      className={classNames(
+        'loading',
+        className,
+        align === 'left' ? 'align-items-start' : 'align-items-center'
+      )}
+    >
       <OLSpinner size={size} />
       &nbsp;
       {loadingText || `${t('loading')}…`}

@@ -1,6 +1,5 @@
 import type { FC, MouseEventHandler, ReactNode } from 'react'
 import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
-import { bsVersion } from '@/features/utils/bootstrap-5'
 import BetaBadgeIcon from '@/shared/components/beta-badge-icon'
 
 type TooltipProps = {
@@ -40,9 +39,7 @@ const BetaBadge: FC<{
       href={href || defaultHref}
       {...linkProps}
     >
-      <span className={bsVersion({ bs5: 'visually-hidden', bs3: 'sr-only' })}>
-        {description || tooltip?.text}
-      </span>
+      <span className="visually-hidden">{description || tooltip?.text}</span>
       <BetaBadgeIcon phase={phase} />
     </a>
   )

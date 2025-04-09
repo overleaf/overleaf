@@ -5,7 +5,6 @@ import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
 import { postJSON } from '@/infrastructure/fetch-json'
 import OLButton from '@/features/ui/components/ol/ol-button'
 import getMeta from '@/utils/meta'
-import { isBootstrap5 } from '@/features/utils/bootstrap-5'
 
 type IntegrationLinkingWidgetProps = {
   logo: ReactNode
@@ -117,17 +116,14 @@ function ActionButton({
       </OLButton>
     )
   } else if (disabled) {
-    const tooltipableButton = isBootstrap5() ? (
+    const tooltipableButton = (
       <div className="d-inline-block">
         <OLButton variant="primary" disabled>
           {t('turn_on')}
         </OLButton>
       </div>
-    ) : (
-      <OLButton variant="primary" disabled>
-        {t('turn_on')}
-      </OLButton>
     )
+
     return (
       <OLTooltip
         id="experiment-disabled"

@@ -24,7 +24,4 @@ export default {
   args: {
     inputValue: '',
   },
-  parameters: {
-    bootstrap5: true,
-  },
 }

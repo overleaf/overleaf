@@ -1,6 +1,5 @@
 import StartFreeTrialButton from '../js/shared/components/start-free-trial-button'
 import { ScopeDecorator } from './decorators/scope'
-import { bsVersionDecorator } from '../../.storybook/utils/with-bootstrap-switcher'
 
 export const Default = args => {
   return <StartFreeTrialButton {...args} />
@@ -31,7 +30,4 @@ export default {
     source: 'storybook',
   },
   decorators: [ScopeDecorator],
-  argTypes: {
-    ...bsVersionDecorator.argTypes,
-  },
 }

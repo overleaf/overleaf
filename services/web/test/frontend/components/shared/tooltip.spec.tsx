@@ -1,6 +1,6 @@
-import Tooltip from '../../../../frontend/js/shared/components/tooltip'
+import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
 
-describe('<Tooltip />', function () {
+describe('<OLTooltip />', function () {
   it('calls the bound handler and blur then hides text on click', function () {
     const clickHandler = cy.stub().as('clickHandler')
     const blurHandler = cy.stub().as('blurHandler')
@@ -16,11 +16,11 @@ describe('<Tooltip />', function () {
           height: '100vh',
         }}
       >
-        <Tooltip id="abc" description={description}>
+        <OLTooltip id="abc" description={description}>
           <button onClick={clickHandler} onBlur={blurHandler}>
             {btnText}
           </button>
-        </Tooltip>
+        </OLTooltip>
       </div>
     )
 

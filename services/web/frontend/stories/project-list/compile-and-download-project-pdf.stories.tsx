@@ -62,7 +62,4 @@ export default {
       </div>
     ),
   ],
-  parameters: {
-    bootstrap5: true,
-  },
 }

@@ -1,5 +1,4 @@
 import classNames from 'classnames'
-import { bsVersion } from '@/features/utils/bootstrap-5'
 
 type IconOwnProps = {
   type: string
@@ -36,9 +35,7 @@ function Icon({
     <>
       <i className={iconClassName} aria-hidden="true" {...rest} />
       {accessibilityLabel && (
-        <span className={bsVersion({ bs5: 'visually-hidden', bs3: 'sr-only' })}>
-          {accessibilityLabel}
-        </span>
+        <span className="visually-hidden">{accessibilityLabel}</span>
       )}
     </>
   )

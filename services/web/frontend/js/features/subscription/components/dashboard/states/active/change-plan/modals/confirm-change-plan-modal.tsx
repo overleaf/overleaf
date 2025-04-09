@@ -112,11 +112,6 @@ export function ConfirmChangePlanModal() {
           isLoading={inflight}
           loadingLabel={t('processing_uppercase') + '…'}
           onClick={handleConfirmChange}
-          bs3Props={{
-            loading: inflight
-              ? t('processing_uppercase') + '…'
-              : t('change_plan'),
-          }}
         >
           {t('change_plan')}
         </OLButton>

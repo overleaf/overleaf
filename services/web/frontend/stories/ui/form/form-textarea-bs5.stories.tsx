@@ -5,11 +5,8 @@ import FormText from '@/features/ui/components/bootstrap-5/form/form-text'
 import FormControl from '@/features/ui/components/bootstrap-5/form/form-control'
 
 const meta: Meta<React.ComponentProps<typeof FormControl>> = {
-  title: 'Shared / Components / Bootstrap 5 / Form / Textarea',
+  title: 'Shared / Components / Form / Textarea',
   component: FormControl,
-  parameters: {
-    bootstrap5: true,
-  },
 }
 export default meta
 

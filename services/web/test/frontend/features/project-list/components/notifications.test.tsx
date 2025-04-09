@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import sinon, { SinonStub } from 'sinon'
+import sinon from 'sinon'
 import {
   fireEvent,
   render,
@@ -49,7 +49,6 @@ import {
   individualSubscription,
 } from '../fixtures/user-subscriptions'
 import getMeta from '@/utils/meta'
-import * as bootstrapUtils from '@/features/utils/bootstrap-5'
 
 const renderWithinProjectListProvider = (Component: React.ComponentType) => {
   render(<Component />, {
@@ -68,16 +67,6 @@ describe('<UserNotifications />', function () {
     samlInitPath: '/fakeSaml/',
     appName: 'Overleaf',
   }
-
-  let isBootstrap5Stub: SinonStub
-
-  before(function () {
-    isBootstrap5Stub = sinon.stub(bootstrapUtils, 'isBootstrap5').returns(true)
-  })
-
-  after(function () {
-    isBootstrap5Stub.restore()
-  })
 
   beforeEach(function () {
     fetchMock.reset()

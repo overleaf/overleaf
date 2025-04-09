@@ -51,9 +51,6 @@ function PersonalSubscriptionRecurlySyncEmail() {
                   disabled={isLoading}
                   isLoading={isLoading}
                   loadingLabel={t('updating')}
-                  bs3Props={{
-                    loading: isLoading ? t('updating') + '…' : t('update'),
-                  }}
                 >
                   {t('update')}
                 </OLButton>

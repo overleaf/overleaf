@@ -3,39 +3,9 @@ import useFetchMock from './hooks/use-fetch-mock'
 import ContactUsModal from '../../modules/support/frontend/js/components/contact-us-modal'
 import fixedHelpSuggestionSearch from '../../modules/support/test/frontend/util/fixed-help-suggestion-search'
 import { ScopeDecorator } from './decorators/scope'
-import { StoryObj } from '@storybook/react'
 import OLButton from '@/features/ui/components/ol/ol-button'
-import { bsVersionDecorator } from '../../.storybook/utils/with-bootstrap-switcher'
 
-type Story = StoryObj<typeof ContactUsModal>
 type ContactUsModalProps = ComponentProps<typeof ContactUsModal>
-
-function bootstrap3Story(render: Story['render']): Story {
-  return {
-    render,
-    decorators: [
-      story => {
-        return ScopeDecorator(story)
-      },
-    ],
-  }
-}
-
-function bootstrap5Story(render: Story['render']): Story {
-  return {
-    render,
-    decorators: [
-      story => {
-        return ScopeDecorator(story, undefined, {
-          'ol-bootstrapVersion': 5,
-        })
-      },
-    ],
-    parameters: {
-      bootstrap5: true,
-    },
-  }
-}
 
 function GenericContactUsModal(args: ContactUsModalProps) {
   useFetchMock(fetchMock => {
@@ -50,13 +20,9 @@ function GenericContactUsModal(args: ContactUsModalProps) {
   )
 }
 
-export const Generic: Story = bootstrap3Story(args => (
+export const Generic = (args: ContactUsModalProps) => (
   <GenericContactUsModal {...args} />
-))
-
-export const GenericBootstrap5: Story = bootstrap5Story(args => (
-  <GenericContactUsModal {...args} />
-))
+)
 
 const ContactUsModalWithRequestError = (args: ContactUsModalProps) => {
   useFetchMock(fetchMock => {
@@ -71,16 +37,8 @@ const ContactUsModalWithRequestError = (args: ContactUsModalProps) => {
   )
 }
 
-const renderContactUsModalWithRequestError = (args: ContactUsModalProps) => (
+export const RequestError = (args: ContactUsModalProps) => (
   <ContactUsModalWithRequestError {...args} />
-)
-
-export const RequestError: Story = bootstrap3Story(
-  renderContactUsModalWithRequestError
-)
-
-export const RequestErrorBootstrap5: Story = bootstrap5Story(
-  renderContactUsModalWithRequestError
 )
 
 const ContactUsModalWithAcknowledgement = (
@@ -110,18 +68,10 @@ const ContactUsModalWithAcknowledgement = (
   )
 }
 
-const renderContactUsModalWithAcknowledgement = (args: ContactUsModalProps) => {
+export const WithAcknowledgement = (args: ContactUsModalProps) => {
   const { show, handleHide, ...rest } = args
   return <ContactUsModalWithAcknowledgement {...rest} />
 }
-
-export const WithAcknowledgement: Story = bootstrap3Story(
-  renderContactUsModalWithAcknowledgement
-)
-
-export const WithAcknowledgementBootstrap5: Story = bootstrap5Story(
-  renderContactUsModalWithAcknowledgement
-)
 
 export default {
   title: 'Shared / Modals / Contact Us',
@@ -133,6 +83,6 @@ export default {
   },
   argTypes: {
     handleHide: { action: 'close modal' },
-    ...bsVersionDecorator.argTypes,
   },
+  decorators: [ScopeDecorator],
 }

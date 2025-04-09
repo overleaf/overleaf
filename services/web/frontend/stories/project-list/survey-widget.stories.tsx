@@ -28,7 +28,4 @@ export const EmptySurvey = (args: any) => {
 export default {
   title: 'Project List / Survey Widget',
   component: SurveyWidget,
-  parameters: {
-    bootstrap5: true,
-  },
 }

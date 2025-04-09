@@ -1,7 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { LoadingUI } from '@/features/ide-react/components/loading'
 import { EditorProviders } from '../../../test/frontend/helpers/editor-providers'
-import { bsVersionDecorator } from '../../../.storybook/utils/with-bootstrap-switcher'
 import { PartialMeta } from '@/utils/meta'
 
 const meta: Meta<typeof LoadingUI> = {
@@ -19,7 +18,6 @@ const meta: Meta<typeof LoadingUI> = {
       ],
     },
     progress: { control: { type: 'range', min: 0, max: 100 } },
-    ...bsVersionDecorator.argTypes,
   },
 }
 

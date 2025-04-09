@@ -51,13 +51,10 @@ export const Sizes = (args: Args) => {
   ))
 }
 const meta: Meta<typeof Dropdown> = {
-  title: 'Shared/Components/Bootstrap 5/SplitButton',
+  title: 'Shared/Components/SplitButton',
   component: Dropdown,
   args: {
     align: { sm: 'start' },
-  },
-  parameters: {
-    bootstrap5: true,
   },
 }
 

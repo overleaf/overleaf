@@ -3,8 +3,6 @@ import { useTranslation } from 'react-i18next'
 import { useLocation } from '@/shared/hooks/use-location'
 import MaterialIcon from '@/shared/components/material-icon'
 import OLTag from '@/features/ui/components/ol/ol-tag'
-import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
-import { bsVersion } from '@/features/utils/bootstrap-5'
 import { ManagedGroupSubscription } from '../../../../../../types/subscription/dashboard/subscription'
 import { sendMB } from '../../../../infrastructure/event-tracking'
 import starIcon from '../../images/star-gradient.svg'
@@ -24,7 +22,7 @@ function AvailableWithGroupProfessionalBadge() {
     <OLTag
       prepend={<img aria-hidden="true" src={starIcon} alt="" />}
       contentProps={{
-        className: bsVersion({ bs5: 'mw-100' }),
+        className: 'mw-100',
         onClick: handleUpgradeClick,
       }}
     >
@@ -82,35 +80,17 @@ export function GroupSettingsButtonWithAdBadge({
     useGroupSettingsButton(subscription)
 
   return (
-    <BootstrapVersionSwitcher
-      bs3={
-        <div className="row-link text-muted">
-          <div className="icon">
-            <MaterialIcon type="settings" />
-          </div>
-          <div className="text">
-            <div className="heading">{heading}</div>
-            <div className="subtext">{groupSettingRowSubText}</div>
-          </div>
-          <span>
-            <AvailableWithGroupProfessionalBadge />
-          </span>
+    <li className="list-group-item row-link">
+      <div className="row-link-inner">
+        <MaterialIcon type="settings" className="p-2 p-md-3 text-muted" />
+        <div className="flex-grow-1 text-truncate text-muted">
+          <strong>{heading}</strong>
+          <div className="text-truncate">{groupSettingRowSubText}</div>
         </div>
-      }
-      bs5={
-        <li className="list-group-item row-link">
-          <div className="row-link-inner">
-            <MaterialIcon type="settings" className="p-2 p-md-3 text-muted" />
-            <div className="flex-grow-1 text-truncate text-muted">
-              <strong>{heading}</strong>
-              <div className="text-truncate">{groupSettingRowSubText}</div>
-            </div>
-            <span className="p-2 p-md-3">
-              <AvailableWithGroupProfessionalBadge />
-            </span>
-          </div>
-        </li>
-      }
-    />
+        <span className="p-2 p-md-3">
+          <AvailableWithGroupProfessionalBadge />
+        </span>
+      </div>
+    </li>
   )
 }

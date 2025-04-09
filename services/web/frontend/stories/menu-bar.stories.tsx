@@ -30,9 +30,6 @@ const meta: Meta<typeof MenuBar> = {
   title: 'Shared / Components / MenuBar',
   component: MenuBar,
   argTypes: {},
-  parameters: {
-    bootstrap5: true,
-  },
 }
 
 export default meta

@@ -343,7 +343,4 @@ export const ReconfirmedAffiliationSuccess = (args: any) => {
 export default {
   title: 'Project List / Notifications',
   component: UserNotifications,
-  parameters: {
-    bootstrap5: true,
-  },
 }

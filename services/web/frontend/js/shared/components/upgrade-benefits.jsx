@@ -1,16 +1,9 @@
-import Icon from './icon'
 import MaterialIcon from '@/shared/components/material-icon'
-import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
 import { useTranslation } from 'react-i18next'
 import { memo } from 'react'
 
 function Check() {
-  return (
-    <BootstrapVersionSwitcher
-      bs3={<Icon type="check" />}
-      bs5={<MaterialIcon type="check" />}
-    />
-  )
+  return <MaterialIcon type="check" />
 }
 
 function UpgradeBenefits() {

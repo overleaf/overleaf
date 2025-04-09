@@ -1,6 +1,5 @@
 import { UpgradePrompt } from '@/shared/components/upgrade-prompt'
 import { StoryObj } from '@storybook/react/*'
-import { bsVersionDecorator } from '../../.storybook/utils/with-bootstrap-switcher'
 
 type Story = StoryObj<typeof UpgradePrompt>
 
@@ -17,8 +16,4 @@ export const Generic: Story = {
 export default {
   title: 'Shared / Components / Upgrade Prompt',
   component: UpgradePrompt,
-  ...bsVersionDecorator,
-  args: {
-    bootstrapVersion: 5,
-  },
 }

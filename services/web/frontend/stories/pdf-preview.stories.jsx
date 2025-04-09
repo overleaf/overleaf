@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from 'react'
 import useFetchMock from './hooks/use-fetch-mock'
-import { Button } from 'react-bootstrap'
+import OLButton from '@/features/ui/components/ol/ol-button'
 import PdfPreviewPane from '../js/features/pdf-preview/components/pdf-preview-pane'
 import PdfPreview from '../js/features/pdf-preview/components/pdf-preview'
 import PdfFileList from '../js/features/pdf-preview/components/pdf-file-list'
@@ -123,10 +123,12 @@ export const Interactive = () => {
                   margin: '10px 0',
                 }}
               >
-                <Button onClick={dispatchDocChanged}>trigger doc change</Button>
-                <Button onClick={toggleLintingError}>
+                <OLButton onClick={dispatchDocChanged}>
+                  trigger doc change
+                </OLButton>
+                <OLButton onClick={toggleLintingError}>
                   toggle linting error
-                </Button>
+                </OLButton>
               </div>
             </div>
           </div>

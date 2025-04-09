@@ -21,7 +21,6 @@ function CompareVersionDropdown({
       id={id}
       isOpened={isOpened}
       setIsOpened={setIsOpened}
-      parentSelector="[data-history-version-list-container]"
       toolTipDescription={t('compare')}
       iconTag={
         <MaterialIcon

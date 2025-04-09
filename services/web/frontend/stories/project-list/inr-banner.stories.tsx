@@ -7,7 +7,4 @@ export const Default = () => {
 export default {
   title: 'Project List / INR Banner',
   component: INRBanner,
-  parameters: {
-    bootstrap5: true,
-  },
 }

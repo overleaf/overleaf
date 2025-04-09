@@ -71,11 +71,6 @@ export default function LeaveGroupModal() {
           disabled={inflight}
           isLoading={inflight}
           loadingLabel={t('processing_uppercase') + '…'}
-          bs3Props={{
-            loading: inflight
-              ? t('processing_uppercase') + '…'
-              : t('leave_now'),
-          }}
         >
           {t('leave_now')}
         </OLButton>

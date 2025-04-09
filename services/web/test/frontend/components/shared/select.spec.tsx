@@ -1,5 +1,7 @@
 import { useCallback, FormEvent } from 'react'
-import { Button, Form, FormControl } from 'react-bootstrap'
+import OLButton from '@/features/ui/components/ol/ol-button'
+import OLForm from '@/features/ui/components/ol/ol-form'
+import OLFormControl from '@/features/ui/components/ol/ol-form-control'
 import {
   Select,
   SelectProps,
@@ -230,7 +232,7 @@ describe('<Select />', function () {
         []
       )
 
-      function handleSubmit(event: FormEvent<Form>) {
+      function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault()
         const formData = new FormData(event.target as HTMLFormElement)
         // a plain object is more convenient to work later with assertions
@@ -238,10 +240,10 @@ describe('<Select />', function () {
       }
 
       return (
-        <Form onSubmit={handleSubmit}>
-          <FormControl componentClass={selectComponent} />
-          <Button type="submit">submit</Button>
-        </Form>
+        <OLForm onSubmit={handleSubmit}>
+          <OLFormControl as={selectComponent} />
+          <OLButton type="submit">submit</OLButton>
+        </OLForm>
       )
     }
 
@@ -303,7 +305,7 @@ describe('<Select />', function () {
       cy.findByRole('option', { name: 'Demo item 1' }).click()
       cy.findByRole('textbox', { name: 'Demo item 1' }).click()
 
-      cy.findByText('check').should('exist')
+      cy.findByText('check').should('not.exist')
     })
   })
 

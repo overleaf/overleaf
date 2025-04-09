@@ -1,5 +1,5 @@
-import { Button } from 'react-bootstrap-5'
-import Tooltip from '@/features/ui/components/bootstrap-5/tooltip'
+import OLButton from '@/features/ui/components/ol/ol-button'
+import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
 import { Meta } from '@storybook/react'
 
 export const Tooltips = () => {
@@ -17,25 +17,22 @@ export const Tooltips = () => {
       }}
     >
       {placements.map(placement => (
-        <Tooltip
+        <OLTooltip
           key={placement}
           id={`tooltip-${placement}`}
           description={`Tooltip on ${placement}`}
           overlayProps={{ placement }}
         >
-          <Button variant="secondary">Tooltip on {placement}</Button>
-        </Tooltip>
+          <OLButton variant="secondary">Tooltip on {placement}</OLButton>
+        </OLTooltip>
       ))}
     </div>
   )
 }
 
-const meta: Meta<typeof Tooltip> = {
-  title: 'Shared / Components / Bootstrap 5 / Tooltip',
-  component: Tooltip,
-  parameters: {
-    bootstrap5: true,
-  },
+const meta: Meta<typeof OLTooltip> = {
+  title: 'Shared / Components / Tooltip',
+  component: OLTooltip,
 }
 
 export default meta

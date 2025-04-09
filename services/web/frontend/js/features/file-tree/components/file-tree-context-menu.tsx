@@ -19,19 +19,10 @@ function FileTreeContextMenu() {
       toggleButtonRef.current = document.querySelector(
         '.entity-menu-toggle'
       ) as HTMLButtonElement | null
-      focusContextMenu()
     }
   }, [contextMenuCoords])
 
   if (!contextMenuCoords || fileTreeReadOnly) return null
-
-  // A11y - Move the focus to the context menu when it opens
-  function focusContextMenu() {
-    const BS3contextMenu = document.querySelector(
-      '[aria-labelledby="dropdown-file-tree-context-menu"]'
-    ) as HTMLElement | null
-    BS3contextMenu?.focus()
-  }
 
   function close() {
     setContextMenuCoords(null)
@@ -78,15 +69,5 @@ function FileTreeContextMenu() {
     document.body
   )
 }
-
-// fake component required as Dropdowns require a Toggle, even tho we don't want
-// one for the context menu
-const FakeDropDownToggle = React.forwardRef<undefined, { bsRole: string }>(
-  ({ bsRole }, ref) => {
-    return null
-  }
-)
-
-FakeDropDownToggle.displayName = 'FakeDropDownToggle'
 
 export default FileTreeContextMenu
