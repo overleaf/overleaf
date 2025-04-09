@@ -477,6 +477,22 @@ function isStandaloneAiAddOnPlanCode(planCode) {
   return STANDALONE_AI_ADD_ON_CODES.includes(planCode)
 }
 
+/**
+ * Returns whether subscription change will have have the ai bundle once the change is processed
+ *
+ * @param {RecurlySubscriptionChange} subscriptionChange The subscription change object coming from Recurly
+ *
+ * @return {boolean}
+ */
+function subscriptionChangeIsAiAssistUpgrade(subscriptionChange) {
+  return Boolean(
+    isStandaloneAiAddOnPlanCode(subscriptionChange.nextPlanCode) ||
+      subscriptionChange.nextAddOns?.some(
+        addOn => addOn.code === AI_ADD_ON_CODE
+      )
+  )
+}
+
 module.exports = {
   AI_ADD_ON_CODE,
   MEMBERS_LIMIT_ADD_ON_CODE,
@@ -493,5 +509,6 @@ module.exports = {
   RecurlyCoupon,
   RecurlyAccount,
   isStandaloneAiAddOnPlanCode,
+  subscriptionChangeIsAiAssistUpgrade,
   RecurlyImmediateCharge,
 }

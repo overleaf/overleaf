@@ -197,6 +197,14 @@ async function doSyncFromV1(v1UserId) {
   return refreshFeatures(user._id, 'sync-v1')
 }
 
+async function hasFeaturesViaWritefull(userId) {
+  const user = await UserGetter.promises.getUser(userId, {
+    _id: 1,
+    writefull: 1,
+  })
+  return Boolean(user?.writefull?.isPremium)
+}
+
 module.exports = {
   featuresEpochIsCurrent,
   computeFeatures: callbackify(computeFeatures),
@@ -209,10 +217,12 @@ module.exports = {
     'featuresChanged',
   ]),
   scheduleRefreshFeatures: callbackify(scheduleRefreshFeatures),
+  hasFeaturesViaWritefull: callbackify(hasFeaturesViaWritefull),
   promises: {
     computeFeatures,
     refreshFeatures,
     scheduleRefreshFeatures,
     doSyncFromV1,
+    hasFeaturesViaWritefull,
   },
 }

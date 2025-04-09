@@ -24,6 +24,7 @@ const HttpErrorHandler = require('../Errors/HttpErrorHandler')
 const RecurlyClient = require('./RecurlyClient')
 const { AI_ADD_ON_CODE } = require('./RecurlyEntities')
 const PlansLocator = require('./PlansLocator')
+const RecurlyEntities = require('./RecurlyEntities')
 
 /**
  * @import { SubscriptionChangeDescription } from '../../../../types/subscription/subscription-change-preview'
@@ -45,7 +46,6 @@ function formatGroupPlansDataForDash() {
 
 async function userSubscriptionPage(req, res) {
   const user = SessionManager.getSessionUser(req.session)
-
   await SplitTestHandler.promises.getAssignment(req, res, 'pause-subscription')
 
   const groupPricingDiscount = await SplitTestHandler.promises.getAssignment(
@@ -321,13 +321,19 @@ async function previewAddonPurchase(req, res) {
   try {
     subscriptionChange =
       await SubscriptionHandler.promises.previewAddonPurchase(userId, addOnCode)
+
+    const hasBundleViaWritefull =
+      await FeaturesUpdater.promises.hasFeaturesViaWritefull(userId)
+    const isAiUpgrade =
+      RecurlyEntities.subscriptionChangeIsAiAssistUpgrade(subscriptionChange)
+    if (hasBundleViaWritefull && isAiUpgrade) {
+      return res.redirect(
+        '/user/subscription?redirect-reason=writefull-entitled'
+      )
+    }
   } catch (err) {
     if (err instanceof DuplicateAddOnError) {
-      return HttpErrorHandler.badRequest(
-        req,
-        res,
-        `Subscription already has add-on "${addOnCode}"`
-      )
+      return res.redirect('/user/subscription?redirect-reason=double-buy')
     }
     throw err
   }
