@@ -4,6 +4,8 @@
   --ide-rail-link-background: var(--bg-dark-primary);
   --ide-rail-link-active-color: var(--green-10);
   --ide-rail-link-active-background: var(--green-70);
+  --ide-rail-link-hover-color: var(--content-primary-dark);
+  --ide-rail-link-hover-background: var(--bg-dark-secondary);
   --ide-rail-border-colour: var(--border-divider-dark);
   --ide-rail-header-subdued-button-color: var(--content-primary-dark);
   --ide-rail-header-subdued-button-hover-background: var(--bg-dark-tertiary);
@@ -15,6 +17,8 @@
   --ide-rail-link-background: #fff;
   --ide-rail-link-active-color: var(--green-70);
   --ide-rail-link-active-background: var(--bg-accent-03);
+  --ide-rail-link-hover-color: var(--content-primary);
+  --ide-rail-link-hover-background: var(--bg-light-secondary);
   --ide-rail-border-colour: var(--border-divider);
   --ide-rail-header-subdued-button-color: var(--content-primary);
   --ide-rail-header-subdued-button-hover-background: var(--bg-light-tertiary);
@@ -63,10 +67,14 @@
   position: relative;
   overflow-y: hidden;
 
-  &:hover,
   &:visited,
   &:focus {
     color: var(--ide-rail-color);
+  }
+
+  &:hover {
+    color: var(--ide-rail-link-hover-color);
+    background-color: var(--ide-rail-link-hover-background);
   }
 
   .ide-rail-tab-link-icon {
