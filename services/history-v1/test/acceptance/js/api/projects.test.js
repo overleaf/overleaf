@@ -21,6 +21,8 @@ const {
   Snapshot,
   Change,
   AddFileOperation,
+  EditFileOperation,
+  TextOperation,
 } = require('overleaf-editor-core')
 const testProjects = require('./support/test_projects')
 
@@ -103,56 +105,182 @@ describe('project controller', function () {
     // https://github.com/overleaf/write_latex/pull/5120#discussion_r244291862
   })
 
-  describe('getLatestHashedContent', function () {
-    let limitsToPersistImmediately
+  describe('project with changes', function () {
+    let projectId
 
-    before(function () {
+    beforeEach(async function () {
       // used to provide a limit which forces us to persist all of the changes.
       const farFuture = new Date()
       farFuture.setTime(farFuture.getTime() + 7 * 24 * 3600 * 1000)
-      limitsToPersistImmediately = {
+      const limits = {
         minChangeTimestamp: farFuture,
         maxChangeTimestamp: farFuture,
       }
-    })
-
-    it('returns a snaphot', async function () {
       const changes = [
         new Change(
           [new AddFileOperation('test.tex', File.fromString('ab'))],
           new Date(),
           []
         ),
+        new Change(
+          [new AddFileOperation('other.tex', File.fromString('hello'))],
+          new Date(),
+          []
+        ),
       ]
 
-      const projectId = await createEmptyProject()
-      await persistChanges(projectId, changes, limitsToPersistImmediately, 0)
-      const response =
-        await testServer.basicAuthClient.apis.Project.getLatestHashedContent({
-          project_id: projectId,
-        })
-      expect(response.status).to.equal(HTTPStatus.OK)
-      const snapshot = Snapshot.fromRaw(response.obj)
-      expect(snapshot.countFiles()).to.equal(1)
-      expect(snapshot.getFile('test.tex').getHash()).to.equal(
-        testFiles.STRING_AB_HASH
-      )
+      projectId = await createEmptyProject()
+      await persistChanges(projectId, changes, limits, 0)
     })
-    describe('getLatestHistoryRaw', function () {
-      it('should handles read', async function () {
-        const projectId = fixtures.docs.initializedProject.id
+
+    describe('getLatestHashedContent', function () {
+      it('returns a snapshot', async function () {
         const response =
-          await testServer.pseudoJwtBasicAuthClient.apis.Project.getLatestHistoryRaw(
-            {
-              project_id: projectId,
-              readOnly: 'true',
-            }
+          await testServer.basicAuthClient.apis.Project.getLatestHashedContent({
+            project_id: projectId,
+          })
+        expect(response.status).to.equal(HTTPStatus.OK)
+        const snapshot = Snapshot.fromRaw(response.obj)
+        expect(snapshot.countFiles()).to.equal(2)
+        expect(snapshot.getFile('test.tex').getHash()).to.equal(
+          testFiles.STRING_AB_HASH
+        )
+      })
+    })
+
+    describe('getChanges', function () {
+      it('returns all changes when not given a limit', async function () {
+        const response =
+          await testServer.basicAuthClient.apis.Project.getChanges({
+            project_id: projectId,
+          })
+        expect(response.status).to.equal(HTTPStatus.OK)
+        const changes = response.obj
+        expect(changes.length).to.equal(2)
+        const filenames = changes
+          .flatMap(change => change.operations)
+          .map(operation => operation.pathname)
+        expect(filenames).to.deep.equal(['test.tex', 'other.tex'])
+      })
+
+      it('returns only requested changes', async function () {
+        const response =
+          await testServer.basicAuthClient.apis.Project.getChanges({
+            project_id: projectId,
+            since: 1,
+          })
+        expect(response.status).to.equal(HTTPStatus.OK)
+        const changes = response.obj
+        expect(changes.length).to.equal(1)
+        const filenames = changes
+          .flatMap(change => change.operations)
+          .map(operation => operation.pathname)
+        expect(filenames).to.deep.equal(['other.tex'])
+      })
+
+      it('rejects negative versions', async function () {
+        await expect(
+          testServer.basicAuthClient.apis.Project.getChanges({
+            project_id: projectId,
+            since: -1,
+          })
+        ).to.be.rejectedWith('Bad Request')
+      })
+
+      it('rejects out of bounds versions', async function () {
+        await expect(
+          testServer.basicAuthClient.apis.Project.getChanges({
+            project_id: projectId,
+            since: 20,
+          })
+        ).to.be.rejectedWith('Bad Request')
+      })
+    })
+  })
+
+  describe('project with many chunks', function () {
+    let projectId
+
+    beforeEach(async function () {
+      // used to provide a limit which forces us to persist all of the changes.
+      const farFuture = new Date()
+      farFuture.setTime(farFuture.getTime() + 7 * 24 * 3600 * 1000)
+      const limits = {
+        minChangeTimestamp: farFuture,
+        maxChangeTimestamp: farFuture,
+        maxChunkChanges: 5,
+      }
+      const changes = [
+        new Change(
+          [new AddFileOperation('test.tex', File.fromString(''))],
+          new Date(),
+          []
+        ),
+      ]
+
+      for (let i = 0; i < 20; i++) {
+        const textOperation = new TextOperation()
+        textOperation.retain(i)
+        textOperation.insert('x')
+        changes.push(
+          new Change(
+            [new EditFileOperation('test.tex', textOperation)],
+            new Date(),
+            []
           )
-        expect(response.body).to.deep.equal({
-          startVersion: 0,
-          endVersion: 1,
-          endTimestamp: '2032-01-01T00:00:00.000Z',
-        })
+        )
+      }
+
+      projectId = await createEmptyProject()
+      await persistChanges(projectId, changes, limits, 0)
+    })
+
+    it('returns all changes when not given a limit', async function () {
+      const response = await testServer.basicAuthClient.apis.Project.getChanges(
+        {
+          project_id: projectId,
+        }
+      )
+      expect(response.status).to.equal(HTTPStatus.OK)
+      const changes = response.obj
+      expect(changes.length).to.equal(21)
+      expect(changes[10].operations[0].operation.textOperation).to.deep.equal([
+        9,
+        'x',
+      ])
+    })
+
+    it('returns only requested changes', async function () {
+      const response = await testServer.basicAuthClient.apis.Project.getChanges(
+        {
+          project_id: projectId,
+          since: 10,
+        }
+      )
+      expect(response.status).to.equal(HTTPStatus.OK)
+      const changes = response.obj
+      expect(changes.length).to.equal(11)
+      expect(changes[2].operations[0].operation.textOperation).to.deep.equal([
+        11,
+        'x',
+      ])
+    })
+  })
+
+  describe('getLatestHistoryRaw', function () {
+    it('should handles read', async function () {
+      const projectId = fixtures.docs.initializedProject.id
+      const response =
+        await testServer.pseudoJwtBasicAuthClient.apis.Project.getLatestHistoryRaw(
+          {
+            project_id: projectId,
+            readOnly: 'true',
+          }
+        )
+      expect(response.body).to.deep.equal({
+        startVersion: 0,
+        endVersion: 1,
+        endTimestamp: '2032-01-01T00:00:00.000Z',
       })
     })
   })

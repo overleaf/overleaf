@@ -8,6 +8,7 @@ const { knex, mongodb } = require('../storage')
 require('mongodb').ObjectId.cacheHexString = true
 
 chai.use(chaiAsPromised)
+chai.config.truncateThreshold = 0
 
 async function setupPostgresDatabase() {
   this.timeout(60_000)
