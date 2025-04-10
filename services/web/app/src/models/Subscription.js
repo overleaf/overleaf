@@ -57,6 +57,14 @@ const SubscriptionSchema = new Schema(
         type: Date,
       },
     },
+    paymentProvider: {
+      service: {
+        type: String,
+      },
+      subscriptionId: {
+        type: String,
+      },
+    },
     collectionMethod: {
       type: String,
       enum: ['automatic', 'manual'],
