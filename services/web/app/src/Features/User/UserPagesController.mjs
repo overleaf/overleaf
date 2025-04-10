@@ -117,11 +117,6 @@ async function settingsPage(req, res) {
     )
   }
 
-  // Get the users write-and-cite assignment to switch between translation strings
-  await SplitTestHandler.promises.getAssignment(req, res, 'write-and-cite')
-  // Get the users papers-integration assignment to show the linking widget
-  await SplitTestHandler.promises.getAssignment(req, res, 'papers-integration')
-
   res.render('user/settings', {
     title: 'account_settings',
     user: {
