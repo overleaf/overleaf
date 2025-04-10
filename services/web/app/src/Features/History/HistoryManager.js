@@ -21,6 +21,12 @@ const projectKey = require('./project_key')
 
 const GLOBAL_BLOBS = new Set() // CHANGE FROM SOURCE: only store hashes.
 
+const HISTORY_V1_URL = settings.apis.v1_history.url
+const HISTORY_V1_BASIC_AUTH = {
+  user: settings.apis.v1_history.user,
+  password: settings.apis.v1_history.pass,
+}
+
 function makeGlobalKey(hash) {
   return `${hash.slice(0, 2)}/${hash.slice(2, 4)}/${hash.slice(4)}`
 }
@@ -144,16 +150,10 @@ async function _deleteProjectInProjectHistory(projectId) {
 
 async function _deleteProjectInFullProjectHistory(historyId) {
   try {
-    await fetchNothing(
-      `${settings.apis.v1_history.url}/projects/${historyId}`,
-      {
-        method: 'DELETE',
-        basicAuth: {
-          user: settings.apis.v1_history.user,
-          password: settings.apis.v1_history.pass,
-        },
-      }
-    )
+    await fetchNothing(`${HISTORY_V1_URL}/projects/${historyId}`, {
+      method: 'DELETE',
+      basicAuth: HISTORY_V1_BASIC_AUTH,
+    })
   } catch (err) {
     throw OError.tag(err, 'failed to clear project history', { historyId })
   }
@@ -162,29 +162,23 @@ async function _deleteProjectInFullProjectHistory(historyId) {
 async function uploadBlobFromDisk(historyId, hash, byteLength, fsPath) {
   const outStream = fs.createReadStream(fsPath)
 
-  const url = `${settings.apis.v1_history.url}/projects/${historyId}/blobs/${hash}`
+  const url = `${HISTORY_V1_URL}/projects/${historyId}/blobs/${hash}`
   await fetchNothing(url, {
     method: 'PUT',
     body: outStream,
     headers: { 'Content-Length': byteLength }, // add the content length to work around problems with chunked encoding in node 18
     signal: AbortSignal.timeout(60 * 1000),
-    basicAuth: {
-      user: settings.apis.v1_history.user,
-      password: settings.apis.v1_history.pass,
-    },
+    basicAuth: HISTORY_V1_BASIC_AUTH,
   })
 }
 
 async function copyBlob(sourceHistoryId, targetHistoryId, hash) {
-  const url = `${settings.apis.v1_history.url}/projects/${targetHistoryId}/blobs/${hash}`
+  const url = `${HISTORY_V1_URL}/projects/${targetHistoryId}/blobs/${hash}`
   await fetchNothing(
     `${url}?${new URLSearchParams({ copyFrom: sourceHistoryId })}`,
     {
       method: 'POST',
-      basicAuth: {
-        user: settings.apis.v1_history.user,
-        password: settings.apis.v1_history.pass,
-      },
+      basicAuth: HISTORY_V1_BASIC_AUTH,
     }
   )
 }
@@ -200,7 +194,7 @@ async function requestBlobWithFallback(
     'overleaf.history.id': true,
   })
   // Talk to history-v1 directly to avoid streaming via project-history.
-  let url = new URL(settings.apis.v1_history.url)
+  let url = new URL(HISTORY_V1_URL)
   url.pathname += `/projects/${project.overleaf.history.id}/blobs/${hash}`
 
   const opts = { method, headers: { Range: range } }
@@ -255,22 +249,14 @@ async function requestBlobWithFallback(
  * @returns Promise<object>
  */
 async function getCurrentContent(projectId) {
-  const project = await ProjectGetter.promises.getProject(projectId, {
-    overleaf: true,
-  })
-  const historyId = project?.overleaf?.history?.id
-  if (!historyId) {
-    throw new OError('project does not have a history id', { projectId })
-  }
+  const historyId = await getHistoryId(projectId)
+
   try {
     return await fetchJson(
-      `${settings.apis.v1_history.url}/projects/${historyId}/latest/content`,
+      `${HISTORY_V1_URL}/projects/${historyId}/latest/content`,
       {
         method: 'GET',
-        basicAuth: {
-          user: settings.apis.v1_history.user,
-          password: settings.apis.v1_history.pass,
-        },
+        basicAuth: HISTORY_V1_BASIC_AUTH,
       }
     )
   } catch (err) {
@@ -287,22 +273,14 @@ async function getCurrentContent(projectId) {
  * @returns Promise<object>
  */
 async function getContentAtVersion(projectId, version) {
-  const project = await ProjectGetter.promises.getProject(projectId, {
-    overleaf: true,
-  })
-  const historyId = project?.overleaf?.history?.id
-  if (!historyId) {
-    throw new OError('project does not have a history id', { projectId })
-  }
+  const historyId = await getHistoryId(projectId)
+
   try {
     return await fetchJson(
-      `${settings.apis.v1_history.url}/projects/${historyId}/versions/${version}/content`,
+      `${HISTORY_V1_URL}/projects/${historyId}/versions/${version}/content`,
       {
         method: 'GET',
-        basicAuth: {
-          user: settings.apis.v1_history.user,
-          password: settings.apis.v1_history.pass,
-        },
+        basicAuth: HISTORY_V1_BASIC_AUTH,
       }
     )
   } catch (err) {
@@ -312,6 +290,53 @@ async function getContentAtVersion(projectId, version) {
       { historyId, version }
     )
   }
+}
+
+/**
+ * Get the latest chunk from history
+ *
+ * @param {string} projectId
+ */
+async function getLatestHistory(projectId) {
+  const historyId = await getHistoryId(projectId)
+
+  return await fetchJson(
+    `${HISTORY_V1_URL}/projects/${historyId}/latest/history`,
+    {
+      basicAuth: HISTORY_V1_BASIC_AUTH,
+    }
+  )
+}
+
+/**
+ * Get history changes since a given version
+ *
+ * @param {string} projectId
+ * @param {object} opts
+ * @param {number} opts.since - The start version of changes to get
+ */
+async function getChanges(projectId, opts = {}) {
+  const historyId = await getHistoryId(projectId)
+
+  const url = new URL(`${HISTORY_V1_URL}/projects/${historyId}/changes`)
+  if (opts.since) {
+    url.searchParams.set('since', opts.since)
+  }
+
+  return await fetchJson(url, {
+    basicAuth: HISTORY_V1_BASIC_AUTH,
+  })
+}
+
+async function getHistoryId(projectId) {
+  const project = await ProjectGetter.promises.getProject(projectId, {
+    overleaf: true,
+  })
+  const historyId = project?.overleaf?.history?.id
+  if (!historyId) {
+    throw new OError('project does not have a history id', { projectId })
+  }
+  return historyId
 }
 
 async function injectUserDetails(data) {
@@ -404,6 +429,8 @@ module.exports = {
   uploadBlobFromDisk: callbackify(uploadBlobFromDisk),
   copyBlob: callbackify(copyBlob),
   requestBlobWithFallback: callbackify(requestBlobWithFallback),
+  getLatestHistory: callbackify(getLatestHistory),
+  getChanges: callbackify(getChanges),
   promises: {
     loadGlobalBlobs,
     initializeProject,
@@ -417,5 +444,7 @@ module.exports = {
     uploadBlobFromDisk,
     copyBlob,
     requestBlobWithFallback,
+    getLatestHistory,
+    getChanges,
   },
 }

@@ -151,15 +151,28 @@ function apply(webRouter, privateApiRouter) {
 
   webRouter.get(
     '/project/:project_id/latest/history',
+    validate({
+      params: Joi.object({
+        project_id: Joi.objectId().required(),
+      }),
+    }),
     AuthorizationMiddleware.blockRestrictedUserFromProject,
     AuthorizationMiddleware.ensureUserCanReadProject,
-    HistoryController.proxyToHistoryApi
+    HistoryController.getLatestHistory
   )
   webRouter.get(
     '/project/:project_id/changes',
+    validate({
+      params: Joi.object({
+        project_id: Joi.objectId().required(),
+      }),
+      query: Joi.object({
+        since: Joi.number().integer().min(0).optional(),
+      }),
+    }),
     AuthorizationMiddleware.blockRestrictedUserFromProject,
     AuthorizationMiddleware.ensureUserCanReadProject,
-    HistoryController.proxyToHistoryApi
+    HistoryController.getChanges
   )
 }
 

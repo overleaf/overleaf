@@ -457,6 +457,19 @@ async function _pipeHistoryZipToResponse(v1ProjectId, version, name, req, res) {
   }
 }
 
+async function getLatestHistory(req, res, next) {
+  const projectId = req.params.project_id
+  const history = await HistoryManager.promises.getLatestHistory(projectId)
+  res.json(history)
+}
+
+async function getChanges(req, res, next) {
+  const projectId = req.params.project_id
+  const since = req.query.since
+  const changes = await HistoryManager.promises.getChanges(projectId, { since })
+  res.json(changes)
+}
+
 function isPrematureClose(err) {
   return (
     err instanceof Error &&
@@ -480,6 +493,8 @@ module.exports = {
   createLabel: expressify(createLabel),
   deleteLabel: expressify(deleteLabel),
   downloadZipOfVersion: expressify(downloadZipOfVersion),
+  getLatestHistory: expressify(getLatestHistory),
+  getChanges: expressify(getChanges),
   _displayNameForUser,
   promises: {
     _pipeHistoryZipToResponse,
