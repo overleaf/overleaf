@@ -35,6 +35,8 @@ import { useEditorManagerContext } from '@/features/ide-react/context/editor-man
 import classNames from 'classnames'
 import useEventListener from '@/shared/hooks/use-event-listener'
 import getMeta from '@/utils/meta'
+import { useRailContext } from '@/features/ide-redesign/contexts/rail-context'
+import { useIsNewEditorEnabled } from '@/features/ide-redesign/utils/new-editor-utils'
 
 const isReviewerRoleEnabled = getMeta('ol-isReviewerRoleEnabled')
 const TRACK_CHANGES_ON_WIDGET_HEIGHT = 25
@@ -49,6 +51,9 @@ const ReviewTooltipMenu: FC = () => {
   const [show, setShow] = useState(true)
   const { setView } = useReviewPanelViewActionsContext()
   const { setReviewPanelOpen } = useLayoutContext()
+  const { setIsOpen: setRailIsOpen, setSelectedTab: setSelectedRailTab } =
+    useRailContext()
+  const newEditor = useIsNewEditorEnabled()
 
   const tooltipState = state.field(reviewTooltipStateField, false)?.tooltip
   const previousTooltipState = usePreviousValue(tooltipState)
@@ -65,7 +70,12 @@ const ReviewTooltipMenu: FC = () => {
       return
     }
 
-    setReviewPanelOpen(true)
+    if (newEditor) {
+      setSelectedRailTab('review-panel')
+      setRailIsOpen(true)
+    } else {
+      setReviewPanelOpen(true)
+    }
     setView('cur_file')
 
     const effects = isCursorNearViewportEdge(view, main.anchor)
@@ -77,7 +87,15 @@ const ReviewTooltipMenu: FC = () => {
 
     view.dispatch({ effects })
     setShow(false)
-  }, [setReviewPanelOpen, setView, setShow, view])
+  }, [
+    setReviewPanelOpen,
+    setView,
+    setShow,
+    view,
+    setSelectedRailTab,
+    setRailIsOpen,
+    newEditor,
+  ])
 
   useEventListener('add-new-review-comment', addComment)
 

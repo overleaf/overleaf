@@ -11,6 +11,7 @@
 }
 
 .panel-heading {
+  color: var(--panel-heading-color);
   display: flex;
   align-items: center;
   padding: var(--spacing-03) var(--spacing-02);

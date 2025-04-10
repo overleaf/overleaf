@@ -20,6 +20,11 @@ import { minimumListDepthForSelection } from '../utils/tree-operations/ancestors
 import { debugConsole } from '@/utils/debugging'
 import { useTranslation } from 'react-i18next'
 import { ToggleSearchButton } from '@/features/source-editor/components/toolbar/toggle-search-button'
+import ReviewPanelHeader from '@/features/review-panel-new/components/review-panel-header'
+import useReviewPanelLayout from '@/features/review-panel-new/hooks/use-review-panel-layout'
+import { useIsNewEditorEnabled } from '@/features/ide-redesign/utils/new-editor-utils'
+import Breadcrumbs from '@/features/ide-redesign/components/breadcrumbs'
+import classNames from 'classnames'
 
 export const CodeMirrorToolbar = () => {
   const view = useCodeMirrorViewContext()
@@ -45,6 +50,9 @@ const Toolbar = memo(function Toolbar() {
   const visual = isVisual(view)
 
   const listDepth = minimumListDepthForSelection(state)
+
+  const newEditor = useIsNewEditorEnabled()
+  const { showHeader: showReviewPanelHeader } = useReviewPanelLayout()
 
   const {
     open: overflowOpen,
@@ -131,50 +139,61 @@ const Toolbar = memo(function Toolbar() {
   const showActions = !state.readOnly && !insideTable
 
   return (
-    <div
-      role="toolbar"
-      aria-label={t('toolbar_editor')}
-      className="ol-cm-toolbar toolbar-editor"
-      ref={elementRef}
-    >
-      <EditorSwitch />
-      {showActions && (
-        <ToolbarItems
-          state={state}
-          languageName={languageName}
-          visual={visual}
-          listDepth={listDepth}
-        />
-      )}
-
-      <div className="ol-cm-toolbar-button-group ol-cm-toolbar-stretch">
-        {showActions && (
-          <ToolbarOverflow
-            overflowed={overflowed}
-            overflowOpen={overflowOpen}
-            setOverflowOpen={setOverflowOpen}
-            overflowRef={overflowRef}
-          >
+    <>
+      {newEditor && showReviewPanelHeader && <ReviewPanelHeader />}
+      <div
+        id="ol-cm-toolbar-wrapper"
+        className={classNames('ol-cm-toolbar-wrapper', {
+          'ol-cm-toolbar-wrapper-indented': newEditor && showReviewPanelHeader,
+        })}
+      >
+        <div
+          role="toolbar"
+          aria-label={t('toolbar_editor')}
+          className="ol-cm-toolbar toolbar-editor"
+          ref={elementRef}
+        >
+          <EditorSwitch />
+          {showActions && (
             <ToolbarItems
               state={state}
-              overflowed={overflowedItemsRef.current}
               languageName={languageName}
               visual={visual}
               listDepth={listDepth}
             />
-          </ToolbarOverflow>
-        )}
-      </div>
+          )}
 
-      <div
-        className="ol-cm-toolbar-button-group ol-cm-toolbar-end"
-        ref={handleButtons}
-      >
-        <ToggleSearchButton state={state} />
-        <SwitchToPDFButton />
-        <DetacherSynctexControl />
-        <DetachCompileButtonWrapper />
+          <div className="ol-cm-toolbar-button-group ol-cm-toolbar-stretch">
+            {showActions && (
+              <ToolbarOverflow
+                overflowed={overflowed}
+                overflowOpen={overflowOpen}
+                setOverflowOpen={setOverflowOpen}
+                overflowRef={overflowRef}
+              >
+                <ToolbarItems
+                  state={state}
+                  overflowed={overflowedItemsRef.current}
+                  languageName={languageName}
+                  visual={visual}
+                  listDepth={listDepth}
+                />
+              </ToolbarOverflow>
+            )}
+          </div>
+
+          <div
+            className="ol-cm-toolbar-button-group ol-cm-toolbar-end"
+            ref={handleButtons}
+          >
+            <ToggleSearchButton state={state} />
+            <SwitchToPDFButton />
+            <DetacherSynctexControl />
+            <DetachCompileButtonWrapper />
+          </div>
+        </div>
+        {newEditor && <Breadcrumbs />}
       </div>
-    </div>
+    </>
   )
 })

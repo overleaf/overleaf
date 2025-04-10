@@ -31,13 +31,6 @@ export const useReviewPanelStyles = (mini: boolean) => {
   }, [])
 
   useEffect(() => {
-    setStyles(value => ({
-      ...value,
-      '--review-panel-width': mini ? '22px' : '230px',
-    }))
-  }, [mini])
-
-  useEffect(() => {
     if ('ResizeObserver' in window) {
       const scrollDomObserver = new window.ResizeObserver(entries =>
         updateScrollDomVariables(entries[0]?.target as HTMLDivElement)

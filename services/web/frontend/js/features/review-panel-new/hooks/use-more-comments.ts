@@ -8,7 +8,7 @@ import {
 import { DecorationSet, EditorView } from '@codemirror/view'
 import { EditorSelection } from '@codemirror/state'
 import _ from 'lodash'
-import { useLayoutContext } from '@/shared/context/layout-context'
+import useReviewPanelLayout from './use-review-panel-layout'
 
 const useMoreCommments = (
   changes: Change<EditOperation>[],
@@ -20,7 +20,8 @@ const useMoreCommments = (
   onMoreCommentsBelowClick: null | (() => void)
 } => {
   const view = useCodeMirrorViewContext()
-  const { reviewPanelOpen } = useLayoutContext()
+  const { showPanel, mini } = useReviewPanelLayout()
+  const reviewPanelOpen = showPanel && !mini
 
   const [positionAbove, setPositionAbove] = useState<number | null>(null)
   const [positionBelow, setPositionBelow] = useState<number | null>(null)

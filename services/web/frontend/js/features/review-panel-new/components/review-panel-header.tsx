@@ -6,6 +6,8 @@ import { useLayoutContext } from '@/shared/context/layout-context'
 import { useTranslation } from 'react-i18next'
 import getMeta from '@/utils/meta'
 import { PanelHeading } from '@/shared/components/panel-heading'
+import { useRailContext } from '@/features/ide-redesign/contexts/rail-context'
+import { useIsNewEditorEnabled } from '@/features/ide-redesign/utils/new-editor-utils'
 
 const isReviewerRoleEnabled = getMeta('ol-isReviewerRoleEnabled')
 
@@ -13,14 +15,17 @@ const ReviewPanelHeader: FC = () => {
   const [trackChangesMenuExpanded, setTrackChangesMenuExpanded] =
     useState(false)
   const { setReviewPanelOpen } = useLayoutContext()
+  const { setIsOpen: setRailIsOpen } = useRailContext()
   const { t } = useTranslation()
+
+  const newEditor = useIsNewEditorEnabled()
+  const handleClose = newEditor
+    ? () => setRailIsOpen(false)
+    : () => setReviewPanelOpen(false)
 
   return (
     <div className="review-panel-header">
-      <PanelHeading
-        title={t('review')}
-        handleClose={() => setReviewPanelOpen(false)}
-      >
+      <PanelHeading title={t('review')} handleClose={handleClose}>
         {isReviewerRoleEnabled && <ReviewPanelResolvedThreadsButton />}
       </PanelHeading>
       {!isReviewerRoleEnabled && (

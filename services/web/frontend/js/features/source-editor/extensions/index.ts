@@ -148,7 +148,7 @@ export const createExtensions = (options: Record<string, any>): Extension[] => [
   mathPreview(options.settings.mathPreview),
   reviewTooltip(),
   toolbarPanel(),
-  breadcrumbPanel(options.settings.enableNewEditor),
+  breadcrumbPanel(),
   verticalOverflow(),
   highlightActiveLine(options.visual.visual),
   // The built-in extension that highlights the active line in the gutter.

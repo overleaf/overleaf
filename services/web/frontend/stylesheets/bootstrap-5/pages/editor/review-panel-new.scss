@@ -16,6 +16,8 @@ $rp-type-blue: #6b7797;
   --review-panel-empty-state-bg-color: var(--bg-light-primary);
   --review-panel-button-hover-bg-color: var(--bg-light-tertiary);
   --review-panel-border-color: var(--border-divider);
+  --review-panel-width: 230px;
+  --review-panel-width-mini: 24px;
 
   @include theme('default') {
     .ide-redesign-main {
@@ -28,6 +30,42 @@ $rp-type-blue: #6b7797;
       --review-panel-empty-state-bg-color: var(--bg-dark-primary);
       --review-panel-button-hover-bg-color: var(--bg-dark-tertiary);
       --review-panel-border-color: var(--border-divider-dark);
+    }
+  }
+}
+
+.ide-redesign-main {
+  .review-panel-container {
+    order: -1;
+  }
+
+  .review-panel-inner {
+    border-left: none;
+    border-right: 1px solid var(--border-divider);
+  }
+
+  .review-panel-header {
+    border-bottom: none;
+    flex: 0 0 var(--review-panel-width);
+  }
+
+  .review-panel-more-comments-button-container {
+    &.upwards {
+      top: calc(var(--review-panel-top) + 16px);
+    }
+  }
+
+  .review-panel-mini {
+    // This needs to have a higher z-index than the gutter
+    // so that the comment/change hover previews appear in
+    // front of the gutter
+    z-index: 201;
+
+    .review-panel-entry-hover {
+      .review-panel-entry-content {
+        left: auto;
+        right: -200px;
+      }
     }
   }
 }
@@ -646,7 +684,7 @@ del.review-panel-content-highlight {
   overflow: visible !important;
 
   .review-panel-inner {
-    width: 24px;
+    width: var(--review-panel-width-mini);
   }
 
   .review-panel-entry {

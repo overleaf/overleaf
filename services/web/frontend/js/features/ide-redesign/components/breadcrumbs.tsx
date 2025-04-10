@@ -3,14 +3,10 @@ import { useFileTreeOpenContext } from '@/features/ide-react/context/file-tree-o
 import { useOutlineContext } from '@/features/ide-react/context/outline-context'
 import useNestedOutline from '@/features/outline/hooks/use-nested-outline'
 import getChildrenLines from '@/features/outline/util/get-children-lines'
-import { useCodeMirrorViewContext } from '@/features/source-editor/components/codemirror-context'
 import MaterialIcon from '@/shared/components/material-icon'
 import { useFileTreeData } from '@/shared/context/file-tree-data-context'
-import { getPanel } from '@codemirror/view'
 import { Fragment, useMemo } from 'react'
 import { Outline } from '@/features/source-editor/utils/tree-operations/outline'
-import { createPortal } from 'react-dom'
-import { createBreadcrumbsPanel } from '@/features/source-editor/extensions/breadcrumbs-panel'
 
 const constructOutlineHierarchy = (
   items: Outline[],
@@ -37,16 +33,6 @@ const constructOutlineHierarchy = (
 }
 
 export default function Breadcrumbs() {
-  const view = useCodeMirrorViewContext()
-  const panel = getPanel(view, createBreadcrumbsPanel)
-
-  if (!panel) {
-    return null
-  }
-  return createPortal(<BreadcrumbsContent />, panel.dom)
-}
-
-function BreadcrumbsContent() {
   const { openEntity } = useFileTreeOpenContext()
   const { fileTreeData } = useFileTreeData()
   const outline = useNestedOutline()

@@ -36,7 +36,7 @@ import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
 type RailElement = {
   icon: AvailableUnfilledIcon
   key: RailTabKey
-  component: ReactElement
+  component: ReactElement | null
   indicator?: ReactElement
   title: string
   hide?: boolean
@@ -111,7 +111,7 @@ export const RailLayout = () => {
         key: 'review-panel',
         icon: 'rate_review',
         title: t('review_panel'),
-        component: <>Review panel</>,
+        component: null,
       },
       {
         key: 'chat',
@@ -169,6 +169,8 @@ export const RailLayout = () => {
     [setSelectedTab, selectedTab, setIsOpen, togglePane, railTabs]
   )
 
+  const isReviewPanelOpen = selectedTab === 'review-panel'
+
   return (
     <TabContainer
       mountOnEnter // Only render when necessary (so that we can lazy load tab content)
@@ -200,6 +202,7 @@ export const RailLayout = () => {
       </div>
       <Panel
         id="ide-redesign-sidebar-panel"
+        className={classNames({ hidden: isReviewPanelOpen })}
         order={1}
         defaultSize={15}
         minSize={5}
@@ -211,7 +214,9 @@ export const RailLayout = () => {
       >
         {isHistoryView && <HistorySidebar />}
         <div
-          className={classNames('ide-rail-content', { hidden: isHistoryView })}
+          className={classNames('ide-rail-content', {
+            hidden: isHistoryView,
+          })}
         >
           <Tab.Content>
             {railTabs
@@ -225,6 +230,7 @@ export const RailLayout = () => {
         </div>
       </Panel>
       <HorizontalResizeHandle
+        className={classNames({ hidden: isReviewPanelOpen })}
         resizable
         hitAreaMargins={{ coarse: 0, fine: 0 }}
         onDoubleClick={togglePane}

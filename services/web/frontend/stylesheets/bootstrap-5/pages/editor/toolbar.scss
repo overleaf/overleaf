@@ -32,8 +32,22 @@
   --editor-toolbar-bg: var(--bg-dark-primary);
   --toolbar-filetree-bg-color: var(--neutral-80);
 
-  .cm-panels-top {
-    border-bottom: none;
+  .ol-cm-toolbar-portal {
+    display: flex;
+    align-items: center;
+    background-color: var(--editor-toolbar-bg);
+
+    .review-panel-header {
+      align-self: flex-start;
+    }
+  }
+
+  .ol-cm-toolbar-wrapper {
+    flex: 1;
+  }
+
+  .ol-cm-toolbar-wrapper-indented {
+    width: calc(100% - var(--review-panel-width));
   }
 }
 
@@ -64,10 +78,6 @@
     --toolbar-btn-hover-color: var(--white);
     --editor-toolbar-bg: var(--white);
     --toolbar-filetree-bg-color: var(--white);
-
-    .ol-cm-toolbar-portal {
-      border-bottom: 1px solid #ddd;
-    }
   }
 }
 

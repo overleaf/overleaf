@@ -53,7 +53,6 @@ import { useHunspell } from '@/features/source-editor/hooks/use-hunspell'
 import { Permissions } from '@/features/ide-react/types/permissions'
 import { useEditorManagerContext } from '@/features/ide-react/context/editor-manager-context'
 import { useOnlineUsersContext } from '@/features/ide-react/context/online-users-context'
-import { setBreadcrumbsEnabled } from '../extensions/breadcrumbs-panel'
 
 function useCodeMirrorScope(view: EditorView) {
   const { fileTreeData } = useFileTreeData()
@@ -435,13 +434,6 @@ function useCodeMirrorScope(view: EditorView) {
   useEffect(() => {
     settingsRef.current.referencesSearchMode = referencesSearchMode
   }, [referencesSearchMode])
-
-  useEffect(() => {
-    settingsRef.current.enableNewEditor = enableNewEditor
-    window.setTimeout(() => {
-      view.dispatch(setBreadcrumbsEnabled(enableNewEditor))
-    })
-  }, [view, enableNewEditor])
 
   const emitSyncToPdf = useScopeEventEmitter('cursor:editor:syncToPdf')
 

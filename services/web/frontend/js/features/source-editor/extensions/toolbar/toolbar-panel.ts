@@ -23,9 +23,11 @@ export function createToolbarPanel() {
 }
 
 const toolbarTheme = EditorView.theme({
-  '.ol-cm-toolbar': {
+  '.ol-cm-toolbar-wrapper': {
     backgroundColor: 'var(--editor-toolbar-bg)',
     color: 'var(--toolbar-btn-color)',
+  },
+  '.ol-cm-toolbar': {
     flex: 1,
     display: 'flex',
     overflowX: 'hidden',

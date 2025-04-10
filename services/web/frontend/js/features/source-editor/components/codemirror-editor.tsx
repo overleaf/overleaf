@@ -17,8 +17,6 @@ import {
   CodeMirrorViewContext,
 } from './codemirror-context'
 import MathPreviewTooltip from './math-preview-tooltip'
-import Breadcrumbs from '@/features/ide-redesign/components/breadcrumbs'
-import { useIsNewEditorEnabled } from '@/features/ide-redesign/utils/new-editor-utils'
 import { useToolbarMenuBarEditorCommands } from '@/features/ide-redesign/hooks/use-toolbar-menu-editor-commands'
 
 // TODO: remove this when definitely no longer used
@@ -68,7 +66,6 @@ function CodeMirrorEditor() {
 }
 
 function CodeMirrorEditorComponents() {
-  const newEditor = useIsNewEditorEnabled()
   useToolbarMenuBarEditorCommands()
 
   return (
@@ -83,7 +80,6 @@ function CodeMirrorEditorComponents() {
           <Component key={path} />
         )
       )}
-      {newEditor && <Breadcrumbs />}
       <CodeMirrorCommandTooltip />
 
       <MathPreviewTooltip />
