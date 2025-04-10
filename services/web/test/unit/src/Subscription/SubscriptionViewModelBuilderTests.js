@@ -525,7 +525,6 @@ describe('SubscriptionViewModelBuilder', function () {
             this.user
           )
         assert.deepEqual(result.personalSubscription.recurly, {
-          tax: 1.5,
           taxRate: 0.1,
           billingDetailsLink: '/user/subscription/recurly/billing-details',
           accountManagementLink:
@@ -597,10 +596,6 @@ describe('SubscriptionViewModelBuilder', function () {
         assert.equal(
           result.personalSubscription.recurly.displayPrice,
           '€1,756.92'
-        )
-        assert.equal(
-          result.personalSubscription.recurly.currentPlanDisplayPrice,
-          '€16.50'
         )
         assert.equal(
           result.personalSubscription.recurly.planOnlyDisplayPrice,

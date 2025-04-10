@@ -284,7 +284,6 @@ async function buildUsersSubscriptionViewModel(user, locale = 'en') {
     })
     const totalLicenses = (plan.membersLimit || 0) + additionalLicenses
     personalSubscription.recurly = {
-      tax,
       taxRate,
       billingDetailsLink: buildHostedLink('billing-details'),
       accountManagementLink: buildHostedLink('account-management'),
@@ -343,11 +342,6 @@ async function buildUsersSubscriptionViewModel(user, locale = 'en') {
 
       personalSubscription.recurly.displayPrice = formatCurrency(
         totalPrice,
-        recurlySubscription.currency,
-        locale
-      )
-      personalSubscription.recurly.currentPlanDisplayPrice = formatCurrency(
-        recurlySubscription.planPrice + addOnPrice + tax,
         recurlySubscription.currency,
         locale
       )

@@ -17,7 +17,6 @@ type RecurlyCoupon = {
 }
 
 type Recurly = {
-  tax: number
   taxRate: number
   billingDetailsLink: string
   accountManagementLink: string
@@ -36,7 +35,6 @@ type Recurly = {
   displayPrice: string
   planOnlyDisplayPrice: string
   addOnDisplayPricesWithoutAdditionalLicense: Record<string, string>
-  currentPlanDisplayPrice?: string
   pendingAdditionalLicenses?: number
   pendingTotalLicenses?: number
   pausedAt?: Nullable<string>

@@ -34,7 +34,6 @@ export const annualActiveSubscription: RecurlySubscription = {
     featureDescription: [],
   },
   recurly: {
-    tax: 0,
     taxRate: 0,
     billingDetailsLink: '/user/subscription/recurly/billing-details',
     accountManagementLink: '/user/subscription/recurly/account-management',
@@ -75,7 +74,6 @@ export const annualActiveSubscriptionEuro: RecurlySubscription = {
     featureDescription: [],
   },
   recurly: {
-    tax: 4296,
     taxRate: 0.24,
     billingDetailsLink: '/user/subscription/recurly/billing-details',
     accountManagementLink: '/user/subscription/recurly/account-management',
@@ -115,7 +113,6 @@ export const annualActiveSubscriptionPro: RecurlySubscription = {
     featureDescription: [],
   },
   recurly: {
-    tax: 0,
     taxRate: 0,
     billingDetailsLink: '/user/subscription/recurly/billing-details',
     accountManagementLink: '/user/subscription/recurly/account-management',
@@ -156,7 +153,6 @@ export const pastDueExpiredSubscription: RecurlySubscription = {
     featureDescription: [],
   },
   recurly: {
-    tax: 0,
     taxRate: 0,
     billingDetailsLink: '/user/subscription/recurly/billing-details',
     accountManagementLink: '/user/subscription/recurly/account-management',
@@ -197,7 +193,6 @@ export const canceledSubscription: RecurlySubscription = {
     featureDescription: [],
   },
   recurly: {
-    tax: 0,
     taxRate: 0,
     billingDetailsLink: '/user/subscription/recurly/billing-details',
     accountManagementLink: '/user/subscription/recurly/account-management',
@@ -238,7 +233,6 @@ export const pendingSubscriptionChange: RecurlySubscription = {
     featureDescription: [],
   },
   recurly: {
-    tax: 0,
     taxRate: 0,
     billingDetailsLink: '/user/subscription/recurly/billing-details',
     accountManagementLink: '/user/subscription/recurly/account-management',
@@ -290,7 +284,6 @@ export const groupActiveSubscription: GroupSubscription = {
     membersLimitAddOn: 'additional-license',
   },
   recurly: {
-    tax: 0,
     taxRate: 0,
     billingDetailsLink: '/user/subscription/recurly/billing-details',
     accountManagementLink: '/user/subscription/recurly/account-management',
@@ -336,7 +329,6 @@ export const groupActiveSubscriptionWithPendingLicenseChange: GroupSubscription 
       membersLimitAddOn: 'additional-license',
     },
     recurly: {
-      tax: 0,
       taxRate: 0,
       billingDetailsLink: '/user/subscription/recurly/billing-details',
       accountManagementLink: '/user/subscription/recurly/account-management',
@@ -352,7 +344,6 @@ export const groupActiveSubscriptionWithPendingLicenseChange: GroupSubscription 
       accountEmail: 'fake@example.com',
       hasPastDueInvoice: false,
       displayPrice: '$2967.00',
-      currentPlanDisplayPrice: '$2709.00',
       pendingAdditionalLicenses: 13,
       pendingTotalLicenses: 23,
       planOnlyDisplayPrice: '',
@@ -390,7 +381,6 @@ export const trialSubscription: RecurlySubscription = {
     hideFromUsers: true,
   },
   recurly: {
-    tax: 0,
     taxRate: 0,
     billingDetailsLink: '/user/subscription/recurly/billing-details',
     accountManagementLink: '/user/subscription/recurly/account-management',
@@ -452,7 +442,6 @@ export const trialCollaboratorSubscription: RecurlySubscription = {
     hideFromUsers: true,
   },
   recurly: {
-    tax: 0,
     taxRate: 0,
     billingDetailsLink: '/user/subscription/recurly/billing-details',
     accountManagementLink: '/user/subscription/recurly/account-management',
@@ -492,7 +481,6 @@ export const monthlyActiveCollaborator: RecurlySubscription = {
     featureDescription: [],
   },
   recurly: {
-    tax: 0,
     taxRate: 0,
     billingDetailsLink: '/user/subscription/recurly/billing-details',
     accountManagementLink: '/user/subscription/recurly/account-management',
