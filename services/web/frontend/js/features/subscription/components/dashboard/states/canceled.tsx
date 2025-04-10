@@ -1,12 +1,12 @@
 import { useTranslation, Trans } from 'react-i18next'
-import { RecurlySubscription } from '../../../../../../../types/subscription/dashboard/subscription'
+import { PaidSubscription } from '../../../../../../../types/subscription/dashboard/subscription'
 import ReactivateSubscription from '../reactivate-subscription'
 import OLButton from '@/features/ui/components/ol/ol-button'
 
 export function CanceledSubscription({
   subscription,
 }: {
-  subscription: RecurlySubscription
+  subscription: PaidSubscription
 }) {
   const { t } = useTranslation()
 
@@ -30,7 +30,7 @@ export function CanceledSubscription({
         <Trans
           i18nKey="subscription_canceled_and_terminate_on_x"
           values={{
-            terminateDate: subscription.recurly.nextPaymentDueAt,
+            terminateDate: subscription.payment.nextPaymentDueAt,
           }}
           shouldUnescape
           tOptions={{ interpolation: { escapeValue: true } }}
@@ -42,7 +42,7 @@ export function CanceledSubscription({
       </p>
       <p>
         <OLButton
-          href={subscription.recurly.accountManagementLink}
+          href={subscription.payment.accountManagementLink}
           target="_blank"
           variant="secondary"
           rel="noopener noreferrer"

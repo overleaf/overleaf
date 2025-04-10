@@ -1,3 +1,6 @@
-import { PaypalPaymentMethod, CreditCardPaymentMethod } from './RecurlyEntities'
+import {
+  PaypalPaymentMethod,
+  CreditCardPaymentMethod,
+} from './PaymentProviderEntities'
 
 export type PaymentMethod = PaypalPaymentMethod | CreditCardPaymentMethod

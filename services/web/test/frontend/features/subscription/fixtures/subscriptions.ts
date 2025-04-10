@@ -1,7 +1,7 @@
 import {
   CustomSubscription,
   GroupSubscription,
-  RecurlySubscription,
+  PaidSubscription,
 } from '../../../../../types/subscription/dashboard/subscription'
 import dateformat from 'dateformat'
 
@@ -15,7 +15,7 @@ const sevenDaysFromTodayFormatted = dateformat(
   'dS mmmm yyyy'
 )
 
-export const annualActiveSubscription: RecurlySubscription = {
+export const annualActiveSubscription: PaidSubscription = {
   manager_ids: ['abc123'],
   member_ids: [],
   invited_emails: [],
@@ -33,7 +33,7 @@ export const annualActiveSubscription: RecurlySubscription = {
     annual: true,
     featureDescription: [],
   },
-  recurly: {
+  payment: {
     taxRate: 0,
     billingDetailsLink: '/user/subscription/recurly/billing-details',
     accountManagementLink: '/user/subscription/recurly/account-management',
@@ -55,7 +55,7 @@ export const annualActiveSubscription: RecurlySubscription = {
   },
 }
 
-export const annualActiveSubscriptionEuro: RecurlySubscription = {
+export const annualActiveSubscriptionEuro: PaidSubscription = {
   manager_ids: ['abc123'],
   member_ids: [],
   invited_emails: [],
@@ -73,7 +73,7 @@ export const annualActiveSubscriptionEuro: RecurlySubscription = {
     annual: true,
     featureDescription: [],
   },
-  recurly: {
+  payment: {
     taxRate: 0.24,
     billingDetailsLink: '/user/subscription/recurly/billing-details',
     accountManagementLink: '/user/subscription/recurly/account-management',
@@ -95,7 +95,7 @@ export const annualActiveSubscriptionEuro: RecurlySubscription = {
   },
 }
 
-export const annualActiveSubscriptionPro: RecurlySubscription = {
+export const annualActiveSubscriptionPro: PaidSubscription = {
   manager_ids: ['abc123'],
   member_ids: [],
   invited_emails: [],
@@ -112,7 +112,7 @@ export const annualActiveSubscriptionPro: RecurlySubscription = {
     price_in_cents: 4500,
     featureDescription: [],
   },
-  recurly: {
+  payment: {
     taxRate: 0,
     billingDetailsLink: '/user/subscription/recurly/billing-details',
     accountManagementLink: '/user/subscription/recurly/account-management',
@@ -134,7 +134,7 @@ export const annualActiveSubscriptionPro: RecurlySubscription = {
   },
 }
 
-export const pastDueExpiredSubscription: RecurlySubscription = {
+export const pastDueExpiredSubscription: PaidSubscription = {
   manager_ids: ['abc123'],
   member_ids: [],
   invited_emails: [],
@@ -152,7 +152,7 @@ export const pastDueExpiredSubscription: RecurlySubscription = {
     annual: true,
     featureDescription: [],
   },
-  recurly: {
+  payment: {
     taxRate: 0,
     billingDetailsLink: '/user/subscription/recurly/billing-details',
     accountManagementLink: '/user/subscription/recurly/account-management',
@@ -174,7 +174,7 @@ export const pastDueExpiredSubscription: RecurlySubscription = {
   },
 }
 
-export const canceledSubscription: RecurlySubscription = {
+export const canceledSubscription: PaidSubscription = {
   manager_ids: ['abc123'],
   member_ids: [],
   invited_emails: [],
@@ -192,7 +192,7 @@ export const canceledSubscription: RecurlySubscription = {
     annual: true,
     featureDescription: [],
   },
-  recurly: {
+  payment: {
     taxRate: 0,
     billingDetailsLink: '/user/subscription/recurly/billing-details',
     accountManagementLink: '/user/subscription/recurly/account-management',
@@ -214,7 +214,7 @@ export const canceledSubscription: RecurlySubscription = {
   },
 }
 
-export const pendingSubscriptionChange: RecurlySubscription = {
+export const pendingSubscriptionChange: PaidSubscription = {
   manager_ids: ['abc123'],
   member_ids: [],
   invited_emails: [],
@@ -232,7 +232,7 @@ export const pendingSubscriptionChange: RecurlySubscription = {
     annual: true,
     featureDescription: [],
   },
-  recurly: {
+  payment: {
     taxRate: 0,
     billingDetailsLink: '/user/subscription/recurly/billing-details',
     accountManagementLink: '/user/subscription/recurly/account-management',
@@ -283,7 +283,7 @@ export const groupActiveSubscription: GroupSubscription = {
     membersLimit: 10,
     membersLimitAddOn: 'additional-license',
   },
-  recurly: {
+  payment: {
     taxRate: 0,
     billingDetailsLink: '/user/subscription/recurly/billing-details',
     accountManagementLink: '/user/subscription/recurly/account-management',
@@ -328,7 +328,7 @@ export const groupActiveSubscriptionWithPendingLicenseChange: GroupSubscription 
       membersLimit: 10,
       membersLimitAddOn: 'additional-license',
     },
-    recurly: {
+    payment: {
       taxRate: 0,
       billingDetailsLink: '/user/subscription/recurly/billing-details',
       accountManagementLink: '/user/subscription/recurly/account-management',
@@ -362,7 +362,7 @@ export const groupActiveSubscriptionWithPendingLicenseChange: GroupSubscription 
     },
   }
 
-export const trialSubscription: RecurlySubscription = {
+export const trialSubscription: PaidSubscription = {
   manager_ids: ['abc123'],
   member_ids: [],
   invited_emails: [],
@@ -380,7 +380,7 @@ export const trialSubscription: RecurlySubscription = {
     featureDescription: [],
     hideFromUsers: true,
   },
-  recurly: {
+  payment: {
     taxRate: 0,
     billingDetailsLink: '/user/subscription/recurly/billing-details',
     accountManagementLink: '/user/subscription/recurly/account-management',
@@ -423,7 +423,7 @@ export const customSubscription: CustomSubscription = {
   customAccount: true,
 }
 
-export const trialCollaboratorSubscription: RecurlySubscription = {
+export const trialCollaboratorSubscription: PaidSubscription = {
   manager_ids: ['abc123'],
   member_ids: [],
   invited_emails: [],
@@ -441,7 +441,7 @@ export const trialCollaboratorSubscription: RecurlySubscription = {
     featureDescription: [],
     hideFromUsers: true,
   },
-  recurly: {
+  payment: {
     taxRate: 0,
     billingDetailsLink: '/user/subscription/recurly/billing-details',
     accountManagementLink: '/user/subscription/recurly/account-management',
@@ -463,7 +463,7 @@ export const trialCollaboratorSubscription: RecurlySubscription = {
   },
 }
 
-export const monthlyActiveCollaborator: RecurlySubscription = {
+export const monthlyActiveCollaborator: PaidSubscription = {
   manager_ids: ['abc123'],
   member_ids: [],
   invited_emails: [],
@@ -480,7 +480,7 @@ export const monthlyActiveCollaborator: RecurlySubscription = {
     price_in_cents: 212300900,
     featureDescription: [],
   },
-  recurly: {
+  payment: {
     taxRate: 0,
     billingDetailsLink: '/user/subscription/recurly/billing-details',
     accountManagementLink: '/user/subscription/recurly/account-management',

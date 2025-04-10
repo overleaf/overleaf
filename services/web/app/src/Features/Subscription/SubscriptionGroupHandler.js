@@ -7,7 +7,7 @@ const RecurlyClient = require('./RecurlyClient')
 const PlansLocator = require('./PlansLocator')
 const SubscriptionHandler = require('./SubscriptionHandler')
 const GroupPlansData = require('./GroupPlansData')
-const { MEMBERS_LIMIT_ADD_ON_CODE } = require('./RecurlyEntities')
+const { MEMBERS_LIMIT_ADD_ON_CODE } = require('./PaymentProviderEntities')
 const {
   ManuallyCollectedError,
   PendingChangeError,

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useTranslation, Trans } from 'react-i18next'
-import { RecurlySubscription } from '../../../../../../../../../../types/subscription/dashboard/subscription'
+import { PaidSubscription } from '../../../../../../../../../../types/subscription/dashboard/subscription'
 import { PriceForDisplayData } from '../../../../../../../../../../types/subscription/plan'
 import { postJSON } from '../../../../../../../../infrastructure/fetch-json'
 import getMeta from '../../../../../../../../utils/meta'
@@ -115,7 +115,7 @@ export function ChangeToGroupModal() {
     useContactUsModal({ autofillProjectUrl: false })
   const groupPlans = getMeta('ol-groupPlans')
   const showGroupDiscount = getMeta('ol-showGroupDiscount')
-  const personalSubscription = getMeta('ol-subscription') as RecurlySubscription
+  const personalSubscription = getMeta('ol-subscription') as PaidSubscription
   const [error, setError] = useState(false)
   const [inflight, setInflight] = useState(false)
   const location = useLocation()

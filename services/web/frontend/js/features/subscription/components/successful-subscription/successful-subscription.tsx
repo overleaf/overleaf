@@ -12,7 +12,7 @@ import {
   ADD_ON_NAME,
   isStandaloneAiPlanCode,
 } from '../../data/add-on-codes'
-import { RecurlySubscription } from '../../../../../../types/subscription/dashboard/subscription'
+import { PaidSubscription } from '../../../../../../types/subscription/dashboard/subscription'
 
 function SuccessfulSubscription() {
   const { t } = useTranslation()
@@ -21,7 +21,7 @@ function SuccessfulSubscription() {
   const postCheckoutRedirect = getMeta('ol-postCheckoutRedirect')
   const { appName, adminEmail } = getMeta('ol-ExposedSettings')
 
-  if (!subscription || !('recurly' in subscription)) return null
+  if (!subscription || !('payment' in subscription)) return null
 
   const onAiStandalonePlan = isStandaloneAiPlanCode(subscription.planCode)
 
@@ -37,15 +37,15 @@ function SuccessfulSubscription() {
               type="success"
               content={
                 <>
-                  {subscription.recurly.trialEndsAt && (
+                  {subscription.payment.trialEndsAt && (
                     <>
                       <p>
                         <Trans
                           i18nKey="next_payment_of_x_collectected_on_y"
                           values={{
-                            paymentAmmount: subscription.recurly.displayPrice,
+                            paymentAmmount: subscription.payment.displayPrice,
                             collectionDate:
-                              subscription.recurly.nextPaymentDueAt,
+                              subscription.payment.nextPaymentDueAt,
                           }}
                           shouldUnescape
                           tOptions={{ interpolation: { escapeValue: true } }}
@@ -126,7 +126,7 @@ function ThankYouSection({
   subscription,
   onAiStandalonePlan,
 }: {
-  subscription: RecurlySubscription
+  subscription: PaidSubscription
   onAiStandalonePlan: boolean
 }) {
   const { t } = useTranslation()

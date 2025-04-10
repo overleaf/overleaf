@@ -9,11 +9,11 @@ import {
   AI_STANDALONE_PLAN_CODE,
 } from '@/features/subscription/data/add-on-codes'
 import sparkle from '@/shared/svgs/sparkle.svg'
-import { RecurlySubscription } from '../../../../../../../../types/subscription/dashboard/subscription'
+import { PaidSubscription } from '../../../../../../../../types/subscription/dashboard/subscription'
 import { LICENSE_ADD_ON } from '@/features/group-management/components/upgrade-subscription/upgrade-subscription-plan-details'
 
 type AddOnsProps = {
-  subscription: RecurlySubscription
+  subscription: PaidSubscription
   onStandalonePlan: boolean
   handleCancelClick: (code: string) => void
 }
@@ -106,9 +106,9 @@ function AddOns({
   const { t } = useTranslation()
   const addOnsDisplayPrices = onStandalonePlan
     ? {
-        [AI_STANDALONE_PLAN_CODE]: subscription.recurly.displayPrice,
+        [AI_STANDALONE_PLAN_CODE]: subscription.payment.displayPrice,
       }
-    : subscription.recurly.addOnDisplayPricesWithoutAdditionalLicense
+    : subscription.payment.addOnDisplayPricesWithoutAdditionalLicense
   const addOnsToDisplay = onStandalonePlan
     ? [{ addOnCode: AI_STANDALONE_PLAN_CODE }]
     : subscription.addOns?.filter(addOn => addOn.addOnCode !== LICENSE_ADD_ON)
@@ -130,7 +130,7 @@ function AddOns({
               )
             }
             displayPrice={addOnsDisplayPrices[addOn.addOnCode]}
-            nextBillingDate={subscription.recurly.nextPaymentDueDate}
+            nextBillingDate={subscription.payment.nextPaymentDueDate}
           />
         ))
       ) : (

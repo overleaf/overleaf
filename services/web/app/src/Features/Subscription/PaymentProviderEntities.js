@@ -9,7 +9,7 @@ const AI_ADD_ON_CODE = 'assistant'
 const MEMBERS_LIMIT_ADD_ON_CODE = 'additional-license'
 const STANDALONE_AI_ADD_ON_CODES = ['assistant', 'assistant-annual']
 
-class RecurlySubscription {
+class PaymentProviderSubscription {
   /**
    * @param {object} props
    * @param {string} props.id
@@ -17,7 +17,7 @@ class RecurlySubscription {
    * @param {string} props.planCode
    * @param {string} props.planName
    * @param {number} props.planPrice
-   * @param {RecurlySubscriptionAddOn[]} [props.addOns]
+   * @param {PaymentProviderSubscriptionAddOn[]} [props.addOns]
    * @param {number} props.subtotal
    * @param {number} [props.taxRate]
    * @param {number} [props.taxAmount]
@@ -26,7 +26,7 @@ class RecurlySubscription {
    * @param {Date} props.periodStart
    * @param {Date} props.periodEnd
    * @param {string} props.collectionMethod
-   * @param {RecurlySubscriptionChange} [props.pendingChange]
+   * @param {PaymentProviderSubscriptionChange} [props.pendingChange]
    * @param {string} [props.service]
    * @param {string} [props.state]
    * @param {Date|null} [props.trialPeriodEnd]
@@ -97,7 +97,7 @@ class RecurlySubscription {
   /**
    * Change this subscription's plan
    *
-   * @return {RecurlySubscriptionChangeRequest}
+   * @return {PaymentProviderSubscriptionChangeRequest}
    */
   getRequestForPlanChange(planCode) {
     const currentPlan = PlansLocator.findLocalPlanInSettings(this.planCode)
@@ -115,7 +115,7 @@ class RecurlySubscription {
       newPlan
     )
 
-    const changeRequest = new RecurlySubscriptionChangeRequest({
+    const changeRequest = new PaymentProviderSubscriptionChangeRequest({
       subscription: this,
       timeframe: shouldChangeAtTermEnd ? 'term_end' : 'now',
       planCode,
@@ -127,7 +127,7 @@ class RecurlySubscription {
       (!shouldChangeAtTermEnd && this.hasAddOn(AI_ADD_ON_CODE)) ||
       (shouldChangeAtTermEnd && this.hasAddOnNextPeriod(AI_ADD_ON_CODE))
     ) {
-      const addOnUpdate = new RecurlySubscriptionAddOnUpdate({
+      const addOnUpdate = new PaymentProviderSubscriptionAddOnUpdate({
         code: AI_ADD_ON_CODE,
         quantity: 1,
       })
@@ -143,7 +143,7 @@ class RecurlySubscription {
    * @param {string} code
    * @param {number} [quantity]
    * @param {number} [unitPrice]
-   * @return {RecurlySubscriptionChangeRequest} - the change request to send to
+   * @return {PaymentProviderSubscriptionChangeRequest} - the change request to send to
    * Recurly
    *
    * @throws {DuplicateAddOnError} if the add-on is already present on the subscription
@@ -158,9 +158,9 @@ class RecurlySubscription {
 
     const addOnUpdates = this.addOns.map(addOn => addOn.toAddOnUpdate())
     addOnUpdates.push(
-      new RecurlySubscriptionAddOnUpdate({ code, quantity, unitPrice })
+      new PaymentProviderSubscriptionAddOnUpdate({ code, quantity, unitPrice })
     )
-    return new RecurlySubscriptionChangeRequest({
+    return new PaymentProviderSubscriptionChangeRequest({
       subscription: this,
       timeframe: 'now',
       addOnUpdates,
@@ -172,7 +172,7 @@ class RecurlySubscription {
    *
    * @param {string} code
    * @param {number} quantity
-   * @return {RecurlySubscriptionChangeRequest} - the change request to send to
+   * @return {PaymentProviderSubscriptionChangeRequest} - the change request to send to
    * Recurly
    *
    * @throws {AddOnNotPresentError} if the subscription doesn't have the add-on
@@ -198,7 +198,7 @@ class RecurlySubscription {
       return update
     })
 
-    return new RecurlySubscriptionChangeRequest({
+    return new PaymentProviderSubscriptionChangeRequest({
       subscription: this,
       timeframe: 'now',
       addOnUpdates,
@@ -209,7 +209,7 @@ class RecurlySubscription {
    * Remove an add-on from this subscription
    *
    * @param {string} code
-   * @return {RecurlySubscriptionChangeRequest}
+   * @return {PaymentProviderSubscriptionChangeRequest}
    *
    * @throws {AddOnNotPresentError} if the subscription doesn't have the add-on
    */
@@ -226,7 +226,7 @@ class RecurlySubscription {
     const addOnUpdates = this.addOns
       .filter(addOn => addOn.code !== code)
       .map(addOn => addOn.toAddOnUpdate())
-    return new RecurlySubscriptionChangeRequest({
+    return new PaymentProviderSubscriptionChangeRequest({
       subscription: this,
       timeframe: 'term_end',
       addOnUpdates,
@@ -237,19 +237,19 @@ class RecurlySubscription {
    * Upgrade group plan with the plan code provided
    *
    * @param {string} newPlanCode
-   * @return {RecurlySubscriptionChangeRequest}
+   * @return {PaymentProviderSubscriptionChangeRequest}
    */
   getRequestForGroupPlanUpgrade(newPlanCode) {
     // Ensure all the existing add-ons are added to the new plan
     const addOns = this.addOns.map(
       addOn =>
-        new RecurlySubscriptionAddOnUpdate({
+        new PaymentProviderSubscriptionAddOnUpdate({
           code: addOn.code,
           quantity: addOn.quantity,
         })
     )
 
-    return new RecurlySubscriptionChangeRequest({
+    return new PaymentProviderSubscriptionChangeRequest({
       subscription: this,
       timeframe: 'now',
       addOnUpdates: addOns,
@@ -270,7 +270,7 @@ class RecurlySubscription {
 /**
  * An add-on attached to a subscription
  */
-class RecurlySubscriptionAddOn {
+class PaymentProviderSubscriptionAddOn {
   /**
    * @param {object} props
    * @param {string} props.code
@@ -290,7 +290,7 @@ class RecurlySubscriptionAddOn {
    * Return an add-on update that doesn't modify the add-on
    */
   toAddOnUpdate() {
-    return new RecurlySubscriptionAddOnUpdate({
+    return new PaymentProviderSubscriptionAddOnUpdate({
       code: this.code,
       quantity: this.quantity,
       unitPrice: this.unitPrice,
@@ -298,17 +298,19 @@ class RecurlySubscriptionAddOn {
   }
 }
 
-class RecurlySubscriptionChangeRequest {
+class PaymentProviderSubscriptionChangeRequest {
   /**
    * @param {object} props
-   * @param {RecurlySubscription} props.subscription
+   * @param {PaymentProviderSubscription} props.subscription
    * @param {"now" | "term_end"} props.timeframe
    * @param {string} [props.planCode]
-   * @param {RecurlySubscriptionAddOnUpdate[]} [props.addOnUpdates]
+   * @param {PaymentProviderSubscriptionAddOnUpdate[]} [props.addOnUpdates]
    */
   constructor(props) {
     if (props.planCode == null && props.addOnUpdates == null) {
-      throw new OError('Invalid RecurlySubscriptionChangeRequest', { props })
+      throw new OError('Invalid PaymentProviderSubscriptionChangeRequest', {
+        props,
+      })
     }
     this.subscription = props.subscription
     this.timeframe = props.timeframe
@@ -317,7 +319,7 @@ class RecurlySubscriptionChangeRequest {
   }
 }
 
-class RecurlySubscriptionAddOnUpdate {
+class PaymentProviderSubscriptionAddOnUpdate {
   /**
    * @param {object} props
    * @param {string} props.code
@@ -331,15 +333,15 @@ class RecurlySubscriptionAddOnUpdate {
   }
 }
 
-class RecurlySubscriptionChange {
+class PaymentProviderSubscriptionChange {
   /**
    * @param {object} props
-   * @param {RecurlySubscription} props.subscription
+   * @param {PaymentProviderSubscription} props.subscription
    * @param {string} props.nextPlanCode
    * @param {string} props.nextPlanName
    * @param {number} props.nextPlanPrice
-   * @param {RecurlySubscriptionAddOn[]} props.nextAddOns
-   * @param {RecurlyImmediateCharge} [props.immediateCharge]
+   * @param {PaymentProviderSubscriptionAddOn[]} props.nextAddOns
+   * @param {PaymentProviderImmediateCharge} [props.immediateCharge]
    */
   constructor(props) {
     this.subscription = props.subscription
@@ -349,7 +351,12 @@ class RecurlySubscriptionChange {
     this.nextAddOns = props.nextAddOns
     this.immediateCharge =
       props.immediateCharge ??
-      new RecurlyImmediateCharge({ subtotal: 0, tax: 0, total: 0, discount: 0 })
+      new PaymentProviderImmediateCharge({
+        subtotal: 0,
+        tax: 0,
+        total: 0,
+        discount: 0,
+      })
 
     this.subtotal = this.nextPlanPrice
     for (const addOn of this.nextAddOns) {
@@ -388,7 +395,7 @@ class CreditCardPaymentMethod {
   }
 }
 
-class RecurlyImmediateCharge {
+class PaymentProviderImmediateCharge {
   /**
    * @param {object} props
    * @param {number} props.subtotal
@@ -407,7 +414,7 @@ class RecurlyImmediateCharge {
 /**
  * An add-on configuration, independent of any subscription
  */
-class RecurlyAddOn {
+class PaymentProviderAddOn {
   /**
    * @param {object} props
    * @param {string} props.code
@@ -422,7 +429,7 @@ class RecurlyAddOn {
 /**
  * A plan configuration
  */
-class RecurlyPlan {
+class PaymentProviderPlan {
   /**
    * @param {object} props
    * @param {string} props.code
@@ -437,7 +444,7 @@ class RecurlyPlan {
 /**
  * A coupon in the payment provider
  */
-class RecurlyCoupon {
+class PaymentProviderCoupon {
   /**
    * @param {object} props
    * @param {string} props.code
@@ -454,7 +461,7 @@ class RecurlyCoupon {
 /**
  * An account in the payment provider
  */
-class RecurlyAccount {
+class PaymentProviderAccount {
   /**
    * @param {object} props
    * @param {string} props.code
@@ -480,7 +487,7 @@ function isStandaloneAiAddOnPlanCode(planCode) {
 /**
  * Returns whether subscription change will have have the ai bundle once the change is processed
  *
- * @param {RecurlySubscriptionChange} subscriptionChange The subscription change object coming from Recurly
+ * @param {PaymentProviderSubscriptionChange} subscriptionChange The subscription change object coming from payment provider
  *
  * @return {boolean}
  */
@@ -497,18 +504,18 @@ module.exports = {
   AI_ADD_ON_CODE,
   MEMBERS_LIMIT_ADD_ON_CODE,
   STANDALONE_AI_ADD_ON_CODES,
-  RecurlySubscription,
-  RecurlySubscriptionAddOn,
-  RecurlySubscriptionChange,
-  RecurlySubscriptionChangeRequest,
-  RecurlySubscriptionAddOnUpdate,
+  PaymentProviderSubscription,
+  PaymentProviderSubscriptionAddOn,
+  PaymentProviderSubscriptionChange,
+  PaymentProviderSubscriptionChangeRequest,
+  PaymentProviderSubscriptionAddOnUpdate,
   PaypalPaymentMethod,
   CreditCardPaymentMethod,
-  RecurlyAddOn,
-  RecurlyPlan,
-  RecurlyCoupon,
-  RecurlyAccount,
+  PaymentProviderAddOn,
+  PaymentProviderPlan,
+  PaymentProviderCoupon,
+  PaymentProviderAccount,
   isStandaloneAiAddOnPlanCode,
   subscriptionChangeIsAiAssistUpgrade,
-  RecurlyImmediateCharge,
+  PaymentProviderImmediateCharge,
 }

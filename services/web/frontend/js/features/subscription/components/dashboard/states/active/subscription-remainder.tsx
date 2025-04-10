@@ -1,8 +1,8 @@
 import { Trans } from 'react-i18next'
-import { RecurlySubscription } from '../../../../../../../../types/subscription/dashboard/subscription'
+import { PaidSubscription } from '../../../../../../../../types/subscription/dashboard/subscription'
 
 type SubscriptionRemainderProps = {
-  subscription: RecurlySubscription
+  subscription: PaidSubscription
   hideTime?: boolean
 }
 
@@ -11,13 +11,13 @@ function SubscriptionRemainder({
   hideTime,
 }: SubscriptionRemainderProps) {
   const stillInATrial =
-    subscription.recurly.trialEndsAtFormatted &&
-    subscription.recurly.trialEndsAt &&
-    new Date(subscription.recurly.trialEndsAt).getTime() > Date.now()
+    subscription.payment.trialEndsAtFormatted &&
+    subscription.payment.trialEndsAt &&
+    new Date(subscription.payment.trialEndsAt).getTime() > Date.now()
 
   const terminationDate = hideTime
-    ? subscription.recurly.nextPaymentDueDate
-    : subscription.recurly.nextPaymentDueAt
+    ? subscription.payment.nextPaymentDueDate
+    : subscription.payment.nextPaymentDueAt
   return stillInATrial ? (
     <Trans
       i18nKey="subscription_will_remain_active_until_end_of_trial_period_x"

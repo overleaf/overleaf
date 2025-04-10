@@ -12,7 +12,7 @@ import OLButton from '@/features/ui/components/ol/ol-button'
 import { postJSON } from '@/infrastructure/fetch-json'
 import { useLocation } from '@/shared/hooks/use-location'
 import OLNotification from '@/features/ui/components/ol/ol-notification'
-import { RecurlySubscription } from '../../../../../../../../types/subscription/dashboard/subscription'
+import { PaidSubscription } from '../../../../../../../../types/subscription/dashboard/subscription'
 
 export function ConfirmUnpauseSubscriptionModal() {
   const modalId: SubscriptionDashModalIds = 'unpause-subscription'
@@ -22,7 +22,7 @@ export function ConfirmUnpauseSubscriptionModal() {
   const { handleCloseModal, modalIdShown, personalSubscription } =
     useSubscriptionDashboardContext()
   const location = useLocation()
-  const subscription = personalSubscription as RecurlySubscription
+  const subscription = personalSubscription as PaidSubscription
 
   async function handleConfirmUnpause() {
     setError(false)
@@ -70,7 +70,7 @@ export function ConfirmUnpauseSubscriptionModal() {
           <Trans
             i18nKey="lets_get_those_premium_features"
             values={{
-              paymentAmount: subscription.recurly.displayPrice,
+              paymentAmount: subscription.payment.displayPrice,
             }}
             shouldUnescape
             tOptions={{ interpolation: { escapeValue: true } }}

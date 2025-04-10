@@ -22,8 +22,8 @@ export type AddOn = {
   unitAmountInCents: number
 }
 
-// add-ons directly accessed through recurly
-export type RecurlyAddOn = {
+// add-ons directly accessed through payment
+export type PaymentProviderAddOn = {
   code: string
   name: string
   quantity: number
@@ -32,11 +32,11 @@ export type RecurlyAddOn = {
   displayPrice?: string
 }
 
-export type PendingRecurlyPlan = {
+export type PendingPaymentProviderPlan = {
   annual?: boolean
   displayPrice?: string
   featureDescription?: Record<string, unknown>[]
-  addOns?: RecurlyAddOn[]
+  addOns?: PaymentProviderAddOn[]
   features?: Features
   groupPlan?: boolean
   hideFromUsers?: boolean

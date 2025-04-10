@@ -1,7 +1,7 @@
 import { expect } from 'chai'
 import { fireEvent, screen, waitFor } from '@testing-library/react'
 import * as eventTracking from '@/infrastructure/event-tracking'
-import { RecurlySubscription } from '../../../../../../../../types/subscription/dashboard/subscription'
+import { PaidSubscription } from '../../../../../../../../types/subscription/dashboard/subscription'
 import {
   annualActiveSubscription,
   groupActiveSubscription,
@@ -36,7 +36,7 @@ describe('<ActiveSubscription />', function () {
     sendMBSpy.restore()
   })
 
-  function expectedInActiveSubscription(subscription: RecurlySubscription) {
+  function expectedInActiveSubscription(subscription: PaidSubscription) {
     // sentence broken up by bolding
     screen.getByText('You are currently subscribed to the', { exact: false })
     screen.getByText(subscription.plan.name, { exact: false })
@@ -45,11 +45,11 @@ describe('<ActiveSubscription />', function () {
 
     // sentence broken up by bolding
     screen.getByText('The next payment of', { exact: false })
-    screen.getByText(subscription.recurly.displayPrice, {
+    screen.getByText(subscription.payment.displayPrice, {
       exact: false,
     })
     screen.getByText('will be collected on', { exact: false })
-    const dates = screen.getAllByText(subscription.recurly.nextPaymentDueAt, {
+    const dates = screen.getAllByText(subscription.payment.nextPaymentDueAt, {
       exact: false,
     })
     expect(dates.length).to.equal(2)
@@ -110,7 +110,7 @@ describe('<ActiveSubscription />', function () {
       JSON.parse(JSON.stringify(annualActiveSubscription))
     )
 
-    activePastDueSubscription.recurly.hasPastDueInvoice = true
+    activePastDueSubscription.payment.hasPastDueInvoice = true
 
     renderActiveSubscription(activePastDueSubscription)
 
@@ -126,14 +126,14 @@ describe('<ActiveSubscription />', function () {
     })
 
     screen.getByText(
-      groupActiveSubscriptionWithPendingLicenseChange.recurly
+      groupActiveSubscriptionWithPendingLicenseChange.payment
         .pendingAdditionalLicenses!
     )
 
     screen.getByText('additional license(s) for a total of', { exact: false })
 
     screen.getByText(
-      groupActiveSubscriptionWithPendingLicenseChange.recurly
+      groupActiveSubscriptionWithPendingLicenseChange.payment
         .pendingTotalLicenses!
     )
 
@@ -146,10 +146,10 @@ describe('<ActiveSubscription />', function () {
 
   it('shows the pending license change message when plan change is not pending', function () {
     const subscription = Object.assign({}, groupActiveSubscription)
-    subscription.recurly.additionalLicenses = 4
-    subscription.recurly.totalLicenses =
-      subscription.recurly.totalLicenses +
-      subscription.recurly.additionalLicenses
+    subscription.payment.additionalLicenses = 4
+    subscription.payment.totalLicenses =
+      subscription.payment.totalLicenses +
+      subscription.payment.additionalLicenses
 
     renderActiveSubscription(subscription)
 
@@ -157,11 +157,11 @@ describe('<ActiveSubscription />', function () {
       exact: false,
     })
 
-    screen.getByText(subscription.recurly.additionalLicenses)
+    screen.getByText(subscription.payment.additionalLicenses)
 
     screen.getByText('additional license(s) for a total of', { exact: false })
 
-    screen.getByText(subscription.recurly.totalLicenses)
+    screen.getByText(subscription.payment.totalLicenses)
   })
 
   it('shows when trial ends and first payment collected and when subscription would become inactive if cancelled', function () {
@@ -169,14 +169,14 @@ describe('<ActiveSubscription />', function () {
     screen.getByText('You’re on a free trial which ends on', { exact: false })
 
     const endDate = screen.getAllByText(
-      trialSubscription.recurly.trialEndsAtFormatted!
+      trialSubscription.payment.trialEndsAtFormatted!
     )
     expect(endDate.length).to.equal(3)
   })
 
   it('shows current discounts', function () {
     const subscriptionWithActiveCoupons = cloneDeep(annualActiveSubscription)
-    subscriptionWithActiveCoupons.recurly.activeCoupons = [
+    subscriptionWithActiveCoupons.payment.activeCoupons = [
       {
         name: 'fake coupon name',
         code: 'fake-coupon',
@@ -188,7 +188,7 @@ describe('<ActiveSubscription />', function () {
       /this does not include your current discounts, which will be applied automatically before your next payment/i
     )
     screen.getByText(
-      subscriptionWithActiveCoupons.recurly.activeCoupons[0].name
+      subscriptionWithActiveCoupons.payment.activeCoupons[0].name
     )
   })
 
@@ -225,7 +225,7 @@ describe('<ActiveSubscription />', function () {
         { exact: false }
       )
       const dates = screen.getAllByText(
-        annualActiveSubscription.recurly.nextPaymentDueAt,
+        annualActiveSubscription.payment.nextPaymentDueAt,
         {
           exact: false,
         }
@@ -244,7 +244,7 @@ describe('<ActiveSubscription />', function () {
         { exact: false }
       )
       const dates = screen.getAllByText(
-        trialSubscription.recurly.trialEndsAtFormatted!
+        trialSubscription.payment.trialEndsAtFormatted!
       )
       expect(dates.length).to.equal(3)
       const button = screen.getByRole('button', {

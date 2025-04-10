@@ -18,9 +18,9 @@ function PersonalSubscriptionRecurlySyncEmail() {
     runAsync(postJSON('/user/subscription/account/email'))
   }
 
-  if (!personalSubscription || !('recurly' in personalSubscription)) return null
+  if (!personalSubscription || !('payment' in personalSubscription)) return null
 
-  const recurlyEmail = personalSubscription.recurly.accountEmail
+  const recurlyEmail = personalSubscription.payment.accountEmail
 
   if (!userEmail || recurlyEmail === userEmail) return null
 

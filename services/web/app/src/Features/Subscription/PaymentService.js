@@ -5,7 +5,7 @@ const logger = require('@overleaf/logger')
 const { callbackify } = require('util')
 
 /**
- * @import { RecurlySubscription, RecurlyAccount, RecurlyCoupon } from "./RecurlyEntities"
+ * @import { PaymentProviderSubscription, PaymentProviderAccount, PaymentProviderCoupon } from "./PaymentProviderEntities.js"
  * @import { ObjectId } from 'mongodb'
  */
 
@@ -19,9 +19,9 @@ const { callbackify } = require('util')
 
 /**
  * @typedef {object} PaymentRecord
- * @property {RecurlySubscription} subscription
- * @property {RecurlyAccount | null} account
- * @property {RecurlyCoupon[]} coupons
+ * @property {PaymentProviderSubscription} subscription
+ * @property {PaymentProviderAccount | null} account
+ * @property {PaymentProviderCoupon[]} coupons
  */
 
 /**

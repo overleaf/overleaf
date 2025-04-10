@@ -5,16 +5,17 @@ const { expect } = require('chai')
 const Errors = require('../../../../app/src/Features/Subscription/Errors')
 const {
   AI_ADD_ON_CODE,
-  RecurlySubscriptionChangeRequest,
-  RecurlySubscriptionChange,
-  RecurlySubscription,
-  RecurlySubscriptionAddOnUpdate,
-} = require('../../../../app/src/Features/Subscription/RecurlyEntities')
+  PaymentProviderSubscriptionChangeRequest,
+  PaymentProviderSubscriptionChange,
+  PaymentProviderSubscription,
+  PaymentProviderSubscriptionAddOnUpdate,
+} = require('../../../../app/src/Features/Subscription/PaymentProviderEntities')
 
-const MODULE_PATH = '../../../../app/src/Features/Subscription/RecurlyEntities'
+const MODULE_PATH =
+  '../../../../app/src/Features/Subscription/PaymentProviderEntities'
 
-describe('RecurlyEntities', function () {
-  describe('RecurlySubscription', function () {
+describe('PaymentProviderEntities', function () {
+  describe('PaymentProviderSubscription', function () {
     beforeEach(function () {
       this.Settings = {
         plans: [
@@ -26,7 +27,7 @@ describe('RecurlyEntities', function () {
         features: [],
       }
 
-      this.RecurlyEntities = SandboxedModule.require(MODULE_PATH, {
+      this.PaymentProviderEntities = SandboxedModule.require(MODULE_PATH, {
         requires: {
           '@overleaf/settings': this.Settings,
           './Errors': Errors,
@@ -36,15 +37,17 @@ describe('RecurlyEntities', function () {
 
     describe('with add-ons', function () {
       beforeEach(function () {
-        const { RecurlySubscription, RecurlySubscriptionAddOn } =
-          this.RecurlyEntities
-        this.addOn = new RecurlySubscriptionAddOn({
+        const {
+          PaymentProviderSubscription,
+          PaymentProviderSubscriptionAddOn,
+        } = this.PaymentProviderEntities
+        this.addOn = new PaymentProviderSubscriptionAddOn({
           code: 'add-on-code',
           name: 'My Add-On',
           quantity: 1,
           unitPrice: 2,
         })
-        this.subscription = new RecurlySubscription({
+        this.subscription = new PaymentProviderSubscription({
           id: 'subscription-id',
           userId: 'user-id',
           planCode: 'regular-plan',
@@ -71,11 +74,12 @@ describe('RecurlyEntities', function () {
 
       describe('getRequestForPlanChange()', function () {
         it('returns a change request for upgrades', function () {
-          const { RecurlySubscriptionChangeRequest } = this.RecurlyEntities
+          const { PaymentProviderSubscriptionChangeRequest } =
+            this.PaymentProviderEntities
           const changeRequest =
             this.subscription.getRequestForPlanChange('premium-plan')
           expect(changeRequest).to.deep.equal(
-            new RecurlySubscriptionChangeRequest({
+            new PaymentProviderSubscriptionChangeRequest({
               subscription: this.subscription,
               timeframe: 'now',
               planCode: 'premium-plan',
@@ -84,11 +88,12 @@ describe('RecurlyEntities', function () {
         })
 
         it('returns a change request for downgrades', function () {
-          const { RecurlySubscriptionChangeRequest } = this.RecurlyEntities
+          const { PaymentProviderSubscriptionChangeRequest } =
+            this.PaymentProviderEntities
           const changeRequest =
             this.subscription.getRequestForPlanChange('cheap-plan')
           expect(changeRequest).to.deep.equal(
-            new RecurlySubscriptionChangeRequest({
+            new PaymentProviderSubscriptionChangeRequest({
               subscription: this.subscription,
               timeframe: 'term_end',
               planCode: 'cheap-plan',
@@ -97,17 +102,18 @@ describe('RecurlyEntities', function () {
         })
 
         it('preserves the AI add-on on upgrades', function () {
-          const { RecurlySubscriptionChangeRequest } = this.RecurlyEntities
+          const { PaymentProviderSubscriptionChangeRequest } =
+            this.PaymentProviderEntities
           this.addOn.code = AI_ADD_ON_CODE
           const changeRequest =
             this.subscription.getRequestForPlanChange('premium-plan')
           expect(changeRequest).to.deep.equal(
-            new RecurlySubscriptionChangeRequest({
+            new PaymentProviderSubscriptionChangeRequest({
               subscription: this.subscription,
               timeframe: 'now',
               planCode: 'premium-plan',
               addOnUpdates: [
-                new RecurlySubscriptionAddOnUpdate({
+                new PaymentProviderSubscriptionAddOnUpdate({
                   code: AI_ADD_ON_CODE,
                   quantity: 1,
                 }),
@@ -117,17 +123,18 @@ describe('RecurlyEntities', function () {
         })
 
         it('preserves the AI add-on on downgrades', function () {
-          const { RecurlySubscriptionChangeRequest } = this.RecurlyEntities
+          const { PaymentProviderSubscriptionChangeRequest } =
+            this.PaymentProviderEntities
           this.addOn.code = AI_ADD_ON_CODE
           const changeRequest =
             this.subscription.getRequestForPlanChange('cheap-plan')
           expect(changeRequest).to.deep.equal(
-            new RecurlySubscriptionChangeRequest({
+            new PaymentProviderSubscriptionChangeRequest({
               subscription: this.subscription,
               timeframe: 'term_end',
               planCode: 'cheap-plan',
               addOnUpdates: [
-                new RecurlySubscriptionAddOnUpdate({
+                new PaymentProviderSubscriptionAddOnUpdate({
                   code: AI_ADD_ON_CODE,
                   quantity: 1,
                 }),
@@ -137,18 +144,19 @@ describe('RecurlyEntities', function () {
         })
 
         it('preserves the AI add-on on upgrades from the standalone AI plan', function () {
-          const { RecurlySubscriptionChangeRequest } = this.RecurlyEntities
+          const { PaymentProviderSubscriptionChangeRequest } =
+            this.PaymentProviderEntities
           this.subscription.planCode = 'assistant-annual'
           this.subscription.addOns = []
           const changeRequest =
             this.subscription.getRequestForPlanChange('cheap-plan')
           expect(changeRequest).to.deep.equal(
-            new RecurlySubscriptionChangeRequest({
+            new PaymentProviderSubscriptionChangeRequest({
               subscription: this.subscription,
               timeframe: 'term_end',
               planCode: 'cheap-plan',
               addOnUpdates: [
-                new RecurlySubscriptionAddOnUpdate({
+                new PaymentProviderSubscriptionAddOnUpdate({
                   code: AI_ADD_ON_CODE,
                   quantity: 1,
                 }),
@@ -161,22 +169,22 @@ describe('RecurlyEntities', function () {
       describe('getRequestForAddOnPurchase()', function () {
         it('returns a change request', function () {
           const {
-            RecurlySubscriptionChangeRequest,
-            RecurlySubscriptionAddOnUpdate,
-          } = this.RecurlyEntities
+            PaymentProviderSubscriptionChangeRequest,
+            PaymentProviderSubscriptionAddOnUpdate,
+          } = this.PaymentProviderEntities
           const changeRequest =
             this.subscription.getRequestForAddOnPurchase('another-add-on')
           expect(changeRequest).to.deep.equal(
-            new RecurlySubscriptionChangeRequest({
+            new PaymentProviderSubscriptionChangeRequest({
               subscription: this.subscription,
               timeframe: 'now',
               addOnUpdates: [
-                new RecurlySubscriptionAddOnUpdate({
+                new PaymentProviderSubscriptionAddOnUpdate({
                   code: this.addOn.code,
                   quantity: this.addOn.quantity,
                   unitPrice: this.addOn.unitPrice,
                 }),
-                new RecurlySubscriptionAddOnUpdate({
+                new PaymentProviderSubscriptionAddOnUpdate({
                   code: 'another-add-on',
                   quantity: 1,
                 }),
@@ -187,9 +195,9 @@ describe('RecurlyEntities', function () {
 
         it('returns a change request with quantity and unit price specified', function () {
           const {
-            RecurlySubscriptionChangeRequest,
-            RecurlySubscriptionAddOnUpdate,
-          } = this.RecurlyEntities
+            PaymentProviderSubscriptionChangeRequest,
+            PaymentProviderSubscriptionAddOnUpdate,
+          } = this.PaymentProviderEntities
           const quantity = 5
           const unitPrice = 10
           const changeRequest = this.subscription.getRequestForAddOnPurchase(
@@ -198,16 +206,16 @@ describe('RecurlyEntities', function () {
             unitPrice
           )
           expect(changeRequest).to.deep.equal(
-            new RecurlySubscriptionChangeRequest({
+            new PaymentProviderSubscriptionChangeRequest({
               subscription: this.subscription,
               timeframe: 'now',
               addOnUpdates: [
-                new RecurlySubscriptionAddOnUpdate({
+                new PaymentProviderSubscriptionAddOnUpdate({
                   code: this.addOn.code,
                   quantity: this.addOn.quantity,
                   unitPrice: this.addOn.unitPrice,
                 }),
-                new RecurlySubscriptionAddOnUpdate({
+                new PaymentProviderSubscriptionAddOnUpdate({
                   code: 'another-add-on',
                   quantity,
                   unitPrice,
@@ -227,20 +235,20 @@ describe('RecurlyEntities', function () {
       describe('getRequestForAddOnUpdate()', function () {
         it('returns a change request', function () {
           const {
-            RecurlySubscriptionChangeRequest,
-            RecurlySubscriptionAddOnUpdate,
-          } = this.RecurlyEntities
+            PaymentProviderSubscriptionChangeRequest,
+            PaymentProviderSubscriptionAddOnUpdate,
+          } = this.PaymentProviderEntities
           const newQuantity = 2
           const changeRequest = this.subscription.getRequestForAddOnUpdate(
             'add-on-code',
             newQuantity
           )
           expect(changeRequest).to.deep.equal(
-            new RecurlySubscriptionChangeRequest({
+            new PaymentProviderSubscriptionChangeRequest({
               subscription: this.subscription,
               timeframe: 'now',
               addOnUpdates: [
-                new RecurlySubscriptionAddOnUpdate({
+                new PaymentProviderSubscriptionAddOnUpdate({
                   code: this.addOn.code,
                   quantity: newQuantity,
                   unitPrice: this.addOn.unitPrice,
@@ -263,7 +271,7 @@ describe('RecurlyEntities', function () {
             this.addOn.code
           )
           expect(changeRequest).to.deep.equal(
-            new RecurlySubscriptionChangeRequest({
+            new PaymentProviderSubscriptionChangeRequest({
               subscription: this.subscription,
               timeframe: 'term_end',
               addOnUpdates: [],
@@ -283,13 +291,13 @@ describe('RecurlyEntities', function () {
           const changeRequest =
             this.subscription.getRequestForGroupPlanUpgrade('test_plan_code')
           const addOns = [
-            new RecurlySubscriptionAddOnUpdate({
+            new PaymentProviderSubscriptionAddOnUpdate({
               code: 'add-on-code',
               quantity: 1,
             }),
           ]
           expect(changeRequest).to.deep.equal(
-            new RecurlySubscriptionChangeRequest({
+            new PaymentProviderSubscriptionChangeRequest({
               subscription: this.subscription,
               timeframe: 'now',
               addOnUpdates: addOns,
@@ -301,8 +309,8 @@ describe('RecurlyEntities', function () {
 
       describe('without add-ons', function () {
         beforeEach(function () {
-          const { RecurlySubscription } = this.RecurlyEntities
-          this.subscription = new RecurlySubscription({
+          const { PaymentProviderSubscription } = this.PaymentProviderEntities
+          this.subscription = new PaymentProviderSubscription({
             id: 'subscription-id',
             userId: 'user-id',
             planCode: 'regular-plan',
@@ -325,17 +333,17 @@ describe('RecurlyEntities', function () {
         describe('getRequestForAddOnPurchase()', function () {
           it('returns a change request', function () {
             const {
-              RecurlySubscriptionChangeRequest,
-              RecurlySubscriptionAddOnUpdate,
-            } = this.RecurlyEntities
+              PaymentProviderSubscriptionChangeRequest,
+              PaymentProviderSubscriptionAddOnUpdate,
+            } = this.PaymentProviderEntities
             const changeRequest =
               this.subscription.getRequestForAddOnPurchase('some-add-on')
             expect(changeRequest).to.deep.equal(
-              new RecurlySubscriptionChangeRequest({
+              new PaymentProviderSubscriptionChangeRequest({
                 subscription: this.subscription,
                 timeframe: 'now',
                 addOnUpdates: [
-                  new RecurlySubscriptionAddOnUpdate({
+                  new PaymentProviderSubscriptionAddOnUpdate({
                     code: 'some-add-on',
                     quantity: 1,
                   }),
@@ -356,10 +364,10 @@ describe('RecurlyEntities', function () {
     })
   })
 
-  describe('RecurlySubscriptionChange', function () {
+  describe('PaymentProviderSubscriptionChange', function () {
     describe('constructor', function () {
       it('rounds the amounts when calculating the taxes', function () {
-        const subscription = new RecurlySubscription({
+        const subscription = new PaymentProviderSubscription({
           id: 'subscription-id',
           userId: 'user-id',
           planCode: 'premium-plan',
@@ -374,7 +382,7 @@ describe('RecurlyEntities', function () {
           periodEnd: new Date(),
           collectionMethod: 'automatic',
         })
-        const change = new RecurlySubscriptionChange({
+        const change = new PaymentProviderSubscriptionChange({
           subscription,
           nextPlanCode: 'promotional-plan',
           nextPlanName: 'Promotial plan',

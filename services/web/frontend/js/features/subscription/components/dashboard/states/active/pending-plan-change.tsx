@@ -1,16 +1,16 @@
 import { Trans } from 'react-i18next'
-import { RecurlySubscription } from '../../../../../../../../types/subscription/dashboard/subscription'
-import { PendingRecurlyPlan } from '../../../../../../../../types/subscription/plan'
+import { PaidSubscription } from '../../../../../../../../types/subscription/dashboard/subscription'
+import { PendingPaymentProviderPlan } from '../../../../../../../../types/subscription/plan'
 import { AI_ADD_ON_CODE, ADD_ON_NAME } from '../../../../data/add-on-codes'
 
 export function PendingPlanChange({
   subscription,
 }: {
-  subscription: RecurlySubscription
+  subscription: PaidSubscription
 }) {
   if (!subscription.pendingPlan) return null
 
-  const pendingPlan = subscription.pendingPlan as PendingRecurlyPlan
+  const pendingPlan = subscription.pendingPlan as PendingPaymentProviderPlan
 
   const hasAiAddon = subscription.addOns?.some(
     addOn => addOn.addOnCode === AI_ADD_ON_CODE
@@ -21,9 +21,9 @@ export function PendingPlanChange({
     !pendingPlan.addOns?.some(addOn => addOn.code === AI_ADD_ON_CODE)
 
   const pendingAdditionalLicenses =
-    (subscription.recurly.pendingAdditionalLicenses &&
-      subscription.recurly.pendingAdditionalLicenses > 0) ||
-    subscription.recurly.additionalLicenses > 0
+    (subscription.payment.pendingAdditionalLicenses &&
+      subscription.payment.pendingAdditionalLicenses > 0) ||
+    subscription.payment.additionalLicenses > 0
 
   return (
     <>
@@ -49,8 +49,8 @@ export function PendingPlanChange({
             i18nKey="pending_additional_licenses"
             values={{
               pendingAdditionalLicenses:
-                subscription.recurly.pendingAdditionalLicenses,
-              pendingTotalLicenses: subscription.recurly.pendingTotalLicenses,
+                subscription.payment.pendingAdditionalLicenses,
+              pendingTotalLicenses: subscription.payment.pendingTotalLicenses,
             }}
             shouldUnescape
             tOptions={{ interpolation: { escapeValue: true } }}

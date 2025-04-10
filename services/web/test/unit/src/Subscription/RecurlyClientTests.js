@@ -3,12 +3,12 @@ const { expect } = require('chai')
 const recurly = require('recurly')
 const SandboxedModule = require('sandboxed-module')
 const {
-  RecurlySubscription,
-  RecurlySubscriptionChangeRequest,
-  RecurlySubscriptionAddOnUpdate,
-  RecurlyAccount,
-  RecurlyCoupon,
-} = require('../../../../app/src/Features/Subscription/RecurlyEntities')
+  PaymentProviderSubscription,
+  PaymentProviderSubscriptionChangeRequest,
+  PaymentProviderSubscriptionAddOnUpdate,
+  PaymentProviderAccount,
+  PaymentProviderCoupon,
+} = require('../../../../app/src/Features/Subscription/PaymentProviderEntities')
 
 const MODULE_PATH = '../../../../app/src/Features/Subscription/RecurlyClient'
 
@@ -41,7 +41,7 @@ describe('RecurlyClient', function () {
       preTaxTotal: 2,
     }
 
-    this.subscription = new RecurlySubscription({
+    this.subscription = new PaymentProviderSubscription({
       id: 'subscription-id',
       userId: 'user-id',
       currency: 'EUR',
@@ -156,7 +156,7 @@ describe('RecurlyClient', function () {
       const account = await this.RecurlyClient.promises.getAccountForUserId(
         this.user._id
       )
-      const expectedAccount = new RecurlyAccount({
+      const expectedAccount = new PaymentProviderAccount({
         code: this.user._id,
         email: this.user.email,
         hasPastDueInvoice: false,
@@ -226,7 +226,7 @@ describe('RecurlyClient', function () {
       const coupons =
         await this.RecurlyClient.promises.getActiveCouponsForUserId('some-user')
       const expectedCoupons = [
-        new RecurlyCoupon({
+        new PaymentProviderCoupon({
           code: 'coupon-code',
           name: 'Coupon Name',
           description: 'hosted page description',
@@ -329,7 +329,7 @@ describe('RecurlyClient', function () {
 
     it('handles plan changes', async function () {
       await this.RecurlyClient.promises.applySubscriptionChangeRequest(
-        new RecurlySubscriptionChangeRequest({
+        new PaymentProviderSubscriptionChangeRequest({
           subscription: this.subscription,
           timeframe: 'now',
           planCode: 'new-plan',
@@ -343,11 +343,11 @@ describe('RecurlyClient', function () {
 
     it('handles add-on changes', async function () {
       await this.RecurlyClient.promises.applySubscriptionChangeRequest(
-        new RecurlySubscriptionChangeRequest({
+        new PaymentProviderSubscriptionChangeRequest({
           subscription: this.subscription,
           timeframe: 'now',
           addOnUpdates: [
-            new RecurlySubscriptionAddOnUpdate({
+            new PaymentProviderSubscriptionAddOnUpdate({
               code: 'new-add-on',
               quantity: 2,
               unitPrice: 8.99,
@@ -514,7 +514,7 @@ describe('RecurlyClient', function () {
         })
         const { immediateCharge } =
           await this.RecurlyClient.promises.previewSubscriptionChange(
-            new RecurlySubscriptionChangeRequest({
+            new PaymentProviderSubscriptionChangeRequest({
               subscription: this.subscription,
               timeframe: 'now',
               planCode: 'new-plan',
@@ -546,7 +546,7 @@ describe('RecurlyClient', function () {
         })
         const { immediateCharge } =
           await this.RecurlyClient.promises.previewSubscriptionChange(
-            new RecurlySubscriptionChangeRequest({
+            new PaymentProviderSubscriptionChangeRequest({
               subscription: this.subscription,
               timeframe: 'now',
               planCode: 'new-plan',
@@ -570,7 +570,7 @@ describe('RecurlyClient', function () {
         .throws(new ValidationError())
       await expect(
         this.RecurlyClient.promises.previewSubscriptionChange(
-          new RecurlySubscriptionChangeRequest({
+          new PaymentProviderSubscriptionChangeRequest({
             subscription: this.subscription,
             timeframe: 'now',
             planCode: 'new-plan',
@@ -583,7 +583,7 @@ describe('RecurlyClient', function () {
       this.client.previewSubscriptionChange = sinon.stub().throws(new Error())
       await expect(
         this.RecurlyClient.promises.previewSubscriptionChange(
-          new RecurlySubscriptionChangeRequest({
+          new PaymentProviderSubscriptionChangeRequest({
             subscription: this.subscription,
             timeframe: 'now',
             planCode: 'new-plan',

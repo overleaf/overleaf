@@ -15,12 +15,12 @@ describe('SubscriptionGroupHandler', function () {
     this.subscription_id = '31DSd1123D'
     this.adding = 1
     this.paymentMethod = { cardType: 'Visa', lastFour: '1111' }
-    this.RecurlyEntities = {
+    this.PaymentProviderEntities = {
       MEMBERS_LIMIT_ADD_ON_CODE: 'additional-license',
     }
     this.localPlanInSettings = {
       membersLimit: 5,
-      membersLimitAddOn: this.RecurlyEntities.MEMBERS_LIMIT_ADD_ON_CODE,
+      membersLimitAddOn: this.PaymentProviderEntities.MEMBERS_LIMIT_ADD_ON_CODE,
     }
 
     this.subscription = {
@@ -40,7 +40,7 @@ describe('SubscriptionGroupHandler', function () {
       id: 123,
       addOns: [
         {
-          code: this.RecurlyEntities.MEMBERS_LIMIT_ADD_ON_CODE,
+          code: this.PaymentProviderEntities.MEMBERS_LIMIT_ADD_ON_CODE,
           quantity: 1,
         },
       ],
@@ -98,7 +98,7 @@ describe('SubscriptionGroupHandler', function () {
     this.previewSubscriptionChange = {
       nextAddOns: [
         {
-          code: this.RecurlyEntities.MEMBERS_LIMIT_ADD_ON_CODE,
+          code: this.PaymentProviderEntities.MEMBERS_LIMIT_ADD_ON_CODE,
           quantity: this.recurlySubscription.addOns[0].quantity + this.adding,
         },
       ],
@@ -166,7 +166,7 @@ describe('SubscriptionGroupHandler', function () {
         },
         './RecurlyClient': this.RecurlyClient,
         './PlansLocator': this.PlansLocator,
-        './RecurlyEntities': this.RecurlyEntities,
+        './PaymentProviderEntities': this.PaymentProviderEntities,
         '../Authentication/SessionManager': this.SessionManager,
         './GroupPlansData': this.GroupPlansData,
       },
@@ -325,7 +325,8 @@ describe('SubscriptionGroupHandler', function () {
         },
         plan: {
           membersLimit: 5,
-          membersLimitAddOn: this.RecurlyEntities.MEMBERS_LIMIT_ADD_ON_CODE,
+          membersLimitAddOn:
+            this.PaymentProviderEntities.MEMBERS_LIMIT_ADD_ON_CODE,
           canUseFlexibleLicensing: true,
         },
         recurlySubscription: this.recurlySubscription,
@@ -347,14 +348,14 @@ describe('SubscriptionGroupHandler', function () {
       beforeEach(function () {
         this.recurlySubscription.addOns = [
           {
-            code: this.RecurlyEntities.MEMBERS_LIMIT_ADD_ON_CODE,
+            code: this.PaymentProviderEntities.MEMBERS_LIMIT_ADD_ON_CODE,
             quantity: 6,
           },
         ]
         this.prevQuantity = this.recurlySubscription.addOns[0].quantity
         this.previewSubscriptionChange.nextAddOns = [
           {
-            code: this.RecurlyEntities.MEMBERS_LIMIT_ADD_ON_CODE,
+            code: this.PaymentProviderEntities.MEMBERS_LIMIT_ADD_ON_CODE,
             quantity: this.prevQuantity + this.adding,
           },
         ]
@@ -367,7 +368,7 @@ describe('SubscriptionGroupHandler', function () {
 
         this.recurlySubscription.getRequestForAddOnUpdate
           .calledWith(
-            this.RecurlyEntities.MEMBERS_LIMIT_ADD_ON_CODE,
+            this.PaymentProviderEntities.MEMBERS_LIMIT_ADD_ON_CODE,
             this.recurlySubscription.addOns[0].quantity + this.adding
           )
           .should.equal(true)
@@ -391,7 +392,7 @@ describe('SubscriptionGroupHandler', function () {
               {
                 type: 'add-on-update',
                 addOn: {
-                  code: this.RecurlyEntities.MEMBERS_LIMIT_ADD_ON_CODE,
+                  code: this.PaymentProviderEntities.MEMBERS_LIMIT_ADD_ON_CODE,
                   quantity:
                     this.previewSubscriptionChange.nextAddOns[0].quantity,
                   prevQuantity: this.prevQuantity,
@@ -435,7 +436,7 @@ describe('SubscriptionGroupHandler', function () {
         this.prevQuantity = this.recurlySubscription.addOns[0]?.quantity ?? 0
         this.previewSubscriptionChange.nextAddOns = [
           {
-            code: this.RecurlyEntities.MEMBERS_LIMIT_ADD_ON_CODE,
+            code: this.PaymentProviderEntities.MEMBERS_LIMIT_ADD_ON_CODE,
             quantity: this.prevQuantity + this.adding,
           },
         ]
@@ -467,7 +468,7 @@ describe('SubscriptionGroupHandler', function () {
               {
                 type: 'add-on-update',
                 addOn: {
-                  code: this.RecurlyEntities.MEMBERS_LIMIT_ADD_ON_CODE,
+                  code: this.PaymentProviderEntities.MEMBERS_LIMIT_ADD_ON_CODE,
                   quantity:
                     this.previewSubscriptionChange.nextAddOns[0].quantity,
                   prevQuantity: this.prevQuantity,
@@ -493,7 +494,7 @@ describe('SubscriptionGroupHandler', function () {
             )
           this.recurlySubscription.getRequestForAddOnPurchase
             .calledWithExactly(
-              this.RecurlyEntities.MEMBERS_LIMIT_ADD_ON_CODE,
+              this.PaymentProviderEntities.MEMBERS_LIMIT_ADD_ON_CODE,
               this.adding,
               this.GroupPlansData.enterprise.collaborator.USD[5]
                 .additional_license_legacy_price_in_cents / 100
@@ -513,7 +514,7 @@ describe('SubscriptionGroupHandler', function () {
             )
           this.recurlySubscription.getRequestForAddOnPurchase
             .calledWithExactly(
-              this.RecurlyEntities.MEMBERS_LIMIT_ADD_ON_CODE,
+              this.PaymentProviderEntities.MEMBERS_LIMIT_ADD_ON_CODE,
               this.adding,
               undefined
             )
@@ -538,7 +539,7 @@ describe('SubscriptionGroupHandler', function () {
             )
           this.recurlySubscription.getRequestForAddOnPurchase
             .calledWithExactly(
-              this.RecurlyEntities.MEMBERS_LIMIT_ADD_ON_CODE,
+              this.PaymentProviderEntities.MEMBERS_LIMIT_ADD_ON_CODE,
               this.adding,
               this.GroupPlansData.enterprise.collaborator.USD[5]
                 .additional_license_legacy_price_in_cents / 100
@@ -563,7 +564,7 @@ describe('SubscriptionGroupHandler', function () {
             )
           this.recurlySubscription.getRequestForAddOnPurchase
             .calledWithExactly(
-              this.RecurlyEntities.MEMBERS_LIMIT_ADD_ON_CODE,
+              this.PaymentProviderEntities.MEMBERS_LIMIT_ADD_ON_CODE,
               this.adding,
               undefined
             )

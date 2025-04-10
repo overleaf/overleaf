@@ -83,7 +83,7 @@ describe('<PersonalSubscription />', function () {
         'Your subscription has been canceled and will terminate on',
         { exact: false }
       )
-      screen.getByText(canceledSubscription.recurly!.nextPaymentDueAt, {
+      screen.getByText(canceledSubscription.payment!.nextPaymentDueAt, {
         exact: false,
       })
 
@@ -134,7 +134,7 @@ describe('<PersonalSubscription />', function () {
         {},
         JSON.parse(JSON.stringify(annualActiveSubscription))
       )
-      withStateDeleted.recurly.state = undefined
+      withStateDeleted.payment.state = undefined
       renderWithSubscriptionDashContext(<PersonalSubscription />, {
         metaTags: [{ name: 'ol-subscription', value: withStateDeleted }],
       })
@@ -194,7 +194,7 @@ describe('<PersonalSubscription />', function () {
     })
   })
 
-  it('shows different recurly email address section', async function () {
+  it('shows different payment email address section', async function () {
     fetchMock.post('/user/subscription/account/email', 200)
     const usersEmail = 'foo@example.com'
     renderWithSubscriptionDashContext(<PersonalSubscription />, {
@@ -208,7 +208,7 @@ describe('<PersonalSubscription />', function () {
       /your billing email address is currently/i
     ).textContent
     expect(billingText).to.contain(
-      `Your billing email address is currently ${annualActiveSubscription.recurly.accountEmail}.` +
+      `Your billing email address is currently ${annualActiveSubscription.payment.accountEmail}.` +
         ` If needed you can update your billing address to ${usersEmail}`
     )
 

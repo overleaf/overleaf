@@ -22,14 +22,14 @@ const Modules = require('../../infrastructure/Modules')
 const async = require('async')
 const HttpErrorHandler = require('../Errors/HttpErrorHandler')
 const RecurlyClient = require('./RecurlyClient')
-const { AI_ADD_ON_CODE } = require('./RecurlyEntities')
+const { AI_ADD_ON_CODE } = require('./PaymentProviderEntities')
 const PlansLocator = require('./PlansLocator')
-const RecurlyEntities = require('./RecurlyEntities')
+const PaymentProviderEntities = require('./PaymentProviderEntities')
 
 /**
  * @import { SubscriptionChangeDescription } from '../../../../types/subscription/subscription-change-preview'
  * @import { SubscriptionChangePreview } from '../../../../types/subscription/subscription-change-preview'
- * @import { RecurlySubscriptionChange } from './RecurlyEntities'
+ * @import { PaymentProviderSubscriptionChange } from './PaymentProviderEntities'
  * @import { PaymentMethod } from './types'
  */
 
@@ -325,7 +325,9 @@ async function previewAddonPurchase(req, res) {
     const hasBundleViaWritefull =
       await FeaturesUpdater.promises.hasFeaturesViaWritefull(userId)
     const isAiUpgrade =
-      RecurlyEntities.subscriptionChangeIsAiAssistUpgrade(subscriptionChange)
+      PaymentProviderEntities.subscriptionChangeIsAiAssistUpgrade(
+        subscriptionChange
+      )
     if (hasBundleViaWritefull && isAiUpgrade) {
       return res.redirect(
         '/user/subscription?redirect-reason=writefull-entitled'
@@ -724,7 +726,7 @@ function getPlanNameForDisplay(planName, planCode) {
  * Build a subscription change preview for display purposes
  *
  * @param {SubscriptionChangeDescription} subscriptionChangeDescription A description of the change for the frontend
- * @param {RecurlySubscriptionChange} subscriptionChange The subscription change object coming from Recurly
+ * @param {PaymentProviderSubscriptionChange} subscriptionChange The subscription change object coming from Recurly
  * @param {PaymentMethod} paymentMethod The payment method associated to the user
  * @return {SubscriptionChangePreview}
  */

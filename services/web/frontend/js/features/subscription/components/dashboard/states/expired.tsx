@@ -1,11 +1,11 @@
 import { useTranslation } from 'react-i18next'
-import { RecurlySubscription } from '../../../../../../../types/subscription/dashboard/subscription'
+import { PaidSubscription } from '../../../../../../../types/subscription/dashboard/subscription'
 import OLButton from '@/features/ui/components/ol/ol-button'
 
 export function ExpiredSubscription({
   subscription,
 }: {
-  subscription: RecurlySubscription
+  subscription: PaidSubscription
 }) {
   const { t } = useTranslation()
 
@@ -14,7 +14,7 @@ export function ExpiredSubscription({
       <p>{t('your_subscription_has_expired')}</p>
       <p>
         <OLButton
-          href={subscription.recurly.accountManagementLink}
+          href={subscription.payment.accountManagementLink}
           target="_blank"
           rel="noreferrer noopener"
           variant="secondary"

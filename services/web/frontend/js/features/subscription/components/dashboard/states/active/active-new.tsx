@@ -1,7 +1,7 @@
 import { useTranslation, Trans } from 'react-i18next'
 import { PriceExceptions } from '../../../shared/price-exceptions'
 import { useSubscriptionDashboardContext } from '../../../../context/subscription-dashboard-context'
-import { RecurlySubscription } from '../../../../../../../../types/subscription/dashboard/subscription'
+import { PaidSubscription } from '../../../../../../../../types/subscription/dashboard/subscription'
 import { CancelSubscriptionButton } from './cancel-subscription-button'
 import { CancelSubscription } from './cancel-plan/cancel-subscription'
 import { TrialEnding } from './trial-ending'
@@ -33,7 +33,7 @@ import Notification from '@/shared/components/notification'
 export function ActiveSubscriptionNew({
   subscription,
 }: {
-  subscription: RecurlySubscription
+  subscription: PaidSubscription
 }) {
   const { t } = useTranslation()
   const {
@@ -77,14 +77,14 @@ export function ActiveSubscriptionNew({
     }
   }
   const hasPendingPause = Boolean(
-    subscription.recurly.state === 'active' &&
-      subscription.recurly.remainingPauseCycles &&
-      subscription.recurly.remainingPauseCycles > 0
+    subscription.payment.state === 'active' &&
+      subscription.payment.remainingPauseCycles &&
+      subscription.payment.remainingPauseCycles > 0
   )
 
   const isLegacyPlan =
-    subscription.recurly.totalLicenses !==
-    subscription.recurly.additionalLicenses
+    subscription.payment.totalLicenses !==
+    subscription.payment.additionalLicenses
 
   return (
     <>
@@ -103,7 +103,7 @@ export function ActiveSubscriptionNew({
         {subscription.plan.annual ? (
           <Trans
             i18nKey="billed_annually_at"
-            values={{ price: subscription.recurly.displayPrice }}
+            values={{ price: subscription.payment.displayPrice }}
             shouldUnescape
             tOptions={{ interpolation: { escapeValue: true } }}
             components={[
@@ -116,7 +116,7 @@ export function ActiveSubscriptionNew({
         ) : (
           <Trans
             i18nKey="billed_monthly_at"
-            values={{ price: subscription.recurly.displayPrice }}
+            values={{ price: subscription.payment.displayPrice }}
             shouldUnescape
             tOptions={{ interpolation: { escapeValue: true } }}
             components={[
@@ -131,7 +131,7 @@ export function ActiveSubscriptionNew({
       <p className="mb-1">
         <Trans
           i18nKey="renews_on"
-          values={{ date: subscription.recurly.nextPaymentDueDate }}
+          values={{ date: subscription.payment.nextPaymentDueDate }}
           shouldUnescape
           tOptions={{ interpolation: { escapeValue: true } }}
           components={[<strong />]} // eslint-disable-line react/jsx-key
@@ -139,7 +139,7 @@ export function ActiveSubscriptionNew({
       </p>
       <div>
         <a
-          href={subscription.recurly.accountManagementLink}
+          href={subscription.payment.accountManagementLink}
           target="_blank"
           rel="noreferrer noopener"
           className="me-2"
@@ -147,7 +147,7 @@ export function ActiveSubscriptionNew({
           {t('view_invoices')}
         </a>
         <a
-          href={subscription.recurly.billingDetailsLink}
+          href={subscription.payment.billingDetailsLink}
           target="_blank"
           rel="noreferrer noopener"
         >
@@ -171,21 +171,21 @@ export function ActiveSubscriptionNew({
         subscription.pendingPlan.name !== subscription.plan.name && (
           <p className="mb-1">{t('want_change_to_apply_before_plan_end')}</p>
         )}
-      {isInFreeTrial(subscription.recurly.trialEndsAt) &&
-        subscription.recurly.trialEndsAtFormatted && (
+      {isInFreeTrial(subscription.payment.trialEndsAt) &&
+        subscription.payment.trialEndsAtFormatted && (
           <TrialEnding
-            trialEndsAtFormatted={subscription.recurly.trialEndsAtFormatted}
+            trialEndsAtFormatted={subscription.payment.trialEndsAtFormatted}
             className="mb-1"
           />
         )}
-      {subscription.recurly.totalLicenses > 0 && (
+      {subscription.payment.totalLicenses > 0 && (
         <p className="mb-1">
-          {isLegacyPlan && subscription.recurly.additionalLicenses > 0 ? (
+          {isLegacyPlan && subscription.payment.additionalLicenses > 0 ? (
             <Trans
               i18nKey="plus_x_additional_licenses_for_a_total_of_y_licenses"
               values={{
-                count: subscription.recurly.totalLicenses,
-                additionalLicenses: subscription.recurly.additionalLicenses,
+                count: subscription.payment.totalLicenses,
+                additionalLicenses: subscription.payment.additionalLicenses,
               }}
               shouldUnescape
               tOptions={{ interpolation: { escapeValue: true } }}
@@ -194,7 +194,7 @@ export function ActiveSubscriptionNew({
           ) : (
             <Trans
               i18nKey="supports_up_to_x_licenses"
-              values={{ count: subscription.recurly.totalLicenses }}
+              values={{ count: subscription.payment.totalLicenses }}
               shouldUnescape
               tOptions={{ interpolation: { escapeValue: true } }}
               components={[<strong />]} // eslint-disable-line react/jsx-key
@@ -209,7 +209,7 @@ export function ActiveSubscriptionNew({
               i18nKey="your_subscription_will_pause_on"
               values={{
                 planName: subscription.plan.name,
-                pauseDate: subscription.recurly.nextPaymentDueAt,
+                pauseDate: subscription.payment.nextPaymentDueAt,
                 reactivationDate: getFormattedRenewalDate(),
               }}
               shouldUnescape
@@ -227,10 +227,10 @@ export function ActiveSubscriptionNew({
         <p className="mb-1">
           {subscription.plan.annual
             ? t('x_price_per_year', {
-                price: subscription.recurly.planOnlyDisplayPrice,
+                price: subscription.payment.planOnlyDisplayPrice,
               })
             : t('x_price_per_month', {
-                price: subscription.recurly.planOnlyDisplayPrice,
+                price: subscription.payment.planOnlyDisplayPrice,
               })}
         </p>
       )}
@@ -261,7 +261,7 @@ export function ActiveSubscriptionNew({
 }
 
 type PlanActionsProps = {
-  subscription: RecurlySubscription
+  subscription: PaidSubscription
   onStandalonePlan: boolean
   handlePlanChange: () => void
   hasPendingPause: boolean
@@ -301,7 +301,7 @@ function PlanActions({
         <FlexibleGroupLicensingActions subscription={subscription} />
       ) : (
         <>
-          {!hasPendingPause && !subscription.recurly.hasPastDueInvoice && (
+          {!hasPendingPause && !subscription.payment.hasPastDueInvoice && (
             <OLButton variant="secondary" onClick={handlePlanChange}>
               {t('change_plan')}
             </OLButton>
@@ -334,7 +334,7 @@ function PlanActions({
 function FlexibleGroupLicensingActions({
   subscription,
 }: {
-  subscription: RecurlySubscription
+  subscription: PaidSubscription
 }) {
   const { t } = useTranslation()
 

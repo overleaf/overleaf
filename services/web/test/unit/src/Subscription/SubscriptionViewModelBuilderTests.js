@@ -2,11 +2,11 @@ const SandboxedModule = require('sandboxed-module')
 const sinon = require('sinon')
 const { assert } = require('chai')
 const {
-  RecurlyAccount,
-  RecurlySubscription,
-  RecurlySubscriptionAddOn,
-  RecurlySubscriptionChange,
-} = require('../../../../app/src/Features/Subscription/RecurlyEntities')
+  PaymentProviderAccount,
+  PaymentProviderSubscription,
+  PaymentProviderSubscriptionAddOn,
+  PaymentProviderSubscriptionChange,
+} = require('../../../../app/src/Features/Subscription/PaymentProviderEntities')
 
 const modulePath =
   '../../../../app/src/Features/Subscription/SubscriptionViewModelBuilder'
@@ -33,7 +33,7 @@ describe('SubscriptionViewModelBuilder', function () {
         state: 'active',
       },
     }
-    this.recurlySubscription = new RecurlySubscription({
+    this.paymentRecord = new PaymentProviderSubscription({
       id: this.recurlySubscription_id,
       userId: this.user._id,
       currency: 'EUR',
@@ -41,7 +41,7 @@ describe('SubscriptionViewModelBuilder', function () {
       planName: 'plan-name',
       planPrice: 13,
       addOns: [
-        new RecurlySubscriptionAddOn({
+        new PaymentProviderSubscriptionAddOn({
           code: 'addon-code',
           name: 'addon name',
           quantity: 1,
@@ -265,7 +265,7 @@ describe('SubscriptionViewModelBuilder', function () {
           plan: this.plan,
           recurlySubscription_id: this.recurlySubscription_id,
         }
-        this.recurlySubscription = {
+        this.paymentRecord = {
           state: 'active',
         }
         this.SubscriptionLocator.promises.getUsersSubscription
@@ -279,7 +279,7 @@ describe('SubscriptionViewModelBuilder', function () {
           .withArgs(this.individualSubscription.recurlySubscription_id, {
             includeAccount: true,
           })
-          .resolves(this.recurlySubscription)
+          .resolves(this.paymentRecord)
 
         const usersBestSubscription =
           await this.SubscriptionViewModelBuilder.promises.getBestSubscription(
@@ -293,7 +293,7 @@ describe('SubscriptionViewModelBuilder', function () {
         )
         sinon.assert.calledWith(
           this.SubscriptionUpdater.promises.updateSubscriptionFromRecurly,
-          this.recurlySubscription,
+          this.paymentRecord,
           this.individualSubscriptionWithoutRecurly
         )
         assert.deepEqual(usersBestSubscription, {
@@ -507,14 +507,14 @@ describe('SubscriptionViewModelBuilder', function () {
 
   describe('buildUsersSubscriptionViewModel', function () {
     describe('with a recurly subscription', function () {
-      it('adds recurly data to the personal subscription', async function () {
+      it('adds payment data to the personal subscription', async function () {
         this.SubscriptionLocator.getUsersSubscription.yields(
           null,
           this.individualSubscription
         )
         this.PaymentService.getPaymentFromRecord.yields(null, {
-          subscription: this.recurlySubscription,
-          account: new RecurlyAccount({
+          subscription: this.paymentRecord,
+          account: new PaymentProviderAccount({
             email: 'example@example.com',
             hasPastDueInvoice: false,
           }),
@@ -524,7 +524,7 @@ describe('SubscriptionViewModelBuilder', function () {
           await this.SubscriptionViewModelBuilder.promises.buildUsersSubscriptionViewModel(
             this.user
           )
-        assert.deepEqual(result.personalSubscription.recurly, {
+        assert.deepEqual(result.personalSubscription.payment, {
           taxRate: 0.1,
           billingDetailsLink: '/user/subscription/recurly/billing-details',
           accountManagementLink:
@@ -564,28 +564,29 @@ describe('SubscriptionViewModelBuilder', function () {
           null,
           this.individualSubscription
         )
-        this.recurlySubscription.pendingChange = new RecurlySubscriptionChange({
-          subscription: this.recurlySubscription,
-          nextPlanCode: this.groupPlanCode,
-          nextPlanName: 'Group Collaborator (Annual) 4 licenses',
-          nextPlanPrice: 1400,
-          nextAddOns: [
-            new RecurlySubscriptionAddOn({
-              code: 'additional-license',
-              name: 'additional license',
-              quantity: 8,
-              unitPrice: 24.4,
-            }),
-            new RecurlySubscriptionAddOn({
-              code: 'addon-code',
-              name: 'addon name',
-              quantity: 1,
-              unitPrice: 2,
-            }),
-          ],
-        })
+        this.paymentRecord.pendingChange =
+          new PaymentProviderSubscriptionChange({
+            subscription: this.paymentRecord,
+            nextPlanCode: this.groupPlanCode,
+            nextPlanName: 'Group Collaborator (Annual) 4 licenses',
+            nextPlanPrice: 1400,
+            nextAddOns: [
+              new PaymentProviderSubscriptionAddOn({
+                code: 'additional-license',
+                name: 'additional license',
+                quantity: 8,
+                unitPrice: 24.4,
+              }),
+              new PaymentProviderSubscriptionAddOn({
+                code: 'addon-code',
+                name: 'addon name',
+                quantity: 1,
+                unitPrice: 2,
+              }),
+            ],
+          })
         this.PaymentService.getPaymentFromRecord.yields(null, {
-          subscription: this.recurlySubscription,
+          subscription: this.paymentRecord,
           account: {},
           coupons: [],
         })
@@ -594,24 +595,24 @@ describe('SubscriptionViewModelBuilder', function () {
             this.user
           )
         assert.equal(
-          result.personalSubscription.recurly.displayPrice,
+          result.personalSubscription.payment.displayPrice,
           '€1,756.92'
         )
         assert.equal(
-          result.personalSubscription.recurly.planOnlyDisplayPrice,
+          result.personalSubscription.payment.planOnlyDisplayPrice,
           '€1,754.72'
         )
         assert.deepEqual(
-          result.personalSubscription.recurly
+          result.personalSubscription.payment
             .addOnDisplayPricesWithoutAdditionalLicense,
           { 'addon-code': '€2.20' }
         )
         assert.equal(
-          result.personalSubscription.recurly.pendingAdditionalLicenses,
+          result.personalSubscription.payment.pendingAdditionalLicenses,
           8
         )
         assert.equal(
-          result.personalSubscription.recurly.pendingTotalLicenses,
+          result.personalSubscription.payment.pendingTotalLicenses,
           12
         )
       })

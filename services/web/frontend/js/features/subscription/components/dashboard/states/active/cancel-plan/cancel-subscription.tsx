@@ -155,14 +155,14 @@ export function CancelSubscription() {
     isSuccessSecondaryAction ||
     isSuccessCancel
 
-  if (!personalSubscription || !('recurly' in personalSubscription)) return null
+  if (!personalSubscription || !('payment' in personalSubscription)) return null
 
   const showDowngrade = showDowngradeOption(
     personalSubscription.plan.planCode,
     personalSubscription.plan.groupPlan,
-    personalSubscription.recurly.trialEndsAt,
-    personalSubscription.recurly.pausedAt,
-    personalSubscription.recurly.remainingPauseCycles
+    personalSubscription.payment.trialEndsAt,
+    personalSubscription.payment.pausedAt,
+    personalSubscription.payment.remainingPauseCycles
   )
   const planToDowngradeTo = plans.find(
     plan => plan.planCode === planCodeToDowngradeTo

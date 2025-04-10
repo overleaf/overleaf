@@ -1,7 +1,7 @@
 import { useSubscriptionDashboardContext } from '@/features/subscription/context/subscription-dashboard-context'
 import Notification from '@/shared/components/notification'
 import { Trans, useTranslation } from 'react-i18next'
-import { RecurlySubscription } from '../../../../../../../../types/subscription/dashboard/subscription'
+import { PaidSubscription } from '../../../../../../../../types/subscription/dashboard/subscription'
 import { useEffect, useState } from 'react'
 import { useLocation } from '@/shared/hooks/use-location'
 
@@ -17,7 +17,7 @@ export function FlashMessage() {
       'flash'
     ) as FlashMessageName
   )
-  const subscription = personalSubscription as RecurlySubscription
+  const subscription = personalSubscription as PaidSubscription
   useEffect(() => {
     // clear any flash message IDs so they only show once
     if (location.toString()) {
@@ -36,7 +36,7 @@ export function FlashMessage() {
             <Trans
               i18nKey="your_subscription_will_pause_on_short"
               values={{
-                pauseDate: subscription.recurly.nextPaymentDueAt,
+                pauseDate: subscription.payment.nextPaymentDueAt,
               }}
               shouldUnescape
               tOptions={{ interpolation: { escapeValue: true } }}

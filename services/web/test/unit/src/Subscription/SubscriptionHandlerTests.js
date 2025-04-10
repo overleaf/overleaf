@@ -3,9 +3,9 @@ const sinon = require('sinon')
 const chai = require('chai')
 const { expect } = chai
 const {
-  RecurlySubscription,
-  RecurlySubscriptionChangeRequest,
-} = require('../../../../app/src/Features/Subscription/RecurlyEntities')
+  PaymentProviderSubscription,
+  PaymentProviderSubscriptionChangeRequest,
+} = require('../../../../app/src/Features/Subscription/PaymentProviderEntities')
 
 const MODULE_PATH =
   '../../../../app/src/Features/Subscription/SubscriptionHandler'
@@ -27,7 +27,7 @@ const mockRecurlySubscriptions = {
 }
 
 const mockRecurlyClientSubscriptions = {
-  'subscription-123-active': new RecurlySubscription({
+  'subscription-123-active': new PaymentProviderSubscription({
     id: 'subscription-123-active',
     userId: 'user-id',
     planCode: 'collaborator',
@@ -275,7 +275,7 @@ describe('SubscriptionHandler', function () {
         expect(
           this.RecurlyClient.promises.applySubscriptionChangeRequest
         ).to.have.been.calledWith(
-          new RecurlySubscriptionChangeRequest({
+          new PaymentProviderSubscriptionChangeRequest({
             subscription: this.activeRecurlyClientSubscription,
             timeframe: 'now',
             planCode: this.plan_code,
@@ -388,7 +388,7 @@ describe('SubscriptionHandler', function () {
         expect(
           this.RecurlyClient.promises.applySubscriptionChangeRequest
         ).to.be.calledWith(
-          new RecurlySubscriptionChangeRequest({
+          new PaymentProviderSubscriptionChangeRequest({
             subscription: this.activeRecurlyClientSubscription,
             timeframe: 'now',
             planCode: this.plan_code,

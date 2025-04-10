@@ -1,7 +1,7 @@
 const SplitTestHandler = require('../SplitTests/SplitTestHandler')
 const AnalyticsManager = require('../Analytics/AnalyticsManager')
 const SubscriptionEmailHandler = require('./SubscriptionEmailHandler')
-const { AI_ADD_ON_CODE } = require('./RecurlyEntities')
+const { AI_ADD_ON_CODE } = require('./PaymentProviderEntities')
 const { ObjectId } = require('mongodb-legacy')
 
 const INVOICE_SUBSCRIPTION_LIMIT = 10

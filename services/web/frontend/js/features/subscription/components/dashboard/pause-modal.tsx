@@ -15,7 +15,7 @@ import { debugConsole } from '@/utils/debugging'
 import * as eventTracking from '../../../../infrastructure/event-tracking'
 import PauseDuck from '../../images/pause-duck.svg'
 import GenericErrorAlert from './generic-error-alert'
-import { RecurlySubscription } from '../../../../../../types/subscription/dashboard/subscription'
+import { PaidSubscription } from '../../../../../../types/subscription/dashboard/subscription'
 
 const pauseMonthDurationOptions = [1, 2, 3]
 
@@ -35,13 +35,13 @@ export default function PauseSubscriptionModal() {
   const location = useLocation()
 
   function handleCancelSubscriptionClick() {
-    const subscription = personalSubscription as RecurlySubscription
+    const subscription = personalSubscription as PaidSubscription
     eventTracking.sendMB('subscription-page-cancel-button-click', {
       plan_code: subscription?.planCode,
       is_trial:
-        subscription?.recurly.trialEndsAtFormatted &&
-        subscription?.recurly.trialEndsAt &&
-        new Date(subscription.recurly.trialEndsAt).getTime() > Date.now(),
+        subscription?.payment.trialEndsAtFormatted &&
+        subscription?.payment.trialEndsAt &&
+        new Date(subscription.payment.trialEndsAt).getTime() > Date.now(),
     })
     setShowCancellation(true)
   }

@@ -1,6 +1,11 @@
 import { CurrencyCode } from '../currency'
 import { Nullable } from '../../utils'
-import { Plan, AddOn, RecurlyAddOn, PendingRecurlyPlan } from '../plan'
+import {
+  Plan,
+  AddOn,
+  PaymentProviderAddOn,
+  PendingPaymentProviderPlan,
+} from '../plan'
 import { User } from '../../user'
 
 type SubscriptionState = 'active' | 'canceled' | 'expired' | 'paused'
@@ -10,18 +15,18 @@ export type PurchasingAddOnCode = {
   code: string
 }
 
-type RecurlyCoupon = {
+type PaymentProviderCoupon = {
   code: string
   name: string
   description: string
 }
 
-type Recurly = {
+type PaymentProviderRecord = {
   taxRate: number
   billingDetailsLink: string
   accountManagementLink: string
   additionalLicenses: number
-  addOns: RecurlyAddOn[]
+  addOns: PaymentProviderAddOn[]
   totalLicenses: number
   nextPaymentDueAt: string
   nextPaymentDueDate: string
@@ -29,7 +34,7 @@ type Recurly = {
   state?: SubscriptionState
   trialEndsAtFormatted: Nullable<string>
   trialEndsAt: Nullable<string>
-  activeCoupons: RecurlyCoupon[]
+  activeCoupons: PaymentProviderCoupon[]
   accountEmail: string
   hasPastDueInvoice: boolean
   displayPrice: string
@@ -58,19 +63,19 @@ export type Subscription = {
   planCode: string
   recurlySubscription_id: string
   plan: Plan
-  pendingPlan?: PendingRecurlyPlan
+  pendingPlan?: PendingPaymentProviderPlan
   addOns?: AddOn[]
 }
 
-export type RecurlySubscription = Subscription & {
-  recurly: Recurly
+export type PaidSubscription = Subscription & {
+  payment: PaymentProviderRecord
 }
 
 export type CustomSubscription = Subscription & {
   customAccount: boolean
 }
 
-export type GroupSubscription = RecurlySubscription & {
+export type GroupSubscription = PaidSubscription & {
   teamName: string
   teamNotice?: string
 }

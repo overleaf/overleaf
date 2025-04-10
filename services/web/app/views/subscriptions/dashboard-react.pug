@@ -23,9 +23,9 @@ block append meta
 	meta(name="ol-showGroupDiscount", data-type="boolean", content=showGroupDiscount)
 	meta(name="ol-groupSettingsEnabledFor", data-type="json" content=groupSettingsEnabledFor)
 	meta(name="ol-user" data-type="json" content=user)
-	if (personalSubscription && personalSubscription.recurly)
+	if (personalSubscription && personalSubscription.payment)
 		meta(name="ol-recurlyApiKey" content=settings.apis.recurly.publicKey)
-		meta(name="ol-recommendedCurrency" content=personalSubscription.recurly.currency)
+		meta(name="ol-recommendedCurrency" content=personalSubscription.payment.currency)
 		meta(name="ol-groupPlans" data-type="json" content=groupPlans)
 
 block content

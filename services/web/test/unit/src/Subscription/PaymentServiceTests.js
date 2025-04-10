@@ -2,10 +2,10 @@ const sinon = require('sinon')
 const { expect } = require('chai')
 const SandboxedModule = require('sandboxed-module')
 const {
-  RecurlySubscription,
-  RecurlyAccount,
-  RecurlyCoupon,
-} = require('../../../../app/src/Features/Subscription/RecurlyEntities')
+  PaymentProviderSubscription,
+  PaymentProviderAccount,
+  PaymentProviderCoupon,
+} = require('../../../../app/src/Features/Subscription/PaymentProviderEntities')
 
 const MODULE_PATH = '../../../../app/src/Features/Subscription/PaymentService'
 
@@ -14,7 +14,7 @@ describe('PaymentService', function () {
     this.user = {
       _id: '123456',
     }
-    this.recurlySubscription = new RecurlySubscription({
+    this.recurlySubscription = new PaymentProviderSubscription({
       id: 'subscription-id',
       userId: this.user._id,
       currency: 'EUR',
@@ -30,13 +30,13 @@ describe('PaymentService', function () {
       periodEnd: new Date(),
       collectionMethod: 'automatic',
     })
-    this.recurlyAccount = new RecurlyAccount({
+    this.recurlyAccount = new PaymentProviderAccount({
       code: this.user._id,
       email: 'example@example.com',
       hasPastDueInvoice: true,
     })
     this.recurlyCoupons = [
-      new RecurlyCoupon({
+      new PaymentProviderCoupon({
         code: 'coupon-code',
         name: 'coupon name',
         description: 'coupon description',

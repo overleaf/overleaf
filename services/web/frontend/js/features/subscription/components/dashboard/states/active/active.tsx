@@ -1,7 +1,7 @@
 import { useTranslation, Trans } from 'react-i18next'
 import { PriceExceptions } from '../../../shared/price-exceptions'
 import { useSubscriptionDashboardContext } from '../../../../context/subscription-dashboard-context'
-import { RecurlySubscription } from '../../../../../../../../types/subscription/dashboard/subscription'
+import { PaidSubscription } from '../../../../../../../../types/subscription/dashboard/subscription'
 import { CancelSubscriptionButton } from './cancel-subscription-button'
 import { CancelSubscription } from './cancel-plan/cancel-subscription'
 import { PendingPlanChange } from './pending-plan-change'
@@ -27,7 +27,7 @@ import LoadingSpinner from '@/shared/components/loading-spinner'
 export function ActiveSubscription({
   subscription,
 }: {
-  subscription: RecurlySubscription
+  subscription: PaidSubscription
 }) {
   const { t } = useTranslation()
   const {
@@ -46,9 +46,9 @@ export function ActiveSubscription({
   if (showCancellation) return <CancelSubscription />
 
   const hasPendingPause =
-    subscription.recurly.state === 'active' &&
-    subscription.recurly.remainingPauseCycles &&
-    subscription.recurly.remainingPauseCycles > 0
+    subscription.payment.state === 'active' &&
+    subscription.payment.remainingPauseCycles &&
+    subscription.payment.remainingPauseCycles > 0
 
   const handleCancelPendingPauseClick = async () => {
     try {
@@ -96,19 +96,19 @@ export function ActiveSubscription({
           </>
         )}
         {!subscription.pendingPlan &&
-          subscription.recurly.additionalLicenses > 0 && (
+          subscription.payment.additionalLicenses > 0 && (
             <>
               {' '}
               <PendingAdditionalLicenses
-                additionalLicenses={subscription.recurly.additionalLicenses}
-                totalLicenses={subscription.recurly.totalLicenses}
+                additionalLicenses={subscription.payment.additionalLicenses}
+                totalLicenses={subscription.payment.totalLicenses}
               />
             </>
           )}
         {!recurlyLoadError &&
           !subscription.groupPlan &&
           !hasPendingPause &&
-          !subscription.recurly.hasPastDueInvoice && (
+          !subscription.payment.hasPastDueInvoice && (
             <>
               {' '}
               <OLButton
@@ -128,10 +128,10 @@ export function ActiveSubscription({
       {(!subscription.pendingPlan ||
         subscription.pendingPlan.name === subscription.plan.name) &&
         subscription.plan.groupPlan && <ContactSupportToChangeGroupPlan />}
-      {isInFreeTrial(subscription.recurly.trialEndsAt) &&
-        subscription.recurly.trialEndsAtFormatted && (
+      {isInFreeTrial(subscription.payment.trialEndsAt) &&
+        subscription.payment.trialEndsAtFormatted && (
           <TrialEnding
-            trialEndsAtFormatted={subscription.recurly.trialEndsAtFormatted}
+            trialEndsAtFormatted={subscription.payment.trialEndsAtFormatted}
           />
         )}
 
@@ -142,7 +142,7 @@ export function ActiveSubscription({
               i18nKey="your_subscription_will_pause_on"
               values={{
                 planName: subscription.plan.name,
-                pauseDate: subscription.recurly.nextPaymentDueAt,
+                pauseDate: subscription.payment.nextPaymentDueAt,
                 reactivationDate: getFormattedRenewalDate(),
               }}
               shouldUnescape
@@ -174,7 +174,7 @@ export function ActiveSubscription({
         <Trans
           i18nKey="next_payment_of_x_collectected_on_y"
           values={{
-            paymentAmmount: subscription.recurly.displayPrice,
+            paymentAmmount: subscription.payment.displayPrice,
             collectionDate: getFormattedRenewalDate(),
           }}
           shouldUnescape
@@ -192,7 +192,7 @@ export function ActiveSubscription({
       <PriceExceptions subscription={subscription} />
       <p className="d-inline-flex flex-wrap gap-1">
         <a
-          href={subscription.recurly.billingDetailsLink}
+          href={subscription.payment.billingDetailsLink}
           target="_blank"
           rel="noreferrer noopener"
           className="btn btn-secondary-info btn-secondary"
@@ -200,7 +200,7 @@ export function ActiveSubscription({
           {t('update_your_billing_details')}
         </a>{' '}
         <a
-          href={subscription.recurly.accountManagementLink}
+          href={subscription.payment.accountManagementLink}
           target="_blank"
           rel="noreferrer noopener"
           className="btn btn-secondary-info btn-secondary"

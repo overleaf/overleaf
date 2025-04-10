@@ -14,7 +14,7 @@ const UserUpdater = require('../User/UserUpdater')
 const { NotFoundError } = require('../Errors/Errors')
 
 /**
- * @import { RecurlySubscription, RecurlySubscriptionChange } from './RecurlyEntities'
+ * @import { PaymentProviderSubscription, PaymentProviderSubscriptionChange } from './PaymentProviderEntities'
  */
 
 async function validateNoSubscriptionInRecurly(userId) {
@@ -69,7 +69,7 @@ async function createSubscription(user, subscriptionDetails, recurlyTokenIds) {
  *
  * @param {string} userId
  * @param {string} planCode
- * @return {Promise<RecurlySubscriptionChange>}
+ * @return {Promise<PaymentProviderSubscriptionChange>}
  */
 async function previewSubscriptionChange(userId, planCode) {
   const subscription = await getSubscriptionForUser(userId)
@@ -283,7 +283,7 @@ async function _updateSubscriptionFromRecurly(subscription) {
  *
  * @param {string} userId
  * @param {string} addOnCode
- * @return {Promise<RecurlySubscriptionChange>}
+ * @return {Promise<PaymentProviderSubscriptionChange>}
  */
 async function previewAddonPurchase(userId, addOnCode) {
   const subscription = await getSubscriptionForUser(userId)
@@ -353,7 +353,7 @@ async function removeAddon(userId, addOnCode) {
  * Throws a NotFoundError if the subscription can't be found
  *
  * @param {string} userId
- * @return {Promise<RecurlySubscription>}
+ * @return {Promise<PaymentProviderSubscription>}
  */
 async function getSubscriptionForUser(userId) {
   const subscription =

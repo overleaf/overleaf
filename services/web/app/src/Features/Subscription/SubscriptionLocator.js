@@ -5,7 +5,7 @@ const logger = require('@overleaf/logger')
 const {
   AI_ADD_ON_CODE,
   isStandaloneAiAddOnPlanCode,
-} = require('./RecurlyEntities')
+} = require('./PaymentProviderEntities')
 require('./GroupPlansData') // make sure dynamic group plans are loaded
 
 const SubscriptionLocator = {

@@ -1,13 +1,13 @@
 import { useTranslation } from 'react-i18next'
-import { RecurlySubscription } from '../../../../../../types/subscription/dashboard/subscription'
+import { PaidSubscription } from '../../../../../../types/subscription/dashboard/subscription'
 
 type PriceExceptionsProps = {
-  subscription: RecurlySubscription
+  subscription: PaidSubscription
 }
 
 export function PriceExceptions({ subscription }: PriceExceptionsProps) {
   const { t } = useTranslation()
-  const { activeCoupons } = subscription.recurly
+  const { activeCoupons } = subscription.payment
 
   return (
     <>

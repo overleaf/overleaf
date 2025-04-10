@@ -49,7 +49,7 @@ const Modules = require('../../infrastructure/Modules')
 const UserGetter = require('../User/UserGetter')
 const {
   isStandaloneAiAddOnPlanCode,
-} = require('../Subscription/RecurlyEntities')
+} = require('../Subscription/PaymentProviderEntities')
 const SubscriptionController = require('../Subscription/SubscriptionController.js')
 const { formatCurrency } = require('../../util/currency')
 

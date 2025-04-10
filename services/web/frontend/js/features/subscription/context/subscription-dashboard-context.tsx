@@ -12,7 +12,7 @@ import {
   CustomSubscription,
   ManagedGroupSubscription,
   MemberGroupSubscription,
-  RecurlySubscription,
+  PaidSubscription,
 } from '../../../../../types/subscription/dashboard/subscription'
 import {
   Plan,
@@ -52,7 +52,7 @@ type SubscriptionDashboardContextValue = {
   managedPublishers: Publisher[]
   updateManagedInstitution: (institution: ManagedInstitution) => void
   modalIdShown?: SubscriptionDashModalIds
-  personalSubscription?: RecurlySubscription | CustomSubscription
+  personalSubscription?: PaidSubscription | CustomSubscription
   hasSubscription: boolean
   plans: Plan[]
   planCodeToChangeTo?: string
@@ -136,21 +136,21 @@ export function SubscriptionDashboardProvider({
   )
 
   const hasValidActiveSubscription = Boolean(
-    ['active', 'canceled'].includes(personalSubscription?.recurly?.state) ||
+    ['active', 'canceled'].includes(personalSubscription?.payment?.state) ||
       institutionMemberships?.length > 0 ||
       memberGroupSubscriptions?.length > 0
   )
 
   const getFormattedRenewalDate = useCallback(() => {
     if (
-      !personalSubscription.recurly.pausedAt ||
-      !personalSubscription.recurly.remainingPauseCycles
+      !personalSubscription.payment.pausedAt ||
+      !personalSubscription.payment.remainingPauseCycles
     ) {
-      return personalSubscription.recurly.nextPaymentDueAt
+      return personalSubscription.payment.nextPaymentDueAt
     }
-    const pausedDate = new Date(personalSubscription.recurly.pausedAt)
+    const pausedDate = new Date(personalSubscription.payment.pausedAt)
     pausedDate.setMonth(
-      pausedDate.getMonth() + personalSubscription.recurly.remainingPauseCycles
+      pausedDate.getMonth() + personalSubscription.payment.remainingPauseCycles
     )
     return formatTime(pausedDate, 'MMMM Do, YYYY')
   }, [personalSubscription])
@@ -167,9 +167,9 @@ export function SubscriptionDashboardProvider({
     if (
       isRecurlyLoaded() &&
       plansWithoutDisplayPrice &&
-      personalSubscription?.recurly
+      personalSubscription?.payment
     ) {
-      const { currency, taxRate } = personalSubscription.recurly
+      const { currency, taxRate } = personalSubscription.payment
       const fetchPlansDisplayPrices = async () => {
         for (const plan of plansWithoutDisplayPrice) {
           try {
@@ -203,11 +203,11 @@ export function SubscriptionDashboardProvider({
       groupPlanToChangeToCode &&
       groupPlanToChangeToSize &&
       groupPlanToChangeToUsage &&
-      personalSubscription?.recurly
+      personalSubscription?.payment
     ) {
       setQueryingGroupPlanToChangeToPrice(true)
 
-      const { currency, taxRate } = personalSubscription.recurly
+      const { currency, taxRate } = personalSubscription.payment
       const fetchGroupDisplayPrice = async () => {
         setGroupPlanToChangeToPriceError(false)
         let priceData

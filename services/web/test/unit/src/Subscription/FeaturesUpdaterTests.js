@@ -4,7 +4,7 @@ const sinon = require('sinon')
 const { ObjectId } = require('mongodb-legacy')
 const {
   AI_ADD_ON_CODE,
-} = require('../../../../app/src/Features/Subscription/RecurlyEntities')
+} = require('../../../../app/src/Features/Subscription/PaymentProviderEntities')
 
 const MODULE_PATH = '../../../../app/src/Features/Subscription/FeaturesUpdater'
 

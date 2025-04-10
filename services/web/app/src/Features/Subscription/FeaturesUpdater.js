@@ -14,7 +14,7 @@ const UserGetter = require('../User/UserGetter')
 const AnalyticsManager = require('../Analytics/AnalyticsManager')
 const Queues = require('../../infrastructure/Queues')
 const Modules = require('../../infrastructure/Modules')
-const { AI_ADD_ON_CODE } = require('./RecurlyEntities')
+const { AI_ADD_ON_CODE } = require('./PaymentProviderEntities')
 
 /**
  * Enqueue a job for refreshing features for the given user

@@ -7,24 +7,24 @@ const OError = require('@overleaf/o-error')
 const { callbackify } = require('util')
 const UserGetter = require('../User/UserGetter')
 const {
-  RecurlySubscription,
-  RecurlySubscriptionAddOn,
-  RecurlySubscriptionChange,
+  PaymentProviderSubscription,
+  PaymentProviderSubscriptionAddOn,
+  PaymentProviderSubscriptionChange,
   PaypalPaymentMethod,
   CreditCardPaymentMethod,
-  RecurlyAddOn,
-  RecurlyPlan,
-  RecurlyCoupon,
-  RecurlyAccount,
-  RecurlyImmediateCharge,
-} = require('./RecurlyEntities')
+  PaymentProviderAddOn,
+  PaymentProviderPlan,
+  PaymentProviderCoupon,
+  PaymentProviderAccount,
+  PaymentProviderImmediateCharge,
+} = require('./PaymentProviderEntities')
 const {
   MissingBillingInfoError,
   SubtotalLimitExceededError,
 } = require('./Errors')
 
 /**
- * @import { RecurlySubscriptionChangeRequest } from './RecurlyEntities'
+ * @import { PaymentProviderSubscriptionChangeRequest } from './PaymentProviderEntities'
  * @import { PaymentMethod } from './types'
  */
 
@@ -37,7 +37,7 @@ const client = new recurly.Client(recurlyApiKey)
  * Get account for a given user
  *
  * @param {string} userId
- * @return {Promise<RecurlyAccount | null>}
+ * @return {Promise<PaymentProviderAccount | null>}
  */
 async function getAccountForUserId(userId) {
   try {
@@ -76,7 +76,7 @@ async function createAccountForUserId(userId) {
  * Get active coupons for a given user
  *
  * @param {string} userId
- * @return {Promise<RecurlyCoupon[]>}
+ * @return {Promise<PaymentProviderCoupon[]>}
  */
 async function getActiveCouponsForUserId(userId) {
   try {
@@ -104,7 +104,7 @@ async function getActiveCouponsForUserId(userId) {
  * Get a subscription from Recurly
  *
  * @param {string} subscriptionId
- * @return {Promise<RecurlySubscription>}
+ * @return {Promise<PaymentProviderSubscription>}
  */
 async function getSubscription(subscriptionId) {
   const subscription = await client.getSubscription(`uuid-${subscriptionId}`)
@@ -118,7 +118,7 @@ async function getSubscription(subscriptionId) {
  * error if the user has more than one subscription.
  *
  * @param {string} userId
- * @return {Promise<RecurlySubscription | null>}
+ * @return {Promise<PaymentProviderSubscription | null>}
  */
 async function getSubscriptionForUser(userId) {
   try {
@@ -153,7 +153,7 @@ async function getSubscriptionForUser(userId) {
 /**
  * Request a susbcription change from Recurly
  *
- * @param {RecurlySubscriptionChangeRequest} changeRequest
+ * @param {PaymentProviderSubscriptionChangeRequest} changeRequest
  */
 async function applySubscriptionChangeRequest(changeRequest) {
   const body = subscriptionChangeRequestToApi(changeRequest)
@@ -193,8 +193,8 @@ async function applySubscriptionChangeRequest(changeRequest) {
 /**
  * Preview a subscription change
  *
- * @param {RecurlySubscriptionChangeRequest} changeRequest
- * @return {Promise<RecurlySubscriptionChange>}
+ * @param {PaymentProviderSubscriptionChangeRequest} changeRequest
+ * @return {Promise<PaymentProviderSubscriptionChange>}
  */
 async function previewSubscriptionChange(changeRequest) {
   const body = subscriptionChangeRequestToApi(changeRequest)
@@ -303,7 +303,7 @@ async function getPaymentMethod(userId) {
  *
  * @param {string} planCode
  * @param {string} addOnCode
- * @return {Promise<RecurlyAddOn>}
+ * @return {Promise<PaymentProviderAddOn>}
  */
 async function getAddOn(planCode, addOnCode) {
   const addOn = await client.getPlanAddOn(
@@ -317,7 +317,7 @@ async function getAddOn(planCode, addOnCode) {
  * Get the configuration for a given plan
  *
  * @param {string} planCode
- * @return {Promise<RecurlyPlan>}
+ * @return {Promise<PaymentProviderPlan>}
  */
 async function getPlan(planCode) {
   const plan = await client.getPlan(`code-${planCode}`)
@@ -330,10 +330,10 @@ function subscriptionIsCanceledOrExpired(subscription) {
 }
 
 /**
- * Build a RecurlyAccount from Recurly API data
+ * Build a PaymentProviderAccount from Recurly API data
  *
  * @param {recurly.Account} apiAccount
- * @return {RecurlyAccount}
+ * @return {PaymentProviderAccount}
  */
 function accountFromApi(apiAccount) {
   if (apiAccount.code == null || apiAccount.email == null) {
@@ -341,7 +341,7 @@ function accountFromApi(apiAccount) {
       account: apiAccount,
     })
   }
-  return new RecurlyAccount({
+  return new PaymentProviderAccount({
     code: apiAccount.code,
     email: apiAccount.email,
     hasPastDueInvoice: apiAccount.hasPastDueInvoice ?? false,
@@ -349,10 +349,10 @@ function accountFromApi(apiAccount) {
 }
 
 /**
- * Build a RecurlyCoupon from Recurly API data
+ * Build a PaymentProviderCoupon from Recurly API data
  *
  * @param {recurly.CouponRedemption} apiRedemption
- * @return {RecurlyCoupon}
+ * @return {PaymentProviderCoupon}
  */
 function couponFromApi(apiRedemption) {
   if (apiRedemption.coupon == null || apiRedemption.coupon.code == null) {
@@ -360,7 +360,7 @@ function couponFromApi(apiRedemption) {
       coupon: apiRedemption,
     })
   }
-  return new RecurlyCoupon({
+  return new PaymentProviderCoupon({
     code: apiRedemption.coupon.code,
     name: apiRedemption.coupon.name ?? '',
     description: apiRedemption.coupon.hostedPageDescription ?? '',
@@ -368,10 +368,10 @@ function couponFromApi(apiRedemption) {
 }
 
 /**
- * Build a RecurlySubscription from Recurly API data
+ * Build a PaymentProviderSubscription from Recurly API data
  *
  * @param {recurly.Subscription} apiSubscription
- * @return {RecurlySubscription}
+ * @return {PaymentProviderSubscription}
  */
 function subscriptionFromApi(apiSubscription) {
   if (
@@ -394,7 +394,7 @@ function subscriptionFromApi(apiSubscription) {
     })
   }
 
-  const subscription = new RecurlySubscription({
+  const subscription = new PaymentProviderSubscription({
     id: apiSubscription.uuid,
     userId: apiSubscription.account.code,
     planCode: apiSubscription.plan.code,
@@ -427,10 +427,10 @@ function subscriptionFromApi(apiSubscription) {
 }
 
 /**
- * Build a RecurlySubscriptionAddOn from Recurly API data
+ * Build a PaymentProviderSubscriptionAddOn from Recurly API data
  *
  * @param {recurly.SubscriptionAddOn} addOn
- * @return {RecurlySubscriptionAddOn}
+ * @return {PaymentProviderSubscriptionAddOn}
  */
 function subscriptionAddOnFromApi(addOn) {
   if (
@@ -442,7 +442,7 @@ function subscriptionAddOnFromApi(addOn) {
     throw new OError('Invalid Recurly add-on', { addOn })
   }
 
-  return new RecurlySubscriptionAddOn({
+  return new PaymentProviderSubscriptionAddOn({
     code: addOn.addOn.code,
     name: addOn.addOn.name,
     quantity: addOn.quantity ?? 1,
@@ -451,11 +451,11 @@ function subscriptionAddOnFromApi(addOn) {
 }
 
 /**
- * Build a RecurlySubscriptionChange from Recurly API data
+ * Build a PaymentProviderSubscriptionChange from Recurly API data
  *
- * @param {RecurlySubscription} subscription - the current subscription
+ * @param {PaymentProviderSubscription} subscription - the current subscription
  * @param {recurly.SubscriptionChange} subscriptionChange - the subscription change returned from the API
- * @return {RecurlySubscriptionChange}
+ * @return {PaymentProviderSubscriptionChange}
  */
 function subscriptionChangeFromApi(subscription, subscriptionChange) {
   if (
@@ -472,7 +472,7 @@ function subscriptionChangeFromApi(subscription, subscriptionChange) {
     subscriptionAddOnFromApi
   )
 
-  return new RecurlySubscriptionChange({
+  return new PaymentProviderSubscriptionChange({
     subscription,
     nextPlanCode: subscriptionChange.plan.code,
     nextPlanName: subscriptionChange.plan.name,
@@ -486,7 +486,7 @@ function subscriptionChangeFromApi(subscription, subscriptionChange) {
  * Compute immediate charge based on invoice collection
  *
  * @param {recurly.SubscriptionChange} subscriptionChange - the subscription change returned from the API
- * @return {RecurlyImmediateCharge}
+ * @return {PaymentProviderImmediateCharge}
  */
 function computeImmediateCharge(subscriptionChange) {
   const roundToTwoDecimal = (/** @type {number} */ num) =>
@@ -506,7 +506,7 @@ function computeImmediateCharge(subscriptionChange) {
     tax = roundToTwoDecimal(tax + (creditInvoice.tax ?? 0))
     discount = roundToTwoDecimal(discount + (creditInvoice.discount ?? 0))
   }
-  return new RecurlyImmediateCharge({
+  return new PaymentProviderImmediateCharge({
     subtotal,
     total,
     tax,
@@ -540,41 +540,41 @@ function paymentMethodFromApi(billingInfo) {
 }
 
 /**
- * Build a RecurlyAddOn from Recurly API data
+ * Build a PaymentProviderAddOn from Recurly API data
  *
  * @param {recurly.AddOn} addOn
- * @return {RecurlyAddOn}
+ * @return {PaymentProviderAddOn}
  */
 function addOnFromApi(addOn) {
   if (addOn.code == null || addOn.name == null) {
     throw new OError('Invalid Recurly add-on', { addOn })
   }
-  return new RecurlyAddOn({
+  return new PaymentProviderAddOn({
     code: addOn.code,
     name: addOn.name,
   })
 }
 
 /**
- * Build a RecurlyPlan from Recurly API data
+ * Build a PaymentProviderPlan from Recurly API data
  *
  * @param {recurly.Plan} plan
- * @return {RecurlyPlan}
+ * @return {PaymentProviderPlan}
  */
 function planFromApi(plan) {
   if (plan.code == null || plan.name == null) {
     throw new OError('Invalid Recurly add-on', { plan })
   }
-  return new RecurlyPlan({
+  return new PaymentProviderPlan({
     code: plan.code,
     name: plan.name,
   })
 }
 
 /**
- * Build an API request from a RecurlySubscriptionChangeRequest
+ * Build an API request from a PaymentProviderSubscriptionChangeRequest
  *
- * @param {RecurlySubscriptionChangeRequest} changeRequest
+ * @param {PaymentProviderSubscriptionChangeRequest} changeRequest
  * @return {recurly.SubscriptionChangeCreate}
  */
 function subscriptionChangeRequestToApi(changeRequest) {

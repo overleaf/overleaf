@@ -1,6 +1,6 @@
 import { useTranslation, Trans } from 'react-i18next'
 import { useSubscriptionDashboardContext } from '../../../../context/subscription-dashboard-context'
-import { RecurlySubscription } from '../../../../../../../../types/subscription/dashboard/subscription'
+import { PaidSubscription } from '../../../../../../../../types/subscription/dashboard/subscription'
 import { CancelSubscriptionButton } from './cancel-subscription-button'
 import { CancelSubscription } from './cancel-plan/cancel-subscription'
 import { ChangePlanModal } from './change-plan/modals/change-plan-modal'
@@ -14,7 +14,7 @@ import { ConfirmUnpauseSubscriptionModal } from './confirm-unpause-modal'
 export function PausedSubscription({
   subscription,
 }: {
-  subscription: RecurlySubscription
+  subscription: PaidSubscription
 }) {
   const { t } = useTranslation()
   const {
@@ -67,7 +67,7 @@ export function PausedSubscription({
 
       <p className="d-inline-flex flex-wrap gap-1">
         <a
-          href={subscription.recurly.billingDetailsLink}
+          href={subscription.payment.billingDetailsLink}
           target="_blank"
           rel="noreferrer noopener"
           className="btn btn-secondary-info btn-secondary"
@@ -75,7 +75,7 @@ export function PausedSubscription({
           {t('update_your_billing_details')}
         </a>{' '}
         <a
-          href={subscription.recurly.accountManagementLink}
+          href={subscription.payment.accountManagementLink}
           target="_blank"
           rel="noreferrer noopener"
           className="btn btn-secondary-info btn-secondary"

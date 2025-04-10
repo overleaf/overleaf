@@ -1,5 +1,5 @@
 import { Trans, useTranslation } from 'react-i18next'
-import { RecurlySubscription } from '../../../../../../types/subscription/dashboard/subscription'
+import { PaidSubscription } from '../../../../../../types/subscription/dashboard/subscription'
 import { PausedSubscription } from './states/active/paused'
 import { ActiveSubscriptionNew } from '@/features/subscription/components/dashboard/states/active/active-new'
 import { CanceledSubscription } from './states/canceled'
@@ -11,7 +11,7 @@ import OLNotification from '@/features/ui/components/ol/ol-notification'
 function PastDueSubscriptionAlert({
   subscription,
 }: {
-  subscription: RecurlySubscription
+  subscription: PaidSubscription
 }) {
   const { t } = useTranslation()
   return (
@@ -21,7 +21,7 @@ function PastDueSubscriptionAlert({
         <>
           {t('account_has_past_due_invoice_change_plan_warning')}{' '}
           <a
-            href={subscription.recurly.accountManagementLink}
+            href={subscription.payment.accountManagementLink}
             target="_blank"
             rel="noreferrer noopener"
           >
@@ -57,10 +57,10 @@ function RedirectAlerts() {
 function PersonalSubscriptionStates({
   subscription,
 }: {
-  subscription: RecurlySubscription
+  subscription: PaidSubscription
 }) {
   const { t } = useTranslation()
-  const state = subscription?.recurly.state
+  const state = subscription?.payment.state
 
   if (state === 'active') {
     // This version handles subscriptions with and without addons
@@ -83,7 +83,7 @@ function PersonalSubscription() {
 
   if (!personalSubscription) return null
 
-  if (!('recurly' in personalSubscription)) {
+  if (!('payment' in personalSubscription)) {
     return (
       <p>
         <Trans
@@ -97,11 +97,11 @@ function PersonalSubscription() {
   return (
     <>
       <RedirectAlerts />
-      {personalSubscription.recurly.hasPastDueInvoice && (
+      {personalSubscription.payment.hasPastDueInvoice && (
         <PastDueSubscriptionAlert subscription={personalSubscription} />
       )}
       <PersonalSubscriptionStates
-        subscription={personalSubscription as RecurlySubscription}
+        subscription={personalSubscription as PaidSubscription}
       />
       {recurlyLoadError && (
         <OLNotification
