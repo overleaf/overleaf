@@ -22,6 +22,7 @@ function DefaultNavbar(props: DefaultNavbarMetadata) {
     canDisplayAdminRedirect,
     canDisplaySplitTestMenu,
     canDisplaySurveyMenu,
+    canDisplayScriptLogMenu,
     enableUpgradeButton,
     suppressNavbarRight,
     suppressNavContentLinks,
@@ -101,6 +102,7 @@ function DefaultNavbar(props: DefaultNavbarMetadata) {
                       canDisplayAdminRedirect={canDisplayAdminRedirect}
                       canDisplaySplitTestMenu={canDisplaySplitTestMenu}
                       canDisplaySurveyMenu={canDisplaySurveyMenu}
+                      canDisplayScriptLogMenu={canDisplayScriptLogMenu}
                       adminUrl={adminUrl}
                     />
                   ) : null}

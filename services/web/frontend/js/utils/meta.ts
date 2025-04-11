@@ -51,6 +51,7 @@ import { Publisher } from '../../../types/subscription/dashboard/publisher'
 import { SubscriptionChangePreview } from '../../../types/subscription/subscription-change-preview'
 import { DefaultNavbarMetadata } from '@/features/ui/components/types/default-navbar-metadata'
 import { FooterMetadata } from '@/features/ui/components/types/footer-metadata'
+import type { ScriptLogType } from '../../../modules/admin-panel/frontend/js/features/script-logs/script-log'
 export interface Meta {
   'ol-ExposedSettings': ExposedSettings
   'ol-addonPrices': Record<string, { annual: string; monthly: string }>
@@ -162,6 +163,7 @@ export interface Meta {
   'ol-oauthProviders': OAuthProviders
   'ol-odcRole': string
   'ol-overallThemes': OverallThemeMeta[]
+  'ol-pages': number
   'ol-passwordStrengthOptions': PasswordStrengthOptions
   'ol-paywallPlans': { [key: string]: string }
   'ol-personalAccessTokens': AccessToken[] | undefined
@@ -188,6 +190,8 @@ export interface Meta {
   'ol-recurlySubdomain': string
   'ol-ro-mirror-on-client-no-local-storage': boolean
   'ol-samlError': SAMLError | undefined
+  'ol-script-log': ScriptLogType
+  'ol-script-logs': ScriptLogType[]
   'ol-settingsGroupSSO': { enabled: boolean } | undefined
   'ol-settingsPlans': Plan[]
   'ol-shouldAllowEditingDetails': boolean

@@ -81,6 +81,7 @@ const db = {
   userAuditLogEntries: internalDb.collection('userAuditLogEntries'),
   users: internalDb.collection('users'),
   onboardingDataCollection: internalDb.collection('onboardingDataCollection'),
+  scriptLogs: internalDb.collection('scriptLogs'),
 }
 
 const connectionPromise = mongoClient.connect()

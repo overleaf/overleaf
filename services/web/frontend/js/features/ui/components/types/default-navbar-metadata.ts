@@ -10,6 +10,7 @@ export type DefaultNavbarMetadata = {
   canDisplayAdminRedirect: boolean
   canDisplaySplitTestMenu: boolean
   canDisplaySurveyMenu: boolean
+  canDisplayScriptLogMenu: boolean
   enableUpgradeButton: boolean
   suppressNavbarRight: boolean
   suppressNavContentLinks: boolean

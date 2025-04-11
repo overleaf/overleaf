@@ -27,6 +27,7 @@ nav.navbar.navbar-default.navbar-main.navbar-expand-lg(class={
 		- var canDisplayAdminRedirect = canRedirectToAdminDomain()
 		- var canDisplaySplitTestMenu = hasFeature('saas') && (canDisplayAdminMenu || (getSessionUser() && getSessionUser().staffAccess && (getSessionUser().staffAccess.splitTestMetrics || getSessionUser().staffAccess.splitTestManagement)))
 		- var canDisplaySurveyMenu = hasFeature('saas') && canDisplayAdminMenu
+		- var canDisplayScriptLogMenu = hasFeature('saas') && canDisplayAdminMenu
 
 		if (typeof suppressNavbarRight === "undefined")
 			button.navbar-toggler.collapsed(
@@ -66,6 +67,8 @@ nav.navbar.navbar-default.navbar-main.navbar-expand-lg(class={
 									+dropdown-menu-link-item()(href="/admin/split-test") Manage Feature Flags
 								if canDisplaySurveyMenu
 									+dropdown-menu-link-item()(href="/admin/survey") Manage Surveys
+								if canDisplayScriptLogMenu
+									+dropdown-menu-link-item()(href="/admin/script-logs") View Script Logs
 
 					// loop over header_extras
 					each item in nav.header_extras

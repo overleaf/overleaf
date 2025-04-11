@@ -30,6 +30,7 @@ nav.navbar.navbar-default.navbar-main.website-redesign-navbar
 		- var canDisplayAdminRedirect = canRedirectToAdminDomain()
 		- var canDisplaySplitTestMenu = hasFeature('saas') && (canDisplayAdminMenu || (getSessionUser() && getSessionUser().staffAccess && (getSessionUser().staffAccess.splitTestMetrics || getSessionUser().staffAccess.splitTestManagement)))
 		- var canDisplaySurveyMenu = hasFeature('saas') && canDisplayAdminMenu
+		- var canDisplayScriptLogMenu = hasFeature('saas') && canDisplayAdminMenu
 
 		if (typeof(suppressNavbarRight) == "undefined")
 			.navbar-collapse.collapse#navbar-main-collapse
@@ -66,6 +67,9 @@ nav.navbar.navbar-default.navbar-main.website-redesign-navbar
 								if canDisplaySurveyMenu
 									li
 										a(href="/admin/survey") Manage Surveys
+								if canDisplayScriptLogMenu
+									li
+										a(href="/admin/script-logs") View Script Logs
 
 					// loop over header_extras
 					each item in nav.header_extras
