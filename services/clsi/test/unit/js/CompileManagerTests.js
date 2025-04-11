@@ -199,7 +199,7 @@ describe('CompileManager', function () {
         const error = new Error('locked')
         this.LockManager.acquire.throws(error)
         await expect(
-          this.CompileManager.promises.doCompileWithLock(this.request)
+          this.CompileManager.promises.doCompileWithLock(this.request, {}, {})
         ).to.be.rejectedWith(error)
       })
 
@@ -217,7 +217,9 @@ describe('CompileManager', function () {
     describe('normally', function () {
       beforeEach(async function () {
         this.result = await this.CompileManager.promises.doCompileWithLock(
-          this.request
+          this.request,
+          {},
+          {}
         )
       })
 
@@ -271,7 +273,11 @@ describe('CompileManager', function () {
     describe('with draft mode', function () {
       beforeEach(async function () {
         this.request.draft = true
-        await this.CompileManager.promises.doCompileWithLock(this.request)
+        await this.CompileManager.promises.doCompileWithLock(
+          this.request,
+          {},
+          {}
+        )
       })
 
       it('should inject the draft mode header', function () {
@@ -284,7 +290,11 @@ describe('CompileManager', function () {
     describe('with a check option', function () {
       beforeEach(async function () {
         this.request.check = 'error'
-        await this.CompileManager.promises.doCompileWithLock(this.request)
+        await this.CompileManager.promises.doCompileWithLock(
+          this.request,
+          {},
+          {}
+        )
       })
 
       it('should run chktex', function () {
@@ -316,7 +326,11 @@ describe('CompileManager', function () {
       beforeEach(async function () {
         this.request.rootResourcePath = 'main.Rtex'
         this.request.check = 'error'
-        await this.CompileManager.promises.doCompileWithLock(this.request)
+        await this.CompileManager.promises.doCompileWithLock(
+          this.request,
+          {},
+          {}
+        )
       })
 
       it('should not run chktex', function () {
@@ -345,7 +359,7 @@ describe('CompileManager', function () {
         error.timedout = true
         this.LatexRunner.promises.runLatex.rejects(error)
         await expect(
-          this.CompileManager.promises.doCompileWithLock(this.request)
+          this.CompileManager.promises.doCompileWithLock(this.request, {}, {})
         ).to.be.rejected
       })
 
@@ -368,7 +382,7 @@ describe('CompileManager', function () {
         error.terminated = true
         this.LatexRunner.promises.runLatex.rejects(error)
         await expect(
-          this.CompileManager.promises.doCompileWithLock(this.request)
+          this.CompileManager.promises.doCompileWithLock(this.request, {}, {})
         ).to.be.rejected
       })
 

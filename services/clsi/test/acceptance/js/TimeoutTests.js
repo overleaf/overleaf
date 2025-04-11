@@ -11,6 +11,7 @@
 const Client = require('./helpers/Client')
 const request = require('request')
 const ClsiApp = require('./helpers/ClsiApp')
+const { expect } = require('chai')
 
 describe('Timed out compile', function () {
   before(function (done) {
@@ -52,6 +53,10 @@ describe('Timed out compile', function () {
 
   it('should return a timedout status', function () {
     return this.body.compile.status.should.equal('timedout')
+  })
+
+  it('should return isInitialCompile flag', function () {
+    expect(this.body.compile.stats.isInitialCompile).to.equal(1)
   })
 
   return it('should return the log output file name', function () {

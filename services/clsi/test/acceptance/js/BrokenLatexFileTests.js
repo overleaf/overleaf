@@ -11,6 +11,7 @@
 const Client = require('./helpers/Client')
 const request = require('request')
 const ClsiApp = require('./helpers/ClsiApp')
+const { expect } = require('chai')
 
 describe('Broken LaTeX file', function () {
   before(function (done) {
@@ -62,6 +63,10 @@ Hello world
       return this.body.compile.status.should.equal('failure')
     })
 
+    it('should return isInitialCompile flag', function () {
+      expect(this.body.compile.stats.isInitialCompile).to.equal(1)
+    })
+
     it('should return output files', function () {
       // NOTE: No output.pdf file.
       this.body.compile.outputFiles
@@ -96,6 +101,10 @@ Hello world
 
     it('should return a failure status', function () {
       return this.body.compile.status.should.equal('failure')
+    })
+
+    it('should not return isInitialCompile flag', function () {
+      expect(this.body.compile.stats.isInitialCompile).to.not.exist
     })
 
     it('should return output files', function () {

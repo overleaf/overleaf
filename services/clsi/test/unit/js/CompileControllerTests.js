@@ -80,16 +80,21 @@ describe('CompileController', function () {
       this.timings = { bar: 2 }
       this.res.status = sinon.stub().returnsThis()
       this.res.send = sinon.stub()
+
+      this.CompileManager.doCompileWithLock = sinon
+        .stub()
+        .callsFake((_req, stats, timings, cb) => {
+          Object.assign(stats, this.stats)
+          Object.assign(timings, this.timings)
+          cb(null, {
+            outputFiles: this.output_files,
+            buildId: this.buildId,
+          })
+        })
     })
 
     describe('successfully', function () {
       beforeEach(function () {
-        this.CompileManager.doCompileWithLock = sinon.stub().yields(null, {
-          outputFiles: this.output_files,
-          stats: this.stats,
-          timings: this.timings,
-          buildId: this.buildId,
-        })
         this.CompileController.compile(this.req, this.res)
       })
 
@@ -133,12 +138,6 @@ describe('CompileController', function () {
     describe('without a outputUrlPrefix', function () {
       beforeEach(function () {
         this.Settings.apis.clsi.outputUrlPrefix = ''
-        this.CompileManager.doCompileWithLock = sinon.stub().yields(null, {
-          outputFiles: this.output_files,
-          stats: this.stats,
-          timings: this.timings,
-          buildId: this.buildId,
-        })
         this.CompileController.compile(this.req, this.res)
       })
 
@@ -177,33 +176,35 @@ describe('CompileController', function () {
             build: 1234,
           },
         ]
-        this.CompileManager.doCompileWithLock = sinon.stub().yields(null, {
-          outputFiles: this.output_files,
-          stats: this.stats,
-          timings: this.timings,
-          buildId: this.buildId,
-        })
+        this.CompileManager.doCompileWithLock = sinon
+          .stub()
+          .callsFake((_req, stats, timings, cb) => {
+            Object.assign(stats, this.stats)
+            Object.assign(timings, this.timings)
+            cb(null, {
+              outputFiles: this.output_files,
+              buildId: this.buildId,
+            })
+          })
         this.CompileController.compile(this.req, this.res)
       })
 
       it('should return the JSON response with status failure', function () {
         this.res.status.calledWith(200).should.equal(true)
-        this.res.send
-          .calledWith({
-            compile: {
-              status: 'failure',
-              error: null,
-              stats: this.stats,
-              timings: this.timings,
-              outputUrlPrefix: '/zone/b',
-              buildId: this.buildId,
-              outputFiles: this.output_files.map(file => ({
-                url: `${this.Settings.apis.clsi.url}/project/${this.project_id}/build/${file.build}/output/${file.path}`,
-                ...file,
-              })),
-            },
-          })
-          .should.equal(true)
+        this.res.send.should.have.been.calledWith({
+          compile: {
+            status: 'failure',
+            error: null,
+            stats: this.stats,
+            timings: this.timings,
+            outputUrlPrefix: '/zone/b',
+            buildId: this.buildId,
+            outputFiles: this.output_files.map(file => ({
+              url: `${this.Settings.apis.clsi.url}/project/${this.project_id}/build/${file.build}/output/${file.path}`,
+              ...file,
+            })),
+          },
+        })
       })
     })
 
@@ -222,33 +223,35 @@ describe('CompileController', function () {
             build: 1234,
           },
         ]
-        this.CompileManager.doCompileWithLock = sinon.stub().yields(null, {
-          outputFiles: this.output_files,
-          stats: this.stats,
-          timings: this.timings,
-          buildId: this.buildId,
-        })
+        this.CompileManager.doCompileWithLock = sinon
+          .stub()
+          .callsFake((_req, stats, timings, cb) => {
+            Object.assign(stats, this.stats)
+            Object.assign(timings, this.timings)
+            cb(null, {
+              outputFiles: this.output_files,
+              buildId: this.buildId,
+            })
+          })
         this.CompileController.compile(this.req, this.res)
       })
 
       it('should return the JSON response with status failure', function () {
         this.res.status.calledWith(200).should.equal(true)
-        this.res.send
-          .calledWith({
-            compile: {
-              status: 'failure',
-              error: null,
-              stats: this.stats,
-              buildId: this.buildId,
-              timings: this.timings,
-              outputUrlPrefix: '/zone/b',
-              outputFiles: this.output_files.map(file => ({
-                url: `${this.Settings.apis.clsi.url}/project/${this.project_id}/build/${file.build}/output/${file.path}`,
-                ...file,
-              })),
-            },
-          })
-          .should.equal(true)
+        this.res.send.should.have.been.calledWith({
+          compile: {
+            status: 'failure',
+            error: null,
+            stats: this.stats,
+            buildId: this.buildId,
+            timings: this.timings,
+            outputUrlPrefix: '/zone/b',
+            outputFiles: this.output_files.map(file => ({
+              url: `${this.Settings.apis.clsi.url}/project/${this.project_id}/build/${file.build}/output/${file.path}`,
+              ...file,
+            })),
+          },
+        })
       })
     })
 
@@ -258,7 +261,11 @@ describe('CompileController', function () {
         error.buildId = this.buildId
         this.CompileManager.doCompileWithLock = sinon
           .stub()
-          .callsArgWith(1, error, null)
+          .callsFake((_req, stats, timings, cb) => {
+            Object.assign(stats, this.stats)
+            Object.assign(timings, this.timings)
+            cb(error)
+          })
         this.CompileController.compile(this.req, this.res)
       })
 
@@ -272,9 +279,8 @@ describe('CompileController', function () {
               outputUrlPrefix: '/zone/b',
               outputFiles: [],
               buildId: this.buildId,
-              // JSON.stringify will omit these
-              stats: undefined,
-              timings: undefined,
+              stats: this.stats,
+              timings: this.timings,
             },
           })
           .should.equal(true)
@@ -288,7 +294,11 @@ describe('CompileController', function () {
         )
         this.CompileManager.doCompileWithLock = sinon
           .stub()
-          .callsArgWith(1, error, null)
+          .callsFake((_req, stats, timings, cb) => {
+            Object.assign(stats, this.stats)
+            Object.assign(timings, this.timings)
+            cb(error)
+          })
         this.CompileController.compile(this.req, this.res)
       })
 
@@ -301,9 +311,10 @@ describe('CompileController', function () {
               error: 'too many concurrent compile requests',
               outputUrlPrefix: '/zone/b',
               outputFiles: [],
+              stats: this.stats,
+              timings: this.timings,
+              // JSON.stringify will omit these undefined values
               buildId: undefined,
-              stats: undefined,
-              timings: undefined,
             },
           })
           .should.equal(true)
@@ -316,7 +327,11 @@ describe('CompileController', function () {
         this.error.timedout = true
         this.CompileManager.doCompileWithLock = sinon
           .stub()
-          .callsArgWith(1, this.error, null)
+          .callsFake((_req, stats, timings, cb) => {
+            Object.assign(stats, this.stats)
+            Object.assign(timings, this.timings)
+            cb(this.error)
+          })
         this.CompileController.compile(this.req, this.res)
       })
 
@@ -329,10 +344,10 @@ describe('CompileController', function () {
               error: this.message,
               outputUrlPrefix: '/zone/b',
               outputFiles: [],
-              // JSON.stringify will omit these
+              stats: this.stats,
+              timings: this.timings,
+              // JSON.stringify will omit these undefined values
               buildId: undefined,
-              stats: undefined,
-              timings: undefined,
             },
           })
           .should.equal(true)
@@ -343,7 +358,11 @@ describe('CompileController', function () {
       beforeEach(function () {
         this.CompileManager.doCompileWithLock = sinon
           .stub()
-          .callsArgWith(1, null, [])
+          .callsFake((_req, stats, timings, cb) => {
+            Object.assign(stats, this.stats)
+            Object.assign(timings, this.timings)
+            cb(null, {})
+          })
         this.CompileController.compile(this.req, this.res)
       })
 
@@ -356,10 +375,10 @@ describe('CompileController', function () {
               status: 'failure',
               outputUrlPrefix: '/zone/b',
               outputFiles: [],
-              // JSON.stringify will omit these
+              stats: this.stats,
+              timings: this.timings,
+              // JSON.stringify will omit these undefined values
               buildId: undefined,
-              stats: undefined,
-              timings: undefined,
             },
           })
           .should.equal(true)

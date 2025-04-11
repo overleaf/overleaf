@@ -46,24 +46,22 @@ function getOutputDir(projectId, userId) {
   return Path.join(Settings.path.outputDir, getCompileName(projectId, userId))
 }
 
-async function doCompileWithLock(request) {
+async function doCompileWithLock(request, stats, timings) {
   const compileDir = getCompileDir(request.project_id, request.user_id)
   request.isInitialCompile =
     (await fsPromises.mkdir(compileDir, { recursive: true })) === compileDir
   // prevent simultaneous compiles
   const lock = LockManager.acquire(compileDir)
   try {
-    return await doCompile(request)
+    return await doCompile(request, stats, timings)
   } finally {
     lock.release()
   }
 }
 
-async function doCompile(request) {
+async function doCompile(request, stats, timings) {
   const { project_id: projectId, user_id: userId } = request
   const compileDir = getCompileDir(request.project_id, request.user_id)
-  const stats = {}
-  const timings = {}
 
   const timerE2E = new Metrics.Timer(
     'compile-e2e-v2',
@@ -321,7 +319,7 @@ async function doCompile(request) {
     emitPdfStats(stats, timings, request)
   }
 
-  return { outputFiles, stats, timings, buildId }
+  return { outputFiles, buildId }
 }
 
 async function _saveOutputFiles({

@@ -226,8 +226,8 @@ module.exports = CompileController = {
                 timeout: limits.timeout === 60 ? 'short' : 'long',
                 server: clsiServerId?.includes('-c2d-') ? 'faster' : 'normal',
                 isAutoCompile,
-                isInitialCompile: stats.isInitialCompile === 1,
-                restoredClsiCache: stats.restoredClsiCache === 1,
+                isInitialCompile: stats?.isInitialCompile === 1,
+                restoredClsiCache: stats?.restoredClsiCache === 1,
                 stopOnFirstError,
               }
             )
