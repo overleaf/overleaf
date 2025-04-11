@@ -341,44 +341,6 @@ function getLatestSnapshotFromChunk(data) {
   }
 }
 
-async function getChangesSince(projectId, historyId, sinceVersion) {
-  const allChanges = []
-  let nextVersion
-  while (true) {
-    let data
-    if (nextVersion) {
-      data = await HistoryStoreManager.promises.getChunkAtVersion(
-        projectId,
-        historyId,
-        nextVersion
-      )
-    } else {
-      data = await HistoryStoreManager.promises.getMostRecentChunk(
-        projectId,
-        historyId
-      )
-    }
-    if (data == null || data.chunk == null) {
-      throw new OError('undefined chunk')
-    }
-    const chunk = Core.Chunk.fromRaw(data.chunk)
-    if (sinceVersion > chunk.getEndVersion()) {
-      throw new OError('requested version past the end')
-    }
-    const changes = chunk.getChanges()
-    if (chunk.getStartVersion() > sinceVersion) {
-      allChanges.unshift(...changes)
-      nextVersion = chunk.getStartVersion()
-    } else {
-      allChanges.unshift(
-        ...changes.slice(sinceVersion - chunk.getStartVersion())
-      )
-      break
-    }
-  }
-  return allChanges
-}
-
 async function getChangesInChunkSince(projectId, historyId, sinceVersion) {
   const latestChunk = Core.Chunk.fromRaw(
     (
@@ -426,7 +388,6 @@ async function _loadFilesLimit(snapshot, kind, blobStore) {
 
 // EXPORTS
 
-const getChangesSinceCb = callbackify(getChangesSince)
 const getChangesInChunkSinceCb = callbackify(getChangesInChunkSince)
 const getFileSnapshotStreamCb = callbackify(getFileSnapshotStream)
 const getProjectSnapshotCb = callbackify(getProjectSnapshot)
@@ -441,7 +402,6 @@ const getPathsAtVersionCb = callbackify(getPathsAtVersion)
 
 export {
   getLatestSnapshotFromChunk,
-  getChangesSinceCb as getChangesSince,
   getChangesInChunkSinceCb as getChangesInChunkSince,
   getFileSnapshotStreamCb as getFileSnapshotStream,
   getProjectSnapshotCb as getProjectSnapshot,
@@ -454,7 +414,6 @@ export {
 }
 
 export const promises = {
-  getChangesSince,
   getChangesInChunkSince,
   getFileSnapshotStream,
   getProjectSnapshot,
