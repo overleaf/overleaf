@@ -22,6 +22,7 @@
   --editor-header-logo-background: url(../../../../../public/img/ol-brand/overleaf-o-white.svg)
     center / contain no-repeat;
   --editor-toolbar-bg: var(--neutral-80);
+  --toolbar-dropdown-divider-color: var(--border-dark-divider);
 }
 
 .ide-redesign-main {
@@ -70,6 +71,7 @@
   --editor-header-logo-background: url(../../../../../public/img/ol-brand/overleaf-o.svg)
     center / contain no-repeat;
   --editor-toolbar-bg: var(--white);
+  --toolbar-dropdown-divider-color: var(--border-divider);
 
   .ide-redesign-main {
     --toolbar-alt-bg-color: var(--bg-light-secondary);

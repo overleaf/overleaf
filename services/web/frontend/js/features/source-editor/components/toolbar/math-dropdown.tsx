@@ -1,25 +1,59 @@
+import { DropdownHeader } from '@/features/ui/components/bootstrap-5/dropdown-menu'
 import { ToolbarButtonMenu } from './button-menu'
 import { emitToolbarEvent } from '../../extensions/toolbar/utils/analytics'
 import MaterialIcon from '../../../../shared/components/material-icon'
 import { useTranslation } from 'react-i18next'
 import { useCodeMirrorViewContext } from '../codemirror-context'
+import { useEditorContext } from '@/shared/context/editor-context'
 import {
   wrapInDisplayMath,
   wrapInInlineMath,
 } from '../../extensions/toolbar/commands'
 import { memo } from 'react'
 import OLListGroupItem from '@/features/ui/components/ol/ol-list-group-item'
+import sparkleWhite from '@/shared/svgs/sparkle-small-white.svg'
+import sparkle from '@/shared/svgs/ai-sparkle-text.svg'
+import { isSplitTestEnabled } from '@/utils/splitTestUtils'
 
 export const MathDropdown = memo(function MathDropdown() {
   const { t } = useTranslation()
   const view = useCodeMirrorViewContext()
+  const { writefullInstance } = useEditorContext()
 
+  const wfRebrandEnabled = isSplitTestEnabled('wf-feature-rebrand')
   return (
     <ToolbarButtonMenu
       id="toolbar-math"
       label={t('toolbar_insert_math')}
       icon={<MaterialIcon type="calculate" />}
     >
+      {wfRebrandEnabled && writefullInstance && (
+        <>
+          <DropdownHeader className="ol-cm-toolbar-header mx-2">
+            {t('toolbar_insert_math_lowercase')}
+          </DropdownHeader>
+          <OLListGroupItem
+            aria-label={t('toolbar_generate_math')}
+            onClick={event => {
+              writefullInstance?.openEquationGenerator()
+            }}
+          >
+            <img
+              alt="sparkle"
+              className="ol-cm-toolbar-ai-sparkle-gradient"
+              src={sparkle}
+              aria-hidden="true"
+            />
+            <img
+              alt="sparkle"
+              className="ol-cm-toolbar-ai-sparkle-white"
+              src={sparkleWhite}
+              aria-hidden="true"
+            />
+            <span>{t('generate_from_text_or_image')}</span>
+          </OLListGroupItem>
+        </>
+      )}
       <OLListGroupItem
         aria-label={t('toolbar_insert_inline_math')}
         onClick={event => {
@@ -30,7 +64,7 @@ export const MathDropdown = memo(function MathDropdown() {
         }}
       >
         <MaterialIcon type="123" />
-        <span>{t('toolbar_insert_inline_math')}</span>
+        <span>{t('inline')}</span>
       </OLListGroupItem>
       <OLListGroupItem
         aria-label={t('toolbar_insert_display_math')}
@@ -42,7 +76,7 @@ export const MathDropdown = memo(function MathDropdown() {
         }}
       >
         <MaterialIcon type="view_day" />
-        <span>{t('toolbar_insert_display_math')}</span>
+        <span>{t('display')}</span>
       </OLListGroupItem>
     </ToolbarButtonMenu>
   )

@@ -9,8 +9,10 @@ import getMeta from '../../../../utils/meta'
 import { InsertFigureDropdown } from './insert-figure-dropdown'
 import { useTranslation } from 'react-i18next'
 import { MathDropdown } from './math-dropdown'
-import { TableInserterDropdown } from './table-inserter-dropdown'
+import { TableDropdown } from './table-dropdown'
+import { LegacyTableDropdown } from './table-inserter-dropdown-legacy'
 import { withinFormattingCommand } from '@/features/source-editor/utils/tree-operations/formatting'
+import { isSplitTestEnabled } from '@/utils/splitTestUtils'
 import { isMac } from '@/shared/utils/os'
 
 export const ToolbarItems: FC<{
@@ -27,11 +29,14 @@ export const ToolbarItems: FC<{
   listDepth,
 }) {
   const { t } = useTranslation()
-  const { toggleSymbolPalette, showSymbolPalette } = useEditorContext()
+  const { toggleSymbolPalette, showSymbolPalette, writefullInstance } =
+    useEditorContext()
   const isActive = withinFormattingCommand(state)
 
   const symbolPaletteAvailable = getMeta('ol-symbolPaletteAvailable')
   const showGroup = (group: string) => !overflowed || overflowed.has(group)
+
+  const wfRebrandEnabled = isSplitTestEnabled('wf-feature-rebrand')
 
   return (
     <>
@@ -142,7 +147,11 @@ export const ToolbarItems: FC<{
                 icon="book_5"
               />
               <InsertFigureDropdown />
-              <TableInserterDropdown />
+              {wfRebrandEnabled && writefullInstance ? (
+                <TableDropdown />
+              ) : (
+                <LegacyTableDropdown />
+              )}
             </div>
           )}
           {showGroup('group-list') && (

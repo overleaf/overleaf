@@ -28,4 +28,6 @@ export interface WritefullAPI {
     name: eventName,
     callback: (detail: WritefullEvents[eventName]) => void
   ): void
+  openTableGenerator(): void
+  openEquationGenerator(): void
 }

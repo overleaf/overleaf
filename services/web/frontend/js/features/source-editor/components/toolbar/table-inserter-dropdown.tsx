@@ -1,78 +1,18 @@
-import { FC, memo, useCallback, useRef, useState } from 'react'
-import * as commands from '../../extensions/toolbar/commands'
-import { useTranslation } from 'react-i18next'
-import useDropdown from '../../../../shared/hooks/use-dropdown'
-import { useCodeMirrorViewContext } from '../codemirror-context'
-import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
-import OLOverlay from '@/features/ui/components/ol/ol-overlay'
-import OLPopover from '@/features/ui/components/ol/ol-popover'
-import MaterialIcon from '../../../../shared/components/material-icon'
+import { FC, useState } from 'react'
 import classNames from 'classnames'
-import { emitToolbarEvent } from '../../extensions/toolbar/utils/analytics'
+import { useTranslation } from 'react-i18next'
 
-export const TableInserterDropdown = memo(() => {
-  const { t } = useTranslation()
-  const { open, onToggle, ref } = useDropdown()
-  const view = useCodeMirrorViewContext()
-  const target = useRef<any>(null)
-
-  const onSizeSelected = useCallback(
-    (sizeX: number, sizeY: number) => {
-      onToggle(false)
-      commands.insertTable(view, sizeX, sizeY)
-      emitToolbarEvent(view, 'table-generator-insert-table')
-      view.focus()
-    },
-    [view, onToggle]
-  )
-
+export const TableInserterDropdown = ({
+  onSizeSelected,
+}: {
+  onSizeSelected: (sizeX: number, sizeY: number) => void
+}) => {
   return (
-    <>
-      <OLTooltip
-        hidden={open}
-        id="toolbar-table"
-        description={<div>{t('toolbar_insert_table')}</div>}
-        overlayProps={{ placement: 'bottom' }}
-      >
-        <button
-          type="button"
-          className="ol-cm-toolbar-button btn"
-          aria-label={t('toolbar_insert_table')}
-          onMouseDown={event => {
-            event.preventDefault()
-            event.stopPropagation()
-          }}
-          onClick={() => {
-            onToggle(!open)
-          }}
-          ref={target}
-        >
-          <MaterialIcon type="table_chart" />
-        </button>
-      </OLTooltip>
-      <OLOverlay
-        show={open}
-        target={target.current}
-        placement="bottom"
-        container={view.dom}
-        containerPadding={0}
-        transition
-        rootClose
-        onHide={() => onToggle(false)}
-      >
-        <OLPopover
-          id="toolbar-table-menu"
-          ref={ref}
-          className="ol-cm-toolbar-button-menu-popover ol-cm-toolbar-button-menu-popover-unstyled"
-        >
-          <div className="ol-cm-toolbar-table-grid-popover">
-            <SizeGrid sizeX={10} sizeY={10} onSizeSelected={onSizeSelected} />
-          </div>
-        </OLPopover>
-      </OLOverlay>
-    </>
+    <div className="ol-cm-toolbar-table-grid-popover">
+      <SizeGrid sizeX={10} sizeY={10} onSizeSelected={onSizeSelected} />
+    </div>
   )
-})
+}
 TableInserterDropdown.displayName = 'TableInserterDropdown'
 
 const range = (start: number, end: number) =>
