@@ -94,6 +94,18 @@ export default function AddCollaborators({ readOnly }) {
           data = await sendInvite(projectId, email, privileges)
         }
 
+        const role = data?.invite?.privileges
+        const membersAndInvites = (members || []).concat(invites || [])
+        const previousEditorsAmount = membersAndInvites.filter(
+          member => member.privileges === 'readAndWrite'
+        ).length
+        const previousReviewersAmount = membersAndInvites.filter(
+          member => member.privileges === 'review'
+        ).length
+        const previousViewersAmount = membersAndInvites.filter(
+          member => member.privileges === 'readOnly'
+        ).length
+
         sendMB('collaborator-invited', {
           project_id: projectId,
           // invitation is only populated on successful invite, meaning that for paywall and other cases this will be null
@@ -101,6 +113,22 @@ export default function AddCollaborators({ readOnly }) {
           users_updated: !!(data.users || data.user),
           current_collaborators_amount: members.length,
           current_invites_amount: invites.length,
+          role,
+          previousEditorsAmount,
+          previousReviewersAmount,
+          previousViewersAmount,
+          newEditorsAmount:
+            role === 'readAndWrite'
+              ? previousEditorsAmount + 1
+              : previousEditorsAmount,
+          newReviewersAmount:
+            role === 'review'
+              ? previousReviewersAmount + 1
+              : previousReviewersAmount,
+          newViewersAmount:
+            role === 'readOnly'
+              ? previousViewersAmount + 1
+              : previousViewersAmount,
         })
       } catch (error) {
         setInFlight(false)
