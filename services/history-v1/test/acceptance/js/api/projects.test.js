@@ -244,10 +244,7 @@ describe('project controller', function () {
       expect(response.status).to.equal(HTTPStatus.OK)
       const changes = response.obj
       expect(changes.length).to.equal(21)
-      expect(changes[10].operations[0].operation.textOperation).to.deep.equal([
-        9,
-        'x',
-      ])
+      expect(changes[10].operations[0].textOperation).to.deep.equal([9, 'x'])
     })
 
     it('returns only requested changes', async function () {
@@ -260,10 +257,7 @@ describe('project controller', function () {
       expect(response.status).to.equal(HTTPStatus.OK)
       const changes = response.obj
       expect(changes.length).to.equal(11)
-      expect(changes[2].operations[0].operation.textOperation).to.deep.equal([
-        11,
-        'x',
-      ])
+      expect(changes[2].operations[0].textOperation).to.deep.equal([11, 'x'])
     })
   })
 

@@ -174,7 +174,7 @@ async function getChanges(req, res, next) {
     .slice(since - chunk.getStartVersion())
   changes.unshift(...changesInChunk)
 
-  res.json(changes)
+  res.json(changes.map(change => change.toRaw()))
 }
 
 async function getZip(req, res, next) {
