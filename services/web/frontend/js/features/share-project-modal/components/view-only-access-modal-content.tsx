@@ -24,8 +24,8 @@ export default function ViewOnlyAccessModalContent({
       </OLModalHeader>
 
       <OLModalBody>
-        <p>{t('this_project_already_has_maximum_editors')}</p>
-        <p>{t('please_ask_the_project_owner_to_upgrade_more_editors')}</p>
+        <p>{t('this_project_already_has_maximum_collaborators')}</p>
+        <p>{t('please_ask_the_project_owner_to_upgrade_more_collaborators')}</p>
       </OLModalBody>
       <OLModalFooter>
         <OLButton

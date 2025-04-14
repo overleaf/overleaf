@@ -17,11 +17,15 @@ export default function SendInvitesNotice() {
         <Notification
           isActionBelowContent
           type="info"
-          title={t('youve_lost_edit_access')}
+          title={t('youve_lost_collaboration_access')}
           content={
             <div>
-              <p>{t('this_project_already_has_maximum_editors')}</p>
-              <p>{t('please_ask_the_project_owner_to_upgrade_more_editors')}</p>
+              <p>{t('this_project_already_has_maximum_collaborators')}</p>
+              <p>
+                {t(
+                  'please_ask_the_project_owner_to_upgrade_more_collaborators'
+                )}
+              </p>
             </div>
           }
         />

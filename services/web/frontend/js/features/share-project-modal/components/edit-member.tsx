@@ -286,7 +286,7 @@ function SelectPrivilege({
 
     if (hasBeenDowngraded) {
       if (isSplitTestEnabled('reviewer-role')) {
-        return t('limited_to_n_editors_or_reviewers', {
+        return t('limited_to_n_collaborators_per_project', {
           count: features.collaborators,
         })
       } else {
@@ -297,7 +297,7 @@ function SelectPrivilege({
       !['readAndWrite', 'review'].includes(value)
     ) {
       if (isSplitTestEnabled('reviewer-role')) {
-        return t('limited_to_n_editors_or_reviewers_per_project', {
+        return t('limited_to_n_collaborators_per_project', {
           count: features.collaborators,
         })
       } else {

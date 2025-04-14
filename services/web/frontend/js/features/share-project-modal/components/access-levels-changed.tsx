@@ -29,11 +29,11 @@ export default function AccessLevelsChanged({
         }
         content={
           somePendingEditorsResolved ? (
-            <p>{t('your_project_exceeded_editor_limit')}</p>
+            <p>{t('your_project_exceeded_collaborator_limit')}</p>
           ) : (
             <p>
-              {t('this_project_exceeded_editor_limit')}{' '}
-              {t('you_can_select_or_invite', {
+              {t('this_project_exceeded_collaborator_limit')}{' '}
+              {t('you_can_select_or_invite_collaborator', {
                 count: features.collaborators,
               })}
             </p>

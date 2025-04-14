@@ -686,7 +686,7 @@ describe('<ShareProjectModal/>', function () {
       },
     })
 
-    await screen.findByText('Add more editors')
+    await screen.findByText('Add more collaborators')
 
     const user = userEvent.setup()
     await user.click(screen.getByTestId('add-collaborator-select'))
@@ -699,7 +699,7 @@ describe('<ShareProjectModal/>', function () {
     expect(viewerOption.classList.contains('disabled')).to.be.false
 
     screen.getByText(
-      /Upgrade to add more editors and access collaboration features like track changes and full project history/
+      /Upgrade to add more collaborators and access collaboration features like track changes and full project history/
     )
   })
 
@@ -722,7 +722,7 @@ describe('<ShareProjectModal/>', function () {
       },
     })
 
-    await screen.findByText('Add more editors')
+    await screen.findByText('Add more collaborators')
 
     const user = userEvent.setup()
     await user.click(screen.getByTestId('add-collaborator-select'))
@@ -736,7 +736,7 @@ describe('<ShareProjectModal/>', function () {
     expect(viewerOption.classList.contains('disabled')).to.be.false
 
     screen.getByText(
-      /Upgrade to add more editors and access collaboration features like track changes and full project history/
+      /Upgrade to add more collaborators and access collaboration features like track changes and full project history/
     )
   })
 
