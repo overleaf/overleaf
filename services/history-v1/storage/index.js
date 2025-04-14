@@ -5,6 +5,7 @@ exports.chunkStore = require('./lib/chunk_store')
 exports.historyStore = require('./lib/history_store').historyStore
 exports.knex = require('./lib/knex')
 exports.mongodb = require('./lib/mongodb')
+exports.redis = require('./lib/redis')
 exports.persistChanges = require('./lib/persist_changes')
 exports.persistor = require('./lib/persistor')
 exports.ProjectArchive = require('./lib/project_archive')

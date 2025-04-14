@@ -14,6 +14,7 @@ import { loadGlobalBlobs } from '../lib/blob_store/index.js'
 import { getDatesBeforeRPO } from '../../backupVerifier/utils.mjs'
 import { EventEmitter } from 'node:events'
 import { mongodb } from '../index.js'
+import redis from '../lib/redis.js'
 
 logger.logger.level('fatal')
 
@@ -30,6 +31,7 @@ const usageMessage = [
 async function gracefulShutdown(code = process.exitCode) {
   await knex.destroy()
   await client.close()
+  await redis.disconnect()
   await setTimeout(1_000)
   process.exit(code)
 }

@@ -1,5 +1,7 @@
 'use strict'
 
+const OError = require('@overleaf/o-error')
+
 const check = require('check-types')
 const { Blob } = require('overleaf-editor-core')
 
@@ -14,15 +16,23 @@ function transaction(transaction, message) {
 }
 
 function blobHash(arg, message) {
-  assert.match(arg, Blob.HEX_HASH_RX, message)
+  try {
+    assert.match(arg, Blob.HEX_HASH_RX, message)
+  } catch (error) {
+    throw OError.tag(error, message, { arg })
+  }
 }
 
 /**
- * A chunk id is a string that contains either an integer (for projects stored in Postgres) or 24
+ * A project id is a string that contains either an integer (for projects stored in Postgres) or 24
  * hex digits (for projects stored in Mongo)
  */
 function projectId(arg, message) {
-  assert.match(arg, PROJECT_ID_REGEXP, message)
+  try {
+    assert.match(arg, PROJECT_ID_REGEXP, message)
+  } catch (error) {
+    throw OError.tag(error, message, { arg })
+  }
 }
 
 /**
@@ -32,16 +42,25 @@ function projectId(arg, message) {
 function chunkId(arg, message) {
   const valid = check.integer(arg) || check.match(arg, MONGO_ID_REGEXP)
   if (!valid) {
-    throw new TypeError(message)
+    const error = new TypeError(message)
+    throw OError.tag(error, message, { arg })
   }
 }
 
 function mongoId(arg, message) {
-  assert.match(arg, MONGO_ID_REGEXP)
+  try {
+    assert.match(arg, MONGO_ID_REGEXP, message)
+  } catch (error) {
+    throw OError.tag(error, message, { arg })
+  }
 }
 
 function postgresId(arg, message) {
-  assert.match(arg, POSTGRES_ID_REGEXP, message)
+  try {
+    assert.match(arg, POSTGRES_ID_REGEXP, message)
+  } catch (error) {
+    throw OError.tag(error, message, { arg })
+  }
 }
 
 module.exports = {

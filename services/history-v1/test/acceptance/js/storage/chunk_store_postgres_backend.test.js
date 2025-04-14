@@ -11,32 +11,32 @@ describe('chunk store Postgres backend', function () {
     const invalidProjectId = new ObjectId().toString()
 
     await expect(backend.getLatestChunk(invalidProjectId)).to.be.rejectedWith(
-      `bad projectId ${invalidProjectId}`
+      'bad projectId'
     )
     await expect(
       backend.getChunkForVersion(invalidProjectId, 1)
-    ).to.be.rejectedWith(`bad projectId ${invalidProjectId}`)
+    ).to.be.rejectedWith('bad projectId')
     await expect(
       backend.getChunkForTimestamp(invalidProjectId, new Date())
-    ).to.be.rejectedWith(`bad projectId ${invalidProjectId}`)
+    ).to.be.rejectedWith('bad projectId')
     await expect(
       backend.getProjectChunkIds(invalidProjectId)
-    ).to.be.rejectedWith(`bad projectId ${invalidProjectId}`)
+    ).to.be.rejectedWith('bad projectId')
     await expect(
       backend.insertPendingChunk(invalidProjectId, makeChunk([], 0))
-    ).to.be.rejectedWith(`bad projectId ${invalidProjectId}`)
+    ).to.be.rejectedWith('bad projectId')
     await expect(
       backend.confirmCreate(invalidProjectId, makeChunk([], 0), 1)
-    ).to.be.rejectedWith(`bad projectId ${invalidProjectId}`)
+    ).to.be.rejectedWith('bad projectId')
     await expect(
       backend.confirmUpdate(invalidProjectId, 1, makeChunk([], 0), 2)
-    ).to.be.rejectedWith(`bad projectId ${invalidProjectId}`)
+    ).to.be.rejectedWith('bad projectId')
     await expect(backend.deleteChunk(invalidProjectId, 1)).to.be.rejectedWith(
-      `bad projectId ${invalidProjectId}`
+      'bad projectId'
     )
     await expect(
       backend.deleteProjectChunks(invalidProjectId)
-    ).to.be.rejectedWith(`bad projectId ${invalidProjectId}`)
+    ).to.be.rejectedWith('bad projectId')
   })
 })
 

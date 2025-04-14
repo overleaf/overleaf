@@ -6,6 +6,7 @@ import {
 } from '../lib/chunk_store/index.js'
 import { client } from '../lib/mongodb.js'
 import knex from '../lib/knex.js'
+import redis from '../lib/redis.js'
 import {
   loadGlobalBlobs,
   BlobStore,
@@ -247,4 +248,7 @@ main()
   .finally(() => {
     knex.destroy().catch(err => console.error('Error closing Postgres:', err))
     client.close().catch(err => console.error('Error closing MongoDB:', err))
+    redis
+      .disconnect()
+      .catch(err => console.error('Error disconnecting Redis:', err))
   })

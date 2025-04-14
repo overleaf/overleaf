@@ -10,6 +10,7 @@ import {
 import assert from '../lib/assert.js'
 import knex from '../lib/knex.js'
 import { client } from '../lib/mongodb.js'
+import redis from '../lib/redis.js'
 import { setTimeout } from 'node:timers/promises'
 import fs from 'node:fs'
 
@@ -23,6 +24,7 @@ async function gracefulShutdown() {
   console.log('Gracefully shutting down')
   await knex.destroy()
   await client.close()
+  await redis.disconnect()
   await setTimeout(100)
   process.exit()
 }

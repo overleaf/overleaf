@@ -16,6 +16,7 @@ import {
   db,
   client,
 } from '../lib/mongodb.js'
+import redis from '../lib/redis.js'
 import commandLineArgs from 'command-line-args'
 import fs from 'node:fs'
 
@@ -146,4 +147,7 @@ main()
       console.error('Error closing Postgres connection:', err)
     })
     client.close().catch(err => console.error('Error closing MongoDB:', err))
+    redis.disconnect().catch(err => {
+      console.error('Error disconnecting Redis:', err)
+    })
   })

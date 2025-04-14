@@ -9,6 +9,7 @@ import {
   create,
 } from '../lib/chunk_store/index.js'
 import { client } from '../lib/mongodb.js'
+import redis from '../lib/redis.js'
 import knex from '../lib/knex.js'
 import { historyStore } from '../lib/history_store.js'
 import pLimit from 'p-limit'
@@ -1090,6 +1091,14 @@ if (import.meta.url === `file://${process.argv[1]}`) {
         })
         .catch(err => {
           console.error('Error closing MongoDB connection:', err)
+        })
+      redis
+        .disconnect()
+        .then(() => {
+          console.log('Redis connection closed')
+        })
+        .catch(err => {
+          console.error('Error closing Redis connection:', err)
         })
     })
 }

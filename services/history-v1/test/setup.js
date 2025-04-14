@@ -2,7 +2,7 @@ const chai = require('chai')
 const chaiAsPromised = require('chai-as-promised')
 const config = require('config')
 const fetch = require('node-fetch')
-const { knex, mongodb } = require('../storage')
+const { knex, mongodb, redis } = require('../storage')
 
 // ensure every ObjectId has the id string as a property for correct comparisons
 require('mongodb').ObjectId.cacheHexString = true
@@ -53,6 +53,7 @@ async function createGcsBuckets() {
 // can exit.
 async function tearDownConnectionPool() {
   await knex.destroy()
+  await redis.disconnect()
 }
 
 module.exports = {
