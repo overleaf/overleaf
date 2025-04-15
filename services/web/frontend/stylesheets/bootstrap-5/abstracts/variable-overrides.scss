@@ -162,10 +162,24 @@ $primary: $bg-accent-01;
 $secondary: $bg-light-primary;
 $success: $bg-accent-01;
 $info: $bg-info-01;
-$warning: $bg-warning-03;
+$warning: $content-warning;
 $danger: $bg-danger-01;
 $light: $bg-light-tertiary;
 $dark: $neutral-90;
+$warning-light-gb: $bg-warning-03;
+
+// Theme colors
+$theme-colors: (
+  'primary': $primary,
+  'secondary': $secondary,
+  'success': $success,
+  'info': $info,
+  'warning': $warning,
+  'warning-light-bg': $warning-light-gb,
+  'danger': $danger,
+  'light': $light,
+  'dark': $dark,
+);
 
 // Body colors
 $body-color: $content-primary;

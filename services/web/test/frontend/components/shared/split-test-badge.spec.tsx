@@ -29,7 +29,8 @@ describe('split test badge', function () {
 
     cy.findByRole('link', { name: /this is an alpha feature/i })
       .should('have.attr', 'href', '/alpha/participate')
-      .find('.badge.alpha-badge')
+      .find('.badge')
+      .contains('α')
   })
 
   it('does not render the alpha badge when user is not assigned to the variant', function () {
@@ -87,7 +88,8 @@ describe('split test badge', function () {
 
     cy.findByRole('link', { name: /this is a beta feature/i })
       .should('have.attr', 'href', '/beta/participate')
-      .find('.badge.beta-badge')
+      .find('.badge')
+      .contains('β')
   })
 
   it('does not render the beta badge when user is not assigned to the variant', function () {
