@@ -30,7 +30,7 @@ import { historyStore } from '../../../../storage/lib/history_store.js'
  * @typedef {import("overleaf-editor-core").Blob} Blob
  */
 
-async function verifyProjectScript(historyId) {
+async function verifyProjectScript(historyId, expectFail = true) {
   try {
     const result = await promisify(execFile)(
       process.argv0,
@@ -53,6 +53,9 @@ async function verifyProjectScript(historyId) {
       'code' in err &&
       'stderr' in err
     ) {
+      if (!expectFail) {
+        console.log(err)
+      }
       return {
         stdout: typeof err.stdout === 'string' ? err.stdout : '',
         status: typeof err.code === 'number' ? err.code : -1,
@@ -228,7 +231,7 @@ describe('backupVerifier', function () {
   describe('storage/scripts/verify_project.mjs', function () {
     describe('when the project is appropriately backed up', function () {
       it('should return 0', async function () {
-        const response = await verifyProjectScript(historyIdPostgres)
+        const response = await verifyProjectScript(historyIdPostgres, false)
         expect(response.status).to.equal(0)
       })
     })
