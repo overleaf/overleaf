@@ -5,6 +5,10 @@ import logger from '@overleaf/logger'
 import { filterOutput } from './helpers/settings.mjs'
 import { db, ObjectId } from '../../../app/src/infrastructure/mongodb.js'
 
+const lastUpdated = new Date(42)
+const lastUpdatedBy = new ObjectId()
+const lastUpdatedChanged = new Date(1337)
+
 async function runScriptFind() {
   try {
     const result = await promisify(exec)(
@@ -36,7 +40,18 @@ async function runScriptFix(instructions) {
 
 const findProjects = () =>
   db.projects
-    .find({}, { projection: { rootFolder: 1, _id: 1, version: 1 } })
+    .find(
+      {},
+      {
+        projection: {
+          rootFolder: 1,
+          _id: 1,
+          version: 1,
+          lastUpdated: 1,
+          lastUpdatedBy: 1,
+        },
+      }
+    )
     .toArray()
 
 const projectId = new ObjectId()
@@ -75,13 +90,15 @@ const wellFormedProject = {
       fileRefs: [wellFormedFileRef('fr00'), wellFormedFileRef('fr01')],
     },
   ],
+  lastUpdated,
+  lastUpdatedBy,
 }
 
 const testCases = [
   ...[{}, { rootFolder: undefined }, { rootFolder: '1234' }].map(
     (project, idx) => ({
       name: `bad rootFolder ${idx + 1}`,
-      project: { _id: projectId, ...project },
+      project: { _id: projectId, ...project, lastUpdated, lastUpdatedBy },
       expectFind: [
         {
           _id: null,
@@ -98,7 +115,7 @@ const testCases = [
 
   {
     name: `missing rootFolder`,
-    project: { _id: projectId, rootFolder: [] },
+    project: { _id: projectId, rootFolder: [], lastUpdated, lastUpdatedBy },
     expectFind: [
       {
         _id: null,
@@ -123,6 +140,8 @@ const testCases = [
             docs: [],
           },
         ],
+        lastUpdated: lastUpdatedChanged,
+        lastUpdatedBy: null,
       })
     },
   },
@@ -132,6 +151,8 @@ const testCases = [
     project: {
       _id: projectId,
       rootFolder: [{ _id: '1234' }],
+      lastUpdated,
+      lastUpdatedBy,
     },
     expectFind: [
       { reason: 'bad folder id', path: 'rootFolder.0._id' },
@@ -154,6 +175,8 @@ const testCases = [
     project: {
       _id: projectId,
       rootFolder: [{ _id: rootFolderId }],
+      lastUpdated,
+      lastUpdatedBy,
     },
     expectFind: [
       { reason: 'bad folder name', path: 'rootFolder.0.name' },
@@ -180,6 +203,8 @@ const testCases = [
             name: 'rootFolder',
           },
         ],
+        lastUpdated: lastUpdatedChanged,
+        lastUpdatedBy: null,
       })
     },
   },
@@ -197,6 +222,8 @@ const testCases = [
           fileRefs: [null, null],
         },
       ],
+      lastUpdated,
+      lastUpdatedBy,
     },
     expectFind: [
       {
@@ -235,6 +262,8 @@ const testCases = [
             folders: [],
           },
         ],
+        lastUpdated: lastUpdatedChanged,
+        lastUpdatedBy: null,
       })
     },
   },
@@ -255,6 +284,8 @@ const testCases = [
           fileRefs: [{ _id: null, name: 'ref-a' }, { name: 'ref-b' }],
         },
       ],
+      lastUpdated,
+      lastUpdatedBy,
     },
     expectFind: [
       { reason: 'bad folder id', path: 'rootFolder.0.folders.0._id', _id: 123 },
@@ -291,6 +322,8 @@ const testCases = [
             fileRefs: [],
           },
         ],
+        lastUpdated: lastUpdatedChanged,
+        lastUpdatedBy: null,
       })
     },
   },
@@ -314,6 +347,8 @@ const testCases = [
           ],
         },
       ],
+      lastUpdated,
+      lastUpdatedBy,
     },
     expectFind: [
       {
@@ -386,6 +421,8 @@ const testCases = [
             ],
           },
         ],
+        lastUpdated: lastUpdatedChanged,
+        lastUpdatedBy: null,
       })
     },
   },
@@ -403,6 +440,8 @@ const testCases = [
           ],
         },
       ],
+      lastUpdated,
+      lastUpdatedBy,
     },
     expectFind: [
       { path: 'rootFolder.0.fileRefs.0.hash', _id: strId('fa') },
@@ -442,6 +481,8 @@ const testCases = [
           fileRefs: [null, null, { ...wellFormedFileRef('fr02'), name: null }],
         },
       ],
+      lastUpdated,
+      lastUpdatedBy,
     },
     expectFind: [
       {
@@ -508,6 +549,8 @@ const testCases = [
             fileRefs: [{ ...wellFormedFileRef('fr02'), name: 'untitled' }],
           },
         ],
+        lastUpdated: lastUpdatedChanged,
+        lastUpdatedBy: null,
       })
     },
   },
@@ -539,6 +582,8 @@ const testCases = [
           fileRefs: [],
         },
       ],
+      lastUpdated,
+      lastUpdatedBy,
     },
     expectFind: [
       {
@@ -637,6 +682,8 @@ const testCases = [
             fileRefs: [],
           },
         ],
+        lastUpdated: lastUpdatedChanged,
+        lastUpdatedBy: null,
       })
     },
   },
@@ -674,6 +721,9 @@ describe('find_malformed_filetrees and fix_malformed_filetree scripts', function
             expect(expectFixStdout).to.be.a('string')
             expect(stdout).to.include(expectFixStdout)
             const [updatedProject] = await findProjects()
+            if (updatedProject.lastUpdated > lastUpdated) {
+              updatedProject.lastUpdated = lastUpdatedChanged
+            }
             expectProject(updatedProject)
           })
         }

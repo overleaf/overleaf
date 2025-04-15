@@ -176,10 +176,11 @@ async function _readFileIntoTextArray(path) {
   return lines
 }
 
-async function createFolder(projectId, path) {
+async function createFolder(projectId, path, userId) {
   const { lastFolder: folder } = await EditorController.promises.mkdirp(
     projectId,
-    path
+    path,
+    userId
   )
   return folder
 }

@@ -107,6 +107,7 @@ const mockApiRequest = function (options) {
 
 describe('RecurlyWrapper', function () {
   beforeEach(function () {
+    tk.freeze(Date.now()) // freeze the time for these tests
     this.settings = {
       plans: [
         {
@@ -134,7 +135,6 @@ describe('RecurlyWrapper', function () {
       fetchStringWithResponse: sinon.stub(),
       RequestFailedError,
     }
-    tk.freeze(Date.now()) // freeze the time for these tests
     this.RecurlyWrapper = SandboxedModule.require(modulePath, {
       requires: {
         '@overleaf/settings': this.settings,

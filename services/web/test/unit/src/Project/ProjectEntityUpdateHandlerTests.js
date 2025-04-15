@@ -747,13 +747,6 @@ describe('ProjectEntityUpdateHandler', function () {
           .should.equal(true)
       })
 
-      it('should mark the project as updated', function () {
-        const args = this.ProjectUpdater.promises.markAsUpdated.args[0]
-        args[0].should.equal(projectId)
-        args[1].should.exist
-        args[2].should.equal(userId)
-      })
-
       it('sends the change in project structure to the doc updater', function () {
         const newFiles = [
           {
@@ -1181,7 +1174,8 @@ describe('ProjectEntityUpdateHandler', function () {
         this.ProjectEntityMongoUpdateHandler.promises.replaceFileWithNew.should.have.been.calledWith(
           projectId,
           this.existingFile._id,
-          this.file
+          this.file,
+          userId
         )
       })
 
@@ -1196,13 +1190,6 @@ describe('ProjectEntityUpdateHandler', function () {
           path: this.fileSystemPath,
           folderId,
         })
-      })
-
-      it('should mark the project as updated', function () {
-        const args = this.ProjectUpdater.promises.markAsUpdated.args[0]
-        args[0].should.equal(projectId)
-        args[1].should.exist
-        args[2].should.equal(userId)
       })
 
       it('updates the project structure in the doc updater', function () {
@@ -1394,7 +1381,12 @@ describe('ProjectEntityUpdateHandler', function () {
       it('replaces the existing doc with a file', function () {
         expect(
           this.ProjectEntityMongoUpdateHandler.promises.replaceDocWithFile
-        ).to.have.been.calledWith(projectId, this.existingDoc._id, this.newFile)
+        ).to.have.been.calledWith(
+          projectId,
+          this.existingDoc._id,
+          this.newFile,
+          userId
+        )
       })
 
       it('updates the doc structure', function () {
@@ -1475,7 +1467,7 @@ describe('ProjectEntityUpdateHandler', function () {
 
       it('creates any necessary folders', function () {
         this.ProjectEntityUpdateHandler.promises.mkdirp.withoutLock
-          .calledWith(projectId, '/folder')
+          .calledWith(projectId, '/folder', userId)
           .should.equal(true)
       })
 
@@ -1620,7 +1612,7 @@ describe('ProjectEntityUpdateHandler', function () {
 
       it('creates any necessary folders', function () {
         this.ProjectEntityUpdateHandler.promises.mkdirp.withoutLock
-          .calledWith(projectId, '/folder')
+          .calledWith(projectId, '/folder', userId)
           .should.equal(true)
       })
 
@@ -1767,7 +1759,7 @@ describe('ProjectEntityUpdateHandler', function () {
 
     it('deletes the entity in mongo', function () {
       this.ProjectEntityMongoUpdateHandler.promises.deleteEntity
-        .calledWith(projectId, docId, 'doc')
+        .calledWith(projectId, docId, 'doc', userId)
         .should.equal(true)
     })
 
@@ -1873,12 +1865,17 @@ describe('ProjectEntityUpdateHandler', function () {
     beforeEach(function (done) {
       this.docPath = '/folder/doc.tex'
       this.ProjectEntityMongoUpdateHandler.promises.mkdirp.resolves({})
-      this.ProjectEntityUpdateHandler.mkdirp(projectId, this.docPath, done)
+      this.ProjectEntityUpdateHandler.mkdirp(
+        projectId,
+        this.docPath,
+        userId,
+        done
+      )
     })
 
     it('calls ProjectEntityMongoUpdateHandler', function () {
       this.ProjectEntityMongoUpdateHandler.promises.mkdirp
-        .calledWith(projectId, this.docPath)
+        .calledWith(projectId, this.docPath, userId)
         .should.equal(true)
     })
   })
@@ -1890,13 +1887,14 @@ describe('ProjectEntityUpdateHandler', function () {
       this.ProjectEntityUpdateHandler.mkdirpWithExactCase(
         projectId,
         this.docPath,
+        userId,
         done
       )
     })
 
     it('calls ProjectEntityMongoUpdateHandler', function () {
       this.ProjectEntityMongoUpdateHandler.promises.mkdirp
-        .calledWith(projectId, this.docPath, { exactCaseMatch: true })
+        .calledWith(projectId, this.docPath, userId, { exactCaseMatch: true })
         .should.equal(true)
     })
   })
@@ -1911,13 +1909,14 @@ describe('ProjectEntityUpdateHandler', function () {
           projectId,
           this.parentFolderId,
           this.folderName,
+          userId,
           done
         )
       })
 
       it('calls ProjectEntityMongoUpdateHandler', function () {
         this.ProjectEntityMongoUpdateHandler.promises.addFolder
-          .calledWith(projectId, this.parentFolderId, this.folderName)
+          .calledWith(projectId, this.parentFolderId, this.folderName, userId)
           .should.equal(true)
       })
     })
@@ -1973,7 +1972,7 @@ describe('ProjectEntityUpdateHandler', function () {
 
     it('moves the entity in mongo', function () {
       this.ProjectEntityMongoUpdateHandler.promises.moveEntity
-        .calledWith(projectId, docId, folderId, 'doc')
+        .calledWith(projectId, docId, folderId, 'doc', userId)
         .should.equal(true)
     })
 
@@ -2035,7 +2034,7 @@ describe('ProjectEntityUpdateHandler', function () {
 
       it('moves the entity in mongo', function () {
         this.ProjectEntityMongoUpdateHandler.promises.renameEntity
-          .calledWith(projectId, docId, 'doc', this.newDocName)
+          .calledWith(projectId, docId, 'doc', this.newDocName, userId)
           .should.equal(true)
       })
 
@@ -2320,25 +2319,29 @@ describe('ProjectEntityUpdateHandler', function () {
           projectId,
           'doc3',
           'doc',
-          'duplicate.tex (1)'
+          'duplicate.tex (1)',
+          null
         )
         expect(renameEntity).to.have.been.calledWith(
           projectId,
           'doc5',
           'doc',
-          'duplicate.tex (2)'
+          'duplicate.tex (2)',
+          null
         )
         expect(renameEntity).to.have.been.calledWith(
           projectId,
           'file3',
           'file',
-          'duplicate.jpg (1)'
+          'duplicate.jpg (1)',
+          null
         )
         expect(renameEntity).to.have.been.calledWith(
           projectId,
           'file4',
           'file',
-          'another dupe (23)'
+          'another dupe (23)',
+          null
         )
       })
 
@@ -2410,25 +2413,29 @@ describe('ProjectEntityUpdateHandler', function () {
           projectId,
           'doc1',
           'doc',
-          '_d_e_f_test.tex'
+          '_d_e_f_test.tex',
+          null
         )
         expect(renameEntity).to.have.been.calledWith(
           projectId,
           'doc2',
           'doc',
-          'untitled'
+          'untitled',
+          null
         )
         expect(renameEntity).to.have.been.calledWith(
           projectId,
           'file1',
           'file',
-          'A_.png'
+          'A_.png',
+          null
         )
         expect(renameEntity).to.have.been.calledWith(
           projectId,
           'file2',
           'file',
-          'A_.png (1)'
+          'A_.png (1)',
+          null
         )
       })
 
@@ -2501,7 +2508,8 @@ describe('ProjectEntityUpdateHandler', function () {
           projectId,
           'folder2',
           'folder',
-          'bad_'
+          'bad_',
+          null
         )
       })
 
@@ -2558,7 +2566,8 @@ describe('ProjectEntityUpdateHandler', function () {
           projectId,
           'doc1',
           'doc',
-          'chapters (1)'
+          'chapters (1)',
+          null
         )
       })
 
@@ -2929,7 +2938,7 @@ describe('ProjectEntityUpdateHandler', function () {
         this.ProjectEntityUpdateHandler.convertDocToFile(
           this.project._id,
           this.doc._id,
-          this.user._id,
+          userId,
           this.source,
           done
         )
@@ -2960,7 +2969,12 @@ describe('ProjectEntityUpdateHandler', function () {
       it('replaces the doc with the file', function () {
         expect(
           this.ProjectEntityMongoUpdateHandler.promises.replaceDocWithFile
-        ).to.have.been.calledWith(this.project._id, this.doc._id, this.file)
+        ).to.have.been.calledWith(
+          this.project._id,
+          this.doc._id,
+          this.file,
+          userId
+        )
       })
 
       it('notifies document updater of changes', function () {
@@ -2969,7 +2983,7 @@ describe('ProjectEntityUpdateHandler', function () {
         ).to.have.been.calledWith(
           this.project._id,
           this.project.overleaf.history.id,
-          this.user._id,
+          userId,
           {
             oldDocs: [{ doc: this.doc, path: this.path }],
             newFiles: [

@@ -136,7 +136,8 @@ async function createRecoveryFolder(projectId) {
   const recoveryFolder = `recovered-${Date.now()}`
   const { folder } = await ProjectEntityMongoUpdateHandler.promises.mkdirp(
     new ObjectId(projectId),
-    recoveryFolder
+    recoveryFolder,
+    null // unset lastUpdatedBy
   )
   console.log('Created recovery folder:', folder._id.toString())
   return folder
@@ -149,7 +150,8 @@ async function restoreMissingDocs(projectId, folder, missingDocs) {
       await ProjectEntityMongoUpdateHandler.promises.addDoc(
         new ObjectId(projectId),
         folder._id,
-        doc
+        doc,
+        null // unset lastUpdatedBy
       )
       console.log('Restored doc to filetree:', doc._id.toString())
     } catch (err) {

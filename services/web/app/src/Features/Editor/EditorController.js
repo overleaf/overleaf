@@ -307,6 +307,7 @@ const EditorController = {
       projectId,
       folderId,
       folderName,
+      userId,
       (err, folder, folderId) => {
         if (err) {
           OError.tag(err, 'could not add folder', {
@@ -333,11 +334,12 @@ const EditorController = {
     )
   },
 
-  mkdirp(projectId, path, callback) {
+  mkdirp(projectId, path, userId, callback) {
     logger.debug({ projectId, path }, "making directories if they don't exist")
     ProjectEntityUpdateHandler.mkdirp(
       projectId,
       path,
+      userId,
       (err, newFolders, lastFolder) => {
         if (err) {
           OError.tag(err, 'could not mkdirp', {

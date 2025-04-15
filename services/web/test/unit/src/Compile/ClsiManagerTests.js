@@ -13,6 +13,8 @@ const GLOBAL_BLOB_HASH = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
 
 describe('ClsiManager', function () {
   beforeEach(function () {
+    tk.freeze(Date.now())
+
     this.user_id = 'user-id'
     this.project = {
       _id: 'project-id',
@@ -182,7 +184,6 @@ describe('ClsiManager', function () {
         '../History/HistoryManager': this.HistoryManager,
       },
     })
-    tk.freeze(Date.now())
   })
 
   after(function () {

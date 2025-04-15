@@ -68,6 +68,7 @@ async function uploadFile(req, res, next) {
   const name = req.body.name
   const path = req.file?.path
   const projectId = req.params.Project_id
+  const userId = SessionManager.getLoggedInUserId(req.session)
   let { folder_id: folderId } = req.query
   if (name == null || name.length === 0 || name.length > 150) {
     return res.status(422).json({
@@ -87,12 +88,11 @@ async function uploadFile(req, res, next) {
     })
     const { lastFolder } = await EditorController.promises.mkdirp(
       projectId,
-      Path.dirname(Path.join('/', path.fileSystem, relativePath))
+      Path.dirname(Path.join('/', path.fileSystem, relativePath)),
+      userId
     )
     folderId = lastFolder._id
   }
-
-  const userId = SessionManager.getLoggedInUserId(req.session)
 
   return FileSystemImportManager.addEntity(
     userId,

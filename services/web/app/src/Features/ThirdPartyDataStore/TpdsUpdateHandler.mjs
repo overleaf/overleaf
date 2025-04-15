@@ -180,7 +180,11 @@ async function createFolder(userId, projectId, projectName, path) {
     return null
   }
 
-  const folder = await UpdateMerger.promises.createFolder(project._id, path)
+  const folder = await UpdateMerger.promises.createFolder(
+    project._id,
+    path,
+    userId
+  )
   return {
     folderId: folder._id,
     parentFolderId: folder.parentFolder_id,

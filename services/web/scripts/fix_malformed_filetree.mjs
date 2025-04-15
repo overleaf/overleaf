@@ -17,6 +17,7 @@ import fs from 'node:fs'
 import logger from '@overleaf/logger'
 
 const { ObjectId } = mongodb
+const lastUpdated = new Date()
 
 const argv = minimist(process.argv.slice(2), {
   string: ['logs'],
@@ -157,6 +158,8 @@ async function fixRootFolder(projectId) {
             fileRefs: [],
           },
         ],
+        lastUpdated,
+        lastUpdatedBy: null, // unset lastUpdatedBy
       },
     }
   )
@@ -185,6 +188,10 @@ async function removeNulls(projectId, _id) {
         [`${path}.docs`]: null,
         [`${path}.fileRefs`]: null,
       },
+      $set: {
+        lastUpdated,
+        lastUpdatedBy: null, // unset lastUpdatedBy
+      },
     }
   )
   return result.modifiedCount
@@ -196,7 +203,7 @@ async function removeNulls(projectId, _id) {
 async function fixArray(projectId, path) {
   const result = await db.projects.updateOne(
     { _id: new ObjectId(projectId), [path]: { $not: { $type: 'array' } } },
-    { $set: { [path]: [] } }
+    { $set: { [path]: [], lastUpdated, lastUpdatedBy: null } }
   )
   return result.modifiedCount
 }
@@ -207,7 +214,13 @@ async function fixArray(projectId, path) {
 async function fixFolderId(projectId, path) {
   const result = await db.projects.updateOne(
     { _id: new ObjectId(projectId), [path]: { $exists: false } },
-    { $set: { [path]: new ObjectId() } }
+    {
+      $set: {
+        [path]: new ObjectId(),
+        lastUpdated,
+        lastUpdatedBy: null, // unset lastUpdatedBy
+      },
+    }
   )
   return result.modifiedCount
 }
@@ -218,7 +231,13 @@ async function fixFolderId(projectId, path) {
 async function removeElementsWithoutIds(projectId, path) {
   const result = await db.projects.updateOne(
     { _id: new ObjectId(projectId), [path]: { $type: 'array' } },
-    { $pull: { [path]: { _id: null } } }
+    {
+      $pull: { [path]: { _id: null } },
+      $set: {
+        lastUpdated,
+        lastUpdatedBy: null, // unset lastUpdatedBy
+      },
+    }
   )
   return result.modifiedCount
 }
@@ -245,7 +264,13 @@ async function fixName(projectId, _id) {
   const pathToName = `${path}.name`
   const result = await db.projects.updateOne(
     { _id: new ObjectId(projectId), [pathToName]: { $in: [null, ''] } },
-    { $set: { [pathToName]: name } }
+    {
+      $set: {
+        [pathToName]: name,
+        lastUpdated,
+        lastUpdatedBy: null, // unset lastUpdatedBy
+      },
+    }
   )
   return result.modifiedCount
 }

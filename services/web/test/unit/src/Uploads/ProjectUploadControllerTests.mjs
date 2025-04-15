@@ -267,7 +267,8 @@ describe('ProjectUploadController', function () {
 
         this.EditorController.promises.mkdirp.should.be.calledWith(
           this.project_id,
-          '/test/foo/bar'
+          '/test/foo/bar',
+          this.user_id
         )
 
         this.FileSystemImportManager.addEntity.should.be.calledOnceWith(

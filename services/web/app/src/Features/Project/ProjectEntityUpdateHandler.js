@@ -296,7 +296,8 @@ const addDocWithRanges = wrapWithLock({
       await ProjectEntityUpdateHandler._addDocAndSendToTpds(
         projectId,
         folderId,
-        doc
+        doc,
+        userId
       )
     const docPath = result?.path?.fileSystem
     const projectHistoryId = project?.overleaf?.history?.id
@@ -364,7 +365,8 @@ const addFile = wrapWithLock({
       await ProjectEntityUpdateHandler._addFileAndSendToTpds(
         projectId,
         folderId,
-        fileRef
+        fileRef,
+        userId
       )
     const projectHistoryId = project.overleaf?.history?.id
     const newFiles = [
@@ -382,12 +384,6 @@ const addFile = wrapWithLock({
       { newFiles, newProject: project },
       source
     )
-
-    ProjectUpdateHandler.promises
-      .markAsUpdated(projectId, new Date(), userId)
-      .catch(error => {
-        logger.error({ error }, 'failed to mark project as updated')
-      })
     return { fileRef, folderId, createdBlob }
   },
 })
@@ -434,7 +430,8 @@ const upsertDoc = wrapWithLock(
         await ProjectEntityMongoUpdateHandler.promises.replaceFileWithDoc(
           projectId,
           existingFile._id,
-          doc
+          doc,
+          userId
         )
 
       await TpdsUpdateSender.promises.addDoc({
@@ -616,7 +613,8 @@ const upsertFile = wrapWithLock({
         await ProjectEntityMongoUpdateHandler.promises.replaceDocWithFile(
           projectId,
           existingDoc._id,
-          fileRef
+          fileRef,
+          userId
         )
       const projectHistoryId = project.overleaf?.history?.id
       await TpdsUpdateSender.promises.addFile({
@@ -699,7 +697,8 @@ const upsertDocWithPath = wrapWithLock(
     const { newFolders, folder } =
       await ProjectEntityUpdateHandler.promises.mkdirp.withoutLock(
         projectId,
-        folderPath
+        folderPath,
+        userId
       )
     const { isNew, doc } =
       await ProjectEntityUpdateHandler.promises.upsertDoc.withoutLock(
@@ -772,7 +771,8 @@ const upsertFileWithPath = wrapWithLock({
     const { newFolders, folder } =
       await ProjectEntityUpdateHandler.promises.mkdirp.withoutLock(
         projectId,
-        folderPath
+        folderPath,
+        userId
       )
     // this calls directly into the upsertFile main task (without the beforeLock part)
     const {
@@ -818,7 +818,8 @@ const deleteEntity = wrapWithLock(
       await ProjectEntityMongoUpdateHandler.promises.deleteEntity(
         projectId,
         entityId,
-        entityType
+        entityType,
+        userId
       )
     const subtreeListing = await ProjectEntityUpdateHandler._cleanUpEntity(
       projectBeforeDeletion,
@@ -866,7 +867,7 @@ const deleteEntityWithPath = wrapWithLock(
   }
 )
 
-const mkdirp = wrapWithLock(async function (projectId, path) {
+const mkdirp = wrapWithLock(async function (projectId, path, userId) {
   for (const folder of path.split('/')) {
     if (folder.length > 0 && !SafePath.isCleanFilename(folder)) {
       throw new Errors.InvalidNameError('invalid element name')
@@ -875,32 +876,37 @@ const mkdirp = wrapWithLock(async function (projectId, path) {
   return await ProjectEntityMongoUpdateHandler.promises.mkdirp(
     projectId,
     path,
+    userId,
     { exactCaseMatch: false }
   )
 })
 
-const mkdirpWithExactCase = wrapWithLock(async function (projectId, path) {
-  for (const folder of path.split('/')) {
-    if (folder.length > 0 && !SafePath.isCleanFilename(folder)) {
-      throw new Errors.InvalidNameError('invalid element name')
+const mkdirpWithExactCase = wrapWithLock(
+  async function (projectId, path, userId) {
+    for (const folder of path.split('/')) {
+      if (folder.length > 0 && !SafePath.isCleanFilename(folder)) {
+        throw new Errors.InvalidNameError('invalid element name')
+      }
     }
+    return await ProjectEntityMongoUpdateHandler.promises.mkdirp(
+      projectId,
+      path,
+      userId,
+      { exactCaseMatch: true }
+    )
   }
-  return await ProjectEntityMongoUpdateHandler.promises.mkdirp(
-    projectId,
-    path,
-    { exactCaseMatch: true }
-  )
-})
+)
 
 const addFolder = wrapWithLock(
-  async function (projectId, parentFolderId, folderName) {
+  async function (projectId, parentFolderId, folderName, userId) {
     if (!SafePath.isCleanFilename(folderName)) {
       throw new Errors.InvalidNameError('invalid element name')
     }
     return await ProjectEntityMongoUpdateHandler.promises.addFolder(
       projectId,
       parentFolderId,
-      folderName
+      folderName,
+      userId
     )
   }
 )
@@ -929,7 +935,8 @@ const moveEntity = wrapWithLock(
         projectId,
         entityId,
         destFolderId,
-        entityType
+        entityType,
+        userId
       )
 
     const projectHistoryId = project.overleaf?.history?.id
@@ -988,7 +995,8 @@ const renameEntity = wrapWithLock(
         projectId,
         entityId,
         entityType,
-        newName
+        newName,
+        userId
       )
 
     const projectHistoryId = project.overleaf?.history?.id
@@ -1115,7 +1123,8 @@ const convertDocToFile = wrapWithLock({
       await ProjectEntityMongoUpdateHandler.promises.replaceDocWithFile(
         projectId,
         doc._id,
-        fileRef
+        fileRef,
+        userId
       )
     const projectHistoryId = project.overleaf?.history?.id
     await DocumentUpdaterHandler.promises.updateProjectStructure(
@@ -1276,14 +1285,15 @@ const ProjectEntityUpdateHandler = {
     appendToDocWithPath: appendToDoc,
   },
 
-  async _addDocAndSendToTpds(projectId, folderId, doc) {
+  async _addDocAndSendToTpds(projectId, folderId, doc, userId) {
     let result, project
     try {
       ;({ result, project } =
         await ProjectEntityMongoUpdateHandler.promises.addDoc(
           projectId,
           folderId,
-          doc
+          doc,
+          userId
         ))
     } catch (err) {
       throw OError.tag(err, 'error adding file with project', {
@@ -1328,14 +1338,15 @@ const ProjectEntityUpdateHandler = {
     }
   },
 
-  async _addFileAndSendToTpds(projectId, folderId, fileRef) {
+  async _addFileAndSendToTpds(projectId, folderId, fileRef, userId) {
     let result, project
     try {
       ;({ result, project } =
         await ProjectEntityMongoUpdateHandler.promises.addFile(
           projectId,
           folderId,
-          fileRef
+          fileRef,
+          userId
         ))
     } catch (err) {
       throw OError.tag(err, 'error adding file with project', {
@@ -1382,7 +1393,8 @@ const ProjectEntityUpdateHandler = {
     } = await ProjectEntityMongoUpdateHandler.promises.replaceFileWithNew(
       projectId,
       fileId,
-      newFileRef
+      newFileRef,
+      userId
     )
 
     const oldFiles = [
@@ -1410,11 +1422,6 @@ const ProjectEntityUpdateHandler = {
       projectName: project.name,
       folderId,
     })
-    ProjectUpdateHandler.promises
-      .markAsUpdated(projectId, new Date(), userId)
-      .catch(error => {
-        logger.error({ error }, 'failed to mark project as updated')
-      })
 
     await DocumentUpdaterHandler.promises.updateProjectStructure(
       projectId,
@@ -1538,7 +1545,8 @@ const ProjectEntityUpdateHandler = {
           projectId,
           entityId,
           entityType,
-          rename.newName
+          rename.newName,
+          null // unset lastUpdatedBy
         )
 
       // update the renamed entity for the resync

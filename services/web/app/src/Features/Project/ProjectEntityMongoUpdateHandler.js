@@ -105,7 +105,7 @@ function wrapWithLock(methodWithoutLock) {
   return methodWithLock
 }
 
-async function addDoc(projectId, folderId, doc) {
+async function addDoc(projectId, folderId, doc, userId) {
   const project = await ProjectGetter.promises.getProjectWithoutLock(
     projectId,
     {
@@ -119,12 +119,13 @@ async function addDoc(projectId, folderId, doc) {
     project,
     folderId,
     doc,
-    'doc'
+    'doc',
+    userId
   )
   return { result, project: newProject }
 }
 
-async function addFile(projectId, folderId, fileRef) {
+async function addFile(projectId, folderId, fileRef, userId) {
   const project = await ProjectGetter.promises.getProjectWithoutLock(
     projectId,
     { rootFolder: true, name: true, overleaf: true }
@@ -134,23 +135,24 @@ async function addFile(projectId, folderId, fileRef) {
     project,
     folderId,
     fileRef,
-    'file'
+    'file',
+    userId
   )
   return { result, project: newProject }
 }
 
-async function addFolder(projectId, parentFolderId, folderName) {
+async function addFolder(projectId, parentFolderId, folderName, userId) {
   const project = await ProjectGetter.promises.getProjectWithoutLock(
     projectId,
     { rootFolder: true, name: true, overleaf: true }
   )
   parentFolderId = _confirmFolder(project, parentFolderId)
   const folder = new Folder({ name: folderName })
-  await _putElement(project, parentFolderId, folder, 'folder')
+  await _putElement(project, parentFolderId, folder, 'folder', userId)
   return { folder, parentFolderId }
 }
 
-async function replaceFileWithNew(projectId, fileId, newFileRef) {
+async function replaceFileWithNew(projectId, fileId, newFileRef, userId) {
   const project = await ProjectGetter.promises.getProjectWithoutLock(
     projectId,
     { rootFolder: true, name: true, overleaf: true }
@@ -169,6 +171,8 @@ async function replaceFileWithNew(projectId, fileId, newFileRef) {
         [`${path.mongo}.created`]: new Date(),
         [`${path.mongo}.linkedFileData`]: newFileRef.linkedFileData,
         [`${path.mongo}.hash`]: newFileRef.hash,
+        lastUpdated: new Date(),
+        lastUpdatedBy: userId,
       },
       $inc: {
         version: 1,
@@ -194,7 +198,7 @@ async function replaceFileWithNew(projectId, fileId, newFileRef) {
   return { oldFileRef: fileRef, project, path, newProject, newFileRef }
 }
 
-async function replaceDocWithFile(projectId, docId, fileRef) {
+async function replaceDocWithFile(projectId, docId, fileRef, userId) {
   const project = await ProjectGetter.promises.getProjectWithoutLock(
     projectId,
     { rootFolder: true, name: true, overleaf: true }
@@ -215,6 +219,7 @@ async function replaceDocWithFile(projectId, docId, fileRef) {
         [`${folderMongoPath}.fileRefs`]: fileRef,
       },
       $inc: { version: 1 },
+      $set: { lastUpdated: new Date(), lastUpdatedBy: userId },
     },
     { new: true }
   ).exec()
@@ -227,7 +232,7 @@ async function replaceDocWithFile(projectId, docId, fileRef) {
   return newProject
 }
 
-async function replaceFileWithDoc(projectId, fileId, newDoc) {
+async function replaceFileWithDoc(projectId, fileId, newDoc, userId) {
   const project = await ProjectGetter.promises.getProjectWithoutLock(
     projectId,
     { rootFolder: true, name: true, overleaf: true }
@@ -248,6 +253,7 @@ async function replaceFileWithDoc(projectId, fileId, newDoc) {
         [`${folderMongoPath}.docs`]: newDoc,
       },
       $inc: { version: 1 },
+      $set: { lastUpdated: new Date(), lastUpdatedBy: userId },
     },
     { new: true }
   ).exec()
@@ -260,7 +266,7 @@ async function replaceFileWithDoc(projectId, fileId, newDoc) {
   return newProject
 }
 
-async function mkdirp(projectId, path, options = {}) {
+async function mkdirp(projectId, path, userId, options = {}) {
   // defaults to case insensitive paths, use options {exactCaseMatch:true}
   // to make matching case-sensitive
   const folders = path.split('/').filter(folder => folder.length !== 0)
@@ -289,7 +295,7 @@ async function mkdirp(projectId, path, options = {}) {
       // Folder couldn't be found. Create it.
       const parentFolderId = lastFolder && lastFolder._id
       const { folder: newFolder, parentFolderId: newParentFolderId } =
-        await addFolder(projectId, parentFolderId, folderName)
+        await addFolder(projectId, parentFolderId, folderName, userId)
       newFolder.parentFolder_id = newParentFolderId
       lastFolder = newFolder
       newFolders.push(newFolder)
@@ -298,7 +304,13 @@ async function mkdirp(projectId, path, options = {}) {
   return { folder: lastFolder, newFolders }
 }
 
-async function moveEntity(projectId, entityId, destFolderId, entityType) {
+async function moveEntity(
+  projectId,
+  entityId,
+  destFolderId,
+  entityType,
+  userId
+) {
   const project = await ProjectGetter.promises.getProjectWithoutLock(
     projectId,
     { rootFolder: true, name: true, overleaf: true }
@@ -326,7 +338,8 @@ async function moveEntity(projectId, entityId, destFolderId, entityType) {
     project,
     destFolderId,
     entity,
-    entityType
+    entityType,
+    userId
   )
   // Note: putElement always pushes onto the end of an
   // array so it will never change an existing mongo
@@ -337,10 +350,10 @@ async function moveEntity(projectId, entityId, destFolderId, entityType) {
   // is done by _checkValidMove above) because that
   // would lead to it being deleted.
   const newProject = await _removeElementFromMongoArray(
-    Project,
     projectId,
     entityPath.mongo,
-    entityId
+    entityId,
+    userId
   )
   const { docs: newDocs, files: newFiles } =
     ProjectEntityHandler.getAllEntitiesFromProject(newProject)
@@ -375,7 +388,7 @@ async function moveEntity(projectId, entityId, destFolderId, entityType) {
   return { project, startPath, endPath, rev: entity.rev, changes }
 }
 
-async function deleteEntity(projectId, entityId, entityType) {
+async function deleteEntity(projectId, entityId, entityType, userId) {
   const project = await ProjectGetter.promises.getProjectWithoutLock(
     projectId,
     { name: true, rootFolder: true, overleaf: true, rootDoc_id: true }
@@ -399,22 +412,16 @@ async function deleteEntity(projectId, entityId, entityType) {
     type: entityType,
   })
   const newProject = await _removeElementFromMongoArray(
-    Project,
     projectId,
     path.mongo,
     entityId,
+    userId,
     deleteRootDoc
   )
   return { entity, path, projectBeforeDeletion: project, newProject }
 }
 
-async function renameEntity(
-  projectId,
-  entityId,
-  entityType,
-  newName,
-  callback
-) {
+async function renameEntity(projectId, entityId, entityType, newName, userId) {
   const project = await ProjectGetter.promises.getProjectWithoutLock(
     projectId,
     { rootFolder: true, name: true, overleaf: true }
@@ -445,7 +452,14 @@ async function renameEntity(
   // we need to increment the project version number for any structure change
   const newProject = await Project.findOneAndUpdate(
     { _id: projectId, [entPath.mongo]: { $exists: true } },
-    { $set: { [`${entPath.mongo}.name`]: newName }, $inc: { version: 1 } },
+    {
+      $set: {
+        [`${entPath.mongo}.name`]: newName,
+        lastUpdated: new Date(),
+        lastUpdatedBy: userId,
+      },
+      $inc: { version: 1 },
+    },
     { new: true }
   ).exec()
   if (newProject == null) {
@@ -478,10 +492,10 @@ async function _insertDeletedFileReference(projectId, fileRef) {
 }
 
 async function _removeElementFromMongoArray(
-  model,
   modelId,
   path,
   elementId,
+  userId,
   deleteRootDoc = false
 ) {
   const nonArrayPath = path.slice(0, path.lastIndexOf('.'))
@@ -490,11 +504,12 @@ async function _removeElementFromMongoArray(
   const update = {
     $pull: { [nonArrayPath]: { _id: elementId } },
     $inc: { version: 1 },
+    $set: { lastUpdated: new Date(), lastUpdatedBy: userId },
   }
   if (deleteRootDoc) {
     update.$unset = { rootDoc_id: 1 }
   }
-  return model.findOneAndUpdate(query, update, options).exec()
+  return Project.findOneAndUpdate(query, update, options).exec()
 }
 
 function _countElements(project) {
@@ -522,7 +537,7 @@ function _countElements(project) {
   return countFolder(project.rootFolder[0])
 }
 
-async function _putElement(project, folderId, element, type) {
+async function _putElement(project, folderId, element, type, userId) {
   if (element == null || element._id == null) {
     logger.warn(
       { projectId: project._id, folderId, element, type },
@@ -578,7 +593,11 @@ async function _putElement(project, folderId, element, type) {
   const mongoPath = `${path.mongo}.${pathSegment}`
   const newProject = await Project.findOneAndUpdate(
     { _id: project._id, [path.mongo]: { $exists: true } },
-    { $push: { [mongoPath]: element }, $inc: { version: 1 } },
+    {
+      $push: { [mongoPath]: element },
+      $inc: { version: 1 },
+      $set: { lastUpdated: new Date(), lastUpdatedBy: userId },
+    },
     { new: true }
   ).exec()
   if (newProject == null) {
@@ -709,7 +728,11 @@ async function createNewFolderStructure(projectId, docEntries, fileEntries) {
         'rootFolder.0.files.0': { $exists: false },
       },
       {
-        $set: { rootFolder: [rootFolder] },
+        $set: {
+          rootFolder: [rootFolder],
+          // NOTE: Do not set lastUpdated/lastUpdatedBy here. They are both set when creating the initial record.
+          // The newly created clsi-cache record uses the lastUpdated timestamp of the initial record. Updating the lastUpdated timestamp here invalidates the cache record.
+        },
         $inc: { version: 1 },
       },
       {

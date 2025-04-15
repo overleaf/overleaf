@@ -81,7 +81,7 @@ describe('RestoreManager', function () {
 
       it('should find the root folder', function () {
         this.RestoreManager.promises._findOrCreateFolder
-          .calledWith(this.project_id, '')
+          .calledWith(this.project_id, '', this.user_id)
           .should.equal(true)
       })
 
@@ -116,7 +116,7 @@ describe('RestoreManager', function () {
 
       it('should find the folder', function () {
         this.RestoreManager.promises._findOrCreateFolder
-          .calledWith(this.project_id, 'foo')
+          .calledWith(this.project_id, 'foo', this.user_id)
           .should.equal(true)
       })
 
@@ -143,13 +143,14 @@ describe('RestoreManager', function () {
       })
       this.result = await this.RestoreManager.promises._findOrCreateFolder(
         this.project_id,
-        'folder/name'
+        'folder/name',
+        this.user_id
       )
     })
 
     it('should look up or create the folder', function () {
       this.EditorController.promises.mkdirp
-        .calledWith(this.project_id, 'folder/name')
+        .calledWith(this.project_id, 'folder/name', this.user_id)
         .should.equal(true)
     })
 

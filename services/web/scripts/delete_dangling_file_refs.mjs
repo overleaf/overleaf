@@ -104,7 +104,8 @@ async function deleteDoc(projectId, docId) {
     await ProjectEntityMongoUpdateHandler.promises.deleteEntity(
       projectId,
       docId,
-      'doc'
+      'doc',
+      null // unset lastUpdatedBy
     )
   }
 }
@@ -115,7 +116,8 @@ async function deleteFile(projectId, fileId) {
     await ProjectEntityMongoUpdateHandler.promises.deleteEntity(
       projectId,
       fileId,
-      'file'
+      'file',
+      null // unset lastUpdatedBy
     )
   }
 }

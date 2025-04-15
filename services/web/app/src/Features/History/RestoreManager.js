@@ -33,7 +33,8 @@ const RestoreManager = {
     }
     const parentFolderId = await RestoreManager._findOrCreateFolder(
       projectId,
-      dirname
+      dirname,
+      userId
     )
     const addEntityWithName = async name =>
       await FileSystemImportManager.promises.addEntity(
@@ -71,7 +72,8 @@ const RestoreManager = {
     }
     const parentFolderId = await RestoreManager._findOrCreateFolder(
       projectId,
-      dirname
+      dirname,
+      userId
     )
     const file = await ProjectLocator.promises
       .findElementByPath({
@@ -264,10 +266,11 @@ const RestoreManager = {
     }
   },
 
-  async _findOrCreateFolder(projectId, dirname) {
+  async _findOrCreateFolder(projectId, dirname, userId) {
     const { lastFolder } = await EditorController.promises.mkdirp(
       projectId,
-      dirname
+      dirname,
+      userId
     )
     return lastFolder?._id
   },

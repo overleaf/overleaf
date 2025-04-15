@@ -518,7 +518,12 @@ describe('EditorController', function () {
 
     it('should add the folder using the project entity handler', function () {
       return this.ProjectEntityUpdateHandler.addFolder
-        .calledWith(this.project_id, this.folder_id, this.folderName)
+        .calledWith(
+          this.project_id,
+          this.folder_id,
+          this.folderName,
+          this.user_id
+        )
         .should.equal(true)
     })
 
@@ -540,6 +545,7 @@ describe('EditorController', function () {
         (this.folderA = { _id: 2, parentFolder_id: 1 }),
         (this.folderB = { _id: 3, parentFolder_id: 2 }),
       ]
+      this.userId = new ObjectId().toString()
       this.EditorController._notifyProjectUsersOfNewFolders = sinon
         .stub()
         .yields()
@@ -549,13 +555,14 @@ describe('EditorController', function () {
       return this.EditorController.mkdirp(
         this.project_id,
         this.path,
+        this.userId,
         this.callback
       )
     })
 
     it('should create the folder using the project entity handler', function () {
       return this.ProjectEntityUpdateHandler.mkdirp
-        .calledWith(this.project_id, this.path)
+        .calledWith(this.project_id, this.path, this.userId)
         .should.equal(true)
     })
 

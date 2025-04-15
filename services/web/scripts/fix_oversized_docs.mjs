@@ -76,7 +76,8 @@ async function processDoc(projectId, docId) {
       await ProjectEntityMongoUpdateHandler.promises.replaceDocWithFile(
         new ObjectId(projectId),
         new ObjectId(docId),
-        fileRef
+        fileRef,
+        null // unset lastUpdatedBy
       )
       await deleteDocFromMongo(projectId, doc)
       await deleteDocFromRedis(projectId, docId)

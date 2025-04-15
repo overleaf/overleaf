@@ -20,6 +20,7 @@ const tk = require('timekeeper')
 
 describe('ConnectedUsersManager', function () {
   beforeEach(function () {
+    tk.freeze(new Date())
     this.settings = {
       redis: {
         realtime: {
@@ -56,7 +57,6 @@ describe('ConnectedUsersManager', function () {
         return this.rClient
       },
     }
-    tk.freeze(new Date())
     this.Metrics = {
       inc: sinon.stub(),
       histogram: sinon.stub(),

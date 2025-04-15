@@ -540,7 +540,8 @@ function expectFolderUpdateProcessed() {
   it('processes the folder update', function () {
     expect(this.UpdateMerger.promises.createFolder).to.have.been.calledWith(
       this.projects.active1._id,
-      this.folderPath
+      this.folderPath,
+      this.userId
     )
   })
 }
