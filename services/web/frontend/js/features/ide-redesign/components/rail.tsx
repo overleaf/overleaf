@@ -79,7 +79,7 @@ export const RailLayout = () => {
   const {
     activeModal,
     selectedTab,
-    setSelectedTab,
+    openTab,
     isOpen,
     setIsOpen,
     panelRef,
@@ -162,11 +162,10 @@ export const RailLayout = () => {
           return
         }
         // Change the selected tab and make sure it's open
-        setSelectedTab((key ?? 'file-tree') as RailTabKey)
-        setIsOpen(true)
+        openTab((key ?? 'file-tree') as RailTabKey)
       }
     },
-    [setSelectedTab, selectedTab, setIsOpen, togglePane, railTabs]
+    [openTab, togglePane, selectedTab, railTabs]
   )
 
   const isReviewPanelOpen = selectedTab === 'review-panel'

@@ -51,8 +51,7 @@ const ReviewTooltipMenu: FC = () => {
   const [show, setShow] = useState(true)
   const { setView } = useReviewPanelViewActionsContext()
   const { setReviewPanelOpen } = useLayoutContext()
-  const { setIsOpen: setRailIsOpen, setSelectedTab: setSelectedRailTab } =
-    useRailContext()
+  const { openTab: openRailTab } = useRailContext()
   const newEditor = useIsNewEditorEnabled()
 
   const tooltipState = state.field(reviewTooltipStateField, false)?.tooltip
@@ -71,8 +70,7 @@ const ReviewTooltipMenu: FC = () => {
     }
 
     if (newEditor) {
-      setSelectedRailTab('review-panel')
-      setRailIsOpen(true)
+      openRailTab('review-panel')
     } else {
       setReviewPanelOpen(true)
     }
@@ -87,15 +85,7 @@ const ReviewTooltipMenu: FC = () => {
 
     view.dispatch({ effects })
     setShow(false)
-  }, [
-    setReviewPanelOpen,
-    setView,
-    setShow,
-    view,
-    setSelectedRailTab,
-    setRailIsOpen,
-    newEditor,
-  ])
+  }, [setReviewPanelOpen, setView, setShow, view, openRailTab, newEditor])
 
   useEventListener('add-new-review-comment', addComment)
 

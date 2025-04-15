@@ -11,7 +11,7 @@ function PdfErrorState() {
   // TODO ide-redesign-cleanup: rename showLogs to something else and check usages
   const { showLogs } = useCompileContext()
   const { t } = useTranslation()
-  const { setSelectedTab: setSelectedRailTab } = useRailContext()
+  const { openTab: openRailTab } = useRailContext()
   const newEditor = useIsNewEditorEnabled()
 
   if (!newEditor || (!loadingError && !showLogs)) {
@@ -34,7 +34,7 @@ function PdfErrorState() {
           variant="secondary"
           size="sm"
           onClick={() => {
-            setSelectedRailTab('errors')
+            openRailTab('errors')
           }}
         >
           {t('check_logs')}

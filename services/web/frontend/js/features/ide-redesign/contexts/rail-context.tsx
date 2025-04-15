@@ -24,7 +24,6 @@ export type RailModalKey = 'keyboard-shortcuts' | 'contact-us' | 'dictionary'
 const RailContext = createContext<
   | {
       selectedTab: RailTabKey
-      setSelectedTab: Dispatch<SetStateAction<RailTabKey>>
       isOpen: boolean
       setIsOpen: Dispatch<SetStateAction<boolean>>
       panelRef: React.RefObject<ImperativePanelHandle>
@@ -35,6 +34,7 @@ const RailContext = createContext<
       setResizing: Dispatch<SetStateAction<boolean>>
       activeModal: RailModalKey | null
       setActiveModal: Dispatch<SetStateAction<RailModalKey | null>>
+      openTab: (tab: RailTabKey) => void
     }
   | undefined
 >(undefined)
@@ -69,10 +69,17 @@ export const RailProvider: FC = ({ children }) => {
   //       since it is responsible for opening the initial document.
   const [selectedTab, setSelectedTab] = useState<RailTabKey>('file-tree')
 
+  const openTab = useCallback(
+    (tab: RailTabKey) => {
+      setSelectedTab(tab)
+      setIsOpen(true)
+    },
+    [setIsOpen, setSelectedTab]
+  )
+
   const value = useMemo(
     () => ({
       selectedTab,
-      setSelectedTab,
       isOpen,
       setIsOpen,
       panelRef,
@@ -83,10 +90,10 @@ export const RailProvider: FC = ({ children }) => {
       setResizing,
       activeModal,
       setActiveModal,
+      openTab,
     }),
     [
       selectedTab,
-      setSelectedTab,
       isOpen,
       setIsOpen,
       panelRef,
@@ -97,6 +104,7 @@ export const RailProvider: FC = ({ children }) => {
       setResizing,
       activeModal,
       setActiveModal,
+      openTab,
     ]
   )
 
