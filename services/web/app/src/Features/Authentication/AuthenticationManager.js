@@ -409,10 +409,6 @@ const AuthenticationManager = {
       if (!_exceedsMaximumLengthRatio(password, MAX_SIMILARITY, emailPart)) {
         const similarity = DiffHelper.stringSimilarity(password, emailPart)
         if (similarity > MAX_SIMILARITY) {
-          logger.warn(
-            { email, emailPart, similarity, maxSimilarity: MAX_SIMILARITY },
-            'Password too similar to email'
-          )
           return new Error('password is too similar to email')
         }
       }
