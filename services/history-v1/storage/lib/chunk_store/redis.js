@@ -172,7 +172,22 @@ function compareChunks(projectId, cachedChunk, currentChunk) {
     return false
   }
   const identical = JSON.stringify(cachedChunk) === JSON.stringify(currentChunk)
-  logger.error({ projectId }, 'chunk cache mismatch')
+  if (!identical) {
+    try {
+      logger.error(
+        {
+          projectId,
+          cachedChunkStartVersion: cachedChunk.getStartVersion(),
+          cachedChunkEndVersion: cachedChunk.getEndVersion(),
+          currentChunkStartVersion: currentChunk.getStartVersion(),
+          currentChunkEndVersion: currentChunk.getEndVersion(),
+        },
+        'chunk cache mismatch'
+      )
+    } catch (err) {
+      // ignore errors while logging
+    }
+  }
   metrics.inc('chunk_store.redis.compare_chunks', 1, {
     status: identical ? 'success' : 'fail',
   })
