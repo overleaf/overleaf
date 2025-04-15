@@ -77,33 +77,33 @@ export const ReactContextRoot: FC<{ providers?: Record<string, FC> }> = ({
                           <Providers.DetachProvider>
                             <Providers.EditorProvider>
                               <Providers.PermissionsProvider>
-                                <Providers.LayoutProvider>
-                                  <Providers.ProjectSettingsProvider>
-                                    <Providers.EditorManagerProvider>
-                                      <Providers.LocalCompileProvider>
-                                        <Providers.DetachCompileProvider>
-                                          <Providers.ChatProvider>
-                                            <Providers.FileTreeOpenProvider>
-                                              <Providers.OnlineUsersProvider>
-                                                <Providers.MetadataProvider>
-                                                  <Providers.OutlineProvider>
-                                                    <Providers.RailProvider>
+                                <Providers.RailProvider>
+                                  <Providers.LayoutProvider>
+                                    <Providers.ProjectSettingsProvider>
+                                      <Providers.EditorManagerProvider>
+                                        <Providers.LocalCompileProvider>
+                                          <Providers.DetachCompileProvider>
+                                            <Providers.ChatProvider>
+                                              <Providers.FileTreeOpenProvider>
+                                                <Providers.OnlineUsersProvider>
+                                                  <Providers.MetadataProvider>
+                                                    <Providers.OutlineProvider>
                                                       <Providers.IdeRedesignSwitcherProvider>
                                                         <Providers.CommandRegistryProvider>
                                                           {children}
                                                         </Providers.CommandRegistryProvider>
                                                       </Providers.IdeRedesignSwitcherProvider>
-                                                    </Providers.RailProvider>
-                                                  </Providers.OutlineProvider>
-                                                </Providers.MetadataProvider>
-                                              </Providers.OnlineUsersProvider>
-                                            </Providers.FileTreeOpenProvider>
-                                          </Providers.ChatProvider>
-                                        </Providers.DetachCompileProvider>
-                                      </Providers.LocalCompileProvider>
-                                    </Providers.EditorManagerProvider>
-                                  </Providers.ProjectSettingsProvider>
-                                </Providers.LayoutProvider>
+                                                    </Providers.OutlineProvider>
+                                                  </Providers.MetadataProvider>
+                                                </Providers.OnlineUsersProvider>
+                                              </Providers.FileTreeOpenProvider>
+                                            </Providers.ChatProvider>
+                                          </Providers.DetachCompileProvider>
+                                        </Providers.LocalCompileProvider>
+                                      </Providers.EditorManagerProvider>
+                                    </Providers.ProjectSettingsProvider>
+                                  </Providers.LayoutProvider>
+                                </Providers.RailProvider>
                               </Providers.PermissionsProvider>
                             </Providers.EditorProvider>
                           </Providers.DetachProvider>
