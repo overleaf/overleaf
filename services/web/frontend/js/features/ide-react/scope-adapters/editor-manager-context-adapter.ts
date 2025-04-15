@@ -1,6 +1,5 @@
 import { ReactScopeValueStore } from '@/features/ide-react/scope-value-store/react-scope-value-store'
 import customLocalStorage from '@/infrastructure/local-storage'
-import getMeta from '@/utils/meta'
 import { DocumentContainer } from '@/features/ide-react/editor/document-container'
 
 export type EditorScopeValue = {
@@ -37,24 +36,13 @@ export function populateEditorScope(
 
   store.persisted(
     'editor.showVisual',
-    getMeta('ol-usedLatex') === 'never' || showVisualFallbackValue(projectId),
+    showVisualFallbackValue(projectId),
     `editor.lastUsedMode`,
     {
       toPersisted: showVisual => (showVisual ? 'visual' : 'code'),
       fromPersisted: mode => mode === 'visual',
     }
   )
-
-  store.persisted(
-    'editor.codeEditorOpened',
-    codeEditorOpenedFallbackValue(),
-    'editor.codeEditorOpened'
-  )
-  store.watch('editor.showVisual', showVisual => {
-    if (store.get('editor.codeEditorOpened') !== true && showVisual === false) {
-      store.set('editor.codeEditorOpened', true)
-    }
-  })
 }
 
 function showVisualFallbackValue(projectId: string) {
@@ -67,17 +55,4 @@ function showVisualFallbackValue(projectId: string) {
   }
 
   return editorModeVal === 'rich-text'
-}
-
-function codeEditorOpenedFallbackValue() {
-  const signUpDate = getMeta('ol-user').signUpDate
-  if (
-    typeof signUpDate === 'string' &&
-    new Date(signUpDate) < new Date('2024-08-02')
-  ) {
-    // if signUpDate is before releasing "codeEditorOpened" value
-    // it is assumed that the user has opened the code editor at some point
-    return true
-  }
-  return false
 }

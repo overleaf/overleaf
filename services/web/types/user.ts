@@ -45,7 +45,6 @@ export type User = {
   alphaProgram?: boolean
   betaProgram?: boolean
   labsProgram?: boolean
-  isLatexBeginner?: boolean
   signUpDate?: string // date string
   features?: Features
   refProviders?: RefProviders

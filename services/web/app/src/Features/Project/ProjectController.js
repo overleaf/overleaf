@@ -349,7 +349,6 @@ const _ProjectController = {
       !anonymous && 'ro-mirror-on-client',
       'track-pdf-download',
       !anonymous && 'writefull-oauth-promotion',
-      'default-visual-for-beginners',
       'hotjar',
       'reviewer-role',
       'editor-redesign',
@@ -404,13 +403,6 @@ const _ProjectController = {
               userId,
               projectId
             ),
-          usedLatex: OnboardingDataCollectionManager.getOnboardingDataValue(
-            userId,
-            'usedLatex'
-          ).catch(err => {
-            logger.error({ err, userId })
-            return null
-          }),
           odcRole: OnboardingDataCollectionManager.getOnboardingDataValue(
             userId,
             'role'
@@ -470,7 +462,6 @@ const _ProjectController = {
         subscription,
         isTokenMember,
         isInvitedMember,
-        usedLatex,
         odcRole,
       } = userValues
 
@@ -887,12 +878,6 @@ const _ProjectController = {
         fixedSizeDocument: true,
         hasTrackChangesFeature: Features.hasFeature('track-changes'),
         projectTags,
-        usedLatex:
-          // only use the usedLatex value if the split test is enabled
-          splitTestAssignments['default-visual-for-beginners']?.variant ===
-          'enabled'
-            ? usedLatex
-            : null,
         odcRole:
           // only use the ODC role value if the split test is enabled
           splitTestAssignments['paywall-change-compile-timeout']?.variant ===
