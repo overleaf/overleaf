@@ -1,4 +1,4 @@
-function GitBridgeLogo({ size = 40 }: { size?: number }) {
+function GitLogo({ size = 40 }: { size?: number }) {
   return (
     <svg
       width={size}
@@ -29,4 +29,4 @@ function GitBridgeLogo({ size = 40 }: { size?: number }) {
   )
 }
 
-export default GitBridgeLogo
+export default GitLogo
