@@ -30,7 +30,6 @@ const { BlobStore } = require('../blob_store')
 const { historyStore } = require('../history_store')
 const mongoBackend = require('./mongo')
 const postgresBackend = require('./postgres')
-const redisBackend = require('./redis')
 const { ChunkVersionConflictError } = require('./errors')
 
 const DEFAULT_DELETE_BATCH_SIZE = parseInt(config.get('maxDeleteKeys'), 10)
@@ -105,23 +104,13 @@ async function loadLatestRaw(projectId, opts) {
  * @return {Promise.<Chunk>}
  */
 async function loadLatest(projectId) {
-  // Test out the redis caching backend - not in use yet
-  const cachedChunk = await redisBackend.getCurrentChunk(projectId)
   const chunkRecord = await loadLatestRaw(projectId)
   const rawHistory = await historyStore.loadRaw(projectId, chunkRecord.id)
   const history = History.fromRaw(rawHistory)
   const blobStore = new BlobStore(projectId)
   const batchBlobStore = new BatchBlobStore(blobStore)
   await lazyLoadHistoryFiles(history, batchBlobStore)
-  const chunk = new Chunk(history, chunkRecord.startVersion)
-  // if the cached chunk is no longer valid, update it
-  const cachedChunkIsValid = redisBackend.checkCacheValidity(cachedChunk, chunk)
-  if (!cachedChunkIsValid) {
-    await redisBackend.setCurrentChunk(projectId, chunk)
-  } else {
-    await redisBackend.compareChunks(projectId, cachedChunk, chunk)
-  }
-  return chunk
+  return new Chunk(history, chunkRecord.startVersion)
 }
 
 /**

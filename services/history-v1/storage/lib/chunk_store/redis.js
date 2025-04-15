@@ -148,7 +148,7 @@ async function setCurrentChunk(projectId, chunk) {
 
 /**
  * Checks whether a cached chunk's version metadata matches the current chunk's metadata
- * @param {Chunk}} cachedChunk - The chunk retrieved from cache
+ * @param {Chunk} cachedChunk - The chunk retrieved from cache
  * @param {Chunk} currentChunk - The current chunk to compare against
  * @returns {boolean} - Returns true if the chunks have matching start and end versions, false otherwise
  */
@@ -157,6 +157,22 @@ function checkCacheValidity(cachedChunk, currentChunk) {
     cachedChunk &&
       cachedChunk.getStartVersion() === currentChunk.getStartVersion() &&
       cachedChunk.getEndVersion() === currentChunk.getEndVersion()
+  )
+}
+
+/**
+ * Validates if a cached chunk matches the current chunk metadata by comparing versions
+ * @param {Object} cachedChunk - The cached chunk object to validate
+ * @param {Object} currentChunkMetadata - The current chunk metadata to compare against
+ * @param {number} currentChunkMetadata.startVersion - The starting version number
+ * @param {number} currentChunkMetadata.endVersion - The ending version number
+ * @returns {boolean} - True if the cached chunk is valid, false otherwise
+ */
+function checkCacheValidityWithMetadata(cachedChunk, currentChunkMetadata) {
+  return Boolean(
+    cachedChunk &&
+      cachedChunk.getStartVersion() === currentChunkMetadata.startVersion &&
+      cachedChunk.getEndVersion() === currentChunkMetadata.endVersion
   )
 }
 
@@ -194,10 +210,45 @@ function compareChunks(projectId, cachedChunk, currentChunk) {
   return identical
 }
 
+// Define Lua script for atomic cache clearing
+rclient.defineCommand('clear_chunk_cache', {
+  numberOfKeys: 3,
+  lua: `
+    -- Delete all keys related to a project's chunk cache atomically
+    redis.call('DEL', KEYS[1]) -- snapshot key
+    redis.call('DEL', KEYS[2]) -- startVersion key
+    redis.call('DEL', KEYS[3]) -- changes key
+    return 1
+  `,
+})
+
+/**
+ * Clears all cache entries for a project's chunk data
+ * @param {string} projectId - The ID of the project whose cache should be cleared
+ * @returns {Promise<boolean>} A promise that resolves to true if successful, false on error
+ */
+async function clearCache(projectId) {
+  try {
+    const snapshotKey = keySchema.snapshot({ projectId })
+    const startVersionKey = keySchema.startVersion({ projectId })
+    const changesKey = keySchema.changes({ projectId })
+
+    await rclient.clear_chunk_cache(snapshotKey, startVersionKey, changesKey)
+    metrics.inc('chunk_store.redis.clear_cache', 1, { status: 'success' })
+    return true
+  } catch (err) {
+    logger.error({ err, projectId }, 'error clearing chunk cache from redis')
+    metrics.inc('chunk_store.redis.clear_cache', 1, { status: 'error' })
+    return false
+  }
+}
+
 module.exports = {
   getCurrentChunk,
   setCurrentChunk,
   getCurrentChunkMetadata,
   checkCacheValidity,
+  checkCacheValidityWithMetadata,
   compareChunks,
+  clearCache,
 }

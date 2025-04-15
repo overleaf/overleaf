@@ -18,6 +18,7 @@ const {
   HashCheckBlobStore,
   ProjectArchive,
   zipStore,
+  chunkBuffer,
 } = require('../../storage')
 
 const render = require('./render')
@@ -44,7 +45,7 @@ async function initializeProject(req, res, next) {
 async function getLatestContent(req, res, next) {
   const projectId = req.swagger.params.project_id.value
   const blobStore = new BlobStore(projectId)
-  const chunk = await chunkStore.loadLatest(projectId)
+  const chunk = await chunkBuffer.loadLatest(projectId)
   const snapshot = chunk.getSnapshot()
   snapshot.applyAll(chunk.getChanges())
   await snapshot.loadFiles('eager', blobStore)
@@ -63,7 +64,7 @@ async function getContentAtVersion(req, res, next) {
 async function getLatestHashedContent(req, res, next) {
   const projectId = req.swagger.params.project_id.value
   const blobStore = new HashCheckBlobStore(new BlobStore(projectId))
-  const chunk = await chunkStore.loadLatest(projectId)
+  const chunk = await chunkBuffer.loadLatest(projectId)
   const snapshot = chunk.getSnapshot()
   snapshot.applyAll(chunk.getChanges())
   await snapshot.loadFiles('eager', blobStore)
@@ -74,7 +75,7 @@ async function getLatestHashedContent(req, res, next) {
 async function getLatestHistory(req, res, next) {
   const projectId = req.swagger.params.project_id.value
   try {
-    const chunk = await chunkStore.loadLatest(projectId)
+    const chunk = await chunkBuffer.loadLatest(projectId)
     const chunkResponse = new ChunkResponse(chunk)
     res.json(chunkResponse.toRaw())
   } catch (err) {
@@ -153,7 +154,7 @@ async function getChanges(req, res, next) {
   }
 
   const changes = []
-  let chunk = await chunkStore.loadLatest(projectId)
+  let chunk = await chunkBuffer.loadLatest(projectId)
 
   if (since > chunk.getEndVersion()) {
     return res.status(400).json({

@@ -1,6 +1,7 @@
 exports.BatchBlobStore = require('./lib/batch_blob_store')
 exports.blobHash = require('./lib/blob_hash')
 exports.HashCheckBlobStore = require('./lib/hash_check_blob_store')
+exports.chunkBuffer = require('./lib/chunk_buffer')
 exports.chunkStore = require('./lib/chunk_store')
 exports.historyStore = require('./lib/history_store').historyStore
 exports.knex = require('./lib/knex')
