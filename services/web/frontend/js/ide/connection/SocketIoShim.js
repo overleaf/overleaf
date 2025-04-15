@@ -277,13 +277,34 @@ if (typeof io === 'undefined' || !io) {
   current = SocketShimV2
 }
 
-export class SocketIOMock extends EventEmitter {
+export class SocketIOMock extends SocketShimBase {
+  constructor() {
+    super(new EventEmitter())
+    this.socket = {
+      get connected() {
+        return false
+      },
+      get sessionid() {
+        return undefined
+      },
+      get transport() {
+        return {}
+      },
+      get transports() {
+        return []
+      },
+
+      connect() {},
+      disconnect(reason) {},
+    }
+  }
+
   addListener(event, listener) {
-    this.on(event, listener)
+    this._socket.on(event, listener)
   }
 
   removeListener(event, listener) {
-    this.off(event, listener)
+    this._socket.off(event, listener)
   }
 
   disconnect() {
@@ -293,6 +314,10 @@ export class SocketIOMock extends EventEmitter {
   emitToClient(...args) {
     // Round-trip through JSON.parse/stringify to simulate (de-)serializing on network layer.
     this.emit(...JSON.parse(JSON.stringify(args)))
+  }
+
+  countEventListeners(event) {
+    return this._socket.events[event].length
   }
 }
 

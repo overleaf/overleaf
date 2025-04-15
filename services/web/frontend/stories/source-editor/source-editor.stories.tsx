@@ -211,6 +211,7 @@ const mockDoc = (content: string, changes: Array<Record<string, any>> = []) => {
       return null
     },
     ranges: new RangesTracker(changes, []),
+    hasBufferedOps: () => false,
   }
 }
 

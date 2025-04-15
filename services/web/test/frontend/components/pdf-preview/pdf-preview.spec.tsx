@@ -28,7 +28,19 @@ const Layout: FC<{ layout: IdeLayout; view?: IdeView }> = ({
 }
 
 describe('<PdfPreview/>', function () {
+  let projectId: string
   beforeEach(function () {
+    /**
+     * There are time sensitive tests in this test suite. They need to wait for a Promise before resolving a request.
+     *
+     * Using a promise across the test-env (browser) vs stub-env (server) causes additional latency.
+     *
+     * This latency seems to stack up when adding more intercepts for the same path. Using static responses for some of these intercepts does not help.
+     *
+     * All of that seems like a bug in Cypress. For now just work around it by using a unique projectId for each intercept.
+     */
+    projectId = Math.random().toString().slice(2)
+
     window.metaAttributesCache.set('ol-preventCompileOnLoad', true)
     window.metaAttributesCache.set(
       'ol-compilesUserContentDomain',
@@ -61,7 +73,12 @@ describe('<PdfPreview/>', function () {
   })
 
   it('uses the cache when available', function () {
-    cy.interceptCompile({ prefix: 'compile', times: 1, cached: true })
+    cy.interceptCompile({
+      prefix: 'compile',
+      times: 1,
+      cached: true,
+      regular: false,
+    })
 
     const scope = mockScope()
 
@@ -74,13 +91,18 @@ describe('<PdfPreview/>', function () {
     )
 
     // wait for "compile from cache on load" to finish
-    cy.waitForCompile({ pdf: true, cached: true })
+    cy.waitForCompile({ pdf: true, cached: true, regular: false })
 
     cy.contains('Your Paper')
   })
 
   it('uses the cache when available then compiles', function () {
-    cy.interceptCompile({ prefix: 'compile', times: 1, cached: true })
+    cy.interceptCompile({
+      prefix: 'compile',
+      times: 1,
+      cached: true,
+      regular: false,
+    })
 
     const scope = mockScope()
 
@@ -93,7 +115,7 @@ describe('<PdfPreview/>', function () {
     )
 
     // wait for "compile from cache on load" to finish
-    cy.waitForCompile({ pdf: true, cached: true })
+    cy.waitForCompile({ pdf: true, cached: true, regular: false })
     cy.contains('Your Paper')
 
     // Then trigger a new compile
@@ -110,6 +132,154 @@ describe('<PdfPreview/>', function () {
     // wait for compile to finish
     cy.waitForCompile({ prefix: 'recompile', pdf: true })
     cy.contains('Modern Authoring Tools for Science')
+  })
+
+  describe('racing compile from cache and regular compile trigger', function () {
+    for (const [timing] of ['before rendering', 'after rendering']) {
+      it(`replaces the compile from cache with a regular compile - ${timing}`, function () {
+        const requestedOnce = new Set()
+        ;['log', 'pdf', 'blg'].forEach(ext => {
+          cy.intercept({ pathname: `/build/*/output.${ext}` }, req => {
+            if (requestedOnce.has(ext)) {
+              throw new Error(
+                `compile from cache triggered extra ${ext} request: ${req.url}`
+              )
+            }
+            requestedOnce.add(ext)
+            req.reply({ fixture: `build/output.${ext},null` })
+          }).as(`compile-${ext}`)
+        })
+        const { promise, resolve } = Promise.withResolvers<void>()
+        cy.interceptCompileFromCacheRequest({
+          promise,
+          times: 1,
+        }).as('cached-compile')
+        cy.interceptCompileRequest().as('compile')
+
+        const scope = mockScope()
+        cy.mount(
+          <EditorProviders scope={scope} projectId={projectId}>
+            <div className="pdf-viewer">
+              <PdfPreview />
+            </div>
+          </EditorProviders>
+        )
+
+        // press the Recompile button => compile
+        cy.findByRole('button', { name: 'Recompile' }).click()
+
+        if (timing === 'before rendering') {
+          cy.then(() => resolve())
+          cy.wait('@cached-compile')
+        }
+
+        // wait for rendering to finish
+        cy.waitForCompile({ pdf: true, cached: false })
+
+        if (timing === 'after rendering') {
+          cy.then(() => resolve())
+          cy.wait('@cached-compile')
+        }
+
+        cy.contains('Your Paper')
+        cy.then(() => Array.from(requestedOnce).sort().join(',')).should(
+          'equal',
+          'blg,log,pdf'
+        )
+      })
+    }
+  })
+
+  describe('clsi-cache project settings validation', function () {
+    const cases = {
+      // Flaky, skip for now
+      'uses compile from cache when nothing changed': {
+        cached: true,
+        setup: () => {},
+        props: {},
+      },
+      'ignores the compile from cache when imageName changed': {
+        cached: false,
+        setup: () => {},
+        props: {
+          imageName: 'texlive-full:2025.1',
+        },
+      },
+      'ignores the compile from cache when compiler changed': {
+        cached: false,
+        setup: () => {},
+        props: {
+          compiler: 'lualatex',
+        },
+      },
+      'ignores the compile from cache when draft mode changed': {
+        cached: false,
+        setup: () => {
+          cy.window().then(w =>
+            w.localStorage.setItem(`draft:${projectId}`, 'true')
+          )
+        },
+        props: {},
+      },
+      'ignores the compile from cache when stopOnFirstError mode changed': {
+        cached: false,
+        setup: () => {
+          cy.window().then(w =>
+            w.localStorage.setItem(`stop_on_first_error:${projectId}`, 'true')
+          )
+        },
+        props: {},
+      },
+      'ignores the compile from cache when rootDoc changed': {
+        cached: false,
+        setup: () => {},
+        props: {
+          rootDocId: 'new-root-doc-id',
+          rootFolder: [
+            {
+              _id: 'root-folder-id',
+              name: 'rootFolder',
+              docs: [
+                {
+                  _id: '_root_doc_id',
+                  name: 'main.tex',
+                },
+                {
+                  _id: 'new-root-doc-id',
+                  name: 'new-main.tex',
+                },
+              ],
+              folders: [],
+              fileRefs: [],
+            },
+          ],
+        },
+      },
+    }
+    Object.entries(cases).forEach(([name, { cached, setup, props }]) => {
+      it(name, function () {
+        cy.interceptCompile({
+          cached: true,
+          regular: !cached,
+        })
+
+        const scope = mockScope()
+        window.metaAttributesCache.set('ol-preventCompileOnLoad', false)
+        setup()
+
+        cy.mount(
+          <EditorProviders scope={scope} projectId={projectId} {...props}>
+            <div className="pdf-viewer">
+              <PdfPreview />
+            </div>
+          </EditorProviders>
+        )
+
+        // wait for compile to finish
+        cy.waitForCompile({ pdf: true, cached, regular: !cached })
+        cy.contains('Your Paper')
+      })
+    })
   })
 
   it('runs a compile when the Recompile button is pressed', function () {

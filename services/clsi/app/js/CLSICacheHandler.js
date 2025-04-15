@@ -28,6 +28,7 @@ const MAX_ENTRIES_IN_OUTPUT_TAR = 100
  * @param {string} editorId
  * @param {[{path: string}]} outputFiles
  * @param {string} compileGroup
+ * @param {Record<string, any>} options
  */
 function notifyCLSICacheAboutBuild({
   projectId,
@@ -36,6 +37,7 @@ function notifyCLSICacheAboutBuild({
   editorId,
   outputFiles,
   compileGroup,
+  options,
 }) {
   if (!Settings.apis.clsiCache.enabled) return
 
@@ -55,6 +57,7 @@ function notifyCLSICacheAboutBuild({
         downloadHost: Settings.apis.clsi.downloadHost,
         clsiServerId: Settings.apis.clsi.clsiServerId,
         compileGroup,
+        options,
       },
       signal: AbortSignal.timeout(15_000),
     }).catch(err => {

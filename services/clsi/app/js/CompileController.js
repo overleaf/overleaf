@@ -1,3 +1,4 @@
+const Path = require('node:path')
 const RequestParser = require('./RequestParser')
 const CompileManager = require('./CompileManager')
 const Settings = require('@overleaf/settings')
@@ -123,6 +124,15 @@ function compile(req, res, next) {
                 editorId: request.editorId,
                 outputFiles,
                 compileGroup: request.compileGroup,
+                options: {
+                  compiler: request.compiler,
+                  draft: request.draft,
+                  imageName: request.imageName
+                    ? Path.basename(request.imageName)
+                    : undefined,
+                  rootResourcePath: request.rootResourcePath,
+                  stopOnFirstError: request.stopOnFirstError,
+                },
               })
             }
 

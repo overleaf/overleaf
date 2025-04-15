@@ -1,8 +1,10 @@
 import '@testing-library/cypress/add-commands'
 import {
   interceptCompile,
+  interceptCompileFromCacheRequest,
   waitForCompile,
   interceptDeferredCompile,
+  interceptCompileRequest,
 } from './compile'
 import { interceptEvents } from './events'
 import { interceptAsync } from './intercept-async'
@@ -21,6 +23,8 @@ declare global {
     interface Chainable {
       interceptAsync: typeof interceptAsync
       interceptCompile: typeof interceptCompile
+      interceptCompileRequest: typeof interceptCompileRequest
+      interceptCompileFromCacheRequest: typeof interceptCompileFromCacheRequest
       interceptEvents: typeof interceptEvents
       interceptMetadata: typeof interceptMetadata
       waitForCompile: typeof waitForCompile
@@ -36,6 +40,11 @@ declare global {
 
 Cypress.Commands.add('interceptAsync', interceptAsync)
 Cypress.Commands.add('interceptCompile', interceptCompile)
+Cypress.Commands.add('interceptCompileRequest', interceptCompileRequest)
+Cypress.Commands.add(
+  'interceptCompileFromCacheRequest',
+  interceptCompileFromCacheRequest
+)
 Cypress.Commands.add('interceptEvents', interceptEvents)
 Cypress.Commands.add('interceptMetadata', interceptMetadata)
 Cypress.Commands.add('waitForCompile', waitForCompile)

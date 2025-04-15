@@ -133,7 +133,8 @@ async function getLatestBuildFromCache(req, res) {
       baseURL += `/user/${userId}`
     }
 
-    const { ranges, contentId, clsiServerId, compileGroup, size } = meta
+    const { ranges, contentId, clsiServerId, compileGroup, size, options } =
+      meta
 
     const outputFiles = allFiles
       .filter(
@@ -175,6 +176,7 @@ async function getLatestBuildFromCache(req, res) {
       clsiServerId,
       pdfDownloadDomain,
       pdfCachingMinChunkSize,
+      options,
     })
   } catch (err) {
     if (err instanceof NotFoundError) {

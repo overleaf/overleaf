@@ -34,6 +34,7 @@ export const ProjectProvider: FC = ({ children }) => {
   const {
     _id,
     compiler,
+    imageName,
     name,
     rootDoc_id: rootDocId,
     members,
@@ -59,6 +60,7 @@ export const ProjectProvider: FC = ({ children }) => {
     return {
       _id,
       compiler,
+      imageName,
       name,
       rootDocId,
       members,
@@ -75,6 +77,7 @@ export const ProjectProvider: FC = ({ children }) => {
   }, [
     _id,
     compiler,
+    imageName,
     name,
     rootDocId,
     members,

@@ -2,6 +2,7 @@ export function mockDocument(text: string) {
   return {
     doc_id: 'story-doc',
     getSnapshot: () => text,
+    hasBufferedOps: () => false,
   }
 }
 

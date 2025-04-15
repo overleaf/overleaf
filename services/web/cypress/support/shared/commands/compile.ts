@@ -43,26 +43,77 @@ const outputFiles = () => {
   ]
 }
 
+const compileFromCacheResponse = () => {
+  return {
+    fromCache: true,
+    status: 'success',
+    clsiServerId: 'foo',
+    compileGroup: 'priority',
+    pdfDownloadDomain: 'https://clsi.test-overleaf.com',
+    outputFiles: outputFiles(),
+    options: {
+      rootResourcePath: 'main.tex',
+      imageName: 'texlive-full:2024.1',
+      compiler: 'pdflatex',
+      stopOnFirstError: false,
+      draft: false,
+    },
+  }
+}
+
+export const interceptCompileFromCacheRequest = ({
+  times,
+  promise,
+}: {
+  times: number
+  promise: Promise<void>
+}) => {
+  return cy.intercept(
+    { path: '/project/*/output/cached/output.overleaf.json', times },
+    async req => {
+      await promise
+      req.reply({ body: compileFromCacheResponse() })
+    }
+  )
+}
+
+export const interceptCompileRequest = ({ times = 1 } = {}) => {
+  return cy.intercept(
+    { method: 'POST', pathname: '/project/*/compile', times },
+    {
+      body: {
+        status: 'success',
+        clsiServerId: 'foo',
+        compileGroup: 'priority',
+        pdfDownloadDomain: 'https://clsi.test-overleaf.com',
+        outputFiles: outputFiles(),
+      },
+    }
+  )
+}
+
 export const interceptCompile = ({
   prefix = 'compile',
   times = 1,
   cached = false,
+  regular = true,
   outputPDFFixture = 'output.pdf',
 } = {}) => {
   if (cached) {
     cy.intercept(
-      { pathname: '/project/*/output/cached/output.overleaf.json', times },
-      {
-        body: {
-          fromCache: true,
-          status: 'success',
-          clsiServerId: 'foo',
-          compileGroup: 'priority',
-          pdfDownloadDomain: 'https://clsi.test-overleaf.com',
-          outputFiles: outputFiles(),
-        },
-      }
+      { path: '/project/*/output/cached/output.overleaf.json', times },
+      { body: compileFromCacheResponse() }
     ).as(`${prefix}-cached`)
+  } else {
+    cy.intercept(
+      { pathname: '/project/*/output/cached/output.overleaf.json', times },
+      { statusCode: 404 }
+    ).as(`${prefix}-cached`)
+  }
+
+  if (regular) {
+    interceptCompileRequest({ times }).as(`${prefix}`)
+  } else {
     cy.intercept(
       { method: 'POST', pathname: '/project/*/compile', times },
       {
@@ -72,23 +123,6 @@ export const interceptCompile = ({
           compileGroup: 'priority',
           pdfDownloadDomain: 'https://clsi.test-overleaf.com',
           outputFiles: [],
-        },
-      }
-    ).as(`${prefix}`)
-  } else {
-    cy.intercept(
-      { pathname: '/project/*/output/cached/output.overleaf.json', times },
-      { statusCode: 404 }
-    ).as(`${prefix}-cached`)
-    cy.intercept(
-      { method: 'POST', pathname: '/project/*/compile', times },
-      {
-        body: {
-          status: 'success',
-          clsiServerId: 'foo',
-          compileGroup: 'priority',
-          pdfDownloadDomain: 'https://clsi.test-overleaf.com',
-          outputFiles: outputFiles(),
         },
       }
     ).as(`${prefix}`)
@@ -114,12 +148,22 @@ export const waitForCompile = ({
   prefix = 'compile',
   pdf = false,
   cached = false,
+  regular = true,
 } = {}) => {
   if (cached) {
     cy.wait(`@${prefix}-cached`)
-  } else {
+  }
+  if (regular) {
     cy.wait(`@${prefix}`)
   }
+  return waitForCompileOutput({ prefix, pdf, cached })
+}
+
+export const waitForCompileOutput = ({
+  prefix = 'compile',
+  pdf = false,
+  cached = false,
+} = {}) => {
   cy.wait(`@${prefix}-log`)
     .its('request.query.clsiserverid')
     .should('eq', cached ? 'cache' : 'foo') // straight from cache if cached

@@ -10,6 +10,7 @@ export const mockScope = () => ({
     sharejs_doc: {
       doc_id: 'test-doc',
       getSnapshot: () => 'some doc content',
+      hasBufferedOps: () => false,
     },
     view: new EditorView({
       doc: '\\documentclass{article}',

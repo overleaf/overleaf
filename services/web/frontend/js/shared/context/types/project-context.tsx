@@ -18,6 +18,7 @@ export type ProjectContextValue = {
   rootDocId?: string
   mainBibliographyDocId?: string
   compiler: string
+  imageName: string
   members: ProjectContextMember[]
   invites: ProjectContextMember[]
   features: {

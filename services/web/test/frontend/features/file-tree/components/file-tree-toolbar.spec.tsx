@@ -5,7 +5,7 @@ import { FileTreeProvider } from '../helpers/file-tree-provider'
 describe('<FileTreeToolbar/>', function () {
   it('without selected files', function () {
     cy.mount(
-      <EditorProviders>
+      <EditorProviders rootDocId="">
         <FileTreeProvider>
           <FileTreeToolbar />
         </FileTreeProvider>

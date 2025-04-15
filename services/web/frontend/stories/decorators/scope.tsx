@@ -89,6 +89,7 @@ const initialize = () => {
       sharejs_doc: {
         doc_id: 'test-doc',
         getSnapshot: () => 'some doc content',
+        hasBufferedOps: () => false,
       },
       open_doc_name: 'testfile.tex',
     },

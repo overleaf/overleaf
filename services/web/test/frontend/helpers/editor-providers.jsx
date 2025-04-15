@@ -44,6 +44,8 @@ export function EditorProviders({
     email: 'owner@example.com',
   },
   rootDocId = '_root_doc_id',
+  imageName = 'texlive-full:2024.1',
+  compiler = 'pdflatex',
   socket = new SocketIOMock(),
   isRestrictedTokenMember = false,
   clsiServerId = '1234',
@@ -58,7 +60,12 @@ export function EditorProviders({
     {
       _id: 'root-folder-id',
       name: 'rootFolder',
-      docs: [],
+      docs: [
+        {
+          _id: '_root_doc_id',
+          name: 'main.tex',
+        },
+      ],
       folders: [],
       fileRefs: [],
     },
@@ -99,6 +106,10 @@ export function EditorProviders({
         sharejs_doc: {
           doc_id: 'test-doc',
           getSnapshot: () => 'some doc content',
+          hasBufferedOps: () => false,
+          on: () => {},
+          off: () => {},
+          leaveAndCleanUpPromise: async () => {},
         },
       },
       project: {
@@ -108,6 +119,8 @@ export function EditorProviders({
         features: projectFeatures,
         rootDoc_id: rootDocId,
         rootFolder,
+        imageName,
+        compiler,
       },
       ui,
       $watch: (path, callback) => {

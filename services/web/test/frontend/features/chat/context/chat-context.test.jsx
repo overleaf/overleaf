@@ -56,8 +56,7 @@ describe('ChatContext', function () {
     it('subscribes when mounted', function () {
       const socket = new SocketIOMock()
       renderChatContextHook({ socket })
-      // Assert that there is 1 listener
-      expect(socket.events['new-chat-message']).to.have.length(1)
+      expect(socket.countEventListeners('new-chat-message')).to.equal(1)
     })
 
     it('unsubscribes when unmounted', function () {
@@ -66,8 +65,7 @@ describe('ChatContext', function () {
 
       unmount()
 
-      // Assert that there is 0 listeners
-      expect(socket.events['new-chat-message'].length).to.equal(0)
+      expect(socket.countEventListeners('new-chat-message')).to.equal(0)
     })
 
     it('adds received messages to the list', async function () {
