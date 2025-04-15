@@ -269,6 +269,7 @@
   }
 
   .message-author {
+    color: var(--chat-message-name-color);
     font-size: var(--font-size-01);
     line-height: var(--line-height-01);
   }
