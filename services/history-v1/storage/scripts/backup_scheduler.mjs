@@ -234,10 +234,6 @@ async function processPendingProjects(
   const changeTimes = []
   for await (const project of pendingCursor(timeIntervalMs, limit)) {
     const projectId = project._id.toHexString()
-    if (!project.overleaf?.history?.id) {
-      logger.error({ projectId }, 'Project does not have a history ID')
-      throw new Error('Project does not have a history ID')
-    }
     const pendingAt =
       project.overleaf?.backup?.pendingChangeAt || project._id.getTimestamp()
     if (pendingAt) {
