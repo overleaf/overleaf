@@ -234,23 +234,35 @@ async function processPendingProjects(
   const changeTimes = []
   for await (const project of pendingCursor(timeIntervalMs, limit)) {
     const projectId = project._id.toHexString()
+    if (!project.overleaf?.history?.id) {
+      logger.error({ projectId }, 'Project does not have a history ID')
+      throw new Error('Project does not have a history ID')
+    }
     const pendingAt =
       project.overleaf?.backup?.pendingChangeAt || project._id.getTimestamp()
     if (pendingAt) {
       changeTimes.push(pendingAt)
       const pendingAge = Math.floor((Date.now() - pendingAt.getTime()) / 1000)
       if (pendingAge > WARN_THRESHOLD) {
-        const backupStatus = await getBackupStatus(projectId)
-        logger.warn(
-          {
-            projectId,
-            pendingAt,
-            pendingAge,
-            backupStatus,
-            warnThreshold: WARN_THRESHOLD,
-          },
-          `pending change exceeds rpo warning threshold`
-        )
+        try {
+          const backupStatus = await getBackupStatus(projectId)
+          logger.warn(
+            {
+              projectId,
+              pendingAt,
+              pendingAge,
+              backupStatus,
+              warnThreshold: WARN_THRESHOLD,
+            },
+            `pending change exceeds rpo warning threshold`
+          )
+        } catch (err) {
+          logger.error(
+            { projectId, pendingAt, pendingAge },
+            'Error getting backup status'
+          )
+          throw err
+        }
       }
     }
     if (showOnly && verbose) {
@@ -290,10 +302,11 @@ async function processPendingProjects(
       )
     }
   }
-
-  const oldestChange = changeTimes.reduce((min, time) =>
-    time < min ? time : min
-  )
+  // Set oldestChange to undefined if there are no changes
+  const oldestChange =
+    changeTimes.length > 0
+      ? changeTimes.reduce((min, time) => (time < min ? time : min))
+      : undefined
 
   if (showOnly) {
     console.log(
@@ -303,7 +316,9 @@ async function processPendingProjects(
     console.log(`Found ${count} projects with pending changes:`)
     console.log(`  ${addedCount} jobs added to queue`)
     console.log(`  ${existingCount} jobs already existed in queue`)
-    console.log(`  Oldest pending change: ${formatPendingTime(oldestChange)}`)
+    if (oldestChange) {
+      console.log(`  Oldest pending change: ${formatPendingTime(oldestChange)}`)
+    }
   }
 }
 
