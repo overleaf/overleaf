@@ -149,6 +149,7 @@ async function settingsPage(req, res) {
         enabled: Boolean(user.aiErrorAssistant?.enabled),
       },
     },
+    labsExperiments: user.labsExperiments ?? [],
     hasPassword: !!user.hashedPassword,
     shouldAllowEditingDetails,
     oauthProviders: UserPagesController._translateProviderDescriptions(

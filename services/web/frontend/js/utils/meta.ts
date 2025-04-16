@@ -52,6 +52,7 @@ import { SubscriptionChangePreview } from '../../../types/subscription/subscript
 import { DefaultNavbarMetadata } from '@/features/ui/components/types/default-navbar-metadata'
 import { FooterMetadata } from '@/features/ui/components/types/footer-metadata'
 import type { ScriptLogType } from '../../../modules/admin-panel/frontend/js/features/script-logs/script-log'
+import { ActiveExperiment } from './labs-utils'
 export interface Meta {
   'ol-ExposedSettings': ExposedSettings
   'ol-addonPrices': Record<string, { annual: string; monthly: string }>
@@ -139,6 +140,7 @@ export interface Meta {
   'ol-itm_content': string
   'ol-itm_referrer': string
   'ol-labs': boolean
+  'ol-labsExperiments': ActiveExperiment[] | undefined
   'ol-languages': SpellCheckLanguage[]
   'ol-learnedWords': string[]
   'ol-legacyEditorThemes': string[]
