@@ -115,7 +115,7 @@ async function projectListPage(req, res, next) {
   })
   const user = await User.findById(
     userId,
-    `email emails features alphaProgram betaProgram lastPrimaryEmailCheck signUpDate${
+    `email emails features alphaProgram betaProgram lastPrimaryEmailCheck signUpDate refProviders${
       isSaas ? ' enrollment writefull completedTutorials' : ''
     }`
   )
@@ -125,6 +125,8 @@ async function projectListPage(req, res, next) {
     UserController.logout(req, res, next)
     return
   }
+
+  user.refProviders = _.mapValues(user.refProviders, Boolean)
 
   if (isSaas) {
     await SplitTestSessionHandler.promises.sessionMaintenance(req, user)
@@ -416,6 +418,15 @@ async function projectListPage(req, res, next) {
     req,
     res,
     'sidebar-navigation-ui-update'
+  )
+
+  // Get the user's assignment for the papers notification banner split test,
+  // which populates splitTestVariants with a value for the split test name and
+  // allows Pug to send it to the browser
+  await SplitTestHandler.promises.getAssignment(
+    req,
+    res,
+    'papers-notification-banner'
   )
 
   res.render('project/list-react', {
