@@ -1,3 +1,5 @@
+// @ts-check
+
 'use strict'
 
 /**
@@ -156,7 +158,6 @@ async function loadAtTimestamp(projectId, timestamp) {
  * @param {string} projectId
  * @param {Chunk} chunk
  * @param {Date} [earliestChangeTimestamp]
- * @return {Promise.<number>} for the chunkId of the inserted chunk
  */
 async function create(projectId, chunk, earliestChangeTimestamp) {
   assert.projectId(projectId, 'bad projectId')
@@ -164,13 +165,18 @@ async function create(projectId, chunk, earliestChangeTimestamp) {
   assert.maybe.date(earliestChangeTimestamp, 'bad timestamp')
 
   const backend = getBackend(projectId)
+  const chunkStart = chunk.getStartVersion()
   const chunkId = await uploadChunk(projectId, chunk)
-  await backend.confirmCreate(
-    projectId,
-    chunk,
-    chunkId,
-    earliestChangeTimestamp
-  )
+
+  const opts = {}
+  if (chunkStart > 0) {
+    opts.oldChunkId = await getChunkIdForVersion(projectId, chunkStart - 1)
+  }
+  if (earliestChangeTimestamp != null) {
+    opts.earliestChangeTimestamp = earliestChangeTimestamp
+  }
+
+  await backend.confirmCreate(projectId, chunk, chunkId, opts)
 }
 
 /**
@@ -220,13 +226,12 @@ async function update(
   const oldChunkId = await getChunkIdForVersion(projectId, oldEndVersion)
   const newChunkId = await uploadChunk(projectId, newChunk)
 
-  await backend.confirmUpdate(
-    projectId,
-    oldChunkId,
-    newChunk,
-    newChunkId,
-    earliestChangeTimestamp
-  )
+  const opts = {}
+  if (earliestChangeTimestamp != null) {
+    opts.earliestChangeTimestamp = earliestChangeTimestamp
+  }
+
+  await backend.confirmUpdate(projectId, oldChunkId, newChunk, newChunkId, opts)
 }
 
 /**
@@ -234,7 +239,7 @@ async function update(
  *
  * @param {string} projectId
  * @param {number} version
- * @return {Promise.<number>}
+ * @return {Promise.<string>}
  */
 async function getChunkIdForVersion(projectId, version) {
   const backend = getBackend(projectId)
@@ -343,10 +348,14 @@ async function deleteProjectChunks(projectId) {
  * Delete a given number of old chunks from both the database
  * and from object storage.
  *
- * @param {number} count - number of chunks to delete
- * @param {number} minAgeSecs - how many seconds ago must chunks have been
- *                              deleted
- * @return {Promise}
+ * @param {object} options
+ * @param {number} [options.batchSize] - number of chunks to delete in each
+ *                                       batch
+ * @param {number} [options.maxBatches] - maximum number of batches to process
+ * @param {number} [options.minAgeSecs] - minimum age of chunks to delete
+ * @param {number} [options.timeout] - maximum time to spend deleting chunks
+ *
+ * @return {Promise<number>} number of chunks deleted
  */
 async function deleteOldChunks(options = {}) {
   const batchSize = options.batchSize ?? DEFAULT_DELETE_BATCH_SIZE

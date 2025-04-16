@@ -21,7 +21,7 @@ async function setupMongoDatabase() {
     {
       key: { projectId: 1, startVersion: 1 },
       name: 'projectId_1_startVersion_1',
-      partialFilterExpression: { state: 'active' },
+      partialFilterExpression: { state: { $in: ['active', 'closed'] } },
       unique: true,
     },
     {

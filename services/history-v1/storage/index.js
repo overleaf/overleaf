@@ -20,3 +20,6 @@ exports.loadGlobalBlobs = loadGlobalBlobs
 
 const { InvalidChangeError } = require('./lib/errors')
 exports.InvalidChangeError = InvalidChangeError
+
+const { ChunkVersionConflictError } = require('./lib/chunk_store/errors')
+exports.ChunkVersionConflictError = ChunkVersionConflictError

@@ -193,12 +193,7 @@ async function insertPendingChunk(projectId, chunk) {
 /**
  * Record that a new chunk was created.
  */
-async function confirmCreate(
-  projectId,
-  chunk,
-  chunkId,
-  earliestChangeTimestamp
-) {
+async function confirmCreate(projectId, chunk, chunkId, opts = {}) {
   assert.postgresId(projectId, 'bad projectId')
   projectId = parseInt(projectId, 10)
 
@@ -207,7 +202,7 @@ async function confirmCreate(
       _deletePendingChunk(tx, projectId, chunkId),
       _insertChunk(tx, projectId, chunk, chunkId),
     ])
-    await updateProjectRecord(projectId, chunk, earliestChangeTimestamp)
+    await updateProjectRecord(projectId, chunk, opts.earliestChangeTimestamp)
   })
 }
 
@@ -219,7 +214,7 @@ async function confirmUpdate(
   oldChunkId,
   newChunk,
   newChunkId,
-  earliestChangeTimestamp
+  opts = {}
 ) {
   assert.postgresId(projectId, 'bad projectId')
   projectId = parseInt(projectId, 10)
@@ -230,7 +225,7 @@ async function confirmUpdate(
       _deletePendingChunk(tx, projectId, newChunkId),
       _insertChunk(tx, projectId, newChunk, newChunkId),
     ])
-    await updateProjectRecord(projectId, newChunk, earliestChangeTimestamp)
+    await updateProjectRecord(projectId, newChunk, opts.earliestChangeTimestamp)
   })
 }
 
@@ -267,10 +262,6 @@ async function _insertChunk(tx, projectId, chunk, chunkId) {
 
 /**
  * Delete a chunk.
- *
- * @param {number} projectId
- * @param {number} chunkId
- * @return {Promise}
  */
 async function deleteChunk(projectId, chunkId) {
   assert.postgresId(projectId, 'bad projectId')
