@@ -380,10 +380,20 @@ module.exports = {
           context: `${dictionariesDir}/dictionaries`,
         },
         // Copy CMap files (used to provide support for non-Latin characters),
-        // fonts and images from pdfjs-dist package to build output.
+        // wasm, ICC profiles, fonts and images from pdfjs-dist package to build output.
         {
           from: 'cmaps',
           to: 'js/pdfjs-dist/cmaps',
+          context: pdfjsDir,
+        },
+        {
+          from: 'iccs',
+          to: 'js/pdfjs-dist/iccs',
+          context: pdfjsDir,
+        },
+        {
+          from: 'wasm',
+          to: 'js/pdfjs-dist/wasm',
           context: pdfjsDir,
         },
         {

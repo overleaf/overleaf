@@ -320,7 +320,7 @@
     "nock": "^13.5.6",
     "nvd3": "^1.8.6",
     "overleaf-editor-core": "*",
-    "pdfjs-dist": "4.10.38",
+    "pdfjs-dist": "5.1.91",
     "pirates": "^4.0.1",
     "postcss": "^8.4.31",
     "postcss-loader": "^7.3.3",
