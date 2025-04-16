@@ -90,15 +90,16 @@ process.on('SIGINT', () => {
 
 /**
  * @param {number} port
+ * @param {boolean} enableVerificationLoop
  * @return {Promise<http.Server>}
  */
-export async function startApp(port) {
+export async function startApp(port, enableVerificationLoop = true) {
   await mongodb.client.connect()
   await loadGlobalBlobs()
   await healthCheck()
   const server = http.createServer(app)
   await promisify(server.listen.bind(server, port))()
-  loopRandomProjects(shutdownEmitter)
+  enableVerificationLoop && loopRandomProjects(shutdownEmitter)
   return server
 }
 

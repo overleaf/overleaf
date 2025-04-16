@@ -26,7 +26,7 @@ async function listenOnRandomPort() {
       return
     } catch {}
   }
-  server = await startApp(0)
+  server = await startApp(0, false)
 }
 
 after('close server', function (done) {
