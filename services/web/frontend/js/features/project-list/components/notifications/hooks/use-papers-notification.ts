@@ -7,7 +7,7 @@ export const usePapersNotification = () => {
   const shouldShow =
     inRollout &&
     user &&
-    user.features?.references &&
+    (user.features?.references || user.features?.papers) &&
     !user.refProviders?.mendeley &&
     !user.refProviders?.zotero &&
     !user.refProviders?.papers
