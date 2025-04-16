@@ -1,5 +1,8 @@
 import { useCommandProvider } from '@/features/ide-react/hooks/use-command-provider'
-import { useCodeMirrorViewContext } from '@/features/source-editor/components/codemirror-context'
+import {
+  useCodeMirrorStateContext,
+  useCodeMirrorViewContext,
+} from '@/features/source-editor/components/codemirror-context'
 import { FigureModalSource } from '@/features/source-editor/components/figure-modal/figure-modal-context'
 import * as commands from '@/features/source-editor/extensions/toolbar/commands'
 import { setSectionHeadingLevel } from '@/features/source-editor/extensions/toolbar/sections'
@@ -11,12 +14,18 @@ import { openSearchPanel } from '@codemirror/search'
 import { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useIsNewEditorEnabled } from '../utils/new-editor-utils'
+import { usePermissionsContext } from '@/features/ide-react/context/permissions-context'
+import { language } from '@codemirror/language'
 
 export const useToolbarMenuBarEditorCommands = () => {
   const view = useCodeMirrorViewContext()
+  const state = useCodeMirrorStateContext()
   const { t } = useTranslation()
   const { view: layoutView } = useLayoutContext()
   const editorIsVisible = layoutView === 'editor'
+  const { trackedWrite } = usePermissionsContext()
+  const languageName = state.facet(language)?.name
+  const isTeXFile = languageName === 'latex'
 
   const openFigureModal = useCallback((source: FigureModalSource) => {
     window.dispatchEvent(
@@ -44,7 +53,7 @@ export const useToolbarMenuBarEditorCommands = () => {
           undo(view)
           view.focus()
         },
-        disabled: !editorIsVisible,
+        disabled: !editorIsVisible || !trackedWrite,
       },
       {
         id: 'redo',
@@ -53,7 +62,7 @@ export const useToolbarMenuBarEditorCommands = () => {
           redo(view)
           view.focus()
         },
-        disabled: !editorIsVisible,
+        disabled: !editorIsVisible || !trackedWrite,
       },
       {
         id: 'find',
@@ -72,6 +81,19 @@ export const useToolbarMenuBarEditorCommands = () => {
         },
         disabled: !editorIsVisible,
       },
+    ]
+  }, [editorIsVisible, t, view, trackedWrite, newEditor])
+
+  // LaTeX commands
+  useCommandProvider(() => {
+    if (!newEditor) {
+      return
+    }
+    if (!isTeXFile || !trackedWrite) {
+      return
+    }
+
+    return [
       /************************************
        *         Insert menu
        ************************************/
@@ -281,12 +303,24 @@ export const useToolbarMenuBarEditorCommands = () => {
         disabled: !editorIsVisible,
       },
     ]
-  }, [view, t, editorIsVisible, openFigureModal, newEditor])
+  }, [
+    view,
+    t,
+    editorIsVisible,
+    openFigureModal,
+    newEditor,
+    trackedWrite,
+    isTeXFile,
+  ])
 
   const { toggleSymbolPalette } = useEditorContext()
   const symbolPaletteAvailable = getMeta('ol-symbolPaletteAvailable')
   useCommandProvider(() => {
     if (!symbolPaletteAvailable) {
+      return
+    }
+
+    if (!isTeXFile || !trackedWrite) {
       return
     }
 
@@ -300,5 +334,12 @@ export const useToolbarMenuBarEditorCommands = () => {
         disabled: !editorIsVisible,
       },
     ]
-  }, [symbolPaletteAvailable, t, toggleSymbolPalette, editorIsVisible])
+  }, [
+    symbolPaletteAvailable,
+    t,
+    toggleSymbolPalette,
+    editorIsVisible,
+    isTeXFile,
+    trackedWrite,
+  ])
 }

@@ -11,7 +11,7 @@ import {
   NestedMenuBarDropdown,
 } from '@/shared/components/menu-bar/menu-bar-dropdown'
 import { MenuBarOption } from '@/shared/components/menu-bar/menu-bar-option'
-import { Fragment, useCallback } from 'react'
+import { Fragment, useCallback, useMemo } from 'react'
 
 type CommandId = string
 type TaggedCommand = Command & { type: 'command' }
@@ -38,9 +38,18 @@ const CommandDropdown = ({
   id: string
 }) => {
   const { registry } = useCommandRegistry()
-  const populatedSections = menu
-    .map(section => populateSectionOrGroup(section, registry))
-    .filter(x => x.children.length > 0)
+  const populatedSections = useMemo(
+    () =>
+      menu
+        .map(section => populateSectionOrGroup(section, registry))
+        .filter(x => x.children.length > 0),
+    [menu, registry]
+  )
+
+  if (populatedSections.length === 0) {
+    return null
+  }
+
   return (
     <MenuBarDropdown
       title={title}

@@ -9,6 +9,7 @@ import MaterialIcon, {
 import React from 'react'
 import useCollapsibleFileTree from '../hooks/use-collapsible-file-tree'
 import { useCommandProvider } from '@/features/ide-react/hooks/use-command-provider'
+import { usePermissionsContext } from '@/features/ide-react/context/permissions-context'
 
 function FileTreeToolbar() {
   const { t } = useTranslation()
@@ -38,6 +39,7 @@ function FileTreeToolbar() {
 function FileTreeActionButtons() {
   const { t } = useTranslation()
   const { fileTreeReadOnly } = useFileTreeData()
+  const { write } = usePermissionsContext()
 
   const {
     canCreate,
@@ -46,7 +48,7 @@ function FileTreeActionButtons() {
     startUploadingDocOrFile,
   } = useFileTreeActionable()
   useCommandProvider(() => {
-    if (!canCreate || fileTreeReadOnly) return
+    if (!canCreate || fileTreeReadOnly || !write) return
     return [
       {
         label: t('new_file'),
@@ -77,6 +79,7 @@ function FileTreeActionButtons() {
     t,
     startCreatingFolder,
     startUploadingDocOrFile,
+    write,
   ])
 
   if (!canCreate || fileTreeReadOnly) return null
