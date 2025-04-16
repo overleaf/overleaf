@@ -88,26 +88,28 @@ app.get(
   fileController.directorySize
 )
 
-app.head(
-  '/template/:template_id/v/:version/:format',
-  keyBuilder.templateFileKeyMiddleware,
-  fileController.getFileHead
-)
-app.get(
-  '/template/:template_id/v/:version/:format',
-  keyBuilder.templateFileKeyMiddleware,
-  fileController.getFile
-)
-app.get(
-  '/template/:template_id/v/:version/:format/:sub_type',
-  keyBuilder.templateFileKeyMiddleware,
-  fileController.getFile
-)
-app.post(
-  '/template/:template_id/v/:version/:format',
-  keyBuilder.templateFileKeyMiddleware,
-  fileController.insertFile
-)
+if (settings.filestore.stores.template_files) {
+  app.head(
+    '/template/:template_id/v/:version/:format',
+    keyBuilder.templateFileKeyMiddleware,
+    fileController.getFileHead
+  )
+  app.get(
+    '/template/:template_id/v/:version/:format',
+    keyBuilder.templateFileKeyMiddleware,
+    fileController.getFile
+  )
+  app.get(
+    '/template/:template_id/v/:version/:format/:sub_type',
+    keyBuilder.templateFileKeyMiddleware,
+    fileController.getFile
+  )
+  app.post(
+    '/template/:template_id/v/:version/:format',
+    keyBuilder.templateFileKeyMiddleware,
+    fileController.insertFile
+  )
+}
 
 app.get(
   '/bucket/:bucket/key/*',
