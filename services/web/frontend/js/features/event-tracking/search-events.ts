@@ -4,7 +4,10 @@ type SearchEventSegmentation = {
   'search-open':
     | ({
         searchType: 'full-project'
-      } & ({ method: 'keyboard' } | { method: 'button'; location: 'toolbar' }))
+      } & (
+        | { method: 'keyboard' }
+        | { method: 'button'; location: 'toolbar' | 'search-form' }
+      ))
     | ({
         searchType: 'document'
         mode: 'visual' | 'source'
