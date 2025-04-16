@@ -15,11 +15,7 @@ const BetaBadgeIcon: FC<{
       </OLBadge>
     )
   } else {
-    return (
-      <OLBadge bg="warning-light-bg" text="warning">
-        β
-      </OLBadge>
-    )
+    return <OLBadge bg="warning">β</OLBadge>
   }
 }
 
