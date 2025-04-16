@@ -71,7 +71,7 @@ async function verifyProjectScript(historyId, expectFail = true) {
  * @param {string} hash
  * @return {Promise<{stdout: string, status:number }>}
  */
-async function verifyBlobScript(historyId, hash) {
+async function verifyBlobScript(historyId, hash, expectFail = true) {
   try {
     const result = await promisify(execFile)(
       process.argv0,
@@ -92,6 +92,9 @@ async function verifyBlobScript(historyId, hash) {
     return { status: 0, stdout: result.stdout }
   } catch (err) {
     if (err && typeof err === 'object' && 'stdout' in err && 'code' in err) {
+      if (!expectFail) {
+        console.log(err)
+      }
       return {
         stdout: typeof err.stdout === 'string' ? err.stdout : '',
         status: typeof err.code === 'number' ? err.code : -1,
@@ -309,12 +312,20 @@ describe('backupVerifier', function () {
       expect(result.stdout).to.include('hash mismatch for backed up blob')
     })
     it('should successfully verify from postgres', async function () {
-      const result = await verifyBlobScript(historyIdPostgres, blobHashPG)
+      const result = await verifyBlobScript(
+        historyIdPostgres,
+        blobHashPG,
+        false
+      )
       expect(result.status).to.equal(0)
       expect(result.stdout.split('\n')).to.include('OK')
     })
     it('should successfully verify from mongo', async function () {
-      const result = await verifyBlobScript(historyIdMongo, blobHashMongo)
+      const result = await verifyBlobScript(
+        historyIdMongo,
+        blobHashMongo,
+        false
+      )
       expect(result.status).to.equal(0)
       expect(result.stdout.split('\n')).to.include('OK')
     })
