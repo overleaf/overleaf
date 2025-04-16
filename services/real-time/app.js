@@ -95,6 +95,12 @@ io.configure(function () {
       const originIsValid = allowedCorsOriginsRegex.test(normalizedOrigin)
 
       if (req.headers.origin) {
+        if (!originIsValid) {
+          logger.warn(
+            { normalizedOrigin, origin, req },
+            'Origin header does not match allowed origins'
+          )
+        }
         return originIsValid
       }
 
