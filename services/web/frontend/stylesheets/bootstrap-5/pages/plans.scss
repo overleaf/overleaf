@@ -1,38 +1,38 @@
-@z-index-plans-new-tabs: 1;
-@z-index-group-member-picker-list: 1;
-@z-index-plans-new-tabs-content: 0;
+@use 'sass:math';
 
-@highlighted-heading-line-height: (@line-height-03 / 1rem) * 16px; // convert to px
-@highlighted-heading-padding-vertical: @spacing-02;
-@highlighted-heading-height: (
-  @highlighted-heading-line-height + (2 * @highlighted-heading-padding-vertical)
+$container-plans-responsive-width: 95%;
+$container-xl: 1280px;
+$z-index-plans-new-tabs-content: 0;
+$z-index-plans-new-tabs: 1;
+$border-radius-full-new: 9999px;
+$highlighted-heading-line-height: 24px; // this is ported directly from the .less file as value
+$highlighted-heading-padding-vertical: $spacing-02;
+$highlighted-heading-height: (
+  $highlighted-heading-line-height + (2 * $highlighted-heading-padding-vertical)
 );
-
-@switcher-container-margin-bottom: @highlighted-heading-height + @spacing-10;
-
-@nondiscounted-price-element-height: var(--line-height-02);
-
-@group-member-picker-height: 24px;
-@group-member-picker-top-height: 36px;
-@group-member-picker-sm-width: 50%;
-@group-member-picker-md-width: 25%;
-@group-member-picker-min-width: 234px;
-
-@container-plans-responsive-width: 95%;
-@table-4-column-width: 25%;
-@table-5-column-width: 20%;
+$switcher-container-margin-bottom: $highlighted-heading-height + $spacing-10;
+$table-4-column-width: 25%;
+$table-5-column-width: 20%;
+$nondiscounted-price-element-height: var(--line-height-02);
+$group-member-picker-height: 24px;
+$group-member-picker-top-height: 36px;
+$z-index-group-member-picker-list: 1;
 
 .plans-new-design {
-  padding-top: var(--header-height);
+  --border-width-base: 3px; // TODO: put this variable in a decent location
+  --border-radius-large-new: 16px; // TODO: put this variable in a decent location
+
+  padding-top: $header-height;
 
   .container {
     padding: 0 var(--spacing-06);
 
-    @media (min-width: @screen-sm-min) {
-      width: @container-plans-responsive-width;
+    @include media-breakpoint-up(md) {
+      width: $container-plans-responsive-width;
     }
-    @media (min-width: @screen-xl-min) {
-      width: @container-xl;
+
+    @include media-breakpoint-up(xxl) {
+      width: $container-xl;
     }
 
     .geo-banner-container {
@@ -47,13 +47,14 @@
       margin-top: var(--spacing-13);
     }
   }
+
   .main-heading-section {
     text-align: center;
     max-width: 885px;
     margin-left: auto;
     margin-right: auto;
 
-    @media (max-width: @screen-xs-max) {
+    @include media-breakpoint-down(md) {
       text-align: left;
       padding: 0 16px;
     }
@@ -64,7 +65,8 @@
       font-size: 3rem;
       font-weight: 600;
       line-height: 64px;
-      @media (max-width: @screen-xs-max) {
+
+      @include media-breakpoint-down(md) {
         font-size: 2.25rem;
         line-height: 48px;
         padding-right: 5rem;
@@ -83,11 +85,12 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    position: relative;
 
-    @media (min-width: @screen-sm-min) {
-      border-left: 1px solid var(--neutral-20);
-      border-right: 1px solid var(--neutral-20);
-      border-bottom: 1px solid var(--neutral-20);
+    @include media-breakpoint-up(md) {
+      border-left: 1px solid var(--border-divider);
+      border-right: 1px solid var(--border-divider);
+      border-bottom: 1px solid var(--border-divider);
       border-radius: 8px;
     }
 
@@ -96,15 +99,15 @@
     &::before {
       content: '';
       display: block;
-      z-index: @z-index-plans-new-tabs-content;
+      z-index: $z-index-plans-new-tabs-content;
       position: absolute;
       top: -1px; // make border overlap with the border on .plans-new-tabs
       width: 100%;
       height: 20px; // arbitrary height since it's transparent, make sure that it's bigger than border radius
       background: transparent;
-      border-top: 1px solid var(--neutral-20);
+      border-top: 1px solid var(--border-divider);
 
-      @media (min-width: @screen-sm-min) {
+      @include media-breakpoint-up(md) {
         border-top-left-radius: 8px;
         border-top-right-radius: 8px;
       }
@@ -112,7 +115,7 @@
   }
 
   .plans-new-tabs-container {
-    z-index: @z-index-plans-new-tabs;
+    z-index: $z-index-plans-new-tabs;
     margin-top: var(--spacing-16);
 
     // explicit padding to tell that the bottom left and bottom right
@@ -125,7 +128,7 @@
     display: flex;
     justify-content: center;
     gap: 8px;
-    border-bottom: 1px solid var(--neutral-20);
+    border-bottom: 1px solid var(--border-divider);
 
     .plans-new-tab {
       cursor: pointer;
@@ -133,18 +136,20 @@
       font-weight: 600;
       border-top-right-radius: 8px;
       border-top-left-radius: 8px;
+      margin-bottom: -1px; // to overlap with the border on .plans-new-tabs to avoid double border
 
       .plans-new-tab-link {
-        border: unset;
         display: flex;
         align-items: center;
-        color: var(--neutral-70);
+        color: var(--content-secondary);
         margin: 0;
         border-top-right-radius: 8px;
         border-top-left-radius: 8px;
-        border: 1px solid var(--neutral-20);
+        /* stylelint-disable-next-line declaration-block-no-duplicate-properties */
+        border: 1px solid var(--border-divider);
         padding: var(--spacing-05) var(--spacing-08);
         gap: var(--spacing-04);
+        text-decoration: unset;
 
         &:focus {
           background-color: unset;
@@ -155,29 +160,30 @@
           background-color: var(--neutral-20);
         }
 
+        // TODO: this is copied directly from the `.less` file, migrate this to scss
         // tab navigation focus style
-        &:focus-visible {
-          .box-shadow-button-input();
-          outline: 0;
-        }
+        // &:focus-visible {
+        //   .box-shadow-button-input();
+        //   outline: 0;
+        // }
 
         .group-discount-bubble {
           padding: var(--spacing-01) var(--spacing-04);
           background-color: var(--green-10);
           color: var(--green-50);
-          border-radius: var(--border-radius-full-new);
+          border-radius: $border-radius-full-new; // TODO: this is ported direction as a scss variable, change this to a css variable
           font-family: 'DM Mono', monospace;
           font-feature-settings: 'ss05';
           font-size: var(--font-size-01);
           line-height: var(--line-height-01);
           font-weight: 500;
 
-          @media (max-width: @screen-xs-max) {
+          @include media-breakpoint-down(md) {
             display: none;
           }
         }
 
-        @media (max-width: @screen-xs-max) {
+        @include media-breakpoint-down(md) {
           font-size: var(--font-size-02);
           line-height: var(--line-height-02);
           padding: var(--spacing-05);
@@ -185,7 +191,7 @@
         }
       }
 
-      &.active {
+      &:has(.active) {
         .plans-new-tab-link {
           border: 1px solid white;
           position: relative;
@@ -204,16 +210,18 @@
             background: border-box
               linear-gradient(
                 to bottom,
-                @green-50 0%,
-                @neutral-20 85%,
-                @neutral-20 100%
+                $green-50 0%,
+                $neutral-20 85%,
+                $neutral-20 100%
               );
+            /* stylelint-disable-next-line property-no-vendor-prefix */
             -webkit-mask:
               linear-gradient(white 0 0) padding-box,
               linear-gradient(white 0 0);
             mask:
               linear-gradient(white 0 0) padding-box,
               linear-gradient(white 0 0);
+            /* stylelint-disable-next-line property-no-vendor-prefix */
             -webkit-mask-composite: xor;
             mask-composite: exclude;
             border-top-right-radius: 8px;
@@ -225,6 +233,7 @@
             top: 0;
             bottom: -2px;
             left: -1px;
+            /* stylelint-disable-next-line declaration-block-no-redundant-longhand-properties */
             right: -1px;
           }
 
@@ -244,14 +253,14 @@
   .plans-new-period-switcher-container {
     position: relative;
     display: inline-flex;
-    background-color: var(--neutral-10);
-    border-radius: var(--border-radius-full-new);
+    background-color: var(--bg-light-secondary);
+    border-radius: $border-radius-full-new; // TODO: this is ported direction as a scss variable, change this to a css variable
     padding: var(--spacing-03);
     margin-top: var(--spacing-09);
-    margin-bottom: @switcher-container-margin-bottom;
+    margin-bottom: $switcher-container-margin-bottom;
     gap: var(--spacing-04);
 
-    @media (max-width: @screen-xs-max) {
+    @include media-breakpoint-down(md) {
       margin-bottom: var(--spacing-09);
     }
 
@@ -264,7 +273,7 @@
       line-height: var(--line-height-04);
       text-align: center;
       padding: var(--spacing-01) var(--spacing-04);
-      border-radius: var(--border-radius-full-new);
+      border-radius: $border-radius-full-new; // TODO: this is ported direction as a scss variable, change this to a css variable
 
       &:hover {
         background-color: var(--neutral-20);
@@ -275,21 +284,25 @@
     input[type='radio'] {
       position: absolute;
       left: -9999px;
+
       &:focus,
       &:focus-visible {
         outline: 0;
       }
     }
 
-    input[type='radio']:focus-visible + label,
-    input[type='radio']:checked:focus-visible + label {
-      .box-shadow-button-input();
-    }
+    // TODO: this is copied directly from the `.less` file, migrate this to scss
+    // input[type='radio']:focus-visible + label,
+    // input[type='radio']:checked:focus-visible + label {
+    //   .box-shadow-button-input();
+    // }
 
     input[type='radio']:checked + label {
       background-color: var(--green-50);
       color: white;
+      /* stylelint-disable-next-line length-zero-no-unit, color-function-notation, alpha-value-notation */
       box-shadow: 0px 2px 4px 0px rgba(30, 37, 48, 0.16);
+
       .plans-new-discount-badge {
         background-color: var(--green-10);
         color: var(--green-60);
@@ -320,7 +333,7 @@
     border: none;
     padding-top: 0;
 
-    @media (max-width: @screen-xs-min) {
+    @include media-breakpoint-down(md) {
       padding: 0;
     }
   }
@@ -328,7 +341,7 @@
   .plans-new-mobile {
     display: none;
 
-    @media (max-width: @screen-xs-max) {
+    @include media-breakpoint-down(md) {
       display: block;
     }
   }
@@ -336,7 +349,7 @@
   .plans-new-desktop {
     display: block;
 
-    @media (max-width: @screen-xs-max) {
+    @include media-breakpoint-down(md) {
       display: none;
     }
   }
@@ -350,12 +363,12 @@
 
     th,
     td {
-      width: @table-4-column-width;
+      width: $table-4-column-width;
     }
   }
 
   .plans-new-table-student {
-    margin-left: @table-4-column-width / 2;
+    margin-left: math.div($table-4-column-width, 2);
   }
 
   .plans-new-table-student-verification {
@@ -365,7 +378,7 @@
   }
 
   .plans-new-table-group {
-    margin-top: @spacing-11 + @highlighted-heading-height;
+    margin-top: $spacing-11 + $highlighted-heading-height;
   }
 
   thead th {
@@ -375,10 +388,10 @@
     font-size: var(--font-size-05);
     font-weight: 600;
     line-height: var(--line-height-04);
-    color: var(--neutral-90);
+    color: var(--content-primary);
     text-align: center;
 
-    @media (max-width: @screen-md-max) {
+    @include media-breakpoint-down(md) {
       padding: var(--spacing-05) var(--spacing-05) 0 var(--spacing-05);
     }
   }
@@ -386,7 +399,8 @@
   .plans-new-table-subheader {
     vertical-align: top;
     padding: 0 var(--spacing-08);
-    @media (max-width: @screen-md-max) {
+
+    @include media-breakpoint-down(xl) {
       padding: 0 var(--spacing-05);
     }
 
@@ -399,7 +413,8 @@
   .plans-new-table-cta-row {
     td {
       padding-bottom: var(--spacing-06);
-      @media (max-width: @screen-md-max) {
+
+      @include media-breakpoint-down(xl) {
         padding-bottom: var(--spacing-05);
       }
 
@@ -410,7 +425,7 @@
       }
     }
 
-    .btn-block + .btn-block {
+    .plans-cta + .plans-cta {
       margin-top: var(--spacing-04);
     }
   }
@@ -423,7 +438,7 @@
     s,
     .match-original-price-height {
       font-size: var(--font-size-02);
-      line-height: @nondiscounted-price-element-height;
+      line-height: $nondiscounted-price-element-height;
       color: var(--neutral-60);
       font-weight: 600;
     }
@@ -432,7 +447,7 @@
       font-size: var(--font-size-08);
       font-weight: 600;
       line-height: var(--line-height-07);
-      color: var(--neutral-90);
+      color: var(--content-primary);
     }
 
     .plans-new-table-header-price-unit {
@@ -443,6 +458,7 @@
 
     .plans-new-table-cta {
       margin-top: auto;
+
       a:nth-child(2) {
         margin-top: var(--spacing-04);
       }
@@ -450,7 +466,7 @@
 
     .plans-new-table-header-icon {
       font-size: 56px;
-      color: var(--neutral-90);
+      color: var(--content-primary);
     }
   }
 
@@ -487,7 +503,7 @@
         justify-content: space-between;
         padding: var(--spacing-01) var(--spacing-03);
         margin-bottom: var(--spacing-04);
-        height: @group-member-picker-height;
+        height: $group-member-picker-height;
         font-size: var(--font-size-02);
         line-height: var(--line-height-02);
 
@@ -505,7 +521,7 @@
         }
 
         &[data-ol-plans-new-group-member-picker-button='group-all'] {
-          height: @group-member-picker-top-height;
+          height: $group-member-picker-top-height;
         }
       }
 
@@ -513,17 +529,18 @@
         list-style-type: none;
         margin-bottom: 0;
         overflow: auto; // to enable box-shadow
+        /* stylelint-disable-next-line length-zero-no-unit, color-function-notation, alpha-value-notation */
         box-shadow: 0px 2px 4px 0px rgba(30, 37, 48, 0.16);
         padding: var(--spacing-02);
         position: absolute;
-        top: @group-member-picker-height;
+        top: $group-member-picker-height;
         background-color: white;
         width: 100%;
         margin-top: var(--spacing-01);
-        z-index: @z-index-group-member-picker-list;
+        z-index: $z-index-group-member-picker-list;
 
         &[data-ol-plans-new-group-member-picker-dropdown='group-all'] {
-          top: @group-member-picker-top-height;
+          top: $group-member-picker-top-height;
         }
       }
 
@@ -553,7 +570,7 @@
 
         &:not(.plans-new-group-member-picker-footer):hover {
           input[type='radio']:not(:checked) + p {
-            background-color: var(--neutral-10);
+            background-color: var(--bg-light-secondary);
           }
         }
 
@@ -562,9 +579,10 @@
           opacity: 0;
           cursor: pointer;
 
-          &:focus + p {
-            &:extend(.input-focus-style);
-          }
+          // TODO: this is copied directly from the `.less` file, migrate this to scss
+          // &:focus + p {
+          //   &:extend(.input-focus-style);
+          // }
 
           + p {
             padding: var(--spacing-05) var(--spacing-08) var(--spacing-05)
@@ -581,13 +599,13 @@
           word-wrap: break-word;
 
           &::after {
-            content: url(../../../public/img/material-icons/check-green-20.svg);
+            content: url(../../../../public/img/material-icons/check-green-20.svg);
             position: absolute;
             right: 12px;
             top: 50%;
             transform: translateY(-50%);
 
-            @media (max-width: @screen-sm-max) {
+            @include media-breakpoint-down(md) {
               right: var(--spacing-04);
             }
           }
@@ -620,9 +638,10 @@
           margin: var(--spacing-02);
           accent-color: var(--green-50);
 
-          &:focus-visible {
-            .box-shadow-button-input();
-          }
+          // TODO: this is copied directly from the `.less` file, migrate this to scss
+          // &:focus-visible {
+          //   .box-shadow-button-input();
+          // }
         }
 
         .plans-new-edu-discount-content {
@@ -631,11 +650,11 @@
 
           span {
             line-height: var(--line-height-03);
-            color: var(--neutral-90);
+            color: var(--content-primary);
           }
 
           small {
-            color: var(--neutral-70);
+            color: var(--content-secondary);
             font-size: var(--font-size-01);
             line-height: var(--line-height-01);
           }
@@ -669,14 +688,15 @@
 
   .plans-new-table-feature-row {
     &:nth-child(even) {
-      background-color: var(--neutral-10);
+      background-color: var(--bg-light-secondary);
     }
   }
 
   .plans-new-table-section-without-header-row {
     &:nth-child(odd):not(.plans-new-table-heading-row) {
-      background-color: var(--neutral-10);
+      background-color: var(--bg-light-secondary);
     }
+
     &:nth-child(even):not(.plans-new-table-heading-row) {
       background-color: var(--white);
     }
@@ -709,7 +729,7 @@
         font-family: Lato, sans-serif;
         font-size: var(--font-size-02);
         text-align: left;
-        background-color: var(--neutral-90);
+        background-color: var(--content-primary);
         border-radius: var(--border-radius-base-new);
       }
     }
@@ -728,15 +748,15 @@
   .plans-new-table-highlighted-heading {
     position: absolute;
     left: calc(-1 * var(--border-width-base));
-    top: -1 * @highlighted-heading-height;
-    height: @highlighted-heading-height;
+    top: -1 * $highlighted-heading-height;
+    height: $highlighted-heading-height;
     width: calc(100% + (2 * var(--border-width-base)));
     border-top-left-radius: var(--border-radius-large-new);
     border-top-right-radius: var(--border-radius-large-new);
-    padding: @highlighted-heading-padding-vertical var(--spacing-04);
+    padding: $highlighted-heading-padding-vertical var(--spacing-04);
     font-weight: 600;
     text-align: center;
-    line-height: @highlighted-heading-line-height;
+    line-height: $highlighted-heading-line-height;
     background-color: var(--green-50);
     color: var(--white);
     font-size: var(--font-size-03);
@@ -763,7 +783,7 @@
       justify-content: space-around;
       align-items: center;
 
-      @media (max-width: @screen-md-max) {
+      @include media-breakpoint-down(xl) {
         flex-wrap: wrap;
         gap: 30px;
       }
@@ -786,14 +806,14 @@
 
     .plans-card-mobile {
       padding: var(--spacing-09);
-      border: 2px solid var(--neutral-20);
+      border: 2px solid var(--border-divider);
       width: 100%; // might need max-width
       border-radius: 8px;
       display: flex;
       flex-direction: column;
 
       .plans-card-title-mobile {
-        color: var(--neutral-90);
+        color: var(--content-primary);
         font-size: var(--font-size-05); // 20px
         font-weight: 600;
         line-height: var(--line-height-04);
@@ -801,9 +821,10 @@
 
       .plans-card-icon-container-mobile {
         margin-top: var(--spacing-04);
+
         .plans-card-icon {
           font-size: var(--font-size-09);
-          color: var(--neutral-90);
+          color: var(--content-primary);
         }
       }
 
@@ -831,7 +852,7 @@
       }
 
       .plans-card-price-mobile {
-        color: var(--neutral-90);
+        color: var(--content-primary);
         font-size: var(--font-size-08); // 36px
         font-weight: 600;
         line-height: var(--line-height-07);
@@ -839,7 +860,7 @@
       }
 
       .light-gray-text {
-        color: var(--neutral-70);
+        color: var(--content-secondary);
         font-size: var(--font-size-02); // 14px
         line-height: var(--line-height-02);
       }
@@ -854,6 +875,7 @@
           list-style-type: none;
           padding-left: 0;
           margin-bottom: unset;
+
           li {
             display: flex;
             margin-top: var(--spacing-05);
@@ -864,7 +886,7 @@
           margin-top: var(--spacing-08);
           width: 100%;
 
-          .btn-block + .btn-block {
+          .plans-cta + .plans-cta {
             margin-top: var(--spacing-04);
           }
         }
@@ -878,11 +900,12 @@
 
   .plans-features-table-section-container-mobile {
     margin-top: var(--spacing-13);
+
     .plans-features-section-heading-mobile {
       font-size: var(--font-size-06);
       font-weight: 600;
       line-height: var(--line-height-05);
-      color: var(--neutral-90);
+      color: var(--content-primary);
       text-align: center;
       margin-bottom: var(--spacing-08);
     }
@@ -913,13 +936,13 @@
           .plans-features-table-header-item-content-mobile {
             padding: var(--spacing-04);
             text-align: center;
-            background-color: var(--neutral-10);
+            background-color: var(--bg-light-secondary);
           }
 
           .plans-group-features-table-header-item-content-mobile {
             padding: var(--spacing-04);
             text-align: center;
-            background-color: var(--neutral-10);
+            background-color: var(--bg-light-secondary);
             height: 64px;
             display: flex;
             justify-content: center;
@@ -927,7 +950,7 @@
           }
 
           .plans-features-table-header-item-title-mobile {
-            color: var(--neutral-90);
+            color: var(--content-primary);
             line-height: var(--line-height-03);
             font-weight: 600;
             font-size: var(--font-size-03);
@@ -935,7 +958,7 @@
 
           .plans-features-table-header-item-price-mobile {
             font-weight: 400;
-            color: var(--neutral-70);
+            color: var(--content-secondary);
             line-height: var(--line-height-01);
             font-size: var(--spacing-05);
           }
@@ -952,7 +975,12 @@
 
         .plans-features-table-header-item-content-mobile.highlighted,
         .plans-group-features-table-header-item-content-mobile.highlighted {
-          .highlighted-styles;
+          background-color: var(--neutral-80);
+
+          .plans-features-table-header-item-title-mobile,
+          .plans-features-table-header-item-price-mobile {
+            color: var(--white);
+          }
         }
       }
 
@@ -965,11 +993,12 @@
           font-weight: 600;
           text-align: center;
           line-height: var(--line-height-03);
+
           .plans-features-table-row-section-heading-content-mobile {
             padding-top: var(--spacing-08);
             padding-bottom: var(--spacing-05);
             font-size: var(--font-size-04);
-            color: var(--neutral-90);
+            color: var(--content-primary);
           }
         }
 
@@ -977,7 +1006,7 @@
         .plans-features-table-row-title-mobile {
           &.plans-features-table-row-title-mobile-without-heading {
             &:nth-child(4n - 3) {
-              background-color: var(--neutral-10);
+              background-color: var(--bg-light-secondary);
             }
 
             &:nth-child(4n - 1) {
@@ -986,7 +1015,7 @@
           }
 
           &:nth-child(4n - 2) {
-            background-color: var(--neutral-10);
+            background-color: var(--bg-light-secondary);
           }
 
           &:nth-child(4n) {
@@ -1000,6 +1029,7 @@
             padding-top: var(--spacing-06);
             font-weight: 600;
             line-height: var(--line-height-03);
+
             .plans-features-table-row-title-accordion {
               display: flex;
               justify-content: center;
@@ -1007,6 +1037,7 @@
               align-items: center;
               text-align: center;
               padding: 0 var(--spacing-04);
+
               .plans-features-table-row-title-accordion-header {
                 font-size: var(--font-size-03);
                 font-weight: 600;
@@ -1015,6 +1046,7 @@
                 justify-content: center;
                 background-color: unset;
                 border: unset;
+
                 .plans-features-table-row-title-accordion-icon {
                   display: flex;
                   align-items: center;
@@ -1029,6 +1061,7 @@
                   }
                 }
               }
+
               .plans-features-table-row-title-accordion-body {
                 font-size: var(--font-size-01);
                 line-height: var(--line-height-01);
@@ -1041,7 +1074,7 @@
         .plans-features-table-row-mobile {
           &.plans-features-table-row-mobile-without-heading {
             &:nth-child(4n - 2) {
-              background-color: var(--neutral-10);
+              background-color: var(--bg-light-secondary);
             }
 
             &:nth-child(4n) {
@@ -1054,7 +1087,7 @@
           }
 
           &:nth-child(4n - 1) {
-            background-color: var(--neutral-10);
+            background-color: var(--bg-light-secondary);
           }
 
           .plans-features-table-cell-content-mobile {
@@ -1091,16 +1124,19 @@
   .only-show-for-specific-plan-type {
     display: none;
   }
+
   &[data-ol-current-plan-type='group'] {
     .show-for-plan-type-group {
       display: block;
     }
   }
+
   &[data-ol-current-plan-type='individual'] {
     .show-for-plan-type-individual {
       display: block;
     }
   }
+
   &[data-ol-current-plan-type='student'] {
     .show-for-plan-type-student {
       display: block;
@@ -1110,11 +1146,13 @@
   .only-show-for-specific-plan-period {
     display: none;
   }
+
   &[data-ol-current-plan-period='annual'] {
     .show-for-plan-period-annual {
       display: block;
     }
   }
+
   &[data-ol-current-plan-period='monthly'] {
     .show-for-plan-period-monthly {
       display: block;
@@ -1123,7 +1161,7 @@
 }
 
 .plans-overleaf-common-request {
-  color: var(--neutral-90);
+  color: var(--content-primary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1131,7 +1169,7 @@
   text-align: center;
   gap: var(--spacing-06);
 
-  @media (max-width: @screen-xs-max) {
+  @include media-breakpoint-down(md) {
     flex-direction: column;
     margin: 0;
   }
@@ -1147,7 +1185,7 @@
     text-align: center;
     margin-bottom: var(--spacing-10);
 
-    @media (max-width: @screen-xs-max) {
+    @include media-breakpoint-down(md) {
       text-align: unset;
     }
   }
@@ -1181,7 +1219,7 @@
 }
 
 .plans-new-design.plans-interstitial-new-design {
-  padding-top: var(--header-height);
+  padding-top: $header-height;
   padding-bottom: var(--spacing-09);
 
   .plans-interstitial-new-content {
@@ -1193,7 +1231,24 @@
   .plans-new-table {
     th,
     td {
-      width: @table-5-column-width;
+      width: $table-5-column-width;
     }
+  }
+}
+
+.plans-cta {
+  display: block;
+}
+
+.plans-faq-tabs {
+  max-width: 800px;
+  margin: 0 auto;
+
+  .nav-tabs-container {
+    margin-bottom: var(--spacing-08);
+  }
+
+  .tab-content {
+    margin-top: 0;
   }
 }

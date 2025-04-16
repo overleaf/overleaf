@@ -13,21 +13,40 @@ include ../../_mixins/eyebrow
 
 	.row
 		.col-xs-12
-			.ol-tabs-scrollable
+			div(
+				class={
+					'plans-faq-tabs': bootstrapVersion === 5,
+					'ol-tabs': bootstrapVersion === 5,
+					'ol-tabs-scrollable': bootstrapVersion === 3
+				}
+			)
 				.nav-tabs-container
 					ul.nav.nav-tabs(role="tablist")
-						li.active(role="presentation")
+						//- In the bs5 version of plans page, the `active` class need to be added to the `a` tag instead of the parent `li` tag
+						//- If the `plans-page-bs5` split test has been completed, remove the `active` class from the `li` tag since we're not using it anymore
+						//- If the `plans-page-bs5` split test has been completed, remove the `data-toggle` because it is not needed anymore (bs5 uses `data-bs-toggle`)
+						li(
+							role="presentation"
+							class={
+								active: bootstrapVersion === 3
+							}
+						)
 							a(
 								role="tab"
 								data-toggle="tab"
+								data-bs-toggle="tab"
 								href='#' + managingYourSubscription
 								aria-controls=managingYourSubscription
+								class={
+									active: bootstrapVersion === 5
+								}
 							)
 								| #{translate('managing_your_subscription')}
 						li(role="presentation")
 							a(
 								role="tab"
 								data-toggle="tab"
+								data-bs-toggle="tab"
 								href='#' + overleafIndividualPlans
 								aria-controls=overleafIndividualPlans
 							)
@@ -36,6 +55,7 @@ include ../../_mixins/eyebrow
 							a(
 								role="tab"
 								data-toggle="tab"
+								data-bs-toggle="tab"
 								href='#' + overleafGroupPlans
 								aria-controls=overleafGroupPlans
 							)
@@ -58,8 +78,9 @@ include ../../_mixins/eyebrow
 					)
 						+overleafGroupPlans()
 
-	.row.plans-faq-support
-		span #{translate('still_have_questions')}
-		button(data-ol-open-contact-form-modal="general")
-			span(style="margin-right: 4px") #{translate('contact_support')}
-			i.icon-md.material-symbols.material-symbols-rounded.material-symbols-arrow-right(aria-hidden="true") arrow_right_alt
+	.row
+		.col-xs-12.plans-faq-support
+			span #{translate('still_have_questions')}
+			button(data-ol-open-contact-form-modal="general")
+				span(style="margin-right: 4px") #{translate('contact_support')}
+				i.icon-md.material-symbols.material-symbols-rounded.material-symbols-arrow-right(aria-hidden="true") arrow_right_alt

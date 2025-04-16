@@ -1,4 +1,6 @@
-nav.navbar.navbar-default.navbar-main
+nav.navbar.navbar-default.navbar-main(class={
+	'website-redesign-navbar': isWebsiteRedesign
+})
 	.container-fluid
 		.navbar-header
 			if (typeof(suppressNavbarRight) == "undefined")

@@ -32,7 +32,8 @@ mixin collinsQuote1
 		-var quotePerson = 'Christopher Collins'
 		-var quotePersonPosition = 'Associate Professor and Lab Director, Ontario Tech University'
 		-var quotePersonImg = buildImgPath("advocates/collins.jpg")
-		+quoteLargeTextCentered(quote, quotePerson, quotePersonPosition, null, null, quotePersonImg, quotePerson)
+		.card-body
+			+quoteLargeTextCentered(quote, quotePerson, quotePersonPosition, null, null, quotePersonImg, quotePerson)
 
 mixin collinsQuote2
 	.card.card-dark-green-bg
@@ -40,7 +41,8 @@ mixin collinsQuote2
 		-var quotePerson = 'Christopher Collins'
 		-var quotePersonPosition = 'Associate Professor and Lab Director, Ontario Tech University'
 		-var quotePersonImg = buildImgPath("advocates/collins.jpg")
-		+quoteLargeTextCentered(quote, quotePerson, quotePersonPosition, null, null, quotePersonImg, quotePerson)
+		.card-body
+			+quoteLargeTextCentered(quote, quotePerson, quotePersonPosition, null, null, quotePersonImg, quotePerson)
 
 mixin bennettQuote1
 	.card.card-dark-green-bg
@@ -48,4 +50,5 @@ mixin bennettQuote1
 		-var quotePerson = 'Andrew Bennett'
 		-var quotePersonPosition = 'Software Architect, Symplectic'
 		-var quotePersonImg = buildImgPath("advocates/bennett.jpg")
-		+quoteLargeTextCentered(quote, quotePerson, quotePersonPosition, null, null, quotePersonImg, quotePerson)
+		.card-body
+			+quoteLargeTextCentered(quote, quotePerson, quotePersonPosition, null, null, quotePersonImg, quotePerson)
