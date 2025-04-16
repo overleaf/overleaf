@@ -149,11 +149,14 @@ export function generatePdfCachingTransportFactory() {
             return blob
           })
           .catch(err => {
-            const { statusCode, url } = OError.getFullInfo(err)
             throw OError.tag(
-              new PDFJS.ResponseException(undefined, statusCode, true),
+              new PDFJS.MissingPDFException(),
               'cache-fallback',
-              { statusCode, url, err }
+              {
+                statusCode: OError.getFullInfo(err).statusCode,
+                url: OError.getFullInfo(err).url,
+                err,
+              }
             )
           })
       }
@@ -185,12 +188,11 @@ export function generatePdfCachingTransportFactory() {
               metrics.failedCount++
               metrics.failedOnce = true
             }
-            const { statusCode, url } = OError.getFullInfo(err)
-            throw OError.tag(
-              new PDFJS.ResponseException(undefined, statusCode, true),
-              'caching',
-              { statusCode, url, err }
-            )
+            throw OError.tag(new PDFJS.MissingPDFException(), 'caching', {
+              statusCode: OError.getFullInfo(err).statusCode,
+              url: OError.getFullInfo(err).url,
+              err,
+            })
           }
           metrics.failedCount++
           metrics.failedOnce = true
@@ -214,12 +216,11 @@ export function generatePdfCachingTransportFactory() {
           }).catch(err => {
             if (canTryFromCache(err)) return fetchFromCache()
             if (isExpectedError(err)) {
-              const { statusCode, url } = OError.getFullInfo(err)
-              throw OError.tag(
-                new PDFJS.ResponseException(undefined, statusCode, true),
-                'fallback',
-                { statusCode, url, err }
-              )
+              throw OError.tag(new PDFJS.MissingPDFException(), 'fallback', {
+                statusCode: OError.getFullInfo(err).statusCode,
+                url: OError.getFullInfo(err).url,
+                err,
+              })
             }
             throw err
           })
@@ -232,7 +233,7 @@ export function generatePdfCachingTransportFactory() {
           if (abortSignal.aborted) return
           err = OError.tag(err, 'fatal pdf download error', getDebugInfo())
           debugConsole.error(err)
-          if (!(err instanceof PDFJS.ResponseException && err.missing)) {
+          if (!(err instanceof PDFJS.MissingPDFException)) {
             captureException(err, {
               tags: {
                 fromPdfCaching: true,

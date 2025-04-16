@@ -57,7 +57,7 @@ export default class PDFJSWrapper {
     url: string
     pdfFile: Record<string, any>
     abortController: AbortController
-    handleFetchError: (error: any) => void
+    handleFetchError: (error: Error) => void
   }) {
     this.url = url
 
@@ -90,10 +90,7 @@ export default class PDFJSWrapper {
 
       return doc
     } catch (error: any) {
-      if (
-        !error ||
-        !(error instanceof PDFJS.ResponseException && error.missing === true)
-      ) {
+      if (!error || error.name !== 'MissingPDFException') {
         captureException(error, {
           tags: { handler: 'pdf-preview' },
         })

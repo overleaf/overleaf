@@ -168,10 +168,10 @@ function PdfJsViewer({ url, pdfFile }: PdfJsViewerProps) {
       setStartFetch(performance.now())
 
       const abortController = new AbortController()
-      const handleFetchError = (err: any) => {
+      const handleFetchError = (err: Error) => {
         if (abortController.signal.aborted) return
         // The error is already logged at the call-site with additional context.
-        if (err instanceof PDFJS.ResponseException && err.missing) {
+        if (err instanceof PDFJS.MissingPDFException) {
           setError('rendering-error-expected')
         } else {
           setError('rendering-error')
