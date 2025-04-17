@@ -5,6 +5,7 @@ export interface WritefullEvents {
   'writefull-received-suggestions': { numberOfSuggestions: number }
   'writefull-register-as-auto-account': { email: string }
   'writefull-shared-analytics': { eventName: string; segmentation: object }
+  'writefull-ai-assist-show-paywall': { origin?: string }
 }
 
 type InsertPosition = {
@@ -25,6 +26,10 @@ export interface WritefullAPI {
     overleafUserId: string
   }): Promise<void>
   addEventListener<eventName extends keyof WritefullEvents>(
+    name: eventName,
+    callback: (detail: WritefullEvents[eventName]) => void
+  ): void
+  removeEventListener<eventName extends keyof WritefullEvents>(
     name: eventName,
     callback: (detail: WritefullEvents[eventName]) => void
   ): void
