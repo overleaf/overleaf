@@ -57,8 +57,9 @@ describe('<TrashProjectButton />', function () {
 
     await waitFor(
       () =>
-        expect(trashProjectMock.called(`/project/${project.id}/trash`)).to.be
-          .true
+        expect(
+          trashProjectMock.callHistory.called(`/project/${project.id}/trash`)
+        ).to.be.true
     )
   })
 })

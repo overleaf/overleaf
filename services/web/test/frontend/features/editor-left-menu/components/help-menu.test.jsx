@@ -14,7 +14,7 @@ describe('<HelpMenu />', function () {
   })
 
   afterEach(function () {
-    fetchMock.reset()
+    fetchMock.removeRoutes().clearHistory()
   })
 
   it('shows correct menu if `showSupport` is `true`', function () {

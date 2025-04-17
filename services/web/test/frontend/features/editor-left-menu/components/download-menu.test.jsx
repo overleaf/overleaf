@@ -6,7 +6,7 @@ import { renderWithEditorContext } from '../../../helpers/render-with-context'
 
 describe('<DownloadMenu />', function () {
   afterEach(function () {
-    fetchMock.reset()
+    fetchMock.removeRoutes().clearHistory()
   })
 
   it('shows download links with correct url', async function () {

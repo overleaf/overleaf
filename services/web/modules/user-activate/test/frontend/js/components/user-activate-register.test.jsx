@@ -5,10 +5,10 @@ import UserActivateRegister from '../../../../frontend/js/components/user-activa
 
 describe('UserActivateRegister', function () {
   beforeEach(function () {
-    fetchMock.reset()
+    fetchMock.removeRoutes().clearHistory()
   })
   afterEach(function () {
-    fetchMock.reset()
+    fetchMock.removeRoutes().clearHistory()
   })
   it('should display the error message', async function () {
     const email = 'abc@gmail.com'
@@ -23,7 +23,7 @@ describe('UserActivateRegister', function () {
     fireEvent.change(registerInput, { target: { value: email } })
     fireEvent.click(registerButton)
 
-    expect(registerMock.called()).to.be.true
+    expect(registerMock.callHistory.called()).to.be.true
     await screen.findByText('Sorry, an error occured', { exact: false })
   })
 
@@ -44,7 +44,7 @@ describe('UserActivateRegister', function () {
     fireEvent.change(registerInput, { target: { value: email } })
     fireEvent.click(registerButton)
 
-    expect(registerMock.called()).to.be.true
+    expect(registerMock.callHistory.called()).to.be.true
     await screen.findByText(
       "We've sent out welcome emails to the registered users."
     )
@@ -78,7 +78,7 @@ describe('UserActivateRegister', function () {
     fireEvent.change(registerInput, { target: { value: email } })
     fireEvent.click(registerButton)
 
-    expect(registerMock.called()).to.be.true
+    expect(registerMock.callHistory.called()).to.be.true
     await screen.findByText('abc@gmail.com')
     await screen.findByText('def@gmail.com')
   })
@@ -103,7 +103,7 @@ describe('UserActivateRegister', function () {
     fireEvent.change(registerInput, { target: { value: email } })
     fireEvent.click(registerButton)
 
-    expect(registerMock.called()).to.be.true
+    expect(registerMock.callHistory.called()).to.be.true
     await screen.findByText('abc@')
     await screen.findByText('def@')
   })
@@ -133,7 +133,7 @@ describe('UserActivateRegister', function () {
     fireEvent.change(registerInput, { target: { value: email } })
     fireEvent.click(registerButton)
 
-    expect(registerMock.called()).to.be.true
+    expect(registerMock.callHistory.called()).to.be.true
     await screen.findByText('abc@gmail.com')
     await screen.findByText('def@')
   })

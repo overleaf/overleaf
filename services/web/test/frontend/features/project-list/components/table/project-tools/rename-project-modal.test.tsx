@@ -58,7 +58,9 @@ describe('<RenameProjectModal />', function () {
     await waitFor(
       () =>
         expect(
-          renameProjectMock.called(`/project/${currentProjects[0].id}/rename`)
+          renameProjectMock.callHistory.called(
+            `/project/${currentProjects[0].id}/rename`
+          )
         ).to.be.true
     )
   })
@@ -88,7 +90,7 @@ describe('<RenameProjectModal />', function () {
     const submitButton = within(modal).getByText('Rename') as HTMLButtonElement
     fireEvent.click(submitButton)
 
-    await waitFor(() => expect(postRenameMock.called()).to.be.true)
+    await waitFor(() => expect(postRenameMock.callHistory.called()).to.be.true)
 
     screen.getByText('Something went wrong. Please try again.')
   })

@@ -59,7 +59,7 @@ describe('<PauseSubscriptionModal />', function () {
   })
 
   afterEach(function () {
-    fetchMock.reset()
+    fetchMock.removeRoutes().clearHistory()
     this.locationStub.restore()
     this.replaceStateStub.restore()
   })

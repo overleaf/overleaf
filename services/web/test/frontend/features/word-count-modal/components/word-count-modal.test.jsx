@@ -7,7 +7,7 @@ import WordCountModal from '../../../../../frontend/js/features/word-count-modal
 
 describe('<WordCountModal />', function () {
   afterEach(function () {
-    fetchMock.reset()
+    fetchMock.removeRoutes().clearHistory()
   })
 
   const contextProps = {

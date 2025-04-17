@@ -7,7 +7,7 @@ import getMeta from '@/utils/meta'
 
 describe('<NewProjectButton />', function () {
   beforeEach(function () {
-    fetchMock.reset()
+    fetchMock.removeRoutes().clearHistory()
   })
 
   describe('for every user (affiliated and non-affiliated)', function () {

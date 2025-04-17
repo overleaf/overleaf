@@ -5,7 +5,7 @@ import fetchMock from 'fetch-mock'
 
 describe('<SecuritySection />', function () {
   afterEach(function () {
-    fetchMock.reset()
+    fetchMock.removeRoutes().clearHistory()
   })
 
   it('shows Group SSO rows in security section', async function () {

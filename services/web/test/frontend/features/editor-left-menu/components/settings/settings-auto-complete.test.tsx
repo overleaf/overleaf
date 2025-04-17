@@ -7,7 +7,7 @@ import { EditorProviders } from '../../../../helpers/editor-providers'
 
 describe('<SettingsAutoComplete />', function () {
   afterEach(function () {
-    fetchMock.reset()
+    fetchMock.removeRoutes().clearHistory()
   })
 
   it('shows correct menu', async function () {

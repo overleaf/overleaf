@@ -22,7 +22,7 @@ describe('<LayoutDropdownButton />', function () {
   afterEach(function () {
     openStub.restore()
     sendMBSpy.restore()
-    fetchMock.restore()
+    fetchMock.removeRoutes().clearHistory()
   })
 
   it('should mark current layout option as selected', async function () {

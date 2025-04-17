@@ -23,7 +23,7 @@ describe('ChatContext', function () {
   const uuidValue = '00000000-0000-0000-0000-000000000000'
 
   beforeEach(function () {
-    fetchMock.reset()
+    fetchMock.removeRoutes().clearHistory()
     cleanUpContext()
 
     stubMathJax()
@@ -43,14 +43,15 @@ describe('ChatContext', function () {
   describe('socket connection', function () {
     beforeEach(function () {
       // Mock GET messages to return no messages
-      fetchMock.get('express:/project/:projectId/messages', [])
+      // FIXME?
+      // fetchMock.get('express:/project/:projectId/messages', [])
 
       // Mock POST new message to return 200
       fetchMock.post('express:/project/:projectId/messages', 200)
     })
 
     afterEach(function () {
-      fetchMock.reset()
+      fetchMock.removeRoutes().clearHistory()
     })
 
     it('subscribes when mounted', function () {
@@ -106,22 +107,18 @@ describe('ChatContext', function () {
         socket,
       })
 
-      fetchMock.get(
-        'express:/project/:projectId/messages',
-        [
-          {
-            id: 'msg_1',
-            content: 'new message',
-            timestamp: Date.now(),
-            user: {
-              id: 'another_fake_user',
-              first_name: 'another_fake_user_first_name',
-              email: 'another_fake@example.com',
-            },
+      fetchMock.get('express:/project/:projectId/messages', [
+        {
+          id: 'msg_1',
+          content: 'new message',
+          timestamp: Date.now(),
+          user: {
+            id: 'another_fake_user',
+            first_name: 'another_fake_user_first_name',
+            email: 'another_fake@example.com',
           },
-        ],
-        { overwriteRoutes: true }
-      )
+        },
+      ])
 
       // Mock message being received from another user
       socket.emitToClient('new-chat-message', {
@@ -157,22 +154,18 @@ describe('ChatContext', function () {
         socket,
       })
 
-      fetchMock.get(
-        'express:/project/:projectId/messages',
-        [
-          {
-            id: 'msg_1',
-            content: 'new message',
-            timestamp: Date.now(),
-            user: {
-              id: 'another_fake_user',
-              first_name: 'another_fake_user_first_name',
-              email: 'another_fake@example.com',
-            },
+      fetchMock.get('express:/project/:projectId/messages', [
+        {
+          id: 'msg_1',
+          content: 'new message',
+          timestamp: Date.now(),
+          user: {
+            id: 'another_fake_user',
+            first_name: 'another_fake_user_first_name',
+            email: 'another_fake@example.com',
           },
-        ],
-        { overwriteRoutes: true }
-      )
+        },
+      ])
 
       // Wait until initial messages have loaded
       result.current.loadInitialMessages()
@@ -320,11 +313,13 @@ describe('ChatContext', function () {
 
       // Calling a second time won't do anything
       result.current.loadInitialMessages()
-      expect(fetchMock.calls()).to.have.lengthOf(1)
+      expect(
+        fetchMock.callHistory.calls('express:/project/:projectId/messages')
+      ).to.have.lengthOf(1)
     })
 
     it('provides an error on failure', async function () {
-      fetchMock.reset()
+      fetchMock.removeRoutes().clearHistory()
       fetchMock.get('express:/project/:projectId/messages', 500)
       const { result, waitForNextUpdate } = renderChatContextHook({})
 
@@ -369,18 +364,14 @@ describe('ChatContext', function () {
           // Resolve a full "page" of messages (50)
           createMessages(50, user, new Date('2021-03-04T10:00:00').getTime())
         )
-        .getOnce(
-          'express:/project/:projectId/messages',
-          [
-            {
-              id: 'msg_51',
-              content: 'message from second page',
-              user,
-              timestamp: new Date('2021-03-04T11:00:00').getTime(),
-            },
-          ],
-          { overwriteRoutes: false }
-        )
+        .getOnce('express:/project/:projectId/messages', [
+          {
+            id: 'msg_51',
+            content: 'message from second page',
+            user,
+            timestamp: new Date('2021-03-04T11:00:00').getTime(),
+          },
+        ])
 
       const { result, waitForNextUpdate } = renderChatContextHook({})
 
@@ -422,7 +413,9 @@ describe('ChatContext', function () {
       result.current.loadMoreMessages()
 
       expect(result.current.atEnd).to.be.true
-      expect(fetchMock.calls()).to.have.lengthOf(1)
+      expect(
+        fetchMock.callHistory.calls('express:/project/:projectId/messages')
+      ).to.have.lengthOf(1)
     })
 
     it('handles socket messages while loading', async function () {
@@ -479,7 +472,7 @@ describe('ChatContext', function () {
     })
 
     it('provides an error on failures', async function () {
-      fetchMock.reset()
+      fetchMock.removeRoutes().clearHistory()
       fetchMock.get('express:/project/:projectId/messages', 500)
       const { result, waitForNextUpdate } = renderChatContextHook({})
 
@@ -515,10 +508,11 @@ describe('ChatContext', function () {
 
       result.current.sendMessage('sent message')
 
-      const [, { body }] = fetchMock.lastCall(
-        'express:/project/:projectId/messages',
-        'POST'
-      )
+      const {
+        options: { body },
+      } = fetchMock.callHistory
+        .calls('express:/project/:projectId/messages', { method: 'POST' })
+        .at(-1)
       expect(JSON.parse(body)).to.deep.include({ content: 'sent message' })
     })
 
@@ -529,14 +523,14 @@ describe('ChatContext', function () {
 
       expect(result.current.messages).to.be.empty
       expect(
-        fetchMock.called('express:/project/:projectId/messages', {
+        fetchMock.callHistory.called('express:/project/:projectId/messages', {
           method: 'post',
         })
       ).to.be.false
     })
 
     it('provides an error on failure', async function () {
-      fetchMock.reset()
+      fetchMock.removeRoutes().clearHistory()
       fetchMock
         .get('express:/project/:projectId/messages', [])
         .postOnce('express:/project/:projectId/messages', 500)
@@ -614,7 +608,7 @@ function createMessages(number, user, timestamp = Date.now()) {
  * Get query param by key from the last fetchMock response
  */
 function getLastFetchMockQueryParam(key) {
-  const url = fetchMock.lastUrl()
+  const { url } = fetchMock.callHistory.calls().at(-1)
   const { searchParams } = new URL(url, 'https://www.overleaf.com')
   return searchParams.get(key)
 }

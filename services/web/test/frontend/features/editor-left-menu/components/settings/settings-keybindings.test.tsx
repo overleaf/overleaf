@@ -7,7 +7,7 @@ import { EditorLeftMenuProvider } from '@/features/editor-left-menu/components/e
 
 describe('<SettingsKeybindings />', function () {
   afterEach(function () {
-    fetchMock.reset()
+    fetchMock.removeRoutes().clearHistory()
   })
 
   it('shows correct menu', async function () {

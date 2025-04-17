@@ -21,7 +21,7 @@ describe('<ActionsMenu />', function () {
   })
 
   afterEach(function () {
-    fetchMock.reset()
+    fetchMock.removeRoutes().clearHistory()
   })
 
   it('shows correct menu for non-anonymous users', async function () {

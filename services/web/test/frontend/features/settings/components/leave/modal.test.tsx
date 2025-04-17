@@ -13,7 +13,7 @@ describe('<LeaveModal />', function () {
   })
 
   afterEach(function () {
-    fetchMock.reset()
+    fetchMock.removeRoutes().clearHistory()
   })
 
   it('closes modal on cancel', async function () {

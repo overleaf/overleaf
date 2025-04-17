@@ -208,7 +208,7 @@ describe('<ActiveSubscription />', function () {
 
     afterEach(function () {
       this.locationStub.restore()
-      fetchMock.reset()
+      fetchMock.removeRoutes().clearHistory()
     })
 
     function showConfirmCancelUI() {

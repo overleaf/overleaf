@@ -52,7 +52,7 @@ describe('<LinkingSection />', function () {
   })
 
   afterEach(function () {
-    fetchMock.reset()
+    fetchMock.removeRoutes().clearHistory()
   })
 
   it('shows header', async function () {

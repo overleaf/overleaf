@@ -37,9 +37,7 @@ export const ErrorImportingFileFromExternalURL = args => {
   useFetchMock(fetchMock => {
     mockCreateFileModalFetch(fetchMock)
 
-    fetchMock.post('express:/project/:projectId/linked_file', 500, {
-      overwriteRoutes: true,
-    })
+    fetchMock.post('express:/project/:projectId/linked_file', 500)
   })
 
   getMeta('ol-ExposedSettings').hasLinkUrlFeature = true
@@ -52,9 +50,7 @@ export const ErrorImportingFileFromReferenceProvider = args => {
   useFetchMock(fetchMock => {
     mockCreateFileModalFetch(fetchMock)
 
-    fetchMock.post('express:/project/:projectId/linked_file', 500, {
-      overwriteRoutes: true,
-    })
+    fetchMock.post('express:/project/:projectId/linked_file', 500)
   })
 
   return <FileTreeModalCreateFile {...args} />

@@ -29,16 +29,16 @@ describe('<TagsList />', function () {
     })
     fetchMock.post('express:/tag/:tagId/projects', 200)
     fetchMock.post('express:/tag/:tagId/edit', 200)
-    fetchMock.delete('express:/tag/:tagId', 200)
+    fetchMock.delete('express:/tag/:tagId', 200, { name: 'delete tag' })
 
     renderWithProjectListContext(<TagsList />)
 
-    await fetchMock.flush(true)
-    await waitFor(() => expect(fetchMock.called('/api/project')))
+    await fetchMock.callHistory.flush(true)
+    await waitFor(() => expect(fetchMock.callHistory.called('/api/project')))
   })
 
   afterEach(function () {
-    fetchMock.reset()
+    fetchMock.removeRoutes().clearHistory()
   })
 
   it('displays the tags list', function () {
@@ -146,7 +146,9 @@ describe('<TagsList />', function () {
 
       await fireEvent.click(createButton)
 
-      await waitFor(() => expect(fetchMock.called(`/tag`)).to.be.true)
+      await waitFor(
+        () => expect(fetchMock.callHistory.called(`/tag`)).to.be.true
+      )
 
       expect(screen.queryByRole('dialog', { hidden: false })).to.be.null
 
@@ -237,7 +239,9 @@ describe('<TagsList />', function () {
 
       await fireEvent.click(saveButton)
 
-      await waitFor(() => expect(fetchMock.called(`/tag/abc123def456/rename`)))
+      await waitFor(() =>
+        expect(fetchMock.callHistory.called(`/tag/abc123def456/rename`))
+      )
 
       expect(screen.queryByRole('dialog', { hidden: false })).to.be.null
 
@@ -278,7 +282,9 @@ describe('<TagsList />', function () {
       const deleteButton = within(modal).getByRole('button', { name: 'Delete' })
       await fireEvent.click(deleteButton)
 
-      await waitFor(() => expect(fetchMock.called(`/tag/bcd234efg567`)))
+      await waitFor(() =>
+        expect(fetchMock.callHistory.called(`/tag/bcd234efg567`))
+      )
 
       expect(screen.queryByRole('dialog', { hidden: false })).to.be.null
       expect(
@@ -289,13 +295,15 @@ describe('<TagsList />', function () {
     })
 
     it('a failed request displays an error message', async function () {
-      fetchMock.delete('express:/tag/:tagId', 500, { overwriteRoutes: true })
+      fetchMock.modifyRoute('delete tag', { response: { status: 500 } })
 
       const modal = screen.getAllByRole('dialog', { hidden: false })[0]
       const deleteButton = within(modal).getByRole('button', { name: 'Delete' })
       await fireEvent.click(deleteButton)
 
-      await waitFor(() => expect(fetchMock.called(`/tag/bcd234efg567`)))
+      await waitFor(() =>
+        expect(fetchMock.callHistory.called(`/tag/bcd234efg567`))
+      )
 
       within(modal).getByText('Sorry, something went wrong')
     })

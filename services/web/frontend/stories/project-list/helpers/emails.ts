@@ -1,5 +1,5 @@
 import { merge, cloneDeep } from 'lodash'
-import { FetchMockStatic } from 'fetch-mock'
+import { type FetchMock } from 'fetch-mock'
 import { UserEmailData } from '../../../../types/user-email'
 import {
   Institution,
@@ -32,7 +32,7 @@ export const fakeReconfirmationUsersData = {
   default: false,
 } as DeepReadonly<UserEmailData>
 
-export function defaultSetupMocks(fetchMock: FetchMockStatic) {
+export function defaultSetupMocks(fetchMock: FetchMock) {
   // at least one project is required to show some notifications
   const projects = [{}] as Project[]
   fetchMock.post(/\/api\/project/, {
@@ -54,7 +54,7 @@ export function setDefaultMeta() {
   window.metaAttributesCache.set('ol-userEmails', [])
 }
 
-export function errorsMocks(fetchMock: FetchMockStatic) {
+export function errorsMocks(fetchMock: FetchMock) {
   defaultSetupMocks(fetchMock)
   fetchMock.post(/\/user\/emails\/*/, 500, { delay: MOCK_DELAY })
   fetchMock.post(
@@ -74,7 +74,7 @@ export function setInstitutionMeta(institutionData: Partial<Institution>) {
   ])
 }
 
-export function institutionSetupMocks(fetchMock: FetchMockStatic) {
+export function institutionSetupMocks(fetchMock: FetchMock) {
   defaultSetupMocks(fetchMock)
   fetchMock.delete(/\/notifications\/*/, 200, { delay: MOCK_DELAY })
 }
@@ -84,7 +84,7 @@ export function setCommonMeta(notificationData: DeepPartial<Notification>) {
   window.metaAttributesCache.set('ol-notifications', [notificationData])
 }
 
-export function commonSetupMocks(fetchMock: FetchMockStatic) {
+export function commonSetupMocks(fetchMock: FetchMock) {
   defaultSetupMocks(fetchMock)
   fetchMock.post(
     /\/project\/[A-Za-z0-9]+\/invite\/token\/[A-Za-z0-9]+\/accept/,
@@ -98,7 +98,7 @@ export function setReconfirmationMeta() {
   window.metaAttributesCache.set('ol-userEmails', [fakeReconfirmationUsersData])
 }
 
-export function reconfirmationSetupMocks(fetchMock: FetchMockStatic) {
+export function reconfirmationSetupMocks(fetchMock: FetchMock) {
   defaultSetupMocks(fetchMock)
   fetchMock.post(/\/user\/emails\/resend_confirmation/, 200, {
     delay: MOCK_DELAY,
@@ -113,19 +113,15 @@ export function setReconfirmAffiliationMeta() {
   )
 }
 
-export function reconfirmAffiliationSetupMocks(fetchMock: FetchMockStatic) {
+export function reconfirmAffiliationSetupMocks(fetchMock: FetchMock) {
   defaultSetupMocks(fetchMock)
-  fetchMock.post(
-    /\/api\/project/,
-    {
-      status: 200,
-      body: {
-        projects: [{}],
-        totalSize: 0,
-      },
+  fetchMock.post(/\/api\/project/, {
+    status: 200,
+    body: {
+      projects: [{}],
+      totalSize: 0,
     },
-    { overwriteRoutes: true }
-  )
+  })
   fetchMock.post(/\/user\/emails\/send-reconfirmation/, 200, {
     delay: MOCK_DELAY,
   })

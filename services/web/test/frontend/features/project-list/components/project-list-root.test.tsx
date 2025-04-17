@@ -79,7 +79,7 @@ describe('<ProjectListRoot />', function () {
 
   afterEach(function () {
     sendMBSpy.restore()
-    fetchMock.reset()
+    fetchMock.removeRoutes().clearHistory()
     this.locationStub.restore()
   })
 
@@ -88,11 +88,11 @@ describe('<ProjectListRoot />', function () {
       renderWithProjectListContext(<ProjectListRoot />, {
         projects: [],
       })
-      await fetchMock.flush(true)
+      await fetchMock.callHistory.flush(true)
     })
 
     it('the welcome page is displayed', async function () {
-      screen.getByRole('heading', { name: 'Welcome to Overleaf' })
+      await screen.findByRole('heading', { name: 'Welcome to Overleaf' })
     })
 
     it('the email confirmation alert is not displayed', async function () {
@@ -110,7 +110,7 @@ describe('<ProjectListRoot />', function () {
         projects: fullList,
       })
       this.unmount = unmount
-      await fetchMock.flush(true)
+      await fetchMock.callHistory.flush(true)
       await screen.findByRole('table')
     })
 
@@ -172,13 +172,17 @@ describe('<ProjectListRoot />', function () {
           await waitFor(
             () =>
               expect(
-                archiveProjectMock.called(`/project/${project1Id}/archive`)
+                archiveProjectMock.callHistory.called(
+                  `/project/${project1Id}/archive`
+                )
               ).to.be.true
           )
           await waitFor(
             () =>
               expect(
-                archiveProjectMock.called(`/project/${project2Id}/archive`)
+                archiveProjectMock.callHistory.called(
+                  `/project/${project2Id}/archive`
+                )
               ).to.be.true
           )
         })
@@ -203,13 +207,19 @@ describe('<ProjectListRoot />', function () {
 
           await waitFor(
             () =>
-              expect(trashProjectMock.called(`/project/${project1Id}/trash`)).to
-                .be.true
+              expect(
+                trashProjectMock.callHistory.called(
+                  `/project/${project1Id}/trash`
+                )
+              ).to.be.true
           )
           await waitFor(
             () =>
-              expect(trashProjectMock.called(`/project/${project2Id}/trash`)).to
-                .be.true
+              expect(
+                trashProjectMock.callHistory.called(
+                  `/project/${project2Id}/trash`
+                )
+              ).to.be.true
           )
         })
 
@@ -281,8 +291,8 @@ describe('<ProjectListRoot />', function () {
           })
           fireEvent.click(unarchiveButton)
 
-          await fetchMock.flush(true)
-          expect(fetchMock.done()).to.be.true
+          await fetchMock.callHistory.flush(true)
+          expect(fetchMock.callHistory.done()).to.be.true
 
           await screen.findByText('No projects')
         })
@@ -296,8 +306,8 @@ describe('<ProjectListRoot />', function () {
             archivedProjects.length - 1
           )
 
-          await fetchMock.flush(true)
-          expect(fetchMock.done()).to.be.true
+          await fetchMock.callHistory.flush(true)
+          expect(fetchMock.callHistory.done()).to.be.true
 
           expect(screen.queryByText('No projects')).to.be.null
         })
@@ -348,8 +358,8 @@ describe('<ProjectListRoot />', function () {
             within(actionsToolbar).getByText<HTMLButtonElement>('Restore')
           fireEvent.click(untrashButton)
 
-          await fetchMock.flush(true)
-          expect(fetchMock.done()).to.be.true
+          await fetchMock.callHistory.flush(true)
+          expect(fetchMock.callHistory.done()).to.be.true
 
           await screen.findByText('No projects')
         })
@@ -361,8 +371,8 @@ describe('<ProjectListRoot />', function () {
           const allCheckboxesChecked = allCheckboxes.filter(c => c.checked)
           expect(allCheckboxesChecked.length).to.equal(trashedList.length - 1)
 
-          await fetchMock.flush(true)
-          expect(fetchMock.done()).to.be.true
+          await fetchMock.callHistory.flush(true)
+          expect(fetchMock.callHistory.done()).to.be.true
 
           expect(screen.queryByText('No projects')).to.be.null
         })
@@ -386,26 +396,28 @@ describe('<ProjectListRoot />', function () {
           fireEvent.click(confirmButton)
           expect(confirmButton.disabled).to.be.true
 
-          await fetchMock.flush(true)
-          expect(fetchMock.done()).to.be.true
+          await fetchMock.callHistory.flush(true)
+          expect(fetchMock.callHistory.done()).to.be.true
 
-          const calls = fetchMock.calls().map(([url]) => url)
+          const calls = fetchMock.callHistory.calls().map(({ url }) => url)
 
           trashedList.forEach(project => {
-            expect(calls).to.contain(`/project/${project.id}/archive`)
+            expect(calls).to.contain(
+              `https://www.test-overleaf.com/project/${project.id}/archive`
+            )
           })
         })
 
         it('removes only selected projects from view when leaving', async function () {
           // rerender content with different projects
           this.unmount()
-          fetchMock.restore()
+          fetchMock.removeRoutes().clearHistory()
 
           renderWithProjectListContext(<ProjectListRoot />, {
             projects: leavableList,
           })
 
-          await fetchMock.flush(true)
+          await fetchMock.callHistory.flush(true)
           await screen.findByRole('table')
 
           expect(leavableList.length).to.be.greaterThan(0)
@@ -446,25 +458,27 @@ describe('<ProjectListRoot />', function () {
           fireEvent.click(confirmButton)
           expect(confirmButton.disabled).to.be.true
 
-          await fetchMock.flush(true)
-          expect(fetchMock.done()).to.be.true
+          await fetchMock.callHistory.flush(true)
+          expect(fetchMock.callHistory.done()).to.be.true
 
-          const calls = fetchMock.calls().map(([url]) => url)
+          const calls = fetchMock.callHistory.calls().map(({ url }) => url)
           leavableList.forEach(project => {
-            expect(calls).to.contain(`/project/${project.id}/leave`)
+            expect(calls).to.contain(
+              `https://www.test-overleaf.com/project/${project.id}/leave`
+            )
           })
         })
 
         it('removes only selected projects from view when deleting', async function () {
           // rerender content with different projects
           this.unmount()
-          fetchMock.restore()
+          fetchMock.removeRoutes().clearHistory()
 
           renderWithProjectListContext(<ProjectListRoot />, {
             projects: deletableList,
           })
 
-          await fetchMock.flush(true)
+          await fetchMock.callHistory.flush(true)
           await screen.findByRole('table')
 
           expect(deletableList.length).to.be.greaterThan(0)
@@ -505,19 +519,21 @@ describe('<ProjectListRoot />', function () {
           fireEvent.click(confirmButton)
           expect(confirmButton.disabled).to.be.true
 
-          await fetchMock.flush(true)
-          expect(fetchMock.done()).to.be.true
+          await fetchMock.callHistory.flush(true)
+          expect(fetchMock.callHistory.done()).to.be.true
 
-          const calls = fetchMock.calls().map(([url]) => url)
+          const calls = fetchMock.callHistory.calls().map(({ url }) => url)
           deletableList.forEach(project => {
-            expect(calls).to.contain(`/project/${project.id}`)
+            expect(calls).to.contain(
+              `https://www.test-overleaf.com/project/${project.id}`
+            )
           })
         })
 
         it('removes only selected projects from view when deleting and leaving', async function () {
           // rerender content with different projects
           this.unmount()
-          fetchMock.restore()
+          fetchMock.removeRoutes().clearHistory()
 
           const deletableAndLeavableList = [...deletableList, ...leavableList]
 
@@ -525,7 +541,7 @@ describe('<ProjectListRoot />', function () {
             projects: deletableAndLeavableList,
           })
 
-          await fetchMock.flush(true)
+          await fetchMock.callHistory.flush(true)
           await screen.findByRole('table')
 
           expect(deletableList.length).to.be.greaterThan(0)
@@ -573,14 +589,14 @@ describe('<ProjectListRoot />', function () {
           fireEvent.click(confirmButton)
           expect(confirmButton.disabled).to.be.true
 
-          await fetchMock.flush(true)
-          expect(fetchMock.done()).to.be.true
+          await fetchMock.callHistory.flush(true)
+          expect(fetchMock.callHistory.done()).to.be.true
 
-          const calls = fetchMock.calls().map(([url]) => url)
+          const calls = fetchMock.callHistory.calls().map(({ url }) => url)
           deletableAndLeavableList.forEach(project => {
             expect(calls).to.contain.oneOf([
-              `/project/${project.id}`,
-              `/project/${project.id}/leave`,
+              `https://www.test-overleaf.com/project/${project.id}`,
+              `https://www.test-overleaf.com/project/${project.id}/leave`,
             ])
           })
         })
@@ -589,7 +605,7 @@ describe('<ProjectListRoot />', function () {
       describe('tags', function () {
         it('does not show archived or trashed project', async function () {
           this.unmount()
-          fetchMock.restore()
+          fetchMock.removeRoutes().clearHistory()
           window.metaAttributesCache.set('ol-tags', [
             {
               _id: this.tagId,
@@ -642,7 +658,7 @@ describe('<ProjectListRoot />', function () {
             )
             await waitFor(() => {
               expect(
-                trashProjectMock.called(
+                trashProjectMock.callHistory.called(
                   `/project/${projectsData[index].id}/trash`
                 )
               ).to.be.true
@@ -702,11 +718,13 @@ describe('<ProjectListRoot />', function () {
           })
           fireEvent.click(createButton)
 
-          await fetchMock.flush(true)
+          await fetchMock.callHistory.flush(true)
 
-          expect(fetchMock.called('/tag', { name: this.newTagName })).to.be.true
           expect(
-            fetchMock.called(`/tag/${this.newTagId}/projects`, {
+            fetchMock.callHistory.called('/tag', { name: this.newTagName })
+          ).to.be.true
+          expect(
+            fetchMock.callHistory.called(`/tag/${this.newTagId}/projects`, {
               body: {
                 projectIds: [projectsData[0].id, projectsData[1].id],
               },
@@ -734,10 +752,10 @@ describe('<ProjectListRoot />', function () {
           )
           fireEvent.click(tagButton)
 
-          await fetchMock.flush(true)
+          await fetchMock.callHistory.flush(true)
 
           expect(
-            deleteProjectsFromTagMock.called(
+            deleteProjectsFromTagMock.callHistory.called(
               `/tag/${this.tagId}/projects/remove`,
               {
                 body: {
@@ -770,14 +788,17 @@ describe('<ProjectListRoot />', function () {
           )
           fireEvent.click(tagButton)
 
-          await fetchMock.flush(true)
+          await fetchMock.callHistory.flush(true)
 
           expect(
-            addProjectsToTagMock.called(`/tag/${this.tagId}/projects`, {
-              body: {
-                projectIds: [projectsData[2].id],
-              },
-            })
+            addProjectsToTagMock.callHistory.called(
+              `/tag/${this.tagId}/projects`,
+              {
+                body: {
+                  projectIds: [projectsData[2].id],
+                },
+              }
+            )
           ).to.be.true
           screen.getByRole('button', { name: `${this.tagName} (3)` })
         })
@@ -919,10 +940,12 @@ describe('<ProjectListRoot />', function () {
             expect(confirmButton.disabled).to.be.false
             fireEvent.click(confirmButton)
 
-            await fetchMock.flush(true)
+            await fetchMock.callHistory.flush(true)
 
             expect(
-              renameProjectMock.called(`/project/${projectsData[0].id}/rename`)
+              renameProjectMock.callHistory.called(
+                `/project/${projectsData[0].id}/rename`
+              )
             ).to.be.true
 
             const table = await screen.findByRole('table')
@@ -982,10 +1005,12 @@ describe('<ProjectListRoot />', function () {
             ) as HTMLElement
             fireEvent.click(copyConfirmButton)
 
-            await fetchMock.flush(true)
+            await fetchMock.callHistory.flush(true)
 
             expect(
-              cloneProjectMock.called(`/project/${projectsData[1].id}/clone`)
+              cloneProjectMock.callHistory.called(
+                `/project/${projectsData[1].id}/clone`
+              )
             ).to.be.true
 
             expect(sendMBSpy).to.have.been.calledTwice
@@ -1149,8 +1174,8 @@ describe('<ProjectListRoot />', function () {
         ) as HTMLElement
         fireEvent.click(copyConfirmButton)
 
-        await fetchMock.flush(true)
-        expect(fetchMock.done()).to.be.true
+        await fetchMock.callHistory.flush(true)
+        expect(fetchMock.callHistory.done()).to.be.true
 
         expect(sendMBSpy).to.have.been.calledTwice
         expect(sendMBSpy).to.have.been.calledWith('loads_v2_dash')

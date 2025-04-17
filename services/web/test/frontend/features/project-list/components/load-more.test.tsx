@@ -11,7 +11,7 @@ import { renderWithProjectListContext } from '../helpers/render-with-context'
 
 describe('<LoadMore />', function () {
   afterEach(function () {
-    fetchMock.reset()
+    fetchMock.removeRoutes().clearHistory()
   })
 
   it('renders on a project list longer than 40', async function () {

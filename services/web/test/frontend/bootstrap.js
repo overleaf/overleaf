@@ -98,3 +98,9 @@ globalThis.DOMParser = window.DOMParser
 
 // Polyfill for IndexedDB
 require('fake-indexeddb/auto')
+
+const fetchMock = require('fetch-mock').default
+
+fetchMock.spyGlobal()
+fetchMock.config.fetch = global.fetch
+fetchMock.config.Response = fetch.Response

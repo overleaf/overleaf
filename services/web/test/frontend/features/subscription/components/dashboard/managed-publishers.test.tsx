@@ -28,7 +28,7 @@ describe('<ManagedPublishers />', function () {
   })
 
   afterEach(function () {
-    fetchMock.reset()
+    fetchMock.removeRoutes().clearHistory()
   })
 
   it('renders all managed publishers', function () {

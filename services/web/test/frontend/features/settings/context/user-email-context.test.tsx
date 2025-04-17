@@ -1,6 +1,8 @@
 import { expect } from 'chai'
 import { cloneDeep } from 'lodash'
 import { renderHook } from '@testing-library/react-hooks'
+import { waitFor } from '@testing-library/react'
+
 import {
   EmailContextType,
   UserEmailsProvider,
@@ -26,7 +28,7 @@ const renderUserEmailsContext = () =>
 
 describe('UserEmailContext', function () {
   beforeEach(function () {
-    fetchMock.reset()
+    fetchMock.removeRoutes().clearHistory()
   })
 
   describe('context bootstrap', function () {
@@ -49,8 +51,8 @@ describe('UserEmailContext', function () {
     it('should load all user emails and update the initialisation state to "success"', async function () {
       fetchMock.get(/\/user\/emails/, fakeUsersData)
       const { result } = renderUserEmailsContext()
-      await fetchMock.flush(true)
-      expect(fetchMock.calls()).to.have.lengthOf(1)
+      await fetchMock.callHistory.flush(true)
+      expect(fetchMock.callHistory.calls()).to.have.lengthOf(1)
       expect(result.current.state.data.byId).to.deep.equal({
         'bar@overleaf.com': { ...untrustedUserData, ...confirmedUserData },
         'baz@overleaf.com': unconfirmedUserData,
@@ -66,10 +68,12 @@ describe('UserEmailContext', function () {
     it('when loading user email fails, it should update the initialisation state to "failed"', async function () {
       fetchMock.get(/\/user\/emails/, 500)
       const { result } = renderUserEmailsContext()
-      await fetchMock.flush()
+      await fetchMock.callHistory.flush()
 
-      expect(result.current.isInitializing).to.equal(false)
-      expect(result.current.isInitializingError).to.equal(true)
+      await waitFor(() => {
+        expect(result.current.isInitializing).to.equal(false)
+        expect(result.current.isInitializingError).to.equal(true)
+      })
     })
 
     describe('state.isLoading', function () {
@@ -94,12 +98,12 @@ describe('UserEmailContext', function () {
       fetchMock.get(/\/user\/emails/, fakeUsersData)
       const value = renderUserEmailsContext()
       result = value.result
-      await fetchMock.flush(true)
+      await fetchMock.callHistory.flush(true)
     })
 
     describe('getEmails()', function () {
       beforeEach(async function () {
-        fetchMock.reset()
+        fetchMock.removeRoutes().clearHistory()
       })
 
       it('should set `isLoading === true`', function () {
@@ -120,7 +124,7 @@ describe('UserEmailContext', function () {
         }
         fetchMock.get(/\/user\/emails/, [emailData])
         result.current.getEmails()
-        await fetchMock.flush(true)
+        await fetchMock.callHistory.flush(true)
         expect(result.current.state.data.byId).to.deep.equal({
           'new@email.com': emailData,
         })
@@ -133,7 +137,7 @@ describe('UserEmailContext', function () {
           { ...professionalUserData, samlProviderId: 'saml_provider_2' },
         ])
         const { result } = renderUserEmailsContext()
-        await fetchMock.flush(true)
+        await fetchMock.callHistory.flush(true)
         expect(result.current.state.data.linkedInstitutionIds).to.deep.equal([
           'saml_provider_1',
           'saml_provider_2',
@@ -257,11 +261,11 @@ describe('UserEmailContext', function () {
         const affiliatedEmail2 = cloneDeep(professionalUserData)
         affiliatedEmail2.emailHasInstitutionLicence = true
 
-        fetchMock.reset()
+        fetchMock.removeRoutes().clearHistory()
         fetchMock.get(/\/user\/emails/, [affiliatedEmail1, affiliatedEmail2])
 
         result.current.getEmails()
-        await fetchMock.flush(true)
+        await fetchMock.callHistory.flush(true)
 
         // `resetLeaversSurveyExpiration` always happens after deletion
         result.current.deleteEmail(affiliatedEmail1.email)
@@ -281,11 +285,11 @@ describe('UserEmailContext', function () {
         const affiliatedEmail2 = cloneDeep(professionalUserData)
         affiliatedEmail2.emailHasInstitutionLicence = true
 
-        fetchMock.reset()
+        fetchMock.removeRoutes().clearHistory()
         fetchMock.get(/\/user\/emails/, [affiliatedEmail1, affiliatedEmail2])
 
         result.current.getEmails()
-        await fetchMock.flush(true)
+        await fetchMock.callHistory.flush(true)
 
         // `resetLeaversSurveyExpiration` always happens after deletion
         result.current.deleteEmail(affiliatedEmail1.email)
@@ -303,11 +307,11 @@ describe('UserEmailContext', function () {
         affiliatedEmail1.email = 'institution-test@example.com'
         affiliatedEmail1.affiliation.pastReconfirmDate = true
 
-        fetchMock.reset()
+        fetchMock.removeRoutes().clearHistory()
         fetchMock.get(/\/user\/emails/, [confirmedUserData, affiliatedEmail1])
 
         result.current.getEmails()
-        await fetchMock.flush(true)
+        await fetchMock.callHistory.flush(true)
 
         // `resetLeaversSurveyExpiration` always happens after deletion
         result.current.deleteEmail(affiliatedEmail1.email)
@@ -323,11 +327,11 @@ describe('UserEmailContext', function () {
         emailWithInstitutionLicense.email = 'institution-licensed@example.com'
         emailWithInstitutionLicense.emailHasInstitutionLicence = false
 
-        fetchMock.reset()
+        fetchMock.removeRoutes().clearHistory()
         fetchMock.get(/\/user\/emails/, [emailWithInstitutionLicense])
 
         result.current.getEmails()
-        await fetchMock.flush(true)
+        await fetchMock.callHistory.flush(true)
 
         // `resetLeaversSurveyExpiration` always happens after deletion
         result.current.deleteEmail(emailWithInstitutionLicense.email)
@@ -342,11 +346,11 @@ describe('UserEmailContext', function () {
         emailWithInstitutionLicense.email = 'institution-licensed@example.com'
         emailWithInstitutionLicense.affiliation.pastReconfirmDate = false
 
-        fetchMock.reset()
+        fetchMock.removeRoutes().clearHistory()
         fetchMock.get(/\/user\/emails/, [emailWithInstitutionLicense])
 
         result.current.getEmails()
-        await fetchMock.flush(true)
+        await fetchMock.callHistory.flush(true)
 
         // `resetLeaversSurveyExpiration` always happens after deletion
         result.current.deleteEmail(emailWithInstitutionLicense.email)

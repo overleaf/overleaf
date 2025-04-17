@@ -51,7 +51,7 @@ describe('<GroupSubscriptionMemberships />', function () {
   })
 
   afterEach(function () {
-    fetchMock.reset()
+    fetchMock.removeRoutes().clearHistory()
   })
 
   it('renders all group subscriptions not managed', function () {
@@ -129,7 +129,7 @@ describe('<GroupSubscriptionMemberships />', function () {
 
       fireEvent.click(this.leaveNowButton)
 
-      expect(leaveGroupApiMock.called()).to.be.true
+      expect(leaveGroupApiMock.callHistory.called()).to.be.true
       await waitFor(() => {
         expect(reloadStub).to.have.been.called
       })

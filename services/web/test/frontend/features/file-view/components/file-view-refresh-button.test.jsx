@@ -23,7 +23,7 @@ describe('<FileViewRefreshButton />', function () {
   }
 
   beforeEach(function () {
-    fetchMock.reset()
+    fetchMock.removeRoutes().clearHistory()
   })
 
   // eslint-disable-next-line mocha/no-skipped-tests

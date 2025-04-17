@@ -174,7 +174,6 @@ export function reconfirmationSetupMocks(fetchMock) {
   defaultSetupMocks(fetchMock)
   fetchMock.get(/\/user\/emails/, fakeReconfirmationUsersData, {
     delay: MOCK_DELAY,
-    overwriteRoutes: true,
   })
 }
 
@@ -186,7 +185,6 @@ export function emailLimitSetupMocks(fetchMock) {
   defaultSetupMocks(fetchMock)
   fetchMock.get(/\/user\/emails/, userData, {
     delay: MOCK_DELAY,
-    overwriteRoutes: true,
   })
 }
 

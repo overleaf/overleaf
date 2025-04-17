@@ -57,8 +57,11 @@ describe('<UnarchiveProjectButton />', function () {
 
     await waitFor(
       () =>
-        expect(unarchiveProjectMock.called(`/project/${project.id}/archive`)).to
-          .be.true
+        expect(
+          unarchiveProjectMock.callHistory.called(
+            `/project/${project.id}/archive`
+          )
+        ).to.be.true
     )
   })
 })

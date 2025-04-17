@@ -6,7 +6,7 @@ import { renderWithEditorContext } from '../../../helpers/render-with-context'
 
 describe('<ActionsWordCount />', function () {
   afterEach(function () {
-    fetchMock.reset()
+    fetchMock.removeRoutes().clearHistory()
   })
 
   it('shows correct modal when clicked after document is compiled', async function () {
@@ -51,11 +51,15 @@ describe('<ActionsWordCount />', function () {
     // when loading, we don't render the "Word Count" as button yet
     expect(screen.queryByRole('button', { name: 'Word Count' })).to.equal(null)
 
-    await waitFor(() => expect(fetchMock.called(compileEndpoint)).to.be.true)
+    await waitFor(
+      () => expect(fetchMock.callHistory.called(compileEndpoint)).to.be.true
+    )
 
     const button = await screen.findByRole('button', { name: 'Word Count' })
     button.click()
 
-    await waitFor(() => expect(fetchMock.called(wordcountEndpoint)).to.be.true)
+    await waitFor(
+      () => expect(fetchMock.callHistory.called(wordcountEndpoint)).to.be.true
+    )
   })
 })

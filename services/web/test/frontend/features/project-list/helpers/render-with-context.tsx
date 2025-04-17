@@ -58,5 +58,5 @@ export function renderWithProjectListContext(
 }
 
 export function resetProjectListContextFetch() {
-  fetchMock.reset()
+  fetchMock.removeRoutes().clearHistory()
 }

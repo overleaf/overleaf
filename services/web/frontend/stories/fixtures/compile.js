@@ -58,7 +58,7 @@ export const mockCompile = (fetchMock, delay = 1000) =>
         outputFiles: cloneDeep(outputFiles),
       },
     },
-    { delay, overwriteRoutes: true }
+    { delay }
   )
 
 export const mockCompileError = (fetchMock, status = 'success', delay = 1000) =>
@@ -91,27 +91,24 @@ export const mockCompileValidationIssues = (
         },
       }
     },
-    { delay, overwriteRoutes: true }
+    { delay }
   )
 
 export const mockClearCache = fetchMock =>
   fetchMock.delete('express:/project/:projectId/output', 204, {
     delay: 1000,
-    overwriteRoutes: true,
   })
 
 export const mockBuildFile = fetchMock =>
-  fetchMock.get(
-    'express:/build/:file',
-    (url, options, request) => {
-      const { pathname } = new URL(url, 'https://example.com')
+  fetchMock.get('express:/build/:file', (url, options, request) => {
+    const { pathname } = new URL(url, 'https://example.com')
 
-      switch (pathname) {
-        case '/build/output.blg':
-          return 'This is BibTeX, Version 4.0' // FIXME
+    switch (pathname) {
+      case '/build/output.blg':
+        return 'This is BibTeX, Version 4.0' // FIXME
 
-        case '/build/output.log':
-          return `
+      case '/build/output.log':
+        return `
 The LaTeX compiler output
   * With a lot of details
 
@@ -134,31 +131,29 @@ LaTeX Font Info:    External font \`cmex10' loaded for size
 
 `
 
-        case '/build/output.pdf':
-          return new Promise(resolve => {
-            const xhr = new XMLHttpRequest()
-            xhr.addEventListener('load', () => {
-              resolve({
-                status: 200,
-                headers: {
-                  'Content-Length': xhr.getResponseHeader('Content-Length'),
-                  'Content-Type': xhr.getResponseHeader('Content-Type'),
-                },
-                body: xhr.response,
-              })
+      case '/build/output.pdf':
+        return new Promise(resolve => {
+          const xhr = new XMLHttpRequest()
+          xhr.addEventListener('load', () => {
+            resolve({
+              status: 200,
+              headers: {
+                'Content-Length': xhr.getResponseHeader('Content-Length'),
+                'Content-Type': xhr.getResponseHeader('Content-Type'),
+              },
+              body: xhr.response,
             })
-            xhr.open('GET', examplePdf)
-            xhr.responseType = 'arraybuffer'
-            xhr.send()
           })
+          xhr.open('GET', examplePdf)
+          xhr.responseType = 'arraybuffer'
+          xhr.send()
+        })
 
-        default:
-          console.log(pathname)
-          return 404
-      }
-    },
-    { sendAsJson: false, overwriteRoutes: true }
-  )
+      default:
+        console.log(pathname)
+        return 404
+    }
+  })
 
 const mockHighlights = [
   {
@@ -195,29 +190,25 @@ export const mockEventTracking = fetchMock =>
   fetchMock.get('express:/event/:event', 204)
 
 export const mockValidPdf = fetchMock =>
-  fetchMock.get(
-    'express:/build/output.pdf',
-    (url, options, request) => {
-      return new Promise(resolve => {
-        const xhr = new XMLHttpRequest()
-        xhr.addEventListener('load', () => {
-          resolve({
-            status: 200,
-            headers: {
-              'Content-Length': xhr.getResponseHeader('Content-Length'),
-              'Content-Type': xhr.getResponseHeader('Content-Type'),
-              'Accept-Ranges': 'bytes',
-            },
-            body: xhr.response,
-          })
+  fetchMock.get('express:/build/output.pdf', (url, options, request) => {
+    return new Promise(resolve => {
+      const xhr = new XMLHttpRequest()
+      xhr.addEventListener('load', () => {
+        resolve({
+          status: 200,
+          headers: {
+            'Content-Length': xhr.getResponseHeader('Content-Length'),
+            'Content-Type': xhr.getResponseHeader('Content-Type'),
+            'Accept-Ranges': 'bytes',
+          },
+          body: xhr.response,
         })
-        xhr.open('GET', examplePdf)
-        xhr.responseType = 'arraybuffer'
-        xhr.send()
       })
-    },
-    { sendAsJson: false, overwriteRoutes: true }
-  )
+      xhr.open('GET', examplePdf)
+      xhr.responseType = 'arraybuffer'
+      xhr.send()
+    })
+  })
 
 export const mockSynctex = fetchMock =>
   fetchMock

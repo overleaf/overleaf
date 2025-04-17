@@ -79,12 +79,14 @@ describe('user role and institution', function () {
     Object.assign(getMeta('ol-ExposedSettings'), {
       hasAffiliationsFeature: true,
     })
-    fetchMock.reset()
-    fetchMock.get('/user/emails?ensureAffiliation=true', [])
+    fetchMock.removeRoutes().clearHistory()
+    fetchMock.get('/user/emails?ensureAffiliation=true', [], {
+      name: 'get user emails',
+    })
   })
 
   afterEach(function () {
-    fetchMock.reset()
+    fetchMock.removeRoutes().clearHistory()
   })
 
   it('renders affiliation name with add role/department button', function () {
@@ -122,13 +124,11 @@ describe('user role and institution', function () {
 
   it('fetches institution data and replaces departments dropdown on add/change', async function () {
     const userEmailData = userData1
-    fetchMock.get('/user/emails?ensureAffiliation=true', [userEmailData], {
-      overwriteRoutes: true,
-    })
+    fetchMock.modifyRoute('get user emails', { response: [userEmailData] })
     render(<EmailsSection />)
 
-    await fetchMock.flush(true)
-    fetchMock.reset()
+    await fetchMock.callHistory.flush(true)
+    fetchMock.removeRoutes().clearHistory()
 
     const fakeDepartment = 'Fake department'
     const institution = userEmailData.affiliation.institution
@@ -143,8 +143,8 @@ describe('user role and institution', function () {
       screen.getByRole('button', { name: /add role and department/i })
     )
 
-    await fetchMock.flush(true)
-    fetchMock.reset()
+    await fetchMock.callHistory.flush(true)
+    fetchMock.removeRoutes().clearHistory()
 
     fireEvent.click(screen.getByRole('textbox', { name: /department/i }))
 
@@ -153,9 +153,7 @@ describe('user role and institution', function () {
 
   it('adds new role and department', async function () {
     fetchMock
-      .get('/user/emails?ensureAffiliation=true', [userData1], {
-        overwriteRoutes: true,
-      })
+      .modifyRoute('get user emails', { response: [userData1] })
       .get(/\/institutions\/list/, { departments: [] })
       .post('/user/emails/endorse', 200)
     render(<EmailsSection />)

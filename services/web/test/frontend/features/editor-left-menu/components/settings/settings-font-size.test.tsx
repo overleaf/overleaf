@@ -9,7 +9,7 @@ describe('<SettingsFontSize />', function () {
   const sizes = ['10', '11', '12', '13', '14', '16', '18', '20', '22', '24']
 
   afterEach(function () {
-    fetchMock.reset()
+    fetchMock.removeRoutes().clearHistory()
   })
 
   it('shows correct menu', async function () {

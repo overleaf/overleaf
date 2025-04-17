@@ -39,7 +39,7 @@ describe('<FileViewHeader/>', function () {
   }
 
   beforeEach(function () {
-    fetchMock.reset()
+    fetchMock.removeRoutes().clearHistory()
   })
 
   describe('header text', function () {

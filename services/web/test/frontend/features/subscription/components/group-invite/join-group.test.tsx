@@ -10,7 +10,7 @@ describe('join group', function () {
     window.metaAttributesCache.set('ol-inviteToken', inviteToken)
   })
   afterEach(function () {
-    fetchMock.reset()
+    fetchMock.removeRoutes().clearHistory()
   })
 
   it('shows option to join subscription', async function () {

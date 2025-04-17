@@ -32,7 +32,7 @@ describe('<FileView/>', function () {
   }
 
   beforeEach(function () {
-    fetchMock.reset()
+    fetchMock.removeRoutes().clearHistory()
   })
 
   describe('for a text file', function () {

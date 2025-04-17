@@ -42,7 +42,7 @@ describe('<ReconfirmationInfo/>', function () {
   })
 
   afterEach(function () {
-    fetchMock.reset()
+    fetchMock.removeRoutes().clearHistory()
     this.locationStub.restore()
   })
 
@@ -145,13 +145,13 @@ describe('<ReconfirmationInfo/>', function () {
         await waitFor(() => {
           expect(confirmButton.disabled).to.be.true
         })
-        expect(fetchMock.called()).to.be.true
+        expect(fetchMock.callHistory.called()).to.be.true
 
         // the confirmation text should now be displayed
         await screen.findByText(/Please check your email inbox to confirm/)
 
         // try the resend button
-        fetchMock.resetHistory()
+        fetchMock.clearHistory()
         const resendButton = await screen.findByRole('button', {
           name: 'Resend confirmation email',
         })
@@ -160,7 +160,7 @@ describe('<ReconfirmationInfo/>', function () {
 
         // commented out as it's already gone by this point
         // await screen.findByText(/Sending/)
-        expect(fetchMock.called()).to.be.true
+        expect(fetchMock.callHistory.called()).to.be.true
         await waitForElementToBeRemoved(() => screen.getByText('Sending…'))
         await screen.findByRole('button', {
           name: 'Resend confirmation email',

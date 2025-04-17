@@ -20,7 +20,7 @@ describe('<ModalContentNewProjectForm />', function () {
 
   afterEach(function () {
     this.locationStub.restore()
-    fetchMock.reset()
+    fetchMock.removeRoutes().clearHistory()
   })
 
   it('submits form', async function () {
@@ -49,7 +49,7 @@ describe('<ModalContentNewProjectForm />', function () {
 
     fireEvent.click(createButton)
 
-    expect(newProjectMock.called()).to.be.true
+    expect(newProjectMock.callHistory.called()).to.be.true
 
     await waitFor(() => {
       sinon.assert.calledOnce(assignStub)
@@ -76,7 +76,7 @@ describe('<ModalContentNewProjectForm />', function () {
     })
     fireEvent.click(createButton)
 
-    expect(newProjectMock.called()).to.be.true
+    expect(newProjectMock.callHistory.called()).to.be.true
 
     await waitFor(() => {
       screen.getByText(errorMessage)
@@ -102,7 +102,7 @@ describe('<ModalContentNewProjectForm />', function () {
     })
     fireEvent.click(createButton)
 
-    expect(newProjectMock.called()).to.be.true
+    expect(newProjectMock.callHistory.called()).to.be.true
 
     await waitFor(() => {
       screen.getByText(errorMessage)
@@ -141,7 +141,7 @@ describe('<ModalContentNewProjectForm />', function () {
     })
     fireEvent.click(createButton)
 
-    expect(newProjectMock.called()).to.be.true
+    expect(newProjectMock.callHistory.called()).to.be.true
 
     await waitFor(() => {
       screen.getByText(errorMessage)

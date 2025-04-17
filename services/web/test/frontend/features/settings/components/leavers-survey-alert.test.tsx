@@ -21,7 +21,7 @@ describe('<LeaversSurveyAlert/>', function () {
   })
 
   afterEach(function () {
-    fetchMock.reset()
+    fetchMock.removeRoutes().clearHistory()
   })
 
   it('should render before the expiration date', function () {

@@ -7,7 +7,7 @@ import { EditorProviders } from '../../../../helpers/editor-providers'
 
 describe('<SettingsAutoCloseBrackets />', function () {
   afterEach(function () {
-    fetchMock.reset()
+    fetchMock.removeRoutes().clearHistory()
   })
 
   it('shows correct menu', async function () {

@@ -12,11 +12,11 @@ describe('Project list search form', function () {
 
   beforeEach(function () {
     sendMBSpy = sinon.spy(eventTracking, 'sendMB')
-    fetchMock.reset()
+    fetchMock.removeRoutes().clearHistory()
   })
 
   afterEach(function () {
-    fetchMock.reset()
+    fetchMock.removeRoutes().clearHistory()
     sendMBSpy.restore()
   })
 

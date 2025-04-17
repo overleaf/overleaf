@@ -66,8 +66,11 @@ describe('<CopyProjectButton />', function () {
 
     await waitFor(
       () =>
-        expect(copyProjectMock.called(`/project/${copyableProject.id}/clone`))
-          .to.be.true
+        expect(
+          copyProjectMock.callHistory.called(
+            `/project/${copyableProject.id}/clone`
+          )
+        ).to.be.true
     )
   })
 })

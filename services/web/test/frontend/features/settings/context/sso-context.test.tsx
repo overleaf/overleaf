@@ -35,7 +35,7 @@ describe('SSOContext', function () {
       google: 'google-id',
     })
     window.metaAttributesCache.set('ol-oauthProviders', mockOauthProviders)
-    fetchMock.reset()
+    fetchMock.removeRoutes().clearHistory()
   })
 
   it('should initialise subscriptions with their linked status', function () {
@@ -69,13 +69,13 @@ describe('SSOContext', function () {
     it('when the provider is not linked, should do nothing', function () {
       const { result } = renderSSOContext()
       result.current.unlink('orcid')
-      expect(fetchMock.called()).to.be.false
+      expect(fetchMock.callHistory.called()).to.be.false
     })
 
     it('supports unmounting the component while the request is inflight', async function () {
       const { result, unmount } = renderSSOContext()
       result.current.unlink('google')
-      expect(fetchMock.called()).to.be.true
+      expect(fetchMock.callHistory.called()).to.be.true
       unmount()
     })
   })

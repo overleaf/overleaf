@@ -63,8 +63,9 @@ describe('<RenameProjectButton />', function () {
 
     await waitFor(
       () =>
-        expect(renameProjectMock.called(`/project/${project.id}/rename`)).to.be
-          .true
+        expect(
+          renameProjectMock.callHistory.called(`/project/${project.id}/rename`)
+        ).to.be.true
     )
   })
 })

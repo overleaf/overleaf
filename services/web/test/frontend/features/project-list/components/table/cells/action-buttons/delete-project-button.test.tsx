@@ -69,7 +69,8 @@ describe('<DeleteProjectButton />', function () {
 
     await waitFor(
       () =>
-        expect(deleteProjectMock.called(`/project/${project.id}`)).to.be.true
+        expect(deleteProjectMock.callHistory.called(`/project/${project.id}`))
+          .to.be.true
     )
   })
 })

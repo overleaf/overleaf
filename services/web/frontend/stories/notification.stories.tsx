@@ -315,11 +315,7 @@ export const OverlayedWithCustomClass = (args: Args) => {
 
 export const SuccessFlow = (args: Args) => {
   console.log('.....render')
-  fetchMock.post(
-    'express:/test-success',
-    { status: 200 },
-    { delay: 250, overwriteRoutes: true }
-  )
+  fetchMock.post('express:/test-success', { status: 200 }, { delay: 250 })
 
   const { isLoading, isSuccess, runAsync } = useAsync()
   function handleClick() {

@@ -158,11 +158,9 @@ ImageFile.args = {
 
 export const TextFile = args => {
   useFetchMock(fetchMock =>
-    setupFetchMock(fetchMock).get(
-      'express:/project/:project_id/blob/:hash',
-      { body: bodies.text },
-      { overwriteRoutes: true }
-    )
+    setupFetchMock(fetchMock).get('express:/project/:project_id/blob/:hash', {
+      body: bodies.text,
+    })
   )
   return <FileView {...args} />
 }
@@ -180,11 +178,9 @@ TextFile.args = {
 
 export const UploadedFile = args => {
   useFetchMock(fetchMock =>
-    setupFetchMock(fetchMock).head(
-      'express:/project/:project_id/blob/:hash',
-      { status: 500 },
-      { overwriteRoutes: true }
-    )
+    setupFetchMock(fetchMock).head('express:/project/:project_id/blob/:hash', {
+      status: 500,
+    })
   )
   return <FileView {...args} />
 }

@@ -6,10 +6,10 @@ import RegisterForm from '../../../../frontend/js/components/register-form'
 
 describe('RegisterForm', function () {
   beforeEach(function () {
-    fetchMock.reset()
+    fetchMock.removeRoutes().clearHistory()
   })
   afterEach(function () {
-    fetchMock.reset()
+    fetchMock.removeRoutes().clearHistory()
   })
   it('should render the register form', async function () {
     const setRegistrationSuccessStub = sinon.stub()
@@ -57,6 +57,6 @@ describe('RegisterForm', function () {
     const registerButton = screen.getByRole('button', { name: /register/i })
     fireEvent.change(registerInput, { target: { value: email } })
     fireEvent.click(registerButton)
-    expect(registerMock.called()).to.be.true
+    expect(registerMock.callHistory.called()).to.be.true
   })
 })

@@ -102,7 +102,7 @@ describe('<ShareProjectModal/>', function () {
 
   afterEach(function () {
     this.locationStub.restore()
-    fetchMock.restore()
+    fetchMock.removeRoutes().clearHistory()
     cleanUpContext()
   })
 
@@ -414,7 +414,7 @@ describe('<ShareProjectModal/>', function () {
 
     await waitFor(() => expect(closeButton.disabled).to.be.true)
 
-    expect(fetchMock.done()).to.be.true
+    expect(fetchMock.callHistory.done()).to.be.true
     expect(closeButton.disabled).to.be.false
   })
 
@@ -447,7 +447,7 @@ describe('<ShareProjectModal/>', function () {
     fireEvent.click(revokeButton)
     await waitFor(() => expect(closeButton.disabled).to.be.true)
 
-    expect(fetchMock.done()).to.be.true
+    expect(fetchMock.callHistory.done()).to.be.true
     expect(closeButton.disabled).to.be.false
   })
 
@@ -484,10 +484,10 @@ describe('<ShareProjectModal/>', function () {
 
     await waitFor(() => expect(closeButton.disabled).to.be.true)
 
-    const { body } = fetchMock.lastOptions()
+    const { body } = fetchMock.callHistory.calls().at(-1).options
     expect(JSON.parse(body)).to.deep.equal({ privilegeLevel: 'readAndWrite' })
 
-    expect(fetchMock.done()).to.be.true
+    expect(fetchMock.callHistory.done()).to.be.true
     expect(closeButton.disabled).to.be.false
   })
 
@@ -525,10 +525,12 @@ describe('<ShareProjectModal/>', function () {
     })
     fireEvent.click(removeButton)
 
-    const url = fetchMock.lastUrl()
-    expect(url).to.equal('/project/test-project/users/member-viewer')
+    const url = fetchMock.callHistory.calls().at(-1).url
+    expect(url).to.equal(
+      'https://www.test-overleaf.com/project/test-project/users/member-viewer'
+    )
 
-    expect(fetchMock.done()).to.be.true
+    expect(fetchMock.callHistory.done()).to.be.true
   })
 
   it('changes member privileges to owner with confirmation', async function () {
@@ -573,10 +575,10 @@ describe('<ShareProjectModal/>', function () {
     fireEvent.click(confirmButton)
     await waitFor(() => expect(confirmButton.disabled).to.be.true)
 
-    const { body } = fetchMock.lastOptions()
+    const { body } = fetchMock.callHistory.calls().at(-1).options
     expect(JSON.parse(body)).to.deep.equal({ user_id: 'member-viewer' })
 
-    expect(fetchMock.done()).to.be.true
+    expect(fetchMock.callHistory.done()).to.be.true
   })
 
   it('sends invites to input email addresses', async function () {
@@ -593,7 +595,7 @@ describe('<ShareProjectModal/>', function () {
 
     // loading contacts
     await waitFor(() => {
-      expect(fetchMock.called('express:/user/contacts')).to.be.true
+      expect(fetchMock.callHistory.called('express:/user/contacts')).to.be.true
     })
 
     // displaying a list of matching contacts
@@ -604,26 +606,29 @@ describe('<ShareProjectModal/>', function () {
 
     // sending invitations
 
-    fetchMock.post('express:/project/:projectId/invite', (url, req) => {
-      const data = JSON.parse(req.body)
+    fetchMock.post(
+      'express:/project/:projectId/invite',
+      ({ args: [url, req] }) => {
+        const data = JSON.parse(req.body)
 
-      if (data.email === 'a@b.c') {
+        if (data.email === 'a@b.c') {
+          return {
+            status: 400,
+            body: { errorReason: 'invalid_email' },
+          }
+        }
+
         return {
-          status: 400,
-          body: { errorReason: 'invalid_email' },
+          status: 200,
+          body: {
+            invite: {
+              ...data,
+              _id: data.email,
+            },
+          },
         }
       }
-
-      return {
-        status: 200,
-        body: {
-          invite: {
-            ...data,
-            _id: data.email,
-          },
-        },
-      }
-    })
+    )
 
     fireEvent.paste(inputElement, {
       clipboardData: {
@@ -643,22 +648,24 @@ describe('<ShareProjectModal/>', function () {
     let calls
     await waitFor(
       () => {
-        calls = fetchMock.calls('express:/project/:projectId/invite')
+        calls = fetchMock.callHistory.calls(
+          'express:/project/:projectId/invite'
+        )
         expect(calls).to.have.length(4)
       },
       { timeout: 5000 } // allow time for delay between each request
     )
 
-    expect(calls[0][1].body).to.equal(
+    expect(calls[0].args[1].body).to.equal(
       JSON.stringify({ email: 'test@example.com', privileges: 'readOnly' })
     )
-    expect(calls[1][1].body).to.equal(
+    expect(calls[1].args[1].body).to.equal(
       JSON.stringify({ email: 'foo@example.com', privileges: 'readOnly' })
     )
-    expect(calls[2][1].body).to.equal(
+    expect(calls[2].args[1].body).to.equal(
       JSON.stringify({ email: 'bar@example.com', privileges: 'readOnly' })
     )
-    expect(calls[3][1].body).to.equal(
+    expect(calls[3].args[1].body).to.equal(
       JSON.stringify({ email: 'a@b.c', privileges: 'readOnly' })
     )
 
@@ -752,7 +759,7 @@ describe('<ShareProjectModal/>', function () {
 
     // loading contacts
     await waitFor(() => {
-      expect(fetchMock.called('express:/user/contacts')).to.be.true
+      expect(fetchMock.callHistory.called('express:/user/contacts')).to.be.true
     })
 
     const [inputElement] = await screen.findAllByLabelText('Add people')
@@ -766,19 +773,15 @@ describe('<ShareProjectModal/>', function () {
       })
       fireEvent.blur(inputElement)
 
-      fetchMock.postOnce(
-        'express:/project/:projectId/invite',
-        {
-          status: 400,
-          body: { errorReason },
-        },
-        { overwriteRoutes: true }
-      )
+      fetchMock.postOnce('express:/project/:projectId/invite', {
+        status: 400,
+        body: { errorReason },
+      })
 
       expect(submitButton.disabled).to.be.false
       await userEvent.click(submitButton)
-      await fetchMock.flush(true)
-      expect(fetchMock.done()).to.be.true
+      await fetchMock.callHistory.flush(true)
+      expect(fetchMock.callHistory.done()).to.be.true
     }
 
     await respondWithError('cannot_invite_non_user')
@@ -820,7 +823,7 @@ describe('<ShareProjectModal/>', function () {
     fireEvent.click(enableButton)
     await waitFor(() => expect(enableButton.disabled).to.be.true)
 
-    const { body: tokenBody } = fetchMock.lastOptions()
+    const { body: tokenBody } = fetchMock.callHistory.calls().at(-1).options
     expect(JSON.parse(tokenBody)).to.deep.equal({
       publicAccessLevel: 'tokenBased',
     })
@@ -840,7 +843,7 @@ describe('<ShareProjectModal/>', function () {
     fireEvent.click(disableButton)
     await waitFor(() => expect(disableButton.disabled).to.be.true)
 
-    const { body: privateBody } = fetchMock.lastOptions()
+    const { body: privateBody } = fetchMock.callHistory.calls().at(-1).options
     expect(JSON.parse(privateBody)).to.deep.equal({
       publicAccessLevel: 'private',
     })
@@ -865,7 +868,7 @@ describe('<ShareProjectModal/>', function () {
 
     // Wait for contacts to load
     await waitFor(() => {
-      expect(fetchMock.called('express:/user/contacts')).to.be.true
+      expect(fetchMock.callHistory.called('express:/user/contacts')).to.be.true
     })
 
     // Enter a prefix that matches a contact
@@ -919,7 +922,7 @@ describe('<ShareProjectModal/>', function () {
 
     // Wait for contacts to load
     await waitFor(() => {
-      expect(fetchMock.called('express:/user/contacts')).to.be.true
+      expect(fetchMock.callHistory.called('express:/user/contacts')).to.be.true
     })
 
     // Enter a prefix that matches a contact
@@ -954,7 +957,7 @@ describe('<ShareProjectModal/>', function () {
 
     // Wait for contacts to load
     await waitFor(() => {
-      expect(fetchMock.called('express:/user/contacts')).to.be.true
+      expect(fetchMock.callHistory.called('express:/user/contacts')).to.be.true
     })
 
     // Enter a prefix that matches a contact
@@ -988,7 +991,7 @@ describe('<ShareProjectModal/>', function () {
 
     // Wait for contacts to load
     await waitFor(() => {
-      expect(fetchMock.called('express:/user/contacts')).to.be.true
+      expect(fetchMock.callHistory.called('express:/user/contacts')).to.be.true
     })
 
     // Enter a prefix that matches a contact

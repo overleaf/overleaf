@@ -19,7 +19,7 @@ describe('<AddEmailInput/>', function () {
 
   beforeEach(function () {
     clearDomainCache()
-    fetchMock.reset()
+    fetchMock.removeRoutes().clearHistory()
   })
 
   describe('on initial render', function () {
@@ -69,7 +69,7 @@ describe('<AddEmailInput/>', function () {
     })
 
     it('should not make any request for institution domains', function () {
-      expect(fetchMock.called()).to.be.false
+      expect(fetchMock.callHistory.called()).to.be.false
     })
 
     it('should submit on Enter if email looks valid', async function () {
@@ -118,10 +118,17 @@ describe('<AddEmailInput/>', function () {
     })
 
     describe('when there is a domain match', function () {
-      beforeEach(function () {
+      beforeEach(async function () {
         fetchMock.get('express:/institutions/domains', testInstitutionData)
         fireEvent.change(screen.getByTestId('affiliations-email'), {
           target: { value: 'user@d' },
+        })
+        // Wait for component to process the change and update the shadow input
+        await waitFor(() => {
+          const shadowInput = screen.getByTestId(
+            'affiliations-email-shadow'
+          ) as HTMLInputElement
+          expect(shadowInput.value).to.equal('user@domain.edu')
         })
       })
 
@@ -146,7 +153,7 @@ describe('<AddEmailInput/>', function () {
         fireEvent.change(screen.getByTestId('affiliations-email'), {
           target: { value: 'user@domain.edu' },
         })
-        await fetchMock.flush(true)
+        await fetchMock.callHistory.flush(true)
         expect(
           onChangeStub.calledWith(
             'user@domain.edu',
@@ -231,7 +238,7 @@ describe('<AddEmailInput/>', function () {
       })
 
       it('should cache the result and skip subsequent requests', async function () {
-        fetchMock.reset()
+        fetchMock.removeRoutes().clearHistory()
 
         // clear input
         fireEvent.change(screen.getByTestId('affiliations-email'), {
@@ -242,7 +249,7 @@ describe('<AddEmailInput/>', function () {
           target: { value: 'user@d' },
         })
 
-        expect(fetchMock.called()).to.be.false
+        expect(fetchMock.callHistory.called()).to.be.false
         expect(onChangeStub.calledWith('user@d')).to.equal(true)
         await waitFor(() => {
           const shadowInput = screen.getByTestId(
@@ -258,7 +265,7 @@ describe('<AddEmailInput/>', function () {
 
       afterEach(function () {
         clearDomainCache()
-        fetchMock.reset()
+        fetchMock.removeRoutes().clearHistory()
       })
 
       it('should not render the suggestion with blocked domain', async function () {
@@ -269,7 +276,7 @@ describe('<AddEmailInput/>', function () {
         fireEvent.change(screen.getByTestId('affiliations-email'), {
           target: { value: `user@${blockedDomain.split('.')[0]}` },
         })
-        await fetchMock.flush(true)
+        await fetchMock.callHistory.flush(true)
         expect(screen.queryByText(`user@${blockedDomain}`)).to.be.null
       })
 
@@ -286,7 +293,7 @@ describe('<AddEmailInput/>', function () {
             value: `user@subdomain.${blockedDomain.split('.')[0]}`,
           },
         })
-        await fetchMock.flush(true)
+        await fetchMock.callHistory.flush(true)
         expect(screen.queryByText(`user@subdomain.${blockedDomain}`)).to.be.null
       })
     })
@@ -307,7 +314,7 @@ describe('<AddEmailInput/>', function () {
 
         // make sure the next suggestions are delayed
         clearDomainCache()
-        fetchMock.reset()
+        fetchMock.removeRoutes().clearHistory()
         fetchMock.get('express:/institutions/domains', 200, { delay: 1000 })
       })
 
@@ -354,7 +361,7 @@ describe('<AddEmailInput/>', function () {
       })
 
       // subsequent requests fail
-      fetchMock.reset()
+      fetchMock.removeRoutes().clearHistory()
       fetchMock.get('express:/institutions/domains', 500)
     })
 
@@ -373,7 +380,7 @@ describe('<AddEmailInput/>', function () {
         expect(shadowInput.value).to.equal('')
       })
 
-      expect(fetchMock.called()).to.be.true // ensures `domainCache` hasn't been hit
+      expect(fetchMock.callHistory.called()).to.be.true // ensures `domainCache` hasn't been hit
     })
   })
 
@@ -384,7 +391,7 @@ describe('<AddEmailInput/>', function () {
       fireEvent.change(screen.getByTestId('affiliations-email'), {
         target: { value: 'user@other' },
       })
-      await fetchMock.flush(true)
+      await fetchMock.callHistory.flush(true)
       const shadowInput = screen.getByTestId(
         'affiliations-email-shadow'
       ) as HTMLInputElement

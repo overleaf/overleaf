@@ -12,7 +12,7 @@ describe('<LeaveModalContent />', function () {
   })
 
   afterEach(function () {
-    fetchMock.reset()
+    fetchMock.removeRoutes().clearHistory()
   })
 
   it('disable delete button if form is not valid', function () {

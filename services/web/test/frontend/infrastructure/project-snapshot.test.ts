@@ -139,7 +139,7 @@ describe('ProjectSnapshot', function () {
     mockLatestChunk()
     mockBlobs(['main.tex', 'hello.txt'])
     await snapshot.refresh()
-    fetchMock.reset()
+    fetchMock.removeRoutes().clearHistory()
   }
 
   describe('after initialization', function () {
@@ -176,7 +176,7 @@ describe('ProjectSnapshot', function () {
     mockChanges()
     mockBlobs(['goodbye.txt'])
     await snapshot.refresh()
-    fetchMock.reset()
+    fetchMock.removeRoutes().clearHistory()
   }
 
   describe('after refresh', function () {
@@ -184,7 +184,7 @@ describe('ProjectSnapshot', function () {
     beforeEach(refreshSnapshot)
 
     afterEach(function () {
-      fetchMock.reset()
+      fetchMock.removeRoutes().clearHistory()
     })
 
     describe('getDocPaths()', function () {
@@ -214,7 +214,7 @@ describe('ProjectSnapshot', function () {
 
   describe('concurrency', function () {
     afterEach(function () {
-      fetchMock.reset()
+      fetchMock.removeRoutes().clearHistory()
     })
 
     specify('two concurrent inits', async function () {
@@ -226,9 +226,9 @@ describe('ProjectSnapshot', function () {
       await Promise.all([snapshot.refresh(), snapshot.refresh()])
 
       // The first request initializes, the second request loads changes
-      expect(fetchMock.calls('flush')).to.have.length(2)
-      expect(fetchMock.calls('latest-chunk')).to.have.length(1)
-      expect(fetchMock.calls('changes-1')).to.have.length(1)
+      expect(fetchMock.callHistory.calls('flush')).to.have.length(2)
+      expect(fetchMock.callHistory.calls('latest-chunk')).to.have.length(1)
+      expect(fetchMock.callHistory.calls('changes-1')).to.have.length(1)
     })
 
     specify('three concurrent inits', async function () {
@@ -245,9 +245,9 @@ describe('ProjectSnapshot', function () {
 
       // The first request initializes, the second and third are combined and
       // load changes
-      expect(fetchMock.calls('flush')).to.have.length(2)
-      expect(fetchMock.calls('latest-chunk')).to.have.length(1)
-      expect(fetchMock.calls('changes-1')).to.have.length(1)
+      expect(fetchMock.callHistory.calls('flush')).to.have.length(2)
+      expect(fetchMock.callHistory.calls('latest-chunk')).to.have.length(1)
+      expect(fetchMock.callHistory.calls('changes-1')).to.have.length(1)
     })
 
     specify('two concurrent inits - first fails', async function () {
@@ -262,9 +262,9 @@ describe('ProjectSnapshot', function () {
 
       // The first init fails, but the second succeeds
       expect(results.filter(r => r.status === 'fulfilled')).to.have.length(1)
-      expect(fetchMock.calls('flush')).to.have.length(2)
-      expect(fetchMock.calls('latest-chunk')).to.have.length(1)
-      expect(fetchMock.calls('changes-1')).to.have.length(0)
+      expect(fetchMock.callHistory.calls('flush')).to.have.length(2)
+      expect(fetchMock.callHistory.calls('latest-chunk')).to.have.length(1)
+      expect(fetchMock.callHistory.calls('changes-1')).to.have.length(0)
     })
 
     specify('three concurrent inits - second fails', async function () {
@@ -285,10 +285,10 @@ describe('ProjectSnapshot', function () {
       // The first init succeeds, the two queued requests fail, the last request
       // succeeds
       expect(results.filter(r => r.status === 'fulfilled')).to.have.length(1)
-      expect(fetchMock.calls('flush')).to.have.length(3)
-      expect(fetchMock.calls('latest-chunk')).to.have.length(1)
-      expect(fetchMock.calls('changes-1')).to.have.length(1)
-      expect(fetchMock.calls('changes-2')).to.have.length(0)
+      expect(fetchMock.callHistory.calls('flush')).to.have.length(3)
+      expect(fetchMock.callHistory.calls('latest-chunk')).to.have.length(1)
+      expect(fetchMock.callHistory.calls('changes-1')).to.have.length(1)
+      expect(fetchMock.callHistory.calls('changes-2')).to.have.length(0)
     })
 
     specify('two concurrent load changes', async function () {
@@ -304,10 +304,10 @@ describe('ProjectSnapshot', function () {
       await Promise.all([snapshot.refresh(), snapshot.refresh()])
 
       // One init, two load changes
-      expect(fetchMock.calls('flush')).to.have.length(3)
-      expect(fetchMock.calls('latest-chunk')).to.have.length(1)
-      expect(fetchMock.calls('changes-1')).to.have.length(1)
-      expect(fetchMock.calls('changes-2')).to.have.length(1)
+      expect(fetchMock.callHistory.calls('flush')).to.have.length(3)
+      expect(fetchMock.callHistory.calls('latest-chunk')).to.have.length(1)
+      expect(fetchMock.callHistory.calls('changes-1')).to.have.length(1)
+      expect(fetchMock.callHistory.calls('changes-2')).to.have.length(1)
     })
 
     specify('three concurrent load changes', async function () {
@@ -327,10 +327,10 @@ describe('ProjectSnapshot', function () {
       ])
 
       // One init, two load changes (the two last are queued and combined)
-      expect(fetchMock.calls('flush')).to.have.length(3)
-      expect(fetchMock.calls('latest-chunk')).to.have.length(1)
-      expect(fetchMock.calls('changes-1')).to.have.length(1)
-      expect(fetchMock.calls('changes-2')).to.have.length(1)
+      expect(fetchMock.callHistory.calls('flush')).to.have.length(3)
+      expect(fetchMock.callHistory.calls('latest-chunk')).to.have.length(1)
+      expect(fetchMock.callHistory.calls('changes-1')).to.have.length(1)
+      expect(fetchMock.callHistory.calls('changes-2')).to.have.length(1)
     })
 
     specify('two concurrent load changes - first fails', async function () {
@@ -350,10 +350,10 @@ describe('ProjectSnapshot', function () {
 
       // One init, one load changes fails, the second succeeds
       expect(results.filter(r => r.status === 'fulfilled')).to.have.length(1)
-      expect(fetchMock.calls('flush')).to.have.length(3)
-      expect(fetchMock.calls('latest-chunk')).to.have.length(1)
-      expect(fetchMock.calls('changes-1')).to.have.length(1)
-      expect(fetchMock.calls('changes-2')).to.have.length(0)
+      expect(fetchMock.callHistory.calls('flush')).to.have.length(3)
+      expect(fetchMock.callHistory.calls('latest-chunk')).to.have.length(1)
+      expect(fetchMock.callHistory.calls('changes-1')).to.have.length(1)
+      expect(fetchMock.callHistory.calls('changes-2')).to.have.length(0)
     })
 
     specify('three concurrent load changes - second fails', async function () {
@@ -378,10 +378,10 @@ describe('ProjectSnapshot', function () {
       // One init, one load changes succeeds, the second and third are combined
       // and fail, the last request succeeds
       expect(results.filter(r => r.status === 'fulfilled')).to.have.length(1)
-      expect(fetchMock.calls('flush')).to.have.length(4)
-      expect(fetchMock.calls('latest-chunk')).to.have.length(1)
-      expect(fetchMock.calls('changes-1')).to.have.length(1)
-      expect(fetchMock.calls('changes-2')).to.have.length(1)
+      expect(fetchMock.callHistory.calls('flush')).to.have.length(4)
+      expect(fetchMock.callHistory.calls('latest-chunk')).to.have.length(1)
+      expect(fetchMock.callHistory.calls('changes-1')).to.have.length(1)
+      expect(fetchMock.callHistory.calls('changes-2')).to.have.length(1)
     })
   })
 })

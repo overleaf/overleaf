@@ -7,7 +7,7 @@ import fetchMock from 'fetch-mock'
 describe('group invite', function () {
   describe('user has a personal subscription', function () {
     afterEach(function () {
-      fetchMock.reset()
+      fetchMock.removeRoutes().clearHistory()
     })
 
     it('shows option to cancel subscription', async function () {

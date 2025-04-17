@@ -11,11 +11,11 @@ describe('<ProjectListTable />', function () {
   beforeEach(function () {
     window.metaAttributesCache.set('ol-tags', [])
     window.metaAttributesCache.set('ol-user_id', userId)
-    fetchMock.reset()
+    fetchMock.removeRoutes().clearHistory()
   })
 
   afterEach(function () {
-    fetchMock.reset()
+    fetchMock.removeRoutes().clearHistory()
   })
 
   it('renders the table', function () {
@@ -65,7 +65,7 @@ describe('<ProjectListTable />', function () {
     this.timeout(10000)
 
     renderWithProjectListContext(<ProjectListTable />)
-    await fetchMock.flush(true)
+    await fetchMock.callHistory.flush(true)
 
     const rows = screen.getAllByRole('row')
     rows.shift() // remove first row since it's the header
@@ -138,7 +138,7 @@ describe('<ProjectListTable />', function () {
 
   it('selects all projects when header checkbox checked', async function () {
     renderWithProjectListContext(<ProjectListTable />)
-    await fetchMock.flush(true)
+    await fetchMock.callHistory.flush(true)
     const checkbox = screen.getByLabelText('Select all projects')
     fireEvent.click(checkbox)
     const allCheckboxes = screen.getAllByRole<HTMLInputElement>('checkbox')
@@ -149,7 +149,7 @@ describe('<ProjectListTable />', function () {
 
   it('unselects all projects when select all checkbox uchecked', async function () {
     renderWithProjectListContext(<ProjectListTable />)
-    await fetchMock.flush(true)
+    await fetchMock.callHistory.flush(true)
     const checkbox = screen.getByLabelText('Select all projects')
     fireEvent.click(checkbox)
     fireEvent.click(checkbox)
@@ -160,7 +160,7 @@ describe('<ProjectListTable />', function () {
 
   it('unselects select all projects checkbox when one project is unchecked', async function () {
     renderWithProjectListContext(<ProjectListTable />)
-    await fetchMock.flush(true)
+    await fetchMock.callHistory.flush(true)
     const checkbox = screen.getByLabelText('Select all projects')
     fireEvent.click(checkbox)
     let allCheckboxes = screen.getAllByRole<HTMLInputElement>('checkbox')
@@ -173,7 +173,7 @@ describe('<ProjectListTable />', function () {
 
   it('only checks the checked project', async function () {
     renderWithProjectListContext(<ProjectListTable />)
-    await fetchMock.flush(true)
+    await fetchMock.callHistory.flush(true)
     const checkbox = screen.getByLabelText(`Select ${currentProjects[0].name}`)
     fireEvent.click(checkbox)
     const allCheckboxes = screen.getAllByRole<HTMLInputElement>('checkbox')

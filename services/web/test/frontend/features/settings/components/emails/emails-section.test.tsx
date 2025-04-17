@@ -22,11 +22,11 @@ describe('<EmailsSection />', function () {
     Object.assign(getMeta('ol-ExposedSettings'), {
       hasAffiliationsFeature: true,
     })
-    fetchMock.reset()
+    fetchMock.removeRoutes().clearHistory()
   })
 
   afterEach(function () {
-    fetchMock.reset()
+    fetchMock.removeRoutes().clearHistory()
   })
 
   it('renders translated heading', function () {

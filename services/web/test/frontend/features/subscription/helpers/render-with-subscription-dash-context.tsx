@@ -90,5 +90,5 @@ export function renderWithSubscriptionDashContext(
 export function cleanUpContext() {
   // @ts-ignore
   delete global.recurly
-  fetchMock.reset()
+  fetchMock.removeRoutes().clearHistory()
 }

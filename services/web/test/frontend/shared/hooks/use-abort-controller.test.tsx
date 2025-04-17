@@ -13,7 +13,7 @@ describe('useAbortController', function () {
   }
 
   beforeEach(function () {
-    fetchMock.restore()
+    fetchMock.removeRoutes().clearHistory()
 
     status = {
       loading: false,
@@ -23,7 +23,7 @@ describe('useAbortController', function () {
   })
 
   after(function () {
-    fetchMock.restore()
+    fetchMock.removeRoutes().clearHistory()
   })
 
   function AbortableRequest({ url }: { url: string }) {
@@ -80,8 +80,8 @@ describe('useAbortController', function () {
 
     unmount()
 
-    await fetchMock.flush(true)
-    expect(fetchMock.done()).to.be.true
+    await fetchMock.callHistory.flush(true)
+    expect(fetchMock.callHistory.done()).to.be.true
 
     // wait for Promises to be resolved
     await new Promise(resolve => setTimeout(resolve, 0))

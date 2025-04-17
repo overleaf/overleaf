@@ -1,7 +1,7 @@
 import { expect } from 'chai'
 import sinon from 'sinon'
 import { fireEvent, screen, render, waitFor } from '@testing-library/react'
-import fetchMock, { FetchMockStatic } from 'fetch-mock'
+import fetchMock, { type FetchMock } from 'fetch-mock'
 
 import LeaveModalForm from '../../../../../../frontend/js/features/settings/components/leave/modal-form'
 import * as useLocationModule from '../../../../../../frontend/js/shared/hooks/use-location'
@@ -14,7 +14,7 @@ describe('<LeaveModalForm />', function () {
   })
 
   afterEach(function () {
-    fetchMock.reset()
+    fetchMock.removeRoutes().clearHistory()
   })
 
   it('validates form', async function () {
@@ -50,7 +50,7 @@ describe('<LeaveModalForm />', function () {
   describe('submits', async function () {
     let setInFlight: sinon.SinonStub
     let setIsFormValid: sinon.SinonStub
-    let deleteMock: FetchMockStatic
+    let deleteMock: FetchMock
     let assignStub: sinon.SinonStub
 
     beforeEach(function () {
@@ -68,7 +68,7 @@ describe('<LeaveModalForm />', function () {
     })
 
     afterEach(function () {
-      fetchMock.reset()
+      fetchMock.removeRoutes().clearHistory()
       this.locationStub.restore()
     })
 
@@ -85,7 +85,7 @@ describe('<LeaveModalForm />', function () {
 
       sinon.assert.calledOnce(setInFlight)
       sinon.assert.calledWithMatch(setInFlight, true)
-      expect(deleteMock.called()).to.be.true
+      expect(deleteMock.callHistory.called()).to.be.true
       await waitFor(() => {
         sinon.assert.calledTwice(setInFlight)
         sinon.assert.calledWithMatch(setInFlight, false)
@@ -105,7 +105,7 @@ describe('<LeaveModalForm />', function () {
 
       fireEvent.submit(screen.getByLabelText('Email'))
 
-      expect(deleteMock.called()).to.be.false
+      expect(deleteMock.callHistory.called()).to.be.false
       sinon.assert.notCalled(setInFlight)
     })
   })

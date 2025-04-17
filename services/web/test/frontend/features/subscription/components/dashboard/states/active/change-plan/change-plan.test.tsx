@@ -38,7 +38,7 @@ describe('<ChangePlanModal />', function () {
 
   afterEach(function () {
     cleanUpContext()
-    fetchMock.reset()
+    fetchMock.removeRoutes().clearHistory()
     this.locationStub.restore()
   })
 

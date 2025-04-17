@@ -37,7 +37,7 @@ describe('<ManagedInstitutions />', function () {
   })
 
   afterEach(function () {
-    fetchMock.reset()
+    fetchMock.removeRoutes().clearHistory()
   })
 
   it('renders all managed institutions', function () {
@@ -98,7 +98,9 @@ describe('<ManagedInstitutions />', function () {
 
     const unsubscribeLink = screen.getByText('Unsubscribe')
     await fireEvent.click(unsubscribeLink)
-    await waitFor(() => expect(fetchMock.called(unsubscribeUrl)).to.be.true)
+    await waitFor(
+      () => expect(fetchMock.callHistory.called(unsubscribeUrl)).to.be.true
+    )
 
     await waitFor(() => {
       expect(screen.getByText('Subscribe')).to.exist
@@ -122,13 +124,14 @@ describe('<ManagedInstitutions />', function () {
       </SplitTestProvider>
     )
 
-    const subscribeLink = screen.getByText('Subscribe')
-    await fireEvent.click(subscribeLink)
-    await waitFor(() => expect(fetchMock.called(subscribeUrl)).to.be.true)
+    const subscribeLink = await screen.findByText('Subscribe')
 
-    await waitFor(() => {
-      expect(screen.getByText('Unsubscribe')).to.exist
-    })
+    await fireEvent.click(subscribeLink)
+    await waitFor(
+      () => expect(fetchMock.callHistory.called(subscribeUrl)).to.be.true
+    )
+
+    await screen.findByText('Unsubscribe')
   })
 
   it('renders nothing when there are no institutions', function () {

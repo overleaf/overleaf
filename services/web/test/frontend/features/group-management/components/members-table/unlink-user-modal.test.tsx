@@ -31,7 +31,7 @@ describe('<UnlinkUserModal />', function () {
   })
 
   afterEach(function () {
-    fetchMock.reset()
+    fetchMock.removeRoutes().clearHistory()
   })
 
   it('displays the modal', async function () {

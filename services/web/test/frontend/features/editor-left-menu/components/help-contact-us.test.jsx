@@ -14,7 +14,7 @@ describe('<HelpContactUs />', function () {
   })
 
   afterEach(function () {
-    fetchMock.reset()
+    fetchMock.removeRoutes().clearHistory()
   })
 
   it('open contact us modal when clicked', function () {

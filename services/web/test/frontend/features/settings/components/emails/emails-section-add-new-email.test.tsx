@@ -56,7 +56,7 @@ const institutionDomainData = [
 ] as const
 
 function resetFetchMock() {
-  fetchMock.reset()
+  fetchMock.removeRoutes().clearHistory()
   fetchMock.get('express:/institutions/domains', [])
 }
 
@@ -80,7 +80,7 @@ describe('<EmailsSection />', function () {
       hasSamlFeature: true,
       samlInitPath: 'saml/init',
     })
-    fetchMock.reset()
+    fetchMock.removeRoutes().clearHistory()
   })
 
   afterEach(function () {
@@ -97,7 +97,7 @@ describe('<EmailsSection />', function () {
   it('renders input', async function () {
     fetchMock.get('/user/emails?ensureAffiliation=true', [])
     render(<EmailsSection />)
-    await fetchMock.flush(true)
+    await fetchMock.callHistory.flush(true)
 
     const button = await screen.findByRole<HTMLButtonElement>('button', {
       name: /add another email/i,
@@ -112,7 +112,7 @@ describe('<EmailsSection />', function () {
     fetchMock.get(`/institutions/domains?hostname=email.com&limit=1`, 200)
     fetchMock.get(`/institutions/domains?hostname=email&limit=1`, 200)
     render(<EmailsSection />)
-    await fetchMock.flush(true)
+    await fetchMock.callHistory.flush(true)
 
     const button = await screen.findByRole<HTMLButtonElement>('button', {
       name: /add another email/i,
@@ -190,7 +190,7 @@ describe('<EmailsSection />', function () {
       { name: /add another email/i }
     )
 
-    await fetchMock.flush(true)
+    await fetchMock.callHistory.flush(true)
     resetFetchMock()
     fetchMock
       .get('/user/emails?ensureAffiliation=true', [userEmailData])
@@ -233,7 +233,7 @@ describe('<EmailsSection />', function () {
       { name: /add another email/i }
     )
 
-    await fetchMock.flush(true)
+    await fetchMock.callHistory.flush(true)
     resetFetchMock()
     fetchMock
       .get('/user/emails?ensureAffiliation=true', [])
@@ -271,8 +271,8 @@ describe('<EmailsSection />', function () {
       name: /add another email/i,
     })
 
-    await fetchMock.flush(true)
-    fetchMock.reset()
+    await fetchMock.callHistory.flush(true)
+    fetchMock.removeRoutes().clearHistory()
     fetchMock.get('express:/institutions/domains', institutionDomainData)
 
     await userEvent.click(button)
@@ -295,7 +295,7 @@ describe('<EmailsSection />', function () {
       name: /add another email/i,
     })
 
-    await fetchMock.flush(true)
+    await fetchMock.callHistory.flush(true)
     resetFetchMock()
 
     await userEvent.click(button)
@@ -330,7 +330,7 @@ describe('<EmailsSection />', function () {
 
     expect(universityInput.disabled).to.be.false
 
-    await fetchMock.flush(true)
+    await fetchMock.callHistory.flush(true)
     resetFetchMock()
 
     // Select the university from dropdown
@@ -364,9 +364,11 @@ describe('<EmailsSection />', function () {
       })
     )
 
-    const [[, request]] = fetchMock.calls(/\/user\/emails/)
+    const request = fetchMock.callHistory.calls(/\/user\/emails/).at(0)
 
-    expect(JSON.parse(request?.body?.toString() || '{}')).to.deep.include({
+    expect(
+      JSON.parse(request?.options.body?.toString() || '{}')
+    ).to.deep.include({
       email: userEmailData.email,
       university: {
         id: userEmailData.affiliation?.institution.id,
@@ -393,7 +395,7 @@ describe('<EmailsSection />', function () {
       name: /add another email/i,
     })
 
-    await fetchMock.flush(true)
+    await fetchMock.callHistory.flush(true)
     resetFetchMock()
 
     fetchMock.get('/institutions/list?country_code=de', [
@@ -446,7 +448,7 @@ describe('<EmailsSection />', function () {
       name: /add another email/i,
     })
 
-    await fetchMock.flush(true)
+    await fetchMock.callHistory.flush(true)
     resetFetchMock()
 
     await userEvent.click(button)
@@ -481,7 +483,7 @@ describe('<EmailsSection />', function () {
 
     expect(universityInput.disabled).to.be.false
 
-    await fetchMock.flush(true)
+    await fetchMock.callHistory.flush(true)
     resetFetchMock()
 
     // Enter the university manually
@@ -516,9 +518,11 @@ describe('<EmailsSection />', function () {
 
     await confirmCodeForEmail(userEmailData.email)
 
-    const [[, request]] = fetchMock.calls(/\/user\/emails/)
+    const request = fetchMock.callHistory.calls(/\/user\/emails/).at(0)
 
-    expect(JSON.parse(request?.body?.toString() || '{}')).to.deep.include({
+    expect(
+      JSON.parse(request?.options.body?.toString() || '{}')
+    ).to.deep.include({
       email: userEmailData.email,
       university: {
         name: newUniversity,
@@ -554,8 +558,8 @@ describe('<EmailsSection />', function () {
       name: /add another email/i,
     })
 
-    await fetchMock.flush(true)
-    fetchMock.reset()
+    await fetchMock.callHistory.flush(true)
+    fetchMock.removeRoutes().clearHistory()
     fetchMock.get(
       `/institutions/domains?hostname=${hostnameFirstChar}&limit=1`,
       institutionDomainDataCopy
@@ -569,8 +573,8 @@ describe('<EmailsSection />', function () {
     )
 
     await userEvent.keyboard('{Tab}')
-    await fetchMock.flush(true)
-    fetchMock.reset()
+    await fetchMock.callHistory.flush(true)
+    fetchMock.removeRoutes().clearHistory()
 
     expect(
       screen.queryByRole('textbox', {
@@ -627,8 +631,8 @@ describe('<EmailsSection />', function () {
       name: /add another email/i,
     })
 
-    await fetchMock.flush(true)
-    fetchMock.reset()
+    await fetchMock.callHistory.flush(true)
+    fetchMock.removeRoutes().clearHistory()
     fetchMock.get(
       `/institutions/domains?hostname=${hostnameFirstChar}&limit=1`,
       institutionDomainDataCopy
@@ -642,8 +646,8 @@ describe('<EmailsSection />', function () {
     )
 
     await userEvent.keyboard('{Tab}')
-    await fetchMock.flush(true)
-    fetchMock.reset()
+    await fetchMock.callHistory.flush(true)
+    fetchMock.removeRoutes().clearHistory()
 
     screen.getByText(institutionDomainDataCopy[0].university.name)
 
@@ -679,8 +683,8 @@ describe('<EmailsSection />', function () {
 
     await confirmCodeForEmail('user@autocomplete.edu')
 
-    await fetchMock.flush(true)
-    fetchMock.reset()
+    await fetchMock.callHistory.flush(true)
+    fetchMock.removeRoutes().clearHistory()
 
     screen.getByText(userEmailDataCopy.affiliation.institution.name, {
       exact: false,

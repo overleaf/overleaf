@@ -7,11 +7,11 @@ import { renderWithEditorContext } from '../../../helpers/render-with-context'
 
 describe('<EditorCloneProjectModalWrapper />', function () {
   beforeEach(function () {
-    fetchMock.reset()
+    fetchMock.removeRoutes().clearHistory()
   })
 
   after(function () {
-    fetchMock.reset()
+    fetchMock.removeRoutes().clearHistory()
   })
 
   const project = {
@@ -78,19 +78,23 @@ describe('<EditorCloneProjectModalWrapper />', function () {
     fireEvent.click(submitButton)
     expect(submitButton.disabled).to.be.true
 
-    await fetchMock.flush(true)
-    expect(fetchMock.done()).to.be.true
-    const [url, options] = fetchMock.lastCall(
-      'express:/project/:projectId/clone'
+    await fetchMock.callHistory.flush(true)
+    expect(fetchMock.callHistory.done()).to.be.true
+    const { url, options } = fetchMock.callHistory
+      .calls('express:/project/:projectId/clone')
+      .at(-1)
+    expect(url).to.equal(
+      'https://www.test-overleaf.com/project/project-1/clone'
     )
-    expect(url).to.equal('/project/project-1/clone')
 
     expect(JSON.parse(options.body)).to.deep.equal({
       projectName: 'A Cloned Project',
       tags: [],
     })
 
-    expect(openProject).to.be.calledOnce
+    await waitFor(() => {
+      expect(openProject).to.be.calledOnce
+    })
 
     const errorMessage = screen.queryByText('Sorry, something went wrong')
     expect(errorMessage).to.be.null
@@ -129,7 +133,7 @@ describe('<EditorCloneProjectModalWrapper />', function () {
 
     fireEvent.click(button)
 
-    expect(fetchMock.done(matcher)).to.be.true
+    expect(fetchMock.callHistory.done(matcher)).to.be.true
     expect(openProject).not.to.be.called
 
     await screen.findByText('Sorry, something went wrong')
@@ -165,9 +169,9 @@ describe('<EditorCloneProjectModalWrapper />', function () {
     expect(cancelButton.disabled).to.be.false
 
     fireEvent.click(button)
-    await fetchMock.flush(true)
+    await fetchMock.callHistory.flush(true)
 
-    expect(fetchMock.done(matcher)).to.be.true
+    expect(fetchMock.callHistory.done(matcher)).to.be.true
     expect(openProject).not.to.be.called
 
     await screen.findByText('There was an error!')

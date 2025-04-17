@@ -28,7 +28,7 @@ describe('<CompileAndDownloadProjectPDFButton />', function () {
 
   afterEach(function () {
     locationStub.restore()
-    fetchMock.reset()
+    fetchMock.removeRoutes().clearHistory()
     sendMBSpy.restore()
   })
 

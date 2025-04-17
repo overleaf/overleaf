@@ -30,7 +30,7 @@ describe('<SettingsDocument />', function () {
   })
 
   afterEach(function () {
-    fetchMock.reset()
+    fetchMock.removeRoutes().clearHistory()
     window.metaAttributesCache.set('ol-ExposedSettings', originalSettings)
   })
 

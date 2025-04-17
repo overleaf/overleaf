@@ -65,7 +65,7 @@ describe('<ProjectTools />', function () {
 
   afterEach(function () {
     window.metaAttributesCache.clear()
-    fetchMock.reset()
+    fetchMock.removeRoutes().clearHistory()
   })
 
   it('does not show the Rename option for a project owned by a different user', function () {

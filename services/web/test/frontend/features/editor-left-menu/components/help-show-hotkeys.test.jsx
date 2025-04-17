@@ -6,7 +6,7 @@ import fetchMock from 'fetch-mock'
 
 describe('<HelpShowHotkeys />', function () {
   afterEach(function () {
-    fetchMock.reset()
+    fetchMock.removeRoutes().clearHistory()
   })
 
   it('open hotkeys modal when clicked', function () {

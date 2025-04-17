@@ -67,8 +67,11 @@ describe('<ArchiveProjectButton />', function () {
 
     await waitFor(
       () =>
-        expect(archiveProjectMock.called(`/project/${project.id}/archive`)).to
-          .be.true
+        expect(
+          archiveProjectMock.callHistory.called(
+            `/project/${project.id}/archive`
+          )
+        ).to.be.true
     )
   })
 })

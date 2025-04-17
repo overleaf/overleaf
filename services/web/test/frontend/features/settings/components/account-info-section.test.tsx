@@ -29,7 +29,7 @@ describe('<AccountInfoSection />', function () {
   })
 
   afterEach(function () {
-    fetchMock.reset()
+    fetchMock.removeRoutes().clearHistory()
   })
 
   it('submits all inputs', async function () {
@@ -50,14 +50,14 @@ describe('<AccountInfoSection />', function () {
         name: 'Update',
       })
     )
-    expect(updateMock.called()).to.be.true
-    expect(JSON.parse(updateMock.lastCall()![1]!.body as string)).to.deep.equal(
-      {
-        email: 'john@watson.co.uk',
-        first_name: 'John',
-        last_name: 'Watson',
-      }
-    )
+    expect(updateMock.callHistory.called()).to.be.true
+    expect(
+      JSON.parse(updateMock.callHistory.calls().at(-1)?.options.body as string)
+    ).to.deep.equal({
+      email: 'john@watson.co.uk',
+      first_name: 'John',
+      last_name: 'Watson',
+    })
   })
 
   it('disables button on invalid email', async function () {
@@ -74,7 +74,7 @@ describe('<AccountInfoSection />', function () {
     expect(button.disabled).to.be.true
     fireEvent.click(button)
 
-    expect(updateMock.called()).to.be.false
+    expect(updateMock.callHistory.called()).to.be.false
   })
 
   it('shows inflight state and success message', async function () {
@@ -156,12 +156,12 @@ describe('<AccountInfoSection />', function () {
         name: 'Update',
       })
     )
-    expect(JSON.parse(updateMock.lastCall()![1]!.body as string)).to.deep.equal(
-      {
-        first_name: 'Sherlock',
-        last_name: 'Holmes',
-      }
-    )
+    expect(
+      JSON.parse(updateMock.callHistory.calls().at(-1)?.options.body as string)
+    ).to.deep.equal({
+      first_name: 'Sherlock',
+      last_name: 'Holmes',
+    })
   })
 
   it('disables email input', async function () {
@@ -187,12 +187,12 @@ describe('<AccountInfoSection />', function () {
         name: 'Update',
       })
     )
-    expect(JSON.parse(updateMock.lastCall()![1]!.body as string)).to.deep.equal(
-      {
-        first_name: 'Sherlock',
-        last_name: 'Holmes',
-      }
-    )
+    expect(
+      JSON.parse(updateMock.callHistory.calls().at(-1)?.options.body as string)
+    ).to.deep.equal({
+      first_name: 'Sherlock',
+      last_name: 'Holmes',
+    })
   })
 
   it('disables names input', async function () {
@@ -215,10 +215,10 @@ describe('<AccountInfoSection />', function () {
         name: 'Update',
       })
     )
-    expect(JSON.parse(updateMock.lastCall()![1]!.body as string)).to.deep.equal(
-      {
-        email: 'sherlock@holmes.co.uk',
-      }
-    )
+    expect(
+      JSON.parse(updateMock.callHistory.calls().at(-1)?.options.body as string)
+    ).to.deep.equal({
+      email: 'sherlock@holmes.co.uk',
+    })
   })
 })

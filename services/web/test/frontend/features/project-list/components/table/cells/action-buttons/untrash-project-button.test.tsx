@@ -49,8 +49,9 @@ describe('<UntrashProjectButton />', function () {
 
     await waitFor(
       () =>
-        expect(untrashProjectMock.called(`/project/${project.id}/trash`)).to.be
-          .true
+        expect(
+          untrashProjectMock.callHistory.called(`/project/${project.id}/trash`)
+        ).to.be.true
     )
   })
 })

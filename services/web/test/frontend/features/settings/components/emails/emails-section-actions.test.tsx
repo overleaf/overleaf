@@ -37,11 +37,11 @@ describe('email actions - make primary', function () {
     Object.assign(getMeta('ol-ExposedSettings'), {
       hasAffiliationsFeature: true,
     })
-    fetchMock.reset()
+    fetchMock.removeRoutes().clearHistory()
   })
 
   afterEach(function () {
-    fetchMock.reset()
+    fetchMock.removeRoutes().clearHistory()
   })
 
   describe('disabled `make primary` button', function () {
@@ -236,11 +236,11 @@ describe('email actions - delete', function () {
     Object.assign(getMeta('ol-ExposedSettings'), {
       hasAffiliationsFeature: true,
     })
-    fetchMock.reset()
+    fetchMock.removeRoutes().clearHistory()
   })
 
   afterEach(function () {
-    fetchMock.reset()
+    fetchMock.removeRoutes().clearHistory()
   })
 
   it('shows loader when deleting and removes the row', async function () {

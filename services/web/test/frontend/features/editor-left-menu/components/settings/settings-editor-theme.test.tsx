@@ -16,7 +16,7 @@ describe('<SettingsEditorTheme />', function () {
   })
 
   afterEach(function () {
-    fetchMock.reset()
+    fetchMock.removeRoutes().clearHistory()
   })
 
   it('shows correct menu', async function () {

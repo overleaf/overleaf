@@ -69,7 +69,7 @@ describe('<UserNotifications />', function () {
   }
 
   beforeEach(function () {
-    fetchMock.reset()
+    fetchMock.removeRoutes().clearHistory()
 
     // at least one project is required to show some notifications
     const projects = [{}] as Project[]
@@ -83,7 +83,7 @@ describe('<UserNotifications />', function () {
   })
 
   afterEach(function () {
-    fetchMock.reset()
+    fetchMock.removeRoutes().clearHistory()
   })
 
   describe('<Common>', function () {
@@ -93,7 +93,7 @@ describe('<UserNotifications />', function () {
     })
 
     afterEach(function () {
-      fetchMock.reset()
+      fetchMock.removeRoutes().clearHistory()
     })
 
     it('accepts project invite', async function () {
@@ -106,14 +106,14 @@ describe('<UserNotifications />', function () {
       ])
 
       renderWithinProjectListProvider(Common)
-      await fetchMock.flush(true)
+      await fetchMock.callHistory.flush(true)
 
       const deleteMock = fetchMock.delete(
         `/notifications/${reconfiguredNotification._id}`,
         200
       )
       const acceptMock = fetchMock.post(
-        `project/${notificationProjectInvite.messageOpts.projectId}/invite/token/${notificationProjectInvite.messageOpts.token}/accept`,
+        `/project/${notificationProjectInvite.messageOpts.projectId}/invite/token/${notificationProjectInvite.messageOpts.token}/accept`,
         200
       )
 
@@ -134,8 +134,9 @@ describe('<UserNotifications />', function () {
         screen.getByRole('button', { name: /joining/i })
       )
 
-      expect(acceptMock.called()).to.be.true
-      screen.getByText(/joined/i)
+      expect(acceptMock.callHistory.called()).to.be.true
+      await screen.findByText(/joined/i)
+
       expect(screen.queryByRole('button', { name: /join project/i })).to.be.null
 
       const openProject = screen.getByRole('button', { name: /open project/i })
@@ -146,7 +147,7 @@ describe('<UserNotifications />', function () {
       const closeBtn = screen.getByRole('button', { name: /close/i })
       fireEvent.click(closeBtn)
 
-      expect(deleteMock.called()).to.be.true
+      expect(deleteMock.callHistory.called()).to.be.true
       expect(screen.queryByRole('alert')).to.be.null
     })
 
@@ -160,9 +161,9 @@ describe('<UserNotifications />', function () {
       ])
 
       renderWithinProjectListProvider(Common)
-      await fetchMock.flush(true)
+      await fetchMock.callHistory.flush(true)
       fetchMock.post(
-        `project/${notificationProjectInvite.messageOpts.projectId}/invite/token/${notificationProjectInvite.messageOpts.token}/accept`,
+        `/project/${notificationProjectInvite.messageOpts.projectId}/invite/token/${notificationProjectInvite.messageOpts.token}/accept`,
         500
       )
 
@@ -179,7 +180,7 @@ describe('<UserNotifications />', function () {
         screen.getByRole('button', { name: /joining/i })
       )
 
-      expect(fetchMock.called()).to.be.true
+      expect(fetchMock.callHistory.called()).to.be.true
       screen.getByRole('button', { name: /join project/i })
       expect(screen.queryByRole('button', { name: /open project/i })).to.be.null
     })
@@ -194,7 +195,7 @@ describe('<UserNotifications />', function () {
       ])
 
       renderWithinProjectListProvider(Common)
-      await fetchMock.flush(true)
+      await fetchMock.callHistory.flush(true)
       fetchMock.delete(`/notifications/${reconfiguredNotification._id}`, 200)
 
       screen.getByRole('alert')
@@ -207,7 +208,7 @@ describe('<UserNotifications />', function () {
       const closeBtn = screen.getByRole('button', { name: /close/i })
       fireEvent.click(closeBtn)
 
-      expect(fetchMock.called()).to.be.true
+      expect(fetchMock.callHistory.called()).to.be.true
       expect(screen.queryByRole('alert')).to.be.null
     })
 
@@ -225,7 +226,7 @@ describe('<UserNotifications />', function () {
       ])
 
       renderWithinProjectListProvider(Common)
-      await fetchMock.flush(true)
+      await fetchMock.callHistory.flush(true)
       fetchMock.delete(`/notifications/${reconfiguredNotification._id}`, 200)
 
       screen.getByRole('alert')
@@ -246,7 +247,7 @@ describe('<UserNotifications />', function () {
       const closeBtn = screen.getByRole('button', { name: /close/i })
       fireEvent.click(closeBtn)
 
-      expect(fetchMock.called()).to.be.true
+      expect(fetchMock.callHistory.called()).to.be.true
       expect(screen.queryByRole('alert')).to.be.null
     })
 
@@ -264,7 +265,7 @@ describe('<UserNotifications />', function () {
       ])
 
       renderWithinProjectListProvider(Common)
-      await fetchMock.flush(true)
+      await fetchMock.callHistory.flush(true)
       fetchMock.delete(`/notifications/${reconfiguredNotification._id}`, 200)
 
       screen.getByRole('alert')
@@ -281,7 +282,7 @@ describe('<UserNotifications />', function () {
       const closeBtn = screen.getByRole('button', { name: /close/i })
       fireEvent.click(closeBtn)
 
-      expect(fetchMock.called()).to.be.true
+      expect(fetchMock.callHistory.called()).to.be.true
       expect(screen.queryByRole('alert')).to.be.null
     })
 
@@ -294,7 +295,7 @@ describe('<UserNotifications />', function () {
       ])
 
       renderWithinProjectListProvider(Common)
-      await fetchMock.flush(true)
+      await fetchMock.callHistory.flush(true)
 
       screen.getByRole('alert')
       screen.getByText(/file limit/i)
@@ -323,7 +324,7 @@ describe('<UserNotifications />', function () {
       ])
 
       renderWithinProjectListProvider(Common)
-      await fetchMock.flush(true)
+      await fetchMock.callHistory.flush(true)
       fetchMock.delete(`/notifications/${reconfiguredNotification._id}`, 200)
 
       screen.getByRole('alert')
@@ -337,7 +338,7 @@ describe('<UserNotifications />', function () {
       const closeBtn = screen.getByRole('button', { name: /close/i })
       fireEvent.click(closeBtn)
 
-      expect(fetchMock.called()).to.be.true
+      expect(fetchMock.callHistory.called()).to.be.true
       expect(screen.queryByRole('alert')).to.be.null
     })
 
@@ -355,7 +356,7 @@ describe('<UserNotifications />', function () {
       ])
 
       renderWithinProjectListProvider(Common)
-      await fetchMock.flush(true)
+      await fetchMock.callHistory.flush(true)
       fetchMock.delete(`/notifications/${reconfiguredNotification._id}`, 200)
 
       screen.getByRole('alert')
@@ -371,7 +372,7 @@ describe('<UserNotifications />', function () {
       const closeBtn = screen.getByRole('button', { name: /close/i })
       fireEvent.click(closeBtn)
 
-      expect(fetchMock.called()).to.be.true
+      expect(fetchMock.callHistory.called()).to.be.true
       expect(screen.queryByRole('alert')).to.be.null
     })
 
@@ -385,7 +386,7 @@ describe('<UserNotifications />', function () {
       ])
 
       renderWithinProjectListProvider(Common)
-      await fetchMock.flush(true)
+      await fetchMock.callHistory.flush(true)
       fetchMock.delete(`/notifications/${reconfiguredNotification._id}`, 200)
 
       screen.getByRole('alert')
@@ -394,7 +395,7 @@ describe('<UserNotifications />', function () {
       const closeBtn = screen.getByRole('button', { name: /close/i })
       fireEvent.click(closeBtn)
 
-      expect(fetchMock.called()).to.be.true
+      expect(fetchMock.callHistory.called()).to.be.true
       expect(screen.queryByRole('alert')).to.be.null
     })
 
@@ -414,7 +415,7 @@ describe('<UserNotifications />', function () {
           ])
 
           renderWithinProjectListProvider(Common)
-          await fetchMock.flush(true)
+          await fetchMock.callHistory.flush(true)
           fetchMock.delete(`/notifications/${notificationGroupInvite._id}`, 200)
           screen.getByRole('alert')
           screen.getByText('inviter@overleaf.com')
@@ -444,7 +445,7 @@ describe('<UserNotifications />', function () {
             )
 
             renderWithinProjectListProvider(Common)
-            await fetchMock.flush(true)
+            await fetchMock.callHistory.flush(true)
             fetchMock.delete(
               `/notifications/${notificationGroupInvite._id}`,
               200
@@ -465,11 +466,11 @@ describe('<UserNotifications />', function () {
   describe('<Institution>', function () {
     beforeEach(function () {
       Object.assign(getMeta('ol-ExposedSettings'), exposedSettings)
-      fetchMock.reset()
+      fetchMock.removeRoutes().clearHistory()
     })
 
     afterEach(function () {
-      fetchMock.reset()
+      fetchMock.removeRoutes().clearHistory()
     })
 
     it('shows sso available', function () {
@@ -513,7 +514,7 @@ describe('<UserNotifications />', function () {
       const closeBtn = screen.getByRole('button', { name: /close/i })
       fireEvent.click(closeBtn)
 
-      expect(fetchMock.called()).to.be.true
+      expect(fetchMock.callHistory.called()).to.be.true
       expect(screen.queryByRole('alert')).to.be.null
     })
 
@@ -537,7 +538,7 @@ describe('<UserNotifications />', function () {
       const closeBtn = screen.getByRole('button', { name: /close/i })
       fireEvent.click(closeBtn)
 
-      expect(fetchMock.called()).to.be.true
+      expect(fetchMock.callHistory.called()).to.be.true
       expect(screen.queryByRole('alert')).to.be.null
     })
 
@@ -563,7 +564,7 @@ describe('<UserNotifications />', function () {
       const closeBtn = screen.getByRole('button', { name: /close/i })
       fireEvent.click(closeBtn)
 
-      expect(fetchMock.called()).to.be.true
+      expect(fetchMock.callHistory.called()).to.be.true
       expect(screen.queryByRole('alert')).to.be.null
     })
 
@@ -658,7 +659,7 @@ describe('<UserNotifications />', function () {
     })
 
     afterEach(function () {
-      fetchMock.reset()
+      fetchMock.removeRoutes().clearHistory()
       this.clock.restore()
     })
 
@@ -670,7 +671,7 @@ describe('<UserNotifications />', function () {
         window.metaAttributesCache.set('ol-userEmails', userEmails)
 
         renderWithinProjectListProvider(ConfirmEmail)
-        await fetchMock.flush(true)
+        await fetchMock.callHistory.flush(true)
         fetchMock.post('/user/emails/resend_confirmation', 200)
 
         const email = userEmails[0].email
@@ -693,7 +694,7 @@ describe('<UserNotifications />', function () {
           screen.getByRole('button', { name: /resend/i })
         )
 
-        expect(fetchMock.called()).to.be.true
+        expect(fetchMock.callHistory.called()).to.be.true
         expect(screen.queryByRole('alert')).to.be.null
       })
     }
@@ -712,7 +713,7 @@ describe('<UserNotifications />', function () {
       window.metaAttributesCache.set('ol-userEmails', [untrustedUserData])
 
       renderWithinProjectListProvider(ConfirmEmail)
-      await fetchMock.flush(true)
+      await fetchMock.callHistory.flush(true)
       fetchMock.post('/user/emails/resend_confirmation', 200)
 
       const email = untrustedUserData.email
@@ -730,7 +731,7 @@ describe('<UserNotifications />', function () {
         screen.getByRole('button', { name: /resend/i })
       )
 
-      expect(fetchMock.called()).to.be.true
+      expect(fetchMock.callHistory.called()).to.be.true
       expect(screen.queryByRole('alert')).to.be.null
     })
 
@@ -738,7 +739,7 @@ describe('<UserNotifications />', function () {
       window.metaAttributesCache.set('ol-userEmails', [unconfirmedUserData])
 
       renderWithinProjectListProvider(ConfirmEmail)
-      await fetchMock.flush(true)
+      await fetchMock.callHistory.flush(true)
       fetchMock.post('/user/emails/resend_confirmation', 500)
 
       const resendButtons = screen.getAllByRole('button', { name: /resend/i })
@@ -752,7 +753,7 @@ describe('<UserNotifications />', function () {
         )
       )
 
-      expect(fetchMock.called()).to.be.true
+      expect(fetchMock.callHistory.called()).to.be.true
       screen.getByText(/something went wrong/i)
     })
 
@@ -764,7 +765,7 @@ describe('<UserNotifications />', function () {
         window.metaAttributesCache.set('ol-usersBestSubscription', subscription)
 
         renderWithinProjectListProvider(ConfirmEmail)
-        await fetchMock.flush(true)
+        await fetchMock.callHistory.flush(true)
 
         const alert = screen.getByRole('alert')
         const email = unconfirmedCommonsUserData.email
@@ -785,7 +786,7 @@ describe('<UserNotifications />', function () {
         window.metaAttributesCache.set('ol-usersBestSubscription', subscription)
 
         renderWithinProjectListProvider(ConfirmEmail)
-        await fetchMock.flush(true)
+        await fetchMock.callHistory.flush(true)
 
         const alert = screen.getByRole('alert')
         const email = unconfirmedCommonsUserData.email
@@ -818,12 +819,12 @@ describe('<UserNotifications />', function () {
         reload: sinon.stub(),
         setHash: sinon.stub(),
       })
-      fetchMock.reset()
+      fetchMock.removeRoutes().clearHistory()
     })
 
     afterEach(function () {
       this.locationStub.restore()
-      fetchMock.reset()
+      fetchMock.removeRoutes().clearHistory()
     })
 
     it('shows reconfirm message with SSO disabled', async function () {
@@ -860,12 +861,12 @@ describe('<UserNotifications />', function () {
         .be.null
       expect(screen.queryByRole('link', { name: /remove it/i })).to.be.null
       expect(screen.queryByRole('link', { name: /learn more/i })).to.be.null
-      expect(sendReconfirmationMock.called()).to.be.true
+      expect(sendReconfirmationMock.callHistory.called()).to.be.true
       fireEvent.click(
         screen.getByRole('button', { name: /resend confirmation email/i })
       )
       await waitForElementToBeRemoved(() => screen.getByText('Sending…'))
-      expect(sendReconfirmationMock.calls()).to.have.lengthOf(2)
+      expect(sendReconfirmationMock.callHistory.calls()).to.have.lengthOf(2)
     })
 
     it('shows reconfirm message with SSO enabled', async function () {
@@ -905,7 +906,7 @@ describe('<UserNotifications />', function () {
   describe('<GroupsAndEnterpriseBanner />', function () {
     beforeEach(function () {
       localStorage.clear()
-      fetchMock.reset()
+      fetchMock.removeRoutes().clearHistory()
 
       // at least one project is required to show some notifications
       const projects = [{}] as Project[]
@@ -924,14 +925,14 @@ describe('<UserNotifications />', function () {
     })
 
     afterEach(function () {
-      fetchMock.reset()
+      fetchMock.removeRoutes().clearHistory()
     })
 
     it('does not show the banner for users that are in group or are affiliated', async function () {
       window.metaAttributesCache.set('ol-showGroupsAndEnterpriseBanner', false)
 
       renderWithinProjectListProvider(GroupsAndEnterpriseBanner)
-      await fetchMock.flush(true)
+      await fetchMock.callHistory.flush(true)
 
       expect(screen.queryByRole('button', { name: 'Contact Sales' })).to.be.null
     })
@@ -941,7 +942,7 @@ describe('<UserNotifications />', function () {
       localStorage.setItem('has_dismissed_groups_and_enterprise_banner', true)
 
       renderWithinProjectListProvider(GroupsAndEnterpriseBanner)
-      await fetchMock.flush(true)
+      await fetchMock.callHistory.flush(true)
 
       expect(screen.queryByRole('button', { name: 'Contact Sales' })).to.not.be
         .null
@@ -957,7 +958,7 @@ describe('<UserNotifications />', function () {
       )
 
       renderWithinProjectListProvider(GroupsAndEnterpriseBanner)
-      await fetchMock.flush(true)
+      await fetchMock.callHistory.flush(true)
 
       expect(screen.queryByRole('button', { name: 'Contact Sales' })).to.not.be
         .null
@@ -973,7 +974,7 @@ describe('<UserNotifications />', function () {
       )
 
       renderWithinProjectListProvider(GroupsAndEnterpriseBanner)
-      await fetchMock.flush(true)
+      await fetchMock.callHistory.flush(true)
 
       expect(screen.queryByRole('button', { name: 'Contact Sales' })).to.be.null
     })
@@ -981,7 +982,7 @@ describe('<UserNotifications />', function () {
     describe('users that are not in group and are not affiliated', function () {
       beforeEach(function () {
         localStorage.clear()
-        fetchMock.reset()
+        fetchMock.removeRoutes().clearHistory()
 
         // at least one project is required to show some notifications
         const projects = [{}] as Project[]
@@ -997,7 +998,7 @@ describe('<UserNotifications />', function () {
       })
 
       afterEach(function () {
-        fetchMock.reset()
+        fetchMock.removeRoutes().clearHistory()
       })
 
       after(function () {
@@ -1011,7 +1012,7 @@ describe('<UserNotifications />', function () {
         )
 
         renderWithinProjectListProvider(GroupsAndEnterpriseBanner)
-        await fetchMock.flush(true)
+        await fetchMock.callHistory.flush(true)
 
         screen.getByText(
           'Overleaf On-Premises: Does your company want to keep its data within its firewall? Overleaf offers Server Pro, an on-premises solution for companies. Get in touch to learn more.'
@@ -1028,7 +1029,7 @@ describe('<UserNotifications />', function () {
         )
 
         renderWithinProjectListProvider(GroupsAndEnterpriseBanner)
-        await fetchMock.flush(true)
+        await fetchMock.callHistory.flush(true)
 
         screen.getByText(
           'Why do Fortune 500 companies and top research institutions trust Overleaf to streamline their collaboration? Get in touch to learn more.'

@@ -17,7 +17,7 @@ describe('<PasswordSection />', function () {
   })
 
   afterEach(function () {
-    fetchMock.reset()
+    fetchMock.removeRoutes().clearHistory()
   })
 
   it('shows password managed externally message', async function () {
@@ -45,14 +45,14 @@ describe('<PasswordSection />', function () {
     render(<PasswordSection />)
     submitValidForm()
 
-    expect(updateMock.called()).to.be.true
-    expect(JSON.parse(updateMock.lastCall()![1]!.body as string)).to.deep.equal(
-      {
-        currentPassword: 'foobar',
-        newPassword1: 'barbaz',
-        newPassword2: 'barbaz',
-      }
-    )
+    expect(updateMock.callHistory.called()).to.be.true
+    expect(
+      JSON.parse(updateMock.callHistory.calls().at(-1)?.options.body as string)
+    ).to.deep.equal({
+      currentPassword: 'foobar',
+      newPassword1: 'barbaz',
+      newPassword2: 'barbaz',
+    })
   })
 
   it('disables button on invalid form', async function () {
@@ -64,7 +64,7 @@ describe('<PasswordSection />', function () {
         name: 'Change',
       })
     )
-    expect(updateMock.called()).to.be.false
+    expect(updateMock.callHistory.called()).to.be.false
   })
 
   it('validates inputs', async function () {

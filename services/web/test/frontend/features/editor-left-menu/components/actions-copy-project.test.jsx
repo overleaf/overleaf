@@ -20,7 +20,7 @@ describe('<ActionsCopyProject />', function () {
 
   afterEach(function () {
     this.locationStub.restore()
-    fetchMock.reset()
+    fetchMock.removeRoutes().clearHistory()
   })
 
   it('shows correct modal when clicked', async function () {

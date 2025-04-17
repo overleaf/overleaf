@@ -106,18 +106,18 @@ describe('<PersonalSubscription />', function () {
       fetchMock.postOnce(reactivateSubscriptionUrl, 400)
       fireEvent.click(reactivateBtn)
       expect(reactivateBtn.disabled).to.be.true
-      await fetchMock.flush(true)
+      await fetchMock.callHistory.flush(true)
       expect(reactivateBtn.disabled).to.be.false
       expect(reloadStub).not.to.have.been.called
-      fetchMock.reset()
+      fetchMock.removeRoutes().clearHistory()
 
       // 2nd click - success
       fetchMock.postOnce(reactivateSubscriptionUrl, 200)
       fireEvent.click(reactivateBtn)
-      await fetchMock.flush(true)
+      await fetchMock.callHistory.flush(true)
       expect(reloadStub).to.have.been.calledOnce
       expect(reactivateBtn.disabled).to.be.true
-      fetchMock.reset()
+      fetchMock.removeRoutes().clearHistory()
     })
 
     it('renders the expired dash', function () {

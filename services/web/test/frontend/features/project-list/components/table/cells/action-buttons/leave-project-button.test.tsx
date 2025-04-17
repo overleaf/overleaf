@@ -75,8 +75,9 @@ describe('<LeaveProjectButtton />', function () {
 
     await waitFor(
       () =>
-        expect(leaveProjectMock.called(`/project/${project.id}/leave`)).to.be
-          .true
+        expect(
+          leaveProjectMock.callHistory.called(`/project/${project.id}/leave`)
+        ).to.be.true
     )
   })
 })

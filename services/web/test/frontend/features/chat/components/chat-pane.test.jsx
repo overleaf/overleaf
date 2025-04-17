@@ -26,7 +26,7 @@ describe('<ChatPane />', function () {
   })
 
   afterEach(function () {
-    fetchMock.reset()
+    fetchMock.removeRoutes().clearHistory()
   })
 
   const testMessages = [
@@ -45,7 +45,7 @@ describe('<ChatPane />', function () {
   ]
 
   beforeEach(function () {
-    fetchMock.reset()
+    fetchMock.removeRoutes().clearHistory()
     cleanUpContext()
 
     stubMathJax()
@@ -73,7 +73,7 @@ describe('<ChatPane />', function () {
     await screen.findByText('Try again')
 
     // bring chat back up
-    fetchMock.reset()
+    fetchMock.removeRoutes().clearHistory()
     fetchMock.get(/messages/, [])
 
     const reconnectButton = screen.getByRole('button', {
