@@ -15,7 +15,6 @@ const logger = require('@overleaf/logger')
 const oneDay = 24 * 60 * 60 * 1000
 const Metrics = require('@overleaf/metrics')
 const Settings = require('@overleaf/settings')
-const diskusage = require('diskusage')
 const { callbackify } = require('node:util')
 const Path = require('node:path')
 const fs = require('node:fs')
@@ -33,7 +32,13 @@ async function collectDiskStats() {
   const diskStats = {}
   for (const path of paths) {
     try {
-      const stats = await diskusage.check(path)
+      const { blocks, bavail, bsize } = await fs.promises.statfs(path)
+      const stats = {
+        // Warning: these values will be wrong by a factor in Docker-for-Mac.
+        // See https://github.com/docker/for-mac/issues/2136
+        total: blocks * bsize, // Total size of the file system in bytes
+        available: bavail * bsize, // Free space available to unprivileged users.
+      }
       const diskAvailablePercent = (stats.available / stats.total) * 100
       Metrics.gauge('disk_available_percent', diskAvailablePercent, 1, {
         path,

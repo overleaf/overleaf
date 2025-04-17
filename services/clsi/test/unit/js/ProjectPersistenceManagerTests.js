@@ -21,12 +21,16 @@ const tk = require('timekeeper')
 
 describe('ProjectPersistenceManager', function () {
   beforeEach(function () {
+    this.fsPromises = {
+      statfs: sinon.stub(),
+    }
+
     this.ProjectPersistenceManager = SandboxedModule.require(modulePath, {
       requires: {
         '@overleaf/metrics': (this.Metrics = { gauge: sinon.stub() }),
         './UrlCache': (this.UrlCache = {}),
         './CompileManager': (this.CompileManager = {}),
-        diskusage: (this.diskusage = { check: sinon.stub() }),
+        fs: { promises: this.fsPromises },
         '@overleaf/settings': (this.settings = {
           project_cache_length_ms: 1000,
           path: {
@@ -44,9 +48,10 @@ describe('ProjectPersistenceManager', function () {
 
   describe('refreshExpiryTimeout', function () {
     it('should leave expiry alone if plenty of disk', function (done) {
-      this.diskusage.check.resolves({
-        available: 40,
-        total: 100,
+      this.fsPromises.statfs.resolves({
+        blocks: 100,
+        bsize: 1,
+        bavail: 40,
       })
 
       this.ProjectPersistenceManager.refreshExpiryTimeout(() => {
@@ -62,9 +67,10 @@ describe('ProjectPersistenceManager', function () {
     })
 
     it('should drop EXPIRY_TIMEOUT 10% if low disk usage', function (done) {
-      this.diskusage.check.resolves({
-        available: 5,
-        total: 100,
+      this.fsPromises.statfs.resolves({
+        blocks: 100,
+        bsize: 1,
+        bavail: 5,
       })
 
       this.ProjectPersistenceManager.refreshExpiryTimeout(() => {
@@ -78,9 +84,10 @@ describe('ProjectPersistenceManager', function () {
     })
 
     it('should not drop EXPIRY_TIMEOUT to below 50% of project_cache_length_ms', function (done) {
-      this.diskusage.check.resolves({
-        available: 5,
-        total: 100,
+      this.fsPromises.statfs.resolves({
+        blocks: 100,
+        bsize: 1,
+        bavail: 5,
       })
       this.ProjectPersistenceManager.EXPIRY_TIMEOUT = 500
       this.ProjectPersistenceManager.refreshExpiryTimeout(() => {
@@ -94,7 +101,7 @@ describe('ProjectPersistenceManager', function () {
     })
 
     it('should not modify EXPIRY_TIMEOUT if there is an error getting disk values', function (done) {
-      this.diskusage.check.throws(new Error())
+      this.fsPromises.statfs.rejects(new Error())
       this.ProjectPersistenceManager.refreshExpiryTimeout(() => {
         this.ProjectPersistenceManager.EXPIRY_TIMEOUT.should.equal(1000)
         done()
