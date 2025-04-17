@@ -36,6 +36,15 @@ const recurlyPlanCodeToStripeLookupKey = {
   student_free_trial_7_days: 'student_monthly',
 }
 
+const stripeLookupKeyToRecurlyPlanCode = {
+  professional_annual: 'professional-annual',
+  professional_monthly: 'professional',
+  standard_annual: 'collaborator-annual',
+  standard_monthly: 'collaborator',
+  student_annual: 'student-annual',
+  student_monthly: 'student',
+}
+
 /**
  *
  * @param {RecurlyPlanCode} recurlyPlanCode
@@ -43,6 +52,14 @@ const recurlyPlanCodeToStripeLookupKey = {
  */
 function mapRecurlyPlanCodeToStripeLookupKey(recurlyPlanCode) {
   return recurlyPlanCodeToStripeLookupKey[recurlyPlanCode]
+}
+
+/**
+ * @param {StripeLookupKey} stripeLookupKey
+ * @returns {RecurlyPlanCode}
+ */
+function mapStripeLookupKeyToRecurlyPlanCode(stripeLookupKey) {
+  return stripeLookupKeyToRecurlyPlanCode[stripeLookupKey]
 }
 
 const recurlyPlanCodeToPlanTypeAndPeriod = {
@@ -82,5 +99,6 @@ module.exports = {
   ensurePlansAreSetupCorrectly,
   findLocalPlanInSettings,
   mapRecurlyPlanCodeToStripeLookupKey,
+  mapStripeLookupKeyToRecurlyPlanCode,
   getPlanTypeAndPeriodFromRecurlyPlanCode,
 }

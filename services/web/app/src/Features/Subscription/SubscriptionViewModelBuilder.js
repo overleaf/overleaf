@@ -260,6 +260,10 @@ async function buildUsersSubscriptionViewModel(user, locale = 'en') {
   }
 
   if (personalSubscription && paymentRecord && paymentRecord.subscription) {
+    // don't return subscription payment information
+    delete personalSubscription.paymentProvider
+    delete personalSubscription.recurly
+
     const tax = paymentRecord.subscription.taxAmount || 0
     // Some plans allow adding more seats than the base plan provides.
     // This is recorded as a subscription add on.
