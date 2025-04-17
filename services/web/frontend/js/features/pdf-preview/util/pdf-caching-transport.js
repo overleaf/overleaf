@@ -175,6 +175,7 @@ export function generatePdfCachingTransportFactory() {
         prefetchLargeEnabled,
         cachedUrlLookupEnabled,
         abortSignal,
+        canTryFromCache,
         fallbackToCacheURL: getOutputPDFURLFromCache(),
       })
         .catch(err => {

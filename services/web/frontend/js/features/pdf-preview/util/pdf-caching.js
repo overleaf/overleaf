@@ -30,7 +30,7 @@ const CACHE_NO_STORE = 'no-store'
  * @param {string} url
  * @param {RequestInit} init
  */
-async function fetchWithCacheFallback(url, init) {
+async function fetchWithBrowserCacheFallback(url, init) {
   try {
     return await fetch(url, init)
   } catch (err) {
@@ -515,7 +515,7 @@ function getDynamicChunkInit({ file, start, end, signal }) {
 export async function fallbackRequest({ file, url, start, end, abortSignal }) {
   try {
     const init = getDynamicChunkInit({ file, start, end, signal: abortSignal })
-    const response = await fetchWithCacheFallback(url, init)
+    const response = await fetchWithBrowserCacheFallback(url, init)
     checkChunkResponse(response, end - start, init)
     return await response.arrayBuffer()
   } catch (e) {
@@ -590,6 +590,7 @@ function skipPrefetched(chunks, prefetched, start, end) {
  * @param {Map<string, {url:string,init:RequestInit}>} cachedUrls
  * @param {Object} metrics
  * @param {boolean} cachedUrlLookupEnabled
+ * @param {() => boolean} canTryFromCache
  * @param {string} fallbackToCacheURL
  * @param {Object} file
  */
@@ -600,6 +601,7 @@ async function fetchChunk({
   cachedUrls,
   metrics,
   cachedUrlLookupEnabled,
+  canTryFromCache,
   fallbackToCacheURL,
   file,
 }) {
@@ -614,7 +616,10 @@ async function fetchChunk({
     // We memorize the previous browser cache keys in `cachedUrls`.
     try {
       oldUrl.init.signal = init.signal
-      const response = await fetchWithCacheFallback(oldUrl.url, oldUrl.init)
+      const response = await fetchWithBrowserCacheFallback(
+        oldUrl.url,
+        oldUrl.init
+      )
       if (response.status === 200) {
         checkChunkResponse(response, estimatedSize, init)
         metrics.oldUrlHitCount += 1
@@ -632,7 +637,7 @@ async function fetchChunk({
   }
   let response
   try {
-    response = await fetchWithCacheFallback(url, init)
+    response = await fetchWithBrowserCacheFallback(url, init)
     checkChunkResponse(response, estimatedSize, init)
     if (chunk.hash) {
       delete init.signal // omit the signal from the cache
@@ -642,9 +647,10 @@ async function fetchChunk({
     if (chunk.hash) {
       cachedUrls.delete(chunk.hash)
     }
-    const isMissing = response?.status === 404 || response?.status === 416
     const hasOthersCached = cachedUrls.size > 0
-    if (isMissing && hasOthersCached) {
+    const info = { url, init, statusCode: response?.status }
+    const errTagged = OError.tag(err1, 'add info for canTryFromCache', info)
+    if (hasOthersCached && canTryFromCache(errTagged) && fallbackToCacheURL) {
       // Only try downloading chunks that were cached previously
       file.ranges = file.ranges.filter(r => cachedUrls.has(r.hash))
       // Try harder at fetching the chunk, fallback to cache
@@ -659,7 +665,7 @@ async function fetchChunk({
         })
       }
       try {
-        response = await fetchWithCacheFallback(url, init)
+        response = await fetchWithBrowserCacheFallback(url, init)
         checkChunkResponse(response, estimatedSize, init)
       } catch (err2) {
         throw err1
@@ -816,6 +822,7 @@ class Timer {
  * @param {boolean} prefetchLargeEnabled
  * @param {boolean} tryOldCachedUrlEnabled
  * @param {AbortSignal} abortSignal
+ * @param {() => boolean} canTryFromCache
  * @param {string} fallbackToCacheURL
  */
 export async function fetchRange({
@@ -832,6 +839,7 @@ export async function fetchRange({
   prefetchLargeEnabled,
   cachedUrlLookupEnabled,
   abortSignal,
+  canTryFromCache,
   fallbackToCacheURL,
 }) {
   const timer = new Timer()
@@ -974,6 +982,7 @@ export async function fetchRange({
           cachedUrls,
           metrics,
           cachedUrlLookupEnabled,
+          canTryFromCache,
           fallbackToCacheURL,
           file,
         })
