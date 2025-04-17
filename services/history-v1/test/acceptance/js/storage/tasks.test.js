@@ -76,9 +76,13 @@ describe('tasks', function () {
     await mongodb.chunks.insertMany(mongoChunks)
     await Promise.all([
       ...postgresChunks.map(chunk =>
-        historyStore.storeRaw(postgresProjectId.toString(), chunk.chunk_id, {
-          history: 'raw history',
-        })
+        historyStore.storeRaw(
+          postgresProjectId.toString(),
+          chunk.chunk_id.toString(),
+          {
+            history: 'raw history',
+          }
+        )
       ),
       ...mongoChunks.map(chunk =>
         historyStore.storeRaw(mongoProjectId.toString(), chunk._id.toString(), {

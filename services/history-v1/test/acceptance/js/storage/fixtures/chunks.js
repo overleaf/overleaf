@@ -15,7 +15,7 @@ exports.chunks = {
 exports.histories = {
   chunkOne: {
     projectId: DocFixtures.initializedProject.id,
-    chunkId: 1000000,
+    chunkId: '1000000',
     json: { snapshot: { files: {} }, changes: [] },
   },
 }

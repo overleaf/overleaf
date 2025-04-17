@@ -9,7 +9,7 @@ const assert = check.assert
 
 const MONGO_ID_REGEXP = /^[0-9a-f]{24}$/
 const POSTGRES_ID_REGEXP = /^[1-9][0-9]{0,9}$/
-const PROJECT_ID_REGEXP = /^([0-9a-f]{24}|[1-9][0-9]{0,9})$/
+const MONGO_OR_POSTGRES_ID_REGEXP = /^([0-9a-f]{24}|[1-9][0-9]{0,9})$/
 
 function transaction(transaction, message) {
   assert.function(transaction, message)
@@ -29,20 +29,20 @@ function blobHash(arg, message) {
  */
 function projectId(arg, message) {
   try {
-    assert.match(arg, PROJECT_ID_REGEXP, message)
+    assert.match(arg, MONGO_OR_POSTGRES_ID_REGEXP, message)
   } catch (error) {
     throw OError.tag(error, message, { arg })
   }
 }
 
 /**
- * A chunk id is either a number (for projects stored in Postgres) or a 24
- * character string (for projects stored in Mongo)
+ * A chunk id is a string that contains either an integer (for projects stored in Postgres) or 24
+ * hex digits (for projects stored in Mongo)
  */
 function chunkId(arg, message) {
-  const valid = check.integer(arg) || check.match(arg, MONGO_ID_REGEXP)
-  if (!valid) {
-    const error = new TypeError(message)
+  try {
+    assert.match(arg, MONGO_OR_POSTGRES_ID_REGEXP, message)
+  } catch (error) {
     throw OError.tag(error, message, { arg })
   }
 }

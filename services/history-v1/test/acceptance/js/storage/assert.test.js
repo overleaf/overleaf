@@ -92,9 +92,9 @@ describe('assert', function () {
       ).to.not.throw()
     })
 
-    it('should not throw for valid integer chunk ids', function () {
+    it('should not throw for valid postgres chunk ids', function () {
       expect(() =>
-        assert.chunkId(123456789, 'should be a chunk id')
+        assert.chunkId('123456789', 'should be a chunk id')
       ).to.not.throw()
     })
 
@@ -109,14 +109,14 @@ describe('assert', function () {
       }
     })
 
-    it('should throw for string integer chunk ids', function () {
+    it('should throw for integer chunk ids', function () {
       try {
-        assert.chunkId('12345', 'should be a chunk id')
+        assert.chunkId(12345, 'should be a chunk id')
         expect.fail()
       } catch (error) {
         expect(error).to.be.instanceOf(TypeError)
         expect(error.message).to.equal('should be a chunk id')
-        expect(OError.getFullInfo(error)).to.deep.equal({ arg: '12345' })
+        expect(OError.getFullInfo(error)).to.deep.equal({ arg: 12345 })
       }
     })
   })

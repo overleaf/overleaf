@@ -25,8 +25,8 @@ const gunzip = promisify(zlib.gunzip)
 
 class LoadError extends OError {
   /**
-   * @param {number|string} projectId
-   * @param {number|string} chunkId
+   * @param {string} projectId
+   * @param {string} chunkId
    * @param {any} cause
    */
   constructor(projectId, chunkId, cause) {
@@ -42,8 +42,8 @@ class LoadError extends OError {
 
 class StoreError extends OError {
   /**
-   * @param {number|string} projectId
-   * @param {number|string} chunkId
+   * @param {string} projectId
+   * @param {string} chunkId
    * @param {any} cause
    */
   constructor(projectId, chunkId, cause) {
@@ -58,8 +58,8 @@ class StoreError extends OError {
 }
 
 /**
- * @param {number|string} projectId
- * @param {number|string} chunkId
+ * @param {string} projectId
+ * @param {string} chunkId
  * @return {string}
  */
 function getKey(projectId, chunkId) {
@@ -89,8 +89,8 @@ class HistoryStore {
   /**
    * Load the raw object for a History.
    *
-   * @param {number|string} projectId
-   * @param {number|string} chunkId
+   * @param {string} projectId
+   * @param {string} chunkId
    * @return {Promise<import('overleaf-editor-core/lib/types').RawHistory>}
    */
   async loadRaw(projectId, chunkId) {
@@ -144,8 +144,8 @@ class HistoryStore {
   /**
    * Compress and store a {@link History}.
    *
-   * @param {number|string} projectId
-   * @param {number|string} chunkId
+   * @param {string} projectId
+   * @param {string} chunkId
    * @param {import('overleaf-editor-core/lib/types').RawHistory} rawHistory
    */
   async storeRaw(projectId, chunkId, rawHistory) {
