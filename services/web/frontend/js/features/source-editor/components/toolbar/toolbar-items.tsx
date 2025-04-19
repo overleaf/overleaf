@@ -15,6 +15,11 @@ import { withinFormattingCommand } from '@/features/source-editor/utils/tree-ope
 import { isSplitTestEnabled } from '@/utils/splitTestUtils'
 import { isMac } from '@/shared/utils/os'
 
+/**
+ * This component serves as the toolbar above the latex editor
+ * This component groups together various buttons with functionality
+ */
+
 export const ToolbarItems: FC<{
   state: EditorState
   overflowed?: Set<string>
@@ -92,6 +97,19 @@ export const ToolbarItems: FC<{
                 active={isActive('\\textit')}
                 icon="format_italic"
                 shortcut={isMac ? '⌘I' : 'Ctrl+I'}
+              />
+              {/**
+               * Insert format color option into toolbar
+               * Uses same styling as italic button but 
+               * with different functions
+               */}
+              <ToolbarButton
+                id="toolbar-format-italic"
+                label={t('Format Color')}
+                command={commands.toggleColor}
+                active={isActive('\\textcolor')}
+                icon={bsVersion({ bs5: 'format_color_text', bs3: 'text_color' })}
+                shortcut={isMac ? '⌘;' : 'Ctrl+;'}
               />
             </div>
           )}
