@@ -1,9 +1,7 @@
 import { useUserSettingsContext } from '@/shared/context/user-settings-context'
-import { isSplitTestEnabled } from '@/utils/splitTestUtils'
+import { isInExperiment } from '@/utils/labs-utils'
 
-// TODO: For now we're using the feature flag, but eventually we'll read this
-// from labs.
-export const canUseNewEditor = () => isSplitTestEnabled('editor-redesign')
+export const canUseNewEditor = () => isInExperiment('editor-redesign')
 
 export const useIsNewEditorEnabled = () => {
   const { userSettings } = useUserSettingsContext()
