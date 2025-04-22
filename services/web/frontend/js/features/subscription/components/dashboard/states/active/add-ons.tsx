@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next'
+import getMeta from '@/utils/meta'
 import { Dropdown, DropdownMenu, DropdownToggle } from 'react-bootstrap-5'
 import OLDropdownMenuItem from '@/features/ui/components/ol/ol-dropdown-menu-item'
 import MaterialIcon from '@/shared/components/material-icon'
@@ -16,6 +17,7 @@ type AddOnsProps = {
   subscription: PaidSubscription
   onStandalonePlan: boolean
   handleCancelClick: (code: string) => void
+  handleManageOnWritefull: () => void
 }
 
 type AddOnProps = {
@@ -98,12 +100,60 @@ function AddOn({
   )
 }
 
+function WritefullGrantedAddOn({
+  handleManageOnWritefull,
+}: {
+  handleManageOnWritefull: () => void
+}) {
+  const { t } = useTranslation()
+  return (
+    <div className="add-on-card">
+      <div>
+        <img
+          alt="sparkle"
+          className="add-on-card-icon"
+          src={sparkle}
+          aria-hidden="true"
+        />
+      </div>
+      <div className="add-on-card-content">
+        <div className="heading">{ADD_ON_NAME}</div>
+        <div className="description small mt-1">
+          {t('included_as_part_of_your_writefull_subscription')}
+        </div>
+      </div>
+
+      <div className="ms-auto">
+        <Dropdown align="end">
+          <DropdownToggle
+            id="add-on-dropdown-toggle"
+            className="add-on-options-toggle"
+            variant="secondary"
+          >
+            <MaterialIcon
+              type="more_vert"
+              accessibilityLabel={t('more_options')}
+            />
+          </DropdownToggle>
+          <DropdownMenu flip={false}>
+            <OLDropdownMenuItem tabIndex={-1} onClick={handleManageOnWritefull}>
+              {t('manage_subscription')}
+            </OLDropdownMenuItem>
+          </DropdownMenu>
+        </Dropdown>
+      </div>
+    </div>
+  )
+}
+
 function AddOns({
   subscription,
   onStandalonePlan,
   handleCancelClick,
+  handleManageOnWritefull,
 }: AddOnsProps) {
   const { t } = useTranslation()
+  const hasAiAssistViaWritefull = getMeta('ol-hasAiAssistViaWritefull')
   const addOnsDisplayPrices = onStandalonePlan
     ? {
         [AI_STANDALONE_PLAN_CODE]: subscription.payment.displayPrice,
@@ -113,26 +163,35 @@ function AddOns({
     ? [{ addOnCode: AI_STANDALONE_PLAN_CODE }]
     : subscription.addOns?.filter(addOn => addOn.addOnCode !== LICENSE_ADD_ON)
 
+  const hasAddons =
+    (addOnsToDisplay && addOnsToDisplay.length > 0) || hasAiAssistViaWritefull
   return (
     <>
       <h2 className="h3 fw-bold">{t('add_ons')}</h2>
-      {addOnsToDisplay && addOnsToDisplay.length > 0 ? (
-        addOnsToDisplay.map(addOn => (
-          <AddOn
-            addOnCode={addOn.addOnCode}
-            key={addOn.addOnCode}
-            isAnnual={Boolean(subscription.plan.annual)}
-            handleCancelClick={handleCancelClick}
-            pendingCancellation={
-              subscription.pendingPlan !== undefined &&
-              (subscription.pendingPlan.addOns ?? []).every(
-                pendingAddOn => pendingAddOn.code !== addOn.addOnCode
-              )
-            }
-            displayPrice={addOnsDisplayPrices[addOn.addOnCode]}
-            nextBillingDate={subscription.payment.nextPaymentDueDate}
-          />
-        ))
+      {hasAddons ? (
+        <>
+          {addOnsToDisplay?.map(addOn => (
+            <AddOn
+              addOnCode={addOn.addOnCode}
+              key={addOn.addOnCode}
+              isAnnual={Boolean(subscription.plan.annual)}
+              handleCancelClick={handleCancelClick}
+              pendingCancellation={
+                subscription.pendingPlan !== undefined &&
+                (subscription.pendingPlan.addOns ?? []).every(
+                  pendingAddOn => pendingAddOn.code !== addOn.addOnCode
+                )
+              }
+              displayPrice={addOnsDisplayPrices[addOn.addOnCode]}
+              nextBillingDate={subscription.payment.nextPaymentDueDate}
+            />
+          ))}
+          {hasAiAssistViaWritefull && (
+            <WritefullGrantedAddOn
+              handleManageOnWritefull={handleManageOnWritefull}
+            />
+          )}
+        </>
       ) : (
         <p>{t('you_dont_have_any_add_ons_on_your_account')}</p>
       )}

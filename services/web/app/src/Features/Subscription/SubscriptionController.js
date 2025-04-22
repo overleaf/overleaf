@@ -154,6 +154,9 @@ async function userSubscriptionPage(req, res) {
     )
   }
 
+  const hasAiAssistViaWritefull =
+    await FeaturesUpdater.promises.hasFeaturesViaWritefull(user._id)
+
   const data = {
     title: 'your_subscription',
     plans: plansData?.plans,
@@ -176,6 +179,7 @@ async function userSubscriptionPage(req, res) {
     groupSettingsEnabledFor,
     isManagedAccount: !!req.managedBy,
     userRestrictions: Array.from(req.userRestrictions || []),
+    hasAiAssistViaWritefull,
   }
   res.render('subscriptions/dashboard-react', data)
 }
@@ -322,13 +326,13 @@ async function previewAddonPurchase(req, res) {
     subscriptionChange =
       await SubscriptionHandler.promises.previewAddonPurchase(userId, addOnCode)
 
-    const hasBundleViaWritefull =
+    const hasAiAssistViaWritefull =
       await FeaturesUpdater.promises.hasFeaturesViaWritefull(userId)
     const isAiUpgrade =
       PaymentProviderEntities.subscriptionChangeIsAiAssistUpgrade(
         subscriptionChange
       )
-    if (hasBundleViaWritefull && isAiUpgrade) {
+    if (hasAiAssistViaWritefull && isAiUpgrade) {
       return res.redirect(
         '/user/subscription?redirect-reason=writefull-entitled'
       )

@@ -155,7 +155,11 @@ describe('SubscriptionController', function () {
         './RecurlyEventHandler': {
           sendRecurlyAnalyticsEvent: sinon.stub().resolves(),
         },
-        './FeaturesUpdater': (this.FeaturesUpdater = {}),
+        './FeaturesUpdater': (this.FeaturesUpdater = {
+          promises: {
+            hasFeaturesViaWritefull: sinon.stub().resolves(false),
+          },
+        }),
         './GroupPlansData': (this.GroupPlansData = {}),
         './V1SubscriptionManager': (this.V1SubscriptionManager = {}),
         '../Errors/HttpErrorHandler': (this.HttpErrorHandler = {

@@ -115,6 +115,7 @@ export interface Meta {
   'ol-groupSsoSetupSuccess': boolean
   'ol-groupSubscriptionsPendingEnrollment': PendingGroupSubscriptionEnrollment[]
   'ol-groupsAndEnterpriseBannerVariant': GroupsAndEnterpriseBannerVariant
+  'ol-hasAiAssistViaWritefull': boolean
   'ol-hasGroupSSOFeature': boolean
   'ol-hasIndividualRecurlySubscription': boolean
   'ol-hasManagedUsersFeature': boolean
