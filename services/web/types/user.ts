@@ -58,6 +58,8 @@ export type User = {
   }
   featureUsage?: FeatureUsage
   planCode?: string
+  planName?: string
+  isAnnualPlan?: boolean
   isMemberOfGroupSubscription?: boolean
   hasInstitutionLicence?: boolean
 }

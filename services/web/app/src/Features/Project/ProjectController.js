@@ -787,8 +787,10 @@ const _ProjectController = {
 
       let planCode = subscription?.planCode
       if (!planCode && !userInNonIndividualSub) {
-        planCode = 'free'
+        planCode = 'personal'
       }
+
+      const planDetails = Settings.plans.find(p => p.planCode === planCode)
 
       res.render(template, {
         title: project.name,
@@ -820,6 +822,8 @@ const _ProjectController = {
           inactiveTutorials: TutorialHandler.getInactiveTutorials(user),
           isAdmin: hasAdminAccess(user),
           planCode,
+          planName: planDetails?.name,
+          isAnnualPlan: planCode && planDetails?.annual,
           isMemberOfGroupSubscription: userIsMemberOfGroupSubscription,
           hasInstitutionLicence: userHasInstitutionLicence,
         },
