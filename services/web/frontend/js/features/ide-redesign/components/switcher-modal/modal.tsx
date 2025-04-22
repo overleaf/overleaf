@@ -149,15 +149,18 @@ const SwitcherWhatsNew = () => {
     <div className="ide-redesign-switcher-modal-whats-new">
       <h4>{t('whats_new')}</h4>
       <ul>
-        <li>{t('chat')}</li>
-        <li>{t('settings_for_git_github_and_dropbox_integrations')}</li>
-        <li>{t('dark_mode')}</li>
+        <li>{t('new_look_and_feel')}</li>
+        <li>
+          {t('new_navigation_introducing_left_hand_side_rail_and_top_menus')}
+        </li>
+        <li>{t('new_look_and_placement_of_the_settings')}</li>
+        <li>{t('improved_dark_mode')}</li>
+        <li>{t('review_panel_and_error_logs_moved_to_the_left')}</li>
       </ul>
       <hr />
       <h4>{t('whats_next')}</h4>
       <ul>
-        <li>{t('history')}</li>
-        <li>{t('review_panel_comments_and_track_changes')}</li>
+        <li>{t('more_changes_based_on_your_feedback')}</li>
       </ul>
     </div>
   )
