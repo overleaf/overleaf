@@ -142,11 +142,8 @@ export class ShareJsDoc extends EventEmitter {
 
   private removeCarriageReturnCharFromShareJsDoc() {
     const doc = this._doc
-    if (doc.snapshot.indexOf('\r') === -1) {
-      return
-    }
     let nextPos
-    while ((nextPos = doc.snapshot.indexOf('\r')) !== -1) {
+    while ((nextPos = doc.getText().indexOf('\r')) !== -1) {
       debugConsole.log('[ShareJsDoc] remove-carriage-return-char', nextPos)
       doc.del(nextPos, 1)
     }
@@ -259,7 +256,7 @@ export class ShareJsDoc extends EventEmitter {
   }
 
   getSnapshot() {
-    return this._doc.snapshot as string | undefined
+    return this._doc.getText() as string
   }
 
   getVersion() {

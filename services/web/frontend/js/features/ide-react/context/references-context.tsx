@@ -60,7 +60,7 @@ export const ReferencesProvider: FC = ({ children }) => {
       // avoid reindexing references if the bib file has not changed since the
       // last time they were indexed
       const docId = doc.doc_id
-      const snapshot = doc._doc.snapshot
+      const snapshot = doc.getSnapshot()
       const now = Date.now()
       const sha1 = generateSHA1Hash(
         'blob ' + snapshot.length + '\x00' + snapshot

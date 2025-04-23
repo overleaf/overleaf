@@ -1008,8 +1008,8 @@ export const { Doc } = (() => {
 
         this.type = type;
         if (type.api) {
-          for (var k in type.api) {
-            var v = type.api[k];this[k] = v;
+          for (const k of ['insert', 'del', 'getText', 'getLength', '_register']) {
+            this[k] = type.api[k]
           }
           return typeof this._register === 'function' ? this._register() : undefined;
         } else {
@@ -1322,7 +1322,8 @@ export const { Doc } = (() => {
           var needToRecomputeHash = !this.__lastSubmitTimestamp || (age > RECOMPUTE_HASH_INTERVAL) || (age < 0)
           if (needToRecomputeHash || debugging) {
             // send git hash of current snapshot
-            var sha1 = generateSHA1Hash("blob " + this.snapshot.length + "\x00" + this.snapshot)
+            const str = this.getText()
+            var sha1 = generateSHA1Hash("blob " + str.length + "\x00" + str)
             this.__lastSubmitTimestamp = now;
           }
         }

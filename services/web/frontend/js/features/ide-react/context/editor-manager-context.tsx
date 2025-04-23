@@ -580,7 +580,7 @@ export const EditorManagerProvider: FC = ({ children }) => {
         editorContent =
           typeof editorContent === 'string'
             ? editorContent
-            : document.doc?._doc.snapshot
+            : document.getSnapshot()
 
         // Tear down the ShareJsDoc.
         if (document.doc) document.doc.clearInflightAndPendingOps()
