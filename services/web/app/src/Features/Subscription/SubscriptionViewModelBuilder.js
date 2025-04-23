@@ -17,11 +17,7 @@ const _ = require('lodash')
 const async = require('async')
 const SubscriptionHelper = require('./SubscriptionHelper')
 const { callbackify } = require('@overleaf/promise-utils')
-const {
-  InvalidError,
-  NotFoundError,
-  V1ConnectionError,
-} = require('../Errors/Errors')
+const { V1ConnectionError } = require('../Errors/Errors')
 const FeaturesHelper = require('./FeaturesHelper')
 const { formatCurrency } = require('../../util/currency')
 const Modules = require('../../infrastructure/Modules')
@@ -31,7 +27,7 @@ const Modules = require('../../infrastructure/Modules')
  */
 
 function buildHostedLink(type) {
-  return `/user/subscription/recurly/${type}`
+  return `/user/subscription/payment/${type}`
 }
 
 // Downgrade from Mongoose object, so we can add custom attributes to object
@@ -39,39 +35,6 @@ function serializeMongooseObject(object) {
   return object && typeof object.toObject === 'function'
     ? object.toObject()
     : object
-}
-
-async function getRedirectToHostedPage(userId, pageType) {
-  if (!['billing-details', 'account-management'].includes(pageType)) {
-    throw new InvalidError('unexpected page type')
-  }
-  const personalSubscription =
-    await SubscriptionLocator.promises.getUsersSubscription(userId)
-  const recurlySubscriptionId = personalSubscription?.recurlySubscription_id
-  if (!recurlySubscriptionId) {
-    throw new NotFoundError('not a recurly subscription')
-  }
-  const recurlySubscription = await RecurlyWrapper.promises.getSubscription(
-    recurlySubscriptionId,
-    { includeAccount: true }
-  )
-
-  const recurlySubdomain = Settings.apis.recurly.subdomain
-  const hostedLoginToken = recurlySubscription.account.hosted_login_token
-  if (!hostedLoginToken) {
-    throw new Error('recurly account does not have hosted login token')
-  }
-  let path = ''
-  if (pageType === 'billing-details') {
-    path = 'billing_info/edit?ht='
-  }
-  return [
-    'https://',
-    recurlySubdomain,
-    '.recurly.com/account/',
-    path,
-    hostedLoginToken,
-  ].join('')
 }
 
 async function buildUsersSubscriptionViewModel(user, locale = 'en') {
@@ -281,7 +244,10 @@ async function buildUsersSubscriptionViewModel(user, locale = 'en') {
     const totalLicenses = (plan.membersLimit || 0) + additionalLicenses
     personalSubscription.payment = {
       taxRate,
-      billingDetailsLink: buildHostedLink('billing-details'),
+      billingDetailsLink:
+        paymentRecord.subscription.service === 'recurly'
+          ? buildHostedLink('billing-details')
+          : null,
       accountManagementLink: buildHostedLink('account-management'),
       additionalLicenses,
       addOns,
@@ -608,7 +574,6 @@ module.exports = {
   getBestSubscription: callbackify(getBestSubscription),
   promises: {
     buildUsersSubscriptionViewModel,
-    getRedirectToHostedPage,
     getBestSubscription,
   },
 }

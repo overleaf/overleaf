@@ -54,13 +54,6 @@ export default {
       SubscriptionController.canceledSubscription
     )
 
-    webRouter.get(
-      '/user/subscription/recurly/:pageType',
-      AuthenticationController.requireLogin(),
-      RateLimiterMiddleware.rateLimit(subscriptionRateLimiter),
-      SubscriptionController.redirectToHostedPage
-    )
-
     webRouter.delete(
       '/subscription/group/user',
       AuthenticationController.requireLogin(),

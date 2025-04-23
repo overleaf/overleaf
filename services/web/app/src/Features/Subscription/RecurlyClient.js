@@ -101,6 +101,43 @@ async function getActiveCouponsForUserId(userId) {
 }
 
 /**
+ * Get hosted customer management link
+ *
+ * @param {string} userId
+ * @param {string} pageType
+ * @return {Promise<string|null>}
+ */
+async function getCustomerManagementLink(userId, pageType) {
+  try {
+    const account = await client.getAccount(`code-${userId}`)
+    const recurlySubdomain = Settings.apis.recurly.subdomain
+    const hostedLoginToken = account.hostedLoginToken
+    if (!hostedLoginToken) {
+      throw new OError('recurly account does not have hosted login token')
+    }
+    let path = ''
+    if (pageType === 'billing-details') {
+      path = 'billing_info/edit?ht='
+    }
+    return [
+      'https://',
+      recurlySubdomain,
+      '.recurly.com/account/',
+      path,
+      hostedLoginToken,
+    ].join('')
+  } catch (err) {
+    if (err instanceof recurly.errors.NotFoundError) {
+      // An expected error, we don't need to handle it, just return nothing
+      logger.debug({ userId }, 'no recurly account found for user')
+      return null
+    } else {
+      throw err
+    }
+  }
+}
+
+/**
  * Get a subscription from Recurly
  *
  * @param {string} subscriptionId
@@ -629,6 +666,7 @@ module.exports = {
     getAccountForUserId,
     createAccountForUserId,
     getActiveCouponsForUserId,
+    getCustomerManagementLink,
     previewSubscriptionChange,
     applySubscriptionChangeRequest,
     removeSubscriptionChange,

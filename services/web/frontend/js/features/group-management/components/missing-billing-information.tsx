@@ -16,7 +16,7 @@ function MissingBillingInformation() {
             components={[
               // eslint-disable-next-line jsx-a11y/anchor-has-content, react/jsx-key
               <a
-                href="/user/subscription/recurly/billing-details"
+                href="/user/subscription/payment/billing-details"
                 rel="noreferrer noopener"
               />,
               // eslint-disable-next-line jsx-a11y/anchor-has-content, react/jsx-key

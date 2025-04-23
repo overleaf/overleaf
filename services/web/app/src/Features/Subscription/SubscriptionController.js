@@ -611,18 +611,6 @@ async function refreshUserFeatures(req, res) {
   res.sendStatus(200)
 }
 
-async function redirectToHostedPage(req, res) {
-  const userId = SessionManager.getLoggedInUserId(req.session)
-  const { pageType } = req.params
-  const url =
-    await SubscriptionViewModelBuilder.promises.getRedirectToHostedPage(
-      userId,
-      pageType
-    )
-  logger.warn({ userId, pageType }, 'redirecting to recurly hosted page')
-  res.redirect(url)
-}
-
 async function getRecommendedCurrency(req, res) {
   const userId = SessionManager.getLoggedInUserId(req.session)
   let ip = req.ip
@@ -793,7 +781,6 @@ module.exports = {
   extendTrial: expressify(extendTrial),
   recurlyNotificationParser,
   refreshUserFeatures: expressify(refreshUserFeatures),
-  redirectToHostedPage: expressify(redirectToHostedPage),
   previewAddonPurchase: expressify(previewAddonPurchase),
   purchaseAddon,
   removeAddon,

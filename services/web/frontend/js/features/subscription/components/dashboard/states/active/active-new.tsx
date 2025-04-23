@@ -140,21 +140,33 @@ export function ActiveSubscriptionNew({
         />
       </p>
       <div>
-        <a
-          href={subscription.payment.accountManagementLink}
-          target="_blank"
-          rel="noreferrer noopener"
-          className="me-2"
-        >
-          {t('view_invoices')}
-        </a>
-        <a
-          href={subscription.payment.billingDetailsLink}
-          target="_blank"
-          rel="noreferrer noopener"
-        >
-          {t('view_billing_details')}
-        </a>
+        {subscription.payment.billingDetailsLink ? (
+          <>
+            <a
+              href={subscription.payment.accountManagementLink}
+              target="_blank"
+              rel="noreferrer noopener"
+              className="me-2"
+            >
+              {t('view_invoices')}
+            </a>
+            <a
+              href={subscription.payment.billingDetailsLink}
+              target="_blank"
+              rel="noreferrer noopener"
+            >
+              {t('view_billing_details')}
+            </a>
+          </>
+        ) : (
+          <a
+            href={subscription.payment.accountManagementLink}
+            rel="noreferrer noopener"
+            className="me-2"
+          >
+            {t('view_payment_portal')}
+          </a>
+        )}
       </div>
       <div className="mt-3">
         <PriceExceptions subscription={subscription} />

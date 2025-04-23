@@ -25,7 +25,7 @@ describe('<MissingBillingInformation />', function () {
         }).should(
           'have.attr',
           'href',
-          '/user/subscription/recurly/billing-details'
+          '/user/subscription/payment/billing-details'
         )
         cy.findByRole('link', { name: /get in touch/i }).should(
           'have.attr',

@@ -531,9 +531,9 @@ describe('SubscriptionViewModelBuilder', function () {
           )
         assert.deepEqual(result.personalSubscription.payment, {
           taxRate: 0.1,
-          billingDetailsLink: '/user/subscription/recurly/billing-details',
+          billingDetailsLink: '/user/subscription/payment/billing-details',
           accountManagementLink:
-            '/user/subscription/recurly/account-management',
+            '/user/subscription/payment/account-management',
           additionalLicenses: 0,
           addOns: [
             {
@@ -623,6 +623,35 @@ describe('SubscriptionViewModelBuilder', function () {
         assert.equal(
           result.personalSubscription.payment.pendingTotalLicenses,
           12
+        )
+      })
+
+      it('does not add a billing details link for a Stripe subscription', async function () {
+        this.paymentRecord.service = 'stripe'
+        this.SubscriptionLocator.getUsersSubscription.yields(
+          null,
+          this.individualSubscription
+        )
+        this.Modules.hooks.fire
+          .withArgs('getPaymentFromRecord', this.individualSubscription)
+          .yields(null, [
+            {
+              subscription: this.paymentRecord,
+              account: new PaymentProviderAccount({}),
+              coupons: [],
+            },
+          ])
+        const result =
+          await this.SubscriptionViewModelBuilder.promises.buildUsersSubscriptionViewModel(
+            this.user
+          )
+        assert.equal(
+          result.personalSubscription.payment.billingDetailsLink,
+          undefined
+        )
+        assert.equal(
+          result.personalSubscription.payment.accountManagementLink,
+          '/user/subscription/payment/account-management'
         )
       })
     })

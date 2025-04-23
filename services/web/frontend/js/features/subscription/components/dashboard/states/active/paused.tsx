@@ -66,22 +66,34 @@ export function PausedSubscription({
       </p>
 
       <p className="d-inline-flex flex-wrap gap-1">
-        <a
-          href={subscription.payment.billingDetailsLink}
-          target="_blank"
-          rel="noreferrer noopener"
-          className="btn btn-secondary-info btn-secondary"
-        >
-          {t('update_your_billing_details')}
-        </a>{' '}
-        <a
-          href={subscription.payment.accountManagementLink}
-          target="_blank"
-          rel="noreferrer noopener"
-          className="btn btn-secondary-info btn-secondary"
-        >
-          {t('view_your_invoices')}
-        </a>
+        {subscription.payment.billingDetailsLink ? (
+          <>
+            <a
+              href={subscription.payment.billingDetailsLink}
+              target="_blank"
+              rel="noreferrer noopener"
+              className="btn btn-secondary-info btn-secondary"
+            >
+              {t('update_your_billing_details')}
+            </a>{' '}
+            <a
+              href={subscription.payment.accountManagementLink}
+              target="_blank"
+              rel="noreferrer noopener"
+              className="btn btn-secondary-info btn-secondary"
+            >
+              {t('view_your_invoices')}
+            </a>
+          </>
+        ) : (
+          <a
+            href={subscription.payment.accountManagementLink}
+            rel="noreferrer noopener"
+            className="btn btn-secondary-info btn-secondary"
+          >
+            {t('view_payment_portal')}
+          </a>
+        )}
       </p>
 
       <ChangePlanModal />

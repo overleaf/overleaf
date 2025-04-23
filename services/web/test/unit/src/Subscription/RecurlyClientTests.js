@@ -19,6 +19,7 @@ describe('RecurlyClient', function () {
         recurly: {
           apiKey: 'nonsense',
           privateKey: 'private_nonsense',
+          subdomain: 'test',
         },
       },
       plans: [],
@@ -249,6 +250,49 @@ describe('RecurlyClient', function () {
       await expect(
         this.RecurlyClient.promises.getActiveCouponsForUserId('some-user')
       ).to.eventually.be.rejectedWith(Error)
+    })
+  })
+
+  describe('getCustomerManagementLink', function () {
+    it('should throw if recurly token is not returned', async function () {
+      this.client.getAccount.resolves({})
+      await expect(
+        this.RecurlyClient.promises.getCustomerManagementLink(
+          '12345',
+          'account-management',
+          'en-US'
+        )
+      ).to.be.rejectedWith('recurly account does not have hosted login token')
+    })
+
+    it('should generate the correct account management url', async function () {
+      this.client.getAccount.resolves({
+        hostedLoginToken: '987654321',
+      })
+      const result =
+        await this.RecurlyClient.promises.getCustomerManagementLink(
+          '12345',
+          'account-management',
+          'en-US'
+        )
+
+      expect(result).to.equal('https://test.recurly.com/account/987654321')
+    })
+
+    it('should generate the correct billing details url', async function () {
+      this.client.getAccount.resolves({
+        hostedLoginToken: '987654321',
+      })
+      const result =
+        await this.RecurlyClient.promises.getCustomerManagementLink(
+          '12345',
+          'billing-details',
+          'en-US'
+        )
+
+      expect(result).to.equal(
+        'https://test.recurly.com/account/billing_info/edit?ht=987654321'
+      )
     })
   })
 
