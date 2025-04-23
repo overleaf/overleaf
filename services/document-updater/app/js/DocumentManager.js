@@ -160,14 +160,6 @@ const DocumentManager = {
       alreadyLoaded,
     } = await DocumentManager.getDoc(projectId, docId)
 
-    if (oldLines != null && oldLines.length > 0 && oldLines[0].text != null) {
-      logger.debug(
-        { docId, projectId, oldLines, newLines },
-        'document is JSON so not updating'
-      )
-      return
-    }
-
     logger.debug(
       { docId, projectId, oldLines, newLines },
       'setting a document via http'
