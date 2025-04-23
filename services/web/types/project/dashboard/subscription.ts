@@ -1,3 +1,5 @@
+import { SubscriptionState } from '../../subscription/dashboard/subscription'
+
 type SubscriptionBase = {
   featuresPageURL: string
 }
@@ -9,7 +11,7 @@ export type FreePlanSubscription = {
 type FreeSubscription = FreePlanSubscription
 
 type RecurlyStatus = {
-  state: 'active' | 'canceled' | 'expired' | 'paused'
+  state: SubscriptionState
 }
 
 type PaidSubscriptionBase = {

@@ -64,6 +64,15 @@ const SubscriptionSchema = new Schema(
       subscriptionId: {
         type: String,
       },
+      state: {
+        type: String,
+      },
+      trialStartedAt: {
+        type: Date,
+      },
+      trialEndsAt: {
+        type: Date,
+      },
     },
     collectionMethod: {
       type: String,

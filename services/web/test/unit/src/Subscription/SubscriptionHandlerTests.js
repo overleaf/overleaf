@@ -114,6 +114,7 @@ describe('SubscriptionHandler', function () {
       promises: {
         updateSubscriptionFromRecurly: sinon.stub().resolves(),
         syncSubscription: sinon.stub().resolves(),
+        syncStripeSubscription: sinon.stub().resolves(),
         startFreeTrial: sinon.stub().resolves(),
       },
     }

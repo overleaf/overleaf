@@ -1,5 +1,9 @@
 // @ts-check
 
+/**
+ * @import { PaymentProvider } from '../../../../types/subscription/dashboard/subscription'
+ */
+
 const OError = require('@overleaf/o-error')
 const { DuplicateAddOnError, AddOnNotPresentError } = require('./Errors')
 const PlansLocator = require('./PlansLocator')
@@ -27,8 +31,9 @@ class PaymentProviderSubscription {
    * @param {Date} props.periodEnd
    * @param {string} props.collectionMethod
    * @param {PaymentProviderSubscriptionChange} [props.pendingChange]
-   * @param {string} [props.service]
+   * @param {PaymentProvider['service']} [props.service]
    * @param {string} [props.state]
+   * @param {Date|null} [props.trialPeriodStart]
    * @param {Date|null} [props.trialPeriodEnd]
    * @param {Date|null} [props.pausePeriodStart]
    * @param {number|null} [props.remainingPauseCycles]
@@ -51,6 +56,7 @@ class PaymentProviderSubscription {
     this.pendingChange = props.pendingChange ?? null
     this.service = props.service ?? 'recurly'
     this.state = props.state ?? 'active'
+    this.trialPeriodStart = props.trialPeriodStart ?? null
     this.trialPeriodEnd = props.trialPeriodEnd ?? null
     this.pausePeriodStart = props.pausePeriodStart ?? null
     this.remainingPauseCycles = props.remainingPauseCycles ?? null

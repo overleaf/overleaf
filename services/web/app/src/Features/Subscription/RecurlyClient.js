@@ -411,6 +411,7 @@ function subscriptionFromApi(apiSubscription) {
     collectionMethod: apiSubscription.collectionMethod,
     service: 'recurly',
     state: apiSubscription.state ?? 'active',
+    trialPeriodStart: apiSubscription.trialStartedAt,
     trialPeriodEnd: apiSubscription.trialEndsAt,
     pausePeriodStart: apiSubscription.pausedAt,
     remainingPauseCycles: apiSubscription.remainingPauseCycles,
