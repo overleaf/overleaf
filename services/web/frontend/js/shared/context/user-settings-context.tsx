@@ -13,6 +13,7 @@ import { UserSettings, Keybindings } from '../../../../types/user-settings'
 import getMeta from '@/utils/meta'
 import useScopeValue from '@/shared/hooks/use-scope-value'
 import { userStyles } from '../utils/styles'
+import { canUseNewEditor } from '@/features/ide-redesign/utils/new-editor-utils'
 
 const defaultSettings: UserSettings = {
   pdfViewer: 'pdfjs',
@@ -43,6 +44,7 @@ type ScopeSettings = {
   fontSize: number
   fontFamily: string
   lineHeight: number
+  isNewEditor: boolean
 }
 
 export const UserSettingsContext = createContext<
@@ -64,6 +66,7 @@ export const UserSettingsProvider: FC = ({ children }) => {
       fontFamily,
       lineHeight,
       fontSize: userSettings.fontSize,
+      isNewEditor: canUseNewEditor() && userSettings.enableNewEditor,
     })
   }, [setScopeSettings, userSettings])
 
