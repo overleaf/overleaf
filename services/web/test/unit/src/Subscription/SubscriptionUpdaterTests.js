@@ -801,4 +801,38 @@ describe('SubscriptionUpdater', function () {
       }
     })
   })
+
+  describe('scheduleRefreshFeatures', function () {
+    it('should call upgrades feature for personal subscription from admin_id', async function () {
+      this.subscription = {
+        _id: new ObjectId().toString(),
+        mock: 'subscription',
+        admin_id: new ObjectId(),
+      }
+
+      await this.SubscriptionUpdater.promises.scheduleRefreshFeatures(
+        this.subscription
+      )
+
+      expect(
+        this.FeaturesUpdater.promises.scheduleRefreshFeatures
+      ).to.have.been.calledOnceWith(this.subscription.admin_id)
+    })
+
+    it('should call upgrades feature for group subscription from admin_id and member_ids', async function () {
+      this.subscription = {
+        _id: new ObjectId().toString(),
+        mock: 'subscription',
+        admin_id: new ObjectId(),
+        member_ids: [new ObjectId(), new ObjectId(), new ObjectId()],
+      }
+      await this.SubscriptionUpdater.promises.scheduleRefreshFeatures(
+        this.subscription
+      )
+
+      expect(
+        this.FeaturesUpdater.promises.scheduleRefreshFeatures.callCount
+      ).to.equal(4)
+    })
+  })
 })

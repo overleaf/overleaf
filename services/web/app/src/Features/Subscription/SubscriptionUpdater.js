@@ -165,7 +165,7 @@ async function deleteSubscription(subscription, deleterData) {
   await Subscription.deleteOne({ _id: subscription._id }).exec()
 
   // 4. refresh users features
-  await _scheduleRefreshFeatures(subscription)
+  await scheduleRefreshFeatures(subscription)
 }
 
 async function restoreSubscription(subscriptionId) {
@@ -206,7 +206,11 @@ async function refreshUsersFeatures(subscription) {
   }
 }
 
-async function _scheduleRefreshFeatures(subscription) {
+/**
+ *
+ * @param {Subscription} subscription
+ */
+async function scheduleRefreshFeatures(subscription) {
   const userIds = [subscription.admin_id].concat(subscription.member_ids || [])
   for (const userId of userIds) {
     await FeaturesUpdater.promises.scheduleRefreshFeatures(
@@ -367,7 +371,7 @@ async function updateSubscriptionFromRecurly(
     AnalyticsManager.registerAccountMapping(accountMapping)
   }
 
-  await _scheduleRefreshFeatures(subscription)
+  await scheduleRefreshFeatures(subscription)
 }
 
 async function _sendUserGroupPlanCodeUserProperty(userId) {
@@ -449,6 +453,7 @@ module.exports = {
   deleteWithV1Id: callbackify(deleteWithV1Id),
   restoreSubscription: callbackify(restoreSubscription),
   updateSubscriptionFromRecurly: callbackify(updateSubscriptionFromRecurly),
+  scheduleRefreshFeatures: callbackify(scheduleRefreshFeatures),
   promises: {
     updateAdmin,
     syncSubscription,
@@ -462,5 +467,6 @@ module.exports = {
     deleteWithV1Id,
     restoreSubscription,
     updateSubscriptionFromRecurly,
+    scheduleRefreshFeatures,
   },
 }
