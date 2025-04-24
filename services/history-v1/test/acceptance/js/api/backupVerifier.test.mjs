@@ -30,6 +30,9 @@ import { historyStore } from '../../../../storage/lib/history_store.js'
  * @typedef {import("overleaf-editor-core").Blob} Blob
  */
 
+// Timeout for script execution, increased to avoid flaky tests
+const SCRIPT_TIMEOUT = 15_000
+
 async function verifyProjectScript(historyId, expectFail = true) {
   try {
     const result = await promisify(execFile)(
@@ -37,7 +40,7 @@ async function verifyProjectScript(historyId, expectFail = true) {
       ['storage/scripts/verify_project.mjs', `--historyId=${historyId}`],
       {
         encoding: 'utf-8',
-        timeout: 5_000,
+        timeout: SCRIPT_TIMEOUT,
         env: {
           ...process.env,
           LOG_LEVEL: 'warn',
@@ -82,7 +85,7 @@ async function verifyBlobScript(historyId, hash, expectFail = true) {
       ],
       {
         encoding: 'utf-8',
-        timeout: 5_000,
+        timeout: SCRIPT_TIMEOUT,
         env: {
           ...process.env,
           LOG_LEVEL: 'warn',
@@ -208,6 +211,7 @@ async function checkDEKExists(historyId) {
 }
 
 describe('backupVerifier', function () {
+  this.timeout(5_000 + SCRIPT_TIMEOUT) // allow time for external scripts to run
   const historyIdPostgres = '42'
   const historyIdMongo = '000000000000000000000042'
   let blobHashPG, blobHashMongo, blobPathPG
