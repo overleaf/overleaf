@@ -33,7 +33,6 @@ import { setSpellCheckLanguage } from '../extensions/spelling'
 import { setKeybindings } from '../extensions/keybindings'
 import { Highlight } from '../../../../../types/highlight'
 import { EditorView } from '@codemirror/view'
-import { useErrorHandler } from 'react-error-boundary'
 import { setVisual } from '../extensions/visual/visual'
 import { useFileTreePathContext } from '@/features/file-tree/contexts/file-tree-path'
 import { useUserSettingsContext } from '@/shared/context/user-settings-context'
@@ -265,8 +264,6 @@ function useCodeMirrorScope(view: EditorView) {
     visual: showVisual,
   })
 
-  const handleError = useErrorHandler()
-
   const handleException = useCallback((exception: any) => {
     captureException(exception, {
       tags: {
@@ -304,7 +301,6 @@ function useCodeMirrorScope(view: EditorView) {
           spelling: spellingRef.current,
           visual: visualRef.current,
           projectFeatures: projectFeaturesRef.current,
-          handleError,
           handleException,
         }),
       })
@@ -335,7 +331,7 @@ function useCodeMirrorScope(view: EditorView) {
     }
     // IMPORTANT: This effect must not depend on anything variable apart from currentDocument,
     // as the editor state is recreated when the effect runs.
-  }, [view, currentDocument, handleError, handleException])
+  }, [view, currentDocument, handleException])
 
   useEffect(() => {
     if (openDocName) {

@@ -333,7 +333,7 @@
     "react-dnd": "^16.0.1",
     "react-dnd-html5-backend": "^16.0.1",
     "react-dom": "^17.0.2",
-    "react-error-boundary": "^2.3.1",
+    "react-error-boundary": "^5.0.0",
     "react-google-recaptcha": "^3.1.0",
     "react-i18next": "^13.3.1",
     "react-linkify": "^1.0.0-alpha",

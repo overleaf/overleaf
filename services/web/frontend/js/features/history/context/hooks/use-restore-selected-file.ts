@@ -3,7 +3,6 @@ import { restoreFileToVersion } from '../../services/api'
 import { isFileRemoved } from '../../utils/file-diff'
 import { useHistoryContext } from '../history-context'
 import type { HistoryContextValue } from '../types/history-context-value'
-import { useErrorHandler } from 'react-error-boundary'
 import { useFileTreeData } from '@/shared/context/file-tree-data-context'
 import { findInTree } from '@/features/file-tree/util/find-in-tree'
 import { useCallback, useEffect, useState } from 'react'
@@ -24,7 +23,6 @@ export function useRestoreSelectedFile() {
   const { projectId } = useHistoryContext()
   const { setView } = useLayoutContext()
   const { openDocWithId, openFileWithId } = useEditorManagerContext()
-  const handleError = useErrorHandler()
   const { fileTreeData } = useFileTreeData()
   const [state, setState] = useState<RestoreState>('idle')
   const [restoredFileMetadata, setRestoredFileMetadata] =
@@ -60,14 +58,14 @@ export function useRestoreSelectedFile() {
     if (state === 'waitingForFileTree') {
       const timer = window.setTimeout(() => {
         setState('timedOut')
-        handleError(new Error('timed out'))
+        throw new Error('timed out')
       }, RESTORE_FILE_TIMEOUT)
 
       return () => {
         window.clearTimeout(timer)
       }
     }
-  }, [handleError, state])
+  }, [state])
 
   const restoreSelectedFile = useCallback(
     (selection: HistoryContextValue['selection']) => {
@@ -91,13 +89,13 @@ export function useRestoreSelectedFile() {
             },
             error => {
               setState('error')
-              handleError(error)
+              throw error
             }
           )
         }
       }
     },
-    [handleError, projectId]
+    [projectId]
   )
 
   return { restoreSelectedFile, isLoading }
