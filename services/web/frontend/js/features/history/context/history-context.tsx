@@ -25,6 +25,7 @@ import {
   Update,
 } from '../services/types/update'
 import { Selection } from '../services/types/selection'
+import { useErrorHandler } from 'react-error-boundary'
 import { getUpdateForVersion } from '../utils/history-details'
 import { getHueForUserId } from '@/shared/utils/colors'
 
@@ -98,6 +99,7 @@ function useHistory() {
   )
 
   const updatesAbortControllerRef = useRef<AbortController | null>(null)
+  const handleError = useErrorHandler()
 
   const fetchNextBatchOfUpdates = useCallback(() => {
     // If there is an in-flight request for updates, just let it complete, by
@@ -197,10 +199,11 @@ function useHistory() {
           loadingState: 'ready',
         })
       })
+      .catch(handleError)
       .finally(() => {
         updatesAbortControllerRef.current = null
       })
-  }, [updatesInfo, projectId, labels, userHasFullFeature])
+  }, [updatesInfo, projectId, labels, handleError, userHasFullFeature])
 
   // Abort in-flight updates request on unmount
   useEffect(() => {
@@ -281,6 +284,7 @@ function useHistory() {
           }
         })
       })
+      .catch(handleError)
       .finally(() => {
         setLoadingFileDiffs(false)
         abortController = null
@@ -291,7 +295,7 @@ function useHistory() {
         abortController.abort()
       }
     }
-  }, [projectId, fromV, toV, updateForToV])
+  }, [projectId, fromV, toV, updateForToV, handleError])
 
   useEffect(() => {
     // Set update range if there isn't one and updates have loaded
