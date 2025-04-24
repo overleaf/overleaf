@@ -1,5 +1,3 @@
-/* eslint-disable jsx-a11y/label-has-for */
-/* eslint-disable jsx-a11y/label-has-associated-control */
 import {
   useRef,
   useEffect,
@@ -89,6 +87,7 @@ export const Select = <T,>({
   } = useSelect({
     items: items ?? [],
     itemToString,
+    isItemDisabled: item => itemToDisabled?.(item) || false,
     selectedItem: selected || defaultItem,
     onSelectedItemChange: changes => {
       if (onSelectedItemChanged) {
@@ -124,22 +123,18 @@ export const Select = <T,>({
     }
   }, [name, itemToString, selectedItem, defaultItem])
 
-  const handleMenuKeyDown = (event: React.KeyboardEvent<HTMLUListElement>) => {
-    if (event.key === 'Escape' && isOpen) {
-      event.stopPropagation()
-      closeMenu()
-    }
-  }
-
-  const onKeyDown: KeyboardEventHandler<HTMLButtonElement> = useCallback(
+  const onKeyDown: KeyboardEventHandler<HTMLInputElement> = useCallback(
     event => {
       if ((event.key === 'Enter' || event.key === ' ') && !isOpen) {
         event.preventDefault()
         ;(event.nativeEvent as any).preventDownshiftDefault = true
         openMenu()
+      } else if (event.key === 'Escape' && isOpen) {
+        event.stopPropagation()
+        closeMenu()
       }
     },
-    [isOpen, openMenu]
+    [closeMenu, isOpen, openMenu]
   )
 
   let value: string | undefined
@@ -187,16 +182,22 @@ export const Select = <T,>({
         }
       />
       <ul
-        {...getMenuProps({ disabled, onKeyDown: handleMenuKeyDown })}
+        {...getMenuProps({ disabled })}
         className={classNames('dropdown-menu w-100', { show: isOpen })}
       >
         {isOpen &&
           items?.map((item, index) => {
-            const isDisabled = itemToDisabled && itemToDisabled(item)
+            // We're using an actual disabled button so we don't need the
+            // aria-disabled prop
+            const { 'aria-disabled': disabled, ...itemProps } = getItemProps({
+              item,
+              index,
+            })
             return (
               <li role="none" key={itemToKey(item)}>
                 <DropdownItem
                   as="button"
+                  type="button"
                   className={classNames({
                     'select-highlighted': highlightedIndex === index,
                   })}
@@ -207,7 +208,8 @@ export const Select = <T,>({
                   description={
                     itemToSubtitle ? itemToSubtitle(item) : undefined
                   }
-                  {...getItemProps({ item, index, disabled: isDisabled })}
+                  {...itemProps}
+                  disabled={disabled}
                 >
                   {itemToString(item)}
                 </DropdownItem>

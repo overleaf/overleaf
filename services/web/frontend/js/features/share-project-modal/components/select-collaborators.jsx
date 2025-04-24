@@ -94,7 +94,6 @@ export default function SelectCollaborators({
     getLabelProps,
     getMenuProps,
     getInputProps,
-    getComboboxProps,
     highlightedIndex,
     getItemProps,
     reset,
@@ -171,11 +170,7 @@ export default function SelectCollaborators({
 
       <div className="host">
         {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events,jsx-a11y/no-static-element-interactions */}
-        <div
-          {...getComboboxProps()}
-          className="tags form-control"
-          onClick={focusInput}
-        >
+        <div className="tags form-control" onClick={focusInput}>
           {selectedItems.map((selectedItem, index) => (
             <SelectedItem
               key={`selected-item-${index}`}

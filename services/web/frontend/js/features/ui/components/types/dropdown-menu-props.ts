@@ -30,6 +30,7 @@ export type DropdownProps = {
 export type DropdownItemProps = PropsWithChildren<{
   active?: boolean
   as?: ElementType
+  type?: string
   description?: ReactNode
   disabled?: boolean
   eventKey?: string | number

@@ -146,7 +146,7 @@ describe('user role and institution', function () {
     await fetchMock.callHistory.flush(true)
     fetchMock.removeRoutes().clearHistory()
 
-    fireEvent.click(screen.getByRole('textbox', { name: /department/i }))
+    fireEvent.click(screen.getByRole('combobox', { name: /department/i }))
 
     screen.getByText(fakeDepartment)
   })

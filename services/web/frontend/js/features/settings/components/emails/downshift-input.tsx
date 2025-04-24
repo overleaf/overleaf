@@ -47,10 +47,8 @@ function Downshift({
     getLabelProps,
     getMenuProps,
     getInputProps,
-    getComboboxProps,
     getItemProps,
     highlightedIndex,
-    openMenu,
     selectedItem,
   } = useCombobox({
     inputValue,
@@ -82,8 +80,7 @@ function Downshift({
 
   return (
     <div className={classnames('dropdown', 'd-block')}>
-      <div {...getComboboxProps()}>
-        {/* eslint-disable-next-line jsx-a11y/label-has-for */}
+      <div>
         <OLFormLabel
           {...getLabelProps()}
           className={showLabel ? '' : 'visually-hidden'}
@@ -94,11 +91,6 @@ function Downshift({
           {...getInputProps({
             onChange: (event: React.ChangeEvent<HTMLInputElement>) => {
               setValue(event.target.value)
-            },
-            onFocus: () => {
-              if (!isOpen) {
-                openMenu()
-              }
             },
             ref: inputRef,
           })}

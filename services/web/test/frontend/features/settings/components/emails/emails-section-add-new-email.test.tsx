@@ -304,7 +304,7 @@ describe('<EmailsSection />', function () {
 
     await userEvent.click(screen.getByRole('button', { name: /let us know/i }))
 
-    const universityInput = screen.getByRole<HTMLInputElement>('textbox', {
+    const universityInput = screen.getByRole<HTMLInputElement>('combobox', {
       name: /university/i,
     })
 
@@ -321,7 +321,7 @@ describe('<EmailsSection />', function () {
 
     // Select the country from dropdown
     await userEvent.type(
-      screen.getByRole('textbox', {
+      screen.getByRole('combobox', {
         name: /country/i,
       }),
       country
@@ -339,9 +339,11 @@ describe('<EmailsSection />', function () {
       await screen.findByText(userEmailData.affiliation.institution.name)
     )
 
-    const roleInput = screen.getByRole('textbox', { name: /role/i })
+    const roleInput = screen.getByRole('combobox', { name: /role/i })
     await userEvent.type(roleInput, userEmailData.affiliation.role!)
-    const departmentInput = screen.getByRole('textbox', { name: /department/i })
+    const departmentInput = screen.getByRole('combobox', {
+      name: /department/i,
+    })
     await userEvent.click(departmentInput)
     await userEvent.click(screen.getByText(customDepartment))
 
@@ -415,7 +417,7 @@ describe('<EmailsSection />', function () {
     await userEvent.click(screen.getByRole('button', { name: /let us know/i }))
 
     // select a country
-    const countryInput = screen.getByRole<HTMLInputElement>('textbox', {
+    const countryInput = screen.getByRole<HTMLInputElement>('combobox', {
       name: /country/i,
     })
     await userEvent.click(countryInput)
@@ -423,7 +425,7 @@ describe('<EmailsSection />', function () {
     await userEvent.click(await screen.findByText('Germany'))
 
     // match several universities on initial typing
-    const universityInput = screen.getByRole<HTMLInputElement>('textbox', {
+    const universityInput = screen.getByRole<HTMLInputElement>('combobox', {
       name: /university/i,
     })
     await userEvent.click(universityInput)
@@ -457,7 +459,7 @@ describe('<EmailsSection />', function () {
 
     await userEvent.click(screen.getByRole('button', { name: /let us know/i }))
 
-    const universityInput = screen.getByRole<HTMLInputElement>('textbox', {
+    const universityInput = screen.getByRole<HTMLInputElement>('combobox', {
       name: /university/i,
     })
 
@@ -474,7 +476,7 @@ describe('<EmailsSection />', function () {
 
     // Select the country from dropdown
     await userEvent.type(
-      screen.getByRole('textbox', {
+      screen.getByRole('combobox', {
         name: /country/i,
       }),
       country
@@ -489,9 +491,11 @@ describe('<EmailsSection />', function () {
     // Enter the university manually
     await userEvent.type(universityInput, newUniversity)
 
-    const roleInput = screen.getByRole('textbox', { name: /role/i })
+    const roleInput = screen.getByRole('combobox', { name: /role/i })
     await userEvent.type(roleInput, userEmailData.affiliation.role!)
-    const departmentInput = screen.getByRole('textbox', { name: /department/i })
+    const departmentInput = screen.getByRole('combobox', {
+      name: /department/i,
+    })
     await userEvent.type(departmentInput, userEmailData.affiliation.department!)
 
     const userEmailDataCopy = {
@@ -577,37 +581,37 @@ describe('<EmailsSection />', function () {
     fetchMock.removeRoutes().clearHistory()
 
     expect(
-      screen.queryByRole('textbox', {
+      screen.queryByRole('combobox', {
         name: /country/i,
       })
     ).to.be.null
     expect(
-      screen.queryByRole('textbox', {
+      screen.queryByRole('combobox', {
         name: /university/i,
       })
     ).to.be.null
-    screen.getByRole('textbox', {
+    screen.getByRole('combobox', {
       name: /role/i,
     })
-    screen.getByRole('textbox', {
+    screen.getByRole('combobox', {
       name: /department/i,
     })
 
     await userEvent.click(screen.getByRole('button', { name: /change/i }))
 
-    screen.getByRole('textbox', {
+    screen.getByRole('combobox', {
       name: /country/i,
     })
-    screen.getByRole('textbox', {
+    screen.getByRole('combobox', {
       name: /university/i,
     })
     expect(
-      screen.queryByRole('textbox', {
+      screen.queryByRole('combobox', {
         name: /role/i,
       })
     ).to.be.null
     expect(
-      screen.queryByRole('textbox', {
+      screen.queryByRole('combobox', {
         name: /department/i,
       })
     ).to.be.null
@@ -668,11 +672,11 @@ describe('<EmailsSection />', function () {
       .post('/user/emails/confirm-secondary', 200)
 
     await userEvent.type(
-      screen.getByRole('textbox', { name: /role/i }),
+      screen.getByRole('combobox', { name: /role/i }),
       userEmailData.affiliation.role!
     )
     await userEvent.type(
-      screen.getByRole('textbox', { name: /department/i }),
+      screen.getByRole('combobox', { name: /department/i }),
       userEmailData.affiliation.department!
     )
     await userEvent.click(
