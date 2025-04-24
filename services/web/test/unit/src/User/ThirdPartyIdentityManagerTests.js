@@ -2,6 +2,9 @@ const sinon = require('sinon')
 const { expect } = require('chai')
 const SandboxedModule = require('sandboxed-module')
 const OError = require('@overleaf/o-error')
+const {
+  ThirdPartyUserNotFoundError,
+} = require('../../../../app/src/Features/Errors/Errors')
 const modulePath =
   '../../../../app/src/Features/User/ThirdPartyIdentityManager.js'
 
@@ -77,16 +80,19 @@ describe('ThirdPartyIdentityManager', function () {
         expect(user).to.deep.equal(this.user)
       })
     })
-    it('should return ThirdPartyUserNotFoundError when no user linked', function (done) {
-      this.ThirdPartyIdentityManager.getUser(
-        'google',
-        'an-id-not-linked',
-        (error, user) => {
-          expect(error).to.exist
-          expect(error.name).to.equal('ThirdPartyUserNotFoundError')
-          done()
-        }
-      )
+    it('should return ThirdPartyUserNotFoundError when no user linked', async function () {
+      let error
+
+      try {
+        await this.ThirdPartyIdentityManager.promises.getUser(
+          'google',
+          'an-id-not-linked'
+        )
+      } catch (err) {
+        error = err
+      }
+
+      expect(error).to.be.instanceOf(ThirdPartyUserNotFoundError)
     })
   })
   describe('link', function () {

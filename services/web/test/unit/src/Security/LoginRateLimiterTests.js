@@ -25,23 +25,17 @@ describe('LoginRateLimiter', function () {
   })
 
   describe('processLoginRequest', function () {
-    it('should consume points', function (done) {
-      this.LoginRateLimiter.processLoginRequest(this.email, (err, allow) => {
-        if (err) {
-          return done(err)
-        }
-        expect(this.rateLimiter.consume).to.have.been.calledWith(this.email)
-        done()
-      })
+    it('should consume points', async function () {
+      await this.LoginRateLimiter.promises.processLoginRequest(this.email)
+      expect(this.rateLimiter.consume).to.have.been.calledWith(this.email)
     })
 
     describe('when login is allowed', function () {
-      it('should call pass allow=true', function (done) {
-        this.LoginRateLimiter.processLoginRequest(this.email, (err, allow) => {
-          expect(err).to.equal(null)
-          expect(allow).to.equal(true)
-          done()
-        })
+      it('should call pass allow=true', async function () {
+        const allow = await this.LoginRateLimiter.promises.processLoginRequest(
+          this.email
+        )
+        expect(allow).to.equal(true)
       })
     })
 
@@ -50,12 +44,11 @@ describe('LoginRateLimiter', function () {
         this.rateLimiter.consume.rejects({ remainingPoints: 0 })
       })
 
-      it('should call pass allow=false', function (done) {
-        this.LoginRateLimiter.processLoginRequest(this.email, (err, allow) => {
-          expect(err).to.equal(null)
-          expect(allow).to.equal(false)
-          done()
-        })
+      it('should call pass allow=false', async function () {
+        const allow = await this.LoginRateLimiter.promises.processLoginRequest(
+          this.email
+        )
+        expect(allow).to.equal(false)
       })
     })
 
@@ -64,22 +57,24 @@ describe('LoginRateLimiter', function () {
         this.rateLimiter.consume.rejects(new Error('woops'))
       })
 
-      it('should produce an error', function (done) {
-        this.LoginRateLimiter.processLoginRequest(this.email, (err, allow) => {
-          expect(err).to.not.equal(null)
-          expect(err).to.be.instanceof(Error)
-          done()
-        })
+      it('should produce an error', async function () {
+        let error
+
+        try {
+          await this.LoginRateLimiter.promises.processLoginRequest(this.email)
+        } catch (err) {
+          error = err
+        }
+
+        expect(error).to.exist
       })
     })
   })
 
   describe('recordSuccessfulLogin', function () {
-    it('should clear the rate limit', function (done) {
-      this.LoginRateLimiter.recordSuccessfulLogin(this.email, () => {
-        expect(this.rateLimiter.delete).to.have.been.calledWith(this.email)
-        done()
-      })
+    it('should clear the rate limit', async function () {
+      await this.LoginRateLimiter.promises.recordSuccessfulLogin(this.email)
+      expect(this.rateLimiter.delete).to.have.been.calledWith(this.email)
     })
   })
 })

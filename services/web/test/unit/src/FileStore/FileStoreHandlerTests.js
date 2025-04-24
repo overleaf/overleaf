@@ -95,7 +95,7 @@ describe('FileStoreHandler', function () {
       this.request.returns(this.writeStream)
     })
 
-    it('should get the project details', function (done) {
+    it('should get the project details', async function () {
       this.fs.createReadStream.returns({
         pipe() {},
         on(type, cb) {
@@ -104,20 +104,17 @@ describe('FileStoreHandler', function () {
           }
         },
       })
-      this.handler.uploadFileFromDisk(
+      await this.handler.promises.uploadFileFromDisk(
         this.projectId,
         this.fileArgs,
-        this.fsPath,
-        () => {
-          this.ProjectDetailsHandler.getDetails
-            .calledWith(this.projectId)
-            .should.equal(true)
-          done()
-        }
+        this.fsPath
       )
+      this.ProjectDetailsHandler.getDetails
+        .calledWith(this.projectId)
+        .should.equal(true)
     })
 
-    it('should compute the file hash', function (done) {
+    it('should compute the file hash', async function () {
       this.fs.createReadStream.returns({
         pipe() {},
         on(type, cb) {
@@ -126,21 +123,18 @@ describe('FileStoreHandler', function () {
           }
         },
       })
-      this.handler.uploadFileFromDisk(
+      await this.handler.promises.uploadFileFromDisk(
         this.projectId,
         this.fileArgs,
-        this.fsPath,
-        () => {
-          this.FileHashManager.computeHash
-            .calledWith(this.fsPath)
-            .should.equal(true)
-          done()
-        }
+        this.fsPath
       )
+      this.FileHashManager.computeHash
+        .calledWith(this.fsPath)
+        .should.equal(true)
     })
 
     describe('when project-history-blobs feature is enabled', function () {
-      it('should upload the file to the history store as a blob', function (done) {
+      it('should upload the file to the history store as a blob', async function () {
         this.fs.createReadStream.returns({
           pipe() {},
           on(type, cb) {
@@ -150,26 +144,23 @@ describe('FileStoreHandler', function () {
           },
         })
         this.Features.hasFeature.withArgs('project-history-blobs').returns(true)
-        this.handler.uploadFileFromDisk(
+        await this.handler.promises.uploadFileFromDisk(
           this.projectId,
           this.fileArgs,
-          this.fsPath,
-          () => {
-            this.HistoryManager.uploadBlobFromDisk
-              .calledWith(
-                this.historyId,
-                this.hashValue,
-                this.fileSize,
-                this.fsPath
-              )
-              .should.equal(true)
-            done()
-          }
+          this.fsPath
         )
+        this.HistoryManager.uploadBlobFromDisk
+          .calledWith(
+            this.historyId,
+            this.hashValue,
+            this.fileSize,
+            this.fsPath
+          )
+          .should.equal(true)
       })
     })
     describe('when project-history-blobs feature is disabled', function () {
-      it('should not upload the file to the history store as a blob', function (done) {
+      it('should not upload the file to the history store as a blob', async function () {
         this.fs.createReadStream.returns({
           pipe() {},
           on(type, cb) {
@@ -178,15 +169,12 @@ describe('FileStoreHandler', function () {
             }
           },
         })
-        this.handler.uploadFileFromDisk(
+        await this.handler.promises.uploadFileFromDisk(
           this.projectId,
           this.fileArgs,
-          this.fsPath,
-          () => {
-            this.HistoryManager.uploadBlobFromDisk.called.should.equal(false)
-            done()
-          }
+          this.fsPath
         )
+        this.HistoryManager.uploadBlobFromDisk.called.should.equal(false)
       })
     })
 
@@ -214,71 +202,63 @@ describe('FileStoreHandler', function () {
         )
       })
 
-      it('should pipe the read stream to request', function (done) {
+      it('should pipe the read stream to request', function () {
         this.request.returns(this.writeStream)
-        this.fs.createReadStream.returns({
-          on(type, cb) {
-            if (type === 'open') {
-              cb()
-            }
-          },
-          pipe: o => {
-            this.writeStream.should.equal(o)
-            done()
-          },
+        return new Promise((resolve, reject) => {
+          this.fs.createReadStream.returns({
+            on(type, cb) {
+              if (type === 'open') {
+                cb()
+              }
+            },
+            pipe: o => {
+              this.writeStream.should.equal(o)
+              resolve()
+            },
+          })
+          this.handler.promises
+            .uploadFileFromDisk(this.projectId, this.fileArgs, this.fsPath)
+            .catch(reject)
         })
-        this.handler.uploadFileFromDisk(
-          this.projectId,
-          this.fileArgs,
-          this.fsPath,
-          () => {}
-        )
       })
 
-      it('should pass the correct options to request', function (done) {
+      it('should pass the correct options to request', async function () {
         const fileUrl = this.getFileUrl(this.projectId, this.fileId)
         this.fs.createReadStream.returns({
-          pipe() {},
-          on(type, cb) {
+          pipe: sinon.stub(),
+          on: sinon.stub((type, cb) => {
             if (type === 'open') {
               cb()
             }
-          },
+          }),
         })
-        this.handler.uploadFileFromDisk(
+        await this.handler.promises.uploadFileFromDisk(
           this.projectId,
           this.fileArgs,
-          this.fsPath,
-          () => {
-            this.request.args[0][0].method.should.equal('post')
-            this.request.args[0][0].uri.should.equal(fileUrl)
-            done()
-          }
+          this.fsPath
         )
+        this.request.args[0][0].method.should.equal('post')
+        this.request.args[0][0].uri.should.equal(fileUrl)
       })
 
-      it('should callback with the url and fileRef', function (done) {
+      it('should resolve with the url and fileRef', async function () {
         const fileUrl = this.getFileUrl(this.projectId, this.fileId)
         this.fs.createReadStream.returns({
-          pipe() {},
-          on(type, cb) {
+          pipe: sinon.stub(),
+          on: sinon.stub((type, cb) => {
             if (type === 'open') {
               cb()
             }
-          },
+          }),
         })
-        this.handler.uploadFileFromDisk(
+        const { url, fileRef } = await this.handler.promises.uploadFileFromDisk(
           this.projectId,
           this.fileArgs,
-          this.fsPath,
-          (err, url, fileRef) => {
-            expect(err).to.not.exist
-            expect(url).to.equal(fileUrl)
-            expect(fileRef._id).to.equal(this.fileId)
-            expect(fileRef.hash).to.equal(this.hashValue)
-            done()
-          }
+          this.fsPath
         )
+        expect(url).to.equal(fileUrl)
+        expect(fileRef._id).to.equal(this.fileId)
+        expect(fileRef.hash).to.equal(this.hashValue)
       })
       describe('when upload to filestore fails', function () {
         beforeEach(function () {
@@ -289,28 +269,32 @@ describe('FileStoreHandler', function () {
           }
         })
 
-        it('should callback with an error', function (done) {
+        it('should reject with an error', async function () {
           this.fs.createReadStream.callCount = 0
           this.fs.createReadStream.returns({
-            pipe() {},
-            on(type, cb) {
+            pipe: sinon.stub(),
+            on: sinon.stub((type, cb) => {
               if (type === 'open') {
                 cb()
               }
-            },
+            }),
           })
-          this.handler.uploadFileFromDisk(
-            this.projectId,
-            this.fileArgs,
-            this.fsPath,
-            err => {
-              expect(err).to.exist
-              expect(err).to.be.instanceof(Error)
-              expect(this.fs.createReadStream.callCount).to.equal(
-                this.handler.RETRY_ATTEMPTS
-              )
-              done()
-            }
+          let error
+
+          try {
+            await this.handler.promises.uploadFileFromDisk(
+              this.projectId,
+              this.fileArgs,
+              this.fsPath
+            )
+          } catch (err) {
+            error = err
+          }
+
+          expect(error).to.be.instanceOf(Error)
+
+          expect(this.fs.createReadStream.callCount).to.equal(
+            this.handler.RETRY_ATTEMPTS
           )
         })
       })
@@ -319,49 +303,40 @@ describe('FileStoreHandler', function () {
       beforeEach(function () {
         this.Features.hasFeature.withArgs('filestore').returns(false)
       })
-      it('should not open file handle', function (done) {
-        this.handler.uploadFileFromDisk(
+      it('should not open file handle', async function () {
+        await this.handler.promises.uploadFileFromDisk(
           this.projectId,
           this.fileArgs,
-          this.fsPath,
-          () => {
-            expect(this.fs.createReadStream).to.not.have.been.called
-            done()
-          }
+          this.fsPath
         )
+        expect(this.fs.createReadStream).to.not.have.been.called
       })
 
-      it('should not talk to filestore', function (done) {
-        this.handler.uploadFileFromDisk(
+      it('should not talk to filestore', async function () {
+        await this.handler.promises.uploadFileFromDisk(
           this.projectId,
           this.fileArgs,
-          this.fsPath,
-          () => {
-            expect(this.request).to.not.have.been.called
-            done()
-          }
+          this.fsPath
         )
+
+        expect(this.request).to.not.have.been.called
       })
 
-      it('should callback with the url and fileRef', function (done) {
+      it('should resolve with the url and fileRef', async function () {
         const fileUrl = this.getFileUrl(this.projectId, this.fileId)
-        this.handler.uploadFileFromDisk(
+        const { url, fileRef } = await this.handler.promises.uploadFileFromDisk(
           this.projectId,
           this.fileArgs,
-          this.fsPath,
-          (err, url, fileRef) => {
-            expect(err).to.not.exist
-            expect(url).to.equal(fileUrl)
-            expect(fileRef._id).to.equal(this.fileId)
-            expect(fileRef.hash).to.equal(this.hashValue)
-            done()
-          }
+          this.fsPath
         )
+        expect(url).to.equal(fileUrl)
+        expect(fileRef._id).to.equal(this.fileId)
+        expect(fileRef.hash).to.equal(this.hashValue)
       })
     })
 
     describe('symlink', function () {
-      it('should not read file if it is symlink', function (done) {
+      it('should not read file if it is symlink', async function () {
         this.fs.lstat = sinon.stub().callsArgWith(1, null, {
           isFile() {
             return false
@@ -371,28 +346,40 @@ describe('FileStoreHandler', function () {
           },
         })
 
-        this.handler.uploadFileFromDisk(
-          this.projectId,
-          this.fileArgs,
-          this.fsPath,
-          () => {
-            this.fs.createReadStream.called.should.equal(false)
-            done()
-          }
-        )
+        let error
+
+        try {
+          await this.handler.promises.uploadFileFromDisk(
+            this.projectId,
+            this.fileArgs,
+            this.fsPath
+          )
+        } catch (err) {
+          error = err
+        }
+
+        expect(error).to.exist
+
+        this.fs.createReadStream.called.should.equal(false)
       })
 
-      it('should not read file stat returns nothing', function (done) {
+      it('should not read file stat returns nothing', async function () {
         this.fs.lstat = sinon.stub().callsArgWith(1, null, null)
-        this.handler.uploadFileFromDisk(
-          this.projectId,
-          this.fileArgs,
-          this.fsPath,
-          () => {
-            this.fs.createReadStream.called.should.equal(false)
-            done()
-          }
-        )
+        let error
+
+        try {
+          await this.handler.promises.uploadFileFromDisk(
+            this.projectId,
+            this.fileArgs,
+            this.fsPath
+          )
+        } catch (err) {
+          error = err
+        }
+
+        expect(error).to.exist
+
+        this.fs.createReadStream.called.should.equal(false)
       })
     })
   })
@@ -410,13 +397,18 @@ describe('FileStoreHandler', function () {
       })
     })
 
-    it('should return the error if there is one', function (done) {
-      const error = 'my error'
-      this.request.callsArgWith(1, error)
-      this.handler.deleteFile(this.projectId, this.fileId, err => {
-        assert.equal(err, error)
-        done()
-      })
+    it('should reject with the error if there is one', async function () {
+      const expectedError = 'my error'
+      this.request.callsArgWith(1, expectedError)
+      let error
+
+      try {
+        await this.handler.promises.deleteFile(this.projectId, this.fileId)
+      } catch (err) {
+        error = err
+      }
+
+      expect(error).to.equal(expectedError)
     })
   })
 
@@ -425,40 +417,43 @@ describe('FileStoreHandler', function () {
       beforeEach(function () {
         this.Features.hasFeature.withArgs('filestore').returns(true)
       })
-      it('should send a delete request to filestore api', function (done) {
+      it('should send a delete request to filestore api', async function () {
         const projectUrl = this.getProjectUrl(this.projectId)
         this.request.callsArgWith(1, null)
 
-        this.handler.deleteProject(this.projectId, err => {
-          assert.equal(err, undefined)
-          this.request.args[0][0].method.should.equal('delete')
-          this.request.args[0][0].uri.should.equal(projectUrl)
-          done()
-        })
+        await this.handler.promises.deleteProject(this.projectId)
+        this.request.args[0][0].method.should.equal('delete')
+        this.request.args[0][0].uri.should.equal(projectUrl)
       })
 
-      it('should wrap the error if there is one', function (done) {
-        const error = new Error('my error')
-        this.request.callsArgWith(1, error)
-        this.handler.deleteProject(this.projectId, err => {
-          expect(OError.getFullStack(err)).to.match(
-            /something went wrong deleting a project in filestore/
-          )
-          expect(OError.getFullStack(err)).to.match(/my error/)
-          done()
-        })
+      it('should wrap the error if there is one', async function () {
+        const expectedError = new Error('my error')
+        this.request.callsArgWith(1, expectedError)
+        const promise = this.handler.promises.deleteProject(this.projectId)
+        let error
+
+        try {
+          await promise
+        } catch (err) {
+          error = err
+        }
+
+        expect(error).to.exist
+
+        expect(OError.getFullStack(error)).to.match(
+          /something went wrong deleting a project in filestore/
+        )
+        expect(OError.getFullStack(error)).to.match(/my error/)
       })
     })
     describe('when filestore is disabled', function () {
       beforeEach(function () {
         this.Features.hasFeature.withArgs('filestore').returns(false)
       })
-      it('should not send a delete request to filestore api', function (done) {
-        this.handler.deleteProject(this.projectId, err => {
-          assert.equal(err, undefined)
-          this.request.called.should.equal(false)
-          done()
-        })
+      it('should not send a delete request to filestore api', async function () {
+        await this.handler.promises.deleteProject(this.projectId)
+
+        this.request.called.should.equal(false)
       })
     })
   })
@@ -469,18 +464,37 @@ describe('FileStoreHandler', function () {
         this.Features.hasFeature.withArgs('filestore').returns(false)
       })
 
-      it('should callback with a NotFoundError', function (done) {
-        this.handler.getFileStream(this.projectId, this.fileId, {}, err => {
-          expect(err).to.be.instanceof(Errors.NotFoundError)
-          done()
-        })
+      it('should callback with a NotFoundError', async function () {
+        let error
+
+        try {
+          await this.handler.promises.getFileStream(
+            this.projectId,
+            this.fileId,
+            {}
+          )
+        } catch (err) {
+          error = err
+        }
+
+        expect(error).to.be.instanceOf(Errors.NotFoundError)
       })
 
-      it('should not call request', function (done) {
-        this.handler.getFileStream(this.projectId, this.fileId, {}, () => {
-          this.request.called.should.equal(false)
-          done()
-        })
+      it('should not call request', async function () {
+        let error
+
+        try {
+          await this.handler.promises.getFileStream(
+            this.projectId,
+            this.fileId,
+            {}
+          )
+        } catch (err) {
+          error = err
+        }
+
+        expect(error).to.exist
+        this.request.called.should.equal(false)
       })
     })
     describe('when filestore is enabled', function () {
@@ -490,53 +504,36 @@ describe('FileStoreHandler', function () {
         this.Features.hasFeature.withArgs('filestore').returns(true)
       })
 
-      it('should get the stream with the correct params', function (done) {
+      it('should get the stream with the correct params', async function () {
         const fileUrl = this.getFileUrl(this.projectId, this.fileId)
-        this.handler.getFileStream(
+        await this.handler.promises.getFileStream(
           this.projectId,
           this.fileId,
-          this.query,
-          (err, stream) => {
-            if (err) {
-              return done(err)
-            }
-            this.request.args[0][0].method.should.equal('get')
-            this.request.args[0][0].uri.should.equal(
-              fileUrl + '?from=getFileStream'
-            )
-            done()
-          }
+          this.query
+        )
+        this.request.args[0][0].method.should.equal('get')
+        this.request.args[0][0].uri.should.equal(
+          fileUrl + '?from=getFileStream'
         )
       })
 
-      it('should get stream from request', function (done) {
-        this.handler.getFileStream(
+      it('should get stream from request', async function () {
+        const stream = await this.handler.promises.getFileStream(
           this.projectId,
           this.fileId,
-          this.query,
-          (err, stream) => {
-            if (err) {
-              return done(err)
-            }
-            stream.should.equal(this.readStream)
-            done()
-          }
+          this.query
         )
+
+        stream.should.equal(this.readStream)
       })
 
-      it('should add an error handler', function (done) {
-        this.handler.getFileStream(
+      it('should add an error handler', async function () {
+        const stream = await this.handler.promises.getFileStream(
           this.projectId,
           this.fileId,
-          this.query,
-          (err, stream) => {
-            if (err) {
-              return done(err)
-            }
-            stream.on.calledWith('error').should.equal(true)
-            done()
-          }
+          this.query
         )
+        stream.on.calledWith('error').should.equal(true)
       })
 
       describe('when range is specified in query', function () {
@@ -544,22 +541,17 @@ describe('FileStoreHandler', function () {
           this.query = { range: '0-10' }
         })
 
-        it('should add a range header', function (done) {
-          this.handler.getFileStream(
+        it('should add a range header', async function () {
+          await this.handler.promises.getFileStream(
             this.projectId,
             this.fileId,
-            this.query,
-            (err, stream) => {
-              if (err) {
-                return done(err)
-              }
-              this.request.callCount.should.equal(1)
-              const { headers } = this.request.firstCall.args[0]
-              expect(headers).to.have.keys('range')
-              expect(headers.range).to.equal('bytes=0-10')
-              done()
-            }
+            this.query
           )
+
+          this.request.callCount.should.equal(1)
+          const { headers } = this.request.firstCall.args[0]
+          expect(headers).to.have.keys('range')
+          expect(headers.range).to.equal('bytes=0-10')
         })
 
         describe('when range is invalid', function () {
@@ -568,21 +560,15 @@ describe('FileStoreHandler', function () {
               this.query = { range: `${r}` }
             })
 
-            it(`should not add a range header for '${r}'`, function (done) {
-              this.handler.getFileStream(
+            it(`should not add a range header for '${r}'`, async function () {
+              await this.handler.promises.getFileStream(
                 this.projectId,
                 this.fileId,
-                this.query,
-                (err, stream) => {
-                  if (err) {
-                    return done(err)
-                  }
-                  this.request.callCount.should.equal(1)
-                  const { headers } = this.request.firstCall.args[0]
-                  expect(headers).to.not.have.keys('range')
-                  done()
-                }
+                this.query
               )
+              this.request.callCount.should.equal(1)
+              const { headers } = this.request.firstCall.args[0]
+              expect(headers).to.not.have.keys('range')
             })
           })
         })
@@ -591,7 +577,7 @@ describe('FileStoreHandler', function () {
   })
 
   describe('getFileSize', function () {
-    it('returns the file size reported by filestore', function (done) {
+    it('returns the file size reported by filestore', async function () {
       const expectedFileSize = 32432
       const fileUrl =
         this.getFileUrl(this.projectId, this.fileId) + '?from=getFileSize'
@@ -605,40 +591,54 @@ describe('FileStoreHandler', function () {
         },
       })
 
-      this.handler.getFileSize(this.projectId, this.fileId, (err, fileSize) => {
-        if (err) {
-          return done(err)
-        }
-        expect(fileSize).to.equal(expectedFileSize)
-        done()
-      })
+      const fileSize = await this.handler.promises.getFileSize(
+        this.projectId,
+        this.fileId
+      )
+      expect(fileSize).to.equal(expectedFileSize)
     })
 
-    it('throws a NotFoundError on a 404 from filestore', function (done) {
+    it('throws a NotFoundError on a 404 from filestore', async function () {
       this.request.head.yields(null, { statusCode: 404 })
 
-      this.handler.getFileSize(this.projectId, this.fileId, err => {
-        expect(err).to.be.instanceof(Errors.NotFoundError)
-        done()
-      })
+      let error
+
+      try {
+        await this.handler.promises.getFileSize(this.projectId, this.fileId)
+      } catch (err) {
+        error = err
+      }
+
+      expect(error).to.be.instanceOf(Errors.NotFoundError)
     })
 
-    it('throws an error on a non-200 from filestore', function (done) {
+    it('throws an error on a non-200 from filestore', async function () {
       this.request.head.yields(null, { statusCode: 500 })
 
-      this.handler.getFileSize(this.projectId, this.fileId, err => {
-        expect(err).to.be.instanceof(Error)
-        done()
-      })
+      let error
+
+      try {
+        await this.handler.promises.getFileSize(this.projectId, this.fileId)
+      } catch (err) {
+        error = err
+      }
+
+      expect(error).to.be.instanceOf(Error)
     })
 
-    it('rethrows errors from filestore', function (done) {
-      this.request.head.yields(new Error())
+    it('rethrows errors from filestore', async function () {
+      const expectedError = new Error('from filestore')
+      this.request.head.yields(expectedError)
 
-      this.handler.getFileSize(this.projectId, this.fileId, err => {
-        expect(err).to.be.instanceof(Error)
-        done()
-      })
+      let error
+
+      try {
+        await this.handler.promises.getFileSize(this.projectId, this.fileId)
+      } catch (err) {
+        error = err
+      }
+
+      expect(error).to.equal(expectedError)
     })
   })
 
@@ -648,74 +648,75 @@ describe('FileStoreHandler', function () {
       this.newFileId = 'new file id'
     })
 
-    it('should post json', function (done) {
+    it('should post json', async function () {
       const newFileUrl = this.getFileUrl(this.newProjectId, this.newFileId)
       this.request.callsArgWith(1, null, { statusCode: 200 })
 
-      this.handler.copyFile(
+      await this.handler.promises.copyFile(
         this.projectId,
         this.fileId,
         this.newProjectId,
-        this.newFileId,
-        () => {
-          this.request.args[0][0].method.should.equal('put')
-          this.request.args[0][0].uri.should.equal(newFileUrl)
-          this.request.args[0][0].json.source.project_id.should.equal(
-            this.projectId
-          )
-          this.request.args[0][0].json.source.file_id.should.equal(this.fileId)
-          done()
-        }
+        this.newFileId
       )
+      this.request.args[0][0].method.should.equal('put')
+      this.request.args[0][0].uri.should.equal(newFileUrl)
+      this.request.args[0][0].json.source.project_id.should.equal(
+        this.projectId
+      )
+      this.request.args[0][0].json.source.file_id.should.equal(this.fileId)
     })
 
-    it('returns the url', function (done) {
+    it('returns the url', async function () {
       const expectedUrl = this.getFileUrl(this.newProjectId, this.newFileId)
       this.request.callsArgWith(1, null, { statusCode: 200 })
-      this.handler.copyFile(
+      const url = await this.handler.promises.copyFile(
         this.projectId,
         this.fileId,
         this.newProjectId,
-        this.newFileId,
-        (err, url) => {
-          if (err) {
-            return done(err)
-          }
-          url.should.equal(expectedUrl)
-          done()
-        }
+        this.newFileId
       )
+
+      url.should.equal(expectedUrl)
     })
 
-    it('should return the err', function (done) {
-      const error = new Error('error')
-      this.request.callsArgWith(1, error)
-      this.handler.copyFile(
-        this.projectId,
-        this.fileId,
-        this.newProjectId,
-        this.newFileId,
-        err => {
-          err.should.equal(error)
-          done()
-        }
-      )
+    it('should return the err', async function () {
+      const expectedError = new Error('error')
+      this.request.callsArgWith(1, expectedError)
+      let error
+
+      try {
+        await this.handler.promises.copyFile(
+          this.projectId,
+          this.fileId,
+          this.newProjectId,
+          this.newFileId
+        )
+      } catch (err) {
+        error = err
+      }
+
+      expect(error).to.equal(expectedError)
     })
 
-    it('should return an error for a non-success statusCode', function (done) {
+    it('should return an error for a non-success statusCode', async function () {
       this.request.callsArgWith(1, null, { statusCode: 500 })
-      this.handler.copyFile(
-        this.projectId,
-        this.fileId,
-        this.newProjectId,
-        this.newFileId,
-        err => {
-          err.should.be.an('error')
-          err.message.should.equal(
-            'non-ok response from filestore for copyFile: 500'
-          )
-          done()
-        }
+      let error
+
+      try {
+        await this.handler.promises.copyFile(
+          this.projectId,
+          this.fileId,
+          this.newProjectId,
+          this.newFileId
+        )
+      } catch (err) {
+        error = err
+      }
+
+      expect(error).to.be.instanceOf(Error)
+      expect(error).to.have.property(
+        'message',
+        'non-ok response from filestore for copyFile: 500'
       )
     })
   })

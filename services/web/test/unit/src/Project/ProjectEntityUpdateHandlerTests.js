@@ -100,7 +100,7 @@ describe('ProjectEntityUpdateHandler', function () {
       withTimeout: sinon.stub().returns(this.LockManager),
     }
     this.ProjectModel = {
-      updateOne: sinon.stub(),
+      updateOne: sinon.stub().returns({ exec: sinon.stub().resolves() }),
     }
     this.ProjectGetter = {
       promises: {
@@ -225,26 +225,20 @@ describe('ProjectEntityUpdateHandler', function () {
     })
 
     describe('when the doc has been modified', function () {
-      beforeEach(function (done) {
+      beforeEach(async function () {
         this.DocstoreManager.promises.updateDoc.resolves({
           modified: true,
           rev: (this.rev = 5),
         })
 
-        const callback = (...args) => {
-          this.callback(...args)
-          done()
-        }
-
-        this.ProjectEntityUpdateHandler.updateDocLines(
+        await this.ProjectEntityUpdateHandler.promises.updateDocLines(
           projectId,
           docId,
           this.docLines,
           this.version,
           this.ranges,
           this.lastUpdatedAt,
-          this.lastUpdatedBy,
-          callback
+          this.lastUpdatedBy
         )
       })
 
@@ -288,7 +282,7 @@ describe('ProjectEntityUpdateHandler', function () {
         )
       })
 
-      it('should send the doc the to the TPDS', function () {
+      it('should send the doc to the TPDS', function () {
         this.TpdsUpdateSender.promises.addDoc.should.have.been.calledWith({
           projectId,
           projectName: this.project.name,
@@ -298,33 +292,23 @@ describe('ProjectEntityUpdateHandler', function () {
           folderId: this.parentFolder._id,
         })
       })
-
-      it('should call the callback', function () {
-        this.callback.called.should.equal(true)
-      })
     })
 
     describe('when the doc has not been modified', function () {
-      beforeEach(function (done) {
+      beforeEach(async function () {
         this.DocstoreManager.promises.updateDoc.resolves({
           modified: false,
           rev: (this.rev = 5),
         })
 
-        const callback = () => {
-          this.callback()
-          done()
-        }
-
-        this.ProjectEntityUpdateHandler.updateDocLines(
+        await this.ProjectEntityUpdateHandler.promises.updateDocLines(
           projectId,
           docId,
           this.docLines,
           this.version,
           this.ranges,
           this.lastUpdatedAt,
-          this.lastUpdatedBy,
-          callback
+          this.lastUpdatedBy
         )
       })
 
@@ -335,33 +319,25 @@ describe('ProjectEntityUpdateHandler', function () {
       it('should not send the doc the to the TPDS', function () {
         this.TpdsUpdateSender.promises.addDoc.called.should.equal(false)
       })
-
-      it('should call the callback', function () {
-        this.callback.called.should.equal(true)
-      })
     })
 
     describe('when the doc has been deleted', function () {
-      beforeEach(function (done) {
+      beforeEach(async function () {
         this.ProjectGetter.promises.getProject.resolves(this.project)
         this.ProjectLocator.promises.findElement.rejects(
           new Errors.NotFoundError()
         )
         this.DocstoreManager.promises.isDocDeleted.resolves(true)
-        this.DocstoreManager.promises.updateDoc.resolves()
+        this.DocstoreManager.promises.updateDoc.resolves({})
 
-        this.ProjectEntityUpdateHandler.updateDocLines(
+        await this.ProjectEntityUpdateHandler.promises.updateDocLines(
           projectId,
           docId,
           this.docLines,
           this.version,
           this.ranges,
           this.lastUpdatedAt,
-          this.lastUpdatedBy,
-          (...args) => {
-            this.callback(...args)
-            done()
-          }
+          this.lastUpdatedBy
         )
       })
 
@@ -384,14 +360,10 @@ describe('ProjectEntityUpdateHandler', function () {
       it('should not send the doc the to the TPDS', function () {
         this.TpdsUpdateSender.promises.addDoc.called.should.equal(false)
       })
-
-      it('should call the callback', function () {
-        this.callback.called.should.equal(true)
-      })
     })
 
     describe('when projects and docs collection are de-synced', function () {
-      beforeEach(function (done) {
+      beforeEach(async function () {
         this.ProjectGetter.promises.getProject.resolves(this.project)
 
         // The doc is not in the file-tree, but also not marked as deleted.
@@ -401,21 +373,16 @@ describe('ProjectEntityUpdateHandler', function () {
         )
         this.DocstoreManager.promises.isDocDeleted.resolves(false)
 
-        this.DocstoreManager.promises.updateDoc.resolves()
-        const callback = (...args) => {
-          this.callback(...args)
-          done()
-        }
+        this.DocstoreManager.promises.updateDoc.resolves({})
 
-        this.ProjectEntityUpdateHandler.updateDocLines(
+        await this.ProjectEntityUpdateHandler.promises.updateDocLines(
           projectId,
           docId,
           this.docLines,
           this.version,
           this.ranges,
           this.lastUpdatedAt,
-          this.lastUpdatedBy,
-          callback
+          this.lastUpdatedBy
         )
       })
 
@@ -438,14 +405,11 @@ describe('ProjectEntityUpdateHandler', function () {
       it('should not send the doc the to the TPDS', function () {
         this.TpdsUpdateSender.promises.addDoc.called.should.equal(false)
       })
-
-      it('should call the callback', function () {
-        this.callback.called.should.equal(true)
-      })
     })
 
     describe('when the doc is not related to the project', function () {
-      beforeEach(function (done) {
+      let updateDocLinesPromise
+      beforeEach(function () {
         this.ProjectGetter.promises.getProject.resolves(this.project)
         this.ProjectLocator.promises.findElement.rejects(
           new Errors.NotFoundError()
@@ -453,65 +417,84 @@ describe('ProjectEntityUpdateHandler', function () {
         this.DocstoreManager.promises.isDocDeleted.rejects(
           new Errors.NotFoundError()
         )
-        const callback = (...args) => {
-          this.callback(...args)
-          done()
+
+        updateDocLinesPromise =
+          this.ProjectEntityUpdateHandler.promises.updateDocLines(
+            projectId,
+            docId,
+            this.docLines,
+            this.version,
+            this.ranges,
+            this.lastUpdatedAt,
+            this.lastUpdatedBy
+          )
+      })
+
+      it('should return a not found error', async function () {
+        let error
+
+        try {
+          await updateDocLinesPromise
+        } catch (err) {
+          error = err
         }
 
-        this.ProjectEntityUpdateHandler.updateDocLines(
-          projectId,
-          docId,
-          this.docLines,
-          this.version,
-          this.ranges,
-          this.lastUpdatedAt,
-          this.lastUpdatedBy,
-          callback
-        )
+        expect(error).to.be.instanceOf(Errors.NotFoundError)
       })
 
-      it('should return a not found error', function () {
-        this.callback
-          .calledWith(sinon.match.instanceOf(Errors.NotFoundError))
-          .should.equal(true)
-      })
+      it('should not update the doc', async function () {
+        let error
 
-      it('should not update the doc', function () {
+        try {
+          await updateDocLinesPromise
+        } catch (err) {
+          error = err
+        }
+
+        expect(error).to.exist
         this.DocstoreManager.promises.updateDoc.called.should.equal(false)
       })
 
-      it('should not send the doc the to the TPDS', function () {
+      it('should not send the doc the to the TPDS', async function () {
+        let error
+
+        try {
+          await updateDocLinesPromise
+        } catch (err) {
+          error = err
+        }
+
+        expect(error).to.exist
         this.TpdsUpdateSender.promises.addDoc.called.should.equal(false)
       })
     })
 
     describe('when the project is not found', function () {
-      beforeEach(function (done) {
+      let error
+      beforeEach(async function () {
         this.ProjectGetter.promises.getProject.rejects(
           new Errors.NotFoundError()
         )
-        this.ProjectEntityUpdateHandler.updateDocLines(
-          projectId,
-          docId,
-          this.docLines,
-          this.version,
-          this.ranges,
-          this.lastUpdatedAt,
-          this.lastUpdatedBy,
-          (...args) => {
-            this.callback(...args)
-            done()
-          }
-        )
+        try {
+          await this.ProjectEntityUpdateHandler.promises.updateDocLines(
+            projectId,
+            docId,
+            this.docLines,
+            this.version,
+            this.ranges,
+            this.lastUpdatedAt,
+            this.lastUpdatedBy
+          )
+        } catch (err) {
+          error = err
+        }
       })
 
-      it('should return a not found error', function () {
-        this.callback
-          .calledWith(sinon.match.instanceOf(Errors.NotFoundError))
-          .should.equal(true)
+      it('should return a not found error', async function () {
+        expect(error).to.be.instanceOf(Errors.NotFoundError)
       })
 
-      it('should not update the doc', function () {
+      it('should not update the doc', async function () {
         this.DocstoreManager.promises.updateDoc.called.should.equal(false)
       })
 
@@ -526,38 +509,42 @@ describe('ProjectEntityUpdateHandler', function () {
       this.rootDocId = 'root-doc-id-123123'
     })
 
-    it('should call Project.updateOne when the doc exists and has a valid extension', function (done) {
+    it('should call Project.updateOne when the doc exists and has a valid extension', async function () {
       this.ProjectEntityHandler.promises.getDocPathByProjectIdAndDocId.resolves(
         `/main.tex`
       )
 
-      this.ProjectEntityUpdateHandler.setRootDoc(
+      await this.ProjectEntityUpdateHandler.promises.setRootDoc(
         projectId,
-        this.rootDocId,
-        () => {
-          this.ProjectModel.updateOne
-            .calledWith({ _id: projectId }, { rootDoc_id: this.rootDocId })
-            .should.equal(true)
-          done()
-        }
+        this.rootDocId
       )
+
+      this.ProjectModel.updateOne
+        .calledWith({ _id: projectId }, { rootDoc_id: this.rootDocId })
+        .should.equal(true)
     })
 
-    it("should not call Project.updateOne when the doc doesn't exist", function (done) {
+    it("should not call Project.updateOne when the doc doesn't exist", async function () {
       this.ProjectEntityHandler.promises.getDocPathByProjectIdAndDocId.rejects(
         Errors.NotFoundError
       )
 
-      this.ProjectEntityUpdateHandler.setRootDoc(
-        projectId,
-        this.rootDocId,
-        () => {
-          this.ProjectModel.updateOne
-            .calledWith({ _id: projectId }, { rootDoc_id: this.rootDocId })
-            .should.equal(false)
-          done()
-        }
-      )
+      let error
+
+      try {
+        await this.ProjectEntityUpdateHandler.promises.setRootDoc(
+          projectId,
+          this.rootDocId
+        )
+      } catch (err) {
+        error = err
+      }
+
+      expect(error).to.exist
+
+      this.ProjectModel.updateOne
+        .calledWith({ _id: projectId }, { rootDoc_id: this.rootDocId })
+        .should.equal(false)
     })
 
     it('should call the callback with an UnsupportedFileTypeError when the doc has an unaccepted file extension', function () {
@@ -576,19 +563,17 @@ describe('ProjectEntityUpdateHandler', function () {
   })
 
   describe('unsetRootDoc', function () {
-    it('should call Project.updateOne', function (done) {
-      this.ProjectEntityUpdateHandler.unsetRootDoc(projectId, () => {
-        this.ProjectModel.updateOne
-          .calledWith({ _id: projectId }, { $unset: { rootDoc_id: true } })
-          .should.equal(true)
-        done()
-      })
+    it('should call Project.updateOne', async function () {
+      await this.ProjectEntityUpdateHandler.promises.unsetRootDoc(projectId)
+      this.ProjectModel.updateOne
+        .calledWith({ _id: projectId }, { $unset: { rootDoc_id: true } })
+        .should.equal(true)
     })
   })
 
   describe('addDoc', function () {
     describe('adding a doc', function () {
-      beforeEach(function (done) {
+      beforeEach(async function () {
         this.path = '/path/to/doc'
         this.rev = 5
 
@@ -607,17 +592,13 @@ describe('ProjectEntityUpdateHandler', function () {
           result: { path: { fileSystem: this.path } },
           project: this.project,
         })
-        this.ProjectEntityUpdateHandler.addDoc(
+        await this.ProjectEntityUpdateHandler.promises.addDoc(
           projectId,
           docId,
           this.docName,
           this.docLines,
           userId,
-          this.source,
-          (...args) => {
-            this.callback(...args)
-            done()
-          }
+          this.source
         )
       })
 
@@ -650,34 +631,36 @@ describe('ProjectEntityUpdateHandler', function () {
     })
 
     describe('adding a doc with an invalid name', function () {
-      beforeEach(function (done) {
+      beforeEach(function () {
         this.path = '/path/to/doc'
 
         this.newDoc = { _id: docId }
-        this.ProjectEntityUpdateHandler.addDoc(
-          projectId,
-          folderId,
-          `*${this.docName}`,
-          this.docLines,
-          userId,
-          this.source,
-          (...args) => {
-            this.callback(...args)
-            done()
-          }
-        )
       })
 
-      it('returns an error', function () {
-        const errorMatcher = sinon.match.instanceOf(Errors.InvalidNameError)
-        this.callback.calledWithMatch(errorMatcher).should.equal(true)
+      it('returns an error', async function () {
+        let error
+
+        try {
+          await this.ProjectEntityUpdateHandler.promises.addDoc(
+            projectId,
+            folderId,
+            `*${this.docName}`,
+            this.docLines,
+            userId,
+            this.source
+          )
+        } catch (err) {
+          error = err
+        }
+
+        expect(error).to.be.instanceOf(Errors.InvalidNameError)
       })
     })
   })
 
   describe('addFile', function () {
     describe('adding a file', function () {
-      beforeEach(function (done) {
+      beforeEach(async function () {
         this.path = '/path/to/file'
 
         this.newFile = {
@@ -697,18 +680,14 @@ describe('ProjectEntityUpdateHandler', function () {
           result: { path: { fileSystem: this.path } },
           project: this.project,
         })
-        this.ProjectEntityUpdateHandler.addFile(
+        await this.ProjectEntityUpdateHandler.promises.addFile(
           projectId,
           folderId,
           this.fileName,
           this.fileSystemPath,
           this.linkedFileData,
           userId,
-          this.source,
-          (...args) => {
-            this.callback(...args)
-            done()
-          }
+          this.source
         )
       })
 
@@ -770,7 +749,7 @@ describe('ProjectEntityUpdateHandler', function () {
     })
 
     describe('adding a file with an invalid name', function () {
-      beforeEach(function (done) {
+      beforeEach(function () {
         this.path = '/path/to/file'
 
         this.newFile = {
@@ -785,54 +764,59 @@ describe('ProjectEntityUpdateHandler', function () {
           result: { path: { fileSystem: this.path } },
           project: this.project,
         })
-        this.ProjectEntityUpdateHandler.addFile(
-          projectId,
-          folderId,
-          `*${this.fileName}`,
-          this.fileSystemPath,
-          this.linkedFileData,
-          userId,
-          this.source,
-          (...args) => {
-            this.callback(...args)
-            done()
-          }
-        )
       })
 
-      it('returns an error', function () {
-        const errorMatcher = sinon.match.instanceOf(Errors.InvalidNameError)
-        this.callback.calledWithMatch(errorMatcher).should.equal(true)
+      it('returns an error', async function () {
+        let error
+
+        try {
+          await this.ProjectEntityUpdateHandler.promises.addFile(
+            projectId,
+            folderId,
+            `*${this.fileName}`,
+            this.fileSystemPath,
+            this.linkedFileData,
+            userId,
+            this.source
+          )
+        } catch (err) {
+          error = err
+        }
+
+        expect(error).to.be.instanceOf(Errors.InvalidNameError)
       })
     })
   })
 
   describe('upsertDoc', function () {
     describe('upserting into an invalid folder', function () {
-      beforeEach(function (done) {
+      beforeEach(function () {
         this.ProjectLocator.promises.findElement.resolves({ element: null })
-        this.ProjectEntityUpdateHandler.upsertDoc(
-          projectId,
-          folderId,
-          this.docName,
-          this.docLines,
-          this.source,
-          userId,
-          (...args) => {
-            this.callback(...args)
-            done()
-          }
-        )
       })
 
-      it('returns an error', function () {
-        const errorMatcher = sinon.match.instanceOf(Error)
-        this.callback.calledWithMatch(errorMatcher).should.equal(true)
+      it('returns an error', async function () {
+        let error
+
+        try {
+          await this.ProjectEntityUpdateHandler.promises.upsertDoc(
+            projectId,
+            folderId,
+            this.docName,
+            this.docLines,
+            this.source,
+            userId
+          )
+        } catch (err) {
+          error = err
+        }
+
+        expect(error).to.be.instanceOf(Error)
       })
     })
 
     describe('updating an existing doc', function () {
-      beforeEach(function (done) {
+      let upsertDocResponse
+      beforeEach(async function () {
         this.existingDoc = { _id: docId, name: this.docName }
         this.existingFile = {
           _id: fileId,
@@ -849,18 +833,15 @@ describe('ProjectEntityUpdateHandler', function () {
         })
         this.DocumentUpdaterHandler.promises.setDocument.resolves()
 
-        this.ProjectEntityUpdateHandler.upsertDoc(
-          projectId,
-          folderId,
-          this.docName,
-          this.docLines,
-          this.source,
-          userId,
-          (...args) => {
-            this.callback(...args)
-            done()
-          }
-        )
+        upsertDocResponse =
+          await this.ProjectEntityUpdateHandler.promises.upsertDoc(
+            projectId,
+            folderId,
+            this.docName,
+            this.docLines,
+            this.source,
+            userId
+          )
       })
 
       it('tries to find the folder', function () {
@@ -886,12 +867,15 @@ describe('ProjectEntityUpdateHandler', function () {
       })
 
       it('returns the doc', function () {
-        this.callback.calledWith(null, this.existingDoc, false)
+        expect(upsertDocResponse.isNew).to.equal(false)
+        expect(upsertDocResponse.doc).to.eql(this.existingDoc)
       })
     })
 
     describe('creating a new doc', function () {
-      beforeEach(function (done) {
+      let upsertDocResponse
+
+      beforeEach(async function () {
         this.folder = { _id: folderId, docs: [], fileRefs: [] }
         this.newDoc = { _id: docId }
         this.ProjectLocator.promises.findElement.resolves({
@@ -901,18 +885,15 @@ describe('ProjectEntityUpdateHandler', function () {
           withoutLock: sinon.stub().resolves({ doc: this.newDoc }),
         }
 
-        this.ProjectEntityUpdateHandler.upsertDoc(
-          projectId,
-          folderId,
-          this.docName,
-          this.docLines,
-          this.source,
-          userId,
-          (...args) => {
-            this.callback(...args)
-            done()
-          }
-        )
+        upsertDocResponse =
+          await this.ProjectEntityUpdateHandler.promises.upsertDoc(
+            projectId,
+            folderId,
+            this.docName,
+            this.docLines,
+            this.source,
+            userId
+          )
       })
 
       it('tries to find the folder', function () {
@@ -938,12 +919,13 @@ describe('ProjectEntityUpdateHandler', function () {
       })
 
       it('returns the doc', function () {
-        this.callback.calledWith(null, this.newDoc, true)
+        expect(upsertDocResponse.isNew).to.equal(true)
+        expect(upsertDocResponse.doc).to.equal(this.newDoc)
       })
     })
 
     describe('upserting a new doc with an invalid name', function () {
-      beforeEach(function (done) {
+      beforeEach(function () {
         this.folder = { _id: folderId, docs: [], fileRefs: [] }
         this.newDoc = { _id: docId }
         this.ProjectLocator.promises.findElement.resolves({
@@ -952,29 +934,30 @@ describe('ProjectEntityUpdateHandler', function () {
         this.ProjectEntityUpdateHandler.promises.addDocWithRanges = {
           withoutLock: sinon.stub().resolves({ doc: this.newDoc }),
         }
-
-        this.ProjectEntityUpdateHandler.upsertDoc(
-          projectId,
-          folderId,
-          `*${this.docName}`,
-          this.docLines,
-          this.source,
-          userId,
-          (...args) => {
-            this.callback(...args)
-            done()
-          }
-        )
       })
 
-      it('returns an error', function () {
-        const errorMatcher = sinon.match.instanceOf(Errors.InvalidNameError)
-        this.callback.calledWithMatch(errorMatcher).should.equal(true)
+      it('returns an error', async function () {
+        let error
+
+        try {
+          await this.ProjectEntityUpdateHandler.promises.upsertDoc(
+            projectId,
+            folderId,
+            `*${this.docName}`,
+            this.docLines,
+            this.source,
+            userId
+          )
+        } catch (err) {
+          error = err
+        }
+
+        expect(error).to.be.instanceOf(Errors.InvalidNameError)
       })
     })
 
     describe('upserting a doc on top of a file', function () {
-      beforeEach(function (done) {
+      beforeEach(async function () {
         this.newProject = {
           name: 'new project',
           overleaf: { history: { id: projectHistoryId } },
@@ -1003,17 +986,13 @@ describe('ProjectEntityUpdateHandler', function () {
         )
         this.TpdsUpdateSender.promises.addDoc.resolves()
 
-        this.ProjectEntityUpdateHandler.upsertDoc(
+        await this.ProjectEntityUpdateHandler.promises.upsertDoc(
           projectId,
           folderId,
           'foo.tex',
           this.docLines,
           this.source,
-          userId,
-          (...args) => {
-            this.callback(...args)
-            done()
-          }
+          userId
         )
       })
 
@@ -1098,31 +1077,34 @@ describe('ProjectEntityUpdateHandler', function () {
     })
 
     describe('upserting into an invalid folder', function () {
-      beforeEach(function (done) {
+      beforeEach(function () {
         this.ProjectLocator.promises.findElement.resolves({ element: null })
-        this.ProjectEntityUpdateHandler.upsertFile(
-          projectId,
-          folderId,
-          this.fileName,
-          this.fileSystemPath,
-          this.linkedFileData,
-          userId,
-          this.source,
-          (...args) => {
-            this.callback(...args)
-            done()
-          }
-        )
       })
 
-      it('returns an error', function () {
-        const errorMatcher = sinon.match.instanceOf(Error)
-        this.callback.calledWithMatch(errorMatcher).should.equal(true)
+      it('returns an error', async function () {
+        let error
+
+        try {
+          await this.ProjectEntityUpdateHandler.promises.upsertFile(
+            projectId,
+            folderId,
+            this.fileName,
+            this.fileSystemPath,
+            this.linkedFileData,
+            userId,
+            this.source
+          )
+        } catch (err) {
+          error = err
+        }
+
+        expect(error).to.be.instanceOf(Error)
       })
     })
 
     describe('updating an existing file', function () {
-      beforeEach(function (done) {
+      let upsertFileResult
+      beforeEach(async function () {
         this.existingFile = { _id: fileId, name: this.fileName, rev: 1 }
         this.newFile = {
           _id: new ObjectId(),
@@ -1144,19 +1126,16 @@ describe('ProjectEntityUpdateHandler', function () {
             newFileRef: this.newFile,
           }
         )
-        this.ProjectEntityUpdateHandler.upsertFile(
-          projectId,
-          folderId,
-          this.fileName,
-          this.fileSystemPath,
-          this.linkedFileData,
-          userId,
-          this.source,
-          (...args) => {
-            this.callback(...args)
-            done()
-          }
-        )
+        upsertFileResult =
+          await this.ProjectEntityUpdateHandler.promises.upsertFile(
+            projectId,
+            folderId,
+            this.fileName,
+            this.fileSystemPath,
+            this.linkedFileData,
+            userId,
+            this.source
+          )
       })
 
       it('uploads a new version of the file', function () {
@@ -1221,12 +1200,16 @@ describe('ProjectEntityUpdateHandler', function () {
       })
 
       it('returns the file', function () {
-        this.callback.calledWith(null, this.existingFile, false)
+        expect(upsertFileResult.isNew).to.be.false
+        expect(upsertFileResult.fileRef.toString()).to.eql(
+          this.existingFile.toString()
+        )
       })
     })
 
     describe('creating a new file', function () {
-      beforeEach(function (done) {
+      let upsertFileResult
+      beforeEach(async function () {
         this.folder = { _id: folderId, fileRefs: [], docs: [] }
         this.newFile = {
           _id: fileId,
@@ -1244,19 +1227,16 @@ describe('ProjectEntityUpdateHandler', function () {
           mainTask: sinon.stub().resolves(this.newFile),
         }
 
-        this.ProjectEntityUpdateHandler.upsertFile(
-          projectId,
-          folderId,
-          this.fileName,
-          this.fileSystemPath,
-          this.linkedFileData,
-          userId,
-          this.source,
-          (...args) => {
-            this.callback(...args)
-            done()
-          }
-        )
+        upsertFileResult =
+          await this.ProjectEntityUpdateHandler.promises.upsertFile(
+            projectId,
+            folderId,
+            this.fileName,
+            this.fileSystemPath,
+            this.linkedFileData,
+            userId,
+            this.source
+          )
       })
 
       it('tries to find the folder', function () {
@@ -1282,12 +1262,13 @@ describe('ProjectEntityUpdateHandler', function () {
       })
 
       it('returns the file', function () {
-        this.callback.calledWith(null, this.newFile, true)
+        expect(upsertFileResult.fileRef).to.eql(this.newFile)
+        expect(upsertFileResult.isNew).to.be.true
       })
     })
 
     describe('upserting a new file with an invalid name', function () {
-      beforeEach(function (done) {
+      beforeEach(function () {
         this.folder = { _id: folderId, fileRefs: [] }
         this.newFile = { _id: fileId }
         this.ProjectLocator.promises.findElement.resolves({
@@ -1296,30 +1277,31 @@ describe('ProjectEntityUpdateHandler', function () {
         this.ProjectEntityUpdateHandler.promises.addFile = {
           mainTask: sinon.stub().resolves(this.newFile),
         }
-
-        this.ProjectEntityUpdateHandler.upsertFile(
-          projectId,
-          folderId,
-          `*${this.fileName}`,
-          this.fileSystemPath,
-          this.linkedFileData,
-          userId,
-          this.source,
-          (...args) => {
-            this.callback(...args)
-            done()
-          }
-        )
       })
 
-      it('returns an error', function () {
-        const errorMatcher = sinon.match.instanceOf(Errors.InvalidNameError)
-        this.callback.calledWithMatch(errorMatcher).should.equal(true)
+      it('returns an error', async function () {
+        let error
+
+        try {
+          await this.ProjectEntityUpdateHandler.promises.upsertFile(
+            projectId,
+            folderId,
+            `*${this.fileName}`,
+            this.fileSystemPath,
+            this.linkedFileData,
+            userId,
+            this.source
+          )
+        } catch (err) {
+          error = err
+        }
+
+        expect(error).to.be.instanceOf(Errors.InvalidNameError)
       })
     })
 
     describe('upserting file on top of a doc', function () {
-      beforeEach(function (done) {
+      beforeEach(async function () {
         this.path = '/path/to/doc'
         this.existingDoc = { _id: new ObjectId(), name: this.fileName }
         this.folder = {
@@ -1366,15 +1348,14 @@ describe('ProjectEntityUpdateHandler', function () {
           this.newProject
         )
 
-        this.ProjectEntityUpdateHandler.upsertFile(
+        await this.ProjectEntityUpdateHandler.promises.upsertFile(
           projectId,
           folderId,
           this.fileName,
           this.fileSystemPath,
           this.linkedFileData,
           userId,
-          this.source,
-          done
+          this.source
         )
       })
 
@@ -1435,7 +1416,8 @@ describe('ProjectEntityUpdateHandler', function () {
 
   describe('upsertDocWithPath', function () {
     describe('upserting a doc', function () {
-      beforeEach(function (done) {
+      let upsertDocWithPathResult
+      beforeEach(async function () {
         this.path = '/folder/doc.tex'
         this.newFolders = ['mock-a', 'mock-b']
         this.folder = { _id: folderId }
@@ -1452,17 +1434,14 @@ describe('ProjectEntityUpdateHandler', function () {
             .resolves({ doc: this.doc, isNew: this.isNewDoc }),
         }
 
-        this.ProjectEntityUpdateHandler.upsertDocWithPath(
-          projectId,
-          this.path,
-          this.docLines,
-          this.source,
-          userId,
-          (...args) => {
-            this.callback(...args)
-            done()
-          }
-        )
+        upsertDocWithPathResult =
+          await this.ProjectEntityUpdateHandler.promises.upsertDocWithPath(
+            projectId,
+            this.path,
+            this.docLines,
+            this.source,
+            userId
+          )
       })
 
       it('creates any necessary folders', function () {
@@ -1484,21 +1463,18 @@ describe('ProjectEntityUpdateHandler', function () {
           .should.equal(true)
       })
 
-      it('calls the callback', function () {
-        this.callback
-          .calledWith(
-            null,
-            this.doc,
-            this.isNewDoc,
-            this.newFolders,
-            this.folder
-          )
-          .should.equal(true)
+      it('returns a doc, the isNewDoc flag, newFolders and a folder', function () {
+        expect(upsertDocWithPathResult).to.eql({
+          doc: this.doc,
+          isNew: this.isNewDoc,
+          newFolders: this.newFolders,
+          folder: this.folder,
+        })
       })
     })
 
     describe('upserting a doc with an invalid path', function () {
-      beforeEach(function (done) {
+      beforeEach(function () {
         this.path = '/*folder/doc.tex'
         this.newFolders = ['mock-a', 'mock-b']
         this.folder = { _id: folderId }
@@ -1514,28 +1490,29 @@ describe('ProjectEntityUpdateHandler', function () {
             .stub()
             .resolves({ doc: this.doc, isNew: this.isNewDoc }),
         }
-
-        this.ProjectEntityUpdateHandler.upsertDocWithPath(
-          projectId,
-          this.path,
-          this.docLines,
-          this.source,
-          userId,
-          (...args) => {
-            this.callback(...args)
-            done()
-          }
-        )
       })
 
-      it('returns an error', function () {
-        const errorMatcher = sinon.match.instanceOf(Errors.InvalidNameError)
-        this.callback.calledWithMatch(errorMatcher).should.equal(true)
+      it('returns an error', async function () {
+        let error
+
+        try {
+          await this.ProjectEntityUpdateHandler.promises.upsertDocWithPath(
+            projectId,
+            this.path,
+            this.docLines,
+            this.source,
+            userId
+          )
+        } catch (err) {
+          error = err
+        }
+
+        expect(error).to.be.instanceOf(Errors.InvalidNameError)
       })
     })
 
     describe('upserting a doc with an invalid name', function () {
-      beforeEach(function (done) {
+      beforeEach(function () {
         this.path = '/folder/*doc.tex'
         this.newFolders = ['mock-a', 'mock-b']
         this.folder = { _id: folderId }
@@ -1551,30 +1528,32 @@ describe('ProjectEntityUpdateHandler', function () {
             .stub()
             .resolves({ doc: this.doc, isNew: this.isNewDoc }),
         }
-
-        this.ProjectEntityUpdateHandler.upsertDocWithPath(
-          projectId,
-          this.path,
-          this.docLines,
-          this.source,
-          userId,
-          (...args) => {
-            this.callback(...args)
-            done()
-          }
-        )
       })
 
-      it('returns an error', function () {
-        const errorMatcher = sinon.match.instanceOf(Errors.InvalidNameError)
-        this.callback.calledWithMatch(errorMatcher).should.equal(true)
+      it('returns an error', async function () {
+        let error
+
+        try {
+          await this.ProjectEntityUpdateHandler.promises.upsertDocWithPath(
+            projectId,
+            this.path,
+            this.docLines,
+            this.source,
+            userId
+          )
+        } catch (err) {
+          error = err
+        }
+
+        expect(error).to.be.instanceOf(Errors.InvalidNameError)
       })
     })
   })
 
   describe('upsertFileWithPath', function () {
     describe('upserting a file', function () {
-      beforeEach(function (done) {
+      let upsertFileWithPathResult
+      beforeEach(async function () {
         this.path = '/folder/file.png'
         this.newFolders = ['mock-a', 'mock-b']
         this.folder = { _id: folderId }
@@ -1596,18 +1575,15 @@ describe('ProjectEntityUpdateHandler', function () {
             .resolves({ fileRef: this.file, isNew: this.isNewFile }),
         }
 
-        this.ProjectEntityUpdateHandler.upsertFileWithPath(
-          projectId,
-          this.path,
-          this.fileSystemPath,
-          this.linkedFileData,
-          userId,
-          this.source,
-          (...args) => {
-            this.callback(...args)
-            done()
-          }
-        )
+        upsertFileWithPathResult =
+          await this.ProjectEntityUpdateHandler.promises.upsertFileWithPath(
+            projectId,
+            this.path,
+            this.fileSystemPath,
+            this.linkedFileData,
+            userId,
+            this.source
+          )
       })
 
       it('creates any necessary folders', function () {
@@ -1633,20 +1609,19 @@ describe('ProjectEntityUpdateHandler', function () {
         )
       })
 
-      it('calls the callback', function () {
-        this.callback.should.have.been.calledWith(
-          null,
-          this.file,
-          this.isNewFile,
-          undefined,
-          this.newFolders,
-          this.folder
-        )
+      it('returns an object with the fileRef, isNew flag, undefined oldFileRef, newFolders, and folder', function () {
+        expect(upsertFileWithPathResult).to.eql({
+          fileRef: this.file,
+          isNew: this.isNewFile,
+          newFolders: this.newFolders,
+          folder: this.folder,
+          oldFileRef: undefined,
+        })
       })
     })
 
     describe('upserting a file with an invalid path', function () {
-      beforeEach(function (done) {
+      beforeEach(function () {
         this.path = '/*folder/file.png'
         this.newFolders = ['mock-a', 'mock-b']
         this.folder = { _id: folderId }
@@ -1662,29 +1637,30 @@ describe('ProjectEntityUpdateHandler', function () {
             .stub()
             .resolves({ doc: this.file, isNew: this.isNewFile }),
         }
-
-        this.ProjectEntityUpdateHandler.upsertFileWithPath(
-          projectId,
-          this.path,
-          this.fileSystemPath,
-          this.linkedFileData,
-          userId,
-          this.source,
-          (...args) => {
-            this.callback(...args)
-            done()
-          }
-        )
       })
 
-      it('returns an error', function () {
-        const errorMatcher = sinon.match.instanceOf(Errors.InvalidNameError)
-        this.callback.calledWithMatch(errorMatcher).should.equal(true)
+      it('returns an error', async function () {
+        let error
+
+        try {
+          await this.ProjectEntityUpdateHandler.promises.upsertFileWithPath(
+            projectId,
+            this.path,
+            this.fileSystemPath,
+            this.linkedFileData,
+            userId,
+            this.source
+          )
+        } catch (err) {
+          error = err
+        }
+
+        expect(error).to.be.instanceOf(Errors.InvalidNameError)
       })
     })
 
     describe('upserting a file with an invalid name', function () {
-      beforeEach(function (done) {
+      beforeEach(function () {
         this.path = '/folder/*file.png'
         this.newFolders = ['mock-a', 'mock-b']
         this.folder = { _id: folderId }
@@ -1700,30 +1676,32 @@ describe('ProjectEntityUpdateHandler', function () {
             .stub()
             .resolves({ doc: this.file, isNew: this.isNewFile }),
         }
-
-        this.ProjectEntityUpdateHandler.upsertFileWithPath(
-          projectId,
-          this.path,
-          this.fileSystemPath,
-          this.linkedFileData,
-          userId,
-          this.source,
-          (...args) => {
-            this.callback(...args)
-            done()
-          }
-        )
       })
 
-      it('returns an error', function () {
-        const errorMatcher = sinon.match.instanceOf(Errors.InvalidNameError)
-        this.callback.calledWithMatch(errorMatcher).should.equal(true)
+      it('returns an error', async function () {
+        let error
+
+        try {
+          await this.ProjectEntityUpdateHandler.promises.upsertFileWithPath(
+            projectId,
+            this.path,
+            this.fileSystemPath,
+            this.linkedFileData,
+            userId,
+            this.source
+          )
+        } catch (err) {
+          error = err
+        }
+
+        expect(error).to.be.instanceOf(Errors.InvalidNameError)
       })
     })
   })
 
   describe('deleteEntity', function () {
-    beforeEach(function (done) {
+    let deleteEntityResult
+    beforeEach(async function () {
       this.path = '/path/to/doc.tex'
       this.doc = { _id: docId }
       this.projectBeforeDeletion = { _id: projectId, name: 'project' }
@@ -1738,17 +1716,14 @@ describe('ProjectEntityUpdateHandler', function () {
         .stub()
         .resolves([{ type: 'doc', entity: this.doc, path: this.path }])
 
-      this.ProjectEntityUpdateHandler.deleteEntity(
-        projectId,
-        docId,
-        'doc',
-        userId,
-        this.source,
-        (...args) => {
-          this.callback(...args)
-          done()
-        }
-      )
+      deleteEntityResult =
+        await this.ProjectEntityUpdateHandler.promises.deleteEntity(
+          projectId,
+          docId,
+          'doc',
+          userId,
+          this.source
+        )
     })
 
     it('flushes the project to mongo', function () {
@@ -1789,13 +1764,13 @@ describe('ProjectEntityUpdateHandler', function () {
     })
 
     it('retuns the entity_id', function () {
-      this.callback.calledWith(null, docId).should.equal(true)
+      expect(deleteEntityResult).to.equal(docId)
     })
   })
 
   describe('deleteEntityWithPath', function () {
     describe('when the entity exists', function () {
-      beforeEach(function (done) {
+      beforeEach(async function () {
         this.doc = { _id: docId }
         this.ProjectLocator.promises.findElementByPath.resolves({
           element: this.doc,
@@ -1805,12 +1780,11 @@ describe('ProjectEntityUpdateHandler', function () {
           withoutLock: sinon.stub().resolves(),
         }
         this.path = '/path/to/doc.tex'
-        this.ProjectEntityUpdateHandler.deleteEntityWithPath(
+        await this.ProjectEntityUpdateHandler.promises.deleteEntityWithPath(
           projectId,
           this.path,
           userId,
-          this.source,
-          done
+          this.source
         )
       })
 
@@ -1836,40 +1810,40 @@ describe('ProjectEntityUpdateHandler', function () {
     })
 
     describe('when the entity does not exist', function () {
-      beforeEach(function (done) {
+      beforeEach(function () {
         this.ProjectLocator.promises.findElementByPath.resolves({
           element: null,
         })
         this.path = '/doc.tex'
-        this.ProjectEntityUpdateHandler.deleteEntityWithPath(
-          projectId,
-          this.path,
-          userId,
-          this.source,
-          (...args) => {
-            this.callback(...args)
-            done()
-          }
-        )
       })
 
-      it('returns an error', function () {
-        this.callback.should.have.been.calledWith(
-          sinon.match.instanceOf(Errors.NotFoundError)
-        )
+      it('returns an error', async function () {
+        let error
+
+        try {
+          await this.ProjectEntityUpdateHandler.promises.deleteEntityWithPath(
+            projectId,
+            this.path,
+            userId,
+            this.source
+          )
+        } catch (err) {
+          error = err
+        }
+
+        expect(error).to.be.instanceOf(Errors.NotFoundError)
       })
     })
   })
 
   describe('mkdirp', function () {
-    beforeEach(function (done) {
+    beforeEach(async function () {
       this.docPath = '/folder/doc.tex'
       this.ProjectEntityMongoUpdateHandler.promises.mkdirp.resolves({})
-      this.ProjectEntityUpdateHandler.mkdirp(
+      await this.ProjectEntityUpdateHandler.promises.mkdirp(
         projectId,
         this.docPath,
-        userId,
-        done
+        userId
       )
     })
 
@@ -1881,14 +1855,13 @@ describe('ProjectEntityUpdateHandler', function () {
   })
 
   describe('mkdirpWithExactCase', function () {
-    beforeEach(function (done) {
+    beforeEach(async function () {
       this.docPath = '/folder/doc.tex'
       this.ProjectEntityMongoUpdateHandler.promises.mkdirp.resolves({})
-      this.ProjectEntityUpdateHandler.mkdirpWithExactCase(
+      await this.ProjectEntityUpdateHandler.promises.mkdirpWithExactCase(
         projectId,
         this.docPath,
-        userId,
-        done
+        userId
       )
     })
 
@@ -1901,16 +1874,15 @@ describe('ProjectEntityUpdateHandler', function () {
 
   describe('addFolder', function () {
     describe('adding a folder', function () {
-      beforeEach(function (done) {
+      beforeEach(async function () {
         this.parentFolderId = '123asdf'
         this.folderName = 'new-folder'
         this.ProjectEntityMongoUpdateHandler.promises.addFolder.resolves({})
-        this.ProjectEntityUpdateHandler.addFolder(
+        await this.ProjectEntityUpdateHandler.promises.addFolder(
           projectId,
           this.parentFolderId,
           this.folderName,
-          userId,
-          done
+          userId
         )
       })
 
@@ -1922,30 +1894,32 @@ describe('ProjectEntityUpdateHandler', function () {
     })
 
     describe('adding a folder with an invalid name', function () {
-      beforeEach(function (done) {
+      beforeEach(function () {
         this.parentFolderId = '123asdf'
         this.folderName = '*new-folder'
         this.ProjectEntityMongoUpdateHandler.promises.addFolder.resolves({})
-        this.ProjectEntityUpdateHandler.addFolder(
-          projectId,
-          this.parentFolderId,
-          this.folderName,
-          (...args) => {
-            this.callback(...args)
-            done()
-          }
-        )
       })
 
-      it('returns an error', function () {
-        const errorMatcher = sinon.match.instanceOf(Errors.InvalidNameError)
-        this.callback.calledWithMatch(errorMatcher).should.equal(true)
+      it('returns an error', async function () {
+        let error
+
+        try {
+          await this.ProjectEntityUpdateHandler.promises.addFolder(
+            projectId,
+            this.parentFolderId,
+            this.folderName
+          )
+        } catch (err) {
+          error = err
+        }
+
+        expect(error).to.be.instanceOf(Errors.InvalidNameError)
       })
     })
   })
 
   describe('moveEntity', function () {
-    beforeEach(function (done) {
+    beforeEach(async function () {
       this.project_name = 'project name'
       this.startPath = '/a.tex'
       this.endPath = '/folder/b.tex'
@@ -1959,14 +1933,13 @@ describe('ProjectEntityUpdateHandler', function () {
         changes: this.changes,
       })
 
-      this.ProjectEntityUpdateHandler.moveEntity(
+      await this.ProjectEntityUpdateHandler.promises.moveEntity(
         projectId,
         docId,
         folderId,
         'doc',
         userId,
-        this.source,
-        done
+        this.source
       )
     })
 
@@ -2006,7 +1979,7 @@ describe('ProjectEntityUpdateHandler', function () {
 
   describe('renameEntity', function () {
     describe('renaming an entity', function () {
-      beforeEach(function (done) {
+      beforeEach(async function () {
         this.project_name = 'project name'
         this.startPath = '/folder/a.tex'
         this.endPath = '/folder/b.tex'
@@ -2021,14 +1994,13 @@ describe('ProjectEntityUpdateHandler', function () {
           changes: this.changes,
         })
 
-        this.ProjectEntityUpdateHandler.renameEntity(
+        await this.ProjectEntityUpdateHandler.promises.renameEntity(
           projectId,
           docId,
           'doc',
           this.newDocName,
           userId,
-          this.source,
-          done
+          this.source
         )
       })
 
@@ -2073,7 +2045,7 @@ describe('ProjectEntityUpdateHandler', function () {
     })
 
     describe('renaming an entity to an invalid name', function () {
-      beforeEach(function (done) {
+      beforeEach(function () {
         this.project_name = 'project name'
         this.startPath = '/folder/a.tex'
         this.endPath = '/folder/b.tex'
@@ -2087,29 +2059,30 @@ describe('ProjectEntityUpdateHandler', function () {
           rev: this.rev,
           changes: this.changes,
         })
-
-        this.ProjectEntityUpdateHandler.renameEntity(
-          projectId,
-          docId,
-          'doc',
-          this.newDocName,
-          userId,
-          this.source,
-          (...args) => {
-            this.callback(...args)
-            done()
-          }
-        )
       })
 
-      it('returns an error', function () {
-        const errorMatcher = sinon.match.instanceOf(Errors.InvalidNameError)
-        this.callback.calledWithMatch(errorMatcher).should.equal(true)
+      it('returns an error', async function () {
+        let error
+
+        try {
+          await this.ProjectEntityUpdateHandler.promises.renameEntity(
+            projectId,
+            docId,
+            'doc',
+            this.newDocName,
+            userId,
+            this.source
+          )
+        } catch (err) {
+          error = err
+        }
+
+        expect(error).to.be.instanceOf(Errors.InvalidNameError)
       })
     })
 
     describe('renaming an entity with a non-string value', function () {
-      beforeEach(function (done) {
+      beforeEach(function () {
         this.project_name = 'project name'
         this.startPath = '/folder/a.tex'
         this.endPath = '/folder/b.tex'
@@ -2123,24 +2096,25 @@ describe('ProjectEntityUpdateHandler', function () {
           rev: this.rev,
           changes: this.changes,
         })
-
-        this.ProjectEntityUpdateHandler.renameEntity(
-          projectId,
-          docId,
-          'doc',
-          this.newDocName,
-          userId,
-          this.source,
-          (...args) => {
-            this.callback(...args)
-            done()
-          }
-        )
       })
 
-      it('returns an error', function () {
-        const errorMatcher = sinon.match.instanceOf(Error)
-        this.callback.calledWithMatch(errorMatcher).should.equal(true)
+      it('returns an error', async function () {
+        let error
+
+        try {
+          await this.ProjectEntityUpdateHandler.promises.renameEntity(
+            projectId,
+            docId,
+            'doc',
+            this.newDocName,
+            userId,
+            this.source
+          )
+        } catch (err) {
+          error = err
+        }
+
+        expect(error).to.be.instanceOf(Error)
         expect(
           this.ProjectEntityMongoUpdateHandler.promises.renameEntity.called
         ).to.equal(false)
@@ -2150,58 +2124,52 @@ describe('ProjectEntityUpdateHandler', function () {
 
   describe('resyncProjectHistory', function () {
     describe('a deleted project', function () {
-      beforeEach(function (done) {
+      beforeEach(function () {
         this.ProjectGetter.promises.getProject.resolves({})
-
-        this.ProjectEntityUpdateHandler.resyncProjectHistory(
-          projectId,
-          {},
-          (...args) => {
-            this.callback(...args)
-            done()
-          }
-        )
       })
 
-      it('should return an error', function () {
-        expect(this.callback).to.have.been.calledWith(
-          sinon.match
-            .instanceOf(Errors.ProjectHistoryDisabledError)
-            .and(
-              sinon.match.has(
-                'message',
-                `project history not enabled for ${projectId}`
-              )
-            )
+      it('should return an error', async function () {
+        let error
+
+        try {
+          await this.ProjectEntityUpdateHandler.promises.resyncProjectHistory(
+            projectId,
+            {}
+          )
+        } catch (err) {
+          error = err
+        }
+
+        expect(error).to.be.instanceOf(Errors.ProjectHistoryDisabledError)
+        expect(error).to.have.property(
+          'message',
+          `project history not enabled for ${projectId}`
         )
       })
     })
 
     describe('a project without project-history enabled', function () {
-      beforeEach(function (done) {
+      beforeEach(function () {
         this.project.overleaf = {}
         this.ProjectGetter.promises.getProject.resolves(this.project)
-
-        this.ProjectEntityUpdateHandler.resyncProjectHistory(
-          projectId,
-          {},
-          (...args) => {
-            this.callback(...args)
-            done()
-          }
-        )
       })
 
-      it('should return an error', function () {
-        expect(this.callback).to.have.been.calledWith(
-          sinon.match
-            .instanceOf(Errors.ProjectHistoryDisabledError)
-            .and(
-              sinon.match.has(
-                'message',
-                `project history not enabled for ${projectId}`
-              )
-            )
+      it('should return an error', async function () {
+        let error
+
+        try {
+          await this.ProjectEntityUpdateHandler.promises.resyncProjectHistory(
+            projectId,
+            {}
+          )
+        } catch (err) {
+          error = err
+        }
+
+        expect(error).to.be.instanceOf(Errors.ProjectHistoryDisabledError)
+        expect(error).to.have.property(
+          'message',
+          `project history not enabled for ${projectId}`
         )
       })
     })
@@ -2214,7 +2182,7 @@ describe('ProjectEntityUpdateHandler', function () {
           path: 'universe.png',
         },
       ]
-      beforeEach(function (done) {
+      beforeEach(async function () {
         this.ProjectGetter.promises.getProject.resolves(this.project)
         const folders = []
         this.ProjectEntityHandler.getAllEntitiesFromProject.returns({
@@ -2222,13 +2190,10 @@ describe('ProjectEntityUpdateHandler', function () {
           files,
           folders,
         })
-        this.ProjectEntityUpdateHandler.resyncProjectHistory(
+
+        await this.ProjectEntityUpdateHandler.promises.resyncProjectHistory(
           projectId,
-          {},
-          (...args) => {
-            this.callback(...args)
-            done()
-          }
+          {}
         )
       })
 
@@ -2253,14 +2218,10 @@ describe('ProjectEntityUpdateHandler', function () {
           .calledWith(projectId, projectHistoryId, docs, files)
           .should.equal(true)
       })
-
-      it('calls the callback', function () {
-        this.callback.called.should.equal(true)
-      })
     })
 
     describe('a project with duplicate filenames', function () {
-      beforeEach(function (done) {
+      beforeEach(async function () {
         this.ProjectGetter.promises.getProject.resolves(this.project)
         this.docs = [
           { doc: { _id: 'doc1', name: 'main.tex' }, path: 'main.tex' },
@@ -2304,10 +2265,9 @@ describe('ProjectEntityUpdateHandler', function () {
           files: this.files,
           folders: [],
         })
-        this.ProjectEntityUpdateHandler.resyncProjectHistory(
+        await this.ProjectEntityUpdateHandler.promises.resyncProjectHistory(
           projectId,
-          {},
-          done
+          {}
         )
       })
 
@@ -2371,7 +2331,7 @@ describe('ProjectEntityUpdateHandler', function () {
     })
 
     describe('a project with bad filenames', function () {
-      beforeEach(function (done) {
+      beforeEach(async function () {
         this.ProjectGetter.promises.getProject.resolves(this.project)
         this.docs = [
           {
@@ -2398,10 +2358,9 @@ describe('ProjectEntityUpdateHandler', function () {
           files: this.files,
           folders: [],
         })
-        this.ProjectEntityUpdateHandler.resyncProjectHistory(
+        await this.ProjectEntityUpdateHandler.promises.resyncProjectHistory(
           projectId,
-          {},
-          done
+          {}
         )
       })
 
@@ -2486,17 +2445,16 @@ describe('ProjectEntityUpdateHandler', function () {
         },
       ]
       const files = []
-      beforeEach(function (done) {
+      beforeEach(async function () {
         this.ProjectGetter.promises.getProject.resolves(this.project)
         this.ProjectEntityHandler.getAllEntitiesFromProject.returns({
           docs,
           files,
           folders,
         })
-        this.ProjectEntityUpdateHandler.resyncProjectHistory(
+        await this.ProjectEntityUpdateHandler.promises.resyncProjectHistory(
           projectId,
-          {},
-          done
+          {}
         )
       })
 
@@ -2544,17 +2502,16 @@ describe('ProjectEntityUpdateHandler', function () {
         },
       ]
       const files = []
-      beforeEach(function (done) {
+      beforeEach(async function () {
         this.ProjectGetter.promises.getProject.resolves(this.project)
         this.ProjectEntityHandler.getAllEntitiesFromProject.returns({
           docs,
           files,
           folders,
         })
-        this.ProjectEntityUpdateHandler.resyncProjectHistory(
+        await this.ProjectEntityUpdateHandler.promises.resyncProjectHistory(
           projectId,
-          {},
-          done
+          {}
         )
       })
 
@@ -2585,24 +2542,25 @@ describe('ProjectEntityUpdateHandler', function () {
     })
 
     describe('a project with an invalid file tree', function () {
-      beforeEach(function (done) {
+      beforeEach(function () {
         this.callback = sinon.stub()
         this.ProjectGetter.promises.getProject.resolves(this.project)
         this.ProjectEntityHandler.getAllEntitiesFromProject.throws()
-        this.ProjectEntityUpdateHandler.resyncProjectHistory(
-          projectId,
-          {},
-          (...args) => {
-            this.callback(...args)
-            done()
-          }
-        )
       })
 
-      it('calls the callback with an error', function () {
-        expect(this.callback).to.have.been.calledWith(
-          sinon.match.instanceOf(Error)
-        )
+      it('calls the callback with an error', async function () {
+        let error
+
+        try {
+          await this.ProjectEntityUpdateHandler.promises.resyncProjectHistory(
+            projectId,
+            {}
+          )
+        } catch (err) {
+          error = err
+        }
+
+        expect(error).to.be.instanceOf(Error)
       })
     })
   })
@@ -2934,13 +2892,12 @@ describe('ProjectEntityUpdateHandler', function () {
     })
 
     describe('successfully', function () {
-      beforeEach(function (done) {
-        this.ProjectEntityUpdateHandler.convertDocToFile(
+      beforeEach(async function () {
+        await this.ProjectEntityUpdateHandler.promises.convertDocToFile(
           this.project._id,
           this.doc._id,
           userId,
-          this.source,
-          done
+          this.source
         )
       })
 
@@ -3026,7 +2983,7 @@ describe('ProjectEntityUpdateHandler', function () {
     })
 
     describe('when the doc has ranges', function () {
-      it('should throw a DocHasRangesError', function (done) {
+      it('should throw a DocHasRangesError', async function () {
         this.ranges = { comments: [{ id: 123 }] }
         this.DocstoreManager.promises.getDoc
           .withArgs(this.project._id, this.doc._id)
@@ -3036,16 +2993,20 @@ describe('ProjectEntityUpdateHandler', function () {
             version: 'version',
             ranges: this.ranges,
           })
-        this.ProjectEntityUpdateHandler.convertDocToFile(
-          this.project._id,
-          this.doc._id,
-          this.user._id,
-          this.source,
-          err => {
-            expect(err).to.be.instanceof(Errors.DocHasRangesError)
-            done()
-          }
-        )
+        let error
+
+        try {
+          await this.ProjectEntityUpdateHandler.promises.convertDocToFile(
+            this.project._id,
+            this.doc._id,
+            this.user._id,
+            this.source
+          )
+        } catch (err) {
+          error = err
+        }
+
+        expect(error).to.be.instanceOf(Errors.DocHasRangesError)
       })
     })
   })
@@ -3090,7 +3051,7 @@ describe('ProjectEntityUpdateHandler', function () {
 
   describe('setMainBibliographyDoc', function () {
     describe('on success', function () {
-      beforeEach(function (done) {
+      beforeEach(async function () {
         this.doc = {
           _id: new ObjectId(),
           name: 'test.bib',
@@ -3100,12 +3061,9 @@ describe('ProjectEntityUpdateHandler', function () {
           .withArgs(this.project._id, this.doc._id)
           .resolves(this.path)
 
-        this.callback = sinon.stub().callsFake(() => done())
-
-        this.ProjectEntityUpdateHandler.setMainBibliographyDoc(
+        await this.ProjectEntityUpdateHandler.promises.setMainBibliographyDoc(
           this.project._id,
-          this.doc._id,
-          this.callback
+          this.doc._id
         )
       })
 
@@ -3119,7 +3077,8 @@ describe('ProjectEntityUpdateHandler', function () {
 
     describe('on failure', function () {
       describe("when document can't be found", function () {
-        beforeEach(function (done) {
+        let setMainBibliographyDocPromise
+        beforeEach(function () {
           this.doc = {
             _id: new ObjectId(),
             name: 'test.bib',
@@ -3127,29 +3086,42 @@ describe('ProjectEntityUpdateHandler', function () {
           this.ProjectEntityHandler.promises.getDocPathByProjectIdAndDocId
             .withArgs(this.project._id, this.doc._id)
             .rejects(new Error('error'))
-
-          this.callback = sinon.stub().callsFake(() => done())
-
-          this.ProjectEntityUpdateHandler.setMainBibliographyDoc(
-            this.project._id,
-            this.doc._id,
-            this.callback
-          )
+          setMainBibliographyDocPromise =
+            this.ProjectEntityUpdateHandler.promises.setMainBibliographyDoc(
+              this.project._id,
+              this.doc._id
+            )
         })
 
-        it('should call the callback with an error', function () {
-          expect(this.callback).to.have.been.calledWith(
-            sinon.match.instanceOf(Error)
-          )
+        it('should call the callback with an error', async function () {
+          let error
+
+          try {
+            await setMainBibliographyDocPromise
+          } catch (err) {
+            error = err
+          }
+
+          expect(error).to.be.instanceOf(Error)
         })
 
-        it('should not update the project with the new main bibliography doc', function () {
+        it('should not update the project with the new main bibliography doc', async function () {
+          let error
+
+          try {
+            await setMainBibliographyDocPromise
+          } catch (err) {
+            error = err
+          }
+
+          expect(error).to.exist
           expect(this.ProjectModel.updateOne).to.not.have.been.called
         })
       })
 
       describe("when path is not a bib file can't be found", function () {
-        beforeEach(function (done) {
+        let setMainBibliographyDocPromise
+        beforeEach(function () {
           this.doc = {
             _id: new ObjectId(),
             name: 'test.bib',
@@ -3159,23 +3131,35 @@ describe('ProjectEntityUpdateHandler', function () {
           this.ProjectEntityHandler.promises.getDocPathByProjectIdAndDocId
             .withArgs(this.project._id, this.doc._id)
             .resolves(this.path)
-
-          this.callback = sinon.stub().callsFake(() => done())
-
-          this.ProjectEntityUpdateHandler.setMainBibliographyDoc(
-            this.project._id,
-            this.doc._id,
-            this.callback
-          )
+          setMainBibliographyDocPromise =
+            this.ProjectEntityUpdateHandler.promises.setMainBibliographyDoc(
+              this.project._id,
+              this.doc._id
+            )
         })
 
-        it('should call the callback with an error', function () {
-          expect(this.callback).to.have.been.calledWith(
-            sinon.match.instanceOf(Error)
-          )
+        it('should reject with an error', async function () {
+          let error
+
+          try {
+            await setMainBibliographyDocPromise
+          } catch (err) {
+            error = err
+          }
+
+          expect(error).to.be.instanceOf(Error)
         })
 
-        it('should not update the project with the new main bibliography doc', function () {
+        it('should not update the project with the new main bibliography doc', async function () {
+          let error
+
+          try {
+            await setMainBibliographyDocPromise
+          } catch (err) {
+            error = err
+          }
+
+          expect(error).to.exist
           expect(this.ProjectModel.updateOne).to.not.have.been.called
         })
       })
@@ -3184,40 +3168,54 @@ describe('ProjectEntityUpdateHandler', function () {
 
   describe('appendToDoc', function () {
     describe('when document cannot be found', function () {
-      beforeEach(function (done) {
+      let appendToDocPromise
+      beforeEach(function () {
         this.appendedLines = ['5678', 'def']
         this.DocumentUpdaterHandler.promises.appendToDocument = sinon.stub()
         this.ProjectLocator.promises.findElement = sinon.stub()
         this.ProjectLocator.promises.findElement
           .withArgs({ project_id: projectId, element_id: docId, type: 'doc' })
           .rejects(new Errors.NotFoundError())
-        this.ProjectEntityUpdateHandler.appendToDoc(
-          projectId,
-          docId,
-          this.appendedLines,
-          this.source,
-          userId,
-          (...args) => {
-            this.callback(...args)
-            done()
-          }
-        )
+        appendToDocPromise =
+          this.ProjectEntityUpdateHandler.promises.appendToDocWithPath(
+            projectId,
+            docId,
+            this.appendedLines,
+            this.source,
+            userId
+          )
       })
 
-      it('should not talk to DocumentUpdaterHandler', function () {
+      it('should not talk to DocumentUpdaterHandler', async function () {
+        let error
+
+        try {
+          await appendToDocPromise
+        } catch (err) {
+          error = err
+        }
+
+        expect(error).to.exist
         this.DocumentUpdaterHandler.promises.appendToDocument.should.not.have
           .been.called
       })
 
-      it('should throw the error', function () {
-        this.callback.should.have.been.calledWith(
-          sinon.match.instanceOf(Errors.NotFoundError)
-        )
+      it('should throw the error', async function () {
+        let error
+
+        try {
+          await appendToDocPromise
+        } catch (err) {
+          error = err
+        }
+
+        expect(error).to.be.instanceOf(Errors.NotFoundError)
       })
     })
 
     describe('when document is found', function () {
-      beforeEach(function (done) {
+      let appendToDocResult
+      beforeEach(async function () {
         this.appendedLines = ['5678', 'def']
         this.DocumentUpdaterHandler.promises.appendToDocument = sinon.stub()
         this.DocumentUpdaterHandler.promises.appendToDocument
@@ -3227,17 +3225,14 @@ describe('ProjectEntityUpdateHandler', function () {
         this.ProjectLocator.promises.findElement
           .withArgs({ project_id: projectId, element_id: docId, type: 'doc' })
           .resolves({ element: { _id: docId } })
-        this.ProjectEntityUpdateHandler.appendToDoc(
-          projectId,
-          docId,
-          this.appendedLines,
-          this.source,
-          userId,
-          (...args) => {
-            this.callback(...args)
-            done()
-          }
-        )
+        appendToDocResult =
+          await this.ProjectEntityUpdateHandler.promises.appendToDocWithPath(
+            projectId,
+            docId,
+            this.appendedLines,
+            this.source,
+            userId
+          )
       })
 
       it('should forward call to DocumentUpdaterHandler.appendToDocument', function () {
@@ -3251,12 +3246,12 @@ describe('ProjectEntityUpdateHandler', function () {
       })
 
       it('should return the response from DocumentUpdaterHandler', function () {
-        this.callback.should.have.been.calledWith(null, { rev: 1 })
+        expect(appendToDocResult).to.eql({ rev: 1 })
       })
     })
 
     describe('when DocumentUpdater throws an error', function () {
-      beforeEach(function (done) {
+      beforeEach(function () {
         this.appendedLines = ['5678', 'def']
         this.DocumentUpdaterHandler.promises.appendToDocument = sinon.stub()
         this.DocumentUpdaterHandler.promises.appendToDocument.rejects(
@@ -3266,21 +3261,24 @@ describe('ProjectEntityUpdateHandler', function () {
         this.ProjectLocator.promises.findElement
           .withArgs({ project_id: projectId, element_id: docId, type: 'doc' })
           .resolves({ element: { _id: docId } })
-        this.ProjectEntityUpdateHandler.appendToDoc(
-          projectId,
-          docId,
-          this.appendedLines,
-          this.source,
-          userId,
-          (...args) => {
-            this.callback(...args)
-            done()
-          }
-        )
       })
 
-      it('should return the response from DocumentUpdaterHandler', function () {
-        this.callback.should.have.been.calledWith(sinon.match.instanceOf(Error))
+      it('should return the response from DocumentUpdaterHandler', async function () {
+        let error
+
+        try {
+          await this.ProjectEntityUpdateHandler.promises.appendToDocWithPath(
+            projectId,
+            docId,
+            this.appendedLines,
+            this.source,
+            userId
+          )
+        } catch (err) {
+          error = err
+        }
+
+        expect(error).to.be.instanceOf(Error)
       })
     })
   })

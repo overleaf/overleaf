@@ -206,7 +206,7 @@ describe('AuthorizationMiddleware', function () {
       expectForbidden()
     })
 
-    describe('for a regular user', function (done) {
+    describe('for a regular user', function () {
       setupPermission('isRestrictedUserForProject', false)
       invokeMiddleware('blockRestrictedUserFromProject')
       expectNext()

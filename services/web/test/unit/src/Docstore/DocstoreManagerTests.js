@@ -1,6 +1,7 @@
 const sinon = require('sinon')
 const modulePath = '../../../../app/src/Features/Docstore/DocstoreManager'
 const SandboxedModule = require('sandboxed-module')
+const { expect } = require('chai')
 const Errors = require('../../../../app/src/Features/Errors/Errors')
 const tk = require('timekeeper')
 
@@ -26,7 +27,6 @@ describe('DocstoreManager', function () {
 
     this.project_id = 'project-id-123'
     this.doc_id = 'doc-id-123'
-    this.callback = sinon.stub()
   })
 
   describe('deleteDoc', function () {
@@ -39,16 +39,15 @@ describe('DocstoreManager', function () {
         tk.reset()
       })
 
-      beforeEach(function () {
+      beforeEach(async function () {
         this.request.patch = sinon
           .stub()
           .callsArgWith(1, null, { statusCode: 204 }, '')
-        this.DocstoreManager.deleteDoc(
+        await this.DocstoreManager.promises.deleteDoc(
           this.project_id,
           this.doc_id,
           'wombat.tex',
-          new Date(),
-          this.callback
+          new Date()
         )
       })
 
@@ -61,10 +60,6 @@ describe('DocstoreManager', function () {
           })
           .should.equal(true)
       })
-
-      it('should call the callback without an error', function () {
-        this.callback.calledWith(null).should.equal(true)
-      })
     })
 
     describe('with a failed response code', function () {
@@ -72,28 +67,27 @@ describe('DocstoreManager', function () {
         this.request.patch = sinon
           .stub()
           .callsArgWith(1, null, { statusCode: 500 }, '')
-        this.DocstoreManager.deleteDoc(
-          this.project_id,
-          this.doc_id,
-          'main.tex',
-          new Date(),
-          this.callback
-        )
       })
 
-      it('should call the callback with an error', function () {
-        this.callback
-          .calledWith(
-            sinon.match
-              .instanceOf(Error)
-              .and(
-                sinon.match.has(
-                  'message',
-                  'docstore api responded with non-success code: 500'
-                )
-              )
+      it('should reject with an error', async function () {
+        let error
+
+        try {
+          await this.DocstoreManager.promises.deleteDoc(
+            this.project_id,
+            this.doc_id,
+            'main.tex',
+            new Date()
           )
-          .should.equal(true)
+        } catch (err) {
+          error = err
+        }
+
+        expect(error).to.be.instanceOf(Error)
+        expect(error).to.have.property(
+          'message',
+          'docstore api responded with non-success code: 500'
+        )
       })
     })
 
@@ -102,28 +96,26 @@ describe('DocstoreManager', function () {
         this.request.patch = sinon
           .stub()
           .callsArgWith(1, null, { statusCode: 404 }, '')
-        this.DocstoreManager.deleteDoc(
-          this.project_id,
-          this.doc_id,
-          'main.tex',
-          new Date(),
-          this.callback
-        )
       })
 
-      it('should call the callback with an error', function () {
-        this.callback
-          .calledWith(
-            sinon.match
-              .instanceOf(Errors.NotFoundError)
-              .and(
-                sinon.match.has(
-                  'message',
-                  'tried to delete doc not in docstore'
-                )
-              )
+      it('should reject with an error', async function () {
+        let error
+        try {
+          await this.DocstoreManager.promises.deleteDoc(
+            this.project_id,
+            this.doc_id,
+            'main.tex',
+            new Date()
           )
-          .should.equal(true)
+        } catch (err) {
+          error = err
+        }
+
+        expect(error).to.be.instanceOf(Error)
+        expect(error).to.have.property(
+          'message',
+          'tried to delete doc not in docstore'
+        )
       })
     })
   })
@@ -137,8 +129,8 @@ describe('DocstoreManager', function () {
       this.modified = true
     })
 
-    describe('with a successful response code', function () {
-      beforeEach(function () {
+    describe('with a successful response code', async function () {
+      beforeEach(async function () {
         this.request.post = sinon
           .stub()
           .callsArgWith(
@@ -147,13 +139,12 @@ describe('DocstoreManager', function () {
             { statusCode: 204 },
             { modified: this.modified, rev: this.rev }
           )
-        this.DocstoreManager.updateDoc(
+        this.updateDocResponse = await this.DocstoreManager.promises.updateDoc(
           this.project_id,
           this.doc_id,
           this.lines,
           this.version,
-          this.ranges,
-          this.callback
+          this.ranges
         )
       })
 
@@ -171,10 +162,12 @@ describe('DocstoreManager', function () {
           .should.equal(true)
       })
 
-      it('should call the callback with the modified status and revision', function () {
-        this.callback
-          .calledWith(null, this.modified, this.rev)
-          .should.equal(true)
+      it('should return the modified status and revision', function () {
+        expect(this.updateDocResponse).to.haveOwnProperty(
+          'modified',
+          this.modified
+        )
+        expect(this.updateDocResponse).to.haveOwnProperty('rev', this.rev)
       })
     })
 
@@ -183,29 +176,28 @@ describe('DocstoreManager', function () {
         this.request.post = sinon
           .stub()
           .callsArgWith(1, null, { statusCode: 500 }, '')
-        this.DocstoreManager.updateDoc(
-          this.project_id,
-          this.doc_id,
-          this.lines,
-          this.version,
-          this.ranges,
-          this.callback
-        )
       })
 
-      it('should call the callback with an error', function () {
-        this.callback
-          .calledWith(
-            sinon.match
-              .instanceOf(Error)
-              .and(
-                sinon.match.has(
-                  'message',
-                  'docstore api responded with non-success code: 500'
-                )
-              )
+      it('should reject with an error', async function () {
+        let error
+
+        try {
+          await this.DocstoreManager.promises.updateDoc(
+            this.project_id,
+            this.doc_id,
+            this.lines,
+            this.version,
+            this.ranges
           )
-          .should.equal(true)
+        } catch (err) {
+          error = err
+        }
+
+        expect(error).to.be.instanceOf(Error)
+        expect(error).to.have.property(
+          'message',
+          'docstore api responded with non-success code: 500'
+        )
       })
     })
   })
@@ -221,11 +213,14 @@ describe('DocstoreManager', function () {
     })
 
     describe('with a successful response code', function () {
-      beforeEach(function () {
+      beforeEach(async function () {
         this.request.get = sinon
           .stub()
           .callsArgWith(1, null, { statusCode: 204 }, this.doc)
-        this.DocstoreManager.getDoc(this.project_id, this.doc_id, this.callback)
+        this.getDocResponse = await this.DocstoreManager.promises.getDoc(
+          this.project_id,
+          this.doc_id
+        )
       })
 
       it('should get the doc from the docstore api', function () {
@@ -236,10 +231,13 @@ describe('DocstoreManager', function () {
         })
       })
 
-      it('should call the callback with the lines, version and rev', function () {
-        this.callback
-          .calledWith(null, this.lines, this.rev, this.version, this.ranges)
-          .should.equal(true)
+      it('should resolve with the lines, version and rev', function () {
+        expect(this.getDocResponse).to.eql({
+          lines: this.lines,
+          rev: this.rev,
+          version: this.version,
+          ranges: this.ranges,
+        })
       })
     })
 
@@ -248,35 +246,37 @@ describe('DocstoreManager', function () {
         this.request.get = sinon
           .stub()
           .callsArgWith(1, null, { statusCode: 500 }, '')
-        this.DocstoreManager.getDoc(this.project_id, this.doc_id, this.callback)
       })
 
-      it('should call the callback with an error', function () {
-        this.callback
-          .calledWith(
-            sinon.match
-              .instanceOf(Error)
-              .and(
-                sinon.match.has(
-                  'message',
-                  'docstore api responded with non-success code: 500'
-                )
-              )
+      it('should reject with an error', async function () {
+        let error
+
+        try {
+          await this.DocstoreManager.promises.getDoc(
+            this.project_id,
+            this.doc_id
           )
-          .should.equal(true)
+        } catch (err) {
+          error = err
+        }
+
+        expect(error).to.be.instanceOf(Error)
+        expect(error).to.have.property(
+          'message',
+          'docstore api responded with non-success code: 500'
+        )
       })
     })
 
     describe('with include_deleted=true', function () {
-      beforeEach(function () {
+      beforeEach(async function () {
         this.request.get = sinon
           .stub()
           .callsArgWith(1, null, { statusCode: 204 }, this.doc)
-        this.DocstoreManager.getDoc(
+        this.getDocResponse = await this.DocstoreManager.promises.getDoc(
           this.project_id,
           this.doc_id,
-          { include_deleted: true },
-          this.callback
+          { include_deleted: true }
         )
       })
 
@@ -289,23 +289,27 @@ describe('DocstoreManager', function () {
         })
       })
 
-      it('should call the callback with the lines, version and rev', function () {
-        this.callback
-          .calledWith(null, this.lines, this.rev, this.version, this.ranges)
-          .should.equal(true)
+      it('should resolve with the lines, version and rev', function () {
+        expect(this.getDocResponse).to.eql({
+          lines: this.lines,
+          rev: this.rev,
+          version: this.version,
+          ranges: this.ranges,
+        })
       })
     })
 
     describe('with peek=true', function () {
-      beforeEach(function () {
+      beforeEach(async function () {
         this.request.get = sinon
           .stub()
           .callsArgWith(1, null, { statusCode: 204 }, this.doc)
-        this.DocstoreManager.getDoc(
+        await this.DocstoreManager.promises.getDoc(
           this.project_id,
           this.doc_id,
-          { peek: true },
-          this.callback
+          {
+            peek: true,
+          }
         )
       })
 
@@ -323,24 +327,30 @@ describe('DocstoreManager', function () {
         this.request.get = sinon
           .stub()
           .callsArgWith(1, null, { statusCode: 404 }, '')
-        this.DocstoreManager.getDoc(this.project_id, this.doc_id, this.callback)
       })
 
-      it('should call the callback with an error', function () {
-        this.callback
-          .calledWith(
-            sinon.match
-              .instanceOf(Errors.NotFoundError)
-              .and(sinon.match.has('message', 'doc not found in docstore'))
+      it('should reject with an error', async function () {
+        let error
+
+        try {
+          await this.DocstoreManager.promises.getDoc(
+            this.project_id,
+            this.doc_id
           )
-          .should.equal(true)
+        } catch (err) {
+          error = err
+        }
+
+        expect(error).to.be.instanceOf(Errors.NotFoundError)
+        expect(error).to.have.property('message', 'doc not found in docstore')
       })
     })
   })
 
   describe('getAllDocs', function () {
     describe('with a successful response code', function () {
-      beforeEach(function () {
+      let getAllDocsResult
+      beforeEach(async function () {
         this.request.get = sinon
           .stub()
           .callsArgWith(
@@ -349,7 +359,9 @@ describe('DocstoreManager', function () {
             { statusCode: 204 },
             (this.docs = [{ _id: 'mock-doc-id' }])
           )
-        this.DocstoreManager.getAllDocs(this.project_id, this.callback)
+        getAllDocsResult = await this.DocstoreManager.promises.getAllDocs(
+          this.project_id
+        )
       })
 
       it('should get all the project docs in the docstore api', function () {
@@ -362,8 +374,8 @@ describe('DocstoreManager', function () {
           .should.equal(true)
       })
 
-      it('should call the callback with the docs', function () {
-        this.callback.calledWith(null, this.docs).should.equal(true)
+      it('should return the docs', function () {
+        expect(getAllDocsResult).to.eql(this.docs)
       })
     })
 
@@ -372,35 +384,36 @@ describe('DocstoreManager', function () {
         this.request.get = sinon
           .stub()
           .callsArgWith(1, null, { statusCode: 500 }, '')
-        this.DocstoreManager.getAllDocs(this.project_id, this.callback)
       })
 
-      it('should call the callback with an error', function () {
-        this.callback
-          .calledWith(
-            sinon.match
-              .instanceOf(Error)
-              .and(
-                sinon.match.has(
-                  'message',
-                  'docstore api responded with non-success code: 500'
-                )
-              )
-          )
-          .should.equal(true)
+      it('should reject with an error', async function () {
+        let error
+
+        try {
+          await this.DocstoreManager.promises.getAllDocs(this.project_id)
+        } catch (err) {
+          error = err
+        }
+
+        expect(error).to.be.instanceOf(Error)
+        expect(error).to.have.property(
+          'message',
+          'docstore api responded with non-success code: 500'
+        )
       })
     })
   })
 
   describe('getAllDeletedDocs', function () {
     describe('with a successful response code', function () {
-      beforeEach(function (done) {
-        this.callback.callsFake(done)
+      let getAllDeletedDocsResponse
+      beforeEach(async function () {
         this.docs = [{ _id: 'mock-doc-id', name: 'foo.tex' }]
         this.request.get = sinon
           .stub()
           .callsArgWith(1, null, { statusCode: 200 }, this.docs)
-        this.DocstoreManager.getAllDeletedDocs(this.project_id, this.callback)
+        getAllDeletedDocsResponse =
+          await this.DocstoreManager.promises.getAllDeletedDocs(this.project_id)
       })
 
       it('should get all the project docs in the docstore api', function () {
@@ -411,48 +424,52 @@ describe('DocstoreManager', function () {
         })
       })
 
-      it('should call the callback with the docs', function () {
-        this.callback.should.have.been.calledWith(null, this.docs)
+      it('should resolve with the docs', function () {
+        expect(getAllDeletedDocsResponse).to.eql(this.docs)
       })
     })
 
     describe('with an error', function () {
-      beforeEach(function (done) {
-        this.callback.callsFake(() => done())
+      beforeEach(async function () {
         this.request.get = sinon
           .stub()
           .callsArgWith(1, new Error('connect failed'))
-        this.DocstoreManager.getAllDocs(this.project_id, this.callback)
       })
 
-      it('should call the callback with an error', function () {
-        this.callback.should.have.been.calledWith(
-          sinon.match
-            .instanceOf(Error)
-            .and(sinon.match.has('message', 'connect failed'))
-        )
+      it('should reject with an error', async function () {
+        let error
+
+        try {
+          await this.DocstoreManager.promises.getAllDocs(this.project_id)
+        } catch (err) {
+          error = err
+        }
+
+        expect(error).to.be.instanceOf(Error)
+        expect(error).to.have.property('message', 'connect failed')
       })
     })
 
     describe('with a failed response code', function () {
-      beforeEach(function (done) {
-        this.callback.callsFake(() => done())
+      beforeEach(function () {
         this.request.get = sinon
           .stub()
           .callsArgWith(1, null, { statusCode: 500 })
-        this.DocstoreManager.getAllDocs(this.project_id, this.callback)
       })
 
-      it('should call the callback with an error', function () {
-        this.callback.should.have.been.calledWith(
-          sinon.match
-            .instanceOf(Error)
-            .and(
-              sinon.match.has(
-                'message',
-                'docstore api responded with non-success code: 500'
-              )
-            )
+      it('should reject with an error', async function () {
+        let error
+
+        try {
+          await this.DocstoreManager.promises.getAllDocs(this.project_id)
+        } catch (err) {
+          error = err
+        }
+
+        expect(error).to.be.instanceOf(Error)
+        expect(error).to.have.property(
+          'message',
+          'docstore api responded with non-success code: 500'
         )
       })
     })
@@ -460,7 +477,8 @@ describe('DocstoreManager', function () {
 
   describe('getAllRanges', function () {
     describe('with a successful response code', function () {
-      beforeEach(function () {
+      let getAllRangesResult
+      beforeEach(async function () {
         this.request.get = sinon
           .stub()
           .callsArgWith(
@@ -469,7 +487,9 @@ describe('DocstoreManager', function () {
             { statusCode: 204 },
             (this.docs = [{ _id: 'mock-doc-id', ranges: 'mock-ranges' }])
           )
-        this.DocstoreManager.getAllRanges(this.project_id, this.callback)
+        getAllRangesResult = await this.DocstoreManager.promises.getAllRanges(
+          this.project_id
+        )
       })
 
       it('should get all the project doc ranges in the docstore api', function () {
@@ -482,8 +502,8 @@ describe('DocstoreManager', function () {
           .should.equal(true)
       })
 
-      it('should call the callback with the docs', function () {
-        this.callback.calledWith(null, this.docs).should.equal(true)
+      it('should return the docs', async function () {
+        expect(getAllRangesResult).to.eql(this.docs)
       })
     })
 
@@ -492,22 +512,22 @@ describe('DocstoreManager', function () {
         this.request.get = sinon
           .stub()
           .callsArgWith(1, null, { statusCode: 500 }, '')
-        this.DocstoreManager.getAllRanges(this.project_id, this.callback)
       })
 
-      it('should call the callback with an error', function () {
-        this.callback
-          .calledWith(
-            sinon.match
-              .instanceOf(Error)
-              .and(
-                sinon.match.has(
-                  'message',
-                  'docstore api responded with non-success code: 500'
-                )
-              )
-          )
-          .should.equal(true)
+      it('should reject with an error', async function () {
+        let error
+
+        try {
+          await this.DocstoreManager.promises.getAllRanges(this.project_id)
+        } catch (err) {
+          error = err
+        }
+
+        expect(error).to.be.instanceOf(Error)
+        expect(error).to.have.property(
+          'message',
+          'docstore api responded with non-success code: 500'
+        )
       })
     })
   })
@@ -518,11 +538,12 @@ describe('DocstoreManager', function () {
         this.request.post = sinon
           .stub()
           .callsArgWith(1, null, { statusCode: 204 })
-        this.DocstoreManager.archiveProject(this.project_id, this.callback)
       })
 
-      it('should call the callback', function () {
-        this.callback.called.should.equal(true)
+      it('should resolve', async function () {
+        await expect(
+          this.DocstoreManager.promises.archiveProject(this.project_id)
+        ).to.eventually.be.fulfilled
       })
     })
 
@@ -531,22 +552,22 @@ describe('DocstoreManager', function () {
         this.request.post = sinon
           .stub()
           .callsArgWith(1, null, { statusCode: 500 })
-        this.DocstoreManager.archiveProject(this.project_id, this.callback)
       })
 
-      it('should call the callback with an error', function () {
-        this.callback
-          .calledWith(
-            sinon.match
-              .instanceOf(Error)
-              .and(
-                sinon.match.has(
-                  'message',
-                  'docstore api responded with non-success code: 500'
-                )
-              )
-          )
-          .should.equal(true)
+      it('should reject with an error', async function () {
+        let error
+
+        try {
+          await this.DocstoreManager.promises.archiveProject(this.project_id)
+        } catch (err) {
+          error = err
+        }
+
+        expect(error).to.be.instanceOf(Error)
+        expect(error).to.have.property(
+          'message',
+          'docstore api responded with non-success code: 500'
+        )
       })
     })
   })
@@ -557,11 +578,12 @@ describe('DocstoreManager', function () {
         this.request.post = sinon
           .stub()
           .callsArgWith(1, null, { statusCode: 204 })
-        this.DocstoreManager.unarchiveProject(this.project_id, this.callback)
       })
 
-      it('should call the callback', function () {
-        this.callback.called.should.equal(true)
+      it('should resolve', async function () {
+        await expect(
+          this.DocstoreManager.promises.unarchiveProject(this.project_id)
+        ).to.eventually.be.fulfilled
       })
     })
 
@@ -570,22 +592,22 @@ describe('DocstoreManager', function () {
         this.request.post = sinon
           .stub()
           .callsArgWith(1, null, { statusCode: 500 })
-        this.DocstoreManager.unarchiveProject(this.project_id, this.callback)
       })
 
-      it('should call the callback with an error', function () {
-        this.callback
-          .calledWith(
-            sinon.match
-              .instanceOf(Error)
-              .and(
-                sinon.match.has(
-                  'message',
-                  'docstore api responded with non-success code: 500'
-                )
-              )
-          )
-          .should.equal(true)
+      it('should reject with an error', async function () {
+        let error
+
+        try {
+          await this.DocstoreManager.promises.unarchiveProject(this.project_id)
+        } catch (err) {
+          error = err
+        }
+
+        expect(error).to.be.instanceOf(Error)
+        expect(error).to.have.property(
+          'message',
+          'docstore api responded with non-success code: 500'
+        )
       })
     })
   })
@@ -596,11 +618,12 @@ describe('DocstoreManager', function () {
         this.request.post = sinon
           .stub()
           .callsArgWith(1, null, { statusCode: 204 })
-        this.DocstoreManager.destroyProject(this.project_id, this.callback)
       })
 
-      it('should call the callback', function () {
-        this.callback.called.should.equal(true)
+      it('should resolve', async function () {
+        await expect(
+          this.DocstoreManager.promises.destroyProject(this.project_id)
+        ).to.eventually.be.fulfilled
       })
     })
 
@@ -609,22 +632,22 @@ describe('DocstoreManager', function () {
         this.request.post = sinon
           .stub()
           .callsArgWith(1, null, { statusCode: 500 })
-        this.DocstoreManager.destroyProject(this.project_id, this.callback)
       })
 
-      it('should call the callback with an error', function () {
-        this.callback
-          .calledWith(
-            sinon.match
-              .instanceOf(Error)
-              .and(
-                sinon.match.has(
-                  'message',
-                  'docstore api responded with non-success code: 500'
-                )
-              )
-          )
-          .should.equal(true)
+      it('should reject with an error', async function () {
+        let error
+
+        try {
+          await this.DocstoreManager.promises.destroyProject(this.project_id)
+        } catch (err) {
+          error = err
+        }
+
+        expect(error).to.be.instanceOf(Error)
+        expect(error).to.have.property(
+          'message',
+          'docstore api responded with non-success code: 500'
+        )
       })
     })
   })

@@ -1,6 +1,7 @@
 const sinon = require('sinon')
 const SandboxedModule = require('sandboxed-module')
 const path = require('path')
+const { expect } = require('chai')
 const { ObjectId } = require('mongodb-legacy')
 const modulePath = path.join(
   __dirname,
@@ -32,7 +33,6 @@ describe('DocumentUpdaterHandler', function () {
     }
     this.source = 'dropbox'
 
-    this.callback = sinon.stub()
     this.handler = SandboxedModule.require(modulePath, {
       requires: {
         request: {
@@ -68,9 +68,9 @@ describe('DocumentUpdaterHandler', function () {
 
   describe('flushProjectToMongo', function () {
     describe('successfully', function () {
-      beforeEach(function () {
+      beforeEach(async function () {
         this.request.callsArgWith(1, null, { statusCode: 204 }, '')
-        this.handler.flushProjectToMongo(this.project_id, this.callback)
+        await this.handler.promises.flushProjectToMongo(this.project_id)
       })
 
       it('should flush the document from the document updater', function () {
@@ -80,10 +80,6 @@ describe('DocumentUpdaterHandler', function () {
             method: 'POST',
           })
           .should.equal(true)
-      })
-
-      it('should call the callback with no error', function () {
-        this.callback.calledWith(null).should.equal(true)
       })
     })
 
@@ -95,46 +91,50 @@ describe('DocumentUpdaterHandler', function () {
           null,
           null
         )
-        this.handler.flushProjectToMongo(this.project_id, this.callback)
       })
 
-      it('should return an error to the callback', function () {
-        this.callback
-          .calledWith(sinon.match.instanceOf(Error))
-          .should.equal(true)
+      it('should reject with an error', async function () {
+        let error
+
+        try {
+          await this.handler.promises.flushProjectToMongo(this.project_id)
+        } catch (err) {
+          error = err
+        }
+
+        expect(error).to.exist
       })
     })
 
     describe('when the document updater returns a failure error code', function () {
       beforeEach(function () {
         this.request.callsArgWith(1, null, { statusCode: 500 }, '')
-        this.handler.flushProjectToMongo(this.project_id, this.callback)
       })
 
-      it('should return the callback with an error', function () {
-        this.callback
-          .calledWith(
-            sinon.match
-              .instanceOf(Error)
-              .and(
-                sinon.match.has(
-                  'message',
-                  'document updater returned a failure status code: 500'
-                )
-              )
-          )
-          .should.equal(true)
+      it('should reject with an error', async function () {
+        let error
+
+        try {
+          await this.handler.promises.flushProjectToMongo(this.project_id)
+        } catch (err) {
+          error = err
+        }
+
+        expect(error).to.be.instanceOf(Error)
+        expect(error).to.have.property(
+          'message',
+          'document updater returned a failure status code: 500'
+        )
       })
     })
   })
 
   describe('flushProjectToMongoAndDelete', function () {
     describe('successfully', function () {
-      beforeEach(function () {
+      beforeEach(async function () {
         this.request.callsArgWith(1, null, { statusCode: 204 }, '')
-        this.handler.flushProjectToMongoAndDelete(
-          this.project_id,
-          this.callback
+        await this.handler.promises.flushProjectToMongoAndDelete(
+          this.project_id
         )
       })
 
@@ -146,10 +146,6 @@ describe('DocumentUpdaterHandler', function () {
           })
           .should.equal(true)
       })
-
-      it('should call the callback with no error', function () {
-        this.callback.calledWith(null).should.equal(true)
-      })
     })
 
     describe('when the document updater API returns an error', function () {
@@ -160,41 +156,44 @@ describe('DocumentUpdaterHandler', function () {
           null,
           null
         )
-        this.handler.flushProjectToMongoAndDelete(
-          this.project_id,
-          this.callback
-        )
       })
 
-      it('should return an error to the callback', function () {
-        this.callback
-          .calledWith(sinon.match.instanceOf(Error))
-          .should.equal(true)
+      it('should reject with an error', async function () {
+        let error
+
+        try {
+          await this.handler.promises.flushProjectToMongoAndDelete(
+            this.project_id
+          )
+        } catch (err) {
+          error = err
+        }
+
+        expect(error).to.be.instanceOf(Error)
       })
     })
 
     describe('when the document updater returns a failure error code', function () {
       beforeEach(function () {
         this.request.callsArgWith(1, null, { statusCode: 500 }, '')
-        this.handler.flushProjectToMongoAndDelete(
-          this.project_id,
-          this.callback
-        )
       })
 
-      it('should return the callback with an error', function () {
-        this.callback
-          .calledWith(
-            sinon.match
-              .instanceOf(Error)
-              .and(
-                sinon.match.has(
-                  'message',
-                  'document updater returned a failure status code: 500'
-                )
-              )
+      it('should reject with an error', async function () {
+        let error
+
+        try {
+          await this.handler.promises.flushProjectToMongoAndDelete(
+            this.project_id
           )
-          .should.equal(true)
+        } catch (err) {
+          error = err
+        }
+
+        expect(error).to.be.instanceOf(Error)
+        expect(error).to.have.property(
+          'message',
+          'document updater returned a failure status code: 500'
+        )
       })
     })
   })
@@ -203,24 +202,19 @@ describe('DocumentUpdaterHandler', function () {
     describe('successfully', function () {
       beforeEach(function () {
         this.request.callsArgWith(1, null, { statusCode: 204 }, '')
-        this.handler.flushDocToMongo(
-          this.project_id,
-          this.doc_id,
-          this.callback
-        )
       })
 
-      it('should flush the document from the document updater', function () {
+      it('should flush the document from the document updater', async function () {
+        await this.handler.promises.flushDocToMongo(
+          this.project_id,
+          this.doc_id
+        )
         this.request
           .calledWithMatch({
             url: `${this.settings.apis.documentupdater.url}/project/${this.project_id}/doc/${this.doc_id}/flush`,
             method: 'POST',
           })
           .should.equal(true)
-      })
-
-      it('should call the callback with no error', function () {
-        this.callback.calledWith(null).should.equal(true)
       })
     })
 
@@ -232,43 +226,46 @@ describe('DocumentUpdaterHandler', function () {
           null,
           null
         )
-        this.handler.flushDocToMongo(
-          this.project_id,
-          this.doc_id,
-          this.callback
-        )
       })
 
-      it('should return an error to the callback', function () {
-        this.callback
-          .calledWith(sinon.match.instanceOf(Error))
-          .should.equal(true)
+      it('should reject with an error', async function () {
+        let error
+
+        try {
+          await this.handler.promises.flushDocToMongo(
+            this.project_id,
+            this.doc_id
+          )
+        } catch (err) {
+          error = err
+        }
+
+        expect(error).to.be.instanceOf(Error)
       })
     })
 
     describe('when the document updater returns a failure error code', function () {
       beforeEach(function () {
         this.request.callsArgWith(1, null, { statusCode: 500 }, '')
-        this.handler.flushDocToMongo(
-          this.project_id,
-          this.doc_id,
-          this.callback
-        )
       })
 
-      it('should return the callback with an error', function () {
-        this.callback
-          .calledWith(
-            sinon.match
-              .instanceOf(Error)
-              .and(
-                sinon.match.has(
-                  'message',
-                  'document updater returned a failure status code: 500'
-                )
-              )
+      it('should reject with an error', async function () {
+        let error
+
+        try {
+          await this.handler.promises.flushDocToMongo(
+            this.project_id,
+            this.doc_id
           )
-          .should.equal(true)
+        } catch (err) {
+          error = err
+        }
+
+        expect(error).to.be.instanceOf(Error)
+        expect(error).to.have.property(
+          'message',
+          'document updater returned a failure status code: 500'
+        )
       })
     })
   })
@@ -277,20 +274,16 @@ describe('DocumentUpdaterHandler', function () {
     describe('successfully', function () {
       beforeEach(function () {
         this.request.callsArgWith(1, null, { statusCode: 204 }, '')
-        this.handler.deleteDoc(this.project_id, this.doc_id, this.callback)
       })
 
-      it('should delete the document from the document updater', function () {
+      it('should delete the document from the document updater', async function () {
+        await this.handler.promises.deleteDoc(this.project_id, this.doc_id)
         this.request
           .calledWithMatch({
             url: `${this.settings.apis.documentupdater.url}/project/${this.project_id}/doc/${this.doc_id}`,
             method: 'DELETE',
           })
           .should.equal(true)
-      })
-
-      it('should call the callback with no error', function () {
-        this.callback.calledWith(null).should.equal(true)
       })
     })
 
@@ -302,35 +295,40 @@ describe('DocumentUpdaterHandler', function () {
           null,
           null
         )
-        this.handler.deleteDoc(this.project_id, this.doc_id, this.callback)
       })
 
-      it('should return an error to the callback', function () {
-        this.callback
-          .calledWith(sinon.match.instanceOf(Error))
-          .should.equal(true)
+      it('should reject with an error', async function () {
+        let error
+
+        try {
+          await this.handler.promises.deleteDoc(this.project_id, this.doc_id)
+        } catch (err) {
+          error = err
+        }
+
+        expect(error).to.be.instanceOf(Error)
       })
     })
 
     describe('when the document updater returns a failure error code', function () {
       beforeEach(function () {
         this.request.callsArgWith(1, null, { statusCode: 500 }, '')
-        this.handler.deleteDoc(this.project_id, this.doc_id, this.callback)
       })
 
-      it('should return the callback with an error', function () {
-        this.callback
-          .calledWith(
-            sinon.match
-              .instanceOf(Error)
-              .and(
-                sinon.match.has(
-                  'message',
-                  'document updater returned a failure status code: 500'
-                )
-              )
-          )
-          .should.equal(true)
+      it('should reject with an error', async function () {
+        let error
+
+        try {
+          await this.handler.promises.deleteDoc(this.project_id, this.doc_id)
+        } catch (err) {
+          error = err
+        }
+
+        expect(error).to.be.instanceOf(Error)
+        expect(error).to.have.property(
+          'message',
+          'document updater returned a failure status code: 500'
+        )
       })
     })
 
@@ -339,12 +337,11 @@ describe('DocumentUpdaterHandler', function () {
         this.request.callsArgWith(1, null, { statusCode: 204 }, '')
       })
 
-      it('when option is true, should send a `ignore_flush_errors=true` URL query to document-updater', function () {
-        this.handler.deleteDoc(
+      it('when option is true, should send a `ignore_flush_errors=true` URL query to document-updater', async function () {
+        await this.handler.promises.deleteDoc(
           this.project_id,
           this.doc_id,
-          true,
-          this.callback
+          true
         )
         this.request
           .calledWithMatch({
@@ -354,12 +351,11 @@ describe('DocumentUpdaterHandler', function () {
           .should.equal(true)
       })
 
-      it("when option is false, shouldn't send any URL query to document-updater", function () {
-        this.handler.deleteDoc(
+      it("when option is false, shouldn't send any URL query to document-updater", async function () {
+        await this.handler.promises.deleteDoc(
           this.project_id,
           this.doc_id,
-          false,
-          this.callback
+          false
         )
         this.request
           .calledWithMatch({
@@ -375,17 +371,16 @@ describe('DocumentUpdaterHandler', function () {
     describe('successfully', function () {
       beforeEach(function () {
         this.request.callsArgWith(1, null, { statusCode: 204 }, '')
-        this.handler.setDocument(
+      })
+
+      it('should set the document in the document updater', async function () {
+        await this.handler.promises.setDocument(
           this.project_id,
           this.doc_id,
           this.user_id,
           this.lines,
-          this.source,
-          this.callback
+          this.source
         )
-      })
-
-      it('should set the document in the document updater', function () {
         this.request
           .calledWith({
             url: `${this.settings.apis.documentupdater.url}/project/${this.project_id}/doc/${this.doc_id}`,
@@ -399,10 +394,6 @@ describe('DocumentUpdaterHandler', function () {
           })
           .should.equal(true)
       })
-
-      it('should call the callback with no error', function () {
-        this.callback.calledWith(null).should.equal(true)
-      })
     })
 
     describe('when the document updater API returns an error', function () {
@@ -413,49 +404,52 @@ describe('DocumentUpdaterHandler', function () {
           null,
           null
         )
-        this.handler.setDocument(
-          this.project_id,
-          this.doc_id,
-          this.user_id,
-          this.lines,
-          this.source,
-          this.callback
-        )
       })
 
-      it('should return an error to the callback', function () {
-        this.callback
-          .calledWith(sinon.match.instanceOf(Error))
-          .should.equal(true)
+      it('should reject with an error', async function () {
+        let error
+
+        try {
+          await this.handler.promises.setDocument(
+            this.project_id,
+            this.doc_id,
+            this.user_id,
+            this.lines,
+            this.source
+          )
+        } catch (err) {
+          error = err
+        }
+
+        expect(error).to.be.instanceOf(Error)
       })
     })
 
     describe('when the document updater returns a failure error code', function () {
       beforeEach(function () {
         this.request.callsArgWith(1, null, { statusCode: 500 }, '')
-        this.handler.setDocument(
-          this.project_id,
-          this.doc_id,
-          this.user_id,
-          this.lines,
-          this.source,
-          this.callback
-        )
       })
 
-      it('should return the callback with an error', function () {
-        this.callback
-          .calledWith(
-            sinon.match
-              .instanceOf(Error)
-              .and(
-                sinon.match.has(
-                  'message',
-                  'document updater returned a failure status code: 500'
-                )
-              )
+      it('should reject with an error', async function () {
+        let error
+
+        try {
+          await this.handler.promises.setDocument(
+            this.project_id,
+            this.doc_id,
+            this.user_id,
+            this.lines,
+            this.source
           )
-          .should.equal(true)
+        } catch (err) {
+          error = err
+        }
+
+        expect(error).to.be.instanceOf(Error)
+        expect(error).to.have.property(
+          'message',
+          'document updater returned a failure status code: 500'
+        )
       })
     })
   })
@@ -468,15 +462,14 @@ describe('DocumentUpdaterHandler', function () {
         }
         this.body = this.comment
         this.request.callsArgWith(1, null, { statusCode: 200 }, this.body)
-        this.handler.getComment(
-          this.project_id,
-          this.doc_id,
-          this.comment.id,
-          this.callback
-        )
       })
 
-      it('should get the comment from the document updater', function () {
+      it('should get the comment from the document updater', async function () {
+        await this.handler.promises.getComment(
+          this.project_id,
+          this.doc_id,
+          this.comment.id
+        )
         const url = `${this.settings.apis.documentupdater.url}/project/${this.project_id}/doc/${this.doc_id}/comment/${this.comment.id}`
         this.request
           .calledWith({
@@ -487,16 +480,13 @@ describe('DocumentUpdaterHandler', function () {
           })
           .should.equal(true)
       })
-
-      it('should call the callback with the comment', function () {
-        this.callback.calledWithExactly(null, this.comment).should.equal(true)
-      })
     })
   })
 
   describe('getDocument', function () {
     describe('successfully', function () {
-      beforeEach(function () {
+      let getDocumentResponse
+      beforeEach(async function () {
         this.body = {
           lines: this.lines,
           version: this.version,
@@ -505,11 +495,10 @@ describe('DocumentUpdaterHandler', function () {
         }
         this.fromVersion = 2
         this.request.callsArgWith(1, null, { statusCode: 200 }, this.body)
-        this.handler.getDocument(
+        getDocumentResponse = await this.handler.promises.getDocument(
           this.project_id,
           this.doc_id,
-          this.fromVersion,
-          this.callback
+          this.fromVersion
         )
       })
 
@@ -525,9 +514,12 @@ describe('DocumentUpdaterHandler', function () {
       })
 
       it('should call the callback with the lines and version', function () {
-        this.callback
-          .calledWith(null, this.lines, this.version, this.ranges, this.ops)
-          .should.equal(true)
+        expect(getDocumentResponse).to.eql({
+          lines: this.lines,
+          version: this.version,
+          ranges: this.ranges,
+          ops: this.ops,
+        })
       })
     })
 
@@ -539,45 +531,48 @@ describe('DocumentUpdaterHandler', function () {
           null,
           null
         )
-        this.handler.getDocument(
-          this.project_id,
-          this.doc_id,
-          this.fromVersion,
-          this.callback
-        )
       })
 
-      it('should return an error to the callback', function () {
-        this.callback
-          .calledWith(sinon.match.instanceOf(Error))
-          .should.equal(true)
+      it('should reject with an error', async function () {
+        let error
+
+        try {
+          await this.handler.promises.getDocument(
+            this.project_id,
+            this.doc_id,
+            this.fromVersion
+          )
+        } catch (err) {
+          error = err
+        }
+
+        expect(error).to.be.instanceOf(Error)
       })
     })
 
     describe('when the document updater returns a failure error code', function () {
       beforeEach(function () {
         this.request.callsArgWith(1, null, { statusCode: 500 }, '')
-        this.handler.getDocument(
-          this.project_id,
-          this.doc_id,
-          this.fromVersion,
-          this.callback
-        )
       })
 
-      it('should return the callback with an error', function () {
-        this.callback
-          .calledWith(
-            sinon.match
-              .instanceOf(Error)
-              .and(
-                sinon.match.has(
-                  'message',
-                  'document updater returned a failure status code: 500'
-                )
-              )
+      it('should reject with an error', async function () {
+        let error
+
+        try {
+          await this.handler.promises.getDocument(
+            this.project_id,
+            this.doc_id,
+            this.fromVersion
           )
-          .should.equal(true)
+        } catch (err) {
+          error = err
+        }
+
+        expect(error).to.be.instanceOf(Error)
+        expect(error).to.have.property(
+          'message',
+          'document updater returned a failure status code: 500'
+        )
       })
     })
   })
@@ -588,7 +583,8 @@ describe('DocumentUpdaterHandler', function () {
     })
 
     describe('successfully', function () {
-      beforeEach(function () {
+      let getProjectDocsIfMatchResponse
+      beforeEach(async function () {
         this.doc0 = {
           _id: this.doc_id,
           lines: this.lines,
@@ -599,11 +595,11 @@ describe('DocumentUpdaterHandler', function () {
         this.request.post = sinon
           .stub()
           .callsArgWith(1, null, { statusCode: 200 }, this.body)
-        this.handler.getProjectDocsIfMatch(
-          this.project_id,
-          this.project_state_hash,
-          this.callback
-        )
+        getProjectDocsIfMatchResponse =
+          await this.handler.promises.getProjectDocsIfMatch(
+            this.project_id,
+            this.project_state_hash
+          )
       })
 
       it('should get the documents from the document updater', function () {
@@ -612,7 +608,7 @@ describe('DocumentUpdaterHandler', function () {
       })
 
       it('should call the callback with the documents', function () {
-        this.callback.calledWithExactly(null, this.docs).should.equal(true)
+        expect(getProjectDocsIfMatchResponse).to.eql(this.docs)
       })
     })
 
@@ -621,17 +617,21 @@ describe('DocumentUpdaterHandler', function () {
         this.request.post = sinon
           .stub()
           .callsArgWith(1, new Error('something went wrong'), null, null)
-        this.handler.getProjectDocsIfMatch(
-          this.project_id,
-          this.project_state_hash,
-          this.callback
-        )
       })
 
-      it('should return an error to the callback', function () {
-        this.callback
-          .calledWith(sinon.match.instanceOf(Error))
-          .should.equal(true)
+      it('should reject with an error', async function () {
+        let error
+
+        try {
+          await this.handler.promises.getProjectDocsIfMatch(
+            this.project_id,
+            this.project_state_hash
+          )
+        } catch (err) {
+          error = err
+        }
+
+        expect(error).to.be.instanceOf(Error)
       })
     })
 
@@ -640,15 +640,14 @@ describe('DocumentUpdaterHandler', function () {
         this.request.post = sinon
           .stub()
           .callsArgWith(1, null, { statusCode: 409 }, 'Conflict')
-        this.handler.getProjectDocsIfMatch(
-          this.project_id,
-          this.project_state_hash,
-          this.callback
-        )
       })
 
-      it('should return the callback with no documents', function () {
-        this.callback.alwaysCalledWithExactly().should.equal(true)
+      it('should return no documents', async function () {
+        const response = await this.handler.promises.getProjectDocsIfMatch(
+          this.project_id,
+          this.project_state_hash
+        )
+        expect(response).to.be.undefined
       })
     })
   })
@@ -657,20 +656,17 @@ describe('DocumentUpdaterHandler', function () {
     describe('successfully', function () {
       beforeEach(function () {
         this.request.callsArgWith(1, null, { statusCode: 200 })
-        this.handler.clearProjectState(this.project_id, this.callback)
       })
 
-      it('should clear the project state from the document updater', function () {
+      it('should clear the project state from the document updater', async function () {
+        await this.handler.promises.clearProjectState(this.project_id)
+
         this.request
           .calledWithMatch({
             url: `${this.settings.apis.documentupdater.url}/project/${this.project_id}/clearState`,
             method: 'POST',
           })
           .should.equal(true)
-      })
-
-      it('should call the callback', function () {
-        this.callback.calledWith(null).should.equal(true)
       })
     })
 
@@ -682,35 +678,40 @@ describe('DocumentUpdaterHandler', function () {
           null,
           null
         )
-        this.handler.clearProjectState(this.project_id, this.callback)
       })
 
-      it('should return an error to the callback', function () {
-        this.callback
-          .calledWith(sinon.match.instanceOf(Error))
-          .should.equal(true)
+      it('should reject with an error', async function () {
+        let error
+
+        try {
+          await this.handler.promises.clearProjectState(this.project_id)
+        } catch (err) {
+          error = err
+        }
+
+        expect(error).to.be.instanceOf(Error)
       })
     })
 
     describe('when the document updater returns an error code', function () {
       beforeEach(function () {
         this.request.callsArgWith(1, null, { statusCode: 500 }, null)
-        this.handler.clearProjectState(this.project_id, this.callback)
       })
 
-      it('should return the callback with no documents', function () {
-        this.callback
-          .calledWith(
-            sinon.match
-              .instanceOf(Error)
-              .and(
-                sinon.match.has(
-                  'message',
-                  'document updater returned a failure status code: 500'
-                )
-              )
-          )
-          .should.equal(true)
+      it('should reject with an error', async function () {
+        let error
+
+        try {
+          await this.handler.promises.clearProjectState(this.project_id)
+        } catch (err) {
+          error = err
+        }
+
+        expect(error).to.be.instanceOf(Error)
+        expect(error).to.have.property(
+          'message',
+          'document updater returned a failure status code: 500'
+        )
       })
     })
   })
@@ -723,15 +724,14 @@ describe('DocumentUpdaterHandler', function () {
     describe('successfully', function () {
       beforeEach(function () {
         this.request.callsArgWith(1, null, { statusCode: 200 }, this.body)
-        this.handler.acceptChanges(
-          this.project_id,
-          this.doc_id,
-          [this.change_id],
-          this.callback
-        )
       })
 
-      it('should accept the change in the document updater', function () {
+      it('should accept the change in the document updater', async function () {
+        await this.handler.promises.acceptChanges(
+          this.project_id,
+          this.doc_id,
+          [this.change_id]
+        )
         this.request
           .calledWith({
             url: `${this.settings.apis.documentupdater.url}/project/${this.project_id}/doc/${this.doc_id}/change/accept`,
@@ -743,10 +743,6 @@ describe('DocumentUpdaterHandler', function () {
           })
           .should.equal(true)
       })
-
-      it('should call the callback', function () {
-        this.callback.calledWith(null).should.equal(true)
-      })
     })
 
     describe('when the document updater API returns an error', function () {
@@ -757,45 +753,48 @@ describe('DocumentUpdaterHandler', function () {
           null,
           null
         )
-        this.handler.acceptChanges(
-          this.project_id,
-          this.doc_id,
-          [this.change_id],
-          this.callback
-        )
       })
 
-      it('should return an error to the callback', function () {
-        this.callback
-          .calledWith(sinon.match.instanceOf(Error))
-          .should.equal(true)
+      it('should reject with an error', async function () {
+        let error
+
+        try {
+          await this.handler.promises.acceptChanges(
+            this.project_id,
+            this.doc_id,
+            [this.change_id]
+          )
+        } catch (err) {
+          error = err
+        }
+
+        expect(error).to.be.instanceOf(Error)
       })
     })
 
     describe('when the document updater returns a failure error code', function () {
       beforeEach(function () {
         this.request.callsArgWith(1, null, { statusCode: 500 }, '')
-        this.handler.acceptChanges(
-          this.project_id,
-          this.doc_id,
-          [this.change_id],
-          this.callback
-        )
       })
 
-      it('should return the callback with an error', function () {
-        this.callback
-          .calledWith(
-            sinon.match
-              .instanceOf(Error)
-              .and(
-                sinon.match.has(
-                  'message',
-                  'document updater returned a failure status code: 500'
-                )
-              )
+      it('should reject with an error', async function () {
+        let error
+
+        try {
+          await this.handler.promises.acceptChanges(
+            this.project_id,
+            this.doc_id,
+            [this.change_id]
           )
-          .should.equal(true)
+        } catch (err) {
+          error = err
+        }
+
+        expect(error).to.be.instanceOf(Error)
+        expect(error).to.have.property(
+          'message',
+          'document updater returned a failure status code: 500'
+        )
       })
     })
   })
@@ -808,26 +807,21 @@ describe('DocumentUpdaterHandler', function () {
     describe('successfully', function () {
       beforeEach(function () {
         this.request.callsArgWith(1, null, { statusCode: 200 }, this.body)
-        this.handler.deleteThread(
+      })
+
+      it('should delete the thread in the document updater', async function () {
+        await this.handler.promises.deleteThread(
           this.project_id,
           this.doc_id,
           this.thread_id,
-          this.user_id,
-          this.callback
+          this.user_id
         )
-      })
-
-      it('should delete the thread in the document updater', function () {
         this.request
           .calledWithMatch({
             url: `${this.settings.apis.documentupdater.url}/project/${this.project_id}/doc/${this.doc_id}/comment/${this.thread_id}`,
             method: 'DELETE',
           })
           .should.equal(true)
-      })
-
-      it('should call the callback', function () {
-        this.callback.calledWith(null).should.equal(true)
       })
     })
 
@@ -839,47 +833,50 @@ describe('DocumentUpdaterHandler', function () {
           null,
           null
         )
-        this.handler.deleteThread(
-          this.project_id,
-          this.doc_id,
-          this.thread_id,
-          this.user_id,
-          this.callback
-        )
       })
 
-      it('should return an error to the callback', function () {
-        this.callback
-          .calledWith(sinon.match.instanceOf(Error))
-          .should.equal(true)
+      it('should reject with an error', async function () {
+        let error
+
+        try {
+          await this.handler.promises.deleteThread(
+            this.project_id,
+            this.doc_id,
+            this.thread_id,
+            this.user_id
+          )
+        } catch (err) {
+          error = err
+        }
+
+        expect(error).to.be.instanceOf(Error)
       })
     })
 
     describe('when the document updater returns a failure error code', function () {
       beforeEach(function () {
         this.request.callsArgWith(1, null, { statusCode: 500 }, '')
-        this.handler.deleteThread(
-          this.project_id,
-          this.doc_id,
-          this.thread_id,
-          this.user_id,
-          this.callback
-        )
       })
 
-      it('should return the callback with an error', function () {
-        this.callback
-          .calledWith(
-            sinon.match
-              .instanceOf(Error)
-              .and(
-                sinon.match.has(
-                  'message',
-                  'document updater returned a failure status code: 500'
-                )
-              )
+      it('should reject with an error', async function () {
+        let error
+
+        try {
+          await this.handler.promises.deleteThread(
+            this.project_id,
+            this.doc_id,
+            this.thread_id,
+            this.user_id
           )
-          .should.equal(true)
+        } catch (err) {
+          error = err
+        }
+
+        expect(error).to.be.instanceOf(Error)
+        expect(error).to.have.property(
+          'message',
+          'document updater returned a failure status code: 500'
+        )
       })
     })
   })
@@ -892,26 +889,21 @@ describe('DocumentUpdaterHandler', function () {
     describe('successfully', function () {
       beforeEach(function () {
         this.request.callsArgWith(1, null, { statusCode: 200 }, this.body)
-        this.handler.resolveThread(
+      })
+
+      it('should resolve the thread in the document updater', async function () {
+        await this.handler.promises.resolveThread(
           this.project_id,
           this.doc_id,
           this.thread_id,
-          this.user_id,
-          this.callback
+          this.user_id
         )
-      })
-
-      it('should resolve the thread in the document updater', function () {
         this.request
           .calledWithMatch({
             url: `${this.settings.apis.documentupdater.url}/project/${this.project_id}/doc/${this.doc_id}/comment/${this.thread_id}/resolve`,
             method: 'POST',
           })
           .should.equal(true)
-      })
-
-      it('should call the callback', function () {
-        this.callback.calledWith(null).should.equal(true)
       })
     })
 
@@ -923,47 +915,50 @@ describe('DocumentUpdaterHandler', function () {
           null,
           null
         )
-        this.handler.resolveThread(
-          this.project_id,
-          this.doc_id,
-          this.thread_id,
-          this.user_id,
-          this.callback
-        )
       })
 
-      it('should return an error to the callback', function () {
-        this.callback
-          .calledWith(sinon.match.instanceOf(Error))
-          .should.equal(true)
+      it('should reject with an error', async function () {
+        let error
+
+        try {
+          await this.handler.promises.resolveThread(
+            this.project_id,
+            this.doc_id,
+            this.thread_id,
+            this.user_id
+          )
+        } catch (err) {
+          error = err
+        }
+
+        expect(error).to.be.instanceOf(Error)
       })
     })
 
     describe('when the document updater returns a failure error code', function () {
       beforeEach(function () {
         this.request.callsArgWith(1, null, { statusCode: 500 }, '')
-        this.handler.resolveThread(
-          this.project_id,
-          this.doc_id,
-          this.thread_id,
-          this.user_id,
-          this.callback
-        )
       })
 
-      it('should return the callback with an error', function () {
-        this.callback
-          .calledWith(
-            sinon.match
-              .instanceOf(Error)
-              .and(
-                sinon.match.has(
-                  'message',
-                  'document updater returned a failure status code: 500'
-                )
-              )
+      it('should reject with an error', async function () {
+        let error
+
+        try {
+          await this.handler.promises.resolveThread(
+            this.project_id,
+            this.doc_id,
+            this.thread_id,
+            this.user_id
           )
-          .should.equal(true)
+        } catch (err) {
+          error = err
+        }
+
+        expect(error).to.be.instanceOf(Error)
+        expect(error).to.have.property(
+          'message',
+          'document updater returned a failure status code: 500'
+        )
       })
     })
   })
@@ -976,26 +971,21 @@ describe('DocumentUpdaterHandler', function () {
     describe('successfully', function () {
       beforeEach(function () {
         this.request.callsArgWith(1, null, { statusCode: 200 }, this.body)
-        this.handler.reopenThread(
+      })
+
+      it('should reopen the thread in the document updater', async function () {
+        await this.handler.promises.reopenThread(
           this.project_id,
           this.doc_id,
           this.thread_id,
-          this.user_id,
-          this.callback
+          this.user_id
         )
-      })
-
-      it('should reopen the thread in the document updater', function () {
         this.request
           .calledWithMatch({
             url: `${this.settings.apis.documentupdater.url}/project/${this.project_id}/doc/${this.doc_id}/comment/${this.thread_id}/reopen`,
             method: 'POST',
           })
           .should.equal(true)
-      })
-
-      it('should call the callback', function () {
-        this.callback.calledWith(null).should.equal(true)
       })
     })
 
@@ -1007,47 +997,50 @@ describe('DocumentUpdaterHandler', function () {
           null,
           null
         )
-        this.handler.reopenThread(
-          this.project_id,
-          this.doc_id,
-          this.thread_id,
-          this.user_id,
-          this.callback
-        )
       })
 
-      it('should return an error to the callback', function () {
-        this.callback
-          .calledWith(sinon.match.instanceOf(Error))
-          .should.equal(true)
+      it('should reject with an error', async function () {
+        let error
+
+        try {
+          await this.handler.promises.reopenThread(
+            this.project_id,
+            this.doc_id,
+            this.thread_id,
+            this.user_id
+          )
+        } catch (err) {
+          error = err
+        }
+
+        expect(error).to.be.instanceOf(Error)
       })
     })
 
     describe('when the document updater returns a failure error code', function () {
       beforeEach(function () {
         this.request.callsArgWith(1, null, { statusCode: 500 }, '')
-        this.handler.reopenThread(
-          this.project_id,
-          this.doc_id,
-          this.thread_id,
-          this.user_id,
-          this.callback
-        )
       })
 
-      it('should return the callback with an error', function () {
-        this.callback
-          .calledWith(
-            sinon.match
-              .instanceOf(Error)
-              .and(
-                sinon.match.has(
-                  'message',
-                  'document updater returned a failure status code: 500'
-                )
-              )
+      it('should reject with an error', async function () {
+        let error
+
+        try {
+          await this.handler.promises.reopenThread(
+            this.project_id,
+            this.doc_id,
+            this.thread_id,
+            this.user_id
           )
-          .should.equal(true)
+        } catch (err) {
+          error = err
+        }
+
+        expect(error).to.be.instanceOf(Error)
+        expect(error).to.have.property(
+          'message',
+          'document updater returned a failure status code: 500'
+        )
       })
     })
   })
@@ -1061,22 +1054,17 @@ describe('DocumentUpdaterHandler', function () {
     describe('with project history disabled', function () {
       beforeEach(function () {
         this.settings.apis.project_history.sendProjectStructureOps = false
-        this.handler.updateProjectStructure(
+      })
+
+      it('does not make a web request', async function () {
+        await this.handler.promises.updateProjectStructure(
           this.project_id,
           this.projectHistoryId,
           this.user_id,
           {},
-          this.source,
-          this.callback
+          this.source
         )
-      })
-
-      it('does not make a web request', function () {
         this.request.called.should.equal(false)
-      })
-
-      it('calls the callback', function () {
-        this.callback.called.should.equal(true)
       })
     })
 
@@ -1088,7 +1076,7 @@ describe('DocumentUpdaterHandler', function () {
       })
 
       describe('when an entity has changed name', function () {
-        it('should send the structure update to the document updater', function (done) {
+        it('should send the structure update to the document updater', async function () {
           this.docIdA = new ObjectId()
           this.docIdB = new ObjectId()
           this.changes = {
@@ -1119,35 +1107,33 @@ describe('DocumentUpdaterHandler', function () {
             },
           ]
 
-          this.handler.updateProjectStructure(
+          await this.handler.promises.updateProjectStructure(
             this.project_id,
             this.projectHistoryId,
             this.user_id,
             this.changes,
-            this.source,
-            () => {
-              this.request
-                .calledWith({
-                  url: this.url,
-                  method: 'POST',
-                  json: {
-                    updates,
-                    userId: this.user_id,
-                    version: this.version,
-                    projectHistoryId: this.projectHistoryId,
-                    source: this.source,
-                  },
-                  timeout: 30 * 1000,
-                })
-                .should.equal(true)
-              done()
-            }
+            this.source
           )
+
+          this.request
+            .calledWith({
+              url: this.url,
+              method: 'POST',
+              json: {
+                updates,
+                userId: this.user_id,
+                version: this.version,
+                projectHistoryId: this.projectHistoryId,
+                source: this.source,
+              },
+              timeout: 30 * 1000,
+            })
+            .should.equal(true)
         })
       })
 
       describe('when a doc has been added', function () {
-        it('should send the structure update to the document updater', function (done) {
+        it('should send the structure update to the document updater', async function () {
           this.docId = new ObjectId()
           this.changes = {
             newDocs: [
@@ -1171,33 +1157,31 @@ describe('DocumentUpdaterHandler', function () {
             },
           ]
 
-          this.handler.updateProjectStructure(
+          await this.handler.promises.updateProjectStructure(
             this.project_id,
             this.projectHistoryId,
             this.user_id,
             this.changes,
-            this.source,
-            () => {
-              this.request.should.have.been.calledWith({
-                url: this.url,
-                method: 'POST',
-                json: {
-                  updates,
-                  userId: this.user_id,
-                  version: this.version,
-                  projectHistoryId: this.projectHistoryId,
-                  source: this.source,
-                },
-                timeout: 30 * 1000,
-              })
-              done()
-            }
+            this.source
           )
+
+          this.request.should.have.been.calledWith({
+            url: this.url,
+            method: 'POST',
+            json: {
+              updates,
+              userId: this.user_id,
+              version: this.version,
+              projectHistoryId: this.projectHistoryId,
+              source: this.source,
+            },
+            timeout: 30 * 1000,
+          })
         })
       })
 
       describe('when a file has been added', function () {
-        it('should send the structure update to the document updater', function (done) {
+        it('should send the structure update to the document updater', async function () {
           this.fileId = new ObjectId()
           this.changes = {
             newFiles: [
@@ -1225,33 +1209,31 @@ describe('DocumentUpdaterHandler', function () {
             },
           ]
 
-          this.handler.updateProjectStructure(
+          await this.handler.promises.updateProjectStructure(
             this.project_id,
             this.projectHistoryId,
             this.user_id,
             this.changes,
-            this.source,
-            () => {
-              this.request.should.have.been.calledWith({
-                url: this.url,
-                method: 'POST',
-                json: {
-                  updates,
-                  userId: this.user_id,
-                  version: this.version,
-                  projectHistoryId: this.projectHistoryId,
-                  source: this.source,
-                },
-                timeout: 30 * 1000,
-              })
-              done()
-            }
+            this.source
           )
+
+          this.request.should.have.been.calledWith({
+            url: this.url,
+            method: 'POST',
+            json: {
+              updates,
+              userId: this.user_id,
+              version: this.version,
+              projectHistoryId: this.projectHistoryId,
+              source: this.source,
+            },
+            timeout: 30 * 1000,
+          })
         })
       })
 
       describe('when an entity has been deleted', function () {
-        it('should end the structure update to the document updater', function (done) {
+        it('should end the structure update to the document updater', async function () {
           this.docId = new ObjectId()
           this.changes = {
             oldDocs: [
@@ -1269,33 +1251,31 @@ describe('DocumentUpdaterHandler', function () {
             },
           ]
 
-          this.handler.updateProjectStructure(
+          await this.handler.promises.updateProjectStructure(
             this.project_id,
             this.projectHistoryId,
             this.user_id,
             this.changes,
-            this.source,
-            () => {
-              this.request.should.have.been.calledWith({
-                url: this.url,
-                method: 'POST',
-                json: {
-                  updates,
-                  userId: this.user_id,
-                  version: this.version,
-                  projectHistoryId: this.projectHistoryId,
-                  source: this.source,
-                },
-                timeout: 30 * 1000,
-              })
-              done()
-            }
+            this.source
           )
+
+          this.request.should.have.been.calledWith({
+            url: this.url,
+            method: 'POST',
+            json: {
+              updates,
+              userId: this.user_id,
+              version: this.version,
+              projectHistoryId: this.projectHistoryId,
+              source: this.source,
+            },
+            timeout: 30 * 1000,
+          })
         })
       })
 
       describe('when a file is converted to a doc', function () {
-        it('should send the delete first', function (done) {
+        it('should send the delete first', async function () {
           this.docId = new ObjectId()
           this.fileId = new ObjectId()
           this.changes = {
@@ -1337,33 +1317,31 @@ describe('DocumentUpdaterHandler', function () {
             },
           ]
 
-          this.handler.updateProjectStructure(
+          await this.handler.promises.updateProjectStructure(
             this.project_id,
             this.projectHistoryId,
             this.user_id,
             this.changes,
-            this.source,
-            () => {
-              this.request.should.have.been.calledWith({
-                url: this.url,
-                method: 'POST',
-                json: {
-                  updates,
-                  userId: this.user_id,
-                  version: this.version,
-                  projectHistoryId: this.projectHistoryId,
-                  source: this.source,
-                },
-                timeout: 30 * 1000,
-              })
-              done()
-            }
+            this.source
           )
+
+          this.request.should.have.been.calledWith({
+            url: this.url,
+            method: 'POST',
+            json: {
+              updates,
+              userId: this.user_id,
+              version: this.version,
+              projectHistoryId: this.projectHistoryId,
+              source: this.source,
+            },
+            timeout: 30 * 1000,
+          })
         })
       })
 
       describe('when the project version is missing', function () {
-        it('should call the callback with an error', function () {
+        it('should call the callback with an error', async function () {
           this.docId = new ObjectId()
           this.changes = {
             oldDocs: [
@@ -1371,20 +1349,23 @@ describe('DocumentUpdaterHandler', function () {
             ],
           }
 
-          this.handler.updateProjectStructure(
-            this.project_id,
-            this.projectHistoryId,
-            this.user_id,
-            this.changes,
-            this.source,
-            this.callback
-          )
+          let error
 
-          this.callback
-            .calledWith(sinon.match.instanceOf(Error))
-            .should.equal(true)
-          const firstCallArgs = this.callback.args[0]
-          firstCallArgs[0].message.should.equal(
+          try {
+            await this.handler.promises.updateProjectStructure(
+              this.project_id,
+              this.projectHistoryId,
+              this.user_id,
+              this.changes,
+              this.source
+            )
+          } catch (err) {
+            error = err
+          }
+
+          expect(error).to.be.instanceOf(Error)
+          expect(error).to.have.property(
+            'message',
             'did not receive project version in changes'
           )
         })
@@ -1424,7 +1405,7 @@ describe('DocumentUpdaterHandler', function () {
           }
         })
 
-        it('should forward ranges', function (done) {
+        it('should forward ranges', async function () {
           const updates = [
             {
               type: 'add-doc',
@@ -1440,31 +1421,29 @@ describe('DocumentUpdaterHandler', function () {
             },
           ]
 
-          this.handler.updateProjectStructure(
+          await this.handler.promises.updateProjectStructure(
             this.project_id,
             this.projectHistoryId,
             this.user_id,
             this.changes,
-            this.source,
-            () => {
-              this.request.should.have.been.calledWith({
-                url: this.url,
-                method: 'POST',
-                json: {
-                  updates,
-                  userId: this.user_id,
-                  version: this.version,
-                  projectHistoryId: this.projectHistoryId,
-                  source: this.source,
-                },
-                timeout: 30 * 1000,
-              })
-              done()
-            }
+            this.source
           )
+
+          this.request.should.have.been.calledWith({
+            url: this.url,
+            method: 'POST',
+            json: {
+              updates,
+              userId: this.user_id,
+              version: this.version,
+              projectHistoryId: this.projectHistoryId,
+              source: this.source,
+            },
+            timeout: 30 * 1000,
+          })
         })
 
-        it('should include flag when history ranges support is enabled', function (done) {
+        it('should include flag when history ranges support is enabled', async function () {
           this.ProjectGetter.getProjectWithoutLock
             .withArgs(this.project_id)
             .yields(null, {
@@ -1487,28 +1466,26 @@ describe('DocumentUpdaterHandler', function () {
             },
           ]
 
-          this.handler.updateProjectStructure(
+          await this.handler.promises.updateProjectStructure(
             this.project_id,
             this.projectHistoryId,
             this.user_id,
             this.changes,
-            this.source,
-            () => {
-              this.request.should.have.been.calledWith({
-                url: this.url,
-                method: 'POST',
-                json: {
-                  updates,
-                  userId: this.user_id,
-                  version: this.version,
-                  projectHistoryId: this.projectHistoryId,
-                  source: this.source,
-                },
-                timeout: 30 * 1000,
-              })
-              done()
-            }
+            this.source
           )
+
+          this.request.should.have.been.calledWith({
+            url: this.url,
+            method: 'POST',
+            json: {
+              updates,
+              userId: this.user_id,
+              version: this.version,
+              projectHistoryId: this.projectHistoryId,
+              source: this.source,
+            },
+            timeout: 30 * 1000,
+          })
         })
       })
 
@@ -1516,7 +1493,7 @@ describe('DocumentUpdaterHandler', function () {
         beforeEach(function () {
           this.settings.disableFilestore = true
         })
-        it('should add files without URL and with createdBlob', function (done) {
+        it('should add files without URL and with createdBlob', async function () {
           this.fileId = new ObjectId()
           this.changes = {
             newFiles: [
@@ -1544,30 +1521,28 @@ describe('DocumentUpdaterHandler', function () {
             },
           ]
 
-          this.handler.updateProjectStructure(
+          await this.handler.promises.updateProjectStructure(
             this.project_id,
             this.projectHistoryId,
             this.user_id,
             this.changes,
-            this.source,
-            () => {
-              this.request.should.have.been.calledWith({
-                url: this.url,
-                method: 'POST',
-                json: {
-                  updates,
-                  userId: this.user_id,
-                  version: this.version,
-                  projectHistoryId: this.projectHistoryId,
-                  source: this.source,
-                },
-                timeout: 30 * 1000,
-              })
-              done()
-            }
+            this.source
           )
+
+          this.request.should.have.been.calledWith({
+            url: this.url,
+            method: 'POST',
+            json: {
+              updates,
+              userId: this.user_id,
+              version: this.version,
+              projectHistoryId: this.projectHistoryId,
+              source: this.source,
+            },
+            timeout: 30 * 1000,
+          })
         })
-        it('should flag files without hash', function (done) {
+        it('should flag files without hash', async function () {
           this.fileId = new ObjectId()
           this.changes = {
             newFiles: [
@@ -1580,25 +1555,26 @@ describe('DocumentUpdaterHandler', function () {
             newProject: { version: this.version },
           }
 
-          this.handler.updateProjectStructure(
-            this.project_id,
-            this.projectHistoryId,
-            this.user_id,
-            this.changes,
-            this.source,
-            err => {
-              err.should.match(/found file with missing hash/)
-              this.request.should.not.have.been.called
-              done()
-            }
-          )
+          let error
+          try {
+            await this.handler.promises.updateProjectStructure(
+              this.project_id,
+              this.projectHistoryId,
+              this.user_id,
+              this.changes,
+              this.source
+            )
+          } catch (err) {
+            error = err
+          }
+          expect(error).to.exist
         })
       })
     })
   })
 
   describe('resyncProjectHistory', function () {
-    it('should add docs', function (done) {
+    it('should add docs', async function () {
       const docId1 = new ObjectId()
       const docId2 = new ObjectId()
       const docs = [
@@ -1609,31 +1585,28 @@ describe('DocumentUpdaterHandler', function () {
       this.request.yields(null, { statusCode: 200 })
       const projectId = new ObjectId()
       const projectHistoryId = 99
-      this.handler.resyncProjectHistory(
+      await this.handler.promises.resyncProjectHistory(
         projectId,
         projectHistoryId,
         docs,
         files,
-        {},
-        () => {
-          this.request.should.have.been.calledWith({
-            url: `${this.settings.apis.documentupdater.url}/project/${projectId}/history/resync`,
-            method: 'POST',
-            json: {
-              docs: [
-                { doc: docId1, path: 'main.tex' },
-                { doc: docId2, path: 'references.bib' },
-              ],
-              files: [],
-              projectHistoryId,
-            },
-            timeout: 6 * 60 * 1000,
-          })
-          done()
-        }
+        {}
       )
+      this.request.should.have.been.calledWith({
+        url: `${this.settings.apis.documentupdater.url}/project/${projectId}/history/resync`,
+        method: 'POST',
+        json: {
+          docs: [
+            { doc: docId1, path: 'main.tex' },
+            { doc: docId2, path: 'references.bib' },
+          ],
+          files: [],
+          projectHistoryId,
+        },
+        timeout: 6 * 60 * 1000,
+      })
     })
-    it('should add files', function (done) {
+    it('should add files', async function () {
       const fileId1 = new ObjectId()
       const fileId2 = new ObjectId()
       const fileId3 = new ObjectId()
@@ -1673,66 +1646,63 @@ describe('DocumentUpdaterHandler', function () {
       this.request.yields(null, { statusCode: 200 })
       const projectId = new ObjectId()
       const projectHistoryId = 99
-      this.handler.resyncProjectHistory(
+      await this.handler.promises.resyncProjectHistory(
         projectId,
         projectHistoryId,
         docs,
         files,
-        {},
-        () => {
-          this.request.should.have.been.calledWith({
-            url: `${this.settings.apis.documentupdater.url}/project/${projectId}/history/resync`,
-            method: 'POST',
-            json: {
-              docs: [],
-              files: [
-                {
-                  file: fileId1,
-                  _hash: '42',
-                  path: '1.png',
-                  url: `http://filestore/project/${projectId}/file/${fileId1}`,
-                  createdBlob: false,
-                  metadata: undefined,
-                },
-                {
-                  file: fileId2,
-                  _hash: '1337',
-                  path: '1.bib',
-                  url: `http://filestore/project/${projectId}/file/${fileId2}`,
-                  createdBlob: false,
-                  metadata: {
-                    importedAt: fileCreated2,
-                    provider: 'references-provider',
-                  },
-                },
-                {
-                  file: fileId3,
-                  _hash: '21',
-                  path: 'bar.txt',
-                  url: `http://filestore/project/${projectId}/file/${fileId3}`,
-                  createdBlob: false,
-                  metadata: {
-                    importedAt: fileCreated3,
-                    provider: 'project_output_file',
-                    source_project_id: otherProjectId,
-                    source_output_file_path: 'foo/bar.txt',
-                    // build_id and clsiServerId are omitted
-                  },
-                },
-              ],
-              projectHistoryId,
-            },
-            timeout: 6 * 60 * 1000,
-          })
-          done()
-        }
+        {}
       )
+      this.request.should.have.been.calledWith({
+        url: `${this.settings.apis.documentupdater.url}/project/${projectId}/history/resync`,
+        method: 'POST',
+        json: {
+          docs: [],
+          files: [
+            {
+              file: fileId1,
+              _hash: '42',
+              path: '1.png',
+              url: `http://filestore/project/${projectId}/file/${fileId1}`,
+              createdBlob: false,
+              metadata: undefined,
+            },
+            {
+              file: fileId2,
+              _hash: '1337',
+              path: '1.bib',
+              url: `http://filestore/project/${projectId}/file/${fileId2}`,
+              createdBlob: false,
+              metadata: {
+                importedAt: fileCreated2,
+                provider: 'references-provider',
+              },
+            },
+            {
+              file: fileId3,
+              _hash: '21',
+              path: 'bar.txt',
+              url: `http://filestore/project/${projectId}/file/${fileId3}`,
+              createdBlob: false,
+              metadata: {
+                importedAt: fileCreated3,
+                provider: 'project_output_file',
+                source_project_id: otherProjectId,
+                source_output_file_path: 'foo/bar.txt',
+                // build_id and clsiServerId are omitted
+              },
+            },
+          ],
+          projectHistoryId,
+        },
+        timeout: 6 * 60 * 1000,
+      })
     })
     describe('with filestore disabled', function () {
       beforeEach(function () {
         this.settings.disableFilestore = true
       })
-      it('should add files without URL', function (done) {
+      it('should add files without URL', async function () {
         const fileId1 = new ObjectId()
         const fileId2 = new ObjectId()
         const fileId3 = new ObjectId()
@@ -1772,62 +1742,59 @@ describe('DocumentUpdaterHandler', function () {
         this.request.yields(null, { statusCode: 200 })
         const projectId = new ObjectId()
         const projectHistoryId = 99
-        this.handler.resyncProjectHistory(
+        await this.handler.promises.resyncProjectHistory(
           projectId,
           projectHistoryId,
           docs,
           files,
-          {},
-          () => {
-            this.request.should.have.been.calledWith({
-              url: `${this.settings.apis.documentupdater.url}/project/${projectId}/history/resync`,
-              method: 'POST',
-              json: {
-                docs: [],
-                files: [
-                  {
-                    file: fileId1,
-                    _hash: '42',
-                    path: '1.png',
-                    url: undefined,
-                    createdBlob: true,
-                    metadata: undefined,
-                  },
-                  {
-                    file: fileId2,
-                    _hash: '1337',
-                    path: '1.bib',
-                    url: undefined,
-                    createdBlob: true,
-                    metadata: {
-                      importedAt: fileCreated2,
-                      provider: 'references-provider',
-                    },
-                  },
-                  {
-                    file: fileId3,
-                    _hash: '21',
-                    path: 'bar.txt',
-                    url: undefined,
-                    createdBlob: true,
-                    metadata: {
-                      importedAt: fileCreated3,
-                      provider: 'project_output_file',
-                      source_project_id: otherProjectId,
-                      source_output_file_path: 'foo/bar.txt',
-                      // build_id and clsiServerId are omitted
-                    },
-                  },
-                ],
-                projectHistoryId,
-              },
-              timeout: 6 * 60 * 1000,
-            })
-            done()
-          }
+          {}
         )
+        this.request.should.have.been.calledWith({
+          url: `${this.settings.apis.documentupdater.url}/project/${projectId}/history/resync`,
+          method: 'POST',
+          json: {
+            docs: [],
+            files: [
+              {
+                file: fileId1,
+                _hash: '42',
+                path: '1.png',
+                url: undefined,
+                createdBlob: true,
+                metadata: undefined,
+              },
+              {
+                file: fileId2,
+                _hash: '1337',
+                path: '1.bib',
+                url: undefined,
+                createdBlob: true,
+                metadata: {
+                  importedAt: fileCreated2,
+                  provider: 'references-provider',
+                },
+              },
+              {
+                file: fileId3,
+                _hash: '21',
+                path: 'bar.txt',
+                url: undefined,
+                createdBlob: true,
+                metadata: {
+                  importedAt: fileCreated3,
+                  provider: 'project_output_file',
+                  source_project_id: otherProjectId,
+                  source_output_file_path: 'foo/bar.txt',
+                  // build_id and clsiServerId are omitted
+                },
+              },
+            ],
+            projectHistoryId,
+          },
+          timeout: 6 * 60 * 1000,
+        })
       })
-      it('should flag files with missing hashes', function (done) {
+      it('should flag files with missing hashes', async function () {
         const fileId1 = new ObjectId()
         const fileId2 = new ObjectId()
         const fileId3 = new ObjectId()
@@ -1866,18 +1833,15 @@ describe('DocumentUpdaterHandler', function () {
         this.request.yields(null, { statusCode: 200 })
         const projectId = new ObjectId()
         const projectHistoryId = 99
-        this.handler.resyncProjectHistory(
-          projectId,
-          projectHistoryId,
-          docs,
-          files,
-          {},
-          err => {
-            err.should.match(/found file with missing hash/)
-            this.request.should.not.have.been.called
-            done()
-          }
-        )
+        await expect(
+          this.handler.promises.resyncProjectHistory(
+            projectId,
+            projectHistoryId,
+            docs,
+            files,
+            {}
+          )
+        ).to.be.rejected
       })
     })
   })
@@ -1889,17 +1853,16 @@ describe('DocumentUpdaterHandler', function () {
           rev: 1,
         }
         this.request.callsArgWith(1, null, { statusCode: 200 }, this.body)
-        this.handler.appendToDocument(
+      })
+
+      it('should append to the document in the document updater', async function () {
+        await this.handler.promises.appendToDocument(
           this.project_id,
           this.doc_id,
           this.user_id,
           this.lines,
-          this.source,
-          this.callback
+          this.source
         )
-      })
-
-      it('should append to the document in the document updater', function () {
         this.request
           .calledWith({
             url: `${this.settings.apis.documentupdater.url}/project/${this.project_id}/doc/${this.doc_id}/append`,
@@ -1913,10 +1876,6 @@ describe('DocumentUpdaterHandler', function () {
           })
           .should.equal(true)
       })
-
-      it('should call the callback with no error', function () {
-        this.callback.calledWith(null).should.equal(true)
-      })
     })
 
     describe('when the document updater API returns an error', function () {
@@ -1927,49 +1886,52 @@ describe('DocumentUpdaterHandler', function () {
           null,
           null
         )
-        this.handler.appendToDocument(
-          this.project_id,
-          this.doc_id,
-          this.user_id,
-          this.lines,
-          this.source,
-          this.callback
-        )
       })
 
-      it('should return an error to the callback', function () {
-        this.callback
-          .calledWith(sinon.match.instanceOf(Error))
-          .should.equal(true)
+      it('should reject with an error', async function () {
+        let error
+
+        try {
+          await this.handler.promises.appendToDocument(
+            this.project_id,
+            this.doc_id,
+            this.user_id,
+            this.lines,
+            this.source
+          )
+        } catch (err) {
+          error = err
+        }
+
+        expect(error).to.be.instanceOf(Error)
       })
     })
 
     describe('when the document updater returns a failure error code', function () {
       beforeEach(function () {
         this.request.callsArgWith(1, null, { statusCode: 500 }, '')
-        this.handler.appendToDocument(
-          this.project_id,
-          this.doc_id,
-          this.user_id,
-          this.lines,
-          this.source,
-          this.callback
-        )
       })
 
-      it('should return the callback with an error', function () {
-        this.callback
-          .calledWith(
-            sinon.match
-              .instanceOf(Error)
-              .and(
-                sinon.match.has(
-                  'message',
-                  'document updater returned a failure status code: 500'
-                )
-              )
+      it('should reject with an error', async function () {
+        let error
+
+        try {
+          await this.handler.promises.appendToDocument(
+            this.project_id,
+            this.doc_id,
+            this.user_id,
+            this.lines,
+            this.source
           )
-          .should.equal(true)
+        } catch (err) {
+          error = err
+        }
+
+        expect(error).to.be.instanceOf(Error)
+        expect(error).to.have.property(
+          'message',
+          'document updater returned a failure status code: 500'
+        )
       })
     })
   })

@@ -47,62 +47,53 @@ describe('ClsiFormatChecker', function () {
       ])
     })
 
-    it('should call _checkDocsAreUnderSizeLimit and _checkForConflictingPaths', function (done) {
+    it('should call _checkDocsAreUnderSizeLimit and _checkForConflictingPaths', async function () {
       this.ClsiFormatChecker._checkForConflictingPaths = sinon
         .stub()
         .callsArgWith(1, null)
       this.ClsiFormatChecker._checkDocsAreUnderSizeLimit = sinon
         .stub()
         .callsArgWith(1)
-      return this.ClsiFormatChecker.checkRecoursesForProblems(
-        this.resources,
-        (err, problems) => {
-          this.ClsiFormatChecker._checkForConflictingPaths.called.should.equal(
-            true
-          )
-          this.ClsiFormatChecker._checkDocsAreUnderSizeLimit.called.should.equal(
-            true
-          )
-          return done()
-        }
+      const problems =
+        await this.ClsiFormatChecker.promises.checkRecoursesForProblems(
+          this.resources
+        )
+      this.ClsiFormatChecker._checkForConflictingPaths.called.should.equal(true)
+      this.ClsiFormatChecker._checkDocsAreUnderSizeLimit.called.should.equal(
+        true
       )
     })
 
-    it('should remove undefined errors', function (done) {
+    it('should remove undefined errors', async function () {
       this.ClsiFormatChecker._checkForConflictingPaths = sinon
         .stub()
         .callsArgWith(1, null, [])
       this.ClsiFormatChecker._checkDocsAreUnderSizeLimit = sinon
         .stub()
         .callsArgWith(1, null, {})
-      return this.ClsiFormatChecker.checkRecoursesForProblems(
-        this.resources,
-        (err, problems) => {
-          expect(problems).to.not.exist
-          expect(problems).to.not.exist
-          return done()
-        }
-      )
+      const problems =
+        await this.ClsiFormatChecker.promises.checkRecoursesForProblems(
+          this.resources
+        )
+      expect(problems).to.not.exist
     })
 
-    it('should keep populated arrays', function (done) {
+    it('should keep populated arrays', async function () {
       this.ClsiFormatChecker._checkForConflictingPaths = sinon
         .stub()
         .callsArgWith(1, null, [{ path: 'somewhere/main.tex' }])
       this.ClsiFormatChecker._checkDocsAreUnderSizeLimit = sinon
         .stub()
         .callsArgWith(1, null, {})
-      return this.ClsiFormatChecker.checkRecoursesForProblems(
-        this.resources,
-        (err, problems) => {
-          problems.conflictedPaths[0].path.should.equal('somewhere/main.tex')
-          expect(problems.sizeCheck).to.not.exist
-          return done()
-        }
-      )
+      const problems =
+        await this.ClsiFormatChecker.promises.checkRecoursesForProblems(
+          this.resources
+        )
+      problems.conflictedPaths[0].path.should.equal('somewhere/main.tex')
+      expect(problems.sizeCheck).to.not.exist
     })
 
-    it('should keep populated object', function (done) {
+    it('should keep populated object', async function () {
       this.ClsiFormatChecker._checkForConflictingPaths = sinon
         .stub()
         .callsArgWith(1, null, [])
@@ -112,15 +103,13 @@ describe('ClsiFormatChecker', function () {
           resources: [{ 'a.tex': 'a.tex' }, { 'b.tex': 'b.tex' }],
           totalSize: 1000000,
         })
-      return this.ClsiFormatChecker.checkRecoursesForProblems(
-        this.resources,
-        (err, problems) => {
-          problems.sizeCheck.resources.length.should.equal(2)
-          problems.sizeCheck.totalSize.should.equal(1000000)
-          expect(problems.conflictedPaths).to.not.exist
-          return done()
-        }
-      )
+      const problems =
+        await this.ClsiFormatChecker.promises.checkRecoursesForProblems(
+          this.resources
+        )
+      problems.sizeCheck.resources.length.should.equal(2)
+      problems.sizeCheck.totalSize.should.equal(1000000)
+      expect(problems.conflictedPaths).to.not.exist
     })
 
     describe('_checkForConflictingPaths', function () {
@@ -136,56 +125,50 @@ describe('ClsiFormatChecker', function () {
         })
       })
 
-      it('should flag up when a nested file has folder with same subpath as file elsewhere', function (done) {
+      it('should flag up when a nested file has folder with same subpath as file elsewhere', async function () {
         this.resources.push({
           path: 'stuff/image',
           url: 'http://somwhere.com',
         })
 
-        return this.ClsiFormatChecker._checkForConflictingPaths(
-          this.resources,
-          (err, conflictPathErrors) => {
-            conflictPathErrors.length.should.equal(1)
-            conflictPathErrors[0].path.should.equal('stuff/image')
-            return done()
-          }
-        )
+        const conflictPathErrors =
+          await this.ClsiFormatChecker.promises._checkForConflictingPaths(
+            this.resources
+          )
+        conflictPathErrors.length.should.equal(1)
+        conflictPathErrors[0].path.should.equal('stuff/image')
       })
 
-      it('should flag up when a root level file has folder with same subpath as file elsewhere', function (done) {
+      it('should flag up when a root level file has folder with same subpath as file elsewhere', async function () {
         this.resources.push({
           path: 'stuff',
           content: 'other stuff',
         })
 
-        return this.ClsiFormatChecker._checkForConflictingPaths(
-          this.resources,
-          (err, conflictPathErrors) => {
-            conflictPathErrors.length.should.equal(1)
-            conflictPathErrors[0].path.should.equal('stuff')
-            return done()
-          }
-        )
+        const conflictPathErrors =
+          await this.ClsiFormatChecker.promises._checkForConflictingPaths(
+            this.resources
+          )
+        conflictPathErrors.length.should.equal(1)
+        conflictPathErrors[0].path.should.equal('stuff')
       })
 
-      it('should not flag up when the file is a substring of a path', function (done) {
+      it('should not flag up when the file is a substring of a path', async function () {
         this.resources.push({
           path: 'stuf',
           content: 'other stuff',
         })
 
-        return this.ClsiFormatChecker._checkForConflictingPaths(
-          this.resources,
-          (err, conflictPathErrors) => {
-            conflictPathErrors.length.should.equal(0)
-            return done()
-          }
-        )
+        const conflictPathErrors =
+          await this.ClsiFormatChecker.promises._checkForConflictingPaths(
+            this.resources
+          )
+        conflictPathErrors.length.should.equal(0)
       })
     })
 
     describe('_checkDocsAreUnderSizeLimit', function () {
-      it('should error when there is more than 5mb of data', function (done) {
+      it('should error when there is more than 5mb of data', async function () {
         this.resources.push({
           path: 'massive.tex',
           content: 'hello world'.repeat(833333), // over 5mb limit
@@ -198,19 +181,17 @@ describe('ClsiFormatChecker', function () {
           })
         }
 
-        return this.ClsiFormatChecker._checkDocsAreUnderSizeLimit(
-          this.resources,
-          (err, sizeError) => {
-            sizeError.totalSize.should.equal(16 + 833333 * 11) // 16 is for earlier resources
-            sizeError.resources.length.should.equal(10)
-            sizeError.resources[0].path.should.equal('massive.tex')
-            sizeError.resources[0].size.should.equal(833333 * 11)
-            return done()
-          }
-        )
+        const sizeError =
+          await this.ClsiFormatChecker.promises._checkDocsAreUnderSizeLimit(
+            this.resources
+          )
+        sizeError.totalSize.should.equal(16 + 833333 * 11) // 16 is for earlier resources
+        sizeError.resources.length.should.equal(10)
+        sizeError.resources[0].path.should.equal('massive.tex')
+        sizeError.resources[0].size.should.equal(833333 * 11)
       })
 
-      it('should return nothing when project is correct size', function (done) {
+      it('should return nothing when project is correct size', async function () {
         this.resources.push({
           path: 'massive.tex',
           content: 'x'.repeat(2 * 1000 * 1000),
@@ -223,13 +204,11 @@ describe('ClsiFormatChecker', function () {
           })
         }
 
-        return this.ClsiFormatChecker._checkDocsAreUnderSizeLimit(
-          this.resources,
-          (err, sizeError) => {
-            expect(sizeError).to.not.exist
-            return done()
-          }
-        )
+        const sizeError =
+          await this.ClsiFormatChecker.promises._checkDocsAreUnderSizeLimit(
+            this.resources
+          )
+        expect(sizeError).to.not.exist
       })
     })
   })

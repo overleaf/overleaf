@@ -22,22 +22,19 @@ describe('NotificationsBuilder', function () {
     })
   })
 
-  describe('dropboxUnlinkedDueToLapsedReconfirmation', function (done) {
-    it('should create the notification', function (done) {
-      this.controller
+  describe('dropboxUnlinkedDueToLapsedReconfirmation', function () {
+    it('should create the notification', async function () {
+      await this.controller.promises
         .dropboxUnlinkedDueToLapsedReconfirmation(userId)
-        .create(error => {
-          expect(error).to.not.exist
-          expect(this.handler.createNotification).to.have.been.calledWith(
-            userId,
-            'drobox-unlinked-due-to-lapsed-reconfirmation',
-            'notification_dropbox_unlinked_due_to_lapsed_reconfirmation',
-            {},
-            null,
-            true
-          )
-          done()
-        })
+        .create()
+      expect(this.handler.createNotification).to.have.been.calledWith(
+        userId,
+        'drobox-unlinked-due-to-lapsed-reconfirmation',
+        'notification_dropbox_unlinked_due_to_lapsed_reconfirmation',
+        {},
+        null,
+        true
+      )
     })
     describe('NotificationsHandler error', function () {
       let anError
@@ -45,19 +42,23 @@ describe('NotificationsBuilder', function () {
         anError = new Error('oops')
         this.handler.createNotification.yields(anError)
       })
-      it('should return errors from NotificationsHandler', function (done) {
-        this.controller
-          .dropboxUnlinkedDueToLapsedReconfirmation(userId)
-          .create(error => {
-            expect(error).to.exist
-            expect(error).to.deep.equal(anError)
-            done()
-          })
+      it('should return errors from NotificationsHandler', async function () {
+        let error
+
+        try {
+          await this.controller.promises
+            .dropboxUnlinkedDueToLapsedReconfirmation(userId)
+            .create()
+        } catch (err) {
+          error = err
+        }
+
+        expect(error).to.equal(anError)
       })
     })
   })
 
-  describe('groupInvitation', function (done) {
+  describe('groupInvitation', function () {
     const subscriptionId = '123123bcabca'
     beforeEach(function () {
       this.invite = {
@@ -67,29 +68,26 @@ describe('NotificationsBuilder', function () {
       }
     })
 
-    it('should create the notification', function (done) {
-      this.controller
+    it('should create the notification', async function () {
+      await this.controller.promises
         .groupInvitation(
           userId,
           subscriptionId,
           this.invite.managedUsersEnabled
         )
-        .create(this.invite, error => {
-          expect(error).to.not.exist
-          expect(this.handler.createNotification).to.have.been.calledWith(
-            userId,
-            `groupInvitation-${subscriptionId}-${userId}`,
-            'notification_group_invitation',
-            {
-              token: this.invite.token,
-              inviterName: this.invite.inviterName,
-              managedUsersEnabled: this.invite.managedUsersEnabled,
-            },
-            null,
-            true
-          )
-          done()
-        })
+        .create(this.invite)
+      expect(this.handler.createNotification).to.have.been.calledWith(
+        userId,
+        `groupInvitation-${subscriptionId}-${userId}`,
+        'notification_group_invitation',
+        {
+          token: this.invite.token,
+          inviterName: this.invite.inviterName,
+          managedUsersEnabled: this.invite.managedUsersEnabled,
+        },
+        null,
+        true
+      )
     })
   })
 
@@ -107,27 +105,25 @@ describe('NotificationsBuilder', function () {
         this.request.callsArgWith(1, null, { statusCode: 200 }, this.body)
       })
 
-      it('should call v1 and create affiliation notifications', function (done) {
+      it('should call v1 and create affiliation notifications', async function () {
         const ip = '192.168.0.1'
-        this.controller.ipMatcherAffiliation(userId).create(ip, callback => {
-          this.request.calledOnce.should.equal(true)
-          const expectedOpts = {
-            institutionId: this.body.id,
-            university_name: this.body.name,
-            content: this.body.enrolment_ad_html,
-            ssoEnabled: false,
-            portalPath: undefined,
-          }
-          this.handler.createNotification
-            .calledWith(
-              userId,
-              `ip-matched-affiliation-${this.body.id}`,
-              'notification_ip_matched_affiliation',
-              expectedOpts
-            )
-            .should.equal(true)
-          done()
-        })
+        await this.controller.promises.ipMatcherAffiliation(userId).create(ip)
+        this.request.calledOnce.should.equal(true)
+        const expectedOpts = {
+          institutionId: this.body.id,
+          university_name: this.body.name,
+          content: this.body.enrolment_ad_html,
+          ssoEnabled: false,
+          portalPath: undefined,
+        }
+        this.handler.createNotification
+          .calledWith(
+            userId,
+            `ip-matched-affiliation-${this.body.id}`,
+            'notification_ip_matched_affiliation',
+            expectedOpts
+          )
+          .should.equal(true)
       })
     })
     describe('without portal and without SSO', function () {
@@ -143,27 +139,25 @@ describe('NotificationsBuilder', function () {
         this.request.callsArgWith(1, null, { statusCode: 200 }, this.body)
       })
 
-      it('should call v1 and create affiliation notifications', function (done) {
+      it('should call v1 and create affiliation notifications', async function () {
         const ip = '192.168.0.1'
-        this.controller.ipMatcherAffiliation(userId).create(ip, callback => {
-          this.request.calledOnce.should.equal(true)
-          const expectedOpts = {
-            institutionId: this.body.id,
-            university_name: this.body.name,
-            content: this.body.enrolment_ad_html,
-            ssoEnabled: true,
-            portalPath: '/edu/stanford',
-          }
-          this.handler.createNotification
-            .calledWith(
-              userId,
-              `ip-matched-affiliation-${this.body.id}`,
-              'notification_ip_matched_affiliation',
-              expectedOpts
-            )
-            .should.equal(true)
-          done()
-        })
+        await this.controller.promises.ipMatcherAffiliation(userId).create(ip)
+        this.request.calledOnce.should.equal(true)
+        const expectedOpts = {
+          institutionId: this.body.id,
+          university_name: this.body.name,
+          content: this.body.enrolment_ad_html,
+          ssoEnabled: true,
+          portalPath: '/edu/stanford',
+        }
+        this.handler.createNotification
+          .calledWith(
+            userId,
+            `ip-matched-affiliation-${this.body.id}`,
+            'notification_ip_matched_affiliation',
+            expectedOpts
+          )
+          .should.equal(true)
       })
     })
   })

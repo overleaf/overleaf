@@ -430,14 +430,15 @@ describe('ProjectEntityHandler', function () {
       })
     })
 
-    it('should call the callback with the lines, version and rev', function (done) {
-      this.ProjectEntityHandler.getDoc(projectId, docId, doc => {
-        this.DocstoreManager.promises.getDoc
-          .calledWith(projectId, docId)
-          .should.equal(true)
-        expect(doc).to.exist
-        done()
-      })
+    it('should call the callback with the lines, version and rev', async function () {
+      const doc = await this.ProjectEntityHandler.promises.getDoc(
+        projectId,
+        docId
+      )
+      this.DocstoreManager.promises.getDoc
+        .calledWith(projectId, docId)
+        .should.equal(true)
+      expect(doc).to.exist
     })
   })
 

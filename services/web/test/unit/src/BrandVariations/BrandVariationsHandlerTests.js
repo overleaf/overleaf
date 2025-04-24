@@ -59,47 +59,34 @@ describe('BrandVariationsHandler', function () {
   })
 
   describe('getBrandVariationById', function () {
-    it('should call the callback with an error when the branding variation id is not provided', function (done) {
-      return this.BrandVariationsHandler.getBrandVariationById(
-        null,
-        (err, brandVariationDetails) => {
-          expect(err).to.be.instanceof(Error)
-          return done()
-        }
-      )
+    it('should reject with an error when the branding variation id is not provided', async function () {
+      await expect(
+        this.BrandVariationsHandler.promises.getBrandVariationById(null)
+      ).to.be.rejected
     })
 
-    it('should call the callback with an error when the request errors', function (done) {
+    it('should reject with an error when the request errors', async function () {
       this.V1Api.request.callsArgWith(1, new Error())
-      return this.BrandVariationsHandler.getBrandVariationById(
-        '12',
-        (err, brandVariationDetails) => {
-          expect(err).to.be.instanceof(Error)
-          return done()
-        }
-      )
+      await expect(
+        this.BrandVariationsHandler.promises.getBrandVariationById('12')
+      ).to.be.rejected
     })
 
-    it('should call the callback with branding details when request succeeds', function (done) {
+    it('should return branding details when request succeeds', async function () {
       this.V1Api.request.callsArgWith(
         1,
         null,
         { statusCode: 200 },
         this.mockedBrandVariationDetails
       )
-      return this.BrandVariationsHandler.getBrandVariationById(
-        '12',
-        (err, brandVariationDetails) => {
-          expect(err).to.not.exist
-          expect(brandVariationDetails).to.deep.equal(
-            this.mockedBrandVariationDetails
-          )
-          return done()
-        }
+      const brandVariationDetails =
+        await this.BrandVariationsHandler.promises.getBrandVariationById('12')
+      expect(brandVariationDetails).to.deep.equal(
+        this.mockedBrandVariationDetails
       )
     })
 
-    it('should transform relative URLs in v1 absolute ones', function (done) {
+    it('should transform relative URLs in v1 absolute ones', async function () {
       this.mockedBrandVariationDetails.logo_url = '/journal-logo.png'
       this.V1Api.request.callsArgWith(
         1,
@@ -107,20 +94,16 @@ describe('BrandVariationsHandler', function () {
         { statusCode: 200 },
         this.mockedBrandVariationDetails
       )
-      return this.BrandVariationsHandler.getBrandVariationById(
-        '12',
-        (err, brandVariationDetails) => {
-          expect(
-            brandVariationDetails.logo_url.startsWith(
-              this.settings.apis.v1.publicUrl
-            )
-          ).to.be.true
-          return done()
-        }
-      )
+      const brandVariationDetails =
+        await this.BrandVariationsHandler.promises.getBrandVariationById('12')
+      expect(
+        brandVariationDetails.logo_url.startsWith(
+          this.settings.apis.v1.publicUrl
+        )
+      ).to.be.true
     })
 
-    it("should sanitize 'submit_button_html'", function (done) {
+    it("should sanitize 'submit_button_html'", async function () {
       this.mockedBrandVariationDetails.submit_button_html =
         '<br class="break"/><strong style="color:#B39500">AGU Journal</strong><iframe>hello</iframe>'
       this.V1Api.request.callsArgWith(
@@ -129,14 +112,10 @@ describe('BrandVariationsHandler', function () {
         { statusCode: 200 },
         this.mockedBrandVariationDetails
       )
-      return this.BrandVariationsHandler.getBrandVariationById(
-        '12',
-        (err, brandVariationDetails) => {
-          expect(brandVariationDetails.submit_button_html).to.equal(
-            '<br /><strong style="color:#B39500">AGU Journal</strong>hello'
-          )
-          return done()
-        }
+      const brandVariationDetails =
+        await this.BrandVariationsHandler.promises.getBrandVariationById('12')
+      expect(brandVariationDetails.submit_button_html).to.equal(
+        '<br /><strong style="color:#B39500">AGU Journal</strong>hello'
       )
     })
   })

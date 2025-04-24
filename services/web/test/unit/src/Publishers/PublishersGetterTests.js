@@ -42,15 +42,10 @@ describe('PublishersGetter', function () {
   })
 
   describe('getManagedPublishers', function () {
-    it('fetches v1 data before returning publisher list', function (done) {
-      this.PublishersGetter.getManagedPublishers(
-        this.userId,
-        (error, publishers) => {
-          expect(error).to.be.null
-          publishers.length.should.equal(1)
-          done()
-        }
-      )
+    it('fetches v1 data before returning publisher list', async function () {
+      const publishers =
+        await this.PublishersGetter.promises.getManagedPublishers(this.userId)
+      expect(publishers.length).to.equal(1)
     })
   })
 })

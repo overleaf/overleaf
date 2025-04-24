@@ -139,7 +139,7 @@ describe('CompileManager', function () {
     })
 
     describe('when the project has been recently compiled', function () {
-      it('should return', function (done) {
+      it('should return', async function () {
         this.CompileManager._checkIfAutoCompileLimitHasBeenHit = async (
           isAutoCompile,
           compileGroup
@@ -147,32 +147,27 @@ describe('CompileManager', function () {
         this.CompileManager._checkIfRecentlyCompiled = sinon
           .stub()
           .resolves(true)
-        this.CompileManager.promises
-          .compile(this.project_id, this.user_id, {})
-          .then(({ status }) => {
-            status.should.equal('too-recently-compiled')
-            done()
-          })
-          .catch(error => {
-            // Catch any errors and fail the test
-            true.should.equal(false)
-            done(error)
-          })
+        const { status } = await this.CompileManager.promises.compile(
+          this.project_id,
+          this.user_id,
+          {}
+        )
+        status.should.equal('too-recently-compiled')
       })
     })
 
     describe('should check the rate limit', function () {
-      it('should return', function (done) {
+      it('should return', async function () {
         this.CompileManager._checkIfAutoCompileLimitHasBeenHit = sinon
           .stub()
           .resolves(false)
-        this.CompileManager.promises
-          .compile(this.project_id, this.user_id, {})
-          .then(({ status }) => {
-            expect(status).to.equal('autocompile-backoff')
-            done()
-          })
-          .catch(err => done(err))
+        const { status } = await this.CompileManager.promises.compile(
+          this.project_id,
+          this.user_id,
+          {}
+        )
+
+        expect(status).to.equal('autocompile-backoff')
       })
     })
   })
@@ -250,15 +245,12 @@ describe('CompileManager', function () {
       beforeEach(function () {
         this.features.compileGroup = 'priority'
       })
-      it('should return the default class', function (done) {
-        this.CompileManager.getProjectCompileLimits(
-          this.project_id,
-          (err, { compileBackendClass }) => {
-            if (err) return done(err)
-            expect(compileBackendClass).to.equal('c2d')
-            done()
-          }
-        )
+      it('should return the default class', async function () {
+        const { compileBackendClass } =
+          await this.CompileManager.promises.getProjectCompileLimits(
+            this.project_id
+          )
+        expect(compileBackendClass).to.equal('c2d')
       })
     })
   })

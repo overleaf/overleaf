@@ -1283,6 +1283,7 @@ const ProjectEntityUpdateHandler = {
     upsertFile,
     upsertFileWithPath,
     appendToDocWithPath: appendToDoc,
+    setMainBibliographyDoc,
   },
 
   async _addDocAndSendToTpds(projectId, folderId, doc, userId) {

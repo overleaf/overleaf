@@ -1,16 +1,3 @@
-/* eslint-disable
-    max-len,
-    no-return-assign,
-    no-unused-vars,
-    no-useless-escape,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const { expect } = require('chai')
 const { ObjectId } = require('mongodb-legacy')
 const sinon = require('sinon')
@@ -33,16 +20,13 @@ describe('ProjectRootDocManager', function () {
     this.sl_req_id = 'sl-req-id-123'
     this.callback = sinon.stub()
     this.globbyFiles = ['a.tex', 'b.tex', 'main.tex']
-    this.globby = sinon.stub().returns(
-      new Promise(resolve => {
-        return resolve(this.globbyFiles)
-      })
-    )
+    this.globby = sinon.stub().resolves(this.globbyFiles)
+
     this.fs = {
       readFile: sinon.stub().callsArgWith(2, new Error('file not found')),
       stat: sinon.stub().callsArgWith(1, null, { size: 100 }),
     }
-    return (this.ProjectRootDocManager = SandboxedModule.require(modulePath, {
+    this.ProjectRootDocManager = SandboxedModule.require(modulePath, {
       requires: {
         './ProjectEntityHandler': (this.ProjectEntityHandler = {}),
         './ProjectEntityUpdateHandler': (this.ProjectEntityUpdateHandler = {}),
@@ -56,7 +40,7 @@ describe('ProjectRootDocManager', function () {
         globby: this.globby,
         fs: this.fs,
       },
-    }))
+    })
   })
 
   describe('setRootDocAutomatically', function () {
@@ -67,7 +51,7 @@ describe('ProjectRootDocManager', function () {
         .returns(true)
     })
     describe('when there is a suitable root doc', function () {
-      beforeEach(function (done) {
+      beforeEach(async function () {
         this.docs = {
           '/chapter1.tex': {
             _id: this.docId1,
@@ -98,27 +82,26 @@ describe('ProjectRootDocManager', function () {
         this.ProjectEntityHandler.getAllDocs = sinon
           .stub()
           .callsArgWith(1, null, this.docs)
-        this.ProjectRootDocManager.setRootDocAutomatically(
-          this.project_id,
-          done
+        await this.ProjectRootDocManager.promises.setRootDocAutomatically(
+          this.project_id
         )
       })
 
       it('should check the docs of the project', function () {
-        return this.ProjectEntityHandler.getAllDocs
+        this.ProjectEntityHandler.getAllDocs
           .calledWith(this.project_id)
           .should.equal(true)
       })
 
       it('should set the root doc to the doc containing a documentclass', function () {
-        return this.ProjectEntityUpdateHandler.setRootDoc
+        this.ProjectEntityUpdateHandler.setRootDoc
           .calledWith(this.project_id, this.docId2)
           .should.equal(true)
       })
     })
 
     describe('when the root doc is an Rtex file', function () {
-      beforeEach(function (done) {
+      beforeEach(async function () {
         this.docs = {
           '/chapter1.tex': {
             _id: this.docId1,
@@ -132,21 +115,20 @@ describe('ProjectRootDocManager', function () {
         this.ProjectEntityHandler.getAllDocs = sinon
           .stub()
           .callsArgWith(1, null, this.docs)
-        return this.ProjectRootDocManager.setRootDocAutomatically(
-          this.project_id,
-          done
+        await this.ProjectRootDocManager.promises.setRootDocAutomatically(
+          this.project_id
         )
       })
 
       it('should set the root doc to the doc containing a documentclass', function () {
-        return this.ProjectEntityUpdateHandler.setRootDoc
+        this.ProjectEntityUpdateHandler.setRootDoc
           .calledWith(this.project_id, this.docId2)
           .should.equal(true)
       })
     })
 
     describe('when there is no suitable root doc', function () {
-      beforeEach(function (done) {
+      beforeEach(async function () {
         this.docs = {
           '/chapter1.tex': {
             _id: this.docId1,
@@ -160,16 +142,13 @@ describe('ProjectRootDocManager', function () {
         this.ProjectEntityHandler.getAllDocs = sinon
           .stub()
           .callsArgWith(1, null, this.docs)
-        return this.ProjectRootDocManager.setRootDocAutomatically(
-          this.project_id,
-          done
+        await this.ProjectRootDocManager.promises.setRootDocAutomatically(
+          this.project_id
         )
       })
 
       it('should not set the root doc to the doc containing a documentclass', function () {
-        return this.ProjectEntityUpdateHandler.setRootDoc.called.should.equal(
-          false
-        )
+        this.ProjectEntityUpdateHandler.setRootDoc.called.should.equal(false)
       })
     })
   })
@@ -191,13 +170,13 @@ describe('ProjectRootDocManager', function () {
       this.fs.readFile
         .withArgs('/foo/a/a.tex')
         .callsArgWith(2, null, 'Potato? Potahto. Potootee!')
-      return (this.documentclassContent = '% test\n\\documentclass\n% test')
+      this.documentclassContent = '% test\n\\documentclass\n% test'
     })
 
     describe('when there is a file in a subfolder', function () {
       beforeEach(function () {
         // have to splice globbyFiles weirdly because of the way the stubbed globby method handles references
-        return this.globbyFiles.splice(
+        this.globbyFiles.splice(
           0,
           this.globbyFiles.length,
           'c.tex',
@@ -207,70 +186,56 @@ describe('ProjectRootDocManager', function () {
         )
       })
 
-      it('processes the root folder files first, and then the subfolder, in alphabetical order', function (done) {
-        return this.ProjectRootDocManager.findRootDocFileFromDirectory(
-          '/foo',
-          (error, path) => {
-            expect(error).not.to.exist
-            expect(path).to.equal('a.tex')
-            sinon.assert.callOrder(
-              this.fs.readFile.withArgs('/foo/a.tex'),
-              this.fs.readFile.withArgs('/foo/b.tex'),
-              this.fs.readFile.withArgs('/foo/c.tex'),
-              this.fs.readFile.withArgs('/foo/a/a.tex')
-            )
-            return done()
-          }
+      it('processes the root folder files first, and then the subfolder, in alphabetical order', async function () {
+        const { path } =
+          await this.ProjectRootDocManager.promises.findRootDocFileFromDirectory(
+            '/foo'
+          )
+        expect(path).to.equal('a.tex')
+        sinon.assert.callOrder(
+          this.fs.readFile.withArgs('/foo/a.tex'),
+          this.fs.readFile.withArgs('/foo/b.tex'),
+          this.fs.readFile.withArgs('/foo/c.tex'),
+          this.fs.readFile.withArgs('/foo/a/a.tex')
         )
       })
 
-      it('processes smaller files first', function (done) {
+      it('processes smaller files first', async function () {
         this.fs.stat.withArgs('/foo/c.tex').callsArgWith(1, null, { size: 1 })
-        return this.ProjectRootDocManager.findRootDocFileFromDirectory(
-          '/foo',
-          (error, path) => {
-            expect(error).not.to.exist
-            expect(path).to.equal('c.tex')
-            sinon.assert.callOrder(
-              this.fs.readFile.withArgs('/foo/c.tex'),
-              this.fs.readFile.withArgs('/foo/a.tex'),
-              this.fs.readFile.withArgs('/foo/b.tex'),
-              this.fs.readFile.withArgs('/foo/a/a.tex')
-            )
-            return done()
-          }
+        const { path } =
+          await this.ProjectRootDocManager.promises.findRootDocFileFromDirectory(
+            '/foo'
+          )
+        expect(path).to.equal('c.tex')
+        sinon.assert.callOrder(
+          this.fs.readFile.withArgs('/foo/c.tex'),
+          this.fs.readFile.withArgs('/foo/a.tex'),
+          this.fs.readFile.withArgs('/foo/b.tex'),
+          this.fs.readFile.withArgs('/foo/a/a.tex')
         )
       })
     })
 
     describe('when main.tex contains a documentclass', function () {
       beforeEach(function () {
-        return this.fs.readFile
+        this.fs.readFile
           .withArgs('/foo/main.tex')
           .callsArgWith(2, null, this.documentclassContent)
       })
 
-      it('returns main.tex', function (done) {
-        return this.ProjectRootDocManager.findRootDocFileFromDirectory(
-          '/foo',
-          (error, path, content) => {
-            expect(error).not.to.exist
-            expect(path).to.equal('main.tex')
-            expect(content).to.equal(this.documentclassContent)
-            return done()
-          }
-        )
+      it('returns main.tex', async function () {
+        const { path, content } =
+          await this.ProjectRootDocManager.promises.findRootDocFileFromDirectory(
+            '/foo'
+          )
+        expect(path).to.equal('main.tex')
+        expect(content).to.equal(this.documentclassContent)
       })
 
-      it('processes main.text first and stops processing when it finds the content', function (done) {
-        return this.ProjectRootDocManager.findRootDocFileFromDirectory(
-          '/foo',
-          () => {
-            expect(this.fs.readFile).to.be.calledWith('/foo/main.tex')
-            expect(this.fs.readFile).not.to.be.calledWith('/foo/a.tex')
-            return done()
-          }
-        )
+      it('processes main.text first and stops processing when it finds the content', async function () {
+        await this.ProjectRootDocManager.findRootDocFileFromDirectory('/foo')
+        expect(this.fs.readFile).to.be.calledWith('/foo/main.tex')
+        expect(this.fs.readFile).not.to.be.calledWith('/foo/a.tex')
       })
     })
 
@@ -284,7 +249,7 @@ describe('ProjectRootDocManager', function () {
           .callsArgWith(2, null, 'foo')
       })
 
-      it('returns the first .tex file from the root folder', function (done) {
+      it('returns the first .tex file from the root folder', async function () {
         this.globbyFiles.splice(
           0,
           this.globbyFiles.length,
@@ -293,18 +258,15 @@ describe('ProjectRootDocManager', function () {
           'nested/chapter1a.tex'
         )
 
-        this.ProjectRootDocManager.findRootDocFileFromDirectory(
-          '/foo',
-          (error, path, content) => {
-            expect(error).not.to.exist
-            expect(path).to.equal('a.tex')
-            expect(content).to.equal('foo')
-            return done()
-          }
-        )
+        const { path, content } =
+          await this.ProjectRootDocManager.promises.findRootDocFileFromDirectory(
+            '/foo'
+          )
+        expect(path).to.equal('a.tex')
+        expect(content).to.equal('foo')
       })
 
-      it('returns main.tex file from the root folder', function (done) {
+      it('returns main.tex file from the root folder', async function () {
         this.globbyFiles.splice(
           0,
           this.globbyFiles.length,
@@ -314,227 +276,206 @@ describe('ProjectRootDocManager', function () {
           'nested/chapter1a.tex'
         )
 
-        this.ProjectRootDocManager.findRootDocFileFromDirectory(
-          '/foo',
-          (error, path, content) => {
-            expect(error).not.to.exist
-            expect(path).to.equal('main.tex')
-            expect(content).to.equal('foo')
-            return done()
-          }
-        )
+        const { path, content } =
+          await this.ProjectRootDocManager.promises.findRootDocFileFromDirectory(
+            '/foo'
+          )
+        expect(path).to.equal('main.tex')
+        expect(content).to.equal('foo')
       })
     })
 
     describe('when a.tex contains a documentclass', function () {
       beforeEach(function () {
-        return this.fs.readFile
+        this.fs.readFile
           .withArgs('/foo/a.tex')
           .callsArgWith(2, null, this.documentclassContent)
       })
 
-      it('returns a.tex', function (done) {
-        return this.ProjectRootDocManager.findRootDocFileFromDirectory(
-          '/foo',
-          (error, path, content) => {
-            expect(error).not.to.exist
-            expect(path).to.equal('a.tex')
-            expect(content).to.equal(this.documentclassContent)
-            return done()
-          }
-        )
+      it('returns a.tex', async function () {
+        const { path, content } =
+          await this.ProjectRootDocManager.promises.findRootDocFileFromDirectory(
+            '/foo'
+          )
+        expect(path).to.equal('a.tex')
+        expect(content).to.equal(this.documentclassContent)
       })
 
-      it('processes main.text first and stops processing when it finds the content', function (done) {
-        return this.ProjectRootDocManager.findRootDocFileFromDirectory(
-          '/foo',
-          () => {
-            expect(this.fs.readFile).to.be.calledWith('/foo/main.tex')
-            expect(this.fs.readFile).to.be.calledWith('/foo/a.tex')
-            expect(this.fs.readFile).not.to.be.calledWith('/foo/b.tex')
-            return done()
-          }
+      it('processes main.text first and stops processing when it finds the content', async function () {
+        await this.ProjectRootDocManager.promises.findRootDocFileFromDirectory(
+          '/foo'
         )
+        expect(this.fs.readFile).to.be.calledWith('/foo/main.tex')
+        expect(this.fs.readFile).to.be.calledWith('/foo/a.tex')
+        expect(this.fs.readFile).not.to.be.calledWith('/foo/b.tex')
       })
     })
 
     describe('when there is no documentclass', function () {
-      it('returns with no error', function (done) {
-        return this.ProjectRootDocManager.findRootDocFileFromDirectory(
-          '/foo',
-          error => {
-            expect(error).not.to.exist
-            return done()
-          }
+      it('returns with no error', async function () {
+        await this.ProjectRootDocManager.promises.findRootDocFileFromDirectory(
+          '/foo'
         )
       })
 
-      it('processes all the files', function (done) {
-        return this.ProjectRootDocManager.findRootDocFileFromDirectory(
-          '/foo',
-          () => {
-            expect(this.fs.readFile).to.be.calledWith('/foo/main.tex')
-            expect(this.fs.readFile).to.be.calledWith('/foo/a.tex')
-            expect(this.fs.readFile).to.be.calledWith('/foo/b.tex')
-            return done()
-          }
+      it('processes all the files', async function () {
+        await this.ProjectRootDocManager.promises.findRootDocFileFromDirectory(
+          '/foo'
         )
+        expect(this.fs.readFile).to.be.calledWith('/foo/main.tex')
+        expect(this.fs.readFile).to.be.calledWith('/foo/a.tex')
+        expect(this.fs.readFile).to.be.calledWith('/foo/b.tex')
       })
     })
 
     describe('when there is an error reading a file', function () {
       beforeEach(function () {
-        return this.fs.readFile
+        this.fs.readFile
           .withArgs('/foo/a.tex')
           .callsArgWith(2, new Error('something went wrong'))
       })
 
-      it('returns an error', function (done) {
-        return this.ProjectRootDocManager.findRootDocFileFromDirectory(
-          '/foo',
-          (error, path, content) => {
-            expect(error).to.exist
-            expect(path).not.to.exist
-            expect(content).not.to.exist
-            return done()
-          }
-        )
+      it('returns an error', async function () {
+        let error
+
+        try {
+          await this.ProjectRootDocManager.promises.findRootDocFileFromDirectory(
+            '/foo'
+          )
+        } catch (err) {
+          error = err
+        }
+
+        expect(error).to.exist
       })
     })
   })
 
   describe('setRootDocFromName', function () {
     describe('when there is a suitable root doc', function () {
-      beforeEach(function (done) {
+      beforeEach(async function () {
         this.ProjectEntityHandler.getAllDocPathsFromProjectById = sinon
           .stub()
           .callsArgWith(1, null, this.docPaths)
         this.ProjectEntityUpdateHandler.setRootDoc = sinon
           .stub()
           .callsArgWith(2)
-        return this.ProjectRootDocManager.setRootDocFromName(
+        await this.ProjectRootDocManager.promises.setRootDocFromName(
           this.project_id,
-          '/main.tex',
-          done
+          '/main.tex'
         )
       })
 
       it('should check the docs of the project', function () {
-        return this.ProjectEntityHandler.getAllDocPathsFromProjectById
+        this.ProjectEntityHandler.getAllDocPathsFromProjectById
           .calledWith(this.project_id)
           .should.equal(true)
       })
 
       it('should set the root doc to main.tex', function () {
-        return this.ProjectEntityUpdateHandler.setRootDoc
+        this.ProjectEntityUpdateHandler.setRootDoc
           .calledWith(this.project_id, this.docId2.toString())
           .should.equal(true)
       })
     })
 
     describe('when there is a suitable root doc but the leading slash is missing', function () {
-      beforeEach(function (done) {
+      beforeEach(async function () {
         this.ProjectEntityHandler.getAllDocPathsFromProjectById = sinon
           .stub()
           .callsArgWith(1, null, this.docPaths)
         this.ProjectEntityUpdateHandler.setRootDoc = sinon
           .stub()
           .callsArgWith(2)
-        return this.ProjectRootDocManager.setRootDocFromName(
+        await this.ProjectRootDocManager.promises.setRootDocFromName(
           this.project_id,
-          'main.tex',
-          done
+          'main.tex'
         )
       })
 
       it('should check the docs of the project', function () {
-        return this.ProjectEntityHandler.getAllDocPathsFromProjectById
+        this.ProjectEntityHandler.getAllDocPathsFromProjectById
           .calledWith(this.project_id)
           .should.equal(true)
       })
 
       it('should set the root doc to main.tex', function () {
-        return this.ProjectEntityUpdateHandler.setRootDoc
+        this.ProjectEntityUpdateHandler.setRootDoc
           .calledWith(this.project_id, this.docId2.toString())
           .should.equal(true)
       })
     })
 
     describe('when there is a suitable root doc with a basename match', function () {
-      beforeEach(function (done) {
+      beforeEach(async function () {
         this.ProjectEntityHandler.getAllDocPathsFromProjectById = sinon
           .stub()
           .callsArgWith(1, null, this.docPaths)
         this.ProjectEntityUpdateHandler.setRootDoc = sinon
           .stub()
           .callsArgWith(2)
-        return this.ProjectRootDocManager.setRootDocFromName(
+        await this.ProjectRootDocManager.promises.setRootDocFromName(
           this.project_id,
-          'chapter1a.tex',
-          done
+          'chapter1a.tex'
         )
       })
 
       it('should check the docs of the project', function () {
-        return this.ProjectEntityHandler.getAllDocPathsFromProjectById
+        this.ProjectEntityHandler.getAllDocPathsFromProjectById
           .calledWith(this.project_id)
           .should.equal(true)
       })
 
       it('should set the root doc using the basename', function () {
-        return this.ProjectEntityUpdateHandler.setRootDoc
+        this.ProjectEntityUpdateHandler.setRootDoc
           .calledWith(this.project_id, this.docId3.toString())
           .should.equal(true)
       })
     })
 
     describe('when there is a suitable root doc but the filename is in quotes', function () {
-      beforeEach(function (done) {
+      beforeEach(async function () {
         this.ProjectEntityHandler.getAllDocPathsFromProjectById = sinon
           .stub()
           .callsArgWith(1, null, this.docPaths)
         this.ProjectEntityUpdateHandler.setRootDoc = sinon
           .stub()
           .callsArgWith(2)
-        return this.ProjectRootDocManager.setRootDocFromName(
+        await this.ProjectRootDocManager.promises.setRootDocFromName(
           this.project_id,
-          "'main.tex'",
-          done
+          "'main.tex'"
         )
       })
 
       it('should check the docs of the project', function () {
-        return this.ProjectEntityHandler.getAllDocPathsFromProjectById
+        this.ProjectEntityHandler.getAllDocPathsFromProjectById
           .calledWith(this.project_id)
           .should.equal(true)
       })
 
       it('should set the root doc to main.tex', function () {
-        return this.ProjectEntityUpdateHandler.setRootDoc
+        this.ProjectEntityUpdateHandler.setRootDoc
           .calledWith(this.project_id, this.docId2.toString())
           .should.equal(true)
       })
     })
 
     describe('when there is no suitable root doc', function () {
-      beforeEach(function (done) {
+      beforeEach(async function () {
         this.ProjectEntityHandler.getAllDocPathsFromProjectById = sinon
           .stub()
           .callsArgWith(1, null, this.docPaths)
         this.ProjectEntityUpdateHandler.setRootDoc = sinon
           .stub()
           .callsArgWith(2)
-        return this.ProjectRootDocManager.setRootDocFromName(
+        await this.ProjectRootDocManager.promises.setRootDocFromName(
           this.project_id,
-          'other.tex',
-          done
+          'other.tex'
         )
       })
 
       it('should not set the root doc', function () {
-        return this.ProjectEntityUpdateHandler.setRootDoc.called.should.equal(
-          false
-        )
+        this.ProjectEntityUpdateHandler.setRootDoc.called.should.equal(false)
       })
     })
   })
@@ -545,73 +486,73 @@ describe('ProjectRootDocManager', function () {
       this.ProjectGetter.getProject = sinon
         .stub()
         .callsArgWith(2, null, this.project)
-      return (this.ProjectRootDocManager.setRootDocAutomatically = sinon
+      this.ProjectRootDocManager.setRootDocAutomatically = sinon
         .stub()
-        .callsArgWith(1, null))
+        .callsArgWith(1, null)
     })
 
     describe('when the root doc is set', function () {
       beforeEach(function () {
         this.project.rootDoc_id = this.docId2
-        return this.ProjectRootDocManager.ensureRootDocumentIsSet(
+        this.ProjectRootDocManager.ensureRootDocumentIsSet(
           this.project_id,
           this.callback
         )
       })
 
       it('should find the project fetching only the rootDoc_id field', function () {
-        return this.ProjectGetter.getProject
+        this.ProjectGetter.getProject
           .calledWith(this.project_id, { rootDoc_id: 1 })
           .should.equal(true)
       })
 
       it('should not try to update the project rootDoc_id', function () {
-        return this.ProjectRootDocManager.setRootDocAutomatically.called.should.equal(
+        this.ProjectRootDocManager.setRootDocAutomatically.called.should.equal(
           false
         )
       })
 
       it('should call the callback', function () {
-        return this.callback.called.should.equal(true)
+        this.callback.called.should.equal(true)
       })
     })
 
     describe('when the root doc is not set', function () {
       beforeEach(function () {
-        return this.ProjectRootDocManager.ensureRootDocumentIsSet(
+        this.ProjectRootDocManager.ensureRootDocumentIsSet(
           this.project_id,
           this.callback
         )
       })
 
       it('should find the project with only the rootDoc_id field', function () {
-        return this.ProjectGetter.getProject
+        this.ProjectGetter.getProject
           .calledWith(this.project_id, { rootDoc_id: 1 })
           .should.equal(true)
       })
 
       it('should update the project rootDoc_id', function () {
-        return this.ProjectRootDocManager.setRootDocAutomatically
+        this.ProjectRootDocManager.setRootDocAutomatically
           .calledWith(this.project_id)
           .should.equal(true)
       })
 
       it('should call the callback', function () {
-        return this.callback.called.should.equal(true)
+        this.callback.called.should.equal(true)
       })
     })
 
     describe('when the project does not exist', function () {
       beforeEach(function () {
         this.ProjectGetter.getProject = sinon.stub().callsArgWith(2, null, null)
-        return this.ProjectRootDocManager.ensureRootDocumentIsSet(
+        this.ProjectRootDocManager.ensureRootDocumentIsSet(
           this.project_id,
           this.callback
         )
       })
 
       it('should call the callback with an error', function () {
-        return this.callback
+        this.callback
           .calledWith(
             sinon.match
               .instanceOf(Error)
@@ -645,26 +586,26 @@ describe('ProjectRootDocManager', function () {
           this.ProjectEntityHandler.getDocPathFromProjectByDocId = sinon
             .stub()
             .callsArgWith(2, null, this.docPaths[this.docId2])
-          return this.ProjectRootDocManager.ensureRootDocumentIsValid(
+          this.ProjectRootDocManager.ensureRootDocumentIsValid(
             this.project_id,
             this.callback
           )
         })
 
         it('should find the project without doc lines', function () {
-          return this.ProjectGetter.getProjectWithoutDocLines
+          this.ProjectGetter.getProjectWithoutDocLines
             .calledWith(this.project_id)
             .should.equal(true)
         })
 
         it('should not try to update the project rootDoc_id', function () {
-          return this.ProjectRootDocManager.setRootDocAutomatically.called.should.equal(
+          this.ProjectRootDocManager.setRootDocAutomatically.called.should.equal(
             false
           )
         })
 
         it('should call the callback', function () {
-          return this.callback.called.should.equal(true)
+          this.callback.called.should.equal(true)
         })
       })
 
@@ -674,58 +615,58 @@ describe('ProjectRootDocManager', function () {
           this.ProjectEntityHandler.getDocPathFromProjectByDocId = sinon
             .stub()
             .callsArgWith(2, null, null)
-          return this.ProjectRootDocManager.ensureRootDocumentIsValid(
+          this.ProjectRootDocManager.ensureRootDocumentIsValid(
             this.project_id,
             this.callback
           )
         })
 
         it('should find the project without doc lines', function () {
-          return this.ProjectGetter.getProjectWithoutDocLines
+          this.ProjectGetter.getProjectWithoutDocLines
             .calledWith(this.project_id)
             .should.equal(true)
         })
 
         it('should unset the root doc', function () {
-          return this.ProjectEntityUpdateHandler.unsetRootDoc
+          this.ProjectEntityUpdateHandler.unsetRootDoc
             .calledWith(this.project_id)
             .should.equal(true)
         })
 
         it('should try to find a new rootDoc', function () {
-          return this.ProjectRootDocManager.setRootDocAutomatically.called.should.equal(
+          this.ProjectRootDocManager.setRootDocAutomatically.called.should.equal(
             true
           )
         })
 
         it('should call the callback', function () {
-          return this.callback.called.should.equal(true)
+          this.callback.called.should.equal(true)
         })
       })
     })
 
     describe('when the root doc is not set', function () {
       beforeEach(function () {
-        return this.ProjectRootDocManager.ensureRootDocumentIsValid(
+        this.ProjectRootDocManager.ensureRootDocumentIsValid(
           this.project_id,
           this.callback
         )
       })
 
       it('should find the project without doc lines', function () {
-        return this.ProjectGetter.getProjectWithoutDocLines
+        this.ProjectGetter.getProjectWithoutDocLines
           .calledWith(this.project_id)
           .should.equal(true)
       })
 
       it('should update the project rootDoc_id', function () {
-        return this.ProjectRootDocManager.setRootDocAutomatically
+        this.ProjectRootDocManager.setRootDocAutomatically
           .calledWith(this.project_id)
           .should.equal(true)
       })
 
       it('should call the callback', function () {
-        return this.callback.called.should.equal(true)
+        this.callback.called.should.equal(true)
       })
     })
 
@@ -734,14 +675,14 @@ describe('ProjectRootDocManager', function () {
         this.ProjectGetter.getProjectWithoutDocLines = sinon
           .stub()
           .callsArgWith(1, null, null)
-        return this.ProjectRootDocManager.ensureRootDocumentIsValid(
+        this.ProjectRootDocManager.ensureRootDocumentIsValid(
           this.project_id,
           this.callback
         )
       })
 
       it('should call the callback with an error', function () {
-        return this.callback
+        this.callback
           .calledWith(
             sinon.match
               .instanceOf(Error)

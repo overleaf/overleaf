@@ -47,8 +47,8 @@ describe('ChatManager', function () {
       }))
     })
 
-    it('should inject a user object into messaged and resolved data', function (done) {
-      return this.ChatManager.injectUserInfoIntoThreads(
+    it('should inject a user object into messaged and resolved data', async function () {
+      const threads = await this.ChatManager.promises.injectUserInfoIntoThreads(
         {
           thread1: {
             resolved: true,
@@ -72,64 +72,56 @@ describe('ChatManager', function () {
               },
             ],
           },
-        },
-        (error, threads) => {
-          expect(error).to.be.null
-          expect(threads).to.deep.equal({
-            thread1: {
-              resolved: true,
-              resolved_by_user_id: 'user_id_1',
-              resolved_by_user: { formatted: 'user_1' },
-              messages: [
-                {
-                  user_id: 'user_id_1',
-                  user: { formatted: 'user_1' },
-                  content: 'foo',
-                },
-                {
-                  user_id: 'user_id_2',
-                  user: { formatted: 'user_2' },
-                  content: 'bar',
-                },
-              ],
-            },
-            thread2: {
-              messages: [
-                {
-                  user_id: 'user_id_1',
-                  user: { formatted: 'user_1' },
-                  content: 'baz',
-                },
-              ],
-            },
-          })
-          return done()
         }
       )
+
+      expect(threads).to.deep.equal({
+        thread1: {
+          resolved: true,
+          resolved_by_user_id: 'user_id_1',
+          resolved_by_user: { formatted: 'user_1' },
+          messages: [
+            {
+              user_id: 'user_id_1',
+              user: { formatted: 'user_1' },
+              content: 'foo',
+            },
+            {
+              user_id: 'user_id_2',
+              user: { formatted: 'user_2' },
+              content: 'bar',
+            },
+          ],
+        },
+        thread2: {
+          messages: [
+            {
+              user_id: 'user_id_1',
+              user: { formatted: 'user_1' },
+              content: 'baz',
+            },
+          ],
+        },
+      })
     })
 
-    it('should only need to look up each user once', function (done) {
-      return this.ChatManager.injectUserInfoIntoThreads(
-        [
-          {
-            messages: [
-              {
-                user_id: 'user_id_1',
-                content: 'foo',
-              },
-              {
-                user_id: 'user_id_1',
-                content: 'bar',
-              },
-            ],
-          },
-        ],
-        (error, threads) => {
-          expect(error).to.be.null
-          this.UserInfoManager.getPersonalInfo.calledOnce.should.equal(true)
-          return done()
-        }
-      )
+    it('should only need to look up each user once', async function () {
+      await this.ChatManager.promises.injectUserInfoIntoThreads([
+        {
+          messages: [
+            {
+              user_id: 'user_id_1',
+              content: 'foo',
+            },
+            {
+              user_id: 'user_id_1',
+              content: 'bar',
+            },
+          ],
+        },
+      ])
+
+      this.UserInfoManager.getPersonalInfo.calledOnce.should.equal(true)
     })
   })
 })
