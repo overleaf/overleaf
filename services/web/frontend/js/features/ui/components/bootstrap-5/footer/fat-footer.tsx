@@ -22,7 +22,7 @@ function FatFooter() {
       links: [
         { href: '/about', label: t('footer_about_us') },
         { href: '/about/values', label: t('our_values') },
-        { href: '/about/careers', label: t('careers') },
+        { href: 'https://digitalscience.pinpointhq.com/', label: t('careers') },
         { href: '/for/press', label: t('press_and_awards') },
         { href: '/blog', label: t('blog') },
       ],
