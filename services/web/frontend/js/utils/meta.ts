@@ -183,6 +183,7 @@ export interface Meta {
   'ol-project': any // TODO
   'ol-projectHistoryBlobsEnabled': boolean
   'ol-projectName': string
+  'ol-projectOwnerHasPremiumOnPageLoad': boolean
   'ol-projectSyncSuccessMessage': string
   'ol-projectTags': Tag[]
   'ol-project_id': string

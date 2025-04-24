@@ -784,8 +784,13 @@ function _finaliseRequest(projectId, options, project, docs, files) {
         syncType: options.syncType,
         syncState: options.syncState,
         compileGroup: options.compileGroup,
-        compileFromClsiCache: options.compileFromClsiCache,
-        populateClsiCache: options.populateClsiCache,
+        // Overleaf alpha/staff users get compileGroup=alpha (via getProjectCompileLimits in CompileManager), enroll them into the premium rollout of clsi-cache.
+        compileFromClsiCache:
+          ['alpha', 'priority'].includes(options.compileGroup) &&
+          options.compileFromClsiCache,
+        populateClsiCache:
+          ['alpha', 'priority'].includes(options.compileGroup) &&
+          options.populateClsiCache,
         enablePdfCaching:
           (Settings.enablePdfCaching && options.enablePdfCaching) || false,
         pdfCachingMinChunkSize: options.pdfCachingMinChunkSize,

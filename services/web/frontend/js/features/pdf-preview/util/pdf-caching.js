@@ -593,6 +593,7 @@ function skipPrefetched(chunks, prefetched, start, end) {
  * @param {() => boolean} canTryFromCache
  * @param {string} fallbackToCacheURL
  * @param {Object} file
+ * @param {() => void} recordFallbackToClsiCache
  */
 async function fetchChunk({
   chunk,
@@ -604,6 +605,7 @@ async function fetchChunk({
   canTryFromCache,
   fallbackToCacheURL,
   file,
+  recordFallbackToClsiCache,
 }) {
   const estimatedSize = Array.isArray(chunk)
     ? estimateSizeOfMultipartResponse(chunk)
@@ -667,6 +669,7 @@ async function fetchChunk({
       try {
         response = await fetchWithBrowserCacheFallback(url, init)
         checkChunkResponse(response, estimatedSize, init)
+        recordFallbackToClsiCache()
       } catch (err2) {
         throw err1
       }
@@ -824,6 +827,7 @@ class Timer {
  * @param {AbortSignal} abortSignal
  * @param {() => boolean} canTryFromCache
  * @param {string} fallbackToCacheURL
+ * @param {() => void} recordFallbackToClsiCache
  */
 export async function fetchRange({
   url,
@@ -841,6 +845,7 @@ export async function fetchRange({
   abortSignal,
   canTryFromCache,
   fallbackToCacheURL,
+  recordFallbackToClsiCache,
 }) {
   const timer = new Timer()
   timer.startBlockingCompute()
@@ -985,6 +990,7 @@ export async function fetchRange({
           canTryFromCache,
           fallbackToCacheURL,
           file,
+          recordFallbackToClsiCache,
         })
         timer.startBlockingCompute()
         const boundary = getMultipartBoundary(response, chunk)

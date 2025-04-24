@@ -49,6 +49,7 @@ describe('<PdfPreview/>', function () {
     window.metaAttributesCache.set('ol-splitTestVariants', {
       'initial-compile-from-clsi-cache': 'enabled',
     })
+    window.metaAttributesCache.set('ol-projectOwnerHasPremiumOnPageLoad', true)
     cy.interceptEvents()
   })
 

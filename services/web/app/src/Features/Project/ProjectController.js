@@ -558,10 +558,11 @@ const _ProjectController = {
         .catch(err =>
           logger.error({ err }, 'failed to update split test info in session')
         )
+
+      const ownerFeatures = await UserGetter.promises.getUserFeatures(
+        project.owner_ref
+      )
       if (userId) {
-        const ownerFeatures = await UserGetter.promises.getUserFeatures(
-          project.owner_ref
-        )
         const planLimit = ownerFeatures?.collaborators || 0
         const namedEditors = project.collaberator_refs?.length || 0
         const pendingEditors = project.pendingEditor_refs?.length || 0
@@ -798,6 +799,8 @@ const _ProjectController = {
         bodyClasses: ['editor'],
         project_id: project._id,
         projectName: project.name,
+        projectOwnerHasPremiumOnPageLoad:
+          ownerFeatures?.compileGroup === 'priority',
         user: {
           id: userId,
           email: user.email,

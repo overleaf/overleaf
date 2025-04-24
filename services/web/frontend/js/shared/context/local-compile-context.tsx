@@ -49,6 +49,7 @@ import { PdfFileDataList } from '@/features/pdf-preview/util/types'
 import { isSplitTestEnabled } from '@/utils/splitTestUtils'
 import { captureException } from '@/infrastructure/error-reporter'
 import OError from '@overleaf/o-error'
+import getMeta from '@/utils/meta'
 
 type PdfFile = Record<string, any>
 
@@ -200,7 +201,8 @@ export const LocalCompileProvider: FC = ({ children }) => {
   const [compiledOnce, setCompiledOnce] = useState(false)
   // fetch initial compile response from cache
   const [initialCompileFromCache, setInitialCompileFromCache] = useState(
-    isSplitTestEnabled('initial-compile-from-clsi-cache') &&
+    getMeta('ol-projectOwnerHasPremiumOnPageLoad') &&
+      isSplitTestEnabled('initial-compile-from-clsi-cache') &&
       // Avoid fetching the initial compile from cache in PDF detach tab
       role !== 'detached'
   )
@@ -385,8 +387,10 @@ export const LocalCompileProvider: FC = ({ children }) => {
         rootDocOverride === dataFromCache.rootDocId &&
         dataFromCache.options.imageName === imageName &&
         dataFromCache.options.compiler === compilerName &&
-        dataFromCache.options.stopOnFirstError === stopOnFirstError &&
-        dataFromCache.options.draft === draft
+        dataFromCache.options.draft === draft &&
+        // Allow stopOnFirstError to be enabled in the compile from cache and disabled locally.
+        // Compiles that passed with stopOnFirstError=true will also pass with stopOnFirstError=false. The inverse does not hold, and we need to recompile.
+        !!dataFromCache.options.stopOnFirstError >= stopOnFirstError
     } catch (err) {
       captureException(
         OError.tag(err as unknown as Error, 'validate compile options', {
@@ -396,6 +400,7 @@ export const LocalCompileProvider: FC = ({ children }) => {
     }
 
     if (settingsUpToDate) {
+      sendMB('compile-from-cache', { projectId })
       setData(dataFromCache)
       setCompiledOnce(true)
     }
@@ -403,6 +408,7 @@ export const LocalCompileProvider: FC = ({ children }) => {
     setInitialCompileFromCache(false)
     setPendingInitialCompileFromCache(false)
   }, [
+    projectId,
     dataFromCache,
     joinedOnce,
     currentDocument,

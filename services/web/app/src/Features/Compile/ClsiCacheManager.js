@@ -3,6 +3,7 @@ const ClsiCacheHandler = require('./ClsiCacheHandler')
 const DocumentUpdaterHandler = require('../DocumentUpdater/DocumentUpdaterHandler')
 const ProjectGetter = require('../Project/ProjectGetter')
 const SplitTestHandler = require('../SplitTests/SplitTestHandler')
+const UserGetter = require('../User/UserGetter')
 
 /**
  * Get the most recent build and metadata
@@ -66,6 +67,10 @@ async function prepareClsiCache(
     'copy-clsi-cache'
   )
   if (variant !== 'enabled') return
+
+  const features = await UserGetter.promises.getUserFeatures(userId)
+  if (features.compileGroup !== 'priority') return
+
   const signal = AbortSignal.timeout(5_000)
   let lastUpdated
   let zone = 'b' // populate template data on zone b
