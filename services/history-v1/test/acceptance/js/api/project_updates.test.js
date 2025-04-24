@@ -22,6 +22,7 @@ const TextOperation = core.TextOperation
 const V2DocVersions = core.V2DocVersions
 
 const knex = require('../../../../storage').knex
+const redis = require('../../../../storage/lib/chunk_store/redis')
 
 describe('history import', function () {
   beforeEach(cleanup.everything)
@@ -580,7 +581,7 @@ describe('history import', function () {
       .catch(expectResponse.unprocessableEntity)
       .then(getLatestContent)
       .then(response => {
-        // Check that no chaes were made
+        // Check that no changes were made
         const snapshot = Snapshot.fromRaw(response.obj)
         expect(snapshot.countFiles()).to.equal(1)
         expect(snapshot.getFile(mainFilePathname).getHash()).to.equal(
@@ -593,6 +594,10 @@ describe('history import', function () {
           'string_length',
           testFiles.NULL_CHARACTERS_TXT_BYTE_LENGTH
         )
+      })
+      .then(() => {
+        // Now clear the cache because we have changed the string length in the database
+        return redis.clearCache(testProjectId)
       })
       .then(importChanges)
       .then(getLatestContent)
