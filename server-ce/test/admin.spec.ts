@@ -293,7 +293,7 @@ describe('admin panel', function () {
       cy.findByText(deletedProjectName).should('not.exist')
 
       cy.log('navigate to thrashed projects and delete the project')
-      cy.get('.project-list-sidebar-react').within(() => {
+      cy.get('.project-list-sidebar-scroll').within(() => {
         cy.findByText('Trashed Projects').click()
       })
       findProjectRow(deletedProjectName).within(() =>
@@ -318,7 +318,7 @@ describe('admin panel', function () {
       cy.log('login as the user and verify the project is restored')
       login(user1)
       cy.visit('/project')
-      cy.get('.project-list-sidebar-react').within(() => {
+      cy.get('.project-list-sidebar-scroll').within(() => {
         cy.findByText('Trashed Projects').click()
       })
       cy.findByText(`${deletedProjectName} (Restored)`)

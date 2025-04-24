@@ -18,12 +18,6 @@ export default function SurveyWidget() {
     return null
   }
 
-  // Short-term hard-coded special case: hide the "DS nav" survey for users on
-  // the default variant
-  if (survey?.name === 'ds-nav') {
-    return null
-  }
-
   return (
     <div className="user-notifications">
       <div className="notification-entry">

@@ -1,7 +1,6 @@
 import { sortBy } from 'lodash'
 import { useTranslation } from 'react-i18next'
 import { DotsThreeVertical, Plus, TagSimple } from '@phosphor-icons/react'
-import MaterialIcon from '../../../../shared/components/material-icon'
 import {
   UNCATEGORIZED_KEY,
   useProjectListContext,
@@ -14,7 +13,6 @@ import {
   DropdownMenu,
   DropdownToggle,
 } from '@/features/ui/components/bootstrap-5/dropdown-menu'
-import { hasDsNav } from '@/features/project-list/components/use-is-ds-nav'
 
 export default function TagsList() {
   const { t } = useTranslation()
@@ -42,16 +40,11 @@ export default function TagsList() {
         aria-hidden="true"
         data-testid="organize-projects"
       >
-        {hasDsNav() ? t('organize_tags') : t('organize_projects')}
+        {t('organize_tags')}
       </li>
       <li className="tag">
         <button type="button" className="tag-name" onClick={openCreateTagModal}>
-          {hasDsNav() ? (
-            <Plus weight="bold" />
-          ) : (
-            <MaterialIcon type="add" className="tag-list-icon" />
-          )}
-
+          <Plus weight="bold" />
           <span className="name">{t('new_tag')}</span>
         </button>
       </li>
@@ -73,11 +66,7 @@ export default function TagsList() {
                   color: getTagColor(tag),
                 }}
               >
-                {hasDsNav() ? (
-                  <TagSimple weight="fill" className="tag-list-icon" />
-                ) : (
-                  <MaterialIcon type="label" className="tag-list-icon" />
-                )}
+                <TagSimple weight="fill" className="tag-list-icon" />
               </span>
               <span className="name">
                 {tag.name}{' '}
@@ -93,7 +82,7 @@ export default function TagsList() {
                 id={`${tag._id}-dropdown-toggle`}
                 data-testid="tag-dropdown-toggle"
               >
-                {hasDsNav() && <DotsThreeVertical weight="bold" />}
+                <DotsThreeVertical weight="bold" />
               </DropdownToggle>
               <DropdownMenu className="dropdown-menu-sm-width">
                 <DropdownItem

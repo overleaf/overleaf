@@ -5,7 +5,6 @@ import {
 } from '../../context/project-list-context'
 import TagsList from './tags-list'
 import ProjectsFilterMenu from '../projects-filter-menu'
-import { hasDsNav } from '@/features/project-list/components/use-is-ds-nav'
 
 type SidebarFilterProps = {
   filter: Filter
@@ -38,11 +37,9 @@ export default function SidebarFilters() {
       <SidebarFilter filter="shared" text={t('shared_with_you')} />
       <SidebarFilter filter="archived" text={t('archived_projects')} />
       <SidebarFilter filter="trashed" text={t('trashed_projects')} />
-      {hasDsNav() && (
-        <li role="none">
-          <hr />
-        </li>
-      )}
+      <li role="none">
+        <hr />
+      </li>
       <TagsList />
     </ul>
   )

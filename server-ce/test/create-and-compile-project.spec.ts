@@ -102,10 +102,6 @@ describe('Project creation and compilation', function () {
       cy.findByText('Invite not yet accepted.')
     })
 
-    cy.visit('/project')
-    cy.findByText('Account').click()
-    cy.findByText('Log Out').click()
-
     login('collaborator@example.com')
     openProjectViaInviteNotification(targetProjectName)
     cy.get('@targetProjectId').then(targetProjectId => {

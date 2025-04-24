@@ -96,12 +96,12 @@ describe('Templates', () => {
         .parent()
         .parent()
         .within(() => cy.get('input[type="checkbox"]').first().check())
-      cy.get('.project-list-sidebar-react').within(() => {
+      cy.get('.project-list-sidebar-scroll').within(() => {
         cy.findAllByText('New Tag').first().click()
       })
       cy.focused().type(tagName)
       cy.findByText('Create').click()
-      cy.get('.project-list-sidebar-react').within(() => {
+      cy.get('.project-list-sidebar-scroll').within(() => {
         cy.findByText(tagName)
           .parent()
           .within(() => cy.get('.name').should('have.text', `${tagName} (1)`))
