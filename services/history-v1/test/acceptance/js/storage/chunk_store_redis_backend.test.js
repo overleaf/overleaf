@@ -603,4 +603,132 @@ describe('chunk store Redis backend', function () {
       expect(chunkMetadata.changesCount).to.equal(3)
     })
   })
+
+  describe('getCurrentChunkIfValid', function () {
+    it('should return the chunk when versions and changes count match', async function () {
+      // Create and cache a sample chunk
+      const snapshot = new Snapshot()
+      const changes = [
+        new Change(
+          [new AddFileOperation('test.tex', File.fromString('Valid content'))],
+          new Date(),
+          []
+        ),
+      ]
+      const history = new History(snapshot, changes)
+      const chunk = new Chunk(history, 7) // startVersion 7, endVersion 8
+      await redisBackend.setCurrentChunk(projectId, chunk)
+
+      // Prepare chunkRecord matching the cached chunk
+      const chunkRecord = { startVersion: 7, endVersion: 8 }
+
+      // Retrieve using getCurrentChunkIfValid
+      const validChunk = await redisBackend.getCurrentChunkIfValid(
+        projectId,
+        chunkRecord
+      )
+
+      expect(validChunk).to.not.be.null
+      expect(validChunk.getStartVersion()).to.equal(7)
+      expect(validChunk.getEndVersion()).to.equal(8)
+      expect(validChunk).to.deep.equal(chunk)
+    })
+
+    it('should return null when no chunk is cached', async function () {
+      // No chunk is cached for this projectId yet
+      const chunkRecord = { startVersion: 1, endVersion: 2 }
+      const validChunk = await redisBackend.getCurrentChunkIfValid(
+        projectId,
+        chunkRecord
+      )
+      expect(validChunk).to.be.null
+    })
+
+    it('should return null when start version mismatches', async function () {
+      // Cache a chunk with startVersion 10
+      const snapshot = new Snapshot()
+      const changes = [
+        new Change(
+          [new AddFileOperation('test.tex', File.fromString('Content'))],
+          new Date(),
+          []
+        ),
+      ]
+      const history = new History(snapshot, changes)
+      const chunk = new Chunk(history, 10) // startVersion 10, endVersion 11
+      await redisBackend.setCurrentChunk(projectId, chunk)
+
+      // Attempt to retrieve with a different startVersion
+      const chunkRecord = { startVersion: 9, endVersion: 10 } // Incorrect startVersion
+      const validChunk = await redisBackend.getCurrentChunkIfValid(
+        projectId,
+        chunkRecord
+      )
+      expect(validChunk).to.be.null
+    })
+
+    it('should return null when changes count mismatches', async function () {
+      // Cache a chunk with one change (startVersion 15, endVersion 16)
+      const snapshot = new Snapshot()
+      const changes = [
+        new Change(
+          [new AddFileOperation('test.tex', File.fromString('Content'))],
+          new Date(),
+          []
+        ),
+      ]
+      const history = new History(snapshot, changes)
+      const chunk = new Chunk(history, 15)
+      await redisBackend.setCurrentChunk(projectId, chunk)
+
+      // Attempt to retrieve with correct startVersion but incorrect endVersion (implying wrong changes count)
+      const chunkRecord = { startVersion: 15, endVersion: 17 } // Incorrect endVersion (implies 2 changes)
+      const validChunk = await redisBackend.getCurrentChunkIfValid(
+        projectId,
+        chunkRecord
+      )
+      expect(validChunk).to.be.null
+    })
+
+    it('should return the chunk when versions and changes count match for a zero-change chunk', async function () {
+      // Cache a chunk with zero changes
+      const snapshot = new Snapshot()
+      const changes = []
+      const history = new History(snapshot, changes)
+      const chunk = new Chunk(history, 20) // startVersion 20, endVersion 20
+      await redisBackend.setCurrentChunk(projectId, chunk)
+
+      // Prepare chunkRecord matching the zero-change chunk
+      const chunkRecord = { startVersion: 20, endVersion: 20 }
+
+      // Retrieve using getCurrentChunkIfValid
+      const validChunk = await redisBackend.getCurrentChunkIfValid(
+        projectId,
+        chunkRecord
+      )
+
+      expect(validChunk).to.not.be.null
+      expect(validChunk.getStartVersion()).to.equal(20)
+      expect(validChunk.getEndVersion()).to.equal(20)
+      expect(validChunk.history.changes.length).to.equal(0)
+      expect(validChunk).to.deep.equal(chunk)
+    })
+
+    it('should return null when start version matches but changes count is wrong for zero-change chunk', async function () {
+      // Cache a chunk with zero changes
+      const snapshot = new Snapshot()
+      const changes = []
+      const history = new History(snapshot, changes)
+      const chunk = new Chunk(history, 25) // startVersion 25, endVersion 25
+      await redisBackend.setCurrentChunk(projectId, chunk)
+
+      // Attempt to retrieve with correct startVersion but incorrect endVersion
+      const chunkRecord = { startVersion: 25, endVersion: 26 } // Incorrect endVersion (implies 1 change)
+      const validChunk = await redisBackend.getCurrentChunkIfValid(
+        projectId,
+        chunkRecord
+      )
+      expect(validChunk).to.be.null
+    })
+  })
 })

@@ -14,13 +14,12 @@ const metrics = require('@overleaf/metrics')
  * @return {Promise.<Chunk>}
  */
 async function loadLatest(projectId) {
-  const cachedChunk = await redisBackend.getCurrentChunk(projectId)
   const chunkRecord = await chunkStore.loadLatestRaw(projectId)
-  const cachedChunkIsValid = redisBackend.checkCacheValidityWithMetadata(
-    cachedChunk,
+  const cachedChunk = await redisBackend.getCurrentChunkIfValid(
+    projectId,
     chunkRecord
   )
-  if (cachedChunkIsValid) {
+  if (cachedChunk) {
     metrics.inc('chunk_buffer.loadLatest', 1, {
       status: 'cache-hit',
     })

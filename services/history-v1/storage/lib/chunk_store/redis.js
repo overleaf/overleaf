@@ -62,6 +62,62 @@ async function getCurrentChunk(projectId) {
   }
 }
 
+rclient.defineCommand('get_current_chunk_if_valid', {
+  numberOfKeys: 3,
+  lua: `
+      local expectedStartVersion = ARGV[1]
+      local expectedChangesCount = tonumber(ARGV[2])
+      local startVersionValue = redis.call('GET', KEYS[2])
+      if not startVersionValue then
+        return nil -- this is a cache-miss
+      end
+      if startVersionValue ~= expectedStartVersion then
+        return nil -- this is a cache-miss
+      end
+      local changesCount = redis.call('LLEN', KEYS[3])
+      if changesCount ~= expectedChangesCount then
+        return nil -- this is a cache-miss
+      end
+      local snapshotValue = redis.call('GET', KEYS[1])
+      local changesValues = redis.call('LRANGE', KEYS[3], 0, -1)
+      return {snapshotValue, startVersionValue, changesValues}
+    `,
+})
+
+async function getCurrentChunkIfValid(projectId, chunkRecord) {
+  try {
+    const changesCount = chunkRecord.endVersion - chunkRecord.startVersion
+    const result = await rclient.get_current_chunk_if_valid(
+      keySchema.snapshot({ projectId }),
+      keySchema.startVersion({ projectId }),
+      keySchema.changes({ projectId }),
+      chunkRecord.startVersion,
+      changesCount
+    )
+    if (!result) {
+      return null // cache-miss
+    }
+    const snapshot = Snapshot.fromRaw(JSON.parse(result[0]))
+    const startVersion = parseInt(result[1], 10)
+    const changes = result[2].map(c => Change.fromRaw(JSON.parse(c)))
+    const history = new History(snapshot, changes)
+    const chunk = new Chunk(history, startVersion)
+    metrics.inc('chunk_store.redis.get_current_chunk_if_valid', 1, {
+      status: 'success',
+    })
+    return chunk
+  } catch (err) {
+    logger.error(
+      { err, projectId, chunkRecord },
+      'error getting current chunk from redis'
+    )
+    metrics.inc('chunk_store.redis.get_current_chunk_if_valid', 1, {
+      status: 'error',
+    })
+    return null
+  }
+}
+
 rclient.defineCommand('get_current_chunk_metadata', {
   numberOfKeys: 2,
   lua: `
@@ -245,6 +301,7 @@ async function clearCache(projectId) {
 
 module.exports = {
   getCurrentChunk,
+  getCurrentChunkIfValid,
   setCurrentChunk,
   getCurrentChunkMetadata,
   checkCacheValidity,
