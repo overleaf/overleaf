@@ -1,7 +1,19 @@
+import { AvailableUnfilledIcon } from '@/shared/components/material-icon'
 import { ButtonProps } from './button-props'
 
-export type IconButtonProps = ButtonProps & {
+type BaseIconButtonProps = ButtonProps & {
   accessibilityLabel?: string
-  icon: string
   type?: 'button' | 'submit'
 }
+
+type FilledIconButtonProps = BaseIconButtonProps & {
+  icon: string
+  unfilled?: false
+}
+
+type UnfilledIconButtonProps = BaseIconButtonProps & {
+  icon: AvailableUnfilledIcon
+  unfilled: true
+}
+
+export type IconButtonProps = FilledIconButtonProps | UnfilledIconButtonProps

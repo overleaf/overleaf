@@ -6,7 +6,15 @@ import type { IconButtonProps } from '@/features/ui/components/types/icon-button
 
 const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(
   (
-    { accessibilityLabel, icon, isLoading = false, size, className, ...props },
+    {
+      accessibilityLabel,
+      icon,
+      isLoading = false,
+      size,
+      className,
+      unfilled,
+      ...props
+    },
     ref
   ) => {
     const iconButtonClassName = classNames(className, {
@@ -17,6 +25,7 @@ const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(
     const iconSizeClassName = size === 'lg' ? 'icon-large' : 'icon-small'
     const materialIconClassName = classNames(iconSizeClassName, {
       'button-content-hidden': isLoading,
+      unfilled,
     })
 
     return (

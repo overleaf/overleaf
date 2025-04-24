@@ -72,6 +72,10 @@
     color: var(--ide-rail-color);
   }
 
+  &:focus-visible {
+    background-color: transparent;
+  }
+
   &:hover {
     color: var(--ide-rail-link-hover-color);
     background-color: var(--ide-rail-link-hover-background);

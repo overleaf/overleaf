@@ -59,6 +59,27 @@
     );
 
     text-decoration: none;
+
+    &.ide-redesign-toolbar-button-icon {
+      @include ol-button-variant(
+        var(--redesign-subdued-button-color),
+        var(--redesign-toolbar-background),
+        transparent,
+        var(--redesign-subdued-button-hover-background),
+        transparent,
+        true
+      );
+
+      border-radius: var(--border-radius-full);
+      display: flex;
+      justify-content: center;
+      padding: var(--spacing-02);
+
+      &:visited,
+      &:focus {
+        color: var(--redesign-subdued-button-color);
+      }
+    }
   }
 
   .ide-redesign-toolbar-home-link {

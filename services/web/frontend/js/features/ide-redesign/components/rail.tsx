@@ -1,4 +1,5 @@
 import { FC, ReactElement, useCallback, useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Nav, NavLink, Tab, TabContainer } from 'react-bootstrap-5'
 import MaterialIcon, {
   AvailableUnfilledIcon,
@@ -16,10 +17,8 @@ import { ChatIndicator, ChatPane } from './chat/chat'
 import getMeta from '@/utils/meta'
 import { HorizontalResizeHandle } from '@/features/ide-react/components/resize/horizontal-resize-handle'
 import { HorizontalToggler } from '@/features/ide-react/components/resize/horizontal-toggler'
-import { useTranslation } from 'react-i18next'
 import classNames from 'classnames'
 import IntegrationsPanel from './integrations-panel/integrations-panel'
-import OLButton from '@/features/ui/components/ol/ol-button'
 import {
   Dropdown,
   DropdownDivider,
@@ -32,6 +31,7 @@ import { RailHelpContactUsModal } from './help/contact-us'
 import { HistorySidebar } from '@/features/ide-react/components/history-sidebar'
 import DictionarySettingsModal from './settings/editor-settings/dictionary-settings-modal'
 import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
+import OLIconButton from '@/features/ui/components/ol/ol-icon-button'
 
 type RailElement = {
   icon: AvailableUnfilledIcon
@@ -277,11 +277,16 @@ const RailTab = ({
         })}
       >
         {open ? (
-          <MaterialIcon className="ide-rail-tab-link-icon" type={icon} />
+          <MaterialIcon
+            className="ide-rail-tab-link-icon"
+            type={icon}
+            accessibilityLabel={title}
+          />
         ) : (
           <MaterialIcon
             className="ide-rail-tab-link-icon"
             type={icon}
+            accessibilityLabel={title}
             unfilled
           />
         )}
@@ -292,13 +297,6 @@ const RailTab = ({
 }
 
 const RailActionElement = ({ action }: { action: RailAction }) => {
-  const icon = (
-    <MaterialIcon
-      className="ide-rail-tab-link-icon"
-      type={action.icon}
-      unfilled
-    />
-  )
   const onActionClick = useCallback(() => {
     if ('action' in action) {
       action.action()
@@ -318,8 +316,13 @@ const RailActionElement = ({ action }: { action: RailAction }) => {
               id="rail-help-dropdown-btn"
               className="ide-rail-tab-link ide-rail-tab-button ide-rail-tab-dropdown"
               as="button"
+              aria-label={action.title}
             >
-              {icon}
+              <MaterialIcon
+                className="ide-rail-tab-link-icon"
+                type={action.icon}
+                unfilled
+              />
             </DropdownToggle>
           </span>
         </OLTooltip>
@@ -333,30 +336,31 @@ const RailActionElement = ({ action }: { action: RailAction }) => {
         description={action.title}
         overlayProps={{ delay: 0, placement: 'right' }}
       >
-        <button
+        <OLIconButton
           onClick={onActionClick}
           className="ide-rail-tab-link ide-rail-tab-button"
-          type="button"
-        >
-          {icon}
-        </button>
+          icon={action.icon}
+          accessibilityLabel={action.title}
+          unfilled
+        />
       </OLTooltip>
     )
   }
 }
 
 export const RailPanelHeader: FC<{ title: string }> = ({ title }) => {
+  const { t } = useTranslation()
   const { handlePaneCollapse } = useRailContext()
   return (
     <header className="rail-panel-header">
       <h4 className="rail-panel-title">{title}</h4>
-      <OLButton
+      <OLIconButton
         onClick={handlePaneCollapse}
         className="rail-panel-header-button-subdued"
+        icon="close"
+        accessibilityLabel={t('close')}
         size="sm"
-      >
-        <MaterialIcon type="close" />
-      </OLButton>
+      />
     </header>
   )
 }
