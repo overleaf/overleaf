@@ -11,15 +11,16 @@ const { NotFoundError, InvalidNameError } = require('../Errors/Errors')
 
 function validateFilename(filename) {
   if (
-    ![
-      'output.blg',
-      'output.log',
-      'output.pdf',
-      'output.synctex.gz',
-      'output.overleaf.json',
-      'output.tar.gz',
-    ].includes(filename) ||
-    filename.endsWith('.blg')
+    !(
+      [
+        'output.blg',
+        'output.log',
+        'output.pdf',
+        'output.synctex.gz',
+        'output.overleaf.json',
+        'output.tar.gz',
+      ].includes(filename) || filename.endsWith('.blg')
+    )
   ) {
     throw new InvalidNameError('bad filename')
   }
