@@ -1,3 +1,4 @@
+import '@/utils/abortsignal-polyfill'
 import * as PDFJS from 'pdfjs-dist'
 import type { DocumentInitParameters } from 'pdfjs-dist/types/src/display/api'
 
