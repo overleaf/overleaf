@@ -108,7 +108,9 @@
     TextStrikeOutCtrlSeq,
     EmphasisCtrlSeq,
     UnderlineCtrlSeq,
-    SetLengthCtrlSeq
+    SetLengthCtrlSeq,
+    FootnoteCtrlSeq,
+    EndnoteCtrlSeq
 }
 
 @external specialize {EnvName} specializeEnvName from "./tokens.mjs" {
@@ -410,6 +412,12 @@ KnownCommand<ArgumentType> {
     } |
     SetLengthCommand {
         SetLengthCtrlSeq optionalWhitespace? ShortTextArgument optionalWhitespace? ShortTextArgument
+    } |
+    FootnoteCommand {
+        FootnoteCtrlSeq optionalWhitespace? OptionalArgument? optionalWhitespace? TextArgument
+    } |
+    EndnoteCommand {
+        EndnoteCtrlSeq optionalWhitespace? OptionalArgument? optionalWhitespace? TextArgument
     }
 }
 

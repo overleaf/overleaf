@@ -99,6 +99,8 @@ import {
   EmphasisCtrlSeq,
   UnderlineCtrlSeq,
   SetLengthCtrlSeq,
+  FootnoteCtrlSeq,
+  EndnoteCtrlSeq,
 } from './latex.terms.mjs'
 
 const MAX_ARGUMENT_LOOKAHEAD = 100
@@ -605,6 +607,8 @@ const otherKnowncommands = {
   '\\emph': EmphasisCtrlSeq,
   '\\underline': UnderlineCtrlSeq,
   '\\setlength': SetLengthCtrlSeq,
+  '\\footnote': FootnoteCtrlSeq,
+  '\\endnote': EndnoteCtrlSeq,
 }
 // specializer for control sequences
 // return new tokens for specific control sequences

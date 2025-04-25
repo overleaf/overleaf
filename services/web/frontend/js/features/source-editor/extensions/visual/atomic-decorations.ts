@@ -1066,6 +1066,44 @@ export const atomicDecorations = (options: Options) => {
               )
             )
           }
+        } else if (
+          nodeRef.type.is('FootnoteCommand') ||
+          nodeRef.type.is('EndnoteCommand')
+        ) {
+          const textArgumentNode = nodeRef.node.getChild('TextArgument')
+          if (textArgumentNode) {
+            if (
+              state.readOnly &&
+              selectionIntersects(state.selection, nodeRef)
+            ) {
+              // a special case for a read-only document:
+              // always display the content, styled differently from the main content.
+              decorations.push(
+                ...decorateArgumentBraces(
+                  new BraceWidget(),
+                  textArgumentNode,
+                  nodeRef.from
+                ),
+                Decoration.mark({
+                  class: 'ol-cm-footnote ol-cm-footnote-view',
+                }).range(textArgumentNode.from, textArgumentNode.to)
+              )
+            } else {
+              if (shouldDecorate(state, nodeRef)) {
+                // collapse the footnote when the selection is outside it
+                decorations.push(
+                  Decoration.replace({
+                    widget: new FootnoteWidget(
+                      nodeRef.type.is('FootnoteCommand')
+                        ? 'footnote'
+                        : 'endnote'
+                    ),
+                  }).range(nodeRef.from, nodeRef.to)
+                )
+                return false
+              }
+            }
+          }
         } else if (nodeRef.type.is('UnknownCommand')) {
           // a command that's not defined separately by the grammar
           const commandNode = nodeRef.node
@@ -1090,43 +1128,6 @@ export const atomicDecorations = (options: Options) => {
                     )
                   )
                   return false
-                }
-              } else if (
-                commandName === '\\footnote' ||
-                commandName === '\\endnote'
-              ) {
-                if (textArgumentNode) {
-                  if (
-                    state.readOnly &&
-                    selectionIntersects(state.selection, nodeRef)
-                  ) {
-                    // a special case for a read-only document:
-                    // always display the content, styled differently from the main content.
-                    decorations.push(
-                      ...decorateArgumentBraces(
-                        new BraceWidget(),
-                        textArgumentNode,
-                        nodeRef.from
-                      ),
-                      Decoration.mark({
-                        class: 'ol-cm-footnote ol-cm-footnote-view',
-                      }).range(textArgumentNode.from, textArgumentNode.to)
-                    )
-                  } else {
-                    if (shouldDecorate(state, nodeRef)) {
-                      // collapse the footnote when the selection is outside it
-                      decorations.push(
-                        Decoration.replace({
-                          widget: new FootnoteWidget(
-                            commandName === '\\footnote'
-                              ? 'footnote'
-                              : 'endnote'
-                          ),
-                        }).range(nodeRef.from, nodeRef.to)
-                      )
-                      return false
-                    }
-                  }
                 }
               } else if (commandName === '\\LaTeX') {
                 if (shouldDecorate(state, nodeRef)) {
