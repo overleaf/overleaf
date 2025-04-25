@@ -683,6 +683,10 @@ del.review-panel-content-highlight {
 .review-panel-mini {
   overflow: visible !important;
 
+  .review-panel-entry-header .review-panel-entry-user {
+    width: 130px;
+  }
+
   .review-panel-inner {
     width: var(--review-panel-width-mini);
   }
