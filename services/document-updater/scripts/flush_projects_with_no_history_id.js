@@ -122,13 +122,18 @@ async function fixAndFlushProjects(updates) {
   for (const update of updates) {
     logger.debug({ ...update }, 'Flushing project')
     if (commit) {
-      await rclient.set(
-        docUpdaterKeys.projectHistoryId({ doc_id: '*' }),
-        update.historyId
-      )
-      await ProjectManager.promises.flushAndDeleteProjectWithLocks(
-        update.projectId,
-        {}
+      try {
+        await rclient.set(
+          docUpdaterKeys.projectHistoryId({ doc_id: update.docId }),
+          update.historyId
+        )
+        await ProjectManager.promises.flushAndDeleteProjectWithLocks(
+          update.projectId,
+          {}
+        )
+      } catch (err) {
+        logger.error({ err, ...update }, 'Error fixing and flushing project')
+      }
       )
     }
   }
