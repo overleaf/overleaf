@@ -355,6 +355,7 @@ const _ProjectController = {
       'paywall-change-compile-timeout',
       'overleaf-assist-bundle',
       'wf-feature-rebrand',
+      'word-count-client',
     ].filter(Boolean)
 
     const getUserValues = async userId =>
