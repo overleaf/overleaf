@@ -2,11 +2,9 @@ import { useTranslation } from 'react-i18next'
 import { LostConnectionAlert } from './lost-connection-alert'
 import { useConnectionContext } from '@/features/ide-react/context/connection-context'
 import { debugging } from '@/utils/debugging'
-import useScopeValue from '@/shared/hooks/use-scope-value'
 import { createPortal } from 'react-dom'
 import { useGlobalAlertsContainer } from '@/features/ide-react/context/global-alerts-context'
 import OLNotification from '@/features/ui/components/ol/ol-notification'
-import OLButton from '@/features/ui/components/ol/ol-button'
 
 export function Alerts() {
   const { t } = useTranslation()
@@ -18,8 +16,6 @@ export function Alerts() {
     secondsUntilReconnect,
   } = useConnectionContext()
   const globalAlertsContainer = useGlobalAlertsContainer()
-
-  const [synctexError] = useScopeValue('sync_tex_error')
 
   if (!globalAlertsContainer) {
     return null
@@ -47,24 +43,6 @@ export function Alerts() {
         <OLNotification
           type="warning"
           content={<strong>{t('reconnecting')}…</strong>}
-        />
-      ) : null}
-
-      {synctexError ? (
-        <OLNotification
-          type="warning"
-          content={<strong>{t('synctex_failed')}</strong>}
-          action={
-            <OLButton
-              href="/learn/how-to/SyncTeX_Errors"
-              target="_blank"
-              id="synctex-more-info-button"
-              variant="secondary"
-              size="sm"
-            >
-              {t('more_info')}
-            </OLButton>
-          }
         />
       ) : null}
 

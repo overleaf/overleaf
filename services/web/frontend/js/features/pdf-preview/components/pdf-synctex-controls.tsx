@@ -4,7 +4,6 @@ import { useProjectContext } from '../../../shared/context/project-context'
 import { getJSON } from '../../../infrastructure/fetch-json'
 import { useDetachCompileContext as useCompileContext } from '../../../shared/context/detach-compile-context'
 import { useLayoutContext } from '../../../shared/context/layout-context'
-import useScopeValue from '../../../shared/hooks/use-scope-value'
 import { useTranslation } from 'react-i18next'
 import useIsMounted from '../../../shared/hooks/use-is-mounted'
 import useAbortController from '../../../shared/hooks/use-abort-controller'
@@ -26,6 +25,7 @@ import { CursorPosition } from '@/features/ide-react/types/cursor-position'
 import { isValidTeXFile } from '@/main/is-valid-tex-file'
 import { PdfScrollPosition } from '@/shared/hooks/use-pdf-scroll-position'
 import { Placement } from 'react-bootstrap-5/types'
+import { showFileErrorToast } from '@/features/pdf-preview/components/synctex-toasts'
 
 const GoToCodeButton = memo(function GoToCodeButton({
   syncToCode,
@@ -183,8 +183,6 @@ function PdfSynctexControls() {
     'detached'
   )
 
-  const [, setSynctexError] = useScopeValue('sync_tex_error')
-
   const getCurrentFilePath = useCallback(() => {
     const docId = getCurrentDocumentId()
 
@@ -212,25 +210,16 @@ function PdfSynctexControls() {
     (file, line) => {
       if (file) {
         const doc = findEntityByPath(file)?.entity
-        if (!doc) {
-          debugConsole.warn(`Document with path ${file} not found`)
+        if (doc) {
+          openDocWithId(doc._id, {
+            gotoLine: line,
+          })
           return
         }
-
-        openDocWithId(doc._id, {
-          gotoLine: line,
-        })
-      } else {
-        setSynctexError(true)
-
-        window.setTimeout(() => {
-          if (isMounted.current) {
-            setSynctexError(false)
-          }
-        }, 4000)
       }
+      showFileErrorToast()
     },
-    [findEntityByPath, openDocWithId, isMounted, setSynctexError]
+    [findEntityByPath, openDocWithId]
   )
 
   const goToPdfLocation = useCallback(

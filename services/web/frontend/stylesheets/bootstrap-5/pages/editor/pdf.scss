@@ -442,3 +442,8 @@
   top: var(--spacing-10);
   z-index: 1;
 }
+
+.synctex-error-toast-content {
+  display: flex;
+  gap: 20px;
+}
