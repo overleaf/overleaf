@@ -131,9 +131,7 @@ const allowedVars = Joi.object(
       'GIT_BRIDGE_HOST',
       'GIT_BRIDGE_PORT',
       'V1_HISTORY_URL',
-      'DOCKER_RUNNER',
       'SANDBOXED_COMPILES',
-      'SANDBOXED_COMPILES_SIBLING_CONTAINERS',
       'ALL_TEX_LIVE_DOCKER_IMAGE_NAMES',
       'OVERLEAF_TEMPLATES_USER_ID',
       'OVERLEAF_NEW_PROJECT_TEMPLATE_LINKS',
@@ -196,10 +194,7 @@ function setVarsDockerCompose({ pro, vars, version, withDataDir }) {
     )
   }
 
-  if (
-    cfg.services.sharelatex.environment
-      .SANDBOXED_COMPILES_SIBLING_CONTAINERS === 'true'
-  ) {
+  if (cfg.services.sharelatex.environment.SANDBOXED_COMPILES === 'true') {
     cfg.services.sharelatex.environment.SANDBOXED_COMPILES_HOST_DIR =
       PATHS.SANDBOXED_COMPILES_HOST_DIR
     cfg.services.sharelatex.environment.TEX_LIVE_DOCKER_IMAGE =

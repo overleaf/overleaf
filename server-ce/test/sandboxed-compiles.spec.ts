@@ -10,9 +10,7 @@ const LABEL_TEX_LIVE_VERSION = 'TeX Live version'
 
 describe('SandboxedCompiles', function () {
   const enabledVars = {
-    DOCKER_RUNNER: 'true',
     SANDBOXED_COMPILES: 'true',
-    SANDBOXED_COMPILES_SIBLING_CONTAINERS: 'true',
     ALL_TEX_LIVE_DOCKER_IMAGE_NAMES: '2023,2022',
   }
 
