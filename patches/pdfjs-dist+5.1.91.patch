@@ -1,0 +1,22 @@
+diff --git a/node_modules/pdfjs-dist/build/pdf.worker.mjs b/node_modules/pdfjs-dist/build/pdf.worker.mjs
+index 6c5c6f1..bb6b7d1 100644
+--- a/node_modules/pdfjs-dist/build/pdf.worker.mjs
++++ b/node_modules/pdfjs-dist/build/pdf.worker.mjs
+@@ -1830,7 +1830,7 @@ async function __wbg_init(module_or_path) {
+     }
+   }
+   if (typeof module_or_path === 'undefined') {
+-    module_or_path = new URL('qcms_bg.wasm', import.meta.url);
++    module_or_path = new URL(/* webpackIgnore: true */ 'qcms_bg.wasm', import.meta.url);
+   }
+   const imports = __wbg_get_imports();
+   if (typeof module_or_path === 'string' || typeof Request === 'function' && module_or_path instanceof Request || typeof URL === 'function' && module_or_path instanceof URL) {
+@@ -5358,7 +5358,7 @@ var OpenJPEG = (() => {
+       if (Module["locateFile"]) {
+         return locateFile("openjpeg.wasm");
+       }
+-      return new URL("openjpeg.wasm", import.meta.url).href;
++      return new URL(/* webpackIgnore: true */ "openjpeg.wasm", import.meta.url).href;
+     }
+     function getBinarySync(file) {
+       if (file == wasmBinaryFile && wasmBinary) {
