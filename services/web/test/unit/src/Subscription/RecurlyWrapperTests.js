@@ -1,4 +1,4 @@
-const { expect } = require('chai')
+const { assert, expect } = require('chai')
 const sinon = require('sinon')
 const modulePath = '../../../../app/src/Features/Subscription/RecurlyWrapper'
 const SandboxedModule = require('sandboxed-module')
@@ -319,7 +319,7 @@ describe('RecurlyWrapper', function () {
           this.recurlyAccountId,
           this.newEmail
         )
-        expect(false).to.equal(true) // Fail if we don't have an error
+        assert.fail('Expected error not thrown')
       } catch (error) {
         expect(error).to.have.property('message')
         expect(error.message.startsWith('Invalid character')).to.be.true
