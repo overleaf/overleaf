@@ -19,11 +19,17 @@ export interface WritefullAPI {
     iconPosition,
     hasAgreedToTOS,
     overleafUserId,
+    overleafLabels,
   }: {
     toolbarPosition: InsertPosition
     iconPosition: InsertPosition
     hasAgreedToTOS: boolean
     overleafUserId: string
+    overleafLabels: {
+      autoImport: boolean
+      autoCreatedAccount: boolean
+      splitTests: Record<string, boolean>
+    }
   }): Promise<void>
   addEventListener<eventName extends keyof WritefullEvents>(
     name: eventName,
