@@ -20,6 +20,8 @@ const { verbose, commit, ...args } = minimist(process.argv.slice(2), {
   },
 })
 
+logger.logger.level(verbose ? 'debug' : 'warn')
+
 const batchSize = parseInt(args.batchSize, 10)
 
 /**
@@ -120,20 +122,25 @@ async function findDocsWithMissingHistoryIds(node, docIds) {
  */
 async function fixAndFlushProjects(updates) {
   for (const update of updates) {
-    logger.debug({ ...update }, 'Flushing project')
     if (commit) {
       try {
         await rclient.set(
           docUpdaterKeys.projectHistoryId({ doc_id: update.docId }),
           update.historyId
         )
+        logger.debug({ ...update }, 'Set history id in redis')
         await ProjectManager.promises.flushAndDeleteProjectWithLocks(
           update.projectId,
           {}
         )
+        logger.debug({ ...update }, 'Flushed project')
       } catch (err) {
         logger.error({ err, ...update }, 'Error fixing and flushing project')
       }
+    } else {
+      logger.debug(
+        { ...update },
+        'Would have set history id in redis and flushed'
       )
     }
   }
