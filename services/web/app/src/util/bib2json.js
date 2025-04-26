@@ -563,7 +563,7 @@ BibtexParser.prototype.processCharacter_ = function (c) {
               doneParsingValue = true
             } else {
               // sometimes imported bibs will have {\},{\\}, {\\\}, {\\\\}, etc for whitespace,
-              //  which would otherwise break the parsing. we watch for these occurences of
+              //  which would otherwise break the parsing. we watch for these occurrences of
               //  1+ backslashes in an empty bracket pair to gracefully handle the malformed bib file
               const doubleSlash =
                 valueCharsArray.length >= 2 &&
