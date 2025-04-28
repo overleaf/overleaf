@@ -30,6 +30,7 @@ import { getStoredSelection, setStoredSelection } from '../extensions/search'
 import { debounce } from 'lodash'
 import { EditorSelection, EditorState } from '@codemirror/state'
 import { sendSearchEvent } from '@/features/event-tracking/search-events'
+import { useIsNewEditorEnabled } from '@/features/ide-redesign/utils/new-editor-utils'
 
 const MATCH_COUNT_DEBOUNCE_WAIT = 100 // the amount of ms to wait before counting matches
 const MAX_MATCH_COUNT = 999 // the maximum number of matches to count
@@ -74,6 +75,8 @@ const CodeMirrorSearchForm: FC = () => {
   const formRef = useRef<HTMLFormElement | null>(null)
   const inputRef = useRef<HTMLInputElement | null>(null)
   const replaceRef = useRef<HTMLInputElement | null>(null)
+
+  const newEditor = useIsNewEditorEnabled()
 
   const handleInputRef = useCallback(node => {
     inputRef.current = node
@@ -437,7 +440,7 @@ const CodeMirrorSearchForm: FC = () => {
             </OLButton>
           </OLButtonGroup>
 
-          {isSplitTestEnabled('full-project-search') ? (
+          {!newEditor && isSplitTestEnabled('full-project-search') ? (
             <OLTooltip
               id="open-full-project-search"
               description={t('search_all_project_files')}
