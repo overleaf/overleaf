@@ -314,6 +314,7 @@ function cancelV1Subscription(req, res, next) {
 async function previewAddonPurchase(req, res) {
   const userId = SessionManager.getLoggedInUserId(req.session)
   const addOnCode = req.params.addOnCode
+  const purchaseReferrer = req.query.purchaseReferrer
 
   if (addOnCode !== AI_ADD_ON_CODE) {
     return HttpErrorHandler.notFound(req, res, `Unknown add-on: ${addOnCode}`)
@@ -363,7 +364,10 @@ async function previewAddonPurchase(req, res) {
     paymentMethod
   )
 
-  res.render('subscriptions/preview-change', { changePreview })
+  res.render('subscriptions/preview-change', {
+    changePreview,
+    purchaseReferrer,
+  })
 }
 
 async function purchaseAddon(req, res, next) {

@@ -187,6 +187,7 @@ export interface Meta {
   'ol-projectSyncSuccessMessage': string
   'ol-projectTags': Tag[]
   'ol-project_id': string
+  'ol-purchaseReferrer': string
   'ol-recommendedCurrency': CurrencyCode
   'ol-reconfirmationRemoveEmail': string
   'ol-reconfirmedViaSAML': string

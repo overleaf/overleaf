@@ -25,19 +25,38 @@ function PreviewSubscriptionChange() {
   const preview = getMeta(
     'ol-subscriptionChangePreview'
   ) as SubscriptionChangePreview
+  const purchaseReferrer = getMeta('ol-purchaseReferrer')
   const { t } = useTranslation()
   const payNowTask = useAsync()
   const location = useLocation()
 
   const handlePayNowClick = useCallback(() => {
+    let addOnSegmentation: Record<any, unknown> | null = null
+    if (preview.change.type === 'add-on-purchase') {
+      addOnSegmentation = {
+        addOn: preview.change.addOn.code,
+        upgradeType: 'add-on',
+      }
+      if (purchaseReferrer) {
+        addOnSegmentation.referrer = purchaseReferrer
+      }
+      eventTracking.sendMB('subscription-change-form-submit', addOnSegmentation)
+    }
+
     eventTracking.sendMB('assistant-add-on-purchase')
     payNowTask
       .runAsync(payNow(preview))
       .then(() => {
+        if (addOnSegmentation) {
+          eventTracking.sendMB(
+            'subscription-change-form-success',
+            addOnSegmentation
+          )
+        }
         location.replace('/user/subscription/thank-you')
       })
       .catch(debugConsole.error)
-  }, [location, payNowTask, preview])
+  }, [purchaseReferrer, location, payNowTask, preview])
 
   const aiAddOnChange =
     preview.change.type === 'add-on-purchase' &&
