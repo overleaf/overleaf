@@ -242,6 +242,9 @@ async function buildUsersSubscriptionViewModel(user, locale = 'en') {
       }
     })
     const totalLicenses = (plan.membersLimit || 0) + additionalLicenses
+    const isInTrial =
+      paymentRecord.subscription.trialPeriodEnd &&
+      paymentRecord.subscription.trialPeriodEnd.getTime() > Date.now()
     personalSubscription.payment = {
       taxRate,
       billingDetailsLink:
@@ -269,6 +272,15 @@ async function buildUsersSubscriptionViewModel(user, locale = 'en') {
       hasPastDueInvoice: paymentRecord.account.hasPastDueInvoice,
       pausedAt: paymentRecord.subscription.pausePeriodStart,
       remainingPauseCycles: paymentRecord.subscription.remainingPauseCycles,
+      isEligibleForPause:
+        paymentRecord.subscription.service === 'recurly' &&
+        !personalSubscription.pendingPlan &&
+        !personalSubscription.groupPlan &&
+        !isInTrial &&
+        !paymentRecord.subscription.planCode.includes('ann') &&
+        !paymentRecord.subscription.addOns?.length > 0,
+      isEligibleForGroupPlan:
+        paymentRecord.subscription.service === 'recurly' && !isInTrial,
     }
     if (paymentRecord.subscription.pendingChange) {
       const pendingPlanCode =

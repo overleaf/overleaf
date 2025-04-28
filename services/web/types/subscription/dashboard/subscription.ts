@@ -44,6 +44,8 @@ type PaymentProviderRecord = {
   pendingTotalLicenses?: number
   pausedAt?: Nullable<string>
   remainingPauseCycles?: Nullable<number>
+  isEligibleForPause: boolean
+  isEligibleForGroupPlan: boolean
 }
 
 export type GroupPolicy = {

@@ -24,12 +24,7 @@ export function CancelSubscriptionButton() {
     (subscription.payment.state === 'active' &&
       subscription.payment.remainingPauseCycles &&
       subscription.payment.remainingPauseCycles > 0)
-  const planIsEligibleForPause =
-    !subscription.pendingPlan &&
-    !subscription.groupPlan &&
-    !isInTrial &&
-    !subscription.planCode.includes('ann') &&
-    !subscription.addOns?.length
+  const planIsEligibleForPause = subscription.payment.isEligibleForPause
   const enablePause =
     useFeatureFlag('pause-subscription') &&
     !hasPendingOrActivePause &&

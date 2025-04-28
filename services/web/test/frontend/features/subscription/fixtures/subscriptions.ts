@@ -52,6 +52,8 @@ export const annualActiveSubscription: PaidSubscription = {
     planOnlyDisplayPrice: '',
     addOns: [],
     addOnDisplayPricesWithoutAdditionalLicense: {},
+    isEligibleForGroupPlan: true,
+    isEligibleForPause: false,
   },
 }
 
@@ -92,6 +94,8 @@ export const annualActiveSubscriptionEuro: PaidSubscription = {
     planOnlyDisplayPrice: '',
     addOns: [],
     addOnDisplayPricesWithoutAdditionalLicense: {},
+    isEligibleForGroupPlan: true,
+    isEligibleForPause: true,
   },
 }
 
@@ -131,6 +135,8 @@ export const annualActiveSubscriptionPro: PaidSubscription = {
     planOnlyDisplayPrice: '',
     addOns: [],
     addOnDisplayPricesWithoutAdditionalLicense: {},
+    isEligibleForGroupPlan: true,
+    isEligibleForPause: true,
   },
 }
 
@@ -171,6 +177,8 @@ export const pastDueExpiredSubscription: PaidSubscription = {
     planOnlyDisplayPrice: '',
     addOns: [],
     addOnDisplayPricesWithoutAdditionalLicense: {},
+    isEligibleForGroupPlan: true,
+    isEligibleForPause: true,
   },
 }
 
@@ -211,6 +219,8 @@ export const canceledSubscription: PaidSubscription = {
     planOnlyDisplayPrice: '',
     addOns: [],
     addOnDisplayPricesWithoutAdditionalLicense: {},
+    isEligibleForGroupPlan: true,
+    isEligibleForPause: true,
   },
 }
 
@@ -251,6 +261,8 @@ export const pendingSubscriptionChange: PaidSubscription = {
     planOnlyDisplayPrice: '',
     addOns: [],
     addOnDisplayPricesWithoutAdditionalLicense: {},
+    isEligibleForGroupPlan: true,
+    isEligibleForPause: false,
   },
   pendingPlan: {
     planCode: 'professional-annual',
@@ -302,6 +314,8 @@ export const groupActiveSubscription: GroupSubscription = {
     planOnlyDisplayPrice: '',
     addOns: [],
     addOnDisplayPricesWithoutAdditionalLicense: {},
+    isEligibleForGroupPlan: true,
+    isEligibleForPause: false,
   },
 }
 
@@ -349,6 +363,8 @@ export const groupActiveSubscriptionWithPendingLicenseChange: GroupSubscription 
       planOnlyDisplayPrice: '',
       addOns: [],
       addOnDisplayPricesWithoutAdditionalLicense: {},
+      isEligibleForGroupPlan: true,
+      isEligibleForPause: false,
     },
     pendingPlan: {
       planCode: 'group_collaborator_10_enterprise',
@@ -399,6 +415,8 @@ export const trialSubscription: PaidSubscription = {
     planOnlyDisplayPrice: '',
     addOns: [],
     addOnDisplayPricesWithoutAdditionalLicense: {},
+    isEligibleForGroupPlan: true,
+    isEligibleForPause: false,
   },
 }
 
@@ -460,6 +478,8 @@ export const trialCollaboratorSubscription: PaidSubscription = {
     planOnlyDisplayPrice: '',
     addOns: [],
     addOnDisplayPricesWithoutAdditionalLicense: {},
+    isEligibleForGroupPlan: true,
+    isEligibleForPause: true,
   },
 }
 
@@ -499,5 +519,7 @@ export const monthlyActiveCollaborator: PaidSubscription = {
     planOnlyDisplayPrice: '',
     addOns: [],
     addOnDisplayPricesWithoutAdditionalLicense: {},
+    isEligibleForGroupPlan: true,
+    isEligibleForPause: true,
   },
 }

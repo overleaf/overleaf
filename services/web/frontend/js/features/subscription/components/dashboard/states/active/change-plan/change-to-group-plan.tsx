@@ -15,6 +15,7 @@ export function ChangeToGroupPlan() {
     personalSubscription && 'payment' in personalSubscription
       ? (personalSubscription as PaidSubscription)
       : null
+  const isInTrial = isInFreeTrial(subscription?.payment?.trialEndsAt)
 
   const handleClick = () => {
     handleOpenModal('change-to-group')
@@ -25,13 +26,15 @@ export function ChangeToGroupPlan() {
       <h2 style={{ marginTop: 0 }}>{t('looking_multiple_licenses')}</h2>
       <p style={{ margin: 0 }}>{t('reduce_costs_group_licenses')}</p>
       <br />
-      {isInFreeTrial(subscription?.payment?.trialEndsAt) ? (
+      {!subscription?.payment?.isEligibleForGroupPlan ? (
         <>
           <OLTooltip
             id="disabled-change-to-group-plan"
-            description={t(
-              'sorry_you_can_only_change_to_group_from_trial_via_support'
-            )}
+            description={
+              isInTrial
+                ? t('sorry_you_can_only_change_to_group_from_trial_via_support')
+                : t('sorry_you_can_only_change_to_group_via_support')
+            }
             overlayProps={{ placement: 'top' }}
           >
             <div>

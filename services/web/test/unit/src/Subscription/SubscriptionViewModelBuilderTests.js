@@ -507,12 +507,24 @@ describe('SubscriptionViewModelBuilder', function () {
   })
 
   describe('buildUsersSubscriptionViewModel', function () {
-    describe('with a recurly subscription', function () {
+    beforeEach(function () {
+      this.SubscriptionLocator.getUsersSubscription.yields(
+        null,
+        this.individualSubscription
+      )
+      this.Modules.hooks.fire
+        .withArgs('getPaymentFromRecord', this.individualSubscription)
+        .yields(null, [
+          {
+            subscription: this.paymentRecord,
+            account: new PaymentProviderAccount({}),
+            coupons: [],
+          },
+        ])
+    })
+
+    describe('with a paid subscription', function () {
       it('adds payment data to the personal subscription', async function () {
-        this.SubscriptionLocator.getUsersSubscription.yields(
-          null,
-          this.individualSubscription
-        )
         this.Modules.hooks.fire
           .withArgs('getPaymentFromRecord', this.individualSubscription)
           .yields(null, [
@@ -561,14 +573,123 @@ describe('SubscriptionViewModelBuilder', function () {
           addOnDisplayPricesWithoutAdditionalLicense: {
             'addon-code': '€2.20',
           },
+          isEligibleForGroupPlan: true,
+          isEligibleForPause: false,
+        })
+      })
+
+      describe('isEligibleForGroupPlan', function () {
+        it('is false for Stripe subscriptions', async function () {
+          this.paymentRecord.service = 'stripe'
+          const result =
+            await this.SubscriptionViewModelBuilder.promises.buildUsersSubscriptionViewModel(
+              this.user
+            )
+          assert.isFalse(
+            result.personalSubscription.payment.isEligibleForGroupPlan
+          )
+        })
+
+        it('is false when in trial', async function () {
+          const msIn24Hours = 24 * 60 * 60 * 1000
+          const tomorrow = new Date(Date.now() + msIn24Hours)
+          this.paymentRecord.trialPeriodEnd = tomorrow
+          this.paymentRecord.service = 'recurly'
+          const result =
+            await this.SubscriptionViewModelBuilder.promises.buildUsersSubscriptionViewModel(
+              this.user
+            )
+          assert.isFalse(
+            result.personalSubscription.payment.isEligibleForGroupPlan
+          )
+        })
+
+        it('is true when not in trial and for a Recurly subscription', async function () {
+          this.paymentRecord.service = 'recurly'
+          const result =
+            await this.SubscriptionViewModelBuilder.promises.buildUsersSubscriptionViewModel(
+              this.user
+            )
+          assert.isTrue(
+            result.personalSubscription.payment.isEligibleForGroupPlan
+          )
+        })
+      })
+
+      describe('isEligibleForPause', function () {
+        it('is false for Stripe subscriptions', async function () {
+          this.paymentRecord.service = 'stripe'
+          const result =
+            await this.SubscriptionViewModelBuilder.promises.buildUsersSubscriptionViewModel(
+              this.user
+            )
+          assert.isFalse(result.personalSubscription.payment.isEligibleForPause)
+        })
+
+        it('is false for subscriptions with pending plan', async function () {
+          this.paymentRecord.service = 'recurly'
+          this.individualSubscription.pendingPlan = {} // anything
+          const result =
+            await this.SubscriptionViewModelBuilder.promises.buildUsersSubscriptionViewModel(
+              this.user
+            )
+          assert.isFalse(result.personalSubscription.payment.isEligibleForPause)
+        })
+
+        it('is false for a group subscription', async function () {
+          this.paymentRecord.service = 'recurly'
+          this.individualSubscription.groupPlan = true
+          const result =
+            await this.SubscriptionViewModelBuilder.promises.buildUsersSubscriptionViewModel(
+              this.user
+            )
+          assert.isFalse(result.personalSubscription.payment.isEligibleForPause)
+        })
+
+        it('is false when in trial', async function () {
+          this.paymentRecord.service = 'recurly'
+          const msIn24Hours = 24 * 60 * 60 * 1000
+          const tomorrow = new Date(Date.now() + msIn24Hours)
+          this.paymentRecord.trialPeriodEnd = tomorrow
+          const result =
+            await this.SubscriptionViewModelBuilder.promises.buildUsersSubscriptionViewModel(
+              this.user
+            )
+          assert.isFalse(result.personalSubscription.payment.isEligibleForPause)
+        })
+
+        it('is false for annual subscriptions', async function () {
+          this.paymentRecord.service = 'recurly'
+          this.paymentRecord.planCode = 'collaborator-annual'
+          const result =
+            await this.SubscriptionViewModelBuilder.promises.buildUsersSubscriptionViewModel(
+              this.user
+            )
+          assert.isFalse(result.personalSubscription.payment.isEligibleForPause)
+        })
+
+        it('is false for subscriptions with add-ons', async function () {
+          this.paymentRecord.service = 'recurly'
+          this.paymentRecord.addOns = [{}] // anything
+          const result =
+            await this.SubscriptionViewModelBuilder.promises.buildUsersSubscriptionViewModel(
+              this.user
+            )
+          assert.isFalse(result.personalSubscription.payment.isEligibleForPause)
+        })
+
+        it('is true when conditions are met', async function () {
+          this.paymentRecord.service = 'recurly'
+          this.paymentRecord.addOns = []
+          const result =
+            await this.SubscriptionViewModelBuilder.promises.buildUsersSubscriptionViewModel(
+              this.user
+            )
+          assert.isTrue(result.personalSubscription.payment.isEligibleForPause)
         })
       })
 
       it('includes pending changes', async function () {
-        this.SubscriptionLocator.getUsersSubscription.yields(
-          null,
-          this.individualSubscription
-        )
         this.paymentRecord.pendingChange =
           new PaymentProviderSubscriptionChange({
             subscription: this.paymentRecord,
@@ -628,10 +749,6 @@ describe('SubscriptionViewModelBuilder', function () {
 
       it('does not add a billing details link for a Stripe subscription', async function () {
         this.paymentRecord.service = 'stripe'
-        this.SubscriptionLocator.getUsersSubscription.yields(
-          null,
-          this.individualSubscription
-        )
         this.Modules.hooks.fire
           .withArgs('getPaymentFromRecord', this.individualSubscription)
           .yields(null, [

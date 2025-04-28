@@ -2042,6 +2042,7 @@
   "sorry_there_was_an_issue_upgrading_your_subscription": "Sorry, there was an issue upgrading your subscription. Please <0>contact our Support team</0> for help.",
   "sorry_this_account_has_been_suspended": "Sorry, this account has been suspended.",
   "sorry_you_can_only_change_to_group_from_trial_via_support": "Sorry, you can only change to a group plan during a free trial by contacting support.",
+  "sorry_you_can_only_change_to_group_via_support": "Sorry, you can only change to a group plan by contacting support.",
   "sorry_your_table_cant_be_displayed_at_the_moment": "Sorry, your table can’t be displayed at the moment.",
   "sorry_your_token_expired": "Sorry, your token expired",
   "sort_by": "Sort by",
