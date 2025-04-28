@@ -16,6 +16,9 @@ const keySchema = {
   changes({ projectId }) {
     return `changes:{${projectId}}`
   },
+  expireTime({ projectId }) {
+    return `expire-time:{${projectId}}`
+  },
 }
 
 rclient.defineCommand('get_current_chunk', {
@@ -122,6 +125,9 @@ rclient.defineCommand('get_current_chunk_metadata', {
   numberOfKeys: 2,
   lua: `
       local startVersionValue = redis.call('GET', KEYS[1])
+      if not startVersionValue then
+        return nil -- this is a cache-miss
+      end
       local changesCount = redis.call('LLEN', KEYS[2])
       return {startVersionValue, changesCount}
     `,
@@ -152,17 +158,19 @@ async function getCurrentChunkMetadata(projectId) {
 }
 
 rclient.defineCommand('set_current_chunk', {
-  numberOfKeys: 3,
+  numberOfKeys: 4,
   lua: `
       local snapshotValue = ARGV[1]
       local startVersionValue = ARGV[2]
-      redis.call('SETEX', KEYS[1], ${TEMPORARY_CACHE_LIFETIME}, snapshotValue)
-      redis.call('SETEX', KEYS[2], ${TEMPORARY_CACHE_LIFETIME}, startVersionValue)
-      redis.call('DEL', KEYS[3]) -- clear the old changes list
-      if #ARGV >= 3 then
-        redis.call('RPUSH', KEYS[3], unpack(ARGV, 3))
-        redis.call('EXPIRE', KEYS[3], ${TEMPORARY_CACHE_LIFETIME})
+      local expireTime = ARGV[3]
+      redis.call('SET', KEYS[1], snapshotValue)
+      redis.call('SET', KEYS[2], startVersionValue)
+      redis.call('SET', KEYS[3], expireTime)
+      redis.call('DEL', KEYS[4]) -- clear the old changes list
+      if #ARGV >= 4 then
+        redis.call('RPUSH', KEYS[4], unpack(ARGV, 4))
       end
+
     `,
 })
 
@@ -178,24 +186,28 @@ async function setCurrentChunk(projectId, chunk) {
     const snapshotKey = keySchema.snapshot({ projectId })
     const startVersionKey = keySchema.startVersion({ projectId })
     const changesKey = keySchema.changes({ projectId })
+    const expireTimeKey = keySchema.expireTime({ projectId })
 
     const snapshot = chunk.history.snapshot
     const startVersion = chunk.startVersion
     const changes = chunk.history.changes
+    const expireTime = Date.now() + TEMPORARY_CACHE_LIFETIME * 1000
 
     await rclient.set_current_chunk(
-      snapshotKey,
-      startVersionKey,
-      changesKey,
-      JSON.stringify(snapshot.toRaw()),
-      startVersion,
-      ...changes.map(c => JSON.stringify(c.toRaw()))
+      snapshotKey, //     KEYS[1]
+      startVersionKey, // KEYS[2]
+      expireTimeKey, //   KEYS[3]
+      changesKey, //      KEYS[4]
+      JSON.stringify(snapshot.toRaw()), // ARGV[1]
+      startVersion, // ARGV[2]
+      expireTime, //   ARGV[3]
+      ...changes.map(c => JSON.stringify(c.toRaw())) // ARGV[4..]
     )
     metrics.inc('chunk_store.redis.set_current_chunk', 1, { status: 'success' })
   } catch (err) {
     logger.error(
       { err, projectId, chunk },
-      'error setting current chunk inredis'
+      'error setting current chunk in redis'
     )
     metrics.inc('chunk_store.redis.set_current_chunk', 1, { status: 'error' })
     return null // while testing we will suppress any errors
@@ -267,13 +279,66 @@ function compareChunks(projectId, cachedChunk, currentChunk) {
 }
 
 // Define Lua script for atomic cache clearing
+rclient.defineCommand('expire_chunk_cache', {
+  numberOfKeys: 4,
+  lua: `
+    local currentTime = tonumber(ARGV[1])
+    local expireTimeValue = redis.call('GET', KEYS[4])
+    if not expireTimeValue then
+      return nil -- this is a cache-miss
+    end
+    local expireTime = tonumber(expireTimeValue)
+    if currentTime < expireTime then
+      return nil -- cache is still valid
+    end
+    -- Cache is expired, proceed to delete the keys atomically
+    redis.call('DEL', KEYS[1]) -- snapshot key
+    redis.call('DEL', KEYS[2]) -- startVersion key
+    redis.call('DEL', KEYS[3]) -- changes key
+    redis.call('DEL', KEYS[4]) -- expireTime key
+    return 1
+  `,
+})
+
+/**
+ * Expire cache entries for a project's chunk data if needed
+ * @param {string} projectId - The ID of the project whose cache should be cleared
+ * @returns {Promise<boolean>} A promise that resolves to true if successful, false on error
+ */
+async function expireCurrentChunk(projectId, currentTime) {
+  try {
+    const snapshotKey = keySchema.snapshot({ projectId })
+    const startVersionKey = keySchema.startVersion({ projectId })
+    const changesKey = keySchema.changes({ projectId })
+    const expireTimeKey = keySchema.expireTime({ projectId })
+    const result = await rclient.expire_chunk_cache(
+      snapshotKey,
+      startVersionKey,
+      changesKey,
+      expireTimeKey,
+      currentTime || Date.now()
+    )
+    if (!result) {
+      return false // not expired
+    }
+    metrics.inc('chunk_store.redis.expire_cache', 1, { status: 'success' })
+    return true
+  } catch (err) {
+    logger.error({ err, projectId }, 'error clearing chunk cache from redis')
+    metrics.inc('chunk_store.redis.expire_cache', 1, { status: 'error' })
+    return false
+  }
+}
+
+// Define Lua script for atomic cache clearing
 rclient.defineCommand('clear_chunk_cache', {
-  numberOfKeys: 3,
+  numberOfKeys: 4,
   lua: `
     -- Delete all keys related to a project's chunk cache atomically
     redis.call('DEL', KEYS[1]) -- snapshot key
     redis.call('DEL', KEYS[2]) -- startVersion key
     redis.call('DEL', KEYS[3]) -- changes key
+    redis.call('DEL', KEYS[4]) -- expireTime key
     return 1
   `,
 })
@@ -288,8 +353,14 @@ async function clearCache(projectId) {
     const snapshotKey = keySchema.snapshot({ projectId })
     const startVersionKey = keySchema.startVersion({ projectId })
     const changesKey = keySchema.changes({ projectId })
+    const expireTimeKey = keySchema.expireTime({ projectId })
 
-    await rclient.clear_chunk_cache(snapshotKey, startVersionKey, changesKey)
+    await rclient.clear_chunk_cache(
+      snapshotKey,
+      startVersionKey,
+      changesKey,
+      expireTimeKey
+    )
     metrics.inc('chunk_store.redis.clear_cache', 1, { status: 'success' })
     return true
   } catch (err) {
@@ -307,5 +378,6 @@ module.exports = {
   checkCacheValidity,
   checkCacheValidityWithMetadata,
   compareChunks,
+  expireCurrentChunk,
   clearCache,
 }

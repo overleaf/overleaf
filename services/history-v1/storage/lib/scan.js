@@ -34,4 +34,19 @@ async function* scanRedisCluster(redisClient, pattern, count = BATCH_SIZE) {
   }
 }
 
-module.exports = { scanRedisCluster }
+/**
+ * Extracts the content within the first pair of curly braces {} from a string.
+ * This is used to extract a user ID or project ID from a Redis key.
+ *
+ * @param {string} key - The input string containing content within curly braces.
+ * @returns {string | null} The extracted content (the key ID) if found, otherwise null.
+ */
+function extractKeyId(key) {
+  const match = key.match(/\{(.*?)\}/)
+  if (match && match[1]) {
+    return match[1]
+  }
+  return null
+}
+
+module.exports = { scanRedisCluster, extractKeyId }

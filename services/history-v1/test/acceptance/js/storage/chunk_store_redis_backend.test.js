@@ -731,4 +731,119 @@ describe('chunk store Redis backend', function () {
       expect(validChunk).to.be.null
     })
   })
+
+  describe('getCurrentChunkMetadata', function () {
+    it('should return metadata for a cached chunk', async function () {
+      // Cache a chunk
+      const snapshot = new Snapshot()
+      const history = new History(snapshot, [
+        new Change(
+          [new AddFileOperation('test.tex', File.fromString('Hello'))],
+          new Date(),
+          []
+        ),
+        new Change(
+          [new AddFileOperation('other.tex', File.fromString('Bonjour'))],
+          new Date(),
+          []
+        ),
+      ])
+      const chunk = new Chunk(history, 10)
+      await redisBackend.setCurrentChunk(projectId, chunk)
+
+      const metadata = await redisBackend.getCurrentChunkMetadata(projectId)
+      expect(metadata).to.deep.equal({ startVersion: 10, changesCount: 2 })
+    })
+
+    it('should return null if no chunk is cached for the project', async function () {
+      const metadata = await redisBackend.getCurrentChunkMetadata(
+        'non-existent-project-id'
+      )
+      expect(metadata).to.be.null
+    })
+
+    it('should return metadata with zero changes for a zero-change chunk', async function () {
+      // Cache a chunk with no changes
+      const snapshot = new Snapshot()
+      const history = new History(snapshot, [])
+      const chunk = new Chunk(history, 5)
+      await redisBackend.setCurrentChunk(projectId, chunk)
+
+      const metadata = await redisBackend.getCurrentChunkMetadata(projectId)
+      expect(metadata).to.deep.equal({ startVersion: 5, changesCount: 0 })
+    })
+  })
+
+  describe('expireCurrentChunk', function () {
+    const TEMPORARY_CACHE_LIFETIME_MS = 300 * 1000 // Match the value in redis.js
+
+    it('should return false and not expire a non-expired chunk', async function () {
+      // Cache a chunk
+      const snapshot = new Snapshot()
+      const history = new History(snapshot, [])
+      const chunk = new Chunk(history, 10)
+      await redisBackend.setCurrentChunk(projectId, chunk)
+
+      // Attempt to expire immediately (should not be expired yet)
+      const expired = await redisBackend.expireCurrentChunk(projectId)
+      expect(expired).to.be.false
+
+      // Verify the chunk still exists
+      const cachedChunk = await redisBackend.getCurrentChunk(projectId)
+      expect(cachedChunk).to.not.be.null
+      expect(cachedChunk.getStartVersion()).to.equal(10)
+    })
+
+    it('should return true and expire an expired chunk using currentTime', async function () {
+      // Cache a chunk
+      const snapshot = new Snapshot()
+      const history = new History(snapshot, [])
+      const chunk = new Chunk(history, 10)
+      await redisBackend.setCurrentChunk(projectId, chunk)
+
+      // Calculate a time far enough in the future to ensure expiry
+      const futureTime = Date.now() + TEMPORARY_CACHE_LIFETIME_MS + 5000 // 5 seconds past expiry
+
+      // Attempt to expire using the future time
+      const expired = await redisBackend.expireCurrentChunk(
+        projectId,
+        futureTime
+      )
+      expect(expired).to.be.true
+
+      // Verify the chunk is gone
+      const cachedChunk = await redisBackend.getCurrentChunk(projectId)
+      expect(cachedChunk).to.be.null
+
+      // Verify metadata is also gone
+      const metadata = await redisBackend.getCurrentChunkMetadata(projectId)
+      expect(metadata).to.be.null
+    })
+
+    it('should return false if no chunk is cached for the project', async function () {
+      const expired = await redisBackend.expireCurrentChunk(
+        'non-existent-project'
+      )
+      expect(expired).to.be.false
+    })
+
+    it('should return false if called with a currentTime before the expiry time', async function () {
+      // Cache a chunk
+      const snapshot = new Snapshot()
+      const history = new History(snapshot, [])
+      const chunk = new Chunk(history, 10)
+      await redisBackend.setCurrentChunk(projectId, chunk)
+
+      // Use a time *before* the cache would normally expire
+      const pastTime = Date.now() - 10000 // 10 seconds ago
+
+      // Attempt to expire using the past time
+      const expired = await redisBackend.expireCurrentChunk(projectId, pastTime)
+      expect(expired).to.be.false
+
+      // Verify the chunk still exists
+      const cachedChunk = await redisBackend.getCurrentChunk(projectId)
+      expect(cachedChunk).to.not.be.null
+    })
+  })
 })
