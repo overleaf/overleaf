@@ -30,6 +30,10 @@ export const loadMathJax = async (options?: {
             // Implements support for the \bm command from the bm package. It bolds the argument in math mode.
             // https://github.com/mathjax/MathJax/issues/1219#issuecomment-341059843
             bm: ['\\boldsymbol{#1}', 1],
+            // MathJax 3 renders \coloneq as :- whereas the mathtools package
+            // renders it as :=. Here we override the \coloneq macro to produce
+            // the := symbol.
+            coloneq: '\\coloneqq',
           },
           inlineMath,
           displayMath: [
