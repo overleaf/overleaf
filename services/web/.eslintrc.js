@@ -64,6 +64,10 @@ module.exports = {
     {
       // Test specific rules
       files: ['**/test/**/*.*'],
+      excludedFiles: [
+        '**/test/unit/src/**/*.test.mjs',
+        'test/unit/vitest_bootstrap.mjs',
+      ], // exclude vitest files
       plugins: ['mocha', 'chai-expect', 'chai-friendly'],
       env: {
         mocha: true,
@@ -92,6 +96,26 @@ module.exports = {
         // based on mocha's context mechanism
         'mocha/prefer-arrow-callback': 'error',
 
+        '@typescript-eslint/no-unused-expressions': 'off',
+      },
+    },
+    {
+      files: [
+        '**/test/unit/src/**/*.test.mjs',
+        'test/unit/vitest_bootstrap.mjs',
+      ],
+      env: {
+        jest: true, // best match for vitest API etc.
+      },
+      plugins: ['@vitest', 'chai-expect', 'chai-friendly'], // still using chai for now
+      rules: {
+        // Swap the no-unused-expressions rule with a more chai-friendly one
+        'no-unused-expressions': 'off',
+        'chai-friendly/no-unused-expressions': 'error',
+
+        // chai-specific rules
+        'chai-expect/missing-assertion': 'error',
+        'chai-expect/terminating-properties': 'error',
         '@typescript-eslint/no-unused-expressions': 'off',
       },
     },

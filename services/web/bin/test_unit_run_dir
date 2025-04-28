@@ -1,0 +1,45 @@
+#!/bin/bash
+
+TARGET_DIR=$1
+
+
+declare -a vitest_args=("$TARGET_DIR")
+
+if [[ -n "$MOCHA_GREP" ]]; then
+  vitest_args+=("--testNamePattern" "$MOCHA_GREP")
+fi
+
+if [[ -n "$VITEST_NO_CACHE" ]]; then
+  echo "Disabling cache for vitest."
+  vitest_args+=("--no-cache")
+fi
+
+echo "Running unit tests in directory: $TARGET_DIR"
+
+npm run test:unit:esm -- "${vitest_args[@]}"
+
+vitest_status=$?
+
+if find "$TARGET_DIR" -type f -name "*.js" -print -quit | grep -q '.'; then
+  mocha --recursive --timeout 25000 --exit --grep="$MOCHA_GREP" --require test/unit/bootstrap.js --extension=js "$TARGET_DIR"
+  mocha_status=$?
+else
+  echo "No mocha tests found in $TARGET_DIR, skipping mocha step."
+  mocha_status=0
+fi
+
+if [ $mocha_status -eq 0 ] && [ $vitest_status -eq 0 ]; then
+  exit 0
+fi
+
+# Report status briefly at the end for failures
+
+if [ $mocha_status -ne 0 ]; then
+  echo "Mocha tests failed with status: $mocha_status"
+fi
+
+if [ $vitest_status -ne 0 ]; then
+  echo "Vitest tests failed with status: $vitest_status"
+fi
+
+exit 1

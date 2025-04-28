@@ -21,6 +21,7 @@ services:
       OVERLEAF_CONFIG:
       NODE_ENV: test
       NODE_OPTIONS: "--unhandled-rejections=strict"
+      VITEST_NO_CACHE: true
     depends_on:
       - mongo
 

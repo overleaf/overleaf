@@ -83,6 +83,16 @@ test_unit_app:
 	$(DOCKER_COMPOSE) run --name unit_test_$(BUILD_DIR_NAME) --rm test_unit
 	$(DOCKER_COMPOSE) down -v -t 0
 
+test_unit_esm: export COMPOSE_PROJECT_NAME=unit_test_esm_$(BUILD_DIR_NAME)
+test_unit_esm:
+	$(DOCKER_COMPOSE) run --rm test_unit npm run test:unit:esm
+	$(DOCKER_COMPOSE) down -v -t 0
+
+test_unit_esm_watch: export COMPOSE_PROJECT_NAME=unit_test_esm_watch_$(BUILD_DIR_NAME)
+test_unit_esm_watch:
+	$(DOCKER_COMPOSE) run --rm test_unit npm run test:unit:esm:watch
+	$(DOCKER_COMPOSE) down -v -t 0
+
 TEST_SUITES = $(sort $(filter-out \
 	$(wildcard test/unit/src/helpers/*), \
 	$(wildcard test/unit/src/*/*)))
