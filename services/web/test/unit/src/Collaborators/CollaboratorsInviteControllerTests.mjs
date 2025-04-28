@@ -117,6 +117,7 @@ describe('CollaboratorsInviteController', function () {
 
     this.SplitTestHandler = {
       promises: {
+        getAssignment: sinon.stub().resolves({ variant: 'default' }),
         getAssignmentForUser: sinon.stub().resolves({ variant: 'default' }),
       },
     }

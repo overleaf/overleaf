@@ -18,6 +18,11 @@ describe('TemplatesController', function () {
         './TemplatesManager': (this.TemplatesManager = {
           promises: { createProjectFromV1Template: sinon.stub() },
         }),
+        '../SplitTests/SplitTestHandler': (this.SplitTestHandler = {
+          promises: {
+            getAssignment: sinon.stub().resolves({ variant: 'default' }),
+          },
+        }),
       },
     })
     this.next = sinon.stub()

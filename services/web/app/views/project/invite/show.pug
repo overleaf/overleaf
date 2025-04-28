@@ -1,37 +1,39 @@
 extends ../../layout-marketing
 
 block vars
-	- bootstrap5PageStatus = 'disabled'
+	- bootstrap5PageStatus = 'enabled'
+	- bootstrap5PageSplitTest = 'core-pug-bs5'
 
 block content
 	main.content.content-alt#main-content
 		.container
 			.row
-				.col-md-8.col-md-offset-2
+				.col-12.col-md-8.col-md-offset-2.offset-md-2
 					.card.project-invite-accept
-						.page-header.text-centered
-							h1 #{translate("user_wants_you_to_see_project", {username:owner.first_name, projectname:""})}
-								br
-								em #{project.name}
-						.row.text-center
-							.col-md-12
-								p
-									| #{translate("accepting_invite_as")}&nbsp;
-									em #{user.email}
-						.row
-							.col-md-12
-								form.form(
-									data-ol-regular-form
-									method="POST",
-									action="/project/"+invite.projectId+"/invite/token/"+token+"/accept"
-								)
-									input(name='_csrf', type='hidden', value=csrfToken)
-									input(name='token', type='hidden', value=token)
-									.form-group.text-center
-										button.btn.btn-lg.btn-primary(
-											type="submit"
-											data-ol-disabled-inflight
-										)
-											span(data-ol-inflight="idle") #{translate("join_project")}
-											span(hidden data-ol-inflight="pending") #{translate("joining")}…
-									.form-group.text-center
+						.card-body
+							.page-header.text-center
+								h1 #{translate("user_wants_you_to_see_project", {username:owner.first_name, projectname:""})}
+									br
+									em #{project.name}
+							.row.text-center
+								.col-12.col-md-12
+									p
+										| #{translate("accepting_invite_as")}&nbsp;
+										em #{user.email}
+							.row
+								.col-12.col-md-12
+									form.form(
+										data-ol-regular-form
+										method="POST",
+										action="/project/"+invite.projectId+"/invite/token/"+token+"/accept"
+									)
+										input(name='_csrf', type='hidden', value=csrfToken)
+										input(name='token', type='hidden', value=token)
+										.form-group.text-center
+											button.btn.btn-lg.btn-primary(
+												type="submit"
+												data-ol-disabled-inflight
+											)
+												span(data-ol-inflight="idle") #{translate("join_project")}
+												span(hidden data-ol-inflight="pending") #{translate("joining")}…
+										.form-group.text-center

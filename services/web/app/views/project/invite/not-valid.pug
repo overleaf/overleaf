@@ -1,21 +1,22 @@
 extends ../../layout-marketing
 
 block vars
-	- bootstrap5PageStatus = 'disabled'
+	- bootstrap5PageStatus = 'enabled'
+	- bootstrap5PageSplitTest = 'core-pug-bs5'
 
 block content
 	main.content.content-alt#main-content
 		.container
 			.row
-				.col-md-8.col-md-offset-2
+				.col-md-8.col-md-offset-2.offset-md-2
 					.card.project-invite-invalid
-						.page-header.text-centered
-							h1  #{translate("invite_not_valid")}
-						.row.text-center
-							.col-md-12
-								p
-									| #{translate("invite_not_valid_description")}.
-						.row.text-center.actions
-							.col-md-12
-								a.btn.btn-secondary-info.btn-secondary(href="/project") #{translate("back_to_your_projects")}
-							
+						.card-body
+							.page-header.text-center
+								h1  #{translate("invite_not_valid")}
+							.row.text-center
+								.col-12.col-md-12
+									p
+										| #{translate("invite_not_valid_description")}.
+							.row.text-center.actions
+								.col-12.col-md-12
+									a.btn.btn-secondary-info.btn-secondary(href="/project") #{translate("back_to_your_projects")}
