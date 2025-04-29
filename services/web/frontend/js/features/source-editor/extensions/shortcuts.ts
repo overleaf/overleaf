@@ -46,11 +46,11 @@ export const shortcuts = Prec.high(
   keymap.of([
     {
       key: 'Tab',
-      run: indentMore,
+      run: indentMore, // note: not using indentWithTab as the user may want to insert tab spaces within a line
     },
     {
       key: 'Shift-Tab',
-      run: indentLess,
+      run: indentLess, // note: not using indentWithTab as the user may want to insert tab spaces within a line
     },
     {
       key: 'Mod-y',

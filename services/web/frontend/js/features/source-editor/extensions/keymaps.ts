@@ -20,6 +20,8 @@ const ignoredDefaultMacKeybindings = new Set([
   // We replace these with our custom visual-line versions
   'Mod-Backspace',
   'Mod-Delete',
+  // Disable toggleTabFocusMode as it conflicts with ” on a Swedish keyboard layout
+  'Shift-Alt-m',
 ])
 
 const filteredDefaultKeymap = defaultKeymap.filter(
