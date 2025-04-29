@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, FC } from 'react'
 import ToggleSwitch from '../../../../../frontend/js/features/history/components/change-list/toggle-switch'
 import ChangeList from '../../../../../frontend/js/features/history/components/change-list/change-list'
 import {
@@ -10,13 +10,14 @@ import { HistoryProvider } from '../../../../../frontend/js/features/history/con
 import { updates } from '../fixtures/updates'
 import { labels } from '../fixtures/labels'
 import { formatTime, relativeDate } from '@/features/utils/format-date'
+import { withTestContainerErrorBoundary } from '../../../helpers/error-boundary'
 
-const mountWithEditorProviders = (
-  component: React.ReactNode,
-  scope: Record<string, unknown> = {},
-  props: Record<string, unknown> = {}
-) => {
-  cy.mount(
+const TestContainerWithoutErrorBoundary: FC<{
+  component: React.ReactNode
+  scope: Record<string, unknown>
+  props: Record<string, unknown>
+}> = ({ component, scope, props }) => {
+  return (
     <EditorProviders scope={scope} {...props}>
       <HistoryProvider>
         <div style={{ display: 'flex', justifyContent: 'center' }}>
@@ -25,6 +26,18 @@ const mountWithEditorProviders = (
       </HistoryProvider>
     </EditorProviders>
   )
+}
+
+const TestContainer = withTestContainerErrorBoundary(
+  TestContainerWithoutErrorBoundary
+)
+
+const mountWithEditorProviders = (
+  component: React.ReactNode,
+  scope: Record<string, unknown> = {},
+  props: Record<string, unknown> = {}
+) => {
+  cy.mount(<TestContainer component={component} scope={scope} props={props} />)
 }
 
 describe('change list (Bootstrap 5)', function () {

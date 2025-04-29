@@ -16,4 +16,6 @@ function SourceEditor() {
   )
 }
 
-export default withErrorBoundary(memo(SourceEditor), ErrorBoundaryFallback)
+export default withErrorBoundary(memo(SourceEditor), () => (
+  <ErrorBoundaryFallback />
+))

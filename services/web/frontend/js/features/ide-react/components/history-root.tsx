@@ -10,4 +10,6 @@ const HistoryRoot = () => (
   </HistoryProvider>
 )
 
-export default withErrorBoundary(memo(HistoryRoot), ErrorBoundaryFallback)
+export default withErrorBoundary(memo(HistoryRoot), () => (
+  <ErrorBoundaryFallback />
+))

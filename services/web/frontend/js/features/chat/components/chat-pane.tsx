@@ -114,4 +114,4 @@ function Placeholder() {
   )
 }
 
-export default withErrorBoundary(ChatPane, ChatFallbackError)
+export default withErrorBoundary(ChatPane, () => <ChatFallbackError />)

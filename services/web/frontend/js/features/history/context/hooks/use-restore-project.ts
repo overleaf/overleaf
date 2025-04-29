@@ -1,12 +1,12 @@
 import { useCallback, useState } from 'react'
-import { useErrorHandler } from 'react-error-boundary'
+import { useErrorBoundary } from 'react-error-boundary'
 import { restoreProjectToVersion } from '../../services/api'
 import { useLayoutContext } from '@/shared/context/layout-context'
 
 type RestorationState = 'initial' | 'restoring' | 'restored' | 'error'
 
 export const useRestoreProject = () => {
-  const handleError = useErrorHandler()
+  const { showBoundary } = useErrorBoundary()
   const { setView } = useLayoutContext()
 
   const [restorationState, setRestorationState] =
@@ -22,10 +22,10 @@ export const useRestoreProject = () => {
         })
         .catch(err => {
           setRestorationState('error')
-          handleError(err)
+          showBoundary(err)
         })
     },
-    [handleError, setView]
+    [showBoundary, setView]
   )
 
   return {

@@ -5,7 +5,7 @@ import { Diff, DocDiffResponse } from '../../services/types/doc'
 import { useHistoryContext } from '../../context/history-context'
 import { diffDoc } from '../../services/api'
 import { highlightsFromDiffResponse } from '../../utils/highlights-from-diff-response'
-import { useErrorHandler } from 'react-error-boundary'
+import { useErrorBoundary } from 'react-error-boundary'
 import useAsync from '../../../../shared/hooks/use-async'
 import { useTranslation } from 'react-i18next'
 
@@ -14,7 +14,7 @@ function DiffView() {
   const { isLoading, data, runAsync } = useAsync<DocDiffResponse>()
   const { t } = useTranslation()
   const { updateRange, selectedFile } = selection
-  const handleError = useErrorHandler()
+  const { showBoundary } = useErrorBoundary()
 
   useEffect(() => {
     if (!updateRange || !selectedFile?.pathname || loadingFileDiffs) {
@@ -33,7 +33,7 @@ function DiffView() {
         abortController.signal
       )
     )
-      .catch(handleError)
+      .catch(showBoundary)
       .finally(() => {
         abortController = null
       })
@@ -50,7 +50,7 @@ function DiffView() {
     updateRange,
     selectedFile,
     loadingFileDiffs,
-    handleError,
+    showBoundary,
   ])
 
   const diff = useMemo(() => {

@@ -3,6 +3,28 @@ import { HistoryProvider } from '../../../../../frontend/js/features/history/con
 import { HistoryContextValue } from '../../../../../frontend/js/features/history/context/types/history-context-value'
 import { Diff } from '../../../../../frontend/js/features/history/services/types/doc'
 import { EditorProviders } from '../../../helpers/editor-providers'
+import { FC } from 'react'
+import { withTestContainerErrorBoundary } from '../../../helpers/error-boundary'
+
+const TestContainerWithoutErrorBoundary: FC<{
+  scope: Record<string, unknown>
+  diff: Diff
+  selection: HistoryContextValue['selection']
+}> = ({ scope, diff, selection }) => {
+  return (
+    <EditorProviders scope={scope}>
+      <HistoryProvider>
+        <div className="history-react">
+          <Toolbar diff={diff} selection={selection} />
+        </div>
+      </HistoryProvider>
+    </EditorProviders>
+  )
+}
+
+const TestContainer = withTestContainerErrorBoundary(
+  TestContainerWithoutErrorBoundary
+)
 
 describe('history toolbar', function () {
   const editorProvidersScope = {
@@ -58,13 +80,11 @@ describe('history toolbar', function () {
     }
 
     cy.mount(
-      <EditorProviders scope={editorProvidersScope}>
-        <HistoryProvider>
-          <div className="history-react">
-            <Toolbar diff={diff} selection={selection} />
-          </div>
-        </HistoryProvider>
-      </EditorProviders>
+      <TestContainer
+        scope={editorProvidersScope}
+        diff={diff}
+        selection={selection}
+      />
     )
 
     cy.get('.history-react-toolbar').within(() => {
@@ -108,13 +128,11 @@ describe('history toolbar', function () {
     }
 
     cy.mount(
-      <EditorProviders scope={editorProvidersScope}>
-        <HistoryProvider>
-          <div className="history-react">
-            <Toolbar diff={diff} selection={selection} />
-          </div>
-        </HistoryProvider>
-      </EditorProviders>
+      <TestContainer
+        scope={editorProvidersScope}
+        diff={diff}
+        selection={selection}
+      />
     )
 
     cy.get('.history-react-toolbar').within(() => {
