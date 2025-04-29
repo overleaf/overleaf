@@ -1,6 +1,9 @@
 const { expect } = require('chai')
+const fs = require('node:fs')
+const events = require('node:events')
 const { FetchError, AbortError } = require('node-fetch')
 const { Readable } = require('node:stream')
+const { pipeline } = require('node:stream/promises')
 const { once } = require('node:events')
 const { TestServer } = require('./helpers/TestServer')
 const selfsigned = require('selfsigned')
@@ -203,6 +206,31 @@ describe('fetch-utils', function () {
       ).to.be.rejectedWith(AbortError)
       expect(stream.destroyed).to.be.true
     })
+
+    it('detaches from signal on success', async function () {
+      const signal = AbortSignal.timeout(10_000)
+      for (let i = 0; i < 20; i++) {
+        const s = await fetchStream(this.url('/hello'), { signal })
+        expect(events.getEventListeners(signal, 'abort')).to.have.length(1)
+        await pipeline(s, fs.createWriteStream('/dev/null'))
+        expect(events.getEventListeners(signal, 'abort')).to.have.length(0)
+      }
+    })
+
+    it('detaches from signal on error', async function () {
+      const signal = AbortSignal.timeout(10_000)
+      for (let i = 0; i < 20; i++) {
+        try {
+          await fetchStream(this.url('/500'), { signal })
+        } catch (err) {
+          if (err instanceof RequestFailedError && err.response.status === 500)
+            continue
+          throw err
+        } finally {
+          expect(events.getEventListeners(signal, 'abort')).to.have.length(0)
+        }
+      }
+    })
   })
 
   describe('fetchNothing', function () {
@@ -391,9 +419,16 @@ async function* infiniteIterator() {
 async function abortOnceReceived(func, server) {
   const controller = new AbortController()
   const promise = func(controller.signal)
+  expect(events.getEventListeners(controller.signal, 'abort')).to.have.length(1)
   await once(server.events, 'request-received')
   controller.abort()
-  return await promise
+  try {
+    return await promise
+  } finally {
+    expect(events.getEventListeners(controller.signal, 'abort')).to.have.length(
+      0
+    )
+  }
 }
 
 async function expectRequestAborted(req) {
