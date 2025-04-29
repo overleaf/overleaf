@@ -193,6 +193,7 @@
     div.pdf-canvas {
       background: white;
       box-shadow: 0 0 10px rgb(0 0 0 / 50%);
+      will-change: transform;
     }
 
     div.pdf-canvas.pdfng-empty {
