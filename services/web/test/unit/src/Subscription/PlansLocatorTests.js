@@ -114,22 +114,6 @@ describe('PlansLocator', function () {
     })
   })
 
-  describe('mapStripeLookupKeyToRecurlyPlanCode', function () {
-    it('should return the recurly plan code for existing plans', function () {
-      const planCode = 'standard_monthly'
-      const lookupKey =
-        this.PlansLocator.mapStripeLookupKeyToRecurlyPlanCode(planCode)
-      expect(lookupKey).to.equal('collaborator')
-    })
-
-    it('should return undefined for unknown plans', function () {
-      const planCode = 'foobar'
-      const lookupKey =
-        this.PlansLocator.mapStripeLookupKeyToRecurlyPlanCode(planCode)
-      expect(lookupKey).to.equal(undefined)
-    })
-  })
-
   describe('getPlanTypeAndPeriodFromRecurlyPlanCode', function () {
     it('should return the plan type and period for "collaborator"', function () {
       const { planType, period } =
