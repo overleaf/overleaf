@@ -57,6 +57,7 @@ function PdfPageNumberControl({
       <div className="pdfjs-page-number-input">
         <form onSubmit={handleSubmit}>
           <input
+            aria-label={t('page_current', { page })}
             inputMode="numeric"
             value={pageInputValue}
             onFocus={event => event.target.select()}
