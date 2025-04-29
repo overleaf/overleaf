@@ -21,7 +21,7 @@ export const ToolbarButtonMenu: FC<{
   const button = (
     <button
       type="button"
-      className="ol-cm-toolbar-button btn"
+      className="ol-cm-toolbar-button"
       aria-label={label}
       onMouseDown={event => {
         event.preventDefault()

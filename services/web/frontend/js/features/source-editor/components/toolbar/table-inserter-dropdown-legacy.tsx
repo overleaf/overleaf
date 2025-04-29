@@ -36,7 +36,7 @@ export const LegacyTableDropdown = memo(() => {
       >
         <button
           type="button"
-          className="ol-cm-toolbar-button btn"
+          className="ol-cm-toolbar-button"
           aria-label={t('toolbar_insert_table')}
           onMouseDown={event => {
             event.preventDefault()
