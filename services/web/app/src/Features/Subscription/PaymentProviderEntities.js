@@ -30,6 +30,8 @@ class PaymentProviderSubscription {
    * @param {Date} props.periodStart
    * @param {Date} props.periodEnd
    * @param {string} props.collectionMethod
+   * @param {string} [props.poNumber]
+   * @param {string} [props.termsAndConditions]
    * @param {PaymentProviderSubscriptionChange} [props.pendingChange]
    * @param {PaymentProvider['service']} [props.service]
    * @param {string} [props.state]
@@ -53,6 +55,8 @@ class PaymentProviderSubscription {
     this.periodStart = props.periodStart
     this.periodEnd = props.periodEnd
     this.collectionMethod = props.collectionMethod
+    this.poNumber = props.poNumber ?? ''
+    this.termsAndConditions = props.termsAndConditions ?? ''
     this.pendingChange = props.pendingChange ?? null
     this.service = props.service ?? 'recurly'
     this.state = props.state ?? 'active'
@@ -264,6 +268,39 @@ class PaymentProviderSubscription {
   }
 
   /**
+   * Update the "PO number" and "Terms and conditions" in a subscription
+   *
+   * @param {string} poNumber
+   * @param {string} termsAndConditions
+   * @return {PaymentProviderSubscriptionUpdateRequest} - the update request to send to
+   * Recurly
+   */
+  getRequestForPoNumberAndTermsAndConditionsUpdate(
+    poNumber,
+    termsAndConditions
+  ) {
+    return new PaymentProviderSubscriptionUpdateRequest({
+      subscription: this,
+      poNumber,
+      termsAndConditions,
+    })
+  }
+
+  /**
+   * Update the "Terms and conditions" in a subscription
+   *
+   * @param {string} termsAndConditions
+   * @return {PaymentProviderSubscriptionUpdateRequest} - the update request to send to
+   * Recurly
+   */
+  getRequestForTermsAndConditionsUpdate(termsAndConditions) {
+    return new PaymentProviderSubscriptionUpdateRequest({
+      subscription: this,
+      termsAndConditions,
+    })
+  }
+
+  /**
    * Returns whether this subscription is manually collected
    *
    * @return {boolean}
@@ -301,6 +338,20 @@ class PaymentProviderSubscriptionAddOn {
       quantity: this.quantity,
       unitPrice: this.unitPrice,
     })
+  }
+}
+
+class PaymentProviderSubscriptionUpdateRequest {
+  /**
+   * @param {object} props
+   * @param {PaymentProviderSubscription} props.subscription
+   * @param {string} [props.poNumber]
+   * @param {string} [props.termsAndConditions]
+   */
+  constructor(props) {
+    this.subscription = props.subscription
+    this.poNumber = props.poNumber ?? ''
+    this.termsAndConditions = props.termsAndConditions ?? ''
   }
 }
 
@@ -514,6 +565,7 @@ module.exports = {
   PaymentProviderSubscriptionAddOn,
   PaymentProviderSubscriptionChange,
   PaymentProviderSubscriptionChangeRequest,
+  PaymentProviderSubscriptionUpdateRequest,
   PaymentProviderSubscriptionAddOnUpdate,
   PaypalPaymentMethod,
   CreditCardPaymentMethod,

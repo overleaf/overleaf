@@ -6,6 +6,7 @@ const Errors = require('../../../../app/src/Features/Subscription/Errors')
 const {
   AI_ADD_ON_CODE,
   PaymentProviderSubscriptionChangeRequest,
+  PaymentProviderSubscriptionUpdateRequest,
   PaymentProviderSubscriptionChange,
   PaymentProviderSubscription,
   PaymentProviderSubscriptionAddOnUpdate,
@@ -307,6 +308,36 @@ describe('PaymentProviderEntities', function () {
         })
       })
 
+      describe('getRequestForPoNumberAndTermsAndConditionsUpdate()', function () {
+        it('returns a correct update request', function () {
+          const updateRequest =
+            this.subscription.getRequestForPoNumberAndTermsAndConditionsUpdate(
+              'O12345',
+              'T&C copy'
+            )
+          expect(updateRequest).to.deep.equal(
+            new PaymentProviderSubscriptionUpdateRequest({
+              subscription: this.subscription,
+              poNumber: 'O12345',
+              termsAndConditions: 'T&C copy',
+            })
+          )
+        })
+      })
+
+      describe('getRequestForTermsAndConditionsUpdate()', function () {
+        it('returns a correct update request', function () {
+          const updateRequest =
+            this.subscription.getRequestForTermsAndConditionsUpdate('T&C copy')
+          expect(updateRequest).to.deep.equal(
+            new PaymentProviderSubscriptionUpdateRequest({
+              subscription: this.subscription,
+              termsAndConditions: 'T&C copy',
+            })
+          )
+        })
+      })
+
       describe('without add-ons', function () {
         beforeEach(function () {
           const { PaymentProviderSubscription } = this.PaymentProviderEntities
@@ -381,6 +412,8 @@ describe('PaymentProviderEntities', function () {
           periodStart: new Date(),
           periodEnd: new Date(),
           collectionMethod: 'automatic',
+          poNumber: '012345',
+          termsAndConditions: 'T&C copy',
         })
         const change = new PaymentProviderSubscriptionChange({
           subscription,

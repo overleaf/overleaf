@@ -25,6 +25,7 @@ const {
 
 /**
  * @import { PaymentProviderSubscriptionChangeRequest } from './PaymentProviderEntities'
+ * @import { PaymentProviderSubscriptionUpdateRequest } from './PaymentProviderEntities'
  * @import { PaymentMethod } from './types'
  */
 
@@ -188,7 +189,29 @@ async function getSubscriptionForUser(userId) {
 }
 
 /**
- * Request a susbcription change from Recurly
+ * Request a subscription update from Recurly
+ *
+ * @param {PaymentProviderSubscriptionUpdateRequest} updateRequest
+ */
+async function updateSubscriptionDetails(updateRequest) {
+  const body = subscriptionUpdateRequestToApi(updateRequest)
+
+  const updatedSubscription = await client.updateSubscription(
+    `uuid-${updateRequest.subscription.id}`,
+    body
+  )
+
+  logger.debug(
+    {
+      subscriptionId: updateRequest.subscription.id,
+      updateId: updatedSubscription.id,
+    },
+    'updated subscription'
+  )
+}
+
+/**
+ * Request a subscription change from Recurly
  *
  * @param {PaymentProviderSubscriptionChangeRequest} changeRequest
  */
@@ -361,6 +384,25 @@ async function getPlan(planCode) {
   return planFromApi(plan)
 }
 
+/**
+ * Get the country code for given user
+ *
+ * @param {string} userId
+ * @return {Promise<string>}
+ */
+async function getCountryCode(userId) {
+  const account = await client.getAccount(`code-${userId}`)
+  const countryCode = account.address?.country
+
+  if (!countryCode) {
+    throw new OError('Country code not found', {
+      userId,
+    })
+  }
+
+  return countryCode
+}
+
 function subscriptionIsCanceledOrExpired(subscription) {
   const state = subscription?.recurlyStatus?.state
   return state === 'canceled' || state === 'expired'
@@ -424,7 +466,10 @@ function subscriptionFromApi(apiSubscription) {
     apiSubscription.currency == null ||
     apiSubscription.currentPeriodStartedAt == null ||
     apiSubscription.currentPeriodEndsAt == null ||
-    apiSubscription.collectionMethod == null
+    apiSubscription.collectionMethod == null ||
+    // The values below could be null initially if the subscription has never updated
+    !('poNumber' in apiSubscription) ||
+    !('termsAndConditions' in apiSubscription)
   ) {
     throw new OError('Invalid Recurly subscription', {
       subscription: apiSubscription,
@@ -446,6 +491,8 @@ function subscriptionFromApi(apiSubscription) {
     periodStart: apiSubscription.currentPeriodStartedAt,
     periodEnd: apiSubscription.currentPeriodEndsAt,
     collectionMethod: apiSubscription.collectionMethod,
+    poNumber: apiSubscription.poNumber ?? '',
+    termsAndConditions: apiSubscription.termsAndConditions ?? '',
     service: 'recurly',
     state: apiSubscription.state ?? 'active',
     trialPeriodStart: apiSubscription.trialStartedAt,
@@ -639,6 +686,22 @@ function subscriptionChangeRequestToApi(changeRequest) {
   return requestBody
 }
 
+/**
+ * Build an API request from a PaymentProviderSubscriptionUpdateRequest
+ *
+ * @param {PaymentProviderSubscriptionUpdateRequest} updateRequest
+ */
+function subscriptionUpdateRequestToApi(updateRequest) {
+  const requestBody = {}
+  if (updateRequest.poNumber) {
+    requestBody.poNumber = updateRequest.poNumber
+  }
+  if (updateRequest.termsAndConditions) {
+    requestBody.termsAndConditions = updateRequest.termsAndConditions
+  }
+  return requestBody
+}
+
 module.exports = {
   errors: recurly.errors,
 
@@ -648,6 +711,7 @@ module.exports = {
   getSubscription: callbackify(getSubscription),
   getSubscriptionForUser: callbackify(getSubscriptionForUser),
   previewSubscriptionChange: callbackify(previewSubscriptionChange),
+  updateSubscriptionDetails: callbackify(updateSubscriptionDetails),
   applySubscriptionChangeRequest: callbackify(applySubscriptionChangeRequest),
   removeSubscriptionChange: callbackify(removeSubscriptionChange),
   removeSubscriptionChangeByUuid: callbackify(removeSubscriptionChangeByUuid),
@@ -656,6 +720,7 @@ module.exports = {
   getPaymentMethod: callbackify(getPaymentMethod),
   getAddOn: callbackify(getAddOn),
   getPlan: callbackify(getPlan),
+  getCountryCode: callbackify(getCountryCode),
   subscriptionIsCanceledOrExpired,
   pauseSubscriptionByUuid: callbackify(pauseSubscriptionByUuid),
   resumeSubscriptionByUuid: callbackify(resumeSubscriptionByUuid),
@@ -668,6 +733,7 @@ module.exports = {
     getActiveCouponsForUserId,
     getCustomerManagementLink,
     previewSubscriptionChange,
+    updateSubscriptionDetails,
     applySubscriptionChangeRequest,
     removeSubscriptionChange,
     removeSubscriptionChangeByUuid,
@@ -678,5 +744,6 @@ module.exports = {
     getPaymentMethod,
     getAddOn,
     getPlan,
+    getCountryCode,
   },
 }

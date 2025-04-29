@@ -1,6 +1,7 @@
 import AddSeats, {
   MAX_NUMBER_OF_USERS,
 } from '@/features/group-management/components/add-seats/add-seats'
+import { SplitTestProvider } from '@/shared/context/split-test-context'
 
 describe('<AddSeats />', function () {
   beforeEach(function () {
@@ -11,9 +12,17 @@ describe('<AddSeats />', function () {
       win.metaAttributesCache.set('ol-subscriptionId', '123')
       win.metaAttributesCache.set('ol-totalLicenses', this.totalLicenses)
       win.metaAttributesCache.set('ol-isProfessional', false)
+      win.metaAttributesCache.set('ol-isCollectionMethodManual', true)
+      win.metaAttributesCache.set('ol-splitTestVariants', {
+        'flexible-group-licensing-for-manually-billed-subscriptions': 'enabled',
+      })
     })
 
-    cy.mount(<AddSeats />)
+    cy.mount(
+      <SplitTestProvider>
+        <AddSeats />
+      </SplitTestProvider>
+    )
 
     cy.findByRole('button', { name: /buy licenses/i })
     cy.findByTestId('add-more-users-group-form')
@@ -68,6 +77,28 @@ describe('<AddSeats />', function () {
     )
   })
 
+  describe('PO number', function () {
+    it('should not render the PO checkbox and PO input if collection method is not manual', function () {
+      cy.window().then(win => {
+        win.metaAttributesCache.set('ol-isCollectionMethodManual', false)
+      })
+      cy.mount(
+        <SplitTestProvider>
+          <AddSeats />
+        </SplitTestProvider>
+      )
+
+      cy.findByLabelText(/i want to add a po number/i).should('not.exist')
+      cy.findByLabelText(/^po number$/i).should('not.exist')
+    })
+
+    it('should check the PO checkbox in order to activate the PO input field', function () {
+      cy.findByLabelText(/^po number$/i).should('not.exist')
+      cy.findByLabelText(/i want to add a po number/i).check()
+      cy.findByLabelText(/^po number$/i)
+    })
+  })
+
   describe('"Upgrade my plan" link', function () {
     it('shows the link', function () {
       cy.findByRole('link', { name: /upgrade my plan/i }).should(
@@ -82,7 +113,11 @@ describe('<AddSeats />', function () {
         win.metaAttributesCache.set('ol-isProfessional', true)
       })
 
-      cy.mount(<AddSeats />)
+      cy.mount(
+        <SplitTestProvider>
+          <AddSeats />
+        </SplitTestProvider>
+      )
 
       cy.findByRole('link', { name: /upgrade my plan/i }).should('not.exist')
     })
@@ -325,16 +360,23 @@ describe('<AddSeats />', function () {
         })
 
         function makeRequest(statusCode: number, adding: string) {
+          const PO_NUMBER = 'PO123456789'
           cy.intercept('POST', '/user/subscription/group/add-users/create', {
             statusCode,
           }).as('addUsersRequest')
           cy.get('@input').type(adding)
+          cy.findByLabelText(/i want to add a po number/i).check()
+          cy.findByLabelText(/^po number$/i).type(PO_NUMBER)
           cy.get('@addUsersBtn').click()
+
+          const body = {
+            adding: Number(adding),
+            poNumber: PO_NUMBER,
+          }
           cy.get('@addUsersRequest')
             .its('request.body')
-            .should('deep.equal', {
-              adding: Number(adding),
-            })
+            .should('deep.equal', body)
+            .and('have.keys', Object.keys(body))
           cy.findByTestId('add-more-users-group-form').should('not.exist')
         }
 

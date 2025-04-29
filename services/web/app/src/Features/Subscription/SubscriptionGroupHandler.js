@@ -7,6 +7,7 @@ const RecurlyClient = require('./RecurlyClient')
 const PlansLocator = require('./PlansLocator')
 const SubscriptionHandler = require('./SubscriptionHandler')
 const GroupPlansData = require('./GroupPlansData')
+const Modules = require('../../infrastructure/Modules')
 const { MEMBERS_LIMIT_ADD_ON_CODE } = require('./PaymentProviderEntities')
 const {
   ManuallyCollectedError,
@@ -122,13 +123,21 @@ async function getUsersGroupSubscriptionDetails(userId) {
   }
 }
 
+async function checkBillingInfoExistence(recurlySubscription, userId) {
+  // Verify the billing info only if the collection method is not manual (e.g. automatic)
+  if (!recurlySubscription.isCollectionMethodManual) {
+    // Check if the user has missing billing details
+    await RecurlyClient.promises.getPaymentMethod(userId)
+  }
+}
+
 async function _addSeatsSubscriptionChange(userId, adding) {
   const { subscription, recurlySubscription, plan } =
     await getUsersGroupSubscriptionDetails(userId)
   await ensureFlexibleLicensingEnabled(plan)
   await ensureSubscriptionIsActive(subscription)
-  await ensureSubscriptionCollectionMethodIsNotManual(recurlySubscription)
   await ensureSubscriptionHasNoPendingChanges(recurlySubscription)
+  await checkBillingInfoExistence(recurlySubscription, userId)
 
   const currentAddonQuantity =
     recurlySubscription.addOns.find(
@@ -202,7 +211,6 @@ function _shouldUseLegacyPricing(
 async function previewAddSeatsSubscriptionChange(userId, adding) {
   const { changeRequest, currentAddonQuantity } =
     await _addSeatsSubscriptionChange(userId, adding)
-  const paymentMethod = await RecurlyClient.promises.getPaymentMethod(userId)
   const subscriptionChange =
     await RecurlyClient.promises.previewSubscriptionChange(changeRequest)
   const subscriptionChangePreview =
@@ -217,16 +225,20 @@ async function previewAddSeatsSubscriptionChange(userId, adding) {
           prevQuantity: currentAddonQuantity,
         },
       },
-      subscriptionChange,
-      paymentMethod
+      subscriptionChange
     )
 
   return subscriptionChangePreview
 }
 
-async function createAddSeatsSubscriptionChange(userId, adding) {
+async function createAddSeatsSubscriptionChange(userId, adding, poNumber) {
   const { changeRequest, recurlySubscription } =
     await _addSeatsSubscriptionChange(userId, adding)
+
+  if (recurlySubscription.isCollectionMethodManual) {
+    await updateSubscriptionPaymentTerms(userId, recurlySubscription, poNumber)
+  }
+
   await RecurlyClient.promises.applySubscriptionChangeRequest(changeRequest)
   await SubscriptionHandler.promises.syncSubscription(
     { uuid: recurlySubscription.id },
@@ -234,6 +246,29 @@ async function createAddSeatsSubscriptionChange(userId, adding) {
   )
 
   return { adding }
+}
+
+async function updateSubscriptionPaymentTerms(
+  userId,
+  recurlySubscription,
+  poNumber
+) {
+  const countryCode = await RecurlyClient.promises.getCountryCode(userId)
+  const [termsAndConditions] = await Modules.promises.hooks.fire(
+    'generateTermsAndConditions',
+    { countryCode, poNumber }
+  )
+
+  const updateRequest = poNumber
+    ? recurlySubscription.getRequestForPoNumberAndTermsAndConditionsUpdate(
+        poNumber,
+        termsAndConditions
+      )
+    : recurlySubscription.getRequestForTermsAndConditionsUpdate(
+        termsAndConditions
+      )
+
+  await RecurlyClient.promises.updateSubscriptionDetails(updateRequest)
 }
 
 async function _getUpgradeTargetPlanCodeMaybeThrow(subscription) {
@@ -308,6 +343,7 @@ module.exports = {
   isUserPartOfGroup: callbackify(isUserPartOfGroup),
   getGroupPlanUpgradePreview: callbackify(getGroupPlanUpgradePreview),
   upgradeGroupPlan: callbackify(upgradeGroupPlan),
+  checkBillingInfoExistence: callbackify(checkBillingInfoExistence),
   promises: {
     removeUserFromGroup,
     replaceUserReferencesInGroups,
@@ -320,7 +356,9 @@ module.exports = {
     getUsersGroupSubscriptionDetails,
     previewAddSeatsSubscriptionChange,
     createAddSeatsSubscriptionChange,
+    updateSubscriptionPaymentTerms,
     getGroupPlanUpgradePreview,
     upgradeGroupPlan,
+    checkBillingInfoExistence,
   },
 }

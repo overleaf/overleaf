@@ -5,6 +5,7 @@ const SandboxedModule = require('sandboxed-module')
 const {
   PaymentProviderSubscription,
   PaymentProviderSubscriptionChangeRequest,
+  PaymentProviderSubscriptionUpdateRequest,
   PaymentProviderSubscriptionAddOnUpdate,
   PaymentProviderAccount,
   PaymentProviderCoupon,
@@ -57,6 +58,8 @@ describe('RecurlyClient', function () {
       periodStart: new Date(),
       periodEnd: new Date(),
       collectionMethod: 'automatic',
+      poNumber: '',
+      termsAndConditions: '',
     })
 
     this.recurlySubscription = {
@@ -87,6 +90,8 @@ describe('RecurlyClient', function () {
       currentPeriodStartedAt: this.subscription.periodStart,
       currentPeriodEndsAt: this.subscription.periodEnd,
       collectionMethod: this.subscription.collectionMethod,
+      poNumber: this.subscription.poNumber,
+      termsAndConditions: this.subscription.termsAndConditions,
     }
 
     this.recurlySubscriptionChange = new recurly.SubscriptionChange()
@@ -444,6 +449,37 @@ describe('RecurlyClient', function () {
     })
   })
 
+  describe('updateSubscriptionDetails', function () {
+    beforeEach(function () {
+      this.client.updateSubscription = sinon
+        .stub()
+        .resolves({ id: this.subscription.id })
+    })
+
+    it('handles subscription update', async function () {
+      await this.RecurlyClient.promises.updateSubscriptionDetails(
+        new PaymentProviderSubscriptionUpdateRequest({
+          subscription: this.subscription,
+          poNumber: '012345',
+          termsAndConditions: 'T&C',
+        })
+      )
+      expect(this.client.updateSubscription).to.be.calledWith(
+        'uuid-subscription-id',
+        { poNumber: '012345', termsAndConditions: 'T&C' }
+      )
+    })
+
+    it('should throw any API errors', async function () {
+      this.client.updateSubscription = sinon.stub().throws()
+      await expect(
+        this.RecurlyClient.promises.updateSubscriptionDetails({
+          subscription: this.subscription,
+        })
+      ).to.eventually.be.rejectedWith(Error)
+    })
+  })
+
   describe('removeSubscriptionChange', function () {
     beforeEach(function () {
       this.client.removeSubscriptionChange = sinon.stub().resolves()
@@ -652,6 +688,31 @@ describe('RecurlyClient', function () {
       await expect(
         this.RecurlyClient.promises.getPaymentMethod(this.user._id)
       ).to.be.rejectedWith(Error)
+    })
+  })
+
+  describe('getCountryCode', function () {
+    it('should return the country code from the account info', async function () {
+      this.client.getAccount = sinon.stub().resolves({
+        address: {
+          country: 'GB',
+        },
+      })
+      const countryCode = await this.RecurlyClient.promises.getCountryCode(
+        this.user._id
+      )
+      expect(countryCode).to.equal('GB')
+    })
+
+    it('should throw if country code doesn’t exist', async function () {
+      this.client.getAccount = sinon.stub().resolves({
+        address: {
+          country: '',
+        },
+      })
+      await expect(
+        this.RecurlyClient.promises.getCountryCode(this.user._id)
+      ).to.be.rejectedWith(Error, 'Country code not found')
     })
   })
 })

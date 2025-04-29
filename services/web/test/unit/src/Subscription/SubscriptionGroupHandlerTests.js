@@ -36,6 +36,15 @@ describe('SubscriptionGroupHandler', function () {
       },
     }
 
+    this.termsAndConditionsUpdate = {
+      termsAndConditions: 'T&C copy',
+    }
+
+    this.poNumberAndTermsAndConditionsUpdate = {
+      poNumber: '4444',
+      ...this.termsAndConditionsUpdate,
+    }
+
     this.recurlySubscription = {
       id: 123,
       addOns: [
@@ -50,9 +59,18 @@ describe('SubscriptionGroupHandler', function () {
       getRequestForFlexibleLicensingGroupPlanUpgrade: sinon
         .stub()
         .returns(this.changeRequest),
+      getRequestForPoNumberAndTermsAndConditionsUpdate: sinon
+        .stub()
+        .returns(this.poNumberAndTermsAndConditionsUpdate),
+      getRequestForTermsAndConditionsUpdate: sinon
+        .stub()
+        .returns(this.termsAndConditionsUpdate),
       currency: 'USD',
       hasAddOn(code) {
         return this.addOns.some(addOn => addOn.code === code)
+      },
+      get isCollectionMethodManual() {
+        return false
       },
     }
 
@@ -119,6 +137,8 @@ describe('SubscriptionGroupHandler', function () {
         applySubscriptionChangeRequest: sinon
           .stub()
           .resolves(this.applySubscriptionChange),
+        getCountryCode: sinon.stub().resolves('BG'),
+        updateSubscriptionDetails: sinon.stub().resolves(),
       },
     }
 
@@ -155,6 +175,19 @@ describe('SubscriptionGroupHandler', function () {
       },
     }
 
+    this.Modules = {
+      promises: {
+        hooks: {
+          fire: sinon.stub().callsFake(hookName => {
+            if (hookName === 'generateTermsAndConditions') {
+              return Promise.resolve(['T&Cs'])
+            }
+            return Promise.resolve()
+          }),
+        },
+      },
+    }
+
     this.Handler = SandboxedModule.require(modulePath, {
       requires: {
         './SubscriptionUpdater': this.SubscriptionUpdater,
@@ -169,6 +202,7 @@ describe('SubscriptionGroupHandler', function () {
         './PaymentProviderEntities': this.PaymentProviderEntities,
         '../Authentication/SessionManager': this.SessionManager,
         './GroupPlansData': this.GroupPlansData,
+        '../../infrastructure/Modules': this.Modules,
       },
     })
   })
@@ -398,8 +432,7 @@ describe('SubscriptionGroupHandler', function () {
                   prevQuantity: this.prevQuantity,
                 },
               },
-              this.previewSubscriptionChange,
-              this.paymentMethod
+              this.previewSubscriptionChange
             )
             .should.equal(true)
           preview.should.equal(this.changePreview)
@@ -408,12 +441,30 @@ describe('SubscriptionGroupHandler', function () {
 
       describe('createAddSeatsSubscriptionChange', function () {
         it('should change the subscription', async function () {
+          this.recurlySubscription = {
+            ...this.recurlySubscription,
+            get isCollectionMethodManual() {
+              return true
+            },
+          }
+          this.RecurlyClient.promises.getSubscription = sinon
+            .stub()
+            .resolves(this.recurlySubscription)
+
           const result =
             await this.Handler.promises.createAddSeatsSubscriptionChange(
               this.adminUser_id,
-              this.adding
+              this.adding,
+              '123'
             )
 
+          this.RecurlyClient.promises.updateSubscriptionDetails
+            .calledWith(
+              sinon.match
+                .has('poNumber')
+                .and(sinon.match.has('termsAndConditions'))
+            )
+            .should.equal(true)
           this.RecurlyClient.promises.applySubscriptionChangeRequest
             .calledWith(this.changeRequest)
             .should.equal(true)
@@ -426,6 +477,48 @@ describe('SubscriptionGroupHandler', function () {
           expect(result).to.deep.equal({
             adding: this.req.body.adding,
           })
+        })
+      })
+    })
+
+    describe('updateSubscriptionPaymentTerms', function () {
+      describe('accounts with PO number', function () {
+        it('should update the subscription PO number and T&C', async function () {
+          this.RecurlyClient.promises.getCountryCode = sinon
+            .stub()
+            .resolves('GB')
+          await this.Handler.promises.updateSubscriptionPaymentTerms(
+            this.adminUser_id,
+            this.recurlySubscription,
+            this.poNumberAndTermsAndConditionsUpdate.poNumber
+          )
+          this.recurlySubscription.getRequestForPoNumberAndTermsAndConditionsUpdate
+            .calledWithMatch(
+              this.poNumberAndTermsAndConditionsUpdate.poNumber,
+              'T&Cs'
+            )
+            .should.equal(true)
+          this.RecurlyClient.promises.updateSubscriptionDetails
+            .calledWith(this.poNumberAndTermsAndConditionsUpdate)
+            .should.equal(true)
+        })
+      })
+
+      describe('accounts with no PO number', function () {
+        it('should update the subscription T&C only', async function () {
+          this.RecurlyClient.promises.getCountryCode = sinon
+            .stub()
+            .resolves('GB')
+          await this.Handler.promises.updateSubscriptionPaymentTerms(
+            this.adminUser_id,
+            this.recurlySubscription
+          )
+          this.recurlySubscription.getRequestForTermsAndConditionsUpdate
+            .calledWithMatch('T&Cs')
+            .should.equal(true)
+          this.RecurlyClient.promises.updateSubscriptionDetails
+            .calledWith(this.termsAndConditionsUpdate)
+            .should.equal(true)
         })
       })
     })
@@ -474,8 +567,7 @@ describe('SubscriptionGroupHandler', function () {
                   prevQuantity: this.prevQuantity,
                 },
               },
-              this.previewSubscriptionChange,
-              this.paymentMethod
+              this.previewSubscriptionChange
             )
             .should.equal(true)
           preview.should.equal(this.changePreview)
@@ -741,6 +833,32 @@ describe('SubscriptionGroupHandler', function () {
         .should.equal(true)
 
       result.should.equal(this.changePreview)
+    })
+  })
+
+  describe('checkBillingInfoExistence', function () {
+    it('should invoke the payment method function when collection method is "automatic"', async function () {
+      await this.Handler.promises.checkBillingInfoExistence(
+        this.recurlySubscription,
+        this.adminUser_id
+      )
+      this.RecurlyClient.promises.getPaymentMethod
+        .calledWith(this.adminUser_id)
+        .should.equal(true)
+    })
+
+    it('shouldn’t invoke the payment method function when collection method is "manual"', async function () {
+      const recurlySubscription = {
+        ...this.recurlySubscription,
+        get isCollectionMethodManual() {
+          return true
+        },
+      }
+      await this.Handler.promises.checkBillingInfoExistence(
+        recurlySubscription,
+        this.adminUser_id
+      )
+      this.RecurlyClient.promises.getPaymentMethod.should.not.have.been.called
     })
   })
 })

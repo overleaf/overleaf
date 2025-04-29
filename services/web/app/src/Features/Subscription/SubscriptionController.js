@@ -723,7 +723,7 @@ function getPlanNameForDisplay(planName, planCode) {
  *
  * @param {SubscriptionChangeDescription} subscriptionChangeDescription A description of the change for the frontend
  * @param {PaymentProviderSubscriptionChange} subscriptionChange The subscription change object coming from Recurly
- * @param {PaymentMethod} paymentMethod The payment method associated to the user
+ * @param {PaymentMethod} [paymentMethod] The payment method associated to the user
  * @return {SubscriptionChangePreview}
  */
 function makeChangePreview(
@@ -739,7 +739,7 @@ function makeChangePreview(
     change: subscriptionChangeDescription,
     currency: subscription.currency,
     immediateCharge: { ...subscriptionChange.immediateCharge },
-    paymentMethod: paymentMethod.toString(),
+    paymentMethod: paymentMethod?.toString(),
     nextPlan: {
       annual: nextPlan.annual ?? false,
     },

@@ -4,11 +4,11 @@ block entrypointVar
 	- entrypoint = 'pages/user/subscription/group-management/add-seats'
 
 block append meta
-	meta(name="ol-subscriptionData" data-type="json" content=subscriptionData)
 	meta(name="ol-groupName", data-type="string", content=groupName)
 	meta(name="ol-subscriptionId", data-type="string", content=subscriptionId)
 	meta(name="ol-totalLicenses", data-type="number", content=totalLicenses)
 	meta(name="ol-isProfessional", data-type="boolean", content=isProfessional)
+	meta(name="ol-isCollectionMethodManual", data-type="boolean", content=isCollectionMethodManual)
 
 block content
 	main.content.content-alt#main-content

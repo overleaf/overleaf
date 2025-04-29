@@ -129,6 +129,7 @@ export interface Meta {
   'ol-institutionLinked': InstitutionLink | undefined
   'ol-inviteToken': string
   'ol-inviterName': string
+  'ol-isCollectionMethodManual': boolean
   'ol-isExternalAuthenticationSystemUsed': boolean
   'ol-isManagedAccount': boolean
   'ol-isPaywallChangeCompileTimeoutEnabled': boolean

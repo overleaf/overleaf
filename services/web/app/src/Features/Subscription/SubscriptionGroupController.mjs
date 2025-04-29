@@ -8,6 +8,7 @@ import SessionManager from '../Authentication/SessionManager.js'
 import UserAuditLogHandler from '../User/UserAuditLogHandler.js'
 import { expressify } from '@overleaf/promise-utils'
 import Modules from '../../infrastructure/Modules.js'
+import SplitTestHandler from '../SplitTests/SplitTestHandler.js'
 import UserGetter from '../User/UserGetter.js'
 import { Subscription } from '../../models/Subscription.js'
 import { isProfessionalGroupPlan } from './PlansHelper.mjs'
@@ -135,23 +136,39 @@ async function addSeatsToGroupSubscription(req, res) {
         userId
       )
     await SubscriptionGroupHandler.promises.ensureFlexibleLicensingEnabled(plan)
-    await SubscriptionGroupHandler.promises.ensureSubscriptionCollectionMethodIsNotManual(
-      recurlySubscription
-    )
     await SubscriptionGroupHandler.promises.ensureSubscriptionHasNoPendingChanges(
       recurlySubscription
     )
-    // Check if the user has missing billing details
-    await RecurlyClient.promises.getPaymentMethod(userId)
     await SubscriptionGroupHandler.promises.ensureSubscriptionIsActive(
       subscription
     )
+
+    const { variant: flexibleLicensingForManuallyBilledSubscriptionsVariant } =
+      await SplitTestHandler.promises.getAssignment(
+        req,
+        res,
+        'flexible-group-licensing-for-manually-billed-subscriptions'
+      )
+
+    if (flexibleLicensingForManuallyBilledSubscriptionsVariant === 'enabled') {
+      await SubscriptionGroupHandler.promises.checkBillingInfoExistence(
+        recurlySubscription,
+        userId
+      )
+    } else {
+      await SubscriptionGroupHandler.promises.ensureSubscriptionCollectionMethodIsNotManual(
+        recurlySubscription
+      )
+      // Check if the user has missing billing details
+      await RecurlyClient.promises.getPaymentMethod(userId)
+    }
 
     res.render('subscriptions/add-seats', {
       subscriptionId: subscription._id,
       groupName: subscription.teamName,
       totalLicenses: subscription.membersLimit,
       isProfessional: isProfessionalGroupPlan(subscription),
+      isCollectionMethodManual: recurlySubscription.isCollectionMethodManual,
     })
   } catch (error) {
     if (error instanceof MissingBillingInfoError) {
@@ -231,7 +248,8 @@ async function createAddSeatsSubscriptionChange(req, res) {
     const create =
       await SubscriptionGroupHandler.promises.createAddSeatsSubscriptionChange(
         userId,
-        req.body.adding
+        req.body.adding,
+        req.body.poNumber
       )
 
     res.json(create)
@@ -264,11 +282,27 @@ async function createAddSeatsSubscriptionChange(req, res) {
 async function submitForm(req, res) {
   const userId = SessionManager.getLoggedInUserId(req.session)
   const userEmail = await UserGetter.promises.getUserEmail(userId)
-  const { adding } = req.body
+  const { adding, poNumber } = req.body
+
+  const { recurlySubscription } =
+    await SubscriptionGroupHandler.promises.getUsersGroupSubscriptionDetails(
+      userId
+    )
+
+  if (recurlySubscription.isCollectionMethodManual) {
+    await SubscriptionGroupHandler.promises.updateSubscriptionPaymentTerms(
+      userId,
+      recurlySubscription,
+      poNumber
+    )
+  }
 
   const messageLines = [`\n**Overleaf Sales Contact Form:**`]
   messageLines.push('**Subject:** Self-Serve Group User Increase Request')
   messageLines.push(`**Estimated Number of Users:** ${adding}`)
+  if (poNumber) {
+    messageLines.push(`**PO Number:** ${poNumber}`)
+  }
   messageLines.push(
     `**Message:** This email has been generated on behalf of user with email **${userEmail}** ` +
       'to request an increase in the total number of users for their subscription.'

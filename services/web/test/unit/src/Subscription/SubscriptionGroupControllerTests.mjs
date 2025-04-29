@@ -34,6 +34,12 @@ describe('SubscriptionGroupController', function () {
       canUseFlexibleLicensing: true,
     }
 
+    this.recurlySubscription = {
+      get isCollectionMethodManual() {
+        return true
+      },
+    }
+
     this.previewSubscriptionChangeData = {
       change: {},
       currency: 'USD',
@@ -41,13 +47,15 @@ describe('SubscriptionGroupController', function () {
 
     this.createSubscriptionChangeData = { adding: 1 }
 
+    this.paymentMethod = { cardType: 'Visa', lastFour: '1111' }
+
     this.SubscriptionGroupHandler = {
       promises: {
         removeUserFromGroup: sinon.stub().resolves(),
         getUsersGroupSubscriptionDetails: sinon.stub().resolves({
           subscription: this.subscription,
           plan: this.plan,
-          recurlySubscription: {},
+          recurlySubscription: this.recurlySubscription,
         }),
         previewAddSeatsSubscriptionChange: sinon
           .stub()
@@ -62,6 +70,8 @@ describe('SubscriptionGroupController', function () {
         getGroupPlanUpgradePreview: sinon
           .stub()
           .resolves(this.previewSubscriptionChangeData),
+        checkBillingInfoExistence: sinon.stub().resolves(this.paymentMethod),
+        updateSubscriptionPaymentTerms: sinon.stub().resolves(),
       },
     }
 
@@ -96,7 +106,7 @@ describe('SubscriptionGroupController', function () {
 
     this.SplitTestHandler = {
       promises: {
-        getAssignment: sinon.stub().resolves(),
+        getAssignment: sinon.stub().resolves({ variant: 'enabled' }),
       },
     }
 
@@ -111,7 +121,6 @@ describe('SubscriptionGroupController', function () {
     this.RecurlyClient = {
       promises: {
         getPaymentMethod: sinon.stub().resolves(this.paymentMethod),
-        // getSubscription: sinon.stub().resolves(this.subscription),
       },
     }
 
@@ -355,14 +364,21 @@ describe('SubscriptionGroupController', function () {
           this.SubscriptionGroupHandler.promises.ensureFlexibleLicensingEnabled
             .calledWith(this.plan)
             .should.equal(true)
+          this.SubscriptionGroupHandler.promises.ensureSubscriptionHasNoPendingChanges
+            .calledWith(this.recurlySubscription)
+            .should.equal(true)
           this.SubscriptionGroupHandler.promises.ensureSubscriptionIsActive
             .calledWith(this.subscription)
+            .should.equal(true)
+          this.SubscriptionGroupHandler.promises.checkBillingInfoExistence
+            .calledWith(this.recurlySubscription, this.adminUserId)
             .should.equal(true)
           page.should.equal('subscriptions/add-seats')
           props.subscriptionId.should.equal(this.subscriptionId)
           props.groupName.should.equal(this.subscription.teamName)
           props.totalLicenses.should.equal(this.subscription.membersLimit)
           props.isProfessional.should.equal(false)
+          props.isCollectionMethodManual.should.equal(true)
           done()
         },
       }
@@ -399,7 +415,7 @@ describe('SubscriptionGroupController', function () {
     })
 
     it('should redirect to missing billing information page when billing information is missing', function (done) {
-      this.RecurlyClient.promises.getPaymentMethod = sinon
+      this.SubscriptionGroupHandler.promises.checkBillingInfoExistence = sinon
         .stub()
         .throws(new this.Errors.MissingBillingInfoError())
 
@@ -407,22 +423,6 @@ describe('SubscriptionGroupController', function () {
         redirect: url => {
           url.should.equal(
             '/user/subscription/group/missing-billing-information'
-          )
-          done()
-        },
-      }
-
-      this.Controller.addSeatsToGroupSubscription(this.req, res)
-    })
-
-    it('should redirect to manually collected subscription error page when collection method is manual', function (done) {
-      this.SubscriptionGroupHandler.promises.ensureSubscriptionCollectionMethodIsNotManual =
-        sinon.stub().throws(new this.Errors.ManuallyCollectedError())
-
-      const res = {
-        redirect: url => {
-          url.should.equal(
-            '/user/subscription/group/manually-collected-subscription'
           )
           done()
         },
@@ -586,10 +586,16 @@ describe('SubscriptionGroupController', function () {
   describe('submitForm', function () {
     it('should build and pass the request body to the sales submit handler', function (done) {
       const adding = 100
-      this.req.body = { adding }
+      const poNumber = 'PO123456'
+      this.req.body = { adding, poNumber }
 
       const res = {
         sendStatus: code => {
+          this.SubscriptionGroupHandler.promises.updateSubscriptionPaymentTerms(
+            this.adminUserId,
+            this.recurlySubscription,
+            poNumber
+          )
           this.Modules.promises.hooks.fire
             .calledWith('sendSupportRequest', {
               email: this.user.email,
@@ -601,6 +607,8 @@ describe('SubscriptionGroupController', function () {
                 '**Subject:** Self-Serve Group User Increase Request\n' +
                 '\n' +
                 `**Estimated Number of Users:** ${adding}\n` +
+                '\n' +
+                `**PO Number:** ${poNumber}\n` +
                 '\n' +
                 `**Message:** This email has been generated on behalf of user with email **${this.user.email}** to request an increase in the total number of users for their subscription.`,
               inbox: 'sales',
