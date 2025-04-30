@@ -1,7 +1,11 @@
 const SandboxedModule = require('sandboxed-module')
+const { ObjectId } = require('mongodb-legacy')
 const sinon = require('sinon')
 const { expect } = require('chai')
 const MockRequest = require('../helpers/MockRequest')
+const {
+  InvalidEmailError,
+} = require('../../../../app/src/Features/Errors/Errors')
 const modulePath =
   '../../../../app/src/Features/Subscription/SubscriptionGroupHandler'
 
@@ -27,6 +31,7 @@ describe('SubscriptionGroupHandler', function () {
       admin_id: this.adminUser_id,
       manager_ids: [this.adminUser_id],
       _id: this.subscription_id,
+      membersLimit: 100,
     }
 
     this.changeRequest = {
@@ -109,6 +114,10 @@ describe('SubscriptionGroupHandler', function () {
       findOne: sinon.stub().returns({ exec: sinon.stub().resolves }),
     }
 
+    this.User = {
+      find: sinon.stub().returns({ exec: sinon.stub().resolves }),
+    }
+
     this.SessionManager = {
       getLoggedInUserId: sinon.stub().returns(this.user._id),
     }
@@ -149,6 +158,13 @@ describe('SubscriptionGroupHandler', function () {
     this.SubscriptionHandler = {
       promises: {
         syncSubscription: sinon.stub().resolves(),
+      },
+    }
+
+    this.TeamInvitesHandler = {
+      promises: {
+        revokeInvite: sinon.stub().resolves(),
+        createInvite: sinon.stub().resolves(),
       },
     }
 
@@ -194,8 +210,12 @@ describe('SubscriptionGroupHandler', function () {
         './SubscriptionLocator': this.SubscriptionLocator,
         './SubscriptionController': this.SubscriptionController,
         './SubscriptionHandler': this.SubscriptionHandler,
+        './TeamInvitesHandler': this.TeamInvitesHandler,
         '../../models/Subscription': {
           Subscription: this.Subscription,
+        },
+        '../../models/User': {
+          User: this.User,
         },
         './RecurlyClient': this.RecurlyClient,
         './PlansLocator': this.PlansLocator,
@@ -859,6 +879,331 @@ describe('SubscriptionGroupHandler', function () {
         this.adminUser_id
       )
       this.RecurlyClient.promises.getPaymentMethod.should.not.have.been.called
+    })
+  })
+
+  describe('updateGroupMembersBulk', function () {
+    const inviterId = new ObjectId()
+
+    let members
+    let emailList
+    let callUpdateGroupMembersBulk
+
+    beforeEach(function () {
+      members = [
+        {
+          _id: new ObjectId(),
+          email: 'user1@example.com',
+          emails: [{ email: 'user1@example.com' }],
+        },
+        {
+          _id: new ObjectId(),
+          email: 'user2-alias@example.com',
+          emails: [
+            {
+              email: 'user2-alias@example.com',
+            },
+            {
+              email: 'user2@example.com',
+            },
+          ],
+        },
+        {
+          _id: new ObjectId(),
+          email: 'user3@example.com',
+          emails: [{ email: 'user3@example.com' }],
+        },
+      ]
+
+      emailList = [
+        'user1@example.com',
+        'user2@example.com',
+        'new-user@example.com', // primary email of existing user
+        'new-user-2@example.com', // secondary email of existing user
+      ]
+      callUpdateGroupMembersBulk = async (options = {}) => {
+        this.Subscription.findOne = sinon
+          .stub()
+          .returns({ exec: sinon.stub().resolves(this.subscription) })
+
+        this.User.find = sinon
+          .stub()
+          .returns({ exec: sinon.stub().resolves(members) })
+
+        return await this.Handler.promises.updateGroupMembersBulk(
+          inviterId,
+          this.subscription._id,
+          emailList,
+          options
+        )
+      }
+    })
+
+    it('throws an error when any of the emails is invalid', async function () {
+      emailList.push('invalid@email')
+
+      await expect(
+        callUpdateGroupMembersBulk({ commit: true })
+      ).to.be.rejectedWith(InvalidEmailError)
+    })
+
+    describe('with commit = false', function () {
+      describe('with removeMembersNotIncluded = false', function () {
+        it('should preview zero users to delete, and should not send invites', async function () {
+          const result = await callUpdateGroupMembersBulk()
+
+          expect(result).to.deep.equal({
+            emailsToSendInvite: [
+              'new-user@example.com',
+              'new-user-2@example.com',
+            ],
+            emailsToRevokeInvite: [],
+            membersToRemove: [],
+            currentMemberCount: 3,
+            newTotalCount: 5,
+            membersLimit: this.subscription.membersLimit,
+          })
+
+          expect(this.TeamInvitesHandler.promises.createInvite).not.to.have.been
+            .called
+
+          expect(this.SubscriptionUpdater.promises.removeUserFromGroup).not.to
+            .have.been.called
+        })
+      })
+
+      describe('with removeMembersNotIncluded = true', function () {
+        it('should preview the users to be deleted, and should not send invites', async function () {
+          const result = await callUpdateGroupMembersBulk({
+            removeMembersNotIncluded: true,
+          })
+
+          expect(result).to.deep.equal({
+            emailsToSendInvite: [
+              'new-user@example.com',
+              'new-user-2@example.com',
+            ],
+            emailsToRevokeInvite: [],
+            membersToRemove: [members[2]._id],
+            currentMemberCount: 3,
+            newTotalCount: 4,
+            membersLimit: this.subscription.membersLimit,
+          })
+
+          expect(this.TeamInvitesHandler.promises.createInvite).not.to.have.been
+            .called
+
+          expect(this.SubscriptionUpdater.promises.removeUserFromGroup).not.to
+            .have.been.called
+        })
+
+        it('should preview but not revoke invites to emails that are no longer invited', async function () {
+          this.subscription.teamInvites = [
+            { email: 'new-user@example.com' },
+            { email: 'no-longer-invited@example.com' },
+          ]
+
+          const result = await callUpdateGroupMembersBulk({
+            removeMembersNotIncluded: true,
+          })
+
+          expect(result.emailsToRevokeInvite).to.deep.equal([
+            'no-longer-invited@example.com',
+          ])
+
+          expect(this.TeamInvitesHandler.promises.revokeInvite).not.to.have.been
+            .called
+        })
+      })
+
+      it('does not throw an error when the member limit is reached', async function () {
+        this.subscription.membersLimit = 3
+        const result = await callUpdateGroupMembersBulk()
+
+        expect(result.membersLimit).to.equal(3)
+        expect(result.newTotalCount).to.equal(5)
+      })
+    })
+
+    describe('with commit = true', function () {
+      describe('with removeMembersNotIncluded = false', function () {
+        it('should preview zero users to delete, and should send invites', async function () {
+          const result = await callUpdateGroupMembersBulk({ commit: true })
+
+          expect(result).to.deep.equal({
+            emailsToSendInvite: [
+              'new-user@example.com',
+              'new-user-2@example.com',
+            ],
+            emailsToRevokeInvite: [],
+            membersToRemove: [],
+            currentMemberCount: 3,
+            newTotalCount: 5,
+            membersLimit: this.subscription.membersLimit,
+          })
+
+          expect(this.SubscriptionUpdater.promises.removeUserFromGroup).not.to
+            .have.been.called
+
+          expect(
+            this.TeamInvitesHandler.promises.createInvite.callCount
+          ).to.equal(2)
+
+          expect(
+            this.TeamInvitesHandler.promises.createInvite
+          ).to.have.been.calledWith(
+            inviterId,
+            this.subscription,
+            'new-user@example.com'
+          )
+
+          expect(
+            this.TeamInvitesHandler.promises.createInvite
+          ).to.have.been.calledWith(
+            inviterId,
+            this.subscription,
+            'new-user-2@example.com'
+          )
+        })
+
+        it('should not send invites to emails already invited', async function () {
+          this.subscription.teamInvites = [{ email: 'new-user@example.com' }]
+
+          const result = await callUpdateGroupMembersBulk({ commit: true })
+
+          expect(result.emailsToSendInvite).to.deep.equal([
+            'new-user-2@example.com',
+          ])
+
+          expect(
+            this.TeamInvitesHandler.promises.createInvite.callCount
+          ).to.equal(1)
+
+          expect(
+            this.TeamInvitesHandler.promises.createInvite
+          ).to.have.been.calledWith(
+            inviterId,
+            this.subscription,
+            'new-user-2@example.com'
+          )
+        })
+
+        it('should preview and not revoke invites to emails that are no longer invited', async function () {
+          this.subscription.teamInvites = [
+            { email: 'new-user@example.com' },
+            { email: 'no-longer-invited@example.com' },
+          ]
+
+          const result = await callUpdateGroupMembersBulk({
+            commit: true,
+          })
+
+          expect(result.emailsToRevokeInvite).to.deep.equal([])
+
+          expect(this.TeamInvitesHandler.promises.revokeInvite).not.to.have.been
+            .called
+        })
+      })
+
+      describe('with removeMembersNotIncluded = true', function () {
+        it('should remove users from group, and should send invites', async function () {
+          const result = await callUpdateGroupMembersBulk({
+            commit: true,
+            removeMembersNotIncluded: true,
+          })
+
+          expect(result).to.deep.equal({
+            emailsToSendInvite: [
+              'new-user@example.com',
+              'new-user-2@example.com',
+            ],
+            emailsToRevokeInvite: [],
+            membersToRemove: [members[2]._id],
+            currentMemberCount: 3,
+            newTotalCount: 4,
+            membersLimit: this.subscription.membersLimit,
+          })
+
+          expect(
+            this.SubscriptionUpdater.promises.removeUserFromGroup.callCount
+          ).to.equal(1)
+
+          expect(
+            this.SubscriptionUpdater.promises.removeUserFromGroup
+          ).to.have.been.calledWith(this.subscription._id, members[2]._id)
+
+          expect(
+            this.TeamInvitesHandler.promises.createInvite.callCount
+          ).to.equal(2)
+
+          expect(
+            this.TeamInvitesHandler.promises.createInvite
+          ).to.have.been.calledWith(
+            inviterId,
+            this.subscription,
+            'new-user@example.com'
+          )
+
+          expect(
+            this.TeamInvitesHandler.promises.createInvite
+          ).to.have.been.calledWith(
+            inviterId,
+            this.subscription,
+            'new-user-2@example.com'
+          )
+        })
+
+        it('should send invites and revoke invites to emails no longer invited', async function () {
+          this.subscription.teamInvites = [
+            { email: 'new-user@example.com' },
+            { email: 'no-longer-invited@example.com' },
+          ]
+
+          const result = await callUpdateGroupMembersBulk({
+            commit: true,
+            removeMembersNotIncluded: true,
+          })
+
+          expect(result.emailsToSendInvite).to.deep.equal([
+            'new-user-2@example.com',
+          ])
+
+          expect(result.emailsToRevokeInvite).to.deep.equal([
+            'no-longer-invited@example.com',
+          ])
+
+          expect(
+            this.TeamInvitesHandler.promises.createInvite.callCount
+          ).to.equal(1)
+
+          expect(
+            this.TeamInvitesHandler.promises.createInvite
+          ).to.have.been.calledWith(
+            inviterId,
+            this.subscription,
+            'new-user-2@example.com'
+          )
+
+          expect(
+            this.TeamInvitesHandler.promises.revokeInvite.callCount
+          ).to.equal(1)
+
+          expect(
+            this.TeamInvitesHandler.promises.revokeInvite
+          ).to.have.been.calledWith(
+            inviterId,
+            this.subscription,
+            'no-longer-invited@example.com'
+          )
+        })
+      })
+
+      it('throws an error when the member limit is reached', async function () {
+        this.subscription.membersLimit = 3
+        await expect(
+          callUpdateGroupMembersBulk({ commit: true })
+        ).to.be.rejectedWith('limit reached')
+      })
     })
   })
 })

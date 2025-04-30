@@ -1,11 +1,15 @@
 const { callbackify } = require('util')
+const _ = require('lodash')
+const OError = require('@overleaf/o-error')
 const SubscriptionUpdater = require('./SubscriptionUpdater')
 const SubscriptionLocator = require('./SubscriptionLocator')
 const SubscriptionController = require('./SubscriptionController')
 const { Subscription } = require('../../models/Subscription')
+const { User } = require('../../models/User')
 const RecurlyClient = require('./RecurlyClient')
 const PlansLocator = require('./PlansLocator')
 const SubscriptionHandler = require('./SubscriptionHandler')
+const TeamInvitesHandler = require('./TeamInvitesHandler')
 const GroupPlansData = require('./GroupPlansData')
 const Modules = require('../../infrastructure/Modules')
 const { MEMBERS_LIMIT_ADD_ON_CODE } = require('./PaymentProviderEntities')
@@ -14,6 +18,8 @@ const {
   PendingChangeError,
   InactiveError,
 } = require('./Errors')
+const EmailHelper = require('../Helpers/EmailHelper')
+const { InvalidEmailError } = require('../Errors/Errors')
 
 async function removeUserFromGroup(subscriptionId, userIdToRemove) {
   await SubscriptionUpdater.promises.removeUserFromGroup(
@@ -328,6 +334,125 @@ async function upgradeGroupPlan(ownerId) {
   )
 }
 
+async function updateGroupMembersBulk(
+  inviterId,
+  subscriptionId,
+  emailList,
+  options = {}
+) {
+  const { removeMembersNotIncluded, commit } = options
+
+  // remove duplications and empty values
+  emailList = _.uniq(_.compact(emailList))
+
+  const invalidEmails = emailList.filter(
+    email => !EmailHelper.parseEmail(email)
+  )
+
+  if (invalidEmails.length > 0) {
+    throw new InvalidEmailError('email not valid', {
+      invalidEmails,
+    })
+  }
+
+  const subscription = await Subscription.findOne({
+    _id: subscriptionId,
+  }).exec()
+
+  const existingUserData = await User.find(
+    {
+      _id: { $in: subscription.member_ids },
+    },
+    { _id: 1, email: 1, 'emails.email': 1 }
+  ).exec()
+
+  const existingUsers = existingUserData.map(user => ({
+    _id: user._id,
+    emails: user.emails?.map(user => user.email),
+  }))
+
+  const currentMemberEmails = _.flatten(
+    existingUsers
+      .filter(userData => userData.emails?.length > 0)
+      .map(user => user.emails)
+  )
+
+  const currentInvites =
+    subscription.teamInvites?.map(invite => invite.email) || []
+  if (subscription.invited_emails?.length > 0) {
+    currentInvites.push(...subscription.invited_emails)
+  }
+
+  const invitesToSend = _.difference(
+    emailList,
+    currentMemberEmails.concat(currentInvites)
+  )
+
+  let membersToRemove
+  let invitesToRevoke
+  let newTotalCount
+
+  if (!removeMembersNotIncluded) {
+    membersToRemove = []
+    invitesToRevoke = []
+    newTotalCount =
+      existingUsers.length + currentInvites.length + invitesToSend.length
+  } else {
+    membersToRemove = []
+    for (const existingUser of existingUsers) {
+      if (_.intersection(existingUser.emails, emailList).length === 0) {
+        membersToRemove.push(existingUser._id)
+      }
+    }
+    const invitesToMaintain = _.intersection(emailList, currentInvites)
+    invitesToRevoke = _.difference(currentInvites, invitesToMaintain)
+    newTotalCount =
+      existingUsers.length -
+      membersToRemove.length +
+      invitesToMaintain.length +
+      invitesToSend.length
+  }
+
+  const result = {
+    emailsToSendInvite: invitesToSend,
+    emailsToRevokeInvite: invitesToRevoke,
+    membersToRemove,
+    currentMemberCount: existingUsers.length,
+    newTotalCount,
+    membersLimit: subscription.membersLimit,
+  }
+
+  if (commit) {
+    if (newTotalCount > subscription.membersLimit) {
+      const { currentMemberCount, newTotalCount, membersLimit } = result
+      throw new OError('limit reached', {
+        currentMemberCount,
+        newTotalCount,
+        membersLimit,
+      })
+    }
+    for (const email of invitesToSend) {
+      await TeamInvitesHandler.promises.createInvite(
+        inviterId,
+        subscription,
+        email
+      )
+    }
+    for (const email of invitesToRevoke) {
+      await TeamInvitesHandler.promises.revokeInvite(
+        inviterId,
+        subscription,
+        email
+      )
+    }
+    for (const user of membersToRemove) {
+      await removeUserFromGroup(subscription._id, user._id)
+    }
+  }
+
+  return result
+}
+
 module.exports = {
   removeUserFromGroup: callbackify(removeUserFromGroup),
   replaceUserReferencesInGroups: callbackify(replaceUserReferencesInGroups),
@@ -344,6 +469,7 @@ module.exports = {
   getGroupPlanUpgradePreview: callbackify(getGroupPlanUpgradePreview),
   upgradeGroupPlan: callbackify(upgradeGroupPlan),
   checkBillingInfoExistence: callbackify(checkBillingInfoExistence),
+  updateGroupMembersBulk: callbackify(updateGroupMembersBulk),
   promises: {
     removeUserFromGroup,
     replaceUserReferencesInGroups,
@@ -360,5 +486,6 @@ module.exports = {
     getGroupPlanUpgradePreview,
     upgradeGroupPlan,
     checkBillingInfoExistence,
+    updateGroupMembersBulk,
   },
 }
