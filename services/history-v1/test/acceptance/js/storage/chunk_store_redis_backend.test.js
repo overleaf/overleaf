@@ -846,4 +846,79 @@ describe('chunk store Redis backend', function () {
       expect(cachedChunk).to.not.be.null
     })
   })
+
+  describe('with a persist-time timestamp', function () {
+    const persistTimestamp = Date.now() + 1000 * 60 * 60 // 1 hour in the future
+
+    beforeEach(async function () {
+      // Ensure a chunk exists before each test in this block
+      const snapshot = new Snapshot()
+      const changes = [
+        new Change(
+          [new AddFileOperation('test.tex', File.fromString('Persist Test'))],
+          new Date(),
+          []
+        ),
+      ]
+      const history = new History(snapshot, changes)
+      const chunk = new Chunk(history, 100)
+      await redisBackend.setCurrentChunk(projectId, chunk)
+    })
+
+    it('should not clear a chunk if persist-time is set', async function () {
+      // Set persist time
+      await redisBackend.setPersistTime(projectId, persistTimestamp)
+
+      // Attempt to clear the cache
+      const cleared = await redisBackend.clearCache(projectId)
+      expect(cleared).to.be.false // Expect clearCache to return false
+
+      // Verify the chunk still exists
+      const chunk = await redisBackend.getCurrentChunk(projectId)
+      expect(chunk).to.not.be.null
+      expect(chunk.getStartVersion()).to.equal(100)
+    })
+
+    it('should not expire a chunk if persist-time is set, even if expire-time has passed', async function () {
+      // Set persist time
+      await redisBackend.setPersistTime(projectId, persistTimestamp)
+
+      // Attempt to expire the chunk with a time far in the future
+      const farFutureTime = Date.now() + 1000 * 60 * 60 * 24 // 24 hours in the future
+      const expired = await redisBackend.expireCurrentChunk(
+        projectId,
+        farFutureTime
+      )
+      expect(expired).to.be.false // Expect expireCurrentChunk to return false
+
+      // Verify the chunk still exists
+      const chunk = await redisBackend.getCurrentChunk(projectId)
+      expect(chunk).to.not.be.null
+      expect(chunk.getStartVersion()).to.equal(100)
+    })
+
+    it('getCurrentChunkStatus should return persist-time when set', async function () {
+      // Set persist time
+      await redisBackend.setPersistTime(projectId, persistTimestamp)
+
+      const status = await redisBackend.getCurrentChunkStatus(projectId)
+      expect(status.persistTime).to.equal(persistTimestamp)
+      expect(status.expireTime).to.be.a('number') // expireTime is set by setCurrentChunk
+    })
+
+    it('getCurrentChunkStatus should return null for persist-time when not set', async function () {
+      const status = await redisBackend.getCurrentChunkStatus(projectId)
+      expect(status.persistTime).to.be.null
+      expect(status.expireTime).to.be.a('number')
+    })
+
+    it('getCurrentChunkStatus should return nulls after cache is cleared (without persist-time)', async function () {
+      // Clear cache (persistTime is not set here)
+      await redisBackend.clearCache(projectId)
+
+      const status = await redisBackend.getCurrentChunkStatus(projectId)
+      expect(status.persistTime).to.be.null
+      expect(status.expireTime).to.be.null
+    })
+  })
 })

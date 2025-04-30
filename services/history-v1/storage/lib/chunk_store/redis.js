@@ -19,6 +19,9 @@ const keySchema = {
   expireTime({ projectId }) {
     return `expire-time:{${projectId}}`
   },
+  persistTime({ projectId }) {
+    return `persist-time:{${projectId}}`
+  },
 }
 
 rclient.defineCommand('get_current_chunk', {
@@ -280,8 +283,12 @@ function compareChunks(projectId, cachedChunk, currentChunk) {
 
 // Define Lua script for atomic cache clearing
 rclient.defineCommand('expire_chunk_cache', {
-  numberOfKeys: 4,
+  numberOfKeys: 5,
   lua: `
+    local persistTimeExists = redis.call('EXISTS', KEYS[5])
+    if persistTimeExists == 1 then
+      return nil -- chunk has changes pending, do not expire
+    end
     local currentTime = tonumber(ARGV[1])
     local expireTimeValue = redis.call('GET', KEYS[4])
     if not expireTimeValue then
@@ -291,7 +298,7 @@ rclient.defineCommand('expire_chunk_cache', {
     if currentTime < expireTime then
       return nil -- cache is still valid
     end
-    -- Cache is expired, proceed to delete the keys atomically
+    -- Cache is expired and all changes are persisted, proceed to delete the keys atomically
     redis.call('DEL', KEYS[1]) -- snapshot key
     redis.call('DEL', KEYS[2]) -- startVersion key
     redis.call('DEL', KEYS[3]) -- changes key
@@ -311,14 +318,23 @@ async function expireCurrentChunk(projectId, currentTime) {
     const startVersionKey = keySchema.startVersion({ projectId })
     const changesKey = keySchema.changes({ projectId })
     const expireTimeKey = keySchema.expireTime({ projectId })
+    const persistTimeKey = keySchema.persistTime({ projectId })
     const result = await rclient.expire_chunk_cache(
       snapshotKey,
       startVersionKey,
       changesKey,
       expireTimeKey,
+      persistTimeKey,
       currentTime || Date.now()
     )
     if (!result) {
+      logger.debug(
+        { projectId },
+        'chunk cache not expired due to pending changes'
+      )
+      metrics.inc('chunk_store.redis.expire_cache', 1, {
+        status: 'skip-due-to-pending-changes',
+      })
       return false // not expired
     }
     metrics.inc('chunk_store.redis.expire_cache', 1, { status: 'success' })
@@ -332,8 +348,12 @@ async function expireCurrentChunk(projectId, currentTime) {
 
 // Define Lua script for atomic cache clearing
 rclient.defineCommand('clear_chunk_cache', {
-  numberOfKeys: 4,
+  numberOfKeys: 5,
   lua: `
+    local persistTimeExists = redis.call('EXISTS', KEYS[5])
+    if persistTimeExists == 1 then
+      return nil -- chunk has changes pending, do not clear
+    end
     -- Delete all keys related to a project's chunk cache atomically
     redis.call('DEL', KEYS[1]) -- snapshot key
     redis.call('DEL', KEYS[2]) -- startVersion key
@@ -354,19 +374,92 @@ async function clearCache(projectId) {
     const startVersionKey = keySchema.startVersion({ projectId })
     const changesKey = keySchema.changes({ projectId })
     const expireTimeKey = keySchema.expireTime({ projectId })
+    const persistTimeKey = keySchema.persistTime({ projectId }) // Add persistTimeKey
 
-    await rclient.clear_chunk_cache(
+    const result = await rclient.clear_chunk_cache(
       snapshotKey,
       startVersionKey,
       changesKey,
-      expireTimeKey
+      expireTimeKey,
+      persistTimeKey
     )
+    if (result === null) {
+      logger.debug(
+        { projectId },
+        'chunk cache not cleared due to pending changes'
+      )
+      metrics.inc('chunk_store.redis.clear_cache', 1, {
+        status: 'skip-due-to-pending-changes',
+      })
+      return false
+    }
     metrics.inc('chunk_store.redis.clear_cache', 1, { status: 'success' })
     return true
   } catch (err) {
     logger.error({ err, projectId }, 'error clearing chunk cache from redis')
     metrics.inc('chunk_store.redis.clear_cache', 1, { status: 'error' })
     return false
+  }
+}
+
+// Define Lua script for getting chunk status
+rclient.defineCommand('get_chunk_status', {
+  numberOfKeys: 2, // expireTimeKey, persistTimeKey
+  lua: `
+    local expireTimeValue = redis.call('GET', KEYS[1])
+    local persistTimeValue = redis.call('GET', KEYS[2])
+    return {expireTimeValue, persistTimeValue}
+  `,
+})
+
+/**
+ * Retrieves the current chunk status for a given project from Redis
+ * @param {string} projectId - The ID of the project to get status for
+ * @returns {Promise<Object>} Object containing expireTime and persistTime, or nulls on error
+ * @property {number|null} expireTime - The expiration time of the chunk
+ * @property {number|null} persistTime - The persistence time of the chunk
+ */
+async function getCurrentChunkStatus(projectId) {
+  try {
+    const expireTimeKey = keySchema.expireTime({ projectId })
+    const persistTimeKey = keySchema.persistTime({ projectId })
+
+    const result = await rclient.get_chunk_status(expireTimeKey, persistTimeKey)
+
+    // Lua script returns an array [expireTimeValue, persistTimeValue]
+    // Redis nil replies are converted to null by ioredis
+    const [expireTime, persistTime] = result
+
+    return {
+      expireTime: expireTime ? parseInt(expireTime, 10) : null, // Parse to number or null
+      persistTime: persistTime ? parseInt(persistTime, 10) : null, // Parse to number or null
+    }
+  } catch (err) {
+    logger.warn({ err, projectId }, 'error getting chunk status from redis')
+    return { expireTime: null, persistTime: null } // Return nulls on error
+  }
+}
+
+/**
+ * Sets the persist time for a project's chunk cache.
+ * This is primarily intended for testing purposes.
+ * @param {string} projectId - The ID of the project.
+ * @param {number} timestamp - The timestamp to set as the persist time.
+ * @returns {Promise<void>}
+ */
+async function setPersistTime(projectId, timestamp) {
+  try {
+    const persistTimeKey = keySchema.persistTime({ projectId })
+    await rclient.set(persistTimeKey, timestamp)
+    metrics.inc('chunk_store.redis.set_persist_time', 1, { status: 'success' })
+  } catch (err) {
+    logger.error(
+      { err, projectId, timestamp },
+      'error setting persist time in redis'
+    )
+    metrics.inc('chunk_store.redis.set_persist_time', 1, { status: 'error' })
+    // Re-throw the error so the test fails if setting fails
+    throw err
   }
 }
 
@@ -380,4 +473,6 @@ module.exports = {
   compareChunks,
   expireCurrentChunk,
   clearCache,
+  getCurrentChunkStatus,
+  setPersistTime, // Export the new function
 }
