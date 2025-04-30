@@ -1,11 +1,7 @@
-import esmock from 'esmock'
-const modulePath = new URL(
-  '../../../../app/src/Features/Referal/ReferalController.js',
-  import.meta.url
-).pathname
+const modulePath = '../../../../app/src/Features/Referal/ReferalController.js'
 
-describe('Referal controller', function () {
-  beforeEach(async function () {
-    this.controller = await esmock.strict(modulePath, {})
+describe.skip('Referal controller', function () {
+  beforeEach(async function (ctx) {
+    ctx.controller = (await import(modulePath)).default
   })
 })

@@ -1,4 +1,4 @@
-import esmock from 'esmock'
+import { vi } from 'vitest'
 import sinon from 'sinon'
 import { expect } from 'chai'
 import mongodb from 'mongodb-legacy'
@@ -13,27 +13,27 @@ const MODULE_PATH =
   '../../../../app/src/Features/TokenAccess/TokenAccessController'
 
 describe('TokenAccessController', function () {
-  beforeEach(async function () {
-    this.token = 'abc123'
-    this.user = { _id: new ObjectId() }
-    this.project = {
+  beforeEach(async function (ctx) {
+    ctx.token = 'abc123'
+    ctx.user = { _id: new ObjectId() }
+    ctx.project = {
       _id: new ObjectId(),
-      owner_ref: this.user._id,
+      owner_ref: ctx.user._id,
       name: 'test',
       tokenAccessReadAndWrite_refs: [],
       tokenAccessReadOnly_refs: [],
     }
-    this.req = new MockRequest()
-    this.res = new MockResponse()
-    this.next = sinon.stub().returns()
+    ctx.req = new MockRequest()
+    ctx.res = new MockResponse()
+    ctx.next = sinon.stub().returns()
 
-    this.Settings = {
+    ctx.Settings = {
       siteUrl: 'https://www.dev-overleaf.com',
       adminPrivilegeAvailable: false,
       adminUrl: 'https://admin.dev-overleaf.com',
       adminDomains: ['overleaf.com'],
     }
-    this.TokenAccessHandler = {
+    ctx.TokenAccessHandler = {
       TOKEN_TYPES: {
         READ_ONLY: 'readOnly',
         READ_AND_WRITE: 'readAndWrite',
@@ -46,7 +46,7 @@ describe('TokenAccessController', function () {
       grantSessionTokenAccess: sinon.stub(),
       promises: {
         addReadOnlyUserToProject: sinon.stub().resolves(),
-        getProjectByToken: sinon.stub().resolves(this.project),
+        getProjectByToken: sinon.stub().resolves(ctx.project),
         getV1DocPublishedInfo: sinon.stub().resolves({ allow: true }),
         getV1DocInfo: sinon.stub(),
         removeReadAndWriteUserFromProject: sinon.stub().resolves(),
@@ -54,16 +54,16 @@ describe('TokenAccessController', function () {
       },
     }
 
-    this.SessionManager = {
-      getLoggedInUserId: sinon.stub().returns(this.user._id),
-      getSessionUser: sinon.stub().returns(this.user._id),
+    ctx.SessionManager = {
+      getLoggedInUserId: sinon.stub().returns(ctx.user._id),
+      getSessionUser: sinon.stub().returns(ctx.user._id),
     }
 
-    this.AuthenticationController = {
+    ctx.AuthenticationController = {
       setRedirectInSession: sinon.stub(),
     }
 
-    this.AuthorizationManager = {
+    ctx.AuthorizationManager = {
       promises: {
         getPrivilegeLevelForProject: sinon
           .stub()
@@ -71,35 +71,35 @@ describe('TokenAccessController', function () {
       },
     }
 
-    this.AuthorizationMiddleware = {}
+    ctx.AuthorizationMiddleware = {}
 
-    this.ProjectAuditLogHandler = {
+    ctx.ProjectAuditLogHandler = {
       promises: {
         addEntry: sinon.stub().resolves(),
       },
     }
 
-    this.SplitTestHandler = {
+    ctx.SplitTestHandler = {
       promises: {
         getAssignment: sinon.stub().resolves({ variant: 'default' }),
         getAssignmentForUser: sinon.stub().resolves({ variant: 'default' }),
       },
     }
 
-    this.CollaboratorsInviteHandler = {
+    ctx.CollaboratorsInviteHandler = {
       promises: {
         revokeInviteForUser: sinon.stub().resolves(),
       },
     }
 
-    this.CollaboratorsHandler = {
+    ctx.CollaboratorsHandler = {
       promises: {
         addUserIdToProject: sinon.stub().resolves(),
         setCollaboratorPrivilegeLevel: sinon.stub().resolves(),
       },
     }
 
-    this.CollaboratorsGetter = {
+    ctx.CollaboratorsGetter = {
       promises: {
         userIsReadWriteTokenMember: sinon.stub().resolves(),
         isUserInvitedReadWriteMemberOfProject: sinon.stub().resolves(),
@@ -107,24 +107,24 @@ describe('TokenAccessController', function () {
       },
     }
 
-    this.EditorRealTimeController = { emitToRoom: sinon.stub() }
+    ctx.EditorRealTimeController = { emitToRoom: sinon.stub() }
 
-    this.ProjectGetter = {
+    ctx.ProjectGetter = {
       promises: {
-        getProject: sinon.stub().resolves(this.project),
+        getProject: sinon.stub().resolves(ctx.project),
       },
     }
 
-    this.AnalyticsManager = {
+    ctx.AnalyticsManager = {
       recordEventForSession: sinon.stub(),
       recordEventForUserInBackground: sinon.stub(),
     }
 
-    this.UserGetter = {
+    ctx.UserGetter = {
       promises: {
         getUser: sinon.stub().callsFake(async (userId, filter) => {
-          if (userId === this.userId) {
-            return this.user
+          if (userId === ctx.userId) {
+            return ctx.user
           } else {
             return null
           }
@@ -134,322 +134,415 @@ describe('TokenAccessController', function () {
       },
     }
 
-    this.LimitationsManager = {
+    ctx.LimitationsManager = {
       promises: {
         canAcceptEditCollaboratorInvite: sinon.stub().resolves(),
       },
     }
 
-    this.TokenAccessController = await esmock.strict(MODULE_PATH, {
-      '@overleaf/settings': this.Settings,
-      '../../../../app/src/Features/TokenAccess/TokenAccessHandler':
-        this.TokenAccessHandler,
-      '../../../../app/src/Features/Authentication/AuthenticationController':
-        this.AuthenticationController,
-      '../../../../app/src/Features/Authentication/SessionManager':
-        this.SessionManager,
-      '../../../../app/src/Features/Authorization/AuthorizationManager':
-        this.AuthorizationManager,
-      '../../../../app/src/Features/Authorization/AuthorizationMiddleware':
-        this.AuthorizationMiddleware,
-      '../../../../app/src/Features/Project/ProjectAuditLogHandler':
-        this.ProjectAuditLogHandler,
-      '../../../../app/src/Features/SplitTests/SplitTestHandler':
-        this.SplitTestHandler,
-      '../../../../app/src/Features/Errors/Errors': (this.Errors = {
+    vi.doMock('@overleaf/settings', () => ({
+      default: ctx.Settings,
+    }))
+
+    vi.doMock(
+      '../../../../app/src/Features/TokenAccess/TokenAccessHandler',
+      () => ({
+        default: ctx.TokenAccessHandler,
+      })
+    )
+
+    vi.doMock(
+      '../../../../app/src/Features/Authentication/AuthenticationController',
+      () => ({
+        default: ctx.AuthenticationController,
+      })
+    )
+
+    vi.doMock(
+      '../../../../app/src/Features/Authentication/SessionManager',
+      () => ({
+        default: ctx.SessionManager,
+      })
+    )
+
+    vi.doMock(
+      '../../../../app/src/Features/Authorization/AuthorizationManager',
+      () => ({
+        default: ctx.AuthorizationManager,
+      })
+    )
+
+    vi.doMock(
+      '../../../../app/src/Features/Authorization/AuthorizationMiddleware',
+      () => ({
+        default: ctx.AuthorizationMiddleware,
+      })
+    )
+
+    vi.doMock(
+      '../../../../app/src/Features/Project/ProjectAuditLogHandler',
+      () => ({
+        default: ctx.ProjectAuditLogHandler,
+      })
+    )
+
+    vi.doMock(
+      '../../../../app/src/Features/SplitTests/SplitTestHandler',
+      () => ({
+        default: ctx.SplitTestHandler,
+      })
+    )
+
+    vi.doMock('../../../../app/src/Features/Errors/Errors', () => ({
+      default: (ctx.Errors = {
         NotFoundError: sinon.stub(),
       }),
-      '../../../../app/src/Features/Collaborators/CollaboratorsHandler':
-        this.CollaboratorsHandler,
-      '../../../../app/src/Features/Collaborators/CollaboratorsInviteHandler':
-        this.CollaboratorsInviteHandler,
-      '../../../../app/src/Features/Collaborators/CollaboratorsGetter':
-        this.CollaboratorsGetter,
-      '../../../../app/src/Features/Editor/EditorRealTimeController':
-        this.EditorRealTimeController,
-      '../../../../app/src/Features/Project/ProjectGetter': this.ProjectGetter,
-      '../../../../app/src/Features/Helpers/AsyncFormHelper':
-        (this.AsyncFormHelper = {
-          redirect: sinon.stub(),
-        }),
-      '../../../../app/src/Features/Helpers/AdminAuthorizationHelper':
-        (this.AdminAuthorizationHelper = {
-          canRedirectToAdminDomain: sinon.stub(),
-        }),
-      '../../../../app/src/Features/Helpers/UrlHelper': (this.UrlHelper = {
-        getSafeAdminDomainRedirect: sinon
-          .stub()
-          .callsFake(
-            path => `${this.Settings.adminUrl}${getSafeRedirectPath(path)}`
-          ),
+    }))
+
+    vi.doMock(
+      '../../../../app/src/Features/Collaborators/CollaboratorsHandler',
+      () => ({
+        default: ctx.CollaboratorsHandler,
+      })
+    )
+
+    vi.doMock(
+      '../../../../app/src/Features/Collaborators/CollaboratorsInviteHandler',
+      () => ({
+        default: ctx.CollaboratorsInviteHandler,
+      })
+    )
+
+    vi.doMock(
+      '../../../../app/src/Features/Collaborators/CollaboratorsGetter',
+      () => ({
+        default: ctx.CollaboratorsGetter,
+      })
+    )
+
+    vi.doMock(
+      '../../../../app/src/Features/Editor/EditorRealTimeController',
+      () => ({
+        default: ctx.EditorRealTimeController,
+      })
+    )
+
+    vi.doMock('../../../../app/src/Features/Project/ProjectGetter', () => ({
+      default: ctx.ProjectGetter,
+    }))
+
+    vi.doMock('../../../../app/src/Features/Helpers/AsyncFormHelper', () => ({
+      default: (ctx.AsyncFormHelper = {
+        redirect: sinon.stub(),
       }),
-      '../../../../app/src/Features/Analytics/AnalyticsManager':
-        this.AnalyticsManager,
-      '../../../../app/src/Features/User/UserGetter': this.UserGetter,
-      '../../../../app/src/Features/Subscription/LimitationsManager':
-        this.LimitationsManager,
-    })
+    }))
+
+    vi.doMock(
+      '../../../../app/src/Features/Helpers/AdminAuthorizationHelper',
+      () =>
+        (ctx.AdminAuthorizationHelper = {
+          canRedirectToAdminDomain: sinon.stub(),
+        })
+    )
+
+    vi.doMock(
+      '../../../../app/src/Features/Helpers/UrlHelper',
+      () =>
+        (ctx.UrlHelper = {
+          getSafeAdminDomainRedirect: sinon
+            .stub()
+            .callsFake(
+              path => `${ctx.Settings.adminUrl}${getSafeRedirectPath(path)}`
+            ),
+        })
+    )
+
+    vi.doMock(
+      '../../../../app/src/Features/Analytics/AnalyticsManager',
+      () => ({
+        default: ctx.AnalyticsManager,
+      })
+    )
+
+    vi.doMock('../../../../app/src/Features/User/UserGetter', () => ({
+      default: ctx.UserGetter,
+    }))
+
+    vi.doMock(
+      '../../../../app/src/Features/Subscription/LimitationsManager',
+      () => ({
+        default: ctx.LimitationsManager,
+      })
+    )
+
+    ctx.TokenAccessController = (await import(MODULE_PATH)).default
   })
 
   describe('grantTokenAccessReadAndWrite', function () {
-    beforeEach(function () {
-      this.LimitationsManager.promises.canAcceptEditCollaboratorInvite.resolves(
+    beforeEach(function (ctx) {
+      ctx.LimitationsManager.promises.canAcceptEditCollaboratorInvite.resolves(
         true
       )
     })
 
     describe('normal case (edit slot available)', function () {
-      beforeEach(function (done) {
-        this.LimitationsManager.promises.canAcceptEditCollaboratorInvite.resolves(
-          true
-        )
-        this.req.params = { token: this.token }
-        this.req.body = {
-          confirmedByUser: true,
-          tokenHashPrefix: '#prefix',
-        }
-        this.res.callback = done
-        this.TokenAccessController.grantTokenAccessReadAndWrite(
-          this.req,
-          this.res,
-          done
-        )
+      beforeEach(function (ctx) {
+        return new Promise(resolve => {
+          ctx.LimitationsManager.promises.canAcceptEditCollaboratorInvite.resolves(
+            true
+          )
+          ctx.req.params = { token: ctx.token }
+          ctx.req.body = {
+            confirmedByUser: true,
+            tokenHashPrefix: '#prefix',
+          }
+          ctx.res.callback = resolve
+          ctx.TokenAccessController.grantTokenAccessReadAndWrite(
+            ctx.req,
+            ctx.res,
+            resolve
+          )
+        })
       })
 
-      it('adds the user as a read and write invited member', function () {
+      it('adds the user as a read and write invited member', function (ctx) {
         expect(
-          this.CollaboratorsHandler.promises.addUserIdToProject
+          ctx.CollaboratorsHandler.promises.addUserIdToProject
         ).to.have.been.calledWith(
-          this.project._id,
+          ctx.project._id,
           undefined,
-          this.user._id,
+          ctx.user._id,
           PrivilegeLevels.READ_AND_WRITE
         )
       })
 
-      it('writes a project audit log', function () {
+      it('writes a project audit log', function (ctx) {
         expect(
-          this.ProjectAuditLogHandler.promises.addEntry
+          ctx.ProjectAuditLogHandler.promises.addEntry
         ).to.have.been.calledWith(
-          this.project._id,
+          ctx.project._id,
           'accept-via-link-sharing',
-          this.user._id,
-          this.req.ip,
+          ctx.user._id,
+          ctx.req.ip,
           { privileges: 'readAndWrite' }
         )
       })
 
-      it('records a project-joined event for the user', function () {
+      it('records a project-joined event for the user', function (ctx) {
         expect(
-          this.AnalyticsManager.recordEventForUserInBackground
-        ).to.have.been.calledWith(this.user._id, 'project-joined', {
+          ctx.AnalyticsManager.recordEventForUserInBackground
+        ).to.have.been.calledWith(ctx.user._id, 'project-joined', {
           mode: 'edit',
-          projectId: this.project._id.toString(),
-          ownerId: this.project.owner_ref.toString(),
+          projectId: ctx.project._id.toString(),
+          ownerId: ctx.project.owner_ref.toString(),
           role: PrivilegeLevels.READ_AND_WRITE,
           source: 'link-sharing',
         })
       })
 
-      it('emits a project membership changed event', function () {
-        expect(
-          this.EditorRealTimeController.emitToRoom
-        ).to.have.been.calledWith(
-          this.project._id,
+      it('emits a project membership changed event', function (ctx) {
+        expect(ctx.EditorRealTimeController.emitToRoom).to.have.been.calledWith(
+          ctx.project._id,
           'project:membership:changed',
           { members: true, invites: true }
         )
       })
 
-      it('checks token hash', function () {
+      it('checks token hash', function (ctx) {
         expect(
-          this.TokenAccessHandler.checkTokenHashPrefix
+          ctx.TokenAccessHandler.checkTokenHashPrefix
         ).to.have.been.calledWith(
-          this.token,
+          ctx.token,
           '#prefix',
           'readAndWrite',
-          this.user._id,
-          { projectId: this.project._id, action: 'continue' }
+          ctx.user._id,
+          { projectId: ctx.project._id, action: 'continue' }
         )
       })
     })
 
     describe('when there are no edit collaborator slots available', function () {
-      beforeEach(function (done) {
-        this.LimitationsManager.promises.canAcceptEditCollaboratorInvite.resolves(
-          false
-        )
-        this.req.params = { token: this.token }
-        this.req.body = {
-          confirmedByUser: true,
-          tokenHashPrefix: '#prefix',
-        }
-        this.res.callback = done
-        this.TokenAccessController.grantTokenAccessReadAndWrite(
-          this.req,
-          this.res,
-          done
-        )
+      beforeEach(function (ctx) {
+        return new Promise(resolve => {
+          ctx.LimitationsManager.promises.canAcceptEditCollaboratorInvite.resolves(
+            false
+          )
+          ctx.req.params = { token: ctx.token }
+          ctx.req.body = {
+            confirmedByUser: true,
+            tokenHashPrefix: '#prefix',
+          }
+          ctx.res.callback = resolve
+          ctx.TokenAccessController.grantTokenAccessReadAndWrite(
+            ctx.req,
+            ctx.res,
+            resolve
+          )
+        })
       })
 
-      it('adds the user as a read only invited member instead (pendingEditor)', function () {
+      it('adds the user as a read only invited member instead (pendingEditor)', function (ctx) {
         expect(
-          this.CollaboratorsHandler.promises.addUserIdToProject
+          ctx.CollaboratorsHandler.promises.addUserIdToProject
         ).to.have.been.calledWith(
-          this.project._id,
+          ctx.project._id,
           undefined,
-          this.user._id,
+          ctx.user._id,
           PrivilegeLevels.READ_ONLY,
           { pendingEditor: true }
         )
       })
 
-      it('writes a project audit log', function () {
+      it('writes a project audit log', function (ctx) {
         expect(
-          this.ProjectAuditLogHandler.promises.addEntry
+          ctx.ProjectAuditLogHandler.promises.addEntry
         ).to.have.been.calledWith(
-          this.project._id,
+          ctx.project._id,
           'accept-via-link-sharing',
-          this.user._id,
-          this.req.ip,
+          ctx.user._id,
+          ctx.req.ip,
           { privileges: 'readOnly', pendingEditor: true }
         )
       })
 
-      it('records a project-joined event for the user', function () {
+      it('records a project-joined event for the user', function (ctx) {
         expect(
-          this.AnalyticsManager.recordEventForUserInBackground
-        ).to.have.been.calledWith(this.user._id, 'project-joined', {
+          ctx.AnalyticsManager.recordEventForUserInBackground
+        ).to.have.been.calledWith(ctx.user._id, 'project-joined', {
           mode: 'view',
-          projectId: this.project._id.toString(),
+          projectId: ctx.project._id.toString(),
           pendingEditor: true,
-          ownerId: this.project.owner_ref.toString(),
+          ownerId: ctx.project.owner_ref.toString(),
           role: PrivilegeLevels.READ_ONLY,
           source: 'link-sharing',
         })
       })
 
-      it('emits a project membership changed event', function () {
-        expect(
-          this.EditorRealTimeController.emitToRoom
-        ).to.have.been.calledWith(
-          this.project._id,
+      it('emits a project membership changed event', function (ctx) {
+        expect(ctx.EditorRealTimeController.emitToRoom).to.have.been.calledWith(
+          ctx.project._id,
           'project:membership:changed',
           { members: true, invites: true }
         )
       })
 
-      it('checks token hash', function () {
+      it('checks token hash', function (ctx) {
         expect(
-          this.TokenAccessHandler.checkTokenHashPrefix
+          ctx.TokenAccessHandler.checkTokenHashPrefix
         ).to.have.been.calledWith(
-          this.token,
+          ctx.token,
           '#prefix',
           'readAndWrite',
-          this.user._id,
-          { projectId: this.project._id, action: 'continue' }
+          ctx.user._id,
+          { projectId: ctx.project._id, action: 'continue' }
         )
       })
     })
 
     describe('when the access was already granted', function () {
-      beforeEach(function (done) {
-        this.project.tokenAccessReadAndWrite_refs.push(this.user._id)
-        this.req.params = { token: this.token }
-        this.req.body = { confirmedByUser: true }
-        this.res.callback = done
-        this.TokenAccessController.grantTokenAccessReadAndWrite(
-          this.req,
-          this.res,
-          done
-        )
+      beforeEach(function (ctx) {
+        return new Promise(resolve => {
+          ctx.project.tokenAccessReadAndWrite_refs.push(ctx.user._id)
+          ctx.req.params = { token: ctx.token }
+          ctx.req.body = { confirmedByUser: true }
+          ctx.res.callback = resolve
+          ctx.TokenAccessController.grantTokenAccessReadAndWrite(
+            ctx.req,
+            ctx.res,
+            resolve
+          )
+        })
       })
 
-      it('writes a project audit log', function () {
+      it('writes a project audit log', function (ctx) {
         expect(
-          this.ProjectAuditLogHandler.promises.addEntry
+          ctx.ProjectAuditLogHandler.promises.addEntry
         ).to.have.been.calledWith(
-          this.project._id,
+          ctx.project._id,
           'accept-via-link-sharing',
-          this.user._id,
-          this.req.ip,
+          ctx.user._id,
+          ctx.req.ip,
           { privileges: 'readAndWrite' }
         )
       })
 
-      it('checks token hash', function () {
+      it('checks token hash', function (ctx) {
         expect(
-          this.TokenAccessHandler.checkTokenHashPrefix
+          ctx.TokenAccessHandler.checkTokenHashPrefix
         ).to.have.been.calledWith(
-          this.token,
+          ctx.token,
           undefined,
           'readAndWrite',
-          this.user._id,
-          { projectId: this.project._id, action: 'continue' }
+          ctx.user._id,
+          { projectId: ctx.project._id, action: 'continue' }
         )
       })
     })
 
     describe('hash prefix missing in request', function () {
-      beforeEach(function (done) {
-        this.req.params = { token: this.token }
-        this.req.body = { confirmedByUser: true }
-        this.res.callback = done
-        this.TokenAccessController.grantTokenAccessReadAndWrite(
-          this.req,
-          this.res,
-          done
-        )
+      beforeEach(function (ctx) {
+        return new Promise(resolve => {
+          ctx.req.params = { token: ctx.token }
+          ctx.req.body = { confirmedByUser: true }
+          ctx.res.callback = resolve
+          ctx.TokenAccessController.grantTokenAccessReadAndWrite(
+            ctx.req,
+            ctx.res,
+            resolve
+          )
+        })
       })
 
-      it('adds the user as a read and write invited member', function () {
+      it('adds the user as a read and write invited member', function (ctx) {
         expect(
-          this.CollaboratorsHandler.promises.addUserIdToProject
+          ctx.CollaboratorsHandler.promises.addUserIdToProject
         ).to.have.been.calledWith(
-          this.project._id,
+          ctx.project._id,
           undefined,
-          this.user._id,
+          ctx.user._id,
           PrivilegeLevels.READ_AND_WRITE
         )
       })
 
-      it('checks the hash prefix', function () {
+      it('checks the hash prefix', function (ctx) {
         expect(
-          this.TokenAccessHandler.checkTokenHashPrefix
+          ctx.TokenAccessHandler.checkTokenHashPrefix
         ).to.have.been.calledWith(
-          this.token,
+          ctx.token,
           undefined,
           'readAndWrite',
-          this.user._id,
-          { projectId: this.project._id, action: 'continue' }
+          ctx.user._id,
+          { projectId: ctx.project._id, action: 'continue' }
         )
       })
     })
 
     describe('user is owner of project', function () {
-      beforeEach(function (done) {
-        this.AuthorizationManager.promises.getPrivilegeLevelForProject.returns(
-          PrivilegeLevels.OWNER
-        )
-        this.req.params = { token: this.token }
-        this.req.body = {}
-        this.res.callback = done
-        this.TokenAccessController.grantTokenAccessReadAndWrite(
-          this.req,
-          this.res,
-          done
-        )
+      beforeEach(function (ctx) {
+        return new Promise(resolve => {
+          ctx.AuthorizationManager.promises.getPrivilegeLevelForProject.returns(
+            PrivilegeLevels.OWNER
+          )
+          ctx.req.params = { token: ctx.token }
+          ctx.req.body = {}
+          ctx.res.callback = resolve
+          ctx.TokenAccessController.grantTokenAccessReadAndWrite(
+            ctx.req,
+            ctx.res,
+            resolve
+          )
+        })
       })
-      it('checks token hash and includes log data', function () {
+      it('checks token hash and includes log data', function (ctx) {
         expect(
-          this.TokenAccessHandler.checkTokenHashPrefix
+          ctx.TokenAccessHandler.checkTokenHashPrefix
         ).to.have.been.calledWith(
-          this.token,
+          ctx.token,
           undefined,
           'readAndWrite',
-          this.user._id,
+          ctx.user._id,
           {
-            projectId: this.project._id,
+            projectId: ctx.project._id,
             action: 'user already has higher or same privilege',
           }
         )
@@ -457,33 +550,35 @@ describe('TokenAccessController', function () {
     })
 
     describe('when user is not logged in', function () {
-      beforeEach(function () {
-        this.SessionManager.getLoggedInUserId.returns(null)
-        this.req.params = { token: this.token }
-        this.req.body = { tokenHashPrefix: '#prefix' }
+      beforeEach(function (ctx) {
+        ctx.SessionManager.getLoggedInUserId.returns(null)
+        ctx.req.params = { token: ctx.token }
+        ctx.req.body = { tokenHashPrefix: '#prefix' }
       })
       describe('ANONYMOUS_READ_AND_WRITE_ENABLED is undefined', function () {
-        beforeEach(function (done) {
-          this.res.callback = done
-          this.TokenAccessController.grantTokenAccessReadAndWrite(
-            this.req,
-            this.res,
-            done
-          )
+        beforeEach(function (ctx) {
+          return new Promise(resolve => {
+            ctx.res.callback = resolve
+            ctx.TokenAccessController.grantTokenAccessReadAndWrite(
+              ctx.req,
+              ctx.res,
+              resolve
+            )
+          })
         })
 
-        it('redirects to restricted', function () {
-          expect(this.res.json).to.have.been.calledWith({
+        it('redirects to restricted', function (ctx) {
+          expect(ctx.res.json).to.have.been.calledWith({
             redirect: '/restricted',
             anonWriteAccessDenied: true,
           })
         })
 
-        it('checks the hash prefix and includes log data', function () {
+        it('checks the hash prefix and includes log data', function (ctx) {
           expect(
-            this.TokenAccessHandler.checkTokenHashPrefix
+            ctx.TokenAccessHandler.checkTokenHashPrefix
           ).to.have.been.calledWith(
-            this.token,
+            ctx.token,
             '#prefix',
             'readAndWrite',
             null,
@@ -493,42 +588,44 @@ describe('TokenAccessController', function () {
           )
         })
 
-        it('saves redirect URL with URL fragment', function () {
+        it('saves redirect URL with URL fragment', function (ctx) {
           expect(
-            this.AuthenticationController.setRedirectInSession.lastCall.args[1]
+            ctx.AuthenticationController.setRedirectInSession.lastCall.args[1]
           ).to.equal('/#prefix')
         })
       })
 
       describe('ANONYMOUS_READ_AND_WRITE_ENABLED is true', function () {
-        beforeEach(function (done) {
-          this.TokenAccessHandler.ANONYMOUS_READ_AND_WRITE_ENABLED = true
-          this.res.callback = done
+        beforeEach(function (ctx) {
+          return new Promise(resolve => {
+            ctx.TokenAccessHandler.ANONYMOUS_READ_AND_WRITE_ENABLED = true
+            ctx.res.callback = resolve
 
-          this.TokenAccessController.grantTokenAccessReadAndWrite(
-            this.req,
-            this.res,
-            done
-          )
+            ctx.TokenAccessController.grantTokenAccessReadAndWrite(
+              ctx.req,
+              ctx.res,
+              resolve
+            )
+          })
         })
 
-        it('redirects to project', function () {
-          expect(this.res.json).to.have.been.calledWith({
-            redirect: `/project/${this.project._id}`,
+        it('redirects to project', function (ctx) {
+          expect(ctx.res.json).to.have.been.calledWith({
+            redirect: `/project/${ctx.project._id}`,
             grantAnonymousAccess: 'readAndWrite',
           })
         })
 
-        it('checks the hash prefix and includes log data', function () {
+        it('checks the hash prefix and includes log data', function (ctx) {
           expect(
-            this.TokenAccessHandler.checkTokenHashPrefix
+            ctx.TokenAccessHandler.checkTokenHashPrefix
           ).to.have.been.calledWith(
-            this.token,
+            ctx.token,
             '#prefix',
             'readAndWrite',
             null,
             {
-              projectId: this.project._id,
+              projectId: ctx.project._id,
               action: 'granting read-write anonymous access',
             }
           )
@@ -537,44 +634,48 @@ describe('TokenAccessController', function () {
     })
 
     describe('when Overleaf SaaS', function () {
-      beforeEach(function () {
-        this.Settings.overleaf = {}
+      beforeEach(function (ctx) {
+        ctx.Settings.overleaf = {}
       })
       describe('when token is for v1 project', function () {
-        beforeEach(function (done) {
-          this.TokenAccessHandler.promises.getProjectByToken.resolves(undefined)
-          this.TokenAccessHandler.promises.getV1DocInfo.resolves({
-            exists: true,
-            has_owner: true,
+        beforeEach(function (ctx) {
+          return new Promise(resolve => {
+            ctx.TokenAccessHandler.promises.getProjectByToken.resolves(
+              undefined
+            )
+            ctx.TokenAccessHandler.promises.getV1DocInfo.resolves({
+              exists: true,
+              has_owner: true,
+            })
+            ctx.req.params = { token: ctx.token }
+            ctx.req.body = { tokenHashPrefix: '#prefix' }
+            ctx.res.callback = resolve
+            ctx.TokenAccessController.grantTokenAccessReadAndWrite(
+              ctx.req,
+              ctx.res,
+              resolve
+            )
           })
-          this.req.params = { token: this.token }
-          this.req.body = { tokenHashPrefix: '#prefix' }
-          this.res.callback = done
-          this.TokenAccessController.grantTokenAccessReadAndWrite(
-            this.req,
-            this.res,
-            done
-          )
         })
-        it('returns v1 import data', function () {
-          expect(this.res.json).to.have.been.calledWith({
+        it('returns v1 import data', function (ctx) {
+          expect(ctx.res.json).to.have.been.calledWith({
             v1Import: {
               status: 'canDownloadZip',
-              projectId: this.token,
+              projectId: ctx.token,
               hasOwner: true,
               name: 'Untitled',
               brandInfo: undefined,
             },
           })
         })
-        it('checks the hash prefix and includes log data', function () {
+        it('checks the hash prefix and includes log data', function (ctx) {
           expect(
-            this.TokenAccessHandler.checkTokenHashPrefix
+            ctx.TokenAccessHandler.checkTokenHashPrefix
           ).to.have.been.calledWith(
-            this.token,
+            ctx.token,
             '#prefix',
             'readAndWrite',
-            this.user._id,
+            ctx.user._id,
             {
               action: 'import v1',
             }
@@ -583,31 +684,35 @@ describe('TokenAccessController', function () {
       })
 
       describe('when token is not for a v1 or v2 project', function () {
-        beforeEach(function (done) {
-          this.TokenAccessHandler.promises.getProjectByToken.resolves(undefined)
-          this.TokenAccessHandler.promises.getV1DocInfo.resolves({
-            exists: false,
+        beforeEach(function (ctx) {
+          return new Promise(resolve => {
+            ctx.TokenAccessHandler.promises.getProjectByToken.resolves(
+              undefined
+            )
+            ctx.TokenAccessHandler.promises.getV1DocInfo.resolves({
+              exists: false,
+            })
+            ctx.req.params = { token: ctx.token }
+            ctx.req.body = { tokenHashPrefix: '#prefix' }
+            ctx.res.callback = resolve
+            ctx.TokenAccessController.grantTokenAccessReadAndWrite(
+              ctx.req,
+              ctx.res,
+              resolve
+            )
           })
-          this.req.params = { token: this.token }
-          this.req.body = { tokenHashPrefix: '#prefix' }
-          this.res.callback = done
-          this.TokenAccessController.grantTokenAccessReadAndWrite(
-            this.req,
-            this.res,
-            done
-          )
         })
-        it('returns 404', function () {
-          expect(this.res.sendStatus).to.have.been.calledWith(404)
+        it('returns 404', function (ctx) {
+          expect(ctx.res.sendStatus).to.have.been.calledWith(404)
         })
-        it('checks the hash prefix and includes log data', function () {
+        it('checks the hash prefix and includes log data', function (ctx) {
           expect(
-            this.TokenAccessHandler.checkTokenHashPrefix
+            ctx.TokenAccessHandler.checkTokenHashPrefix
           ).to.have.been.calledWith(
-            this.token,
+            ctx.token,
             '#prefix',
             'readAndWrite',
-            this.user._id,
+            ctx.user._id,
             {
               action: '404',
             }
@@ -617,62 +722,67 @@ describe('TokenAccessController', function () {
     })
 
     describe('not Overleaf SaaS', function () {
-      beforeEach(function () {
-        this.TokenAccessHandler.promises.getProjectByToken.resolves(undefined)
-        this.req.params = { token: this.token }
-        this.req.body = { tokenHashPrefix: '#prefix' }
+      beforeEach(function (ctx) {
+        ctx.TokenAccessHandler.promises.getProjectByToken.resolves(undefined)
+        ctx.req.params = { token: ctx.token }
+        ctx.req.body = { tokenHashPrefix: '#prefix' }
       })
-      it('passes Errors.NotFoundError to next when project not found and still checks token hash', function (done) {
-        this.TokenAccessController.grantTokenAccessReadAndWrite(
-          this.req,
-          this.res,
-          args => {
-            expect(args).to.be.instanceof(this.Errors.NotFoundError)
+      it('passes Errors.NotFoundError to next when project not found and still checks token hash', function (ctx) {
+        return new Promise(resolve => {
+          ctx.TokenAccessController.grantTokenAccessReadAndWrite(
+            ctx.req,
+            ctx.res,
+            args => {
+              expect(args).to.be.instanceof(ctx.Errors.NotFoundError)
 
-            expect(
-              this.TokenAccessHandler.checkTokenHashPrefix
-            ).to.have.been.calledWith(
-              this.token,
-              '#prefix',
-              'readAndWrite',
-              this.user._id,
-              {
-                action: '404',
-              }
-            )
+              expect(
+                ctx.TokenAccessHandler.checkTokenHashPrefix
+              ).to.have.been.calledWith(
+                ctx.token,
+                '#prefix',
+                'readAndWrite',
+                ctx.user._id,
+                {
+                  action: '404',
+                }
+              )
 
-            done()
-          }
-        )
+              resolve()
+            }
+          )
+        })
       })
     })
 
     describe('when user is admin', function () {
       const admin = { _id: new ObjectId(), isAdmin: true }
-      beforeEach(function () {
-        this.SessionManager.getLoggedInUserId.returns(admin._id)
-        this.SessionManager.getSessionUser.returns(admin)
-        this.AdminAuthorizationHelper.canRedirectToAdminDomain.returns(true)
-        this.req.params = { token: this.token }
-        this.req.body = { confirmedByUser: true, tokenHashPrefix: '#prefix' }
+      beforeEach(function (ctx) {
+        ctx.SessionManager.getLoggedInUserId.returns(admin._id)
+        ctx.SessionManager.getSessionUser.returns(admin)
+        ctx.AdminAuthorizationHelper.canRedirectToAdminDomain.returns(true)
+        ctx.req.params = { token: ctx.token }
+        ctx.req.body = { confirmedByUser: true, tokenHashPrefix: '#prefix' }
       })
 
-      it('redirects if project owner is non-admin', function () {
-        this.UserGetter.promises.getUserConfirmedEmails = sinon
+      it('redirects if project owner is non-admin', function (ctx) {
+        ctx.UserGetter.promises.getUserConfirmedEmails = sinon
           .stub()
           .resolves([{ email: 'test@not-overleaf.com' }])
-        this.res.callback = () => {
-          expect(this.res.json).to.have.been.calledWith({
-            redirect: `${this.Settings.adminUrl}/#prefix`,
-          })
-        }
-        this.TokenAccessController.grantTokenAccessReadAndWrite(
-          this.req,
-          this.res
-        )
+        return new Promise(resolve => {
+          ctx.res.callback = () => {
+            expect(ctx.res.json).to.have.been.calledWith({
+              redirect: `${ctx.Settings.adminUrl}/#prefix`,
+            })
+            resolve()
+          }
+          ctx.TokenAccessController.grantTokenAccessReadAndWrite(
+            ctx.req,
+            ctx.res
+          )
+        })
       })
 
-      it('grants access if project owner is an internal staff', function () {
+      it('grants access if project owner is an internal staff', function (ctx) {
         const internalStaff = { _id: new ObjectId(), isAdmin: true }
         const projectFromInternalStaff = {
           _id: new ObjectId(),
@@ -681,16 +791,16 @@ describe('TokenAccessController', function () {
           tokenAccessReadOnly_refs: [],
           owner_ref: internalStaff._id,
         }
-        this.UserGetter.promises.getUser = sinon.stub().resolves(internalStaff)
-        this.UserGetter.promises.getUserConfirmedEmails = sinon
+        ctx.UserGetter.promises.getUser = sinon.stub().resolves(internalStaff)
+        ctx.UserGetter.promises.getUserConfirmedEmails = sinon
           .stub()
           .resolves([{ email: 'test@overleaf.com' }])
-        this.TokenAccessHandler.promises.getProjectByToken = sinon
+        ctx.TokenAccessHandler.promises.getProjectByToken = sinon
           .stub()
           .resolves(projectFromInternalStaff)
-        this.res.callback = () => {
+        ctx.res.callback = () => {
           expect(
-            this.CollaboratorsHandler.promises.addUserIdToProject
+            ctx.CollaboratorsHandler.promises.addUserIdToProject
           ).to.have.been.calledWith(
             projectFromInternalStaff._id,
             undefined,
@@ -698,327 +808,345 @@ describe('TokenAccessController', function () {
             PrivilegeLevels.READ_AND_WRITE
           )
         }
-        this.TokenAccessController.grantTokenAccessReadAndWrite(
-          this.req,
-          this.res
+        ctx.TokenAccessController.grantTokenAccessReadAndWrite(ctx.req, ctx.res)
+      })
+    })
+
+    it('passes Errors.NotFoundError to next when token access is not enabled but still checks token hash', function (ctx) {
+      return new Promise(resolve => {
+        ctx.TokenAccessHandler.tokenAccessEnabledForProject.returns(false)
+        ctx.req.params = { token: ctx.token }
+        ctx.req.body = { tokenHashPrefix: '#prefix' }
+        ctx.TokenAccessController.grantTokenAccessReadAndWrite(
+          ctx.req,
+          ctx.res,
+          args => {
+            expect(args).to.be.instanceof(ctx.Errors.NotFoundError)
+
+            expect(
+              ctx.TokenAccessHandler.checkTokenHashPrefix
+            ).to.have.been.calledWith(
+              ctx.token,
+              '#prefix',
+              'readAndWrite',
+              ctx.user._id,
+              {
+                projectId: ctx.project._id,
+                action: 'token access not enabled',
+              }
+            )
+
+            resolve()
+          }
         )
       })
     })
 
-    it('passes Errors.NotFoundError to next when token access is not enabled but still checks token hash', function (done) {
-      this.TokenAccessHandler.tokenAccessEnabledForProject.returns(false)
-      this.req.params = { token: this.token }
-      this.req.body = { tokenHashPrefix: '#prefix' }
-      this.TokenAccessController.grantTokenAccessReadAndWrite(
-        this.req,
-        this.res,
-        args => {
-          expect(args).to.be.instanceof(this.Errors.NotFoundError)
-
-          expect(
-            this.TokenAccessHandler.checkTokenHashPrefix
-          ).to.have.been.calledWith(
-            this.token,
-            '#prefix',
-            'readAndWrite',
-            this.user._id,
-            {
-              projectId: this.project._id,
-              action: 'token access not enabled',
-            }
-          )
-
-          done()
-        }
-      )
-    })
-
-    it('returns 400 when not using a read write token', function () {
-      this.TokenAccessHandler.isReadAndWriteToken.returns(false)
-      this.req.params = { token: this.token }
-      this.req.body = { tokenHashPrefix: '#prefix' }
-      this.TokenAccessController.grantTokenAccessReadAndWrite(
-        this.req,
-        this.res
-      )
-      expect(this.res.sendStatus).to.have.been.calledWith(400)
+    it('returns 400 when not using a read write token', function (ctx) {
+      ctx.TokenAccessHandler.isReadAndWriteToken.returns(false)
+      ctx.req.params = { token: ctx.token }
+      ctx.req.body = { tokenHashPrefix: '#prefix' }
+      ctx.TokenAccessController.grantTokenAccessReadAndWrite(ctx.req, ctx.res)
+      expect(ctx.res.sendStatus).to.have.been.calledWith(400)
     })
   })
 
   describe('grantTokenAccessReadOnly', function () {
     describe('normal case', function () {
-      beforeEach(function (done) {
-        this.req.params = { token: this.token }
-        this.req.body = { confirmedByUser: true, tokenHashPrefix: '#prefix' }
-        this.res.callback = done
-        this.TokenAccessController.grantTokenAccessReadOnly(
-          this.req,
-          this.res,
-          done
+      beforeEach(function (ctx) {
+        return new Promise(resolve => {
+          ctx.req.params = { token: ctx.token }
+          ctx.req.body = { confirmedByUser: true, tokenHashPrefix: '#prefix' }
+          ctx.res.callback = resolve
+          ctx.TokenAccessController.grantTokenAccessReadOnly(
+            ctx.req,
+            ctx.res,
+            resolve
+          )
+        })
+      })
+
+      it('grants read-only access', function (ctx) {
+        expect(
+          ctx.TokenAccessHandler.promises.addReadOnlyUserToProject
+        ).to.have.been.calledWith(
+          ctx.user._id,
+          ctx.project._id,
+          ctx.project.owner_ref
         )
       })
 
-      it('grants read-only access', function () {
+      it('writes a project audit log', function (ctx) {
         expect(
-          this.TokenAccessHandler.promises.addReadOnlyUserToProject
+          ctx.ProjectAuditLogHandler.promises.addEntry
         ).to.have.been.calledWith(
-          this.user._id,
-          this.project._id,
-          this.project.owner_ref
-        )
-      })
-
-      it('writes a project audit log', function () {
-        expect(
-          this.ProjectAuditLogHandler.promises.addEntry
-        ).to.have.been.calledWith(
-          this.project._id,
+          ctx.project._id,
           'join-via-token',
-          this.user._id,
-          this.req.ip,
+          ctx.user._id,
+          ctx.req.ip,
           { privileges: 'readOnly' }
         )
       })
 
-      it('checks if hash prefix matches', function () {
+      it('checks if hash prefix matches', function (ctx) {
         expect(
-          this.TokenAccessHandler.checkTokenHashPrefix
+          ctx.TokenAccessHandler.checkTokenHashPrefix
         ).to.have.been.calledWith(
-          this.token,
+          ctx.token,
           '#prefix',
           'readOnly',
-          this.user._id,
-          { projectId: this.project._id, action: 'continue' }
+          ctx.user._id,
+          { projectId: ctx.project._id, action: 'continue' }
         )
       })
     })
 
     describe('when the access was already granted', function () {
-      beforeEach(function (done) {
-        this.project.tokenAccessReadOnly_refs.push(this.user._id)
-        this.req.params = { token: this.token }
-        this.req.body = { confirmedByUser: true }
-        this.res.callback = done
-        this.TokenAccessController.grantTokenAccessReadOnly(
-          this.req,
-          this.res,
-          done
-        )
+      beforeEach(function (ctx) {
+        return new Promise(resolve => {
+          ctx.project.tokenAccessReadOnly_refs.push(ctx.user._id)
+          ctx.req.params = { token: ctx.token }
+          ctx.req.body = { confirmedByUser: true }
+          ctx.res.callback = resolve
+          ctx.TokenAccessController.grantTokenAccessReadOnly(
+            ctx.req,
+            ctx.res,
+            resolve
+          )
+        })
       })
 
-      it("doesn't write a project audit log", function () {
-        expect(this.ProjectAuditLogHandler.promises.addEntry).to.not.have.been
+      it("doesn't write a project audit log", function (ctx) {
+        expect(ctx.ProjectAuditLogHandler.promises.addEntry).to.not.have.been
           .called
       })
 
-      it('still checks if hash prefix matches', function () {
+      it('still checks if hash prefix matches', function (ctx) {
         expect(
-          this.TokenAccessHandler.checkTokenHashPrefix
+          ctx.TokenAccessHandler.checkTokenHashPrefix
         ).to.have.been.calledWith(
-          this.token,
+          ctx.token,
           undefined,
           'readOnly',
-          this.user._id,
-          { projectId: this.project._id, action: 'continue' }
+          ctx.user._id,
+          { projectId: ctx.project._id, action: 'continue' }
         )
       })
     })
 
-    it('returns 400 when not using a read only token', function () {
-      this.TokenAccessHandler.isReadOnlyToken.returns(false)
-      this.req.params = { token: this.token }
-      this.req.body = { tokenHashPrefix: '#prefix' }
-      this.TokenAccessController.grantTokenAccessReadOnly(this.req, this.res)
-      expect(this.res.sendStatus).to.have.been.calledWith(400)
+    it('returns 400 when not using a read only token', function (ctx) {
+      ctx.TokenAccessHandler.isReadOnlyToken.returns(false)
+      ctx.req.params = { token: ctx.token }
+      ctx.req.body = { tokenHashPrefix: '#prefix' }
+      ctx.TokenAccessController.grantTokenAccessReadOnly(ctx.req, ctx.res)
+      expect(ctx.res.sendStatus).to.have.been.calledWith(400)
     })
 
     describe('anonymous users', function () {
-      beforeEach(function (done) {
-        this.req.params = { token: this.token }
-        this.SessionManager.getLoggedInUserId.returns(null)
-        this.res.callback = done
+      beforeEach(function (ctx) {
+        return new Promise(resolve => {
+          ctx.req.params = { token: ctx.token }
+          ctx.SessionManager.getLoggedInUserId.returns(null)
+          ctx.res.callback = resolve
 
-        this.TokenAccessController.grantTokenAccessReadOnly(
-          this.req,
-          this.res,
-          done
-        )
+          ctx.TokenAccessController.grantTokenAccessReadOnly(
+            ctx.req,
+            ctx.res,
+            resolve
+          )
+        })
       })
 
-      it('allows anonymous users and checks the token hash', function () {
-        expect(this.res.json).to.have.been.calledWith({
-          redirect: `/project/${this.project._id}`,
+      it('allows anonymous users and checks the token hash', function (ctx) {
+        expect(ctx.res.json).to.have.been.calledWith({
+          redirect: `/project/${ctx.project._id}`,
           grantAnonymousAccess: 'readOnly',
         })
 
         expect(
-          this.TokenAccessHandler.checkTokenHashPrefix
-        ).to.have.been.calledWith(this.token, undefined, 'readOnly', null, {
-          projectId: this.project._id,
+          ctx.TokenAccessHandler.checkTokenHashPrefix
+        ).to.have.been.calledWith(ctx.token, undefined, 'readOnly', null, {
+          projectId: ctx.project._id,
           action: 'granting read-only anonymous access',
         })
       })
     })
 
     describe('user is owner of project', function () {
-      beforeEach(function (done) {
-        this.AuthorizationManager.promises.getPrivilegeLevelForProject.returns(
-          PrivilegeLevels.OWNER
-        )
-        this.req.params = { token: this.token }
-        this.req.body = {}
-        this.res.callback = done
-        this.TokenAccessController.grantTokenAccessReadOnly(
-          this.req,
-          this.res,
-          done
-        )
+      beforeEach(function (ctx) {
+        return new Promise(resolve => {
+          ctx.AuthorizationManager.promises.getPrivilegeLevelForProject.returns(
+            PrivilegeLevels.OWNER
+          )
+          ctx.req.params = { token: ctx.token }
+          ctx.req.body = {}
+          ctx.res.callback = resolve
+          ctx.TokenAccessController.grantTokenAccessReadOnly(
+            ctx.req,
+            ctx.res,
+            resolve
+          )
+        })
       })
-      it('checks token hash and includes log data', function () {
+      it('checks token hash and includes log data', function (ctx) {
         expect(
-          this.TokenAccessHandler.checkTokenHashPrefix
+          ctx.TokenAccessHandler.checkTokenHashPrefix
         ).to.have.been.calledWith(
-          this.token,
+          ctx.token,
           undefined,
           'readOnly',
-          this.user._id,
+          ctx.user._id,
           {
-            projectId: this.project._id,
+            projectId: ctx.project._id,
             action: 'user already has higher or same privilege',
           }
         )
       })
     })
 
-    it('passes Errors.NotFoundError to next when token access is not enabled but still checks token hash', function (done) {
-      this.TokenAccessHandler.tokenAccessEnabledForProject.returns(false)
-      this.req.params = { token: this.token }
-      this.req.body = { tokenHashPrefix: '#prefix' }
-      this.TokenAccessController.grantTokenAccessReadOnly(
-        this.req,
-        this.res,
-        args => {
-          expect(args).to.be.instanceof(this.Errors.NotFoundError)
+    it('passes Errors.NotFoundError to next when token access is not enabled but still checks token hash', function (ctx) {
+      return new Promise(resolve => {
+        ctx.TokenAccessHandler.tokenAccessEnabledForProject.returns(false)
+        ctx.req.params = { token: ctx.token }
+        ctx.req.body = { tokenHashPrefix: '#prefix' }
+        ctx.TokenAccessController.grantTokenAccessReadOnly(
+          ctx.req,
+          ctx.res,
+          args => {
+            expect(args).to.be.instanceof(ctx.Errors.NotFoundError)
 
-          expect(
-            this.TokenAccessHandler.checkTokenHashPrefix
-          ).to.have.been.calledWith(
-            this.token,
-            '#prefix',
-            'readOnly',
-            this.user._id,
-            {
-              projectId: this.project._id,
-              action: 'token access not enabled',
-            }
-          )
+            expect(
+              ctx.TokenAccessHandler.checkTokenHashPrefix
+            ).to.have.been.calledWith(
+              ctx.token,
+              '#prefix',
+              'readOnly',
+              ctx.user._id,
+              {
+                projectId: ctx.project._id,
+                action: 'token access not enabled',
+              }
+            )
 
-          done()
-        }
-      )
+            resolve()
+          }
+        )
+      })
     })
   })
 
   describe('ensureUserCanUseSharingUpdatesConsentPage', function () {
-    beforeEach(function () {
-      this.req.params = { Project_id: this.project._id }
+    beforeEach(function (ctx) {
+      ctx.req.params = { Project_id: ctx.project._id }
     })
 
     describe('when not in link sharing changes test', function () {
-      beforeEach(function (done) {
-        this.AsyncFormHelper.redirect = sinon.stub().callsFake(() => done())
-        this.TokenAccessController.ensureUserCanUseSharingUpdatesConsentPage(
-          this.req,
-          this.res,
-          done
-        )
+      beforeEach(function (ctx) {
+        return new Promise(resolve => {
+          ctx.AsyncFormHelper.redirect = sinon.stub().callsFake(() => resolve())
+          ctx.TokenAccessController.ensureUserCanUseSharingUpdatesConsentPage(
+            ctx.req,
+            ctx.res,
+            resolve
+          )
+        })
       })
 
-      it('redirects to the project/editor', function () {
-        expect(this.AsyncFormHelper.redirect).to.have.been.calledWith(
-          this.req,
-          this.res,
-          `/project/${this.project._id}`
+      it('redirects to the project/editor', function (ctx) {
+        expect(ctx.AsyncFormHelper.redirect).to.have.been.calledWith(
+          ctx.req,
+          ctx.res,
+          `/project/${ctx.project._id}`
         )
       })
     })
 
     describe('when link sharing changes test active', function () {
-      beforeEach(function () {
-        this.SplitTestHandler.promises.getAssignmentForUser.resolves({
+      beforeEach(function (ctx) {
+        ctx.SplitTestHandler.promises.getAssignmentForUser.resolves({
           variant: 'active',
         })
       })
 
       describe('when user is not an invited editor and is a read write token member', function () {
-        beforeEach(function (done) {
-          this.CollaboratorsGetter.promises.isUserInvitedReadWriteMemberOfProject.resolves(
-            false
-          )
-          this.CollaboratorsGetter.promises.userIsReadWriteTokenMember.resolves(
-            true
-          )
-          this.next.callsFake(() => done())
-          this.TokenAccessController.ensureUserCanUseSharingUpdatesConsentPage(
-            this.req,
-            this.res,
-            this.next
-          )
+        beforeEach(function (ctx) {
+          return new Promise(resolve => {
+            ctx.CollaboratorsGetter.promises.isUserInvitedReadWriteMemberOfProject.resolves(
+              false
+            )
+            ctx.CollaboratorsGetter.promises.userIsReadWriteTokenMember.resolves(
+              true
+            )
+            ctx.next.callsFake(() => resolve())
+            ctx.TokenAccessController.ensureUserCanUseSharingUpdatesConsentPage(
+              ctx.req,
+              ctx.res,
+              ctx.next
+            )
+          })
         })
 
-        it('calls next', function () {
+        it('calls next', function (ctx) {
           expect(
-            this.CollaboratorsGetter.promises
+            ctx.CollaboratorsGetter.promises
               .isUserInvitedReadWriteMemberOfProject
-          ).to.have.been.calledWith(this.user._id, this.project._id)
+          ).to.have.been.calledWith(ctx.user._id, ctx.project._id)
           expect(
-            this.CollaboratorsGetter.promises.userIsReadWriteTokenMember
-          ).to.have.been.calledWith(this.user._id, this.project._id)
-          expect(this.next).to.have.been.calledOnce
-          expect(this.next.firstCall.args[0]).to.not.exist
+            ctx.CollaboratorsGetter.promises.userIsReadWriteTokenMember
+          ).to.have.been.calledWith(ctx.user._id, ctx.project._id)
+          expect(ctx.next).to.have.been.calledOnce
+          expect(ctx.next.firstCall.args[0]).to.not.exist
         })
       })
 
       describe('when user is already an invited editor', function () {
-        beforeEach(function (done) {
-          this.CollaboratorsGetter.promises.isUserInvitedReadWriteMemberOfProject.resolves(
-            true
-          )
-          this.AsyncFormHelper.redirect = sinon.stub().callsFake(() => done())
-          this.TokenAccessController.ensureUserCanUseSharingUpdatesConsentPage(
-            this.req,
-            this.res,
-            done
-          )
+        beforeEach(function (ctx) {
+          return new Promise(resolve => {
+            ctx.CollaboratorsGetter.promises.isUserInvitedReadWriteMemberOfProject.resolves(
+              true
+            )
+            ctx.AsyncFormHelper.redirect = sinon
+              .stub()
+              .callsFake(() => resolve())
+            ctx.TokenAccessController.ensureUserCanUseSharingUpdatesConsentPage(
+              ctx.req,
+              ctx.res,
+              resolve
+            )
+          })
         })
 
-        it('redirects to the project/editor', function () {
-          expect(this.AsyncFormHelper.redirect).to.have.been.calledWith(
-            this.req,
-            this.res,
-            `/project/${this.project._id}`
+        it('redirects to the project/editor', function (ctx) {
+          expect(ctx.AsyncFormHelper.redirect).to.have.been.calledWith(
+            ctx.req,
+            ctx.res,
+            `/project/${ctx.project._id}`
           )
         })
       })
 
       describe('when user not a read write token member', function () {
-        beforeEach(function (done) {
-          this.CollaboratorsGetter.promises.userIsReadWriteTokenMember.resolves(
-            false
-          )
-          this.AsyncFormHelper.redirect = sinon.stub().callsFake(() => done())
-          this.TokenAccessController.ensureUserCanUseSharingUpdatesConsentPage(
-            this.req,
-            this.res,
-            done
-          )
+        beforeEach(function (ctx) {
+          return new Promise(resolve => {
+            ctx.CollaboratorsGetter.promises.userIsReadWriteTokenMember.resolves(
+              false
+            )
+            ctx.AsyncFormHelper.redirect = sinon
+              .stub()
+              .callsFake(() => resolve())
+            ctx.TokenAccessController.ensureUserCanUseSharingUpdatesConsentPage(
+              ctx.req,
+              ctx.res,
+              resolve
+            )
+          })
         })
 
-        it('redirects to the project/editor', function () {
-          expect(this.AsyncFormHelper.redirect).to.have.been.calledWith(
-            this.req,
-            this.res,
-            `/project/${this.project._id}`
+        it('redirects to the project/editor', function (ctx) {
+          expect(ctx.AsyncFormHelper.redirect).to.have.been.calledWith(
+            ctx.req,
+            ctx.res,
+            `/project/${ctx.project._id}`
           )
         })
       })
@@ -1026,116 +1154,122 @@ describe('TokenAccessController', function () {
   })
 
   describe('moveReadWriteToCollaborators', function () {
-    beforeEach(function () {
-      this.req.params = { Project_id: this.project._id }
+    beforeEach(function (ctx) {
+      ctx.req.params = { Project_id: ctx.project._id }
     })
 
     describe('when there are collaborator slots available', function () {
-      beforeEach(function () {
-        this.LimitationsManager.promises.canAcceptEditCollaboratorInvite.resolves(
+      beforeEach(function (ctx) {
+        ctx.LimitationsManager.promises.canAcceptEditCollaboratorInvite.resolves(
           true
         )
       })
 
       describe('previously joined token access user moving to named collaborator', function () {
-        beforeEach(function (done) {
-          this.CollaboratorsGetter.promises.isUserInvitedMemberOfProject.resolves(
-            false
-          )
-          this.res.callback = done
-          this.TokenAccessController.moveReadWriteToCollaborators(
-            this.req,
-            this.res,
-            done
-          )
+        beforeEach(function (ctx) {
+          return new Promise(resolve => {
+            ctx.CollaboratorsGetter.promises.isUserInvitedMemberOfProject.resolves(
+              false
+            )
+            ctx.res.callback = resolve
+            ctx.TokenAccessController.moveReadWriteToCollaborators(
+              ctx.req,
+              ctx.res,
+              resolve
+            )
+          })
         })
 
-        it('sets the privilege level to read and write for the invited viewer', function () {
+        it('sets the privilege level to read and write for the invited viewer', function (ctx) {
           expect(
-            this.TokenAccessHandler.promises.removeReadAndWriteUserFromProject
-          ).to.have.been.calledWith(this.user._id, this.project._id)
+            ctx.TokenAccessHandler.promises.removeReadAndWriteUserFromProject
+          ).to.have.been.calledWith(ctx.user._id, ctx.project._id)
           expect(
-            this.CollaboratorsHandler.promises.addUserIdToProject
+            ctx.CollaboratorsHandler.promises.addUserIdToProject
           ).to.have.been.calledWith(
-            this.project._id,
+            ctx.project._id,
             undefined,
-            this.user._id,
+            ctx.user._id,
             PrivilegeLevels.READ_AND_WRITE
           )
-          expect(this.res.sendStatus).to.have.been.calledWith(204)
+          expect(ctx.res.sendStatus).to.have.been.calledWith(204)
         })
       })
     })
 
     describe('when there are no edit collaborator slots available', function () {
-      beforeEach(function () {
-        this.LimitationsManager.promises.canAcceptEditCollaboratorInvite.resolves(
+      beforeEach(function (ctx) {
+        ctx.LimitationsManager.promises.canAcceptEditCollaboratorInvite.resolves(
           false
         )
       })
 
       describe('previously joined token access user moving to named collaborator', function () {
-        beforeEach(function (done) {
-          this.CollaboratorsGetter.promises.isUserInvitedMemberOfProject.resolves(
-            false
-          )
-          this.res.callback = done
-          this.TokenAccessController.moveReadWriteToCollaborators(
-            this.req,
-            this.res,
-            done
-          )
+        beforeEach(function (ctx) {
+          return new Promise(resolve => {
+            ctx.CollaboratorsGetter.promises.isUserInvitedMemberOfProject.resolves(
+              false
+            )
+            ctx.res.callback = resolve
+            ctx.TokenAccessController.moveReadWriteToCollaborators(
+              ctx.req,
+              ctx.res,
+              resolve
+            )
+          })
         })
 
-        it('sets the privilege level to read only for the invited viewer (pendingEditor)', function () {
+        it('sets the privilege level to read only for the invited viewer (pendingEditor)', function (ctx) {
           expect(
-            this.TokenAccessHandler.promises.removeReadAndWriteUserFromProject
-          ).to.have.been.calledWith(this.user._id, this.project._id)
+            ctx.TokenAccessHandler.promises.removeReadAndWriteUserFromProject
+          ).to.have.been.calledWith(ctx.user._id, ctx.project._id)
           expect(
-            this.CollaboratorsHandler.promises.addUserIdToProject
+            ctx.CollaboratorsHandler.promises.addUserIdToProject
           ).to.have.been.calledWith(
-            this.project._id,
+            ctx.project._id,
             undefined,
-            this.user._id,
+            ctx.user._id,
             PrivilegeLevels.READ_ONLY,
             { pendingEditor: true }
           )
-          expect(this.res.sendStatus).to.have.been.calledWith(204)
+          expect(ctx.res.sendStatus).to.have.been.calledWith(204)
         })
       })
     })
   })
 
   describe('moveReadWriteToReadOnly', function () {
-    beforeEach(function () {
-      this.req.params = { Project_id: this.project._id }
+    beforeEach(function (ctx) {
+      ctx.req.params = { Project_id: ctx.project._id }
     })
 
     describe('previously joined token access user moving to anonymous viewer', function () {
-      beforeEach(function (done) {
-        this.res.callback = done
-        this.TokenAccessController.moveReadWriteToReadOnly(
-          this.req,
-          this.res,
-          done
-        )
+      beforeEach(function (ctx) {
+        return new Promise(resolve => {
+          ctx.res.callback = resolve
+          ctx.TokenAccessController.moveReadWriteToReadOnly(
+            ctx.req,
+            ctx.res,
+            resolve
+          )
+        })
       })
 
-      it('removes them from read write token access refs and adds them to read only token access refs', function () {
+      it('removes them from read write token access refs and adds them to read only token access refs', function (ctx) {
         expect(
-          this.TokenAccessHandler.promises.moveReadAndWriteUserToReadOnly
-        ).to.have.been.calledWith(this.user._id, this.project._id)
-        expect(this.res.sendStatus).to.have.been.calledWith(204)
+          ctx.TokenAccessHandler.promises.moveReadAndWriteUserToReadOnly
+        ).to.have.been.calledWith(ctx.user._id, ctx.project._id)
+        expect(ctx.res.sendStatus).to.have.been.calledWith(204)
       })
 
-      it('writes a project audit log', function () {
+      it('writes a project audit log', function (ctx) {
         expect(
-          this.ProjectAuditLogHandler.promises.addEntry
+          ctx.ProjectAuditLogHandler.promises.addEntry
         ).to.have.been.calledWith(
-          this.project._id,
+          ctx.project._id,
           'readonly-via-sharing-updates',
-          this.user._id,
-          this.req.ip
+          ctx.user._id,
+          ctx.req.ip
         )
       })
     })

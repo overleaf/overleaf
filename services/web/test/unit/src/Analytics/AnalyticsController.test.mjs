@@ -1,4 +1,4 @@
-import esmock from 'esmock'
+import { vi } from 'vitest'
 import sinon from 'sinon'
 import MockResponse from '../helpers/MockResponse.js'
 const modulePath = new URL(
@@ -7,37 +7,52 @@ const modulePath = new URL(
 ).pathname
 
 describe('AnalyticsController', function () {
-  beforeEach(async function () {
-    this.SessionManager = { getLoggedInUserId: sinon.stub() }
+  beforeEach(async function (ctx) {
+    ctx.SessionManager = { getLoggedInUserId: sinon.stub() }
 
-    this.AnalyticsManager = {
+    ctx.AnalyticsManager = {
       updateEditingSession: sinon.stub(),
       recordEventForSession: sinon.stub(),
     }
 
-    this.Features = {
+    ctx.Features = {
       hasFeature: sinon.stub().returns(true),
     }
 
-    this.controller = await esmock.strict(modulePath, {
-      '../../../../app/src/Features/Analytics/AnalyticsManager.js':
-        this.AnalyticsManager,
-      '../../../../app/src/Features/Authentication/SessionManager.js':
-        this.SessionManager,
-      '../../../../app/src/infrastructure/Features.js': this.Features,
-      '../../../../app/src/infrastructure/GeoIpLookup.js': (this.GeoIpLookup = {
+    vi.doMock(
+      '../../../../app/src/Features/Analytics/AnalyticsManager.js',
+      () => ({
+        default: ctx.AnalyticsManager,
+      })
+    )
+
+    vi.doMock(
+      '../../../../app/src/Features/Authentication/SessionManager.js',
+      () => ({
+        default: ctx.SessionManager,
+      })
+    )
+
+    vi.doMock('../../../../app/src/infrastructure/Features.js', () => ({
+      default: ctx.Features,
+    }))
+
+    vi.doMock('../../../../app/src/infrastructure/GeoIpLookup.js', () => ({
+      default: (ctx.GeoIpLookup = {
         promises: {
           getDetails: sinon.stub().resolves(),
         },
       }),
-    })
+    }))
 
-    this.res = new MockResponse()
+    ctx.controller = (await import(modulePath)).default
+
+    ctx.res = new MockResponse()
   })
 
   describe('updateEditingSession', function () {
-    beforeEach(function () {
-      this.req = {
+    beforeEach(function (ctx) {
+      ctx.req = {
         params: {
           projectId: 'a project id',
         },
@@ -48,34 +63,36 @@ describe('AnalyticsController', function () {
           },
         },
       }
-      this.GeoIpLookup.promises.getDetails = sinon
+      ctx.GeoIpLookup.promises.getDetails = sinon
         .stub()
         .resolves({ country_code: 'XY' })
     })
 
-    it('delegates to the AnalyticsManager', function (done) {
-      this.SessionManager.getLoggedInUserId.returns('1234')
-      this.res.callback = () => {
-        sinon.assert.calledWith(
-          this.AnalyticsManager.updateEditingSession,
-          '1234',
-          'a project id',
-          'XY',
-          { editorType: 'abc' }
-        )
-        done()
-      }
-      this.controller.updateEditingSession(this.req, this.res)
+    it('delegates to the AnalyticsManager', function (ctx) {
+      return new Promise(resolve => {
+        ctx.SessionManager.getLoggedInUserId.returns('1234')
+        ctx.res.callback = () => {
+          sinon.assert.calledWith(
+            ctx.AnalyticsManager.updateEditingSession,
+            '1234',
+            'a project id',
+            'XY',
+            { editorType: 'abc' }
+          )
+          resolve()
+        }
+        ctx.controller.updateEditingSession(ctx.req, ctx.res)
+      })
     })
   })
 
   describe('recordEvent', function () {
-    beforeEach(function () {
+    beforeEach(function (ctx) {
       const body = {
         foo: 'stuff',
         _csrf: 'atoken123',
       }
-      this.req = {
+      ctx.req = {
         params: {
           event: 'i_did_something',
         },
@@ -84,30 +101,34 @@ describe('AnalyticsController', function () {
         session: {},
       }
 
-      this.expectedData = Object.assign({}, body)
-      delete this.expectedData._csrf
+      ctx.expectedData = Object.assign({}, body)
+      delete ctx.expectedData._csrf
     })
 
-    it('should use the session', function (done) {
-      this.controller.recordEvent(this.req, this.res)
-      sinon.assert.calledWith(
-        this.AnalyticsManager.recordEventForSession,
-        this.req.session,
-        this.req.params.event,
-        this.expectedData
-      )
-      done()
+    it('should use the session', function (ctx) {
+      return new Promise(resolve => {
+        ctx.controller.recordEvent(ctx.req, ctx.res)
+        sinon.assert.calledWith(
+          ctx.AnalyticsManager.recordEventForSession,
+          ctx.req.session,
+          ctx.req.params.event,
+          ctx.expectedData
+        )
+        resolve()
+      })
     })
 
-    it('should remove the CSRF token before sending to the manager', function (done) {
-      this.controller.recordEvent(this.req, this.res)
-      sinon.assert.calledWith(
-        this.AnalyticsManager.recordEventForSession,
-        this.req.session,
-        this.req.params.event,
-        this.expectedData
-      )
-      done()
+    it('should remove the CSRF token before sending to the manager', function (ctx) {
+      return new Promise(resolve => {
+        ctx.controller.recordEvent(ctx.req, ctx.res)
+        sinon.assert.calledWith(
+          ctx.AnalyticsManager.recordEventForSession,
+          ctx.req.session,
+          ctx.req.params.event,
+          ctx.expectedData
+        )
+        resolve()
+      })
     })
   })
 })

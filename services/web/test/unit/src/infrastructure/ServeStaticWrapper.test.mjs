@@ -1,24 +1,22 @@
-import { strict as esmock } from 'esmock'
+import { vi } from 'vitest'
 import { expect } from 'chai'
 import Path from 'node:path'
-import { fileURLToPath } from 'node:url'
 import sinon from 'sinon'
 import MockResponse from '../helpers/MockResponse.js'
 import MockRequest from '../helpers/MockRequest.js'
 
-const __dirname = fileURLToPath(new URL('.', import.meta.url))
 const modulePath = Path.join(
-  __dirname,
+  import.meta.dirname,
   '../../../../app/src/infrastructure/ServeStaticWrapper'
 )
 
 describe('ServeStaticWrapperTests', function () {
   let error = null
 
-  beforeEach(async function () {
-    this.req = new MockRequest()
-    this.res = new MockResponse()
-    this.express = {
+  beforeEach(async function (ctx) {
+    ctx.req = new MockRequest()
+    ctx.res = new MockResponse()
+    ctx.express = {
       static: () => (req, res, next) => {
         if (error) {
           next(error)
@@ -27,36 +25,39 @@ describe('ServeStaticWrapperTests', function () {
         }
       },
     }
-    this.serveStaticWrapper = await esmock(modulePath, {
-      express: this.express,
-    })
+
+    vi.doMock('express', () => ({
+      default: ctx.express,
+    }))
+
+    ctx.serveStaticWrapper = (await import(modulePath)).default
   })
 
-  this.afterEach(() => {
+  afterEach(() => {
     error = null
   })
 
-  it('Premature close error thrown', async function () {
+  it('Premature close error thrown', async function (ctx) {
     error = new Error()
     error.code = 'ERR_STREAM_PREMATURE_CLOSE'
-    const middleware = this.serveStaticWrapper('test_folder', {})
+    const middleware = ctx.serveStaticWrapper('test_folder', {})
     const next = sinon.stub()
-    middleware(this.req, this.res, next)
+    middleware(ctx.req, ctx.res, next)
     expect(next.called).to.be.false
   })
 
-  it('No error thrown', async function () {
-    const middleware = this.serveStaticWrapper('test_folder', {})
+  it('No error thrown', async function (ctx) {
+    const middleware = ctx.serveStaticWrapper('test_folder', {})
     const next = sinon.stub()
-    middleware(this.req, this.res, next)
+    middleware(ctx.req, ctx.res, next)
     expect(next).to.be.calledWith()
   })
 
-  it('Other error thrown', async function () {
+  it('Other error thrown', async function (ctx) {
     error = new Error()
-    const middleware = this.serveStaticWrapper('test_folder', {})
+    const middleware = ctx.serveStaticWrapper('test_folder', {})
     const next = sinon.stub()
-    middleware(this.req, this.res, next)
+    middleware(ctx.req, ctx.res, next)
     expect(next).to.be.calledWith(error)
   })
 })

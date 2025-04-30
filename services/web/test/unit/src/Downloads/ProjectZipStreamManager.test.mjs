@@ -1,3 +1,4 @@
+import { vi } from 'vitest'
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
 /*
@@ -9,120 +10,143 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 import sinon from 'sinon'
-import esmock from 'esmock'
 import { EventEmitter } from 'events'
 const modulePath =
   '../../../../app/src/Features/Downloads/ProjectZipStreamManager.mjs'
 
 describe('ProjectZipStreamManager', function () {
-  beforeEach(async function () {
-    this.project_id = 'project-id-123'
-    this.callback = sinon.stub()
-    this.archive = {
+  beforeEach(async function (ctx) {
+    ctx.project_id = 'project-id-123'
+    ctx.callback = sinon.stub()
+    ctx.archive = {
       on() {},
       append: sinon.stub(),
     }
-    this.logger = {
+    ctx.logger = {
       error: sinon.stub(),
       info: sinon.stub(),
       debug: sinon.stub(),
     }
 
-    return (this.ProjectZipStreamManager = await esmock.strict(modulePath, {
-      archiver: (this.archiver = sinon.stub().returns(this.archive)),
-      '@overleaf/logger': this.logger,
-      '../../../../app/src/Features/Project/ProjectEntityHandler':
-        (this.ProjectEntityHandler = {}),
-      '../../../../app/src/Features/History/HistoryManager.js':
-        (this.HistoryManager = {}),
-      '../../../../app/src/Features/Project/ProjectGetter':
-        (this.ProjectGetter = {}),
-      '../../../../app/src/Features/FileStore/FileStoreHandler':
-        (this.FileStoreHandler = {}),
-      '../../../../app/src/infrastructure/Features': (this.Features = {
+    vi.doMock('archiver', () => ({
+      default: (ctx.archiver = sinon.stub().returns(ctx.archive)),
+    }))
+
+    vi.doMock('@overleaf/logger', () => ({
+      default: ctx.logger,
+    }))
+
+    vi.doMock(
+      '../../../../app/src/Features/Project/ProjectEntityHandler',
+      () => ({
+        default: (ctx.ProjectEntityHandler = {}),
+      })
+    )
+
+    vi.doMock('../../../../app/src/Features/History/HistoryManager.js', () => ({
+      default: (ctx.HistoryManager = {}),
+    }))
+
+    vi.doMock('../../../../app/src/Features/Project/ProjectGetter', () => ({
+      default: (ctx.ProjectGetter = {}),
+    }))
+
+    vi.doMock(
+      '../../../../app/src/Features/FileStore/FileStoreHandler',
+      () => ({
+        default: (ctx.FileStoreHandler = {}),
+      })
+    )
+
+    vi.doMock('../../../../app/src/infrastructure/Features', () => ({
+      default: (ctx.Features = {
         hasFeature: sinon
           .stub()
           .withArgs('project-history-blobs')
           .returns(true),
       }),
     }))
+
+    ctx.ProjectZipStreamManager = (await import(modulePath)).default
   })
 
   describe('createZipStreamForMultipleProjects', function () {
     describe('successfully', function () {
-      beforeEach(function (done) {
-        this.project_ids = ['project-1', 'project-2']
-        this.zip_streams = {
-          'project-1': new EventEmitter(),
-          'project-2': new EventEmitter(),
-        }
-
-        this.project_names = {
-          'project-1': 'Project One Name',
-          'project-2': 'Project Two Name',
-        }
-
-        this.ProjectZipStreamManager.createZipStreamForProject = (
-          projectId,
-          callback
-        ) => {
-          callback(null, this.zip_streams[projectId])
-          setTimeout(() => {
-            return this.zip_streams[projectId].emit('end')
-          })
-          return 0
-        }
-        sinon.spy(this.ProjectZipStreamManager, 'createZipStreamForProject')
-
-        this.ProjectGetter.getProject = (projectId, fields, callback) => {
-          return callback(null, { name: this.project_names[projectId] })
-        }
-        sinon.spy(this.ProjectGetter, 'getProject')
-
-        this.ProjectZipStreamManager.createZipStreamForMultipleProjects(
-          this.project_ids,
-          (...args) => {
-            return this.callback(...Array.from(args || []))
+      beforeEach(function (ctx) {
+        return new Promise(resolve => {
+          ctx.project_ids = ['project-1', 'project-2']
+          ctx.zip_streams = {
+            'project-1': new EventEmitter(),
+            'project-2': new EventEmitter(),
           }
-        )
 
-        return (this.archive.finalize = () => done())
+          ctx.project_names = {
+            'project-1': 'Project One Name',
+            'project-2': 'Project Two Name',
+          }
+
+          ctx.ProjectZipStreamManager.createZipStreamForProject = (
+            projectId,
+            callback
+          ) => {
+            callback(null, ctx.zip_streams[projectId])
+            setTimeout(() => {
+              return ctx.zip_streams[projectId].emit('end')
+            })
+            return 0
+          }
+          sinon.spy(ctx.ProjectZipStreamManager, 'createZipStreamForProject')
+
+          ctx.ProjectGetter.getProject = (projectId, fields, callback) => {
+            return callback(null, { name: ctx.project_names[projectId] })
+          }
+          sinon.spy(ctx.ProjectGetter, 'getProject')
+
+          ctx.ProjectZipStreamManager.createZipStreamForMultipleProjects(
+            ctx.project_ids,
+            (...args) => {
+              return ctx.callback(...Array.from(args || []))
+            }
+          )
+
+          return (ctx.archive.finalize = () => resolve())
+        })
       })
 
-      it('should create a zip archive', function () {
-        return this.archiver.calledWith('zip').should.equal(true)
+      it('should create a zip archive', function (ctx) {
+        return ctx.archiver.calledWith('zip').should.equal(true)
       })
 
-      it('should return a stream before any processing is done', function () {
-        this.callback
-          .calledWith(sinon.match.falsy, this.archive)
+      it('should return a stream before any processing is done', function (ctx) {
+        ctx.callback
+          .calledWith(sinon.match.falsy, ctx.archive)
           .should.equal(true)
-        return this.callback
-          .calledBefore(this.ProjectZipStreamManager.createZipStreamForProject)
+        return ctx.callback
+          .calledBefore(ctx.ProjectZipStreamManager.createZipStreamForProject)
           .should.equal(true)
       })
 
-      it('should get a zip stream for all of the projects', function () {
-        return Array.from(this.project_ids).map(projectId =>
-          this.ProjectZipStreamManager.createZipStreamForProject
+      it('should get a zip stream for all of the projects', function (ctx) {
+        return Array.from(ctx.project_ids).map(projectId =>
+          ctx.ProjectZipStreamManager.createZipStreamForProject
             .calledWith(projectId)
             .should.equal(true)
         )
       })
 
-      it('should get the names of each project', function () {
-        return Array.from(this.project_ids).map(projectId =>
-          this.ProjectGetter.getProject
+      it('should get the names of each project', function (ctx) {
+        return Array.from(ctx.project_ids).map(projectId =>
+          ctx.ProjectGetter.getProject
             .calledWith(projectId, { name: true })
             .should.equal(true)
         )
       })
 
-      it('should add all of the projects to the zip', function () {
-        return Array.from(this.project_ids).map(projectId =>
-          this.archive.append
-            .calledWith(this.zip_streams[projectId], {
-              name: this.project_names[projectId] + '.zip',
+      it('should add all of the projects to the zip', function (ctx) {
+        return Array.from(ctx.project_ids).map(projectId =>
+          ctx.archive.append
+            .calledWith(ctx.zip_streams[projectId], {
+              name: ctx.project_names[projectId] + '.zip',
             })
             .should.equal(true)
         )
@@ -130,75 +154,77 @@ describe('ProjectZipStreamManager', function () {
     })
 
     describe('with a project not existing', function () {
-      beforeEach(function (done) {
-        this.project_ids = ['project-1', 'wrong-id']
-        this.project_names = {
-          'project-1': 'Project One Name',
-        }
-        this.zip_streams = {
-          'project-1': new EventEmitter(),
-        }
+      beforeEach(function (ctx) {
+        return new Promise(resolve => {
+          ctx.project_ids = ['project-1', 'wrong-id']
+          ctx.project_names = {
+            'project-1': 'Project One Name',
+          }
+          ctx.zip_streams = {
+            'project-1': new EventEmitter(),
+          }
 
-        this.ProjectZipStreamManager.createZipStreamForProject = (
-          projectId,
-          callback
-        ) => {
-          callback(null, this.zip_streams[projectId])
-          setTimeout(() => {
-            this.zip_streams[projectId].emit('end')
-          })
-        }
-        sinon.spy(this.ProjectZipStreamManager, 'createZipStreamForProject')
+          ctx.ProjectZipStreamManager.createZipStreamForProject = (
+            projectId,
+            callback
+          ) => {
+            callback(null, ctx.zip_streams[projectId])
+            setTimeout(() => {
+              ctx.zip_streams[projectId].emit('end')
+            })
+          }
+          sinon.spy(ctx.ProjectZipStreamManager, 'createZipStreamForProject')
 
-        this.ProjectGetter.getProject = (projectId, fields, callback) => {
-          const name = this.project_names[projectId]
-          callback(null, name ? { name } : undefined)
-        }
-        sinon.spy(this.ProjectGetter, 'getProject')
+          ctx.ProjectGetter.getProject = (projectId, fields, callback) => {
+            const name = ctx.project_names[projectId]
+            callback(null, name ? { name } : undefined)
+          }
+          sinon.spy(ctx.ProjectGetter, 'getProject')
 
-        this.ProjectZipStreamManager.createZipStreamForMultipleProjects(
-          this.project_ids,
-          this.callback
-        )
+          ctx.ProjectZipStreamManager.createZipStreamForMultipleProjects(
+            ctx.project_ids,
+            ctx.callback
+          )
 
-        this.archive.finalize = () => done()
+          ctx.archive.finalize = () => resolve()
+        })
       })
 
-      it('should create a zip archive', function () {
-        this.archiver.calledWith('zip').should.equal(true)
+      it('should create a zip archive', function (ctx) {
+        ctx.archiver.calledWith('zip').should.equal(true)
       })
 
-      it('should return a stream before any processing is done', function () {
-        this.callback
-          .calledWith(sinon.match.falsy, this.archive)
+      it('should return a stream before any processing is done', function (ctx) {
+        ctx.callback
+          .calledWith(sinon.match.falsy, ctx.archive)
           .should.equal(true)
-        this.callback
-          .calledBefore(this.ProjectZipStreamManager.createZipStreamForProject)
+        ctx.callback
+          .calledBefore(ctx.ProjectZipStreamManager.createZipStreamForProject)
           .should.equal(true)
       })
 
-      it('should get the names of each project', function () {
-        this.project_ids.map(projectId =>
-          this.ProjectGetter.getProject
+      it('should get the names of each project', function (ctx) {
+        ctx.project_ids.map(projectId =>
+          ctx.ProjectGetter.getProject
             .calledWith(projectId, { name: true })
             .should.equal(true)
         )
       })
 
-      it('should get a zip stream only for the existing project', function () {
-        this.ProjectZipStreamManager.createZipStreamForProject
+      it('should get a zip stream only for the existing project', function (ctx) {
+        ctx.ProjectZipStreamManager.createZipStreamForProject
           .calledWith('project-1')
           .should.equal(true)
-        this.ProjectZipStreamManager.createZipStreamForProject
+        ctx.ProjectZipStreamManager.createZipStreamForProject
           .calledWith('wrong-id')
           .should.equal(false)
       })
 
-      it('should only add the existing project to the zip', function () {
-        sinon.assert.calledOnce(this.archive.append)
-        this.archive.append
-          .calledWith(this.zip_streams['project-1'], {
-            name: this.project_names['project-1'] + '.zip',
+      it('should only add the existing project to the zip', function (ctx) {
+        sinon.assert.calledOnce(ctx.archive.append)
+        ctx.archive.append
+          .calledWith(ctx.zip_streams['project-1'], {
+            name: ctx.project_names['project-1'] + '.zip',
           })
           .should.equal(true)
       })
@@ -207,160 +233,162 @@ describe('ProjectZipStreamManager', function () {
 
   describe('createZipStreamForProject', function () {
     describe('successfully', function () {
-      beforeEach(function () {
-        this.ProjectZipStreamManager.addAllDocsToArchive = sinon
+      beforeEach(function (ctx) {
+        ctx.ProjectZipStreamManager.addAllDocsToArchive = sinon
           .stub()
           .callsArg(2)
-        this.ProjectZipStreamManager.addAllFilesToArchive = sinon
+        ctx.ProjectZipStreamManager.addAllFilesToArchive = sinon
           .stub()
           .callsArg(2)
-        this.archive.finalize = sinon.stub()
-        return this.ProjectZipStreamManager.createZipStreamForProject(
-          this.project_id,
-          this.callback
+        ctx.archive.finalize = sinon.stub()
+        return ctx.ProjectZipStreamManager.createZipStreamForProject(
+          ctx.project_id,
+          ctx.callback
         )
       })
 
-      it('should create a zip archive', function () {
-        return this.archiver.calledWith('zip').should.equal(true)
+      it('should create a zip archive', function (ctx) {
+        return ctx.archiver.calledWith('zip').should.equal(true)
       })
 
-      it('should return a stream before any processing is done', function () {
-        this.callback
-          .calledWith(sinon.match.falsy, this.archive)
+      it('should return a stream before any processing is done', function (ctx) {
+        ctx.callback
+          .calledWith(sinon.match.falsy, ctx.archive)
           .should.equal(true)
-        this.callback
-          .calledBefore(this.ProjectZipStreamManager.addAllDocsToArchive)
+        ctx.callback
+          .calledBefore(ctx.ProjectZipStreamManager.addAllDocsToArchive)
           .should.equal(true)
-        return this.callback
-          .calledBefore(this.ProjectZipStreamManager.addAllFilesToArchive)
-          .should.equal(true)
-      })
-
-      it('should add all of the project docs to the zip', function () {
-        return this.ProjectZipStreamManager.addAllDocsToArchive
-          .calledWith(this.project_id, this.archive)
+        return ctx.callback
+          .calledBefore(ctx.ProjectZipStreamManager.addAllFilesToArchive)
           .should.equal(true)
       })
 
-      it('should add all of the project files to the zip', function () {
-        return this.ProjectZipStreamManager.addAllFilesToArchive
-          .calledWith(this.project_id, this.archive)
+      it('should add all of the project docs to the zip', function (ctx) {
+        return ctx.ProjectZipStreamManager.addAllDocsToArchive
+          .calledWith(ctx.project_id, ctx.archive)
           .should.equal(true)
       })
 
-      it('should finalise the stream', function () {
-        return this.archive.finalize.called.should.equal(true)
+      it('should add all of the project files to the zip', function (ctx) {
+        return ctx.ProjectZipStreamManager.addAllFilesToArchive
+          .calledWith(ctx.project_id, ctx.archive)
+          .should.equal(true)
+      })
+
+      it('should finalise the stream', function (ctx) {
+        return ctx.archive.finalize.called.should.equal(true)
       })
     })
 
     describe('with an error adding docs', function () {
-      beforeEach(function () {
-        this.ProjectZipStreamManager.addAllDocsToArchive = sinon
+      beforeEach(function (ctx) {
+        ctx.ProjectZipStreamManager.addAllDocsToArchive = sinon
           .stub()
           .callsArgWith(2, new Error('something went wrong'))
-        this.ProjectZipStreamManager.addAllFilesToArchive = sinon
+        ctx.ProjectZipStreamManager.addAllFilesToArchive = sinon
           .stub()
           .callsArg(2)
-        this.archive.finalize = sinon.stub()
-        this.ProjectZipStreamManager.createZipStreamForProject(
-          this.project_id,
-          this.callback
+        ctx.archive.finalize = sinon.stub()
+        ctx.ProjectZipStreamManager.createZipStreamForProject(
+          ctx.project_id,
+          ctx.callback
         )
       })
 
-      it('should log out an error', function () {
-        return this.logger.error
+      it('should log out an error', function (ctx) {
+        return ctx.logger.error
           .calledWith(sinon.match.any, 'error adding docs to zip stream')
           .should.equal(true)
       })
 
-      it('should continue with the process', function () {
-        this.ProjectZipStreamManager.addAllDocsToArchive.called.should.equal(
+      it('should continue with the process', function (ctx) {
+        ctx.ProjectZipStreamManager.addAllDocsToArchive.called.should.equal(
           true
         )
-        this.ProjectZipStreamManager.addAllFilesToArchive.called.should.equal(
+        ctx.ProjectZipStreamManager.addAllFilesToArchive.called.should.equal(
           true
         )
-        return this.archive.finalize.called.should.equal(true)
+        return ctx.archive.finalize.called.should.equal(true)
       })
     })
 
     describe('with an error adding files', function () {
-      beforeEach(function () {
-        this.ProjectZipStreamManager.addAllDocsToArchive = sinon
+      beforeEach(function (ctx) {
+        ctx.ProjectZipStreamManager.addAllDocsToArchive = sinon
           .stub()
           .callsArg(2)
-        this.ProjectZipStreamManager.addAllFilesToArchive = sinon
+        ctx.ProjectZipStreamManager.addAllFilesToArchive = sinon
           .stub()
           .callsArgWith(2, new Error('something went wrong'))
-        this.archive.finalize = sinon.stub()
-        return this.ProjectZipStreamManager.createZipStreamForProject(
-          this.project_id,
-          this.callback
+        ctx.archive.finalize = sinon.stub()
+        return ctx.ProjectZipStreamManager.createZipStreamForProject(
+          ctx.project_id,
+          ctx.callback
         )
       })
 
-      it('should log out an error', function () {
-        return this.logger.error
+      it('should log out an error', function (ctx) {
+        return ctx.logger.error
           .calledWith(sinon.match.any, 'error adding files to zip stream')
           .should.equal(true)
       })
 
-      it('should continue with the process', function () {
-        this.ProjectZipStreamManager.addAllDocsToArchive.called.should.equal(
+      it('should continue with the process', function (ctx) {
+        ctx.ProjectZipStreamManager.addAllDocsToArchive.called.should.equal(
           true
         )
-        this.ProjectZipStreamManager.addAllFilesToArchive.called.should.equal(
+        ctx.ProjectZipStreamManager.addAllFilesToArchive.called.should.equal(
           true
         )
-        return this.archive.finalize.called.should.equal(true)
+        return ctx.archive.finalize.called.should.equal(true)
       })
     })
   })
 
   describe('addAllDocsToArchive', function () {
-    beforeEach(function (done) {
-      this.docs = {
-        '/main.tex': {
-          lines: [
-            '\\documentclass{article}',
-            '\\begin{document}',
-            'Hello world',
-            '\\end{document}',
-          ],
-        },
-        '/chapters/chapter1.tex': {
-          lines: ['chapter1', 'content'],
-        },
-      }
-      this.ProjectEntityHandler.getAllDocs = sinon
-        .stub()
-        .callsArgWith(1, null, this.docs)
-      return this.ProjectZipStreamManager.addAllDocsToArchive(
-        this.project_id,
-        this.archive,
-        error => {
-          this.callback(error)
-          return done()
+    beforeEach(function (ctx) {
+      return new Promise(resolve => {
+        ctx.docs = {
+          '/main.tex': {
+            lines: [
+              '\\documentclass{article}',
+              '\\begin{document}',
+              'Hello world',
+              '\\end{document}',
+            ],
+          },
+          '/chapters/chapter1.tex': {
+            lines: ['chapter1', 'content'],
+          },
         }
-      )
+        ctx.ProjectEntityHandler.getAllDocs = sinon
+          .stub()
+          .callsArgWith(1, null, ctx.docs)
+        return ctx.ProjectZipStreamManager.addAllDocsToArchive(
+          ctx.project_id,
+          ctx.archive,
+          error => {
+            ctx.callback(error)
+            return resolve()
+          }
+        )
+      })
     })
 
-    it('should get the docs for the project', function () {
-      return this.ProjectEntityHandler.getAllDocs
-        .calledWith(this.project_id)
+    it('should get the docs for the project', function (ctx) {
+      return ctx.ProjectEntityHandler.getAllDocs
+        .calledWith(ctx.project_id)
         .should.equal(true)
     })
 
-    it('should add each doc to the archive', function () {
+    it('should add each doc to the archive', function (ctx) {
       return (() => {
         const result = []
-        for (let path in this.docs) {
-          const doc = this.docs[path]
+        for (let path in ctx.docs) {
+          const doc = ctx.docs[path]
           path = path.slice(1) // remove "/"
           result.push(
-            this.archive.append
+            ctx.archive.append
               .calledWith(doc.lines.join('\n'), { name: path })
               .should.equal(true)
           )
@@ -371,8 +399,8 @@ describe('ProjectZipStreamManager', function () {
   })
 
   describe('addAllFilesToArchive', function () {
-    beforeEach(function () {
-      this.files = {
+    beforeEach(function (ctx) {
+      ctx.files = {
         '/image.png': {
           _id: 'file-id-1',
           hash: 'abc',
@@ -382,93 +410,91 @@ describe('ProjectZipStreamManager', function () {
           hash: 'def',
         },
       }
-      this.streams = {
+      ctx.streams = {
         'file-id-1': new EventEmitter(),
         'file-id-2': new EventEmitter(),
       }
-      this.ProjectEntityHandler.getAllFiles = sinon
+      ctx.ProjectEntityHandler.getAllFiles = sinon
         .stub()
-        .callsArgWith(1, null, this.files)
+        .callsArgWith(1, null, ctx.files)
     })
     describe('with project-history-blobs feature enabled', function () {
-      beforeEach(function () {
-        this.HistoryManager.requestBlobWithFallback = (
+      beforeEach(function (ctx) {
+        ctx.HistoryManager.requestBlobWithFallback = (
           projectId,
           hash,
           fileId,
           callback
         ) => {
-          return callback(null, { stream: this.streams[fileId] })
+          return callback(null, { stream: ctx.streams[fileId] })
         }
-        sinon.spy(this.HistoryManager, 'requestBlobWithFallback')
-        this.ProjectZipStreamManager.addAllFilesToArchive(
-          this.project_id,
-          this.archive,
-          this.callback
+        sinon.spy(ctx.HistoryManager, 'requestBlobWithFallback')
+        ctx.ProjectZipStreamManager.addAllFilesToArchive(
+          ctx.project_id,
+          ctx.archive,
+          ctx.callback
         )
-        for (const path in this.streams) {
-          const stream = this.streams[path]
+        for (const path in ctx.streams) {
+          const stream = ctx.streams[path]
           stream.emit('end')
         }
       })
 
-      it('should get the files for the project', function () {
-        return this.ProjectEntityHandler.getAllFiles
-          .calledWith(this.project_id)
+      it('should get the files for the project', function (ctx) {
+        return ctx.ProjectEntityHandler.getAllFiles
+          .calledWith(ctx.project_id)
           .should.equal(true)
       })
 
-      it('should get a stream for each file', function () {
-        for (const path in this.files) {
-          const file = this.files[path]
+      it('should get a stream for each file', function (ctx) {
+        for (const path in ctx.files) {
+          const file = ctx.files[path]
 
-          this.HistoryManager.requestBlobWithFallback
-            .calledWith(this.project_id, file.hash, file._id)
+          ctx.HistoryManager.requestBlobWithFallback
+            .calledWith(ctx.project_id, file.hash, file._id)
             .should.equal(true)
         }
       })
 
-      it('should add each file to the archive', function () {
-        for (let path in this.files) {
-          const file = this.files[path]
+      it('should add each file to the archive', function (ctx) {
+        for (let path in ctx.files) {
+          const file = ctx.files[path]
           path = path.slice(1) // remove "/"
-          this.archive.append
-            .calledWith(this.streams[file._id], { name: path })
+          ctx.archive.append
+            .calledWith(ctx.streams[file._id], { name: path })
             .should.equal(true)
         }
       })
     })
 
     describe('with project-history-blobs feature disabled', function () {
-      beforeEach(function () {
-        this.FileStoreHandler.getFileStream = (
+      beforeEach(function (ctx) {
+        ctx.FileStoreHandler.getFileStream = (
           projectId,
           fileId,
           query,
           callback
-        ) => callback(null, this.streams[fileId])
+        ) => callback(null, ctx.streams[fileId])
 
-        sinon.spy(this.FileStoreHandler, 'getFileStream')
-        this.Features.hasFeature
-          .withArgs('project-history-blobs')
-          .returns(false)
-        this.ProjectZipStreamManager.addAllFilesToArchive(
-          this.project_id,
-          this.archive,
-          this.callback
+        sinon.spy(ctx.FileStoreHandler, 'getFileStream')
+        ctx.Features.hasFeature.withArgs('project-history-blobs').returns(false)
+        ctx.ProjectZipStreamManager.addAllFilesToArchive(
+          ctx.project_id,
+          ctx.archive,
+          ctx.callback
         )
-        for (const path in this.streams) {
-          const stream = this.streams[path]
+        for (const path in ctx.streams) {
+          const stream = ctx.streams[path]
           stream.emit('end')
         }
       })
 
-      it('should get a stream for each file', function () {
-        for (const path in this.files) {
-          const file = this.files[path]
+      it('should get a stream for each file', function (ctx) {
+        for (const path in ctx.files) {
+          const file = ctx.files[path]
 
-          this.FileStoreHandler.getFileStream
-            .calledWith(this.project_id, file._id)
+          ctx.FileStoreHandler.getFileStream
+            .calledWith(ctx.project_id, file._id)
             .should.equal(true)
         }
       })

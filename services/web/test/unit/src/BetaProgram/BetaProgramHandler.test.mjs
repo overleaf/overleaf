@@ -1,4 +1,4 @@
-import esmock from 'esmock'
+import { vi } from 'vitest'
 import path from 'node:path'
 
 import sinon from 'sinon'
@@ -13,128 +13,155 @@ const modulePath = path.join(
 )
 
 describe('BetaProgramHandler', function () {
-  beforeEach(async function () {
-    this.user_id = 'some_id'
-    this.user = {
-      _id: this.user_id,
+  beforeEach(async function (ctx) {
+    ctx.user_id = 'some_id'
+    ctx.user = {
+      _id: ctx.user_id,
       email: 'user@example.com',
       features: {},
       betaProgram: false,
       save: sinon.stub().callsArgWith(0, null),
     }
-    this.handler = await esmock.strict(modulePath, {
-      '@overleaf/metrics': {
+
+    vi.doMock('@overleaf/metrics', () => ({
+      default: {
         inc: sinon.stub(),
       },
-      '../../../../app/src/Features/User/UserUpdater': (this.UserUpdater = {
+    }))
+
+    vi.doMock('../../../../app/src/Features/User/UserUpdater', () => ({
+      default: (ctx.UserUpdater = {
         promises: {
           updateUser: sinon.stub().resolves(),
         },
       }),
-      '../../../../app/src/Features/Analytics/AnalyticsManager':
-        (this.AnalyticsManager = {
+    }))
+
+    vi.doMock(
+      '../../../../app/src/Features/Analytics/AnalyticsManager',
+      () => ({
+        default: (ctx.AnalyticsManager = {
           setUserPropertyForUserInBackground: sinon.stub(),
         }),
-    })
+      })
+    )
+
+    ctx.handler = (await import(modulePath)).default
   })
 
   describe('optIn', function () {
-    beforeEach(function () {
-      this.user.betaProgram = false
-      this.call = callback => {
-        this.handler.optIn(this.user_id, callback)
+    beforeEach(function (ctx) {
+      ctx.user.betaProgram = false
+      ctx.call = callback => {
+        ctx.handler.optIn(ctx.user_id, callback)
       }
     })
 
-    it('should call userUpdater', function (done) {
-      this.call(err => {
-        expect(err).to.not.exist
-        this.UserUpdater.promises.updateUser.callCount.should.equal(1)
-        done()
+    it('should call userUpdater', function (ctx) {
+      return new Promise(resolve => {
+        ctx.call(err => {
+          expect(err).to.not.exist
+          ctx.UserUpdater.promises.updateUser.callCount.should.equal(1)
+          resolve()
+        })
       })
     })
 
-    it('should set beta-program user property to true', function (done) {
-      this.call(err => {
-        expect(err).to.not.exist
-        sinon.assert.calledWith(
-          this.AnalyticsManager.setUserPropertyForUserInBackground,
-          this.user_id,
-          'beta-program',
-          true
-        )
-        done()
+    it('should set beta-program user property to true', function (ctx) {
+      return new Promise(resolve => {
+        ctx.call(err => {
+          expect(err).to.not.exist
+          sinon.assert.calledWith(
+            ctx.AnalyticsManager.setUserPropertyForUserInBackground,
+            ctx.user_id,
+            'beta-program',
+            true
+          )
+          resolve()
+        })
       })
     })
 
-    it('should not produce an error', function (done) {
-      this.call(err => {
-        expect(err).to.not.exist
-        done()
+    it('should not produce an error', function (ctx) {
+      return new Promise(resolve => {
+        ctx.call(err => {
+          expect(err).to.not.exist
+          resolve()
+        })
       })
     })
 
     describe('when userUpdater produces an error', function () {
-      beforeEach(function () {
-        this.UserUpdater.promises.updateUser.rejects()
+      beforeEach(function (ctx) {
+        ctx.UserUpdater.promises.updateUser.rejects()
       })
 
-      it('should produce an error', function (done) {
-        this.call(err => {
-          expect(err).to.exist
-          expect(err).to.be.instanceof(Error)
-          done()
+      it('should produce an error', function (ctx) {
+        return new Promise(resolve => {
+          ctx.call(err => {
+            expect(err).to.exist
+            expect(err).to.be.instanceof(Error)
+            resolve()
+          })
         })
       })
     })
   })
 
   describe('optOut', function () {
-    beforeEach(function () {
-      this.user.betaProgram = true
-      this.call = callback => {
-        this.handler.optOut(this.user_id, callback)
+    beforeEach(function (ctx) {
+      ctx.user.betaProgram = true
+      ctx.call = callback => {
+        ctx.handler.optOut(ctx.user_id, callback)
       }
     })
 
-    it('should call userUpdater', function (done) {
-      this.call(err => {
-        expect(err).to.not.exist
-        this.UserUpdater.promises.updateUser.callCount.should.equal(1)
-        done()
+    it('should call userUpdater', function (ctx) {
+      return new Promise(resolve => {
+        ctx.call(err => {
+          expect(err).to.not.exist
+          ctx.UserUpdater.promises.updateUser.callCount.should.equal(1)
+          resolve()
+        })
       })
     })
 
-    it('should set beta-program user property to false', function (done) {
-      this.call(err => {
-        expect(err).to.not.exist
-        sinon.assert.calledWith(
-          this.AnalyticsManager.setUserPropertyForUserInBackground,
-          this.user_id,
-          'beta-program',
-          false
-        )
-        done()
+    it('should set beta-program user property to false', function (ctx) {
+      return new Promise(resolve => {
+        ctx.call(err => {
+          expect(err).to.not.exist
+          sinon.assert.calledWith(
+            ctx.AnalyticsManager.setUserPropertyForUserInBackground,
+            ctx.user_id,
+            'beta-program',
+            false
+          )
+          resolve()
+        })
       })
     })
 
-    it('should not produce an error', function (done) {
-      this.call(err => {
-        expect(err).to.not.exist
-        done()
+    it('should not produce an error', function (ctx) {
+      return new Promise(resolve => {
+        ctx.call(err => {
+          expect(err).to.not.exist
+          resolve()
+        })
       })
     })
 
     describe('when userUpdater produces an error', function () {
-      beforeEach(function () {
-        this.UserUpdater.promises.updateUser.rejects()
+      beforeEach(function (ctx) {
+        ctx.UserUpdater.promises.updateUser.rejects()
       })
 
-      it('should produce an error', function (done) {
-        this.call(err => {
-          expect(err).to.exist
-          expect(err).to.be.instanceof(Error)
-          done()
+      it('should produce an error', function (ctx) {
+        return new Promise(resolve => {
+          ctx.call(err => {
+            expect(err).to.exist
+            expect(err).to.be.instanceof(Error)
+            resolve()
+          })
         })
       })
     })

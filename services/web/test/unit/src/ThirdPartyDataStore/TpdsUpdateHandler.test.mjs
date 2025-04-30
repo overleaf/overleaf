@@ -1,4 +1,4 @@
-import esmock from 'esmock'
+import { vi } from 'vitest'
 import sinon from 'sinon'
 import { expect } from 'chai'
 import mongodb from 'mongodb-legacy'
@@ -9,120 +9,158 @@ const ObjectId = mongodb.ObjectId
 const MODULE_PATH =
   '../../../../app/src/Features/ThirdPartyDataStore/TpdsUpdateHandler.mjs'
 
+vi.mock('../../../../app/src/Features/Errors/Errors.js', () =>
+  vi.importActual('../../../../app/src/Features/Errors/Errors.js')
+)
+
 describe('TpdsUpdateHandler', function () {
-  beforeEach(async function () {
-    this.projectName = 'My recipes'
-    this.projects = {
-      active1: { _id: new ObjectId(), name: this.projectName },
-      active2: { _id: new ObjectId(), name: this.projectName },
+  beforeEach(async function (ctx) {
+    ctx.projectName = 'My recipes'
+    ctx.projects = {
+      active1: { _id: new ObjectId(), name: ctx.projectName },
+      active2: { _id: new ObjectId(), name: ctx.projectName },
       archived1: {
         _id: new ObjectId(),
-        name: this.projectName,
-        archived: [this.userId],
+        name: ctx.projectName,
+        archived: [ctx.userId],
       },
       archived2: {
         _id: new ObjectId(),
-        name: this.projectName,
-        archived: [this.userId],
+        name: ctx.projectName,
+        archived: [ctx.userId],
       },
     }
-    this.userId = new ObjectId()
-    this.source = 'dropbox'
-    this.path = `/some/file`
-    this.update = {}
-    this.folderPath = '/some/folder'
-    this.folder = {
+    ctx.userId = new ObjectId()
+    ctx.source = 'dropbox'
+    ctx.path = `/some/file`
+    ctx.update = {}
+    ctx.folderPath = '/some/folder'
+    ctx.folder = {
       _id: new ObjectId(),
       parentFolder_id: new ObjectId(),
     }
 
-    this.CooldownManager = {
+    ctx.CooldownManager = {
       promises: {
         isProjectOnCooldown: sinon.stub().resolves(false),
       },
     }
-    this.FileTypeManager = {
+    ctx.FileTypeManager = {
       promises: {
         shouldIgnore: sinon.stub().resolves(false),
       },
     }
-    this.Modules = {
+    ctx.Modules = {
       promises: {
         hooks: { fire: sinon.stub().resolves() },
       },
     }
-    this.notification = {
+    ctx.notification = {
       create: sinon.stub().resolves(),
     }
-    this.NotificationsBuilder = {
+    ctx.NotificationsBuilder = {
       promises: {
-        dropboxDuplicateProjectNames: sinon.stub().returns(this.notification),
+        dropboxDuplicateProjectNames: sinon.stub().returns(ctx.notification),
       },
     }
-    this.ProjectCreationHandler = {
+    ctx.ProjectCreationHandler = {
       promises: {
-        createBlankProject: sinon.stub().resolves(this.projects.active1),
+        createBlankProject: sinon.stub().resolves(ctx.projects.active1),
       },
     }
-    this.ProjectDeleter = {
+    ctx.ProjectDeleter = {
       promises: {
         markAsDeletedByExternalSource: sinon.stub().resolves(),
       },
     }
-    this.ProjectGetter = {
+    ctx.ProjectGetter = {
       promises: {
         findUsersProjectsByName: sinon.stub(),
         findAllUsersProjects: sinon
           .stub()
-          .resolves({ owned: [this.projects.active1], readAndWrite: [] }),
+          .resolves({ owned: [ctx.projects.active1], readAndWrite: [] }),
       },
     }
-    this.ProjectHelper = {
+    ctx.ProjectHelper = {
       isArchivedOrTrashed: sinon.stub().returns(false),
     }
-    this.ProjectHelper.isArchivedOrTrashed
-      .withArgs(this.projects.archived1, this.userId)
+    ctx.ProjectHelper.isArchivedOrTrashed
+      .withArgs(ctx.projects.archived1, ctx.userId)
       .returns(true)
-    this.ProjectHelper.isArchivedOrTrashed
-      .withArgs(this.projects.archived2, this.userId)
+    ctx.ProjectHelper.isArchivedOrTrashed
+      .withArgs(ctx.projects.archived2, ctx.userId)
       .returns(true)
-    this.RootDocManager = {
+    ctx.RootDocManager = {
       setRootDocAutomaticallyInBackground: sinon.stub(),
     }
-    this.UpdateMerger = {
+    ctx.UpdateMerger = {
       promises: {
         deleteUpdate: sinon.stub().resolves(),
         mergeUpdate: sinon.stub().resolves(),
-        createFolder: sinon.stub().resolves(this.folder),
+        createFolder: sinon.stub().resolves(ctx.folder),
       },
     }
 
-    this.TpdsUpdateHandler = await esmock.strict(MODULE_PATH, {
-      '.../../../../app/src/Features/Cooldown/CooldownManager':
-        this.CooldownManager,
-      '../../../../app/src/Features/Uploads/FileTypeManager':
-        this.FileTypeManager,
-      '../../../../app/src/infrastructure/Modules': this.Modules,
-      '../../../../app/src/Features/Notifications/NotificationsBuilder':
-        this.NotificationsBuilder,
-      '../../../../app/src/Features/Project/ProjectCreationHandler':
-        this.ProjectCreationHandler,
-      '../../../../app/src/Features/Project/ProjectDeleter':
-        this.ProjectDeleter,
-      '../../../../app/src/Features/Project/ProjectGetter': this.ProjectGetter,
-      '../../../../app/src/Features/Project/ProjectHelper': this.ProjectHelper,
-      '../../../../app/src/Features/Project/ProjectRootDocManager':
-        this.RootDocManager,
-      '../../../../app/src/Features/ThirdPartyDataStore/UpdateMerger':
-        this.UpdateMerger,
-    })
+    vi.doMock('../../../../app/src/Features/Cooldown/CooldownManager', () => ({
+      default: ctx.CooldownManager,
+    }))
+
+    vi.doMock('../../../../app/src/Features/Uploads/FileTypeManager', () => ({
+      default: ctx.FileTypeManager,
+    }))
+
+    vi.doMock('../../../../app/src/infrastructure/Modules', () => ({
+      default: ctx.Modules,
+    }))
+
+    vi.doMock(
+      '../../../../app/src/Features/Notifications/NotificationsBuilder',
+      () => ({
+        default: ctx.NotificationsBuilder,
+      })
+    )
+
+    vi.doMock(
+      '../../../../app/src/Features/Project/ProjectCreationHandler',
+      () => ({
+        default: ctx.ProjectCreationHandler,
+      })
+    )
+
+    vi.doMock('../../../../app/src/Features/Project/ProjectDeleter', () => ({
+      default: ctx.ProjectDeleter,
+    }))
+
+    vi.doMock('../../../../app/src/Features/Project/ProjectGetter', () => ({
+      default: ctx.ProjectGetter,
+    }))
+
+    vi.doMock('../../../../app/src/Features/Project/ProjectHelper', () => ({
+      default: ctx.ProjectHelper,
+    }))
+
+    vi.doMock(
+      '../../../../app/src/Features/Project/ProjectRootDocManager',
+      () => ({
+        default: ctx.RootDocManager,
+      })
+    )
+
+    vi.doMock(
+      '../../../../app/src/Features/ThirdPartyDataStore/UpdateMerger',
+      () => ({
+        default: ctx.UpdateMerger,
+      })
+    )
+
+    ctx.TpdsUpdateHandler = (await import(MODULE_PATH)).default
   })
 
   describe('getting an update', function () {
     describe('byId', function () {
       describe('with no matching project', function () {
-        beforeEach(function () {
-          this.projectId = new ObjectId().toString()
+        beforeEach(function (ctx) {
+          ctx.projectId = new ObjectId().toString()
         })
         receiveUpdateById()
         expectProjectNotCreated()
@@ -130,8 +168,8 @@ describe('TpdsUpdateHandler', function () {
       })
 
       describe('with one matching active project', function () {
-        beforeEach(function () {
-          this.projectId = this.projects.active1._id.toString()
+        beforeEach(function (ctx) {
+          ctx.projectId = ctx.projects.active1._id.toString()
         })
         receiveUpdateById()
         expectProjectNotCreated()
@@ -187,8 +225,8 @@ describe('TpdsUpdateHandler', function () {
 
     describe('update to a file that should be ignored', async function () {
       setupMatchingProjects(['active1'])
-      beforeEach(function () {
-        this.FileTypeManager.promises.shouldIgnore.resolves(true)
+      beforeEach(function (ctx) {
+        ctx.FileTypeManager.promises.shouldIgnore.resolves(true)
       })
       receiveUpdate()
       expectProjectNotCreated()
@@ -199,15 +237,15 @@ describe('TpdsUpdateHandler', function () {
     describe('update to a project on cooldown', async function () {
       setupMatchingProjects(['active1'])
       setupProjectOnCooldown()
-      beforeEach(async function () {
+      beforeEach(async function (ctx) {
         await expect(
-          this.TpdsUpdateHandler.promises.newUpdate(
-            this.userId,
+          ctx.TpdsUpdateHandler.promises.newUpdate(
+            ctx.userId,
             '', // projectId
-            this.projectName,
-            this.path,
-            this.update,
-            this.source
+            ctx.projectName,
+            ctx.path,
+            ctx.update,
+            ctx.source
           )
         ).to.be.rejectedWith(Errors.TooManyRequestsError)
       })
@@ -218,8 +256,8 @@ describe('TpdsUpdateHandler', function () {
   describe('getting a file delete', function () {
     describe('byId', function () {
       describe('with no matching project', function () {
-        beforeEach(function () {
-          this.projectId = new ObjectId().toString()
+        beforeEach(function (ctx) {
+          ctx.projectId = new ObjectId().toString()
         })
         receiveFileDeleteById()
         expectDeleteNotProcessed()
@@ -227,8 +265,8 @@ describe('TpdsUpdateHandler', function () {
       })
 
       describe('with one matching active project', function () {
-        beforeEach(function () {
-          this.projectId = this.projects.active1._id.toString()
+        beforeEach(function (ctx) {
+          ctx.projectId = ctx.projects.active1._id.toString()
         })
         receiveFileDeleteById()
         expectDeleteProcessed()
@@ -379,13 +417,13 @@ describe('TpdsUpdateHandler', function () {
     describe('update to a project on cooldown', async function () {
       setupMatchingProjects(['active1'])
       setupProjectOnCooldown()
-      beforeEach(async function () {
+      beforeEach(async function (ctx) {
         await expect(
-          this.TpdsUpdateHandler.promises.createFolder(
-            this.userId,
-            this.projectId,
-            this.projectName,
-            this.path
+          ctx.TpdsUpdateHandler.promises.createFolder(
+            ctx.userId,
+            ctx.projectId,
+            ctx.projectName,
+            ctx.path
           )
         ).to.be.rejectedWith(Errors.TooManyRequestsError)
       })
@@ -397,18 +435,18 @@ describe('TpdsUpdateHandler', function () {
 /* Setup helpers */
 
 function setupMatchingProjects(projectKeys) {
-  beforeEach(function () {
-    const projects = projectKeys.map(key => this.projects[key])
-    this.ProjectGetter.promises.findUsersProjectsByName
-      .withArgs(this.userId, this.projectName)
+  beforeEach(function (ctx) {
+    const projects = projectKeys.map(key => ctx.projects[key])
+    ctx.ProjectGetter.promises.findUsersProjectsByName
+      .withArgs(ctx.userId, ctx.projectName)
       .resolves(projects)
   })
 }
 
 function setupProjectOnCooldown() {
-  beforeEach(function () {
-    this.CooldownManager.promises.isProjectOnCooldown
-      .withArgs(this.projects.active1._id)
+  beforeEach(function (ctx) {
+    ctx.CooldownManager.promises.isProjectOnCooldown
+      .withArgs(ctx.projects.active1._id)
       .resolves(true)
   })
 }
@@ -416,76 +454,77 @@ function setupProjectOnCooldown() {
 /* Test helpers */
 
 function receiveUpdate() {
-  beforeEach(async function () {
-    await this.TpdsUpdateHandler.promises.newUpdate(
-      this.userId,
+  beforeEach(async function (ctx) {
+    await ctx.TpdsUpdateHandler.promises.newUpdate(
+      ctx.userId,
       '', // projectId
-      this.projectName,
-      this.path,
-      this.update,
-      this.source
+      ctx.projectName,
+      ctx.path,
+      ctx.update,
+      ctx.source
     )
   })
 }
 
 function receiveUpdateById() {
-  beforeEach(function (done) {
-    this.TpdsUpdateHandler.newUpdate(
-      this.userId,
-      this.projectId,
+  beforeEach(async function (ctx) {
+    await ctx.TpdsUpdateHandler.promises.newUpdate(
+      ctx.userId,
+      ctx.projectId,
       '', // projectName
-      this.path,
-      this.update,
-      this.source,
-      done
+      ctx.path,
+      ctx.update,
+      ctx.source
     )
   })
 }
 
 function receiveFileDelete() {
-  beforeEach(async function () {
-    await this.TpdsUpdateHandler.promises.deleteUpdate(
-      this.userId,
+  beforeEach(async function (ctx) {
+    await ctx.TpdsUpdateHandler.promises.deleteUpdate(
+      ctx.userId,
       '', // projectId
-      this.projectName,
-      this.path,
-      this.source
+      ctx.projectName,
+      ctx.path,
+      ctx.source
     )
   })
 }
 
 function receiveFileDeleteById() {
-  beforeEach(function (done) {
-    this.TpdsUpdateHandler.deleteUpdate(
-      this.userId,
-      this.projectId,
-      '', // projectName
-      this.path,
-      this.source,
-      done
-    )
+  beforeEach(function (ctx) {
+    return new Promise(resolve => {
+      ctx.TpdsUpdateHandler.deleteUpdate(
+        ctx.userId,
+        ctx.projectId,
+        '', // projectName
+        ctx.path,
+        ctx.source,
+        resolve
+      )
+    })
   })
 }
 
 function receiveProjectDelete() {
-  beforeEach(async function () {
-    await this.TpdsUpdateHandler.promises.deleteUpdate(
-      this.userId,
+  beforeEach(async function (ctx) {
+    await ctx.TpdsUpdateHandler.promises.deleteUpdate(
+      ctx.userId,
       '', // projectId
-      this.projectName,
+      ctx.projectName,
       '/',
-      this.source
+      ctx.source
     )
   })
 }
 
 function receiveFolderUpdate() {
-  beforeEach(async function () {
-    await this.TpdsUpdateHandler.promises.createFolder(
-      this.userId,
-      this.projectId,
-      this.projectName,
-      this.folderPath
+  beforeEach(async function (ctx) {
+    await ctx.TpdsUpdateHandler.promises.createFolder(
+      ctx.userId,
+      ctx.projectId,
+      ctx.projectName,
+      ctx.folderPath
     )
   })
 }
@@ -493,121 +532,121 @@ function receiveFolderUpdate() {
 /* Expectations */
 
 function expectProjectCreated() {
-  it('creates a project', function () {
+  it('creates a project', function (ctx) {
     expect(
-      this.ProjectCreationHandler.promises.createBlankProject
-    ).to.have.been.calledWith(this.userId, this.projectName)
+      ctx.ProjectCreationHandler.promises.createBlankProject
+    ).to.have.been.calledWith(ctx.userId, ctx.projectName)
   })
 
-  it('sets the root doc', function () {
+  it('sets the root doc', function (ctx) {
     expect(
-      this.RootDocManager.setRootDocAutomaticallyInBackground
-    ).to.have.been.calledWith(this.projects.active1._id)
+      ctx.RootDocManager.setRootDocAutomaticallyInBackground
+    ).to.have.been.calledWith(ctx.projects.active1._id)
   })
 }
 
 function expectProjectNotCreated() {
-  it('does not create a project', function () {
-    expect(this.ProjectCreationHandler.promises.createBlankProject).not.to.have
+  it('does not create a project', function (ctx) {
+    expect(ctx.ProjectCreationHandler.promises.createBlankProject).not.to.have
       .been.called
   })
 
-  it('does not set the root doc', function () {
-    expect(this.RootDocManager.setRootDocAutomaticallyInBackground).not.to.have
+  it('does not set the root doc', function (ctx) {
+    expect(ctx.RootDocManager.setRootDocAutomaticallyInBackground).not.to.have
       .been.called
   })
 }
 
 function expectUpdateProcessed() {
-  it('processes the update', function () {
-    expect(this.UpdateMerger.promises.mergeUpdate).to.have.been.calledWith(
-      this.userId,
-      this.projects.active1._id,
-      this.path,
-      this.update,
-      this.source
+  it('processes the update', function (ctx) {
+    expect(ctx.UpdateMerger.promises.mergeUpdate).to.have.been.calledWith(
+      ctx.userId,
+      ctx.projects.active1._id,
+      ctx.path,
+      ctx.update,
+      ctx.source
     )
   })
 }
 
 function expectUpdateNotProcessed() {
-  it('does not process the update', function () {
-    expect(this.UpdateMerger.promises.mergeUpdate).not.to.have.been.called
+  it('does not process the update', function (ctx) {
+    expect(ctx.UpdateMerger.promises.mergeUpdate).not.to.have.been.called
   })
 }
 
 function expectFolderUpdateProcessed() {
-  it('processes the folder update', function () {
-    expect(this.UpdateMerger.promises.createFolder).to.have.been.calledWith(
-      this.projects.active1._id,
-      this.folderPath,
-      this.userId
+  it('processes the folder update', function (ctx) {
+    expect(ctx.UpdateMerger.promises.createFolder).to.have.been.calledWith(
+      ctx.projects.active1._id,
+      ctx.folderPath,
+      ctx.userId
     )
   })
 }
 
 function expectFolderUpdateNotProcessed() {
-  it("doesn't process the folder update", function () {
-    expect(this.UpdateMerger.promises.createFolder).not.to.have.been.called
+  it("doesn't process the folder update", function (ctx) {
+    expect(ctx.UpdateMerger.promises.createFolder).not.to.have.been.called
   })
 }
 
 function expectDropboxUnlinked() {
-  it('unlinks Dropbox', function () {
-    expect(this.Modules.promises.hooks.fire).to.have.been.calledWith(
+  it('unlinks Dropbox', function (ctx) {
+    expect(ctx.Modules.promises.hooks.fire).to.have.been.calledWith(
       'removeDropbox',
-      this.userId,
+      ctx.userId,
       'duplicate-projects'
     )
   })
 
-  it('creates a notification that dropbox was unlinked', function () {
+  it('creates a notification that dropbox was unlinked', function (ctx) {
     expect(
-      this.NotificationsBuilder.promises.dropboxDuplicateProjectNames
-    ).to.have.been.calledWith(this.userId)
-    expect(this.notification.create).to.have.been.calledWith(this.projectName)
+      ctx.NotificationsBuilder.promises.dropboxDuplicateProjectNames
+    ).to.have.been.calledWith(ctx.userId)
+    expect(ctx.notification.create).to.have.been.calledWith(ctx.projectName)
   })
 }
 
 function expectDropboxNotUnlinked() {
-  it('does not unlink Dropbox', function () {
-    expect(this.Modules.promises.hooks.fire).not.to.have.been.called
+  it('does not unlink Dropbox', function (ctx) {
+    expect(ctx.Modules.promises.hooks.fire).not.to.have.been.called
   })
 
-  it('does not create a notification that dropbox was unlinked', function () {
-    expect(this.NotificationsBuilder.promises.dropboxDuplicateProjectNames).not
+  it('does not create a notification that dropbox was unlinked', function (ctx) {
+    expect(ctx.NotificationsBuilder.promises.dropboxDuplicateProjectNames).not
       .to.have.been.called
   })
 }
 
 function expectDeleteProcessed() {
-  it('processes the delete', function () {
-    expect(this.UpdateMerger.promises.deleteUpdate).to.have.been.calledWith(
-      this.userId,
-      this.projects.active1._id,
-      this.path,
-      this.source
+  it('processes the delete', function (ctx) {
+    expect(ctx.UpdateMerger.promises.deleteUpdate).to.have.been.calledWith(
+      ctx.userId,
+      ctx.projects.active1._id,
+      ctx.path,
+      ctx.source
     )
   })
 }
 
 function expectDeleteNotProcessed() {
-  it('does not process the delete', function () {
-    expect(this.UpdateMerger.promises.deleteUpdate).not.to.have.been.called
+  it('does not process the delete', function (ctx) {
+    expect(ctx.UpdateMerger.promises.deleteUpdate).not.to.have.been.called
   })
 }
 
 function expectProjectDeleted() {
-  it('deletes the project', function () {
+  it('deletes the project', function (ctx) {
     expect(
-      this.ProjectDeleter.promises.markAsDeletedByExternalSource
-    ).to.have.been.calledWith(this.projects.active1._id)
+      ctx.ProjectDeleter.promises.markAsDeletedByExternalSource
+    ).to.have.been.calledWith(ctx.projects.active1._id)
   })
 }
 
 function expectProjectNotDeleted() {
-  it('does not delete the project', function () {
-    expect(this.ProjectDeleter.promises.markAsDeletedByExternalSource).not.to
+  it('does not delete the project', function (ctx) {
+    expect(ctx.ProjectDeleter.promises.markAsDeletedByExternalSource).not.to
       .have.been.called
   })
 }

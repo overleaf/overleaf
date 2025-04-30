@@ -1,34 +1,47 @@
+import { vi } from 'vitest'
 import sinon from 'sinon'
 import { expect } from 'chai'
-import esmock from 'esmock'
 import MockResponse from '../helpers/MockResponse.js'
 const modulePath = '../../../../app/src/Features/Contacts/ContactController.mjs'
 
 describe('ContactController', function () {
-  beforeEach(async function () {
-    this.SessionManager = { getLoggedInUserId: sinon.stub() }
-    this.ContactController = await esmock.strict(modulePath, {
-      '../../../../app/src/Features/User/UserGetter': (this.UserGetter = {
+  beforeEach(async function (ctx) {
+    ctx.SessionManager = { getLoggedInUserId: sinon.stub() }
+
+    vi.doMock('../../../../app/src/Features/User/UserGetter', () => ({
+      default: (ctx.UserGetter = {
         promises: {},
       }),
-      '../../../../app/src/Features/Contacts/ContactManager':
-        (this.ContactManager = { promises: {} }),
-      '../../../../app/src/Features/Authentication/SessionManager':
-        (this.SessionManager = {}),
-      '../../../../app/src/infrastructure/Modules': (this.Modules = {
+    }))
+
+    vi.doMock('../../../../app/src/Features/Contacts/ContactManager', () => ({
+      default: (ctx.ContactManager = { promises: {} }),
+    }))
+
+    vi.doMock(
+      '../../../../app/src/Features/Authentication/SessionManager',
+      () => ({
+        default: (ctx.SessionManager = {}),
+      })
+    )
+
+    vi.doMock('../../../../app/src/infrastructure/Modules', () => ({
+      default: (ctx.Modules = {
         promises: { hooks: {} },
       }),
-    })
+    }))
 
-    this.req = {}
-    this.res = new MockResponse()
+    ctx.ContactController = (await import(modulePath)).default
+
+    ctx.req = {}
+    ctx.res = new MockResponse()
   })
 
   describe('getContacts', function () {
-    beforeEach(function () {
-      this.user_id = 'mock-user-id'
-      this.contact_ids = ['contact-1', 'contact-2', 'contact-3']
-      this.contacts = [
+    beforeEach(function (ctx) {
+      ctx.user_id = 'mock-user-id'
+      ctx.contact_ids = ['contact-1', 'contact-2', 'contact-3']
+      ctx.contacts = [
         {
           _id: 'contact-1',
           email: 'joe@example.com',
@@ -52,78 +65,84 @@ describe('ContactController', function () {
           unsued: 'foo',
         },
       ]
-      this.SessionManager.getLoggedInUserId = sinon.stub().returns(this.user_id)
-      this.ContactManager.promises.getContactIds = sinon
+      ctx.SessionManager.getLoggedInUserId = sinon.stub().returns(ctx.user_id)
+      ctx.ContactManager.promises.getContactIds = sinon
         .stub()
-        .resolves(this.contact_ids)
-      this.UserGetter.promises.getUsers = sinon.stub().resolves(this.contacts)
-      this.Modules.promises.hooks.fire = sinon.stub()
+        .resolves(ctx.contact_ids)
+      ctx.UserGetter.promises.getUsers = sinon.stub().resolves(ctx.contacts)
+      ctx.Modules.promises.hooks.fire = sinon.stub()
     })
 
-    it('should look up the logged in user id', async function () {
-      this.ContactController.getContacts(this.req, this.res)
-      this.SessionManager.getLoggedInUserId
-        .calledWith(this.req.session)
+    it('should look up the logged in user id', async function (ctx) {
+      ctx.ContactController.getContacts(ctx.req, ctx.res)
+      ctx.SessionManager.getLoggedInUserId
+        .calledWith(ctx.req.session)
         .should.equal(true)
     })
 
-    it('should get the users contact ids', async function () {
-      this.res.callback = () => {
+    it('should get the users contact ids', async function (ctx) {
+      ctx.res.callback = () => {
         expect(
-          this.ContactManager.promises.getContactIds
-        ).to.have.been.calledWith(this.user_id, { limit: 50 })
+          ctx.ContactManager.promises.getContactIds
+        ).to.have.been.calledWith(ctx.user_id, { limit: 50 })
       }
-      this.ContactController.getContacts(this.req, this.res)
+      ctx.ContactController.getContacts(ctx.req, ctx.res)
     })
 
-    it('should populate the users contacts ids', function (done) {
-      this.res.callback = () => {
-        expect(this.UserGetter.promises.getUsers).to.have.been.calledWith(
-          this.contact_ids,
-          {
-            email: 1,
-            first_name: 1,
-            last_name: 1,
-            holdingAccount: 1,
-          }
-        )
-        done()
-      }
-      this.ContactController.getContacts(this.req, this.res, done)
+    it('should populate the users contacts ids', function (ctx) {
+      return new Promise(resolve => {
+        ctx.res.callback = () => {
+          expect(ctx.UserGetter.promises.getUsers).to.have.been.calledWith(
+            ctx.contact_ids,
+            {
+              email: 1,
+              first_name: 1,
+              last_name: 1,
+              holdingAccount: 1,
+            }
+          )
+          resolve()
+        }
+        ctx.ContactController.getContacts(ctx.req, ctx.res, resolve)
+      })
     })
 
-    it('should fire the getContact module hook', function (done) {
-      this.res.callback = () => {
-        expect(this.Modules.promises.hooks.fire).to.have.been.calledWith(
-          'getContacts',
-          this.user_id
-        )
-        done()
-      }
-      this.ContactController.getContacts(this.req, this.res, done)
+    it('should fire the getContact module hook', function (ctx) {
+      return new Promise(resolve => {
+        ctx.res.callback = () => {
+          expect(ctx.Modules.promises.hooks.fire).to.have.been.calledWith(
+            'getContacts',
+            ctx.user_id
+          )
+          resolve()
+        }
+        ctx.ContactController.getContacts(ctx.req, ctx.res, resolve)
+      })
     })
 
-    it('should return a formatted list of contacts in contact list order, without holding accounts', function (done) {
-      this.res.callback = () => {
-        this.res.json.args[0][0].contacts.should.deep.equal([
-          {
-            id: 'contact-1',
-            email: 'joe@example.com',
-            first_name: 'Joe',
-            last_name: 'Example',
-            type: 'user',
-          },
-          {
-            id: 'contact-3',
-            email: 'jim@example.com',
-            first_name: 'Jim',
-            last_name: 'Example',
-            type: 'user',
-          },
-        ])
-        done()
-      }
-      this.ContactController.getContacts(this.req, this.res, done)
+    it('should return a formatted list of contacts in contact list order, without holding accounts', function (ctx) {
+      return new Promise(resolve => {
+        ctx.res.callback = () => {
+          ctx.res.json.args[0][0].contacts.should.deep.equal([
+            {
+              id: 'contact-1',
+              email: 'joe@example.com',
+              first_name: 'Joe',
+              last_name: 'Example',
+              type: 'user',
+            },
+            {
+              id: 'contact-3',
+              email: 'jim@example.com',
+              first_name: 'Jim',
+              last_name: 'Example',
+              type: 'user',
+            },
+          ])
+          resolve()
+        }
+        ctx.ContactController.getContacts(ctx.req, ctx.res, resolve)
+      })
     })
   })
 })

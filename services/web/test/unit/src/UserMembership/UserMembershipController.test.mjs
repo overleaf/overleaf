@@ -1,6 +1,6 @@
+import { vi } from 'vitest'
 import sinon from 'sinon'
 import { expect } from 'chai'
-import esmock from 'esmock'
 import MockRequest from '../helpers/MockRequest.js'
 import MockResponse from '../helpers/MockResponse.js'
 import EntityConfigs from '../../../../app/src/Features/UserMembership/UserMembershipEntityConfigs.js'
@@ -15,27 +15,39 @@ const assertCalledWith = sinon.assert.calledWith
 const modulePath =
   '../../../../app/src/Features/UserMembership/UserMembershipController.mjs'
 
+vi.mock(
+  '../../../../app/src/Features/UserMembership/UserMembershipErrors.js',
+  () =>
+    vi.importActual(
+      '../../../../app/src/Features/UserMembership/UserMembershipErrors.js'
+    )
+)
+
+vi.mock('../../../../app/src/Features/Errors/Errors.js', () =>
+  vi.importActual('../../../../app/src/Features/Errors/Errors.js')
+)
+
 describe('UserMembershipController', function () {
-  beforeEach(async function () {
-    this.req = new MockRequest()
-    this.req.params.id = 'mock-entity-id'
-    this.user = { _id: 'mock-user-id' }
-    this.newUser = { _id: 'mock-new-user-id', email: 'new-user-email@foo.bar' }
-    this.subscription = {
+  beforeEach(async function (ctx) {
+    ctx.req = new MockRequest()
+    ctx.req.params.id = 'mock-entity-id'
+    ctx.user = { _id: 'mock-user-id' }
+    ctx.newUser = { _id: 'mock-new-user-id', email: 'new-user-email@foo.bar' }
+    ctx.subscription = {
       _id: 'mock-subscription-id',
       admin_id: 'mock-admin-id',
-      fetchV1Data: callback => callback(null, this.subscription),
+      fetchV1Data: callback => callback(null, ctx.subscription),
     }
-    this.institution = {
+    ctx.institution = {
       _id: 'mock-institution-id',
       v1Id: 123,
       fetchV1Data: callback => {
-        const institution = Object.assign({}, this.institution)
+        const institution = Object.assign({}, ctx.institution)
         institution.name = 'Test Institution Name'
         callback(null, institution)
       },
     }
-    this.users = [
+    ctx.users = [
       {
         _id: 'mock-member-id-1',
         email: 'mock-email-1@foo.com',
@@ -50,106 +62,136 @@ describe('UserMembershipController', function () {
       },
     ]
 
-    this.Settings = {
+    ctx.Settings = {
       managedUsers: {
         enabled: false,
       },
     }
 
-    this.SessionManager = {
-      getSessionUser: sinon.stub().returns(this.user),
-      getLoggedInUserId: sinon.stub().returns(this.user._id),
+    ctx.SessionManager = {
+      getSessionUser: sinon.stub().returns(ctx.user),
+      getLoggedInUserId: sinon.stub().returns(ctx.user._id),
     }
-    this.SSOConfig = {
+    ctx.SSOConfig = {
       findById: sinon
         .stub()
         .returns({ exec: sinon.stub().resolves({ enabled: true }) }),
     }
-    this.UserMembershipHandler = {
-      getEntity: sinon.stub().yields(null, this.subscription),
-      createEntity: sinon.stub().yields(null, this.institution),
-      getUsers: sinon.stub().yields(null, this.users),
-      addUser: sinon.stub().yields(null, this.newUser),
+    ctx.UserMembershipHandler = {
+      getEntity: sinon.stub().yields(null, ctx.subscription),
+      createEntity: sinon.stub().yields(null, ctx.institution),
+      getUsers: sinon.stub().yields(null, ctx.users),
+      addUser: sinon.stub().yields(null, ctx.newUser),
       removeUser: sinon.stub().yields(null),
       promises: {
-        getUsers: sinon.stub().resolves(this.users),
+        getUsers: sinon.stub().resolves(ctx.users),
       },
     }
-    this.SplitTestHandler = {
+    ctx.SplitTestHandler = {
       promises: {
         getAssignment: sinon.stub().resolves({ variant: 'default' }),
       },
       getAssignment: sinon.stub().yields(null, { variant: 'default' }),
     }
-    this.RecurlyClient = {
+    ctx.RecurlyClient = {
       promises: {
         getSubscription: sinon.stub().resolves({}),
       },
     }
-    this.UserMembershipController = await esmock.strict(modulePath, {
-      '../../../../app/src/Features/UserMembership/UserMembershipErrors': {
+
+    vi.doMock(
+      '../../../../app/src/Features/UserMembership/UserMembershipErrors',
+      () => ({
         UserIsManagerError,
         UserNotFoundError,
         UserAlreadyAddedError,
-      },
-      '../../../../app/src/Features/Authentication/SessionManager':
-        this.SessionManager,
-      '../../../../app/src/Features/SplitTests/SplitTestHandler':
-        this.SplitTestHandler,
-      '../../../../app/src/Features/UserMembership/UserMembershipHandler':
-        this.UserMembershipHandler,
-      '../../../../app/src/Features/Subscription/RecurlyClient':
-        this.RecurlyClient,
-      '@overleaf/settings': this.Settings,
-      '../../../../app/src/models/SSOConfig': { SSOConfig: this.SSOConfig },
-    })
+      })
+    )
+
+    vi.doMock(
+      '../../../../app/src/Features/Authentication/SessionManager',
+      () => ({
+        default: ctx.SessionManager,
+      })
+    )
+
+    vi.doMock(
+      '../../../../app/src/Features/SplitTests/SplitTestHandler',
+      () => ({
+        default: ctx.SplitTestHandler,
+      })
+    )
+
+    vi.doMock(
+      '../../../../app/src/Features/UserMembership/UserMembershipHandler',
+      () => ({
+        default: ctx.UserMembershipHandler,
+      })
+    )
+
+    vi.doMock(
+      '../../../../app/src/Features/Subscription/RecurlyClient',
+      () => ({
+        default: ctx.RecurlyClient,
+      })
+    )
+
+    vi.doMock('@overleaf/settings', () => ({
+      default: ctx.Settings,
+    }))
+
+    vi.doMock('../../../../app/src/models/SSOConfig', () => ({
+      SSOConfig: ctx.SSOConfig,
+    }))
+
+    ctx.UserMembershipController = (await import(modulePath)).default
   })
 
   describe('index', function () {
-    beforeEach(function () {
-      this.req.entity = this.subscription
-      this.req.entityConfig = EntityConfigs.group
+    beforeEach(function (ctx) {
+      ctx.req.entity = ctx.subscription
+      ctx.req.entityConfig = EntityConfigs.group
     })
 
-    it('get users', async function () {
-      await this.UserMembershipController.manageGroupMembers(this.req, {
+    it('get users', async function (ctx) {
+      await ctx.UserMembershipController.manageGroupMembers(ctx.req, {
         render: () => {
           sinon.assert.calledWithMatch(
-            this.UserMembershipHandler.promises.getUsers,
-            this.subscription,
+            ctx.UserMembershipHandler.promises.getUsers,
+            ctx.subscription,
             { modelName: 'Subscription' }
           )
         },
       })
     })
 
-    it('render group view', async function () {
-      this.subscription.managedUsersEnabled = false
-      await this.UserMembershipController.manageGroupMembers(this.req, {
+    it('render group view', async function (ctx) {
+      ctx.subscription.managedUsersEnabled = false
+      await ctx.UserMembershipController.manageGroupMembers(ctx.req, {
         render: (viewPath, viewParams) => {
           expect(viewPath).to.equal('user_membership/group-members-react')
-          expect(viewParams.users).to.deep.equal(this.users)
-          expect(viewParams.groupSize).to.equal(this.subscription.membersLimit)
+          expect(viewParams.users).to.deep.equal(ctx.users)
+          expect(viewParams.groupSize).to.equal(ctx.subscription.membersLimit)
           expect(viewParams.managedUsersActive).to.equal(false)
         },
       })
     })
 
-    it('render group view with managed users', async function () {
-      this.subscription.managedUsersEnabled = true
-      await this.UserMembershipController.manageGroupMembers(this.req, {
+    it('render group view with managed users', async function (ctx) {
+      ctx.subscription.managedUsersEnabled = true
+      await ctx.UserMembershipController.manageGroupMembers(ctx.req, {
         render: (viewPath, viewParams) => {
           expect(viewPath).to.equal('user_membership/group-members-react')
-          expect(viewParams.users).to.deep.equal(this.users)
-          expect(viewParams.groupSize).to.equal(this.subscription.membersLimit)
+          expect(viewParams.users).to.deep.equal(ctx.users)
+          expect(viewParams.groupSize).to.equal(ctx.subscription.membersLimit)
           expect(viewParams.managedUsersActive).to.equal(true)
         },
       })
     })
 
-    it('render group managers view', async function () {
-      this.req.entityConfig = EntityConfigs.groupManagers
-      await this.UserMembershipController.manageGroupManagers(this.req, {
+    it('render group managers view', async function (ctx) {
+      ctx.req.entityConfig = EntityConfigs.groupManagers
+      await ctx.UserMembershipController.manageGroupManagers(ctx.req, {
         render: (viewPath, viewParams) => {
           expect(viewPath).to.equal('user_membership/group-managers-react')
           expect(viewParams.groupSize).to.equal(undefined)
@@ -157,10 +199,10 @@ describe('UserMembershipController', function () {
       })
     })
 
-    it('render institution view', async function () {
-      this.req.entity = this.institution
-      this.req.entityConfig = EntityConfigs.institution
-      await this.UserMembershipController.manageInstitutionManagers(this.req, {
+    it('render institution view', async function (ctx) {
+      ctx.req.entity = ctx.institution
+      ctx.req.entityConfig = EntityConfigs.institution
+      await ctx.UserMembershipController.manageInstitutionManagers(ctx.req, {
         render: (viewPath, viewParams) => {
           expect(viewPath).to.equal(
             'user_membership/institution-managers-react'
@@ -173,207 +215,233 @@ describe('UserMembershipController', function () {
   })
 
   describe('add', function () {
-    beforeEach(function () {
-      this.req.body.email = this.newUser.email
-      this.req.entity = this.subscription
-      this.req.entityConfig = EntityConfigs.groupManagers
+    beforeEach(function (ctx) {
+      ctx.req.body.email = ctx.newUser.email
+      ctx.req.entity = ctx.subscription
+      ctx.req.entityConfig = EntityConfigs.groupManagers
     })
 
-    it('add user', function (done) {
-      this.UserMembershipController.add(this.req, {
-        json: () => {
-          sinon.assert.calledWithMatch(
-            this.UserMembershipHandler.addUser,
-            this.subscription,
-            { modelName: 'Subscription' },
-            this.newUser.email
-          )
-          done()
-        },
-      })
-    })
-
-    it('return user object', function (done) {
-      this.UserMembershipController.add(this.req, {
-        json: payload => {
-          payload.user.should.equal(this.newUser)
-          done()
-        },
-      })
-    })
-
-    it('handle readOnly entity', function (done) {
-      this.req.entityConfig = EntityConfigs.group
-      this.UserMembershipController.add(this.req, null, error => {
-        expect(error).to.exist
-        expect(error).to.be.an.instanceof(Errors.NotFoundError)
-        done()
-      })
-    })
-
-    it('handle user already added', function (done) {
-      this.UserMembershipHandler.addUser.yields(new UserAlreadyAddedError())
-      this.UserMembershipController.add(this.req, {
-        status: () => ({
-          json: payload => {
-            expect(payload.error.code).to.equal('user_already_added')
-            done()
+    it('add user', function (ctx) {
+      return new Promise(resolve => {
+        ctx.UserMembershipController.add(ctx.req, {
+          json: () => {
+            sinon.assert.calledWithMatch(
+              ctx.UserMembershipHandler.addUser,
+              ctx.subscription,
+              { modelName: 'Subscription' },
+              ctx.newUser.email
+            )
+            resolve()
           },
-        }),
+        })
       })
     })
 
-    it('handle user not found', function (done) {
-      this.UserMembershipHandler.addUser.yields(new UserNotFoundError())
-      this.UserMembershipController.add(this.req, {
-        status: () => ({
+    it('return user object', function (ctx) {
+      return new Promise(resolve => {
+        ctx.UserMembershipController.add(ctx.req, {
           json: payload => {
-            expect(payload.error.code).to.equal('user_not_found')
-            done()
+            payload.user.should.equal(ctx.newUser)
+            resolve()
           },
-        }),
+        })
       })
     })
 
-    it('handle invalid email', function (done) {
-      this.req.body.email = 'not_valid_email'
-      this.UserMembershipController.add(this.req, {
-        status: () => ({
-          json: payload => {
-            expect(payload.error.code).to.equal('invalid_email')
-            done()
-          },
-        }),
+    it('handle readOnly entity', function (ctx) {
+      return new Promise(resolve => {
+        ctx.req.entityConfig = EntityConfigs.group
+        ctx.UserMembershipController.add(ctx.req, null, error => {
+          expect(error).to.exist
+          expect(error).to.be.an.instanceof(Errors.NotFoundError)
+          resolve()
+        })
+      })
+    })
+
+    it('handle user already added', function (ctx) {
+      return new Promise(resolve => {
+        ctx.UserMembershipHandler.addUser.yields(new UserAlreadyAddedError())
+        ctx.UserMembershipController.add(ctx.req, {
+          status: () => ({
+            json: payload => {
+              expect(payload.error.code).to.equal('user_already_added')
+              resolve()
+            },
+          }),
+        })
+      })
+    })
+
+    it('handle user not found', function (ctx) {
+      return new Promise(resolve => {
+        ctx.UserMembershipHandler.addUser.yields(new UserNotFoundError())
+        ctx.UserMembershipController.add(ctx.req, {
+          status: () => ({
+            json: payload => {
+              expect(payload.error.code).to.equal('user_not_found')
+              resolve()
+            },
+          }),
+        })
+      })
+    })
+
+    it('handle invalid email', function (ctx) {
+      return new Promise(resolve => {
+        ctx.req.body.email = 'not_valid_email'
+        ctx.UserMembershipController.add(ctx.req, {
+          status: () => ({
+            json: payload => {
+              expect(payload.error.code).to.equal('invalid_email')
+              resolve()
+            },
+          }),
+        })
       })
     })
   })
 
   describe('remove', function () {
-    beforeEach(function () {
-      this.req.params.userId = this.newUser._id
-      this.req.entity = this.subscription
-      this.req.entityConfig = EntityConfigs.groupManagers
+    beforeEach(function (ctx) {
+      ctx.req.params.userId = ctx.newUser._id
+      ctx.req.entity = ctx.subscription
+      ctx.req.entityConfig = EntityConfigs.groupManagers
     })
 
-    it('remove user', function (done) {
-      this.UserMembershipController.remove(this.req, {
-        sendStatus: () => {
-          sinon.assert.calledWithMatch(
-            this.UserMembershipHandler.removeUser,
-            this.subscription,
-            { modelName: 'Subscription' },
-            this.newUser._id
-          )
-          done()
-        },
-      })
-    })
-
-    it('handle readOnly entity', function (done) {
-      this.req.entityConfig = EntityConfigs.group
-      this.UserMembershipController.remove(this.req, null, error => {
-        expect(error).to.exist
-        expect(error).to.be.an.instanceof(Errors.NotFoundError)
-        done()
-      })
-    })
-
-    it('prevent self removal', function (done) {
-      this.req.params.userId = this.user._id
-      this.UserMembershipController.remove(this.req, {
-        status: () => ({
-          json: payload => {
-            expect(payload.error.code).to.equal('managers_cannot_remove_self')
-            done()
+    it('remove user', function (ctx) {
+      return new Promise(resolve => {
+        ctx.UserMembershipController.remove(ctx.req, {
+          sendStatus: () => {
+            sinon.assert.calledWithMatch(
+              ctx.UserMembershipHandler.removeUser,
+              ctx.subscription,
+              { modelName: 'Subscription' },
+              ctx.newUser._id
+            )
+            resolve()
           },
-        }),
+        })
       })
     })
 
-    it('prevent admin removal', function (done) {
-      this.UserMembershipHandler.removeUser.yields(new UserIsManagerError())
-      this.UserMembershipController.remove(this.req, {
-        status: () => ({
-          json: payload => {
-            expect(payload.error.code).to.equal('managers_cannot_remove_admin')
-            done()
-          },
-        }),
+    it('handle readOnly entity', function (ctx) {
+      return new Promise(resolve => {
+        ctx.req.entityConfig = EntityConfigs.group
+        ctx.UserMembershipController.remove(ctx.req, null, error => {
+          expect(error).to.exist
+          expect(error).to.be.an.instanceof(Errors.NotFoundError)
+          resolve()
+        })
+      })
+    })
+
+    it('prevent self removal', function (ctx) {
+      return new Promise(resolve => {
+        ctx.req.params.userId = ctx.user._id
+        ctx.UserMembershipController.remove(ctx.req, {
+          status: () => ({
+            json: payload => {
+              expect(payload.error.code).to.equal('managers_cannot_remove_self')
+              resolve()
+            },
+          }),
+        })
+      })
+    })
+
+    it('prevent admin removal', function (ctx) {
+      return new Promise(resolve => {
+        ctx.UserMembershipHandler.removeUser.yields(new UserIsManagerError())
+        ctx.UserMembershipController.remove(ctx.req, {
+          status: () => ({
+            json: payload => {
+              expect(payload.error.code).to.equal(
+                'managers_cannot_remove_admin'
+              )
+              resolve()
+            },
+          }),
+        })
       })
     })
   })
 
   describe('exportCsv', function () {
-    beforeEach(function () {
-      this.req.entity = this.subscription
-      this.req.entityConfig = EntityConfigs.groupManagers
-      this.res = new MockResponse()
-      this.UserMembershipController.exportCsv(this.req, this.res)
+    beforeEach(function (ctx) {
+      ctx.req.entity = ctx.subscription
+      ctx.req.entityConfig = EntityConfigs.groupManagers
+      ctx.res = new MockResponse()
+      ctx.UserMembershipController.exportCsv(ctx.req, ctx.res)
     })
 
-    it('get users', function () {
+    it('get users', function (ctx) {
       sinon.assert.calledWithMatch(
-        this.UserMembershipHandler.getUsers,
-        this.subscription,
+        ctx.UserMembershipHandler.getUsers,
+        ctx.subscription,
         { modelName: 'Subscription' }
       )
     })
 
-    it('should set the correct content type on the request', function () {
-      assertCalledWith(this.res.contentType, 'text/csv; charset=utf-8')
+    it('should set the correct content type on the request', function (ctx) {
+      assertCalledWith(ctx.res.contentType, 'text/csv; charset=utf-8')
     })
 
-    it('should name the exported csv file', function () {
+    it('should name the exported csv file', function (ctx) {
       assertCalledWith(
-        this.res.header,
+        ctx.res.header,
         'Content-Disposition',
         'attachment; filename="Group.csv"'
       )
     })
 
-    it('should export the correct csv', function () {
+    it('should export the correct csv', function (ctx) {
       assertCalledWith(
-        this.res.send,
+        ctx.res.send,
         '"email","last_logged_in_at","last_active_at"\n"mock-email-1@foo.com","2020-08-09T12:43:11.467Z","2021-08-09T12:43:11.467Z"\n"mock-email-2@foo.com","2020-05-20T10:41:11.407Z","2021-05-20T10:41:11.407Z"'
       )
     })
   })
 
   describe('new', function () {
-    beforeEach(function () {
-      this.req.params.name = 'publisher'
-      this.req.params.id = 'abc'
+    beforeEach(function (ctx) {
+      ctx.req.params.name = 'publisher'
+      ctx.req.params.id = 'abc'
     })
 
-    it('renders view', function (done) {
-      this.UserMembershipController.new(this.req, {
-        render: (viewPath, data) => {
-          expect(data.entityName).to.eq('publisher')
-          expect(data.entityId).to.eq('abc')
-          done()
-        },
+    it('renders view', function (ctx) {
+      return new Promise(resolve => {
+        ctx.UserMembershipController.new(ctx.req, {
+          render: (viewPath, data) => {
+            expect(data.entityName).to.eq('publisher')
+            expect(data.entityId).to.eq('abc')
+            resolve()
+          },
+        })
       })
     })
   })
 
   describe('create', function () {
-    beforeEach(function () {
-      this.req.params.name = 'institution'
-      this.req.entityConfig = EntityConfigs.institution
-      this.req.params.id = 123
+    beforeEach(function (ctx) {
+      ctx.req.params.name = 'institution'
+      ctx.req.entityConfig = EntityConfigs.institution
+      ctx.req.params.id = 123
     })
 
-    it('creates institution', function (done) {
-      this.UserMembershipController.create(this.req, {
-        redirect: path => {
-          expect(path).to.eq(EntityConfigs.institution.pathsFor(123).index)
-          sinon.assert.calledWithMatch(
-            this.UserMembershipHandler.createEntity,
-            123,
-            { modelName: 'Institution' }
-          )
-          done()
-        },
+    it('creates institution', function (ctx) {
+      return new Promise(resolve => {
+        ctx.UserMembershipController.create(ctx.req, {
+          redirect: path => {
+            expect(path).to.eq(EntityConfigs.institution.pathsFor(123).index)
+            sinon.assert.calledWithMatch(
+              ctx.UserMembershipHandler.createEntity,
+              123,
+              { modelName: 'Institution' }
+            )
+            resolve()
+          },
+        })
       })
     })
   })

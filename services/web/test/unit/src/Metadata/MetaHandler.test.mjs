@@ -1,15 +1,15 @@
+import { vi } from 'vitest'
 import { expect } from 'chai'
 import sinon from 'sinon'
-import esmock from 'esmock'
 
 const modulePath = '../../../../app/src/Features/Metadata/MetaHandler.mjs'
 
 describe('MetaHandler', function () {
-  beforeEach(async function () {
-    this.projectId = 'someprojectid'
-    this.docId = 'somedocid'
+  beforeEach(async function (ctx) {
+    ctx.projectId = 'someprojectid'
+    ctx.docId = 'somedocid'
 
-    this.lines = [
+    ctx.lines = [
       '\\usepackage{ foo, bar }',
       '\\usepackage{baz}',
       'one',
@@ -23,28 +23,28 @@ describe('MetaHandler', function () {
       '\\begin{lstlisting}[label={lst:foo},caption={Test}]', // lst:foo should be in the returned labels
     ]
 
-    this.docs = {
-      [this.docId]: {
-        _id: this.docId,
-        lines: this.lines,
+    ctx.docs = {
+      [ctx.docId]: {
+        _id: ctx.docId,
+        lines: ctx.lines,
       },
     }
 
-    this.ProjectEntityHandler = {
+    ctx.ProjectEntityHandler = {
       promises: {
-        getAllDocs: sinon.stub().resolves(this.docs),
-        getDoc: sinon.stub().resolves(this.docs[this.docId]),
+        getAllDocs: sinon.stub().resolves(ctx.docs),
+        getDoc: sinon.stub().resolves(ctx.docs[ctx.docId]),
       },
     }
 
-    this.DocumentUpdaterHandler = {
+    ctx.DocumentUpdaterHandler = {
       promises: {
         flushDocToMongo: sinon.stub().resolves(),
         flushProjectToMongo: sinon.stub().resolves(),
       },
     }
 
-    this.packageMapping = {
+    ctx.packageMapping = {
       foo: [
         {
           caption: '\\bar',
@@ -69,47 +69,58 @@ describe('MetaHandler', function () {
       ],
     }
 
-    this.MetaHandler = await esmock.strict(modulePath, {
-      '../../../../app/src/Features/Project/ProjectEntityHandler':
-        this.ProjectEntityHandler,
-      '../../../../app/src/Features/DocumentUpdater/DocumentUpdaterHandler':
-        this.DocumentUpdaterHandler,
-      '../../../../app/src/Features/Metadata/packageMapping':
-        this.packageMapping,
-    })
+    vi.doMock(
+      '../../../../app/src/Features/Project/ProjectEntityHandler',
+      () => ({
+        default: ctx.ProjectEntityHandler,
+      })
+    )
+
+    vi.doMock(
+      '../../../../app/src/Features/DocumentUpdater/DocumentUpdaterHandler',
+      () => ({
+        default: ctx.DocumentUpdaterHandler,
+      })
+    )
+
+    vi.doMock('../../../../app/src/Features/Metadata/packageMapping', () => ({
+      default: ctx.packageMapping,
+    }))
+
+    ctx.MetaHandler = (await import(modulePath)).default
   })
 
   describe('getMetaForDoc', function () {
-    it('should extract all the labels and packages', async function () {
-      const result = await this.MetaHandler.promises.getMetaForDoc(
-        this.projectId,
-        this.docId
+    it('should extract all the labels and packages', async function (ctx) {
+      const result = await ctx.MetaHandler.promises.getMetaForDoc(
+        ctx.projectId,
+        ctx.docId
       )
 
       expect(result).to.deep.equal({
         labels: ['aaa', 'ccc', 'ddd', 'e,f,g', 'foo', 'lst:foo'],
         packages: {
-          foo: this.packageMapping.foo,
-          baz: this.packageMapping.baz,
+          foo: ctx.packageMapping.foo,
+          baz: ctx.packageMapping.baz,
         },
         packageNames: ['foo', 'bar', 'baz'],
       })
 
-      this.DocumentUpdaterHandler.promises.flushDocToMongo.should.be.calledWith(
-        this.projectId,
-        this.docId
+      ctx.DocumentUpdaterHandler.promises.flushDocToMongo.should.be.calledWith(
+        ctx.projectId,
+        ctx.docId
       )
 
-      this.ProjectEntityHandler.promises.getDoc.should.be.calledWith(
-        this.projectId,
-        this.docId
+      ctx.ProjectEntityHandler.promises.getDoc.should.be.calledWith(
+        ctx.projectId,
+        ctx.docId
       )
     })
   })
 
   describe('getAllMetaForProject', function () {
-    it('should extract all metadata', async function () {
-      this.ProjectEntityHandler.promises.getAllDocs = sinon.stub().resolves({
+    it('should extract all metadata', async function (ctx) {
+      ctx.ProjectEntityHandler.promises.getAllDocs = sinon.stub().resolves({
         doc_one: {
           _id: 'id_one',
           lines: ['one', '\\label{aaa} two', 'three'],
@@ -142,8 +153,8 @@ describe('MetaHandler', function () {
         },
       })
 
-      const result = await this.MetaHandler.promises.getAllMetaForProject(
-        this.projectId
+      const result = await ctx.MetaHandler.promises.getAllMetaForProject(
+        ctx.projectId
       )
 
       expect(result).to.deep.equal({
@@ -206,12 +217,12 @@ describe('MetaHandler', function () {
         },
       })
 
-      this.DocumentUpdaterHandler.promises.flushProjectToMongo.should.be.calledWith(
-        this.projectId
+      ctx.DocumentUpdaterHandler.promises.flushProjectToMongo.should.be.calledWith(
+        ctx.projectId
       )
 
-      this.ProjectEntityHandler.promises.getAllDocs.should.be.calledWith(
-        this.projectId
+      ctx.ProjectEntityHandler.promises.getAllDocs.should.be.calledWith(
+        ctx.projectId
       )
     })
   })

@@ -1,132 +1,162 @@
+import { vi } from 'vitest'
 import Path from 'node:path'
-import { fileURLToPath } from 'node:url'
-import { strict as esmock } from 'esmock'
 import sinon from 'sinon'
-
-const __dirname = Path.dirname(fileURLToPath(import.meta.url))
 
 const MODULE_PATH = '../../../app/src/UserActivateController.mjs'
 
-const VIEW_PATH = Path.join(__dirname, '../../../app/views/user/activate')
+const VIEW_PATH = Path.join(
+  import.meta.dirname,
+  '../../../app/views/user/activate'
+)
 
 describe('UserActivateController', function () {
-  beforeEach(async function () {
-    this.user = {
-      _id: (this.user_id = 'kwjewkl'),
+  beforeEach(async function (ctx) {
+    ctx.user = {
+      _id: (ctx.user_id = 'kwjewkl'),
       features: {},
       email: 'joe@example.com',
     }
 
-    this.UserGetter = {
+    ctx.UserGetter = {
       promises: {
         getUser: sinon.stub(),
       },
     }
-    this.UserRegistrationHandler = { promises: {} }
-    this.ErrorController = { notFound: sinon.stub() }
-    this.SplitTestHandler = {
+    ctx.UserRegistrationHandler = { promises: {} }
+    ctx.ErrorController = { notFound: sinon.stub() }
+    ctx.SplitTestHandler = {
       promises: {
         getAssignment: sinon.stub().resolves({ variant: 'default' }),
       },
     }
-    this.UserActivateController = await esmock(MODULE_PATH, {
-      '../../../../../app/src/Features/User/UserGetter.js': this.UserGetter,
-      '../../../../../app/src/Features/User/UserRegistrationHandler.js':
-        this.UserRegistrationHandler,
-      '../../../../../app/src/Features/Errors/ErrorController.js':
-        this.ErrorController,
-      '../../../../../app/src/Features/SplitTests/SplitTestHandler':
-        this.SplitTestHandler,
-    })
-    this.req = {
+
+    vi.doMock('../../../../../app/src/Features/User/UserGetter.js', () => ({
+      default: ctx.UserGetter,
+    }))
+
+    vi.doMock(
+      '../../../../../app/src/Features/User/UserRegistrationHandler.js',
+      () => ({
+        default: ctx.UserRegistrationHandler,
+      })
+    )
+
+    vi.doMock(
+      '../../../../../app/src/Features/Errors/ErrorController.js',
+      () => ({
+        default: ctx.ErrorController,
+      })
+    )
+
+    vi.doMock(
+      '../../../../../app/src/Features/SplitTests/SplitTestHandler',
+      () => ({
+        default: ctx.SplitTestHandler,
+      })
+    )
+
+    ctx.UserActivateController = (await import(MODULE_PATH)).default
+    ctx.req = {
       body: {},
       query: {},
       session: {
-        user: this.user,
+        user: ctx.user,
       },
     }
-    this.res = {
+    ctx.res = {
       json: sinon.stub(),
     }
   })
 
   describe('activateAccountPage', function () {
-    beforeEach(function () {
-      this.UserGetter.promises.getUser = sinon.stub().resolves(this.user)
-      this.req.query.user_id = this.user_id
-      this.req.query.token = this.token = 'mock-token-123'
+    beforeEach(function (ctx) {
+      ctx.UserGetter.promises.getUser = sinon.stub().resolves(ctx.user)
+      ctx.req.query.user_id = ctx.user_id
+      ctx.req.query.token = ctx.token = 'mock-token-123'
     })
 
-    it('should 404 without a user_id', async function (done) {
-      delete this.req.query.user_id
-      this.ErrorController.notFound = () => done()
-      this.UserActivateController.activateAccountPage(this.req, this.res)
+    it('should 404 without a user_id', async function (ctx) {
+      delete ctx.req.query.user_id
+      return new Promise(resolve => {
+        ctx.ErrorController.notFound = () => resolve()
+        ctx.UserActivateController.activateAccountPage(ctx.req, ctx.res)
+      })
     })
 
-    it('should 404 without a token', function (done) {
-      delete this.req.query.token
-      this.ErrorController.notFound = () => done()
-      this.UserActivateController.activateAccountPage(this.req, this.res)
+    it('should 404 without a token', function (ctx) {
+      return new Promise(resolve => {
+        delete ctx.req.query.token
+        ctx.ErrorController.notFound = resolve
+        ctx.UserActivateController.activateAccountPage(ctx.req, ctx.res)
+      })
     })
 
-    it('should 404 without a valid user_id', function (done) {
-      this.UserGetter.promises.getUser = sinon.stub().resolves(null)
-      this.ErrorController.notFound = () => done()
-      this.UserActivateController.activateAccountPage(this.req, this.res)
+    it('should 404 without a valid user_id', function (ctx) {
+      return new Promise(resolve => {
+        ctx.UserGetter.promises.getUser = sinon.stub().resolves(null)
+        ctx.ErrorController.notFound = resolve
+        ctx.UserActivateController.activateAccountPage(ctx.req, ctx.res)
+      })
     })
 
-    it('should 403 for complex user_id', function (done) {
-      this.ErrorController.forbidden = () => done()
-      this.req.query.user_id = { first_name: 'X' }
-      this.UserActivateController.activateAccountPage(this.req, this.res)
+    it('should 403 for complex user_id', function (ctx) {
+      return new Promise(resolve => {
+        ctx.ErrorController.forbidden = resolve
+        ctx.req.query.user_id = { first_name: 'X' }
+        ctx.UserActivateController.activateAccountPage(ctx.req, ctx.res)
+      })
     })
 
-    it('should redirect activated users to login', function (done) {
-      this.user.loginCount = 1
-      this.res.redirect = url => {
-        sinon.assert.calledWith(this.UserGetter.promises.getUser, this.user_id)
-        url.should.equal('/login')
-        return done()
-      }
-      this.UserActivateController.activateAccountPage(this.req, this.res)
+    it('should redirect activated users to login', function (ctx) {
+      return new Promise(resolve => {
+        ctx.user.loginCount = 1
+        ctx.res.redirect = url => {
+          sinon.assert.calledWith(ctx.UserGetter.promises.getUser, ctx.user_id)
+          url.should.equal('/login')
+          resolve()
+        }
+        ctx.UserActivateController.activateAccountPage(ctx.req, ctx.res)
+      })
     })
 
-    it('render the activation page if the user has not logged in before', function (done) {
-      this.user.loginCount = 0
-      this.res.render = (page, opts) => {
-        page.should.equal(VIEW_PATH)
-        opts.email.should.equal(this.user.email)
-        opts.token.should.equal(this.token)
-        return done()
-      }
-      this.UserActivateController.activateAccountPage(this.req, this.res)
+    it('render the activation page if the user has not logged in before', function (ctx) {
+      return new Promise(resolve => {
+        ctx.user.loginCount = 0
+        ctx.res.render = (page, opts) => {
+          page.should.equal(VIEW_PATH)
+          opts.email.should.equal(ctx.user.email)
+          opts.token.should.equal(ctx.token)
+          resolve()
+        }
+        ctx.UserActivateController.activateAccountPage(ctx.req, ctx.res)
+      })
     })
   })
 
   describe('register', function () {
-    beforeEach(async function () {
-      this.UserRegistrationHandler.promises.registerNewUserAndSendActivationEmail =
+    beforeEach(async function (ctx) {
+      ctx.UserRegistrationHandler.promises.registerNewUserAndSendActivationEmail =
         sinon.stub().resolves({
-          user: this.user,
-          setNewPasswordUrl: (this.url = 'mock/url'),
+          user: ctx.user,
+          setNewPasswordUrl: (ctx.url = 'mock/url'),
         })
-      this.req.body.email = this.user.email = this.email = 'email@example.com'
-      await this.UserActivateController.register(this.req, this.res)
+      ctx.req.body.email = ctx.user.email = ctx.email = 'email@example.com'
+      await ctx.UserActivateController.register(ctx.req, ctx.res)
     })
 
-    it('should register the user and send them an email', function () {
+    it('should register the user and send them an email', function (ctx) {
       sinon.assert.calledWith(
-        this.UserRegistrationHandler.promises
+        ctx.UserRegistrationHandler.promises
           .registerNewUserAndSendActivationEmail,
-        this.email
+        ctx.email
       )
     })
 
-    it('should return the user and activation url', function () {
-      this.res.json
+    it('should return the user and activation url', function (ctx) {
+      ctx.res.json
         .calledWith({
-          email: this.email,
-          setNewPasswordUrl: this.url,
+          email: ctx.email,
+          setNewPasswordUrl: ctx.url,
         })
         .should.equal(true)
     })

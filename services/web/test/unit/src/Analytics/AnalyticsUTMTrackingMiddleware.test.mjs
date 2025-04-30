@@ -1,4 +1,4 @@
-import esmock from 'esmock'
+import { vi } from 'vitest'
 import sinon from 'sinon'
 import MockRequest from '../helpers/MockRequest.js'
 import MockResponse from '../helpers/MockResponse.js'
@@ -10,83 +10,90 @@ const MODULE_PATH = new URL(
 ).pathname
 
 describe('AnalyticsUTMTrackingMiddleware', function () {
-  beforeEach(async function () {
-    this.analyticsId = 'ecdb935a-52f3-4f91-aebc-7a70d2ffbb55'
-    this.userId = '61795fcb013504bb7b663092'
+  beforeEach(async function (ctx) {
+    ctx.analyticsId = 'ecdb935a-52f3-4f91-aebc-7a70d2ffbb55'
+    ctx.userId = '61795fcb013504bb7b663092'
 
-    this.req = new MockRequest()
-    this.res = new MockResponse()
-    this.next = sinon.stub().returns()
-    this.req.session = {
+    ctx.req = new MockRequest()
+    ctx.res = new MockResponse()
+    ctx.next = sinon.stub().returns()
+    ctx.req.session = {
       user: {
-        _id: this.userId,
-        analyticsId: this.analyticsId,
+        _id: ctx.userId,
+        analyticsId: ctx.analyticsId,
       },
     }
 
-    this.AnalyticsUTMTrackingMiddleware = await esmock.strict(MODULE_PATH, {
-      '../../../../app/src/Features/Analytics/AnalyticsManager.js':
-        (this.AnalyticsManager = {
+    vi.doMock(
+      '../../../../app/src/Features/Analytics/AnalyticsManager.js',
+      () => ({
+        default: (ctx.AnalyticsManager = {
           recordEventForSession: sinon.stub().resolves(),
           setUserPropertyForSessionInBackground: sinon.stub(),
         }),
-      '@overleaf/settings': {
+      })
+    )
+
+    vi.doMock('@overleaf/settings', () => ({
+      default: {
         siteUrl: 'https://www.overleaf.com',
       },
-    })
+    }))
 
-    this.middleware = this.AnalyticsUTMTrackingMiddleware.recordUTMTags()
+    ctx.AnalyticsUTMTrackingMiddleware = (await import(MODULE_PATH)).default
+
+    ctx.middleware = ctx.AnalyticsUTMTrackingMiddleware.recordUTMTags()
   })
 
   describe('without UTM tags in query', function () {
-    beforeEach(function () {
-      this.req.url = '/project'
-      this.middleware(this.req, this.res, this.next)
+    beforeEach(function (ctx) {
+      ctx.req.url = '/project'
+      ctx.middleware(ctx.req, ctx.res, ctx.next)
     })
 
-    it('user is not redirected', function () {
-      assert.isFalse(this.res.redirected)
+    it('user is not redirected', function (ctx) {
+      assert.isFalse(ctx.res.redirected)
     })
 
-    it('next middleware is executed', function () {
-      sinon.assert.calledOnce(this.next)
+    it('next middleware is executed', function (ctx) {
+      sinon.assert.calledOnce(ctx.next)
     })
 
-    it('no event or user property is recorded', function () {
-      sinon.assert.notCalled(this.AnalyticsManager.recordEventForSession)
+    it('no event or user property is recorded', function (ctx) {
+      sinon.assert.notCalled(ctx.AnalyticsManager.recordEventForSession)
       sinon.assert.notCalled(
-        this.AnalyticsManager.setUserPropertyForSessionInBackground
+        ctx.AnalyticsManager.setUserPropertyForSessionInBackground
       )
     })
   })
 
   describe('with all UTM tags in query', function () {
-    beforeEach(function () {
-      this.req.url =
+    beforeEach(function (ctx) {
+      ctx.req.url =
         '/project?utm_source=Organic&utm_medium=Facebook&utm_campaign=Some%20Campaign&utm_content=foo-bar&utm_term=overridden'
-      this.req.query = {
+      ctx.req.query = {
         utm_source: 'Organic',
         utm_medium: 'Facebook',
         utm_campaign: 'Some Campaign',
         utm_content: 'foo-bar',
         utm_term: 'overridden',
       }
-      this.middleware(this.req, this.res, this.next)
+      ctx.middleware(ctx.req, ctx.res, ctx.next)
     })
 
-    it('user is redirected', function () {
-      assert.isTrue(this.res.redirected)
-      assert.equal('/project', this.res.redirectedTo)
+    it('user is redirected', function (ctx) {
+      assert.isTrue(ctx.res.redirected)
+      assert.equal('/project', ctx.res.redirectedTo)
     })
 
-    it('next middleware is not executed', function () {
-      sinon.assert.notCalled(this.next)
+    it('next middleware is not executed', function (ctx) {
+      sinon.assert.notCalled(ctx.next)
     })
 
-    it('page-view event is recorded for session', function () {
+    it('page-view event is recorded for session', function (ctx) {
       sinon.assert.calledWith(
-        this.AnalyticsManager.recordEventForSession,
-        this.req.session,
+        ctx.AnalyticsManager.recordEventForSession,
+        ctx.req.session,
         'page-view',
         {
           path: '/project',
@@ -99,10 +106,10 @@ describe('AnalyticsUTMTrackingMiddleware', function () {
       )
     })
 
-    it('utm-tags user property is set for session', function () {
+    it('utm-tags user property is set for session', function (ctx) {
       sinon.assert.calledWith(
-        this.AnalyticsManager.setUserPropertyForSessionInBackground,
-        this.req.session,
+        ctx.AnalyticsManager.setUserPropertyForSessionInBackground,
+        ctx.req.session,
         'utm-tags',
         'Organic;Facebook;Some Campaign;foo-bar'
       )
@@ -110,30 +117,30 @@ describe('AnalyticsUTMTrackingMiddleware', function () {
   })
 
   describe('with some UTM tags in query', function () {
-    beforeEach(function () {
-      this.req.url =
+    beforeEach(function (ctx) {
+      ctx.req.url =
         '/project?utm_medium=Facebook&utm_campaign=Some%20Campaign&utm_term=foo'
-      this.req.query = {
+      ctx.req.query = {
         utm_medium: 'Facebook',
         utm_campaign: 'Some Campaign',
         utm_term: 'foo',
       }
-      this.middleware(this.req, this.res, this.next)
+      ctx.middleware(ctx.req, ctx.res, ctx.next)
     })
 
-    it('user is redirected', function () {
-      assert.isTrue(this.res.redirected)
-      assert.equal('/project', this.res.redirectedTo)
+    it('user is redirected', function (ctx) {
+      assert.isTrue(ctx.res.redirected)
+      assert.equal('/project', ctx.res.redirectedTo)
     })
 
-    it('next middleware is not executed', function () {
-      sinon.assert.notCalled(this.next)
+    it('next middleware is not executed', function (ctx) {
+      sinon.assert.notCalled(ctx.next)
     })
 
-    it('page-view event is recorded for session', function () {
+    it('page-view event is recorded for session', function (ctx) {
       sinon.assert.calledWith(
-        this.AnalyticsManager.recordEventForSession,
-        this.req.session,
+        ctx.AnalyticsManager.recordEventForSession,
+        ctx.req.session,
         'page-view',
         {
           path: '/project',
@@ -144,10 +151,10 @@ describe('AnalyticsUTMTrackingMiddleware', function () {
       )
     })
 
-    it('utm-tags user property is set for session', function () {
+    it('utm-tags user property is set for session', function (ctx) {
       sinon.assert.calledWith(
-        this.AnalyticsManager.setUserPropertyForSessionInBackground,
-        this.req.session,
+        ctx.AnalyticsManager.setUserPropertyForSessionInBackground,
+        ctx.req.session,
         'utm-tags',
         'N/A;Facebook;Some Campaign;foo'
       )
@@ -155,30 +162,30 @@ describe('AnalyticsUTMTrackingMiddleware', function () {
   })
 
   describe('with some UTM tags and additional parameters in query', function () {
-    beforeEach(function () {
-      this.req.url =
+    beforeEach(function (ctx) {
+      ctx.req.url =
         '/project?utm_medium=Facebook&utm_campaign=Some%20Campaign&other_param=some-value'
-      this.req.query = {
+      ctx.req.query = {
         utm_medium: 'Facebook',
         utm_campaign: 'Some Campaign',
         other_param: 'some-value',
       }
-      this.middleware(this.req, this.res, this.next)
+      ctx.middleware(ctx.req, ctx.res, ctx.next)
     })
 
-    it('user is redirected', function () {
-      assert.isTrue(this.res.redirected)
-      assert.equal('/project?other_param=some-value', this.res.redirectedTo)
+    it('user is redirected', function (ctx) {
+      assert.isTrue(ctx.res.redirected)
+      assert.equal('/project?other_param=some-value', ctx.res.redirectedTo)
     })
 
-    it('next middleware is not executed', function () {
-      sinon.assert.notCalled(this.next)
+    it('next middleware is not executed', function (ctx) {
+      sinon.assert.notCalled(ctx.next)
     })
 
-    it('page-view event is recorded for session', function () {
+    it('page-view event is recorded for session', function (ctx) {
       sinon.assert.calledWith(
-        this.AnalyticsManager.recordEventForSession,
-        this.req.session,
+        ctx.AnalyticsManager.recordEventForSession,
+        ctx.req.session,
         'page-view',
         {
           path: '/project',
@@ -188,10 +195,10 @@ describe('AnalyticsUTMTrackingMiddleware', function () {
       )
     })
 
-    it('utm-tags user property is set for session', function () {
+    it('utm-tags user property is set for session', function (ctx) {
       sinon.assert.calledWith(
-        this.AnalyticsManager.setUserPropertyForSessionInBackground,
-        this.req.session,
+        ctx.AnalyticsManager.setUserPropertyForSessionInBackground,
+        ctx.req.session,
         'utm-tags',
         'N/A;Facebook;Some Campaign;N/A'
       )

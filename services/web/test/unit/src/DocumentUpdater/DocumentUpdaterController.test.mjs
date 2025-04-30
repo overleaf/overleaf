@@ -1,92 +1,102 @@
+import { vi } from 'vitest'
 import sinon from 'sinon'
 import { expect } from 'chai'
-import esmock from 'esmock'
 import MockResponse from '../helpers/MockResponse.js'
 
 const MODULE_PATH =
   '../../../../app/src/Features/DocumentUpdater/DocumentUpdaterController.mjs'
 
 describe('DocumentUpdaterController', function () {
-  beforeEach(async function () {
-    this.DocumentUpdaterHandler = {
+  beforeEach(async function (ctx) {
+    ctx.DocumentUpdaterHandler = {
       promises: {
         getDocument: sinon.stub(),
       },
     }
-    this.ProjectLocator = {
+    ctx.ProjectLocator = {
       promises: {
         findElement: sinon.stub(),
       },
     }
-    this.controller = await esmock.strict(MODULE_PATH, {
-      '@overleaf/settings': this.settings,
-      '../../../../app/src/Features/Project/ProjectLocator.js':
-        this.ProjectLocator,
-      '../../../../app/src/Features/DocumentUpdater/DocumentUpdaterHandler.js':
-        this.DocumentUpdaterHandler,
-    })
-    this.projectId = '2k3j1lk3j21lk3j'
-    this.fileId = '12321kklj1lk3jk12'
-    this.req = {
+
+    vi.doMock('@overleaf/settings', () => ({
+      default: ctx.settings,
+    }))
+
+    vi.doMock('../../../../app/src/Features/Project/ProjectLocator.js', () => ({
+      default: ctx.ProjectLocator,
+    }))
+
+    vi.doMock(
+      '../../../../app/src/Features/DocumentUpdater/DocumentUpdaterHandler.js',
+      () => ({
+        default: ctx.DocumentUpdaterHandler,
+      })
+    )
+
+    ctx.controller = (await import(MODULE_PATH)).default
+    ctx.projectId = '2k3j1lk3j21lk3j'
+    ctx.fileId = '12321kklj1lk3jk12'
+    ctx.req = {
       params: {
-        Project_id: this.projectId,
-        Doc_id: this.docId,
+        Project_id: ctx.projectId,
+        Doc_id: ctx.docId,
       },
       get(key) {
         return undefined
       },
     }
-    this.lines = ['test', '', 'testing']
-    this.res = new MockResponse()
-    this.next = sinon.stub()
-    this.doc = { name: 'myfile.tex' }
+    ctx.lines = ['test', '', 'testing']
+    ctx.res = new MockResponse()
+    ctx.next = sinon.stub()
+    ctx.doc = { name: 'myfile.tex' }
   })
 
   describe('getDoc', function () {
-    beforeEach(function () {
-      this.DocumentUpdaterHandler.promises.getDocument.resolves({
-        lines: this.lines,
+    beforeEach(function (ctx) {
+      ctx.DocumentUpdaterHandler.promises.getDocument.resolves({
+        lines: ctx.lines,
       })
-      this.ProjectLocator.promises.findElement.resolves({
-        element: this.doc,
+      ctx.ProjectLocator.promises.findElement.resolves({
+        element: ctx.doc,
       })
-      this.res = new MockResponse()
+      ctx.res = new MockResponse()
     })
 
-    it('should call the document updater handler with the project_id and doc_id', async function () {
-      await this.controller.getDoc(this.req, this.res, this.next)
+    it('should call the document updater handler with the project_id and doc_id', async function (ctx) {
+      await ctx.controller.getDoc(ctx.req, ctx.res, ctx.next)
       expect(
-        this.DocumentUpdaterHandler.promises.getDocument
+        ctx.DocumentUpdaterHandler.promises.getDocument
       ).to.have.been.calledOnceWith(
-        this.req.params.Project_id,
-        this.req.params.Doc_id,
+        ctx.req.params.Project_id,
+        ctx.req.params.Doc_id,
         -1
       )
     })
 
-    it('should return the content', async function () {
-      await this.controller.getDoc(this.req, this.res)
-      expect(this.next).to.not.have.been.called
-      expect(this.res.statusCode).to.equal(200)
-      expect(this.res.body).to.equal('test\n\ntesting')
+    it('should return the content', async function (ctx) {
+      await ctx.controller.getDoc(ctx.req, ctx.res)
+      expect(ctx.next).to.not.have.been.called
+      expect(ctx.res.statusCode).to.equal(200)
+      expect(ctx.res.body).to.equal('test\n\ntesting')
     })
 
-    it('should find the doc in the project', async function () {
-      await this.controller.getDoc(this.req, this.res)
+    it('should find the doc in the project', async function (ctx) {
+      await ctx.controller.getDoc(ctx.req, ctx.res)
       expect(
-        this.ProjectLocator.promises.findElement
+        ctx.ProjectLocator.promises.findElement
       ).to.have.been.calledOnceWith({
-        project_id: this.projectId,
-        element_id: this.docId,
+        project_id: ctx.projectId,
+        element_id: ctx.docId,
         type: 'doc',
       })
     })
 
-    it('should set the Content-Disposition header', async function () {
-      await this.controller.getDoc(this.req, this.res)
-      expect(this.res.setContentDisposition).to.have.been.calledWith(
+    it('should set the Content-Disposition header', async function (ctx) {
+      await ctx.controller.getDoc(ctx.req, ctx.res)
+      expect(ctx.res.setContentDisposition).to.have.been.calledWith(
         'attachment',
-        { filename: this.doc.name }
+        { filename: ctx.doc.name }
       )
     })
   })

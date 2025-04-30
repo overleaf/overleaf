@@ -1,4 +1,4 @@
-import esmock from 'esmock'
+import { vi } from 'vitest'
 import sinon from 'sinon'
 import { expect } from 'chai'
 import mongodb from 'mongodb-legacy'
@@ -12,10 +12,10 @@ const MODULE_PATH = new URL(
 ).pathname
 
 describe('ProjectListController', function () {
-  beforeEach(async function () {
-    this.project_id = new ObjectId('abcdefabcdefabcdefabcdef')
+  beforeEach(async function (ctx) {
+    ctx.project_id = new ObjectId('abcdefabcdefabcdefabcdef')
 
-    this.user = {
+    ctx.user = {
       _id: new ObjectId('123456123456123456123456'),
       email: 'test@overleaf.com',
       first_name: 'bjkdsjfk',
@@ -23,7 +23,7 @@ describe('ProjectListController', function () {
       emails: [{ email: 'test@overleaf.com' }],
       lastLoginIp: '111.111.111.112',
     }
-    this.users = {
+    ctx.users = {
       'user-1': {
         first_name: 'James',
       },
@@ -31,17 +31,17 @@ describe('ProjectListController', function () {
         first_name: 'Henry',
       },
     }
-    this.users[this.user._id] = this.user // Owner
-    this.usersArr = Object.entries(this.users).map(([key, value]) => ({
+    ctx.users[ctx.user._id] = ctx.user // Owner
+    ctx.usersArr = Object.entries(ctx.users).map(([key, value]) => ({
       _id: key,
       ...value,
     }))
-    this.tags = [
+    ctx.tags = [
       { name: 1, project_ids: ['1', '2', '3'] },
       { name: 2, project_ids: ['a', '1'] },
       { name: 3, project_ids: ['a', 'b', 'c', 'd'] },
     ]
-    this.notifications = [
+    ctx.notifications = [
       {
         _id: '1',
         user_id: '2',
@@ -50,63 +50,63 @@ describe('ProjectListController', function () {
         key: '5',
       },
     ]
-    this.settings = {
+    ctx.settings = {
       siteUrl: 'https://overleaf.com',
     }
-    this.TagsHandler = {
+    ctx.TagsHandler = {
       promises: {
-        getAllTags: sinon.stub().resolves(this.tags),
+        getAllTags: sinon.stub().resolves(ctx.tags),
       },
     }
-    this.NotificationsHandler = {
+    ctx.NotificationsHandler = {
       promises: {
-        getUserNotifications: sinon.stub().resolves(this.notifications),
+        getUserNotifications: sinon.stub().resolves(ctx.notifications),
       },
     }
-    this.UserModel = {
-      findById: sinon.stub().resolves(this.user),
+    ctx.UserModel = {
+      findById: sinon.stub().resolves(ctx.user),
     }
-    this.UserPrimaryEmailCheckHandler = {
+    ctx.UserPrimaryEmailCheckHandler = {
       requiresPrimaryEmailCheck: sinon.stub().returns(false),
     }
-    this.ProjectGetter = {
+    ctx.ProjectGetter = {
       promises: {
         findAllUsersProjects: sinon.stub(),
       },
     }
-    this.ProjectHelper = {
+    ctx.ProjectHelper = {
       isArchived: sinon.stub(),
       isTrashed: sinon.stub(),
     }
-    this.SessionManager = {
-      getLoggedInUserId: sinon.stub().returns(this.user._id),
+    ctx.SessionManager = {
+      getLoggedInUserId: sinon.stub().returns(ctx.user._id),
     }
-    this.UserController = {
+    ctx.UserController = {
       logout: sinon.stub(),
     }
-    this.UserGetter = {
+    ctx.UserGetter = {
       promises: {
-        getUsers: sinon.stub().resolves(this.usersArr),
+        getUsers: sinon.stub().resolves(ctx.usersArr),
         getUserFullEmails: sinon.stub().resolves([]),
       },
     }
-    this.Features = {
+    ctx.Features = {
       hasFeature: sinon.stub(),
     }
-    this.Metrics = {
+    ctx.Metrics = {
       inc: sinon.stub(),
     }
-    this.SplitTestHandler = {
+    ctx.SplitTestHandler = {
       promises: {
         getAssignment: sinon.stub().resolves({ variant: 'default' }),
       },
     }
-    this.SplitTestSessionHandler = {
+    ctx.SplitTestSessionHandler = {
       promises: {
         sessionMaintenance: sinon.stub().resolves(),
       },
     }
-    this.SubscriptionViewModelBuilder = {
+    ctx.SubscriptionViewModelBuilder = {
       promises: {
         getUsersSubscriptionDetails: sinon.stub().resolves({
           bestSubscription: { type: 'free' },
@@ -115,17 +115,17 @@ describe('ProjectListController', function () {
         }),
       },
     }
-    this.SurveyHandler = {
+    ctx.SurveyHandler = {
       promises: {
         getSurvey: sinon.stub().resolves({}),
       },
     }
-    this.NotificationBuilder = {
+    ctx.NotificationBuilder = {
       promises: {
         ipMatcherAffiliation: sinon.stub().returns({ create: sinon.stub() }),
       },
     }
-    this.GeoIpLookup = {
+    ctx.GeoIpLookup = {
       promises: {
         getCurrencyCode: sinon.stub().resolves({
           countryCode: 'US',
@@ -133,11 +133,11 @@ describe('ProjectListController', function () {
         }),
       },
     }
-    this.TutorialHandler = {
+    ctx.TutorialHandler = {
       getInactiveTutorials: sinon.stub().returns([]),
     }
 
-    this.Modules = {
+    ctx.Modules = {
       promises: {
         hooks: {
           fire: sinon.stub().resolves([]),
@@ -145,58 +145,133 @@ describe('ProjectListController', function () {
       },
     }
 
-    this.ProjectListController = await esmock.strict(MODULE_PATH, {
-      'mongodb-legacy': { ObjectId },
-      '@overleaf/settings': this.settings,
-      '@overleaf/metrics': this.Metrics,
-      '../../../../app/src/Features/SplitTests/SplitTestHandler':
-        this.SplitTestHandler,
-      '../../../../app/src/Features/SplitTests/SplitTestSessionHandler':
-        this.SplitTestSessionHandler,
-      '../../../../app/src/Features/User/UserController': this.UserController,
-      '../../../../app/src/Features/Project/ProjectHelper': this.ProjectHelper,
-      '../../../../app/src/Features/Tags/TagsHandler': this.TagsHandler,
-      '../../../../app/src/Features/Notifications/NotificationsHandler':
-        this.NotificationsHandler,
-      '../../../../app/src/models/User': { User: this.UserModel },
-      '../../../../app/src/Features/Project/ProjectGetter': this.ProjectGetter,
-      '../../../../app/src/Features/Authentication/SessionManager':
-        this.SessionManager,
-      '../../../../app/src/infrastructure/Features': this.Features,
-      '../../../../app/src/Features/User/UserGetter': this.UserGetter,
-      '../../../../app/src/Features/Subscription/SubscriptionViewModelBuilder':
-        this.SubscriptionViewModelBuilder,
-      '../../../../app/src/infrastructure/Modules': this.Modules,
-      '../../../../app/src/Features/Survey/SurveyHandler': this.SurveyHandler,
-      '../../../../app/src/Features/User/UserPrimaryEmailCheckHandler':
-        this.UserPrimaryEmailCheckHandler,
-      '../../../../app/src/Features/Notifications/NotificationsBuilder':
-        this.NotificationBuilder,
-      '../../../../app/src/infrastructure/GeoIpLookup': this.GeoIpLookup,
-      '../../../../app/src/Features/Tutorial/TutorialHandler':
-        this.TutorialHandler,
-    })
+    vi.doMock('mongodb-legacy', () => ({
+      default: { ObjectId },
+    }))
 
-    this.req = {
+    vi.doMock('@overleaf/settings', () => ({
+      default: ctx.settings,
+    }))
+
+    vi.doMock('@overleaf/metrics', () => ({
+      default: ctx.Metrics,
+    }))
+
+    vi.doMock(
+      '../../../../app/src/Features/SplitTests/SplitTestHandler',
+      () => ({
+        default: ctx.SplitTestHandler,
+      })
+    )
+
+    vi.doMock(
+      '../../../../app/src/Features/SplitTests/SplitTestSessionHandler',
+      () => ({
+        default: ctx.SplitTestSessionHandler,
+      })
+    )
+
+    vi.doMock('../../../../app/src/Features/User/UserController', () => ({
+      default: ctx.UserController,
+    }))
+
+    vi.doMock('../../../../app/src/Features/Project/ProjectHelper', () => ({
+      default: ctx.ProjectHelper,
+    }))
+
+    vi.doMock('../../../../app/src/Features/Tags/TagsHandler', () => ({
+      default: ctx.TagsHandler,
+    }))
+
+    vi.doMock(
+      '../../../../app/src/Features/Notifications/NotificationsHandler',
+      () => ({
+        default: ctx.NotificationsHandler,
+      })
+    )
+
+    vi.doMock('../../../../app/src/models/User', () => ({
+      User: ctx.UserModel,
+    }))
+
+    vi.doMock('../../../../app/src/Features/Project/ProjectGetter', () => ({
+      default: ctx.ProjectGetter,
+    }))
+
+    vi.doMock(
+      '../../../../app/src/Features/Authentication/SessionManager',
+      () => ({
+        default: ctx.SessionManager,
+      })
+    )
+
+    vi.doMock('../../../../app/src/infrastructure/Features', () => ({
+      default: ctx.Features,
+    }))
+
+    vi.doMock('../../../../app/src/Features/User/UserGetter', () => ({
+      default: ctx.UserGetter,
+    }))
+
+    vi.doMock(
+      '../../../../app/src/Features/Subscription/SubscriptionViewModelBuilder',
+      () => ({
+        default: ctx.SubscriptionViewModelBuilder,
+      })
+    )
+
+    vi.doMock('../../../../app/src/infrastructure/Modules', () => ({
+      default: ctx.Modules,
+    }))
+
+    vi.doMock('../../../../app/src/Features/Survey/SurveyHandler', () => ({
+      default: ctx.SurveyHandler,
+    }))
+
+    vi.doMock(
+      '../../../../app/src/Features/User/UserPrimaryEmailCheckHandler',
+      () => ({
+        default: ctx.UserPrimaryEmailCheckHandler,
+      })
+    )
+
+    vi.doMock(
+      '../../../../app/src/Features/Notifications/NotificationsBuilder',
+      () => ({
+        default: ctx.NotificationBuilder,
+      })
+    )
+
+    vi.doMock('../../../../app/src/infrastructure/GeoIpLookup', () => ({
+      default: ctx.GeoIpLookup,
+    }))
+
+    vi.doMock('../../../../app/src/Features/Tutorial/TutorialHandler', () => ({
+      default: ctx.TutorialHandler,
+    }))
+
+    ctx.ProjectListController = (await import(MODULE_PATH)).default
+
+    ctx.req = {
       query: {},
       params: {
-        Project_id: this.project_id,
+        Project_id: ctx.project_id,
       },
       headers: {},
       session: {
-        user: this.user,
+        user: ctx.user,
       },
       body: {},
       i18n: {
         translate() {},
       },
     }
-    this.res = {}
+    ctx.res = {}
   })
 
   describe('projectListPage', function () {
-    beforeEach(function () {
-      this.projects = [
+    beforeEach(function (ctx) {
+      ctx.projects = [
         { _id: 1, lastUpdated: 1, owner_ref: 'user-1' },
         {
           _id: 2,
@@ -205,184 +280,206 @@ describe('ProjectListController', function () {
           lastUpdatedBy: 'user-1',
         },
       ]
-      this.readAndWrite = [{ _id: 5, lastUpdated: 5, owner_ref: 'user-1' }]
-      this.readOnly = [{ _id: 3, lastUpdated: 3, owner_ref: 'user-1' }]
-      this.tokenReadAndWrite = [{ _id: 6, lastUpdated: 5, owner_ref: 'user-4' }]
-      this.tokenReadOnly = [{ _id: 7, lastUpdated: 4, owner_ref: 'user-5' }]
-      this.review = [{ _id: 8, lastUpdated: 4, owner_ref: 'user-6' }]
-      this.allProjects = {
-        owned: this.projects,
-        readAndWrite: this.readAndWrite,
-        readOnly: this.readOnly,
-        tokenReadAndWrite: this.tokenReadAndWrite,
-        tokenReadOnly: this.tokenReadOnly,
-        review: this.review,
+      ctx.readAndWrite = [{ _id: 5, lastUpdated: 5, owner_ref: 'user-1' }]
+      ctx.readOnly = [{ _id: 3, lastUpdated: 3, owner_ref: 'user-1' }]
+      ctx.tokenReadAndWrite = [{ _id: 6, lastUpdated: 5, owner_ref: 'user-4' }]
+      ctx.tokenReadOnly = [{ _id: 7, lastUpdated: 4, owner_ref: 'user-5' }]
+      ctx.review = [{ _id: 8, lastUpdated: 4, owner_ref: 'user-6' }]
+      ctx.allProjects = {
+        owned: ctx.projects,
+        readAndWrite: ctx.readAndWrite,
+        readOnly: ctx.readOnly,
+        tokenReadAndWrite: ctx.tokenReadAndWrite,
+        tokenReadOnly: ctx.tokenReadOnly,
+        review: ctx.review,
       }
 
-      this.ProjectGetter.promises.findAllUsersProjects.resolves(
-        this.allProjects
-      )
+      ctx.ProjectGetter.promises.findAllUsersProjects.resolves(ctx.allProjects)
     })
 
-    it('should render the project/list-react page', function (done) {
-      this.res.render = (pageName, opts) => {
-        pageName.should.equal('project/list-react')
-        done()
-      }
-      this.ProjectListController.projectListPage(this.req, this.res)
-    })
-
-    it('should invoke the session maintenance', function (done) {
-      this.Features.hasFeature.withArgs('saas').returns(true)
-      this.res.render = () => {
-        this.SplitTestSessionHandler.promises.sessionMaintenance.should.have.been.calledWith(
-          this.req,
-          this.user
-        )
-        done()
-      }
-      this.ProjectListController.projectListPage(this.req, this.res)
-    })
-
-    it('should send the tags', function (done) {
-      this.res.render = (pageName, opts) => {
-        opts.tags.length.should.equal(this.tags.length)
-        done()
-      }
-      this.ProjectListController.projectListPage(this.req, this.res)
-    })
-
-    it('should create trigger ip matcher notifications', function (done) {
-      this.settings.overleaf = true
-      this.req.ip = '111.111.111.111'
-      this.res.render = (pageName, opts) => {
-        this.NotificationBuilder.promises.ipMatcherAffiliation.called.should.equal(
-          true
-        )
-        done()
-      }
-      this.ProjectListController.projectListPage(this.req, this.res)
-    })
-
-    it('should send the projects', function (done) {
-      this.res.render = (pageName, opts) => {
-        opts.prefetchedProjectsBlob.projects.length.should.equal(
-          this.projects.length +
-            this.readAndWrite.length +
-            this.readOnly.length +
-            this.tokenReadAndWrite.length +
-            this.tokenReadOnly.length +
-            this.review.length
-        )
-        done()
-      }
-      this.ProjectListController.projectListPage(this.req, this.res)
-    })
-
-    it('should send the user', function (done) {
-      this.res.render = (pageName, opts) => {
-        opts.user.should.deep.equal(this.user)
-        done()
-      }
-      this.ProjectListController.projectListPage(this.req, this.res)
-    })
-
-    it('should inject the users', function (done) {
-      this.res.render = (pageName, opts) => {
-        const projects = opts.prefetchedProjectsBlob.projects
-
-        projects
-          .filter(p => p.id === '1')[0]
-          .owner.firstName.should.equal(
-            this.users[this.projects.filter(p => p._id === 1)[0].owner_ref]
-              .first_name
-          )
-        projects
-          .filter(p => p.id === '2')[0]
-          .owner.firstName.should.equal(
-            this.users[this.projects.filter(p => p._id === 2)[0].owner_ref]
-              .first_name
-          )
-        projects
-          .filter(p => p.id === '2')[0]
-          .lastUpdatedBy.firstName.should.equal(
-            this.users[this.projects.filter(p => p._id === 2)[0].lastUpdatedBy]
-              .first_name
-          )
-        done()
-      }
-      this.ProjectListController.projectListPage(this.req, this.res)
-    })
-
-    it("should send the user's best subscription when saas feature present", function (done) {
-      this.Features.hasFeature.withArgs('saas').returns(true)
-      this.res.render = (pageName, opts) => {
-        expect(opts.usersBestSubscription).to.deep.include({ type: 'free' })
-        done()
-      }
-      this.ProjectListController.projectListPage(this.req, this.res)
-    })
-
-    it('should not return a best subscription without saas feature', function (done) {
-      this.Features.hasFeature.withArgs('saas').returns(false)
-      this.res.render = (pageName, opts) => {
-        expect(opts.usersBestSubscription).to.be.undefined
-        done()
-      }
-      this.ProjectListController.projectListPage(this.req, this.res)
-    })
-
-    it('should show INR Banner for Indian users with free account', function (done) {
-      // usersBestSubscription is only available when saas feature is present
-      this.Features.hasFeature.withArgs('saas').returns(true)
-      this.SubscriptionViewModelBuilder.promises.getUsersSubscriptionDetails.resolves(
-        {
-          bestSubscription: {
-            type: 'free',
-          },
+    it('should render the project/list-react page', function (ctx) {
+      return new Promise(resolve => {
+        ctx.res.render = (pageName, opts) => {
+          pageName.should.equal('project/list-react')
+          resolve()
         }
-      )
-      this.GeoIpLookup.promises.getCurrencyCode.resolves({
-        countryCode: 'IN',
+        ctx.ProjectListController.projectListPage(ctx.req, ctx.res)
       })
-      this.res.render = (pageName, opts) => {
-        expect(opts.showInrGeoBanner).to.be.true
-        done()
-      }
-      this.ProjectListController.projectListPage(this.req, this.res)
     })
 
-    it('should not show INR Banner for Indian users with premium account', function (done) {
-      // usersBestSubscription is only available when saas feature is present
-      this.Features.hasFeature.withArgs('saas').returns(true)
-      this.SubscriptionViewModelBuilder.promises.getUsersSubscriptionDetails.resolves(
-        {
-          bestSubscription: {
-            type: 'individual',
-          },
+    it('should invoke the session maintenance', function (ctx) {
+      return new Promise(resolve => {
+        ctx.Features.hasFeature.withArgs('saas').returns(true)
+        ctx.res.render = () => {
+          ctx.SplitTestSessionHandler.promises.sessionMaintenance.should.have.been.calledWith(
+            ctx.req,
+            ctx.user
+          )
+          resolve()
         }
-      )
-      this.GeoIpLookup.promises.getCurrencyCode.resolves({
-        countryCode: 'IN',
+        ctx.ProjectListController.projectListPage(ctx.req, ctx.res)
       })
-      this.res.render = (pageName, opts) => {
-        expect(opts.showInrGeoBanner).to.be.false
-        done()
-      }
-      this.ProjectListController.projectListPage(this.req, this.res)
+    })
+
+    it('should send the tags', function (ctx) {
+      return new Promise(resolve => {
+        ctx.res.render = (pageName, opts) => {
+          opts.tags.length.should.equal(ctx.tags.length)
+          resolve()
+        }
+        ctx.ProjectListController.projectListPage(ctx.req, ctx.res)
+      })
+    })
+
+    it('should create trigger ip matcher notifications', function (ctx) {
+      return new Promise(resolve => {
+        ctx.settings.overleaf = true
+        ctx.req.ip = '111.111.111.111'
+        ctx.res.render = (pageName, opts) => {
+          ctx.NotificationBuilder.promises.ipMatcherAffiliation.called.should.equal(
+            true
+          )
+          resolve()
+        }
+        ctx.ProjectListController.projectListPage(ctx.req, ctx.res)
+      })
+    })
+
+    it('should send the projects', function (ctx) {
+      return new Promise(resolve => {
+        ctx.res.render = (pageName, opts) => {
+          opts.prefetchedProjectsBlob.projects.length.should.equal(
+            ctx.projects.length +
+              ctx.readAndWrite.length +
+              ctx.readOnly.length +
+              ctx.tokenReadAndWrite.length +
+              ctx.tokenReadOnly.length +
+              ctx.review.length
+          )
+          resolve()
+        }
+        ctx.ProjectListController.projectListPage(ctx.req, ctx.res)
+      })
+    })
+
+    it('should send the user', function (ctx) {
+      return new Promise(resolve => {
+        ctx.res.render = (pageName, opts) => {
+          opts.user.should.deep.equal(ctx.user)
+          resolve()
+        }
+        ctx.ProjectListController.projectListPage(ctx.req, ctx.res)
+      })
+    })
+
+    it('should inject the users', function (ctx) {
+      return new Promise(resolve => {
+        ctx.res.render = (pageName, opts) => {
+          const projects = opts.prefetchedProjectsBlob.projects
+
+          projects
+            .filter(p => p.id === '1')[0]
+            .owner.firstName.should.equal(
+              ctx.users[ctx.projects.filter(p => p._id === 1)[0].owner_ref]
+                .first_name
+            )
+          projects
+            .filter(p => p.id === '2')[0]
+            .owner.firstName.should.equal(
+              ctx.users[ctx.projects.filter(p => p._id === 2)[0].owner_ref]
+                .first_name
+            )
+          projects
+            .filter(p => p.id === '2')[0]
+            .lastUpdatedBy.firstName.should.equal(
+              ctx.users[ctx.projects.filter(p => p._id === 2)[0].lastUpdatedBy]
+                .first_name
+            )
+          resolve()
+        }
+        ctx.ProjectListController.projectListPage(ctx.req, ctx.res)
+      })
+    })
+
+    it("should send the user's best subscription when saas feature present", function (ctx) {
+      return new Promise(resolve => {
+        ctx.Features.hasFeature.withArgs('saas').returns(true)
+        ctx.res.render = (pageName, opts) => {
+          expect(opts.usersBestSubscription).to.deep.include({ type: 'free' })
+          resolve()
+        }
+        ctx.ProjectListController.projectListPage(ctx.req, ctx.res)
+      })
+    })
+
+    it('should not return a best subscription without saas feature', function (ctx) {
+      return new Promise(resolve => {
+        ctx.Features.hasFeature.withArgs('saas').returns(false)
+        ctx.res.render = (pageName, opts) => {
+          expect(opts.usersBestSubscription).to.be.undefined
+          resolve()
+        }
+        ctx.ProjectListController.projectListPage(ctx.req, ctx.res)
+      })
+    })
+
+    it('should show INR Banner for Indian users with free account', function (ctx) {
+      return new Promise(resolve => {
+        // usersBestSubscription is only available when saas feature is present
+        ctx.Features.hasFeature.withArgs('saas').returns(true)
+        ctx.SubscriptionViewModelBuilder.promises.getUsersSubscriptionDetails.resolves(
+          {
+            bestSubscription: {
+              type: 'free',
+            },
+          }
+        )
+        ctx.GeoIpLookup.promises.getCurrencyCode.resolves({
+          countryCode: 'IN',
+        })
+        ctx.res.render = (pageName, opts) => {
+          expect(opts.showInrGeoBanner).to.be.true
+          resolve()
+        }
+        ctx.ProjectListController.projectListPage(ctx.req, ctx.res)
+      })
+    })
+
+    it('should not show INR Banner for Indian users with premium account', function (ctx) {
+      return new Promise(resolve => {
+        // usersBestSubscription is only available when saas feature is present
+        ctx.Features.hasFeature.withArgs('saas').returns(true)
+        ctx.SubscriptionViewModelBuilder.promises.getUsersSubscriptionDetails.resolves(
+          {
+            bestSubscription: {
+              type: 'individual',
+            },
+          }
+        )
+        ctx.GeoIpLookup.promises.getCurrencyCode.resolves({
+          countryCode: 'IN',
+        })
+        ctx.res.render = (pageName, opts) => {
+          expect(opts.showInrGeoBanner).to.be.false
+          resolve()
+        }
+        ctx.ProjectListController.projectListPage(ctx.req, ctx.res)
+      })
     })
 
     describe('With Institution SSO feature', function () {
-      beforeEach(function (done) {
-        this.institutionEmail = 'test@overleaf.com'
-        this.institutionName = 'Overleaf'
-        this.Features.hasFeature.withArgs('saml').returns(true)
-        this.Features.hasFeature.withArgs('affiliations').returns(true)
-        this.Features.hasFeature.withArgs('saas').returns(true)
-        done()
+      beforeEach(function (ctx) {
+        return new Promise(resolve => {
+          ctx.institutionEmail = 'test@overleaf.com'
+          ctx.institutionName = 'Overleaf'
+          ctx.Features.hasFeature.withArgs('saml').returns(true)
+          ctx.Features.hasFeature.withArgs('affiliations').returns(true)
+          ctx.Features.hasFeature.withArgs('saas').returns(true)
+          resolve()
+        })
       })
-      it('should show institution SSO available notification for confirmed domains', function () {
-        this.UserGetter.promises.getUserFullEmails.resolves([
+      it('should show institution SSO available notification for confirmed domains', function (ctx) {
+        ctx.UserGetter.promises.getUserFullEmails.resolves([
           {
             email: 'test@overleaf.com',
             affiliation: {
@@ -396,64 +493,64 @@ describe('ProjectListController', function () {
             },
           },
         ])
-        this.res.render = (pageName, opts) => {
+        ctx.res.render = (pageName, opts) => {
           expect(opts.notificationsInstitution).to.deep.include({
-            email: this.institutionEmail,
+            email: ctx.institutionEmail,
             institutionId: 1,
-            institutionName: this.institutionName,
+            institutionName: ctx.institutionName,
             templateKey: 'notification_institution_sso_available',
           })
         }
-        this.ProjectListController.projectListPage(this.req, this.res)
+        ctx.ProjectListController.projectListPage(ctx.req, ctx.res)
       })
-      it('should show a linked notification', function () {
-        this.req.session.saml = {
-          institutionEmail: this.institutionEmail,
+      it('should show a linked notification', function (ctx) {
+        ctx.req.session.saml = {
+          institutionEmail: ctx.institutionEmail,
           linked: {
             hasEntitlement: false,
-            universityName: this.institutionName,
+            universityName: ctx.institutionName,
           },
         }
-        this.res.render = (pageName, opts) => {
+        ctx.res.render = (pageName, opts) => {
           expect(opts.notificationsInstitution).to.deep.include({
-            email: this.institutionEmail,
-            institutionName: this.institutionName,
+            email: ctx.institutionEmail,
+            institutionName: ctx.institutionName,
             templateKey: 'notification_institution_sso_linked',
           })
         }
-        this.ProjectListController.projectListPage(this.req, this.res)
+        ctx.ProjectListController.projectListPage(ctx.req, ctx.res)
       })
-      it('should show a linked another email notification', function () {
+      it('should show a linked another email notification', function (ctx) {
         // when they request to link an email but the institution returns
         // a different email
-        this.res.render = (pageName, opts) => {
+        ctx.res.render = (pageName, opts) => {
           expect(opts.notificationsInstitution).to.deep.include({
-            institutionEmail: this.institutionEmail,
+            institutionEmail: ctx.institutionEmail,
             requestedEmail: 'requested@overleaf.com',
             templateKey: 'notification_institution_sso_non_canonical',
           })
         }
-        this.req.session.saml = {
-          emailNonCanonical: this.institutionEmail,
-          institutionEmail: this.institutionEmail,
+        ctx.req.session.saml = {
+          emailNonCanonical: ctx.institutionEmail,
+          institutionEmail: ctx.institutionEmail,
           requestedEmail: 'requested@overleaf.com',
           linked: {
             hasEntitlement: false,
-            universityName: this.institutionName,
+            universityName: ctx.institutionName,
           },
         }
-        this.ProjectListController.projectListPage(this.req, this.res)
+        ctx.ProjectListController.projectListPage(ctx.req, ctx.res)
       })
 
-      it('should show a notification when intent was to register via SSO but account existed', function () {
-        this.res.render = (pageName, opts) => {
+      it('should show a notification when intent was to register via SSO but account existed', function (ctx) {
+        ctx.res.render = (pageName, opts) => {
           expect(opts.notificationsInstitution).to.deep.include({
-            email: this.institutionEmail,
+            email: ctx.institutionEmail,
             templateKey: 'notification_institution_sso_already_registered',
           })
         }
-        this.req.session.saml = {
-          institutionEmail: this.institutionEmail,
+        ctx.req.session.saml = {
+          institutionEmail: ctx.institutionEmail,
           linked: {
             hasEntitlement: false,
             universityName: 'Overleaf',
@@ -463,29 +560,29 @@ describe('ProjectListController', function () {
             name: 'Example University',
           },
         }
-        this.ProjectListController.projectListPage(this.req, this.res)
+        ctx.ProjectListController.projectListPage(ctx.req, ctx.res)
       })
 
-      it('should not show a register notification if the flow was abandoned', function () {
+      it('should not show a register notification if the flow was abandoned', function (ctx) {
         // could initially start to register with an SSO email and then
         // abandon flow and login with an existing non-institution SSO email
-        this.res.render = (pageName, opts) => {
+        ctx.res.render = (pageName, opts) => {
           expect(opts.notificationsInstitution).to.deep.not.include({
             email: 'test@overleaf.com',
             templateKey: 'notification_institution_sso_already_registered',
           })
         }
-        this.req.session.saml = {
+        ctx.req.session.saml = {
           registerIntercept: {
             id: 1,
             name: 'Example University',
           },
         }
-        this.ProjectListController.projectListPage(this.req, this.res)
+        ctx.ProjectListController.projectListPage(ctx.req, ctx.res)
       })
 
-      it('should show error notification', function () {
-        this.res.render = (pageName, opts) => {
+      it('should show error notification', function (ctx) {
+        ctx.res.render = (pageName, opts) => {
           expect(opts.notificationsInstitution.length).to.equal(1)
           expect(opts.notificationsInstitution[0].templateKey).to.equal(
             'notification_institution_sso_error'
@@ -494,81 +591,85 @@ describe('ProjectListController', function () {
             Errors.SAMLAlreadyLinkedError
           )
         }
-        this.req.session.saml = {
-          institutionEmail: this.institutionEmail,
+        ctx.req.session.saml = {
+          institutionEmail: ctx.institutionEmail,
           error: new Errors.SAMLAlreadyLinkedError(),
         }
-        this.ProjectListController.projectListPage(this.req, this.res)
+        ctx.ProjectListController.projectListPage(ctx.req, ctx.res)
       })
 
       describe('for an unconfirmed domain for an SSO institution', function () {
-        beforeEach(function (done) {
-          this.UserGetter.promises.getUserFullEmails.resolves([
-            {
-              email: 'test@overleaf-uncofirmed.com',
-              affiliation: {
-                institution: {
-                  id: 1,
-                  confirmed: false,
-                  name: 'Overleaf',
-                  ssoBeta: false,
-                  ssoEnabled: true,
+        beforeEach(function (ctx) {
+          return new Promise(resolve => {
+            ctx.UserGetter.promises.getUserFullEmails.resolves([
+              {
+                email: 'test@overleaf-uncofirmed.com',
+                affiliation: {
+                  institution: {
+                    id: 1,
+                    confirmed: false,
+                    name: 'Overleaf',
+                    ssoBeta: false,
+                    ssoEnabled: true,
+                  },
                 },
               },
-            },
-          ])
-          done()
+            ])
+            resolve()
+          })
         })
-        it('should not show institution SSO available notification', function () {
-          this.res.render = (pageName, opts) => {
+        it('should not show institution SSO available notification', function (ctx) {
+          ctx.res.render = (pageName, opts) => {
             expect(opts.notificationsInstitution.length).to.equal(0)
           }
-          this.ProjectListController.projectListPage(this.req, this.res)
+          ctx.ProjectListController.projectListPage(ctx.req, ctx.res)
         })
       })
       describe('when linking/logging in initiated on institution side', function () {
-        it('should not show a linked another email notification', function () {
+        it('should not show a linked another email notification', function (ctx) {
           // this is only used when initated on Overleaf,
           // because we keep track of the requested email they tried to link
-          this.res.render = (pageName, opts) => {
+          ctx.res.render = (pageName, opts) => {
             expect(opts.notificationsInstitution).to.not.deep.include({
-              institutionEmail: this.institutionEmail,
+              institutionEmail: ctx.institutionEmail,
               requestedEmail: undefined,
               templateKey: 'notification_institution_sso_non_canonical',
             })
           }
-          this.req.session.saml = {
-            emailNonCanonical: this.institutionEmail,
-            institutionEmail: this.institutionEmail,
+          ctx.req.session.saml = {
+            emailNonCanonical: ctx.institutionEmail,
+            institutionEmail: ctx.institutionEmail,
             linked: {
               hasEntitlement: false,
-              universityName: this.institutionName,
+              universityName: ctx.institutionName,
             },
           }
-          this.ProjectListController.projectListPage(this.req, this.res)
+          ctx.ProjectListController.projectListPage(ctx.req, ctx.res)
         })
       })
       describe('Institution with SSO beta testable', function () {
-        beforeEach(function (done) {
-          this.UserGetter.promises.getUserFullEmails.resolves([
-            {
-              email: 'beta@beta.com',
-              affiliation: {
-                institution: {
-                  id: 2,
-                  confirmed: true,
-                  name: 'Beta University',
-                  ssoBeta: true,
-                  ssoEnabled: false,
+        beforeEach(function (ctx) {
+          return new Promise(resolve => {
+            ctx.UserGetter.promises.getUserFullEmails.resolves([
+              {
+                email: 'beta@beta.com',
+                affiliation: {
+                  institution: {
+                    id: 2,
+                    confirmed: true,
+                    name: 'Beta University',
+                    ssoBeta: true,
+                    ssoEnabled: false,
+                  },
                 },
               },
-            },
-          ])
-          done()
+            ])
+            resolve()
+          })
         })
-        it('should show institution SSO available notification when on a beta testing session', function () {
-          this.req.session.samlBeta = true
-          this.res.render = (pageName, opts) => {
+        it('should show institution SSO available notification when on a beta testing session', function (ctx) {
+          ctx.req.session.samlBeta = true
+          ctx.res.render = (pageName, opts) => {
             expect(opts.notificationsInstitution).to.deep.include({
               email: 'beta@beta.com',
               institutionId: 2,
@@ -576,11 +677,11 @@ describe('ProjectListController', function () {
               templateKey: 'notification_institution_sso_available',
             })
           }
-          this.ProjectListController.projectListPage(this.req, this.res)
+          ctx.ProjectListController.projectListPage(ctx.req, ctx.res)
         })
-        it('should not show institution SSO available notification when not on a beta testing session', function () {
-          this.req.session.samlBeta = false
-          this.res.render = (pageName, opts) => {
+        it('should not show institution SSO available notification when not on a beta testing session', function (ctx) {
+          ctx.req.session.samlBeta = false
+          ctx.res.render = (pageName, opts) => {
             expect(opts.notificationsInstitution).to.deep.not.include({
               email: 'test@overleaf.com',
               institutionId: 1,
@@ -588,18 +689,20 @@ describe('ProjectListController', function () {
               templateKey: 'notification_institution_sso_available',
             })
           }
-          this.ProjectListController.projectListPage(this.req, this.res)
+          ctx.ProjectListController.projectListPage(ctx.req, ctx.res)
         })
       })
     })
 
     describe('Without Institution SSO feature', function () {
-      beforeEach(function (done) {
-        this.Features.hasFeature.withArgs('saml').returns(false)
-        done()
+      beforeEach(function (ctx) {
+        return new Promise(resolve => {
+          ctx.Features.hasFeature.withArgs('saml').returns(false)
+          resolve()
+        })
       })
-      it('should not show institution sso available notification', function () {
-        this.res.render = (pageName, opts) => {
+      it('should not show institution sso available notification', function (ctx) {
+        ctx.res.render = (pageName, opts) => {
           expect(opts.notificationsInstitution).to.deep.not.include({
             email: 'test@overleaf.com',
             institutionId: 1,
@@ -607,35 +710,33 @@ describe('ProjectListController', function () {
             templateKey: 'notification_institution_sso_available',
           })
         }
-        this.ProjectListController.projectListPage(this.req, this.res)
+        ctx.ProjectListController.projectListPage(ctx.req, ctx.res)
       })
     })
 
     describe('enterprise banner', function () {
-      beforeEach(function (done) {
-        this.Features.hasFeature.withArgs('saas').returns(true)
-        this.SubscriptionViewModelBuilder.promises.getUsersSubscriptionDetails.resolves(
+      beforeEach(function (ctx) {
+        ctx.Features.hasFeature.withArgs('saas').returns(true)
+        ctx.SubscriptionViewModelBuilder.promises.getUsersSubscriptionDetails.resolves(
           { memberGroupSubscriptions: [] }
         )
-        this.UserGetter.promises.getUserFullEmails.resolves([
+        ctx.UserGetter.promises.getUserFullEmails.resolves([
           {
             email: 'test@test-domain.com',
           },
         ])
-
-        done()
       })
 
       describe('normal enterprise banner', function () {
-        it('shows banner', function () {
-          this.res.render = (pageName, opts) => {
+        it('shows banner', function (ctx) {
+          ctx.res.render = (pageName, opts) => {
             expect(opts.showGroupsAndEnterpriseBanner).to.be.true
           }
-          this.ProjectListController.projectListPage(this.req, this.res)
+          ctx.ProjectListController.projectListPage(ctx.req, ctx.res)
         })
 
-        it('does not show banner if user is part of any affiliation', function () {
-          this.UserGetter.promises.getUserFullEmails.resolves([
+        it('does not show banner if user is part of any affiliation', function (ctx) {
+          ctx.UserGetter.promises.getUserFullEmails.resolves([
             {
               email: 'test@overleaf.com',
               affiliation: {
@@ -651,36 +752,36 @@ describe('ProjectListController', function () {
             },
           ])
 
-          this.res.render = (pageName, opts) => {
+          ctx.res.render = (pageName, opts) => {
             expect(opts.showGroupsAndEnterpriseBanner).to.be.false
           }
-          this.ProjectListController.projectListPage(this.req, this.res)
+          ctx.ProjectListController.projectListPage(ctx.req, ctx.res)
         })
 
-        it('does not show banner if user is part of any group subscription', function () {
-          this.SubscriptionViewModelBuilder.promises.getUsersSubscriptionDetails.resolves(
+        it('does not show banner if user is part of any group subscription', function (ctx) {
+          ctx.SubscriptionViewModelBuilder.promises.getUsersSubscriptionDetails.resolves(
             { memberGroupSubscriptions: [{}] }
           )
 
-          this.res.render = (pageName, opts) => {
+          ctx.res.render = (pageName, opts) => {
             expect(opts.showGroupsAndEnterpriseBanner).to.be.false
           }
-          this.ProjectListController.projectListPage(this.req, this.res)
+          ctx.ProjectListController.projectListPage(ctx.req, ctx.res)
         })
 
-        it('have a banner variant of "FOMO" or "on-premise"', function () {
-          this.res.render = (pageName, opts) => {
+        it('have a banner variant of "FOMO" or "on-premise"', function (ctx) {
+          ctx.res.render = (pageName, opts) => {
             expect(opts.groupsAndEnterpriseBannerVariant).to.be.oneOf([
               'FOMO',
               'on-premise',
             ])
           }
-          this.ProjectListController.projectListPage(this.req, this.res)
+          ctx.ProjectListController.projectListPage(ctx.req, ctx.res)
         })
       })
 
       describe('US government enterprise banner', function () {
-        it('does not show enterprise banner if US government enterprise banner is shown', function () {
+        it('does not show enterprise banner if US government enterprise banner is shown', function (ctx) {
           const emails = [
             {
               email: 'test@test.mil',
@@ -688,8 +789,8 @@ describe('ProjectListController', function () {
             },
           ]
 
-          this.UserGetter.promises.getUserFullEmails.resolves(emails)
-          this.Modules.promises.hooks.fire
+          ctx.UserGetter.promises.getUserFullEmails.resolves(emails)
+          ctx.Modules.promises.hooks.fire
             .withArgs('getUSGovBanner', emails, false, [])
             .resolves([
               {
@@ -697,66 +798,68 @@ describe('ProjectListController', function () {
                 usGovBannerVariant: 'variant',
               },
             ])
-          this.res.render = (pageName, opts) => {
+          ctx.res.render = (pageName, opts) => {
             expect(opts.showGroupsAndEnterpriseBanner).to.be.false
             expect(opts.showUSGovBanner).to.be.true
           }
-          this.ProjectListController.projectListPage(this.req, this.res)
+          ctx.ProjectListController.projectListPage(ctx.req, ctx.res)
         })
       })
     })
   })
 
   describe('projectListReactPage with duplicate projects', function () {
-    beforeEach(function () {
-      this.projects = [
+    beforeEach(function (ctx) {
+      ctx.projects = [
         { _id: 1, lastUpdated: 1, owner_ref: 'user-1' },
         { _id: 2, lastUpdated: 2, owner_ref: 'user-2' },
       ]
-      this.readAndWrite = [{ _id: 5, lastUpdated: 5, owner_ref: 'user-1' }]
-      this.readOnly = [{ _id: 3, lastUpdated: 3, owner_ref: 'user-1' }]
-      this.tokenReadAndWrite = [{ _id: 6, lastUpdated: 5, owner_ref: 'user-4' }]
-      this.tokenReadOnly = [
+      ctx.readAndWrite = [{ _id: 5, lastUpdated: 5, owner_ref: 'user-1' }]
+      ctx.readOnly = [{ _id: 3, lastUpdated: 3, owner_ref: 'user-1' }]
+      ctx.tokenReadAndWrite = [{ _id: 6, lastUpdated: 5, owner_ref: 'user-4' }]
+      ctx.tokenReadOnly = [
         { _id: 6, lastUpdated: 5, owner_ref: 'user-4' }, // Also in tokenReadAndWrite
         { _id: 7, lastUpdated: 4, owner_ref: 'user-5' },
       ]
-      this.review = [{ _id: 8, lastUpdated: 5, owner_ref: 'user-6' }]
-      this.allProjects = {
-        owned: this.projects,
-        readAndWrite: this.readAndWrite,
-        readOnly: this.readOnly,
-        tokenReadAndWrite: this.tokenReadAndWrite,
-        tokenReadOnly: this.tokenReadOnly,
-        review: this.review,
+      ctx.review = [{ _id: 8, lastUpdated: 5, owner_ref: 'user-6' }]
+      ctx.allProjects = {
+        owned: ctx.projects,
+        readAndWrite: ctx.readAndWrite,
+        readOnly: ctx.readOnly,
+        tokenReadAndWrite: ctx.tokenReadAndWrite,
+        tokenReadOnly: ctx.tokenReadOnly,
+        review: ctx.review,
       }
 
-      this.ProjectGetter.promises.findAllUsersProjects.resolves(
-        this.allProjects
-      )
+      ctx.ProjectGetter.promises.findAllUsersProjects.resolves(ctx.allProjects)
     })
 
-    it('should render the project/list-react page', function (done) {
-      this.res.render = (pageName, opts) => {
-        pageName.should.equal('project/list-react')
-        done()
-      }
-      this.ProjectListController.projectListPage(this.req, this.res)
+    it('should render the project/list-react page', function (ctx) {
+      return new Promise(resolve => {
+        ctx.res.render = (pageName, opts) => {
+          pageName.should.equal('project/list-react')
+          resolve()
+        }
+        ctx.ProjectListController.projectListPage(ctx.req, ctx.res)
+      })
     })
 
-    it('should omit one of the projects', function (done) {
-      this.res.render = (pageName, opts) => {
-        opts.prefetchedProjectsBlob.projects.length.should.equal(
-          this.projects.length +
-            this.readAndWrite.length +
-            this.readOnly.length +
-            this.tokenReadAndWrite.length +
-            this.tokenReadOnly.length +
-            this.review.length -
-            1
-        )
-        done()
-      }
-      this.ProjectListController.projectListPage(this.req, this.res)
+    it('should omit one of the projects', function (ctx) {
+      return new Promise(resolve => {
+        ctx.res.render = (pageName, opts) => {
+          opts.prefetchedProjectsBlob.projects.length.should.equal(
+            ctx.projects.length +
+              ctx.readAndWrite.length +
+              ctx.readOnly.length +
+              ctx.tokenReadAndWrite.length +
+              ctx.tokenReadOnly.length +
+              ctx.review.length -
+              1
+          )
+          resolve()
+        }
+        ctx.ProjectListController.projectListPage(ctx.req, ctx.res)
+      })
     })
   })
 })

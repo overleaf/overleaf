@@ -1,17 +1,14 @@
-import esmock from 'esmock'
+import { vi } from 'vitest'
 import sinon from 'sinon'
 import { assert } from 'chai'
-const modulePath = new URL(
-  '../../../../app/src/Features/Tags/TagsController.mjs',
-  import.meta.url
-).pathname
+const modulePath = '../../../../app/src/Features/Tags/TagsController.mjs'
 
 describe('TagsController', function () {
   const userId = '123nd3ijdks'
   const projectId = '123njdskj9jlk'
 
-  beforeEach(async function () {
-    this.TagsHandler = {
+  beforeEach(async function (ctx) {
+    ctx.TagsHandler = {
       promises: {
         addProjectToTag: sinon.stub().resolves(),
         addProjectsToTag: sinon.stub().resolves(),
@@ -23,17 +20,25 @@ describe('TagsController', function () {
         createTag: sinon.stub().resolves(),
       },
     }
-    this.SessionManager = {
+    ctx.SessionManager = {
       getLoggedInUserId: session => {
         return session.user._id
       },
     }
-    this.TagsController = await esmock.strict(modulePath, {
-      '../../../../app/src/Features/Tags/TagsHandler': this.TagsHandler,
-      '../../../../app/src/Features/Authentication/SessionManager':
-        this.SessionManager,
-    })
-    this.req = {
+
+    vi.doMock('../../../../app/src/Features/Tags/TagsHandler', () => ({
+      default: ctx.TagsHandler,
+    }))
+
+    vi.doMock(
+      '../../../../app/src/Features/Authentication/SessionManager',
+      () => ({
+        default: ctx.SessionManager,
+      })
+    )
+
+    ctx.TagsController = (await import(modulePath)).default
+    ctx.req = {
       params: {
         projectId,
       },
@@ -45,149 +50,235 @@ describe('TagsController', function () {
       body: {},
     }
 
-    this.res = {}
-    this.res.status = sinon.stub().returns(this.res)
-    this.res.end = sinon.stub()
-    this.res.json = sinon.stub()
+    ctx.res = {}
+    ctx.res.status = sinon.stub().returns(ctx.res)
+    ctx.res.end = sinon.stub()
+    ctx.res.json = sinon.stub()
   })
 
-  it('get all tags', function (done) {
-    const allTags = [{ name: 'tag', projects: ['123423', '423423'] }]
-    this.TagsHandler.promises.getAllTags = sinon.stub().resolves(allTags)
-    this.TagsController.getAllTags(this.req, {
-      json: body => {
-        body.should.equal(allTags)
-        sinon.assert.calledWith(this.TagsHandler.promises.getAllTags, userId)
-        done()
-        return {
-          end: () => {},
-        }
-      },
+  it('get all tags', function (ctx) {
+    return new Promise(resolve => {
+      const allTags = [{ name: 'tag', projects: ['123423', '423423'] }]
+      ctx.TagsHandler.promises.getAllTags = sinon.stub().resolves(allTags)
+      ctx.TagsController.getAllTags(ctx.req, {
+        json: body => {
+          body.should.equal(allTags)
+          sinon.assert.calledWith(ctx.TagsHandler.promises.getAllTags, userId)
+          resolve()
+          return {
+            end: () => {},
+          }
+        },
+      })
     })
   })
 
   describe('create a tag', function (done) {
-    it('without a color', function (done) {
-      this.tag = { mock: 'tag' }
-      this.TagsHandler.promises.createTag = sinon.stub().resolves(this.tag)
-      this.req.session.user._id = this.userId = 'user-id-123'
-      this.req.body = { name: (this.name = 'tag-name') }
-      this.TagsController.createTag(this.req, {
-        json: () => {
-          sinon.assert.calledWith(
-            this.TagsHandler.promises.createTag,
-            this.userId,
-            this.name
-          )
-          done()
-          return {
-            end: () => {},
-          }
-        },
+    it('without a color', function (ctx) {
+      return new Promise(resolve => {
+        ctx.tag = { mock: 'tag' }
+        ctx.TagsHandler.promises.createTag = sinon.stub().resolves(ctx.tag)
+        ctx.req.session.user._id = ctx.userId = 'user-id-123'
+        ctx.req.body = { name: (ctx.tagName = 'tag-name') }
+        ctx.TagsController.createTag(ctx.req, {
+          json: () => {
+            sinon.assert.calledWith(
+              ctx.TagsHandler.promises.createTag,
+              ctx.userId,
+              ctx.tagName
+            )
+            resolve()
+            return {
+              end: () => {},
+            }
+          },
+        })
       })
     })
 
-    it('with a color', function (done) {
-      this.tag = { mock: 'tag' }
-      this.TagsHandler.promises.createTag = sinon.stub().resolves(this.tag)
-      this.req.session.user._id = this.userId = 'user-id-123'
-      this.req.body = {
-        name: (this.name = 'tag-name'),
-        color: (this.color = '#123456'),
-      }
-      this.TagsController.createTag(this.req, {
-        json: () => {
-          sinon.assert.calledWith(
-            this.TagsHandler.promises.createTag,
-            this.userId,
-            this.name,
-            this.color
-          )
-          done()
-          return {
-            end: () => {},
-          }
-        },
+    it('with a color', function (ctx) {
+      return new Promise(resolve => {
+        ctx.tag = { mock: 'tag' }
+        ctx.TagsHandler.promises.createTag = sinon.stub().resolves(ctx.tag)
+        ctx.req.session.user._id = ctx.userId = 'user-id-123'
+        ctx.req.body = {
+          name: (ctx.tagName = 'tag-name'),
+          color: (ctx.color = '#123456'),
+        }
+        ctx.TagsController.createTag(ctx.req, {
+          json: () => {
+            sinon.assert.calledWith(
+              ctx.TagsHandler.promises.createTag,
+              ctx.userId,
+              ctx.tagName,
+              ctx.color
+            )
+            resolve()
+            return {
+              end: () => {},
+            }
+          },
+        })
       })
     })
   })
 
-  it('delete a tag', function (done) {
-    this.req.params.tagId = this.tagId = 'tag-id-123'
-    this.req.session.user._id = this.userId = 'user-id-123'
-    this.TagsController.deleteTag(this.req, {
-      status: code => {
-        assert.equal(code, 204)
-        sinon.assert.calledWith(
-          this.TagsHandler.promises.deleteTag,
-          this.userId,
-          this.tagId
-        )
-        done()
-        return {
-          end: () => {},
-        }
-      },
+  it('delete a tag', function (ctx) {
+    return new Promise(resolve => {
+      ctx.req.params.tagId = ctx.tagId = 'tag-id-123'
+      ctx.req.session.user._id = ctx.userId = 'user-id-123'
+      ctx.TagsController.deleteTag(ctx.req, {
+        status: code => {
+          assert.equal(code, 204)
+          sinon.assert.calledWith(
+            ctx.TagsHandler.promises.deleteTag,
+            ctx.userId,
+            ctx.tagId
+          )
+          resolve()
+          return {
+            end: () => {},
+          }
+        },
+      })
     })
   })
 
   describe('edit a tag', function () {
-    beforeEach(function () {
-      this.req.params.tagId = this.tagId = 'tag-id-123'
-      this.req.session.user._id = this.userId = 'user-id-123'
+    beforeEach(function (ctx) {
+      ctx.req.params.tagId = ctx.tagId = 'tag-id-123'
+      ctx.req.session.user._id = ctx.userId = 'user-id-123'
     })
 
-    it('with a name and no color', function (done) {
-      this.req.body = {
-        name: (this.name = 'new-name'),
-      }
-      this.TagsController.editTag(this.req, {
+    it('with a name and no color', function (ctx) {
+      return new Promise(resolve => {
+        ctx.req.body = {
+          name: (ctx.tagName = 'new-name'),
+        }
+        ctx.TagsController.editTag(ctx.req, {
+          status: code => {
+            assert.equal(code, 204)
+            sinon.assert.calledWith(
+              ctx.TagsHandler.promises.editTag,
+              ctx.userId,
+              ctx.tagId,
+              ctx.tagName
+            )
+            resolve()
+            return {
+              end: () => {},
+            }
+          },
+        })
+      })
+    })
+
+    it('with a name and color', function (ctx) {
+      return new Promise(resolve => {
+        ctx.req.body = {
+          name: (ctx.tagName = 'new-name'),
+          color: (ctx.color = '#FF0011'),
+        }
+        ctx.TagsController.editTag(ctx.req, {
+          status: code => {
+            assert.equal(code, 204)
+            sinon.assert.calledWith(
+              ctx.TagsHandler.promises.editTag,
+              ctx.userId,
+              ctx.tagId,
+              ctx.tagName,
+              ctx.color
+            )
+            resolve()
+            return {
+              end: () => {},
+            }
+          },
+        })
+      })
+    })
+
+    it('without a name', function (ctx) {
+      return new Promise(resolve => {
+        ctx.req.body = { name: undefined }
+        ctx.TagsController.renameTag(ctx.req, {
+          status: code => {
+            assert.equal(code, 400)
+            sinon.assert.notCalled(ctx.TagsHandler.promises.renameTag)
+            resolve()
+            return {
+              end: () => {},
+            }
+          },
+        })
+      })
+    })
+  })
+
+  it('add a project to a tag', function (ctx) {
+    return new Promise(resolve => {
+      ctx.req.params.tagId = ctx.tagId = 'tag-id-123'
+      ctx.req.params.projectId = ctx.projectId = 'project-id-123'
+      ctx.req.session.user._id = ctx.userId = 'user-id-123'
+      ctx.TagsController.addProjectToTag(ctx.req, {
         status: code => {
           assert.equal(code, 204)
           sinon.assert.calledWith(
-            this.TagsHandler.promises.editTag,
-            this.userId,
-            this.tagId,
-            this.name
+            ctx.TagsHandler.promises.addProjectToTag,
+            ctx.userId,
+            ctx.tagId,
+            ctx.projectId
           )
-          done()
+          resolve()
           return {
             end: () => {},
           }
         },
       })
     })
+  })
 
-    it('with a name and color', function (done) {
-      this.req.body = {
-        name: (this.name = 'new-name'),
-        color: (this.color = '#FF0011'),
-      }
-      this.TagsController.editTag(this.req, {
+  it('add projects to a tag', function (ctx) {
+    return new Promise(resolve => {
+      ctx.req.params.tagId = ctx.tagId = 'tag-id-123'
+      ctx.req.body.projectIds = ctx.projectIds = [
+        'project-id-123',
+        'project-id-234',
+      ]
+      ctx.req.session.user._id = ctx.userId = 'user-id-123'
+      ctx.TagsController.addProjectsToTag(ctx.req, {
         status: code => {
           assert.equal(code, 204)
           sinon.assert.calledWith(
-            this.TagsHandler.promises.editTag,
-            this.userId,
-            this.tagId,
-            this.name,
-            this.color
+            ctx.TagsHandler.promises.addProjectsToTag,
+            ctx.userId,
+            ctx.tagId,
+            ctx.projectIds
           )
-          done()
+          resolve()
           return {
             end: () => {},
           }
         },
       })
     })
+  })
 
-    it('without a name', function (done) {
-      this.req.body = { name: undefined }
-      this.TagsController.renameTag(this.req, {
+  it('remove a project from a tag', function (ctx) {
+    return new Promise(resolve => {
+      ctx.req.params.tagId = ctx.tagId = 'tag-id-123'
+      ctx.req.params.projectId = ctx.projectId = 'project-id-123'
+      ctx.req.session.user._id = ctx.userId = 'user-id-123'
+      ctx.TagsController.removeProjectFromTag(ctx.req, {
         status: code => {
-          assert.equal(code, 400)
-          sinon.assert.notCalled(this.TagsHandler.promises.renameTag)
-          done()
+          assert.equal(code, 204)
+          sinon.assert.calledWith(
+            ctx.TagsHandler.promises.removeProjectFromTag,
+            ctx.userId,
+            ctx.tagId,
+            ctx.projectId
+          )
+          resolve()
           return {
             end: () => {},
           }
@@ -196,93 +287,29 @@ describe('TagsController', function () {
     })
   })
 
-  it('add a project to a tag', function (done) {
-    this.req.params.tagId = this.tagId = 'tag-id-123'
-    this.req.params.projectId = this.projectId = 'project-id-123'
-    this.req.session.user._id = this.userId = 'user-id-123'
-    this.TagsController.addProjectToTag(this.req, {
-      status: code => {
-        assert.equal(code, 204)
-        sinon.assert.calledWith(
-          this.TagsHandler.promises.addProjectToTag,
-          this.userId,
-          this.tagId,
-          this.projectId
-        )
-        done()
-        return {
-          end: () => {},
-        }
-      },
-    })
-  })
-
-  it('add projects to a tag', function (done) {
-    this.req.params.tagId = this.tagId = 'tag-id-123'
-    this.req.body.projectIds = this.projectIds = [
-      'project-id-123',
-      'project-id-234',
-    ]
-    this.req.session.user._id = this.userId = 'user-id-123'
-    this.TagsController.addProjectsToTag(this.req, {
-      status: code => {
-        assert.equal(code, 204)
-        sinon.assert.calledWith(
-          this.TagsHandler.promises.addProjectsToTag,
-          this.userId,
-          this.tagId,
-          this.projectIds
-        )
-        done()
-        return {
-          end: () => {},
-        }
-      },
-    })
-  })
-
-  it('remove a project from a tag', function (done) {
-    this.req.params.tagId = this.tagId = 'tag-id-123'
-    this.req.params.projectId = this.projectId = 'project-id-123'
-    this.req.session.user._id = this.userId = 'user-id-123'
-    this.TagsController.removeProjectFromTag(this.req, {
-      status: code => {
-        assert.equal(code, 204)
-        sinon.assert.calledWith(
-          this.TagsHandler.promises.removeProjectFromTag,
-          this.userId,
-          this.tagId,
-          this.projectId
-        )
-        done()
-        return {
-          end: () => {},
-        }
-      },
-    })
-  })
-
-  it('remove projects from a tag', function (done) {
-    this.req.params.tagId = this.tagId = 'tag-id-123'
-    this.req.body.projectIds = this.projectIds = [
-      'project-id-123',
-      'project-id-234',
-    ]
-    this.req.session.user._id = this.userId = 'user-id-123'
-    this.TagsController.removeProjectsFromTag(this.req, {
-      status: code => {
-        assert.equal(code, 204)
-        sinon.assert.calledWith(
-          this.TagsHandler.promises.removeProjectsFromTag,
-          this.userId,
-          this.tagId,
-          this.projectIds
-        )
-        done()
-        return {
-          end: () => {},
-        }
-      },
+  it('remove projects from a tag', function (ctx) {
+    return new Promise(resolve => {
+      ctx.req.params.tagId = ctx.tagId = 'tag-id-123'
+      ctx.req.body.projectIds = ctx.projectIds = [
+        'project-id-123',
+        'project-id-234',
+      ]
+      ctx.req.session.user._id = ctx.userId = 'user-id-123'
+      ctx.TagsController.removeProjectsFromTag(ctx.req, {
+        status: code => {
+          assert.equal(code, 204)
+          sinon.assert.calledWith(
+            ctx.TagsHandler.promises.removeProjectsFromTag,
+            ctx.userId,
+            ctx.tagId,
+            ctx.projectIds
+          )
+          resolve()
+          return {
+            end: () => {},
+          }
+        },
+      })
     })
   })
 })
