@@ -1,6 +1,10 @@
 import { useState } from 'react'
 import PropTypes from 'prop-types'
 import RegisterForm from './register-form'
+import OLRow from '@/features/ui/components/ol/ol-row'
+import OLCol from '@/features/ui/components/ol/ol-col'
+import OLCard from '@/features/ui/components/ol/ol-card'
+
 function UserActivateRegister() {
   const [emails, setEmails] = useState([])
   const [failedEmails, setFailedEmails] = useState([])
@@ -8,11 +12,11 @@ function UserActivateRegister() {
   const [registrationSuccess, setRegistrationSuccess] = useState(false)
 
   return (
-    <div className="row">
-      <div className="col-md-12">
-        <div className="card">
+    <OLRow>
+      <OLCol>
+        <OLCard>
           <div className="page-header">
-            <h1> Register New Users</h1>
+            <h1>Register New Users</h1>
           </div>
           <RegisterForm
             setRegistrationSuccess={setRegistrationSuccess}
@@ -30,9 +34,9 @@ function UserActivateRegister() {
               <DisplayEmailsList emails={emails} />
             </>
           ) : null}
-        </div>
-      </div>
-    </div>
+        </OLCard>
+      </OLCol>
+    </OLRow>
   )
 }
 

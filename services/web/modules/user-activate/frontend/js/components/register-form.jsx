@@ -1,5 +1,9 @@
+import { useState } from 'react'
 import PropTypes from 'prop-types'
-import { postJSON } from '../../../../../frontend/js/infrastructure/fetch-json'
+import { postJSON } from '@/infrastructure/fetch-json'
+import OLButton from '@/features/ui/components/ol/ol-button'
+import OLForm from '@/features/ui/components/ol/ol-form'
+import OLFormControl from '@/features/ui/components/ol/ol-form-control'
 
 function RegisterForm({
   setRegistrationSuccess,
@@ -7,6 +11,7 @@ function RegisterForm({
   setRegisterError,
   setFailedEmails,
 }) {
+  const [isLoading, setIsLoading] = useState(false)
   function handleRegister(event) {
     event.preventDefault()
     const formData = new FormData(event.target)
@@ -22,6 +27,7 @@ function RegisterForm({
   async function registerGivenUsers(emails) {
     const registeredEmails = []
     const failingEmails = []
+    setIsLoading(true)
     for (const email of emails) {
       try {
         const result = await registerUser(email)
@@ -30,6 +36,7 @@ function RegisterForm({
         failingEmails.push(email)
       }
     }
+    setIsLoading(false)
     if (registeredEmails.length > 0) setRegistrationSuccess(true)
     if (failingEmails.length > 0) {
       setRegisterError(true)
@@ -45,10 +52,10 @@ function RegisterForm({
   }
 
   return (
-    <form onSubmit={handleRegister}>
-      <div className="row">
-        <div className="col-md-4 col-xs-8">
-          <input
+    <OLForm onSubmit={handleRegister}>
+      <div className="d-flex gap-2 flex-wrap">
+        <div className="flex-grow-1 max-width">
+          <OLFormControl
             className="form-control"
             name="email"
             type="text"
@@ -61,11 +68,11 @@ function RegisterForm({
             commas
           </p>
         </div>
-        <div className="col-md-8 col-xs-4">
-          <button className="btn btn-primary">Register</button>
-        </div>
+        <OLButton type="submit" className="ms-auto" isLoading={isLoading}>
+          Register
+        </OLButton>
       </div>
-    </form>
+    </OLForm>
   )
 }
 
