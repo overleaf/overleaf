@@ -58,6 +58,15 @@ describe('<UnlinkUserModal />', function () {
     await waitFor(() => expect(defaultProps.onClose).to.have.been.called)
   })
 
+  it('closes the modal on cancelling', async function () {
+    renderWithContext(<UnlinkUserModal {...defaultProps} />)
+
+    const cancelButton = screen.getByRole('button', { name: 'Cancel' })
+    fireEvent.click(cancelButton)
+
+    await waitFor(() => expect(defaultProps.onClose).to.have.been.called)
+  })
+
   it('handles errors', async function () {
     fetchMock.post(`/manage/groups/${groupId}/unlink-user/${userId}`, 500)
 

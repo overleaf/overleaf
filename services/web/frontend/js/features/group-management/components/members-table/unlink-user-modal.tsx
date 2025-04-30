@@ -108,7 +108,11 @@ export default function UnlinkUserModal({
         </p>
       </OLModalBody>
       <OLModalFooter>
-        <OLButton variant="secondary" disabled={unlinkInFlight}>
+        <OLButton
+          variant="secondary"
+          disabled={unlinkInFlight}
+          onClick={onClose}
+        >
           {t('cancel')}
         </OLButton>
         <OLButton
