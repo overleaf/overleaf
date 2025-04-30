@@ -1187,9 +1187,7 @@ async function initialize(webRouter, privateApiRouter, publicApiRouter) {
       const sendRes = _.once(function (statusCode, message) {
         res.status(statusCode)
         plainTextResponse(res, message)
-        ClsiCookieManager.promises
-          .clearServerId(projectId, testUserId)
-          .catch(() => {})
+        ClsiCookieManager.clearServerId(projectId, testUserId, () => {})
       }) // force every compile to a new server
       // set a timeout
       let handler = setTimeout(function () {
