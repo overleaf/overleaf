@@ -16,10 +16,6 @@ async function main() {
       console.error('Missing --name option')
       process.exit(1)
     }
-    if (opts.secret == null) {
-      console.error('Missing --secret option')
-      process.exit(1)
-    }
   } else {
     console.log(`Updating configuration for client: ${application.name}`)
     if (opts.mongoId != null) {
@@ -104,7 +100,7 @@ Creates or updates an OAuth client configuration
 
 Options:
     --name            Descriptive name for the OAuth client (required for creation)
-    --secret          Client secret (required for creation)
+    --secret          Client secret
     --scope           Accepted scope (can be given more than once)
     --grant           Accepted grant type (can be given more than once)
     --redirect-uri    Accepted redirect URI (can be given more than once)
