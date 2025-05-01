@@ -696,6 +696,8 @@ const equationArrayEnvNames = new Set([
   'rcases*',
   'IEEEeqnarray',
   'IEEEeqnarray*',
+  'subeqnarray',
+  'subeqnarray*',
 ])
 
 const verbatimEnvNames = new Set([
