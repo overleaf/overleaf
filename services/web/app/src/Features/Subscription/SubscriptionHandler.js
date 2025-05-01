@@ -12,6 +12,7 @@ const EmailHandler = require('../Email/EmailHandler')
 const { callbackify } = require('@overleaf/promise-utils')
 const UserUpdater = require('../User/UserUpdater')
 const { NotFoundError } = require('../Errors/Errors')
+const Modules = require('../../infrastructure/Modules')
 
 /**
  * @import { PaymentProviderSubscription, PaymentProviderSubscriptionChange } from './PaymentProviderEntities'
@@ -149,10 +150,7 @@ async function cancelSubscription(user) {
     const { hasSubscription, subscription } =
       await LimitationsManager.promises.userHasSubscription(user)
     if (hasSubscription && subscription != null) {
-      await RecurlyClient.promises.cancelSubscriptionByUuid(
-        subscription.recurlySubscription_id
-      )
-      await _updateSubscriptionFromRecurly(subscription)
+      await Modules.promises.hooks.fire('cancelPaidSubscription', subscription)
       const emailOpts = {
         to: user.email,
         first_name: user.first_name,
@@ -180,10 +178,10 @@ async function reactivateSubscription(user) {
     const { hasSubscription, subscription } =
       await LimitationsManager.promises.userHasSubscription(user)
     if (hasSubscription && subscription != null) {
-      await RecurlyClient.promises.reactivateSubscriptionByUuid(
-        subscription.recurlySubscription_id
+      await Modules.promises.hooks.fire(
+        'reactivatePaidSubscription',
+        subscription
       )
-      await _updateSubscriptionFromRecurly(subscription)
       EmailHandler.sendEmail(
         'reactivatedSubscription',
         { to: user.email },
@@ -264,17 +262,6 @@ async function extendTrial(subscription, daysToExend) {
   await RecurlyWrapper.promises.extendTrial(
     subscription.recurlySubscription_id,
     daysToExend
-  )
-}
-
-async function _updateSubscriptionFromRecurly(subscription) {
-  const recurlySubscription = await RecurlyWrapper.promises.getSubscription(
-    subscription.recurlySubscription_id,
-    {}
-  )
-  await SubscriptionUpdater.promises.updateSubscriptionFromRecurly(
-    recurlySubscription,
-    subscription
   )
 }
 

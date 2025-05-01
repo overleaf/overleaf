@@ -128,7 +128,11 @@ async function userHasSubscription(user) {
   )
   let hasValidSubscription = false
   if (subscription) {
-    if (subscription.recurlySubscription_id || subscription.customAccount) {
+    if (
+      subscription.recurlySubscription_id ||
+      subscription.paymentProvider?.subscriptionId ||
+      subscription.customAccount
+    ) {
       hasValidSubscription = true
     }
   }

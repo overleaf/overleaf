@@ -156,6 +156,13 @@ describe('SubscriptionHandler', function () {
         '../Email/EmailHandler': this.EmailHandler,
         '../Analytics/AnalyticsManager': this.AnalyticsManager,
         '../User/UserUpdater': this.UserUpdater,
+        '../../infrastructure/Modules': (this.Modules = {
+          promises: {
+            hooks: {
+              fire: sinon.stub(),
+            },
+          },
+        }),
       },
     })
   })
@@ -426,12 +433,10 @@ describe('SubscriptionHandler', function () {
       })
 
       it('should cancel the subscription', function () {
-        this.RecurlyClient.promises.cancelSubscriptionByUuid.called.should.equal(
-          true
+        expect(this.Modules.promises.hooks.fire).to.have.been.calledWith(
+          'cancelPaidSubscription',
+          this.subscription
         )
-        this.RecurlyClient.promises.cancelSubscriptionByUuid
-          .calledWith(this.subscription.recurlySubscription_id)
-          .should.equal(true)
       })
 
       it('should send the email after 1 hour', function () {
@@ -626,12 +631,10 @@ describe('SubscriptionHandler', function () {
       })
 
       it('should reactivate the subscription', function () {
-        this.RecurlyClient.promises.reactivateSubscriptionByUuid.called.should.equal(
-          true
+        expect(this.Modules.promises.hooks.fire).to.have.been.calledWith(
+          'reactivatePaidSubscription',
+          this.subscription
         )
-        this.RecurlyClient.promises.reactivateSubscriptionByUuid
-          .calledWith(this.subscription.recurlySubscription_id)
-          .should.equal(true)
       })
 
       it('should send a notification email', function () {

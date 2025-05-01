@@ -434,6 +434,19 @@ describe('LimitationsManager', function () {
       expect(hasSubscription).to.be.true
     })
 
+    it('should return true if the paymentProvider field is set', async function () {
+      this.SubscriptionLocator.promises.getUsersSubscription = sinon
+        .stub()
+        .resolves({
+          paymentProvider: {
+            subscriptionId: '1234',
+          },
+        })
+      const { hasSubscription } =
+        await this.LimitationsManager.promises.userHasSubscription(this.user)
+      expect(hasSubscription).to.be.true
+    })
+
     it('should return false if the recurly token is not set', async function () {
       this.SubscriptionLocator.promises.getUsersSubscription.resolves({})
       const { hasSubscription } =
