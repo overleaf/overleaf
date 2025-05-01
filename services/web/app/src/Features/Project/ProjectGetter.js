@@ -83,6 +83,9 @@ const ProjectGetter = {
     return project._id
   },
 
+  /**
+   * @return {Promise<any>}
+   */
   async findAllUsersProjects(userId, fields) {
     const CollaboratorsGetter = require('../Collaborators/CollaboratorsGetter')
     const ownedProjects = await Project.find(

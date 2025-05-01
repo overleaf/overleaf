@@ -64,6 +64,11 @@ function flushProjectToMongoAndDelete(projectId, callback) {
   )
 }
 
+/**
+ * @param {string} projectId
+ * @param {string} docId
+ * @param {Callback} callback
+ */
 function flushDocToMongo(projectId, docId, callback) {
   _makeRequest(
     {
