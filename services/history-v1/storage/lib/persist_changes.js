@@ -11,7 +11,6 @@ const History = core.History
 
 const assert = require('./assert')
 const chunkStore = require('./chunk_store')
-const chunkBuffer = require('./chunk_buffer')
 const { BlobStore } = require('./blob_store')
 const { InvalidChangeError } = require('./errors')
 const { getContentHash } = require('./content_hash')
@@ -181,7 +180,7 @@ async function persistChanges(projectId, allChanges, limits, clientEndVersion) {
   }
 
   async function extendLastChunkIfPossible() {
-    const latestChunk = await chunkBuffer.loadLatest(projectId)
+    const latestChunk = await chunkStore.loadLatest(projectId)
 
     currentChunk = latestChunk
     originalEndVersion = latestChunk.getEndVersion()
