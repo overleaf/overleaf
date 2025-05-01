@@ -938,7 +938,7 @@ const _ProjectController = {
     return plansData
   },
 
-  async _getAddonPrices(req, res, addonPlans = ['assistBundle']) {
+  async _getAddonPrices(req, res, addonPlans = ['assistant']) {
     const plansData = {}
 
     const locale = req.i18n.language

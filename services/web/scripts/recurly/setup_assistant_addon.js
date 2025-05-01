@@ -6,7 +6,7 @@ const minimist = require('minimist')
 const Settings = require('@overleaf/settings')
 
 const ADD_ON_CODE = 'assistant'
-const ADD_ON_NAME = 'Error Assist'
+const ADD_ON_NAME = 'AI Assist'
 
 const INDIVIDUAL_PLANS = [
   'student',
