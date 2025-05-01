@@ -10,7 +10,12 @@ import { useHasLintingError } from '@/features/ide-react/hooks/use-has-linting-e
 import { Modals } from '@/features/ide-react/components/modals/modals'
 import { GlobalAlertsProvider } from '@/features/ide-react/context/global-alerts-context'
 import { GlobalToasts } from '../global-toasts'
-import { useIsNewEditorEnabled } from '@/features/ide-redesign/utils/new-editor-utils'
+import {
+  canUseNewEditor,
+  useIsNewEditorEnabled,
+} from '@/features/ide-redesign/utils/new-editor-utils'
+import EditorSurvey from '../editor-survey'
+import { useFeatureFlag } from '@/shared/context/split-test-context'
 
 const MainLayoutNew = lazy(
   () => import('@/features/ide-redesign/components/main-layout')
@@ -27,6 +32,9 @@ export default function IdePage() {
   useHasLintingError() // pass editor:lint hasLintingError to the compiler
 
   const newEditor = useIsNewEditorEnabled()
+  const canAccessNewEditor = canUseNewEditor()
+  const editorSurveyFlag = useFeatureFlag('editor-popup-ux-survey')
+  const showEditorSurvey = editorSurveyFlag && !canAccessNewEditor
 
   return (
     <GlobalAlertsProvider>
@@ -44,6 +52,7 @@ export default function IdePage() {
         </>
       )}
       <GlobalToasts />
+      {showEditorSurvey && <EditorSurvey />}
     </GlobalAlertsProvider>
   )
 }

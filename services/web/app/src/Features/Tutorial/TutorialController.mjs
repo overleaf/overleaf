@@ -11,6 +11,7 @@ const VALID_KEYS = [
   'history-restore-promo',
   'us-gov-banner',
   'us-gov-banner-fedramp',
+  'editor-popup-ux-survey',
 ]
 
 async function completeTutorial(req, res, next) {

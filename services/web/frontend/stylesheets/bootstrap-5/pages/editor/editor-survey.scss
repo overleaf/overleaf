@@ -1,0 +1,73 @@
+.editor-survey-toast {
+  position: fixed;
+  bottom: 12px;
+  right: 12px;
+  z-index: 1000;
+}
+
+.editor-survey-question-toast {
+  .notification-icon {
+    display: none;
+  }
+}
+
+.editor-survey-question {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  font-size: var(--font-size-02);
+
+  .btn {
+    align-self: flex-end;
+  }
+
+  .form-group {
+    margin-bottom: 0;
+  }
+
+  .form-check {
+    display: flex;
+    flex-direction: column-reverse;
+    align-items: center;
+    padding-left: 0;
+    gap: 2px;
+  }
+
+  .form-check-input {
+    margin: 4px;
+  }
+}
+
+.editor-survey-question-top-line {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  .btn-ghost {
+    --bs-btn-bg: transparent;
+
+    margin-left: 8px;
+  }
+}
+
+.editor-survey-question-label {
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.editor-survey-question-form {
+  display: flex;
+}
+
+.editor-survey-question-options {
+  display: flex;
+  gap: 32px;
+  margin: auto;
+}
+
+.editor-survey-option-labels {
+  display: flex;
+  justify-content: space-between;
+  color: var(--content-secondary);
+  margin-top: 4px;
+}

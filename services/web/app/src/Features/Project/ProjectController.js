@@ -356,6 +356,7 @@ const _ProjectController = {
       'overleaf-assist-bundle',
       'wf-feature-rebrand',
       'word-count-client',
+      'editor-popup-ux-survey',
     ].filter(Boolean)
 
     const getUserValues = async userId =>
