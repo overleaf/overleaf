@@ -11,10 +11,10 @@ import {
   highlightRanges,
 } from '@/features/source-editor/extensions/ranges'
 import { useEditorManagerContext } from '@/features/ide-react/context/editor-manager-context'
-import { useLayoutContext } from '@/shared/context/layout-context'
 import { EditorSelection } from '@codemirror/state'
 import MaterialIcon from '@/shared/components/material-icon'
 import { OFFSET_FOR_ENTRIES_ABOVE } from '../utils/position-items'
+import useReviewPanelLayout from '../hooks/use-review-panel-layout'
 
 export const ReviewPanelEntry: FC<
   React.PropsWithChildren<{
@@ -50,14 +50,10 @@ export const ReviewPanelEntry: FC<
   const [selected, setSelected] = useState(false)
   const [focused, setFocused] = useState(false)
   const [textareaFocused, setTextareaFocused] = useState(false)
-  const { setReviewPanelOpen } = useLayoutContext()
+  const { openReviewPanel } = useReviewPanelLayout()
   const highlighted = isSelectionWithinOp(op, state.selection.main)
   const entryRef = useRef<HTMLDivElement>(null)
   const mousePressedRef = useRef(false)
-
-  const openReviewPanel = useCallback(() => {
-    setReviewPanelOpen(true)
-  }, [setReviewPanelOpen])
 
   const selectEntry = useCallback(
     (event: React.FocusEvent | React.MouseEvent) => {
