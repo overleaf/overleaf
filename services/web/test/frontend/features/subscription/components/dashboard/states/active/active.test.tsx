@@ -21,7 +21,7 @@ import {
   extendTrialUrl,
   subscriptionUpdateUrl,
 } from '@/features/subscription/data/subscription-url'
-import * as useLocationModule from '../../../../../../../../frontend/js/shared/hooks/use-location'
+import { location } from '@/shared/components/location'
 import { MetaTag } from '@/utils/meta'
 
 describe('<ActiveSubscription />', function () {
@@ -77,9 +77,13 @@ describe('<ActiveSubscription />', function () {
     screen.getByText('You are currently subscribed to the', { exact: false })
 
     await screen.findByRole('heading', { name: 'Change plan' })
-    expect(
-      screen.getAllByRole('button', { name: 'Change to this plan' }).length > 0
-    ).to.be.true
+    await waitFor(
+      () =>
+        expect(
+          screen.getAllByRole('button', { name: 'Change to this plan' })
+            .length > 0
+        ).to.be.true
+    )
   })
 
   it('notes when user is changing plan at end of current plan term', function () {
@@ -193,21 +197,13 @@ describe('<ActiveSubscription />', function () {
   })
 
   describe('cancel plan', function () {
-    const assignStub = sinon.stub()
-    const reloadStub = sinon.stub()
-
     beforeEach(function () {
-      this.locationStub = sinon.stub(useLocationModule, 'useLocation').returns({
-        assign: assignStub,
-        replace: sinon.stub(),
-        reload: reloadStub,
-        setHash: sinon.stub(),
-        toString: sinon.stub(),
-      })
+      this.locationWrapperSandbox = sinon.createSandbox()
+      this.locationWrapperStub = this.locationWrapperSandbox.stub(location)
     })
 
     afterEach(function () {
-      this.locationStub.restore()
+      this.locationWrapperSandbox.restore()
       fetchMock.removeRoutes().clearHistory()
     })
 
@@ -277,6 +273,7 @@ describe('<ActiveSubscription />', function () {
         name: 'Cancel my subscription',
       })
       fireEvent.click(button)
+      const assignStub = this.locationWrapperStub.assign
       await waitFor(() => {
         expect(assignStub).to.have.been.called
       })
@@ -406,6 +403,7 @@ describe('<ActiveSubscription />', function () {
         })
         fireEvent.click(extendTrialButton)
         // page is reloaded on success
+        const reloadStub = this.locationWrapperStub.reload
         await waitFor(() => {
           expect(reloadStub).to.have.been.called
         })
@@ -499,7 +497,10 @@ describe('<ActiveSubscription />', function () {
         const endPointResponse = {
           status: 200,
         }
-        fetchMock.post(subscriptionUpdateUrl, endPointResponse)
+        fetchMock.post(
+          `${subscriptionUpdateUrl}?downgradeToPaidPersonal`,
+          endPointResponse
+        )
         renderActiveSubscription(monthlyActiveCollaborator)
         showConfirmCancelUI()
         const downgradeButton = await screen.findByRole('button', {
@@ -507,6 +508,7 @@ describe('<ActiveSubscription />', function () {
         })
         fireEvent.click(downgradeButton)
         // page is reloaded on success
+        const reloadStub = this.locationWrapperStub.reload
         await waitFor(() => {
           expect(reloadStub).to.have.been.called
         })

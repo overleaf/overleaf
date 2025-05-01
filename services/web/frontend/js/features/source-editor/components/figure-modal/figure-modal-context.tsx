@@ -80,7 +80,9 @@ const FigureModalExistingFigureContext = createContext<
   | undefined
 >(undefined)
 
-export const FigureModalProvider: FC = ({ children }) => {
+export const FigureModalProvider: FC<React.PropsWithChildren> = ({
+  children,
+}) => {
   const [state, dispatch] = useReducer(reducer, {
     source: FigureModalSource.NONE,
     helpShown: false,

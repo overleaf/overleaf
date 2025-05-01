@@ -137,4 +137,6 @@ function TokenAccessRoot() {
   )
 }
 
-export default withErrorBoundary(TokenAccessRoot, GenericErrorBoundaryFallback)
+export default withErrorBoundary(TokenAccessRoot, () => (
+  <GenericErrorBoundaryFallback />
+))

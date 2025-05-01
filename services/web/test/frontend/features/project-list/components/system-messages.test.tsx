@@ -24,7 +24,7 @@ describe('<SystemMessages />', function () {
 
     await fetchMock.callHistory.flush(true)
 
-    screen.getByText(data.content)
+    await screen.findByText(data.content)
     expect(screen.queryByRole('button', { name: /close/i })).to.be.null
   })
 
@@ -38,7 +38,7 @@ describe('<SystemMessages />', function () {
 
     await fetchMock.callHistory.flush(true)
 
-    screen.getByText(data.content)
+    await screen.findByText(data.content)
     const closeBtn = screen.getByRole('button', { name: /close/i })
     fireEvent.click(closeBtn)
 

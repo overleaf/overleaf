@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react'
+import React, { ChangeEvent, useCallback, useState } from 'react'
 import { Trans, useTranslation } from 'react-i18next'
 import useWaitForI18n from '../../../shared/hooks/use-wait-for-i18n'
 import getMeta from '../../../utils/meta'
@@ -37,7 +37,7 @@ export default function GroupMembers() {
   const canUseAddSeatsFeature = getMeta('ol-canUseAddSeatsFeature')
 
   const handleEmailsChange = useCallback(
-    e => {
+    (e: ChangeEvent<HTMLInputElement>) => {
       setEmailString(e.target.value)
     },
     [setEmailString]

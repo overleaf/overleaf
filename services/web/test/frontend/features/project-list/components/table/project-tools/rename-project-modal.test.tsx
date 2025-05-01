@@ -92,6 +92,6 @@ describe('<RenameProjectModal />', function () {
 
     await waitFor(() => expect(postRenameMock.callHistory.called()).to.be.true)
 
-    screen.getByText('Something went wrong. Please try again.')
+    await screen.findByText('Something went wrong. Please try again.')
   })
 })

@@ -1,9 +1,10 @@
 import './base'
-import ReactDOM from 'react-dom'
+import { createRoot } from 'react-dom/client'
 import InviteRoot from '@/features/subscription/components/invite-root'
 
 const element = document.getElementById('invite-root')
 
 if (element) {
-  ReactDOM.render(<InviteRoot />, element)
+  const root = createRoot(element)
+  root.render(<InviteRoot />)
 }

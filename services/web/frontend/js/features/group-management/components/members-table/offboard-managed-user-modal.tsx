@@ -101,7 +101,6 @@ export default function OffboardManagedUserModal({
             <OLFormSelect
               aria-label={t('select_user')}
               required
-              placeholder={t('choose_from_group_members')}
               value={selectedRecipientId || ''}
               onChange={e => setSelectedRecipientId(e.target.value)}
             >

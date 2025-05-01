@@ -18,7 +18,7 @@ describe('<PdfLogsEntries/>', function () {
     entity: { _id: '123', name: '123 Doc' },
   }
 
-  const FileTreePathProvider: FC = ({ children }) => (
+  const FileTreePathProvider: FC<React.PropsWithChildren> = ({ children }) => (
     <FileTreePathContext.Provider
       value={{
         dirname: cy.stub(),
@@ -34,7 +34,7 @@ describe('<PdfLogsEntries/>', function () {
     </FileTreePathContext.Provider>
   )
 
-  const EditorManagerProvider: FC = ({ children }) => {
+  const EditorManagerProvider: FC<React.PropsWithChildren> = ({ children }) => {
     const value = {
       openDocWithId: cy.spy().as('openDocWithId'),
       // @ts-ignore

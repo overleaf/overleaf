@@ -21,7 +21,9 @@ describe('<CodeMirrorEditor/> in Visual mode', function () {
     const scope = mockScope(content)
     scope.editor.showVisual = true
 
-    const FileTreePathProvider: FC = ({ children }) => (
+    const FileTreePathProvider: FC<React.PropsWithChildren> = ({
+      children,
+    }) => (
       <FileTreePathContext.Provider
         value={{
           dirname: cy.stub(),

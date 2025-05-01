@@ -1,9 +1,10 @@
 import '@/marketing'
 
-import ReactDOM from 'react-dom'
+import { createRoot } from 'react-dom/client'
 import UserActivateRegister from '../components/user-activate-register'
 
-ReactDOM.render(
-  <UserActivateRegister />,
-  document.getElementById('user-activate-register-container')
-)
+const container = document.getElementById('user-activate-register-container')
+if (container) {
+  const root = createRoot(container)
+  root.render(<UserActivateRegister />)
+}

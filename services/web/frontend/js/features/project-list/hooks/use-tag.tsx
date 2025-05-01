@@ -50,7 +50,7 @@ function useTag() {
   )
 
   const handleEditTag = useCallback(
-    (e, tagId) => {
+    (e: React.MouseEvent, tagId: string) => {
       e.preventDefault()
       const tag = find(tags, ['_id', tagId])
       if (tag) {
@@ -69,7 +69,7 @@ function useTag() {
   )
 
   const handleDeleteTag = useCallback(
-    (e, tagId) => {
+    (e: React.MouseEvent, tagId: string) => {
       e.preventDefault()
       const tag = find(tags, ['_id', tagId])
       if (tag) {
@@ -80,7 +80,7 @@ function useTag() {
   )
 
   const onDelete = useCallback(
-    tagId => {
+    (tagId: string) => {
       deleteTag(tagId)
       setDeletingTag(undefined)
     },
@@ -88,7 +88,7 @@ function useTag() {
   )
 
   const handleManageTag = useCallback(
-    (e, tagId) => {
+    (e: React.MouseEvent, tagId: string) => {
       e.preventDefault()
       const tag = find(tags, ['_id', tagId])
       if (tag) {

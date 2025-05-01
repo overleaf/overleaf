@@ -20,7 +20,10 @@ export default function ManagedInstitution({
   const { updateManagedInstitution } = useSubscriptionDashboardContext()
 
   const changeInstitutionalEmailSubscription = useCallback(
-    (e, institutionId: Institution['v1Id']) => {
+    (
+      e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
+      institutionId: Institution['v1Id']
+    ) => {
       const updateSubscription = async (institutionId: Institution['v1Id']) => {
         setSubscriptionChanging(true)
         try {

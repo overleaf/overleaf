@@ -9,16 +9,18 @@ import { emitTableGeneratorEvent } from '../analytics'
 import { useCodeMirrorViewContext } from '../../codemirror-context'
 import classNames from 'classnames'
 
-export const ToolbarDropdown: FC<{
-  id: string
-  label?: string
-  btnClassName?: string
-  icon?: string
-  tooltip?: string
-  disabled?: boolean
-  disabledTooltip?: string
-  showCaret?: boolean
-}> = ({
+export const ToolbarDropdown: FC<
+  React.PropsWithChildren<{
+    id: string
+    label?: string
+    btnClassName?: string
+    icon?: string
+    tooltip?: string
+    disabled?: boolean
+    disabledTooltip?: string
+    showCaret?: boolean
+  }>
+> = ({
   id,
   label,
   children,
@@ -112,12 +114,14 @@ export const ToolbarDropdown: FC<{
 }
 
 export const ToolbarDropdownItem: FC<
-  Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'onClick'> & {
-    command: () => void
-    id: string
-    icon?: string
-    active?: boolean
-  }
+  React.PropsWithChildren<
+    Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'onClick'> & {
+      command: () => void
+      id: string
+      icon?: string
+      active?: boolean
+    }
+  >
 > = ({ children, command, id, icon, active, ...props }) => {
   const view = useCodeMirrorViewContext()
   const onClick = useCallback(() => {

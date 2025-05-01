@@ -22,7 +22,9 @@ export const FileTreePathContext = createContext<
   FileTreePathContextValue | undefined
 >(undefined)
 
-export const FileTreePathProvider: FC = ({ children }) => {
+export const FileTreePathProvider: FC<React.PropsWithChildren> = ({
+  children,
+}) => {
   const { fileTreeData }: { fileTreeData: Folder } = useFileTreeData()
   const projectId = getMeta('ol-project_id')
 

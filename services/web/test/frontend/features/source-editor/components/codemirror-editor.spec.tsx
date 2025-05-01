@@ -216,7 +216,7 @@ describe('<CodeMirrorEditor/>', { scrollBehavior: false }, function () {
       onlineUsersCount: 3,
     }
 
-    const OnlineUsersProvider: FC = ({ children }) => {
+    const OnlineUsersProvider: FC<React.PropsWithChildren> = ({ children }) => {
       return (
         <OnlineUsersContext.Provider value={value}>
           {children}

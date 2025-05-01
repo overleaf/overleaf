@@ -51,7 +51,7 @@ export default function useSynctex(): {
 
   useEventListener(
     'cursor:editor:update',
-    useCallback(event => setCursorPosition(event.detail), [])
+    useCallback((event: CustomEvent) => setCursorPosition(event.detail), [])
   )
 
   const [syncToPdfInFlight, setSyncToPdfInFlight] = useState(false)
@@ -86,7 +86,7 @@ export default function useSynctex(): {
   }, [dirname, getCurrentDocumentId, pathInFolder, rootDocId])
 
   const goToCodeLine = useCallback(
-    (file, line) => {
+    (file?: string, line?: number) => {
       if (file) {
         const doc = findEntityByPath(file)?.entity
         if (doc) {
@@ -102,7 +102,7 @@ export default function useSynctex(): {
   )
 
   const goToPdfLocation = useCallback(
-    params => {
+    (params: string) => {
       setSyncToPdfInFlight(true)
 
       if (clsiServerId) {
@@ -251,7 +251,10 @@ export default function useSynctex(): {
 
   useEventListener(
     'synctex:sync-to-position',
-    useCallback(event => syncToCode({ position: event.detail }), [syncToCode])
+    useCallback(
+      (event: CustomEvent) => syncToCode({ position: event.detail }),
+      [syncToCode]
+    )
   )
 
   const [hasSingleSelectedDoc, setHasSingleSelectedDoc] = useDetachState(

@@ -77,7 +77,7 @@ function DocumentDiffViewer({
 
   // Append the editor view DOM to the container node when mounted
   const containerRef = useCallback(
-    node => {
+    (node: HTMLDivElement) => {
       if (node) {
         node.appendChild(view.dom)
       }

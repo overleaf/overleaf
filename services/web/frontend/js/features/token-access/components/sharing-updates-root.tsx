@@ -159,7 +159,6 @@ function SharingUpdatesRoot() {
   )
 }
 
-export default withErrorBoundary(
-  SharingUpdatesRoot,
-  GenericErrorBoundaryFallback
-)
+export default withErrorBoundary(SharingUpdatesRoot, () => (
+  <GenericErrorBoundaryFallback />
+))

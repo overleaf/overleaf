@@ -27,10 +27,11 @@ import { UserSettingsProvider } from '@/shared/context/user-settings-context'
 import { IdeRedesignSwitcherProvider } from './ide-redesign-switcher-context'
 import { CommandRegistryProvider } from './command-registry-context'
 
-export const ReactContextRoot: FC<{ providers?: Record<string, FC> }> = ({
-  children,
-  providers = {},
-}) => {
+export const ReactContextRoot: FC<
+  React.PropsWithChildren<{
+    providers?: Record<string, FC>
+  }>
+> = ({ children, providers = {} }) => {
   const Providers = {
     ChatProvider,
     ConnectionProvider,

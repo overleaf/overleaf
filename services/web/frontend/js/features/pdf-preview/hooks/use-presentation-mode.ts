@@ -33,8 +33,8 @@ export default function usePresentationMode(
   }, [handlePageChange, page])
 
   const clickListener = useCallback(
-    event => {
-      if (event.target.tagName === 'A') {
+    (event: MouseEvent) => {
+      if ((event.target as HTMLElement).tagName === 'A') {
         return
       }
 
@@ -48,7 +48,7 @@ export default function usePresentationMode(
   )
 
   const arrowKeyListener = useCallback(
-    event => {
+    (event: KeyboardEvent) => {
       switch (event.key) {
         case 'ArrowLeft':
         case 'ArrowUp':

@@ -34,13 +34,15 @@ const TableContext = createContext<
   | undefined
 >(undefined)
 
-export const TableProvider: FC<{
-  tableData: ParsedTableData
-  tableNode: SyntaxNode | null
-  tabularNode: SyntaxNode
-  view: EditorView
-  directTableChild?: boolean
-}> = ({
+export const TableProvider: FC<
+  React.PropsWithChildren<{
+    tableData: ParsedTableData
+    tableNode: SyntaxNode | null
+    tabularNode: SyntaxNode
+    view: EditorView
+    directTableChild?: boolean
+  }>
+> = ({
   tableData,
   children,
   tableNode,

@@ -27,7 +27,7 @@ export const ToolbarProjectTitle = () => {
   const hasRenamePermissions = permissionsLevel === 'owner'
   const [isRenaming, setIsRenaming] = useState(false)
   const onRename = useCallback(
-    name => {
+    (name: string) => {
       if (name) {
         renameProject(name)
       }

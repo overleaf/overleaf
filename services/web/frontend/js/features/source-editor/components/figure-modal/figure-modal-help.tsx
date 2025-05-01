@@ -1,7 +1,10 @@
 import { FC } from 'react'
 import { Trans, useTranslation } from 'react-i18next'
 
-const LearnWikiLink: FC<{ article: string }> = ({ article, children }) => {
+const LearnWikiLink: FC<React.PropsWithChildren<{ article: string }>> = ({
+  article,
+  children,
+}) => {
   return <a href={`/learn/latex/${article}`}>{children}</a>
 }
 

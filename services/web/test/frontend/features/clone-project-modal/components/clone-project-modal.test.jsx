@@ -8,6 +8,7 @@ import { renderWithEditorContext } from '../../../helpers/render-with-context'
 describe('<EditorCloneProjectModalWrapper />', function () {
   beforeEach(function () {
     fetchMock.removeRoutes().clearHistory()
+    window.metaAttributesCache.set('ol-preventCompileOnLoad', true)
   })
 
   after(function () {

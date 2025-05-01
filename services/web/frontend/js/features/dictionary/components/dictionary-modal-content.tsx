@@ -33,7 +33,7 @@ export default function DictionaryModalContent({
   const { isError, runAsync } = useAsync()
 
   const handleRemove = useCallback(
-    word => {
+    (word: string) => {
       runAsync(postJSON('/spelling/unlearn', { body: { word } }))
         .then(() => {
           setLearnedWords(prevLearnedWords => {

@@ -50,7 +50,7 @@ export default function FileTreeImportFromProject() {
 
   // use the basename of a path as the file name
   const setNameFromPath = useCallback(
-    path => {
+    (path: string) => {
       const filename = path.split('/').pop()
 
       if (filename) {

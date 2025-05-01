@@ -88,7 +88,9 @@ export const EditorManagerContext = createContext<EditorManager | undefined>(
   undefined
 )
 
-export const EditorManagerProvider: FC = ({ children }) => {
+export const EditorManagerProvider: FC<React.PropsWithChildren> = ({
+  children,
+}) => {
   const { t } = useTranslation()
   const { scopeStore } = useIdeContext()
   const { reportError, eventEmitter, projectId } = useIdeReactContext()

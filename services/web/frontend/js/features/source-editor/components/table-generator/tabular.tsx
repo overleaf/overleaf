@@ -273,7 +273,7 @@ export const Tabular: FC<{
   )
 }
 
-const TabularWrapper: FC = () => {
+const TabularWrapper: FC<React.PropsWithChildren> = () => {
   const { setSelection, selection } = useSelectionContext()
   const { commitCellData, cellData } = useEditingContext()
   const { ref } = useTabularContext()

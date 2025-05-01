@@ -26,7 +26,9 @@ export const ChangesUsersContext = createContext<ChangesUsers | undefined>(
   undefined
 )
 
-export const ChangesUsersProvider: FC = ({ children }) => {
+export const ChangesUsersProvider: FC<React.PropsWithChildren> = ({
+  children,
+}) => {
   const { _id: projectId, members, owner } = useProjectContext()
   const { isRestrictedTokenMember } = useEditorContext()
 

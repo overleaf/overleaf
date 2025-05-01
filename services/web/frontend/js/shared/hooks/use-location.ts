@@ -6,7 +6,7 @@ export const useLocation = () => {
   const isMounted = useIsMounted()
 
   const assign = useCallback(
-    url => {
+    (url: string) => {
       if (isMounted.current) {
         location.assign(url)
       }
@@ -15,7 +15,7 @@ export const useLocation = () => {
   )
 
   const replace = useCallback(
-    url => {
+    (url: string) => {
       if (isMounted.current) {
         location.replace(url)
       }

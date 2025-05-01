@@ -36,7 +36,9 @@ export const ConnectionContext = createContext<
   ConnectionContextValue | undefined
 >(undefined)
 
-export const ConnectionProvider: FC = ({ children }) => {
+export const ConnectionProvider: FC<React.PropsWithChildren> = ({
+  children,
+}) => {
   const location = useLocation()
 
   const [connectionManager] = useState(() => new ConnectionManager())

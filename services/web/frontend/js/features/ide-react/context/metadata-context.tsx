@@ -47,7 +47,7 @@ export const MetadataContext = createContext<
   | undefined
 >(undefined)
 
-export const MetadataProvider: FC = ({ children }) => {
+export const MetadataProvider: FC<React.PropsWithChildren> = ({ children }) => {
   const { t } = useTranslation()
   const { eventEmitter, projectId } = useIdeReactContext()
   const { socket } = useConnectionContext()

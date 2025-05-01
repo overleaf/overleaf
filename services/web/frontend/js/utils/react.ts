@@ -1,16 +1,23 @@
-import { forwardRef } from 'react'
+import {
+  forwardRef,
+  PropsWithoutRef,
+  ReactElement,
+  Ref,
+  RefAttributes,
+  FunctionComponent,
+} from 'react'
 
 export const fixedForwardRef = <
   T,
   P = object,
-  A extends Record<string, React.FunctionComponent> = Record<
+  A extends Record<string, FunctionComponent> = Record<
     string,
-    React.FunctionComponent
+    FunctionComponent
   >,
 >(
-  render: (props: P, ref: React.Ref<T>) => React.ReactElement | null,
+  render: (props: PropsWithoutRef<P>, ref: Ref<T>) => ReactElement | null,
   propsToAttach: A = {} as A
-): ((props: P & React.RefAttributes<T>) => React.ReactElement | null) & A => {
+): ((props: P & RefAttributes<T>) => ReactElement | null) & A => {
   const ForwardReferredComponent = forwardRef(render) as any
 
   for (const i in propsToAttach) {

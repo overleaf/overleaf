@@ -6,14 +6,15 @@ import { useCodeMirrorViewContext } from '../codemirror-context'
 import OLOverlay from '@/features/ui/components/ol/ol-overlay'
 import OLPopover from '@/features/ui/components/ol/ol-popover'
 
-export const ToolbarOverflow: FC<{
-  overflowed: boolean
-  overflowOpen: boolean
-  setOverflowOpen: (open: boolean) => void
-  overflowRef?: React.Ref<HTMLDivElement>
-}> = ({ overflowed, overflowOpen, setOverflowOpen, overflowRef, children }) => {
+export const ToolbarOverflow: FC<
+  React.PropsWithChildren<{
+    overflowed: boolean
+    overflowOpen: boolean
+    setOverflowOpen: (open: boolean) => void
+    overflowRef?: React.Ref<HTMLDivElement>
+  }>
+> = ({ overflowed, overflowOpen, setOverflowOpen, overflowRef, children }) => {
   const { t } = useTranslation()
-
   const buttonRef = useRef<HTMLButtonElement>(null)
   const keyboardInputRef = useRef(false)
   const view = useCodeMirrorViewContext()

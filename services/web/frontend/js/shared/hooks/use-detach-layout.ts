@@ -100,7 +100,7 @@ export default function useDetachLayout() {
   }, [setRole, setIsLinked])
 
   const handleEventForDetacherFromDetached = useCallback(
-    message => {
+    (message: any) => {
       switch (message.event) {
         case 'connected':
           broadcastEvent('up')
@@ -118,7 +118,7 @@ export default function useDetachLayout() {
   )
 
   const handleEventForDetachedFromDetacher = useCallback(
-    message => {
+    (message: any) => {
       switch (message.event) {
         case 'connected':
           broadcastEvent('up')
@@ -140,7 +140,7 @@ export default function useDetachLayout() {
   )
 
   const handleEventForDetachedFromDetached = useCallback(
-    message => {
+    (message: any) => {
       switch (message.event) {
         case 'closed':
           broadcastEvent('up')
@@ -151,7 +151,7 @@ export default function useDetachLayout() {
   )
 
   const handleEvent = useCallback(
-    message => {
+    (message: any) => {
       if (role === 'detacher') {
         if (message.role === 'detacher') {
           handleEventForDetacherFromDetacher()

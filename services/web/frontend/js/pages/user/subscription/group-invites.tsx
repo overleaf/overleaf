@@ -1,8 +1,9 @@
 import './base'
-import ReactDOM from 'react-dom'
+import { createRoot } from 'react-dom/client'
 import GroupInvitesRoot from '@/features/subscription/components/group-invites/group-invites-root'
 
 const element = document.getElementById('group-invites-root')
 if (element) {
-  ReactDOM.render(<GroupInvitesRoot />, element)
+  const root = createRoot(element)
+  root.render(<GroupInvitesRoot />)
 }

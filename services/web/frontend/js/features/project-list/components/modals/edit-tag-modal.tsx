@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { FormEvent, useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Tag } from '../../../../../../app/src/Features/Tags/types'
 import useAsync from '../../../../shared/hooks/use-async'
@@ -56,7 +56,7 @@ export function EditTagModal({ id, tag, onEdit, onClose }: EditTagModalProps) {
   )
 
   const handleSubmit = useCallback(
-    e => {
+    (e: FormEvent) => {
       e.preventDefault()
       if (tag) {
         runEditTag(tag._id)

@@ -256,7 +256,7 @@ export function SubscriptionDashboardProvider({
   }, [setModalIdShown, setPlanCodeToChangeTo])
 
   const handleOpenModal = useCallback(
-    (id, planCode) => {
+    (id: SubscriptionDashModalIds, planCode?: string) => {
       setModalIdShown(id)
       setPlanCodeToChangeTo(planCode)
     },

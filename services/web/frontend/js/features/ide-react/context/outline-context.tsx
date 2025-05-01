@@ -42,7 +42,7 @@ const OutlineContext = createContext<
   | undefined
 >(undefined)
 
-export const OutlineProvider: FC = ({ children }) => {
+export const OutlineProvider: FC<React.PropsWithChildren> = ({ children }) => {
   const [flatOutline, setFlatOutline] = useState<FlatOutlineState>(undefined)
   const [currentlyHighlightedLine, setCurrentlyHighlightedLine] =
     useState<number>(-1)
@@ -55,7 +55,7 @@ export const OutlineProvider: FC = ({ children }) => {
 
   useEventListener(
     'file-view:file-opened',
-    useCallback(_ => {
+    useCallback(() => {
       setBinaryFileOpened(true)
     }, [])
   )
@@ -63,7 +63,7 @@ export const OutlineProvider: FC = ({ children }) => {
   useEventListener(
     'scroll:editor:update',
     useCallback(
-      evt => {
+      (evt: CustomEvent) => {
         if (ignoreNextScroll) {
           setIgnoreNextScroll(false)
           return
@@ -77,7 +77,7 @@ export const OutlineProvider: FC = ({ children }) => {
   useEventListener(
     'cursor:editor:update',
     useCallback(
-      evt => {
+      (evt: CustomEvent) => {
         if (ignoreNextCursorUpdate) {
           setIgnoreNextCursorUpdate(false)
           return
@@ -90,7 +90,7 @@ export const OutlineProvider: FC = ({ children }) => {
 
   useEventListener(
     'doc:after-opened',
-    useCallback(evt => {
+    useCallback((evt: CustomEvent) => {
       if (evt.detail.isNewDoc) {
         setIgnoreNextCursorUpdate(true)
       }

@@ -26,7 +26,9 @@ export const ReferencesContext = createContext<
   | undefined
 >(undefined)
 
-export const ReferencesProvider: FC = ({ children }) => {
+export const ReferencesProvider: FC<React.PropsWithChildren> = ({
+  children,
+}) => {
   const { fileTreeData } = useFileTreeData()
   const { eventEmitter, projectId } = useIdeReactContext()
   const { socket } = useConnectionContext()

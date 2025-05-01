@@ -50,7 +50,7 @@ export const SnapshotContext = createContext<
   | undefined
 >(undefined)
 
-export const SnapshotProvider: FC = ({ children }) => {
+export const SnapshotProvider: FC<React.PropsWithChildren> = ({ children }) => {
   const { _id: projectId } = useProjectContext()
   const [snapshotLoadingState, setSnapshotLoadingState] =
     useState<SnapshotLoadingState>('')

@@ -39,7 +39,7 @@ const RailContext = createContext<
   | undefined
 >(undefined)
 
-export const RailProvider: FC = ({ children }) => {
+export const RailProvider: FC<React.PropsWithChildren> = ({ children }) => {
   const [isOpen, setIsOpen] = useState(true)
   const [resizing, setResizing] = useState(false)
   const [activeModal, setActiveModalInternal] = useState<RailModalKey | null>(

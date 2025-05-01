@@ -10,7 +10,9 @@ type HorizontalResizeHandleOwnProps = {
 }
 
 export const HorizontalResizeHandle: FC<
-  HorizontalResizeHandleOwnProps & PanelResizeHandleProps
+  React.PropsWithChildren<
+    HorizontalResizeHandleOwnProps & PanelResizeHandleProps
+  >
 > = ({ children, resizable = true, onDoubleClick, ...props }) => {
   const { t } = useTranslation()
   const [isDragging, setIsDragging] = useState(false)

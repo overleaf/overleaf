@@ -4,22 +4,17 @@ import sinon from 'sinon'
 import { expect } from 'chai'
 import ActionsCopyProject from '../../../../../frontend/js/features/editor-left-menu/components/actions-copy-project'
 import { renderWithEditorContext } from '../../../helpers/render-with-context'
-import * as useLocationModule from '../../../../../frontend/js/shared/hooks/use-location'
+import { location } from '@/shared/components/location'
 
 describe('<ActionsCopyProject />', function () {
-  let assignStub
-
   beforeEach(function () {
-    assignStub = sinon.stub()
-    this.locationStub = sinon.stub(useLocationModule, 'useLocation').returns({
-      assign: assignStub,
-      replace: sinon.stub(),
-      reload: sinon.stub(),
-    })
+    this.locationWrapperSandbox = sinon.createSandbox()
+    this.locationWrapperStub = this.locationWrapperSandbox.stub(location)
+    window.metaAttributesCache.set('ol-preventCompileOnLoad', true)
   })
 
   afterEach(function () {
-    this.locationStub.restore()
+    this.locationWrapperSandbox.restore()
     fetchMock.removeRoutes().clearHistory()
   })
 
@@ -53,6 +48,7 @@ describe('<ActionsCopyProject />', function () {
       expect(button.textContent).to.equal('Copying…')
     })
 
+    const assignStub = this.locationWrapperStub.assign
     await waitFor(() => {
       expect(assignStub).to.have.been.calledOnceWith('/project/new-project')
     })

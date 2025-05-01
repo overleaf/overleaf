@@ -1,6 +1,6 @@
 import '../../marketing'
 
-import ReactDOM from 'react-dom'
+import { createRoot } from 'react-dom/client'
 import { AddSecondaryEmailPrompt } from '../../features/settings/components/emails/add-secondary-email-prompt'
 
 const addSecondaryEmailContainer = document.getElementById(
@@ -8,5 +8,6 @@ const addSecondaryEmailContainer = document.getElementById(
 )
 
 if (addSecondaryEmailContainer) {
-  ReactDOM.render(<AddSecondaryEmailPrompt />, addSecondaryEmailContainer)
+  const root = createRoot(addSecondaryEmailContainer)
+  root.render(<AddSecondaryEmailPrompt />)
 }

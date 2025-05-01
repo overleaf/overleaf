@@ -16,7 +16,9 @@ export const useFileTreeCreateForm = () => {
   return context
 }
 
-const FileTreeCreateFormProvider: FC = ({ children }) => {
+const FileTreeCreateFormProvider: FC<React.PropsWithChildren> = ({
+  children,
+}) => {
   // is the form valid
   const [valid, setValid] = useState(false)
 

@@ -10,10 +10,9 @@ export const NestableDropdownContext = createContext<
   NestableDropdownContextType | undefined
 >(undefined)
 
-export const NestableDropdownContextProvider: FC<{ id: string }> = ({
-  id,
-  children,
-}) => {
+export const NestableDropdownContextProvider: FC<
+  React.PropsWithChildren<{ id: string }>
+> = ({ id, children }) => {
   const [selected, setSelected] = useState<string | null>(null)
   return (
     <NestableDropdownContext.Provider

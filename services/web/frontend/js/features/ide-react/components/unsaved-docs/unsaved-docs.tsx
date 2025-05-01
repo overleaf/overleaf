@@ -30,7 +30,7 @@ export const UnsavedDocs: FC = () => {
   useEventListener(
     'beforeunload',
     useCallback(
-      event => {
+      (event: BeforeUnloadEvent) => {
         if (openDocs.hasUnsavedChanges()) {
           // https://developer.mozilla.org/en-US/docs/Web/API/Window/beforeunload_event
           event.preventDefault()

@@ -64,7 +64,7 @@ export default function DropdownButton({
   const isUserManaged = !userPending && user.enrollment?.managedBy === groupId
 
   const handleResendManagedUserInvite = useCallback(
-    async user => {
+    async (user: User) => {
       try {
         const result = await runResendManagedUserInviteAsync(
           postJSON(
@@ -96,7 +96,7 @@ export default function DropdownButton({
   )
 
   const handleResendLinkSSOInviteAsync = useCallback(
-    async user => {
+    async (user: User) => {
       try {
         const result = await runResendLinkSSOInviteAsync(
           postJSON(`/manage/groups/${groupId}/resendSSOLinkInvite/${user._id}`)
@@ -126,7 +126,7 @@ export default function DropdownButton({
   )
 
   const handleResendGroupInvite = useCallback(
-    async user => {
+    async (user: User) => {
       try {
         await runResendGroupInviteAsync(
           postJSON(`/manage/groups/${groupId}/resendInvite/`, {

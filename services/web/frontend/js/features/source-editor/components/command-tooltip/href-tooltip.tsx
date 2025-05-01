@@ -1,4 +1,4 @@
-import { FC, useCallback, useEffect, useRef, useState } from 'react'
+import { FC, FormEvent, useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   useCodeMirrorStateContext,
@@ -71,7 +71,7 @@ export const HrefTooltipContent: FC = () => {
   }, [view])
 
   const handleSubmit = useCallback(
-    event => {
+    (event: FormEvent) => {
       event.preventDefault()
       view.dispatch(closeCommandTooltip())
       view.focus()

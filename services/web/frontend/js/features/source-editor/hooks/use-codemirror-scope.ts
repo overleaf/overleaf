@@ -51,7 +51,11 @@ import { updateRanges } from '@/features/source-editor/extensions/ranges'
 import { useThreadsContext } from '@/features/review-panel-new/context/threads-context'
 import { useHunspell } from '@/features/source-editor/hooks/use-hunspell'
 import { Permissions } from '@/features/ide-react/types/permissions'
-import { useEditorManagerContext } from '@/features/ide-react/context/editor-manager-context'
+import {
+  GotoOffsetOptions,
+  useEditorManagerContext,
+} from '@/features/ide-react/context/editor-manager-context'
+import { GotoLineOptions } from '@/features/ide-react/types/goto-line-options'
 import { useOnlineUsersContext } from '@/features/ide-react/context/online-users-context'
 
 function useCodeMirrorScope(view: EditorView) {
@@ -441,7 +445,7 @@ function useCodeMirrorScope(view: EditorView) {
   useScopeEventListener(
     'editor:gotoLine',
     useCallback(
-      (_event, options) => {
+      (_event: any, options: GotoLineOptions) => {
         setCursorLineAndScroll(
           view,
           options.gotoLine,
@@ -460,7 +464,7 @@ function useCodeMirrorScope(view: EditorView) {
   useScopeEventListener(
     'editor:gotoOffset',
     useCallback(
-      (_event, options) => {
+      (_event: any, options: GotoOffsetOptions) => {
         setCursorPositionAndScroll(view, options.gotoOffset)
       },
       [view]

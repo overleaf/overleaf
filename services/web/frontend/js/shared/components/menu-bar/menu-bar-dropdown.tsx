@@ -18,17 +18,13 @@ type MenuBarDropdownProps = {
   align?: 'start' | 'end'
 }
 
-export const MenuBarDropdown: FC<MenuBarDropdownProps> = ({
-  title,
-  children,
-  id,
-  className,
-  align = 'start',
-}) => {
+export const MenuBarDropdown: FC<
+  React.PropsWithChildren<MenuBarDropdownProps>
+> = ({ title, children, id, className, align = 'start' }) => {
   const { menuId, selected, setSelected } = useNestableDropdown()
 
   const onToggle = useCallback(
-    show => {
+    (show: boolean) => {
       setSelected(show ? id : null)
     },
     [id, setSelected]
@@ -65,11 +61,9 @@ export const MenuBarDropdown: FC<MenuBarDropdownProps> = ({
   )
 }
 
-const NestableDropdownMenu: FC<DropdownMenuProps & { id: string }> = ({
-  children,
-  id,
-  ...props
-}) => {
+const NestableDropdownMenu: FC<
+  React.PropsWithChildren<DropdownMenuProps & { id: string }>
+> = ({ children, id, ...props }) => {
   return (
     <DropdownMenu {...props}>
       <NestableDropdownContextProvider id={id}>
@@ -79,43 +73,42 @@ const NestableDropdownMenu: FC<DropdownMenuProps & { id: string }> = ({
   )
 }
 
-const NestedDropdownToggle: FC = forwardRef<HTMLAnchorElement, AnchorProps>(
-  function NestedDropdownToggle(
-    { children, className, onMouseEnter, id },
-    ref
-  ) {
-    return (
-      // eslint-disable-next-line jsx-a11y/anchor-is-valid
-      <a
-        id={id}
-        href="#"
-        ref={ref}
-        onMouseEnter={onMouseEnter}
-        onClick={onMouseEnter}
-        className={classNames(
-          className,
-          'nested-dropdown-toggle',
-          'dropdown-item'
-        )}
-      >
-        {children}
-        <MaterialIcon type="chevron_right" />
-      </a>
-    )
-  }
-)
+const NestedDropdownToggle: FC<React.PropsWithChildren> = forwardRef<
+  HTMLAnchorElement,
+  AnchorProps
+>(function NestedDropdownToggle(
+  { children, className, onMouseEnter, id },
+  ref
+) {
+  return (
+    // eslint-disable-next-line jsx-a11y/anchor-is-valid
+    <a
+      id={id}
+      href="#"
+      ref={ref}
+      onMouseEnter={onMouseEnter}
+      onClick={onMouseEnter}
+      className={classNames(
+        className,
+        'nested-dropdown-toggle',
+        'dropdown-item'
+      )}
+    >
+      {children}
+      <MaterialIcon type="chevron_right" />
+    </a>
+  )
+})
 
-export const NestedMenuBarDropdown: FC<{ id: string; title: string }> = ({
-  children,
-  id,
-  title,
-}) => {
+export const NestedMenuBarDropdown: FC<
+  React.PropsWithChildren<{ id: string; title: string }>
+> = ({ children, id, title }) => {
   const { menuId, selected, setSelected } = useNestableDropdown()
   const select = useCallback(() => {
     setSelected(id)
   }, [id, setSelected])
   const onToggle = useCallback(
-    show => {
+    (show: boolean) => {
       setSelected(show ? id : null)
     },
     [setSelected, id]

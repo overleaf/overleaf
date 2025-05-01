@@ -4,7 +4,7 @@ import '../../utils/webpack-public-path'
 import './../../infrastructure/error-reporter'
 import '@/i18n'
 import '../../features/settings/components/root'
-import ReactDOM from 'react-dom'
+import { createRoot } from 'react-dom/client'
 import SettingsPageRoot from '../../features/settings/components/root.tsx'
 
 const element = document.getElementById('settings-page-root')
@@ -14,5 +14,6 @@ window.recaptchaOptions = {
   useRecaptchaNet: true,
 }
 if (element) {
-  ReactDOM.render(<SettingsPageRoot />, element)
+  const root = createRoot(element)
+  root.render(<SettingsPageRoot />)
 }

@@ -190,7 +190,7 @@ export const ChatContext = createContext<
   | undefined
 >(undefined)
 
-export const ChatProvider: FC = ({ children }) => {
+export const ChatProvider: FC<React.PropsWithChildren> = ({ children }) => {
   const chatEnabled = getMeta('ol-chatEnabled')
 
   const clientId = useRef<string>()
@@ -283,7 +283,7 @@ export const ChatProvider: FC = ({ children }) => {
   ])
 
   const sendMessage = useCallback(
-    content => {
+    (content: string) => {
       if (!chatEnabled) {
         debugConsole.warn(`chat is disabled, won't send message`)
         return

@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import { renderHook } from '@testing-library/react-hooks'
+import { renderHook, waitFor } from '@testing-library/react'
 import {
   SSOProvider,
   useSSOContext,
@@ -60,10 +60,11 @@ describe('SSOContext', function () {
     })
 
     it('should unlink an existing subscription', async function () {
-      const { result, waitForNextUpdate } = renderSSOContext()
+      const { result } = renderSSOContext()
       result.current.unlink('google')
-      await waitForNextUpdate()
-      expect(result.current.subscriptions.google.linked).to.be.false
+      await waitFor(
+        () => expect(result.current.subscriptions.google.linked).to.be.false
+      )
     })
 
     it('when the provider is not linked, should do nothing', function () {

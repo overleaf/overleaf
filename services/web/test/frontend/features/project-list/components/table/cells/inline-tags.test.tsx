@@ -57,7 +57,7 @@ describe('<InlineTags />', function () {
     const removeButton = screen.getByRole('button', {
       name: 'Remove tag My Test Tag',
     })
-    await fireEvent.click(removeButton)
+    fireEvent.click(removeButton)
     await waitFor(() =>
       expect(
         fetchMock.callHistory.called(

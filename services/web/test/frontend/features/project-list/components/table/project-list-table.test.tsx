@@ -1,4 +1,4 @@
-import { screen, within, fireEvent } from '@testing-library/react'
+import { screen, within, fireEvent, waitFor } from '@testing-library/react'
 import { expect } from 'chai'
 import ProjectListTable from '../../../../../../frontend/js/features/project-list/components/table/project-list-table'
 import { currentProjects } from '../../fixtures/projects-data'
@@ -67,9 +67,13 @@ describe('<ProjectListTable />', function () {
     renderWithProjectListContext(<ProjectListTable />)
     await fetchMock.callHistory.flush(true)
 
+    await waitFor(() =>
+      expect(screen.getAllByRole('row').length).to.equal(
+        currentProjects.length + 1
+      )
+    )
     const rows = screen.getAllByRole('row')
     rows.shift() // remove first row since it's the header
-    expect(rows.length).to.equal(currentProjects.length)
 
     // Project name cell
     currentProjects.forEach(project => {
@@ -139,42 +143,60 @@ describe('<ProjectListTable />', function () {
   it('selects all projects when header checkbox checked', async function () {
     renderWithProjectListContext(<ProjectListTable />)
     await fetchMock.callHistory.flush(true)
-    const checkbox = screen.getByLabelText('Select all projects')
+    const checkbox = await screen.findByLabelText('Select all projects')
     fireEvent.click(checkbox)
-    const allCheckboxes = screen.getAllByRole<HTMLInputElement>('checkbox')
-    const allCheckboxesChecked = allCheckboxes.filter(c => c.checked)
-    // + 1 because of select all checkbox
-    expect(allCheckboxesChecked.length).to.equal(currentProjects.length + 1)
+
+    await waitFor(() => {
+      const allCheckboxes = screen.queryAllByRole<HTMLInputElement>('checkbox')
+      const allCheckboxesChecked = allCheckboxes.filter(c => c.checked)
+      // + 1 because of select all checkbox
+      expect(allCheckboxesChecked.length).to.equal(currentProjects.length + 1)
+    })
   })
 
   it('unselects all projects when select all checkbox uchecked', async function () {
     renderWithProjectListContext(<ProjectListTable />)
     await fetchMock.callHistory.flush(true)
-    const checkbox = screen.getByLabelText('Select all projects')
+    const checkbox = await screen.findByLabelText('Select all projects')
     fireEvent.click(checkbox)
     fireEvent.click(checkbox)
-    const allCheckboxes = screen.getAllByRole<HTMLInputElement>('checkbox')
-    const allCheckboxesChecked = allCheckboxes.filter(c => c.checked)
-    expect(allCheckboxesChecked.length).to.equal(0)
+
+    await waitFor(() => {
+      const allCheckboxes = screen.queryAllByRole<HTMLInputElement>('checkbox')
+      const allCheckboxesChecked = allCheckboxes.filter(c => c.checked)
+      expect(allCheckboxesChecked.length).to.equal(0)
+    })
   })
 
   it('unselects select all projects checkbox when one project is unchecked', async function () {
     renderWithProjectListContext(<ProjectListTable />)
     await fetchMock.callHistory.flush(true)
-    const checkbox = screen.getByLabelText('Select all projects')
+    const checkbox = await screen.findByLabelText('Select all projects')
     fireEvent.click(checkbox)
-    let allCheckboxes = screen.getAllByRole<HTMLInputElement>('checkbox')
-    expect(allCheckboxes[1].getAttribute('data-project-id')).to.exist // make sure we are unchecking a project checkbox
-    fireEvent.click(allCheckboxes[1])
-    allCheckboxes = screen.getAllByRole<HTMLInputElement>('checkbox')
-    const allCheckboxesChecked = allCheckboxes.filter(c => c.checked)
-    expect(allCheckboxesChecked.length).to.equal(currentProjects.length - 1)
+
+    await waitFor(() => {
+      expect(
+        screen
+          .getAllByRole<HTMLInputElement>('checkbox')[1]
+          .getAttribute('data-project-id')
+      ).to.exist // make sure we are unchecking a project checkbox
+    })
+
+    fireEvent.click(screen.getAllByRole<HTMLInputElement>('checkbox')[1])
+
+    await waitFor(() => {
+      const allCheckboxes = screen.getAllByRole<HTMLInputElement>('checkbox')
+      const allCheckboxesChecked = allCheckboxes.filter(c => c.checked)
+      expect(allCheckboxesChecked.length).to.equal(currentProjects.length - 1)
+    })
   })
 
   it('only checks the checked project', async function () {
     renderWithProjectListContext(<ProjectListTable />)
     await fetchMock.callHistory.flush(true)
-    const checkbox = screen.getByLabelText(`Select ${currentProjects[0].name}`)
+    const checkbox = await screen.findByLabelText(
+      `Select ${currentProjects[0].name}`
+    )
     fireEvent.click(checkbox)
     const allCheckboxes = screen.getAllByRole<HTMLInputElement>('checkbox')
     const allCheckboxesChecked = allCheckboxes.filter(c => c.checked)

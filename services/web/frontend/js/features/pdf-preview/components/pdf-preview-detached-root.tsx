@@ -1,4 +1,4 @@
-import ReactDOM from 'react-dom'
+import { createRoot } from 'react-dom/client'
 import PdfPreview from './pdf-preview'
 import useWaitForI18n from '../../../shared/hooks/use-wait-for-i18n'
 import { ReactContextRoot } from '@/features/ide-react/context/react-context-root'
@@ -21,5 +21,6 @@ export default PdfPreviewDetachedRoot // for testing
 
 const element = document.getElementById('pdf-preview-detached-root')
 if (element) {
-  ReactDOM.render(<PdfPreviewDetachedRoot />, element)
+  const root = createRoot(element)
+  root.render(<PdfPreviewDetachedRoot />)
 }

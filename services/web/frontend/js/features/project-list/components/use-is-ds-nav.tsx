@@ -6,9 +6,11 @@ import { createContext, type FC, type ReactNode, useContext } from 'react'
  */
 const DsNavStyleContext = createContext<boolean | undefined>(undefined)
 
-export const DsNavStyleProvider: FC<{
-  children: ReactNode
-}> = ({ children }) => (
+export const DsNavStyleProvider: FC<
+  React.PropsWithChildren<{
+    children: ReactNode
+  }>
+> = ({ children }) => (
   <DsNavStyleContext.Provider value>{children}</DsNavStyleContext.Provider>
 )
 

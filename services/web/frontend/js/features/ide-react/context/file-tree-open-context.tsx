@@ -36,7 +36,9 @@ const FileTreeOpenContext = createContext<
   | undefined
 >(undefined)
 
-export const FileTreeOpenProvider: FC = ({ children }) => {
+export const FileTreeOpenProvider: FC<React.PropsWithChildren> = ({
+  children,
+}) => {
   const { rootDocId, owner } = useProjectContext()
   const { eventEmitter, projectJoined } = useIdeReactContext()
   const { openDocWithId, currentDocumentId, openInitialDoc } =

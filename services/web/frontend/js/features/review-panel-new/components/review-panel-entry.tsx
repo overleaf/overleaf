@@ -16,19 +16,21 @@ import { EditorSelection } from '@codemirror/state'
 import MaterialIcon from '@/shared/components/material-icon'
 import { OFFSET_FOR_ENTRIES_ABOVE } from '../utils/position-items'
 
-export const ReviewPanelEntry: FC<{
-  position: number
-  op: AnyOperation
-  docId: string
-  top?: number
-  className?: string
-  selectLineOnFocus?: boolean
-  hoverRanges?: boolean
-  disabled?: boolean
-  onEnterEntryIndicator?: () => void
-  onLeaveEntryIndicator?: () => void
-  entryIndicator?: 'comment' | 'edit'
-}> = ({
+export const ReviewPanelEntry: FC<
+  React.PropsWithChildren<{
+    position: number
+    op: AnyOperation
+    docId: string
+    top?: number
+    className?: string
+    selectLineOnFocus?: boolean
+    hoverRanges?: boolean
+    disabled?: boolean
+    onEnterEntryIndicator?: () => void
+    onLeaveEntryIndicator?: () => void
+    entryIndicator?: 'comment' | 'edit'
+  }>
+> = ({
   children,
   position,
   top,
@@ -58,7 +60,7 @@ export const ReviewPanelEntry: FC<{
   }, [setReviewPanelOpen])
 
   const selectEntry = useCallback(
-    event => {
+    (event: React.FocusEvent | React.MouseEvent) => {
       setFocused(true)
 
       if (event.target instanceof HTMLTextAreaElement) {

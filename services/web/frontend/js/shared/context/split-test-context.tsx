@@ -10,7 +10,9 @@ export const SplitTestContext = createContext<
   | undefined
 >(undefined)
 
-export const SplitTestProvider: FC = ({ children }) => {
+export const SplitTestProvider: FC<React.PropsWithChildren> = ({
+  children,
+}) => {
   const value = useMemo(
     () => ({
       splitTestVariants: getMeta('ol-splitTestVariants') || {},

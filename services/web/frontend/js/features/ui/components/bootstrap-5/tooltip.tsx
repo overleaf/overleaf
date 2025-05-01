@@ -9,18 +9,10 @@ import { callFnsInSequence } from '@/utils/functions'
 
 type OverlayProps = Omit<OverlayTriggerProps, 'overlay' | 'children'>
 
-type UpdatingTooltipProps = {
-  popper: {
-    scheduleUpdate: () => void
-  }
-  show: boolean
-  [x: string]: unknown
-}
-
-const UpdatingTooltip = forwardRef<HTMLDivElement, UpdatingTooltipProps>(
+const UpdatingTooltip = forwardRef<HTMLDivElement, BSTooltipProps>(
   ({ popper, children, show: _, ...props }, ref) => {
     useEffect(() => {
-      popper.scheduleUpdate()
+      popper?.scheduleUpdate?.()
     }, [children, popper])
 
     return (

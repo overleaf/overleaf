@@ -106,7 +106,7 @@ const Toolbar = memo(function Toolbar() {
   // calculate overflow when buttons change
   const observerRef = useRef<MutationObserver | null>(null)
   const handleButtons = useCallback(
-    node => {
+    (node: HTMLDivElement) => {
       if (!('MutationObserver' in window)) {
         return
       }

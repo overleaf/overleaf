@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { ChangeEvent, FormEvent, useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { deleteJSON, FetchError, postJSON } from '@/infrastructure/fetch-json'
 import getMeta from '../../../utils/meta'
@@ -58,7 +58,7 @@ export function ManagersTable({
   const [removeMemberError, setRemoveMemberError] = useState<APIError>()
 
   const addManagers = useCallback(
-    e => {
+    (e: FormEvent | React.MouseEvent) => {
       e.preventDefault()
       setInviteError(undefined)
       const emails = parseEmails(emailString)
@@ -92,7 +92,7 @@ export function ManagersTable({
   )
 
   const removeManagers = useCallback(
-    e => {
+    (e: React.MouseEvent) => {
       e.preventDefault()
       setRemoveMemberError(undefined)
       ;(async () => {
@@ -131,7 +131,7 @@ export function ManagersTable({
   )
 
   const handleEmailsChange = useCallback(
-    e => {
+    (e: ChangeEvent<HTMLInputElement>) => {
       setEmailString(e.target.value)
     },
     [setEmailString]

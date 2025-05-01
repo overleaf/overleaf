@@ -40,7 +40,7 @@ export const detachChannel =
     ? new BroadcastChannel(detachChannelId)
     : undefined
 
-export const DetachProvider: FC = ({ children }) => {
+export const DetachProvider: FC<React.PropsWithChildren> = ({ children }) => {
   const [lastDetachedConnectedAt, setLastDetachedConnectedAt] = useState<Date>()
   const [role, setRole] = useState(() => getMeta('ol-detachRole') || null)
   const {

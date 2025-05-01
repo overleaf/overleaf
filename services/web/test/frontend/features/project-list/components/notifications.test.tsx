@@ -41,7 +41,7 @@ import { Project } from '../../../../../types/project/dashboard/api'
 import GroupsAndEnterpriseBanner from '../../../../../frontend/js/features/project-list/components/notifications/groups-and-enterprise-banner'
 import GroupSsoSetupSuccess from '../../../../../frontend/js/features/project-list/components/notifications/groups/group-sso-setup-success'
 import localStorage from '@/infrastructure/local-storage'
-import * as useLocationModule from '../../../../../frontend/js/shared/hooks/use-location'
+import { location } from '@/shared/components/location'
 import {
   commonsSubscription,
   freeSubscription,
@@ -50,7 +50,9 @@ import {
 } from '../fixtures/user-subscriptions'
 import getMeta from '@/utils/meta'
 
-const renderWithinProjectListProvider = (Component: React.ComponentType) => {
+const renderWithinProjectListProvider = (
+  Component: React.ComponentType<React.PropsWithChildren>
+) => {
   render(<Component />, {
     wrapper: ({ children }) => (
       <ProjectListProvider>
@@ -655,12 +657,10 @@ describe('<UserNotifications />', function () {
       window.metaAttributesCache.set('ol-user', {
         signUpDate: new Date('2024-01-01').toISOString(),
       })
-      this.clock = sinon.useFakeTimers(new Date('2025-07-01').getTime())
     })
 
     afterEach(function () {
       fetchMock.removeRoutes().clearHistory()
-      this.clock.restore()
     })
 
     function testUnconfirmedNotification(
@@ -675,7 +675,9 @@ describe('<UserNotifications />', function () {
         fetchMock.post('/user/emails/resend_confirmation', 200)
 
         const email = userEmails[0].email
-        const notificationBody = screen.getByTestId('pro-notification-body')
+        const notificationBody = await screen.findByTestId(
+          'pro-notification-body'
+        )
 
         if (isPrimary) {
           expect(notificationBody.textContent).to.contain(
@@ -691,7 +693,7 @@ describe('<UserNotifications />', function () {
         fireEvent.click(resendButton)
 
         await waitForElementToBeRemoved(() =>
-          screen.getByRole('button', { name: /resend/i })
+          screen.queryByRole('button', { name: /resend/i })
         )
 
         expect(fetchMock.callHistory.called()).to.be.true
@@ -717,7 +719,7 @@ describe('<UserNotifications />', function () {
       fetchMock.post('/user/emails/resend_confirmation', 200)
 
       const email = untrustedUserData.email
-      const notificationBody = screen.getByTestId(
+      const notificationBody = await screen.findByTestId(
         'not-trusted-notification-body'
       )
       expect(notificationBody.textContent).to.contain(
@@ -742,7 +744,9 @@ describe('<UserNotifications />', function () {
       await fetchMock.callHistory.flush(true)
       fetchMock.post('/user/emails/resend_confirmation', 500)
 
-      const resendButtons = screen.getAllByRole('button', { name: /resend/i })
+      const resendButtons = await screen.findAllByRole('button', {
+        name: /resend/i,
+      })
       const resendButton = resendButtons[0]
       fireEvent.click(resendButton)
       const notificationBody = screen.getByTestId('pro-notification-body')
@@ -767,7 +771,7 @@ describe('<UserNotifications />', function () {
         renderWithinProjectListProvider(ConfirmEmail)
         await fetchMock.callHistory.flush(true)
 
-        const alert = screen.getByRole('alert')
+        const alert = await screen.findByRole('alert')
         const email = unconfirmedCommonsUserData.email
         const notificationBody = within(alert).getByTestId('notification-body')
         expect(notificationBody.textContent).to.contain(
@@ -788,7 +792,7 @@ describe('<UserNotifications />', function () {
         renderWithinProjectListProvider(ConfirmEmail)
         await fetchMock.callHistory.flush(true)
 
-        const alert = screen.getByRole('alert')
+        const alert = await screen.findByRole('alert')
         const email = unconfirmedCommonsUserData.email
         const notificationBody = within(alert).getByTestId(
           'pro-notification-body'
@@ -808,22 +812,15 @@ describe('<UserNotifications />', function () {
   })
 
   describe('<Affiliation/>', function () {
-    let assignStub: sinon.SinonStub
-
     beforeEach(function () {
       Object.assign(getMeta('ol-ExposedSettings'), exposedSettings)
-      assignStub = sinon.stub()
-      this.locationStub = sinon.stub(useLocationModule, 'useLocation').returns({
-        assign: assignStub,
-        replace: sinon.stub(),
-        reload: sinon.stub(),
-        setHash: sinon.stub(),
-      })
+      this.locationWrapperSandbox = sinon.createSandbox()
+      this.locationWrapperStub = this.locationWrapperSandbox.stub(location)
       fetchMock.removeRoutes().clearHistory()
     })
 
     afterEach(function () {
-      this.locationStub.restore()
+      this.locationWrapperSandbox.restore()
       fetchMock.removeRoutes().clearHistory()
     })
 
@@ -879,9 +876,9 @@ describe('<UserNotifications />', function () {
       fireEvent.click(
         screen.getByRole('button', { name: /confirm affiliation/i })
       )
-      sinon.assert.calledOnce(assignStub)
+      sinon.assert.calledOnce(this.locationWrapperStub.assign)
       sinon.assert.calledWithMatch(
-        assignStub,
+        this.locationWrapperStub.assign,
         `${exposedSettings.samlInitPath}?university_id=${professionalUserData.affiliation.institution.id}&reconfirm=/project`
       )
     })
@@ -944,8 +941,7 @@ describe('<UserNotifications />', function () {
       renderWithinProjectListProvider(GroupsAndEnterpriseBanner)
       await fetchMock.callHistory.flush(true)
 
-      expect(screen.queryByRole('button', { name: 'Contact Sales' })).to.not.be
-        .null
+      await screen.findByRole('button', { name: 'Contact Sales' })
     })
 
     it('shows the banner for users that have dismissed the banner more than 30 days ago', async function () {
@@ -960,8 +956,7 @@ describe('<UserNotifications />', function () {
       renderWithinProjectListProvider(GroupsAndEnterpriseBanner)
       await fetchMock.callHistory.flush(true)
 
-      expect(screen.queryByRole('button', { name: 'Contact Sales' })).to.not.be
-        .null
+      await screen.findByRole('button', { name: 'Contact Sales' })
     })
 
     it('does not show the banner for users that have dismissed the banner within the last 30 days', async function () {
@@ -1014,7 +1009,7 @@ describe('<UserNotifications />', function () {
         renderWithinProjectListProvider(GroupsAndEnterpriseBanner)
         await fetchMock.callHistory.flush(true)
 
-        screen.getByText(
+        await screen.findByText(
           'Overleaf On-Premises: Does your company want to keep its data within its firewall? Overleaf offers Server Pro, an on-premises solution for companies. Get in touch to learn more.'
         )
         const link = screen.getByRole('button', { name: 'Contact Sales' })
@@ -1031,7 +1026,7 @@ describe('<UserNotifications />', function () {
         renderWithinProjectListProvider(GroupsAndEnterpriseBanner)
         await fetchMock.callHistory.flush(true)
 
-        screen.getByText(
+        await screen.findByText(
           'Why do Fortune 500 companies and top research institutions trust Overleaf to streamline their collaboration? Get in touch to learn more.'
         )
         const link = screen.getByRole('button', { name: 'Contact Sales' })

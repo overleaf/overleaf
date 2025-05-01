@@ -47,7 +47,7 @@ export default function UnlinkUserModal({
   }, [groupId, updateMemberView, user])
 
   const handleUnlink = useCallback(
-    event => {
+    (event: React.MouseEvent) => {
       event.preventDefault()
       setHasError(undefined)
       if (!user) {

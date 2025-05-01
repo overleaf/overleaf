@@ -16,7 +16,9 @@ export const IdeRedesignSwitcherContext = createContext<
   IdeRedesignSwitcherContextValue | undefined
 >(undefined)
 
-export const IdeRedesignSwitcherProvider: FC = ({ children }) => {
+export const IdeRedesignSwitcherProvider: FC<React.PropsWithChildren> = ({
+  children,
+}) => {
   const [showSwitcherModal, setShowSwitcherModal] = useState(false)
 
   return (

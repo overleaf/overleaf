@@ -79,7 +79,9 @@ const noTrackChangesPermissionsMap: typeof permissionsMap = {
   owner: permissionsMap.owner,
 }
 
-export const PermissionsProvider: React.FC = ({ children }) => {
+export const PermissionsProvider: React.FC<React.PropsWithChildren> = ({
+  children,
+}) => {
   const [permissions, setPermissions] =
     useScopeValue<Readonly<Permissions>>('permissions')
   const { connectionState } = useConnectionContext()

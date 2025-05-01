@@ -78,7 +78,7 @@ const buildRanges = (currentDocument: DocumentContainer | null) => {
 
 const RangesActionsContext = createContext<RangesActions | undefined>(undefined)
 
-export const RangesProvider: FC = ({ children }) => {
+export const RangesProvider: FC<React.PropsWithChildren> = ({ children }) => {
   const view = useCodeMirrorViewContext()
   const { projectId } = useIdeReactContext()
   const { currentDocument } = useEditorManagerContext()

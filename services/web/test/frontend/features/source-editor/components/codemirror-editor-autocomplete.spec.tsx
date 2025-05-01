@@ -307,7 +307,7 @@ describe('autocomplete', { scrollBehavior: false }, function () {
       packageNames: new Set(['foo']),
     }
 
-    const MetadataProvider: FC = ({ children }) => {
+    const MetadataProvider: FC<React.PropsWithChildren> = ({ children }) => {
       return (
         <MetadataContext.Provider value={metadata}>
           {children}
@@ -376,7 +376,7 @@ describe('autocomplete', { scrollBehavior: false }, function () {
 
     const scope = mockScope()
 
-    const ReferencesProvider: FC = ({ children }) => {
+    const ReferencesProvider: FC<React.PropsWithChildren> = ({ children }) => {
       return (
         <ReferencesContext.Provider
           value={{
@@ -728,7 +728,7 @@ describe('autocomplete', { scrollBehavior: false }, function () {
       packageNames: new Set<string>('amsmath'),
     }
 
-    const MetadataProvider: FC = ({ children }) => {
+    const MetadataProvider: FC<React.PropsWithChildren> = ({ children }) => {
       return (
         <MetadataContext.Provider value={metadata}>
           {children}

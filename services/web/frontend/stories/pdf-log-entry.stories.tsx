@@ -59,7 +59,9 @@ export default meta
 
 type Story = StoryObj<typeof PdfLogEntry>
 
-const Provider: FC<{ children: ReactNode }> = ({ children }) => {
+const Provider: FC<React.PropsWithChildren<{ children: ReactNode }>> = ({
+  children,
+}) => {
   useMeta({ 'ol-showAiErrorAssistant': true })
   useScope({ 'editor.view': new EditorView({ doc: '\\begin{document' }) })
   return <div className="logs-pane p-2">{children}</div>

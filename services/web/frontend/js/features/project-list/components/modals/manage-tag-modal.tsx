@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { FormEvent, useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import useAsync from '../../../../shared/hooks/use-async'
 import { useRefWithAutoFocus } from '../../../../shared/hooks/use-ref-with-auto-focus'
@@ -73,7 +73,7 @@ export function ManageTagModal({
   )
 
   const handleSubmit = useCallback(
-    e => {
+    (e: FormEvent) => {
       e.preventDefault()
       if (tag) {
         runUpdateTag(tag._id)

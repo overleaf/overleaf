@@ -293,7 +293,7 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
   }, [selectedProjectIds, visibleProjects])
 
   const selectOrUnselectAllProjects = useCallback(
-    checked => {
+    (checked: any) => {
       setSelectedProjectIds(prevSelectedProjectIds => {
         const selectedProjectIds = new Set(prevSelectedProjectIds)
         for (const project of visibleProjects) {

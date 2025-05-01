@@ -62,10 +62,10 @@ function PdfJsViewer({ url, pdfFile }: PdfJsViewerProps) {
 
   // create the viewer when the container is mounted
   const handleContainer = useCallback(
-    parent => {
+    (parent: HTMLDivElement | null) => {
       if (parent) {
         try {
-          setPdfJsWrapper(new PDFJSWrapper(parent.firstChild))
+          setPdfJsWrapper(new PDFJSWrapper(parent.firstChild as HTMLDivElement))
         } catch (error: any) {
           setLoadingError(true)
           captureException(error)
@@ -385,7 +385,7 @@ function PdfJsViewer({ url, pdfFile }: PdfJsViewerProps) {
 
   // set the scale in response to zoom option changes
   const setZoom = useCallback(
-    zoom => {
+    (zoom: any) => {
       switch (zoom) {
         case 'zoom-in':
           if (pdfJsWrapper) {
@@ -430,7 +430,7 @@ function PdfJsViewer({ url, pdfFile }: PdfJsViewerProps) {
   }, [pdfJsWrapper])
 
   const handleKeyDown = useCallback(
-    event => {
+    (event: React.KeyboardEvent) => {
       if (!initialised || !pdfJsWrapper) {
         return
       }

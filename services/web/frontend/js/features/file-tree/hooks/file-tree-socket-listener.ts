@@ -25,7 +25,7 @@ export function useFileTreeSocketListener(onDelete: (entity: any) => void) {
 
   const selectEntityIfCreatedByUser = useCallback(
     // hack to automatically re-open refreshed linked files
-    (entityId, entityName, userId) => {
+    (entityId: any, entityName: any, userId: string) => {
       // If the created entity's user exists and is the current user
       if (userId && user?.id === userId) {
         // And we're expecting a refreshed socket for this entity

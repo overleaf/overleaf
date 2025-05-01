@@ -17,7 +17,7 @@ export default function PdfLogEntryRawContent({
 
   const { elementRef } = useResizeObserver(
     useCallback(
-      element => {
+      (element: Element) => {
         if (element.scrollHeight === 0) return // skip update when logs-pane is closed
         setNeedsExpander(element.scrollHeight > collapsedSize)
       },

@@ -1,4 +1,11 @@
-import { memo, useCallback, useEffect, useMemo, useState } from 'react'
+import {
+  FormEvent,
+  memo,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react'
 import { useTranslation } from 'react-i18next'
 import * as eventTracking from '../../../../infrastructure/event-tracking'
 import { Project } from '../../../../../../types/project/dashboard/api'
@@ -58,7 +65,7 @@ function RenameProjectModal({
   }, [project.name])
 
   const handleSubmit = useCallback(
-    event => {
+    (event: FormEvent) => {
       event.preventDefault()
 
       if (!isValid) return

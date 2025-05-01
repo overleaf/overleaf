@@ -1,3 +1,4 @@
+import { createRoot } from 'react-dom/client'
 import {
   StateField,
   StateEffect,
@@ -12,7 +13,6 @@ import {
   getSpellCheckLanguage,
 } from '@/features/source-editor/extensions/spelling/index'
 import { sendMB } from '@/infrastructure/event-tracking'
-import ReactDOM from 'react-dom'
 import { SpellingSuggestions } from '@/features/source-editor/extensions/spelling/spelling-suggestions'
 import { SplitTestProvider } from '@/shared/context/split-test-context'
 import { addLearnedWord } from '@/features/source-editor/extensions/spelling/learned-words'
@@ -159,7 +159,8 @@ const createSpellingSuggestionList = (word: Word) => (view: EditorView) => {
   const dom = document.createElement('div')
   dom.classList.add('ol-cm-spelling-context-menu-tooltip')
 
-  ReactDOM.render(
+  const root = createRoot(dom)
+  root.render(
     <SplitTestProvider>
       <SpellingSuggestions
         word={word}
@@ -235,12 +236,11 @@ const createSpellingSuggestionList = (word: Word) => (view: EditorView) => {
           })
         }}
       />
-    </SplitTestProvider>,
-    dom
+    </SplitTestProvider>
   )
 
   const destroy = () => {
-    ReactDOM.unmountComponentAtNode(dom)
+    root.unmount()
   }
 
   return { dom, destroy }

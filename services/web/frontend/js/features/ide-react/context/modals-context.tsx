@@ -30,7 +30,9 @@ type ModalsContextValue = {
 
 const ModalsContext = createContext<ModalsContextValue | undefined>(undefined)
 
-export const ModalsContextProvider: FC = ({ children }) => {
+export const ModalsContextProvider: FC<React.PropsWithChildren> = ({
+  children,
+}) => {
   const [showGenericModal, setShowGenericModal] = useState(false)
   const [showConfirmModal, setShowConfirmModal] = useState(false)
   const [genericMessageModalData, setGenericMessageModalData] =

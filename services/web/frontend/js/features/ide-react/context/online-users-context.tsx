@@ -65,7 +65,9 @@ export const OnlineUsersContext = createContext<
   OnlineUsersContextValue | undefined
 >(undefined)
 
-export const OnlineUsersProvider: FC = ({ children }) => {
+export const OnlineUsersProvider: FC<React.PropsWithChildren> = ({
+  children,
+}) => {
   const { eventEmitter } = useIdeReactContext()
   const { socket } = useConnectionContext()
   const { currentDocumentId } = useEditorManagerContext()

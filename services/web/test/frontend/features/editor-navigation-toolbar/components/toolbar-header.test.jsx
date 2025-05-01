@@ -28,6 +28,7 @@ describe('<ToolbarHeader />', function () {
 
   beforeEach(function () {
     window.metaAttributesCache.set('ol-chatEnabled', true)
+    window.metaAttributesCache.set('ol-preventCompileOnLoad', true)
   })
 
   describe('cobranding logo', function () {

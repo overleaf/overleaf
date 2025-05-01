@@ -9,7 +9,7 @@ export default function useDropdown(defaultOpen = false) {
 
   // react-bootstrap v0.x passes `component` instead of `node` to the ref callback
   const handleRef = useCallback(
-    component => {
+    (component: any) => {
       if (component) {
         // eslint-disable-next-line react/no-find-dom-node
         ref.current = findDOMNode(component)
@@ -19,18 +19,18 @@ export default function useDropdown(defaultOpen = false) {
   )
 
   // prevent a click on the dropdown toggle propagating to the original handler
-  const handleClick = useCallback(event => {
+  const handleClick = useCallback((event: any) => {
     event.stopPropagation()
   }, [])
 
   // handle dropdown toggle
-  const handleToggle = useCallback(value => {
+  const handleToggle = useCallback((value: any) => {
     setOpen(Boolean(value))
   }, [])
 
   // close the dropdown on click outside the dropdown
   const handleDocumentClick = useCallback(
-    event => {
+    (event: any) => {
       if (ref.current && !ref.current.contains(event.target)) {
         setOpen(false)
       }

@@ -37,7 +37,9 @@ export const ProjectSettingsContext = createContext<
   ProjectSettingsContextValue | undefined
 >(undefined)
 
-export const ProjectSettingsProvider: FC = ({ children }) => {
+export const ProjectSettingsProvider: FC<React.PropsWithChildren> = ({
+  children,
+}) => {
   const {
     compiler,
     setCompiler,

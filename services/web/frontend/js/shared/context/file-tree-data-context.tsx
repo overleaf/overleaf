@@ -176,7 +176,9 @@ export function useFileTreeData() {
   return context
 }
 
-export const FileTreeDataProvider: FC = ({ children }) => {
+export const FileTreeDataProvider: FC<React.PropsWithChildren> = ({
+  children,
+}) => {
   const [project] = useScopeValue<Project>('project')
   const [currentDocumentId] = useScopeValue('editor.open_doc_id')
   const [, setOpenDocName] = useScopeValueSetterOnly('editor.open_doc_name')
@@ -227,14 +229,17 @@ export const FileTreeDataProvider: FC = ({ children }) => {
     })
   }, [rootFolder])
 
-  const dispatchCreateFolder = useCallback((parentFolderId, entity) => {
-    entity.type = 'folder'
-    dispatch({
-      type: ACTION_TYPES.CREATE,
-      parentFolderId,
-      entity,
-    })
-  }, [])
+  const dispatchCreateFolder = useCallback(
+    (parentFolderId: string, entity: any) => {
+      entity.type = 'folder'
+      dispatch({
+        type: ACTION_TYPES.CREATE,
+        parentFolderId,
+        entity,
+      })
+    },
+    []
+  )
 
   const dispatchCreateDoc = useCallback(
     (parentFolderId: string, entity: any) => {

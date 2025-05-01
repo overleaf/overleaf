@@ -1,5 +1,5 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
-import { ReactElement } from 'react'
+import { FC, PropsWithChildren, ReactElement } from 'react'
 import sinon from 'sinon'
 import fetchMock from 'fetch-mock'
 import UnlinkUserModal from '@/features/group-management/components/members-table/unlink-user-modal'
@@ -7,11 +7,9 @@ import { GroupMembersProvider } from '@/features/group-management/context/group-
 import { expect } from 'chai'
 
 export function renderWithContext(component: ReactElement, props = {}) {
-  const GroupMembersProviderWrapper = ({
-    children,
-  }: {
-    children: ReactElement
-  }) => <GroupMembersProvider {...props}>{children}</GroupMembersProvider>
+  const GroupMembersProviderWrapper: FC<PropsWithChildren> = ({ children }) => (
+    <GroupMembersProvider {...props}>{children}</GroupMembersProvider>
+  )
 
   return render(component, { wrapper: GroupMembersProviderWrapper })
 }

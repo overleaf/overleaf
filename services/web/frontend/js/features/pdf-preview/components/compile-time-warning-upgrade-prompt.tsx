@@ -15,7 +15,7 @@ function CompileTimeWarningUpgradePrompt() {
   >(`has-dismissed-10s-compile-time-warning-until`)
 
   const handleNewCompile = useCallback(
-    compileTime => {
+    (compileTime: number) => {
       setShowWarning(false)
       if (compileTime > 10000) {
         if (isProjectOwner) {

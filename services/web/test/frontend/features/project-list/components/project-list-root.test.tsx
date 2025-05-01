@@ -19,7 +19,7 @@ import {
   archiveableProject,
   copyableProject,
 } from '../fixtures/projects-data'
-import * as useLocationModule from '../../../../../frontend/js/shared/hooks/use-location'
+import { location } from '@/shared/components/location'
 import getMeta from '@/utils/meta'
 
 const {
@@ -37,7 +37,6 @@ describe('<ProjectListRoot />', function () {
   this.timeout('10s')
 
   let sendMBSpy: sinon.SinonSpy
-  let assignStub: sinon.SinonStub
 
   beforeEach(async function () {
     global.localStorage.clear()
@@ -68,19 +67,14 @@ describe('<ProjectListRoot />', function () {
     window.metaAttributesCache.set('ol-navbar', {
       items: [],
     })
-    assignStub = sinon.stub()
-    this.locationStub = sinon.stub(useLocationModule, 'useLocation').returns({
-      assign: assignStub,
-      replace: sinon.stub(),
-      reload: sinon.stub(),
-      setHash: sinon.stub(),
-    })
+    this.locationWrapperSandbox = sinon.createSandbox()
+    this.locationWrapperStub = this.locationWrapperSandbox.stub(location)
   })
 
   afterEach(function () {
     sendMBSpy.restore()
     fetchMock.removeRoutes().clearHistory()
-    this.locationStub.restore()
+    this.locationWrapperSandbox.restore()
   })
 
   describe('welcome page', function () {
@@ -136,6 +130,7 @@ describe('<ProjectListRoot />', function () {
             within(actionsToolbar).getByLabelText('Download')
           fireEvent.click(downloadButton)
 
+          const assignStub = this.locationWrapperStub.assign
           await waitFor(() => {
             expect(assignStub).to.have.been.called
           })
@@ -430,12 +425,15 @@ describe('<ProjectListRoot />', function () {
             { repeat: leavableList.length }
           )
 
-          allCheckboxes = screen.getAllByRole<HTMLInputElement>('checkbox')
           // + 1 because of select all
-          expect(allCheckboxes.length).to.equal(leavableList.length + 1)
+          await waitFor(() =>
+            expect(
+              screen.getAllByRole<HTMLInputElement>('checkbox').length
+            ).to.equal(leavableList.length + 1)
+          )
 
           // first one is the select all checkbox
-          fireEvent.click(allCheckboxes[0])
+          fireEvent.click(screen.getAllByRole('checkbox')[0])
 
           actionsToolbar = screen.getAllByRole('toolbar')[0]
 
@@ -491,9 +489,11 @@ describe('<ProjectListRoot />', function () {
             { repeat: deletableList.length }
           )
 
-          allCheckboxes = screen.getAllByRole<HTMLInputElement>('checkbox')
-          // + 1 because of select all
-          expect(allCheckboxes.length).to.equal(deletableList.length + 1)
+          await waitFor(() => {
+            allCheckboxes = screen.getAllByRole<HTMLInputElement>('checkbox')
+            // + 1 because of select all
+            expect(allCheckboxes.length).to.equal(deletableList.length + 1)
+          })
 
           // first one is the select all checkbox
           fireEvent.click(allCheckboxes[0])
@@ -563,14 +563,15 @@ describe('<ProjectListRoot />', function () {
               { repeat: leavableList.length }
             )
 
-          allCheckboxes = screen.getAllByRole<HTMLInputElement>('checkbox')
           // + 1 because of select all
-          expect(allCheckboxes.length).to.equal(
-            deletableAndLeavableList.length + 1
+          await waitFor(() =>
+            expect(
+              screen.getAllByRole<HTMLInputElement>('checkbox').length
+            ).to.equal(deletableAndLeavableList.length + 1)
           )
 
           // first one is the select all checkbox
-          fireEvent.click(allCheckboxes[0])
+          fireEvent.click(screen.getAllByRole<HTMLInputElement>('checkbox')[0])
 
           actionsToolbar = screen.getAllByRole('toolbar')[0]
 
@@ -663,9 +664,11 @@ describe('<ProjectListRoot />', function () {
                 )
               ).to.be.true
             })
-            expect(
-              screen.queryAllByText(projectsData[index].name)
-            ).to.have.length(0)
+            await waitFor(() => {
+              expect(
+                screen.queryAllByText(projectsData[index].name)
+              ).to.have.length(0)
+            })
 
             screen.getAllByRole('button', {
               name: `${this.tagName} (${--visibleProjectsCount})`,
@@ -699,13 +702,15 @@ describe('<ProjectListRoot />', function () {
             status: 204,
           })
 
-          await waitFor(() => {
-            const tagsDropdown = within(actionsToolbar).getByLabelText('Tags')
-            fireEvent.click(tagsDropdown)
-          })
+          const tagsDropdown =
+            await within(actionsToolbar).findByLabelText('Tags')
+          fireEvent.click(tagsDropdown)
           screen.getByText('Add to tag')
 
-          const newTagButton = screen.getByText('Create new tag')
+          const newTagButton = screen.getByRole('menuitem', {
+            name: 'Create new tag',
+          })
+
           fireEvent.click(newTagButton)
 
           const modal = screen.getAllByRole('dialog')[0]
@@ -731,7 +736,11 @@ describe('<ProjectListRoot />', function () {
             })
           ).to.be.true
 
-          screen.getByRole('button', { name: `${this.newTagName} (2)` })
+          await screen.findByRole(
+            'button',
+            { name: `${this.newTagName} (2)` },
+            { timeout: 5000 }
+          )
         })
 
         it('opens the tags dropdown and remove a tag from selected projects', async function () {
@@ -949,7 +958,7 @@ describe('<ProjectListRoot />', function () {
             ).to.be.true
 
             const table = await screen.findByRole('table')
-            within(table).getByText(newProjectName)
+            await within(table).findByText(newProjectName)
             expect(within(table).queryByText(oldName)).to.be.null
 
             const allCheckboxesInTable =
@@ -1025,7 +1034,7 @@ describe('<ProjectListRoot />', function () {
               }
             )
 
-            screen.getByText(copiedProjectName)
+            await screen.findByText(copiedProjectName)
           })
         })
       })
@@ -1073,6 +1082,8 @@ describe('<ProjectListRoot />', function () {
         }
 
         beforeEach(function () {
+          fetchMock.removeRoutes().clearHistory()
+
           allCheckboxes = screen.getAllByRole<HTMLInputElement>('checkbox')
           // first one is the select all checkbox, just check 2 at first
           fireEvent.click(allCheckboxes[1])

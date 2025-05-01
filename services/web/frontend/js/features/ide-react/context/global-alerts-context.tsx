@@ -4,7 +4,9 @@ const GlobalAlertsContext = createContext<HTMLDivElement | null | undefined>(
   undefined
 )
 
-export const GlobalAlertsProvider: FC = ({ children }) => {
+export const GlobalAlertsProvider: FC<React.PropsWithChildren> = ({
+  children,
+}) => {
   const [globalAlertsContainer, setGlobalAlertsContainer] =
     useState<HTMLDivElement | null>(null)
 

@@ -27,7 +27,7 @@ const projectFallback = {
   features: {},
 }
 
-export const ProjectProvider: FC = ({ children }) => {
+export const ProjectProvider: FC<React.PropsWithChildren> = ({ children }) => {
   const [project] = useScopeValue('project')
   const joinedOnce = !!project
 

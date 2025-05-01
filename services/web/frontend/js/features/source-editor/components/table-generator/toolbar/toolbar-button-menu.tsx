@@ -7,13 +7,15 @@ import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
 import MaterialIcon from '../../../../../shared/components/material-icon'
 import { useTabularContext } from '../contexts/tabular-context'
 
-export const ToolbarButtonMenu: FC<{
-  id: string
-  label: string
-  icon: string
-  disabled?: boolean
-  disabledLabel?: string
-}> = memo(function ButtonMenu({
+export const ToolbarButtonMenu: FC<
+  React.PropsWithChildren<{
+    id: string
+    label: string
+    icon: string
+    disabled?: boolean
+    disabledLabel?: string
+  }>
+> = memo(function ButtonMenu({
   icon,
   id,
   label,

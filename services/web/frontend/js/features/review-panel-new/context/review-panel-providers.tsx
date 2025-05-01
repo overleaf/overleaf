@@ -5,7 +5,9 @@ import { TrackChangesStateProvider } from './track-changes-state-context'
 import { ThreadsProvider } from './threads-context'
 import { ReviewPanelViewProvider } from './review-panel-view-context'
 
-export const ReviewPanelProviders: FC = ({ children }) => {
+export const ReviewPanelProviders: FC<React.PropsWithChildren> = ({
+  children,
+}) => {
   return (
     <ReviewPanelViewProvider>
       <ChangesUsersProvider>

@@ -14,15 +14,15 @@ import {
   USER_EMAIL,
   USER_ID,
 } from '../../../helpers/editor-providers'
-import * as useLocationModule from '../../../../../frontend/js/shared/hooks/use-location'
+import { location } from '@/shared/components/location'
 
 async function changePrivilegeLevel(screen, { current, next }) {
   const select = screen.getByDisplayValue(current)
-  await fireEvent.click(select)
+  fireEvent.click(select)
   const option = screen.getByRole('option', {
     name: next,
   })
-  await fireEvent.click(option)
+  fireEvent.click(option)
 }
 
 describe('<ShareProjectModal/>', function () {
@@ -89,19 +89,17 @@ describe('<ShareProjectModal/>', function () {
   }
 
   beforeEach(function () {
-    this.locationStub = sinon.stub(useLocationModule, 'useLocation').returns({
-      assign: sinon.stub(),
-      replace: sinon.stub(),
-      reload: sinon.stub(),
-    })
+    this.locationWrapperSandbox = sinon.createSandbox()
+    this.locationWrapperStub = this.locationWrapperSandbox.stub(location)
     fetchMock.get('/user/contacts', { contacts })
     window.metaAttributesCache.set('ol-user', { allowedFreeTrial: true })
     window.metaAttributesCache.set('ol-showUpgradePrompt', true)
     window.metaAttributesCache.set('ol-isReviewerRoleEnabled', true)
+    window.metaAttributesCache.set('ol-preventCompileOnLoad', true)
   })
 
   afterEach(function () {
-    this.locationStub.restore()
+    this.locationWrapperSandbox.restore()
     fetchMock.removeRoutes().clearHistory()
     cleanUpContext()
   })
@@ -199,6 +197,8 @@ describe('<ShareProjectModal/>', function () {
   })
 
   it('displays actions for project-owners', async function () {
+    fetchMock.get(`/project/${project._id}/tokens`, {})
+
     const invites = [
       {
         _id: 'invited-author',
@@ -304,6 +304,7 @@ describe('<ShareProjectModal/>', function () {
 
   it('only shows read-only token link to restricted token members', async function () {
     window.metaAttributesCache.set('ol-isRestrictedTokenMember', true)
+    fetchMock.get(`/project/${project._id}/tokens`, {})
 
     renderWithEditorContext(<ShareProjectModal {...modalProps} />, {
       isRestrictedTokenMember: true,
@@ -349,6 +350,8 @@ describe('<ShareProjectModal/>', function () {
       },
     ]
 
+    fetchMock.get(`/project/${project._id}/tokens`, {})
+
     renderWithEditorContext(<ShareProjectModal {...modalProps} />, {
       scope: {
         project: {
@@ -382,6 +385,7 @@ describe('<ShareProjectModal/>', function () {
   })
 
   it('resends an invite', async function () {
+    fetchMock.get(`/project/${project._id}/tokens`, {})
     fetchMock.postOnce(
       'express:/project/:projectId/invite/:inviteId/resend',
       204
@@ -415,10 +419,11 @@ describe('<ShareProjectModal/>', function () {
     await waitFor(() => expect(closeButton.disabled).to.be.true)
 
     expect(fetchMock.callHistory.done()).to.be.true
-    expect(closeButton.disabled).to.be.false
+    await waitFor(() => expect(closeButton.disabled).to.be.false)
   })
 
   it('revokes an invite', async function () {
+    fetchMock.get(`/project/${project._id}/tokens`, {})
     fetchMock.deleteOnce('express:/project/:projectId/invite/:inviteId', 204)
 
     const invites = [
@@ -448,10 +453,11 @@ describe('<ShareProjectModal/>', function () {
     await waitFor(() => expect(closeButton.disabled).to.be.true)
 
     expect(fetchMock.callHistory.done()).to.be.true
-    expect(closeButton.disabled).to.be.false
+    await waitFor(() => expect(closeButton.disabled).to.be.false)
   })
 
   it('changes member privileges to read + write', async function () {
+    fetchMock.get(`/project/${project._id}/tokens`, {})
     fetchMock.putOnce('express:/project/:projectId/users/:userId', 204)
 
     const members = [
@@ -488,10 +494,11 @@ describe('<ShareProjectModal/>', function () {
     expect(JSON.parse(body)).to.deep.equal({ privilegeLevel: 'readAndWrite' })
 
     expect(fetchMock.callHistory.done()).to.be.true
-    expect(closeButton.disabled).to.be.false
+    await waitFor(() => expect(closeButton.disabled).to.be.false)
   })
 
   it('removes a member from the project', async function () {
+    fetchMock.get(`/project/${project._id}/tokens`, {})
     fetchMock.deleteOnce('express:/project/:projectId/users/:userId', 204)
 
     const members = [
@@ -534,6 +541,7 @@ describe('<ShareProjectModal/>', function () {
   })
 
   it('changes member privileges to owner with confirmation', async function () {
+    fetchMock.get(`/project/${project._id}/tokens`, {})
     fetchMock.postOnce('express:/project/:projectId/transfer-ownership', 204)
 
     const members = [
@@ -582,6 +590,8 @@ describe('<ShareProjectModal/>', function () {
   })
 
   it('sends invites to input email addresses', async function () {
+    fetchMock.get(`/project/${project._id}/tokens`, {})
+
     renderWithEditorContext(<ShareProjectModal {...modalProps} />, {
       scope: {
         project: {
@@ -674,6 +684,7 @@ describe('<ShareProjectModal/>', function () {
   })
 
   it('displays a message when the collaborator limit is reached', async function () {
+    fetchMock.get(`/project/${project._id}/tokens`, {})
     fetchMock.post(
       '/event/paywall-prompt',
       {},
@@ -748,6 +759,8 @@ describe('<ShareProjectModal/>', function () {
   })
 
   it('handles server error responses', async function () {
+    fetchMock.get(`/project/${project._id}/tokens`, {})
+
     renderWithEditorContext(<ShareProjectModal {...modalProps} />, {
       scope: {
         project: {
@@ -807,6 +820,7 @@ describe('<ShareProjectModal/>', function () {
   })
 
   it('handles switching between access levels', async function () {
+    fetchMock.get(`/project/${project._id}/tokens`, {})
     fetchMock.post('express:/project/:projectId/settings/admin', 204)
 
     renderWithEditorContext(<ShareProjectModal {...modalProps} />, {

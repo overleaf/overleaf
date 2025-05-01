@@ -1,4 +1,4 @@
-import { mount } from 'cypress/react'
+import { mount } from 'cypress/react18'
 
 // eslint-disable-next-line no-unused-vars,@typescript-eslint/no-namespace
 declare global {

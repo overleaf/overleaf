@@ -77,7 +77,7 @@ export function createReactScopeValueStore(projectId: string) {
   return scopeStore
 }
 
-export const IdeReactProvider: FC = ({ children }) => {
+export const IdeReactProvider: FC<React.PropsWithChildren> = ({ children }) => {
   const projectId = getMeta('ol-project_id')
   const [scopeStore] = useState(() => createReactScopeValueStore(projectId))
   const [eventEmitter] = useState(createIdeEventEmitter)

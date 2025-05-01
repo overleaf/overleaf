@@ -8,7 +8,7 @@ export const useUserChannel = (): BroadcastChannel | null => {
   }
 
   useEffect(() => {
-    return () => channelRef.current?.close()
+    return () => channelRef.current?.close?.()
   }, [])
 
   return channelRef.current

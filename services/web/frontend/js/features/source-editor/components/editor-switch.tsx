@@ -14,7 +14,7 @@ function EditorSwitch() {
   const richTextAvailable = openDocName ? isValidTeXFile(openDocName) : false
 
   const handleChange = useCallback(
-    event => {
+    (event: ChangeEvent<HTMLInputElement>) => {
       const editorType = event.target.value
 
       switch (editorType) {

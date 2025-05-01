@@ -18,7 +18,9 @@ export const usePdfPreviewContext = () => {
   return context
 }
 
-export const PdfPreviewProvider: FC = ({ children }) => {
+export const PdfPreviewProvider: FC<React.PropsWithChildren> = ({
+  children,
+}) => {
   const [loadingError, setLoadingError] = useState(false)
 
   const value = useMemo(

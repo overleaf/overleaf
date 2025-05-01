@@ -56,7 +56,7 @@ const EditorNavigationToolbarRoot = React.memo(
     }, [chatIsOpen, setChatIsOpen, markMessagesAsRead])
 
     const toggleReviewPanelOpen = useCallback(
-      event => {
+      (event: any) => {
         event.preventDefault()
         eventTracking.sendMB('navigation-clicked-review', {
           action: isOpentoString(!reviewPanelOpen),
@@ -93,7 +93,7 @@ const EditorNavigationToolbarRoot = React.memo(
     }, [setLeftMenuShown])
 
     const goToUser = useCallback(
-      user => {
+      (user: any) => {
         if (user.doc && typeof user.row === 'number') {
           openDoc(user.doc, { gotoLine: user.row + 1 })
         }

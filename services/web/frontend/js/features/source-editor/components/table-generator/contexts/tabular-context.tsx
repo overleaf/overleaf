@@ -21,7 +21,7 @@ const TabularContext = createContext<
   | undefined
 >(undefined)
 
-export const TabularProvider: FC = ({ children }) => {
+export const TabularProvider: FC<React.PropsWithChildren> = ({ children }) => {
   const ref = useRef<HTMLDivElement>(null)
   const [helpShown, setHelpShown] = useState(false)
   const [columnWidthModalShown, setColumnWidthModalShown] = useState(false)

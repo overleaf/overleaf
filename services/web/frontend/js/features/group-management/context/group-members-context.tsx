@@ -72,7 +72,7 @@ export function GroupMembersProvider({ children }: GroupMembersProviderProps) {
   )
 
   const addMembers = useCallback(
-    emailString => {
+    (emailString: string) => {
       setInviteError(undefined)
       const emails = parseEmails(emailString)
       mapSeries(emails, async email => {
@@ -102,7 +102,7 @@ export function GroupMembersProvider({ children }: GroupMembersProviderProps) {
   )
 
   const removeMember = useCallback(
-    async user => {
+    async (user: User) => {
       let url
       if (paths.removeInvite && user.invite && user._id == null) {
         url = `${paths.removeInvite}/${encodeURIComponent(user.email)}`
@@ -126,7 +126,7 @@ export function GroupMembersProvider({ children }: GroupMembersProviderProps) {
   )
 
   const removeMembers = useCallback(
-    e => {
+    (e: any) => {
       e.preventDefault()
       setRemoveMemberError(undefined)
       ;(async () => {
@@ -142,7 +142,7 @@ export function GroupMembersProvider({ children }: GroupMembersProviderProps) {
   )
 
   const updateMemberView = useCallback(
-    (userId, updatedUser) => {
+    (userId: string, updatedUser: User) => {
       setUsers(
         users.map(u => {
           if (u._id === userId) {

@@ -1,4 +1,4 @@
-import { renderHook, act } from '@testing-library/react-hooks'
+import { renderHook, act } from '@testing-library/react'
 import { expect } from 'chai'
 import sinon from 'sinon'
 import useAsync from '../../../../frontend/js/shared/hooks/use-async'

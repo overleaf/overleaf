@@ -2,32 +2,25 @@ import { expect } from 'chai'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import sinon from 'sinon'
 import { projectsData } from '../../../../fixtures/projects-data'
-import * as useLocationModule from '../../../../../../../../frontend/js/shared/hooks/use-location'
+import { location } from '@/shared/components/location'
 import { CompileAndDownloadProjectPDFButtonTooltip } from '../../../../../../../../frontend/js/features/project-list/components/table/cells/action-buttons/compile-and-download-project-pdf-button'
 import fetchMock from 'fetch-mock'
 import * as eventTracking from '@/infrastructure/event-tracking'
 
 describe('<CompileAndDownloadProjectPDFButton />', function () {
-  let assignStub: sinon.SinonStub
-  let locationStub: sinon.SinonStub
   let sendMBSpy: sinon.SinonSpy
 
   beforeEach(function () {
     sendMBSpy = sinon.spy(eventTracking, 'sendMB')
-    assignStub = sinon.stub()
-    locationStub = sinon.stub(useLocationModule, 'useLocation').returns({
-      assign: assignStub,
-      replace: sinon.stub(),
-      reload: sinon.stub(),
-      setHash: sinon.stub(),
-    })
+    this.locationWrapperSandbox = sinon.createSandbox()
+    this.locationWrapperStub = this.locationWrapperSandbox.stub(location)
     render(
       <CompileAndDownloadProjectPDFButtonTooltip project={projectsData[0]} />
     )
   })
 
   afterEach(function () {
-    locationStub.restore()
+    this.locationWrapperSandbox.restore()
     fetchMock.removeRoutes().clearHistory()
     sendMBSpy.restore()
   })
@@ -57,6 +50,7 @@ describe('<CompileAndDownloadProjectPDFButton />', function () {
       screen.getByRole('button', { name: 'Compiling…' })
     })
 
+    const assignStub = this.locationWrapperStub.assign
     await waitFor(() => {
       expect(assignStub).to.have.been.called
     })
@@ -85,9 +79,9 @@ describe('<CompileAndDownloadProjectPDFButton />', function () {
     }) as HTMLButtonElement
     fireEvent.click(btn)
 
-    await waitFor(() => {
-      screen.getByText(`${projectsData[0].name}: PDF unavailable for download`)
-    })
-    expect(assignStub).to.have.not.been.called
+    await screen.findByText(
+      `${projectsData[0].name}: PDF unavailable for download`
+    )
+    expect(this.locationWrapperStub.assign).to.have.not.been.called
   })
 })

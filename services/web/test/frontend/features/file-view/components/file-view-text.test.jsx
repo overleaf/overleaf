@@ -20,6 +20,7 @@ describe('<FileViewText/>', function () {
 
   beforeEach(function () {
     fetchMock.removeRoutes().clearHistory()
+    window.metaAttributesCache.set('ol-preventCompileOnLoad', true)
   })
 
   it('renders a text view', async function () {

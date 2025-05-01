@@ -20,7 +20,9 @@ const ReviewPanelViewActionsContext = createContext<ViewActions | undefined>(
   undefined
 )
 
-export const ReviewPanelViewProvider: FC = ({ children }) => {
+export const ReviewPanelViewProvider: FC<React.PropsWithChildren> = ({
+  children,
+}) => {
   const [view, setView] = useState<View>('cur_file')
 
   const actions = useMemo(

@@ -18,9 +18,11 @@ import { isAcceptableFile } from '@/features/file-tree/util/is-acceptable-file'
 import { FileTreeFindResult } from '@/features/ide-react/types/file-tree'
 
 const DRAGGABLE_TYPE = 'ENTITY'
-export const FileTreeDraggableProvider: FC<{
-  fileTreeContainer?: HTMLDivElement
-}> = ({ fileTreeContainer, children }) => {
+export const FileTreeDraggableProvider: FC<
+  React.PropsWithChildren<{
+    fileTreeContainer?: HTMLDivElement
+  }>
+> = ({ fileTreeContainer, children }) => {
   const options = useMemo(
     () => ({ rootElement: fileTreeContainer }),
     [fileTreeContainer]

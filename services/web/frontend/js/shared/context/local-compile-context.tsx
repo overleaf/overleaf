@@ -118,7 +118,9 @@ export const LocalCompileContext = createContext<CompileContext | undefined>(
   undefined
 )
 
-export const LocalCompileProvider: FC = ({ children }) => {
+export const LocalCompileProvider: FC<React.PropsWithChildren> = ({
+  children,
+}) => {
   const { hasPremiumCompile, isProjectOwner } = useEditorContext()
   const { openDocWithId, openDocs, currentDocument } = useEditorManagerContext()
   const { role } = useDetachContext()
@@ -296,7 +298,7 @@ export const LocalCompileProvider: FC = ({ children }) => {
   }, [compiling])
 
   const _buildLogEntryAnnotations = useCallback(
-    entries =>
+    (entries: any) =>
       buildLogEntryAnnotations(entries, fileTreeData, lastCompileRootDocId),
     [fileTreeData, lastCompileRootDocId]
   )
@@ -686,7 +688,7 @@ export const LocalCompileProvider: FC = ({ children }) => {
 
   // start a compile manually
   const startCompile = useCallback(
-    options => {
+    (options: any) => {
       setCompiledOnce(true)
       compiler.compile(options)
     },
@@ -714,7 +716,7 @@ export const LocalCompileProvider: FC = ({ children }) => {
   }, [compiler])
 
   const syncToEntry = useCallback(
-    (entry, keepCurrentView = false) => {
+    (entry: any, keepCurrentView = false) => {
       const result = findEntityByPath(entry.file)
 
       if (result && result.type === 'doc') {

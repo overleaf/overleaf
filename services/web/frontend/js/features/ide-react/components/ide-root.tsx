@@ -15,4 +15,6 @@ const IdeRoot: FC = () => {
   )
 }
 
-export default withErrorBoundary(memo(IdeRoot), GenericErrorBoundaryFallback)
+export default withErrorBoundary(memo(IdeRoot), () => (
+  <GenericErrorBoundaryFallback />
+))

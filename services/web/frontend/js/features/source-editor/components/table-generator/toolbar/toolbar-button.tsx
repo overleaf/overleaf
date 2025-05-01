@@ -28,12 +28,12 @@ export const ToolbarButton = memo<{
   disabledLabel,
 }) {
   const view = useCodeMirrorViewContext()
-  const handleMouseDown = useCallback(event => {
+  const handleMouseDown = useCallback((event: React.MouseEvent) => {
     event.preventDefault()
   }, [])
 
   const handleClick = useCallback(
-    event => {
+    (event: React.MouseEvent) => {
       if (command) {
         emitTableGeneratorEvent(view, id)
         event.preventDefault()

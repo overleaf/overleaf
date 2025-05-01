@@ -97,7 +97,7 @@ describe('<ManagedInstitutions />', function () {
     )
 
     const unsubscribeLink = screen.getByText('Unsubscribe')
-    await fireEvent.click(unsubscribeLink)
+    fireEvent.click(unsubscribeLink)
     await waitFor(
       () => expect(fetchMock.callHistory.called(unsubscribeUrl)).to.be.true
     )
@@ -126,7 +126,7 @@ describe('<ManagedInstitutions />', function () {
 
     const subscribeLink = await screen.findByText('Subscribe')
 
-    await fireEvent.click(subscribeLink)
+    fireEvent.click(subscribeLink)
     await waitFor(
       () => expect(fetchMock.callHistory.called(subscribeUrl)).to.be.true
     )

@@ -1,4 +1,4 @@
-import { memo, useCallback, useState } from 'react'
+import { Dispatch, memo, SetStateAction, useCallback, useState } from 'react'
 import { Change, CommentOperation } from '../../../../../types/change'
 import { ReviewPanelMessage } from './review-panel-message'
 import { useTranslation } from 'react-i18next'
@@ -41,7 +41,7 @@ export const ReviewPanelCommentContent = memo<{
     const [submitting, setSubmitting] = useState(false)
 
     const handleSubmit = useCallback(
-      (content, setContent) => {
+      (content: string, setContent: Dispatch<SetStateAction<string>>) => {
         if (!onReply || submitting) {
           return
         }

@@ -1,8 +1,9 @@
 import '../base'
-import ReactDOM from 'react-dom'
+import { createRoot } from 'react-dom/client'
 import Root from '@/features/group-management/components/add-seats/root'
 
 const element = document.getElementById('add-seats-root')
 if (element) {
-  ReactDOM.render(<Root />, element)
+  const root = createRoot(element)
+  root.render(<Root />)
 }

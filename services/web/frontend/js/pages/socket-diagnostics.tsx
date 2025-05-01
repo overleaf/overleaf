@@ -1,10 +1,11 @@
 import '../marketing'
 
-import ReactDOM from 'react-dom'
+import { createRoot } from 'react-dom/client'
 import { SocketDiagnostics } from '@/features/socket-diagnostics/components/socket-diagnostics'
 
 const socketDiagnosticsContainer = document.getElementById('socket-diagnostics')
 
 if (socketDiagnosticsContainer) {
-  ReactDOM.render(<SocketDiagnostics />, socketDiagnosticsContainer)
+  const root = createRoot(socketDiagnosticsContainer)
+  root.render(<SocketDiagnostics />)
 }

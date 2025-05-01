@@ -44,7 +44,9 @@ const TrackChangesStateActionsContext = createContext<
   TrackChangesStateActions | undefined
 >(undefined)
 
-export const TrackChangesStateProvider: FC = ({ children }) => {
+export const TrackChangesStateProvider: FC<React.PropsWithChildren> = ({
+  children,
+}) => {
   const permissions = usePermissionsContext()
   const { socket } = useConnectionContext()
   const project = useProjectContext()

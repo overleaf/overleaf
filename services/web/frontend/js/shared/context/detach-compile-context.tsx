@@ -9,7 +9,9 @@ export const DetachCompileContext = createContext<CompileContext | undefined>(
   undefined
 )
 
-export const DetachCompileProvider: FC = ({ children }) => {
+export const DetachCompileProvider: FC<React.PropsWithChildren> = ({
+  children,
+}) => {
   const localCompileContext = useLocalCompileContext()
   if (!localCompileContext) {
     throw new Error(

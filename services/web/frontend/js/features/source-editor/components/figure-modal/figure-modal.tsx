@@ -104,7 +104,8 @@ const FigureModalContent = () => {
   const hide = useCallback(() => {
     dispatch({ source: FigureModalSource.NONE })
     view.requestMeasure()
-    view.focus()
+    // Wait for the modal to close before focusing the editor
+    window.setTimeout(() => view.focus(), 0)
   }, [dispatch, view])
 
   useEventListener(

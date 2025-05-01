@@ -4,6 +4,7 @@ import {
   fireEvent,
   waitForElementToBeRemoved,
   within,
+  waitFor,
 } from '@testing-library/react'
 import PersonalSubscription from '../../../../../../frontend/js/features/subscription/components/dashboard/personal-subscription'
 import {
@@ -19,7 +20,7 @@ import {
 import { reactivateSubscriptionUrl } from '../../../../../../frontend/js/features/subscription/data/subscription-url'
 import fetchMock from 'fetch-mock'
 import sinon from 'sinon'
-import * as useLocationModule from '../../../../../../frontend/js/shared/hooks/use-location'
+import { location } from '@/shared/components/location'
 
 describe('<PersonalSubscription />', function () {
   afterEach(function () {
@@ -48,21 +49,13 @@ describe('<PersonalSubscription />', function () {
   })
 
   describe('subscription states  ', function () {
-    let reloadStub: sinon.SinonStub
-
     beforeEach(function () {
-      reloadStub = sinon.stub()
-      this.locationStub = sinon.stub(useLocationModule, 'useLocation').returns({
-        assign: sinon.stub(),
-        replace: sinon.stub(),
-        reload: reloadStub,
-        setHash: sinon.stub(),
-        toString: sinon.stub(),
-      })
+      this.locationWrapperSandbox = sinon.createSandbox()
+      this.locationWrapperStub = this.locationWrapperSandbox.stub(location)
     })
 
     afterEach(function () {
-      this.locationStub.restore()
+      this.locationWrapperSandbox.restore()
     })
 
     it('renders the active dash', function () {
@@ -107,15 +100,17 @@ describe('<PersonalSubscription />', function () {
       fireEvent.click(reactivateBtn)
       expect(reactivateBtn.disabled).to.be.true
       await fetchMock.callHistory.flush(true)
-      expect(reactivateBtn.disabled).to.be.false
-      expect(reloadStub).not.to.have.been.called
+      await waitFor(() => expect(reactivateBtn.disabled).to.be.false)
+      expect(this.locationWrapperStub.reload).not.to.have.been.called
       fetchMock.removeRoutes().clearHistory()
 
       // 2nd click - success
       fetchMock.postOnce(reactivateSubscriptionUrl, 200)
       fireEvent.click(reactivateBtn)
       await fetchMock.callHistory.flush(true)
-      expect(reloadStub).to.have.been.calledOnce
+      await waitFor(() => {
+        expect(this.locationWrapperStub.reload).to.have.been.calledOnce
+      })
       expect(reactivateBtn.disabled).to.be.true
       fetchMock.removeRoutes().clearHistory()
     })

@@ -6,7 +6,7 @@ export const UserContext = createContext<User | LoggedOutUser | undefined>(
   undefined
 )
 
-export const UserProvider: FC = ({ children }) => {
+export const UserProvider: FC<React.PropsWithChildren> = ({ children }) => {
   const user = useMemo(() => getMeta('ol-user'), [])
 
   return <UserContext.Provider value={user}>{children}</UserContext.Provider>

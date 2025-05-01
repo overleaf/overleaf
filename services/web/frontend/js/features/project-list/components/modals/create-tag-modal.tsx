@@ -55,7 +55,7 @@ export default function CreateTagModal({
   }, [runAsync, tagName, selectedColor, onCreate])
 
   const handleSubmit = useCallback(
-    e => {
+    (e: React.FormEvent) => {
       e.preventDefault()
       runCreateTag()
     },

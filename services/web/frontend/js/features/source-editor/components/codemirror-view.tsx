@@ -10,7 +10,7 @@ function CodeMirrorView() {
 
   // append the editor view dom to the container node when mounted
   const containerRef = useCallback(
-    node => {
+    (node: HTMLDivElement) => {
       if (node) {
         node.appendChild(view.dom)
       }

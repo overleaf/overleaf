@@ -51,7 +51,9 @@ export const UserSettingsContext = createContext<
   UserSettingsContextValue | undefined
 >(undefined)
 
-export const UserSettingsProvider: FC = ({ children }) => {
+export const UserSettingsProvider: FC<React.PropsWithChildren> = ({
+  children,
+}) => {
   const [userSettings, setUserSettings] = useState<UserSettings>(
     () => getMeta('ol-userSettings') || defaultSettings
   )

@@ -3,12 +3,14 @@ import SplitTestBadge from '@/shared/components/split-test-badge'
 import MaterialIcon from '@/shared/components/material-icon'
 import { useTranslation } from 'react-i18next'
 
-export const PanelHeading: FC<{
-  title: string
-  splitTestName?: string
-  children?: React.ReactNode
-  handleClose(): void
-}> = ({ title, splitTestName, children, handleClose }) => {
+export const PanelHeading: FC<
+  React.PropsWithChildren<{
+    title: string
+    splitTestName?: string
+    children?: React.ReactNode
+    handleClose(): void
+  }>
+> = ({ title, splitTestName, children, handleClose }) => {
   const { t } = useTranslation()
 
   return (

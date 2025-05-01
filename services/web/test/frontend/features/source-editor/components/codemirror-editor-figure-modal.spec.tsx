@@ -43,7 +43,9 @@ describe('<FigureModal />', function () {
     const scope = mockScope(content)
     scope.editor.showVisual = true
 
-    const FileTreePathProvider: FC = ({ children }) => (
+    const FileTreePathProvider: FC<React.PropsWithChildren> = ({
+      children,
+    }) => (
       <FileTreePathContext.Provider
         value={{
           dirname: cy.stub(),
@@ -545,7 +547,7 @@ describe('<FigureModal />', function () {
       cy.findByText('Done').click()
       cy.get('.cm-content').should(
         'have.text',
-        '\\begin{figure}\\centering\\end{figure}'
+        '\\begin{figure}\\centering\\includegraphics[width=0.75\\linewidth]{frog.jpg}\\end{figure}'
       )
     })
 
@@ -567,7 +569,7 @@ describe('<FigureModal />', function () {
       cy.findByText('Done').click()
       cy.get('.cm-content').should(
         'have.text',
-        '\\begin{figure}\\centering🏷fig:my-label\\end{figure}'
+        '\\begin{figure}\\centering\\includegraphics[width=0.75\\linewidth]{frog.jpg}🏷fig:my-label\\end{figure}'
       )
     })
 

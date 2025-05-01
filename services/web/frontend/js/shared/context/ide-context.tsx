@@ -15,11 +15,13 @@ type IdeContextValue = Ide & {
 
 export const IdeContext = createContext<IdeContextValue | undefined>(undefined)
 
-export const IdeProvider: FC<{
-  ide: Ide
-  scopeStore: ScopeValueStore
-  scopeEventEmitter: ScopeEventEmitter
-}> = ({ ide, scopeStore, scopeEventEmitter, children }) => {
+export const IdeProvider: FC<
+  React.PropsWithChildren<{
+    ide: Ide
+    scopeStore: ScopeValueStore
+    scopeEventEmitter: ScopeEventEmitter
+  }>
+> = ({ ide, scopeStore, scopeEventEmitter, children }) => {
   /**
    * Expose scopeStore via `window.overleaf.unstable.store`, so it can be accessed by external extensions.
    *

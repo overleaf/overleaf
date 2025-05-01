@@ -28,10 +28,9 @@ type State = {
   touchedName: boolean
 }
 
-const FileTreeCreateNameProvider: FC<{ initialName?: string }> = ({
-  children,
-  initialName = '',
-}) => {
+const FileTreeCreateNameProvider: FC<
+  React.PropsWithChildren<{ initialName?: string }>
+> = ({ children, initialName = '' }) => {
   const [state, setName] = useReducer(
     (state: State, name: string) => ({
       name, // the file name

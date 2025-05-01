@@ -139,16 +139,18 @@ describe('user role and institution', function () {
       departments: [fakeDepartment],
     })
 
-    fireEvent.click(
-      screen.getByRole('button', { name: /add role and department/i })
-    )
+    const addRoleButton = await screen.findByRole('button', {
+      name: /add role and department/i,
+    })
+
+    fireEvent.click(addRoleButton)
 
     await fetchMock.callHistory.flush(true)
     fetchMock.removeRoutes().clearHistory()
 
     fireEvent.click(screen.getByRole('combobox', { name: /department/i }))
 
-    screen.getByText(fakeDepartment)
+    await screen.findByText(fakeDepartment)
   })
 
   it('adds new role and department', async function () {

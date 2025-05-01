@@ -16,7 +16,7 @@ export default function SelectUserCheckbox({
     useGroupMembersContext()
 
   const handleSelectUser = useCallback(
-    (event, user) => {
+    (event: React.ChangeEvent<HTMLInputElement>, user: User) => {
       if (event.target.checked) {
         selectUser(user)
       } else {

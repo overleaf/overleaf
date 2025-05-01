@@ -120,9 +120,16 @@ describe('<AddEmailInput/>', function () {
     describe('when there is a domain match', function () {
       beforeEach(async function () {
         fetchMock.get('express:/institutions/domains', testInstitutionData)
-        fireEvent.change(screen.getByTestId('affiliations-email'), {
-          target: { value: 'user@d' },
-        })
+        const input = await screen.findByTestId('affiliations-email')
+        fireEvent.change(input, { target: { value: 'user@d' } })
+
+        // Wait for the request to complete and the domain cache to pouplate
+        await waitFor(
+          () =>
+            expect(
+              fetchMock.callHistory.called('express:/institutions/domains')
+            ).to.be.true
+        )
         // Wait for component to process the change and update the shadow input
         await waitFor(() => {
           const shadowInput = screen.getByTestId(

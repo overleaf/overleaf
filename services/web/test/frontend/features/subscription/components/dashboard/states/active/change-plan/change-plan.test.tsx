@@ -20,26 +20,18 @@ import {
   subscriptionUpdateUrl,
 } from '../../../../../../../../../frontend/js/features/subscription/data/subscription-url'
 import { renderActiveSubscription } from '../../../../../helpers/render-active-subscription'
-import * as useLocationModule from '../../../../../../../../../frontend/js/shared/hooks/use-location'
+import { location } from '@/shared/components/location'
 
 describe('<ChangePlanModal />', function () {
-  let reloadStub: sinon.SinonStub
-
   beforeEach(function () {
-    reloadStub = sinon.stub()
-    this.locationStub = sinon.stub(useLocationModule, 'useLocation').returns({
-      assign: sinon.stub(),
-      replace: sinon.stub(),
-      reload: reloadStub,
-      setHash: sinon.stub(),
-      toString: sinon.stub(),
-    })
+    this.locationWrapperSandbox = sinon.createSandbox()
+    this.locationWrapperStub = this.locationWrapperSandbox.stub(location)
   })
 
   afterEach(function () {
     cleanUpContext()
     fetchMock.removeRoutes().clearHistory()
-    this.locationStub.restore()
+    this.locationWrapperSandbox.restore()
   })
 
   it('renders the individual plans table and group plans UI', async function () {
@@ -210,6 +202,7 @@ describe('<ChangePlanModal />', function () {
       screen.getByRole('button', { name: 'Processing…' })
 
       // page is reloaded on success
+      const reloadStub = this.locationWrapperStub.reload
       await waitFor(() => {
         expect(reloadStub).to.have.been.called
       })
@@ -299,6 +292,7 @@ describe('<ChangePlanModal />', function () {
       screen.getByRole('button', { name: 'Processing…' })
 
       // page is reloaded on success
+      const reloadStub = this.locationWrapperStub.reload
       await waitFor(() => {
         expect(reloadStub).to.have.been.called
       })
@@ -530,7 +524,8 @@ describe('<ChangePlanModal />', function () {
 
       screen.getByRole('button', { name: 'Processing…' })
 
-      // // page is reloaded on success
+      // page is reloaded on success
+      const reloadStub = this.locationWrapperStub.reload
       await waitFor(() => {
         expect(reloadStub).to.have.been.called
       })

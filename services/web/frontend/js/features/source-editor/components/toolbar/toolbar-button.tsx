@@ -31,12 +31,12 @@ export const ToolbarButton = memo<{
 }) {
   const view = useCodeMirrorViewContext()
 
-  const handleMouseDown = useCallback(event => {
+  const handleMouseDown = useCallback((event: React.MouseEvent) => {
     event.preventDefault()
   }, [])
 
   const handleClick = useCallback(
-    event => {
+    (event: React.MouseEvent) => {
       emitToolbarEvent(view, id)
       if (command) {
         event.preventDefault()

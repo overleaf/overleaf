@@ -176,8 +176,8 @@ export const Cell: FC<{
   }, [cellData.content, editing, view])
 
   const onInput = useCallback(
-    e => {
-      update(filterInput(e.target.value))
+    (e: React.FormEvent<HTMLTextAreaElement>) => {
+      update(filterInput((e.target as HTMLTextAreaElement).value))
     },
     [update, filterInput]
   )

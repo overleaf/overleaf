@@ -61,7 +61,7 @@ export const EditorContext = createContext<
   | undefined
 >(undefined)
 
-export const EditorProvider: FC = ({ children }) => {
+export const EditorProvider: FC<React.PropsWithChildren> = ({ children }) => {
   const { socket } = useIdeContext()
   const { id: userId, featureUsage } = useUserContext()
   const { role } = useDetachContext()
@@ -125,7 +125,7 @@ export const EditorProvider: FC = ({ children }) => {
   )
 
   const deactivateTutorial = useCallback(
-    tutorialKey => {
+    (tutorialKey: string) => {
       setInactiveTutorials([...inactiveTutorials, tutorialKey])
     },
     [inactiveTutorials]

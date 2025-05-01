@@ -411,7 +411,9 @@ export const useSelectionContext = () => {
   return context
 }
 
-export const SelectionContextProvider: FC = ({ children }) => {
+export const SelectionContextProvider: FC<React.PropsWithChildren> = ({
+  children,
+}) => {
   const [selection, setSelection] = useState<TableSelection | null>(null)
   const [dragging, setDragging] = useState(false)
   return (

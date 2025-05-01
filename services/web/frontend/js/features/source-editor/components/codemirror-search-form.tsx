@@ -2,7 +2,15 @@ import {
   useCodeMirrorStateContext,
   useCodeMirrorViewContext,
 } from './codemirror-context'
-import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import {
+  FC,
+  FormEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import { runScopeHandlers } from '@codemirror/view'
 import {
   closeSearchPanel,
@@ -49,7 +57,7 @@ type MatchPositions = {
   interrupted: boolean
 }
 
-const CodeMirrorSearchForm: FC = () => {
+const CodeMirrorSearchForm: FC<React.PropsWithChildren> = () => {
   const view = useCodeMirrorViewContext()
   const state = useCodeMirrorStateContext()
   const { setProjectSearchIsOpen } = useLayoutContext()
@@ -78,7 +86,7 @@ const CodeMirrorSearchForm: FC = () => {
 
   const newEditor = useIsNewEditorEnabled()
 
-  const handleInputRef = useCallback(node => {
+  const handleInputRef = useCallback((node: HTMLInputElement) => {
     inputRef.current = node
 
     // focus the search input when the panel opens
@@ -88,11 +96,11 @@ const CodeMirrorSearchForm: FC = () => {
     }
   }, [])
 
-  const handleReplaceRef = useCallback(node => {
+  const handleReplaceRef = useCallback((node: HTMLInputElement) => {
     replaceRef.current = node
   }, [])
 
-  const handleSubmit = useCallback(event => {
+  const handleSubmit = useCallback((event: FormEvent) => {
     event.preventDefault()
   }, [])
 
@@ -125,8 +133,8 @@ const CodeMirrorSearchForm: FC = () => {
   }, [handleChange, state, view])
 
   const handleFormKeyDown = useCallback(
-    event => {
-      if (runScopeHandlers(view, event, 'search-panel')) {
+    (event: React.KeyboardEvent<HTMLFormElement>) => {
+      if (runScopeHandlers(view, event.nativeEvent, 'search-panel')) {
         event.preventDefault()
       }
     },
@@ -135,7 +143,7 @@ const CodeMirrorSearchForm: FC = () => {
 
   // Returns true if the event was handled, false otherwise
   const handleEmacsNavigation = useCallback(
-    event => {
+    (event: KeyboardEvent) => {
       const emacsCtrlSeq =
         emacsKeybindingsActive &&
         event.ctrlKey &&
@@ -163,7 +171,14 @@ const CodeMirrorSearchForm: FC = () => {
           event.stopPropagation()
           event.preventDefault()
           closeSearchPanel(view)
-          document.dispatchEvent(new CustomEvent('cm:emacs-close-search-panel'))
+          // Wait for the search panel to close before moving the cursor
+          window.setTimeout(
+            () =>
+              document.dispatchEvent(
+                new CustomEvent('cm:emacs-close-search-panel')
+              ),
+            0
+          )
           return true
         }
         default: {
@@ -175,7 +190,7 @@ const CodeMirrorSearchForm: FC = () => {
   )
 
   const handleSearchKeyDown = useCallback(
-    event => {
+    (event: React.KeyboardEvent<HTMLInputElement>) => {
       switch (event.key) {
         case 'Enter':
           event.preventDefault()
@@ -191,13 +206,13 @@ const CodeMirrorSearchForm: FC = () => {
           }
           break
       }
-      handleEmacsNavigation(event)
+      handleEmacsNavigation(event.nativeEvent)
     },
     [view, handleEmacsNavigation, emacsKeybindingsActive]
   )
 
   const handleReplaceKeyDown = useCallback(
-    event => {
+    (event: React.KeyboardEvent<HTMLInputElement>) => {
       switch (event.key) {
         case 'Enter':
           event.preventDefault()
@@ -216,7 +231,7 @@ const CodeMirrorSearchForm: FC = () => {
           }
         }
       }
-      handleEmacsNavigation(event)
+      handleEmacsNavigation(event.nativeEvent)
     },
     [view, handleEmacsNavigation]
   )

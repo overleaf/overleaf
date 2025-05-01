@@ -95,7 +95,7 @@ const createInitialValue = () =>
     setProjectSearchIsOpen: cy.stub(),
   }) satisfies LayoutContextValue
 
-const LayoutProvider: FC = ({ children }) => {
+const LayoutProvider: FC<React.PropsWithChildren> = ({ children }) => {
   const [value] = useState(createInitialValue)
 
   return (

@@ -1,6 +1,6 @@
 import '../marketing'
 
-import ReactDOM from 'react-dom'
+import { createRoot } from 'react-dom/client'
 import { CompromisedPasswordCard } from '../features/compromised-password/components/compromised-password-root'
 
 const compromisedPasswordContainer = document.getElementById(
@@ -8,5 +8,6 @@ const compromisedPasswordContainer = document.getElementById(
 )
 
 if (compromisedPasswordContainer) {
-  ReactDOM.render(<CompromisedPasswordCard />, compromisedPasswordContainer)
+  const root = createRoot(compromisedPasswordContainer)
+  root.render(<CompromisedPasswordCard />)
 }

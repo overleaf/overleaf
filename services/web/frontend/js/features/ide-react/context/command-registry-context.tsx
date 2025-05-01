@@ -23,7 +23,9 @@ type CommandRegistry = {
   unregister: (...id: string[]) => void
 }
 
-export const CommandRegistryProvider: React.FC = ({ children }) => {
+export const CommandRegistryProvider: React.FC<React.PropsWithChildren> = ({
+  children,
+}) => {
   const [registry, setRegistry] = useState(new Map<string, Command>())
   const register = useCallback((...elements: Command[]) => {
     setRegistry(

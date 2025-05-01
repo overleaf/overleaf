@@ -25,11 +25,13 @@ export function useFileTreeMainContext() {
   return context
 }
 
-export const FileTreeMainProvider: FC<{
-  refProviders: object
-  setRefProviderEnabled: (provider: string, value: boolean) => void
-  setStartedFreeTrial: (value: boolean) => void
-}> = ({
+export const FileTreeMainProvider: FC<
+  React.PropsWithChildren<{
+    refProviders: object
+    setRefProviderEnabled: (provider: string, value: boolean) => void
+    setStartedFreeTrial: (value: boolean) => void
+  }>
+> = ({
   refProviders,
   setRefProviderEnabled,
   setStartedFreeTrial,

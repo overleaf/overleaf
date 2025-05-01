@@ -15,7 +15,7 @@ import {
   groupActiveSubscription,
   groupActiveSubscriptionWithPendingLicenseChange,
 } from '../../fixtures/subscriptions'
-import * as useLocationModule from '../../../../../../frontend/js/shared/hooks/use-location'
+import { location } from '@/shared/components/location'
 import { UserId } from '../../../../../../types/user'
 import { SplitTestProvider } from '@/shared/context/split-test-context'
 
@@ -73,16 +73,9 @@ describe('<GroupSubscriptionMemberships />', function () {
   })
 
   describe('opens leave group modal when button is clicked', function () {
-    let reloadStub: sinon.SinonStub
-
     beforeEach(function () {
-      reloadStub = sinon.stub()
-      this.locationStub = sinon.stub(useLocationModule, 'useLocation').returns({
-        assign: sinon.stub(),
-        replace: sinon.stub(),
-        reload: reloadStub,
-        setHash: sinon.stub(),
-      })
+      this.locationWrapperSandbox = sinon.createSandbox()
+      this.locationWrapperStub = this.locationWrapperSandbox.stub(location)
 
       render(
         <SplitTestProvider>
@@ -111,7 +104,7 @@ describe('<GroupSubscriptionMemberships />', function () {
     })
 
     afterEach(function () {
-      this.locationStub.restore()
+      this.locationWrapperSandbox.restore()
     })
 
     it('close the modal', function () {
@@ -130,6 +123,7 @@ describe('<GroupSubscriptionMemberships />', function () {
       fireEvent.click(this.leaveNowButton)
 
       expect(leaveGroupApiMock.callHistory.called()).to.be.true
+      const reloadStub = this.locationWrapperStub.reload
       await waitFor(() => {
         expect(reloadStub).to.have.been.called
       })

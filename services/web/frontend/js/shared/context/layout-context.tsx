@@ -71,7 +71,7 @@ function setLayoutInLocalStorage(pdfLayout: IdeLayout) {
   )
 }
 
-export const LayoutProvider: FC = ({ children }) => {
+export const LayoutProvider: FC<React.PropsWithChildren> = ({ children }) => {
   // what to show in the "flat" view (editor or pdf)
   const [view, _setView] = useScopeValue<IdeView | null>('ui.view')
   const [openFile] = useScopeValue<BinaryFile | null>('openFile')
@@ -139,8 +139,8 @@ export const LayoutProvider: FC = ({ children }) => {
   useEventListener(
     'ui.toggle-left-menu',
     useCallback(
-      event => {
-        setLeftMenuShown((event as CustomEvent<boolean>).detail)
+      (event: CustomEvent<boolean>) => {
+        setLeftMenuShown(event.detail)
       },
       [setLeftMenuShown]
     )

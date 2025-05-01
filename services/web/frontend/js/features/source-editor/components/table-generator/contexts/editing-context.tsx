@@ -38,7 +38,9 @@ export const useEditingContext = () => {
   return context
 }
 
-export const EditingContextProvider: FC = ({ children }) => {
+export const EditingContextProvider: FC<React.PropsWithChildren> = ({
+  children,
+}) => {
   const { table } = useTableContext()
   const [cellData, setCellData] = useState<EditingContextData | null>(null)
   const [initialContent, setInitialContent] = useState<string | undefined>(
@@ -85,7 +87,7 @@ export const EditingContextProvider: FC = ({ children }) => {
   }, [setCellData])
 
   const startEditing = useCallback(
-    (rowIndex: number, cellIndex: number, initialContent = undefined) => {
+    (rowIndex: number, cellIndex: number, initialContent?: string) => {
       if (cellData?.dirty) {
         // We're already editing something else
         commitCellData()

@@ -9,17 +9,19 @@ export const EditorLeftMenuContext = createContext<
   EditorLeftMenuState | undefined
 >(undefined)
 
-export const EditorLeftMenuProvider: FC = ({ children }) => {
+export const EditorLeftMenuProvider: FC<React.PropsWithChildren> = ({
+  children,
+}) => {
   const [value, setValue] = useState<EditorLeftMenuState>(() => ({
     settingToFocus: undefined,
   }))
 
   useEventListener(
     'ui.focus-setting',
-    useCallback(event => {
+    useCallback((event: CustomEvent<string>) => {
       setValue(value => ({
         ...value,
-        settingToFocus: (event as CustomEvent<string>).detail,
+        settingToFocus: event.detail,
       }))
     }, [])
   )

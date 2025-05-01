@@ -36,8 +36,8 @@ function PdfViewerControlsToolbar({
   const [availableWidth, setAvailableWidth] = useState<number>(1000)
 
   const handleResize = useCallback(
-    element => {
-      setAvailableWidth(element.offsetWidth)
+    (element: Element) => {
+      setAvailableWidth((element as HTMLElement).offsetWidth)
     },
     [setAvailableWidth]
   )

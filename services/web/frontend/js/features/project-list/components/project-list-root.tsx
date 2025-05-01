@@ -100,4 +100,6 @@ function ProjectListPageContent() {
   )
 }
 
-export default withErrorBoundary(ProjectListRoot, GenericErrorBoundaryFallback)
+export default withErrorBoundary(ProjectListRoot, () => (
+  <GenericErrorBoundaryFallback />
+))

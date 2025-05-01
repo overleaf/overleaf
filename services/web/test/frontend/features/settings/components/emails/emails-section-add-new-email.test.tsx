@@ -61,7 +61,9 @@ function resetFetchMock() {
 }
 
 async function confirmCodeForEmail(email: string) {
-  screen.getByText(`Enter the 6-digit confirmation code sent to ${email}.`)
+  await screen.findByText(
+    `Enter the 6-digit confirmation code sent to ${email}.`
+  )
   const inputCode = screen.getByLabelText(/6-digit confirmation code/i)
   fireEvent.change(inputCode, { target: { value: '123456' } })
   const submitCodeBtn = screen.getByRole<HTMLButtonElement>('button', {

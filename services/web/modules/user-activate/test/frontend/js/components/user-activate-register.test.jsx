@@ -2,6 +2,7 @@ import { expect } from 'chai'
 import { render, screen, fireEvent } from '@testing-library/react'
 import fetchMock from 'fetch-mock'
 import UserActivateRegister from '../../../../frontend/js/components/user-activate-register'
+import { TPDS_SYNCED } from '../../../../../dropbox/test/frontend/components/dropbox-sync-status.test'
 
 describe('UserActivateRegister', function () {
   beforeEach(function () {
@@ -16,6 +17,7 @@ describe('UserActivateRegister', function () {
     const endPointResponse = {
       status: 500,
     }
+    fetchMock.get('/user/tpds/queues', TPDS_SYNCED)
     const registerMock = fetchMock.post('/admin/register', endPointResponse)
     const registerInput = screen.getByLabelText('emails to register')
     const registerButton = screen.getByRole('button', { name: /register/i })
@@ -37,6 +39,7 @@ describe('UserActivateRegister', function () {
         setNewPasswordUrl: 'SetNewPasswordURL',
       },
     }
+    fetchMock.get('/user/tpds/queues', TPDS_SYNCED)
     const registerMock = fetchMock.post('/admin/register', endPointResponse)
     const registerInput = screen.getByLabelText('emails to register')
     const registerButton = screen.getByRole('button', { name: /register/i })
@@ -67,6 +70,7 @@ describe('UserActivateRegister', function () {
         setNewPasswordUrl: 'SetNewPasswordURL',
       },
     }
+    fetchMock.get('/user/tpds/queues', TPDS_SYNCED)
     const registerMock = fetchMock.post('/admin/register', (path, req) => {
       const body = JSON.parse(req.body)
       if (body.email === 'abc@gmail.com') return endPointResponse1
@@ -92,6 +96,7 @@ describe('UserActivateRegister', function () {
     const endPointResponse2 = {
       status: 500,
     }
+    fetchMock.get('/user/tpds/queues', TPDS_SYNCED)
     const registerMock = fetchMock.post('/admin/register', (path, req) => {
       const body = JSON.parse(req.body)
       if (body.email === 'abc@') return endPointResponse1
@@ -121,6 +126,7 @@ describe('UserActivateRegister', function () {
     const endPointResponse2 = {
       status: 500,
     }
+    fetchMock.get('/user/tpds/queues', TPDS_SYNCED)
     const registerMock = fetchMock.post('/admin/register', (path, req) => {
       const body = JSON.parse(req.body)
       if (body.email === 'abc@gmail.com') return endPointResponse1

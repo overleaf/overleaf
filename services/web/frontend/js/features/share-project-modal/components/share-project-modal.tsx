@@ -126,7 +126,7 @@ const ShareProjectModal = React.memo(function ShareProjectModal({
   }, [handleHide, inFlight])
 
   // update `error` and `inFlight` while sending a request
-  const monitorRequest = useCallback(request => {
+  const monitorRequest = useCallback((request: () => any) => {
     setError(undefined)
     setInFlight(true)
 
@@ -149,7 +149,7 @@ const ShareProjectModal = React.memo(function ShareProjectModal({
 
   // merge the new data with the old project data
   const updateProject = useCallback(
-    data => Object.assign(project, data),
+    (data: ProjectContextUpdateValue) => Object.assign(project, data),
     [project]
   )
 

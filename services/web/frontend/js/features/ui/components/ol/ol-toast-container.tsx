@@ -6,11 +6,9 @@ type OLToastContainerProps = {
   className?: string
 }
 
-export const OLToastContainer: FC<OLToastContainerProps> = ({
-  children,
-  className,
-  style,
-}) => {
+export const OLToastContainer: FC<
+  React.PropsWithChildren<OLToastContainerProps>
+> = ({ children, className, style }) => {
   return (
     <BS5ToastContainer className={className} style={style}>
       {children}

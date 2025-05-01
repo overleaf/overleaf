@@ -48,7 +48,7 @@ const ThreadsActionsContext = createContext<ThreadsActions | undefined>(
   undefined
 )
 
-export const ThreadsProvider: FC = ({ children }) => {
+export const ThreadsProvider: FC<React.PropsWithChildren> = ({ children }) => {
   const { _id: projectId } = useProjectContext()
   const { currentDocument } = useEditorManagerContext()
   const { isRestrictedTokenMember } = useEditorContext()
@@ -225,7 +225,7 @@ export const ThreadsProvider: FC = ({ children }) => {
   useSocketListener(
     socket,
     'new-comment-threads',
-    useCallback(threads => {
+    useCallback((threads: any) => {
       setData(prevState => {
         const newThreads = { ...prevState }
         for (const threadId of Object.keys(threads)) {

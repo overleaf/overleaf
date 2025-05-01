@@ -36,7 +36,7 @@ export const ReviewPanelAddComment = memo<{
   }, [view, threadId])
 
   const submitForm = useCallback(
-    async message => {
+    async (message: string) => {
       setSubmitting(true)
 
       const content = view.state.sliceDoc(from, to)
@@ -85,14 +85,15 @@ export const ReviewPanelAddComment = memo<{
   // We cannot use the autofocus attribute as we need to wait until the parent element
   // has been positioned (with the "top" attribute) to avoid scrolling to the initial
   // position of the element
-  const observerCallback = useCallback(mutationList => {
+  const observerCallback = useCallback((mutationList: MutationRecord[]) => {
     if (hasBeenFocused.current) {
       return
     }
 
     for (const mutation of mutationList) {
-      if (mutation.target.style.top) {
-        const textArea = mutation.target.getElementsByTagName('textarea')[0]
+      const target = mutation.target as HTMLElement
+      if (target.style.top) {
+        const textArea = target.getElementsByTagName('textarea')[0]
         if (textArea) {
           textArea.focus()
           hasBeenFocused.current = true
