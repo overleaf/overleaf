@@ -37,7 +37,7 @@
 
   .ide-redesign-main {
     --chat-bg: var(--white);
-    --chat-color: var(--neutral-70);
+    --chat-color: var(--content-primary);
     --chat-instructions-color: var(--neutral-70);
     --chat-new-message-bg: var(--neutral-10);
     --chat-new-message-textarea-color: var(--neutral-90);
@@ -255,6 +255,11 @@
     text-align: center;
     color: var(--white);
     text-transform: uppercase;
+  }
+
+  .message-avatar .message-avatar-deleted-user-icon {
+    line-height: 24px;
+    font-size: 16px;
   }
 
   .message-author,

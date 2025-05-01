@@ -504,6 +504,7 @@
   "deleted_by_id": "Deleted By ID",
   "deleted_by_ip": "Deleted By IP",
   "deleted_by_on": "Deleted by __name__ on __date__",
+  "deleted_user": "Deleted user",
   "deleting": "Deleting",
   "demonstrating_git_integration": "Demonstrating Git integration",
   "demonstrating_track_changes_feature": "Demonstrating Track Changes feature",
