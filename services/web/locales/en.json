@@ -1453,6 +1453,7 @@
   "notification_project_invite_accepted_message": "You’ve joined <b>__projectName__</b>",
   "notification_project_invite_message": "<b>__userName__</b> would like you to join <b>__projectName__</b>",
   "november": "November",
+  "now_you_can_search_your_whole_project_not_just_this_file": "Now you can search your whole project (not just this file!)",
   "number_collab": "Number of collaborators",
   "number_collab_info": "The number of people you can invite to work on a project with you. The limit is per project, so you can invite different people to each project.",
   "number_of_projects": "Number of projects",

@@ -33,12 +33,12 @@ import { isSplitTestEnabled } from '@/utils/splitTestUtils'
 import { useTranslation } from 'react-i18next'
 import classnames from 'classnames'
 import { useUserSettingsContext } from '@/shared/context/user-settings-context'
-import { useLayoutContext } from '@/shared/context/layout-context'
 import { getStoredSelection, setStoredSelection } from '../extensions/search'
 import { debounce } from 'lodash'
 import { EditorSelection, EditorState } from '@codemirror/state'
 import { sendSearchEvent } from '@/features/event-tracking/search-events'
 import { useIsNewEditorEnabled } from '@/features/ide-redesign/utils/new-editor-utils'
+import { FullProjectSearchButton } from './full-project-search-button'
 
 const MATCH_COUNT_DEBOUNCE_WAIT = 100 // the amount of ms to wait before counting matches
 const MAX_MATCH_COUNT = 999 // the maximum number of matches to count
@@ -60,7 +60,6 @@ type MatchPositions = {
 const CodeMirrorSearchForm: FC<React.PropsWithChildren> = () => {
   const view = useCodeMirrorViewContext()
   const state = useCodeMirrorStateContext()
-  const { setProjectSearchIsOpen } = useLayoutContext()
 
   const { userSettings } = useUserSettingsContext()
   const emacsKeybindingsActive = userSettings.mode === 'emacs'
@@ -243,16 +242,6 @@ const CodeMirrorSearchForm: FC<React.PropsWithChildren> = () => {
   const query = useMemo(() => {
     return getSearchQuery(state)
   }, [state])
-
-  const openFullProjectSearch = useCallback(() => {
-    setProjectSearchIsOpen(true)
-    closeSearchPanel(view)
-    window.setTimeout(() => {
-      window.dispatchEvent(
-        new CustomEvent('editor:full-project-search', { detail: query })
-      )
-    }, 200)
-  }, [setProjectSearchIsOpen, query, view])
 
   const showReplace = !state.readOnly
 
@@ -455,30 +444,9 @@ const CodeMirrorSearchForm: FC<React.PropsWithChildren> = () => {
             </OLButton>
           </OLButtonGroup>
 
-          {!newEditor && isSplitTestEnabled('full-project-search') ? (
-            <OLTooltip
-              id="open-full-project-search"
-              description={t('search_all_project_files')}
-            >
-              <OLButton
-                variant="secondary"
-                size="sm"
-                onClick={() => {
-                  sendSearchEvent('search-open', {
-                    searchType: 'full-project',
-                    method: 'button',
-                    location: 'search-form',
-                  })
-                  openFullProjectSearch()
-                }}
-              >
-                <MaterialIcon
-                  type="manage_search"
-                  accessibilityLabel={t('search_next')}
-                />
-              </OLButton>
-            </OLTooltip>
-          ) : null}
+          {!newEditor && isSplitTestEnabled('full-project-search') && (
+            <FullProjectSearchButton query={query} />
+          )}
 
           {position !== null && (
             <div className="ol-cm-search-form-position">

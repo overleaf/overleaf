@@ -11,6 +11,7 @@ const VALID_KEYS = [
   'history-restore-promo',
   'us-gov-banner',
   'us-gov-banner-fedramp',
+  'full-project-search-promo',
   'editor-popup-ux-survey',
 ]
 
