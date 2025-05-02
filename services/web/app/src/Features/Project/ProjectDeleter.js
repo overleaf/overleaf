@@ -80,7 +80,12 @@ async function unmarkAsDeletedByExternalSource(projectId) {
 
 async function deleteUsersProjects(userId) {
   const projects = await Project.find({ owner_ref: userId }).exec()
+  logger.info(
+    { userId, projectCount: projects.length },
+    'found user projects to delete'
+  )
   await promiseMapWithLimit(5, projects, project => deleteProject(project._id))
+  logger.info({ userId }, 'deleted all user projects')
   await CollaboratorsHandler.promises.removeUserFromAllProjects(userId)
 }
 

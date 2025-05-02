@@ -43,21 +43,28 @@ async function deleteUser(userId, options) {
 
   try {
     const user = await User.findById(userId).exec()
-    logger.debug({ user }, 'deleting user')
-
+    logger.info({ userId }, 'deleting user')
     await ensureCanDeleteUser(user)
+    logger.info({ userId }, 'cleaning up user')
     await _cleanupUser(user)
+    logger.info({ userId }, 'firing deleteUser hook')
     await Modules.promises.hooks.fire('deleteUser', userId)
+    logger.info({ userId }, 'adding delete-account audit log entry')
     await UserAuditLogHandler.promises.addEntry(
       userId,
       'delete-account',
       options.deleterUser ? options.deleterUser._id : userId,
       options.ipAddress
     )
+    logger.info({ userId }, 'creating deleted user record')
     await _createDeletedUser(user, options)
+    logger.info({ userId }, 'deleting user projects')
     await ProjectDeleter.promises.deleteUsersProjects(user._id)
+    logger.info({ userId }, 'sending deletion email to user')
     await _sendDeleteEmail(user, options.force)
+    logger.info({ userId }, 'deleting user record')
     await deleteMongoUser(user._id)
+    logger.info({ userId }, 'user deletion complete')
   } catch (error) {
     logger.warn({ error, userId }, 'something went wrong deleting the user')
     throw error
@@ -161,13 +168,22 @@ async function _createDeletedUser(user, options) {
 }
 
 async function _cleanupUser(user) {
+  const userId = user._id
+
+  logger.info({ userId }, '[cleanupUser] removing user sessions from Redis')
   await UserSessionsManager.promises.removeSessionsFromRedis(user)
+  logger.info({ userId }, '[cleanupUser] unsubscribing from newsletters')
   await NewsletterManager.promises.unsubscribe(user, { delete: true })
+  logger.info({ userId }, '[cleanupUser] cancelling subscription')
   await SubscriptionHandler.promises.cancelSubscription(user)
-  await InstitutionsAPI.promises.deleteAffiliations(user._id)
-  await SubscriptionUpdater.promises.removeUserFromAllGroups(user._id)
-  await UserMembershipsHandler.promises.removeUserFromAllEntities(user._id)
-  await Modules.promises.hooks.fire('cleanupPersonalAccessTokens', user._id, [
+  logger.info({ userId }, '[cleanupUser] deleting affiliations')
+  await InstitutionsAPI.promises.deleteAffiliations(userId)
+  logger.info({ userId }, '[cleanupUser] removing user from groups')
+  await SubscriptionUpdater.promises.removeUserFromAllGroups(userId)
+  logger.info({ userId }, '[cleanupUser] removing user from memberships')
+  await UserMembershipsHandler.promises.removeUserFromAllEntities(userId)
+  logger.info({ userId }, '[cleanupUser] removing personal access tokens')
+  await Modules.promises.hooks.fire('cleanupPersonalAccessTokens', userId, [
     'collabratec',
     'git_bridge',
   ])

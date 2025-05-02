@@ -122,9 +122,26 @@ async function removeUserFromAllProjects(userId) {
     .concat(readOnly)
     .concat(tokenReadAndWrite)
     .concat(tokenReadOnly)
+  logger.info(
+    {
+      userId,
+      readAndWriteCount: readAndWrite.length,
+      readOnlyCount: readOnly.length,
+      tokenReadAndWriteCount: tokenReadAndWrite.length,
+      tokenReadOnlyCount: tokenReadOnly.length,
+    },
+    'removing user from projects'
+  )
   for (const project of allProjects) {
     await removeUserFromProject(project._id, userId)
   }
+  logger.info(
+    {
+      userId,
+      allProjectsCount: allProjects.length,
+    },
+    'removed user from all projects'
+  )
 }
 
 async function addUserIdToProject(
