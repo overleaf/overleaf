@@ -23,7 +23,7 @@ export const LabsActions = () => {
         >
           <OLButton
             size="sm"
-            variant="info"
+            variant="secondary"
             className="ide-redesign-labs-button"
             onClick={openEditorRedesignSwitcherModal}
             leadingIcon={<MaterialIcon type="experiment" unfilled />}

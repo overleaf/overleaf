@@ -41,7 +41,7 @@ function PreviewLogsPaneMaxEntries({ totalEntries, entriesShown, hasErrors }) {
                   i18nKey="log_entry_maximum_entries_enable_stop_on_first_error"
                   components={[
                     <OLButton
-                      variant="info"
+                      variant="primary"
                       size="sm"
                       key="enable-stop-on-first-error"
                       onClick={handleEnableStopOnFirstErrorClick}

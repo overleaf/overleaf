@@ -28,7 +28,11 @@ export default function StopOnFirstErrorPrompt() {
             // eslint-disable-next-line react/jsx-key
             components={[<strong />]}
           />{' '}
-          <OLButton variant="info" size="sm" onClick={handleDisableButtonClick}>
+          <OLButton
+            variant="primary"
+            size="sm"
+            onClick={handleDisableButtonClick}
+          >
             {t('disable_stop_on_first_error')}
           </OLButton>
         </>

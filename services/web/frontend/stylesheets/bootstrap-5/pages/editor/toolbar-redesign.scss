@@ -182,13 +182,6 @@
   }
 }
 
-.ide-redesign-labs-button.btn.btn-info {
-  @include ol-button-variant(
-    var(--content-positive),
-    var(--bg-accent-03),
-    var(--green-40),
-    var(--bg-accent-03),
-    var(--green-40),
-    false
-  );
+.ide-redesign-labs-button.btn.btn-secondary {
+  @include labs-button;
 }

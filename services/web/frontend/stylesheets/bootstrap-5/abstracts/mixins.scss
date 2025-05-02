@@ -60,6 +60,17 @@
   }
 }
 
+@mixin labs-button {
+  @include ol-button-variant(
+    $color: var(--content-positive),
+    $background: var(--bg-accent-03),
+    $border: var(--green-40),
+    $hover-background: var(--bg-accent-03),
+    $hover-border: var(--green-40),
+    $borderless: false
+  );
+}
+
 @mixin reset-button() {
   padding: 0;
   cursor: pointer;

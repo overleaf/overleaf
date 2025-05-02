@@ -17,7 +17,7 @@ const TryNewEditorButton = () => {
         onClick={onClick}
         size="sm"
         leadingIcon={<MaterialIcon type="experiment" unfilled />}
-        variant="info"
+        variant="secondary"
       >
         {t('try_the_new_editor')}
       </OLButton>

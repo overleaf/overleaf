@@ -533,15 +533,10 @@
   border-right: 1px solid var(--formatting-btn-border);
 }
 
-.toolbar-experiment-button.btn.btn-info {
-  @include ol-button-variant(
-    var(--content-positive),
-    var(--bg-accent-03),
-    var(--green-40),
-    var(--bg-accent-03),
-    var(--green-40),
-    false
-  );
+// Override a secondary button to ensure that the border is visible because
+// overriding a borderless button will not add a border.
+.toolbar-experiment-button.btn-secondary {
+  @include labs-button;
 
   max-height: 39px;
   font-size: var(--font-size-01);

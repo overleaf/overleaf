@@ -23,7 +23,7 @@ function PdfPreviewError({ error }: { error: string }) {
                 components={[
                   // eslint-disable-next-line react/jsx-key
                   <OLButton
-                    variant="info"
+                    variant="primary"
                     size="sm"
                     onClick={() => startCompile()}
                   />,
@@ -281,7 +281,7 @@ function TimedOutLogEntry() {
                 components={[
                   // eslint-disable-next-line react/jsx-key
                   <OLButton
-                    variant="info"
+                    variant="primary"
                     size="sm"
                     onClick={handleEnableStopOnFirstErrorClick}
                   />,
