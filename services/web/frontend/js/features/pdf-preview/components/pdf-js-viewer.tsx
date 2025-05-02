@@ -144,6 +144,10 @@ function PdfJsViewer({ url, pdfFile }: PdfJsViewerProps) {
       setRawScale(scale.scale)
     }
 
+    const handlePageChanging = (event: { pageNumber: number }) => {
+      setPage(event.pageNumber)
+    }
+
     // `pagesinit` fires when the data for rendering the first page is ready.
     pdfJsWrapper.eventBus.on('pagesinit', handlePagesinit)
     // `pagerendered` fires when a page was actually rendered.
@@ -151,12 +155,15 @@ function PdfJsViewer({ url, pdfFile }: PdfJsViewerProps) {
     // Once a page has been rendered we can set the initial current page number.
     pdfJsWrapper.eventBus.on('pagerendered', handleRenderedInitialPageNumber)
     pdfJsWrapper.eventBus.on('scalechanging', handleScaleChanged)
+    // `pagechanging` fires when the page number changes.
+    pdfJsWrapper.eventBus.on('pagechanging', handlePageChanging)
 
     return () => {
       pdfJsWrapper.eventBus.off('pagesinit', handlePagesinit)
       pdfJsWrapper.eventBus.off('pagerendered', handleRendered)
       pdfJsWrapper.eventBus.off('pagerendered', handleRenderedInitialPageNumber)
       pdfJsWrapper.eventBus.off('scalechanging', handleScaleChanged)
+      pdfJsWrapper.eventBus.off('pagechanging', handlePageChanging)
     }
   }, [pdfJsWrapper, firstRenderDone, startFetch])
 
