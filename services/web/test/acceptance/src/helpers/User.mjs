@@ -36,6 +36,7 @@ class User {
     this.request = request.defaults({
       jar: this.jar,
     })
+    this.signUpDate = options.signUpDate ?? new Date()
   }
 
   getSession(options, callback) {
@@ -425,7 +426,13 @@ class User {
 
         UserModel.findOneAndUpdate(
           filter,
-          { $set: { hashedPassword, emails: this.emails } },
+          {
+            $set: {
+              hashedPassword,
+              emails: this.emails,
+              signUpDate: this.signUpDate,
+            },
+          },
           options
         )
           .then(user => {

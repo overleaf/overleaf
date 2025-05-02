@@ -36,6 +36,12 @@ const SurveySchema = new Schema(
         type: Boolean,
         default: false,
       },
+      earliestSignupDate: {
+        type: Date,
+      },
+      latestSignupDate: {
+        type: Date,
+      },
       rolloutPercentage: {
         type: Number,
         default: 100,

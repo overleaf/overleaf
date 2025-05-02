@@ -4,6 +4,7 @@ import crypto from 'node:crypto'
 import SurveyCache from './SurveyCache.mjs'
 import SubscriptionLocator from '../Subscription/SubscriptionLocator.js'
 import { callbackify } from '@overleaf/promise-utils'
+import UserGetter from '../User/UserGetter.js'
 
 /**
  * @import { Survey } from '../../../../types/project/dashboard/survey'
@@ -31,6 +32,25 @@ async function getSurvey(userId) {
     const rolloutPercentage = options?.rolloutPercentage || 100
     if (!_userInRolloutPercentile(userId, name, rolloutPercentage)) {
       return
+    }
+
+    const { earliestSignupDate, latestSignupDate } = survey.options || {}
+    if (earliestSignupDate || latestSignupDate) {
+      const user = await UserGetter.promises.getUser(userId, { signUpDate: 1 })
+      if (!user) {
+        return
+      }
+      const { signUpDate } = user
+      if (latestSignupDate) {
+        // Make the check inclusive
+        latestSignupDate.setHours(23, 59, 59, 999)
+        if (signUpDate > latestSignupDate) {
+          return
+        }
+      }
+      if (earliestSignupDate && signUpDate < earliestSignupDate) {
+        return
+      }
     }
 
     return { name, preText, linkText, url }
