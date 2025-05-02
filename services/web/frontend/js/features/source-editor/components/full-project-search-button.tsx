@@ -11,6 +11,9 @@ import { Overlay, Popover } from 'react-bootstrap-5'
 import Close from '@/shared/components/close'
 import useTutorial from '@/shared/hooks/promotions/use-tutorial'
 import { useEditorContext } from '@/shared/context/editor-context'
+import getMeta from '@/utils/meta'
+
+const PROMOTION_SIGNUP_CUT_OFF_DATE = new Date('2025-04-22T00:00:00Z')
 
 export const FullProjectSearchButton = ({ query }: { query: SearchQuery }) => {
   const view = useCodeMirrorViewContext()
@@ -29,6 +32,17 @@ export const FullProjectSearchButton = ({ query }: { query: SearchQuery }) => {
       name: 'full-project-search-promotion',
     })
 
+  let isEligibleForPromotion = true
+  const signUpDateString = getMeta('ol-user')?.signUpDate
+  if (!signUpDateString) {
+    isEligibleForPromotion = false
+  } else {
+    const signupDate = new Date(signUpDateString)
+    if (signupDate > PROMOTION_SIGNUP_CUT_OFF_DATE) {
+      isEligibleForPromotion = false
+    }
+  }
+
   const openFullProjectSearch = useCallback(() => {
     setProjectSearchIsOpen(true)
     closeSearchPanel(view)
@@ -46,10 +60,15 @@ export const FullProjectSearchButton = ({ query }: { query: SearchQuery }) => {
       location: 'search-form',
     })
     openFullProjectSearch()
-    if (!hasCompletedTutorial) {
+    if (!hasCompletedTutorial && isEligibleForPromotion) {
       completeTutorial({ action: 'complete', event: 'promo-click' })
     }
-  }, [completeTutorial, openFullProjectSearch, hasCompletedTutorial])
+  }, [
+    completeTutorial,
+    openFullProjectSearch,
+    hasCompletedTutorial,
+    isEligibleForPromotion,
+  ])
 
   return (
     <>
@@ -65,7 +84,7 @@ export const FullProjectSearchButton = ({ query }: { query: SearchQuery }) => {
           />
         </OLButton>
       </OLTooltip>
-      {!hasCompletedTutorial && (
+      {!hasCompletedTutorial && isEligibleForPromotion && (
         <PromotionOverlay
           ref={ref}
           showPopup={showPopup}
