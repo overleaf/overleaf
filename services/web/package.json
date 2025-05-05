@@ -165,7 +165,7 @@
     "request": "^2.88.2",
     "requestretry": "^7.1.0",
     "sanitize-html": "^2.8.1",
-    "stripe": "^17.7.0",
+    "stripe": "^18.1.0",
     "tough-cookie": "^4.0.0",
     "tsscmp": "^1.0.6",
     "uid-safe": "^2.1.5",
