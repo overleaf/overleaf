@@ -1,4 +1,4 @@
-import { useCallback } from 'react'
+import { useCallback, useEffect } from 'react'
 import moment from 'moment'
 import { useTranslation, Trans } from 'react-i18next'
 import {
@@ -30,28 +30,35 @@ function PreviewSubscriptionChange() {
   const payNowTask = useAsync()
   const location = useLocation()
 
-  const handlePayNowClick = useCallback(() => {
-    let addOnSegmentation: Record<any, unknown> | null = null
+  useEffect(() => {
     if (preview.change.type === 'add-on-purchase') {
-      addOnSegmentation = {
-        addOn: preview.change.addOn.code,
+      eventTracking.sendMB('preview-subscription-change-view', {
+        plan: preview.change.addOn.code,
         upgradeType: 'add-on',
-      }
-      if (purchaseReferrer) {
-        addOnSegmentation.referrer = purchaseReferrer
-      }
-      eventTracking.sendMB('subscription-change-form-submit', addOnSegmentation)
+        referrer: purchaseReferrer,
+      })
+    }
+  }, [preview.change, purchaseReferrer])
+
+  const handlePayNowClick = useCallback(() => {
+    if (preview.change.type === 'add-on-purchase') {
+      eventTracking.sendMB('subscription-change-form-submit', {
+        plan: preview.change.addOn.code,
+        upgradeType: 'add-on',
+        referrer: purchaseReferrer,
+      })
     }
 
     eventTracking.sendMB('assistant-add-on-purchase')
     payNowTask
       .runAsync(payNow(preview))
       .then(() => {
-        if (addOnSegmentation) {
-          eventTracking.sendMB(
-            'subscription-change-form-success',
-            addOnSegmentation
-          )
+        if (preview.change.type === 'add-on-purchase') {
+          eventTracking.sendMB('subscription-change-form-success', {
+            plan: preview.change.addOn.code,
+            upgradeType: 'add-on',
+            referrer: purchaseReferrer,
+          })
         }
         location.replace('/user/subscription/thank-you')
       })
