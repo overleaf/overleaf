@@ -212,6 +212,8 @@ app.use((error, req, res, next) => {
     return res.status(422).json(error.info)
   } else if (error instanceof Errors.FileTooLargeError) {
     return res.sendStatus(413)
+  } else if (error instanceof Errors.ProjectMigratedToHistoryOTError) {
+    return res.status(422).send(error.message)
   } else if (error.statusCode === 413) {
     return res.status(413).send('request entity too large')
   } else {

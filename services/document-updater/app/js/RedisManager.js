@@ -324,6 +324,13 @@ const RedisManager = {
             } catch (e) {
               return callback(e)
             }
+            if (docLines != null && !Array.isArray(docLines)) {
+              return callback(
+                new Errors.ProjectMigratedToHistoryOTError(
+                  'refusing to process doc that was migrated to history-ot'
+                )
+              )
+            }
 
             version = parseInt(version || 0, 10)
             // check doc is in requested project
