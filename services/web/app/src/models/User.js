@@ -196,6 +196,7 @@ const UserSchema = new Schema(
       enabled: { type: Boolean, default: null },
       autoCreatedAccount: { type: Boolean, default: false },
       isPremium: { type: Boolean, default: false },
+      premiumSource: { type: String, default: null },
     },
     aiErrorAssistant: {
       enabled: { type: Boolean, default: true },
