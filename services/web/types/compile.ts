@@ -23,6 +23,7 @@ export type CompileResponseData = {
   outputFiles: CompileOutputFile[]
   compileGroup?: string
   clsiServerId?: string
+  clsiCacheShard?: string
   pdfDownloadDomain?: string
   pdfCachingMinChunkSize: number
   validationProblems: any

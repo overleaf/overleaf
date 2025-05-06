@@ -116,7 +116,9 @@ export function generatePdfCachingTransportFactory() {
         return (
           u.pathname.endsWith(
             `build/${this.pdfFile.editorId}-${this.pdfFile.build}/output/output.pdf`
-          ) && u.searchParams.get('clsiserverid') === 'cache'
+          ) &&
+          (u.searchParams.get('clsiserverid') === 'cache' ||
+            u.searchParams.get('clsiserverid')?.startsWith('clsi-cache-'))
         )
       }
       const canTryFromCache = err => {
@@ -127,7 +129,7 @@ export function generatePdfCachingTransportFactory() {
       const getOutputPDFURLFromCache = () => {
         if (usesCache(this.url)) return this.url
         const u = new URL(this.url)
-        u.searchParams.set('clsiserverid', 'cache')
+        u.searchParams.set('clsiserverid', this.pdfFile.clsiCacheShard)
         u.pathname = u.pathname.replace(
           /build\/[a-f0-9-]+\//,
           `build/${this.pdfFile.editorId}-${this.pdfFile.build}/`

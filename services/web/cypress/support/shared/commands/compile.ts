@@ -48,6 +48,7 @@ const compileFromCacheResponse = () => {
     fromCache: true,
     status: 'success',
     clsiServerId: 'foo',
+    clsiCacheShard: 'clsi-cache-zone-b-shard-1',
     compileGroup: 'priority',
     pdfDownloadDomain: 'https://clsi.test-overleaf.com',
     outputFiles: outputFiles(),
@@ -166,10 +167,10 @@ export const waitForCompileOutput = ({
 } = {}) => {
   cy.wait(`@${prefix}-log`)
     .its('request.query.clsiserverid')
-    .should('eq', cached ? 'cache' : 'foo') // straight from cache if cached
+    .should('eq', cached ? 'clsi-cache-zone-b-shard-1' : 'foo') // straight from cache if cached
   cy.wait(`@${prefix}-blg`)
     .its('request.query.clsiserverid')
-    .should('eq', cached ? 'cache' : 'foo') // straight from cache if cached
+    .should('eq', cached ? 'clsi-cache-zone-b-shard-1' : 'foo') // straight from cache if cached
   if (pdf) {
     cy.wait(`@${prefix}-pdf`)
       .its('request.query.clsiserverid')

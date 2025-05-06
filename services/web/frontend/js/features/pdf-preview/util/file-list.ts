@@ -13,6 +13,7 @@ export function buildFileList(
   outputFiles: Map<string, CompileOutputFile>,
   {
     clsiServerId,
+    clsiCacheShard,
     compileGroup,
     outputFilesArchive,
     fromCache = false,
@@ -24,7 +25,7 @@ export function buildFileList(
     const params = new URLSearchParams()
 
     if (fromCache) {
-      params.set('clsiserverid', 'cache')
+      params.set('clsiserverid', clsiCacheShard || 'cache')
     } else if (clsiServerId) {
       params.set('clsiserverid', clsiServerId)
     }

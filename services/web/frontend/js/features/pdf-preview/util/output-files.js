@@ -17,6 +17,7 @@ export function handleOutputFiles(outputFiles, projectId, data) {
   if (!outputFile) return null
 
   outputFile.editorId = outputFile.editorId || EDITOR_SESSION_ID
+  outputFile.clsiCacheShard = data.clsiCacheShard || 'cache'
 
   // build the URL for viewing the PDF in the preview UI
   const params = new URLSearchParams()

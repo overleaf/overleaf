@@ -112,12 +112,13 @@ function compile(req, res, next) {
               buildId = error.buildId
             }
 
+            let clsiCacheShard
             if (
               status === 'success' &&
               request.editorId &&
               request.populateClsiCache
             ) {
-              notifyCLSICacheAboutBuild({
+              clsiCacheShard = notifyCLSICacheAboutBuild({
                 projectId: request.project_id,
                 userId: request.user_id,
                 buildId: outputFiles[0].build,
@@ -144,6 +145,7 @@ function compile(req, res, next) {
                 stats,
                 timings,
                 buildId,
+                clsiCacheShard,
                 outputUrlPrefix: Settings.apis.clsi.outputUrlPrefix,
                 outputFiles: outputFiles.map(file => ({
                   url:

@@ -129,6 +129,7 @@ describe('CompileController', function () {
                 url: `${this.Settings.apis.clsi.url}/project/${this.project_id}/build/${file.build}/output/${file.path}`,
                 ...file,
               })),
+              clsiCacheShard: undefined,
             },
           })
           .should.equal(true)
@@ -156,6 +157,7 @@ describe('CompileController', function () {
                 url: `${this.Settings.apis.clsi.url}/project/${this.project_id}/build/${file.build}/output/${file.path}`,
                 ...file,
               })),
+              clsiCacheShard: undefined,
             },
           })
           .should.equal(true)
@@ -203,6 +205,7 @@ describe('CompileController', function () {
               url: `${this.Settings.apis.clsi.url}/project/${this.project_id}/build/${file.build}/output/${file.path}`,
               ...file,
             })),
+            clsiCacheShard: undefined,
           },
         })
       })
@@ -250,6 +253,7 @@ describe('CompileController', function () {
               url: `${this.Settings.apis.clsi.url}/project/${this.project_id}/build/${file.build}/output/${file.path}`,
               ...file,
             })),
+            clsiCacheShard: undefined,
           },
         })
       })
@@ -281,6 +285,7 @@ describe('CompileController', function () {
               buildId: this.buildId,
               stats: this.stats,
               timings: this.timings,
+              clsiCacheShard: undefined,
             },
           })
           .should.equal(true)
@@ -315,6 +320,7 @@ describe('CompileController', function () {
               timings: this.timings,
               // JSON.stringify will omit these undefined values
               buildId: undefined,
+              clsiCacheShard: undefined,
             },
           })
           .should.equal(true)
@@ -348,6 +354,7 @@ describe('CompileController', function () {
               timings: this.timings,
               // JSON.stringify will omit these undefined values
               buildId: undefined,
+              clsiCacheShard: undefined,
             },
           })
           .should.equal(true)
@@ -379,6 +386,7 @@ describe('CompileController', function () {
               timings: this.timings,
               // JSON.stringify will omit these undefined values
               buildId: undefined,
+              clsiCacheShard: undefined,
             },
           })
           .should.equal(true)

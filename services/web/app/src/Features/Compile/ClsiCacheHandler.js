@@ -41,7 +41,7 @@ async function clearCache(projectId, userId) {
   path += '/output'
 
   await Promise.all(
-    Settings.apis.clsiCache.instances.map(async ({ url, zone }) => {
+    Settings.apis.clsiCache.instances.map(async ({ url, shard }) => {
       const u = new URL(url)
       u.pathname = path
       try {
@@ -50,7 +50,7 @@ async function clearCache(projectId, userId) {
           signal: AbortSignal.timeout(15_000),
         })
       } catch (err) {
-        throw OError.tag(err, 'clear clsi-cache', { url, zone })
+        throw OError.tag(err, 'clear clsi-cache', { url, shard })
       }
     })
   )
@@ -64,7 +64,7 @@ async function clearCache(projectId, userId) {
  * @param buildId
  * @param filename
  * @param signal
- * @return {Promise<{size: number, zone: string, location: string, lastModified: Date, allFiles: string[]}>}
+ * @return {Promise<{size: number, zone: string, shard: string, location: string, lastModified: Date, allFiles: string[]}>}
  */
 async function getOutputFile(
   projectId,
@@ -93,7 +93,7 @@ async function getOutputFile(
  * @param userId
  * @param filename
  * @param signal
- * @return {Promise<{size: number, zone: string, location: string, lastModified: Date, allFiles: string[]}>}
+ * @return {Promise<{size: number, zone: string, shard: string, location: string, lastModified: Date, allFiles: string[]}>}
  */
 async function getLatestOutputFile(
   projectId,
@@ -125,7 +125,7 @@ async function getLatestOutputFile(
  * @param userId
  * @param path
  * @param signal
- * @return {Promise<{size: number, zone: string, location: string, lastModified: Date, allFiles: string[]}>}
+ * @return {Promise<{size: number, zone: string, shard: string, location: string, lastModified: Date, allFiles: string[]}>}
  */
 async function getRedirectWithFallback(
   projectId,
@@ -135,7 +135,7 @@ async function getRedirectWithFallback(
 ) {
   // Avoid hitting the same instance first all the time.
   const instances = _.shuffle(Settings.apis.clsiCache.instances)
-  for (const { url, zone } of instances) {
+  for (const { url, shard } of instances) {
     const u = new URL(url)
     u.pathname = path
     try {
@@ -149,6 +149,7 @@ async function getRedirectWithFallback(
       return {
         location,
         zone: headers.get('X-Zone'),
+        shard: headers.get('X-Shard') || 'cache',
         lastModified: new Date(headers.get('X-Last-Modified')),
         size: parseInt(headers.get('X-Content-Length'), 10),
         allFiles: JSON.parse(headers.get('X-All-Files')),
@@ -158,7 +159,7 @@ async function getRedirectWithFallback(
         break // No clsi-cache instance has cached something for this project/user.
       }
       logger.warn(
-        { err, projectId, userId, url, zone },
+        { err, projectId, userId, url, shard },
         'getLatestOutputFile from clsi-cache failed'
       )
       // This clsi-cache instance is down, try the next backend.
@@ -178,18 +179,18 @@ async function getRedirectWithFallback(
  * @param templateId
  * @param templateVersionId
  * @param lastUpdated
- * @param zone
+ * @param shard
  * @param signal
  * @return {Promise<void>}
  */
 async function prepareCacheSource(
   projectId,
   userId,
-  { sourceProjectId, templateId, templateVersionId, lastUpdated, zone, signal }
+  { sourceProjectId, templateId, templateVersionId, lastUpdated, shard, signal }
 ) {
   const url = new URL(
     `/project/${projectId}/user/${userId}/import-from`,
-    Settings.apis.clsiCache.instances.find(i => i.zone === zone).url
+    Settings.apis.clsiCache.instances.find(i => i.shard === shard).url
   )
   try {
     await fetchNothing(url, {

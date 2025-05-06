@@ -1,9 +1,11 @@
+const _ = require('lodash')
 const { NotFoundError } = require('../Errors/Errors')
 const ClsiCacheHandler = require('./ClsiCacheHandler')
 const DocumentUpdaterHandler = require('../DocumentUpdater/DocumentUpdaterHandler')
 const ProjectGetter = require('../Project/ProjectGetter')
 const SplitTestHandler = require('../SplitTests/SplitTestHandler')
 const UserGetter = require('../User/UserGetter')
+const Settings = require('@overleaf/settings')
 
 /**
  * Get the most recent build and metadata
@@ -14,11 +16,11 @@ const UserGetter = require('../User/UserGetter')
  * @param userId
  * @param filename
  * @param signal
- * @return {Promise<{internal: {zone: string, location: string}, external: {isUpToDate: boolean, lastUpdated: Date, size: number, allFiles: string[]}}>}
+ * @return {Promise<{internal: {location: string}, external: {zone: string, shard: string, isUpToDate: boolean, lastUpdated: Date, size: number, allFiles: string[]}}>}
  */
 async function getLatestBuildFromCache(projectId, userId, filename, signal) {
   const [
-    { location, lastModified: lastCompiled, zone, size, allFiles },
+    { location, lastModified: lastCompiled, zone, shard, size, allFiles },
     lastUpdatedInRedis,
     { lastUpdated: lastUpdatedInMongo },
   ] = await Promise.all([
@@ -36,13 +38,14 @@ async function getLatestBuildFromCache(projectId, userId, filename, signal) {
   return {
     internal: {
       location,
-      zone,
     },
     external: {
       isUpToDate,
       lastUpdated,
       size,
       allFiles,
+      shard,
+      zone,
     },
   }
 }
@@ -73,12 +76,11 @@ async function prepareClsiCache(
 
   const signal = AbortSignal.timeout(5_000)
   let lastUpdated
-  let zone = 'b' // populate template data on zone b
+  let shard = _.shuffle(Settings.apis.clsiCache.instances)[0].shard
   if (sourceProjectId) {
     try {
       ;({
-        internal: { zone },
-        external: { lastUpdated },
+        external: { lastUpdated, shard },
       } = await getLatestBuildFromCache(
         sourceProjectId,
         userId,
@@ -95,7 +97,7 @@ async function prepareClsiCache(
       sourceProjectId,
       templateId,
       templateVersionId,
-      zone,
+      shard,
       lastUpdated,
       signal,
     })

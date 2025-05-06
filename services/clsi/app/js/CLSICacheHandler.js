@@ -20,6 +20,19 @@ const TIMING_BUCKETS = [
   0, 10, 100, 1000, 2000, 5000, 10000, 15000, 20000, 30000,
 ]
 const MAX_ENTRIES_IN_OUTPUT_TAR = 100
+const OBJECT_ID_REGEX = /^[0-9a-f]{24}$/
+
+/**
+ * @param {string} projectId
+ * @return {{shard: string, url: string}}
+ */
+function getShard(projectId) {
+  // [timestamp 4bytes][random per machine 5bytes][counter 3bytes]
+  //                                          [32bit       4bytes]
+  const last4Bytes = Buffer.from(projectId, 'hex').subarray(8, 12)
+  const idx = last4Bytes.readUInt32BE() % Settings.apis.clsiCache.shards.length
+  return Settings.apis.clsiCache.shards[idx]
+}
 
 /**
  * @param {string} projectId
@@ -29,6 +42,7 @@ const MAX_ENTRIES_IN_OUTPUT_TAR = 100
  * @param {[{path: string}]} outputFiles
  * @param {string} compileGroup
  * @param {Record<string, any>} options
+ * @return {string | undefined}
  */
 function notifyCLSICacheAboutBuild({
   projectId,
@@ -39,14 +53,16 @@ function notifyCLSICacheAboutBuild({
   compileGroup,
   options,
 }) {
-  if (!Settings.apis.clsiCache.enabled) return
+  if (!Settings.apis.clsiCache.enabled) return undefined
+  if (!OBJECT_ID_REGEX.test(projectId)) return undefined
+  const { url, shard } = getShard(projectId)
 
   /**
    * @param {[{path: string}]} files
    */
   const enqueue = files => {
     Metrics.count('clsi_cache_enqueue_files', files.length)
-    fetchNothing(`${Settings.apis.clsiCache.url}/enqueue`, {
+    fetchNothing(`${url}/enqueue`, {
       method: 'POST',
       json: {
         projectId,
@@ -97,6 +113,8 @@ function notifyCLSICacheAboutBuild({
         'build output.tar.gz for clsi cache failed'
       )
     })
+
+  return shard
 }
 
 /**
@@ -155,6 +173,7 @@ async function downloadOutputDotSynctexFromCompileCache(
   outputDir
 ) {
   if (!Settings.apis.clsiCache.enabled) return false
+  if (!OBJECT_ID_REGEX.test(projectId)) return false
 
   const timer = new Metrics.Timer(
     'clsi_cache_download',
@@ -165,7 +184,7 @@ async function downloadOutputDotSynctexFromCompileCache(
   let stream
   try {
     stream = await fetchStream(
-      `${Settings.apis.clsiCache.url}/project/${projectId}/${
+      `${getShard(projectId).url}/project/${projectId}/${
         userId ? `user/${userId}/` : ''
       }build/${editorId}-${buildId}/search/output/output.synctex.gz`,
       {
@@ -205,8 +224,9 @@ async function downloadOutputDotSynctexFromCompileCache(
  */
 async function downloadLatestCompileCache(projectId, userId, compileDir) {
   if (!Settings.apis.clsiCache.enabled) return false
+  if (!OBJECT_ID_REGEX.test(projectId)) return false
 
-  const url = `${Settings.apis.clsiCache.url}/project/${projectId}/${
+  const url = `${getShard(projectId).url}/project/${projectId}/${
     userId ? `user/${userId}/` : ''
   }latest/output/output.tar.gz`
   const timer = new Metrics.Timer(

@@ -86,6 +86,7 @@ async function compile(projectId, userId, options = {}) {
     timings,
     outputUrlPrefix,
     buildId,
+    clsiCacheShard,
   } = await ClsiManager.promises.sendRequest(projectId, compileAsUser, options)
 
   return {
@@ -98,6 +99,7 @@ async function compile(projectId, userId, options = {}) {
     timings,
     outputUrlPrefix,
     buildId,
+    clsiCacheShard,
   }
 }
 
@@ -184,6 +186,7 @@ module.exports = CompileManager = {
     'timings',
     'outputUrlPrefix',
     'buildId',
+    'clsiCacheShard',
   ]),
 
   stopCompile: callbackify(stopCompile),

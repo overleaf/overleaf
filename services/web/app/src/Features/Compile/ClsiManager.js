@@ -207,6 +207,7 @@ async function _sendBuiltRequest(projectId, userId, req, options, callback) {
     stats: compile.stats,
     timings: compile.timings,
     outputUrlPrefix: compile.outputUrlPrefix,
+    clsiCacheShard: compile.clsiCacheShard,
   }
 }
 
@@ -853,6 +854,7 @@ module.exports = {
     'timings',
     'outputUrlPrefix',
     'buildId',
+    'clsiCacheShard',
   ]),
   sendExternalRequest: callbackifyMultiResult(sendExternalRequest, [
     'status',

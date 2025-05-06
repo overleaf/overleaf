@@ -110,8 +110,8 @@ async function getLatestBuildFromCache(req, res) {
   const userId = CompileController._getUserIdForCompile(req)
   try {
     const {
-      internal: { location: metaLocation, zone },
-      external: { isUpToDate, allFiles },
+      internal: { location: metaLocation },
+      external: { isUpToDate, allFiles, zone, shard },
     } = await ClsiCacheManager.getLatestBuildFromCache(
       projectId,
       userId,
@@ -153,7 +153,7 @@ async function getLatestBuildFromCache(req, res) {
             size,
             editorId,
           })
-          if (clsiServerId !== 'cache') {
+          if (clsiServerId !== shard) {
             // Enable PDF caching and attempt to download from VM first.
             // (clsi VMs do not have the editorId in the path on disk, omit it).
             Object.assign(f, {
@@ -174,6 +174,7 @@ async function getLatestBuildFromCache(req, res) {
       outputFiles,
       compileGroup,
       clsiServerId,
+      clsiCacheShard: shard,
       pdfDownloadDomain,
       pdfCachingMinChunkSize,
       options,

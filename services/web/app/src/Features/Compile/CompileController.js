@@ -192,7 +192,8 @@ module.exports = CompileController = {
           stats,
           timings,
           outputUrlPrefix,
-          buildId
+          buildId,
+          clsiCacheShard
         ) => {
           if (error) {
             Metrics.inc('compile-error')
@@ -236,6 +237,7 @@ module.exports = CompileController = {
             outputFilesArchive,
             compileGroup: limits?.compileGroup,
             clsiServerId,
+            clsiCacheShard,
             validationProblems,
             stats,
             timings,
