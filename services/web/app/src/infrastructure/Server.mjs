@@ -372,6 +372,10 @@ if (Settings.enabledServices.includes('web')) {
 metrics.injectMetricsRoute(webRouter)
 metrics.injectMetricsRoute(privateApiRouter)
 
+const beforeRouterInitialize = performance.now()
 await Router.initialize(webRouter, privateApiRouter, publicApiRouter)
+metrics.gauge('web_startup', performance.now() - beforeRouterInitialize, 1, {
+  path: 'Router.initialize',
+})
 
 export default { app, server }

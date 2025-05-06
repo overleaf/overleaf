@@ -4,6 +4,7 @@ const { promisify, callbackify } = require('util')
 const Settings = require('@overleaf/settings')
 const Views = require('./Views')
 const _ = require('lodash')
+const Metrics = require('@overleaf/metrics')
 
 const MODULE_BASE_PATH = Path.join(__dirname, '/../../../modules')
 
@@ -15,7 +16,11 @@ let _viewIncludes = {}
 
 async function modules() {
   if (!_modulesLoaded) {
+    const beforeLoadModules = performance.now()
     await loadModules()
+    Metrics.gauge('web_startup', performance.now() - beforeLoadModules, 1, {
+      path: 'loadModules',
+    })
   }
   return _modules
 }
