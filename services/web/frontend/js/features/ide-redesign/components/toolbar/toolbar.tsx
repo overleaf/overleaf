@@ -11,6 +11,7 @@ import { useLayoutContext } from '@/shared/context/layout-context'
 import BackToEditorButton from '@/features/editor-navigation-toolbar/components/back-to-editor-button'
 import { useCallback } from 'react'
 import * as eventTracking from '../../../../infrastructure/event-tracking'
+import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
 
 export const Toolbar = () => {
   const { view, setView } = useLayoutContext()
@@ -45,12 +46,18 @@ const ToolbarMenus = () => {
   const { t } = useTranslation()
   return (
     <div className="ide-redesign-toolbar-menu">
-      <div className="ide-redesign-toolbar-home-button">
-        <a href="/project" className="ide-redesign-toolbar-home-link">
-          <span className="toolbar-ol-logo" aria-label={t('overleaf_logo')} />
-          <MaterialIcon type="home" className="toolbar-ol-home-button" />
-        </a>
-      </div>
+      <OLTooltip
+        id="tooltip-home-button"
+        description={t('back_to_your_projects')}
+        overlayProps={{ delay: 0, placement: 'bottom' }}
+      >
+        <div className="ide-redesign-toolbar-home-button">
+          <a href="/project" className="ide-redesign-toolbar-home-link">
+            <span className="toolbar-ol-logo" aria-label={t('overleaf_logo')} />
+            <MaterialIcon type="home" className="toolbar-ol-home-button" />
+          </a>
+        </div>
+      </OLTooltip>
       <ToolbarMenuBar />
     </div>
   )
