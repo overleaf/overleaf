@@ -281,7 +281,6 @@
   font-size: inherit;
   vertical-align: inherit;
   position: relative;
-  z-index: 1;
   color: var(--outline-item-carat-color);
   margin-right: calc(var(--spacing-03) * -1);
   border-radius: var(--border-radius-base);
@@ -304,7 +303,6 @@
   background-color: transparent;
   border: 0;
   position: relative;
-  z-index: 1;
   padding: 0 var(--spacing-03);
   line-height: var(--spacing-08);
   border-radius: var(--border-radius-base);
