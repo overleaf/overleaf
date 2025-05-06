@@ -193,7 +193,6 @@
     div.pdf-canvas {
       background: white;
       box-shadow: 0 0 10px rgb(0 0 0 / 50%);
-      will-change: transform;
     }
 
     div.pdf-canvas.pdfng-empty {
@@ -235,6 +234,18 @@
 
     &:focus-within {
       outline: none;
+    }
+
+    /* Avoid slowdown in Safari when text layers are reset on selection change */
+    /* stylelint-disable-next-line selector-class-pattern */
+    .textLayer {
+      will-change: transform;
+    }
+
+    /* Avoid multiple small layers within annotation layer */
+    /* stylelint-disable-next-line selector-class-pattern */
+    .annotationLayer {
+      will-change: transform;
     }
 
     /* Avoids https://github.com/mozilla/pdf.js/issues/13840 in Chrome */
