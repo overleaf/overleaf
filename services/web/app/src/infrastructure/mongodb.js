@@ -49,7 +49,6 @@ const db = {
   githubSyncUserCredentials: internalDb.collection('githubSyncUserCredentials'),
   globalMetrics: internalDb.collection('globalMetrics'),
   grouppolicies: internalDb.collection('grouppolicies'),
-  groupAuditLogEntries: internalDb.collection('groupAuditLogEntries'),
   institutions: internalDb.collection('institutions'),
   messages: internalDb.collection('messages'),
   migrations: internalDb.collection('migrations'),

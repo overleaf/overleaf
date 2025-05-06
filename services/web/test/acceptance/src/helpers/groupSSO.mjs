@@ -34,7 +34,7 @@ export const baseSsoConfig = {
   userIdAttribute,
 } // the database also sets enabled and validated, but we cannot set that in the POST request for /manage/groups/:ID/settings/sso
 
-export async function createGroupSSO(SSOConfigValidated = true) {
+export async function createGroupSSO() {
   const nonSSOMemberHelper = await UserHelper.createUser()
   const nonSSOMember = nonSSOMemberHelper.user
 
@@ -47,7 +47,7 @@ export async function createGroupSSO(SSOConfigValidated = true) {
   const ssoConfig = new SSOConfig({
     ...baseSsoConfig,
     enabled: true,
-    validated: SSOConfigValidated,
+    validated: true,
   })
 
   await ssoConfig.save()
@@ -68,14 +68,12 @@ export async function createGroupSSO(SSOConfigValidated = true) {
   const enrollmentUrl = getEnrollmentUrl(subscriptionId)
   const internalProviderId = getProviderId(subscriptionId)
 
-  if (SSOConfigValidated) {
-    await linkGroupMember(
-      memberUser.email,
-      memberUser.password,
-      subscriptionId,
-      'mock@email.com'
-    )
-  }
+  await linkGroupMember(
+    memberUser.email,
+    memberUser.password,
+    subscriptionId,
+    'mock@email.com'
+  )
 
   const userHelper = new UserHelper()
 
