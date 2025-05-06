@@ -1,4 +1,4 @@
-type CustomerSubscriptionCreated = {
+export type CustomerSubscriptionWebhookEvent = {
   type: 'customer.subscription.created'
   data: {
     object: {
@@ -9,5 +9,3 @@ type CustomerSubscriptionCreated = {
     }
   }
 }
-
-export type WebhookEvent = CustomerSubscriptionCreated
