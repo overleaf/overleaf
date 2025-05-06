@@ -305,8 +305,10 @@ module.exports = class FSPersistor extends AbstractPersistor {
 
   async _listDirectory(path) {
     if (this.useSubdirectories) {
+      // eslint-disable-next-line @typescript-eslint/return-await
       return await glob(Path.join(path, '**'))
     } else {
+      // eslint-disable-next-line @typescript-eslint/return-await
       return await glob(`${path}_*`)
     }
   }
