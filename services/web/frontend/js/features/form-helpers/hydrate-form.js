@@ -3,6 +3,7 @@ import { FetchError, postJSON } from '../../infrastructure/fetch-json'
 import { canSkipCaptcha, validateCaptchaV2 } from './captcha'
 import inputValidator from './input-validator'
 import { disableElement, enableElement } from '../utils/disableElement'
+import { isBootstrap5 } from '@/features/utils/bootstrap-5'
 
 // Form helper(s) to handle:
 // - Attaching to the relevant form elements
@@ -133,6 +134,66 @@ function hideFormElements(formEl) {
   }
 }
 
+/**
+ * Creates a notification element from a message object, with BS5 classes.
+ *
+ * @param {Object} message
+ * @param {'error' | 'success' | 'warning' | 'info'} message.type
+ * @param {string} message.key
+ * @param {string} message.text
+ * @param {string[]} message.hints
+ * @returns {HTMLDivElement}
+ */
+function createNotificationFromMessageBS5(message) {
+  const messageEl = document.createElement('div')
+  messageEl.className = classNames('mb-3 notification', {
+    'notification-type-error': message.type === 'error',
+    'notification-type-success': message.type === 'success',
+    'notification-type-warning': message.type === 'warning',
+    'notification-type-info': message.type === 'info',
+  })
+  messageEl.setAttribute('aria-live', 'assertive')
+  messageEl.setAttribute('role', message.type === 'error' ? 'alert' : 'status')
+
+  const materialIcon = {
+    info: 'info',
+    success: 'check_circle',
+    error: 'error',
+    warning: 'warning',
+  }[message.type]
+  if (materialIcon) {
+    const iconEl = document.createElement('div')
+    iconEl.className = 'notification-icon'
+    const iconSpan = document.createElement('span')
+    iconSpan.className = 'material-symbols'
+    iconSpan.setAttribute('aria-hidden', 'true')
+    iconSpan.textContent = materialIcon
+    iconEl.append(iconSpan)
+    messageEl.append(iconEl)
+  }
+
+  const contentAndCtaEl = document.createElement('div')
+  contentAndCtaEl.className = 'notification-content-and-cta'
+
+  const contentEl = document.createElement('div')
+  contentEl.className = 'notification-content'
+  contentEl.append(message.text || `Error: ${message.key}`)
+
+  if (message.hints && message.hints.length) {
+    const listEl = document.createElement('ul')
+    message.hints.forEach(hint => {
+      const listItemEl = document.createElement('li')
+      listItemEl.textContent = hint
+      listEl.append(listItemEl)
+    })
+    contentEl.append(listEl)
+  }
+  contentAndCtaEl.append(contentEl)
+  messageEl.append(contentAndCtaEl)
+
+  return messageEl
+}
+
 // TODO: remove the showMessages function after every form alerts are updated to use the new style
 // TODO: rename showMessagesNewStyle to showMessages after the above is done
 function showMessages(formEl, messageBag) {
@@ -157,6 +218,9 @@ function showMessages(formEl, messageBag) {
       customErrorElements.forEach(el => {
         el.hidden = false
       })
+    } else if (isBootstrap5()) {
+      const notification = createNotificationFromMessageBS5(message)
+      messagesEl.append(notification)
     } else {
       // No custom error element for key on page, append a new error message
       const messageEl = document.createElement('div')
