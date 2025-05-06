@@ -250,6 +250,7 @@ describe('CompileController', function () {
             fileLineErrors: false,
             stopOnFirstError: false,
             editorId: undefined,
+            clsiCacheSharded: false,
           }
         )
       })
@@ -293,6 +294,7 @@ describe('CompileController', function () {
             fileLineErrors: false,
             stopOnFirstError: false,
             editorId: undefined,
+            clsiCacheSharded: false,
           }
         )
       })
@@ -318,6 +320,7 @@ describe('CompileController', function () {
             fileLineErrors: false,
             stopOnFirstError: false,
             editorId: undefined,
+            clsiCacheSharded: false,
           }
         )
       })
@@ -342,6 +345,7 @@ describe('CompileController', function () {
             fileLineErrors: false,
             stopOnFirstError: false,
             editorId: 'the-editor-id',
+            clsiCacheSharded: false,
           }
         )
       })

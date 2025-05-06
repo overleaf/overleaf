@@ -125,6 +125,7 @@ function compile(req, res, next) {
                 editorId: request.editorId,
                 outputFiles,
                 compileGroup: request.compileGroup,
+                clsiCacheSharded: request.clsiCacheSharded,
                 options: {
                   compiler: request.compiler,
                   draft: request.draft,

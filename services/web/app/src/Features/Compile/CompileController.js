@@ -132,12 +132,14 @@ module.exports = CompileController = {
     const isAutoCompile = !!req.query.auto_compile
     const fileLineErrors = !!req.query.file_line_errors
     const stopOnFirstError = !!req.body.stopOnFirstError
+    const clsiCacheSharded = !!req.body.clsiCacheSharded
     const userId = SessionManager.getLoggedInUserId(req.session)
     const options = {
       isAutoCompile,
       fileLineErrors,
       stopOnFirstError,
       editorId: req.body.editorId,
+      clsiCacheSharded,
     }
 
     if (req.body.rootDoc_id) {

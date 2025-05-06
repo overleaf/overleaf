@@ -90,6 +90,14 @@ function parse(body, callback) {
         type: 'boolean',
       }
     )
+    response.clsiCacheSharded = _parseAttribute(
+      'clsiCacheSharded',
+      compile.options.clsiCacheSharded,
+      {
+        default: false,
+        type: 'boolean',
+      }
+    )
     response.check = _parseAttribute('check', compile.options.check, {
       type: 'string',
     })

@@ -110,6 +110,7 @@ export default class DocumentCompiler {
         incrementalCompilesEnabled: !this.error,
         stopOnFirstError: options.stopOnFirstError,
         editorId: EDITOR_SESSION_ID,
+        clsiCacheSharded: true,
       }
 
       const data = await postJSON(
