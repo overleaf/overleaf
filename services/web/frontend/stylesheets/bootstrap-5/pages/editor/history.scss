@@ -154,6 +154,10 @@ history-root {
     }
   }
 
+  .history-version-main-details {
+    color: var(--content-primary);
+  }
+
   .version-element-within-selected {
     background-color: var(--bg-light-secondary);
     border-left: var(--spacing-02) solid var(--green-50);
