@@ -1,5 +1,9 @@
 import { useTranslation, Trans } from 'react-i18next'
 import { PaidSubscription } from '../../../../../../../types/subscription/dashboard/subscription'
+import {
+  hasPendingAiAddonCancellation,
+  ADD_ON_NAME,
+} from '../../../data/add-on-codes'
 import ReactivateSubscription from '../reactivate-subscription'
 import OLButton from '@/features/ui/components/ol/ol-button'
 
@@ -9,6 +13,7 @@ export function CanceledSubscription({
   subscription: PaidSubscription
 }) {
   const { t } = useTranslation()
+  const pendingAiAddonCancellation = hasPendingAiAddonCancellation(subscription)
 
   return (
     <>
@@ -26,6 +31,19 @@ export function CanceledSubscription({
           ]}
         />
       </p>
+      {pendingAiAddonCancellation && (
+        <p>
+          <Trans
+            i18nKey="pending_addon_cancellation"
+            values={{
+              addOnName: ADD_ON_NAME,
+            }}
+            shouldUnescape
+            tOptions={{ interpolation: { escapeValue: true } }}
+            components={{ strong: <strong /> }}
+          />
+        </p>
+      )}
       <p>
         <Trans
           i18nKey="subscription_canceled_and_terminate_on_x"

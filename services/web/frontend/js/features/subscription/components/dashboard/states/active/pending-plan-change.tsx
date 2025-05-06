@@ -1,7 +1,9 @@
 import { Trans } from 'react-i18next'
 import { PaidSubscription } from '../../../../../../../../types/subscription/dashboard/subscription'
-import { PendingPaymentProviderPlan } from '../../../../../../../../types/subscription/plan'
-import { AI_ADD_ON_CODE, ADD_ON_NAME } from '../../../../data/add-on-codes'
+import {
+  hasPendingAiAddonCancellation,
+  ADD_ON_NAME,
+} from '../../../../data/add-on-codes'
 
 export function PendingPlanChange({
   subscription,
@@ -10,15 +12,7 @@ export function PendingPlanChange({
 }) {
   if (!subscription.pendingPlan) return null
 
-  const pendingPlan = subscription.pendingPlan as PendingPaymentProviderPlan
-
-  const hasAiAddon = subscription.addOns?.some(
-    addOn => addOn.addOnCode === AI_ADD_ON_CODE
-  )
-
-  const pendingAiAddonCancellation =
-    hasAiAddon &&
-    !pendingPlan.addOns?.some(addOn => addOn.code === AI_ADD_ON_CODE)
+  const pendingAiAddonCancellation = hasPendingAiAddonCancellation(subscription)
 
   const pendingAdditionalLicenses =
     (subscription.payment.pendingAdditionalLicenses &&
