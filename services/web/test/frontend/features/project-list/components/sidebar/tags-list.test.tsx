@@ -41,20 +41,20 @@ describe('<TagsList />', function () {
     fetchMock.removeRoutes().clearHistory()
   })
 
-  it('displays the tags list', function () {
-    const header = screen.getByTestId('organize-projects')
+  it('displays the tags list', async function () {
+    const header = await screen.findByTestId('organize-projects')
     expect(header.textContent).to.equal('Organize Tags')
 
-    screen.getByRole('button', {
+    await screen.findByRole('button', {
       name: 'New Tag',
     })
-    screen.getByRole('button', {
+    await screen.findByRole('button', {
       name: 'Tag 1 (1)',
     })
-    screen.getByRole('button', {
+    await screen.findByRole('button', {
       name: 'Another tag (2)',
     })
-    screen.getByRole('button', {
+    await screen.findByRole('button', {
       name: 'Uncategorized (3)',
     })
   })
