@@ -109,6 +109,10 @@ module.exports = {
       },
       plugins: ['@vitest', 'chai-expect', 'chai-friendly'], // still using chai for now
       rules: {
+        // vitest-specific rules
+        '@vitest/no-focused-tests': 'error',
+        '@vitest/no-disabled-tests': 'error',
+
         // Swap the no-unused-expressions rule with a more chai-friendly one
         'no-unused-expressions': 'off',
         'chai-friendly/no-unused-expressions': 'error',
