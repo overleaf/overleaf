@@ -20,6 +20,8 @@ import { useIdeContext } from '@/shared/context/ide-context'
 import getMeta from '@/utils/meta'
 import { debugConsole } from '@/utils/debugging'
 import { User } from '../../../../../types/user'
+import { useRailContext } from '@/features/ide-redesign/contexts/rail-context'
+import { useIsNewEditorEnabled } from '@/features/ide-redesign/utils/new-editor-utils'
 
 const PAGE_SIZE = 50
 
@@ -200,7 +202,12 @@ export const ChatProvider: FC<React.PropsWithChildren> = ({ children }) => {
   const user = useUserContext()
   const { _id: projectId } = useProjectContext()
 
-  const { chatIsOpen } = useLayoutContext()
+  const { chatIsOpen: chatIsOpenOldEditor } = useLayoutContext()
+  const { selectedTab: selectedRailTab, isOpen: railIsOpen } = useRailContext()
+  const newEditor = useIsNewEditorEnabled()
+  const chatIsOpen = newEditor
+    ? selectedRailTab === 'chat' && railIsOpen
+    : chatIsOpenOldEditor
 
   const {
     hasFocus: windowHasFocus,

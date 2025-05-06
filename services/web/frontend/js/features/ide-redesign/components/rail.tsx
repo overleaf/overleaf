@@ -32,6 +32,7 @@ import { HistorySidebar } from '@/features/ide-react/components/history-sidebar'
 import DictionarySettingsModal from './settings/editor-settings/dictionary-settings-modal'
 import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
 import OLIconButton from '@/features/ui/components/ol/ol-icon-button'
+import { useChatContext } from '@/features/chat/context/chat-context'
 
 type RailElement = {
   icon: AvailableUnfilledIcon
@@ -90,6 +91,8 @@ export const RailLayout = () => {
   } = useRailContext()
 
   const { view, setLeftMenuShown } = useLayoutContext()
+
+  const { markMessagesAsRead } = useChatContext()
 
   const isHistoryView = view === 'history'
 
@@ -163,9 +166,13 @@ export const RailLayout = () => {
         }
         // Change the selected tab and make sure it's open
         openTab((key ?? 'file-tree') as RailTabKey)
+
+        if (key === 'chat') {
+          markMessagesAsRead()
+        }
       }
     },
-    [openTab, togglePane, selectedTab, railTabs]
+    [openTab, togglePane, selectedTab, railTabs, markMessagesAsRead]
   )
 
   const isReviewPanelOpen = selectedTab === 'review-panel'
