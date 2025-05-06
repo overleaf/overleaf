@@ -1,50 +1,5 @@
-# Compiled source #
-###################
-*.com
-*.class
-*.dll
-*.exe
-*.o
-*.so
-
-# Packages #
-############
-# it's better to unpack these files and commit the raw source
-# git has its own built in compression methods
-*.7z
-*.dmg
-*.gz
-*.iso
-*.jar
-*.rar
-*.tar
-*.zip
-
-# Logs and databases #
-######################
-*.log
-*.sql
-*.sqlite
-
-# OS generated files #
-######################
-.DS_Store?
-ehthumbs.db
-Icon?
-Thumbs.db
-
-# allow "icons"
-![Ii]cons
-
-node_modules/*
 data/*
 coverage
-
-cookies.txt
-requestQueueWorker.js
-TpdsWorker.js
-BackgroundJobsWorker.js
-UserAndProjectPopulator.coffee
 
 public/manifest.json
 
@@ -54,22 +9,6 @@ public/stylesheets
 public/fonts
 public/images
 
-Gemfile.lock
-
-*.swp
-.DS_Store
-
-docker-shared.yml
-
-config/*.coffee
-!config/settings.defaults.coffee
-!config/settings.webpack.coffee
-config/*.js
-!config/settings.defaults.js
-!config/settings.webpack.js
-!config/settings.overrides.saas.js
-!config/settings.overrides.server-pro.js
-
 modules/**/Makefile
 
 # Precompiled pug files
@@ -77,13 +16,6 @@ modules/**/Makefile
 
 # Sentry secrets file (injected by CI)
 .sentryclirc
-
-# via dev-environment
-.npmrc
-
-# Intellij
-.idea
-.run
 
 # Cypress
 cypress/screenshots/

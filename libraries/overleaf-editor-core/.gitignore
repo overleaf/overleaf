@@ -1,5 +1,0 @@
-/coverage
-/node_modules
-
-# managed by monorepo$ bin/update_build_scripts
-.npmrc
