@@ -154,17 +154,24 @@ describe('<ProjectListTable />', function () {
     })
   })
 
-  it('unselects all projects when select all checkbox uchecked', async function () {
+  it('unselects all projects when select all checkbox unchecked', async function () {
     renderWithProjectListContext(<ProjectListTable />)
     await fetchMock.callHistory.flush(true)
     const checkbox = await screen.findByLabelText('Select all projects')
-    fireEvent.click(checkbox)
+
     fireEvent.click(checkbox)
 
     await waitFor(() => {
       const allCheckboxes = screen.queryAllByRole<HTMLInputElement>('checkbox')
       const allCheckboxesChecked = allCheckboxes.filter(c => c.checked)
-      expect(allCheckboxesChecked.length).to.equal(0)
+      expect(allCheckboxesChecked).to.have.length(currentProjects.length + 1)
+    })
+
+    fireEvent.click(checkbox)
+
+    await waitFor(() => {
+      const allCheckboxes = screen.queryAllByRole<HTMLInputElement>('checkbox')
+      expect(allCheckboxes.every(c => !c.checked)).to.be.true
     })
   })
 
@@ -174,12 +181,14 @@ describe('<ProjectListTable />', function () {
     const checkbox = await screen.findByLabelText('Select all projects')
     fireEvent.click(checkbox)
 
+    // make sure we are unchecking a project checkbox and that it is already
+    // checked
     await waitFor(() => {
       expect(
         screen
-          .getAllByRole<HTMLInputElement>('checkbox')[1]
+          .getAllByRole<HTMLInputElement>('checkbox', { checked: true })[1]
           .getAttribute('data-project-id')
-      ).to.exist // make sure we are unchecking a project checkbox
+      ).to.exist
     })
 
     fireEvent.click(screen.getAllByRole<HTMLInputElement>('checkbox')[1])
