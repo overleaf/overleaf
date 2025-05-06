@@ -1,4 +1,5 @@
 import useCollapsiblePanel from '@/features/ide-react/hooks/use-collapsible-panel'
+import useEventListener from '@/shared/hooks/use-event-listener'
 import {
   createContext,
   Dispatch,
@@ -75,6 +76,17 @@ export const RailProvider: FC<React.PropsWithChildren> = ({ children }) => {
       setIsOpen(true)
     },
     [setIsOpen, setSelectedTab]
+  )
+
+  useEventListener(
+    'ui.toggle-review-panel',
+    useCallback(() => {
+      if (isOpen && selectedTab === 'review-panel') {
+        handlePaneCollapse()
+      } else {
+        openTab('review-panel')
+      }
+    }, [handlePaneCollapse, selectedTab, isOpen, openTab])
   )
 
   const value = useMemo(
