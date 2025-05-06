@@ -82,7 +82,7 @@ async function consumeCsvFileAndUpdate() {
           $addToSet: {
             emails: {
               email: newEmail,
-              createdAt: Date.now(),
+              createdAt: new Date(),
               reversedHostname: 'moc.faelrevo',
             },
           },
