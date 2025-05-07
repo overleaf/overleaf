@@ -274,8 +274,7 @@ describe('SubscriptionHandler', function () {
         })
         await this.SubscriptionHandler.promises.updateSubscription(
           this.user,
-          this.plan_code,
-          null
+          this.plan_code
         )
       })
 
@@ -324,8 +323,7 @@ describe('SubscriptionHandler', function () {
         expect(
           this.SubscriptionHandler.promises.updateSubscription(
             this.user,
-            'unknown-plan',
-            null
+            'unknown-plan'
           )
         ).to.be.rejected
         this.RecurlyClient.promises.applySubscriptionChangeRequest.called.should.equal(
@@ -339,8 +337,7 @@ describe('SubscriptionHandler', function () {
         this.LimitationsManager.promises.userHasSubscription.resolves(false)
         await this.SubscriptionHandler.promises.updateSubscription(
           this.user,
-          this.plan_code,
-          null
+          this.plan_code
         )
       })
 
@@ -350,57 +347,6 @@ describe('SubscriptionHandler', function () {
         )
         this.SubscriptionUpdater.promises.syncSubscription.called.should.equal(
           false
-        )
-      })
-    })
-
-    describe('with a coupon code', function () {
-      beforeEach(async function () {
-        this.user.id = this.activeRecurlySubscription.account.account_code
-
-        this.User.findById = (userId, projection) => ({
-          exec: () => {
-            userId.should.equal(this.user.id)
-            return Promise.resolve(this.user)
-          },
-        })
-        this.plan_code = 'collaborator'
-        this.coupon_code = '1231312'
-        this.LimitationsManager.promises.userHasSubscription.resolves({
-          hasSubscription: true,
-          subscription: this.subscription,
-        })
-        await this.SubscriptionHandler.promises.updateSubscription(
-          this.user,
-          this.plan_code,
-          this.coupon_code
-        )
-      })
-
-      it('should get the users account', function () {
-        this.RecurlyWrapper.promises.getSubscription
-          .calledWith(this.activeRecurlySubscription.uuid)
-          .should.equal(true)
-      })
-
-      it('should redeem the coupon', function () {
-        this.RecurlyWrapper.promises.redeemCoupon
-          .calledWith(
-            this.activeRecurlySubscription.account.account_code,
-            this.coupon_code
-          )
-          .should.equal(true)
-      })
-
-      it('should update the subscription', function () {
-        expect(
-          this.RecurlyClient.promises.applySubscriptionChangeRequest
-        ).to.be.calledWith(
-          new PaymentProviderSubscriptionChangeRequest({
-            subscription: this.activeRecurlyClientSubscription,
-            timeframe: 'now',
-            planCode: this.plan_code,
-          })
         )
       })
     })

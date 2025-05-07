@@ -83,9 +83,8 @@ async function previewSubscriptionChange(userId, planCode) {
 /**
  * @param user
  * @param planCode
- * @param couponCode
  */
-async function updateSubscription(user, planCode, couponCode) {
+async function updateSubscription(user, planCode) {
   let hasSubscription = false
   let subscription
 
@@ -107,18 +106,6 @@ async function updateSubscription(user, planCode, couponCode) {
     return
   }
   const recurlySubscriptionId = subscription.recurlySubscription_id
-
-  if (couponCode) {
-    const usersSubscription = await RecurlyWrapper.promises.getSubscription(
-      recurlySubscriptionId,
-      { includeAccount: true }
-    )
-
-    await RecurlyWrapper.promises.redeemCoupon(
-      usersSubscription.account.account_code,
-      couponCode
-    )
-  }
 
   const recurlySubscription = await RecurlyClient.promises.getSubscription(
     recurlySubscriptionId
