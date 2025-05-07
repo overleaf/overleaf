@@ -1,9 +1,4 @@
-/* eslint-disable
-    n/handle-callback-err,
-    max-len,
-*/
 // TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
@@ -122,6 +117,16 @@ const FileWriter = {
         }).withCause(err || {})
       }
       if (err) {
+        stream.destroy()
+        writeStream.destroy()
+        fs.unlink(fsPath, error => {
+          if (error && error.code !== 'ENOENT') {
+            logger.warn(
+              { error, fsPath },
+              'Failed to delete partial file after error'
+            )
+          }
+        })
         OError.tag(
           err,
           '[writeStreamToDisk] something went wrong writing the stream to disk',
@@ -153,14 +158,16 @@ const FileWriter = {
     callback = _.once(callback)
 
     const stream = request.get(url)
-    stream.on('error', function (err) {
+    const errorHandler = function (err) {
       logger.warn(
         { err, identifier, url },
         '[writeUrlToDisk] something went wrong with writing to disk'
       )
       callback(err)
-    })
+    }
+    stream.on('error', errorHandler)
     stream.on('response', function (response) {
+      stream.removeListener('error', errorHandler)
       if (response.statusCode >= 200 && response.statusCode < 300) {
         FileWriter.writeStreamToDisk(identifier, stream, options, callback)
       } else {
