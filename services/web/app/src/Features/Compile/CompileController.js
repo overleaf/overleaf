@@ -216,7 +216,7 @@ const _CompileController = {
           ownerAnalyticsId: limits.ownerAnalyticsId,
           status,
           compileTime: timings?.compileE2E,
-          timeout: limits.timeout === 60 ? 'short' : 'long',
+          timeout: limits.timeout,
           server: clsiServerId?.includes('-c2d-') ? 'faster' : 'normal',
           isAutoCompile,
           isInitialCompile: stats?.isInitialCompile === 1,
