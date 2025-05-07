@@ -354,7 +354,6 @@ const _ProjectController = {
       'editor-redesign',
       'paywall-change-compile-timeout',
       'overleaf-assist-bundle',
-      'wf-feature-rebrand',
       'word-count-client',
       'editor-popup-ux-survey',
     ].filter(Boolean)

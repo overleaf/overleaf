@@ -20,7 +20,7 @@ export const MathDropdown = memo(function MathDropdown() {
   const view = useCodeMirrorViewContext()
   const { writefullInstance } = useEditorContext()
 
-  const wfRebrandEnabled = isSplitTestEnabled('wf-feature-rebrand')
+  const wfRebrandEnabled = isSplitTestEnabled('overleaf-assist-bundle')
   return (
     <ToolbarButtonMenu
       id="toolbar-math"

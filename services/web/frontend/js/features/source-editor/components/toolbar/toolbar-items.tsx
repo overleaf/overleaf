@@ -36,7 +36,7 @@ export const ToolbarItems: FC<{
   const symbolPaletteAvailable = getMeta('ol-symbolPaletteAvailable')
   const showGroup = (group: string) => !overflowed || overflowed.has(group)
 
-  const wfRebrandEnabled = isSplitTestEnabled('wf-feature-rebrand')
+  const wfRebrandEnabled = isSplitTestEnabled('overleaf-assist-bundle')
 
   return (
     <>
