@@ -2609,6 +2609,7 @@
   "will_need_to_log_out_from_and_in_with": "You will need to <b>log out</b> from your <b>__email1__</b> account and then log in with <b>__email2__</b>.",
   "with_premium_subscription_you_also_get": "With an Overleaf Premium subscription you also get",
   "word_count": "Word Count",
+  "word_count_lower": "Word count",
   "work_in_vim_or_emacs_emulation_mode": "Work in Vim or Emacs emulation mode",
   "work_offline": "Work offline",
   "work_offline_pull_to_overleaf": "Work offline, then pull to __appName__",

@@ -7,7 +7,7 @@ import { MenuBarDropdown } from '@/shared/components/menu-bar/menu-bar-dropdown'
 import { MenuBarOption } from '@/shared/components/menu-bar/menu-bar-option'
 import { useTranslation } from 'react-i18next'
 import ChangeLayoutOptions from './change-layout-options'
-import { MouseEventHandler, useCallback, useMemo } from 'react'
+import { MouseEventHandler, useCallback, useMemo, useState } from 'react'
 import { useIdeRedesignSwitcherContext } from '@/features/ide-react/context/ide-redesign-switcher-context'
 import { useSwitchEnableNewEditorState } from '../../hooks/use-switch-enable-new-editor-state'
 import MaterialIcon from '@/shared/components/material-icon'
@@ -21,6 +21,9 @@ import CommandDropdown, {
 } from './command-dropdown'
 import { useUserSettingsContext } from '@/shared/context/user-settings-context'
 import { useRailContext } from '../../contexts/rail-context'
+import WordCountModal from '@/features/word-count-modal/components/word-count-modal'
+import { isSplitTestEnabled } from '@/utils/splitTestUtils'
+import { useDetachCompileContext as useCompileContext } from '@/shared/context/detach-compile-context'
 
 export const ToolbarMenuBar = () => {
   const { t } = useTranslation()
@@ -29,6 +32,9 @@ export const ToolbarMenuBar = () => {
     setShowSwitcherModal(true)
   }, [setShowSwitcherModal])
   const { setView, view } = useLayoutContext()
+  const { pdfUrl } = useCompileContext()
+  const wordCountEnabled = pdfUrl || isSplitTestEnabled('word-count-client')
+  const [showWordCountModal, setShowWordCountModal] = useState(false)
 
   useCommandProvider(
     () => [
@@ -40,8 +46,17 @@ export const ToolbarMenuBar = () => {
         },
         id: 'show_version_history',
       },
+      {
+        type: 'command',
+        label: t('word_count_lower'),
+        disabled: !wordCountEnabled,
+        handler: () => {
+          setShowWordCountModal(true)
+        },
+        id: 'word_count',
+      },
     ],
-    [t, setView, view]
+    [t, setView, view, wordCountEnabled]
   )
   const fileMenuStructure: MenuStructure = useMemo(
     () => [
@@ -49,7 +64,7 @@ export const ToolbarMenuBar = () => {
         id: 'file-file-tree',
         children: ['new_file', 'new_folder', 'upload_file'],
       },
-      { id: 'file-history', children: ['show_version_history'] },
+      { id: 'file-tools', children: ['show_version_history', 'word_count'] },
       {
         id: 'file-download',
         children: ['download-as-source-zip', 'download-pdf'],
@@ -175,67 +190,73 @@ export const ToolbarMenuBar = () => {
     setActiveModal('contact-us')
   }, [setActiveModal])
   return (
-    <MenuBar
-      className="ide-redesign-toolbar-menu-bar"
-      id="toolbar-menu-bar-item"
-    >
-      <CommandDropdown menu={fileMenuStructure} title={t('file')} id="file" />
-      <CommandDropdown menu={editMenuStructure} title={t('edit')} id="edit" />
-      <CommandDropdown
-        menu={insertMenuStructure}
-        title={t('insert')}
-        id="insert"
-      />
-      <MenuBarDropdown
-        title={t('view')}
-        id="view"
-        className="ide-redesign-toolbar-dropdown-toggle-subdued ide-redesign-toolbar-button-subdued"
+    <>
+      <MenuBar
+        className="ide-redesign-toolbar-menu-bar"
+        id="toolbar-menu-bar-item"
       >
-        <ChangeLayoutOptions />
-        <DropdownHeader>Editor settings</DropdownHeader>
-        <MenuBarOption
-          title={t('show_equation_preview')}
-          trailingIcon={mathPreview ? 'check' : undefined}
-          onClick={toggleMathPreview}
+        <CommandDropdown menu={fileMenuStructure} title={t('file')} id="file" />
+        <CommandDropdown menu={editMenuStructure} title={t('edit')} id="edit" />
+        <CommandDropdown
+          menu={insertMenuStructure}
+          title={t('insert')}
+          id="insert"
         />
-        <CommandSection section={pdfControlsMenuSectionStructure} />
-      </MenuBarDropdown>
-      <CommandDropdown
-        menu={formatMenuStructure}
-        title={t('format')}
-        id="format"
+        <MenuBarDropdown
+          title={t('view')}
+          id="view"
+          className="ide-redesign-toolbar-dropdown-toggle-subdued ide-redesign-toolbar-button-subdued"
+        >
+          <ChangeLayoutOptions />
+          <DropdownHeader>Editor settings</DropdownHeader>
+          <MenuBarOption
+            title={t('show_equation_preview')}
+            trailingIcon={mathPreview ? 'check' : undefined}
+            onClick={toggleMathPreview}
+          />
+          <CommandSection section={pdfControlsMenuSectionStructure} />
+        </MenuBarDropdown>
+        <CommandDropdown
+          menu={formatMenuStructure}
+          title={t('format')}
+          id="format"
+        />
+        <MenuBarDropdown
+          title={t('help')}
+          id="help"
+          className="ide-redesign-toolbar-dropdown-toggle-subdued ide-redesign-toolbar-button-subdued"
+        >
+          <MenuBarOption
+            title={t('keyboard_shortcuts')}
+            onClick={openKeyboardShortcutsModal}
+          />
+          <MenuBarOption
+            title={t('documentation')}
+            href="/learn"
+            target="_blank"
+            rel="noopener noreferrer"
+          />
+          <DropdownDivider />
+          <MenuBarOption title={t('contact_us')} onClick={openContactUsModal} />
+          <MenuBarOption
+            title={t('give_feedback')}
+            href="https://forms.gle/soyVStc5qDx9na1Z6"
+            target="_blank"
+            rel="noopener noreferrer"
+          />
+          <DropdownDivider />
+          <SwitchToOldEditorMenuBarOption />
+          <MenuBarOption
+            title="What's new?"
+            onClick={openEditorRedesignSwitcherModal}
+          />
+        </MenuBarDropdown>
+      </MenuBar>
+      <WordCountModal
+        show={showWordCountModal}
+        handleHide={() => setShowWordCountModal(false)}
       />
-      <MenuBarDropdown
-        title={t('help')}
-        id="help"
-        className="ide-redesign-toolbar-dropdown-toggle-subdued ide-redesign-toolbar-button-subdued"
-      >
-        <MenuBarOption
-          title={t('keyboard_shortcuts')}
-          onClick={openKeyboardShortcutsModal}
-        />
-        <MenuBarOption
-          title={t('documentation')}
-          href="/learn"
-          target="_blank"
-          rel="noopener noreferrer"
-        />
-        <DropdownDivider />
-        <MenuBarOption title={t('contact_us')} onClick={openContactUsModal} />
-        <MenuBarOption
-          title={t('give_feedback')}
-          href="https://forms.gle/soyVStc5qDx9na1Z6"
-          target="_blank"
-          rel="noopener noreferrer"
-        />
-        <DropdownDivider />
-        <SwitchToOldEditorMenuBarOption />
-        <MenuBarOption
-          title="What's new?"
-          onClick={openEditorRedesignSwitcherModal}
-        />
-      </MenuBarDropdown>
-    </MenuBar>
+    </>
   )
 }
 
