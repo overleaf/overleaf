@@ -1,10 +1,6 @@
 const Path = require('node:path')
-const http = require('node:http')
-const https = require('node:https')
 const os = require('node:os')
 
-http.globalAgent.keepAlive = false
-https.globalAgent.keepAlive = false
 const isPreEmptible = process.env.PREEMPTIBLE === 'TRUE'
 const CLSI_SERVER_ID = os.hostname().replace('-ctr', '')
 
