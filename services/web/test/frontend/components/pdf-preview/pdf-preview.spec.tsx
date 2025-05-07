@@ -47,7 +47,7 @@ describe('<PdfPreview/>', function () {
       'https://compiles-user.dev-overleaf.com'
     )
     window.metaAttributesCache.set('ol-splitTestVariants', {
-      'initial-compile-from-clsi-cache': 'enabled',
+      'populate-clsi-cache': 'enabled',
     })
     window.metaAttributesCache.set('ol-projectOwnerHasPremiumOnPageLoad', true)
     cy.interceptEvents()

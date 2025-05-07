@@ -30,4 +30,4 @@ export const projectOwnerHasPremiumOnPageLoad = getMeta(
   'ol-projectOwnerHasPremiumOnPageLoad'
 )
 export const fallBackToClsiCache =
-  projectOwnerHasPremiumOnPageLoad && isFlagEnabled('fall-back-to-clsi-cache')
+  projectOwnerHasPremiumOnPageLoad && isFlagEnabled('populate-clsi-cache')

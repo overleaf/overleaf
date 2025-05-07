@@ -204,7 +204,7 @@ export const LocalCompileProvider: FC<React.PropsWithChildren> = ({
   // fetch initial compile response from cache
   const [initialCompileFromCache, setInitialCompileFromCache] = useState(
     getMeta('ol-projectOwnerHasPremiumOnPageLoad') &&
-      isSplitTestEnabled('initial-compile-from-clsi-cache') &&
+      isSplitTestEnabled('populate-clsi-cache') &&
       // Avoid fetching the initial compile from cache in PDF detach tab
       role !== 'detached'
   )
