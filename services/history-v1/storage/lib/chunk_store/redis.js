@@ -1,3 +1,5 @@
+// @ts-check
+
 const metrics = require('@overleaf/metrics')
 const OError = require('@overleaf/o-error')
 const redis = require('../redis')
@@ -97,27 +99,36 @@ rclient.defineCommand('queue_changes', {
   local head = ARGV[2]
   local persistTime = tonumber(ARGV[3])
   local expireTime = tonumber(ARGV[4])
-  -- Changes start from ARGV[5]
+  local onlyIfExists = ARGV[5]
+  local changesIndex = 6 -- Changes start here
 
   local headVersion = tonumber(redis.call('GET', headVersionKey))
+
+  -- Check if updates should only be queued if the project already exists (used for gradual rollouts)
+  if not headVersion and onlyIfExists == 'true' then
+    return 'ignore'
+  end
+
+  -- Check that the supplied baseVersion matches the head version
+  -- If headVersion is nil, it means the project does not exist yet and will be created.
   if headVersion and headVersion ~= baseVersion then
     return 'conflict'
   end
 
   -- Check if there are any changes to queue
-  if #ARGV < 5 then
+  if #ARGV < changesIndex then
     return 'no_changes_provided'
   end
 
   -- Store the changes
   -- RPUSH changesKey change1 change2 ...
-  redis.call('RPUSH', changesKey, unpack(ARGV, 5, #ARGV))
+  redis.call('RPUSH', changesKey, unpack(ARGV, changesIndex, #ARGV))
 
   -- Update head snapshot only if changes were successfully pushed
   redis.call('SET', headSnapshotKey, head)
 
   -- Update the head version
-  local numChanges = #ARGV - 4
+  local numChanges = #ARGV - changesIndex + 1
   local newHeadVersion = baseVersion + numChanges
   redis.call('SET', headVersionKey, newHeadVersion)
 
@@ -142,9 +153,14 @@ rclient.defineCommand('queue_changes', {
  * @param {Snapshot} headSnapshot - The new head snapshot after applying changes.
  * @param {number} baseVersion - The expected current head version.
  * @param {Change[]} changes - An array of Change objects to queue.
- * @param {number} persistTime - Timestamp (ms since epoch) when the oldest change in the buffer should be persisted.
- * @param {number} expireTime - Timestamp (ms since epoch) when the project buffer should expire if inactive.
- * @returns {Promise<void>} Resolves on success.
+ * @param {object} [opts]
+ * @param {number} [opts.persistTime] - Timestamp (ms since epoch) when the
+ *                 oldest change in the buffer should be persisted.
+ * @param {number} [opts.expireTime] - Timestamp (ms since epoch) when the
+ *                 project buffer should expire if inactive.
+ * @param {boolean} [opts.onlyIfExists] - If true, only queue changes if the
+ *                 project already exists in Redis, otherwise ignore.
+ * @returns {Promise<string>} Resolves on success to either 'ok' or 'ignore'.
  * @throws {BaseVersionConflictError} If the baseVersion does not match the current head version in Redis.
  * @throws {Error} If changes array is empty or if Redis operations fail.
  */
@@ -153,12 +169,15 @@ async function queueChanges(
   headSnapshot,
   baseVersion,
   changes,
-  persistTime,
-  expireTime
+  opts = {}
 ) {
   if (!changes || changes.length === 0) {
     throw new Error('Cannot queue empty changes array')
   }
+
+  const persistTime = opts.persistTime ?? Date.now() + MAX_PERSIST_DELAY_MS
+  const expireTime = opts.expireTime ?? Date.now() + PROJECT_TTL_MS
+  const onlyIfExists = Boolean(opts.onlyIfExists)
 
   try {
     const keys = [
@@ -174,13 +193,17 @@ async function queueChanges(
       JSON.stringify(headSnapshot.toRaw()),
       persistTime.toString(),
       expireTime.toString(),
+      onlyIfExists.toString(), // Only queue changes if the snapshot already exists
       ...changes.map(change => JSON.stringify(change.toRaw())), // Serialize changes
     ]
 
     const status = await rclient.queue_changes(keys, args)
     metrics.inc('chunk_store.redis.queue_changes', 1, { status })
     if (status === 'ok') {
-      return
+      return status
+    }
+    if (status === 'ignore') {
+      return status // skip changes when project does not exist and onlyIfExists is true
     }
     if (status === 'conflict') {
       throw new BaseVersionConflictError('base version mismatch', {

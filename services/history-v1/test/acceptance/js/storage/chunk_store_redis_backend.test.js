@@ -86,8 +86,7 @@ describe('chunk buffer Redis backend', function () {
         headSnapshot,
         baseVersion,
         [change],
-        persistTime,
-        expireTime
+        { persistTime, expireTime }
       )
 
       // Get the state to verify the changes
@@ -126,8 +125,7 @@ describe('chunk buffer Redis backend', function () {
           headSnapshot,
           baseVersion,
           [change],
-          persistTime,
-          expireTime
+          { persistTime, expireTime }
         )
         // If we get here, the test should fail
         expect.fail('Expected BaseVersionConflictError but no error was thrown')
@@ -157,8 +155,7 @@ describe('chunk buffer Redis backend', function () {
           headSnapshot,
           baseVersion,
           [], // Empty changes array
-          persistTime,
-          expireTime
+          { persistTime, expireTime }
         )
         // If we get here, the test should fail
         expect.fail('Expected Error but no error was thrown')
@@ -191,8 +188,7 @@ describe('chunk buffer Redis backend', function () {
         headSnapshot,
         baseVersion,
         [change1, change2, change3], // Multiple changes
-        persistTime,
-        expireTime
+        { persistTime, expireTime }
       )
 
       // Get the state to verify the changes
@@ -226,8 +222,7 @@ describe('chunk buffer Redis backend', function () {
         headSnapshot,
         baseVersion,
         [change],
-        laterPersistTime,
-        expireTime
+        { persistTime: laterPersistTime, expireTime }
       )
 
       // Get the state to verify the first persist time was set
@@ -241,8 +236,10 @@ describe('chunk buffer Redis backend', function () {
         newerHeadSnapshot,
         baseVersion + 1, // Updated base version
         [change],
-        earlierPersistTime, // Earlier time should replace the later one
-        expireTime
+        {
+          persistTime: earlierPersistTime, // Earlier time should replace the later one
+          expireTime,
+        }
       )
 
       // Get the state to verify the persist time was updated to the earlier time
@@ -256,13 +253,126 @@ describe('chunk buffer Redis backend', function () {
         evenNewerHeadSnapshot,
         baseVersion + 2, // Updated base version
         [change],
-        laterPersistTime, // Later time should not replace the earlier one
-        expireTime
+        {
+          persistTime: laterPersistTime, // Later time should not replace the earlier one
+          expireTime,
+        }
       )
 
       // Get the state to verify the persist time remains at the earlier time
       state = await redisBackend.getState(projectId)
       expect(state.persistTime).to.equal(earlierPersistTime) // Should still be the earlier time
+    })
+
+    it('should ignore changes when onlyIfExists is true and project does not exist', async function () {
+      // Create base version
+      const baseVersion = 10
+
+      // Create a new head snapshot
+      const headSnapshot = new Snapshot()
+
+      // Create changes
+      const timestamp = new Date()
+      const change = new Change([], timestamp)
+
+      // Set times
+      const now = Date.now()
+      const persistTime = now + 30 * 1000
+      const expireTime = now + 60 * 60 * 1000
+
+      // Queue changes with onlyIfExists set to true
+      const result = await redisBackend.queueChanges(
+        projectId,
+        headSnapshot,
+        baseVersion,
+        [change],
+        { persistTime, expireTime, onlyIfExists: true }
+      )
+
+      // Should return 'ignore' status
+      expect(result).to.equal('ignore')
+
+      // Get the state - should be empty/null
+      const state = await redisBackend.getState(projectId)
+      expect(state.headVersion).to.be.null
+      expect(state.headSnapshot).to.be.null
+    })
+
+    it('should queue changes when onlyIfExists is true and project exists', async function () {
+      // First create the project
+      const headSnapshot = new Snapshot()
+      const baseVersion = 10
+      const timestamp = new Date()
+      const change1 = new Change([], timestamp)
+
+      // Set times
+      const now = Date.now()
+      const persistTime = now + 30 * 1000
+      const expireTime = now + 60 * 60 * 1000
+
+      // Create the project first
+      await redisBackend.queueChanges(
+        projectId,
+        headSnapshot,
+        baseVersion,
+        [change1],
+        { persistTime, expireTime }
+      )
+
+      // Now create another change with onlyIfExists set to true
+      const newerSnapshot = new Snapshot()
+      const change2 = new Change([], timestamp)
+
+      // Queue changes with onlyIfExists set to true
+      const result = await redisBackend.queueChanges(
+        projectId,
+        newerSnapshot,
+        baseVersion + 1, // Version should be 1 after the first change
+        [change2],
+        { persistTime, expireTime, onlyIfExists: true }
+      )
+
+      // Should return 'ok' status
+      expect(result).to.equal('ok')
+
+      // Get the state to verify the changes were applied
+      const state = await redisBackend.getState(projectId)
+      expect(state.headVersion).to.equal(baseVersion + 2) // Should be 2 after both changes
+      expect(state.headSnapshot).to.deep.equal(newerSnapshot.toRaw())
+    })
+
+    it('should queue changes when onlyIfExists is false and project does not exist', async function () {
+      // Create base version
+      const baseVersion = 10
+
+      // Create a new head snapshot
+      const headSnapshot = new Snapshot()
+
+      // Create changes
+      const timestamp = new Date()
+      const change = new Change([], timestamp)
+
+      // Set times
+      const now = Date.now()
+      const persistTime = now + 30 * 1000
+      const expireTime = now + 60 * 60 * 1000
+
+      // Queue changes with onlyIfExists explicitly set to false
+      const result = await redisBackend.queueChanges(
+        projectId,
+        headSnapshot,
+        baseVersion,
+        [change],
+        { persistTime, expireTime, onlyIfExists: false }
+      )
+
+      // Should return 'ok' status
+      expect(result).to.equal('ok')
+
+      // Get the state to verify the project was created
+      const state = await redisBackend.getState(projectId)
+      expect(state.headVersion).to.equal(baseVersion + 1)
+      expect(state.headSnapshot).to.deep.equal(headSnapshot.toRaw())
     })
   })
 
@@ -1011,18 +1121,15 @@ async function queueChanges(projectId, changes, opts = {}) {
   const baseVersion = 0
   const headSnapshot = new Snapshot()
 
-  // Set times
-  const now = Date.now()
-  const persistTime = opts.persistTime ?? now + 30 * 1000 // 30 seconds from now
-  const expireTime = opts.expireTime ?? now + 60 * 60 * 1000 // 1 hour from now
-
   await redisBackend.queueChanges(
     projectId,
     headSnapshot,
     baseVersion,
     changes,
-    persistTime,
-    expireTime
+    {
+      persistTime: opts.persistTime,
+      expireTime: opts.expireTime,
+    }
   )
 }
 
