@@ -6,8 +6,8 @@ import MaterialIcon from '@/shared/components/material-icon'
 import {
   ADD_ON_NAME,
   AI_ADD_ON_CODE,
-  AI_STANDALONE_ANNUAL_PLAN_CODE,
-  AI_STANDALONE_PLAN_CODE,
+  AI_ASSIST_STANDALONE_ANNUAL_PLAN_CODE,
+  AI_ASSIST_STANDALONE_MONTHLY_PLAN_CODE,
 } from '@/features/subscription/data/add-on-codes'
 import sparkle from '@/shared/svgs/sparkle.svg'
 import { PaidSubscription } from '../../../../../../../../types/subscription/dashboard/subscription'
@@ -32,8 +32,8 @@ type AddOnProps = {
 function resolveAddOnName(addOnCode: string) {
   switch (addOnCode) {
     case AI_ADD_ON_CODE:
-    case AI_STANDALONE_ANNUAL_PLAN_CODE:
-    case AI_STANDALONE_PLAN_CODE:
+    case AI_ASSIST_STANDALONE_ANNUAL_PLAN_CODE:
+    case AI_ASSIST_STANDALONE_MONTHLY_PLAN_CODE:
       return ADD_ON_NAME
   }
 }
@@ -156,11 +156,12 @@ function AddOns({
   const hasAiAssistViaWritefull = getMeta('ol-hasAiAssistViaWritefull')
   const addOnsDisplayPrices = onStandalonePlan
     ? {
-        [AI_STANDALONE_PLAN_CODE]: subscription.payment.displayPrice,
+        [AI_ASSIST_STANDALONE_MONTHLY_PLAN_CODE]:
+          subscription.payment.displayPrice,
       }
     : subscription.payment.addOnDisplayPricesWithoutAdditionalLicense
   const addOnsToDisplay = onStandalonePlan
-    ? [{ addOnCode: AI_STANDALONE_PLAN_CODE }]
+    ? [{ addOnCode: AI_ASSIST_STANDALONE_MONTHLY_PLAN_CODE }]
     : subscription.addOns?.filter(addOn => addOn.addOnCode !== LICENSE_ADD_ON)
 
   const hasAddons =

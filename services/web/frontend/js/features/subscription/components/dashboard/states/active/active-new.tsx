@@ -16,7 +16,7 @@ import isInFreeTrial from '../../../../util/is-in-free-trial'
 import AddOns from '@/features/subscription/components/dashboard/states/active/add-ons'
 import {
   AI_ADD_ON_CODE,
-  AI_STANDALONE_PLAN_CODE,
+  AI_ASSIST_STANDALONE_MONTHLY_PLAN_CODE,
   isStandaloneAiPlanCode,
 } from '@/features/subscription/data/add-on-codes'
 import getMeta from '@/utils/meta'
@@ -74,7 +74,11 @@ export function ActiveSubscriptionNew({
   const handlePlanChange = () => setModalIdShown('change-plan')
   const handleManageOnWritefull = () => setModalIdShown('manage-on-writefull')
   const handleCancelClick = (addOnCode: string) => {
-    if ([AI_STANDALONE_PLAN_CODE, AI_ADD_ON_CODE].includes(addOnCode)) {
+    if (
+      [AI_ASSIST_STANDALONE_MONTHLY_PLAN_CODE, AI_ADD_ON_CODE].includes(
+        addOnCode
+      )
+    ) {
       setModalIdShown('cancel-ai-add-on')
     }
   }

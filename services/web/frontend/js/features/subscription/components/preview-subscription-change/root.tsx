@@ -108,7 +108,7 @@ function PreviewSubscriptionChange() {
             {aiAddOnChange && (
               <div>
                 <Trans
-                  i18nKey="add_error_assist_to_your_projects"
+                  i18nKey="add_ai_assist_to_your_plan"
                   components={{
                     sparkle: (
                       <img
