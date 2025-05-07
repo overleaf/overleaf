@@ -24,7 +24,7 @@
     "bunyan": "^1.8.12",
     "check-types": "^11.1.2",
     "command-line-args": "^3.0.3",
-    "config": "^1.19.0",
+    "config": "^3.3.12",
     "express": "^4.21.2",
     "fs-extra": "^9.0.1",
     "generic-pool": "^2.1.1",
