@@ -12,12 +12,12 @@ import {
 import sparkle from '@/shared/svgs/sparkle.svg'
 import { PaidSubscription } from '../../../../../../../../types/subscription/dashboard/subscription'
 import { LICENSE_ADD_ON } from '@/features/group-management/components/upgrade-subscription/upgrade-subscription-plan-details'
+import WritefullManagedBundleAddOn from './change-plan/modals/writefull-bundle-management-modal'
 
 type AddOnsProps = {
   subscription: PaidSubscription
   onStandalonePlan: boolean
   handleCancelClick: (code: string) => void
-  handleManageOnWritefull: () => void
 }
 
 type AddOnProps = {
@@ -100,57 +100,10 @@ function AddOn({
   )
 }
 
-function WritefullGrantedAddOn({
-  handleManageOnWritefull,
-}: {
-  handleManageOnWritefull: () => void
-}) {
-  const { t } = useTranslation()
-  return (
-    <div className="add-on-card">
-      <div>
-        <img
-          alt="sparkle"
-          className="add-on-card-icon"
-          src={sparkle}
-          aria-hidden="true"
-        />
-      </div>
-      <div className="add-on-card-content">
-        <div className="heading">{ADD_ON_NAME}</div>
-        <div className="description small mt-1">
-          {t('included_as_part_of_your_writefull_subscription')}
-        </div>
-      </div>
-
-      <div className="ms-auto">
-        <Dropdown align="end">
-          <DropdownToggle
-            id="add-on-dropdown-toggle"
-            className="add-on-options-toggle"
-            variant="secondary"
-          >
-            <MaterialIcon
-              type="more_vert"
-              accessibilityLabel={t('more_options')}
-            />
-          </DropdownToggle>
-          <DropdownMenu flip={false}>
-            <OLDropdownMenuItem tabIndex={-1} onClick={handleManageOnWritefull}>
-              {t('manage_subscription')}
-            </OLDropdownMenuItem>
-          </DropdownMenu>
-        </Dropdown>
-      </div>
-    </div>
-  )
-}
-
 function AddOns({
   subscription,
   onStandalonePlan,
   handleCancelClick,
-  handleManageOnWritefull,
 }: AddOnsProps) {
   const { t } = useTranslation()
   const hasAiAssistViaWritefull = getMeta('ol-hasAiAssistViaWritefull')
@@ -187,11 +140,7 @@ function AddOns({
               nextBillingDate={subscription.payment.nextPaymentDueDate}
             />
           ))}
-          {hasAiAssistViaWritefull && (
-            <WritefullGrantedAddOn
-              handleManageOnWritefull={handleManageOnWritefull}
-            />
-          )}
+          {hasAiAssistViaWritefull && <WritefullManagedBundleAddOn />}
         </>
       ) : (
         <p>{t('you_dont_have_any_add_ons_on_your_account')}</p>

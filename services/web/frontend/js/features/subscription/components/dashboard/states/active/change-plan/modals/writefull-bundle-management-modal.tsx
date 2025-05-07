@@ -8,8 +8,13 @@ import OLModal, {
   OLModalTitle,
 } from '@/features/ui/components/ol/ol-modal'
 import OLButton from '@/features/ui/components/ol/ol-button'
+import sparkle from '@/shared/svgs/sparkle.svg'
+import { Dropdown, DropdownMenu, DropdownToggle } from 'react-bootstrap-5'
+import OLDropdownMenuItem from '@/features/ui/components/ol/ol-dropdown-menu-item'
+import MaterialIcon from '@/shared/components/material-icon'
+import { ADD_ON_NAME } from '@/features/subscription/data/add-on-codes'
 
-export function WritefullBundleManagementModal() {
+function WritefullBundleManagementModal() {
   const modalId: SubscriptionDashModalIds = 'manage-on-writefull'
   const { t } = useTranslation()
   const { handleCloseModal, modalIdShown } = useSubscriptionDashboardContext()
@@ -49,3 +54,64 @@ export function WritefullBundleManagementModal() {
     </OLModal>
   )
 }
+
+function WritefullGrantedAddOn({
+  handleManageOnWritefull,
+}: {
+  handleManageOnWritefull: () => void
+}) {
+  const { t } = useTranslation()
+  return (
+    <div className="add-on-card">
+      <div>
+        <img
+          alt="sparkle"
+          className="add-on-card-icon"
+          src={sparkle}
+          aria-hidden="true"
+        />
+      </div>
+      <div className="add-on-card-content">
+        <div className="heading">{ADD_ON_NAME}</div>
+        <div className="description small mt-1">
+          {t('included_as_part_of_your_writefull_subscription')}
+        </div>
+      </div>
+
+      <div className="ms-auto">
+        <Dropdown align="end">
+          <DropdownToggle
+            id="add-on-dropdown-toggle"
+            className="add-on-options-toggle"
+            variant="secondary"
+          >
+            <MaterialIcon
+              type="more_vert"
+              accessibilityLabel={t('more_options')}
+            />
+          </DropdownToggle>
+          <DropdownMenu flip={false}>
+            <OLDropdownMenuItem tabIndex={-1} onClick={handleManageOnWritefull}>
+              {t('manage_subscription')}
+            </OLDropdownMenuItem>
+          </DropdownMenu>
+        </Dropdown>
+      </div>
+    </div>
+  )
+}
+
+export function WritefullManagedBundleAddOn() {
+  const { setModalIdShown } = useSubscriptionDashboardContext()
+  const handleManageOnWritefull = () => setModalIdShown('manage-on-writefull')
+  return (
+    <>
+      <WritefullGrantedAddOn
+        handleManageOnWritefull={handleManageOnWritefull}
+      />
+      <WritefullBundleManagementModal />
+    </>
+  )
+}
+
+export default WritefullManagedBundleAddOn
