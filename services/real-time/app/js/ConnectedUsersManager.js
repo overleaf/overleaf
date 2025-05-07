@@ -29,6 +29,10 @@ function recordProjectNotEmptySinceMetric(res, status) {
 }
 
 module.exports = {
+  countConnectedClients(projectId, callback) {
+    rclient.scard(Keys.clientsInProject({ project_id: projectId }), callback)
+  },
+
   // Use the same method for when a user connects, and when a user sends a cursor
   // update. This way we don't care if the connected_user key has expired when
   // we receive a cursor update.

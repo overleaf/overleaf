@@ -52,6 +52,11 @@ async function getDocument(req, res) {
       'overleaf.history.rangesSupportEnabled',
       false
     )
+    const otMigrationStage = _.get(
+      project,
+      'overleaf.history.otMigrationStage',
+      0
+    )
 
     // all projects are now migrated to Full Project History, keeping the field
     // for API compatibility
@@ -65,6 +70,7 @@ async function getDocument(req, res) {
       projectHistoryId,
       projectHistoryType,
       historyRangesSupport,
+      otMigrationStage,
       resolvedCommentIds,
     })
   }

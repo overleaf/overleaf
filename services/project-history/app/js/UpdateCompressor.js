@@ -2,6 +2,7 @@
 
 import OError from '@overleaf/o-error'
 import DMP from 'diff-match-patch'
+import { EditOperationBuilder } from 'overleaf-editor-core'
 
 /**
  * @import { DeleteOp, InsertOp, Op, Update } from './types'
@@ -230,6 +231,15 @@ function _concatTwoUpdates(firstUpdate, secondUpdate) {
     return [firstUpdate, secondUpdate]
   }
 
+  const firstUpdateIsHistoryV1OT = EditOperationBuilder.isValid(firstUpdate.op)
+  const secondUpdateIsHistoryV1OT = EditOperationBuilder.isValid(
+    secondUpdate.op
+  )
+  if (firstUpdateIsHistoryV1OT !== secondUpdateIsHistoryV1OT) {
+    // cannot merge mix of sharejs-text-op and history-ot, should not happen.
+    return [firstUpdate, secondUpdate]
+  }
+
   if (
     firstUpdate.doc !== secondUpdate.doc ||
     firstUpdate.pathname !== secondUpdate.pathname
@@ -274,6 +284,15 @@ function _concatTwoUpdates(firstUpdate, secondUpdate) {
     // treated as a tracked insert rejection by the history, so these updates
     // need to be well separated.
     return [firstUpdate, secondUpdate]
+  }
+
+  if (firstUpdateIsHistoryV1OT && secondUpdateIsHistoryV1OT) {
+    const op1 = EditOperationBuilder.fromJSON(firstUpdate.op)
+    const op2 = EditOperationBuilder.fromJSON(secondUpdate.op)
+    if (!op1.canBeComposedWith(op2)) return [firstUpdate, secondUpdate]
+    return [
+      mergeUpdatesWithOp(firstUpdate, secondUpdate, op1.compose(op2).toJSON()),
+    ]
   }
 
   if (
@@ -440,8 +459,7 @@ export function diffAsShareJsOps(before, after) {
   const ops = []
   let position = 0
   for (const diff of diffs) {
-    const type = diff[0]
-    const content = diff[1]
+    const [type, content] = diff
     if (type === ADDED) {
       ops.push({
         i: content,

@@ -123,6 +123,16 @@ module.exports = Client = {
     )
   },
 
+  countConnectedClients(projectId, callback) {
+    request.get(
+      {
+        url: `http://127.0.0.1:3026/project/${projectId}/count-connected-clients`,
+        json: true,
+      },
+      (error, response, data) => callback(error, data)
+    )
+  },
+
   getConnectedClient(clientId, callback) {
     if (callback == null) {
       callback = function () {}

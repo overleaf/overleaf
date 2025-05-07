@@ -19,7 +19,7 @@ const Keys = settings.redis.documentupdater.key_schema
 const DocumentUpdaterManager = {
   getDocument(projectId, docId, fromVersion, callback) {
     const timer = new metrics.Timer('get-document')
-    const url = `${settings.apis.documentupdater.url}/project/${projectId}/doc/${docId}?fromVersion=${fromVersion}`
+    const url = `${settings.apis.documentupdater.url}/project/${projectId}/doc/${docId}?fromVersion=${fromVersion}&historyV1OTSupport=true`
     logger.debug(
       { projectId, docId, fromVersion },
       'getting doc from document updater'
@@ -48,7 +48,8 @@ const DocumentUpdaterManager = {
           body.version,
           body.ranges,
           body.ops,
-          body.ttlInS
+          body.ttlInS,
+          body.type
         )
       } else if (res.statusCode === 422 && body?.firstVersionInRedis) {
         callback(new ClientRequestedMissingOpsError(422, body))

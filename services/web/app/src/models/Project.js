@@ -99,6 +99,7 @@ const ProjectSchema = new Schema(
         allowDowngrade: { type: Boolean },
         zipFileArchivedInProject: { type: Boolean },
         rangesSupportEnabled: { type: Boolean },
+        otMigrationStage: { type: Number },
       },
     },
     collabratecUsers: [

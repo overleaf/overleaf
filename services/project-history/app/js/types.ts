@@ -1,5 +1,9 @@
 import { HistoryRanges } from '../../../document-updater/app/js/types'
-import { LinkedFileData, RawOrigin } from 'overleaf-editor-core/lib/types'
+import {
+  LinkedFileData,
+  RawEditOperation,
+  RawOrigin,
+} from 'overleaf-editor-core/lib/types'
 
 export type Update =
   | TextUpdate
@@ -37,6 +41,15 @@ export type TextUpdate = {
     doc_length: number
     doc_hash?: string
     history_doc_length?: number
+  }
+}
+
+export type HistoryV1OTEditOperationUpdate = {
+  doc: string
+  op: RawEditOperation[]
+  v: number
+  meta: UpdateMeta & {
+    pathname: string
   }
 }
 

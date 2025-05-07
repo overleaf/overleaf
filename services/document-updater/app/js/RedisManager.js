@@ -48,6 +48,7 @@ const RedisManager = {
       timer.done()
       _callback(error)
     }
+    const shareJSTextOT = Array.isArray(docLines)
     const docLinesArray = docLines
     docLines = JSON.stringify(docLines)
     if (docLines.indexOf('\u0000') !== -1) {
@@ -60,7 +61,10 @@ const RedisManager = {
     // Do an optimised size check on the docLines using the serialised
     // length as an upper bound
     const sizeBound = docLines.length
-    if (docIsTooLarge(sizeBound, docLinesArray, Settings.max_doc_length)) {
+    if (
+      shareJSTextOT && // editor-core has a size check in TextOperation.apply and TextOperation.applyToLength.
+      docIsTooLarge(sizeBound, docLinesArray, Settings.max_doc_length)
+    ) {
       const docSize = docLines.length
       const err = new Error('blocking doc insert into redis: doc is too large')
       logger.error({ projectId, docId, err, docSize }, err.message)
@@ -324,13 +328,6 @@ const RedisManager = {
             } catch (e) {
               return callback(e)
             }
-            if (docLines != null && !Array.isArray(docLines)) {
-              return callback(
-                new Errors.ProjectMigratedToHistoryOTError(
-                  'refusing to process doc that was migrated to history-ot'
-                )
-              )
-            }
 
             version = parseInt(version || 0, 10)
             // check doc is in requested project
@@ -468,6 +465,7 @@ const RedisManager = {
     if (appliedOps == null) {
       appliedOps = []
     }
+    const shareJSTextOT = Array.isArray(docLines)
     RedisManager.getDocVersion(docId, (error, currentVersion) => {
       if (error) {
         return callback(error)
@@ -507,7 +505,10 @@ const RedisManager = {
       // Do an optimised size check on the docLines using the serialised
       // length as an upper bound
       const sizeBound = newDocLines.length
-      if (docIsTooLarge(sizeBound, docLines, Settings.max_doc_length)) {
+      if (
+        shareJSTextOT && // editor-core has a size check in TextOperation.apply and TextOperation.applyToLength.
+        docIsTooLarge(sizeBound, docLines, Settings.max_doc_length)
+      ) {
         const err = new Error('blocking doc update: doc is too large')
         const docSize = newDocLines.length
         logger.error({ projectId, docId, err, docSize }, err.message)

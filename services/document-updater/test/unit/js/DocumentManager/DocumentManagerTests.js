@@ -49,6 +49,9 @@ describe('DocumentManager', function () {
         applyUpdate: sinon.stub().resolves(),
       },
     }
+    this.HistoryV1OTUpdateManager = {
+      applyUpdate: sinon.stub().resolves(),
+    }
     this.RangesManager = {
       acceptChanges: sinon.stub(),
       deleteComment: sinon.stub(),
@@ -66,6 +69,7 @@ describe('DocumentManager', function () {
         './Metrics': this.Metrics,
         './DiffCodec': this.DiffCodec,
         './UpdateManager': this.UpdateManager,
+        './HistoryV1OTUpdateManager': this.HistoryV1OTUpdateManager,
         './RangesManager': this.RangesManager,
         './Errors': Errors,
         '@overleaf/settings': this.Settings,
@@ -222,6 +226,7 @@ describe('DocumentManager', function () {
           ranges: this.ranges,
           pathname: this.pathname,
           projectHistoryId: this.projectHistoryId,
+          type: 'sharejs-text-ot',
         })
         this.RedisManager.promises.getPreviousDocOps.resolves(this.ops)
         this.result = await this.DocumentManager.promises.getDocAndRecentOps(
@@ -251,6 +256,7 @@ describe('DocumentManager', function () {
           ranges: this.ranges,
           pathname: this.pathname,
           projectHistoryId: this.projectHistoryId,
+          type: 'sharejs-text-ot',
         })
       })
     })
@@ -263,6 +269,7 @@ describe('DocumentManager', function () {
           ranges: this.ranges,
           pathname: this.pathname,
           projectHistoryId: this.projectHistoryId,
+          type: 'sharejs-text-ot',
         })
         this.RedisManager.promises.getPreviousDocOps.resolves(this.ops)
         this.result = await this.DocumentManager.promises.getDocAndRecentOps(
@@ -290,6 +297,7 @@ describe('DocumentManager', function () {
           ranges: this.ranges,
           pathname: this.pathname,
           projectHistoryId: this.projectHistoryId,
+          type: 'sharejs-text-ot',
         })
       })
     })
@@ -333,6 +341,7 @@ describe('DocumentManager', function () {
           unflushedTime: this.unflushedTime,
           alreadyLoaded: true,
           historyRangesSupport: this.historyRangesSupport,
+          type: 'sharejs-text-ot',
         })
       })
     })
@@ -400,6 +409,7 @@ describe('DocumentManager', function () {
           unflushedTime: null,
           alreadyLoaded: false,
           historyRangesSupport: this.historyRangesSupport,
+          type: 'sharejs-text-ot',
         })
       })
     })

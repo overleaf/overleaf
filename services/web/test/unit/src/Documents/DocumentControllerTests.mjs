@@ -126,6 +126,7 @@ describe('DocumentController', function () {
           projectHistoryType: 'project-history',
           resolvedCommentIds: ['comment2'],
           historyRangesSupport: false,
+          otMigrationStage: 0,
         })
       })
     })

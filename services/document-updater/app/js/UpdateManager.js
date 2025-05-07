@@ -15,9 +15,10 @@ const RangesManager = require('./RangesManager')
 const SnapshotManager = require('./SnapshotManager')
 const Profiler = require('./Profiler')
 const { isInsert, isDelete, getDocLength, computeDocHash } = require('./Utils')
+const HistoryV1OTUpdateManager = require('./HistoryV1OTUpdateManager')
 
 /**
- * @import { DeleteOp, InsertOp, Op, Ranges, Update, HistoryUpdate } from "./types"
+ * @import { Ranges, Update, HistoryUpdate } from "./types"
  */
 
 const UpdateManager = {
@@ -80,7 +81,11 @@ const UpdateManager = {
     profile.log('getPendingUpdatesForDoc')
 
     for (const update of updates) {
-      await UpdateManager.applyUpdate(projectId, docId, update)
+      if (HistoryV1OTUpdateManager.isHistoryOTEditOperationUpdate(update)) {
+        await HistoryV1OTUpdateManager.applyUpdate(projectId, docId, update)
+      } else {
+        await UpdateManager.applyUpdate(projectId, docId, update)
+      }
       profile.log('applyUpdate')
     }
     profile.log('async done').end()
@@ -110,11 +115,15 @@ const UpdateManager = {
         pathname,
         projectHistoryId,
         historyRangesSupport,
+        type,
       } = await DocumentManager.promises.getDoc(projectId, docId)
       profile.log('getDoc')
 
       if (lines == null || version == null) {
         throw new Errors.NotFoundError(`document not found: ${docId}`)
+      }
+      if (type !== 'sharejs-text-ot') {
+        throw new Errors.OTTypeMismatchError(type, 'sharejs-text-ot')
       }
 
       const previousVersion = version

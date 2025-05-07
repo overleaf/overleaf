@@ -1,12 +1,17 @@
 import {
   TrackingPropsRawData,
   ClearTrackingPropsRawData,
+  RawEditOperation,
 } from 'overleaf-editor-core/lib/types'
+
+export type OTType = 'sharejs-text-ot' | 'history-ot'
 
 /**
  * An update coming from the editor
  */
 export type Update = {
+  dup?: boolean
+  dupIfSource?: string[]
   doc: string
   op: Op[]
   v: number
@@ -16,6 +21,11 @@ export type Update = {
     ts?: number
   }
   projectHistoryId?: string
+}
+
+export type HistoryV1OTEditOperationUpdate = Omit<Update, 'op'> & {
+  op: RawEditOperation[]
+  meta: Update['meta'] & { source: string }
 }
 
 export type Op = InsertOp | DeleteOp | CommentOp | RetainOp

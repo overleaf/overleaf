@@ -2,7 +2,7 @@
 // Migrated from services/web/frontend/js/ide/editor/ShareJsDoc.js
 
 import EventEmitter from '../../../utils/EventEmitter'
-import { Doc } from '@/vendor/libs/sharejs'
+import sharejs, { Doc } from '@/vendor/libs/sharejs'
 import { Socket } from '@/features/ide-react/connection/types/socket'
 import { debugConsole } from '@/utils/debugging'
 import { decodeUtf8 } from '@/utils/decode-utf8'
@@ -12,11 +12,18 @@ import {
   Message,
   ShareJsConnectionState,
   ShareJsOperation,
+  ShareJsTextType,
   TrackChangesIdSeeds,
 } from '@/features/ide-react/editor/types/document'
 import { EditorFacade } from '@/features/source-editor/extensions/realtime'
 import { recordDocumentFirstChangeEvent } from '@/features/event-tracking/document-first-change-event'
 import getMeta from '@/utils/meta'
+import { HistoryOTType } from './share-js-history-ot-type'
+import { StringFileData } from 'overleaf-editor-core/index'
+import {
+  RawEditOperation,
+  StringFileRawData,
+} from 'overleaf-editor-core/lib/types'
 
 // All times below are in milliseconds
 const SINGLE_USER_FLUSH_DELAY = 2000
@@ -27,6 +34,7 @@ const FATAL_OP_TIMEOUT = 45000
 const RECENT_ACK_LIMIT = 2 * SINGLE_USER_FLUSH_DELAY
 
 type Update = Record<string, any>
+export type OTType = 'sharejs-text-ot' | 'history-ot'
 
 type Connection = {
   send: (update: Update) => void
@@ -35,7 +43,6 @@ type Connection = {
 }
 
 export class ShareJsDoc extends EventEmitter {
-  type: string
   track_changes = false
   track_changes_id_seeds: TrackChangesIdSeeds | null = null
   connection: Connection
@@ -57,12 +64,24 @@ export class ShareJsDoc extends EventEmitter {
     version: number,
     readonly socket: Socket,
     private readonly globalEditorWatchdogManager: EditorWatchdogManager,
-    private readonly eventEmitter: IdeEventEmitter
+    private readonly eventEmitter: IdeEventEmitter,
+    readonly type: OTType = 'sharejs-text-ot'
   ) {
     super()
-    this.type = 'text'
+    let sharejsType: ShareJsTextType = sharejs.types.text
     // Decode any binary bits of data
-    const snapshot = docLines.map(line => decodeUtf8(line)).join('\n')
+    let snapshot: string | StringFileData
+    if (this.type === 'history-ot') {
+      snapshot = StringFileData.fromRaw(
+        docLines as unknown as StringFileRawData
+      )
+      sharejsType = new HistoryOTType(snapshot) as ShareJsTextType<
+        StringFileData,
+        RawEditOperation[]
+      >
+    } else {
+      snapshot = docLines.map(line => decodeUtf8(line)).join('\n')
+    }
 
     this.connection = {
       send: (update: Update) => {
@@ -89,7 +108,7 @@ export class ShareJsDoc extends EventEmitter {
     }
 
     this._doc = new Doc(this.connection, this.doc_id, {
-      type: this.type,
+      type: sharejsType,
     })
     this._doc.setFlushDelay(SINGLE_USER_FLUSH_DELAY)
     this._doc.on('change', (...args: any[]) => {

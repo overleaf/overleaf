@@ -34,6 +34,7 @@
     "lodash": "^4.17.21",
     "minimist": "^1.2.8",
     "mongodb-legacy": "6.1.3",
+    "overleaf-editor-core": "*",
     "request": "^2.88.2",
     "requestretry": "^7.1.0"
   },

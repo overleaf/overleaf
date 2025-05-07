@@ -26,6 +26,7 @@ describe('HttpController', function () {
     this.Metrics.Timer.prototype.done = sinon.stub()
 
     this.project_id = 'project-id-123'
+    this.projectHistoryId = '123'
     this.doc_id = 'doc-id-123'
     this.source = 'editor'
     this.next = sinon.stub()
@@ -65,7 +66,9 @@ describe('HttpController', function () {
             this.version,
             [],
             this.ranges,
-            this.pathname
+            this.pathname,
+            this.projectHistoryId,
+            'sharejs-text-ot'
           )
         this.HttpController.getDoc(this.req, this.res, this.next)
       })
@@ -77,17 +80,16 @@ describe('HttpController', function () {
       })
 
       it('should return the doc as JSON', function () {
-        this.res.json
-          .calledWith({
-            id: this.doc_id,
-            lines: this.lines,
-            version: this.version,
-            ops: [],
-            ranges: this.ranges,
-            pathname: this.pathname,
-            ttlInS: 42,
-          })
-          .should.equal(true)
+        this.res.json.should.have.been.calledWith({
+          id: this.doc_id,
+          lines: this.lines,
+          version: this.version,
+          ops: [],
+          ranges: this.ranges,
+          pathname: this.pathname,
+          ttlInS: 42,
+          type: 'sharejs-text-ot',
+        })
       })
 
       it('should log the request', function () {
@@ -115,7 +117,9 @@ describe('HttpController', function () {
             this.version,
             this.ops,
             this.ranges,
-            this.pathname
+            this.pathname,
+            this.projectHistoryId,
+            'sharejs-text-ot'
           )
         this.req.query = { fromVersion: `${this.fromVersion}` }
         this.HttpController.getDoc(this.req, this.res, this.next)
@@ -128,17 +132,16 @@ describe('HttpController', function () {
       })
 
       it('should return the doc as JSON', function () {
-        this.res.json
-          .calledWith({
-            id: this.doc_id,
-            lines: this.lines,
-            version: this.version,
-            ops: this.ops,
-            ranges: this.ranges,
-            pathname: this.pathname,
-            ttlInS: 42,
-          })
-          .should.equal(true)
+        this.res.json.should.have.been.calledWith({
+          id: this.doc_id,
+          lines: this.lines,
+          version: this.version,
+          ops: this.ops,
+          ranges: this.ranges,
+          pathname: this.pathname,
+          ttlInS: 42,
+          type: 'sharejs-text-ot',
+        })
       })
 
       it('should log the request', function () {

@@ -113,6 +113,10 @@ module.exports = Router = {
       bodyParser.json({ limit: '5mb' }),
       HttpApiController.sendMessage
     )
+    app.get(
+      '/project/:projectId/count-connected-clients',
+      HttpApiController.countConnectedClients
+    )
 
     app.post('/drain', HttpApiController.startDrain)
     app.post(

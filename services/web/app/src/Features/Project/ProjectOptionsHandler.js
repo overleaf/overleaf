@@ -2,6 +2,8 @@ const { Project } = require('../../models/Project')
 const settings = require('@overleaf/settings')
 const { callbackify } = require('util')
 const { db, ObjectId } = require('../../infrastructure/mongodb')
+const Errors = require('../Errors/Errors')
+const { ReturnDocument } = require('mongodb-legacy')
 const safeCompilers = ['xelatex', 'pdflatex', 'latex', 'lualatex']
 
 const ProjectOptionsHandler = {
@@ -72,6 +74,21 @@ const ProjectOptionsHandler = {
     // NOTE: Updating the Mongoose model with the same query doesn't work. Maybe
     // because rangesSupportEnabled is not part of the schema?
     return db.projects.updateOne(conditions, update)
+  },
+
+  async setOTMigrationStage(projectId, nextStage) {
+    const project = await db.projects.findOneAndUpdate(
+      { _id: new ObjectId(projectId) },
+      // Use $max to ensure that we never downgrade the migration stage.
+      { $max: { 'overleaf.history.otMigrationStage': nextStage } },
+      {
+        returnDocument: ReturnDocument.AFTER,
+        projection: { 'overleaf.history.otMigrationStage': 1 },
+      }
+    )
+    if (!project) throw new Errors.NotFoundError('project does not exist')
+    const { otMigrationStage } = project.overleaf.history
+    return { otMigrationStage }
   },
 }
 

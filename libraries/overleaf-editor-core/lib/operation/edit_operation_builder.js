@@ -36,6 +36,20 @@ class EditOperationBuilder {
     }
     throw new Error('Unsupported operation in EditOperationBuilder.fromJSON')
   }
+
+  /**
+   * @param {unknown} raw
+   * @return {raw is RawEditOperation}
+   */
+  static isValid(raw) {
+    return (
+      isTextOperation(raw) ||
+      isRawAddCommentOperation(raw) ||
+      isRawDeleteCommentOperation(raw) ||
+      isRawSetCommentStateOperation(raw) ||
+      isRawEditNoOperation(raw)
+    )
+  }
 }
 
 /**

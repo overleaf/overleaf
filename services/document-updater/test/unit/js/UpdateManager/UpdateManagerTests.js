@@ -331,6 +331,7 @@ describe('UpdateManager', function () {
         pathname: this.pathname,
         projectHistoryId: this.projectHistoryId,
         historyRangesSupport: false,
+        type: 'sharejs-text-ot',
       })
       this.RangesManager.applyUpdate.returns({
         newRanges: this.updated_ranges,
@@ -502,6 +503,7 @@ describe('UpdateManager', function () {
           pathname: this.pathname,
           projectHistoryId: this.projectHistoryId,
           historyRangesSupport: true,
+          type: 'sharejs-text-ot',
         })
         await this.UpdateManager.promises.applyUpdate(
           this.project_id,

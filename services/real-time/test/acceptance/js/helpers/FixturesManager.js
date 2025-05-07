@@ -108,13 +108,17 @@ module.exports = FixturesManager = {
     if (!options.ops) {
       options.ops = ['mock', 'ops']
     }
-    const { doc_id: docId, lines, version, ops, ranges } = options
+    if (!options.type) {
+      options.type = 'sharejs-text-ot'
+    }
+    const { doc_id: docId, lines, version, ops, ranges, type } = options
 
     MockDocUpdaterServer.createMockDoc(projectId, docId, {
       lines,
       version,
       ops,
       ranges,
+      type,
     })
     return MockDocUpdaterServer.run(error => {
       if (error != null) {

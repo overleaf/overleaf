@@ -9,6 +9,7 @@ const Metrics = require('./Metrics')
 const DeleteQueueManager = require('./DeleteQueueManager')
 const { getTotalSizeOfLines } = require('./Limits')
 const async = require('async')
+const { StringFileData } = require('overleaf-editor-core')
 
 function getDoc(req, res, next) {
   let fromVersion
@@ -27,7 +28,7 @@ function getDoc(req, res, next) {
     projectId,
     docId,
     fromVersion,
-    (error, lines, version, ops, ranges, pathname) => {
+    (error, lines, version, ops, ranges, pathname, _projectHistoryId, type) => {
       timer.done()
       if (error) {
         return next(error)
@@ -35,6 +36,11 @@ function getDoc(req, res, next) {
       logger.debug({ projectId, docId }, 'got doc via http')
       if (lines == null || version == null) {
         return next(new Errors.NotFoundError('document not found'))
+      }
+      if (!Array.isArray(lines) && req.query.historyV1OTSupport !== 'true') {
+        const file = StringFileData.fromRaw(lines)
+        // TODO(24596): tc support for history-ot
+        lines = file.getLines()
       }
       res.json({
         id: docId,
@@ -44,6 +50,7 @@ function getDoc(req, res, next) {
         ranges,
         pathname,
         ttlInS: RedisManager.DOC_OPS_TTL,
+        type,
       })
     }
   )
@@ -83,6 +90,11 @@ function peekDoc(req, res, next) {
     }
     if (lines == null || version == null) {
       return next(new Errors.NotFoundError('document not found'))
+    }
+    if (!Array.isArray(lines) && req.query.historyV1OTSupport !== 'true') {
+      const file = StringFileData.fromRaw(lines)
+      // TODO(24596): tc support for history-ot
+      lines = file.getLines()
     }
     res.json({ id: docId, lines, version })
   })

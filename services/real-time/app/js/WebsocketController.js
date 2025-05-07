@@ -8,6 +8,7 @@ const ConnectedUsersManager = require('./ConnectedUsersManager')
 const WebsocketLoadBalancer = require('./WebsocketLoadBalancer')
 const RoomManager = require('./RoomManager')
 const {
+  CodedError,
   JoinLeaveEpochMismatchError,
   NotAuthorizedError,
   NotJoinedError,
@@ -283,7 +284,7 @@ module.exports = WebsocketController = {
             projectId,
             docId,
             fromVersion,
-            function (error, lines, version, ranges, ops, ttlInS) {
+            function (error, lines, version, ranges, ops, ttlInS, type) {
               if (error) {
                 if (error instanceof ClientRequestedMissingOpsError) {
                   emitJoinDocCatchUpMetrics('missing', error.info)
@@ -307,36 +308,53 @@ module.exports = WebsocketController = {
               // See http://ecmanaut.blogspot.co.uk/2006/07/encoding-decoding-utf8-in-javascript.html
               const encodeForWebsockets = text =>
                 unescape(encodeURIComponent(text))
-              const escapedLines = []
-              for (let line of lines) {
-                try {
-                  line = encodeForWebsockets(line)
-                } catch (err) {
-                  OError.tag(err, 'error encoding line uri component', { line })
-                  return callback(err)
+              metrics.inc('client_supports_history_v1_ot', 1, {
+                status: options.supportsHistoryV1OT ? 'success' : 'failure',
+              })
+              let escapedLines
+              if (type === 'history-ot') {
+                if (!options.supportsHistoryV1OT) {
+                  RoomManager.leaveDoc(client, docId)
+                  // TODO(24596): ask the user to reload the editor page (via out-of-sync modal when there are pending ops).
+                  return callback(
+                    new CodedError('client does not support history-ot')
+                  )
                 }
-                escapedLines.push(line)
-              }
-              if (options.encodeRanges) {
-                try {
-                  for (const comment of (ranges && ranges.comments) || []) {
-                    if (comment.op.c) {
-                      comment.op.c = encodeForWebsockets(comment.op.c)
-                    }
+                escapedLines = lines
+              } else {
+                escapedLines = []
+                for (let line of lines) {
+                  try {
+                    line = encodeForWebsockets(line)
+                  } catch (err) {
+                    OError.tag(err, 'error encoding line uri component', {
+                      line,
+                    })
+                    return callback(err)
                   }
-                  for (const change of (ranges && ranges.changes) || []) {
-                    if (change.op.i) {
-                      change.op.i = encodeForWebsockets(change.op.i)
+                  escapedLines.push(line)
+                }
+                if (options.encodeRanges) {
+                  try {
+                    for (const comment of (ranges && ranges.comments) || []) {
+                      if (comment.op.c) {
+                        comment.op.c = encodeForWebsockets(comment.op.c)
+                      }
                     }
-                    if (change.op.d) {
-                      change.op.d = encodeForWebsockets(change.op.d)
+                    for (const change of (ranges && ranges.changes) || []) {
+                      if (change.op.i) {
+                        change.op.i = encodeForWebsockets(change.op.i)
+                      }
+                      if (change.op.d) {
+                        change.op.d = encodeForWebsockets(change.op.d)
+                      }
                     }
+                  } catch (err) {
+                    OError.tag(err, 'error encoding range uri component', {
+                      ranges,
+                    })
+                    return callback(err)
                   }
-                } catch (err) {
-                  OError.tag(err, 'error encoding range uri component', {
-                    ranges,
-                  })
-                  return callback(err)
                 }
               }
 
@@ -351,7 +369,7 @@ module.exports = WebsocketController = {
                 },
                 'client joined doc'
               )
-              callback(null, escapedLines, version, ops, ranges)
+              callback(null, escapedLines, version, ops, ranges, type)
             }
           )
         })

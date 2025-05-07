@@ -13,11 +13,6 @@ const { expect } = require('chai')
 const MockWebApi = require('./helpers/MockWebApi')
 const DocUpdaterClient = require('./helpers/DocUpdaterClient')
 const DocUpdaterApp = require('./helpers/DocUpdaterApp')
-const Settings = require('@overleaf/settings')
-const docUpdaterRedis = require('@overleaf/redis-wrapper').createClient(
-  Settings.redis.documentupdater
-)
-const Keys = Settings.redis.documentupdater.key_schema
 
 describe('Getting a document', function () {
   before(function (done) {
@@ -111,59 +106,6 @@ describe('Getting a document', function () {
 
     return it('should return the document lines', function () {
       return this.returnedDoc.lines.should.deep.equal(this.lines)
-    })
-  })
-
-  describe('when the document is migrated (history-ot)', function () {
-    before(function (done) {
-      ;[this.project_id, this.doc_id] = Array.from([
-        DocUpdaterClient.randomId(),
-        DocUpdaterClient.randomId(),
-      ])
-
-      MockWebApi.insertDoc(this.project_id, this.doc_id, {
-        lines: this.lines,
-        version: this.version,
-      })
-      DocUpdaterClient.preloadDoc(this.project_id, this.doc_id, error => {
-        if (error != null) {
-          throw error
-        }
-        sinon.spy(MockWebApi, 'getDocument')
-        docUpdaterRedis.set(
-          Keys.docLines({ doc_id: this.doc_id }),
-          JSON.stringify({ content: this.lines.join('\n') }),
-          err => {
-            if (err) return done(err)
-
-            DocUpdaterClient.getDoc(
-              this.project_id,
-              this.doc_id,
-              (error, res, body) => {
-                if (error) return done(error)
-                this.res = res
-                this.body = body
-                done()
-              }
-            )
-          }
-        )
-      })
-    })
-
-    after(function () {
-      MockWebApi.getDocument.restore()
-    })
-
-    it('should not load the document from the web API', function () {
-      MockWebApi.getDocument.called.should.equal(false)
-    })
-
-    it('should return an error', function () {
-      expect(this.res.statusCode).to.equal(422)
-      expect(this.body).to.equal(
-        'refusing to process doc that was migrated to history-ot'
-      )
     })
   })
 

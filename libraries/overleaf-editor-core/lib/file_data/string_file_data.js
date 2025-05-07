@@ -88,6 +88,14 @@ class StringFileData extends FileData {
     return content
   }
 
+  /**
+   * Return docstore view of a doc: each line separated
+   * @return {string[]}
+   */
+  getLines() {
+    return this.getContent({ filterTrackedDeletes: true }).split('\n')
+  }
+
   /** @inheritdoc */
   getByteLength() {
     return Buffer.byteLength(this.content)

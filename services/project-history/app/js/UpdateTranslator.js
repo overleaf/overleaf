@@ -7,7 +7,7 @@ import * as OperationsCompressor from './OperationsCompressor.js'
 import { isInsert, isRetain, isDelete, isComment } from './Utils.js'
 
 /**
- * @import { AddDocUpdate, AddFileUpdate, DeleteCommentUpdate, Op, RawScanOp } from './types'
+ * @import { AddDocUpdate, AddFileUpdate, DeleteCommentUpdate, HistoryV1OTEditOperationUpdate, Op, RawScanOp } from './types'
  * @import { RenameUpdate, TextUpdate, TrackingDirective, TrackingProps } from './types'
  * @import { SetCommentStateUpdate, SetFileMetadataOperation, Update, UpdateWithBlob } from './types'
  */
@@ -60,6 +60,16 @@ function _convertToChange(projectId, updateWithBlob) {
     }
     operations = [op]
     projectVersion = update.version
+  } else if (isHistoryOTEditOperationUpdate(update)) {
+    let { pathname } = update.meta
+    pathname = _convertPathname(pathname)
+    if (update.v != null) {
+      v2DocVersions[update.doc] = { pathname, v: update.v }
+    }
+    operations = update.op.map(op => {
+      // Turn EditOperation into EditFileOperation by adding the pathname field.
+      return { pathname, ...op }
+    })
   } else if (isTextUpdate(update)) {
     const docLength = update.meta.history_doc_length ?? update.meta.doc_length
     let pathname = update.meta.pathname
@@ -191,6 +201,22 @@ export function isTextUpdate(update) {
     update.meta.pathname != null &&
     'doc_length' in update.meta &&
     update.meta.doc_length != null
+  )
+}
+
+/**
+ * @param {Update} update
+ * @returns {update is HistoryV1OTEditOperationUpdate}
+ */
+export function isHistoryOTEditOperationUpdate(update) {
+  return (
+    'doc' in update &&
+    update.doc != null &&
+    'op' in update &&
+    update.op != null &&
+    'pathname' in update.meta &&
+    update.meta.pathname != null &&
+    Core.EditOperationBuilder.isValid(update.op[0])
   )
 }
 

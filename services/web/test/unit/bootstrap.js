@@ -88,6 +88,7 @@ function getSandboxedModuleRequires() {
     'sshpk',
     'xml2js',
     'mongodb',
+    'mongodb-legacy',
   ]
   for (const modulePath of internalModules) {
     requires[Path.resolve(__dirname, modulePath)] = require(modulePath)
