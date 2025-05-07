@@ -101,18 +101,18 @@ async function updateSubscription(user, planCode) {
   if (
     !hasSubscription ||
     subscription == null ||
-    subscription.recurlySubscription_id == null
+    (subscription.recurlySubscription_id == null &&
+      subscription.paymentProvider?.subscriptionId == null)
   ) {
     return
   }
-  const recurlySubscriptionId = subscription.recurlySubscription_id
 
-  const recurlySubscription = await RecurlyClient.promises.getSubscription(
-    recurlySubscriptionId
+  await Modules.promises.hooks.fire(
+    'updatePaidSubscription',
+    subscription,
+    planCode,
+    user._id
   )
-  const changeRequest = recurlySubscription.getRequestForPlanChange(planCode)
-  await RecurlyClient.promises.applySubscriptionChangeRequest(changeRequest)
-  await syncSubscription({ uuid: recurlySubscriptionId }, user._id)
 }
 
 /**

@@ -4,7 +4,6 @@ const chai = require('chai')
 const { expect } = chai
 const {
   PaymentProviderSubscription,
-  PaymentProviderSubscriptionChangeRequest,
 } = require('../../../../app/src/Features/Subscription/PaymentProviderEntities')
 
 const MODULE_PATH =
@@ -258,97 +257,65 @@ describe('SubscriptionHandler', function () {
   })
 
   describe('updateSubscription', function () {
-    describe('with a user with a subscription', function () {
-      beforeEach(async function () {
-        this.user.id = this.activeRecurlySubscription.account.account_code
-        this.User.findById = (userId, projection) => ({
-          exec: () => {
-            userId.should.equal(this.user.id)
-            return Promise.resolve(this.user)
-          },
-        })
-        this.plan_code = 'professional'
-        this.LimitationsManager.promises.userHasSubscription.resolves({
-          hasSubscription: true,
-          subscription: this.subscription,
-        })
-        await this.SubscriptionHandler.promises.updateSubscription(
-          this.user,
-          this.plan_code
-        )
-      })
-
-      it('should update the subscription', function () {
-        expect(
-          this.RecurlyClient.promises.applySubscriptionChangeRequest
-        ).to.have.been.calledWith(
-          new PaymentProviderSubscriptionChangeRequest({
-            subscription: this.activeRecurlyClientSubscription,
-            timeframe: 'now',
-            planCode: this.plan_code,
-          })
-        )
-      })
-
-      it('should sync the new subscription to the user', function () {
-        expect(this.SubscriptionUpdater.promises.syncSubscription).to.have.been
-          .called
-
-        this.SubscriptionUpdater.promises.syncSubscription.args[0][0].should.deep.equal(
-          this.activeRecurlySubscription
-        )
-        this.SubscriptionUpdater.promises.syncSubscription.args[0][1].should.deep.equal(
-          this.user._id
-        )
+    beforeEach(function () {
+      this.user.id = this.activeRecurlySubscription.account.account_code
+      this.User.findById = (userId, projection) => ({
+        exec: () => {
+          userId.should.equal(this.user.id)
+          return Promise.resolve(this.user)
+        },
       })
     })
 
-    describe('when plan(s) could not be located in settings', function () {
-      beforeEach(async function () {
-        this.user.id = this.activeRecurlySubscription.account.account_code
-        this.User.findById = (userId, projection) => ({
-          exec: () => {
-            userId.should.equal(this.user.id)
-            return Promise.resolve(this.user)
-          },
-        })
-
-        this.LimitationsManager.promises.userHasSubscription.resolves({
-          hasSubscription: true,
-          subscription: this.subscription,
-        })
+    it('should not fire updatePaidSubscription hook if user has no subscription', async function () {
+      this.LimitationsManager.promises.userHasSubscription.resolves({
+        hasSubscription: false,
+        subscription: null,
       })
-
-      it('should be rejected and should not update the subscription', function () {
-        expect(
-          this.SubscriptionHandler.promises.updateSubscription(
-            this.user,
-            'unknown-plan'
-          )
-        ).to.be.rejected
-        this.RecurlyClient.promises.applySubscriptionChangeRequest.called.should.equal(
-          false
-        )
-      })
+      await this.SubscriptionHandler.promises.updateSubscription(
+        this.user,
+        this.plan_code
+      )
+      expect(this.Modules.promises.hooks.fire).to.not.have.been.calledWith(
+        'updatePaidSubscription',
+        sinon.match.any,
+        sinon.match.any,
+        sinon.match.any
+      )
     })
 
-    describe('with a user without a subscription', function () {
-      beforeEach(async function () {
-        this.LimitationsManager.promises.userHasSubscription.resolves(false)
-        await this.SubscriptionHandler.promises.updateSubscription(
-          this.user,
-          this.plan_code
-        )
+    it('should not fire updatePaidSubscription hook if user has custom subscription', async function () {
+      this.LimitationsManager.promises.userHasSubscription.resolves({
+        hasSubscription: true,
+        subscription: { customAccount: true },
       })
+      await this.SubscriptionHandler.promises.updateSubscription(
+        this.user,
+        this.plan_code
+      )
+      expect(this.Modules.promises.hooks.fire).to.not.have.been.calledWith(
+        'updatePaidSubscription',
+        sinon.match.any,
+        sinon.match.any,
+        sinon.match.any
+      )
+    })
 
-      it('should redirect to the subscription dashboard', function () {
-        this.RecurlyClient.promises.applySubscriptionChangeRequest.called.should.equal(
-          false
-        )
-        this.SubscriptionUpdater.promises.syncSubscription.called.should.equal(
-          false
-        )
+    it('should fire updatePaidSubscription to update a valid subscription', async function () {
+      this.LimitationsManager.promises.userHasSubscription.resolves({
+        hasSubscription: true,
+        subscription: this.subscription,
       })
+      await this.SubscriptionHandler.promises.updateSubscription(
+        this.user,
+        this.plan_code
+      )
+      expect(this.Modules.promises.hooks.fire).to.have.been.calledWith(
+        'updatePaidSubscription',
+        this.subscription,
+        this.plan_code,
+        this.user._id
+      )
     })
   })
 
