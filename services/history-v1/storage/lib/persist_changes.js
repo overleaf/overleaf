@@ -209,8 +209,7 @@ async function persistChanges(projectId, allChanges, limits, clientEndVersion) {
       projectId,
       hollowSnapshot,
       baseVersion,
-      changesToPersist,
-      { onlyIfExists: true }
+      changesToPersist
     )
   }
 
