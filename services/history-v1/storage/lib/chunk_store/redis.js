@@ -1,20 +1,28 @@
 const metrics = require('@overleaf/metrics')
-const logger = require('@overleaf/logger')
+const OError = require('@overleaf/o-error')
 const redis = require('../redis')
 const rclient = redis.rclientHistory //
-const { Snapshot, Change, History, Chunk } = require('overleaf-editor-core')
+const { Change, Snapshot } = require('overleaf-editor-core')
+const {
+  BaseVersionConflictError,
+  JobNotFoundError,
+  JobNotReadyError,
+} = require('./errors')
 
-const TEMPORARY_CACHE_LIFETIME = 300 // 5 minutes
+const MAX_PERSISTED_CHANGES = 100 // Maximum number of persisted changes to keep in the buffer for clients that need to catch up.
+const PROJECT_TTL_MS = 3600 * 1000 // Amount of time a project can stay inactive before it gets expired
+const MAX_PERSIST_DELAY_MS = 300 * 1000 // Maximum amount of time before a change is persisted
+const RETRY_DELAY_MS = 120 * 1000 // Time before a claimed job is considered stale and a worker can retry it.
 
 const keySchema = {
-  snapshot({ projectId }) {
-    return `snapshot:{${projectId}}`
+  head({ projectId }) {
+    return `head:{${projectId}}`
   },
-  startVersion({ projectId }) {
-    return `snapshot-version:{${projectId}}`
+  headVersion({ projectId }) {
+    return `head-version:{${projectId}}`
   },
-  changes({ projectId }) {
-    return `changes:{${projectId}}`
+  persistedVersion({ projectId }) {
+    return `persisted-version:{${projectId}}`
   },
   expireTime({ projectId }) {
     return `expire-time:{${projectId}}`
@@ -22,457 +30,689 @@ const keySchema = {
   persistTime({ projectId }) {
     return `persist-time:{${projectId}}`
   },
+  changes({ projectId }) {
+    return `changes:{${projectId}}`
+  },
 }
 
-rclient.defineCommand('get_current_chunk', {
-  numberOfKeys: 3,
-  lua: `
-      local startVersionValue = redis.call('GET', KEYS[2])
-      if not startVersionValue then
-        return nil -- this is a cache-miss
-      end
-      local snapshotValue = redis.call('GET', KEYS[1])
-      local changesValues = redis.call('LRANGE', KEYS[3], 0, -1)
-      return {snapshotValue, startVersionValue, changesValues}
-    `,
-})
-
-/**
- * Retrieves the current chunk of project history from Redis storage
- * @param {string} projectId - The unique identifier of the project
- * @returns {Promise<Chunk|null>} A Promise that resolves to a Chunk object containing project history,
- *                               or null if retrieval fails
- * @throws {Error} If Redis operations fail
- */
-async function getCurrentChunk(projectId) {
-  try {
-    const result = await rclient.get_current_chunk(
-      keySchema.snapshot({ projectId }),
-      keySchema.startVersion({ projectId }),
-      keySchema.changes({ projectId })
-    )
-    if (!result) {
-      return null // cache-miss
-    }
-    const snapshot = Snapshot.fromRaw(JSON.parse(result[0]))
-    const startVersion = JSON.parse(result[1])
-    const changes = result[2].map(c => Change.fromRaw(JSON.parse(c)))
-    const history = new History(snapshot, changes)
-    const chunk = new Chunk(history, startVersion)
-    metrics.inc('chunk_store.redis.get_current_chunk', 1, { status: 'success' })
-    return chunk
-  } catch (err) {
-    logger.error({ err, projectId }, 'error getting current chunk from redis')
-    metrics.inc('chunk_store.redis.get_current_chunk', 1, { status: 'error' })
-    return null
-  }
-}
-
-rclient.defineCommand('get_current_chunk_if_valid', {
-  numberOfKeys: 3,
-  lua: `
-      local expectedStartVersion = ARGV[1]
-      local expectedChangesCount = tonumber(ARGV[2])
-      local startVersionValue = redis.call('GET', KEYS[2])
-      if not startVersionValue then
-        return nil -- this is a cache-miss
-      end
-      if startVersionValue ~= expectedStartVersion then
-        return nil -- this is a cache-miss
-      end
-      local changesCount = redis.call('LLEN', KEYS[3])
-      if changesCount ~= expectedChangesCount then
-        return nil -- this is a cache-miss
-      end
-      local snapshotValue = redis.call('GET', KEYS[1])
-      local changesValues = redis.call('LRANGE', KEYS[3], 0, -1)
-      return {snapshotValue, startVersionValue, changesValues}
-    `,
-})
-
-async function getCurrentChunkIfValid(projectId, chunkRecord) {
-  try {
-    const changesCount = chunkRecord.endVersion - chunkRecord.startVersion
-    const result = await rclient.get_current_chunk_if_valid(
-      keySchema.snapshot({ projectId }),
-      keySchema.startVersion({ projectId }),
-      keySchema.changes({ projectId }),
-      chunkRecord.startVersion,
-      changesCount
-    )
-    if (!result) {
-      return null // cache-miss
-    }
-    const snapshot = Snapshot.fromRaw(JSON.parse(result[0]))
-    const startVersion = parseInt(result[1], 10)
-    const changes = result[2].map(c => Change.fromRaw(JSON.parse(c)))
-    const history = new History(snapshot, changes)
-    const chunk = new Chunk(history, startVersion)
-    metrics.inc('chunk_store.redis.get_current_chunk_if_valid', 1, {
-      status: 'success',
-    })
-    return chunk
-  } catch (err) {
-    logger.error(
-      { err, projectId, chunkRecord },
-      'error getting current chunk from redis'
-    )
-    metrics.inc('chunk_store.redis.get_current_chunk_if_valid', 1, {
-      status: 'error',
-    })
-    return null
-  }
-}
-
-rclient.defineCommand('get_current_chunk_metadata', {
+rclient.defineCommand('get_head_snapshot', {
   numberOfKeys: 2,
   lua: `
-      local startVersionValue = redis.call('GET', KEYS[1])
-      if not startVersionValue then
-        return nil -- this is a cache-miss
+      local headSnapshotKey = KEYS[1]
+      local headVersionKey = KEYS[2]
+
+      -- Check if the head version exists. If not, consider it a cache miss.
+      local version = redis.call('GET', headVersionKey)
+      if not version then
+        return nil
       end
-      local changesCount = redis.call('LLEN', KEYS[2])
-      return {startVersionValue, changesCount}
+
+      -- Retrieve the snapshot value
+      local snapshot = redis.call('GET', headSnapshotKey)
+      return {snapshot, version}
     `,
 })
 
 /**
- * Retrieves the current chunk metadata for a given project from Redis
- * @param {string} projectId - The ID of the project to get metadata for
- * @returns {Promise<Object|null>} Object containing startVersion and changesCount if found, null on error or cache miss
- * @property {number} startVersion - The starting version information
- * @property {number} changesCount - The number of changes in the chunk
+ * Retrieves the head snapshot from Redis storage
+ * @param {string} projectId - The unique identifier of the project
+ * @returns {Promise<{version: number, snapshot: Snapshot}|null>} A Promise that resolves to an object containing the version and Snapshot,
+ *                               or null if retrieval fails or cache miss
+ * @throws {Error} If Redis operations fail
  */
-async function getCurrentChunkMetadata(projectId) {
+async function getHeadSnapshot(projectId) {
   try {
-    const result = await rclient.get_current_chunk_metadata(
-      keySchema.startVersion({ projectId }),
-      keySchema.changes({ projectId })
+    const result = await rclient.get_head_snapshot(
+      keySchema.head({ projectId }),
+      keySchema.headVersion({ projectId })
     )
     if (!result) {
+      metrics.inc('chunk_store.redis.get_head_snapshot', 1, {
+        status: 'cache-miss',
+      })
       return null // cache-miss
     }
-    const startVersion = JSON.parse(result[0])
-    const changesCount = parseInt(result[1], 10)
-    return { startVersion, changesCount }
+    const snapshot = Snapshot.fromRaw(JSON.parse(result[0]))
+    const version = parseInt(result[1], 10)
+    metrics.inc('chunk_store.redis.get_head_snapshot', 1, {
+      status: 'success',
+    })
+    return { version, snapshot }
   } catch (err) {
-    return null
-  }
-}
-
-rclient.defineCommand('set_current_chunk', {
-  numberOfKeys: 4,
-  lua: `
-      local snapshotValue = ARGV[1]
-      local startVersionValue = ARGV[2]
-      local expireTime = ARGV[3]
-      redis.call('SET', KEYS[1], snapshotValue)
-      redis.call('SET', KEYS[2], startVersionValue)
-      redis.call('SET', KEYS[3], expireTime)
-      redis.call('DEL', KEYS[4]) -- clear the old changes list
-      if #ARGV >= 4 then
-        redis.call('RPUSH', KEYS[4], unpack(ARGV, 4))
-      end
-
-    `,
-})
-
-/**
- * Stores the current chunk of project history in Redis
- * @param {string} projectId - The ID of the project
- * @param {Chunk} chunk - The chunk object containing history data
- * @returns {Promise<*>} Returns the result of the Redis operation, or null if an error occurs
- * @throws {Error} May throw Redis-related errors which are caught internally
- */
-async function setCurrentChunk(projectId, chunk) {
-  try {
-    const snapshotKey = keySchema.snapshot({ projectId })
-    const startVersionKey = keySchema.startVersion({ projectId })
-    const changesKey = keySchema.changes({ projectId })
-    const expireTimeKey = keySchema.expireTime({ projectId })
-
-    const snapshot = chunk.history.snapshot
-    const startVersion = chunk.startVersion
-    const changes = chunk.history.changes
-    const expireTime = Date.now() + TEMPORARY_CACHE_LIFETIME * 1000
-
-    await rclient.set_current_chunk(
-      snapshotKey, //     KEYS[1]
-      startVersionKey, // KEYS[2]
-      expireTimeKey, //   KEYS[3]
-      changesKey, //      KEYS[4]
-      JSON.stringify(snapshot.toRaw()), // ARGV[1]
-      startVersion, // ARGV[2]
-      expireTime, //   ARGV[3]
-      ...changes.map(c => JSON.stringify(c.toRaw())) // ARGV[4..]
-    )
-    metrics.inc('chunk_store.redis.set_current_chunk', 1, { status: 'success' })
-  } catch (err) {
-    logger.error(
-      { err, projectId, chunk },
-      'error setting current chunk in redis'
-    )
-    metrics.inc('chunk_store.redis.set_current_chunk', 1, { status: 'error' })
-    return null // while testing we will suppress any errors
-  }
-}
-
-/**
- * Checks whether a cached chunk's version metadata matches the current chunk's metadata
- * @param {Chunk} cachedChunk - The chunk retrieved from cache
- * @param {Chunk} currentChunk - The current chunk to compare against
- * @returns {boolean} - Returns true if the chunks have matching start and end versions, false otherwise
- */
-function checkCacheValidity(cachedChunk, currentChunk) {
-  return Boolean(
-    cachedChunk &&
-      cachedChunk.getStartVersion() === currentChunk.getStartVersion() &&
-      cachedChunk.getEndVersion() === currentChunk.getEndVersion()
-  )
-}
-
-/**
- * Validates if a cached chunk matches the current chunk metadata by comparing versions
- * @param {Object} cachedChunk - The cached chunk object to validate
- * @param {Object} currentChunkMetadata - The current chunk metadata to compare against
- * @param {number} currentChunkMetadata.startVersion - The starting version number
- * @param {number} currentChunkMetadata.endVersion - The ending version number
- * @returns {boolean} - True if the cached chunk is valid, false otherwise
- */
-function checkCacheValidityWithMetadata(cachedChunk, currentChunkMetadata) {
-  return Boolean(
-    cachedChunk &&
-      cachedChunk.getStartVersion() === currentChunkMetadata.startVersion &&
-      cachedChunk.getEndVersion() === currentChunkMetadata.endVersion
-  )
-}
-
-/**
- * Compares two chunks for equality using stringified JSON comparison
- * @param {string} projectId - The ID of the project
- * @param {Chunk} cachedChunk - The cached chunk to compare
- * @param {Chunk} currentChunk - The current chunk to compare against
- * @returns {boolean} - Returns false if either chunk is null/undefined, otherwise returns the comparison result
- */
-function compareChunks(projectId, cachedChunk, currentChunk) {
-  if (!cachedChunk || !currentChunk) {
-    return false
-  }
-  const identical = JSON.stringify(cachedChunk) === JSON.stringify(currentChunk)
-  if (!identical) {
-    try {
-      logger.error(
-        {
-          projectId,
-          cachedChunkStartVersion: cachedChunk.getStartVersion(),
-          cachedChunkEndVersion: cachedChunk.getEndVersion(),
-          currentChunkStartVersion: currentChunk.getStartVersion(),
-          currentChunkEndVersion: currentChunk.getEndVersion(),
-        },
-        'chunk cache mismatch'
-      )
-    } catch (err) {
-      // ignore errors while logging
-    }
-  }
-  metrics.inc('chunk_store.redis.compare_chunks', 1, {
-    status: identical ? 'success' : 'fail',
-  })
-  return identical
-}
-
-// Define Lua script for atomic cache clearing
-rclient.defineCommand('expire_chunk_cache', {
-  numberOfKeys: 5,
-  lua: `
-    local persistTimeExists = redis.call('EXISTS', KEYS[5])
-    if persistTimeExists == 1 then
-      return nil -- chunk has changes pending, do not expire
-    end
-    local currentTime = tonumber(ARGV[1])
-    local expireTimeValue = redis.call('GET', KEYS[4])
-    if not expireTimeValue then
-      return nil -- this is a cache-miss
-    end
-    local expireTime = tonumber(expireTimeValue)
-    if currentTime < expireTime then
-      return nil -- cache is still valid
-    end
-    -- Cache is expired and all changes are persisted, proceed to delete the keys atomically
-    redis.call('DEL', KEYS[1]) -- snapshot key
-    redis.call('DEL', KEYS[2]) -- startVersion key
-    redis.call('DEL', KEYS[3]) -- changes key
-    redis.call('DEL', KEYS[4]) -- expireTime key
-    return 1
-  `,
-})
-
-/**
- * Expire cache entries for a project's chunk data if needed
- * @param {string} projectId - The ID of the project whose cache should be cleared
- * @returns {Promise<boolean>} A promise that resolves to true if successful, false on error
- */
-async function expireCurrentChunk(projectId, currentTime) {
-  try {
-    const snapshotKey = keySchema.snapshot({ projectId })
-    const startVersionKey = keySchema.startVersion({ projectId })
-    const changesKey = keySchema.changes({ projectId })
-    const expireTimeKey = keySchema.expireTime({ projectId })
-    const persistTimeKey = keySchema.persistTime({ projectId })
-    const result = await rclient.expire_chunk_cache(
-      snapshotKey,
-      startVersionKey,
-      changesKey,
-      expireTimeKey,
-      persistTimeKey,
-      currentTime || Date.now()
-    )
-    if (!result) {
-      logger.debug(
-        { projectId },
-        'chunk cache not expired due to pending changes'
-      )
-      metrics.inc('chunk_store.redis.expire_cache', 1, {
-        status: 'skip-due-to-pending-changes',
-      })
-      return false // not expired
-    }
-    metrics.inc('chunk_store.redis.expire_cache', 1, { status: 'success' })
-    return true
-  } catch (err) {
-    logger.error({ err, projectId }, 'error clearing chunk cache from redis')
-    metrics.inc('chunk_store.redis.expire_cache', 1, { status: 'error' })
-    return false
-  }
-}
-
-// Define Lua script for atomic cache clearing
-rclient.defineCommand('clear_chunk_cache', {
-  numberOfKeys: 5,
-  lua: `
-    local persistTimeExists = redis.call('EXISTS', KEYS[5])
-    if persistTimeExists == 1 then
-      return nil -- chunk has changes pending, do not clear
-    end
-    -- Delete all keys related to a project's chunk cache atomically
-    redis.call('DEL', KEYS[1]) -- snapshot key
-    redis.call('DEL', KEYS[2]) -- startVersion key
-    redis.call('DEL', KEYS[3]) -- changes key
-    redis.call('DEL', KEYS[4]) -- expireTime key
-    return 1
-  `,
-})
-
-/**
- * Clears all cache entries for a project's chunk data
- * @param {string} projectId - The ID of the project whose cache should be cleared
- * @returns {Promise<boolean>} A promise that resolves to true if successful, false on error
- */
-async function clearCache(projectId) {
-  try {
-    const snapshotKey = keySchema.snapshot({ projectId })
-    const startVersionKey = keySchema.startVersion({ projectId })
-    const changesKey = keySchema.changes({ projectId })
-    const expireTimeKey = keySchema.expireTime({ projectId })
-    const persistTimeKey = keySchema.persistTime({ projectId }) // Add persistTimeKey
-
-    const result = await rclient.clear_chunk_cache(
-      snapshotKey,
-      startVersionKey,
-      changesKey,
-      expireTimeKey,
-      persistTimeKey
-    )
-    if (result === null) {
-      logger.debug(
-        { projectId },
-        'chunk cache not cleared due to pending changes'
-      )
-      metrics.inc('chunk_store.redis.clear_cache', 1, {
-        status: 'skip-due-to-pending-changes',
-      })
-      return false
-    }
-    metrics.inc('chunk_store.redis.clear_cache', 1, { status: 'success' })
-    return true
-  } catch (err) {
-    logger.error({ err, projectId }, 'error clearing chunk cache from redis')
-    metrics.inc('chunk_store.redis.clear_cache', 1, { status: 'error' })
-    return false
-  }
-}
-
-// Define Lua script for getting chunk status
-rclient.defineCommand('get_chunk_status', {
-  numberOfKeys: 2, // expireTimeKey, persistTimeKey
-  lua: `
-    local expireTimeValue = redis.call('GET', KEYS[1])
-    local persistTimeValue = redis.call('GET', KEYS[2])
-    return {expireTimeValue, persistTimeValue}
-  `,
-})
-
-/**
- * Retrieves the current chunk status for a given project from Redis
- * @param {string} projectId - The ID of the project to get status for
- * @returns {Promise<Object>} Object containing expireTime and persistTime, or nulls on error
- * @property {number|null} expireTime - The expiration time of the chunk
- * @property {number|null} persistTime - The persistence time of the chunk
- */
-async function getCurrentChunkStatus(projectId) {
-  try {
-    const expireTimeKey = keySchema.expireTime({ projectId })
-    const persistTimeKey = keySchema.persistTime({ projectId })
-
-    const result = await rclient.get_chunk_status(expireTimeKey, persistTimeKey)
-
-    // Lua script returns an array [expireTimeValue, persistTimeValue]
-    // Redis nil replies are converted to null by ioredis
-    const [expireTime, persistTime] = result
-
-    return {
-      expireTime: expireTime ? parseInt(expireTime, 10) : null, // Parse to number or null
-      persistTime: persistTime ? parseInt(persistTime, 10) : null, // Parse to number or null
-    }
-  } catch (err) {
-    logger.warn({ err, projectId }, 'error getting chunk status from redis')
-    return { expireTime: null, persistTime: null } // Return nulls on error
-  }
-}
-
-/**
- * Sets the persist time for a project's chunk cache.
- * This is primarily intended for testing purposes.
- * @param {string} projectId - The ID of the project.
- * @param {number} timestamp - The timestamp to set as the persist time.
- * @returns {Promise<void>}
- */
-async function setPersistTime(projectId, timestamp) {
-  try {
-    const persistTimeKey = keySchema.persistTime({ projectId })
-    await rclient.set(persistTimeKey, timestamp)
-    metrics.inc('chunk_store.redis.set_persist_time', 1, { status: 'success' })
-  } catch (err) {
-    logger.error(
-      { err, projectId, timestamp },
-      'error setting persist time in redis'
-    )
-    metrics.inc('chunk_store.redis.set_persist_time', 1, { status: 'error' })
-    // Re-throw the error so the test fails if setting fails
+    metrics.inc('chunk_store.redis.get_head_snapshot', 1, { status: 'error' })
     throw err
   }
 }
 
+rclient.defineCommand('queue_changes', {
+  numberOfKeys: 5,
+  lua: `
+  local headSnapshotKey = KEYS[1]
+  local headVersionKey = KEYS[2]
+  local changesKey = KEYS[3]
+  local expireTimeKey = KEYS[4]
+  local persistTimeKey = KEYS[5]
+
+  local baseVersion = tonumber(ARGV[1])
+  local head = ARGV[2]
+  local persistTime = tonumber(ARGV[3])
+  local expireTime = tonumber(ARGV[4])
+  -- Changes start from ARGV[5]
+
+  local headVersion = tonumber(redis.call('GET', headVersionKey))
+  if headVersion and headVersion ~= baseVersion then
+    return 'conflict'
+  end
+
+  -- Check if there are any changes to queue
+  if #ARGV < 5 then
+    return 'no_changes_provided'
+  end
+
+  -- Store the changes
+  -- RPUSH changesKey change1 change2 ...
+  redis.call('RPUSH', changesKey, unpack(ARGV, 5, #ARGV))
+
+  -- Update head snapshot only if changes were successfully pushed
+  redis.call('SET', headSnapshotKey, head)
+
+  -- Update the head version
+  local numChanges = #ARGV - 4
+  local newHeadVersion = baseVersion + numChanges
+  redis.call('SET', headVersionKey, newHeadVersion)
+
+  -- Update the persist time if the new time is sooner
+  local currentPersistTime = tonumber(redis.call('GET', persistTimeKey))
+  if not currentPersistTime or persistTime < currentPersistTime then
+    redis.call('SET', persistTimeKey, persistTime)
+  end
+
+  -- Update the expire time
+  redis.call('SET', expireTimeKey, expireTime)
+
+  return 'ok'
+  `,
+})
+
+/**
+ * Atomically queues changes to the project history in Redis if the baseVersion matches.
+ * Updates head snapshot, version, persist time, and expire time.
+ *
+ * @param {string} projectId - The project identifier.
+ * @param {Snapshot} headSnapshot - The new head snapshot after applying changes.
+ * @param {number} baseVersion - The expected current head version.
+ * @param {Change[]} changes - An array of Change objects to queue.
+ * @param {number} persistTime - Timestamp (ms since epoch) when the oldest change in the buffer should be persisted.
+ * @param {number} expireTime - Timestamp (ms since epoch) when the project buffer should expire if inactive.
+ * @returns {Promise<void>} Resolves on success.
+ * @throws {BaseVersionConflictError} If the baseVersion does not match the current head version in Redis.
+ * @throws {Error} If changes array is empty or if Redis operations fail.
+ */
+async function queueChanges(
+  projectId,
+  headSnapshot,
+  baseVersion,
+  changes,
+  persistTime,
+  expireTime
+) {
+  if (!changes || changes.length === 0) {
+    throw new Error('Cannot queue empty changes array')
+  }
+
+  try {
+    const keys = [
+      keySchema.head({ projectId }),
+      keySchema.headVersion({ projectId }),
+      keySchema.changes({ projectId }),
+      keySchema.expireTime({ projectId }),
+      keySchema.persistTime({ projectId }),
+    ]
+
+    const args = [
+      baseVersion.toString(),
+      JSON.stringify(headSnapshot.toRaw()),
+      persistTime.toString(),
+      expireTime.toString(),
+      ...changes.map(change => JSON.stringify(change.toRaw())), // Serialize changes
+    ]
+
+    const status = await rclient.queue_changes(keys, args)
+    metrics.inc('chunk_store.redis.queue_changes', 1, { status })
+    if (status === 'ok') {
+      return
+    }
+    if (status === 'conflict') {
+      throw new BaseVersionConflictError('base version mismatch', {
+        projectId,
+        baseVersion,
+      })
+    } else {
+      throw new Error(`unexpected result queuing changes: ${status}`)
+    }
+  } catch (err) {
+    if (err instanceof BaseVersionConflictError) {
+      // Re-throw conflict errors directly
+      throw err
+    }
+    metrics.inc('chunk_store.redis.queue_changes', 1, { status: 'error' })
+    throw err
+  }
+}
+
+rclient.defineCommand('get_state', {
+  numberOfKeys: 6, // Number of keys defined in keySchema
+  lua: `
+    local headSnapshotKey = KEYS[1]
+    local headVersionKey = KEYS[2]
+    local persistedVersionKey = KEYS[3]
+    local expireTimeKey = KEYS[4]
+    local persistTimeKey = KEYS[5]
+    local changesKey = KEYS[6]
+
+    local headSnapshot = redis.call('GET', headSnapshotKey)
+    local headVersion = redis.call('GET', headVersionKey)
+    local persistedVersion = redis.call('GET', persistedVersionKey)
+    local expireTime = redis.call('GET', expireTimeKey)
+    local persistTime = redis.call('GET', persistTimeKey)
+    local changes = redis.call('LRANGE', changesKey, 0, -1) -- Get all changes in the list
+
+    return {headSnapshot, headVersion, persistedVersion, expireTime, persistTime, changes}
+  `,
+})
+
+/**
+ * Retrieves the entire state associated with a project from Redis atomically.
+ * @param {string} projectId - The unique identifier of the project.
+ * @returns {Promise<object|null>} A Promise that resolves to an object containing the project state,
+ *                                  or null if the project state does not exist (e.g., head version is missing).
+ * @throws {Error} If Redis operations fail.
+ */
+async function getState(projectId) {
+  const keys = [
+    keySchema.head({ projectId }),
+    keySchema.headVersion({ projectId }),
+    keySchema.persistedVersion({ projectId }),
+    keySchema.expireTime({ projectId }),
+    keySchema.persistTime({ projectId }),
+    keySchema.changes({ projectId }),
+  ]
+
+  // Pass keys individually, not as an array
+  const result = await rclient.get_state(...keys)
+
+  const [
+    rawHeadSnapshot,
+    rawHeadVersion,
+    rawPersistedVersion,
+    rawExpireTime,
+    rawPersistTime,
+    rawChanges,
+  ] = result
+
+  // Safely parse values, providing defaults or nulls if necessary
+  const headSnapshot = rawHeadSnapshot
+    ? JSON.parse(rawHeadSnapshot)
+    : rawHeadSnapshot
+  const headVersion = rawHeadVersion ? parseInt(rawHeadVersion, 10) : null // Should always exist if result is not null
+  const persistedVersion = rawPersistedVersion
+    ? parseInt(rawPersistedVersion, 10)
+    : null
+  const expireTime = rawExpireTime ? parseInt(rawExpireTime, 10) : null
+  const persistTime = rawPersistTime ? parseInt(rawPersistTime, 10) : null
+  const changes = rawChanges ? rawChanges.map(JSON.parse) : null
+
+  return {
+    headSnapshot,
+    headVersion,
+    persistedVersion,
+    expireTime,
+    persistTime,
+    changes,
+  }
+}
+
+rclient.defineCommand('get_changes_since_version', {
+  numberOfKeys: 2,
+  lua: `
+    local headVersionKey = KEYS[1]
+    local changesKey = KEYS[2]
+
+    local requestedVersion = tonumber(ARGV[1])
+
+    -- Check if head version exists
+    local headVersion = tonumber(redis.call('GET', headVersionKey))
+    if not headVersion then
+      return {'not_found'}
+    end
+
+    -- If requested version equals head version, return empty array
+    if requestedVersion == headVersion then
+      return {'ok', {}}
+    end
+
+    -- If requested version is greater than head version, return error
+    if requestedVersion > headVersion then
+      return {'out_of_bounds'}
+    end
+
+    -- Get length of changes list
+    local changesCount = redis.call('LLEN', changesKey)
+
+    -- Check if requested version is too old (changes already removed from buffer)
+    if requestedVersion < (headVersion - changesCount) then
+      return {'out_of_bounds'}
+    end
+
+    -- Calculate the starting index, using negative indexing to count backwards
+    -- from the end of the list
+    local startIndex = requestedVersion - headVersion
+
+    -- Get changes using LRANGE
+    local changes = redis.call('LRANGE', changesKey, startIndex, -1)
+
+    return {'ok', changes}
+  `,
+})
+
+/**
+ * Retrieves changes since a specific version for a project from Redis.
+ *
+ * @param {string} projectId - The unique identifier of the project.
+ * @param {number} version - The version number to retrieve changes since.
+ * @returns {Promise<{status: string, changes?: Array<Change>}>} A Promise that resolves to an object containing:
+ *   - status: 'OK', 'NOT_FOUND', or 'OUT_OF_BOUNDS'
+ *   - changes: Array of Change objects (only when status is 'OK')
+ * @throws {Error} If Redis operations fail.
+ */
+async function getChangesSinceVersion(projectId, version) {
+  try {
+    const keys = [
+      keySchema.headVersion({ projectId }),
+      keySchema.changes({ projectId }),
+    ]
+
+    const args = [version.toString()]
+
+    const result = await rclient.get_changes_since_version(keys, args)
+    const status = result[0]
+
+    if (status === 'ok') {
+      // If status is OK, parse the changes
+      const changes = result[1]
+        ? result[1].map(rawChange =>
+            typeof rawChange === 'string' ? JSON.parse(rawChange) : rawChange
+          )
+        : []
+
+      metrics.inc('chunk_store.redis.get_changes_since_version', 1, {
+        status: 'success',
+      })
+      return { status, changes }
+    } else {
+      // For other statuses, just return the status
+      metrics.inc('chunk_store.redis.get_changes_since_version', 1, {
+        status,
+      })
+      return { status }
+    }
+  } catch (err) {
+    metrics.inc('chunk_store.redis.get_changes_since_version', 1, {
+      status: 'error',
+    })
+    throw err
+  }
+}
+
+rclient.defineCommand('get_non_persisted_changes', {
+  numberOfKeys: 3,
+  lua: `
+    local headVersionKey = KEYS[1]
+    local persistedVersionKey = KEYS[2]
+    local changesKey = KEYS[3]
+
+    -- Check if head version exists
+    local headVersion = tonumber(redis.call('GET', headVersionKey))
+    if not headVersion then
+      return {}
+    end
+
+    -- Check if persisted version exists
+    local persistedVersion = tonumber(redis.call('GET', persistedVersionKey))
+
+    local startIndex
+    if not persistedVersion then
+      -- None of the changes in Redis have been persisted
+      startIndex = 0
+    elseif persistedVersion > headVersion then
+      -- This should never happen
+      return redis.error_reply('HEAD_VERSION_BEHIND_PERSISTED_VERSION')
+    elseif persistedVersion == headVersion then
+      return {}
+    else
+      -- startIndex is negative and counts from the end of the list of changes
+      startIndex = persistedVersion - headVersion
+    end
+
+    -- Get changes using LRANGE
+    local changes = redis.call('LRANGE', changesKey, startIndex, -1)
+
+    return changes
+  `,
+})
+
+/**
+ * Retrieves non-persisted changes for a project from Redis.
+ *
+ * @param {string} projectId - The unique identifier of the project.
+ * @returns {Promise<Change[]>} A Promise that resolves to an array of non-persisted Change objects.
+ * @throws {Error} If Redis operations fail.
+ */
+async function getNonPersistedChanges(projectId) {
+  try {
+    const keys = [
+      keySchema.headVersion({ projectId }),
+      keySchema.persistedVersion({ projectId }),
+      keySchema.changes({ projectId }),
+    ]
+
+    const result = await rclient.get_non_persisted_changes(keys)
+
+    // Parse the changes
+    const changes = result?.map(json => Change.fromRaw(JSON.parse(json))) ?? []
+
+    metrics.inc('chunk_store.redis.get_non_persisted_changes', 1, {
+      status: 'success',
+    })
+    return changes
+  } catch (err) {
+    metrics.inc('chunk_store.redis.get_non_persisted_changes', 1, {
+      status: 'error',
+    })
+    throw err
+  }
+}
+
+rclient.defineCommand('set_persisted_version', {
+  numberOfKeys: 3,
+  lua: `
+    local headVersionKey = KEYS[1]
+    local persistedVersionKey = KEYS[2]
+    local changesKey = KEYS[3]
+
+    local newPersistedVersion = tonumber(ARGV[1])
+    local maxPersistedChanges = tonumber(ARGV[2])
+
+    -- Check if head version exists
+    local headVersion = tonumber(redis.call('GET', headVersionKey))
+    if not headVersion then
+      return 'not_found'
+    end
+
+    -- Set the persisted version
+    redis.call('SET', persistedVersionKey, newPersistedVersion)
+
+    -- Calculate the starting index, to keep only maxPersistedChanges beyond the persisted version
+    -- Using negative indexing to count backwards from the end of the list
+    local startIndex = newPersistedVersion - headVersion - maxPersistedChanges
+
+    -- Trim the changes list to keep only the specified number of changes beyond persisted version
+    if startIndex < 0 then
+      redis.call('LTRIM', changesKey, startIndex, -1)
+    end
+
+    return 'ok'
+  `,
+})
+
+/**
+ * Sets the persisted version for a project in Redis and trims the changes list.
+ *
+ * @param {string} projectId - The unique identifier of the project.
+ * @param {number} persistedVersion - The version number to set as persisted.
+ * @returns {Promise<string>} A Promise that resolves to 'OK' or 'NOT_FOUND'.
+ * @throws {Error} If Redis operations fail.
+ */
+async function setPersistedVersion(projectId, persistedVersion) {
+  try {
+    const keys = [
+      keySchema.headVersion({ projectId }),
+      keySchema.persistedVersion({ projectId }),
+      keySchema.changes({ projectId }),
+    ]
+
+    const args = [persistedVersion.toString(), MAX_PERSISTED_CHANGES.toString()]
+
+    const status = await rclient.set_persisted_version(keys, args)
+
+    metrics.inc('chunk_store.redis.set_persisted_version', 1, {
+      status,
+    })
+
+    return status
+  } catch (err) {
+    metrics.inc('chunk_store.redis.set_persisted_version', 1, {
+      status: 'error',
+    })
+    throw err
+  }
+}
+
+rclient.defineCommand('set_expire_time', {
+  numberOfKeys: 2,
+  lua: `
+    local expireTimeKey = KEYS[1]
+    local headVersionKey = KEYS[2]
+    local expireTime = tonumber(ARGV[1])
+
+    -- Only set the expire time if the project is loaded in Redis
+    local headVersion = redis.call('GET', headVersionKey)
+    if headVersion then
+      redis.call('SET', expireTimeKey, expireTime)
+    end
+  `,
+})
+
+/**
+ * Sets the expire version for a project in Redis
+ *
+ * @param {string} projectId
+ * @param {number} expireTime - Timestamp (ms since epoch) when the project
+ *                 buffer should expire if inactive
+ */
+async function setExpireTime(projectId, expireTime) {
+  try {
+    await rclient.set_expire_time(
+      keySchema.expireTime({ projectId }),
+      keySchema.headVersion({ projectId }),
+      expireTime.toString()
+    )
+    metrics.inc('chunk_store.redis.set_expire_time', 1, { status: 'success' })
+  } catch (err) {
+    metrics.inc('chunk_store.redis.set_expire_time', 1, { status: 'error' })
+    throw err
+  }
+}
+
+rclient.defineCommand('expire_project', {
+  numberOfKeys: 6,
+  lua: `
+    local headKey = KEYS[1]
+    local headVersionKey = KEYS[2]
+    local changesKey = KEYS[3]
+    local persistedVersionKey = KEYS[4]
+    local persistTimeKey = KEYS[5]
+    local expireTimeKey = KEYS[6]
+
+    local headVersion = tonumber(redis.call('GET', headVersionKey))
+    if not headVersion then
+      return 'not-found'
+    end
+
+    local persistedVersion = tonumber(redis.call('GET', persistedVersionKey))
+    if not persistedVersion or persistedVersion ~= headVersion then
+      return 'not-persisted'
+    end
+
+    redis.call('DEL',
+      headKey,
+      headVersionKey,
+      changesKey,
+      persistedVersionKey,
+      persistTimeKey,
+      expireTimeKey
+    )
+    return 'success'
+  `,
+})
+
+async function expireProject(projectId) {
+  try {
+    const status = await rclient.expire_project(
+      keySchema.head({ projectId }),
+      keySchema.headVersion({ projectId }),
+      keySchema.changes({ projectId }),
+      keySchema.persistedVersion({ projectId }),
+      keySchema.persistTime({ projectId }),
+      keySchema.expireTime({ projectId })
+    )
+    metrics.inc('chunk_store.redis.set_persisted_version', 1, {
+      status,
+    })
+  } catch (err) {
+    metrics.inc('chunk_store.redis.set_persisted_version', 1, {
+      status: 'error',
+    })
+    throw err
+  }
+}
+
+rclient.defineCommand('claim_job', {
+  numberOfKeys: 1,
+  lua: `
+    local jobTimeKey = KEYS[1]
+    local currentTime = tonumber(ARGV[1])
+    local retryDelay = tonumber(ARGV[2])
+
+    local jobTime = tonumber(redis.call('GET', jobTimeKey))
+    if not jobTime then
+      return {'no-job'}
+    end
+
+    local msUntilReady = jobTime - currentTime
+    if msUntilReady <= 0 then
+      local retryTime = currentTime + retryDelay
+      redis.call('SET', jobTimeKey, retryTime)
+      return {'ok', retryTime}
+    else
+      return {'wait', msUntilReady}
+    end
+  `,
+})
+
+rclient.defineCommand('close_job', {
+  numberOfKeys: 1,
+  lua: `
+    local jobTimeKey = KEYS[1]
+    local expectedJobTime = tonumber(ARGV[1])
+
+    local jobTime = tonumber(redis.call('GET', jobTimeKey))
+    if jobTime and jobTime == expectedJobTime then
+      redis.call('DEL', jobTimeKey)
+    end
+  `,
+})
+
+/**
+ * Claim an expire job
+ *
+ * @param {string} projectId
+ * @return {Promise<Job>}
+ */
+async function claimExpireJob(projectId) {
+  return await claimJob(keySchema.expireTime({ projectId }))
+}
+
+/**
+ * Claim a persist job
+ *
+ * @param {string} projectId
+ * @return {Promise<Job>}
+ */
+async function claimPersistJob(projectId) {
+  return await claimJob(keySchema.persistTime({ projectId }))
+}
+
+/**
+ * Claim a persist or expire job
+ *
+ * @param {string} jobKey - the Redis key containing the time at which the job
+ *                 is ready
+ * @return {Promise<Job>}
+ */
+async function claimJob(jobKey) {
+  let result, status
+  try {
+    result = await rclient.claim_job(jobKey, Date.now(), RETRY_DELAY_MS)
+    status = result[0]
+    metrics.inc('chunk_store.redis.claim_job', 1, { status })
+  } catch (err) {
+    metrics.inc('chunk_store.redis.claim_job', 1, { status: 'error' })
+    throw err
+  }
+
+  if (status === 'ok') {
+    return new Job(jobKey, parseInt(result[1], 10))
+  } else if (status === 'wait') {
+    throw new JobNotReadyError('job not ready', {
+      jobKey,
+      retryTime: result[1],
+    })
+  } else if (status === 'no-job') {
+    throw new JobNotFoundError('job not found', { jobKey })
+  } else {
+    throw new OError('unknown status for claim_job', { jobKey, status })
+  }
+}
+
+/**
+ * Handle for a claimed job
+ */
+class Job {
+  /**
+   * @param {string} redisKey
+   * @param {number} claimTimestamp
+   */
+  constructor(redisKey, claimTimestamp) {
+    this.redisKey = redisKey
+    this.claimTimestamp = claimTimestamp
+  }
+
+  async close() {
+    try {
+      await rclient.close_job(this.redisKey, this.claimTimestamp.toString())
+      metrics.inc('chunk_store.redis.close_job', 1, { status: 'success' })
+    } catch (err) {
+      metrics.inc('chunk_store.redis.close_job', 1, { status: 'error' })
+      throw err
+    }
+  }
+}
+
 module.exports = {
-  getCurrentChunk,
-  getCurrentChunkIfValid,
-  setCurrentChunk,
-  getCurrentChunkMetadata,
-  checkCacheValidity,
-  checkCacheValidityWithMetadata,
-  compareChunks,
-  expireCurrentChunk,
-  clearCache,
-  getCurrentChunkStatus,
-  setPersistTime, // Export the new function
+  getHeadSnapshot,
+  queueChanges,
+  getState,
+  getChangesSinceVersion,
+  getNonPersistedChanges,
+  setPersistedVersion,
+  setExpireTime,
+  expireProject,
+  claimExpireJob,
+  claimPersistJob,
+  MAX_PERSISTED_CHANGES,
+  MAX_PERSIST_DELAY_MS,
+  PROJECT_TTL_MS,
+  RETRY_DELAY_MS,
+  keySchema,
 }

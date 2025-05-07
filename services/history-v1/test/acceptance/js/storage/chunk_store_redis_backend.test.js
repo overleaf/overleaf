@@ -2,923 +2,1031 @@
 
 const { expect } = require('chai')
 const {
-  Chunk,
   Snapshot,
-  History,
-  File,
-  AddFileOperation,
-  Origin,
   Change,
-  V2DocVersions,
+  AddFileOperation,
+  File,
 } = require('overleaf-editor-core')
 const cleanup = require('./support/cleanup')
 const redisBackend = require('../../../../storage/lib/chunk_store/redis')
+const {
+  JobNotReadyError,
+  JobNotFoundError,
+} = require('../../../../storage/lib/chunk_store/errors')
+const redis = require('../../../../storage/lib/redis')
+const rclient = redis.rclientHistory
+const keySchema = redisBackend.keySchema
 
-describe('chunk store Redis backend', function () {
+describe('chunk buffer Redis backend', function () {
   beforeEach(cleanup.everything)
-  const projectId = '123456'
+  const projectId = 'project123'
 
-  describe('getCurrentChunk', function () {
+  describe('getHeadSnapshot', function () {
     it('should return null on cache miss', async function () {
-      const chunk = await redisBackend.getCurrentChunk(projectId)
-      expect(chunk).to.be.null
+      const result = await redisBackend.getHeadSnapshot(projectId)
+      expect(result).to.be.null
     })
 
-    it('should return the cached chunk', async function () {
-      // Create a sample chunk
+    it('should return the cached head snapshot and version', async function () {
+      // Create a sample snapshot and version
       const snapshot = new Snapshot()
-      const changes = [
-        new Change(
-          [new AddFileOperation('test.tex', File.fromString('Hello World'))],
-          new Date(),
-          []
-        ),
-      ]
-      const history = new History(snapshot, changes)
-      const chunk = new Chunk(history, 5) // startVersion 5
+      const version = 42
+      const rawSnapshot = JSON.stringify(snapshot.toRaw())
 
-      // Cache the chunk
-      await redisBackend.setCurrentChunk(projectId, chunk)
+      // Manually set the data in Redis
+      await rclient.set(keySchema.head({ projectId }), rawSnapshot)
+      await rclient.set(
+        keySchema.headVersion({ projectId }),
+        version.toString()
+      )
 
-      // Retrieve the cached chunk
-      const cachedChunk = await redisBackend.getCurrentChunk(projectId)
+      // Retrieve the cached snapshot
+      const result = await redisBackend.getHeadSnapshot(projectId)
 
-      expect(cachedChunk).to.not.be.null
-      expect(cachedChunk.getStartVersion()).to.equal(5)
-      expect(cachedChunk.getEndVersion()).to.equal(6)
-      expect(cachedChunk).to.deep.equal(chunk)
+      expect(result).to.not.be.null
+      expect(result.version).to.equal(version)
+      expect(result.snapshot).to.deep.equal(snapshot) // Use deep equal for object comparison
+    })
+
+    it('should return null if the version is missing', async function () {
+      // Create a sample snapshot
+      const snapshot = new Snapshot()
+      const rawSnapshot = JSON.stringify(snapshot.toRaw())
+
+      // Manually set only the snapshot data in Redis
+      await rclient.set(keySchema.head({ projectId }), rawSnapshot)
+
+      // Attempt to retrieve the snapshot
+      const result = await redisBackend.getHeadSnapshot(projectId)
+
+      expect(result).to.be.null
     })
   })
 
-  describe('setCurrentChunk', function () {
-    it('should successfully cache a chunk', async function () {
-      // Create a sample chunk
-      const snapshot = new Snapshot()
-      const changes = [
-        new Change(
-          [new AddFileOperation('test.tex', File.fromString('Hello World'))],
-          new Date(),
-          []
-        ),
-      ]
-      const history = new History(snapshot, changes)
-      const chunk = new Chunk(history, 5) // startVersion 5
+  describe('queueChanges', function () {
+    it('should queue changes when the base version matches head version', async function () {
+      // Create base version
+      const baseVersion = 0
 
-      // Cache the chunk
-      await redisBackend.setCurrentChunk(projectId, chunk)
+      // Create a new head snapshot that will be set after changes
+      const headSnapshot = new Snapshot()
 
-      // Verify the chunk was cached correctly by retrieving it
-      const cachedChunk = await redisBackend.getCurrentChunk(projectId)
-      expect(cachedChunk).to.not.be.null
-      expect(cachedChunk.getStartVersion()).to.equal(5)
-      expect(cachedChunk.getEndVersion()).to.equal(6)
-      expect(cachedChunk).to.deep.equal(chunk)
+      // Create changes
+      const timestamp = new Date()
+      const change = new Change([], timestamp, [])
 
-      // Verify that the chunk was stored correctly using the chunk metadata
-      const chunkMetadata =
-        await redisBackend.getCurrentChunkMetadata(projectId)
-      expect(chunkMetadata).to.not.be.null
-      expect(chunkMetadata.startVersion).to.equal(5)
-      expect(chunkMetadata.changesCount).to.equal(1)
+      // Set times
+      const now = Date.now()
+      const persistTime = now + 30 * 1000 // 30 seconds from now
+      const expireTime = now + 60 * 60 * 1000 // 1 hour from now
+
+      // Queue the changes
+      await redisBackend.queueChanges(
+        projectId,
+        headSnapshot,
+        baseVersion,
+        [change],
+        persistTime,
+        expireTime
+      )
+
+      // Get the state to verify the changes
+      const state = await redisBackend.getState(projectId)
+
+      // Verify the result
+      expect(state).to.exist
+      expect(state.headVersion).to.equal(baseVersion + 1)
+      expect(state.headSnapshot).to.deep.equal(headSnapshot.toRaw())
+      expect(state.persistTime).to.equal(persistTime)
+      expect(state.expireTime).to.equal(expireTime)
     })
 
-    it('should correctly handle a chunk with zero changes', async function () {
-      // Create a sample chunk with no changes
-      const snapshot = new Snapshot()
-      const changes = []
-      const history = new History(snapshot, changes)
-      const chunk = new Chunk(history, 10) // startVersion 10
+    it('should throw BaseVersionConflictError when base version does not match head version', async function () {
+      // Create a mismatch scenario
+      const headSnapshot = new Snapshot()
+      const baseVersion = 0
 
-      // Cache the chunk
-      await redisBackend.setCurrentChunk(projectId, chunk)
+      // Manually set a different head version in Redis
+      await rclient.set(keySchema.headVersion({ projectId }), '5')
 
-      // Retrieve the cached chunk
-      const cachedChunk = await redisBackend.getCurrentChunk(projectId)
+      // Create changes
+      const timestamp = new Date()
+      const change = new Change([], timestamp, [])
 
-      expect(cachedChunk).to.not.be.null
-      expect(cachedChunk.getStartVersion()).to.equal(10)
-      expect(cachedChunk.getEndVersion()).to.equal(10) // End version should equal start version with no changes
-      expect(cachedChunk.history.changes.length).to.equal(0)
-      expect(cachedChunk).to.deep.equal(chunk)
+      // Set times
+      const now = Date.now()
+      const persistTime = now + 30 * 1000
+      const expireTime = now + 60 * 60 * 1000
+
+      // Attempt to queue the changes with a mismatched base version
+      // This should throw a BaseVersionConflictError
+      try {
+        await redisBackend.queueChanges(
+          projectId,
+          headSnapshot,
+          baseVersion,
+          [change],
+          persistTime,
+          expireTime
+        )
+        // If we get here, the test should fail
+        expect.fail('Expected BaseVersionConflictError but no error was thrown')
+      } catch (err) {
+        expect(err.name).to.equal('BaseVersionConflictError')
+        expect(err.info).to.deep.include({
+          projectId,
+          baseVersion,
+        })
+      }
+    })
+
+    it('should throw error when given an empty changes array', async function () {
+      // Create a valid scenario but with empty changes
+      const headSnapshot = new Snapshot()
+      const baseVersion = 0
+
+      // Set times
+      const now = Date.now()
+      const persistTime = now + 30 * 1000
+      const expireTime = now + 60 * 60 * 1000
+
+      // Attempt to queue with empty changes array
+      try {
+        await redisBackend.queueChanges(
+          projectId,
+          headSnapshot,
+          baseVersion,
+          [], // Empty changes array
+          persistTime,
+          expireTime
+        )
+        // If we get here, the test should fail
+        expect.fail('Expected Error but no error was thrown')
+      } catch (err) {
+        expect(err.message).to.equal('Cannot queue empty changes array')
+      }
+    })
+
+    it('should queue multiple changes and increment version correctly', async function () {
+      // Create base version
+      const baseVersion = 0
+
+      // Create a new head snapshot
+      const headSnapshot = new Snapshot()
+
+      // Create multiple changes
+      const timestamp = new Date()
+      const change1 = new Change([], timestamp)
+      const change2 = new Change([], timestamp)
+      const change3 = new Change([], timestamp)
+
+      // Set times
+      const now = Date.now()
+      const persistTime = now + 30 * 1000
+      const expireTime = now + 60 * 60 * 1000
+
+      // Queue the changes
+      await redisBackend.queueChanges(
+        projectId,
+        headSnapshot,
+        baseVersion,
+        [change1, change2, change3], // Multiple changes
+        persistTime,
+        expireTime
+      )
+
+      // Get the state to verify the changes
+      const state = await redisBackend.getState(projectId)
+
+      // Verify that version was incremented by the number of changes
+      expect(state.headVersion).to.equal(baseVersion + 3)
+      expect(state.headSnapshot).to.deep.equal(headSnapshot.toRaw())
+    })
+
+    it('should use the provided persistTime only if it is sooner than existing time', async function () {
+      // Create base version
+      const baseVersion = 0
+
+      // Create a new head snapshot
+      const headSnapshot = new Snapshot()
+
+      // Create changes
+      const timestamp = new Date()
+      const change = new Change([], timestamp)
+
+      // Set times
+      const now = Date.now()
+      const earlierPersistTime = now + 15 * 1000 // 15 seconds from now
+      const laterPersistTime = now + 30 * 1000 // 30 seconds from now
+      const expireTime = now + 60 * 60 * 1000 // 1 hour from now
+
+      // First queue changes with the later persist time
+      await redisBackend.queueChanges(
+        projectId,
+        headSnapshot,
+        baseVersion,
+        [change],
+        laterPersistTime,
+        expireTime
+      )
+
+      // Get the state to verify the first persist time was set
+      let state = await redisBackend.getState(projectId)
+      expect(state.persistTime).to.equal(laterPersistTime)
+
+      // Queue more changes with an earlier persist time
+      const newerHeadSnapshot = new Snapshot()
+      await redisBackend.queueChanges(
+        projectId,
+        newerHeadSnapshot,
+        baseVersion + 1, // Updated base version
+        [change],
+        earlierPersistTime, // Earlier time should replace the later one
+        expireTime
+      )
+
+      // Get the state to verify the persist time was updated to the earlier time
+      state = await redisBackend.getState(projectId)
+      expect(state.persistTime).to.equal(earlierPersistTime)
+
+      // Queue more changes with another later persist time
+      const evenNewerHeadSnapshot = new Snapshot()
+      await redisBackend.queueChanges(
+        projectId,
+        evenNewerHeadSnapshot,
+        baseVersion + 2, // Updated base version
+        [change],
+        laterPersistTime, // Later time should not replace the earlier one
+        expireTime
+      )
+
+      // Get the state to verify the persist time remains at the earlier time
+      state = await redisBackend.getState(projectId)
+      expect(state.persistTime).to.equal(earlierPersistTime) // Should still be the earlier time
     })
   })
 
-  describe('updating already cached chunks', function () {
-    it('should replace a chunk with a longer chunk', async function () {
-      // Set initial chunk with one change
-      const snapshotA = new Snapshot()
-      const changesA = [
-        new Change(
-          [
-            new AddFileOperation(
-              'test.tex',
-              File.fromString('Initial content')
-            ),
-          ],
-          new Date(),
-          []
-        ),
-      ]
-      const historyA = new History(snapshotA, changesA)
-      const chunkA = new Chunk(historyA, 10)
-
-      await redisBackend.setCurrentChunk(projectId, chunkA)
-
-      // Verify the initial chunk was cached
-      const cachedChunkA = await redisBackend.getCurrentChunk(projectId)
-      expect(cachedChunkA.getStartVersion()).to.equal(10)
-      expect(cachedChunkA.getEndVersion()).to.equal(11)
-      expect(cachedChunkA.history.changes.length).to.equal(1)
-
-      // Create a longer chunk (with more changes)
-      const snapshotB = new Snapshot()
-      const changesB = [
-        new Change(
-          [new AddFileOperation('test1.tex', File.fromString('Content 1'))],
-          new Date(),
-          []
-        ),
-        new Change(
-          [new AddFileOperation('test2.tex', File.fromString('Content 2'))],
-          new Date(),
-          []
-        ),
-        new Change(
-          [new AddFileOperation('test3.tex', File.fromString('Content 3'))],
-          new Date(),
-          []
-        ),
-      ]
-      const historyB = new History(snapshotB, changesB)
-      const chunkB = new Chunk(historyB, 15)
-
-      // Replace the cached chunk
-      await redisBackend.setCurrentChunk(projectId, chunkB)
-
-      // Verify the new chunk replaced the old one
-      const cachedChunkB = await redisBackend.getCurrentChunk(projectId)
-      expect(cachedChunkB).to.not.be.null
-      expect(cachedChunkB.getStartVersion()).to.equal(15)
-      expect(cachedChunkB.getEndVersion()).to.equal(18)
-      expect(cachedChunkB.history.changes.length).to.equal(3)
-      expect(cachedChunkB).to.deep.equal(chunkB)
-
-      // Verify the metadata was updated
-      const updatedMetadata =
-        await redisBackend.getCurrentChunkMetadata(projectId)
-      expect(updatedMetadata.startVersion).to.equal(15)
-      expect(updatedMetadata.changesCount).to.equal(3)
+  describe('getChangesSinceVersion', function () {
+    it('should return not_found when project does not exist', async function () {
+      const result = await redisBackend.getChangesSinceVersion(projectId, 1)
+      expect(result.status).to.equal('not_found')
     })
 
-    it('should replace a chunk with a shorter chunk', async function () {
-      // Set initial chunk with three changes
-      const snapshotA = new Snapshot()
-      const changesA = [
-        new Change(
-          [new AddFileOperation('file1.tex', File.fromString('Content 1'))],
-          new Date(),
-          []
-        ),
-        new Change(
-          [new AddFileOperation('file2.tex', File.fromString('Content 2'))],
-          new Date(),
-          []
-        ),
-        new Change(
-          [new AddFileOperation('file3.tex', File.fromString('Content 3'))],
-          new Date(),
-          []
-        ),
-      ]
-      const historyA = new History(snapshotA, changesA)
-      const chunkA = new Chunk(historyA, 20)
+    it('should return empty array when requested version equals head version', async function () {
+      // Set head version
+      const headVersion = 5
+      await rclient.set(
+        keySchema.headVersion({ projectId }),
+        headVersion.toString()
+      )
 
-      await redisBackend.setCurrentChunk(projectId, chunkA)
+      // Request changes since the current head version
+      const result = await redisBackend.getChangesSinceVersion(
+        projectId,
+        headVersion
+      )
 
-      // Verify the initial chunk was cached
-      const cachedChunkA = await redisBackend.getCurrentChunk(projectId)
-      expect(cachedChunkA.getStartVersion()).to.equal(20)
-      expect(cachedChunkA.getEndVersion()).to.equal(23)
-      expect(cachedChunkA.history.changes.length).to.equal(3)
-
-      // Create a shorter chunk (with fewer changes)
-      const snapshotB = new Snapshot()
-      const changesB = [
-        new Change(
-          [new AddFileOperation('new.tex', File.fromString('New content'))],
-          new Date(),
-          []
-        ),
-      ]
-      const historyB = new History(snapshotB, changesB)
-      const chunkB = new Chunk(historyB, 30)
-
-      // Replace the cached chunk
-      await redisBackend.setCurrentChunk(projectId, chunkB)
-
-      // Verify the new chunk replaced the old one
-      const cachedChunkB = await redisBackend.getCurrentChunk(projectId)
-      expect(cachedChunkB).to.not.be.null
-      expect(cachedChunkB.getStartVersion()).to.equal(30)
-      expect(cachedChunkB.getEndVersion()).to.equal(31)
-      expect(cachedChunkB.history.changes.length).to.equal(1)
-      expect(cachedChunkB).to.deep.equal(chunkB)
-
-      // Verify the metadata was updated
-      const updatedMetadata =
-        await redisBackend.getCurrentChunkMetadata(projectId)
-      expect(updatedMetadata.startVersion).to.equal(30)
-      expect(updatedMetadata.changesCount).to.equal(1)
+      expect(result.status).to.equal('ok')
+      expect(result.changes).to.be.an('array').that.is.empty
     })
 
-    it('should replace a chunk with a zero-length chunk', async function () {
-      // Set initial chunk with changes
-      const snapshotA = new Snapshot()
-      const changesA = [
-        new Change(
-          [new AddFileOperation('file1.tex', File.fromString('Content 1'))],
-          new Date(),
-          []
-        ),
-        new Change(
-          [new AddFileOperation('file2.tex', File.fromString('Content 2'))],
-          new Date(),
-          []
-        ),
-      ]
-      const historyA = new History(snapshotA, changesA)
-      const chunkA = new Chunk(historyA, 25)
+    it('should return out_of_bounds when requested version is greater than head version', async function () {
+      // Set head version
+      const headVersion = 5
+      await rclient.set(
+        keySchema.headVersion({ projectId }),
+        headVersion.toString()
+      )
 
-      await redisBackend.setCurrentChunk(projectId, chunkA)
+      // Request changes with version larger than head
+      const result = await redisBackend.getChangesSinceVersion(
+        projectId,
+        headVersion + 1
+      )
 
-      // Verify the initial chunk was cached
-      const cachedChunkA = await redisBackend.getCurrentChunk(projectId)
-      expect(cachedChunkA.getStartVersion()).to.equal(25)
-      expect(cachedChunkA.getEndVersion()).to.equal(27)
-      expect(cachedChunkA.history.changes.length).to.equal(2)
-
-      // Create a zero-length chunk (with no changes)
-      const snapshotB = new Snapshot()
-      const changesB = []
-      const historyB = new History(snapshotB, changesB)
-      const chunkB = new Chunk(historyB, 40)
-
-      // Replace the cached chunk
-      await redisBackend.setCurrentChunk(projectId, chunkB)
-
-      // Verify the new chunk replaced the old one
-      const cachedChunkB = await redisBackend.getCurrentChunk(projectId)
-      expect(cachedChunkB).to.not.be.null
-      expect(cachedChunkB.getStartVersion()).to.equal(40)
-      expect(cachedChunkB.getEndVersion()).to.equal(40) // Start version equals end version with no changes
-      expect(cachedChunkB.history.changes.length).to.equal(0)
-      expect(cachedChunkB).to.deep.equal(chunkB)
-
-      // Verify the metadata was updated
-      const updatedMetadata =
-        await redisBackend.getCurrentChunkMetadata(projectId)
-      expect(updatedMetadata.startVersion).to.equal(40)
-      expect(updatedMetadata.changesCount).to.equal(0)
+      expect(result.status).to.equal('out_of_bounds')
     })
 
-    it('should replace a zero-length chunk with a non-empty chunk', async function () {
-      // Set initial empty chunk
-      const snapshotA = new Snapshot()
-      const changesA = []
-      const historyA = new History(snapshotA, changesA)
-      const chunkA = new Chunk(historyA, 50)
+    it('should return out_of_bounds when requested version is too old', async function () {
+      // Set head version
+      const headVersion = 10
+      await rclient.set(
+        keySchema.headVersion({ projectId }),
+        headVersion.toString()
+      )
 
-      await redisBackend.setCurrentChunk(projectId, chunkA)
+      // Create a few changes but less than what we'd need to reach requested version
+      const timestamp = new Date()
+      const change1 = new Change([], timestamp)
+      const change2 = new Change([], timestamp)
+      await rclient.rpush(
+        keySchema.changes({ projectId }),
+        JSON.stringify(change1.toRaw()),
+        JSON.stringify(change2.toRaw())
+      )
 
-      // Verify the initial chunk was cached
-      const cachedChunkA = await redisBackend.getCurrentChunk(projectId)
-      expect(cachedChunkA.getStartVersion()).to.equal(50)
-      expect(cachedChunkA.getEndVersion()).to.equal(50)
-      expect(cachedChunkA.history.changes.length).to.equal(0)
+      // Request changes from version 5, which is too old (headVersion - changesCount = 10 - 2 = 8)
+      const result = await redisBackend.getChangesSinceVersion(projectId, 5)
 
-      // Create a non-empty chunk
-      const snapshotB = new Snapshot()
-      const changesB = [
-        new Change(
-          [new AddFileOperation('newfile.tex', File.fromString('New content'))],
-          new Date(),
-          []
-        ),
-        new Change(
-          [
-            new AddFileOperation(
-              'another.tex',
-              File.fromString('Another file')
-            ),
-          ],
-          new Date(),
-          []
-        ),
-      ]
-      const historyB = new History(snapshotB, changesB)
-      const chunkB = new Chunk(historyB, 60)
+      expect(result.status).to.equal('out_of_bounds')
+    })
 
-      // Replace the cached chunk
-      await redisBackend.setCurrentChunk(projectId, chunkB)
+    it('should return changes since requested version', async function () {
+      // Set head version
+      const headVersion = 5
+      await rclient.set(
+        keySchema.headVersion({ projectId }),
+        headVersion.toString()
+      )
 
-      // Verify the new chunk replaced the old one
-      const cachedChunkB = await redisBackend.getCurrentChunk(projectId)
-      expect(cachedChunkB).to.not.be.null
-      expect(cachedChunkB.getStartVersion()).to.equal(60)
-      expect(cachedChunkB.getEndVersion()).to.equal(62)
-      expect(cachedChunkB.history.changes.length).to.equal(2)
-      expect(cachedChunkB).to.deep.equal(chunkB)
+      // Create changes
+      const timestamp = new Date()
+      const change1 = new Change([], timestamp)
+      const change2 = new Change([], timestamp)
+      const change3 = new Change([], timestamp)
 
-      // Verify the metadata was updated
-      const updatedMetadata =
-        await redisBackend.getCurrentChunkMetadata(projectId)
-      expect(updatedMetadata.startVersion).to.equal(60)
-      expect(updatedMetadata.changesCount).to.equal(2)
+      // Push changes to Redis (representing versions 3, 4, and 5)
+      await rclient.rpush(
+        keySchema.changes({ projectId }),
+        JSON.stringify(change1.toRaw()),
+        JSON.stringify(change2.toRaw()),
+        JSON.stringify(change3.toRaw())
+      )
+
+      // Request changes since version 3 (should return changes for versions 4 and 5)
+      const result = await redisBackend.getChangesSinceVersion(projectId, 3)
+
+      expect(result.status).to.equal('ok')
+      expect(result.changes).to.be.an('array').with.lengthOf(2)
+
+      // The changes array should contain the raw changes
+      // Note: We're comparing raw objects, not the Change instances
+      expect(result.changes[0]).to.deep.equal(change2.toRaw())
+      expect(result.changes[1]).to.deep.equal(change3.toRaw())
+    })
+
+    it('should return all changes when requested version is earliest available', async function () {
+      // Set head version to 5
+      const headVersion = 5
+      await rclient.set(
+        keySchema.headVersion({ projectId }),
+        headVersion.toString()
+      )
+
+      // Create changes
+      const timestamp = new Date()
+      const change1 = new Change([], timestamp)
+      const change2 = new Change([], timestamp)
+      const change3 = new Change([], timestamp)
+
+      // Push changes to Redis (representing versions 3, 4, and 5)
+      await rclient.rpush(
+        keySchema.changes({ projectId }),
+        JSON.stringify(change1.toRaw()),
+        JSON.stringify(change2.toRaw()),
+        JSON.stringify(change3.toRaw())
+      )
+
+      // Request changes since version 2 (should return all 3 changes)
+      const result = await redisBackend.getChangesSinceVersion(projectId, 2)
+
+      expect(result.status).to.equal('ok')
+      expect(result.changes).to.be.an('array').with.lengthOf(3)
+      expect(result.changes[0]).to.deep.equal(change1.toRaw())
+      expect(result.changes[1]).to.deep.equal(change2.toRaw())
+      expect(result.changes[2]).to.deep.equal(change3.toRaw())
     })
   })
 
-  describe('checkCacheValidity', function () {
-    it('should return true when versions match', function () {
-      const snapshotA = new Snapshot()
-      const historyA = new History(snapshotA, [])
-      const chunkA = new Chunk(historyA, 10)
-      chunkA.pushChanges([
-        new Change(
-          [new AddFileOperation('test.tex', File.fromString('Hello'))],
-          new Date(),
-          []
-        ),
-      ])
-
-      const snapshotB = new Snapshot()
-      const historyB = new History(snapshotB, [])
-      const chunkB = new Chunk(historyB, 10)
-      chunkB.pushChanges([
-        new Change(
-          [new AddFileOperation('test.tex', File.fromString('Hello'))],
-          new Date(),
-          []
-        ),
-      ])
-
-      const isValid = redisBackend.checkCacheValidity(chunkA, chunkB)
-      expect(isValid).to.be.true
+  describe('getNonPersistedChanges', function () {
+    it('should return empty array when project does not exist', async function () {
+      const changes = await redisBackend.getNonPersistedChanges(projectId)
+      expect(changes).to.be.an('array').that.is.empty
     })
 
-    it('should return false when start versions differ', function () {
-      const snapshotA = new Snapshot()
-      const historyA = new History(snapshotA, [])
-      const chunkA = new Chunk(historyA, 10)
+    it('should return all changes when persisted version is not set', async function () {
+      const changes = [makeChange(), makeChange(), makeChange()]
+      queueChanges(projectId, changes)
 
-      const snapshotB = new Snapshot()
-      const historyB = new History(snapshotB, [])
-      const chunkB = new Chunk(historyB, 11)
-
-      const isValid = redisBackend.checkCacheValidity(chunkA, chunkB)
-      expect(isValid).to.be.false
+      const nonPersistedChanges =
+        await redisBackend.getNonPersistedChanges(projectId)
+      expect(nonPersistedChanges.map(change => change.toRaw())).to.deep.equal(
+        changes.map(change => change.toRaw())
+      )
     })
 
-    it('should return false when end versions differ', function () {
-      const snapshotA = new Snapshot()
-      const historyA = new History(snapshotA, [])
-      const chunkA = new Chunk(historyA, 10)
-      chunkA.pushChanges([
-        new Change(
-          [new AddFileOperation('test.tex', File.fromString('Hello'))],
-          new Date(),
-          []
-        ),
-      ])
+    it('should return empty array when persisted version equals head version', async function () {
+      // Set both head and persisted versions to be equal
+      const version = 5
+      await rclient.set(
+        keySchema.headVersion({ projectId }),
+        version.toString()
+      )
+      await rclient.set(
+        keySchema.persistedVersion({ projectId }),
+        version.toString()
+      )
 
-      const snapshotB = new Snapshot()
-      const historyB = new History(snapshotB, [])
-      const chunkB = new Chunk(historyB, 10)
-      chunkB.pushChanges([
-        new Change(
-          [new AddFileOperation('test.tex', File.fromString('Hello'))],
-          new Date(),
-          []
-        ),
-        new Change(
-          [new AddFileOperation('other.tex', File.fromString('World'))],
-          new Date(),
-          []
-        ),
-      ])
-
-      const isValid = redisBackend.checkCacheValidity(chunkA, chunkB)
-      expect(isValid).to.be.false
+      const changes = await redisBackend.getNonPersistedChanges(projectId)
+      expect(changes).to.be.an('array').that.is.empty
     })
 
-    it('should return false when cached chunk is null', function () {
-      const snapshotB = new Snapshot()
-      const historyB = new History(snapshotB, [])
-      const chunkB = new Chunk(historyB, 10)
+    it('should return all non-persisted changes', async function () {
+      // Set head version to 5 and persisted version to 2
+      const headVersion = 5
+      const persistedVersion = 2
+      await rclient.set(
+        keySchema.headVersion({ projectId }),
+        headVersion.toString()
+      )
+      await rclient.set(
+        keySchema.persistedVersion({ projectId }),
+        persistedVersion.toString()
+      )
 
-      const isValid = redisBackend.checkCacheValidity(null, chunkB)
-      expect(isValid).to.be.false
+      // Create changes for versions 3, 4, 5
+      const timestamp = new Date()
+      const change1 = new Change([], timestamp) // Version 3
+      const change2 = new Change([], timestamp) // Version 4
+      const change3 = new Change([], timestamp) // Version 5
+
+      // Push changes to Redis
+      await rclient.rpush(
+        keySchema.changes({ projectId }),
+        JSON.stringify(change1.toRaw()),
+        JSON.stringify(change2.toRaw()),
+        JSON.stringify(change3.toRaw())
+      )
+
+      // Get non-persisted changes
+      const nonPersistedChanges =
+        await redisBackend.getNonPersistedChanges(projectId)
+
+      // Should return changes for versions 3, 4, 5
+      expect(nonPersistedChanges).to.be.an('array').with.lengthOf(3)
+      expect(nonPersistedChanges[0].toRaw()).to.deep.equal(change1.toRaw())
+      expect(nonPersistedChanges[1].toRaw()).to.deep.equal(change2.toRaw())
+      expect(nonPersistedChanges[2].toRaw()).to.deep.equal(change3.toRaw())
+    })
+
+    it('should return a subset of changes when some are persisted', async function () {
+      // Set head version to 5 and persisted version to 3
+      // This means versions 4 and 5 are not persisted
+      const headVersion = 5
+      const persistedVersion = 3
+      await rclient.set(
+        keySchema.headVersion({ projectId }),
+        headVersion.toString()
+      )
+      await rclient.set(
+        keySchema.persistedVersion({ projectId }),
+        persistedVersion.toString()
+      )
+
+      // Create changes for versions 1, 2, 3, 4, 5
+      const timestamp = new Date()
+      const change1 = new Change([], timestamp) // Version 1
+      const change2 = new Change([], timestamp) // Version 2
+      const change3 = new Change([], timestamp) // Version 3
+      const change4 = new Change([], timestamp) // Version 4
+      const change5 = new Change([], timestamp) // Version 5
+
+      // Push changes to Redis
+      await rclient.rpush(
+        keySchema.changes({ projectId }),
+        JSON.stringify(change1.toRaw()),
+        JSON.stringify(change2.toRaw()),
+        JSON.stringify(change3.toRaw()),
+        JSON.stringify(change4.toRaw()),
+        JSON.stringify(change5.toRaw())
+      )
+
+      // Get non-persisted changes
+      const nonPersistedChanges =
+        await redisBackend.getNonPersistedChanges(projectId)
+
+      // Should return only changes for versions 4 and 5
+      expect(nonPersistedChanges).to.be.an('array').with.lengthOf(2)
+      expect(nonPersistedChanges[0].toRaw()).to.deep.equal(change4.toRaw())
+      expect(nonPersistedChanges[1].toRaw()).to.deep.equal(change5.toRaw())
+    })
+
+    it('should throw an error when persisted version is higher than head version', async function () {
+      // This is an unusual case that should not happen in practice
+      // The system should throw an error to indicate this abnormal state
+      const headVersion = 3
+      const persistedVersion = 5
+      await rclient.set(
+        keySchema.headVersion({ projectId }),
+        headVersion.toString()
+      )
+      await rclient.set(
+        keySchema.persistedVersion({ projectId }),
+        persistedVersion.toString()
+      )
+
+      // Create changes
+      const timestamp = new Date()
+      const change1 = new Change([], timestamp)
+      const change2 = new Change([], timestamp)
+      const change3 = new Change([], timestamp)
+
+      // Push changes to Redis
+      await rclient.rpush(
+        keySchema.changes({ projectId }),
+        JSON.stringify(change1.toRaw()),
+        JSON.stringify(change2.toRaw()),
+        JSON.stringify(change3.toRaw())
+      )
+
+      // Use chai-as-promised for cleaner async error assertion
+      await expect(
+        redisBackend.getNonPersistedChanges(projectId)
+      ).to.be.rejectedWith(/HEAD_VERSION_BEHIND_PERSISTED_VERSION/)
+    })
+
+    it('should handle case where persisted version is before start of changes list', async function () {
+      // Setup: head version is 5, persisted version is 1
+      // But changes list only starts from version 3
+      const headVersion = 5
+      const persistedVersion = 1
+      await rclient.set(
+        keySchema.headVersion({ projectId }),
+        headVersion.toString()
+      )
+      await rclient.set(
+        keySchema.persistedVersion({ projectId }),
+        persistedVersion.toString()
+      )
+
+      // Create changes for versions 3, 4, 5 only
+      const timestamp = new Date()
+      const change3 = new Change([], timestamp) // Version 3
+      const change4 = new Change([], timestamp) // Version 4
+      const change5 = new Change([], timestamp) // Version 5
+
+      // Push changes to Redis
+      await rclient.rpush(
+        keySchema.changes({ projectId }),
+        JSON.stringify(change3.toRaw()),
+        JSON.stringify(change4.toRaw()),
+        JSON.stringify(change5.toRaw())
+      )
+
+      // Get non-persisted changes
+      const nonPersistedChanges =
+        await redisBackend.getNonPersistedChanges(projectId)
+
+      // Should return all changes since the persisted version is before the start of the list
+      expect(nonPersistedChanges).to.be.an('array').with.lengthOf(3)
+      expect(nonPersistedChanges[0].toRaw()).to.deep.equal(change3.toRaw())
+      expect(nonPersistedChanges[1].toRaw()).to.deep.equal(change4.toRaw())
+      expect(nonPersistedChanges[2].toRaw()).to.deep.equal(change5.toRaw())
     })
   })
 
-  describe('compareChunks', function () {
-    it('should return true when chunks are identical', function () {
-      // Create two identical chunks
-      const snapshot = new Snapshot()
-      const changes = [
-        new Change(
-          [new AddFileOperation('test.tex', File.fromString('Hello World'))],
-          new Date('2025-04-10T12:00:00Z'), // Using fixed date for consistent comparison
-          []
-        ),
-      ]
-      const history1 = new History(snapshot, changes)
-      const chunk1 = new Chunk(history1, 5)
-
-      // Create a separate but identical chunk
-      const snapshot2 = new Snapshot()
-      const changes2 = [
-        new Change(
-          [new AddFileOperation('test.tex', File.fromString('Hello World'))],
-          new Date('2025-04-10T12:00:00Z'), // Using same fixed date
-          []
-        ),
-      ]
-      const history2 = new History(snapshot2, changes2)
-      const chunk2 = new Chunk(history2, 5)
-
-      const result = redisBackend.compareChunks(projectId, chunk1, chunk2)
-      expect(result).to.be.true
+  describe('setPersistedVersion', function () {
+    it('should return not_found when project does not exist', async function () {
+      const result = await redisBackend.setPersistedVersion(projectId, 5)
+      expect(result).to.equal('not_found')
     })
 
-    it('should return false when chunks differ', function () {
-      // Create first chunk
-      const snapshot1 = new Snapshot()
-      const changes1 = [
-        new Change(
-          [new AddFileOperation('test.tex', File.fromString('Hello World'))],
-          new Date('2025-04-10T12:00:00Z'),
-          []
-        ),
-      ]
-      const history1 = new History(snapshot1, changes1)
-      const chunk1 = new Chunk(history1, 5)
-
-      // Create a different chunk (different content)
-      const snapshot2 = new Snapshot()
-      const changes2 = [
-        new Change(
-          [
-            new AddFileOperation(
-              'test.tex',
-              File.fromString('Different content')
-            ),
-          ],
-          new Date('2025-04-10T12:00:00Z'),
-          []
-        ),
-      ]
-      const history2 = new History(snapshot2, changes2)
-      const chunk2 = new Chunk(history2, 5)
-
-      const result = redisBackend.compareChunks(projectId, chunk1, chunk2)
-      expect(result).to.be.false
-    })
-
-    it('should return false when one chunk is null', function () {
-      // Create a chunk
-      const snapshot = new Snapshot()
-      const changes = [
-        new Change(
-          [new AddFileOperation('test.tex', File.fromString('Hello World'))],
-          new Date('2025-04-10T12:00:00Z'),
-          []
-        ),
-      ]
-      const history = new History(snapshot, changes)
-      const chunk = new Chunk(history, 5)
-
-      const resultWithNullCached = redisBackend.compareChunks(
-        projectId,
-        null,
-        chunk
+    it('should set the persisted version', async function () {
+      // Set head version
+      const headVersion = 5
+      await rclient.set(
+        keySchema.headVersion({ projectId }),
+        headVersion.toString()
       )
-      expect(resultWithNullCached).to.be.false
 
-      const resultWithNullCurrent = redisBackend.compareChunks(
+      // Set persisted version
+      const persistedVersion = 3
+      const result = await redisBackend.setPersistedVersion(
         projectId,
-        chunk,
-        null
+        persistedVersion
       )
-      expect(resultWithNullCurrent).to.be.false
+
+      expect(result).to.equal('ok')
+
+      // Verify the persisted version was set
+      const persistedVersionRedis = await rclient.get(
+        keySchema.persistedVersion({ projectId })
+      )
+      expect(parseInt(persistedVersionRedis, 10)).to.equal(persistedVersion)
     })
 
-    it('should return false when chunks have different start versions', function () {
-      // Create first chunk with start version 5
-      const snapshot1 = new Snapshot()
-      const changes1 = [
-        new Change(
-          [new AddFileOperation('test.tex', File.fromString('Hello World'))],
-          new Date('2025-04-10T12:00:00Z'),
-          []
-        ),
-      ]
-      const history1 = new History(snapshot1, changes1)
-      const chunk1 = new Chunk(history1, 5)
+    it('should trim the changes list to keep only MAX_PERSISTED_CHANGES beyond persisted version', async function () {
+      // Get MAX_PERSISTED_CHANGES to ensure our test data is larger
+      const maxPersistedChanges = redisBackend.MAX_PERSISTED_CHANGES
 
-      // Create second chunk with identical content but different start version (10)
-      const snapshot2 = new Snapshot()
-      const changes2 = [
-        new Change(
-          [new AddFileOperation('test.tex', File.fromString('Hello World'))],
-          new Date('2025-04-10T12:00:00Z'),
-          []
-        ),
-      ]
-      const history2 = new History(snapshot2, changes2)
-      const chunk2 = new Chunk(history2, 10)
+      // Create a larger number of changes for the test
+      // Using MAX_PERSISTED_CHANGES + 10 to ensure we have enough changes to trigger trimming
+      const totalChanges = maxPersistedChanges + 10
 
-      const result = redisBackend.compareChunks(projectId, chunk1, chunk2)
-      expect(result).to.be.false
+      // Set head version to match total number of changes
+      const headVersion = totalChanges
+      await rclient.set(
+        keySchema.headVersion({ projectId }),
+        headVersion.toString()
+      )
+
+      // Create changes for versions 1 through totalChanges
+      const timestamp = new Date()
+      const changes = Array.from(
+        { length: totalChanges },
+        (_, idx) =>
+          new Change(
+            [new AddFileOperation(`file${idx}.tex`, File.fromString('hello'))],
+            timestamp
+          )
+      )
+
+      // Push changes to Redis
+      await rclient.rpush(
+        keySchema.changes({ projectId }),
+        ...changes.map(change => JSON.stringify(change.toRaw()))
+      )
+
+      // Set persisted version to somewhere near the head version
+      const persistedVersion = headVersion - 5
+
+      // Set the persisted version
+      const result = await redisBackend.setPersistedVersion(
+        projectId,
+        persistedVersion
+      )
+      expect(result).to.equal('ok')
+
+      // Get all changes that remain in Redis
+      const remainingChanges = await rclient.lrange(
+        keySchema.changes({ projectId }),
+        0,
+        -1
+      )
+
+      // Calculate the expected number of changes to remain
+      expect(remainingChanges).to.have.lengthOf(
+        maxPersistedChanges + (headVersion - persistedVersion)
+      )
+
+      // Check that remaining changes are the expected ones
+      const expectedChanges = changes.slice(
+        persistedVersion - maxPersistedChanges,
+        totalChanges
+      )
+      expect(remainingChanges).to.deep.equal(
+        expectedChanges.map(change => JSON.stringify(change.toRaw()))
+      )
+    })
+
+    it('should keep all changes when there are fewer than MAX_PERSISTED_CHANGES', async function () {
+      // Set head version to 5
+      const headVersion = 5
+      await rclient.set(
+        keySchema.headVersion({ projectId }),
+        headVersion.toString()
+      )
+
+      // Create changes for versions 1 through 5
+      const timestamp = new Date()
+      const changes = Array.from({ length: 5 }, () => new Change([], timestamp))
+
+      // Push changes to Redis
+      await rclient.rpush(
+        keySchema.changes({ projectId }),
+        ...changes.map(change => JSON.stringify(change.toRaw()))
+      )
+
+      // Set persisted version to 3
+      // All changes should remain since total count is small
+      const persistedVersion = 3
+
+      // Ensure MAX_PERSISTED_CHANGES is larger than our test dataset
+      expect(redisBackend.MAX_PERSISTED_CHANGES).to.be.greaterThan(
+        5,
+        'MAX_PERSISTED_CHANGES should be greater than 5 for this test'
+      )
+
+      // Set the persisted version
+      const result = await redisBackend.setPersistedVersion(
+        projectId,
+        persistedVersion
+      )
+      expect(result).to.equal('ok')
+
+      // Get all changes that remain in Redis
+      const remainingChanges = await rclient.lrange(
+        keySchema.changes({ projectId }),
+        0,
+        -1
+      )
+
+      // All changes should remain
+      expect(remainingChanges).to.have.lengthOf(5)
     })
   })
 
-  describe('integration with redis', function () {
-    it('should store and retrieve complex chunks correctly', async function () {
-      // Create a more complex chunk
+  describe('getState', function () {
+    it('should return complete project state from Redis', async function () {
+      // Set up the test data in Redis
       const snapshot = new Snapshot()
-      const changes = [
-        new Change(
-          [new AddFileOperation('file1.tex', File.fromString('Content 1'))],
-          new Date(),
-          [1234]
-        ),
-        new Change(
-          [new AddFileOperation('file2.tex', File.fromString('Content 2'))],
-          new Date(),
-          null,
-          new Origin('test-origin'),
-          ['5a296963ad5e82432674c839', null],
-          '123.4',
-          new V2DocVersions({
-            'random-doc-id': { pathname: 'file2.tex', v: 123 },
-          })
-        ),
-        new Change(
-          [new AddFileOperation('file3.tex', File.fromString('Content 3'))],
-          new Date(),
-          []
-        ),
-      ]
-      const history = new History(snapshot, changes)
-      const chunk = new Chunk(history, 20)
+      const rawSnapshot = JSON.stringify(snapshot.toRaw())
+      const headVersion = 42
+      const persistedVersion = 40
+      const now = Date.now()
+      const expireTime = now + 60 * 60 * 1000 // 1 hour from now
+      const persistTime = now + 30 * 1000 // 30 seconds from now
 
-      // Cache the chunk
-      await redisBackend.setCurrentChunk(projectId, chunk)
+      // Create a change
+      const timestamp = new Date()
+      const change = new Change([], timestamp)
+      const serializedChange = JSON.stringify(change.toRaw())
 
-      // Retrieve the cached chunk
-      const cachedChunk = await redisBackend.getCurrentChunk(projectId)
-
-      expect(cachedChunk.getStartVersion()).to.equal(20)
-      expect(cachedChunk.getEndVersion()).to.equal(23)
-      expect(cachedChunk).to.deep.equal(chunk)
-      expect(cachedChunk.history.changes.length).to.equal(3)
-
-      // Check that the operations were preserved correctly
-      const retrievedChanges = cachedChunk.history.changes
-      expect(retrievedChanges[0].getOperations()[0].getPathname()).to.equal(
-        'file1.tex'
+      // Set everything in Redis
+      await rclient.set(keySchema.head({ projectId }), rawSnapshot)
+      await rclient.set(
+        keySchema.headVersion({ projectId }),
+        headVersion.toString()
       )
-      expect(retrievedChanges[1].getOperations()[0].getPathname()).to.equal(
-        'file2.tex'
+      await rclient.set(
+        keySchema.persistedVersion({ projectId }),
+        persistedVersion.toString()
       )
-      expect(retrievedChanges[2].getOperations()[0].getPathname()).to.equal(
-        'file3.tex'
+      await rclient.set(
+        keySchema.expireTime({ projectId }),
+        expireTime.toString()
+      )
+      await rclient.set(
+        keySchema.persistTime({ projectId }),
+        persistTime.toString()
+      )
+      await rclient.rpush(keySchema.changes({ projectId }), serializedChange)
+
+      // Get the state
+      const state = await redisBackend.getState(projectId)
+
+      // Verify everything matches
+      expect(state).to.exist
+      expect(state.headSnapshot).to.deep.equal(snapshot.toRaw())
+      expect(state.headVersion).to.equal(headVersion)
+      expect(state.persistedVersion).to.equal(persistedVersion)
+      expect(state.expireTime).to.equal(expireTime)
+      expect(state.persistTime).to.equal(persistTime)
+    })
+
+    it('should return proper defaults for missing fields', async function () {
+      // Only set the head snapshot and version, leave others unset
+      const snapshot = new Snapshot()
+      const rawSnapshot = JSON.stringify(snapshot.toRaw())
+      const headVersion = 42
+
+      await rclient.set(keySchema.head({ projectId }), rawSnapshot)
+      await rclient.set(
+        keySchema.headVersion({ projectId }),
+        headVersion.toString()
       )
 
-      // Check that the chunk was stored correctly using the chunk metadata
-      const chunkMetadata =
-        await redisBackend.getCurrentChunkMetadata(projectId)
-      expect(chunkMetadata).to.not.be.null
-      expect(chunkMetadata.startVersion).to.equal(20)
-      expect(chunkMetadata.changesCount).to.equal(3)
+      // Get the state
+      const state = await redisBackend.getState(projectId)
+
+      // Verify only what we set exists, and other fields have correct defaults
+      expect(state).to.exist
+      expect(state.headSnapshot).to.deep.equal(snapshot.toRaw())
+      expect(state.headVersion).to.equal(headVersion)
+      expect(state.persistedVersion).to.be.null
+      expect(state.expireTime).to.be.null
+      expect(state.persistTime).to.be.null
     })
   })
 
-  describe('getCurrentChunkIfValid', function () {
-    it('should return the chunk when versions and changes count match', async function () {
-      // Create and cache a sample chunk
-      const snapshot = new Snapshot()
-      const changes = [
-        new Change(
-          [new AddFileOperation('test.tex', File.fromString('Valid content'))],
-          new Date(),
-          []
-        ),
-      ]
-      const history = new History(snapshot, changes)
-      const chunk = new Chunk(history, 7) // startVersion 7, endVersion 8
-      await redisBackend.setCurrentChunk(projectId, chunk)
+  describe('setExpireTime', function () {
+    it('should set the expire time on an active project', async function () {
+      // Load a fake project in Redis
+      const change = makeChange()
+      await queueChanges(projectId, [change], { expireTime: 123 })
 
-      // Prepare chunkRecord matching the cached chunk
-      const chunkRecord = { startVersion: 7, endVersion: 8 }
+      // Check that the right expire time was recorded
+      let state = await redisBackend.getState(projectId)
+      expect(state.expireTime).to.equal(123)
 
-      // Retrieve using getCurrentChunkIfValid
-      const validChunk = await redisBackend.getCurrentChunkIfValid(
-        projectId,
-        chunkRecord
-      )
-
-      expect(validChunk).to.not.be.null
-      expect(validChunk.getStartVersion()).to.equal(7)
-      expect(validChunk.getEndVersion()).to.equal(8)
-      expect(validChunk).to.deep.equal(chunk)
+      // Set the expire time to something else
+      await redisBackend.setExpireTime(projectId, 456)
+      state = await redisBackend.getState(projectId)
+      expect(state.expireTime).to.equal(456)
     })
 
-    it('should return null when no chunk is cached', async function () {
-      // No chunk is cached for this projectId yet
-      const chunkRecord = { startVersion: 1, endVersion: 2 }
-      const validChunk = await redisBackend.getCurrentChunkIfValid(
-        projectId,
-        chunkRecord
-      )
-      expect(validChunk).to.be.null
-    })
+    it('should not set an expire time on an inactive project', async function () {
+      let state = await redisBackend.getState(projectId)
+      expect(state.expireTime).to.be.null
 
-    it('should return null when start version mismatches', async function () {
-      // Cache a chunk with startVersion 10
-      const snapshot = new Snapshot()
-      const changes = [
-        new Change(
-          [new AddFileOperation('test.tex', File.fromString('Content'))],
-          new Date(),
-          []
-        ),
-      ]
-      const history = new History(snapshot, changes)
-      const chunk = new Chunk(history, 10) // startVersion 10, endVersion 11
-      await redisBackend.setCurrentChunk(projectId, chunk)
-
-      // Attempt to retrieve with a different startVersion
-      const chunkRecord = { startVersion: 9, endVersion: 10 } // Incorrect startVersion
-      const validChunk = await redisBackend.getCurrentChunkIfValid(
-        projectId,
-        chunkRecord
-      )
-      expect(validChunk).to.be.null
-    })
-
-    it('should return null when changes count mismatches', async function () {
-      // Cache a chunk with one change (startVersion 15, endVersion 16)
-      const snapshot = new Snapshot()
-      const changes = [
-        new Change(
-          [new AddFileOperation('test.tex', File.fromString('Content'))],
-          new Date(),
-          []
-        ),
-      ]
-      const history = new History(snapshot, changes)
-      const chunk = new Chunk(history, 15)
-      await redisBackend.setCurrentChunk(projectId, chunk)
-
-      // Attempt to retrieve with correct startVersion but incorrect endVersion (implying wrong changes count)
-      const chunkRecord = { startVersion: 15, endVersion: 17 } // Incorrect endVersion (implies 2 changes)
-      const validChunk = await redisBackend.getCurrentChunkIfValid(
-        projectId,
-        chunkRecord
-      )
-      expect(validChunk).to.be.null
-    })
-
-    it('should return the chunk when versions and changes count match for a zero-change chunk', async function () {
-      // Cache a chunk with zero changes
-      const snapshot = new Snapshot()
-      const changes = []
-      const history = new History(snapshot, changes)
-      const chunk = new Chunk(history, 20) // startVersion 20, endVersion 20
-      await redisBackend.setCurrentChunk(projectId, chunk)
-
-      // Prepare chunkRecord matching the zero-change chunk
-      const chunkRecord = { startVersion: 20, endVersion: 20 }
-
-      // Retrieve using getCurrentChunkIfValid
-      const validChunk = await redisBackend.getCurrentChunkIfValid(
-        projectId,
-        chunkRecord
-      )
-
-      expect(validChunk).to.not.be.null
-      expect(validChunk.getStartVersion()).to.equal(20)
-      expect(validChunk.getEndVersion()).to.equal(20)
-      expect(validChunk.history.changes.length).to.equal(0)
-      expect(validChunk).to.deep.equal(chunk)
-    })
-
-    it('should return null when start version matches but changes count is wrong for zero-change chunk', async function () {
-      // Cache a chunk with zero changes
-      const snapshot = new Snapshot()
-      const changes = []
-      const history = new History(snapshot, changes)
-      const chunk = new Chunk(history, 25) // startVersion 25, endVersion 25
-      await redisBackend.setCurrentChunk(projectId, chunk)
-
-      // Attempt to retrieve with correct startVersion but incorrect endVersion
-      const chunkRecord = { startVersion: 25, endVersion: 26 } // Incorrect endVersion (implies 1 change)
-      const validChunk = await redisBackend.getCurrentChunkIfValid(
-        projectId,
-        chunkRecord
-      )
-      expect(validChunk).to.be.null
+      await redisBackend.setExpireTime(projectId, 456)
+      state = await redisBackend.getState(projectId)
+      expect(state.expireTime).to.be.null
     })
   })
 
-  describe('getCurrentChunkMetadata', function () {
-    it('should return metadata for a cached chunk', async function () {
-      // Cache a chunk
-      const snapshot = new Snapshot()
-      const history = new History(snapshot, [
-        new Change(
-          [new AddFileOperation('test.tex', File.fromString('Hello'))],
-          new Date(),
-          []
-        ),
-        new Change(
-          [new AddFileOperation('other.tex', File.fromString('Bonjour'))],
-          new Date(),
-          []
-        ),
-      ])
-      const chunk = new Chunk(history, 10)
-      await redisBackend.setCurrentChunk(projectId, chunk)
+  describe('expireProject', function () {
+    it('should expire a persisted project', async function () {
+      // Load and persist a project in Redis
+      const change = makeChange()
+      await queueChanges(projectId, [change])
+      await redisBackend.setPersistedVersion(projectId, 1)
 
-      const metadata = await redisBackend.getCurrentChunkMetadata(projectId)
-      expect(metadata).to.deep.equal({ startVersion: 10, changesCount: 2 })
+      // Check that the project is loaded
+      let state = await redisBackend.getState(projectId)
+      expect(state.headVersion).to.equal(1)
+      expect(state.persistedVersion).to.equal(1)
+
+      // Expire the project
+      await redisBackend.expireProject(projectId)
+      state = await redisBackend.getState(projectId)
+      expect(state.headVersion).to.be.null
     })
 
-    it('should return null if no chunk is cached for the project', async function () {
-      const metadata = await redisBackend.getCurrentChunkMetadata(
-        'non-existent-project-id'
-      )
-      expect(metadata).to.be.null
+    it('should not expire a non-persisted project', async function () {
+      // Load a project in Redis
+      const change = makeChange()
+      await queueChanges(projectId, [change])
+
+      // Check that the project is loaded
+      let state = await redisBackend.getState(projectId)
+      expect(state.headVersion).to.equal(1)
+      expect(state.persistedVersion).to.equal(null)
+
+      // Expire the project
+      await redisBackend.expireProject(projectId)
+      state = await redisBackend.getState(projectId)
+      expect(state.headVersion).to.equal(1)
     })
 
-    it('should return metadata with zero changes for a zero-change chunk', async function () {
-      // Cache a chunk with no changes
-      const snapshot = new Snapshot()
-      const history = new History(snapshot, [])
-      const chunk = new Chunk(history, 5)
-      await redisBackend.setCurrentChunk(projectId, chunk)
+    it('should not expire a partially persisted project', async function () {
+      // Load a fake project in Redis
+      const change1 = makeChange()
+      const change2 = makeChange()
+      await queueChanges(projectId, [change1, change2])
 
-      const metadata = await redisBackend.getCurrentChunkMetadata(projectId)
-      expect(metadata).to.deep.equal({ startVersion: 5, changesCount: 0 })
-    })
-  })
+      // Persist the first change
+      await redisBackend.setPersistedVersion(projectId, 1)
 
-  describe('expireCurrentChunk', function () {
-    const TEMPORARY_CACHE_LIFETIME_MS = 300 * 1000 // Match the value in redis.js
+      // Check that the project is loaded
+      let state = await redisBackend.getState(projectId)
+      expect(state.headVersion).to.equal(2)
+      expect(state.persistedVersion).to.equal(1)
 
-    it('should return false and not expire a non-expired chunk', async function () {
-      // Cache a chunk
-      const snapshot = new Snapshot()
-      const history = new History(snapshot, [])
-      const chunk = new Chunk(history, 10)
-      await redisBackend.setCurrentChunk(projectId, chunk)
-
-      // Attempt to expire immediately (should not be expired yet)
-      const expired = await redisBackend.expireCurrentChunk(projectId)
-      expect(expired).to.be.false
-
-      // Verify the chunk still exists
-      const cachedChunk = await redisBackend.getCurrentChunk(projectId)
-      expect(cachedChunk).to.not.be.null
-      expect(cachedChunk.getStartVersion()).to.equal(10)
+      // Expire the project
+      await redisBackend.expireProject(projectId)
+      state = await redisBackend.getState(projectId)
+      expect(state.headVersion).to.equal(2)
     })
 
-    it('should return true and expire an expired chunk using currentTime', async function () {
-      // Cache a chunk
-      const snapshot = new Snapshot()
-      const history = new History(snapshot, [])
-      const chunk = new Chunk(history, 10)
-      await redisBackend.setCurrentChunk(projectId, chunk)
+    it('should handle a project that is not loaded', async function () {
+      // Check that the project is not loaded
+      let state = await redisBackend.getState(projectId)
+      expect(state.headVersion).to.be.null
 
-      // Calculate a time far enough in the future to ensure expiry
-      const futureTime = Date.now() + TEMPORARY_CACHE_LIFETIME_MS + 5000 // 5 seconds past expiry
-
-      // Attempt to expire using the future time
-      const expired = await redisBackend.expireCurrentChunk(
-        projectId,
-        futureTime
-      )
-      expect(expired).to.be.true
-
-      // Verify the chunk is gone
-      const cachedChunk = await redisBackend.getCurrentChunk(projectId)
-      expect(cachedChunk).to.be.null
-
-      // Verify metadata is also gone
-      const metadata = await redisBackend.getCurrentChunkMetadata(projectId)
-      expect(metadata).to.be.null
-    })
-
-    it('should return false if no chunk is cached for the project', async function () {
-      const expired = await redisBackend.expireCurrentChunk(
-        'non-existent-project'
-      )
-      expect(expired).to.be.false
-    })
-
-    it('should return false if called with a currentTime before the expiry time', async function () {
-      // Cache a chunk
-      const snapshot = new Snapshot()
-      const history = new History(snapshot, [])
-      const chunk = new Chunk(history, 10)
-      await redisBackend.setCurrentChunk(projectId, chunk)
-
-      // Use a time *before* the cache would normally expire
-      const pastTime = Date.now() - 10000 // 10 seconds ago
-
-      // Attempt to expire using the past time
-      const expired = await redisBackend.expireCurrentChunk(projectId, pastTime)
-      expect(expired).to.be.false
-
-      // Verify the chunk still exists
-      const cachedChunk = await redisBackend.getCurrentChunk(projectId)
-      expect(cachedChunk).to.not.be.null
+      // Expire the project
+      await redisBackend.expireProject(projectId)
+      state = await redisBackend.getState(projectId)
+      expect(state.headVersion).to.be.null
     })
   })
 
-  describe('with a persist-time timestamp', function () {
-    const persistTimestamp = Date.now() + 1000 * 60 * 60 // 1 hour in the future
+  describe('claimExpireJob', function () {
+    it("should claim the expire job when it's ready", async function () {
+      // Load a project in Redis
+      const change = makeChange()
+      const now = Date.now()
+      const expireTime = now - 1000
+      await queueChanges(projectId, [change], { expireTime })
+
+      // Check that the expire time has been set correctly
+      let state = await redisBackend.getState(projectId)
+      expect(state.expireTime).to.equal(expireTime)
+
+      // Claim the job
+      await redisBackend.claimExpireJob(projectId)
+
+      // Check the job expires in the future
+      state = await redisBackend.getState(projectId)
+      expect(state.expireTime).to.satisfy(time => time > now)
+    })
+
+    it('should throw an error when the job is not ready', async function () {
+      // Load a project in Redis
+      const change = makeChange()
+      const now = Date.now()
+      const expireTime = now + 100_000
+      await queueChanges(projectId, [change], { expireTime })
+
+      // Claim the job
+      await expect(redisBackend.claimExpireJob(projectId)).to.be.rejectedWith(
+        JobNotReadyError
+      )
+    })
+
+    it('should throw an error when the job is not found', async function () {
+      // Claim a job on a project that is not loaded
+      await expect(redisBackend.claimExpireJob(projectId)).to.be.rejectedWith(
+        JobNotFoundError
+      )
+    })
+  })
+
+  describe('claimPersistJob', function () {
+    it("should claim the persist job when it's ready", async function () {
+      // Load a project in Redis
+      const change = makeChange()
+      const now = Date.now()
+      const persistTime = now - 1000
+      await queueChanges(projectId, [change], { persistTime })
+
+      // Check that the persist time has been set correctly
+      let state = await redisBackend.getState(projectId)
+      expect(state.persistTime).to.equal(persistTime)
+
+      // Claim the job
+      await redisBackend.claimPersistJob(projectId)
+
+      // Check the job is not ready
+      state = await redisBackend.getState(projectId)
+      expect(state.persistTime).to.satisfy(time => time > now)
+    })
+
+    it('should throw an error when the job is not ready', async function () {
+      // Load a project in Redis
+      const change = makeChange()
+      const now = Date.now()
+      const persistTime = now + 100_000
+      await queueChanges(projectId, [change], { persistTime })
+
+      // Claim the job
+      await expect(redisBackend.claimPersistJob(projectId)).to.be.rejectedWith(
+        JobNotReadyError
+      )
+    })
+
+    it('should throw an error when the job is not found', async function () {
+      // Claim a job on a project that is not loaded
+      await expect(redisBackend.claimExpireJob(projectId)).to.be.rejectedWith(
+        JobNotFoundError
+      )
+    })
+  })
+
+  describe('closing a job', function () {
+    let job
 
     beforeEach(async function () {
-      // Ensure a chunk exists before each test in this block
-      const snapshot = new Snapshot()
-      const changes = [
-        new Change(
-          [new AddFileOperation('test.tex', File.fromString('Persist Test'))],
-          new Date(),
-          []
-        ),
-      ]
-      const history = new History(snapshot, changes)
-      const chunk = new Chunk(history, 100)
-      await redisBackend.setCurrentChunk(projectId, chunk)
+      // Load a project in Redis
+      const change = makeChange()
+      const now = Date.now()
+      const expireTime = now - 1000
+      await queueChanges(projectId, [change], { expireTime })
+
+      // Check that the expire time has been set correctly
+      const state = await redisBackend.getState(projectId)
+      expect(state.expireTime).to.equal(expireTime)
+
+      // Claim the job
+      job = await redisBackend.claimExpireJob(projectId)
     })
 
-    it('should not clear a chunk if persist-time is set', async function () {
-      // Set persist time
-      await redisBackend.setPersistTime(projectId, persistTimestamp)
-
-      // Attempt to clear the cache
-      const cleared = await redisBackend.clearCache(projectId)
-      expect(cleared).to.be.false // Expect clearCache to return false
-
-      // Verify the chunk still exists
-      const chunk = await redisBackend.getCurrentChunk(projectId)
-      expect(chunk).to.not.be.null
-      expect(chunk.getStartVersion()).to.equal(100)
+    it("should delete the key if it hasn't changed", async function () {
+      await job.close()
+      const state = await redisBackend.getState(projectId)
+      expect(state.expireTime).to.be.null
     })
 
-    it('should not expire a chunk if persist-time is set, even if expire-time has passed', async function () {
-      // Set persist time
-      await redisBackend.setPersistTime(projectId, persistTimestamp)
-
-      // Attempt to expire the chunk with a time far in the future
-      const farFutureTime = Date.now() + 1000 * 60 * 60 * 24 // 24 hours in the future
-      const expired = await redisBackend.expireCurrentChunk(
-        projectId,
-        farFutureTime
-      )
-      expect(expired).to.be.false // Expect expireCurrentChunk to return false
-
-      // Verify the chunk still exists
-      const chunk = await redisBackend.getCurrentChunk(projectId)
-      expect(chunk).to.not.be.null
-      expect(chunk.getStartVersion()).to.equal(100)
-    })
-
-    it('getCurrentChunkStatus should return persist-time when set', async function () {
-      // Set persist time
-      await redisBackend.setPersistTime(projectId, persistTimestamp)
-
-      const status = await redisBackend.getCurrentChunkStatus(projectId)
-      expect(status.persistTime).to.equal(persistTimestamp)
-      expect(status.expireTime).to.be.a('number') // expireTime is set by setCurrentChunk
-    })
-
-    it('getCurrentChunkStatus should return null for persist-time when not set', async function () {
-      const status = await redisBackend.getCurrentChunkStatus(projectId)
-      expect(status.persistTime).to.be.null
-      expect(status.expireTime).to.be.a('number')
-    })
-
-    it('getCurrentChunkStatus should return nulls after cache is cleared (without persist-time)', async function () {
-      // Clear cache (persistTime is not set here)
-      await redisBackend.clearCache(projectId)
-
-      const status = await redisBackend.getCurrentChunkStatus(projectId)
-      expect(status.persistTime).to.be.null
-      expect(status.expireTime).to.be.null
+    it('should keep the key if it has changed', async function () {
+      const newTimestamp = job.claimTimestamp + 1000
+      await redisBackend.setExpireTime(projectId, newTimestamp)
+      await job.close()
+      const state = await redisBackend.getState(projectId)
+      expect(state.expireTime).to.equal(newTimestamp)
     })
   })
 })
+
+async function queueChanges(projectId, changes, opts = {}) {
+  const baseVersion = 0
+  const headSnapshot = new Snapshot()
+
+  // Set times
+  const now = Date.now()
+  const persistTime = opts.persistTime ?? now + 30 * 1000 // 30 seconds from now
+  const expireTime = opts.expireTime ?? now + 60 * 60 * 1000 // 1 hour from now
+
+  await redisBackend.queueChanges(
+    projectId,
+    headSnapshot,
+    baseVersion,
+    changes,
+    persistTime,
+    expireTime
+  )
+}
+
+function makeChange() {
+  const timestamp = new Date()
+  return new Change([], timestamp)
+}

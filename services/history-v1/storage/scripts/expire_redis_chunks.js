@@ -2,7 +2,7 @@ const logger = require('@overleaf/logger')
 const commandLineArgs = require('command-line-args') // Add this line
 const redis = require('../lib/redis')
 const { scanRedisCluster, extractKeyId } = require('../lib/scan')
-const { expireCurrentChunk } = require('../lib/chunk_store/redis')
+const { expireProject, claimExpireJob } = require('../lib/chunk_store/redis')
 
 const rclient = redis.rclientHistory
 const EXPIRE_TIME_KEY_PATTERN = `expire-time:{*}`
@@ -30,24 +30,42 @@ function isExpiredKey(expireTimestamp, currentTime) {
   return currentTime > expireTime
 }
 
-async function processKeysBatch(keysBatch, rclient) {
+async function fetchTimestamps(projectIds, rclient) {
+  const expireTimeKeys = projectIds.map(id => `expire-time:{${id}}`)
+  // For efficiency, we use MGET to fetch all the timestamps in a single request
+  const expireTimestamps = await rclient.mget(expireTimeKeys)
+  // Return an array of objects with projectId and expireTimestamp
+  const results = projectIds.map((projectId, index) => ({
+    projectId,
+    expireTimestamp: expireTimestamps[index],
+  }))
+  return results
+}
+
+async function processKeysBatch(projectIds, rclient) {
   let clearedKeyCount = 0
-  if (keysBatch.length === 0) {
+  if (projectIds.length === 0) {
     return 0
   }
-  // For efficiency, we use MGET to fetch all the timestamps in a single request
-  const expireTimestamps = await rclient.mget(keysBatch)
+  const projects = await fetchTimestamps(projectIds, rclient)
   const currentTime = Date.now()
-  for (let i = 0; i < keysBatch.length; i++) {
-    const key = keysBatch[i]
+
+  for (const project of projects) {
+    const { projectId, expireTimestamp } = project
     // For each key, do a quick check to see if the key is expired before calling
     // the LUA script to expire the chunk atomically.
-    if (isExpiredKey(expireTimestamps[i], currentTime)) {
-      const projectId = extractKeyId(key)
+    if (isExpiredKey(expireTimestamp, currentTime)) {
       if (DRY_RUN) {
         logger.info({ projectId }, '[Dry Run] Would expire chunk for project')
       } else {
-        await expireCurrentChunk(projectId)
+        try {
+          const job = await claimExpireJob(projectId)
+          await expireProject(projectId)
+          await job.close()
+        } catch (err) {
+          logger.error({ projectId, err }, 'error expiring chunk for project')
+          continue
+        }
       }
       clearedKeyCount++
     }
@@ -61,7 +79,6 @@ async function expireRedisChunks() {
   const START_TIME = Date.now()
 
   if (DRY_RUN) {
-    // Use global DRY_RUN
     logger.info({}, 'starting expireRedisChunks scan in DRY RUN mode')
   } else {
     logger.info({}, 'starting expireRedisChunks scan')
@@ -72,7 +89,10 @@ async function expireRedisChunks() {
     EXPIRE_TIME_KEY_PATTERN
   )) {
     scannedKeyCount += keysBatch.length
-    clearedKeyCount += await processKeysBatch(keysBatch, rclient)
+    clearedKeyCount += await processKeysBatch(
+      keysBatch.map(extractKeyId),
+      rclient
+    )
     if (scannedKeyCount % 1000 === 0) {
       logger.info(
         { scannedKeyCount, clearedKeyCount },
@@ -92,7 +112,13 @@ async function expireRedisChunks() {
   await redis.disconnect()
 }
 
-expireRedisChunks().catch(err => {
-  logger.fatal({ err }, 'unhandled error in expireRedisChunks')
-  process.exit(1)
-})
+// Check if the script is being run directly
+if (require.main === module) {
+  expireRedisChunks().catch(err => {
+    logger.fatal({ err }, 'unhandled error in expireRedisChunks')
+    process.exit(1)
+  })
+} else {
+  // Export the function for module usage
+  module.exports = { expireRedisChunks }
+}
