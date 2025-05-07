@@ -147,7 +147,12 @@ const SwitcherWhatsNew = () => {
   const { t } = useTranslation()
   return (
     <div className="ide-redesign-switcher-modal-whats-new">
-      <h4>{t('whats_new')}</h4>
+      <h4>{t('latest_updates')}</h4>
+      <ul>
+        <li>{t('double_clicking_on_the_pdf_shows')}</li>
+      </ul>
+      <hr />
+      <h4>{t('whats_different_in_the_new_editor')}</h4>
       <ul>
         <li>{t('new_look_and_feel')}</li>
         <li>
@@ -156,11 +161,6 @@ const SwitcherWhatsNew = () => {
         <li>{t('new_look_and_placement_of_the_settings')}</li>
         <li>{t('improved_dark_mode')}</li>
         <li>{t('review_panel_and_error_logs_moved_to_the_left')}</li>
-      </ul>
-      <hr />
-      <h4>{t('whats_next')}</h4>
-      <ul>
-        <li>{t('more_changes_based_on_your_feedback')}</li>
       </ul>
     </div>
   )
