@@ -206,7 +206,7 @@ async function persistChanges(projectId, allChanges, limits, clientEndVersion) {
     // doesn't really need a blobStore, but its signature still requires it.
     const blobStore = new BlobStore(projectId)
     await hollowSnapshot.loadFiles('hollow', blobStore)
-    hollowSnapshot.applyAll(changesToPersist)
+    hollowSnapshot.applyAll(changesToPersist, { strict: true })
     const baseVersion = currentChunk.getEndVersion()
     await redisBackend.queueChanges(
       projectId,
