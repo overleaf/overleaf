@@ -52,12 +52,12 @@ export const ToolbarProjectTitle = () => {
   }
 
   return (
-    <Dropdown align="start">
+    <Dropdown align="start" className="ide-redesign-toolbar-project-dropdown">
       <DropdownToggle
         id="project-title-options"
-        className="ide-redesign-toolbar-dropdown-toggle-subdued fw-bold  ide-redesign-toolbar-button-subdued"
+        className="ide-redesign-toolbar-project-dropdown-toggle ide-redesign-toolbar-dropdown-toggle-subdued fw-bold ide-redesign-toolbar-button-subdued"
       >
-        {name}
+        <span className="ide-redesign-toolbar-project-name">{name}</span>
         <MaterialIcon
           type="keyboard_arrow_down"
           accessibilityLabel={t('project_title_options')}

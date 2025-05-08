@@ -36,10 +36,16 @@
   box-sizing: border-box;
   height: $toolbar-height;
   padding: 0 var(--spacing-02);
+  gap: var(--spacing-05);
 
   .ide-redesign-toolbar-menu {
     display: flex;
     gap: var(--spacing-05);
+  }
+
+  .ide-redesign-toolbar-menu,
+  .ide-redesign-toolbar-actions {
+    flex: 0 0 auto;
   }
 
   .ide-redesign-toolbar-home-button {
@@ -180,6 +186,22 @@
   &:visited {
     color: var(--redesign-toolbar-feedback-link-color);
   }
+}
+
+.ide-redesign-toolbar-project-dropdown {
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
+.ide-redesign-toolbar-project-dropdown-toggle {
+  display: flex;
+  max-width: 100%;
+}
+
+.ide-redesign-toolbar-project-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .ide-redesign-labs-button.btn.btn-secondary {
