@@ -169,8 +169,8 @@ describe('backup script', function () {
         makeChunkKey(historyId, 0)
       )
       const chunkContent = await text(chunkStream.pipe(createGunzip()))
-      const chunk = await ChunkStore.loadLatestRaw(historyId)
-      const rawHistory = await historyStore.loadRaw(historyId, chunk.id)
+      const chunkMetadata = await ChunkStore.getLatestChunkMetadata(historyId)
+      const rawHistory = await historyStore.loadRaw(historyId, chunkMetadata.id)
       expect(JSON.parse(chunkContent)).to.deep.equal(rawHistory)
 
       // Unrelated entries from backedUpBlobs should be not cleared
@@ -299,8 +299,8 @@ describe('backup script', function () {
         makeChunkKey(historyId, 0)
       )
       const chunkContent = await text(chunkStream.pipe(createGunzip()))
-      const chunk = await ChunkStore.loadLatestRaw(historyId)
-      const rawHistory = await historyStore.loadRaw(historyId, chunk.id)
+      const chunkMetadata = await ChunkStore.getLatestChunkMetadata(historyId)
+      const rawHistory = await historyStore.loadRaw(historyId, chunkMetadata.id)
       expect(JSON.parse(chunkContent)).to.deep.equal(rawHistory)
 
       // Unrelated entries from backedUpBlobs should be not cleared
@@ -399,8 +399,8 @@ describe('backup script', function () {
         makeChunkKey(historyId, 0)
       )
       const chunkContent = await text(chunkStream.pipe(createGunzip()))
-      const chunk = await ChunkStore.loadLatestRaw(historyId)
-      const rawHistory = await historyStore.loadRaw(historyId, chunk.id)
+      const chunkMetadata = await ChunkStore.getLatestChunkMetadata(historyId)
+      const rawHistory = await historyStore.loadRaw(historyId, chunkMetadata.id)
       expect(JSON.parse(chunkContent)).to.deep.equal(rawHistory)
 
       // Verify that the demoted global blob was backed up

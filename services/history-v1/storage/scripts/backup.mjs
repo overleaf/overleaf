@@ -5,7 +5,7 @@ import commandLineArgs from 'command-line-args'
 import { Chunk, History, Snapshot } from 'overleaf-editor-core'
 import {
   getProjectChunks,
-  loadLatestRaw,
+  getLatestChunkMetadata,
   create,
 } from '../lib/chunk_store/index.js'
 import { client } from '../lib/mongodb.js'
@@ -444,7 +444,7 @@ async function analyseBackupStatus(projectId) {
     await getBackupStatus(projectId)
   // TODO: when we have confidence that the latestChunkMetadata always matches
   // the values from the backupStatus we can skip loading it here
-  const latestChunkMetadata = await loadLatestRaw(historyId, {
+  const latestChunkMetadata = await getLatestChunkMetadata(historyId, {
     readOnly: Boolean(USE_SECONDARY),
   })
   if (
@@ -454,7 +454,7 @@ async function analyseBackupStatus(projectId) {
     // compare the current end version with the latest chunk metadata to check that
     // the updates to the project collection are reliable
     // expect some failures due to the time window between getBackupStatus and
-    // loadLatestRaw where the project is being actively edited.
+    // getLatestChunkMetadata where the project is being actively edited.
     logger.warn(
       {
         projectId,

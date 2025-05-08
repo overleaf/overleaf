@@ -119,17 +119,17 @@ async function verifyBlobHTTP(historyId, hash) {
 }
 
 async function backupChunk(historyId) {
-  const newChunk = await chunkStore.loadLatestRaw(historyId)
+  const newChunkMetadata = await chunkStore.getLatestChunkMetadata(historyId)
   const { buffer: chunkBuffer } = await historyStore.loadRawWithBuffer(
     historyId,
-    newChunk.id
+    newChunkMetadata.id
   )
   const md5 = Crypto.createHash('md5').update(chunkBuffer)
   await backupPersistor.sendStream(
     chunksBucket,
     path.join(
       projectKey.format(historyId),
-      projectKey.pad(newChunk.startVersion)
+      projectKey.pad(newChunkMetadata.startVersion)
     ),
     Stream.Readable.from([chunkBuffer]),
     {

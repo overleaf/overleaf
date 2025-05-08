@@ -120,8 +120,9 @@ describe('chunkStore', function () {
         })
 
         it('records the correct metadata in db readOnly=false', async function () {
-          const raw = await chunkStore.loadLatestRaw(projectId)
-          expect(raw).to.deep.include({
+          const chunkMetadata =
+            await chunkStore.getLatestChunkMetadata(projectId)
+          expect(chunkMetadata).to.deep.include({
             startVersion: 0,
             endVersion: 2,
             endTimestamp: lastChangeTimestamp,
@@ -129,10 +130,11 @@ describe('chunkStore', function () {
         })
 
         it('records the correct metadata in db readOnly=true', async function () {
-          const raw = await chunkStore.loadLatestRaw(projectId, {
-            readOnly: true,
-          })
-          expect(raw).to.deep.include({
+          const chunkMetadata = await chunkStore.getLatestChunkMetadata(
+            projectId,
+            { readOnly: true }
+          )
+          expect(chunkMetadata).to.deep.include({
             startVersion: 0,
             endVersion: 2,
             endTimestamp: lastChangeTimestamp,

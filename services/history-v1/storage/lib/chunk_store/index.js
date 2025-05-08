@@ -96,15 +96,15 @@ async function lazyLoadHistoryFiles(history, batchBlobStore) {
  * @param {boolean} [opts.readOnly]
  * @return {Promise<{id: string, startVersion: number, endVersion: number, endTimestamp: Date}>}
  */
-async function loadLatestRaw(projectId, opts) {
+async function getLatestChunkMetadata(projectId, opts) {
   assert.projectId(projectId, 'bad projectId')
 
   const backend = getBackend(projectId)
-  const chunkRecord = await backend.getLatestChunk(projectId, opts)
-  if (chunkRecord == null) {
+  const chunkMetadata = await backend.getLatestChunk(projectId, opts)
+  if (chunkMetadata == null) {
     throw new Chunk.NotFoundError(projectId)
   }
-  return chunkRecord
+  return chunkMetadata
 }
 
 /**
@@ -116,14 +116,14 @@ async function loadLatestRaw(projectId, opts) {
  * @return {Promise<Chunk>}
  */
 async function loadLatest(projectId, opts = {}) {
-  const chunkRecord = await loadLatestRaw(projectId)
-  const rawHistory = await historyStore.loadRaw(projectId, chunkRecord.id)
+  const chunkMetadata = await getLatestChunkMetadata(projectId)
+  const rawHistory = await historyStore.loadRaw(projectId, chunkMetadata.id)
   const history = History.fromRaw(rawHistory)
 
   if (!opts.persistedOnly) {
     const nonPersistedChanges = await getChunkExtension(
       projectId,
-      chunkRecord.endVersion
+      chunkMetadata.endVersion
     )
     history.pushChanges(nonPersistedChanges)
   }
@@ -131,7 +131,7 @@ async function loadLatest(projectId, opts = {}) {
   const blobStore = new BlobStore(projectId)
   const batchBlobStore = new BatchBlobStore(blobStore)
   await lazyLoadHistoryFiles(history, batchBlobStore)
-  return new Chunk(history, chunkRecord.startVersion)
+  return new Chunk(history, chunkMetadata.startVersion)
 }
 
 /**
@@ -354,7 +354,7 @@ async function loadByChunkRecord(projectId, chunkRecord) {
  */
 async function* getProjectChunksFromVersion(projectId, version) {
   const backend = getBackend(projectId)
-  const latestChunkMetadata = await loadLatestRaw(projectId)
+  const latestChunkMetadata = await getLatestChunkMetadata(projectId)
   if (!latestChunkMetadata || version > latestChunkMetadata.endVersion) {
     return
   }
@@ -500,7 +500,7 @@ module.exports = {
   getBackend,
   initializeProject,
   loadLatest,
-  loadLatestRaw,
+  getLatestChunkMetadata,
   loadAtVersion,
   loadAtTimestamp,
   loadByChunkRecord,
