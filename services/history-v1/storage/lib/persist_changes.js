@@ -167,10 +167,13 @@ async function persistChanges(projectId, allChanges, limits, clientEndVersion) {
         const actualHash = content != null ? getContentHash(content) : null
         logger.debug({ expectedHash, actualHash }, 'validating content hash')
         if (actualHash !== expectedHash) {
-          logger.warn(
-            { projectId, path, expectedHash, actualHash },
-            'content hash mismatch'
-          )
+          // only log a warning on the first mismatch in each persistChanges call
+          if (!resyncNeeded) {
+            logger.warn(
+              { projectId, path, expectedHash, actualHash },
+              'content hash mismatch'
+            )
+          }
           resyncNeeded = true
         }
 
