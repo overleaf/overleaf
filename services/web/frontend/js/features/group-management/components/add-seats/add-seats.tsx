@@ -33,6 +33,7 @@ import { sendMB } from '../../../../infrastructure/event-tracking'
 import { useFeatureFlag } from '@/shared/context/split-test-context'
 
 export const MAX_NUMBER_OF_USERS = 20
+export const MAX_NUMBER_OF_PO_NUMBER_CHARACTERS = 50
 
 type CostSummaryData = MergeAndOverride<
   SubscriptionChangePreview,
@@ -47,6 +48,7 @@ function AddSeats() {
   const isProfessional = getMeta('ol-isProfessional')
   const isCollectionMethodManual = getMeta('ol-isCollectionMethodManual')
   const [addSeatsInputError, setAddSeatsInputError] = useState<string>()
+  const [poNumberInputError, setPoNumberInputError] = useState<string>()
   const [shouldContactSales, setShouldContactSales] = useState(false)
   const isFlexibleGroupLicensingForManuallyBilledSubscriptions = useFeatureFlag(
     'flexible-group-licensing-for-manually-billed-subscriptions'
@@ -125,6 +127,38 @@ function AddSeats() {
     }
   }
 
+  const poNumberValidationSchema = useMemo(() => {
+    return yup
+      .string()
+      .matches(
+        /^[\p{L}\p{N}]*$/u,
+        t('po_number_can_include_digits_and_letters_only')
+      )
+      .max(
+        MAX_NUMBER_OF_PO_NUMBER_CHARACTERS,
+        t('po_number_must_not_exceed_x_characters', {
+          count: MAX_NUMBER_OF_PO_NUMBER_CHARACTERS,
+        })
+      )
+  }, [t])
+
+  const validatePoNumber = async (value: string | undefined) => {
+    try {
+      await poNumberValidationSchema.validate(value)
+      setPoNumberInputError(undefined)
+
+      return true
+    } catch (error) {
+      if (error instanceof yup.ValidationError) {
+        setPoNumberInputError(error.errors[0])
+      } else {
+        debugConsole.error(error)
+      }
+
+      return false
+    }
+  }
+
   const handleSeatsChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value === '' ? undefined : e.target.value
     const isValidSeatsNumber = await validateSeats(value)
@@ -161,7 +195,10 @@ function AddSeats() {
       ? undefined
       : (formData.get('po_number') as string)
 
-    if (!(await validateSeats(rawSeats))) {
+    if (
+      !(await validateSeats(rawSeats)) ||
+      !(await validatePoNumber(poNumber))
+    ) {
       return
     }
 
@@ -337,7 +374,12 @@ function AddSeats() {
                     )}
                   </FormGroup>
                   {isFlexibleGroupLicensingForManuallyBilledSubscriptions &&
-                    isCollectionMethodManual && <PoNumber />}
+                    isCollectionMethodManual && (
+                      <PoNumber
+                        error={poNumberInputError}
+                        validate={validatePoNumber}
+                      />
+                    )}
                 </div>
                 <CostSummarySection
                   isLoadingCostSummary={isLoadingCostSummary}

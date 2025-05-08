@@ -19,11 +19,12 @@ const subscriptionRateLimiter = new RateLimiter('subscription', {
 })
 
 const MAX_NUMBER_OF_USERS = 20
+const MAX_NUMBER_OF_PO_NUMBER_CHARACTERS = 50
 
 const addSeatsValidateSchema = {
   body: Joi.object({
     adding: Joi.number().integer().min(1).max(MAX_NUMBER_OF_USERS).required(),
-    poNumber: Joi.string(),
+    poNumber: Joi.string().max(MAX_NUMBER_OF_PO_NUMBER_CHARACTERS),
   }),
 }
 

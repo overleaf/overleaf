@@ -384,25 +384,6 @@ async function getPlan(planCode) {
   return planFromApi(plan)
 }
 
-/**
- * Get the country code for given user
- *
- * @param {string} userId
- * @return {Promise<string>}
- */
-async function getCountryCode(userId) {
-  const account = await client.getAccount(`code-${userId}`)
-  const countryCode = account.address?.country
-
-  if (!countryCode) {
-    throw new OError('Country code not found', {
-      userId,
-    })
-  }
-
-  return countryCode
-}
-
 function subscriptionIsCanceledOrExpired(subscription) {
   const state = subscription?.recurlyStatus?.state
   return state === 'canceled' || state === 'expired'
@@ -467,6 +448,7 @@ function subscriptionFromApi(apiSubscription) {
     apiSubscription.currentPeriodStartedAt == null ||
     apiSubscription.currentPeriodEndsAt == null ||
     apiSubscription.collectionMethod == null ||
+    apiSubscription.netTerms == null ||
     // The values below could be null initially if the subscription has never updated
     !('poNumber' in apiSubscription) ||
     !('termsAndConditions' in apiSubscription)
@@ -491,6 +473,7 @@ function subscriptionFromApi(apiSubscription) {
     periodStart: apiSubscription.currentPeriodStartedAt,
     periodEnd: apiSubscription.currentPeriodEndsAt,
     collectionMethod: apiSubscription.collectionMethod,
+    netTerms: apiSubscription.netTerms ?? 0,
     poNumber: apiSubscription.poNumber ?? '',
     termsAndConditions: apiSubscription.termsAndConditions ?? '',
     service: 'recurly',
@@ -720,7 +703,6 @@ module.exports = {
   getPaymentMethod: callbackify(getPaymentMethod),
   getAddOn: callbackify(getAddOn),
   getPlan: callbackify(getPlan),
-  getCountryCode: callbackify(getCountryCode),
   subscriptionIsCanceledOrExpired,
   pauseSubscriptionByUuid: callbackify(pauseSubscriptionByUuid),
   resumeSubscriptionByUuid: callbackify(resumeSubscriptionByUuid),
@@ -744,6 +726,5 @@ module.exports = {
     getPaymentMethod,
     getAddOn,
     getPlan,
-    getCountryCode,
   },
 }

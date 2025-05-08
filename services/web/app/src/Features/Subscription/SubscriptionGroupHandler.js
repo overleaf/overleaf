@@ -17,6 +17,7 @@ const {
   ManuallyCollectedError,
   PendingChangeError,
   InactiveError,
+  HasPastDueInvoiceError,
 } = require('./Errors')
 const EmailHelper = require('../Helpers/EmailHelper')
 const { InvalidEmailError } = require('../Errors/Errors')
@@ -103,6 +104,22 @@ async function ensureSubscriptionHasNoPendingChanges(recurlySubscription) {
   }
 }
 
+async function ensureSubscriptionHasNoPastDueInvoice(subscription) {
+  const [paymentRecord] = await Modules.promises.hooks.fire(
+    'getPaymentFromRecord',
+    subscription
+  )
+
+  if (paymentRecord.account.hasPastDueInvoice) {
+    throw new HasPastDueInvoiceError(
+      'This subscription has a past due invoice',
+      {
+        subscriptionId: subscription._id.toString(),
+      }
+    )
+  }
+}
+
 async function getUsersGroupSubscriptionDetails(userId) {
   const subscription =
     await SubscriptionLocator.promises.getUsersSubscription(userId)
@@ -144,6 +161,7 @@ async function _addSeatsSubscriptionChange(userId, adding) {
   await ensureSubscriptionIsActive(subscription)
   await ensureSubscriptionHasNoPendingChanges(recurlySubscription)
   await checkBillingInfoExistence(recurlySubscription, userId)
+  await ensureSubscriptionHasNoPastDueInvoice(subscription)
 
   const currentAddonQuantity =
     recurlySubscription.addOns.find(
@@ -259,10 +277,9 @@ async function updateSubscriptionPaymentTerms(
   recurlySubscription,
   poNumber
 ) {
-  const countryCode = await RecurlyClient.promises.getCountryCode(userId)
   const [termsAndConditions] = await Modules.promises.hooks.fire(
     'generateTermsAndConditions',
-    { countryCode, poNumber }
+    { currency: recurlySubscription.currency, poNumber }
   )
 
   const updateRequest = poNumber
@@ -464,6 +481,9 @@ module.exports = {
   ensureSubscriptionHasNoPendingChanges: callbackify(
     ensureSubscriptionHasNoPendingChanges
   ),
+  ensureSubscriptionHasNoPastDueInvoice: callbackify(
+    ensureSubscriptionHasNoPastDueInvoice
+  ),
   getTotalConfirmedUsersInGroup: callbackify(getTotalConfirmedUsersInGroup),
   isUserPartOfGroup: callbackify(isUserPartOfGroup),
   getGroupPlanUpgradePreview: callbackify(getGroupPlanUpgradePreview),
@@ -477,6 +497,7 @@ module.exports = {
     ensureSubscriptionIsActive,
     ensureSubscriptionCollectionMethodIsNotManual,
     ensureSubscriptionHasNoPendingChanges,
+    ensureSubscriptionHasNoPastDueInvoice,
     getTotalConfirmedUsersInGroup,
     isUserPartOfGroup,
     getUsersGroupSubscriptionDetails,

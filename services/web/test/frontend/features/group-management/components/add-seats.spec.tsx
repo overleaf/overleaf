@@ -1,5 +1,6 @@
 import AddSeats, {
   MAX_NUMBER_OF_USERS,
+  MAX_NUMBER_OF_PO_NUMBER_CHARACTERS,
 } from '@/features/group-management/components/add-seats/add-seats'
 import { SplitTestProvider } from '@/shared/context/split-test-context'
 
@@ -96,6 +97,30 @@ describe('<AddSeats />', function () {
       cy.findByLabelText(/^po number$/i).should('not.exist')
       cy.findByLabelText(/i want to add a po number/i).check()
       cy.findByLabelText(/^po number$/i)
+    })
+
+    describe('validation', function () {
+      beforeEach(function () {
+        cy.findByLabelText(/i want to add a po number/i).check()
+      })
+
+      it('should show max characters error', function () {
+        const totalCharacters = 'a'.repeat(
+          MAX_NUMBER_OF_PO_NUMBER_CHARACTERS + 1
+        )
+        cy.findByLabelText(/^po number$/i).type(totalCharacters)
+        cy.findByText(
+          new RegExp(
+            `po number must not exceed ${MAX_NUMBER_OF_PO_NUMBER_CHARACTERS} characters`,
+            'i'
+          )
+        )
+      })
+
+      it('should show letters and numbers only error', function () {
+        cy.findByLabelText(/^po number$/i).type('🚧')
+        cy.findByText(/po number can include digits and letters only/i)
+      })
     })
   })
 
@@ -251,6 +276,7 @@ describe('<AddSeats />', function () {
             },
           },
           currency: 'USD',
+          netTerms: 30,
           immediateCharge: {
             subtotal: 100,
             tax: 20,
@@ -276,13 +302,16 @@ describe('<AddSeats />', function () {
         cy.findByRole('button', { name: /send request/i }).should('not.exist')
       })
 
-      it('renders the preview data', function () {
+      function makeRequest(body: object, inputValue: string) {
         cy.intercept('POST', '/user/subscription/group/add-users/preview', {
           statusCode: 200,
-          body: this.body,
+          body,
         }).as('addUsersRequest')
-        cy.get('@input').type(this.adding.toString())
+        cy.get('@input').type(inputValue)
+      }
 
+      it('renders common preview data content', function () {
+        makeRequest(this.body, this.adding.toString())
         cy.findByTestId('cost-summary').within(() => {
           cy.contains(
             new RegExp(
@@ -314,7 +343,6 @@ describe('<AddSeats />', function () {
           cy.findByTestId('discount').should('not.exist')
 
           cy.findByTestId('total').within(() => {
-            cy.findByText(/total due today/i)
             cy.findByTestId('price').should(
               'have.text',
               `$${this.body.immediateCharge.total}.00`
@@ -322,12 +350,46 @@ describe('<AddSeats />', function () {
           })
 
           cy.findByText(
-            /we’ll charge you now for the cost of your additional licenses based on the remaining months of your current subscription/i
-          )
-          cy.findByText(
             /after that, we’ll bill you \$1,000\.00 \(\$895\.00 \+ \$105\.00 tax\) annually on December 1, unless you cancel/i
           )
         })
+      })
+
+      it('renders the preview data with manually billed subscription', function () {
+        makeRequest(this.body, this.adding.toString())
+        cy.findByTestId('cost-summary').within(() => {
+          cy.findByTestId('total').within(() => {
+            cy.findByText(
+              new RegExp(`total due in ${this.body.netTerms} days`, 'i')
+            )
+          })
+        })
+        cy.findByText(
+          new RegExp(
+            `we’ll invoice you now for the additional licences based on the remaining months of your current subscription, and payment will be due in ${this.body.netTerms} days`,
+            'i'
+          )
+        )
+      })
+
+      it('renders the preview data with automatically billed subscription', function () {
+        cy.window().then(win => {
+          win.metaAttributesCache.set('ol-isCollectionMethodManual', false)
+        })
+        cy.mount(
+          <SplitTestProvider>
+            <AddSeats />
+          </SplitTestProvider>
+        )
+        makeRequest(this.body, this.adding.toString())
+        cy.findByTestId('cost-summary').within(() => {
+          cy.findByTestId('total').within(() => {
+            cy.findByText(/total due today/i)
+          })
+        })
+        cy.findByText(
+          /we’ll charge you now for the cost of your additional licenses based on the remaining months of your current subscription/i
+        )
       })
 
       it('renders the preview data with discount', function () {

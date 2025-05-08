@@ -740,6 +740,7 @@ function makeChangePreview(
     currency: subscription.currency,
     immediateCharge: { ...subscriptionChange.immediateCharge },
     paymentMethod: paymentMethod?.toString(),
+    netTerms: subscription.netTerms,
     nextPlan: {
       annual: nextPlan.annual ?? false,
     },

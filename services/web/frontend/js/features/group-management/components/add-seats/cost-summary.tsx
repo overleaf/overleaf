@@ -7,6 +7,7 @@ import {
   SubscriptionChangePreview,
 } from '../../../../../../types/subscription/subscription-change-preview'
 import { MergeAndOverride } from '../../../../../../types/utils'
+import getMeta from '@/utils/meta'
 
 type CostSummaryProps = {
   subscriptionChange: MergeAndOverride<
@@ -18,6 +19,7 @@ type CostSummaryProps = {
 
 function CostSummary({ subscriptionChange, totalLicenses }: CostSummaryProps) {
   const { t } = useTranslation()
+  const isCollectionMethodManual = getMeta('ol-isCollectionMethodManual')
   const factor = 100
 
   return (
@@ -109,7 +111,13 @@ function CostSummary({ subscriptionChange, totalLicenses }: CostSummaryProps) {
                   className="bg-transparent border-0 px-0 gap-3 card-description-secondary"
                   data-testid="total"
                 >
-                  <strong className="me-auto">{t('total_due_today')}</strong>
+                  <strong className="me-auto">
+                    {isCollectionMethodManual
+                      ? t('total_due_in_x_days', {
+                          days: subscriptionChange.netTerms,
+                        })
+                      : t('total_due_today')}
+                  </strong>
                   <strong data-testid="price">
                     {formatCurrency(
                       subscriptionChange.immediateCharge.total,
@@ -121,9 +129,14 @@ function CostSummary({ subscriptionChange, totalLicenses }: CostSummaryProps) {
               <hr className="m-0" />
             </div>
             <div>
-              {t(
-                'we_will_charge_you_now_for_the_cost_of_your_additional_licenses_based_on_remaining_months'
-              )}
+              {isCollectionMethodManual
+                ? t(
+                    'we_will_invoice_you_now_for_the_additional_licenses_based_on_remaining_months',
+                    { days: subscriptionChange.netTerms }
+                  )
+                : t(
+                    'we_will_charge_you_now_for_the_cost_of_your_additional_licenses_based_on_remaining_months'
+                  )}
             </div>
             <div>
               {t(

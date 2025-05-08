@@ -67,6 +67,7 @@ describe('SubscriptionGroupController', function () {
         ensureSubscriptionIsActive: sinon.stub().resolves(),
         ensureSubscriptionCollectionMethodIsNotManual: sinon.stub().resolves(),
         ensureSubscriptionHasNoPendingChanges: sinon.stub().resolves(),
+        ensureSubscriptionHasNoPastDueInvoice: sinon.stub().resolves(),
         getGroupPlanUpgradePreview: sinon
           .stub()
           .resolves(this.previewSubscriptionChangeData),
@@ -138,6 +139,7 @@ describe('SubscriptionGroupController', function () {
       PendingChangeError: class extends Error {},
       InactiveError: class extends Error {},
       SubtotalLimitExceededError: class extends Error {},
+      HasPastDueInvoiceError: class extends Error {},
     }
 
     this.Controller = await esmock.strict(modulePath, {
@@ -370,6 +372,9 @@ describe('SubscriptionGroupController', function () {
           this.SubscriptionGroupHandler.promises.ensureSubscriptionIsActive
             .calledWith(this.subscription)
             .should.equal(true)
+          this.SubscriptionGroupHandler.promises.ensureSubscriptionHasNoPastDueInvoice
+            .calledWith(this.subscription)
+            .should.equal(true)
           this.SubscriptionGroupHandler.promises.checkBillingInfoExistence
             .calledWith(this.recurlySubscription, this.adminUserId)
             .should.equal(true)
@@ -449,6 +454,20 @@ describe('SubscriptionGroupController', function () {
       this.SubscriptionGroupHandler.promises.ensureSubscriptionIsActive = sinon
         .stub()
         .rejects()
+
+      const res = {
+        redirect: url => {
+          url.should.equal('/user/subscription')
+          done()
+        },
+      }
+
+      this.Controller.addSeatsToGroupSubscription(this.req, res)
+    })
+
+    it('should redirect to subscription page when subscription has pending invoice', function (done) {
+      this.SubscriptionGroupHandler.promises.ensureSubscriptionHasNoPastDueInvoice =
+        sinon.stub().rejects()
 
       const res = {
         redirect: url => {

@@ -412,6 +412,7 @@ describe('PaymentProviderEntities', function () {
           periodStart: new Date(),
           periodEnd: new Date(),
           collectionMethod: 'automatic',
+          netTerms: 0,
           poNumber: '012345',
           termsAndConditions: 'T&C copy',
         })

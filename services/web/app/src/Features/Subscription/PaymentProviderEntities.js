@@ -30,6 +30,7 @@ class PaymentProviderSubscription {
    * @param {Date} props.periodStart
    * @param {Date} props.periodEnd
    * @param {string} props.collectionMethod
+   * @param {number} [props.netTerms]
    * @param {string} [props.poNumber]
    * @param {string} [props.termsAndConditions]
    * @param {PaymentProviderSubscriptionChange} [props.pendingChange]
@@ -55,6 +56,7 @@ class PaymentProviderSubscription {
     this.periodStart = props.periodStart
     this.periodEnd = props.periodEnd
     this.collectionMethod = props.collectionMethod
+    this.netTerms = props.netTerms ?? 0
     this.poNumber = props.poNumber ?? ''
     this.termsAndConditions = props.termsAndConditions ?? ''
     this.pendingChange = props.pendingChange ?? null

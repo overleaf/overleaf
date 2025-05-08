@@ -354,7 +354,7 @@ function FlexibleGroupLicensingActions({
 }) {
   const { t } = useTranslation()
 
-  if (subscription.pendingPlan) {
+  if (subscription.pendingPlan || subscription.payment.hasPastDueInvoice) {
     return null
   }
 

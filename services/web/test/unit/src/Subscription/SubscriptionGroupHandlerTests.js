@@ -146,7 +146,6 @@ describe('SubscriptionGroupHandler', function () {
         applySubscriptionChangeRequest: sinon
           .stub()
           .resolves(this.applySubscriptionChange),
-        getCountryCode: sinon.stub().resolves('BG'),
         updateSubscriptionDetails: sinon.stub().resolves(),
       },
     }
@@ -197,6 +196,11 @@ describe('SubscriptionGroupHandler', function () {
           fire: sinon.stub().callsFake(hookName => {
             if (hookName === 'generateTermsAndConditions') {
               return Promise.resolve(['T&Cs'])
+            }
+            if (hookName === 'getPaymentFromRecord') {
+              return Promise.resolve([
+                { account: { hasPastDueInvoice: false } },
+              ])
             }
             return Promise.resolve()
           }),
@@ -504,9 +508,6 @@ describe('SubscriptionGroupHandler', function () {
     describe('updateSubscriptionPaymentTerms', function () {
       describe('accounts with PO number', function () {
         it('should update the subscription PO number and T&C', async function () {
-          this.RecurlyClient.promises.getCountryCode = sinon
-            .stub()
-            .resolves('GB')
           await this.Handler.promises.updateSubscriptionPaymentTerms(
             this.adminUser_id,
             this.recurlySubscription,
@@ -526,9 +527,6 @@ describe('SubscriptionGroupHandler', function () {
 
       describe('accounts with no PO number', function () {
         it('should update the subscription T&C only', async function () {
-          this.RecurlyClient.promises.getCountryCode = sinon
-            .stub()
-            .resolves('GB')
           await this.Handler.promises.updateSubscriptionPaymentTerms(
             this.adminUser_id,
             this.recurlySubscription
@@ -754,6 +752,27 @@ describe('SubscriptionGroupHandler', function () {
     it('should not throw if the subscription has no pending change', async function () {
       await expect(
         this.Handler.promises.ensureSubscriptionHasNoPendingChanges({})
+      ).to.not.be.rejected
+    })
+  })
+
+  describe('ensureSubscriptionHasNoPastDueInvoice', function () {
+    it('should throw if the subscription has past due invoice', async function () {
+      this.Modules.promises.hooks.fire
+        .withArgs('getPaymentFromRecord')
+        .resolves([{ account: { hasPastDueInvoice: true } }])
+      await expect(
+        this.Handler.promises.ensureSubscriptionHasNoPastDueInvoice(
+          this.subscription
+        )
+      ).to.be.rejectedWith('This subscription has a past due invoice')
+    })
+
+    it('should not throw if the subscription has no past due invoice', async function () {
+      await expect(
+        this.Handler.promises.ensureSubscriptionHasNoPastDueInvoice(
+          this.subscription
+        )
       ).to.not.be.rejected
     })
   })

@@ -18,6 +18,7 @@ import {
   PendingChangeError,
   InactiveError,
   SubtotalLimitExceededError,
+  HasPastDueInvoiceError,
 } from './Errors.js'
 import RecurlyClient from './RecurlyClient.js'
 
@@ -142,6 +143,9 @@ async function addSeatsToGroupSubscription(req, res) {
     await SubscriptionGroupHandler.promises.ensureSubscriptionIsActive(
       subscription
     )
+    await SubscriptionGroupHandler.promises.ensureSubscriptionHasNoPastDueInvoice(
+      subscription
+    )
 
     const { variant: flexibleLicensingForManuallyBilledSubscriptionsVariant } =
       await SplitTestHandler.promises.getAssignment(
@@ -183,7 +187,11 @@ async function addSeatsToGroupSubscription(req, res) {
       )
     }
 
-    if (error instanceof PendingChangeError || error instanceof InactiveError) {
+    if (
+      error instanceof PendingChangeError ||
+      error instanceof InactiveError ||
+      error instanceof HasPastDueInvoiceError
+    ) {
       return res.redirect('/user/subscription')
     }
 
@@ -216,7 +224,8 @@ async function previewAddSeatsSubscriptionChange(req, res) {
       error instanceof MissingBillingInfoError ||
       error instanceof ManuallyCollectedError ||
       error instanceof PendingChangeError ||
-      error instanceof InactiveError
+      error instanceof InactiveError ||
+      error instanceof HasPastDueInvoiceError
     ) {
       return res.status(422).end()
     }
@@ -258,7 +267,8 @@ async function createAddSeatsSubscriptionChange(req, res) {
       error instanceof MissingBillingInfoError ||
       error instanceof ManuallyCollectedError ||
       error instanceof PendingChangeError ||
-      error instanceof InactiveError
+      error instanceof InactiveError ||
+      error instanceof HasPastDueInvoiceError
     ) {
       return res.status(422).end()
     }
@@ -394,6 +404,12 @@ async function manuallyCollectedSubscription(req, res) {
     const userId = SessionManager.getLoggedInUserId(req.session)
     const subscription =
       await SubscriptionLocator.promises.getUsersSubscription(userId)
+
+    await SplitTestHandler.promises.getAssignment(
+      req,
+      res,
+      'flexible-group-licensing-for-manually-billed-subscriptions'
+    )
 
     res.render('subscriptions/manually-collected-subscription', {
       groupName: subscription.teamName,

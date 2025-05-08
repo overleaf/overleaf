@@ -58,6 +58,7 @@ describe('RecurlyClient', function () {
       periodStart: new Date(),
       periodEnd: new Date(),
       collectionMethod: 'automatic',
+      netTerms: 0,
       poNumber: '',
       termsAndConditions: '',
     })
@@ -90,6 +91,7 @@ describe('RecurlyClient', function () {
       currentPeriodStartedAt: this.subscription.periodStart,
       currentPeriodEndsAt: this.subscription.periodEnd,
       collectionMethod: this.subscription.collectionMethod,
+      netTerms: this.subscription.netTerms,
       poNumber: this.subscription.poNumber,
       termsAndConditions: this.subscription.termsAndConditions,
     }
@@ -688,31 +690,6 @@ describe('RecurlyClient', function () {
       await expect(
         this.RecurlyClient.promises.getPaymentMethod(this.user._id)
       ).to.be.rejectedWith(Error)
-    })
-  })
-
-  describe('getCountryCode', function () {
-    it('should return the country code from the account info', async function () {
-      this.client.getAccount = sinon.stub().resolves({
-        address: {
-          country: 'GB',
-        },
-      })
-      const countryCode = await this.RecurlyClient.promises.getCountryCode(
-        this.user._id
-      )
-      expect(countryCode).to.equal('GB')
-    })
-
-    it('should throw if country code doesn’t exist', async function () {
-      this.client.getAccount = sinon.stub().resolves({
-        address: {
-          country: '',
-        },
-      })
-      await expect(
-        this.RecurlyClient.promises.getCountryCode(this.user._id)
-      ).to.be.rejectedWith(Error, 'Country code not found')
     })
   })
 })
