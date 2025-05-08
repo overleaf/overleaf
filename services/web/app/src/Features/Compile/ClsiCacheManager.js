@@ -1,11 +1,12 @@
 const _ = require('lodash')
-const { NotFoundError } = require('../Errors/Errors')
+const { NotFoundError, ResourceGoneError } = require('../Errors/Errors')
 const ClsiCacheHandler = require('./ClsiCacheHandler')
 const DocumentUpdaterHandler = require('../DocumentUpdater/DocumentUpdaterHandler')
 const ProjectGetter = require('../Project/ProjectGetter')
 const SplitTestHandler = require('../SplitTests/SplitTestHandler')
 const UserGetter = require('../User/UserGetter')
 const Settings = require('@overleaf/settings')
+const { fetchJson, RequestFailedError } = require('@overleaf/fetch-utils')
 
 /**
  * Get the most recent build and metadata
@@ -47,6 +48,98 @@ async function getLatestBuildFromCache(projectId, userId, filename, signal) {
       shard,
       zone,
     },
+  }
+}
+
+class MetaFileExpiredError extends NotFoundError {}
+
+async function getLatestCompileResult(projectId, userId) {
+  const signal = AbortSignal.timeout(15_000)
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      return await tryGetLatestCompileResult(projectId, userId, signal)
+    } catch (err) {
+      if (err instanceof MetaFileExpiredError) {
+        continue
+      }
+      throw err
+    }
+  }
+  throw new NotFoundError()
+}
+
+async function tryGetLatestCompileResult(projectId, userId, signal) {
+  const {
+    internal: { location: metaLocation },
+    external: { isUpToDate, allFiles, zone, shard: clsiCacheShard },
+  } = await getLatestBuildFromCache(
+    projectId,
+    userId,
+    'output.overleaf.json',
+    signal
+  )
+  if (!isUpToDate) throw new ResourceGoneError()
+
+  let meta
+  try {
+    meta = await fetchJson(metaLocation, {
+      signal: AbortSignal.timeout(5 * 1000),
+    })
+  } catch (err) {
+    if (err instanceof RequestFailedError && err.response.status === 404) {
+      throw new MetaFileExpiredError(
+        'build expired between listing and reading'
+      )
+    }
+    throw err
+  }
+
+  const [, editorId, buildId] = metaLocation.match(
+    /\/build\/([a-f0-9-]+?)-([a-f0-9]+-[a-f0-9]+)\//
+  )
+  const { ranges, contentId, clsiServerId, compileGroup, size, options } = meta
+
+  let baseURL = `/project/${projectId}`
+  if (userId) {
+    baseURL += `/user/${userId}`
+  }
+
+  const outputFiles = allFiles
+    .filter(path => path !== 'output.overleaf.json' && path !== 'output.tar.gz')
+    .map(path => {
+      const f = {
+        url: `${baseURL}/build/${editorId}-${buildId}/output/${path}`,
+        downloadURL: `/download/project/${projectId}/build/${editorId}-${buildId}/output/cached/${path}`,
+        build: buildId,
+        path,
+        type: path.split('.').pop(),
+      }
+      if (path === 'output.pdf') {
+        Object.assign(f, {
+          size,
+          editorId,
+        })
+        if (clsiServerId !== clsiCacheShard) {
+          // Enable PDF caching and attempt to download from VM first.
+          // (clsi VMs do not have the editorId in the path on disk, omit it).
+          Object.assign(f, {
+            url: `${baseURL}/build/${buildId}/output/output.pdf`,
+            ranges,
+            contentId,
+          })
+        }
+      }
+      return f
+    })
+
+  return {
+    allFiles,
+    zone,
+    outputFiles,
+    compileGroup,
+    clsiServerId,
+    clsiCacheShard,
+    options,
   }
 }
 
@@ -109,5 +202,6 @@ async function prepareClsiCache(
 
 module.exports = {
   getLatestBuildFromCache,
+  getLatestCompileResult,
   prepareClsiCache,
 }

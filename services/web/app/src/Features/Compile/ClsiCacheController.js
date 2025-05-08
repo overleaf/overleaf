@@ -1,8 +1,7 @@
-const { NotFoundError } = require('../Errors/Errors')
+const { NotFoundError, ResourceGoneError } = require('../Errors/Errors')
 const {
   fetchStreamWithResponse,
   RequestFailedError,
-  fetchJson,
 } = require('@overleaf/fetch-utils')
 const Path = require('path')
 const { pipeline } = require('stream/promises')
@@ -110,61 +109,14 @@ async function getLatestBuildFromCache(req, res) {
   const userId = CompileController._getUserIdForCompile(req)
   try {
     const {
-      internal: { location: metaLocation },
-      external: { isUpToDate, allFiles, zone, shard },
-    } = await ClsiCacheManager.getLatestBuildFromCache(
-      projectId,
-      userId,
-      'output.overleaf.json'
-    )
+      zone,
+      outputFiles,
+      compileGroup,
+      clsiServerId,
+      clsiCacheShard,
+      options,
+    } = await ClsiCacheManager.getLatestCompileResult(projectId, userId)
 
-    if (!isUpToDate) return res.sendStatus(410)
-
-    const meta = await fetchJson(metaLocation, {
-      signal: AbortSignal.timeout(5 * 1000),
-    })
-
-    const [, editorId, buildId] = metaLocation.match(
-      /\/build\/([a-f0-9-]+?)-([a-f0-9]+-[a-f0-9]+)\//
-    )
-
-    let baseURL = `/project/${projectId}`
-    if (userId) {
-      baseURL += `/user/${userId}`
-    }
-
-    const { ranges, contentId, clsiServerId, compileGroup, size, options } =
-      meta
-
-    const outputFiles = allFiles
-      .filter(
-        path => path !== 'output.overleaf.json' && path !== 'output.tar.gz'
-      )
-      .map(path => {
-        const f = {
-          url: `${baseURL}/build/${editorId}-${buildId}/output/${path}`,
-          downloadURL: `/download/project/${projectId}/build/${editorId}-${buildId}/output/cached/${path}`,
-          build: buildId,
-          path,
-          type: path.split('.').pop(),
-        }
-        if (path === 'output.pdf') {
-          Object.assign(f, {
-            size,
-            editorId,
-          })
-          if (clsiServerId !== shard) {
-            // Enable PDF caching and attempt to download from VM first.
-            // (clsi VMs do not have the editorId in the path on disk, omit it).
-            Object.assign(f, {
-              url: `${baseURL}/build/${buildId}/output/output.pdf`,
-              ranges,
-              contentId,
-            })
-          }
-        }
-        return f
-      })
     let { pdfCachingMinChunkSize, pdfDownloadDomain } =
       await CompileController._getSplitTestOptions(req, res)
     pdfDownloadDomain += `/zone/${zone}`
@@ -174,7 +126,7 @@ async function getLatestBuildFromCache(req, res) {
       outputFiles,
       compileGroup,
       clsiServerId,
-      clsiCacheShard: shard,
+      clsiCacheShard,
       pdfDownloadDomain,
       pdfCachingMinChunkSize,
       options,
@@ -182,6 +134,8 @@ async function getLatestBuildFromCache(req, res) {
   } catch (err) {
     if (err instanceof NotFoundError) {
       res.sendStatus(404)
+    } else if (err instanceof ResourceGoneError) {
+      res.sendStatus(410)
     } else {
       throw err
     }
