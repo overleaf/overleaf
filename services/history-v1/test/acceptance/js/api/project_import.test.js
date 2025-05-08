@@ -52,6 +52,6 @@ describe('project import', function () {
       })
 
     expect(importResponse.status).to.equal(HTTPStatus.CREATED)
-    expect(importResponse.obj).to.deep.equal({})
+    expect(importResponse.obj).to.deep.equal({ resyncNeeded: false })
   })
 })

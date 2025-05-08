@@ -82,6 +82,7 @@ async function persistChanges(projectId, allChanges, limits, clientEndVersion) {
 
   let originalEndVersion
   let changesToPersist
+  let resyncNeeded = false
 
   limits = limits || {}
   _.defaults(limits, {
@@ -166,12 +167,11 @@ async function persistChanges(projectId, allChanges, limits, clientEndVersion) {
         const actualHash = content != null ? getContentHash(content) : null
         logger.debug({ expectedHash, actualHash }, 'validating content hash')
         if (actualHash !== expectedHash) {
-          throw new InvalidChangeError('content hash mismatch', {
-            projectId,
-            path,
-            expectedHash,
-            actualHash,
-          })
+          logger.warn(
+            { projectId, path, expectedHash, actualHash },
+            'content hash mismatch'
+          )
+          resyncNeeded = true
         }
 
         // Remove the content hash from the change before storing it in the chunk.
@@ -300,6 +300,7 @@ async function persistChanges(projectId, allChanges, limits, clientEndVersion) {
       numberOfChangesPersisted: numberOfChangesToPersist,
       originalEndVersion,
       currentChunk,
+      resyncNeeded,
     }
   } else {
     return null

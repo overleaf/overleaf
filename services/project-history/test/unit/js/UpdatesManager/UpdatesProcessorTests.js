@@ -13,7 +13,7 @@ describe('UpdatesProcessor', function () {
     }
     this.HistoryStoreManager = {
       getMostRecentVersion: sinon.stub(),
-      sendChanges: sinon.stub().yields(),
+      sendChanges: sinon.stub().yields(null, {}),
     }
     this.LockManager = {
       runWithLock: sinon.spy((key, runner, callback) =>
@@ -109,7 +109,7 @@ describe('UpdatesProcessor', function () {
       this.queueSize = 445
       this.UpdatesProcessor._mocks._countAndProcessUpdates = sinon
         .stub()
-        .callsArgWith(3, this.error, this.queueSize)
+        .callsArgWith(3, this.error, { queueSize: this.queueSize })
     })
 
     describe('when there is no existing error', function () {

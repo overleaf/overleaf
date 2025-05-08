@@ -249,7 +249,7 @@ export function sendChanges(
       method: 'POST',
       json: changes,
     },
-    error => {
+    (error, response) => {
       if (error) {
         OError.tag(error, 'failed to send changes to v1', {
           projectId,
@@ -261,7 +261,7 @@ export function sendChanges(
         })
         return callback(error)
       }
-      callback()
+      callback(null, { resyncNeeded: response?.resyncNeeded ?? false })
     }
   )
 }

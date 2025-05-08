@@ -85,7 +85,7 @@ export function startResyncAndProcessUpdatesUnderLock(
         })
       })
     },
-    (flushError, queueSize) => {
+    (flushError, { queueSize } = {}) => {
       if (flushError) {
         OError.tag(flushError)
         ErrorRecorder.record(projectId, queueSize, flushError, recordError => {
@@ -132,7 +132,7 @@ export function processUpdatesForProject(projectId, callback) {
         releaseLock
       )
     },
-    (flushError, queueSize) => {
+    (flushError, { queueSize, resyncNeeded } = {}) => {
       if (flushError) {
         OError.tag(flushError)
         ErrorRecorder.record(
@@ -167,7 +167,15 @@ export function processUpdatesForProject(projectId, callback) {
               'failed to clear error'
             )
           }
-          callback()
+          if (resyncNeeded) {
+            logger.warn(
+              { projectId },
+              'Resyncing project as requested by full project history'
+            )
+            resyncProject(projectId, callback)
+          } else {
+            callback()
+          }
         })
       }
       if (queueSize > 0) {
@@ -198,7 +206,7 @@ export function resyncProject(projectId, callback) {
           releaseLock
         )
       },
-      (flushError, queueSize) => {
+      (flushError, { queueSize } = {}) => {
         if (flushError) {
           ErrorRecorder.record(
             projectId,
@@ -247,7 +255,7 @@ export function processUpdatesForProjectUsingBisect(
         releaseLock
       )
     },
-    (flushError, queueSize) => {
+    (flushError, { queueSize } = {}) => {
       if (amountToProcess === 0 || queueSize === 0) {
         // no further processing possible
         if (flushError != null) {
@@ -298,7 +306,7 @@ export function processSingleUpdateForProject(projectId, callback) {
     ) => {
       _countAndProcessUpdates(projectId, extendLock, 1, releaseLock)
     },
-    (flushError, queueSize) => {
+    (flushError, { queueSize } = {}) => {
       // no need to clear the flush marker when single stepping
       // it will be cleared up on the next background flush if
       // the queue is empty
@@ -339,18 +347,34 @@ _mocks._countAndProcessUpdates = (
     }
     if (queueSize > 0) {
       logger.debug({ projectId, queueSize }, 'processing uncompressed updates')
+
+      let resyncNeeded = false
       RedisManager.getUpdatesInBatches(
         projectId,
         batchSize,
         (updates, cb) => {
-          _processUpdatesBatch(projectId, updates, extendLock, cb)
+          _processUpdatesBatch(
+            projectId,
+            updates,
+            extendLock,
+            (err, flushResponse) => {
+              if (err) {
+                return cb(err)
+              }
+
+              if (flushResponse.resyncNeeded) {
+                resyncNeeded = true
+              }
+              cb()
+            }
+          )
         },
         error => {
           // Unconventional callback signature. The caller needs the queue size
           // even when an error is thrown in order to record the queue size in
           // the projectHistoryFailures collection. We'll have to find another
           // way to achieve this when we promisify.
-          callback(error, queueSize)
+          callback(error, { queueSize, resyncNeeded })
         }
       )
     } else {
@@ -376,15 +400,21 @@ function _processUpdatesBatch(projectId, updates, extendLock, callback) {
         { projectId },
         'discarding updates as project does not use history'
       )
-      return callback()
+      return callback(null, {})
     }
 
-    _processUpdates(projectId, historyId, updates, extendLock, error => {
-      if (error != null) {
-        return callback(OError.tag(error))
+    _processUpdates(
+      projectId,
+      historyId,
+      updates,
+      extendLock,
+      (error, flushResponse) => {
+        if (error != null) {
+          return callback(OError.tag(error))
+        }
+        callback(null, flushResponse)
       }
-      callback()
-    })
+    )
   })
 }
 
@@ -536,6 +566,8 @@ export function _processUpdates(
           if (error != null) {
             return callback(error)
           }
+
+          let resyncNeeded = false
           async.waterfall(
             [
               cb => {
@@ -646,7 +678,13 @@ export function _processUpdates(
                     projectHistoryId,
                     changes,
                     baseVersion,
-                    cb
+                    (err, response) => {
+                      if (err) {
+                        return cb(err)
+                      }
+                      resyncNeeded = response.resyncNeeded
+                      cb()
+                    }
                   )
                 })
               },
@@ -657,7 +695,11 @@ export function _processUpdates(
             ],
             error => {
               profile.end()
-              callback(error)
+              if (error) {
+                callback(error)
+              } else {
+                callback(null, { resyncNeeded })
+              }
             }
           )
         }

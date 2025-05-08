@@ -58,6 +58,7 @@ describe('persistChanges', function () {
       numberOfChangesPersisted: 1,
       originalEndVersion: 0,
       currentChunk,
+      resyncNeeded: false,
     })
 
     const chunk = await chunkStore.loadLatest(projectId)
@@ -106,6 +107,7 @@ describe('persistChanges', function () {
       numberOfChangesPersisted: 2,
       originalEndVersion: 0,
       currentChunk,
+      resyncNeeded: false,
     })
 
     const chunk = await chunkStore.loadLatest(projectId)
@@ -147,6 +149,7 @@ describe('persistChanges', function () {
       numberOfChangesPersisted: 2,
       originalEndVersion: 0,
       currentChunk,
+      resyncNeeded: false,
     })
 
     const chunk = await chunkStore.loadLatest(projectId)
@@ -213,7 +216,7 @@ describe('persistChanges', function () {
       expect(result.numberOfChangesPersisted).to.equal(1)
     })
 
-    it('rejects a change with an invalid hash', async function () {
+    it('turns on the resyncNeeded flag if content hash validation fails', async function () {
       const limitsToPersistImmediately = {
         minChangeTimestamp: farFuture,
         maxChangeTimestamp: farFuture,
@@ -235,9 +238,13 @@ describe('persistChanges', function () {
       )
       const changes = [change]
 
-      await expect(
-        persistChanges(projectId, changes, limitsToPersistImmediately, 0)
-      ).to.be.rejectedWith(storage.InvalidChangeError)
+      const result = await persistChanges(
+        projectId,
+        changes,
+        limitsToPersistImmediately,
+        0
+      )
+      expect(result.resyncNeeded).to.be.true
     })
   })
 })

@@ -130,7 +130,9 @@ async function importChanges(req, res, next) {
   }
 
   if (returnSnapshot === 'none') {
-    res.status(HTTPStatus.CREATED).json({})
+    res.status(HTTPStatus.CREATED).json({
+      resyncNeeded: result.resyncNeeded,
+    })
   } else {
     const rawSnapshot = await buildResultSnapshot(result && result.currentChunk)
     res.status(HTTPStatus.CREATED).json(rawSnapshot)
