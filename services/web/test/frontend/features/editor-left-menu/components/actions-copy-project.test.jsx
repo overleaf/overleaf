@@ -23,7 +23,7 @@ describe('<ActionsCopyProject />', function () {
 
     fireEvent.click(screen.getByRole('button', { name: 'Copy Project' }))
 
-    screen.getByPlaceholderText('New Project Name')
+    screen.getByPlaceholderText('New project name')
   })
 
   it('loads the project page when submitted', async function () {
@@ -38,7 +38,7 @@ describe('<ActionsCopyProject />', function () {
 
     fireEvent.click(screen.getByRole('button', { name: 'Copy Project' }))
 
-    const input = screen.getByPlaceholderText('New Project Name')
+    const input = screen.getByPlaceholderText('New project name')
     fireEvent.change(input, { target: { value: 'New Project' } })
 
     const button = screen.getByRole('button', { name: 'Copy' })

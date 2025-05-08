@@ -91,7 +91,7 @@ export default function CloneProjectModalContent({
             <OLFormLabel>{t('new_name')}</OLFormLabel>
             <OLFormControl
               type="text"
-              placeholder="New Project Name"
+              placeholder={t('new_project_name')}
               required
               value={clonedProjectName}
               onChange={event => setClonedProjectName(event.target.value)}
