@@ -1,5 +1,10 @@
+type StripeWebhookEventType =
+  | 'customer.subscription.created'
+  | 'customer.subscription.updated'
+  | 'customer.subscription.deleted'
+
 export type CustomerSubscriptionWebhookEvent = {
-  type: 'customer.subscription.created'
+  type: StripeWebhookEventType
   data: {
     object: {
       id: string

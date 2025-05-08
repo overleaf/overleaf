@@ -111,3 +111,8 @@ export type PaymentProvider = {
   trialStartedAt?: Nullable<Date>
   trialEndsAt?: Nullable<Date>
 }
+
+export type SubscriptionRequesterData = {
+  id?: string
+  ip?: string
+}
