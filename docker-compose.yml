@@ -73,7 +73,11 @@ services:
             ## Server Pro ##
             ################
 
-            ## Sandboxed Compiles: https://github.com/overleaf/overleaf/wiki/Server-Pro:-Sandboxed-Compiles
+            ## The Community Edition is intended for use in environments where all users are trusted and is not appropriate for
+            ## scenarios where isolation of users is required. Sandboxed Compiles are not available in the Community Edition,
+            ## so the following environment variables must be commented out to avoid compile issues.
+            ##
+            ## Sandboxed Compiles: https://docs.overleaf.com/on-premises/configuration/overleaf-toolkit/server-pro-only-configuration/sandboxed-compiles
             SANDBOXED_COMPILES: 'true'
             ### Bind-mount source for /var/lib/overleaf/data/compiles inside the container.
             SANDBOXED_COMPILES_HOST_DIR_COMPILES: '/home/user/sharelatex_data/data/compiles'
