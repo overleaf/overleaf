@@ -123,8 +123,9 @@ async function cancelPendingSubscriptionChange(user) {
     await LimitationsManager.promises.userHasSubscription(user)
 
   if (hasSubscription && subscription != null) {
-    await RecurlyClient.promises.removeSubscriptionChangeByUuid(
-      subscription.recurlySubscription_id
+    await Modules.promises.hooks.fire(
+      'cancelPendingPaidSubscriptionChange',
+      subscription
     )
   }
 }

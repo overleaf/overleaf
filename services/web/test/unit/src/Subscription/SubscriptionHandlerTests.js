@@ -319,6 +319,48 @@ describe('SubscriptionHandler', function () {
     })
   })
 
+  describe('cancelPendingSubscriptionChange', function () {
+    beforeEach(function () {
+      this.user.id = this.activeRecurlySubscription.account.account_code
+      this.User.findById = (userId, projection) => ({
+        exec: () => {
+          userId.should.equal(this.user.id)
+          return Promise.resolve(this.user)
+        },
+      })
+    })
+
+    it('should not fire cancelPendingPaidSubscriptionChange hook if user has no subscription', async function () {
+      this.LimitationsManager.promises.userHasSubscription.resolves({
+        hasSubscription: false,
+        subscription: null,
+      })
+      await this.SubscriptionHandler.promises.cancelPendingSubscriptionChange(
+        this.user,
+        this.plan_code
+      )
+      expect(this.Modules.promises.hooks.fire).to.not.have.been.calledWith(
+        'cancelPendingPaidSubscriptionChange',
+        sinon.match.any
+      )
+    })
+
+    it('should fire cancelPendingPaidSubscriptionChange to update a valid subscription', async function () {
+      this.LimitationsManager.promises.userHasSubscription.resolves({
+        hasSubscription: true,
+        subscription: this.subscription,
+      })
+      await this.SubscriptionHandler.promises.cancelPendingSubscriptionChange(
+        this.user,
+        this.plan_code
+      )
+      expect(this.Modules.promises.hooks.fire).to.have.been.calledWith(
+        'cancelPendingPaidSubscriptionChange',
+        this.subscription
+      )
+    })
+  })
+
   describe('cancelSubscription', function () {
     describe('with a user without a subscription', function () {
       beforeEach(async function () {
