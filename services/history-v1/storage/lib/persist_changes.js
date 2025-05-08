@@ -185,7 +185,9 @@ async function persistChanges(projectId, allChanges, limits, clientEndVersion) {
   }
 
   async function loadLatestChunk() {
-    const latestChunk = await chunkStore.loadLatest(projectId)
+    const latestChunk = await chunkStore.loadLatest(projectId, {
+      persistedOnly: true,
+    })
 
     currentChunk = latestChunk
     originalEndVersion = latestChunk.getEndVersion()
@@ -217,8 +219,11 @@ async function persistChanges(projectId, allChanges, limits, clientEndVersion) {
   }
 
   async function fakePersistRedisChanges() {
-    const nonPersistedChanges =
-      await redisBackend.getNonPersistedChanges(projectId)
+    const baseVersion = currentChunk.getEndVersion()
+    const nonPersistedChanges = await redisBackend.getNonPersistedChanges(
+      projectId,
+      baseVersion
+    )
 
     if (
       serializeChanges(nonPersistedChanges) ===
@@ -232,7 +237,6 @@ async function persistChanges(projectId, allChanges, limits, clientEndVersion) {
       })
     }
 
-    const baseVersion = currentChunk.getEndVersion()
     const persistedVersion = baseVersion + nonPersistedChanges.length
     await redisBackend.setPersistedVersion(projectId, persistedVersion)
   }

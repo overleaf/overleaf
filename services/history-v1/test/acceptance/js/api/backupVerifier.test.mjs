@@ -149,7 +149,7 @@ async function addFileInNewChunk(
   historyId,
   { creationDate = new Date() }
 ) {
-  const chunk = await chunkStore.loadLatest(historyId)
+  const chunk = await chunkStore.loadLatest(historyId, { persistedOnly: true })
   const operation = Operation.addFile(
     `${historyId}.txt`,
     File.fromString(fileContents)

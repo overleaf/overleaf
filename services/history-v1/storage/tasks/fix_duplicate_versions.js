@@ -34,7 +34,7 @@ async function main() {
 
 async function processProject(projectId, save) {
   console.log(`Project ${projectId}:`)
-  const chunk = await chunkStore.loadLatest(projectId)
+  const chunk = await chunkStore.loadLatest(projectId, { persistedOnly: true })
   let numChanges = 0
   numChanges += removeDuplicateProjectVersions(chunk)
   numChanges += removeDuplicateDocVersions(chunk)

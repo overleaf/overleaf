@@ -12,6 +12,7 @@ const redisBackend = require('../../../../storage/lib/chunk_store/redis')
 const {
   JobNotReadyError,
   JobNotFoundError,
+  VersionOutOfBoundsError,
 } = require('../../../../storage/lib/chunk_store/errors')
 const redis = require('../../../../storage/lib/redis')
 const rclient = redis.rclientHistory
@@ -509,189 +510,191 @@ describe('chunk buffer Redis backend', function () {
   })
 
   describe('getNonPersistedChanges', function () {
-    it('should return empty array when project does not exist', async function () {
-      const changes = await redisBackend.getNonPersistedChanges(projectId)
-      expect(changes).to.be.an('array').that.is.empty
+    describe('project not loaded', function () {
+      it('should return empty array', async function () {
+        const changes = await redisBackend.getNonPersistedChanges(projectId, 0)
+        expect(changes).to.be.an('array').that.is.empty
+      })
+
+      it('should handle any base version', async function () {
+        const changes = await redisBackend.getNonPersistedChanges(projectId, 2)
+        expect(changes).to.be.an('array').that.is.empty
+      })
     })
 
-    it('should return all changes when persisted version is not set', async function () {
-      const changes = [makeChange(), makeChange(), makeChange()]
-      queueChanges(projectId, changes)
+    describe('project never persisted', function () {
+      let changes
 
-      const nonPersistedChanges =
-        await redisBackend.getNonPersistedChanges(projectId)
-      expect(nonPersistedChanges.map(change => change.toRaw())).to.deep.equal(
-        changes.map(change => change.toRaw())
-      )
+      beforeEach(async function () {
+        changes = await setupState(projectId, {
+          headVersion: 5,
+          persistedVersion: null,
+          changes: 3,
+        })
+      })
+
+      it('should return all changes if requested', async function () {
+        const nonPersistedChanges = await redisBackend.getNonPersistedChanges(
+          projectId,
+          2
+        )
+        expect(nonPersistedChanges).to.deep.equal(changes)
+      })
+
+      it('should return part of the changes if requested', async function () {
+        const nonPersistedChanges = await redisBackend.getNonPersistedChanges(
+          projectId,
+          3
+        )
+        expect(nonPersistedChanges).to.deep.equal(changes.slice(1))
+      })
+
+      it('should error if the base version requested is too low', async function () {
+        await expect(
+          redisBackend.getNonPersistedChanges(projectId, 0)
+        ).to.be.rejectedWith(VersionOutOfBoundsError)
+      })
+
+      it('should return an empty array if the base version is the head version', async function () {
+        const nonPersistedChanges = await redisBackend.getNonPersistedChanges(
+          projectId,
+          5
+        )
+        expect(nonPersistedChanges).to.deep.equal([])
+      })
+
+      it('should error if the base version requested is too high', async function () {
+        await expect(
+          redisBackend.getNonPersistedChanges(projectId, 6)
+        ).to.be.rejectedWith(VersionOutOfBoundsError)
+      })
     })
 
-    it('should return empty array when persisted version equals head version', async function () {
-      // Set both head and persisted versions to be equal
-      const version = 5
-      await rclient.set(
-        keySchema.headVersion({ projectId }),
-        version.toString()
-      )
-      await rclient.set(
-        keySchema.persistedVersion({ projectId }),
-        version.toString()
-      )
+    describe('fully persisted changes', function () {
+      beforeEach(async function () {
+        await setupState(projectId, {
+          headVersion: 5,
+          persistedVersion: 5,
+          changes: 3,
+        })
+      })
 
-      const changes = await redisBackend.getNonPersistedChanges(projectId)
-      expect(changes).to.be.an('array').that.is.empty
+      it('should return an empty array when asked for the head version', async function () {
+        const nonPersistedChanges = await redisBackend.getNonPersistedChanges(
+          projectId,
+          5
+        )
+        expect(nonPersistedChanges).to.deep.equal([])
+      })
+
+      it('should throw an error when asked for an older version', async function () {
+        await expect(
+          redisBackend.getNonPersistedChanges(projectId, 4)
+        ).to.be.rejectedWith(VersionOutOfBoundsError)
+      })
+
+      it('should throw an error when asked for a newer version', async function () {
+        await expect(
+          redisBackend.getNonPersistedChanges(projectId, 6)
+        ).to.be.rejectedWith(VersionOutOfBoundsError)
+      })
     })
 
-    it('should return all non-persisted changes', async function () {
-      // Set head version to 5 and persisted version to 2
-      const headVersion = 5
-      const persistedVersion = 2
-      await rclient.set(
-        keySchema.headVersion({ projectId }),
-        headVersion.toString()
-      )
-      await rclient.set(
-        keySchema.persistedVersion({ projectId }),
-        persistedVersion.toString()
-      )
+    describe('partially persisted project', async function () {
+      let changes
 
-      // Create changes for versions 3, 4, 5
-      const timestamp = new Date()
-      const change1 = new Change([], timestamp) // Version 3
-      const change2 = new Change([], timestamp) // Version 4
-      const change3 = new Change([], timestamp) // Version 5
+      beforeEach(async function () {
+        changes = await setupState(projectId, {
+          headVersion: 10,
+          persistedVersion: 7,
+          changes: 6,
+        })
+      })
 
-      // Push changes to Redis
-      await rclient.rpush(
-        keySchema.changes({ projectId }),
-        JSON.stringify(change1.toRaw()),
-        JSON.stringify(change2.toRaw()),
-        JSON.stringify(change3.toRaw())
-      )
+      it('should return all non-persisted changes if requested', async function () {
+        const nonPersistedChanges = await redisBackend.getNonPersistedChanges(
+          projectId,
+          7
+        )
+        expect(nonPersistedChanges).to.deep.equal(changes.slice(3))
+      })
 
-      // Get non-persisted changes
-      const nonPersistedChanges =
-        await redisBackend.getNonPersistedChanges(projectId)
+      it('should return part of the changes if requested', async function () {
+        const nonPersistedChanges = await redisBackend.getNonPersistedChanges(
+          projectId,
+          8
+        )
+        expect(nonPersistedChanges).to.deep.equal(changes.slice(4))
+      })
 
-      // Should return changes for versions 3, 4, 5
-      expect(nonPersistedChanges).to.be.an('array').with.lengthOf(3)
-      expect(nonPersistedChanges[0].toRaw()).to.deep.equal(change1.toRaw())
-      expect(nonPersistedChanges[1].toRaw()).to.deep.equal(change2.toRaw())
-      expect(nonPersistedChanges[2].toRaw()).to.deep.equal(change3.toRaw())
+      it('should error if the base version requested is too low', async function () {
+        await expect(
+          redisBackend.getNonPersistedChanges(projectId, 5)
+        ).to.be.rejectedWith(VersionOutOfBoundsError)
+      })
+
+      it('should return an empty array if the base version is the head version', async function () {
+        const nonPersistedChanges = await redisBackend.getNonPersistedChanges(
+          projectId,
+          10
+        )
+        expect(nonPersistedChanges).to.deep.equal([])
+      })
+
+      it('should error if the base version requested is too high', async function () {
+        await expect(
+          redisBackend.getNonPersistedChanges(projectId, 12)
+        ).to.be.rejectedWith(VersionOutOfBoundsError)
+      })
     })
 
-    it('should return a subset of changes when some are persisted', async function () {
-      // Set head version to 5 and persisted version to 3
-      // This means versions 4 and 5 are not persisted
-      const headVersion = 5
-      const persistedVersion = 3
-      await rclient.set(
-        keySchema.headVersion({ projectId }),
-        headVersion.toString()
-      )
-      await rclient.set(
-        keySchema.persistedVersion({ projectId }),
-        persistedVersion.toString()
-      )
+    // This case should never happen, but we'll handle it anyway
+    describe('persisted version before start of changes list', async function () {
+      let changes
 
-      // Create changes for versions 1, 2, 3, 4, 5
-      const timestamp = new Date()
-      const change1 = new Change([], timestamp) // Version 1
-      const change2 = new Change([], timestamp) // Version 2
-      const change3 = new Change([], timestamp) // Version 3
-      const change4 = new Change([], timestamp) // Version 4
-      const change5 = new Change([], timestamp) // Version 5
+      beforeEach(async function () {
+        changes = await setupState(projectId, {
+          headVersion: 5,
+          persistedVersion: 1,
+          changes: 3,
+        })
+      })
 
-      // Push changes to Redis
-      await rclient.rpush(
-        keySchema.changes({ projectId }),
-        JSON.stringify(change1.toRaw()),
-        JSON.stringify(change2.toRaw()),
-        JSON.stringify(change3.toRaw()),
-        JSON.stringify(change4.toRaw()),
-        JSON.stringify(change5.toRaw())
-      )
+      it('should return all non-persisted changes if requested', async function () {
+        const nonPersistedChanges = await redisBackend.getNonPersistedChanges(
+          projectId,
+          2
+        )
+        expect(nonPersistedChanges).to.deep.equal(changes)
+      })
 
-      // Get non-persisted changes
-      const nonPersistedChanges =
-        await redisBackend.getNonPersistedChanges(projectId)
+      it('should return part of the changes if requested', async function () {
+        const nonPersistedChanges = await redisBackend.getNonPersistedChanges(
+          projectId,
+          3
+        )
+        expect(nonPersistedChanges).to.deep.equal(changes.slice(1))
+      })
 
-      // Should return only changes for versions 4 and 5
-      expect(nonPersistedChanges).to.be.an('array').with.lengthOf(2)
-      expect(nonPersistedChanges[0].toRaw()).to.deep.equal(change4.toRaw())
-      expect(nonPersistedChanges[1].toRaw()).to.deep.equal(change5.toRaw())
-    })
+      it('should error if the base version requested is too low', async function () {
+        await expect(
+          redisBackend.getNonPersistedChanges(projectId, 1)
+        ).to.be.rejectedWith(VersionOutOfBoundsError)
+      })
 
-    it('should throw an error when persisted version is higher than head version', async function () {
-      // This is an unusual case that should not happen in practice
-      // The system should throw an error to indicate this abnormal state
-      const headVersion = 3
-      const persistedVersion = 5
-      await rclient.set(
-        keySchema.headVersion({ projectId }),
-        headVersion.toString()
-      )
-      await rclient.set(
-        keySchema.persistedVersion({ projectId }),
-        persistedVersion.toString()
-      )
+      it('should return an empty array if the base version is the head version', async function () {
+        const nonPersistedChanges = await redisBackend.getNonPersistedChanges(
+          projectId,
+          5
+        )
+        expect(nonPersistedChanges).to.deep.equal([])
+      })
 
-      // Create changes
-      const timestamp = new Date()
-      const change1 = new Change([], timestamp)
-      const change2 = new Change([], timestamp)
-      const change3 = new Change([], timestamp)
-
-      // Push changes to Redis
-      await rclient.rpush(
-        keySchema.changes({ projectId }),
-        JSON.stringify(change1.toRaw()),
-        JSON.stringify(change2.toRaw()),
-        JSON.stringify(change3.toRaw())
-      )
-
-      // Use chai-as-promised for cleaner async error assertion
-      await expect(
-        redisBackend.getNonPersistedChanges(projectId)
-      ).to.be.rejectedWith(/HEAD_VERSION_BEHIND_PERSISTED_VERSION/)
-    })
-
-    it('should handle case where persisted version is before start of changes list', async function () {
-      // Setup: head version is 5, persisted version is 1
-      // But changes list only starts from version 3
-      const headVersion = 5
-      const persistedVersion = 1
-      await rclient.set(
-        keySchema.headVersion({ projectId }),
-        headVersion.toString()
-      )
-      await rclient.set(
-        keySchema.persistedVersion({ projectId }),
-        persistedVersion.toString()
-      )
-
-      // Create changes for versions 3, 4, 5 only
-      const timestamp = new Date()
-      const change3 = new Change([], timestamp) // Version 3
-      const change4 = new Change([], timestamp) // Version 4
-      const change5 = new Change([], timestamp) // Version 5
-
-      // Push changes to Redis
-      await rclient.rpush(
-        keySchema.changes({ projectId }),
-        JSON.stringify(change3.toRaw()),
-        JSON.stringify(change4.toRaw()),
-        JSON.stringify(change5.toRaw())
-      )
-
-      // Get non-persisted changes
-      const nonPersistedChanges =
-        await redisBackend.getNonPersistedChanges(projectId)
-
-      // Should return all changes since the persisted version is before the start of the list
-      expect(nonPersistedChanges).to.be.an('array').with.lengthOf(3)
-      expect(nonPersistedChanges[0].toRaw()).to.deep.equal(change3.toRaw())
-      expect(nonPersistedChanges[1].toRaw()).to.deep.equal(change4.toRaw())
-      expect(nonPersistedChanges[2].toRaw()).to.deep.equal(change5.toRaw())
+      it('should error if the base version requested is too high', async function () {
+        await expect(
+          redisBackend.getNonPersistedChanges(projectId, 6)
+        ).to.be.rejectedWith(VersionOutOfBoundsError)
+      })
     })
   })
 
@@ -1136,4 +1139,38 @@ async function queueChanges(projectId, changes, opts = {}) {
 function makeChange() {
   const timestamp = new Date()
   return new Change([], timestamp)
+}
+
+/**
+ * Setup Redis buffer state for tests
+ *
+ * @param {string} projectId
+ * @param {object} params
+ * @param {number} params.headVersion
+ * @param {number | null} params.persistedVersion
+ * @param {number} params.changes - number of changes to create
+ * @return {Promise<Change[]>} dummy changes that have been created
+ */
+async function setupState(projectId, params) {
+  await rclient.set(keySchema.headVersion({ projectId }), params.headVersion)
+  if (params.persistedVersion) {
+    await rclient.set(
+      keySchema.persistedVersion({ projectId }),
+      params.persistedVersion
+    )
+  }
+
+  const changes = []
+  for (let i = 1; i <= params.changes; i++) {
+    const change = new Change(
+      [new AddFileOperation(`file${i}.tex`, File.createHollow(i, i))],
+      new Date()
+    )
+    changes.push(change)
+  }
+  await rclient.rpush(
+    keySchema.changes({ projectId }),
+    changes.map(change => JSON.stringify(change.toRaw()))
+  )
+  return changes
 }

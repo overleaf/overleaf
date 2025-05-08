@@ -32,7 +32,15 @@ const { BlobStore } = require('../blob_store')
 const { historyStore } = require('../history_store')
 const mongoBackend = require('./mongo')
 const postgresBackend = require('./postgres')
-const { ChunkVersionConflictError } = require('./errors')
+const redisBackend = require('./redis')
+const {
+  ChunkVersionConflictError,
+  VersionOutOfBoundsError,
+} = require('./errors')
+
+/**
+ * @import { Change } from 'overleaf-editor-core'
+ */
 
 const DEFAULT_DELETE_BATCH_SIZE = parseInt(config.get('maxDeleteKeys'), 10)
 const DEFAULT_DELETE_TIMEOUT_SECS = 3000 // 50 minutes
@@ -103,12 +111,23 @@ async function loadLatestRaw(projectId, opts) {
  * Load the latest Chunk stored for a project, including blob metadata.
  *
  * @param {string} projectId
- * @return {Promise.<Chunk>}
+ * @param {object} [opts]
+ * @param {boolean} [opts.persistedOnly] - only include persisted changes
+ * @return {Promise<Chunk>}
  */
-async function loadLatest(projectId) {
+async function loadLatest(projectId, opts = {}) {
   const chunkRecord = await loadLatestRaw(projectId)
   const rawHistory = await historyStore.loadRaw(projectId, chunkRecord.id)
   const history = History.fromRaw(rawHistory)
+
+  if (!opts.persistedOnly) {
+    const nonPersistedChanges = await getChunkExtension(
+      projectId,
+      chunkRecord.endVersion
+    )
+    history.pushChanges(nonPersistedChanges)
+  }
+
   const blobStore = new BlobStore(projectId)
   const batchBlobStore = new BatchBlobStore(blobStore)
   await lazyLoadHistoryFiles(history, batchBlobStore)
@@ -117,8 +136,13 @@ async function loadLatest(projectId) {
 
 /**
  * Load the the chunk that contains the given version, including blob metadata.
+ *
+ * @param {string} projectId
+ * @param {number} version
+ * @param {object} [opts]
+ * @param {boolean} [opts.persistedOnly] - only include persisted changes
  */
-async function loadAtVersion(projectId, version) {
+async function loadAtVersion(projectId, version, opts = {}) {
   assert.projectId(projectId, 'bad projectId')
   assert.integer(version, 'bad version')
 
@@ -129,6 +153,15 @@ async function loadAtVersion(projectId, version) {
   const chunkRecord = await backend.getChunkForVersion(projectId, version)
   const rawHistory = await historyStore.loadRaw(projectId, chunkRecord.id)
   const history = History.fromRaw(rawHistory)
+
+  if (!opts.persistedOnly) {
+    const nonPersistedChanges = await getChunkExtension(
+      projectId,
+      chunkRecord.endVersion
+    )
+    history.pushChanges(nonPersistedChanges)
+  }
+
   await lazyLoadHistoryFiles(history, batchBlobStore)
   return new Chunk(history, chunkRecord.endVersion - history.countChanges())
 }
@@ -136,8 +169,13 @@ async function loadAtVersion(projectId, version) {
 /**
  * Load the chunk that contains the version that was current at the given
  * timestamp, including blob metadata.
+ *
+ * @param {string} projectId
+ * @param {Date} timestamp
+ * @param {object} [opts]
+ * @param {boolean} [opts.persistedOnly] - only include persisted changes
  */
-async function loadAtTimestamp(projectId, timestamp) {
+async function loadAtTimestamp(projectId, timestamp, opts = {}) {
   assert.projectId(projectId, 'bad projectId')
   assert.date(timestamp, 'bad timestamp')
 
@@ -148,6 +186,15 @@ async function loadAtTimestamp(projectId, timestamp) {
   const chunkRecord = await backend.getChunkForTimestamp(projectId, timestamp)
   const rawHistory = await historyStore.loadRaw(projectId, chunkRecord.id)
   const history = History.fromRaw(rawHistory)
+
+  if (!opts.persistedOnly) {
+    const nonPersistedChanges = await getChunkExtension(
+      projectId,
+      chunkRecord.endVersion
+    )
+    history.pushChanges(nonPersistedChanges)
+  }
+
   await lazyLoadHistoryFiles(history, batchBlobStore)
   return new Chunk(history, chunkRecord.endVersion - history.countChanges())
 }
@@ -415,6 +462,31 @@ function getBackend(projectId) {
     return mongoBackend
   } else {
     throw new OError('bad project id', { projectId })
+  }
+}
+
+/**
+ * Gets non-persisted changes that could extend a chunk
+ *
+ * @param {string} projectId
+ * @param {number} chunkEndVersion - end version of the chunk to extend
+ *
+ * @return {Promise<Change[]>}
+ */
+async function getChunkExtension(projectId, chunkEndVersion) {
+  try {
+    const changes = await redisBackend.getNonPersistedChanges(
+      projectId,
+      chunkEndVersion
+    )
+    return changes
+  } catch (err) {
+    if (err instanceof VersionOutOfBoundsError) {
+      // If we can't extend the chunk, simply return an empty list
+      return []
+    } else {
+      throw err
+    }
   }
 }
 

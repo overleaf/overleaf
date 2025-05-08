@@ -31,7 +31,8 @@ async function lookBehindForSeenBlobs(
     // so we find the set of backed up blobs from the previous chunk
     const previousChunk = await chunkStore.loadAtVersion(
       projectId,
-      lastBackedUpVersion
+      lastBackedUpVersion,
+      { persistedOnly: true }
     )
     const previousChunkHistory = previousChunk.getHistory()
     previousChunkHistory.findBlobHashes(seenBlobs)

@@ -2,13 +2,14 @@
 
 const metrics = require('@overleaf/metrics')
 const OError = require('@overleaf/o-error')
-const redis = require('../redis')
-const rclient = redis.rclientHistory //
 const { Change, Snapshot } = require('overleaf-editor-core')
+const redis = require('../redis')
+const rclient = redis.rclientHistory
 const {
   BaseVersionConflictError,
   JobNotFoundError,
   JobNotReadyError,
+  VersionOutOfBoundsError,
 } = require('./errors')
 
 const MAX_PERSISTED_CHANGES = 100 // Maximum number of persisted changes to keep in the buffer for clients that need to catch up.
@@ -393,34 +394,36 @@ rclient.defineCommand('get_non_persisted_changes', {
     local headVersionKey = KEYS[1]
     local persistedVersionKey = KEYS[2]
     local changesKey = KEYS[3]
+    local baseVersion = tonumber(ARGV[1])
 
     -- Check if head version exists
     local headVersion = tonumber(redis.call('GET', headVersionKey))
     if not headVersion then
-      return {}
+      return {'not_found'}
     end
 
     -- Check if persisted version exists
     local persistedVersion = tonumber(redis.call('GET', persistedVersionKey))
-
-    local startIndex
     if not persistedVersion then
-      -- None of the changes in Redis have been persisted
-      startIndex = 0
-    elseif persistedVersion > headVersion then
-      -- This should never happen
-      return redis.error_reply('HEAD_VERSION_BEHIND_PERSISTED_VERSION')
-    elseif persistedVersion == headVersion then
-      return {}
-    else
-      -- startIndex is negative and counts from the end of the list of changes
-      startIndex = persistedVersion - headVersion
+      local changesCount = tonumber(redis.call('LLEN', changesKey))
+      persistedVersion = headVersion - changesCount
     end
 
-    -- Get changes using LRANGE
-    local changes = redis.call('LRANGE', changesKey, startIndex, -1)
+    if baseVersion < persistedVersion or baseVersion > headVersion then
+      return {'out_of_bounds'}
+    elseif baseVersion == headVersion then
+      return {'ok', {}}
+    else
+      local numChanges = headVersion - baseVersion
+      local changes = redis.call('LRANGE', changesKey, -numChanges, -1)
 
-    return changes
+      if #changes < numChanges then
+        -- We didn't get as many changes as we expected
+        return {'out_of_bounds'}
+      end
+
+      return {'ok', changes}
+    end
   `,
 })
 
@@ -428,31 +431,51 @@ rclient.defineCommand('get_non_persisted_changes', {
  * Retrieves non-persisted changes for a project from Redis.
  *
  * @param {string} projectId - The unique identifier of the project.
- * @returns {Promise<Change[]>} A Promise that resolves to an array of non-persisted Change objects.
+ * @param {number} baseVersion - The version on top of which the changes should
+ *        be applied.
+ * @returns {Promise<Change[]>} Changes that can be applied on top of
+ *          baseVersion. An empty array means that the project doesn't have
+ *          changes to persist. A null value means that the non-persisted
+ *          changes can't be applied to the given base version.
+ *
  * @throws {Error} If Redis operations fail.
  */
-async function getNonPersistedChanges(projectId) {
+async function getNonPersistedChanges(projectId, baseVersion) {
+  let result
   try {
-    const keys = [
+    result = await rclient.get_non_persisted_changes(
       keySchema.headVersion({ projectId }),
       keySchema.persistedVersion({ projectId }),
       keySchema.changes({ projectId }),
-    ]
-
-    const result = await rclient.get_non_persisted_changes(keys)
-
-    // Parse the changes
-    const changes = result?.map(json => Change.fromRaw(JSON.parse(json))) ?? []
-
-    metrics.inc('chunk_store.redis.get_non_persisted_changes', 1, {
-      status: 'success',
-    })
-    return changes
+      baseVersion.toString()
+    )
   } catch (err) {
     metrics.inc('chunk_store.redis.get_non_persisted_changes', 1, {
       status: 'error',
     })
     throw err
+  }
+
+  const status = result[0]
+  metrics.inc('chunk_store.redis.get_non_persisted_changes', 1, {
+    status,
+  })
+
+  if (status === 'ok') {
+    return result[1].map(json => Change.fromRaw(JSON.parse(json)))
+  } else if (status === 'not_found') {
+    return []
+  } else if (status === 'out_of_bounds') {
+    throw new VersionOutOfBoundsError(
+      "Non-persisted changes can't be applied to base version",
+      { projectId, baseVersion }
+    )
+  } else {
+    throw new OError('unknown status for get_non_persisted_changes', {
+      projectId,
+      baseVersion,
+      status,
+    })
   }
 }
 

@@ -279,7 +279,7 @@ async function processProject(project, summary) {
 
 async function getHistoryDocVersions(project) {
   const historyId = project.overleaf.history.id
-  const chunk = await chunkStore.loadLatest(historyId)
+  const chunk = await chunkStore.loadLatest(historyId, { persistedOnly: true })
   if (chunk == null) {
     return []
   }
