@@ -35,7 +35,7 @@ describe('CompileManager', function () {
         build: 1234,
       },
     ]
-    this.buildId = 'build-id-123'
+    this.buildId = '00000000000-0000000000000000'
     this.commandOutput = 'Dummy output'
     this.compileBaseDir = '/compile/dir'
     this.outputBaseDir = '/output/dir'
@@ -61,6 +61,8 @@ describe('CompileManager', function () {
       },
     }
     this.OutputCacheManager = {
+      BUILD_REGEX: /^[0-9a-f]+-[0-9a-f]+$/,
+      CACHE_SUBDIR: 'generated-files',
       promises: {
         queueDirOperation: sinon.stub().callsArg(1),
         saveOutputFiles: sinon
@@ -88,9 +90,10 @@ describe('CompileManager', function () {
       execFile: sinon.stub().yields(),
     }
     this.CommandRunner = {
+      canRunSyncTeXInOutputDir: sinon.stub().returns(false),
       promises: {
         run: sinon.stub().callsFake((_1, _2, _3, _4, _5, _6, compileGroup) => {
-          if (compileGroup === 'synctex') {
+          if (compileGroup === 'synctex' || compileGroup === 'synctex-output') {
             return Promise.resolve({ stdout: this.commandOutput })
           } else {
             return Promise.resolve({
@@ -141,6 +144,12 @@ describe('CompileManager', function () {
       .withArgs(Path.join(this.compileDir, 'output.synctex.gz'))
       .resolves(this.fileStats)
 
+    this.CLSICacheHandler = {
+      notifyCLSICacheAboutBuild: sinon.stub(),
+      downloadLatestCompileCache: sinon.stub().resolves(),
+      downloadOutputDotSynctexFromCompileCache: sinon.stub().resolves(),
+    }
+
     this.CompileManager = SandboxedModule.require(MODULE_PATH, {
       requires: {
         './LatexRunner': this.LatexRunner,
@@ -161,11 +170,7 @@ describe('CompileManager', function () {
         './LockManager': this.LockManager,
         './SynctexOutputParser': this.SynctexOutputParser,
         'fs/promises': this.fsPromises,
-        './CLSICacheHandler': {
-          notifyCLSICacheAboutBuild: sinon.stub(),
-          downloadLatestCompileCache: sinon.stub().resolves(),
-          downloadOutputDotSynctexFromCompileCache: sinon.stub().resolves(),
-        },
+        './CLSICacheHandler': this.CLSICacheHandler,
       },
     })
   })
@@ -462,12 +467,83 @@ describe('CompileManager', function () {
             this.compileDir,
             this.Settings.clsi.docker.image,
             60000,
-            {}
+            {},
+            'synctex'
           )
         })
 
         it('should return the parsed output', function () {
-          expect(this.result).to.deep.equal(this.records)
+          expect(this.result).to.deep.equal({
+            codePositions: this.records,
+            downloadedFromCache: false,
+          })
+        })
+      })
+
+      describe('from cache in docker', function () {
+        beforeEach(async function () {
+          this.CommandRunner.canRunSyncTeXInOutputDir.returns(true)
+          this.Settings.path.synctexBaseDir
+            .withArgs(`${this.projectId}-${this.userId}`)
+            .returns('/compile')
+
+          const errNotFound = new Error()
+          errNotFound.code = 'ENOENT'
+          this.outputDir = `${this.outputBaseDir}/${this.projectId}-${this.userId}/${this.OutputCacheManager.CACHE_SUBDIR}/${this.buildId}`
+          const filename = Path.join(this.outputDir, 'output.synctex.gz')
+          this.fsPromises.stat
+            .withArgs(this.outputDir)
+            .onFirstCall()
+            .rejects(errNotFound)
+          this.fsPromises.stat
+            .withArgs(this.outputDir)
+            .onSecondCall()
+            .resolves(this.dirStats)
+          this.fsPromises.stat.withArgs(filename).resolves(this.fileStats)
+          this.CLSICacheHandler.downloadOutputDotSynctexFromCompileCache.resolves(
+            true
+          )
+          this.result = await this.CompileManager.promises.syncFromCode(
+            this.projectId,
+            this.userId,
+            this.filename,
+            this.line,
+            this.column,
+            {
+              imageName: 'image',
+              editorId: '00000000-0000-0000-0000-000000000000',
+              buildId: this.buildId,
+              compileFromClsiCache: true,
+            }
+          )
+        })
+
+        it('should run in output dir', function () {
+          const outputFilePath = '/compile/output.pdf'
+          const inputFilePath = `/compile/${this.filename}`
+          expect(this.CommandRunner.promises.run).to.have.been.calledWith(
+            `${this.projectId}-${this.userId}`,
+            [
+              'synctex',
+              'view',
+              '-i',
+              `${this.line}:${this.column}:${inputFilePath}`,
+              '-o',
+              outputFilePath,
+            ],
+            this.outputDir,
+            'image',
+            60000,
+            {},
+            'synctex-output'
+          )
+        })
+
+        it('should return the parsed output', function () {
+          expect(this.result).to.deep.equal({
+            codePositions: this.records,
+            downloadedFromCache: true,
+          })
         })
       })
 
@@ -500,7 +576,8 @@ describe('CompileManager', function () {
             this.compileDir,
             customImageName,
             60000,
-            {}
+            {},
+            'synctex'
           )
         })
       })
@@ -544,7 +621,10 @@ describe('CompileManager', function () {
         })
 
         it('should return the parsed output', function () {
-          expect(this.result).to.deep.equal(this.records)
+          expect(this.result).to.deep.equal({
+            pdfPositions: this.records,
+            downloadedFromCache: false,
+          })
         })
       })
 

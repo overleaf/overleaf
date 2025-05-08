@@ -109,6 +109,7 @@ Hello world
                 width: 343.71106,
               },
             ],
+            downloadedFromCache: false,
           })
           done()
         }
@@ -146,6 +147,7 @@ Hello world
           expect(error).to.not.exist
           expect(result).to.deep.equal({
             code: [{ file: 'main.tex', line: 3, column: -1 }],
+            downloadedFromCache: false,
           })
           done()
         }

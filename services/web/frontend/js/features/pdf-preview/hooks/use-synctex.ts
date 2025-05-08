@@ -18,6 +18,7 @@ import { CursorPosition } from '@/features/ide-react/types/cursor-position'
 import { isValidTeXFile } from '@/main/is-valid-tex-file'
 import { PdfScrollPosition } from '@/shared/hooks/use-pdf-scroll-position'
 import { showFileErrorToast } from '@/features/pdf-preview/components/synctex-toasts'
+import { sendMB } from '@/infrastructure/event-tracking'
 
 export default function useSynctex(): {
   syncToPdf: () => void
@@ -115,6 +116,12 @@ export default function useSynctex(): {
         .then(data => {
           setShowLogs(false)
           setHighlights(data.pdf)
+          if (data.downloadedFromCache) {
+            sendMB('synctex-downloaded-from-cache', {
+              projectId,
+              method: 'code',
+            })
+          }
         })
         .catch(debugConsole.error)
         .finally(() => {
@@ -223,6 +230,12 @@ export default function useSynctex(): {
         .then(data => {
           const [{ file, line }] = data.code
           goToCodeLine(file, line)
+          if (data.downloadedFromCache) {
+            sendMB('synctex-downloaded-from-cache', {
+              projectId,
+              method: 'pdf',
+            })
+          }
         })
         .catch(debugConsole.error)
         .finally(() => {

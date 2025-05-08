@@ -204,12 +204,13 @@ function syncFromCode(req, res, next) {
     line,
     column,
     { imageName, editorId, buildId, compileFromClsiCache },
-    function (error, pdfPositions) {
+    function (error, pdfPositions, downloadedFromCache) {
       if (error) {
         return next(error)
       }
       res.json({
         pdf: pdfPositions,
+        downloadedFromCache,
       })
     }
   )
@@ -229,12 +230,13 @@ function syncFromPdf(req, res, next) {
     h,
     v,
     { imageName, editorId, buildId, compileFromClsiCache },
-    function (error, codePositions) {
+    function (error, codePositions, downloadedFromCache) {
       if (error) {
         return next(error)
       }
       res.json({
         code: codePositions,
+        downloadedFromCache,
       })
     }
   )

@@ -410,7 +410,7 @@ describe('CompileController', function () {
 
       this.CompileManager.syncFromCode = sinon
         .stub()
-        .yields(null, (this.pdfPositions = ['mock-positions']))
+        .yields(null, (this.pdfPositions = ['mock-positions']), true)
       this.CompileController.syncFromCode(this.req, this.res, this.next)
     })
 
@@ -430,6 +430,7 @@ describe('CompileController', function () {
       this.res.json
         .calledWith({
           pdf: this.pdfPositions,
+          downloadedFromCache: true,
         })
         .should.equal(true)
     })
@@ -451,7 +452,7 @@ describe('CompileController', function () {
 
       this.CompileManager.syncFromPdf = sinon
         .stub()
-        .yields(null, (this.codePositions = ['mock-positions']))
+        .yields(null, (this.codePositions = ['mock-positions']), true)
       this.CompileController.syncFromPdf(this.req, this.res, this.next)
     })
 
@@ -465,6 +466,7 @@ describe('CompileController', function () {
       this.res.json
         .calledWith({
           code: this.codePositions,
+          downloadedFromCache: true,
         })
         .should.equal(true)
     })

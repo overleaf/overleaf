@@ -23,6 +23,7 @@ const {
   downloadLatestCompileCache,
   downloadOutputDotSynctexFromCompileCache,
 } = require('./CLSICacheHandler')
+const { callbackifyMultiResult } = require('@overleaf/promise-utils')
 
 const COMPILE_TIME_BUCKETS = [
   // NOTE: These buckets are locked in per metric name.
@@ -447,12 +448,20 @@ async function syncFromCode(projectId, userId, filename, line, column, opts) {
     '-o',
     outputFilePath,
   ]
-  const stdout = await _runSynctex(projectId, userId, command, opts)
+  const { stdout, downloadedFromCache } = await _runSynctex(
+    projectId,
+    userId,
+    command,
+    opts
+  )
   logger.debug(
     { projectId, userId, filename, line, column, command, stdout },
     'synctex code output'
   )
-  return SynctexOutputParser.parseViewOutput(stdout)
+  return {
+    codePositions: SynctexOutputParser.parseViewOutput(stdout),
+    downloadedFromCache,
+  }
 }
 
 async function syncFromPdf(projectId, userId, page, h, v, opts) {
@@ -465,9 +474,17 @@ async function syncFromPdf(projectId, userId, page, h, v, opts) {
     '-o',
     `${page}:${h}:${v}:${outputFilePath}`,
   ]
-  const stdout = await _runSynctex(projectId, userId, command, opts)
+  const { stdout, downloadedFromCache } = await _runSynctex(
+    projectId,
+    userId,
+    command,
+    opts
+  )
   logger.debug({ projectId, userId, page, h, v, stdout }, 'synctex pdf output')
-  return SynctexOutputParser.parseEditOutput(stdout, baseDir)
+  return {
+    pdfPositions: SynctexOutputParser.parseEditOutput(stdout, baseDir),
+    downloadedFromCache,
+  }
 }
 
 async function _checkFileExists(dir, filename) {
@@ -522,9 +539,10 @@ async function _runSynctex(projectId, userId, command, opts) {
   return await OutputCacheManager.promises.queueDirOperation(
     outputDir,
     /**
-     * @return {Promise<string>}
+     * @return {Promise<{stdout: string, downloadedFromCache: boolean}>}
      */
     async () => {
+      let downloadedFromCache = false
       try {
         await _checkFileExists(directory, 'output.synctex.gz')
       } catch (err) {
@@ -535,13 +553,14 @@ async function _runSynctex(projectId, userId, command, opts) {
           buildId
         ) {
           try {
-            await downloadOutputDotSynctexFromCompileCache(
-              projectId,
-              userId,
-              editorId,
-              buildId,
-              directory
-            )
+            downloadedFromCache =
+              await downloadOutputDotSynctexFromCompileCache(
+                projectId,
+                userId,
+                editorId,
+                buildId,
+                directory
+              )
           } catch (err) {
             logger.warn(
               { err, projectId, userId, editorId, buildId },
@@ -554,7 +573,7 @@ async function _runSynctex(projectId, userId, command, opts) {
         }
       }
       try {
-        const output = await CommandRunner.promises.run(
+        const { stdout } = await CommandRunner.promises.run(
           compileName,
           command,
           directory,
@@ -563,7 +582,10 @@ async function _runSynctex(projectId, userId, command, opts) {
           {},
           compileGroup
         )
-        return output.stdout
+        return {
+          stdout,
+          downloadedFromCache,
+        }
       } catch (error) {
         throw OError.tag(error, 'error running synctex', {
           command,
@@ -686,8 +708,14 @@ module.exports = {
   stopCompile: callbackify(stopCompile),
   clearProject: callbackify(clearProject),
   clearExpiredProjects: callbackify(clearExpiredProjects),
-  syncFromCode: callbackify(syncFromCode),
-  syncFromPdf: callbackify(syncFromPdf),
+  syncFromCode: callbackifyMultiResult(syncFromCode, [
+    'codePositions',
+    'downloadedFromCache',
+  ]),
+  syncFromPdf: callbackifyMultiResult(syncFromPdf, [
+    'pdfPositions',
+    'downloadedFromCache',
+  ]),
   wordcount: callbackify(wordcount),
   promises: {
     doCompileWithLock,

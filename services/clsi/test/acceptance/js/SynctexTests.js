@@ -67,6 +67,7 @@ Hello world
                 width: 343.71106,
               },
             ],
+            downloadedFromCache: false,
           })
           return done()
         }
@@ -87,6 +88,7 @@ Hello world
           }
           expect(codePositions).to.deep.equal({
             code: [{ file: 'main.tex', line: 3, column: -1 }],
+            downloadedFromCache: false,
           })
           return done()
         }
