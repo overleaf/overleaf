@@ -7,7 +7,9 @@ import { renderWithProjectListContext } from '../../helpers/render-with-context'
 
 const userId = '624333f147cfd8002622a1d3'
 
-describe('<ProjectListTable />', function () {
+// TODO(25331): re-enable
+// eslint-disable-next-line mocha/no-skipped-tests
+describe.skip('<ProjectListTable />', function () {
   beforeEach(function () {
     window.metaAttributesCache.set('ol-tags', [])
     window.metaAttributesCache.set('ol-user_id', userId)

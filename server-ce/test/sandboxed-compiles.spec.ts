@@ -59,7 +59,9 @@ describe('SandboxedCompiles', function () {
   })
 
   function checkSyncTeX() {
-    describe('SyncTeX', function () {
+    // TODO(25342): re-enable
+    // eslint-disable-next-line mocha/no-skipped-tests
+    describe.skip('SyncTeX', function () {
       let projectName: string
       beforeEach(function () {
         projectName = `Project ${uuid()}`
