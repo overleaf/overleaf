@@ -27,6 +27,7 @@ export const ReviewPanelResolvedThreadsButton: FC = () => {
           }
           ref={buttonRef}
           onClick={() => setExpanded(true)}
+          aria-label={t('resolved_comments')}
         >
           <MaterialIcon type="inbox" />
         </button>

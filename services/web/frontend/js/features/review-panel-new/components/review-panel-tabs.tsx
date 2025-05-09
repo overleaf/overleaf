@@ -16,6 +16,10 @@ const ReviewPanelTabs: FC = () => {
   return (
     <>
       <button
+        role="tab"
+        aria-selected={subView === 'cur_file'}
+        aria-controls="review-panel-current-file"
+        id="review-panel-tab-button-current-file"
         className={classnames('review-panel-tab', {
           'review-panel-tab-active': subView === 'cur_file',
         })}
@@ -25,6 +29,10 @@ const ReviewPanelTabs: FC = () => {
         {t('current_file')}
       </button>
       <button
+        role="tab"
+        aria-selected={subView === 'overview'}
+        aria-controls="review-panel-overview"
+        id="review-panel-tab-button-overview"
         className={classnames('review-panel-tab', {
           'review-panel-tab-active': subView === 'overview',
         })}

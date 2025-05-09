@@ -53,7 +53,10 @@ class MockShareDoc extends EventEmitter {
   }
 }
 
-export const mockDoc = (content = defaultContent) => {
+export const mockDoc = (
+  content = defaultContent,
+  { rangesOptions = {} } = {}
+) => {
   const mockShareJSDoc: ShareDoc = new MockShareDoc(content)
 
   return {
@@ -92,7 +95,10 @@ export const mockDoc = (content = defaultContent) => {
         },
       }),
       resetDirtyState: () => {},
+      removeCommentId: () => {},
+      ...rangesOptions,
     },
+    submitOp: (op: any) => {},
     setTrackChangesIdSeeds: () => {},
     getTrackingChanges: () => true,
     setTrackingChanges: () => {},

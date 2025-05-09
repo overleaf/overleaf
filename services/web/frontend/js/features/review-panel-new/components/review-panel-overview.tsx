@@ -48,7 +48,11 @@ export const ReviewPanelOverview: FC = () => {
   }, [rangesForDocs])
 
   return (
-    <div className="review-panel-overview">
+    <div
+      className="review-panel-overview"
+      id="review-panel-overview"
+      aria-labelledby="review-panel-tab-button-overview"
+    >
       {error && <div>{t('something_went_wrong')}</div>}
 
       {showEmptyState && <ReviewPanelEmptyState />}

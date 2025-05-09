@@ -244,6 +244,7 @@ const ReviewTooltipMenuContent: FC<{ onAddComment: () => void }> = ({
             <button
               className="review-tooltip-menu-button"
               onClick={acceptChangesHandler}
+              aria-label={t('accept_selected_changes')}
             >
               <MaterialIcon type="check" />
             </button>
@@ -256,6 +257,7 @@ const ReviewTooltipMenuContent: FC<{ onAddComment: () => void }> = ({
             <button
               className="review-tooltip-menu-button"
               onClick={rejectChangesHandler}
+              aria-label={t('reject_selected_changes')}
             >
               <MaterialIcon type="clear" />
             </button>

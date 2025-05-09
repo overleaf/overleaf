@@ -7,9 +7,8 @@ import getMeta from '@/utils/meta'
 import { PanelHeading } from '@/shared/components/panel-heading'
 import useReviewPanelLayout from '../hooks/use-review-panel-layout'
 
-const isReviewerRoleEnabled = getMeta('ol-isReviewerRoleEnabled')
-
 const ReviewPanelHeader: FC = () => {
+  const isReviewerRoleEnabled = getMeta('ol-isReviewerRoleEnabled')
   const [trackChangesMenuExpanded, setTrackChangesMenuExpanded] =
     useState(false)
   const { closeReviewPanel } = useReviewPanelLayout()

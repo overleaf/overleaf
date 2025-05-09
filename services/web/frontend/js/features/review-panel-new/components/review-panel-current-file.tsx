@@ -295,7 +295,11 @@ const ReviewPanelCurrentFile: FC = () => {
   }
 
   return (
-    <>
+    <div
+      role="tabpanel"
+      id="review-panel-current-file"
+      aria-labelledby="review-panel-tab-button-current-file"
+    >
       {showEmptyState && <ReviewPanelEmptyState />}
       {onMoreCommentsAboveClick && (
         <ReviewPanelMoreCommentsButton
@@ -356,7 +360,7 @@ const ReviewPanelCurrentFile: FC = () => {
           direction="downward"
         />
       )}
-    </>
+    </div>
   )
 }
 

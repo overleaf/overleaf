@@ -1,21 +1,188 @@
 import CodeMirrorEditor from '../../../../frontend/js/features/source-editor/components/codemirror-editor'
-import { EditorProviders } from '../../helpers/editor-providers'
+import {
+  EditorProviders,
+  USER_EMAIL,
+  USER_ID,
+} from '../../helpers/editor-providers'
 import { mockScope } from '../source-editor/helpers/mock-scope'
 import { TestContainer } from '../source-editor/helpers/test-container'
+import { docId } from '../source-editor/helpers/mock-doc'
 
-// TODO: update tests and re-enable once reviewer role is active
-// eslint-disable-next-line mocha/no-skipped-tests
-describe.skip('<ReviewPanel />', function () {
+describe('<ReviewPanel />', function () {
   beforeEach(function () {
+    window.metaAttributesCache.set('ol-isReviewerRoleEnabled', true)
     window.metaAttributesCache.set('ol-preventCompileOnLoad', true)
 
     cy.interceptEvents()
 
-    const scope = mockScope('')
-    scope.editor.showVisual = true
+    cy.intercept('GET', '/project/*/changes/users', [
+      {
+        id: USER_ID,
+        email: USER_EMAIL,
+        first_name: 'Test',
+        last_name: 'User',
+      },
+    ])
 
-    // The tests expect no documents, so remove them from the scope
-    scope.project.rootFolder = []
+    const userData = {
+      avatar_text: 'User',
+      email: USER_EMAIL,
+      hue: 180,
+      id: USER_ID,
+      isSelf: true,
+      first_name: 'Test',
+      last_name: 'User',
+    }
+
+    const resolvedThreadId = 'resolved-thread-id'
+    const unresolvedThreadId = 'unresolved-thread-id'
+
+    cy.intercept('GET', '/project/*/threads', {
+      // Resolved comment thread
+      [resolvedThreadId]: {
+        messages: [
+          {
+            content: 'comment text',
+            id: `${resolvedThreadId}-1`,
+            timestamp: new Date('2025-01-01T00:00:00.000Z'),
+            user: userData,
+            user_id: USER_ID,
+          },
+        ],
+        resolved: true,
+        resolved_at: new Date('2025-01-02T00:00:00.000Z').toISOString(),
+        resolved_by_user_id: USER_ID,
+        resolved_by_user: userData,
+      },
+      // Unresolved comment thread
+      [unresolvedThreadId]: {
+        messages: [
+          {
+            content: 'unresolved comment text',
+            id: `${unresolvedThreadId}-1`,
+            timestamp: new Date('2025-01-01T00:00:00.000Z'),
+            user: userData,
+            user_id: USER_ID,
+          },
+          {
+            content: 'reply to thread',
+            id: `${unresolvedThreadId}-2`,
+            timestamp: new Date('2025-01-01T01:00:00.000Z'),
+            user: userData,
+            user_id: USER_ID,
+          },
+        ],
+      },
+    })
+
+    const commentOps = [
+      {
+        id: 'resolved-op-id',
+        op: { p: 161, c: 'Your introduction', t: resolvedThreadId },
+      },
+      {
+        id: 'unresolved-op-id',
+        op: { p: 210, c: 'Your results', t: unresolvedThreadId },
+      },
+    ]
+
+    const changesOps = [
+      {
+        metadata: {
+          user_id: USER_ID,
+          ts: new Date('2025-01-01T00:00:00.000Z'),
+        },
+        id: 'inserted-op-id',
+        op: { p: 166, t: 'inserted-op-id', i: 'introduction' },
+      },
+      {
+        metadata: {
+          user_id: USER_ID,
+          ts: new Date('2025-01-01T01:00:00.000Z'),
+        },
+        id: 'deleted-op-id',
+        op: { p: 110, t: 'deleted-op-id', d: 'beautiful ' },
+      },
+    ]
+
+    cy.intercept('GET', '/project/*/ranges', [
+      {
+        id: docId,
+        ranges: {
+          changes: changesOps,
+          comments: commentOps,
+          docId,
+        },
+      },
+    ])
+
+    cy.intercept(
+      'POST',
+      `/project/*/doc/${docId}/thread/${resolvedThreadId}/reopen`,
+      {}
+    ).as('reopenThread')
+
+    cy.intercept(
+      'POST',
+      `/project/*/doc/${docId}/thread/${unresolvedThreadId}/resolve`,
+      {}
+    ).as('resolveThreadId')
+
+    cy.intercept(
+      'POST',
+      `/project/*/thread/${unresolvedThreadId}/messages/${unresolvedThreadId}-1/edit`,
+      {}
+    ).as('editComment')
+
+    cy.intercept(
+      'POST',
+      `/project/*/thread/${unresolvedThreadId}/messages`,
+      {}
+    ).as('addReply')
+
+    cy.intercept(
+      'POST',
+      /\/project\/.*\/thread\/[a-z0-9]{24}\/messages/,
+      {}
+    ).as('addNewComment')
+
+    cy.intercept(
+      'DELETE',
+      `/project/*/doc/${docId}/thread/${resolvedThreadId}`,
+      {}
+    ).as('deleteResolvedThread')
+
+    cy.intercept(
+      'DELETE',
+      `/project/*/thread/${unresolvedThreadId}/messages/${unresolvedThreadId}-2`,
+      {}
+    ).as('deleteComment')
+
+    cy.intercept(
+      'DELETE',
+      `/project/*/doc/${docId}/thread/${unresolvedThreadId}`,
+      {}
+    ).as('deleteThread')
+
+    cy.intercept('POST', `/project/*/doc/${docId}/changes/accept`, {}).as(
+      'acceptChange'
+    )
+
+    cy.intercept('POST', `/project/*/doc/${docId}/metadata`, {})
+
+    const getChanges = cy.stub().as('getChanges').returns([])
+    const removeChangeIds = cy.stub().as('removeChangeIds')
+
+    const scope = mockScope(undefined, {
+      docOptions: {
+        rangesOptions: {
+          comments: commentOps,
+          changes: changesOps,
+          getChanges,
+          removeChangeIds,
+        },
+      },
+    })
 
     cy.wrap(scope).as('scope')
 
@@ -27,107 +194,80 @@ describe.skip('<ReviewPanel />', function () {
       </TestContainer>
     )
 
+    // Open the review panel with keyboard shortcut
+    cy.findByText('contentLine 0').type('{command}j', { scrollBehavior: false })
+    cy.findByText('contentLine 1').type('{ctrl}j', { scrollBehavior: false })
+
     cy.findByTestId('review-panel').as('review-panel')
   })
 
   describe('toolbar', function () {
     describe('resolved comments dropdown', function () {
-      it('renders dropdown button', function () {
-        cy.findByRole('button', { name: /resolved comments/i })
-      })
-
-      // eslint-disable-next-line mocha/no-skipped-tests
-      it.skip('opens dropdown', function () {
-        cy.findByRole('button', { name: /resolved comments/i }).click()
-        // TODO dropdown opens/closes
-      })
-
-      // eslint-disable-next-line mocha/no-skipped-tests
-      it.skip('renders list of resolved comments', function () {})
-
-      // eslint-disable-next-line mocha/no-skipped-tests
-      it.skip('reopens resolved comment', function () {})
-
-      // eslint-disable-next-line mocha/no-skipped-tests
-      it.skip('deletes resolved comment', function () {})
-    })
-
-    describe('track changes toggle menu', function () {
-      it('renders track changes toolbar', function () {
-        cy.get('@review-panel').within(() => {
-          cy.findByRole('button', { name: /track changes is (on|off)$/i })
-        })
-      })
-
-      it('opens/closes toggle menu', function () {
-        cy.get('@review-panel').within(() => {
-          cy.findByTestId('review-panel-track-changes-menu').should('not.exist')
-          cy.findByRole('button', { name: /track changes is/i }).click()
-          // verify the menu is expanded
-          cy.findByTestId('review-panel-track-changes-menu')
-            .as('menu')
-            .then($el => {
-              const height = window
-                .getComputedStyle($el[0])
-                .getPropertyValue('height')
-              return parseFloat(height)
-            })
-            .should('be.gt', 1)
-          cy.findByRole('button', { name: /track changes is/i }).click()
-          cy.get('@menu').should('not.exist')
-        })
-      })
-
-      it('toggles the "everyone" track changes switch', function () {
-        cy.get('@review-panel').within(() => {
-          cy.findByRole('button', { name: /track changes is off/i }).click()
-          cy.findByLabelText(/track changes for everyone/i).click({
-            force: true,
+      it('renders a dropdown of resolved comments', function () {
+        // The dropdown button should be visible
+        cy.findByLabelText('Resolved comments').click()
+        // It should open the dropdown
+        cy.findByRole('tooltip')
+          .should('exist')
+          .within(() => {
+            // TODO: Fix selector
+            cy.get(
+              '.review-panel-resolved-comments-header .badge-content'
+            ).should('contain.text', '1')
+            // Should name the document with the comment
+            cy.findByText('test.tex').should('exist')
+            // Should show the comment text
+            cy.findByText('comment text').should('exist')
+            // Should show the author name
+            // TODO: Fix selector
+            cy.get('.review-panel-entry-user').should(
+              'contain.text',
+              'Test User'
+            )
           })
-          cy.findByLabelText(/track changes for everyone/i).should('be.checked')
-          // TODO: assert that track changes is on for everyone
+      })
+
+      it('reopens resolved comment', function () {
+        cy.findByLabelText('Resolved comments').click()
+        cy.findByRole('tooltip').within(() => {
+          // Find the re-open icon button using the hidden label
+          cy.findByText('Re-open').click({ force: true })
+          // verify the reopen thread API call
+          cy.wait('@reopenThread')
+
+          // TODO: Figure out a way to plumb the websocket response back through
+          // to the test so we can verify the comment is no longer resolved
+          // cy.get(
+          //   '.review-panel-resolved-comments-header .badge-content'
+          // ).should('contain.text', '0')
         })
       })
 
-      // eslint-disable-next-line mocha/no-skipped-tests
-      it.skip('renders track changes with "on" state', function () {
-        const scope = mockScope('')
-        scope.editor.showVisual = true
-        scope.editor.wantTrackChanges = true
+      it('deletes resolved comment', function () {
+        cy.findByLabelText('Resolved comments').click()
+        cy.findByRole('tooltip').within(() => {
+          // Find the Delete icon button using the hidden label
+          cy.findByText('Delete').click({ force: true })
+          // verify the delete thread API call
+          cy.wait('@deleteResolvedThread')
 
-        cy.mount(
-          <TestContainer className="rp-size-expanded">
-            <EditorProviders scope={scope}>
-              <CodeMirrorEditor />
-            </EditorProviders>
-          </TestContainer>
-        )
-
-        cy.findByTestId('review-panel').within(() => {
-          cy.findByRole('button', { name: /track changes is on/i }).click()
+          // TODO: Figure out a way to plumb the websocket response back through
+          // to the test so we can verify the comment is no longer there
+          // cy.get(
+          //   '.review-panel-resolved-comments-header .badge-content'
+          // ).should('contain.text', '0')
         })
-      })
-
-      it('renders a disabled guests switch', function () {
-        cy.findByRole('button', { name: /track changes is off/i }).click()
-        cy.findByLabelText(/track changes for guests/i).should('be.disabled')
       })
     })
   })
 
   describe('toggler', function () {
-    it('renders toggler button', function () {
+    it('should close panel when pressing close button', function () {
       cy.get('@review-panel').within(() => {
-        cy.findByRole('button', { name: /toggle review panel/i })
+        cy.findByLabelText('Close').click({ scrollBehavior: false })
       })
-    })
-
-    // eslint-disable-next-line mocha/no-skipped-tests
-    it.skip('calls the toggler function on click', function () {
-      cy.get('@review-panel').within(() => {
-        cy.findByRole('button', { name: /toggle review panel/i }).click()
-        cy.get('@scope').its('toggleReviewPanel').should('be.calledOnce')
-      })
+      // We should collapse to the mini state
+      cy.get('.review-panel-mini').should('exist')
     })
   })
 
@@ -167,46 +307,177 @@ describe.skip('<ReviewPanel />', function () {
   })
 
   describe('comment entries', function () {
-    // eslint-disable-next-line mocha/no-skipped-tests
-    it.skip('shows threads and comments', function () {})
+    it('shows threads and comments', function () {
+      cy.get('@review-panel').within(() => {
+        cy.findByText('unresolved comment text').should('exist')
+        cy.findByText('reply to thread').should('exist')
+      })
+    })
 
-    // eslint-disable-next-line mocha/no-skipped-tests
-    it.skip('edits comment', function () {})
+    it('edits comment', function () {
+      cy.get('@review-panel').within(() => {
+        // TODO: Fix selector
+        cy.get('.review-panel-comment-wrapper')
+          .first()
+          .within(() => {
+            // Find the options icon button using the hidden label
+            cy.findByText('More options')
+              .first()
+              .click({ force: true, scrollBehavior: false })
+            cy.findByRole('menu').within(() => {
+              cy.findByText('Edit').click({ scrollBehavior: false })
+            })
+            cy.findByRole('textbox').type(
+              '{selectAll}edited comment text{enter}',
+              { scrollBehavior: false }
+            )
+            cy.wait('@editComment')
+            // TODO: Figure out a way to plumb the websocket response back through
+            // to the test so we can verify the comment is resolved
+            // cy.findByText('edited comment text').should('exist')
+          })
+      })
+    })
 
-    // eslint-disable-next-line mocha/no-skipped-tests
-    it.skip('deletes comment', function () {})
+    it('deletes thread', function () {
+      cy.get('@review-panel').within(() => {
+        // TODO: Fix selector
+        cy.get('.review-panel-comment-wrapper')
+          .first()
+          .within(() => {
+            // Find the options icon button using the hidden label
+            cy.findByText('More options')
+              .first()
+              .click({ force: true, scrollBehavior: false })
+            cy.findByRole('menu').within(() => {
+              cy.findByText('Delete').click({ scrollBehavior: false })
+            })
+          })
+      })
+      cy.findByRole('dialog').within(() => {
+        cy.findByRole('button', { name: 'Delete' }).click()
+      })
+      cy.wait('@deleteThread')
+      // TODO: Figure out a way to plumb the websocket response back through
+      // to the test so we can verify the thread is deleted
+      // cy.findByText('unresolved comment text').should('not.exist')
+    })
 
-    // eslint-disable-next-line mocha/no-skipped-tests
-    it.skip('cancels comment editing', function () {})
+    it('deletes reply', function () {
+      cy.get('@review-panel').within(() => {
+        // TODO: Fix selector
+        cy.get('.review-panel-comment-wrapper')
+          .eq(1)
+          .within(() => {
+            // Find the options icon button using the hidden label
+            cy.findByText('More options')
+              .first()
+              .click({ force: true, scrollBehavior: false })
+            cy.findByRole('menu').within(() => {
+              cy.findByText('Delete').click({ scrollBehavior: false })
+            })
+          })
+      })
+      cy.findByRole('dialog').within(() => {
+        cy.findByRole('button', { name: 'Delete' }).click()
+      })
+      cy.wait('@deleteComment')
+      // TODO: Figure out a way to plumb the websocket response back through
+      // to the test so we can verify the reply is deleted
+      // cy.findByText('reply to thread').should('not.exist')
+    })
 
-    // eslint-disable-next-line mocha/no-skipped-tests
-    it.skip('cancels comment deletion', function () {})
+    it('cancels comment deletion', function () {
+      cy.get('@review-panel').within(() => {
+        // TODO: Fix selector
+        cy.get('.review-panel-comment-wrapper')
+          .eq(1)
+          .within(() => {
+            // Find the options icon button using the hidden label
+            cy.findByText('More options')
+              .first()
+              .click({ force: true, scrollBehavior: false })
+            cy.findByRole('menu').within(() => {
+              cy.findByText('Delete').click({ scrollBehavior: false })
+            })
+          })
+      })
+      cy.findByRole('dialog').within(() => {
+        cy.findByRole('button', { name: 'Cancel' }).click()
+      })
+      cy.findByText('unresolved comment text').should('exist')
+    })
 
-    // eslint-disable-next-line mocha/no-skipped-tests
-    it.skip('adds new comment (replies) to a thread', function () {})
+    it('adds new comment (replies) to a thread', function () {
+      cy.get('@review-panel').within(() => {
+        cy.findByRole('textbox').type('a new reply{enter}', {
+          scrollBehavior: false,
+        })
+      })
+      cy.wait('@addReply')
+    })
 
-    // eslint-disable-next-line mocha/no-skipped-tests
-    it.skip('resolves comment', function () {})
+    it('resolves comment', function () {
+      cy.get('@review-panel').within(() => {
+        // Find the resolve icon button using the hidden label
+        cy.findByText('Resolve comment').click({ force: true })
+        cy.wait('@resolveThreadId')
+        // TODO: Figure out a way to plumb the websocket response back through
+        // to the test so we can verify the comment is resolved
+        // cy.findByText('unresolved comment text').should('not.exist')
+      })
+    })
   })
 
   describe('change entries', function () {
-    // eslint-disable-next-line mocha/no-skipped-tests
-    it.skip('renders inserted entries in current file mode', function () {})
+    it('renders inserted entries in current file mode', function () {
+      cy.get('@review-panel').within(() => {
+        cy.findByText('Added:').should('exist')
+        cy.findByText('introduction').should('exist')
+      })
+    })
 
-    // eslint-disable-next-line mocha/no-skipped-tests
-    it.skip('renders deleted entries in current file mode', function () {})
+    it('renders deleted entries in current file mode', function () {
+      cy.get('@review-panel').within(() => {
+        cy.findByText('Deleted:').should('exist')
+        cy.findByText('beautiful').should('exist')
+      })
+    })
 
-    // eslint-disable-next-line mocha/no-skipped-tests
-    it.skip('renders inserted entries in overview mode', function () {})
+    it('accepts change', function () {
+      cy.get('@review-panel').within(() => {
+        // TODO: Fix selector
+        cy.get('.review-panel-entry-insert').within(() => {
+          // Find the accept icon button using the hidden label
+          cy.findByText('Accept change').click({ force: true })
+          cy.wait('@acceptChange')
+        })
 
-    // eslint-disable-next-line mocha/no-skipped-tests
-    it.skip('renders deleted entries in overview mode', function () {})
+        // TODO: Fix selector
+        cy.get('.review-panel-entry-delete').within(() => {
+          // Find the accept icon button using the hidden label
+          cy.findByText('Accept change').click({ force: true })
+          cy.wait('@acceptChange')
+        })
+      })
+    })
 
-    // eslint-disable-next-line mocha/no-skipped-tests
-    it.skip('accepts change', function () {})
-
-    // eslint-disable-next-line mocha/no-skipped-tests
-    it.skip('rejects change', function () {})
+    it('rejects change', function () {
+      cy.get('@review-panel').within(() => {
+        // TODO: Fix selector
+        cy.get('.review-panel-entry-insert').within(() => {
+          // Find the reject icon button using the hidden label
+          cy.findByText('Reject change').click({ force: true })
+          cy.get('@getChanges').should('be.calledOnce')
+        })
+        // TODO: Fix selector
+        cy.get('.review-panel-entry-delete').within(() => {
+          // Find the reject icon button using the hidden label
+          cy.findByText('Reject change').click({ force: true })
+          cy.get('@getChanges').should('be.calledTwice')
+        })
+      })
+    })
   })
 
   describe('aggregate change entries', function () {
@@ -218,63 +489,206 @@ describe.skip('<ReviewPanel />', function () {
   })
 
   describe('add comment entry', function () {
-    // eslint-disable-next-line mocha/no-skipped-tests
-    it.skip('renders `add comment button`', function () {})
+    beforeEach(function () {
+      cy.findByText('contentLine 12').type(
+        '{home}{shift}' + '{rightArrow}'.repeat(6),
+        { scrollBehavior: false }
+      )
+      // TODO: Fix selector
+      cy.get('.review-tooltip-add-comment-button').as('add-comment-button')
+    })
 
-    // eslint-disable-next-line mocha/no-skipped-tests
-    it.skip('cancels adding comment', function () {})
+    it('renders floating `add comment button`', function () {
+      cy.get('@add-comment-button').should('exist')
+    })
 
-    // eslint-disable-next-line mocha/no-skipped-tests
-    it.skip('adds comment', function () {})
+    it('can add comment', function () {
+      cy.get('@add-comment-button').click({ scrollBehavior: false })
+      cy.get('@review-panel').within(() => {
+        // TODO: Fix selector
+        cy.get('.review-panel-add-comment-textarea').type(
+          'a new comment{enter}',
+          {
+            scrollBehavior: false,
+          }
+        )
+      })
+      cy.wait('@addNewComment')
+      // TODO : Figure out a way to plumb the websocket response back through
+      // to the test so we can verify the comment is added
+      // cy.findByText('a new comment').should('exist')
+    })
+
+    it('cancels adding comment', function () {
+      cy.get('@add-comment-button').click({ scrollBehavior: false })
+      cy.get('@review-panel').within(() => {
+        cy.findByRole('button', { name: 'Cancel' }).click({
+          scrollBehavior: false,
+        })
+      })
+    })
   })
 
   describe('bulk actions entry', function () {
-    // eslint-disable-next-line mocha/no-skipped-tests
-    it.skip('renders the reject and accept all buttons`', function () {})
+    beforeEach(function () {
+      // Select a deletion and an insertion
+      cy.findByText('\\maketitle').type(
+        '{home}{shift}' + '{downArrow}'.repeat(10),
+        { scrollBehavior: false }
+      )
+      cy.findByLabelText('Accept selected changes').as(
+        'accept-selected-changes'
+      )
+      cy.findByLabelText('Reject selected changes').as(
+        'reject-selected-changes'
+      )
+    })
 
-    // eslint-disable-next-line mocha/no-skipped-tests
-    it.skip('accepts all changes', function () {})
+    it('renders the reject and accept all buttons`', function () {
+      cy.get('@accept-selected-changes').should('exist')
+      cy.get('@reject-selected-changes').should('exist')
+    })
 
-    // eslint-disable-next-line mocha/no-skipped-tests
-    it.skip('rejects all changes', function () {})
+    it('accepts all changes', function () {
+      cy.get('@accept-selected-changes').click({ scrollBehavior: false })
+      cy.findByRole('dialog').within(() => {
+        cy.findByText(
+          'Are you sure you want to accept the selected 2 changes?'
+        ).should('exist')
+        cy.findByRole('button', { name: 'OK' }).click({
+          scrollBehavior: false,
+        })
+        cy.wait('@acceptChange')
+        cy.get('@removeChangeIds').should('have.been.calledWith', [
+          'inserted-op-id',
+          'deleted-op-id',
+        ])
+      })
+    })
+
+    it('rejects all changes', function () {
+      cy.get('@reject-selected-changes').click({ scrollBehavior: false })
+      cy.findByRole('dialog').within(() => {
+        cy.findByText(
+          'Are you sure you want to reject the selected 2 changes?'
+        ).should('exist')
+        cy.findByRole('button', { name: 'OK' }).click({
+          scrollBehavior: false,
+        })
+        cy.get('@getChanges').should('have.been.calledWith', [
+          'inserted-op-id',
+          'deleted-op-id',
+        ])
+      })
+    })
   })
 
   describe('overview mode', function () {
-    // eslint-disable-next-line mocha/no-skipped-tests
-    it.skip('shows list of files changed', function () {})
+    beforeEach(function () {
+      cy.findByRole('tab', { name: /overview/i }).click()
+    })
+    it('shows list of files changed', function () {
+      // TODO: Fix selector
+      cy.get('.collapsible-file-header').should('contain.text', 'test.tex')
+    })
 
-    // eslint-disable-next-line mocha/no-skipped-tests
-    it.skip('renders comments', function () {})
+    it('renders comments', function () {
+      cy.get('@review-panel').within(() => {
+        cy.findByText('unresolved comment text').should('exist')
+        cy.findByText('reply to thread').should('exist')
+      })
+    })
+
+    it('renders changes', function () {
+      cy.get('@review-panel').within(() => {
+        cy.findByText('Added:').should('exist')
+        cy.findByText('introduction').should('exist')
+        cy.findByText('Deleted:').should('exist')
+        cy.findByText('beautiful').should('exist')
+      })
+    })
+
+    it('collapses the file entries when clicked', function () {
+      cy.findByText('test.tex').click()
+      cy.get('@review-panel').within(() => {
+        // TODO: Fix selector
+        cy.get('.review-panel-entry').should('not.exist')
+      })
+      cy.findByText('test.tex').click()
+      cy.get('@review-panel').within(() => {
+        // TODO: Fix selector
+        cy.get('.review-panel-entry').should('exist')
+      })
+    })
+  })
+})
+
+describe('<ReviewPanel /> for free users', function () {
+  function mountEditor(ownerId = USER_ID) {
+    const scope = mockScope(undefined, {
+      permissions: { write: true, trackedWrite: false, comment: true },
+      projectFeatures: { trackChanges: false },
+      projectOwner: {
+        _id: ownerId,
+      },
+    })
+
+    cy.wrap(scope).as('scope')
+
+    cy.mount(
+      <TestContainer className="rp-size-expanded">
+        <EditorProviders scope={scope}>
+          <CodeMirrorEditor />
+        </EditorProviders>
+      </TestContainer>
+    )
+
+    cy.findByLabelText('Editing').click()
+    cy.findByRole('menu').within(() => {
+      cy.findByText(/Reviewing/).click()
+    })
+  }
+
+  beforeEach(function () {
+    window.metaAttributesCache.set('ol-isReviewerRoleEnabled', true)
+    window.metaAttributesCache.set('ol-preventCompileOnLoad', true)
+    cy.interceptEvents()
+    cy.intercept('GET', '/project/*/changes/users', [])
+    cy.intercept('GET', '/project/*/threads', {})
   })
 
-  describe('in editor widgets', function () {
-    // eslint-disable-next-line mocha/no-skipped-tests
-    it.skip('toggle review panel', function () {})
-
-    // eslint-disable-next-line mocha/no-skipped-tests
-    it.skip('accepts all changes', function () {})
-
-    // eslint-disable-next-line mocha/no-skipped-tests
-    it.skip('rejects all changes', function () {})
-
-    // eslint-disable-next-line mocha/no-skipped-tests
-    it.skip('add comment', function () {})
+  it('renders modal', function () {
+    mountEditor()
+    cy.findByRole('dialog').within(() => {
+      cy.findByText('Upgrade to Review').should('exist')
+    })
   })
 
-  describe('upgrade track changes', function () {
-    // eslint-disable-next-line mocha/no-skipped-tests
-    it.skip('renders modal', function () {})
+  it('closes modal', function () {
+    mountEditor()
+    cy.findByRole('dialog').within(() => {
+      cy.findByText('Close').click()
+    })
+    cy.findByRole('dialog').should('not.exist')
+  })
 
-    // eslint-disable-next-line mocha/no-skipped-tests
-    it.skip('closes modal', function () {})
+  it('opens subscription page after clicking on `upgrade`', function () {
+    mountEditor()
+    cy.findByRole('dialog').within(() => {
+      // Verify the button exists. Clicking it will open a new window
+      cy.findByText('Upgrade').should('exist')
+    })
+  })
 
-    // eslint-disable-next-line mocha/no-skipped-tests
-    it.skip('opens subscription page after clicking on `upgrade`', function () {})
+  // eslint-disable-next-line mocha/no-skipped-tests
+  it.skip('opens subscription page after clicking on `try it for free`', function () {})
 
-    // eslint-disable-next-line mocha/no-skipped-tests
-    it.skip('opens subscription page after clicking on `try it for free`', function () {})
-
-    // eslint-disable-next-line mocha/no-skipped-tests
-    it.skip('shows `ask project owner to upgrade` message', function () {})
+  it('shows `ask project owner to upgrade` message', function () {
+    mountEditor('other-user-id')
+    cy.findByRole('dialog').within(() => {
+      cy.findByText(
+        'Please ask the project owner to upgrade to use track changes'
+      ).should('exist')
+    })
   })
 })
