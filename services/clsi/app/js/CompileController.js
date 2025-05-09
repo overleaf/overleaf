@@ -191,7 +191,8 @@ function clearCache(req, res, next) {
 }
 
 function syncFromCode(req, res, next) {
-  const { file, editorId, buildId, compileFromClsiCache } = req.query
+  const { file, editorId, buildId } = req.query
+  const compileFromClsiCache = req.query.compileFromClsiCache === 'true'
   const line = parseInt(req.query.line, 10)
   const column = parseInt(req.query.column, 10)
   const { imageName } = req.query
@@ -220,7 +221,8 @@ function syncFromPdf(req, res, next) {
   const page = parseInt(req.query.page, 10)
   const h = parseFloat(req.query.h)
   const v = parseFloat(req.query.v)
-  const { imageName, editorId, buildId, compileFromClsiCache } = req.query
+  const { imageName, editorId, buildId } = req.query
+  const compileFromClsiCache = req.query.compileFromClsiCache === 'true'
   const projectId = req.params.project_id
   const userId = req.params.user_id
   CompileManager.syncFromPdf(

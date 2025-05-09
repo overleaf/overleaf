@@ -553,6 +553,12 @@ const _CompileController = {
   async _proxyToClsi(projectId, action, url, qs, req, res) {
     const limits =
       await CompileManager.promises.getProjectCompileLimits(projectId)
+    if (
+      qs?.compileFromClsiCache &&
+      !['alpha', 'priority'].includes(limits.compileGroup)
+    ) {
+      qs.compileFromClsiCache = false
+    }
     return CompileController._proxyToClsiWithLimits(
       projectId,
       action,
