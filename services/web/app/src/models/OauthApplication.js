@@ -10,6 +10,7 @@ const OauthApplicationSchema = new Schema(
     name: String,
     redirectUris: [String],
     scopes: [String],
+    pkceEnabled: Boolean,
   },
   {
     collection: 'oauthApplications',
