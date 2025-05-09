@@ -142,7 +142,7 @@ async function scanAndProcessDueItems(
       } else {
         try {
           await actionFn(projectId)
-          logger.info(
+          logger.debug(
             { ...logContext, projectId },
             `Successfully performed ${taskName} for project`
           )
