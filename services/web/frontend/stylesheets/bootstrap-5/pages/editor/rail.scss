@@ -65,7 +65,7 @@
   color: var(--ide-rail-color);
   background-color: var(--ide-rail-link-background);
   position: relative;
-  overflow-y: hidden;
+  overflow: visible;
 
   &:visited,
   &:focus {
@@ -108,8 +108,12 @@
 
   .badge {
     position: absolute;
-    top: 0;
-    right: 0;
+    top: -4px;
+    right: -4px;
+    pointer-events: none;
+    z-index: 10;
+    padding: var(--spacing-00) var(--spacing-02);
+    border-radius: var(--border-radius-full);
   }
 }
 

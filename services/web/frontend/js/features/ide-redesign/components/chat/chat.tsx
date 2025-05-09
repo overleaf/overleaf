@@ -2,7 +2,6 @@ import ChatFallbackError from '@/features/chat/components/chat-fallback-error'
 import InfiniteScroll from '@/features/chat/components/infinite-scroll'
 import MessageInput from '@/features/chat/components/message-input'
 import { useChatContext } from '@/features/chat/context/chat-context'
-import OLBadge from '@/features/ui/components/ol/ol-badge'
 import { FetchError } from '@/infrastructure/fetch-json'
 import { FullSizeLoadingSpinner } from '@/shared/components/loading-spinner'
 import MaterialIcon from '@/shared/components/material-icon'
@@ -11,6 +10,7 @@ import { lazy, Suspense, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import classNames from 'classnames'
 import { RailPanelHeader } from '../rail'
+import { RailIndicator } from '../rail-indicator'
 
 const MessageList = lazy(() => import('../../../chat/components/message-list'))
 
@@ -19,7 +19,7 @@ export const ChatIndicator = () => {
   if (unreadMessageCount === 0) {
     return null
   }
-  return <OLBadge bg="info">{unreadMessageCount}</OLBadge>
+  return <RailIndicator count={unreadMessageCount} type="info" />
 }
 
 const Loading = () => <FullSizeLoadingSpinner delay={500} className="pt-4" />

@@ -1,7 +1,7 @@
 import PdfLogsViewer from '@/features/pdf-preview/components/pdf-logs-viewer'
 import { PdfPreviewProvider } from '@/features/pdf-preview/components/pdf-preview-provider'
 import { useDetachCompileContext as useCompileContext } from '@/shared/context/detach-compile-context'
-import OLBadge from '@/features/ui/components/ol/ol-badge'
+import { RailIndicator } from './rail-indicator'
 
 export const ErrorIndicator = () => {
   const { logEntries } = useCompileContext()
@@ -19,7 +19,10 @@ export const ErrorIndicator = () => {
   }
 
   return (
-    <OLBadge bg={errorCount > 0 ? 'danger' : 'warning'}>{totalCount}</OLBadge>
+    <RailIndicator
+      count={totalCount}
+      type={errorCount > 0 ? 'danger' : 'warning'}
+    />
   )
 }
 
