@@ -116,6 +116,12 @@ EXPOSE 80
 
 ENTRYPOINT ["/sbin/my_init"]
 
+# Install Language Supports
+# -------------------------
+RUN tlmgr install \
+      collection-langcjk \
+      collection-langjapanese
+
 # Store the revision
 # ------------------
 # This should be the last step to optimize docker image caching.
