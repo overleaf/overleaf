@@ -820,6 +820,7 @@
   "generic_something_went_wrong": "Sorry, something went wrong",
   "get_collaborative_benefits": "Get the collaborative benefits from __appName__, even if you prefer to work offline",
   "get_discounted_plan": "Get discounted plan",
+  "get_error_assist": "Get Error Assist",
   "get_exclusive_access_to_labs": "Get exclusive access to early-stage experiments when you join Overleaf Labs. All we ask in return is your honest feedback to help us develop and improve.",
   "get_in_touch": "Get in touch",
   "get_in_touch_having_problems": "<a href=\"__link__\">Get in touch with support</a> if you’re having problems",
