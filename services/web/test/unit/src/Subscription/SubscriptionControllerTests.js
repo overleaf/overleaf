@@ -158,6 +158,7 @@ describe('SubscriptionController', function () {
         './FeaturesUpdater': (this.FeaturesUpdater = {
           promises: {
             hasFeaturesViaWritefull: sinon.stub().resolves(false),
+            refreshFeatures: sinon.stub().resolves({ features: {} }),
           },
         }),
         './GroupPlansData': (this.GroupPlansData = {}),
@@ -186,6 +187,11 @@ describe('SubscriptionController', function () {
         '../../util/currency': (this.currency = {
           formatCurrency: sinon.stub(),
         }),
+        '../../models/User': {
+          User: {
+            findById: sinon.stub().resolves(this.user),
+          },
+        },
       },
     })
 
@@ -221,7 +227,10 @@ describe('SubscriptionController', function () {
           title: 'thank_you',
           personalSubscription: 'foo',
           postCheckoutRedirect: undefined,
-          user: this.user,
+          user: {
+            _id: this.user._id,
+            features: this.user.features,
+          },
         })
         done()
       }

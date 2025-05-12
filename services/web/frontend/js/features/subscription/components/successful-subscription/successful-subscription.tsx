@@ -13,6 +13,7 @@ import {
   isStandaloneAiPlanCode,
 } from '../../data/add-on-codes'
 import { PaidSubscription } from '../../../../../../types/subscription/dashboard/subscription'
+import { useBroadcastUser } from '@/shared/hooks/user-channel/use-broadcast-user'
 
 function SuccessfulSubscription() {
   const { t } = useTranslation()
@@ -20,6 +21,7 @@ function SuccessfulSubscription() {
     useSubscriptionDashboardContext()
   const postCheckoutRedirect = getMeta('ol-postCheckoutRedirect')
   const { appName, adminEmail } = getMeta('ol-ExposedSettings')
+  useBroadcastUser()
 
   if (!subscription || !('payment' in subscription)) return null
 

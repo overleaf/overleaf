@@ -1,6 +1,7 @@
 export interface WritefullEvents {
   'writefull-login-complete': {
     method: 'email-password' | 'login-with-overleaf'
+    isPremium: boolean
   }
   'writefull-received-suggestions': { numberOfSuggestions: number }
   'writefull-register-as-auto-account': { email: string }

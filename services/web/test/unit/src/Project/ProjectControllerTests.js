@@ -1121,44 +1121,6 @@ describe('ProjectController', function () {
         this.ProjectController.loadEditor(this.req, this.res)
       })
     })
-
-    describe('when fetching the users featureSet', function () {
-      beforeEach(function () {
-        this.Modules.promises.hooks.fire = sinon.stub().resolves()
-        this.user.features = {}
-      })
-
-      it('should take into account features overrides from modules', function (done) {
-        // this case occurs when the user has bought the ai bundle on WF, which should include our error assistant
-        const bundleFeatures = { aiErrorAssistant: true }
-        this.user.features = { aiErrorAssistant: false }
-        this.Modules.promises.hooks.fire = sinon
-          .stub()
-          .resolves([bundleFeatures])
-        this.res.render = (pageName, opts) => {
-          expect(opts.user.features).to.deep.equal(bundleFeatures)
-          this.Modules.promises.hooks.fire.should.have.been.calledWith(
-            'getModuleProvidedFeatures',
-            this.user._id
-          )
-          done()
-        }
-        this.ProjectController.loadEditor(this.req, this.res)
-      })
-
-      it('should handle modules not returning any features', function (done) {
-        this.Modules.promises.hooks.fire = sinon.stub().resolves([])
-        this.res.render = (pageName, opts) => {
-          expect(opts.user.features).to.deep.equal({})
-          this.Modules.promises.hooks.fire.should.have.been.calledWith(
-            'getModuleProvidedFeatures',
-            this.user._id
-          )
-          done()
-        }
-        this.ProjectController.loadEditor(this.req, this.res)
-      })
-    })
   })
 
   describe('userProjectsJson', function () {

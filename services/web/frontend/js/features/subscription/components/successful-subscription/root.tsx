@@ -1,3 +1,4 @@
+import { UserProvider } from '@/shared/context/user-context'
 import useWaitForI18n from '../../../../shared/hooks/use-wait-for-i18n'
 import { SubscriptionDashboardProvider } from '../../context/subscription-dashboard-context'
 import SuccessfulSubscription from './successful-subscription'
@@ -13,7 +14,9 @@ function Root() {
   return (
     <SplitTestProvider>
       <SubscriptionDashboardProvider>
-        <SuccessfulSubscription />
+        <UserProvider>
+          <SuccessfulSubscription />
+        </UserProvider>
       </SubscriptionDashboardProvider>
     </SplitTestProvider>
   )

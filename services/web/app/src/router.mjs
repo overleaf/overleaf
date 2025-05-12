@@ -484,6 +484,11 @@ async function initialize(webRouter, privateApiRouter, publicApiRouter) {
     AuthenticationController.requirePrivateApiAuth(),
     UserInfoController.getPersonalInfo
   )
+  webRouter.get(
+    '/user/features',
+    AuthenticationController.requireLogin(),
+    UserInfoController.getUserFeatures
+  )
 
   webRouter.get(
     '/user/reconfirm',

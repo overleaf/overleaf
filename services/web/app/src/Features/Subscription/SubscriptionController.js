@@ -25,6 +25,7 @@ const RecurlyClient = require('./RecurlyClient')
 const { AI_ADD_ON_CODE } = require('./PaymentProviderEntities')
 const PlansLocator = require('./PlansLocator')
 const PaymentProviderEntities = require('./PaymentProviderEntities')
+const { User } = require('../../models/User')
 
 /**
  * @import { SubscriptionChangeDescription } from '../../../../types/subscription/subscription-change-preview'
@@ -186,7 +187,9 @@ async function userSubscriptionPage(req, res) {
 
 async function successfulSubscription(req, res) {
   const user = SessionManager.getSessionUser(req.session)
-
+  if (!user) {
+    throw new Error('User is not logged in')
+  }
   const { personalSubscription } =
     await SubscriptionViewModelBuilder.promises.buildUsersSubscriptionViewModel(
       user,
@@ -198,11 +201,23 @@ async function successfulSubscription(req, res) {
   if (!personalSubscription) {
     res.redirect('/user/subscription/plans')
   } else {
+    const userInDb = await User.findById(user._id, {
+      _id: 1,
+      features: 1,
+    })
+
+    if (!userInDb) {
+      throw new Error('User not found')
+    }
+
     res.render('subscriptions/successful-subscription-react', {
       title: 'thank_you',
       personalSubscription,
       postCheckoutRedirect,
-      user,
+      user: {
+        _id: user._id,
+        features: userInDb.features,
+      },
     })
   }
 }
@@ -387,7 +402,6 @@ async function purchaseAddon(req, res, next) {
       addOnCode,
       quantity
     )
-    return res.sendStatus(200)
   } catch (err) {
     if (err instanceof DuplicateAddOnError) {
       HttpErrorHandler.badRequest(
@@ -406,6 +420,14 @@ async function purchaseAddon(req, res, next) {
       return next(err)
     }
   }
+
+  try {
+    await FeaturesUpdater.promises.refreshFeatures(user._id, 'add-on-purchase')
+  } catch (err) {
+    logger.error({ err }, 'Failed to refresh features after add-on purchase')
+  }
+
+  return res.sendStatus(200)
 }
 
 async function removeAddon(req, res, next) {

@@ -19,7 +19,7 @@ describe('UserGetter', function () {
   beforeEach(function () {
     const confirmedAt = new Date()
     this.fakeUser = {
-      _id: '12390i',
+      _id: new ObjectId(),
       email: 'email2@foo.bar',
       emails: [
         {
@@ -45,6 +45,10 @@ describe('UserGetter', function () {
     }
     this.getUserAffiliations = sinon.stub().resolves([])
 
+    this.Modules = {
+      promises: { hooks: { fire: sinon.stub().resolves() } },
+    }
+
     this.UserGetter = SandboxedModule.require(modulePath, {
       requires: {
         '../Helpers/Mongo': { normalizeQuery, normalizeMultiQuery },
@@ -63,6 +67,7 @@ describe('UserGetter', function () {
         '../../models/User': {
           User: (this.User = {}),
         },
+        '../../infrastructure/Modules': this.Modules,
       },
     })
   })
@@ -1257,6 +1262,58 @@ describe('UserGetter', function () {
         expect(err).not.to.exist
         done()
       })
+    })
+  })
+
+  describe('getUserFeatures', function () {
+    beforeEach(function () {
+      this.Modules.promises.hooks.fire = sinon.stub().resolves()
+      this.fakeUser.features = {}
+    })
+
+    it('should return user features', function (done) {
+      this.fakeUser.features = { feature1: true, feature2: false }
+      this.UserGetter.getUserFeatures(new ObjectId(), (error, features) => {
+        expect(error).to.not.exist
+        expect(features).to.deep.equal(this.fakeUser.features)
+        done()
+      })
+    })
+
+    it('should return user features when using promises', async function () {
+      this.fakeUser.features = { feature1: true, feature2: false }
+      const features = await this.UserGetter.promises.getUserFeatures(
+        this.fakeUser._id
+      )
+      expect(features).to.deep.equal(this.fakeUser.features)
+    })
+
+    it('should take into account features overrides from modules', async function () {
+      // this case occurs when the user has bought the ai bundle on WF, which should include our error assistant
+      const bundleFeatures = { aiErrorAssistant: true }
+      this.fakeUser.features = { aiErrorAssistant: false }
+      this.Modules.promises.hooks.fire = sinon.stub().resolves([bundleFeatures])
+      const features = await this.UserGetter.promises.getUserFeatures(
+        this.fakeUser._id
+      )
+      expect(features).to.deep.equal(bundleFeatures)
+      this.Modules.promises.hooks.fire.should.have.been.calledWith(
+        'getModuleProvidedFeatures',
+        this.fakeUser._id
+      )
+    })
+
+    it('should handle modules not returning any features', async function () {
+      this.Modules.promises.hooks.fire = sinon.stub().resolves([])
+      this.fakeUser.features = { test: true }
+      const features = await this.UserGetter.promises.getUserFeatures(
+        this.fakeUser._id
+      )
+      expect(features).to.deep.equal({ test: true })
+      this.Modules.promises.hooks.fire.should.have.been.calledWith(
+        'getModuleProvidedFeatures',
+        this.fakeUser._id
+      )
     })
   })
 })

@@ -23,6 +23,7 @@ import { ReferencesProvider } from '@/features/ide-react/context/references-cont
 import { SnapshotProvider } from '@/features/ide-react/context/snapshot-context'
 import { SplitTestProvider } from '@/shared/context/split-test-context'
 import { UserProvider } from '@/shared/context/user-context'
+import { UserFeaturesProvider } from '@/shared/context/user-features-context'
 import { UserSettingsProvider } from '@/shared/context/user-settings-context'
 import { IdeRedesignSwitcherProvider } from './ide-redesign-switcher-context'
 import { CommandRegistryProvider } from './command-registry-context'
@@ -60,6 +61,7 @@ export const ReactContextRoot: FC<
     UserSettingsProvider,
     IdeRedesignSwitcherProvider,
     CommandRegistryProvider,
+    UserFeaturesProvider,
     ...providers,
   }
 
@@ -77,35 +79,37 @@ export const ReactContextRoot: FC<
                         <Providers.ReferencesProvider>
                           <Providers.DetachProvider>
                             <Providers.EditorProvider>
-                              <Providers.PermissionsProvider>
-                                <Providers.RailProvider>
-                                  <Providers.LayoutProvider>
-                                    <Providers.ProjectSettingsProvider>
-                                      <Providers.EditorManagerProvider>
-                                        <Providers.LocalCompileProvider>
-                                          <Providers.DetachCompileProvider>
-                                            <Providers.ChatProvider>
-                                              <Providers.FileTreeOpenProvider>
-                                                <Providers.OnlineUsersProvider>
-                                                  <Providers.MetadataProvider>
-                                                    <Providers.OutlineProvider>
-                                                      <Providers.IdeRedesignSwitcherProvider>
-                                                        <Providers.CommandRegistryProvider>
-                                                          {children}
-                                                        </Providers.CommandRegistryProvider>
-                                                      </Providers.IdeRedesignSwitcherProvider>
-                                                    </Providers.OutlineProvider>
-                                                  </Providers.MetadataProvider>
-                                                </Providers.OnlineUsersProvider>
-                                              </Providers.FileTreeOpenProvider>
-                                            </Providers.ChatProvider>
-                                          </Providers.DetachCompileProvider>
-                                        </Providers.LocalCompileProvider>
-                                      </Providers.EditorManagerProvider>
-                                    </Providers.ProjectSettingsProvider>
-                                  </Providers.LayoutProvider>
-                                </Providers.RailProvider>
-                              </Providers.PermissionsProvider>
+                              <Providers.UserFeaturesProvider>
+                                <Providers.PermissionsProvider>
+                                  <Providers.RailProvider>
+                                    <Providers.LayoutProvider>
+                                      <Providers.ProjectSettingsProvider>
+                                        <Providers.EditorManagerProvider>
+                                          <Providers.LocalCompileProvider>
+                                            <Providers.DetachCompileProvider>
+                                              <Providers.ChatProvider>
+                                                <Providers.FileTreeOpenProvider>
+                                                  <Providers.OnlineUsersProvider>
+                                                    <Providers.MetadataProvider>
+                                                      <Providers.OutlineProvider>
+                                                        <Providers.IdeRedesignSwitcherProvider>
+                                                          <Providers.CommandRegistryProvider>
+                                                            {children}
+                                                          </Providers.CommandRegistryProvider>
+                                                        </Providers.IdeRedesignSwitcherProvider>
+                                                      </Providers.OutlineProvider>
+                                                    </Providers.MetadataProvider>
+                                                  </Providers.OnlineUsersProvider>
+                                                </Providers.FileTreeOpenProvider>
+                                              </Providers.ChatProvider>
+                                            </Providers.DetachCompileProvider>
+                                          </Providers.LocalCompileProvider>
+                                        </Providers.EditorManagerProvider>
+                                      </Providers.ProjectSettingsProvider>
+                                    </Providers.LayoutProvider>
+                                  </Providers.RailProvider>
+                                </Providers.PermissionsProvider>
+                              </Providers.UserFeaturesProvider>
                             </Providers.EditorProvider>
                           </Providers.DetachProvider>
                         </Providers.ReferencesProvider>

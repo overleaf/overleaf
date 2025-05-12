@@ -1,6 +1,7 @@
 const UserGetter = require('./UserGetter')
 const SessionManager = require('../Authentication/SessionManager')
 const { ObjectId } = require('mongodb-legacy')
+const { expressify } = require('@overleaf/promise-utils')
 
 function getLoggedInUsersPersonalInfo(req, res, next) {
   const userId = SessionManager.getLoggedInUserId(req.session)
@@ -78,9 +79,19 @@ function formatPersonalInfo(user) {
   return formattedUser
 }
 
+async function getUserFeatures(req, res, next) {
+  const userId = SessionManager.getLoggedInUserId(req.session)
+  if (!userId) {
+    throw new Error('User is not logged in')
+  }
+  const features = await UserGetter.promises.getUserFeatures(userId)
+  return res.json(features)
+}
+
 module.exports = {
   getLoggedInUsersPersonalInfo,
   getPersonalInfo,
   sendFormattedPersonalInfo,
   formatPersonalInfo,
+  getUserFeatures: expressify(getUserFeatures),
 }

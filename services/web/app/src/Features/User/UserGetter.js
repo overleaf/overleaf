@@ -11,6 +11,8 @@ const Errors = require('../Errors/Errors')
 const Features = require('../../infrastructure/Features')
 const { User } = require('../../models/User')
 const { normalizeQuery, normalizeMultiQuery } = require('../Helpers/Mongo')
+const Modules = require('../../infrastructure/Modules')
+const FeaturesHelper = require('../Subscription/FeaturesHelper')
 
 function _lastDayToReconfirm(emailData, institutionData) {
   const globalReconfirmPeriod = settings.reconfirmNotificationDays
@@ -95,6 +97,21 @@ async function getUserFullEmails(userId) {
   )
 }
 
+async function getUserFeatures(userId) {
+  const user = await UserGetter.promises.getUser(userId, {
+    features: 1,
+  })
+  if (!user) {
+    throw new Error('User not Found')
+  }
+
+  const moduleFeatures =
+    (await Modules.promises.hooks.fire('getModuleProvidedFeatures', userId)) ||
+    []
+
+  return FeaturesHelper.computeFeatureSet([user.features, ...moduleFeatures])
+}
+
 async function getUserConfirmedEmails(userId) {
   const user = await UserGetter.promises.getUser(userId, {
     emails: 1,
@@ -136,13 +153,7 @@ const UserGetter = {
     }
   },
 
-  getUserFeatures(userId, callback) {
-    this.getUser(userId, { features: 1 }, (error, user) => {
-      if (error) return callback(error)
-      if (!user) return callback(new Errors.NotFoundError('user not found'))
-      callback(null, user.features)
-    })
-  },
+  getUserFeatures: callbackify(getUserFeatures),
 
   getUserEmail(userId, callback) {
     this.getUser(userId, { email: 1 }, (error, user) =>
@@ -335,9 +346,10 @@ const decorateFullEmails = (
 }
 
 UserGetter.promises = promisifyAll(UserGetter, {
-  without: ['getSsoUsersAtInstitution', 'getUserFullEmails'],
+  without: ['getSsoUsersAtInstitution', 'getUserFullEmails', 'getUserFeatures'],
 })
 UserGetter.promises.getUserFullEmails = getUserFullEmails
 UserGetter.promises.getSsoUsersAtInstitution = getSsoUsersAtInstitution
+UserGetter.promises.getUserFeatures = getUserFeatures
 
 module.exports = UserGetter
