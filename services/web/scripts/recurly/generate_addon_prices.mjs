@@ -37,6 +37,8 @@ async function main() {
       localizedAddOnsPricing[currency] = { [ADD_ON_CODE]: {} }
     }
     localizedAddOnsPricing[currency][ADD_ON_CODE].annual = unitAmount
+    localizedAddOnsPricing[currency][ADD_ON_CODE].annualDividedByTwelve =
+      (unitAmount || 0) / 12
   }
 
   console.log(JSON.stringify({ localizedAddOnsPricing }, null, 2))

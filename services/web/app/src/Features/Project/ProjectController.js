@@ -949,9 +949,17 @@ const _ProjectController = {
       const annualPrice = Settings.localizedAddOnsPricing[currency][plan].annual
       const monthlyPrice =
         Settings.localizedAddOnsPricing[currency][plan].monthly
+      const annualDividedByTwelve =
+        Settings.localizedAddOnsPricing[currency][plan].annualDividedByTwelve
 
       plansData[plan] = {
         annual: formatCurrency(annualPrice, currency, locale, true),
+        annualDividedByTwelve: formatCurrency(
+          annualDividedByTwelve,
+          currency,
+          locale,
+          true
+        ),
         monthly: formatCurrency(monthlyPrice, currency, locale, true),
       }
     })

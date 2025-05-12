@@ -1594,6 +1594,7 @@
   "per_license": "per license",
   "per_month": "per month",
   "per_month_billed_annually": "per month, billed annually",
+  "per_month_x_annually": "per month, __price__ annually",
   "per_user_month": "per user / month",
   "per_user_year": "per user / year",
   "per_year": "per year",

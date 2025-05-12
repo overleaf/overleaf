@@ -55,7 +55,10 @@ import type { ScriptLogType } from '../../../modules/admin-panel/frontend/js/fea
 import { ActiveExperiment } from './labs-utils'
 export interface Meta {
   'ol-ExposedSettings': ExposedSettings
-  'ol-addonPrices': Record<string, { annual: string; monthly: string }>
+  'ol-addonPrices': Record<
+    string,
+    { annual: string; monthly: string; annualDividedByTwelve: string }
+  >
   'ol-allInReconfirmNotificationPeriods': UserEmailData[]
   'ol-allowedExperiments': string[]
   'ol-allowedImageNames': AllowedImageName[]
