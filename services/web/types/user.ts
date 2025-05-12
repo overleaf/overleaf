@@ -52,6 +52,7 @@ export type User = {
     enabled: boolean
     autoCreatedAccount: boolean
     firstAutoLoad: boolean
+    premiumSource: string
   }
   aiErrorAssistant?: {
     enabled: boolean
