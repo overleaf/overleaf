@@ -2,7 +2,6 @@ import { useTranslation } from 'react-i18next'
 import { useFileTreeCreateForm } from '../../contexts/file-tree-create-form'
 import { useFileTreeActionable } from '../../contexts/file-tree-actionable'
 import { useFileTreeData } from '../../../../shared/context/file-tree-data-context'
-import PropTypes from 'prop-types'
 import OLButton from '@/features/ui/components/ol/ol-button'
 import OLNotification from '@/features/ui/components/ol/ol-notification'
 
@@ -26,21 +25,33 @@ export function FileTreeModalCreateFileFooterContent({
   valid,
   fileCount,
   inFlight,
-  newFileCreateMode,
   cancel,
+  newFileCreateMode,
+}: {
+  valid: boolean
+  fileCount:
+    | {
+        limit: number
+        status: string
+        value: number
+      }
+    | number
+  inFlight: boolean
+  cancel: () => void
+  newFileCreateMode?: string
 }) {
   const { t } = useTranslation()
 
   return (
     <>
-      {fileCount.status === 'warning' && (
+      {typeof fileCount !== 'number' && fileCount.status === 'warning' && (
         <div className="modal-footer-left approaching-file-limit">
           {t('project_approaching_file_limit')} ({fileCount.value}/
           {fileCount.limit})
         </div>
       )}
 
-      {fileCount.status === 'error' && (
+      {typeof fileCount !== 'number' && fileCount.status === 'error' && (
         <OLNotification
           type="error"
           className="at-file-limit"
@@ -72,15 +83,4 @@ export function FileTreeModalCreateFileFooterContent({
       )}
     </>
   )
-}
-FileTreeModalCreateFileFooterContent.propTypes = {
-  cancel: PropTypes.func.isRequired,
-  fileCount: PropTypes.shape({
-    limit: PropTypes.number.isRequired,
-    status: PropTypes.string.isRequired,
-    value: PropTypes.number.isRequired,
-  }).isRequired,
-  inFlight: PropTypes.bool.isRequired,
-  newFileCreateMode: PropTypes.string,
-  valid: PropTypes.bool.isRequired,
 }

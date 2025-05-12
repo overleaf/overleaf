@@ -1,7 +1,6 @@
 import { useRef, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useFileTreeCreateName } from '../../contexts/file-tree-create-name'
-import PropTypes from 'prop-types'
 import {
   BlockedFilenameError,
   DuplicateFilenameError,
@@ -23,6 +22,15 @@ export default function FileTreeCreateNameInput({
   placeholder,
   error,
   inFlight,
+}: {
+  label?: string
+  focusName?: boolean
+  classes?: {
+    formGroup?: string
+  }
+  placeholder?: string
+  error?: string | Record<string, any>
+  inFlight: boolean
 }) {
   const { t } = useTranslation()
 
@@ -30,7 +38,7 @@ export default function FileTreeCreateNameInput({
   const { name, setName, touchedName, validName } = useFileTreeCreateName()
 
   // focus the first part of the filename if needed
-  const inputRef = useRef(null)
+  const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     if (inputRef.current && focusName) {
@@ -73,18 +81,7 @@ export default function FileTreeCreateNameInput({
   )
 }
 
-FileTreeCreateNameInput.propTypes = {
-  focusName: PropTypes.bool,
-  label: PropTypes.string,
-  classes: PropTypes.shape({
-    formGroup: PropTypes.string,
-  }),
-  placeholder: PropTypes.string,
-  error: PropTypes.oneOfType([PropTypes.object, PropTypes.string]),
-  inFlight: PropTypes.bool.isRequired,
-}
-
-function ErrorMessage({ error }) {
+function ErrorMessage({ error }: { error: string | Record<string, any> }) {
   const { t } = useTranslation()
 
   // if (typeof error === 'string') {
@@ -123,7 +120,4 @@ function ErrorMessage({ error }) {
       // return <Trans i18nKey="generic_something_went_wrong" />
       return null // other errors are displayed elsewhere
   }
-}
-ErrorMessage.propTypes = {
-  error: PropTypes.oneOfType([PropTypes.object, PropTypes.string]).isRequired,
 }

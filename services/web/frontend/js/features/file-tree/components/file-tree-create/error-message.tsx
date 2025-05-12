@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types'
 import { useTranslation } from 'react-i18next'
 import { FetchError } from '../../../../infrastructure/fetch-json'
 import RedirectToLogin from './redirect-to-login'
@@ -9,7 +8,12 @@ import {
 } from '../../errors'
 import DangerMessage from './danger-message'
 
-export default function ErrorMessage({ error }) {
+// TODO: Update the error type when we properly type FileTreeActionableContext
+export default function ErrorMessage({
+  error,
+}: {
+  error: string | Record<string, any>
+}) {
   const { t } = useTranslation()
   const fileNameLimit = 150
 
@@ -118,7 +122,4 @@ export default function ErrorMessage({ error }) {
       // return error.message
       return <DangerMessage>{t('generic_something_went_wrong')}</DangerMessage>
   }
-}
-ErrorMessage.propTypes = {
-  error: PropTypes.oneOfType([PropTypes.string, PropTypes.object]).isRequired,
 }

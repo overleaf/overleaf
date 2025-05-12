@@ -1,11 +1,18 @@
 import classnames from 'classnames'
-import PropTypes from 'prop-types'
 import { useFileTreeActionable } from '../../contexts/file-tree-actionable'
 import * as eventTracking from '../../../../infrastructure/event-tracking'
 import OLButton from '@/features/ui/components/ol/ol-button'
 import MaterialIcon from '@/shared/components/material-icon'
 
-export default function FileTreeModalCreateFileMode({ mode, icon, label }) {
+export default function FileTreeModalCreateFileMode({
+  mode,
+  icon,
+  label,
+}: {
+  mode: string
+  icon: string
+  label: string
+}) {
   const { newFileCreateMode, startCreatingFile } = useFileTreeActionable()
 
   const handleClick = () => {
@@ -26,10 +33,4 @@ export default function FileTreeModalCreateFileMode({ mode, icon, label }) {
       </OLButton>
     </li>
   )
-}
-
-FileTreeModalCreateFileMode.propTypes = {
-  mode: PropTypes.string.isRequired,
-  icon: PropTypes.string.isRequired,
-  label: PropTypes.string.isRequired,
 }

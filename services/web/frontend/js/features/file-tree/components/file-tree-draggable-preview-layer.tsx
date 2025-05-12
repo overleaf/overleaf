@@ -1,6 +1,6 @@
 import { useRef } from 'react'
-import PropTypes from 'prop-types'
 import classNames from 'classnames'
+import { XYCoord } from 'react-dnd'
 
 // a custom component rendered on top of a draggable area that renders the
 // dragged item. See
@@ -12,8 +12,13 @@ function FileTreeDraggablePreviewLayer({
   isDragging,
   item,
   clientOffset,
+}: {
+  isOver: boolean
+  isDragging: boolean
+  item: { title: string }
+  clientOffset: XYCoord | null
 }) {
-  const ref = useRef()
+  const ref = useRef<HTMLDivElement>(null)
 
   return (
     <div
@@ -36,29 +41,16 @@ function FileTreeDraggablePreviewLayer({
   )
 }
 
-FileTreeDraggablePreviewLayer.propTypes = {
-  isOver: PropTypes.bool.isRequired,
-  isDragging: PropTypes.bool.isRequired,
-  item: PropTypes.shape({
-    title: PropTypes.string,
-  }),
-  clientOffset: PropTypes.shape({
-    x: PropTypes.number,
-    y: PropTypes.number,
-  }),
-}
-
-function DraggablePreviewItem({ title }) {
+function DraggablePreviewItem({ title }: { title: string }) {
   return <div className="dnd-draggable-preview-item">{title}</div>
-}
-
-DraggablePreviewItem.propTypes = {
-  title: PropTypes.string.isRequired,
 }
 
 // makes the preview item follow the cursor.
 // See https://react-dnd.github.io/react-dnd/docs/api/drag-layer-monitor
-function getItemStyle(clientOffset, containerOffset) {
+function getItemStyle(
+  clientOffset: XYCoord | null,
+  containerOffset: DOMRect | undefined
+) {
   if (!containerOffset || !clientOffset) {
     return {
       display: 'none',

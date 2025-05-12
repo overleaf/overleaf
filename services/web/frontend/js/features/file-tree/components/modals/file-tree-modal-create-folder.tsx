@@ -1,5 +1,4 @@
-import { useEffect, useState } from 'react'
-import PropTypes from 'prop-types'
+import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useRefWithAutoFocus } from '../../../../shared/hooks/use-ref-with-auto-focus'
 import { useFileTreeActionable } from '../../contexts/file-tree-actionable'
@@ -109,19 +108,25 @@ function InputName({
   validName,
   setValidName,
   handleCreateFolder,
+}: {
+  name: string
+  setName: (name: string) => void
+  validName: boolean
+  setValidName: (validName: boolean) => void
+  handleCreateFolder: () => void
 }) {
-  const { autoFocusedRef } = useRefWithAutoFocus()
+  const { autoFocusedRef } = useRefWithAutoFocus<HTMLInputElement>()
 
-  function handleFocus(ev) {
+  function handleFocus(ev: React.FocusEvent<HTMLInputElement>) {
     ev.target.setSelectionRange(0, -1)
   }
 
-  function handleChange(ev) {
+  function handleChange(ev: React.ChangeEvent<HTMLInputElement>) {
     setValidName(isCleanFilename(ev.target.value.trim()))
     setName(ev.target.value)
   }
 
-  function handleKeyDown(ev) {
+  function handleKeyDown(ev: React.KeyboardEvent<HTMLInputElement>) {
     if (ev.key === 'Enter' && validName) {
       handleCreateFolder()
     }
@@ -138,14 +143,6 @@ function InputName({
       onFocus={handleFocus}
     />
   )
-}
-
-InputName.propTypes = {
-  name: PropTypes.string.isRequired,
-  setName: PropTypes.func.isRequired,
-  validName: PropTypes.bool.isRequired,
-  setValidName: PropTypes.func.isRequired,
-  handleCreateFolder: PropTypes.func.isRequired,
 }
 
 export default FileTreeModalCreateFolder
