@@ -1,8 +1,7 @@
-import PropTypes from 'prop-types'
 import { useTranslation } from 'react-i18next'
 import MaterialIcon from '@/shared/components/material-icon'
 
-function HistoryToggleButton({ onClick }) {
+function HistoryToggleButton({ onClick }: { onClick: () => void }) {
   const { t } = useTranslation()
 
   return (
@@ -14,10 +13,6 @@ function HistoryToggleButton({ onClick }) {
       <div id="toolbar-cio-history" className="toolbar-cio-tooltip" />
     </div>
   )
-}
-
-HistoryToggleButton.propTypes = {
-  onClick: PropTypes.func.isRequired,
 }
 
 export default HistoryToggleButton

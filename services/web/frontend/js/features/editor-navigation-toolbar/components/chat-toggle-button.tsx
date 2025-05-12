@@ -1,10 +1,17 @@
-import PropTypes from 'prop-types'
 import classNames from 'classnames'
 import { useTranslation } from 'react-i18next'
 import MaterialIcon from '@/shared/components/material-icon'
 import OLBadge from '@/features/ui/components/ol/ol-badge'
 
-function ChatToggleButton({ chatIsOpen, unreadMessageCount, onClick }) {
+function ChatToggleButton({
+  chatIsOpen,
+  unreadMessageCount,
+  onClick,
+}: {
+  chatIsOpen: boolean
+  unreadMessageCount: number
+  onClick: () => void
+}) {
   const { t } = useTranslation()
   const classes = classNames('btn', 'btn-full-height', { active: chatIsOpen })
 
@@ -24,12 +31,6 @@ function ChatToggleButton({ chatIsOpen, unreadMessageCount, onClick }) {
       </button>
     </div>
   )
-}
-
-ChatToggleButton.propTypes = {
-  chatIsOpen: PropTypes.bool,
-  unreadMessageCount: PropTypes.number.isRequired,
-  onClick: PropTypes.func.isRequired,
 }
 
 export default ChatToggleButton

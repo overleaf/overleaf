@@ -20,20 +20,11 @@ import { saveProjectSettings } from '@/features/editor-left-menu/utils/api'
 import { PermissionsLevel } from '@/features/ide-react/types/permissions'
 import { useModalsContext } from '@/features/ide-react/context/modals-context'
 import { WritefullAPI } from './types/writefull-instance'
+import { Cobranding } from '../../../../types/cobranding'
 
 export const EditorContext = createContext<
   | {
-      cobranding?: {
-        logoImgUrl: string
-        brandVariationName: string
-        brandVariationId: number
-        brandId: number
-        brandVariationHomeUrl: string
-        publishGuideHtml?: string
-        partner?: string
-        brandedMenu?: boolean
-        submitBtnHtml?: string
-      }
+      cobranding?: Cobranding
       hasPremiumCompile?: boolean
       renameProject: (newName: string) => void
       setPermissionsLevel: (permissionsLevel: PermissionsLevel) => void

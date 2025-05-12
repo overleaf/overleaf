@@ -1,9 +1,11 @@
-import PropTypes from 'prop-types'
-
 function CobrandingLogo({
   brandVariationHomeUrl,
   brandVariationName,
   logoImgUrl,
+}: {
+  brandVariationHomeUrl: string
+  brandVariationName: string
+  logoImgUrl: string
 }) {
   return (
     <a
@@ -19,12 +21,6 @@ function CobrandingLogo({
       />
     </a>
   )
-}
-
-CobrandingLogo.propTypes = {
-  brandVariationHomeUrl: PropTypes.string.isRequired,
-  brandVariationName: PropTypes.string.isRequired,
-  logoImgUrl: PropTypes.string.isRequired,
 }
 
 export default CobrandingLogo

@@ -1,8 +1,7 @@
-import PropTypes from 'prop-types'
 import { useTranslation } from 'react-i18next'
 import MaterialIcon from '@/shared/components/material-icon'
 
-function ShareProjectButton({ onClick }) {
+function ShareProjectButton({ onClick }: { onClick: () => void }) {
   const { t } = useTranslation()
 
   return (
@@ -14,10 +13,6 @@ function ShareProjectButton({ onClick }) {
       <div id="toolbar-cio-share" className="toolbar-cio-tooltip" />
     </div>
   )
-}
-
-ShareProjectButton.propTypes = {
-  onClick: PropTypes.func.isRequired,
 }
 
 export default ShareProjectButton

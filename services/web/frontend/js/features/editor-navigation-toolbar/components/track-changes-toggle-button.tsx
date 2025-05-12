@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types'
 import classNames from 'classnames'
 import { useTranslation } from 'react-i18next'
 import MaterialIcon from '@/shared/components/material-icon'
@@ -7,6 +6,10 @@ function TrackChangesToggleButton({
   trackChangesIsOpen,
   disabled,
   onMouseDown,
+}: {
+  trackChangesIsOpen: boolean
+  disabled?: boolean
+  onMouseDown: (e: React.MouseEvent) => void
 }) {
   const { t } = useTranslation()
   const classes = classNames('btn', 'btn-full-height', {
@@ -28,12 +31,6 @@ function TrackChangesToggleButton({
       <div id="toolbar-cio-review" className="toolbar-cio-tooltip" />
     </div>
   )
-}
-
-TrackChangesToggleButton.propTypes = {
-  trackChangesIsOpen: PropTypes.bool,
-  disabled: PropTypes.bool,
-  onMouseDown: PropTypes.func.isRequired,
 }
 
 export default TrackChangesToggleButton

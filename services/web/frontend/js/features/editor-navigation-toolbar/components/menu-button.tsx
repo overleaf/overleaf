@@ -1,8 +1,7 @@
-import PropTypes from 'prop-types'
 import { useTranslation } from 'react-i18next'
 import MaterialIcon from '@/shared/components/material-icon'
 
-function MenuButton({ onClick }) {
+function MenuButton({ onClick }: { onClick: () => void }) {
   const { t } = useTranslation()
 
   return (
@@ -13,10 +12,6 @@ function MenuButton({ onClick }) {
       </button>
     </div>
   )
-}
-
-MenuButton.propTypes = {
-  onClick: PropTypes.func.isRequired,
 }
 
 export default MenuButton

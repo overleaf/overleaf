@@ -5,7 +5,7 @@ import OLButton from '@/features/ui/components/ol/ol-button'
 function UpgradePrompt() {
   const { t } = useTranslation()
 
-  function handleClick(e) {
+  function handleClick() {
     eventTracking.send('subscription-funnel', 'code-editor', 'upgrade')
     eventTracking.sendMB('upgrade-button-click', { source: 'code-editor' })
   }

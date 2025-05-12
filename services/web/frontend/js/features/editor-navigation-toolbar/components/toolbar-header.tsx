@@ -1,5 +1,4 @@
-import React from 'react'
-import PropTypes from 'prop-types'
+import React, { ElementType } from 'react'
 import { useTranslation } from 'react-i18next'
 import MenuButton from './menu-button'
 import CobrandingLogo from './cobranding-logo'
@@ -18,13 +17,22 @@ import getMeta from '@/utils/meta'
 import { isSplitTestEnabled } from '@/utils/splitTestUtils'
 import { canUseNewEditor } from '@/features/ide-redesign/utils/new-editor-utils'
 import TryNewEditorButton from '../try-new-editor-button'
+import { OnlineUser } from '@/features/ide-react/context/online-users-context'
+import { Cobranding } from '../../../../../types/cobranding'
 
-const [publishModalModules] = importOverleafModules('publishModal')
+const [publishModalModules] = importOverleafModules('publishModal') as {
+  import: { default: ElementType }
+  path: string
+}[]
 const PublishButton = publishModalModules?.import.default
 
 const offlineModeToolbarButtons = importOverleafModules(
   'offlineModeToolbarButtons'
-)
+) as {
+  import: { default: ElementType }
+  path: string
+}[]
+
 // double opt-in
 const enableROMirrorOnClient =
   isSplitTestEnabled('ro-mirror-on-client') &&
@@ -51,6 +59,26 @@ const ToolbarHeader = React.memo(function ToolbarHeader({
   hasRenamePermissions,
   openShareModal,
   trackChangesVisible,
+}: {
+  cobranding: Cobranding | undefined
+  onShowLeftMenuClick: () => void
+  chatIsOpen: boolean
+  toggleChatOpen: () => void
+  reviewPanelOpen: boolean
+  toggleReviewPanelOpen: (e: React.MouseEvent) => void
+  historyIsOpen: boolean
+  toggleHistoryOpen: () => void
+  unreadMessageCount: number
+  onlineUsers: OnlineUser[]
+  goToUser: (user: OnlineUser) => void
+  isRestrictedTokenMember: boolean | undefined
+  hasPublishPermissions: boolean
+  chatVisible: boolean
+  projectName: string
+  renameProject: (name: string) => void
+  hasRenamePermissions: boolean
+  openShareModal: () => void
+  trackChangesVisible: boolean | undefined
 }) {
   const chatEnabled = getMeta('ol-chatEnabled')
 
@@ -131,27 +159,5 @@ const ToolbarHeader = React.memo(function ToolbarHeader({
     </header>
   )
 })
-
-ToolbarHeader.propTypes = {
-  onShowLeftMenuClick: PropTypes.func.isRequired,
-  cobranding: PropTypes.object,
-  chatIsOpen: PropTypes.bool,
-  toggleChatOpen: PropTypes.func.isRequired,
-  reviewPanelOpen: PropTypes.bool,
-  toggleReviewPanelOpen: PropTypes.func.isRequired,
-  historyIsOpen: PropTypes.bool,
-  toggleHistoryOpen: PropTypes.func.isRequired,
-  unreadMessageCount: PropTypes.number.isRequired,
-  onlineUsers: PropTypes.array.isRequired,
-  goToUser: PropTypes.func.isRequired,
-  isRestrictedTokenMember: PropTypes.bool,
-  hasPublishPermissions: PropTypes.bool,
-  chatVisible: PropTypes.bool,
-  projectName: PropTypes.string.isRequired,
-  renameProject: PropTypes.func.isRequired,
-  hasRenamePermissions: PropTypes.bool,
-  openShareModal: PropTypes.func.isRequired,
-  trackChangesVisible: PropTypes.bool,
-}
 
 export default ToolbarHeader

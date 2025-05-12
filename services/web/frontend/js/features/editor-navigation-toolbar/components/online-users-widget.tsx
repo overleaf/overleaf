@@ -1,5 +1,4 @@
 import React from 'react'
-import PropTypes from 'prop-types'
 import { useTranslation } from 'react-i18next'
 import {
   Dropdown,
@@ -11,17 +10,27 @@ import {
 import { getBackgroundColorForUserId } from '@/shared/utils/colors'
 import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
 import MaterialIcon from '@/shared/components/material-icon'
+import { OnlineUser } from '@/features/ide-react/context/online-users-context'
 
-function OnlineUsersWidget({ onlineUsers, goToUser }) {
+function OnlineUsersWidget({
+  onlineUsers,
+  goToUser,
+}: {
+  onlineUsers: OnlineUser[]
+  goToUser: (user: OnlineUser) => void
+}) {
   const { t } = useTranslation()
 
   const shouldDisplayDropdown = onlineUsers.length >= 4
 
   if (shouldDisplayDropdown) {
     return (
-      <Dropdown id="online-users" className="online-users" align="end">
+      <Dropdown className="online-users" align="end">
         <DropdownToggle
+          id="online-users"
           as={DropDownToggleButton}
+          // @ts-ignore: fix type of DropdownToggle with "as" prop so that it can accept
+          // custom props for that component
           onlineUserCount={onlineUsers.length}
         />
         <DropdownMenu>
@@ -63,17 +72,15 @@ function OnlineUsersWidget({ onlineUsers, goToUser }) {
   }
 }
 
-OnlineUsersWidget.propTypes = {
-  onlineUsers: PropTypes.arrayOf(
-    PropTypes.shape({
-      user_id: PropTypes.string.isRequired,
-      name: PropTypes.string.isRequired,
-    })
-  ).isRequired,
-  goToUser: PropTypes.func.isRequired,
-}
-
-function UserIcon({ user, showName, onClick }) {
+function UserIcon({
+  user,
+  showName,
+  onClick,
+}: {
+  user: OnlineUser
+  showName?: boolean
+  onClick?: (user: OnlineUser) => void
+}) {
   const backgroundColor = getBackgroundColorForUserId(user.user_id)
 
   function handleOnClick() {
@@ -93,16 +100,10 @@ function UserIcon({ user, showName, onClick }) {
   )
 }
 
-UserIcon.propTypes = {
-  user: PropTypes.shape({
-    user_id: PropTypes.string.isRequired,
-    name: PropTypes.string.isRequired,
-  }),
-  showName: PropTypes.bool,
-  onClick: PropTypes.func,
-}
-
-const DropDownToggleButton = React.forwardRef((props, ref) => {
+const DropDownToggleButton = React.forwardRef<
+  HTMLButtonElement,
+  { onlineUserCount: number; onClick: React.MouseEventHandler }
+>((props, ref) => {
   const { t } = useTranslation()
   return (
     <OLTooltip
@@ -124,10 +125,5 @@ const DropDownToggleButton = React.forwardRef((props, ref) => {
 })
 
 DropDownToggleButton.displayName = 'DropDownToggleButton'
-
-DropDownToggleButton.propTypes = {
-  onlineUserCount: PropTypes.number.isRequired,
-  onClick: PropTypes.func,
-}
 
 export default OnlineUsersWidget
