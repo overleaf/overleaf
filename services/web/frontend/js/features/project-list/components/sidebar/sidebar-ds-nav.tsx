@@ -73,6 +73,7 @@ function SidebarDsNav() {
                   sendMB('menu-expand', { item: 'help', location: 'sidebar' })
                 }
               }}
+              role="menu"
             >
               <Dropdown.Toggle role="menuitem" aria-label={t('help')}>
                 <OLTooltip
@@ -117,6 +118,7 @@ function SidebarDsNav() {
                     })
                   }
                 }}
+                role="menu"
               >
                 <Dropdown.Toggle role="menuitem" aria-label={t('Account')}>
                   <OLTooltip

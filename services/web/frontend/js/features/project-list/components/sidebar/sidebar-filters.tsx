@@ -37,7 +37,7 @@ export default function SidebarFilters() {
       <SidebarFilter filter="shared" text={t('shared_with_you')} />
       <SidebarFilter filter="archived" text={t('archived_projects')} />
       <SidebarFilter filter="trashed" text={t('trashed_projects')} />
-      <li role="none">
+      <li aria-hidden="true">
         <hr />
       </li>
       <TagsList />
