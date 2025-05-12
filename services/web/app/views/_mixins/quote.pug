@@ -1,9 +1,10 @@
-mixin quoteLargeTextCentered(quote, person, position, affiliation, link, pictureUrl, pictureAltAttr)
+mixin quoteLargeTextCentered(quote, person, position, affiliation, link, pictureUrl)
 	blockquote.quote-large-text-centered
 		.quote !{quote}
 		if pictureUrl
 			.quote-img
-				img(src=pictureUrl alt=pictureAltAttr)
+				-var pictureAlt=`Photo of ${person}`
+				img(src=pictureUrl alt=pictureAlt)
 		footer
 			div.quote-person
 				strong #{person}
@@ -33,7 +34,7 @@ mixin collinsQuote1
 		-var quotePersonPosition = 'Associate Professor and Lab Director, Ontario Tech University'
 		-var quotePersonImg = buildImgPath("advocates/collins.jpg")
 		.card-body
-			+quoteLargeTextCentered(quote, quotePerson, quotePersonPosition, null, null, quotePersonImg, quotePerson)
+			+quoteLargeTextCentered(quote, quotePerson, quotePersonPosition, null, null, quotePersonImg)
 
 mixin collinsQuote2
 	.card.card-dark-green-bg
@@ -42,7 +43,7 @@ mixin collinsQuote2
 		-var quotePersonPosition = 'Associate Professor and Lab Director, Ontario Tech University'
 		-var quotePersonImg = buildImgPath("advocates/collins.jpg")
 		.card-body
-			+quoteLargeTextCentered(quote, quotePerson, quotePersonPosition, null, null, quotePersonImg, quotePerson)
+			+quoteLargeTextCentered(quote, quotePerson, quotePersonPosition, null, null, quotePersonImg)
 
 mixin bennettQuote1
 	.card.card-dark-green-bg
@@ -51,4 +52,4 @@ mixin bennettQuote1
 		-var quotePersonPosition = 'Software Architect, Symplectic'
 		-var quotePersonImg = buildImgPath("advocates/bennett.jpg")
 		.card-body
-			+quoteLargeTextCentered(quote, quotePerson, quotePersonPosition, null, null, quotePersonImg, quotePerson)
+			+quoteLargeTextCentered(quote, quotePerson, quotePersonPosition, null, null, quotePersonImg)
