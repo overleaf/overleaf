@@ -470,10 +470,10 @@ describe('<ActiveSubscription />', function () {
         })
       })
 
-      it('does not show option to downgrade when not a collaborator plan', function () {
-        const trialPlan = cloneDeep(monthlyActiveCollaborator)
-        trialPlan.plan.planCode = 'anotherplan'
-        renderActiveSubscription(trialPlan)
+      it('does not show option to downgrade when plan is not eligible for downgrades', function () {
+        const ineligiblePlan = cloneDeep(monthlyActiveCollaborator)
+        ineligiblePlan.payment.isEligibleForDowngradeUpsell = false
+        renderActiveSubscription(ineligiblePlan)
         showConfirmCancelUI()
         expect(
           screen.queryByRole('button', {

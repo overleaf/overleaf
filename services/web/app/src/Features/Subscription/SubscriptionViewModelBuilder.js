@@ -282,6 +282,18 @@ async function buildUsersSubscriptionViewModel(user, locale = 'en') {
       isEligibleForGroupPlan:
         paymentRecord.subscription.service === 'recurly' && !isInTrial,
     }
+
+    const isMonthlyCollaboratorPlan =
+      personalSubscription.planCode.includes('collaborator') &&
+      !personalSubscription.planCode.includes('ann') &&
+      !personalSubscription.plan.groupPlan
+    personalSubscription.payment.isEligibleForDowngradeUpsell =
+      !personalSubscription.payment.pausedAt &&
+      !personalSubscription.payment.remainingPauseCycles &&
+      isMonthlyCollaboratorPlan &&
+      !isInTrial &&
+      paymentRecord.subscription.service === 'recurly'
+
     if (paymentRecord.subscription.pendingChange) {
       const pendingPlanCode =
         paymentRecord.subscription.pendingChange.nextPlanCode

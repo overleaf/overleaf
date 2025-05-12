@@ -46,6 +46,7 @@ type PaymentProviderRecord = {
   remainingPauseCycles?: Nullable<number>
   isEligibleForPause: boolean
   isEligibleForGroupPlan: boolean
+  isEligibleForDowngradeUpsell: boolean
 }
 
 export type GroupPolicy = {

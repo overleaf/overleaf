@@ -25,6 +25,11 @@ describe('SubscriptionViewModelBuilder', function () {
       planCode: this.planCode,
       features: this.planFeatures,
     }
+    this.annualPlanCode = 'collaborator_annual'
+    this.annualPlan = {
+      planCode: this.annualPlanCode,
+      features: this.planFeatures,
+    }
     this.individualSubscription = {
       planCode: this.planCode,
       plan: this.plan,
@@ -74,6 +79,7 @@ describe('SubscriptionViewModelBuilder', function () {
       features: this.groupPlanFeatures,
       membersLimit: 4,
       membersLimitAddOn: 'additional-license',
+      groupPlan: true,
     }
     this.groupSubscription = {
       planCode: this.groupPlanCode,
@@ -166,6 +172,8 @@ describe('SubscriptionViewModelBuilder', function () {
     this.PlansLocator.findLocalPlanInSettings
       .withArgs(this.planCode)
       .returns(this.plan)
+      .withArgs(this.annualPlanCode)
+      .returns(this.annualPlan)
       .withArgs(this.groupPlanCode)
       .returns(this.groupPlan)
       .withArgs(this.commonsPlanCode)
@@ -575,6 +583,7 @@ describe('SubscriptionViewModelBuilder', function () {
           },
           isEligibleForGroupPlan: true,
           isEligibleForPause: false,
+          isEligibleForDowngradeUpsell: true,
         })
       })
 
@@ -686,6 +695,96 @@ describe('SubscriptionViewModelBuilder', function () {
               this.user
             )
           assert.isTrue(result.personalSubscription.payment.isEligibleForPause)
+        })
+      })
+
+      describe('isEligibleForDowngradeUpsell', function () {
+        it('is true for eligible individual subscriptions', async function () {
+          this.paymentRecord.pausePeriodStart = null
+          this.paymentRecord.remainingPauseCycles = null
+          this.paymentRecord.trialPeriodEnd = null
+          this.paymentRecord.service = 'recurly'
+          const result =
+            await this.SubscriptionViewModelBuilder.promises.buildUsersSubscriptionViewModel(
+              this.user
+            )
+          assert.isTrue(
+            result.personalSubscription.payment.isEligibleForDowngradeUpsell
+          )
+        })
+
+        it('is false for group plans', async function () {
+          this.individualSubscription.planCode = this.groupPlanCode
+          this.paymentRecord.pausePeriodStart = null
+          this.paymentRecord.remainingPauseCycles = null
+          this.paymentRecord.trialPeriodEnd = null
+          this.paymentRecord.service = 'recurly'
+          const result =
+            await this.SubscriptionViewModelBuilder.promises.buildUsersSubscriptionViewModel(
+              this.user
+            )
+          assert.isFalse(
+            result.personalSubscription.payment.isEligibleForDowngradeUpsell
+          )
+        })
+
+        it('is false for annual individual plans', async function () {
+          this.individualSubscription.planCode = this.annualPlanCode
+          this.paymentRecord.pausePeriodStart = null
+          this.paymentRecord.remainingPauseCycles = null
+          this.paymentRecord.trialPeriodEnd = null
+          this.paymentRecord.service = 'recurly'
+          const result =
+            await this.SubscriptionViewModelBuilder.promises.buildUsersSubscriptionViewModel(
+              this.user
+            )
+          assert.isFalse(
+            result.personalSubscription.payment.isEligibleForDowngradeUpsell
+          )
+        })
+
+        it('is false for paused plans', async function () {
+          this.paymentRecord.pausePeriodStart = new Date()
+          this.paymentRecord.remainingPauseCycles = 1
+          this.paymentRecord.trialPeriodEnd = null
+          this.paymentRecord.service = 'recurly'
+          const result =
+            await this.SubscriptionViewModelBuilder.promises.buildUsersSubscriptionViewModel(
+              this.user
+            )
+          assert.isFalse(
+            result.personalSubscription.payment.isEligibleForDowngradeUpsell
+          )
+        })
+
+        it('is false for plans in free trial period', async function () {
+          this.paymentRecord.pausePeriodStart = null
+          this.paymentRecord.remainingPauseCycles = null
+          this.paymentRecord.trialPeriodEnd = new Date(
+            Date.now() + 24 * 60 * 60 * 1000 // tomorrow
+          )
+          this.paymentRecord.service = 'recurly'
+          const result =
+            await this.SubscriptionViewModelBuilder.promises.buildUsersSubscriptionViewModel(
+              this.user
+            )
+          assert.isFalse(
+            result.personalSubscription.payment.isEligibleForDowngradeUpsell
+          )
+        })
+
+        it('is false for Stripe subscriptions', async function () {
+          this.paymentRecord.pausePeriodStart = null
+          this.paymentRecord.remainingPauseCycles = null
+          this.paymentRecord.trialPeriodEnd = null
+          this.paymentRecord.service = 'stripe'
+          const result =
+            await this.SubscriptionViewModelBuilder.promises.buildUsersSubscriptionViewModel(
+              this.user
+            )
+          assert.isFalse(
+            result.personalSubscription.payment.isEligibleForDowngradeUpsell
+          )
         })
       })
 
