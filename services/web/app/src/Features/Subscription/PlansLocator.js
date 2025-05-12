@@ -34,6 +34,10 @@ const recurlyPlanCodeToStripeLookupKey = {
   'student-annual': 'student_annual',
   student: 'student_monthly',
   student_free_trial_7_days: 'student_monthly',
+  group_professional: 'group_professional_enterprise',
+  group_professional_educational: 'group_professional_educational',
+  group_collaborator: 'group_standard_enterprise',
+  group_collaborator_educational: 'group_standard_educational',
 }
 
 /**
@@ -46,24 +50,28 @@ function mapRecurlyPlanCodeToStripeLookupKey(recurlyPlanCode) {
 }
 
 const recurlyPlanCodeToPlanTypeAndPeriod = {
-  collaborator: { planType: 'standard', period: 'monthly' },
-  collaborator_free_trial_7_days: { planType: 'standard', period: 'monthly' },
-  'collaborator-annual': { planType: 'standard', period: 'annual' },
-  professional: { planType: 'professional', period: 'monthly' },
+  collaborator: { planType: 'individual', period: 'monthly' },
+  collaborator_free_trial_7_days: { planType: 'individual', period: 'monthly' },
+  'collaborator-annual': { planType: 'individual', period: 'annual' },
+  professional: { planType: 'individual', period: 'monthly' },
   professional_free_trial_7_days: {
-    planType: 'professional',
+    planType: 'individual',
     period: 'monthly',
   },
-  'professional-annual': { planType: 'professional', period: 'annual' },
+  'professional-annual': { planType: 'individual', period: 'annual' },
   student: { planType: 'student', period: 'monthly' },
   student_free_trial_7_days: { planType: 'student', period: 'monthly' },
   'student-annual': { planType: 'student', period: 'annual' },
+  group_professional: { planType: 'group', period: 'annual' },
+  group_professional_educational: { planType: 'group', period: 'annual' },
+  group_collaborator: { planType: 'group', period: 'annual' },
+  group_collaborator_educational: { planType: 'group', period: 'annual' },
 }
 
 /**
  *
  * @param {RecurlyPlanCode} recurlyPlanCode
- * @returns {{ planType: 'standard' | 'professional' | 'student', period: 'annual' | 'monthly'}}
+ * @returns {{ planType: 'individual' | 'group' | 'student', period: 'annual' | 'monthly'}}
  */
 function getPlanTypeAndPeriodFromRecurlyPlanCode(recurlyPlanCode) {
   return recurlyPlanCodeToPlanTypeAndPeriod[recurlyPlanCode]

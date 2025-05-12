@@ -88,6 +88,15 @@ class PaymentProviderSubscription {
   }
 
   /**
+   * Returns whether this subscription is a group subscription
+   *
+   * @return {boolean}
+   */
+  isGroupSubscription() {
+    return isGroupPlanCode(this.planCode)
+  }
+
+  /**
    * Returns whether this subcription will have the given add-on next billing
    * period.
    *
@@ -544,6 +553,15 @@ function isStandaloneAiAddOnPlanCode(planCode) {
 }
 
 /**
+ * Returns whether the given plan code is a group plan
+ *
+ * @param {string} planCode
+ */
+function isGroupPlanCode(planCode) {
+  return planCode.includes('group')
+}
+
+/**
  * Returns whether subscription change will have have the ai bundle once the change is processed
  *
  * @param {PaymentProviderSubscriptionChange} subscriptionChange The subscription change object coming from payment provider
@@ -575,6 +593,7 @@ module.exports = {
   PaymentProviderPlan,
   PaymentProviderCoupon,
   PaymentProviderAccount,
+  isGroupPlanCode,
   isStandaloneAiAddOnPlanCode,
   subscriptionChangeIsAiAssistUpgrade,
   PaymentProviderImmediateCharge,

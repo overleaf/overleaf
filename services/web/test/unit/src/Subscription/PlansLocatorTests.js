@@ -120,7 +120,7 @@ describe('PlansLocator', function () {
         this.PlansLocator.getPlanTypeAndPeriodFromRecurlyPlanCode(
           'collaborator'
         )
-      expect(planType).to.equal('standard')
+      expect(planType).to.equal('individual')
       expect(period).to.equal('monthly')
     })
 
@@ -129,7 +129,7 @@ describe('PlansLocator', function () {
         this.PlansLocator.getPlanTypeAndPeriodFromRecurlyPlanCode(
           'collaborator_free_trial_7_days'
         )
-      expect(planType).to.equal('standard')
+      expect(planType).to.equal('individual')
       expect(period).to.equal('monthly')
     })
 
@@ -138,7 +138,7 @@ describe('PlansLocator', function () {
         this.PlansLocator.getPlanTypeAndPeriodFromRecurlyPlanCode(
           'collaborator-annual'
         )
-      expect(planType).to.equal('standard')
+      expect(planType).to.equal('individual')
       expect(period).to.equal('annual')
     })
 
@@ -147,7 +147,7 @@ describe('PlansLocator', function () {
         this.PlansLocator.getPlanTypeAndPeriodFromRecurlyPlanCode(
           'professional'
         )
-      expect(planType).to.equal('professional')
+      expect(planType).to.equal('individual')
       expect(period).to.equal('monthly')
     })
 
@@ -156,7 +156,7 @@ describe('PlansLocator', function () {
         this.PlansLocator.getPlanTypeAndPeriodFromRecurlyPlanCode(
           'professional_free_trial_7_days'
         )
-      expect(planType).to.equal('professional')
+      expect(planType).to.equal('individual')
       expect(period).to.equal('monthly')
     })
 
@@ -165,7 +165,7 @@ describe('PlansLocator', function () {
         this.PlansLocator.getPlanTypeAndPeriodFromRecurlyPlanCode(
           'professional-annual'
         )
-      expect(planType).to.equal('professional')
+      expect(planType).to.equal('individual')
       expect(period).to.equal('annual')
     })
 
