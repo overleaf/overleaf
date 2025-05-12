@@ -968,6 +968,7 @@ module.exports = {
     sourceEditorComponents: [],
     pdfLogEntryComponents: [],
     pdfLogEntriesComponents: [],
+    pdfPreviewPromotions: [],
     diagnosticActions: [],
     sourceEditorCompletionSources: [],
     sourceEditorSymbolPalette: [],

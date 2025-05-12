@@ -13,6 +13,7 @@ const VALID_KEYS = [
   'us-gov-banner-fedramp',
   'full-project-search-promo',
   'editor-popup-ux-survey',
+  'wf-features-moved',
 ]
 
 async function completeTutorial(req, res, next) {

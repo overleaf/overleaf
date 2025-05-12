@@ -1,4 +1,4 @@
-import { memo, Suspense } from 'react'
+import { ElementType, memo, Suspense } from 'react'
 import classNames from 'classnames'
 import PdfLogsViewer from './pdf-logs-viewer'
 import PdfViewer from './pdf-viewer'
@@ -11,6 +11,7 @@ import { PdfPreviewProvider } from './pdf-preview-provider'
 import PdfPreviewHybridToolbarNew from '@/features/ide-redesign/components/pdf-preview/pdf-preview-hybrid-toolbar'
 import PdfErrorState from '@/features/ide-redesign/components/pdf-preview/pdf-error-state'
 import { useIsNewEditorEnabled } from '@/features/ide-redesign/utils/new-editor-utils'
+import importOverleafModules from '../../../../macros/import-overleaf-module.macro'
 
 function PdfPreviewPane() {
   const { pdfUrl, hasShortCompileTimeout } = useCompileContext()
@@ -18,6 +19,10 @@ function PdfPreviewPane() {
     'pdf-empty': !pdfUrl,
   })
   const newEditor = useIsNewEditorEnabled()
+  const pdfPromotions = importOverleafModules('pdfPreviewPromotions') as {
+    import: { default: ElementType }
+    path: string
+  }[]
 
   return (
     <div className={classes}>
@@ -36,6 +41,9 @@ function PdfPreviewPane() {
           </div>
         </Suspense>
         {newEditor ? <PdfErrorState /> : <PdfLogsViewer />}
+        {pdfPromotions.map(({ import: { default: Component }, path }) => (
+          <Component key={path} />
+        ))}
       </PdfPreviewProvider>
     </div>
   )

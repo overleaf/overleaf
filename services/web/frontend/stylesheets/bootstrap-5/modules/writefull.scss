@@ -10,3 +10,26 @@
   max-width: 520px;
   text-align: left;
 }
+
+.feature-rebrand-promo-container {
+  z-index: 1;
+  position: absolute;
+  bottom: 15px;
+  right: 15px;
+  background: $bg-dark-primary;
+  color: $content-primary-dark;
+  max-width: 450px;
+}
+
+.feature-rebrand-promo-title-container {
+  display: flex;
+}
+
+.feature-rebrand-promo-title-text {
+  color: white;
+  font-size: 14px;
+}
+
+.feature-rebrand-promo-body {
+  color: white;
+}
