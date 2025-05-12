@@ -227,6 +227,40 @@ describe('<CodeMirrorEditor/> paste HTML in Visual mode', function () {
     cy.get('.table-generator-cell[colspan="2"]').should('have.length', 2)
   })
 
+  it('handles a pasted 1-row table with merged columns', function () {
+    mountEditor()
+
+    const data = [
+      `<table><tbody>`,
+      `<tr><td>test</td><td colspan="2">test</td></tr>`,
+      `</tbody></table>`,
+    ].join('')
+
+    const clipboardData = new DataTransfer()
+    clipboardData.setData('text/html', data)
+    cy.get('@content').trigger('paste', { clipboardData })
+
+    cy.get('@content').should('have.text', 'testtest' + menuIconsText)
+    cy.get('.table-generator-cell').should('have.length', 2)
+    cy.get('.table-generator-cell[colspan="2"]').should('have.length', 1)
+  })
+
+  it('handles a pasted table with a bordered merged column', function () {
+    mountEditor()
+
+    const data = [
+      `<table><tbody>`,
+      `<tr><td style="border-right:1px solid black;border-left:1px solid black;">test</td></tr>`,
+      `</tbody></table>`,
+    ].join('')
+
+    const clipboardData = new DataTransfer()
+    clipboardData.setData('text/html', data)
+    cy.get('@content').trigger('paste', { clipboardData })
+    cy.get('.table-generator-cell-border-right').should('have.length', 1)
+    cy.get('.table-generator-cell-border-left').should('have.length', 1)
+  })
+
   it('handles a pasted table with merged rows', function () {
     mountEditor()
 
@@ -312,8 +346,8 @@ describe('<CodeMirrorEditor/> paste HTML in Visual mode', function () {
     cy.get('@content').should('have.text', 'foofoobarfoobar' + menuIconsText)
     cy.get('.table-generator-cell').should('have.length', 5)
     cy.get('.table-generator-cell[colspan="2"]').should('have.length', 1)
-    cy.get('.table-generator-cell-border-left').should('have.length', 2)
-    cy.get('.table-generator-cell-border-right').should('have.length', 4)
+    cy.get('.table-generator-cell-border-left').should('have.length', 3)
+    cy.get('.table-generator-cell-border-right').should('have.length', 5)
     cy.get('.table-generator-row-border-top').should('have.length', 5)
     cy.get('.table-generator-row-border-bottom').should('have.length', 2)
   })
