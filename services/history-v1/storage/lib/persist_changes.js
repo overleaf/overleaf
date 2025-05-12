@@ -250,12 +250,7 @@ async function persistChanges(projectId, allChanges, limits, clientEndVersion) {
 
     checkElapsedTime(timer)
 
-    await chunkStore.update(
-      projectId,
-      originalEndVersion,
-      currentChunk,
-      earliestChangeTimestamp
-    )
+    await chunkStore.update(projectId, currentChunk, earliestChangeTimestamp)
   }
 
   async function createNewChunksAsNeeded() {

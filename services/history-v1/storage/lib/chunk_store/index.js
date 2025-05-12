@@ -213,16 +213,29 @@ async function create(projectId, chunk, earliestChangeTimestamp) {
 
   const backend = getBackend(projectId)
   const chunkStart = chunk.getStartVersion()
-  const chunkId = await uploadChunk(projectId, chunk)
 
   const opts = {}
   if (chunkStart > 0) {
-    opts.oldChunkId = await getChunkIdForVersion(projectId, chunkStart - 1)
+    const oldChunk = await backend.getChunkForVersion(projectId, chunkStart - 1)
+
+    if (oldChunk.endVersion !== chunkStart) {
+      throw new ChunkVersionConflictError(
+        'unexpected end version on chunk to be updated',
+        {
+          projectId,
+          expectedVersion: chunkStart,
+          actualVersion: oldChunk.endVersion,
+        }
+      )
+    }
+
+    opts.oldChunkId = oldChunk.id
   }
   if (earliestChangeTimestamp != null) {
     opts.earliestChangeTimestamp = earliestChangeTimestamp
   }
 
+  const chunkId = await uploadChunk(projectId, chunk)
   await backend.confirmCreate(projectId, chunk, chunkId, opts)
 }
 
@@ -253,24 +266,44 @@ async function uploadChunk(projectId, chunk) {
  * chunk.
  *
  * @param {string} projectId
- * @param {number} oldEndVersion
  * @param {Chunk} newChunk
  * @param {Date} [earliestChangeTimestamp]
  * @return {Promise}
  */
-async function update(
-  projectId,
-  oldEndVersion,
-  newChunk,
-  earliestChangeTimestamp
-) {
+async function update(projectId, newChunk, earliestChangeTimestamp) {
   assert.projectId(projectId, 'bad projectId')
-  assert.integer(oldEndVersion, 'bad oldEndVersion')
   assert.instance(newChunk, Chunk, 'bad newChunk')
   assert.maybe.date(earliestChangeTimestamp, 'bad timestamp')
 
   const backend = getBackend(projectId)
-  const oldChunkId = await getChunkIdForVersion(projectId, oldEndVersion)
+  const oldChunk = await backend.getChunkForVersion(
+    projectId,
+    newChunk.getStartVersion(),
+    { preferNewer: true }
+  )
+
+  if (oldChunk.startVersion !== newChunk.getStartVersion()) {
+    throw new ChunkVersionConflictError(
+      'unexpected start version on chunk to be updated',
+      {
+        projectId,
+        expectedVersion: newChunk.getStartVersion(),
+        actualVersion: oldChunk.startVersion,
+      }
+    )
+  }
+
+  if (oldChunk.endVersion > newChunk.getEndVersion()) {
+    throw new ChunkVersionConflictError(
+      'chunk update would decrease chunk version',
+      {
+        projectId,
+        currentVersion: oldChunk.endVersion,
+        newVersion: newChunk.getEndVersion(),
+      }
+    )
+  }
+
   const newChunkId = await uploadChunk(projectId, newChunk)
 
   const opts = {}
@@ -278,7 +311,13 @@ async function update(
     opts.earliestChangeTimestamp = earliestChangeTimestamp
   }
 
-  await backend.confirmUpdate(projectId, oldChunkId, newChunk, newChunkId, opts)
+  await backend.confirmUpdate(
+    projectId,
+    oldChunk.id,
+    newChunk,
+    newChunkId,
+    opts
+  )
 }
 
 /**

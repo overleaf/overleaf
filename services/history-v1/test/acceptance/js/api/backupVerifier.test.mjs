@@ -156,7 +156,7 @@ async function addFileInNewChunk(
   )
   const changes = [new Change([operation], creationDate, [])]
   chunk.pushChanges(changes)
-  await chunkStore.update(historyId, 0, chunk)
+  await chunkStore.update(historyId, chunk)
 }
 
 /**

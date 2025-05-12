@@ -43,8 +43,14 @@ async function getLatestChunk(projectId, opts = {}) {
 
 /**
  * Get the metadata for the chunk that contains the given version.
+ *
+ * @param {string} projectId
+ * @param {number} version
+ * @param {object} [opts]
+ * @param {boolean} [opts.preferNewer] - If the version is at the boundary of
+ *        two chunks, return the newer chunk.
  */
-async function getChunkForVersion(projectId, version) {
+async function getChunkForVersion(projectId, version, opts = {}) {
   assert.mongoId(projectId, 'bad projectId')
   assert.integer(version, 'bad version')
 
@@ -55,7 +61,7 @@ async function getChunkForVersion(projectId, version) {
       startVersion: { $lte: version },
       endVersion: { $gte: version },
     },
-    { sort: { startVersion: 1 } }
+    { sort: { startVersion: opts.preferNewer ? -1 : 1 } }
   )
   if (record == null) {
     throw new Chunk.VersionNotFoundError(projectId, version)

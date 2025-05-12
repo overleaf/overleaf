@@ -495,6 +495,12 @@ rclient.defineCommand('set_persisted_version', {
       return 'not_found'
     end
 
+    -- Get current persisted version
+    local persistedVersion = tonumber(redis.call('GET', persistedVersionKey))
+    if persistedVersion and persistedVersion > newPersistedVersion then
+      return 'too_low'
+    end
+
     -- Set the persisted version
     redis.call('SET', persistedVersionKey, newPersistedVersion)
 

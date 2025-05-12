@@ -6,6 +6,9 @@ const { expect } = require('chai')
 const sinon = require('sinon')
 const { ObjectId } = require('mongodb')
 const { projects } = require('../../../../storage/lib/mongodb')
+const {
+  ChunkVersionConflictError,
+} = require('../../../../storage/lib/chunk_store/errors')
 
 const {
   Chunk,
@@ -66,17 +69,33 @@ describe('chunkStore', function () {
         const lastChangeTimestamp = new Date('2015-01-01T00:00:00')
         beforeEach(async function () {
           const blob = await blobStore.putString('abc')
-          const chunk = makeChunk(
+          const firstChunk = makeChunk(
             [
               makeChange(
                 Operation.addFile('main.tex', File.createLazyFromBlobs(blob)),
                 lastChangeTimestamp
               ),
             ],
+            0
+          )
+          await chunkStore.update(projectId, firstChunk, pendingChangeTimestamp)
+
+          const secondChunk = makeChunk(
+            [
+              makeChange(
+                Operation.addFile('other.tex', File.createLazyFromBlobs(blob)),
+                lastChangeTimestamp
+              ),
+            ],
             1
           )
-          await chunkStore.create(projectId, chunk, pendingChangeTimestamp)
+          await chunkStore.create(
+            projectId,
+            secondChunk,
+            pendingChangeTimestamp
+          )
         })
+
         it('creates a chunk and inserts the pending change timestamp', async function () {
           const project = await projects.findOne({
             _id: new ObjectId(projectRecord.insertedId),
@@ -101,7 +120,6 @@ describe('chunkStore', function () {
 
         beforeEach(async function () {
           const chunk = await chunkStore.loadLatest(projectId)
-          const oldEndVersion = chunk.getEndVersion()
           const blob = await blobStore.putString('')
           const changes = [
             makeChange(
@@ -111,12 +129,7 @@ describe('chunkStore', function () {
           ]
           lastChangeTimestamp = changes[1].getTimestamp()
           chunk.pushChanges(changes)
-          await chunkStore.update(
-            projectId,
-            oldEndVersion,
-            chunk,
-            pendingChangeTimestamp
-          )
+          await chunkStore.update(projectId, chunk, pendingChangeTimestamp)
         })
 
         it('records the correct metadata in db readOnly=false', async function () {
@@ -204,12 +217,7 @@ describe('chunkStore', function () {
             ],
             0
           )
-          await chunkStore.update(
-            projectId,
-            0,
-            firstChunk,
-            pendingChangeTimestamp
-          )
+          await chunkStore.update(projectId, firstChunk, pendingChangeTimestamp)
           firstChunk = await chunkStore.loadLatest(projectId)
 
           secondChunk = makeChunk(
@@ -232,6 +240,10 @@ describe('chunkStore', function () {
             [
               makeChange(
                 Operation.addFile('quux.tex', File.createLazyFromBlobs(blob)),
+                thirdChunkTimestamp
+              ),
+              makeChange(
+                Operation.addFile('barbar.tex', File.createLazyFromBlobs(blob)),
                 thirdChunkTimestamp
               ),
             ],
@@ -308,7 +320,7 @@ describe('chunkStore', function () {
           const project = await projects.findOne({
             _id: new ObjectId(projectRecord.insertedId),
           })
-          expect(project.overleaf.history.currentEndVersion).to.equal(5)
+          expect(project.overleaf.history.currentEndVersion).to.equal(6)
           expect(project.overleaf.history.currentEndTimestamp).to.deep.equal(
             thirdChunkTimestamp
           )
@@ -321,6 +333,80 @@ describe('chunkStore', function () {
           expect(project.overleaf.backup.pendingChangeAt).to.deep.equal(
             pendingChangeTimestamp
           )
+        })
+
+        describe('chunk update', function () {
+          it('rejects a chunk that removes changes', async function () {
+            const newChunk = makeChunk([thirdChunk.getChanges()[0]], 4)
+            await expect(
+              chunkStore.update(projectId, newChunk)
+            ).to.be.rejectedWith(ChunkVersionConflictError)
+            const latestChunk = await chunkStore.loadLatest(projectId)
+            expect(latestChunk.toRaw()).to.deep.equal(thirdChunk.toRaw())
+          })
+
+          it('accepts the same chunk', async function () {
+            await chunkStore.update(projectId, thirdChunk)
+            const latestChunk = await chunkStore.loadLatest(projectId)
+            expect(latestChunk.toRaw()).to.deep.equal(thirdChunk.toRaw())
+          })
+
+          it('accepts a larger chunk', async function () {
+            const blob = await blobStore.putString('foobar')
+            const newChunk = makeChunk(
+              [
+                ...thirdChunk.getChanges(),
+                makeChange(
+                  Operation.addFile(
+                    'onemore.tex',
+                    File.createLazyFromBlobs(blob)
+                  ),
+                  thirdChunkTimestamp
+                ),
+              ],
+              4
+            )
+            await chunkStore.update(projectId, newChunk)
+            const latestChunk = await chunkStore.loadLatest(projectId)
+            expect(latestChunk.toRaw()).to.deep.equal(newChunk.toRaw())
+          })
+        })
+
+        describe('chunk create', function () {
+          let change
+
+          beforeEach(async function () {
+            const blob = await blobStore.putString('foobar')
+            change = makeChange(
+              Operation.addFile('onemore.tex', File.createLazyFromBlobs(blob)),
+              thirdChunkTimestamp
+            )
+          })
+
+          it('rejects a base version that is too low', async function () {
+            const newChunk = makeChunk([change], 5)
+            await expect(
+              chunkStore.create(projectId, newChunk)
+            ).to.be.rejectedWith(ChunkVersionConflictError)
+            const latestChunk = await chunkStore.loadLatest(projectId)
+            expect(latestChunk.toRaw()).to.deep.equal(thirdChunk.toRaw())
+          })
+
+          it('rejects a base version that is too high', async function () {
+            const newChunk = makeChunk([change], 7)
+            await expect(
+              chunkStore.create(projectId, newChunk)
+            ).to.be.rejectedWith(ChunkVersionConflictError)
+            const latestChunk = await chunkStore.loadLatest(projectId)
+            expect(latestChunk.toRaw()).to.deep.equal(thirdChunk.toRaw())
+          })
+
+          it('accepts the right base version', async function () {
+            const newChunk = makeChunk([change], 6)
+            await chunkStore.create(projectId, newChunk)
+            const latestChunk = await chunkStore.loadLatest(projectId)
+            expect(latestChunk.toRaw()).to.deep.equal(newChunk.toRaw())
+          })
         })
 
         describe('after updating the last chunk', function () {
@@ -341,12 +427,12 @@ describe('chunkStore', function () {
               ],
               4
             )
-            await chunkStore.update(projectId, 5, newChunk)
+            await chunkStore.update(projectId, newChunk)
             newChunk = await chunkStore.loadLatest(projectId)
           })
 
           it('replaces the latest chunk', function () {
-            expect(newChunk.getChanges()).to.have.length(2)
+            expect(newChunk.getChanges()).to.have.length(3)
           })
 
           it('returns the right chunk when querying by version', async function () {
@@ -366,7 +452,7 @@ describe('chunkStore', function () {
             const project = await projects.findOne({
               _id: new ObjectId(projectRecord.insertedId),
             })
-            expect(project.overleaf.history.currentEndVersion).to.equal(6)
+            expect(project.overleaf.history.currentEndVersion).to.equal(7)
             expect(project.overleaf.history.currentEndTimestamp).to.deep.equal(
               thirdChunkTimestamp
             )
@@ -529,7 +615,7 @@ describe('chunkStore', function () {
             const chunkRecords = []
             for await (const chunk of chunkStore.getProjectChunksFromVersion(
               projectId,
-              6
+              7
             )) {
               chunkRecords.push(chunk)
             }
@@ -566,9 +652,9 @@ describe('chunkStore', function () {
           ]
           chunk.pushChanges(changes)
 
-          await expect(
-            chunkStore.update(projectId, oldEndVersion, chunk)
-          ).to.be.rejectedWith('S3 Error')
+          await expect(chunkStore.update(projectId, chunk)).to.be.rejectedWith(
+            'S3 Error'
+          )
           chunk = await chunkStore.loadLatest(projectId)
           expect(chunk.getEndVersion()).to.equal(oldEndVersion)
         })
@@ -598,7 +684,7 @@ describe('chunkStore', function () {
             ],
             0
           )
-          await chunkStore.update(projectId, 0, chunk)
+          await chunkStore.update(projectId, chunk)
         })
 
         it('refuses to create a chunk with the same start version', async function () {

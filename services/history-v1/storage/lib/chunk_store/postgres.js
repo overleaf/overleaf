@@ -38,14 +38,18 @@ async function getLatestChunk(projectId, opts = {}) {
  *
  * @param {string} projectId
  * @param {number} version
+ * @param {object} [opts]
+ * @param {boolean} [opts.preferNewer] - If the version is at the boundary of
+ *        two chunks, return the newer chunk.
  */
-async function getChunkForVersion(projectId, version) {
+async function getChunkForVersion(projectId, version, opts = {}) {
   assert.postgresId(projectId, 'bad projectId')
 
   const record = await knex('chunks')
     .where('doc_id', parseInt(projectId, 10))
+    .where('start_version', '<=', version)
     .where('end_version', '>=', version)
-    .orderBy('end_version')
+    .orderBy('end_version', opts.preferNewer ? 'desc' : 'asc')
     .first()
   if (!record) {
     throw new Chunk.VersionNotFoundError(projectId, version)

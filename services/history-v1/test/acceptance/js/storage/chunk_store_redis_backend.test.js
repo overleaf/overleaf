@@ -704,28 +704,42 @@ describe('chunk buffer Redis backend', function () {
       expect(result).to.equal('not_found')
     })
 
-    it('should set the persisted version', async function () {
-      // Set head version
-      const headVersion = 5
-      await rclient.set(
-        keySchema.headVersion({ projectId }),
-        headVersion.toString()
-      )
+    describe('when the persisted version is not set', function () {
+      beforeEach(async function () {
+        await setupState(projectId, {
+          headVersion: 5,
+          persistedVersion: null,
+          changes: 5,
+        })
+      })
 
-      // Set persisted version
-      const persistedVersion = 3
-      const result = await redisBackend.setPersistedVersion(
-        projectId,
-        persistedVersion
-      )
+      it('should set the persisted version', async function () {
+        await redisBackend.setPersistedVersion(projectId, 3)
+        const state = await redisBackend.getState(projectId)
+        expect(state.persistedVersion).to.equal(3)
+      })
+    })
 
-      expect(result).to.equal('ok')
+    describe('when the persisted version is set', function () {
+      beforeEach(async function () {
+        await setupState(projectId, {
+          headVersion: 5,
+          persistedVersion: 3,
+          changes: 5,
+        })
+      })
 
-      // Verify the persisted version was set
-      const persistedVersionRedis = await rclient.get(
-        keySchema.persistedVersion({ projectId })
-      )
-      expect(parseInt(persistedVersionRedis, 10)).to.equal(persistedVersion)
+      it('should set the persisted version', async function () {
+        await redisBackend.setPersistedVersion(projectId, 5)
+        const state = await redisBackend.getState(projectId)
+        expect(state.persistedVersion).to.equal(5)
+      })
+
+      it('should not decrease the persisted version', async function () {
+        await redisBackend.setPersistedVersion(projectId, 2)
+        const state = await redisBackend.getState(projectId)
+        expect(state.persistedVersion).to.equal(3)
+      })
     })
 
     it('should trim the changes list to keep only MAX_PERSISTED_CHANGES beyond persisted version', async function () {
