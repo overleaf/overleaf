@@ -36,14 +36,13 @@ describe('Project Sharing', function () {
     login('user@example.com')
     createProject(projectName)
 
-    // TODO(25342): re-enable
-    // // Add chat message
-    // cy.findByText('Chat').click()
-    // // wait for lazy loading of the chat pane
-    // cy.findByText('Send your first message to your collaborators')
-    // cy.get(
-    //   'textarea[placeholder="Send a message to your collaborators…"]'
-    // ).type('New Chat Message{enter}')
+    // Add chat message
+    cy.findByText('Chat').click()
+    // wait for lazy loading of the chat pane
+    cy.findByText('Send your first message to your collaborators')
+    cy.get(
+      'textarea[placeholder="Send a message to your collaborators…"]'
+    ).type('New Chat Message{enter}')
 
     // Get link sharing links
     enableLinkSharing().then(
@@ -95,9 +94,8 @@ describe('Project Sharing', function () {
   }
 
   function expectChatAccess() {
-    // TODO(25342): re-enable
-    // cy.findByText('Chat').click()
-    // cy.findByText('New Chat Message')
+    cy.findByText('Chat').click()
+    cy.findByText('New Chat Message')
   }
 
   function expectHistoryAccess() {
@@ -111,9 +109,8 @@ describe('Project Sharing', function () {
   }
 
   function expectNoChatAccess() {
-    // TODO(25342): re-enable
-    // cy.findByText('Layout') // wait for lazy loading
-    // cy.findByText('Chat').should('not.exist')
+    cy.findByText('Layout') // wait for lazy loading
+    cy.findByText('Chat').should('not.exist')
   }
 
   function expectNoHistoryAccess() {
