@@ -6,6 +6,7 @@ import * as eventTracking from '@/infrastructure/event-tracking'
 
 describe('<IntegrationLinkingWidgetTest/>', function () {
   const defaultProps = {
+    id: 'integration-widget-id',
     logo: <div />,
     title: 'Integration',
     description: 'paragraph1',
@@ -32,7 +33,7 @@ describe('<IntegrationLinkingWidgetTest/>', function () {
     })
 
     it('should render an upgrade link and track clicks', function () {
-      const upgradeLink = screen.getByRole('button', { name: 'Upgrade' })
+      const upgradeLink = screen.getByRole('button', { name: /upgrade/i })
       expect(upgradeLink.getAttribute('href')).to.equal(
         '/user/subscription/plans'
       )

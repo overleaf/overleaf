@@ -93,7 +93,7 @@ describe('git-bridge', function () {
           cy.get('code').contains(`git clone ${gitURL(id.toString())}`)
         })
         cy.findByRole('button', {
-          name: 'Generate token',
+          name: /generate token/i,
         }).click()
         cy.get('code').contains(/olp_[a-zA-Z0-9]{16}/)
       })
@@ -196,7 +196,7 @@ describe('git-bridge', function () {
           cy.get('code').contains(`git clone ${gitURL(projectId.toString())}`)
         })
         cy.findByRole('button', {
-          name: 'Generate token',
+          name: /generate token/i,
         }).click()
         cy.get('code')
           .contains(/olp_[a-zA-Z0-9]{16}/)

@@ -70,7 +70,7 @@ function AccountInfoSection() {
 
   return (
     <>
-      <h3>{t('update_account_info')}</h3>
+      <h3 id="update-account-info">{t('update_account_info')}</h3>
       <form id="account-info-form" onSubmit={handleSubmit}>
         {hasAffiliationsFeature ? null : (
           <ReadOrWriteFormGroup
@@ -128,6 +128,7 @@ function AccountInfoSection() {
               disabled={!isFormValid}
               isLoading={isLoading}
               loadingLabel={t('saving') + '…'}
+              aria-labelledby={isLoading ? undefined : 'update-account-info'}
             >
               {t('update')}
             </OLButton>

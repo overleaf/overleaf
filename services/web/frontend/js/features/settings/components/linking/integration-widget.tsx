@@ -20,6 +20,7 @@ function trackLinkingClick(integration: string) {
 }
 
 type IntegrationLinkingWidgetProps = {
+  id: string
   logo: ReactNode
   title: string
   description: string
@@ -35,6 +36,7 @@ type IntegrationLinkingWidgetProps = {
 }
 
 export function IntegrationLinkingWidget({
+  id,
   logo,
   title,
   description,
@@ -65,12 +67,17 @@ export function IntegrationLinkingWidget({
       <div>{logo}</div>
       <div className="description-container">
         <div className="title-row">
-          <h4>{title}</h4>
+          <h4 id={id}>{title}</h4>
           {!hasFeature && <OLBadge bg="info">{t('premium_feature')}</OLBadge>}
         </div>
         <p className="small">
           {description}{' '}
-          <a href={helpPath} target="_blank" rel="noreferrer">
+          <a
+            href={helpPath}
+            target="_blank"
+            rel="noreferrer"
+            aria-label={t('learn_more_about', { integrationName: title })}
+          >
             {t('learn_more')}
           </a>
         </p>
@@ -78,6 +85,7 @@ export function IntegrationLinkingWidget({
       </div>
       <div>
         <ActionButton
+          titleId={id}
           integration={title}
           hasFeature={hasFeature}
           linked={linked}
@@ -105,6 +113,7 @@ type ActionButtonProps = {
   handleUnlinkClick: () => void
   linkPath: string
   disabled?: boolean
+  titleId: string
 }
 
 function ActionButton({
@@ -114,16 +123,22 @@ function ActionButton({
   linkPath,
   disabled,
   integration,
+  titleId,
 }: ActionButtonProps) {
   const { t } = useTranslation()
+  const linkTextId = `${titleId}-link`
+
   if (!hasFeature) {
     return (
       <OLButton
         variant="primary"
         href="/user/subscription/plans"
         onClick={() => trackUpgradeClick(integration)}
+        aria-labelledby={`${titleId} ${linkTextId}`}
       >
-        <span className="text-capitalize">{t('upgrade')}</span>
+        <span id={linkTextId} className="text-capitalize">
+          {t('upgrade')}
+        </span>
       </OLButton>
     )
   } else if (linked) {

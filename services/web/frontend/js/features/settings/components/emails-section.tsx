@@ -40,6 +40,7 @@ function EmailsSectionContent() {
             <a
               href="/learn/how-to/Managing_your_Overleaf_emails"
               target="_blank"
+              aria-label={t('learn_more_about_managing_email')}
             />,
           ]}
         />

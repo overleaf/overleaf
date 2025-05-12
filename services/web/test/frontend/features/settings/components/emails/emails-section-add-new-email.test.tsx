@@ -106,7 +106,7 @@ describe('<EmailsSection />', function () {
     })
     fireEvent.click(button)
 
-    await screen.findByLabelText(/email/i)
+    await screen.findByLabelText(/email/i, { selector: 'input' })
   })
 
   it('renders "Start adding your address" until a valid email is typed', async function () {
@@ -121,7 +121,7 @@ describe('<EmailsSection />', function () {
     })
     fireEvent.click(button)
 
-    const input = screen.getByLabelText(/email/i)
+    const input = screen.getByLabelText(/email/i, { selector: 'input' })
 
     // initially the text is displayed and the "add email" button disabled
     screen.getByText('Start by adding your email address.')
@@ -200,7 +200,7 @@ describe('<EmailsSection />', function () {
       .post('/user/emails/confirm-secondary', 200)
 
     fireEvent.click(addAnotherEmailBtn)
-    const input = screen.getByLabelText(/email/i)
+    const input = screen.getByLabelText(/email/i, { selector: 'input' })
 
     fireEvent.change(input, {
       target: { value: userEmailData.email },
@@ -242,7 +242,7 @@ describe('<EmailsSection />', function () {
       .post('/user/emails/secondary', 400)
 
     fireEvent.click(addAnotherEmailBtn)
-    const input = screen.getByLabelText(/email/i)
+    const input = screen.getByLabelText(/email/i, { selector: 'input' })
 
     fireEvent.change(input, {
       target: { value: userEmailData.email },
@@ -279,7 +279,7 @@ describe('<EmailsSection />', function () {
 
     await userEvent.click(button)
 
-    const input = screen.getByLabelText(/email/i)
+    const input = screen.getByLabelText(/email/i, { selector: 'input' })
     fireEvent.change(input, {
       target: { value: 'user@autocomplete.edu' },
     })
@@ -302,7 +302,10 @@ describe('<EmailsSection />', function () {
 
     await userEvent.click(button)
 
-    await userEvent.type(screen.getByLabelText(/email/i), userEmailData.email)
+    await userEvent.type(
+      screen.getByLabelText(/email/i, { selector: 'input' }),
+      userEmailData.email
+    )
 
     await userEvent.click(screen.getByRole('button', { name: /let us know/i }))
 
@@ -415,7 +418,10 @@ describe('<EmailsSection />', function () {
 
     // open "add new email" section and click "let us know" to open the Country/University form
     await userEvent.click(button)
-    await userEvent.type(screen.getByLabelText(/email/i), userEmailData.email)
+    await userEvent.type(
+      screen.getByLabelText(/email/i, { selector: 'input' }),
+      userEmailData.email
+    )
     await userEvent.click(screen.getByRole('button', { name: /let us know/i }))
 
     // select a country
@@ -457,7 +463,10 @@ describe('<EmailsSection />', function () {
 
     await userEvent.click(button)
 
-    await userEvent.type(screen.getByLabelText(/email/i), userEmailData.email)
+    await userEvent.type(
+      screen.getByLabelText(/email/i, { selector: 'input' }),
+      userEmailData.email
+    )
 
     await userEvent.click(screen.getByRole('button', { name: /let us know/i }))
 
@@ -574,7 +583,7 @@ describe('<EmailsSection />', function () {
     await userEvent.click(button)
 
     await userEvent.type(
-      screen.getByLabelText(/email/i),
+      screen.getByLabelText(/email/i, { selector: 'input' }),
       `user@${hostnameFirstChar}`
     )
 
@@ -647,7 +656,7 @@ describe('<EmailsSection />', function () {
     await userEvent.click(button)
 
     await userEvent.type(
-      screen.getByLabelText(/email/i),
+      screen.getByLabelText(/email/i, { selector: 'input' }),
       `user@${hostnameFirstChar}`
     )
 

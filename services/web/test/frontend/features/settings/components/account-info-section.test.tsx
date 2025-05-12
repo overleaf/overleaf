@@ -47,7 +47,7 @@ describe('<AccountInfoSection />', function () {
     })
     fireEvent.click(
       screen.getByRole('button', {
-        name: 'Update',
+        name: /update/i,
       })
     )
     expect(updateMock.callHistory.called()).to.be.true
@@ -68,7 +68,7 @@ describe('<AccountInfoSection />', function () {
       target: { value: 'john' },
     })
     const button = screen.getByRole('button', {
-      name: 'Update',
+      name: /update/i,
     }) as HTMLButtonElement
 
     expect(button.disabled).to.be.true
@@ -87,14 +87,14 @@ describe('<AccountInfoSection />', function () {
 
     fireEvent.click(
       screen.getByRole('button', {
-        name: 'Update',
+        name: /update/i,
       })
     )
     await screen.findByRole('button', { name: /saving/i })
 
     finishUpdateCall(200)
     await screen.findByRole('button', {
-      name: 'Update',
+      name: /update/i,
     })
     screen.getByText('Thanks, your settings have been updated.')
   })
@@ -105,7 +105,7 @@ describe('<AccountInfoSection />', function () {
 
     fireEvent.click(
       screen.getByRole('button', {
-        name: 'Update',
+        name: /update/i,
       })
     )
     await screen.findByText('Something went wrong. Please try again.')
@@ -117,7 +117,7 @@ describe('<AccountInfoSection />', function () {
 
     fireEvent.click(
       screen.getByRole('button', {
-        name: 'Update',
+        name: /update/i,
       })
     )
     await screen.findByText(
@@ -136,7 +136,7 @@ describe('<AccountInfoSection />', function () {
 
     fireEvent.click(
       screen.getByRole('button', {
-        name: 'Update',
+        name: /update/i,
       })
     )
     await screen.findByText('This email is already registered')
@@ -153,7 +153,7 @@ describe('<AccountInfoSection />', function () {
 
     fireEvent.click(
       screen.getByRole('button', {
-        name: 'Update',
+        name: /update/i,
       })
     )
     expect(
@@ -184,7 +184,7 @@ describe('<AccountInfoSection />', function () {
 
     fireEvent.click(
       screen.getByRole('button', {
-        name: 'Update',
+        name: /update account info/i,
       })
     )
     expect(
@@ -212,7 +212,7 @@ describe('<AccountInfoSection />', function () {
 
     fireEvent.click(
       screen.getByRole('button', {
-        name: 'Update',
+        name: /update/i,
       })
     )
     expect(
