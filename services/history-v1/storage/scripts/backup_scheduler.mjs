@@ -17,8 +17,8 @@ const redisOptions = config.get('redis.queue')
 const backupQueue = new Queue('backup', {
   redis: redisOptions,
   defaultJobOptions: {
-    removeOnComplete: true,
-    removeOnFail: true,
+    removeOnComplete: { age: 60 }, // keep completed jobs for 60 seconds
+    removeOnFail: { age: 7 * 24 * 3600, count: 1000 }, // keep failed jobs for 7 days, max 1000
   },
 })
 
