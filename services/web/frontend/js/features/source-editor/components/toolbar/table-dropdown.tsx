@@ -18,18 +18,18 @@ import { emitToolbarEvent } from '../../extensions/toolbar/utils/analytics'
 export const TableDropdown = memo(function TableDropdown() {
   const { t } = useTranslation()
   const { writefullInstance } = useEditorContext()
-  const { open, onToggle, ref } = useDropdown()
+  const selectSizeDropdown = useDropdown()
   const target = useRef<any>(null)
   const view = useCodeMirrorViewContext()
 
   const onSizeSelected = useCallback(
     (sizeX: number, sizeY: number) => {
-      onToggle(false)
+      selectSizeDropdown.onToggle(false)
       commands.insertTable(view, sizeX, sizeY)
       emitToolbarEvent(view, 'table-generator-insert-table')
       view.focus()
     },
-    [view, onToggle]
+    [selectSizeDropdown, view]
   )
 
   return (
@@ -38,6 +38,7 @@ export const TableDropdown = memo(function TableDropdown() {
         <ToolbarButtonMenu
           id="toolbar-table"
           label={t('toolbar_insert_table')}
+          disablePopover={selectSizeDropdown.open}
           icon={<MaterialIcon type="table_chart" />}
         >
           <DropdownHeader className="ol-cm-toolbar-header mx-2">
@@ -70,26 +71,28 @@ export const TableDropdown = memo(function TableDropdown() {
               event.preventDefault()
               event.stopPropagation()
             }}
-            onClick={() => {
-              onToggle(!open)
+            onClick={event => {
+              selectSizeDropdown.onToggle(!selectSizeDropdown.open)
+              // prevent click event from bubbling up to the toolbar overflow button causing it to close
+              event.stopPropagation()
             }}
           >
             <span>{t('select_size')}</span>
           </OLListGroupItem>
         </ToolbarButtonMenu>
         <OLOverlay
-          show={open}
+          show={selectSizeDropdown.open}
           target={target.current}
           placement="bottom"
           container={view.dom}
           containerPadding={0}
           transition
           rootClose
-          onHide={() => onToggle(false)}
+          onHide={() => selectSizeDropdown.onToggle(false)}
         >
           <OLPopover
             id="toolbar-table-menu"
-            ref={ref}
+            ref={selectSizeDropdown.ref}
             className="ol-cm-toolbar-button-menu-popover ol-cm-toolbar-button-menu-popover-unstyled"
           >
             <TableInserterDropdown onSizeSelected={onSizeSelected} />
