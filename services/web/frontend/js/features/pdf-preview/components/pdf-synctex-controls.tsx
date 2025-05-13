@@ -57,17 +57,19 @@ const GoToCodeButton = memo(function GoToCodeButton({
       description={t('go_to_pdf_location_in_code')}
       overlayProps={overlayProps}
     >
-      <OLButton
-        variant="secondary"
-        size="sm"
-        onClick={syncToCodeWithButton}
-        disabled={syncToCodeInFlight}
-        className={buttonClasses}
-        aria-label={t('go_to_pdf_location_in_code')}
-      >
-        {buttonIcon}
-        {isDetachLayout ? <span>&nbsp;{t('show_in_code')}</span> : ''}
-      </OLButton>
+      <span>
+        <OLButton
+          variant="secondary"
+          size="sm"
+          onClick={syncToCodeWithButton}
+          disabled={syncToCodeInFlight}
+          className={buttonClasses}
+          aria-label={t('go_to_pdf_location_in_code')}
+        >
+          {buttonIcon}
+          {isDetachLayout ? <span>&nbsp;{t('show_in_code')}</span> : ''}
+        </OLButton>
+      </span>
     </OLTooltip>
   )
 })
@@ -106,17 +108,19 @@ const GoToPdfButton = memo(function GoToPdfButton({
       description={t('go_to_code_location_in_pdf')}
       overlayProps={{ placement: tooltipPlacement }}
     >
-      <OLButton
-        variant="secondary"
-        size="sm"
-        onClick={syncToPdf}
-        disabled={syncToPdfInFlight || !canSyncToPdf}
-        className={buttonClasses}
-        aria-label={t('go_to_code_location_in_pdf')}
-      >
-        {buttonIcon}
-        {isDetachLayout ? <span>&nbsp;{t('show_in_pdf')}</span> : ''}
-      </OLButton>
+      <span>
+        <OLButton
+          variant="secondary"
+          size="sm"
+          onClick={syncToPdf}
+          disabled={syncToPdfInFlight || !canSyncToPdf}
+          className={buttonClasses}
+          aria-label={t('go_to_code_location_in_pdf')}
+        >
+          {buttonIcon}
+          {isDetachLayout ? <span>&nbsp;{t('show_in_pdf')}</span> : ''}
+        </OLButton>
+      </span>
     </OLTooltip>
   )
 })
