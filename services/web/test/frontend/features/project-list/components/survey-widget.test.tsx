@@ -36,7 +36,7 @@ describe('<SurveyWidgetDsNav />', function () {
       screen.getByText(this.preText)
       screen.getByText(this.linkText)
 
-      const link = screen.getByRole('button', {
+      const link = screen.getByRole('link', {
         name: 'Take survey',
       }) as HTMLAnchorElement
       expect(link.href).to.equal(this.url)

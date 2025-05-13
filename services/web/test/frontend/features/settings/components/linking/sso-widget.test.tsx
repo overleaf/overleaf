@@ -33,7 +33,7 @@ describe('<SSOLinkingWidget />', function () {
     it('should render a link to `linkPath`', function () {
       render(<SSOLinkingWidget {...defaultProps} linked={false} />)
       expect(
-        screen.getByRole('button', { name: /link/i }).getAttribute('href')
+        screen.getByRole('link', { name: /link/i }).getAttribute('href')
       ).to.equal('/integration/link?intent=link')
     })
   })

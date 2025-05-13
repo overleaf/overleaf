@@ -31,7 +31,7 @@ describe('<AddSeats />', function () {
 
   it('renders the back button', function () {
     cy.findByTestId('group-heading').within(() => {
-      cy.findByRole('button', { name: /back to subscription/i }).should(
+      cy.findByRole('link', { name: /back to subscription/i }).should(
         'have.attr',
         'href',
         '/user/subscription'
@@ -71,7 +71,7 @@ describe('<AddSeats />', function () {
   })
 
   it('renders the cancel button', function () {
-    cy.findByRole('button', { name: /cancel/i }).should(
+    cy.findByRole('link', { name: /cancel/i }).should(
       'have.attr',
       'href',
       '/user/subscription'
@@ -213,7 +213,7 @@ describe('<AddSeats />', function () {
 
       describe('request', function () {
         afterEach(function () {
-          cy.findByRole('button', { name: /go to subscriptions/i }).should(
+          cy.findByRole('link', { name: /go to subscriptions/i }).should(
             'have.attr',
             'href',
             '/user/subscription'
@@ -414,7 +414,7 @@ describe('<AddSeats />', function () {
 
       describe('request', function () {
         afterEach(function () {
-          cy.findByRole('button', { name: /go to subscriptions/i }).should(
+          cy.findByRole('link', { name: /go to subscriptions/i }).should(
             'have.attr',
             'href',
             '/user/subscription'

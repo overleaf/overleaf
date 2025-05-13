@@ -69,7 +69,6 @@ describe('<LinkingSection />', function () {
     screen.getByText('linked accounts')
 
     screen.getByText('Google')
-    screen.getByRole('button', { name: /link google/i })
     screen.getByText('Log in with Google.')
     screen.getByRole('button', { name: /unlink/i })
 
@@ -81,7 +80,7 @@ describe('<LinkingSection />', function () {
       name: /learn more about orcid/i,
     })
     expect(helpLink.getAttribute('href')).to.equal('/blog/434')
-    const linkButton = screen.getByRole('button', { name: /link orcid/i })
+    const linkButton = screen.getByRole('link', { name: /link orcid/i })
     expect(linkButton.getAttribute('href')).to.equal('/auth/orcid?intent=link')
   })
 

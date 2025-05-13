@@ -252,7 +252,6 @@
 
 // Set the visited colour for a link that is styled as a button. This is necessary because we have a generic rule that
 // sets the colour of visited links
-a[role='button']:visited,
 a.btn:visited {
   color: var(--bs-btn-color);
 }

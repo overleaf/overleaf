@@ -52,6 +52,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         ref={ref}
         disabled={isLoading || props.disabled}
         data-ol-loading={isLoading}
+        role={undefined}
       >
         {isLoading && (
           <span className="spinner-container">

@@ -141,7 +141,7 @@ describe('<UserNotifications />', function () {
 
       expect(screen.queryByRole('button', { name: /join project/i })).to.be.null
 
-      const openProject = screen.getByRole('button', { name: /open project/i })
+      const openProject = screen.getByRole('link', { name: /open project/i })
       expect(openProject.getAttribute('href')).to.equal(
         `/project/${notificationProjectInvite.messageOpts.projectId}`
       )
@@ -203,7 +203,7 @@ describe('<UserNotifications />', function () {
       screen.getByRole('alert')
       screen.getByText(/your free WFH2020 upgrade came to an end on/i)
 
-      const viewLink = screen.getByRole('button', { name: /view/i })
+      const viewLink = screen.getByRole('link', { name: /view/i })
       expect(viewLink.getAttribute('href')).to.equal(
         'https://www.overleaf.com/events/wfh2020'
       )
@@ -242,7 +242,7 @@ describe('<UserNotifications />', function () {
       expect(findOutMore.getAttribute('href')).to.equal(
         'https://www.overleaf.com/learn/how-to/Institutional_Login'
       )
-      const linkAccount = screen.getByRole('button', { name: /link account/i })
+      const linkAccount = screen.getByRole('link', { name: /link account/i })
       expect(linkAccount.getAttribute('href')).to.equal(
         `${exposedSettings.samlInitPath}?university_id=${notificationIPMatchedAffiliation.messageOpts.institutionId}&auto=/project`
       )
@@ -277,7 +277,7 @@ describe('<UserNotifications />', function () {
         /add an institutional email address to claim your features/i
       )
 
-      const addAffiliation = screen.getByRole('button', {
+      const addAffiliation = screen.getByRole('link', {
         name: /add affiliation/i,
       })
       expect(addAffiliation.getAttribute('href')).to.equal(`/user/settings`)
@@ -303,7 +303,7 @@ describe('<UserNotifications />', function () {
       screen.getByText(/file limit/i)
       screen.getByText(/You can't add more files to the project or sync it/i)
 
-      const accountSettings = screen.getByRole('button', {
+      const accountSettings = screen.getByRole('link', {
         name: /Open project/i,
       })
       expect(accountSettings.getAttribute('href')).to.equal('/project/123')
@@ -493,7 +493,7 @@ describe('<UserNotifications />', function () {
         '/learn/how-to/Institutional_Login'
       )
 
-      const action = screen.getByRole('button', { name: /link account/i })
+      const action = screen.getByRole('link', { name: /link account/i })
       expect(action.getAttribute('href')).to.equal(
         `${exposedSettings.samlInitPath}?university_id=${notificationsInstitution.institutionId}&auto=/project&email=${notificationsInstitution.email}`
       )
@@ -558,7 +558,7 @@ describe('<UserNotifications />', function () {
       screen.getByRole('alert')
       screen.getByText(/which is already registered with/i)
 
-      const action = screen.getByRole('button', { name: /find out more/i })
+      const action = screen.getByRole('link', { name: /find out more/i })
       expect(action.getAttribute('href')).to.equal(
         '/learn/how-to/Institutional_Login'
       )
@@ -931,7 +931,7 @@ describe('<UserNotifications />', function () {
       renderWithinProjectListProvider(GroupsAndEnterpriseBanner)
       await fetchMock.callHistory.flush(true)
 
-      expect(screen.queryByRole('button', { name: 'Contact Sales' })).to.be.null
+      expect(screen.queryByRole('link', { name: 'Contact Sales' })).to.be.null
     })
 
     it('shows the banner for users that have dismissed the previous banners', async function () {
@@ -941,7 +941,7 @@ describe('<UserNotifications />', function () {
       renderWithinProjectListProvider(GroupsAndEnterpriseBanner)
       await fetchMock.callHistory.flush(true)
 
-      await screen.findByRole('button', { name: 'Contact Sales' })
+      await screen.findByRole('link', { name: 'Contact Sales' })
     })
 
     it('shows the banner for users that have dismissed the banner more than 30 days ago', async function () {
@@ -956,7 +956,7 @@ describe('<UserNotifications />', function () {
       renderWithinProjectListProvider(GroupsAndEnterpriseBanner)
       await fetchMock.callHistory.flush(true)
 
-      await screen.findByRole('button', { name: 'Contact Sales' })
+      await screen.findByRole('link', { name: 'Contact Sales' })
     })
 
     it('does not show the banner for users that have dismissed the banner within the last 30 days', async function () {
@@ -971,7 +971,7 @@ describe('<UserNotifications />', function () {
       renderWithinProjectListProvider(GroupsAndEnterpriseBanner)
       await fetchMock.callHistory.flush(true)
 
-      expect(screen.queryByRole('button', { name: 'Contact Sales' })).to.be.null
+      expect(screen.queryByRole('link', { name: 'Contact Sales' })).to.be.null
     })
 
     describe('users that are not in group and are not affiliated', function () {
@@ -1012,7 +1012,7 @@ describe('<UserNotifications />', function () {
         await screen.findByText(
           'Overleaf On-Premises: Does your company want to keep its data within its firewall? Overleaf offers Server Pro, an on-premises solution for companies. Get in touch to learn more.'
         )
-        const link = screen.getByRole('button', { name: 'Contact Sales' })
+        const link = screen.getByRole('link', { name: 'Contact Sales' })
 
         expect(link.getAttribute('href')).to.equal(`/for/contact-sales-2`)
       })
@@ -1029,7 +1029,7 @@ describe('<UserNotifications />', function () {
         await screen.findByText(
           'Why do Fortune 500 companies and top research institutions trust Overleaf to streamline their collaboration? Get in touch to learn more.'
         )
-        const link = screen.getByRole('button', { name: 'Contact Sales' })
+        const link = screen.getByRole('link', { name: 'Contact Sales' })
 
         expect(link.getAttribute('href')).to.equal(`/for/contact-sales-4`)
       })

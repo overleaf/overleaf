@@ -33,7 +33,7 @@ describe('<IntegrationLinkingWidgetTest/>', function () {
     })
 
     it('should render an upgrade link and track clicks', function () {
-      const upgradeLink = screen.getByRole('button', { name: /upgrade/i })
+      const upgradeLink = screen.getByRole('link', { name: /upgrade/i })
       expect(upgradeLink.getAttribute('href')).to.equal(
         '/user/subscription/plans'
       )
@@ -52,7 +52,7 @@ describe('<IntegrationLinkingWidgetTest/>', function () {
 
     it('should render a link to initiate integration linking', function () {
       expect(
-        screen.getByRole('button', { name: 'Link' }).getAttribute('href')
+        screen.getByRole('link', { name: 'Link' }).getAttribute('href')
       ).to.equal('/link')
     })
 

@@ -66,7 +66,7 @@ describe('<UpgradeSubscription />', function () {
 
   it('shows the "Upgrade" and "Cancel" buttons', function () {
     cy.findByRole('button', { name: /upgrade/i })
-    cy.findByRole('button', { name: /cancel/i }).should(
+    cy.findByRole('link', { name: /cancel/i }).should(
       'have.attr',
       'href',
       '/user/subscription'

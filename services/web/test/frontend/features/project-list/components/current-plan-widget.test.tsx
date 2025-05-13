@@ -70,7 +70,7 @@ describe('<CurrentPlanWidget />', function () {
     })
 
     it('clicks on upgrade button', function () {
-      const upgradeLink = screen.getByRole('button', { name: /upgrade/i })
+      const upgradeLink = screen.getByRole('link', { name: /upgrade/i })
       fireEvent.click(upgradeLink)
       expect(sendMBSpy).to.be.calledOnce
       expect(sendMBSpy).calledWith('upgrade-button-click', {

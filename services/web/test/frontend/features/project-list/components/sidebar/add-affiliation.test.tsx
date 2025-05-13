@@ -31,7 +31,7 @@ describe('Add affiliation widget', function () {
     await waitFor(() => expect(fetchMock.callHistory.called('/api/project')))
 
     await screen.findByText(/are you affiliated with an institution/i)
-    const addAffiliationLink = screen.getByRole('button', {
+    const addAffiliationLink = screen.getByRole('link', {
       name: /add affiliation/i,
     })
     expect(addAffiliationLink.getAttribute('href')).to.equal('/user/settings')

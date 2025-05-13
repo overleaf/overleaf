@@ -22,7 +22,7 @@ describe('<SecuritySection />', function () {
     render(<SecuritySection />)
 
     expect(screen.getAllByText('Single Sign-On (SSO)').length).to.equal(2)
-    const link = screen.getByRole('button', {
+    const link = screen.getByRole('link', {
       name: /Set up SSO/i,
     })
     expect(link).to.exist
