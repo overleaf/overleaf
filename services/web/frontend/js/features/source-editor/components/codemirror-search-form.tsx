@@ -29,7 +29,6 @@ import MaterialIcon from '@/shared/components/material-icon'
 import OLButtonGroup from '@/features/ui/components/ol/ol-button-group'
 import OLFormControl from '@/features/ui/components/ol/ol-form-control'
 import OLCloseButton from '@/features/ui/components/ol/ol-close-button'
-import { isSplitTestEnabled } from '@/utils/splitTestUtils'
 import { useTranslation } from 'react-i18next'
 import classnames from 'classnames'
 import { useUserSettingsContext } from '@/shared/context/user-settings-context'
@@ -444,9 +443,7 @@ const CodeMirrorSearchForm: FC<React.PropsWithChildren> = () => {
             </OLButton>
           </OLButtonGroup>
 
-          {!newEditor && isSplitTestEnabled('full-project-search') && (
-            <FullProjectSearchButton query={query} />
-          )}
+          {!newEditor && <FullProjectSearchButton query={query} />}
 
           {position !== null && (
             <div className="ol-cm-search-form-position">

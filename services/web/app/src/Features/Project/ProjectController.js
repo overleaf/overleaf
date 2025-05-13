@@ -335,7 +335,6 @@ const _ProjectController = {
     const splitTests = [
       'compile-log-events',
       'external-socket-heartbeat',
-      'full-project-search',
       'null-test-share-modal',
       'populate-clsi-cache',
       'pdf-caching-cached-url-lookup',

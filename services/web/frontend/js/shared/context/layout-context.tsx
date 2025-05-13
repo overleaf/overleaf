@@ -18,7 +18,6 @@ import { debugConsole } from '@/utils/debugging'
 import { BinaryFile } from '@/features/file-view/types/binary-file'
 import useScopeEventEmitter from '@/shared/hooks/use-scope-event-emitter'
 import useEventListener from '@/shared/hooks/use-event-listener'
-import { isSplitTestEnabled } from '@/utils/splitTestUtils'
 import { isMac } from '@/shared/utils/os'
 import { sendSearchEvent } from '@/features/event-tracking/search-events'
 import { useRailContext } from '@/features/ide-redesign/contexts/rail-context'
@@ -161,14 +160,12 @@ export const LayoutProvider: FC<React.PropsWithChildren> = ({ children }) => {
         event.shiftKey &&
         event.code === 'KeyF'
       ) {
-        if (isSplitTestEnabled('full-project-search')) {
-          event.preventDefault()
-          sendSearchEvent('search-open', {
-            searchType: 'full-project',
-            method: 'keyboard',
-          })
-          setProjectSearchIsOpen(true)
-        }
+        event.preventDefault()
+        sendSearchEvent('search-open', {
+          searchType: 'full-project',
+          method: 'keyboard',
+        })
+        setProjectSearchIsOpen(true)
       }
     }, [])
   )

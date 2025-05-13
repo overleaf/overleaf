@@ -80,7 +80,7 @@ export const FullProjectSearchButton = ({ query }: { query: SearchQuery }) => {
         <OLButton variant="secondary" size="sm" ref={ref} onClick={onClick}>
           <MaterialIcon
             type="manage_search"
-            accessibilityLabel={t('search_next')}
+            accessibilityLabel={t('search_all_project_files')}
           />
         </OLButton>
       </OLTooltip>
