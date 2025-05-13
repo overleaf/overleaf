@@ -40,8 +40,6 @@ export const EditorContext = createContext<
       currentPopup: string | null
       setCurrentPopup: Dispatch<SetStateAction<string | null>>
       setOutOfSync: (value: boolean) => void
-      assistantUpgraded: boolean
-      setAssistantUpgraded: (value: boolean) => void
       hasPremiumSuggestion: boolean
       setHasPremiumSuggestion: (value: boolean) => void
       setPremiumSuggestionResetDate: (date: Date) => void
@@ -89,7 +87,6 @@ export const EditorProvider: FC<React.PropsWithChildren> = ({ children }) => {
   )
 
   const [currentPopup, setCurrentPopup] = useState<string | null>(null)
-  const [assistantUpgraded, setAssistantUpgraded] = useState(false)
   const [hasPremiumSuggestion, setHasPremiumSuggestion] = useState<boolean>(
     () => {
       return Boolean(
@@ -205,8 +202,6 @@ export const EditorProvider: FC<React.PropsWithChildren> = ({ children }) => {
       setHasPremiumSuggestion,
       premiumSuggestionResetDate,
       setPremiumSuggestionResetDate,
-      assistantUpgraded,
-      setAssistantUpgraded,
       writefullInstance,
       setWritefullInstance,
     }),
@@ -232,8 +227,6 @@ export const EditorProvider: FC<React.PropsWithChildren> = ({ children }) => {
       setHasPremiumSuggestion,
       premiumSuggestionResetDate,
       setPremiumSuggestionResetDate,
-      assistantUpgraded,
-      setAssistantUpgraded,
       writefullInstance,
       setWritefullInstance,
     ]
