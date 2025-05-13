@@ -106,7 +106,6 @@
   user-select: none;
 }
 
-.onboarding-collapse-button,
 .onboarding-privacy-extended {
   @include media-breakpoint-down(md) {
     padding: 0 var(--spacing-08);
