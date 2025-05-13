@@ -8,6 +8,7 @@ import PdfViewerControlsMenuButton from './pdf-viewer-controls-menu-button'
 import { useDetachCompileContext as useCompileContext } from '../../../shared/context/detach-compile-context'
 import { useCommandProvider } from '@/features/ide-react/hooks/use-command-provider'
 import { useTranslation } from 'react-i18next'
+import { useLayoutContext } from '@/shared/context/layout-context'
 
 type PdfViewerControlsToolbarProps = {
   requestPresentationMode: () => void
@@ -44,8 +45,15 @@ function PdfViewerControlsToolbar({
 
   const { elementRef: pdfControlsRef } = useResizeObserver(handleResize)
 
-  useCommandProvider(
-    () => [
+  const { view: ideView, pdfLayout } = useLayoutContext()
+  const editorOnly = ideView !== 'pdf' && pdfLayout === 'flat'
+
+  useCommandProvider(() => {
+    if (editorOnly) {
+      return
+    }
+
+    return [
       {
         id: 'view-pdf-presentation-mode',
         label: t('presentation_mode'),
@@ -71,9 +79,8 @@ function PdfViewerControlsToolbar({
         label: t('fit_to_height'),
         handler: () => setZoom('page-height'),
       },
-    ],
-    [t, requestPresentationMode, setZoom]
-  )
+    ]
+  }, [t, requestPresentationMode, setZoom, editorOnly])
 
   if (!toolbarControlsElement) {
     return null
