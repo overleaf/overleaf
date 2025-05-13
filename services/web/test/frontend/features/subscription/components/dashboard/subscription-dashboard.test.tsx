@@ -32,7 +32,7 @@ describe('<SubscriptionDashboard />', function () {
     })
 
     it('renders the "Get the most from your subscription" text', function () {
-      screen.getByText(/get the most from your Overleaf subscription/i)
+      screen.getByText(/Get the most out of your subscription/i)
     })
   })
 
@@ -42,7 +42,7 @@ describe('<SubscriptionDashboard />', function () {
     })
 
     it('does not render the "Get the most out of your" subscription text', function () {
-      const text = screen.queryByText('Get the most out of your', {
+      const text = screen.queryByText('Get the most out of your subscription', {
         exact: false,
       })
       expect(text).to.be.null

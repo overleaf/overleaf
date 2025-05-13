@@ -21,6 +21,7 @@ function SubscriptionDashboard() {
     hasDisplayedSubscription,
     hasSubscription,
     hasValidActiveSubscription,
+    personalSubscription,
   } = useSubscriptionDashboardContext()
 
   const fromPlansPage = getMeta('ol-fromPlansPage')
@@ -49,7 +50,9 @@ function SubscriptionDashboard() {
               <ManagedPublishers />
               <GroupSubscriptionMemberships />
               <InstitutionMemberships />
-              {hasValidActiveSubscription && <PremiumFeaturesLink />}
+              {hasValidActiveSubscription && (
+                <PremiumFeaturesLink subscription={personalSubscription} />
+              )}
               {!hasDisplayedSubscription &&
                 (hasSubscription ? <ContactSupport /> : <FreePlan />)}
             </div>

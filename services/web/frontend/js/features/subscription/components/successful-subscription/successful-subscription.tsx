@@ -80,7 +80,7 @@ function SuccessfulSubscription() {
               subscription={subscription}
               onAiStandalonePlan={onAiStandalonePlan}
             />
-            {!onAiStandalonePlan && <PremiumFeaturesLink />}
+            <PremiumFeaturesLink subscription={subscription} />
             <p>
               {t('need_anything_contact_us_at')}&nbsp;
               <a href={`mailto:${adminEmail}`} rel="noopener noreferrer">
