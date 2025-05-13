@@ -1,3 +1,8 @@
+const stream = require('node:stream')
+
+// TODO(24011): remove this after node 22 update
+stream.setDefaultHighWaterMark(false, 64 * 1024)
+
 module.exports = {
   internal: {
     notifications: {

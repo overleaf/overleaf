@@ -1,5 +1,9 @@
 const Path = require('node:path')
 const os = require('node:os')
+const stream = require('node:stream')
+
+// TODO(24011): remove this after node 22 update
+stream.setDefaultHighWaterMark(false, 64 * 1024)
 
 const isPreEmptible = process.env.PREEMPTIBLE === 'TRUE'
 const CLSI_SERVER_ID = os.hostname().replace('-ctr', '')
