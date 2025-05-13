@@ -31,6 +31,16 @@ async function shutdown(code = 0) {
   process.exit(code)
 }
 
+function usage() {
+  console.log(
+    'Usage: node recover_zip_from_backup.mjs --historyId=<historyId> --output=<output> [--mode=<mode>] [--verbose] [--useBackupGlobalBlobs]'
+  )
+  console.log('Supported modes: ' + SUPPORTED_MODES.join(', '))
+  console.log(
+    '--useBackupGlobalBlobs can be used if the global blobs have not been restored from the backup yet.'
+  )
+}
+
 /**
  * @typedef {import('archiver').ZipArchive} ZipArchive
  */
@@ -50,21 +60,37 @@ async function shutdown(code = 0) {
  * @property {Object} data
  */
 
-const { historyId, mode, output, verbose } = commandLineArgs([
-  { name: 'historyId', type: String },
-  { name: 'output', type: String },
-  { name: 'mode', type: String, defaultValue: 'raw' },
-  { name: 'verbose', type: String, defaultValue: false },
-])
+let historyId, help, mode, output, useBackupGlobalBlobs, verbose
+
+try {
+  ;({ historyId, help, mode, output, useBackupGlobalBlobs, verbose } =
+    commandLineArgs([
+      { name: 'historyId', type: String },
+      { name: 'output', type: String },
+      { name: 'mode', type: String, defaultValue: 'raw' },
+      { name: 'verbose', type: Boolean, defaultValue: false },
+      { name: 'useBackupGlobalBlobs', type: Boolean, defaultValue: false },
+      { name: 'help', type: Boolean },
+    ]))
+} catch (err) {
+  console.error(err.message)
+  help = true
+}
+
+if (help) {
+  usage()
+  await shutdown(0)
+}
 
 if (!historyId) {
   console.error('missing --historyId')
+  usage()
   await shutdown(1)
 }
 
 if (!output) {
   console.error('missing --output')
-
+  usage()
   await shutdown(1)
 }
 
@@ -147,16 +173,35 @@ archive.on(
   }
 )
 
-switch (mode) {
-  case 'latest':
-    await archiveLatestChunk(archive, historyId)
-    break
-  case 'raw':
-  default:
-    await archiveRawProject(archive, historyId)
-    break
+try {
+  switch (mode) {
+    case 'latest':
+      await archiveLatestChunk(archive, historyId, useBackupGlobalBlobs)
+      break
+    case 'raw':
+    default:
+      await archiveRawProject(archive, historyId, useBackupGlobalBlobs)
+      break
+  }
+  archive.pipe(outputFile)
+} catch (error) {
+  if (error instanceof BackupPersistorError) {
+    console.error(error.message)
+  }
+  if (error instanceof Chunk.NotPersistedError) {
+    console.error('Chunk not found. Project may not have been fully backed up.')
+  }
+  if (verbose) {
+    console.error(error)
+  } else {
+    console.error('Error encountered when writing archive')
+  }
+} finally {
+  await Promise.race([
+    await archive.finalize(),
+    setTimeout(10000).then(() => {
+      console.error('Archive did not finalize in time')
+      return shutdown(1)
+    }),
+  ])
 }
-
-archive.pipe(outputFile)
-
-await archive.finalize()
