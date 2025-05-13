@@ -145,6 +145,10 @@ async function getRedirectWithFallback(
       } = await fetchRedirectWithResponse(u, {
         signal,
       })
+      let allFilesRaw = headers.get('X-All-Files')
+      if (!allFilesRaw.startsWith('[')) {
+        allFilesRaw = Buffer.from(allFilesRaw, 'base64url').toString()
+      }
       // Success, return the cache entry.
       return {
         location,
@@ -152,7 +156,7 @@ async function getRedirectWithFallback(
         shard: headers.get('X-Shard') || 'cache',
         lastModified: new Date(headers.get('X-Last-Modified')),
         size: parseInt(headers.get('X-Content-Length'), 10),
-        allFiles: JSON.parse(headers.get('X-All-Files')),
+        allFiles: JSON.parse(allFilesRaw),
       }
     } catch (err) {
       if (err instanceof RequestFailedError && err.response.status === 404) {
