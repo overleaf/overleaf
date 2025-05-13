@@ -100,7 +100,11 @@ function UpgradeSummary({ subscriptionChange }: UpgradeSummaryProps) {
                 subscriptionChange.nextInvoice.tax.amount,
                 subscriptionChange.currency
               ),
-              date: formatTime(subscriptionChange.nextInvoice.date, 'MMMM D'),
+              date: formatTime(
+                subscriptionChange.nextInvoice.date,
+                'MMMM D',
+                true
+              ),
             }
           )}
           {subscriptionChange.immediateCharge.discount !== 0 &&

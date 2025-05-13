@@ -156,7 +156,8 @@ function CostSummary({ subscriptionChange, totalLicenses }: CostSummaryProps) {
                   ),
                   date: formatTime(
                     subscriptionChange.nextInvoice.date,
-                    'MMMM D'
+                    'MMMM D',
+                    true
                   ),
                 }
               )}
