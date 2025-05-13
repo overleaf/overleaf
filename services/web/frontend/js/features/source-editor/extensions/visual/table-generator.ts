@@ -322,6 +322,7 @@ export const tableGeneratorTheme = EditorView.baseTheme({
   },
 
   '.table-generator-cell-input': {
+    color: 'inherit',
     'background-color': 'transparent',
     width: '100%',
     'text-align': 'inherit',
