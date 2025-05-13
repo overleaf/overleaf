@@ -11,8 +11,8 @@ import { debugConsole } from '@/utils/debugging'
 import { signalWithTimeout } from '@/utils/abort-signal'
 import { isMainFile } from '@/features/pdf-preview/util/editor-files'
 import { countWordsInFile } from '@/features/word-count-modal/utils/count-words-in-file'
-import { WordCounts } from '@/features/word-count-modal/components/word-counts'
 import { createSegmenters } from '@/features/word-count-modal/utils/segmenters'
+import { WordCountsClient } from './word-counts-client'
 
 export const WordCountClient: FC = () => {
   const [loading, setLoading] = useState(true)
@@ -59,7 +59,8 @@ export const WordCountClient: FC = () => {
           footnoteWords: 0,
           footnoteCharacters: 0,
           outside: 0,
-          outsideCharacters: 0,
+          otherWords: 0,
+          otherCharacters: 0,
           headers: 0,
           elements: 0,
           mathInline: 0,
@@ -99,7 +100,7 @@ export const WordCountClient: FC = () => {
     <>
       {loading && !error && <WordCountLoading />}
       {error && <WordCountError />}
-      {data && <WordCounts data={data} source="client" />}
+      {data && <WordCountsClient data={data} />}
     </>
   )
 }

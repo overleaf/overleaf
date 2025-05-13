@@ -1,0 +1,118 @@
+\documentclass{article}
+\usepackage{graphicx}
+\usepackage{amsmath}
+
+\title{The Title} % 2 in headers
+\author{An Author} % 0
+\date{May 2025} % 0
+
+\begin{document}
+
+\maketitle % 0
+
+\thanks{bleep bloop}
+
+\begin{abstract}
+Word word % 2 in abstract
+\end{abstract}
+
+\section{plain text}
+Word word % 2
+
+\section{accents}
+w\'ard w\`erd w\"ird w\~ord w\.urd w\^ord % 6
+
+\section{accents with groups}
+% w\'{a}rd w\`{e}rd w\"{i}rd w\~{o}rd w\.{u}rd w\^{o}rd w\c{o}rd w\u{o}rd % 8 % TODO
+
+\section{grouped single character command}
+% w{\o}rd w\~{\o}rd % 2 % TODO
+
+\section{commands that create characters}
+\o\oe\aa\AE % 1
+
+\subsection{with braces}
+w\o{}rd w\oe{}rd w\aa{}rd w\AE{}rd % 4
+
+\subsection{with spaces}
+w\o rd w\oe rd w\ae rd w\AE rd % 4
+
+\section{symbols}
+\S{} \P{} % 0
+
+\section{formatting}
+\textit{italic} \textbf{bold} \textit{\textbf{bold italic}} % 4
+\texttt{teletype} \textsf{sans-serif} \textsc{small caps} % 4
+\textsf{-} % 0
+
+\section{formatting inside word}
+% wo\textit{italic}rd %1 % TODO
+
+\section{commands that create text}
+\textbackslash{}word \LaTeX{} % 2
+
+\section{special characters}
+word\&word \$word word\% \#word wo\_rd \{word\} % 7
+
+\section{footnote}
+\footnote{word word} % 2 in footnote
+
+\section{headers}
+\part{word} % 1
+\chapter{word} % 1
+\section{word} % 1
+\subsection{word} % 1
+\subsubsection{word} % 1
+\paragraph{word} % 1
+
+\section{verbatim}
+\verb|word word word| % 0
+
+\section{list}
+\begin{itemize}
+    \item word % 1
+    \item word % 1
+\end{itemize}
+
+\section{figure}
+\begin{figure}
+    \includegraphics[width=0.5\linewidth]{example.png} %0
+    \caption{Word word} %2 in captions
+\end{figure}
+
+\section{table}
+\begin{table}
+    \begin{tabular}{c|c}
+       word & word \\ % 2
+       word & word % 2
+    \end{tabular}
+    \caption{Word word} % 2 in captions
+\end{table}
+
+\section{line break}
+word\\word % 2
+
+\section{inline math}
+$2+3=5$ % 0
+
+\section{display math}
+\[2+3=5\]
+
+\begin{equation}
+    2+3=5
+\end{equation}
+
+\begin{equation*}
+    2+3=5
+\end{equation*}
+
+\begin{align*}
+2x - 5y &=  8 \\
+3x + 9y &=  -12
+\end{align*}
+
+\section{text in math}
+
+$ 2+3 \text{ is equal to } 5 $
+
+\end{document}

@@ -1,5 +1,5 @@
 const wordRe = /['\-.\p{L}]+/gu
-const wordLikeRe = /\p{L}/gu // must contain at least one "letter" to be a word
+const wordLikeRe = /\p{L}/u // must contain at least one "letter" to be a word
 const characterRe = /\S/gu
 
 type SegmentDataLike = {

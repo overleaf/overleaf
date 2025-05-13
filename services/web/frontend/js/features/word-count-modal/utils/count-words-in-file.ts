@@ -1,4 +1,3 @@
-import { ProjectSnapshot } from '@/infrastructure/project-snapshot'
 import { LaTeXLanguage } from '@/features/source-editor/languages/latex/latex-language'
 import { WordCountData } from '@/features/word-count-modal/components/word-count-data'
 import { NodeType, SyntaxNodeRef } from '@lezer/common'
@@ -8,7 +7,7 @@ import { Segmenters } from './segmenters'
 
 const whiteSpaceRe = /^\s$/
 
-type Context = 'text' | 'header' | 'abstract' | 'caption' | 'footnote'
+type Context = 'text' | 'header' | 'abstract' | 'caption' | 'footnote' | 'other'
 
 const counters: Record<
   Context,
@@ -37,10 +36,15 @@ const counters: Record<
     word: 'footnoteWords',
     character: 'footnoteCharacters',
   },
+  other: {
+    word: 'otherWords',
+    character: 'otherCharacters',
+  },
 }
 
+// https://en.wikibooks.org/wiki/LaTeX/Special_Characters#Escaped_codes
 const replacementsMap: Map<string, string> = new Map([
-  // LaTeX commands that create part of a word
+  // LaTeX commands that create characters
   ['aa', 'å'],
   ['AA', 'Å'],
   ['ae', 'æ'],
@@ -63,19 +67,36 @@ const replacementsMap: Map<string, string> = new Map([
   ['NG', 'Ŋ'],
   ['i', 'ı'],
   ['j', 'ȷ'],
+  // reserved characters
+  ['&', '&'],
+  ['$', '$'],
+  ['%', '%'],
+  ['#', '#'],
   ['_', '_'],
-  // modifier commands for the character in the arguments
-  ['H', 'a'],
-  ['c', 'a'],
-  ['d', 'a'],
-  ['k', 'a'],
-  ['v', 'a'],
+  ['{', '{'],
+  ['}', '}'],
+  // modifier commands for the subsequent character(s) (in braces)
+  ['H', 'ő'], // long Hungarian umlaut (double acute)
+  ['b', 'o'], // bar under the letter
+  ['c', 'ç'], // cedilla
+  ['d', 'o'], // dot under the letter
+  ['k', 'ą'], // ogonek
+  ['r', 'å'], // ring over the letter
+  ['t', 'o͡o'], // "tie" over the two letters
+  ['u', 'ŏ'], // breve over the letter
+  ['v', 'š'], // caron/háček over the letter
   // modifier symbols for the subsequent character
-  ["'", ''],
-  ['^', ''],
-  ['"', ''],
-  ['=', ''],
-  ['.', ''],
+  ["'", ''], // acute
+  ['^', ''], // circumflex
+  ['"', ''], // umlaut, trema or dieresis
+  ['=', ''], // macron accent (a bar over the letter)
+  ['.', ''], // dot over the letter
+  ['`', ''], // grave
+  ['~', ''], // tilde
+  // commands that create text
+  ['TeX', 'TeX'],
+  ['LaTeX', 'LaTeX'],
+  ['textbackslash', '\\'],
 ])
 
 type TextNode = {
@@ -87,7 +108,7 @@ type TextNode = {
 
 export const countWordsInFile = (
   data: WordCountData,
-  projectSnapshot: ProjectSnapshot,
+  projectSnapshot: { getDocContents(path: string): string | null },
   docPath: string,
   segmenters: Segmenters
 ) => {
@@ -106,10 +127,9 @@ export const countWordsInFile = (
   const iterateNode = (nodeRef: SyntaxNodeRef, context: Context = 'text') => {
     const previousContext = currentContext
     currentContext = context
-    const { node } = nodeRef
-    node.cursor().iterate(childNodeRef => {
+    nodeRef.node.cursor().iterate(childNodeRef => {
       // TODO: a better way to iterate only descendants?
-      if (childNodeRef.node !== node) {
+      if (childNodeRef.node !== nodeRef.node) {
         return bodyMatcher(childNodeRef.type)?.(childNodeRef)
       }
     })
@@ -141,33 +161,71 @@ export const countWordsInFile = (
       const child = nodeRef.node.getChild('UnknownCommand')
       if (!child) return
 
-      const grandchild = child.getChild('CtrlSeq') ?? child.getChild('CtrlSym')
+      const grandchild =
+        child.getChild('$CtrlSeq') ?? child.getChild('$CtrlSym')
       if (!grandchild) return
 
       const commandName = content.substring(grandchild.from + 1, grandchild.to)
       if (!commandName) return
 
+      switch (commandName) {
+        case 'thanks':
+          iterateNode(nodeRef, 'other')
+          return false
+      }
+
       if (!replacementsMap.has(commandName)) return
 
+      // TODO: handle accented character in braces after a CtrlSym, e.g. \'{a}
+      // TODO: handle markup within words, e.g. inter\textbf{nal}formatting
+      // TODO: handle commands like \egrave and \eacute
+
       const text = replacementsMap.get(commandName)!
+
       textNodes.push({
         from: nodeRef.from,
         to: nodeRef.to,
         text,
         context: currentContext,
       })
+
       return false
     },
-    BeginEnv(nodeRef) {
-      const envName = content
-        ?.substring(nodeRef.from + '\\begin{'.length, nodeRef.to - 1)
-        .replace(/\*$/, '')
+    $Environment(nodeRef) {
+      const envNameNode = nodeRef.node
+        .getChild('BeginEnv')
+        ?.getChild('EnvNameGroup')
+        ?.getChild('EnvName')
 
-      if (envName === 'abstract') {
-        data.headers++
-        iterateNode(nodeRef, 'abstract')
-        return false
+      if (envNameNode) {
+        const envName = content
+          ?.substring(envNameNode.from, envNameNode.to)
+          .replace(/\*$/, '')
+
+        if (envName === 'abstract') {
+          data.headers++
+
+          const contentNode = nodeRef.node.getChild('Content')
+          if (contentNode) {
+            iterateNode(contentNode, 'abstract')
+          }
+
+          return false
+        }
       }
+    },
+    BeginEnv() {
+      return false // ignore text in \begin arguments
+    },
+    Math(nodeRef) {
+      const parent = nodeRef.node.parent
+      if (parent?.type.is('InlineMath') || parent?.type.is('ParenMath')) {
+        data.mathInline++
+      } else {
+        data.mathDisplay++
+      }
+
+      return false // TODO: count \text in math nodes?
     },
     'ShortTextArgument ShortOptionalArg'() {
       return false
@@ -176,12 +234,6 @@ export const countWordsInFile = (
       data.headers++
       iterateNode(nodeRef, 'header')
       return false
-    },
-    'DisplayMath BracketMath'() {
-      data.mathDisplay++
-    },
-    'InlineMath ParenMath'() {
-      data.mathInline++
     },
     Caption(nodeRef) {
       iterateNode(nodeRef, 'caption')
@@ -200,6 +252,14 @@ export const countWordsInFile = (
       if (path) {
         countWordsInFile(data, projectSnapshot, path, segmenters)
       }
+    },
+    'BlankLine LineBreak'(nodeRef) {
+      textNodes.push({
+        from: nodeRef.from,
+        to: nodeRef.to,
+        text: '\n',
+        context: currentContext,
+      })
     },
   })
 
@@ -226,6 +286,7 @@ export const countWordsInFile = (
     caption: '',
     text: '',
     footnote: '',
+    other: '',
   }
 
   let pos = 0
@@ -240,11 +301,17 @@ export const countWordsInFile = (
   for (const [context, text] of Object.entries(texts)) {
     const counter = counters[context as Context]
 
-    for (const value of segmenters.word.segment(text)) {
+    // TODO: replace - and _ with a word character if hyphenated words should be counted as one word?
+
+    for (const value of segmenters.word.segment(
+      text.replace(/\w[-_]\w/g, 'aaa')
+    )) {
       if (value.isWordLike) {
         data[counter.word]++
       }
     }
+
+    // TODO: count hyphens as characters?
 
     for (const value of segmenters.character.segment(text)) {
       // TODO: option for whether to include whitespace?

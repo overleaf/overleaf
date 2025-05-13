@@ -42,7 +42,7 @@ export const WordCountServer: FC = () => {
     <>
       {loading && !error && <WordCountLoading />}
       {error && <WordCountError />}
-      {data && <WordCounts data={data} source="server" />}
+      {data && <WordCounts data={data} />}
     </>
   )
 }

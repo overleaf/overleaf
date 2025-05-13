@@ -1,22 +1,12 @@
-import {
-  ServerWordCountData,
-  WordCountData,
-} from '@/features/word-count-modal/components/word-count-data'
-import { useTranslation } from 'react-i18next'
 import { FC } from 'react'
+import { ServerWordCountData } from '@/features/word-count-modal/components/word-count-data'
+import { useTranslation } from 'react-i18next'
 import { Container, Row, Col } from 'react-bootstrap-5'
 import OLNotification from '@/features/ui/components/ol/ol-notification'
 
-export const WordCounts: FC<
-  | {
-      data: ServerWordCountData
-      source: 'server'
-    }
-  | {
-      data: WordCountData
-      source: 'client'
-    }
-> = ({ data, source }) => {
+export const WordCounts: FC<{
+  data: ServerWordCountData
+}> = ({ data }) => {
   const { t } = useTranslation()
 
   return (
@@ -34,69 +24,32 @@ export const WordCounts: FC<
         </Row>
       )}
 
-      {source === 'client' ? (
-        <>
-          <Row>
-            <Col xs={4}>
-              <div className="pull-right">Text:</div>
-            </Col>
-            <Col xs={6}>{data.textWords}</Col>
-          </Row>
+      <Row>
+        <Col xs={4}>
+          <div className="pull-right">{t('total_words')}:</div>
+        </Col>
+        <Col xs={6}>{data.textWords}</Col>
+      </Row>
+      <Row>
+        <Col xs={4}>
+          <div className="pull-right">{t('headers')}:</div>
+        </Col>
+        <Col xs={6}>{data.headers}</Col>
+      </Row>
 
-          <Row>
-            <Col xs={4}>
-              <div className="pull-right">Headers:</div>
-            </Col>
-            <Col xs={6}>{data.headWords}</Col>
-          </Row>
+      <Row>
+        <Col xs={4}>
+          <div className="pull-right">{t('math_inline')}:</div>
+        </Col>
+        <Col xs={6}>{data.mathInline}</Col>
+      </Row>
 
-          <Row>
-            <Col xs={4}>
-              <div className="pull-right">Captions:</div>
-            </Col>
-            <Col xs={6}>{data.captionWords}</Col>
-          </Row>
-
-          <Row>
-            <Col xs={4}>
-              <div className="pull-right">Footnotes:</div>
-            </Col>
-            <Col xs={6}>{data.footnoteWords}</Col>
-          </Row>
-        </>
-      ) : (
-        <Row>
-          <Col xs={4}>
-            <div className="pull-right">{t('total_words')}:</div>
-          </Col>
-          <Col xs={6}>{data.textWords}</Col>
-        </Row>
-      )}
-
-      {source === 'server' && (
-        <>
-          <Row>
-            <Col xs={4}>
-              <div className="pull-right">{t('headers')}:</div>
-            </Col>
-            <Col xs={6}>{data.headers}</Col>
-          </Row>
-
-          <Row>
-            <Col xs={4}>
-              <div className="pull-right">{t('math_inline')}:</div>
-            </Col>
-            <Col xs={6}>{data.mathInline}</Col>
-          </Row>
-
-          <Row>
-            <Col xs={4}>
-              <div className="pull-right">{t('math_display')}:</div>
-            </Col>
-            <Col xs={6}>{data.mathDisplay}</Col>
-          </Row>
-        </>
-      )}
+      <Row>
+        <Col xs={4}>
+          <div className="pull-right">{t('math_display')}:</div>
+        </Col>
+        <Col xs={6}>{data.mathDisplay}</Col>
+      </Row>
     </Container>
   )
 }

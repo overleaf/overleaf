@@ -20,6 +20,6 @@ export type WordCountData = ServerWordCountData & {
   footnoteCharacters: number
   abstractWords: number
   abstractCharacters: number
-  // outsideWords: number
-  outsideCharacters: number
+  otherWords: number
+  otherCharacters: number
 }
