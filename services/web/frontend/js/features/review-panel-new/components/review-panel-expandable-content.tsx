@@ -1,24 +1,24 @@
-import { FC, useCallback, useRef, useState } from 'react'
+import { memo, useCallback, useRef, useState } from 'react'
 import OLButton from '@/features/ui/components/ol/ol-button'
 import { useTranslation } from 'react-i18next'
 import classNames from 'classnames'
 import { PreventSelectingEntry } from './review-panel-prevent-selecting'
 
-export const ExpandableContent: FC<{
+export const ExpandableContent = memo<{
   className?: string
   content: string
   contentLimit?: number
   newLineCharsLimit?: number
   checkNewLines?: boolean
   inline?: boolean
-}> = ({
+}>(function ExpandableContent({
   content,
   className,
   contentLimit = 50,
   newLineCharsLimit = 3,
   checkNewLines = true,
   inline = false,
-}) => {
+}) {
   const { t } = useTranslation()
   const contentRef = useRef<HTMLDivElement>(null)
   const [isExpanded, setIsExpanded] = useState(false)
@@ -83,7 +83,7 @@ export const ExpandableContent: FC<{
       </div>
     </>
   )
-}
+})
 
 function indexOfNthLine(content: string, n: number) {
   if (n < 1) return null

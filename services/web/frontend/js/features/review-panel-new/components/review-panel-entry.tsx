@@ -12,9 +12,9 @@ import {
 } from '@/features/source-editor/extensions/ranges'
 import { useEditorManagerContext } from '@/features/ide-react/context/editor-manager-context'
 import { EditorSelection } from '@codemirror/state'
-import MaterialIcon from '@/shared/components/material-icon'
 import { OFFSET_FOR_ENTRIES_ABOVE } from '../utils/position-items'
 import useReviewPanelLayout from '../hooks/use-review-panel-layout'
+import { EntryIndicator } from './review-panel-entry-indicator'
 
 export const ReviewPanelEntry: FC<
   React.PropsWithChildren<{
@@ -26,8 +26,8 @@ export const ReviewPanelEntry: FC<
     selectLineOnFocus?: boolean
     hoverRanges?: boolean
     disabled?: boolean
-    onEnterEntryIndicator?: () => void
-    onLeaveEntryIndicator?: () => void
+    handleEnter?: () => void
+    handleLeave?: () => void
     entryIndicator?: 'comment' | 'edit'
   }>
 > = ({
@@ -40,8 +40,8 @@ export const ReviewPanelEntry: FC<
   docId,
   hoverRanges = true,
   disabled,
-  onEnterEntryIndicator,
-  onLeaveEntryIndicator,
+  handleEnter,
+  handleLeave,
   entryIndicator,
 }) => {
   const state = useCodeMirrorStateContext()
@@ -194,19 +194,12 @@ export const ReviewPanelEntry: FC<
       }}
     >
       {entryIndicator && (
-        <div
-          className="review-panel-entry-indicator"
-          onMouseEnter={onEnterEntryIndicator}
-          onMouseLeave={onLeaveEntryIndicator}
-          onMouseDown={openReviewPanel} // Using onMouseDown rather than onClick to guarantee that it fires before onFocus
-          role="button"
-          tabIndex={0}
-        >
-          <MaterialIcon
-            type={entryIndicator}
-            className="review-panel-entry-icon"
-          />
-        </div>
+        <EntryIndicator
+          type={entryIndicator}
+          handleMouseEnter={handleEnter}
+          handleMouseLeave={handleLeave}
+          handleMouseDown={openReviewPanel}
+        />
       )}
       {children}
     </div>

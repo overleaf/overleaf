@@ -1,4 +1,4 @@
-import { memo, useCallback, useState } from 'react'
+import { memo, useCallback, useMemo, useState } from 'react'
 import { useRangesActionsContext } from '../context/ranges-context'
 import {
   Change,
@@ -8,8 +8,6 @@ import {
 import { useTranslation } from 'react-i18next'
 import classnames from 'classnames'
 import { usePermissionsContext } from '@/features/ide-react/context/permissions-context'
-import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
-import MaterialIcon from '@/shared/components/material-icon'
 import { FormatTimeBasedOnYear } from '@/shared/components/format-time-based-on-year'
 import { useChangesUsersContext } from '../context/changes-users-context'
 import { ReviewPanelChangeUser } from './review-panel-change-user'
@@ -17,7 +15,12 @@ import { ReviewPanelEntry } from './review-panel-entry'
 import { useModalsContext } from '@/features/ide-react/context/modals-context'
 import { ExpandableContent } from './review-panel-expandable-content'
 import { useUserContext } from '@/shared/context/user-context'
-import { PreventSelectingEntry } from './review-panel-prevent-selecting'
+import { ChangeAction } from '@/features/review-panel-new/components/review-panel-change-action'
+import {
+  AddIcon,
+  DeleteIcon,
+  EditIcon,
+} from '@/features/review-panel-new/components/review-panel-action-icons'
 
 export const ReviewPanelChange = memo<{
   change: Change<EditOperation>
@@ -27,8 +30,8 @@ export const ReviewPanelChange = memo<{
   docId: string
   hoverRanges?: boolean
   hovered?: boolean
-  onEnter?: (changeId: string) => void
-  onLeave?: (changeId: string) => void
+  handleEnter?: (changeId: string) => void
+  handleLeave?: () => void
 }>(
   ({
     change,
@@ -38,8 +41,8 @@ export const ReviewPanelChange = memo<{
     hoverRanges,
     editable = true,
     hovered,
-    onEnter,
-    onLeave,
+    handleEnter,
+    handleLeave,
   }) => {
     const { t } = useTranslation()
     const { acceptChanges, rejectChanges } = useRangesActionsContext()
@@ -68,6 +71,34 @@ export const ReviewPanelChange = memo<{
       }
     }, [acceptChanges, aggregate, change.id, showGenericMessageModal, t])
 
+    const rejectHandler = useCallback(async () => {
+      if (aggregate) {
+        await rejectChanges(change.id, aggregate.id)
+      } else {
+        await rejectChanges(change.id)
+      }
+    }, [aggregate, change, rejectChanges])
+
+    const translations = useMemo(
+      () => ({
+        accept_change: t('accept_change'),
+        reject_change: t('reject_change'),
+        aggregate_changed: t('aggregate_changed'),
+        aggregate_to: t('aggregate_to'),
+        tracked_change_added: t('tracked_change_added'),
+        tracked_change_deleted: t('tracked_change_deleted'),
+      }),
+      [t]
+    )
+
+    const { handleMouseEnter, handleMouseLeave } = useMemo(
+      () => ({
+        handleMouseEnter: handleEnter && (() => handleEnter(change.id)),
+        handleMouseLeave: handleLeave && (() => handleLeave()),
+      }),
+      [change.id, handleEnter, handleLeave]
+    )
+
     if (!changesUsers) {
       // if users are not loaded yet, do not show "Unknown" user
       return null
@@ -90,14 +121,14 @@ export const ReviewPanelChange = memo<{
         docId={docId}
         hoverRanges={hoverRanges}
         disabled={accepting}
-        onEnterEntryIndicator={onEnter && (() => onEnter(change.id))}
-        onLeaveEntryIndicator={onLeave && (() => onLeave(change.id))}
+        handleEnter={handleMouseEnter}
+        handleLeave={handleMouseLeave}
         entryIndicator="edit"
       >
         <div
           className="review-panel-entry-content"
-          onMouseEnter={onEnter && (() => onEnter(change.id))}
-          onMouseLeave={onLeave && (() => onLeave(change.id))}
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
         >
           <div className="review-panel-entry-header">
             <div>
@@ -111,56 +142,22 @@ export const ReviewPanelChange = memo<{
             {editable && (
               <div className="review-panel-entry-actions">
                 {permissions.write && (
-                  <PreventSelectingEntry>
-                    <OLTooltip
-                      id="accept-change"
-                      overlayProps={{ placement: 'bottom' }}
-                      description={t('accept_change')}
-                      tooltipProps={{ className: 'review-panel-tooltip' }}
-                    >
-                      <button
-                        type="button"
-                        className="btn"
-                        onClick={acceptHandler}
-                        tabIndex={0}
-                      >
-                        <MaterialIcon
-                          type="check"
-                          className="review-panel-entry-actions-icon"
-                          accessibilityLabel={t('accept_change')}
-                        />
-                      </button>
-                    </OLTooltip>
-                  </PreventSelectingEntry>
+                  <ChangeAction
+                    id="accept-change"
+                    label={translations.accept_change}
+                    type="check"
+                    handleClick={acceptHandler}
+                  />
                 )}
 
                 {(permissions.write ||
                   (permissions.trackedWrite && isChangeAuthor)) && (
-                  <PreventSelectingEntry>
-                    <OLTooltip
-                      id="reject-change"
-                      description={t('reject_change')}
-                      overlayProps={{ placement: 'bottom' }}
-                      tooltipProps={{ className: 'review-panel-tooltip' }}
-                    >
-                      <button
-                        tabIndex={0}
-                        type="button"
-                        className="btn"
-                        onClick={() =>
-                          aggregate
-                            ? rejectChanges(change.id, aggregate.id)
-                            : rejectChanges(change.id)
-                        }
-                      >
-                        <MaterialIcon
-                          className="review-panel-entry-actions-icon"
-                          accessibilityLabel={t('reject_change')}
-                          type="close"
-                        />
-                      </button>
-                    </OLTooltip>
-                  </PreventSelectingEntry>
+                  <ChangeAction
+                    id="reject-change"
+                    label={translations.reject_change}
+                    type="close"
+                    handleClick={rejectHandler}
+                  />
                 )}
               </div>
             )}
@@ -169,21 +166,11 @@ export const ReviewPanelChange = memo<{
           <div className="review-panel-change-body">
             {'i' in change.op && (
               <>
-                {aggregateChange ? (
-                  <MaterialIcon
-                    className="review-panel-entry-icon review-panel-entry-change-icon review-panel-entry-icon-changed"
-                    type="edit"
-                  />
-                ) : (
-                  <MaterialIcon
-                    className="review-panel-entry-icon review-panel-entry-change-icon review-panel-entry-icon-accept"
-                    type="add_circle"
-                  />
-                )}
+                {aggregateChange ? <EditIcon /> : <AddIcon />}
 
                 {aggregateChange ? (
                   <span>
-                    {t('aggregate_changed')}:{' '}
+                    {translations.aggregate_changed}:{' '}
                     <del className="review-panel-content-highlight">
                       <ExpandableContent
                         inline
@@ -191,7 +178,7 @@ export const ReviewPanelChange = memo<{
                         checkNewLines={false}
                       />
                     </del>{' '}
-                    {t('aggregate_to')}{' '}
+                    {translations.aggregate_to}{' '}
                     <ExpandableContent
                       inline
                       content={change.op.i}
@@ -200,7 +187,7 @@ export const ReviewPanelChange = memo<{
                   </span>
                 ) : (
                   <span>
-                    {t('tracked_change_added')}:&nbsp;
+                    {translations.tracked_change_added}:&nbsp;
                     <ins className="review-panel-content-highlight">
                       <ExpandableContent
                         content={change.op.i}
@@ -214,13 +201,9 @@ export const ReviewPanelChange = memo<{
 
             {'d' in change.op && (
               <>
-                <MaterialIcon
-                  className="review-panel-entry-icon review-panel-entry-change-icon review-panel-entry-icon-reject"
-                  type="delete"
-                />
-
+                <DeleteIcon />
                 <span>
-                  {t('tracked_change_deleted')}:&nbsp;
+                  {translations.tracked_change_deleted}:&nbsp;
                   <del className="review-panel-content-highlight">
                     <ExpandableContent
                       content={change.op.d}

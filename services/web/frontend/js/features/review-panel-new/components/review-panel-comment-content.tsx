@@ -21,8 +21,8 @@ export const ReviewPanelCommentContent = memo<{
   onDeleteMessage?: (commentId: CommentId) => Promise<void>
   onDeleteThread?: (threadId: ThreadId) => Promise<void>
   onResolve?: () => Promise<void>
-  onLeave?: (changeId: string) => void
-  onEnter?: (changeId: string) => void
+  onLeave?: () => void
+  onEnter?: () => void
 }>(
   ({
     comment,
@@ -69,8 +69,8 @@ export const ReviewPanelCommentContent = memo<{
     return (
       <div
         className="review-panel-entry-content"
-        onMouseEnter={onEnter && (() => onEnter(comment.id))}
-        onMouseLeave={onLeave && (() => onLeave(comment.id))}
+        onMouseEnter={onEnter}
+        onMouseLeave={onLeave}
       >
         {thread.messages.map((message, i) => {
           const isReply = i !== 0

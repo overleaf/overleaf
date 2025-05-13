@@ -32,8 +32,8 @@ export type Ranges = {
 export const RangesContext = createContext<Ranges | undefined>(undefined)
 
 type RangesActions = {
-  acceptChanges: (...ids: string[]) => void
-  rejectChanges: (...ids: string[]) => void
+  acceptChanges: (...ids: string[]) => Promise<void>
+  rejectChanges: (...ids: string[]) => Promise<void>
 }
 
 const buildRanges = (currentDocument: DocumentContainer | null) => {
@@ -166,7 +166,7 @@ export const RangesProvider: FC<React.PropsWithChildren> = ({ children }) => {
           setRanges(buildRanges(currentDocument))
         }
       },
-      rejectChanges(...ids: string[]) {
+      async rejectChanges(...ids: string[]) {
         if (currentDocument?.ranges) {
           view.dispatch(rejectChanges(view.state, currentDocument.ranges, ids))
         }

@@ -53,7 +53,7 @@ const ReviewPanelCurrentFile: FC = () => {
     setHoveredEntry(id)
   }, [])
 
-  const handleEntryLeave = useCallback((id: string) => {
+  const handleEntryLeave = useCallback(() => {
     clearTimeout(hoverTimeout.current)
     hoverTimeout.current = window.setTimeout(() => {
       setHoveredEntry(null)
@@ -333,8 +333,8 @@ const ReviewPanelCurrentFile: FC = () => {
                 top={positions.get(change.id)}
                 aggregate={aggregatedRanges.aggregates.get(change.id)}
                 hovered={hoveredEntry === change.id}
-                onEnter={handleEntryEnter}
-                onLeave={handleEntryLeave}
+                handleEnter={handleEntryEnter}
+                handleLeave={handleEntryLeave}
               />
             )
         )}
@@ -348,8 +348,8 @@ const ReviewPanelCurrentFile: FC = () => {
                 comment={comment}
                 top={positions.get(comment.id)}
                 hovered={hoveredEntry === comment.id}
-                onEnter={handleEntryEnter}
-                onLeave={handleEntryLeave}
+                handleEnter={handleEntryEnter}
+                handleLeave={handleEntryLeave}
               />
             )
         )}

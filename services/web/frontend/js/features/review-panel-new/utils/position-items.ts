@@ -44,37 +44,39 @@ export const positionItems = debounce(
 
     const activeItemTop = getTopPosition(activeItem, activeItemIndex === 0)
 
-    activeItem.style.top = `${activeItemTop}px`
-    activeItem.style.visibility = 'visible'
-    const focusedItemRect = activeItem.getBoundingClientRect()
+    const positions: [HTMLElement, number][] = []
+    positions.push([activeItem, activeItemTop])
 
     // above the active item
     let topLimit = activeItemTop
     for (let i = activeItemIndex - 1; i >= 0; i--) {
       const item = items[i]
-      const rect = item.getBoundingClientRect()
+      const height = item.offsetHeight
       let top = getTopPosition(item, i === 0)
-      const bottom = top + rect.height
+      const bottom = top + height
       if (bottom > topLimit) {
-        top = topLimit - rect.height - GAP_BETWEEN_ENTRIES
+        top = topLimit - height - GAP_BETWEEN_ENTRIES
       }
-      item.style.top = `${top}px`
-      item.style.visibility = 'visible'
+      positions.push([item, top])
       topLimit = top
     }
 
     // below the active item
-    let bottomLimit = activeItemTop + focusedItemRect.height
+    let bottomLimit = activeItemTop + activeItem.offsetHeight
     for (let i = activeItemIndex + 1; i < items.length; i++) {
       const item = items[i]
-      const rect = item.getBoundingClientRect()
+      const height = item.offsetHeight
       let top = getTopPosition(item, false)
       if (top < bottomLimit) {
         top = bottomLimit + GAP_BETWEEN_ENTRIES
       }
+      positions.push([item, top])
+      bottomLimit = top + height
+    }
+
+    for (const [item, top] of positions) {
       item.style.top = `${top}px`
       item.style.visibility = 'visible'
-      bottomLimit = top + rect.height
     }
 
     return {

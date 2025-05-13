@@ -131,8 +131,8 @@ const ReviewTooltipMenuContent: FC<{ onAddComment: () => void }> = ({
     showGenericConfirmModal({
       message: t('confirm_accept_selected_changes', { count: nChanges }),
       title: t('accept_selected_changes'),
-      onConfirm: () => {
-        acceptChanges(...changeIdsInSelection)
+      onConfirm: async () => {
+        await acceptChanges(...changeIdsInSelection)
       },
       primaryVariant: 'danger',
     })
@@ -153,8 +153,8 @@ const ReviewTooltipMenuContent: FC<{ onAddComment: () => void }> = ({
     showGenericConfirmModal({
       message: t('confirm_reject_selected_changes', { count: nChanges }),
       title: t('reject_selected_changes'),
-      onConfirm: () => {
-        rejectChanges(...changeIdsInSelection)
+      onConfirm: async () => {
+        await rejectChanges(...changeIdsInSelection)
       },
       primaryVariant: 'danger',
     })
