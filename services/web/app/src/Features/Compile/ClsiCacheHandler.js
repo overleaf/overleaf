@@ -9,7 +9,15 @@ const Settings = require('@overleaf/settings')
 const OError = require('@overleaf/o-error')
 const { NotFoundError, InvalidNameError } = require('../Errors/Errors')
 
+/**
+ * Keep in sync with validateFilename in services/clsi-cache/app/js/utils.js
+ *
+ * @param {string} filename
+ */
 function validateFilename(filename) {
+  if (filename.split('/').includes('..')) {
+    throw new InvalidNameError('path traversal')
+  }
   if (
     !(
       [
