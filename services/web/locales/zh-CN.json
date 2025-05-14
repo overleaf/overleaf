@@ -806,6 +806,7 @@
   "generic_something_went_wrong": "抱歉，出错了",
   "get_collaborative_benefits": "从 __appName__ 获得协作优势，即使你喜欢离线工作",
   "get_discounted_plan": "获得折扣计划",
+  "get_error_assist": "获取错误帮助",
   "get_exclusive_access_to_labs": "加入 Overleaf Labs 后，即可获得早期实验的独家访问权。我们唯一的要求就是您提供真实的反馈，以帮助我们发展和改进。",
   "get_in_touch": "联系",
   "get_in_touch_having_problems": "如果遇到问题，请<a href=\"__link__\">与支持部门联系</a>",
