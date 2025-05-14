@@ -91,6 +91,11 @@ io.configure(function () {
     )
 
     io.set('origins', function (origin, req) {
+      if (!origin) {
+        // There is no origin or referer header - this is likely a same-site request.
+        logger.warn({ req }, 'No origin or referer header')
+        return true
+      }
       const normalizedOrigin = URL.parse(origin).origin
       const originIsValid = allowedCorsOriginsRegex.test(normalizedOrigin)
 
