@@ -5,6 +5,6 @@ settings
 --env-pass-through=
 --esmock-loader=False
 --is-library=True
---node-version=20.18.2
+--node-version=22.15.0
 --public-repo=False
 --script-version=4.7.0

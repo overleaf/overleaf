@@ -104,3 +104,8 @@ const fetchMock = require('fetch-mock').default
 fetchMock.spyGlobal()
 fetchMock.config.fetch = global.fetch
 fetchMock.config.Response = fetch.Response
+
+Object.defineProperty(navigator, 'onLine', {
+  configurable: true,
+  get: () => true,
+})

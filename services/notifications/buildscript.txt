@@ -4,6 +4,6 @@ notifications
 --env-add=
 --env-pass-through=
 --esmock-loader=False
---node-version=20.18.2
+--node-version=22.15.0
 --public-repo=True
 --script-version=4.7.0

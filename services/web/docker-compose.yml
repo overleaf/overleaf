@@ -6,7 +6,7 @@ volumes:
 services:
 
   test_unit:
-    image: node:20.18.2
+    image: node:22.15.0
     volumes:
       - .:/overleaf/services/web
       - ../../node_modules:/overleaf/node_modules
@@ -26,7 +26,7 @@ services:
       - mongo
 
   test_acceptance:
-    image: node:20.18.2
+    image: node:22.15.0
     volumes:
       - .:/overleaf/services/web
       - ../../node_modules:/overleaf/node_modules

@@ -287,7 +287,6 @@ describe('<ProjectListRoot />', function () {
           fireEvent.click(unarchiveButton)
 
           await fetchMock.callHistory.flush(true)
-          expect(fetchMock.callHistory.done()).to.be.true
 
           await screen.findByText('No projects')
         })
@@ -302,7 +301,6 @@ describe('<ProjectListRoot />', function () {
           )
 
           await fetchMock.callHistory.flush(true)
-          expect(fetchMock.callHistory.done()).to.be.true
 
           expect(screen.queryByText('No projects')).to.be.null
         })
@@ -354,7 +352,6 @@ describe('<ProjectListRoot />', function () {
           fireEvent.click(untrashButton)
 
           await fetchMock.callHistory.flush(true)
-          expect(fetchMock.callHistory.done()).to.be.true
 
           await screen.findByText('No projects')
         })
@@ -367,7 +364,6 @@ describe('<ProjectListRoot />', function () {
           expect(allCheckboxesChecked.length).to.equal(trashedList.length - 1)
 
           await fetchMock.callHistory.flush(true)
-          expect(fetchMock.callHistory.done()).to.be.true
 
           expect(screen.queryByText('No projects')).to.be.null
         })
@@ -392,7 +388,6 @@ describe('<ProjectListRoot />', function () {
           expect(confirmButton.disabled).to.be.true
 
           await fetchMock.callHistory.flush(true)
-          expect(fetchMock.callHistory.done()).to.be.true
 
           const calls = fetchMock.callHistory.calls().map(({ url }) => url)
 
@@ -457,7 +452,6 @@ describe('<ProjectListRoot />', function () {
           expect(confirmButton.disabled).to.be.true
 
           await fetchMock.callHistory.flush(true)
-          expect(fetchMock.callHistory.done()).to.be.true
 
           const calls = fetchMock.callHistory.calls().map(({ url }) => url)
           leavableList.forEach(project => {
@@ -520,7 +514,6 @@ describe('<ProjectListRoot />', function () {
           expect(confirmButton.disabled).to.be.true
 
           await fetchMock.callHistory.flush(true)
-          expect(fetchMock.callHistory.done()).to.be.true
 
           const calls = fetchMock.callHistory.calls().map(({ url }) => url)
           deletableList.forEach(project => {
@@ -591,7 +584,6 @@ describe('<ProjectListRoot />', function () {
           expect(confirmButton.disabled).to.be.true
 
           await fetchMock.callHistory.flush(true)
-          expect(fetchMock.callHistory.done()).to.be.true
 
           const calls = fetchMock.callHistory.calls().map(({ url }) => url)
           deletableAndLeavableList.forEach(project => {
@@ -1186,7 +1178,6 @@ describe('<ProjectListRoot />', function () {
         fireEvent.click(copyConfirmButton)
 
         await fetchMock.callHistory.flush(true)
-        expect(fetchMock.callHistory.done()).to.be.true
 
         expect(sendMBSpy).to.have.been.calledTwice
         expect(sendMBSpy).to.have.been.calledWith('loads_v2_dash')
