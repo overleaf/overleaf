@@ -1,24 +1,11 @@
-/* eslint-disable
-    n/handle-callback-err,
-    max-len,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-let CooldownManager
 const RedisWrapper = require('../../infrastructure/RedisWrapper')
 const rclient = RedisWrapper.client('cooldown')
 const logger = require('@overleaf/logger')
-const { promisifyAll } = require('@overleaf/promise-utils')
+const { promisify } = require('@overleaf/promise-utils')
 
 const COOLDOWN_IN_SECONDS = 60 * 10
 
-module.exports = CooldownManager = {
+const CooldownManager = {
   _buildKey(projectId) {
     return `Cooldown:{${projectId}}`
   },
@@ -31,7 +18,7 @@ module.exports = CooldownManager = {
       { projectId },
       `[Cooldown] putting project on cooldown for ${COOLDOWN_IN_SECONDS} seconds`
     )
-    return rclient.set(
+    rclient.set(
       CooldownManager._buildKey(projectId),
       '1',
       'EX',
@@ -44,18 +31,18 @@ module.exports = CooldownManager = {
     if (callback == null) {
       callback = function () {}
     }
-    return rclient.get(
-      CooldownManager._buildKey(projectId),
-      function (err, result) {
-        if (err != null) {
-          return callback(err)
-        }
-        return callback(null, result === '1')
+    rclient.get(CooldownManager._buildKey(projectId), function (err, result) {
+      if (err != null) {
+        return callback(err)
       }
-    )
+      return callback(null, result === '1')
+    })
   },
 }
 
-module.exports.promises = promisifyAll(module.exports, {
-  without: ['_buildKey'],
-})
+CooldownManager.promises = {
+  putProjectOnCooldown: promisify(CooldownManager.putProjectOnCooldown),
+  isProjectOnCooldown: promisify(CooldownManager.isProjectOnCooldown),
+}
+
+module.exports = CooldownManager
