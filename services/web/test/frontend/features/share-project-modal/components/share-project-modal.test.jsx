@@ -94,7 +94,6 @@ describe('<ShareProjectModal/>', function () {
     fetchMock.get('/user/contacts', { contacts })
     window.metaAttributesCache.set('ol-user', { allowedFreeTrial: true })
     window.metaAttributesCache.set('ol-showUpgradePrompt', true)
-    window.metaAttributesCache.set('ol-isReviewerRoleEnabled', true)
     window.metaAttributesCache.set('ol-preventCompileOnLoad', true)
   })
 

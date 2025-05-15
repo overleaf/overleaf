@@ -14,7 +14,6 @@ import OLForm from '@/features/ui/components/ol/ol-form'
 import OLFormGroup from '@/features/ui/components/ol/ol-form-group'
 import { Select } from '@/shared/components/select'
 import OLButton from '@/features/ui/components/ol/ol-button'
-import getMeta from '@/utils/meta'
 
 export default function AddCollaborators({ readOnly }) {
   const [privileges, setPrivileges] = useState('readAndWrite')
@@ -178,29 +177,23 @@ export default function AddCollaborators({ readOnly }) {
   ])
 
   const privilegeOptions = useMemo(() => {
-    const options = [
+    return [
       {
         key: 'readAndWrite',
         label: t('editor'),
       },
-    ]
-
-    if (getMeta('ol-isReviewerRoleEnabled')) {
-      options.push({
+      {
         key: 'review',
         label: t('reviewer'),
         description: !features.trackChanges
           ? t('comment_only_upgrade_for_track_changes')
           : null,
-      })
-    }
-
-    options.push({
-      key: 'readOnly',
-      label: t('viewer'),
-    })
-
-    return options
+      },
+      {
+        key: 'readOnly',
+        label: t('viewer'),
+      },
+    ]
   }, [features.trackChanges, t])
 
   return (

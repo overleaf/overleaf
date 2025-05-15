@@ -1,8 +1,7 @@
-import getMeta from '@/utils/meta'
 import { debounce } from 'lodash'
 
 export const OFFSET_FOR_ENTRIES_ABOVE = 70
-const COLLAPSED_HEADER_HEIGHT = getMeta('ol-isReviewerRoleEnabled') ? 42 : 75
+const COLLAPSED_HEADER_HEIGHT = 42
 const GAP_BETWEEN_ENTRIES = 4
 
 export const positionItems = debounce(

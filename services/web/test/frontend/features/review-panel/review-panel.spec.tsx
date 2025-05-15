@@ -10,7 +10,6 @@ import { docId } from '../source-editor/helpers/mock-doc'
 
 describe('<ReviewPanel />', function () {
   beforeEach(function () {
-    window.metaAttributesCache.set('ol-isReviewerRoleEnabled', true)
     window.metaAttributesCache.set('ol-preventCompileOnLoad', true)
 
     cy.interceptEvents()
@@ -650,7 +649,6 @@ describe('<ReviewPanel /> for free users', function () {
   }
 
   beforeEach(function () {
-    window.metaAttributesCache.set('ol-isReviewerRoleEnabled', true)
     window.metaAttributesCache.set('ol-preventCompileOnLoad', true)
     cy.interceptEvents()
     cy.intercept('GET', '/project/*/changes/users', [])

@@ -5,7 +5,6 @@ import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
 import { ReviewPanelResolvedThreadsMenu } from './review-panel-resolved-threads-menu'
 import { useTranslation } from 'react-i18next'
 import MaterialIcon from '@/shared/components/material-icon'
-import getMeta from '@/utils/meta'
 
 export const ReviewPanelResolvedThreadsButton: FC = () => {
   const [expanded, setExpanded] = useState(false)
@@ -20,11 +19,7 @@ export const ReviewPanelResolvedThreadsButton: FC = () => {
         description={t('resolved_comments')}
       >
         <button
-          className={
-            getMeta('ol-isReviewerRoleEnabled')
-              ? 'review-panel-resolved-comments-toggle-reviewer-role'
-              : 'review-panel-resolved-comments-toggle'
-          }
+          className="review-panel-resolved-comments-toggle"
           ref={buttonRef}
           onClick={() => setExpanded(true)}
           aria-label={t('resolved_comments')}

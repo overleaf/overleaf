@@ -250,75 +250,7 @@ del.review-panel-content-highlight {
   z-index: 4;
 }
 
-// TODO: Update this when we move the track changes menu to the new design
-.rp-tc-state {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
-  overflow: hidden;
-  list-style: none;
-  padding: 0 var(--spacing-03);
-  margin: 0;
-  border-bottom: 1px solid var(--rp-border-grey);
-  text-align: left;
-  background-color: var(--white);
-  max-height: calc(
-    100vh - var(--review-panel-top) - var(--review-panel-header-height)
-  );
-  overflow-y: auto;
-
-  .rp-tc-state-item {
-    display: flex;
-    align-items: center;
-    padding: var(--spacing-02) 0;
-
-    &:last-of-type {
-      padding-bottom: var(--spacing-03);
-    }
-  }
-
-  .rp-tc-state-item-name {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    flex-grow: 1;
-    font-weight: 600;
-  }
-}
-
-.review-panel-tools {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding-left: var(--spacing-02);
-  padding-right: var(--spacing-05);
-  flex-shrink: 0;
-  flex-basis: 32px;
-}
-
 .review-panel-resolved-comments-toggle {
-  background-color: var(--bg-light-secondary);
-  font-size: var(--font-size-02);
-  color: color.adjust($rp-type-blue, $lightness: 25%);
-  border: solid 1px var(--rp-border-grey);
-  border-radius: var(--border-radius-base);
-  padding: 0;
-  height: 22px;
-  width: 22px;
-  line-height: 1.4;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  &:hover,
-  &:focus {
-    text-decoration: none;
-    color: var(--rp-type-blue);
-  }
-}
-
-.review-panel-resolved-comments-toggle-reviewer-role {
   display: flex;
   align-items: center;
   border: none;
@@ -330,27 +262,6 @@ del.review-panel-content-highlight {
   &:hover,
   &:focus {
     background-color: var(--review-panel-button-hover-bg-color);
-  }
-}
-
-.track-changes-indicator-circle {
-  width: 8px;
-  height: 8px;
-  border-radius: 100%;
-  background-color: var(--bg-accent-01);
-}
-
-.track-changes-menu-button {
-  border: none;
-  background: none;
-  padding: 0;
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-02);
-  font-size: var(--font-size-02);
-
-  i {
-    width: 8px;
   }
 }
 
@@ -778,56 +689,6 @@ del.review-panel-content-highlight {
 
 .review-panel-tooltip {
   pointer-events: none; // this is to prevent mouseLeave event from firing when hovering over the tooltip
-}
-
-.review-panel-in-editor-widgets {
-  position: sticky;
-  top: 0;
-  right: 0;
-  font-size: 11px;
-  z-index: 2;
-  font-family: $font-family-base;
-
-  .review-panel-in-editor-widgets-inner {
-    position: absolute;
-    top: 0;
-    right: 0;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .review-panel-track-changes-indicator {
-    border: 0;
-  }
-}
-
-.review-panel-track-changes-indicator {
-  display: block;
-  padding: 5px 10px;
-  background-color: rgb(240 240 240 / 90%);
-  color: var(--rp-type-blue);
-  text-align: center;
-  border-bottom-left-radius: 3px;
-  white-space: nowrap;
-
-  &.review-panel-track-changes-indicator-on-dark {
-    background-color: rgb(88 88 88 / 80%);
-    color: #fff;
-
-    &:hover,
-    &:focus {
-      background-color: rgb(88 88 88 / 100%);
-      color: #fff;
-    }
-  }
-
-  &:hover,
-  &:focus {
-    outline: 0;
-    text-decoration: none;
-    background-color: rgb(240 240 240 / 100%);
-    color: var(--rp-type-blue);
-  }
 }
 
 .review-mode-switcher-container {

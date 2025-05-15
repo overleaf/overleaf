@@ -140,7 +140,6 @@ export interface Meta {
   'ol-isProfessional': boolean
   'ol-isRegisteredViaGoogle': boolean
   'ol-isRestrictedTokenMember': boolean
-  'ol-isReviewerRoleEnabled': boolean
   'ol-isSaas': boolean
   'ol-itm_campaign': string
   'ol-itm_content': string

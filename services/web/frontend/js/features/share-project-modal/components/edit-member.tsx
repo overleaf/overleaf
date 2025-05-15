@@ -14,9 +14,7 @@ import OLButton from '@/features/ui/components/ol/ol-button'
 import OLFormGroup from '@/features/ui/components/ol/ol-form-group'
 import OLCol from '@/features/ui/components/ol/ol-col'
 import MaterialIcon from '@/shared/components/material-icon'
-import getMeta from '@/utils/meta'
 import { useUserContext } from '@/shared/context/user-context'
-import { isSplitTestEnabled } from '@/utils/splitTestUtils'
 import { upgradePlan } from '@/main/account-upgrade'
 
 type PermissionsOption = PermissionsLevel | 'removeAccess' | 'downgraded'
@@ -256,21 +254,13 @@ function SelectPrivilege({
   const { features } = useProjectContext()
 
   const privileges = useMemo(
-    (): Privilege[] =>
-      getMeta('ol-isReviewerRoleEnabled')
-        ? [
-            { key: 'owner', label: t('make_owner') },
-            { key: 'readAndWrite', label: t('editor') },
-            { key: 'review', label: t('reviewer') },
-            { key: 'readOnly', label: t('viewer') },
-            { key: 'removeAccess', label: t('remove_access') },
-          ]
-        : [
-            { key: 'owner', label: t('make_owner') },
-            { key: 'readAndWrite', label: t('editor') },
-            { key: 'readOnly', label: t('viewer') },
-            { key: 'removeAccess', label: t('remove_access') },
-          ],
+    (): Privilege[] => [
+      { key: 'owner', label: t('make_owner') },
+      { key: 'readAndWrite', label: t('editor') },
+      { key: 'review', label: t('reviewer') },
+      { key: 'readOnly', label: t('viewer') },
+      { key: 'removeAccess', label: t('remove_access') },
+    ],
     [t]
   )
 
@@ -284,27 +274,13 @@ function SelectPrivilege({
       return ''
     }
 
-    if (hasBeenDowngraded) {
-      if (isSplitTestEnabled('reviewer-role')) {
-        return t('limited_to_n_collaborators_per_project', {
-          count: features.collaborators,
-        })
-      } else {
-        return t('limited_to_n_editors', { count: features.collaborators })
-      }
-    } else if (
-      !canAddCollaborators &&
-      !['readAndWrite', 'review'].includes(value)
+    if (
+      hasBeenDowngraded ||
+      (!canAddCollaborators && !['readAndWrite', 'review'].includes(value))
     ) {
-      if (isSplitTestEnabled('reviewer-role')) {
-        return t('limited_to_n_collaborators_per_project', {
-          count: features.collaborators,
-        })
-      } else {
-        return t('limited_to_n_editors_per_project', {
-          count: features.collaborators,
-        })
-      }
+      return t('limited_to_n_collaborators_per_project', {
+        count: features.collaborators,
+      })
     } else {
       return ''
     }

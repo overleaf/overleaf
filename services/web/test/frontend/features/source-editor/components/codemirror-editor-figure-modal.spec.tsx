@@ -509,7 +509,7 @@ describe('<FigureModal />', function () {
 \\end{{}figure}`,
         { delay: 0 }
       )
-      cy.get('[aria-label="Edit figure"]').click()
+      cy.get('[aria-label="Edit figure"]').click({ force: true })
       cy.findByRole('checkbox', { name: 'Include caption' }).should(
         'be.checked'
       )
@@ -526,7 +526,7 @@ describe('<FigureModal />', function () {
 \\end{{}figure}`,
         { delay: 0 }
       )
-      cy.get('[aria-label="Edit figure"]').click()
+      cy.get('[aria-label="Edit figure"]').click({ force: true })
       cy.get('[value="0.75"]').should('be.checked')
     })
 
@@ -539,7 +539,7 @@ describe('<FigureModal />', function () {
 \\end{{}figure}`,
         { delay: 0 }
       )
-      cy.get('[aria-label="Edit figure"]').click()
+      cy.get('[aria-label="Edit figure"]').click({ force: true })
       cy.findByRole('checkbox', { name: 'Include label' }).click()
       cy.findByRole('checkbox', { name: 'Include label' }).should(
         'not.be.checked'
@@ -561,7 +561,7 @@ describe('<FigureModal />', function () {
 \\end{{}figure}`,
         { delay: 0 }
       )
-      cy.get('[aria-label="Edit figure"]').click()
+      cy.get('[aria-label="Edit figure"]').click({ force: true })
       cy.findByRole('checkbox', { name: 'Include caption' }).click()
       cy.findByRole('checkbox', { name: 'Include caption' }).should(
         'not.be.checked'
@@ -585,7 +585,7 @@ describe('<FigureModal />', function () {
 text below`,
         { delay: 0 }
       )
-      cy.get('[aria-label="Edit figure"]').click()
+      cy.get('[aria-label="Edit figure"]').click({ force: true })
       cy.findByRole('button', { name: 'Remove or replace figure' }).click()
       cy.findByText('Delete figure').click()
       cy.get('.cm-content').should('have.text', 'text abovetext below')
