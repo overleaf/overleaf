@@ -11,6 +11,17 @@ export type CustomerSubscriptionUpdatedWebhookEvent = {
     // https://docs.stripe.com/api/events/object?api-version=2025-04-30.basil#event_object-data-previous_attributes
     previous_attributes: {
       cancel_at_period_end?: boolean // will only be present if the subscription was cancelled or reactivated
+      items?: {
+        // will be present if the subscription was downgraded, upgraded, or renewed
+        data: [
+          {
+            price: {
+              id: string
+            }
+            quantity: number
+          },
+        ]
+      }
     }
   }
 }
