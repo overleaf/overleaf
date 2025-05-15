@@ -97,7 +97,8 @@ module.exports = class RedisLocker {
   }
 
   /**
-   * @param {Callback} callback
+   * @param {string} id
+   * @param {function(Error, boolean, string): void} callback
    */
   tryLock(id, callback) {
     if (callback == null) {
@@ -106,7 +107,7 @@ module.exports = class RedisLocker {
     const lockValue = this.randomLock()
     const key = this.getKey(id)
     const startTime = Date.now()
-    return this.rclient.set(
+    this.rclient.set(
       key,
       lockValue,
       'EX',
@@ -121,7 +122,7 @@ module.exports = class RedisLocker {
           const timeTaken = Date.now() - startTime
           if (timeTaken > MAX_REDIS_REQUEST_LENGTH) {
             // took too long, so try to free the lock
-            return this.releaseLock(id, lockValue, function (err, result) {
+            this.releaseLock(id, lockValue, function (err, result) {
               if (err != null) {
                 return callback(err)
               } // error freeing lock
@@ -139,7 +140,8 @@ module.exports = class RedisLocker {
   }
 
   /**
-   * @param {Callback} callback
+   * @param {string} id
+   * @param {function(Error, string): void} callback
    */
   getLock(id, callback) {
     if (callback == null) {
@@ -153,7 +155,7 @@ module.exports = class RedisLocker {
         return callback(e)
       }
 
-      return this.tryLock(id, (error, gotLock, lockValue) => {
+      this.tryLock(id, (error, gotLock, lockValue) => {
         if (error != null) {
           return callback(error)
         }
@@ -173,14 +175,15 @@ module.exports = class RedisLocker {
   }
 
   /**
-   * @param {Callback} callback
+   * @param {string} id
+   * @param {function(Error, boolean): void} callback
    */
   checkLock(id, callback) {
     if (callback == null) {
       callback = function () {}
     }
     const key = this.getKey(id)
-    return this.rclient.exists(key, (err, exists) => {
+    this.rclient.exists(key, (err, exists) => {
       if (err != null) {
         return callback(err)
       }
@@ -196,30 +199,26 @@ module.exports = class RedisLocker {
   }
 
   /**
-   * @param {Callback} callback
+   * @param {string} id
+   * @param {string} lockValue
+   * @param {function(Error, boolean): void} callback
    */
   releaseLock(id, lockValue, callback) {
     const key = this.getKey(id)
-    return this.rclient.eval(
-      UNLOCK_SCRIPT,
-      1,
-      key,
-      lockValue,
-      (err, result) => {
-        if (err != null) {
-          return callback(err)
-        } else if (result != null && result !== 1) {
-          // successful unlock should release exactly one key
-          logger.error(
-            { id, key, lockValue, redis_err: err, redis_result: result },
-            'unlocking error'
-          )
-          metrics.inc(this.metricsPrefix + '-unlock-error')
-          return callback(new Error('tried to release timed out lock'))
-        } else {
-          return callback(null, result)
-        }
+    this.rclient.eval(UNLOCK_SCRIPT, 1, key, lockValue, (err, result) => {
+      if (err != null) {
+        return callback(err)
+      } else if (result != null && result !== 1) {
+        // successful unlock should release exactly one key
+        logger.error(
+          { id, key, lockValue, redis_err: err, redis_result: result },
+          'unlocking error'
+        )
+        metrics.inc(this.metricsPrefix + '-unlock-error')
+        return callback(new Error('tried to release timed out lock'))
+      } else {
+        return callback(null, result)
       }
-    )
+    })
   }
 }
