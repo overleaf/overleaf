@@ -1,12 +1,22 @@
 import Stripe from 'stripe'
 
-type StripeWebhookEventType =
-  | 'customer.subscription.created'
-  | 'customer.subscription.updated'
-  | 'customer.subscription.deleted'
+export type CustomerSubscriptionUpdatedWebhookEvent = {
+  type: 'customer.subscription.updated'
+  data: {
+    object: Stripe.Subscription & {
+      metadata: {
+        adminUserId?: string
+      }
+    }
+    // https://docs.stripe.com/api/events/object?api-version=2025-04-30.basil#event_object-data-previous_attributes
+    previous_attributes: {
+      cancel_at_period_end?: boolean // will only be present if the subscription was cancelled or reactivated
+    }
+  }
+}
 
-export type CustomerSubscriptionWebhookEvent = {
-  type: StripeWebhookEventType
+export type CustomerSubscriptionCreatedWebhookEvent = {
+  type: 'customer.subscription.created'
   data: {
     object: Stripe.Subscription & {
       metadata: {
@@ -15,3 +25,19 @@ export type CustomerSubscriptionWebhookEvent = {
     }
   }
 }
+
+export type CustomerSubscriptionsDeletedWebhookEvent = {
+  type: 'customer.subscription.deleted'
+  data: {
+    object: Stripe.Subscription & {
+      metadata: {
+        adminUserId?: string
+      }
+    }
+  }
+}
+
+export type CustomerSubscriptionWebhookEvent =
+  | CustomerSubscriptionUpdatedWebhookEvent
+  | CustomerSubscriptionCreatedWebhookEvent
+  | CustomerSubscriptionsDeletedWebhookEvent
