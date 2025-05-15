@@ -114,7 +114,7 @@ function SuccessfulSubscription() {
                 href={postCheckoutRedirect || '/project'}
                 rel="noopener noreferrer"
               >
-                &lt; {t('back_to_your_projects')}
+                {t('back_to_your_projects')}
               </a>
             </p>
           </OLPageContentCard>
