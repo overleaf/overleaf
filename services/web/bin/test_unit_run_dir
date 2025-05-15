@@ -1,9 +1,28 @@
 #!/bin/bash
 
-TARGET_DIR=$1
+declare -a vitest_args=("$@")
 
+has_mocha_test=0
+has_mocha_mjs_test=0
+has_vitest_test=0
 
-declare -a vitest_args=("$TARGET_DIR")
+mocha_mjs_dirs=()
+
+for dir_path in "$@"; do
+  if [ -n "$(find "$dir_path" -name "*.js" -type f -print -quit 2>/dev/null)" ]; then
+    has_mocha_test=1
+  fi
+
+  if [ -n "$(find "$dir_path" -name "*Tests.mjs" -type f -print -quit 2>/dev/null)" ]; then
+    has_mocha_mjs_test=1
+    mocha_mjs_dirs+=("$dir_path/**/*Tests.mjs")
+  fi
+
+  if [ -n "$(find "$dir_path" -name "*.test.mjs" -type f -print -quit 2>/dev/null)" ]; then
+    has_vitest_test=1
+  fi
+
+done
 
 if [[ -n "$MOCHA_GREP" ]]; then
   vitest_args+=("--testNamePattern" "$MOCHA_GREP")
@@ -14,31 +33,43 @@ if [[ -n "$VITEST_NO_CACHE" ]]; then
   vitest_args+=("--no-cache")
 fi
 
-echo "Running unit tests in directory: $TARGET_DIR"
+echo "Running unit tests in directory: $*"
 
-npm run test:unit:esm -- "${vitest_args[@]}"
-
-vitest_status=$?
-
-if find "$TARGET_DIR" -type f -name "*.js" -print -quit | grep -q '.'; then
-  mocha --recursive --timeout 25000 --exit --grep="$MOCHA_GREP" --require test/unit/bootstrap.js --extension=js "$TARGET_DIR"
-  mocha_status=$?
+# Remove this if/else when we have converted all module tests to vitest.
+if (( has_vitest_test == 1 )); then
+  npm run test:unit:esm -- "${vitest_args[@]}"
+  vitest_status=$?
 else
+  echo "No vitest tests found in $*, skipping vitest step."
+  vitest_status=0
+fi
+
+if (( has_mocha_test == 1 )); then
+  mocha --recursive --timeout 25000 --exit --grep="$MOCHA_GREP" --require test/unit/bootstrap.js --extension=js "$@"
+  mocha_status=$?
+fi
+# Remove this if/else when we have converted all module tests to vitest.
+if (( has_mocha_mjs_test == 1)); then
+  mocha --recursive --timeout 25000 --exit --grep="$MOCHA_GREP" --require test/unit/bootstrap.js --extension=mjs "${mocha_mjs_dirs[@]}"
+  mocha_status=$((mocha_status != 0 ? mocha_status : $?))
+fi
+
+if (( has_mocha_mjs_test == 0 && has_mocha_test == 0 )); then
   echo "No mocha tests found in $TARGET_DIR, skipping mocha step."
   mocha_status=0
 fi
 
-if [ $mocha_status -eq 0 ] && [ $vitest_status -eq 0 ]; then
+if [ "$mocha_status" -eq 0 ] && [ "$vitest_status" -eq 0 ]; then
   exit 0
 fi
 
 # Report status briefly at the end for failures
 
-if [ $mocha_status -ne 0 ]; then
+if [ "$mocha_status" -ne 0 ]; then
   echo "Mocha tests failed with status: $mocha_status"
 fi
 
-if [ $vitest_status -ne 0 ]; then
+if [ "$vitest_status" -ne 0 ]; then
   echo "Vitest tests failed with status: $vitest_status"
 fi
 
