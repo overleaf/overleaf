@@ -384,6 +384,8 @@ ul.project-list-filters {
 
   .dash-cell-owner {
     width: 20%;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .dash-cell-date {
