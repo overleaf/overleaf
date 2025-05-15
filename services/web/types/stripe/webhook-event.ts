@@ -48,7 +48,18 @@ export type CustomerSubscriptionsDeletedWebhookEvent = {
   }
 }
 
+export type InvoicePaidWebhookEvent = {
+  type: 'invoice.paid'
+  data: {
+    object: Stripe.Invoice
+  }
+}
+
 export type CustomerSubscriptionWebhookEvent =
   | CustomerSubscriptionUpdatedWebhookEvent
   | CustomerSubscriptionCreatedWebhookEvent
   | CustomerSubscriptionsDeletedWebhookEvent
+
+export type WebhookEvent =
+  | CustomerSubscriptionWebhookEvent
+  | InvoicePaidWebhookEvent
