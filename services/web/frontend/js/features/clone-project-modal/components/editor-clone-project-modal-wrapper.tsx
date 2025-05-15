@@ -1,11 +1,18 @@
 import React from 'react'
-import PropTypes from 'prop-types'
 import { useProjectContext } from '../../../shared/context/project-context'
 import withErrorBoundary from '../../../infrastructure/error-boundary'
 import CloneProjectModal from './clone-project-modal'
 
 const EditorCloneProjectModalWrapper = React.memo(
-  function EditorCloneProjectModalWrapper({ show, handleHide, openProject }) {
+  function EditorCloneProjectModalWrapper({
+    show,
+    handleHide,
+    openProject,
+  }: {
+    show: boolean
+    handleHide: () => void
+    openProject: ({ project_id }: { project_id: string }) => void
+  }) {
     const {
       _id: projectId,
       name: projectName,
@@ -29,11 +36,5 @@ const EditorCloneProjectModalWrapper = React.memo(
     }
   }
 )
-
-EditorCloneProjectModalWrapper.propTypes = {
-  handleHide: PropTypes.func.isRequired,
-  show: PropTypes.bool.isRequired,
-  openProject: PropTypes.func.isRequired,
-}
 
 export default withErrorBoundary(EditorCloneProjectModalWrapper)

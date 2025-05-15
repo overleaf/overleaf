@@ -1,7 +1,8 @@
 import React, { memo, useCallback, useState } from 'react'
-import PropTypes from 'prop-types'
 import CloneProjectModalContent from './clone-project-modal-content'
 import OLModal from '@/features/ui/components/ol/ol-modal'
+import { ClonedProject } from '../../../../../types/project/dashboard/api'
+import { Tag } from '../../../../../app/src/Features/Tags/types'
 
 function CloneProjectModal({
   show,
@@ -10,6 +11,13 @@ function CloneProjectModal({
   projectId,
   projectName,
   projectTags,
+}: {
+  show: boolean
+  handleHide: () => void
+  handleAfterCloned: (clonedProject: ClonedProject, tags: Tag[]) => void
+  projectId: string
+  projectName: string
+  projectTags: Tag[]
 }) {
   const [inFlight, setInFlight] = useState(false)
 
@@ -40,21 +48,6 @@ function CloneProjectModal({
       />
     </OLModal>
   )
-}
-
-CloneProjectModal.propTypes = {
-  handleHide: PropTypes.func.isRequired,
-  show: PropTypes.bool.isRequired,
-  handleAfterCloned: PropTypes.func.isRequired,
-  projectId: PropTypes.string,
-  projectName: PropTypes.string,
-  projectTags: PropTypes.arrayOf(
-    PropTypes.shape({
-      _id: PropTypes.string.isRequired,
-      name: PropTypes.string.isRequired,
-      color: PropTypes.string,
-    })
-  ),
 }
 
 export default memo(CloneProjectModal)

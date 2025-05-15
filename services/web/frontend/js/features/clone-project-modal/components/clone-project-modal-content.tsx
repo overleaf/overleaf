@@ -1,6 +1,5 @@
 /* eslint-disable jsx-a11y/no-autofocus */
-import PropTypes from 'prop-types'
-import { useCallback, useMemo, useState } from 'react'
+import { FormEvent, useCallback, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { postJSON } from '../../../infrastructure/fetch-json'
 import { CloneProjectTag } from './clone-project-tag'
@@ -16,6 +15,7 @@ import OLFormGroup from '@/features/ui/components/ol/ol-form-group'
 import OLFormControl from '@/features/ui/components/ol/ol-form-control'
 import OLFormLabel from '@/features/ui/components/ol/ol-form-label'
 import OLButton from '@/features/ui/components/ol/ol-button'
+import { Tag } from '../../../../../app/src/Features/Tags/types'
 
 export default function CloneProjectModalContent({
   handleHide,
@@ -25,10 +25,18 @@ export default function CloneProjectModalContent({
   projectId,
   projectName,
   projectTags,
+}: {
+  handleHide: () => void
+  inFlight: boolean
+  setInFlight: (inFlight: boolean) => void
+  handleAfterCloned: (clonedProject: any, tags: Tag[]) => void
+  projectId: string
+  projectName: string
+  projectTags: Tag[]
 }) {
   const { t } = useTranslation()
 
-  const [error, setError] = useState()
+  const [error, setError] = useState<string | boolean>()
   const [clonedProjectName, setClonedProjectName] = useState(
     `${projectName} (Copy)`
   )
@@ -42,7 +50,7 @@ export default function CloneProjectModalContent({
   )
 
   // form submission: clone the project if the name is valid
-  const handleSubmit = event => {
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
 
     if (!valid) {
@@ -75,7 +83,7 @@ export default function CloneProjectModalContent({
       })
   }
 
-  const removeTag = useCallback(tag => {
+  const removeTag = useCallback((tag: Tag) => {
     setClonedProjectTags(value => value.filter(item => item._id !== tag._id))
   }, [])
 
@@ -120,7 +128,11 @@ export default function CloneProjectModalContent({
 
         {error && (
           <Notification
-            content={error.length ? error : t('generic_something_went_wrong')}
+            content={
+              typeof error === 'string' && error.length
+                ? error
+                : t('generic_something_went_wrong')
+            }
             type="error"
           />
         )}
@@ -141,19 +153,4 @@ export default function CloneProjectModalContent({
       </OLModalFooter>
     </>
   )
-}
-CloneProjectModalContent.propTypes = {
-  handleHide: PropTypes.func.isRequired,
-  inFlight: PropTypes.bool,
-  setInFlight: PropTypes.func.isRequired,
-  handleAfterCloned: PropTypes.func.isRequired,
-  projectId: PropTypes.string,
-  projectName: PropTypes.string,
-  projectTags: PropTypes.arrayOf(
-    PropTypes.shape({
-      _id: PropTypes.string.isRequired,
-      name: PropTypes.string.isRequired,
-      color: PropTypes.string,
-    })
-  ),
 }
