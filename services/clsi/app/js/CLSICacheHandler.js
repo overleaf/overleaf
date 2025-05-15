@@ -41,7 +41,6 @@ function getShard(projectId) {
  * @param {string} editorId
  * @param {[{path: string}]} outputFiles
  * @param {string} compileGroup
- * @param {boolean} clsiCacheSharded
  * @param {Record<string, any>} options
  * @return {string | undefined}
  */
@@ -52,17 +51,11 @@ function notifyCLSICacheAboutBuild({
   editorId,
   outputFiles,
   compileGroup,
-  clsiCacheSharded,
   options,
 }) {
   if (!Settings.apis.clsiCache.enabled) return undefined
   if (!OBJECT_ID_REGEX.test(projectId)) return undefined
-  let { url, shard } = getShard(projectId)
-  if (!clsiCacheSharded) {
-    // Client is not aware of sharding yet.
-    url = Settings.apis.clsiCache.url
-    shard = 'cache'
-  }
+  const { url, shard } = getShard(projectId)
 
   /**
    * @param {[{path: string}]} files

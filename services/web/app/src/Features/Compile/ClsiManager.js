@@ -781,7 +781,6 @@ function _finaliseRequest(projectId, options, project, docs, files) {
         imageName: project.imageName,
         draft: Boolean(options.draft),
         stopOnFirstError: Boolean(options.stopOnFirstError),
-        clsiCacheSharded: Boolean(options.clsiCacheSharded),
         check: options.check,
         syncType: options.syncType,
         syncState: options.syncState,

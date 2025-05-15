@@ -60,16 +60,8 @@ module.exports = {
       }`,
     },
     clsiCache: {
-      enabled: !!(process.env.CLSI_CACHE_SHARDS || process.env.CLSI_CACHE_HOST),
-      url: `http://${process.env.CLSI_CACHE_HOST}:3044`,
-      shards: process.env.CLSI_CACHE_SHARDS
-        ? JSON.parse(process.env.CLSI_CACHE_SHARDS)
-        : [
-            {
-              url: `http://${process.env.CLSI_CACHE_HOST}:3044`,
-              shard: 'cache',
-            },
-          ],
+      enabled: !!process.env.CLSI_CACHE_SHARDS,
+      shards: JSON.parse(process.env.CLSI_CACHE_SHARDS || '[]'),
     },
   },
 
