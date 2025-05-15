@@ -4,16 +4,15 @@ import sinon from 'sinon'
 import logger from '@overleaf/logger'
 
 vi.mock('@overleaf/logger', async () => {
-  const sinon = (await import('sinon')).default
   return {
     default: {
-      debug: sinon.stub(),
-      info: sinon.stub(),
-      log: sinon.stub(),
-      warn: sinon.stub(),
-      err: sinon.stub(),
-      error: sinon.stub(),
-      fatal: sinon.stub(),
+      debug: vi.fn(),
+      info: vi.fn(),
+      log: vi.fn(),
+      warn: vi.fn(),
+      err: vi.fn(),
+      error: vi.fn(),
+      fatal: vi.fn(),
     },
   }
 })
