@@ -22,11 +22,6 @@ export default {
       HomeController.externalPage('planned_maintenance', 'Planned Maintenance')
     )
 
-    webRouter.get(
-      '/track-changes-and-comments-in-latex',
-      HomeController.externalPage('review-features-page', 'Review features')
-    )
-
     webRouter.get('/university', UniversityController.getIndexPage)
     return webRouter.get('/university/*', UniversityController.getPage)
   },
