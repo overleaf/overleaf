@@ -21,6 +21,7 @@ import { PermissionsLevel } from '@/features/ide-react/types/permissions'
 import { useModalsContext } from '@/features/ide-react/context/modals-context'
 import { WritefullAPI } from './types/writefull-instance'
 import { Cobranding } from '../../../../types/cobranding'
+import { SymbolWithCharacter } from '../../../../modules/symbol-palette/frontend/js/data/symbols'
 
 export const EditorContext = createContext<
   | {
@@ -30,7 +31,7 @@ export const EditorContext = createContext<
       setPermissionsLevel: (permissionsLevel: PermissionsLevel) => void
       showSymbolPalette?: boolean
       toggleSymbolPalette?: () => void
-      insertSymbol?: (symbol: string) => void
+      insertSymbol?: (symbol: SymbolWithCharacter) => void
       isProjectOwner: boolean
       isRestrictedTokenMember?: boolean
       isPendingEditor: boolean
@@ -169,7 +170,7 @@ export const EditorProvider: FC<React.PropsWithChildren> = ({ children }) => {
     setTitle(title)
   }, [projectName, setTitle, role])
 
-  const insertSymbol = useCallback((symbol: string) => {
+  const insertSymbol = useCallback((symbol: SymbolWithCharacter) => {
     window.dispatchEvent(
       new CustomEvent('editor:insert-symbol', {
         detail: symbol,
