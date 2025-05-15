@@ -35,6 +35,14 @@ describe('OError', function () {
     expect(err2.cause.message).to.equal('cause 2')
   })
 
+  it('accepts non-Error causes', function () {
+    const err1 = new OError('foo', {}, 'not-an-error')
+    expect(err1.cause).to.equal('not-an-error')
+
+    const err2 = new OError('foo').withCause('not-an-error')
+    expect(err2.cause).to.equal('not-an-error')
+  })
+
   it('handles a custom error type with a cause', function () {
     function doSomethingBadInternally() {
       throw new Error('internal error')

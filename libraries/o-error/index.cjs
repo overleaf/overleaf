@@ -1,20 +1,34 @@
+// @ts-check
+
 /**
  * Light-weight helpers for handling JavaScript Errors in node.js and the
  * browser.
  */
 class OError extends Error {
   /**
+   * The error that is the underlying cause of this error
+   *
+   * @type {unknown}
+   */
+  cause
+
+  /**
+   * List of errors encountered as the callback chain is unwound
+   *
+   * @type {TaggedError[] | undefined}
+   */
+  _oErrorTags
+
+  /**
    * @param {string} message as for built-in Error
    * @param {Object} [info] extra data to attach to the error
-   * @param {Error} [cause] the internal error that caused this error
+   * @param {unknown} [cause] the internal error that caused this error
    */
   constructor(message, info, cause) {
     super(message)
     this.name = this.constructor.name
     if (info) this.info = info
     if (cause) this.cause = cause
-    /** @private @type {Array<TaggedError> | undefined} */
-    this._oErrorTags // eslint-disable-line
   }
 
   /**
@@ -31,7 +45,7 @@ class OError extends Error {
   /**
    * Wrap the given error, which caused this error.
    *
-   * @param {Error} cause the internal error that caused this error
+   * @param {unknown} cause the internal error that caused this error
    * @return {this}
    */
   withCause(cause) {
@@ -65,13 +79,16 @@ class OError extends Error {
    *   }
    * }
    *
-   * @param {Error} error the error to tag
+   * @template {unknown} E
+   * @param {E} error the error to tag
    * @param {string} [message] message with which to tag `error`
    * @param {Object} [info] extra data with wich to tag `error`
-   * @return {Error} the modified `error` argument
+   * @return {E} the modified `error` argument
    */
   static tag(error, message, info) {
-    const oError = /** @type{OError} */ (error)
+    const oError = /** @type {{ _oErrorTags: TaggedError[] | undefined }} */ (
+      error
+    )
 
     if (!oError._oErrorTags) oError._oErrorTags = []
 
@@ -102,7 +119,7 @@ class OError extends Error {
    *
    * If an info property is repeated, the last one wins.
    *
-   * @param {Error | null | undefined} error any error (may or may not be an `OError`)
+   * @param {unknown} error any error (may or may not be an `OError`)
    * @return {Object}
    */
   static getFullInfo(error) {
@@ -129,7 +146,7 @@ class OError extends Error {
    * Return the `stack` property from `error`, including the `stack`s for any
    * tagged errors added with `OError.tag` and for any `cause`s.
    *
-   * @param {Error | null | undefined} error any error (may or may not be an `OError`)
+   * @param {unknown} error any error (may or may not be an `OError`)
    * @return {string}
    */
   static getFullStack(error) {
@@ -143,7 +160,7 @@ class OError extends Error {
       stack += `\n${oError._oErrorTags.map(tag => tag.stack).join('\n')}`
     }
 
-    const causeStack = oError.cause && OError.getFullStack(oError.cause)
+    const causeStack = OError.getFullStack(oError.cause)
     if (causeStack) {
       stack += '\ncaused by:\n' + indent(causeStack)
     }

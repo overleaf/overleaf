@@ -268,6 +268,11 @@ describe('utils', function () {
       expect(OError.getFullInfo(null)).to.deep.equal({})
     })
 
+    it('works when given a string', function () {
+      const err = 'not an error instance'
+      expect(OError.getFullInfo(err)).to.deep.equal({})
+    })
+
     it('works on a normal error', function () {
       const err = new Error('foo')
       expect(OError.getFullInfo(err)).to.deep.equal({})
