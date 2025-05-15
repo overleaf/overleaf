@@ -62,6 +62,7 @@ describe('RecurlyEventHandler', function () {
         is_trial: true,
         has_ai_add_on: false,
         subscriptionId: this.eventData.subscription.uuid,
+        payment_provider: 'recurly',
       }
     )
     sinon.assert.calledWith(
@@ -116,6 +117,7 @@ describe('RecurlyEventHandler', function () {
         is_trial: false,
         has_ai_add_on: false,
         subscriptionId: this.eventData.subscription.uuid,
+        payment_provider: 'recurly',
       }
     )
     sinon.assert.calledWith(
@@ -149,6 +151,7 @@ describe('RecurlyEventHandler', function () {
         is_trial: true,
         has_ai_add_on: false,
         subscriptionId: this.eventData.subscription.uuid,
+        payment_provider: 'recurly',
       }
     )
     sinon.assert.calledWith(
@@ -187,6 +190,7 @@ describe('RecurlyEventHandler', function () {
         is_trial: true,
         has_ai_add_on: false,
         subscriptionId: this.eventData.subscription.uuid,
+        payment_provider: 'recurly',
       }
     )
     sinon.assert.calledWith(
@@ -219,6 +223,7 @@ describe('RecurlyEventHandler', function () {
         is_trial: true,
         has_ai_add_on: false,
         subscriptionId: this.eventData.subscription.uuid,
+        payment_provider: 'recurly',
       }
     )
     sinon.assert.calledWith(
@@ -256,6 +261,7 @@ describe('RecurlyEventHandler', function () {
         is_trial: true,
         has_ai_add_on: false,
         subscriptionId: this.eventData.subscription.uuid,
+        payment_provider: 'recurly',
       }
     )
   })
@@ -274,6 +280,7 @@ describe('RecurlyEventHandler', function () {
         quantity: 1,
         has_ai_add_on: false,
         subscriptionId: this.eventData.subscription.uuid,
+        payment_provider: 'recurly',
       }
     )
   })
@@ -313,6 +320,7 @@ describe('RecurlyEventHandler', function () {
         collectionMethod: invoice.collection_method,
         subscriptionId1: invoice.subscription_ids[0],
         subscriptionId2: invoice.subscription_ids[1],
+        payment_provider: 'recurly',
       }
     )
   })

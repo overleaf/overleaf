@@ -66,6 +66,7 @@ async function _sendSubscriptionResumedEvent(userId, eventData) {
     {
       plan_code: planCode,
       subscriptionId,
+      payment_provider: 'recurly',
     }
   )
   AnalyticsManager.setUserPropertyForUserInBackground(
@@ -87,6 +88,7 @@ async function _sendSubscriptionPausedEvent(userId, eventData) {
       pause_length: pauseLength,
       plan_code: planCode,
       subscriptionId,
+      payment_provider: 'recurly',
     }
   )
   AnalyticsManager.setUserPropertyForUserInBackground(
@@ -108,6 +110,7 @@ async function _sendSubscriptionStartedEvent(userId, eventData) {
       is_trial: isTrial,
       has_ai_add_on: hasAiAddOn,
       subscriptionId,
+      payment_provider: 'recurly',
     }
   )
   AnalyticsManager.setUserPropertyForUserInBackground(
@@ -154,6 +157,7 @@ async function _sendSubscriptionUpdatedEvent(userId, eventData) {
       is_trial: isTrial,
       has_ai_add_on: hasAiAddOn,
       subscriptionId,
+      payment_provider: 'recurly',
     }
   )
   AnalyticsManager.setUserPropertyForUserInBackground(
@@ -185,6 +189,7 @@ async function _sendSubscriptionCancelledEvent(userId, eventData) {
       is_trial: isTrial,
       has_ai_add_on: hasAiAddOn,
       subscriptionId,
+      payment_provider: 'recurly',
     }
   )
   AnalyticsManager.setUserPropertyForUserInBackground(
@@ -211,6 +216,7 @@ async function _sendSubscriptionExpiredEvent(userId, eventData) {
       is_trial: isTrial,
       has_ai_add_on: hasAiAddOn,
       subscriptionId,
+      payment_provider: 'recurly',
     }
   )
   AnalyticsManager.setUserPropertyForUserInBackground(
@@ -242,6 +248,7 @@ async function _sendSubscriptionRenewedEvent(userId, eventData) {
       is_trial: isTrial,
       has_ai_add_on: hasAiAddOn,
       subscriptionId,
+      payment_provider: 'recurly',
     }
   )
   AnalyticsManager.setUserPropertyForUserInBackground(
@@ -272,6 +279,7 @@ async function _sendSubscriptionReactivatedEvent(userId, eventData) {
       quantity,
       has_ai_add_on: hasAiAddOn,
       subscriptionId,
+      payment_provider: 'recurly',
     }
   )
   AnalyticsManager.setUserPropertyForUserInBackground(
@@ -318,6 +326,7 @@ async function _sendInvoicePaidEvent(userId, eventData) {
       taxInCents,
       country,
       collectionMethod,
+      payment_provider: 'recurly',
       ...subscriptionIds,
     }
   )

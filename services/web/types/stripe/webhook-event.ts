@@ -1,3 +1,5 @@
+import Stripe from 'stripe'
+
 type StripeWebhookEventType =
   | 'customer.subscription.created'
   | 'customer.subscription.updated'
@@ -6,8 +8,7 @@ type StripeWebhookEventType =
 export type CustomerSubscriptionWebhookEvent = {
   type: StripeWebhookEventType
   data: {
-    object: {
-      id: string
+    object: Stripe.Subscription & {
       metadata: {
         adminUserId?: string
       }
