@@ -1,4 +1,4 @@
-import { CloseButton, CloseButtonProps } from 'react-bootstrap-5'
+import { CloseButton, CloseButtonProps } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
 import { forwardRef } from 'react'
 

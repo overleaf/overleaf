@@ -1,4 +1,4 @@
-import { OverlayTrigger, Tooltip } from 'react-bootstrap-5'
+import { OverlayTrigger, Tooltip } from 'react-bootstrap'
 import type { MergeAndOverride } from '../../../../../../types/utils'
 import BadgeLink, { type BadgeLinkProps } from './badge-link'
 import { useEffect, useRef, useState } from 'react'

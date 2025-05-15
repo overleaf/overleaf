@@ -1,4 +1,4 @@
-import { Form, FormSelectProps } from 'react-bootstrap-5'
+import { Form, FormSelectProps } from 'react-bootstrap'
 import type { Meta, StoryObj } from '@storybook/react'
 import FormGroup from '@/features/ui/components/bootstrap-5/form/form-group'
 import FormText from '@/features/ui/components/bootstrap-5/form/form-text'

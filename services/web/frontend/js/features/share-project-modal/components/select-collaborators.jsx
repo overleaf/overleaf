@@ -8,7 +8,7 @@ import classnames from 'classnames'
 import MaterialIcon from '@/shared/components/material-icon'
 import Tag from '@/features/ui/components/bootstrap-5/tag'
 import { DropdownItem } from '@/features/ui/components/bootstrap-5/dropdown-menu'
-import { Spinner } from 'react-bootstrap-5'
+import { Spinner } from 'react-bootstrap'
 
 // Unicode characters in these Unicode groups:
 //  "General Punctuation — Spaces"

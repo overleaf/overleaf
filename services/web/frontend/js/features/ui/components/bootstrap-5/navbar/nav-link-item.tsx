@@ -1,5 +1,5 @@
 import { ReactNode } from 'react'
-import { Nav } from 'react-bootstrap-5'
+import { Nav } from 'react-bootstrap'
 import NavItem from '@/features/ui/components/bootstrap-5/navbar/nav-item'
 
 export default function NavLinkItem({

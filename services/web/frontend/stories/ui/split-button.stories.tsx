@@ -9,7 +9,7 @@ import {
   DropdownToggle,
 } from '@/features/ui/components/bootstrap-5/dropdown-menu'
 import Button from '@/features/ui/components/bootstrap-5/button'
-import { ButtonGroup } from 'react-bootstrap-5'
+import { ButtonGroup } from 'react-bootstrap'
 
 type Args = React.ComponentProps<typeof Dropdown>
 

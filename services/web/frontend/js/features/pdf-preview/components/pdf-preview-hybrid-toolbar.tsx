@@ -9,7 +9,7 @@ import PdfHybridDownloadButton from './pdf-hybrid-download-button'
 import PdfHybridCodeCheckButton from './pdf-hybrid-code-check-button'
 import PdfOrphanRefreshButton from './pdf-orphan-refresh-button'
 import { DetachedSynctexControl } from './detach-synctex-control'
-import { Spinner } from 'react-bootstrap-5'
+import { Spinner } from 'react-bootstrap'
 
 const ORPHAN_UI_TIMEOUT_MS = 5000
 

@@ -1,7 +1,7 @@
 import React from 'react'
 import classnames from 'classnames'
 import type { ConnectionStatus } from './types'
-import { Badge, Button } from 'react-bootstrap-5'
+import { Badge, Button } from 'react-bootstrap'
 import OLNotification from '@/features/ui/components/ol/ol-notification'
 import MaterialIcon from '@/shared/components/material-icon'
 

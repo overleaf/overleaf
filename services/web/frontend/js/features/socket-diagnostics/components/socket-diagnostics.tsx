@@ -7,7 +7,7 @@ import {
   DiagnosticItem,
   ErrorAlert,
 } from './diagnostic-component'
-import { Col, Container, Row } from 'react-bootstrap-5'
+import { Col, Container, Row } from 'react-bootstrap'
 import MaterialIcon from '@/shared/components/material-icon'
 import OLFormCheckbox from '@/features/ui/components/ol/ol-form-checkbox'
 import { CopyToClipboard } from '@/shared/components/copy-to-clipboard'

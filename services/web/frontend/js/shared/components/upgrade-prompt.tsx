@@ -5,7 +5,7 @@ import OLCol from '@/features/ui/components/ol/ol-col'
 import OLRow from '@/features/ui/components/ol/ol-row'
 import MaterialIcon from '@/shared/components/material-icon'
 import { PropsWithChildren } from 'react'
-import { Container } from 'react-bootstrap-5'
+import { Container } from 'react-bootstrap'
 import { Trans, useTranslation } from 'react-i18next'
 
 type IconListItemProps = PropsWithChildren<{

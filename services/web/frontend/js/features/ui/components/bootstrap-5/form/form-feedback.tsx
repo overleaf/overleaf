@@ -1,4 +1,4 @@
-import { Form } from 'react-bootstrap-5'
+import { Form } from 'react-bootstrap'
 import FormText from '@/features/ui/components/bootstrap-5/form/form-text'
 import { ComponentProps } from 'react'
 

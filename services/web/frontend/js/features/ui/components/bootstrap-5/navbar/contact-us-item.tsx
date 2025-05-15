@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { DropdownItem } from 'react-bootstrap-5'
+import { DropdownItem } from 'react-bootstrap'
 import DropdownListItem from '@/features/ui/components/bootstrap-5/dropdown-list-item'
 import {
   type ExtraSegmentations,

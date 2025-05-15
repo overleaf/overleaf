@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import getMeta from '@/utils/meta'
-import { Dropdown, DropdownMenu, DropdownToggle } from 'react-bootstrap-5'
+import { Dropdown, DropdownMenu, DropdownToggle } from 'react-bootstrap'
 import OLDropdownMenuItem from '@/features/ui/components/ol/ol-dropdown-menu-item'
 import MaterialIcon from '@/shared/components/material-icon'
 import {

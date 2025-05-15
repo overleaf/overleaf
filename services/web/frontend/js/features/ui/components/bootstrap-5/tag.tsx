@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { Badge, BadgeProps } from 'react-bootstrap-5'
+import { Badge, BadgeProps } from 'react-bootstrap'
 import MaterialIcon from '@/shared/components/material-icon'
 import { MergeAndOverride } from '../../../../../../types/utils'
 import classnames from 'classnames'

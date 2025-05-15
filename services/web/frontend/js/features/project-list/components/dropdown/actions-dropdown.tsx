@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { Spinner } from 'react-bootstrap-5'
+import { Spinner } from 'react-bootstrap'
 import {
   Dropdown,
   DropdownItem,

@@ -1,7 +1,7 @@
 import { FC } from 'react'
 import { ServerWordCountData } from '@/features/word-count-modal/components/word-count-data'
 import { useTranslation } from 'react-i18next'
-import { Container, Row, Col } from 'react-bootstrap-5'
+import { Container, Row, Col } from 'react-bootstrap'
 import OLNotification from '@/features/ui/components/ol/ol-notification'
 
 export const WordCounts: FC<{

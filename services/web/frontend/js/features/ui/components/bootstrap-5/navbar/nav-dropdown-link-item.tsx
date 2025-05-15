@@ -1,7 +1,7 @@
 import { ReactNode } from 'react'
 import DropdownListItem from '@/features/ui/components/bootstrap-5/dropdown-list-item'
-import { DropdownItem } from 'react-bootstrap-5'
-import { DropdownItemProps } from 'react-bootstrap-5/DropdownItem'
+import { DropdownItem } from 'react-bootstrap'
+import { DropdownItemProps } from 'react-bootstrap/DropdownItem'
 
 export default function NavDropdownLinkItem({
   href,

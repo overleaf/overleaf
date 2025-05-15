@@ -1,4 +1,4 @@
-import { Form, FormCheckProps } from 'react-bootstrap-5'
+import { Form, FormCheckProps } from 'react-bootstrap'
 import { MergeAndOverride } from '../../../../../../types/utils'
 import FormText from '../bootstrap-5/form/form-text'
 

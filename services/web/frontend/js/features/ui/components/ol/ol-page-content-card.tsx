@@ -1,4 +1,4 @@
-import { Card, CardBody } from 'react-bootstrap-5'
+import { Card, CardBody } from 'react-bootstrap'
 import { FC } from 'react'
 import classNames from 'classnames'
 

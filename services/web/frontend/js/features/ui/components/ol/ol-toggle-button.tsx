@@ -1,4 +1,4 @@
-import { ToggleButton, ToggleButtonProps } from 'react-bootstrap-5'
+import { ToggleButton, ToggleButtonProps } from 'react-bootstrap'
 
 function OLToggleButton(props: ToggleButtonProps) {
   return <ToggleButton {...props} />

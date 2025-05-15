@@ -24,7 +24,7 @@ import OLFormGroup from '@/features/ui/components/ol/ol-form-group'
 import OLFormLabel from '@/features/ui/components/ol/ol-form-label'
 import OLForm from '@/features/ui/components/ol/ol-form'
 import OLFormSelect from '@/features/ui/components/ol/ol-form-select'
-import { Spinner } from 'react-bootstrap-5'
+import { Spinner } from 'react-bootstrap'
 
 export default function FileTreeImportFromProject() {
   const { t } = useTranslation()

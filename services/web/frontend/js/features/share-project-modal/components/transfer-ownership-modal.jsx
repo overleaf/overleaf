@@ -12,7 +12,7 @@ import OLModal, {
 } from '@/features/ui/components/ol/ol-modal'
 import OLNotification from '@/features/ui/components/ol/ol-notification'
 import OLButton from '@/features/ui/components/ol/ol-button'
-import { Spinner } from 'react-bootstrap-5'
+import { Spinner } from 'react-bootstrap'
 
 export default function TransferOwnershipModal({ member, cancel }) {
   const { t } = useTranslation()

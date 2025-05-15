@@ -1,5 +1,5 @@
 import { forwardRef } from 'react'
-import { Form, FormSelectProps } from 'react-bootstrap-5'
+import { Form, FormSelectProps } from 'react-bootstrap'
 
 const OLFormSelect = forwardRef<HTMLSelectElement, FormSelectProps>(
   (props, ref) => {

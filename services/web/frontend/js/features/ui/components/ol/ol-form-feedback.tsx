@@ -1,4 +1,4 @@
-import { Form } from 'react-bootstrap-5'
+import { Form } from 'react-bootstrap'
 import { ComponentProps } from 'react'
 import FormFeedback from '@/features/ui/components/bootstrap-5/form/form-feedback'
 

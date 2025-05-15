@@ -1,4 +1,4 @@
-import { Nav, NavItemProps } from 'react-bootstrap-5'
+import { Nav, NavItemProps } from 'react-bootstrap'
 
 export default function NavItem(props: Omit<NavItemProps, 'as'>) {
   const { children, ...rest } = props

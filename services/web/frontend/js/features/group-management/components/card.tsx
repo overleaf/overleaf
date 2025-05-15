@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import getMeta from '@/utils/meta'
 import useWaitForI18n from '@/shared/hooks/use-wait-for-i18n'
-import { Card as BSCard, CardBody, Col, Row } from 'react-bootstrap-5'
+import { Card as BSCard, CardBody, Col, Row } from 'react-bootstrap'
 import IconButton from '@/features/ui/components/bootstrap-5/icon-button'
 
 type CardProps = {

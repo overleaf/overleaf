@@ -1,7 +1,7 @@
 import getMeta from '@/utils/meta'
 import { postJSON } from '@/infrastructure/fetch-json'
 import { useTranslation, Trans } from 'react-i18next'
-import { Card, Row, Col } from 'react-bootstrap-5'
+import { Card, Row, Col } from 'react-bootstrap'
 import IconButton from '@/features/ui/components/bootstrap-5/icon-button'
 import Button from '@/features/ui/components/bootstrap-5/button'
 import UpgradeSubscriptionPlanDetails from './upgrade-subscription-plan-details'

@@ -4,7 +4,7 @@ import {
   OverlayTriggerProps,
   Tooltip as BSTooltip,
   TooltipProps as BSTooltipProps,
-} from 'react-bootstrap-5'
+} from 'react-bootstrap'
 import { callFnsInSequence } from '@/utils/functions'
 
 type OverlayProps = Omit<OverlayTriggerProps, 'overlay' | 'children'>

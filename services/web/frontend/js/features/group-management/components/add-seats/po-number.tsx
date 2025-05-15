@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { FormControl, FormGroup, FormLabel } from 'react-bootstrap-5'
+import { FormControl, FormGroup, FormLabel } from 'react-bootstrap'
 import FormText from '@/features/ui/components/bootstrap-5/form/form-text'
 import OLFormCheckbox from '@/features/ui/components/ol/ol-form-checkbox'
 

@@ -1,4 +1,4 @@
-import { FormCheck, FormCheckProps, FormLabel } from 'react-bootstrap-5'
+import { FormCheck, FormCheckProps, FormLabel } from 'react-bootstrap'
 
 type OLFormSwitchProps = FormCheckProps & {
   inputRef?: React.MutableRefObject<HTMLInputElement | null>

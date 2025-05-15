@@ -1,8 +1,5 @@
 import React, { forwardRef } from 'react'
-import {
-  Form,
-  FormControlProps as BS5FormControlProps,
-} from 'react-bootstrap-5'
+import { Form, FormControlProps as BS5FormControlProps } from 'react-bootstrap'
 import classnames from 'classnames'
 
 export type OLBS5FormControlProps = BS5FormControlProps & {

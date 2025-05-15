@@ -10,7 +10,7 @@ import OLModal, {
 import { Select } from '@/shared/components/select'
 import OLFormGroup from '@/features/ui/components/ol/ol-form-group'
 import Button from '@/features/ui/components/bootstrap-5/button'
-import { Stack } from 'react-bootstrap-5'
+import { Stack } from 'react-bootstrap'
 import { debugConsole } from '@/utils/debugging'
 import * as eventTracking from '../../../../infrastructure/event-tracking'
 import PauseDuck from '../../images/pause-duck.svg'

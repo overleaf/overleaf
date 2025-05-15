@@ -1,4 +1,4 @@
-import { ListGroup, ListGroupProps } from 'react-bootstrap-5'
+import { ListGroup, ListGroupProps } from 'react-bootstrap'
 
 function OLListGroup(props: ListGroupProps) {
   const as = props.as ?? 'div'

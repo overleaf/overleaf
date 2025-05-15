@@ -1,5 +1,5 @@
 import { CSSProperties, FC } from 'react'
-import { ToastContainer as BS5ToastContainer } from 'react-bootstrap-5'
+import { ToastContainer as BS5ToastContainer } from 'react-bootstrap'
 
 type OLToastContainerProps = {
   style?: CSSProperties

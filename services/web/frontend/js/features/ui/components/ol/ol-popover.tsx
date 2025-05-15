@@ -1,5 +1,5 @@
 import { forwardRef } from 'react'
-import { Popover, PopoverProps } from 'react-bootstrap-5'
+import { Popover, PopoverProps } from 'react-bootstrap'
 
 type OLPopoverProps = Omit<PopoverProps, 'title'> & {
   title?: React.ReactNode

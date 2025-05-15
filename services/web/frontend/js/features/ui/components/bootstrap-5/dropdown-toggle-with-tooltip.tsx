@@ -1,12 +1,12 @@
 import { ReactNode, forwardRef } from 'react'
-import { BsPrefixRefForwardingComponent } from 'react-bootstrap-5/helpers'
+import { BsPrefixRefForwardingComponent } from 'react-bootstrap/helpers'
 import type { DropdownToggleProps } from '@/features/ui/components/types/dropdown-menu-props'
 import {
   DropdownToggle as BS5DropdownToggle,
   OverlayTrigger,
   OverlayTriggerProps,
   Tooltip,
-} from 'react-bootstrap-5'
+} from 'react-bootstrap'
 import type { MergeAndOverride } from '../../../../../../types/utils'
 
 type DropdownToggleWithTooltipProps = MergeAndOverride<

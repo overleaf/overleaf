@@ -4,8 +4,8 @@ import {
   ModalHeaderProps,
   ModalTitleProps,
   ModalFooterProps,
-} from 'react-bootstrap-5'
-import { ModalBodyProps } from 'react-bootstrap-5/ModalBody'
+} from 'react-bootstrap'
+import { ModalBodyProps } from 'react-bootstrap/ModalBody'
 
 type OLModalProps = ModalProps & {
   size?: 'sm' | 'lg'

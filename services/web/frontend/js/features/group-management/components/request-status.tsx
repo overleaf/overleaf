@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { Card, CardBody, Row, Col } from 'react-bootstrap-5'
+import { Card, CardBody, Row, Col } from 'react-bootstrap'
 import Button from '@/features/ui/components/bootstrap-5/button'
 import MaterialIcon from '@/shared/components/material-icon'
 import getMeta from '@/utils/meta'

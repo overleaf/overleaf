@@ -13,7 +13,7 @@ import {
   FormGroup,
   FormLabel,
   FormControl,
-} from 'react-bootstrap-5'
+} from 'react-bootstrap'
 import FormText from '@/features/ui/components/bootstrap-5/form/form-text'
 import Button from '@/features/ui/components/bootstrap-5/button'
 import PoNumber from '@/features/group-management/components/add-seats/po-number'

@@ -7,7 +7,7 @@ import { FC, forwardRef, useCallback } from 'react'
 import classNames from 'classnames'
 import { useNestableDropdown } from '@/shared/hooks/use-nestable-dropdown'
 import { NestableDropdownContextProvider } from '@/shared/context/nestable-dropdown-context'
-import { AnchorProps } from 'react-bootstrap-5'
+import { AnchorProps } from 'react-bootstrap'
 import MaterialIcon from '../material-icon'
 import { DropdownMenuProps } from '@/features/ui/components/types/dropdown-menu-props'
 

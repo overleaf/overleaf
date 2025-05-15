@@ -1,4 +1,4 @@
-import { Overlay, OverlayProps } from 'react-bootstrap-5'
+import { Overlay, OverlayProps } from 'react-bootstrap'
 
 function OLOverlay(props: OverlayProps) {
   return <Overlay {...props} />

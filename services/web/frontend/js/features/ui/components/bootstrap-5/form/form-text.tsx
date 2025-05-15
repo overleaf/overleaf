@@ -1,4 +1,4 @@
-import { Form, FormTextProps as BS5FormTextProps } from 'react-bootstrap-5'
+import { Form, FormTextProps as BS5FormTextProps } from 'react-bootstrap'
 import MaterialIcon from '@/shared/components/material-icon'
 import classnames from 'classnames'
 import { MergeAndOverride } from '../../../../../../../types/utils'

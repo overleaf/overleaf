@@ -1,4 +1,4 @@
-import { Col } from 'react-bootstrap-5'
+import { Col } from 'react-bootstrap'
 
 function OLCol(props: React.ComponentProps<typeof Col>) {
   return <Col {...props} />

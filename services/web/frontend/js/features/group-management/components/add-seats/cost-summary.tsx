@@ -1,5 +1,5 @@
 import { Trans, useTranslation } from 'react-i18next'
-import { Card, ListGroup } from 'react-bootstrap-5'
+import { Card, ListGroup } from 'react-bootstrap'
 import { formatCurrency } from '@/shared/utils/currency'
 import { formatTime } from '@/features/utils/format-date'
 import {

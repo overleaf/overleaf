@@ -1,4 +1,4 @@
-import { Container, Row, Col } from 'react-bootstrap-5'
+import { Container, Row, Col } from 'react-bootstrap'
 import { Meta } from '@storybook/react'
 
 type Args = React.ComponentProps<typeof Row>

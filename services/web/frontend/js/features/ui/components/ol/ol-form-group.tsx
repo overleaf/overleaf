@@ -1,4 +1,4 @@
-import { FormGroupProps } from 'react-bootstrap-5'
+import { FormGroupProps } from 'react-bootstrap'
 import FormGroup from '@/features/ui/components/bootstrap-5/form/form-group'
 
 function OLFormGroup(props: FormGroupProps) {

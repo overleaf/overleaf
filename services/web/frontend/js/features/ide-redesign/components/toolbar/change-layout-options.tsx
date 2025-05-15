@@ -12,7 +12,7 @@ import { useTranslation } from 'react-i18next'
 import * as eventTracking from '../../../../infrastructure/event-tracking'
 import useEventListener from '@/shared/hooks/use-event-listener'
 import { DetachRole } from '@/shared/context/detach-context'
-import { Spinner } from 'react-bootstrap-5'
+import { Spinner } from 'react-bootstrap'
 
 type LayoutOption = 'sideBySide' | 'editorOnly' | 'pdfOnly' | 'detachedPdf'
 

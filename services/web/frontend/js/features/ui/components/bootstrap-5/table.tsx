@@ -1,4 +1,4 @@
-import { Table as BS5Table } from 'react-bootstrap-5'
+import { Table as BS5Table } from 'react-bootstrap'
 import classnames from 'classnames'
 
 export function TableContainer({

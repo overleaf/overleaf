@@ -2,7 +2,7 @@ import OLFormGroup from '@/features/ui/components/ol/ol-form-group'
 import OLFormLabel from '@/features/ui/components/ol/ol-form-label'
 import OLFormSelect from '@/features/ui/components/ol/ol-form-select'
 import { ChangeEventHandler, useCallback, useEffect, useRef } from 'react'
-import { Spinner } from 'react-bootstrap-5'
+import { Spinner } from 'react-bootstrap'
 import { useEditorLeftMenuContext } from '@/features/editor-left-menu/components/editor-left-menu-context'
 
 type PossibleValue = string | number | boolean

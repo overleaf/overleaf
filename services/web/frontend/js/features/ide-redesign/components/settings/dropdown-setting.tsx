@@ -2,7 +2,7 @@ import OLFormSelect from '@/features/ui/components/ol/ol-form-select'
 import { ChangeEventHandler, useCallback } from 'react'
 import Setting from './setting'
 import classNames from 'classnames'
-import { Spinner } from 'react-bootstrap-5'
+import { Spinner } from 'react-bootstrap'
 
 type PossibleValue = string | number | boolean
 

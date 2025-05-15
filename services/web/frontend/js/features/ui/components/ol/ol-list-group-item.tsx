@@ -1,4 +1,4 @@
-import { ListGroupItem, ListGroupItemProps } from 'react-bootstrap-5'
+import { ListGroupItem, ListGroupItemProps } from 'react-bootstrap'
 
 function OLListGroupItem(props: ListGroupItemProps) {
   const as = props.as ?? 'button'

@@ -1,6 +1,6 @@
 import { FC, ReactElement, useCallback, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Nav, NavLink, Tab, TabContainer } from 'react-bootstrap-5'
+import { Nav, NavLink, Tab, TabContainer } from 'react-bootstrap'
 import MaterialIcon, {
   AvailableUnfilledIcon,
 } from '@/shared/components/material-icon'

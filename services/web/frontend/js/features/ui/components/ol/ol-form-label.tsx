@@ -1,4 +1,4 @@
-import { Form } from 'react-bootstrap-5'
+import { Form } from 'react-bootstrap'
 
 function OLFormLabel(props: React.ComponentProps<(typeof Form)['Label']>) {
   return <Form.Label {...props} />

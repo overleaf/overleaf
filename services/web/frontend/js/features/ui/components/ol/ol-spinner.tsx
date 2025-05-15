@@ -1,4 +1,4 @@
-import { Spinner } from 'react-bootstrap-5'
+import { Spinner } from 'react-bootstrap'
 
 export type OLSpinnerSize = 'sm' | 'lg'
 

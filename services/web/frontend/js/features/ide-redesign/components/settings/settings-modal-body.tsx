@@ -8,7 +8,7 @@ import {
   TabContainer,
   TabContent,
   TabPane,
-} from 'react-bootstrap-5'
+} from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
 import EditorSettings from './editor-settings/editor-settings'
 import AppearanceSettings from './appearance-settings/appearance-settings'

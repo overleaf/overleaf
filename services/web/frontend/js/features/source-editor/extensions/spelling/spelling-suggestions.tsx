@@ -15,7 +15,7 @@ import { SpellingSuggestionsLanguage } from './spelling-suggestions-language'
 import { captureException } from '@/infrastructure/error-reporter'
 import { debugConsole } from '@/utils/debugging'
 import { SpellCheckLanguage } from '../../../../../../types/project-settings'
-import { Dropdown } from 'react-bootstrap-5'
+import { Dropdown } from 'react-bootstrap'
 
 const ITEMS_TO_SHOW = 8
 

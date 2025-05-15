@@ -1,4 +1,4 @@
-import { Row } from 'react-bootstrap-5'
+import { Row } from 'react-bootstrap'
 
 function OLRow(props: React.ComponentProps<typeof Row>) {
   return <Row {...props} />

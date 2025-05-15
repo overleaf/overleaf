@@ -1,5 +1,5 @@
 import { memo, useCallback, forwardRef } from 'react'
-import { Spinner } from 'react-bootstrap-5'
+import { Spinner } from 'react-bootstrap'
 import {
   Dropdown,
   DropdownItem,

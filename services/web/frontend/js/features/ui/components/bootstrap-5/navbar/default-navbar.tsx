@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { sendMB } from '@/infrastructure/event-tracking'
 import { useTranslation } from 'react-i18next'
-import { Button, Container, Nav, Navbar } from 'react-bootstrap-5'
+import { Button, Container, Nav, Navbar } from 'react-bootstrap'
 import useWaitForI18n from '@/shared/hooks/use-wait-for-i18n'
 import AdminMenu from '@/features/ui/components/bootstrap-5/navbar/admin-menu'
 import type { DefaultNavbarMetadata } from '@/features/ui/components/types/default-navbar-metadata'

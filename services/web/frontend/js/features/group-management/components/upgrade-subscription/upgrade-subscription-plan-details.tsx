@@ -1,7 +1,7 @@
 import getMeta from '@/utils/meta'
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Card, Row, Col } from 'react-bootstrap-5'
+import { Card, Row, Col } from 'react-bootstrap'
 import MaterialIcon from '@/shared/components/material-icon'
 import { formatCurrency } from '@/shared/utils/currency'
 

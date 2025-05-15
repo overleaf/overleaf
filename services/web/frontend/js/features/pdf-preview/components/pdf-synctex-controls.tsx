@@ -7,8 +7,8 @@ import * as eventTracking from '../../../infrastructure/event-tracking'
 import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
 import OLButton from '@/features/ui/components/ol/ol-button'
 import MaterialIcon from '@/shared/components/material-icon'
-import { Spinner } from 'react-bootstrap-5'
-import { Placement } from 'react-bootstrap-5/types'
+import { Spinner } from 'react-bootstrap'
+import { Placement } from 'react-bootstrap/types'
 import useSynctex from '../hooks/use-synctex'
 
 const GoToCodeButton = memo(function GoToCodeButton({

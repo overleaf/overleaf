@@ -19,7 +19,7 @@ import { useGroupMembersContext } from '../../context/group-members-context'
 import getMeta from '@/utils/meta'
 import MaterialIcon from '@/shared/components/material-icon'
 import DropdownListItem from '@/features/ui/components/bootstrap-5/dropdown-list-item'
-import { Spinner } from 'react-bootstrap-5'
+import { Spinner } from 'react-bootstrap'
 
 type resendInviteResponse = {
   success: boolean

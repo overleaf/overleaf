@@ -1,5 +1,5 @@
 import classNames from 'classnames'
-import { Toast as BS5Toast } from 'react-bootstrap-5'
+import { Toast as BS5Toast } from 'react-bootstrap'
 import {
   NotificationIcon,
   NotificationType,

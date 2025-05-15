@@ -1,5 +1,5 @@
 import { type ReactNode, useState } from 'react'
-import { Dropdown } from 'react-bootstrap-5'
+import { Dropdown } from 'react-bootstrap'
 import { CaretUp, CaretDown } from '@phosphor-icons/react'
 import { useDsNavStyle } from '@/features/project-list/components/use-is-ds-nav'
 

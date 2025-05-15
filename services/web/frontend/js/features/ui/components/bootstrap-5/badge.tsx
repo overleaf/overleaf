@@ -1,4 +1,4 @@
-import { Badge as BSBadge, BadgeProps as BSBadgeProps } from 'react-bootstrap-5'
+import { Badge as BSBadge, BadgeProps as BSBadgeProps } from 'react-bootstrap'
 import { MergeAndOverride } from '../../../../../../types/utils'
 
 export type BadgeProps = MergeAndOverride<

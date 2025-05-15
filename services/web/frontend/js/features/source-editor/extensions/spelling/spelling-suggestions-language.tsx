@@ -1,7 +1,7 @@
 import { memo, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
-import { Dropdown } from 'react-bootstrap-5'
+import { Dropdown } from 'react-bootstrap'
 import MaterialIcon from '@/shared/components/material-icon'
 
 export const SpellingSuggestionsLanguage = memo<{

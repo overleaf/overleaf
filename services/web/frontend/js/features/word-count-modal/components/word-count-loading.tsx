@@ -1,4 +1,4 @@
-import { Spinner } from 'react-bootstrap-5'
+import { Spinner } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
 
 export const WordCountLoading = () => {

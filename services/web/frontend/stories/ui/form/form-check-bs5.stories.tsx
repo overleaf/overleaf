@@ -1,5 +1,5 @@
 import { useRef, useLayoutEffect } from 'react'
-import { Form } from 'react-bootstrap-5'
+import { Form } from 'react-bootstrap'
 import type { Meta, StoryObj } from '@storybook/react'
 
 const meta: Meta<(typeof Form)['Check']> = {
