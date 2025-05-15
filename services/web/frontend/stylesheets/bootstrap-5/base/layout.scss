@@ -78,3 +78,12 @@ hr {
 .row-spaced-extra-large {
   margin-top: calc(var(--line-height-03) * 4);
 }
+
+.inline-material-symbols {
+  display: inline-flex;
+  align-items: center;
+
+  a.material-symbols {
+    text-decoration: none;
+  }
+}
