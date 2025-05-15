@@ -160,7 +160,7 @@ async function prepareClsiCache(
 ) {
   const { variant } = await SplitTestHandler.promises.getAssignmentForUser(
     userId,
-    'copy-clsi-cache'
+    'populate-clsi-cache'
   )
   if (variant !== 'enabled') return
 
