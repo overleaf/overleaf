@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react'
 import { getJSON } from '../../../infrastructure/fetch-json'
 import useAbortController from '../../../shared/hooks/use-abort-controller'
+import { Contact } from '../utils/types'
 
 export function useUserContacts() {
   const [loading, setLoading] = useState(true)
-  const [data, setData] = useState(null)
+  const [data, setData] = useState<Contact[] | null>(null)
   const [error, setError] = useState(false)
 
   const { signal } = useAbortController()
@@ -21,7 +22,7 @@ export function useUserContacts() {
   return { loading, data, error }
 }
 
-function buildContact(contact) {
+function buildContact(contact: Omit<Contact, 'name' | 'display'>): Contact {
   const [emailPrefix] = contact.email.split('@')
 
   // the name is not just the default "email prefix as first name"

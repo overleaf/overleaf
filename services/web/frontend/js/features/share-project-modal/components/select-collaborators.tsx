@@ -1,14 +1,20 @@
 import { useEffect, useMemo, useState, useRef, useCallback } from 'react'
-import PropTypes from 'prop-types'
 import { useTranslation } from 'react-i18next'
 import { matchSorter } from 'match-sorter'
-import { useCombobox } from 'downshift'
+import { useCombobox, UseMultipleSelectionReturnValue } from 'downshift'
 import classnames from 'classnames'
 
 import MaterialIcon from '@/shared/components/material-icon'
 import Tag from '@/features/ui/components/bootstrap-5/tag'
 import { DropdownItem } from '@/features/ui/components/bootstrap-5/dropdown-menu'
 import { Spinner } from 'react-bootstrap'
+import { Contact } from '../utils/types'
+
+export type ContactItem = {
+  email: string
+  display: string
+  type: string
+}
 
 // Unicode characters in these Unicode groups:
 //  "General Punctuation — Spaces"
@@ -21,6 +27,11 @@ export default function SelectCollaborators({
   options,
   placeholder,
   multipleSelectionProps,
+}: {
+  loading: boolean
+  options: Contact[]
+  placeholder: string
+  multipleSelectionProps: UseMultipleSelectionReturnValue<ContactItem>
 }) {
   const { t } = useTranslation()
   const {
@@ -58,12 +69,14 @@ export default function SelectCollaborators({
     })
   }, [unselectedOptions, inputValue])
 
-  const inputRef = useRef(null)
+  const inputRef = useRef<HTMLInputElement>(null)
 
   const focusInput = useCallback(() => {
     if (inputRef.current) {
       window.setTimeout(() => {
-        inputRef.current.focus()
+        if (inputRef.current) {
+          inputRef.current.focus()
+        }
       }, 10)
     }
   }, [inputRef])
@@ -80,7 +93,7 @@ export default function SelectCollaborators({
     return true
   }, [inputValue, selectedItems])
 
-  function stateReducer(state, actionAndChanges) {
+  function stateReducer(_: unknown, actionAndChanges: any) {
     const { type, changes } = actionAndChanges
     // force selected item to be null so that adding, removing, then re-adding the same collaborator is recognised as a selection change
     if (type === useCombobox.stateChangeTypes.InputChange) {
@@ -101,7 +114,7 @@ export default function SelectCollaborators({
     inputValue,
     defaultHighlightedIndex: 0,
     items: filteredOptions,
-    itemToString: item => item && item.name,
+    itemToString: item => (item && item.name) || '',
     stateReducer,
     onStateChange: ({ inputValue, type, selectedItem }) => {
       switch (type) {
@@ -119,7 +132,7 @@ export default function SelectCollaborators({
   })
 
   const addNewItem = useCallback(
-    (_email, focus = true) => {
+    (_email: string, focus = true) => {
       const email = _email.replace(matchAllSpaces, '')
 
       if (
@@ -200,7 +213,7 @@ export default function SelectCollaborators({
                   addNewItem(inputValue, false)
                 },
                 onChange: e => {
-                  setInputValue(e.target.value)
+                  setInputValue((e.target as HTMLInputElement).value)
                 },
                 onClick: () => focusInput,
                 onKeyDown: event => {
@@ -230,7 +243,7 @@ export default function SelectCollaborators({
                   const data =
                     // modern browsers
                     event.clipboardData?.getData('text/plain') ??
-                    // IE11
+                    // @ts-ignore IE11
                     window.clipboardData?.getData('text')
 
                   if (data) {
@@ -276,20 +289,18 @@ export default function SelectCollaborators({
     </div>
   )
 }
-SelectCollaborators.propTypes = {
-  loading: PropTypes.bool.isRequired,
-  options: PropTypes.array.isRequired,
-  placeholder: PropTypes.string,
-  multipleSelectionProps: PropTypes.shape({
-    getSelectedItemProps: PropTypes.func.isRequired,
-    getDropdownProps: PropTypes.func.isRequired,
-    addSelectedItem: PropTypes.func.isRequired,
-    removeSelectedItem: PropTypes.func.isRequired,
-    selectedItems: PropTypes.array.isRequired,
-  }).isRequired,
-}
 
-function Option({ selected, item, getItemProps, index }) {
+function Option({
+  selected,
+  item,
+  getItemProps,
+  index,
+}: {
+  selected: boolean
+  item: Contact
+  getItemProps: (any: any) => any
+  index: number
+}) {
   return (
     <li {...getItemProps({ item, index })}>
       <DropdownItem
@@ -306,24 +317,21 @@ function Option({ selected, item, getItemProps, index }) {
   )
 }
 
-Option.propTypes = {
-  selected: PropTypes.bool.isRequired,
-  item: PropTypes.shape({
-    display: PropTypes.string.isRequired,
-  }),
-  index: PropTypes.number.isRequired,
-  getItemProps: PropTypes.func.isRequired,
-}
-
 function SelectedItem({
   removeSelectedItem,
   selectedItem,
   focusInput,
   getSelectedItemProps,
   index,
+}: {
+  removeSelectedItem: (item: ContactItem) => void
+  selectedItem: ContactItem
+  focusInput: () => void
+  getSelectedItemProps: (any: any) => any
+  index: number
 }) {
   const handleClick = useCallback(
-    event => {
+    (event: React.MouseEvent) => {
       event.preventDefault()
       event.stopPropagation()
       removeSelectedItem(selectedItem)
@@ -343,14 +351,4 @@ function SelectedItem({
       {selectedItem.display}
     </Tag>
   )
-}
-
-SelectedItem.propTypes = {
-  focusInput: PropTypes.func.isRequired,
-  removeSelectedItem: PropTypes.func.isRequired,
-  selectedItem: PropTypes.shape({
-    display: PropTypes.string.isRequired,
-  }),
-  getSelectedItemProps: PropTypes.func.isRequired,
-  index: PropTypes.number.isRequired,
 }

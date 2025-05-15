@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { Trans, useTranslation } from 'react-i18next'
-import PropTypes from 'prop-types'
 import { transferProjectOwnership } from '../utils/api'
 import { useProjectContext } from '@/shared/context/project-context'
 import { useLocation } from '@/shared/hooks/use-location'
@@ -13,8 +12,15 @@ import OLModal, {
 import OLNotification from '@/features/ui/components/ol/ol-notification'
 import OLButton from '@/features/ui/components/ol/ol-button'
 import { Spinner } from 'react-bootstrap'
+import { ProjectContextMember } from '@/shared/context/types/project-context'
 
-export default function TransferOwnershipModal({ member, cancel }) {
+export default function TransferOwnershipModal({
+  member,
+  cancel,
+}: {
+  member: ProjectContextMember
+  cancel: () => void
+}) {
   const { t } = useTranslation()
 
   const [inflight, setInflight] = useState(false)
@@ -81,8 +87,4 @@ export default function TransferOwnershipModal({ member, cancel }) {
       </OLModalFooter>
     </OLModal>
   )
-}
-TransferOwnershipModal.propTypes = {
-  member: PropTypes.object.isRequired,
-  cancel: PropTypes.func.isRequired,
 }

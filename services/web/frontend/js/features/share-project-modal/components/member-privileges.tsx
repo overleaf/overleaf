@@ -1,7 +1,11 @@
-import PropTypes from 'prop-types'
+import { ProjectContextMember } from '@/shared/context/types/project-context'
 import { useTranslation } from 'react-i18next'
 
-export default function MemberPrivileges({ privileges }) {
+export default function MemberPrivileges({
+  privileges,
+}: {
+  privileges: ProjectContextMember['privileges']
+}) {
   const { t } = useTranslation()
 
   switch (privileges) {
@@ -17,7 +21,4 @@ export default function MemberPrivileges({ privileges }) {
     default:
       return null
   }
-}
-MemberPrivileges.propTypes = {
-  privileges: PropTypes.string.isRequired,
 }

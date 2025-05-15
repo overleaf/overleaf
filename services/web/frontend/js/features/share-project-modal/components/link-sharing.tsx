@@ -1,5 +1,4 @@
 import { useCallback, useState, useEffect } from 'react'
-import PropTypes from 'prop-types'
 import { useTranslation } from 'react-i18next'
 import { useShareProjectContext } from './share-project-modal'
 import { setProjectAccessLevel } from '../utils/api'
@@ -18,6 +17,16 @@ import OLButton from '@/features/ui/components/ol/ol-button'
 import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
 import MaterialIcon from '@/shared/components/material-icon'
 
+type Tokens = {
+  readAndWrite: string
+  readAndWriteHashPrefix: string
+  readAndWritePrefix: string
+  readOnly: string
+  readOnlyHashPrefix: string
+}
+
+type AccessLevel = 'private' | 'tokenBased' | 'readAndWrite' | 'readOnly'
+
 export default function LinkSharing() {
   const [inflight, setInflight] = useState(false)
   const [showLinks, setShowLinks] = useState(true)
@@ -28,7 +37,7 @@ export default function LinkSharing() {
 
   // set the access level of a project
   const setAccessLevel = useCallback(
-    newPublicAccessLevel => {
+    (newPublicAccessLevel: string) => {
       setInflight(true)
       sendMB('link-sharing-click-off', {
         project_id: projectId,
@@ -75,6 +84,7 @@ export default function LinkSharing() {
     case 'readAndWrite':
     case 'readOnly':
       return (
+        // TODO: do we even need this anymore?
         <LegacySharing
           setAccessLevel={setAccessLevel}
           accessLevel={publicAccessLevel}
@@ -87,7 +97,17 @@ export default function LinkSharing() {
   }
 }
 
-function PrivateSharing({ setAccessLevel, inflight, projectId, setShowLinks }) {
+function PrivateSharing({
+  setAccessLevel,
+  inflight,
+  projectId,
+  setShowLinks,
+}: {
+  setAccessLevel: (level: AccessLevel) => void
+  inflight: boolean
+  projectId: string
+  setShowLinks: (show: boolean) => void
+}) {
   const { t } = useTranslation()
   return (
     <OLRow className="public-access-level">
@@ -113,23 +133,21 @@ function PrivateSharing({ setAccessLevel, inflight, projectId, setShowLinks }) {
   )
 }
 
-PrivateSharing.propTypes = {
-  setAccessLevel: PropTypes.func.isRequired,
-  inflight: PropTypes.bool,
-  projectId: PropTypes.string,
-  setShowLinks: PropTypes.func.isRequired,
-}
-
 function TokenBasedSharing({
   setAccessLevel,
   inflight,
   setShowLinks,
   showLinks,
+}: {
+  setAccessLevel: (level: AccessLevel) => void
+  inflight: boolean
+  setShowLinks: (show: boolean) => void
+  showLinks: boolean
 }) {
   const { t } = useTranslation()
   const { _id: projectId } = useProjectContext()
 
-  const [tokens, setTokens] = useState(null)
+  const [tokens, setTokens] = useState<Tokens | null>(null)
 
   const { signal } = useAbortController()
 
@@ -190,14 +208,15 @@ function TokenBasedSharing({
   )
 }
 
-TokenBasedSharing.propTypes = {
-  setAccessLevel: PropTypes.func.isRequired,
-  inflight: PropTypes.bool,
-  setShowLinks: PropTypes.func.isRequired,
-  showLinks: PropTypes.bool,
-}
-
-function LegacySharing({ accessLevel, setAccessLevel, inflight }) {
+function LegacySharing({
+  accessLevel,
+  setAccessLevel,
+  inflight,
+}: {
+  accessLevel: AccessLevel
+  setAccessLevel: (level: AccessLevel) => void
+  inflight: boolean
+}) {
   const { t } = useTranslation()
 
   return (
@@ -223,17 +242,11 @@ function LegacySharing({ accessLevel, setAccessLevel, inflight }) {
   )
 }
 
-LegacySharing.propTypes = {
-  accessLevel: PropTypes.string.isRequired,
-  setAccessLevel: PropTypes.func.isRequired,
-  inflight: PropTypes.bool,
-}
-
 export function ReadOnlyTokenLink() {
   const { t } = useTranslation()
   const { _id: projectId } = useProjectContext()
 
-  const [tokens, setTokens] = useState(null)
+  const [tokens, setTokens] = useState<Tokens | null>(null)
 
   const { signal } = useAbortController()
 
@@ -260,7 +273,17 @@ export function ReadOnlyTokenLink() {
   )
 }
 
-function AccessToken({ token, tokenHashPrefix, path, tooltipId }) {
+function AccessToken({
+  token,
+  tokenHashPrefix,
+  path,
+  tooltipId,
+}: {
+  token?: string
+  tokenHashPrefix?: string
+  path: string
+  tooltipId: string
+}) {
   const { t } = useTranslation()
   const { isAdmin } = useUserContext()
 
@@ -286,13 +309,6 @@ function AccessToken({ token, tokenHashPrefix, path, tooltipId }) {
       <CopyToClipboard content={link} tooltipId={tooltipId} />
     </div>
   )
-}
-
-AccessToken.propTypes = {
-  token: PropTypes.string,
-  tokenHashPrefix: PropTypes.string,
-  tooltipId: PropTypes.string.isRequired,
-  path: PropTypes.string.isRequired,
 }
 
 function LinkSharingInfo() {

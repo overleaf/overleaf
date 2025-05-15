@@ -2,7 +2,6 @@ import AddCollaborators from './add-collaborators'
 import AddCollaboratorsUpgrade from './add-collaborators-upgrade'
 import CollaboratorsLimitUpgrade from './collaborators-limit-upgrade'
 import AccessLevelsChanged from './access-levels-changed'
-import PropTypes from 'prop-types'
 import OLRow from '@/features/ui/components/ol/ol-row'
 
 export default function SendInvites({
@@ -10,6 +9,11 @@ export default function SendInvites({
   hasExceededCollaboratorLimit,
   haveAnyEditorsBeenDowngraded,
   somePendingEditorsResolved,
+}: {
+  canAddCollaborators: boolean
+  hasExceededCollaboratorLimit: boolean
+  haveAnyEditorsBeenDowngraded: boolean
+  somePendingEditorsResolved: boolean
 }) {
   return (
     <OLRow className="invite-controls">
@@ -29,11 +33,4 @@ export default function SendInvites({
       <AddCollaborators readOnly={!canAddCollaborators} />
     </OLRow>
   )
-}
-
-SendInvites.propTypes = {
-  canAddCollaborators: PropTypes.bool,
-  hasExceededCollaboratorLimit: PropTypes.bool,
-  haveAnyEditorsBeenDowngraded: PropTypes.bool,
-  somePendingEditorsResolved: PropTypes.bool,
 }

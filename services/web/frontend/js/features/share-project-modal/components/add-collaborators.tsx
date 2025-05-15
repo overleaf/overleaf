@@ -2,20 +2,19 @@ import { useEffect, useState, useMemo, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useMultipleSelection } from 'downshift'
 import { useShareProjectContext } from './share-project-modal'
-import SelectCollaborators from './select-collaborators'
+import SelectCollaborators, { ContactItem } from './select-collaborators'
 import { resendInvite, sendInvite } from '../utils/api'
 import { useUserContacts } from '../hooks/use-user-contacts'
 import useIsMounted from '@/shared/hooks/use-is-mounted'
 import { useProjectContext } from '@/shared/context/project-context'
 import { sendMB } from '@/infrastructure/event-tracking'
 import ClickableElementEnhancer from '@/shared/components/clickable-element-enhancer'
-import PropTypes from 'prop-types'
 import OLForm from '@/features/ui/components/ol/ol-form'
 import OLFormGroup from '@/features/ui/components/ol/ol-form-group'
 import { Select } from '@/shared/components/select'
 import OLButton from '@/features/ui/components/ol/ol-button'
 
-export default function AddCollaborators({ readOnly }) {
+export default function AddCollaborators({ readOnly }: { readOnly?: boolean }) {
   const [privileges, setPrivileges] = useState('readAndWrite')
 
   const isMounted = useIsMounted()
@@ -43,7 +42,7 @@ export default function AddCollaborators({ readOnly }) {
     )
   }, [contacts, currentMemberEmails])
 
-  const multipleSelectionProps = useMultipleSelection({
+  const multipleSelectionProps = useMultipleSelection<ContactItem>({
     initialActiveIndex: 0,
     initialSelectedItems: [],
   })
@@ -129,7 +128,7 @@ export default function AddCollaborators({ readOnly }) {
               ? previousViewersAmount + 1
               : previousViewersAmount,
         })
-      } catch (error) {
+      } catch (error: any) {
         setInFlight(false)
         setError(
           error.data?.errorReason ||
@@ -213,13 +212,17 @@ export default function AddCollaborators({ readOnly }) {
             dataTestId="add-collaborator-select"
             items={privilegeOptions}
             itemToKey={item => item.key}
-            itemToString={item => item.label}
-            itemToSubtitle={item => item.description || ''}
-            itemToDisabled={item => readOnly && item.key !== 'readOnly'}
+            itemToString={item => item?.label || ''}
+            itemToSubtitle={item => item?.description || ''}
+            itemToDisabled={item => !!(readOnly && item?.key !== 'readOnly')}
             selected={privilegeOptions.find(
               option => option.key === privileges
             )}
-            onSelectedItemChanged={item => setPrivileges(item.key)}
+            onSelectedItemChanged={item => {
+              if (item) {
+                setPrivileges(item.key)
+              }
+            }}
           />
           <ClickableElementEnhancer
             as={OLButton}
@@ -232,8 +235,4 @@ export default function AddCollaborators({ readOnly }) {
       </OLFormGroup>
     </OLForm>
   )
-}
-
-AddCollaborators.propTypes = {
-  readOnly: PropTypes.bool,
 }

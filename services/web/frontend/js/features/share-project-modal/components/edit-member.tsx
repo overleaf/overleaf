@@ -1,5 +1,4 @@
 import { useState, useEffect, useMemo } from 'react'
-import PropTypes from 'prop-types'
 import { Trans, useTranslation } from 'react-i18next'
 import { useShareProjectContext } from './share-project-modal'
 import TransferOwnershipModal from './transfer-ownership-modal'
@@ -226,15 +225,6 @@ export default function EditMember({
       </OLFormGroup>
     </form>
   )
-}
-EditMember.propTypes = {
-  member: PropTypes.shape({
-    _id: PropTypes.string.isRequired,
-    email: PropTypes.string.isRequired,
-    privileges: PropTypes.string.isRequired,
-  }),
-  hasExceededCollaboratorLimit: PropTypes.bool.isRequired,
-  canAddCollaborators: PropTypes.bool.isRequired,
 }
 
 type SelectPrivilegeProps = {

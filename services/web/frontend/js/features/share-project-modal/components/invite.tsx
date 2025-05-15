@@ -1,5 +1,4 @@
 import { useCallback } from 'react'
-import PropTypes from 'prop-types'
 import { useShareProjectContext } from './share-project-modal'
 import { useTranslation } from 'react-i18next'
 import MemberPrivileges from './member-privileges'
@@ -11,8 +10,15 @@ import OLCol from '@/features/ui/components/ol/ol-col'
 import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
 import OLButton from '@/features/ui/components/ol/ol-button'
 import MaterialIcon from '@/shared/components/material-icon'
+import { ProjectContextMember } from '@/shared/context/types/project-context'
 
-export default function Invite({ invite, isProjectOwner }) {
+export default function Invite({
+  invite,
+  isProjectOwner,
+}: {
+  invite: ProjectContextMember
+  isProjectOwner: boolean
+}) {
   const { t } = useTranslation()
   return (
     <OLRow className="project-invite">
@@ -38,12 +44,7 @@ export default function Invite({ invite, isProjectOwner }) {
   )
 }
 
-Invite.propTypes = {
-  invite: PropTypes.object.isRequired,
-  isProjectOwner: PropTypes.bool.isRequired,
-}
-
-function ResendInvite({ invite }) {
+function ResendInvite({ invite }: { invite: ProjectContextMember }) {
   const { t } = useTranslation()
   const { monitorRequest, setError, inFlight } = useShareProjectContext()
   const { _id: projectId } = useProjectContext()
@@ -66,7 +67,9 @@ function ResendInvite({ invite }) {
           // if (buttonRef.current) {
           //   buttonRef.current.blur()
           // }
-          document.activeElement.blur()
+          if (document.activeElement) {
+            ;(document.activeElement as HTMLElement).blur()
+          }
         }),
     [invite, monitorRequest, projectId, setError]
   )
@@ -84,16 +87,12 @@ function ResendInvite({ invite }) {
   )
 }
 
-ResendInvite.propTypes = {
-  invite: PropTypes.object.isRequired,
-}
-
-function RevokeInvite({ invite }) {
+function RevokeInvite({ invite }: { invite: ProjectContextMember }) {
   const { t } = useTranslation()
   const { updateProject, monitorRequest } = useShareProjectContext()
   const { _id: projectId, invites, members } = useProjectContext()
 
-  function handleClick(event) {
+  function handleClick(event: React.MouseEvent) {
     event.preventDefault()
 
     monitorRequest(() => revokeInvite(projectId, invite)).then(() => {
@@ -125,8 +124,4 @@ function RevokeInvite({ invite }) {
       </OLButton>
     </OLTooltip>
   )
-}
-
-RevokeInvite.propTypes = {
-  invite: PropTypes.object.isRequired,
 }
