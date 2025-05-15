@@ -74,13 +74,8 @@ export function SSOLinkingWidget({
         <p className="small">
           {description?.replace(/<[^>]+>/g, '')}{' '}
           {helpPath ? (
-            <a
-              href={helpPath}
-              target="_blank"
-              rel="noreferrer"
-              aria-label={t('learn_more_about', { integrationName: title })}
-            >
-              {t('learn_more')}
+            <a href={helpPath} target="_blank" rel="noreferrer">
+              {t('learn_more_about', { appName: title })}
             </a>
           ) : null}
         </p>

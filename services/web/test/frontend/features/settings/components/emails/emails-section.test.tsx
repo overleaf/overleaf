@@ -40,7 +40,9 @@ describe('<EmailsSection />', function () {
 
     screen.getByText(/add additional email addresses/i)
     screen.getByText(/to change your primary email/i)
-    screen.getByLabelText('Learn more about managing your Overleaf emails.')
+    screen.getByRole('link', {
+      name: /learn more about managing your Overleaf emails/i,
+    })
   })
 
   it('renders a loading message when loading', async function () {

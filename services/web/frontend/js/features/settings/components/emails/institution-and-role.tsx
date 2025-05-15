@@ -115,7 +115,7 @@ function InstitutionAndRole({ userEmailData }: InstitutionAndRoleProps) {
           >
             {!affiliation.department && !affiliation.role
               ? t('add_role_and_department')
-              : t('change')}
+              : t('change_email')}
           </OLButton>
         </div>
       ) : (

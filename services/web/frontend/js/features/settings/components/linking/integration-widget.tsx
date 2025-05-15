@@ -72,13 +72,8 @@ export function IntegrationLinkingWidget({
         </div>
         <p className="small">
           {description}{' '}
-          <a
-            href={helpPath}
-            target="_blank"
-            rel="noreferrer"
-            aria-label={t('learn_more_about', { integrationName: title })}
-          >
-            {t('learn_more')}
+          <a href={helpPath} target="_blank" rel="noreferrer">
+            {t('learn_more_about', { appName: title })}
           </a>
         </p>
         {hasFeature && statusIndicator}
