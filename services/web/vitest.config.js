@@ -8,5 +8,6 @@ module.exports = defineConfig({
     ],
     setupFiles: ['./test/unit/vitest_bootstrap.mjs'],
     globals: true,
+    isolate: false,
   },
 })
