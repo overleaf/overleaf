@@ -52,6 +52,7 @@ describe('CollaboratorsGetter', function () {
     this.UserGetter = {
       promises: {
         getUser: sinon.stub().resolves(null),
+        getUsers: sinon.stub().resolves([]),
       },
     }
     this.ProjectMock = sinon.mock(Project)
@@ -205,21 +206,13 @@ describe('CollaboratorsGetter', function () {
 
   describe('getInvitedMembersWithPrivilegeLevels', function () {
     beforeEach(function () {
-      this.UserGetter.promises.getUser
-        .withArgs(this.readOnlyRef1.toString())
-        .resolves({ _id: this.readOnlyRef1 })
-      this.UserGetter.promises.getUser
-        .withArgs(this.readOnlyTokenRef.toString())
-        .resolves({ _id: this.readOnlyTokenRef })
-      this.UserGetter.promises.getUser
-        .withArgs(this.readWriteRef2.toString())
-        .resolves({ _id: this.readWriteRef2 })
-      this.UserGetter.promises.getUser
-        .withArgs(this.readWriteTokenRef.toString())
-        .resolves({ _id: this.readWriteTokenRef })
-      this.UserGetter.promises.getUser
-        .withArgs(this.reviewer1Ref.toString())
-        .resolves({ _id: this.reviewer1Ref })
+      this.UserGetter.promises.getUsers.resolves([
+        { _id: this.readOnlyRef1 },
+        { _id: this.readOnlyTokenRef },
+        { _id: this.readWriteRef2 },
+        { _id: this.readWriteTokenRef },
+        { _id: this.reviewer1Ref },
+      ])
     })
 
     it('should return an array of invited members with their privilege levels', async function () {
@@ -416,15 +409,11 @@ describe('CollaboratorsGetter', function () {
           { _id: this.reviewUser._id, email: this.reviewUser.email },
         ],
       }
-      this.UserGetter.promises.getUser
-        .withArgs(this.owningUser._id.toString())
-        .resolves(this.owningUser)
-      this.UserGetter.promises.getUser
-        .withArgs(this.readWriteUser._id.toString())
-        .resolves(this.readWriteUser)
-      this.UserGetter.promises.getUser
-        .withArgs(this.reviewUser._id.toString())
-        .resolves(this.reviewUser)
+      this.UserGetter.promises.getUsers.resolves([
+        this.owningUser,
+        this.readWriteUser,
+        this.reviewUser,
+      ])
       this.ProjectEditorHandler.buildOwnerAndMembersViews.returns(this.views)
       this.result =
         await this.CollaboratorsGetter.promises.getAllInvitedMembers(

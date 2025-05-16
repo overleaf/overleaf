@@ -385,34 +385,32 @@ function _getMemberIdsWithPrivilegeLevelsFromFields(
 }
 
 async function _loadMembers(members) {
-  const limit = pLimit(3)
-  const results = await Promise.all(
-    members.map(member =>
-      limit(async () => {
-        const user = await UserGetter.promises.getUser(member.id, {
-          _id: 1,
-          email: 1,
-          features: 1,
-          first_name: 1,
-          last_name: 1,
-          signUpDate: 1,
-        })
-        if (user != null) {
-          const record = {
-            user,
-            privilegeLevel: member.privilegeLevel,
-          }
-          if (member.pendingEditor) {
-            record.pendingEditor = true
-          } else if (member.pendingReviewer) {
-            record.pendingReviewer = true
-          }
-          return record
-        } else {
-          return null
-        }
-      })
-    )
-  )
-  return results.filter(r => r != null)
+  const userIds = Array.from(new Set(members.map(m => m.id)))
+  const users = new Map()
+  for (const user of await UserGetter.promises.getUsers(userIds, {
+    _id: 1,
+    email: 1,
+    features: 1,
+    first_name: 1,
+    last_name: 1,
+    signUpDate: 1,
+  })) {
+    users.set(user._id.toString(), user)
+  }
+  return members
+    .map(member => {
+      const user = users.get(member.id)
+      if (!user) return null
+      const record = {
+        user,
+        privilegeLevel: member.privilegeLevel,
+      }
+      if (member.pendingEditor) {
+        record.pendingEditor = true
+      } else if (member.pendingReviewer) {
+        record.pendingReviewer = true
+      }
+      return record
+    })
+    .filter(r => r != null)
 }
