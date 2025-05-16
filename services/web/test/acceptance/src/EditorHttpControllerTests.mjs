@@ -14,42 +14,13 @@ describe('EditorHttpController', function () {
       done()
     })
   })
-  beforeEach('create doc', function (done) {
-    this.user.createDocInProject(
-      this.projectId,
-      null,
-      'potato.tex',
-      (error, docId) => {
-        this.docId = docId
-        done(error)
-      }
-    )
-  })
-
   describe('joinProject', function () {
-    it('should emit an empty deletedDocs array', function (done) {
+    it('returns project details', function (done) {
       this.user.joinProject(this.projectId, (error, details) => {
         if (error) return done(error)
 
-        expect(details.project.deletedDocs).to.deep.equal([])
+        expect(details.project.name).to.equal(this.projectName)
         done()
-      })
-    })
-
-    describe('after deleting a doc', function () {
-      beforeEach(function (done) {
-        this.user.deleteItemInProject(this.projectId, 'doc', this.docId, done)
-      })
-
-      it('should include the deleted doc in the deletedDocs array', function (done) {
-        this.user.joinProject(this.projectId, (error, details) => {
-          if (error) return done(error)
-
-          expect(details.project.deletedDocs).to.deep.equal([
-            { _id: this.docId, name: 'potato.tex' },
-          ])
-          done()
-        })
       })
     })
   })

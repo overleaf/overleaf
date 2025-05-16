@@ -42,13 +42,6 @@ describe('ProjectEditorHandler', function () {
           ],
         },
       ],
-      deletedDocs: [
-        {
-          _id: 'deleted-doc-id',
-          name: 'main.tex',
-          deletedAt: (this.deletedAt = new Date('2017-01-01')),
-        },
-      ],
     }
     this.members = [
       {
@@ -95,9 +88,6 @@ describe('ProjectEditorHandler', function () {
         token: 'my-secret-token2',
       },
     ]
-    this.deletedDocsFromDocstore = [
-      { _id: 'deleted-doc-id-from-docstore', name: 'docstore.tex' },
-    ]
     this.handler = SandboxedModule.require(modulePath)
   })
 
@@ -107,8 +97,7 @@ describe('ProjectEditorHandler', function () {
         this.result = this.handler.buildProjectModelView(
           this.project,
           this.members,
-          this.invites,
-          this.deletedDocsFromDocstore
+          this.invites
         )
       })
 
@@ -139,18 +128,6 @@ describe('ProjectEditorHandler', function () {
         this.result.owner.first_name.should.equal('Owner')
         this.result.owner.last_name.should.equal('Overleaf')
         this.result.owner.privileges.should.equal('owner')
-      })
-
-      it('should include the deletedDocs', function () {
-        expect(this.result.deletedDocs).to.exist
-        this.result.deletedDocs.should.deep.equal([
-          {
-            // omit deletedAt field
-            _id: this.project.deletedDocs[0]._id,
-            name: this.project.deletedDocs[0].name,
-          },
-          this.deletedDocsFromDocstore[0],
-        ])
       })
 
       it('should gather readOnly_refs and collaberators_refs into a list of members', function () {
@@ -231,33 +208,12 @@ describe('ProjectEditorHandler', function () {
       })
     })
 
-    describe('when docstore sends a deleted doc that is also present in the project', function () {
-      beforeEach(function () {
-        this.deletedDocsFromDocstore.push(this.project.deletedDocs[0])
-        this.result = this.handler.buildProjectModelView(
-          this.project,
-          this.members,
-          this.invites,
-          this.deletedDocsFromDocstore
-        )
-      })
-
-      it('should not send any duplicate', function () {
-        expect(this.result.deletedDocs).to.exist
-        this.result.deletedDocs.should.deep.equal([
-          this.project.deletedDocs[0],
-          this.deletedDocsFromDocstore[0],
-        ])
-      })
-    })
-
     describe('deletedByExternalDataSource', function () {
       it('should set the deletedByExternalDataSource flag to false when it is not there', function () {
         delete this.project.deletedByExternalDataSource
         const result = this.handler.buildProjectModelView(
           this.project,
           this.members,
-          [],
           []
         )
         result.deletedByExternalDataSource.should.equal(false)
@@ -267,7 +223,6 @@ describe('ProjectEditorHandler', function () {
         const result = this.handler.buildProjectModelView(
           this.project,
           this.members,
-          [],
           []
         )
         result.deletedByExternalDataSource.should.equal(false)
@@ -278,7 +233,6 @@ describe('ProjectEditorHandler', function () {
         const result = this.handler.buildProjectModelView(
           this.project,
           this.members,
-          [],
           []
         )
         result.deletedByExternalDataSource.should.equal(true)
@@ -296,7 +250,6 @@ describe('ProjectEditorHandler', function () {
         this.result = this.handler.buildProjectModelView(
           this.project,
           this.members,
-          [],
           []
         )
       })
@@ -326,7 +279,6 @@ describe('ProjectEditorHandler', function () {
           this.result = this.handler.buildProjectModelView(
             this.project,
             this.members,
-            [],
             []
           )
         })
@@ -351,7 +303,6 @@ describe('ProjectEditorHandler', function () {
               this.result = this.handler.buildProjectModelView(
                 this.project,
                 this.members,
-                [],
                 []
               )
             })

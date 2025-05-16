@@ -3,23 +3,11 @@ const _ = require('lodash')
 const Path = require('path')
 const Features = require('../../infrastructure/Features')
 
-function mergeDeletedDocs(a, b) {
-  const docIdsInA = new Set(a.map(doc => doc._id.toString()))
-  return a.concat(b.filter(doc => !docIdsInA.has(doc._id.toString())))
-}
-
 module.exports = ProjectEditorHandler = {
   trackChangesAvailable: false,
 
-  buildProjectModelView(project, members, invites, deletedDocsFromDocstore) {
+  buildProjectModelView(project, members, invites) {
     let owner, ownerFeatures
-    if (!Array.isArray(project.deletedDocs)) {
-      project.deletedDocs = []
-    }
-    project.deletedDocs.forEach(doc => {
-      // The frontend does not use this field.
-      delete doc.deletedAt
-    })
     const result = {
       _id: project._id,
       name: project.name,
@@ -32,10 +20,6 @@ module.exports = ProjectEditorHandler = {
       description: project.description,
       spellCheckLanguage: project.spellCheckLanguage,
       deletedByExternalDataSource: project.deletedByExternalDataSource || false,
-      deletedDocs: mergeDeletedDocs(
-        project.deletedDocs,
-        deletedDocsFromDocstore
-      ),
       members: [],
       invites: this.buildInvitesView(invites),
       imageName:
