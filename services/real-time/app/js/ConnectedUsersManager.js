@@ -89,13 +89,14 @@ module.exports = {
     multi.exec(function (err, res) {
       if (err) {
         err = new OError('problem marking user as connected').withCause(err)
+        return callback(err)
       }
       const [, nConnectedClients] = res
       Metrics.inc('editing_session_mode', 1, {
         method: cursorData ? 'update' : 'connect',
         status: nConnectedClients === 1 ? 'single' : 'multi',
       })
-      callback(err)
+      callback(null)
     })
   },
 
@@ -136,6 +137,7 @@ module.exports = {
     multi.exec(function (err, res) {
       if (err) {
         err = new OError('problem marking user as disconnected').withCause(err)
+        return callback(err)
       }
       const [, nConnectedClients] = res
       const status =
@@ -183,7 +185,7 @@ module.exports = {
           }
         })
       }
-      callback(err)
+      callback(null)
     })
   },
 
