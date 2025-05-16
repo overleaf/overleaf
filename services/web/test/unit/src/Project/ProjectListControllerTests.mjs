@@ -53,11 +53,6 @@ describe('ProjectListController', function () {
     this.settings = {
       siteUrl: 'https://overleaf.com',
     }
-    this.LimitationsManager = {
-      promises: {
-        userIsMemberOfGroupSubscription: sinon.stub().resolves(false),
-      },
-    }
     this.TagsHandler = {
       promises: {
         getAllTags: sinon.stub().resolves(this.tags),
@@ -113,7 +108,11 @@ describe('ProjectListController', function () {
     }
     this.SubscriptionViewModelBuilder = {
       promises: {
-        getBestSubscription: sinon.stub().resolves({ type: 'free' }),
+        getUsersSubscriptionDetails: sinon.stub().resolves({
+          bestSubscription: { type: 'free' },
+          individualSubscription: null,
+          memberGroupSubscriptions: [],
+        }),
       },
     }
     this.SurveyHandler = {
@@ -124,11 +123,6 @@ describe('ProjectListController', function () {
     this.NotificationBuilder = {
       promises: {
         ipMatcherAffiliation: sinon.stub().returns({ create: sinon.stub() }),
-      },
-    }
-    this.SubscriptionLocator = {
-      promises: {
-        getUserSubscription: sinon.stub().resolves({}),
       },
     }
     this.GeoIpLookup = {
@@ -161,8 +155,6 @@ describe('ProjectListController', function () {
         this.SplitTestSessionHandler,
       '../../../../app/src/Features/User/UserController': this.UserController,
       '../../../../app/src/Features/Project/ProjectHelper': this.ProjectHelper,
-      '../../../../app/src/Features/Subscription/LimitationsManager':
-        this.LimitationsManager,
       '../../../../app/src/Features/Tags/TagsHandler': this.TagsHandler,
       '../../../../app/src/Features/Notifications/NotificationsHandler':
         this.NotificationsHandler,
@@ -180,8 +172,6 @@ describe('ProjectListController', function () {
         this.UserPrimaryEmailCheckHandler,
       '../../../../app/src/Features/Notifications/NotificationsBuilder':
         this.NotificationBuilder,
-      '../../../../app/src/Features/Subscription/SubscriptionLocator':
-        this.SubscriptionLocator,
       '../../../../app/src/infrastructure/GeoIpLookup': this.GeoIpLookup,
       '../../../../app/src/Features/Tutorial/TutorialHandler':
         this.TutorialHandler,
@@ -345,9 +335,13 @@ describe('ProjectListController', function () {
     it('should show INR Banner for Indian users with free account', function (done) {
       // usersBestSubscription is only available when saas feature is present
       this.Features.hasFeature.withArgs('saas').returns(true)
-      this.SubscriptionViewModelBuilder.promises.getBestSubscription.resolves({
-        type: 'free',
-      })
+      this.SubscriptionViewModelBuilder.promises.getUsersSubscriptionDetails.resolves(
+        {
+          bestSubscription: {
+            type: 'free',
+          },
+        }
+      )
       this.GeoIpLookup.promises.getCurrencyCode.resolves({
         countryCode: 'IN',
       })
@@ -361,9 +355,13 @@ describe('ProjectListController', function () {
     it('should not show INR Banner for Indian users with premium account', function (done) {
       // usersBestSubscription is only available when saas feature is present
       this.Features.hasFeature.withArgs('saas').returns(true)
-      this.SubscriptionViewModelBuilder.promises.getBestSubscription.resolves({
-        type: 'individual',
-      })
+      this.SubscriptionViewModelBuilder.promises.getUsersSubscriptionDetails.resolves(
+        {
+          bestSubscription: {
+            type: 'individual',
+          },
+        }
+      )
       this.GeoIpLookup.promises.getCurrencyCode.resolves({
         countryCode: 'IN',
       })
@@ -616,8 +614,8 @@ describe('ProjectListController', function () {
     describe('enterprise banner', function () {
       beforeEach(function (done) {
         this.Features.hasFeature.withArgs('saas').returns(true)
-        this.LimitationsManager.promises.userIsMemberOfGroupSubscription.resolves(
-          { isMember: false }
+        this.SubscriptionViewModelBuilder.promises.getUsersSubscriptionDetails.resolves(
+          { memberGroupSubscriptions: [] }
         )
         this.UserGetter.promises.getUserFullEmails.resolves([
           {
@@ -660,8 +658,8 @@ describe('ProjectListController', function () {
         })
 
         it('does not show banner if user is part of any group subscription', function () {
-          this.LimitationsManager.promises.userIsMemberOfGroupSubscription.resolves(
-            { isMember: true }
+          this.SubscriptionViewModelBuilder.promises.getUsersSubscriptionDetails.resolves(
+            { memberGroupSubscriptions: [{}] }
           )
 
           this.res.render = (pageName, opts) => {

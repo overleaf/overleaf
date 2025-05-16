@@ -24,6 +24,7 @@ const Modules = require('../../infrastructure/Modules')
 
 /**
  * @import { Subscription } from "../../../../types/project/dashboard/subscription"
+ * @import { Subscription as DBSubscription } from "../../models/Subscription"
  */
 
 function buildHostedLink(type) {
@@ -378,6 +379,15 @@ async function buildUsersSubscriptionViewModel(user, locale = 'en') {
  * @returns {Promise<Subscription>}
  */
 async function getBestSubscription(user) {
+  const { bestSubscription } = await getUsersSubscriptionDetails(user)
+  return bestSubscription
+}
+
+/**
+ * @param {{_id: string}} user
+ * @returns {Promise<{bestSubscription:Subscription,individualSubscription:DBSubscription|null,memberGroupSubscriptions:DBSubscription[]}>}
+ */
+async function getUsersSubscriptionDetails(user) {
   let [
     individualSubscription,
     memberGroupSubscriptions,
@@ -464,7 +474,7 @@ async function getBestSubscription(user) {
       }
     }
   }
-  return bestSubscription
+  return { bestSubscription, individualSubscription, memberGroupSubscriptions }
 }
 
 function buildPlansList(currentPlan) {
@@ -599,5 +609,6 @@ module.exports = {
   promises: {
     buildUsersSubscriptionViewModel,
     getBestSubscription,
+    getUsersSubscriptionDetails,
   },
 }

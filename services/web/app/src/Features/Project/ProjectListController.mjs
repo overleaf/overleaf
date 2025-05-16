@@ -21,12 +21,10 @@ import { OError, V1ConnectionError } from '../Errors/Errors.js'
 import { User } from '../../models/User.js'
 import UserPrimaryEmailCheckHandler from '../User/UserPrimaryEmailCheckHandler.js'
 import UserController from '../User/UserController.js'
-import LimitationsManager from '../Subscription/LimitationsManager.js'
 import NotificationsBuilder from '../Notifications/NotificationsBuilder.js'
 import GeoIpLookup from '../../infrastructure/GeoIpLookup.js'
 import SplitTestHandler from '../SplitTests/SplitTestHandler.js'
 import SplitTestSessionHandler from '../SplitTests/SplitTestSessionHandler.js'
-import SubscriptionLocator from '../Subscription/SubscriptionLocator.js'
 import TutorialHandler from '../Tutorial/TutorialHandler.js'
 
 /**
@@ -102,6 +100,8 @@ async function projectListPage(req, res, next) {
   // - undefined - when there's no "saas" feature or couldn't get subscription data
   // - object - the subscription data object
   let usersBestSubscription
+  let usersIndividualSubscription
+  let usersGroupSubscriptions = []
   let survey
   let userIsMemberOfGroupSubscription = false
   let groupSubscriptionsPendingEnrollment = []
@@ -132,10 +132,13 @@ async function projectListPage(req, res, next) {
     await SplitTestSessionHandler.promises.sessionMaintenance(req, user)
 
     try {
-      usersBestSubscription =
-        await SubscriptionViewModelBuilder.promises.getBestSubscription({
-          _id: userId,
-        })
+      ;({
+        bestSubscription: usersBestSubscription,
+        individualSubscription: usersIndividualSubscription,
+        memberGroupSubscriptions: usersGroupSubscriptions,
+      } = await SubscriptionViewModelBuilder.promises.getUsersSubscriptionDetails(
+        { _id: userId }
+      ))
     } catch (error) {
       logger.err(
         { err: error, userId },
@@ -143,14 +146,11 @@ async function projectListPage(req, res, next) {
       )
     }
     try {
-      const { isMember, subscriptions } =
-        await LimitationsManager.promises.userIsMemberOfGroupSubscription(user)
-
-      userIsMemberOfGroupSubscription = isMember
+      userIsMemberOfGroupSubscription = usersGroupSubscriptions?.length > 0
 
       // TODO use helper function
       if (!user.enrollment?.managedBy) {
-        groupSubscriptionsPendingEnrollment = subscriptions.filter(
+        groupSubscriptionsPendingEnrollment = usersGroupSubscriptions.filter(
           subscription =>
             subscription.groupPlan && subscription.managedUsersEnabled
         )
@@ -391,13 +391,10 @@ async function projectListPage(req, res, next) {
   let hasIndividualRecurlySubscription = false
 
   try {
-    const individualSubscription =
-      await SubscriptionLocator.promises.getUsersSubscription(userId)
-
     hasIndividualRecurlySubscription =
-      individualSubscription?.groupPlan === false &&
-      individualSubscription?.recurlyStatus?.state !== 'canceled' &&
-      individualSubscription?.recurlySubscription_id !== ''
+      usersIndividualSubscription?.groupPlan === false &&
+      usersIndividualSubscription?.recurlyStatus?.state !== 'canceled' &&
+      usersIndividualSubscription?.recurlySubscription_id !== ''
   } catch (error) {
     logger.error({ err: error }, 'Failed to get individual subscription')
   }
