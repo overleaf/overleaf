@@ -265,6 +265,7 @@ function drainAndShutdown(signal) {
 }
 
 Settings.shutDownInProgress = false
+Settings.shutDownScheduled = false
 const shutdownDrainTimeWindow = parseInt(Settings.shutdownDrainTimeWindow, 10)
 if (Settings.shutdownDrainTimeWindow) {
   logger.info({ shutdownDrainTimeWindow }, 'shutdownDrainTimeWindow enabled')
@@ -304,8 +305,16 @@ if (Settings.shutdownDrainTimeWindow) {
         )
       }
       logger.error({ err: error }, 'uncaught exception')
-      if (Settings.errors && Settings.errors.shutdownOnUncaughtError) {
-        drainAndShutdown('SIGABRT')
+      if (
+        Settings.errors?.shutdownOnUncaughtError &&
+        !Settings.shutDownScheduled
+      ) {
+        Settings.shutDownScheduled = true
+        const delay = Math.ceil(
+          Math.random() * 60 * Math.max(io.sockets.clients().length, 1_000)
+        )
+        logger.info({ delay }, 'delaying shutdown on uncaught error')
+        setTimeout(() => drainAndShutdown('SIGABRT'), delay)
       }
     })
   }
