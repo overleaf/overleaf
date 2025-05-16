@@ -314,18 +314,9 @@ async function projectListPage(req, res, next) {
     delete req.session.saml
   }
 
-  function fakeDelay() {
-    return new Promise(resolve => {
-      setTimeout(() => resolve(undefined), 0)
-    })
-  }
-
-  const prefetchedProjectsBlob = await Promise.race([
-    projectsBlobPending,
-    fakeDelay(),
-  ])
+  const prefetchedProjectsBlob = await projectsBlobPending
   Metrics.inc('project-list-prefetch-projects', 1, {
-    status: prefetchedProjectsBlob ? 'success' : 'too-slow',
+    status: prefetchedProjectsBlob ? 'success' : 'error',
   })
 
   // in v2 add notifications for matching university IPs
