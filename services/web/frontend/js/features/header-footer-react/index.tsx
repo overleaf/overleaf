@@ -1,6 +1,6 @@
 import { createRoot } from 'react-dom/client'
 import getMeta from '@/utils/meta'
-import DefaultNavbar from '@/features/ui/components/bootstrap-5/navbar/default-navbar'
+import { DefaultNavbarRoot } from '@/features/ui/components/bootstrap-5/navbar/default-navbar'
 import Footer from '@/features/ui/components/bootstrap-5/footer/footer'
 import { SplitTestProvider } from '@/shared/context/split-test-context'
 
@@ -10,7 +10,7 @@ if (navbarElement) {
   const root = createRoot(navbarElement)
   root.render(
     <SplitTestProvider>
-      <DefaultNavbar {...navbarProps} />
+      <DefaultNavbarRoot {...navbarProps} />
     </SplitTestProvider>
   )
 }

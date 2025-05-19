@@ -34,7 +34,6 @@ function DefaultNavbar(props: DefaultNavbarMetadata) {
     items,
   } = props
   const { t } = useTranslation()
-  const { isReady } = useWaitForI18n()
   const [expanded, setExpanded] = useState(false)
 
   // The Contact Us modal is rendered at this level rather than inside the nav
@@ -43,10 +42,6 @@ function DefaultNavbar(props: DefaultNavbarMetadata) {
     useContactUsModal({
       autofillProjectUrl: false,
     })
-
-  if (!isReady) {
-    return null
-  }
 
   return (
     <>
@@ -140,6 +135,16 @@ function DefaultNavbar(props: DefaultNavbarMetadata) {
       <UserProvider>{contactUsModal}</UserProvider>
     </>
   )
+}
+
+export const DefaultNavbarRoot = (props: DefaultNavbarMetadata) => {
+  const { isReady } = useWaitForI18n()
+
+  if (!isReady) {
+    return null
+  }
+
+  return <DefaultNavbar {...props} />
 }
 
 export default DefaultNavbar

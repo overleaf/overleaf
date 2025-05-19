@@ -384,7 +384,7 @@ describe('<EmailsSection />', function () {
       department: customDepartment,
     })
 
-    screen.getByText(
+    await screen.findByText(
       `Enter the 6-digit confirmation code sent to ${userEmailData.email}.`
     )
 
