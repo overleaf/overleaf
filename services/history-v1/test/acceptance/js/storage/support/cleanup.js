@@ -64,6 +64,10 @@ async function clearBucket(name) {
 let s3PersistorForBackupCleanup
 
 async function cleanupBackup() {
+  if (!config.has('backupStore')) {
+    return
+  }
+
   // The backupPersistor refuses to delete short prefixes. Use a low-level S3 persistor.
   if (!s3PersistorForBackupCleanup) {
     const { backupPersistor } = await import(

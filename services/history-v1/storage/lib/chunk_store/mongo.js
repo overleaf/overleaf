@@ -3,6 +3,7 @@
 const { ObjectId, ReadPreference, MongoError } = require('mongodb')
 const { Chunk } = require('overleaf-editor-core')
 const OError = require('@overleaf/o-error')
+const config = require('config')
 const assert = require('../assert')
 const mongodb = require('../mongodb')
 const { ChunkVersionConflictError } = require('./errors')
@@ -259,6 +260,9 @@ async function updateProjectRecord(
   earliestChangeTimestamp,
   mongoOpts = {}
 ) {
+  if (!config.has('backupStore')) {
+    return
+  }
   // record the end version against the project
   await mongodb.projects.updateOne(
     {

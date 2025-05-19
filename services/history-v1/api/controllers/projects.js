@@ -255,11 +255,13 @@ async function createProjectBlob(req, res, next) {
     const blobStore = new BlobStore(projectId)
     const newBlob = await blobStore.putFile(tmpPath)
 
-    try {
-      const { backupBlob } = await import('../../storage/lib/backupBlob.mjs')
-      await backupBlob(projectId, newBlob, tmpPath)
-    } catch (error) {
-      logger.warn({ error, projectId, hash }, 'Failed to backup blob')
+    if (config.has('backupStore')) {
+      try {
+        const { backupBlob } = await import('../../storage/lib/backupBlob.mjs')
+        await backupBlob(projectId, newBlob, tmpPath)
+      } catch (error) {
+        logger.warn({ error, projectId, hash }, 'Failed to backup blob')
+      }
     }
     res.status(HTTPStatus.CREATED).end()
   })
