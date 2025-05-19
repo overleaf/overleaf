@@ -379,12 +379,6 @@ async function previewAddonPurchase(req, res) {
     paymentMethod
   )
 
-  await SplitTestHandler.promises.getAssignment(
-    req,
-    res,
-    'overleaf-assist-bundle'
-  )
-
   res.render('subscriptions/preview-change', {
     changePreview,
     purchaseReferrer,
