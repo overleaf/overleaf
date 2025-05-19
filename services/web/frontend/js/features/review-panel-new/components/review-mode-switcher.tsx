@@ -73,7 +73,7 @@ function ReviewModeSwitcher() {
               })
               saveTrackChangesForCurrentUser(false)
             }}
-            description={t('can_edit_content')}
+            description={t('edit_content_directly')}
             leadingIcon="edit"
             active={write && mode === 'edit'}
           >
