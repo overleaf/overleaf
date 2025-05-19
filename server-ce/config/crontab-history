@@ -1,3 +1,4 @@
 */20 * * * *  root  /overleaf/cron/project-history-periodic-flush.sh >> /var/log/overleaf/cron-project-history-periodic-flush.log 2>&1
 30 * * * *    root  /overleaf/cron/project-history-retry-soft.sh >> /var/log/overleaf/project-history-retry-soft.log 2>&1
 45 * * * *    root  /overleaf/cron/project-history-retry-hard.sh >> /var/log/overleaf/project-history-retry-hard.log 2>&1
+0 3 * * *     root  /overleaf/cron/project-history-flush-all.sh >> /var/log/overleaf/project-history-flush-all.log 2>&1
