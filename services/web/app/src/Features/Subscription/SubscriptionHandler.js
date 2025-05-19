@@ -73,11 +73,12 @@ async function createSubscription(user, subscriptionDetails, recurlyTokenIds) {
  * @return {Promise<PaymentProviderSubscriptionChange>}
  */
 async function previewSubscriptionChange(userId, planCode) {
-  const subscription = await getSubscriptionForUser(userId)
-  const changeRequest = subscription?.getRequestForPlanChange(planCode)
-  const change =
-    await RecurlyClient.promises.previewSubscriptionChange(changeRequest)
-  return change
+  const change = await Modules.promises.hooks.fire(
+    'previewSubscriptionChange',
+    userId,
+    planCode
+  )
+  return change[0]
 }
 
 /**

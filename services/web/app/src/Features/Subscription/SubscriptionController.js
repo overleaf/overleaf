@@ -468,6 +468,7 @@ async function previewSubscription(req, res, next) {
   if (!planCode) {
     return HttpErrorHandler.notFound(req, res, 'Missing plan code')
   }
+  // TODO: use PaymentService to fetch plan information
   const plan = await RecurlyClient.promises.getPlan(planCode)
   const userId = SessionManager.getLoggedInUserId(req.session)
   const subscriptionChange =
@@ -475,14 +476,17 @@ async function previewSubscription(req, res, next) {
       userId,
       planCode
     )
-  const paymentMethod = await RecurlyClient.promises.getPaymentMethod(userId)
+  const paymentMethod = await Modules.promises.hooks.fire(
+    'getPaymentMethod',
+    userId
+  )
   const changePreview = makeChangePreview(
     {
       type: 'premium-subscription',
       plan: { code: plan.code, name: plan.name },
     },
     subscriptionChange,
-    paymentMethod
+    paymentMethod[0]
   )
 
   res.render('subscriptions/preview-change', { changePreview })
