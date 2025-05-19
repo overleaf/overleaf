@@ -721,6 +721,11 @@ del.review-panel-content-highlight {
       display: block;
     }
   }
+
+  // prevent gap between button and menu
+  > .dropdown-menu {
+    margin-top: -2px;
+  }
 }
 
 .review-mode-switcher-toggle-button {
