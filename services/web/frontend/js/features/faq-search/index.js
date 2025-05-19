@@ -2,7 +2,7 @@ import _ from 'lodash'
 import { formatWikiHit, searchWiki } from '../algolia-search/search-wiki'
 
 function setupSearch(formEl) {
-  const inputEl = formEl.querySelector('input[type="text"]')
+  const inputEl = formEl.querySelector('input[type="search"]')
   const resultsEl = formEl.querySelector('[data-ol-search-results]')
   const wrapperEl = formEl.querySelector('[data-ol-search-results-wrapper]')
   const noResultsEl = formEl.querySelector('[data-ol-search-no-results]')
