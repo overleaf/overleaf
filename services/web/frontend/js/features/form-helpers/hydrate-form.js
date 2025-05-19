@@ -375,7 +375,7 @@ function formSentHelper(el) {
 }
 
 function formValidationHelper(el) {
-  el.querySelectorAll('input').forEach(inputEl => {
+  el.querySelectorAll('input, textarea').forEach(inputEl => {
     if (
       inputEl.willValidate &&
       !inputEl.hasAttribute('data-ol-no-custom-form-validation-messages')
