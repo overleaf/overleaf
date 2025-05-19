@@ -20,6 +20,7 @@ import OLButton from '@/features/ui/components/ol/ol-button'
 import { subscriptionUpdateUrl } from '@/features/subscription/data/subscription-url'
 import * as eventTracking from '@/infrastructure/event-tracking'
 import sparkleText from '@/shared/svgs/ai-sparkle-text.svg'
+import { useFeatureFlag } from '@/shared/context/split-test-context'
 
 function PreviewSubscriptionChange() {
   const preview = getMeta(
@@ -29,6 +30,7 @@ function PreviewSubscriptionChange() {
   const { t } = useTranslation()
   const payNowTask = useAsync()
   const location = useLocation()
+  const aiAssistEnabled = useFeatureFlag('overleaf-assist-bundle')
 
   useEffect(() => {
     if (preview.change.type === 'add-on-purchase') {
@@ -107,20 +109,37 @@ function PreviewSubscriptionChange() {
 
             {aiAddOnChange && (
               <div>
-                <Trans
-                  i18nKey="add_ai_assist_to_your_plan"
-                  components={{
-                    sparkle: (
-                      <img
-                        alt="sparkle"
-                        className="ai-error-assistant-sparkle"
-                        src={sparkleText}
-                        aria-hidden="true"
-                        key="sparkle"
-                      />
-                    ),
-                  }}
-                />
+                {aiAssistEnabled ? (
+                  <Trans
+                    i18nKey="add_ai_assist_to_your_plan"
+                    components={{
+                      sparkle: (
+                        <img
+                          alt="sparkle"
+                          className="ai-error-assistant-sparkle"
+                          src={sparkleText}
+                          aria-hidden="true"
+                          key="sparkle"
+                        />
+                      ),
+                    }}
+                  />
+                ) : (
+                  <Trans
+                    i18nKey="add_error_assist_to_your_projects"
+                    components={{
+                      sparkle: (
+                        <img
+                          alt="sparkle"
+                          className="ai-error-assistant-sparkle"
+                          src={sparkleText}
+                          aria-hidden="true"
+                          key="sparkle"
+                        />
+                      ),
+                    }}
+                  />
+                )}
               </div>
             )}
 
