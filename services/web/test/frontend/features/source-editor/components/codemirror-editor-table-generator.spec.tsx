@@ -217,6 +217,41 @@ cell 3 & cell 4 \\\\
       )
     })
 
+    it('Correctly sets borders for booktabs', function () {
+      // Add a blank line above the table to allow room for the table toolbar
+      mountEditor(`
+
+\\begin{tabular}{c|c}
+    cell 1 & cell 2 \\\\
+    cell 3 & cell 4 \\\\
+    cell 5 & cell 6 \\\\
+\\end{tabular}
+`)
+      checkBordersWithNoMultiColumn(
+        [false, false, false, false],
+        [false, true, false]
+      )
+      cy.get('.table-generator-floating-toolbar').should('not.exist')
+      cy.get('.table-generator-cell').first().click()
+      cy.get('.table-generator-floating-toolbar').as('toolbar').should('exist')
+      cy.get('@toolbar').findByText('Custom borders').click({ force: true })
+      cy.get('.table-generator').findByText('Booktabs').click()
+      // The element is partially covered, but we can still click it
+      cy.get('.cm-line').first().click({ force: true })
+      // Table should be unchanged
+      checkTable([
+        ['cell 1', 'cell 2'],
+        ['cell 3', 'cell 4'],
+        ['cell 5', 'cell 6'],
+      ])
+      checkBordersWithNoMultiColumn(
+        [true, true, false, true],
+        [false, false, false]
+      )
+      cy.get('.table-generator-cell').first().click()
+      cy.get('@toolbar').findByText('Booktabs').should('exist')
+    })
+
     it('Changes the column alignment with dropdown buttons', function () {
       // Add a blank line above the table to allow room for the table toolbar
       mountEditor(`

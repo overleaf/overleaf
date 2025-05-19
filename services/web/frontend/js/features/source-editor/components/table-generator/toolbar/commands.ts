@@ -20,8 +20,224 @@ import { WidthSelection } from './column-width-modal/column-width'
 export enum BorderTheme {
   NO_BORDERS = 0,
   FULLY_BORDERED = 1,
+  BOOKTABS = 2,
 }
 /* eslint-enable no-unused-vars */
+
+type ThemeGenerator = {
+  column: (
+    number: number,
+    numColumns: number
+  ) => { left: boolean; right: boolean }
+  row: (number: number, numRows: number) => string | false
+  lastRow?: () => string | false
+  multicolumn: () => { left: boolean; right: boolean }
+}
+
+const themeGenerators: Record<BorderTheme, ThemeGenerator> = {
+  [BorderTheme.NO_BORDERS]: {
+    column: () => ({ left: false, right: false }),
+    row: () => false,
+    multicolumn: () => ({ left: false, right: false }),
+  },
+  [BorderTheme.FULLY_BORDERED]: {
+    column: (number: number, numColumns: number) => ({
+      left: true,
+      right: number === numColumns - 1,
+    }),
+    row: (number: number, numRows: number) => '\\hline',
+    multicolumn: () => ({ left: true, right: true }),
+    lastRow: () => '\\hline',
+  },
+  [BorderTheme.BOOKTABS]: {
+    column: (number: number, numColumns: number) => ({
+      left: false,
+      right: false,
+    }),
+    row: (number: number, numRows: number) => {
+      if (number === 0) {
+        return '\\toprule'
+      }
+      if (number === 1) {
+        return '\\midrule'
+      }
+      return false
+    },
+    lastRow: () => '\\bottomrule',
+    multicolumn: () => ({ left: false, right: false }),
+  },
+}
+
+function applyBorderTheme(
+  generator: ThemeGenerator,
+  view: EditorView,
+  table: TableData,
+  positions: Positions,
+  rowSeparators: RowSeparator[]
+): ChangeSpec[] {
+  const changes: ChangeSpec[] = []
+
+  // Update specification
+  const spec = view.state.sliceDoc(
+    positions.columnDeclarations.from,
+    positions.columnDeclarations.to
+  )
+  const columnSpecification = parseColumnSpecifications(spec)
+  columnSpecification.forEach((column, index) => {
+    const { left, right } = generator.column(index, columnSpecification.length)
+    column.borderLeft = left ? 1 : 0
+    column.borderRight = right ? 1 : 0
+  })
+  const newSpec = generateColumnSpecification(columnSpecification)
+  if (newSpec !== spec) {
+    changes.push({
+      from: positions.columnDeclarations.from,
+      to: positions.columnDeclarations.to,
+      insert: newSpec,
+    })
+  }
+
+  for (let i = 0; i < positions.rowPositions.length; i++) {
+    const row = positions.rowPositions[i]
+    const topBorder = generator.row(i, positions.rowPositions.length)
+    if (topBorder) {
+      let borderPresent = false
+      for (const hline of row.hlines) {
+        if (hline.from > rowSeparators[i]?.to) {
+          continue
+        }
+        if (borderPresent) {
+          // Remove extra border
+          changes.push({
+            from: hline.from,
+            to: hline.to,
+            insert: '',
+          })
+        } else {
+          const type = view.state.sliceDoc(hline.from, hline.to)
+          if (type.trim() !== topBorder) {
+            // Replace with the correct border
+            changes.push({
+              from: hline.from,
+              to: hline.to,
+              insert: topBorder,
+            })
+          }
+          borderPresent = true
+        }
+      }
+      if (!borderPresent) {
+        // Add the border
+        changes.push({
+          from: row.from,
+          to: row.from,
+          insert: topBorder,
+        })
+      }
+    } else {
+      for (const hline of row.hlines) {
+        if (hline.from > rowSeparators[i]?.to) {
+          continue
+        }
+        changes.push({
+          from: hline.from,
+          to: hline.to,
+          insert: '',
+        })
+      }
+    }
+  }
+
+  const lastRow = positions.rowPositions[positions.rowPositions.length - 1]
+  const lastRowBorder = generator.lastRow?.()
+  const hasLastRowSeparator =
+    positions.rowPositions.length === rowSeparators.length
+  if (hasLastRowSeparator) {
+    if (lastRowBorder) {
+      let borderPresent = false
+      for (const hline of lastRow.hlines) {
+        if (hline.from < rowSeparators[positions.rowPositions.length - 1].to) {
+          continue
+        }
+        if (borderPresent) {
+          // Remove extra border
+          changes.push({
+            from: hline.from,
+            to: hline.to,
+            insert: '',
+          })
+        } else {
+          const type = view.state.sliceDoc(hline.from, hline.to)
+          if (type.trim() !== lastRowBorder) {
+            // Replace with the correct border
+            changes.push({
+              from: hline.from,
+              to: hline.to,
+              insert: lastRowBorder,
+            })
+          }
+          borderPresent = true
+        }
+      }
+      if (!borderPresent) {
+        const rowSeparator = rowSeparators[positions.rowPositions.length - 1]
+
+        // Add the border
+        changes.push({
+          from: rowSeparator.to,
+          to: rowSeparator.to,
+          insert: ` ${lastRowBorder}`,
+        })
+      }
+    } else {
+      for (const hline of lastRow.hlines) {
+        if (hline.from < rowSeparators[positions.rowPositions.length - 1].to) {
+          continue
+        }
+        changes.push({
+          from: hline.from,
+          to: hline.to,
+          insert: '',
+        })
+      }
+    }
+  } else if (lastRowBorder) {
+    changes.push({
+      from: lastRow.to,
+      to: lastRow.to,
+      insert: `\\\\ ${lastRowBorder}`,
+    })
+  }
+
+  // Update multicolumn
+  for (const row of table.rows) {
+    for (const cell of row.cells) {
+      if (cell.multiColumn) {
+        const { left, right } = generator.multicolumn()
+        const spec = view.state.sliceDoc(
+          cell.multiColumn.columns.from,
+          cell.multiColumn.columns.to
+        )
+        const columnSpecification = parseColumnSpecifications(spec)
+        columnSpecification.forEach(column => {
+          column.borderLeft = left ? 1 : 0
+          column.borderRight = right ? 1 : 0
+        })
+        const newSpec = generateColumnSpecification(columnSpecification)
+        if (newSpec !== spec) {
+          changes.push({
+            from: cell.multiColumn.columns.from,
+            to: cell.multiColumn.columns.to,
+            insert: newSpec,
+          })
+        }
+      }
+    }
+  }
+
+  return changes
+}
+
 export const setBorders = (
   view: EditorView,
   theme: BorderTheme,
@@ -29,118 +245,18 @@ export const setBorders = (
   rowSeparators: RowSeparator[],
   table: TableData
 ) => {
-  const specification = view.state.sliceDoc(
-    positions.columnDeclarations.from,
-    positions.columnDeclarations.to
+  const generator = themeGenerators[theme]
+  const changes = applyBorderTheme(
+    generator,
+    view,
+    table,
+    positions,
+    rowSeparators
   )
-  if (theme === BorderTheme.NO_BORDERS) {
-    const removeColumnBorders = view.state.changes({
-      from: positions.columnDeclarations.from,
-      to: positions.columnDeclarations.to,
-      insert: specification.replace(/\|/g, ''),
-    })
-    const removeHlines: ChangeSpec[] = []
-    for (const row of positions.rowPositions) {
-      for (const hline of row.hlines) {
-        removeHlines.push({
-          from: hline.from,
-          to: hline.to,
-          insert: '',
-        })
-      }
-    }
-    const removeMulticolumnBorders: ChangeSpec[] = []
-    for (const row of table.rows) {
-      for (const cell of row.cells) {
-        if (cell.multiColumn) {
-          const specification = view.state.sliceDoc(
-            cell.multiColumn.columns.from,
-            cell.multiColumn.columns.to
-          )
-          removeMulticolumnBorders.push({
-            from: cell.multiColumn.columns.from,
-            to: cell.multiColumn.columns.to,
-            insert: specification.replace(/\|/g, ''),
-          })
-        }
-      }
-    }
-    view.dispatch({
-      changes: [
-        removeColumnBorders,
-        ...removeHlines,
-        ...removeMulticolumnBorders,
-      ],
-    })
-  } else if (theme === BorderTheme.FULLY_BORDERED) {
-    const newSpec = generateColumnSpecification(
-      addColumnBordersToSpecification(table.columns)
-    )
 
-    const insertColumns = view.state.changes({
-      from: positions.columnDeclarations.from,
-      to: positions.columnDeclarations.to,
-      insert: newSpec,
-    })
-
-    const insertHlines: ChangeSpec[] = []
-    for (const row of positions.rowPositions) {
-      if (row.hlines.length === 0) {
-        insertHlines.push(
-          view.state.changes({
-            from: row.from,
-            to: row.from,
-            insert: ' \\hline ',
-          })
-        )
-      }
-    }
-    const lastRow = positions.rowPositions[positions.rowPositions.length - 1]
-    if (lastRow.hlines.length < 2) {
-      let toInsert = ' \\hline'
-      if (rowSeparators.length < positions.rowPositions.length) {
-        // We need a trailing \\
-        toInsert = ` \\\\${toInsert}`
-      }
-      insertHlines.push(
-        view.state.changes({
-          from: lastRow.to,
-          to: lastRow.to,
-          insert: toInsert,
-        })
-      )
-    }
-    const addMulticolumnBorders: ChangeSpec[] = []
-    for (const row of table.rows) {
-      for (const cell of row.cells) {
-        if (cell.multiColumn) {
-          addMulticolumnBorders.push({
-            from: cell.multiColumn.columns.from,
-            to: cell.multiColumn.columns.to,
-            insert: generateColumnSpecification(
-              addColumnBordersToSpecification(
-                cell.multiColumn.columns.specification
-              )
-            ),
-          })
-        }
-      }
-    }
-
-    view.dispatch({
-      changes: [insertColumns, ...insertHlines, ...addMulticolumnBorders],
-    })
-  }
-}
-
-const addColumnBordersToSpecification = (specification: ColumnDefinition[]) => {
-  const newSpec = specification.map(column => ({
-    ...column,
-    borderLeft: 1,
-    borderRight: 0,
-  }))
-  newSpec[newSpec.length - 1].borderRight = 1
-  return newSpec
+  view.dispatch({
+    changes,
+  })
 }
 
 export const setAlignment = (

@@ -139,6 +139,33 @@ export class TableData {
     if (this.rows.length === 0 || this.columns.length === 0) {
       return null
     }
+    const hasTopRule = this.rows[0].borderTop === 1
+    const hasMidRule =
+      this.rows[1]?.borderTop === 1 &&
+      (this.rows.length === 2 || this.rows[1]?.borderBottom === 0)
+    const hasBottomRule =
+      this.rows[this.rows.length - 1].borderBottom === 1 &&
+      (this.rows.length === 2 ||
+        this.rows[this.rows.length - 1].borderTop === 0)
+
+    if (hasTopRule && hasMidRule && hasBottomRule) {
+      let isBooktabs = true
+      // Check for no other borders
+      for (const row of this.rows.slice(2, -1)) {
+        if (row.borderTop > 0 || row.borderBottom > 0) {
+          isBooktabs = false
+        }
+      }
+      for (const column of this.columns) {
+        if (column.borderLeft > 0 || column.borderRight > 0) {
+          isBooktabs = false
+        }
+      }
+      if (isBooktabs) {
+        return BorderTheme.BOOKTABS
+      }
+    }
+
     const lastRow = this.rows[this.rows.length - 1]
     const hasBottomBorder = lastRow.borderBottom > 0
     const firstColumn = this.columns[0]
@@ -180,8 +207,10 @@ export class TableData {
 
     if (hasAllRowBorders && hasAllColumnBorders) {
       return BorderTheme.FULLY_BORDERED
-    } else {
+    } else if (!hasAllRowBorders && !hasAllColumnBorders) {
       return BorderTheme.NO_BORDERS
+    } else {
+      return null
     }
   }
 }
