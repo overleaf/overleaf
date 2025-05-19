@@ -28,7 +28,7 @@ function EmailsRow({ userEmailData, primary }: EmailsRowProps) {
 
   return (
     <>
-      <OLRow>
+      <OLRow data-testid="email-row">
         <OLCol lg={4}>
           <EmailCell>
             <Email userEmailData={userEmailData} />
