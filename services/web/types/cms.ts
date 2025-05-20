@@ -12,6 +12,7 @@ export type IconElementSticker =
   | 'sticker | globe | green'
   | 'sticker | house-tree | grey | large'
   | 'sticker | hub | tangerine'
+  | 'sticker | journal | grey'
   | 'sticker | lock | grey | medium'
   | 'sticker | lightning | yellow'
   | 'sticker | overleaf | green | medium'
