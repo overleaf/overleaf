@@ -182,10 +182,6 @@
 
       h4 {
         margin-bottom: var(--spacing-06);
-
-        &:has(+ .payment-nudge-annual-button) {
-          margin-bottom: 0;
-        }
       }
 
       .features-list {
@@ -449,16 +445,6 @@
     .button-content {
       color: var(--link-web);
     }
-  }
-}
-
-.payment-nudge-annual-button {
-  margin: var(--spacing-02) 0 var(--spacing-06) 0;
-
-  @include body-sm;
-
-  button {
-    padding: 0;
   }
 }
 

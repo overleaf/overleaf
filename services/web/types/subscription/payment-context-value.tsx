@@ -73,5 +73,4 @@ export type PaymentContextValue = {
     React.SetStateAction<PaymentContextValue['studentConfirmationChecked']>
   >
   updatePlan: (newPlanCode: string) => void
-  showNudgeToAnnualText: boolean
 }
