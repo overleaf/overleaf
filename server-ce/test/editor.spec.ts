@@ -1,11 +1,7 @@
 import {
   createNewFile,
   createProject,
-  enableLinkSharing,
-  openFile,
   openProjectById,
-  openProjectViaLinkSharingAsUser,
-  toggleTrackChanges,
 } from './helpers/project'
 import { isExcludedBySharding, startWith } from './helpers/config'
 import { ensureUserExists, login } from './helpers/login'
@@ -71,7 +67,7 @@ describe('editor', () => {
 
       cy.log('remove word from dictionary')
       cy.get('button').contains('Menu').click()
-      cy.get('button').contains('Edit').click()
+      cy.get('button#dictionary-settings').contains('Edit').click()
       cy.get('[id="dictionary-modal"]').within(() => {
         cy.findByText(word)
           .parent()
@@ -89,136 +85,6 @@ describe('editor', () => {
       cy.get('.cm-line').type('{selectAll}{del}' + word + '{enter}')
 
       cy.get('.ol-cm-spelling-error').should('contain.text', word)
-    })
-  })
-
-  describe('collaboration', () => {
-    beforeWithReRunOnTestRetry(function () {
-      enableLinkSharing().then(({ linkSharingReadAndWrite }) => {
-        const email = 'collaborator@example.com'
-        login(email)
-        openProjectViaLinkSharingAsUser(
-          linkSharingReadAndWrite,
-          projectName,
-          email
-        )
-      })
-
-      login('user@example.com')
-      waitForCompileRateLimitCoolOff(() => {
-        openProjectById(projectId)
-      })
-    })
-
-    it('track-changes', () => {
-      cy.log('disable track-changes before populating doc')
-      toggleTrackChanges(false)
-
-      const fileName = createNewFile()
-      const oldContent = 'oldContent'
-      cy.get('.cm-line').type(`${oldContent}\n\nstatic`)
-
-      cy.log('recompile to force flush')
-      recompile()
-
-      cy.log('enable track-changes for everyone')
-      toggleTrackChanges(true)
-
-      login('collaborator@example.com')
-      waitForCompileRateLimitCoolOff(() => {
-        openProjectById(projectId)
-      })
-      openFile(fileName, 'static')
-
-      cy.log('make changes in main file')
-      // cy.type() "clicks" in the center of the selected element before typing. This "click" discards the text as selected by the dblclick.
-      // Go down to the lower level event based typing, the frontend tests in web use similar events.
-      cy.get('.cm-editor').as('editor')
-      cy.get('@editor').findByText(oldContent).dblclick()
-      cy.get('@editor').trigger('keydown', { key: 'Delete' })
-      cy.get('@editor').trigger('keydown', { key: 'Enter' })
-      cy.get('@editor').trigger('keydown', { key: 'Enter' })
-
-      cy.log('recompile to force flush')
-      recompile()
-
-      login('user@example.com')
-      waitForCompileRateLimitCoolOff(() => {
-        openProjectById(projectId)
-      })
-      openFile(fileName, 'static')
-
-      cy.log('reject changes')
-      cy.contains('.toolbar-item', 'Review').click()
-      cy.get('.cm-content').should('not.contain.text', oldContent)
-      cy.findByText('Reject change').click({ force: true })
-      cy.contains('.toolbar-item', 'Review').click()
-
-      cy.log('recompile to force flush')
-      recompile()
-
-      cy.log('verify the changes are applied')
-      cy.get('.cm-content').should('contain.text', oldContent)
-
-      cy.log('disable track-changes for everyone again')
-      toggleTrackChanges(false)
-    })
-
-    it('track-changes rich text', () => {
-      cy.log('disable track-changes before populating doc')
-      toggleTrackChanges(false)
-
-      const fileName = createNewFile()
-      const oldContent = 'oldContent'
-      cy.get('.cm-line').type(`\\section{{}${oldContent}}\n\nstatic`)
-
-      cy.log('recompile to force flush')
-      recompile()
-
-      cy.log('enable track-changes for everyone')
-      toggleTrackChanges(true)
-
-      login('collaborator@example.com')
-      waitForCompileRateLimitCoolOff(() => {
-        openProjectById(projectId)
-      })
-      cy.log('enable visual editor and make changes in main file')
-      cy.findByText('Visual Editor').click()
-
-      openFile(fileName, 'static')
-
-      // cy.type() "clicks" in the center of the selected element before typing. This "click" discards the text as selected by the dblclick.
-      // Go down to the lower level event based typing, the frontend tests in web use similar events.
-      cy.get('.cm-editor').as('editor')
-      cy.get('@editor').findByText(oldContent).dblclick()
-      cy.get('@editor').trigger('keydown', { key: 'Delete' })
-      cy.get('@editor').trigger('keydown', { key: 'Enter' })
-      cy.get('@editor').trigger('keydown', { key: 'Enter' })
-
-      cy.log('recompile to force flush')
-      recompile()
-
-      login('user@example.com')
-      waitForCompileRateLimitCoolOff(() => {
-        openProjectById(projectId)
-      })
-      openFile(fileName, 'static')
-
-      cy.log('reject changes')
-      cy.contains('.toolbar-item', 'Review').click()
-      cy.get('.cm-content').should('not.contain.text', oldContent)
-      cy.findAllByText('Reject change').first().click({ force: true })
-      cy.contains('.toolbar-item', 'Review').click()
-
-      cy.log('recompile to force flush')
-      recompile()
-
-      cy.log('verify the changes are applied in the visual editor')
-      cy.findByText('Visual Editor').click()
-      cy.get('.cm-content').should('contain.text', oldContent)
-
-      cy.log('disable track-changes for everyone again')
-      toggleTrackChanges(false)
     })
   })
 

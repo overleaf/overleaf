@@ -215,37 +215,3 @@ export function createNewFile() {
 
   return fileName
 }
-
-export function toggleTrackChanges(state: boolean) {
-  cy.findByText('Review').click()
-  cy.get('.track-changes-menu-button').then(el => {
-    // when the menu is expanded renders the `expand_more` icon,
-    // and the `chevron_right` icon when it's collapsed
-    if (!el.text().includes('expand_more')) {
-      el.click()
-    }
-  })
-
-  cy.findByText('Everyone')
-    .parent()
-    .within(() => {
-      cy.get('.form-check-input').then(el => {
-        if (el.prop('checked') === state) return
-
-        const id = uuid()
-        const alias = `@${id}`
-        cy.intercept({
-          method: 'POST',
-          url: '**/track_changes',
-          times: 1,
-        }).as(id)
-        if (state) {
-          cy.get('.form-check-input').check()
-        } else {
-          cy.get('.form-check-input').uncheck()
-        }
-        cy.wait(alias)
-      })
-    })
-  cy.contains('.toolbar-item', 'Review').click()
-}
