@@ -19,7 +19,7 @@ export const UserFeaturesProvider: FC<React.PropsWithChildren> = ({
 }) => {
   const user = useUserContext()
   const { writefullInstance } = useEditorContext()
-  const [features, setFeatures] = useState(user.features)
+  const [features, setFeatures] = useState(user.features || {})
 
   useReceiveUser(
     useCallback(data => {
@@ -61,7 +61,7 @@ export function useUserFeaturesContext() {
 
   if (!context) {
     throw new Error(
-      'useUserFeaturesContext is only available inside UserFeaturesContext, or `ol-user` meta is not defined'
+      'useUserFeaturesContext is only available inside UserFeaturesContext'
     )
   }
 
