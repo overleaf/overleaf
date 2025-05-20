@@ -417,8 +417,11 @@ function _userView(user) {
   return { first_name: firstName, last_name: lastName, email, id: _id }
 }
 
+const loadGlobalBlobsPromise = loadGlobalBlobs()
+
 module.exports = {
   getBlobLocation,
+  loadGlobalBlobsPromise,
   initializeProject: callbackify(initializeProject),
   flushProject: callbackify(flushProject),
   resyncProject: callbackify(resyncProject),
@@ -432,7 +435,6 @@ module.exports = {
   getLatestHistory: callbackify(getLatestHistory),
   getChanges: callbackify(getChanges),
   promises: {
-    loadGlobalBlobs,
     initializeProject,
     flushProject,
     resyncProject,

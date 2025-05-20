@@ -75,7 +75,7 @@ try {
   await Promise.all([
     mongodb.connectionPromise,
     mongoose.connectionPromise,
-    HistoryManager.promises.loadGlobalBlobs(),
+    HistoryManager.loadGlobalBlobsPromise,
   ])
 } catch (err) {
   logger.fatal({ err }, 'Cannot connect to mongo. Exiting.')
