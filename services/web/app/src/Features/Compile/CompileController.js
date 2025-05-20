@@ -715,6 +715,7 @@ async function _getPersistenceOptions(
 }
 
 const CompileController = {
+  COMPILE_TIMEOUT_MS,
   compile: expressify(_CompileController.compile),
   stopCompile: expressify(_CompileController.stopCompile),
   compileSubmission: expressify(_CompileController.compileSubmission),

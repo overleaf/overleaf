@@ -443,7 +443,7 @@ describe('LinkedFiles', function () {
       projectTwoRootFolderId = projectTwo.rootFolder[0]._id.toString()
     })
 
-    it('should import the project.pdf file from the source project and refresh it', async function () {
+    it('should import the output.pdf file from the source project and refresh it', async function () {
       // import the file
       let { response, body } = await owner.doRequest('post', {
         url: `/project/${projectOneId}/linked_file`,
@@ -453,7 +453,7 @@ describe('LinkedFiles', function () {
           provider: 'project_output_file',
           data: {
             source_project_id: projectTwoId,
-            source_output_file_path: 'project.pdf',
+            source_output_file_path: 'output.pdf',
             build_id: '1234-abcd',
           },
         },
@@ -468,7 +468,7 @@ describe('LinkedFiles', function () {
       expect(firstFile.linkedFileData).to.deep.equal({
         provider: 'project_output_file',
         source_project_id: projectTwoId,
-        source_output_file_path: 'project.pdf',
+        source_output_file_path: 'output.pdf',
         build_id: '1234-abcd',
         importedAt: new Date().toISOString(),
       })
@@ -503,7 +503,7 @@ describe('LinkedFiles', function () {
         linkedFileData: {
           provider: 'project_output_file',
           v1_source_doc_id: 9999999, // We won't find this id in the database
-          source_output_file_path: 'project.pdf',
+          source_output_file_path: 'output.pdf',
         },
         _id: 'abcdef',
         rev: 0,

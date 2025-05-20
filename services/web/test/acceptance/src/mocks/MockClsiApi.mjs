@@ -9,14 +9,14 @@ class MockClsiApi extends AbstractMockApi {
         error: null,
         outputFiles: [
           {
-            url: `http://clsi:3013/project/${req.params.project_id}/build/1234/output/project.pdf`,
-            path: 'project.pdf',
+            url: `http://clsi:3013/project/${req.params.project_id}/build/1234/output/output.pdf`,
+            path: 'output.pdf',
             type: 'pdf',
             build: 1234,
           },
           {
-            url: `http://clsi:3013/project/${req.params.project_id}/build/1234/output/project.log`,
-            path: 'project.log',
+            url: `http://clsi:3013/project/${req.params.project_id}/build/1234/output/output.log`,
+            path: 'output.log',
             type: 'log',
             build: 1234,
           },
@@ -36,9 +36,9 @@ class MockClsiApi extends AbstractMockApi {
       '/project/:project_id/build/:build_id/output/*',
       (req, res) => {
         const filename = req.params[0]
-        if (filename === 'project.pdf') {
+        if (filename === 'output.pdf') {
           plainTextResponse(res, 'mock-pdf')
-        } else if (filename === 'project.log') {
+        } else if (filename === 'output.log') {
           plainTextResponse(res, 'mock-log')
         } else {
           res.sendStatus(404)
