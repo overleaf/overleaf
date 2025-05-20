@@ -1,6 +1,5 @@
 volumes:
   clsi-cache:
-  clsi-output:
   filestore-public-files:
   filestore-template-files:
   filestore-uploads:
@@ -33,9 +32,9 @@ services:
     user: root
     volumes:
       - ${PWD}/compiles:/overleaf/services/clsi/compiles
+      - ${PWD}/output:/overleaf/services/clsi/output
       - ${DOCKER_SOCKET_PATH:-/var/run/docker.sock}:/var/run/docker.sock
       - clsi-cache:/overleaf/services/clsi/cache
-      - clsi-output:/overleaf/services/clsi/output
 
   contacts:
     build:
