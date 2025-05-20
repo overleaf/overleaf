@@ -22,6 +22,9 @@ const fs = require('node:fs')
 // projectId -> timestamp mapping.
 const LAST_ACCESS = new Map()
 
+let ANY_DISK_LOW = false
+let ANY_DISK_CRITICAL_LOW = false
+
 async function collectDiskStats() {
   const paths = [
     Settings.path.compilesDir,
@@ -30,6 +33,8 @@ async function collectDiskStats() {
   ]
 
   const diskStats = {}
+  let anyDiskLow = false
+  let anyDiskCriticalLow = false
   for (const path of paths) {
     try {
       const { blocks, bavail, bsize } = await fs.promises.statfs(path)
@@ -45,10 +50,16 @@ async function collectDiskStats() {
       })
       const lowDisk = diskAvailablePercent < 10
       diskStats[path] = { stats, lowDisk }
+
+      const criticalLowDisk = diskAvailablePercent < 3
+      anyDiskLow = anyDiskLow || lowDisk
+      anyDiskCriticalLow = anyDiskCriticalLow || criticalLowDisk
     } catch (err) {
       logger.err({ err, path }, 'error getting disk usage')
     }
   }
+  ANY_DISK_LOW = anyDiskLow
+  ANY_DISK_CRITICAL_LOW = anyDiskCriticalLow
   return diskStats
 }
 
@@ -70,10 +81,21 @@ async function refreshExpiryTimeout() {
       break
     }
   }
+  Metrics.gauge(
+    'project_persistence_expiry_timeout',
+    ProjectPersistenceManager.EXPIRY_TIMEOUT
+  )
 }
 
 module.exports = ProjectPersistenceManager = {
   EXPIRY_TIMEOUT: Settings.project_cache_length_ms || oneDay * 2.5,
+
+  isAnyDiskLow() {
+    return ANY_DISK_LOW
+  },
+  isAnyDiskCriticalLow() {
+    return ANY_DISK_CRITICAL_LOW
+  },
 
   promises: {
     refreshExpiryTimeout,
@@ -125,12 +147,12 @@ module.exports = ProjectPersistenceManager = {
       )
     })
 
-    // Collect disk stats frequently to have them ready the next time /metrics is scraped (60s +- jitter).
+    // Collect disk stats frequently to have them ready the next time /metrics is scraped (60s +- jitter) or every 5th scrape of the load agent (3s +- jitter).
     setInterval(() => {
       collectDiskStats().catch(err => {
         logger.err({ err }, 'low level error collecting disk stats')
       })
-    }, 50_000)
+    }, 15_000)
   },
 
   markProjectAsJustAccessed(projectId, callback) {

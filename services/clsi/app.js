@@ -249,6 +249,9 @@ app.get('/health_check', function (req, res) {
   if (Settings.processTooOld) {
     return res.status(500).json({ processTooOld: true })
   }
+  if (ProjectPersistenceManager.isAnyDiskCriticalLow()) {
+    return res.status(500).json({ diskCritical: true })
+  }
   smokeTest.sendLastResult(res)
 })
 
@@ -296,9 +299,14 @@ const loadTcpServer = net.createServer(function (socket) {
     }
 
     const freeLoad = availableWorkingCpus - currentLoad
-    const freeLoadPercentage = Math.round(
-      (freeLoad / availableWorkingCpus) * 100
-    )
+    let freeLoadPercentage = Math.round((freeLoad / availableWorkingCpus) * 100)
+    if (ProjectPersistenceManager.isAnyDiskCriticalLow()) {
+      freeLoadPercentage = 0
+    }
+    if (ProjectPersistenceManager.isAnyDiskLow()) {
+      freeLoadPercentage = freeLoadPercentage / 2
+    }
+
     if (
       Settings.internal.load_balancer_agent.allow_maintenance &&
       freeLoadPercentage <= 0
