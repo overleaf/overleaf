@@ -37,7 +37,7 @@ function getDoc(req, res, next) {
       if (lines == null || version == null) {
         return next(new Errors.NotFoundError('document not found'))
       }
-      if (!Array.isArray(lines) && req.query.historyV1OTSupport !== 'true') {
+      if (!Array.isArray(lines) && req.query.historyOTSupport !== 'true') {
         const file = StringFileData.fromRaw(lines)
         // TODO(24596): tc support for history-ot
         lines = file.getLines()
@@ -91,7 +91,7 @@ function peekDoc(req, res, next) {
     if (lines == null || version == null) {
       return next(new Errors.NotFoundError('document not found'))
     }
-    if (!Array.isArray(lines) && req.query.historyV1OTSupport !== 'true') {
+    if (!Array.isArray(lines) && req.query.historyOTSupport !== 'true') {
       const file = StringFileData.fromRaw(lines)
       // TODO(24596): tc support for history-ot
       lines = file.getLines()

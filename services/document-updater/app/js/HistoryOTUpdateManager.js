@@ -16,12 +16,12 @@ const RealTimeRedisManager = require('./RealTimeRedisManager')
 
 /**
  * @typedef {import("./types").Update} Update
- * @typedef {import("./types").HistoryV1OTEditOperationUpdate} HistoryV1OTEditOperationUpdate
+ * @typedef {import("./types").HistoryOTEditOperationUpdate} HistoryOTEditOperationUpdate
  */
 
 /**
  * @param {Update} update
- * @return {update is HistoryV1OTEditOperationUpdate}
+ * @return {update is HistoryOTEditOperationUpdate}
  */
 function isHistoryOTEditOperationUpdate(update) {
   return (
@@ -39,7 +39,7 @@ function isHistoryOTEditOperationUpdate(update) {
  *
  * @param {string} projectId
  * @param {string} docId
- * @param {HistoryV1OTEditOperationUpdate} update
+ * @param {HistoryOTEditOperationUpdate} update
  * @param {Profiler} profiler
  */
 async function tryApplyUpdate(projectId, docId, update, profiler) {
@@ -131,7 +131,7 @@ async function tryApplyUpdate(projectId, docId, update, profiler) {
  *
  * @param {string} projectId
  * @param {string} docId
- * @param {HistoryV1OTEditOperationUpdate} update
+ * @param {HistoryOTEditOperationUpdate} update
  */
 async function applyUpdate(projectId, docId, update) {
   const profiler = new Profiler('applyUpdate', {

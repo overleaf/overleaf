@@ -176,7 +176,7 @@ const DocumentManager = {
     }
 
     // Circular dependencies. Import at runtime.
-    const HistoryV1OTUpdateManager = require('./HistoryV1OTUpdateManager')
+    const HistoryOTUpdateManager = require('./HistoryOTUpdateManager')
     const UpdateManager = require('./UpdateManager')
 
     const {
@@ -246,7 +246,7 @@ const DocumentManager = {
     // removed from redis.
     if (op.length > 0) {
       if (type === 'history-ot') {
-        await HistoryV1OTUpdateManager.applyUpdate(projectId, docId, update)
+        await HistoryOTUpdateManager.applyUpdate(projectId, docId, update)
       } else {
         await UpdateManager.promises.applyUpdate(projectId, docId, update)
       }

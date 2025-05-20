@@ -23,7 +23,7 @@ export type Update = {
   projectHistoryId?: string
 }
 
-export type HistoryV1OTEditOperationUpdate = Omit<Update, 'op'> & {
+export type HistoryOTEditOperationUpdate = Omit<Update, 'op'> & {
   op: RawEditOperation[]
   meta: Update['meta'] & { source: string }
 }

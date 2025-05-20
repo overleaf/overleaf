@@ -19,7 +19,7 @@ const Keys = settings.redis.documentupdater.key_schema
 const DocumentUpdaterManager = {
   getDocument(projectId, docId, fromVersion, callback) {
     const timer = new metrics.Timer('get-document')
-    const url = `${settings.apis.documentupdater.url}/project/${projectId}/doc/${docId}?fromVersion=${fromVersion}&historyV1OTSupport=true`
+    const url = `${settings.apis.documentupdater.url}/project/${projectId}/doc/${docId}?fromVersion=${fromVersion}&historyOTSupport=true`
     logger.debug(
       { projectId, docId, fromVersion },
       'getting doc from document updater'

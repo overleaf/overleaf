@@ -49,7 +49,7 @@ describe('DocumentManager', function () {
         applyUpdate: sinon.stub().resolves(),
       },
     }
-    this.HistoryV1OTUpdateManager = {
+    this.HistoryOTUpdateManager = {
       applyUpdate: sinon.stub().resolves(),
     }
     this.RangesManager = {
@@ -69,7 +69,7 @@ describe('DocumentManager', function () {
         './Metrics': this.Metrics,
         './DiffCodec': this.DiffCodec,
         './UpdateManager': this.UpdateManager,
-        './HistoryV1OTUpdateManager': this.HistoryV1OTUpdateManager,
+        './HistoryOTUpdateManager': this.HistoryOTUpdateManager,
         './RangesManager': this.RangesManager,
         './Errors': Errors,
         '@overleaf/settings': this.Settings,

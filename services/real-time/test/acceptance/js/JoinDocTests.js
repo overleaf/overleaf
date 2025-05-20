@@ -641,7 +641,7 @@ describe('joinDoc', function () {
               this.client.emit(
                 'joinDoc',
                 this.doc_id,
-                { supportsHistoryV1OT: true },
+                { supportsHistoryOT: true },
                 (error, ...rest) => {
                   ;[...this.returnedArgs] = Array.from(rest)
                   cb(error)

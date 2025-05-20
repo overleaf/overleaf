@@ -309,11 +309,11 @@ module.exports = WebsocketController = {
               const encodeForWebsockets = text =>
                 unescape(encodeURIComponent(text))
               metrics.inc('client_supports_history_v1_ot', 1, {
-                status: options.supportsHistoryV1OT ? 'success' : 'failure',
+                status: options.supportsHistoryOT ? 'success' : 'failure',
               })
               let escapedLines
               if (type === 'history-ot') {
-                if (!options.supportsHistoryV1OT) {
+                if (!options.supportsHistoryOT) {
                   RoomManager.leaveDoc(client, docId)
                   // TODO(24596): ask the user to reload the editor page (via out-of-sync modal when there are pending ops).
                   return callback(

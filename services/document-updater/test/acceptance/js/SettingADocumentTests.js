@@ -201,7 +201,7 @@ describe('Setting a document', function () {
       numberOfReceivedUpdates = 0
       this.project_id = DocUpdaterClient.randomId()
       this.doc_id = DocUpdaterClient.randomId()
-      this.historyV1OTUpdate = {
+      this.historyOTUpdate = {
         doc: this.doc_id,
         op: [{ textOperation: [4, 'one and a half\n', 9] }],
         v: this.version,
@@ -219,7 +219,7 @@ describe('Setting a document', function () {
         DocUpdaterClient.sendUpdate(
           this.project_id,
           this.doc_id,
-          this.historyV1OTUpdate,
+          this.historyOTUpdate,
           error => {
             if (error) {
               throw error

@@ -79,7 +79,7 @@ describe('DocumentUpdaterManager', function () {
       })
 
       it('should get the document from the document updater', function () {
-        const url = `${this.settings.apis.documentupdater.url}/project/${this.project_id}/doc/${this.doc_id}?fromVersion=${this.fromVersion}&historyV1OTSupport=true`
+        const url = `${this.settings.apis.documentupdater.url}/project/${this.project_id}/doc/${this.doc_id}?fromVersion=${this.fromVersion}&historyOTSupport=true`
         return this.request.get.calledWith(url).should.equal(true)
       })
 

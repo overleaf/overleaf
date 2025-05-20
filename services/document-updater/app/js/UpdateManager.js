@@ -15,7 +15,7 @@ const RangesManager = require('./RangesManager')
 const SnapshotManager = require('./SnapshotManager')
 const Profiler = require('./Profiler')
 const { isInsert, isDelete, getDocLength, computeDocHash } = require('./Utils')
-const HistoryV1OTUpdateManager = require('./HistoryV1OTUpdateManager')
+const HistoryOTUpdateManager = require('./HistoryOTUpdateManager')
 
 /**
  * @import { Ranges, Update, HistoryUpdate } from "./types"
@@ -81,8 +81,8 @@ const UpdateManager = {
     profile.log('getPendingUpdatesForDoc')
 
     for (const update of updates) {
-      if (HistoryV1OTUpdateManager.isHistoryOTEditOperationUpdate(update)) {
-        await HistoryV1OTUpdateManager.applyUpdate(projectId, docId, update)
+      if (HistoryOTUpdateManager.isHistoryOTEditOperationUpdate(update)) {
+        await HistoryOTUpdateManager.applyUpdate(projectId, docId, update)
       } else {
         await UpdateManager.applyUpdate(projectId, docId, update)
       }

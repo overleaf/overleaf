@@ -44,7 +44,7 @@ export type TextUpdate = {
   }
 }
 
-export type HistoryV1OTEditOperationUpdate = {
+export type HistoryOTEditOperationUpdate = {
   doc: string
   op: RawEditOperation[]
   v: number

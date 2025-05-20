@@ -451,7 +451,7 @@ export class DocumentContainer extends EventEmitter {
         {
           encodeRanges: true,
           age: this.doc.getTimeSinceLastServerActivity(),
-          supportsHistoryV1OT: true,
+          supportsHistoryOT: true,
         },
         (
           error,
@@ -487,7 +487,7 @@ export class DocumentContainer extends EventEmitter {
         this.doc_id,
         {
           encodeRanges: true,
-          supportsHistoryV1OT: true,
+          supportsHistoryOT: true,
         },
         (
           error,

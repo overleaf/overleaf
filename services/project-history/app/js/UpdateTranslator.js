@@ -7,7 +7,7 @@ import * as OperationsCompressor from './OperationsCompressor.js'
 import { isInsert, isRetain, isDelete, isComment } from './Utils.js'
 
 /**
- * @import { AddDocUpdate, AddFileUpdate, DeleteCommentUpdate, HistoryV1OTEditOperationUpdate, Op, RawScanOp } from './types'
+ * @import { AddDocUpdate, AddFileUpdate, DeleteCommentUpdate, HistoryOTEditOperationUpdate, Op, RawScanOp } from './types'
  * @import { RenameUpdate, TextUpdate, TrackingDirective, TrackingProps } from './types'
  * @import { SetCommentStateUpdate, SetFileMetadataOperation, Update, UpdateWithBlob } from './types'
  */
@@ -206,7 +206,7 @@ export function isTextUpdate(update) {
 
 /**
  * @param {Update} update
- * @returns {update is HistoryV1OTEditOperationUpdate}
+ * @returns {update is HistoryOTEditOperationUpdate}
  */
 export function isHistoryOTEditOperationUpdate(update) {
   return (

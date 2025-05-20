@@ -231,11 +231,9 @@ function _concatTwoUpdates(firstUpdate, secondUpdate) {
     return [firstUpdate, secondUpdate]
   }
 
-  const firstUpdateIsHistoryV1OT = EditOperationBuilder.isValid(firstUpdate.op)
-  const secondUpdateIsHistoryV1OT = EditOperationBuilder.isValid(
-    secondUpdate.op
-  )
-  if (firstUpdateIsHistoryV1OT !== secondUpdateIsHistoryV1OT) {
+  const firstUpdateIsHistoryOT = EditOperationBuilder.isValid(firstUpdate.op)
+  const secondUpdateIsHistoryOT = EditOperationBuilder.isValid(secondUpdate.op)
+  if (firstUpdateIsHistoryOT !== secondUpdateIsHistoryOT) {
     // cannot merge mix of sharejs-text-op and history-ot, should not happen.
     return [firstUpdate, secondUpdate]
   }
@@ -286,7 +284,7 @@ function _concatTwoUpdates(firstUpdate, secondUpdate) {
     return [firstUpdate, secondUpdate]
   }
 
-  if (firstUpdateIsHistoryV1OT && secondUpdateIsHistoryV1OT) {
+  if (firstUpdateIsHistoryOT && secondUpdateIsHistoryOT) {
     const op1 = EditOperationBuilder.fromJSON(firstUpdate.op)
     const op2 = EditOperationBuilder.fromJSON(secondUpdate.op)
     if (!op1.canBeComposedWith(op2)) return [firstUpdate, secondUpdate]

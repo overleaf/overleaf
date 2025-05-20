@@ -31,7 +31,7 @@ describe('Applying updates to a doc', function () {
       op: [this.op],
       v: this.version,
     }
-    this.historyV1OTUpdate = {
+    this.historyOTUpdate = {
       doc: this.doc_id,
       op: [{ textOperation: [4, 'one and a half\n', 9] }],
       v: this.version,
@@ -301,7 +301,7 @@ describe('Applying updates to a doc', function () {
       DocUpdaterClient.sendUpdate(
         this.project_id,
         this.doc_id,
-        this.historyV1OTUpdate,
+        this.historyOTUpdate,
         error => {
           if (error != null) {
             throw error
@@ -352,7 +352,7 @@ describe('Applying updates to a doc', function () {
           if (error != null) {
             throw error
           }
-          JSON.parse(updates[0]).op.should.deep.equal(this.historyV1OTUpdate.op)
+          JSON.parse(updates[0]).op.should.deep.equal(this.historyOTUpdate.op)
           JSON.parse(updates[0]).meta.pathname.should.equal('/a/b/c.tex')
 
           done()
@@ -395,7 +395,7 @@ describe('Applying updates to a doc', function () {
     describe('when sending another update', function () {
       beforeEach(function (done) {
         this.timeout(10000)
-        this.second_update = Object.assign({}, this.historyV1OTUpdate)
+        this.second_update = Object.assign({}, this.historyOTUpdate)
         this.second_update.op = [
           {
             textOperation: [4, 'one and a half\n', 24],
@@ -664,7 +664,7 @@ describe('Applying updates to a doc', function () {
         DocUpdaterClient.sendUpdate(
           this.project_id,
           this.doc_id,
-          this.historyV1OTUpdate,
+          this.historyOTUpdate,
           error => {
             if (error != null) {
               throw error
@@ -694,7 +694,7 @@ describe('Applying updates to a doc', function () {
         -1,
         (error, updates) => {
           if (error) return done(error)
-          JSON.parse(updates[0]).op.should.deep.equal(this.historyV1OTUpdate.op)
+          JSON.parse(updates[0]).op.should.deep.equal(this.historyOTUpdate.op)
           JSON.parse(updates[0]).meta.pathname.should.equal('/a/b/c.tex')
           done()
         }
@@ -979,7 +979,7 @@ describe('Applying updates to a doc', function () {
       DocUpdaterClient.sendUpdate(
         this.project_id,
         this.doc_id,
-        this.historyV1OTUpdate,
+        this.historyOTUpdate,
         error => {
           if (error != null) {
             throw error
