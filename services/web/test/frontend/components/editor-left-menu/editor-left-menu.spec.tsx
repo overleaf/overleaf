@@ -75,7 +75,7 @@ describe('<EditorLeftMenu />', function () {
 
       // Actions Menu
       cy.findByRole('heading', { name: 'Actions' })
-      cy.findByRole('button', { name: 'Copy Project' })
+      cy.findByRole('button', { name: 'Copy project' })
       cy.findByRole('button', { name: 'Word Count' })
 
       // Sync Menu
@@ -105,7 +105,7 @@ describe('<EditorLeftMenu />', function () {
       cy.findByRole('heading', { name: 'Help' })
       cy.findByRole('button', { name: 'Show Hotkeys' })
       cy.findByRole('link', { name: 'Documentation' })
-      cy.findByRole('button', { name: 'Contact Us' })
+      cy.findByRole('button', { name: 'Contact us' })
     })
 
     describe('download menu', function () {
@@ -154,14 +154,14 @@ describe('<EditorLeftMenu />', function () {
           </EditorProviders>
         )
 
-        cy.findByRole('button', { name: 'Copy Project' }).click()
-        cy.findByRole('heading', { name: 'Copy Project' })
+        cy.findByRole('button', { name: 'Copy project' }).click()
+        cy.findByRole('heading', { name: 'Copy project' })
 
         // try closing & re-opening the modal with different methods
         cy.findByRole('button', { name: 'Close' }).click()
-        cy.findByRole('button', { name: 'Copy Project' }).click()
+        cy.findByRole('button', { name: 'Copy project' }).click()
         cy.findByRole('button', { name: 'Cancel' }).click()
-        cy.findByRole('button', { name: 'Copy Project' }).click()
+        cy.findByRole('button', { name: 'Copy project' }).click()
 
         cy.findByLabelText('New Name').focus()
         cy.findByLabelText('New Name').clear()
@@ -840,7 +840,7 @@ describe('<EditorLeftMenu />', function () {
           </EditorProviders>
         )
 
-        cy.findByRole('button', { name: 'Contact Us' }).click()
+        cy.findByRole('button', { name: 'Contact us' }).click()
         cy.findByText('Affected project URL (Optional)')
       })
     })
@@ -869,7 +869,7 @@ describe('<EditorLeftMenu />', function () {
 
       // Actions Menu
       cy.findByRole('heading', { name: 'Actions' }).should('not.exist')
-      cy.findByRole('button', { name: 'Copy Project' }).should('not.exist')
+      cy.findByRole('button', { name: 'Copy project' }).should('not.exist')
       cy.findByRole('button', { name: 'Word Count' }).should('not.exist')
 
       // Sync Menu
@@ -899,7 +899,7 @@ describe('<EditorLeftMenu />', function () {
       cy.findByRole('heading', { name: 'Help' })
       cy.findByRole('button', { name: 'Show Hotkeys' })
       cy.findByRole('button', { name: 'Documentation' }).should('not.exist')
-      cy.findByRole('link', { name: 'Contact Us' }).should('not.exist')
+      cy.findByRole('link', { name: 'Contact us' }).should('not.exist')
     })
   })
 })

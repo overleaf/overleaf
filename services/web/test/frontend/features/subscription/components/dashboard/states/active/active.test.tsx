@@ -102,7 +102,7 @@ describe('<ActiveSubscription />', function () {
       'If you wish this change to apply before the end of your current billing period, please contact us.'
     )
 
-    expect(screen.queryByRole('link', { name: 'contact support' })).to.be.null
+    expect(screen.queryByRole('link', { name: 'contact Support' })).to.be.null
     expect(screen.queryByText('if you wish to change your group subscription.'))
       .to.be.null
   })
@@ -524,9 +524,9 @@ describe('<ActiveSubscription />', function () {
       expect(changePlan).to.be.null
     })
 
-    it('shows contact support message for group plan change requests', function () {
+    it('shows contact Support message for group plan change requests', function () {
       renderActiveSubscription(groupActiveSubscription)
-      screen.getByRole('link', { name: 'contact support' })
+      screen.getByRole('link', { name: 'contact Support' })
       screen.getByText('if you wish to change your group subscription.', {
         exact: false,
       })

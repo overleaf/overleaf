@@ -48,7 +48,7 @@ describe('<EmailsRow/>', function () {
 
     it('renders actions', function () {
       renderEmailsRow(unconfirmedUserData)
-      screen.getByRole('button', { name: 'Make Primary' })
+      screen.getByRole('button', { name: 'Make primary' })
     })
   })
 
@@ -96,7 +96,7 @@ describe('<EmailsRow/>', function () {
         getByTextContent(
           'You can now link your Overleaf account to your Overleaf institutional account.'
         )
-        screen.getByRole('button', { name: 'Link Accounts' })
+        screen.getByRole('button', { name: 'Link accounts' })
       })
     })
 
@@ -113,7 +113,7 @@ describe('<EmailsRow/>', function () {
         getByTextContent(
           'You can log in to Overleaf through your Overleaf institutional login.'
         )
-        expect(screen.queryByRole('button', { name: 'Link Accounts' })).to.be
+        expect(screen.queryByRole('button', { name: 'Link accounts' })).to.be
           .null
       })
     })

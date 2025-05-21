@@ -36,7 +36,7 @@ function DefaultNavbar(props: DefaultNavbarMetadata) {
   const { t } = useTranslation()
   const [expanded, setExpanded] = useState(false)
 
-  // The Contact Us modal is rendered at this level rather than inside the nav
+  // The Contact us modal is rendered at this level rather than inside the nav
   // bar because otherwise the help wiki search results dropdown doesn't show up
   const { modal: contactUsModal, showModal: showContactUsModal } =
     useContactUsModal({

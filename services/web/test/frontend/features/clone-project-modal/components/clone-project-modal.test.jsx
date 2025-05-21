@@ -33,7 +33,7 @@ describe('<EditorCloneProjectModalWrapper />', function () {
       { scope: { project } }
     )
 
-    await screen.findByText('Copy Project')
+    await screen.findByText('Copy project')
   })
 
   it('posts the generated project name', async function () {

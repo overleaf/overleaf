@@ -931,7 +931,7 @@ describe('<UserNotifications />', function () {
       renderWithinProjectListProvider(GroupsAndEnterpriseBanner)
       await fetchMock.callHistory.flush(true)
 
-      expect(screen.queryByRole('link', { name: 'Contact Sales' })).to.be.null
+      expect(screen.queryByRole('link', { name: 'Contact sales' })).to.be.null
     })
 
     it('shows the banner for users that have dismissed the previous banners', async function () {
@@ -941,7 +941,7 @@ describe('<UserNotifications />', function () {
       renderWithinProjectListProvider(GroupsAndEnterpriseBanner)
       await fetchMock.callHistory.flush(true)
 
-      await screen.findByRole('link', { name: 'Contact Sales' })
+      await screen.findByRole('link', { name: 'Contact sales' })
     })
 
     it('shows the banner for users that have dismissed the banner more than 30 days ago', async function () {
@@ -956,7 +956,7 @@ describe('<UserNotifications />', function () {
       renderWithinProjectListProvider(GroupsAndEnterpriseBanner)
       await fetchMock.callHistory.flush(true)
 
-      await screen.findByRole('link', { name: 'Contact Sales' })
+      await screen.findByRole('link', { name: 'Contact sales' })
     })
 
     it('does not show the banner for users that have dismissed the banner within the last 30 days', async function () {
@@ -971,7 +971,7 @@ describe('<UserNotifications />', function () {
       renderWithinProjectListProvider(GroupsAndEnterpriseBanner)
       await fetchMock.callHistory.flush(true)
 
-      expect(screen.queryByRole('link', { name: 'Contact Sales' })).to.be.null
+      expect(screen.queryByRole('link', { name: 'Contact sales' })).to.be.null
     })
 
     describe('users that are not in group and are not affiliated', function () {
@@ -1012,7 +1012,7 @@ describe('<UserNotifications />', function () {
         await screen.findByText(
           'Overleaf On-Premises: Does your company want to keep its data within its firewall? Overleaf offers Server Pro, an on-premises solution for companies. Get in touch to learn more.'
         )
-        const link = screen.getByRole('link', { name: 'Contact Sales' })
+        const link = screen.getByRole('link', { name: 'Contact sales' })
 
         expect(link.getAttribute('href')).to.equal(`/for/contact-sales-2`)
       })
@@ -1029,7 +1029,7 @@ describe('<UserNotifications />', function () {
         await screen.findByText(
           'Why do Fortune 500 companies and top research institutions trust Overleaf to streamline their collaboration? Get in touch to learn more.'
         )
-        const link = screen.getByRole('link', { name: 'Contact Sales' })
+        const link = screen.getByRole('link', { name: 'Contact sales' })
 
         expect(link.getAttribute('href')).to.equal(`/for/contact-sales-4`)
       })

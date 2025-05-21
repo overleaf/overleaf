@@ -90,9 +90,7 @@ function LinkingSection() {
       <p className="small">{t('linked_accounts_explained')}</p>
       {haslangFeedbackLinkingWidgets ? (
         <>
-          <h3 id="language-feedback" className="text-capitalize">
-            {t('ai_features')}
-          </h3>
+          <h3 id="language-feedback">{t('ai_features')}</h3>
           <div className="settings-widgets-container">
             {langFeedbackLinkingWidgets.map(
               ({ import: { default: widget }, path }, widgetIndex) => (
@@ -108,9 +106,7 @@ function LinkingSection() {
       ) : null}
       {hasIntegrationLinkingSection ? (
         <>
-          <h3 id="project-sync" className="text-capitalize">
-            {t('project_synchronisation')}
-          </h3>
+          <h3 id="project-sync">{t('project_synchronisation')}</h3>
           {projectSyncSuccessMessage ? (
             <OLNotification
               type="success"
@@ -134,9 +130,7 @@ function LinkingSection() {
       ) : null}
       {hasReferencesLinkingSection ? (
         <>
-          <h3 id="references" className="text-capitalize">
-            {t('reference_managers')}
-          </h3>
+          <h3 id="references">{t('reference_managers')}</h3>
           <div className="settings-widgets-container">
             {referenceLinkingWidgets.map(
               ({ import: importObject, path }, widgetIndex) => (
@@ -152,9 +146,7 @@ function LinkingSection() {
       ) : null}
       {hasSSOLinkingSection ? (
         <>
-          <h3 id="linked-accounts" className="text-capitalize">
-            {t('linked_accounts')}
-          </h3>
+          <h3 id="linked-accounts">{t('linked_accounts')}</h3>
           {ssoErrorMessage ? (
             <OLNotification
               type="error"

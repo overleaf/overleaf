@@ -97,7 +97,7 @@ describe('<ReconfirmationInfo/>', function () {
       it('redirects to SAML flow', async function () {
         renderReconfirmationInfo(inReconfirmUserData)
         const confirmButton = screen.getByRole('button', {
-          name: 'Confirm Affiliation',
+          name: 'Confirm affiliation',
         }) as HTMLButtonElement
 
         await waitFor(() => {
@@ -127,7 +127,7 @@ describe('<ReconfirmationInfo/>', function () {
       it('sends and resends confirmation email', async function () {
         renderReconfirmationInfo(inReconfirmUserData)
         const confirmButton = (await screen.findByRole('button', {
-          name: 'Confirm Affiliation',
+          name: 'Confirm affiliation',
         })) as HTMLButtonElement
 
         await waitFor(() => {

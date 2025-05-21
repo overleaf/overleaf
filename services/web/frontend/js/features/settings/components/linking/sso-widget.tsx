@@ -142,7 +142,6 @@ function ActionButton({
       <OLButton
         variant="secondary"
         href={linkPath}
-        className="text-capitalize"
         aria-labelledby={`${linkTextId} ${titleId}`}
         id={linkTextId}
       >

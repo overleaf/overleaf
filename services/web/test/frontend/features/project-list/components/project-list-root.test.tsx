@@ -260,7 +260,7 @@ describe('<ProjectListRoot />', function () {
 
       describe('archived projects', function () {
         beforeEach(function () {
-          const filterButton = screen.getAllByText('Archived Projects')[0]
+          const filterButton = screen.getAllByText('Archived projects')[0]
           fireEvent.click(filterButton)
 
           allCheckboxes = screen.getAllByRole<HTMLInputElement>('checkbox')
@@ -308,7 +308,7 @@ describe('<ProjectListRoot />', function () {
 
       describe('trashed projects', function () {
         beforeEach(function () {
-          const filterButton = screen.getAllByText('Trashed Projects')[0]
+          const filterButton = screen.getAllByText('Trashed projects')[0]
           fireEvent.click(filterButton)
 
           allCheckboxes = screen.getAllByRole<HTMLInputElement>('checkbox')
@@ -333,7 +333,7 @@ describe('<ProjectListRoot />', function () {
         })
 
         it('clears selected projects when filter changed', function () {
-          const filterButton = screen.getAllByText('All Projects')[0]
+          const filterButton = screen.getAllByText('All projects')[0]
           fireEvent.click(filterButton)
 
           const allCheckboxes =
@@ -843,7 +843,7 @@ describe('<ProjectListRoot />', function () {
 
         describe('"More" dropdown', function () {
           beforeEach(async function () {
-            const filterButton = screen.getAllByText('All Projects')[0]
+            const filterButton = screen.getAllByText('All projects')[0]
             fireEvent.click(filterButton)
             allCheckboxes = screen.getAllByRole<HTMLInputElement>('checkbox')
           })
@@ -1193,7 +1193,7 @@ describe('<ProjectListRoot />', function () {
 
         expect(screen.queryByText(copiedProjectName)).to.be.null
 
-        const yourProjectFilter = screen.getAllByText('Your Projects')[0]
+        const yourProjectFilter = screen.getAllByText('Your projects')[0]
         fireEvent.click(yourProjectFilter)
         await screen.findByText(copiedProjectName)
       })

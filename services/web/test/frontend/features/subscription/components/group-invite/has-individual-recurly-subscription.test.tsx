@@ -40,7 +40,7 @@ describe('group invite', function () {
       fireEvent.click(button)
       await waitFor(() => {
         screen.getByText(
-          'Something went wrong canceling your subscription. Please contact support.'
+          'Something went wrong canceling your subscription. Please contact Support.'
         )
       })
     })

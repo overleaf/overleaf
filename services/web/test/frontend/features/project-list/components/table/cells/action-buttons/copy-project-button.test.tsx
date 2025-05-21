@@ -55,7 +55,7 @@ describe('<CopyProjectButton />', function () {
     const btn = screen.getByRole('button', { name: 'Copy' })
 
     fireEvent.click(btn)
-    screen.getByText('Copy Project')
+    screen.getByText('Copy project')
     screen.getByLabelText('New Name')
     screen.getByDisplayValue(`${copyableProject.name} (Copy)`)
     const copyBtn = screen.getAllByRole<HTMLButtonElement>('button', {

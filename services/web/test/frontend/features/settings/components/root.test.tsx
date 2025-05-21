@@ -36,11 +36,11 @@ describe('<SettingsPageRoot />', function () {
     render(<SettingsPageRoot />)
 
     await waitFor(() => {
-      screen.getByText('Account Settings')
+      screen.getByText('Account settings')
     })
-    screen.getByText('Emails and Affiliations')
-    screen.getByText('Update Account Info')
-    screen.getByText('Change Password')
+    screen.getByText('Emails and affiliations')
+    screen.getByText('Update account info')
+    screen.getByText('Change password')
     screen.getByText('Integrations')
     screen.getByText('Overleaf Beta Program')
     screen.getByText('Sessions')
@@ -58,11 +58,11 @@ describe('<SettingsPageRoot />', function () {
     render(<SettingsPageRoot />)
 
     await waitFor(() => {
-      screen.getByText('Account Settings')
+      screen.getByText('Account settings')
     })
-    expect(screen.queryByText('Emails and Affiliations')).to.not.exist
-    screen.getByText('Update Account Info')
-    screen.getByText('Change Password')
+    expect(screen.queryByText('Emails and affiliations')).to.not.exist
+    screen.getByText('Update account info')
+    screen.getByText('Change password')
     screen.getByText('Integrations')
     expect(screen.queryByText('Overleaf Beta Program')).to.not.exist
     screen.getByText('Sessions')

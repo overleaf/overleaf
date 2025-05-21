@@ -66,7 +66,7 @@ describe('<LinkingSection />', function () {
 
   it('lists SSO providers', async function () {
     renderSectionWithProviders()
-    screen.getByText('linked accounts')
+    screen.getByText('Linked accounts')
 
     screen.getByText('Google')
     screen.getByText('Log in with Google.')
@@ -94,6 +94,6 @@ describe('<LinkingSection />', function () {
     window.metaAttributesCache.delete('ol-oauthProviders')
     renderSectionWithProviders()
 
-    expect(screen.queryByText('linked accounts')).to.not.exist
+    expect(screen.queryByText('Linked accounts')).to.not.exist
   })
 })

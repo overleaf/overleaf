@@ -9,7 +9,7 @@ export const Default = () => {
     <MenuBar id="toolbar-menu-bar-item">
       <MenuBarDropdown title="File" id="file">
         <MenuBarOption title="New File" />
-        <MenuBarOption title="New Project" />
+        <MenuBarOption title="New project" />
       </MenuBarDropdown>
       <MenuBarDropdown title="Edit" id="edit">
         <MenuBarOption title="Undo" />

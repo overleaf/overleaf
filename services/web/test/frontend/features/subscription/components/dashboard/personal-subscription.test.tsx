@@ -37,13 +37,13 @@ describe('<PersonalSubscription />', function () {
   })
 
   describe('custom subscription', function () {
-    it('displays contact support message', function () {
+    it('displays contact Support message', function () {
       renderWithSubscriptionDashContext(<PersonalSubscription />, {
         metaTags: [{ name: 'ol-subscription', value: customSubscription }],
       })
 
       screen.getByText('Please', { exact: false })
-      screen.getByText('contact support', { exact: false })
+      screen.getByText('contact Support', { exact: false })
       screen.getByText('to make changes to your plan', { exact: false })
     })
   })

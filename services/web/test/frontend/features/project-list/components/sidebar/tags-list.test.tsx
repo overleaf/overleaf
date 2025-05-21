@@ -24,7 +24,7 @@ describe('<TagsList />', function () {
 
     fetchMock.post('/tag', {
       _id: 'eee888eee888',
-      name: 'New Tag',
+      name: 'New tag',
       project_ids: [],
     })
     fetchMock.post('express:/tag/:tagId/projects', 200)
@@ -46,7 +46,7 @@ describe('<TagsList />', function () {
     expect(header.textContent).to.equal('Organize Tags')
 
     await screen.findByRole('button', {
-      name: 'New Tag',
+      name: 'New tag',
     })
     await screen.findByRole('button', {
       name: 'Tag 1 (1)',
@@ -82,7 +82,7 @@ describe('<TagsList />', function () {
   describe('Create modal', function () {
     beforeEach(async function () {
       const newTagButton = screen.getByRole('button', {
-        name: 'New Tag',
+        name: 'New tag',
       })
 
       fireEvent.click(newTagButton)
@@ -139,7 +139,7 @@ describe('<TagsList />', function () {
     it('filling the input and clicking Create sends a request', async function () {
       const modal = screen.getAllByRole('dialog', { hidden: false })[0]
       const input = within(modal).getByRole('textbox')
-      fireEvent.change(input, { target: { value: 'New Tag' } })
+      fireEvent.change(input, { target: { value: 'New tag' } })
 
       const createButton = within(modal).getByRole('button', { name: 'Create' })
       expect(createButton.hasAttribute('disabled')).to.be.false
@@ -155,7 +155,7 @@ describe('<TagsList />', function () {
       )
 
       screen.getByRole('button', {
-        name: 'New Tag (0)',
+        name: 'New tag (0)',
       })
     })
   })
@@ -234,7 +234,7 @@ describe('<TagsList />', function () {
     it('filling the input and clicking Save sends a request', async function () {
       const modal = screen.getAllByRole('dialog', { hidden: false })[0]
       const input = within(modal).getByRole('textbox')
-      fireEvent.change(input, { target: { value: 'New Tag Name' } })
+      fireEvent.change(input, { target: { value: 'New tag Name' } })
 
       const saveButton = within(modal).getByRole('button', { name: 'Save' })
       expect(saveButton.hasAttribute('disabled')).to.be.false
@@ -250,7 +250,7 @@ describe('<TagsList />', function () {
       )
 
       screen.getByRole('button', {
-        name: 'New Tag Name (1)',
+        name: 'New tag Name (1)',
       })
     })
   })

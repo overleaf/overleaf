@@ -30,9 +30,9 @@ describe('<WelcomeMessage />', function () {
 
     fireEvent.click(button)
 
-    screen.getByText('Blank Project')
-    screen.getByText('Example Project')
-    screen.getByText('Upload Project')
+    screen.getByText('Blank project')
+    screen.getByText('Example project')
+    screen.getByText('Upload project')
     screen.getByText('Import from GitHub')
   })
 
@@ -52,9 +52,9 @@ describe('<WelcomeMessage />', function () {
 
     fireEvent.click(button)
     // static menu
-    screen.getByText('Blank Project')
-    screen.getByText('Example Project')
-    screen.getByText('Upload Project')
+    screen.getByText('Blank project')
+    screen.getByText('Example project')
+    screen.getByText('Upload project')
     screen.getByText('Import from GitHub')
 
     // static text for institution templates
@@ -79,9 +79,9 @@ describe('<WelcomeMessage />', function () {
 
     fireEvent.click(button)
 
-    screen.getByText('Blank Project')
-    screen.getByText('Example Project')
-    screen.getByText('Upload Project')
+    screen.getByText('Blank project')
+    screen.getByText('Example project')
+    screen.getByText('Upload project')
     screen.getByText('Import from GitHub')
   })
 
@@ -130,9 +130,9 @@ describe('<WelcomeMessage />', function () {
 
       fireEvent.click(button)
 
-      screen.getByText('Blank Project')
-      screen.getByText('Example Project')
-      screen.getByText('Upload Project')
+      screen.getByText('Blank project')
+      screen.getByText('Example project')
+      screen.getByText('Upload project')
       expect(screen.queryByText('Import from GitHub')).to.not.exist
     })
 

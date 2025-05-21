@@ -229,7 +229,7 @@ describe('EmailBuilder', function () {
         describe('HTML email', function () {
           it('should include a CTA button and a fallback CTA link', function () {
             const dom = cheerio.load(this.email.html)
-            const buttonLink = dom('a:contains("Confirm Email")')
+            const buttonLink = dom('a:contains("Confirm email")')
             expect(buttonLink.length).to.equal(1)
             expect(buttonLink.attr('href')).to.equal(this.opts.confirmEmailUrl)
             const fallback = dom('.force-overleaf-style').last()
@@ -592,7 +592,7 @@ describe('EmailBuilder', function () {
 
         describe('HTML email', function () {
           it('should include a CTA button and a fallback CTA link', function () {
-            const buttonLink = this.dom('a:contains("Confirm Email")')
+            const buttonLink = this.dom('a:contains("Confirm email")')
             expect(buttonLink.length).to.equal(1)
             expect(buttonLink.attr('href')).to.equal(this.opts.confirmEmailUrl)
             const fallback = this.dom('.force-overleaf-style').last()

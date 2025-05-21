@@ -131,9 +131,7 @@ function ActionButton({
         onClick={() => trackUpgradeClick(integration)}
         aria-labelledby={`${titleId} ${linkTextId}`}
       >
-        <span id={linkTextId} className="text-capitalize">
-          {t('upgrade')}
-        </span>
+        <span id={linkTextId}>{t('upgrade')}</span>
       </OLButton>
     )
   } else if (linked) {
@@ -150,14 +148,13 @@ function ActionButton({
     return (
       <>
         {disabled ? (
-          <OLButton disabled variant="secondary" className="text-capitalize">
+          <OLButton disabled variant="secondary">
             {t('link')}
           </OLButton>
         ) : (
           <OLButton
             variant="secondary"
             href={linkPath}
-            className="text-capitalize"
             onClick={() => trackLinkingClick(integration)}
           >
             {t('link')}

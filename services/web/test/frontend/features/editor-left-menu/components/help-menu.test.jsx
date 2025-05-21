@@ -23,7 +23,7 @@ describe('<HelpMenu />', function () {
     renderWithEditorContext(<HelpMenu />)
 
     screen.getByRole('button', { name: 'Show Hotkeys' })
-    screen.getByRole('button', { name: 'Contact Us' })
+    screen.getByRole('button', { name: 'Contact us' })
     screen.getByRole('link', { name: 'Documentation' })
   })
 
@@ -33,7 +33,7 @@ describe('<HelpMenu />', function () {
     renderWithEditorContext(<HelpMenu />)
 
     screen.getByRole('button', { name: 'Show Hotkeys' })
-    expect(screen.queryByRole('button', { name: 'Contact Us' })).to.equal(null)
+    expect(screen.queryByRole('button', { name: 'Contact us' })).to.equal(null)
     expect(screen.queryByRole('link', { name: 'Documentation' })).to.equal(null)
   })
 })

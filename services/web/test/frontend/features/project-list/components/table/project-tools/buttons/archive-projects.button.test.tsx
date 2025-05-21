@@ -21,6 +21,6 @@ describe('<ArchiveProjectsButton />', function () {
     renderWithProjectListContext(<ArchiveProjectsButton />)
     const btn = screen.getByRole('button', { name: 'Archive' })
     fireEvent.click(btn)
-    screen.getByText('Archive Projects')
+    screen.getByText('Archive projects')
   })
 })

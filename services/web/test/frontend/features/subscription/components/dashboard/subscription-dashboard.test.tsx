@@ -48,7 +48,7 @@ describe('<SubscriptionDashboard />', function () {
       expect(text).to.be.null
     })
 
-    it('does not render the contact support message', function () {
+    it('does not render the contact Support message', function () {
       const text = screen.queryByText(
         `You’re on an Overleaf Paid plan. Contact`,
         {
@@ -60,7 +60,7 @@ describe('<SubscriptionDashboard />', function () {
   })
 
   describe('Custom subscription', function () {
-    it('renders the contact support message', function () {
+    it('renders the contact Support message', function () {
       renderWithSubscriptionDashContext(<SubscriptionDashboard />, {
         metaTags: [
           {
@@ -77,7 +77,7 @@ describe('<SubscriptionDashboard />', function () {
       screen.getByText(`You’re on an Overleaf Paid plan.`, {
         exact: false,
       })
-      screen.getByText(`Contact support`, {
+      screen.getByText(`Contact Support`, {
         exact: false,
       })
     })

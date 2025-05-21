@@ -103,7 +103,7 @@ export function ActionButton({
         href="/user/subscription/plans"
         onClick={trackUpgradeClick}
       >
-        <span className="text-capitalize">{t('upgrade')}</span>
+        <span>{t('upgrade')}</span>
       </OLButton>
     )
   } else if (linked) {

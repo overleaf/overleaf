@@ -21,7 +21,7 @@ describe('<ActionsCopyProject />', function () {
   it('shows correct modal when clicked', async function () {
     renderWithEditorContext(<ActionsCopyProject />)
 
-    fireEvent.click(screen.getByRole('button', { name: 'Copy Project' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Copy project' }))
 
     screen.getByPlaceholderText('New project name')
   })
@@ -36,10 +36,10 @@ describe('<ActionsCopyProject />', function () {
 
     renderWithEditorContext(<ActionsCopyProject />)
 
-    fireEvent.click(screen.getByRole('button', { name: 'Copy Project' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Copy project' }))
 
     const input = screen.getByPlaceholderText('New project name')
-    fireEvent.change(input, { target: { value: 'New Project' } })
+    fireEvent.change(input, { target: { value: 'New project' } })
 
     const button = screen.getByRole('button', { name: 'Copy' })
     button.click()

@@ -222,10 +222,10 @@ templates.passwordResetRequested = ctaTemplate({
 
 templates.confirmEmail = ctaTemplate({
   subject() {
-    return `Confirm Email - ${settings.appName}`
+    return `Confirm email - ${settings.appName}`
   },
   title() {
-    return 'Confirm Email'
+    return 'Confirm email'
   },
   message(opts) {
     return [
@@ -239,7 +239,7 @@ templates.confirmEmail = ctaTemplate({
     ]
   },
   ctaText() {
-    return 'Confirm Email'
+    return 'Confirm email'
   },
   ctaURL(opts) {
     return opts.confirmEmailUrl
@@ -861,7 +861,7 @@ templates.SAMLDataCleared = ctaTemplate({
     ]
   },
   ctaText(opts) {
-    return 'Update my Emails and Affiliations'
+    return 'Update my Emails and affiliations'
   },
   ctaURL(opts) {
     return `${settings.siteUrl}/user/settings`
@@ -907,7 +907,7 @@ templates.welcome = ctaTemplate({
     ]
   },
   ctaText() {
-    return 'Confirm Email'
+    return 'Confirm email'
   },
   ctaURL(opts) {
     return opts.confirmEmailUrl

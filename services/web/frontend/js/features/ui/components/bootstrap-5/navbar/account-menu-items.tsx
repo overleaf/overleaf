@@ -25,7 +25,7 @@ export function AccountMenuItems({
       </Dropdown.Item>
       <NavDropdownDivider />
       <NavDropdownLinkItem href="/user/settings">
-        {t('Account Settings')}
+        {t('account_settings')}
       </NavDropdownLinkItem>
       {showSubscriptionLink ? (
         <NavDropdownLinkItem href="/user/subscription">
