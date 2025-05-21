@@ -14,6 +14,7 @@ const VALID_KEYS = [
   'full-project-search-promo',
   'editor-popup-ux-survey',
   'wf-features-moved',
+  'review-mode',
 ]
 
 async function completeTutorial(req, res, next) {
