@@ -13,7 +13,7 @@ const V2DocVersions = require('./v2_doc_versions')
 
 /**
  * @import Author from "./author"
- * @import { BlobStore } from "./types"
+ * @import { BlobStore, RawChange } from "./types"
  */
 
 /**
@@ -54,7 +54,7 @@ class Change {
   /**
    * For serialization.
    *
-   * @return {Object}
+   * @return {RawChange}
    */
   toRaw() {
     function toRaw(object) {
