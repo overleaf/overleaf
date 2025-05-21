@@ -23,6 +23,7 @@ import { mathPreviewStateField } from '../extensions/math-preview'
 import { getTooltip } from '@codemirror/view'
 import ReactDOM from 'react-dom'
 import OLDropdownMenuItem from '@/features/ui/components/ol/ol-dropdown-menu-item'
+import { useIsNewEditorEnabled } from '@/features/ide-redesign/utils/new-editor-utils'
 
 const MathPreviewTooltipContainer: FC = () => {
   const state = useCodeMirrorStateContext()
@@ -56,6 +57,8 @@ const MathPreviewTooltip: FC<{ mathContent: HTMLDivElement }> = ({
   mathContent,
 }) => {
   const { t } = useTranslation()
+
+  const newEditor = useIsNewEditorEnabled()
 
   const [showDisableModal, setShowDisableModal] = useState(false)
   const { setMathPreview } = useProjectSettingsContext()
@@ -133,10 +136,17 @@ const MathPreviewTooltip: FC<{ mathContent: HTMLDivElement }> = ({
           <OLModalBody>
             {t('disable_equation_preview_confirm')}
             <br />
-            <Trans
-              i18nKey="disable_equation_preview_enable"
-              components={{ b: <strong /> }}
-            />
+            {newEditor ? (
+              <Trans
+                i18nKey="disable_equation_preview_enable_in_settings"
+                components={{ b: <strong /> }}
+              />
+            ) : (
+              <Trans
+                i18nKey="disable_equation_preview_enable"
+                components={{ b: <strong /> }}
+              />
+            )}
           </OLModalBody>
 
           <OLModalFooter>

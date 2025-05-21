@@ -521,6 +521,7 @@
   "disable_equation_preview": "Disable equation preview",
   "disable_equation_preview_confirm": "This will disable equation preview for you in all projects.",
   "disable_equation_preview_enable": "You can enable it again from the <b>Menu</b>.",
+  "disable_equation_preview_enable_in_settings": "You can enable it again in <b>Settings</b>.",
   "disable_single_sign_on": "Disable single sign-on",
   "disable_sso": "Disable SSO",
   "disable_stop_on_first_error": "Disable “Stop on first error”",
