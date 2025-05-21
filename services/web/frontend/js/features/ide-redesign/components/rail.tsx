@@ -12,7 +12,7 @@ import {
   RailTabKey,
   useRailContext,
 } from '../contexts/rail-context'
-import FileTreeOutlinePanel from './file-tree-outline-panel'
+import FileTreeOutlinePanel from './file-tree/file-tree-outline-panel'
 import { ChatIndicator, ChatPane } from './chat/chat'
 import getMeta from '@/utils/meta'
 import { HorizontalResizeHandle } from '@/features/ide-react/components/resize/horizontal-resize-handle'

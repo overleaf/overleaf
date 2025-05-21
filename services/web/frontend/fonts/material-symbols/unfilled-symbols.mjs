@@ -8,6 +8,7 @@ export default /** @type {const} */ ([
   'brush',
   'code',
   'create_new_folder',
+  'delete',
   'description',
   'experiment',
   'forum',

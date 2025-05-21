@@ -57,6 +57,7 @@ const FileTreeActionableContext = createContext<
       newFileCreateMode: any | null
       error: any | null
       canDelete: boolean
+      canBulkDelete: boolean
       canRename: boolean
       canCreate: boolean
       parentFolderId: string
@@ -509,6 +510,8 @@ export const FileTreeActionableProvider: FC<React.PropsWithChildren> = ({
   const value = useMemo(
     () => ({
       canDelete: write && selectedEntityIds.size > 0 && !isRootFolderSelected,
+      canBulkDelete:
+        write && selectedEntityIds.size > 1 && !isRootFolderSelected,
       canRename: write && selectedEntityIds.size === 1 && !isRootFolderSelected,
       canCreate: write && selectedEntityIds.size < 2,
       ...state,
@@ -545,8 +548,8 @@ export const FileTreeActionableProvider: FC<React.PropsWithChildren> = ({
       isDuplicate,
       isRootFolderSelected,
       parentFolderId,
-      selectedEntityIds.size,
       selectedFileName,
+      selectedEntityIds.size,
       startCreatingDocOrFile,
       startCreatingFile,
       startCreatingFolder,
