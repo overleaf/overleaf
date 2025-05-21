@@ -335,7 +335,11 @@ async function previewAddonPurchase(req, res) {
     return HttpErrorHandler.notFound(req, res, `Unknown add-on: ${addOnCode}`)
   }
 
-  const paymentMethod = await RecurlyClient.promises.getPaymentMethod(userId)
+  /** @type {PaymentMethod[]} */
+  const paymentMethod = await Modules.promises.hooks.fire(
+    'getPaymentMethod',
+    userId
+  )
 
   let subscriptionChange
   try {
@@ -376,7 +380,7 @@ async function previewAddonPurchase(req, res) {
       },
     },
     subscriptionChange,
-    paymentMethod
+    paymentMethod[0]
   )
 
   await SplitTestHandler.promises.getAssignment(
@@ -482,6 +486,7 @@ async function previewSubscription(req, res, next) {
       userId,
       planCode
     )
+  /** @type {PaymentMethod[]} */
   const paymentMethod = await Modules.promises.hooks.fire(
     'getPaymentMethod',
     userId

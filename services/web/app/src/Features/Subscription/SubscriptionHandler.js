@@ -262,24 +262,12 @@ async function extendTrial(subscription, daysToExend) {
  * @return {Promise<PaymentProviderSubscriptionChange>}
  */
 async function previewAddonPurchase(userId, addOnCode) {
-  const subscription = await getSubscriptionForUser(userId)
-
-  try {
-    await RecurlyClient.promises.getAddOn(subscription.planCode, addOnCode)
-  } catch (err) {
-    if (err instanceof recurly.errors.NotFoundError) {
-      throw new NotFoundError({
-        message: 'Add-on not found',
-        info: { addOnCode },
-      })
-    }
-    throw err
-  }
-
-  const changeRequest = subscription.getRequestForAddOnPurchase(addOnCode)
-  const change =
-    await RecurlyClient.promises.previewSubscriptionChange(changeRequest)
-  return change
+  const change = await Modules.promises.hooks.fire(
+    'previewAddOnPurchase',
+    userId,
+    addOnCode
+  )
+  return change[0]
 }
 
 /**

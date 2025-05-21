@@ -38,6 +38,8 @@ const recurlyPlanCodeToStripeLookupKey = {
   group_professional_educational: 'group_professional_educational',
   group_collaborator: 'group_standard_enterprise',
   group_collaborator_educational: 'group_standard_educational',
+  assistant_annual: 'error_assist_annual',
+  assistant: 'error_assist_monthly',
 }
 
 /**
