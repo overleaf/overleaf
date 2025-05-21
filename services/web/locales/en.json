@@ -1365,6 +1365,8 @@
   "my_library": "My Library",
   "n_items": "__count__ item",
   "n_items_plural": "__count__ items",
+  "n_more_collaborators": "__count__ more collaborator",
+  "n_more_collaborators_plural": "__count__ more collaborators",
   "n_more_updates_above": "__count__ more update above",
   "n_more_updates_above_plural": "__count__ more updates above",
   "n_more_updates_below": "__count__ more update below",
