@@ -1,9 +1,5 @@
 const Path = require('node:path')
-const stream = require('node:stream')
 const { merge } = require('@overleaf/settings/merge')
-
-// TODO(24011): remove this after node 22 update
-stream.setDefaultHighWaterMark(false, 64 * 1024)
 
 let defaultFeatures, siteUrl
 

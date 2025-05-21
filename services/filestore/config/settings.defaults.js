@@ -1,8 +1,4 @@
 const Path = require('node:path')
-const stream = require('node:stream')
-
-// TODO(24011): remove this after node 22 update
-stream.setDefaultHighWaterMark(false, 64 * 1024)
 
 // environment variables renamed for consistency
 // use AWS_ACCESS_KEY_ID-style going forward
