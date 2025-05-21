@@ -73,6 +73,19 @@ function sentryReporter() {
               return null // Block the event from sending
             }
 
+            // Do not send link-sharing token to Sentry
+            if (event.request?.headers?.Referer) {
+              const refererUrl = new URL(event.request.headers.Referer)
+
+              if (
+                refererUrl.hostname === location.hostname &&
+                refererUrl.pathname.startsWith('/read/')
+              ) {
+                refererUrl.pathname = '/read/'
+                event.request.headers.Referer = refererUrl.toString()
+              }
+            }
+
             return event
           },
         })
