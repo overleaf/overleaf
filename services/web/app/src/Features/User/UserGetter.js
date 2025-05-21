@@ -137,6 +137,19 @@ async function getSsoUsersAtInstitution(institutionId, projection) {
   ).exec()
 }
 
+async function getWritefullData(userId) {
+  const user = await UserGetter.promises.getUser(userId, {
+    writefull: 1,
+  })
+  if (!user) {
+    throw new Error('user not found')
+  }
+  return {
+    isPremium: Boolean(user?.writefull?.isPremium),
+    premiumSource: user.writefull.premiumSource || null,
+  }
+}
+
 const UserGetter = {
   getSsoUsersAtInstitution: callbackify(getSsoUsersAtInstitution),
 
@@ -271,6 +284,7 @@ const UserGetter = {
       callback(error)
     })
   },
+  getWritefullData: callbackify(getWritefullData),
 }
 
 const decorateFullEmails = (
@@ -346,10 +360,16 @@ const decorateFullEmails = (
 }
 
 UserGetter.promises = promisifyAll(UserGetter, {
-  without: ['getSsoUsersAtInstitution', 'getUserFullEmails', 'getUserFeatures'],
+  without: [
+    'getSsoUsersAtInstitution',
+    'getUserFullEmails',
+    'getUserFeatures',
+    'getWritefullData',
+  ],
 })
 UserGetter.promises.getUserFullEmails = getUserFullEmails
 UserGetter.promises.getSsoUsersAtInstitution = getSsoUsersAtInstitution
 UserGetter.promises.getUserFeatures = getUserFeatures
+UserGetter.promises.getWritefullData = getWritefullData
 
 module.exports = UserGetter

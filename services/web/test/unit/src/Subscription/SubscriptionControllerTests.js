@@ -127,6 +127,9 @@ describe('SubscriptionController', function () {
       getUser: sinon.stub().callsArgWith(2, null, this.user),
       promises: {
         getUser: sinon.stub().resolves(this.user),
+        getWritefullData: sinon
+          .stub()
+          .resolves({ isPremium: false, premiumSource: null }),
       },
     }
     this.SplitTestV2Hander = {
@@ -157,7 +160,6 @@ describe('SubscriptionController', function () {
         },
         './FeaturesUpdater': (this.FeaturesUpdater = {
           promises: {
-            hasFeaturesViaWritefull: sinon.stub().resolves(false),
             refreshFeatures: sinon.stub().resolves({ features: {} }),
           },
         }),

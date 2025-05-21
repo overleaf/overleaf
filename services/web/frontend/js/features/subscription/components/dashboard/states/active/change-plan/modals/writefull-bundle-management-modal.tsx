@@ -13,13 +13,17 @@ import { Dropdown, DropdownMenu, DropdownToggle } from 'react-bootstrap'
 import OLDropdownMenuItem from '@/features/ui/components/ol/ol-dropdown-menu-item'
 import MaterialIcon from '@/shared/components/material-icon'
 import { ADD_ON_NAME } from '@/features/subscription/data/add-on-codes'
+import getMeta from '@/utils/meta'
 
 function WritefullBundleManagementModal() {
   const modalId: SubscriptionDashModalIds = 'manage-on-writefull'
   const { t } = useTranslation()
   const { handleCloseModal, modalIdShown } = useSubscriptionDashboardContext()
+  const aiAssistViaWritefullSource = getMeta('ol-aiAssistViaWritefullSource')
 
   if (modalIdShown !== modalId) return null
+
+  const individualWFSubscription = aiAssistViaWritefullSource === 'individual'
 
   return (
     <OLModal
@@ -34,22 +38,28 @@ function WritefullBundleManagementModal() {
       </OLModalHeader>
 
       <OLModalBody>
-        <p>{t('ai_assist_in_overleaf_is_included_via_writefull')}</p>
+        <p>
+          {individualWFSubscription
+            ? t('ai_assist_in_overleaf_is_included_via_writefull_individual')
+            : t('ai_assist_in_overleaf_is_included_via_writefull_groups')}
+        </p>
       </OLModalBody>
 
       <OLModalFooter>
         <OLButton variant="secondary" onClick={handleCloseModal}>
           {t('back')}
         </OLButton>
-        <OLButton
-          variant="primary"
-          onClick={handleCloseModal}
-          href="https://my.writefull.com/account"
-          target="_blank"
-          rel="noreferrer"
-        >
-          {t('go_to_writefull')}
-        </OLButton>
+        {individualWFSubscription && (
+          <OLButton
+            variant="primary"
+            onClick={handleCloseModal}
+            href="https://my.writefull.com/account"
+            target="_blank"
+            rel="noreferrer"
+          >
+            {t('go_to_writefull')}
+          </OLButton>
+        )}
       </OLModalFooter>
     </OLModal>
   )

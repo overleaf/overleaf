@@ -26,6 +26,7 @@ const { AI_ADD_ON_CODE } = require('./PaymentProviderEntities')
 const PlansLocator = require('./PlansLocator')
 const PaymentProviderEntities = require('./PaymentProviderEntities')
 const { User } = require('../../models/User')
+const UserGetter = require('../User/UserGetter')
 
 /**
  * @import { SubscriptionChangeDescription } from '../../../../types/subscription/subscription-change-preview'
@@ -154,9 +155,10 @@ async function userSubscriptionPage(req, res) {
       'Failed to list groups with group settings enabled for advertising'
     )
   }
-
-  const hasAiAssistViaWritefull =
-    await FeaturesUpdater.promises.hasFeaturesViaWritefull(user._id)
+  const {
+    isPremium: hasAiAssistViaWritefull,
+    premiumSource: aiAssistViaWritefullSource,
+  } = await UserGetter.promises.getWritefullData(user._id)
 
   const data = {
     title: 'your_subscription',
@@ -181,6 +183,7 @@ async function userSubscriptionPage(req, res) {
     isManagedAccount: !!req.managedBy,
     userRestrictions: Array.from(req.userRestrictions || []),
     hasAiAssistViaWritefull,
+    aiAssistViaWritefullSource,
   }
   res.render('subscriptions/dashboard-react', data)
 }
@@ -346,8 +349,8 @@ async function previewAddonPurchase(req, res) {
     subscriptionChange =
       await SubscriptionHandler.promises.previewAddonPurchase(userId, addOnCode)
 
-    const hasAiAssistViaWritefull =
-      await FeaturesUpdater.promises.hasFeaturesViaWritefull(userId)
+    const { isPremium: hasAiAssistViaWritefull } =
+      await UserGetter.promises.getWritefullData(userId)
     const isAiUpgrade =
       PaymentProviderEntities.subscriptionChangeIsAiAssistUpgrade(
         subscriptionChange
