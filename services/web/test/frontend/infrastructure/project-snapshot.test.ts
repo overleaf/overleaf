@@ -119,10 +119,14 @@ describe('ProjectSnapshot', function () {
   }
 
   function mockChanges() {
-    fetchMock.getOnce(`/project/${projectId}/changes?since=1`, changes, {
-      name: 'changes-1',
-    })
-    fetchMock.get(`/project/${projectId}/changes?since=2`, [], {
+    fetchMock.getOnce(
+      `/project/${projectId}/changes?since=1&paginated=true`,
+      changes,
+      {
+        name: 'changes-1',
+      }
+    )
+    fetchMock.get(`/project/${projectId}/changes?since=2&paginated=true`, [], {
       name: 'changes-2',
     })
   }

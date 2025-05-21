@@ -124,9 +124,15 @@ export class ProjectSnapshot {
    */
   private async loadChanges() {
     await flushHistory(this.projectId)
-    const changes = await fetchLatestChanges(this.projectId, this.version)
-    this.snapshot.applyAll(changes)
-    this.version += changes.length
+    let hasMore = true
+    while (hasMore) {
+      const response = await fetchLatestChanges(this.projectId, this.version)
+      const changes = response.changes
+      this.snapshot.applyAll(changes)
+      this.version += changes.length
+      hasMore = response.hasMore
+    }
+
     await this.loadDocs()
   }
 
@@ -181,14 +187,43 @@ async function fetchLatestChunk(projectId: string): Promise<Chunk> {
   return Chunk.fromRaw(response.chunk)
 }
 
+type FetchLatestChangesResponse = {
+  changes: Change[]
+  hasMore: boolean
+}
+
+type FetchLatestChangesApiResponse =
+  | RawChange[]
+  | {
+      changes: RawChange[]
+      hasMore: boolean
+    }
+
 async function fetchLatestChanges(
   projectId: string,
   version: number
-): Promise<Change[]> {
-  const response = await getJSON<RawChange[]>(
-    `/project/${projectId}/changes?since=${version}`
+): Promise<FetchLatestChangesResponse> {
+  // TODO: The paginated flag is a transition flag. It can be removed after this
+  // code has been deployed for a few weeks.
+  const response = await getJSON<FetchLatestChangesApiResponse>(
+    `/project/${projectId}/changes?since=${version}&paginated=true`
   )
-  return response.map(Change.fromRaw).filter(change => change != null)
+
+  let changes, hasMore
+  if (Array.isArray(response)) {
+    // deprecated response format is a simple array of changes
+    // TODO: Remove this branch after the transition
+    changes = response
+    hasMore = false
+  } else {
+    changes = response.changes
+    hasMore = response.hasMore
+  }
+
+  return {
+    changes: changes.map(Change.fromRaw).filter(change => change != null),
+    hasMore,
+  }
 }
 
 async function fetchBlob(projectId: string, hash: string): Promise<string> {

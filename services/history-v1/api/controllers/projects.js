@@ -152,29 +152,27 @@ async function getChanges(req, res, next) {
     })
   }
 
-  const changes = []
-  let chunk = await chunkStore.loadLatest(projectId)
-
-  if (since > chunk.getEndVersion()) {
-    return res.status(400).json({
-      error: `Version out of bounds: ${since}`,
+  let chunk
+  try {
+    chunk = await chunkStore.loadAtVersion(projectId, since, {
+      preferNewer: true,
     })
+  } catch (err) {
+    if (err instanceof Chunk.VersionNotFoundError) {
+      return res.status(400).json({
+        error: `Version out of bounds: ${since}`,
+      })
+    }
+    throw err
   }
 
-  // Fetch all chunks that come after the chunk that contains the start version
-  while (chunk.getStartVersion() > since) {
-    const changesInChunk = chunk.getChanges()
-    changes.unshift(...changesInChunk)
-    chunk = await chunkStore.loadAtVersion(projectId, chunk.getStartVersion())
-  }
+  const latestChunkMetadata = await chunkStore.getLatestChunkMetadata(projectId)
 
   // Extract the relevant changes from the chunk that contains the start version
-  const changesInChunk = chunk
-    .getChanges()
-    .slice(since - chunk.getStartVersion())
-  changes.unshift(...changesInChunk)
+  const changes = chunk.getChanges().slice(since - chunk.getStartVersion())
+  const hasMore = latestChunkMetadata.endVersion > chunk.getEndVersion()
 
-  res.json(changes.map(change => change.toRaw()))
+  res.json({ changes: changes.map(change => change.toRaw()), hasMore })
 }
 
 async function getZip(req, res, next) {

@@ -141,6 +141,8 @@ async function loadLatest(projectId, opts = {}) {
  * @param {number} version
  * @param {object} [opts]
  * @param {boolean} [opts.persistedOnly] - only include persisted changes
+ * @param {boolean} [opts.preferNewer] - If the version is at the boundary of
+ *        two chunks, return the newer chunk.
  */
 async function loadAtVersion(projectId, version, opts = {}) {
   assert.projectId(projectId, 'bad projectId')
@@ -150,7 +152,9 @@ async function loadAtVersion(projectId, version, opts = {}) {
   const blobStore = new BlobStore(projectId)
   const batchBlobStore = new BatchBlobStore(blobStore)
 
-  const chunkRecord = await backend.getChunkForVersion(projectId, version)
+  const chunkRecord = await backend.getChunkForVersion(projectId, version, {
+    preferNewer: opts.preferNewer,
+  })
   const rawHistory = await historyStore.loadRaw(projectId, chunkRecord.id)
   const history = History.fromRaw(rawHistory)
 

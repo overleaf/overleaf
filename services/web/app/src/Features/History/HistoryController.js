@@ -465,9 +465,37 @@ async function getLatestHistory(req, res, next) {
 
 async function getChanges(req, res, next) {
   const projectId = req.params.project_id
-  const since = req.query.since
-  const changes = await HistoryManager.promises.getChanges(projectId, { since })
-  res.json(changes)
+  let since = req.query.since
+  // TODO: Transition flag; remove after a while
+  const paginated = req.query.paginated === 'true'
+
+  if (paginated) {
+    const changes = await HistoryManager.promises.getChanges(projectId, {
+      since,
+    })
+    return res.json(changes)
+  } else {
+    // TODO: Remove this code path after a while
+    let hasMore = true
+    const allChanges = []
+    while (hasMore) {
+      const response = await HistoryManager.promises.getChanges(projectId, {
+        since,
+      })
+
+      let changes
+      if (Array.isArray(response)) {
+        changes = response
+        hasMore = false
+      } else {
+        changes = response.changes
+        hasMore = response.hasMore
+        since += changes.length
+      }
+      allChanges.push(...changes)
+    }
+    return res.json(allChanges)
+  }
 }
 
 function isPrematureClose(err) {
