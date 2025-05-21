@@ -1,7 +1,7 @@
 import sessionStorage from './session-storage'
 import getMeta from '@/utils/meta'
 
-type Segmentation = Record<
+export type Segmentation = Record<
   string,
   string | number | boolean | undefined | unknown | any // TODO: RecurlyError
 >

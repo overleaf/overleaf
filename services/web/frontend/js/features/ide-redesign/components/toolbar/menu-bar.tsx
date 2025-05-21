@@ -24,6 +24,7 @@ import { useRailContext } from '../../contexts/rail-context'
 import WordCountModal from '@/features/word-count-modal/components/word-count-modal'
 import { isSplitTestEnabled } from '@/utils/splitTestUtils'
 import { useDetachCompileContext as useCompileContext } from '@/shared/context/detach-compile-context'
+import { useEditorAnalytics } from '@/shared/hooks/use-editor-analytics'
 
 export const ToolbarMenuBar = () => {
   const { t } = useTranslation()
@@ -210,6 +211,7 @@ export const ToolbarMenuBar = () => {
           <ChangeLayoutOptions />
           <DropdownHeader>Editor settings</DropdownHeader>
           <MenuBarOption
+            eventKey="show_equation_preview"
             title={t('show_equation_preview')}
             trailingIcon={mathPreview ? 'check' : undefined}
             onClick={toggleMathPreview}
@@ -227,18 +229,25 @@ export const ToolbarMenuBar = () => {
           className="ide-redesign-toolbar-dropdown-toggle-subdued ide-redesign-toolbar-button-subdued"
         >
           <MenuBarOption
+            eventKey="keyboard_shortcuts"
             title={t('keyboard_shortcuts')}
             onClick={openKeyboardShortcutsModal}
           />
           <MenuBarOption
             title={t('documentation')}
+            eventKey="documentation"
             href="/learn"
             target="_blank"
             rel="noopener noreferrer"
           />
           <DropdownDivider />
-          <MenuBarOption title={t('contact_us')} onClick={openContactUsModal} />
           <MenuBarOption
+            eventKey="contact_us"
+            title={t('contact_us')}
+            onClick={openContactUsModal}
+          />
+          <MenuBarOption
+            eventKey="give_feedback"
             title={t('give_feedback')}
             href="https://forms.gle/soyVStc5qDx9na1Z6"
             target="_blank"
@@ -247,6 +256,7 @@ export const ToolbarMenuBar = () => {
           <DropdownDivider />
           <SwitchToOldEditorMenuBarOption />
           <MenuBarOption
+            eventKey="whats_new"
             title="What's new?"
             onClick={openEditorRedesignSwitcherModal}
           />
@@ -263,14 +273,19 @@ export const ToolbarMenuBar = () => {
 const SwitchToOldEditorMenuBarOption = () => {
   const { loading, error, setEditorRedesignStatus } =
     useSwitchEnableNewEditorState()
+  const { sendEvent } = useEditorAnalytics()
 
   const disable: MouseEventHandler = useCallback(
     event => {
       // Don't close the dropdown
       event.stopPropagation()
+      sendEvent('editor-redesign-toggle', {
+        action: 'disable',
+        location: 'menu-bar',
+      })
       setEditorRedesignStatus(false)
     },
-    [setEditorRedesignStatus]
+    [setEditorRedesignStatus, sendEvent]
   )
   let icon = null
   if (loading) {
@@ -280,6 +295,7 @@ const SwitchToOldEditorMenuBarOption = () => {
   }
   return (
     <MenuBarOption
+      eventKey="switch_to_old_editor"
       title="Switch to old editor"
       onClick={disable}
       disabled={loading}

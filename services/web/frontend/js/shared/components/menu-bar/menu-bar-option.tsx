@@ -1,7 +1,8 @@
 import DropdownListItem from '@/features/ui/components/bootstrap-5/dropdown-list-item'
 import { DropdownItem } from '@/features/ui/components/bootstrap-5/dropdown-menu'
+import { useEditorAnalytics } from '@/shared/hooks/use-editor-analytics'
 import { useNestableDropdown } from '@/shared/hooks/use-nestable-dropdown'
-import { MouseEventHandler, ReactNode } from 'react'
+import { MouseEventHandler, ReactNode, useCallback } from 'react'
 
 type MenuBarOptionProps = {
   title: string
@@ -11,18 +12,30 @@ type MenuBarOptionProps = {
   href?: string
   target?: string
   rel?: string
+  eventKey?: string
 }
 
 export const MenuBarOption = ({
   title,
-  onClick,
+  onClick: clickHandler,
   href,
   disabled,
   trailingIcon,
   target,
   rel,
+  eventKey,
 }: MenuBarOptionProps) => {
   const { setSelected } = useNestableDropdown()
+  const { sendEvent } = useEditorAnalytics()
+  const onClick: MouseEventHandler = useCallback(
+    e => {
+      if (eventKey) {
+        sendEvent('menu-bar-option-click', { key: eventKey })
+      }
+      return clickHandler?.(e)
+    },
+    [clickHandler, eventKey, sendEvent]
+  )
   return (
     <DropdownListItem>
       <DropdownItem

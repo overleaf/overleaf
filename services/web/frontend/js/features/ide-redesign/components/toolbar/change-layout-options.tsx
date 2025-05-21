@@ -9,10 +9,10 @@ import {
 } from '@/shared/context/layout-context'
 import React, { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import * as eventTracking from '../../../../infrastructure/event-tracking'
 import useEventListener from '@/shared/hooks/use-event-listener'
 import { DetachRole } from '@/shared/context/detach-context'
 import { Spinner } from 'react-bootstrap'
+import { useEditorAnalytics } from '@/shared/hooks/use-editor-analytics'
 
 type LayoutOption = 'sideBySide' | 'editorOnly' | 'pdfOnly' | 'detachedPdf'
 
@@ -87,6 +87,7 @@ const LayoutDropdownItem = ({
 }
 
 export default function ChangeLayoutOptions() {
+  const { sendEvent } = useEditorAnalytics()
   const {
     reattach,
     detach,
@@ -99,16 +100,16 @@ export default function ChangeLayoutOptions() {
 
   const handleDetach = useCallback(() => {
     detach()
-    eventTracking.sendMB('project-layout-detach')
-  }, [detach])
+    sendEvent('project-layout-detach')
+  }, [detach, sendEvent])
 
   const handleReattach = useCallback(() => {
     if (detachRole !== 'detacher') {
       return
     }
     reattach()
-    eventTracking.sendMB('project-layout-reattach')
-  }, [detachRole, reattach])
+    sendEvent('project-layout-reattach')
+  }, [detachRole, reattach, sendEvent])
 
   // reattach when the PDF pane opens
   useEventListener('ui:pdf-open', handleReattach)
@@ -117,12 +118,12 @@ export default function ChangeLayoutOptions() {
     (newLayout: IdeLayout, newView?: IdeView) => {
       handleReattach()
       changeLayout(newLayout, newView)
-      eventTracking.sendMB('project-layout-change', {
+      sendEvent('project-layout-change', {
         layout: newLayout,
         view: newView,
       })
     },
-    [changeLayout, handleReattach]
+    [changeLayout, handleReattach, sendEvent]
   )
 
   const { t } = useTranslation()

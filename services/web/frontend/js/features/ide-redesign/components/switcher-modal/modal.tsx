@@ -14,6 +14,7 @@ import {
 import Notification from '@/shared/components/notification'
 import { useSwitchEnableNewEditorState } from '../../hooks/use-switch-enable-new-editor-state'
 import { Trans, useTranslation } from 'react-i18next'
+import { useEditorAnalytics } from '@/shared/hooks/use-editor-analytics'
 
 export const IdeRedesignSwitcherModal = () => {
   const { t } = useTranslation()
@@ -66,13 +67,18 @@ const SwitcherModalContentEnabled: FC<ModalContentProps> = ({
   loading,
 }) => {
   const { t } = useTranslation()
+  const { sendEvent } = useEditorAnalytics()
   const disable = useCallback(() => {
+    sendEvent('editor-redesign-toggle', {
+      action: 'disable',
+      location: 'modal',
+    })
     setEditorRedesignStatus(false)
       .then(hide)
       .catch(() => {
         // do nothing, we're already showing the error
       })
-  }, [setEditorRedesignStatus, hide])
+  }, [setEditorRedesignStatus, hide, sendEvent])
   return (
     <>
       <OLModalBody>
@@ -116,13 +122,18 @@ const SwitcherModalContentDisabled: FC<ModalContentProps> = ({
   loading,
 }) => {
   const { t } = useTranslation()
+  const { sendEvent } = useEditorAnalytics()
   const enable = useCallback(() => {
+    sendEvent('editor-redesign-toggle', {
+      action: 'enable',
+      location: 'modal',
+    })
     setEditorRedesignStatus(true)
       .then(hide)
       .catch(() => {
         // do nothing, we're already showing the error
       })
-  }, [setEditorRedesignStatus, hide])
+  }, [setEditorRedesignStatus, hide, sendEvent])
   return (
     <>
       <OLModalBody>

@@ -101,6 +101,7 @@ const CommandDropdownChild = ({ item }: { item: Entry<TaggedCommand> }) => {
   if (isTaggedCommand(item)) {
     return (
       <MenuBarOption
+        eventKey={item.id}
         key={item.id}
         title={item.label}
         // eslint-disable-next-line react/jsx-handler-names

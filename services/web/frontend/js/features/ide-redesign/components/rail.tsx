@@ -33,6 +33,7 @@ import DictionarySettingsModal from './settings/editor-settings/dictionary-setti
 import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
 import OLIconButton from '@/features/ui/components/ol/ol-icon-button'
 import { useChatContext } from '@/features/chat/context/chat-context'
+import { useEditorAnalytics } from '@/shared/hooks/use-editor-analytics'
 
 type RailElement = {
   icon: AvailableUnfilledIcon
@@ -76,6 +77,7 @@ const RAIL_MODALS: {
 ]
 
 export const RailLayout = () => {
+  const { sendEvent } = useEditorAnalytics()
   const { t } = useTranslation()
   const {
     activeModal,
@@ -147,16 +149,20 @@ export const RailLayout = () => {
         key: 'settings',
         icon: 'settings',
         title: t('settings'),
-        action: () => setLeftMenuShown(true),
+        action: () => {
+          sendEvent('rail-click', { tab: 'settings' })
+          setLeftMenuShown(true)
+        },
       },
     ],
-    [setLeftMenuShown, t]
+    [setLeftMenuShown, t, sendEvent]
   )
 
   const onTabSelect = useCallback(
     (key: string | null) => {
       if (key === selectedTab) {
         togglePane()
+        sendEvent('rail-click', { tab: key, type: 'toggle' })
       } else {
         // HACK: Apparently the onSelect event is triggered with href attributes
         // from DropdownItems
@@ -164,15 +170,17 @@ export const RailLayout = () => {
           // Attempting to open a non-existent tab
           return
         }
+        const keyOrDefault = key ?? 'file-tree'
         // Change the selected tab and make sure it's open
-        openTab((key ?? 'file-tree') as RailTabKey)
+        openTab(keyOrDefault as RailTabKey)
+        sendEvent('rail-click', { tab: keyOrDefault })
 
         if (key === 'chat') {
           markMessagesAsRead()
         }
       }
     },
-    [openTab, togglePane, selectedTab, railTabs, markMessagesAsRead]
+    [openTab, togglePane, selectedTab, railTabs, sendEvent, markMessagesAsRead]
   )
 
   const isReviewPanelOpen = selectedTab === 'review-panel'
