@@ -146,7 +146,7 @@ async function getWritefullData(userId) {
   }
   return {
     isPremium: Boolean(user?.writefull?.isPremium),
-    premiumSource: user.writefull.premiumSource || null,
+    premiumSource: user?.writefull?.premiumSource || null,
   }
 }
 
