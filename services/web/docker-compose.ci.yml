@@ -88,7 +88,7 @@ services:
     image: redis
 
   mongo:
-    image: mongo:6.0.13
+    image: mongo:7.0.20
     logging:
       driver: none
     command: --replSet overleaf

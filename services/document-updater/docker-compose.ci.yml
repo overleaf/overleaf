@@ -52,7 +52,7 @@ services:
       retries: 20
 
   mongo:
-    image: mongo:6.0.13
+    image: mongo:7.0.20
     command: --replSet overleaf
     volumes:
       - ../../bin/shared/mongodb-init-replica-set.js:/docker-entrypoint-initdb.d/mongodb-init-replica-set.js
