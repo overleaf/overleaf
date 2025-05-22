@@ -12,18 +12,6 @@ const DeletedDocSchema = new Schema({
   deletedAt: { type: Date },
 })
 
-const DeletedFileSchema = new Schema({
-  name: String,
-  created: {
-    type: Date,
-  },
-  linkedFileData: { type: Schema.Types.Mixed },
-  hash: {
-    type: String,
-  },
-  deletedAt: { type: Date },
-})
-
 const ProjectSchema = new Schema(
   {
     name: { type: String, default: 'new project' },
@@ -54,7 +42,6 @@ const ProjectSchema = new Schema(
     archived: { type: Schema.Types.Mixed },
     trashed: [{ type: ObjectId, ref: 'User' }],
     deletedDocs: [DeletedDocSchema],
-    deletedFiles: [DeletedFileSchema],
     imageName: { type: String },
     brandVariationId: { type: String },
     track_changes: { type: Object },

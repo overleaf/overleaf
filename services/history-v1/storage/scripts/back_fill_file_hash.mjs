@@ -89,14 +89,13 @@ ObjectId.cacheHexString = true
  */
 
 /**
- * @return {{PROJECT_IDS_FROM: string, PROCESS_HASHED_FILES: boolean, PROCESS_DELETED_FILES: boolean, LOGGING_IDENTIFIER: string, BATCH_RANGE_START: string, PROCESS_BLOBS: boolean, BATCH_RANGE_END: string, PROCESS_NON_DELETED_PROJECTS: boolean, PROCESS_DELETED_PROJECTS: boolean, COLLECT_BACKED_UP_BLOBS: boolean}}
+ * @return {{PROJECT_IDS_FROM: string, PROCESS_HASHED_FILES: boolean, LOGGING_IDENTIFIER: string, BATCH_RANGE_START: string, PROCESS_BLOBS: boolean, BATCH_RANGE_END: string, PROCESS_NON_DELETED_PROJECTS: boolean, PROCESS_DELETED_PROJECTS: boolean, COLLECT_BACKED_UP_BLOBS: boolean}}
  */
 function parseArgs() {
   const PUBLIC_LAUNCH_DATE = new Date('2012-01-01T00:00:00Z')
   const args = commandLineArgs([
     { name: 'processNonDeletedProjects', type: String, defaultValue: 'false' },
     { name: 'processDeletedProjects', type: String, defaultValue: 'false' },
-    { name: 'processDeletedFiles', type: String, defaultValue: 'false' },
     { name: 'processHashedFiles', type: String, defaultValue: 'false' },
     { name: 'processBlobs', type: String, defaultValue: 'true' },
     { name: 'projectIdsFrom', type: String, defaultValue: '' },
@@ -131,7 +130,6 @@ function parseArgs() {
     PROCESS_NON_DELETED_PROJECTS: boolVal('processNonDeletedProjects'),
     PROCESS_DELETED_PROJECTS: boolVal('processDeletedProjects'),
     PROCESS_BLOBS: boolVal('processBlobs'),
-    PROCESS_DELETED_FILES: boolVal('processDeletedFiles'),
     PROCESS_HASHED_FILES: boolVal('processHashedFiles'),
     COLLECT_BACKED_UP_BLOBS: boolVal('collectBackedUpBlobs'),
     BATCH_RANGE_START,
@@ -145,7 +143,6 @@ const {
   PROCESS_NON_DELETED_PROJECTS,
   PROCESS_DELETED_PROJECTS,
   PROCESS_BLOBS,
-  PROCESS_DELETED_FILES,
   PROCESS_HASHED_FILES,
   COLLECT_BACKED_UP_BLOBS,
   BATCH_RANGE_START,
@@ -188,7 +185,6 @@ const typedProjectsCollection = db.collection('projects')
 const deletedProjectsCollection = db.collection('deletedProjects')
 /** @type {DeletedProjectsCollection} */
 const typedDeletedProjectsCollection = db.collection('deletedProjects')
-const deletedFilesCollection = db.collection('deletedFiles')
 
 const concurrencyLimit = pLimit(CONCURRENCY)
 
@@ -647,22 +643,15 @@ async function queueNextBatch(batch, prefix = 'rootFolder.0') {
  * @return {Promise<void>}
  */
 async function processBatch(batch, prefix = 'rootFolder.0') {
-  const [deletedFiles, { nBlobs, blobs }, { nBackedUpBlobs, backedUpBlobs }] =
-    await Promise.all([
-      collectDeletedFiles(batch),
-      collectProjectBlobs(batch),
-      collectBackedUpBlobs(batch),
-    ])
-  const files = Array.from(
-    findFileInBatch(batch, prefix, deletedFiles, blobs, backedUpBlobs)
-  )
+  const [{ nBlobs, blobs }, { nBackedUpBlobs, backedUpBlobs }] =
+    await Promise.all([collectProjectBlobs(batch), collectBackedUpBlobs(batch)])
+  const files = Array.from(findFileInBatch(batch, prefix, blobs, backedUpBlobs))
   STATS.projects += batch.length
   STATS.blobs += nBlobs
   STATS.backedUpBlobs += nBackedUpBlobs
 
   // GC
   batch.length = 0
-  deletedFiles.clear()
   blobs.clear()
   backedUpBlobs.clear()
 
@@ -713,9 +702,7 @@ async function handleDeletedFileTreeBatch(batch) {
  * @return {Promise<boolean>}
  */
 async function tryUpdateFileRefInMongo(entry) {
-  if (entry.path === MONGO_PATH_DELETED_FILE) {
-    return await tryUpdateDeletedFileRefInMongo(entry)
-  } else if (entry.path.startsWith('project.')) {
+  if (entry.path.startsWith('project.')) {
     return await tryUpdateFileRefInMongoInDeletedProject(entry)
   }
 
@@ -728,22 +715,6 @@ async function tryUpdateFileRefInMongo(entry) {
     {
       $set: { [`${entry.path}.hash`]: entry.hash },
     }
-  )
-  return result.matchedCount === 1
-}
-
-/**
- * @param {QueueEntry} entry
- * @return {Promise<boolean>}
- */
-async function tryUpdateDeletedFileRefInMongo(entry) {
-  STATS.mongoUpdates++
-  const result = await deletedFilesCollection.updateOne(
-    {
-      _id: new ObjectId(entry.fileId),
-      projectId: entry.ctx.projectId,
-    },
-    { $set: { hash: entry.hash } }
   )
   return result.matchedCount === 1
 }
@@ -812,7 +783,6 @@ async function updateFileRefInMongo(entry) {
       break
     }
     if (!found) {
-      if (await tryUpdateDeletedFileRefInMongo(entry)) return
       STATS.fileHardDeleted++
       console.warn('bug: file hard-deleted while processing', projectId, fileId)
       return
@@ -905,49 +875,22 @@ function* findFiles(ctx, folder, path, isInputLoop = false) {
 /**
  * @param {Array<Project>} projects
  * @param {string} prefix
- * @param {Map<string,Array<DeletedFileRef>>} deletedFiles
  * @param {Map<string,Array<Blob>>} blobs
  * @param {Map<string,Array<string>>} backedUpBlobs
  * @return Generator<QueueEntry>
  */
-function* findFileInBatch(
-  projects,
-  prefix,
-  deletedFiles,
-  blobs,
-  backedUpBlobs
-) {
+function* findFileInBatch(projects, prefix, blobs, backedUpBlobs) {
   for (const project of projects) {
     const projectIdS = project._id.toString()
     const historyIdS = project.overleaf.history.id.toString()
     const projectBlobs = blobs.get(historyIdS) || []
     const projectBackedUpBlobs = new Set(backedUpBlobs.get(projectIdS) || [])
-    const projectDeletedFiles = deletedFiles.get(projectIdS) || []
     const ctx = new ProjectContext(
       project._id,
       historyIdS,
       projectBlobs,
       projectBackedUpBlobs
     )
-    for (const fileRef of projectDeletedFiles) {
-      const fileId = fileRef._id.toString()
-      if (fileRef.hash) {
-        if (ctx.canSkipProcessingHashedFile(fileRef.hash)) continue
-        ctx.remainingQueueEntries++
-        STATS.filesWithHash++
-        yield {
-          ctx,
-          cacheKey: fileRef.hash,
-          fileId,
-          hash: fileRef.hash,
-          path: MONGO_PATH_SKIP_WRITE_HASH_TO_FILE_TREE,
-        }
-      } else {
-        ctx.remainingQueueEntries++
-        STATS.filesWithoutHash++
-        yield { ctx, cacheKey: fileId, fileId, path: MONGO_PATH_DELETED_FILE }
-      }
-    }
     for (const blob of projectBlobs) {
       if (projectBackedUpBlobs.has(blob.getHash())) continue
       ctx.remainingQueueEntries++
@@ -983,41 +926,6 @@ async function collectProjectBlobs(batch) {
 
 /**
  * @param {Array<Project>} projects
- * @return {Promise<Map<string, Array<DeletedFileRef>>>}
- */
-async function collectDeletedFiles(projects) {
-  const deletedFiles = new Map()
-  if (!PROCESS_DELETED_FILES) return deletedFiles
-
-  const cursor = deletedFilesCollection.find(
-    {
-      projectId: { $in: projects.map(p => p._id) },
-      ...(PROCESS_HASHED_FILES
-        ? {}
-        : {
-            hash: { $exists: false },
-          }),
-    },
-    {
-      projection: { _id: 1, projectId: 1, hash: 1 },
-      readPreference: READ_PREFERENCE_SECONDARY,
-      sort: { projectId: 1 },
-    }
-  )
-  for await (const deletedFileRef of cursor) {
-    const projectId = deletedFileRef.projectId.toString()
-    const found = deletedFiles.get(projectId)
-    if (found) {
-      found.push(deletedFileRef)
-    } else {
-      deletedFiles.set(projectId, [deletedFileRef])
-    }
-  }
-  return deletedFiles
-}
-
-/**
- * @param {Array<Project>} projects
  * @return {Promise<{nBackedUpBlobs:number,backedUpBlobs:Map<string,Array<string>>}>}
  */
 async function collectBackedUpBlobs(projects) {
@@ -1043,7 +951,6 @@ async function collectBackedUpBlobs(projects) {
 const BATCH_HASH_WRITES = 1_000
 const BATCH_FILE_UPDATES = 100
 
-const MONGO_PATH_DELETED_FILE = 'deleted-file'
 const MONGO_PATH_SKIP_WRITE_HASH_TO_FILE_TREE = 'skip-write-to-file-tree'
 
 class ProjectContext {
@@ -1264,9 +1171,7 @@ class ProjectContext {
     const projectEntries = []
     const deletedProjectEntries = []
     for (const entry of this.#pendingFileWrites) {
-      if (entry.path === MONGO_PATH_DELETED_FILE) {
-        individualUpdates.push(entry)
-      } else if (entry.path.startsWith('project.')) {
+      if (entry.path.startsWith('project.')) {
         deletedProjectEntries.push(entry)
       } else {
         projectEntries.push(entry)

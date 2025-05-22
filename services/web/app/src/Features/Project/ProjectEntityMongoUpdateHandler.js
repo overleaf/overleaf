@@ -15,7 +15,6 @@ const ProjectGetter = require('./ProjectGetter')
 const ProjectLocator = require('./ProjectLocator')
 const FolderStructureBuilder = require('./FolderStructureBuilder')
 const SafePath = require('./SafePath')
-const { DeletedFile } = require('../../models/DeletedFile')
 const { iterablePaths } = require('./IterablePath')
 
 const LOCK_NAMESPACE = 'mongoTransaction'
@@ -72,7 +71,6 @@ module.exports = {
     'changes',
   ]),
   createNewFolderStructure: callbackify(wrapWithLock(createNewFolderStructure)),
-  _insertDeletedFileReference: callbackify(_insertDeletedFileReference),
   _putElement: callbackifyMultiResult(_putElement, ['result', 'project']),
   _confirmFolder,
   promises: {
@@ -87,7 +85,6 @@ module.exports = {
     deleteEntity: wrapWithLock(deleteEntity),
     renameEntity: wrapWithLock(renameEntity),
     createNewFolderStructure: wrapWithLock(createNewFolderStructure),
-    _insertDeletedFileReference,
     _putElement,
   },
 }
@@ -162,7 +159,6 @@ async function replaceFileWithNew(projectId, fileId, newFileRef, userId) {
     element_id: fileId,
     type: 'file',
   })
-  await _insertDeletedFileReference(projectId, fileRef)
   const newProject = await Project.findOneAndUpdate(
     { _id: project._id, [path.mongo]: { $exists: true } },
     {
@@ -478,17 +474,6 @@ async function renameEntity(projectId, entityId, entityType, newName, userId) {
     rev: entity.rev,
     changes: { oldDocs, newDocs, oldFiles, newFiles, newProject },
   }
-}
-
-async function _insertDeletedFileReference(projectId, fileRef) {
-  await DeletedFile.create({
-    projectId,
-    _id: fileRef._id,
-    name: fileRef.name,
-    linkedFileData: fileRef.linkedFileData,
-    hash: fileRef.hash,
-    deletedAt: new Date(),
-  })
 }
 
 async function _removeElementFromMongoArray(

@@ -1,14 +1,8 @@
-import runScript from '../scripts/back_fill_deleted_files.mjs'
-
 const tags = ['server-ce', 'server-pro', 'saas']
 
 const migrate = async client => {
-  const options = {
-    performCleanup: true,
-    letUserDoubleCheckInputsFor: 10,
-    fixPartialInserts: true,
-  }
-  await runScript(options)
+  // Skip back-filling. The deletedFiles collection will be deleted in a following migration.
+  // The projects.deletedFiles array will be purged as part of the later migration as well.
 }
 
 const rollback = async client => {}

@@ -33,7 +33,6 @@ addConnectionDrainer('mongodb', async () => {
 const internalDb = mongoClient.db()
 const db = {
   contacts: internalDb.collection('contacts'),
-  deletedFiles: internalDb.collection('deletedFiles'),
   deletedProjects: internalDb.collection('deletedProjects'),
   deletedSubscriptions: internalDb.collection('deletedSubscriptions'),
   deletedUsers: internalDb.collection('deletedUsers'),

@@ -324,19 +324,6 @@ async function undeleteProject(projectId, options = {}) {
     })
     restored.deletedDocs = []
   }
-  if (restored.deletedFiles && restored.deletedFiles.length > 0) {
-    filterDuplicateDeletedFilesInPlace(restored)
-    const deletedFiles = restored.deletedFiles.map(file => {
-      // break free from the model
-      file = file.toObject()
-
-      // add projectId
-      file.projectId = projectId
-      return file
-    })
-    await db.deletedFiles.insertMany(deletedFiles)
-    restored.deletedFiles = []
-  }
 
   // we can't use Mongoose to re-insert the project, as it won't
   // create a new document with an _id already specified. We need to
@@ -388,7 +375,6 @@ async function expireDeletedProject(projectId) {
       ),
       FilestoreHandler.promises.deleteProject(deletedProject.project._id),
       ChatApiHandler.promises.destroyProject(deletedProject.project._id),
-      hardDeleteDeletedFiles(deletedProject.project._id),
       ProjectAuditLogEntry.deleteMany({ projectId }),
       Modules.promises.hooks.fire('projectExpired', deletedProject.project._id),
     ])
@@ -408,32 +394,4 @@ async function expireDeletedProject(projectId) {
     logger.warn({ projectId, error }, 'error expiring deleted project')
     throw error
   }
-}
-
-function filterDuplicateDeletedFilesInPlace(project) {
-  const fileIds = new Set()
-  project.deletedFiles = project.deletedFiles.filter(file => {
-    const id = file._id.toString()
-    if (fileIds.has(id)) return false
-    fileIds.add(id)
-    return true
-  })
-}
-
-let deletedFilesProjectIdIndexExist
-async function doesDeletedFilesProjectIdIndexExist() {
-  if (typeof deletedFilesProjectIdIndexExist !== 'boolean') {
-    // Resolve this about once. No need for locking or retry handling.
-    deletedFilesProjectIdIndexExist =
-      await db.deletedFiles.indexExists('projectId_1')
-  }
-  return deletedFilesProjectIdIndexExist
-}
-
-async function hardDeleteDeletedFiles(projectId) {
-  if (!(await doesDeletedFilesProjectIdIndexExist())) {
-    // Running the deletion command w/o index would kill mongo performance
-    return
-  }
-  return db.deletedFiles.deleteMany({ projectId })
 }

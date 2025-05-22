@@ -35,7 +35,6 @@ const { tieringStorageClass } = config.get('backupPersistor')
 
 const projectsCollection = db.collection('projects')
 const deletedProjectsCollection = db.collection('deletedProjects')
-const deletedFilesCollection = db.collection('deletedFiles')
 
 const FILESTORE_PERSISTOR = ObjectPersistor({
   backend: 'gcs',
@@ -130,11 +129,8 @@ describe('back_fill_file_hash script', function () {
   const fileId7 = objectIdFromTime('2017-02-01T00:07:00Z')
   const fileId8 = objectIdFromTime('2017-02-01T00:08:00Z')
   const fileId9 = objectIdFromTime('2017-02-01T00:09:00Z')
-  const fileIdDeleted1 = objectIdFromTime('2017-03-01T00:01:00Z')
-  const fileIdDeleted2 = objectIdFromTime('2017-03-01T00:02:00Z')
-  const fileIdDeleted3 = objectIdFromTime('2017-03-01T00:03:00Z')
-  const fileIdDeleted4 = objectIdFromTime('2024-03-01T00:04:00Z')
-  const fileIdDeleted5 = objectIdFromTime('2024-03-01T00:05:00Z')
+  const fileId10 = objectIdFromTime('2017-02-01T00:10:00Z')
+  const fileId11 = objectIdFromTime('2017-02-01T00:11:00Z')
   const contentTextBlob0 = Buffer.from('Hello 0')
   const hashTextBlob0 = gitBlobHashBuffer(contentTextBlob0)
   const contentTextBlob1 = Buffer.from('Hello 1')
@@ -161,7 +157,6 @@ describe('back_fill_file_hash script', function () {
       hash: hashFile7,
       content: contentFile7,
     },
-    { projectId: projectId0, historyId: historyId0, fileId: fileIdDeleted5 },
     {
       projectId: projectId0,
       historyId: historyId0,
@@ -181,7 +176,6 @@ describe('back_fill_file_hash script', function () {
       content: contentTextBlob2,
     },
     { projectId: projectId1, historyId: historyId1, fileId: fileId1 },
-    { projectId: projectId1, historyId: historyId1, fileId: fileIdDeleted1 },
     {
       projectId: projectId2,
       historyId: historyId2,
@@ -189,22 +183,27 @@ describe('back_fill_file_hash script', function () {
       hasHash: true,
     },
     { projectId: projectId3, historyId: historyId3, fileId: fileId3 },
+    // fileId10 is dupe of fileId3, without a hash
+    {
+      projectId: projectId3,
+      historyId: historyId3,
+      fileId: fileId10,
+      content: Buffer.from(fileId3.toString()),
+      hash: gitBlobHash(fileId3),
+    },
+    // fileId11 is dupe of fileId3, but with a hash
+    {
+      projectId: projectId3,
+      historyId: historyId3,
+      fileId: fileId11,
+      content: Buffer.from(fileId3.toString()),
+      hash: gitBlobHash(fileId3),
+      hasHash: true,
+    },
     {
       projectId: projectIdDeleted0,
       historyId: historyIdDeleted0,
       fileId: fileId4,
-    },
-    {
-      projectId: projectIdDeleted0,
-      historyId: historyIdDeleted0,
-      fileId: fileIdDeleted2,
-    },
-    // { historyId: historyIdDeleted0, fileId:fileIdDeleted3 }, // fileIdDeleted3 is dupe of fileIdDeleted2
-    {
-      projectId: projectIdDeleted0,
-      historyId: historyIdDeleted0,
-      fileId: fileIdDeleted4,
-      hasHash: true,
     },
     {
       projectId: projectIdDeleted1,
@@ -233,10 +232,6 @@ describe('back_fill_file_hash script', function () {
       fileId4,
       fileId5,
       fileId6,
-      fileIdDeleted1,
-      fileIdDeleted2,
-      fileIdDeleted3,
-      fileIdDeleted4,
     }
     console.log({
       projectId0,
@@ -328,7 +323,11 @@ describe('back_fill_file_hash script', function () {
                 fileRefs: [],
                 folders: [
                   {
-                    fileRefs: [{ _id: fileId3 }],
+                    fileRefs: [
+                      { _id: fileId3 },
+                      { _id: fileId10 },
+                      { _id: fileId11, hash: gitBlobHash(fileId3) },
+                    ],
                     folders: [],
                   },
                 ],
@@ -446,17 +445,6 @@ describe('back_fill_file_hash script', function () {
         },
       },
     ])
-    await deletedFilesCollection.insertMany([
-      { _id: fileIdDeleted1, projectId: projectId1 },
-      { _id: fileIdDeleted2, projectId: projectIdDeleted0 },
-      { _id: fileIdDeleted3, projectId: projectIdDeleted0 },
-      {
-        _id: fileIdDeleted4,
-        projectId: projectIdDeleted0,
-        hash: gitBlobHash(fileIdDeleted4),
-      },
-      { _id: fileIdDeleted5, projectId: projectId0 },
-    ])
   }
 
   async function populateHistoryV1() {
@@ -501,11 +489,6 @@ describe('back_fill_file_hash script', function () {
     )
     await FILESTORE_PERSISTOR.sendStream(
       USER_FILES_BUCKET_NAME,
-      `${projectId0}/${fileIdDeleted5}`,
-      Stream.Readable.from([fileIdDeleted5.toString()])
-    )
-    await FILESTORE_PERSISTOR.sendStream(
-      USER_FILES_BUCKET_NAME,
       `${projectId1}/${fileId1}`,
       Stream.Readable.from([fileId1.toString()])
     )
@@ -521,6 +504,18 @@ describe('back_fill_file_hash script', function () {
     )
     await FILESTORE_PERSISTOR.sendStream(
       USER_FILES_BUCKET_NAME,
+      `${projectId3}/${fileId10}`,
+      // fileId10 is dupe of fileId3
+      Stream.Readable.from([fileId3.toString()])
+    )
+    await FILESTORE_PERSISTOR.sendStream(
+      USER_FILES_BUCKET_NAME,
+      `${projectId3}/${fileId11}`,
+      // fileId11 is dupe of fileId3
+      Stream.Readable.from([fileId3.toString()])
+    )
+    await FILESTORE_PERSISTOR.sendStream(
+      USER_FILES_BUCKET_NAME,
       `${projectIdDeleted0}/${fileId4}`,
       Stream.Readable.from([fileId4.toString()])
     )
@@ -528,27 +523,6 @@ describe('back_fill_file_hash script', function () {
       USER_FILES_BUCKET_NAME,
       `${projectIdDeleted1}/${fileId5}`,
       Stream.Readable.from([fileId5.toString()])
-    )
-    await FILESTORE_PERSISTOR.sendStream(
-      USER_FILES_BUCKET_NAME,
-      `${projectId1}/${fileIdDeleted1}`,
-      Stream.Readable.from([fileIdDeleted1.toString()])
-    )
-    await FILESTORE_PERSISTOR.sendStream(
-      USER_FILES_BUCKET_NAME,
-      `${projectIdDeleted0}/${fileIdDeleted2}`,
-      Stream.Readable.from([fileIdDeleted2.toString()])
-    )
-    await FILESTORE_PERSISTOR.sendStream(
-      USER_FILES_BUCKET_NAME,
-      `${projectIdDeleted0}/${fileIdDeleted3}`,
-      // same content as 2, deduplicate
-      Stream.Readable.from([fileIdDeleted2.toString()])
-    )
-    await FILESTORE_PERSISTOR.sendStream(
-      USER_FILES_BUCKET_NAME,
-      `${projectIdDeleted0}/${fileIdDeleted4}`,
-      Stream.Readable.from([fileIdDeleted4.toString()])
     )
     await FILESTORE_PERSISTOR.sendStream(
       USER_FILES_BUCKET_NAME,
@@ -579,7 +553,6 @@ describe('back_fill_file_hash script', function () {
           'storage/scripts/back_fill_file_hash.mjs',
           '--processNonDeletedProjects=true',
           '--processDeletedProjects=true',
-          '--processDeletedFiles=true',
           ...args,
         ],
         {
@@ -741,6 +714,8 @@ describe('back_fill_file_hash script', function () {
                       {
                         fileRefs: [
                           { _id: fileId3, hash: gitBlobHash(fileId3) },
+                          { _id: fileId10, hash: gitBlobHash(fileId3) },
+                          { _id: fileId11, hash: gitBlobHash(fileId3) },
                         ],
                         folders: [],
                       },
@@ -868,34 +843,6 @@ describe('back_fill_file_hash script', function () {
           },
         },
       ])
-      expect(await deletedFilesCollection.find({}).toArray()).to.deep.equal([
-        {
-          _id: fileIdDeleted1,
-          projectId: projectId1,
-          hash: gitBlobHash(fileIdDeleted1),
-        },
-        {
-          _id: fileIdDeleted2,
-          projectId: projectIdDeleted0,
-          hash: gitBlobHash(fileIdDeleted2),
-        },
-        {
-          _id: fileIdDeleted3,
-          projectId: projectIdDeleted0,
-          // uses the same content as fileIdDeleted2
-          hash: gitBlobHash(fileIdDeleted2),
-        },
-        {
-          _id: fileIdDeleted4,
-          projectId: projectIdDeleted0,
-          hash: gitBlobHash(fileIdDeleted4),
-        },
-        {
-          _id: fileIdDeleted5,
-          projectId: projectId0,
-          hash: gitBlobHash(fileIdDeleted5),
-        },
-      ])
       expect(
         (await backedUpBlobs.find({}, { sort: { _id: 1 } }).toArray()).map(
           entry => {
@@ -910,7 +857,6 @@ describe('back_fill_file_hash script', function () {
           blobs: [
             binaryForGitBlobHash(gitBlobHash(fileId0)),
             binaryForGitBlobHash(hashFile7),
-            binaryForGitBlobHash(gitBlobHash(fileIdDeleted5)),
             binaryForGitBlobHash(hashTextBlob0),
           ].sort(),
         },
@@ -918,7 +864,6 @@ describe('back_fill_file_hash script', function () {
           _id: projectId1,
           blobs: [
             binaryForGitBlobHash(gitBlobHash(fileId1)),
-            binaryForGitBlobHash(gitBlobHash(fileIdDeleted1)),
             binaryForGitBlobHash(hashTextBlob1),
           ].sort(),
         },
@@ -934,16 +879,7 @@ describe('back_fill_file_hash script', function () {
         },
         {
           _id: projectIdDeleted0,
-          blobs: [
-            binaryForGitBlobHash(gitBlobHash(fileId4)),
-            binaryForGitBlobHash(gitBlobHash(fileIdDeleted2)),
-          ]
-            .concat(
-              processHashedFiles
-                ? [binaryForGitBlobHash(gitBlobHash(fileIdDeleted4))]
-                : []
-            )
-            .sort(),
+          blobs: [binaryForGitBlobHash(gitBlobHash(fileId4))].sort(),
         },
         {
           _id: projectId3,
@@ -971,11 +907,15 @@ describe('back_fill_file_hash script', function () {
       expect(tieringStorageClass).to.exist
       const blobs = await listS3Bucket(projectBlobsBucket, tieringStorageClass)
       expect(blobs.sort()).to.deep.equal(
-        writtenBlobs
-          .map(({ historyId, fileId, hash }) =>
-            makeProjectKey(historyId, hash || gitBlobHash(fileId))
+        Array.from(
+          new Set(
+            writtenBlobs
+              .map(({ historyId, fileId, hash }) =>
+                makeProjectKey(historyId, hash || gitBlobHash(fileId))
+              )
+              .sort()
           )
-          .sort()
+        )
       )
       for (let { historyId, fileId, hash, content } of writtenBlobs) {
         hash = hash || gitBlobHash(fileId.toString())
@@ -1037,15 +977,15 @@ describe('back_fill_file_hash script', function () {
         ...STATS_ALL_ZERO,
         // We still need to iterate over all the projects and blobs.
         projects: 10,
-        blobs: 13,
-        backedUpBlobs: 13,
+        blobs: 10,
+        backedUpBlobs: 10,
         badFileTrees: 4,
       }
       if (processHashedFiles) {
         stats = sumStats(stats, {
           ...STATS_ALL_ZERO,
-          blobs: 3,
-          backedUpBlobs: 3,
+          blobs: 2,
+          backedUpBlobs: 2,
         })
       }
       expect(rerun.stats).deep.equal(stats)
@@ -1101,7 +1041,7 @@ describe('back_fill_file_hash script', function () {
     blobs: 2,
     backedUpBlobs: 0,
     filesWithHash: 0,
-    filesWithoutHash: 7,
+    filesWithoutHash: 5,
     filesDuplicated: 1,
     filesRetries: 0,
     filesFailed: 0,
@@ -1112,24 +1052,24 @@ describe('back_fill_file_hash script', function () {
     projectHardDeleted: 0,
     fileHardDeleted: 0,
     badFileTrees: 0,
-    mongoUpdates: 6,
+    mongoUpdates: 4,
     deduplicatedWriteToAWSLocalCount: 0,
     deduplicatedWriteToAWSLocalEgress: 0,
     deduplicatedWriteToAWSRemoteCount: 0,
     deduplicatedWriteToAWSRemoteEgress: 0,
-    readFromGCSCount: 8,
-    readFromGCSIngress: 4000134,
-    writeToAWSCount: 7,
-    writeToAWSEgress: 4086,
-    writeToGCSCount: 5,
-    writeToGCSEgress: 4000096,
+    readFromGCSCount: 6,
+    readFromGCSIngress: 4000086,
+    writeToAWSCount: 5,
+    writeToAWSEgress: 4026,
+    writeToGCSCount: 3,
+    writeToGCSEgress: 4000048,
   }
   const STATS_UP_FROM_PROJECT1_ONWARD = {
     projects: 8,
     blobs: 2,
     backedUpBlobs: 0,
     filesWithHash: 0,
-    filesWithoutHash: 5,
+    filesWithoutHash: 4,
     filesDuplicated: 0,
     filesRetries: 0,
     filesFailed: 0,
@@ -1140,28 +1080,28 @@ describe('back_fill_file_hash script', function () {
     projectHardDeleted: 0,
     fileHardDeleted: 0,
     badFileTrees: 4,
-    mongoUpdates: 10,
+    mongoUpdates: 8,
     deduplicatedWriteToAWSLocalCount: 1,
     deduplicatedWriteToAWSLocalEgress: 30,
     deduplicatedWriteToAWSRemoteCount: 0,
     deduplicatedWriteToAWSRemoteEgress: 0,
-    readFromGCSCount: 7,
-    readFromGCSIngress: 134,
-    writeToAWSCount: 6,
-    writeToAWSEgress: 173,
-    writeToGCSCount: 4,
-    writeToGCSEgress: 96,
+    readFromGCSCount: 6,
+    readFromGCSIngress: 110,
+    writeToAWSCount: 5,
+    writeToAWSEgress: 143,
+    writeToGCSCount: 3,
+    writeToGCSEgress: 72,
   }
   const STATS_FILES_HASHED_EXTRA = {
     ...STATS_ALL_ZERO,
-    filesWithHash: 3,
-    mongoUpdates: 1,
-    readFromGCSCount: 3,
-    readFromGCSIngress: 72,
-    writeToAWSCount: 3,
-    writeToAWSEgress: 89,
-    writeToGCSCount: 3,
-    writeToGCSEgress: 72,
+    filesWithHash: 2,
+    mongoUpdates: 2,
+    readFromGCSCount: 2,
+    readFromGCSIngress: 48,
+    writeToAWSCount: 2,
+    writeToAWSEgress: 60,
+    writeToGCSCount: 2,
+    writeToGCSEgress: 48,
   }
 
   function sumStats(a, b) {
@@ -1331,10 +1271,9 @@ describe('back_fill_file_hash script', function () {
       expect(output2.stats).deep.equal({
         ...STATS_FILES_HASHED_EXTRA,
         projects: 10,
-        blobs: 13,
-        backedUpBlobs: 13,
+        blobs: 10,
+        backedUpBlobs: 10,
         badFileTrees: 4,
-        mongoUpdates: 3,
       })
     })
     commonAssertions(true)
@@ -1376,7 +1315,15 @@ describe('back_fill_file_hash script', function () {
     })
     it('should print stats', function () {
       expect(output.stats).deep.equal(
-        sumStats(STATS_ALL, STATS_FILES_HASHED_EXTRA)
+        sumStats(STATS_ALL, {
+          ...STATS_FILES_HASHED_EXTRA,
+          readFromGCSCount: 3,
+          readFromGCSIngress: 72,
+          deduplicatedWriteToAWSLocalCount: 1,
+          deduplicatedWriteToAWSLocalEgress: 30,
+          mongoUpdates: 1,
+          filesWithHash: 3,
+        })
       )
     })
     commonAssertions(true)

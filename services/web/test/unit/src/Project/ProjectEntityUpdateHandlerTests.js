@@ -133,7 +133,6 @@ describe('ProjectEntityUpdateHandler', function () {
         addFolder: sinon.stub(),
         _confirmFolder: sinon.stub(),
         _putElement: sinon.stub(),
-        _insertDeletedFileReference: sinon.stub(),
         replaceFileWithNew: sinon.stub(),
         mkdirp: sinon.stub(),
         moveEntity: sinon.stub(),
@@ -2572,7 +2571,6 @@ describe('ProjectEntityUpdateHandler', function () {
       this.ProjectEntityUpdateHandler.promises.unsetRootDoc = sinon
         .stub()
         .resolves()
-      this.ProjectEntityMongoUpdateHandler.promises._insertDeletedFileReference.resolves()
     })
 
     describe('a file', function () {
@@ -2590,12 +2588,6 @@ describe('ProjectEntityUpdateHandler', function () {
             userId,
             this.source
           )
-      })
-
-      it('should insert the file into the deletedFiles collection', function () {
-        this.ProjectEntityMongoUpdateHandler.promises._insertDeletedFileReference
-          .calledWith(this.project._id, this.entity)
-          .should.equal(true)
       })
 
       it('should not delete the file from FileStoreHandler', function () {
@@ -2696,7 +2688,6 @@ describe('ProjectEntityUpdateHandler', function () {
         }
 
         this.ProjectEntityUpdateHandler._cleanUpDoc = sinon.stub().resolves()
-        this.ProjectEntityUpdateHandler._cleanUpFile = sinon.stub().resolves()
         const path = '/folder'
         this.newProject = 'new-project'
         this.subtreeListing =
@@ -2709,17 +2700,6 @@ describe('ProjectEntityUpdateHandler', function () {
             userId,
             this.source
           )
-      })
-
-      it('should clean up all sub files', function () {
-        this.ProjectEntityUpdateHandler._cleanUpFile.should.have.been.calledWith(
-          this.project,
-          this.file1
-        )
-        this.ProjectEntityUpdateHandler._cleanUpFile.should.have.been.calledWith(
-          this.project,
-          this.file2
-        )
       })
 
       it('should clean up all sub docs', function () {

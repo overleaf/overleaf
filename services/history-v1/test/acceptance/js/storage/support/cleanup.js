@@ -17,7 +17,6 @@ const MONGO_COLLECTIONS = [
   'projectHistoryChunks',
 
   // back_fill_file_hash.test.mjs
-  'deletedFiles',
   'deletedProjects',
   'projects',
   'projectHistoryBackedUpBlobs',

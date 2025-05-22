@@ -1,4 +1,5 @@
 import Helpers from './lib/helpers.mjs'
+import { getCollectionInternal } from '../app/src/infrastructure/mongodb.js'
 
 const tags = ['server-ce', 'server-pro', 'saas']
 
@@ -11,14 +12,17 @@ const indexes = [
   },
 ]
 
-const migrate = async client => {
-  const { db } = client
-  await Helpers.addIndexesToCollection(db.deletedFiles, indexes)
+async function getCollection() {
+  // NOTE: The deletedFiles collection is not available to the application as it has been retired. Fetch it here.
+  return await getCollectionInternal('deletedFiles')
 }
 
-const rollback = async client => {
-  const { db } = client
-  await Helpers.dropIndexesFromCollection(db.deletedFiles, indexes)
+const migrate = async () => {
+  await Helpers.addIndexesToCollection(await getCollection(), indexes)
+}
+
+const rollback = async () => {
+  await Helpers.dropIndexesFromCollection(await getCollection(), indexes)
 }
 
 export default {

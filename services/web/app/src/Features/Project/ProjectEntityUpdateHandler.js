@@ -1627,8 +1627,6 @@ const ProjectEntityUpdateHandler = {
           entry.path,
           userId
         )
-      } else if (entry.type === 'file') {
-        await ProjectEntityUpdateHandler._cleanUpFile(project, entry.entity)
       }
     }
     return subtreeListing
@@ -1678,13 +1676,6 @@ const ProjectEntityUpdateHandler = {
     await DocstoreManager.promises.deleteDoc(projectId, docId, name, deletedAt)
 
     return await DocumentUpdaterHandler.promises.deleteDoc(projectId, docId)
-  },
-
-  async _cleanUpFile(project, file) {
-    return await ProjectEntityMongoUpdateHandler.promises._insertDeletedFileReference(
-      project._id,
-      file
-    )
   },
 }
 

@@ -99,10 +99,6 @@ describe('ProjectDeleter', function () {
     }
 
     this.db = {
-      deletedFiles: {
-        indexExists: sinon.stub().resolves(false),
-        deleteMany: sinon.stub(),
-      },
       projects: {
         insertOne: sinon.stub().resolves(),
       },
