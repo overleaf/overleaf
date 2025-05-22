@@ -9,6 +9,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 import { app } from '../../../../app/js/server.js'
+import { mongoClient } from '../../../../app/js/mongodb.js'
 
 let running = false
 let initing = false
@@ -29,13 +30,16 @@ export function ensureRunning(callback) {
     if (error != null) {
       throw error
     }
-    running = true
-    return (() => {
-      const result = []
-      for (callback of Array.from(callbacks)) {
-        result.push(callback())
+
+    // Wait for mongo
+    mongoClient.connect(error => {
+      if (error != null) {
+        throw error
       }
-      return result
-    })()
+      running = true
+      for (callback of Array.from(callbacks)) {
+        callback()
+      }
+    })
   })
 }

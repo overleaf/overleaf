@@ -11,6 +11,7 @@ import async from 'async'
 import logger from '@overleaf/logger'
 import OError from '@overleaf/o-error'
 import metrics from '@overleaf/metrics'
+import Settings from '@overleaf/settings'
 import _ from 'lodash'
 import * as RedisManager from './RedisManager.js'
 import * as UpdatesProcessor from './UpdatesProcessor.js'
@@ -36,6 +37,13 @@ export function flushIfOld(projectId, cutoffTime, callback) {
           'flushing old project'
         )
         metrics.inc('flush-old-updates', 1, { status: 'flushed' })
+        return UpdatesProcessor.processUpdatesForProject(projectId, callback)
+      } else if (Settings.shortHistoryQueues.includes(projectId)) {
+        logger.debug(
+          { projectId, firstOpTimestamp, cutoffTime },
+          'flushing project with short queue'
+        )
+        metrics.inc('flush-old-updates', 1, { status: 'short-queue' })
         return UpdatesProcessor.processUpdatesForProject(projectId, callback)
       } else {
         metrics.inc('flush-old-updates', 1, { status: 'skipped' })

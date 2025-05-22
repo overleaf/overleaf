@@ -62,6 +62,7 @@ const HistoryManager = {
     // record updates for project history
     if (
       HistoryManager.shouldFlushHistoryOps(
+        projectId,
         projectOpsLength,
         ops.length,
         HistoryManager.FLUSH_PROJECT_EVERY_N_OPS
@@ -77,7 +78,8 @@ const HistoryManager = {
     }
   },
 
-  shouldFlushHistoryOps(length, opsLength, threshold) {
+  shouldFlushHistoryOps(projectId, length, opsLength, threshold) {
+    if (Settings.shortHistoryQueues.includes(projectId)) return true
     if (!length) {
       return false
     } // don't flush unless we know the length

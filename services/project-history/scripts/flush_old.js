@@ -124,11 +124,14 @@ async function main() {
       .map((projectId, idx) => {
         return { projectId, timestamp: timestamps[idx] }
       })
-      .filter(({ timestamp }) => {
+      .filter(({ projectId, timestamp }) => {
         if (!timestamp) {
           nullCount++
+          return true // Unknown age
         }
-        return timestamp ? olderThan(maxAge, timestamp) : true
+        if (olderThan(maxAge, timestamp)) return true // Older than threshold
+        if (Settings.shortHistoryQueues.includes(projectId)) return true // Short queue
+        return false // Do not flush
       })
     collectedProjects.push(...newProjects)
   }

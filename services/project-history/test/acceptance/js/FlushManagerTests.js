@@ -6,6 +6,7 @@ import assert from 'node:assert'
 import mongodb from 'mongodb-legacy'
 import * as ProjectHistoryClient from './helpers/ProjectHistoryClient.js'
 import * as ProjectHistoryApp from './helpers/ProjectHistoryApp.js'
+import Settings from '@overleaf/settings'
 const { ObjectId } = mongodb
 
 const MockHistoryStore = () => nock('http://127.0.0.1:3100')
@@ -127,7 +128,7 @@ describe('Flushing old queues', function () {
                 'made calls to history service to store updates in the background'
               )
               done()
-            }, 100)
+            }, 1_000)
           }
         )
       })
@@ -178,6 +179,88 @@ describe('Flushing old queues', function () {
               'did not make calls to history service to store updates'
             )
             done()
+          }
+        )
+      })
+    })
+
+    describe('when the update is newer than the cutoff and project has short queue', function () {
+      beforeEach(function () {
+        Settings.shortHistoryQueues.push(this.projectId)
+      })
+      afterEach(function () {
+        Settings.shortHistoryQueues.length = 0
+      })
+      beforeEach(function (done) {
+        this.flushCall = MockHistoryStore()
+          .put(
+            `/api/projects/${historyId}/blobs/0a207c060e61f3b88eaee0a8cd0696f46fb155eb`
+          )
+          .reply(201)
+          .post(`/api/projects/${historyId}/legacy_changes?end_version=0`)
+          .reply(200)
+        const update = {
+          pathname: '/main.tex',
+          docLines: 'a\nb',
+          doc: this.docId,
+          meta: { user_id: this.user_id, ts: new Date() },
+        }
+        async.series(
+          [
+            cb =>
+              ProjectHistoryClient.pushRawUpdate(this.projectId, update, cb),
+            cb =>
+              ProjectHistoryClient.setFirstOpTimestamp(
+                this.projectId,
+                Date.now() - 60 * 1000,
+                cb
+              ),
+          ],
+          done
+        )
+      })
+
+      it('flushes the project history queue', function (done) {
+        request.post(
+          {
+            url: `http://127.0.0.1:3054/flush/old?maxAge=${3 * 3600}`,
+          },
+          (error, res, body) => {
+            if (error) {
+              return done(error)
+            }
+            expect(res.statusCode).to.equal(200)
+            assert(
+              this.flushCall.isDone(),
+              'made calls to history service to store updates'
+            )
+            done()
+          }
+        )
+      })
+
+      it('flushes the project history queue in the background when requested', function (done) {
+        request.post(
+          {
+            url: `http://127.0.0.1:3054/flush/old?maxAge=${3 * 3600}&background=1`,
+          },
+          (error, res, body) => {
+            if (error) {
+              return done(error)
+            }
+            expect(res.statusCode).to.equal(200)
+            expect(body).to.equal('{"message":"running flush in background"}')
+            assert(
+              !this.flushCall.isDone(),
+              'did not make calls to history service to store updates in the foreground'
+            )
+            setTimeout(() => {
+              assert(
+                this.flushCall.isDone(),
+                'made calls to history service to store updates in the background'
+              )
+              done()
+            }, 1_000)
           }
         )
       })
