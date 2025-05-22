@@ -294,7 +294,7 @@ describe('admin panel', function () {
 
       cy.log('navigate to thrashed projects and delete the project')
       cy.get('.project-list-sidebar-scroll').within(() => {
-        cy.findByText('Trashed Projects').click()
+        cy.findByText('Trashed projects').click()
       })
       findProjectRow(deletedProjectName).within(() =>
         cy.findByRole('button', { name: 'Delete' }).click()
@@ -319,7 +319,7 @@ describe('admin panel', function () {
       login(user1)
       cy.visit('/project')
       cy.get('.project-list-sidebar-scroll').within(() => {
-        cy.findByText('Trashed Projects').click()
+        cy.findByText('Trashed projects').click()
       })
       cy.findByText(`${deletedProjectName} (Restored)`)
     })

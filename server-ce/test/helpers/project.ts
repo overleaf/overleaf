@@ -5,11 +5,11 @@ import { v4 as uuid } from 'uuid'
 export function createProject(
   name: string,
   {
-    type = 'Blank Project',
+    type = 'Blank project',
     newProjectButtonMatcher = /new project/i,
     open = true,
   }: {
-    type?: 'Blank Project' | 'Example Project'
+    type?: 'Blank project' | 'Example project'
     newProjectButtonMatcher?: RegExp
     open?: boolean
   } = {}
@@ -37,7 +37,7 @@ export function createProject(
   }
   cy.findAllByRole('button').contains(newProjectButtonMatcher).click()
   // FIXME: This should only look in the left menu
-  cy.findAllByText(type).first().click()
+  cy.findAllByText(new RegExp(type, 'i')).first().click()
   cy.findByRole('dialog').within(() => {
     cy.get('input').type(name)
     cy.findByText('Create').click()

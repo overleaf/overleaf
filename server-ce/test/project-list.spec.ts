@@ -32,7 +32,7 @@ describe('Project List', () => {
 
     before(() => {
       login(REGULAR_USER)
-      createProject(projectName, { type: 'Example Project', open: false })
+      createProject(projectName, { type: 'Example project', open: false })
     })
     beforeEach(function () {
       login(REGULAR_USER)

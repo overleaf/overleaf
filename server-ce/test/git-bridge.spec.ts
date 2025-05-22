@@ -46,7 +46,7 @@ describe('git-bridge', function () {
 
     function maybeClearAllTokens() {
       cy.visit('/user/settings')
-      cy.findByText('Git Integration')
+      cy.findByText('Git integration')
       cy.get('button')
         .contains(/Generate token|Add another token/)
         .then(btn => {
@@ -63,7 +63,7 @@ describe('git-bridge', function () {
     it('should render the git-bridge UI in the settings', () => {
       maybeClearAllTokens()
       cy.visit('/user/settings')
-      cy.findByText('Git Integration')
+      cy.findByText('Git integration')
       cy.get('button').contains('Generate token').click()
       cy.get('code')
         .contains(/olp_[a-zA-Z0-9]{16}/)
@@ -107,7 +107,7 @@ describe('git-bridge', function () {
           cy.get('code').contains(`git clone ${gitURL(id.toString())}`)
         })
         cy.findByText('Generate token').should('not.exist')
-        cy.findByText(/generate a new one in Account Settings/)
+        cy.findByText(/generate a new one in Account settings/i)
         cy.findByText('Go to settings')
           .should('have.attr', 'target', '_blank')
           .and('have.attr', 'href', '/user/settings')
@@ -365,7 +365,7 @@ Hello world
     it('should not render the git-bridge UI in the settings', () => {
       login('user@example.com')
       cy.visit('/user/settings')
-      cy.findByText('Git Integration').should('not.exist')
+      cy.findByText('Git integration').should('not.exist')
     })
     it('should not render the git-bridge UI in the editor', function () {
       login('user@example.com')

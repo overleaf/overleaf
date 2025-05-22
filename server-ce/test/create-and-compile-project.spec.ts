@@ -51,7 +51,7 @@ describe('Project creation and compilation', function () {
     login('user@example.com')
 
     createProject(sourceProjectName, {
-      type: 'Example Project',
+      type: 'Example project',
       open: false,
     }).as('sourceProjectId')
     createProject(targetProjectName)
@@ -79,7 +79,7 @@ describe('Project creation and compilation', function () {
     const targetProjectName = `${sourceProjectName}-target`
     login('user@example.com')
     createProject(sourceProjectName, {
-      type: 'Example Project',
+      type: 'Example project',
       open: false,
     }).as('sourceProjectId')
     createProject(targetProjectName).as('targetProjectId')

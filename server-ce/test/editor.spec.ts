@@ -22,7 +22,7 @@ describe('editor', () => {
   beforeWithReRunOnTestRetry(function () {
     projectName = `project-${uuid()}`
     login('user@example.com')
-    createProject(projectName, { type: 'Example Project', open: false }).then(
+    createProject(projectName, { type: 'Example project', open: false }).then(
       id => (projectId = id)
     )
     ;({ recompile, waitForCompileRateLimitCoolOff } =
@@ -62,7 +62,7 @@ describe('editor', () => {
 
       cy.log('add word to dictionary')
       cy.get('.ol-cm-spelling-error').contains(word).rightclick()
-      cy.findByText('Add to Dictionary').click()
+      cy.findByText('Add to dictionary').click()
       cy.get('.ol-cm-spelling-error').should('not.exist')
 
       cy.log('remove word from dictionary')
