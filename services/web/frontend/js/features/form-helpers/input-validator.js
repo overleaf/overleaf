@@ -1,9 +1,25 @@
+import { isBootstrap5 } from '@/features/utils/bootstrap-5'
+import createIcon from '@/features/form-helpers/create-icon'
+
 export default function inputValidator(inputEl) {
   const messageEl = document.createElement('div')
   messageEl.className =
     inputEl.getAttribute('data-ol-validation-message-classes') ||
-    'small text-danger mt-2'
+    'small text-danger mt-2 form-text'
   messageEl.hidden = true
+
+  const messageInnerEl = messageEl.appendChild(document.createElement('span'))
+  messageInnerEl.className = 'form-text-inner'
+
+  const messageTextNode = document.createTextNode('')
+
+  // In Bootstrap 5, add an icon
+  if (isBootstrap5()) {
+    const iconEl = createIcon('error')
+    messageInnerEl.append(iconEl)
+  }
+  messageInnerEl.append(messageTextNode)
+
   inputEl.insertAdjacentElement('afterend', messageEl)
 
   // Hide messages until the user leaves the input field or submits the form.
@@ -54,7 +70,7 @@ export default function inputValidator(inputEl) {
       // Require another blur before displaying errors again.
       canDisplayErrorMessages = false
     } else {
-      messageEl.textContent = inputEl.validationMessage
+      messageTextNode.data = inputEl.validationMessage
       messageEl.hidden = false
     }
   }

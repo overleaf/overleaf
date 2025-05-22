@@ -4,11 +4,12 @@ mixin formMessages()
 		role="alert"
 	)
 
-mixin formMessagesNewStyle()
+mixin formMessagesNewStyle(extraClass = 'form-messages-bottom-margin')
+	- const attrs = extraClass ? { 'class': extraClass }  : {}
 	div(
 		data-ol-form-messages-new-style='',
 		role="alert"
-	)
+	)&attributes(attrs)
 
 mixin customFormMessage(key, kind)
 	if kind === 'success'
@@ -36,20 +37,23 @@ mixin customFormMessage(key, kind)
 		)
 			block
 
-mixin customFormMessageNewStyle(key, kind)
+mixin customFormMessageNewStyle(key, kind, extraClass = 'mb-3')
+	- extraClass = extraClass ? ' ' + extraClass : ''
 	if kind === 'success'
-		div.notification.notification-type-success(
-				hidden,
-				data-ol-custom-form-message=key,
-				role="alert"
-				aria-live="polite"
-			)
+		div(
+			class="notification notification-type-success" + extraClass,
+			hidden,
+			data-ol-custom-form-message=key,
+			role="alert"
+			aria-live="polite"
+		)
 			div.notification-icon
 				span.material-symbols(aria-hidden="true") check_circle
 			div.notification-content.text-left
 				block
 	else if kind === 'danger'
-		div.notification.notification-type-error(
+		div(
+			class="notification notification-type-error" + extraClass,
 			hidden,
 			data-ol-custom-form-message=key,
 			role="alert"
@@ -60,12 +64,13 @@ mixin customFormMessageNewStyle(key, kind)
 			div.notification-content.text-left
 				block
 	else
-		div.notification.notification-type-warning(
-				hidden,
-				data-ol-custom-form-message=key,
-				role="alert"
-				aria-live="polite"
-			)
+		div(
+			class="notification notification-type-warning" + extraClass,
+			hidden,
+			data-ol-custom-form-message=key,
+			role="alert"
+			aria-live="polite"
+		)
 			div.notification-icon
 				span.material-symbols(aria-hidden="true") warning
 			div.notification-content.text-left

@@ -257,3 +257,8 @@
     }
   }
 }
+
+// Only apply bottom margin to form messages when it is non-empty
+.form-messages-bottom-margin > :last-child {
+  margin-bottom: var(--spacing-06);
+}

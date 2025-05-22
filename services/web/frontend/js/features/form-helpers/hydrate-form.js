@@ -4,6 +4,7 @@ import { canSkipCaptcha, validateCaptchaV2 } from './captcha'
 import inputValidator from './input-validator'
 import { disableElement, enableElement } from '../utils/disableElement'
 import { isBootstrap5 } from '@/features/utils/bootstrap-5'
+import createIcon from '@/features/form-helpers/create-icon'
 
 // Form helper(s) to handle:
 // - Attaching to the relevant form elements
@@ -164,10 +165,7 @@ function createNotificationFromMessageBS5(message) {
   if (materialIcon) {
     const iconEl = document.createElement('div')
     iconEl.className = 'notification-icon'
-    const iconSpan = document.createElement('span')
-    iconSpan.className = 'material-symbols'
-    iconSpan.setAttribute('aria-hidden', 'true')
-    iconSpan.textContent = materialIcon
+    const iconSpan = createIcon(materialIcon)
     iconEl.append(iconSpan)
     messageEl.append(iconEl)
   }
@@ -315,10 +313,9 @@ function showMessagesNewStyle(formEl, messageBag) {
       }
 
       // create the left icon
-      const icon = document.createElement('span')
-      icon.className = 'material-symbols'
-      icon.setAttribute('aria-hidden', 'true')
-      icon.innerText = message.type === 'error' ? 'error' : 'check_circle'
+      const icon = createIcon(
+        message.type === 'error' ? 'error' : 'check_circle'
+      )
       const messageIcon = document.createElement('div')
       messageIcon.className = 'notification-icon'
       messageIcon.appendChild(icon)
