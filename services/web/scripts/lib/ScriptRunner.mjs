@@ -1,23 +1,28 @@
 import { ScriptLog } from '../../app/src/models/ScriptLog.mjs'
 import Settings from '@overleaf/settings'
 
+const UNKNOWN = 'unknown'
+
 async function beforeScriptExecution(canonicalName, vars, scriptPath) {
   let log = new ScriptLog({
     canonicalName,
     filePathAtVersion: scriptPath,
-    podName: process.env.OL_POD_NAME,
-    username: process.env.OL_USERNAME,
-    imageVersion: process.env.OL_IMAGE_VERSION,
+    podName: process.env.OL_POD_NAME ?? UNKNOWN,
+    username: process.env.OL_USERNAME ?? UNKNOWN,
+    imageVersion: process.env.OL_IMAGE_VERSION ?? UNKNOWN,
     vars,
   })
   log = await log.save()
-  console.log(
-    '\n==================================' +
-      '\n✨ Your script is running!' +
-      '\n📊 Track progress at:' +
-      `\n${Settings.adminUrl}/admin/script-log/${log._id}` +
-      '\n==================================\n'
-  )
+  // Print Script Log link if ran by a user
+  if (process.env.OL_USERNAME) {
+    console.log(
+      '\n==================================' +
+        '\n✨ Your script is running!' +
+        '\n📊 Track progress at:' +
+        `\n${Settings.adminUrl}/admin/script-log/${log._id}` +
+        '\n==================================\n'
+    )
+  }
   return log._id
 }
 

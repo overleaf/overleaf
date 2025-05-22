@@ -1,5 +1,6 @@
 import SAMLUserIdMigrationHandler from '../modules/saas-authentication/app/src/SAML/SAMLUserIdMigrationHandler.mjs'
 import { ensureMongoTimeout } from './helpers/env_variable_helper.mjs'
+import { scriptRunner } from './lib/ScriptRunner.mjs'
 
 ensureMongoTimeout(300000)
 
@@ -30,7 +31,7 @@ async function main() {
 }
 
 try {
-  await main()
+  await scriptRunner(main)
 } catch (error) {
   console.error(error)
   process.exit(1)

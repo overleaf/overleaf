@@ -7,6 +7,7 @@ import {
 import _ from 'lodash'
 import LRUCache from 'lru-cache'
 import { fileURLToPath } from 'node:url'
+import { scriptRunner } from './lib/ScriptRunner.mjs'
 
 const { ObjectId } = mongodb
 const sleep = promisify(setTimeout)
@@ -151,7 +152,7 @@ export default main
 
 if (fileURLToPath(import.meta.url) === process.argv[1]) {
   try {
-    await main()
+    await scriptRunner(async () => await main())
     console.error('Done.')
     process.exit(0)
   } catch (error) {

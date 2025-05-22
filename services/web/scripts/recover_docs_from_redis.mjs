@@ -8,6 +8,7 @@ import ProjectEntityRestoreHandler from '../app/src/Features/Project/ProjectEnti
 import RedisWrapper from '@overleaf/redis-wrapper'
 import Settings from '@overleaf/settings'
 import logger from '@overleaf/logger'
+import { scriptRunner } from './lib/ScriptRunner.mjs'
 const opts = parseArgs()
 const redis = RedisWrapper.createClient(Settings.redis.web)
 
@@ -173,7 +174,7 @@ async function deleteDocFromRedis(projectId, docId) {
 }
 
 try {
-  await main()
+  await scriptRunner(main)
   process.exit(0)
 } catch (error) {
   console.error(error)

@@ -1,6 +1,7 @@
 import mongodb from 'mongodb-legacy'
 import { db } from '../app/src/infrastructure/mongodb.js'
 import DocumentUpdaterHandler from '../app/src/Features/DocumentUpdater/DocumentUpdaterHandler.js'
+import { scriptRunner } from './lib/ScriptRunner.mjs'
 
 const { ObjectId } = mongodb
 const PROJECT_ID = process.env.PROJECT_ID
@@ -67,7 +68,7 @@ function getDocument() {
 }
 
 try {
-  await main()
+  await scriptRunner(main)
   console.error('Done.')
   process.exit(0)
 } catch (error) {

@@ -8,6 +8,7 @@ import fs from 'node:fs/promises'
 import * as csv from 'csv'
 import { promisify } from 'node:util'
 import _ from 'lodash'
+import { scriptRunner } from './lib/ScriptRunner.mjs'
 
 const CSV_FILENAME = '/tmp/remove_unconfirmed_emails.csv'
 /**
@@ -38,7 +39,7 @@ const { generate, consume, commit, help } = minimist(process.argv.slice(2), {
   default: { generate: false, consume: false, commit: false },
 })
 
-async function generateCsvFile() {
+async function generateCsvFile(trackProgress) {
   console.time('generate_csv')
 
   let processedUsersCount = 0
@@ -92,7 +93,9 @@ async function generateCsvFile() {
         totalEmailsToRemove += unconfirmedSecondaries.length
       }
     },
-    { _id: 1, signUpDate: 1, emails: 1, email: 1 }
+    { _id: 1, signUpDate: 1, emails: 1, email: 1 },
+    undefined,
+    { trackProgress }
   )
 
   const csvContent = await stringifyAsync(records)
@@ -226,7 +229,7 @@ async function consumeCsvFile() {
   console.log()
 }
 
-async function main() {
+async function main(trackProgress) {
   if (help) {
     return usage()
   }
@@ -247,14 +250,14 @@ async function main() {
   }
 
   if (generate) {
-    await generateCsvFile()
+    await generateCsvFile(trackProgress)
   } else if (consume) {
     await consumeCsvFile()
   }
 }
 
 try {
-  await main()
+  await scriptRunner(main)
   process.exit(0)
 } catch (error) {
   console.error(error)

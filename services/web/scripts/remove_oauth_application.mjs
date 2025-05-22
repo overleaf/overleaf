@@ -1,6 +1,7 @@
 import { OauthApplication } from '../app/src/models/OauthApplication.js'
 import parseArgs from 'minimist'
 import OError from '@overleaf/o-error'
+import { scriptRunner } from './lib/ScriptRunner.mjs'
 
 async function _removeOauthApplication(appId) {
   if (!appId) {
@@ -24,7 +25,7 @@ async function main() {
 }
 
 try {
-  await main()
+  await scriptRunner(main)
   console.log('Done')
   process.exit(0)
 } catch (error) {

@@ -3,6 +3,7 @@ import ChatApiHandler from '../app/src/Features/Chat/ChatApiHandler.js'
 import DocstoreManager from '../app/src/Features/Docstore/DocstoreManager.js'
 import DocumentUpdaterHandler from '../app/src/Features/DocumentUpdater/DocumentUpdaterHandler.js'
 import { promiseMapWithLimit } from '@overleaf/promise-utils'
+import { scriptRunner } from './lib/ScriptRunner.mjs'
 
 const WRITE_CONCURRENCY = parseInt(process.env.WRITE_CONCURRENCY, 10) || 10
 
@@ -43,7 +44,7 @@ async function main() {
 }
 
 try {
-  await main()
+  await scriptRunner(main)
   console.log('Done.')
   process.exit(0)
 } catch (error) {

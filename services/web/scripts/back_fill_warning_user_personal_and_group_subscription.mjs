@@ -1,6 +1,7 @@
 import NotificationsBuilder from '../app/src/Features/Notifications/NotificationsBuilder.js'
 import { db } from '../app/src/infrastructure/mongodb.js'
 import { batchedUpdate } from '@overleaf/mongo-utils/batchedUpdate.js'
+import { scriptRunner } from './lib/ScriptRunner.mjs'
 
 const DRY_RUN = !process.argv.includes('--dry-run=false')
 
@@ -55,14 +56,23 @@ async function processBatch(groupSubscriptionsBatch) {
   }
 }
 
-async function main() {
-  await batchedUpdate(db.subscriptions, { groupPlan: true }, processBatch, {
-    member_ids: 1,
-  })
+async function main(trackProgress) {
+  await batchedUpdate(
+    db.subscriptions,
+    { groupPlan: true },
+    processBatch,
+    {
+      member_ids: 1,
+    },
+    undefined,
+    {
+      trackProgress,
+    }
+  )
 }
 
 try {
-  await main()
+  await scriptRunner(main)
   process.exit(0)
 } catch (error) {
   console.error(error)

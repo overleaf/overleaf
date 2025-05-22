@@ -4,6 +4,7 @@ import * as csv from 'csv'
 import minimist from 'minimist'
 import recurly from 'recurly'
 import Settings from '@overleaf/settings'
+import { scriptRunner } from '../lib/ScriptRunner.mjs'
 
 const recurlyClient = new recurly.Client(Settings.apis.recurly.apiKey)
 
@@ -223,7 +224,7 @@ class ReportError extends Error {
 }
 
 try {
-  await main()
+  await scriptRunner(main)
 } catch (error) {
   console.error(error)
   process.exit(1)

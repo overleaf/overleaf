@@ -19,6 +19,7 @@ import AccountMappingHelper from '../../app/src/Features/Analytics/AccountMappin
 import { registerAccountMapping } from '../../app/src/Features/Analytics/AnalyticsManager.js'
 import { triggerGracefulShutdown } from '../../app/src/infrastructure/GracefulShutdown.js'
 import Validation from '../../app/src/infrastructure/Validation.js'
+import { scriptRunner } from '../lib/ScriptRunner.mjs'
 
 const paramsSchema = Validation.Joi.object({
   endDate: Validation.Joi.string().isoDate(),
@@ -59,7 +60,7 @@ function registerMapping(subscription) {
   }
 }
 
-async function main() {
+async function main(trackProgress) {
   const additionalBatchedUpdateOptions = {}
 
   if (endDate) {
@@ -83,6 +84,7 @@ async function main() {
     {
       verboseLogging: verbose,
       ...additionalBatchedUpdateOptions,
+      trackProgress,
     }
   )
 
@@ -109,7 +111,7 @@ if (error) {
   triggerGracefulShutdown(done => done(1))
 } else {
   logger.info({ verbose, commit, endDate }, commit ? 'COMMITTING' : 'DRY RUN')
-  await main()
+  await scriptRunner(main)
 
   triggerGracefulShutdown({
     close(done) {

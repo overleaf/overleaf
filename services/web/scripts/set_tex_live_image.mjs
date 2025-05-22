@@ -1,6 +1,7 @@
 import Settings from '@overleaf/settings'
 import mongodb from 'mongodb-legacy'
 import { Project } from '../app/src/models/Project.js'
+import { scriptRunner } from './lib/ScriptRunner.mjs'
 
 const { ObjectId } = mongodb
 
@@ -61,7 +62,7 @@ async function updateImage(image, projectIds) {
 }
 
 try {
-  await main()
+  await scriptRunner(main)
   process.exit()
 } catch (error) {
   console.error(error)

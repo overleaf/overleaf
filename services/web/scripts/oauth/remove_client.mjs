@@ -3,6 +3,7 @@ import {
   db,
   READ_PREFERENCE_SECONDARY,
 } from '../../app/src/infrastructure/mongodb.js'
+import { scriptRunner } from '../lib/ScriptRunner.mjs'
 
 async function main() {
   const opts = parseArgs()
@@ -113,7 +114,7 @@ Options:
 }
 
 try {
-  await main()
+  await scriptRunner(main)
   process.exit(0)
 } catch (error) {
   console.error(error)

@@ -1,6 +1,7 @@
 import checkSanitizeOptions from './checkSanitizeOptions.mjs'
 import Scrape from './scrape.mjs'
 import { fileURLToPath } from 'node:url'
+import { scriptRunner } from '../../lib/ScriptRunner.mjs'
 
 const { getAllPagesAndCache, scrapeAndCachePage } = Scrape
 
@@ -32,7 +33,7 @@ async function main() {
 
 if (fileURLToPath(import.meta.url) === process.argv[1]) {
   try {
-    await main()
+    await scriptRunner(main)
     process.exit(0)
   } catch (error) {
     console.error(error)

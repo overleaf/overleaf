@@ -2,6 +2,7 @@ import { db } from '../app/src/infrastructure/mongodb.js'
 import minimist from 'minimist'
 import UserGetter from '../app/src/Features/User/UserGetter.js'
 import fs from 'node:fs'
+import { scriptRunner } from './lib/ScriptRunner.mjs'
 
 function usage() {
   console.log(
@@ -112,7 +113,7 @@ async function main() {
 }
 
 try {
-  await main()
+  await scriptRunner(main)
   process.exit(0)
 } catch (error) {
   console.error(error)

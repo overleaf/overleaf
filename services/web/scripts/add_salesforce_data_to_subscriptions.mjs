@@ -4,6 +4,7 @@ import { parse } from 'csv'
 import Stream from 'node:stream/promises'
 import { ObjectId } from '../app/src/infrastructure/mongodb.js'
 import { Subscription } from '../app/src/models/Subscription.js'
+import { scriptRunner } from './lib/ScriptRunner.mjs'
 
 function usage() {
   console.log(
@@ -76,20 +77,22 @@ const stats = {
   },
 }
 
-function showStats() {
-  console.log('Stats:')
-  console.log(`  Total rows: ${stats.totalRows}`)
-  console.log(`  Processed rows: ${stats.processedRows}`)
-  console.log(`  Skipped (no subscription ID): ${stats.subscriptionIDMissing}`)
-  console.log(`  Used V1 ID: ${stats.usedV1ID}`)
-  console.log(`  Used Salesforce ID: ${stats.usedSalesforceID}`)
-  if (commit) {
-    console.log('Database operations:')
-    console.log(`  Errors: ${stats.db.errors}`)
-    console.log(`  Matched: ${stats.db.matched}`)
-    console.log(`  Updated: ${stats.db.updated}`)
-    console.log(`  Update attempted: ${stats.db.updateAttempted}`)
-  }
+function generateStats() {
+  return `Stats:
+  Total rows: ${stats.totalRows}
+  Processed rows: ${stats.processedRows}
+  Skipped (no subscription ID): ${stats.subscriptionIDMissing}
+  Used V1 ID: ${stats.usedV1ID}
+  Used Salesforce ID: ${stats.usedSalesforceID}${
+    commit
+      ? `
+Database operations:
+  Errors: ${stats.db.errors}
+  Matched: ${stats.db.matched}
+  Updated: ${stats.db.updated}
+  Update attempted: ${stats.db.updateAttempted}`
+      : ''
+  }`
 }
 
 function pickRelevantColumns(row) {
@@ -161,7 +164,7 @@ async function processRows(rows) {
   }
 }
 
-async function main() {
+async function main(trackProgress) {
   await Stream.pipeline(
     fs.createReadStream(filename),
     parse({
@@ -191,6 +194,7 @@ async function main() {
     }),
     processRows
   )
+  await trackProgress(generateStats())
 }
 
 if (!commit) {
@@ -199,6 +203,5 @@ if (!commit) {
   console.log('Committing changes to the database')
 }
 
-await main()
-showStats()
+await scriptRunner(main)
 process.exit()

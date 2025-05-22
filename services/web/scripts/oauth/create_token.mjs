@@ -1,6 +1,7 @@
 import minimist from 'minimist'
 import { db } from '../../app/src/infrastructure/mongodb.js'
 import { hashSecret } from '../../modules/oauth2-server/app/src/SecretsHelper.js'
+import { scriptRunner } from '../lib/ScriptRunner.mjs'
 
 async function main() {
   const opts = parseArgs()
@@ -88,7 +89,7 @@ Options:
 }
 
 try {
-  await main()
+  await scriptRunner(main)
   process.exit(0)
 } catch (error) {
   console.error(error)

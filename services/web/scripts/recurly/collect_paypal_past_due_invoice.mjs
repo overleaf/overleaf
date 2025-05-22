@@ -2,6 +2,7 @@ import RecurlyWrapper from '../../app/src/Features/Subscription/RecurlyWrapper.j
 import minimist from 'minimist'
 import logger from '@overleaf/logger'
 import { fileURLToPath } from 'node:url'
+import { scriptRunner } from '../lib/ScriptRunner.mjs'
 
 const waitMs =
   fileURLToPath(import.meta.url) === process.argv[1]
@@ -119,7 +120,7 @@ const main = async () => {
 
 if (fileURLToPath(import.meta.url) === process.argv[1]) {
   try {
-    await main()
+    await scriptRunner(main)
     logger.info('Done.')
     process.exit(0)
   } catch (error) {

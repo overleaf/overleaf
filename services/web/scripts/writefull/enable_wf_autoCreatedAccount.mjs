@@ -3,6 +3,7 @@ import mongodb from 'mongodb-legacy'
 import fs from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { chunkArray } from '../helpers/chunkArray.mjs'
+import { scriptRunner } from '../lib/ScriptRunner.mjs'
 
 const { ObjectId } = mongodb
 
@@ -37,7 +38,7 @@ export default main
 
 if (fileURLToPath(import.meta.url) === process.argv[1]) {
   try {
-    await main()
+    await scriptRunner(main)
     process.exit(0)
   } catch (error) {
     console.error({ error })

@@ -1,5 +1,6 @@
 import HistoryRangesSupportMigration from '../../app/src/Features/History/HistoryRangesSupportMigration.mjs'
 import minimist from 'minimist'
+import { scriptRunner } from '../lib/ScriptRunner.mjs'
 
 async function main() {
   const {
@@ -111,7 +112,7 @@ function arrayOpt(value) {
 }
 
 try {
-  await main()
+  await scriptRunner(main)
   process.exit(0)
 } catch (error) {
   console.error(error)

@@ -1,6 +1,7 @@
 import { promisify, promiseMapWithLimit } from '@overleaf/promise-utils'
 import UserSessionsRedis from '../app/src/Features/User/UserSessionsRedis.js'
 import minimist from 'minimist'
+import { scriptRunner } from './lib/ScriptRunner.mjs'
 
 const rClient = UserSessionsRedis.client()
 
@@ -76,7 +77,7 @@ async function main() {
 }
 
 try {
-  await main()
+  await scriptRunner(main)
 } catch (error) {
   console.error(error)
   process.exit(1)

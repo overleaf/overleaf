@@ -3,6 +3,7 @@ import {
   READ_PREFERENCE_SECONDARY,
 } from '../app/src/infrastructure/mongodb.js'
 import parseArgs from 'minimist'
+import { scriptRunner } from './lib/ScriptRunner.mjs'
 
 async function _removeFeatureFromAllUsers(feature, commit) {
   let removals = 0
@@ -44,7 +45,7 @@ async function main() {
 }
 
 try {
-  await main()
+  await scriptRunner(main)
   console.log('Done')
   process.exit(0)
 } catch (error) {

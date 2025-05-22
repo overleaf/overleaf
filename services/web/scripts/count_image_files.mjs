@@ -3,6 +3,7 @@ import {
   READ_PREFERENCE_SECONDARY,
 } from '../app/src/infrastructure/mongodb.js'
 import { extname } from 'node:path'
+import { scriptRunner } from './lib/ScriptRunner.mjs'
 
 const FILE_TYPES = [
   '.jpg',
@@ -71,7 +72,7 @@ function countFiles(folder, result) {
 }
 
 try {
-  await main()
+  await scriptRunner(main)
   process.exit(0)
 } catch (error) {
   console.error(error)

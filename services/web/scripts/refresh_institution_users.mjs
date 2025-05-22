@@ -1,5 +1,6 @@
 import minimist from 'minimist'
 import InstitutionsManager from '../app/src/Features/Institutions/InstitutionsManager.js'
+import { scriptRunner } from './lib/ScriptRunner.mjs'
 
 const institutionId = parseInt(process.argv[2])
 if (isNaN(institutionId)) throw new Error('No institution id')
@@ -31,7 +32,7 @@ function main() {
 }
 
 try {
-  await main()
+  await scriptRunner(main)
 } catch (error) {
   console.error(error)
   process.exit(1)

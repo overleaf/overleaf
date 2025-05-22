@@ -1,4 +1,5 @@
 import ProjectDetailsHandler from '../app/src/Features/Project/ProjectDetailsHandler.js'
+import { scriptRunner } from './lib/ScriptRunner.mjs'
 const projectId = process.argv[2]
 
 if (!/^(?=[a-f\d]{24}$)(\d+[a-f]|[a-f]+\d)/.test(projectId)) {
@@ -21,7 +22,7 @@ function main() {
 }
 
 try {
-  await main()
+  await scriptRunner(main)
 } catch (error) {
   console.error(error)
   process.exit(1)

@@ -5,6 +5,7 @@ import {
 import _ from 'lodash'
 import { formatTokenUsageStats } from '@overleaf/access-token-encryptor/scripts/helpers/format-usage-stats.js'
 import { ensureMongoTimeout } from './helpers/env_variable_helper.mjs'
+import { scriptRunner } from './lib/ScriptRunner.mjs'
 
 if (!process.env.MONGO_SOCKET_TIMEOUT) {
   const TEN_MINUTES = 1000 * 60 * 10
@@ -65,7 +66,7 @@ async function main() {
 }
 
 try {
-  await main()
+  await scriptRunner(main)
   process.exit(0)
 } catch (error) {
   console.error(error)

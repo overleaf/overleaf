@@ -15,6 +15,7 @@ import minimist from 'minimist'
 import readline from 'node:readline'
 import fs from 'node:fs'
 import logger from '@overleaf/logger'
+import { scriptRunner } from './lib/ScriptRunner.mjs'
 
 const { ObjectId } = mongodb
 const lastUpdated = new Date()
@@ -287,7 +288,7 @@ function findUniqueName(existingFilenames) {
 
 try {
   try {
-    await main()
+    await scriptRunner(main)
   } finally {
     logStats()
   }

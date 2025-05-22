@@ -1,6 +1,7 @@
 // @ts-check
 import settings from '@overleaf/settings'
 import recurly from 'recurly'
+import { scriptRunner } from '../lib/ScriptRunner.mjs'
 
 const ADD_ON_CODE = process.argv[2]
 
@@ -54,4 +55,4 @@ async function getPlan(planCode) {
   return await recurlyClient.getPlan(`code-${planCode}`)
 }
 
-await main()
+await scriptRunner(main)

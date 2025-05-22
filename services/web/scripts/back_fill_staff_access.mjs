@@ -3,6 +3,7 @@ import {
   READ_PREFERENCE_SECONDARY,
 } from '../app/src/infrastructure/mongodb.js'
 import UserSessionsManager from '../app/src/Features/User/UserSessionsManager.js'
+import { scriptRunner } from './lib/ScriptRunner.mjs'
 
 const COMMIT = process.argv.includes('--commit')
 const KEEP_SESSIONS = process.argv.includes('--keep-sessions')
@@ -84,7 +85,7 @@ async function main() {
 }
 
 try {
-  await main()
+  await scriptRunner(main)
   console.error('Done.')
   process.exit(0)
 } catch (error) {

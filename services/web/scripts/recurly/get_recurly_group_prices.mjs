@@ -7,6 +7,7 @@
 import recurly from 'recurly'
 
 import Settings from '@overleaf/settings'
+import { scriptRunner } from '../lib/ScriptRunner.mjs'
 
 const recurlySettings = Settings.apis.recurly
 const recurlyApiKey = recurlySettings ? recurlySettings.apiKey : undefined
@@ -39,7 +40,7 @@ async function main() {
 }
 
 try {
-  await main()
+  await scriptRunner(main)
   process.exit(0)
 } catch (error) {
   console.error({ error })

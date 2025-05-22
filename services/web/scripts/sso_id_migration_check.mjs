@@ -1,5 +1,6 @@
 import SAMLUserIdMigrationHandler from '../modules/saas-authentication/app/src/SAML/SAMLUserIdMigrationHandler.mjs'
 import { ensureRunningOnMongoSecondaryWithTimeout } from './helpers/env_variable_helper.mjs'
+import { scriptRunner } from './lib/ScriptRunner.mjs'
 
 ensureRunningOnMongoSecondaryWithTimeout(300000)
 
@@ -10,7 +11,7 @@ const emitUsers = process.argv.includes('--emit-users')
 console.log('Checking SSO user ID migration for institution:', institutionId)
 
 try {
-  await main()
+  await scriptRunner(main)
 } catch (error) {
   console.error(error)
   process.exit(1)

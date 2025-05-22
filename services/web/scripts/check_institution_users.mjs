@@ -1,5 +1,6 @@
 import InstitutionsManager from '../app/src/Features/Institutions/InstitutionsManager.js'
 import { ensureRunningOnMongoSecondaryWithTimeout } from './helpers/env_variable_helper.mjs'
+import { scriptRunner } from './lib/ScriptRunner.mjs'
 
 ensureRunningOnMongoSecondaryWithTimeout(300000)
 
@@ -18,7 +19,7 @@ async function main() {
 }
 
 try {
-  await main()
+  await scriptRunner(main)
 } catch (error) {
   console.error(error)
   process.exit(1)

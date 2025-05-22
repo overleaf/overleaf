@@ -1,6 +1,7 @@
 import minimist from 'minimist'
 import ThirdPartyIdentityManager from '../app/src/Features/User/ThirdPartyIdentityManager.js'
 import UserGetter from '../app/src/Features/User/UserGetter.js'
+import { scriptRunner } from './lib/ScriptRunner.mjs'
 
 /**
  * This script is used to remove a linked third party identity from a user account.
@@ -79,7 +80,7 @@ async function main() {
 setup()
 
 try {
-  await main()
+  await scriptRunner(main)
   process.exit(0)
 } catch (error) {
   console.error(error)

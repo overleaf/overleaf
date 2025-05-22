@@ -1,6 +1,7 @@
 import ProjectEntityRestoreHandler from '../app/src/Features/Project/ProjectEntityRestoreHandler.js'
 import ProjectEntityHandler from '../app/src/Features/Project/ProjectEntityHandler.js'
 import DocstoreManager from '../app/src/Features/Docstore/DocstoreManager.js'
+import { scriptRunner } from './lib/ScriptRunner.mjs'
 
 const ARGV = process.argv.slice(2)
 const DEVELOPER_USER_ID = ARGV.shift()
@@ -35,7 +36,7 @@ async function main() {
 }
 
 try {
-  await main()
+  await scriptRunner(main)
   process.exit(0)
 } catch (error) {
   console.error(error)

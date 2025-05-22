@@ -9,6 +9,7 @@ import {
 } from '../app/src/infrastructure/mongodb.js'
 import DocstoreManager from '../app/src/Features/Docstore/DocstoreManager.js'
 import { NotFoundError } from '../app/src/Features/Errors/Errors.js'
+import { scriptRunner } from './lib/ScriptRunner.mjs'
 
 const OPTS = parseArgs()
 
@@ -213,7 +214,7 @@ function docsHaveTrackedChanges(docs) {
 }
 
 try {
-  await main()
+  await scriptRunner(main)
   process.exit(0)
 } catch (err) {
   console.error(err)

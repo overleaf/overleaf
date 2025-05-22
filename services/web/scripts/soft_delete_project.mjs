@@ -1,5 +1,6 @@
 import minimist from 'minimist'
 import ProjectDeleter from '../app/src/Features/Project/ProjectDeleter.js'
+import { scriptRunner } from './lib/ScriptRunner.mjs'
 
 async function main() {
   const argv = minimist(process.argv.slice(2))
@@ -14,7 +15,7 @@ async function main() {
 }
 
 try {
-  await main()
+  await scriptRunner(main)
   console.log('Done.')
   process.exit(0)
 } catch (error) {

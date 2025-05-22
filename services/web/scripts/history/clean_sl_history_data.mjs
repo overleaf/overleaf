@@ -1,5 +1,6 @@
 import { db } from '../../app/src/infrastructure/mongodb.js'
 import { ensureMongoTimeout } from '../helpers/env_variable_helper.mjs'
+import { scriptRunner } from '../lib/ScriptRunner.mjs'
 // Ensure default mongo query timeout has been increased 1h
 if (!process.env.MONGO_SOCKET_TIMEOUT) {
   ensureMongoTimeout(360000)
@@ -66,7 +67,7 @@ async function gracefullyDropCollection(collection) {
 }
 
 try {
-  await main()
+  await scriptRunner(main)
 } catch (err) {
   console.error(err)
   process.exit(1)

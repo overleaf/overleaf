@@ -5,6 +5,7 @@ import { setTimeout } from 'node:timers/promises'
 import minimist from 'minimist'
 import * as csv from 'csv'
 import Stream from 'node:stream/promises'
+import { scriptRunner } from '../lib/ScriptRunner.mjs'
 
 const recurlyApiKey = Settings.apis.recurly.apiKey
 if (!recurlyApiKey) {
@@ -95,7 +96,7 @@ async function main() {
 }
 
 try {
-  await main()
+  await scriptRunner(main)
   process.exit(0)
 } catch (error) {
   console.error(error)

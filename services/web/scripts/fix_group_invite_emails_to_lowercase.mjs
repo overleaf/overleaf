@@ -1,5 +1,6 @@
 import { db } from '../app/src/infrastructure/mongodb.js'
 import { batchedUpdate } from '@overleaf/mongo-utils/batchedUpdate.js'
+import { scriptRunner } from './lib/ScriptRunner.mjs'
 
 const DRY_RUN = process.env.DRY_RUN !== 'false'
 
@@ -44,7 +45,7 @@ async function processBatch(subscriptions) {
   }
 }
 
-async function main() {
+async function main(trackProgress) {
   const projection = {
     _id: 1,
     teamInvites: 1,
@@ -54,11 +55,18 @@ async function main() {
       $exists: true,
     },
   }
-  await batchedUpdate(db.subscriptions, query, processBatch, projection)
+  await batchedUpdate(
+    db.subscriptions,
+    query,
+    processBatch,
+    projection,
+    undefined,
+    { trackProgress }
+  )
 }
 
 try {
-  await main()
+  await scriptRunner(main)
   console.error('Done.')
   process.exit(0)
 } catch (error) {

@@ -4,10 +4,11 @@ import mongodb from 'mongodb-legacy'
 import fs from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { chunkArray } from '../helpers/chunkArray.mjs'
+import { scriptRunner } from '../lib/ScriptRunner.mjs'
 
 const { ObjectId } = mongodb
 
-async function main() {
+async function main(trackProgress) {
   // search for file of users who already explicitly opted out first
   const optOutPath = process.argv[2]
   const optedOutFile = fs.readFileSync(optOutPath, 'utf8')
@@ -20,7 +21,10 @@ async function main() {
   await batchedUpdate(
     db.users,
     { 'writefull.enabled': false }, // and is false
-    { $set: { 'writefull.enabled': null } }
+    { $set: { 'writefull.enabled': null } },
+    undefined,
+    undefined,
+    { trackProgress }
   )
 
   const chunks = chunkArray(optedOutList)
@@ -41,7 +45,7 @@ export default main
 
 if (fileURLToPath(import.meta.url) === process.argv[1]) {
   try {
-    await main()
+    await scriptRunner(main)
     process.exit(0)
   } catch (error) {
     console.error({ error })

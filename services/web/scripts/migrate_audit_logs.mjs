@@ -3,10 +3,11 @@ import { promiseMapWithLimit, promisify } from '@overleaf/promise-utils'
 import { db, ObjectId } from '../app/src/infrastructure/mongodb.js'
 import _ from 'lodash'
 import { fileURLToPath } from 'node:url'
+import { scriptRunner } from './lib/ScriptRunner.mjs'
 
 const sleep = promisify(setTimeout)
 
-async function main(options) {
+async function main(options, trackProgress) {
   if (!options) {
     options = {}
   }
@@ -54,7 +55,9 @@ async function main(options) {
         async users => {
           await processUsersBatch(users, options)
         },
-        { _id: 1, auditLog: 1 }
+        { _id: 1, auditLog: 1 },
+        undefined,
+        { trackProgress }
       )
     }
 
@@ -67,7 +70,9 @@ async function main(options) {
       async projects => {
         await processProjectsBatch(projects, options)
       },
-      { _id: 1, auditLog: 1 }
+      { _id: 1, auditLog: 1 },
+      undefined,
+      { trackProgress }
     )
   }
 }
@@ -152,7 +157,9 @@ export default main
 
 if (fileURLToPath(import.meta.url) === process.argv[1]) {
   try {
-    await main()
+    await scriptRunner(
+      async trackProgress => await main(undefined, trackProgress)
+    )
     console.log('Done.')
     process.exit(0)
   } catch (error) {

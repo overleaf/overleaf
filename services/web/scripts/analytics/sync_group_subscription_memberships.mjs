@@ -5,6 +5,7 @@ import { DeletedSubscription } from '../../app/src/models/DeletedSubscription.js
 import minimist from 'minimist'
 import _ from 'lodash'
 import mongodb from 'mongodb-legacy'
+import { scriptRunner } from '../lib/ScriptRunner.mjs'
 
 const { ObjectId } = mongodb
 
@@ -272,7 +273,7 @@ const setup = () => {
 
 setup()
 try {
-  await main()
+  await scriptRunner(main)
   console.error('Done.')
   process.exit(0)
 } catch (error) {

@@ -35,6 +35,7 @@ let BATCHED_UPDATE_RUNNING = false
  * @property {string} [BATCH_RANGE_START]
  * @property {string} [BATCH_SIZE]
  * @property {string} [VERBOSE_LOGGING]
+ * @property {(progress: string) => Promise<void>} [trackProgress]
  */
 
 /**
@@ -210,7 +211,7 @@ async function batchedUpdate(
   update,
   projection,
   findOptions,
-  batchedUpdateOptions
+  batchedUpdateOptions = {}
 ) {
   // only a single batchedUpdate can run at a time due to global variables
   if (BATCHED_UPDATE_RUNNING) {
@@ -226,6 +227,8 @@ async function batchedUpdate(
       return 0
     }
     refreshGlobalOptionsForBatchedUpdate(batchedUpdateOptions)
+    const { trackProgress = async progress => console.warn(progress) } =
+      batchedUpdateOptions
 
     findOptions = findOptions || {}
     findOptions.readPreference = READ_PREFERENCE_SECONDARY
@@ -255,9 +258,10 @@ async function batchedUpdate(
               nextBatch.map(entry => entry._id)
             )}`
           )
-        } else {
-          console.error(`Running update on batch ending ${renderObjectId(end)}`)
         }
+        await trackProgress(
+          `Running update on batch ending ${renderObjectId(end)}`
+        )
 
         if (typeof update === 'function') {
           await update(nextBatch)
@@ -265,7 +269,7 @@ async function batchedUpdate(
           await performUpdate(collection, nextBatch, update)
         }
       }
-      console.error(`Completed batch ending ${renderObjectId(end)}`)
+      await trackProgress(`Completed batch ending ${renderObjectId(end)}`)
       start = end
     }
     return updated

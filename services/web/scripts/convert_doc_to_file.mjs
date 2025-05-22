@@ -2,6 +2,7 @@ import minimist from 'minimist'
 import { ObjectId } from '../app/src/infrastructure/mongodb.js'
 import ProjectEntityUpdateHandler from '../app/src/Features/Project/ProjectEntityUpdateHandler.js'
 import Errors from '../app/src/Features/Errors/Errors.js'
+import { scriptRunner } from './lib/ScriptRunner.mjs'
 
 async function main() {
   const argv = minimist(process.argv.slice(2))
@@ -35,7 +36,7 @@ async function main() {
 }
 
 try {
-  await main()
+  await scriptRunner(main)
   console.log('Done.')
   process.exit(0)
 } catch (error) {

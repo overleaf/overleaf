@@ -1,6 +1,7 @@
 // @ts-check
 import { db, ObjectId } from '../app/src/infrastructure/mongodb.js'
 import { batchedUpdate } from '@overleaf/mongo-utils/batchedUpdate.js'
+import { scriptRunner } from './lib/ScriptRunner.mjs'
 
 /**
  * @typedef {Object} Doc
@@ -30,7 +31,12 @@ import { batchedUpdate } from '@overleaf/mongo-utils/batchedUpdate.js'
  * @property {Array<Folder>} rootFolder
  */
 
-async function main() {
+/**
+ * @param {(progress: string) => Promise<void>} trackProgress
+ * @returns {Promise<void>}
+ * @async
+ */
+async function main(trackProgress) {
   let projectsProcessed = 0
   await batchedUpdate(
     db.projects,
@@ -59,7 +65,9 @@ async function main() {
         }
       }
     },
-    { _id: 1, rootFolder: 1 }
+    { _id: 1, rootFolder: 1 },
+    undefined,
+    { trackProgress }
   )
 }
 
@@ -161,7 +169,7 @@ function* findBadPaths(folder) {
 }
 
 try {
-  await main()
+  await scriptRunner(main)
   process.exit(0)
 } catch (error) {
   console.error(error)

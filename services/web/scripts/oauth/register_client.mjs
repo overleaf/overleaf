@@ -2,6 +2,7 @@ import minimist from 'minimist'
 import mongodb from 'mongodb-legacy'
 import { db } from '../../app/src/infrastructure/mongodb.js'
 import { hashSecret } from '../../modules/oauth2-server/app/src/SecretsHelper.js'
+import { scriptRunner } from '../lib/ScriptRunner.mjs'
 
 const { ObjectId } = mongodb
 
@@ -142,7 +143,7 @@ function toArray(value) {
 }
 
 try {
-  await main()
+  await scriptRunner(main)
   process.exit(0)
 } catch (error) {
   console.error(error)
