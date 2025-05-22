@@ -347,7 +347,6 @@ const _ProjectController = {
       'track-pdf-download',
       !anonymous && 'writefull-oauth-promotion',
       'hotjar',
-      'reviewer-role',
       'editor-redesign',
       'paywall-change-compile-timeout',
       'overleaf-assist-bundle',
@@ -480,12 +479,6 @@ const _ProjectController = {
           userId,
           projectId,
           anonRequestToken
-        )
-
-      const reviewerRoleAssignment =
-        await SplitTestHandler.promises.getAssignmentForUser(
-          project.owner_ref,
-          'reviewer-role'
         )
 
       await Modules.promises.hooks.fire('enforceCollaboratorLimit', projectId)
@@ -883,9 +876,6 @@ const _ProjectController = {
             : null,
         isSaas: Features.hasFeature('saas'),
         shouldLoadHotjar: splitTestAssignments.hotjar?.variant === 'enabled',
-        isReviewerRoleEnabled:
-          reviewerRoleAssignment?.variant === 'enabled' ||
-          Object.keys(project.reviewer_refs || {}).length > 0,
         isPaywallChangeCompileTimeoutEnabled,
         isOverleafAssistBundleEnabled,
         paywallPlans,
