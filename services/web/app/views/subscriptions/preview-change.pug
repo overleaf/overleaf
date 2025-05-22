@@ -1,9 +1,10 @@
-extends ../layout-marketing
+extends ../layout-react
 
 block entrypointVar
 	- entrypoint = 'pages/user/subscription/preview-change'
 
 block append meta
+	meta(name="ol-user" data-type="json" content=user)
 	meta(name="ol-subscriptionChangePreview" data-type="json" content=changePreview)
 	meta(name="ol-purchaseReferrer" data-type="string" content=purchaseReferrer)
 

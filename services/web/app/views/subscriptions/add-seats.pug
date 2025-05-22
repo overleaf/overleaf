@@ -1,9 +1,10 @@
-extends ../layout-marketing
+extends ../layout-react
 
 block entrypointVar
 	- entrypoint = 'pages/user/subscription/group-management/add-seats'
 
 block append meta
+	meta(name="ol-user" data-type="json" content=user)
 	meta(name="ol-groupName", data-type="string", content=groupName)
 	meta(name="ol-subscriptionId", data-type="string", content=subscriptionId)
 	meta(name="ol-totalLicenses", data-type="number", content=totalLicenses)

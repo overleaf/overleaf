@@ -1,4 +1,4 @@
-extends ../../layout-marketing
+extends ../../layout-react
 
 block entrypointVar
 	- entrypoint = 'pages/sharing-updates'
@@ -9,6 +9,7 @@ block vars
 	- var suppressSkipToContent = true
 
 block append meta
+	meta(name="ol-user" data-type="json" content=user)
 	meta(name="ol-project_id" data-type="string" content=projectId)
 
 block content

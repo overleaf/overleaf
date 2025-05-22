@@ -1,7 +1,10 @@
-extends ../../../../../app/views/layout-marketing
+extends ../../../../../app/views/layout-react
 
 block entrypointVar
 	- entrypoint = 'modules/user-activate/pages/user-activate-page'
+
+block append meta
+	meta(name="ol-user" data-type="json" content=user)
 
 block content
 	.content.content-alt#main-content
