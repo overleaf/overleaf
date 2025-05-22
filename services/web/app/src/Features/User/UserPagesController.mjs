@@ -195,7 +195,7 @@ async function reconfirmAccountPage(req, res) {
   const { variant } = await SplitTestHandler.promises.getAssignment(
     req,
     res,
-    'auth-pages-bs5'
+    'bs5-auth-pages'
   )
 
   const template =

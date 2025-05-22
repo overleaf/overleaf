@@ -148,7 +148,7 @@ async function renderSetPasswordForm(req, res, next) {
   const { variant } = await SplitTestHandler.promises.getAssignment(
     req,
     res,
-    'auth-pages-bs5'
+    'bs5-auth-pages'
   )
 
   if (req.query.passwordResetToken != null) {
@@ -217,7 +217,7 @@ async function renderRequestResetForm(req, res) {
   const { variant } = await SplitTestHandler.promises.getAssignment(
     req,
     res,
-    'auth-pages-bs5'
+    'bs5-auth-pages'
   )
 
   const template =
