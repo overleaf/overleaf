@@ -38,7 +38,7 @@ export const useToolbarMenuBarEditorCommands = () => {
   const newEditor = useIsNewEditorEnabled()
 
   useCommandProvider(() => {
-    if (!newEditor) {
+    if (!newEditor || !editorIsVisible) {
       return
     }
 
@@ -53,7 +53,7 @@ export const useToolbarMenuBarEditorCommands = () => {
           undo(view)
           view.focus()
         },
-        disabled: !editorIsVisible || !trackedWrite,
+        disabled: !trackedWrite,
       },
       {
         id: 'redo',
@@ -62,7 +62,7 @@ export const useToolbarMenuBarEditorCommands = () => {
           redo(view)
           view.focus()
         },
-        disabled: !editorIsVisible || !trackedWrite,
+        disabled: !trackedWrite,
       },
       {
         id: 'find',
@@ -70,7 +70,6 @@ export const useToolbarMenuBarEditorCommands = () => {
         handler: () => {
           openSearchPanel(view)
         },
-        disabled: !editorIsVisible,
       },
       {
         id: 'select-all',
@@ -79,14 +78,13 @@ export const useToolbarMenuBarEditorCommands = () => {
           selectAll(view)
           view.focus()
         },
-        disabled: !editorIsVisible,
       },
     ]
   }, [editorIsVisible, t, view, trackedWrite, newEditor])
 
   // LaTeX commands
   useCommandProvider(() => {
-    if (!newEditor) {
+    if (!newEditor || !editorIsVisible) {
       return
     }
     if (!isTeXFile || !trackedWrite) {
@@ -104,7 +102,6 @@ export const useToolbarMenuBarEditorCommands = () => {
           commands.wrapInInlineMath(view)
           view.focus()
         },
-        disabled: !editorIsVisible,
       },
       {
         id: 'insert-display-math',
@@ -113,7 +110,6 @@ export const useToolbarMenuBarEditorCommands = () => {
           commands.wrapInDisplayMath(view)
           view.focus()
         },
-        disabled: !editorIsVisible,
       },
       {
         label: t('upload_from_computer'),
@@ -121,7 +117,6 @@ export const useToolbarMenuBarEditorCommands = () => {
         handler: () => {
           openFigureModal(FigureModalSource.FILE_UPLOAD)
         },
-        disabled: !editorIsVisible,
       },
       {
         label: t('from_project_files'),
@@ -129,7 +124,6 @@ export const useToolbarMenuBarEditorCommands = () => {
         handler: () => {
           openFigureModal(FigureModalSource.FILE_TREE)
         },
-        disabled: !editorIsVisible,
       },
       {
         label: t('from_another_project'),
@@ -137,7 +131,6 @@ export const useToolbarMenuBarEditorCommands = () => {
         handler: () => {
           openFigureModal(FigureModalSource.OTHER_PROJECT)
         },
-        disabled: !editorIsVisible,
       },
       {
         label: t('from_url'),
@@ -145,7 +138,6 @@ export const useToolbarMenuBarEditorCommands = () => {
         handler: () => {
           openFigureModal(FigureModalSource.FROM_URL)
         },
-        disabled: !editorIsVisible,
       },
       {
         id: 'insert-table',
@@ -154,7 +146,6 @@ export const useToolbarMenuBarEditorCommands = () => {
           commands.insertTable(view, 3, 3)
           view.focus()
         },
-        disabled: !editorIsVisible,
       },
       {
         id: 'insert-citation',
@@ -163,7 +154,6 @@ export const useToolbarMenuBarEditorCommands = () => {
           commands.insertCite(view)
           view.focus()
         },
-        disabled: !editorIsVisible,
       },
       {
         id: 'insert-link',
@@ -172,7 +162,6 @@ export const useToolbarMenuBarEditorCommands = () => {
           commands.wrapInHref(view)
           view.focus()
         },
-        disabled: !editorIsVisible,
       },
       {
         id: 'insert-cross-reference',
@@ -181,7 +170,6 @@ export const useToolbarMenuBarEditorCommands = () => {
           commands.insertRef(view)
           view.focus()
         },
-        disabled: !editorIsVisible,
       },
       {
         id: 'comment',
@@ -189,7 +177,6 @@ export const useToolbarMenuBarEditorCommands = () => {
         handler: () => {
           commands.addComment()
         },
-        disabled: !editorIsVisible,
       },
       /************************************
        *         Format menu
@@ -201,7 +188,6 @@ export const useToolbarMenuBarEditorCommands = () => {
           commands.toggleBold(view)
           view.focus()
         },
-        disabled: !editorIsVisible,
       },
       {
         id: 'format-italics',
@@ -210,7 +196,6 @@ export const useToolbarMenuBarEditorCommands = () => {
           commands.toggleItalic(view)
           view.focus()
         },
-        disabled: !editorIsVisible,
       },
       {
         id: 'format-bullet-list',
@@ -219,7 +204,6 @@ export const useToolbarMenuBarEditorCommands = () => {
           commands.toggleBulletList(view)
           view.focus()
         },
-        disabled: !editorIsVisible,
       },
       {
         id: 'format-numbered-list',
@@ -228,7 +212,6 @@ export const useToolbarMenuBarEditorCommands = () => {
           commands.toggleNumberedList(view)
           view.focus()
         },
-        disabled: !editorIsVisible,
       },
       {
         id: 'format-increase-indentation',
@@ -237,7 +220,6 @@ export const useToolbarMenuBarEditorCommands = () => {
           commands.indentIncrease(view)
           view.focus()
         },
-        disabled: !editorIsVisible,
       },
       {
         id: 'format-decrease-indentation',
@@ -246,7 +228,6 @@ export const useToolbarMenuBarEditorCommands = () => {
           commands.indentDecrease(view)
           view.focus()
         },
-        disabled: !editorIsVisible,
       },
       {
         id: 'format-style-normal',
@@ -255,7 +236,6 @@ export const useToolbarMenuBarEditorCommands = () => {
           setSectionHeadingLevel(view, 'text')
           view.focus()
         },
-        disabled: !editorIsVisible,
       },
       {
         id: 'format-style-section',
@@ -264,7 +244,6 @@ export const useToolbarMenuBarEditorCommands = () => {
           setSectionHeadingLevel(view, 'section')
           view.focus()
         },
-        disabled: !editorIsVisible,
       },
       {
         id: 'format-style-subsection',
@@ -273,7 +252,6 @@ export const useToolbarMenuBarEditorCommands = () => {
           setSectionHeadingLevel(view, 'subsection')
           view.focus()
         },
-        disabled: !editorIsVisible,
       },
       {
         id: 'format-style-subsubsection',
@@ -282,7 +260,6 @@ export const useToolbarMenuBarEditorCommands = () => {
           setSectionHeadingLevel(view, 'subsubsection')
           view.focus()
         },
-        disabled: !editorIsVisible,
       },
       {
         id: 'format-style-paragraph',
@@ -291,7 +268,6 @@ export const useToolbarMenuBarEditorCommands = () => {
           setSectionHeadingLevel(view, 'paragraph')
           view.focus()
         },
-        disabled: !editorIsVisible,
       },
       {
         id: 'format-style-subparagraph',
@@ -300,7 +276,6 @@ export const useToolbarMenuBarEditorCommands = () => {
           setSectionHeadingLevel(view, 'subparagraph')
           view.focus()
         },
-        disabled: !editorIsVisible,
       },
     ]
   }, [
@@ -316,6 +291,10 @@ export const useToolbarMenuBarEditorCommands = () => {
   const { toggleSymbolPalette } = useEditorContext()
   const symbolPaletteAvailable = getMeta('ol-symbolPaletteAvailable')
   useCommandProvider(() => {
+    if (!newEditor || !editorIsVisible) {
+      return
+    }
+
     if (!symbolPaletteAvailable) {
       return
     }
@@ -331,7 +310,6 @@ export const useToolbarMenuBarEditorCommands = () => {
         handler: () => {
           toggleSymbolPalette?.()
         },
-        disabled: !editorIsVisible,
       },
     ]
   }, [
@@ -341,5 +319,6 @@ export const useToolbarMenuBarEditorCommands = () => {
     editorIsVisible,
     isTeXFile,
     trackedWrite,
+    newEditor,
   ])
 }
