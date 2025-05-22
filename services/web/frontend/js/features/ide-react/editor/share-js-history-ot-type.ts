@@ -1,6 +1,7 @@
 import EventEmitter from '@/utils/EventEmitter'
 import {
   EditOperationBuilder,
+  EditOperationTransformer,
   InsertOp,
   RemoveOp,
   RetainOp,
@@ -8,14 +9,6 @@ import {
   TextOperation,
 } from 'overleaf-editor-core'
 import { RawEditOperation } from 'overleaf-editor-core/lib/types'
-
-function loadTextOperation(raw: RawEditOperation): TextOperation {
-  const operation = EditOperationBuilder.fromJSON(raw)
-  if (!(operation instanceof TextOperation)) {
-    throw new Error(`operation not supported: ${operation.constructor.name}`)
-  }
-  return operation
-}
 
 export class HistoryOTType extends EventEmitter {
   // stub interface, these are actually on the Doc
@@ -29,15 +22,15 @@ export class HistoryOTType extends EventEmitter {
   }
 
   transformX(raw1: RawEditOperation[], raw2: RawEditOperation[]) {
-    const [a, b] = TextOperation.transform(
-      loadTextOperation(raw1[0]),
-      loadTextOperation(raw2[0])
+    const [a, b] = EditOperationTransformer.transform(
+      EditOperationBuilder.fromJSON(raw1[0]),
+      EditOperationBuilder.fromJSON(raw2[0])
     )
     return [[a.toJSON()], [b.toJSON()]]
   }
 
   apply(snapshot: StringFileData, rawEditOperation: RawEditOperation[]) {
-    const operation = loadTextOperation(rawEditOperation[0])
+    const operation = EditOperationBuilder.fromJSON(rawEditOperation[0])
     const afterFile = StringFileData.fromRaw(snapshot.toRaw())
     afterFile.edit(operation)
     this.snapshot = afterFile
@@ -46,7 +39,9 @@ export class HistoryOTType extends EventEmitter {
 
   compose(op1: RawEditOperation[], op2: RawEditOperation[]) {
     return [
-      loadTextOperation(op1[0]).compose(loadTextOperation(op2[0])).toJSON(),
+      EditOperationBuilder.fromJSON(op1[0])
+        .compose(EditOperationBuilder.fromJSON(op2[0]))
+        .toJSON(),
     ]
   }
 
@@ -88,40 +83,47 @@ export class HistoryOTType extends EventEmitter {
     this.on(
       'remoteop',
       (rawEditOperation: RawEditOperation[], oldSnapshot: StringFileData) => {
-        const operation = loadTextOperation(rawEditOperation[0])
-        const str = oldSnapshot.getContent()
-        if (str.length !== operation.baseLength)
-          throw new TextOperation.ApplyError(
-            "The operation's base length must be equal to the string's length.",
-            operation,
-            str
-          )
-
-        let outputCursor = 0
-        let inputCursor = 0
-        for (const op of operation.ops) {
-          if (op instanceof RetainOp) {
-            inputCursor += op.length
-            outputCursor += op.length
-          } else if (op instanceof InsertOp) {
-            this.emit('insert', outputCursor, op.insertion, op.insertion.length)
-            outputCursor += op.insertion.length
-          } else if (op instanceof RemoveOp) {
-            this.emit(
-              'delete',
-              outputCursor,
-              str.slice(inputCursor, inputCursor + op.length)
+        const operation = EditOperationBuilder.fromJSON(rawEditOperation[0])
+        if (operation instanceof TextOperation) {
+          const str = oldSnapshot.getContent()
+          if (str.length !== operation.baseLength)
+            throw new TextOperation.ApplyError(
+              "The operation's base length must be equal to the string's length.",
+              operation,
+              str
             )
-            inputCursor += op.length
-          }
-        }
 
-        if (inputCursor !== str.length)
-          throw new TextOperation.ApplyError(
-            "The operation didn't operate on the whole string.",
-            operation,
-            str
-          )
+          let outputCursor = 0
+          let inputCursor = 0
+          for (const op of operation.ops) {
+            if (op instanceof RetainOp) {
+              inputCursor += op.length
+              outputCursor += op.length
+            } else if (op instanceof InsertOp) {
+              this.emit(
+                'insert',
+                outputCursor,
+                op.insertion,
+                op.insertion.length
+              )
+              outputCursor += op.insertion.length
+            } else if (op instanceof RemoveOp) {
+              this.emit(
+                'delete',
+                outputCursor,
+                str.slice(inputCursor, inputCursor + op.length)
+              )
+              inputCursor += op.length
+            }
+          }
+
+          if (inputCursor !== str.length)
+            throw new TextOperation.ApplyError(
+              "The operation didn't operate on the whole string.",
+              operation,
+              str
+            )
+        }
       }
     )
   }
