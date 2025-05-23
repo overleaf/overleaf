@@ -1,13 +1,28 @@
 import UserGetter from '../../../app/src/Features/User/UserGetter.js'
 import UserDeleter from '../../../app/src/Features/User/UserDeleter.js'
 import { fileURLToPath } from 'url'
+import minimist from 'minimist'
 
 const filename = fileURLToPath(import.meta.url)
 
 async function main() {
-  const email = (process.argv.slice(2).pop() || '').replace(/^--email=/, '')
+  const argv = minimist(process.argv.slice(2), {
+    string: ['email'],
+    boolean: ['skip-email'],
+  })
+
+  const { email, 'skip-email': skipEmail } = argv
   if (!email) {
-    console.error(`Usage: node ${filename} --email=joe@example.com`)
+    console.error(
+      `Usage: node ${filename} [--skip-email] --email=joe@example.com
+
+Deletes a user. All users' projects will also be deleted.
+
+Options:
+    --email          email address of the user being deleted
+    --skip-email    (optional) when present, the user is not notified of the deletion via email
+`
+    )
     process.exit(1)
   }
 
@@ -25,6 +40,7 @@ async function main() {
       const options = {
         ipAddress: '0.0.0.0',
         force: true,
+        skipEmail,
       }
       UserDeleter.deleteUser(user._id, options, function (err) {
         if (err) {

@@ -60,8 +60,12 @@ async function deleteUser(userId, options) {
     await _createDeletedUser(user, options)
     logger.info({ userId }, 'deleting user projects')
     await ProjectDeleter.promises.deleteUsersProjects(user._id)
-    logger.info({ userId }, 'sending deletion email to user')
-    await _sendDeleteEmail(user, options.force)
+    if (options.skipEmail) {
+      logger.info({ userId }, 'skipping sending deletion email to user')
+    } else {
+      logger.info({ userId }, 'sending deletion email to user')
+      await _sendDeleteEmail(user, options.force)
+    }
     logger.info({ userId }, 'deleting user record')
     await deleteMongoUser(user._id)
     logger.info({ userId }, 'user deletion complete')

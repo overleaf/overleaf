@@ -314,6 +314,15 @@ describe('UserDeleter', function () {
               ).to.have.been.calledWith('securityAlert', emailOptions)
             })
 
+            it('should not email the user with skipEmail === true', async function () {
+              await this.UserDeleter.promises.deleteUser(this.userId, {
+                ipAddress: this.ipAddress,
+                skipEmail: true,
+              })
+              expect(this.EmailHandler.promises.sendEmail).not.to.have.been
+                .called
+            })
+
             it('should fail when the email service fails', async function () {
               this.EmailHandler.promises.sendEmail = sinon
                 .stub()
