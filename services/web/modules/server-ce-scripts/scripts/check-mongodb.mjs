@@ -6,7 +6,7 @@ import {
 
 const { ObjectId } = mongodb
 
-const MIN_MONGO_VERSION = [5, 0]
+const MIN_MONGO_VERSION = [6, 0]
 
 async function main() {
   let mongoClient
