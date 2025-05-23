@@ -48,6 +48,7 @@ function getClient() {
         'secure',
         'auth',
         'ignoreTLS',
+        'tls',
         'logger',
         'name'
       )
