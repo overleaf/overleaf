@@ -140,6 +140,7 @@ const settings = {
     api: redisConfig,
     pubsub: redisConfig,
     project_history: redisConfig,
+    references: redisConfig,
 
     project_history_migration: {
       host: redisConfig.host,
