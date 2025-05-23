@@ -11,7 +11,7 @@ const OError = require('@overleaf/o-error')
 const UserGetter = require('../User/UserGetter')
 const ProjectGetter = require('../Project/ProjectGetter')
 const HistoryBackupDeletionHandler = require('./HistoryBackupDeletionHandler')
-const { db, ObjectId } = require('../../infrastructure/mongodb')
+const { db, ObjectId, waitForDb } = require('../../infrastructure/mongodb')
 const Metrics = require('@overleaf/metrics')
 const logger = require('@overleaf/logger')
 const { NotFoundError } = require('../Errors/Errors')
@@ -50,6 +50,7 @@ function getBlobLocation(projectId, hash) {
 }
 
 async function loadGlobalBlobs() {
+  await waitForDb() // CHANGE FROM SOURCE: wait for db before running query.
   const blobs = db.projectHistoryGlobalBlobs.find()
   for await (const blob of blobs) {
     GLOBAL_BLOBS.add(blob._id) // CHANGE FROM SOURCE: only store hashes.

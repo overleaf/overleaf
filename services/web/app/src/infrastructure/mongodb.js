@@ -130,10 +130,15 @@ async function getCollectionInternal(name) {
   return internalDb.collection(name)
 }
 
+async function waitForDb() {
+  await connectionPromise
+}
+
 module.exports = {
   db,
   ObjectId,
   connectionPromise,
+  waitForDb,
   getCollectionNames,
   getCollectionInternal,
   cleanupTestDatabase,

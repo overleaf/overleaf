@@ -3,9 +3,9 @@ const sinon = require('sinon')
 const SandboxedModule = require('sandboxed-module')
 const { ObjectId } = require('mongodb-legacy')
 const {
-  connectionPromise,
   cleanupTestDatabase,
   db,
+  waitForDb,
 } = require('../../../../app/src/infrastructure/mongodb')
 
 const MODULE_PATH = '../../../../app/src/Features/History/HistoryManager'
@@ -19,7 +19,7 @@ const GLOBAL_BLOBS = {
 
 describe('HistoryManager', function () {
   before(async function () {
-    await connectionPromise
+    await waitForDb()
   })
   before(cleanupTestDatabase)
   before(async function () {
@@ -90,7 +90,7 @@ describe('HistoryManager', function () {
 
     this.HistoryManager = SandboxedModule.require(MODULE_PATH, {
       requires: {
-        '../../infrastructure/mongodb': { ObjectId, db },
+        '../../infrastructure/mongodb': { ObjectId, db, waitForDb },
         '@overleaf/fetch-utils': this.FetchUtils,
         '@overleaf/settings': this.settings,
         '../User/UserGetter': this.UserGetter,
