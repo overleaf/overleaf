@@ -5,15 +5,21 @@ import {
   matchingAncestor,
 } from '@/features/source-editor/utils/tree-operations/ancestors'
 
-export type FormattingCommand = '\\textbf' | '\\textit'
+
+//Added formating command of slant text
+export type FormattingCommand = '\\textbf' | '\\textit' | '\\textsl' | '\\textcolor'
 export type FormattingNodeType = string | number
 
+
+//paired command with name of command
 export const formattingCommandMap: Record<
   FormattingCommand,
   FormattingNodeType
 > = {
   '\\textbf': 'TextBoldCommand',
   '\\textit': 'TextItalicCommand',
+  '\\textsl': 'TextSlantCommand',
+  '\\textcolor': 'TextColorCommand',
 }
 
 export const withinFormattingCommand = (state: EditorState) => {
