@@ -19,7 +19,7 @@
         <jetty.servlet.version>9.4.57.v20241219</jetty.servlet.version>
         <gson.version>2.9.0</gson.version>
         <async.http.client.version>3.0.1</async.http.client.version>
-        <jgit.version>6.6.1.202309021850-r</jgit.version>
+        <jgit.version>6.10.1.202505221210-r</jgit.version>
         <sqlite.jdbc.version>3.41.2.2</sqlite.jdbc.version>
         <joda.time.version>2.9.9</joda.time.version>
         <google.oauth.client.version>1.37.0</google.oauth.client.version>
