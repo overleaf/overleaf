@@ -14,6 +14,7 @@ import OLPageContentCard from '@/features/ui/components/ol/ol-page-content-card'
 import OLRow from '@/features/ui/components/ol/ol-row'
 import OLCol from '@/features/ui/components/ol/ol-col'
 import OLNotification from '@/features/ui/components/ol/ol-notification'
+import WritefullManagedBundleAddOn from './states/active/change-plan/modals/writefull-bundle-management-modal'
 
 function SubscriptionDashboard() {
   const { t } = useTranslation()
@@ -24,6 +25,7 @@ function SubscriptionDashboard() {
     personalSubscription,
   } = useSubscriptionDashboardContext()
 
+  const hasAiAssistViaWritefull = getMeta('ol-hasAiAssistViaWritefull')
   const fromPlansPage = getMeta('ol-fromPlansPage')
 
   return (
@@ -50,6 +52,12 @@ function SubscriptionDashboard() {
               <ManagedPublishers />
               <GroupSubscriptionMemberships />
               <InstitutionMemberships />
+              {!personalSubscription && hasAiAssistViaWritefull && (
+                <div className="mb-4">
+                  <h2 className="h3 fw-bold">{t('add_ons')}</h2>
+                  <WritefullManagedBundleAddOn />
+                </div>
+              )}
               {hasValidActiveSubscription && (
                 <PremiumFeaturesLink subscription={personalSubscription} />
               )}
