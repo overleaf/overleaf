@@ -12,6 +12,40 @@
   }
 }
 
+.ide-redesign-main {
+  --pdf-bg: var(--bg-dark-secondary);
+
+  .pdf-viewer {
+    .pdfjs-viewer {
+      .page {
+        box-shadow:
+          0 5px 5px 0 #23282f0d,
+          0 3px 14px 0 #23282f08,
+          0 8px 10px 0 #23282f14;
+      }
+    }
+  }
+
+  .toolbar-pdf-left {
+    .compile-button-group {
+      height: 24px;
+      border-radius: 12px;
+      margin-left: var(--spacing-02);
+    }
+
+    .dropdown > .compile-button {
+      border-top-left-radius: 12px;
+      border-bottom-left-radius: 12px;
+      font-size: var(--font-size-02);
+    }
+
+    .dropdown > .compile-dropdown-toggle {
+      width: 26px;
+      padding: var(--spacing-01);
+    }
+  }
+}
+
 .pdf .toolbar.toolbar-pdf {
   @include toolbar-sm-height;
   @include toolbar-alt-bg;
@@ -156,21 +190,6 @@
   @extend .full-size;
 
   top: var(--toolbar-small-height);
-}
-
-.ide-redesign-main {
-  --pdf-bg: var(--bg-dark-secondary);
-
-  .pdf-viewer {
-    .pdfjs-viewer {
-      .page {
-        box-shadow:
-          0 5px 5px 0 #23282f0d,
-          0 3px 14px 0 #23282f08,
-          0 8px 10px 0 #23282f14;
-      }
-    }
-  }
 }
 
 .pdf-viewer {

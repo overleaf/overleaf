@@ -75,11 +75,13 @@ function PdfCompileButton() {
       'btn-striped-animated': hasChanges,
     },
     'no-left-border',
-    'dropdown-button-toggle'
+    'dropdown-button-toggle',
+    'compile-dropdown-toggle'
   )
 
   const buttonClassName = classNames(
     'align-items-center py-0 no-left-radius px-3',
+    'compile-button',
     {
       'btn-striped-animated': hasChanges,
     }
