@@ -5,6 +5,7 @@ import RangesTracker from '@overleaf/ranges-tracker'
 import { ShareDoc } from '../../../../../types/share-doc'
 import { debugConsole } from '@/utils/debugging'
 import { DocumentContainer } from '@/features/ide-react/editor/document-container'
+import { OTType } from '@/features/ide-react/editor/share-js-doc'
 
 /*
  * Integrate CodeMirror 6 with the real-time system, via ShareJS.
@@ -76,15 +77,22 @@ export const realtime = (
   return Prec.highest([realtimePlugin, ensureRealtimePlugin])
 }
 
+type OTAdapter = {
+  handleUpdateFromCM(
+    transactions: readonly Transaction[],
+    ranges?: RangesTracker
+  ): void
+  attachShareJs(): void
+}
+
 export class EditorFacade extends EventEmitter {
-  public shareDoc: ShareDoc | null
+  private otAdapter: OTAdapter | null
   public events: EventEmitter
-  private maxDocLength?: number
 
   constructor(public view: EditorView) {
     super()
     this.view = view
-    this.shareDoc = null
+    this.otAdapter = null
     this.events = new EventEmitter()
   }
 
@@ -118,23 +126,56 @@ export class EditorFacade extends EventEmitter {
     this.cmChange({ from: position, to: position + text.length }, origin)
   }
 
+  attachShareJs(shareDoc: ShareDoc, maxDocLength?: number, type?: OTType) {
+    this.otAdapter =
+      type === 'history-ot'
+        ? new HistoryOTAdapter(this, shareDoc, maxDocLength)
+        : new ShareLatexOTAdapter(this, shareDoc, maxDocLength)
+    this.otAdapter.attachShareJs()
+  }
+
+  detachShareJs() {
+    this.otAdapter = null
+  }
+
+  handleUpdateFromCM(
+    transactions: readonly Transaction[],
+    ranges?: RangesTracker
+  ) {
+    if (this.otAdapter == null) {
+      throw new Error('Trying to process updates with no otAdapter')
+    }
+
+    this.otAdapter.handleUpdateFromCM(transactions, ranges)
+  }
+}
+
+class ShareLatexOTAdapter {
+  constructor(
+    public editor: EditorFacade,
+    private shareDoc: ShareDoc,
+    private maxDocLength?: number
+  ) {
+    this.editor = editor
+    this.shareDoc = shareDoc
+    this.maxDocLength = maxDocLength
+  }
+
   // Connect to ShareJS, passing changes to the CodeMirror view
   // as new transactions.
   // This is a broad immitation of helper functions supplied in
   // the sharejs library. (See vendor/libs/sharejs, in particular
   // the 'attach_ace' helper)
-  attachShareJs(shareDoc: ShareDoc, maxDocLength?: number) {
-    this.shareDoc = shareDoc
-    this.maxDocLength = maxDocLength
-
+  attachShareJs() {
+    const shareDoc = this.shareDoc
     const check = () => {
       // run in a timeout so it checks the editor content once this update has been applied
       window.setTimeout(() => {
-        const editorText = this.getValue()
+        const editorText = this.editor.getValue()
         const otText = shareDoc.getText()
 
         if (editorText !== otText) {
-          shareDoc.emit('error', 'Text does not match in CodeMirror 6')
+          this.shareDoc.emit('error', 'Text does not match in CodeMirror 6')
           debugConsole.error('Text does not match!')
           debugConsole.error('editor: ' + editorText)
           debugConsole.error('ot:     ' + otText)
@@ -143,12 +184,12 @@ export class EditorFacade extends EventEmitter {
     }
 
     const onInsert = (pos: number, text: string) => {
-      this.cmInsert(pos, text, 'remote')
+      this.editor.cmInsert(pos, text, 'remote')
       check()
     }
 
     const onDelete = (pos: number, text: string) => {
-      this.cmDelete(pos, text, 'remote')
+      this.editor.cmDelete(pos, text, 'remote')
       check()
     }
 
@@ -161,7 +202,7 @@ export class EditorFacade extends EventEmitter {
       shareDoc.removeListener('insert', onInsert)
       shareDoc.removeListener('delete', onDelete)
       delete shareDoc.detach_cm6
-      this.shareDoc = null
+      this.editor.detachShareJs()
     }
   }
 
@@ -174,10 +215,6 @@ export class EditorFacade extends EventEmitter {
     const shareDoc = this.shareDoc
     const trackedDeletesLength =
       ranges != null ? ranges.getTrackedDeletesLength() : 0
-
-    if (!shareDoc) {
-      throw new Error('Trying to process updates with no shareDoc')
-    }
 
     for (const transaction of transactions) {
       if (transaction.docChanged) {
@@ -234,13 +271,15 @@ export class EditorFacade extends EventEmitter {
               removed,
             }
 
-            this.emit('change', this, changeDescription)
+            this.editor.emit('change', this, changeDescription)
           }
         )
       }
     }
   }
 }
+
+class HistoryOTAdapter extends ShareLatexOTAdapter {}
 
 export const trackChangesAnnotation = Annotation.define()
 
