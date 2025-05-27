@@ -108,10 +108,16 @@ async function _removeUserFromGroup(
     })
   }
 
+  const groupAuditLog = {
+    initiatorId: loggedInUserId,
+    ipAddress: req.ip,
+  }
+
   try {
     await SubscriptionGroupHandler.promises.removeUserFromGroup(
       subscriptionId,
-      userToRemoveId
+      userToRemoveId,
+      groupAuditLog
     )
   } catch (error) {
     logger.err(

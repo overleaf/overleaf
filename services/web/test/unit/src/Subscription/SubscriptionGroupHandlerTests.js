@@ -233,13 +233,15 @@ describe('SubscriptionGroupHandler', function () {
 
   describe('removeUserFromGroup', function () {
     it('should call the subscription updater to remove the user', async function () {
+      const auditLog = { ipAddress: '0:0:0:0', initiatorId: this.user._id }
       await this.Handler.promises.removeUserFromGroup(
         this.adminUser_id,
-        this.user._id
+        this.user._id,
+        auditLog
       )
 
       this.SubscriptionUpdater.promises.removeUserFromGroup
-        .calledWith(this.adminUser_id, this.user._id)
+        .calledWith(this.adminUser_id, this.user._id, auditLog)
         .should.equal(true)
     })
   })
@@ -1149,7 +1151,9 @@ describe('SubscriptionGroupHandler', function () {
 
           expect(
             this.SubscriptionUpdater.promises.removeUserFromGroup
-          ).to.have.been.calledWith(this.subscription._id, members[2]._id)
+          ).to.have.been.calledWith(this.subscription._id, members[2]._id, {
+            initiatorId: inviterId,
+          })
 
           expect(
             this.TeamInvitesHandler.promises.createInvite.callCount

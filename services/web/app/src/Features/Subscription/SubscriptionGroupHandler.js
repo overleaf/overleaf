@@ -22,10 +22,11 @@ const {
 const EmailHelper = require('../Helpers/EmailHelper')
 const { InvalidEmailError } = require('../Errors/Errors')
 
-async function removeUserFromGroup(subscriptionId, userIdToRemove) {
+async function removeUserFromGroup(subscriptionId, userIdToRemove, auditLog) {
   await SubscriptionUpdater.promises.removeUserFromGroup(
     subscriptionId,
-    userIdToRemove
+    userIdToRemove,
+    auditLog
   )
 }
 
@@ -463,7 +464,9 @@ async function updateGroupMembersBulk(
       )
     }
     for (const user of membersToRemove) {
-      await removeUserFromGroup(subscription._id, user._id)
+      await removeUserFromGroup(subscription._id, user._id, {
+        initiatorId: inviterId,
+      })
     }
   }
 

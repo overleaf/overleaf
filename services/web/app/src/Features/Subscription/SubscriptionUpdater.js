@@ -18,7 +18,30 @@ const Modules = require('../../infrastructure/Modules')
 /**
  * @typedef {import('../../../../types/subscription/dashboard/subscription').Subscription} Subscription
  * @typedef {import('../../../../types/subscription/dashboard/subscription').PaymentProvider} PaymentProvider
+ * @typedef {import('../../../../types/group-management/group-audit-log').GroupAuditLog} GroupAuditLog
  */
+
+/**
+ *
+ * @param {GroupAuditLog} auditLog
+ */
+async function subscriptionUpdateWithAuditLog(dbFilter, dbUpdate, auditLog) {
+  const session = await mongoose.startSession()
+
+  try {
+    await session.withTransaction(async () => {
+      await Subscription.updateOne(dbFilter, dbUpdate, { session }).exec()
+
+      await Modules.promises.hooks.fire(
+        'addGroupAuditLogEntry',
+        auditLog,
+        session
+      )
+    })
+  } finally {
+    await session.endSession()
+  }
+}
 
 /**
  * Change the admin of the given subscription.
@@ -68,8 +91,6 @@ async function syncSubscription(
 }
 
 async function addUserToGroup(subscriptionId, userId, auditLog) {
-  const session = await mongoose.startSession()
-
   await UserAuditLogHandler.promises.addEntry(
     userId,
     'join-group-subscription',
@@ -78,28 +99,16 @@ async function addUserToGroup(subscriptionId, userId, auditLog) {
     { subscriptionId }
   )
 
-  try {
-    await session.withTransaction(async () => {
-      await Subscription.updateOne(
-        { _id: subscriptionId },
-        { $addToSet: { member_ids: userId } },
-        { session }
-      ).exec()
-
-      await Modules.promises.hooks.fire(
-        'addGroupAuditLogEntry',
-        {
-          initiatorId: auditLog?.initiatorId,
-          ipAddress: auditLog?.ipAddress,
-          groupId: subscriptionId,
-          operation: 'join-group',
-        },
-        session
-      )
-    })
-  } finally {
-    await session.endSession()
-  }
+  await subscriptionUpdateWithAuditLog(
+    { _id: subscriptionId },
+    { $addToSet: { member_ids: userId } },
+    {
+      initiatorId: auditLog?.initiatorId,
+      ipAddress: auditLog?.ipAddress,
+      groupId: subscriptionId,
+      operation: 'join-group',
+    }
+  )
 
   await FeaturesUpdater.promises.refreshFeatures(userId, 'add-to-group')
   await _sendUserGroupPlanCodeUserProperty(userId)
@@ -110,7 +119,7 @@ async function addUserToGroup(subscriptionId, userId, auditLog) {
   )
 }
 
-async function removeUserFromGroup(subscriptionId, userId) {
+async function removeUserFromGroup(subscriptionId, userId, auditLog) {
   await UserAuditLogHandler.promises.addEntry(
     userId,
     'leave-group-subscription',
@@ -118,6 +127,19 @@ async function removeUserFromGroup(subscriptionId, userId) {
     undefined,
     { subscriptionId }
   )
+
+  await subscriptionUpdateWithAuditLog(
+    { _id: subscriptionId },
+    { $pull: { member_ids: userId } },
+    {
+      initiatorId: auditLog?.initiatorId,
+      ipAddress: auditLog?.ipAddress,
+      groupId: subscriptionId,
+      operation: 'leave-group',
+      info: { userIdRemoved: userId },
+    }
+  )
+
   await Subscription.updateOne(
     { _id: subscriptionId },
     { $pull: { member_ids: userId } }

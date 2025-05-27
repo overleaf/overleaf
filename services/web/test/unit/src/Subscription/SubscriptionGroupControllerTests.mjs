@@ -185,7 +185,10 @@ describe('SubscriptionGroupController', function () {
       const res = {
         sendStatus: () => {
           this.SubscriptionGroupHandler.promises.removeUserFromGroup
-            .calledWith(this.subscriptionId, userIdToRemove)
+            .calledWith(this.subscriptionId, userIdToRemove, {
+              initiatorId: this.req.session.user._id,
+              ipAddress: this.req.ip,
+            })
             .should.equal(true)
           done()
         },
@@ -277,7 +280,11 @@ describe('SubscriptionGroupController', function () {
           sinon.assert.calledWith(
             this.SubscriptionGroupHandler.promises.removeUserFromGroup,
             this.subscriptionId,
-            memberUserIdToremove
+            memberUserIdToremove,
+            {
+              initiatorId: this.req.session.user._id,
+              ipAddress: this.req.ip,
+            }
           )
           done()
         },
