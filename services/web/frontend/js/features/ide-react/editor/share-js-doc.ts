@@ -365,7 +365,7 @@ export class ShareJsDoc extends EventEmitter {
 
   attachToCM6(cm6: EditorFacade) {
     this.attachToEditor(cm6, () => {
-      cm6.attachShareJs(this._doc, getMeta('ol-maxDocLength'), this.type)
+      cm6.attachShareJs(this._doc, getMeta('ol-maxDocLength'))
     })
   }
 
