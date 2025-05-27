@@ -120,6 +120,18 @@ describe('SubscriptionUpdater', function () {
           },
         },
       ],
+      mongo: {
+        options: {
+          appname: 'web',
+          maxPoolSize: 100,
+          serverSelectionTimeoutMS: 60000,
+          socketTimeoutMS: 60000,
+          monitorCommands: true,
+          family: 4,
+        },
+        url: 'mongodb://mongo/test-overleaf',
+        hasSecondaries: false,
+      },
     }
 
     this.UserFeaturesUpdater = {
@@ -181,6 +193,13 @@ describe('SubscriptionUpdater', function () {
         }),
         '../../infrastructure/Features': this.Features,
         '../User/UserAuditLogHandler': this.UserAuditLogHandler,
+        '../../infrastructure/Modules': (this.Modules = {
+          promises: {
+            hooks: {
+              fire: sinon.stub().resolves(),
+            },
+          },
+        }),
       },
     })
   })
@@ -486,6 +505,7 @@ describe('SubscriptionUpdater', function () {
       this.SubscriptionModel.updateOne
         .calledWith(searchOps, insertOperation)
         .should.equal(true)
+      expect(this.SubscriptionModel.updateOne.lastCall.args[2].session).to.exist
       sinon.assert.calledWith(
         this.AnalyticsManager.recordEventForUserInBackground,
         this.otherUserId,
@@ -568,6 +588,24 @@ describe('SubscriptionUpdater', function () {
         undefined,
         {
           subscriptionId: this.subscription._id,
+        }
+      )
+    })
+
+    it('should add an entry to the group audit log when joining a group', async function () {
+      await this.SubscriptionUpdater.promises.addUserToGroup(
+        this.subscription._id,
+        this.otherUserId,
+        { ipAddress: '0:0:0:0', initiatorId: 'user123' }
+      )
+
+      expect(this.Modules.promises.hooks.fire).to.have.been.calledWith(
+        'addGroupAuditLogEntry',
+        {
+          groupId: this.subscription._id,
+          initiatorId: 'user123',
+          ipAddress: '0:0:0:0',
+          operation: 'join-group',
         }
       )
     })

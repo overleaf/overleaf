@@ -36,10 +36,15 @@ async function createInvite(req, res, next) {
   }
 
   try {
+    const auditLog = {
+      initiatorId: teamManagerId,
+      ipAddress: req.ip,
+    }
     const invitedUserData = await TeamInvitesHandler.promises.createInvite(
       teamManagerId,
       subscription,
-      email
+      email,
+      auditLog
     )
     return res.json({ user: invitedUserData })
   } catch (err) {

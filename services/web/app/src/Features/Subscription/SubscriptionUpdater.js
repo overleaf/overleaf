@@ -12,6 +12,8 @@ const Features = require('../../infrastructure/Features')
 const UserAuditLogHandler = require('../User/UserAuditLogHandler')
 const AccountMappingHelper = require('../Analytics/AccountMappingHelper')
 const { SSOConfig } = require('../../models/SSOConfig')
+const mongoose = require('../../infrastructure/Mongoose')
+const Modules = require('../../infrastructure/Modules')
 
 /**
  * @typedef {import('../../../../types/subscription/dashboard/subscription').Subscription} Subscription
@@ -65,7 +67,9 @@ async function syncSubscription(
   )
 }
 
-async function addUserToGroup(subscriptionId, userId) {
+async function addUserToGroup(subscriptionId, userId, auditLog) {
+  const session = await mongoose.startSession()
+
   await UserAuditLogHandler.promises.addEntry(
     userId,
     'join-group-subscription',
@@ -73,10 +77,30 @@ async function addUserToGroup(subscriptionId, userId) {
     undefined,
     { subscriptionId }
   )
-  await Subscription.updateOne(
-    { _id: subscriptionId },
-    { $addToSet: { member_ids: userId } }
-  ).exec()
+
+  try {
+    await session.withTransaction(async () => {
+      await Subscription.updateOne(
+        { _id: subscriptionId },
+        { $addToSet: { member_ids: userId } },
+        { session }
+      ).exec()
+
+      await Modules.promises.hooks.fire(
+        'addGroupAuditLogEntry',
+        {
+          initiatorId: auditLog?.initiatorId,
+          ipAddress: auditLog?.ipAddress,
+          groupId: subscriptionId,
+          operation: 'join-group',
+        },
+        session
+      )
+    })
+  } finally {
+    await session.endSession()
+  }
+
   await FeaturesUpdater.promises.refreshFeatures(userId, 'add-to-group')
   await _sendUserGroupPlanCodeUserProperty(userId)
   await _sendSubscriptionEvent(
