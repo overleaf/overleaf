@@ -37,7 +37,8 @@ export function createProject(
   }
   cy.findAllByRole('button').contains(newProjectButtonMatcher).click()
   // FIXME: This should only look in the left menu
-  cy.findAllByText(new RegExp(type, 'i')).first().click()
+  // The upgrading tests create projects in older versions of Server Pro which used different casing of the project type. Use case-insensitive match.
+  cy.findAllByText(type, { exact: false }).first().click()
   cy.findByRole('dialog').within(() => {
     cy.get('input').type(name)
     cy.findByText('Create').click()

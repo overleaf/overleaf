@@ -107,7 +107,7 @@ describe('git-bridge', function () {
           cy.get('code').contains(`git clone ${gitURL(id.toString())}`)
         })
         cy.findByText('Generate token').should('not.exist')
-        cy.findByText(/generate a new one in Account settings/i)
+        cy.findByText(/generate a new one in Account settings/)
         cy.findByText('Go to settings')
           .should('have.attr', 'target', '_blank')
           .and('have.attr', 'href', '/user/settings')
