@@ -64,7 +64,7 @@ async function importInvite(subscription, inviterName, email, token, sentAt) {
   return subscription.save()
 }
 
-async function acceptInvite(token, userId) {
+async function acceptInvite(token, userId, auditLog) {
   const { invite, subscription } = await getInvite(token)
   if (!invite) {
     throw new Errors.NotFoundError('invite not found')
@@ -76,7 +76,8 @@ async function acceptInvite(token, userId) {
     await Modules.promises.hooks.fire(
       'enrollInManagedSubscription',
       userId,
-      subscription
+      subscription,
+      auditLog
     )
   }
   if (subscription.ssoConfig) {

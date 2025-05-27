@@ -126,7 +126,11 @@ class PromisifiedSubscription {
     return await Modules.promises.hooks.fire(
       'enrollInManagedSubscription',
       user._id,
-      subscription
+      subscription,
+      {
+        initiatorId: user._id,
+        ipAddress: '0:0:0:0',
+      }
     )
   }
 

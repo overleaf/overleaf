@@ -197,7 +197,8 @@ async function acceptInvite(req, res, next) {
 
   const subscription = await TeamInvitesHandler.promises.acceptInvite(
     token,
-    userId
+    userId,
+    { initiatorId: userId, ipAddress: req.ip }
   )
   const groupSSOActive = (
     await Modules.promises.hooks.fire('hasGroupSSOEnabled', subscription)
