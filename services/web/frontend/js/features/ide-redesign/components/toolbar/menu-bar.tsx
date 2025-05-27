@@ -1,6 +1,7 @@
 import {
   DropdownDivider,
   DropdownHeader,
+  DropdownItem,
 } from '@/features/ui/components/bootstrap-5/dropdown-menu'
 import { MenuBar } from '@/shared/components/menu-bar/menu-bar'
 import { MenuBarDropdown } from '@/shared/components/menu-bar/menu-bar-dropdown'
@@ -209,13 +210,17 @@ export const ToolbarMenuBar = () => {
           className="ide-redesign-toolbar-dropdown-toggle-subdued ide-redesign-toolbar-button-subdued"
         >
           <ChangeLayoutOptions />
+          <DropdownDivider />
           <DropdownHeader>Editor settings</DropdownHeader>
           <MenuBarOption
             eventKey="show_equation_preview"
             title={t('show_equation_preview')}
-            trailingIcon={mathPreview ? 'check' : undefined}
+            leadingIcon={
+              mathPreview ? 'check' : <DropdownItem.EmptyLeadingIcon />
+            }
             onClick={toggleMathPreview}
           />
+          <DropdownDivider />
           <CommandSection section={pdfControlsMenuSectionStructure} />
         </MenuBarDropdown>
         <CommandDropdown

@@ -8,6 +8,7 @@ type MenuBarOptionProps = {
   title: string
   onClick?: MouseEventHandler
   disabled?: boolean
+  leadingIcon?: ReactNode
   trailingIcon?: ReactNode
   href?: string
   target?: string
@@ -20,6 +21,7 @@ export const MenuBarOption = ({
   onClick: clickHandler,
   href,
   disabled,
+  leadingIcon,
   trailingIcon,
   target,
   rel,
@@ -42,6 +44,7 @@ export const MenuBarOption = ({
         onMouseEnter={() => setSelected(null)}
         onClick={onClick}
         disabled={disabled}
+        leadingIcon={leadingIcon}
         trailingIcon={trailingIcon}
         href={href}
         rel={rel}
