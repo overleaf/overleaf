@@ -1,16 +1,10 @@
 import { Trans, useTranslation } from 'react-i18next'
 import Notification from '../notification'
 import getMeta from '../../../../../utils/meta'
-import useAsync from '../../../../../shared/hooks/use-async'
 import { useProjectListContext } from '../../../context/project-list-context'
-import {
-  postJSON,
-  getUserFacingMessage,
-} from '../../../../../infrastructure/fetch-json'
 import { UserEmailData } from '../../../../../../../types/user-email'
-import { debugConsole } from '@/utils/debugging'
-import OLButton from '@/features/ui/components/ol/ol-button'
-import LoadingSpinner from '@/shared/components/loading-spinner'
+import ResendConfirmationCodeModal from '@/features/settings/components/emails/resend-confirmation-code-modal'
+import { ReactNode, useState } from 'react'
 
 const ssoAvailable = ({ samlProviderId, affiliation }: UserEmailData) => {
   const { hasSamlFeature, hasSamlBeta } = getMeta('ol-ExposedSettings')
@@ -114,12 +108,17 @@ function getEmailDeletionDate(emailData: UserEmailData, signUpDate: string) {
 function ConfirmEmailNotification({
   userEmail,
   signUpDate,
+  setIsLoading,
+  isLoading,
 }: {
   userEmail: UserEmailData
   signUpDate: string
+  setIsLoading: (loading: boolean) => void
+  isLoading: boolean
 }) {
   const { t } = useTranslation()
-  const { isLoading, isSuccess, isError, error, runAsync } = useAsync()
+  const [isSuccess, setIsSuccess] = useState(false)
+  const emailAddress = userEmail.email
 
   // We consider secondary emails added on or after 22.03.2024 to be trusted for account recovery
   // https://github.com/overleaf/internal/pull/17572
@@ -127,6 +126,7 @@ function ConfirmEmailNotification({
   const emailDeletionDate = getEmailDeletionDate(userEmail, signUpDate)
   const isPrimary = userEmail.default
 
+  const isEmailConfirmed = !!userEmail.lastConfirmedAt
   const isEmailTrusted =
     userEmail.lastConfirmedAt &&
     new Date(userEmail.lastConfirmedAt) >= emailTrustCutoffDate
@@ -134,163 +134,97 @@ function ConfirmEmailNotification({
   const shouldShowCommonsNotification =
     emailHasLicenceAfterConfirming(userEmail) && isOnFreeOrIndividualPlan()
 
-  const handleResendConfirmationEmail = ({ email }: UserEmailData) => {
-    runAsync(
-      postJSON('/user/emails/resend_confirmation', {
-        body: { email },
-      })
-    ).catch(debugConsole.error)
-  }
-
   if (isSuccess) {
     return null
   }
 
-  if (!userEmail.lastConfirmedAt && !shouldShowCommonsNotification) {
-    return (
-      <Notification
-        type="warning"
-        content={
-          <div data-testid="pro-notification-body">
-            {isLoading ? (
-              <div data-testid="loading-resending-confirmation-email">
-                <LoadingSpinner
-                  loadingText={t('resending_confirmation_email')}
-                />
-              </div>
-            ) : isError ? (
-              <div aria-live="polite">{getUserFacingMessage(error)}</div>
-            ) : (
-              <>
-                <p>
-                  {isPrimary
-                    ? t('please_confirm_primary_email', {
-                        emailAddress: userEmail.email,
-                      })
-                    : t('please_confirm_secondary_email', {
-                        emailAddress: userEmail.email,
-                      })}
-                </p>
-                {emailDeletionDate && (
-                  <p>
-                    {t('email_remove_by_date', { date: emailDeletionDate })}
-                  </p>
-                )}
-              </>
-            )}
-          </div>
-        }
-        action={
-          <>
-            <OLButton
-              variant="secondary"
-              onClick={() => handleResendConfirmationEmail(userEmail)}
-            >
-              {t('resend_confirmation_email')}
-            </OLButton>
-            <OLButton variant="link" href="/user/settings">
-              {isPrimary
-                ? t('change_primary_email')
-                : t('remove_email_address')}
-            </OLButton>
-          </>
-        }
-      />
-    )
-  }
+  const confirmationCodeModal = (
+    <ResendConfirmationCodeModal
+      email={emailAddress}
+      onSuccess={() => setIsSuccess(true)}
+      setGroupLoading={setIsLoading}
+      groupLoading={isLoading}
+      triggerVariant="secondary"
+    />
+  )
 
-  if (!isEmailTrusted && !isPrimary && !shouldShowCommonsNotification) {
-    return (
-      <Notification
-        type="warning"
-        content={
-          <div data-testid="not-trusted-notification-body">
-            {isLoading ? (
-              <div data-testid="error-id">
-                <LoadingSpinner
-                  loadingText={t('resending_confirmation_email')}
-                />
-              </div>
-            ) : isError ? (
-              <div aria-live="polite">{getUserFacingMessage(error)}</div>
-            ) : (
-              <>
-                <p>
-                  <b>{t('confirm_secondary_email')}</b>
-                </p>
-                <p>
-                  {t('reconfirm_secondary_email', {
-                    emailAddress: userEmail.email,
-                  })}
-                </p>
-                <p>{t('ensure_recover_account')}</p>
-              </>
-            )}
-          </div>
-        }
-        action={
-          <>
-            <OLButton
-              variant="secondary"
-              onClick={() => handleResendConfirmationEmail(userEmail)}
-            >
-              {t('resend_confirmation_email')}
-            </OLButton>
-            <OLButton
-              variant="link"
-              href="/user/settings"
-              style={{ textDecoration: 'underline' }}
-            >
-              {t('remove_email_address')}
-            </OLButton>
-          </>
-        }
-      />
-    )
-  }
+  let notificationType: 'info' | 'warning' | undefined
+  let notificationBody: ReactNode | undefined
 
-  // Only show the notification if a) a commons license is available and b) the
-  // user is on a free or individual plan. Users on a group or Commons plan
-  // already have premium features.
   if (shouldShowCommonsNotification) {
+    notificationType = 'info'
+    notificationBody = (
+      <>
+        <Trans
+          i18nKey="one_step_away_from_professional_features"
+          components={[<strong />]} // eslint-disable-line react/jsx-key
+        />
+        <br />
+        <Trans
+          i18nKey="institution_has_overleaf_subscription"
+          values={{
+            institutionName: userEmail.affiliation?.institution.name,
+            emailAddress,
+          }}
+          shouldUnescape
+          tOptions={{ interpolation: { escapeValue: true } }}
+          components={[<strong />]} // eslint-disable-line react/jsx-key
+        />
+      </>
+    )
+  } else if (!isEmailConfirmed) {
+    notificationType = 'warning'
+    notificationBody = (
+      <>
+        <p>
+          {isPrimary ? (
+            <Trans
+              i18nKey="please_confirm_primary_email_or_edit"
+              shouldUnescape
+              tOptions={{ interpolation: { escapeValue: true } }}
+              values={{ emailAddress }}
+              components={[
+                // eslint-disable-next-line jsx-a11y/anchor-has-content, react/jsx-key
+                <a href="/user/settings" />,
+              ]}
+            />
+          ) : (
+            <Trans
+              i18nKey="please_confirm_secondary_email_or_edit"
+              shouldUnescape
+              tOptions={{ interpolation: { escapeValue: true } }}
+              values={{ emailAddress }}
+              components={[
+                // eslint-disable-next-line jsx-a11y/anchor-has-content, react/jsx-key
+                <a href="/user/settings" />,
+              ]}
+            />
+          )}
+        </p>
+        {emailDeletionDate && (
+          <p>{t('email_remove_by_date', { date: emailDeletionDate })}</p>
+        )}
+      </>
+    )
+  } else if (!isEmailTrusted && !isPrimary) {
+    notificationType = 'warning'
+    notificationBody = (
+      <>
+        <p>
+          <b>{t('confirm_secondary_email')}</b>
+        </p>
+        <p>{t('reconfirm_secondary_email', { emailAddress })}</p>
+        <p>{t('ensure_recover_account')}</p>
+      </>
+    )
+  }
+
+  if (notificationType) {
     return (
       <Notification
-        type="info"
-        content={
-          <div data-testid="notification-body">
-            {isLoading ? (
-              <LoadingSpinner loadingText={t('resending_confirmation_email')} />
-            ) : isError ? (
-              <div aria-live="polite">{getUserFacingMessage(error)}</div>
-            ) : (
-              <>
-                <Trans
-                  i18nKey="one_step_away_from_professional_features"
-                  components={[<strong />]} // eslint-disable-line react/jsx-key
-                />
-                <br />
-                <Trans
-                  i18nKey="institution_has_overleaf_subscription"
-                  values={{
-                    institutionName: userEmail.affiliation?.institution.name,
-                    emailAddress: userEmail.email,
-                  }}
-                  shouldUnescape
-                  tOptions={{ interpolation: { escapeValue: true } }}
-                  components={[<strong />]} // eslint-disable-line react/jsx-key
-                />
-              </>
-            )}
-          </div>
-        }
-        action={
-          <OLButton
-            variant="secondary"
-            onClick={() => handleResendConfirmationEmail(userEmail)}
-          >
-            {t('resend_email')}
-          </OLButton>
-        }
+        type={notificationType}
+        content={notificationBody}
+        action={confirmationCodeModal}
       />
     )
   }
@@ -302,6 +236,7 @@ function ConfirmEmail() {
   const { totalProjectsCount } = useProjectListContext()
   const userEmails = getMeta('ol-userEmails') || []
   const signUpDate = getMeta('ol-user')?.signUpDate
+  const [isLoading, setIsLoading] = useState(false)
 
   if (!totalProjectsCount || !userEmails.length || !signUpDate) {
     return null
@@ -315,6 +250,8 @@ function ConfirmEmail() {
             key={`confirm-email-${userEmail.email}`}
             userEmail={userEmail}
             signUpDate={signUpDate}
+            isLoading={isLoading}
+            setIsLoading={setIsLoading}
           />
         ) : null
       })}

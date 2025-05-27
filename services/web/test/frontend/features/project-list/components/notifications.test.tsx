@@ -5,7 +5,6 @@ import {
   render,
   screen,
   waitForElementToBeRemoved,
-  within,
 } from '@testing-library/react'
 import fetchMock from 'fetch-mock'
 import { merge, cloneDeep } from 'lodash'
@@ -672,32 +671,37 @@ describe('<UserNotifications />', function () {
 
         renderWithinProjectListProvider(ConfirmEmail)
         await fetchMock.callHistory.flush(true)
-        fetchMock.post('/user/emails/resend_confirmation', 200)
+        fetchMock.post('/user/emails/send-confirmation-code', 200)
 
         const email = userEmails[0].email
-        const notificationBody = await screen.findByTestId(
-          'pro-notification-body'
-        )
+        const alert = await screen.findByRole('alert')
 
         if (isPrimary) {
-          expect(notificationBody.textContent).to.contain(
-            `Please confirm your primary email address ${email} by clicking on the link in the confirmation email.`
+          expect(alert.textContent).to.contain(
+            `Please confirm your primary email address ${email}. To edit it, go to `
           )
         } else {
-          expect(notificationBody.textContent).to.contain(
-            `Please confirm your secondary email address ${email} by clicking on the link in the confirmation email.`
+          expect(alert.textContent).to.contain(
+            `Please confirm your secondary email address ${email}. To edit it, go to `
           )
         }
 
-        const resendButton = screen.getByRole('button', { name: /resend/i })
-        fireEvent.click(resendButton)
+        expect(
+          screen
+            .getByRole('button', { name: 'Send confirmation code' })
+            .classList.contains('button-loading')
+        ).to.be.false
 
-        await waitForElementToBeRemoved(() =>
-          screen.queryByRole('button', { name: /resend/i })
-        )
+        expect(screen.queryByRole('dialog')).to.be.null
+
+        const sendCodeButton = await screen.findByRole('button', {
+          name: 'Send confirmation code',
+        })
+        fireEvent.click(sendCodeButton)
+
+        await screen.findByRole('dialog')
 
         expect(fetchMock.callHistory.called()).to.be.true
-        expect(screen.queryByRole('alert')).to.be.null
       })
     }
 
@@ -716,25 +720,22 @@ describe('<UserNotifications />', function () {
 
       renderWithinProjectListProvider(ConfirmEmail)
       await fetchMock.callHistory.flush(true)
-      fetchMock.post('/user/emails/resend_confirmation', 200)
+      fetchMock.post('/user/emails/send-confirmation-code', 200)
 
       const email = untrustedUserData.email
-      const notificationBody = await screen.findByTestId(
-        'not-trusted-notification-body'
-      )
-      expect(notificationBody.textContent).to.contain(
+      const alert = await screen.findByRole('alert')
+      expect(alert.textContent).to.contain(
         `To enhance the security of your Overleaf account, please reconfirm your secondary email address ${email}.`
       )
 
-      const resendButton = screen.getByRole('button', { name: /resend/i })
+      const resendButton = screen.getByRole('button', {
+        name: 'Send confirmation code',
+      })
       fireEvent.click(resendButton)
 
-      await waitForElementToBeRemoved(() =>
-        screen.getByRole('button', { name: /resend/i })
-      )
+      await screen.findByRole('dialog')
 
       expect(fetchMock.callHistory.called()).to.be.true
-      expect(screen.queryByRole('alert')).to.be.null
     })
 
     it('fails to send', async function () {
@@ -742,20 +743,15 @@ describe('<UserNotifications />', function () {
 
       renderWithinProjectListProvider(ConfirmEmail)
       await fetchMock.callHistory.flush(true)
-      fetchMock.post('/user/emails/resend_confirmation', 500)
+      fetchMock.post('/user/emails/send-confirmation-code', 500)
 
       const resendButtons = await screen.findAllByRole('button', {
-        name: /resend/i,
+        name: 'Send confirmation code',
       })
       const resendButton = resendButtons[0]
       fireEvent.click(resendButton)
-      const notificationBody = screen.getByTestId('pro-notification-body')
 
-      await waitForElementToBeRemoved(() =>
-        within(notificationBody).getByTestId(
-          'loading-resending-confirmation-email'
-        )
-      )
+      await screen.findByRole('dialog')
 
       expect(fetchMock.callHistory.called()).to.be.true
       screen.getByText(/something went wrong/i)
@@ -773,11 +769,10 @@ describe('<UserNotifications />', function () {
 
         const alert = await screen.findByRole('alert')
         const email = unconfirmedCommonsUserData.email
-        const notificationBody = within(alert).getByTestId('notification-body')
-        expect(notificationBody.textContent).to.contain(
+        expect(alert.textContent).to.contain(
           'You are one step away from accessing Overleaf Professional features'
         )
-        expect(notificationBody.textContent).to.contain(
+        expect(alert.textContent).to.contain(
           `Overleaf has an Overleaf subscription. Click the confirmation link sent to ${email} to upgrade to Overleaf Professional`
         )
       })
@@ -794,17 +789,14 @@ describe('<UserNotifications />', function () {
 
         const alert = await screen.findByRole('alert')
         const email = unconfirmedCommonsUserData.email
-        const notificationBody = within(alert).getByTestId(
-          'pro-notification-body'
-        )
         const isPrimary = unconfirmedCommonsUserData.default
         if (isPrimary) {
-          expect(notificationBody.textContent).to.contain(
-            `Please confirm your primary email address ${email} by clicking on the link in the confirmation email`
+          expect(alert.textContent).to.contain(
+            `Please confirm your primary email address ${email}.`
           )
         } else {
-          expect(notificationBody.textContent).to.contain(
-            `Please confirm your secondary email address ${email} by clicking on the link in the confirmation email`
+          expect(alert.textContent).to.contain(
+            `Please confirm your secondary email address ${email}.`
           )
         }
       })

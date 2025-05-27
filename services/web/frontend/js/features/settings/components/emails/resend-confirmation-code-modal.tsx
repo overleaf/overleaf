@@ -1,10 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import Icon from '../../../../shared/components/icon'
 import { FetchError, postJSON } from '@/infrastructure/fetch-json'
 import useAsync from '../../../../shared/hooks/use-async'
 import { UserEmailData } from '../../../../../../types/user-email'
-import { useUserEmailsContext } from '../../context/user-email-context'
 import OLButton from '@/features/ui/components/ol/ol-button'
 import OLModal, {
   OLModalBody,
@@ -16,39 +14,33 @@ import { ConfirmEmailForm } from '@/features/settings/components/emails/confirm-
 
 type ResendConfirmationEmailButtonProps = {
   email: UserEmailData['email']
+  groupLoading: boolean
+  setGroupLoading: (loading: boolean) => void
+  onSuccess: () => void
+  triggerVariant: 'link' | 'secondary'
 }
 
 function ResendConfirmationCodeModal({
   email,
+  groupLoading,
+  setGroupLoading,
+  onSuccess,
+  triggerVariant,
 }: ResendConfirmationEmailButtonProps) {
   const { t } = useTranslation()
   const { error, isLoading, isError, runAsync } = useAsync()
-  const {
-    state,
-    setLoading: setUserEmailsContextLoading,
-    getEmails,
-  } = useUserEmailsContext()
   const [modalVisible, setModalVisible] = useState(false)
 
-  // Update global isLoading prop
   useEffect(() => {
-    setUserEmailsContextLoading(isLoading)
-  }, [setUserEmailsContextLoading, isLoading])
+    setGroupLoading(isLoading)
+  }, [isLoading, setGroupLoading])
 
   const handleResendConfirmationEmail = async () => {
     await runAsync(
       postJSON('/user/emails/send-confirmation-code', { body: { email } })
     )
-      .then(() => setModalVisible(true))
       .catch(() => {})
-  }
-
-  if (isLoading) {
-    return (
-      <>
-        <Icon type="refresh" spin fw /> {t('sending')}&hellip;
-      </>
-    )
+      .finally(() => setModalVisible(true))
   }
 
   const rateLimited =
@@ -77,9 +69,16 @@ function ResendConfirmationCodeModal({
               confirmationEndpoint="/user/emails/confirm-code"
               email={email}
               onSuccessfulConfirmation={() => {
-                getEmails()
+                onSuccess()
                 setModalVisible(false)
               }}
+              outerError={
+                isError
+                  ? rateLimited
+                    ? t('too_many_requests')
+                    : t('generic_something_went_wrong')
+                  : undefined
+              }
             />
           </OLModalBody>
           <OLModalFooter>
@@ -94,21 +93,14 @@ function ResendConfirmationCodeModal({
         </OLModal>
       )}
       <OLButton
-        variant="link"
-        disabled={state.isLoading || isLoading}
+        variant={triggerVariant}
+        disabled={groupLoading}
+        isLoading={isLoading}
         onClick={handleResendConfirmationEmail}
-        className="btn-inline-link"
+        className={triggerVariant === 'link' ? 'btn-inline-link' : undefined}
       >
-        {t('resend_confirmation_code')}
+        {t('send_confirmation_code')}
       </OLButton>
-      <br />
-      {isError && (
-        <div className="text-danger">
-          {rateLimited
-            ? t('too_many_requests')
-            : t('generic_something_went_wrong')}
-        </div>
-      )}
     </>
   )
 }

@@ -99,7 +99,7 @@ describe('<EmailsSection />', function () {
     fetchMock.get('/user/emails?ensureAffiliation=true', [unconfirmedUserData])
     render(<EmailsSection />)
 
-    await screen.findByRole('button', { name: /resend confirmation code/i })
+    await screen.findByRole('button', { name: 'Send confirmation code' })
   })
 
   it('renders professional label', async function () {
@@ -121,24 +121,24 @@ describe('<EmailsSection />', function () {
     fetchMock.post('/user/emails/send-confirmation-code', 200)
 
     const button = screen.getByRole('button', {
-      name: /resend confirmation code/i,
+      name: 'Send confirmation code',
     })
     fireEvent.click(button)
 
     expect(
       screen.queryByRole('button', {
-        name: /resend confirmation code/i,
+        name: 'Send confirmation code',
       })
     ).to.be.null
 
-    await waitForElementToBeRemoved(() => screen.getByText(/sending/i))
+    await screen.findByRole('dialog')
 
     expect(
       screen.queryByText(/an error has occurred while performing your request/i)
     ).to.be.null
 
     await screen.findAllByRole('button', {
-      name: /resend confirmation code/i,
+      name: 'Resend confirmation code',
     })
   })
 
@@ -151,17 +151,17 @@ describe('<EmailsSection />', function () {
     fetchMock.post('/user/emails/send-confirmation-code', 503)
 
     const button = screen.getByRole('button', {
-      name: /resend confirmation code/i,
+      name: 'Send confirmation code',
     })
     fireEvent.click(button)
 
-    expect(screen.queryByRole('button', { name: /resend confirmation code/i }))
-      .to.be.null
+    expect(screen.queryByRole('button', { name: 'Send confirmation code' })).to
+      .be.null
 
-    await waitForElementToBeRemoved(() => screen.getByText(/sending/i))
+    await screen.findByRole('dialog')
 
-    screen.getByText(/sorry, something went wrong/i)
-    screen.getByRole('button', { name: /resend confirmation code/i })
+    await screen.findByText(/sorry, something went wrong/i)
+    screen.getByRole('button', { name: 'Resend confirmation code' })
   })
 
   it('sorts emails with primary first, then confirmed, then unconfirmed', async function () {
