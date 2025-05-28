@@ -47,6 +47,8 @@ class DuplicateNameError extends OError {}
 
 class InvalidNameError extends BackwardCompatibleError {}
 
+class IndeterminateInvoiceError extends OError {}
+
 class UnsupportedFileTypeError extends BackwardCompatibleError {}
 
 class FileTooLargeError extends BackwardCompatibleError {}
@@ -333,6 +335,7 @@ module.exports = {
   UnconfirmedEmailError,
   EmailExistsError,
   InvalidError,
+  IndeterminateInvoiceError,
   NotInV2Error,
   OutputFileFetchFailedError,
   SAMLAssertionAudienceMismatch,

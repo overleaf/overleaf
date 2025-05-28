@@ -1,3 +1,7 @@
+/**
+ * @import { AddOn } from '../../../../types/subscription/plan'
+ */
+
 const { callbackifyAll } = require('@overleaf/promise-utils')
 const { Subscription } = require('../../models/Subscription')
 const { DeletedSubscription } = require('../../models/DeletedSubscription')
@@ -124,7 +128,8 @@ const SubscriptionLocator = {
     // todo: as opposed to recurlyEntities which use addon.code, subscription model uses addon.addOnCode
     //  which we hope to align via https://github.com/overleaf/internal/issues/25494
     return Boolean(
-      isStandaloneAiAddOnPlanCode(subscription?.planCode) ||
+      (subscription?.planCode &&
+        isStandaloneAiAddOnPlanCode(subscription?.planCode)) ||
         subscription?.addOns?.some(addOn => addOn.addOnCode === AI_ADD_ON_CODE)
     )
   },
@@ -135,6 +140,27 @@ const SubscriptionLocator = {
     } else if (userOrId) {
       return userOrId
     }
+  },
+
+  /**
+   * Retrieves the last successful subscription for a given user.
+   *
+   * @async
+   * @function
+   * @param {string} recurlyId - The ID of the recurly subscription tied to the mongo subscription to check for a previous successful state.
+   * @returns {Promise<{_id: ObjectId, planCode: string, addOns: [AddOn]}|null>} A promise that resolves to the last successful planCode and addon state,
+   *   or null if we havent stored a previous
+   */
+  async getLastSuccessfulSubscription(recurlyId) {
+    const subscription = await Subscription.findOne({
+      recurlySubscription_id: recurlyId,
+    }).exec()
+    return subscription && subscription.lastSuccesfulSubscription
+      ? {
+          ...subscription.lastSuccesfulSubscription,
+          _id: subscription._id,
+        }
+      : null
   },
 }
 

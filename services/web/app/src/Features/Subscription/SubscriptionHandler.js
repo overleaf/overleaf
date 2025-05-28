@@ -11,7 +11,7 @@ const LimitationsManager = require('./LimitationsManager')
 const EmailHandler = require('../Email/EmailHandler')
 const { callbackify } = require('@overleaf/promise-utils')
 const UserUpdater = require('../User/UserUpdater')
-const { NotFoundError } = require('../Errors/Errors')
+const { NotFoundError, IndeterminateInvoiceError } = require('../Errors/Errors')
 const Modules = require('../../infrastructure/Modules')
 
 /**
@@ -387,6 +387,80 @@ async function resumeSubscription(user) {
   )
 }
 
+/**
+ * @param recurlySubscriptionId
+ */
+async function getSubscriptionRestorePoint(recurlySubscriptionId) {
+  const lastSubscription =
+    await SubscriptionLocator.promises.getLastSuccessfulSubscription(
+      recurlySubscriptionId
+    )
+  return lastSubscription
+}
+
+/**
+ * @param recurlySubscriptionId
+ * @param subscriptionRestorePoint
+ */
+async function revertPlanChange(
+  recurlySubscriptionId,
+  subscriptionRestorePoint
+) {
+  const subscription = await RecurlyClient.promises.getSubscription(
+    recurlySubscriptionId
+  )
+
+  const changeRequest = subscription.getRequestForPlanRevert(
+    subscriptionRestorePoint.planCode,
+    subscriptionRestorePoint.addOns
+  )
+
+  const pastDue = await RecurlyClient.promises.getPastDueInvoices(
+    recurlySubscriptionId
+  )
+
+  // only process revert requests within the past 24 hours, as we dont want to restore plans at the end of their dunning cycle
+  const yesterday = new Date()
+  yesterday.setDate(yesterday.getDate() - 1)
+  if (
+    pastDue.length !== 1 ||
+    !pastDue[0].id ||
+    !pastDue[0].dueAt ||
+    pastDue[0].dueAt < yesterday ||
+    pastDue[0].collectionMethod !== 'automatic'
+  ) {
+    throw new IndeterminateInvoiceError(
+      'cant determine invoice to fail for plan revert',
+      {
+        info: { recurlySubscriptionId },
+      }
+    )
+  }
+
+  await RecurlyClient.promises.failInvoice(pastDue[0].id)
+  await SubscriptionUpdater.promises.setSubscriptionWasReverted(
+    subscriptionRestorePoint._id
+  )
+  await RecurlyClient.promises.applySubscriptionChangeRequest(changeRequest)
+  await syncSubscription({ uuid: recurlySubscriptionId }, {})
+}
+
+async function setSubscriptionRestorePoint(userId) {
+  const subscription =
+    await SubscriptionLocator.promises.getUsersSubscription(userId)
+  // if the subscription is not a recurly one, we can return early as we dont allow for failed payments on other payment providers
+  //  we need to deal with it for recurly, because we cant verify payment in advance
+  if (!subscription?.recurlySubscription_id || !subscription.planCode) {
+    return
+  }
+  await SubscriptionUpdater.promises.setRestorePoint(
+    subscription.id,
+    subscription.planCode,
+    subscription.addOns,
+    false
+  )
+}
+
 module.exports = {
   validateNoSubscriptionInRecurly: callbackify(validateNoSubscriptionInRecurly),
   createSubscription: callbackify(createSubscription),
@@ -403,6 +477,9 @@ module.exports = {
   removeAddon: callbackify(removeAddon),
   pauseSubscription: callbackify(pauseSubscription),
   resumeSubscription: callbackify(resumeSubscription),
+  revertPlanChange: callbackify(revertPlanChange),
+  setSubscriptionRestorePoint: callbackify(setSubscriptionRestorePoint),
+  getSubscriptionRestorePoint: callbackify(getSubscriptionRestorePoint),
   promises: {
     validateNoSubscriptionInRecurly,
     createSubscription,
@@ -419,5 +496,8 @@ module.exports = {
     removeAddon,
     pauseSubscription,
     resumeSubscription,
+    revertPlanChange,
+    setSubscriptionRestorePoint,
+    getSubscriptionRestorePoint,
   },
 }

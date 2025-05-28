@@ -410,6 +410,8 @@ async function purchaseAddon(req, res, next) {
 
   logger.debug({ userId: user._id, addOnCode }, 'purchasing add-ons')
   try {
+    // set a restore point in the case of a failed payment for the upgrade (Recurly only)
+    await SubscriptionHandler.promises.setSubscriptionRestorePoint(user._id)
     await SubscriptionHandler.promises.purchaseAddon(
       user._id,
       addOnCode,
@@ -574,7 +576,35 @@ function recurlyCallback(req, res, next) {
     )
   )
 
-  if (
+  // this is a recurly only case which is required since Recurly does not have a reliable way to check credit info pre-upgrade purchase
+  if (event === 'failed_payment_notification') {
+    if (!Settings.planReverts?.enabled) {
+      return res.sendStatus(200)
+    }
+
+    SubscriptionHandler.getSubscriptionRestorePoint(
+      eventData.transaction.subscription_id,
+      function (err, lastSubscription) {
+        if (err) {
+          return next(err)
+        }
+        // if theres no restore point it could be a failed renewal, or no restore set. Either way it will be handled through dunning automatically
+        if (!lastSubscription || !lastSubscription?.planCode) {
+          res.sendStatus(200)
+        }
+        SubscriptionHandler.revertPlanChange(
+          eventData.transaction.subscription_id,
+          lastSubscription,
+          function (err) {
+            if (err) {
+              return next(err)
+            }
+            res.sendStatus(200)
+          }
+        )
+      }
+    )
+  } else if (
     [
       'new_subscription_notification',
       'updated_subscription_notification',

@@ -2,6 +2,7 @@
 
 /**
  * @import { PaymentProvider } from '../../../../types/subscription/dashboard/subscription'
+ * @import { AddOn } from '../../../../types/subscription/plan'
  */
 
 const OError = require('@overleaf/o-error')
@@ -252,6 +253,43 @@ class PaymentProviderSubscription {
       timeframe: 'term_end',
       addOnUpdates,
     })
+  }
+
+  /**
+   * Form a request to revert the plan to it's last saved backup state
+   *
+   * @param {string} previousPlanCode
+   * @param {Array<AddOn> | null} previousAddOns
+   * @return {PaymentProviderSubscriptionChangeRequest}
+   *
+   * @throws {OError} if the restore point plan doesnt exist
+   */
+  getRequestForPlanRevert(previousPlanCode, previousAddOns) {
+    const lastSuccessfulPlan =
+      PlansLocator.findLocalPlanInSettings(previousPlanCode)
+    if (lastSuccessfulPlan == null) {
+      throw new OError('Unable to find plan in settings', { previousPlanCode })
+    }
+    const changeRequest = new PaymentProviderSubscriptionChangeRequest({
+      subscription: this,
+      timeframe: 'now',
+      planCode: previousPlanCode,
+    })
+
+    // defaulting to empty array is important, as that will wipe away any add-ons that were added in the failed payment
+    //  but were not part of the last successful subscription
+    const addOns = []
+    for (const previousAddon of previousAddOns || []) {
+      const addOnUpdate = new PaymentProviderSubscriptionAddOnUpdate({
+        code: previousAddon.addOnCode,
+        quantity: previousAddon.quantity,
+        unitPrice: previousAddon.unitAmountInCents / 100,
+      })
+      addOns.push(addOnUpdate)
+    }
+    changeRequest.addOnUpdates = addOns
+
+    return changeRequest
   }
 
   /**
