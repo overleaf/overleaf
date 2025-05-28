@@ -1,5 +1,5 @@
 const logger = require('@overleaf/logger')
-
+const { JobNotFoundError, JobNotReadyError } = require('./errors')
 const BATCH_SIZE = 1000 // Default batch size for SCAN
 
 /**
@@ -147,10 +147,24 @@ async function scanAndProcessDueItems(
             `Successfully performed ${taskName} for project`
           )
         } catch (err) {
-          logger.error(
-            { ...logContext, projectId, err },
-            `Error performing ${taskName} for project`
-          )
+          if (err instanceof JobNotReadyError) {
+            // the project has been touched since the job was created
+            logger.info(
+              { ...logContext, projectId },
+              `Job not ready for ${taskName} for project`
+            )
+          } else if (err instanceof JobNotFoundError) {
+            // the project has been expired already by another worker
+            logger.info(
+              { ...logContext, projectId },
+              `Job not found for ${taskName} for project`
+            )
+          } else {
+            logger.error(
+              { ...logContext, projectId, err },
+              `Error performing ${taskName} for project`
+            )
+          }
           continue
         }
       }
