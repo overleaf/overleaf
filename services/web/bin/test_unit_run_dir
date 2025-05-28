@@ -3,25 +3,16 @@
 declare -a vitest_args=("$@")
 
 has_mocha_test=0
-has_mocha_mjs_test=0
 has_vitest_test=0
-
-mocha_mjs_dirs=()
 
 for dir_path in "$@"; do
   if [ -n "$(find "$dir_path" -name "*.js" -type f -print -quit 2>/dev/null)" ]; then
     has_mocha_test=1
   fi
 
-  if [ -n "$(find "$dir_path" -name "*Tests.mjs" -type f -print -quit 2>/dev/null)" ]; then
-    has_mocha_mjs_test=1
-    mocha_mjs_dirs+=("$dir_path/**/*Tests.mjs")
-  fi
-
   if [ -n "$(find "$dir_path" -name "*.test.mjs" -type f -print -quit 2>/dev/null)" ]; then
     has_vitest_test=1
   fi
-
 done
 
 if [[ -n "$MOCHA_GREP" ]]; then
@@ -47,14 +38,7 @@ fi
 if (( has_mocha_test == 1 )); then
   mocha --recursive --timeout 25000 --exit --grep="$MOCHA_GREP" --require test/unit/bootstrap.js --extension=js "$@"
   mocha_status=$?
-fi
-# Remove this if/else when we have converted all module tests to vitest.
-if (( has_mocha_mjs_test == 1)); then
-  mocha --recursive --timeout 25000 --exit --grep="$MOCHA_GREP" --require test/unit/bootstrap.js --extension=mjs "${mocha_mjs_dirs[@]}"
-  mocha_status=$((mocha_status != 0 ? mocha_status : $?))
-fi
-
-if (( has_mocha_mjs_test == 0 && has_mocha_test == 0 )); then
+else
   echo "No mocha tests found in $TARGET_DIR, skipping mocha step."
   mocha_status=0
 fi
