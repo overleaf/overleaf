@@ -1,5 +1,5 @@
 const logger = require('@overleaf/logger')
-const { JobNotFoundError, JobNotReadyError } = require('./errors')
+const { JobNotFoundError, JobNotReadyError } = require('./chunk_store/errors')
 const BATCH_SIZE = 1000 // Default batch size for SCAN
 
 /**
