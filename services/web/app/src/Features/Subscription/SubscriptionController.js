@@ -590,7 +590,7 @@ function recurlyCallback(req, res, next) {
         }
         // if theres no restore point it could be a failed renewal, or no restore set. Either way it will be handled through dunning automatically
         if (!lastSubscription || !lastSubscription?.planCode) {
-          res.sendStatus(200)
+          return res.sendStatus(200)
         }
         SubscriptionHandler.revertPlanChange(
           eventData.transaction.subscription_id,
@@ -599,7 +599,7 @@ function recurlyCallback(req, res, next) {
             if (err) {
               return next(err)
             }
-            res.sendStatus(200)
+            return res.sendStatus(200)
           }
         )
       }
