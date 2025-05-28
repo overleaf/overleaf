@@ -395,6 +395,11 @@ footer.site-footer {
       white-space: nowrap;
       padding-top: var(--spacing-00);
     }
+
+    .cookie-banner-content a,
+    .cookie-banner-actions .btn-link {
+      color: var(--link-ui);
+    }
   }
 }
 
