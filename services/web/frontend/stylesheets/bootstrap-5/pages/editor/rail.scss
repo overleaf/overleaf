@@ -85,15 +85,15 @@ body {
     &::after {
       $indicator-height: 3px;
 
-      border-radius: 12px;
+      border-top-left-radius: 12px;
+      border-top-right-radius: 12px;
       content: '';
       position: absolute;
-      bottom: -$indicator-height;
+      bottom: 0;
       left: 4px;
       box-sizing: border-box;
       width: 24px;
-      height: $indicator-height * 2;
-      border: $indicator-height solid var(--ide-rail-link-active-color);
+      height: $indicator-height;
       background-color: var(--ide-rail-link-active-color);
     }
   }
