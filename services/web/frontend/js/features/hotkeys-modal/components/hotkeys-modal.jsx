@@ -209,6 +209,11 @@ HotkeysModal.propTypes = {
   trackChangesVisible: PropTypes.bool,
 }
 
+/**
+ * This is the component to generate a hotkey
+ * It passes in the command combination and the
+ * description of the command
+ */
 function Hotkey({ combination, description }) {
   return (
     <div className="hotkey" data-test-selector="hotkey">
