@@ -1,11 +1,17 @@
-# Dockerfile for git-bridge
+# Build the a8m/envsubst binary, as it supports default values,
+# which the gnu envsubst (from gettext-base) does not.
+FROM golang:1.24.3-alpine AS envsubst_builder
+
+WORKDIR /build
+
+RUN go install github.com/a8m/envsubst/cmd/envsubst@latest
 
 FROM maven:3-amazoncorretto-21-debian AS base
 
 RUN apt-get update && apt-get install -y make git sqlite3 \
  && rm -rf /var/lib/apt/lists
 
-COPY vendor/envsubst /opt/envsubst
+COPY --from=envsubst_builder /go/bin/envsubst /opt/envsubst
 RUN chmod +x /opt/envsubst
 
 RUN useradd --create-home node
@@ -33,7 +39,7 @@ RUN adduser -D node
 
 COPY --from=builder /git-bridge.jar /
 
-COPY vendor/envsubst /opt/envsubst
+COPY --from=envsubst_builder /go/bin/envsubst /opt/envsubst
 RUN chmod +x /opt/envsubst
 
 COPY conf/envsubst_template.json envsubst_template.json
