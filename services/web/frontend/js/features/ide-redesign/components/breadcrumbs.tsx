@@ -50,6 +50,15 @@ export default function Breadcrumbs() {
       })
   }, [openEntity, fileTreeData])
 
+  const fileName = useMemo(() => {
+    // NOTE: openEntity.entity.name may not always be accurate, so we read it
+    // from the file tree data instead.
+    if (!openEntity || !fileTreeData) {
+      return undefined
+    }
+    return findInTreeOrThrow(fileTreeData, openEntity.entity._id)?.entity.name
+  }, [fileTreeData, openEntity])
+
   const outlineHierarchy = useMemo(() => {
     if (!canShowOutline || !outline) {
       return []
@@ -73,7 +82,7 @@ export default function Breadcrumbs() {
         </Fragment>
       ))}
       <MaterialIcon unfilled type="description" />
-      <div>{openEntity.entity.name}</div>
+      <div>{fileName}</div>
       {numOutlineItems > 0 && <Chevron />}
       {outlineHierarchy.map((section, idx) => (
         <Fragment key={section.line}>
