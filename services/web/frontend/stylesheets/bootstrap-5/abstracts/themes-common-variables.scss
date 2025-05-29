@@ -1,7 +1,55 @@
+/* ====== Semantic CSS color variables that adjust depending on the current theme ====== */
 :root {
   --editor-border-color: var(--neutral-80);
+  --bg-primary-themed: var(--bg-dark-primary);
+  --bg-secondary-themed: var(--bg-dark-secondary);
+  --bg-tertiary-themed: var(--bg-dark-tertiary);
+  --bg-disabled-themed: var(--bg-dark-disabled);
+  --content-primary-themed: var(--content-primary-dark);
+  --content-secondary-themed: var(--content-secondary-dark);
+  --content-disabled-themed: var(--content-disabled-dark);
+  --content-placeholder-themed: var(--content-placeholder-dark);
+  --content-danger-themed: var(--content-danger-dark);
+  --content-warning-themed: var(--content-warning-dark);
+  --content-positive-themed: var(--content-positive-dark);
+  --border-primary-themed: var(--border-primary-dark);
+  --border-hover-themed: var(--border-hover-dark);
+  --border-disabled-themed: var(--border-disabled-dark);
+  --border-active-themed: var(--border-active-dark);
+  --border-danger-themed: var(--border-danger-dark);
+  --border-divider-themed: var(--border-divider-dark);
+  --link-web-themed: var(--link-web-dark);
+  --link-web-hover-themed: var(--link-web-hover-dark);
+  --link-web-visited-themed: var(--link-web-visited-dark);
+  --link-ui-themed: var(--link-ui-dark);
+  --link-ui-hover-themed: var(--link-ui-hover-dark);
+  --link-ui-visited-themed: var(--link-ui-visited-dark);
 }
 
 @include theme('light') {
   --editor-border-color: var(--neutral-20);
+  --bg-primary-themed: var(--bg-light-primary);
+  --bg-secondary-themed: var(--bg-light-secondary);
+  --bg-tertiary-themed: var(--bg-light-tertiary);
+  --bg-disabled-themed: var(--bg-light-disabled);
+  --content-primary-themed: var(--content-primary);
+  --content-secondary-themed: var(--content-secondary);
+  --content-disabled-themed: var(--content-disabled);
+  --content-placeholder-themed: var(--content-placeholder);
+  --content-danger-themed: var(--content-danger);
+  --content-warning-themed: var(--content-warning);
+  --content-positive-themed: var(--content-positive);
+  --border-primary-themed: var(--border-primary);
+  --border-hover-themed: var(--border-hover);
+  --border-disabled-themed: var(--border-disabled);
+  --border-active-themed: var(--border-active);
+  --border-danger-themed: var(--border-danger);
+  --border-divider-themed: var(--border-divider);
+  --border-dark-divider-themed: var(--border-dark-divider);
+  --link-web-themed: var(--link-web);
+  --link-web-hover-themed: var(--link-web-hover);
+  --link-web-visited-themed: var(--link-web-visited);
+  --link-ui-themed: var(--link-ui);
+  --link-ui-hover-themed: var(--link-ui-hover);
+  --link-ui-visited-themed: var(--link-ui-visited);
 }
