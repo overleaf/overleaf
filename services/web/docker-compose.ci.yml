@@ -86,7 +86,7 @@ services:
     user: root
 
   redis:
-    image: redis
+    image: redis:7.4.3
 
   mongo:
     image: mongo:7.0.20

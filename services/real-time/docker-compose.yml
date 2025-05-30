@@ -46,7 +46,7 @@ services:
     command: npm run --silent test:acceptance
 
   redis:
-    image: redis
+    image: redis:7.4.3
     healthcheck:
       test: ping=$$(redis-cli ping) && [ "$$ping" = 'PONG' ]
       interval: 1s
