@@ -15,7 +15,11 @@ const AnalyticsManager = require('../Analytics/AnalyticsManager')
 const RecurlyEventHandler = require('./RecurlyEventHandler')
 const { expressify } = require('@overleaf/promise-utils')
 const OError = require('@overleaf/o-error')
-const { DuplicateAddOnError, AddOnNotPresentError } = require('./Errors')
+const {
+  DuplicateAddOnError,
+  AddOnNotPresentError,
+  PaymentActionRequiredError,
+} = require('./Errors')
 const SplitTestHandler = require('../SplitTests/SplitTestHandler')
 const AuthorizationManager = require('../Authorization/AuthorizationManager')
 const Modules = require('../../infrastructure/Modules')
@@ -425,6 +429,11 @@ async function purchaseAddon(req, res, next) {
         'Your subscription already includes this add-on',
         { addon: addOnCode }
       )
+    } else if (err instanceof PaymentActionRequiredError) {
+      return res.status(402).json({
+        message: 'Payment action required',
+        clientSecret: err.info.clientSecret,
+      })
     } else {
       if (err instanceof Error) {
         OError.tag(err, 'something went wrong purchasing add-ons', {

@@ -27,6 +27,7 @@ block append meta
   meta(name="ol-user" data-type="json" content=user)
   if (personalSubscription && personalSubscription.payment)
     meta(name="ol-recurlyApiKey" content=settings.apis.recurly.publicKey)
+    meta(name="ol-stripeApiKey" content=settings.apis.stripe.publishableKey)
     meta(name="ol-recommendedCurrency" content=personalSubscription.payment.currency)
     meta(name="ol-groupPlans" data-type="json" content=groupPlans)
 

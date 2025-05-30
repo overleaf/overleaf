@@ -1,7 +1,10 @@
 import { useState } from 'react'
 import { useTranslation, Trans } from 'react-i18next'
 import { SubscriptionDashModalIds } from '../../../../../../../../../../types/subscription/dashboard/modal-ids'
-import { postJSON } from '../../../../../../../../infrastructure/fetch-json'
+import {
+  postJSON,
+  FetchError,
+} from '../../../../../../../../infrastructure/fetch-json'
 import getMeta from '../../../../../../../../utils/meta'
 import { useSubscriptionDashboardContext } from '../../../../../../context/subscription-dashboard-context'
 import { subscriptionUpdateUrl } from '../../../../../../data/subscription-url'
@@ -14,6 +17,7 @@ import OLModal, {
 } from '@/features/ui/components/ol/ol-modal'
 import OLButton from '@/features/ui/components/ol/ol-button'
 import OLNotification from '@/features/ui/components/ol/ol-notification'
+import handleStripePaymentAction from '@/features/subscription/util/handle-stripe-payment-action'
 
 export function ConfirmChangePlanModal() {
   const modalId: SubscriptionDashModalIds = 'change-to-plan'
@@ -37,8 +41,13 @@ export function ConfirmChangePlanModal() {
       })
       location.reload()
     } catch (e) {
-      setError(true)
-      setInflight(false)
+      const { handled } = await handleStripePaymentAction(e as FetchError)
+      if (handled) {
+        location.reload()
+      } else {
+        setError(true)
+        setInflight(false)
+      }
     }
   }
 

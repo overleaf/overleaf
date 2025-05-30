@@ -11,7 +11,7 @@ import { formatCurrency } from '@/shared/utils/currency'
 import useAsync from '@/shared/hooks/use-async'
 import { useLocation } from '@/shared/hooks/use-location'
 import { debugConsole } from '@/utils/debugging'
-import { postJSON } from '@/infrastructure/fetch-json'
+import { FetchError, postJSON } from '@/infrastructure/fetch-json'
 import Notification from '@/shared/components/notification'
 import OLCard from '@/features/ui/components/ol/ol-card'
 import OLRow from '@/features/ui/components/ol/ol-row'
@@ -21,6 +21,7 @@ import { subscriptionUpdateUrl } from '@/features/subscription/data/subscription
 import * as eventTracking from '@/infrastructure/event-tracking'
 import sparkleText from '@/shared/svgs/ai-sparkle-text.svg'
 import { useFeatureFlag } from '@/shared/context/split-test-context'
+import handleStripePaymentAction from '../../util/handle-stripe-payment-action'
 
 function PreviewSubscriptionChange() {
   const preview = getMeta(
@@ -279,16 +280,25 @@ function PreviewSubscriptionChange() {
 }
 
 async function payNow(preview: SubscriptionChangePreview) {
-  if (preview.change.type === 'add-on-purchase') {
-    await postJSON(`/user/subscription/addon/${preview.change.addOn.code}/add`)
-  } else if (preview.change.type === 'premium-subscription') {
-    await postJSON(subscriptionUpdateUrl, {
-      body: { plan_code: preview.change.plan.code },
-    })
-  } else {
-    throw new Error(
-      `Unknown subscription change preview type: ${preview.change}`
-    )
+  try {
+    if (preview.change.type === 'add-on-purchase') {
+      await postJSON(
+        `/user/subscription/addon/${preview.change.addOn.code}/add`
+      )
+    } else if (preview.change.type === 'premium-subscription') {
+      await postJSON(subscriptionUpdateUrl, {
+        body: { plan_code: preview.change.plan.code },
+      })
+    } else {
+      throw new Error(
+        `Unknown subscription change preview type: ${preview.change}`
+      )
+    }
+  } catch (e) {
+    const { handled } = await handleStripePaymentAction(e as FetchError)
+    if (!handled) {
+      throw e
+    }
   }
 }
 
