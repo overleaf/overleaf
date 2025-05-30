@@ -617,7 +617,7 @@ describe('<ShareProjectModal/>', function () {
 
     fetchMock.post(
       'express:/project/:projectId/invite',
-      ({ args: [url, req] }) => {
+      ({ args: [, req] }) => {
         const data = JSON.parse(req.body)
 
         if (data.email === 'a@b.c') {
