@@ -42,12 +42,6 @@ async function joinProject(req, res, next) {
   if (!project) {
     return res.sendStatus(403)
   }
-  // Hide sensitive data if the user is restricted
-  if (isRestrictedUser) {
-    project.owner = { _id: project.owner._id }
-    project.members = []
-    project.invites = []
-  }
   // Only show the 'renamed or deleted' message once
   if (project.deletedByExternalDataSource) {
     await ProjectDeleter.promises.unmarkAsDeletedByExternalSource(projectId)
@@ -75,7 +69,6 @@ async function _buildJoinProjectView(req, projectId, userId) {
     throw new Errors.NotFoundError('project not found')
   }
   const projectAccess = new ProjectAccess(project)
-  const members = await projectAccess.loadInvitedMembers()
   const token = req.body.anonymousAccessToken
   const privilegeLevel =
     await AuthorizationManager.promises.getPrivilegeLevelForProjectWithProjectAccess(
@@ -87,8 +80,6 @@ async function _buildJoinProjectView(req, projectId, userId) {
   if (privilegeLevel == null || privilegeLevel === PrivilegeLevels.NONE) {
     return { project: null, privilegeLevel: null, isRestrictedUser: false }
   }
-  const invites =
-    await CollaboratorsInviteGetter.promises.getAllInvites(projectId)
   const isTokenMember = projectAccess.isUserTokenMember(userId)
   const isInvitedMember = projectAccess.isUserInvitedMember(userId)
   const isRestrictedUser = AuthorizationManager.isRestrictedUser(
@@ -97,11 +88,23 @@ async function _buildJoinProjectView(req, projectId, userId) {
     isTokenMember,
     isInvitedMember
   )
+  let ownerMember
+  let members = []
+  let invites = []
+  if (isRestrictedUser) {
+    ownerMember = await projectAccess.loadOwner()
+  } else {
+    ;({ ownerMember, members } =
+      await projectAccess.loadOwnerAndInvitedMembers())
+    invites = await CollaboratorsInviteGetter.promises.getAllInvites(projectId)
+  }
   return {
     project: ProjectEditorHandler.buildProjectModelView(
       project,
+      ownerMember,
       members,
-      invites
+      invites,
+      isRestrictedUser
     ),
     privilegeLevel,
     isTokenMember,

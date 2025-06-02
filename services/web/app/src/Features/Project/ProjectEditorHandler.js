@@ -6,8 +6,13 @@ const Features = require('../../infrastructure/Features')
 module.exports = ProjectEditorHandler = {
   trackChangesAvailable: false,
 
-  buildProjectModelView(project, members, invites) {
-    let owner, ownerFeatures
+  buildProjectModelView(
+    project,
+    ownerMember,
+    members,
+    invites,
+    isRestrictedUser
+  ) {
     const result = {
       _id: project._id,
       name: project.name,
@@ -20,20 +25,23 @@ module.exports = ProjectEditorHandler = {
       description: project.description,
       spellCheckLanguage: project.spellCheckLanguage,
       deletedByExternalDataSource: project.deletedByExternalDataSource || false,
-      members: [],
-      invites: this.buildInvitesView(invites),
       imageName:
         project.imageName != null
           ? Path.basename(project.imageName)
           : undefined,
     }
 
-    ;({ owner, ownerFeatures, members } =
-      this.buildOwnerAndMembersViews(members))
-    result.owner = owner
-    result.members = members
+    if (isRestrictedUser) {
+      result.owner = { _id: project.owner_ref }
+      result.members = []
+      result.invites = []
+    } else {
+      result.owner = this.buildUserModelView(ownerMember)
+      result.members = members.map(this.buildUserModelView)
+      result.invites = this.buildInvitesView(invites)
+    }
 
-    result.features = _.defaults(ownerFeatures || {}, {
+    result.features = _.defaults(ownerMember?.user?.features || {}, {
       collaborators: -1, // Infinite
       versioning: false,
       dropbox: false,
@@ -60,25 +68,6 @@ module.exports = ProjectEditorHandler = {
       result.features.mendeley || result.features.references
 
     return result
-  },
-
-  buildOwnerAndMembersViews(members) {
-    let owner = null
-    let ownerFeatures = null
-    const filteredMembers = []
-    for (const member of members || []) {
-      if (member.privilegeLevel === 'owner') {
-        ownerFeatures = member.user.features
-        owner = this.buildUserModelView(member)
-      } else {
-        filteredMembers.push(this.buildUserModelView(member))
-      }
-    }
-    return {
-      owner,
-      ownerFeatures,
-      members: filteredMembers,
-    }
   },
 
   buildUserModelView(member) {

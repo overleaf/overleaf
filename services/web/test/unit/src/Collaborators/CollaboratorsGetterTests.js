@@ -62,7 +62,7 @@ describe('CollaboratorsGetter', function () {
       },
     }
     this.ProjectEditorHandler = {
-      buildOwnerAndMembersViews: sinon.stub(),
+      buildUserModelView: sinon.stub(),
     }
     this.CollaboratorsGetter = SandboxedModule.require(MODULE_PATH, {
       requires: {
@@ -200,30 +200,6 @@ describe('CollaboratorsGetter', function () {
         this.pendingReviewerRef.toString(),
         this.reviewer1Ref.toString(),
         this.reviewer2Ref.toString(),
-      ])
-    })
-  })
-
-  describe('getInvitedMembersWithPrivilegeLevels', function () {
-    beforeEach(function () {
-      this.UserGetter.promises.getUsers.resolves([
-        { _id: this.readOnlyRef1 },
-        { _id: this.readOnlyTokenRef },
-        { _id: this.readWriteRef2 },
-        { _id: this.readWriteTokenRef },
-        { _id: this.reviewer1Ref },
-      ])
-    })
-
-    it('should return an array of invited members with their privilege levels', async function () {
-      const result =
-        await this.CollaboratorsGetter.promises.getInvitedMembersWithPrivilegeLevels(
-          this.project._id
-        )
-      expect(result).to.have.deep.members([
-        { user: { _id: this.readOnlyRef1 }, privilegeLevel: 'readOnly' },
-        { user: { _id: this.readWriteRef2 }, privilegeLevel: 'readAndWrite' },
-        { user: { _id: this.reviewer1Ref }, privilegeLevel: 'review' },
       ])
     })
   })
@@ -401,20 +377,21 @@ describe('CollaboratorsGetter', function () {
         { user: this.readWriteUser, privilegeLevel: 'readAndWrite' },
         { user: this.reviewUser, privilegeLevel: 'review' },
       ]
-      this.views = {
-        owner: this.owningUser,
-        ownerFeatures: this.owningUser.features,
-        members: [
-          { _id: this.readWriteUser._id, email: this.readWriteUser.email },
-          { _id: this.reviewUser._id, email: this.reviewUser.email },
-        ],
-      }
+      this.memberViews = [
+        { _id: this.readWriteUser._id, email: this.readWriteUser.email },
+        { _id: this.reviewUser._id, email: this.reviewUser.email },
+      ]
       this.UserGetter.promises.getUsers.resolves([
         this.owningUser,
         this.readWriteUser,
         this.reviewUser,
       ])
-      this.ProjectEditorHandler.buildOwnerAndMembersViews.returns(this.views)
+      this.ProjectEditorHandler.buildUserModelView
+        .withArgs(this.members[1])
+        .returns(this.memberViews[0])
+      this.ProjectEditorHandler.buildUserModelView
+        .withArgs(this.members[2])
+        .returns(this.memberViews[1])
       this.result =
         await this.CollaboratorsGetter.promises.getAllInvitedMembers(
           this.project._id
@@ -422,15 +399,18 @@ describe('CollaboratorsGetter', function () {
     })
 
     it('should produce a list of members', function () {
-      expect(this.result).to.deep.equal(this.views.members)
+      expect(this.result).to.deep.equal(this.memberViews)
     })
 
-    it('should call ProjectEditorHandler.buildOwnerAndMembersViews', function () {
-      expect(this.ProjectEditorHandler.buildOwnerAndMembersViews).to.have.been
-        .calledOnce
+    it('should call ProjectEditorHandler.buildUserModelView', function () {
+      expect(this.ProjectEditorHandler.buildUserModelView).to.have.been
+        .calledTwice
       expect(
-        this.ProjectEditorHandler.buildOwnerAndMembersViews
-      ).to.have.been.calledWith(this.members)
+        this.ProjectEditorHandler.buildUserModelView
+      ).to.have.been.calledWith(this.members[1])
+      expect(
+        this.ProjectEditorHandler.buildUserModelView
+      ).to.have.been.calledWith(this.members[2])
     })
   })
 

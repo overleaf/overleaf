@@ -16,9 +16,6 @@ module.exports = {
   getMemberIdsWithPrivilegeLevels: callbackify(getMemberIdsWithPrivilegeLevels),
   getMemberIds: callbackify(getMemberIds),
   getInvitedMemberIds: callbackify(getInvitedMemberIds),
-  getInvitedMembersWithPrivilegeLevels: callbackify(
-    getInvitedMembersWithPrivilegeLevels
-  ),
   getInvitedMembersWithPrivilegeLevelsFromFields: callbackify(
     getInvitedMembersWithPrivilegeLevelsFromFields
   ),
@@ -36,7 +33,6 @@ module.exports = {
     getMemberIdsWithPrivilegeLevels,
     getMemberIds,
     getInvitedMemberIds,
-    getInvitedMembersWithPrivilegeLevels,
     getInvitedMembersWithPrivilegeLevelsFromFields,
     getMemberIdPrivilegeLevel,
     getInvitedEditCollaboratorCount,
@@ -96,10 +92,39 @@ class ProjectAccess {
   }
 
   /**
+   * @return {Promise<{ownerMember: LoadedProjectMember|undefined, members: LoadedProjectMember[]}>}
+   */
+  async loadOwnerAndInvitedMembers() {
+    const all = await _loadMembers(
+      this.#members.filter(m => m.source !== Sources.TOKEN)
+    )
+    return {
+      ownerMember: all.find(m => m.privilegeLevel === PrivilegeLevels.OWNER),
+      members: all.filter(m => m.privilegeLevel !== PrivilegeLevels.OWNER),
+    }
+  }
+
+  /**
    * @return {Promise<LoadedProjectMember[]>}
    */
   async loadInvitedMembers() {
-    return _loadMembers(this.#members.filter(m => m.source !== Sources.TOKEN))
+    return _loadMembers(
+      this.#members.filter(
+        m =>
+          m.source !== Sources.TOKEN &&
+          m.privilegeLevel !== PrivilegeLevels.OWNER
+      )
+    )
+  }
+
+  /**
+   * @return {Promise<LoadedProjectMember|undefined>}
+   */
+  async loadOwner() {
+    const [owner] = await _loadMembers(
+      this.#members.filter(m => m.privilegeLevel === PrivilegeLevels.OWNER)
+    )
+    return owner
   }
 
   /**
@@ -248,10 +273,6 @@ async function getInvitedMemberIds(projectId) {
   return (await getProjectAccess(projectId)).invitedMemberIds()
 }
 
-async function getInvitedMembersWithPrivilegeLevels(projectId) {
-  return await (await getProjectAccess(projectId)).loadInvitedMembers()
-}
-
 async function getInvitedMembersWithPrivilegeLevelsFromFields(
   ownerId,
   collaboratorIds,
@@ -397,10 +418,9 @@ async function dangerouslyGetAllProjectsUserIsMemberOf(userId, fields) {
 
 async function getAllInvitedMembers(projectId) {
   try {
-    const { members } = ProjectEditorHandler.buildOwnerAndMembersViews(
-      await (await getProjectAccess(projectId)).loadInvitedMembers()
-    )
-    return members
+    const projectAccess = await getProjectAccess(projectId)
+    const invitedMembers = await projectAccess.loadInvitedMembers()
+    return invitedMembers.map(ProjectEditorHandler.buildUserModelView)
   } catch (err) {
     throw OError.tag(err, 'error getting members for project', { projectId })
   }
@@ -526,6 +546,7 @@ function _getMemberIdsWithPrivilegeLevelsFromFields(
  * @private
  */
 async function _loadMembers(members) {
+  if (members.length === 0) return []
   const userIds = Array.from(new Set(members.map(m => m.id)))
   const users = new Map()
   for (const user of await UserGetter.promises.getUsers(userIds, {

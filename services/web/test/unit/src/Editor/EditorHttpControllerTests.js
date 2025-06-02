@@ -20,6 +20,12 @@ describe('EditorHttpController', function () {
       _id: new ObjectId(),
       projects: {},
     }
+    this.members = [
+      { user: { _id: 'owner', features: {} }, privilegeLevel: 'owner' },
+      { user: { _id: 'one' }, privilegeLevel: 'readOnly' },
+    ]
+    this.ownerMember = this.members[0]
+    this.invites = [{ _id: 'three' }, { _id: 'four' }]
     this.projectView = {
       _id: this.project._id,
       owner: {
@@ -27,7 +33,10 @@ describe('EditorHttpController', function () {
         email: 'owner@example.com',
         other_property: true,
       },
-      members: [{ one: 1 }, { two: 2 }],
+      members: [
+        { _id: 'owner', privileges: 'owner' },
+        { _id: 'one', privileges: 'readOnly' },
+      ],
       invites: [{ three: 3 }, { four: 4 }],
     }
     this.reducedProjectView = {
@@ -56,10 +65,16 @@ describe('EditorHttpController', function () {
           .resolves('owner'),
       },
     }
+    const members = this.members
+    const ownerMember = this.ownerMember
     this.CollaboratorsGetter = {
       ProjectAccess: class {
-        loadInvitedMembers() {
-          return []
+        loadOwnerAndInvitedMembers() {
+          return { members, ownerMember }
+        }
+
+        loadOwner() {
+          return ownerMember
         }
 
         isUserTokenMember() {
@@ -71,9 +86,6 @@ describe('EditorHttpController', function () {
         }
       },
       promises: {
-        getInvitedMembersWithPrivilegeLevels: sinon
-          .stub()
-          .resolves(['members', 'mock']),
         isUserInvitedMemberOfProject: sinon.stub().resolves(false),
       },
     }
@@ -82,22 +94,23 @@ describe('EditorHttpController', function () {
         userIsTokenMember: sinon.stub().resolves(false),
       },
     }
+    this.invites = [
+      {
+        _id: 'invite_one',
+        email: 'user-one@example.com',
+        privileges: 'readOnly',
+        projectId: this.project._id,
+      },
+      {
+        _id: 'invite_two',
+        email: 'user-two@example.com',
+        privileges: 'readOnly',
+        projectId: this.project._id,
+      },
+    ]
     this.CollaboratorsInviteGetter = {
       promises: {
-        getAllInvites: sinon.stub().resolves([
-          {
-            _id: 'invite_one',
-            email: 'user-one@example.com',
-            privileges: 'readOnly',
-            projectId: this.project._id,
-          },
-          {
-            _id: 'invite_two',
-            email: 'user-two@example.com',
-            privileges: 'readOnly',
-            projectId: this.project._id,
-          },
-        ]),
+        getAllInvites: sinon.stub().resolves(this.invites),
       },
     }
     this.EditorController = {
@@ -195,6 +208,18 @@ describe('EditorHttpController', function () {
         this.EditorHttpController.joinProject(this.req, this.res)
       })
 
+      it('should request a full view', function () {
+        expect(
+          this.ProjectEditorHandler.buildProjectModelView
+        ).to.have.been.calledWith(
+          this.project,
+          this.ownerMember,
+          this.members,
+          this.invites,
+          false
+        )
+      })
+
       it('should return the project and privilege level', function () {
         expect(this.res.json).to.have.been.calledWith({
           project: this.projectView,
@@ -231,12 +256,21 @@ describe('EditorHttpController', function () {
 
     describe('with a restricted user', function () {
       beforeEach(function (done) {
+        this.ProjectEditorHandler.buildProjectModelView.returns(
+          this.reducedProjectView
+        )
         this.AuthorizationManager.isRestrictedUser.returns(true)
         this.AuthorizationManager.promises.getPrivilegeLevelForProjectWithProjectAccess.resolves(
           'readOnly'
         )
         this.res.callback = done
         this.EditorHttpController.joinProject(this.req, this.res)
+      })
+
+      it('should request a restricted view', function () {
+        expect(
+          this.ProjectEditorHandler.buildProjectModelView
+        ).to.have.been.calledWith(this.project, this.ownerMember, [], [], true)
       })
 
       it('should mark the user as restricted, and hide details of owner', function () {
@@ -268,6 +302,9 @@ describe('EditorHttpController', function () {
       beforeEach(function (done) {
         this.token = 'token'
         this.TokenAccessHandler.getRequestToken.returns(this.token)
+        this.ProjectEditorHandler.buildProjectModelView.returns(
+          this.reducedProjectView
+        )
         this.req.body = {
           userId: 'anonymous-user',
           anonymousAccessToken: this.token,
@@ -280,6 +317,12 @@ describe('EditorHttpController', function () {
           .withArgs(null, this.project._id, this.token)
           .resolves('readOnly')
         this.EditorHttpController.joinProject(this.req, this.res)
+      })
+
+      it('should request a restricted view', function () {
+        expect(
+          this.ProjectEditorHandler.buildProjectModelView
+        ).to.have.been.calledWith(this.project, this.ownerMember, [], [], true)
       })
 
       it('should mark the user as restricted', function () {
