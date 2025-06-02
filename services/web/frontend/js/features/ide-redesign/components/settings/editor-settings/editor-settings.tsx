@@ -9,6 +9,7 @@ import PDFViewerSetting from './pdf-viewer-setting'
 import SpellCheckSetting from './spell-check-setting'
 import DictionarySetting from './dictionary-setting'
 import importOverleafModules from '../../../../../../macros/import-overleaf-module.macro'
+import BreadcrumbsSetting from './breadcrumbs-setting'
 
 const [referenceSearchSettingModule] = importOverleafModules(
   'referenceSearchSetting'
@@ -33,6 +34,7 @@ export default function EditorSettings() {
         <DictionarySetting />
       </SettingsSection>
       <SettingsSection title={t('tools')}>
+        <BreadcrumbsSetting />
         <MathPreviewSetting />
       </SettingsSection>
     </>

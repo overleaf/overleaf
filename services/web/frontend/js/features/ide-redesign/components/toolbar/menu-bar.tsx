@@ -20,12 +20,12 @@ import CommandDropdown, {
   MenuSectionStructure,
   MenuStructure,
 } from './command-dropdown'
-import { useUserSettingsContext } from '@/shared/context/user-settings-context'
 import { useRailContext } from '../../contexts/rail-context'
 import WordCountModal from '@/features/word-count-modal/components/word-count-modal'
 import { isSplitTestEnabled } from '@/utils/splitTestUtils'
 import { useDetachCompileContext as useCompileContext } from '@/shared/context/detach-compile-context'
 import { useEditorAnalytics } from '@/shared/hooks/use-editor-analytics'
+import { useProjectSettingsContext } from '@/features/editor-left-menu/context/project-settings-context'
 
 export const ToolbarMenuBar = () => {
   const { t } = useTranslation()
@@ -170,19 +170,16 @@ export const ToolbarMenuBar = () => {
     [t]
   )
 
-  const {
-    userSettings: { mathPreview },
-    setUserSettings,
-  } = useUserSettingsContext()
+  const { mathPreview, setMathPreview, breadcrumbs, setBreadcrumbs } =
+    useProjectSettingsContext()
 
   const toggleMathPreview = useCallback(() => {
-    setUserSettings(prev => {
-      return {
-        ...prev,
-        mathPreview: !prev.mathPreview,
-      }
-    })
-  }, [setUserSettings])
+    setMathPreview(!mathPreview)
+  }, [setMathPreview, mathPreview])
+
+  const toggleBreadcrumbs = useCallback(() => {
+    setBreadcrumbs(!breadcrumbs)
+  }, [setBreadcrumbs, breadcrumbs])
 
   const { setActiveModal } = useRailContext()
   const openKeyboardShortcutsModal = useCallback(() => {
@@ -212,6 +209,14 @@ export const ToolbarMenuBar = () => {
           <ChangeLayoutOptions />
           <DropdownDivider />
           <DropdownHeader>Editor settings</DropdownHeader>
+          <MenuBarOption
+            eventKey="show_breadcrumbs"
+            title={t('show_breadcrumbs')}
+            leadingIcon={
+              breadcrumbs ? 'check' : <DropdownItem.EmptyLeadingIcon />
+            }
+            onClick={toggleBreadcrumbs}
+          />
           <MenuBarOption
             eventKey="show_equation_preview"
             title={t('show_equation_preview')}

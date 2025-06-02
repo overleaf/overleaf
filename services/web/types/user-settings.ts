@@ -17,4 +17,5 @@ export type UserSettings = {
   mathPreview: boolean
   referencesSearchMode: 'advanced' | 'simple'
   enableNewEditor: boolean
+  breadcrumbs: boolean
 }

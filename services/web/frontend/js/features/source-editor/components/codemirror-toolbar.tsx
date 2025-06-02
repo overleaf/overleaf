@@ -25,6 +25,7 @@ import useReviewPanelLayout from '@/features/review-panel-new/hooks/use-review-p
 import { useIsNewEditorEnabled } from '@/features/ide-redesign/utils/new-editor-utils'
 import Breadcrumbs from '@/features/ide-redesign/components/breadcrumbs'
 import classNames from 'classnames'
+import { useUserSettingsContext } from '@/shared/context/user-settings-context'
 
 export const CodeMirrorToolbar = () => {
   const view = useCodeMirrorViewContext()
@@ -41,6 +42,9 @@ const Toolbar = memo(function Toolbar() {
   const { t } = useTranslation()
   const state = useCodeMirrorStateContext()
   const view = useCodeMirrorViewContext()
+  const {
+    userSettings: { breadcrumbs },
+  } = useUserSettingsContext()
 
   const [overflowed, setOverflowed] = useState(false)
 
@@ -192,7 +196,7 @@ const Toolbar = memo(function Toolbar() {
             <DetachCompileButtonWrapper />
           </div>
         </div>
-        {newEditor && <Breadcrumbs />}
+        {newEditor && breadcrumbs && <Breadcrumbs />}
       </div>
     </>
   )

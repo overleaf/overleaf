@@ -824,6 +824,7 @@ const _ProjectController = {
           lineHeight: user.ace.lineHeight || 'normal',
           overallTheme: user.ace.overallTheme,
           mathPreview: user.ace.mathPreview,
+          breadcrumbs: user.ace.breadcrumbs,
           referencesSearchMode: user.ace.referencesSearchMode,
           enableNewEditor: user.ace.enableNewEditor ?? true,
         },

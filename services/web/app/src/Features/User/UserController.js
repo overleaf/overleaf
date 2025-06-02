@@ -387,6 +387,9 @@ async function updateUserSettings(req, res, next) {
   if (req.body.mathPreview != null) {
     user.ace.mathPreview = req.body.mathPreview
   }
+  if (req.body.breadcrumbs != null) {
+    user.ace.breadcrumbs = Boolean(req.body.breadcrumbs)
+  }
   if (req.body.referencesSearchMode != null) {
     const mode =
       req.body.referencesSearchMode === 'simple' ? 'simple' : 'advanced'

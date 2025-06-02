@@ -29,6 +29,7 @@ const defaultSettings: UserSettings = {
   mathPreview: true,
   referencesSearchMode: 'advanced',
   enableNewEditor: true,
+  breadcrumbs: true,
 }
 
 type UserSettingsContextValue = {

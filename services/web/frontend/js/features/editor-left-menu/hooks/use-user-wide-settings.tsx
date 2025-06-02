@@ -20,6 +20,7 @@ export default function useUserWideSettings() {
     lineHeight,
     pdfViewer,
     mathPreview,
+    breadcrumbs,
   } = userSettings
 
   const setOverallTheme = useSetOverallTheme()
@@ -93,6 +94,13 @@ export default function useUserWideSettings() {
     [saveUserSettings]
   )
 
+  const setBreadcrumbs = useCallback(
+    (breadcrumbs: UserSettings['breadcrumbs']) => {
+      saveUserSettings('breadcrumbs', breadcrumbs)
+    },
+    [saveUserSettings]
+  )
+
   return {
     autoComplete,
     setAutoComplete,
@@ -116,5 +124,7 @@ export default function useUserWideSettings() {
     setPdfViewer,
     mathPreview,
     setMathPreview,
+    breadcrumbs,
+    setBreadcrumbs,
   }
 }
