@@ -210,9 +210,13 @@ async function getUser(providerId, externalUserId, userIdAttribute) {
     )
   }
   const user = await User.findOne({
-    'samlIdentifiers.externalUserId': externalUserId.toString(),
-    'samlIdentifiers.providerId': providerId.toString(),
-    'samlIdentifiers.userIdAttribute': userIdAttribute.toString(),
+    samlIdentifiers: {
+      $elemMatch: {
+        externalUserId: externalUserId.toString(),
+        providerId: providerId.toString(),
+        userIdAttribute: userIdAttribute.toString(),
+      },
+    },
   }).exec()
 
   return user
