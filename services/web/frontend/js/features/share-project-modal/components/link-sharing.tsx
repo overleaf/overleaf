@@ -1,7 +1,7 @@
 import { useCallback, useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useShareProjectContext } from './share-project-modal'
-import { setProjectAccessLevel } from '../utils/api'
+import { setPublicAccessLevel } from '../utils/api'
 import { CopyToClipboard } from '@/shared/components/copy-to-clipboard'
 import { useProjectContext } from '@/shared/context/project-context'
 import * as eventTracking from '../../../infrastructure/event-tracking'
@@ -43,7 +43,7 @@ export default function LinkSharing() {
         project_id: projectId,
       })
       monitorRequest(() =>
-        setProjectAccessLevel(projectId, newPublicAccessLevel)
+        setPublicAccessLevel(projectId, newPublicAccessLevel)
       )
         .then(() => {
           // NOTE: not calling `updateProject` here as it receives data via

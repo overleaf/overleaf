@@ -47,7 +47,7 @@ export function transferProjectOwnership(projectId, member) {
   })
 }
 
-export function setProjectAccessLevel(projectId, publicAccessLevel) {
+export function setPublicAccessLevel(projectId, publicAccessLevel) {
   return postJSON(`/project/${projectId}/settings/admin`, {
     body: { publicAccessLevel },
   })
