@@ -13,6 +13,7 @@ import { DownloadProjectPDF, DownloadProjectZip } from './download-project'
 import { useCallback, useState } from 'react'
 import OLDropdownMenuItem from '@/features/ui/components/ol/ol-dropdown-menu-item'
 import EditableLabel from './editable-label'
+import { DuplicateProject } from './duplicate-project'
 
 const [publishModalModules] = importOverleafModules('publishModal')
 const SubmitProjectButton = publishModalModules?.import.NewPublishToolbarButton
@@ -73,6 +74,7 @@ export const ToolbarProjectTitle = () => {
         <DownloadProjectPDF />
         <DownloadProjectZip />
         <DropdownDivider />
+        <DuplicateProject />
         <OLDropdownMenuItem
           onClick={() => {
             setIsRenaming(true)
