@@ -16,7 +16,6 @@ import ProjectAuditLogHandler from '../Project/ProjectAuditLogHandler.js'
 import Errors from '../Errors/Errors.js'
 import AuthenticationController from '../Authentication/AuthenticationController.js'
 import PrivilegeLevels from '../Authorization/PrivilegeLevels.js'
-import SplitTestHandler from '../SplitTests/SplitTestHandler.js'
 
 // This rate limiter allows a different number of requests depending on the
 // number of callaborators a user is allowed. This is implemented by providing
@@ -245,9 +244,6 @@ async function generateNewInvite(req, res) {
 async function viewInvite(req, res) {
   const projectId = req.params.Project_id
   const { token } = req.params
-
-  // Read split test assignment so that it's available for Pug to read
-  await SplitTestHandler.promises.getAssignment(req, res, 'core-pug-bs5')
 
   const _renderInvalidPage = function () {
     res.status(404)

@@ -4,13 +4,9 @@ const TemplatesManager = require('./TemplatesManager')
 const ProjectHelper = require('../Project/ProjectHelper')
 const logger = require('@overleaf/logger')
 const { expressify } = require('@overleaf/promise-utils')
-const SplitTestHandler = require('../SplitTests/SplitTestHandler')
 
 const TemplatesController = {
   async getV1Template(req, res) {
-    // Read split test assignment so that it's available for Pug to read
-    await SplitTestHandler.promises.getAssignment(req, res, 'core-pug-bs5')
-
     const templateVersionId = req.params.Template_version_id
     const templateId = req.query.id
     if (!/^[0-9]+$/.test(templateVersionId) || !/^[0-9]+$/.test(templateId)) {
