@@ -12,6 +12,8 @@ import Close from '@/shared/components/close'
 import useTutorial from '@/shared/hooks/promotions/use-tutorial'
 import { useEditorContext } from '@/shared/context/editor-context'
 import getMeta from '@/utils/meta'
+import { useIsNewEditorEnabled } from '@/features/ide-redesign/utils/new-editor-utils'
+import { useRailContext } from '@/features/ide-redesign/contexts/rail-context'
 
 const PROMOTION_SIGNUP_CUT_OFF_DATE = new Date('2025-04-22T00:00:00Z')
 
@@ -19,6 +21,8 @@ export const FullProjectSearchButton = ({ query }: { query: SearchQuery }) => {
   const view = useCodeMirrorViewContext()
   const { t } = useTranslation()
   const { setProjectSearchIsOpen } = useLayoutContext()
+  const newEditor = useIsNewEditorEnabled()
+  const { openTab } = useRailContext()
   const ref = useRef<HTMLButtonElement>(null)
 
   const { inactiveTutorials } = useEditorContext()
@@ -44,14 +48,18 @@ export const FullProjectSearchButton = ({ query }: { query: SearchQuery }) => {
   }
 
   const openFullProjectSearch = useCallback(() => {
-    setProjectSearchIsOpen(true)
+    if (newEditor) {
+      openTab('full-project-search')
+    } else {
+      setProjectSearchIsOpen(true)
+    }
     closeSearchPanel(view)
     window.setTimeout(() => {
       window.dispatchEvent(
         new CustomEvent('editor:full-project-search', { detail: query })
       )
     }, 200)
-  }, [setProjectSearchIsOpen, query, view])
+  }, [setProjectSearchIsOpen, query, view, newEditor, openTab])
 
   const onClick = useCallback(() => {
     sendSearchEvent('search-open', {

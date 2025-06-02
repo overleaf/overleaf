@@ -36,7 +36,6 @@ import { getStoredSelection, setStoredSelection } from '../extensions/search'
 import { debounce } from 'lodash'
 import { EditorSelection, EditorState } from '@codemirror/state'
 import { sendSearchEvent } from '@/features/event-tracking/search-events'
-import { useIsNewEditorEnabled } from '@/features/ide-redesign/utils/new-editor-utils'
 import { FullProjectSearchButton } from './full-project-search-button'
 
 const MATCH_COUNT_DEBOUNCE_WAIT = 100 // the amount of ms to wait before counting matches
@@ -81,8 +80,6 @@ const CodeMirrorSearchForm: FC<React.PropsWithChildren> = () => {
   const formRef = useRef<HTMLFormElement | null>(null)
   const inputRef = useRef<HTMLInputElement | null>(null)
   const replaceRef = useRef<HTMLInputElement | null>(null)
-
-  const newEditor = useIsNewEditorEnabled()
 
   const handleInputRef = useCallback((node: HTMLInputElement) => {
     inputRef.current = node
@@ -443,7 +440,7 @@ const CodeMirrorSearchForm: FC<React.PropsWithChildren> = () => {
             </OLButton>
           </OLButtonGroup>
 
-          {!newEditor && <FullProjectSearchButton query={query} />}
+          <FullProjectSearchButton query={query} />
 
           {position !== null && (
             <div className="ol-cm-search-form-position">

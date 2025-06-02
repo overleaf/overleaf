@@ -996,6 +996,7 @@ module.exports = {
     toastGenerators: [],
     editorSidebarComponents: [],
     fileTreeToolbarComponents: [],
+    fullProjectSearchPanel: [],
     integrationPanelComponents: [],
     referenceSearchSetting: [],
   },

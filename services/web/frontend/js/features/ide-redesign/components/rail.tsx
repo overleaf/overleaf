@@ -34,6 +34,11 @@ import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
 import OLIconButton from '@/features/ui/components/ol/ol-icon-button'
 import { useChatContext } from '@/features/chat/context/chat-context'
 import { useEditorAnalytics } from '@/shared/hooks/use-editor-analytics'
+import {
+  FullProjectSearchPanel,
+  hasFullProjectSearch,
+} from './full-project-search-panel'
+import { sendSearchEvent } from '@/features/event-tracking/search-events'
 
 type RailElement = {
   icon: AvailableUnfilledIcon
@@ -107,6 +112,13 @@ export const RailLayout = () => {
         component: <FileTreeOutlinePanel />,
       },
       {
+        key: 'full-project-search',
+        icon: 'search',
+        title: t('project_search'),
+        component: <FullProjectSearchPanel />,
+        hide: !hasFullProjectSearch,
+      },
+      {
         key: 'integrations',
         icon: 'integration_instructions',
         title: t('integrations'),
@@ -170,10 +182,17 @@ export const RailLayout = () => {
           // Attempting to open a non-existent tab
           return
         }
-        const keyOrDefault = key ?? 'file-tree'
+        const keyOrDefault = (key ?? 'file-tree') as RailTabKey
         // Change the selected tab and make sure it's open
-        openTab(keyOrDefault as RailTabKey)
+        openTab(keyOrDefault)
         sendEvent('rail-click', { tab: keyOrDefault })
+        if (keyOrDefault === 'full-project-search') {
+          sendSearchEvent('search-open', {
+            searchType: 'full-project',
+            method: 'button',
+            location: 'rail',
+          })
+        }
 
         if (key === 'chat') {
           markMessagesAsRead()

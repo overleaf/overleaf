@@ -6,7 +6,7 @@ type SearchEventSegmentation = {
         searchType: 'full-project'
       } & (
         | { method: 'keyboard' }
-        | { method: 'button'; location: 'toolbar' | 'search-form' }
+        | { method: 'button'; location: 'toolbar' | 'search-form' | 'rail' }
       ))
     | ({
         searchType: 'document'
