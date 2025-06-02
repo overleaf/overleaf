@@ -51,10 +51,25 @@ describe('EditorHttpController', function () {
     this.AuthorizationManager = {
       isRestrictedUser: sinon.stub().returns(false),
       promises: {
-        getPrivilegeLevelForProject: sinon.stub().resolves('owner'),
+        getPrivilegeLevelForProjectWithProjectAccess: sinon
+          .stub()
+          .resolves('owner'),
       },
     }
     this.CollaboratorsGetter = {
+      ProjectAccess: class {
+        loadInvitedMembers() {
+          return []
+        }
+
+        isUserTokenMember() {
+          return false
+        }
+
+        isUserInvitedMember() {
+          return false
+        }
+      },
       promises: {
         getInvitedMembersWithPrivilegeLevels: sinon
           .stub()
@@ -170,9 +185,12 @@ describe('EditorHttpController', function () {
 
     describe('successfully', function () {
       beforeEach(function (done) {
-        this.CollaboratorsGetter.promises.isUserInvitedMemberOfProject.resolves(
-          true
-        )
+        sinon
+          .stub(
+            this.CollaboratorsGetter.ProjectAccess.prototype,
+            'isUserInvitedMember'
+          )
+          .returns(true)
         this.res.callback = done
         this.EditorHttpController.joinProject(this.req, this.res)
       })
@@ -214,7 +232,7 @@ describe('EditorHttpController', function () {
     describe('with a restricted user', function () {
       beforeEach(function (done) {
         this.AuthorizationManager.isRestrictedUser.returns(true)
-        this.AuthorizationManager.promises.getPrivilegeLevelForProject.resolves(
+        this.AuthorizationManager.promises.getPrivilegeLevelForProjectWithProjectAccess.resolves(
           'readOnly'
         )
         this.res.callback = done
@@ -234,7 +252,7 @@ describe('EditorHttpController', function () {
 
     describe('when not authorized', function () {
       beforeEach(function (done) {
-        this.AuthorizationManager.promises.getPrivilegeLevelForProject.resolves(
+        this.AuthorizationManager.promises.getPrivilegeLevelForProjectWithProjectAccess.resolves(
           null
         )
         this.res.callback = done
@@ -258,7 +276,7 @@ describe('EditorHttpController', function () {
         this.AuthorizationManager.isRestrictedUser
           .withArgs(null, 'readOnly', false, false)
           .returns(true)
-        this.AuthorizationManager.promises.getPrivilegeLevelForProject
+        this.AuthorizationManager.promises.getPrivilegeLevelForProjectWithProjectAccess
           .withArgs(null, this.project._id, this.token)
           .resolves('readOnly')
         this.EditorHttpController.joinProject(this.req, this.res)
@@ -277,11 +295,19 @@ describe('EditorHttpController', function () {
 
     describe('with a token access user', function () {
       beforeEach(function (done) {
-        this.CollaboratorsGetter.promises.isUserInvitedMemberOfProject.resolves(
-          false
-        )
-        this.CollaboratorsHandler.promises.userIsTokenMember.resolves(true)
-        this.AuthorizationManager.promises.getPrivilegeLevelForProject.resolves(
+        sinon
+          .stub(
+            this.CollaboratorsGetter.ProjectAccess.prototype,
+            'isUserInvitedMember'
+          )
+          .returns(false)
+        sinon
+          .stub(
+            this.CollaboratorsGetter.ProjectAccess.prototype,
+            'isUserTokenMember'
+          )
+          .returns(true)
+        this.AuthorizationManager.promises.getPrivilegeLevelForProjectWithProjectAccess.resolves(
           'readAndWrite'
         )
         this.res.callback = done

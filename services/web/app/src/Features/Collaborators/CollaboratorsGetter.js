@@ -32,6 +32,7 @@ module.exports = {
   userIsTokenMember: callbackify(userIsTokenMember),
   getAllInvitedMembers: callbackify(getAllInvitedMembers),
   promises: {
+    getProjectAccess,
     getMemberIdsWithPrivilegeLevels,
     getMemberIds,
     getInvitedMemberIds,
@@ -134,6 +135,7 @@ class ProjectAccess {
    * @return {typeof PrivilegeLevels[keyof PrivilegeLevels]}
    */
   privilegeLevelForUser(userId) {
+    if (!userId) return PrivilegeLevels.NONE
     for (const member of this.#members) {
       if (member.id === userId.toString()) {
         return member.privilegeLevel
@@ -146,7 +148,22 @@ class ProjectAccess {
    * @param {string | ObjectId} userId
    * @return {boolean}
    */
+  isUserTokenMember(userId) {
+    if (!userId) return false
+    for (const member of this.#members) {
+      if (member.id === userId.toString() && member.source === Sources.TOKEN) {
+        return true
+      }
+    }
+    return false
+  }
+
+  /**
+   * @param {string | ObjectId} userId
+   * @return {boolean}
+   */
   isUserInvitedMember(userId) {
+    if (!userId) return false
     for (const member of this.#members) {
       if (member.id === userId.toString() && member.source !== Sources.TOKEN) {
         return true
@@ -198,6 +215,8 @@ class ProjectAccess {
     ).length
   }
 }
+
+module.exports.ProjectAccess = ProjectAccess
 
 async function getProjectAccess(projectId) {
   const project = await ProjectGetter.promises.getProject(projectId, {

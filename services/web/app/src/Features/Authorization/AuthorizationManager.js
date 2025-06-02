@@ -88,9 +88,54 @@ async function getPrivilegeLevelForProject(
   opts = {}
 ) {
   if (userId) {
-    return getPrivilegeLevelForProjectWithUser(userId, projectId, opts)
+    return await getPrivilegeLevelForProjectWithUser(
+      userId,
+      projectId,
+      null,
+      opts
+    )
   } else {
-    return getPrivilegeLevelForProjectWithoutUser(projectId, token, opts)
+    return await getPrivilegeLevelForProjectWithoutUser(projectId, token, opts)
+  }
+}
+
+/**
+ * Get the privilege level that the user has for the project.
+ *
+ * @param userId - The id of the user that wants to access the project.
+ * @param projectId - The id of the project to be accessed.
+ * @param {string} token
+ * @param {ProjectAccess} projectAccess
+ * @param {Object} opts
+ * @param {boolean} opts.ignoreSiteAdmin - Do not consider whether the user is
+ *     a site admin.
+ * @param {boolean} opts.ignorePublicAccess - Do not consider the project is
+ *     publicly accessible.
+ *
+ * @returns {string|boolean} The privilege level. One of "owner",
+ *     "readAndWrite", "readOnly" or false.
+ */
+async function getPrivilegeLevelForProjectWithProjectAccess(
+  userId,
+  projectId,
+  token,
+  projectAccess,
+  opts = {}
+) {
+  if (userId) {
+    return await getPrivilegeLevelForProjectWithUser(
+      userId,
+      projectId,
+      projectAccess,
+      opts
+    )
+  } else {
+    return await _getPrivilegeLevelForProjectWithoutUserWithPublicAccessLevel(
+      projectId,
+      token,
+      projectAccess.publicAccessLevel(),
+      opts
+    )
   }
 }
 
@@ -98,6 +143,7 @@ async function getPrivilegeLevelForProject(
 async function getPrivilegeLevelForProjectWithUser(
   userId,
   projectId,
+  projectAccess,
   opts = {}
 ) {
   if (!opts.ignoreSiteAdmin) {
@@ -106,11 +152,11 @@ async function getPrivilegeLevelForProjectWithUser(
     }
   }
 
-  const privilegeLevel =
-    await CollaboratorsGetter.promises.getMemberIdPrivilegeLevel(
-      userId,
-      projectId
-    )
+  projectAccess =
+    projectAccess ||
+    (await CollaboratorsGetter.promises.getProjectAccess(projectId))
+
+  const privilegeLevel = projectAccess.privilegeLevelForUser(userId)
   if (privilegeLevel && privilegeLevel !== PrivilegeLevels.NONE) {
     // The user has direct access
     return privilegeLevel
@@ -119,7 +165,7 @@ async function getPrivilegeLevelForProjectWithUser(
   if (!opts.ignorePublicAccess) {
     // Legacy public-access system
     // User is present (not anonymous), but does not have direct access
-    const publicAccessLevel = await getPublicAccessLevel(projectId)
+    const publicAccessLevel = projectAccess.publicAccessLevel()
     if (publicAccessLevel === PublicAccessLevels.READ_ONLY) {
       return PrivilegeLevels.READ_ONLY
     }
@@ -137,7 +183,21 @@ async function getPrivilegeLevelForProjectWithoutUser(
   token,
   opts = {}
 ) {
-  const publicAccessLevel = await getPublicAccessLevel(projectId)
+  return await _getPrivilegeLevelForProjectWithoutUserWithPublicAccessLevel(
+    projectId,
+    token,
+    await getPublicAccessLevel(projectId),
+    opts
+  )
+}
+
+// User is Anonymous, Try Token-based access
+async function _getPrivilegeLevelForProjectWithoutUserWithPublicAccessLevel(
+  projectId,
+  token,
+  publicAccessLevel,
+  opts = {}
+) {
   if (!opts.ignorePublicAccess) {
     if (publicAccessLevel === PublicAccessLevels.READ_ONLY) {
       // Legacy public read-only access for anonymous user
@@ -149,7 +209,7 @@ async function getPrivilegeLevelForProjectWithoutUser(
     }
   }
   if (publicAccessLevel === PublicAccessLevels.TOKEN_BASED) {
-    return getPrivilegeLevelForProjectWithToken(projectId, token)
+    return await getPrivilegeLevelForProjectWithToken(projectId, token)
   }
 
   // Deny anonymous user access
@@ -309,6 +369,7 @@ module.exports = {
     canUserRenameProject,
     canUserAdminProject,
     getPrivilegeLevelForProject,
+    getPrivilegeLevelForProjectWithProjectAccess,
     isRestrictedUserForProject,
     isUserSiteAdmin,
   },
