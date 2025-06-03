@@ -198,7 +198,7 @@ const mockDoc = (content: string, changes: Array<Record<string, any>> = []) => {
     setTrackChangesIdSeeds: () => {
       // Do nothing
     },
-    setTrackingChanges: () => {
+    setTrackChangesUserId: () => {
       // Do nothing
     },
     getTrackingChanges: () => {

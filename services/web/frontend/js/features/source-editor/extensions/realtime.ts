@@ -1,11 +1,26 @@
-import { Prec, Transaction, Annotation, ChangeSpec } from '@codemirror/state'
+import {
+  Prec,
+  Transaction,
+  Annotation,
+  ChangeSpec,
+  Text,
+} from '@codemirror/state'
 import { EditorView, ViewPlugin } from '@codemirror/view'
 import { EventEmitter } from 'events'
 import RangesTracker from '@overleaf/ranges-tracker'
-import { ShareDoc } from '../../../../../types/share-doc'
+import {
+  ShareDoc,
+  ShareLatexOTShareDoc,
+  HistoryOTShareDoc,
+} from '../../../../../types/share-doc'
 import { debugConsole } from '@/utils/debugging'
 import { DocumentContainer } from '@/features/ide-react/editor/document-container'
-import { OTType } from '@/features/ide-react/editor/share-js-doc'
+import { TrackedChangeList } from 'overleaf-editor-core'
+import {
+  updateTrackedChanges,
+  setTrackChangesUserId,
+  historyOTOperationEffect,
+} from './history-ot'
 
 /*
  * Integrate CodeMirror 6 with the real-time system, via ShareJS.
@@ -26,8 +41,10 @@ import { OTType } from '@/features/ide-react/editor/share-js-doc'
  *   - frontend/js/features/ide-react/connection/editor-watchdog-manager.js
  */
 
+type Origin = 'remote' | 'undo' | 'reject' | undefined
+
 export type ChangeDescription = {
-  origin: 'remote' | 'undo' | 'reject' | undefined
+  origin: Origin
   inserted: boolean
   removed: boolean
 }
@@ -126,9 +143,13 @@ export class EditorFacade extends EventEmitter {
     this.cmChange({ from: position, to: position + text.length }, origin)
   }
 
-  attachShareJs(shareDoc: ShareDoc, maxDocLength?: number, type?: OTType) {
+  cmUpdateTrackedChanges(trackedChanges: TrackedChangeList) {
+    this.view.dispatch(updateTrackedChanges(trackedChanges))
+  }
+
+  attachShareJs(shareDoc: ShareDoc, maxDocLength?: number) {
     this.otAdapter =
-      type === 'history-ot'
+      shareDoc.otType === 'history-ot'
         ? new HistoryOTAdapter(this, shareDoc, maxDocLength)
         : new ShareLatexOTAdapter(this, shareDoc, maxDocLength)
     this.otAdapter.attachShareJs()
@@ -148,12 +169,18 @@ export class EditorFacade extends EventEmitter {
 
     this.otAdapter.handleUpdateFromCM(transactions, ranges)
   }
+
+  setTrackChangesUserId(userId: string | null) {
+    if (this.otAdapter instanceof HistoryOTAdapter) {
+      this.view.dispatch(setTrackChangesUserId(userId))
+    }
+  }
 }
 
 class ShareLatexOTAdapter {
   constructor(
     public editor: EditorFacade,
-    private shareDoc: ShareDoc,
+    private shareDoc: ShareLatexOTShareDoc,
     private maxDocLength?: number
   ) {
     this.editor = editor
@@ -279,7 +306,133 @@ class ShareLatexOTAdapter {
   }
 }
 
-class HistoryOTAdapter extends ShareLatexOTAdapter {}
+class HistoryOTAdapter {
+  constructor(
+    public editor: EditorFacade,
+    private shareDoc: HistoryOTShareDoc,
+    private maxDocLength?: number
+  ) {
+    this.editor = editor
+    this.shareDoc = shareDoc
+    this.maxDocLength = maxDocLength
+  }
+
+  attachShareJs() {
+    this.checkContent()
+
+    const onInsert = this.onShareJsInsert.bind(this)
+    const onDelete = this.onShareJsDelete.bind(this)
+    const onTrackedChangesInvalidated =
+      this.onShareJsTrackedChangesInvalidated.bind(this)
+
+    this.shareDoc.on('insert', onInsert)
+    this.shareDoc.on('delete', onDelete)
+    this.shareDoc.on('tracked-changes-invalidated', onTrackedChangesInvalidated)
+
+    this.shareDoc.detach_cm6 = () => {
+      this.shareDoc.removeListener('insert', onInsert)
+      this.shareDoc.removeListener('delete', onDelete)
+      this.shareDoc.removeListener(
+        'tracked-changes-invalidated',
+        onTrackedChangesInvalidated
+      )
+      delete this.shareDoc.detach_cm6
+      this.editor.detachShareJs()
+    }
+  }
+
+  handleUpdateFromCM(
+    transactions: readonly Transaction[],
+    ranges?: RangesTracker
+  ) {
+    for (const transaction of transactions) {
+      if (
+        this.maxDocLength &&
+        transaction.changes.newLength >= this.maxDocLength
+      ) {
+        this.shareDoc.emit(
+          'error',
+          new Error('document length is greater than maxDocLength')
+        )
+        return
+      }
+
+      let snapshotUpdated = false
+      for (const effect of transaction.effects) {
+        if (effect.is(historyOTOperationEffect)) {
+          this.shareDoc.submitOp(effect.value.map(op => op.toJSON()))
+          snapshotUpdated = true
+        }
+      }
+
+      if (snapshotUpdated || transaction.annotation(Transaction.remote)) {
+        window.setTimeout(() => {
+          this.editor.cmUpdateTrackedChanges(
+            this.shareDoc.snapshot.getTrackedChanges()
+          )
+        }, 0)
+      }
+
+      const origin = chooseOrigin(transaction)
+      transaction.changes.iterChanges((fromA, toA, fromB, toB, inserted) => {
+        this.onCodeMirrorChange(fromA, toA, fromB, toB, inserted, origin)
+      })
+    }
+  }
+
+  onShareJsInsert(pos: number, text: string) {
+    this.editor.cmInsert(pos, text, 'remote')
+    this.checkContent()
+  }
+
+  onShareJsDelete(pos: number, text: string) {
+    this.editor.cmDelete(pos, text, 'remote')
+    this.checkContent()
+  }
+
+  onShareJsTrackedChangesInvalidated() {
+    this.editor.cmUpdateTrackedChanges(
+      this.shareDoc.snapshot.getTrackedChanges()
+    )
+  }
+
+  onCodeMirrorChange(
+    fromA: number,
+    toA: number,
+    fromB: number,
+    toB: number,
+    insertedText: Text,
+    origin: Origin
+  ) {
+    const insertedLength = insertedText.length
+    const removedLength = toA - fromA
+    const inserted = insertedLength > 0
+    const removed = removedLength > 0
+
+    const changeDescription: ChangeDescription = {
+      origin,
+      inserted,
+      removed,
+    }
+
+    this.editor.emit('change', this.editor, changeDescription)
+  }
+
+  checkContent() {
+    // run in a timeout so it checks the editor content once this update has been applied
+    window.setTimeout(() => {
+      const editorText = this.editor.getValue()
+      const otText = this.shareDoc.getText()
+
+      if (editorText !== otText) {
+        this.shareDoc.emit('error', 'Text does not match in CodeMirror 6')
+        debugConsole.error('Text does not match!')
+        debugConsole.error('editor: ' + editorText)
+        debugConsole.error('ot:     ' + otText)
+      }
+    }, 0)
+  }
+}
 
 export const trackChangesAnnotation = Annotation.define()
 

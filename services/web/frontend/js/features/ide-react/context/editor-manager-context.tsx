@@ -18,6 +18,7 @@ import { useConnectionContext } from '@/features/ide-react/context/connection-co
 import { debugConsole } from '@/utils/debugging'
 import { DocumentContainer } from '@/features/ide-react/editor/document-container'
 import { useLayoutContext } from '@/shared/context/layout-context'
+import { useUserContext } from '@/shared/context/user-context'
 import { GotoLineOptions } from '@/features/ide-react/types/goto-line-options'
 import { Doc } from '../../../../../types/doc'
 import { useFileTreeData } from '@/shared/context/file-tree-data-context'
@@ -99,6 +100,7 @@ export const EditorManagerProvider: FC<React.PropsWithChildren> = ({
   const { view, setView } = useLayoutContext()
   const { showGenericMessageModal, genericModalVisible, showOutOfSyncModal } =
     useModalsContext()
+  const { id: userId } = useUserContext()
 
   const [showSymbolPalette, setShowSymbolPalette] = useScopeValue<boolean>(
     'editor.showSymbolPalette'
@@ -309,7 +311,7 @@ export const EditorManagerProvider: FC<React.PropsWithChildren> = ({
       const tryToggle = () => {
         const saved = doc.getInflightOp() == null && doc.getPendingOp() == null
         if (saved) {
-          doc.setTrackingChanges(want)
+          doc.setTrackChangesUserId(want ? userId : null)
           setTrackChanges(want)
         } else {
           syncTimeoutRef.current = window.setTimeout(tryToggle, 100)
@@ -318,7 +320,7 @@ export const EditorManagerProvider: FC<React.PropsWithChildren> = ({
 
       tryToggle()
     },
-    [setTrackChanges]
+    [setTrackChanges, userId]
   )
 
   const doOpenNewDocument = useCallback(

@@ -680,6 +680,7 @@ export const { Doc } = (() => {
   // Text document API for text
 
   text.api = {
+    otType: "sharejs-text-ot",
     provides: { text: true },
 
     // The number of characters in the string
@@ -1008,8 +1009,8 @@ export const { Doc } = (() => {
 
         this.type = type;
         if (type.api) {
-          for (const k of ['insert', 'del', 'getText', 'getLength', '_register']) {
-            this[k] = type.api[k]
+          for (var k in type.api) {
+            var v = type.api[k];this[k] = v;
           }
           return typeof this._register === 'function' ? this._register() : undefined;
         } else {

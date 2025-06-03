@@ -50,6 +50,7 @@ import { docName } from './doc-name'
 import { fileTreeItemDrop } from './file-tree-item-drop'
 import { mathPreview } from './math-preview'
 import { ranges } from './ranges'
+import { historyOT } from './history-ot'
 import { trackDetachedComments } from './track-detached-comments'
 import { reviewTooltip } from './review-tooltip'
 
@@ -142,7 +143,9 @@ export const createExtensions = (options: Record<string, any>): Extension[] => [
   // NOTE: `emptyLineFiller` needs to be before `trackChanges`,
   // so the decorations are added in the correct order.
   emptyLineFiller(),
-  ranges(),
+  options.currentDoc.currentDocument.getType() === 'history-ot'
+    ? historyOT(options.currentDoc.currentDocument)
+    : ranges(),
   trackDetachedComments(options.currentDoc),
   visual(options.visual),
   mathPreview(options.settings.mathPreview),

@@ -12,18 +12,14 @@ import {
   Message,
   ShareJsConnectionState,
   ShareJsOperation,
-  ShareJsTextType,
   TrackChangesIdSeeds,
 } from '@/features/ide-react/editor/types/document'
 import { EditorFacade } from '@/features/source-editor/extensions/realtime'
 import { recordDocumentFirstChangeEvent } from '@/features/event-tracking/document-first-change-event'
 import getMeta from '@/utils/meta'
-import { HistoryOTType } from './share-js-history-ot-type'
-import { StringFileData } from 'overleaf-editor-core/index'
-import {
-  RawEditOperation,
-  StringFileRawData,
-} from 'overleaf-editor-core/lib/types'
+import { historyOTType } from './share-js-history-ot-type'
+import { StringFileData, TrackedChangeList } from 'overleaf-editor-core/index'
+import { StringFileRawData } from 'overleaf-editor-core/lib/types'
 
 // All times below are in milliseconds
 const SINGLE_USER_FLUSH_DELAY = 2000
@@ -68,19 +64,17 @@ export class ShareJsDoc extends EventEmitter {
     readonly type: OTType = 'sharejs-text-ot'
   ) {
     super()
-    let sharejsType: ShareJsTextType = sharejs.types.text
+    let sharejsType
     // Decode any binary bits of data
     let snapshot: string | StringFileData
     if (this.type === 'history-ot') {
       snapshot = StringFileData.fromRaw(
         docLines as unknown as StringFileRawData
       )
-      sharejsType = new HistoryOTType(snapshot) as ShareJsTextType<
-        StringFileData,
-        RawEditOperation[]
-      >
+      sharejsType = historyOTType
     } else {
       snapshot = docLines.map(line => decodeUtf8(line)).join('\n')
+      sharejsType = sharejs.types.text
     }
 
     this.connection = {
@@ -157,6 +151,18 @@ export class ShareJsDoc extends EventEmitter {
       snapshot,
     })
     this.removeCarriageReturnCharFromShareJsDoc()
+  }
+
+  setTrackChangesUserId(userId: string | null) {
+    this.track_changes = userId != null
+  }
+
+  getTrackedChanges() {
+    if (this._doc.otType === 'history-ot') {
+      return this._doc.snapshot.getTrackedChanges() as TrackedChangeList
+    } else {
+      return null
+    }
   }
 
   private removeCarriageReturnCharFromShareJsDoc() {
@@ -365,7 +371,7 @@ export class ShareJsDoc extends EventEmitter {
 
   attachToCM6(cm6: EditorFacade) {
     this.attachToEditor(cm6, () => {
-      cm6.attachShareJs(this._doc, getMeta('ol-maxDocLength'), this.type)
+      cm6.attachShareJs(this._doc, getMeta('ol-maxDocLength'))
     })
   }
 

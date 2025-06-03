@@ -196,9 +196,13 @@ export class DocumentContainer extends EventEmitter {
     return this.doc?.hasBufferedOps()
   }
 
-  setTrackingChanges(track_changes: boolean) {
+  setTrackChangesUserId(userId: string | null) {
+    this.track_changes_as = userId
     if (this.doc) {
-      this.doc.track_changes = track_changes
+      this.doc.setTrackChangesUserId(userId)
+    }
+    if (this.cm6) {
+      this.cm6.setTrackChangesUserId(userId)
     }
   }
 

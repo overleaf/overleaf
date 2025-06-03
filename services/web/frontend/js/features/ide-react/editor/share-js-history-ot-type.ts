@@ -1,4 +1,3 @@
-import EventEmitter from '@/utils/EventEmitter'
 import {
   EditOperationBuilder,
   EditOperationTransformer,
@@ -9,75 +8,28 @@ import {
   TextOperation,
 } from 'overleaf-editor-core'
 import { RawEditOperation } from 'overleaf-editor-core/lib/types'
+import { ShareDoc } from '../../../../../types/share-doc'
 
-export class HistoryOTType extends EventEmitter {
-  // stub interface, these are actually on the Doc
-  api: HistoryOTType
-  snapshot: StringFileData
+type Api = {
+  otType: 'history-ot'
+  trackChangesUserId: string | null
 
-  constructor(snapshot: StringFileData) {
-    super()
-    this.api = this
-    this.snapshot = snapshot
-  }
+  getText(): string
+  getLength(): number
+  _register(): void
+}
 
-  transformX(raw1: RawEditOperation[], raw2: RawEditOperation[]) {
-    const [a, b] = EditOperationTransformer.transform(
-      EditOperationBuilder.fromJSON(raw1[0]),
-      EditOperationBuilder.fromJSON(raw2[0])
-    )
-    return [[a.toJSON()], [b.toJSON()]]
-  }
-
-  apply(snapshot: StringFileData, rawEditOperation: RawEditOperation[]) {
-    const operation = EditOperationBuilder.fromJSON(rawEditOperation[0])
-    const afterFile = StringFileData.fromRaw(snapshot.toRaw())
-    afterFile.edit(operation)
-    this.snapshot = afterFile
-    return afterFile
-  }
-
-  compose(op1: RawEditOperation[], op2: RawEditOperation[]) {
-    return [
-      EditOperationBuilder.fromJSON(op1[0])
-        .compose(EditOperationBuilder.fromJSON(op2[0]))
-        .toJSON(),
-    ]
-  }
-
-  // Do not provide normalize, used by submitOp to fixup bad input.
-  // normalize(op: TextOperation) {}
-
-  // Do not provide invert, only needed for reverting a rejected update.
-  // We are displaying an out-of-sync modal when an op is rejected.
-  // invert(op: TextOperation) {}
-
-  // API
-  insert(pos: number, text: string, fromUndo: boolean) {
-    const old = this.getText()
-    const op = new TextOperation()
-    op.retain(pos)
-    op.insert(text)
-    op.retain(old.length - pos)
-    this.submitOp([op.toJSON()])
-  }
-
-  del(pos: number, length: number, fromUndo: boolean) {
-    const old = this.getText()
-    const op = new TextOperation()
-    op.retain(pos)
-    op.remove(length)
-    op.retain(old.length - pos - length)
-    this.submitOp([op.toJSON()])
-  }
+const api: Api & ThisType<Api & ShareDoc & { snapshot: StringFileData }> = {
+  otType: 'history-ot',
+  trackChangesUserId: null,
 
   getText() {
-    return this.snapshot.getContent({ filterTrackedDeletes: true })
-  }
+    return this.snapshot.getContent()
+  },
 
   getLength() {
-    return this.getText().length
-  }
+    return this.snapshot.getStringLength()
+  },
 
   _register() {
     this.on(
@@ -95,10 +47,14 @@ export class HistoryOTType extends EventEmitter {
 
           let outputCursor = 0
           let inputCursor = 0
+          let trackedChangesInvalidated = false
           for (const op of operation.ops) {
             if (op instanceof RetainOp) {
               inputCursor += op.length
               outputCursor += op.length
+              if (op.tracking != null) {
+                trackedChangesInvalidated = true
+              }
             } else if (op instanceof InsertOp) {
               this.emit(
                 'insert',
@@ -107,6 +63,7 @@ export class HistoryOTType extends EventEmitter {
                 op.insertion.length
               )
               outputCursor += op.insertion.length
+              trackedChangesInvalidated = true
             } else if (op instanceof RemoveOp) {
               this.emit(
                 'delete',
@@ -114,20 +71,57 @@ export class HistoryOTType extends EventEmitter {
                 str.slice(inputCursor, inputCursor + op.length)
               )
               inputCursor += op.length
+              trackedChangesInvalidated = true
             }
           }
 
-          if (inputCursor !== str.length)
+          if (inputCursor !== str.length) {
             throw new TextOperation.ApplyError(
               "The operation didn't operate on the whole string.",
               operation,
               str
             )
+          }
+
+          if (trackedChangesInvalidated) {
+            this.emit('tracked-changes-invalidated')
+          }
         }
       }
     )
-  }
+  },
+}
 
-  // stub-interface, provided by sharejs.Doc
-  submitOp(op: RawEditOperation[]) {}
+export const historyOTType = {
+  api,
+
+  transformX(raw1: RawEditOperation[], raw2: RawEditOperation[]) {
+    const [a, b] = EditOperationTransformer.transform(
+      EditOperationBuilder.fromJSON(raw1[0]),
+      EditOperationBuilder.fromJSON(raw2[0])
+    )
+    return [[a.toJSON()], [b.toJSON()]]
+  },
+
+  apply(snapshot: StringFileData, rawEditOperation: RawEditOperation[]) {
+    const operation = EditOperationBuilder.fromJSON(rawEditOperation[0])
+    const afterFile = StringFileData.fromRaw(snapshot.toRaw())
+    afterFile.edit(operation)
+    return afterFile
+  },
+
+  compose(op1: RawEditOperation[], op2: RawEditOperation[]) {
+    return [
+      EditOperationBuilder.fromJSON(op1[0])
+        .compose(EditOperationBuilder.fromJSON(op2[0]))
+        .toJSON(),
+    ]
+  },
+
+  // Do not provide normalize, used by submitOp to fixup bad input.
+  // normalize(op: TextOperation) {}
+
+  // Do not provide invert, only needed for reverting a rejected update.
+  // We are displaying an out-of-sync modal when an op is rejected.
+  // invert(op: TextOperation) {}
 }
