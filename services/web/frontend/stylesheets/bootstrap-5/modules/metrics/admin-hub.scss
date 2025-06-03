@@ -1,0 +1,93 @@
+.hub-header {
+  h2 {
+    display: inline-block;
+  }
+
+  .dropdown {
+    margin-right: var(--spacing-04);
+  }
+}
+
+.admin-item {
+  position: relative;
+  margin-bottom: var(--spacing-12);
+
+  .section-title {
+    text-transform: capitalize;
+  }
+
+  .alert-danger {
+    color: var(--content-danger);
+  }
+}
+
+.hidden-chart-section {
+  display: none;
+}
+
+.hub-circle {
+  display: inline-block;
+  background-color: var(--green-70);
+  border-radius: 50%;
+  width: 160px;
+  height: 160px;
+  text-align: center;
+  padding-top: 50px;
+  color: white;
+}
+
+.hub-circle-number {
+  display: block;
+  font-size: 36px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.hub-big-number {
+  float: left;
+  font-size: 32px;
+  font-weight: 900;
+  line-height: 40px;
+  color: var(--green-70);
+}
+
+.hub-big-number,
+.hub-number-label {
+  display: block;
+}
+
+.hub-metric-link {
+  position: absolute;
+  top: 9px;
+  right: 0;
+
+  i {
+    margin-right: 5px;
+  }
+}
+
+.custom-donut-container {
+  svg {
+    max-width: 700px;
+    margin: auto;
+  }
+
+  .chart-center-text {
+    font-family: $font-family-sans-serif;
+    font-size: 40px;
+    font-weight: bold;
+    fill: var(--green-70);
+    text-anchor: middle;
+  }
+
+  .nv-legend-text {
+    font-family: $font-family-sans-serif;
+    font-size: 14px;
+  }
+}
+
+.chart-no-center-text {
+  .chart-center-text {
+    display: none;
+  }
+}

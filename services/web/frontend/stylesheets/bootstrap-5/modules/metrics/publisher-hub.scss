@@ -2,48 +2,66 @@
   .recent-activity {
     .hub-big-number {
       text-align: right;
-      padding-right: 15px;
+      padding-right: var(--spacing-06);
     }
   }
 
   #templates-container {
     width: 100%;
+
     tr {
-      border: 1px solid @ol-blue-gray-0;
+      border: 1px solid var(--bg-light-secondary);
     }
+
     td {
-      padding: 15px;
+      padding: var(--spacing-06);
     }
+
     td:last-child {
       text-align: right;
     }
+
     .title-cell {
       max-width: 300px;
     }
+
     .title-text {
       font-weight: bold;
     }
+
     .hub-big-number {
       width: 60%;
-      padding-right: 10px;
-      padding-top: 10px;
+      padding-right: var(--spacing-04);
+      padding-top: var(--spacing-04);
       text-align: right;
     }
+
     .hub-number-label,
     .since {
       width: 35%;
       float: right;
-      @media screen and (max-width: 940px) {
+
+      @include media-breakpoint-down(md) {
         float: none;
       }
     }
+
     .hub-long-big-number {
-      padding-right: 40px;
+      padding-right: var(--spacing-10);
     }
+
     .created-on {
-      color: @gray-light;
+      @include body-sm;
+
+      color: var(--content-disabled);
       font-style: italic;
-      font-size: 14px;
     }
+  }
+
+  .overbox {
+    margin: 0;
+    padding: var(--spacing-10) var(--spacing-07);
+    background: var(--white);
+    border: 1px solid var(--content-disabled);
   }
 }
