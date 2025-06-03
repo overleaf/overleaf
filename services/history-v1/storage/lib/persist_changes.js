@@ -57,9 +57,18 @@ Timer.prototype.elapsed = function () {
  * @param {core.Change[]} allChanges
  * @param {Object} limits
  * @param {number} clientEndVersion
+ * @param {Object} options
+ * @param {Boolean} [options.queueChangesInRedis]
+ *   If true, queue the changes in Redis for testing purposes.
  * @return {Promise.<Object?>}
  */
-async function persistChanges(projectId, allChanges, limits, clientEndVersion) {
+async function persistChanges(
+  projectId,
+  allChanges,
+  limits,
+  clientEndVersion,
+  options = {}
+) {
   assert.projectId(projectId)
   assert.array(allChanges)
   assert.maybe.object(limits)
@@ -289,11 +298,13 @@ async function persistChanges(projectId, allChanges, limits, clientEndVersion) {
     const numberOfChangesToPersist = oldChanges.length
 
     await loadLatestChunk()
-    try {
-      await queueChangesInRedis()
-      await fakePersistRedisChanges()
-    } catch (err) {
-      logger.error({ err }, 'Chunk buffer verification failed')
+    if (options.queueChangesInRedis) {
+      try {
+        await queueChangesInRedis()
+        await fakePersistRedisChanges()
+      } catch (err) {
+        logger.error({ err }, 'Chunk buffer verification failed')
+      }
     }
     await extendLastChunkIfPossible()
     await createNewChunksAsNeeded()

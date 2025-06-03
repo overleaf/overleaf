@@ -110,7 +110,9 @@ async function importChanges(req, res, next) {
 
   let result
   try {
-    result = await persistChanges(projectId, changes, limits, endVersion)
+    result = await persistChanges(projectId, changes, limits, endVersion, {
+      queueChangesInRedis: true,
+    })
   } catch (err) {
     if (
       err instanceof Chunk.ConflictingEndVersion ||
