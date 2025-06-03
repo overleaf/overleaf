@@ -2,27 +2,30 @@ extends ../layout/layout-no-js
 
 block vars
 	- metadata = { title: 'Something went wrong' }
+	- bootstrap5PageStatus = 'disabled'
 
 block body
-	body
-		main.content.content-alt#main-content
-			.container
-				.error-container
-					h1.mb-4 Something went wrong, sorry.
-					p.fs-5
-						| There was a problem with your request.
+	body.full-height
+		main.content.content-alt.full-height#main-content
+			.container.full-height
+				.error-container.full-height
+					.error-details
+						p.error-status Something went wrong, sorry.
+						p.error-description
+							| There was a problem with your request.
+							if(message)
+								|
+								| The error is:
 						if(message)
+							p.error-box
+								| #{message}
+						p.error-description
+							| Please go back and try again.
+							| If the problem persists, please contact us at
 							|
-							| The error is:
-					if(message)
-						p.bg-light.p-3.border-2.font-monospace
-							| #{message}
-					p.fs-5
-						| Please go back and try again.
-						| If the problem persists, please contact us at
-						|
-						a(href="mailto:" + settings.adminEmail) #{settings.adminEmail}
-						| .
-					p.mt-5.d-flex.gap-3
-						a.btn.btn-primary(href="javascript:history.back()") Back
-						a.btn.btn-secondary(href="/") Home
+							a(href="mailto:" + settings.adminEmail) #{settings.adminEmail}
+							| .
+						p.error-actions
+							a.error-btn(href="javascript:history.back()") Back
+							| &nbsp;
+							a.btn.btn-secondary(href="/") Home

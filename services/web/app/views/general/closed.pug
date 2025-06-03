@@ -1,13 +1,13 @@
-extends ../layout-react
+extends ../layout-marketing
 
-block append meta
-	meta(name="ol-user" data-type="json" content=user)
+block vars
+	- bootstrap5PageStatus = 'disabled'
 
 block content
 	main.content#main-content
 		.container
 			.row
-				.col-lg-8.offset-lg-2.text-center
+				.col-md-8.col-md-offset-2.text-center
 					.page-header
 						h1 Maintenance
 					p

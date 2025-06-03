@@ -2,21 +2,23 @@ extends ../layout/layout-no-js
 
 block vars
 	- metadata = { title: 'Something went wrong' }
+	- bootstrap5PageStatus = 'disabled'
 
 block body
-	body
-		main.content.content-alt#main-content
-			.container
-				.error-container
-					h1.mb-4 Something went wrong, sorry.
-					p.fs-5 Our staff are probably looking into this, but if it continues, please check our status page at
-						|
-						|
-						a(href="http://" + settings.statusPageUrl) #{settings.statusPageUrl}
-						|
-						| or contact us at
-						|
-						a(href="mailto:" + settings.adminEmail) #{settings.adminEmail}
-						| .
-					p.mt-5
-						a.btn.btn-primary.d-block.d-md-inline-block(href="/") Home
+	body.full-height
+		main.content.content-alt.full-height#main-content
+			.container.full-height
+				.error-container.full-height
+					.error-details
+						p.error-status Something went wrong, sorry.
+						p.error-description Our staff are probably looking into this, but if it continues, please check our status page at
+							|
+							|
+							a(href="http://" + settings.statusPageUrl) #{settings.statusPageUrl}
+							|
+							| or contact us at
+							|
+							a(href="mailto:" + settings.adminEmail) #{settings.adminEmail}
+							| .
+						p.error-actions
+							a.error-btn(href="/") Home
