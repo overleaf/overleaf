@@ -501,6 +501,11 @@ rclient.defineCommand('set_persisted_version', {
       return 'too_low'
     end
 
+    -- Refuse to set a persisted version that is higher than the head version
+    if newPersistedVersion > headVersion then
+      return 'too_high'
+    end
+
     -- Set the persisted version
     redis.call('SET', persistedVersionKey, newPersistedVersion)
 
@@ -540,6 +545,13 @@ async function setPersistedVersion(projectId, persistedVersion) {
     metrics.inc('chunk_store.redis.set_persisted_version', 1, {
       status,
     })
+
+    if (status === 'too_high') {
+      throw new VersionOutOfBoundsError(
+        'Persisted version cannot be higher than head version',
+        { projectId, persistedVersion }
+      )
+    }
 
     return status
   } catch (err) {

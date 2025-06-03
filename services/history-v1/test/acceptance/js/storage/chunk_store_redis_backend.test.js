@@ -714,9 +714,19 @@ describe('chunk buffer Redis backend', function () {
       })
 
       it('should set the persisted version', async function () {
-        await redisBackend.setPersistedVersion(projectId, 3)
+        const status = await redisBackend.setPersistedVersion(projectId, 3)
+        expect(status).to.equal('ok')
         const state = await redisBackend.getState(projectId)
         expect(state.persistedVersion).to.equal(3)
+      })
+
+      it('should refuse to set a persisted version greater than the head version', async function () {
+        await expect(
+          redisBackend.setPersistedVersion(projectId, 10)
+        ).to.be.rejectedWith(VersionOutOfBoundsError)
+        // Ensure persisted version remains unchanged
+        const state = await redisBackend.getState(projectId)
+        expect(state.persistedVersion).to.be.null
       })
     })
 
@@ -730,13 +740,24 @@ describe('chunk buffer Redis backend', function () {
       })
 
       it('should set the persisted version', async function () {
-        await redisBackend.setPersistedVersion(projectId, 5)
+        const status = await redisBackend.setPersistedVersion(projectId, 5)
+        expect(status).to.equal('ok')
         const state = await redisBackend.getState(projectId)
         expect(state.persistedVersion).to.equal(5)
       })
 
       it('should not decrease the persisted version', async function () {
-        await redisBackend.setPersistedVersion(projectId, 2)
+        const status = await redisBackend.setPersistedVersion(projectId, 2)
+        expect(status).to.equal('too_low')
+        const state = await redisBackend.getState(projectId)
+        expect(state.persistedVersion).to.equal(3)
+      })
+
+      it('should refuse to set a persisted version greater than the head version', async function () {
+        await expect(
+          redisBackend.setPersistedVersion(projectId, 10)
+        ).to.be.rejectedWith(VersionOutOfBoundsError)
+        // Ensure persisted version remains unchanged
         const state = await redisBackend.getState(projectId)
         expect(state.persistedVersion).to.equal(3)
       })
