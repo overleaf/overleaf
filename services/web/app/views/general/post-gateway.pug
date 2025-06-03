@@ -5,15 +5,15 @@ block vars
 	- var suppressFooter = true
 	- var suppressSkipToContent = true
 	- var suppressCookieBanner = true
-	- bootstrap5PageStatus = 'disabled'
 
 block content
 	.content.content-alt
 		.container
 			.row
-				.col-md-6.col-md-offset-3
+				.col-lg-6.offset-lg-3
 					.card
-						p.text-center #{translate('processing_your_request')}
+						.card-body
+							p.text-center #{translate('processing_your_request')}
 
 	form(
 		data-ol-regular-form
