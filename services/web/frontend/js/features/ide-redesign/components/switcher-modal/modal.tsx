@@ -160,6 +160,7 @@ const SwitcherWhatsNew = () => {
     <div className="ide-redesign-switcher-modal-whats-new">
       <h4>{t('latest_updates')}</h4>
       <ul>
+        <li>{t('searching_all_project_files_is_now_available')}</li>
         <li>{t('double_clicking_on_the_pdf_shows')}</li>
       </ul>
       <hr />
