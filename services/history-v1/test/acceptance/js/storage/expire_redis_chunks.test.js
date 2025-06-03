@@ -1,90 +1,12 @@
 'use strict'
 
 const { expect } = require('chai')
-const { promisify } = require('node:util')
-const { execFile } = require('node:child_process')
-const { Snapshot, Author, Change } = require('overleaf-editor-core')
+const { Author, Change } = require('overleaf-editor-core')
 const cleanup = require('./support/cleanup')
-const redisBackend = require('../../../../storage/lib/chunk_store/redis')
-const redis = require('../../../../storage/lib/redis')
-const rclient = redis.rclientHistory
-const keySchema = redisBackend.keySchema
+const { setupProjectState, rclient, keySchema } = require('./support/redis')
+const { runScript } = require('./support/runscript')
 
 const SCRIPT_PATH = 'storage/scripts/expire_redis_chunks.js'
-
-async function runExpireScript() {
-  const TIMEOUT = 10 * 1000 // 10 seconds
-  let result
-  try {
-    result = await promisify(execFile)('node', [SCRIPT_PATH], {
-      encoding: 'utf-8',
-      timeout: TIMEOUT,
-      env: {
-        ...process.env,
-        LOG_LEVEL: 'debug', // Override LOG_LEVEL for script output
-      },
-    })
-    result.status = 0
-  } catch (err) {
-    const { stdout, stderr, code } = err
-    if (typeof code !== 'number') {
-      console.error('Error running expire script:', err)
-      throw err
-    }
-    result = { stdout, stderr, status: code }
-  }
-  // The script might exit with status 1 if it finds no keys to process, which is ok
-  if (result.status !== 0 && result.status !== 1) {
-    console.error('Expire script failed:', result.stderr)
-    throw new Error(`expire script failed with status ${result.status}`)
-  }
-  return result
-}
-
-// Helper to set up a basic project state in Redis
-async function setupProjectState(
-  projectId,
-  {
-    headVersion = 0,
-    persistedVersion = null,
-    expireTime = null,
-    persistTime = null,
-    changes = [],
-  }
-) {
-  const headSnapshot = new Snapshot()
-  await rclient.set(
-    keySchema.head({ projectId }),
-    JSON.stringify(headSnapshot.toRaw())
-  )
-  await rclient.set(
-    keySchema.headVersion({ projectId }),
-    headVersion.toString()
-  )
-
-  if (persistedVersion !== null) {
-    await rclient.set(
-      keySchema.persistedVersion({ projectId }),
-      persistedVersion.toString()
-    )
-  }
-  if (expireTime !== null) {
-    await rclient.set(
-      keySchema.expireTime({ projectId }),
-      expireTime.toString()
-    )
-  }
-  if (persistTime !== null) {
-    await rclient.set(
-      keySchema.persistTime({ projectId }),
-      persistTime.toString()
-    )
-  }
-  if (changes.length > 0) {
-    const rawChanges = changes.map(c => JSON.stringify(c.toRaw()))
-    await rclient.rpush(keySchema.changes({ projectId }), ...rawChanges)
-  }
-}
 
 function makeChange() {
   const timestamp = new Date()
@@ -150,7 +72,7 @@ describe('expire_redis_chunks script', function () {
     })
 
     // Run the expire script once after all projects are set up
-    await runExpireScript()
+    await runScript(SCRIPT_PATH)
   })
 
   async function checkProjectStatus(projectId) {
