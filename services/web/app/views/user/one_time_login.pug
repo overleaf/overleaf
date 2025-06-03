@@ -1,20 +1,18 @@
 extends ../layout-marketing
 
-block vars
-	- bootstrap5PageStatus = 'disabled'
-
 block content
 	main.content.content-alt#main-content
 		.container
 			.row
-				.col-md-6.col-md-offset-3.col-lg-4.col-lg-offset-4
+				.col-lg-6.offset-lg-3.col-xl-4.offset-xl-4
 					.card
-						.page-header
-							h1 We're back!
-						p Overleaf is now running normally.
-						p
-							| Please
-							|
-							a(href="/login") log in
-							|
-							| to continue working on your projects.
+						.card-body
+							.page-header
+								h1 We're back!
+							p Overleaf is now running normally.
+							p
+								| Please
+								|
+								a(href="/login") log in
+								|
+								| to continue working on your projects.

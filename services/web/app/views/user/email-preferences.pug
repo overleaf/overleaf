@@ -1,49 +1,47 @@
 extends ../layout-marketing
 include ../_mixins/back_to_btns
 
-block vars
-	- bootstrap5PageStatus = 'disabled'
-
 block content
 	main.content.content-alt#main-content
 		.container
 			.row
-				.col-md-10.col-md-offset-1.col-lg-8.col-lg-offset-2
+				.col-lg-10.offset-lg-1.col-xl-8.offset-xl-2
 					.card
-						.page-header
-							h1 #{translate("newsletter_info_title")}
-
-						p #{translate("newsletter_info_summary")}
-
-						- var submitAction
-						if subscribed
-							- submitAction = '/user/newsletter/unsubscribe'
-							p !{translate("newsletter_info_subscribed", {}, ['strong'])}
-						else
-							- submitAction = '/user/newsletter/subscribe'
-							p !{translate("newsletter_info_unsubscribed", {}, ['strong'])}
-
-						form(
-							data-ol-async-form
-							data-ol-reload-on-success
-							name="newsletterForm"
-							action=submitAction
-							method="POST"
-						)
-							input(name='_csrf', type='hidden', value=csrfToken)
-							+formMessages()
-							p.actions.text-center
-								if subscribed
-									button.btn-danger.btn(type='submit', data-ol-disabled-inflight)
-										span(data-ol-inflight="idle") #{translate("unsubscribe")}
-										span(hidden data-ol-inflight="pending") #{translate("saving")}…
-								else
-									button.btn-primary.btn(type='submit', data-ol-disabled-inflight)
-										span(data-ol-inflight="idle") #{translate("subscribe")}
-										span(hidden data-ol-inflight="pending") #{translate("saving")}…
-
-						if subscribed
-							p #{translate("newsletter_info_note")}
-
-						.page-separator
-						+back-to-btns()
+						.card-body
+							.page-header
+								h1 #{translate("newsletter_info_title")}
+	
+							p #{translate("newsletter_info_summary")}
+	
+							- var submitAction
+							if subscribed
+								- submitAction = '/user/newsletter/unsubscribe'
+								p !{translate("newsletter_info_subscribed", {}, ['strong'])}
+							else
+								- submitAction = '/user/newsletter/subscribe'
+								p !{translate("newsletter_info_unsubscribed", {}, ['strong'])}
+	
+							form(
+								data-ol-async-form
+								data-ol-reload-on-success
+								name="newsletterForm"
+								action=submitAction
+								method="POST"
+							)
+								input(name='_csrf', type='hidden', value=csrfToken)
+								+formMessages()
+								p.actions.text-center
+									if subscribed
+										button.btn-danger.btn(type='submit', data-ol-disabled-inflight)
+											span(data-ol-inflight="idle") #{translate("unsubscribe")}
+											span(hidden data-ol-inflight="pending") #{translate("saving")}…
+									else
+										button.btn-primary.btn(type='submit', data-ol-disabled-inflight)
+											span(data-ol-inflight="idle") #{translate("subscribe")}
+											span(hidden data-ol-inflight="pending") #{translate("saving")}…
+	
+							if subscribed
+								p #{translate("newsletter_info_note")}
+	
+							.page-separator
+							+back-to-btns()
