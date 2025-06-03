@@ -535,18 +535,17 @@ function cancelPendingSubscriptionChange(req, res, next) {
   })
 }
 
-function updateAccountEmailAddress(req, res, next) {
+async function updateAccountEmailAddress(req, res, next) {
   const user = SessionManager.getSessionUser(req.session)
-  RecurlyWrapper.updateAccountEmailAddress(
-    user._id,
-    user.email,
-    function (error) {
-      if (error) {
-        return next(error)
-      }
-      res.sendStatus(200)
-    }
-  )
+  try {
+    await RecurlyWrapper.promises.updateAccountEmailAddress(
+      user._id,
+      user.email
+    )
+    return res.sendStatus(200)
+  } catch (error) {
+    return next(error)
+  }
 }
 
 function reactivateSubscription(req, res, next) {
@@ -859,7 +858,7 @@ module.exports = {
   cancelV1Subscription,
   previewSubscription: expressify(previewSubscription),
   cancelPendingSubscriptionChange,
-  updateAccountEmailAddress,
+  updateAccountEmailAddress: expressify(updateAccountEmailAddress),
   reactivateSubscription,
   recurlyCallback,
   extendTrial: expressify(extendTrial),

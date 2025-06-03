@@ -153,7 +153,9 @@ describe('SubscriptionController', function () {
         '@overleaf/settings': this.settings,
         '../User/UserGetter': this.UserGetter,
         './RecurlyWrapper': (this.RecurlyWrapper = {
-          updateAccountEmailAddress: sinon.stub().yields(),
+          promises: {
+            updateAccountEmailAddress: sinon.stub().resolves(),
+          },
         }),
         './RecurlyEventHandler': {
           sendRecurlyAnalyticsEvent: sinon.stub().resolves(),
@@ -309,31 +311,39 @@ describe('SubscriptionController', function () {
   })
 
   describe('updateAccountEmailAddress via put', function () {
-    it('should send the user and subscriptionId to RecurlyWrapper', function () {
+    it('should send the user and subscriptionId to RecurlyWrapper', async function () {
       this.res.sendStatus = sinon.spy()
-      this.SubscriptionController.updateAccountEmailAddress(this.req, this.res)
-      this.RecurlyWrapper.updateAccountEmailAddress
+      await this.SubscriptionController.updateAccountEmailAddress(
+        this.req,
+        this.res
+      )
+      this.RecurlyWrapper.promises.updateAccountEmailAddress
         .calledWith(this.user._id, this.user.email)
         .should.equal(true)
     })
 
-    it('should respond with 200', function () {
+    it('should respond with 200', async function () {
       this.res.sendStatus = sinon.spy()
-      this.SubscriptionController.updateAccountEmailAddress(this.req, this.res)
+      await this.SubscriptionController.updateAccountEmailAddress(
+        this.req,
+        this.res
+      )
       this.res.sendStatus.calledWith(200).should.equal(true)
     })
 
-    it('should send the error to the next handler when updating recurly account email fails', function (done) {
-      this.RecurlyWrapper.updateAccountEmailAddress.yields(new Error())
+    it('should send the error to the next handler when updating recurly account email fails', async function () {
+      this.RecurlyWrapper.promises.updateAccountEmailAddress.rejects(
+        new Error()
+      )
       this.next = sinon.spy(error => {
-        expect(error).instanceOf(Error)
-        done()
+        expect(error).to.be.instanceOf(Error)
       })
-      this.SubscriptionController.updateAccountEmailAddress(
+      await this.SubscriptionController.updateAccountEmailAddress(
         this.req,
         this.res,
         this.next
       )
+      expect(this.next.calledOnce).to.be.true
     })
   })
 

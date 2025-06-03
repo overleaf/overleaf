@@ -11,7 +11,6 @@ const EmailHandler = require('../Email/EmailHandler')
 const EmailHelper = require('../Helpers/EmailHelper')
 const Errors = require('../Errors/Errors')
 const NewsletterManager = require('../Newsletter/NewsletterManager')
-const RecurlyWrapper = require('../Subscription/RecurlyWrapper')
 const UserAuditLogHandler = require('./UserAuditLogHandler')
 const AnalyticsManager = require('../Analytics/AnalyticsManager')
 const SubscriptionLocator = require('../Subscription/SubscriptionLocator')
@@ -252,7 +251,11 @@ async function setDefaultEmailAddress(
   }
 
   try {
-    await RecurlyWrapper.promises.updateAccountEmailAddress(user._id, email)
+    await Modules.promises.hooks.fire(
+      'updateAccountEmailAddress',
+      user._id,
+      email
+    )
   } catch (error) {
     // errors are ignored
   }

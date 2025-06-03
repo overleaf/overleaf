@@ -59,11 +59,6 @@ describe('UserUpdater', function () {
         changeEmail: sinon.stub().resolves(),
       },
     }
-    this.RecurlyWrapper = {
-      promises: {
-        updateAccountEmailAddress: sinon.stub().resolves(),
-      },
-    }
     this.AnalyticsManager = {
       recordEventForUserInBackground: sinon.stub(),
     }
@@ -264,9 +259,11 @@ describe('UserUpdater', function () {
       expect(
         this.NewsletterManager.promises.changeEmail
       ).to.have.been.calledWith(this.user, this.newEmail)
-      expect(
-        this.RecurlyWrapper.promises.updateAccountEmailAddress
-      ).to.have.been.calledWith(this.user._id, this.newEmail)
+      expect(this.Modules.promises.hooks.fire).to.have.been.calledWith(
+        'updateAccountEmailAddress',
+        this.user._id,
+        this.newEmail
+      )
     })
 
     it('validates email', async function () {
@@ -615,9 +612,11 @@ describe('UserUpdater', function () {
       expect(
         this.NewsletterManager.promises.changeEmail
       ).to.have.been.calledWith(this.user, this.newEmail)
-      expect(
-        this.RecurlyWrapper.promises.updateAccountEmailAddress
-      ).to.have.been.calledWith(this.user._id, this.newEmail)
+      expect(this.Modules.promises.hooks.fire).to.have.been.calledWith(
+        'updateAccountEmailAddress',
+        this.user._id,
+        this.newEmail
+      )
     })
 
     it('handles Mongo errors', async function () {

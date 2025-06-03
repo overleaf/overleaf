@@ -11,22 +11,27 @@ const SubscriptionErrors = require('./Errors')
 const { callbackify } = require('@overleaf/promise-utils')
 
 /**
- * @param accountId
- * @param newEmail
+ * Updates the email address of a Recurly account
+ *
+ * @param userId
+ * @param newAccountEmail - the new email address to set for the Recurly account
  */
-async function updateAccountEmailAddress(accountId, newEmail) {
+async function updateAccountEmailAddress(userId, newAccountEmail) {
   const data = {
-    email: newEmail,
+    email: newAccountEmail,
   }
   let requestBody
   try {
     requestBody = RecurlyWrapper._buildXml('account', data)
   } catch (error) {
-    throw OError.tag(error, 'error building xml', { accountId, newEmail })
+    throw OError.tag(error, 'error building xml', {
+      accountId: userId,
+      newEmail: newAccountEmail,
+    })
   }
 
   const { body } = await RecurlyWrapper.promises.apiRequest({
-    url: `accounts/${accountId}`,
+    url: `accounts/${userId}`,
     method: 'PUT',
     body: requestBody,
   })
