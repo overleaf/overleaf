@@ -18,7 +18,15 @@ logger.initialize('persist-redis-chunks')
 
 async function persistProjectAction(projectId) {
   const job = await claimPersistJob(projectId)
-  await persistBuffer(projectId)
+  // Set limits to force us to persist all of the changes.
+  const farFuture = new Date()
+  farFuture.setTime(farFuture.getTime() + 7 * 24 * 3600 * 1000)
+  const limits = {
+    maxChanges: 0,
+    minChangeTimestamp: farFuture,
+    maxChangeTimestamp: farFuture,
+  }
+  await persistBuffer(projectId, limits)
   if (job && job.close) {
     await job.close()
   }

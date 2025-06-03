@@ -92,7 +92,7 @@ describe('persistBuffer', function () {
       await redisBackend.setPersistedVersion(projectId, initialVersion)
 
       // Persist the changes from Redis to the chunk store
-      await persistBuffer(projectId)
+      await persistBuffer(projectId, limitsToPersistImmediately)
 
       const latestChunk = await chunkStore.loadLatest(projectId)
       expect(latestChunk).to.exist
@@ -196,7 +196,7 @@ describe('persistBuffer', function () {
         persistedChunkEndVersion
       )
 
-      await persistBuffer(projectId)
+      await persistBuffer(projectId, limitsToPersistImmediately)
 
       const latestChunk = await chunkStore.loadLatest(projectId)
       expect(latestChunk).to.exist
@@ -287,7 +287,8 @@ describe('persistBuffer', function () {
 
       const chunksBefore = await chunkStore.getProjectChunks(projectId)
 
-      await persistBuffer(projectId)
+      // Persist buffer (which should do nothing as there are no new changes)
+      await persistBuffer(projectId, limitsToPersistImmediately)
 
       const chunksAfter = await chunkStore.getProjectChunks(projectId)
       expect(chunksAfter.length).to.equal(chunksBefore.length)
@@ -333,6 +334,106 @@ describe('persistBuffer', function () {
         await redisBackend.getState(projectId)
       ).persistedVersion
       expect(finalPersistedVersionInRedis).to.equal(persistedChunkEndVersion)
+    })
+  })
+
+  describe('when limits restrict the number of changes to persist', function () {
+    it('should persist only a subset of changes and update persistedVersion accordingly', async function () {
+      const now = Date.now()
+      const oneDayAgo = now - 1000 * 60 * 60 * 24
+      const oneHourAgo = now - 1000 * 60 * 60
+      const twoHoursAgo = now - 1000 * 60 * 60 * 2
+      const threeHoursAgo = now - 1000 * 60 * 60 * 3
+
+      // Create an initial file with some content
+      const initialContent = 'Initial content.'
+      const addInitialFileChange = new Change(
+        [new AddFileOperation('main.tex', File.fromString(initialContent))],
+        new Date(oneDayAgo),
+        []
+      )
+
+      await persistChanges(
+        projectId,
+        [addInitialFileChange],
+        limitsToPersistImmediately,
+        initialVersion
+      )
+      const versionAfterInitialSetup = initialVersion + 1 // Version is 1
+
+      // Queue three additional changes in Redis
+      const op1 = new TextOperation()
+        .retain(initialContent.length)
+        .insert(' Change 1.')
+      const change1 = new Change(
+        [new EditFileOperation('main.tex', op1)],
+        new Date(threeHoursAgo)
+      )
+      const contentAfterC1 = initialContent + ' Change 1.'
+
+      const op2 = new TextOperation()
+        .retain(contentAfterC1.length)
+        .insert(' Change 2.')
+      const change2 = new Change(
+        [new EditFileOperation('main.tex', op2)],
+        new Date(twoHoursAgo)
+      )
+      const contentAfterC2 = contentAfterC1 + ' Change 2.'
+
+      const op3 = new TextOperation()
+        .retain(contentAfterC2.length)
+        .insert(' Change 3.')
+      const change3 = new Change(
+        [new EditFileOperation('main.tex', op3)],
+        new Date(oneHourAgo)
+      )
+
+      const changesToQueue = [change1, change2, change3]
+      await redisBackend.queueChanges(
+        projectId,
+        new Snapshot(), // dummy snapshot
+        versionAfterInitialSetup, // startVersion for queued changes
+        changesToQueue,
+        {
+          persistTime: now + redisBackend.MAX_PERSIST_DELAY_MS,
+          expireTime: now + redisBackend.PROJECT_TTL_MS,
+        }
+      )
+      await redisBackend.setPersistedVersion(
+        projectId,
+        versionAfterInitialSetup
+      )
+
+      // Define limits to only persist 2 additional changes (on top of the initial file creation),
+      // which should leave the final change (change3) in the redis buffer.
+      const restrictiveLimits = {
+        minChangeTimestamp: new Date(oneHourAgo), // only changes more than 1 hour old are considered
+        maxChangeTimestamp: new Date(twoHoursAgo), // they will be persisted if any change is older than 2 hours
+      }
+
+      await persistBuffer(projectId, restrictiveLimits)
+
+      // Check the latest persisted chunk, it should only have the initial file and the first two changes
+      const latestChunk = await chunkStore.loadLatest(projectId, {
+        persistedOnly: true,
+      })
+      expect(latestChunk).to.exist
+      expect(latestChunk.getChanges().length).to.equal(3) // addInitialFileChange + change1 + change2
+      expect(latestChunk.getStartVersion()).to.equal(initialVersion)
+      const expectedEndVersion = versionAfterInitialSetup + 2 // Persisted two changes from the queue
+      expect(latestChunk.getEndVersion()).to.equal(expectedEndVersion)
+
+      // Check persisted version in Redis
+      const state = await redisBackend.getState(projectId)
+      expect(state.persistedVersion).to.equal(expectedEndVersion)
+
+      // Check non-persisted changes in Redis
+      const nonPersisted = await redisBackend.getNonPersistedChanges(
+        projectId,
+        expectedEndVersion
+      )
+      expect(nonPersisted).to.be.an('array').with.lengthOf(1) // change3 should remain
+      expect(nonPersisted).to.deep.equal([change3])
     })
   })
 })

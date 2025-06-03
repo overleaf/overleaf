@@ -23,20 +23,12 @@ const redisBackend = require('./chunk_store/redis')
  * 6. Set the new persisted version (endVersion of the latest persisted chunk) in Redis.
  *
  * @param {string} projectId
+ * @param {Object} limits
  * @throws {Error | OError} If a critical error occurs during persistence.
  */
-async function persistBuffer(projectId) {
+async function persistBuffer(projectId, limits) {
   assert.projectId(projectId)
   logger.debug({ projectId }, 'starting persistBuffer operation')
-
-  // Set limits to force us to persist all of the changes.
-  const farFuture = new Date()
-  farFuture.setTime(farFuture.getTime() + 7 * 24 * 3600 * 1000)
-  const limits = {
-    maxChanges: 0,
-    minChangeTimestamp: farFuture,
-    maxChangeTimestamp: farFuture,
-  }
 
   // 1. Get the latest chunk's endVersion from GCS/main store
   let endVersion
