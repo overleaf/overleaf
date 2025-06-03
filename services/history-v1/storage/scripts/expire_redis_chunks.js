@@ -14,12 +14,9 @@ logger.initialize('expire-redis-chunks')
 
 async function expireProjectAction(projectId) {
   const job = await claimExpireJob(projectId)
-  try {
-    await expireProject(projectId)
-  } finally {
-    if (job && job.close) {
-      await job.close()
-    }
+  await expireProject(projectId)
+  if (job && job.close) {
+    await job.close()
   }
 }
 
