@@ -18,8 +18,15 @@ import { EditorFacade } from '@/features/source-editor/extensions/realtime'
 import { recordDocumentFirstChangeEvent } from '@/features/event-tracking/document-first-change-event'
 import getMeta from '@/utils/meta'
 import { historyOTType } from './share-js-history-ot-type'
-import { StringFileData, TrackedChangeList } from 'overleaf-editor-core/index'
-import { StringFileRawData } from 'overleaf-editor-core/lib/types'
+import {
+  StringFileData,
+  TrackedChangeList,
+  EditOperationBuilder,
+} from 'overleaf-editor-core'
+import {
+  StringFileRawData,
+  RawEditOperation,
+} from 'overleaf-editor-core/lib/types'
 
 // All times below are in milliseconds
 const SINGLE_USER_FLUSH_DELAY = 2000
@@ -259,7 +266,15 @@ export class ShareJsDoc extends EventEmitter {
   // issues are resolved.
   processUpdateFromServer(message: Message) {
     try {
-      this._doc._onMessage(message)
+      if (this.type === 'history-ot' && message.op != null) {
+        const ops = message.op as RawEditOperation[]
+        this._doc._onMessage({
+          ...message,
+          op: ops.map(EditOperationBuilder.fromJSON),
+        })
+      } else {
+        this._doc._onMessage(message)
+      }
     } catch (error) {
       // Version mismatches are thrown as errors
       debugConsole.log(error)

@@ -360,7 +360,7 @@ class HistoryOTAdapter {
       let snapshotUpdated = false
       for (const effect of transaction.effects) {
         if (effect.is(historyOTOperationEffect)) {
-          this.shareDoc.submitOp(effect.value.map(op => op.toJSON()))
+          this.shareDoc.submitOp(effect.value)
           snapshotUpdated = true
         }
       }

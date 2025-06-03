@@ -1,5 +1,5 @@
 import {
-  EditOperationBuilder,
+  EditOperation,
   EditOperationTransformer,
   InsertOp,
   RemoveOp,
@@ -7,7 +7,6 @@ import {
   StringFileData,
   TextOperation,
 } from 'overleaf-editor-core'
-import { RawEditOperation } from 'overleaf-editor-core/lib/types'
 import { ShareDoc } from '../../../../../types/share-doc'
 
 type Api = {
@@ -32,90 +31,74 @@ const api: Api & ThisType<Api & ShareDoc & { snapshot: StringFileData }> = {
   },
 
   _register() {
-    this.on(
-      'remoteop',
-      (rawEditOperation: RawEditOperation[], oldSnapshot: StringFileData) => {
-        const operation = EditOperationBuilder.fromJSON(rawEditOperation[0])
-        if (operation instanceof TextOperation) {
-          const str = oldSnapshot.getContent()
-          if (str.length !== operation.baseLength)
-            throw new TextOperation.ApplyError(
-              "The operation's base length must be equal to the string's length.",
-              operation,
-              str
-            )
+    this.on('remoteop', (ops: EditOperation[], oldSnapshot: StringFileData) => {
+      const operation = ops[0]
+      if (operation instanceof TextOperation) {
+        const str = oldSnapshot.getContent()
+        if (str.length !== operation.baseLength)
+          throw new TextOperation.ApplyError(
+            "The operation's base length must be equal to the string's length.",
+            operation,
+            str
+          )
 
-          let outputCursor = 0
-          let inputCursor = 0
-          let trackedChangesInvalidated = false
-          for (const op of operation.ops) {
-            if (op instanceof RetainOp) {
-              inputCursor += op.length
-              outputCursor += op.length
-              if (op.tracking != null) {
-                trackedChangesInvalidated = true
-              }
-            } else if (op instanceof InsertOp) {
-              this.emit(
-                'insert',
-                outputCursor,
-                op.insertion,
-                op.insertion.length
-              )
-              outputCursor += op.insertion.length
-              trackedChangesInvalidated = true
-            } else if (op instanceof RemoveOp) {
-              this.emit(
-                'delete',
-                outputCursor,
-                str.slice(inputCursor, inputCursor + op.length)
-              )
-              inputCursor += op.length
+        let outputCursor = 0
+        let inputCursor = 0
+        let trackedChangesInvalidated = false
+        for (const op of operation.ops) {
+          if (op instanceof RetainOp) {
+            inputCursor += op.length
+            outputCursor += op.length
+            if (op.tracking != null) {
               trackedChangesInvalidated = true
             }
-          }
-
-          if (inputCursor !== str.length) {
-            throw new TextOperation.ApplyError(
-              "The operation didn't operate on the whole string.",
-              operation,
-              str
+          } else if (op instanceof InsertOp) {
+            this.emit('insert', outputCursor, op.insertion, op.insertion.length)
+            outputCursor += op.insertion.length
+            trackedChangesInvalidated = true
+          } else if (op instanceof RemoveOp) {
+            this.emit(
+              'delete',
+              outputCursor,
+              str.slice(inputCursor, inputCursor + op.length)
             )
-          }
-
-          if (trackedChangesInvalidated) {
-            this.emit('tracked-changes-invalidated')
+            inputCursor += op.length
+            trackedChangesInvalidated = true
           }
         }
+
+        if (inputCursor !== str.length) {
+          throw new TextOperation.ApplyError(
+            "The operation didn't operate on the whole string.",
+            operation,
+            str
+          )
+        }
+
+        if (trackedChangesInvalidated) {
+          this.emit('tracked-changes-invalidated')
+        }
       }
-    )
+    })
   },
 }
 
 export const historyOTType = {
   api,
 
-  transformX(raw1: RawEditOperation[], raw2: RawEditOperation[]) {
-    const [a, b] = EditOperationTransformer.transform(
-      EditOperationBuilder.fromJSON(raw1[0]),
-      EditOperationBuilder.fromJSON(raw2[0])
-    )
-    return [[a.toJSON()], [b.toJSON()]]
+  transformX(ops1: EditOperation[], ops2: EditOperation[]) {
+    const [a, b] = EditOperationTransformer.transform(ops1[0], ops2[0])
+    return [[a], [b]]
   },
 
-  apply(snapshot: StringFileData, rawEditOperation: RawEditOperation[]) {
-    const operation = EditOperationBuilder.fromJSON(rawEditOperation[0])
+  apply(snapshot: StringFileData, ops: EditOperation[]) {
     const afterFile = StringFileData.fromRaw(snapshot.toRaw())
-    afterFile.edit(operation)
+    afterFile.edit(ops[0])
     return afterFile
   },
 
-  compose(op1: RawEditOperation[], op2: RawEditOperation[]) {
-    return [
-      EditOperationBuilder.fromJSON(op1[0])
-        .compose(EditOperationBuilder.fromJSON(op2[0]))
-        .toJSON(),
-    ]
+  compose(ops1: EditOperation[], ops2: EditOperation[]) {
+    return [ops1[0].compose(ops2[0])]
   },
 
   // Do not provide normalize, used by submitOp to fixup bad input.
