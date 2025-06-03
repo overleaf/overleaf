@@ -34,6 +34,7 @@ import {
 import { SplitTestInfo } from '../../../types/split-test'
 import { ValidationStatus } from '../../../types/group-management/validation'
 import { ManagedInstitution } from '../../../types/subscription/dashboard/managed-institution'
+import { OnboardingFormData } from '../../../types/onboarding'
 import { GroupSSOTestResult } from '../../../modules/group-settings/frontend/js/utils/types'
 import {
   AccessToken,
@@ -53,6 +54,7 @@ import { DefaultNavbarMetadata } from '@/features/ui/components/types/default-na
 import { FooterMetadata } from '@/features/ui/components/types/footer-metadata'
 import type { ScriptLogType } from '../../../modules/admin-panel/frontend/js/features/script-logs/script-log'
 import { ActiveExperiment } from './labs-utils'
+
 export interface Meta {
   'ol-ExposedSettings': ExposedSettings
   'ol-addonPrices': Record<
@@ -170,6 +172,7 @@ export interface Meta {
   'ol-notifications': NotificationType[]
   'ol-notificationsInstitution': InstitutionType[]
   'ol-oauthProviders': OAuthProviders
+  'ol-odcData': OnboardingFormData
   'ol-odcRole': string
   'ol-overallThemes': OverallThemeMeta[]
   'ol-pages': number
