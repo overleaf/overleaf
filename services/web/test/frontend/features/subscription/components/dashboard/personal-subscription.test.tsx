@@ -190,7 +190,9 @@ describe('<PersonalSubscription />', function () {
   })
 
   it('shows different payment email address section', async function () {
-    fetchMock.post('/user/subscription/account/email', 200)
+    fetchMock.post('/user/subscription/account/email', {
+      status: 200,
+    })
     const usersEmail = 'foo@example.com'
     renderWithSubscriptionDashContext(<PersonalSubscription />, {
       metaTags: [

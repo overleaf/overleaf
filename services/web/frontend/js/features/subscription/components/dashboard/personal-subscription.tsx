@@ -5,7 +5,7 @@ import { ActiveSubscriptionNew } from '@/features/subscription/components/dashbo
 import { CanceledSubscription } from './states/canceled'
 import { ExpiredSubscription } from './states/expired'
 import { useSubscriptionDashboardContext } from '../../context/subscription-dashboard-context'
-import PersonalSubscriptionRecurlySyncEmail from './personal-subscription-recurly-sync-email'
+import PersonalSubscriptionSyncEmail from './personal-subscription-sync-email'
 import OLNotification from '@/features/ui/components/ol/ol-notification'
 import RedirectAlerts from './redirect-alerts'
 
@@ -90,7 +90,7 @@ function PersonalSubscription() {
         />
       )}
       <hr />
-      <PersonalSubscriptionRecurlySyncEmail />
+      <PersonalSubscriptionSyncEmail />
     </>
   )
 }

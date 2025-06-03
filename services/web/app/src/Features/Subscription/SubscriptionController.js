@@ -538,7 +538,8 @@ function cancelPendingSubscriptionChange(req, res, next) {
 async function updateAccountEmailAddress(req, res, next) {
   const user = SessionManager.getSessionUser(req.session)
   try {
-    await RecurlyWrapper.promises.updateAccountEmailAddress(
+    await Modules.promises.hooks.fire(
+      'updateAccountEmailAddress',
       user._id,
       user.email
     )

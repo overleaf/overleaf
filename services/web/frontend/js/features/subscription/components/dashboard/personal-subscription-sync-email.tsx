@@ -7,22 +7,22 @@ import OLNotification from '@/features/ui/components/ol/ol-notification'
 import OLButton from '@/features/ui/components/ol/ol-button'
 import OLFormGroup from '@/features/ui/components/ol/ol-form-group'
 
-function PersonalSubscriptionRecurlySyncEmail() {
+function PersonalSubscriptionSyncEmail() {
   const { t } = useTranslation()
   const { personalSubscription } = useSubscriptionDashboardContext()
   const userEmail = getMeta('ol-usersEmail')
   const { isLoading, isSuccess, runAsync } = useAsync()
 
+  if (!personalSubscription || !('payment' in personalSubscription)) return null
+
+  const accountEmail = personalSubscription.payment.accountEmail
+
+  if (!userEmail || accountEmail === userEmail) return null
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     runAsync(postJSON('/user/subscription/account/email'))
   }
-
-  if (!personalSubscription || !('payment' in personalSubscription)) return null
-
-  const recurlyEmail = personalSubscription.payment.accountEmail
-
-  if (!userEmail || recurlyEmail === userEmail) return null
 
   return (
     <>
@@ -39,7 +39,7 @@ function PersonalSubscriptionRecurlySyncEmail() {
                 <Trans
                   i18nKey="recurly_email_update_needed"
                   components={[<em />, <em />]} // eslint-disable-line react/jsx-key
-                  values={{ recurlyEmail, userEmail }}
+                  values={{ recurlyEmail: accountEmail, userEmail }}
                   shouldUnescape
                   tOptions={{ interpolation: { escapeValue: true } }}
                 />
@@ -64,4 +64,4 @@ function PersonalSubscriptionRecurlySyncEmail() {
   )
 }
 
-export default PersonalSubscriptionRecurlySyncEmail
+export default PersonalSubscriptionSyncEmail

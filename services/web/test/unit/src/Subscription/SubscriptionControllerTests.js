@@ -311,15 +311,25 @@ describe('SubscriptionController', function () {
   })
 
   describe('updateAccountEmailAddress via put', function () {
-    it('should send the user and subscriptionId to RecurlyWrapper', async function () {
+    beforeEach(function () {
+      this.req.body = {
+        account_email: 'current_account_email@overleaf.com',
+      }
+    })
+
+    it('should send the user and subscriptionId to "updateAccountEmailAddress" hooks', async function () {
       this.res.sendStatus = sinon.spy()
+
       await this.SubscriptionController.updateAccountEmailAddress(
         this.req,
         this.res
       )
-      this.RecurlyWrapper.promises.updateAccountEmailAddress
-        .calledWith(this.user._id, this.user.email)
-        .should.equal(true)
+
+      expect(this.Modules.promises.hooks.fire).to.have.been.calledWith(
+        'updateAccountEmailAddress',
+        this.user._id,
+        this.user.email
+      )
     })
 
     it('should respond with 200', async function () {
@@ -332,9 +342,10 @@ describe('SubscriptionController', function () {
     })
 
     it('should send the error to the next handler when updating recurly account email fails', async function () {
-      this.RecurlyWrapper.promises.updateAccountEmailAddress.rejects(
-        new Error()
-      )
+      this.Modules.promises.hooks.fire
+        .withArgs('updateAccountEmailAddress', this.user._id, this.user.email)
+        .rejects(new Error())
+
       this.next = sinon.spy(error => {
         expect(error).to.be.instanceOf(Error)
       })
