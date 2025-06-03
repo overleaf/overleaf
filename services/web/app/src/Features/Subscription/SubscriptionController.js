@@ -704,7 +704,7 @@ async function getRecommendedCurrency(req, res) {
     ip = req.query.ip
   }
   const currencyLookup = await GeoIpLookup.promises.getCurrencyCode(ip)
-  let countryCode = currencyLookup.countryCode
+  const countryCode = currencyLookup.countryCode
   const recommendedCurrency = currencyLookup.currencyCode
 
   let currency = null
@@ -713,13 +713,6 @@ async function getRecommendedCurrency(req, res) {
     currency = queryCurrency
   } else if (recommendedCurrency) {
     currency = recommendedCurrency
-  }
-
-  const queryCountryCode = req.query.countryCode?.toUpperCase()
-
-  // only enable countryCode testing flag on staging or dev environments
-  if (queryCountryCode && process.env.NODE_ENV !== 'production') {
-    countryCode = queryCountryCode
   }
 
   return {
