@@ -343,7 +343,6 @@ async function expireDeletedProject(projectId) {
       await DeletedProject.deleteOne({
         'deleterData.deletedProjectId': projectId,
       })
-      await ProjectAuditLogEntry.deleteMany({ projectId })
       return
     }
     const deletedProject = await DeletedProject.findOne({
