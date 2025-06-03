@@ -34,6 +34,7 @@ async function initializeProject(req, res, next) {
     res.status(HTTPStatus.OK).json({ projectId })
   } catch (err) {
     if (err instanceof chunkStore.AlreadyInitialized) {
+      logger.warn({ err, projectId }, 'failed to initialize')
       render.conflict(res)
     } else {
       throw err
@@ -242,11 +243,15 @@ async function createProjectBlob(req, res, next) {
     const sizeLimit = new StreamSizeLimit(maxUploadSize)
     await pipeline(req, sizeLimit, fs.createWriteStream(tmpPath))
     if (sizeLimit.sizeLimitExceeded) {
+      logger.warn(
+        { projectId, expectedHash, maxUploadSize },
+        'blob exceeds size threshold'
+      )
       return render.requestEntityTooLarge(res)
     }
     const hash = await blobHash.fromFile(tmpPath)
     if (hash !== expectedHash) {
-      logger.debug({ hash, expectedHash }, 'Hash mismatch')
+      logger.warn({ projectId, hash, expectedHash }, 'Hash mismatch')
       return render.conflict(res, 'File hash mismatch')
     }
 
@@ -343,6 +348,10 @@ async function copyProjectBlob(req, res, next) {
     targetBlobStore.getBlob(blobHash),
   ])
   if (!sourceBlob) {
+    logger.warn(
+      { sourceProjectId, targetProjectId, blobHash },
+      'missing source blob when copying across projects'
+    )
     return render.notFound(res)
   }
   // Exit early if the blob exists in the target project.

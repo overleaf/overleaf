@@ -35,6 +35,7 @@ async function importSnapshot(req, res) {
   try {
     snapshot = Snapshot.fromRaw(rawSnapshot)
   } catch (err) {
+    logger.warn({ err, projectId }, 'failed to import snapshot')
     return render.unprocessableEntity(res)
   }
 
@@ -43,6 +44,7 @@ async function importSnapshot(req, res) {
     historyId = await chunkStore.initializeProject(projectId, snapshot)
   } catch (err) {
     if (err instanceof chunkStore.AlreadyInitialized) {
+      logger.warn({ err, projectId }, 'already initialized')
       return render.conflict(res)
     } else {
       throw err

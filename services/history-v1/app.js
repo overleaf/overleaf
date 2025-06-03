@@ -100,11 +100,13 @@ function setupErrorHandling() {
       })
     }
     if (err.code === 'ENUM_MISMATCH') {
+      logger.warn({ err, projectId }, err.message)
       return res.status(HTTPStatus.UNPROCESSABLE_ENTITY).json({
         message: 'invalid enum value: ' + err.paramName,
       })
     }
     if (err.code === 'REQUIRED') {
+      logger.warn({ err, projectId }, err.message)
       return res.status(HTTPStatus.UNPROCESSABLE_ENTITY).json({
         message: err.message,
       })

@@ -35,7 +35,10 @@ class StringStream extends stream.Readable {
 _mocks.getMostRecentChunk = (projectId, historyId, callback) => {
   const path = `projects/${historyId}/latest/history`
   logger.debug({ projectId, historyId }, 'getting chunk from history service')
-  _requestChunk({ path, json: true }, callback)
+  _requestChunk({ path, json: true }, (err, chunk) => {
+    if (err) return callback(OError.tag(err))
+    callback(null, chunk)
+  })
 }
 
 /**
@@ -54,7 +57,10 @@ export function getChunkAtVersion(projectId, historyId, version, callback) {
     { projectId, historyId, version },
     'getting chunk from history service for version'
   )
-  _requestChunk({ path, json: true }, callback)
+  _requestChunk({ path, json: true }, (err, chunk) => {
+    if (err) return callback(OError.tag(err))
+    callback(null, chunk)
+  })
 }
 
 export function getMostRecentVersion(projectId, historyId, callback) {
@@ -68,8 +74,10 @@ export function getMostRecentVersion(projectId, historyId, callback) {
       _.sortBy(chunk.chunk.history.changes || [], x => x.timestamp)
     )
     // find the latest project and doc versions in the chunk
-    _getLatestProjectVersion(projectId, chunk, (err1, projectVersion) =>
+    _getLatestProjectVersion(projectId, chunk, (err1, projectVersion) => {
+      if (err1) err1 = OError.tag(err1)
       _getLatestV2DocVersions(projectId, chunk, (err2, v2DocVersions) => {
+        if (err2) err2 = OError.tag(err2)
         // return the project and doc versions
         const projectStructureAndDocVersions = {
           project: projectVersion,
@@ -83,7 +91,7 @@ export function getMostRecentVersion(projectId, historyId, callback) {
           chunk
         )
       })
-    )
+    })
   })
 }
 
@@ -211,7 +219,10 @@ export function getProjectBlob(historyId, blobHash, callback) {
   logger.debug({ historyId, blobHash }, 'getting blob from history service')
   _requestHistoryService(
     { path: `projects/${historyId}/blobs/${blobHash}` },
-    callback
+    (err, blob) => {
+      if (err) return callback(OError.tag(err))
+      callback(null, blob)
+    }
   )
 }
 
@@ -277,7 +288,10 @@ function createBlobFromString(historyId, data, fileId, callback) {
     (fsPath, cb) => {
       _createBlob(historyId, fsPath, cb)
     },
-    callback
+    (err, hash) => {
+      if (err) return callback(OError.tag(err))
+      callback(null, hash)
+    }
   )
 }
 
@@ -330,7 +344,7 @@ export function createBlobForUpdate(projectId, historyId, update, callback) {
     try {
       ranges = HistoryBlobTranslator.createRangeBlobDataFromUpdate(update)
     } catch (error) {
-      return callback(error)
+      return callback(OError.tag(error))
     }
     createBlobFromString(
       historyId,
@@ -338,7 +352,7 @@ export function createBlobForUpdate(projectId, historyId, update, callback) {
       `project-${projectId}-doc-${update.doc}`,
       (err, fileHash) => {
         if (err) {
-          return callback(err)
+          return callback(OError.tag(err))
         }
         if (ranges) {
           createBlobFromString(
@@ -347,7 +361,7 @@ export function createBlobForUpdate(projectId, historyId, update, callback) {
             `project-${projectId}-doc-${update.doc}-ranges`,
             (err, rangesHash) => {
               if (err) {
-                return callback(err)
+                return callback(OError.tag(err))
               }
               logger.debug(
                 { fileHash, rangesHash },
@@ -415,7 +429,7 @@ export function createBlobForUpdate(projectId, historyId, update, callback) {
             },
             (err, fileHash) => {
               if (err) {
-                return callback(err)
+                return callback(OError.tag(err))
               }
               if (update.hash && update.hash !== fileHash) {
                 logger.warn(
@@ -447,7 +461,7 @@ export function createBlobForUpdate(projectId, historyId, update, callback) {
               },
               (err, fileHash) => {
                 if (err) {
-                  return callback(err)
+                  return callback(OError.tag(err))
                 }
                 logger.debug({ fileHash }, 'created empty blob for file')
                 callback(null, { file: fileHash })
@@ -520,7 +534,10 @@ export function initializeProject(historyId, callback) {
 export function deleteProject(projectId, callback) {
   _requestHistoryService(
     { method: 'DELETE', path: `projects/${projectId}` },
-    callback
+    err => {
+      if (err) return callback(OError.tag(err))
+      callback(null)
+    }
   )
 }
 
