@@ -245,7 +245,11 @@ export const RailLayout = () => {
         </Nav>
       </div>
       <Panel
-        id="ide-redesign-sidebar-panel"
+        id={
+          newErrorlogs
+            ? `ide-redesign-sidebar-panel-${selectedTab}`
+            : 'ide-redesign-sidebar-panel'
+        }
         className={classNames({ hidden: isReviewPanelOpen })}
         order={1}
         defaultSize={15}
