@@ -1,6 +1,5 @@
 // @ts-check
 
-const recurly = require('recurly')
 const RecurlyWrapper = require('./RecurlyWrapper')
 const RecurlyClient = require('./RecurlyClient')
 const { User } = require('../../models/User')
@@ -11,11 +10,11 @@ const LimitationsManager = require('./LimitationsManager')
 const EmailHandler = require('../Email/EmailHandler')
 const { callbackify } = require('@overleaf/promise-utils')
 const UserUpdater = require('../User/UserUpdater')
-const { NotFoundError, IndeterminateInvoiceError } = require('../Errors/Errors')
+const { IndeterminateInvoiceError } = require('../Errors/Errors')
 const Modules = require('../../infrastructure/Modules')
 
 /**
- * @import { PaymentProviderSubscription, PaymentProviderSubscriptionChange } from './PaymentProviderEntities'
+ * @import { PaymentProviderSubscriptionChange } from './PaymentProviderEntities'
  */
 
 async function validateNoSubscriptionInRecurly(userId) {
@@ -278,24 +277,12 @@ async function previewAddonPurchase(userId, addOnCode) {
  * @param {number} quantity
  */
 async function purchaseAddon(userId, addOnCode, quantity) {
-  const subscription = await getSubscriptionForUser(userId)
-  try {
-    await RecurlyClient.promises.getAddOn(subscription.planCode, addOnCode)
-  } catch (err) {
-    if (err instanceof recurly.errors.NotFoundError) {
-      throw new NotFoundError({
-        message: 'Add-on not found',
-        info: { addOnCode },
-      })
-    }
-    throw err
-  }
-  const changeRequest = subscription.getRequestForAddOnPurchase(
+  await Modules.promises.hooks.fire(
+    'purchaseAddOn',
+    userId,
     addOnCode,
     quantity
   )
-  await RecurlyClient.promises.applySubscriptionChangeRequest(changeRequest)
-  await syncSubscription({ uuid: subscription.id }, userId)
 }
 
 /**
@@ -305,44 +292,7 @@ async function purchaseAddon(userId, addOnCode, quantity) {
  * @param {string} addOnCode
  */
 async function removeAddon(userId, addOnCode) {
-  const subscription = await getSubscriptionForUser(userId)
-  const changeRequest = subscription.getRequestForAddOnRemoval(addOnCode)
-  await RecurlyClient.promises.applySubscriptionChangeRequest(changeRequest)
-  await syncSubscription({ uuid: subscription.id }, userId)
-}
-
-/**
- * Returns the Recurly UUID for the given user
- *
- * Throws a NotFoundError if the subscription can't be found
- *
- * @param {string} userId
- * @return {Promise<PaymentProviderSubscription>}
- */
-async function getSubscriptionForUser(userId) {
-  const subscription =
-    await SubscriptionLocator.promises.getUsersSubscription(userId)
-  const recurlyId = subscription?.recurlySubscription_id
-  if (recurlyId == null) {
-    throw new NotFoundError({
-      message: 'Recurly subscription not found',
-      info: { userId },
-    })
-  }
-
-  try {
-    const subscription = await RecurlyClient.promises.getSubscription(recurlyId)
-    return subscription
-  } catch (err) {
-    if (err instanceof recurly.errors.NotFoundError) {
-      throw new NotFoundError({
-        message: 'Subscription not found',
-        info: { userId, recurlyId },
-      })
-    } else {
-      throw err
-    }
-  }
+  await Modules.promises.hooks.fire('removeAddOn', userId, addOnCode)
 }
 
 async function pauseSubscription(user, pauseCycles) {

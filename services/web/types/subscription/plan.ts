@@ -85,6 +85,10 @@ export type RecurlyPlanCode =
   | 'group_professional_educational'
   | 'group_collaborator'
   | 'group_collaborator_educational'
+  | 'assistant'
+  | 'assistant-annual'
+
+export type RecurlyAddOnCode = 'assistant'
 
 export type StripeLookupKey =
   | 'standard_monthly'
@@ -97,3 +101,5 @@ export type StripeLookupKey =
   | 'group_professional_enterprise'
   | 'group_standard_educational'
   | 'group_professional_educational'
+  | 'error_assist_annual'
+  | 'error_assist_monthly'

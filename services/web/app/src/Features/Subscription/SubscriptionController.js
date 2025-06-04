@@ -414,8 +414,6 @@ async function purchaseAddon(req, res, next) {
 
   logger.debug({ userId: user._id, addOnCode }, 'purchasing add-ons')
   try {
-    // set a restore point in the case of a failed payment for the upgrade (Recurly only)
-    await SubscriptionHandler.promises.setSubscriptionRestorePoint(user._id)
     await SubscriptionHandler.promises.purchaseAddon(
       user._id,
       addOnCode,
