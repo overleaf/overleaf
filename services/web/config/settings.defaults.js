@@ -966,6 +966,7 @@ module.exports = {
     editorToolbarButtons: [],
     sourceEditorExtensions: [],
     sourceEditorComponents: [],
+    pdfLogEntryHeaderActionComponents: [],
     pdfLogEntryComponents: [],
     pdfLogEntriesComponents: [],
     pdfPreviewPromotions: [],

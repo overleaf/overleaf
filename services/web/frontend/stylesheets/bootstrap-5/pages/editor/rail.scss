@@ -35,6 +35,12 @@ body {
   }
 }
 
+.rail-panel-header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-01);
+}
+
 .rail-panel-title {
   font-size: var(--font-size-02);
   color: var(--ide-rail-color);
@@ -127,12 +133,12 @@ body {
   .tab-pane {
     height: 100%;
   }
+}
 
-  .tab-content {
-    height: 100%;
-    width: 100%;
-    position: relative;
-  }
+.ide-rail-tab-content {
+  height: 100%;
+  width: 100%;
+  position: relative;
 }
 
 .ide-rail-tabs-nav {

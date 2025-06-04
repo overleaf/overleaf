@@ -45,7 +45,7 @@ import {
   PdfScrollPosition,
   usePdfScrollPosition,
 } from '@/shared/hooks/use-pdf-scroll-position'
-import { PdfFileDataList } from '@/features/pdf-preview/util/types'
+import { LogEntry, PdfFileDataList } from '@/features/pdf-preview/util/types'
 import { isSplitTestEnabled } from '@/utils/splitTestUtils'
 import { captureException } from '@/infrastructure/error-reporter'
 import OError from '@overleaf/o-error'
@@ -69,7 +69,12 @@ export type CompileContext = {
   hasShortCompileTimeout: boolean
   highlights?: Record<string, any>[]
   isProjectOwner: boolean
-  logEntries?: Record<string, any>
+  logEntries?: {
+    all: LogEntry[]
+    errors: LogEntry[]
+    warnings: LogEntry[]
+    typesetting: LogEntry[]
+  }
   logEntryAnnotations?: Record<string, any>
   outputFilesArchive?: string
   pdfDownloadUrl?: string

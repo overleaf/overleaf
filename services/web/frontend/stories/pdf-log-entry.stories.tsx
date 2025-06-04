@@ -34,7 +34,6 @@ const fakeArgs = {
   formattedContent: 'This is a log entry',
   level: 'error' as const,
   extraInfoURL: 'https://example.com',
-  showCloseButton: true,
   showSourceLocationLink: true,
   rawContent: 'This is a raw log entry',
   contentDetails: ['detail 1', 'detail 2'],

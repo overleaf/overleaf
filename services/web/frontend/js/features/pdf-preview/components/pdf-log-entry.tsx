@@ -1,4 +1,3 @@
-import classNames from 'classnames'
 import { memo, MouseEventHandler, useCallback } from 'react'
 import PreviewLogEntryHeader from '../../preview/components/preview-log-entry-header'
 import PdfLogEntryContent from './pdf-log-entry-content'
@@ -6,6 +5,9 @@ import HumanReadableLogsHints from '../../../ide/human-readable-logs/HumanReadab
 import { sendMB } from '@/infrastructure/event-tracking'
 import getMeta from '@/utils/meta'
 import { ErrorLevel, LogEntry, SourceLocation } from '../util/types'
+import { useIsNewEditorEnabled } from '@/features/ide-redesign/utils/new-editor-utils'
+import NewLogEntry from '@/features/ide-redesign/components/error-logs/log-entry'
+import { useFeatureFlag } from '@/shared/context/split-test-context'
 
 function PdfLogEntry({
   ruleId,
@@ -18,12 +20,9 @@ function PdfLogEntry({
   level,
   sourceLocation,
   showSourceLocationLink = true,
-  showCloseButton = false,
   entryAriaLabel = undefined,
-  customClass,
   contentDetails,
   onSourceLocationClick,
-  onClose,
   index,
   logEntry,
   id,
@@ -38,12 +37,9 @@ function PdfLogEntry({
   extraInfoURL?: string | null
   sourceLocation?: SourceLocation
   showSourceLocationLink?: boolean
-  showCloseButton?: boolean
   entryAriaLabel?: string
-  customClass?: string
   contentDetails?: string[]
   onSourceLocationClick?: (sourceLocation: SourceLocation) => void
-  onClose?: () => void
   index?: number
   logEntry?: LogEntry
   id?: string
@@ -73,9 +69,34 @@ function PdfLogEntry({
       [level, onSourceLocationClick, ruleId, sourceLocation]
     )
 
+  const newEditor = useIsNewEditorEnabled()
+  const newErrorlogs = useFeatureFlag('new-editor-error-logs-redesign')
+
+  if (newEditor && newErrorlogs) {
+    return (
+      <NewLogEntry
+        index={index}
+        id={id}
+        logEntry={logEntry}
+        ruleId={ruleId}
+        headerTitle={headerTitle}
+        formattedContent={formattedContent}
+        rawContent={rawContent}
+        logType={logType}
+        level={level}
+        contentDetails={contentDetails}
+        entryAriaLabel={entryAriaLabel}
+        sourceLocation={sourceLocation}
+        onSourceLocationClick={onSourceLocationClick}
+        showSourceLocationLink={showSourceLocationLink}
+        extraInfoURL={extraInfoURL}
+      />
+    )
+  }
+
   return (
     <div
-      className={classNames('log-entry', customClass)}
+      className="log-entry"
       aria-label={entryAriaLabel}
       data-ruleid={ruleId}
       data-log-entry-id={id}
@@ -88,8 +109,6 @@ function PdfLogEntry({
         logType={logType}
         showSourceLocationLink={showSourceLocationLink}
         onSourceLocationClick={handleLogEntryLinkClick}
-        showCloseButton={showCloseButton}
-        onClose={onClose}
       />
 
       {(rawContent || formattedContent || showAiErrorAssistant) && (

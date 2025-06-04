@@ -17,12 +17,14 @@ export default function PdfLogEntryContent({
   extraInfoURL,
   index,
   logEntry,
+  alwaysExpandRawContent = false,
 }: {
   rawContent?: string
   formattedContent?: React.ReactNode
   extraInfoURL?: string | null
   index?: number
   logEntry?: LogEntry
+  alwaysExpandRawContent?: boolean
 }) {
   const { t } = useTranslation()
 
@@ -48,7 +50,11 @@ export default function PdfLogEntryContent({
         )}
 
       {rawContent && (
-        <PdfLogEntryRawContent rawContent={rawContent} collapsedSize={150} />
+        <PdfLogEntryRawContent
+          rawContent={rawContent}
+          collapsedSize={150}
+          alwaysExpanded={alwaysExpandRawContent}
+        />
       )}
     </div>
   )

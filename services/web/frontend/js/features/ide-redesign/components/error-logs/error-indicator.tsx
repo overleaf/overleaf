@@ -1,9 +1,7 @@
-import PdfLogsViewer from '@/features/pdf-preview/components/pdf-logs-viewer'
-import { PdfPreviewProvider } from '@/features/pdf-preview/components/pdf-preview-provider'
 import { useDetachCompileContext as useCompileContext } from '@/shared/context/detach-compile-context'
-import { RailIndicator } from './rail-indicator'
+import { RailIndicator } from '../rail-indicator'
 
-export const ErrorIndicator = () => {
+export default function ErrorIndicator() {
   const { logEntries } = useCompileContext()
 
   if (!logEntries) {
@@ -23,13 +21,5 @@ export const ErrorIndicator = () => {
       count={totalCount}
       type={errorCount > 0 ? 'danger' : 'warning'}
     />
-  )
-}
-
-export const ErrorPane = () => {
-  return (
-    <PdfPreviewProvider>
-      <PdfLogsViewer alwaysVisible />
-    </PdfPreviewProvider>
   )
 }

@@ -1,7 +1,7 @@
 import { ElementType } from 'react'
 import importOverleafModules from '../../../../../macros/import-overleaf-module.macro'
-import { RailPanelHeader } from '../rail'
 import { useTranslation } from 'react-i18next'
+import RailPanelHeader from '../rail-panel-header'
 
 const integrationPanelComponents = importOverleafModules(
   'integrationPanelComponents'

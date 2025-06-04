@@ -8,20 +8,24 @@ import Icon from '../../../shared/components/icon'
 export default function PdfLogEntryRawContent({
   rawContent,
   collapsedSize = 0,
+  alwaysExpanded = false,
 }: {
   rawContent: string
   collapsedSize?: number
+  alwaysExpanded?: boolean
 }) {
-  const [expanded, setExpanded] = useState(false)
-  const [needsExpander, setNeedsExpander] = useState(true)
+  const [expanded, setExpanded] = useState(alwaysExpanded)
+  const [needsExpander, setNeedsExpander] = useState(!alwaysExpanded)
 
   const { elementRef } = useResizeObserver(
     useCallback(
       (element: Element) => {
         if (element.scrollHeight === 0) return // skip update when logs-pane is closed
-        setNeedsExpander(element.scrollHeight > collapsedSize)
+        setNeedsExpander(
+          !alwaysExpanded && element.scrollHeight > collapsedSize
+        )
       },
-      [collapsedSize]
+      [collapsedSize, alwaysExpanded]
     )
   )
 

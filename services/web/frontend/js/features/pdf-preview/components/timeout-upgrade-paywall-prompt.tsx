@@ -17,7 +17,7 @@ type Segmentation = Record<
 >
 
 interface TimeoutUpgradePaywallPromptProps {
-  setIsShowingPrimary: Dispatch<SetStateAction<boolean>>
+  setIsShowingPrimary?: Dispatch<SetStateAction<boolean>>
 }
 
 function TimeoutUpgradePaywallPrompt({
@@ -40,7 +40,9 @@ function TimeoutUpgradePaywallPrompt({
   function onClose() {
     sendPaywallEvent('paywall-dismiss')
     setIsPaywallDismissed(true)
-    setIsShowingPrimary(false)
+    if (setIsShowingPrimary) {
+      setIsShowingPrimary(false)
+    }
   }
 
   function onClickInfoLink() {
@@ -57,7 +59,9 @@ function TimeoutUpgradePaywallPrompt({
     sendPaywallEvent('paywall-prompt', {
       plan: isStudent ? 'student' : 'collaborator',
     })
-    setIsShowingPrimary(true)
+    if (setIsShowingPrimary) {
+      setIsShowingPrimary(true)
+    }
   }, [isStudent, setIsShowingPrimary])
 
   return (

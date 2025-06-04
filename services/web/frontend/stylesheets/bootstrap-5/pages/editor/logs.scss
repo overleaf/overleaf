@@ -1,16 +1,168 @@
 :root {
   --logs-pane-bg: var(--bg-dark-secondary);
-}
-
-.ide-redesign-main {
-  --logs-pane-bg: var(--bg-dark-primary);
+  --logs-info-color: var(--blue-40);
 }
 
 @include theme('light') {
   --logs-pane-bg: var(--bg-light-secondary);
+  --logs-info-color: var(--blue-60);
+}
 
-  .ide-redesign-main {
-    --logs-pane-bg: #fff;
+.ide-redesign-main {
+  --logs-pane-bg: var(--bg-primary-themed);
+
+  .error-logs-panel {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
+  // TODO $ide-redesign-cleanup: Unnest everything from inside .error-logs
+  //  when we remove the styles for the old pane
+  .error-logs {
+    --logs-pane-bg: var(--bg-secondary-themed);
+
+    overflow-y: auto;
+    background-color: var(--logs-pane-bg);
+    flex: 1;
+
+    .logs-pane-content {
+      display: flex;
+      flex-direction: column;
+      padding: var(--spacing-02);
+      gap: var(--spacing-02);
+    }
+
+    .icon-button,
+    .icon-button-small {
+      @include ol-button-variant(
+        var(--content-secondary-themed),
+        transparent,
+        transparent,
+        var(--bg-secondary-themed),
+        transparent,
+        true
+      );
+    }
+
+    .log-entry-content {
+      color: var(--content-primary-themed);
+      background-color: var(--bg-primary-themed);
+      padding: 0;
+    }
+
+    .log-entry-content-raw {
+      color: var(--content-primary-themed);
+      background-color: var(--bg-secondary-themed);
+    }
+
+    .log-entry-content-raw-container {
+      background-color: var(--bg-secondary-themed);
+    }
+
+    .log-entry {
+      background-color: var(--bg-primary-themed);
+      width: 100%;
+      border-radius: var(--border-radius-base);
+      padding: var(--spacing-05) var(--spacing-04);
+
+      .horizontal-divider {
+        margin: var(--spacing-04) 0;
+        border-top: 1px solid var(--border-divider-themed);
+      }
+    }
+
+    .log-entry-header-card {
+      background-color: var(--bg-primary-themed);
+      width: 100%;
+      display: flex;
+      gap: var(--spacing-03);
+      align-items: center;
+      border: none;
+    }
+
+    .log-entry-header-content {
+      display: flex;
+      flex-direction: column;
+      text-align: left;
+      gap: var(--spacing-02);
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .log-entry-header-text {
+      font-weight: 600;
+      font-size: var(--font-size-02);
+      line-height: var(--line-height-02);
+      margin-bottom: 0;
+    }
+
+    .log-entry-header-text-error {
+      color: var(--content-danger-themed);
+    }
+
+    .log-entry-header-text-warning {
+      color: var(--content-warning-themed);
+    }
+
+    .log-entry-header-text-info {
+      color: var(--logs-info-color);
+    }
+
+    .log-entry-header-text-success {
+      color: var(--content-positive-themed);
+    }
+
+    .log-entry-location {
+      white-space: nowrap;
+      direction: rtl;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      font-size: var(--font-size-01);
+      line-height: var(--line-height-01);
+      color: var(--content-secondary-themed);
+    }
+
+    .log-entry-header-actions {
+      display: flex;
+      gap: var(--spacing-03);
+    }
+
+    .log-entry-content-button-container {
+      background-image: linear-gradient(
+        0deg,
+        var(--bg-secondary-themed) 0%,
+        transparent 100%
+      );
+    }
+  }
+
+  .error-logs-tabs {
+    display: flex;
+  }
+
+  .error-logs-tab-header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-04);
+    color: var(--content-secondary-themed);
+    padding: var(--spacing-03) var(--spacing-04);
+    font-size: var(--font-size-02);
+    border-bottom: 3px solid transparent;
+
+    &[aria-selected='true'] {
+      color: var(--content-primary-themed);
+      border-bottom: 3px solid var(--bg-accent-01);
+    }
+  }
+
+  .error-logs-tab-count {
+    background-color: var(--bg-secondary-themed);
+    border-radius: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 var(--spacing-02);
   }
 }
 
@@ -148,53 +300,53 @@
     text-overflow: ellipsis;
     overflow: hidden;
   }
+}
 
-  .log-entry-content {
-    &:empty {
-      display: none;
-    }
-
-    background-color: var(--bg-light-primary);
-    color: var(--content-primary);
-    padding: var(--spacing-04);
+.log-entry-content {
+  &:empty {
+    display: none;
   }
 
-  .log-entry-content-raw {
-    @include body-xs;
+  background-color: var(--bg-light-primary);
+  color: var(--content-primary);
+  padding: var(--spacing-04);
+}
 
-    color: var(--content-secondary);
-    padding: var(--spacing-03);
-    margin: 0;
-    white-space: pre-wrap;
-  }
+.log-entry-content-raw {
+  @include body-xs;
 
-  .log-entry-content-button-container {
-    position: relative;
-    height: 40px;
-    margin-top: 0;
-    transition:
-      margin 0.15s ease-in-out,
-      opacity 0.15s ease-in-out;
-    padding-bottom: var(--spacing-04);
-    text-align: center;
-    background-image: linear-gradient(
-      0deg,
-      var(--bg-light-tertiary) 0%,
-      transparent 100%
-    );
-    border-radius: 0 0 var(--border-radius-base) var(--border-radius-base);
-  }
+  color: var(--content-secondary);
+  padding: var(--spacing-03);
+  margin: 0;
+  white-space: pre-wrap;
+}
 
-  .log-entry-content-button-container-collapsed {
-    margin-top: -40px;
-  }
+.log-entry-content-button-container {
+  position: relative;
+  height: 40px;
+  margin-top: 0;
+  transition:
+    margin 0.15s ease-in-out,
+    opacity 0.15s ease-in-out;
+  padding-bottom: var(--spacing-04);
+  text-align: center;
+  background-image: linear-gradient(
+    0deg,
+    var(--bg-light-tertiary) 0%,
+    transparent 100%
+  );
+  border-radius: 0 0 var(--border-radius-base) var(--border-radius-base);
+}
 
-  .log-entry-content-raw-container {
-    background-color: var(--bg-light-tertiary);
-    border-radius: var(--border-radius-base);
-    overflow: hidden;
-    margin-top: var(--spacing-03);
-  }
+.log-entry-content-button-container-collapsed {
+  margin-top: -40px;
+}
+
+.log-entry-content-raw-container {
+  background-color: var(--bg-light-tertiary);
+  border-radius: var(--border-radius-base);
+  overflow: hidden;
+  margin-top: var(--spacing-03);
 }
 
 .log-entry-formatted-content,

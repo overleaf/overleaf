@@ -344,7 +344,6 @@
   "disable_stop_on_first_error": "Désactiver “Arrêter à la première erreur”",
   "disconnected": "Déconnecté",
   "discount_of": "Remise de __amount__",
-  "dismiss_error_popup": "Ignorer l’alerte de première erreur",
   "do_not_have_acct_or_do_not_want_to_link": "Si vous n’avez pas de compte <b>__appName__</b> ou si vous ne souhaitez pas le lier à votre compte <b>__institutionName__</b>, veuillez cliquer <b>__clickText__</b>.",
   "do_not_link_accounts": "Ne pas lier les comptes",
   "do_you_want_to_change_your_primary_email_address_to": "Voulez-vous définir <b>__email__</b> comme votre adresse email principale ?",

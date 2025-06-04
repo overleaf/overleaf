@@ -6,7 +6,15 @@ import { useDetachCompileContext as useCompileContext } from '../../../shared/co
 import { useStopOnFirstError } from '../../../shared/hooks/use-stop-on-first-error'
 import getMeta from '../../../utils/meta'
 
-function PdfPreviewError({ error }: { error: string }) {
+function PdfPreviewError({
+  error,
+  includeWarnings = true,
+  includeErrors = true,
+}: {
+  error: string
+  includeWarnings?: boolean
+  includeErrors?: boolean
+}) {
   const { t } = useTranslation()
 
   const { startCompile } = useCompileContext()
@@ -14,191 +22,217 @@ function PdfPreviewError({ error }: { error: string }) {
   switch (error) {
     case 'rendering-error-expected':
       return (
-        <PdfLogEntry
-          headerTitle={t('pdf_rendering_error')}
-          formattedContent={
-            <>
-              <Trans
-                i18nKey="something_went_wrong_rendering_pdf_expected"
-                components={[
-                  // eslint-disable-next-line react/jsx-key
-                  <OLButton
-                    variant="primary"
-                    size="sm"
-                    onClick={() => startCompile()}
-                  />,
-                ]}
-              />
-              <br />
-              <br />
-              <Trans
-                i18nKey="last_resort_trouble_shooting_guide"
-                components={[
-                  // eslint-disable-next-line jsx-a11y/anchor-has-content
-                  <a
-                    href="/learn/how-to/Resolving_access%2C_loading%2C_and_display_problems"
-                    target="_blank"
-                    key="troubleshooting-link"
-                  />,
-                ]}
-              />
-            </>
-          }
-          level="warning"
-        />
+        includeWarnings && (
+          <PdfLogEntry
+            headerTitle={t('pdf_rendering_error')}
+            formattedContent={
+              <>
+                <Trans
+                  i18nKey="something_went_wrong_rendering_pdf_expected"
+                  components={[
+                    // eslint-disable-next-line react/jsx-key
+                    <OLButton
+                      variant="primary"
+                      size="sm"
+                      onClick={() => startCompile()}
+                    />,
+                  ]}
+                />
+                <br />
+                <br />
+                <Trans
+                  i18nKey="last_resort_trouble_shooting_guide"
+                  components={[
+                    // eslint-disable-next-line jsx-a11y/anchor-has-content
+                    <a
+                      href="/learn/how-to/Resolving_access%2C_loading%2C_and_display_problems"
+                      target="_blank"
+                      key="troubleshooting-link"
+                    />,
+                  ]}
+                />
+              </>
+            }
+            level="warning"
+          />
+        )
       )
 
     case 'rendering-error':
       return (
-        <ErrorLogEntry title={t('pdf_rendering_error')}>
-          {t('something_went_wrong_rendering_pdf')}
-          &nbsp;
-          <Trans
-            i18nKey="try_recompile_project_or_troubleshoot"
-            components={[
-              // eslint-disable-next-line jsx-a11y/anchor-has-content
-              <a
-                href="/learn/how-to/Resolving_access%2C_loading%2C_and_display_problems"
-                target="_blank"
-                key="troubleshooting-link"
-              />,
-            ]}
-          />
-          {getMeta('ol-compilesUserContentDomain') && (
-            <>
-              <br />
-              <br />
-              <Trans
-                i18nKey="new_compile_domain_notice"
-                values={{
-                  compilesUserContentDomain: new URL(
-                    getMeta('ol-compilesUserContentDomain')
-                  ).hostname,
-                }}
-                shouldUnescape
-                tOptions={{ interpolation: { escapeValue: true } }}
-                components={[
-                  <code key="domain" />,
-                  /* eslint-disable-next-line jsx-a11y/anchor-has-content */
-                  <a
-                    href="/learn/how-to/Resolving_access%2C_loading%2C_and_display_problems"
-                    target="_blank"
-                    key="troubleshooting-link"
-                  />,
-                ]}
-              />
-            </>
-          )}
-        </ErrorLogEntry>
+        includeErrors && (
+          <ErrorLogEntry title={t('pdf_rendering_error')}>
+            {t('something_went_wrong_rendering_pdf')}
+            &nbsp;
+            <Trans
+              i18nKey="try_recompile_project_or_troubleshoot"
+              components={[
+                // eslint-disable-next-line jsx-a11y/anchor-has-content
+                <a
+                  href="/learn/how-to/Resolving_access%2C_loading%2C_and_display_problems"
+                  target="_blank"
+                  key="troubleshooting-link"
+                />,
+              ]}
+            />
+            {getMeta('ol-compilesUserContentDomain') && (
+              <>
+                <br />
+                <br />
+                <Trans
+                  i18nKey="new_compile_domain_notice"
+                  values={{
+                    compilesUserContentDomain: new URL(
+                      getMeta('ol-compilesUserContentDomain')
+                    ).hostname,
+                  }}
+                  shouldUnescape
+                  tOptions={{ interpolation: { escapeValue: true } }}
+                  components={[
+                    <code key="domain" />,
+                    /* eslint-disable-next-line jsx-a11y/anchor-has-content */
+                    <a
+                      href="/learn/how-to/Resolving_access%2C_loading%2C_and_display_problems"
+                      target="_blank"
+                      key="troubleshooting-link"
+                    />,
+                  ]}
+                />
+              </>
+            )}
+          </ErrorLogEntry>
+        )
       )
 
     case 'clsi-maintenance':
       return (
-        <ErrorLogEntry title={t('server_error')}>
-          {t('clsi_maintenance')}
-        </ErrorLogEntry>
+        includeErrors && (
+          <ErrorLogEntry title={t('server_error')}>
+            {t('clsi_maintenance')}
+          </ErrorLogEntry>
+        )
       )
 
     case 'clsi-unavailable':
       return (
-        <ErrorLogEntry title={t('server_error')}>
-          {t('clsi_unavailable')}
-        </ErrorLogEntry>
+        includeErrors && (
+          <ErrorLogEntry title={t('server_error')}>
+            {t('clsi_unavailable')}
+          </ErrorLogEntry>
+        )
       )
 
     case 'too-recently-compiled':
       return (
-        <ErrorLogEntry title={t('server_error')}>
-          {t('too_recently_compiled')}
-        </ErrorLogEntry>
+        includeErrors && (
+          <ErrorLogEntry title={t('server_error')}>
+            {t('too_recently_compiled')}
+          </ErrorLogEntry>
+        )
       )
 
     case 'terminated':
       return (
-        <ErrorLogEntry title={t('terminated')}>
-          {t('compile_terminated_by_user')}
-        </ErrorLogEntry>
+        includeErrors && (
+          <ErrorLogEntry title={t('terminated')}>
+            {t('compile_terminated_by_user')}
+          </ErrorLogEntry>
+        )
       )
 
     case 'rate-limited':
       return (
-        <ErrorLogEntry title={t('pdf_compile_rate_limit_hit')}>
-          {t('project_flagged_too_many_compiles')}
-        </ErrorLogEntry>
+        includeErrors && (
+          <ErrorLogEntry title={t('pdf_compile_rate_limit_hit')}>
+            {t('project_flagged_too_many_compiles')}
+          </ErrorLogEntry>
+        )
       )
 
     case 'compile-in-progress':
       return (
-        <ErrorLogEntry title={t('pdf_compile_in_progress_error')}>
-          {t('pdf_compile_try_again')}
-        </ErrorLogEntry>
+        includeErrors && (
+          <ErrorLogEntry title={t('pdf_compile_in_progress_error')}>
+            {t('pdf_compile_try_again')}
+          </ErrorLogEntry>
+        )
       )
 
     case 'autocompile-disabled':
       return (
-        <ErrorLogEntry title={t('autocompile_disabled')}>
-          {t('autocompile_disabled_reason')}
-        </ErrorLogEntry>
+        includeErrors && (
+          <ErrorLogEntry title={t('autocompile_disabled')}>
+            {t('autocompile_disabled_reason')}
+          </ErrorLogEntry>
+        )
       )
 
     case 'project-too-large':
       return (
-        <ErrorLogEntry title={t('project_too_large')}>
-          {t('project_too_much_editable_text')}
-        </ErrorLogEntry>
+        includeErrors && (
+          <ErrorLogEntry title={t('project_too_large')}>
+            {t('project_too_much_editable_text')}
+          </ErrorLogEntry>
+        )
       )
 
     case 'timedout':
-      return <TimedOutLogEntry />
+      return includeErrors && <TimedOutLogEntry />
 
     case 'failure':
       return (
-        <ErrorLogEntry title={t('no_pdf_error_title')}>
-          {t('no_pdf_error_explanation')}
+        includeErrors && (
+          <ErrorLogEntry title={t('no_pdf_error_title')}>
+            {t('no_pdf_error_explanation')}
 
-          <ul className="my-1 ps-3">
-            <li>{t('no_pdf_error_reason_unrecoverable_error')}</li>
-            <li>
-              <Trans
-                i18nKey="no_pdf_error_reason_no_content"
-                components={{ code: <code /> }}
-              />
-            </li>
-            <li>
-              <Trans
-                i18nKey="no_pdf_error_reason_output_pdf_already_exists"
-                components={{ code: <code /> }}
-              />
-            </li>
-          </ul>
-        </ErrorLogEntry>
+            <ul className="my-1 ps-3">
+              <li>{t('no_pdf_error_reason_unrecoverable_error')}</li>
+              <li>
+                <Trans
+                  i18nKey="no_pdf_error_reason_no_content"
+                  components={{ code: <code /> }}
+                />
+              </li>
+              <li>
+                <Trans
+                  i18nKey="no_pdf_error_reason_output_pdf_already_exists"
+                  components={{ code: <code /> }}
+                />
+              </li>
+            </ul>
+          </ErrorLogEntry>
+        )
       )
 
     case 'clear-cache':
       return (
-        <ErrorLogEntry title={t('server_error')}>
-          {t('somthing_went_wrong_compiling')}
-        </ErrorLogEntry>
+        includeErrors && (
+          <ErrorLogEntry title={t('server_error')}>
+            {t('somthing_went_wrong_compiling')}
+          </ErrorLogEntry>
+        )
       )
 
     case 'pdf-viewer-loading-error':
       return (
-        <ErrorLogEntry title={t('pdf_rendering_error')}>
-          <Trans
-            i18nKey="something_went_wrong_loading_pdf_viewer"
-            components={[
-              <strong key="strong-" />,
-              // eslint-disable-next-line jsx-a11y/anchor-has-content
-              <a
-                href="/learn/how-to/Resolving_access%2C_loading%2C_and_display_problems"
-                target="_blank"
-                key="troubleshooting-link"
-              />,
-              // eslint-disable-next-line jsx-a11y/anchor-has-content
-              <a key="contact-link" target="_blank" href="/contact" />,
-            ]}
-          />
-        </ErrorLogEntry>
+        includeErrors && (
+          <ErrorLogEntry title={t('pdf_rendering_error')}>
+            <Trans
+              i18nKey="something_went_wrong_loading_pdf_viewer"
+              components={[
+                <strong key="strong-" />,
+                // eslint-disable-next-line jsx-a11y/anchor-has-content
+                <a
+                  href="/learn/how-to/Resolving_access%2C_loading%2C_and_display_problems"
+                  target="_blank"
+                  key="troubleshooting-link"
+                />,
+                // eslint-disable-next-line jsx-a11y/anchor-has-content
+                <a key="contact-link" target="_blank" href="/contact" />,
+              ]}
+            />
+          </ErrorLogEntry>
+        )
       )
 
     case 'validation-problems':
@@ -207,9 +241,11 @@ function PdfPreviewError({ error }: { error: string }) {
     case 'error':
     default:
       return (
-        <ErrorLogEntry title={t('server_error')}>
-          {t('somthing_went_wrong_compiling')}
-        </ErrorLogEntry>
+        includeErrors && (
+          <ErrorLogEntry title={t('server_error')}>
+            {t('somthing_went_wrong_compiling')}
+          </ErrorLogEntry>
+        )
       )
   }
 }

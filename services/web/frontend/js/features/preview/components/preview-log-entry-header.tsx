@@ -14,9 +14,7 @@ function PreviewLogEntryHeader({
   headerIcon,
   logType,
   showSourceLocationLink = true,
-  showCloseButton = false,
   onSourceLocationClick,
-  onClose,
 }: {
   headerTitle: string | React.ReactNode
   level: ErrorLevel
@@ -24,9 +22,7 @@ function PreviewLogEntryHeader({
   logType?: string
   sourceLocation?: SourceLocation
   showSourceLocationLink?: boolean
-  showCloseButton?: boolean
   onSourceLocationClick?: MouseEventHandler<HTMLButtonElement>
-  onClose?: () => void
 }) {
   const { t } = useTranslation()
   const logLocationSpanRef = useRef<HTMLSpanElement>(null)
@@ -116,16 +112,6 @@ function PreviewLogEntryHeader({
       ) : (
         locationLink
       )}
-      {showCloseButton ? (
-        <OLButton
-          variant="link"
-          className="btn-inline-link log-entry-header-link"
-          aria-label={t('dismiss_error_popup')}
-          onClick={onClose}
-        >
-          <span aria-hidden="true">&times;</span>
-        </OLButton>
-      ) : null}
     </header>
   )
 }
