@@ -99,6 +99,14 @@ describe('ServerCEScripts', function () {
       expect(await getUser('foo@bar.com')).to.deep.equal({ isAdmin: false })
     })
 
+    it('should also work with mjs version', async function () {
+      const out = run(
+        'node modules/server-ce-scripts/scripts/create-user.mjs --email=foo@bar.com'
+      )
+      expect(out).to.include('/user/activate?token=')
+      expect(await getUser('foo@bar.com')).to.deep.equal({ isAdmin: false })
+    })
+
     it('should create an admin user with --admin flag', async function () {
       run(
         'node modules/server-ce-scripts/scripts/create-user.js --admin --email=foo@bar.com'
