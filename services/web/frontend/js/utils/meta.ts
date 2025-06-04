@@ -54,6 +54,7 @@ import { DefaultNavbarMetadata } from '@/features/ui/components/types/default-na
 import { FooterMetadata } from '@/features/ui/components/types/footer-metadata'
 import type { ScriptLogType } from '../../../modules/admin-panel/frontend/js/features/script-logs/script-log'
 import { ActiveExperiment } from './labs-utils'
+import { Subscription as AdminSubscription } from '../../../types/admin/subscription'
 
 export interface Meta {
   'ol-ExposedSettings': ExposedSettings
@@ -61,6 +62,7 @@ export interface Meta {
     string,
     { annual: string; monthly: string; annualDividedByTwelve: string }
   >
+  'ol-adminSubscription': AdminSubscription
   'ol-aiAssistViaWritefullSource': string
   'ol-allInReconfirmNotificationPeriods': UserEmailData[]
   'ol-allowedExperiments': string[]
@@ -201,6 +203,16 @@ export interface Meta {
   'ol-recommendedCurrency': CurrencyCode
   'ol-reconfirmationRemoveEmail': string
   'ol-reconfirmedViaSAML': string
+  'ol-recurlyAccount':
+    | {
+        code: string
+        error?: undefined
+      }
+    | {
+        error: boolean
+        code?: undefined
+      }
+    | undefined
   'ol-recurlyApiKey': string
   'ol-recurlySubdomain': string
   'ol-ro-mirror-on-client-no-local-storage': boolean
@@ -229,6 +241,7 @@ export interface Meta {
   'ol-ssoDisabled': boolean
   'ol-ssoErrorMessage': string
   'ol-stripeApiKey': string
+  'ol-stripeCustomerId': string
   'ol-subscription': any // TODO: mixed types, split into two fields
   'ol-subscriptionChangePreview': SubscriptionChangePreview
   'ol-subscriptionId': string
