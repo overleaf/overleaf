@@ -370,6 +370,8 @@
   "compile_error_entry_description": "An error which prevented this project from compiling",
   "compile_error_handling": "Compile error handling",
   "compile_larger_projects": "Compile larger projects",
+  "compile_limit_reached": "Compile limit reached",
+  "compile_limit_upgrade_prompt": "Your document took longer than the free plan’s compile window. Upgrade to Overleaf Premium for extended compile durations, priority build servers, and uninterrupted LaTeX processing—so you can focus on writing, not waiting.",
   "compile_mode": "Compile mode",
   "compile_servers": "Compile servers",
   "compile_servers_info_new": "The servers used to compile your project. Compiles for users on paid plans always run on the fastest available servers.",

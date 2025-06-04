@@ -287,6 +287,8 @@
   "compile_error_entry_description": "",
   "compile_error_handling": "",
   "compile_larger_projects": "",
+  "compile_limit_reached": "",
+  "compile_limit_upgrade_prompt": "",
   "compile_mode": "",
   "compile_terminated_by_user": "",
   "compiler": "",
