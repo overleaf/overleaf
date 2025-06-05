@@ -1,60 +1,57 @@
 extends ../layout-marketing
-
-block vars
-	- bootstrap5PageStatus = 'disabled'
+include ../_mixins/notification
 
 block content
 	main.content.content-alt#main-content
 		.container
 			.row
-				.col-md-8.col-md-offset-2.col-lg-6.col-lg-offset-3
+				.col-lg-8.offset-lg-2.col-xl-6.offset-xl-3
 					.card
-						.page-header(data-ol-hide-on-error-message="confirm-email-wrong-user")
-							h1 #{translate("confirm_email")}
-						form(
-							method="POST"
-							action="/logout"
-							id="logoutForm"
-						)
-							input(type="hidden", name="_csrf", value=csrfToken)
-							input(type="hidden", name="redirect", value=currentUrlWithQueryParams)
-						form(
-							data-ol-async-form,
-							data-ol-auto-submit,
-							name="confirmEmailForm"
-							action="/user/emails/confirm",
-							method="POST",
-							id="confirmEmailForm",
-						)
-							input(type="hidden", name="_csrf", value=csrfToken)
-							input(type="hidden", name="token", value=token)
+						.card-body
+							.page-header(data-ol-hide-on-error-message="confirm-email-wrong-user")
+								h1 #{translate("confirm_email")}
+							form(
+								method="POST"
+								action="/logout"
+								id="logoutForm"
+							)
+								input(type="hidden", name="_csrf", value=csrfToken)
+								input(type="hidden", name="redirect", value=currentUrlWithQueryParams)
+							form(
+								data-ol-async-form,
+								data-ol-auto-submit,
+								name="confirmEmailForm"
+								action="/user/emails/confirm",
+								method="POST",
+								id="confirmEmailForm",
+							)
+								input(type="hidden", name="_csrf", value=csrfToken)
+								input(type="hidden", name="token", value=token)
 
-							div(data-ol-not-sent)
-								+formMessages()
-								div(data-ol-custom-form-message="confirm-email-wrong-user" hidden)
-									h1.h3 #{translate("we_cant_confirm_this_email")}
-									p !{translate("to_confirm_email_address_you_must_be_logged_in_with_the_requesting_account")}
-									p !{translate("you_are_currently_logged_in_as", {email: getUserEmail()})}
+								div(data-ol-not-sent)
+									+formMessages()
+									div(data-ol-custom-form-message="confirm-email-wrong-user" hidden)
+										h1.h3 #{translate("we_cant_confirm_this_email")}
+										p !{translate("to_confirm_email_address_you_must_be_logged_in_with_the_requesting_account")}
+										p !{translate("you_are_currently_logged_in_as", {email: getUserEmail()})}
+										.actions
+											button.btn-primary.btn.w-100(
+												form="logoutForm"
+											) #{translate('log_in_with_a_different_account')}
+
 									.actions
-										button.btn-primary.btn.btn-block(
-											form="logoutForm"
-										) #{translate('log_in_with_a_different_account')}
+										button.btn-primary.btn.w-100(
+											type='submit',
+											data-ol-disabled-inflight
+											data-ol-hide-on-error-message="confirm-email-wrong-user"
+										)
+											span(data-ol-inflight="idle")
+												| #{translate('confirm')}
+											span(hidden data-ol-inflight="pending")
+												span(role='status').spinner-border.spinner-border-sm.mx-2
 
-								.actions
-									button.btn-primary.btn.btn-block(
-										type='submit',
-										data-ol-disabled-inflight
-										data-ol-hide-on-error-message="confirm-email-wrong-user"
-									)
-										span(data-ol-inflight="idle")
-											| #{translate('confirm')}
-										span(hidden data-ol-inflight="pending")
-											i.fa.fa-fw.fa-spin.fa-spinner(aria-hidden="true")
-											| &nbsp;#{translate('confirming')}… 
-
-							div(hidden data-ol-sent)
-								.alert.alert-success
-									| #{translate('thank_you_email_confirmed')}
-								div.text-center
-									a.btn.btn-primary(href="/user/settings")
-										| #{translate('go_to_account_settings')}
+								div(hidden data-ol-sent)
+									+notification({ariaLive: 'polite', type: 'success', className: 'mb-3', content: translate("thank_you_email_confirmed")})
+									div.text-center
+										a.btn.btn-primary(href="/user/settings")
+											| #{translate('go_to_account_settings')}
