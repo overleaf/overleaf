@@ -194,9 +194,8 @@ const DocumentManager = {
     let op
     if (type === 'history-ot') {
       const file = StringFileData.fromRaw(oldLines)
-      const operation = DiffCodec.diffAsHistoryV1EditOperation(
-        // TODO(24596): tc support for history-ot
-        file.getContent({ filterTrackedDeletes: true }),
+      const operation = DiffCodec.diffAsHistoryOTEditOperation(
+        file,
         newLines.join('\n')
       )
       if (operation.isNoop()) {

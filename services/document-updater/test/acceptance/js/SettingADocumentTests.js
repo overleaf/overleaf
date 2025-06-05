@@ -686,4 +686,285 @@ describe('Setting a document', function () {
       })
     })
   })
+
+  describe('with track changes (history-ot)', function () {
+    const lines = ['one', 'one and a half', 'two', 'three']
+    const userId = DocUpdaterClient.randomId()
+    const ts = new Date().toISOString()
+    beforeEach(function (done) {
+      numberOfReceivedUpdates = 0
+      this.newLines = ['one', 'two', 'three']
+      this.project_id = DocUpdaterClient.randomId()
+      this.doc_id = DocUpdaterClient.randomId()
+      this.historyOTUpdate = {
+        doc: this.doc_id,
+        op: [
+          {
+            textOperation: [
+              4,
+              {
+                r: 'one and a half\n'.length,
+                tracking: {
+                  type: 'delete',
+                  userId,
+                  ts,
+                },
+              },
+              9,
+            ],
+          },
+        ],
+        v: this.version,
+        meta: { source: 'random-publicId' },
+      }
+      MockWebApi.insertDoc(this.project_id, this.doc_id, {
+        lines,
+        version: this.version,
+        otMigrationStage: 1,
+      })
+      DocUpdaterClient.preloadDoc(this.project_id, this.doc_id, error => {
+        if (error) {
+          throw error
+        }
+        DocUpdaterClient.sendUpdate(
+          this.project_id,
+          this.doc_id,
+          this.historyOTUpdate,
+          error => {
+            if (error) {
+              throw error
+            }
+            DocUpdaterClient.waitForPendingUpdates(
+              this.project_id,
+              this.doc_id,
+              done
+            )
+          }
+        )
+      })
+    })
+
+    afterEach(function () {
+      MockProjectHistoryApi.flushProject.resetHistory()
+      MockWebApi.setDocument.resetHistory()
+    })
+    it('should record tracked changes', function (done) {
+      docUpdaterRedis.get(
+        Keys.docLines({ doc_id: this.doc_id }),
+        (error, data) => {
+          if (error) {
+            throw error
+          }
+          expect(JSON.parse(data)).to.deep.equal({
+            content: lines.join('\n'),
+            trackedChanges: [
+              {
+                range: {
+                  pos: 4,
+                  length: 15,
+                },
+                tracking: {
+                  ts,
+                  type: 'delete',
+                  userId,
+                },
+              },
+            ],
+          })
+          done()
+        }
+      )
+    })
+
+    it('should apply the change', function (done) {
+      DocUpdaterClient.getDoc(
+        this.project_id,
+        this.doc_id,
+        (error, res, data) => {
+          if (error) {
+            throw error
+          }
+          expect(data.lines).to.deep.equal(this.newLines)
+          done()
+        }
+      )
+    })
+    const cases = [
+      {
+        name: 'when resetting the content',
+        lines,
+        want: {
+          content: 'one\none and a half\none and a half\ntwo\nthree',
+          trackedChanges: [
+            {
+              range: {
+                pos: 'one and a half\n'.length + 4,
+                length: 15,
+              },
+              tracking: {
+                ts,
+                type: 'delete',
+                userId,
+              },
+            },
+          ],
+        },
+      },
+      {
+        name: 'when adding content before a tracked delete',
+        lines: ['one', 'INSERT', 'two', 'three'],
+        want: {
+          content: 'one\nINSERT\none and a half\ntwo\nthree',
+          trackedChanges: [
+            {
+              range: {
+                pos: 'INSERT\n'.length + 4,
+                length: 15,
+              },
+              tracking: {
+                ts,
+                type: 'delete',
+                userId,
+              },
+            },
+          ],
+        },
+      },
+      {
+        name: 'when adding content after a tracked delete',
+        lines: ['one', 'two', 'INSERT', 'three'],
+        want: {
+          content: 'one\none and a half\ntwo\nINSERT\nthree',
+          trackedChanges: [
+            {
+              range: {
+                pos: 4,
+                length: 15,
+              },
+              tracking: {
+                ts,
+                type: 'delete',
+                userId,
+              },
+            },
+          ],
+        },
+      },
+      {
+        name: 'when deleting content before a tracked delete',
+        lines: ['two', 'three'],
+        want: {
+          content: 'one and a half\ntwo\nthree',
+          trackedChanges: [
+            {
+              range: {
+                pos: 0,
+                length: 15,
+              },
+              tracking: {
+                ts,
+                type: 'delete',
+                userId,
+              },
+            },
+          ],
+        },
+      },
+      {
+        name: 'when deleting content after a tracked delete',
+        lines: ['one', 'two'],
+        want: {
+          content: 'one\none and a half\ntwo',
+          trackedChanges: [
+            {
+              range: {
+                pos: 4,
+                length: 15,
+              },
+              tracking: {
+                ts,
+                type: 'delete',
+                userId,
+              },
+            },
+          ],
+        },
+      },
+      {
+        name: 'when deleting content immediately after a tracked delete',
+        lines: ['one', 'three'],
+        want: {
+          content: 'one\none and a half\nthree',
+          trackedChanges: [
+            {
+              range: {
+                pos: 4,
+                length: 15,
+              },
+              tracking: {
+                ts,
+                type: 'delete',
+                userId,
+              },
+            },
+          ],
+        },
+      },
+      {
+        name: 'when deleting content across a tracked delete',
+        lines: ['onethree'],
+        want: {
+          content: 'oneone and a half\nthree',
+          trackedChanges: [
+            {
+              range: {
+                pos: 3,
+                length: 15,
+              },
+              tracking: {
+                ts,
+                type: 'delete',
+                userId,
+              },
+            },
+          ],
+        },
+      },
+    ]
+
+    for (const { name, lines, want } of cases) {
+      describe(name, function () {
+        beforeEach(function (done) {
+          DocUpdaterClient.setDocLines(
+            this.project_id,
+            this.doc_id,
+            lines,
+            this.source,
+            userId,
+            false,
+            (error, res, body) => {
+              if (error) {
+                return done(error)
+              }
+              this.statusCode = res.statusCode
+              this.body = body
+              done()
+            }
+          )
+        })
+        it('should update accordingly', function (done) {
+          docUpdaterRedis.get(
+            Keys.docLines({ doc_id: this.doc_id }),
+            (error, data) => {
+              if (error) {
+                throw error
+              }
+              expect(JSON.parse(data)).to.deep.equal(want)
+              done()
+            }
+          )
+        })
+      })
+    }
+  })
 })

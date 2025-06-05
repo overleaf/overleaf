@@ -1,3 +1,4 @@
+const OError = require('@overleaf/o-error')
 const DMP = require('diff-match-patch')
 const { TextOperation } = require('overleaf-editor-core')
 const dmp = new DMP()
@@ -38,22 +39,61 @@ module.exports = {
     return ops
   },
 
-  diffAsHistoryV1EditOperation(before, after) {
-    const diffs = dmp.diff_main(before, after)
+  /**
+   * @param {import("overleaf-editor-core").StringFileData} file
+   * @param {string} after
+   * @return {TextOperation}
+   */
+  diffAsHistoryOTEditOperation(file, after) {
+    const beforeWithoutTrackedDeletes = file.getContent({
+      filterTrackedDeletes: true,
+    })
+    const diffs = dmp.diff_main(beforeWithoutTrackedDeletes, after)
     dmp.diff_cleanupSemantic(diffs)
+
+    const trackedChanges = file.trackedChanges.asSorted()
+    let nextTc = trackedChanges.shift()
 
     const op = new TextOperation()
     for (const diff of diffs) {
-      const [type, content] = diff
+      let [type, content] = diff
       if (type === this.ADDED) {
         op.insert(content)
-      } else if (type === this.REMOVED) {
-        op.remove(content.length)
-      } else if (type === this.UNCHANGED) {
-        op.retain(content.length)
+      } else if (type === this.REMOVED || type === this.UNCHANGED) {
+        while (op.baseLength + content.length > nextTc?.range.start) {
+          if (nextTc.tracking.type === 'delete') {
+            const untilRange = nextTc.range.start - op.baseLength
+            if (type === this.REMOVED) {
+              op.remove(untilRange)
+            } else if (type === this.UNCHANGED) {
+              op.retain(untilRange)
+            }
+            op.retain(nextTc.range.end - nextTc.range.start)
+            content = content.slice(untilRange)
+          }
+          nextTc = trackedChanges.shift()
+        }
+        if (type === this.REMOVED) {
+          op.remove(content.length)
+        } else if (type === this.UNCHANGED) {
+          op.retain(content.length)
+        }
       } else {
         throw new Error('Unknown type')
       }
+    }
+    while (nextTc) {
+      if (
+        nextTc.tracking.type !== 'delete' ||
+        nextTc.range.start !== op.baseLength
+      ) {
+        throw new OError(
+          'StringFileData.trackedChanges out of sync: unexpected range after end of diff',
+          { nextTc, baseLength: op.baseLength }
+        )
+      }
+      op.retain(nextTc.range.end - nextTc.range.start)
+      nextTc = trackedChanges.shift()
     }
     return op
   },
