@@ -1,8 +1,26 @@
-import { vi } from 'vitest'
+import { chai, vi } from 'vitest'
 import './common_bootstrap.js'
 import sinon from 'sinon'
 import logger from '@overleaf/logger'
+import sinonChai from 'sinon-chai'
+import chaiAsPromised from 'chai-as-promised'
 
+/*
+ * Chai configuration
+ */
+
+// add chai.should()
+chai.should()
+
+// Load sinon-chai assertions so expect(stubFn).to.have.been.calledWith('abc')
+// has a nicer failure messages
+chai.use(sinonChai)
+
+// Load promise support for chai
+chai.use(chaiAsPromised)
+
+// Do not truncate assertion errors
+chai.config.truncateThreshold = 0
 vi.mock('@overleaf/logger', async () => {
   return {
     default: {
