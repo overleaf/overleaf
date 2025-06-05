@@ -1,5 +1,4 @@
-import { vi } from 'vitest'
-import { expect } from 'chai'
+import { expect, vi } from 'vitest'
 import sinon from 'sinon'
 const modulePath =
   '../../../../app/src/Features/LinkedFiles/LinkedFilesController.mjs'

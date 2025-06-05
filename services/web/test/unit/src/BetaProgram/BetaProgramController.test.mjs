@@ -1,7 +1,6 @@
-import { vi } from 'vitest'
+import { expect, vi } from 'vitest'
 import path from 'node:path'
 import sinon from 'sinon'
-import { expect } from 'chai'
 import MockResponse from '../helpers/MockResponse.js'
 import { fileURLToPath } from 'node:url'
 

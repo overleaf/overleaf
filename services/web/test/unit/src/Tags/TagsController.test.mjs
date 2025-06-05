@@ -1,6 +1,6 @@
-import { vi } from 'vitest'
+import { assert, vi } from 'vitest'
 import sinon from 'sinon'
-import { assert } from 'chai'
+
 const modulePath = '../../../../app/src/Features/Tags/TagsController.mjs'
 
 describe('TagsController', function () {

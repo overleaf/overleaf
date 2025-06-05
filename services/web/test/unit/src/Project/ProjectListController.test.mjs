@@ -1,6 +1,5 @@
-import { vi } from 'vitest'
+import { expect, vi } from 'vitest'
 import sinon from 'sinon'
-import { expect } from 'chai'
 import mongodb from 'mongodb-legacy'
 import Errors from '../../../../app/src/Features/Errors/Errors.js'
 

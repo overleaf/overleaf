@@ -1,6 +1,5 @@
-import { vi } from 'vitest'
+import { expect, vi } from 'vitest'
 import sinon from 'sinon'
-import { expect } from 'chai'
 import MockRequest from '../helpers/MockRequest.js'
 import MockResponse from '../helpers/MockResponse.js'
 import mongodb from 'mongodb-legacy'

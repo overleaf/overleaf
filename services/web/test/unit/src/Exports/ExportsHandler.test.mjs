@@ -1,6 +1,5 @@
-import { vi } from 'vitest'
+import { expect, vi } from 'vitest'
 import sinon from 'sinon'
-import { expect } from 'chai'
 const modulePath = '../../../../app/src/Features/Exports/ExportsHandler.mjs'
 
 describe('ExportsHandler', function () {

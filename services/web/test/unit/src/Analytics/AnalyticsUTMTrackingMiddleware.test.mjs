@@ -1,8 +1,7 @@
-import { vi } from 'vitest'
+import { assert, vi } from 'vitest'
 import sinon from 'sinon'
 import MockRequest from '../helpers/MockRequest.js'
 import MockResponse from '../helpers/MockResponse.js'
-import { assert } from 'chai'
 
 const MODULE_PATH = new URL(
   '../../../../app/src/Features/Analytics/AnalyticsUTMTrackingMiddleware',

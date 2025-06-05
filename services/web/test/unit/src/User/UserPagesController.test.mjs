@@ -1,7 +1,6 @@
-import { vi } from 'vitest'
+import { expect, vi } from 'vitest'
 import assert from 'assert'
 import sinon from 'sinon'
-import { expect } from 'chai'
 import MockResponse from '../helpers/MockResponse.js'
 import MockRequest from '../helpers/MockRequest.js'
 

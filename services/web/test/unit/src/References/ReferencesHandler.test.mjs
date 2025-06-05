@@ -1,6 +1,4 @@
-import { vi } from 'vitest'
-
-import { expect } from 'chai'
+import { expect, vi } from 'vitest'
 import sinon from 'sinon'
 import Errors from '../../../../app/src/Features/Errors/Errors.js'
 const modulePath =

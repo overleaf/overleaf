@@ -1,6 +1,5 @@
-import { vi } from 'vitest'
+import { expect, vi } from 'vitest'
 import sinon from 'sinon'
-import { expect } from 'chai'
 const modulePath = new URL(
   '../../../../app/src/Features/PasswordReset/PasswordResetHandler',
   import.meta.url
