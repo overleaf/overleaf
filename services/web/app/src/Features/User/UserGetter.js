@@ -269,6 +269,7 @@ const UserGetter = {
   getUsers(query, projection, callback) {
     try {
       query = normalizeMultiQuery(query)
+      if (query?._id?.$in?.length === 0) return callback(null, []) // shortcut for getUsers([])
       db.users.find(query, { projection }).toArray(callback)
     } catch (err) {
       callback(err)

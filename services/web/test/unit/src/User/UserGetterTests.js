@@ -119,6 +119,17 @@ describe('UserGetter', function () {
       })
     })
 
+    it('should not call mongo with empty list', function (done) {
+      const query = []
+      const projection = { email: 1 }
+      this.UserGetter.getUsers(query, projection, (error, users) => {
+        expect(error).to.not.exist
+        expect(users).to.deep.equal([])
+        expect(this.find).to.not.have.been.called
+        done()
+      })
+    })
+
     it('should not allow null query', function (done) {
       this.UserGetter.getUser(null, {}, error => {
         error.should.exist
