@@ -385,7 +385,7 @@ async function expireDeletedProject(projectId) {
       )
       return
     }
-    const userId = deleteProject.deletedProjectOwnerId
+    const userId = deletedProject.deletedProjectOwnerId
     const historyId =
       deletedProject.project.overleaf &&
       deletedProject.project.overleaf.history &&
