@@ -35,6 +35,33 @@
   padding-bottom: var(--spacing-09);
 }
 
+.login-register-container {
+  max-width: 400px;
+  margin: 0 auto;
+  padding-bottom: 125px;
+}
+
+.login-register-error-container {
+  padding-bottom: var(--spacing-05);
+  text-align: left;
+}
+
+.login-register-card {
+  padding-top: 0;
+  padding-bottom: 0;
+  text-align: center;
+}
+
+.login-register-header {
+  padding-bottom: var(--spacing-07);
+  border-bottom: solid 1px var(--border-divider);
+}
+
+.login-register-header-heading {
+  margin: 0;
+  color: var(--content-secondary);
+}
+
 .login-register-hr-text-container {
   line-height: 1;
   position: relative;
@@ -56,6 +83,19 @@
   position: relative;
   background-color: #fff;
   padding: 0 var(--spacing-05);
+}
+
+.login-register-text,
+.login-register-hr-text-container {
+  margin: 0;
+}
+
+.login-register-text {
+  padding-bottom: var(--spacing-08);
+
+  &:last-child {
+    padding-bottom: 0;
+  }
 }
 
 .sso-auth-login-container {
