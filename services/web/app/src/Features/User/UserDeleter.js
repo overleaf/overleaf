@@ -87,17 +87,29 @@ async function deleteMongoUser(userId) {
 }
 
 async function expireDeletedUser(userId) {
-  await Modules.promises.hooks.fire('expireDeletedUser', userId)
-  const deletedUser = await DeletedUser.findOne({
-    'deleterData.deletedUserId': userId,
-  }).exec()
-
-  await Feedback.deleteMany({ userId }).exec()
-  await OnboardingDataCollectionManager.deleteOnboardingDataCollection(userId)
-
-  deletedUser.user = undefined
-  deletedUser.deleterData.deleterIpAddress = undefined
-  await deletedUser.save()
+  logger.info({ userId }, 'expiring deleted user')
+  try {
+    logger.info({ userId }, 'firing expireDeletedUser hook')
+    await Modules.promises.hooks.fire('expireDeletedUser', userId)
+    logger.info({ userId }, 'removing deleted user feedback records')
+    await Feedback.deleteMany({ userId }).exec()
+    logger.info({ userId }, 'removing deleted user onboarding data')
+    await OnboardingDataCollectionManager.deleteOnboardingDataCollection(userId)
+    logger.info({ userId }, 'redacting PII from the deleted user record')
+    const deletedUser = await DeletedUser.findOne({
+      'deleterData.deletedUserId': userId,
+    }).exec()
+    deletedUser.user = undefined
+    deletedUser.deleterData.deleterIpAddress = undefined
+    await deletedUser.save()
+    logger.info({ userId }, 'deleted user expiry complete')
+  } catch (error) {
+    logger.warn(
+      { error, userId },
+      'something went wrong expiring the deleted user'
+    )
+    throw error
+  }
 }
 
 async function expireDeletedUsersAfterDuration() {
@@ -112,11 +124,27 @@ async function expireDeletedUsersAfterDuration() {
   if (deletedUsers.length === 0) {
     return
   }
-
-  for (let i = 0; i < deletedUsers.length; i++) {
-    const deletedUserId = deletedUsers[i].deleterData.deletedUserId
-    await expireDeletedUser(deletedUserId)
-    await UserAuditLogEntry.deleteMany({ userId: deletedUserId }).exec()
+  logger.info(
+    { deletedUsers: deletedUsers.length, retentionPeriodInDays: DURATION },
+    'expiring batch of deleted users older than retention period'
+  )
+  try {
+    for (let i = 0; i < deletedUsers.length; i++) {
+      const deletedUserId = deletedUsers[i].deleterData.deletedUserId
+      await expireDeletedUser(deletedUserId)
+      logger.info({ deletedUserId }, 'removing deleted user audit log entries')
+      await UserAuditLogEntry.deleteMany({ userId: deletedUserId }).exec()
+    }
+    logger.info(
+      { deletedUsers: deletedUsers.length },
+      'batch of deleted users expired successfully'
+    )
+  } catch (error) {
+    logger.warn(
+      { error },
+      'something went wrong expiring batch of deleted users'
+    )
+    throw error
   }
 }
 
