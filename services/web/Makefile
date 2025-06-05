@@ -83,6 +83,11 @@ test_unit_app:
 	$(DOCKER_COMPOSE) run --name unit_test_$(BUILD_DIR_NAME) --rm test_unit
 	$(DOCKER_COMPOSE) down -v -t 0
 
+test_unit_mocha: export COMPOSE_PROJECT_NAME=unit_test_mocha_$(BUILD_DIR_NAME)
+test_unit_mocha:
+	$(DOCKER_COMPOSE) run --rm test_unit npm run test:unit:mocha
+	$(DOCKER_COMPOSE) down -v -t 0
+
 test_unit_esm: export COMPOSE_PROJECT_NAME=unit_test_esm_$(BUILD_DIR_NAME)
 test_unit_esm:
 	$(DOCKER_COMPOSE) run --rm test_unit npm run test:unit:esm
