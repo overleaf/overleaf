@@ -106,8 +106,24 @@ async function expireDeletedProjectsAfterDuration() {
       deletedProject => deletedProject.deleterData.deletedProjectId
     )
   )
-  for (const projectId of projectIds) {
-    await expireDeletedProject(projectId)
+  logger.info(
+    { projectCount: projectIds.length },
+    'expiring batch of deleted projects'
+  )
+  try {
+    for (const projectId of projectIds) {
+      await expireDeletedProject(projectId)
+    }
+    logger.info(
+      { projectCount: projectIds.length },
+      'batch of deleted projects expired successfully'
+    )
+  } catch (error) {
+    logger.warn(
+      { error },
+      'something went wrong expiring batch of deleted projects'
+    )
+    throw error
   }
 }
 
@@ -276,12 +292,15 @@ async function deleteProject(projectId, options = {}) {
     )
 
     await Project.deleteOne({ _id: projectId }).exec()
+
+    logger.info(
+      { projectId, userId: project.owner_ref },
+      'successfully deleted project'
+    )
   } catch (err) {
     logger.warn({ err }, 'problem deleting project')
     throw err
   }
-
-  logger.debug({ projectId }, 'successfully deleted project')
 }
 
 async function undeleteProject(projectId, options = {}) {
@@ -335,16 +354,22 @@ async function undeleteProject(projectId, options = {}) {
 
 async function expireDeletedProject(projectId) {
   try {
+    logger.info({ projectId }, 'expiring deleted project')
     const activeProject = await Project.findById(projectId).exec()
     if (activeProject) {
       // That project is active. The deleted project record might be there
       // because of an incomplete delete or undelete operation. Clean it up and
       // return.
+      logger.info(
+        { projectId },
+        'deleted project record found but project is active'
+      )
       await DeletedProject.deleteOne({
         'deleterData.deletedProjectId': projectId,
       })
       return
     }
+
     const deletedProject = await DeletedProject.findOne({
       'deleterData.deletedProjectId': projectId,
     }).exec()
@@ -360,11 +385,13 @@ async function expireDeletedProject(projectId) {
       )
       return
     }
-
+    const userId = deleteProject.deletedProjectOwnerId
     const historyId =
       deletedProject.project.overleaf &&
       deletedProject.project.overleaf.history &&
       deletedProject.project.overleaf.history.id
+
+    logger.info({ projectId, userId }, 'destroying expired project data')
 
     await Promise.all([
       DocstoreManager.promises.destroyProject(deletedProject.project._id),
@@ -378,6 +405,10 @@ async function expireDeletedProject(projectId) {
       Modules.promises.hooks.fire('projectExpired', deletedProject.project._id),
     ])
 
+    logger.info(
+      { projectId, userId },
+      'redacting PII from the deleted project record'
+    )
     await DeletedProject.updateOne(
       {
         _id: deletedProject._id,
@@ -389,6 +420,7 @@ async function expireDeletedProject(projectId) {
         },
       }
     ).exec()
+    logger.info({ projectId, userId }, 'expired deleted project successfully')
   } catch (error) {
     logger.warn({ projectId, error }, 'error expiring deleted project')
     throw error
