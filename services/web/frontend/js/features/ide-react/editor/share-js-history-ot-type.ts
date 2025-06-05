@@ -1,11 +1,7 @@
 import {
   EditOperation,
   EditOperationTransformer,
-  InsertOp,
-  RemoveOp,
-  RetainOp,
   StringFileData,
-  TextOperation,
 } from 'overleaf-editor-core'
 import { ShareDoc } from '../../../../../types/share-doc'
 
@@ -15,7 +11,6 @@ type Api = {
 
   getText(): string
   getLength(): number
-  _register(): void
 }
 
 const api: Api & ThisType<Api & ShareDoc & { snapshot: StringFileData }> = {
@@ -23,63 +18,11 @@ const api: Api & ThisType<Api & ShareDoc & { snapshot: StringFileData }> = {
   trackChangesUserId: null,
 
   getText() {
-    return this.snapshot.getContent()
+    return this.snapshot.getContent({ filterTrackedDeletes: true })
   },
 
   getLength() {
     return this.snapshot.getStringLength()
-  },
-
-  _register() {
-    this.on('remoteop', (ops: EditOperation[], oldSnapshot: StringFileData) => {
-      const operation = ops[0]
-      if (operation instanceof TextOperation) {
-        const str = oldSnapshot.getContent()
-        if (str.length !== operation.baseLength)
-          throw new TextOperation.ApplyError(
-            "The operation's base length must be equal to the string's length.",
-            operation,
-            str
-          )
-
-        let outputCursor = 0
-        let inputCursor = 0
-        let trackedChangesInvalidated = false
-        for (const op of operation.ops) {
-          if (op instanceof RetainOp) {
-            inputCursor += op.length
-            outputCursor += op.length
-            if (op.tracking != null) {
-              trackedChangesInvalidated = true
-            }
-          } else if (op instanceof InsertOp) {
-            this.emit('insert', outputCursor, op.insertion, op.insertion.length)
-            outputCursor += op.insertion.length
-            trackedChangesInvalidated = true
-          } else if (op instanceof RemoveOp) {
-            this.emit(
-              'delete',
-              outputCursor,
-              str.slice(inputCursor, inputCursor + op.length)
-            )
-            inputCursor += op.length
-            trackedChangesInvalidated = true
-          }
-        }
-
-        if (inputCursor !== str.length) {
-          throw new TextOperation.ApplyError(
-            "The operation didn't operate on the whole string.",
-            operation,
-            str
-          )
-        }
-
-        if (trackedChangesInvalidated) {
-          this.emit('tracked-changes-invalidated')
-        }
-      }
-    })
   },
 }
 

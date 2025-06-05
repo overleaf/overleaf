@@ -4,6 +4,7 @@ import {
   Annotation,
   ChangeSpec,
   Text,
+  StateEffect,
 } from '@codemirror/state'
 import { EditorView, ViewPlugin } from '@codemirror/view'
 import { EventEmitter } from 'events'
@@ -15,11 +16,18 @@ import {
 } from '../../../../../types/share-doc'
 import { debugConsole } from '@/utils/debugging'
 import { DocumentContainer } from '@/features/ide-react/editor/document-container'
-import { TrackedChangeList } from 'overleaf-editor-core'
 import {
-  updateTrackedChanges,
+  EditOperation,
+  TextOperation,
+  InsertOp,
+  RemoveOp,
+  RetainOp,
+} from 'overleaf-editor-core'
+import {
+  updateTrackedChangesEffect,
   setTrackChangesUserId,
-  historyOTOperationEffect,
+  trackedChangesState,
+  shareDocState,
 } from './history-ot'
 
 /*
@@ -141,10 +149,6 @@ export class EditorFacade extends EventEmitter {
 
   cmDelete(position: number, text: string, origin?: string) {
     this.cmChange({ from: position, to: position + text.length }, origin)
-  }
-
-  cmUpdateTrackedChanges(trackedChanges: TrackedChangeList) {
-    this.view.dispatch(updateTrackedChanges(trackedChanges))
   }
 
   attachShareJs(shareDoc: ShareDoc, maxDocLength?: number) {
@@ -320,22 +324,11 @@ class HistoryOTAdapter {
   attachShareJs() {
     this.checkContent()
 
-    const onInsert = this.onShareJsInsert.bind(this)
-    const onDelete = this.onShareJsDelete.bind(this)
-    const onTrackedChangesInvalidated =
-      this.onShareJsTrackedChangesInvalidated.bind(this)
-
-    this.shareDoc.on('insert', onInsert)
-    this.shareDoc.on('delete', onDelete)
-    this.shareDoc.on('tracked-changes-invalidated', onTrackedChangesInvalidated)
+    const onRemoteOp = this.onRemoteOp.bind(this)
+    this.shareDoc.on('remoteop', onRemoteOp)
 
     this.shareDoc.detach_cm6 = () => {
-      this.shareDoc.removeListener('insert', onInsert)
-      this.shareDoc.removeListener('delete', onDelete)
-      this.shareDoc.removeListener(
-        'tracked-changes-invalidated',
-        onTrackedChangesInvalidated
-      )
+      this.shareDoc.removeListener('remoteop', onRemoteOp)
       delete this.shareDoc.detach_cm6
       this.editor.detachShareJs()
     }
@@ -357,22 +350,6 @@ class HistoryOTAdapter {
         return
       }
 
-      let snapshotUpdated = false
-      for (const effect of transaction.effects) {
-        if (effect.is(historyOTOperationEffect)) {
-          this.shareDoc.submitOp(effect.value)
-          snapshotUpdated = true
-        }
-      }
-
-      if (snapshotUpdated || transaction.annotation(Transaction.remote)) {
-        window.setTimeout(() => {
-          this.editor.cmUpdateTrackedChanges(
-            this.shareDoc.snapshot.getTrackedChanges()
-          )
-        }, 0)
-      }
-
       const origin = chooseOrigin(transaction)
       transaction.changes.iterChanges((fromA, toA, fromB, toB, inserted) => {
         this.onCodeMirrorChange(fromA, toA, fromB, toB, inserted, origin)
@@ -380,20 +357,70 @@ class HistoryOTAdapter {
     }
   }
 
-  onShareJsInsert(pos: number, text: string) {
-    this.editor.cmInsert(pos, text, 'remote')
-    this.checkContent()
-  }
+  onRemoteOp(operations: EditOperation[]) {
+    const positionMapper =
+      this.editor.view.state.field(trackedChangesState).positionMapper
+    const changes: ChangeSpec[] = []
+    let trackedChangesUpdated = false
+    for (const operation of operations) {
+      if (operation instanceof TextOperation) {
+        let cursor = 0
+        for (const op of operation.ops) {
+          if (op instanceof InsertOp) {
+            if (op.tracking?.type !== 'delete') {
+              changes.push({
+                from: positionMapper.toCM6(cursor),
+                insert: op.insertion,
+              })
+            }
+            trackedChangesUpdated = true
+          } else if (op instanceof RemoveOp) {
+            changes.push({
+              from: positionMapper.toCM6(cursor),
+              to: positionMapper.toCM6(cursor + op.length),
+            })
+            cursor += op.length
+            trackedChangesUpdated = true
+          } else if (op instanceof RetainOp) {
+            if (op.tracking != null) {
+              if (op.tracking.type === 'delete') {
+                changes.push({
+                  from: positionMapper.toCM6(cursor),
+                  to: positionMapper.toCM6(cursor + op.length),
+                })
+              }
+              trackedChangesUpdated = true
+            }
+            cursor += op.length
+          }
+        }
+      }
 
-  onShareJsDelete(pos: number, text: string) {
-    this.editor.cmDelete(pos, text, 'remote')
-    this.checkContent()
-  }
+      const view = this.editor.view
+      const effects: StateEffect<any>[] = []
+      const scrollEffect = view
+        .scrollSnapshot()
+        .map(view.state.changes(changes))
+      if (scrollEffect != null) {
+        effects.push(scrollEffect)
+      }
+      if (trackedChangesUpdated) {
+        const shareDoc = this.editor.view.state.field(shareDocState)
+        if (shareDoc != null) {
+          const trackedChanges = shareDoc.snapshot.getTrackedChanges()
+          effects.push(updateTrackedChangesEffect.of(trackedChanges))
+        }
+      }
 
-  onShareJsTrackedChangesInvalidated() {
-    this.editor.cmUpdateTrackedChanges(
-      this.shareDoc.snapshot.getTrackedChanges()
-    )
+      view.dispatch({
+        changes,
+        effects,
+        annotations: [
+          Transaction.remote.of(true),
+          Transaction.addToHistory.of(false),
+        ],
+      })
+    }
   }
 
   onCodeMirrorChange(
