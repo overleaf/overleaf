@@ -21,8 +21,8 @@ if (footerLanguageElement) {
 
 const allTooltips = document.querySelectorAll('[data-bs-toggle="tooltip"]')
 allTooltips.forEach(element => {
-  // eslint-disable-next-line no-unused-vars
-  const tooltip = new Tooltip(element)
+  // eslint-disable-next-line no-new
+  new Tooltip(element)
 })
 
 const possibleBadgeTooltips = document.querySelectorAll('[data-badge-tooltip]')
@@ -36,8 +36,8 @@ possibleBadgeTooltips.forEach(element => {
   if (element.parentElement) {
     const parentWidth = getElementWidth(element.parentElement)
     if (element.scrollWidth > parentWidth) {
-      // eslint-disable-next-line no-unused-vars
-      const tooltip = new Tooltip(element)
+      // eslint-disable-next-line no-new
+      new Tooltip(element)
     } else {
       element.parentElement.style.maxWidth = 'none'
     }
