@@ -14,11 +14,23 @@ import { client } from '../lib/mongodb.js'
 import archiver from 'archiver'
 import Events from 'node:events'
 import { Chunk } from 'overleaf-editor-core'
+import _ from 'lodash'
 
 // Silence warning.
 Events.setMaxListeners(20)
 
 const SUPPORTED_MODES = ['raw', 'latest']
+
+// Pads the mode name to a fixed length for better alignment in output.
+const padModeName = _.partialRight(
+  _.padEnd,
+  Math.max(...SUPPORTED_MODES.map(mode => mode.length))
+)
+
+const SUPPORTED_MODES_HELP = {
+  raw: 'Retrieve all chunk and blob files from the project backup.',
+  latest: 'Retrieves the last backed up state of the project.',
+}
 
 // outputFile needs to be available in the shutdown function (which may be called before it's declared)
 // eslint-disable-next-line prefer-const
@@ -42,10 +54,15 @@ function usage() {
   console.log(
     'Usage: node recover_zip_from_backup.mjs --historyId=<historyId> --output=<output> [--mode=<mode>] [--verbose] [--useBackupGlobalBlobs]'
   )
-  console.log('Supported modes: ' + SUPPORTED_MODES.join(', '))
   console.log(
     '--useBackupGlobalBlobs can be used if the global blobs have not been restored from the backup yet.'
   )
+  console.log('Supported modes: ' + SUPPORTED_MODES.join(', '))
+  SUPPORTED_MODES.forEach(mode => {
+    console.log(
+      `    --mode=${padModeName(mode)} -  ${SUPPORTED_MODES_HELP[mode] || ''}`
+    )
+  })
 }
 
 /**
