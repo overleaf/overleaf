@@ -8,8 +8,9 @@ export default async function handleStripePaymentAction(
   const clientSecret = error?.data?.clientSecret
 
   if (clientSecret) {
-    const stripePublicKey = getMeta('ol-stripeApiKey')
-    const stripe = await loadStripe(stripePublicKey)
+    // TODO: support both US and UK Stripe accounts
+    const stripeUKPublicKey = getMeta('ol-stripeUKApiKey')
+    const stripe = await loadStripe(stripeUKPublicKey)
     if (stripe) {
       const manualConfirmationFlow =
         await stripe.confirmCardPayment(clientSecret)

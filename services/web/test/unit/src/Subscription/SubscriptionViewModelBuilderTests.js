@@ -589,7 +589,7 @@ describe('SubscriptionViewModelBuilder', function () {
 
       describe('isEligibleForGroupPlan', function () {
         it('is false for Stripe subscriptions', async function () {
-          this.paymentRecord.service = 'stripe'
+          this.paymentRecord.service = 'stripe-us'
           const result =
             await this.SubscriptionViewModelBuilder.promises.buildUsersSubscriptionViewModel(
               this.user
@@ -627,7 +627,7 @@ describe('SubscriptionViewModelBuilder', function () {
 
       describe('isEligibleForPause', function () {
         it('is false for Stripe subscriptions', async function () {
-          this.paymentRecord.service = 'stripe'
+          this.paymentRecord.service = 'stripe-us'
           const result =
             await this.SubscriptionViewModelBuilder.promises.buildUsersSubscriptionViewModel(
               this.user
@@ -777,7 +777,7 @@ describe('SubscriptionViewModelBuilder', function () {
           this.paymentRecord.pausePeriodStart = null
           this.paymentRecord.remainingPauseCycles = null
           this.paymentRecord.trialPeriodEnd = null
-          this.paymentRecord.service = 'stripe'
+          this.paymentRecord.service = 'stripe-us'
           const result =
             await this.SubscriptionViewModelBuilder.promises.buildUsersSubscriptionViewModel(
               this.user
@@ -847,7 +847,7 @@ describe('SubscriptionViewModelBuilder', function () {
       })
 
       it('does not add a billing details link for a Stripe subscription', async function () {
-        this.paymentRecord.service = 'stripe'
+        this.paymentRecord.service = 'stripe-us'
         this.Modules.hooks.fire
           .withArgs('getPaymentFromRecord', this.individualSubscription)
           .yields(null, [

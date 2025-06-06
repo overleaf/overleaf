@@ -7,7 +7,7 @@ import { TeamInvite } from '../team-invite'
 
 type RecurlyAdminClientPaymentProvider = Record<string, never>
 type StripeAdminClientPaymentProvider = PaymentProvider & {
-  service: 'stripe'
+  service: 'stripe-us' | 'stripe-uk'
 }
 
 export type Subscription = {

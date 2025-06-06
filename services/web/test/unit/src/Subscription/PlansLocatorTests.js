@@ -55,63 +55,63 @@ describe('PlansLocator', function () {
       const planCode = 'collaborator'
       const lookupKey =
         this.PlansLocator.mapRecurlyPlanCodeToStripeLookupKey(planCode)
-      expect(lookupKey).to.equal('standard_monthly')
+      expect(lookupKey).to.equal('collaborator_may2025')
     })
 
     it('should map "collaborator_free_trial_7_days" plan code to stripe lookup keys', function () {
       const planCode = 'collaborator_free_trial_7_days'
       const lookupKey =
         this.PlansLocator.mapRecurlyPlanCodeToStripeLookupKey(planCode)
-      expect(lookupKey).to.equal('standard_monthly')
+      expect(lookupKey).to.equal('collaborator_may2025')
     })
 
     it('should map "collaborator-annual" plan code to stripe lookup keys', function () {
       const planCode = 'collaborator-annual'
       const lookupKey =
         this.PlansLocator.mapRecurlyPlanCodeToStripeLookupKey(planCode)
-      expect(lookupKey).to.equal('standard_annual')
+      expect(lookupKey).to.equal('collaborator_annual_may2025')
     })
 
     it('should map "professional" plan code to stripe lookup keys', function () {
       const planCode = 'professional'
       const lookupKey =
         this.PlansLocator.mapRecurlyPlanCodeToStripeLookupKey(planCode)
-      expect(lookupKey).to.equal('professional_monthly')
+      expect(lookupKey).to.equal('professional_may2025')
     })
 
     it('should map "professional_free_trial_7_days" plan code to stripe lookup keys', function () {
       const planCode = 'professional_free_trial_7_days'
       const lookupKey =
         this.PlansLocator.mapRecurlyPlanCodeToStripeLookupKey(planCode)
-      expect(lookupKey).to.equal('professional_monthly')
+      expect(lookupKey).to.equal('professional_may2025')
     })
 
     it('should map "professional-annual" plan code to stripe lookup keys', function () {
       const planCode = 'professional-annual'
       const lookupKey =
         this.PlansLocator.mapRecurlyPlanCodeToStripeLookupKey(planCode)
-      expect(lookupKey).to.equal('professional_annual')
+      expect(lookupKey).to.equal('professional_annual_may2025')
     })
 
     it('should map "student" plan code to stripe lookup keys', function () {
       const planCode = 'student'
       const lookupKey =
         this.PlansLocator.mapRecurlyPlanCodeToStripeLookupKey(planCode)
-      expect(lookupKey).to.equal('student_monthly')
+      expect(lookupKey).to.equal('student_may2025')
     })
 
     it('shoult map "student_free_trial_7_days" plan code to stripe lookup keys', function () {
       const planCode = 'student_free_trial_7_days'
       const lookupKey =
         this.PlansLocator.mapRecurlyPlanCodeToStripeLookupKey(planCode)
-      expect(lookupKey).to.equal('student_monthly')
+      expect(lookupKey).to.equal('student_may2025')
     })
 
     it('should map "student-annual" plan code to stripe lookup keys', function () {
       const planCode = 'student-annual'
       const lookupKey =
         this.PlansLocator.mapRecurlyPlanCodeToStripeLookupKey(planCode)
-      expect(lookupKey).to.equal('student_annual')
+      expect(lookupKey).to.equal('student_annual_may2025')
     })
   })
 
@@ -141,7 +141,7 @@ describe('PlansLocator', function () {
         addOnCode,
         billingCycleInterval
       )
-      expect(lookupKey).to.equal('error_assist_monthly')
+      expect(lookupKey).to.equal('assistant_may2025')
     })
 
     it('returns the key for an annual AI assist add-on', function () {
@@ -151,7 +151,7 @@ describe('PlansLocator', function () {
         addOnCode,
         billingCycleInterval
       )
-      expect(lookupKey).to.equal('error_assist_annual')
+      expect(lookupKey).to.equal('assistant_annual_may2025')
     })
   })
 
