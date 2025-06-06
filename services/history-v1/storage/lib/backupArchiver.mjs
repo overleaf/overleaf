@@ -375,6 +375,41 @@ export async function archiveLatestChunk(
 }
 
 /**
+ * Fetches all raw blobs from the project and adds them to the archive.
+ *
+ * @param {string} historyId
+ * @param {Archiver} archive
+ * @param {CachedPerProjectEncryptedS3Persistor} projectCache
+ * @return {Promise<void>}
+ */
+async function addRawBlobsToArchive(historyId, archive, projectCache) {
+  const key = projectKey.format(historyId)
+  const { contents } = await projectCache.listDirectory(projectBlobsBucket, key)
+  for (const blobRecord of contents) {
+    if (!blobRecord.Key) {
+      logger.debug({ blobRecord }, 'no key')
+      continue
+    }
+    const blobKey = blobRecord.Key
+    try {
+      const stream = await projectCache.getObjectStream(
+        projectBlobsBucket,
+        blobKey,
+        { autoGunzip: true }
+      )
+      archive.append(stream, {
+        name: path.join(historyId, 'blobs', blobKey),
+      })
+    } catch (err) {
+      logger.warn(
+        { err, path: blobRecord.Key },
+        'Failed to append blob to archive'
+      )
+    }
+  }
+}
+
+/**
  * Download raw files from the backup.
  *
  * This can work without the database being backed up.
@@ -410,22 +445,13 @@ export async function archiveRawProject(
     const chunkId = chunkRecord.Key.split('/').pop()
     logger.debug({ chunkId, key: chunkRecord.Key }, 'Processing chunk')
 
-    const { chunkData, buffer } = await loadChunkByKey(
-      projectCache,
-      chunkRecord.Key
-    )
+    const { buffer } = await loadChunkByKey(projectCache, chunkRecord.Key)
 
     archive.append(buffer, {
       name: `${historyId}/chunks/${chunkId}/chunk.json`,
     })
-
-    const chunk = History.fromRaw(chunkData)
-
-    await addChunkToArchive(chunk, archive, projectCache, historyId, {
-      prefix: `${historyId}/chunks/${chunkId}/`,
-      useBackupGlobalBlobs,
-    })
   }
+  await addRawBlobsToArchive(historyId, archive, projectCache)
 }
 
 export class BackupPersistorError extends OError {}
