@@ -7,6 +7,9 @@ class MockRecurlyApi extends AbstractMockApi {
     this.mockSubscriptions = []
     this.redemptions = {}
     this.coupons = {}
+    this.rateLimitResetSeconds = Math.ceil(
+      (Date.now() + 24 * 60 * 60 * 1000) / 1000
+    )
   }
 
   addMockSubscription(recurlySubscription) {
@@ -25,7 +28,21 @@ class MockRecurlyApi extends AbstractMockApi {
     )
   }
 
+  getRateLimitHeaders() {
+    return {
+      'X-RateLimit-Limit': 1000,
+      'X-RateLimit-Remaining': 999,
+      'X-RateLimit-Reset': this.rateLimitResetSeconds,
+    }
+  }
+
   applyRoutes() {
+    this.app.use((req, res, next) => {
+      for (const [name, v] of Object.entries(this.getRateLimitHeaders())) {
+        res.setHeader(name, v)
+      }
+      next()
+    })
     this.app.get('/subscriptions/:id', (req, res) => {
       const subscription = this.getMockSubscriptionById(req.params.id)
       if (!subscription) {

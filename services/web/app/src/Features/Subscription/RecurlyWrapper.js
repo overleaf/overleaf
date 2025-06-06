@@ -9,6 +9,7 @@ const logger = require('@overleaf/logger')
 const Errors = require('../Errors/Errors')
 const SubscriptionErrors = require('./Errors')
 const { callbackify } = require('@overleaf/promise-utils')
+const RecurlyMetrics = require('./RecurlyMetrics')
 
 /**
  * Updates the email address of a Recurly account
@@ -417,9 +418,15 @@ const promises = {
     }
 
     try {
-      return await fetchStringWithResponse(fetchUrl, fetchOptions)
+      const { body, response } = await fetchStringWithResponse(
+        fetchUrl,
+        fetchOptions
+      )
+      RecurlyMetrics.recordMetricsFromResponse(response)
+      return { body, response }
     } catch (error) {
       if (error instanceof RequestFailedError) {
+        RecurlyMetrics.recordMetricsFromResponse(error.response)
         if (error.response.status === 404 && expect404) {
           return { response: error.response, body: null }
         } else if (error.response.status === 422 && expect422) {
