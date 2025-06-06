@@ -208,7 +208,6 @@
   "dictionary": "Ordbok",
   "disable_stop_on_first_error": "Inaktivera \"Stopp vid första fel\"",
   "disconnected": "Frånkopplad",
-  "dismiss_error_popup": "Avfärda varning om första fel",
   "do_not_have_acct_or_do_not_want_to_link": "Om du inte har ett <b>__appName__</b>-konto, eller om du inte vill länka till ditt <b>__institutionName__</b>-konto, vänligen klicka på <b>__clickText__</b>.",
   "do_not_link_accounts": "Länka ej konton",
   "documentation": "Dokumentation",

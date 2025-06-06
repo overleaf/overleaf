@@ -312,7 +312,6 @@
   "disable_stop_on_first_error": "„Anhalten beim ersten Fehler“ deaktivieren",
   "disconnected": "Nicht verbunden",
   "discount_of": "__amount__ Rabatt",
-  "dismiss_error_popup": "Erste Fehlermeldung schließen",
   "do_not_have_acct_or_do_not_want_to_link": "Wenn du kein <b>__appName__</b>-Konto hast oder nicht mit deinem <b>__institutionName__</b>-Konto verknüpfen möchtest, klicke auf <b>„__clickText__“</b>.",
   "do_not_link_accounts": "Konten nicht verknüpfen",
   "do_you_want_to_change_your_primary_email_address_to": "Willst Du deine primäre E-Mail-Adresse in <b>__email__</b> ändern?",
