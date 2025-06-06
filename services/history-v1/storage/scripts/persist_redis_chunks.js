@@ -5,7 +5,7 @@ const knex = require('../lib/knex.js')
 const knexReadOnly = require('../lib/knex_read_only.js')
 const { client } = require('../lib/mongodb.js')
 const { scanAndProcessDueItems } = require('../lib/scan')
-const { persistBuffer } = require('../lib/persist_buffer')
+const persistBuffer = require('../lib/persist_buffer')
 const { claimPersistJob } = require('../lib/chunk_store/redis')
 
 const rclient = redis.rclientHistory

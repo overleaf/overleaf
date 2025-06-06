@@ -10,7 +10,7 @@ import {
   AddFileOperation,
   EditFileOperation, // Added EditFileOperation
 } from 'overleaf-editor-core'
-import { persistBuffer } from '../../../../storage/lib/persist_buffer.js'
+import persistBuffer from '../../../../storage/lib/persist_buffer.js'
 import chunkStore from '../../../../storage/lib/chunk_store/index.js'
 import redisBackend from '../../../../storage/lib/chunk_store/redis.js'
 import persistChanges from '../../../../storage/lib/persist_changes.js'

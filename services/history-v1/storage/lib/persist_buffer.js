@@ -162,4 +162,4 @@ async function persistBuffer(projectId, limits) {
   )
 }
 
-module.exports = { persistBuffer }
+module.exports = persistBuffer
