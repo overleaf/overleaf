@@ -127,7 +127,7 @@ export interface Meta {
   'ol-groupsAndEnterpriseBannerVariant': GroupsAndEnterpriseBannerVariant
   'ol-hasAiAssistViaWritefull': boolean
   'ol-hasGroupSSOFeature': boolean
-  'ol-hasIndividualRecurlySubscription': boolean
+  'ol-hasIndividualPaidSubscription': boolean
   'ol-hasManagedUsersFeature': boolean
   'ol-hasPassword': boolean
   'ol-hasSubscription': boolean

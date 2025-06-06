@@ -2,6 +2,7 @@
 
 const SessionManager = require('../Authentication/SessionManager')
 const SubscriptionHandler = require('./SubscriptionHandler')
+const SubscriptionHelper = require('./SubscriptionHelper')
 const SubscriptionViewModelBuilder = require('./SubscriptionViewModelBuilder')
 const LimitationsManager = require('./LimitationsManager')
 const RecurlyWrapper = require('./RecurlyWrapper')
@@ -262,7 +263,8 @@ async function pauseSubscription(req, res, next) {
       {
         pause_length: pauseCycles,
         plan_code: subscription?.planCode,
-        subscriptionId: subscription?.recurlySubscription_id,
+        subscriptionId:
+          SubscriptionHelper.getPaymentProviderSubscriptionId(subscription),
       }
     )
 

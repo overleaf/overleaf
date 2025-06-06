@@ -3,6 +3,7 @@ const { callbackify } = require('util')
 const { callbackifyMultiResult } = require('@overleaf/promise-utils')
 const PlansLocator = require('./PlansLocator')
 const SubscriptionLocator = require('./SubscriptionLocator')
+const SubscriptionHelper = require('./SubscriptionHelper')
 const UserFeaturesUpdater = require('./UserFeaturesUpdater')
 const FeaturesHelper = require('./FeaturesHelper')
 const Settings = require('@overleaf/settings')
@@ -117,7 +118,10 @@ async function computeFeatures(userId) {
 async function _getIndividualFeatures(userId) {
   const subscription =
     await SubscriptionLocator.promises.getUsersSubscription(userId)
-  if (subscription == null || subscription?.recurlyStatus?.state === 'paused') {
+  if (
+    subscription == null ||
+    SubscriptionHelper.getPaidSubscriptionState(subscription) === 'paused'
+  ) {
     return {}
   }
 

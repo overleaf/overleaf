@@ -441,7 +441,7 @@ describe('<UserNotifications />', function () {
               ),
             ])
             window.metaAttributesCache.set(
-              'ol-hasIndividualRecurlySubscription',
+              'ol-hasIndividualPaidSubscription',
               true
             )
 

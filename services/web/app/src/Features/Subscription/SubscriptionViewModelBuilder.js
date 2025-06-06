@@ -1,6 +1,5 @@
 // ts-check
 const Settings = require('@overleaf/settings')
-const RecurlyWrapper = require('./RecurlyWrapper')
 const PlansLocator = require('./PlansLocator')
 const {
   isStandaloneAiAddOnPlanCode,
@@ -8,7 +7,6 @@ const {
 } = require('./PaymentProviderEntities')
 const SubscriptionFormatters = require('./SubscriptionFormatters')
 const SubscriptionLocator = require('./SubscriptionLocator')
-const SubscriptionUpdater = require('./SubscriptionUpdater')
 const InstitutionsGetter = require('../Institutions/InstitutionsGetter')
 const InstitutionsManager = require('../Institutions/InstitutionsManager')
 const PublishersGetter = require('../Publishers/PublishersGetter')
@@ -227,6 +225,7 @@ async function buildUsersSubscriptionViewModel(user, locale = 'en') {
     // don't return subscription payment information
     delete personalSubscription.paymentProvider
     delete personalSubscription.recurly
+    delete personalSubscription.recurlySubscription_id
 
     const tax = paymentRecord.subscription.taxAmount || 0
     // Some plans allow adding more seats than the base plan provides.
@@ -376,15 +375,6 @@ async function buildUsersSubscriptionViewModel(user, locale = 'en') {
 
 /**
  * @param {{_id: string}} user
- * @returns {Promise<Subscription>}
- */
-async function getBestSubscription(user) {
-  const { bestSubscription } = await getUsersSubscriptionDetails(user)
-  return bestSubscription
-}
-
-/**
- * @param {{_id: string}} user
  * @returns {Promise<{bestSubscription:Subscription,individualSubscription:DBSubscription|null,memberGroupSubscriptions:DBSubscription[]}>}
  */
 async function getUsersSubscriptionDetails(user) {
@@ -400,15 +390,18 @@ async function getUsersSubscriptionDetails(user) {
   if (
     individualSubscription &&
     !individualSubscription.customAccount &&
-    individualSubscription.recurlySubscription_id &&
-    !individualSubscription.recurlyStatus?.state
+    SubscriptionHelper.getPaymentProviderSubscriptionId(
+      individualSubscription
+    ) &&
+    !SubscriptionHelper.getPaidSubscriptionState(individualSubscription)
   ) {
-    const recurlySubscription = await RecurlyWrapper.promises.getSubscription(
-      individualSubscription.recurlySubscription_id,
-      { includeAccount: true }
+    const paymentResults = await Modules.promises.hooks.fire(
+      'getPaymentFromRecordPromise',
+      individualSubscription
     )
-    await SubscriptionUpdater.promises.updateSubscriptionFromRecurly(
-      recurlySubscription,
+    await Modules.promises.hooks.fire(
+      'syncSubscription',
+      paymentResults[0]?.subscription,
       individualSubscription
     )
     individualSubscription =
@@ -540,7 +533,8 @@ function _isPlanEqualOrBetter(planA, planB) {
 
 function _getRemainingTrialDays(subscription) {
   const now = new Date()
-  const trialEndDate = subscription.recurlyStatus?.trialEndsAt
+  const trialEndDate =
+    SubscriptionHelper.getSubscriptionTrialEndsAt(subscription)
   return trialEndDate && trialEndDate > now
     ? Math.ceil(
         (trialEndDate.getTime() - now.getTime()) / (24 * 60 * 60 * 1000)
@@ -605,10 +599,8 @@ module.exports = {
   buildUsersSubscriptionViewModel: callbackify(buildUsersSubscriptionViewModel),
   buildPlansList,
   buildPlansListForSubscriptionDash,
-  getBestSubscription: callbackify(getBestSubscription),
   promises: {
     buildUsersSubscriptionViewModel,
-    getBestSubscription,
     getUsersSubscriptionDetails,
   },
 }

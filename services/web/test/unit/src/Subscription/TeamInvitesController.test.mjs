@@ -175,7 +175,7 @@ describe('TeamInvitesController', function () {
       },
     }
 
-    describe('hasIndividualRecurlySubscription', function () {
+    describe('hasIndividualPaidSubscription', function () {
       it('is true for personal subscription', function (ctx) {
         return new Promise(resolve => {
           ctx.SubscriptionLocator.promises.getUsersSubscription.resolves({
@@ -184,7 +184,7 @@ describe('TeamInvitesController', function () {
           })
           const res = {
             render: (template, data) => {
-              expect(data.hasIndividualRecurlySubscription).to.be.true
+              expect(data.hasIndividualPaidSubscription).to.be.true
               resolve()
             },
           }
@@ -200,7 +200,7 @@ describe('TeamInvitesController', function () {
           })
           const res = {
             render: (template, data) => {
-              expect(data.hasIndividualRecurlySubscription).to.be.false
+              expect(data.hasIndividualPaidSubscription).to.be.false
               resolve()
             },
           }
@@ -219,7 +219,7 @@ describe('TeamInvitesController', function () {
           })
           const res = {
             render: (template, data) => {
-              expect(data.hasIndividualRecurlySubscription).to.be.false
+              expect(data.hasIndividualPaidSubscription).to.be.false
               resolve()
             },
           }

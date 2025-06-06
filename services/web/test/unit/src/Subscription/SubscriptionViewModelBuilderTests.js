@@ -7,6 +7,7 @@ const {
   PaymentProviderSubscriptionAddOn,
   PaymentProviderSubscriptionChange,
 } = require('../../../../app/src/Features/Subscription/PaymentProviderEntities')
+const SubscriptionHelper = require('../../../../app/src/Features/Subscription/SubscriptionHelper')
 
 const modulePath =
   '../../../../app/src/Features/Subscription/SubscriptionViewModelBuilder'
@@ -159,13 +160,14 @@ describe('SubscriptionViewModelBuilder', function () {
         './SubscriptionUpdater': this.SubscriptionUpdater,
         './PlansLocator': this.PlansLocator,
         '../../infrastructure/Modules': (this.Modules = {
+          promises: { hooks: { fire: sinon.stub().resolves([]) } },
           hooks: {
             fire: sinon.stub().yields(null, []),
           },
         }),
         './V1SubscriptionManager': {},
         '../Publishers/PublishersGetter': this.PublishersGetter,
-        './SubscriptionHelper': {},
+        './SubscriptionHelper': SubscriptionHelper,
       },
     })
 
@@ -180,10 +182,10 @@ describe('SubscriptionViewModelBuilder', function () {
       .returns(this.commonsPlan)
   })
 
-  describe('getBestSubscription', function () {
+  describe('getUsersSubscriptionDetails', function () {
     it('should return a free plan when user has no subscription or affiliation', async function () {
-      const usersBestSubscription =
-        await this.SubscriptionViewModelBuilder.promises.getBestSubscription(
+      const { bestSubscription: usersBestSubscription } =
+        await this.SubscriptionViewModelBuilder.promises.getUsersSubscriptionDetails(
           this.user
         )
       assert.deepEqual(usersBestSubscription, { type: 'free' })
@@ -195,8 +197,8 @@ describe('SubscriptionViewModelBuilder', function () {
           .withArgs(this.user)
           .resolves(this.individualCustomSubscription)
 
-        const usersBestSubscription =
-          await this.SubscriptionViewModelBuilder.promises.getBestSubscription(
+        const { bestSubscription: usersBestSubscription } =
+          await this.SubscriptionViewModelBuilder.promises.getUsersSubscriptionDetails(
             this.user
           )
 
@@ -213,8 +215,8 @@ describe('SubscriptionViewModelBuilder', function () {
           .withArgs(this.user)
           .resolves(this.individualSubscription)
 
-        const usersBestSubscription =
-          await this.SubscriptionViewModelBuilder.promises.getBestSubscription(
+        const { bestSubscription: usersBestSubscription } =
+          await this.SubscriptionViewModelBuilder.promises.getUsersSubscriptionDetails(
             this.user
           )
 
@@ -234,8 +236,8 @@ describe('SubscriptionViewModelBuilder', function () {
           .withArgs(this.user)
           .resolves(this.individualSubscription)
 
-        const usersBestSubscription =
-          await this.SubscriptionViewModelBuilder.promises.getBestSubscription(
+        const { bestSubscription: usersBestSubscription } =
+          await this.SubscriptionViewModelBuilder.promises.getUsersSubscriptionDetails(
             this.user
           )
 
@@ -255,8 +257,8 @@ describe('SubscriptionViewModelBuilder', function () {
           .withArgs(this.user)
           .resolves(this.individualSubscription)
 
-        const usersBestSubscription =
-          await this.SubscriptionViewModelBuilder.promises.getBestSubscription(
+        const { bestSubscription: usersBestSubscription } =
+          await this.SubscriptionViewModelBuilder.promises.getUsersSubscriptionDetails(
             this.user
           )
 
@@ -268,8 +270,8 @@ describe('SubscriptionViewModelBuilder', function () {
         })
       })
 
-      it('should update subscription if recurly data is missing', async function () {
-        this.individualSubscriptionWithoutRecurly = {
+      it('should update subscription if recurly payment state is missing', async function () {
+        this.individualSubscriptionWithoutPaymentState = {
           planCode: this.planCode,
           plan: this.plan,
           recurlySubscription_id: this.recurlySubscription_id,
@@ -280,37 +282,104 @@ describe('SubscriptionViewModelBuilder', function () {
         this.SubscriptionLocator.promises.getUsersSubscription
           .withArgs(this.user)
           .onCall(0)
-          .resolves(this.individualSubscriptionWithoutRecurly)
+          .resolves(this.individualSubscriptionWithoutPaymentState)
           .withArgs(this.user)
           .onCall(1)
           .resolves(this.individualSubscription)
-        this.RecurlyWrapper.promises.getSubscription
-          .withArgs(this.individualSubscription.recurlySubscription_id, {
-            includeAccount: true,
-          })
-          .resolves(this.paymentRecord)
+        const payment = {
+          subscription: this.paymentRecord,
+          account: new PaymentProviderAccount({}),
+          coupons: [],
+        }
 
-        const usersBestSubscription =
-          await this.SubscriptionViewModelBuilder.promises.getBestSubscription(
+        this.Modules.promises.hooks.fire
+          .withArgs(
+            'getPaymentFromRecordPromise',
+            this.individualSubscriptionWithoutPaymentState
+          )
+          .resolves([payment])
+        this.Modules.promises.hooks.fire
+          .withArgs(
+            'syncSubscription',
+            payment,
+            this.individualSubscriptionWithoutPaymentState
+          )
+          .resolves([])
+
+        const { bestSubscription: usersBestSubscription } =
+          await this.SubscriptionViewModelBuilder.promises.getUsersSubscriptionDetails(
             this.user
           )
 
-        sinon.assert.calledWith(
-          this.RecurlyWrapper.promises.getSubscription,
-          this.individualSubscriptionWithoutRecurly.recurlySubscription_id,
-          { includeAccount: true }
-        )
-        sinon.assert.calledWith(
-          this.SubscriptionUpdater.promises.updateSubscriptionFromRecurly,
-          this.paymentRecord,
-          this.individualSubscriptionWithoutRecurly
-        )
         assert.deepEqual(usersBestSubscription, {
           type: 'individual',
           subscription: this.individualSubscription,
           plan: this.plan,
           remainingTrialDays: -1,
         })
+        assert.isTrue(
+          this.Modules.promises.hooks.fire.withArgs(
+            'getPaymentFromRecordPromise',
+            this.individualSubscriptionWithoutPaymentState
+          ).calledOnce
+        )
+      })
+
+      it('should update subscription if stripe payment state is missing', async function () {
+        this.individualSubscriptionWithoutPaymentState = {
+          planCode: this.planCode,
+          plan: this.plan,
+          paymentProvider: {
+            subscriptionId: this.recurlySubscription_id,
+          },
+        }
+        this.paymentRecord = {
+          state: 'active',
+        }
+        this.SubscriptionLocator.promises.getUsersSubscription
+          .withArgs(this.user)
+          .onCall(0)
+          .resolves(this.individualSubscriptionWithoutPaymentState)
+          .withArgs(this.user)
+          .onCall(1)
+          .resolves(this.individualSubscription)
+        const payment = {
+          subscription: this.paymentRecord,
+          account: new PaymentProviderAccount({}),
+          coupons: [],
+        }
+
+        this.Modules.promises.hooks.fire
+          .withArgs(
+            'getPaymentFromRecordPromise',
+            this.individualSubscriptionWithoutPaymentState
+          )
+          .resolves([payment])
+        this.Modules.promises.hooks.fire
+          .withArgs(
+            'syncSubscription',
+            payment,
+            this.individualSubscriptionWithoutPaymentState
+          )
+          .resolves([])
+
+        const { bestSubscription: usersBestSubscription } =
+          await this.SubscriptionViewModelBuilder.promises.getUsersSubscriptionDetails(
+            this.user
+          )
+
+        assert.deepEqual(usersBestSubscription, {
+          type: 'individual',
+          subscription: this.individualSubscription,
+          plan: this.plan,
+          remainingTrialDays: -1,
+        })
+        assert.isTrue(
+          this.Modules.promises.hooks.fire.withArgs(
+            'getPaymentFromRecordPromise',
+            this.individualSubscriptionWithoutPaymentState
+          ).calledOnce
+        )
       })
     })
 
@@ -318,8 +387,8 @@ describe('SubscriptionViewModelBuilder', function () {
       this.SubscriptionLocator.promises.getMemberSubscriptions
         .withArgs(this.user)
         .resolves([this.groupSubscription])
-      const usersBestSubscription =
-        await this.SubscriptionViewModelBuilder.promises.getBestSubscription(
+      const { bestSubscription: usersBestSubscription } =
+        await this.SubscriptionViewModelBuilder.promises.getUsersSubscriptionDetails(
           this.user
         )
       assert.deepEqual(usersBestSubscription, {
@@ -336,8 +405,8 @@ describe('SubscriptionViewModelBuilder', function () {
         .resolves([
           Object.assign({}, this.groupSubscription, { teamName: 'test team' }),
         ])
-      const usersBestSubscription =
-        await this.SubscriptionViewModelBuilder.promises.getBestSubscription(
+      const { bestSubscription: usersBestSubscription } =
+        await this.SubscriptionViewModelBuilder.promises.getUsersSubscriptionDetails(
           this.user
         )
       assert.deepEqual(usersBestSubscription, {
@@ -353,8 +422,8 @@ describe('SubscriptionViewModelBuilder', function () {
         .withArgs(this.user._id)
         .resolves([this.commonsSubscription])
 
-      const usersBestSubscription =
-        await this.SubscriptionViewModelBuilder.promises.getBestSubscription(
+      const { bestSubscription: usersBestSubscription } =
+        await this.SubscriptionViewModelBuilder.promises.getUsersSubscriptionDetails(
           this.user
         )
 
@@ -385,8 +454,8 @@ describe('SubscriptionViewModelBuilder', function () {
           compileTimeout: 60,
         }
 
-        const usersBestSubscription =
-          await this.SubscriptionViewModelBuilder.promises.getBestSubscription(
+        const { bestSubscription: usersBestSubscription } =
+          await this.SubscriptionViewModelBuilder.promises.getUsersSubscriptionDetails(
             this.user
           )
 
@@ -410,8 +479,8 @@ describe('SubscriptionViewModelBuilder', function () {
           compileTimeout: 60,
         }
 
-        const usersBestSubscription =
-          await this.SubscriptionViewModelBuilder.promises.getBestSubscription(
+        const { bestSubscription: usersBestSubscription } =
+          await this.SubscriptionViewModelBuilder.promises.getUsersSubscriptionDetails(
             this.user
           )
 
@@ -440,8 +509,8 @@ describe('SubscriptionViewModelBuilder', function () {
           compileTimeout: 240,
         }
 
-        const usersBestSubscription =
-          await this.SubscriptionViewModelBuilder.promises.getBestSubscription(
+        const { bestSubscription: usersBestSubscription } =
+          await this.SubscriptionViewModelBuilder.promises.getUsersSubscriptionDetails(
             this.user
           )
 
@@ -469,8 +538,8 @@ describe('SubscriptionViewModelBuilder', function () {
           compileTimeout: 240,
         }
 
-        const usersBestSubscription =
-          await this.SubscriptionViewModelBuilder.promises.getBestSubscription(
+        const { bestSubscription: usersBestSubscription } =
+          await this.SubscriptionViewModelBuilder.promises.getUsersSubscriptionDetails(
             this.user
           )
 
@@ -499,8 +568,8 @@ describe('SubscriptionViewModelBuilder', function () {
           compileTimeout: 240,
         }
 
-        const usersBestSubscription =
-          await this.SubscriptionViewModelBuilder.promises.getBestSubscription(
+        const { bestSubscription: usersBestSubscription } =
+          await this.SubscriptionViewModelBuilder.promises.getUsersSubscriptionDetails(
             this.user
           )
 

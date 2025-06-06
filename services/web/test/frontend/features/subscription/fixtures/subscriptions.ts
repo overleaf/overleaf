@@ -25,7 +25,6 @@ export const annualActiveSubscription: PaidSubscription = {
   admin_id: 'abc123',
   teamInvites: [],
   planCode: 'collaborator-annual',
-  recurlySubscription_id: 'ghi789',
   plan: {
     planCode: 'collaborator-annual',
     name: 'Standard (Collaborator) Annual',
@@ -68,7 +67,6 @@ export const annualActiveSubscriptionEuro: PaidSubscription = {
   admin_id: 'abc123',
   teamInvites: [],
   planCode: 'collaborator-annual',
-  recurlySubscription_id: 'ghi789',
   plan: {
     planCode: 'collaborator-annual',
     name: 'Standard (Collaborator) Annual',
@@ -111,7 +109,6 @@ export const annualActiveSubscriptionPro: PaidSubscription = {
   admin_id: 'abc123',
   teamInvites: [],
   planCode: 'professional',
-  recurlySubscription_id: 'ghi789',
   plan: {
     planCode: 'professional',
     name: 'Professional',
@@ -153,7 +150,6 @@ export const pastDueExpiredSubscription: PaidSubscription = {
   admin_id: 'abc123',
   teamInvites: [],
   planCode: 'collaborator-annual',
-  recurlySubscription_id: 'ghi789',
   plan: {
     planCode: 'collaborator-annual',
     name: 'Standard (Collaborator) Annual',
@@ -196,7 +192,6 @@ export const canceledSubscription: PaidSubscription = {
   admin_id: 'abc123',
   teamInvites: [],
   planCode: 'collaborator-annual',
-  recurlySubscription_id: 'ghi789',
   plan: {
     planCode: 'collaborator-annual',
     name: 'Standard (Collaborator) Annual',
@@ -239,7 +234,6 @@ export const pendingSubscriptionChange: PaidSubscription = {
   admin_id: 'abc123',
   teamInvites: [],
   planCode: 'collaborator-annual',
-  recurlySubscription_id: 'ghi789',
   plan: {
     planCode: 'collaborator-annual',
     name: 'Standard (Collaborator) Annual',
@@ -290,7 +284,6 @@ export const groupActiveSubscription: GroupSubscription = {
   admin_id: 'abc123',
   teamInvites: [],
   planCode: 'group_collaborator_10_enterprise',
-  recurlySubscription_id: 'ghi789',
   plan: {
     planCode: 'group_collaborator_10_enterprise',
     name: 'Overleaf Standard (Collaborator) - Group Account (10 licenses) - Enterprise',
@@ -338,7 +331,6 @@ export const groupActiveSubscriptionWithPendingLicenseChange: GroupSubscription 
     admin_id: 'abc123',
     teamInvites: [],
     planCode: 'group_collaborator_10_enterprise',
-    recurlySubscription_id: 'ghi789',
     plan: {
       planCode: 'group_collaborator_10_enterprise',
       name: 'Overleaf Standard (Collaborator) - Group Account (10 licenses) - Enterprise',
@@ -396,7 +388,6 @@ export const trialSubscription: PaidSubscription = {
   admin_id: 'abc123',
   teamInvites: [],
   planCode: 'paid-personal_free_trial_7_days',
-  recurlySubscription_id: 'ghi789',
   plan: {
     planCode: 'paid-personal_free_trial_7_days',
     name: 'Personal',
@@ -439,7 +430,6 @@ export const customSubscription: CustomSubscription = {
   admin_id: 'abc123',
   teamInvites: [],
   planCode: 'collaborator-annual',
-  recurlySubscription_id: 'ghi789',
   plan: {
     planCode: 'collaborator-annual',
     name: 'Standard (Collaborator) Annual',
@@ -460,7 +450,6 @@ export const trialCollaboratorSubscription: PaidSubscription = {
   admin_id: 'abc123',
   teamInvites: [],
   planCode: 'collaborator_free_trial_7_days',
-  recurlySubscription_id: 'ghi789',
   plan: {
     planCode: 'collaborator_free_trial_7_days',
     name: 'Standard (Collaborator)',
@@ -503,7 +492,6 @@ export const monthlyActiveCollaborator: PaidSubscription = {
   admin_id: 'abc123',
   teamInvites: [],
   planCode: 'collaborator',
-  recurlySubscription_id: 'ghi789',
   plan: {
     planCode: 'collaborator',
     name: 'Standard (Collaborator)',

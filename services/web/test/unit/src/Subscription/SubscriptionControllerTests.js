@@ -6,6 +6,7 @@ const MockResponse = require('../helpers/MockResponse')
 const modulePath =
   '../../../../app/src/Features/Subscription/SubscriptionController'
 const SubscriptionErrors = require('../../../../app/src/Features/Subscription/Errors')
+const SubscriptionHelper = require('../../../../app/src/Features/Subscription/SubscriptionHelper')
 
 const mockSubscriptions = {
   'subscription-123-active': {
@@ -77,7 +78,6 @@ describe('SubscriptionController', function () {
       buildPlansList: sinon.stub(),
       promises: {
         buildUsersSubscriptionViewModel: sinon.stub().resolves({}),
-        getBestSubscription: sinon.stub().resolves({}),
       },
       buildPlansListForSubscriptionDash: sinon
         .stub()
@@ -146,7 +146,7 @@ describe('SubscriptionController', function () {
         '../SplitTests/SplitTestHandler': this.SplitTestV2Hander,
         '../Authentication/SessionManager': this.SessionManager,
         './SubscriptionHandler': this.SubscriptionHandler,
-        './SubscriptionHelper': this.SubscriptionHelper,
+        './SubscriptionHelper': SubscriptionHelper,
         './SubscriptionViewModelBuilder': this.SubscriptionViewModelBuilder,
         './LimitationsManager': this.LimitationsManager,
         '../../infrastructure/GeoIpLookup': this.GeoIpLookup,

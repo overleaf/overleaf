@@ -19,20 +19,20 @@ export type InviteViewTypes =
   | undefined
 
 function GroupInviteViews() {
-  const hasIndividualRecurlySubscription = getMeta(
-    'ol-hasIndividualRecurlySubscription'
+  const hasIndividualPaidSubscription = getMeta(
+    'ol-hasIndividualPaidSubscription'
   )
   const cannotJoinSubscription = getMeta('ol-cannot-join-subscription')
 
   useEffect(() => {
     if (cannotJoinSubscription) {
       setView('managed-user-cannot-join')
-    } else if (hasIndividualRecurlySubscription) {
+    } else if (hasIndividualPaidSubscription) {
       setView('cancel-personal-subscription')
     } else {
       setView('invite')
     }
-  }, [cannotJoinSubscription, hasIndividualRecurlySubscription])
+  }, [cannotJoinSubscription, hasIndividualPaidSubscription])
   const [view, setView] = useState<InviteViewTypes>(undefined)
 
   if (!view) {

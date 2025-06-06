@@ -4,6 +4,7 @@ const RecurlyWrapper = require('./RecurlyWrapper')
 const RecurlyClient = require('./RecurlyClient')
 const { User } = require('../../models/User')
 const logger = require('@overleaf/logger')
+const SubscriptionHelper = require('./SubscriptionHelper')
 const SubscriptionUpdater = require('./SubscriptionUpdater')
 const SubscriptionLocator = require('./SubscriptionLocator')
 const LimitationsManager = require('./LimitationsManager')
@@ -101,8 +102,7 @@ async function updateSubscription(user, planCode) {
   if (
     !hasSubscription ||
     subscription == null ||
-    (subscription.recurlySubscription_id == null &&
-      subscription.paymentProvider?.subscriptionId == null)
+    SubscriptionHelper.getPaymentProviderSubscriptionId(subscription) == null
   ) {
     return
   }
@@ -299,7 +299,10 @@ async function pauseSubscription(user, pauseCycles) {
   // only allow pausing on monthly plans not in a trial
   const { subscription } =
     await LimitationsManager.promises.userHasSubscription(user)
-  if (!subscription || !subscription.recurlyStatus) {
+  if (
+    !subscription ||
+    !SubscriptionHelper.getPaidSubscriptionState(subscription)
+  ) {
     throw new Error('No active subscription to pause')
   }
 
@@ -310,10 +313,9 @@ async function pauseSubscription(user, pauseCycles) {
   ) {
     throw new Error('Can only pause monthly individual plans')
   }
-  if (
-    subscription.recurlyStatus.trialEndsAt &&
-    subscription.recurlyStatus.trialEndsAt > new Date()
-  ) {
+  const trialEndsAt =
+    SubscriptionHelper.getSubscriptionTrialEndsAt(subscription)
+  if (trialEndsAt && trialEndsAt > new Date()) {
     throw new Error('Cannot pause a subscription in a trial')
   }
   if (subscription.addOns?.length) {
@@ -329,7 +331,10 @@ async function pauseSubscription(user, pauseCycles) {
 async function resumeSubscription(user) {
   const { subscription } =
     await LimitationsManager.promises.userHasSubscription(user)
-  if (!subscription || !subscription.recurlyStatus) {
+  if (
+    !subscription ||
+    !SubscriptionHelper.getPaidSubscriptionState(subscription)
+  ) {
     throw new Error('No active subscription to resume')
   }
   await RecurlyClient.promises.resumeSubscriptionByUuid(

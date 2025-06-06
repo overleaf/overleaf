@@ -14,6 +14,7 @@ const ProjectHelper = require('./ProjectHelper')
 const metrics = require('@overleaf/metrics')
 const { User } = require('../../models/User')
 const SubscriptionLocator = require('../Subscription/SubscriptionLocator')
+const { isPaidSubscription } = require('../Subscription/SubscriptionHelper')
 const LimitationsManager = require('../Subscription/LimitationsManager')
 const Settings = require('@overleaf/settings')
 const AuthorizationManager = require('../Authorization/AuthorizationManager')
@@ -655,12 +656,11 @@ const _ProjectController = {
         }
       }
 
-      const hasNonRecurlySubscription =
-        subscription && !subscription.recurlySubscription_id
+      const hasPaidSubscription = isPaidSubscription(subscription)
       const hasManuallyCollectedSubscription =
         subscription?.collectionMethod === 'manual'
       const canPurchaseAddons = !(
-        hasNonRecurlySubscription || hasManuallyCollectedSubscription
+        hasPaidSubscription || hasManuallyCollectedSubscription
       )
       const assistantDisabled = user.aiErrorAssistant?.enabled === false // the assistant has been manually disabled by the user
       const canUseErrorAssistant =
@@ -792,7 +792,7 @@ const _ProjectController = {
           referal_id: user.referal_id,
           signUpDate: user.signUpDate,
           allowedFreeTrial,
-          hasRecurlySubscription: subscription?.recurlySubscription_id != null,
+          hasPaidSubscription,
           featureSwitches: user.featureSwitches,
           features: fullFeatureSet,
           featureUsage,

@@ -57,19 +57,19 @@ export function useGroupInvitationNotification(
   const location = useLocation()
   const { handleDismiss } = useAsyncDismiss()
 
-  const hasIndividualRecurlySubscription = getMeta(
-    'ol-hasIndividualRecurlySubscription'
+  const hasIndividualPaidSubscription = getMeta(
+    'ol-hasIndividualPaidSubscription'
   )
 
   useEffect(() => {
-    if (hasIndividualRecurlySubscription) {
+    if (hasIndividualPaidSubscription) {
       setGroupInvitationStatus(
         GroupInvitationStatus.CancelIndividualSubscription
       )
     } else {
       setGroupInvitationStatus(GroupInvitationStatus.AskToJoin)
     }
-  }, [hasIndividualRecurlySubscription])
+  }, [hasIndividualPaidSubscription])
 
   const acceptGroupInvite = useCallback(() => {
     if (managedUsersEnabled) {

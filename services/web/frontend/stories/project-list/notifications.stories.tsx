@@ -186,7 +186,7 @@ export const NotificationGroupInvitationCancelSubscription = (args: any) => {
     },
   })
 
-  window.metaAttributesCache.set('ol-hasIndividualRecurlySubscription', true)
+  window.metaAttributesCache.set('ol-hasIndividualPaidSubscription', true)
 
   return (
     <ProjectListProvider>

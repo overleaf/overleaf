@@ -4,6 +4,7 @@ const OError = require('@overleaf/o-error')
 const SubscriptionUpdater = require('./SubscriptionUpdater')
 const SubscriptionLocator = require('./SubscriptionLocator')
 const SubscriptionController = require('./SubscriptionController')
+const SubscriptionHelper = require('./SubscriptionHelper')
 const { Subscription } = require('../../models/Subscription')
 const { User } = require('../../models/User')
 const RecurlyClient = require('./RecurlyClient')
@@ -77,7 +78,7 @@ async function ensureFlexibleLicensingEnabled(plan) {
 }
 
 async function ensureSubscriptionIsActive(subscription) {
-  if (subscription?.recurlyStatus?.state !== 'active') {
+  if (SubscriptionHelper.getPaidSubscriptionState(subscription) !== 'active') {
     throw new InactiveError('The subscription is not active', {
       subscriptionId: subscription._id.toString(),
     })

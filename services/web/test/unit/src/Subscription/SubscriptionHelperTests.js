@@ -267,4 +267,206 @@ describe('SubscriptionHelper', function () {
       })
     })
   })
+
+  describe('isPaidSubscription', function () {
+    it('should return true for a subscription with a recurly subscription id', function () {
+      const result = this.SubscriptionHelper.isPaidSubscription({
+        recurlySubscription_id: 'some-id',
+      })
+      expect(result).to.be.true
+    })
+
+    it('should return true for a subscription with a stripe subscription id', function () {
+      const result = this.SubscriptionHelper.isPaidSubscription({
+        paymentProvider: { subscriptionId: 'some-id' },
+      })
+      expect(result).to.be.true
+    })
+
+    it('should return false for a free subscription', function () {
+      const result = this.SubscriptionHelper.isPaidSubscription({})
+      expect(result).to.be.false
+    })
+
+    it('should return false for a missing subscription', function () {
+      const result = this.SubscriptionHelper.isPaidSubscription()
+      expect(result).to.be.false
+    })
+  })
+
+  describe('isIndividualActivePaidSubscription', function () {
+    it('should return true for an active recurly subscription', function () {
+      const result = this.SubscriptionHelper.isIndividualActivePaidSubscription(
+        {
+          groupPlan: false,
+          recurlyStatus: { state: 'active' },
+          recurlySubscription_id: 'some-id',
+        }
+      )
+      expect(result).to.be.true
+    })
+
+    it('should return true for an active stripe subscription', function () {
+      const result = this.SubscriptionHelper.isIndividualActivePaidSubscription(
+        {
+          groupPlan: false,
+          paymentProvider: { subscriptionId: 'sub_123', state: 'active' },
+        }
+      )
+      expect(result).to.be.true
+    })
+
+    it('should return false for a canceled recurly subscription', function () {
+      const result = this.SubscriptionHelper.isIndividualActivePaidSubscription(
+        {
+          groupPlan: false,
+          recurlyStatus: { state: 'canceled' },
+          recurlySubscription_id: 'some-id',
+        }
+      )
+      expect(result).to.be.false
+    })
+
+    it('should return false for a canceled stripe subscription', function () {
+      const result = this.SubscriptionHelper.isIndividualActivePaidSubscription(
+        {
+          groupPlan: false,
+          paymentProvider: { state: 'canceled', subscriptionId: 'sub_123' },
+        }
+      )
+      expect(result).to.be.false
+    })
+
+    it('should return false for a group plan subscription', function () {
+      const result = this.SubscriptionHelper.isIndividualActivePaidSubscription(
+        {
+          groupPlan: true,
+          recurlyStatus: { state: 'active' },
+          recurlySubscription_id: 'some-id',
+        }
+      )
+      expect(result).to.be.false
+    })
+
+    it('should return false for a free subscription', function () {
+      const result = this.SubscriptionHelper.isIndividualActivePaidSubscription(
+        {}
+      )
+      expect(result).to.be.false
+    })
+
+    it('should return false for a subscription with an empty string for recurlySubscription_id', function () {
+      const result = this.SubscriptionHelper.isIndividualActivePaidSubscription(
+        {
+          groupPlan: false,
+          recurlySubscription_id: '',
+          recurlyStatus: { state: 'active' },
+        }
+      )
+      expect(result).to.be.false
+    })
+
+    it('should return false for a subscription with an empty string for paymentProvider.subscriptionId', function () {
+      const result = this.SubscriptionHelper.isIndividualActivePaidSubscription(
+        {
+          groupPlan: false,
+          paymentProvider: { state: 'active', subscriptionId: '' },
+        }
+      )
+      expect(result).to.be.false
+    })
+
+    it('should return false for a missing subscription', function () {
+      const result = this.SubscriptionHelper.isPaidSubscription()
+      expect(result).to.be.false
+    })
+  })
+
+  describe('getPaymentProviderSubscriptionId', function () {
+    it('should return the recurly subscription id if it exists', function () {
+      const result = this.SubscriptionHelper.getPaymentProviderSubscriptionId({
+        recurlySubscription_id: 'some-id',
+      })
+      expect(result).to.equal('some-id')
+    })
+
+    it('should return the payment provider subscription id if it exists', function () {
+      const result = this.SubscriptionHelper.getPaymentProviderSubscriptionId({
+        paymentProvider: { subscriptionId: 'sub_123' },
+      })
+      expect(result).to.equal('sub_123')
+    })
+
+    it('should return null if no subscription id exists', function () {
+      const result = this.SubscriptionHelper.getPaymentProviderSubscriptionId(
+        {}
+      )
+      expect(result).to.be.null
+    })
+  })
+
+  describe('getPaidSubscriptionState', function () {
+    it('should return the recurly state if it exists', function () {
+      const result = this.SubscriptionHelper.getPaidSubscriptionState({
+        recurlyStatus: { state: 'active' },
+      })
+      expect(result).to.equal('active')
+    })
+
+    it('should return the payment provider state if it exists', function () {
+      const result = this.SubscriptionHelper.getPaidSubscriptionState({
+        paymentProvider: { state: 'active' },
+      })
+      expect(result).to.equal('active')
+    })
+
+    it('should return null if no state exists', function () {
+      const result = this.SubscriptionHelper.getPaidSubscriptionState({})
+      expect(result).to.be.null
+    })
+  })
+
+  describe('getSubscriptionTrialStartedAt', function () {
+    it('should return the recurly trial start date if it exists', function () {
+      const result = this.SubscriptionHelper.getSubscriptionTrialStartedAt({
+        recurlySubscription_id: 'some-id',
+        recurlyStatus: { trialStartedAt: new Date('2023-01-01') },
+      })
+      expect(result).to.deep.equal(new Date('2023-01-01'))
+    })
+
+    it('should return the payment provider trial start date if it exists', function () {
+      const result = this.SubscriptionHelper.getSubscriptionTrialStartedAt({
+        paymentProvider: { trialStartedAt: new Date('2023-01-01') },
+      })
+      expect(result).to.deep.equal(new Date('2023-01-01'))
+    })
+
+    it('should return undefined if no trial start date exists', function () {
+      const result = this.SubscriptionHelper.getSubscriptionTrialStartedAt({})
+      expect(result).to.be.undefined
+    })
+  })
+
+  describe('getSubscriptionTrialEndsAt', function () {
+    it('should return the recurly trial end date if it exists', function () {
+      const result = this.SubscriptionHelper.getSubscriptionTrialEndsAt({
+        recurlySubscription_id: 'some-id',
+        recurlyStatus: { trialEndsAt: new Date('2023-01-01') },
+      })
+      expect(result).to.deep.equal(new Date('2023-01-01'))
+    })
+
+    it('should return the payment provider trial end date if it exists', function () {
+      const result = this.SubscriptionHelper.getSubscriptionTrialEndsAt({
+        paymentProvider: { trialEndsAt: new Date('2023-01-01') },
+      })
+      expect(result).to.deep.equal(new Date('2023-01-01'))
+    })
+
+    it('should return undefined if no trial end date exists', function () {
+      const result = this.SubscriptionHelper.getSubscriptionTrialEndsAt({})
+      expect(result).to.be.undefined
+    })
+  })
 })

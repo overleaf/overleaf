@@ -86,7 +86,66 @@ function generateInitialLocalizedGroupPrice(recommendedCurrency, locale) {
   }
 }
 
+function isPaidSubscription(subscription) {
+  const hasRecurlySubscription =
+    subscription?.recurlySubscription_id &&
+    subscription?.recurlySubscription_id !== ''
+  const hasStripeSubscription =
+    subscription?.paymentProvider?.subscriptionId &&
+    subscription?.paymentProvider?.subscriptionId !== ''
+  return !!(subscription && (hasRecurlySubscription || hasStripeSubscription))
+}
+
+function isIndividualActivePaidSubscription(subscription) {
+  return (
+    isPaidSubscription(subscription) &&
+    subscription?.groupPlan === false &&
+    subscription?.recurlyStatus?.state !== 'canceled' &&
+    subscription?.paymentProvider?.state !== 'canceled'
+  )
+}
+
+function getPaymentProviderSubscriptionId(subscription) {
+  if (subscription?.recurlySubscription_id) {
+    return subscription.recurlySubscription_id
+  }
+  if (subscription?.paymentProvider?.subscriptionId) {
+    return subscription.paymentProvider.subscriptionId
+  }
+  return null
+}
+
+function getPaidSubscriptionState(subscription) {
+  if (subscription?.recurlyStatus?.state) {
+    return subscription.recurlyStatus.state
+  }
+  if (subscription?.paymentProvider?.state) {
+    return subscription.paymentProvider.state
+  }
+  return null
+}
+
+function getSubscriptionTrialStartedAt(subscription) {
+  if (subscription?.recurlyStatus) {
+    return subscription.recurlyStatus?.trialStartedAt
+  }
+  return subscription?.paymentProvider?.trialStartedAt
+}
+
+function getSubscriptionTrialEndsAt(subscription) {
+  if (subscription?.recurlyStatus) {
+    return subscription.recurlyStatus?.trialEndsAt
+  }
+  return subscription?.paymentProvider?.trialEndsAt
+}
+
 module.exports = {
   shouldPlanChangeAtTermEnd,
   generateInitialLocalizedGroupPrice,
+  isPaidSubscription,
+  isIndividualActivePaidSubscription,
+  getPaymentProviderSubscriptionId,
+  getPaidSubscriptionState,
+  getSubscriptionTrialStartedAt,
+  getSubscriptionTrialEndsAt,
 }

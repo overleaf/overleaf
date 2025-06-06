@@ -26,6 +26,7 @@ import GeoIpLookup from '../../infrastructure/GeoIpLookup.js'
 import SplitTestHandler from '../SplitTests/SplitTestHandler.js'
 import SplitTestSessionHandler from '../SplitTests/SplitTestSessionHandler.js'
 import TutorialHandler from '../Tutorial/TutorialHandler.js'
+import SubscriptionHelper from '../Subscription/SubscriptionHelper.js'
 
 /**
  * @import { GetProjectsRequest, GetProjectsResponse, AllUsersProjects, MongoProject } from "./types"
@@ -388,13 +389,13 @@ async function projectListPage(req, res, next) {
     }
   }
 
-  let hasIndividualRecurlySubscription = false
+  let hasIndividualPaidSubscription = false
 
   try {
-    hasIndividualRecurlySubscription =
-      usersIndividualSubscription?.groupPlan === false &&
-      usersIndividualSubscription?.recurlyStatus?.state !== 'canceled' &&
-      usersIndividualSubscription?.recurlySubscription_id !== ''
+    hasIndividualPaidSubscription =
+      SubscriptionHelper.isIndividualActivePaidSubscription(
+        usersIndividualSubscription
+      )
   } catch (error) {
     logger.error({ err: error }, 'Failed to get individual subscription')
   }
@@ -437,7 +438,7 @@ async function projectListPage(req, res, next) {
         groupId: subscription._id,
         groupName: subscription.teamName,
       })),
-    hasIndividualRecurlySubscription,
+    hasIndividualPaidSubscription,
     userRestrictions: Array.from(req.userRestrictions || []),
   })
 }

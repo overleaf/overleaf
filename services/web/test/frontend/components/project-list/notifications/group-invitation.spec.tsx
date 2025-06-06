@@ -62,10 +62,7 @@ describe('<GroupInvitationNotification />', function () {
 
   describe('user with existing personal subscription', function () {
     beforeEach(function () {
-      window.metaAttributesCache.set(
-        'ol-hasIndividualRecurlySubscription',
-        true
-      )
+      window.metaAttributesCache.set('ol-hasIndividualPaidSubscription', true)
     })
 
     it('is able to join group successfully without cancelling personal subscription', function () {

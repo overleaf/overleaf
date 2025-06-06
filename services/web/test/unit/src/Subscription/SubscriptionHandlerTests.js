@@ -5,6 +5,7 @@ const { expect } = chai
 const {
   PaymentProviderSubscription,
 } = require('../../../../app/src/Features/Subscription/PaymentProviderEntities')
+const SubscriptionHelper = require('../../../../app/src/Features/Subscription/SubscriptionHelper')
 
 const MODULE_PATH =
   '../../../../app/src/Features/Subscription/SubscriptionHandler'
@@ -149,6 +150,7 @@ describe('SubscriptionHandler', function () {
         '../../models/User': {
           User: this.User,
         },
+        './SubscriptionHelper': SubscriptionHelper,
         './SubscriptionUpdater': this.SubscriptionUpdater,
         './SubscriptionLocator': this.SubscriptionLocator,
         './LimitationsManager': this.LimitationsManager,

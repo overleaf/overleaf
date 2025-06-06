@@ -64,7 +64,6 @@ export type Subscription = {
   membersLimit: number
   teamInvites: object[]
   planCode: string
-  recurlySubscription_id: string
   plan: Plan
   pendingPlan?: PendingPaymentProviderPlan
   addOns?: AddOn[]

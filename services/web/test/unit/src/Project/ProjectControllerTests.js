@@ -201,9 +201,6 @@ describe('ProjectController', function () {
         getCurrentAffiliations: sinon.stub().resolves([]),
       },
     }
-    this.SubscriptionViewModelBuilder = {
-      getBestSubscription: sinon.stub().yields(null, { type: 'free' }),
-    }
     this.SurveyHandler = {
       getSurvey: sinon.stub().yields(null, {}),
     }

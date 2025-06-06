@@ -1,4 +1,7 @@
-import { SubscriptionState } from '../../subscription/dashboard/subscription'
+import {
+  SubscriptionState,
+  PaymentProvider,
+} from '../../subscription/dashboard/subscription'
 
 type SubscriptionBase = {
   featuresPageURL: string
@@ -22,6 +25,7 @@ type PaidSubscriptionBase = {
     teamName?: string
     name: string
     recurlyStatus?: RecurlyStatus
+    paymentProvider?: PaymentProvider
   }
 } & SubscriptionBase
 
