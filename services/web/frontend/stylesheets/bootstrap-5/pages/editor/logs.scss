@@ -1,11 +1,9 @@
 :root {
   --logs-pane-bg: var(--bg-dark-secondary);
-  --logs-info-color: var(--blue-40);
 }
 
 @include theme('light') {
   --logs-pane-bg: var(--bg-light-secondary);
-  --logs-info-color: var(--blue-60);
 }
 
 .ide-redesign-main {
@@ -106,7 +104,7 @@
     }
 
     .log-entry-header-text-info {
-      color: var(--logs-info-color);
+      color: var(--content-info-themed);
     }
 
     .log-entry-header-text-success {
