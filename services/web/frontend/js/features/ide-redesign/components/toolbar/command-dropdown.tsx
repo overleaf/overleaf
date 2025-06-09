@@ -1,5 +1,7 @@
 import {
   Command,
+  formatShortcut,
+  Shortcuts,
   useCommandRegistry,
 } from '@/features/ide-react/context/command-registry-context'
 import {
@@ -14,7 +16,10 @@ import { MenuBarOption } from '@/shared/components/menu-bar/menu-bar-option'
 import { Fragment, useCallback, useMemo } from 'react'
 
 type CommandId = string
-type TaggedCommand = Command & { type: 'command' }
+type TaggedCommand = Command & {
+  type: 'command'
+  shortcuts?: Shortcuts[CommandId]
+}
 type Entry<T> = T | GroupStructure<T>
 type GroupStructure<T> = {
   id: string
@@ -37,13 +42,13 @@ const CommandDropdown = ({
   title: string
   id: string
 }) => {
-  const { registry } = useCommandRegistry()
+  const { registry, shortcuts } = useCommandRegistry()
   const populatedSections = useMemo(
     () =>
       menu
-        .map(section => populateSectionOrGroup(section, registry))
+        .map(section => populateSectionOrGroup(section, registry, shortcuts))
         .filter(x => x.children.length > 0),
-    [menu, registry]
+    [menu, registry, shortcuts]
   )
 
   if (populatedSections.length === 0) {
@@ -76,8 +81,8 @@ export const CommandSection = ({
 }: {
   section: MenuSectionStructure<CommandId>
 }) => {
-  const { registry } = useCommandRegistry()
-  const section = populateSectionOrGroup(sectionStructure, registry)
+  const { registry, shortcuts } = useCommandRegistry()
+  const section = populateSectionOrGroup(sectionStructure, registry, shortcuts)
   if (section.children.length === 0) {
     return null
   }
@@ -108,6 +113,9 @@ const CommandDropdownChild = ({ item }: { item: Entry<TaggedCommand> }) => {
         onClick={onClickHandler}
         href={item.href}
         disabled={item.disabled}
+        trailingIcon={
+          item.shortcuts && <span>{formatShortcut(item.shortcuts[0])}</span>
+        }
       />
     )
   } else {
@@ -127,7 +135,8 @@ function populateSectionOrGroup<
   T extends { children: Array<Entry<CommandId>> },
 >(
   section: T,
-  registry: Map<string, Command>
+  registry: Map<string, Command>,
+  shortcuts: Shortcuts
 ): Omit<T, 'children'> & {
   children: Array<Entry<TaggedCommand>>
 } {
@@ -137,7 +146,11 @@ function populateSectionOrGroup<
     children: children
       .map(child => {
         if (typeof child !== 'string') {
-          const populatedChild = populateSectionOrGroup(child, registry)
+          const populatedChild = populateSectionOrGroup(
+            child,
+            registry,
+            shortcuts
+          )
           if (populatedChild.children.length === 0) {
             // Skip empty groups
             return undefined
@@ -146,7 +159,11 @@ function populateSectionOrGroup<
         }
         const command = registry.get(child)
         if (command) {
-          return { ...command, type: 'command' as const }
+          return {
+            ...command,
+            shortcuts: shortcuts[command.id],
+            type: 'command' as const,
+          }
         }
         return undefined
       })
