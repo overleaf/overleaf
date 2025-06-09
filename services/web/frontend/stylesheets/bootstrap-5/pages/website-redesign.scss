@@ -555,7 +555,7 @@
     width: unset;
 
     @include media-breakpoint-down(lg) {
-      width: 74px; // 70% of 106px
+      width: 106px;
     }
   }
 
