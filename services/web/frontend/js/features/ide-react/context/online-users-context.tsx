@@ -95,7 +95,7 @@ export const OnlineUsersProvider: FC<React.PropsWithChildren> = ({
       for (const [clientId, user] of Object.entries(onlineUsers)) {
         const decoratedUser = { ...user }
         const docId = user.doc_id
-        if (docId) {
+        if (docId && fileTreeData) {
           decoratedUser.doc = findDocEntityById(fileTreeData, docId)
         }
 

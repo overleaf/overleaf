@@ -1,4 +1,7 @@
-import { findInTreeOrThrow } from '@/features/file-tree/util/find-in-tree'
+import {
+  findInTree,
+  findInTreeOrThrow,
+} from '@/features/file-tree/util/find-in-tree'
 import { useFileTreeOpenContext } from '@/features/ide-react/context/file-tree-open-context'
 import { useOutlineContext } from '@/features/ide-react/context/outline-context'
 import useNestedOutline from '@/features/outline/hooks/use-nested-outline'
@@ -39,35 +42,41 @@ export default function Breadcrumbs() {
   const { highlightedLine, canShowOutline } = useOutlineContext()
 
   const folderHierarchy = useMemo(() => {
-    if (!openEntity || !fileTreeData) {
+    if (openEntity?.type !== 'doc' || !fileTreeData) {
       return []
     }
 
-    return openEntity.path
-      .filter(id => id !== fileTreeData._id) // Filter out the root folder
-      .map(id => {
-        return findInTreeOrThrow(fileTreeData, id)?.entity
-      })
+    try {
+      return openEntity.path
+        .filter(id => id !== fileTreeData._id) // Filter out the root folder
+        .map(id => {
+          return findInTreeOrThrow(fileTreeData, id)?.entity
+        })
+    } catch {
+      // If any of the folders in the path are not found, the entire hierarchy
+      // is invalid.
+      return []
+    }
   }, [openEntity, fileTreeData])
 
   const fileName = useMemo(() => {
     // NOTE: openEntity.entity.name may not always be accurate, so we read it
     // from the file tree data instead.
-    if (!openEntity || !fileTreeData) {
+    if (openEntity?.type !== 'doc' || !fileTreeData) {
       return undefined
     }
-    return findInTreeOrThrow(fileTreeData, openEntity.entity._id)?.entity.name
+    return findInTree(fileTreeData, openEntity.entity._id)?.entity.name
   }, [fileTreeData, openEntity])
 
   const outlineHierarchy = useMemo(() => {
-    if (!canShowOutline || !outline) {
+    if (openEntity?.type !== 'doc' || !canShowOutline || !outline) {
       return []
     }
 
     return constructOutlineHierarchy(outline.items, highlightedLine)
-  }, [outline, highlightedLine, canShowOutline])
+  }, [outline, highlightedLine, canShowOutline, openEntity])
 
-  if (!openEntity || !fileTreeData) {
+  if (openEntity?.type !== 'doc' || !fileTreeData) {
     return null
   }
 
