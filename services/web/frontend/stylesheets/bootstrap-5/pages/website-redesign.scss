@@ -258,6 +258,7 @@
   .round-background {
     border-radius: 50%;
     vertical-align: middle;
+    margin-right: var(--spacing-04);
     width: 20px;
     height: 20px;
   }
@@ -292,11 +293,11 @@
     .resources-card {
       display: flex;
       flex-flow: column wrap;
-      margin-bottom: 48px;
+      margin-bottom: var(--spacing-11);
       align-content: flex-start;
 
       @include media-breakpoint-down(lg) {
-        margin-bottom: 16px;
+        margin-bottom: var(--spacing-06);
       }
 
       img {
@@ -384,7 +385,114 @@
     }
   }
 
+  .inline-green-link {
+    color: var(--green-50);
+    padding: 0;
+    text-decoration: underline;
+
+    // text-decoration-skip-ink is for letters with descenders (like 'g' and 'y')
+    // this will force underline to not skip the descender
+    text-decoration-skip-ink: none;
+
+    &:hover {
+      color: var(--green-60);
+    }
+
+    // TODO: this is copied directly from the `.less` file, migrate this to scss
+    // &:focus {
+    //   @extend .input-focus-style;
+    // }
+  }
+
+  .customer-story-card-title {
+    @include heading-md;
+
+    margin-top: var(--spacing-08);
+    margin-bottom: var(--spacing-05);
+  }
+
+  .plans-bottom-text {
+    font-size: var(--font-size-04);
+  }
+
+  .plans-cards {
+    @include media-breakpoint-up(lg) {
+      display: flex;
+    }
+
+    .plans-card-container {
+      min-height: 348px;
+      padding-left: var(--spacing-05);
+      padding-right: var(--spacing-05);
+
+      @include media-breakpoint-down(lg) {
+        margin-bottom: var(--spacing-06);
+        min-height: unset;
+      }
+    }
+
+    .plans-card {
+      border-radius: 8px;
+      padding: 0;
+      height: 100%;
+
+      .plans-card-inner {
+        padding: var(--spacing-09);
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        font-size: var(--font-size-03);
+
+        .plans-card-inner-title {
+          font-size: var(--font-size-05);
+          line-height: var(--line-height-04);
+          font-weight: 600;
+          margin-top: 0;
+        }
+
+        ul {
+          list-style-type: none;
+          padding: 0;
+          margin: 0;
+
+          li {
+            margin-bottom: var(--spacing-04);
+          }
+        }
+
+        .plans-card-inner-footer {
+          margin-top: auto;
+          display: flex;
+          flex-direction: column;
+          gap: var(--spacing-05);
+
+          @include media-breakpoint-down(lg) {
+            margin-top: var(--spacing-06);
+          }
+        }
+      }
+
+      &.grey-border {
+        border: 2px solid var(--neutral-20);
+      }
+
+      &.blue-border {
+        border: solid 2px var(--sapphire-blue);
+        border-radius: 8px;
+
+        .plans-card-inner-title {
+          color: var(--sapphire-blue);
+        }
+      }
+    }
+  }
+
   .heading-section-md-align-left {
+    h2,
+    p {
+      text-align: center;
+    }
+
     @include media-breakpoint-down(lg) {
       display: flex;
       flex-direction: column;
@@ -410,7 +518,7 @@
     }
 
     &.align-left-button-sm {
-      @include media-breakpoint-down(md) {
+      @include media-breakpoint-down(lg) {
         justify-content: start;
       }
     }
@@ -421,11 +529,157 @@
     }
   }
 
+  .editor-pdf-video {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 585px;
+    padding: 0 var(--spacing-06);
+
+    @include media-breakpoint-down(lg) {
+      height: auto;
+    }
+
+    video {
+      box-shadow: 0 60px 25px -15px rgb(16 24 40 / 20%);
+      max-height: 100%;
+      width: auto;
+
+      @include media-breakpoint-down(lg) {
+        width: 100%;
+      }
+    }
+  }
+
   .overleaf-sticker {
     width: unset;
 
     @include media-breakpoint-down(lg) {
       width: 74px; // 70% of 106px
+    }
+  }
+
+  .organization-logos-container {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+
+    @include media-breakpoint-down(xl) {
+      flex-wrap: wrap;
+      gap: 30px;
+    }
+
+    .organization-logo {
+      object-fit: contain;
+      max-height: 62px;
+
+      &.samsung-logo {
+        max-height: 110px;
+        height: 110px;
+      }
+
+      @include media-breakpoint-down(xl) {
+        max-height: 40px;
+        flex-basis: 34%;
+      }
+    }
+  }
+
+  .integrations-card {
+    display: flex;
+
+    /* for center align */
+    flex-wrap: wrap;
+    align-items: center;
+
+    .integrations-icons {
+      img {
+        width: 6rem; // 96px
+        height: 6rem; // 96px
+      }
+
+      .first-row,
+      .second-row {
+        display: flex;
+      }
+
+      .first-row {
+        justify-content: space-between;
+      }
+
+      .second-row {
+        margin-top: var(--spacing-10);
+        justify-content: space-evenly;
+      }
+    }
+  }
+
+  .security-info {
+    .security-info-first-row {
+      margin-bottom: var(--spacing-09);
+
+      @include media-breakpoint-down(lg) {
+        margin-bottom: 0;
+      }
+    }
+
+    .security-info-item {
+      @include media-breakpoint-down(lg) {
+        margin-bottom: var(--spacing-06);
+      }
+    }
+
+    h3 {
+      @include heading-sm;
+    }
+  }
+
+  .security-heading-section {
+    @include media-breakpoint-down(lg) {
+      p {
+        text-align: left;
+      }
+
+      h2 {
+        width: 100%;
+        text-align: left;
+      }
+    }
+
+    .heading-and-stickers-container {
+      display: flex;
+      justify-content: center;
+      position: relative;
+
+      .lock-sticker {
+        width: 70px;
+        position: absolute;
+        top: -95px;
+        right: -50px;
+
+        @include media-breakpoint-down(xl) {
+          right: -105px;
+        }
+
+        @include media-breakpoint-down(lg) {
+          display: none;
+        }
+      }
+
+      .arrow-sticker {
+        width: 140px;
+        position: absolute;
+        top: -50px;
+        right: -15px;
+
+        @include media-breakpoint-down(xl) {
+          right: -70px;
+        }
+
+        @include media-breakpoint-down(lg) {
+          display: none;
+        }
+      }
     }
   }
 
@@ -525,6 +779,141 @@
             font-weight: 600;
           }
         }
+      }
+    }
+  }
+
+  .features-card-hero {
+    display: flex;
+
+    /* equal heights */
+    flex-wrap: wrap;
+    align-items: center;
+    position: relative;
+    height: 655px;
+
+    // padding-top: @line-height-computed * 2;
+
+    @include media-breakpoint-down(lg) {
+      height: unset;
+      padding-top: 0;
+    }
+
+    .features-card-description {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+
+      h1 {
+        &.features-card-hero-smaller-title {
+          @include media-breakpoint-up(xl) {
+            // 3rem is the default, this is a workaround for big screen
+            // since 6-width column on md screen size will wrap the text in three lines
+            font-size: var(--font-size-09);
+          }
+        }
+      }
+
+      p {
+        font-size: var(--font-size-05);
+        width: 90%;
+
+        @include media-breakpoint-down(lg) {
+          font-size: var(--font-size-04);
+          line-height: var(--line-height-03);
+          width: unset;
+        }
+      }
+    }
+
+    .features-card-image {
+      position: absolute;
+
+      // on wide screen, image will be fixed without any variable width translation
+      transform: translateX(600px);
+      top: 100px;
+      width: 720px;
+      height: auto;
+      padding: 0 15px;
+
+      // starting from 1500px, image will have a variable translation that depends on screen width
+      // this will make image "fixed" on a specific point on the screen
+      @media (width <= 1500px) {
+        transform: translateX(calc(50vw - 121px));
+      }
+
+      @media (width <= 1400px) {
+        width: 650px;
+        transform: translateX(calc(50vw - 52px));
+      }
+
+      // bootstrap layout changes on 1200px (@screen-lg), add a specific
+      // case for this exact width
+      @media (width >= 1200px) and (width <= 1200px) {
+        width: 600px;
+        transform: translateX(calc(50vw));
+      }
+
+      @media (width <= 1199px) {
+        width: 600px;
+        transform: translateX(calc(50vw - 106px));
+      }
+
+      @media (width <= 1100px) {
+        width: 550px;
+        transform: translateX(calc(50vw - 55px));
+      }
+
+      // 991px
+      @include media-breakpoint-down(lg) {
+        position: relative;
+        transform: none;
+        top: 0;
+        width: 100%;
+        margin-bottom: var(--spacing-11);
+        padding: var(--spacing-09) 0 0 0;
+      }
+
+      img.img-responsive {
+        width: 100%;
+      }
+    }
+
+    .sticky-tags {
+      position: absolute;
+      z-index: 2;
+      height: 160px;
+      bottom: -105px;
+      right: 55px;
+
+      @media (width <= 1400px) {
+        height: 150px;
+        bottom: -103px;
+        right: 47px;
+      }
+
+      @media (width <= 1200px) {
+        height: 130px;
+        bottom: -87px;
+      }
+
+      @media (width <= 1100px) {
+        height: 120px;
+        bottom: -81px;
+      }
+
+      // 991px
+      @include media-breakpoint-down(lg) {
+        height: 130px;
+        bottom: -75px;
+        right: 70px;
+      }
+
+      // 767px
+      @include media-breakpoint-down(md) {
+        height: 24%;
+        bottom: -10vw; // scale with width
+        right: 9.5vw; // scale with width
       }
     }
   }
