@@ -1,7 +1,9 @@
 {
+  "0_free_suggestions": "",
   "12x_more_compile_time": "",
   "1_2_width": "",
   "1_4_width": "",
+  "1_free_suggestion": "",
   "3_4_width": "",
   "About": "",
   "Account": "",
@@ -624,6 +626,7 @@
   "generic_if_problem_continues_contact_us": "",
   "generic_linked_file_compile_error": "",
   "generic_something_went_wrong": "",
+  "get_ai_assist": "",
   "get_collaborative_benefits": "",
   "get_discounted_plan": "",
   "get_error_assist": "",

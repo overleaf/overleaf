@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { memo, useMemo, useState } from 'react'
+import { ElementType, memo, useMemo, useState } from 'react'
 import { usePdfPreviewContext } from '@/features/pdf-preview/components/pdf-preview-provider'
 import StopOnFirstErrorPrompt from '@/features/pdf-preview/components/stop-on-first-error-prompt'
 import PdfPreviewError from '@/features/pdf-preview/components/pdf-preview-error'
@@ -11,6 +11,12 @@ import { useDetachCompileContext as useCompileContext } from '@/shared/context/d
 import { Nav, NavLink, TabContainer, TabContent } from 'react-bootstrap'
 import { LogEntry as LogEntryData } from '@/features/pdf-preview/util/types'
 import LogEntry from './log-entry'
+import importOverleafModules from '../../../../../macros/import-overleaf-module.macro'
+
+const logsComponents: Array<{
+  import: { default: ElementType }
+  path: string
+}> = importOverleafModules('errorLogsComponents')
 
 type ErrorLogTab = {
   key: string
@@ -52,6 +58,9 @@ function ErrorLogs() {
           <TabHeader key={tab.key} tab={tab} active={activeTab === tab.key} />
         ))}
       </Nav>
+      {logsComponents.map(({ import: { default: Component }, path }) => (
+        <Component key={path} />
+      ))}
       <TabContent className="error-logs">
         <div className="logs-pane-content">
           {stoppedOnFirstError && includeErrors && <StopOnFirstErrorPrompt />}

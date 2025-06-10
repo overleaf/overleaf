@@ -1,8 +1,10 @@
 {
+  "0_free_suggestions": "0 free suggestions",
   "12x_basic": "12x Basic",
   "12x_more_compile_time": "12x more compile time on our fastest servers",
   "1_2_width": "½ width",
   "1_4_width": "¼ width",
+  "1_free_suggestion": "1 free suggestion",
   "3_4_width": "¾ width",
   "About": "About",
   "Account": "Account",
@@ -824,6 +826,7 @@
   "generic_if_problem_continues_contact_us": "If the problem continues please contact us",
   "generic_linked_file_compile_error": "This project’s output files are not available because it failed to compile. Please open the project to see the compilation error details.",
   "generic_something_went_wrong": "Sorry, something went wrong",
+  "get_ai_assist": "Get AI Assist",
   "get_collaborative_benefits": "Get the collaborative benefits from __appName__, even if you prefer to work offline",
   "get_discounted_plan": "Get discounted plan",
   "get_error_assist": "Get Error Assist",

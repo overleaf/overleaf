@@ -1002,6 +1002,7 @@ module.exports = {
     fullProjectSearchPanel: [],
     integrationPanelComponents: [],
     referenceSearchSetting: [],
+    errorLogsComponents: [],
   },
 
   moduleImportSequence: [
