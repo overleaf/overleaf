@@ -480,11 +480,12 @@ async function getNonPersistedChanges(projectId, baseVersion) {
 }
 
 rclient.defineCommand('set_persisted_version', {
-  numberOfKeys: 3,
+  numberOfKeys: 4,
   lua: `
     local headVersionKey = KEYS[1]
     local persistedVersionKey = KEYS[2]
-    local changesKey = KEYS[3]
+    local persistTimeKey = KEYS[3]
+    local changesKey = KEYS[4]
 
     local newPersistedVersion = tonumber(ARGV[1])
     local maxPersistedChanges = tonumber(ARGV[2])
@@ -508,6 +509,11 @@ rclient.defineCommand('set_persisted_version', {
 
     -- Set the persisted version
     redis.call('SET', persistedVersionKey, newPersistedVersion)
+
+    -- Clear the persist time if the persisted version now matches the head version
+    if newPersistedVersion == headVersion then
+      redis.call('DEL', persistTimeKey)
+    end
 
     -- Calculate the starting index, to keep only maxPersistedChanges beyond the persisted version
     -- Using negative indexing to count backwards from the end of the list
@@ -535,6 +541,7 @@ async function setPersistedVersion(projectId, persistedVersion) {
     const keys = [
       keySchema.headVersion({ projectId }),
       keySchema.persistedVersion({ projectId }),
+      keySchema.persistTime({ projectId }),
       keySchema.changes({ projectId }),
     ]
 

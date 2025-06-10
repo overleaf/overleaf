@@ -699,6 +699,8 @@ describe('chunk buffer Redis backend', function () {
   })
 
   describe('setPersistedVersion', function () {
+    const persistTime = Date.now() + 60 * 1000 // 1 minute from now
+
     it('should return not_found when project does not exist', async function () {
       const result = await redisBackend.setPersistedVersion(projectId, 5)
       expect(result).to.equal('not_found')
@@ -709,6 +711,7 @@ describe('chunk buffer Redis backend', function () {
         await setupState(projectId, {
           headVersion: 5,
           persistedVersion: null,
+          persistTime,
           changes: 5,
         })
       })
@@ -720,6 +723,13 @@ describe('chunk buffer Redis backend', function () {
         expect(state.persistedVersion).to.equal(3)
       })
 
+      it('should leave the persist time if the persisted version is not current', async function () {
+        const status = await redisBackend.setPersistedVersion(projectId, 3)
+        expect(status).to.equal('ok')
+        const state = await redisBackend.getState(projectId)
+        expect(state.persistTime).to.deep.equal(persistTime) // Persist time should remain unchanged
+      })
+
       it('should refuse to set a persisted version greater than the head version', async function () {
         await expect(
           redisBackend.setPersistedVersion(projectId, 10)
@@ -728,6 +738,14 @@ describe('chunk buffer Redis backend', function () {
         const state = await redisBackend.getState(projectId)
         expect(state.persistedVersion).to.be.null
       })
+
+      it('should clear the persist time when the persisted version is current', async function () {
+        const status = await redisBackend.setPersistedVersion(projectId, 5)
+        expect(status).to.equal('ok')
+        const state = await redisBackend.getState(projectId)
+        expect(state.persistedVersion).to.equal(5)
+        expect(state.persistTime).to.be.null // Persist time should be cleared
+      })
     })
 
     describe('when the persisted version is set', function () {
@@ -735,6 +753,7 @@ describe('chunk buffer Redis backend', function () {
         await setupState(projectId, {
           headVersion: 5,
           persistedVersion: 3,
+          persistTime,
           changes: 5,
         })
       })
@@ -744,6 +763,22 @@ describe('chunk buffer Redis backend', function () {
         expect(status).to.equal('ok')
         const state = await redisBackend.getState(projectId)
         expect(state.persistedVersion).to.equal(5)
+      })
+
+      it('should clear the persist time when the persisted version is current', async function () {
+        const status = await redisBackend.setPersistedVersion(projectId, 5)
+        expect(status).to.equal('ok')
+        const state = await redisBackend.getState(projectId)
+        expect(state.persistedVersion).to.equal(5)
+        expect(state.persistTime).to.be.null // Persist time should be cleared
+      })
+
+      it('should leave the persist time if the persisted version is not current', async function () {
+        const status = await redisBackend.setPersistedVersion(projectId, 4)
+        expect(status).to.equal('ok')
+        const state = await redisBackend.getState(projectId)
+        expect(state.persistedVersion).to.equal(4)
+        expect(state.persistTime).to.deep.equal(persistTime) // Persist time should remain unchanged
       })
 
       it('should not decrease the persisted version', async function () {
@@ -1183,6 +1218,8 @@ function makeChange() {
  * @param {object} params
  * @param {number} params.headVersion
  * @param {number | null} params.persistedVersion
+ * @param {number | null} params.persistTime - time when the project should be persisted
+ * @param {number | null} params.expireTime - time when the project should expire
  * @param {number} params.changes - number of changes to create
  * @return {Promise<Change[]>} dummy changes that have been created
  */
@@ -1194,7 +1231,12 @@ async function setupState(projectId, params) {
       params.persistedVersion
     )
   }
-
+  if (params.persistTime) {
+    await rclient.set(keySchema.persistTime({ projectId }), params.persistTime)
+  }
+  if (params.expireTime) {
+    await rclient.set(keySchema.expireTime({ projectId }), params.expireTime)
+  }
   const changes = []
   for (let i = 1; i <= params.changes; i++) {
     const change = new Change(
