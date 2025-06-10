@@ -509,6 +509,12 @@ describe('chunkStore', function () {
               .getChanges()
               .concat(queuedChanges)
             expect(chunk.getChanges()).to.deep.equal(expectedChanges)
+            expect(chunk.getStartVersion()).to.equal(
+              thirdChunk.getStartVersion()
+            )
+            expect(chunk.getEndVersion()).to.equal(
+              thirdChunk.getEndVersion() + queuedChanges.length
+            )
           })
 
           it("doesn't include the queued changes when getting another chunk by timestamp", async function () {

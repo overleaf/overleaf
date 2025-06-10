@@ -190,6 +190,7 @@ async function loadAtTimestamp(projectId, timestamp, opts = {}) {
   const chunkRecord = await backend.getChunkForTimestamp(projectId, timestamp)
   const rawHistory = await historyStore.loadRaw(projectId, chunkRecord.id)
   const history = History.fromRaw(rawHistory)
+  const startVersion = chunkRecord.endVersion - history.countChanges()
 
   if (!opts.persistedOnly) {
     const nonPersistedChanges = await getChunkExtension(
@@ -200,7 +201,7 @@ async function loadAtTimestamp(projectId, timestamp, opts = {}) {
   }
 
   await lazyLoadHistoryFiles(history, batchBlobStore)
-  return new Chunk(history, chunkRecord.endVersion - history.countChanges())
+  return new Chunk(history, startVersion)
 }
 
 /**
