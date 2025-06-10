@@ -41,7 +41,7 @@ export const shareDocState = StateField.define<HistoryOTShareDoc | null>({
     return null
   },
 
-  update(value, transaction) {
+  update(value) {
     // this state is constant
     return value
   },
@@ -134,7 +134,7 @@ class ChangeDeletedWidget extends WidgetType {
     return widget
   }
 
-  eq(old: ChangeDeletedWidget) {
+  eq() {
     return true
   }
 }
@@ -407,7 +407,7 @@ class PositionMapper {
         })
         this.offsets.toCM6.push({
           pos: change.range.pos,
-          map: pos => deletePos - oldOffset,
+          map: () => deletePos - oldOffset,
         })
         this.offsets.toCM6.push({
           pos: change.range.pos + deleteLength,
