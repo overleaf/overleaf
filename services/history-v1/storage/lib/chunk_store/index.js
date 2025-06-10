@@ -157,6 +157,7 @@ async function loadAtVersion(projectId, version, opts = {}) {
   })
   const rawHistory = await historyStore.loadRaw(projectId, chunkRecord.id)
   const history = History.fromRaw(rawHistory)
+  const startVersion = chunkRecord.endVersion - history.countChanges()
 
   if (!opts.persistedOnly) {
     const nonPersistedChanges = await getChunkExtension(
@@ -167,7 +168,7 @@ async function loadAtVersion(projectId, version, opts = {}) {
   }
 
   await lazyLoadHistoryFiles(history, batchBlobStore)
-  return new Chunk(history, chunkRecord.endVersion - history.countChanges())
+  return new Chunk(history, startVersion)
 }
 
 /**
