@@ -58,7 +58,17 @@ async function persistBuffer(projectId, limits) {
     // to match the current endVersion.  This shouldn't be needed
     // unless a worker failed to update the persisted version.
     await redisBackend.setPersistedVersion(projectId, endVersion)
-    return
+    const { chunk } = await chunkStore.loadByChunkRecord(
+      projectId,
+      latestChunkMetadata
+    )
+    // Return the result in the same format as persistChanges
+    // so that the caller can handle it uniformly.
+    return {
+      numberOfChangesPersisted: changesToPersist.length,
+      originalEndVersion: endVersion,
+      currentChunk: chunk,
+    }
   }
 
   logger.debug(
@@ -160,6 +170,8 @@ async function persistBuffer(projectId, limits) {
     { projectId, finalPersistedVersion: newEndVersion },
     'persistBuffer operation completed successfully'
   )
+
+  return persistResult
 }
 
 module.exports = persistBuffer

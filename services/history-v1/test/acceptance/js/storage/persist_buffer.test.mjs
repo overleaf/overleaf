@@ -92,15 +92,34 @@ describe('persistBuffer', function () {
       await redisBackend.setPersistedVersion(projectId, initialVersion)
 
       // Persist the changes from Redis to the chunk store
-      await persistBuffer(projectId, limitsToPersistImmediately)
+      const persistResult = await persistBuffer(
+        projectId,
+        limitsToPersistImmediately
+      )
 
-      const latestChunk = await chunkStore.loadLatest(projectId)
+      // Check the return value of persistBuffer
+      expect(persistResult).to.exist
+      expect(persistResult).to.have.property('numberOfChangesPersisted')
+      expect(persistResult).to.have.property('originalEndVersion')
+      expect(persistResult).to.have.property('currentChunk')
+      expect(persistResult).to.have.property('resyncNeeded')
+      expect(persistResult.numberOfChangesPersisted).to.equal(
+        changesToQueue.length
+      )
+      expect(persistResult.originalEndVersion).to.equal(initialVersion + 1)
+      expect(persistResult.resyncNeeded).to.be.false
+
+      const latestChunk = await chunkStore.loadLatest(projectId, {
+        persistedOnly: true,
+      })
       expect(latestChunk).to.exist
       expect(latestChunk.getStartVersion()).to.equal(initialVersion)
       expect(latestChunk.getEndVersion()).to.equal(finalHeadVersion)
       expect(latestChunk.getChanges().length).to.equal(
         changesToQueue.length + 1
       )
+      // Check that chunk returned by persistBuffer matches the latest chunk
+      expect(latestChunk).to.deep.equal(persistResult.currentChunk)
 
       const chunkSnapshot = latestChunk.getSnapshot()
       expect(Object.keys(chunkSnapshot.getFileMap()).length).to.equal(1)
@@ -196,9 +215,28 @@ describe('persistBuffer', function () {
         persistedChunkEndVersion
       )
 
-      await persistBuffer(projectId, limitsToPersistImmediately)
+      const persistResult = await persistBuffer(
+        projectId,
+        limitsToPersistImmediately
+      )
 
-      const latestChunk = await chunkStore.loadLatest(projectId)
+      // Check the return value of persistBuffer
+      expect(persistResult).to.exist
+      expect(persistResult).to.have.property('numberOfChangesPersisted')
+      expect(persistResult).to.have.property('originalEndVersion')
+      expect(persistResult).to.have.property('currentChunk')
+      expect(persistResult).to.have.property('resyncNeeded')
+      expect(persistResult.numberOfChangesPersisted).to.equal(
+        redisChangesToPush.length
+      )
+      expect(persistResult.originalEndVersion).to.equal(
+        persistedChunkEndVersion
+      )
+      expect(persistResult.resyncNeeded).to.be.false
+
+      const latestChunk = await chunkStore.loadLatest(projectId, {
+        persistedOnly: true,
+      })
       expect(latestChunk).to.exist
       expect(latestChunk.getStartVersion()).to.equal(0)
       expect(latestChunk.getEndVersion()).to.equal(
@@ -214,6 +252,9 @@ describe('persistBuffer', function () {
       expect(persistedVersionInRedisAfter).to.equal(
         finalHeadVersionAfterRedisPush
       )
+
+      // Check that chunk returned by persistBuffer matches the latest chunk
+      expect(persistResult.currentChunk).to.deep.equal(latestChunk)
 
       const nonPersisted = await redisBackend.getNonPersistedChanges(
         projectId,
@@ -287,8 +328,19 @@ describe('persistBuffer', function () {
 
       const chunksBefore = await chunkStore.getProjectChunks(projectId)
 
-      // Persist buffer (which should do nothing as there are no new changes)
-      await persistBuffer(projectId, limitsToPersistImmediately)
+      const persistResult = await persistBuffer(
+        projectId,
+        limitsToPersistImmediately
+      )
+
+      const currentChunk = await chunkStore.loadLatest(projectId, {
+        persistedOnly: true,
+      })
+      expect(persistResult).to.deep.equal({
+        numberOfChangesPersisted: 0,
+        originalEndVersion: persistedChunkEndVersion,
+        currentChunk,
+      })
 
       const chunksAfter = await chunkStore.getProjectChunks(projectId)
       expect(chunksAfter.length).to.equal(chunksBefore.length)
@@ -324,7 +376,20 @@ describe('persistBuffer', function () {
       const chunksBefore = await chunkStore.getProjectChunks(projectId)
 
       // Persist buffer (which should do nothing as there are no new changes)
-      await persistBuffer(projectId, limitsToPersistImmediately)
+      const persistResult = await persistBuffer(
+        projectId,
+        limitsToPersistImmediately
+      )
+
+      // Check the return value
+      const currentChunk = await chunkStore.loadLatest(projectId, {
+        persistedOnly: true,
+      })
+      expect(persistResult).to.deep.equal({
+        numberOfChangesPersisted: 0,
+        originalEndVersion: persistedChunkEndVersion,
+        currentChunk,
+      })
 
       const chunksAfter = await chunkStore.getProjectChunks(projectId)
       expect(chunksAfter.length).to.equal(chunksBefore.length)
@@ -411,7 +476,19 @@ describe('persistBuffer', function () {
         maxChangeTimestamp: new Date(twoHoursAgo), // they will be persisted if any change is older than 2 hours
       }
 
-      await persistBuffer(projectId, restrictiveLimits)
+      const persistResult = await persistBuffer(projectId, restrictiveLimits)
+
+      // Check the return value of persistBuffer
+      expect(persistResult).to.exist
+      expect(persistResult).to.have.property('numberOfChangesPersisted')
+      expect(persistResult).to.have.property('originalEndVersion')
+      expect(persistResult).to.have.property('currentChunk')
+      expect(persistResult).to.have.property('resyncNeeded')
+      expect(persistResult.numberOfChangesPersisted).to.equal(2) // change1 + change2
+      expect(persistResult.originalEndVersion).to.equal(
+        versionAfterInitialSetup
+      )
+      expect(persistResult.resyncNeeded).to.be.false
 
       // Check the latest persisted chunk, it should only have the initial file and the first two changes
       const latestChunk = await chunkStore.loadLatest(projectId, {
@@ -422,6 +499,9 @@ describe('persistBuffer', function () {
       expect(latestChunk.getStartVersion()).to.equal(initialVersion)
       const expectedEndVersion = versionAfterInitialSetup + 2 // Persisted two changes from the queue
       expect(latestChunk.getEndVersion()).to.equal(expectedEndVersion)
+
+      // Check that chunk returned by persistBuffer matches the latest chunk
+      expect(persistResult.currentChunk).to.deep.equal(latestChunk)
 
       // Check persisted version in Redis
       const state = await redisBackend.getState(projectId)
