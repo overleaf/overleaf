@@ -27,6 +27,10 @@ describe('<GroupInvitationNotification />', function () {
   }
 
   beforeEach(function () {
+    cy.intercept('GET', `/user/notification/${notification._id}`, {
+      statusCode: 200,
+      body: notification,
+    }).as('getNotification')
     cy.intercept(
       'PUT',
       `/subscription/invites/${notification.messageOpts.token}`,
@@ -48,6 +52,7 @@ describe('<GroupInvitationNotification />', function () {
 
       cy.findByRole('button', { name: 'Join now' }).click()
 
+      cy.wait('@getNotification')
       cy.wait('@acceptInvite')
 
       cy.findByText(
@@ -82,6 +87,7 @@ describe('<GroupInvitationNotification />', function () {
 
       cy.findByRole('button', { name: 'Join now' }).click()
 
+      cy.wait('@getNotification')
       cy.wait('@acceptInvite')
 
       cy.findByText(
@@ -116,6 +122,7 @@ describe('<GroupInvitationNotification />', function () {
 
       cy.findByRole('button', { name: 'Join now' }).click()
 
+      cy.wait('@getNotification')
       cy.wait('@acceptInvite')
 
       cy.findByText(

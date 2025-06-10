@@ -915,6 +915,12 @@ async function initialize(webRouter, privateApiRouter, publicApiRouter) {
     NotificationsController.markNotificationAsRead
   )
 
+  webRouter.get(
+    '/user/notification/:notificationId',
+    AuthenticationController.requireLogin(),
+    NotificationsController.getNotification
+  )
+
   // Deprecated in favour of /internal/project/:project_id but still used by versioning
   privateApiRouter.get(
     '/project/:project_id/details',

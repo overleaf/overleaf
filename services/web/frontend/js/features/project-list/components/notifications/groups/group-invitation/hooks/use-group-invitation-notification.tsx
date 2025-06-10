@@ -9,6 +9,7 @@ import type { NotificationGroupInvitation } from '../../../../../../../../../typ
 import useAsync from '../../../../../../../shared/hooks/use-async'
 import {
   FetchError,
+  getJSON,
   postJSON,
   putJSON,
 } from '../../../../../../../infrastructure/fetch-json'
@@ -43,17 +44,12 @@ type UseGroupInvitationNotificationReturnType = {
 export function useGroupInvitationNotification(
   notification: NotificationGroupInvitation
 ): UseGroupInvitationNotificationReturnType {
-  const {
-    _id: notificationId,
-    messageOpts: { token, managedUsersEnabled },
-  } = notification
-
+  const { _id: notificationId } = notification
   const [groupInvitationStatus, setGroupInvitationStatus] =
     useState<GroupInvitationStatus>(GroupInvitationStatus.Idle)
-  const { runAsync, isLoading: isAcceptingInvitation } = useAsync<
-    never,
-    FetchError
-  >()
+  const { runAsync, isLoading } = useAsync<void, FetchError>()
+  const { runAsync: runAsyncNotification, isLoading: isLoadingNotification } =
+    useAsync<NotificationGroupInvitation, FetchError>()
   const location = useLocation()
   const { handleDismiss } = useAsyncDismiss()
 
@@ -72,31 +68,41 @@ export function useGroupInvitationNotification(
   }, [hasIndividualPaidSubscription])
 
   const acceptGroupInvite = useCallback(() => {
-    if (managedUsersEnabled) {
-      location.assign(`/subscription/invites/${token}/`)
-    } else {
-      runAsync(
-        putJSON(`/subscription/invites/${token}/`, {
-          body: {
-            _csrf: getMeta('ol-csrfToken'),
-          },
-        })
-      )
-        .then(() => {
-          setGroupInvitationStatus(GroupInvitationStatus.SuccessfullyJoined)
-        })
-        .catch(err => {
-          debugConsole.error(err)
-          setGroupInvitationStatus(GroupInvitationStatus.Error)
-        })
-        .finally(() => {
-          // remove notification automatically in the browser
-          window.setTimeout(() => {
-            setGroupInvitationStatus(GroupInvitationStatus.NotificationIsHidden)
-          }, SUCCESSFUL_NOTIF_TIME_BEFORE_HIDDEN)
-        })
-    }
-  }, [runAsync, token, location, managedUsersEnabled])
+    // Fetch the latest notification data to ensure it's up-to-date
+    runAsyncNotification(getJSON(`/user/notification/${notificationId}`))
+      .then(notification => {
+        const {
+          messageOpts: { token, managedUsersEnabled },
+        } = notification
+        if (managedUsersEnabled) {
+          location.assign(`/subscription/invites/${token}/`)
+        } else {
+          runAsync(
+            putJSON(`/subscription/invites/${token}/`, {
+              body: {
+                _csrf: getMeta('ol-csrfToken'),
+              },
+            })
+          )
+            .then(() => {
+              setGroupInvitationStatus(GroupInvitationStatus.SuccessfullyJoined)
+            })
+            .catch(err => {
+              debugConsole.error(err)
+              setGroupInvitationStatus(GroupInvitationStatus.Error)
+            })
+            .finally(() => {
+              // remove notification automatically in the browser
+              window.setTimeout(() => {
+                setGroupInvitationStatus(
+                  GroupInvitationStatus.NotificationIsHidden
+                )
+              }, SUCCESSFUL_NOTIF_TIME_BEFORE_HIDDEN)
+            })
+        }
+      })
+      .catch(debugConsole.error)
+  }, [runAsync, runAsyncNotification, notificationId, location])
 
   const cancelPersonalSubscription = useCallback(() => {
     setGroupInvitationStatus(GroupInvitationStatus.AskToJoin)
@@ -113,6 +119,8 @@ export function useGroupInvitationNotification(
   const hideNotification = useCallback(() => {
     setGroupInvitationStatus(GroupInvitationStatus.NotificationIsHidden)
   }, [])
+
+  const isAcceptingInvitation = isLoadingNotification || isLoading
 
   return {
     isAcceptingInvitation,

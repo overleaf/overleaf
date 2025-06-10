@@ -14,6 +14,9 @@ describe('NotificationsController', function () {
     ctx.handler = {
       getUserNotifications: sinon.stub().callsArgWith(1),
       markAsRead: sinon.stub().callsArgWith(2),
+      promises: {
+        getUserNotifications: sinon.stub().callsArgWith(1),
+      },
     }
     ctx.req = {
       params: {
@@ -74,6 +77,24 @@ describe('NotificationsController', function () {
             .should.equal(true)
           resolve()
         },
+      })
+    })
+  })
+
+  it('should get a notification by notification id', function (ctx) {
+    return new Promise(resolve => {
+      const notification = { _id: notificationId, user_id: userId }
+      ctx.handler.getUserNotifications = sinon
+        .stub()
+        .callsArgWith(1, null, [notification])
+      ctx.controller.getNotification(ctx.req, {
+        json: body => {
+          body.should.deep.equal(notification)
+          resolve()
+        },
+        status: () => ({
+          end: () => {},
+        }),
       })
     })
   })
