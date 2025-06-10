@@ -1,4 +1,5 @@
 :root {
+  --history-react-icon-color: var(--content-disabled);
   --history-react-header-bg: var(--bg-dark-secondary);
   --history-react-header-color: var(--content-primary-dark);
   --history-react-separator-color: var(--border-divider-dark);
@@ -8,6 +9,61 @@
   --history-react-header-bg: var(--bg-light-primary);
   --history-react-header-color: var(--content-primary);
   --history-react-separator-color: var(--border-divider);
+}
+
+.ide-redesign-main {
+  --history-react-header-bg: var(--bg-primary-themed);
+  --history-react-header-color: var(--content-primary-themed);
+  --history-react-icon-color: var(--file-tree-item-color);
+
+  .history-file-tree {
+    ul.history-file-tree-list {
+      padding: var(--spacing-02);
+
+      .history-file-tree-item > ul,
+      ul[role='tree'] {
+        border-left: 1px solid
+          color-mix(in srgb, var(--border-primary-themed) 24%, transparent);
+        margin-left: 14px !important;
+        margin-top: 0;
+      }
+
+      li {
+        padding: var(--spacing-02);
+        padding-right: 0;
+        margin-left: 0;
+      }
+
+      .history-file-tree-item {
+        border-radius: var(--border-radius-base);
+
+        .history-file-tree-item-name-wrapper {
+          .history-file-tree-item-badge {
+            margin-right: var(--spacing-02);
+          }
+        }
+
+        &::before {
+          display: none;
+        }
+
+        .material-symbols {
+          &.file-tree-expand-icon {
+            margin-left: 0;
+            vertical-align: middle;
+          }
+
+          &.file-tree-icon {
+            margin-left: 0;
+          }
+        }
+      }
+    }
+  }
+
+  ul[role='tree'].history-file-tree-list-inner {
+    padding-left: 10px;
+  }
 }
 
 history-root {
@@ -510,7 +566,7 @@ history-root {
       }
 
       .material-symbols {
-        color: var(--content-disabled);
+        color: var(--history-react-icon-color);
 
         &.file-tree-icon {
           margin-right: var(--spacing-02);
