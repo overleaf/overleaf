@@ -470,6 +470,8 @@ describe('chunkStore', function () {
 
         describe('with changes queued in the Redis buffer', function () {
           let queuedChanges
+          const firstQueuedChangeTimestamp = new Date('2017-01-01T00:01:00')
+          const lastQueuedChangeTimestamp = new Date('2017-01-01T00:02:00')
 
           beforeEach(async function () {
             const snapshot = thirdChunk.getSnapshot()
@@ -481,7 +483,15 @@ describe('chunkStore', function () {
                   'in-redis.tex',
                   File.createLazyFromBlobs(blob)
                 ),
-                new Date()
+                firstQueuedChangeTimestamp
+              ),
+              makeChange(
+                // Add a second change to make the buffer more interesting
+                Operation.editFile(
+                  'in-redis.tex',
+                  TextOperation.fromJSON({ textOperation: ['hello'] })
+                ),
+                lastQueuedChangeTimestamp
               ),
             ]
             await redisBackend.queueChanges(
@@ -503,6 +513,9 @@ describe('chunkStore', function () {
             )
             expect(chunk.getEndVersion()).to.equal(
               thirdChunk.getEndVersion() + queuedChanges.length
+            )
+            expect(chunk.getEndTimestamp()).to.deep.equal(
+              lastQueuedChangeTimestamp
             )
           })
 
@@ -534,6 +547,7 @@ describe('chunkStore', function () {
               secondChunk.getStartVersion()
             )
             expect(chunk.getEndVersion()).to.equal(secondChunk.getEndVersion())
+            expect(chunk.getEndTimestamp()).to.deep.equal(secondChunkTimestamp)
           })
 
           it('includes the queued changes when getting the latest chunk by version', async function () {
@@ -551,6 +565,9 @@ describe('chunkStore', function () {
             expect(chunk.getEndVersion()).to.equal(
               thirdChunk.getEndVersion() + queuedChanges.length
             )
+            expect(chunk.getEndTimestamp()).to.deep.equal(
+              lastQueuedChangeTimestamp
+            )
           })
 
           it("doesn't include the queued changes when getting another chunk by version", async function () {
@@ -564,6 +581,43 @@ describe('chunkStore', function () {
               secondChunk.getStartVersion()
             )
             expect(chunk.getEndVersion()).to.equal(secondChunk.getEndVersion())
+            expect(chunk.getEndTimestamp()).to.deep.equal(secondChunkTimestamp)
+          })
+
+          it('loads a version that is only in the Redis buffer', async function () {
+            const versionInRedis = thirdChunk.getEndVersion() + 1 // the first change in Redis
+            const chunk = await chunkStore.loadAtVersion(
+              projectId,
+              versionInRedis
+            )
+            // The chunk should contain changes from the thirdChunk and the queuedChanges
+            const expectedChanges = thirdChunk
+              .getChanges()
+              .concat(queuedChanges)
+            expect(chunk.getChanges()).to.deep.equal(expectedChanges)
+            expect(chunk.getStartVersion()).to.equal(
+              thirdChunk.getStartVersion()
+            )
+            expect(chunk.getEndVersion()).to.equal(
+              thirdChunk.getEndVersion() + queuedChanges.length
+            )
+            expect(chunk.getEndTimestamp()).to.deep.equal(
+              lastQueuedChangeTimestamp
+            )
+          })
+
+          it('throws an error when loading a version beyond the Redis buffer', async function () {
+            const versionBeyondRedis =
+              thirdChunk.getEndVersion() + queuedChanges.length + 1
+            await expect(
+              chunkStore.loadAtVersion(projectId, versionBeyondRedis)
+            )
+              .to.be.rejectedWith(chunkStore.VersionOutOfBoundsError)
+              .and.eventually.satisfy(err => {
+                expect(err.info).to.have.property('projectId', projectId)
+                expect(err.info).to.have.property('version', versionBeyondRedis)
+                return true
+              })
           })
         })
 

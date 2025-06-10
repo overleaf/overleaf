@@ -151,20 +151,44 @@ async function loadAtVersion(projectId, version, opts = {}) {
   const backend = getBackend(projectId)
   const blobStore = new BlobStore(projectId)
   const batchBlobStore = new BatchBlobStore(blobStore)
+  const latestChunkMetadata = await getLatestChunkMetadata(projectId)
 
-  const chunkRecord = await backend.getChunkForVersion(projectId, version, {
-    preferNewer: opts.preferNewer,
-  })
+  // When loading a chunk for a version there are three cases to consider:
+  // 1. If `persistedOnly` is true, we always use the requested version
+  //  to fetch the chunk.
+  // 2. If `persistedOnly` is false and the requested version is in the
+  //  persisted chunk version range, we use the requested version.
+  // 3. If `persistedOnly` is false and the requested version is ahead of
+  //  the persisted chunk versions, we fetch the latest chunk and see if
+  //  the non-persisted changes include the requested version.
+  const targetChunkVersion = opts.persistedOnly
+    ? version
+    : Math.min(latestChunkMetadata.endVersion, version)
+
+  const chunkRecord = await backend.getChunkForVersion(
+    projectId,
+    targetChunkVersion,
+    {
+      preferNewer: opts.preferNewer,
+    }
+  )
   const rawHistory = await historyStore.loadRaw(projectId, chunkRecord.id)
   const history = History.fromRaw(rawHistory)
   const startVersion = chunkRecord.endVersion - history.countChanges()
 
   if (!opts.persistedOnly) {
+    // Try to extend the chunk with any non-persisted changes that
+    // follow the chunk's end version.
     const nonPersistedChanges = await getChunkExtension(
       projectId,
       chunkRecord.endVersion
     )
     history.pushChanges(nonPersistedChanges)
+
+    // Check that the changes do actually contain the requested version
+    if (version > chunkRecord.endVersion + nonPersistedChanges.length) {
+      throw new Chunk.VersionNotFoundError(projectId, version)
+    }
   }
 
   await lazyLoadHistoryFiles(history, batchBlobStore)
