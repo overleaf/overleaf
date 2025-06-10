@@ -17,19 +17,15 @@ describe('DocManager', function () {
     this.version = 42
 
     this.MongoManager = {
-      promises: {
-        findDoc: sinon.stub(),
-        getProjectsDocs: sinon.stub(),
-        patchDoc: sinon.stub().resolves(),
-        upsertIntoDocCollection: sinon.stub().resolves(),
-      },
+      findDoc: sinon.stub(),
+      getProjectsDocs: sinon.stub(),
+      patchDoc: sinon.stub().resolves(),
+      upsertIntoDocCollection: sinon.stub().resolves(),
     }
     this.DocArchiveManager = {
-      promises: {
-        unarchiveDoc: sinon.stub(),
-        unArchiveAllDocs: sinon.stub(),
-        archiveDoc: sinon.stub().resolves(),
-      },
+      unarchiveDoc: sinon.stub(),
+      unArchiveAllDocs: sinon.stub(),
+      archiveDoc: sinon.stub().resolves(),
     }
     this.RangeManager = {
       jsonRangesToMongo(r) {
@@ -52,7 +48,7 @@ describe('DocManager', function () {
 
   describe('getFullDoc', function () {
     beforeEach(function () {
-      this.DocManager.promises._getDoc = sinon.stub()
+      this.DocManager._getDoc = sinon.stub()
       this.doc = {
         _id: this.doc_id,
         lines: ['2134'],
@@ -60,13 +56,10 @@ describe('DocManager', function () {
     })
 
     it('should call get doc with a quick filter', async function () {
-      this.DocManager.promises._getDoc.resolves(this.doc)
-      const doc = await this.DocManager.promises.getFullDoc(
-        this.project_id,
-        this.doc_id
-      )
+      this.DocManager._getDoc.resolves(this.doc)
+      const doc = await this.DocManager.getFullDoc(this.project_id, this.doc_id)
       doc.should.equal(this.doc)
-      this.DocManager.promises._getDoc
+      this.DocManager._getDoc
         .calledWith(this.project_id, this.doc_id, {
           lines: true,
           rev: true,
@@ -79,27 +72,27 @@ describe('DocManager', function () {
     })
 
     it('should return error when get doc errors', async function () {
-      this.DocManager.promises._getDoc.rejects(this.stubbedError)
+      this.DocManager._getDoc.rejects(this.stubbedError)
       await expect(
-        this.DocManager.promises.getFullDoc(this.project_id, this.doc_id)
+        this.DocManager.getFullDoc(this.project_id, this.doc_id)
       ).to.be.rejectedWith(this.stubbedError)
     })
   })
 
   describe('getRawDoc', function () {
     beforeEach(function () {
-      this.DocManager.promises._getDoc = sinon.stub()
+      this.DocManager._getDoc = sinon.stub()
       this.doc = { lines: ['2134'] }
     })
 
     it('should call get doc with a quick filter', async function () {
-      this.DocManager.promises._getDoc.resolves(this.doc)
-      const doc = await this.DocManager.promises.getDocLines(
+      this.DocManager._getDoc.resolves(this.doc)
+      const content = await this.DocManager.getDocLines(
         this.project_id,
         this.doc_id
       )
-      doc.should.equal(this.doc)
-      this.DocManager.promises._getDoc
+      content.should.equal(this.doc.lines.join('\n'))
+      this.DocManager._getDoc
         .calledWith(this.project_id, this.doc_id, {
           lines: true,
           inS3: true,
@@ -108,10 +101,24 @@ describe('DocManager', function () {
     })
 
     it('should return error when get doc errors', async function () {
-      this.DocManager.promises._getDoc.rejects(this.stubbedError)
+      this.DocManager._getDoc.rejects(this.stubbedError)
       await expect(
-        this.DocManager.promises.getDocLines(this.project_id, this.doc_id)
+        this.DocManager.getDocLines(this.project_id, this.doc_id)
       ).to.be.rejectedWith(this.stubbedError)
+    })
+
+    it('should return error when get doc does not exist', async function () {
+      this.DocManager._getDoc.resolves(null)
+      await expect(
+        this.DocManager.getDocLines(this.project_id, this.doc_id)
+      ).to.be.rejectedWith(Errors.NotFoundError)
+    })
+
+    it('should return error when get doc has no lines', async function () {
+      this.DocManager._getDoc.resolves({})
+      await expect(
+        this.DocManager.getDocLines(this.project_id, this.doc_id)
+      ).to.be.rejectedWith(Errors.DocWithoutLinesError)
     })
   })
 
@@ -128,26 +135,25 @@ describe('DocManager', function () {
 
     describe('when using a filter', function () {
       beforeEach(function () {
-        this.MongoManager.promises.findDoc.resolves(this.doc)
+        this.MongoManager.findDoc.resolves(this.doc)
       })
 
       it('should error if inS3 is not set to true', async function () {
         await expect(
-          this.DocManager.promises._getDoc(this.project_id, this.doc_id, {
+          this.DocManager._getDoc(this.project_id, this.doc_id, {
             inS3: false,
           })
         ).to.be.rejected
       })
 
       it('should always get inS3 even when no filter is passed', async function () {
-        await expect(
-          this.DocManager.promises._getDoc(this.project_id, this.doc_id)
-        ).to.be.rejected
-        this.MongoManager.promises.findDoc.called.should.equal(false)
+        await expect(this.DocManager._getDoc(this.project_id, this.doc_id)).to
+          .be.rejected
+        this.MongoManager.findDoc.called.should.equal(false)
       })
 
       it('should not error if inS3 is set to true', async function () {
-        await this.DocManager.promises._getDoc(this.project_id, this.doc_id, {
+        await this.DocManager._getDoc(this.project_id, this.doc_id, {
           inS3: true,
         })
       })
@@ -155,8 +161,8 @@ describe('DocManager', function () {
 
     describe('when the doc is in the doc collection', function () {
       beforeEach(async function () {
-        this.MongoManager.promises.findDoc.resolves(this.doc)
-        this.result = await this.DocManager.promises._getDoc(
+        this.MongoManager.findDoc.resolves(this.doc)
+        this.result = await this.DocManager._getDoc(
           this.project_id,
           this.doc_id,
           { version: true, inS3: true }
@@ -164,7 +170,7 @@ describe('DocManager', function () {
       })
 
       it('should get the doc from the doc collection', function () {
-        this.MongoManager.promises.findDoc
+        this.MongoManager.findDoc
           .calledWith(this.project_id, this.doc_id)
           .should.equal(true)
       })
@@ -177,9 +183,9 @@ describe('DocManager', function () {
 
     describe('when MongoManager.findDoc errors', function () {
       it('should return the error', async function () {
-        this.MongoManager.promises.findDoc.rejects(this.stubbedError)
+        this.MongoManager.findDoc.rejects(this.stubbedError)
         await expect(
-          this.DocManager.promises._getDoc(this.project_id, this.doc_id, {
+          this.DocManager._getDoc(this.project_id, this.doc_id, {
             version: true,
             inS3: true,
           })
@@ -202,15 +208,15 @@ describe('DocManager', function () {
           version: 2,
           inS3: false,
         }
-        this.MongoManager.promises.findDoc.resolves(this.doc)
-        this.DocArchiveManager.promises.unarchiveDoc.callsFake(
+        this.MongoManager.findDoc.resolves(this.doc)
+        this.DocArchiveManager.unarchiveDoc.callsFake(
           async (projectId, docId) => {
-            this.MongoManager.promises.findDoc.resolves({
+            this.MongoManager.findDoc.resolves({
               ...this.unarchivedDoc,
             })
           }
         )
-        this.result = await this.DocManager.promises._getDoc(
+        this.result = await this.DocManager._getDoc(
           this.project_id,
           this.doc_id,
           {
@@ -221,13 +227,13 @@ describe('DocManager', function () {
       })
 
       it('should call the DocArchive to unarchive the doc', function () {
-        this.DocArchiveManager.promises.unarchiveDoc
+        this.DocArchiveManager.unarchiveDoc
           .calledWith(this.project_id, this.doc_id)
           .should.equal(true)
       })
 
       it('should look up the doc twice', function () {
-        this.MongoManager.promises.findDoc.calledTwice.should.equal(true)
+        this.MongoManager.findDoc.calledTwice.should.equal(true)
       })
 
       it('should return the doc', function () {
@@ -239,9 +245,9 @@ describe('DocManager', function () {
 
     describe('when the doc does not exist in the docs collection', function () {
       it('should return a NotFoundError', async function () {
-        this.MongoManager.promises.findDoc.resolves(null)
+        this.MongoManager.findDoc.resolves(null)
         await expect(
-          this.DocManager.promises._getDoc(this.project_id, this.doc_id, {
+          this.DocManager._getDoc(this.project_id, this.doc_id, {
             version: true,
             inS3: true,
           })
@@ -262,17 +268,17 @@ describe('DocManager', function () {
             lines: ['mock-lines'],
           },
         ]
-        this.MongoManager.promises.getProjectsDocs.resolves(this.docs)
-        this.DocArchiveManager.promises.unArchiveAllDocs.resolves(this.docs)
+        this.MongoManager.getProjectsDocs.resolves(this.docs)
+        this.DocArchiveManager.unArchiveAllDocs.resolves(this.docs)
         this.filter = { lines: true }
-        this.result = await this.DocManager.promises.getAllNonDeletedDocs(
+        this.result = await this.DocManager.getAllNonDeletedDocs(
           this.project_id,
           this.filter
         )
       })
 
       it('should get the project from the database', function () {
-        this.MongoManager.promises.getProjectsDocs.should.have.been.calledWith(
+        this.MongoManager.getProjectsDocs.should.have.been.calledWith(
           this.project_id,
           { include_deleted: false },
           this.filter
@@ -286,13 +292,10 @@ describe('DocManager', function () {
 
     describe('when there are no docs for the project', function () {
       it('should return a NotFoundError', async function () {
-        this.MongoManager.promises.getProjectsDocs.resolves(null)
-        this.DocArchiveManager.promises.unArchiveAllDocs.resolves(null)
+        this.MongoManager.getProjectsDocs.resolves(null)
+        this.DocArchiveManager.unArchiveAllDocs.resolves(null)
         await expect(
-          this.DocManager.promises.getAllNonDeletedDocs(
-            this.project_id,
-            this.filter
-          )
+          this.DocManager.getAllNonDeletedDocs(this.project_id, this.filter)
         ).to.be.rejectedWith(`No docs for project ${this.project_id}`)
       })
     })
@@ -303,7 +306,7 @@ describe('DocManager', function () {
       beforeEach(function () {
         this.lines = ['mock', 'doc', 'lines']
         this.rev = 77
-        this.MongoManager.promises.findDoc.resolves({
+        this.MongoManager.findDoc.resolves({
           _id: new ObjectId(this.doc_id),
         })
         this.meta = {}
@@ -311,7 +314,7 @@ describe('DocManager', function () {
 
       describe('standard path', function () {
         beforeEach(async function () {
-          await this.DocManager.promises.patchDoc(
+          await this.DocManager.patchDoc(
             this.project_id,
             this.doc_id,
             this.meta
@@ -319,14 +322,14 @@ describe('DocManager', function () {
         })
 
         it('should get the doc', function () {
-          expect(this.MongoManager.promises.findDoc).to.have.been.calledWith(
+          expect(this.MongoManager.findDoc).to.have.been.calledWith(
             this.project_id,
             this.doc_id
           )
         })
 
         it('should persist the meta', function () {
-          expect(this.MongoManager.promises.patchDoc).to.have.been.calledWith(
+          expect(this.MongoManager.patchDoc).to.have.been.calledWith(
             this.project_id,
             this.doc_id,
             this.meta
@@ -339,7 +342,7 @@ describe('DocManager', function () {
           this.settings.docstore.archiveOnSoftDelete = false
           this.meta.deleted = true
 
-          await this.DocManager.promises.patchDoc(
+          await this.DocManager.patchDoc(
             this.project_id,
             this.doc_id,
             this.meta
@@ -347,8 +350,7 @@ describe('DocManager', function () {
         })
 
         it('should not flush the doc out of mongo', function () {
-          expect(this.DocArchiveManager.promises.archiveDoc).to.not.have.been
-            .called
+          expect(this.DocArchiveManager.archiveDoc).to.not.have.been.called
         })
       })
 
@@ -356,7 +358,7 @@ describe('DocManager', function () {
         beforeEach(async function () {
           this.settings.docstore.archiveOnSoftDelete = false
           this.meta.deleted = false
-          await this.DocManager.promises.patchDoc(
+          await this.DocManager.patchDoc(
             this.project_id,
             this.doc_id,
             this.meta
@@ -364,8 +366,7 @@ describe('DocManager', function () {
         })
 
         it('should not flush the doc out of mongo', function () {
-          expect(this.DocArchiveManager.promises.archiveDoc).to.not.have.been
-            .called
+          expect(this.DocArchiveManager.archiveDoc).to.not.have.been.called
         })
       })
 
@@ -377,7 +378,7 @@ describe('DocManager', function () {
 
         describe('when the background flush succeeds', function () {
           beforeEach(async function () {
-            await this.DocManager.promises.patchDoc(
+            await this.DocManager.patchDoc(
               this.project_id,
               this.doc_id,
               this.meta
@@ -389,17 +390,18 @@ describe('DocManager', function () {
           })
 
           it('should flush the doc out of mongo', function () {
-            expect(
-              this.DocArchiveManager.promises.archiveDoc
-            ).to.have.been.calledWith(this.project_id, this.doc_id)
+            expect(this.DocArchiveManager.archiveDoc).to.have.been.calledWith(
+              this.project_id,
+              this.doc_id
+            )
           })
         })
 
         describe('when the background flush fails', function () {
           beforeEach(async function () {
             this.err = new Error('foo')
-            this.DocArchiveManager.promises.archiveDoc.rejects(this.err)
-            await this.DocManager.promises.patchDoc(
+            this.DocArchiveManager.archiveDoc.rejects(this.err)
+            await this.DocManager.patchDoc(
               this.project_id,
               this.doc_id,
               this.meta
@@ -422,9 +424,9 @@ describe('DocManager', function () {
 
     describe('when the doc does not exist', function () {
       it('should return a NotFoundError', async function () {
-        this.MongoManager.promises.findDoc.resolves(null)
+        this.MongoManager.findDoc.resolves(null)
         await expect(
-          this.DocManager.promises.patchDoc(this.project_id, this.doc_id, {})
+          this.DocManager.patchDoc(this.project_id, this.doc_id, {})
         ).to.be.rejectedWith(
           `No such project/doc to delete: ${this.project_id}/${this.doc_id}`
         )
@@ -470,13 +472,13 @@ describe('DocManager', function () {
         ranges: this.originalRanges,
       }
 
-      this.DocManager.promises._getDoc = sinon.stub()
+      this.DocManager._getDoc = sinon.stub()
     })
 
     describe('when only the doc lines have changed', function () {
       beforeEach(async function () {
-        this.DocManager.promises._getDoc = sinon.stub().resolves(this.doc)
-        this.result = await this.DocManager.promises.updateDoc(
+        this.DocManager._getDoc = sinon.stub().resolves(this.doc)
+        this.result = await this.DocManager.updateDoc(
           this.project_id,
           this.doc_id,
           this.newDocLines,
@@ -486,7 +488,7 @@ describe('DocManager', function () {
       })
 
       it('should get the existing doc', function () {
-        this.DocManager.promises._getDoc
+        this.DocManager._getDoc
           .calledWith(this.project_id, this.doc_id, {
             version: true,
             rev: true,
@@ -498,7 +500,7 @@ describe('DocManager', function () {
       })
 
       it('should upsert the document to the doc collection', function () {
-        this.MongoManager.promises.upsertIntoDocCollection
+        this.MongoManager.upsertIntoDocCollection
           .calledWith(this.project_id, this.doc_id, this.rev, {
             lines: this.newDocLines,
           })
@@ -512,9 +514,9 @@ describe('DocManager', function () {
 
     describe('when the doc ranges have changed', function () {
       beforeEach(async function () {
-        this.DocManager.promises._getDoc = sinon.stub().resolves(this.doc)
+        this.DocManager._getDoc = sinon.stub().resolves(this.doc)
         this.RangeManager.shouldUpdateRanges.returns(true)
-        this.result = await this.DocManager.promises.updateDoc(
+        this.result = await this.DocManager.updateDoc(
           this.project_id,
           this.doc_id,
           this.oldDocLines,
@@ -524,7 +526,7 @@ describe('DocManager', function () {
       })
 
       it('should upsert the ranges', function () {
-        this.MongoManager.promises.upsertIntoDocCollection
+        this.MongoManager.upsertIntoDocCollection
           .calledWith(this.project_id, this.doc_id, this.rev, {
             ranges: this.newRanges,
           })
@@ -538,8 +540,8 @@ describe('DocManager', function () {
 
     describe('when only the version has changed', function () {
       beforeEach(async function () {
-        this.DocManager.promises._getDoc = sinon.stub().resolves(this.doc)
-        this.result = await this.DocManager.promises.updateDoc(
+        this.DocManager._getDoc = sinon.stub().resolves(this.doc)
+        this.result = await this.DocManager.updateDoc(
           this.project_id,
           this.doc_id,
           this.oldDocLines,
@@ -549,7 +551,7 @@ describe('DocManager', function () {
       })
 
       it('should update the version', function () {
-        this.MongoManager.promises.upsertIntoDocCollection.should.have.been.calledWith(
+        this.MongoManager.upsertIntoDocCollection.should.have.been.calledWith(
           this.project_id,
           this.doc_id,
           this.rev,
@@ -564,8 +566,8 @@ describe('DocManager', function () {
 
     describe('when the doc has not changed at all', function () {
       beforeEach(async function () {
-        this.DocManager.promises._getDoc = sinon.stub().resolves(this.doc)
-        this.result = await this.DocManager.promises.updateDoc(
+        this.DocManager._getDoc = sinon.stub().resolves(this.doc)
+        this.result = await this.DocManager.updateDoc(
           this.project_id,
           this.doc_id,
           this.oldDocLines,
@@ -575,9 +577,7 @@ describe('DocManager', function () {
       })
 
       it('should not update the ranges or lines or version', function () {
-        this.MongoManager.promises.upsertIntoDocCollection.called.should.equal(
-          false
-        )
+        this.MongoManager.upsertIntoDocCollection.called.should.equal(false)
       })
 
       it('should return the old rev and modified == false', function () {
@@ -588,7 +588,7 @@ describe('DocManager', function () {
     describe('when the version is null', function () {
       it('should return an error', async function () {
         await expect(
-          this.DocManager.promises.updateDoc(
+          this.DocManager.updateDoc(
             this.project_id,
             this.doc_id,
             this.newDocLines,
@@ -602,7 +602,7 @@ describe('DocManager', function () {
     describe('when the lines are null', function () {
       it('should return an error', async function () {
         await expect(
-          this.DocManager.promises.updateDoc(
+          this.DocManager.updateDoc(
             this.project_id,
             this.doc_id,
             null,
@@ -616,7 +616,7 @@ describe('DocManager', function () {
     describe('when the ranges are null', function () {
       it('should return an error', async function () {
         await expect(
-          this.DocManager.promises.updateDoc(
+          this.DocManager.updateDoc(
             this.project_id,
             this.doc_id,
             this.newDocLines,
@@ -630,9 +630,9 @@ describe('DocManager', function () {
     describe('when there is a generic error getting the doc', function () {
       beforeEach(async function () {
         this.error = new Error('doc could not be found')
-        this.DocManager.promises._getDoc = sinon.stub().rejects(this.error)
+        this.DocManager._getDoc = sinon.stub().rejects(this.error)
         await expect(
-          this.DocManager.promises.updateDoc(
+          this.DocManager.updateDoc(
             this.project_id,
             this.doc_id,
             this.newDocLines,
@@ -643,16 +643,15 @@ describe('DocManager', function () {
       })
 
       it('should not upsert the document to the doc collection', function () {
-        this.MongoManager.promises.upsertIntoDocCollection.should.not.have.been
-          .called
+        this.MongoManager.upsertIntoDocCollection.should.not.have.been.called
       })
     })
 
     describe('when the version was decremented', function () {
       it('should return an error', async function () {
-        this.DocManager.promises._getDoc = sinon.stub().resolves(this.doc)
+        this.DocManager._getDoc = sinon.stub().resolves(this.doc)
         await expect(
-          this.DocManager.promises.updateDoc(
+          this.DocManager.updateDoc(
             this.project_id,
             this.doc_id,
             this.newDocLines,
@@ -665,8 +664,8 @@ describe('DocManager', function () {
 
     describe('when the doc lines have not changed', function () {
       beforeEach(async function () {
-        this.DocManager.promises._getDoc = sinon.stub().resolves(this.doc)
-        this.result = await this.DocManager.promises.updateDoc(
+        this.DocManager._getDoc = sinon.stub().resolves(this.doc)
+        this.result = await this.DocManager.updateDoc(
           this.project_id,
           this.doc_id,
           this.oldDocLines.slice(),
@@ -676,9 +675,7 @@ describe('DocManager', function () {
       })
 
       it('should not update the doc', function () {
-        this.MongoManager.promises.upsertIntoDocCollection.called.should.equal(
-          false
-        )
+        this.MongoManager.upsertIntoDocCollection.called.should.equal(false)
       })
 
       it('should return the existing rev', function () {
@@ -688,8 +685,8 @@ describe('DocManager', function () {
 
     describe('when the doc does not exist', function () {
       beforeEach(async function () {
-        this.DocManager.promises._getDoc = sinon.stub().resolves(null)
-        this.result = await this.DocManager.promises.updateDoc(
+        this.DocManager._getDoc = sinon.stub().resolves(null)
+        this.result = await this.DocManager.updateDoc(
           this.project_id,
           this.doc_id,
           this.newDocLines,
@@ -699,7 +696,7 @@ describe('DocManager', function () {
       })
 
       it('should upsert the document to the doc collection', function () {
-        this.MongoManager.promises.upsertIntoDocCollection.should.have.been.calledWith(
+        this.MongoManager.upsertIntoDocCollection.should.have.been.calledWith(
           this.project_id,
           this.doc_id,
           undefined,
@@ -718,12 +715,12 @@ describe('DocManager', function () {
 
     describe('when another update is racing', function () {
       beforeEach(async function () {
-        this.DocManager.promises._getDoc = sinon.stub().resolves(this.doc)
-        this.MongoManager.promises.upsertIntoDocCollection
+        this.DocManager._getDoc = sinon.stub().resolves(this.doc)
+        this.MongoManager.upsertIntoDocCollection
           .onFirstCall()
           .rejects(new Errors.DocRevValueError())
         this.RangeManager.shouldUpdateRanges.returns(true)
-        this.result = await this.DocManager.promises.updateDoc(
+        this.result = await this.DocManager.updateDoc(
           this.project_id,
           this.doc_id,
           this.newDocLines,
@@ -733,7 +730,7 @@ describe('DocManager', function () {
       })
 
       it('should upsert the doc twice', function () {
-        this.MongoManager.promises.upsertIntoDocCollection.should.have.been.calledWith(
+        this.MongoManager.upsertIntoDocCollection.should.have.been.calledWith(
           this.project_id,
           this.doc_id,
           this.rev,
@@ -743,8 +740,7 @@ describe('DocManager', function () {
             version: this.version + 1,
           }
         )
-        this.MongoManager.promises.upsertIntoDocCollection.should.have.been
-          .calledTwice
+        this.MongoManager.upsertIntoDocCollection.should.have.been.calledTwice
       })
 
       it('should return the new rev', function () {

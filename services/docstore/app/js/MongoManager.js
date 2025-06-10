@@ -1,7 +1,6 @@
 const { db, ObjectId } = require('./mongodb')
 const Settings = require('@overleaf/settings')
 const Errors = require('./Errors')
-const { callbackify } = require('node:util')
 
 const ARCHIVING_LOCK_DURATION_MS = Settings.archivingLockDurationMs
 
@@ -241,34 +240,17 @@ async function destroyProject(projectId) {
 }
 
 module.exports = {
-  findDoc: callbackify(findDoc),
-  getProjectsDeletedDocs: callbackify(getProjectsDeletedDocs),
-  getProjectsDocs: callbackify(getProjectsDocs),
-  getArchivedProjectDocs: callbackify(getArchivedProjectDocs),
-  getNonArchivedProjectDocIds: callbackify(getNonArchivedProjectDocIds),
-  getNonDeletedArchivedProjectDocs: callbackify(
-    getNonDeletedArchivedProjectDocs
-  ),
-  upsertIntoDocCollection: callbackify(upsertIntoDocCollection),
-  restoreArchivedDoc: callbackify(restoreArchivedDoc),
-  patchDoc: callbackify(patchDoc),
-  getDocForArchiving: callbackify(getDocForArchiving),
-  markDocAsArchived: callbackify(markDocAsArchived),
-  checkRevUnchanged: callbackify(checkRevUnchanged),
-  destroyProject: callbackify(destroyProject),
-  promises: {
-    findDoc,
-    getProjectsDeletedDocs,
-    getProjectsDocs,
-    getArchivedProjectDocs,
-    getNonArchivedProjectDocIds,
-    getNonDeletedArchivedProjectDocs,
-    upsertIntoDocCollection,
-    restoreArchivedDoc,
-    patchDoc,
-    getDocForArchiving,
-    markDocAsArchived,
-    checkRevUnchanged,
-    destroyProject,
-  },
+  findDoc,
+  getProjectsDeletedDocs,
+  getProjectsDocs,
+  getArchivedProjectDocs,
+  getNonArchivedProjectDocIds,
+  getNonDeletedArchivedProjectDocs,
+  upsertIntoDocCollection,
+  restoreArchivedDoc,
+  patchDoc,
+  getDocForArchiving,
+  markDocAsArchived,
+  checkRevUnchanged,
+  destroyProject,
 }

@@ -181,6 +181,13 @@ module.exports = DocstoreClient = {
     )
   },
 
+  healthCheck(callback) {
+    request.get(
+      `http://127.0.0.1:${settings.internal.docstore.port}/health_check`,
+      callback
+    )
+  },
+
   getS3Doc(projectId, docId, callback) {
     getStringFromPersistor(
       Persistor,

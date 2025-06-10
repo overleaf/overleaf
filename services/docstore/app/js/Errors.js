@@ -10,10 +10,13 @@ class DocRevValueError extends OError {}
 
 class DocVersionDecrementedError extends OError {}
 
+class DocWithoutLinesError extends OError {}
+
 module.exports = {
   Md5MismatchError,
   DocModifiedError,
   DocRevValueError,
   DocVersionDecrementedError,
+  DocWithoutLinesError,
   ...Errors,
 }

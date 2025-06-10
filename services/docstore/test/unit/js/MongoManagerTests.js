@@ -41,7 +41,7 @@ describe('MongoManager', function () {
       this.doc = { name: 'mock-doc' }
       this.db.docs.findOne = sinon.stub().resolves(this.doc)
       this.filter = { lines: true }
-      this.result = await this.MongoManager.promises.findDoc(
+      this.result = await this.MongoManager.findDoc(
         this.projectId,
         this.docId,
         this.filter
@@ -70,11 +70,7 @@ describe('MongoManager', function () {
   describe('patchDoc', function () {
     beforeEach(async function () {
       this.meta = { name: 'foo.tex' }
-      await this.MongoManager.promises.patchDoc(
-        this.projectId,
-        this.docId,
-        this.meta
-      )
+      await this.MongoManager.patchDoc(this.projectId, this.docId, this.meta)
     })
 
     it('should pass the parameter along', function () {
@@ -104,7 +100,7 @@ describe('MongoManager', function () {
 
     describe('with included_deleted = false', function () {
       beforeEach(async function () {
-        this.result = await this.MongoManager.promises.getProjectsDocs(
+        this.result = await this.MongoManager.getProjectsDocs(
           this.projectId,
           { include_deleted: false },
           this.filter
@@ -132,7 +128,7 @@ describe('MongoManager', function () {
 
     describe('with included_deleted = true', function () {
       beforeEach(async function () {
-        this.result = await this.MongoManager.promises.getProjectsDocs(
+        this.result = await this.MongoManager.getProjectsDocs(
           this.projectId,
           { include_deleted: true },
           this.filter
@@ -167,7 +163,7 @@ describe('MongoManager', function () {
       this.db.docs.find = sinon.stub().returns({
         toArray: sinon.stub().resolves([this.doc1, this.doc2, this.doc3]),
       })
-      this.result = await this.MongoManager.promises.getProjectsDeletedDocs(
+      this.result = await this.MongoManager.getProjectsDeletedDocs(
         this.projectId,
         this.filter
       )
@@ -203,7 +199,7 @@ describe('MongoManager', function () {
     })
 
     it('should upsert the document', async function () {
-      await this.MongoManager.promises.upsertIntoDocCollection(
+      await this.MongoManager.upsertIntoDocCollection(
         this.projectId,
         this.docId,
         this.oldRev,
@@ -223,7 +219,7 @@ describe('MongoManager', function () {
     it('should handle update error', async function () {
       this.db.docs.updateOne.rejects(this.stubbedErr)
       await expect(
-        this.MongoManager.promises.upsertIntoDocCollection(
+        this.MongoManager.upsertIntoDocCollection(
           this.projectId,
           this.docId,
           this.rev,
@@ -235,7 +231,7 @@ describe('MongoManager', function () {
     })
 
     it('should insert without a previous rev', async function () {
-      await this.MongoManager.promises.upsertIntoDocCollection(
+      await this.MongoManager.upsertIntoDocCollection(
         this.projectId,
         this.docId,
         null,
@@ -254,7 +250,7 @@ describe('MongoManager', function () {
     it('should handle generic insert error', async function () {
       this.db.docs.insertOne.rejects(this.stubbedErr)
       await expect(
-        this.MongoManager.promises.upsertIntoDocCollection(
+        this.MongoManager.upsertIntoDocCollection(
           this.projectId,
           this.docId,
           null,
@@ -266,7 +262,7 @@ describe('MongoManager', function () {
     it('should handle duplicate insert error', async function () {
       this.db.docs.insertOne.rejects({ code: 11000 })
       await expect(
-        this.MongoManager.promises.upsertIntoDocCollection(
+        this.MongoManager.upsertIntoDocCollection(
           this.projectId,
           this.docId,
           null,
@@ -280,7 +276,7 @@ describe('MongoManager', function () {
     beforeEach(async function () {
       this.projectId = new ObjectId()
       this.db.docs.deleteMany = sinon.stub().resolves()
-      await this.MongoManager.promises.destroyProject(this.projectId)
+      await this.MongoManager.destroyProject(this.projectId)
     })
 
     it('should destroy all docs', function () {
@@ -297,13 +293,13 @@ describe('MongoManager', function () {
 
     it('should not error when the rev has not changed', async function () {
       this.db.docs.findOne = sinon.stub().resolves({ rev: 1 })
-      await this.MongoManager.promises.checkRevUnchanged(this.doc)
+      await this.MongoManager.checkRevUnchanged(this.doc)
     })
 
     it('should return an error when the rev has changed', async function () {
       this.db.docs.findOne = sinon.stub().resolves({ rev: 2 })
       await expect(
-        this.MongoManager.promises.checkRevUnchanged(this.doc)
+        this.MongoManager.checkRevUnchanged(this.doc)
       ).to.be.rejectedWith(Errors.DocModifiedError)
     })
 
@@ -311,14 +307,14 @@ describe('MongoManager', function () {
       this.db.docs.findOne = sinon.stub().resolves({ rev: 2 })
       this.doc = { _id: new ObjectId(), name: 'mock-doc', rev: NaN }
       await expect(
-        this.MongoManager.promises.checkRevUnchanged(this.doc)
+        this.MongoManager.checkRevUnchanged(this.doc)
       ).to.be.rejectedWith(Errors.DocRevValueError)
     })
 
     it('should return a value error if checked doc rev is NaN', async function () {
       this.db.docs.findOne = sinon.stub().resolves({ rev: NaN })
       await expect(
-        this.MongoManager.promises.checkRevUnchanged(this.doc)
+        this.MongoManager.checkRevUnchanged(this.doc)
       ).to.be.rejectedWith(Errors.DocRevValueError)
     })
   })
@@ -334,7 +330,7 @@ describe('MongoManager', function () {
 
     describe('complete doc', function () {
       beforeEach(async function () {
-        await this.MongoManager.promises.restoreArchivedDoc(
+        await this.MongoManager.restoreArchivedDoc(
           this.projectId,
           this.docId,
           this.archivedDoc
@@ -364,7 +360,7 @@ describe('MongoManager', function () {
     describe('without ranges', function () {
       beforeEach(async function () {
         delete this.archivedDoc.ranges
-        await this.MongoManager.promises.restoreArchivedDoc(
+        await this.MongoManager.restoreArchivedDoc(
           this.projectId,
           this.docId,
           this.archivedDoc
@@ -395,7 +391,7 @@ describe('MongoManager', function () {
       it('throws a DocRevValueError', async function () {
         this.db.docs.updateOne.resolves({ matchedCount: 0 })
         await expect(
-          this.MongoManager.promises.restoreArchivedDoc(
+          this.MongoManager.restoreArchivedDoc(
             this.projectId,
             this.docId,
             this.archivedDoc

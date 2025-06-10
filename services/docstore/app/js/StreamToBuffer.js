@@ -2,13 +2,9 @@ const { LoggerStream, WritableBuffer } = require('@overleaf/stream-utils')
 const Settings = require('@overleaf/settings')
 const logger = require('@overleaf/logger/logging-manager')
 const { pipeline } = require('node:stream/promises')
-const { callbackify } = require('node:util')
 
 module.exports = {
-  streamToBuffer: callbackify(streamToBuffer),
-  promises: {
-    streamToBuffer,
-  },
+  streamToBuffer,
 }
 
 async function streamToBuffer(projectId, docId, stream) {

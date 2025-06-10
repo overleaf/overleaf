@@ -4,143 +4,92 @@ const DocArchive = require('./DocArchiveManager')
 const HealthChecker = require('./HealthChecker')
 const Errors = require('./Errors')
 const Settings = require('@overleaf/settings')
+const { expressify } = require('@overleaf/promise-utils')
 
-function getDoc(req, res, next) {
+async function getDoc(req, res) {
   const { doc_id: docId, project_id: projectId } = req.params
   const includeDeleted = req.query.include_deleted === 'true'
   logger.debug({ projectId, docId }, 'getting doc')
-  DocManager.getFullDoc(projectId, docId, function (error, doc) {
-    if (error) {
-      return next(error)
-    }
-    logger.debug({ docId, projectId }, 'got doc')
-    if (doc == null) {
-      res.sendStatus(404)
-    } else if (doc.deleted && !includeDeleted) {
-      res.sendStatus(404)
-    } else {
-      res.json(_buildDocView(doc))
-    }
-  })
+  const doc = await DocManager.getFullDoc(projectId, docId)
+  logger.debug({ docId, projectId }, 'got doc')
+  if (doc.deleted && !includeDeleted) {
+    res.sendStatus(404)
+  } else {
+    res.json(_buildDocView(doc))
+  }
 }
 
-function peekDoc(req, res, next) {
+async function peekDoc(req, res) {
   const { doc_id: docId, project_id: projectId } = req.params
   logger.debug({ projectId, docId }, 'peeking doc')
-  DocManager.peekDoc(projectId, docId, function (error, doc) {
-    if (error) {
-      return next(error)
-    }
-    if (doc == null) {
-      res.sendStatus(404)
-    } else {
-      res.setHeader('x-doc-status', doc.inS3 ? 'archived' : 'active')
-      res.json(_buildDocView(doc))
-    }
-  })
+  const doc = await DocManager.peekDoc(projectId, docId)
+  res.setHeader('x-doc-status', doc.inS3 ? 'archived' : 'active')
+  res.json(_buildDocView(doc))
 }
 
-function isDocDeleted(req, res, next) {
+async function isDocDeleted(req, res) {
   const { doc_id: docId, project_id: projectId } = req.params
-  DocManager.isDocDeleted(projectId, docId, function (error, deleted) {
-    if (error) {
-      return next(error)
-    }
-    res.json({ deleted })
-  })
+  const deleted = await DocManager.isDocDeleted(projectId, docId)
+  res.json({ deleted })
 }
 
-function getRawDoc(req, res, next) {
+async function getRawDoc(req, res) {
   const { doc_id: docId, project_id: projectId } = req.params
   logger.debug({ projectId, docId }, 'getting raw doc')
-  DocManager.getDocLines(projectId, docId, function (error, doc) {
-    if (error) {
-      return next(error)
-    }
-    if (doc == null) {
-      res.sendStatus(404)
-    } else {
-      res.setHeader('content-type', 'text/plain')
-      res.send(_buildRawDocView(doc))
-    }
-  })
+  const content = await DocManager.getDocLines(projectId, docId)
+  res.setHeader('content-type', 'text/plain')
+  res.send(content)
 }
 
-function getAllDocs(req, res, next) {
+async function getAllDocs(req, res) {
   const { project_id: projectId } = req.params
   logger.debug({ projectId }, 'getting all docs')
-  DocManager.getAllNonDeletedDocs(
-    projectId,
-    { lines: true, rev: true },
-    function (error, docs) {
-      if (docs == null) {
-        docs = []
-      }
-      if (error) {
-        return next(error)
-      }
-      const docViews = _buildDocsArrayView(projectId, docs)
-      for (const docView of docViews) {
-        if (!docView.lines) {
-          logger.warn({ projectId, docId: docView._id }, 'missing doc lines')
-          docView.lines = []
-        }
-      }
-      res.json(docViews)
+  const docs = await DocManager.getAllNonDeletedDocs(projectId, {
+    lines: true,
+    rev: true,
+  })
+  const docViews = _buildDocsArrayView(projectId, docs)
+  for (const docView of docViews) {
+    if (!docView.lines) {
+      logger.warn({ projectId, docId: docView._id }, 'missing doc lines')
+      docView.lines = []
     }
-  )
+  }
+  res.json(docViews)
 }
 
-function getAllDeletedDocs(req, res, next) {
+async function getAllDeletedDocs(req, res) {
   const { project_id: projectId } = req.params
   logger.debug({ projectId }, 'getting all deleted docs')
-  DocManager.getAllDeletedDocs(
-    projectId,
-    { name: true, deletedAt: true },
-    function (error, docs) {
-      if (error) {
-        return next(error)
-      }
-      res.json(
-        docs.map(doc => ({
-          _id: doc._id.toString(),
-          name: doc.name,
-          deletedAt: doc.deletedAt,
-        }))
-      )
-    }
+  const docs = await DocManager.getAllDeletedDocs(projectId, {
+    name: true,
+    deletedAt: true,
+  })
+  res.json(
+    docs.map(doc => ({
+      _id: doc._id.toString(),
+      name: doc.name,
+      deletedAt: doc.deletedAt,
+    }))
   )
 }
 
-function getAllRanges(req, res, next) {
+async function getAllRanges(req, res) {
   const { project_id: projectId } = req.params
   logger.debug({ projectId }, 'getting all ranges')
-  DocManager.getAllNonDeletedDocs(
-    projectId,
-    { ranges: true },
-    function (error, docs) {
-      if (docs == null) {
-        docs = []
-      }
-      if (error) {
-        return next(error)
-      }
-      res.json(_buildDocsArrayView(projectId, docs))
-    }
-  )
-}
-
-function projectHasRanges(req, res, next) {
-  const { project_id: projectId } = req.params
-  DocManager.projectHasRanges(projectId, (err, projectHasRanges) => {
-    if (err) {
-      return next(err)
-    }
-    res.json({ projectHasRanges })
+  const docs = await DocManager.getAllNonDeletedDocs(projectId, {
+    ranges: true,
   })
+  res.json(_buildDocsArrayView(projectId, docs))
 }
 
-function updateDoc(req, res, next) {
+async function projectHasRanges(req, res) {
+  const { project_id: projectId } = req.params
+  const projectHasRanges = await DocManager.projectHasRanges(projectId)
+  res.json({ projectHasRanges })
+}
+
+async function updateDoc(req, res) {
   const { doc_id: docId, project_id: projectId } = req.params
   const lines = req.body?.lines
   const version = req.body?.version
@@ -172,25 +121,20 @@ function updateDoc(req, res, next) {
   }
 
   logger.debug({ projectId, docId }, 'got http request to update doc')
-  DocManager.updateDoc(
+  const { modified, rev } = await DocManager.updateDoc(
     projectId,
     docId,
     lines,
     version,
-    ranges,
-    function (error, modified, rev) {
-      if (error) {
-        return next(error)
-      }
-      res.json({
-        modified,
-        rev,
-      })
-    }
+    ranges
   )
+  res.json({
+    modified,
+    rev,
+  })
 }
 
-function patchDoc(req, res, next) {
+async function patchDoc(req, res) {
   const { doc_id: docId, project_id: projectId } = req.params
   logger.debug({ projectId, docId }, 'patching doc')
 
@@ -203,12 +147,8 @@ function patchDoc(req, res, next) {
       logger.fatal({ field }, 'joi validation for pathDoc is broken')
     }
   })
-  DocManager.patchDoc(projectId, docId, meta, function (error) {
-    if (error) {
-      return next(error)
-    }
-    res.sendStatus(204)
-  })
+  await DocManager.patchDoc(projectId, docId, meta)
+  res.sendStatus(204)
 }
 
 function _buildDocView(doc) {
@@ -219,10 +159,6 @@ function _buildDocView(doc) {
     }
   }
   return docView
-}
-
-function _buildRawDocView(doc) {
-  return (doc?.lines ?? []).join('\n')
 }
 
 function _buildDocsArrayView(projectId, docs) {
@@ -241,79 +177,67 @@ function _buildDocsArrayView(projectId, docs) {
   return docViews
 }
 
-function archiveAllDocs(req, res, next) {
+async function archiveAllDocs(req, res) {
   const { project_id: projectId } = req.params
   logger.debug({ projectId }, 'archiving all docs')
-  DocArchive.archiveAllDocs(projectId, function (error) {
-    if (error) {
-      return next(error)
-    }
-    res.sendStatus(204)
-  })
+  await DocArchive.archiveAllDocs(projectId)
+  res.sendStatus(204)
 }
 
-function archiveDoc(req, res, next) {
+async function archiveDoc(req, res) {
   const { doc_id: docId, project_id: projectId } = req.params
   logger.debug({ projectId, docId }, 'archiving a doc')
-  DocArchive.archiveDoc(projectId, docId, function (error) {
-    if (error) {
-      return next(error)
-    }
-    res.sendStatus(204)
-  })
+  await DocArchive.archiveDoc(projectId, docId)
+  res.sendStatus(204)
 }
 
-function unArchiveAllDocs(req, res, next) {
+async function unArchiveAllDocs(req, res) {
   const { project_id: projectId } = req.params
   logger.debug({ projectId }, 'unarchiving all docs')
-  DocArchive.unArchiveAllDocs(projectId, function (err) {
-    if (err) {
-      if (err instanceof Errors.DocRevValueError) {
-        logger.warn({ err }, 'Failed to unarchive doc')
-        return res.sendStatus(409)
-      }
-      return next(err)
+  try {
+    await DocArchive.unArchiveAllDocs(projectId)
+  } catch (err) {
+    if (err instanceof Errors.DocRevValueError) {
+      logger.warn({ err }, 'Failed to unarchive doc')
+      return res.sendStatus(409)
     }
-    res.sendStatus(200)
-  })
+    throw err
+  }
+  res.sendStatus(200)
 }
 
-function destroyProject(req, res, next) {
+async function destroyProject(req, res) {
   const { project_id: projectId } = req.params
   logger.debug({ projectId }, 'destroying all docs')
-  DocArchive.destroyProject(projectId, function (error) {
-    if (error) {
-      return next(error)
-    }
-    res.sendStatus(204)
-  })
+  await DocArchive.destroyProject(projectId)
+  res.sendStatus(204)
 }
 
-function healthCheck(req, res) {
-  HealthChecker.check(function (err) {
-    if (err) {
-      logger.err({ err }, 'error performing health check')
-      res.sendStatus(500)
-    } else {
-      res.sendStatus(200)
-    }
-  })
+async function healthCheck(req, res) {
+  try {
+    await HealthChecker.check()
+  } catch (err) {
+    logger.err({ err }, 'error performing health check')
+    res.sendStatus(500)
+    return
+  }
+  res.sendStatus(200)
 }
 
 module.exports = {
-  getDoc,
-  peekDoc,
-  isDocDeleted,
-  getRawDoc,
-  getAllDocs,
-  getAllDeletedDocs,
-  getAllRanges,
-  projectHasRanges,
-  updateDoc,
-  patchDoc,
-  archiveAllDocs,
-  archiveDoc,
-  unArchiveAllDocs,
-  destroyProject,
-  healthCheck,
+  getDoc: expressify(getDoc),
+  peekDoc: expressify(peekDoc),
+  isDocDeleted: expressify(isDocDeleted),
+  getRawDoc: expressify(getRawDoc),
+  getAllDocs: expressify(getAllDocs),
+  getAllDeletedDocs: expressify(getAllDeletedDocs),
+  getAllRanges: expressify(getAllRanges),
+  projectHasRanges: expressify(projectHasRanges),
+  updateDoc: expressify(updateDoc),
+  patchDoc: expressify(patchDoc),
+  archiveAllDocs: expressify(archiveAllDocs),
+  archiveDoc: expressify(archiveDoc),
+  unArchiveAllDocs: expressify(unArchiveAllDocs),
+  destroyProject: expressify(destroyProject),
+  healthCheck: expressify(healthCheck),
 }

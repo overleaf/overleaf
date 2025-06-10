@@ -17,6 +17,7 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
+    "@overleaf/fetch-utils": "*",
     "@overleaf/logger": "*",
     "@overleaf/metrics": "*",
     "@overleaf/o-error": "*",

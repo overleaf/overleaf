@@ -1,5 +1,4 @@
-const { callbackify } = require('node:util')
-const MongoManager = require('./MongoManager').promises
+const MongoManager = require('./MongoManager')
 const Errors = require('./Errors')
 const logger = require('@overleaf/logger')
 const Settings = require('@overleaf/settings')
@@ -8,28 +7,11 @@ const { ReadableString } = require('@overleaf/stream-utils')
 const RangeManager = require('./RangeManager')
 const PersistorManager = require('./PersistorManager')
 const pMap = require('p-map')
-const { streamToBuffer } = require('./StreamToBuffer').promises
+const { streamToBuffer } = require('./StreamToBuffer')
 const { BSON } = require('mongodb-legacy')
 
 const PARALLEL_JOBS = Settings.parallelArchiveJobs
 const UN_ARCHIVE_BATCH_SIZE = Settings.unArchiveBatchSize
-
-module.exports = {
-  archiveAllDocs: callbackify(archiveAllDocs),
-  archiveDoc: callbackify(archiveDoc),
-  unArchiveAllDocs: callbackify(unArchiveAllDocs),
-  unarchiveDoc: callbackify(unarchiveDoc),
-  destroyProject: callbackify(destroyProject),
-  getDoc: callbackify(getDoc),
-  promises: {
-    archiveAllDocs,
-    archiveDoc,
-    unArchiveAllDocs,
-    unarchiveDoc,
-    destroyProject,
-    getDoc,
-  },
-}
 
 async function archiveAllDocs(projectId) {
   if (!_isArchivingEnabled()) {
@@ -224,4 +206,13 @@ function _isArchivingEnabled() {
   }
 
   return true
+}
+
+module.exports = {
+  archiveAllDocs,
+  archiveDoc,
+  unArchiveAllDocs,
+  unarchiveDoc,
+  destroyProject,
+  getDoc,
 }

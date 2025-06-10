@@ -5,7 +5,6 @@ const _ = require('lodash')
 const DocArchive = require('./DocArchiveManager')
 const RangeManager = require('./RangeManager')
 const Settings = require('@overleaf/settings')
-const { callbackifyAll } = require('@overleaf/promise-utils')
 const { setTimeout } = require('node:timers/promises')
 
 /**
@@ -29,7 +28,7 @@ const DocManager = {
       throw new Error('must include inS3 when getting doc')
     }
 
-    const doc = await MongoManager.promises.findDoc(projectId, docId, filter)
+    const doc = await MongoManager.findDoc(projectId, docId, filter)
 
     if (doc == null) {
       throw new Errors.NotFoundError(
@@ -38,7 +37,7 @@ const DocManager = {
     }
 
     if (doc.inS3) {
-      await DocArchive.promises.unarchiveDoc(projectId, docId)
+      await DocArchive.unarchiveDoc(projectId, docId)
       return await DocManager._getDoc(projectId, docId, filter)
     }
 
@@ -46,7 +45,7 @@ const DocManager = {
   },
 
   async isDocDeleted(projectId, docId) {
-    const doc = await MongoManager.promises.findDoc(projectId, docId, {
+    const doc = await MongoManager.findDoc(projectId, docId, {
       deleted: true,
     })
 
@@ -74,7 +73,7 @@ const DocManager = {
 
   // returns the doc without any version information
   async _peekRawDoc(projectId, docId) {
-    const doc = await MongoManager.promises.findDoc(projectId, docId, {
+    const doc = await MongoManager.findDoc(projectId, docId, {
       lines: true,
       rev: true,
       deleted: true,
@@ -91,7 +90,7 @@ const DocManager = {
 
     if (doc.inS3) {
       // skip the unarchiving to mongo when getting a doc
-      const archivedDoc = await DocArchive.promises.getDoc(projectId, docId)
+      const archivedDoc = await DocArchive.getDoc(projectId, docId)
       Object.assign(doc, archivedDoc)
     }
 
@@ -102,7 +101,7 @@ const DocManager = {
   // without unarchiving it (avoids unnecessary writes to mongo)
   async peekDoc(projectId, docId) {
     const doc = await DocManager._peekRawDoc(projectId, docId)
-    await MongoManager.promises.checkRevUnchanged(doc)
+    await MongoManager.checkRevUnchanged(doc)
     return doc
   },
 
@@ -111,16 +110,18 @@ const DocManager = {
       lines: true,
       inS3: true,
     })
-    return doc
+    if (!doc) throw new Errors.NotFoundError()
+    if (!Array.isArray(doc.lines)) throw new Errors.DocWithoutLinesError()
+    return doc.lines.join('\n')
   },
 
   async getAllDeletedDocs(projectId, filter) {
-    return await MongoManager.promises.getProjectsDeletedDocs(projectId, filter)
+    return await MongoManager.getProjectsDeletedDocs(projectId, filter)
   },
 
   async getAllNonDeletedDocs(projectId, filter) {
-    await DocArchive.promises.unArchiveAllDocs(projectId)
-    const docs = await MongoManager.promises.getProjectsDocs(
+    await DocArchive.unArchiveAllDocs(projectId)
+    const docs = await MongoManager.getProjectsDocs(
       projectId,
       { include_deleted: false },
       filter
@@ -132,11 +133,7 @@ const DocManager = {
   },
 
   async projectHasRanges(projectId) {
-    const docs = await MongoManager.promises.getProjectsDocs(
-      projectId,
-      {},
-      { _id: 1 }
-    )
+    const docs = await MongoManager.getProjectsDocs(projectId, {}, { _id: 1 })
     const docIds = docs.map(doc => doc._id)
     for (const docId of docIds) {
       const doc = await DocManager.peekDoc(projectId, docId)
@@ -247,7 +244,7 @@ const DocManager = {
       }
 
       modified = true
-      await MongoManager.promises.upsertIntoDocCollection(
+      await MongoManager.upsertIntoDocCollection(
         projectId,
         docId,
         doc?.rev,
@@ -262,11 +259,7 @@ const DocManager = {
 
   async patchDoc(projectId, docId, meta) {
     const projection = { _id: 1, deleted: true }
-    const doc = await MongoManager.promises.findDoc(
-      projectId,
-      docId,
-      projection
-    )
+    const doc = await MongoManager.findDoc(projectId, docId, projection)
     if (!doc) {
       throw new Errors.NotFoundError(
         `No such project/doc to delete: ${projectId}/${docId}`
@@ -275,7 +268,7 @@ const DocManager = {
 
     if (meta.deleted && Settings.docstore.archiveOnSoftDelete) {
       // The user will not read this doc anytime soon. Flush it out of mongo.
-      DocArchive.promises.archiveDoc(projectId, docId).catch(err => {
+      DocArchive.archiveDoc(projectId, docId).catch(err => {
         logger.warn(
           { projectId, docId, err },
           'archiving a single doc in the background failed'
@@ -283,15 +276,8 @@ const DocManager = {
       })
     }
 
-    await MongoManager.promises.patchDoc(projectId, docId, meta)
+    await MongoManager.patchDoc(projectId, docId, meta)
   },
 }
 
-module.exports = {
-  ...callbackifyAll(DocManager, {
-    multiResult: {
-      updateDoc: ['modified', 'rev'],
-    },
-  }),
-  promises: DocManager,
-}
+module.exports = DocManager

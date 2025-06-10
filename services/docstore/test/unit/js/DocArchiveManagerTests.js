@@ -4,7 +4,7 @@ const modulePath = '../../../app/js/DocArchiveManager.js'
 const SandboxedModule = require('sandboxed-module')
 const { ObjectId } = require('mongodb-legacy')
 const Errors = require('../../../app/js/Errors')
-const StreamToBuffer = require('../../../app/js/StreamToBuffer').promises
+const StreamToBuffer = require('../../../app/js/StreamToBuffer')
 
 describe('DocArchiveManager', function () {
   let DocArchiveManager,
@@ -142,37 +142,33 @@ describe('DocArchiveManager', function () {
     }
 
     MongoManager = {
-      promises: {
-        markDocAsArchived: sinon.stub().resolves(),
-        restoreArchivedDoc: sinon.stub().resolves(),
-        upsertIntoDocCollection: sinon.stub().resolves(),
-        getProjectsDocs: sinon.stub().resolves(mongoDocs),
-        getNonDeletedArchivedProjectDocs: getArchivedProjectDocs,
-        getNonArchivedProjectDocIds,
-        getArchivedProjectDocs,
-        findDoc: sinon.stub().callsFake(fakeGetDoc),
-        getDocForArchiving: sinon.stub().callsFake(fakeGetDoc),
-        destroyProject: sinon.stub().resolves(),
-      },
+      markDocAsArchived: sinon.stub().resolves(),
+      restoreArchivedDoc: sinon.stub().resolves(),
+      upsertIntoDocCollection: sinon.stub().resolves(),
+      getProjectsDocs: sinon.stub().resolves(mongoDocs),
+      getNonDeletedArchivedProjectDocs: getArchivedProjectDocs,
+      getNonArchivedProjectDocIds,
+      getArchivedProjectDocs,
+      findDoc: sinon.stub().callsFake(fakeGetDoc),
+      getDocForArchiving: sinon.stub().callsFake(fakeGetDoc),
+      destroyProject: sinon.stub().resolves(),
     }
 
     // Wrap streamToBuffer so that we can pass in something that it expects (in
     // this case, a Promise) rather than a stubbed stream object
     streamToBuffer = {
-      promises: {
-        streamToBuffer: async () => {
-          const inputStream = new Promise(resolve => {
-            stream.on('data', data => resolve(data))
-          })
+      streamToBuffer: async () => {
+        const inputStream = new Promise(resolve => {
+          stream.on('data', data => resolve(data))
+        })
 
-          const value = await StreamToBuffer.streamToBuffer(
-            'testProjectId',
-            'testDocId',
-            inputStream
-          )
+        const value = await StreamToBuffer.streamToBuffer(
+          'testProjectId',
+          'testDocId',
+          inputStream
+        )
 
-          return value
-        },
+        return value
       },
     }
 
@@ -192,9 +188,8 @@ describe('DocArchiveManager', function () {
 
   describe('archiveDoc', function () {
     it('should resolve when passed a valid document', async function () {
-      await expect(
-        DocArchiveManager.promises.archiveDoc(projectId, mongoDocs[0]._id)
-      ).to.eventually.be.fulfilled
+      await expect(DocArchiveManager.archiveDoc(projectId, mongoDocs[0]._id)).to
+        .eventually.be.fulfilled
     })
 
     it('should throw an error if the doc has no lines', async function () {
@@ -202,26 +197,26 @@ describe('DocArchiveManager', function () {
       doc.lines = null
 
       await expect(
-        DocArchiveManager.promises.archiveDoc(projectId, doc._id)
+        DocArchiveManager.archiveDoc(projectId, doc._id)
       ).to.eventually.be.rejectedWith('doc has no lines')
     })
 
     it('should add the schema version', async function () {
-      await DocArchiveManager.promises.archiveDoc(projectId, mongoDocs[1]._id)
+      await DocArchiveManager.archiveDoc(projectId, mongoDocs[1]._id)
       expect(StreamUtils.ReadableString).to.have.been.calledWith(
         sinon.match(/"schema_v":1/)
       )
     })
 
     it('should calculate the hex md5 sum of the content', async function () {
-      await DocArchiveManager.promises.archiveDoc(projectId, mongoDocs[0]._id)
+      await DocArchiveManager.archiveDoc(projectId, mongoDocs[0]._id)
       expect(Crypto.createHash).to.have.been.calledWith('md5')
       expect(HashUpdate).to.have.been.calledWith(archivedDocJson)
       expect(HashDigest).to.have.been.calledWith('hex')
     })
 
     it('should pass the md5 hash to the object persistor for verification', async function () {
-      await DocArchiveManager.promises.archiveDoc(projectId, mongoDocs[0]._id)
+      await DocArchiveManager.archiveDoc(projectId, mongoDocs[0]._id)
 
       expect(PersistorManager.sendStream).to.have.been.calledWith(
         sinon.match.any,
@@ -232,7 +227,7 @@ describe('DocArchiveManager', function () {
     })
 
     it('should pass the correct bucket and key to the persistor', async function () {
-      await DocArchiveManager.promises.archiveDoc(projectId, mongoDocs[0]._id)
+      await DocArchiveManager.archiveDoc(projectId, mongoDocs[0]._id)
 
       expect(PersistorManager.sendStream).to.have.been.calledWith(
         Settings.docstore.bucket,
@@ -241,7 +236,7 @@ describe('DocArchiveManager', function () {
     })
 
     it('should create a stream from the encoded json and send it', async function () {
-      await DocArchiveManager.promises.archiveDoc(projectId, mongoDocs[0]._id)
+      await DocArchiveManager.archiveDoc(projectId, mongoDocs[0]._id)
       expect(StreamUtils.ReadableString).to.have.been.calledWith(
         archivedDocJson
       )
@@ -253,8 +248,8 @@ describe('DocArchiveManager', function () {
     })
 
     it('should mark the doc as archived', async function () {
-      await DocArchiveManager.promises.archiveDoc(projectId, mongoDocs[0]._id)
-      expect(MongoManager.promises.markDocAsArchived).to.have.been.calledWith(
+      await DocArchiveManager.archiveDoc(projectId, mongoDocs[0]._id)
+      expect(MongoManager.markDocAsArchived).to.have.been.calledWith(
         projectId,
         mongoDocs[0]._id,
         mongoDocs[0].rev
@@ -267,8 +262,8 @@ describe('DocArchiveManager', function () {
       })
 
       it('should bail out early', async function () {
-        await DocArchiveManager.promises.archiveDoc(projectId, mongoDocs[0]._id)
-        expect(MongoManager.promises.getDocForArchiving).to.not.have.been.called
+        await DocArchiveManager.archiveDoc(projectId, mongoDocs[0]._id)
+        expect(MongoManager.getDocForArchiving).to.not.have.been.called
       })
     })
 
@@ -285,7 +280,7 @@ describe('DocArchiveManager', function () {
 
       it('should return an error', async function () {
         await expect(
-          DocArchiveManager.promises.archiveDoc(projectId, mongoDocs[0]._id)
+          DocArchiveManager.archiveDoc(projectId, mongoDocs[0]._id)
         ).to.eventually.be.rejectedWith('null bytes detected')
       })
     })
@@ -296,21 +291,19 @@ describe('DocArchiveManager', function () {
 
     describe('when the doc is in S3', function () {
       beforeEach(function () {
-        MongoManager.promises.findDoc = sinon
-          .stub()
-          .resolves({ inS3: true, rev })
+        MongoManager.findDoc = sinon.stub().resolves({ inS3: true, rev })
         docId = mongoDocs[0]._id
         lines = ['doc', 'lines']
         rev = 123
       })
 
       it('should resolve when passed a valid document', async function () {
-        await expect(DocArchiveManager.promises.unarchiveDoc(projectId, docId))
-          .to.eventually.be.fulfilled
+        await expect(DocArchiveManager.unarchiveDoc(projectId, docId)).to
+          .eventually.be.fulfilled
       })
 
       it('should test md5 validity with the raw buffer', async function () {
-        await DocArchiveManager.promises.unarchiveDoc(projectId, docId)
+        await DocArchiveManager.unarchiveDoc(projectId, docId)
         expect(HashUpdate).to.have.been.calledWith(
           sinon.match.instanceOf(Buffer)
         )
@@ -319,15 +312,17 @@ describe('DocArchiveManager', function () {
       it('should throw an error if the md5 does not match', async function () {
         PersistorManager.getObjectMd5Hash.resolves('badf00d')
         await expect(
-          DocArchiveManager.promises.unarchiveDoc(projectId, docId)
+          DocArchiveManager.unarchiveDoc(projectId, docId)
         ).to.eventually.be.rejected.and.be.instanceof(Errors.Md5MismatchError)
       })
 
       it('should restore the doc in Mongo', async function () {
-        await DocArchiveManager.promises.unarchiveDoc(projectId, docId)
-        expect(
-          MongoManager.promises.restoreArchivedDoc
-        ).to.have.been.calledWith(projectId, docId, archivedDoc)
+        await DocArchiveManager.unarchiveDoc(projectId, docId)
+        expect(MongoManager.restoreArchivedDoc).to.have.been.calledWith(
+          projectId,
+          docId,
+          archivedDoc
+        )
       })
 
       describe('when archiving is not configured', function () {
@@ -337,15 +332,15 @@ describe('DocArchiveManager', function () {
 
         it('should error out on archived doc', async function () {
           await expect(
-            DocArchiveManager.promises.unarchiveDoc(projectId, docId)
+            DocArchiveManager.unarchiveDoc(projectId, docId)
           ).to.eventually.be.rejected.and.match(
             /found archived doc, but archiving backend is not configured/
           )
         })
 
         it('should return early on non-archived doc', async function () {
-          MongoManager.promises.findDoc = sinon.stub().resolves({ rev })
-          await DocArchiveManager.promises.unarchiveDoc(projectId, docId)
+          MongoManager.findDoc = sinon.stub().resolves({ rev })
+          await DocArchiveManager.unarchiveDoc(projectId, docId)
           expect(PersistorManager.getObjectMd5Hash).to.not.have.been.called
         })
       })
@@ -363,10 +358,12 @@ describe('DocArchiveManager', function () {
           })
 
           it('should return the docs lines', async function () {
-            await DocArchiveManager.promises.unarchiveDoc(projectId, docId)
-            expect(
-              MongoManager.promises.restoreArchivedDoc
-            ).to.have.been.calledWith(projectId, docId, { lines, rev })
+            await DocArchiveManager.unarchiveDoc(projectId, docId)
+            expect(MongoManager.restoreArchivedDoc).to.have.been.calledWith(
+              projectId,
+              docId,
+              { lines, rev }
+            )
           })
         })
 
@@ -385,14 +382,16 @@ describe('DocArchiveManager', function () {
           })
 
           it('should return the doc lines and ranges', async function () {
-            await DocArchiveManager.promises.unarchiveDoc(projectId, docId)
-            expect(
-              MongoManager.promises.restoreArchivedDoc
-            ).to.have.been.calledWith(projectId, docId, {
-              lines,
-              ranges: { mongo: 'ranges' },
-              rev: 456,
-            })
+            await DocArchiveManager.unarchiveDoc(projectId, docId)
+            expect(MongoManager.restoreArchivedDoc).to.have.been.calledWith(
+              projectId,
+              docId,
+              {
+                lines,
+                ranges: { mongo: 'ranges' },
+                rev: 456,
+              }
+            )
           })
         })
 
@@ -406,10 +405,12 @@ describe('DocArchiveManager', function () {
           })
 
           it('should return only the doc lines', async function () {
-            await DocArchiveManager.promises.unarchiveDoc(projectId, docId)
-            expect(
-              MongoManager.promises.restoreArchivedDoc
-            ).to.have.been.calledWith(projectId, docId, { lines, rev: 456 })
+            await DocArchiveManager.unarchiveDoc(projectId, docId)
+            expect(MongoManager.restoreArchivedDoc).to.have.been.calledWith(
+              projectId,
+              docId,
+              { lines, rev: 456 }
+            )
           })
         })
 
@@ -423,10 +424,12 @@ describe('DocArchiveManager', function () {
           })
 
           it('should use the rev obtained from Mongo', async function () {
-            await DocArchiveManager.promises.unarchiveDoc(projectId, docId)
-            expect(
-              MongoManager.promises.restoreArchivedDoc
-            ).to.have.been.calledWith(projectId, docId, { lines, rev })
+            await DocArchiveManager.unarchiveDoc(projectId, docId)
+            expect(MongoManager.restoreArchivedDoc).to.have.been.calledWith(
+              projectId,
+              docId,
+              { lines, rev }
+            )
           })
         })
 
@@ -441,7 +444,7 @@ describe('DocArchiveManager', function () {
 
           it('should throw an error', async function () {
             await expect(
-              DocArchiveManager.promises.unarchiveDoc(projectId, docId)
+              DocArchiveManager.unarchiveDoc(projectId, docId)
             ).to.eventually.be.rejectedWith(
               "I don't understand the doc format in s3"
             )
@@ -451,8 +454,8 @@ describe('DocArchiveManager', function () {
     })
 
     it('should not do anything if the file is already unarchived', async function () {
-      MongoManager.promises.findDoc.resolves({ inS3: false })
-      await DocArchiveManager.promises.unarchiveDoc(projectId, docId)
+      MongoManager.findDoc.resolves({ inS3: false })
+      await DocArchiveManager.unarchiveDoc(projectId, docId)
       expect(PersistorManager.getObjectStream).not.to.have.been.called
     })
 
@@ -461,7 +464,7 @@ describe('DocArchiveManager', function () {
         .stub()
         .rejects(new Errors.NotFoundError())
       await expect(
-        DocArchiveManager.promises.unarchiveDoc(projectId, docId)
+        DocArchiveManager.unarchiveDoc(projectId, docId)
       ).to.eventually.be.rejected.and.be.instanceof(Errors.NotFoundError)
     })
   })
@@ -469,13 +472,11 @@ describe('DocArchiveManager', function () {
   describe('destroyProject', function () {
     describe('when archiving is enabled', function () {
       beforeEach(async function () {
-        await DocArchiveManager.promises.destroyProject(projectId)
+        await DocArchiveManager.destroyProject(projectId)
       })
 
       it('should delete the project in Mongo', function () {
-        expect(MongoManager.promises.destroyProject).to.have.been.calledWith(
-          projectId
-        )
+        expect(MongoManager.destroyProject).to.have.been.calledWith(projectId)
       })
 
       it('should delete the project in the persistor', function () {
@@ -489,13 +490,11 @@ describe('DocArchiveManager', function () {
     describe('when archiving is disabled', function () {
       beforeEach(async function () {
         Settings.docstore.backend = ''
-        await DocArchiveManager.promises.destroyProject(projectId)
+        await DocArchiveManager.destroyProject(projectId)
       })
 
       it('should delete the project in Mongo', function () {
-        expect(MongoManager.promises.destroyProject).to.have.been.calledWith(
-          projectId
-        )
+        expect(MongoManager.destroyProject).to.have.been.calledWith(projectId)
       })
 
       it('should not delete the project in the persistor', function () {
@@ -506,33 +505,35 @@ describe('DocArchiveManager', function () {
 
   describe('archiveAllDocs', function () {
     it('should resolve with valid arguments', async function () {
-      await expect(DocArchiveManager.promises.archiveAllDocs(projectId)).to
-        .eventually.be.fulfilled
+      await expect(DocArchiveManager.archiveAllDocs(projectId)).to.eventually.be
+        .fulfilled
     })
 
     it('should archive all project docs which are not in s3', async function () {
-      await DocArchiveManager.promises.archiveAllDocs(projectId)
+      await DocArchiveManager.archiveAllDocs(projectId)
       // not inS3
-      expect(MongoManager.promises.markDocAsArchived).to.have.been.calledWith(
+      expect(MongoManager.markDocAsArchived).to.have.been.calledWith(
         projectId,
         mongoDocs[0]._id
       )
-      expect(MongoManager.promises.markDocAsArchived).to.have.been.calledWith(
+      expect(MongoManager.markDocAsArchived).to.have.been.calledWith(
         projectId,
         mongoDocs[1]._id
       )
-      expect(MongoManager.promises.markDocAsArchived).to.have.been.calledWith(
+      expect(MongoManager.markDocAsArchived).to.have.been.calledWith(
         projectId,
         mongoDocs[4]._id
       )
 
       // inS3
-      expect(
-        MongoManager.promises.markDocAsArchived
-      ).not.to.have.been.calledWith(projectId, mongoDocs[2]._id)
-      expect(
-        MongoManager.promises.markDocAsArchived
-      ).not.to.have.been.calledWith(projectId, mongoDocs[3]._id)
+      expect(MongoManager.markDocAsArchived).not.to.have.been.calledWith(
+        projectId,
+        mongoDocs[2]._id
+      )
+      expect(MongoManager.markDocAsArchived).not.to.have.been.calledWith(
+        projectId,
+        mongoDocs[3]._id
+      )
     })
 
     describe('when archiving is not configured', function () {
@@ -541,21 +542,20 @@ describe('DocArchiveManager', function () {
       })
 
       it('should bail out early', async function () {
-        await DocArchiveManager.promises.archiveDoc(projectId, mongoDocs[0]._id)
-        expect(MongoManager.promises.getNonArchivedProjectDocIds).to.not.have
-          .been.called
+        await DocArchiveManager.archiveDoc(projectId, mongoDocs[0]._id)
+        expect(MongoManager.getNonArchivedProjectDocIds).to.not.have.been.called
       })
     })
   })
 
   describe('unArchiveAllDocs', function () {
     it('should resolve with valid arguments', async function () {
-      await expect(DocArchiveManager.promises.unArchiveAllDocs(projectId)).to
-        .eventually.be.fulfilled
+      await expect(DocArchiveManager.unArchiveAllDocs(projectId)).to.eventually
+        .be.fulfilled
     })
 
     it('should unarchive all inS3 docs', async function () {
-      await DocArchiveManager.promises.unArchiveAllDocs(projectId)
+      await DocArchiveManager.unArchiveAllDocs(projectId)
 
       for (const doc of archivedDocs) {
         expect(PersistorManager.getObjectStream).to.have.been.calledWith(
@@ -571,9 +571,9 @@ describe('DocArchiveManager', function () {
       })
 
       it('should bail out early', async function () {
-        await DocArchiveManager.promises.archiveDoc(projectId, mongoDocs[0]._id)
-        expect(MongoManager.promises.getNonDeletedArchivedProjectDocs).to.not
-          .have.been.called
+        await DocArchiveManager.archiveDoc(projectId, mongoDocs[0]._id)
+        expect(MongoManager.getNonDeletedArchivedProjectDocs).to.not.have.been
+          .called
       })
     })
   })
