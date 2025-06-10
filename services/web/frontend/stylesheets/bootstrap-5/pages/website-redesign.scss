@@ -551,6 +551,20 @@
     }
   }
 
+  .customer-stories-hero-heading {
+    @include media-breakpoint-down(lg) {
+      @include heading-xl;
+    }
+  }
+
+  .customer-stories-logos-text {
+    font-size: var(--font-size-05);
+  }
+
+  .customer-stories-hero-text {
+    font-size: var(--font-size-05);
+  }
+
   .overleaf-sticker {
     width: unset;
 
