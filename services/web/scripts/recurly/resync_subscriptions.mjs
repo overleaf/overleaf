@@ -89,20 +89,18 @@ const syncSubscription = async subscription => {
 
   ScriptLogger.recordMismatch(subscription, recurlySubscription)
 
-  if (!COMMIT) {
-    return
+  if (COMMIT) {
+    try {
+      await SubscriptionUpdater.promises.updateSubscriptionFromRecurly(
+        recurlySubscription,
+        subscription,
+        {}
+      )
+    } catch (error) {
+      await handleSyncSubscriptionError(subscription, error)
+    }
   }
 
-  try {
-    await SubscriptionUpdater.promises.updateSubscriptionFromRecurly(
-      recurlySubscription,
-      subscription,
-      {}
-    )
-  } catch (error) {
-    await handleSyncSubscriptionError(subscription, error)
-    return
-  }
   await setTimeout(80)
 }
 
