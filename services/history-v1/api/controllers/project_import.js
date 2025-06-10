@@ -21,7 +21,7 @@ const BatchBlobStore = storage.BatchBlobStore
 const BlobStore = storage.BlobStore
 const chunkStore = storage.chunkStore
 const HashCheckBlobStore = storage.HashCheckBlobStore
-const persistChanges = storage.persistChanges
+const commitChanges = storage.commitChanges
 const InvalidChangeError = storage.InvalidChangeError
 
 const render = require('./render')
@@ -110,7 +110,7 @@ async function importChanges(req, res, next) {
 
   let result
   try {
-    result = await persistChanges(projectId, changes, limits, endVersion, {
+    result = await commitChanges(projectId, changes, limits, endVersion, {
       queueChangesInRedis: true,
     })
   } catch (err) {
