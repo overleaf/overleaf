@@ -7,6 +7,11 @@ const { client } = require('../lib/mongodb.js')
 const { scanAndProcessDueItems } = require('../lib/scan')
 const persistBuffer = require('../lib/persist_buffer')
 const { claimPersistJob } = require('../lib/chunk_store/redis')
+const { loadGlobalBlobs } = require('../lib/blob_store/index.js')
+
+// Something is registering 11 listeners, over the limit of 10, which generates
+// a lot of warning noise.
+require('node:events').EventEmitter.defaultMaxListeners = 11
 
 const rclient = redis.rclientHistory
 
@@ -33,6 +38,7 @@ async function persistProjectAction(projectId) {
 }
 
 async function runPersistChunks() {
+  await loadGlobalBlobs()
   await scanAndProcessDueItems(
     rclient,
     'persistChunks',
