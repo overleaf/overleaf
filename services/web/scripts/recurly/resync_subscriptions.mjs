@@ -181,6 +181,13 @@ const setup = () => {
   }
 }
 
+if (process.env.NODE_ENV !== 'development') {
+  console.warn(
+    'This script can cause issues with manually amended subscriptions and can also exhaust our rate-limit with Recurly so is not intended to be run in production. Please use it in development environments only.'
+  )
+  process.exit(1)
+}
+
 setup()
 await run()
 process.exit()
