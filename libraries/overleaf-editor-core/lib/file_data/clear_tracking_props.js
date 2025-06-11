@@ -1,7 +1,7 @@
 // @ts-check
 
 /**
- * @import { ClearTrackingPropsRawData } from '../types'
+ * @import { ClearTrackingPropsRawData, TrackingDirective } from '../types'
  */
 
 class ClearTrackingProps {
@@ -11,10 +11,25 @@ class ClearTrackingProps {
 
   /**
    * @param {any} other
-   * @returns {boolean}
+   * @returns {other is ClearTrackingProps}
    */
   equals(other) {
     return other instanceof ClearTrackingProps
+  }
+
+  /**
+   * @param {TrackingDirective} other
+   * @returns {other is ClearTrackingProps}
+   */
+  canMergeWith(other) {
+    return other instanceof ClearTrackingProps
+  }
+
+  /**
+   * @param {TrackingDirective} other
+   */
+  mergeWith(other) {
+    return this
   }
 
   /**

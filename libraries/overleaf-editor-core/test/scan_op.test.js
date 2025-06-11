@@ -107,7 +107,7 @@ describe('RetainOp', function () {
     expect(op1.equals(new RetainOp(3))).to.be.true
   })
 
-  it('cannot merge with another RetainOp if tracking info is different', function () {
+  it('cannot merge with another RetainOp if the tracking user is different', function () {
     const op1 = new RetainOp(
       4,
       new TrackingProps('insert', 'user1', new Date('2024-01-01T00:00:00.000Z'))
@@ -120,14 +120,14 @@ describe('RetainOp', function () {
     expect(() => op1.mergeWith(op2)).to.throw(Error)
   })
 
-  it('can merge with another RetainOp if tracking info is the same', function () {
+  it('can merge with another RetainOp if the tracking user is the same', function () {
     const op1 = new RetainOp(
       4,
       new TrackingProps('insert', 'user1', new Date('2024-01-01T00:00:00.000Z'))
     )
     const op2 = new RetainOp(
       4,
-      new TrackingProps('insert', 'user1', new Date('2024-01-01T00:00:00.000Z'))
+      new TrackingProps('insert', 'user1', new Date('2024-01-01T00:00:01.000Z'))
     )
     op1.mergeWith(op2)
     expect(
@@ -310,7 +310,7 @@ describe('InsertOp', function () {
     expect(() => op1.mergeWith(op2)).to.throw(Error)
   })
 
-  it('cannot merge with another InsertOp if tracking info is different', function () {
+  it('cannot merge with another InsertOp if tracking user is different', function () {
     const op1 = new InsertOp(
       'a',
       new TrackingProps('insert', 'user1', new Date('2024-01-01T00:00:00.000Z'))
@@ -323,7 +323,7 @@ describe('InsertOp', function () {
     expect(() => op1.mergeWith(op2)).to.throw(Error)
   })
 
-  it('can merge with another InsertOp if tracking and comment info is the same', function () {
+  it('can merge with another InsertOp if tracking user and comment info is the same', function () {
     const op1 = new InsertOp(
       'a',
       new TrackingProps(
@@ -338,7 +338,7 @@ describe('InsertOp', function () {
       new TrackingProps(
         'insert',
         'user1',
-        new Date('2024-01-01T00:00:00.000Z')
+        new Date('2024-01-01T00:00:01.000Z')
       ),
       ['1', '2']
     )
