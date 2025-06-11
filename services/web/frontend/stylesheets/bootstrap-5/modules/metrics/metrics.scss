@@ -1,6 +1,6 @@
 #metrics {
   max-width: none;
-  padding: 0 30px;
+  padding: 0 var(--spacing-09);
   width: auto;
 
   svg.nvd3-svg {
@@ -9,17 +9,18 @@
 
   .overbox {
     margin: 0;
-    padding: 40px 20px;
+    padding: var(--spacing-10) var(--spacing-07);
     background: #fff;
     border: 1px solid #dfdfdf;
+
     .box {
-      padding-bottom: 30px;
+      padding-bottom: var(--spacing-09);
       overflow: hidden;
-      margin-bottom: 40px;
-      border-bottom: 1px solid rgb(216, 216, 216);
+      margin-bottom: var(--spacing-10);
+      border-bottom: 1px solid rgb(216 216 216);
 
       .header {
-        margin-bottom: 20px;
+        margin-bottom: var(--spacing-07);
 
         h4 {
           font-size: 19px;
@@ -27,10 +28,14 @@
         }
       }
     }
+
+    &.overbox-small {
+      padding: var(--spacing-04);
+    }
   }
 
   .print-button {
-    margin-right: 10px;
+    margin-right: var(--spacing-04);
     font-size: 20px;
   }
 
@@ -40,21 +45,18 @@
   }
 
   .metric-col {
-    padding: 15px;
-  }
-
-  .metric-header-container {
-    h4 {
-      margin-bottom: 0;
-    }
+    position: relative;
+    padding: var(--spacing-06);
   }
 
   svg {
     display: block;
     height: 250px;
+
     text {
       font-family: 'Open Sans', sans-serif;
     }
+
     &:not(:root) {
       overflow: visible;
     }
@@ -79,6 +81,10 @@
 
   // BEGIN: Metrics header
   .metric-header-container {
+    h4 {
+      margin-bottom: 0;
+    }
+
     > h4 {
       margin-top: 0;
       margin-bottom: 0;
@@ -89,12 +95,14 @@
       font-size: 0.5em;
     }
   }
+
   // END: Metrics header
 
   // BEGIN: Metrics footer
   .metric-footer-container {
     text-align: center;
   }
+
   // END: Metrics footer
 
   // BEGIN: Metrics overlays
@@ -107,7 +115,7 @@
     height: 100%;
     width: 100%;
     padding: 16px; /* 15px of .metric-col padding + 1px border */
-    padding-top: 56px; /* Same as above + 30px for title + 10px overbox padding*/
+    padding-top: 56px; /* Same as above + 30px for title + 10px overbox padding */
   }
 
   .metric-overlay-loading {
@@ -129,19 +137,20 @@
     width: 100%;
     height: 100%;
   }
+
   // END: Metrics overlays
 }
 
 #metrics-header {
-  @media (min-width: 1200px) {
-    margin-bottom: 30px;
+  @include media-breakpoint-up(lg) {
+    margin-bottom: var(--spacing-09);
   }
 
   h3 {
     display: inline-block;
   }
 
-  .section_header {
+  .section-header {
     margin-bottom: 0;
   }
 
@@ -162,9 +171,11 @@
 
   #dates-container {
     display: inline-block;
+
     .daterangepicker {
-      margin-right: 15px;
+      margin-right: var(--spacing-06);
     }
+
     #metrics-dates {
       padding: 0;
     }
@@ -172,14 +183,10 @@
 }
 
 #metrics-footer {
-  margin-top: 30px;
+  margin-top: var(--spacing-09);
   text-align: center;
 }
 
-body.print-loading {
-  #metrics {
-    .metric-col {
-      opacity: 0.5;
-    }
-  }
+body.print-loading #metrics .metric-col {
+  opacity: 0.5;
 }

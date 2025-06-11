@@ -85,7 +85,7 @@
       }
 
       &:hover {
-        background-color: $bg-light-secondary;
+        background-color: var(--bg-light-secondary);
       }
 
       .welcome-message-card-img {
