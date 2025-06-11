@@ -12,6 +12,7 @@ import PdfPreviewHybridToolbarNew from '@/features/ide-redesign/components/pdf-p
 import PdfErrorState from '@/features/ide-redesign/components/pdf-preview/pdf-error-state'
 import { useIsNewEditorEnabled } from '@/features/ide-redesign/utils/new-editor-utils'
 import importOverleafModules from '../../../../macros/import-overleaf-module.macro'
+import PdfCodeCheckFailedBanner from '@/features/ide-redesign/components/pdf-preview/pdf-code-check-failed-banner'
 
 function PdfPreviewPane() {
   const { pdfUrl, hasShortCompileTimeout } = useCompileContext()
@@ -32,6 +33,7 @@ function PdfPreviewPane() {
         ) : (
           <PdfHybridPreviewToolbar />
         )}
+        {newEditor && <PdfCodeCheckFailedBanner />}
         <PdfPreviewMessages>
           {hasShortCompileTimeout && <CompileTimeWarningUpgradePrompt />}
         </PdfPreviewMessages>

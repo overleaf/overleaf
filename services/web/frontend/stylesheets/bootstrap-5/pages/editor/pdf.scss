@@ -44,6 +44,30 @@
       padding: var(--spacing-01);
     }
   }
+
+  .pdf-code-check-failed-banner-container {
+    position: absolute;
+    top: calc(var(--toolbar-small-height) + var(--spacing-04));
+    left: 0;
+    right: 0;
+    z-index: 1;
+    display: flex;
+    justify-content: center;
+    padding: 0 var(--spacing-06);
+  }
+
+  .pdf-code-check-failed-banner {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-02);
+    background-color: var(--bg-light-primary);
+    color: var(--content-primary);
+    border: 1px solid var(--border-divider);
+    padding: var(--spacing-02) var(--spacing-03) var(--spacing-02)
+      var(--spacing-02);
+    border-radius: var(--border-radius-full);
+    box-shadow: 0 2px 4px 0 #1e253029;
+  }
 }
 
 .pdf .toolbar.toolbar-pdf {
