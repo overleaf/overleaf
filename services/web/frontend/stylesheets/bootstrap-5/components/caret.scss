@@ -1,0 +1,15 @@
+:root {
+  --caret-width-base: 4px;
+}
+
+.caret {
+  display: inline-block;
+  width: 0;
+  height: 0;
+  margin-left: 2px;
+  vertical-align: middle;
+  border-top: var(--caret-width-base) solid;
+  border-right: var(--caret-width-base) solid transparent;
+  border-left: var(--caret-width-base) solid transparent;
+  margin-top: calc(-1 * var(--caret-width-base) / 2);
+}

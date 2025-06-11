@@ -151,6 +151,11 @@
     height: 100%;
     display: flex;
     align-items: center;
+
+    &:has(> i),
+    &:has(> .material-symbols) {
+      pointer-events: none;
+    }
   }
 
   .form-control-start-icon {

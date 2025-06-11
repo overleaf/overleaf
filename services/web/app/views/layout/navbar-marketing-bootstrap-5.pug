@@ -55,7 +55,6 @@ nav.navbar.navbar-default.navbar-main.navbar-expand-lg(class={
 								event-segmentation={"item": "admin", "location": "top-menu"}
 							)
 								| Admin
-								span.caret
 							+dropdown-menu.dropdown-menu-end
 								if canDisplayAdminMenu
 									+dropdown-menu-link-item()(href="/admin") Manage Site
@@ -97,7 +96,6 @@ nav.navbar.navbar-default.navbar-main.navbar-expand-lg(class={
 										event-segmentation={"item": item.trackingKey, "location": "top-menu"}
 									)
 										| !{translate(item.text)}
-										span.caret
 									+dropdown-menu.dropdown-menu-end
 										each child in item.dropdown
 											if child.divider
@@ -173,7 +171,6 @@ nav.navbar.navbar-default.navbar-main.navbar-expand-lg(class={
 								event-segmentation={"item": "account", "location": "top-menu"}
 							)
 								| #{translate('Account')}
-								span.caret
 							+dropdown-menu.dropdown-menu-end
 								+dropdown-menu-item
 									div.disabled.dropdown-item #{getSessionUser().email}

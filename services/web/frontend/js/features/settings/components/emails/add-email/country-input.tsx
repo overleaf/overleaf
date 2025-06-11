@@ -60,9 +60,9 @@ function Downshift({ setValue, inputRef }: CountryInputProps) {
             },
             ref: inputRef,
           })}
+          append={<i className="caret" aria-hidden />}
           placeholder={t('country')}
         />
-        <i className="caret" />
       </div>
       <ul
         {...getMenuProps()}
