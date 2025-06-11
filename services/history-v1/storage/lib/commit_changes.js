@@ -96,7 +96,7 @@ async function queueChangesFake(
   options = {}
 ) {
   try {
-    await queueChanges(projectId, changes, limits, endVersion)
+    await queueChanges(projectId, changes, endVersion)
     await fakePersistRedisChanges(projectId, changes, endVersion)
   } catch (err) {
     logger.error({ err }, 'Chunk buffer verification failed')
