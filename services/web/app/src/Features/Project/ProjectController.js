@@ -659,13 +659,9 @@ const _ProjectController = {
       const hasPaidSubscription = isPaidSubscription(subscription)
       const hasManuallyCollectedSubscription =
         subscription?.collectionMethod === 'manual'
-      const canPurchaseAddons = !(
-        hasPaidSubscription || hasManuallyCollectedSubscription
-      )
       const assistantDisabled = user.aiErrorAssistant?.enabled === false // the assistant has been manually disabled by the user
       const canUseErrorAssistant =
-        (user.features?.aiErrorAssistant || canPurchaseAddons) &&
-        !assistantDisabled
+        !hasManuallyCollectedSubscription && !assistantDisabled
 
       let featureUsage = {}
 
