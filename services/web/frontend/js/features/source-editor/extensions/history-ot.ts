@@ -1,6 +1,5 @@
 import { Decoration, EditorView, WidgetType } from '@codemirror/view'
 import {
-  ChangeSpec,
   EditorState,
   StateEffect,
   StateField,
@@ -21,6 +20,7 @@ export const historyOT = (currentDoc: DocumentContainer) => {
     currentDoc.doc?.getTrackedChanges() ?? new TrackedChangeList([])
   const positionMapper = new PositionMapper(trackedChanges)
   return [
+    updateSender,
     trackChangesUserIdState,
     shareDocState.init(() => currentDoc?.doc?._doc ?? null),
     commentsState,
@@ -31,7 +31,6 @@ export const historyOT = (currentDoc: DocumentContainer) => {
       ),
       positionMapper,
     })),
-    trackedChangesFilter,
     trackedChangesTheme,
   ]
 }
@@ -148,13 +147,17 @@ export const trackedChangesState = StateField.define({
   },
 
   update(value, transaction) {
-    for (const effect of transaction.effects) {
-      if (effect.is(updateTrackedChangesEffect)) {
-        const trackedChanges = effect.value
+    if (
+      (transaction.docChanged && !transaction.annotation(Transaction.remote)) ||
+      transaction.effects.some(effect => effect.is(updateTrackedChangesEffect))
+    ) {
+      const shareDoc = transaction.startState.field(shareDocState)
+      if (shareDoc != null) {
+        const trackedChanges = shareDoc.snapshot.getTrackedChanges()
         const positionMapper = new PositionMapper(trackedChanges)
         value = {
           decorations: buildTrackedChangesDecorations(
-            effect.value,
+            trackedChanges,
             positionMapper
           ),
           positionMapper,
@@ -241,16 +244,14 @@ const commentsState = StateField.define({
 
 export const historyOTOperationEffect = StateEffect.define<EditOperation[]>()
 
-const trackedChangesFilter = EditorState.transactionFilter.of(tr => {
+const updateSender = EditorState.transactionExtender.of(tr => {
   if (!tr.docChanged || tr.annotation(Transaction.remote)) {
-    return tr
+    return {}
   }
 
   const trackingUserId = tr.startState.field(trackChangesUserIdState)
   const positionMapper = tr.startState.field(trackedChangesState).positionMapper
   const startDoc = tr.startState.doc
-  const changes: ChangeSpec[] = []
-  const effects = []
   const opBuilder = new OperationBuilder(
     positionMapper.toSnapshot(startDoc.length)
   )
@@ -299,12 +300,9 @@ const trackedChangesFilter = EditorState.transactionFilter.of(tr => {
   const shareDoc = tr.startState.field(shareDocState)
   if (shareDoc != null) {
     shareDoc.submitOp([op])
-    effects.push(
-      updateTrackedChangesEffect.of(shareDoc.snapshot.getTrackedChanges())
-    )
   }
 
-  return [tr, { changes, effects, sequential: true }]
+  return {}
 })
 
 /**
