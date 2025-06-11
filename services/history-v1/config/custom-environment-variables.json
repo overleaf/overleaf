@@ -84,6 +84,8 @@
   "maxFileUploadSize": "MAX_FILE_UPLOAD_SIZE",
   "httpsOnly": "HTTPS_ONLY",
   "httpRequestTimeout": "HTTP_REQUEST_TIMEOUT",
+  "historyBufferLevel": "HISTORY_BUFFER_LEVEL",
+  "forcePersistBuffer": "FORCE_PERSIST_BUFFER",
   "redis": {
     "queue": {
       "host": "QUEUES_REDIS_HOST",

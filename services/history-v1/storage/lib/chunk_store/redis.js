@@ -650,6 +650,7 @@ async function expireProject(projectId) {
     metrics.inc('chunk_store.redis.set_persisted_version', 1, {
       status,
     })
+    return status
   } catch (err) {
     metrics.inc('chunk_store.redis.set_persisted_version', 1, {
       status: 'error',

@@ -2,6 +2,7 @@
 'use strict'
 
 const logger = require('@overleaf/logger')
+const metrics = require('@overleaf/metrics')
 const OError = require('@overleaf/o-error')
 const assert = require('./assert')
 const chunkStore = require('./chunk_store')
@@ -54,6 +55,7 @@ async function persistBuffer(projectId, limits) {
       { projectId, endVersion },
       'no new changes in Redis buffer to persist'
     )
+    metrics.inc('persist_buffer', 1, { status: 'no_changes' })
     // No changes to persist, update the persisted version in Redis
     // to match the current endVersion.  This shouldn't be needed
     // unless a worker failed to update the persisted version.
@@ -113,6 +115,7 @@ async function persistBuffer(projectId, limits) {
   )
 
   if (!persistResult || !persistResult.currentChunk) {
+    metrics.inc('persist_buffer', 1, { status: 'no-chunk-error' })
     throw new OError(
       'persistChanges did not produce a new chunk for non-empty changes',
       {
@@ -127,6 +130,7 @@ async function persistBuffer(projectId, limits) {
   const newEndVersion = newPersistedChunk.getEndVersion()
 
   if (newEndVersion <= endVersion) {
+    metrics.inc('persist_buffer', 1, { status: 'chunk-version-mismatch' })
     throw new OError(
       'persisted chunk endVersion must be greater than current persisted chunk end version for non-empty changes',
       {
@@ -154,6 +158,7 @@ async function persistBuffer(projectId, limits) {
   )
 
   if (status !== 'ok') {
+    metrics.inc('persist_buffer', 1, { status: 'error-on-persisted-version' })
     throw new OError('failed to update persisted version in Redis', {
       projectId,
       newEndVersion,
@@ -170,6 +175,8 @@ async function persistBuffer(projectId, limits) {
     { projectId, finalPersistedVersion: newEndVersion },
     'persistBuffer operation completed successfully'
   )
+
+  metrics.inc('persist_buffer', 1, { status: 'persisted' })
 
   return persistResult
 }
