@@ -1,0 +1,19 @@
+--- a/services/history-v1/config/custom-environment-variables.json
++++ b/services/history-v1/config/custom-environment-variables.json
+@@ -50,12 +50,14 @@
+     "history": {
+       "host": "OVERLEAF_REDIS_HOST",
+       "password": "OVERLEAF_REDIS_PASS",
+-      "port": "OVERLEAF_REDIS_PORT"
++      "port": "OVERLEAF_REDIS_PORT",
++      "tls": "OVERLEAF_REDIS_TLS"
+     },
+     "lock": {
+       "host": "OVERLEAF_REDIS_HOST",
+       "password": "OVERLEAF_REDIS_PASS",
+-      "port": "OVERLEAF_REDIS_PORT"
++      "port": "OVERLEAF_REDIS_PORT",
++      "tls": "OVERLEAF_REDIS_TLS"
+     }
+   }
+ }

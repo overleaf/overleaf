@@ -1,0 +1,200 @@
+--- a/services/history-v1/api/controllers/project_import.js
++++ b/services/history-v1/api/controllers/project_import.js
+@@ -35,6 +35,7 @@ async function importSnapshot(req, res) {
+   try {
+     snapshot = Snapshot.fromRaw(rawSnapshot)
+   } catch (err) {
++    logger.warn({ err, projectId }, 'failed to import snapshot')
+     return render.unprocessableEntity(res)
+   }
+
+@@ -43,6 +44,7 @@ async function importSnapshot(req, res) {
+     historyId = await chunkStore.initializeProject(projectId, snapshot)
+   } catch (err) {
+     if (err instanceof chunkStore.AlreadyInitialized) {
++      logger.warn({ err, projectId }, 'already initialized')
+       return render.conflict(res)
+     } else {
+       throw err
+--- a/services/history-v1/api/controllers/projects.js
++++ b/services/history-v1/api/controllers/projects.js
+@@ -34,6 +34,7 @@ async function initializeProject(req, res, next) {
+     res.status(HTTPStatus.OK).json({ projectId })
+   } catch (err) {
+     if (err instanceof chunkStore.AlreadyInitialized) {
++      logger.warn({ err, projectId }, 'failed to initialize')
+       render.conflict(res)
+     } else {
+       throw err
+@@ -242,11 +243,15 @@ async function createProjectBlob(req, res, next) {
+     const sizeLimit = new StreamSizeLimit(maxUploadSize)
+     await pipeline(req, sizeLimit, fs.createWriteStream(tmpPath))
+     if (sizeLimit.sizeLimitExceeded) {
++      logger.warn(
++        { projectId, expectedHash, maxUploadSize },
++        'blob exceeds size threshold'
++      )
+       return render.requestEntityTooLarge(res)
+     }
+     const hash = await blobHash.fromFile(tmpPath)
+     if (hash !== expectedHash) {
+-      logger.debug({ hash, expectedHash }, 'Hash mismatch')
++      logger.warn({ projectId, hash, expectedHash }, 'Hash mismatch')
+       return render.conflict(res, 'File hash mismatch')
+     }
+
+@@ -343,6 +348,10 @@ async function copyProjectBlob(req, res, next) {
+     targetBlobStore.getBlob(blobHash),
+   ])
+   if (!sourceBlob) {
++    logger.warn(
++      { sourceProjectId, targetProjectId, blobHash },
++      'missing source blob when copying across projects'
++    )
+     return render.notFound(res)
+   }
+   // Exit early if the blob exists in the target project.
+--- a/services/history-v1/app.js
++++ b/services/history-v1/app.js
+@@ -100,11 +100,13 @@ function setupErrorHandling() {
+       })
+     }
+     if (err.code === 'ENUM_MISMATCH') {
++      logger.warn({ err, projectId }, err.message)
+       return res.status(HTTPStatus.UNPROCESSABLE_ENTITY).json({
+         message: 'invalid enum value: ' + err.paramName,
+       })
+     }
+     if (err.code === 'REQUIRED') {
++      logger.warn({ err, projectId }, err.message)
+       return res.status(HTTPStatus.UNPROCESSABLE_ENTITY).json({
+         message: err.message,
+       })
+--- a/services/project-history/app/js/HistoryStoreManager.js
++++ b/services/project-history/app/js/HistoryStoreManager.js
+@@ -35,7 +35,10 @@ class StringStream extends stream.Readable {
+ _mocks.getMostRecentChunk = (projectId, historyId, callback) => {
+   const path = `projects/${historyId}/latest/history`
+   logger.debug({ projectId, historyId }, 'getting chunk from history service')
+-  _requestChunk({ path, json: true }, callback)
++  _requestChunk({ path, json: true }, (err, chunk) => {
++    if (err) return callback(OError.tag(err))
++    callback(null, chunk)
++  })
+ }
+
+ /**
+@@ -54,7 +57,10 @@ export function getChunkAtVersion(projectId, historyId, version, callback) {
+     { projectId, historyId, version },
+     'getting chunk from history service for version'
+   )
+-  _requestChunk({ path, json: true }, callback)
++  _requestChunk({ path, json: true }, (err, chunk) => {
++    if (err) return callback(OError.tag(err))
++    callback(null, chunk)
++  })
+ }
+
+ export function getMostRecentVersion(projectId, historyId, callback) {
+@@ -68,8 +74,10 @@ export function getMostRecentVersion(projectId, historyId, callback) {
+       _.sortBy(chunk.chunk.history.changes || [], x => x.timestamp)
+     )
+     // find the latest project and doc versions in the chunk
+-    _getLatestProjectVersion(projectId, chunk, (err1, projectVersion) =>
++    _getLatestProjectVersion(projectId, chunk, (err1, projectVersion) => {
++      if (err1) err1 = OError.tag(err1)
+       _getLatestV2DocVersions(projectId, chunk, (err2, v2DocVersions) => {
++        if (err2) err2 = OError.tag(err2)
+         // return the project and doc versions
+         const projectStructureAndDocVersions = {
+           project: projectVersion,
+@@ -83,7 +91,7 @@ export function getMostRecentVersion(projectId, historyId, callback) {
+           chunk
+         )
+       })
+-    )
++    })
+   })
+ }
+
+@@ -211,7 +219,10 @@ export function getProjectBlob(historyId, blobHash, callback) {
+   logger.debug({ historyId, blobHash }, 'getting blob from history service')
+   _requestHistoryService(
+     { path: `projects/${historyId}/blobs/${blobHash}` },
+-    callback
++    (err, blob) => {
++      if (err) return callback(OError.tag(err))
++      callback(null, blob)
++    }
+   )
+ }
+
+@@ -277,7 +288,10 @@ function createBlobFromString(historyId, data, fileId, callback) {
+     (fsPath, cb) => {
+       _createBlob(historyId, fsPath, cb)
+     },
+-    callback
++    (err, hash) => {
++      if (err) return callback(OError.tag(err))
++      callback(null, hash)
++    }
+   )
+ }
+
+@@ -330,7 +344,7 @@ export function createBlobForUpdate(projectId, historyId, update, callback) {
+     try {
+       ranges = HistoryBlobTranslator.createRangeBlobDataFromUpdate(update)
+     } catch (error) {
+-      return callback(error)
++      return callback(OError.tag(error))
+     }
+     createBlobFromString(
+       historyId,
+@@ -338,7 +352,7 @@ export function createBlobForUpdate(projectId, historyId, update, callback) {
+       `project-${projectId}-doc-${update.doc}`,
+       (err, fileHash) => {
+         if (err) {
+-          return callback(err)
++          return callback(OError.tag(err))
+         }
+         if (ranges) {
+           createBlobFromString(
+@@ -347,7 +361,7 @@ export function createBlobForUpdate(projectId, historyId, update, callback) {
+             `project-${projectId}-doc-${update.doc}-ranges`,
+             (err, rangesHash) => {
+               if (err) {
+-                return callback(err)
++                return callback(OError.tag(err))
+               }
+               logger.debug(
+                 { fileHash, rangesHash },
+@@ -415,7 +429,7 @@ export function createBlobForUpdate(projectId, historyId, update, callback) {
+             },
+             (err, fileHash) => {
+               if (err) {
+-                return callback(err)
++                return callback(OError.tag(err))
+               }
+               if (update.hash && update.hash !== fileHash) {
+                 logger.warn(
+@@ -447,7 +461,7 @@ export function createBlobForUpdate(projectId, historyId, update, callback) {
+               },
+               (err, fileHash) => {
+                 if (err) {
+-                  return callback(err)
++                  return callback(OError.tag(err))
+                 }
+                 logger.debug({ fileHash }, 'created empty blob for file')
+                 callback(null, { file: fileHash })
+@@ -520,7 +534,10 @@ export function initializeProject(historyId, callback) {
+ export function deleteProject(projectId, callback) {
+   _requestHistoryService(
+     { method: 'DELETE', path: `projects/${projectId}` },
+-    callback
++    err => {
++      if (err) return callback(OError.tag(err))
++      callback(null)
++    }
+   )
+ }
+
