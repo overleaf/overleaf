@@ -132,6 +132,20 @@ const DocManager = {
     return docs
   },
 
+  async getTrackedChangesUserIds(projectId) {
+    const docs = await DocManager.getAllNonDeletedDocs(projectId, {
+      ranges: true,
+    })
+    const userIds = new Set()
+    for (const doc of docs) {
+      for (const change of doc.ranges?.changes || []) {
+        if (change.metadata.user_id === 'anonymous-user') continue
+        userIds.add(change.metadata.user_id)
+      }
+    }
+    return Array.from(userIds)
+  },
+
   async projectHasRanges(projectId) {
     const docs = await MongoManager.getProjectsDocs(projectId, {}, { _id: 1 })
     const docIds = docs.map(doc => doc._id)

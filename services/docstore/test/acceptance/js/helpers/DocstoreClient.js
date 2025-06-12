@@ -100,6 +100,16 @@ module.exports = DocstoreClient = {
     )
   },
 
+  getTrackedChangesUserIds(projectId, callback) {
+    request.get(
+      {
+        url: `http://127.0.0.1:${settings.internal.docstore.port}/project/${projectId}/tracked-changes-user-ids`,
+        json: true,
+      },
+      callback
+    )
+  },
+
   updateDoc(projectId, docId, lines, version, ranges, callback) {
     return request.post(
       {

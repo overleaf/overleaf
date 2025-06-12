@@ -1,10 +1,11 @@
 const { promisify } = require('util')
-const { promisifyMultiResult } = require('@overleaf/promise-utils')
+const { promisifyMultiResult, callbackify } = require('@overleaf/promise-utils')
 const request = require('request').defaults({ jar: false })
 const OError = require('@overleaf/o-error')
 const logger = require('@overleaf/logger')
 const settings = require('@overleaf/settings')
 const Errors = require('../Errors/Errors')
+const { fetchJson } = require('@overleaf/fetch-utils')
 
 const TIMEOUT = 30 * 1000 // request timeout
 
@@ -84,6 +85,14 @@ function getAllDeletedDocs(projectId, callback) {
       )
     }
   })
+}
+
+/**
+ * @param {string} projectId
+ */
+async function getTrackedChangesUserIds(projectId) {
+  const url = `${settings.apis.docstore.url}/project/${projectId}/tracked-changes-user-ids`
+  return fetchJson(url, { signal: AbortSignal.timeout(TIMEOUT) })
 }
 
 /**
@@ -292,6 +301,7 @@ module.exports = {
   getAllDeletedDocs,
   getAllRanges,
   getDoc,
+  getTrackedChangesUserIds: callbackify(getTrackedChangesUserIds),
   isDocDeleted,
   updateDoc,
   projectHasRanges,
@@ -304,6 +314,7 @@ module.exports = {
     getAllDeletedDocs: promisify(getAllDeletedDocs),
     getAllRanges: promisify(getAllRanges),
     getDoc: promisifyMultiResult(getDoc, ['lines', 'rev', 'version', 'ranges']),
+    getTrackedChangesUserIds,
     isDocDeleted: promisify(isDocDeleted),
     updateDoc: promisifyMultiResult(updateDoc, ['modified', 'rev']),
     projectHasRanges: promisify(projectHasRanges),
