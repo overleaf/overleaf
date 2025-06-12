@@ -551,10 +551,13 @@
     }
   }
 
-  // TODO: Change rem sizes to variables
+  .lime-color-text {
+    color: var(--green-bright);
+  }
+
   .customer-story-content {
     .table-of-contents-section {
-      padding-right: 64px;
+      padding-right: var(--spacing-13);
 
       @include media-breakpoint-down(lg) {
         display: none;
@@ -563,18 +566,18 @@
       .table-of-contents {
         border-top: 1px solid var(--neutral-30);
         border-bottom: 1px solid var(--neutral-30);
-        padding: 32px 0;
+        padding: var(--spacing-09) 0;
 
         .heading {
-          font-size: 1.125rem;
+          @include heading-xs;
+
           font-weight: 600;
-          line-height: 1.333;
           color: var(--green-60);
         }
 
         li {
           list-style: none;
-          padding-top: 16px;
+          padding-top: var(--spacing-06);
           font-weight: 500;
 
           a {
@@ -585,23 +588,37 @@
       }
     }
 
+    .customer-story-layout-card {
+      p {
+        @include heading-xs;
+      }
+    }
+
     .story-details-section {
       h3 {
-        font-size: 1.875rem;
-        line-height: 1.333;
+        @include heading-lg;
+
         margin-top: 0;
       }
 
+      .customer-story-list-padding {
+        padding-left: var(--spacing-10);
+      }
+
+      .card-gray {
+        padding: var(--spacing-08);
+      }
+
       .at-glance-section {
-        padding-top: 24px;
+        padding-top: var(--spacing-08);
 
         p {
-          margin-top: 16px;
+          margin-top: var(--spacing-06);
         }
       }
 
       p {
-        font-size: 1.125rem;
+        font-size: var(--font-size-04);
       }
 
       .border-r-16 {
@@ -609,13 +626,13 @@
       }
 
       .introduction-image-caption {
-        padding-top: 16px;
+        padding-top: var(--spacing-06);
       }
 
       .stats-card {
         display: flex;
         flex-direction: row;
-        padding: 32px;
+        padding: var(--spacing-09);
         border-radius: 16px;
         background: var(--dark-jungle-green);
         color: var(--white);
@@ -640,17 +657,59 @@
 
     .customer-quote {
       border-left: 2px solid var(--green-60);
-      padding-left: 16px;
+      padding-left: var(--spacing-06);
 
       blockquote {
         color: var(--neutral-90);
-        font-size: 1.6rem;
-        line-height: 1.333;
+
+        @include heading-md;
       }
 
       p {
-        margin-top: 1rem;
-        font-size: 1.125rem;
+        margin-top: var(--spacing-06);
+        font-size: var(--font-size-04);
+      }
+    }
+  }
+
+  // most of these are here to replace rules from core/type.less
+  blockquote {
+    @include heading-lg;
+
+    border-left: none;
+    font-weight: 600;
+    quotes: '\201C' '\201D'; // override default quotes
+    padding: unset;
+    margin: unset;
+    font-family: 'Noto Sans', sans-serif;
+
+    &::after {
+      visibility: visible;
+      display: inline;
+      margin-left: 1px; // it's too tight to the text otherwise
+      content: close-quote;
+    }
+
+    &::before {
+      color: inherit;
+      margin-right: 0;
+      vertical-align: 0;
+      content: open-quote;
+    }
+
+    &::after,
+    &::before {
+      @include heading-lg;
+    }
+
+    @include media-breakpoint-down(lg) {
+      @include heading-md;
+
+      &::after,
+      &::before {
+        visibility: visible;
+
+        @include heading-md;
       }
     }
   }
@@ -658,26 +717,17 @@
   .cta-card-individual-customer {
     display: flex;
     justify-content: space-between;
-    padding: 64px;
-
-    // TODO: Uncomment this in next PR when individual page PR is made
-    // background-image: linear-gradient(
-    //     to right,
-    //     rgba(0, 0, 0, 0.4) 0%,
-    //     @cta-card-bg-color 20%,
-    //     @cta-card-bg-color 100%
-    //   ),
-    //   url('../../../public/img/website-redesign/overleaf-pattern-purple.png');
+    padding: var(--spacing-13);
     background-size: cover;
     color: var(--white);
     border-radius: 8px;
 
     @include media-breakpoint-down(lg) {
-      padding: 48px 24px;
+      padding: var(--spacing-11) var(--spacing-08);
     }
 
     h2 {
-      font-size: 1.875rem;
+      font-size: var(--font-size-07);
       color: var(--white);
     }
 
