@@ -231,8 +231,6 @@ const RestoreManager = {
         delete threadData.resolved_by_user_id
         delete threadData.resolved_at
       }
-      // remove the resolved property from the comment range as the chat service is synced at this point
-      delete commentRange.op.resolved
     }
 
     await ChatManager.promises.injectUserInfoIntoThreads(newCommentThreadData)
