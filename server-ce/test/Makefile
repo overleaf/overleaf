@@ -6,8 +6,8 @@ all: test-e2e
 # Notable the container labels com.docker.compose.project.working_dir and com.docker.compose.project.config_files need to match when creating containers from the docker host (how you started things) and from host-admin (how tests reconfigure the instance).
 export PWD = $(shell pwd)
 
-export TEX_LIVE_DOCKER_IMAGE ?= gcr.io/overleaf-ops/texlive-full:2023.1
-export ALL_TEX_LIVE_DOCKER_IMAGES ?= gcr.io/overleaf-ops/texlive-full:2023.1,gcr.io/overleaf-ops/texlive-full:2022.1
+export TEX_LIVE_DOCKER_IMAGE ?= us-east1-docker.pkg.dev/overleaf-ops/ol-docker/texlive-full:2023.1
+export ALL_TEX_LIVE_DOCKER_IMAGES ?= us-east1-docker.pkg.dev/overleaf-ops/ol-docker/texlive-full:2023.1,us-east1-docker.pkg.dev/overleaf-ops/ol-docker/texlive-full:2022.1
 export IMAGE_TAG_PRO ?= us-east1-docker.pkg.dev/overleaf-ops/ol-docker/pro:latest
 export CYPRESS_SHARD ?=
 export COMPOSE_PROJECT_NAME ?= test
@@ -46,7 +46,7 @@ prefetch_custom_compose_pull:
 prefetch_custom: prefetch_custom_texlive
 prefetch_custom_texlive:
 	echo "$$ALL_TEX_LIVE_DOCKER_IMAGES" | tr ',' '\n' | xargs -I% \
-	sh -exc 'tag=%; re_tag=quay.io/sharelatex/$${tag#*/*/}; docker pull $$tag; docker tag $$tag $$re_tag'
+	sh -exc 'tag=%; re_tag=quay.io/sharelatex/$${tag#*/*/*/}; docker pull $$tag; docker tag $$tag $$re_tag'
 
 prefetch_custom: prefetch_old
 prefetch_old:

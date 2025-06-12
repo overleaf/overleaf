@@ -1,6 +1,6 @@
 mongo-utils
 --dependencies=None
---docker-repos=gcr.io/overleaf-ops
+--docker-repos=us-east1-docker.pkg.dev/overleaf-ops/ol-docker
 --env-add=
 --env-pass-through=
 --esmock-loader=False

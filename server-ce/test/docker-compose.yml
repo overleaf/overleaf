@@ -131,7 +131,7 @@ services:
 
   saml:
     restart: always
-    image: gcr.io/overleaf-ops/saml-test
+    image: us-east1-docker.pkg.dev/overleaf-ops/ol-docker/saml-test
     environment:
       SAML_TEST_SP_ENTITY_ID: 'sharelatex-test-saml'
       SAML_BASE_URL_PATH: 'http://saml/simplesaml/'
