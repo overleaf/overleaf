@@ -1,61 +1,46 @@
-const async = require('async')
-const UserInfoManager = require('../User/UserInfoManager')
 const UserInfoController = require('../User/UserInfoController')
-const { promisify } = require('@overleaf/promise-utils')
+const UserGetter = require('../User/UserGetter')
+const { callbackify } = require('@overleaf/promise-utils')
 
-function injectUserInfoIntoThreads(threads, callback) {
-  // There will be a lot of repitition of user_ids, so first build a list
-  // of unique ones to perform db look ups on, then use these to populate the
-  // user fields
-  let message, thread, threadId, userId
-  if (callback == null) {
-    callback = function () {}
-  }
-  const userIds = {}
-  for (threadId in threads) {
-    thread = threads[threadId]
+async function injectUserInfoIntoThreads(threads) {
+  const userIds = new Set()
+  for (const thread of Object.values(threads)) {
     if (thread.resolved) {
-      userIds[thread.resolved_by_user_id] = true
+      userIds.add(thread.resolved_by_user_id)
     }
-    for (message of Array.from(thread.messages)) {
-      userIds[message.user_id] = true
+    for (const message of thread.messages) {
+      userIds.add(message.user_id)
     }
   }
 
-  const jobs = []
-  const users = {}
-  for (userId in userIds) {
-    ;(userId =>
-      jobs.push(cb =>
-        UserInfoManager.getPersonalInfo(userId, function (error, user) {
-          if (error != null) return cb(error)
-          user = UserInfoController.formatPersonalInfo(user)
-          users[userId] = user
-          cb()
-        })
-      ))(userId)
+  const projection = {
+    _id: true,
+    first_name: true,
+    last_name: true,
+    email: true,
   }
-
-  return async.series(jobs, function (error) {
-    if (error != null) {
-      return callback(error)
+  const users = await UserGetter.promises.getUsers(userIds, projection)
+  const usersById = new Map()
+  for (const user of users) {
+    usersById.set(
+      user._id.toString(),
+      UserInfoController.formatPersonalInfo(user)
+    )
+  }
+  for (const thread of Object.values(threads)) {
+    if (thread.resolved) {
+      thread.resolved_by_user = usersById.get(thread.resolved_by_user_id)
     }
-    for (threadId in threads) {
-      thread = threads[threadId]
-      if (thread.resolved) {
-        thread.resolved_by_user = users[thread.resolved_by_user_id]
-      }
-      for (message of Array.from(thread.messages)) {
-        message.user = users[message.user_id]
-      }
+    for (const message of thread.messages) {
+      message.user = usersById.get(message.user_id)
     }
-    return callback(null, threads)
-  })
+  }
+  return threads
 }
 
 module.exports = {
-  injectUserInfoIntoThreads,
+  injectUserInfoIntoThreads: callbackify(injectUserInfoIntoThreads),
   promises: {
-    injectUserInfoIntoThreads: promisify(injectUserInfoIntoThreads),
+    injectUserInfoIntoThreads,
   },
 }

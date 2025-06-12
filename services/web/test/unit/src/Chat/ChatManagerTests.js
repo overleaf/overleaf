@@ -12,7 +12,7 @@ describe('ChatManager', function () {
     this.user_id = 'mock-user-id'
     this.ChatManager = SandboxedModule.require(modulePath, {
       requires: {
-        '../User/UserInfoManager': (this.UserInfoManager = {}),
+        '../User/UserGetter': (this.UserGetter = { promises: {} }),
         '../User/UserInfoController': (this.UserInfoController = {}),
       },
     })
@@ -32,18 +32,22 @@ describe('ChatManager', function () {
     beforeEach(function () {
       this.users = {
         user_id_1: {
-          mock: 'user_1',
+          _id: 'user_id_1',
         },
         user_id_2: {
-          mock: 'user_2',
+          _id: 'user_id_2',
         },
       }
-      this.UserInfoManager.getPersonalInfo = (userId, callback) => {
-        return callback(null, this.users[userId])
-      }
-      sinon.spy(this.UserInfoManager, 'getPersonalInfo')
+      this.UserGetter.promises.getUsers = userIds =>
+        Promise.resolve(
+          Array.from(userIds)
+            .map(id => this.users[id])
+            .filter(u => !!u)
+        )
+
+      sinon.spy(this.UserGetter.promises, 'getUsers')
       return (this.UserInfoController.formatPersonalInfo = user => ({
-        formatted: user.mock,
+        formatted: { id: user._id.toString() },
       }))
     })
 
@@ -79,16 +83,16 @@ describe('ChatManager', function () {
         thread1: {
           resolved: true,
           resolved_by_user_id: 'user_id_1',
-          resolved_by_user: { formatted: 'user_1' },
+          resolved_by_user: { formatted: { id: 'user_id_1' } },
           messages: [
             {
               user_id: 'user_id_1',
-              user: { formatted: 'user_1' },
+              user: { formatted: { id: 'user_id_1' } },
               content: 'foo',
             },
             {
               user_id: 'user_id_2',
-              user: { formatted: 'user_2' },
+              user: { formatted: { id: 'user_id_2' } },
               content: 'bar',
             },
           ],
@@ -97,7 +101,7 @@ describe('ChatManager', function () {
           messages: [
             {
               user_id: 'user_id_1',
-              user: { formatted: 'user_1' },
+              user: { formatted: { id: 'user_id_1' } },
               content: 'baz',
             },
           ],
@@ -105,7 +109,7 @@ describe('ChatManager', function () {
       })
     })
 
-    it('should only need to look up each user once', async function () {
+    it('should lookup all users in a single batch', async function () {
       await this.ChatManager.promises.injectUserInfoIntoThreads([
         {
           messages: [
@@ -121,7 +125,7 @@ describe('ChatManager', function () {
         },
       ])
 
-      this.UserInfoManager.getPersonalInfo.calledOnce.should.equal(true)
+      this.UserGetter.promises.getUsers.should.have.been.calledOnce
     })
   })
 })
