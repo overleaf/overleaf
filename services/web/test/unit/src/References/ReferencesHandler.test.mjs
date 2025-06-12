@@ -113,8 +113,8 @@ describe('ReferencesHandler', function () {
       })
     })
 
-    it('should call _findBibDocIds', function (ctx) {
-      return new Promise(resolve => {
+    it('should call _findBibDocIds', async function (ctx) {
+      await new Promise(resolve => {
         return ctx.call((err, data) => {
           expect(err).to.be.null
           ctx.handler._findBibDocIds.callCount.should.equal(1)
@@ -126,8 +126,8 @@ describe('ReferencesHandler', function () {
       })
     })
 
-    it('should call _findBibFileRefs', function (ctx) {
-      return new Promise(resolve => {
+    it('should call _findBibFileRefs', async function (ctx) {
+      await new Promise(resolve => {
         return ctx.call((err, data) => {
           expect(err).to.be.null
           ctx.handler._findBibDocIds.callCount.should.equal(1)
@@ -139,8 +139,8 @@ describe('ReferencesHandler', function () {
       })
     })
 
-    it('should call DocumentUpdaterHandler.flushDocToMongo', function (ctx) {
-      return new Promise(resolve => {
+    it('should call DocumentUpdaterHandler.flushDocToMongo', async function (ctx) {
+      await new Promise(resolve => {
         return ctx.call((err, data) => {
           expect(err).to.be.null
           ctx.DocumentUpdaterHandler.flushDocToMongo.callCount.should.equal(2)
@@ -149,8 +149,8 @@ describe('ReferencesHandler', function () {
       })
     })
 
-    it('should make a request to references service', function (ctx) {
-      return new Promise(resolve => {
+    it('should make a request to references service', async function (ctx) {
+      await new Promise(resolve => {
         return ctx.call((err, data) => {
           expect(err).to.be.null
           ctx.request.post.callCount.should.equal(1)
@@ -189,8 +189,8 @@ describe('ReferencesHandler', function () {
       })
     })
 
-    it('should not produce an error', function (ctx) {
-      return new Promise(resolve => {
+    it('should not produce an error', async function (ctx) {
+      await new Promise(resolve => {
         return ctx.call((err, data) => {
           expect(err).to.equal(null)
           return resolve()
@@ -198,8 +198,8 @@ describe('ReferencesHandler', function () {
       })
     })
 
-    it('should return data', function (ctx) {
-      return new Promise(resolve => {
+    it('should return data', async function (ctx) {
+      await new Promise(resolve => {
         return ctx.call((err, data) => {
           expect(err).to.be.null
           expect(data).to.not.equal(null)
@@ -215,8 +215,8 @@ describe('ReferencesHandler', function () {
         ctx.ProjectGetter.getProject.callsArgWith(2, new Error('woops'))
       })
 
-      it('should produce an error', function (ctx) {
-        return new Promise(resolve => {
+      it('should produce an error', async function (ctx) {
+        await new Promise(resolve => {
           ctx.call((err, data) => {
             expect(err).to.not.equal(null)
             expect(err).to.be.instanceof(Error)
@@ -226,8 +226,8 @@ describe('ReferencesHandler', function () {
         })
       })
 
-      it('should not send request', function (ctx) {
-        return new Promise(resolve => {
+      it('should not send request', async function (ctx) {
+        await new Promise(resolve => {
           ctx.call(() => {
             ctx.request.post.callCount.should.equal(0)
             resolve()
@@ -241,8 +241,8 @@ describe('ReferencesHandler', function () {
         ctx.ProjectGetter.getProject.callsArgWith(2, null)
       })
 
-      it('should produce an error', function (ctx) {
-        return new Promise(resolve => {
+      it('should produce an error', async function (ctx) {
+        await new Promise(resolve => {
           ctx.call((err, data) => {
             expect(err).to.not.equal(null)
             expect(err).to.be.instanceof(Errors.NotFoundError)
@@ -252,8 +252,8 @@ describe('ReferencesHandler', function () {
         })
       })
 
-      it('should not send request', function (ctx) {
-        return new Promise(resolve => {
+      it('should not send request', async function (ctx) {
+        await new Promise(resolve => {
           ctx.call(() => {
             ctx.request.post.callCount.should.equal(0)
             resolve()
@@ -268,8 +268,8 @@ describe('ReferencesHandler', function () {
         ctx.handler._isFullIndex.callsArgWith(1, new Error('woops'))
       })
 
-      it('should produce an error', function (ctx) {
-        return new Promise(resolve => {
+      it('should produce an error', async function (ctx) {
+        await new Promise(resolve => {
           ctx.call((err, data) => {
             expect(err).to.not.equal(null)
             expect(err).to.be.instanceof(Error)
@@ -279,8 +279,8 @@ describe('ReferencesHandler', function () {
         })
       })
 
-      it('should not send request', function (ctx) {
-        return new Promise(resolve => {
+      it('should not send request', async function (ctx) {
+        await new Promise(resolve => {
           ctx.call(() => {
             ctx.request.post.callCount.should.equal(0)
             resolve()
@@ -299,8 +299,8 @@ describe('ReferencesHandler', function () {
         )
       })
 
-      it('should produce an error', function (ctx) {
-        return new Promise(resolve => {
+      it('should produce an error', async function (ctx) {
+        await new Promise(resolve => {
           ctx.call((err, data) => {
             expect(err).to.not.equal(null)
             expect(err).to.be.instanceof(Error)
@@ -310,8 +310,8 @@ describe('ReferencesHandler', function () {
         })
       })
 
-      it('should not send request', function (ctx) {
-        return new Promise(resolve => {
+      it('should not send request', async function (ctx) {
+        await new Promise(resolve => {
           ctx.call(() => {
             ctx.request.post.callCount.should.equal(0)
             resolve()

@@ -56,8 +56,8 @@ describe('TagsController', function () {
     ctx.res.json = sinon.stub()
   })
 
-  it('get all tags', function (ctx) {
-    return new Promise(resolve => {
+  it('get all tags', async function (ctx) {
+    await new Promise(resolve => {
       const allTags = [{ name: 'tag', projects: ['123423', '423423'] }]
       ctx.TagsHandler.promises.getAllTags = sinon.stub().resolves(allTags)
       ctx.TagsController.getAllTags(ctx.req, {
@@ -74,8 +74,8 @@ describe('TagsController', function () {
   })
 
   describe('create a tag', function (done) {
-    it('without a color', function (ctx) {
-      return new Promise(resolve => {
+    it('without a color', async function (ctx) {
+      await new Promise(resolve => {
         ctx.tag = { mock: 'tag' }
         ctx.TagsHandler.promises.createTag = sinon.stub().resolves(ctx.tag)
         ctx.req.session.user._id = ctx.userId = 'user-id-123'
@@ -96,8 +96,8 @@ describe('TagsController', function () {
       })
     })
 
-    it('with a color', function (ctx) {
-      return new Promise(resolve => {
+    it('with a color', async function (ctx) {
+      await new Promise(resolve => {
         ctx.tag = { mock: 'tag' }
         ctx.TagsHandler.promises.createTag = sinon.stub().resolves(ctx.tag)
         ctx.req.session.user._id = ctx.userId = 'user-id-123'
@@ -123,8 +123,8 @@ describe('TagsController', function () {
     })
   })
 
-  it('delete a tag', function (ctx) {
-    return new Promise(resolve => {
+  it('delete a tag', async function (ctx) {
+    await new Promise(resolve => {
       ctx.req.params.tagId = ctx.tagId = 'tag-id-123'
       ctx.req.session.user._id = ctx.userId = 'user-id-123'
       ctx.TagsController.deleteTag(ctx.req, {
@@ -150,8 +150,8 @@ describe('TagsController', function () {
       ctx.req.session.user._id = ctx.userId = 'user-id-123'
     })
 
-    it('with a name and no color', function (ctx) {
-      return new Promise(resolve => {
+    it('with a name and no color', async function (ctx) {
+      await new Promise(resolve => {
         ctx.req.body = {
           name: (ctx.tagName = 'new-name'),
         }
@@ -173,8 +173,8 @@ describe('TagsController', function () {
       })
     })
 
-    it('with a name and color', function (ctx) {
-      return new Promise(resolve => {
+    it('with a name and color', async function (ctx) {
+      await new Promise(resolve => {
         ctx.req.body = {
           name: (ctx.tagName = 'new-name'),
           color: (ctx.color = '#FF0011'),
@@ -198,8 +198,8 @@ describe('TagsController', function () {
       })
     })
 
-    it('without a name', function (ctx) {
-      return new Promise(resolve => {
+    it('without a name', async function (ctx) {
+      await new Promise(resolve => {
         ctx.req.body = { name: undefined }
         ctx.TagsController.renameTag(ctx.req, {
           status: code => {
@@ -215,8 +215,8 @@ describe('TagsController', function () {
     })
   })
 
-  it('add a project to a tag', function (ctx) {
-    return new Promise(resolve => {
+  it('add a project to a tag', async function (ctx) {
+    await new Promise(resolve => {
       ctx.req.params.tagId = ctx.tagId = 'tag-id-123'
       ctx.req.params.projectId = ctx.projectId = 'project-id-123'
       ctx.req.session.user._id = ctx.userId = 'user-id-123'
@@ -238,8 +238,8 @@ describe('TagsController', function () {
     })
   })
 
-  it('add projects to a tag', function (ctx) {
-    return new Promise(resolve => {
+  it('add projects to a tag', async function (ctx) {
+    await new Promise(resolve => {
       ctx.req.params.tagId = ctx.tagId = 'tag-id-123'
       ctx.req.body.projectIds = ctx.projectIds = [
         'project-id-123',
@@ -264,8 +264,8 @@ describe('TagsController', function () {
     })
   })
 
-  it('remove a project from a tag', function (ctx) {
-    return new Promise(resolve => {
+  it('remove a project from a tag', async function (ctx) {
+    await new Promise(resolve => {
       ctx.req.params.tagId = ctx.tagId = 'tag-id-123'
       ctx.req.params.projectId = ctx.projectId = 'project-id-123'
       ctx.req.session.user._id = ctx.userId = 'user-id-123'
@@ -287,8 +287,8 @@ describe('TagsController', function () {
     })
   })
 
-  it('remove projects from a tag', function (ctx) {
-    return new Promise(resolve => {
+  it('remove projects from a tag', async function (ctx) {
+    await new Promise(resolve => {
       ctx.req.params.tagId = ctx.tagId = 'tag-id-123'
       ctx.req.body.projectIds = ctx.projectIds = [
         'project-id-123',

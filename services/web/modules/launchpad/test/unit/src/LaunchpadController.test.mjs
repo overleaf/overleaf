@@ -281,8 +281,8 @@ describe('LaunchpadController', function () {
           .rejects(new Error('woops'))
       })
 
-      it('should call next with an error', function (ctx) {
-        return new Promise(resolve => {
+      it('should call next with an error', async function (ctx) {
+        await new Promise(resolve => {
           ctx.next = sinon.stub().callsFake(err => {
             expect(err).to.be.instanceof(Error)
             ctx.next.callCount.should.equal(1)

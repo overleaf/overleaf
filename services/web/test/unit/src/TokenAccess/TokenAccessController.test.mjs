@@ -285,8 +285,8 @@ describe('TokenAccessController', function () {
     })
 
     describe('normal case (edit slot available)', function () {
-      beforeEach(function (ctx) {
-        return new Promise(resolve => {
+      beforeEach(async function (ctx) {
+        await new Promise(resolve => {
           ctx.LimitationsManager.promises.canAcceptEditCollaboratorInvite.resolves(
             true
           )
@@ -361,8 +361,8 @@ describe('TokenAccessController', function () {
     })
 
     describe('when there are no edit collaborator slots available', function () {
-      beforeEach(function (ctx) {
-        return new Promise(resolve => {
+      beforeEach(async function (ctx) {
+        await new Promise(resolve => {
           ctx.LimitationsManager.promises.canAcceptEditCollaboratorInvite.resolves(
             false
           )
@@ -439,8 +439,8 @@ describe('TokenAccessController', function () {
     })
 
     describe('when the access was already granted', function () {
-      beforeEach(function (ctx) {
-        return new Promise(resolve => {
+      beforeEach(async function (ctx) {
+        await new Promise(resolve => {
           ctx.project.tokenAccessReadAndWrite_refs.push(ctx.user._id)
           ctx.req.params = { token: ctx.token }
           ctx.req.body = { confirmedByUser: true }
@@ -479,8 +479,8 @@ describe('TokenAccessController', function () {
     })
 
     describe('hash prefix missing in request', function () {
-      beforeEach(function (ctx) {
-        return new Promise(resolve => {
+      beforeEach(async function (ctx) {
+        await new Promise(resolve => {
           ctx.req.params = { token: ctx.token }
           ctx.req.body = { confirmedByUser: true }
           ctx.res.callback = resolve
@@ -517,8 +517,8 @@ describe('TokenAccessController', function () {
     })
 
     describe('user is owner of project', function () {
-      beforeEach(function (ctx) {
-        return new Promise(resolve => {
+      beforeEach(async function (ctx) {
+        await new Promise(resolve => {
           ctx.AuthorizationManager.promises.getPrivilegeLevelForProject.returns(
             PrivilegeLevels.OWNER
           )
@@ -555,8 +555,8 @@ describe('TokenAccessController', function () {
         ctx.req.body = { tokenHashPrefix: '#prefix' }
       })
       describe('ANONYMOUS_READ_AND_WRITE_ENABLED is undefined', function () {
-        beforeEach(function (ctx) {
-          return new Promise(resolve => {
+        beforeEach(async function (ctx) {
+          await new Promise(resolve => {
             ctx.res.callback = resolve
             ctx.TokenAccessController.grantTokenAccessReadAndWrite(
               ctx.req,
@@ -595,8 +595,8 @@ describe('TokenAccessController', function () {
       })
 
       describe('ANONYMOUS_READ_AND_WRITE_ENABLED is true', function () {
-        beforeEach(function (ctx) {
-          return new Promise(resolve => {
+        beforeEach(async function (ctx) {
+          await new Promise(resolve => {
             ctx.TokenAccessHandler.ANONYMOUS_READ_AND_WRITE_ENABLED = true
             ctx.res.callback = resolve
 
@@ -637,8 +637,8 @@ describe('TokenAccessController', function () {
         ctx.Settings.overleaf = {}
       })
       describe('when token is for v1 project', function () {
-        beforeEach(function (ctx) {
-          return new Promise(resolve => {
+        beforeEach(async function (ctx) {
+          await new Promise(resolve => {
             ctx.TokenAccessHandler.promises.getProjectByToken.resolves(
               undefined
             )
@@ -683,8 +683,8 @@ describe('TokenAccessController', function () {
       })
 
       describe('when token is not for a v1 or v2 project', function () {
-        beforeEach(function (ctx) {
-          return new Promise(resolve => {
+        beforeEach(async function (ctx) {
+          await new Promise(resolve => {
             ctx.TokenAccessHandler.promises.getProjectByToken.resolves(
               undefined
             )
@@ -726,8 +726,8 @@ describe('TokenAccessController', function () {
         ctx.req.params = { token: ctx.token }
         ctx.req.body = { tokenHashPrefix: '#prefix' }
       })
-      it('passes Errors.NotFoundError to next when project not found and still checks token hash', function (ctx) {
-        return new Promise(resolve => {
+      it('passes Errors.NotFoundError to next when project not found and still checks token hash', async function (ctx) {
+        await new Promise(resolve => {
           ctx.TokenAccessController.grantTokenAccessReadAndWrite(
             ctx.req,
             ctx.res,
@@ -763,11 +763,12 @@ describe('TokenAccessController', function () {
         ctx.req.body = { confirmedByUser: true, tokenHashPrefix: '#prefix' }
       })
 
-      it('redirects if project owner is non-admin', function (ctx) {
+      it('redirects if project owner is non-admin', async function (ctx) {
         ctx.UserGetter.promises.getUserConfirmedEmails = sinon
           .stub()
           .resolves([{ email: 'test@not-overleaf.com' }])
-        return new Promise(resolve => {
+
+        await new Promise(resolve => {
           ctx.res.callback = () => {
             expect(ctx.res.json).to.have.been.calledWith({
               redirect: `${ctx.Settings.adminUrl}/#prefix`,
@@ -811,8 +812,8 @@ describe('TokenAccessController', function () {
       })
     })
 
-    it('passes Errors.NotFoundError to next when token access is not enabled but still checks token hash', function (ctx) {
-      return new Promise(resolve => {
+    it('passes Errors.NotFoundError to next when token access is not enabled but still checks token hash', async function (ctx) {
+      await new Promise(resolve => {
         ctx.TokenAccessHandler.tokenAccessEnabledForProject.returns(false)
         ctx.req.params = { token: ctx.token }
         ctx.req.body = { tokenHashPrefix: '#prefix' }
@@ -852,8 +853,8 @@ describe('TokenAccessController', function () {
 
   describe('grantTokenAccessReadOnly', function () {
     describe('normal case', function () {
-      beforeEach(function (ctx) {
-        return new Promise(resolve => {
+      beforeEach(async function (ctx) {
+        await new Promise(resolve => {
           ctx.req.params = { token: ctx.token }
           ctx.req.body = { confirmedByUser: true, tokenHashPrefix: '#prefix' }
           ctx.res.callback = resolve
@@ -901,8 +902,8 @@ describe('TokenAccessController', function () {
     })
 
     describe('when the access was already granted', function () {
-      beforeEach(function (ctx) {
-        return new Promise(resolve => {
+      beforeEach(async function (ctx) {
+        await new Promise(resolve => {
           ctx.project.tokenAccessReadOnly_refs.push(ctx.user._id)
           ctx.req.params = { token: ctx.token }
           ctx.req.body = { confirmedByUser: true }
@@ -942,8 +943,8 @@ describe('TokenAccessController', function () {
     })
 
     describe('anonymous users', function () {
-      beforeEach(function (ctx) {
-        return new Promise(resolve => {
+      beforeEach(async function (ctx) {
+        await new Promise(resolve => {
           ctx.req.params = { token: ctx.token }
           ctx.SessionManager.getLoggedInUserId.returns(null)
           ctx.res.callback = resolve
@@ -972,8 +973,8 @@ describe('TokenAccessController', function () {
     })
 
     describe('user is owner of project', function () {
-      beforeEach(function (ctx) {
-        return new Promise(resolve => {
+      beforeEach(async function (ctx) {
+        await new Promise(resolve => {
           ctx.AuthorizationManager.promises.getPrivilegeLevelForProject.returns(
             PrivilegeLevels.OWNER
           )
@@ -1003,8 +1004,8 @@ describe('TokenAccessController', function () {
       })
     })
 
-    it('passes Errors.NotFoundError to next when token access is not enabled but still checks token hash', function (ctx) {
-      return new Promise(resolve => {
+    it('passes Errors.NotFoundError to next when token access is not enabled but still checks token hash', async function (ctx) {
+      await new Promise(resolve => {
         ctx.TokenAccessHandler.tokenAccessEnabledForProject.returns(false)
         ctx.req.params = { token: ctx.token }
         ctx.req.body = { tokenHashPrefix: '#prefix' }
@@ -1040,8 +1041,8 @@ describe('TokenAccessController', function () {
     })
 
     describe('when not in link sharing changes test', function () {
-      beforeEach(function (ctx) {
-        return new Promise(resolve => {
+      beforeEach(async function (ctx) {
+        await new Promise(resolve => {
           ctx.AsyncFormHelper.redirect = sinon.stub().callsFake(() => resolve())
           ctx.TokenAccessController.ensureUserCanUseSharingUpdatesConsentPage(
             ctx.req,
@@ -1068,8 +1069,8 @@ describe('TokenAccessController', function () {
       })
 
       describe('when user is not an invited editor and is a read write token member', function () {
-        beforeEach(function (ctx) {
-          return new Promise(resolve => {
+        beforeEach(async function (ctx) {
+          await new Promise(resolve => {
             ctx.CollaboratorsGetter.promises.isUserInvitedReadWriteMemberOfProject.resolves(
               false
             )
@@ -1099,8 +1100,8 @@ describe('TokenAccessController', function () {
       })
 
       describe('when user is already an invited editor', function () {
-        beforeEach(function (ctx) {
-          return new Promise(resolve => {
+        beforeEach(async function (ctx) {
+          await new Promise(resolve => {
             ctx.CollaboratorsGetter.promises.isUserInvitedReadWriteMemberOfProject.resolves(
               true
             )
@@ -1125,8 +1126,8 @@ describe('TokenAccessController', function () {
       })
 
       describe('when user not a read write token member', function () {
-        beforeEach(function (ctx) {
-          return new Promise(resolve => {
+        beforeEach(async function (ctx) {
+          await new Promise(resolve => {
             ctx.CollaboratorsGetter.promises.userIsReadWriteTokenMember.resolves(
               false
             )
@@ -1165,8 +1166,8 @@ describe('TokenAccessController', function () {
       })
 
       describe('previously joined token access user moving to named collaborator', function () {
-        beforeEach(function (ctx) {
-          return new Promise(resolve => {
+        beforeEach(async function (ctx) {
+          await new Promise(resolve => {
             ctx.CollaboratorsGetter.promises.isUserInvitedMemberOfProject.resolves(
               false
             )
@@ -1204,8 +1205,8 @@ describe('TokenAccessController', function () {
       })
 
       describe('previously joined token access user moving to named collaborator', function () {
-        beforeEach(function (ctx) {
-          return new Promise(resolve => {
+        beforeEach(async function (ctx) {
+          await new Promise(resolve => {
             ctx.CollaboratorsGetter.promises.isUserInvitedMemberOfProject.resolves(
               false
             )
@@ -1243,8 +1244,8 @@ describe('TokenAccessController', function () {
     })
 
     describe('previously joined token access user moving to anonymous viewer', function () {
-      beforeEach(function (ctx) {
-        return new Promise(resolve => {
+      beforeEach(async function (ctx) {
+        await new Promise(resolve => {
           ctx.res.callback = resolve
           ctx.TokenAccessController.moveReadWriteToReadOnly(
             ctx.req,

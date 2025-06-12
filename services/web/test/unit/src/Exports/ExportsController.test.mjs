@@ -65,8 +65,8 @@ describe('ExportsController', function () {
   })
 
   describe('without gallery fields', function () {
-    it('should ask the handler to perform the export', function (ctx) {
-      return new Promise(resolve => {
+    it('should ask the handler to perform the export', async function (ctx) {
+      await new Promise(resolve => {
         ctx.handler.exportProject = sinon
           .stub()
           .yields(null, { iAmAnExport: true, v1_id: 897 })
@@ -92,8 +92,8 @@ describe('ExportsController', function () {
   })
 
   describe('with a message from v1', function () {
-    it('should ask the handler to perform the export', function (ctx) {
-      return new Promise(resolve => {
+    it('should ask the handler to perform the export', async function (ctx) {
+      await new Promise(resolve => {
         ctx.handler.exportProject = sinon.stub().yields(null, {
           iAmAnExport: true,
           v1_id: 897,
@@ -129,8 +129,8 @@ describe('ExportsController', function () {
       return (ctx.req.body.showSource = true)
     })
 
-    it('should ask the handler to perform the export', function (ctx) {
-      return new Promise(resolve => {
+    it('should ask the handler to perform the export', async function (ctx) {
+      await new Promise(resolve => {
         ctx.handler.exportProject = sinon
           .stub()
           .yields(null, { iAmAnExport: true, v1_id: 897 })
@@ -161,8 +161,8 @@ describe('ExportsController', function () {
   })
 
   describe('with an error return from v1 to forward to the publish modal', function () {
-    it('should forward the response onward', function (ctx) {
-      return new Promise(resolve => {
+    it('should forward the response onward', async function (ctx) {
+      await new Promise(resolve => {
         ctx.error_json = { status: 422, message: 'nope' }
         ctx.handler.exportProject = sinon
           .stub()
@@ -175,8 +175,8 @@ describe('ExportsController', function () {
     })
   })
 
-  it('should ask the handler to return the status of an export', function (ctx) {
-    return new Promise(resolve => {
+  it('should ask the handler to return the status of an export', async function (ctx) {
+    await new Promise(resolve => {
       ctx.handler.fetchExport = sinon.stub().yields(
         null,
         `{

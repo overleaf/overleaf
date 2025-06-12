@@ -221,8 +221,8 @@ describe('UserMembershipController', function () {
       ctx.req.entityConfig = EntityConfigs.groupManagers
     })
 
-    it('add user', function (ctx) {
-      return new Promise(resolve => {
+    it('add user', async function (ctx) {
+      await new Promise(resolve => {
         ctx.UserMembershipController.add(ctx.req, {
           json: () => {
             sinon.assert.calledWithMatch(
@@ -237,8 +237,8 @@ describe('UserMembershipController', function () {
       })
     })
 
-    it('return user object', function (ctx) {
-      return new Promise(resolve => {
+    it('return user object', async function (ctx) {
+      await new Promise(resolve => {
         ctx.UserMembershipController.add(ctx.req, {
           json: payload => {
             payload.user.should.equal(ctx.newUser)
@@ -248,8 +248,8 @@ describe('UserMembershipController', function () {
       })
     })
 
-    it('handle readOnly entity', function (ctx) {
-      return new Promise(resolve => {
+    it('handle readOnly entity', async function (ctx) {
+      await new Promise(resolve => {
         ctx.req.entityConfig = EntityConfigs.group
         ctx.UserMembershipController.add(ctx.req, null, error => {
           expect(error).to.exist
@@ -259,8 +259,8 @@ describe('UserMembershipController', function () {
       })
     })
 
-    it('handle user already added', function (ctx) {
-      return new Promise(resolve => {
+    it('handle user already added', async function (ctx) {
+      await new Promise(resolve => {
         ctx.UserMembershipHandler.addUser.yields(new UserAlreadyAddedError())
         ctx.UserMembershipController.add(ctx.req, {
           status: () => ({
@@ -273,8 +273,8 @@ describe('UserMembershipController', function () {
       })
     })
 
-    it('handle user not found', function (ctx) {
-      return new Promise(resolve => {
+    it('handle user not found', async function (ctx) {
+      await new Promise(resolve => {
         ctx.UserMembershipHandler.addUser.yields(new UserNotFoundError())
         ctx.UserMembershipController.add(ctx.req, {
           status: () => ({
@@ -287,8 +287,8 @@ describe('UserMembershipController', function () {
       })
     })
 
-    it('handle invalid email', function (ctx) {
-      return new Promise(resolve => {
+    it('handle invalid email', async function (ctx) {
+      await new Promise(resolve => {
         ctx.req.body.email = 'not_valid_email'
         ctx.UserMembershipController.add(ctx.req, {
           status: () => ({
@@ -309,8 +309,8 @@ describe('UserMembershipController', function () {
       ctx.req.entityConfig = EntityConfigs.groupManagers
     })
 
-    it('remove user', function (ctx) {
-      return new Promise(resolve => {
+    it('remove user', async function (ctx) {
+      await new Promise(resolve => {
         ctx.UserMembershipController.remove(ctx.req, {
           sendStatus: () => {
             sinon.assert.calledWithMatch(
@@ -325,8 +325,8 @@ describe('UserMembershipController', function () {
       })
     })
 
-    it('handle readOnly entity', function (ctx) {
-      return new Promise(resolve => {
+    it('handle readOnly entity', async function (ctx) {
+      await new Promise(resolve => {
         ctx.req.entityConfig = EntityConfigs.group
         ctx.UserMembershipController.remove(ctx.req, null, error => {
           expect(error).to.exist
@@ -336,8 +336,8 @@ describe('UserMembershipController', function () {
       })
     })
 
-    it('prevent self removal', function (ctx) {
-      return new Promise(resolve => {
+    it('prevent self removal', async function (ctx) {
+      await new Promise(resolve => {
         ctx.req.params.userId = ctx.user._id
         ctx.UserMembershipController.remove(ctx.req, {
           status: () => ({
@@ -350,8 +350,8 @@ describe('UserMembershipController', function () {
       })
     })
 
-    it('prevent admin removal', function (ctx) {
-      return new Promise(resolve => {
+    it('prevent admin removal', async function (ctx) {
+      await new Promise(resolve => {
         ctx.UserMembershipHandler.removeUser.yields(new UserIsManagerError())
         ctx.UserMembershipController.remove(ctx.req, {
           status: () => ({
@@ -409,8 +409,8 @@ describe('UserMembershipController', function () {
       ctx.req.params.id = 'abc'
     })
 
-    it('renders view', function (ctx) {
-      return new Promise(resolve => {
+    it('renders view', async function (ctx) {
+      await new Promise(resolve => {
         ctx.UserMembershipController.new(ctx.req, {
           render: (viewPath, data) => {
             expect(data.entityName).to.eq('publisher')
@@ -429,8 +429,8 @@ describe('UserMembershipController', function () {
       ctx.req.params.id = 123
     })
 
-    it('creates institution', function (ctx) {
-      return new Promise(resolve => {
+    it('creates institution', async function (ctx) {
+      await new Promise(resolve => {
         ctx.UserMembershipController.create(ctx.req, {
           redirect: path => {
             expect(path).to.eq(EntityConfigs.institution.pathsFor(123).index)

@@ -322,8 +322,8 @@ describe('ProjectListController', function () {
       ctx.ProjectGetter.promises.findAllUsersProjects.resolves(ctx.allProjects)
     })
 
-    it('should render the project/list-react page', function (ctx) {
-      return new Promise(resolve => {
+    it('should render the project/list-react page', async function (ctx) {
+      await new Promise(resolve => {
         ctx.res.render = (pageName, opts) => {
           pageName.should.equal('project/list-react')
           resolve()
@@ -332,8 +332,8 @@ describe('ProjectListController', function () {
       })
     })
 
-    it('should invoke the session maintenance', function (ctx) {
-      return new Promise(resolve => {
+    it('should invoke the session maintenance', async function (ctx) {
+      await new Promise(resolve => {
         ctx.Features.hasFeature.withArgs('saas').returns(true)
         ctx.res.render = () => {
           ctx.SplitTestSessionHandler.promises.sessionMaintenance.should.have.been.calledWith(
@@ -346,8 +346,8 @@ describe('ProjectListController', function () {
       })
     })
 
-    it('should send the tags', function (ctx) {
-      return new Promise(resolve => {
+    it('should send the tags', async function (ctx) {
+      await new Promise(resolve => {
         ctx.res.render = (pageName, opts) => {
           opts.tags.length.should.equal(ctx.tags.length)
           resolve()
@@ -356,8 +356,8 @@ describe('ProjectListController', function () {
       })
     })
 
-    it('should create trigger ip matcher notifications', function (ctx) {
-      return new Promise(resolve => {
+    it('should create trigger ip matcher notifications', async function (ctx) {
+      await new Promise(resolve => {
         ctx.settings.overleaf = true
         ctx.req.ip = '111.111.111.111'
         ctx.res.render = (pageName, opts) => {
@@ -370,8 +370,8 @@ describe('ProjectListController', function () {
       })
     })
 
-    it('should send the projects', function (ctx) {
-      return new Promise(resolve => {
+    it('should send the projects', async function (ctx) {
+      await new Promise(resolve => {
         ctx.res.render = (pageName, opts) => {
           opts.prefetchedProjectsBlob.projects.length.should.equal(
             ctx.projects.length +
@@ -387,8 +387,8 @@ describe('ProjectListController', function () {
       })
     })
 
-    it('should send the user', function (ctx) {
-      return new Promise(resolve => {
+    it('should send the user', async function (ctx) {
+      await new Promise(resolve => {
         ctx.res.render = (pageName, opts) => {
           opts.user.should.deep.equal(ctx.user)
           resolve()
@@ -397,8 +397,8 @@ describe('ProjectListController', function () {
       })
     })
 
-    it('should inject the users', function (ctx) {
-      return new Promise(resolve => {
+    it('should inject the users', async function (ctx) {
+      await new Promise(resolve => {
         ctx.res.render = (pageName, opts) => {
           const projects = opts.prefetchedProjectsBlob.projects
 
@@ -426,8 +426,8 @@ describe('ProjectListController', function () {
       })
     })
 
-    it("should send the user's best subscription when saas feature present", function (ctx) {
-      return new Promise(resolve => {
+    it("should send the user's best subscription when saas feature present", async function (ctx) {
+      await new Promise(resolve => {
         ctx.Features.hasFeature.withArgs('saas').returns(true)
         ctx.res.render = (pageName, opts) => {
           expect(opts.usersBestSubscription).to.deep.include({ type: 'free' })
@@ -437,8 +437,8 @@ describe('ProjectListController', function () {
       })
     })
 
-    it('should not return a best subscription without saas feature', function (ctx) {
-      return new Promise(resolve => {
+    it('should not return a best subscription without saas feature', async function (ctx) {
+      await new Promise(resolve => {
         ctx.Features.hasFeature.withArgs('saas').returns(false)
         ctx.res.render = (pageName, opts) => {
           expect(opts.usersBestSubscription).to.be.undefined
@@ -448,8 +448,8 @@ describe('ProjectListController', function () {
       })
     })
 
-    it('should show INR Banner for Indian users with free account', function (ctx) {
-      return new Promise(resolve => {
+    it('should show INR Banner for Indian users with free account', async function (ctx) {
+      await new Promise(resolve => {
         // usersBestSubscription is only available when saas feature is present
         ctx.Features.hasFeature.withArgs('saas').returns(true)
         ctx.SubscriptionViewModelBuilder.promises.getUsersSubscriptionDetails.resolves(
@@ -470,8 +470,8 @@ describe('ProjectListController', function () {
       })
     })
 
-    it('should not show INR Banner for Indian users with premium account', function (ctx) {
-      return new Promise(resolve => {
+    it('should not show INR Banner for Indian users with premium account', async function (ctx) {
+      await new Promise(resolve => {
         // usersBestSubscription is only available when saas feature is present
         ctx.Features.hasFeature.withArgs('saas').returns(true)
         ctx.SubscriptionViewModelBuilder.promises.getUsersSubscriptionDetails.resolves(
@@ -493,8 +493,8 @@ describe('ProjectListController', function () {
     })
 
     describe('With Institution SSO feature', function () {
-      beforeEach(function (ctx) {
-        return new Promise(resolve => {
+      beforeEach(async function (ctx) {
+        await new Promise(resolve => {
           ctx.institutionEmail = 'test@overleaf.com'
           ctx.institutionName = 'Overleaf'
           ctx.Features.hasFeature.withArgs('saml').returns(true)
@@ -624,8 +624,8 @@ describe('ProjectListController', function () {
       })
 
       describe('for an unconfirmed domain for an SSO institution', function () {
-        beforeEach(function (ctx) {
-          return new Promise(resolve => {
+        beforeEach(async function (ctx) {
+          await new Promise(resolve => {
             ctx.UserGetter.promises.getUserFullEmails.resolves([
               {
                 email: 'test@overleaf-uncofirmed.com',
@@ -673,8 +673,8 @@ describe('ProjectListController', function () {
         })
       })
       describe('Institution with SSO beta testable', function () {
-        beforeEach(function (ctx) {
-          return new Promise(resolve => {
+        beforeEach(async function (ctx) {
+          await new Promise(resolve => {
             ctx.UserGetter.promises.getUserFullEmails.resolves([
               {
                 email: 'beta@beta.com',
@@ -720,8 +720,8 @@ describe('ProjectListController', function () {
     })
 
     describe('Without Institution SSO feature', function () {
-      beforeEach(function (ctx) {
-        return new Promise(resolve => {
+      beforeEach(async function (ctx) {
+        await new Promise(resolve => {
           ctx.Features.hasFeature.withArgs('saml').returns(false)
           resolve()
         })
@@ -859,8 +859,8 @@ describe('ProjectListController', function () {
       ctx.ProjectGetter.promises.findAllUsersProjects.resolves(ctx.allProjects)
     })
 
-    it('should render the project/list-react page', function (ctx) {
-      return new Promise(resolve => {
+    it('should render the project/list-react page', async function (ctx) {
+      await new Promise(resolve => {
         ctx.res.render = (pageName, opts) => {
           pageName.should.equal('project/list-react')
           resolve()
@@ -869,8 +869,8 @@ describe('ProjectListController', function () {
       })
     })
 
-    it('should omit one of the projects', function (ctx) {
-      return new Promise(resolve => {
+    it('should omit one of the projects', async function (ctx) {
+      await new Promise(resolve => {
         ctx.res.render = (pageName, opts) => {
           opts.prefetchedProjectsBlob.projects.length.should.equal(
             ctx.projects.length +

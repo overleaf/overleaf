@@ -79,14 +79,14 @@ describe('BetaProgramController', function () {
   })
 
   describe('optIn', function () {
-    it("should redirect to '/beta/participate'", function (ctx) {
-      return new Promise(resolve => {
+    it("should redirect to '/beta/participate'", async function(ctx) {
+      await new Promise(resolve => {
         ctx.res.callback = () => {
           ctx.res.redirectedTo.should.equal('/beta/participate')
           resolve()
         }
         ctx.BetaProgramController.optIn(ctx.req, ctx.res, resolve)
-      })
+      });
     })
 
     it('should not call next with an error', function (ctx) {
@@ -99,8 +99,8 @@ describe('BetaProgramController', function () {
       ctx.BetaProgramHandler.promises.optIn.callCount.should.equal(1)
     })
 
-    it('should invoke the session maintenance', function (ctx) {
-      return new Promise(resolve => {
+    it('should invoke the session maintenance', async function(ctx) {
+      await new Promise(resolve => {
         ctx.res.callback = () => {
           ctx.SplitTestSessionHandler.promises.sessionMaintenance.should.have.been.calledWith(
             ctx.req
@@ -108,7 +108,7 @@ describe('BetaProgramController', function () {
           resolve()
         }
         ctx.BetaProgramController.optIn(ctx.req, ctx.res, resolve)
-      })
+      });
     })
 
     describe('when BetaProgramHandler.opIn produces an error', function () {
@@ -121,50 +121,50 @@ describe('BetaProgramController', function () {
         ctx.res.redirect.callCount.should.equal(0)
       })
 
-      it('should produce an error', function (ctx) {
-        return new Promise(resolve => {
+      it('should produce an error', async function(ctx) {
+        await new Promise(resolve => {
           ctx.BetaProgramController.optIn(ctx.req, ctx.res, err => {
             expect(err).to.be.instanceof(Error)
             resolve()
           })
-        })
+        });
       })
     })
   })
 
   describe('optOut', function () {
-    it("should redirect to '/beta/participate'", function (ctx) {
-      return new Promise(resolve => {
+    it("should redirect to '/beta/participate'", async function(ctx) {
+      await new Promise(resolve => {
         ctx.res.callback = () => {
           expect(ctx.res.redirectedTo).to.equal('/beta/participate')
           resolve()
         }
         ctx.BetaProgramController.optOut(ctx.req, ctx.res, resolve)
-      })
+      });
     })
 
-    it('should not call next with an error', function (ctx) {
-      return new Promise(resolve => {
+    it('should not call next with an error', async function(ctx) {
+      await new Promise(resolve => {
         ctx.res.callback = () => {
           ctx.next.callCount.should.equal(0)
           resolve()
         }
         ctx.BetaProgramController.optOut(ctx.req, ctx.res, resolve)
-      })
+      });
     })
 
-    it('should call BetaProgramHandler.optOut', function (ctx) {
-      return new Promise(resolve => {
+    it('should call BetaProgramHandler.optOut', async function(ctx) {
+      await new Promise(resolve => {
         ctx.res.callback = () => {
           ctx.BetaProgramHandler.promises.optOut.callCount.should.equal(1)
           resolve()
         }
         ctx.BetaProgramController.optOut(ctx.req, ctx.res, resolve)
-      })
+      });
     })
 
-    it('should invoke the session maintenance', function (ctx) {
-      return new Promise(resolve => {
+    it('should invoke the session maintenance', async function(ctx) {
+      await new Promise(resolve => {
         ctx.res.callback = () => {
           ctx.SplitTestSessionHandler.promises.sessionMaintenance.should.have.been.calledWith(
             ctx.req,
@@ -173,7 +173,7 @@ describe('BetaProgramController', function () {
           resolve()
         }
         ctx.BetaProgramController.optOut(ctx.req, ctx.res, resolve)
-      })
+      });
     })
 
     describe('when BetaProgramHandler.optOut produces an error', function () {
@@ -181,23 +181,23 @@ describe('BetaProgramController', function () {
         ctx.BetaProgramHandler.promises.optOut.throws(new Error('woops'))
       })
 
-      it("should not redirect to '/beta/participate'", function (ctx) {
-        return new Promise(resolve => {
+      it("should not redirect to '/beta/participate'", async function(ctx) {
+        await new Promise(resolve => {
           ctx.BetaProgramController.optOut(ctx.req, ctx.res, error => {
             expect(error).to.exist
             expect(ctx.res.redirected).to.equal(false)
             resolve()
           })
-        })
+        });
       })
 
-      it('should produce an error', function (ctx) {
-        return new Promise(resolve => {
+      it('should produce an error', async function(ctx) {
+        await new Promise(resolve => {
           ctx.BetaProgramController.optOut(ctx.req, ctx.res, error => {
             expect(error).to.exist
             resolve()
           })
-        })
+        });
       })
     })
   })
@@ -207,14 +207,14 @@ describe('BetaProgramController', function () {
       ctx.UserGetter.promises.getUser.resolves(ctx.user)
     })
 
-    it('should render the opt-in page', function (ctx) {
-      return new Promise(resolve => {
+    it('should render the opt-in page', async function(ctx) {
+      await new Promise(resolve => {
         ctx.res.callback = () => {
           expect(ctx.res.renderedTemplate).to.equal('beta_program/opt_in')
           resolve()
         }
         ctx.BetaProgramController.optInPage(ctx.req, ctx.res, resolve)
-      })
+      });
     })
 
     describe('when UserGetter.getUser produces an error', function () {
@@ -227,14 +227,14 @@ describe('BetaProgramController', function () {
         ctx.res.render.callCount.should.equal(0)
       })
 
-      it('should produce an error', function (ctx) {
-        return new Promise(resolve => {
+      it('should produce an error', async function(ctx) {
+        await new Promise(resolve => {
           ctx.BetaProgramController.optInPage(ctx.req, ctx.res, error => {
             expect(error).to.exist
             expect(error).to.be.instanceof(Error)
             resolve()
           })
-        })
+        });
       })
     })
   })

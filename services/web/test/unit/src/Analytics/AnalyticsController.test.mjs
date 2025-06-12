@@ -68,8 +68,8 @@ describe('AnalyticsController', function () {
         .resolves({ country_code: 'XY' })
     })
 
-    it('delegates to the AnalyticsManager', function (ctx) {
-      return new Promise(resolve => {
+    it('delegates to the AnalyticsManager', async function (ctx) {
+      await new Promise(resolve => {
         ctx.SessionManager.getLoggedInUserId.returns('1234')
         ctx.res.callback = () => {
           sinon.assert.calledWith(
@@ -105,8 +105,8 @@ describe('AnalyticsController', function () {
       delete ctx.expectedData._csrf
     })
 
-    it('should use the session', function (ctx) {
-      return new Promise(resolve => {
+    it('should use the session', async function (ctx) {
+      await new Promise(resolve => {
         ctx.controller.recordEvent(ctx.req, ctx.res)
         sinon.assert.calledWith(
           ctx.AnalyticsManager.recordEventForSession,
@@ -118,8 +118,8 @@ describe('AnalyticsController', function () {
       })
     })
 
-    it('should remove the CSRF token before sending to the manager', function (ctx) {
-      return new Promise(resolve => {
+    it('should remove the CSRF token before sending to the manager', async function (ctx) {
+      await new Promise(resolve => {
         ctx.controller.recordEvent(ctx.req, ctx.res)
         sinon.assert.calledWith(
           ctx.AnalyticsManager.recordEventForSession,

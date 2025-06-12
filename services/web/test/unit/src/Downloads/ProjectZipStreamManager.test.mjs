@@ -72,8 +72,8 @@ describe('ProjectZipStreamManager', function () {
 
   describe('createZipStreamForMultipleProjects', function () {
     describe('successfully', function () {
-      beforeEach(function (ctx) {
-        return new Promise(resolve => {
+      beforeEach(async function (ctx) {
+        await new Promise(resolve => {
           ctx.project_ids = ['project-1', 'project-2']
           ctx.zip_streams = {
             'project-1': new EventEmitter(),
@@ -154,8 +154,8 @@ describe('ProjectZipStreamManager', function () {
     })
 
     describe('with a project not existing', function () {
-      beforeEach(function (ctx) {
-        return new Promise(resolve => {
+      beforeEach(async function (ctx) {
+        await new Promise(resolve => {
           ctx.project_ids = ['project-1', 'wrong-id']
           ctx.project_names = {
             'project-1': 'Project One Name',
@@ -346,8 +346,8 @@ describe('ProjectZipStreamManager', function () {
   })
 
   describe('addAllDocsToArchive', function () {
-    beforeEach(function (ctx) {
-      return new Promise(resolve => {
+    beforeEach(async function (ctx) {
+      await new Promise(resolve => {
         ctx.docs = {
           '/main.tex': {
             lines: [

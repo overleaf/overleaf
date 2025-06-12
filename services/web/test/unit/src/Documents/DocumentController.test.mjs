@@ -125,8 +125,8 @@ describe('DocumentController', function () {
     })
 
     describe('when project exists with project history enabled', function () {
-      beforeEach(function (ctx) {
-        return new Promise(resolve => {
+      beforeEach(async function (ctx) {
+        await new Promise(resolve => {
           ctx.res.callback = err => {
             resolve(err)
           }
@@ -151,8 +151,8 @@ describe('DocumentController', function () {
     })
 
     describe('when the project does not exist', function () {
-      beforeEach(function (ctx) {
-        return new Promise(resolve => {
+      beforeEach(async function (ctx) {
+        await new Promise(resolve => {
           ctx.ProjectGetter.promises.getProject.resolves(null)
           ctx.res.callback = err => {
             resolve(err)
@@ -176,8 +176,8 @@ describe('DocumentController', function () {
     })
 
     describe('when the document exists', function () {
-      beforeEach(function (ctx) {
-        return new Promise(resolve => {
+      beforeEach(async function (ctx) {
+        await new Promise(resolve => {
           ctx.req.body = {
             lines: ctx.doc_lines,
             version: ctx.version,
@@ -211,8 +211,8 @@ describe('DocumentController', function () {
     })
 
     describe("when the document doesn't exist", function () {
-      beforeEach(function (ctx) {
-        return new Promise(resolve => {
+      beforeEach(async function (ctx) {
+        await new Promise(resolve => {
           ctx.ProjectEntityUpdateHandler.promises.updateDocLines.rejects(
             new Errors.NotFoundError('document does not exist')
           )

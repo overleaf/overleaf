@@ -103,8 +103,8 @@ describe('PasswordResetHandler', function () {
       )
     })
 
-    it('should send the email with the token', function (ctx) {
-      return new Promise(resolve => {
+    it('should send the email with the token', async function (ctx) {
+      await new Promise(resolve => {
         ctx.UserGetter.promises.getUserByAnyEmail.resolves(ctx.user)
         ctx.OneTimeTokenHandler.promises.getNewToken.resolves(ctx.token)
         ctx.EmailHandler.promises.sendEmail.resolves()
@@ -127,8 +127,8 @@ describe('PasswordResetHandler', function () {
       })
     })
 
-    it('should return errors from getUserByAnyEmail', function (ctx) {
-      return new Promise(resolve => {
+    it('should return errors from getUserByAnyEmail', async function (ctx) {
+      await new Promise(resolve => {
         const err = new Error('oops')
         ctx.UserGetter.promises.getUserByAnyEmail.rejects(err)
         ctx.PasswordResetHandler.generateAndEmailResetToken(
@@ -273,8 +273,8 @@ describe('PasswordResetHandler', function () {
             .yields(null, null)
         })
 
-        it('should return found == false and reset == false', function (ctx) {
-          return new Promise(resolve => {
+        it('should return found == false and reset == false', async function (ctx) {
+          await new Promise(resolve => {
             ctx.PasswordResetHandler.setNewUserPassword(
               ctx.token,
               ctx.password,
@@ -302,8 +302,8 @@ describe('PasswordResetHandler', function () {
           ctx.OneTimeTokenHandler.expireToken.callsArgWith(2, null)
         })
 
-        it('should return found == false and reset == false', function (ctx) {
-          return new Promise(resolve => {
+        it('should return found == false and reset == false', async function (ctx) {
+          await new Promise(resolve => {
             ctx.PasswordResetHandler.setNewUserPassword(
               ctx.token,
               ctx.password,
@@ -332,8 +332,8 @@ describe('PasswordResetHandler', function () {
               .callsArgWith(2, null)
           })
 
-          it('should update the user audit log', function (ctx) {
-            return new Promise(resolve => {
+          it('should update the user audit log', async function (ctx) {
+            await new Promise(resolve => {
               ctx.PasswordResetHandler.setNewUserPassword(
                 ctx.token,
                 ctx.password,
@@ -354,8 +354,8 @@ describe('PasswordResetHandler', function () {
             })
           })
 
-          it('should return reset == true and the user id', function (ctx) {
-            return new Promise(resolve => {
+          it('should return reset == true and the user id', async function (ctx) {
+            await new Promise(resolve => {
               ctx.PasswordResetHandler.setNewUserPassword(
                 ctx.token,
                 ctx.password,
@@ -371,8 +371,8 @@ describe('PasswordResetHandler', function () {
             })
           })
 
-          it('should expire the token', function (ctx) {
-            return new Promise(resolve => {
+          it('should expire the token', async function (ctx) {
+            await new Promise(resolve => {
               ctx.PasswordResetHandler.setNewUserPassword(
                 ctx.token,
                 ctx.password,
@@ -391,8 +391,8 @@ describe('PasswordResetHandler', function () {
             beforeEach(function (ctx) {
               ctx.auditLog.initiatorId = ctx.user_id
             })
-            it('should update the user audit log with initiatorId', function (ctx) {
-              return new Promise(resolve => {
+            it('should update the user audit log with initiatorId', async function (ctx) {
+              await new Promise(resolve => {
                 ctx.PasswordResetHandler.setNewUserPassword(
                   ctx.token,
                   ctx.password,
@@ -424,8 +424,8 @@ describe('PasswordResetHandler', function () {
                 .withArgs(ctx.user, ctx.password)
                 .rejects()
             })
-            it('should return the error', function (ctx) {
-              return new Promise(resolve => {
+            it('should return the error', async function (ctx) {
+              await new Promise(resolve => {
                 ctx.PasswordResetHandler.setNewUserPassword(
                   ctx.token,
                   ctx.password,
@@ -450,8 +450,8 @@ describe('PasswordResetHandler', function () {
                 new Error('oops')
               )
             })
-            it('should return the error', function (ctx) {
-              return new Promise(resolve => {
+            it('should return the error', async function (ctx) {
+              await new Promise(resolve => {
                 ctx.PasswordResetHandler.setNewUserPassword(
                   ctx.token,
                   ctx.password,
@@ -495,8 +495,8 @@ describe('PasswordResetHandler', function () {
             .yields(null, null)
         })
 
-        it('should return reset == false', function (ctx) {
-          return new Promise(resolve => {
+        it('should return reset == false', async function (ctx) {
+          await new Promise(resolve => {
             ctx.PasswordResetHandler.setNewUserPassword(
               ctx.token,
               ctx.password,
@@ -524,8 +524,8 @@ describe('PasswordResetHandler', function () {
           })
         })
 
-        it('should return reset == false', function (ctx) {
-          return new Promise(resolve => {
+        it('should return reset == false', async function (ctx) {
+          await new Promise(resolve => {
             ctx.PasswordResetHandler.setNewUserPassword(
               ctx.token,
               ctx.password,
@@ -549,8 +549,8 @@ describe('PasswordResetHandler', function () {
           ctx.UserGetter.promises.getUserByMainEmail.resolves(ctx.user)
         })
 
-        it('should return reset == true and the user id', function (ctx) {
-          return new Promise(resolve => {
+        it('should return reset == true and the user id', async function (ctx) {
+          await new Promise(resolve => {
             ctx.PasswordResetHandler.setNewUserPassword(
               ctx.token,
               ctx.password,
