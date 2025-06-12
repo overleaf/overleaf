@@ -22,6 +22,7 @@ const BlobStore = storage.BlobStore
 const chunkStore = storage.chunkStore
 const HashCheckBlobStore = storage.HashCheckBlobStore
 const commitChanges = storage.commitChanges
+const persistBuffer = storage.persistBuffer
 const InvalidChangeError = storage.InvalidChangeError
 
 const render = require('./render')
@@ -169,5 +170,28 @@ async function importChanges(req, res, next) {
   }
 }
 
+async function flushChanges(req, res, next) {
+  const projectId = req.swagger.params.project_id.value
+  // Use the same limits importChanges, since these are passed to persistChanges
+  const farFuture = new Date()
+  farFuture.setTime(farFuture.getTime() + 7 * 24 * 3600 * 1000)
+  const limits = {
+    maxChanges: 0,
+    minChangeTimestamp: farFuture,
+    maxChangeTimestamp: farFuture,
+  }
+  try {
+    await persistBuffer(projectId, limits)
+    res.status(HTTPStatus.OK).end()
+  } catch (err) {
+    if (err instanceof Chunk.NotFoundError) {
+      render.notFound(res)
+    } else {
+      throw err
+    }
+  }
+}
+
 exports.importSnapshot = expressify(importSnapshot)
 exports.importChanges = expressify(importChanges)
+exports.flushChanges = expressify(flushChanges)
