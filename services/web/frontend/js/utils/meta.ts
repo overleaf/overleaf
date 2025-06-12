@@ -133,6 +133,7 @@ export interface Meta {
   'ol-hasIndividualPaidSubscription': boolean
   'ol-hasManagedUsersFeature': boolean
   'ol-hasPassword': boolean
+  'ol-hasSplitTestWriteAccess': boolean
   'ol-hasSubscription': boolean
   'ol-hasTrackChangesFeature': boolean
   'ol-hideLinkingWidgets': boolean // CI only
@@ -241,6 +242,7 @@ export interface Meta {
   'ol-showUpgradePrompt': boolean
   'ol-skipUrl': string
   'ol-splitTestInfo': { [name: string]: SplitTestInfo }
+  'ol-splitTestName': string
   'ol-splitTestVariants': { [name: string]: string }
   'ol-ssoDisabled': boolean
   'ol-ssoErrorMessage': string
