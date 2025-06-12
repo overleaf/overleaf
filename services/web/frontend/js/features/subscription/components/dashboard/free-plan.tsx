@@ -1,6 +1,5 @@
 import { useTranslation, Trans } from 'react-i18next'
 import WritefullManagedBundleAddOn from '@/features/subscription/components/dashboard/states/active/change-plan/modals/writefull-bundle-management-modal'
-import RedirectAlerts from './redirect-alerts'
 import getMeta from '@/utils/meta'
 
 function FreePlan() {
@@ -9,7 +8,6 @@ function FreePlan() {
 
   return (
     <>
-      <RedirectAlerts />
       <Trans
         i18nKey="on_free_plan_upgrade_to_access_features"
         components={[

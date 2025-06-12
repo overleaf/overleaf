@@ -32,6 +32,7 @@ const PlansLocator = require('./PlansLocator')
 const PaymentProviderEntities = require('./PaymentProviderEntities')
 const { User } = require('../../models/User')
 const UserGetter = require('../User/UserGetter')
+const PermissionsManager = require('../Authorization/PermissionsManager')
 
 /**
  * @import { SubscriptionChangeDescription } from '../../../../types/subscription/subscription-change-preview'
@@ -336,12 +337,23 @@ function cancelV1Subscription(req, res, next) {
 }
 
 async function previewAddonPurchase(req, res) {
-  const userId = SessionManager.getLoggedInUserId(req.session)
+  const user = SessionManager.getSessionUser(req.session)
+  const userId = user._id
   const addOnCode = req.params.addOnCode
   const purchaseReferrer = req.query.purchaseReferrer
 
   if (addOnCode !== AI_ADD_ON_CODE) {
     return HttpErrorHandler.notFound(req, res, `Unknown add-on: ${addOnCode}`)
+  }
+
+  const canUseAi = await PermissionsManager.promises.checkUserPermissions(
+    user,
+    ['use-ai']
+  )
+  if (!canUseAi) {
+    return res.redirect(
+      '/user/subscription?redirect-reason=ai-assist-unavailable'
+    )
   }
 
   /** @type {PaymentMethod[]} */

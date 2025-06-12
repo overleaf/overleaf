@@ -15,6 +15,7 @@ import OLRow from '@/features/ui/components/ol/ol-row'
 import OLCol from '@/features/ui/components/ol/ol-col'
 import OLNotification from '@/features/ui/components/ol/ol-notification'
 import WritefullManagedBundleAddOn from './states/active/change-plan/modals/writefull-bundle-management-modal'
+import RedirectAlerts from './redirect-alerts'
 
 function SubscriptionDashboard() {
   const { t } = useTranslation()
@@ -40,6 +41,7 @@ function SubscriptionDashboard() {
               type="warning"
             />
           )}
+          <RedirectAlerts />
           <OLPageContentCard>
             <div className="page-header">
               <h1>{t('your_subscription')}</h1>

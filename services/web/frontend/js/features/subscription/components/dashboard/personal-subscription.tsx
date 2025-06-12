@@ -7,7 +7,6 @@ import { ExpiredSubscription } from './states/expired'
 import { useSubscriptionDashboardContext } from '../../context/subscription-dashboard-context'
 import PersonalSubscriptionSyncEmail from './personal-subscription-sync-email'
 import OLNotification from '@/features/ui/components/ol/ol-notification'
-import RedirectAlerts from './redirect-alerts'
 
 function PastDueSubscriptionAlert({
   subscription,
@@ -76,7 +75,6 @@ function PersonalSubscription() {
 
   return (
     <>
-      <RedirectAlerts />
       {personalSubscription.payment.hasPastDueInvoice && (
         <PastDueSubscriptionAlert subscription={personalSubscription} />
       )}
