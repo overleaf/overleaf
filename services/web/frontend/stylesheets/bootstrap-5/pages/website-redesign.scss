@@ -551,6 +551,148 @@
     }
   }
 
+  // TODO: Change rem sizes to variables
+  .customer-story-content {
+    .table-of-contents-section {
+      padding-right: 64px;
+
+      @include media-breakpoint-down(lg) {
+        display: none;
+      }
+
+      .table-of-contents {
+        border-top: 1px solid var(--neutral-30);
+        border-bottom: 1px solid var(--neutral-30);
+        padding: 32px 0;
+
+        .heading {
+          font-size: 1.125rem;
+          font-weight: 600;
+          line-height: 1.333;
+          color: var(--green-60);
+        }
+
+        li {
+          list-style: none;
+          padding-top: 16px;
+          font-weight: 500;
+
+          a {
+            text-decoration: none;
+            color: var(--neutral-70);
+          }
+        }
+      }
+    }
+
+    .story-details-section {
+      h3 {
+        font-size: 1.875rem;
+        line-height: 1.333;
+        margin-top: 0;
+      }
+
+      .at-glance-section {
+        padding-top: 24px;
+
+        p {
+          margin-top: 16px;
+        }
+      }
+
+      p {
+        font-size: 1.125rem;
+      }
+
+      .border-r-16 {
+        border-radius: 16px;
+      }
+
+      .introduction-image-caption {
+        padding-top: 16px;
+      }
+
+      .stats-card {
+        display: flex;
+        flex-direction: row;
+        padding: 32px;
+        border-radius: 16px;
+        background: var(--dark-jungle-green);
+        color: var(--white);
+
+        @include media-breakpoint-down(lg) {
+          flex-direction: column;
+        }
+
+        .stats {
+          h3 {
+            font-size: 2rem;
+            font-weight: 600;
+          }
+
+          p {
+            font-weight: 600;
+            height: 50px;
+          }
+        }
+      }
+    }
+
+    .customer-quote {
+      border-left: 2px solid var(--green-60);
+      padding-left: 16px;
+
+      blockquote {
+        color: var(--neutral-90);
+        font-size: 1.6rem;
+        line-height: 1.333;
+      }
+
+      p {
+        margin-top: 1rem;
+        font-size: 1.125rem;
+      }
+    }
+  }
+
+  .cta-card-individual-customer {
+    display: flex;
+    justify-content: space-between;
+    padding: 64px;
+
+    // TODO: Uncomment this in next PR when individual page PR is made
+    // background-image: linear-gradient(
+    //     to right,
+    //     rgba(0, 0, 0, 0.4) 0%,
+    //     @cta-card-bg-color 20%,
+    //     @cta-card-bg-color 100%
+    //   ),
+    //   url('../../../public/img/website-redesign/overleaf-pattern-purple.png');
+    background-size: cover;
+    color: var(--white);
+    border-radius: 8px;
+
+    @include media-breakpoint-down(lg) {
+      padding: 48px 24px;
+    }
+
+    h2 {
+      font-size: 1.875rem;
+      color: var(--white);
+    }
+
+    p {
+      font-size: 1.125rem;
+    }
+
+    .btn-container {
+      padding-top: 10px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
+  }
+
   .customer-stories-hero-heading {
     @include media-breakpoint-down(lg) {
       @include heading-xl;
