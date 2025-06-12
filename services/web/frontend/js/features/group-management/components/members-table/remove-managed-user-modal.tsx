@@ -16,6 +16,7 @@ import OLButton from '@/features/ui/components/ol/ol-button'
 import OLNotification from '@/features/ui/components/ol/ol-notification'
 import OLFormControl from '@/features/ui/components/ol/ol-form-control'
 import OLFormLabel from '@/features/ui/components/ol/ol-form-label'
+import { sendMB } from '@/infrastructure/event-tracking'
 
 type RemoveManagedUserModalProps = {
   user: User
@@ -42,6 +43,7 @@ export default function RemoveManagedUserModal({
 
   const handleReleaseUserSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
+    sendMB('remove-managed-user-confirmed')
     runAsync(
       postJSON(`/manage/groups/${groupId}/release-managed-user/${user._id}`, {
         body: {

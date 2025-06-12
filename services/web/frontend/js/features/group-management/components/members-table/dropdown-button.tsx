@@ -20,6 +20,7 @@ import getMeta from '@/utils/meta'
 import MaterialIcon from '@/shared/components/material-icon'
 import DropdownListItem from '@/features/ui/components/bootstrap-5/dropdown-list-item'
 import { Spinner } from 'react-bootstrap'
+import { sendMB } from '@/infrastructure/event-tracking'
 
 type resendInviteResponse = {
   success: boolean
@@ -171,10 +172,12 @@ export default function DropdownButton({
   }
 
   const onDeleteUserClick = () => {
+    sendMB('delete-managed-user-selected')
     openOffboardingModalForUser(user)
   }
 
   const onReleaseUserClick = () => {
+    sendMB('remove-managed-user-selected')
     openRemoveModalForUser(user)
   }
 

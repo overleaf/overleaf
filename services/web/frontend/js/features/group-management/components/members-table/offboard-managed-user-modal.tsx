@@ -17,6 +17,7 @@ import OLNotification from '@/features/ui/components/ol/ol-notification'
 import OLFormControl from '@/features/ui/components/ol/ol-form-control'
 import OLFormLabel from '@/features/ui/components/ol/ol-form-label'
 import OLFormSelect from '@/features/ui/components/ol/ol-form-select'
+import { sendMB } from '@/infrastructure/event-tracking'
 
 type OffboardManagedUserModalProps = {
   user: User
@@ -48,8 +49,9 @@ export default function OffboardManagedUserModal({
   const shouldEnableDeleteUserButton =
     suppliedEmail === user.email && !!selectedRecipientId
 
-  const handleDeleteUserSubmit = (event: any) => {
+  const handleDeleteUserSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
+    sendMB('delete-managed-user-confirmed')
     runAsync(
       postJSON(`/manage/groups/${groupId}/offboardManagedUser/${user._id}`, {
         body: {
