@@ -246,11 +246,8 @@ async function attemptPaypalInvoiceCollection(recurlyAccountCode) {
   )
 }
 
-async function extendTrial(subscription, daysToExend) {
-  await RecurlyWrapper.promises.extendTrial(
-    subscription.recurlySubscription_id,
-    daysToExend
-  )
+async function extendTrial(subscription, daysToExtend) {
+  await Modules.promises.hooks.fire('extendTrial', subscription, daysToExtend)
 }
 
 /**

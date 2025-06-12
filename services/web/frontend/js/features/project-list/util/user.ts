@@ -24,7 +24,7 @@ export function getUserName(user: UserRef) {
 
 export function getUserSubscriptionState(subscription: Subscription) {
   if ('subscription' in subscription) {
-    if (subscription.subscription.recurlyStatus) {
+    if (subscription.subscription.recurlyStatus?.state) {
       return subscription.subscription.recurlyStatus.state
     }
     if (subscription.subscription.paymentProvider) {

@@ -126,14 +126,14 @@ function getPaidSubscriptionState(subscription) {
 }
 
 function getSubscriptionTrialStartedAt(subscription) {
-  if (subscription?.recurlyStatus) {
+  if (subscription?.recurlyStatus?.trialStartedAt) {
     return subscription.recurlyStatus?.trialStartedAt
   }
   return subscription?.paymentProvider?.trialStartedAt
 }
 
 function getSubscriptionTrialEndsAt(subscription) {
-  if (subscription?.recurlyStatus) {
+  if (subscription?.recurlyStatus?.trialEndsAt) {
     return subscription.recurlyStatus?.trialEndsAt
   }
   return subscription?.paymentProvider?.trialEndsAt

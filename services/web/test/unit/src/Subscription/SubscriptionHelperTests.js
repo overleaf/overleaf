@@ -437,6 +437,7 @@ describe('SubscriptionHelper', function () {
 
     it('should return the payment provider trial start date if it exists', function () {
       const result = this.SubscriptionHelper.getSubscriptionTrialStartedAt({
+        recurlyStatus: {},
         paymentProvider: { trialStartedAt: new Date('2023-01-01') },
       })
       expect(result).to.deep.equal(new Date('2023-01-01'))
@@ -459,6 +460,7 @@ describe('SubscriptionHelper', function () {
 
     it('should return the payment provider trial end date if it exists', function () {
       const result = this.SubscriptionHelper.getSubscriptionTrialEndsAt({
+        recurlyStatus: {},
         paymentProvider: { trialEndsAt: new Date('2023-01-01') },
       })
       expect(result).to.deep.equal(new Date('2023-01-01'))
