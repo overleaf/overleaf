@@ -86,7 +86,10 @@ export interface Meta {
   'ol-cannot-reactivate-subscription': boolean
   'ol-cannot-use-ai': boolean
   'ol-chatEnabled': boolean
-
+  'ol-compileSettings': {
+    reducedTimeoutWarning: string
+    compileTimeout: number
+  }
   'ol-compilesUserContentDomain': string
   'ol-countryCode': PricingFormState['country']
   'ol-couponCode': PricingFormState['coupon']

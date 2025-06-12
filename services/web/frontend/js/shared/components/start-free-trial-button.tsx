@@ -10,6 +10,7 @@ type StartFreeTrialButtonProps = {
   buttonProps?: React.ComponentProps<typeof OLButton>
   children?: React.ReactNode
   handleClick?: React.ComponentProps<typeof OLButton>['onClick']
+  segmentation?: eventTracking.Segmentation
 }
 
 export default function StartFreeTrialButton({
@@ -20,18 +21,20 @@ export default function StartFreeTrialButton({
   handleClick,
   source,
   variant,
+  segmentation,
 }: StartFreeTrialButtonProps) {
   const { t } = useTranslation()
 
   useEffect(() => {
     const eventSegmentation: { [key: string]: unknown } = {
       'paywall-type': source,
+      ...segmentation,
     }
     if (variant) {
       eventSegmentation.variant = variant
     }
     eventTracking.sendMB('paywall-prompt', eventSegmentation)
-  }, [source, variant])
+  }, [source, variant, segmentation])
 
   const onClick = useCallback(
     (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
@@ -41,9 +44,9 @@ export default function StartFreeTrialButton({
         handleClick(event)
       }
 
-      startFreeTrial(source, variant)
+      startFreeTrial(source, variant, segmentation)
     },
-    [handleClick, source, variant]
+    [handleClick, source, variant, segmentation]
   )
 
   return (

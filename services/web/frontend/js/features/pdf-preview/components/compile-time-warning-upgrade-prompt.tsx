@@ -1,23 +1,56 @@
-import { memo, useCallback, useEffect, useState } from 'react'
+import { memo, useCallback, useEffect, useMemo, useState } from 'react'
 import * as eventTracking from '@/infrastructure/event-tracking'
 import { useDetachCompileContext } from '@/shared/context/detach-compile-context'
 import usePersistedState from '@/shared/hooks/use-persisted-state'
 import { CompileTimeWarningUpgradePromptInner } from '@/features/pdf-preview/components/compile-time-warning-upgrade-prompt-inner'
 import getMeta from '@/utils/meta'
+import { CompileTimeoutChangingSoon } from './compile-time-changing-soon'
 
 function CompileTimeWarningUpgradePrompt() {
   const { isProjectOwner, deliveryLatencies, compiling, showLogs, error } =
     useDetachCompileContext()
 
   const [showWarning, setShowWarning] = useState(false)
+  const [showChangingSoon, setShowChangingSoon] = useState(false)
   const [dismissedUntilWarning, setDismissedUntilWarning] = usePersistedState<
     Date | undefined
   >(`has-dismissed-10s-compile-time-warning-until`)
+  const { reducedTimeoutWarning } = getMeta('ol-compileSettings')
+  const warningThreshold = reducedTimeoutWarning === 'enabled' ? 7 : 10
+
+  const sharedSegmentation = useMemo(
+    () => ({
+      '10s-timeout-warning': reducedTimeoutWarning,
+      'is-owner': isProjectOwner,
+    }),
+    [isProjectOwner, reducedTimeoutWarning]
+  )
+
+  const warningSegmentation = useMemo(
+    () => ({
+      content: 'warning',
+      time: warningThreshold,
+      ...sharedSegmentation,
+    }),
+    [sharedSegmentation, warningThreshold]
+  )
+
+  const changingSoonSegmentation = useMemo(
+    () => ({
+      content: 'changes',
+      time: 10,
+      ...sharedSegmentation,
+    }),
+    [sharedSegmentation]
+  )
 
   const handleNewCompile = useCallback(
     (compileTime: number) => {
       setShowWarning(false)
-      if (compileTime > 10000) {
+      setShowChangingSoon(false)
+      if (reducedTimeoutWarning === 'enabled' && compileTime > 10000) {
+        setShowChangingSoon(true)
+      } else if (compileTime > warningThreshold * 1000) {
         if (isProjectOwner) {
           if (
             !dismissedUntilWarning ||
@@ -25,26 +58,52 @@ function CompileTimeWarningUpgradePrompt() {
           ) {
             setShowWarning(true)
             eventTracking.sendMB('compile-time-warning-displayed', {
-              time: 10,
+              time: warningThreshold,
               isProjectOwner,
             })
           }
         }
       }
     },
-    [isProjectOwner, dismissedUntilWarning]
+    [
+      isProjectOwner,
+      dismissedUntilWarning,
+      reducedTimeoutWarning,
+      warningThreshold,
+    ]
   )
 
   const handleDismissWarning = useCallback(() => {
     eventTracking.sendMB('compile-time-warning-dismissed', {
-      time: 10,
+      time: warningThreshold,
       isProjectOwner,
+    })
+    eventTracking.sendMB('paywall-dismiss', {
+      'paywall-type': 'compile-time-warning',
+      content: 'warning',
+      time: warningThreshold,
+      ...sharedSegmentation,
     })
     setShowWarning(false)
     const until = new Date()
     until.setDate(until.getDate() + 1) // 1 day
     setDismissedUntilWarning(until)
-  }, [isProjectOwner, setDismissedUntilWarning])
+  }, [
+    isProjectOwner,
+    setDismissedUntilWarning,
+    warningThreshold,
+    sharedSegmentation,
+  ])
+
+  const handleDismissChangingSoon = useCallback(() => {
+    eventTracking.sendMB('paywall-dismiss', {
+      'paywall-type': 'compile-time-warning',
+      time: 10,
+      content: 'changes',
+      ...sharedSegmentation,
+    })
+    setShowChangingSoon(false)
+  }, [sharedSegmentation])
 
   useEffect(() => {
     if (compiling || error || showLogs) return
@@ -55,21 +114,32 @@ function CompileTimeWarningUpgradePrompt() {
     return null
   }
 
-  if (compiling || error || showLogs) {
+  if (
+    compiling ||
+    error ||
+    showLogs ||
+    !deliveryLatencies.compileTimeServerE2E
+  ) {
     return null
   }
 
-  if (!showWarning) {
+  if (!showWarning && !showChangingSoon) {
     return null
   }
-
-  // if showWarning is true then the 10s warning is shown
 
   return (
     <div>
       {showWarning && isProjectOwner && (
         <CompileTimeWarningUpgradePromptInner
           handleDismissWarning={handleDismissWarning}
+          segmentation={warningSegmentation}
+        />
+      )}
+      {showChangingSoon && (
+        <CompileTimeoutChangingSoon
+          isProjectOwner={isProjectOwner}
+          handleDismissChangingSoon={handleDismissChangingSoon}
+          segmentation={changingSoonSegmentation}
         />
       )}
     </div>

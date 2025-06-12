@@ -1,20 +1,31 @@
 import getMeta from '@/utils/meta'
 import { Trans, useTranslation } from 'react-i18next'
-import { memo, useEffect } from 'react'
+import { memo, useMemo } from 'react'
 import { useDetachCompileContext } from '@/shared/context/detach-compile-context'
 import StartFreeTrialButton from '@/shared/components/start-free-trial-button'
 import MaterialIcon from '@/shared/components/material-icon'
 import * as eventTracking from '@/infrastructure/event-tracking'
 import PdfLogEntry from './pdf-log-entry'
 
-function TimeoutMessageAfterPaywallDismissal() {
-  const { lastCompileOptions, isProjectOwner } = useDetachCompileContext()
+type TimeoutMessageProps = {
+  segmentation?: eventTracking.Segmentation
+}
 
+function TimeoutMessageAfterPaywallDismissal({
+  segmentation,
+}: TimeoutMessageProps) {
+  const { lastCompileOptions, isProjectOwner } = useDetachCompileContext()
   return (
     <div className="website-redesign timeout-upgrade-paywall-prompt">
-      <CompileTimeout isProjectOwner={isProjectOwner} />
+      <CompileTimeout
+        isProjectOwner={isProjectOwner}
+        segmentation={segmentation}
+      />
       {getMeta('ol-ExposedSettings').enableSubscriptions && (
-        <PreventTimeoutHelpMessage lastCompileOptions={lastCompileOptions} />
+        <PreventTimeoutHelpMessage
+          lastCompileOptions={lastCompileOptions}
+          segmentation={segmentation}
+        />
       )}
     </div>
   )
@@ -22,26 +33,22 @@ function TimeoutMessageAfterPaywallDismissal() {
 
 type CompileTimeoutProps = {
   isProjectOwner: boolean
+  segmentation?: eventTracking.Segmentation
 }
 
 const CompileTimeout = memo(function CompileTimeout({
   isProjectOwner,
+  segmentation,
 }: CompileTimeoutProps) {
   const { t } = useTranslation()
 
-  useEffect(() => {
-    eventTracking.sendMB('paywall-prompt', {
-      'paywall-type': 'compile-timeout',
+  const eventSegmentation = useMemo(
+    () => ({
+      ...segmentation,
       'paywall-version': 'secondary',
-    })
-  }, [])
-
-  function onPaywallClick() {
-    eventTracking.sendMB('paywall-click', {
-      'paywall-type': 'compile-timeout',
-      'paywall-version': 'secondary',
-    })
-  }
+    }),
+    [segmentation]
+  )
 
   return (
     <PdfLogEntry
@@ -86,7 +93,7 @@ const CompileTimeout = memo(function CompileTimeout({
                 <StartFreeTrialButton
                   source="compile-timeout"
                   buttonProps={{ variant: 'secondary' }}
-                  handleClick={onPaywallClick}
+                  segmentation={eventSegmentation}
                 >
                   {t('try_for_free')}
                 </StartFreeTrialButton>
@@ -104,18 +111,50 @@ const CompileTimeout = memo(function CompileTimeout({
 
 type PreventTimeoutHelpMessageProps = {
   lastCompileOptions: any
+  segmentation?: eventTracking.Segmentation
 }
 
 const PreventTimeoutHelpMessage = memo(function PreventTimeoutHelpMessage({
   lastCompileOptions,
+  segmentation,
 }: PreventTimeoutHelpMessageProps) {
   const { t } = useTranslation()
 
+  function sendInfoClickEvent() {
+    eventTracking.sendMB('paywall-info-click', {
+      'paywall-type': 'compile-timeout',
+      content: 'blog',
+      ...segmentation,
+    })
+  }
+
+  const compileTimeoutChangesBlogLink = (
+    /* eslint-disable-next-line jsx-a11y/anchor-has-content, react/jsx-key */
+    <a
+      aria-label={t('read_more_about_free_compile_timeouts_servers')}
+      href="/blog/changes-to-free-compile-timeout"
+      rel="noopener noreferrer"
+      target="_blank"
+      onClick={sendInfoClickEvent}
+    />
+  )
+
   return (
     <PdfLogEntry
-      headerTitle={t('other_causes_of_compile_timeouts')}
+      headerTitle={t('reasons_for_compile_timeouts')}
       formattedContent={
         <>
+          {segmentation?.['10s-timeout-warning'] === 'enabled' && (
+            <p>
+              <em>
+                <Trans
+                  i18nKey="were_reducing_compile_timeout"
+                  components={[compileTimeoutChangesBlogLink]}
+                />
+              </em>
+            </p>
+          )}
+          <p>{t('common_causes_of_compile_timeouts_include')}:</p>
           <ul>
             <li>
               {t('large_or_high_resolution_images_taking_too_long_to_process')}

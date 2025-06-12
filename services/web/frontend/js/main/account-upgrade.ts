@@ -1,7 +1,14 @@
 import * as eventTracking from '../infrastructure/event-tracking'
 
-export function startFreeTrial(source: string, variant?: string) {
-  const eventSegmentation: Record<string, string> = { 'paywall-type': source }
+export function startFreeTrial(
+  source: string,
+  variant?: string,
+  segmentation?: eventTracking.Segmentation
+) {
+  const eventSegmentation: Record<string, string> = {
+    'paywall-type': source,
+    ...segmentation,
+  }
   if (variant) {
     eventSegmentation.variant = variant
   }

@@ -1,8 +1,16 @@
-import { Dispatch, SetStateAction, useEffect, useMemo, useState } from 'react'
+import {
+  Dispatch,
+  SetStateAction,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react'
 import getMeta from '@/utils/meta'
 import * as eventTracking from '@/infrastructure/event-tracking'
 import TimeoutMessageAfterPaywallDismissal from './timeout-message-after-paywall-dismissal'
 import { UpgradePrompt } from '@/shared/components/upgrade-prompt'
+import { useDetachCompileContext } from '@/shared/context/detach-compile-context'
 
 const studentRoles = [
   'High-school student',
@@ -10,11 +18,6 @@ const studentRoles = [
   "Master's student (e.g. MSc, MA)",
   'Doctoral student (e.g. PhD, MD, EngD)',
 ]
-
-type Segmentation = Record<
-  string,
-  string | number | boolean | undefined | unknown | any
->
 
 interface TimeoutUpgradePaywallPromptProps {
   setIsShowingPrimary?: Dispatch<SetStateAction<boolean>>
@@ -26,16 +29,32 @@ function TimeoutUpgradePaywallPrompt({
   const odcRole = getMeta('ol-odcRole')
   const planPrices = getMeta('ol-paywallPlans')
   const isStudent = useMemo(() => studentRoles.includes(odcRole), [odcRole])
+  const { isProjectOwner } = useDetachCompileContext()
 
   const [isPaywallDismissed, setIsPaywallDismissed] = useState<boolean>(false)
+  const { reducedTimeoutWarning, compileTimeout } =
+    getMeta('ol-compileSettings')
 
-  function sendPaywallEvent(event: string, segmentation?: Segmentation) {
-    eventTracking.sendMB(event, {
-      'paywall-type': 'compile-timeout',
-      'paywall-version': 'primary',
-      ...segmentation,
-    })
-  }
+  const sharedSegmentation = useMemo(
+    () => ({
+      '10s-timeout-warning': reducedTimeoutWarning,
+      'is-owner': isProjectOwner,
+      time: compileTimeout,
+    }),
+    [isProjectOwner, reducedTimeoutWarning, compileTimeout]
+  )
+
+  const sendPaywallEvent = useCallback(
+    (event: string, segmentation?: eventTracking.Segmentation) => {
+      eventTracking.sendMB(event, {
+        'paywall-type': 'compile-timeout',
+        'paywall-version': 'primary',
+        ...sharedSegmentation,
+        ...segmentation,
+      })
+    },
+    [sharedSegmentation]
+  )
 
   function onClose() {
     sendPaywallEvent('paywall-dismiss')
@@ -62,7 +81,7 @@ function TimeoutUpgradePaywallPrompt({
     if (setIsShowingPrimary) {
       setIsShowingPrimary(true)
     }
-  }, [isStudent, setIsShowingPrimary])
+  }, [isStudent, setIsShowingPrimary, sendPaywallEvent])
 
   return (
     <div>
@@ -81,7 +100,9 @@ function TimeoutUpgradePaywallPrompt({
           onClickPaywall={onClickPaywall}
         />
       ) : (
-        <TimeoutMessageAfterPaywallDismissal />
+        <TimeoutMessageAfterPaywallDismissal
+          segmentation={sharedSegmentation}
+        />
       )}
     </div>
   )

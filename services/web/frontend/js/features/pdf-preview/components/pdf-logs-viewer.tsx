@@ -21,7 +21,6 @@ function PdfLogsViewer({ alwaysVisible = false }: { alwaysVisible?: boolean }) {
   const {
     codeCheckFailed,
     error,
-    hasShortCompileTimeout,
     logEntries,
     rawLog,
     validationIssues,
@@ -31,6 +30,8 @@ function PdfLogsViewer({ alwaysVisible = false }: { alwaysVisible?: boolean }) {
   } = useCompileContext()
 
   const { loadingError } = usePdfPreviewContext()
+
+  const { compileTimeout } = getMeta('ol-compileSettings')
 
   const { t } = useTranslation()
 
@@ -58,7 +59,7 @@ function PdfLogsViewer({ alwaysVisible = false }: { alwaysVisible?: boolean }) {
 
         {loadingError && <PdfPreviewError error="pdf-viewer-loading-error" />}
 
-        {hasShortCompileTimeout && error === 'timedout' ? (
+        {compileTimeout < 60 && error === 'timedout' ? (
           isCompileTimeoutPaywallDisplay ? (
             <TimeoutUpgradePaywallPrompt
               setIsShowingPrimary={setIsShowingPrimaryCompileTimeoutPaywall}

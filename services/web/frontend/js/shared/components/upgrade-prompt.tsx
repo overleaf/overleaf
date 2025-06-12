@@ -104,7 +104,7 @@ export function UpgradePrompt({
             <OLRow>
               <ul className="upgrade-prompt-list">
                 <IconListItem icon="hourglass_top">
-                  {t('12x_more_compile_time')}
+                  {t('24x_more_compile_time')}
                 </IconListItem>
                 <IconListItem icon="group_add">
                   {t('collabs_per_proj', { collabcount: isStudent ? 6 : 10 })}

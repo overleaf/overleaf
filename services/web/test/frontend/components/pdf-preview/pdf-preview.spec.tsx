@@ -50,6 +50,10 @@ describe('<PdfPreview/>', function () {
       'populate-clsi-cache': 'enabled',
     })
     window.metaAttributesCache.set('ol-projectOwnerHasPremiumOnPageLoad', true)
+    window.metaAttributesCache.set('ol-compileSettings', {
+      reducedWarningThreshold: 'default',
+      compileTimeout: 240,
+    })
     cy.interceptEvents()
   })
 
