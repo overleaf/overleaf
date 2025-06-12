@@ -33,6 +33,9 @@ const PaymentProviderEntities = require('./PaymentProviderEntities')
 const { User } = require('../../models/User')
 const UserGetter = require('../User/UserGetter')
 const PermissionsManager = require('../Authorization/PermissionsManager')
+const {
+  sanitizeSessionUserForFrontEnd,
+} = require('../../infrastructure/FrontEndUser')
 
 /**
  * @import { SubscriptionChangeDescription } from '../../../../types/subscription/subscription-change-preview'
@@ -318,7 +321,9 @@ function cancelSubscription(req, res, next) {
 async function canceledSubscription(req, res, next) {
   return res.render('subscriptions/canceled-subscription-react', {
     title: 'subscription_canceled',
-    user: SessionManager.getSessionUser(req.session),
+    user: sanitizeSessionUserForFrontEnd(
+      SessionManager.getSessionUser(req.session)
+    ),
   })
 }
 

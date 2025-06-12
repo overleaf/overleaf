@@ -19,6 +19,7 @@ const {
 const {
   addOptionalCleanupHandlerAfterDrainingConnections,
 } = require('./GracefulShutdown')
+const { sanitizeSessionUserForFrontEnd } = require('./FrontEndUser')
 
 const IEEE_BRAND_ID = Settings.ieeeBrandId
 
@@ -300,11 +301,7 @@ module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
   webRouter.use(function (req, res, next) {
     const currentUser = SessionManager.getSessionUser(req.session)
     if (currentUser != null) {
-      res.locals.user = {
-        email: currentUser.email,
-        first_name: currentUser.first_name,
-        last_name: currentUser.last_name,
-      }
+      res.locals.user = sanitizeSessionUserForFrontEnd(currentUser)
     }
     next()
   })
