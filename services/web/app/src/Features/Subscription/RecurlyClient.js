@@ -736,6 +736,21 @@ async function failInvoice(invoiceId) {
   await client.markInvoiceFailed(invoiceId)
 }
 
+async function terminateSubscriptionByUuid(subscriptionUuid) {
+  const subscription = await client.terminateSubscription(
+    'uuid-' + subscriptionUuid,
+    {
+      body: {
+        refund: 'none',
+      },
+    }
+  )
+
+  logger.debug({ subscriptionUuid }, 'subscription terminated')
+
+  return subscription
+}
+
 module.exports = {
   errors: recurly.errors,
 
@@ -759,6 +774,7 @@ module.exports = {
   resumeSubscriptionByUuid: callbackify(resumeSubscriptionByUuid),
   getPastDueInvoices: callbackify(getPastDueInvoices),
   failInvoice: callbackify(failInvoice),
+  terminateSubscriptionByUuid: callbackify(terminateSubscriptionByUuid),
 
   promises: {
     getSubscription,
@@ -781,5 +797,6 @@ module.exports = {
     getPlan,
     getPastDueInvoices,
     failInvoice,
+    terminateSubscriptionByUuid,
   },
 }

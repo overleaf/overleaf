@@ -22,6 +22,7 @@ const {
   callbackifyMultiResult,
 } = require('@overleaf/promise-utils')
 const NotificationsBuilder = require('../Notifications/NotificationsBuilder')
+const RecurlyClient = require('./RecurlyClient')
 
 async function getInvite(token) {
   const subscription = await Subscription.findOne({
@@ -64,11 +65,50 @@ async function importInvite(subscription, inviterName, email, token, sentAt) {
   return subscription.save()
 }
 
-async function acceptInvite(token, userId, auditLog) {
+async function _deleteUserSubscription(userId, ipAddress) {
+  // Delete released user subscription to make it on a free plan
+  const subscription =
+    await SubscriptionLocator.promises.getUsersSubscription(userId)
+
+  if (subscription) {
+    logger.debug(
+      {
+        subscriptionId: subscription._id,
+      },
+      'deleting user subscription'
+    )
+
+    const deleterData = {
+      id: userId,
+      ip: ipAddress,
+    }
+    await SubscriptionUpdater.promises.deleteSubscription(
+      subscription,
+      deleterData
+    )
+
+    // Terminate the subscription in Recurly
+    if (subscription.recurlySubscription_id) {
+      try {
+        await RecurlyClient.promises.terminateSubscriptionByUuid(
+          subscription.recurlySubscription_id
+        )
+      } catch (err) {
+        logger.error(
+          { err, subscriptionId: subscription._id },
+          'terminating subscription failed'
+        )
+      }
+    }
+  }
+}
+
+async function acceptInvite(token, userId, ipAddress) {
   const { invite, subscription } = await getInvite(token)
   if (!invite) {
     throw new Errors.NotFoundError('invite not found')
   }
+  const auditLog = { initiatorId: userId, ipAddress }
 
   await SubscriptionUpdater.promises.addUserToGroup(
     subscription._id,
@@ -77,6 +117,7 @@ async function acceptInvite(token, userId, auditLog) {
   )
 
   if (subscription.managedUsersEnabled) {
+    await _deleteUserSubscription(userId, ipAddress)
     await Modules.promises.hooks.fire(
       'enrollInManagedSubscription',
       userId,

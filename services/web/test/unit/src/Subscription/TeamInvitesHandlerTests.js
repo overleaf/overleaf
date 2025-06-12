@@ -29,6 +29,7 @@ describe('TeamInvitesHandler', function () {
     this.subscription = {
       id: '55153a8014829a865bbf700d',
       _id: new ObjectId('55153a8014829a865bbf700d'),
+      recurlySubscription_id: '1a2b3c4d5e6f7g',
       admin_id: this.manager._id,
       groupPlan: true,
       member_ids: [],
@@ -54,6 +55,7 @@ describe('TeamInvitesHandler', function () {
     this.SubscriptionUpdater = {
       promises: {
         addUserToGroup: sinon.stub().resolves(),
+        deleteSubscription: sinon.stub().resolves(),
       },
     }
 
@@ -109,6 +111,12 @@ describe('TeamInvitesHandler', function () {
 
     this.Subscription.findOne.resolves(this.subscription)
 
+    this.RecurlyClient = {
+      promises: {
+        terminateSubscriptionByUuid: sinon.stub().resolves(),
+      },
+    }
+
     this.TeamInvitesHandler = SandboxedModule.require(modulePath, {
       requires: {
         'mongodb-legacy': { ObjectId },
@@ -126,6 +134,7 @@ describe('TeamInvitesHandler', function () {
         '../../infrastructure/Modules': (this.Modules = {
           promises: { hooks: { fire: sinon.stub().resolves() } },
         }),
+        './RecurlyClient': this.RecurlyClient,
       },
     })
   })
@@ -335,6 +344,8 @@ describe('TeamInvitesHandler', function () {
         email: 'tyrion@example.com',
       }
 
+      this.ipAddress = '127.0.0.1'
+
       this.UserGetter.promises.getUserByAnyEmail
         .withArgs(this.user.email)
         .resolves(this.user)
@@ -350,7 +361,8 @@ describe('TeamInvitesHandler', function () {
       it('adds the user to the team', async function () {
         await this.TeamInvitesHandler.promises.acceptInvite(
           'dddddddd',
-          this.user.id
+          this.user.id,
+          this.ipAddress
         )
         this.SubscriptionUpdater.promises.addUserToGroup
           .calledWith(this.subscription._id, this.user.id)
@@ -360,7 +372,8 @@ describe('TeamInvitesHandler', function () {
       it('removes the invite from the subscription', async function () {
         await this.TeamInvitesHandler.promises.acceptInvite(
           'dddddddd',
-          this.user.id
+          this.user.id,
+          this.ipAddress
         )
         this.Subscription.updateOne
           .calledWith(
@@ -375,7 +388,8 @@ describe('TeamInvitesHandler', function () {
 
         await this.TeamInvitesHandler.promises.acceptInvite(
           'dddddddd',
-          this.user.id
+          this.user.id,
+          this.ipAddress
         )
         sinon.assert.called(
           this.NotificationsBuilder.promises.groupInvitation(
@@ -389,7 +403,8 @@ describe('TeamInvitesHandler', function () {
       it('should not schedule an SSO invite reminder', async function () {
         await this.TeamInvitesHandler.promises.acceptInvite(
           'dddddddd',
-          this.user.id
+          this.user.id,
+          this.ipAddress
         )
         sinon.assert.notCalled(this.Modules.promises.hooks.fire)
       })
@@ -401,7 +416,17 @@ describe('TeamInvitesHandler', function () {
 
         await this.TeamInvitesHandler.promises.acceptInvite(
           'dddddddd',
-          this.user.id
+          this.user.id,
+          this.ipAddress
+        )
+        sinon.assert.calledWith(
+          this.SubscriptionUpdater.promises.deleteSubscription,
+          this.subscription,
+          { id: this.user.id, ip: this.ipAddress }
+        )
+        sinon.assert.calledWith(
+          this.RecurlyClient.promises.terminateSubscriptionByUuid,
+          this.subscription.recurlySubscription_id
         )
         sinon.assert.calledWith(
           this.Modules.promises.hooks.fire,
@@ -421,7 +446,8 @@ describe('TeamInvitesHandler', function () {
 
         await this.TeamInvitesHandler.promises.acceptInvite(
           'dddddddd',
-          this.user.id
+          this.user.id,
+          this.ipAddress
         )
         sinon.assert.calledWith(
           this.Modules.promises.hooks.fire,

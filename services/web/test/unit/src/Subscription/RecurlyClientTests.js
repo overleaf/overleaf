@@ -692,4 +692,20 @@ describe('RecurlyClient', function () {
       ).to.be.rejectedWith(Error)
     })
   })
+
+  describe('terminateSubscriptionByUuid', function () {
+    it('should attempt to terminate the subscription', async function () {
+      this.client.terminateSubscription = sinon
+        .stub()
+        .resolves(this.recurlySubscription)
+      const subscription =
+        await this.RecurlyClient.promises.terminateSubscriptionByUuid(
+          this.subscription.uuid
+        )
+      expect(subscription).to.deep.equal(this.recurlySubscription)
+      expect(this.client.terminateSubscription).to.be.calledWith(
+        'uuid-' + this.subscription.uuid
+      )
+    })
+  })
 })
