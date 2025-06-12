@@ -16,6 +16,7 @@ import classnames from 'classnames'
 type ManagedUserRowProps = {
   user: User
   openOffboardingModalForUser: (user: User) => void
+  openRemoveModalForUser: (user: User) => void
   openUnlinkUserModal: (user: User) => void
   groupId: string
   setGroupUserAlert: Dispatch<SetStateAction<GroupUserAlert>>
@@ -24,6 +25,7 @@ type ManagedUserRowProps = {
 export default function MemberRow({
   user,
   openOffboardingModalForUser,
+  openRemoveModalForUser,
   openUnlinkUserModal,
   setGroupUserAlert,
   groupId,
@@ -112,6 +114,7 @@ export default function MemberRow({
         <DropdownButton
           user={user}
           openOffboardingModalForUser={openOffboardingModalForUser}
+          openRemoveModalForUser={openRemoveModalForUser}
           openUnlinkUserModal={openUnlinkUserModal}
           setGroupUserAlert={setGroupUserAlert}
           groupId={groupId}

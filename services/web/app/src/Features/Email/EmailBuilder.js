@@ -949,6 +949,33 @@ templates.welcomeWithoutCTA = NoCTAEmailTemplate({
   },
 })
 
+templates.removeGroupMember = NoCTAEmailTemplate({
+  subject(opts) {
+    return `Your ${settings.appName} account has been removed from ${opts.adminName}’s group`
+  },
+  title(opts) {
+    return `Your ${settings.appName} account has been removed from ${opts.adminName}’s group`
+  },
+  greeting() {
+    return ''
+  },
+  message() {
+    const passwordResetUrl = `${settings.siteUrl}/user/password/reset`
+
+    return [
+      'Don’t worry, your account and projects are still accessible. But there are a few changes to be aware of:',
+      '<ul>' +
+        `<li>Your account will have reverted to a free ${settings.appName} plan.</li>`,
+      `<li>Any project collaborators have been set to read-only (you can invite one collaborator per project on the free plan).</li>`,
+      `<li>If you previously logged in via SSO, you’ll need to <a href="${passwordResetUrl}">set a password</a> to access your account.</li>` +
+        '</ul>',
+      `If you think this has been done in error, please contact your group admin.`,
+      `Thanks!`,
+      `Team ${settings.appName}`,
+    ]
+  },
+})
+
 function _formatUserNameAndEmail(user, placeholder) {
   if (user.first_name && user.last_name) {
     const fullName = `${user.first_name} ${user.last_name}`

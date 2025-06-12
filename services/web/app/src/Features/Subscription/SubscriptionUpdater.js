@@ -10,6 +10,7 @@ const { DeletedSubscription } = require('../../models/DeletedSubscription')
 const logger = require('@overleaf/logger')
 const Features = require('../../infrastructure/Features')
 const UserAuditLogHandler = require('../User/UserAuditLogHandler')
+const UserUpdater = require('../User/UserUpdater')
 const AccountMappingHelper = require('../Analytics/AccountMappingHelper')
 const { SSOConfig } = require('../../models/SSOConfig')
 const mongoose = require('../../infrastructure/Mongoose')
@@ -145,6 +146,20 @@ async function removeUserFromGroup(subscriptionId, userId, auditLog) {
     { _id: subscriptionId },
     { $pull: { member_ids: userId } }
   ).exec()
+
+  const subscription = await Subscription.findById(subscriptionId)
+  if (subscription.managedUsersEnabled) {
+    await UserUpdater.promises.updateUser(
+      { _id: userId },
+      {
+        $unset: {
+          'enrollment.managedBy': 1,
+          'enrollment.enrolledAt': 1,
+        },
+      }
+    )
+  }
+
   await FeaturesUpdater.promises.refreshFeatures(
     userId,
     'remove-user-from-group'

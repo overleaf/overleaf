@@ -28,6 +28,7 @@ type resendInviteResponse = {
 type ManagedUserDropdownButtonProps = {
   user: User
   openOffboardingModalForUser: (user: User) => void
+  openRemoveModalForUser: (user: User) => void
   openUnlinkUserModal: (user: User) => void
   groupId: string
   setGroupUserAlert: Dispatch<SetStateAction<GroupUserAlert>>
@@ -36,6 +37,7 @@ type ManagedUserDropdownButtonProps = {
 export default function DropdownButton({
   user,
   openOffboardingModalForUser,
+  openRemoveModalForUser,
   openUnlinkUserModal,
   groupId,
   setGroupUserAlert,
@@ -172,6 +174,10 @@ export default function DropdownButton({
     openOffboardingModalForUser(user)
   }
 
+  const onReleaseUserClick = () => {
+    openRemoveModalForUser(user)
+  }
+
   const onRemoveFromGroup = () => {
     removeMember(user)
   }
@@ -232,12 +238,20 @@ export default function DropdownButton({
   if (isUserManaged && !user.isEntityAdmin) {
     buttons.push(
       <MenuItemButton
-        className="delete-user-action"
         key="delete-user-action"
         data-testid="delete-user-action"
         onClick={onDeleteUserClick}
       >
         {t('delete_user')}
+      </MenuItemButton>
+    )
+    buttons.push(
+      <MenuItemButton
+        key="release-user-action"
+        data-testid="release-user-action"
+        onClick={onReleaseUserClick}
+      >
+        {t('remove_user')}
       </MenuItemButton>
     )
   } else if (!isUserManaged) {
@@ -246,7 +260,6 @@ export default function DropdownButton({
         key="remove-user-action"
         data-testid="remove-user-action"
         onClick={onRemoveFromGroup}
-        className="delete-user-action"
         variant="danger"
       >
         {t('remove_from_group')}

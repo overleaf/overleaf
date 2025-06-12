@@ -70,6 +70,7 @@ describe('SubscriptionUpdater', function () {
       .stub()
       .returns({ exec: sinon.stub().resolves() })
     this.SubscriptionModel.findOne = sinon.stub().resolves()
+    this.SubscriptionModel.findById = sinon.stub().resolves()
     this.SubscriptionModel.updateMany = sinon
       .stub()
       .returns({ exec: sinon.stub().resolves() })
@@ -173,6 +174,12 @@ describe('SubscriptionUpdater', function () {
       },
     }
 
+    this.UserUpdater = {
+      promises: {
+        updateUser: sinon.stub().resolves(),
+      },
+    }
+
     this.SubscriptionUpdater = SandboxedModule.require(modulePath, {
       requires: {
         '../../models/Subscription': {
@@ -193,6 +200,7 @@ describe('SubscriptionUpdater', function () {
         }),
         '../../infrastructure/Features': this.Features,
         '../User/UserAuditLogHandler': this.UserAuditLogHandler,
+        '../User/UserUpdater': this.UserUpdater,
         '../../infrastructure/Modules': (this.Modules = {
           promises: {
             hooks: {
@@ -622,6 +630,9 @@ describe('SubscriptionUpdater', function () {
         },
       ]
       this.SubscriptionModel.findOne.resolves(this.groupSubscription)
+      this.SubscriptionModel.findById = sinon
+        .stub()
+        .resolves(this.groupSubscription)
       this.SubscriptionLocator.promises.getMemberSubscriptions.resolves(
         this.fakeSubscriptions
       )
@@ -635,6 +646,28 @@ describe('SubscriptionUpdater', function () {
       const removeOperation = { $pull: { member_ids: this.otherUserId } }
       this.SubscriptionModel.updateOne
         .calledWith({ _id: this.subscription._id }, removeOperation)
+        .should.equal(true)
+    })
+
+    it('should remove user enrollment if the group is managed', async function () {
+      this.SubscriptionModel.findById.resolves({
+        ...this.groupSubscription,
+        managedUsersEnabled: true,
+      })
+      await this.SubscriptionUpdater.promises.removeUserFromGroup(
+        this.groupSubscription._id,
+        this.otherUserId
+      )
+      this.UserUpdater.promises.updateUser
+        .calledWith(
+          { _id: this.otherUserId },
+          {
+            $unset: {
+              'enrollment.managedBy': 1,
+              'enrollment.enrolledAt': 1,
+            },
+          }
+        )
         .should.equal(true)
     })
 

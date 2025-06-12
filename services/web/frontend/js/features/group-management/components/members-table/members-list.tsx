@@ -5,6 +5,7 @@ import { useGroupMembersContext } from '../../context/group-members-context'
 import type { GroupUserAlert } from '../../utils/types'
 import MemberRow from './member-row'
 import OffboardManagedUserModal from './offboard-managed-user-modal'
+import RemoveManagedUserModal from '@/features/group-management/components/members-table/remove-managed-user-modal'
 import ListAlert from './list-alert'
 import SelectAllCheckbox from './select-all-checkbox'
 import classNames from 'classnames'
@@ -22,6 +23,7 @@ export default function MembersList({ groupId }: ManagedUsersListProps) {
   const [userToOffboard, setUserToOffboard] = useState<User | undefined>(
     undefined
   )
+  const [userToRemove, setUserToRemove] = useState<User | undefined>(undefined)
   const [groupUserAlert, setGroupUserAlert] =
     useState<GroupUserAlert>(undefined)
   const [userToUnlink, setUserToUnlink] = useState<User | undefined>(undefined)
@@ -101,6 +103,7 @@ export default function MembersList({ groupId }: ManagedUsersListProps) {
               key={user.email}
               user={user}
               openOffboardingModalForUser={setUserToOffboard}
+              openRemoveModalForUser={setUserToRemove}
               openUnlinkUserModal={setUserToUnlink}
               setGroupUserAlert={setGroupUserAlert}
               groupId={groupId}
@@ -114,6 +117,13 @@ export default function MembersList({ groupId }: ManagedUsersListProps) {
           groupId={groupId}
           allMembers={users}
           onClose={() => setUserToOffboard(undefined)}
+        />
+      )}
+      {userToRemove && (
+        <RemoveManagedUserModal
+          user={userToRemove}
+          groupId={groupId}
+          onClose={() => setUserToRemove(undefined)}
         />
       )}
       {userToUnlink && (
