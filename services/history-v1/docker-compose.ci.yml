@@ -39,6 +39,7 @@ services:
       NODE_OPTIONS: "--unhandled-rejections=strict"
     volumes:
       - ./test/acceptance/certs:/certs
+      - ../../bin/shared/wait_for_it:/overleaf/bin/shared/wait_for_it
     depends_on:
       mongo:
         condition: service_started
@@ -55,6 +56,7 @@ services:
       gcs:
         condition: service_healthy
     user: node
+    entrypoint: /overleaf/bin/shared/wait_for_it mongo:27017 --timeout=0 --
     command: npm run test:acceptance
 
 

@@ -11,6 +11,7 @@ services:
       - .:/overleaf/services/web
       - ../../node_modules:/overleaf/node_modules
       - ../../libraries:/overleaf/libraries
+      - ../../bin/shared/wait_for_it:/overleaf/bin/shared/wait_for_it
     working_dir: /overleaf/services/web
     env_file: docker-compose.common.env
     environment:
@@ -20,6 +21,7 @@ services:
       LOG_LEVEL: ${LOG_LEVEL:-}
       NODE_ENV: test
       NODE_OPTIONS: "--unhandled-rejections=strict"
+    entrypoint: /overleaf/bin/shared/wait_for_it mongo:27017 --timeout=0 --
     command: npm run --silent test:unit:app
     user: node
     depends_on:
@@ -31,6 +33,7 @@ services:
       - .:/overleaf/services/web
       - ../../node_modules:/overleaf/node_modules
       - ../../libraries:/overleaf/libraries
+      - ../../bin/shared/wait_for_it:/overleaf/bin/shared/wait_for_it
     user: node
     working_dir: /overleaf/services/web
     env_file: docker-compose.common.env
@@ -50,6 +53,7 @@ services:
       - mongo
       - saml
       - ldap
+    entrypoint: /overleaf/bin/shared/wait_for_it mongo:27017 --timeout=0 --
     command: npm run --silent test:acceptance:app
 
   test_frontend:

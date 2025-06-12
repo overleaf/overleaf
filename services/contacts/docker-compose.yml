@@ -26,6 +26,7 @@ services:
       - .:/overleaf/services/contacts
       - ../../node_modules:/overleaf/node_modules
       - ../../libraries:/overleaf/libraries
+      - ../../bin/shared/wait_for_it:/overleaf/bin/shared/wait_for_it
     working_dir: /overleaf/services/contacts
     environment:
       ELASTIC_SEARCH_DSN: es:9200
@@ -39,6 +40,7 @@ services:
     depends_on:
       mongo:
         condition: service_started
+    entrypoint: /overleaf/bin/shared/wait_for_it mongo:27017 --timeout=0 --
     command: npm run --silent test:acceptance
 
   mongo:

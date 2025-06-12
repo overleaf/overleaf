@@ -26,6 +26,7 @@ services:
       - .:/overleaf/services/docstore
       - ../../node_modules:/overleaf/node_modules
       - ../../libraries:/overleaf/libraries
+      - ../../bin/shared/wait_for_it:/overleaf/bin/shared/wait_for_it
     working_dir: /overleaf/services/docstore
     environment:
       ELASTIC_SEARCH_DSN: es:9200
@@ -44,6 +45,7 @@ services:
         condition: service_started
       gcs:
         condition: service_healthy
+    entrypoint: /overleaf/bin/shared/wait_for_it mongo:27017 --timeout=0 --
     command: npm run --silent test:acceptance
 
   mongo:
