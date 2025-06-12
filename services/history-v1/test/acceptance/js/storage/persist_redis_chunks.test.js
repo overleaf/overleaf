@@ -16,7 +16,7 @@ const { setupProjectState } = require('./support/redis')
 const { runScript } = require('./support/runscript')
 const persistChanges = require('../../../../storage/lib/persist_changes')
 
-const SCRIPT_PATH = 'storage/scripts/persist_redis_chunks.js'
+const SCRIPT_PATH = 'storage/scripts/persist_redis_chunks.mjs'
 
 describe('persist_redis_chunks script', function () {
   before(cleanup.everything)
