@@ -60,7 +60,8 @@ export default function DropdownButton({
 
   const managedUsersActive = getMeta('ol-managedUsersActive')
   const groupSSOActive = getMeta('ol-groupSSOActive')
-
+  const userId = getMeta('ol-user_id')
+  const isUserGroupManager = getMeta('ol-isUserGroupManager')
   const userPending = user.invite
   const isGroupSSOLinked =
     !userPending && user.enrollment?.sso?.some(sso => sso.groupId === groupId)
@@ -238,7 +239,11 @@ export default function DropdownButton({
       </MenuItemButton>
     )
   }
-  if (isUserManaged && !user.isEntityAdmin) {
+  if (
+    isUserManaged &&
+    !user.isEntityAdmin &&
+    (!isUserGroupManager || userId !== user._id)
+  ) {
     buttons.push(
       <MenuItemButton
         key="delete-user-action"
@@ -272,7 +277,7 @@ export default function DropdownButton({
 
   if (buttons.length === 0) {
     buttons.push(
-      <DropdownListItem>
+      <DropdownListItem key="no-actions-available">
         <DropdownItem
           as="button"
           tabIndex={-1}

@@ -175,6 +175,7 @@ describe('DropdownButton', function () {
       beforeEach(function () {
         cy.window().then(win => {
           win.metaAttributesCache.set('ol-users', [user])
+          win.metaAttributesCache.set('ol-isUserGroupManager', true)
         })
         mountDropDownComponent(user, subscriptionId)
       })
@@ -637,6 +638,7 @@ describe('DropdownButton', function () {
       beforeEach(function () {
         cy.window().then(win => {
           win.metaAttributesCache.set('ol-users', [user])
+          win.metaAttributesCache.set('ol-isUserGroupManager', true)
         })
         mountDropDownComponent(user, subscriptionId)
       })
@@ -687,6 +689,7 @@ describe('DropdownButton', function () {
       beforeEach(function () {
         cy.window().then(win => {
           win.metaAttributesCache.set('ol-users', [user])
+          win.metaAttributesCache.set('ol-isUserGroupManager', true)
         })
         mountDropDownComponent(user, subscriptionId)
       })

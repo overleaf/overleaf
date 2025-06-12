@@ -31,8 +31,11 @@ async function manageGroupMembers(req, res, next) {
   )
   const ssoConfig = await SSOConfig.findById(subscription.ssoConfig).exec()
   const plan = PlansLocator.findLocalPlanInSettings(subscription.planCode)
-  const userId = SessionManager.getLoggedInUserId(req.session)
+  const userId = SessionManager.getLoggedInUserId(req.session)?.toString()
   const isAdmin = subscription.admin_id.toString() === userId
+  const isUserGroupManager =
+    Boolean(subscription.manager_ids?.some(id => id.toString() === userId)) &&
+    !isAdmin
   const recurlySubscription = subscription.recurlySubscription_id
     ? await RecurlyClient.promises.getSubscription(
         subscription.recurlySubscription_id
@@ -51,6 +54,7 @@ async function manageGroupMembers(req, res, next) {
     users,
     groupSize: subscription.membersLimit,
     managedUsersActive: subscription.managedUsersEnabled,
+    isUserGroupManager,
     groupSSOActive: ssoConfig?.enabled,
     canUseFlexibleLicensing: plan?.canUseFlexibleLicensing,
     canUseAddSeatsFeature,

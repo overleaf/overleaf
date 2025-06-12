@@ -184,6 +184,7 @@ describe('UserMembershipController', function () {
           expect(viewParams.users).to.deep.equal(ctx.users)
           expect(viewParams.groupSize).to.equal(ctx.subscription.membersLimit)
           expect(viewParams.managedUsersActive).to.equal(true)
+          expect(viewParams.isUserGroupManager).to.equal(false)
         },
       })
     })

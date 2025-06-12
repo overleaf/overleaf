@@ -132,6 +132,9 @@ async function viewInvite(req, res, next) {
         logger.error({ err }, 'error getting subscription admin email')
       }
 
+      const usersSubscription =
+        await SubscriptionLocator.promises.getUserSubscriptionStatus(userId)
+
       return res.render('subscriptions/team/invite-managed', {
         inviterName: invite.inviterName,
         inviteToken: invite.token,
@@ -141,6 +144,7 @@ async function viewInvite(req, res, next) {
         groupSSOActive,
         subscriptionId: subscription._id.toString(),
         user: sessionUser,
+        usersSubscription,
       })
     } else {
       let currentManagedUserAdminEmail

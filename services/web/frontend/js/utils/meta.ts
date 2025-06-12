@@ -147,6 +147,7 @@ export interface Meta {
   'ol-isRegisteredViaGoogle': boolean
   'ol-isRestrictedTokenMember': boolean
   'ol-isSaas': boolean
+  'ol-isUserGroupManager': boolean
   'ol-itm_campaign': string
   'ol-itm_content': string
   'ol-itm_referrer': string
@@ -268,6 +269,7 @@ export interface Meta {
   'ol-users': ManagedUser[]
   'ol-usersBestSubscription': ProjectDashboardSubscription | undefined
   'ol-usersEmail': string | undefined
+  'ol-usersSubscription': { personal: boolean; group: boolean }
   'ol-validationStatus': ValidationStatus
   'ol-wikiEnabled': boolean
   'ol-writefullCssUrl': string

@@ -162,6 +162,45 @@ const SubscriptionLocator = {
         }
       : null
   },
+
+  async getUserSubscriptionStatus(userId) {
+    let usersSubscription = { personal: false, group: false }
+
+    if (!userId) {
+      return usersSubscription
+    }
+
+    const memberSubscriptions =
+      await SubscriptionLocator.getMemberSubscriptions(userId)
+
+    const hasActiveGroupSubscription = memberSubscriptions.some(
+      subscription =>
+        subscription.recurlyStatus?.state === 'active' && subscription.groupPlan
+    )
+    if (hasActiveGroupSubscription) {
+      // Member of a group plan
+      usersSubscription = { ...usersSubscription, group: true }
+    }
+
+    const personalSubscription =
+      await SubscriptionLocator.getUsersSubscription(userId)
+
+    if (personalSubscription) {
+      const hasActivePersonalSubscription =
+        personalSubscription.recurlyStatus?.state === 'active'
+      if (hasActivePersonalSubscription) {
+        if (personalSubscription.groupPlan) {
+          // Owner of a group plan
+          usersSubscription = { ...usersSubscription, group: true }
+        } else {
+          // Owner of an individual plan
+          usersSubscription = { ...usersSubscription, personal: true }
+        }
+      }
+    }
+
+    return usersSubscription
+  },
 }
 
 module.exports = {
