@@ -29,7 +29,7 @@ function CompileTimeWarningUpgradePrompt() {
   const warningSegmentation = useMemo(
     () => ({
       content: 'warning',
-      time: warningThreshold,
+      compileTime: warningThreshold,
       ...sharedSegmentation,
     }),
     [sharedSegmentation, warningThreshold]
@@ -38,7 +38,7 @@ function CompileTimeWarningUpgradePrompt() {
   const changingSoonSegmentation = useMemo(
     () => ({
       content: 'changes',
-      time: 10,
+      compileTime: 10,
       ...sharedSegmentation,
     }),
     [sharedSegmentation]
@@ -58,7 +58,7 @@ function CompileTimeWarningUpgradePrompt() {
           ) {
             setShowWarning(true)
             eventTracking.sendMB('compile-time-warning-displayed', {
-              time: warningThreshold,
+              compileTime: warningThreshold,
               isProjectOwner,
             })
           }
@@ -75,13 +75,13 @@ function CompileTimeWarningUpgradePrompt() {
 
   const handleDismissWarning = useCallback(() => {
     eventTracking.sendMB('compile-time-warning-dismissed', {
-      time: warningThreshold,
+      compileTime: warningThreshold,
       isProjectOwner,
     })
     eventTracking.sendMB('paywall-dismiss', {
       'paywall-type': 'compile-time-warning',
       content: 'warning',
-      time: warningThreshold,
+      compileTime: warningThreshold,
       ...sharedSegmentation,
     })
     setShowWarning(false)
@@ -98,7 +98,7 @@ function CompileTimeWarningUpgradePrompt() {
   const handleDismissChangingSoon = useCallback(() => {
     eventTracking.sendMB('paywall-dismiss', {
       'paywall-type': 'compile-time-warning',
-      time: 10,
+      compileTime: 10,
       content: 'changes',
       ...sharedSegmentation,
     })

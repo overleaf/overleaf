@@ -33,7 +33,7 @@ function TimeoutUpgradePromptNew() {
     () => ({
       '10s-timeout-warning': reducedTimeoutWarning,
       'is-owner': isProjectOwner,
-      time: compileTimeout,
+      compileTime: compileTimeout,
     }),
     [isProjectOwner, reducedTimeoutWarning, compileTimeout]
   )
