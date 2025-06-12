@@ -56,6 +56,9 @@ export default function MainLayout() {
             <PanelGroup
               autoSaveId="ide-redesign-editor-and-pdf-panel-group"
               direction="horizontal"
+              className={classNames({
+                hidden: view === 'history',
+              })}
             >
               <Panel
                 id="ide-redesign-editor-panel"
