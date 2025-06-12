@@ -18,11 +18,11 @@ block content
 								.row
 									.col-md-12
 										if user.betaProgram
-											p.text-centered
+											p.text-center
 												strong #{translate("beta_program_already_participating")}.
 											p !{translate("thank_you_for_being_part_of_our_beta_program", {}, ['strong'])}.
 										else
-											p.text-centered
+											p.text-center
 												strong #{translate("beta_program_not_participating")}.
 											p !{translate("beta_program_benefits", {}, ['strong'])}
 
@@ -34,7 +34,7 @@ block content
 											li !{translate("you_can_opt_in_and_out_of_the_program_at_any_time_on_this_page", {}, ['strong'])}.
 										p !{translate("note_features_under_development", {}, ['strong'])}.
 
-								.row.text-centered
+								.row.text-center
 									.col-md-12
 										if user.betaProgram
 											form(

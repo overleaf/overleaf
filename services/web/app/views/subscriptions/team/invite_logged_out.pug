@@ -14,7 +14,7 @@ block content
 						.card-body
 							.page-header
 								// TODO: Remove `team-invite-name` once we fully migrated to Bootstrap 5
-								h1.text-centered !{translate("invited_to_group", {inviterName: inviterName, appName: appName }, [{name: 'span', attrs: {class: 'team-invite-name'}}])}
+								h1.text-center !{translate("invited_to_group", {inviterName: inviterName, appName: appName }, [{name: 'span', attrs: {class: 'team-invite-name'}}])}
 
 							if (accountExists)
 								div
