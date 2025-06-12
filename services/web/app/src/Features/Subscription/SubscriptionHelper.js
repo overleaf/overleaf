@@ -1,11 +1,20 @@
 const { formatCurrency } = require('../../util/currency')
 const GroupPlansData = require('./GroupPlansData')
+const { isStandaloneAiAddOnPlanCode } = require('./PaymentProviderEntities')
 
 /**
  * If the user changes to a less expensive plan, we shouldn't apply the change immediately.
  * This is to avoid unintended/artifical credits on users Recurly accounts.
  */
 function shouldPlanChangeAtTermEnd(oldPlan, newPlan) {
+  if (
+    oldPlan.annual === newPlan.annual &&
+    isStandaloneAiAddOnPlanCode(oldPlan.planCode) &&
+    !isStandaloneAiAddOnPlanCode(newPlan.planCode)
+  ) {
+    // changing from an standalone AI add-on plan to a non-AI plan should not be considered a downgrade
+    return false
+  }
   return oldPlan.price_in_cents > newPlan.price_in_cents
 }
 

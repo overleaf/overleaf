@@ -11,6 +11,7 @@ const {
   PaymentProviderSubscription,
   PaymentProviderSubscriptionAddOnUpdate,
 } = require('../../../../app/src/Features/Subscription/PaymentProviderEntities')
+const SubscriptionHelper = require('../../../../app/src/Features/Subscription/SubscriptionHelper')
 
 const MODULE_PATH =
   '../../../../app/src/Features/Subscription/PaymentProviderEntities'
@@ -32,6 +33,7 @@ describe('PaymentProviderEntities', function () {
         requires: {
           '@overleaf/settings': this.Settings,
           './Errors': Errors,
+          './SubscriptionHelper': SubscriptionHelper,
         },
       })
     })
@@ -154,7 +156,7 @@ describe('PaymentProviderEntities', function () {
           expect(changeRequest).to.deep.equal(
             new PaymentProviderSubscriptionChangeRequest({
               subscription: this.subscription,
-              timeframe: 'term_end',
+              timeframe: 'now',
               planCode: 'cheap-plan',
               addOnUpdates: [
                 new PaymentProviderSubscriptionAddOnUpdate({

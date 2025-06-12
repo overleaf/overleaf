@@ -8,7 +8,8 @@
 const OError = require('@overleaf/o-error')
 const { DuplicateAddOnError, AddOnNotPresentError } = require('./Errors')
 const PlansLocator = require('./PlansLocator')
-const SubscriptionHelper = require('./SubscriptionHelper')
+
+let SubscriptionHelper = null // Work around circular import (loaded at the bottom of the file)
 
 const AI_ADD_ON_CODE = 'assistant'
 const MEMBERS_LIMIT_ADD_ON_CODE = 'additional-license'
@@ -636,3 +637,5 @@ module.exports = {
   subscriptionChangeIsAiAssistUpgrade,
   PaymentProviderImmediateCharge,
 }
+
+SubscriptionHelper = require('./SubscriptionHelper')
