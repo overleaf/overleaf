@@ -409,6 +409,15 @@ async function projectListPage(req, res, next) {
     'papers-notification-banner'
   )
 
+  const customerIoEnabled =
+    await SplitTestHandler.promises.hasUserBeenAssignedToVariant(
+      req,
+      userId,
+      'customer-io-trial-conversion',
+      'enabled',
+      true
+    )
+
   res.render('project/list-react', {
     title: 'your_projects',
     usersBestSubscription,
@@ -440,6 +449,7 @@ async function projectListPage(req, res, next) {
       })),
     hasIndividualPaidSubscription,
     userRestrictions: Array.from(req.userRestrictions || []),
+    customerIoEnabled,
   })
 }
 

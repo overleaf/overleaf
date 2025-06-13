@@ -98,6 +98,7 @@ describe('ProjectListController', function () {
     ctx.SplitTestHandler = {
       promises: {
         getAssignment: sinon.stub().resolves({ variant: 'default' }),
+        hasUserBeenAssignedToVariant: sinon.stub().resolves(false),
       },
     }
     ctx.SplitTestSessionHandler = {
