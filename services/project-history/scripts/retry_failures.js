@@ -1,5 +1,5 @@
-const RetryManager = require('../app/js/RetryManager.js')
-const minimist = require('minimist')
+import * as RetryManager from '../app/js/RetryManager.js'
+import minimist from 'minimist'
 
 const args = minimist(process.argv.slice(2), {
   string: ['failureType', 'timeout', 'limit'],
