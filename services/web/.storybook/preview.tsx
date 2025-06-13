@@ -122,6 +122,12 @@ const preview: Preview = {
       // render stories in iframes, to isolate modals
       inlineStories: false,
     },
+    options: {
+      storySort: {
+        method: 'alphabetical',
+        order: ['Shared'],
+      },
+    },
   },
   globalTypes: {
     theme: {
