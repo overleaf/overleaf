@@ -25,10 +25,10 @@ services:
     env_file:
       - dev.env
     environment:
-      - DOCKER_RUNNER=true
       - TEXLIVE_IMAGE=texlive-full # docker build texlive -t texlive-full
-      - COMPILES_HOST_DIR=${PWD}/compiles
-      - OUTPUT_HOST_DIR=${PWD}/output
+      - SANDBOXED_COMPILES=true
+      - SANDBOXED_COMPILES_HOST_DIR_COMPILES=${PWD}/compiles
+      - SANDBOXED_COMPILES_HOST_DIR_OUTPUT=${PWD}/output
     user: root
     volumes:
       - ${PWD}/compiles:/overleaf/services/clsi/compiles

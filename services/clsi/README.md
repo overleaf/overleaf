@@ -19,10 +19,10 @@ The CLSI can be configured through the following environment variables:
 * `ALLOWED_IMAGES` - Space separated list of allowed Docker TeX Live images
 * `CATCH_ERRORS` - Set to `true` to log uncaught exceptions
 * `COMPILE_GROUP_DOCKER_CONFIGS` - JSON string of Docker configs for compile groups
-* `COMPILES_HOST_DIR` - Working directory for LaTeX compiles
-* `OUTPUT_HOST_DIR` - Output directory for LaTeX compiles
+* `SANDBOXED_COMPILES` - Set to true to use sibling containers
+* `SANDBOXED_COMPILES_HOST_DIR_COMPILES` - Working directory for LaTeX compiles
+* `SANDBOXED_COMPILES_HOST_DIR_OUTPUT` - Output directory for LaTeX compiles
 * `COMPILE_SIZE_LIMIT` - Sets the body-parser [limit](https://github.com/expressjs/body-parser#limit)
-* `DOCKER_RUNNER` - Set to true to use sibling containers
 * `DOCKER_RUNTIME` -
 * `FILESTORE_DOMAIN_OVERRIDE` - The url for the filestore service e.g.`http://$FILESTORE_HOST:3009`
 * `FILESTORE_PARALLEL_FILE_DOWNLOADS` - Number of parallel file downloads
@@ -63,10 +63,10 @@ Then start the Docker container:
 docker run --rm \
   -p 127.0.0.1:3013:3013 \
   -e LISTEN_ADDRESS=0.0.0.0 \
-  -e DOCKER_RUNNER=true \
+  -e SANDBOXED_COMPILES=true \
   -e TEXLIVE_IMAGE=texlive/texlive \
   -e TEXLIVE_IMAGE_USER=root \
-  -e COMPILES_HOST_DIR="$PWD/compiles" \
+  -e SANDBOXED_COMPILES_HOST_DIR_COMPILES="$PWD/compiles" \
   -v "$PWD/compiles:/overleaf/services/clsi/compiles" \
   -v "$PWD/cache:/overleaf/services/clsi/cache" \
   -v /var/run/docker.sock:/var/run/docker.sock \
