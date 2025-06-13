@@ -428,7 +428,8 @@ describe('UpdatesProcessor', function () {
       })
 
       it('should not compress updates', function () {
-        this.UpdateCompressor.compressRawUpdates.should.not.have.been.called
+        this.UpdateCompressor.compressRawUpdatesWithMetricsCb.should.not.have
+          .been.called
       })
 
       it('should not create any blobs for the updates', function () {
