@@ -546,7 +546,10 @@ export function _processUpdates(
       }
       if (filteredUpdates.length === 0) {
         // return early if there are no updates to apply
-        return SyncManager.setResyncState(projectId, newSyncState, callback)
+        return SyncManager.setResyncState(projectId, newSyncState, err => {
+          if (err) return callback(err)
+          callback(null, { resyncNeeded: false })
+        })
       }
       // only make request to history service if we have actual updates to process
       _getMostRecentVersionWithDebug(
