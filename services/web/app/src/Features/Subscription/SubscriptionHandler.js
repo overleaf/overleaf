@@ -384,7 +384,7 @@ async function revertPlanChange(
     throw new IndeterminateInvoiceError(
       'cant determine invoice to fail for plan revert',
       {
-        info: { recurlySubscriptionId },
+        recurlySubscriptionId,
       }
     )
   }

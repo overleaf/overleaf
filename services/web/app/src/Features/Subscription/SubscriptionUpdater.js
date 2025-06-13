@@ -522,7 +522,7 @@ async function setRestorePoint(subscriptionId, planCode, addOns, consumed) {
   }
 
   if (consumed) {
-    update.$inc = { revertedDueToFailedPayment: 1 }
+    update.$inc = { timesRevertedDueToFailedPayment: 1 }
   }
 
   await Subscription.updateOne({ _id: subscriptionId }, update).exec()

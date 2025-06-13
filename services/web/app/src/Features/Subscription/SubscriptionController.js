@@ -36,6 +36,7 @@ const PermissionsManager = require('../Authorization/PermissionsManager')
 const {
   sanitizeSessionUserForFrontEnd,
 } = require('../../infrastructure/FrontEndUser')
+const { IndeterminateInvoiceError } = require('../Errors/Errors')
 
 /**
  * @import { SubscriptionChangeDescription } from '../../../../types/subscription/subscription-change-preview'
@@ -622,6 +623,13 @@ function recurlyCallback(req, res, next) {
           eventData.transaction.subscription_id,
           lastSubscription,
           function (err) {
+            if (err instanceof IndeterminateInvoiceError) {
+              logger.warn(
+                { recurlySubscriptionId: err.info.recurlySubscriptionId },
+                'could not determine invoice to fail for subscription'
+              )
+              return res.sendStatus(200)
+            }
             if (err) {
               return next(err)
             }
