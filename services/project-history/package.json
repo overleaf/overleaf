@@ -25,6 +25,7 @@
     "@overleaf/promise-utils": "*",
     "@overleaf/redis-wrapper": "*",
     "@overleaf/settings": "*",
+    "@overleaf/stream-utils": "*",
     "async": "^3.2.5",
     "aws-sdk": "^2.650.0",
     "body-parser": "^1.20.3",

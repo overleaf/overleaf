@@ -22,7 +22,7 @@ describe('UpdatesProcessor', function () {
     }
     this.RedisManager = {}
     this.UpdateCompressor = {
-      compressRawUpdates: sinon.stub(),
+      compressRawUpdatesWithMetricsCb: sinon.stub(),
     }
     this.UpdateTranslator = {
       convertToChanges: sinon.stub(),
@@ -299,7 +299,10 @@ describe('UpdatesProcessor', function () {
         null,
         this.expandedUpdates
       )
-      this.UpdateCompressor.compressRawUpdates.returns(this.compressedUpdates)
+      this.UpdateCompressor.compressRawUpdatesWithMetricsCb.yields(
+        null,
+        this.compressedUpdates
+      )
       this.BlobManager.createBlobsForUpdates.callsArgWith(
         4,
         null,
@@ -347,7 +350,7 @@ describe('UpdatesProcessor', function () {
       })
 
       it('should compress updates', function () {
-        this.UpdateCompressor.compressRawUpdates.should.have.been.calledWith(
+        this.UpdateCompressor.compressRawUpdatesWithMetricsCb.should.have.been.calledWith(
           this.expandedUpdates
         )
       })

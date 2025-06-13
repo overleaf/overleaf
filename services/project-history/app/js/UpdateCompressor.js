@@ -1,8 +1,15 @@
 // @ts-check
 
+import Metrics from '@overleaf/metrics'
 import OError from '@overleaf/o-error'
 import DMP from 'diff-match-patch'
 import { EditOperationBuilder } from 'overleaf-editor-core'
+import zlib from 'node:zlib'
+import { ReadableString, WritableBuffer } from '@overleaf/stream-utils'
+import Stream from 'node:stream'
+import logger from '@overleaf/logger'
+import { callbackify } from '@overleaf/promise-utils'
+import Settings from '@overleaf/settings'
 
 /**
  * @import { DeleteOp, InsertOp, Op, Update } from './types'
@@ -178,6 +185,66 @@ export function concatUpdatesWithSameVersion(updates) {
     }
   }
   return concattedUpdates
+}
+
+async function estimateStorage(updates) {
+  const blob = JSON.stringify(updates)
+  const bytes = Buffer.from(blob).byteLength
+  const read = new ReadableString(blob)
+  const compress = zlib.createGzip()
+  const write = new WritableBuffer()
+  await Stream.promises.pipeline(read, compress, write)
+  const bytesGz = write.size()
+  return { bytes, bytesGz, nUpdates: updates.length }
+}
+
+/**
+ * @param {Update[]} rawUpdates
+ * @param {string} projectId
+ * @param {import("./Profiler").Profiler} profile
+ * @return {Promise<Update[]>}
+ */
+async function compressRawUpdatesWithMetrics(rawUpdates, projectId, profile) {
+  if (100 * Math.random() > Settings.estimateCompressionSample) {
+    return compressRawUpdatesWithProfile(rawUpdates, projectId, profile)
+  }
+  const before = await estimateStorage(rawUpdates)
+  profile.log('estimateRawUpdatesSize')
+  const updates = compressRawUpdatesWithProfile(rawUpdates, projectId, profile)
+  const after = await estimateStorage(updates)
+  for (const [path, values] of Object.entries({ before, after })) {
+    for (const [method, v] of Object.entries(values)) {
+      Metrics.summary('updates_compression_estimate', v, { path, method })
+    }
+  }
+  for (const method of Object.keys(before)) {
+    const percentage = Math.ceil(100 * (after[method] / before[method]))
+    Metrics.summary('updates_compression_percentage', percentage, { method })
+  }
+  profile.log('estimateCompressedUpdatesSize')
+  return updates
+}
+
+export const compressRawUpdatesWithMetricsCb = callbackify(
+  compressRawUpdatesWithMetrics
+)
+
+/**
+ * @param {Update[]} rawUpdates
+ * @param {string} projectId
+ * @param {import("./Profiler").Profiler} profile
+ * @return {Update[]}
+ */
+function compressRawUpdatesWithProfile(rawUpdates, projectId, profile) {
+  const updates = compressRawUpdates(rawUpdates)
+  const timeTaken = profile.log('compressRawUpdates').getTimeDelta()
+  if (timeTaken >= 1000) {
+    logger.debug(
+      { projectId, updates: rawUpdates, timeTaken },
+      'slow compression of raw updates'
+    )
+  }
+  return updates
 }
 
 export function compressRawUpdates(rawUpdates) {

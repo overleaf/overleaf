@@ -593,17 +593,17 @@ export function _processUpdates(
                   return cb(err)
                 }
                 profile.log('skipAlreadyAppliedUpdates')
-                const compressedUpdates =
-                  UpdateCompressor.compressRawUpdates(unappliedUpdates)
-                const timeTaken = profile
-                  .log('compressRawUpdates')
-                  .getTimeDelta()
-                if (timeTaken >= 1000) {
-                  logger.debug(
-                    { projectId, updates: unappliedUpdates, timeTaken },
-                    'slow compression of raw updates'
-                  )
-                }
+                cb(null, unappliedUpdates)
+              },
+              (unappliedUpdates, cb) => {
+                UpdateCompressor.compressRawUpdatesWithMetricsCb(
+                  unappliedUpdates,
+                  projectId,
+                  profile,
+                  cb
+                )
+              },
+              (compressedUpdates, cb) => {
                 cb = profile.wrap('createBlobs', cb)
                 BlobManager.createBlobsForUpdates(
                   projectId,
