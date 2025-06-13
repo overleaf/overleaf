@@ -9,6 +9,12 @@ const tk = require('timekeeper')
 const moment = require('moment')
 const { expect } = require('chai')
 
+function nestedMapWithSetToObject(m) {
+  return Object.fromEntries(
+    Array.from(m.entries()).map(([key, set]) => [key, Array.from(set)])
+  )
+}
+
 describe('RestoreManager', function () {
   beforeEach(function () {
     tk.freeze(Date.now()) // freeze the time for these tests
@@ -28,7 +34,7 @@ describe('RestoreManager', function () {
             promises: { flushProjectToMongo: sinon.stub().resolves() },
           }),
         '../Docstore/DocstoreManager': (this.DocstoreManager = {
-          promises: {},
+          promises: { getCommentThreadIds: sinon.stub().resolves({}) },
         }),
         '../Chat/ChatApiHandler': (this.ChatApiHandler = { promises: {} }),
         '../Chat/ChatManager': (this.ChatManager = { promises: {} }),
@@ -269,13 +275,9 @@ describe('RestoreManager', function () {
           { op: { t: 'single-comment', p: 10, c: 'bar' } },
         ]
         this.ProjectLocator.promises.findElementByPath = sinon.stub().rejects()
-        this.DocstoreManager.promises.getAllRanges = sinon.stub().resolves([
-          {
-            ranges: {
-              comments: this.comments.slice(0, 1),
-            },
-          },
-        ])
+        this.DocstoreManager.promises.getCommentThreadIds = sinon
+          .stub()
+          .resolves({ 'other-doc': [this.comments[0].op.t] })
         this.ChatApiHandler.promises.duplicateCommentThreads = sinon
           .stub()
           .resolves({
@@ -355,7 +357,7 @@ describe('RestoreManager', function () {
           expect(
             this.DocumentUpdaterHandler.promises.flushProjectToMongo
           ).to.have.been.calledBefore(
-            this.DocstoreManager.promises.getAllRanges
+            this.DocstoreManager.promises.getCommentThreadIds
           )
         })
 
@@ -451,19 +453,11 @@ describe('RestoreManager', function () {
           )
         })
 
-        it('should delete the document before flushing', function () {
-          expect(
-            this.EditorController.promises.deleteEntity
-          ).to.have.been.calledBefore(
-            this.DocumentUpdaterHandler.promises.flushProjectToMongo
-          )
-        })
-
         it('should flush the document before fetching ranges', function () {
           expect(
             this.DocumentUpdaterHandler.promises.flushProjectToMongo
           ).to.have.been.calledBefore(
-            this.DocstoreManager.promises.getAllRanges
+            this.DocstoreManager.promises.getCommentThreadIds
           )
         })
 
@@ -499,6 +493,143 @@ describe('RestoreManager', function () {
           )
         })
       })
+
+      describe('with comments in same doc', function () {
+        // copy of the above, addition: inject and later inspect threadIds set
+        beforeEach(async function () {
+          this.ProjectLocator.promises.findElementByPath = sinon
+            .stub()
+            .resolves({ type: 'doc', element: { _id: 'mock-file-id' } })
+          this.EditorController.promises.deleteEntity = sinon.stub().resolves()
+          this.ChatApiHandler.promises.generateThreadData = sinon
+            .stub()
+            .resolves(
+              (this.threadData = {
+                [this.comments[0].op.t]: {
+                  messages: [
+                    {
+                      content: 'message',
+                      timestamp: '2024-01-01T00:00:00.000Z',
+                      user_id: 'user-1',
+                    },
+                  ],
+                },
+                [this.comments[1].op.t]: {
+                  messages: [
+                    {
+                      content: 'other message',
+                      timestamp: '2024-01-01T00:00:00.000Z',
+                      user_id: 'user-1',
+                    },
+                  ],
+                },
+              })
+            )
+
+          this.threadIds = new Map([
+            [
+              'mock-file-id',
+              new Set([this.comments[0].op.t, this.comments[1].op.t]),
+            ],
+          ])
+          // Comments are updated in-place. Look up threads before reverting.
+          this.afterThreadIds = {
+            // mock-file-id removed
+            [this.addedFile._id]: [
+              this.comments[0].op.t,
+              this.comments[1].op.t,
+            ],
+          }
+          this.data = await this.RestoreManager.promises._revertSingleFile(
+            this.user_id,
+            this.project_id,
+            this.version,
+            this.pathname,
+            this.threadIds
+          )
+        })
+
+        it('should import the file with original comments minus the deleted one', function () {
+          expect(
+            this.EditorController.promises.addDocWithRanges
+          ).to.have.been.calledWith(
+            this.project_id,
+            this.folder_id,
+            'foo.tex',
+            ['foo', 'bar', 'baz'],
+            {
+              changes: this.tracked_changes,
+              comments: this.comments.slice(0, 2),
+            },
+            {
+              kind: 'file-restore',
+              path: this.pathname,
+              version: this.version,
+              timestamp: new Date(this.endTs).toISOString(),
+            }
+          )
+        })
+
+        it('should add the seen thread ids to the map', function () {
+          expect(nestedMapWithSetToObject(this.threadIds)).to.deep.equal(
+            this.afterThreadIds
+          )
+        })
+      })
+
+      describe('with remapped comments during revertProject', function () {
+        // copy of the above, addition: inject and later inspect threadIds set
+        beforeEach(async function () {
+          this.ProjectLocator.promises.findElementByPath = sinon
+            .stub()
+            .resolves({ type: 'doc', element: { _id: 'mock-file-id' } })
+          this.EditorController.promises.deleteEntity = sinon.stub().resolves()
+
+          this.threadIds = new Map([
+            ['other-doc', new Set([this.comments[0].op.t])],
+          ])
+          // Comments are updated in-place. Look up threads before reverting.
+          this.afterThreadIds = {
+            // mock-file-id removed
+            'other-doc': [this.comments[0].op.t],
+            [this.addedFile._id]: [
+              this.remappedComments[0].op.t,
+              this.remappedComments[1].op.t,
+            ],
+          }
+          this.data = await this.RestoreManager.promises._revertSingleFile(
+            this.user_id,
+            this.project_id,
+            this.version,
+            this.pathname,
+            this.threadIds
+          )
+        })
+
+        it('should import the file', function () {
+          expect(
+            this.EditorController.promises.addDocWithRanges
+          ).to.have.been.calledWith(
+            this.project_id,
+            this.folder_id,
+            'foo.tex',
+            ['foo', 'bar', 'baz'],
+            { changes: this.tracked_changes, comments: this.remappedComments },
+            {
+              kind: 'file-restore',
+              path: this.pathname,
+              version: this.version,
+              timestamp: new Date(this.endTs).toISOString(),
+            }
+          )
+        })
+
+        it('should add the seen thread ids to the map', function () {
+          expect(nestedMapWithSetToObject(this.threadIds)).to.deep.equal(
+            this.afterThreadIds
+          )
+        })
+      })
     })
 
     describe('reverting a file or document with metadata', function () {
@@ -524,7 +655,9 @@ describe('RestoreManager', function () {
           .stub()
           .resolves((this.addedFile = { _id: 'mock-doc-id', type: 'doc' }))
 
-        this.DocstoreManager.promises.getAllRanges = sinon.stub().resolves([])
+        this.DocstoreManager.promises.getCommentThreadIds = sinon
+          .stub()
+          .resolves({})
         this.ChatApiHandler.promises.generateThreadData = sinon
           .stub()
           .resolves({})
@@ -741,7 +874,7 @@ describe('RestoreManager', function () {
       this.ProjectGetter.promises.getProject
         .withArgs(this.project_id)
         .resolves({ overleaf: { history: { rangesSupportEnabled: true } } })
-      this.RestoreManager.promises.revertFile = sinon.stub().resolves()
+      this.RestoreManager.promises._revertSingleFile = sinon.stub().resolves()
       this.RestoreManager.promises._getProjectPathsAtVersion = sinon
         .stub()
         .resolves([])
@@ -832,21 +965,27 @@ describe('RestoreManager', function () {
       })
 
       it('should revert the old files', function () {
-        expect(this.RestoreManager.promises.revertFile).to.have.been.calledWith(
+        expect(
+          this.RestoreManager.promises._revertSingleFile
+        ).to.have.been.calledWith(
           this.user_id,
           this.project_id,
           this.version,
           'main.tex'
         )
 
-        expect(this.RestoreManager.promises.revertFile).to.have.been.calledWith(
+        expect(
+          this.RestoreManager.promises._revertSingleFile
+        ).to.have.been.calledWith(
           this.user_id,
           this.project_id,
           this.version,
           'figures/image.png'
         )
 
-        expect(this.RestoreManager.promises.revertFile).to.have.been.calledWith(
+        expect(
+          this.RestoreManager.promises._revertSingleFile
+        ).to.have.been.calledWith(
           this.user_id,
           this.project_id,
           this.version,
@@ -856,7 +995,7 @@ describe('RestoreManager', function () {
 
       it('should not revert the current files', function () {
         expect(
-          this.RestoreManager.promises.revertFile
+          this.RestoreManager.promises._revertSingleFile
         ).to.not.have.been.calledWith(
           this.user_id,
           this.project_id,

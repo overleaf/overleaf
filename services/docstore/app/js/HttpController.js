@@ -83,6 +83,12 @@ async function getAllRanges(req, res) {
   res.json(_buildDocsArrayView(projectId, docs))
 }
 
+async function getCommentThreadIds(req, res) {
+  const { project_id: projectId } = req.params
+  const threadIds = await DocManager.getCommentThreadIds(projectId)
+  res.json(threadIds)
+}
+
 async function getTrackedChangesUserIds(req, res) {
   const { project_id: projectId } = req.params
   const userIds = await DocManager.getTrackedChangesUserIds(projectId)
@@ -239,6 +245,7 @@ module.exports = {
   getAllDeletedDocs: expressify(getAllDeletedDocs),
   getAllRanges: expressify(getAllRanges),
   getTrackedChangesUserIds: expressify(getTrackedChangesUserIds),
+  getCommentThreadIds: expressify(getCommentThreadIds),
   projectHasRanges: expressify(projectHasRanges),
   updateDoc: expressify(updateDoc),
   patchDoc: expressify(patchDoc),

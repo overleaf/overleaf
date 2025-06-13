@@ -100,6 +100,16 @@ module.exports = DocstoreClient = {
     )
   },
 
+  getCommentThreadIds(projectId, callback) {
+    request.get(
+      {
+        url: `http://127.0.0.1:${settings.internal.docstore.port}/project/${projectId}/comment-thread-ids`,
+        json: true,
+      },
+      callback
+    )
+  },
+
   getTrackedChangesUserIds(projectId, callback) {
     request.get(
       {

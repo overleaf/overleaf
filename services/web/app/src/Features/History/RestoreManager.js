@@ -18,6 +18,12 @@ const OError = require('@overleaf/o-error')
 const ProjectGetter = require('../Project/ProjectGetter')
 const ProjectEntityHandler = require('../Project/ProjectEntityHandler')
 
+async function getCommentThreadIds(projectId) {
+  await DocumentUpdaterHandler.promises.flushProjectToMongo(projectId)
+  const raw = await DocstoreManager.promises.getCommentThreadIds(projectId)
+  return new Map(Object.entries(raw).map(([doc, ids]) => [doc, new Set(ids)]))
+}
+
 const RestoreManager = {
   async restoreFileFromV2(userId, projectId, version, pathname) {
     const fsPath = await RestoreManager._writeFileVersionToDisk(
@@ -52,6 +58,25 @@ const RestoreManager = {
   },
 
   async revertFile(userId, projectId, version, pathname, options = {}) {
+    const threadIds = await getCommentThreadIds(projectId)
+    return await RestoreManager._revertSingleFile(
+      userId,
+      projectId,
+      version,
+      pathname,
+      threadIds,
+      options
+    )
+  },
+
+  async _revertSingleFile(
+    userId,
+    projectId,
+    version,
+    pathname,
+    threadIds,
+    options = {}
+  ) {
     const project = await ProjectGetter.promises.getProject(projectId, {
       overleaf: true,
     })
@@ -115,6 +140,7 @@ const RestoreManager = {
         origin,
         userId
       )
+      threadIds.delete(file.element._id.toString())
     }
 
     const { metadata } = await RestoreManager._getMetadataFromHistory(
@@ -154,22 +180,12 @@ const RestoreManager = {
     const documentCommentIds = new Set(
       ranges.comments?.map(({ op: { t } }) => t)
     )
-
-    await DocumentUpdaterHandler.promises.flushProjectToMongo(projectId)
-
-    const docsWithRanges =
-      await DocstoreManager.promises.getAllRanges(projectId)
-
-    const nonOrphanedThreadIds = new Set()
-    for (const { ranges } of docsWithRanges) {
-      for (const comment of ranges.comments ?? []) {
-        nonOrphanedThreadIds.add(comment.op.t)
+    const commentIdsToDuplicate = Array.from(documentCommentIds).filter(id => {
+      for (const ids of threadIds.values()) {
+        if (ids.has(id)) return true
       }
-    }
-
-    const commentIdsToDuplicate = Array.from(documentCommentIds).filter(id =>
-      nonOrphanedThreadIds.has(id)
-    )
+      return false
+    })
 
     const newRanges = { changes: ranges.changes, comments: [] }
 
@@ -257,6 +273,11 @@ const RestoreManager = {
       origin,
       userId
     )
+    // For revertProject: The next doc that gets reverted will need to duplicate all the threads seen here.
+    threadIds.set(
+      _id.toString(),
+      new Set(newRanges.comments.map(({ op: { t } }) => t))
+    )
 
     return {
       _id,
@@ -319,11 +340,17 @@ const RestoreManager = {
       version,
       timestamp: new Date(updateAtVersion.meta.end_ts).toISOString(),
     }
+    const threadIds = await getCommentThreadIds(projectId)
 
     for (const pathname of pathsAtPastVersion) {
-      await RestoreManager.revertFile(userId, projectId, version, pathname, {
-        origin,
-      })
+      await RestoreManager._revertSingleFile(
+        userId,
+        projectId,
+        version,
+        pathname,
+        threadIds,
+        { origin }
+      )
     }
 
     const entitiesAtLiveVersion =

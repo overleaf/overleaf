@@ -132,6 +132,22 @@ const DocManager = {
     return docs
   },
 
+  async getCommentThreadIds(projectId) {
+    const docs = await DocManager.getAllNonDeletedDocs(projectId, {
+      _id: true,
+      ranges: true,
+    })
+    const byDoc = new Map()
+    for (const doc of docs) {
+      const ids = new Set()
+      for (const comment of doc.ranges?.comments || []) {
+        ids.add(comment.op.t)
+      }
+      if (ids.size > 0) byDoc.set(doc._id.toString(), Array.from(ids))
+    }
+    return Object.fromEntries(byDoc.entries())
+  },
+
   async getTrackedChangesUserIds(projectId) {
     const docs = await DocManager.getAllNonDeletedDocs(projectId, {
       ranges: true,

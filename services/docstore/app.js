@@ -51,6 +51,10 @@ app.get('/project/:project_id/doc-deleted', HttpController.getAllDeletedDocs)
 app.get('/project/:project_id/doc', HttpController.getAllDocs)
 app.get('/project/:project_id/ranges', HttpController.getAllRanges)
 app.get(
+  '/project/:project_id/comment-thread-ids',
+  HttpController.getCommentThreadIds
+)
+app.get(
   '/project/:project_id/tracked-changes-user-ids',
   HttpController.getTrackedChangesUserIds
 )

@@ -90,6 +90,14 @@ function getAllDeletedDocs(projectId, callback) {
 /**
  * @param {string} projectId
  */
+async function getCommentThreadIds(projectId) {
+  const url = `${settings.apis.docstore.url}/project/${projectId}/comment-thread-ids`
+  return fetchJson(url, { signal: AbortSignal.timeout(TIMEOUT) })
+}
+
+/**
+ * @param {string} projectId
+ */
 async function getTrackedChangesUserIds(projectId) {
   const url = `${settings.apis.docstore.url}/project/${projectId}/tracked-changes-user-ids`
   return fetchJson(url, { signal: AbortSignal.timeout(TIMEOUT) })
@@ -301,6 +309,7 @@ module.exports = {
   getAllDeletedDocs,
   getAllRanges,
   getDoc,
+  getCommentThreadIds: callbackify(getCommentThreadIds),
   getTrackedChangesUserIds: callbackify(getTrackedChangesUserIds),
   isDocDeleted,
   updateDoc,
@@ -314,6 +323,7 @@ module.exports = {
     getAllDeletedDocs: promisify(getAllDeletedDocs),
     getAllRanges: promisify(getAllRanges),
     getDoc: promisifyMultiResult(getDoc, ['lines', 'rev', 'version', 'ranges']),
+    getCommentThreadIds,
     getTrackedChangesUserIds,
     isDocDeleted: promisify(isDocDeleted),
     updateDoc: promisifyMultiResult(updateDoc, ['modified', 'rev']),
