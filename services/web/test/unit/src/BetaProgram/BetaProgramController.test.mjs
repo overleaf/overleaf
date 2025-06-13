@@ -80,12 +80,16 @@ describe('BetaProgramController', function () {
 
   describe('optIn', function () {
     it("should redirect to '/beta/participate'", async function (ctx) {
-      await new Promise(resolve => {
+      await new Promise((resolve, reject) => {
         ctx.res.callback = () => {
           ctx.res.redirectedTo.should.equal('/beta/participate')
           resolve()
         }
-        ctx.BetaProgramController.optIn(ctx.req, ctx.res)
+        ctx.BetaProgramController.optIn(
+          ctx.req,
+          ctx.res,
+          ctx.rejectOnError(reject)
+        )
       })
     })
 
@@ -134,37 +138,49 @@ describe('BetaProgramController', function () {
 
   describe('optOut', function () {
     it("should redirect to '/beta/participate'", async function (ctx) {
-      await new Promise(resolve => {
+      await new Promise((resolve, reject) => {
         ctx.res.callback = () => {
           expect(ctx.res.redirectedTo).to.equal('/beta/participate')
           resolve()
         }
-        ctx.BetaProgramController.optOut(ctx.req, ctx.res)
+        ctx.BetaProgramController.optOut(
+          ctx.req,
+          ctx.res,
+          ctx.rejectOnError(reject)
+        )
       })
     })
 
     it('should not call next with an error', async function (ctx) {
-      await new Promise(resolve => {
+      await new Promise((resolve, reject) => {
         ctx.res.callback = () => {
           ctx.next.callCount.should.equal(0)
           resolve()
         }
-        ctx.BetaProgramController.optOut(ctx.req, ctx.res)
+        ctx.BetaProgramController.optOut(
+          ctx.req,
+          ctx.res,
+          ctx.rejectOnError(reject)
+        )
       })
     })
 
     it('should call BetaProgramHandler.optOut', async function (ctx) {
-      await new Promise(resolve => {
+      await new Promise((resolve, reject) => {
         ctx.res.callback = () => {
           ctx.BetaProgramHandler.promises.optOut.callCount.should.equal(1)
           resolve()
         }
-        ctx.BetaProgramController.optOut(ctx.req, ctx.res)
+        ctx.BetaProgramController.optOut(
+          ctx.req,
+          ctx.res,
+          ctx.rejectOnError(reject)
+        )
       })
     })
 
     it('should invoke the session maintenance', async function (ctx) {
-      await new Promise(resolve => {
+      await new Promise((resolve, reject) => {
         ctx.res.callback = () => {
           ctx.SplitTestSessionHandler.promises.sessionMaintenance.should.have.been.calledWith(
             ctx.req,
@@ -172,7 +188,11 @@ describe('BetaProgramController', function () {
           )
           resolve()
         }
-        ctx.BetaProgramController.optOut(ctx.req, ctx.res)
+        ctx.BetaProgramController.optOut(
+          ctx.req,
+          ctx.res,
+          ctx.rejectOnError(reject)
+        )
       })
     })
 
@@ -208,12 +228,16 @@ describe('BetaProgramController', function () {
     })
 
     it('should render the opt-in page', async function (ctx) {
-      await new Promise(resolve => {
+      await new Promise((resolve, reject) => {
         ctx.res.callback = () => {
           expect(ctx.res.renderedTemplate).to.equal('beta_program/opt_in')
           resolve()
         }
-        ctx.BetaProgramController.optInPage(ctx.req, ctx.res)
+        ctx.BetaProgramController.optInPage(
+          ctx.req,
+          ctx.res,
+          ctx.rejectOnError(reject)
+        )
       })
     })
 

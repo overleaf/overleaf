@@ -36,6 +36,14 @@ vi.mock('@overleaf/logger', async () => {
 })
 
 beforeEach(ctx => {
+  // This function is a utility to duplicate the behaviour of passing `done` in place of `next` in an express route handler.
+  ctx.rejectOnError = reject => {
+    return err => {
+      if (err) {
+        reject(err)
+      }
+    }
+  }
   ctx.logger = logger
 })
 
