@@ -1096,14 +1096,7 @@ export const { Doc } = (() => {
           if (!msg.error) {
             if (msg.op === undefined && msg.v !== undefined) {
               if (msg.v < this.version) {
-                postJSON('/error/client', {
-                  body: {
-                    error: {
-                      message: 'out-of-order-ack-ignored'
-                    },
-                    meta: { msg, version: this.version }
-                  }
-                })
+                debugConsole.warn('Received an ack for an op with an outdated version.')
                 return
               }
             } else {
