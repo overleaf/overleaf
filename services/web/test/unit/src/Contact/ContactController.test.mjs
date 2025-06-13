@@ -88,7 +88,7 @@ describe('ContactController', function () {
       ctx.ContactController.getContacts(ctx.req, ctx.res)
     })
 
-    it('should populate the users contacts ids', async function(ctx) {
+    it('should populate the users contacts ids', async function (ctx) {
       await new Promise(resolve => {
         ctx.res.callback = () => {
           expect(ctx.UserGetter.promises.getUsers).to.have.been.calledWith(
@@ -102,11 +102,11 @@ describe('ContactController', function () {
           )
           resolve()
         }
-        ctx.ContactController.getContacts(ctx.req, ctx.res, resolve)
-      });
+        ctx.ContactController.getContacts(ctx.req, ctx.res)
+      })
     })
 
-    it('should fire the getContact module hook', async function(ctx) {
+    it('should fire the getContact module hook', async function (ctx) {
       await new Promise(resolve => {
         ctx.res.callback = () => {
           expect(ctx.Modules.promises.hooks.fire).to.have.been.calledWith(
@@ -115,11 +115,11 @@ describe('ContactController', function () {
           )
           resolve()
         }
-        ctx.ContactController.getContacts(ctx.req, ctx.res, resolve)
-      });
+        ctx.ContactController.getContacts(ctx.req, ctx.res)
+      })
     })
 
-    it('should return a formatted list of contacts in contact list order, without holding accounts', async function(ctx) {
+    it('should return a formatted list of contacts in contact list order, without holding accounts', async function (ctx) {
       await new Promise(resolve => {
         ctx.res.callback = () => {
           ctx.res.json.args[0][0].contacts.should.deep.equal([
@@ -140,8 +140,8 @@ describe('ContactController', function () {
           ])
           resolve()
         }
-        ctx.ContactController.getContacts(ctx.req, ctx.res, resolve)
-      });
+        ctx.ContactController.getContacts(ctx.req, ctx.res)
+      })
     })
   })
 })
