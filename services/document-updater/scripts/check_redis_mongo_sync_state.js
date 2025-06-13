@@ -15,6 +15,7 @@ const request = require('requestretry').defaults({
   retryDelay: 10,
 })
 
+const ONLY_PROJECT_ID = process.env.ONLY_PROJECT_ID
 const AUTO_FIX_VERSION_MISMATCH =
   process.env.AUTO_FIX_VERSION_MISMATCH === 'true'
 const AUTO_FIX_PARTIALLY_DELETED_DOC_METADATA =
@@ -319,10 +320,12 @@ async function processProject(projectId) {
  * @return {Promise<{perIterationOutOfSync: number, done: boolean}>}
  */
 async function scanOnce(processed, outOfSync) {
-  const projectIds = await ProjectFlusher.promises.flushAllProjects({
-    limit: LIMIT,
-    dryRun: true,
-  })
+  const projectIds = ONLY_PROJECT_ID
+    ? [ONLY_PROJECT_ID]
+    : await ProjectFlusher.promises.flushAllProjects({
+        limit: LIMIT,
+        dryRun: true,
+      })
 
   let perIterationOutOfSync = 0
   for (const projectId of projectIds) {
