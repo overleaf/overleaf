@@ -6,8 +6,8 @@ block content
 			.row
 				.col-md-8.offset-md-2.text-center
 					.page-header
-						h2 #{translate("restricted_no_permission")}
+						h1 #{translate("restricted_no_permission")}
 					p
-						span.inline-material-symbols
-							a(href="/").material-symbols(aria-hidden="true") arrow_left_alt
-							a(href="/") #{translate("take_me_home")}
+						a.inline-material-symbols(href="/")
+							span.material-symbols(aria-hidden="true") arrow_left_alt
+							| #{translate("take_me_home")}
