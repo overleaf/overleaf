@@ -29,6 +29,8 @@ function LogEntryHeader({
   onToggleCollapsed,
   id,
   logEntry,
+  actionButtonsOverride,
+  openCollapseIconOverride,
 }: {
   headerTitle: string | React.ReactNode
   level: ErrorLevel
@@ -40,6 +42,8 @@ function LogEntryHeader({
   onToggleCollapsed: () => void
   id?: string
   logEntry?: LogEntryData
+  actionButtonsOverride?: React.ReactNode
+  openCollapseIconOverride?: string
 }) {
   const { t } = useTranslation()
   const logLocationSpanRef = useRef<HTMLSpanElement>(null)
@@ -101,7 +105,10 @@ function LogEntryHeader({
         <OLIconButton
           size="sm"
           variant="ghost"
-          icon={collapsed ? 'chevron_right' : 'expand_more'}
+          icon={
+            openCollapseIconOverride ??
+            (collapsed ? 'chevron_right' : 'expand_more')
+          }
           onClick={onToggleCollapsed}
           accessibilityLabel={collapsed ? t('expand') : t('collapse')}
         />
@@ -121,31 +128,33 @@ function LogEntryHeader({
           formattedLocationText
         )}
       </div>
-      <div className="log-entry-header-actions">
-        {showSourceLocationLink && (
-          <OLTooltip
-            id={`go-to-location-${locationText}`}
-            description={t('go_to_code_location')}
-            overlayProps={{ placement: 'bottom' }}
-          >
-            <OLIconButton
-              onClick={onSourceLocationClick}
-              variant="ghost"
-              icon="my_location"
-              accessibilityLabel={t('go_to_code_location')}
+      {actionButtonsOverride ?? (
+        <div className="log-entry-header-actions">
+          {showSourceLocationLink && (
+            <OLTooltip
+              id={`go-to-location-${locationText}`}
+              description={t('go_to_code_location')}
+              overlayProps={{ placement: 'bottom' }}
+            >
+              <OLIconButton
+                onClick={onSourceLocationClick}
+                variant="ghost"
+                icon="my_location"
+                accessibilityLabel={t('go_to_code_location')}
+              />
+            </OLTooltip>
+          )}
+          {actionComponents.map(({ import: { default: Component }, path }) => (
+            <Component
+              key={path}
+              collapsed={collapsed}
+              onToggleCollapsed={onToggleCollapsed}
+              logEntry={logEntry}
+              id={id}
             />
-          </OLTooltip>
-        )}
-        {actionComponents.map(({ import: { default: Component }, path }) => (
-          <Component
-            key={path}
-            collapsed={collapsed}
-            onToggleCollapsed={onToggleCollapsed}
-            logEntry={logEntry}
-            id={id}
-          />
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </header>
   )
 }

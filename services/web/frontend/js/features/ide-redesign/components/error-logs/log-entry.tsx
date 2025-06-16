@@ -1,4 +1,11 @@
-import { memo, MouseEventHandler, useCallback, useState } from 'react'
+import {
+  Dispatch,
+  MouseEventHandler,
+  useCallback,
+  memo,
+  SetStateAction,
+  useState,
+} from 'react'
 import HumanReadableLogsHints from '../../../../ide/human-readable-logs/HumanReadableLogsHints'
 import { sendMB } from '@/infrastructure/event-tracking'
 import {
@@ -10,24 +17,7 @@ import LogEntryHeader from './log-entry-header'
 import PdfLogEntryContent from '@/features/pdf-preview/components/pdf-log-entry-content'
 import classNames from 'classnames'
 
-function LogEntry({
-  ruleId,
-  headerTitle,
-  rawContent,
-  logType,
-  formattedContent,
-  extraInfoURL,
-  level,
-  sourceLocation,
-  showSourceLocationLink = true,
-  entryAriaLabel = undefined,
-  contentDetails,
-  onSourceLocationClick,
-  index,
-  logEntry,
-  id,
-  alwaysExpandRawContent = false,
-}: {
+type LogEntryProps = {
   headerTitle: string | React.ReactNode
   level: ErrorLevel
   ruleId?: string
@@ -44,9 +34,49 @@ function LogEntry({
   logEntry?: LogEntryData
   id?: string
   alwaysExpandRawContent?: boolean
-}) {
+  className?: string
+  actionButtonsOverride?: React.ReactNode
+  openCollapseIconOverride?: string
+}
+
+function LogEntry(props: LogEntryProps) {
   const [collapsed, setCollapsed] = useState(true)
 
+  return (
+    <ControlledLogEntry
+      {...props}
+      collapsed={collapsed}
+      setCollapsed={setCollapsed}
+    />
+  )
+}
+
+export function ControlledLogEntry({
+  ruleId,
+  headerTitle,
+  rawContent,
+  logType,
+  formattedContent,
+  extraInfoURL,
+  level,
+  sourceLocation,
+  showSourceLocationLink = true,
+  entryAriaLabel = undefined,
+  contentDetails,
+  onSourceLocationClick,
+  index,
+  logEntry,
+  id,
+  alwaysExpandRawContent = false,
+  className,
+  collapsed,
+  setCollapsed,
+  actionButtonsOverride,
+  openCollapseIconOverride,
+}: LogEntryProps & {
+  collapsed: boolean
+  setCollapsed: Dispatch<SetStateAction<boolean>>
+}) {
   if (ruleId && HumanReadableLogsHints[ruleId]) {
     const hint = HumanReadableLogsHints[ruleId]
     formattedContent = hint.formattedContent(contentDetails)
@@ -72,7 +102,7 @@ function LogEntry({
 
   return (
     <div
-      className="log-entry"
+      className={classNames('log-entry', className)}
       data-ruleid={ruleId}
       data-log-entry-id={id}
       aria-label={entryAriaLabel}
@@ -88,6 +118,8 @@ function LogEntry({
         onToggleCollapsed={() => setCollapsed(collapsed => !collapsed)}
         id={id}
         logEntry={logEntry}
+        actionButtonsOverride={actionButtonsOverride}
+        openCollapseIconOverride={openCollapseIconOverride}
       />
       <div
         className={classNames('horizontal-divider', { hidden: collapsed })}
