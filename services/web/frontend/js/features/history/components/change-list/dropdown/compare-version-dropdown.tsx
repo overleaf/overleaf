@@ -21,7 +21,7 @@ function CompareVersionDropdown({
       id={id}
       isOpened={isOpened}
       setIsOpened={setIsOpened}
-      toolTipDescription={t('compare')}
+      tooltipDescription={t('compare')}
       iconTag={
         <MaterialIcon
           type="align_space_even"

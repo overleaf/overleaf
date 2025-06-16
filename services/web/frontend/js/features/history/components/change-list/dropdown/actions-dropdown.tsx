@@ -2,20 +2,21 @@ import React, { ReactNode } from 'react'
 import {
   Dropdown,
   DropdownMenu,
+  DropdownToggle,
 } from '@/features/ui/components/bootstrap-5/dropdown-menu'
-import DropdownToggleWithTooltip from '@/features/ui/components/bootstrap-5/dropdown-toggle-with-tooltip'
+import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
 
 type ActionDropdownProps = {
   id: string
   children: React.ReactNode
   isOpened: boolean
   iconTag: ReactNode
-  toolTipDescription: string
+  tooltipDescription: string
   setIsOpened: (isOpened: boolean) => void
 }
 
 function ActionsDropdown(props: ActionDropdownProps) {
-  const { id, children, isOpened, iconTag, setIsOpened, toolTipDescription } =
+  const { id, children, isOpened, iconTag, setIsOpened, tooltipDescription } =
     props
   return (
     <Dropdown
@@ -24,16 +25,23 @@ function ActionsDropdown(props: ActionDropdownProps) {
       show={isOpened}
       onToggle={open => setIsOpened(open)}
     >
-      <DropdownToggleWithTooltip
+      <OLTooltip
         id={`history-version-dropdown-${id}`}
-        className="history-version-dropdown-menu-btn"
-        aria-label={toolTipDescription}
-        toolTipDescription={toolTipDescription}
-        overlayTriggerProps={{ placement: 'bottom' }}
-        tooltipProps={{ hidden: isOpened }}
+        description={tooltipDescription}
+        overlayProps={{ placement: 'bottom' }}
+        hidden={isOpened}
       >
-        {iconTag}
-      </DropdownToggleWithTooltip>
+        {/* OverlayTrigger won't fire unless the child is a non-react html element (e.g div, span) */}
+        <span>
+          <DropdownToggle
+            id={`history-version-dropdown-toggle-${id}`}
+            className="history-version-dropdown-menu-btn"
+            as="button"
+          >
+            {iconTag}
+          </DropdownToggle>
+        </span>
+      </OLTooltip>
       <DropdownMenu className="history-version-dropdown-menu">
         {children}
       </DropdownMenu>

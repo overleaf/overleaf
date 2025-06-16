@@ -1,4 +1,10 @@
-import { cloneElement, useEffect, forwardRef } from 'react'
+import {
+  cloneElement,
+  useEffect,
+  forwardRef,
+  useState,
+  useCallback,
+} from 'react'
 import {
   OverlayTrigger,
   OverlayTriggerProps,
@@ -41,18 +47,36 @@ function Tooltip({
   overlayProps,
   hidden,
 }: TooltipProps) {
+  const [show, setShow] = useState(false)
+
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent) => {
+      if (show && e.key === 'Escape') {
+        setShow(false)
+        e.stopPropagation()
+      }
+    },
+    [show, setShow]
+  )
+
+  useEffect(() => {
+    document.addEventListener('keydown', handleKeyDown, true)
+    return () => document.removeEventListener('keydown', handleKeyDown, true)
+  }, [handleKeyDown])
+
+  const hideTooltip = (e: React.MouseEvent) => {
+    if (e.currentTarget instanceof HTMLElement) {
+      e.currentTarget.blur()
+    }
+    setShow(false)
+  }
+
   const delay = overlayProps?.delay
   let delayShow = 300
   let delayHide = 300
   if (delay) {
     delayShow = typeof delay === 'number' ? delay : delay.show
     delayHide = typeof delay === 'number' ? delay : delay.hide
-  }
-
-  const hideTooltip = (e: React.MouseEvent) => {
-    if (e.currentTarget instanceof HTMLElement) {
-      e.currentTarget.blur()
-    }
   }
 
   return (
@@ -69,6 +93,8 @@ function Tooltip({
       {...overlayProps}
       delay={{ show: delayShow, hide: delayHide }}
       placement={overlayProps?.placement || 'top'}
+      show={show}
+      onToggle={setShow}
     >
       {cloneElement(children, {
         onClick: callFnsInSequence(children.props.onClick, hideTooltip),

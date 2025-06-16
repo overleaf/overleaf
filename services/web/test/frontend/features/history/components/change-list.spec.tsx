@@ -372,7 +372,7 @@ describe('change list (Bootstrap 5)', function () {
       cy.findAllByTestId('history-version-details')
         .eq(1)
         .within(() => {
-          cy.get('[aria-label="Compare"]').click()
+          cy.findByRole('button', { name: /compare/i }).click()
           cy.findByRole('menu').within(() => {
             cy.findByRole('menuitem', {
               name: /compare up to this version/i,

@@ -6,14 +6,14 @@ import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
 type CompareProps = {
   comparisonRange: UpdateRange
   icon: ReactNode
-  toolTipDescription?: string
+  tooltipDescription?: string
   closeDropdown: () => void
 }
 
 function Compare({
   comparisonRange,
   closeDropdown,
-  toolTipDescription,
+  tooltipDescription,
   icon,
 }: CompareProps) {
   const { setSelection } = useHistoryContext()
@@ -32,12 +32,12 @@ function Compare({
 
   return (
     <OLTooltip
-      description={toolTipDescription}
+      description={tooltipDescription}
       id="compare-btn"
       overlayProps={{ placement: 'left' }}
     >
       <button className="history-compare-btn" onClick={handleCompareVersion}>
-        <span className="visually-hidden">{toolTipDescription}</span>
+        <span className="visually-hidden">{tooltipDescription}</span>
         {icon}
       </button>
     </OLTooltip>
