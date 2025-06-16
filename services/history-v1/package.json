@@ -7,6 +7,7 @@
   "private": true,
   "dependencies": {
     "@google-cloud/secret-manager": "^5.6.0",
+    "@overleaf/fetch-utils": "*",
     "@overleaf/logger": "*",
     "@overleaf/metrics": "*",
     "@overleaf/mongo-utils": "*",
@@ -36,6 +37,7 @@
     "mongodb": "6.12.0",
     "overleaf-editor-core": "*",
     "p-limit": "^6.2.0",
+    "p-queue": "^8.1.0",
     "pg": "^8.7.1",
     "pg-query-stream": "^4.2.4",
     "swagger-tools": "^0.10.4",
