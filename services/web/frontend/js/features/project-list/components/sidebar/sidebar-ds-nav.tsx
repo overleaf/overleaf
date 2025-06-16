@@ -154,7 +154,7 @@ function SidebarDsNav() {
             </>
           )}
         </div>
-        <div className="ds-nav-ds-name">
+        <div className="ds-nav-ds-name" translate="no">
           <span>Digital Science</span>
         </div>
       </div>

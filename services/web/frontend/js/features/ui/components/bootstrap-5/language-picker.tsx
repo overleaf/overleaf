@@ -49,7 +49,7 @@ function LanguagePicker({ showHeader } = { showHeader: false }) {
               return null
             const isActive = subdomainDetails.lngCode === currentLangCode
             return (
-              <li role="none" key={subdomain}>
+              <li role="none" key={subdomain} translate="no">
                 <DropdownItem
                   href={`${subdomainDetails.url}${currentUrlWithQueryParams}`}
                   active={isActive}

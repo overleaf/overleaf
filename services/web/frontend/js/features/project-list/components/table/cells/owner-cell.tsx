@@ -47,7 +47,7 @@ export default function OwnerCell({ project }: OwnerCellProps) {
 
   return (
     <>
-      {ownerName === 'You' ? t('you') : ownerName}
+      <span translate="no">{ownerName === 'You' ? t('you') : ownerName}</span>
       {project.source === 'token' && (
         <LinkSharingIcon project={project} prependSpace={!!project.owner} />
       )}

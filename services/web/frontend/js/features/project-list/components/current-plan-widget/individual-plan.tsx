@@ -14,21 +14,25 @@ function IndividualPlan({
   remainingTrialDays,
 }: IndividualPlanProps) {
   const { t } = useTranslation()
+  const planNameComponent = <strong translate="no" />
   const currentPlanLabel =
     remainingTrialDays >= 0 ? (
       remainingTrialDays === 1 ? (
-        <Trans i18nKey="trial_last_day" components={{ b: <strong /> }} />
+        <Trans i18nKey="trial_last_day" components={{ b: planNameComponent }} />
       ) : (
         <Trans
           i18nKey="trial_remaining_days"
-          components={{ b: <strong /> }}
+          components={{ b: planNameComponent }}
           values={{ days: remainingTrialDays }}
           shouldUnescape
           tOptions={{ interpolation: { escapeValue: true } }}
         />
       )
     ) : (
-      <Trans i18nKey="premium_plan_label" components={{ b: <strong /> }} />
+      <Trans
+        i18nKey="premium_plan_label"
+        components={{ b: planNameComponent }}
+      />
     )
 
   return (

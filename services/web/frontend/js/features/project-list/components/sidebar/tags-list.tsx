@@ -57,6 +57,7 @@ export default function TagsList() {
             <button
               type="button"
               className="tag-name"
+              translate="no"
               onClick={e =>
                 handleSelectTag(e as unknown as React.MouseEvent, tag._id)
               }

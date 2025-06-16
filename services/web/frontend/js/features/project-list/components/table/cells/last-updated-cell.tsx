@@ -19,7 +19,7 @@ export default function LastUpdatedCell({ project }: LastUpdatedCellProps) {
       overlayProps={{ placement: 'top', trigger: ['hover', 'focus'] }}
     >
       {project.lastUpdatedBy ? (
-        <span>
+        <span translate="no">
           <LastUpdatedBy
             lastUpdatedBy={project.lastUpdatedBy}
             lastUpdatedDate={lastUpdatedDate}

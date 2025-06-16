@@ -38,7 +38,12 @@ function MaterialIcon({
 
   return (
     <>
-      <span className={iconClassName} aria-hidden="true" {...rest}>
+      <span
+        className={iconClassName}
+        aria-hidden="true"
+        translate="no"
+        {...rest}
+      >
         {type}
       </span>
       {accessibilityLabel && (

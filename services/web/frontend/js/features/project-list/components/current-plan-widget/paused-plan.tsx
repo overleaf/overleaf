@@ -13,7 +13,7 @@ function PausedPlan({ subscriptionPageUrl }: PausedPlanProps) {
       i18nKey="your_premium_plan_is_paused"
       components={[
         // eslint-disable-next-line react/jsx-key
-        <strong />,
+        <strong translate="no" />,
       ]}
     />
   )

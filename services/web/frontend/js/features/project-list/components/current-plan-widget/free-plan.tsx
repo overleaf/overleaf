@@ -10,7 +10,10 @@ type FreePlanProps = Pick<FreePlanSubscription, 'featuresPageURL'>
 function FreePlan({ featuresPageURL }: FreePlanProps) {
   const { t } = useTranslation()
   const currentPlanLabel = (
-    <Trans i18nKey="free_plan_label" components={{ b: <strong /> }} />
+    <Trans
+      i18nKey="free_plan_label"
+      components={{ b: <strong translate="no" /> }}
+    />
   )
 
   const handleClick = () => {

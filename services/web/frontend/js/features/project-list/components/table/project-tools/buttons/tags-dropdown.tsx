@@ -111,6 +111,7 @@ function TagsDropdown() {
                     <DropdownItem.EmptyLeadingIcon />
                   )
                 }
+                translate="no"
               >
                 <div className="badge-tag-content">
                   <span className="badge-prepend">

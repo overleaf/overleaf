@@ -15,7 +15,10 @@ function CommonsPlan({
 }: CommonsPlanProps) {
   const { t } = useTranslation()
   const currentPlanLabel = (
-    <Trans i18nKey="premium_plan_label" components={{ b: <strong /> }} />
+    <Trans
+      i18nKey="premium_plan_label"
+      components={{ b: <strong translate="no" /> }}
+    />
   )
 
   return (

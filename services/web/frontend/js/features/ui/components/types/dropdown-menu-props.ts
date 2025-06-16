@@ -46,6 +46,7 @@ export type DropdownItemProps = PropsWithChildren<{
   target?: string
   download?: boolean | string
   rel?: string
+  translate?: React.HTMLAttributes<HTMLElement>['translate']
 }>
 
 export type DropdownToggleProps = PropsWithChildren<{

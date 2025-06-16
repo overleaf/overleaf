@@ -26,7 +26,7 @@ function FatFooterBase() {
     <footer className="fat-footer-base">
       <div className="fat-footer-base-section fat-footer-base-meta">
         <div className="fat-footer-base-item">
-          <div className="fat-footer-base-copyright">
+          <div className="fat-footer-base-copyright" translate="no">
             © {currentYear} Overleaf
           </div>
           <FooterBaseLink href="/legal">

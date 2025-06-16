@@ -57,6 +57,7 @@ function InlineTag({ tag, projectId }: InlineTagProps) {
         onClick: () => handleRemoveTag(tag._id, projectId),
       }}
       className="ms-2"
+      translate="no"
     >
       {tag.name}
     </Tag>
