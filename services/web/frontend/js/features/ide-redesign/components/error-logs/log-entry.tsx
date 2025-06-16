@@ -8,6 +8,7 @@ import {
 } from '@/features/pdf-preview/util/types'
 import LogEntryHeader from './log-entry-header'
 import PdfLogEntryContent from '@/features/pdf-preview/components/pdf-log-entry-content'
+import classNames from 'classnames'
 
 function LogEntry({
   ruleId,
@@ -88,20 +89,18 @@ function LogEntry({
         id={id}
         logEntry={logEntry}
       />
-
-      {!collapsed && (
-        <>
-          <div className="horizontal-divider" />
-          <PdfLogEntryContent
-            alwaysExpandRawContent={alwaysExpandRawContent}
-            rawContent={rawContent}
-            formattedContent={formattedContent}
-            extraInfoURL={extraInfoURL}
-            index={index}
-            logEntry={logEntry}
-          />
-        </>
-      )}
+      <div
+        className={classNames('horizontal-divider', { hidden: collapsed })}
+      />
+      <PdfLogEntryContent
+        className={classNames({ hidden: collapsed })}
+        alwaysExpandRawContent={alwaysExpandRawContent}
+        rawContent={rawContent}
+        formattedContent={formattedContent}
+        extraInfoURL={extraInfoURL}
+        index={index}
+        logEntry={logEntry}
+      />
     </div>
   )
 }

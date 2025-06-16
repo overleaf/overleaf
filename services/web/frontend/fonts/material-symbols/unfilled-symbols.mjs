@@ -8,6 +8,7 @@ export default /** @type {const} */ ([
   'book_5',
   'brush',
   'code',
+  'content_copy',
   'create_new_folder',
   'delete',
   'description',
@@ -26,6 +27,8 @@ export default /** @type {const} */ ([
   'settings',
   'space_dashboard',
   'table_chart',
+  'thumb_down',
+  'thumb_up',
   'upload_file',
   'web_asset',
 ])
