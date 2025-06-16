@@ -86,6 +86,8 @@
   "httpRequestTimeout": "HTTP_REQUEST_TIMEOUT",
   "historyBufferLevel": "HISTORY_BUFFER_LEVEL",
   "forcePersistBuffer": "FORCE_PERSIST_BUFFER",
+  "nextHistoryBufferLevel": "NEXT_HISTORY_BUFFER_LEVEL",
+  "nextHistoryBufferLevelRolloutPercentage": "NEXT_HISTORY_BUFFER_LEVEL_ROLLOUT_PERCENTAGE",
   "redis": {
     "queue": {
       "host": "QUEUES_REDIS_HOST",
