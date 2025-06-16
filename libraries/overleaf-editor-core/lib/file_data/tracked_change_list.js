@@ -2,9 +2,11 @@
 const Range = require('../range')
 const TrackedChange = require('./tracked_change')
 const TrackingProps = require('../file_data/tracking_props')
+const { InsertOp, RemoveOp, RetainOp } = require('../operation/scan_op')
 
 /**
  * @import { TrackingDirective, TrackedChangeRawData } from "../types"
+ * @import TextOperation from "../operation/text_operation"
  */
 
 class TrackedChangeList {
@@ -59,6 +61,22 @@ class TrackedChangeList {
   }
 
   /**
+   * Returns tracked changes that overlap with the given range
+   * @param {Range} range
+   * @returns {TrackedChange[]}
+   */
+  intersectRange(range) {
+    const changes = []
+    for (const change of this._trackedChanges) {
+      const intersection = change.intersectRange(range)
+      if (intersection != null) {
+        changes.push(intersection)
+      }
+    }
+    return changes
+  }
+
+  /**
    * Returns the tracking props for a given range.
    * @param {Range} range
    * @returns {TrackingProps | undefined}
@@ -89,6 +107,8 @@ class TrackedChangeList {
 
   /**
    * Collapses consecutive (and compatible) ranges
+   *
+   * @private
    * @returns {void}
    */
   _mergeRanges() {
@@ -117,12 +137,28 @@ class TrackedChangeList {
   }
 
   /**
+   * Apply an insert operation
    *
    * @param {number} cursor
    * @param {string} insertedText
    * @param {{tracking?: TrackingProps}} opts
    */
   applyInsert(cursor, insertedText, opts = {}) {
+    this._applyInsert(cursor, insertedText, opts)
+    this._mergeRanges()
+  }
+
+  /**
+   * Apply an insert operation
+   *
+   * This method will not merge ranges at the end
+   *
+   * @private
+   * @param {number} cursor
+   * @param {string} insertedText
+   * @param {{tracking?: TrackingProps}} [opts]
+   */
+  _applyInsert(cursor, insertedText, opts = {}) {
     const newTrackedChanges = []
     for (const trackedChange of this._trackedChanges) {
       if (
@@ -171,15 +207,29 @@ class TrackedChangeList {
       newTrackedChanges.push(newTrackedChange)
     }
     this._trackedChanges = newTrackedChanges
-    this._mergeRanges()
   }
 
   /**
+   * Apply a delete operation to the list of tracked changes
    *
    * @param {number} cursor
    * @param {number} length
    */
   applyDelete(cursor, length) {
+    this._applyDelete(cursor, length)
+    this._mergeRanges()
+  }
+
+  /**
+   * Apply a delete operation to the list of tracked changes
+   *
+   * This method will not merge ranges at the end
+   *
+   * @private
+   * @param {number} cursor
+   * @param {number} length
+   */
+  _applyDelete(cursor, length) {
     const newTrackedChanges = []
     for (const trackedChange of this._trackedChanges) {
       const deletedRange = new Range(cursor, length)
@@ -205,15 +255,31 @@ class TrackedChangeList {
       }
     }
     this._trackedChanges = newTrackedChanges
+  }
+
+  /**
+   * Apply a retain operation to the list of tracked changes
+   *
+   * @param {number} cursor
+   * @param {number} length
+   * @param {{tracking?: TrackingDirective}} [opts]
+   */
+  applyRetain(cursor, length, opts = {}) {
+    this._applyRetain(cursor, length, opts)
     this._mergeRanges()
   }
 
   /**
+   * Apply a retain operation to the list of tracked changes
+   *
+   * This method will not merge ranges at the end
+   *
+   * @private
    * @param {number} cursor
    * @param {number} length
    * @param {{tracking?: TrackingDirective}} opts
    */
-  applyRetain(cursor, length, opts = {}) {
+  _applyRetain(cursor, length, opts = {}) {
     // If there's no tracking info, leave everything as-is
     if (!opts.tracking) {
       return
@@ -269,6 +335,31 @@ class TrackedChangeList {
       newTrackedChanges.push(newTrackedChange)
     }
     this._trackedChanges = newTrackedChanges
+  }
+
+  /**
+   * Apply a text operation to the list of tracked changes
+   *
+   * Ranges are merged only once at the end, for performance and to avoid
+   * problematic edge cases where intermediate ranges get incorrectly merged.
+   *
+   * @param {TextOperation} operation
+   */
+  applyTextOperation(operation) {
+    // this cursor tracks the destination document that gets modified as
+    // operations are applied to it.
+    let cursor = 0
+    for (const op of operation.ops) {
+      if (op instanceof InsertOp) {
+        this._applyInsert(cursor, op.insertion, { tracking: op.tracking })
+        cursor += op.insertion.length
+      } else if (op instanceof RemoveOp) {
+        this._applyDelete(cursor, op.length)
+      } else if (op instanceof RetainOp) {
+        this._applyRetain(cursor, op.length, { tracking: op.tracking })
+        cursor += op.length
+      }
+    }
     this._mergeRanges()
   }
 }

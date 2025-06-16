@@ -1,4 +1,3 @@
-// @ts-check
 'use strict'
 
 const { expect } = require('chai')
@@ -447,6 +446,46 @@ describe('Range', function () {
       const range = new Range(5, 10)
       expect(() => range.insertAt(4, 3)).to.throw()
       expect(() => range.insertAt(16, 3)).to.throw()
+    })
+  })
+
+  describe('intersect', function () {
+    it('should handle partially overlapping ranges', function () {
+      const range1 = new Range(5, 10)
+      const range2 = new Range(3, 6)
+      const intersection1 = range1.intersect(range2)
+      expect(intersection1.pos).to.equal(5)
+      expect(intersection1.length).to.equal(4)
+      const intersection2 = range2.intersect(range1)
+      expect(intersection2.pos).to.equal(5)
+      expect(intersection2.length).to.equal(4)
+    })
+
+    it('should intersect with itself', function () {
+      const range = new Range(5, 10)
+      const intersection = range.intersect(range)
+      expect(intersection.pos).to.equal(5)
+      expect(intersection.length).to.equal(10)
+    })
+
+    it('should handle nested ranges', function () {
+      const range1 = new Range(5, 10)
+      const range2 = new Range(7, 2)
+      const intersection1 = range1.intersect(range2)
+      expect(intersection1.pos).to.equal(7)
+      expect(intersection1.length).to.equal(2)
+      const intersection2 = range2.intersect(range1)
+      expect(intersection2.pos).to.equal(7)
+      expect(intersection2.length).to.equal(2)
+    })
+
+    it('should handle disconnected ranges', function () {
+      const range1 = new Range(5, 10)
+      const range2 = new Range(20, 30)
+      const intersection1 = range1.intersect(range2)
+      expect(intersection1).to.be.null
+      const intersection2 = range2.intersect(range1)
+      expect(intersection2).to.be.null
     })
   })
 })

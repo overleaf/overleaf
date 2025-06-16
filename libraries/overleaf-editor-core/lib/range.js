@@ -86,10 +86,32 @@ class Range {
   }
 
   /**
-   * @param {Range} range
+   * Does this range overlap another range?
+   *
+   * Overlapping means that the two ranges have at least one character in common
+   *
+   * @param {Range} other - the other range
    */
-  overlaps(range) {
-    return this.start < range.end && this.end > range.start
+  overlaps(other) {
+    return this.start < other.end && this.end > other.start
+  }
+
+  /**
+   * Does this range overlap the start of another range?
+   *
+   * @param {Range} other - the other range
+   */
+  overlapsStart(other) {
+    return this.start <= other.start && this.end > other.start
+  }
+
+  /**
+   * Does this range overlap the end of another range?
+   *
+   * @param {Range} other - the other range
+   */
+  overlapsEnd(other) {
+    return this.start < other.end && this.end >= other.end
   }
 
   /**
@@ -226,6 +248,26 @@ class Range {
       this.length - rangeUpToCursor.length
     )
     return [rangeUpToCursor, rangeAfterCursor]
+  }
+
+  /**
+   * Returns the intersection of this range with another range
+   *
+   * @param {Range} other - the other range
+   * @return {Range | null} the intersection or null if the intersection is empty
+   */
+  intersect(other) {
+    if (this.contains(other)) {
+      return other
+    } else if (other.contains(this)) {
+      return this
+    } else if (other.overlapsStart(this)) {
+      return new Range(this.pos, other.end - this.start)
+    } else if (other.overlapsEnd(this)) {
+      return new Range(other.pos, this.end - other.start)
+    } else {
+      return null
+    }
   }
 }
 

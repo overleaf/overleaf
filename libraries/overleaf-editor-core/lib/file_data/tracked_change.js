@@ -84,6 +84,21 @@ class TrackedChange {
       )
     )
   }
+
+  /**
+   * Return an equivalent tracked change whose extent is limited to the given
+   * range
+   *
+   * @param {Range} range
+   * @returns {TrackedChange | null} - the result or null if the intersection is empty
+   */
+  intersectRange(range) {
+    const intersection = this.range.intersect(range)
+    if (intersection == null) {
+      return null
+    }
+    return new TrackedChange(intersection, this.tracking)
+  }
 }
 
 module.exports = TrackedChange

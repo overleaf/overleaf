@@ -322,6 +322,47 @@ describe('TextOperation', function () {
         new TextOperation().retain(4).remove(4).retain(3)
       )
     })
+
+    it('undoing a tracked delete restores the tracked changes', function () {
+      expectInverseToLeadToInitialState(
+        new StringFileData(
+          'the quick brown fox jumps over the lazy dog',
+          undefined,
+          [
+            {
+              range: { pos: 5, length: 5 },
+              tracking: {
+                ts: '2023-01-01T00:00:00.000Z',
+                type: 'insert',
+                userId: 'user1',
+              },
+            },
+            {
+              range: { pos: 12, length: 3 },
+              tracking: {
+                ts: '2023-01-01T00:00:00.000Z',
+                type: 'delete',
+                userId: 'user1',
+              },
+            },
+            {
+              range: { pos: 18, length: 5 },
+              tracking: {
+                ts: '2023-01-01T00:00:00.000Z',
+                type: 'insert',
+                userId: 'user1',
+              },
+            },
+          ]
+        ),
+        new TextOperation()
+          .retain(7)
+          .retain(13, {
+            tracking: new TrackingProps('delete', 'user1', new Date()),
+          })
+          .retain(23)
+      )
+    })
   })
 
   describe('compose', function () {
