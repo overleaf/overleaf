@@ -1,3 +1,5 @@
+import { StripeCurrencyCode } from './currency'
+
 type Features = {
   collaborators: number
   compileGroup: string
@@ -60,6 +62,7 @@ export type Plan = {
   name: string
   planCode: string
   price_in_cents: number
+  canUseFlexibleLicensing?: boolean
 }
 
 export type PriceForDisplayData = {
@@ -90,17 +93,22 @@ export type RecurlyPlanCode =
 
 export type RecurlyAddOnCode = 'assistant'
 
-export type StripeLookupKey =
-  | 'collaborator_may2025'
-  | 'collaborator_annual_may2025'
-  | 'professional_may2025'
-  | 'professional_annual_may2025'
-  | 'student_may2025'
-  | 'student_annual_may2025'
+export type StripeBaseLookupKey =
+  | 'standard_monthly'
+  | 'standard_annual'
+  | 'professional_monthly'
+  | 'professional_annual'
+  | 'student_monthly'
+  | 'student_annual'
+  | 'assistant_annual'
+  | 'assistant_monthly'
   // TODO: change all group plans' lookup_keys to match the UK account after they have been added
   | 'group_standard_enterprise'
   | 'group_professional_enterprise'
   | 'group_standard_educational'
   | 'group_professional_educational'
-  | 'assistant_annual_may2025'
-  | 'assistant_may2025'
+
+export type StripeLookupKeyVersion = 'jun2025'
+
+export type StripeLookupKey =
+  `${StripeBaseLookupKey}_${StripeLookupKeyVersion}_${StripeCurrencyCode}`

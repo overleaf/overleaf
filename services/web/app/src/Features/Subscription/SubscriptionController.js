@@ -839,7 +839,7 @@ function makeChangePreview(
     paymentMethod: paymentMethod?.toString(),
     netTerms: subscription.netTerms,
     nextPlan: {
-      annual: nextPlan.annual ?? false,
+      annual: nextPlan?.annual ?? false,
     },
     nextInvoice: {
       date: subscription.periodEnd.toISOString(),

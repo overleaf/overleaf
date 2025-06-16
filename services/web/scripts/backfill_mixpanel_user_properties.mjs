@@ -66,6 +66,7 @@ async function _getGroupSubscriptionPlanCode(userId) {
     const plan = PlansLocator.findLocalPlanInSettings(subscription.planCode)
     if (
       plan &&
+      plan.features &&
       FeaturesHelper.isFeatureSetBetter(plan.features, bestFeatures)
     ) {
       bestPlanCode = plan.planCode
