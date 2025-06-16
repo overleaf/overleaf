@@ -8,7 +8,8 @@ export const positionItems = debounce(
   (
     element: HTMLDivElement,
     previousFocusedItemIndex: number | undefined,
-    docId: string
+    docId: string,
+    newEditor: boolean
   ) => {
     const items = Array.from(
       element.querySelectorAll<HTMLDivElement>('.review-panel-entry')
@@ -41,7 +42,11 @@ export const positionItems = debounce(
       return
     }
 
-    const activeItemTop = getTopPosition(activeItem, activeItemIndex === 0)
+    const activeItemTop = getTopPosition(
+      activeItem,
+      activeItemIndex === 0,
+      newEditor
+    )
 
     const positions: [HTMLElement, number][] = []
     positions.push([activeItem, activeItemTop])
@@ -51,7 +56,7 @@ export const positionItems = debounce(
     for (let i = activeItemIndex - 1; i >= 0; i--) {
       const item = items[i]
       const height = item.offsetHeight
-      let top = getTopPosition(item, i === 0)
+      let top = getTopPosition(item, i === 0, newEditor)
       const bottom = top + height
       if (bottom > topLimit) {
         top = topLimit - height - GAP_BETWEEN_ENTRIES
@@ -65,7 +70,7 @@ export const positionItems = debounce(
     for (let i = activeItemIndex + 1; i < items.length; i++) {
       const item = items[i]
       const height = item.offsetHeight
-      let top = getTopPosition(item, false)
+      let top = getTopPosition(item, false, newEditor)
       if (top < bottomLimit) {
         top = bottomLimit + GAP_BETWEEN_ENTRIES
       }
@@ -87,7 +92,16 @@ export const positionItems = debounce(
   { leading: false, trailing: true, maxWait: 1000 }
 )
 
-function getTopPosition(item: HTMLDivElement, isFirstEntry: boolean) {
+function getTopPosition(
+  item: HTMLDivElement,
+  isFirstEntry: boolean,
+  newEditor: boolean
+) {
   const offset = isFirstEntry ? 0 : OFFSET_FOR_ENTRIES_ABOVE
+
+  if (newEditor) {
+    return Math.max(offset, Number(item.dataset.top))
+  }
+
   return Math.max(COLLAPSED_HEADER_HEIGHT + offset, Number(item.dataset.top))
 }

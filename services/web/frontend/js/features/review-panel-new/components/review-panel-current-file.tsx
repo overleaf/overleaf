@@ -33,6 +33,7 @@ import ReviewPanelMoreCommentsButton from './review-panel-more-comments-button'
 import useMoreCommments from '../hooks/use-more-comments'
 import { Decoration } from '@codemirror/view'
 import { debounce } from 'lodash'
+import { useIsNewEditorEnabled } from '@/features/ide-redesign/utils/new-editor-utils'
 
 type AggregatedRanges = {
   changes: Change<EditOperation>[]
@@ -46,6 +47,7 @@ const ReviewPanelCurrentFile: FC = () => {
   const threads = useThreadsContext()
   const state = useCodeMirrorStateContext()
   const [hoveredEntry, setHoveredEntry] = useState<string | null>(null)
+  const newEditor = useIsNewEditorEnabled()
 
   const hoverTimeout = useRef<number>(0)
   const handleEntryEnter = useCallback((id: string) => {
@@ -242,7 +244,8 @@ const ReviewPanelCurrentFile: FC = () => {
       const positioningRes = positionItems(
         containerRef.current,
         previousFocusedItem.current.get(docId),
-        docId
+        docId,
+        newEditor
       )
 
       onEntriesPositioned()
@@ -254,7 +257,7 @@ const ReviewPanelCurrentFile: FC = () => {
         )
       }
     }
-  }, [ranges?.docId, onEntriesPositioned])
+  }, [ranges?.docId, onEntriesPositioned, newEditor])
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
