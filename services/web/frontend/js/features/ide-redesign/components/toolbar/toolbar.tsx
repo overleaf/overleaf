@@ -12,6 +12,8 @@ import BackToEditorButton from '@/features/editor-navigation-toolbar/components/
 import { useCallback } from 'react'
 import * as eventTracking from '../../../../infrastructure/event-tracking'
 import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
+import UpgradeButton from './upgrade-button'
+import getMeta from '@/utils/meta'
 
 export const Toolbar = () => {
   const { view, setView } = useLayoutContext()
@@ -71,6 +73,7 @@ const ToolbarButtons = () => {
       <ShowHistoryButton />
       <ChangeLayoutButton />
       <ShareProjectButton />
+      {getMeta('ol-showUpgradePrompt') && <UpgradeButton />}
     </div>
   )
 }
