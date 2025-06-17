@@ -10,6 +10,7 @@ import {
 import useResizeObserver from '@/features/preview/hooks/use-resize-observer'
 import OLIconButton from '@/features/ui/components/ol/ol-icon-button'
 import importOverleafModules from '../../../../../macros/import-overleaf-module.macro'
+import MaterialIcon from '@/shared/components/material-icon'
 
 const actionComponents = importOverleafModules(
   'pdfLogEntryHeaderActionComponents'
@@ -102,32 +103,36 @@ function LogEntryHeader({
         description={collapsed ? t('expand') : t('collapse')}
         overlayProps={{ placement: 'bottom' }}
       >
-        <OLIconButton
-          size="sm"
-          variant="ghost"
-          icon={
-            openCollapseIconOverride ??
-            (collapsed ? 'chevron_right' : 'expand_more')
-          }
+        <button
+          className="log-entry-header-button"
           onClick={onToggleCollapsed}
-          accessibilityLabel={collapsed ? t('expand') : t('collapse')}
-        />
+          aria-label={collapsed ? t('expand') : t('collapse')}
+        >
+          <MaterialIcon
+            onClick={onToggleCollapsed}
+            type={
+              openCollapseIconOverride ??
+              (collapsed ? 'chevron_right' : 'expand_more')
+            }
+          />
+          <div className="log-entry-header-content">
+            <h3 className={logEntryHeaderTextClasses}>{headerTitleText}</h3>
+            {locationSpanOverflown && formattedLocationText && locationText ? (
+              <OLTooltip
+                id={locationText}
+                description={locationText}
+                overlayProps={{ placement: 'left' }}
+                tooltipProps={{ className: 'log-location-tooltip' }}
+              >
+                {formattedLocationText}
+              </OLTooltip>
+            ) : (
+              formattedLocationText
+            )}
+          </div>
+        </button>
       </OLTooltip>
-      <div className="log-entry-header-content">
-        <h3 className={logEntryHeaderTextClasses}>{headerTitleText}</h3>
-        {locationSpanOverflown && formattedLocationText && locationText ? (
-          <OLTooltip
-            id={locationText}
-            description={locationText}
-            overlayProps={{ placement: 'left' }}
-            tooltipProps={{ className: 'log-location-tooltip' }}
-          >
-            {formattedLocationText}
-          </OLTooltip>
-        ) : (
-          formattedLocationText
-        )}
-      </div>
+
       {actionButtonsOverride ?? (
         <div className="log-entry-header-actions">
           {showSourceLocationLink && (

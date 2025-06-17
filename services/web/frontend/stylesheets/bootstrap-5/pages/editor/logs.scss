@@ -64,7 +64,7 @@
       background-color: var(--bg-primary-themed);
       width: 100%;
       border-radius: var(--border-radius-base);
-      padding: var(--spacing-05) var(--spacing-04);
+      padding: var(--spacing-04);
 
       .horizontal-divider {
         margin: var(--spacing-04) 0;
@@ -76,9 +76,28 @@
       background-color: var(--bg-primary-themed);
       width: 100%;
       display: flex;
-      gap: var(--spacing-03);
       align-items: center;
       border: none;
+    }
+
+    .log-entry-header-button {
+      all: unset;
+      display: flex;
+      gap: var(--spacing-03);
+      align-items: center;
+      flex: 1;
+      border-radius: var(--border-radius-base);
+      padding: var(--spacing-02) var(--spacing-03) var(--spacing-02) 0;
+
+      &:hover {
+        cursor: pointer;
+      }
+
+      &:hover,
+      :focus,
+      :active {
+        background-color: var(--bg-secondary-themed);
+      }
     }
 
     .log-entry-header-content {
@@ -88,6 +107,7 @@
       gap: var(--spacing-02);
       flex: 1;
       overflow: hidden;
+      font-weight: normal;
     }
 
     .log-entry-header-text {
