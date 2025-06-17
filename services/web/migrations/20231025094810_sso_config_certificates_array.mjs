@@ -1,8 +1,11 @@
+import { batchedUpdate } from '@overleaf/mongo-utils/batchedUpdate.js'
+
 const tags = ['saas']
 
 const migrate = async client => {
   const { db } = client
-  await db.ssoConfigs.updateMany(
+  await batchedUpdate(
+    db.ssoConfigs,
     { certificate: { $exists: true }, certificates: { $exists: false } },
     [
       { $set: { certificates: ['$certificate'] } },
@@ -11,11 +14,13 @@ const migrate = async client => {
       },
     ]
   )
-  await db.ssoConfigs.updateMany(
+  await batchedUpdate(
+    db.ssoConfigs,
     { userFirstNameAttribute: null },
     { $unset: { userFirstNameAttribute: true } }
   )
-  await db.ssoConfigs.updateMany(
+  await batchedUpdate(
+    db.ssoConfigs,
     { userLastNameAttribute: null },
     { $unset: { userLastNameAttribute: true } }
   )
@@ -23,7 +28,8 @@ const migrate = async client => {
 
 const rollback = async client => {
   const { db } = client
-  await db.ssoConfigs.updateMany(
+  await batchedUpdate(
+    db.ssoConfigs,
     { certificate: { $exists: false }, certificates: { $exists: true } },
     [
       { $set: { certificate: { $arrayElemAt: ['$certificates', 0] } } },

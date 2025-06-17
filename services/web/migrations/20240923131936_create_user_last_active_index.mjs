@@ -1,6 +1,6 @@
-const Helpers = require('./lib/helpers')
+import Helpers from './lib/helpers.mjs'
 
-exports.tags = ['server-ce', 'server-pro', 'saas']
+const tags = ['server-ce', 'server-pro', 'saas']
 
 const indexes = [
   {
@@ -9,12 +9,18 @@ const indexes = [
   },
 ]
 
-exports.migrate = async client => {
+async function migrate(client) {
   const { db } = client
   await Helpers.addIndexesToCollection(db.users, indexes)
 }
 
-exports.rollback = async client => {
+async function rollback(client) {
   const { db } = client
   await Helpers.dropIndexesFromCollection(db.users, indexes)
+}
+
+export default {
+  tags,
+  migrate,
+  rollback,
 }

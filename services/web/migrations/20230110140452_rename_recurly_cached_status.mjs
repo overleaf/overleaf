@@ -1,13 +1,12 @@
-/* eslint-disable no-unused-vars */
-
-import Helpers from './lib/helpers.mjs'
+import { batchedUpdate } from '@overleaf/mongo-utils/batchedUpdate.js'
 
 const tags = ['saas']
 
 const migrate = async client => {
   const { db } = client
   // 'recurly' -> 'recurlyStatus'
-  await db.subscriptions.updateMany(
+  await batchedUpdate(
+    db.subscriptions,
     {
       $and: [
         { recurlyStatus: { $exists: false } },
@@ -17,7 +16,8 @@ const migrate = async client => {
     { $rename: { recurly: 'recurlyStatus' } }
   )
   // some records may have already recached the recurly status, discard old cache
-  await db.subscriptions.updateMany(
+  await batchedUpdate(
+    db.subscriptions,
     {
       $and: [
         { recurlyStatus: { $exists: true } },
@@ -31,7 +31,8 @@ const migrate = async client => {
 const rollback = async client => {
   const { db } = client
   // 'recurlyStatus' -> 'recurly'
-  await db.subscriptions.updateMany(
+  await batchedUpdate(
+    db.subscriptions,
     {
       $and: [
         { recurly: { $exists: false } },
@@ -41,7 +42,8 @@ const rollback = async client => {
     { $rename: { recurlyStatus: 'recurly' } }
   )
   // some records may have already recached the recurly status, discard old cache
-  await db.subscriptions.updateMany(
+  await batchedUpdate(
+    db.subscriptions,
     {
       $and: [
         { recurlyStatus: { $exists: true } },

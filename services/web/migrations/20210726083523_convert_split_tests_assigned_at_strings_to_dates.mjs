@@ -1,4 +1,4 @@
-import updateStringDates from '../scripts/confirmed_at_to_dates.mjs'
+import updateStringDates from '../scripts/split_tests_assigned_at_to_dates.mjs'
 
 const tags = ['saas']
 

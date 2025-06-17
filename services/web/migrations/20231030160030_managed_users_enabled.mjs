@@ -1,12 +1,11 @@
-/* eslint-disable no-unused-vars */
-
-import Helpers from './lib/helpers.mjs'
+import { batchedUpdate } from '@overleaf/mongo-utils/batchedUpdate.js'
 
 const tags = ['saas']
 
 const migrate = async client => {
   const { db } = client
-  await db.subscriptions.updateMany(
+  await batchedUpdate(
+    db.subscriptions,
     { groupPolicy: { $exists: true } },
     { $set: { managedUsersEnabled: true } }
   )
@@ -14,7 +13,8 @@ const migrate = async client => {
 
 const rollback = async client => {
   const { db } = client
-  await db.subscriptions.updateMany(
+  await batchedUpdate(
+    db.subscriptions,
     { groupPolicy: { $exists: true } },
     { $unset: { managedUsersEnabled: '' } }
   )
