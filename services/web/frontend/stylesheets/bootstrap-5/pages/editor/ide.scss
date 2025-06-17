@@ -61,6 +61,24 @@ $editor-toggler-bg-dark-color: color.adjust(
       display: none !important;
     }
   }
+
+  .synctex-controls {
+    background-color: var(--bg-primary-themed);
+    border-radius: var(--border-radius-full);
+    border: 1px solid var(--border-divider-themed);
+  }
+
+  .synctex-control:not(.detach-synctex-control) {
+    margin-bottom: 0;
+    background-color: transparent;
+    color: var(--content-primary-themed);
+
+    &:hover,
+    &:active,
+    &:focus {
+      background-color: var(--bg-tertiary-themed);
+    }
+  }
 }
 
 .global-alerts {

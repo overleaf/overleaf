@@ -91,7 +91,7 @@ export default function MainLayout() {
                   tooltipWhenClosed={t('tooltip_show_pdf')}
                 />
                 {pdfLayout === 'sideBySide' && (
-                  <div className="synctex-controls" hidden>
+                  <div className="synctex-controls">
                     <DefaultSynctexControl />
                   </div>
                 )}
