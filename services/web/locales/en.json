@@ -1408,6 +1408,7 @@
   "neither_agree_nor_disagree": "Neither agree nor disagree",
   "new_compile_domain_notice": "We’ve recently migrated PDF downloads to a new domain. Something might be blocking your browser from accessing that new domain, <0>__compilesUserContentDomain__</0>. This could be caused by network blocking or a strict browser plugin rule. Please follow our <1>troubleshooting guide</1>.",
   "new_create_tables_and_equations": "NEW! <sparkle/> Create tables and equations in seconds",
+  "new_error_logs_panel": "New error logs panel. Added ‘Go to location in code’ and ‘Go to location in PDF’ buttons (17 June 2025)",
   "new_file": "New file",
   "new_folder": "New folder",
   "new_font_open_dyslexic": "New font: OpenDyslexic Mono is designed to improve readability for those with dyslexia.",

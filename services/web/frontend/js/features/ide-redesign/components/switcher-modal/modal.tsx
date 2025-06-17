@@ -15,6 +15,7 @@ import Notification from '@/shared/components/notification'
 import { useSwitchEnableNewEditorState } from '../../hooks/use-switch-enable-new-editor-state'
 import { Trans, useTranslation } from 'react-i18next'
 import { useEditorAnalytics } from '@/shared/hooks/use-editor-analytics'
+import { useFeatureFlag } from '@/shared/context/split-test-context'
 import { useSurveyUrl } from '../../hooks/use-survey-url'
 
 export const IdeRedesignSwitcherModal = () => {
@@ -160,10 +161,13 @@ const SwitcherModalContentDisabled: FC<ModalContentProps> = ({
 
 const SwitcherWhatsNew = () => {
   const { t } = useTranslation()
+  const newErrorlogs = useFeatureFlag('new-editor-error-logs-redesign')
+
   return (
     <div className="ide-redesign-switcher-modal-whats-new">
       <h4>{t('latest_updates')}</h4>
       <ul>
+        {newErrorlogs && <li>{t('new_error_logs_panel')}</li>}
         <li>{t('searching_all_project_files_is_now_available')}</li>
         <li>{t('double_clicking_on_the_pdf_shows')}</li>
       </ul>
