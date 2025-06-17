@@ -207,6 +207,7 @@ const RestoreManager = {
             continue
           }
           // We have a new id for this comment thread
+          comment.id = result.duplicateId
           comment.op.t = result.duplicateId
         }
         newRanges.comments.push(comment)

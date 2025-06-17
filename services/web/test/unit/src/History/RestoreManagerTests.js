@@ -266,13 +266,28 @@ describe('RestoreManager', function () {
       beforeEach(function () {
         this.pathname = 'foo.tex'
         this.comments = [
-          { op: { t: 'comment-in-other-doc', p: 0, c: 'foo' } },
-          { op: { t: 'single-comment', p: 10, c: 'bar' } },
-          { op: { t: 'deleted-comment', p: 20, c: 'baz' } },
+          {
+            id: 'comment-in-other-doc',
+            op: { t: 'comment-in-other-doc', p: 0, c: 'foo' },
+          },
+          {
+            id: 'single-comment',
+            op: { t: 'single-comment', p: 10, c: 'bar' },
+          },
+          {
+            id: 'deleted-comment',
+            op: { t: 'deleted-comment', p: 20, c: 'baz' },
+          },
         ]
         this.remappedComments = [
-          { op: { t: 'duplicate-comment', p: 0, c: 'foo' } },
-          { op: { t: 'single-comment', p: 10, c: 'bar' } },
+          {
+            id: 'duplicate-comment',
+            op: { t: 'duplicate-comment', p: 0, c: 'foo' },
+          },
+          {
+            id: 'single-comment',
+            op: { t: 'single-comment', p: 10, c: 'bar' },
+          },
         ]
         this.ProjectLocator.promises.findElementByPath = sinon.stub().rejects()
         this.DocstoreManager.promises.getCommentThreadIds = sinon
