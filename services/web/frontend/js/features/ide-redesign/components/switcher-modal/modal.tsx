@@ -15,6 +15,7 @@ import Notification from '@/shared/components/notification'
 import { useSwitchEnableNewEditorState } from '../../hooks/use-switch-enable-new-editor-state'
 import { Trans, useTranslation } from 'react-i18next'
 import { useEditorAnalytics } from '@/shared/hooks/use-editor-analytics'
+import { useSurveyUrl } from '../../hooks/use-survey-url'
 
 export const IdeRedesignSwitcherModal = () => {
   const { t } = useTranslation()
@@ -79,6 +80,9 @@ const SwitcherModalContentEnabled: FC<ModalContentProps> = ({
         // do nothing, we're already showing the error
       })
   }, [setEditorRedesignStatus, hide, sendEvent])
+
+  const surveyURL = useSurveyUrl()
+
   return (
     <>
       <OLModalBody>
@@ -104,7 +108,7 @@ const SwitcherModalContentEnabled: FC<ModalContentProps> = ({
           {t('cancel')}
         </OLButton>
         <OLButton
-          href="https://forms.gle/soyVStc5qDx9na1Z6"
+          href={surveyURL}
           target="_blank"
           rel="noopener noreferrer"
           variant="primary"

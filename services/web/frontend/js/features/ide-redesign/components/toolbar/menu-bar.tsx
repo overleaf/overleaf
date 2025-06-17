@@ -26,6 +26,7 @@ import { isSplitTestEnabled } from '@/utils/splitTestUtils'
 import { useDetachCompileContext as useCompileContext } from '@/shared/context/detach-compile-context'
 import { useEditorAnalytics } from '@/shared/hooks/use-editor-analytics'
 import { useProjectSettingsContext } from '@/features/editor-left-menu/context/project-settings-context'
+import { useSurveyUrl } from '../../hooks/use-survey-url'
 
 export const ToolbarMenuBar = () => {
   const { t } = useTranslation()
@@ -188,6 +189,9 @@ export const ToolbarMenuBar = () => {
   const openContactUsModal = useCallback(() => {
     setActiveModal('contact-us')
   }, [setActiveModal])
+
+  const surveyURL = useSurveyUrl()
+
   return (
     <>
       <MenuBar
@@ -259,7 +263,7 @@ export const ToolbarMenuBar = () => {
           <MenuBarOption
             eventKey="give_feedback"
             title={t('give_feedback')}
-            href="https://forms.gle/soyVStc5qDx9na1Z6"
+            href={surveyURL}
             target="_blank"
             rel="noopener noreferrer"
           />

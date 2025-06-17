@@ -4,6 +4,7 @@ import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
 import MaterialIcon from '@/shared/components/material-icon'
 import { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useSurveyUrl } from '../../hooks/use-survey-url'
 
 export const LabsActions = () => {
   const { t } = useTranslation()
@@ -11,6 +12,7 @@ export const LabsActions = () => {
   const openEditorRedesignSwitcherModal = useCallback(() => {
     setShowSwitcherModal(true)
   }, [setShowSwitcherModal])
+  const surveyURL = useSurveyUrl()
   return (
     <>
       <div className="ide-redesign-toolbar-button-container">
@@ -34,7 +36,7 @@ export const LabsActions = () => {
       </div>
       <div className="ide-redesign-toolbar-button-container">
         <a
-          href="https://forms.gle/soyVStc5qDx9na1Z6"
+          href={surveyURL}
           rel="noopener noreferrer"
           target="_blank"
           className="ide-redesign-toolbar-labs-feedback-link"

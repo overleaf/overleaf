@@ -43,6 +43,7 @@ import ErrorLogsPanel from './error-logs/error-logs-panel'
 import { useDetachCompileContext as useCompileContext } from '@/shared/context/detach-compile-context'
 import OldErrorPane from './error-logs/old-error-pane'
 import { useFeatureFlag } from '@/shared/context/split-test-context'
+import { useSurveyUrl } from '../hooks/use-survey-url'
 
 type RailElement = {
   icon: AvailableUnfilledIcon
@@ -410,6 +411,8 @@ const RailHelpDropdown = () => {
   const openContactUsModal = useCallback(() => {
     setActiveModal('contact-us')
   }, [setActiveModal])
+  const surveyURL = useSurveyUrl()
+
   return (
     <DropdownMenu>
       <DropdownItem onClick={openKeyboardShortcutsModal}>
@@ -430,7 +433,7 @@ const RailHelpDropdown = () => {
         </DropdownItem>
       )}
       <DropdownItem
-        href="https://forms.gle/soyVStc5qDx9na1Z6"
+        href={surveyURL}
         role="menuitem"
         target="_blank"
         rel="noopener noreferrer"
