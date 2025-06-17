@@ -9,6 +9,7 @@ const chunkStore = require('./chunk_store')
 const { BlobStore } = require('./blob_store')
 const BatchBlobStore = require('./batch_blob_store')
 const persistChanges = require('./persist_changes')
+const resyncProject = require('./resync_project')
 const redisBackend = require('./chunk_store/redis')
 
 /**
@@ -170,6 +171,24 @@ async function persistBuffer(projectId, limits) {
     { projectId, newEndVersion },
     'updated persisted version in Redis'
   )
+
+  // 7. Resync the project if content hash validation failed
+  if (limits.autoResync && persistResult.resyncNeeded) {
+    if (
+      changesToPersist.some(
+        change => change.getOrigin()?.getKind() === 'history-resync'
+      )
+    ) {
+      // To avoid an infinite loop, do not resync if the current batch of
+      // changes contains a history resync.
+      logger.warn(
+        { projectId },
+        'content hash validation failed while persisting a history resync, skipping additional resync'
+      )
+    } else {
+      await resyncProject(projectId)
+    }
+  }
 
   logger.debug(
     { projectId, finalPersistedVersion: newEndVersion },

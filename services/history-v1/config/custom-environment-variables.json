@@ -104,5 +104,9 @@
       "password": "REDIS_PASSWORD",
       "port": "REDIS_PORT"
     }
+  },
+  "projectHistory": {
+    "host": "PROJECT_HISTORY_HOST",
+    "port": "PROJECT_HISTORY_PORT"
   }
 }

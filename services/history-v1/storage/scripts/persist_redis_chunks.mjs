@@ -45,6 +45,7 @@ async function persistProjectAction(projectId) {
     maxChanges: 0,
     minChangeTimestamp: farFuture,
     maxChangeTimestamp: farFuture,
+    autoResync: true,
   }
   await persistBuffer(projectId, limits)
   if (job && job.close) {

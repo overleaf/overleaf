@@ -163,6 +163,7 @@ async function flushChanges(req, res, next) {
     maxChanges: 0,
     minChangeTimestamp: farFuture,
     maxChangeTimestamp: farFuture,
+    autoResync: true,
   }
   try {
     await persistBuffer(projectId, limits)

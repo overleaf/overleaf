@@ -39,5 +39,8 @@
   "databasePoolMin": "2",
   "databasePoolMax": "10",
   "httpsOnly": "false",
-  "httpRequestTimeout": "300000"
+  "httpRequestTimeout": "300000",
+  "projectHistory": {
+    "port": "3054"
+  }
 }
