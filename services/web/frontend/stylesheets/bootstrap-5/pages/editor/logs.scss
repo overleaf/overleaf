@@ -44,6 +44,8 @@
     }
 
     .log-entry-content {
+      --bs-code-color: var(--content-secondary-themed);
+
       color: var(--content-primary-themed);
       background-color: var(--bg-primary-themed);
       padding: 0;

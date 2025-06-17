@@ -25,6 +25,7 @@
   --link-ui-themed: var(--link-ui-dark);
   --link-ui-hover-themed: var(--link-ui-hover-dark);
   --link-ui-visited-themed: var(--link-ui-visited-dark);
+  --premium-gradient-themed: var(--premium-gradient-dark);
 }
 
 @include theme('light') {
@@ -54,4 +55,5 @@
   --link-ui-themed: var(--link-ui);
   --link-ui-hover-themed: var(--link-ui-hover);
   --link-ui-visited-themed: var(--link-ui-visited);
+  --premium-gradient-themed: var(--premium-gradient);
 }

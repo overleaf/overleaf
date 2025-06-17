@@ -237,4 +237,10 @@ $link-ui-visited-dark: $blue-40;
     #254c84 29%,
     var(--blue-40) 97%
   );
+  --premium-gradient-dark: linear-gradient(
+    246deg,
+    #6f8bcd 0%,
+    #8ea3d7 29%,
+    #ccdcff 97%
+  );
 }
