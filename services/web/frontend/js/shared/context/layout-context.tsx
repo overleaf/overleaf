@@ -145,6 +145,7 @@ export const LayoutProvider: FC<React.PropsWithChildren> = ({ children }) => {
     )
   )
 
+  // TODO ide-redesign-cleanup: remove this listener as we have an equivalent in rail-context
   useEventListener(
     'ui.toggle-review-panel',
     useCallback(() => {
@@ -152,6 +153,7 @@ export const LayoutProvider: FC<React.PropsWithChildren> = ({ children }) => {
     }, [setReviewPanelOpen])
   )
 
+  // TODO ide-redesign-cleanup: remove this listener as we have an equivalent in rail-context
   useEventListener(
     'keydown',
     useCallback((event: KeyboardEvent) => {

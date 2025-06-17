@@ -1,5 +1,7 @@
+import { sendSearchEvent } from '@/features/event-tracking/search-events'
 import useCollapsiblePanel from '@/features/ide-react/hooks/use-collapsible-panel'
 import useEventListener from '@/shared/hooks/use-event-listener'
+import { isMac } from '@/shared/utils/os'
 import {
   createContext,
   Dispatch,
@@ -88,6 +90,27 @@ export const RailProvider: FC<React.PropsWithChildren> = ({ children }) => {
         openTab('review-panel')
       }
     }, [handlePaneCollapse, selectedTab, isOpen, openTab])
+  )
+
+  useEventListener(
+    'keydown',
+    useCallback(
+      (event: KeyboardEvent) => {
+        if (
+          (isMac ? event.metaKey : event.ctrlKey) &&
+          event.shiftKey &&
+          event.code === 'KeyF'
+        ) {
+          event.preventDefault()
+          sendSearchEvent('search-open', {
+            searchType: 'full-project',
+            method: 'keyboard',
+          })
+          openTab('full-project-search')
+        }
+      },
+      [openTab]
+    )
   )
 
   const value = useMemo(
