@@ -49,7 +49,6 @@ function ErrorLogs() {
 
   const includeErrors = activeTab === 'all' || activeTab === 'errors'
   const includeWarnings = activeTab === 'all' || activeTab === 'warnings'
-  const includeInfo = activeTab === 'all' || activeTab === 'info'
 
   return (
     <TabContainer onSelect={setActiveTab} defaultActiveKey={activeTab ?? 'all'}>
@@ -94,13 +93,14 @@ function ErrorLogs() {
             />
           )}
 
-          {rawLog && includeInfo && (
+          {rawLog && activeTab === 'all' && (
             <LogEntry
               headerTitle={t('raw_logs')}
               rawContent={rawLog}
               entryAriaLabel={t('raw_logs_description')}
               level="raw"
               alwaysExpandRawContent
+              showSourceLocationLink={false}
             />
           )}
         </div>

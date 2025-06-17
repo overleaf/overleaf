@@ -61,9 +61,9 @@ function LogEntryHeader({
   const logEntryHeaderTextClasses = classNames('log-entry-header-text', {
     'log-entry-header-text-error': level === 'error',
     'log-entry-header-text-warning': level === 'warning',
-    'log-entry-header-text-info':
-      level === 'info' || level === 'typesetting' || level === 'raw',
+    'log-entry-header-text-info': level === 'info' || level === 'typesetting',
     'log-entry-header-text-success': level === 'success',
+    'log-entry-header-text-raw': level === 'raw',
   })
 
   function checkLocationSpanOverflow(observedElement: ResizeObserverEntry) {
