@@ -45,6 +45,18 @@ class PromisifiedSubscription {
     return await db.subscriptions.findOne({ _id: new ObjectId(this._id) })
   }
 
+  async getSSOConfig() {
+    const subscription = await this.get()
+
+    if (!subscription.ssoConfig) {
+      return
+    }
+
+    return await db.ssoConfigs.findOne({
+      _id: new ObjectId(subscription.ssoConfig),
+    })
+  }
+
   async getWithGroupPolicy() {
     // eslint-disable-next-line no-restricted-syntax
     return await SubscriptionModel.findById(this._id)
