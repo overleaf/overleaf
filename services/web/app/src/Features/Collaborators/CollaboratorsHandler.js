@@ -161,6 +161,7 @@ async function addUserIdToProject(
   })
   let level
   let existingUsers = project.collaberator_refs || []
+  existingUsers = existingUsers.concat(project.reviewer_refs || [])
   existingUsers = existingUsers.concat(project.readOnly_refs || [])
   existingUsers = existingUsers.map(u => u.toString())
   if (existingUsers.includes(userId.toString())) {

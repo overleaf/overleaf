@@ -447,6 +447,40 @@ describe('CollaboratorsHandler', function () {
       })
     })
 
+    describe('when user already exists as a reviewer', function () {
+      beforeEach(function () {
+        this.project.collaberator_refs = []
+        this.project.reviewer_refs = [this.userId]
+        this.project.readOnly_refs = []
+      })
+
+      it('should not add the user again', async function () {
+        await this.CollaboratorsHandler.promises.addUserIdToProject(
+          this.project._id,
+          this.addingUserId,
+          this.userId,
+          'readAndWrite'
+        )
+      })
+    })
+
+    describe('when user already exists as a read-only user', function () {
+      beforeEach(function () {
+        this.project.collaberator_refs = []
+        this.project.reviewer_refs = []
+        this.project.readOnly_refs = [this.userId]
+      })
+
+      it('should not add the user again', async function () {
+        await this.CollaboratorsHandler.promises.addUserIdToProject(
+          this.project._id,
+          this.addingUserId,
+          this.userId,
+          'readAndWrite'
+        )
+      })
+    })
+
     describe('with null addingUserId', function () {
       beforeEach(async function () {
         this.project.collaberator_refs = []
