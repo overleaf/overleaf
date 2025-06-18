@@ -127,10 +127,11 @@ export const IdeReactProvider: FC<React.PropsWithChildren> = ({ children }) => {
   // Populate scope values when joining project, then fire project:joined event
   useEffect(() => {
     function handleJoinProjectResponse({
-      project,
+      project: { rootDoc_id: rootDocId, ..._project },
       permissionsLevel,
     }: JoinProjectPayload) {
-      scopeStore.set('project', { rootDoc_id: null, ...project })
+      const project = { ..._project, rootDocId }
+      scopeStore.set('project', project)
       scopeStore.set('permissionsLevel', permissionsLevel)
       // Make watchers update immediately
       scopeStore.flushUpdates()

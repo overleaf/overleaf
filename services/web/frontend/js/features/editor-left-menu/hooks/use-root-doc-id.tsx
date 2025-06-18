@@ -6,7 +6,7 @@ import useSaveProjectSettings from './use-save-project-settings'
 
 export default function useRootDocId() {
   const [rootDocId] =
-    useScopeValue<ProjectSettings['rootDocId']>('project.rootDoc_id')
+    useScopeValue<ProjectSettings['rootDocId']>('project.rootDocId')
   const { permissionsLevel } = useEditorContext()
   const saveProjectSettings = useSaveProjectSettings()
 

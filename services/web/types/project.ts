@@ -25,7 +25,8 @@ export type Project = {
   owner: MongoUser
   members: ProjectMember[]
   invites: ProjectInvite[]
-  rootDoc_id?: string
+  // `rootDoc_id` in the backend; `rootDocId` in the frontend
+  rootDocId?: string
   rootFolder?: Folder[]
   deletedByExternalDataSource?: boolean
 }

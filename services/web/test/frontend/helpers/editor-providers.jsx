@@ -103,7 +103,7 @@ export function EditorProviders({
         name: PROJECT_NAME,
         owner: projectOwner,
         features: projectFeatures,
-        rootDoc_id: rootDocId,
+        rootDocId,
         rootFolder,
         imageName,
         compiler,

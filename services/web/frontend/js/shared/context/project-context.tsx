@@ -36,7 +36,7 @@ export const ProjectProvider: FC<React.PropsWithChildren> = ({ children }) => {
     compiler,
     imageName,
     name,
-    rootDoc_id: rootDocId,
+    rootDocId,
     members,
     invites,
     features,
