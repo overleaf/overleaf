@@ -28,7 +28,6 @@ const InvalidChangeError = storage.InvalidChangeError
 
 const render = require('./render')
 const Rollout = require('../app/rollout')
-const redisBackend = require('../../storage/lib/chunk_store/redis')
 
 const rollout = new Rollout(config)
 rollout.report(logger) // display the rollout configuration in the logs
@@ -178,13 +177,6 @@ async function flushChanges(req, res, next) {
   }
 }
 
-async function expireProject(req, res, next) {
-  const projectId = req.swagger.params.project_id.value
-  await redisBackend.expireProject(projectId)
-  res.status(HTTPStatus.OK).end()
-}
-
 exports.importSnapshot = expressify(importSnapshot)
 exports.importChanges = expressify(importChanges)
 exports.flushChanges = expressify(flushChanges)
-exports.expireProject = expressify(expireProject)
