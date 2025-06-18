@@ -24,6 +24,10 @@ import { sendSearchEvent } from '@/features/event-tracking/search-events'
 
 export const toggleBold = toggleRanges('\\textbf')
 export const toggleItalic = toggleRanges('\\textit')
+//Added toggleSlant as a test case before implementing color picker
+export const toggleSlant = toggleRanges('\\textsl')
+//Added toggleColor to test choosing a color
+export const toggleColor = toggleRanges('\\textcolor')
 
 // TODO: apply as a snippet?
 // TODO: read URL from clipboard?
