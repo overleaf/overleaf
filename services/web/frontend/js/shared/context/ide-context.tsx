@@ -4,7 +4,6 @@ import { ScopeEventEmitter } from '../../../../types/ide/scope-event-emitter'
 import { Socket } from '@/features/ide-react/connection/types/socket'
 
 export type Ide = {
-  $scope: Record<string, any>
   socket: Socket
 }
 

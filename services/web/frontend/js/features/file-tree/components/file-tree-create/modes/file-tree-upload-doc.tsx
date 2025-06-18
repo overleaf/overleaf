@@ -176,7 +176,6 @@ export default function FileTreeUploadDoc() {
         // close the modal when all the uploads completed successfully
         .on('complete', result => {
           if (!result.failed.length) {
-            // $scope.$emit('done', { name: name })
             cancel()
           }
         })

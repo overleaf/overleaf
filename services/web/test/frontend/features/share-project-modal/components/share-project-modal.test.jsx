@@ -5,10 +5,7 @@ import fetchMock from 'fetch-mock'
 import userEvent from '@testing-library/user-event'
 
 import ShareProjectModal from '../../../../../frontend/js/features/share-project-modal/components/share-project-modal'
-import {
-  renderWithEditorContext,
-  cleanUpContext,
-} from '../../../helpers/render-with-context'
+import { renderWithEditorContext } from '../../../helpers/render-with-context'
 import {
   EditorProviders,
   USER_EMAIL,
@@ -100,7 +97,6 @@ describe('<ShareProjectModal/>', function () {
   afterEach(function () {
     this.locationWrapperSandbox.restore()
     fetchMock.removeRoutes().clearHistory()
-    cleanUpContext()
   })
 
   it('renders the modal', async function () {

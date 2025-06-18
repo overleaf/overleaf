@@ -9,7 +9,6 @@ import {
   useChatContext,
   chatClientIdGenerator,
 } from '@/features/chat/context/chat-context'
-import { cleanUpContext } from '../../../helpers/render-with-context'
 import { stubMathJax, tearDownMathJaxStubs } from '../components/stubs'
 import { SocketIOMock } from '@/ide/connection/SocketIoShim'
 import { EditorProviders } from '../../../helpers/editor-providers'
@@ -24,7 +23,6 @@ describe('ChatContext', function () {
 
   beforeEach(function () {
     fetchMock.removeRoutes().clearHistory()
-    cleanUpContext()
 
     stubMathJax()
 

@@ -1,7 +1,6 @@
 // Disable prop type checks for test harnesses
 /* eslint-disable react/prop-types */
-import sinon from 'sinon'
-import { get, merge } from 'lodash'
+import { merge } from 'lodash'
 import { SocketIOMock } from '@/ide/connection/SocketIoShim'
 import { IdeContext } from '@/shared/context/ide-context'
 import React, { useEffect, useState } from 'react'
@@ -48,8 +47,7 @@ export function EditorProviders({
   compiler = 'pdflatex',
   socket = new SocketIOMock(),
   isRestrictedTokenMember = false,
-  clsiServerId = '1234',
-  scope = {},
+  scope: defaultScope = {},
   features = {
     referencesSearch: true,
   },
@@ -71,18 +69,6 @@ export function EditorProviders({
     },
   ],
   ui = { view: 'editor', pdfLayout: 'sideBySide', chatOpen: true },
-  fileTreeManager = {
-    findEntityById: () => null,
-    findEntityByPath: () => null,
-    getEntityPath: () => '',
-    getRootDocDirname: () => '',
-    getPreviewByPath: path => ({ url: path, extension: 'png' }),
-  },
-  editorManager = {
-    getCurrentDocumentId: () => 'foo',
-    getCurrentDocValue: () => {},
-    openDoc: sinon.stub(),
-  },
   userSettings = {},
   providers = {},
 }) {
@@ -99,7 +85,7 @@ export function EditorProviders({
     merge({}, defaultUserSettings, userSettings)
   )
 
-  const $scope = merge(
+  const scope = merge(
     {
       user,
       editor: {
@@ -123,24 +109,10 @@ export function EditorProviders({
         compiler,
       },
       ui,
-      $watch: (path, callback) => {
-        callback(get($scope, path))
-        return () => null
-      },
-      $on: sinon.stub(),
-      $applyAsync: sinon.stub(),
       permissionsLevel,
     },
-    scope
+    defaultScope
   )
-
-  window._ide = {
-    $scope,
-    socket,
-    clsiServerId,
-    editorManager,
-    fileTreeManager,
-  }
 
   // Add details for useUserContext
   window.metaAttributesCache.set('ol-user', { ...user, features })
@@ -149,8 +121,8 @@ export function EditorProviders({
   return (
     <ReactContextRoot
       providers={{
-        ConnectionProvider,
-        IdeReactProvider,
+        ConnectionProvider: makeConnectionProvider(socket),
+        IdeReactProvider: makeIdeReactProvider(scope, socket),
         ...providers,
       }}
     >
@@ -159,79 +131,85 @@ export function EditorProviders({
   )
 }
 
-const ConnectionProvider = ({ children }) => {
-  const [value] = useState(() => ({
-    socket: window._ide.socket,
-    connectionState: {
-      readyState: WebSocket.OPEN,
-      forceDisconnected: false,
-      inactiveDisconnect: false,
-      reconnectAt: null,
-      forcedDisconnectDelay: 0,
-      lastConnectionAttempt: 0,
-      error: '',
-    },
-    isConnected: true,
-    isStillReconnecting: false,
-    secondsUntilReconnect: () => 0,
-    tryReconnectNow: () => {},
-    registerUserActivity: () => {},
-    disconnect: () => {},
-  }))
+const makeConnectionProvider = socket => {
+  const ConnectionProvider = ({ children }) => {
+    const [value] = useState(() => ({
+      socket,
+      connectionState: {
+        readyState: WebSocket.OPEN,
+        forceDisconnected: false,
+        inactiveDisconnect: false,
+        reconnectAt: null,
+        forcedDisconnectDelay: 0,
+        lastConnectionAttempt: 0,
+        error: '',
+      },
+      isConnected: true,
+      isStillReconnecting: false,
+      secondsUntilReconnect: () => 0,
+      tryReconnectNow: () => {},
+      registerUserActivity: () => {},
+      disconnect: () => {},
+    }))
 
-  return (
-    <ConnectionContext.Provider value={value}>
-      {children}
-    </ConnectionContext.Provider>
-  )
+    return (
+      <ConnectionContext.Provider value={value}>
+        {children}
+      </ConnectionContext.Provider>
+    )
+  }
+  return ConnectionProvider
 }
 
-const IdeReactProvider = ({ children }) => {
-  const [startedFreeTrial, setStartedFreeTrial] = useState(false)
+const makeIdeReactProvider = (scope, socket) => {
+  const IdeReactProvider = ({ children }) => {
+    const [startedFreeTrial, setStartedFreeTrial] = useState(false)
 
-  const [ideReactContextValue] = useState(() => ({
-    projectId: PROJECT_ID,
-    eventEmitter: new IdeEventEmitter(),
-    startedFreeTrial,
-    setStartedFreeTrial,
-    reportError: () => {},
-    projectJoined: true,
-  }))
+    const [ideReactContextValue] = useState(() => ({
+      projectId: PROJECT_ID,
+      eventEmitter: new IdeEventEmitter(),
+      startedFreeTrial,
+      setStartedFreeTrial,
+      reportError: () => {},
+      projectJoined: true,
+    }))
 
-  const [ideContextValue] = useState(() => {
-    const ide = window._ide
+    const [ideContextValue] = useState(() => {
+      const scopeStore = createReactScopeValueStore(PROJECT_ID)
+      for (const [key, value] of Object.entries(scope)) {
+        // TODO: path for nested entries
+        scopeStore.set(key, value)
+      }
+      scopeStore.set('editor.sharejs_doc', scope.editor.sharejs_doc)
+      scopeStore.set('ui.chatOpen', scope.ui.chatOpen)
+      const scopeEventEmitter = new ReactScopeEventEmitter(
+        new IdeEventEmitter()
+      )
 
-    const scopeStore = createReactScopeValueStore(PROJECT_ID)
-    for (const [key, value] of Object.entries(ide.$scope)) {
-      // TODO: path for nested entries
-      scopeStore.set(key, value)
-    }
-    scopeStore.set('editor.sharejs_doc', ide.$scope.editor.sharejs_doc)
-    scopeStore.set('ui.chatOpen', ide.$scope.ui.chatOpen)
-    const scopeEventEmitter = new ReactScopeEventEmitter(new IdeEventEmitter())
+      return {
+        socket,
+        scopeStore,
+        scopeEventEmitter,
+      }
+    })
 
-    return {
-      ...ide,
-      scopeStore,
-      scopeEventEmitter,
-    }
-  })
+    useEffect(() => {
+      window.overleaf = {
+        ...window.overleaf,
+        unstable: {
+          ...window.overleaf?.unstable,
+          store: ideContextValue.scopeStore,
+        },
+      }
+    }, [ideContextValue.scopeStore])
 
-  useEffect(() => {
-    window.overleaf = {
-      ...window.overleaf,
-      unstable: {
-        ...window.overleaf?.unstable,
-        store: ideContextValue.scopeStore,
-      },
-    }
-  }, [ideContextValue.scopeStore])
-
-  return (
-    <IdeReactContext.Provider value={ideReactContextValue}>
-      <IdeContext.Provider value={ideContextValue}>
-        {children}
-      </IdeContext.Provider>
-    </IdeReactContext.Provider>
-  )
+    return (
+      <IdeReactContext.Provider value={ideReactContextValue}>
+        <IdeContext.Provider value={ideContextValue}>
+          {children}
+        </IdeContext.Provider>
+      </IdeReactContext.Provider>
+    )
+  }
+  return IdeReactProvider
 }

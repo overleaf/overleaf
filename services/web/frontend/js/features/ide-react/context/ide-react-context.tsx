@@ -16,7 +16,6 @@ import {
 } from '@/features/ide-react/create-ide-event-emitter'
 import { JoinProjectPayload } from '@/features/ide-react/connection/join-project-payload'
 import { useConnectionContext } from '@/features/ide-react/context/connection-context'
-import { getMockIde } from '@/shared/context/mock/mock-ide'
 import { populateEditorScope } from '@/features/ide-react/scope-adapters/editor-manager-context-adapter'
 import { postJSON } from '@/infrastructure/fetch-json'
 import { ReactScopeEventEmitter } from '@/features/ide-react/scope-event-emitter/react-scope-event-emitter'
@@ -157,11 +156,11 @@ export const IdeReactProvider: FC<React.PropsWithChildren> = ({ children }) => {
 
   const ide = useMemo(() => {
     return {
-      ...getMockIde(),
+      _id: projectId,
       socket,
       reportError,
     }
-  }, [socket, reportError])
+  }, [projectId, socket, reportError])
 
   const value = useMemo(
     () => ({

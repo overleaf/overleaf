@@ -13,6 +13,7 @@ import en from '../../../services/web/locales/en.json'
 function resetMeta() {
   window.metaAttributesCache = new Map()
   window.metaAttributesCache.set('ol-i18n', { currentLangCode: 'en' })
+  window.metaAttributesCache.set('ol-chatEnabled', true)
   window.metaAttributesCache.set('ol-ExposedSettings', {
     adminEmail: 'placeholder@example.com',
     appName: 'Overleaf',

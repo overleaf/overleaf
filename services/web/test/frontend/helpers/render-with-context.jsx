@@ -18,7 +18,3 @@ export function renderWithEditorContext(
     ...renderOptions,
   })
 }
-
-export function cleanUpContext() {
-  delete window._ide
-}

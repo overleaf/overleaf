@@ -12,7 +12,7 @@ describe('<WordCountModal />', function () {
     })
 
     cy.mount(
-      <EditorProviders projectId="project-1" clsiServerId="clsi-server-1">
+      <EditorProviders projectId="project-1">
         <WordCountModal show handleHide={cy.stub()} />
       </EditorProviders>
     )
@@ -30,7 +30,7 @@ describe('<WordCountModal />', function () {
     })
 
     cy.mount(
-      <EditorProviders projectId="project-1" clsiServerId="clsi-server-1">
+      <EditorProviders projectId="project-1">
         <WordCountModal show handleHide={cy.stub()} />
       </EditorProviders>
     )
@@ -48,7 +48,7 @@ describe('<WordCountModal />', function () {
     })
 
     cy.mount(
-      <EditorProviders projectId="project-1" clsiServerId="clsi-server-1">
+      <EditorProviders projectId="project-1">
         <WordCountModal show handleHide={cy.stub()} />
       </EditorProviders>
     )
@@ -64,7 +64,7 @@ describe('<WordCountModal />', function () {
     })
 
     cy.mount(
-      <EditorProviders projectId="project-1" clsiServerId="clsi-server-1">
+      <EditorProviders projectId="project-1">
         <WordCountModal show handleHide={cy.stub()} />
       </EditorProviders>
     )
@@ -87,7 +87,7 @@ describe('<WordCountModal />', function () {
     })
 
     cy.mount(
-      <EditorProviders projectId="project-1" clsiServerId="clsi-server-1">
+      <EditorProviders projectId="project-1">
         <WordCountModal show handleHide={cy.stub()} />
       </EditorProviders>
     )
