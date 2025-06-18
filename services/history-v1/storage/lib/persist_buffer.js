@@ -186,7 +186,10 @@ async function persistBuffer(projectId, limits) {
         'content hash validation failed while persisting a history resync, skipping additional resync'
       )
     } else {
-      await resyncProject(projectId)
+      const backend = chunkStore.getBackend(projectId)
+      const mongoProjectId =
+        await backend.resolveHistoryIdToMongoProjectId(projectId)
+      await resyncProject(mongoProjectId)
     }
   }
 
