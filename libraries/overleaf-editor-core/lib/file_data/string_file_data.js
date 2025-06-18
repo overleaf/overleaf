@@ -8,7 +8,7 @@ const CommentList = require('./comment_list')
 const TrackedChangeList = require('./tracked_change_list')
 
 /**
- * @import { StringFileRawData, RawFileData, BlobStore, CommentRawData } from "../types"
+ * @import { StringFileRawData, RawHashFileData, BlobStore, CommentRawData } from "../types"
  * @import { TrackedChangeRawData, RangesBlob } from "../types"
  * @import EditOperation from "../operation/edit_operation"
  */
@@ -139,7 +139,7 @@ class StringFileData extends FileData {
   /**
    * @inheritdoc
    * @param {BlobStore} blobStore
-   * @return {Promise<RawFileData>}
+   * @return {Promise<RawHashFileData>}
    */
   async store(blobStore) {
     const blob = await blobStore.putString(this.content)

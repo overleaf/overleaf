@@ -11,7 +11,7 @@ const EditOperation = require('../operation/edit_operation')
 const EditOperationBuilder = require('../operation/edit_operation_builder')
 
 /**
- *  @import { BlobStore, ReadonlyBlobStore, RangesBlob, RawFileData, RawLazyStringFileData } from '../types'
+ *  @import { BlobStore, ReadonlyBlobStore, RangesBlob, RawHashFileData, RawLazyStringFileData } from '../types'
  */
 
 class LazyStringFileData extends FileData {
@@ -159,11 +159,11 @@ class LazyStringFileData extends FileData {
 
   /** @inheritdoc
    * @param {BlobStore} blobStore
-   * @return {Promise<RawFileData>}
+   * @return {Promise<RawHashFileData>}
    */
   async store(blobStore) {
     if (this.operations.length === 0) {
-      /** @type RawFileData */
+      /** @type RawHashFileData */
       const raw = { hash: this.hash }
       if (this.rangesHash) {
         raw.rangesHash = this.rangesHash
@@ -171,9 +171,11 @@ class LazyStringFileData extends FileData {
       return raw
     }
     const eager = await this.toEager(blobStore)
+    const raw = await eager.store(blobStore)
+    this.hash = raw.hash
+    this.rangesHash = raw.rangesHash
     this.operations.length = 0
-    /** @type RawFileData */
-    return await eager.store(blobStore)
+    return raw
   }
 }
 
