@@ -693,12 +693,15 @@ const promises = {
     }
   },
 
-  async extendTrial(subscriptionId, daysUntilExpire) {
+  async extendTrial(subscriptionId, trialEndsAt, daysUntilExpire) {
     if (daysUntilExpire == null) {
       daysUntilExpire = 7
     }
+    if (trialEndsAt == null) {
+      trialEndsAt = new Date()
+    }
     const nextRenewalDate = new Date()
-    nextRenewalDate.setDate(nextRenewalDate.getDate() + daysUntilExpire)
+    nextRenewalDate.setDate(trialEndsAt.getDate() + daysUntilExpire)
     logger.debug(
       { subscriptionId, daysUntilExpire },
       'Exending Free trial for user'
