@@ -1225,7 +1225,7 @@ describe('Syncing with web and doc-updater', function () {
           )
         })
 
-        it('should fix comments in the history store', function (done) {
+        it('should add comments in the history store', function (done) {
           const commentId = 'comment-id'
           const addComment = MockHistoryStore()
             .post(`/api/projects/${historyId}/legacy_changes`, body => {
@@ -1309,6 +1309,1195 @@ describe('Syncing with web and doc-updater', function () {
               }
               assert(
                 addComment.isDone(),
+                `/api/projects/${historyId}/changes should have been called`
+              )
+              done()
+            }
+          )
+        })
+
+        it('should add comments in the history store (history-ot)', function (done) {
+          const commentId = 'comment-id'
+          const addComment = MockHistoryStore()
+            .post(`/api/projects/${historyId}/legacy_changes`, body => {
+              expect(body).to.deep.equal([
+                {
+                  v2Authors: [],
+                  authors: [],
+                  timestamp: this.timestamp.toJSON(),
+                  operations: [
+                    {
+                      pathname: 'main.tex',
+                      commentId,
+                      ranges: [{ pos: 1, length: 10 }],
+                    },
+                  ],
+                  origin: { kind: 'test-origin' },
+                },
+              ])
+              return true
+            })
+            .query({ end_version: 0 })
+            .reply(204)
+
+          async.series(
+            [
+              cb => {
+                ProjectHistoryClient.resyncHistory(this.project_id, cb)
+              },
+              cb => {
+                const update = {
+                  projectHistoryId: historyId,
+                  resyncProjectStructure: {
+                    docs: [{ path: '/main.tex' }],
+                    files: [],
+                  },
+                  meta: {
+                    ts: this.timestamp,
+                  },
+                }
+                ProjectHistoryClient.pushRawUpdate(this.project_id, update, cb)
+              },
+              cb => {
+                const update = {
+                  path: '/main.tex',
+                  projectHistoryId: historyId,
+                  resyncDocContent: {
+                    content: 'a\nb',
+                    historyOTRanges: {
+                      comments: [
+                        {
+                          id: commentId,
+                          ranges: [
+                            {
+                              pos: 1,
+                              length: 10,
+                            },
+                          ],
+                        },
+                      ],
+                    },
+                  },
+                  doc: this.doc_id,
+                  meta: {
+                    ts: this.timestamp,
+                  },
+                }
+                ProjectHistoryClient.pushRawUpdate(this.project_id, update, cb)
+              },
+              cb => {
+                ProjectHistoryClient.flushProject(this.project_id, cb)
+              },
+            ],
+            error => {
+              if (error) {
+                return done(error)
+              }
+              assert(
+                addComment.isDone(),
+                `/api/projects/${historyId}/changes should have been called`
+              )
+              done()
+            }
+          )
+        })
+
+        it('should add tracked changes in the history store', function (done) {
+          const fixTrackedChange = MockHistoryStore()
+            .post(`/api/projects/${historyId}/legacy_changes`, body => {
+              expect(body).to.deep.equal([
+                {
+                  v2Authors: [],
+                  authors: [],
+                  timestamp: this.timestamp.toJSON(),
+                  operations: [
+                    {
+                      pathname: 'main.tex',
+                      textOperation: [
+                        {
+                          r: 1,
+                          tracking: {
+                            ts: this.timestamp.toJSON(),
+                            type: 'delete',
+                            userId: 'user-id',
+                          },
+                        },
+                        {
+                          r: 1,
+                          tracking: {
+                            ts: this.timestamp.toJSON(),
+                            type: 'insert',
+                            userId: 'user-id',
+                          },
+                        },
+                        1,
+                      ],
+                    },
+                  ],
+                  origin: { kind: 'test-origin' },
+                },
+              ])
+              return true
+            })
+            .query({ end_version: 0 })
+            .reply(204)
+
+          async.series(
+            [
+              cb => {
+                ProjectHistoryClient.resyncHistory(this.project_id, cb)
+              },
+              cb => {
+                const update = {
+                  projectHistoryId: historyId,
+                  resyncProjectStructure: {
+                    docs: [{ path: '/main.tex' }],
+                    files: [],
+                  },
+                  meta: {
+                    ts: this.timestamp,
+                  },
+                }
+                ProjectHistoryClient.pushRawUpdate(this.project_id, update, cb)
+              },
+              cb => {
+                const update = {
+                  path: '/main.tex',
+                  projectHistoryId: historyId,
+                  resyncDocContent: {
+                    content: 'a\nb',
+                    ranges: {
+                      changes: [
+                        {
+                          id: 'id1',
+                          op: {
+                            d: 'a',
+                            p: 0,
+                          },
+                          metadata: {
+                            user_id: 'user-id',
+                            ts: this.timestamp,
+                          },
+                        },
+                        {
+                          id: 'id2',
+                          op: {
+                            i: '\n',
+                            p: 0,
+                            hpos: 1,
+                          },
+                          metadata: {
+                            user_id: 'user-id',
+                            ts: this.timestamp,
+                          },
+                        },
+                      ],
+                    },
+                  },
+                  doc: this.doc_id,
+                  meta: {
+                    ts: this.timestamp,
+                  },
+                }
+                ProjectHistoryClient.pushRawUpdate(this.project_id, update, cb)
+              },
+              cb => {
+                ProjectHistoryClient.flushProject(this.project_id, cb)
+              },
+            ],
+            error => {
+              if (error) {
+                return done(error)
+              }
+              assert(
+                fixTrackedChange.isDone(),
+                `/api/projects/${historyId}/changes should have been called`
+              )
+              done()
+            }
+          )
+        })
+
+        it('should add tracked changes in the history store (history-ot)', function (done) {
+          const fixTrackedChange = MockHistoryStore()
+            .post(`/api/projects/${historyId}/legacy_changes`, body => {
+              expect(body).to.deep.equal([
+                {
+                  v2Authors: [],
+                  authors: [],
+                  timestamp: this.timestamp.toJSON(),
+                  operations: [
+                    {
+                      pathname: 'main.tex',
+                      textOperation: [
+                        {
+                          r: 1,
+                          tracking: {
+                            ts: this.timestamp.toJSON(),
+                            type: 'delete',
+                            userId: 'user-id',
+                          },
+                        },
+                        {
+                          r: 1,
+                          tracking: {
+                            ts: this.timestamp.toJSON(),
+                            type: 'insert',
+                            userId: 'user-id',
+                          },
+                        },
+                        1,
+                      ],
+                    },
+                  ],
+                  origin: { kind: 'test-origin' },
+                },
+              ])
+              return true
+            })
+            .query({ end_version: 0 })
+            .reply(204)
+
+          async.series(
+            [
+              cb => {
+                ProjectHistoryClient.resyncHistory(this.project_id, cb)
+              },
+              cb => {
+                const update = {
+                  projectHistoryId: historyId,
+                  resyncProjectStructure: {
+                    docs: [{ path: '/main.tex' }],
+                    files: [],
+                  },
+                  meta: {
+                    ts: this.timestamp,
+                  },
+                }
+                ProjectHistoryClient.pushRawUpdate(this.project_id, update, cb)
+              },
+              cb => {
+                const update = {
+                  path: '/main.tex',
+                  projectHistoryId: historyId,
+                  resyncDocContent: {
+                    content: 'a\nb',
+                    historyOTRanges: {
+                      trackedChanges: [
+                        {
+                          range: { pos: 0, length: 1 },
+                          tracking: {
+                            ts: this.timestamp.toJSON(),
+                            type: 'delete',
+                            userId: 'user-id',
+                          },
+                        },
+                        {
+                          range: { pos: 1, length: 1 },
+                          tracking: {
+                            ts: this.timestamp.toJSON(),
+                            type: 'insert',
+                            userId: 'user-id',
+                          },
+                        },
+                      ],
+                    },
+                  },
+                  doc: this.doc_id,
+                  meta: {
+                    ts: this.timestamp,
+                  },
+                }
+                ProjectHistoryClient.pushRawUpdate(this.project_id, update, cb)
+              },
+              cb => {
+                ProjectHistoryClient.flushProject(this.project_id, cb)
+              },
+            ],
+            error => {
+              if (error) {
+                return done(error)
+              }
+              assert(
+                fixTrackedChange.isDone(),
+                `/api/projects/${historyId}/changes should have been called`
+              )
+              done()
+            }
+          )
+        })
+      })
+
+      describe("when a doc's ranges are out of sync", function () {
+        const commentId = 'comment-id'
+        beforeEach(function () {
+          MockHistoryStore()
+            .get(`/api/projects/${historyId}/latest/history`)
+            .reply(200, {
+              chunk: {
+                history: {
+                  snapshot: {
+                    files: {
+                      'main.tex': {
+                        hash: '0a207c060e61f3b88eaee0a8cd0696f46fb155eb',
+                        rangesHash: '0a207c060e61f3b88eaee0a8cd0696f46fb155ec',
+                        stringLength: 3,
+                      },
+                    },
+                  },
+                  changes: [],
+                },
+                startVersion: 0,
+              },
+            })
+
+          MockHistoryStore()
+            .get(
+              `/api/projects/${historyId}/blobs/0a207c060e61f3b88eaee0a8cd0696f46fb155eb`
+            )
+            .reply(200, 'a\nb')
+
+          MockHistoryStore()
+            .get(
+              `/api/projects/${historyId}/blobs/0a207c060e61f3b88eaee0a8cd0696f46fb155ec`
+            )
+            .reply(
+              200,
+              JSON.stringify({
+                comments: [{ id: commentId, ranges: [{ pos: 0, length: 3 }] }],
+                trackedChanges: [
+                  {
+                    range: { pos: 0, length: 1 },
+                    tracking: {
+                      ts: this.timestamp.toJSON(),
+                      type: 'delete',
+                      userId: 'user-id',
+                    },
+                  },
+                  {
+                    range: { pos: 2, length: 1 },
+                    tracking: {
+                      ts: this.timestamp.toJSON(),
+                      type: 'insert',
+                      userId: 'user-id',
+                    },
+                  },
+                ],
+              })
+            )
+        })
+
+        it('should fix comments in the history store', function (done) {
+          const addComment = MockHistoryStore()
+            .post(`/api/projects/${historyId}/legacy_changes`, body => {
+              expect(body).to.deep.equal([
+                {
+                  v2Authors: [],
+                  authors: [],
+                  timestamp: this.timestamp.toJSON(),
+                  operations: [
+                    {
+                      pathname: 'main.tex',
+                      commentId,
+                      ranges: [{ pos: 1, length: 2 }],
+                    },
+                  ],
+                  origin: { kind: 'test-origin' },
+                },
+              ])
+              return true
+            })
+            .query({ end_version: 0 })
+            .reply(204)
+
+          async.series(
+            [
+              cb => {
+                ProjectHistoryClient.resyncHistory(this.project_id, cb)
+              },
+              cb => {
+                const update = {
+                  projectHistoryId: historyId,
+                  resyncProjectStructure: {
+                    docs: [{ path: '/main.tex' }],
+                    files: [],
+                  },
+                  meta: {
+                    ts: this.timestamp,
+                  },
+                }
+                ProjectHistoryClient.pushRawUpdate(this.project_id, update, cb)
+              },
+              cb => {
+                const update = {
+                  path: '/main.tex',
+                  projectHistoryId: historyId,
+                  resyncDocContent: {
+                    content: 'a\nb',
+                    ranges: {
+                      comments: [
+                        {
+                          id: commentId,
+                          op: {
+                            c: 'a',
+                            p: 0,
+                            hpos: 1,
+                            hlen: 2,
+                            t: commentId,
+                          },
+                          meta: {
+                            user_id: 'user-id',
+                            ts: this.timestamp,
+                          },
+                        },
+                      ],
+                      changes: [
+                        {
+                          id: 'id1',
+                          op: {
+                            d: 'a',
+                            p: 0,
+                          },
+                          metadata: {
+                            user_id: 'user-id',
+                            ts: this.timestamp,
+                          },
+                        },
+                        {
+                          id: 'id2',
+                          op: {
+                            i: '\n',
+                            p: 1,
+                            hpos: 2,
+                          },
+                          metadata: {
+                            user_id: 'user-id',
+                            ts: this.timestamp,
+                          },
+                        },
+                      ],
+                    },
+                  },
+                  doc: this.doc_id,
+                  meta: {
+                    ts: this.timestamp,
+                  },
+                }
+                ProjectHistoryClient.pushRawUpdate(this.project_id, update, cb)
+              },
+              cb => {
+                ProjectHistoryClient.flushProject(this.project_id, cb)
+              },
+            ],
+            error => {
+              if (error) {
+                return done(error)
+              }
+              assert(
+                addComment.isDone(),
+                `/api/projects/${historyId}/changes should have been called`
+              )
+              done()
+            }
+          )
+        })
+
+        it('should fix resolved state for comments in the history store', function (done) {
+          const addComment = MockHistoryStore()
+            .post(`/api/projects/${historyId}/legacy_changes`, body => {
+              expect(body).to.deep.equal([
+                {
+                  v2Authors: [],
+                  authors: [],
+                  timestamp: this.timestamp.toJSON(),
+                  operations: [
+                    {
+                      pathname: 'main.tex',
+                      commentId,
+                      resolved: true,
+                    },
+                  ],
+                  origin: { kind: 'test-origin' },
+                },
+              ])
+              return true
+            })
+            .query({ end_version: 0 })
+            .reply(204)
+
+          async.series(
+            [
+              cb => {
+                ProjectHistoryClient.resyncHistory(this.project_id, cb)
+              },
+              cb => {
+                const update = {
+                  projectHistoryId: historyId,
+                  resyncProjectStructure: {
+                    docs: [{ path: '/main.tex' }],
+                    files: [],
+                  },
+                  meta: {
+                    ts: this.timestamp,
+                  },
+                }
+                ProjectHistoryClient.pushRawUpdate(this.project_id, update, cb)
+              },
+              cb => {
+                const update = {
+                  path: '/main.tex',
+                  projectHistoryId: historyId,
+                  resyncDocContent: {
+                    content: 'a\nb',
+                    resolvedCommentIds: [commentId],
+                    ranges: {
+                      comments: [
+                        {
+                          id: commentId,
+                          op: {
+                            c: 'a',
+                            p: 0,
+                            hpos: 0,
+                            hlen: 3,
+                            t: commentId,
+                          },
+                          meta: {
+                            user_id: 'user-id',
+                            ts: this.timestamp,
+                          },
+                        },
+                      ],
+                      changes: [
+                        {
+                          id: 'id1',
+                          op: {
+                            d: 'a',
+                            p: 0,
+                          },
+                          metadata: {
+                            user_id: 'user-id',
+                            ts: this.timestamp,
+                          },
+                        },
+                        {
+                          id: 'id2',
+                          op: {
+                            i: '\n',
+                            p: 1,
+                            hpos: 2,
+                          },
+                          metadata: {
+                            user_id: 'user-id',
+                            ts: this.timestamp,
+                          },
+                        },
+                      ],
+                    },
+                  },
+                  doc: this.doc_id,
+                  meta: {
+                    ts: this.timestamp,
+                  },
+                }
+                ProjectHistoryClient.pushRawUpdate(this.project_id, update, cb)
+              },
+              cb => {
+                ProjectHistoryClient.flushProject(this.project_id, cb)
+              },
+            ],
+            error => {
+              if (error) {
+                return done(error)
+              }
+              assert(
+                addComment.isDone(),
+                `/api/projects/${historyId}/changes should have been called`
+              )
+              done()
+            }
+          )
+        })
+
+        it('should fix comments in the history store (history-ot)', function (done) {
+          const addComment = MockHistoryStore()
+            .post(`/api/projects/${historyId}/legacy_changes`, body => {
+              expect(body).to.deep.equal([
+                {
+                  v2Authors: [],
+                  authors: [],
+                  timestamp: this.timestamp.toJSON(),
+                  operations: [
+                    {
+                      pathname: 'main.tex',
+                      commentId,
+                      ranges: [{ pos: 1, length: 2 }],
+                    },
+                  ],
+                  origin: { kind: 'test-origin' },
+                },
+              ])
+              return true
+            })
+            .query({ end_version: 0 })
+            .reply(204)
+
+          async.series(
+            [
+              cb => {
+                ProjectHistoryClient.resyncHistory(this.project_id, cb)
+              },
+              cb => {
+                const update = {
+                  projectHistoryId: historyId,
+                  resyncProjectStructure: {
+                    docs: [{ path: '/main.tex' }],
+                    files: [],
+                  },
+                  meta: {
+                    ts: this.timestamp,
+                  },
+                }
+                ProjectHistoryClient.pushRawUpdate(this.project_id, update, cb)
+              },
+              cb => {
+                const update = {
+                  path: '/main.tex',
+                  projectHistoryId: historyId,
+                  resyncDocContent: {
+                    content: 'a\nb',
+                    historyOTRanges: {
+                      comments: [
+                        {
+                          id: commentId,
+                          ranges: [
+                            {
+                              pos: 1,
+                              length: 2,
+                            },
+                          ],
+                        },
+                      ],
+                      trackedChanges: [
+                        {
+                          range: { pos: 0, length: 1 },
+                          tracking: {
+                            ts: this.timestamp.toJSON(),
+                            type: 'delete',
+                            userId: 'user-id',
+                          },
+                        },
+                        {
+                          range: { pos: 2, length: 1 },
+                          tracking: {
+                            ts: this.timestamp.toJSON(),
+                            type: 'insert',
+                            userId: 'user-id',
+                          },
+                        },
+                      ],
+                    },
+                  },
+                  doc: this.doc_id,
+                  meta: {
+                    ts: this.timestamp,
+                  },
+                }
+                ProjectHistoryClient.pushRawUpdate(this.project_id, update, cb)
+              },
+              cb => {
+                ProjectHistoryClient.flushProject(this.project_id, cb)
+              },
+            ],
+            error => {
+              if (error) {
+                return done(error)
+              }
+              assert(
+                addComment.isDone(),
+                `/api/projects/${historyId}/changes should have been called`
+              )
+              done()
+            }
+          )
+        })
+
+        it('should fix resolved state for comments in the history store (history-ot)', function (done) {
+          const addComment = MockHistoryStore()
+            .post(`/api/projects/${historyId}/legacy_changes`, body => {
+              expect(body).to.deep.equal([
+                {
+                  v2Authors: [],
+                  authors: [],
+                  timestamp: this.timestamp.toJSON(),
+                  operations: [
+                    {
+                      pathname: 'main.tex',
+                      commentId,
+                      resolved: true,
+                    },
+                  ],
+                  origin: { kind: 'test-origin' },
+                },
+              ])
+              return true
+            })
+            .query({ end_version: 0 })
+            .reply(204)
+
+          async.series(
+            [
+              cb => {
+                ProjectHistoryClient.resyncHistory(this.project_id, cb)
+              },
+              cb => {
+                const update = {
+                  projectHistoryId: historyId,
+                  resyncProjectStructure: {
+                    docs: [{ path: '/main.tex' }],
+                    files: [],
+                  },
+                  meta: {
+                    ts: this.timestamp,
+                  },
+                }
+                ProjectHistoryClient.pushRawUpdate(this.project_id, update, cb)
+              },
+              cb => {
+                const update = {
+                  path: '/main.tex',
+                  projectHistoryId: historyId,
+                  resyncDocContent: {
+                    content: 'a\nb',
+                    historyOTRanges: {
+                      comments: [
+                        {
+                          id: commentId,
+                          ranges: [
+                            {
+                              pos: 0,
+                              length: 3,
+                            },
+                          ],
+                          resolved: true,
+                        },
+                      ],
+                      trackedChanges: [
+                        {
+                          range: { pos: 0, length: 1 },
+                          tracking: {
+                            ts: this.timestamp.toJSON(),
+                            type: 'delete',
+                            userId: 'user-id',
+                          },
+                        },
+                        {
+                          range: { pos: 2, length: 1 },
+                          tracking: {
+                            ts: this.timestamp.toJSON(),
+                            type: 'insert',
+                            userId: 'user-id',
+                          },
+                        },
+                      ],
+                    },
+                  },
+                  doc: this.doc_id,
+                  meta: {
+                    ts: this.timestamp,
+                  },
+                }
+                ProjectHistoryClient.pushRawUpdate(this.project_id, update, cb)
+              },
+              cb => {
+                ProjectHistoryClient.flushProject(this.project_id, cb)
+              },
+            ],
+            error => {
+              if (error) {
+                return done(error)
+              }
+              assert(
+                addComment.isDone(),
+                `/api/projects/${historyId}/changes should have been called`
+              )
+              done()
+            }
+          )
+        })
+
+        it('should fix tracked changes in the history store', function (done) {
+          const fixTrackedChange = MockHistoryStore()
+            .post(`/api/projects/${historyId}/legacy_changes`, body => {
+              expect(body).to.deep.equal([
+                {
+                  v2Authors: [],
+                  authors: [],
+                  timestamp: this.timestamp.toJSON(),
+                  operations: [
+                    {
+                      pathname: 'main.tex',
+                      textOperation: [
+                        1,
+                        {
+                          r: 1,
+                          tracking: {
+                            ts: this.timestamp.toJSON(),
+                            type: 'insert',
+                            userId: 'user-id',
+                          },
+                        },
+                        {
+                          r: 1,
+                          tracking: {
+                            type: 'none',
+                          },
+                        },
+                      ],
+                    },
+                  ],
+                  origin: { kind: 'test-origin' },
+                },
+              ])
+              return true
+            })
+            .query({ end_version: 0 })
+            .reply(204)
+
+          async.series(
+            [
+              cb => {
+                ProjectHistoryClient.resyncHistory(this.project_id, cb)
+              },
+              cb => {
+                const update = {
+                  projectHistoryId: historyId,
+                  resyncProjectStructure: {
+                    docs: [{ path: '/main.tex' }],
+                    files: [],
+                  },
+                  meta: {
+                    ts: this.timestamp,
+                  },
+                }
+                ProjectHistoryClient.pushRawUpdate(this.project_id, update, cb)
+              },
+              cb => {
+                const update = {
+                  path: '/main.tex',
+                  projectHistoryId: historyId,
+                  resyncDocContent: {
+                    content: 'a\nb',
+                    ranges: {
+                      comments: [
+                        {
+                          id: commentId,
+                          op: {
+                            c: 'a',
+                            p: 0,
+                            hpos: 0,
+                            hlen: 3,
+                            t: commentId,
+                          },
+                          meta: {
+                            user_id: 'user-id',
+                            ts: this.timestamp,
+                          },
+                        },
+                      ],
+                      changes: [
+                        {
+                          id: 'id1',
+                          op: {
+                            d: 'a',
+                            p: 0,
+                          },
+                          metadata: {
+                            user_id: 'user-id',
+                            ts: this.timestamp,
+                          },
+                        },
+                        {
+                          id: 'id2',
+                          op: {
+                            i: '\n',
+                            p: 0,
+                            hpos: 1,
+                          },
+                          metadata: {
+                            user_id: 'user-id',
+                            ts: this.timestamp,
+                          },
+                        },
+                      ],
+                    },
+                  },
+                  doc: this.doc_id,
+                  meta: {
+                    ts: this.timestamp,
+                  },
+                }
+                ProjectHistoryClient.pushRawUpdate(this.project_id, update, cb)
+              },
+              cb => {
+                ProjectHistoryClient.flushProject(this.project_id, cb)
+              },
+            ],
+            error => {
+              if (error) {
+                return done(error)
+              }
+              assert(
+                fixTrackedChange.isDone(),
+                `/api/projects/${historyId}/changes should have been called`
+              )
+              done()
+            }
+          )
+        })
+
+        it('should fix tracked changes in the history store (history-ot)', function (done) {
+          const fixTrackedChange = MockHistoryStore()
+            .post(`/api/projects/${historyId}/legacy_changes`, body => {
+              expect(body).to.deep.equal([
+                {
+                  v2Authors: [],
+                  authors: [],
+                  timestamp: this.timestamp.toJSON(),
+                  operations: [
+                    {
+                      pathname: 'main.tex',
+                      textOperation: [
+                        1,
+                        {
+                          r: 1,
+                          tracking: {
+                            ts: this.timestamp.toJSON(),
+                            type: 'insert',
+                            userId: 'user-id',
+                          },
+                        },
+                        {
+                          r: 1,
+                          tracking: {
+                            type: 'none',
+                          },
+                        },
+                      ],
+                    },
+                  ],
+                  origin: { kind: 'test-origin' },
+                },
+              ])
+              return true
+            })
+            .query({ end_version: 0 })
+            .reply(204)
+
+          async.series(
+            [
+              cb => {
+                ProjectHistoryClient.resyncHistory(this.project_id, cb)
+              },
+              cb => {
+                const update = {
+                  projectHistoryId: historyId,
+                  resyncProjectStructure: {
+                    docs: [{ path: '/main.tex' }],
+                    files: [],
+                  },
+                  meta: {
+                    ts: this.timestamp,
+                  },
+                }
+                ProjectHistoryClient.pushRawUpdate(this.project_id, update, cb)
+              },
+              cb => {
+                const update = {
+                  path: '/main.tex',
+                  projectHistoryId: historyId,
+                  resyncDocContent: {
+                    content: 'a\nb',
+                    historyOTRanges: {
+                      comments: [
+                        {
+                          id: commentId,
+                          ranges: [
+                            {
+                              pos: 0,
+                              length: 3,
+                            },
+                          ],
+                        },
+                      ],
+                      trackedChanges: [
+                        {
+                          range: { pos: 0, length: 1 },
+                          tracking: {
+                            ts: this.timestamp.toJSON(),
+                            type: 'delete',
+                            userId: 'user-id',
+                          },
+                        },
+                        {
+                          range: { pos: 1, length: 1 },
+                          tracking: {
+                            ts: this.timestamp.toJSON(),
+                            type: 'insert',
+                            userId: 'user-id',
+                          },
+                        },
+                      ],
+                    },
+                  },
+                  doc: this.doc_id,
+                  meta: {
+                    ts: this.timestamp,
+                  },
+                }
+                ProjectHistoryClient.pushRawUpdate(this.project_id, update, cb)
+              },
+              cb => {
+                ProjectHistoryClient.flushProject(this.project_id, cb)
+              },
+            ],
+            error => {
+              if (error) {
+                return done(error)
+              }
+              assert(
+                fixTrackedChange.isDone(),
+                `/api/projects/${historyId}/changes should have been called`
+              )
+              done()
+            }
+          )
+        })
+
+        it('should fix both comments and tracked changes in the history store (history-ot)', function (done) {
+          const fixTrackedChange = MockHistoryStore()
+            .post(`/api/projects/${historyId}/legacy_changes`, body => {
+              expect(body).to.deep.equal([
+                // not merged due to comment operation using history-ot and tracked-changes operation using sharejs ot
+                {
+                  v2Authors: [],
+                  authors: [],
+                  timestamp: this.timestamp.toJSON(),
+                  operations: [
+                    {
+                      pathname: 'main.tex',
+                      commentId,
+                      ranges: [{ pos: 1, length: 2 }],
+                    },
+                  ],
+                  origin: { kind: 'test-origin' },
+                },
+                {
+                  v2Authors: [],
+                  authors: [],
+                  timestamp: this.timestamp.toJSON(),
+                  operations: [
+                    {
+                      pathname: 'main.tex',
+                      textOperation: [
+                        1,
+                        {
+                          r: 1,
+                          tracking: {
+                            ts: this.timestamp.toJSON(),
+                            type: 'insert',
+                            userId: 'user-id',
+                          },
+                        },
+                        {
+                          r: 1,
+                          tracking: {
+                            type: 'none',
+                          },
+                        },
+                      ],
+                    },
+                  ],
+                  origin: { kind: 'test-origin' },
+                },
+              ])
+              return true
+            })
+            .query({ end_version: 0 })
+            .reply(204)
+
+          async.series(
+            [
+              cb => {
+                ProjectHistoryClient.resyncHistory(this.project_id, cb)
+              },
+              cb => {
+                const update = {
+                  projectHistoryId: historyId,
+                  resyncProjectStructure: {
+                    docs: [{ path: '/main.tex' }],
+                    files: [],
+                  },
+                  meta: {
+                    ts: this.timestamp,
+                  },
+                }
+                ProjectHistoryClient.pushRawUpdate(this.project_id, update, cb)
+              },
+              cb => {
+                const update = {
+                  path: '/main.tex',
+                  projectHistoryId: historyId,
+                  resyncDocContent: {
+                    content: 'a\nb',
+                    historyOTRanges: {
+                      comments: [
+                        {
+                          id: commentId,
+                          ranges: [
+                            {
+                              pos: 1,
+                              length: 2,
+                            },
+                          ],
+                        },
+                      ],
+                      trackedChanges: [
+                        {
+                          range: { pos: 0, length: 1 },
+                          tracking: {
+                            ts: this.timestamp.toJSON(),
+                            type: 'delete',
+                            userId: 'user-id',
+                          },
+                        },
+                        {
+                          range: { pos: 1, length: 1 },
+                          tracking: {
+                            ts: this.timestamp.toJSON(),
+                            type: 'insert',
+                            userId: 'user-id',
+                          },
+                        },
+                      ],
+                    },
+                  },
+                  doc: this.doc_id,
+                  meta: {
+                    ts: this.timestamp,
+                  },
+                }
+                ProjectHistoryClient.pushRawUpdate(this.project_id, update, cb)
+              },
+              cb => {
+                ProjectHistoryClient.flushProject(this.project_id, cb)
+              },
+            ],
+            error => {
+              if (error) {
+                return done(error)
+              }
+              assert(
+                fixTrackedChange.isDone(),
                 `/api/projects/${historyId}/changes should have been called`
               )
               done()

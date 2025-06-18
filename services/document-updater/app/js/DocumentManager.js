@@ -535,11 +535,6 @@ const DocumentManager = {
     if (opts.historyRangesMigration) {
       historyRangesSupport = opts.historyRangesMigration === 'forwards'
     }
-    if (!Array.isArray(lines)) {
-      const file = StringFileData.fromRaw(lines)
-      // TODO(24596): tc support for history-ot
-      lines = file.getLines()
-    }
 
     await ProjectHistoryRedisManager.promises.queueResyncDocContent(
       projectId,

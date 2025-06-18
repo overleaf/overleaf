@@ -3,6 +3,8 @@ import {
   LinkedFileData,
   RawEditOperation,
   RawOrigin,
+  CommentRawData,
+  TrackedChangeRawData,
 } from 'overleaf-editor-core/lib/types'
 
 export type Update =
@@ -118,6 +120,10 @@ export type ResyncDocContentUpdate = {
     content: string
     version: number
     ranges?: Ranges
+    historyOTRanges?: {
+      comments: CommentRawData[]
+      trackedChanges: TrackedChangeRawData[]
+    }
     resolvedCommentIds?: string[]
   }
   projectHistoryId: string

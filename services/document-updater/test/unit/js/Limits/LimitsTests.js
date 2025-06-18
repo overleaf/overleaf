@@ -81,4 +81,88 @@ describe('Limits', function () {
       })
     })
   })
+
+  describe('stringFileDataContentIsTooLarge', function () {
+    it('should handle small docs', function () {
+      expect(
+        this.Limits.stringFileDataContentIsTooLarge({ content: '' }, 123)
+      ).to.equal(false)
+    })
+    it('should handle docs at the limit', function () {
+      expect(
+        this.Limits.stringFileDataContentIsTooLarge(
+          { content: 'x'.repeat(123) },
+          123
+        )
+      ).to.equal(false)
+    })
+    it('should handle docs above the limit', function () {
+      expect(
+        this.Limits.stringFileDataContentIsTooLarge(
+          { content: 'x'.repeat(123 + 1) },
+          123
+        )
+      ).to.equal(true)
+    })
+    it('should handle docs above the limit and below with tracked-deletes removed', function () {
+      expect(
+        this.Limits.stringFileDataContentIsTooLarge(
+          {
+            content: 'x'.repeat(123 + 1),
+            trackedChanges: [
+              {
+                range: { pos: 1, length: 1 },
+                tracking: {
+                  type: 'delete',
+                  ts: '2025-06-16T14:31:44.910Z',
+                  userId: 'user-id',
+                },
+              },
+            ],
+          },
+          123
+        )
+      ).to.equal(false)
+    })
+    it('should handle docs above the limit and above with tracked-deletes removed', function () {
+      expect(
+        this.Limits.stringFileDataContentIsTooLarge(
+          {
+            content: 'x'.repeat(123 + 2),
+            trackedChanges: [
+              {
+                range: { pos: 1, length: 1 },
+                tracking: {
+                  type: 'delete',
+                  ts: '2025-06-16T14:31:44.910Z',
+                  userId: 'user-id',
+                },
+              },
+            ],
+          },
+          123
+        )
+      ).to.equal(true)
+    })
+    it('should handle docs above the limit and with tracked-inserts', function () {
+      expect(
+        this.Limits.stringFileDataContentIsTooLarge(
+          {
+            content: 'x'.repeat(123 + 1),
+            trackedChanges: [
+              {
+                range: { pos: 1, length: 1 },
+                tracking: {
+                  type: 'insert',
+                  ts: '2025-06-16T14:31:44.910Z',
+                  userId: 'user-id',
+                },
+              },
+            ],
+          },
+          123
+        )
+      ).to.equal(true)
+    })
+  })
 })

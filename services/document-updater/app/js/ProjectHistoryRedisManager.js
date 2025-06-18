@@ -8,13 +8,14 @@ const rclient = require('@overleaf/redis-wrapper').createClient(
 )
 const logger = require('@overleaf/logger')
 const metrics = require('./Metrics')
-const { docIsTooLarge } = require('./Limits')
+const { docIsTooLarge, stringFileDataContentIsTooLarge } = require('./Limits')
 const { addTrackedDeletesToContent, extractOriginOrSource } = require('./Utils')
 const HistoryConversions = require('./HistoryConversions')
 const OError = require('@overleaf/o-error')
 
 /**
  * @import { Ranges } from './types'
+ * @import { StringFileRawData } from 'overleaf-editor-core/lib/types'
  */
 
 const ProjectHistoryRedisManager = {
@@ -180,7 +181,7 @@ const ProjectHistoryRedisManager = {
    * @param {string} projectId
    * @param {string} projectHistoryId
    * @param {string} docId
-   * @param {string[]} lines
+   * @param {string[] | StringFileRawData} lines
    * @param {Ranges} ranges
    * @param {string[]} resolvedCommentIds
    * @param {number} version
@@ -204,13 +205,8 @@ const ProjectHistoryRedisManager = {
       'queue doc content resync'
     )
 
-    let content = lines.join('\n')
-    if (historyRangesSupport) {
-      content = addTrackedDeletesToContent(content, ranges.changes ?? [])
-    }
-
     const projectUpdate = {
-      resyncDocContent: { content, version },
+      resyncDocContent: { version },
       projectHistoryId,
       path: pathname,
       doc: docId,
@@ -219,17 +215,38 @@ const ProjectHistoryRedisManager = {
       },
     }
 
-    if (historyRangesSupport) {
-      projectUpdate.resyncDocContent.ranges =
-        HistoryConversions.toHistoryRanges(ranges)
-      projectUpdate.resyncDocContent.resolvedCommentIds = resolvedCommentIds
+    let content = ''
+    if (Array.isArray(lines)) {
+      content = lines.join('\n')
+      if (historyRangesSupport) {
+        content = addTrackedDeletesToContent(content, ranges.changes ?? [])
+        projectUpdate.resyncDocContent.ranges =
+          HistoryConversions.toHistoryRanges(ranges)
+        projectUpdate.resyncDocContent.resolvedCommentIds = resolvedCommentIds
+      }
+    } else {
+      content = lines.content
+      projectUpdate.resyncDocContent.historyOTRanges = {
+        comments: lines.comments,
+        trackedChanges: lines.trackedChanges,
+      }
     }
+    projectUpdate.resyncDocContent.content = content
 
     const jsonUpdate = JSON.stringify(projectUpdate)
     // Do an optimised size check on the docLines using the serialised
     // project update length as an upper bound
     const sizeBound = jsonUpdate.length
-    if (docIsTooLarge(sizeBound, lines, Settings.max_doc_length)) {
+    if (Array.isArray(lines)) {
+      if (docIsTooLarge(sizeBound, lines, Settings.max_doc_length)) {
+        throw new OError(
+          'blocking resync doc content insert into project history queue: doc is too large',
+          { projectId, docId, docSize: sizeBound }
+        )
+      }
+    } else if (
+      stringFileDataContentIsTooLarge(lines, Settings.max_doc_length)
+    ) {
       throw new OError(
         'blocking resync doc content insert into project history queue: doc is too large',
         { projectId, docId, docSize: sizeBound }

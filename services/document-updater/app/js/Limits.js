@@ -28,4 +28,19 @@ module.exports = {
     // since we didn't hit the limit in the loop, the document is within the allowed length
     return false
   },
+
+  /**
+   * @param {StringFileRawData} raw
+   * @param {number} maxDocLength
+   */
+  stringFileDataContentIsTooLarge(raw, maxDocLength) {
+    let n = raw.content.length
+    if (n <= maxDocLength) return false // definitely under the limit, no need to calculate the total size
+    for (const tc of raw.trackedChanges ?? []) {
+      if (tc.tracking.type !== 'delete') continue
+      n -= tc.range.length
+      if (n <= maxDocLength) return false // under the limit now, no need to calculate the exact size
+    }
+    return true
+  },
 }
