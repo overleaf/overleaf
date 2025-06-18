@@ -10,6 +10,7 @@ const SSOConfigSchema = new Schema(
     userLastNameAttribute: { type: String },
     validated: { type: Boolean, default: false },
     enabled: { type: Boolean, default: false },
+    useSettingsUKAMF: { type: Boolean, default: false },
   },
 
   {

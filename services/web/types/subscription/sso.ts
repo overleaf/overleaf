@@ -13,6 +13,7 @@ export type SSOConfig = {
   userLastNameAttribute?: string
   validated?: boolean
   enabled?: boolean
+  useSettingsUKAMF?: boolean
 }
 
 export type GroupSSOLinkingStatus = {
