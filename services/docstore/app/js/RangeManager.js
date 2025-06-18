@@ -49,16 +49,23 @@ module.exports = RangeManager = {
       updateMetadata(change.metadata)
     }
     for (const comment of Array.from(ranges.comments || [])) {
-      comment.id = RangeManager._safeObjectId(comment.id)
-      if ((comment.op != null ? comment.op.t : undefined) != null) {
-        comment.op.t = RangeManager._safeObjectId(comment.op.t)
-      }
+      // Two bugs resulted in mismatched ids, prefer the thread id from the op: https://github.com/overleaf/internal/issues/23272
+      comment.id = RangeManager._safeObjectId(comment.op?.t || comment.id)
+      if (comment.op) comment.op.t = comment.id
+
       // resolved property is added to comments when they are obtained from history, but this state doesn't belong in mongo docs collection
       // more info: https://github.com/overleaf/internal/issues/24371#issuecomment-2913095174
       delete comment.op?.resolved
       updateMetadata(comment.metadata)
     }
     return ranges
+  },
+
+  fixCommentIds(doc) {
+    for (const comment of doc?.ranges?.comments || []) {
+      // Two bugs resulted in mismatched ids, prefer the thread id from the op: https://github.com/overleaf/internal/issues/23272
+      if (comment.op?.t) comment.id = comment.op.t
+    }
   },
 
   _safeObjectId(data) {

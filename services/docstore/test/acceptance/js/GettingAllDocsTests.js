@@ -20,13 +20,15 @@ const DocstoreClient = require('./helpers/DocstoreClient')
 describe('Getting all docs', function () {
   beforeEach(function (done) {
     this.project_id = new ObjectId()
+    this.threadId1 = new ObjectId().toString()
+    this.threadId2 = new ObjectId().toString()
     this.docs = [
       {
         _id: new ObjectId(),
         lines: ['one', 'two', 'three'],
         ranges: {
           comments: [
-            { id: new ObjectId().toString(), op: { t: 'thread-id-1' } },
+            { id: new ObjectId().toString(), op: { t: this.threadId1 } },
           ],
           changes: [
             {
@@ -55,7 +57,7 @@ describe('Getting all docs', function () {
         lines: ['111', '222', '333'],
         ranges: {
           comments: [
-            { id: new ObjectId().toString(), op: { t: 'thread-id-2' } },
+            { id: new ObjectId().toString(), op: { t: this.threadId2 } },
           ],
           changes: [
             {
@@ -67,6 +69,15 @@ describe('Getting all docs', function () {
         rev: 6,
       },
     ]
+    this.fixedRanges = this.docs.map(doc => {
+      if (!doc.ranges?.comments?.length) return doc.ranges
+      return {
+        ...doc.ranges,
+        comments: [
+          { ...doc.ranges.comments[0], id: doc.ranges.comments[0].op.t },
+        ],
+      }
+    })
     this.deleted_doc = {
       _id: new ObjectId(),
       lines: ['deleted'],
@@ -136,7 +147,7 @@ describe('Getting all docs', function () {
       docs.length.should.equal(this.docs.length)
       for (let i = 0; i < docs.length; i++) {
         const doc = docs[i]
-        doc.ranges.should.deep.equal(this.docs[i].ranges)
+        doc.ranges.should.deep.equal(this.fixedRanges[i])
       }
       return done()
     })
@@ -163,8 +174,8 @@ describe('Getting all docs', function () {
           throw error
         }
         threadIds.should.deep.equal({
-          [this.docs[0]._id.toString()]: ['thread-id-1'],
-          [this.docs[2]._id.toString()]: ['thread-id-2'],
+          [this.docs[0]._id.toString()]: [this.threadId1],
+          [this.docs[2]._id.toString()]: [this.threadId2],
         })
         done()
       }

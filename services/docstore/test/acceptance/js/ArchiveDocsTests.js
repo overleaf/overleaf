@@ -1001,6 +1001,15 @@ describe('Archiving', function () {
         },
         version: 2,
       }
+      this.fixedRanges = {
+        ...this.doc.ranges,
+        comments: [
+          {
+            ...this.doc.ranges.comments[0],
+            id: this.doc.ranges.comments[0].op.t,
+          },
+        ],
+      }
       return DocstoreClient.createDoc(
         this.project_id,
         this.doc._id,
@@ -1048,7 +1057,7 @@ describe('Archiving', function () {
             throw error
           }
           s3Doc.lines.should.deep.equal(this.doc.lines)
-          const ranges = JSON.parse(JSON.stringify(this.doc.ranges)) // ObjectId -> String
+          const ranges = JSON.parse(JSON.stringify(this.fixedRanges)) // ObjectId -> String
           s3Doc.ranges.should.deep.equal(ranges)
           return done()
         }
@@ -1075,7 +1084,7 @@ describe('Archiving', function () {
             throw error
           }
           doc.lines.should.deep.equal(this.doc.lines)
-          doc.ranges.should.deep.equal(this.doc.ranges)
+          doc.ranges.should.deep.equal(this.fixedRanges)
           expect(doc.inS3).not.to.exist
           return done()
         })

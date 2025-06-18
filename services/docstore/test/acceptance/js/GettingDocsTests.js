@@ -28,9 +28,25 @@ describe('Getting a doc', function () {
           op: { i: 'foo', p: 3 },
           meta: {
             user_id: new ObjectId().toString(),
-            ts: new Date().toString(),
+            ts: new Date().toJSON(),
           },
         },
+      ],
+      comments: [
+        {
+          id: new ObjectId().toString(),
+          op: { c: 'comment', p: 1, t: new ObjectId().toString() },
+          metadata: {
+            user_id: new ObjectId().toString(),
+            ts: new Date().toJSON(),
+          },
+        },
+      ],
+    }
+    this.fixedRanges = {
+      ...this.ranges,
+      comments: [
+        { ...this.ranges.comments[0], id: this.ranges.comments[0].op.t },
       ],
     }
     return DocstoreApp.ensureRunning(() => {
@@ -60,7 +76,7 @@ describe('Getting a doc', function () {
           if (error) return done(error)
           doc.lines.should.deep.equal(this.lines)
           doc.version.should.equal(this.version)
-          doc.ranges.should.deep.equal(this.ranges)
+          doc.ranges.should.deep.equal(this.fixedRanges)
           return done()
         }
       )
@@ -114,7 +130,7 @@ describe('Getting a doc', function () {
           if (error) return done(error)
           doc.lines.should.deep.equal(this.lines)
           doc.version.should.equal(this.version)
-          doc.ranges.should.deep.equal(this.ranges)
+          doc.ranges.should.deep.equal(this.fixedRanges)
           doc.deleted.should.equal(true)
           return done()
         }

@@ -44,6 +44,8 @@ async function archiveDoc(projectId, docId) {
     throw new Error('doc has no lines')
   }
 
+  RangeManager.fixCommentIds(doc)
+
   // warn about any oversized docs already in mongo
   const linesSize = BSON.calculateObjectSize(doc.lines || {})
   const rangesSize = BSON.calculateObjectSize(doc.ranges || {})

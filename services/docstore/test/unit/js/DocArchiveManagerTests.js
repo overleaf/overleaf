@@ -31,6 +31,7 @@ describe('DocArchiveManager', function () {
 
     RangeManager = {
       jsonRangesToMongo: sinon.stub().returns({ mongo: 'ranges' }),
+      fixCommentIds: sinon.stub(),
     }
     Settings = {
       docstore: {
@@ -190,6 +191,11 @@ describe('DocArchiveManager', function () {
     it('should resolve when passed a valid document', async function () {
       await expect(DocArchiveManager.archiveDoc(projectId, mongoDocs[0]._id)).to
         .eventually.be.fulfilled
+    })
+
+    it('should fix comment ids', async function () {
+      await DocArchiveManager.archiveDoc(projectId, mongoDocs[1]._id)
+      expect(RangeManager.fixCommentIds).to.have.been.called
     })
 
     it('should throw an error if the doc has no lines', async function () {

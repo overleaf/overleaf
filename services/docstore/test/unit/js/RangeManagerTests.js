@@ -30,7 +30,7 @@ describe('RangeManager', function () {
   })
 
   describe('jsonRangesToMongo', function () {
-    it('should convert ObjectIds and dates to proper objects', function () {
+    it('should convert ObjectIds and dates to proper objects and fix comment id', function () {
       const changeId = new ObjectId().toString()
       const commentId = new ObjectId().toString()
       const userId = new ObjectId().toString()
@@ -66,7 +66,7 @@ describe('RangeManager', function () {
         ],
         comments: [
           {
-            id: new ObjectId(commentId),
+            id: new ObjectId(threadId),
             op: { c: 'foo', p: 3, t: new ObjectId(threadId) },
           },
         ],
@@ -110,7 +110,6 @@ describe('RangeManager', function () {
 
     return it('should be consistent when transformed through json -> mongo -> json', function () {
       const changeId = new ObjectId().toString()
-      const commentId = new ObjectId().toString()
       const userId = new ObjectId().toString()
       const threadId = new ObjectId().toString()
       const ts = new Date().toJSON()
@@ -127,7 +126,7 @@ describe('RangeManager', function () {
         ],
         comments: [
           {
-            id: commentId,
+            id: threadId,
             op: { c: 'foo', p: 3, t: threadId },
           },
         ],
@@ -142,6 +141,7 @@ describe('RangeManager', function () {
 
   return describe('shouldUpdateRanges', function () {
     beforeEach(function () {
+      const threadId = new ObjectId()
       this.ranges = {
         changes: [
           {
@@ -155,8 +155,8 @@ describe('RangeManager', function () {
         ],
         comments: [
           {
-            id: new ObjectId(),
-            op: { c: 'foo', p: 3, t: new ObjectId() },
+            id: threadId,
+            op: { c: 'foo', p: 3, t: threadId },
           },
         ],
       }
