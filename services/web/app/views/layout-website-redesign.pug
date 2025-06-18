@@ -8,20 +8,32 @@ block entrypointVar
 
 block body
 	if (typeof(suppressNavbar) == "undefined")
-		include layout/navbar-website-redesign
+		if bootstrapVersion === 5
+			include layout/navbar-marketing-bootstrap-5
+		else
+			include layout/navbar-website-redesign
 
 	block content
 
+	//- bootstrapVersion needed here, because plans.pug uses both BS version
+	//- If the `plans-page-bs5` split test has been completed, remove bootstrapVersion logic
 	if (typeof(suppressFooter) == "undefined")
 		if showThinFooter
-			include layout/thin-footer
+			if bootstrapVersion === 5
+				include layout/thin-footer-bootstrap-5
+			else 
+				include layout/thin-footer
 		else
 			include layout/fat-footer-website-redesign
 
 	if (typeof(suppressCookieBanner) == 'undefined')
 		include _cookie_banner
 
-	!= moduleIncludes("contactModal-marketing", locals)
+	block contactModal
+		if bootstrapVersion === 5
+			!= moduleIncludes("contactModal-marketing-bootstrap-5", locals)
+		else
+			!= moduleIncludes("contactModal-marketing", locals)
 
 block prepend foot-scripts
 	+bootstrap-js(bootstrapVersion)

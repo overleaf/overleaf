@@ -81,6 +81,10 @@ include ../../_mixins/eyebrow
 	.row
 		.col-xs-12.plans-faq-support
 			span #{translate('still_have_questions')}
-			button(data-ol-open-contact-form-modal="general")
+			button(
+				data-ol-open-contact-form-modal="general"
+				data-bs-toggle=bootstrapVersion === 5 ? "modal" : undefined
+				data-bs-target=bootstrapVersion === 5 ? "#contactUsModal" : undefined
+			)
 				span(style="margin-right: 4px") #{translate('contact_support')}
 				i.icon-md.material-symbols.material-symbols-rounded.material-symbols-arrow-right(aria-hidden="true") arrow_right_alt
