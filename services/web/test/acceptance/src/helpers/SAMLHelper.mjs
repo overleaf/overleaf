@@ -12,7 +12,7 @@ const __dirname = fileURLToPath(new URL('.', import.meta.url))
 const samlDataDefaults = {
   firstName: 'first-name',
   hasEntitlement: 'Y',
-  issuer: 'Overleaf',
+  issuer: 'https://www.overleaf.test/saml/ukamf/sp/entity',
   lastName: 'last-name',
   requestId: 'dummy-request-id',
 }

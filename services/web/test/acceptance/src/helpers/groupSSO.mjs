@@ -34,7 +34,10 @@ export const baseSsoConfig = {
   userIdAttribute,
 } // the database also sets enabled and validated, but we cannot set that in the POST request for /manage/groups/:ID/settings/sso
 
-export async function createGroupSSO(SSOConfigValidated = true) {
+export async function createGroupSSO(
+  SSOConfigValidated = true,
+  useSettingsUKAMF
+) {
   const nonSSOMemberHelper = await UserHelper.createUser()
   const nonSSOMember = nonSSOMemberHelper.user
 
@@ -44,11 +47,17 @@ export async function createGroupSSO(SSOConfigValidated = true) {
   await groupAdminUser.ensureUserExists()
   await memberUser.ensureUserExists()
 
-  const ssoConfig = new SSOConfig({
+  const ssoConfigDoc = {
     ...baseSsoConfig,
     enabled: true,
     validated: SSOConfigValidated,
-  })
+  }
+
+  if (useSettingsUKAMF) {
+    ssoConfigDoc.useSettingsUKAMF = useSettingsUKAMF // conditionally adding because this field was added after group SSO was released and it will be undefined for some groups
+  }
+
+  const ssoConfig = new SSOConfig(ssoConfigDoc)
 
   await ssoConfig.save()
 
@@ -73,7 +82,8 @@ export async function createGroupSSO(SSOConfigValidated = true) {
       memberUser.email,
       memberUser.password,
       subscriptionId,
-      'mock@email.com'
+      'mock@email.com',
+      useSettingsUKAMF
     )
   }
 
@@ -98,8 +108,13 @@ export async function linkGroupMember(
   userEmail,
   userPassword,
   groupId,
-  externalUserId
+  externalUserId,
+  usingSettingsUKAMF
 ) {
+  const samlSettings = usingSettingsUKAMF
+    ? Settings.saml.ukamf
+    : Settings.saml.groupSSO
+
   // eslint-disable-next-line no-restricted-syntax
   const subscription = await SubscriptionModel.findById(groupId)
     .populate('ssoConfig')
@@ -121,7 +136,7 @@ export async function linkGroupMember(
   })
   if (
     !headers.get('location') ||
-    !headers.get('location').includes(Settings.saml.groupSSO.initPath)
+    !headers.get('location').includes(samlSettings.initPath)
   ) {
     throw new Error('invalid redirect when linking to group SSO')
   }
@@ -133,18 +148,22 @@ export async function linkGroupMember(
   // redirect to IdP
   const idpEntryPointUrl = new URL(initSSOResponse.headers.get('location'))
   const requestId = await SAMLHelper.getRequestId(idpEntryPointUrl)
-  const response = await userHelper.fetch(Settings.saml.groupSSO.path, {
+  const response = await userHelper.fetch(samlSettings.path, {
     method: 'POST',
     body: new URLSearchParams({
       SAMLResponse: SAMLHelper.createMockSamlResponse({
         requestId,
         userIdAttribute,
         uniqueId: externalUserId,
-        issuer: 'https://www.overleaf.test/saml/group-sso/meta',
+        issuer: samlSettings.issuer,
       }),
     }),
   })
-  if (response.status !== 302) {
+
+  if (
+    response.status !== 302 &&
+    response.headers.get('location').path !== '/project'
+  ) {
     throw new Error('failed to link group SSO')
   }
 
