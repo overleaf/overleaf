@@ -1,3 +1,12 @@
+---
+name: Bug report
+about: Report a bug
+title: ''
+labels: type:bug
+assignees: ''
+
+---
+
 <!--
 
 Note: If you are using www.overleaf.com and have a problem, 
