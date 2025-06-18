@@ -6,7 +6,12 @@ const { isStandaloneAiAddOnPlanCode } = require('./PaymentProviderEntities')
  * If the user changes to a less expensive plan, we shouldn't apply the change immediately.
  * This is to avoid unintended/artifical credits on users Recurly accounts.
  */
-function shouldPlanChangeAtTermEnd(oldPlan, newPlan) {
+function shouldPlanChangeAtTermEnd(oldPlan, newPlan, isInTrial) {
+  if (isInTrial) {
+    // we should always upgrade or downgrade immediately if actively in trial
+    return false
+  }
+
   if (
     oldPlan.annual === newPlan.annual &&
     isStandaloneAiAddOnPlanCode(oldPlan.planCode) &&
@@ -148,6 +153,14 @@ function getSubscriptionTrialEndsAt(subscription) {
   return subscription?.paymentProvider?.trialEndsAt
 }
 
+function isInTrial(trialEndsAt) {
+  if (!trialEndsAt) {
+    return false
+  }
+
+  return trialEndsAt.getTime() > Date.now()
+}
+
 module.exports = {
   shouldPlanChangeAtTermEnd,
   generateInitialLocalizedGroupPrice,
@@ -157,4 +170,5 @@ module.exports = {
   getPaidSubscriptionState,
   getSubscriptionTrialStartedAt,
   getSubscriptionTrialEndsAt,
+  isInTrial,
 }

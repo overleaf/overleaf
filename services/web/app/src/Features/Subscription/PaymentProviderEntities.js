@@ -134,9 +134,11 @@ class PaymentProviderSubscription {
     if (newPlan == null) {
       throw new OError('Unable to find plan in settings', { planCode })
     }
+    const isInTrial = SubscriptionHelper.isInTrial(this.trialPeriodEnd)
     const shouldChangeAtTermEnd = SubscriptionHelper.shouldPlanChangeAtTermEnd(
       currentPlan,
-      newPlan
+      newPlan,
+      isInTrial
     )
 
     const changeRequest = new PaymentProviderSubscriptionChangeRequest({
@@ -250,9 +252,10 @@ class PaymentProviderSubscription {
     const addOnUpdates = this.addOns
       .filter(addOn => addOn.code !== code)
       .map(addOn => addOn.toAddOnUpdate())
+    const isInTrial = SubscriptionHelper.isInTrial(this.trialPeriodEnd)
     return new PaymentProviderSubscriptionChangeRequest({
       subscription: this,
-      timeframe: 'term_end',
+      timeframe: isInTrial ? 'now' : 'term_end',
       addOnUpdates,
     })
   }

@@ -102,38 +102,65 @@ describe('SubscriptionHelper', function () {
   })
 
   describe('shouldPlanChangeAtTermEnd', function () {
-    it('should return true if the new plan is less expensive', function () {
+    it('should return false if isInTrial is true', function () {
+      const isInTrial = true
       const changeAtTermEnd = this.SubscriptionHelper.shouldPlanChangeAtTermEnd(
         plans.expensive,
-        plans.cheaper
+        plans.cheaper,
+        isInTrial
+      )
+      expect(changeAtTermEnd).to.be.false
+    })
+
+    it('should return true if the new plan is less expensive', function () {
+      const isInTrial = false
+      const changeAtTermEnd = this.SubscriptionHelper.shouldPlanChangeAtTermEnd(
+        plans.expensive,
+        plans.cheaper,
+        isInTrial
       )
       expect(changeAtTermEnd).to.be.true
     })
+
     it('should return false if the new plan is more exepensive', function () {
+      const isInTrial = false
       const changeAtTermEnd = this.SubscriptionHelper.shouldPlanChangeAtTermEnd(
         plans.cheaper,
-        plans.expensive
+        plans.expensive,
+        isInTrial
       )
       expect(changeAtTermEnd).to.be.false
     })
+
     it('should return false if the new plan is the same price', function () {
+      const isInTrial = false
+
       const changeAtTermEnd = this.SubscriptionHelper.shouldPlanChangeAtTermEnd(
         plans.cheaper,
-        plans.alsoCheap
+        plans.alsoCheap,
+        isInTrial
       )
       expect(changeAtTermEnd).to.be.false
     })
+
     it('should return false if the change is from an individual plan to a more expensive group plan', function () {
+      const isInTrial = false
+
       const changeAtTermEnd = this.SubscriptionHelper.shouldPlanChangeAtTermEnd(
         plans.expensive,
-        plans.expensiveGroup
+        plans.expensiveGroup,
+        isInTrial
       )
       expect(changeAtTermEnd).to.be.false
     })
+
     it('should return true if the change is from an individual plan to a cheaper group plan', function () {
+      const isInTrial = false
+
       const changeAtTermEnd = this.SubscriptionHelper.shouldPlanChangeAtTermEnd(
         plans.expensive,
-        plans.cheapGroup
+        plans.cheapGroup,
+        isInTrial
       )
       expect(changeAtTermEnd).to.be.true
     })
@@ -469,6 +496,27 @@ describe('SubscriptionHelper', function () {
     it('should return undefined if no trial end date exists', function () {
       const result = this.SubscriptionHelper.getSubscriptionTrialEndsAt({})
       expect(result).to.be.undefined
+    })
+  })
+
+  describe('isInTrial', function () {
+    it('should return false if trialEndsAt is null', function () {
+      const result = this.SubscriptionHelper.isInTrial(null)
+      expect(result).to.be.false
+    })
+
+    it('should return false if trialEndsAt is before now', function () {
+      const tenDaysAgo = new Date()
+      tenDaysAgo.setDate(tenDaysAgo.getDate() - 10)
+      const result = this.SubscriptionHelper.isInTrial(tenDaysAgo)
+      expect(result).to.be.false
+    })
+
+    it('should return true if trialEndsAt is after now', function () {
+      const tenDaysFromNow = new Date()
+      tenDaysFromNow.setDate(tenDaysFromNow.getDate() + 10)
+      const result = this.SubscriptionHelper.isInTrial(tenDaysFromNow)
+      expect(result).to.be.true
     })
   })
 })

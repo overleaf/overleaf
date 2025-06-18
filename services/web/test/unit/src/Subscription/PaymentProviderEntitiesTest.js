@@ -104,6 +104,23 @@ describe('PaymentProviderEntities', function () {
           )
         })
 
+        it('returns a change request for downgrades while on trial', function () {
+          const fiveDaysFromNow = new Date()
+          fiveDaysFromNow.setDate(fiveDaysFromNow.getDate() + 5)
+          this.subscription.trialPeriodEnd = fiveDaysFromNow
+          const { PaymentProviderSubscriptionChangeRequest } =
+            this.PaymentProviderEntities
+          const changeRequest =
+            this.subscription.getRequestForPlanChange('cheap-plan')
+          expect(changeRequest).to.deep.equal(
+            new PaymentProviderSubscriptionChangeRequest({
+              subscription: this.subscription,
+              timeframe: 'now',
+              planCode: 'cheap-plan',
+            })
+          )
+        })
+
         it('preserves the AI add-on on upgrades', function () {
           const { PaymentProviderSubscriptionChangeRequest } =
             this.PaymentProviderEntities
@@ -277,6 +294,22 @@ describe('PaymentProviderEntities', function () {
             new PaymentProviderSubscriptionChangeRequest({
               subscription: this.subscription,
               timeframe: 'term_end',
+              addOnUpdates: [],
+            })
+          )
+        })
+
+        it('returns a change request when in trial', function () {
+          const fiveDaysFromNow = new Date()
+          fiveDaysFromNow.setDate(fiveDaysFromNow.getDate() + 5)
+          this.subscription.trialPeriodEnd = fiveDaysFromNow
+          const changeRequest = this.subscription.getRequestForAddOnRemoval(
+            this.addOn.code
+          )
+          expect(changeRequest).to.deep.equal(
+            new PaymentProviderSubscriptionChangeRequest({
+              subscription: this.subscription,
+              timeframe: 'now',
               addOnUpdates: [],
             })
           )

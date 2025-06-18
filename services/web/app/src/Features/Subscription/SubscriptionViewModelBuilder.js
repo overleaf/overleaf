@@ -470,7 +470,7 @@ async function getUsersSubscriptionDetails(user) {
   return { bestSubscription, individualSubscription, memberGroupSubscriptions }
 }
 
-function buildPlansList(currentPlan) {
+function buildPlansList(currentPlan, isInTrial) {
   const { plans } = Settings
 
   const allPlans = {}
@@ -484,7 +484,11 @@ function buildPlansList(currentPlan) {
     result.planCodesChangingAtTermEnd = _.map(
       _.filter(plans, plan => {
         if (!plan.hideFromUsers) {
-          return SubscriptionHelper.shouldPlanChangeAtTermEnd(currentPlan, plan)
+          return SubscriptionHelper.shouldPlanChangeAtTermEnd(
+            currentPlan,
+            plan,
+            isInTrial
+          )
         }
       }),
       'planCode'
@@ -569,8 +573,8 @@ function buildGroupSubscriptionForView(groupSubscription) {
   }
 }
 
-function buildPlansListForSubscriptionDash(currentPlan) {
-  const allPlansData = buildPlansList(currentPlan)
+function buildPlansListForSubscriptionDash(currentPlan, isInTrial) {
+  const allPlansData = buildPlansList(currentPlan, isInTrial)
   const plans = []
   // only list individual and visible plans for "change plans" UI
   if (allPlansData.studentAccounts) {

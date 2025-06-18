@@ -88,9 +88,13 @@ async function userSubscriptionPage(req, res) {
     await Modules.promises.hooks.fire('userCanExtendTrial', user)
   )?.[0]
   const fromPlansPage = req.query.hasSubscription
+  const isInTrial = SubscriptionHelper.isInTrial(
+    personalSubscription?.payment?.trialEndsAt
+  )
   const plansData =
     SubscriptionViewModelBuilder.buildPlansListForSubscriptionDash(
-      personalSubscription?.plan
+      personalSubscription?.plan,
+      isInTrial
     )
 
   AnalyticsManager.recordEventForSession(req.session, 'subscription-page-view')
