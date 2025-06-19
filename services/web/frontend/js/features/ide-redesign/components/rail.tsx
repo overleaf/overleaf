@@ -1,4 +1,11 @@
-import { FC, ReactElement, useCallback, useMemo } from 'react'
+import {
+  FC,
+  forwardRef,
+  ReactElement,
+  useCallback,
+  useMemo,
+  useRef,
+} from 'react'
 import { useTranslation } from 'react-i18next'
 import { Nav, NavLink, Tab, TabContainer } from 'react-bootstrap'
 import MaterialIcon, {
@@ -44,6 +51,7 @@ import { useDetachCompileContext as useCompileContext } from '@/shared/context/d
 import OldErrorPane from './error-logs/old-error-pane'
 import { useFeatureFlag } from '@/shared/context/split-test-context'
 import { useSurveyUrl } from '../hooks/use-survey-url'
+import NewErrorLogsPromo from './error-logs/new-error-logs-promo'
 
 type RailElement = {
   icon: AvailableUnfilledIcon
@@ -104,6 +112,8 @@ export const RailLayout = () => {
   } = useRailContext()
   const { logEntries } = useCompileContext()
   const errorLogsDisabled = !logEntries
+
+  const errorsTabRef = useRef<HTMLAnchorElement>(null)
 
   const { view, setLeftMenuShown } = useLayoutContext()
 
@@ -230,6 +240,7 @@ export const RailLayout = () => {
             .filter(({ hide }) => !hide)
             .map(({ icon, key, indicator, title, disabled }) => (
               <RailTab
+                ref={key === 'errors' ? errorsTabRef : null}
                 open={isOpen && selectedTab === key}
                 key={key}
                 eventKey={key}
@@ -243,6 +254,7 @@ export const RailLayout = () => {
           {railActions?.map(action => (
             <RailActionElement key={action.key} action={action} />
           ))}
+          {newErrorlogs && <NewErrorLogsPromo target={errorsTabRef.current} />}
         </Nav>
       </div>
       <Panel
@@ -301,21 +313,17 @@ export const RailLayout = () => {
   )
 }
 
-const RailTab = ({
-  icon,
-  eventKey,
-  open,
-  indicator,
-  title,
-  disabled = false,
-}: {
-  icon: AvailableUnfilledIcon
-  eventKey: string
-  open: boolean
-  indicator?: ReactElement
-  title: string
-  disabled?: boolean
-}) => {
+const RailTab = forwardRef<
+  HTMLAnchorElement,
+  {
+    icon: AvailableUnfilledIcon
+    eventKey: string
+    open: boolean
+    indicator?: ReactElement
+    title: string
+    disabled?: boolean
+  }
+>(({ icon, eventKey, open, indicator, title, disabled = false }, ref) => {
   return (
     <OLTooltip
       id={`rail-tab-tooltip-${eventKey}`}
@@ -323,6 +331,7 @@ const RailTab = ({
       overlayProps={{ delay: 0, placement: 'right' }}
     >
       <NavLink
+        ref={ref}
         eventKey={eventKey}
         className={classNames('ide-rail-tab-link', {
           'open-rail': open,
@@ -347,7 +356,9 @@ const RailTab = ({
       </NavLink>
     </OLTooltip>
   )
-}
+})
+
+RailTab.displayName = 'RailTab'
 
 const RailActionElement = ({ action }: { action: RailAction }) => {
   const onActionClick = useCallback(() => {

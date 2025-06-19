@@ -156,3 +156,13 @@ body {
     display: none;
   }
 }
+
+.new-error-logs-promo {
+  display: flex;
+  gap: var(--spacing-04);
+  font-weight: bold;
+  font-size: var(--font-size-02);
+  line-height: var(--line-height-02);
+  background-color: black;
+  border-radius: var(--border-radius-base);
+}

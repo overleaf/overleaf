@@ -697,6 +697,7 @@
   "error": "Error",
   "error_assist": "Error Assist",
   "error_log": "Error log",
+  "error_logs_have_had_an_update": "Error logs have had an update",
   "error_opening_document": "Error opening document",
   "error_opening_document_detail": "Sorry, something went wrong opening this document. Please try again.",
   "error_performing_request": "An error has occurred while performing your request.",

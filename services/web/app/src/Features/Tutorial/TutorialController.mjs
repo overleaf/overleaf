@@ -15,6 +15,7 @@ const VALID_KEYS = [
   'editor-popup-ux-survey',
   'wf-features-moved',
   'review-mode',
+  'new-error-logs-promo',
 ]
 
 async function completeTutorial(req, res, next) {
