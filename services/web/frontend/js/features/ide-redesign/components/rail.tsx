@@ -156,7 +156,7 @@ export const RailLayout = () => {
         component: <ChatPane />,
         indicator: <ChatIndicator />,
         title: t('chat'),
-        hide: !getMeta('ol-chatEnabled'),
+        hide: !getMeta('ol-capabilities')?.includes('chat'),
       },
       {
         key: 'errors',

@@ -80,7 +80,7 @@ const ToolbarHeader = React.memo(function ToolbarHeader({
   openShareModal: () => void
   trackChangesVisible: boolean | undefined
 }) {
-  const chatEnabled = getMeta('ol-chatEnabled')
+  const chatEnabled = getMeta('ol-capabilities')?.includes('chat')
 
   const { t } = useTranslation()
   const shouldDisplayPublishButton = hasPublishPermissions && PublishButton

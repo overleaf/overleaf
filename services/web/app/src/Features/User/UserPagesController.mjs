@@ -176,6 +176,7 @@ async function settingsPage(req, res) {
     gitBridgeEnabled: Settings.enableGitBridge,
     isSaas: Features.hasFeature('saas'),
     memberOfSSOEnabledGroups,
+    capabilities: [...req.capabilitySet],
   })
 }
 

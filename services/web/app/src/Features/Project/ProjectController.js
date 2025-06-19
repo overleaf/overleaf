@@ -728,14 +728,6 @@ const _ProjectController = {
           ? 'project/ide-react-detached'
           : 'project/ide-react'
 
-      let chatEnabled
-      if (Features.hasFeature('saas')) {
-        chatEnabled =
-          Features.hasFeature('chat') && req.capabilitySet.has('chat')
-      } else {
-        chatEnabled = Features.hasFeature('chat')
-      }
-
       const isOverleafAssistBundleEnabled =
         splitTestAssignments['overleaf-assist-bundle']?.variant === 'enabled'
 
@@ -841,7 +833,7 @@ const _ProjectController = {
           isTokenMember,
           isInvitedMember
         ),
-        chatEnabled,
+        capabilities: [...req.capabilitySet],
         projectHistoryBlobsEnabled: Features.hasFeature(
           'project-history-blobs'
         ),

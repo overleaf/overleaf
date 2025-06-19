@@ -85,6 +85,8 @@ export function EditorProviders({
     merge({}, defaultUserSettings, userSettings)
   )
 
+  window.metaAttributesCache.set('ol-capabilities', ['chat', 'dropbox'])
+
   const scope = merge(
     {
       user,
