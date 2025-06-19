@@ -728,6 +728,13 @@ const _ProjectController = {
           ? 'project/ide-react-detached'
           : 'project/ide-react'
 
+      const capabilities = [...req.capabilitySet]
+
+      // make sure the capability is added to CE/SP when the feature is enabled
+      if (!Features.hasFeature('saas') && Features.hasFeature('chat')) {
+        capabilities.push('chat')
+      }
+
       const isOverleafAssistBundleEnabled =
         splitTestAssignments['overleaf-assist-bundle']?.variant === 'enabled'
 
@@ -833,7 +840,7 @@ const _ProjectController = {
           isTokenMember,
           isInvitedMember
         ),
-        capabilities: [...req.capabilitySet],
+        capabilities,
         projectHistoryBlobsEnabled: Features.hasFeature(
           'project-history-blobs'
         ),
