@@ -26,20 +26,13 @@
     "typescript": "^5.5.4"
   },
   "overrides": {
-    "cross-env": {
+    "cross-env@4.0.0": {
       "cross-spawn": "^7.0.6"
     },
-    "fetch-mock": {
-      "path-to-regexp": "3.3.0"
-    },
-    "google-gax": {
-      "protobufjs": "^7.2.5"
-    },
-    "swagger-tools": {
-      "body-parser": "1.20.3",
-      "multer": "2.0.1",
+    "swagger-tools@0.10.4": {
       "path-to-regexp": "3.3.0",
-      "qs": "6.13.0"
+      "body-parser": "1.20.3",
+      "multer": "2.0.1"
     }
   },
   "scripts": {
