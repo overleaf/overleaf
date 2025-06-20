@@ -58,7 +58,7 @@
       @include box-shadow-button-input;
     }
 
-    i {
+    .material-symbols {
       vertical-align: middle;
       margin-left: var(--spacing-02);
       padding-bottom: 3px;
@@ -378,7 +378,7 @@
           }
         }
 
-        i.material-symbols {
+        .material-symbols {
           color: var(--sapphire-blue);
         }
       }

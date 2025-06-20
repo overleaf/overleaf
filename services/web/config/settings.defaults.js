@@ -919,7 +919,7 @@ module.exports = {
           col: ['width'],
           figure: ['class', 'id', 'style'],
           figcaption: ['class', 'id', 'style'],
-          i: ['aria-hidden', 'aria-label', 'class', 'id'],
+          i: ['aria-hidden', 'aria-label', 'class', 'id', 'translate'],
           iframe: [
             'allowfullscreen',
             'frameborder',

@@ -1,3 +1,5 @@
+include ./material_symbol
+
 mixin formMessages()
 	div(
 		data-ol-form-messages='',
@@ -48,7 +50,7 @@ mixin customFormMessageNewStyle(key, kind, extraClass = 'mb-3')
 			aria-live="polite"
 		)
 			div.notification-icon
-				span.material-symbols(aria-hidden="true") check_circle
+				+material-symbol("check_circle")
 			div.notification-content.text-left
 				block
 	else if kind === 'danger'
@@ -60,7 +62,7 @@ mixin customFormMessageNewStyle(key, kind, extraClass = 'mb-3')
 			aria-live="polite"
 		)
 			div.notification-icon
-				span.material-symbols(aria-hidden="true") error
+				+material-symbol("error")
 			div.notification-content.text-left
 				block
 	else
@@ -72,7 +74,7 @@ mixin customFormMessageNewStyle(key, kind, extraClass = 'mb-3')
 			aria-live="polite"
 		)
 			div.notification-icon
-				span.material-symbols(aria-hidden="true") warning
+				+material-symbol("warning")
 			div.notification-content.text-left
 				block
 
@@ -91,6 +93,6 @@ mixin customValidationMessageNewStyle(key)
 			data-ol-custom-form-message=key
 		)
 		div.notification-icon
-			span.material-symbols(aria-hidden="true") error
+			+material-symbol("error")
 		div.notification-content.text-left.small
 			block

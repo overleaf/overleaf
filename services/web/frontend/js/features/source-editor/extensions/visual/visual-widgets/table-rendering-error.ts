@@ -17,6 +17,7 @@ export class TableRenderingErrorWidget extends WidgetType {
     const iconType = document.createElement('span')
     iconType.classList.add('material-symbols')
     iconType.setAttribute('aria-hidden', 'true')
+    iconType.setAttribute('translate', 'no')
     iconType.textContent = 'info'
     icon.appendChild(iconType)
     warning.appendChild(icon)

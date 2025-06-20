@@ -3,6 +3,8 @@ extends ../../../../../app/views/layout-website-redesign
 block vars
 	- isWebsiteRedesign = true
 
+include ../../../../../app/views/_mixins/material_symbol
+
 block content
 	main.content.content-alt#main-content
 		.container
@@ -11,8 +13,7 @@ block content
 					.notification.notification-type-success(aria-live="off" role="alert")
 						.notification-content-and-cta
 							.notification-icon
-								span.material-symbols(aria-hidden="true")
-									| check_circle
+								+material-symbol("check_circle")
 							.notification-content
 								p
 									| #{translate("nearly_activated")}

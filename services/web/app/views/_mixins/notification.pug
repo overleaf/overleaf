@@ -1,14 +1,15 @@
 //- to be kept in sync with frontend/js/shared/components/notification.tsx
+include ./material_symbol
 
 mixin notificationIcon(type)
 	if type === 'info'
-		span.material-symbols(aria-hidden="true") info
+		+material-symbol("info")
 	else if type === 'success'
-		span.material-symbols(aria-hidden="true") check_circle
+		+material-symbol("check_circle")
 	else if type === 'error'
-		span.material-symbols(aria-hidden="true") error
+		+material-symbol("error")
 	else if type === 'warning'
-		span.material-symbols(aria-hidden="true") warning
+		+material-symbol("warning")
 
 
 mixin notification(options)
@@ -39,4 +40,4 @@ mixin notification(options)
 		//- if isDismissible
 		//- 	.notification-close-btn
 		//- 		button(aria-label=translate('close'))
-		//- 			span.material-symbols(aria-hidden="true") close
+		//- 			+material-symbol("close")

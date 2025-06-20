@@ -1,5 +1,6 @@
 include ./_plans_faq_tabs
 include ../../_mixins/eyebrow
+include ../../_mixins/material_symbol
 
 - var managingYourSubscription = 'managingYourSubscription'
 - var overleafIndividualPlans = 'overleafIndividualPlans'
@@ -87,4 +88,4 @@ include ../../_mixins/eyebrow
 				data-bs-target=bootstrapVersion === 5 ? "#contactUsModal" : undefined
 			)
 				span(style="margin-right: 4px") #{translate('contact_support')}
-				i.icon-md.material-symbols.material-symbols-rounded.material-symbols-arrow-right(aria-hidden="true") arrow_right_alt
+				+material-symbol-rounded("arrow_right_alt", "icon-md")

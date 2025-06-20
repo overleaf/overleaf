@@ -1,5 +1,6 @@
 //- If the `plans-page-bs5` split test has been completed, remove the `data-toggle` and `data-target` because it is not needed anymore (bs5 uses `data-bs-toggle` and `data-bs-target`)
-
+include ../../_mixins/material_symbol
+	
 mixin managingYourSubscription()
 	.ol-accordions-container
 		.custom-accordion-item
@@ -14,7 +15,7 @@ mixin managingYourSubscription()
 			)
 				| Can I change plans or cancel later?
 				span.custom-accordion-icon
-					i.material-symbols.material-symbols-outlined(aria-hidden="true") keyboard_arrow_down
+					+material-symbol-outlined("keyboard_arrow_down")
 			.collapse(id="managingYourSubscriptionQ1")
 				.custom-accordion-body
 					span Yes, you can do this at any time by going to 
@@ -32,7 +33,7 @@ mixin managingYourSubscription()
 			)
 				| If I change or cancel my Overleaf plan, will I lose my projects?
 				span.custom-accordion-icon
-					i.material-symbols.material-symbols-outlined(aria-hidden="true") keyboard_arrow_down
+					+material-symbol-outlined("keyboard_arrow_down")
 			.collapse(id="managingYourSubscriptionQ2")
 				.custom-accordion-body
 					| No. Changing or canceling your plan won’t affect your projects, the only change will be to the features available to you. You can see which features are available only on paid plans in the comparison table.
@@ -48,7 +49,7 @@ mixin managingYourSubscription()
 			)
 				| Can I pay by invoice or purchase order?
 				span.custom-accordion-icon
-					i.material-symbols.material-symbols-outlined(aria-hidden="true") keyboard_arrow_down
+					+material-symbol-outlined("keyboard_arrow_down")
 			.collapse(id="managingYourSubscriptionQ3")
 				.custom-accordion-body
 					| This is possible when you’re purchasing a group subscription for five or more people, or a site license. For individual subscriptions, we can only accept payment online via credit card, debit card, or PayPal.
@@ -64,7 +65,7 @@ mixin managingYourSubscription()
 			)
 				| How do I view/update the credit card being charged for my subscription?
 				span.custom-accordion-icon
-					i.material-symbols.material-symbols-outlined(aria-hidden="true") keyboard_arrow_down
+					+material-symbol-outlined("keyboard_arrow_down")
 			.collapse(id="managingYourSubscriptionQ4")
 				.custom-accordion-body
 					| You can view and update the card on file by going to Account > 
@@ -96,7 +97,7 @@ mixin overleafIndividualPlans()
 			)
 				| How does the free trial work?
 				span.custom-accordion-icon
-					i.material-symbols.material-symbols-outlined(aria-hidden="true") keyboard_arrow_down
+					+material-symbol-outlined("keyboard_arrow_down")
 			.collapse(id="overleafIndividualPlansQ1")
 				.custom-accordion-body
 					span You get full access to your chosen plan during your 7-day free trial, and there’s no obligation to continue beyond the trial. Your card will be charged at the end of your trial unless you cancel before then. To cancel, go to 
@@ -124,7 +125,7 @@ mixin overleafIndividualPlans()
 			)
 				| What’s a collaborator on an Overleaf individual subscription?
 				span.custom-accordion-icon
-					i.material-symbols.material-symbols-outlined(aria-hidden="true") keyboard_arrow_down
+					+material-symbol-outlined("keyboard_arrow_down")
 			.collapse(id="overleafIndividualPlansQ2")
 				.custom-accordion-body
 					| A collaborator is someone you invite to work with you on a project. So, for example, on our Standard plan you can have up to 10 people collaborating with you on any given project. 
@@ -141,7 +142,7 @@ mixin overleafIndividualPlans()
 			)
 				| The individual Standard plan has 10 project collaborators, does it mean that 10 people will be upgraded?
 				span.custom-accordion-icon
-					i.material-symbols.material-symbols-outlined(aria-hidden="true") keyboard_arrow_down
+					+material-symbol-outlined("keyboard_arrow_down")
 			.collapse(id="overleafIndividualPlansQ3")
 				.custom-accordion-body
 					span No. Only the subscriber’s account will be upgraded. An individual Standard subscription allows you to invite 10 people per project to edit the project with you. Your collaborators can access features such as the full document history and extended compile time, but 
@@ -159,7 +160,7 @@ mixin overleafIndividualPlans()
 			)
 				| Do collaborators also have access to the editing and collaboration features I’ve paid for?
 				span.custom-accordion-icon
-					i.material-symbols.material-symbols-outlined(aria-hidden="true") keyboard_arrow_down
+					+material-symbol-outlined("keyboard_arrow_down")
 			.collapse(id="overleafIndividualPlansQ4")
 				.custom-accordion-body
 					span If you have an Overleaf subscription, then your project collaborators will have access to features like real-time track changes and document history, but 
@@ -177,7 +178,7 @@ mixin overleafIndividualPlans()
 			)
 				| Can I purchase an individual plan on behalf of someone else?
 				span.custom-accordion-icon
-					i.material-symbols.material-symbols-outlined(aria-hidden="true") keyboard_arrow_down
+					+material-symbol-outlined("keyboard_arrow_down")
 			.collapse(id="overleafIndividualPlansQ5")
 				.custom-accordion-body
 					| Individual subscriptions must be purchased by the account that will be the end user. If you want to purchase a plan for someone else, you’ll need to provide them with relevant payment details to enable them to make the purchase. 
@@ -193,7 +194,7 @@ mixin overleafIndividualPlans()
 			)
 				| Who is eligible for the Student plan?
 				span.custom-accordion-icon
-					i.material-symbols.material-symbols-outlined(aria-hidden="true") keyboard_arrow_down
+					+material-symbol-outlined("keyboard_arrow_down")
 			.collapse(id="overleafIndividualPlansQ6")
 				.custom-accordion-body
 					| As the name suggests, the Student plan is only for students at educational institutions. This includes graduate students.
@@ -209,7 +210,7 @@ mixin overleafIndividualPlans()
 			)
 				| Can I transfer an individual subscription to someone else?
 				span.custom-accordion-icon
-					i.material-symbols.material-symbols-outlined(aria-hidden="true") keyboard_arrow_down
+					+material-symbol-outlined("keyboard_arrow_down")
 			.collapse(id="overleafIndividualPlansQ7")
 				.custom-accordion-body
 					| No. Individual plans can’t be transferred. 
@@ -232,7 +233,7 @@ mixin overleafGroupPlans()
 			)
 				| What’s the difference between users and collaborators on an Overleaf group subscription?
 				span.custom-accordion-icon
-					i.material-symbols.material-symbols-outlined(aria-hidden="true") keyboard_arrow_down
+					+material-symbol-outlined("keyboard_arrow_down")
 			.collapse(id="overleafGroupPlansQ1")
 				.custom-accordion-body
 					div On any of our group plans, the number of users refers to the number of people you can invite to join your group. All of these people will have access to the plan’s paid-for features across all their projects, such as real-time track changes and document history. 
@@ -249,7 +250,7 @@ mixin overleafGroupPlans()
 			)
 				| What is the benefit of purchasing an Overleaf Group plan?
 				span.custom-accordion-icon
-					i.material-symbols.material-symbols-outlined(aria-hidden="true") keyboard_arrow_down
+					+material-symbol-outlined("keyboard_arrow_down")
 			.collapse(id="overleafGroupPlansQ2")
 				.custom-accordion-body
 					| Our Group subscriptions allow you to purchase access to our premium features for multiple people. They’re easy to manage, help save on paperwork, and allow groups of 5 or more to purchase via purchase order (PO). We also offer discounts on purchases of Group subscriptions for more than 20 users; just get in touch with our 
@@ -275,7 +276,7 @@ mixin overleafGroupPlans()
 			)
 				| Who is eligible for the educational discount?
 				span.custom-accordion-icon
-					i.material-symbols.material-symbols-outlined(aria-hidden="true") keyboard_arrow_down
+					+material-symbol-outlined("keyboard_arrow_down")
 			.collapse(id="overleafGroupPlansQ3")
 				.custom-accordion-body
 					| The educational discount for group subscriptions is for students or faculty who are using Overleaf primarily for teaching. 
@@ -291,7 +292,7 @@ mixin overleafGroupPlans()
 			)
 				| How do I add more licenses to my group subscription, and what will it cost?
 				span.custom-accordion-icon
-					i.material-symbols.material-symbols-outlined(aria-hidden="true") keyboard_arrow_down
+					+material-symbol-outlined("keyboard_arrow_down")
 			.collapse(id="overleafGroupPlansQ4")
 				.custom-accordion-body
 					div 
@@ -340,7 +341,7 @@ mixin overleafGroupPlans()
 			)
 				| How do I upgrade my plan from Group Standard to Group Professional?
 				span.custom-accordion-icon
-					i.material-symbols.material-symbols-outlined(aria-hidden="true") keyboard_arrow_down
+					+material-symbol-outlined("keyboard_arrow_down")
 			.collapse(id="overleafGroupPlansQ5")
 				.custom-accordion-body
 					| You can upgrade your plan from Group Standard to Group Professional on the 

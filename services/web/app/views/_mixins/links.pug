@@ -1,3 +1,5 @@
+include ./material_symbol
+
 mixin linkAdvisors(linkText, linkClass, track)
 	//- To Do: verify path
 	- var gaCategory = track && track.category ? track.category : 'All'
@@ -120,4 +122,4 @@ mixin linkUniversities(linkText, linkClass)
 mixin linkWithArrow({text, href, eventTracking, eventSegmentation, eventTrackingTrigger})
 	a.link-with-arrow(href=href event-tracking=eventTracking event-segmentation=eventSegmentation, event-tracking-trigger=eventTrackingTrigger event-tracking-mb)
 		| #{text}
-		i.material-symbols(aria-hidden="true") arrow_right_alt
+		+material-symbol("arrow_right_alt")

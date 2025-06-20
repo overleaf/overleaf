@@ -1,3 +1,5 @@
+include ../_mixins/material_symbol
+
 li.dropdown.dropup.subdued(dropdown).language-picker
 	button#language-picker-toggle.btn.btn-link.btn-inline-link(
 		dropdown-toggle,
@@ -9,7 +11,7 @@ li.dropdown.dropup.subdued(dropdown).language-picker
 		tooltip=translate('language')
 		title=translate('language')
 	)
-		span.material-symbols(aria-hidden="true") translate
+		+material-symbol("translate")
 		| &nbsp;
 		span.language-picker-text #{settings.translatedLanguages[currentLngCode]}
 
@@ -22,4 +24,4 @@ li.dropdown.dropup.subdued(dropdown).language-picker
 					a.menu-indent(href=subdomainDetails.url+currentUrlWithQueryParams, role="menuitem", class=isActive ? 'dropdown-item active' : 'dropdown-item', aria-selected=isActive ? 'true' : 'false')
 						| #{settings.translatedLanguages[subdomainDetails.lngCode]}
 						if subdomainDetails.lngCode === currentLngCode
-							span.material-symbols.dropdown-item-trailing-icon(aria-hidden="true") check
+							+material-symbol("check", "dropdown-item-trailing-icon")

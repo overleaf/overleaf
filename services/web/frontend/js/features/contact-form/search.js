@@ -47,8 +47,9 @@ export function setupSearch(formEl) {
 
         const iconEl = document.createElement('i')
         iconEl.className = 'material-symbols dropdown-item-trailing-icon'
-        iconEl.innerText = 'open_in_new'
+        iconEl.textContent = 'open_in_new'
         iconEl.setAttribute('aria-hidden', 'true')
+        iconEl.translate = false
         linkEl.append(iconEl)
 
         resultsEl.append(liEl)
