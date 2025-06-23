@@ -3,4 +3,4 @@
 /** @type {WebModule} */
 const ServerCeScriptsModule = {}
 
-module.exports = ServerCeScriptsModule
+export default ServerCeScriptsModule
