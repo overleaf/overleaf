@@ -7,10 +7,10 @@ include ./_mixins/bootstrap_js
 
 block entrypointVar
 	- entrypoint = 'marketing'
-		
+
 block isApplicationPageVar
 	- isApplicationPage = true
-		
+
 block append meta
 	- const canDisplayAdminMenu = hasAdminAccess()
 	- const canDisplayAdminRedirect = canRedirectToAdminDomain()
@@ -22,44 +22,52 @@ block append meta
 	- const enableUpgradeButton = projectDashboardReact && usersBestSubscription && (usersBestSubscription.type === 'free' || usersBestSubscription.type === 'standalone-ai-add-on')
 	- const showSignUpLink = hasFeature('registration-page')
 
-	meta(name="ol-navbar" data-type="json" content={
-		customLogo: settings.nav.custom_logo,
-		title: nav.title,
-		canDisplayAdminMenu,
-		canDisplayAdminRedirect,
-		canDisplaySplitTestMenu,
-		canDisplaySurveyMenu,
-		canDisplayScriptLogMenu,
-		enableUpgradeButton,
-		suppressNavbarRight: !!suppressNavbarRight,
-		suppressNavContentLinks: !!suppressNavContentLinks,
-		showSubscriptionLink: nav.showSubscriptionLink,
-		showSignUpLink: showSignUpLink,
-		currentUrl: currentUrl,
-		sessionUser: sessionUser ? { email: sessionUser.email} : undefined,
-		adminUrl: settings.adminUrl,
-		items: cloneAndTranslateText(nav.header_extras)
-	})
-	meta(name="ol-footer" data-type="json" content={
-		showThinFooter: showThinFooter,
-		showPoweredBy: !hasFeature('saas') && !settings.nav.hide_powered_by,
-		subdomainLang: settings.i18n.subdomainLang,
-		translatedLanguages: settings.translatedLanguages,
-		leftItems: cloneAndTranslateText(settings.nav.left_footer),
-		rightItems: settings.nav.right_footer
-	})
+	meta(
+		name='ol-navbar'
+		data-type='json'
+		content={
+			customLogo: settings.nav.custom_logo,
+			title: nav.title,
+			canDisplayAdminMenu,
+			canDisplayAdminRedirect,
+			canDisplaySplitTestMenu,
+			canDisplaySurveyMenu,
+			canDisplayScriptLogMenu,
+			enableUpgradeButton,
+			suppressNavbarRight: !!suppressNavbarRight,
+			suppressNavContentLinks: !!suppressNavContentLinks,
+			showSubscriptionLink: nav.showSubscriptionLink,
+			showSignUpLink: showSignUpLink,
+			currentUrl: currentUrl,
+			sessionUser: sessionUser ? {email: sessionUser.email} : undefined,
+			adminUrl: settings.adminUrl,
+			items: cloneAndTranslateText(nav.header_extras),
+		}
+	)
+	meta(
+		name='ol-footer'
+		data-type='json'
+		content={
+			showThinFooter: showThinFooter,
+			showPoweredBy: !hasFeature('saas') && !settings.nav.hide_powered_by,
+			subdomainLang: settings.i18n.subdomainLang,
+			translatedLanguages: settings.translatedLanguages,
+			leftItems: cloneAndTranslateText(settings.nav.left_footer),
+			rightItems: settings.nav.right_footer,
+		}
+	)
 
 block body
-	if (typeof suppressNavbar === "undefined")
+	if typeof suppressNavbar === 'undefined'
 		include layout/navbar-marketing-react-bootstrap-5
 
 	block content
 
-	if (typeof suppressFooter === "undefined")
+	if typeof suppressFooter === 'undefined'
 		if showThinFooter
 			include layout/thin-footer-bootstrap-5
 		else
 			include layout/fat-footer-react-bootstrap-5
 
-	if (typeof suppressCookieBanner === "undefined")
+	if typeof suppressCookieBanner === 'undefined'
 		include _cookie_banner

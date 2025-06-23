@@ -1,10 +1,10 @@
-mixin begin_now_card()
+mixin begin_now_card
 	- var registerURL = '/register'
 	- var plansURL = '/user/subscription/plans'
 	- var isUserLoggedIn = !!getSessionUser()
 
 	.begin-now-card
-		div.card.card-pattern
+		.card.card-pattern
 			.card-body
 				p.dm-mono
 					span.font-size-display-xs
@@ -16,10 +16,8 @@ mixin begin_now_card()
 				p #{translate("discover_why_over_people_worldwide_trust_overleaf", {count: settings.userCountInMillions})}
 				p.card-links
 					if !isUserLoggedIn
-						a.btn.btn-primary.card-link(
-							href=registerURL
-						) #{translate("sign_up_for_free")}
+						a.btn.btn-primary.card-link(href=registerURL) #{translate("sign_up_for_free")}
 					a.btn.card-link(
-						class = isUserLoggedIn ? 'btn-primary' : 'btn-secondary'
+						class=isUserLoggedIn ? 'btn-primary' : 'btn-secondary'
 						href=plansURL
 					) #{translate("explore_all_plans")}

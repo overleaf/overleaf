@@ -2,7 +2,7 @@ extends ../layout-marketing
 include ../_mixins/back_to_btns
 
 block content
-	main.content.content-alt#main-content
+	main#main-content.content.content-alt
 		.container
 			.row
 				.col-lg-10.offset-lg-1.col-xl-8.offset-xl-2
@@ -10,9 +10,9 @@ block content
 						.card-body
 							.page-header
 								h1 #{translate("newsletter_info_title")}
-	
+
 							p #{translate("newsletter_info_summary")}
-	
+
 							- var submitAction
 							if subscribed
 								- submitAction = '/user/newsletter/unsubscribe'
@@ -20,28 +20,28 @@ block content
 							else
 								- submitAction = '/user/newsletter/subscribe'
 								p !{translate("newsletter_info_unsubscribed", {}, ['strong'])}
-	
+
 							form(
+								name='newsletterForm'
 								data-ol-async-form
 								data-ol-reload-on-success
-								name="newsletterForm"
 								action=submitAction
-								method="POST"
+								method='POST'
 							)
-								input(name='_csrf', type='hidden', value=csrfToken)
-								+formMessages()
+								input(name='_csrf' type='hidden' value=csrfToken)
+								+formMessages
 								p.actions.text-center
 									if subscribed
-										button.btn-danger.btn(type='submit', data-ol-disabled-inflight)
-											span(data-ol-inflight="idle") #{translate("unsubscribe")}
-											span(hidden data-ol-inflight="pending") #{translate("saving")}…
+										button.btn-danger.btn(type='submit' data-ol-disabled-inflight)
+											span(data-ol-inflight='idle') #{translate("unsubscribe")}
+											span(hidden data-ol-inflight='pending') #{translate("saving")}…
 									else
-										button.btn-primary.btn(type='submit', data-ol-disabled-inflight)
-											span(data-ol-inflight="idle") #{translate("subscribe")}
-											span(hidden data-ol-inflight="pending") #{translate("saving")}…
-	
+										button.btn-primary.btn(type='submit' data-ol-disabled-inflight)
+											span(data-ol-inflight='idle') #{translate("subscribe")}
+											span(hidden data-ol-inflight='pending') #{translate("saving")}…
+
 							if subscribed
 								p #{translate("newsletter_info_note")}
-	
+
 							.page-separator
-							+back-to-btns()
+							+back-to-btns

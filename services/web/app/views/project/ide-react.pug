@@ -15,7 +15,7 @@ block content
 	main#ide-root
 		.loading-screen
 			.loading-screen-brand-container
-				.loading-screen-brand(style="height: 20%;")
+				.loading-screen-brand(style='height: 20%')
 			h3.loading-screen-label #{translate("loading")}
 				span.loading-screen-ellip .
 				span.loading-screen-ellip .
@@ -25,4 +25,9 @@ block append meta
 	include editor/_meta
 
 block prepend foot-scripts
-	script(type="text/javascript", nonce=scriptNonce, src=(wsUrl || '/socket.io') + '/socket.io.js', defer=deferScripts)
+	script(
+		type='text/javascript'
+		nonce=scriptNonce
+		src=(wsUrl || '/socket.io') + '/socket.io.js'
+		defer=deferScripts
+	)

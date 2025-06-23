@@ -4,20 +4,13 @@ block vars
 	- bootstrap5PageStatus = 'disabled'
 
 block content
-	main.content.content-alt#main-content
+	main#main-content.content.content-alt
 		.container
 			.row
 				.col-md-10.col-md-offset-1
 					h3 #{entityName} "#{entityId}" does not exists in v2
-					form(
-						data-ol-regular-form
-						method='post',
-						action=''
-					)
-						input(name="_csrf", type="hidden", value=csrfToken)
-						button.btn.btn-primary(
-							type="submit",
-							data-ol-disabled-inflight
-						)
-							span(data-ol-inflight="idle") Create #{entityName} in v2
-							span(hidden data-ol-inflight="pending") #{translate("creating")}…
+					form(data-ol-regular-form method='post' action='')
+						input(name='_csrf' type='hidden' value=csrfToken)
+						button.btn.btn-primary(type='submit' data-ol-disabled-inflight)
+							span(data-ol-inflight='idle') Create #{entityName} in v2
+							span(hidden data-ol-inflight='pending') #{translate("creating")}…

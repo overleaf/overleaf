@@ -5,20 +5,24 @@ block vars
 	- bootstrap5PageStatus = 'disabled'
 
 block content
-	- var email = reconfirm_email ? reconfirm_email : ""
+	- var email = reconfirm_email ? reconfirm_email : ''
 	- var showCaptcha = settings.recaptcha && settings.recaptcha.siteKey && !(settings.recaptcha.disabled && settings.recaptcha.disabled.passwordReset)
 
 	if showCaptcha
-		script(type="text/javascript", nonce=scriptNonce, src="https://www.recaptcha.net/recaptcha/api.js?render=explicit")
+		script(
+			type='text/javascript'
+			nonce=scriptNonce
+			src='https://www.recaptcha.net/recaptcha/api.js?render=explicit'
+		)
 		div(
-			id="recaptcha"
-			class="g-recaptcha"
+			id='recaptcha'
+			class='g-recaptcha'
 			data-sitekey=settings.recaptcha.siteKey
-			data-size="invisible"
-			data-badge="inline"
+			data-size='invisible'
+			data-badge='inline'
 		)
 
-	main.content.content-alt#main-content(data-ol-captcha-retry-trigger-area="")
+	main#main-content.content.content-alt(data-ol-captcha-retry-trigger-area='')
 		.container
 			.row
 				.col-sm-12.col-md-6.col-md-offset-3
@@ -28,44 +32,41 @@ block content
 							a(href=`mailto:${settings.adminEmail}`) #{settings.adminEmail}
 							| .
 						form(
+							name='reconfirmAccountForm'
+							captcha-action-name=showCaptcha ? 'passwordReset' : false
 							data-ol-async-form
-							name="reconfirmAccountForm"
-							action="/user/reconfirm",
-							method="POST",
+							action='/user/reconfirm'
+							method='POST'
 							aria-label=translate('request_reconfirmation_email')
-							captcha=(showCaptcha ? '' : false),
-							captcha-action-name=(showCaptcha ? "passwordReset" : false)
+							captcha=showCaptcha ? '' : false
 						)
 							div(data-ol-not-sent)
-								+formMessages()
-	
-								input(type="hidden", name="_csrf", value=csrfToken)
+								+formMessages
+
+								input(name='_csrf' type='hidden' value=csrfToken)
 								.form-group
 									label(for='email') #{translate("please_enter_email")}
 									input.form-control(
-										aria-label="email"
-										type='email',
-										name='email',
-										placeholder='email@example.com',
-										required,
+										name='email'
+										aria-label='email'
+										type='email'
+										placeholder='email@example.com'
+										required
 										autofocus
 										value=email
 									)
 								.actions
 									button.btn.btn-primary(
-										type='submit',
-										data-ol-disabled-inflight,
+										type='submit'
+										data-ol-disabled-inflight
 										aria-label=translate('request_password_reset_to_reconfirm')
 									)
-										span(data-ol-inflight="idle")
+										span(data-ol-inflight='idle')
 											| #{translate('request_password_reset_to_reconfirm')}
-										span(hidden data-ol-inflight="pending")
+										span(hidden data-ol-inflight='pending')
 											| #{translate('request_password_reset_to_reconfirm')}… 
 							div(hidden data-ol-sent)
-								div.alert.alert-success(
-									role="alert"
-									aria-live="polite"
-								)
+								.alert.alert-success(role='alert' aria-live='polite')
 									span #{translate('password_reset_email_sent')}
 			.row
 				.col-sm-12.col-md-6.col-md-offset-3

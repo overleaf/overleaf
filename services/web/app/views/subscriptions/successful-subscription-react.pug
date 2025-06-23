@@ -4,9 +4,9 @@ block entrypointVar
 	- entrypoint = 'pages/user/subscription/successful-subscription'
 
 block append meta
-	meta(name="ol-subscription" data-type="json" content=personalSubscription)
-	meta(name="ol-postCheckoutRedirect" content=postCheckoutRedirect)
-	meta(name="ol-user" data-type="json" content=user)
+	meta(name='ol-subscription' data-type='json' content=personalSubscription)
+	meta(name='ol-postCheckoutRedirect' content=postCheckoutRedirect)
+	meta(name='ol-user' data-type='json' content=user)
 
 block content
-	main.content.content-alt#subscription-success-root
+	main#subscription-success-root.content.content-alt

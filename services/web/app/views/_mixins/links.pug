@@ -8,7 +8,8 @@ mixin linkAdvisors(linkText, linkClass, track)
 	- var mb = track && track.mb ? 'true' : null
 	- var mbSegmentation = track && track.segmentation ? track.segmentation : null
 	- var trigger = track && track.trigger ? track.trigger : null
-	a(href="/advisors" 
+	a(
+		href='/advisors'
 		class=linkClass ? linkClass : ''
 		event-tracking-ga=gaCategory
 		event-tracking=gaAction
@@ -20,24 +21,36 @@ mixin linkAdvisors(linkText, linkClass, track)
 		span #{linkText ? linkText : 'advisor programme'}
 
 mixin linkBenefits(linkText, linkClass)
-	a(href=(settings.siteUrl ? settings.siteUrl : '') + "/for/authors" class=linkClass ? linkClass : '')
+	a(
+		href=(settings.siteUrl ? settings.siteUrl : '') + '/for/authors'
+		class=linkClass ? linkClass : ''
+	)
 		| #{linkText ? linkText : 'benefits'}
-		
+
 mixin linkBlog(linkText, linkClass, slug)
 	if slug
-		a(href=(settings.siteUrl ? settings.siteUrl : '') + "/blog/" + slug class=linkClass ? linkClass : '')
+		a(
+			href=(settings.siteUrl ? settings.siteUrl : '') + '/blog/' + slug
+			class=linkClass ? linkClass : ''
+		)
 			| #{linkText ? linkText : 'blog'}
 
 mixin linkContact(linkText, linkClass)
-	a(href=(settings.siteUrl ? settings.siteUrl : '') + "/contact" class=linkClass ? linkClass : '')
+	a(
+		href=(settings.siteUrl ? settings.siteUrl : '') + '/contact'
+		class=linkClass ? linkClass : ''
+	)
 		| #{linkText ? linkText : 'contact'}
 
 mixin linkDash(linkText, linkClass)
-	a(href="/project" class=linkClass ? linkClass : '')
+	a(href='/project' class=linkClass ? linkClass : '')
 		| #{linkText ? linkText : 'project dashboard'}
 
 mixin linkEducation(linkText, linkClass)
-	a(href=(settings.siteUrl ? settings.siteUrl : '') + "/for/edu" class=linkClass ? linkClass : '')
+	a(
+		href=(settings.siteUrl ? settings.siteUrl : '') + '/for/edu'
+		class=linkClass ? linkClass : ''
+	)
 		| #{linkText ? linkText : 'teaching toolkit'}
 
 mixin linkInvite(linkText, linkClass, track)
@@ -48,7 +61,8 @@ mixin linkInvite(linkText, linkClass, track)
 	- var mbSegmentation = track && track.segmentation ? track.segmentation : null
 	- var trigger = track && track.trigger ? track.trigger : null
 
-	a(href="/user/bonus"
+	a(
+		href='/user/bonus'
 		class=linkClass ? linkClass : ''
 		event-tracking-ga=gaCategory
 		event-tracking=gaAction
@@ -60,7 +74,7 @@ mixin linkInvite(linkText, linkClass, track)
 		span #{linkText ? linkText : 'invite your friends'}
 
 mixin linkPlansAndPricing(linkText, linkClass)
-	a(href="/user/subscription/plans" class=linkClass ? linkClass : '')
+	a(href='/user/subscription/plans' class=linkClass ? linkClass : '')
 		| #{linkText ? linkText : 'plans and pricing'}
 
 mixin linkPrintNewTab(linkText, linkClass, icon, track)
@@ -71,7 +85,8 @@ mixin linkPrintNewTab(linkText, linkClass, icon, track)
 	- var mbSegmentation = track && track.segmentation ? track.segmentation : null
 	- var trigger = track && track.trigger ? track.trigger : null
 
-	a(href='?media=print'
+	a(
+		href='?media=print'
 		class=linkClass ? linkClass : ''
 		event-tracking-ga=gaCategory
 		event-tracking=gaAction
@@ -79,20 +94,26 @@ mixin linkPrintNewTab(linkText, linkClass, icon, track)
 		event-tracking-trigger=trigger
 		event-tracking-mb=mb
 		event-segmentation=mbSegmentation
-		target="_BLANK",
-		rel="noopener noreferrer"
+		target='_BLANK'
+		rel='noopener noreferrer'
 	)
 		if icon
-			i(class="fa fa-print")
+			i(class='fa fa-print')
 			| &nbsp;
 		span #{linkText ? linkText : 'print'}
 
 mixin linkSignIn(linkText, linkClass, redirect)
-	a(href=`/login${redirect ? '?redir=' + redirect : ''}` class=linkClass ? linkClass : '')
+	a(
+		href=`/login${redirect ? '?redir=' + redirect : ''}`
+		class=linkClass ? linkClass : ''
+	)
 		| #{linkText ? linkText : 'sign in'}
 
 mixin linkSignUp(linkText, linkClass, redirect)
-	a(href=`/register${redirect ? '?redir=' + redirect : ''}` class=linkClass ? linkClass : '')
+	a(
+		href=`/register${redirect ? '?redir=' + redirect : ''}`
+		class=linkClass ? linkClass : ''
+	)
 		| #{linkText ? linkText : 'sign up'}
 
 mixin linkTweet(linkText, linkClass, tweetText, track)
@@ -103,23 +124,33 @@ mixin linkTweet(linkText, linkClass, tweetText, track)
 	- var mb = track && track.mb ? 'true' : null
 	- var mbSegmentation = track && track.segmentation ? track.segmentation : null
 	- var trigger = track && track.trigger ? track.trigger : null
-	a(class="twitter-share-button " + linkClass
+	a(
+		class='twitter-share-button ' + linkClass
 		event-tracking-ga=gaCategory
 		event-tracking=gaAction
 		event-tracking-label=gaLabel
 		event-tracking-trigger=trigger
 		event-tracking-mb=mb
 		event-segmentation=mbSegmentation
-		href="https://twitter.com/intent/tweet?text=" + tweetText
-		target="_BLANK",
-		rel="noopener noreferrer"
+		href='https://twitter.com/intent/tweet?text=' + tweetText
+		target='_BLANK'
+		rel='noopener noreferrer'
 	) #{linkText ? linkText : 'tweet'}
 
 mixin linkUniversities(linkText, linkClass)
-	a(href=(settings.siteUrl ? settings.siteUrl : '') + "/for/universities" class=linkClass ? linkClass : '')
+	a(
+		href=(settings.siteUrl ? settings.siteUrl : '') + '/for/universities'
+		class=linkClass ? linkClass : ''
+	)
 		| #{linkText ? linkText : 'universities'}
 
 mixin linkWithArrow({text, href, eventTracking, eventSegmentation, eventTrackingTrigger})
-	a.link-with-arrow(href=href event-tracking=eventTracking event-segmentation=eventSegmentation, event-tracking-trigger=eventTrackingTrigger event-tracking-mb)
+	a.link-with-arrow(
+		href=href
+		event-tracking=eventTracking
+		event-segmentation=eventSegmentation
+		event-tracking-trigger=eventTrackingTrigger
+		event-tracking-mb
+	)
 		| #{text}
-		+material-symbol("arrow_right_alt")
+		+material-symbol('arrow_right_alt')

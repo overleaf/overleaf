@@ -13,3 +13,28 @@ frontend/js/features/source-editor/lezer-latex/latex.terms.mjs
 frontend/js/features/source-editor/lezer-bibtex/bibtex.mjs
 frontend/js/features/source-editor/lezer-bibtex/bibtex.terms.mjs
 frontend/js/features/source-editor/hunspell/wasm/hunspell.mjs
+
+# complex pages
+app/views/project/editor.pug
+app/views/project/editor/**
+modules/open-in-overleaf/app/views/documentation.pug
+modules/references-search/app/views/project/editor/**
+modules/rich-text/app/views/toolbar.pug
+
+# loops
+app/views/referal/bonus.pug
+modules/templates/app/views/tag.pug
+
+# expressions that could not be formatted correctly
+app/views/_mixins/faq_search.pug
+app/views/external/home/v2.pug
+app/views/project/token/access.pug
+app/views/user/primaryEmailCheck.pug
+app/views/user/restricted.pug
+modules/admin-panel/app/views/project/show.pug
+modules/templates/app/views/project/editor/_left-menu.pug
+modules/two-factor-authentication/app/views/_mixins.pug
+
+# minified files
+app/views/_google_analytics.pug
+app/views/_customer_io.pug

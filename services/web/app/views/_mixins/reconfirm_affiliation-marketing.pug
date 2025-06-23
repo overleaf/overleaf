@@ -1,14 +1,11 @@
 mixin reconfirmAffiliationNotification-marketing(userEmail, location)
-	form(
-		data-ol-async-form
-		action='/user/emails/send-reconfirmation'
-	)
-		input(name="_csrf" type="hidden" value=csrfToken)
-		input(name="email" type="hidden" value=userEmail.email)
-		+formMessages()
+	form(data-ol-async-form action='/user/emails/send-reconfirmation')
+		input(name='_csrf' type='hidden' value=csrfToken)
+		input(name='email' type='hidden' value=userEmail.email)
+		+formMessages
 
 		.reconfirm-notification
-			div(data-ol-not-sent style="width:100%;")
+			div(data-ol-not-sent style='width: 100%')
 				i.fa.fa-warning
 
 				- var ssoEnabled = userEmail.affiliation && userEmail.affiliation.institution && userEmail.affiliation.institution.ssoEnabled
@@ -18,16 +15,16 @@ mixin reconfirmAffiliationNotification-marketing(userEmail, location)
 						data-ol-slow-link
 						href=`${settings.saml.ukamf.initPath}?university_id=${institutionId}&reconfirm=${location}`
 					)
-						span(data-ol-inflight="idle") #{translate("confirm_affiliation")}
-						span(hidden data-ol-inflight="pending") #{translate("pending")}…
+						span(data-ol-inflight='idle') #{translate("confirm_affiliation")}
+						span(hidden data-ol-inflight='pending') #{translate("pending")}…
 
 				else
 					button.btn-reconfirm.btn.btn-sm.btn-info(
-						type="submit"
+						type='submit'
 						data-ol-disabled-inflight
 					)
-						span(data-ol-inflight="idle") #{translate("confirm_affiliation")}
-						span(hidden data-ol-inflight="pending") #{translate("pending")}…
+						span(data-ol-inflight='idle') #{translate("confirm_affiliation")}
+						span(hidden data-ol-inflight='pending') #{translate("pending")}…
 
 				| !{translate("are_you_still_at", {institutionName: userEmail.affiliation.institution.name}, ['strong'])}&nbsp;
 
@@ -39,22 +36,19 @@ mixin reconfirmAffiliationNotification-marketing(userEmail, location)
 					| !{translate("please_reconfirm_institutional_email", {}, [{name: 'a', attrs: {href: '/user/settings?remove=' + userEmail.email}}])}
 
 				| &nbsp;
-				a(href="/learn/how-to/Institutional_Email_Reconfirmation" target="_blank") #{translate("learn_more")}
+				a(href='/learn/how-to/Institutional_Email_Reconfirmation' target='_blank') #{translate("learn_more")}
 
 			div(hidden data-ol-sent)
 				| !{translate("please_check_your_inbox_to_confirm", {institutionName: userEmail.affiliation.institution.name}, ['strong'])}
 				| &nbsp;
-				button.btn-inline-link(
-					type="submit"
-					data-ol-disabled-inflight
-				)
-					span(data-ol-inflight="idle") #{translate('resend_confirmation_email')}
-					span(hidden data-ol-inflight="pending") #{translate("pending")}…
+				button.btn-inline-link(type='submit' data-ol-disabled-inflight)
+					span(data-ol-inflight='idle') #{translate('resend_confirmation_email')}
+					span(hidden data-ol-inflight='pending') #{translate("pending")}…
 
 mixin reconfirmedAffiliationNotification-marketing(userEmail)
 	.alert.alert-info
 		.reconfirm-notification
-			div(style="width:100%;")
+			div(style='width: 100%')
 				//- extra div for flex styling
 				| !{translate("your_affiliation_is_confirmed", {institutionName: userEmail.affiliation.institution.name}, ['strong'])}
 				|

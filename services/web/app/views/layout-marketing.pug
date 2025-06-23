@@ -7,7 +7,7 @@ block entrypointVar
 	- entrypoint = 'marketing'
 
 block body
-	if (typeof suppressNavbar === "undefined")
+	if typeof suppressNavbar === 'undefined'
 		if bootstrapVersion === 5
 			include layout/navbar-marketing-bootstrap-5
 		else
@@ -15,7 +15,7 @@ block body
 
 	block content
 
-	if (typeof suppressFooter === "undefined")
+	if typeof suppressFooter === 'undefined'
 		if showThinFooter
 			if bootstrapVersion === 5
 				include layout/thin-footer-bootstrap-5
@@ -24,13 +24,13 @@ block body
 		else
 			include layout/fat-footer
 
-	if (typeof(suppressCookieBanner) == 'undefined')
+	if typeof suppressCookieBanner == 'undefined'
 		include _cookie_banner
 
 	if bootstrapVersion === 5
-		!= moduleIncludes("contactModal-marketing-bootstrap-5", locals)
+		!= moduleIncludes('contactModal-marketing-bootstrap-5', locals)
 	else
-		!= moduleIncludes("contactModal-marketing", locals)
+		!= moduleIncludes('contactModal-marketing', locals)
 
 block prepend foot-scripts
 	+bootstrap-js(bootstrapVersion)

@@ -4,8 +4,8 @@ block entrypointVar
 	- entrypoint = 'pages/user/subscription/group-invites'
 
 block append meta
-	meta(name="ol-teamInvites" data-type="json" content=teamInvites)
-	meta(name="ol-user" data-type="json" content=user)
+	meta(name='ol-teamInvites' data-type='json' content=teamInvites)
+	meta(name='ol-user' data-type='json' content=user)
 
 block content
-	main.content.content-alt.team-invite#group-invites-root
+	main#group-invites-root.content.content-alt.team-invite

@@ -10,77 +10,74 @@ mixin pagination(pages, page_path, max_btns)
 		- var max_btns = max_btns || 4
 		- var prev_page = Math.max(parseInt(pages.current_page, 10) - max_btns, 1)
 		- var next_page = parseInt(pages.current_page, 10) + 1
-		- var next_index = 0;
-		- var full_page_path = page_path + "/page/"
+		- var next_index = 0
+		- var full_page_path = page_path + '/page/'
 
-		nav(role="navigation" aria-label=(translate("pagination_navigation")))
+		nav(role='navigation' aria-label=translate('pagination_navigation'))
 			ul.pagination
 				if pages.current_page > 1
 					li
-						a(
-							aria-label=translate("go_to_first_page")
-							href=page_path
-						)
-							span(aria-hidden="true") &lt;&lt;
+						a(aria-label=translate('go_to_first_page') href=page_path)
+							span(aria-hidden='true') &lt;&lt;
 							|
 							| First
 					li
 						a(
-							aria-label=translate("go_to_previous_page")
+							aria-label=translate('go_to_previous_page')
 							href=full_page_path + (parseInt(pages.current_page, 10) - 1)
-							rel="prev"
+							rel='prev'
 						)
-							span(aria-hidden="true") &lt;
+							span(aria-hidden='true') &lt;
 							|
 							| Prev
 
 				if pages.current_page - max_btns > 1
-					li(aria-hidden="true")
+					li(aria-hidden='true')
 						span …
 
 				while prev_page < pages.current_page
 					li
 						a(
-							aria-label=translate("go_to_page_x", {page: prev_page})
+							aria-label=translate('go_to_page_x', {page: prev_page})
 							href=full_page_path + prev_page
 						) #{prev_page}
 						- prev_page++
 
-				li(class="active")
+				li(class='active')
 					span(
-						aria-label=translate("current_page_page", {page: pages.current_page})
-						aria-current="true"
+						aria-label=translate('current_page_page', {page: pages.current_page})
+						aria-current='true'
 					) #{pages.current_page}
 
 				if pages.current_page < pages.total_pages
 					while next_page <= pages.total_pages && next_index < max_btns
 						li
 							a(
-								aria-label=translate("go_to_page_x", {page: next_page})
+								aria-label=translate('go_to_page_x', {page: next_page})
 								href=full_page_path + next_page
 							) #{next_page}
 						- next_page++
 						- next_index++
 
-					if next_page <= pages.total_pages 
-						li.ellipses(aria-hidden="true")
+					if next_page <= pages.total_pages
+						li.ellipses(aria-hidden='true')
 							span …
 
 					li
 						a(
-							aria-label=translate("go_to_next_page")
+							aria-label=translate('go_to_next_page')
 							href=full_page_path + (parseInt(pages.current_page, 10) + 1)
-							rel="next"
+							rel='next'
 						)
 							| Next
 							|
-							span(aria-hidden="true") &gt;
+							span(aria-hidden='true') &gt;
 
 					li
 						a(
-							aria-label=translate("go_to_last_page")
+							aria-label=translate('go_to_last_page')
 							href=full_page_path + pages.total_pages
 						)
 							| Last
 							|
-							span(aria-hidden="true") &gt;&gt;
+							span(aria-hidden='true') &gt;&gt;

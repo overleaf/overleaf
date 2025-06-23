@@ -9,7 +9,7 @@ include ../../_mixins/material_symbol
 	.row.row-spaced-extra-large
 		.col-md-12.faq-heading-container
 			h2
-				+eyebrow(translate("frequently_asked_questions"))
+				+eyebrow(translate('frequently_asked_questions'))
 				| #{translate("your_questions_answered")}
 
 	.row
@@ -18,74 +18,62 @@ include ../../_mixins/material_symbol
 				class={
 					'plans-faq-tabs': bootstrapVersion === 5,
 					'ol-tabs': bootstrapVersion === 5,
-					'ol-tabs-scrollable': bootstrapVersion === 3
+					'ol-tabs-scrollable': bootstrapVersion === 3,
 				}
 			)
 				.nav-tabs-container
-					ul.nav.nav-tabs(role="tablist")
+					ul.nav.nav-tabs(role='tablist')
 						//- In the bs5 version of plans page, the `active` class need to be added to the `a` tag instead of the parent `li` tag
 						//- If the `plans-page-bs5` split test has been completed, remove the `active` class from the `li` tag since we're not using it anymore
 						//- If the `plans-page-bs5` split test has been completed, remove the `data-toggle` because it is not needed anymore (bs5 uses `data-bs-toggle`)
-						li(
-							role="presentation"
-							class={
-								active: bootstrapVersion === 3
-							}
-						)
+						li(role='presentation' class={
+							active: bootstrapVersion === 3,
+						})
 							a(
-								role="tab"
-								data-toggle="tab"
-								data-bs-toggle="tab"
+								role='tab'
+								data-toggle='tab'
+								data-bs-toggle='tab'
 								href='#' + managingYourSubscription
 								aria-controls=managingYourSubscription
 								class={
-									active: bootstrapVersion === 5
+									active: bootstrapVersion === 5,
 								}
 							)
 								| #{translate('managing_your_subscription')}
-						li(role="presentation")
+						li(role='presentation')
 							a(
-								role="tab"
-								data-toggle="tab"
-								data-bs-toggle="tab"
+								role='tab'
+								data-toggle='tab'
+								data-bs-toggle='tab'
 								href='#' + overleafIndividualPlans
 								aria-controls=overleafIndividualPlans
 							)
 								| #{translate('overleaf_individual_plans')}
-						li(role="presentation")
+						li(role='presentation')
 							a(
-								role="tab"
-								data-toggle="tab"
-								data-bs-toggle="tab"
+								role='tab'
+								data-toggle='tab'
+								data-bs-toggle='tab'
 								href='#' + overleafGroupPlans
 								aria-controls=overleafGroupPlans
 							)
 								| #{translate('overleaf_group_plans')}
 
 				.tab-content
-					.tab-pane.active(
-						role="tabpanel"
-						id=managingYourSubscription
-					)
-						+managingYourSubscription()
-					.tab-pane(
-						role="tabpanel"
-						id=overleafIndividualPlans
-					)
-						+overleafIndividualPlans()
-					.tab-pane(
-						role="tabpanel"
-						id=overleafGroupPlans
-					)
-						+overleafGroupPlans()
+					.tab-pane.active(role='tabpanel' id=managingYourSubscription)
+						+managingYourSubscription
+					.tab-pane(role='tabpanel' id=overleafIndividualPlans)
+						+overleafIndividualPlans
+					.tab-pane(role='tabpanel' id=overleafGroupPlans)
+						+overleafGroupPlans
 
 	.row
 		.col-xs-12.plans-faq-support
 			span #{translate('still_have_questions')}
 			button(
-				data-ol-open-contact-form-modal="general"
-				data-bs-toggle=bootstrapVersion === 5 ? "modal" : undefined
-				data-bs-target=bootstrapVersion === 5 ? "#contactUsModal" : undefined
+				data-ol-open-contact-form-modal='general'
+				data-bs-toggle=bootstrapVersion === 5 ? 'modal' : undefined
+				data-bs-target=bootstrapVersion === 5 ? '#contactUsModal' : undefined
 			)
-				span(style="margin-right: 4px") #{translate('contact_support')}
-				+material-symbol-rounded("arrow_right_alt", "icon-md")
+				span(style='margin-right: 4px') #{translate('contact_support')}
+				+material-symbol-rounded('arrow_right_alt', 'icon-md')

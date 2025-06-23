@@ -1,9 +1,23 @@
 {
   "arrowParens": "avoid",
   "jsxSingleQuote": false,
+  "pugAttributeSeparator": "as-needed",
+  "pugBracketSpacing": false,
+  "pugClassNotation": "as-is",
+  "pugIdNotation": "as-is",
+  "pugSortAttributesBeginning": ["name", "data-type"],
+  "plugins": ["@prettier/plugin-pug"],
   "semi": false,
   "singleQuote": true,
   "trailingComma": "es5",
   "tabWidth": 2,
-  "useTabs": false
+  "useTabs": false,
+  "overrides": [
+    {
+      "files": "*.pug",
+      "options": {
+        "useTabs": true
+      }
+    }
+  ]
 }

@@ -1,4 +1,6 @@
 mixin back-to-btns(settingsAnchor)
 	.d-flex.flex-column.flex-sm-row.gap-3
-		a.btn.btn-secondary(href=`/user/settings${settingsAnchor ? '#' + settingsAnchor : '' }`) #{translate('back_to_account_settings')}
+		a.btn.btn-secondary(
+			href=`/user/settings${settingsAnchor ? '#' + settingsAnchor : '' }`
+		) #{translate('back_to_account_settings')}
 		a.btn.btn-secondary(href='/project') #{translate('back_to_your_projects')}

@@ -455,11 +455,18 @@ format: format_styles
 format_styles:
 	npm run --silent format:styles
 
+format: format_pug
+format_pug:
+	npm run --silent format:pug
+
 format_fix:
 	npm run --silent format:fix
 
 format_styles_fix:
 	npm run --silent format:styles:fix
+
+format_pug_fix:
+	npm run --silent format:pug:fix
 
 format_in_docker:
 	$(RUN_LINT_FORMAT) make format -j2 --output-sync

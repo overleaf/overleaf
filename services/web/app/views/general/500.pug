@@ -1,11 +1,11 @@
 extends ../layout/layout-no-js
 
 block vars
-	- metadata = { title: 'Something went wrong' }
+	- metadata = {title: 'Something went wrong'}
 
 block body
 	body.full-height
-		main.content.content-alt.full-height#main-content
+		main#main-content.content.content-alt.full-height
 			.container.full-height
 				.error-container.full-height
 					.error-details
@@ -13,11 +13,11 @@ block body
 						p.error-description Our staff are probably looking into this, but if it continues, please check our status page at
 							|
 							|
-							a(href="http://" + settings.statusPageUrl) #{settings.statusPageUrl}
+							a(href='http://' + settings.statusPageUrl) #{settings.statusPageUrl}
 							|
 							| or contact us at
 							|
-							a(href="mailto:" + settings.adminEmail) #{settings.adminEmail}
+							a(href='mailto:' + settings.adminEmail) #{settings.adminEmail}
 							| .
 						p.error-actions
-							a.error-btn(href="/") Home
+							a.error-btn(href='/') Home

@@ -1,30 +1,39 @@
 nav.navbar.navbar-default.navbar-main.website-redesign-navbar
 	.container-fluid
 		.navbar-header
-			if (typeof(suppressNavbarRight) == "undefined")
+			if typeof suppressNavbarRight == 'undefined'
 				button.navbar-toggle.collapsed(
-					type="button",
-					data-toggle="collapse",
-					data-target="#navbar-main-collapse"
-					aria-label="Toggle " + translate('navigation')
+					type='button'
+					data-toggle='collapse'
+					data-target='#navbar-main-collapse'
+					aria-label='Toggle ' + translate('navigation')
 				)
-					i.fa.fa-bars(aria-hidden="true")
+					i.fa.fa-bars(aria-hidden='true')
 			- var enableUpgradeButton = projectDashboardReact && usersBestSubscription && (usersBestSubscription.type === 'free' || usersBestSubscription.type === 'standalone-ai-add-on')
-			if (enableUpgradeButton)
+			if enableUpgradeButton
 				a.btn.btn-primary.pull-right.me-2.visible-xs(
-					href="/user/subscription/plans"
-					event-tracking="upgrade-button-click"
-					event-tracking-mb="true"
-					event-tracking-label="upgrade"
-					event-tracking-trigger="click"
-					event-segmentation='{"source": "dashboard-top", "project-dashboard-react": "enabled", "is-dashboard-sidebar-hidden": "true", "is-screen-width-less-than-768px": "true"}'
+					href='/user/subscription/plans'
+					event-tracking='upgrade-button-click'
+					event-tracking-mb='true'
+					event-tracking-label='upgrade'
+					event-tracking-trigger='click'
+					event-segmentation={
+						source: 'dashboard-top',
+						projectDashboardReact: 'enabled',
+						isDashboardSidebarHidden: 'true',
+						isScreenWidthLessThan768px: 'true',
+					}
 				) #{translate("upgrade")}
 			if settings.nav.custom_logo
-				a(href='/', aria-label=settings.appName, style='background-image:url("'+settings.nav.custom_logo+'")').navbar-brand
-			else if (nav.title)
-				a(href='/', aria-label=settings.appName).navbar-title #{nav.title}
+				a.navbar-brand(
+					href='/'
+					aria-label=settings.appName
+					style='background-image:url("' + settings.nav.custom_logo + '")'
+				)
+			else if nav.title
+				a.navbar-title(href='/' aria-label=settings.appName) #{nav.title}
 			else
-				a(href='/', aria-label=settings.appName).navbar-brand
+				a.navbar-brand(href='/' aria-label=settings.appName)
 
 		- var canDisplayAdminMenu = hasAdminAccess()
 		- var canDisplayAdminRedirect = canRedirectToAdminDomain()
@@ -32,44 +41,44 @@ nav.navbar.navbar-default.navbar-main.website-redesign-navbar
 		- var canDisplaySurveyMenu = hasFeature('saas') && canDisplayAdminMenu
 		- var canDisplayScriptLogMenu = hasFeature('saas') && canDisplayAdminMenu
 
-		if (typeof(suppressNavbarRight) == "undefined")
-			.navbar-collapse.collapse#navbar-main-collapse
+		if typeof suppressNavbarRight == 'undefined'
+			#navbar-main-collapse.navbar-collapse.collapse
 				ul.nav.navbar-nav.navbar-right
-					if (canDisplayAdminMenu || canDisplayAdminRedirect || canDisplaySplitTestMenu)
+					if canDisplayAdminMenu || canDisplayAdminRedirect || canDisplaySplitTestMenu
 						li.dropdown.subdued
 							a.dropdown-toggle(
-								href="#",
-								role="button",
-								aria-haspopup="true",
-								aria-expanded="false",
-								data-toggle="dropdown"
-								event-tracking="menu-expand"
-								event-tracking-mb="true"
-								event-tracking-trigger="click"
-								event-segmentation={"item": "admin", "location": "top-menu"}
+								href='#'
+								role='button'
+								aria-haspopup='true'
+								aria-expanded='false'
+								data-toggle='dropdown'
+								event-tracking='menu-expand'
+								event-tracking-mb='true'
+								event-tracking-trigger='click'
+								event-segmentation={item: 'admin', location: 'top-menu'}
 							)
 								| Admin
 								span.caret
 							ul.dropdown-menu
 								if canDisplayAdminMenu
 									li
-										a(href="/admin") Manage Site
+										a(href='/admin') Manage Site
 									li
-										a(href="/admin/user") Manage Users
+										a(href='/admin/user') Manage Users
 									li
-										a(href="/admin/project") Project URL Lookup
+										a(href='/admin/project') Project URL Lookup
 								if canDisplayAdminRedirect
 									li
 										a(href=settings.adminUrl) Switch to Admin
 								if canDisplaySplitTestMenu
 									li
-										a(href="/admin/split-test") Manage Feature Flags
+										a(href='/admin/split-test') Manage Feature Flags
 								if canDisplaySurveyMenu
 									li
-										a(href="/admin/survey") Manage Surveys
+										a(href='/admin/survey') Manage Surveys
 								if canDisplayScriptLogMenu
 									li
-										a(href="/admin/script-logs") View Script Logs
+										a(href='/admin/script-logs') View Script Logs
 
 					// loop over header_extras
 					each item in nav.header_extras
@@ -88,15 +97,15 @@ nav.navbar.navbar-default.navbar-main.website-redesign-navbar
 							if item.dropdown
 								li.dropdown(class=item.class)
 									a.dropdown-toggle(
-										href="#",
-										role="button",
-										aria-haspopup="true",
-										aria-expanded="false",
-										data-toggle="dropdown"
-										event-tracking="menu-expand"
-										event-tracking-mb="true"
-										event-tracking-trigger="click"
-										event-segmentation={"item": item.trackingKey, "location": "top-menu"}
+										href='#'
+										role='button'
+										aria-haspopup='true'
+										aria-expanded='false'
+										data-toggle='dropdown'
+										event-tracking='menu-expand'
+										event-tracking-mb='true'
+										event-tracking-trigger='click'
+										event-segmentation={item: item.trackingKey, location: 'top-menu'}
 									)
 										| !{translate(item.text)}
 										span.caret
@@ -106,18 +115,25 @@ nav.navbar.navbar-default.navbar-main.website-redesign-navbar
 												li.divider
 											else if child.isContactUs
 												li
-													a(data-ol-open-contact-form-modal="contact-us" href event-tracking="menu-click" event-tracking-mb="true" event-tracking-trigger="click" event-segmentation={"item": "contact", "location": "top-menu"})
+													a(
+														data-ol-open-contact-form-modal='contact-us'
+														href
+														event-tracking='menu-click'
+														event-tracking-mb='true'
+														event-tracking-trigger='click'
+														event-segmentation={item: 'contact', location: 'top-menu'}
+													)
 														span
 															| #{translate("contact_us")}
 											else
 												li
 													if child.url
 														a(
-															href=child.url,
-															class=child.class,
-															event-tracking="menu-click"
-															event-tracking-mb="true"
-															event-tracking-trigger="click"
+															href=child.url
+															class=child.class
+															event-tracking='menu-click'
+															event-tracking-mb='true'
+															event-tracking-trigger='click'
 															event-segmentation={item: child.trackingKey, location: 'top-menu'}
 														) !{translate(child.text)}
 													else
@@ -126,12 +142,12 @@ nav.navbar.navbar-default.navbar-main.website-redesign-navbar
 								li(class=item.class)
 									if item.url
 										a(
-											href=item.url,
-											class=item.class,
-											event-tracking="menu-click"
-											event-tracking-mb="true"
-											event-tracking-trigger="click"
-											event-segmentation={ item: item.trackingKey, location: 'top-menu' }
+											href=item.url
+											class=item.class
+											event-tracking='menu-click'
+											event-tracking-mb='true'
+											event-tracking-trigger='click'
+											event-segmentation={item: item.trackingKey, location: 'top-menu'}
 										) !{translate(item.text)}
 									else
 										| !{translate(item.text)}
@@ -142,54 +158,54 @@ nav.navbar.navbar-default.navbar-main.website-redesign-navbar
 						if hasFeature('registration-page')
 							li.primary
 								a(
-									href="/register"
-									event-tracking="menu-click"
-									event-tracking-action="clicked"
-									event-tracking-trigger="click"
-									event-tracking-mb="true"
-									event-segmentation={ page: currentUrl, item: 'register', location: 'top-menu' }
+									href='/register'
+									event-tracking='menu-click'
+									event-tracking-action='clicked'
+									event-tracking-trigger='click'
+									event-tracking-mb='true'
+									event-segmentation={page: currentUrl, item: 'register', location: 'top-menu'}
 								) #{translate('sign_up')}
 
 						// login link
 						li.secondary
 							a(
-								href="/login"
-								event-tracking="menu-click"
-								event-tracking-action="clicked"
-								event-tracking-trigger="click"
-								event-tracking-mb="true"
-								event-segmentation={ page: currentUrl, item: 'login', location: 'top-menu' }
+								href='/login'
+								event-tracking='menu-click'
+								event-tracking-action='clicked'
+								event-tracking-trigger='click'
+								event-tracking-mb='true'
+								event-segmentation={page: currentUrl, item: 'login', location: 'top-menu'}
 							) #{translate('log_in')}
 
 					// projects link and account menu
 					if getSessionUser()
 						li.secondary
-							a(href="/project") #{translate('Projects')}
+							a(href='/project') #{translate('Projects')}
 						li.secondary.dropdown
 							a.dropdown-toggle(
-								href="#",
-								role="button",
-								aria-haspopup="true",
-								aria-expanded="false",
-								data-toggle="dropdown"
-								event-tracking="menu-expand"
-								event-tracking-mb="true"
-								event-tracking-trigger="click"
-								event-segmentation={"item": "account", "location": "top-menu"}
+								href='#'
+								role='button'
+								aria-haspopup='true'
+								aria-expanded='false'
+								data-toggle='dropdown'
+								event-tracking='menu-expand'
+								event-tracking-mb='true'
+								event-tracking-trigger='click'
+								event-segmentation={item: 'account', location: 'top-menu'}
 							)
 								| #{translate('Account')}
 								span.caret
 							ul.dropdown-menu
 								li
-									div.subdued #{getSessionUser().email}
+									.subdued #{getSessionUser().email}
 								li.divider.hidden-xs.hidden-sm
 								li
-									a(href="/user/settings") #{translate('account_settings')}
+									a(href='/user/settings') #{translate('account_settings')}
 								if nav.showSubscriptionLink
 									li
-										a(href="/user/subscription") #{translate('subscription')}
+										a(href='/user/subscription') #{translate('subscription')}
 								li.divider.hidden-xs.hidden-sm
 								li
-									form(method="POST" action="/logout")
-										input(name='_csrf', type='hidden', value=csrfToken)
+									form(method='POST' action='/logout')
+										input(name='_csrf' type='hidden' value=csrfToken)
 										button.btn-link.text-left.dropdown-menu-button #{translate('log_out')}

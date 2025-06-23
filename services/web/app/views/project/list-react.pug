@@ -9,35 +9,83 @@ block vars
 	- const suppressFooter = true
 
 block append meta
-	meta(name="ol-usersBestSubscription" data-type="json" content=usersBestSubscription)
-	meta(name="ol-notifications" data-type="json" content=notifications)
-	meta(name="ol-notificationsInstitution" data-type="json" content=notificationsInstitution)
-	meta(name="ol-userEmails" data-type="json" content=userEmails)
-	meta(name="ol-allInReconfirmNotificationPeriods" data-type="json" content=allInReconfirmNotificationPeriods)
-	meta(name="ol-user" data-type="json" content=user)
-	meta(name="ol-userAffiliations" data-type="json" content=userAffiliations)
-	meta(name="ol-reconfirmedViaSAML" content=reconfirmedViaSAML)
-	meta(name="ol-survey" data-type="json" content=survey)
-	meta(name="ol-tags" data-type="json" content=tags)
-	meta(name="ol-portalTemplates" data-type="json" content=portalTemplates)
-	meta(name="ol-prefetchedProjectsBlob" data-type="json" content=prefetchedProjectsBlob)
-	if (suggestedLanguageSubdomainConfig)
-		meta(name="ol-suggestedLanguage" data-type="json" content=Object.assign(suggestedLanguageSubdomainConfig, {
-			lngName: translate(suggestedLanguageSubdomainConfig.lngCode),
-			imgUrl: buildImgPath("flags/24/" + suggestedLanguageSubdomainConfig.lngCode + ".png")
-		}))
-	meta(name="ol-currentUrl" data-type="string" content=currentUrl)
-	meta(name="ol-showGroupsAndEnterpriseBanner" data-type="boolean" content=showGroupsAndEnterpriseBanner)
-	meta(name="ol-groupsAndEnterpriseBannerVariant" data-type="string" content=groupsAndEnterpriseBannerVariant)
-	meta(name="ol-showInrGeoBanner" data-type="boolean" content=showInrGeoBanner)
-	meta(name="ol-showBrlGeoBanner" data-type="boolean" content=showBrlGeoBanner)
-	meta(name="ol-recommendedCurrency" data-type="string" content=recommendedCurrency)
-	meta(name="ol-showLATAMBanner" data-type="boolean" content=showLATAMBanner)
-	meta(name="ol-groupSubscriptionsPendingEnrollment" data-type="json" content=groupSubscriptionsPendingEnrollment)
-	meta(name="ol-hasIndividualPaidSubscription" data-type="boolean" content=hasIndividualPaidSubscription)
-	meta(name="ol-groupSsoSetupSuccess" data-type="boolean" content=groupSsoSetupSuccess)
-	meta(name="ol-showUSGovBanner" data-type="boolean" content=showUSGovBanner)
-	meta(name="ol-usGovBannerVariant" data-type="string" content=usGovBannerVariant)
+	meta(
+		name='ol-usersBestSubscription'
+		data-type='json'
+		content=usersBestSubscription
+	)
+	meta(name='ol-notifications' data-type='json' content=notifications)
+	meta(
+		name='ol-notificationsInstitution'
+		data-type='json'
+		content=notificationsInstitution
+	)
+	meta(name='ol-userEmails' data-type='json' content=userEmails)
+	meta(
+		name='ol-allInReconfirmNotificationPeriods'
+		data-type='json'
+		content=allInReconfirmNotificationPeriods
+	)
+	meta(name='ol-user' data-type='json' content=user)
+	meta(name='ol-userAffiliations' data-type='json' content=userAffiliations)
+	meta(name='ol-reconfirmedViaSAML' content=reconfirmedViaSAML)
+	meta(name='ol-survey' data-type='json' content=survey)
+	meta(name='ol-tags' data-type='json' content=tags)
+	meta(name='ol-portalTemplates' data-type='json' content=portalTemplates)
+	meta(
+		name='ol-prefetchedProjectsBlob'
+		data-type='json'
+		content=prefetchedProjectsBlob
+	)
+	if suggestedLanguageSubdomainConfig
+		meta(
+			name='ol-suggestedLanguage'
+			data-type='json'
+			content=Object.assign(suggestedLanguageSubdomainConfig, {
+				lngName: translate(suggestedLanguageSubdomainConfig.lngCode),
+				imgUrl: buildImgPath('flags/24/' + suggestedLanguageSubdomainConfig.lngCode + '.png'),
+			})
+		)
+	meta(name='ol-currentUrl' data-type='string' content=currentUrl)
+	meta(
+		name='ol-showGroupsAndEnterpriseBanner'
+		data-type='boolean'
+		content=showGroupsAndEnterpriseBanner
+	)
+	meta(
+		name='ol-groupsAndEnterpriseBannerVariant'
+		data-type='string'
+		content=groupsAndEnterpriseBannerVariant
+	)
+	meta(name='ol-showInrGeoBanner' data-type='boolean' content=showInrGeoBanner)
+	meta(name='ol-showBrlGeoBanner' data-type='boolean' content=showBrlGeoBanner)
+	meta(
+		name='ol-recommendedCurrency'
+		data-type='string'
+		content=recommendedCurrency
+	)
+	meta(name='ol-showLATAMBanner' data-type='boolean' content=showLATAMBanner)
+	meta(
+		name='ol-groupSubscriptionsPendingEnrollment'
+		data-type='json'
+		content=groupSubscriptionsPendingEnrollment
+	)
+	meta(
+		name='ol-hasIndividualPaidSubscription'
+		data-type='boolean'
+		content=hasIndividualPaidSubscription
+	)
+	meta(
+		name='ol-groupSsoSetupSuccess'
+		data-type='boolean'
+		content=groupSsoSetupSuccess
+	)
+	meta(name='ol-showUSGovBanner' data-type='boolean' content=showUSGovBanner)
+	meta(
+		name='ol-usGovBannerVariant'
+		data-type='string'
+		content=usGovBannerVariant
+	)
 
 block content
 	#project-list-root

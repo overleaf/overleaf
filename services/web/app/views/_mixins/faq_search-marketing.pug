@@ -1,30 +1,37 @@
 mixin faq_search-marketing(headerText, headerClass)
-	if (typeof(settings.algolia) != "undefined" && typeof(settings.algolia.indexes) != "undefined" && typeof(settings.algolia.indexes.wiki) != "undefined")
+	if typeof settings.algolia != 'undefined' && typeof settings.algolia.indexes != 'undefined' && typeof settings.algolia.indexes.wiki != 'undefined'
 		if headerText
 			div(class=headerClass) #{headerText}
 		.wiki
-			form.project-search.form-horizontal(role="search" data-ol-faq-search)
+			form.project-search.form-horizontal(role='search' data-ol-faq-search)
 				.form-group.has-feedback.has-feedback-left
 					.col-sm-12
-						input.form-control(type='search', placeholder="Search help library…" aria-label="Search help library…")
-						i.fa.fa-search.form-control-feedback-left(aria-hidden="true")
+						input.form-control(
+							type='search'
+							placeholder='Search help library…'
+							aria-label='Search help library…'
+						)
+						i.fa.fa-search.form-control-feedback-left(aria-hidden='true')
 						i.fa.fa-times.form-control-feedback(
-							style="cursor: pointer;",
+							style='cursor: pointer'
 							hidden
 							data-ol-clear-search
-							aria-hidden="true"
+							aria-hidden='true'
 						)
 						button.sr-only(
-							type="button"
+							type='button'
 							hidden
 							data-ol-clear-search
 							aria-label=translate('clear_search')
 						)
 
-				.row(role="region" aria-label="search results")
-					.col-md-12()
+				.row(role='region' aria-label='search results')
+					.col-md-12
 						div(data-ol-search-results-wrapper)
-							span.sr-only(aria-live="polite" data-ol-search-sr-help-message)
+							span.sr-only(aria-live='polite' data-ol-search-sr-help-message)
 							div(data-ol-search-results)
-						.row-spaced-small.search-result.card.card-thin(hidden data-ol-search-no-results)
+						.row-spaced-small.search-result.card.card-thin(
+							hidden
+							data-ol-search-no-results
+						)
 							p #{translate("no_search_results")}

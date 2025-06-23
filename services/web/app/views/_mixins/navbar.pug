@@ -1,23 +1,23 @@
 mixin nav-item
-	li(role="none")&attributes(attributes)
+	li(role='none')&attributes(attributes)
 		block
 
 mixin nav-link
-	a(role="menuitem").nav-link&attributes(attributes)
+	a.nav-link(role='menuitem')&attributes(attributes)
 		block
 
 mixin dropdown-menu
-	ul(role="menu").dropdown-menu&attributes(attributes)
+	ul.dropdown-menu(role='menu')&attributes(attributes)
 		block
 
 mixin dropdown-menu-item
-	li(role="none")
+	li(role='none')
 		block
 
 mixin dropdown-menu-link-item
 	+dropdown-menu-item
-		a(role="menuitem").dropdown-item&attributes(attributes)
+		a.dropdown-item(role='menuitem')&attributes(attributes)
 			block
-		
+
 mixin dropdown-menu-divider
-	li(role="separator").dropdown-divider.d-none.d-lg-block
+	li.dropdown-divider.d-none.d-lg-block(role='separator')

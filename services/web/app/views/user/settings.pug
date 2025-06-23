@@ -2,38 +2,65 @@ extends ../layout-react
 
 block entrypointVar
 	- entrypoint = 'pages/user/settings'
-		
+
 block vars
 	- isWebsiteRedesign = true
 
 block append meta
-	meta(name="ol-hasPassword" data-type="boolean" content=hasPassword)
-	meta(name="ol-shouldAllowEditingDetails" data-type="boolean" content=shouldAllowEditingDetails)
-	meta(name="ol-oauthProviders", data-type="json", content=oauthProviders)
-	meta(name="ol-institutionLinked", data-type="json", content=institutionLinked)
-	meta(name="ol-samlError", data-type="json", content=samlError)
-	meta(name="ol-institutionEmailNonCanonical", content=institutionEmailNonCanonical)
+	meta(name='ol-hasPassword' data-type='boolean' content=hasPassword)
+	meta(
+		name='ol-shouldAllowEditingDetails'
+		data-type='boolean'
+		content=shouldAllowEditingDetails
+	)
+	meta(name='ol-oauthProviders' data-type='json' content=oauthProviders)
+	meta(name='ol-institutionLinked' data-type='json' content=institutionLinked)
+	meta(name='ol-samlError' data-type='json' content=samlError)
+	meta(
+		name='ol-institutionEmailNonCanonical'
+		content=institutionEmailNonCanonical
+	)
 
-	meta(name="ol-reconfirmedViaSAML", content=reconfirmedViaSAML)
-	meta(name="ol-reconfirmationRemoveEmail", content=reconfirmationRemoveEmail)
-	meta(name="ol-samlBeta", content=samlBeta)
-	meta(name="ol-ssoErrorMessage", content=ssoErrorMessage)
-	meta(name="ol-thirdPartyIds", data-type="json", content=thirdPartyIds || {})
-	meta(name="ol-passwordStrengthOptions", data-type="json", content=settings.passwordStrengthOptions || {})
-	meta(name="ol-isExternalAuthenticationSystemUsed" data-type="boolean" content=externalAuthenticationSystemUsed())
-	meta(name="ol-user" data-type="json" content=user)
-	meta(name="ol-labsExperiments" data-type="json" content=labsExperiments)
-	meta(name="ol-dropbox" data-type="json" content=dropbox)
-	meta(name="ol-github" data-type="json" content=github)
-	meta(name="ol-projectSyncSuccessMessage", content=projectSyncSuccessMessage)
-	meta(name="ol-personalAccessTokens", data-type="json" content=personalAccessTokens)
-	meta(name="ol-emailAddressLimit", data-type="json", content=emailAddressLimit)
-	meta(name="ol-currentManagedUserAdminEmail" data-type="string" content=currentManagedUserAdminEmail)
-	meta(name="ol-gitBridgeEnabled" data-type="boolean" content=gitBridgeEnabled)
-	meta(name="ol-isSaas" data-type="boolean" content=isSaas)
-	meta(name="ol-memberOfSSOEnabledGroups" data-type="json" content=memberOfSSOEnabledGroups)
-	meta(name="ol-capabilities" data-type="json" content=capabilities)
+	meta(name='ol-reconfirmedViaSAML' content=reconfirmedViaSAML)
+	meta(name='ol-reconfirmationRemoveEmail' content=reconfirmationRemoveEmail)
+	meta(name='ol-samlBeta' content=samlBeta)
+	meta(name='ol-ssoErrorMessage' content=ssoErrorMessage)
+	meta(name='ol-thirdPartyIds' data-type='json' content=thirdPartyIds || {})
+	meta(
+		name='ol-passwordStrengthOptions'
+		data-type='json'
+		content=settings.passwordStrengthOptions || {}
+	)
+	meta(
+		name='ol-isExternalAuthenticationSystemUsed'
+		data-type='boolean'
+		content=externalAuthenticationSystemUsed()
+	)
+	meta(name='ol-user' data-type='json' content=user)
+	meta(name='ol-labsExperiments' data-type='json' content=labsExperiments)
+	meta(name='ol-dropbox' data-type='json' content=dropbox)
+	meta(name='ol-github' data-type='json' content=github)
+	meta(name='ol-projectSyncSuccessMessage' content=projectSyncSuccessMessage)
+	meta(
+		name='ol-personalAccessTokens'
+		data-type='json'
+		content=personalAccessTokens
+	)
+	meta(name='ol-emailAddressLimit' data-type='json' content=emailAddressLimit)
+	meta(
+		name='ol-currentManagedUserAdminEmail'
+		data-type='string'
+		content=currentManagedUserAdminEmail
+	)
+	meta(name='ol-gitBridgeEnabled' data-type='boolean' content=gitBridgeEnabled)
+	meta(name='ol-isSaas' data-type='boolean' content=isSaas)
+	meta(
+		name='ol-memberOfSSOEnabledGroups'
+		data-type='json'
+		content=memberOfSSOEnabledGroups
+	)
+	meta(name='ol-capabilities' data-type='json' content=capabilities)
 
 block content
-	main.content.content-alt#main-content
+	main#main-content.content.content-alt
 		#settings-page-root

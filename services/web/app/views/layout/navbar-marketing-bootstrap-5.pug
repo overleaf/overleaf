@@ -1,26 +1,32 @@
 include ../_mixins/navbar
 
-nav.navbar.navbar-default.navbar-main.navbar-expand-lg(class={
-	'website-redesign-navbar': isWebsiteRedesign
-})
+nav.navbar.navbar-default.navbar-main.navbar-expand-lg(
+	class={
+		'website-redesign-navbar': isWebsiteRedesign,
+	}
+)
 	.container-fluid.navbar-container
 		.navbar-header
 			if settings.nav.custom_logo
-				a(href='/', aria-label=settings.appName, style='background-image:url("'+settings.nav.custom_logo+'")').navbar-brand
-			else if (nav.title)
-				a(href='/', aria-label=settings.appName).navbar-title #{nav.title}
+				a.navbar-brand(
+					href='/'
+					aria-label=settings.appName
+					style='background-image:url("' + settings.nav.custom_logo + '")'
+				)
+			else if nav.title
+				a.navbar-title(href='/' aria-label=settings.appName) #{nav.title}
 			else
-				a(href='/', aria-label=settings.appName).navbar-brand
+				a.navbar-brand(href='/' aria-label=settings.appName)
 
 			- var enableUpgradeButton = projectDashboardReact && usersBestSubscription && (usersBestSubscription.type === 'free' || usersBestSubscription.type === 'standalone-ai-add-on')
-			if (enableUpgradeButton)
+			if enableUpgradeButton
 				a.btn.btn-primary.me-2.d-md-none(
-					href="/user/subscription/plans"
-					event-tracking="upgrade-button-click"
-					event-tracking-mb="true"
-					event-tracking-label="upgrade"
-					event-tracking-trigger="click"
-					event-segmentation='{"source": "dashboard-top", "project-dashboard-react": "enabled", "is-dashboard-sidebar-hidden": "true", "is-screen-width-less-than-768px": "true"}'
+					href='/user/subscription/plans'
+					event-tracking='upgrade-button-click'
+					event-tracking-mb='true'
+					event-tracking-label='upgrade'
+					event-tracking-trigger='click'
+					event-segmentation={source: 'dashboard-top', projectDashboardReact: 'enabled', isDashboardSidebarHidden: 'true', isScreenWidthLessThan768px: 'true'}
 				) #{translate("upgrade")}
 
 		- var canDisplayAdminMenu = hasAdminAccess()
@@ -29,45 +35,45 @@ nav.navbar.navbar-default.navbar-main.navbar-expand-lg(class={
 		- var canDisplaySurveyMenu = hasFeature('saas') && canDisplayAdminMenu
 		- var canDisplayScriptLogMenu = hasFeature('saas') && canDisplayAdminMenu
 
-		if (typeof suppressNavbarRight === "undefined")
+		if typeof suppressNavbarRight === 'undefined'
 			button.navbar-toggler.collapsed(
-				type="button",
-				data-bs-toggle="collapse",
-				data-bs-target="#navbar-main-collapse"
-				aria-controls="navbar-main-collapse"
-				aria-expanded="false"
-				aria-label="Toggle " + translate('navigation')
+				type='button'
+				data-bs-toggle='collapse'
+				data-bs-target='#navbar-main-collapse'
+				aria-controls='navbar-main-collapse'
+				aria-expanded='false'
+				aria-label='Toggle ' + translate('navigation')
 			)
-				i.fa.fa-bars(aria-hidden="true")
+				i.fa.fa-bars(aria-hidden='true')
 
-			.navbar-collapse.collapse#navbar-main-collapse
-				ul.nav.navbar-nav.navbar-right.ms-auto(role="menubar")
-					if (canDisplayAdminMenu || canDisplayAdminRedirect || canDisplaySplitTestMenu)
+			#navbar-main-collapse.navbar-collapse.collapse
+				ul.nav.navbar-nav.navbar-right.ms-auto(role='menubar')
+					if canDisplayAdminMenu || canDisplayAdminRedirect || canDisplaySplitTestMenu
 						+nav-item.dropdown.subdued
 							button.dropdown-toggle(
-								aria-haspopup="true",
-								aria-expanded="false",
-								data-bs-toggle="dropdown"
-								role="menuitem"
-								event-tracking="menu-expand"
-								event-tracking-mb="true"
-								event-tracking-trigger="click"
-								event-segmentation={"item": "admin", "location": "top-menu"}
+								aria-haspopup='true'
+								aria-expanded='false'
+								data-bs-toggle='dropdown'
+								role='menuitem'
+								event-tracking='menu-expand'
+								event-tracking-mb='true'
+								event-tracking-trigger='click'
+								event-segmentation={item: 'admin', location: 'top-menu'}
 							)
 								| Admin
 							+dropdown-menu.dropdown-menu-end
 								if canDisplayAdminMenu
-									+dropdown-menu-link-item()(href="/admin") Manage Site
-									+dropdown-menu-link-item()(href="/admin/user") Manage Users
-									+dropdown-menu-link-item()(href="/admin/project") Project URL Lookup
+									+dropdown-menu-link-item(href='/admin') Manage Site
+									+dropdown-menu-link-item(href='/admin/user') Manage Users
+									+dropdown-menu-link-item(href='/admin/project') Project URL Lookup
 								if canDisplayAdminRedirect
-									+dropdown-menu-link-item()(href=settings.adminUrl) Switch to Admin
+									+dropdown-menu-link-item(href=settings.adminUrl) Switch to Admin
 								if canDisplaySplitTestMenu
-									+dropdown-menu-link-item()(href="/admin/split-test") Manage Feature Flags
+									+dropdown-menu-link-item(href='/admin/split-test') Manage Feature Flags
 								if canDisplaySurveyMenu
-									+dropdown-menu-link-item()(href="/admin/survey") Manage Surveys
+									+dropdown-menu-link-item(href='/admin/survey') Manage Surveys
 								if canDisplayScriptLogMenu
-									+dropdown-menu-link-item()(href="/admin/script-logs") View Script Logs
+									+dropdown-menu-link-item(href='/admin/script-logs') View Script Logs
 
 					// loop over header_extras
 					each item in nav.header_extras
@@ -86,14 +92,14 @@ nav.navbar.navbar-default.navbar-main.navbar-expand-lg(class={
 							if item.dropdown
 								+nav-item.dropdown(class=item.class)
 									button.dropdown-toggle(
-										aria-haspopup="true",
-										aria-expanded="false",
-										data-bs-toggle="dropdown"
-										role="menuitem"
-										event-tracking="menu-expand"
-										event-tracking-mb="true"
-										event-tracking-trigger="click"
-										event-segmentation={"item": item.trackingKey, "location": "top-menu"}
+										aria-haspopup='true'
+										aria-expanded='false'
+										data-bs-toggle='dropdown'
+										role='menuitem'
+										event-tracking='menu-expand'
+										event-tracking-mb='true'
+										event-tracking-trigger='click'
+										event-segmentation={item: item.trackingKey, location: 'top-menu'}
 									)
 										| !{translate(item.text)}
 									+dropdown-menu.dropdown-menu-end
@@ -101,31 +107,41 @@ nav.navbar.navbar-default.navbar-main.navbar-expand-lg(class={
 											if child.divider
 												+dropdown-menu-divider
 											else if child.isContactUs
-												+dropdown-menu-link-item()(data-ol-open-contact-form-modal="contact-us" data-bs-target="#contactUsModal" href data-bs-toggle="modal" event-tracking="menu-click" event-tracking-mb="true" event-tracking-trigger="click" event-segmentation={"item": "contact", "location": "top-menu"})
+												+dropdown-menu-link-item(
+													data-ol-open-contact-form-modal='contact-us'
+													data-bs-target='#contactUsModal'
+													href
+													data-bs-toggle='modal'
+													event-tracking='menu-click'
+													event-tracking-mb='true'
+													event-tracking-trigger='click'
+													event-segmentation={item: 'contact', location: 'top-menu'}
+												)
 													span
 														| #{translate("contact_us")}
 											else
 												if child.url
-													+dropdown-menu-link-item()(
-														href=child.url,
-														class=child.class,
-														event-tracking="menu-click"
-														event-tracking-mb="true"
-														event-tracking-trigger="click"
-														event-segmentation={ item: child.trackingKey, location: 'top-menu' }
+													+dropdown-menu-link-item(
+														href=child.url
+														class=child.class
+														event-tracking='menu-click'
+														event-tracking-mb='true'
+														event-tracking-trigger='click'
+														event-segmentation={item: child.trackingKey, location: 'top-menu'}
 													) !{translate(child.text)}
 												else
-													+dropdown-menu-item !{translate(child.text)}
+													+dropdown-menu-item
+														| !{translate(child.text)}
 							else
 								+nav-item(class=item.class)
 									if item.url
 										+nav-link(
-											href=item.url,
-											class=item.class,
-											event-tracking="menu-click"
-											event-tracking-mb="true"
-											event-tracking-trigger="click"
-											event-segmentation={ item: item.trackingKey, location: 'top-menu' }
+											href=item.url
+											class=item.class
+											event-tracking='menu-click'
+											event-tracking-mb='true'
+											event-tracking-trigger='click'
+											event-segmentation={item: item.trackingKey, location: 'top-menu'}
 										) !{translate(item.text)}
 									else
 										| !{translate(item.text)}
@@ -136,48 +152,48 @@ nav.navbar.navbar-default.navbar-main.navbar-expand-lg(class={
 						if hasFeature('registration-page')
 							+nav-item.primary
 								+nav-link(
-									href="/register"
-									event-tracking="menu-click"
-									event-tracking-action="clicked"
-									event-tracking-trigger="click"
-									event-tracking-mb="true"
-									event-segmentation={ page: currentUrl, item: 'register', location: 'top-menu' }
+									href='/register'
+									event-tracking='menu-click'
+									event-tracking-action='clicked'
+									event-tracking-trigger='click'
+									event-tracking-mb='true'
+									event-segmentation={page: currentUrl, item: 'register', location: 'top-menu'}
 								) #{translate('sign_up')}
 
 						// login link
 						+nav-item
 							+nav-link(
-								href="/login"
-								event-tracking="menu-click"
-								event-tracking-action="clicked"
-								event-tracking-trigger="click"
-								event-tracking-mb="true"
-								event-segmentation={ page: currentUrl, item: 'login', location: 'top-menu' }
+								href='/login'
+								event-tracking='menu-click'
+								event-tracking-action='clicked'
+								event-tracking-trigger='click'
+								event-tracking-mb='true'
+								event-segmentation={page: currentUrl, item: 'login', location: 'top-menu'}
 							) #{translate('log_in')}
 
 					// projects link and account menu
 					if getSessionUser()
 						+nav-item
-							+nav-link(href="/project") #{translate('Projects')}
+							+nav-link(href='/project') #{translate('Projects')}
 						+nav-item.dropdown
 							button.dropdown-toggle(
-								aria-haspopup="true",
-								aria-expanded="false",
-								data-bs-toggle="dropdown"
-								role="menuitem"
-								event-tracking="menu-expand"
-								event-tracking-mb="true"
-								event-tracking-trigger="click"
-								event-segmentation={"item": "account", "location": "top-menu"}
+								aria-haspopup='true'
+								aria-expanded='false'
+								data-bs-toggle='dropdown'
+								role='menuitem'
+								event-tracking='menu-expand'
+								event-tracking-mb='true'
+								event-tracking-trigger='click'
+								event-segmentation={item: 'account', location: 'top-menu'}
 							)
 								| #{translate('Account')}
 							+dropdown-menu.dropdown-menu-end
 								+dropdown-menu-item
-									div.disabled.dropdown-item #{getSessionUser().email}
+									.disabled.dropdown-item #{getSessionUser().email}
 								+dropdown-menu-divider
-								+dropdown-menu-link-item()(href="/user/settings") #{translate('account_settings')}
+								+dropdown-menu-link-item(href='/user/settings') #{translate('account_settings')}
 								if nav.showSubscriptionLink
-									+dropdown-menu-link-item()(href="/user/subscription") #{translate('subscription')}
+									+dropdown-menu-link-item(href='/user/subscription') #{translate('subscription')}
 								+dropdown-menu-divider
 								+dropdown-menu-item
 									//-
@@ -185,14 +201,10 @@ nav.navbar.navbar-default.navbar-main.navbar-expand-lg(class={
 										this is that if the button is inside the form, screen readers will not count it in the total
 										number of menu items.
 									button.btn-link.text-left.dropdown-menu-button.dropdown-item(
-										role="menuitem",
-										tabindex="-1"
-										form="logOutForm"
+										role='menuitem'
+										tabindex='-1'
+										form='logOutForm'
 									)
 										| #{translate('log_out')}
-									form(
-										method="POST",
-										action="/logout",
-										id="logOutForm"
-									)
-										input(name='_csrf', type='hidden', value=csrfToken)
+									form(method='POST' action='/logout' id='logOutForm')
+										input(name='_csrf' type='hidden' value=csrfToken)
