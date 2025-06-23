@@ -9,6 +9,7 @@ import MaterialIcon from '@/shared/components/material-icon'
 import { sendMB } from '@/infrastructure/event-tracking'
 import OLFormLabel from '@/features/ui/components/ol/ol-form-label'
 import OLButton from '@/features/ui/components/ol/ol-button'
+import { useLocation } from '@/shared/hooks/use-location'
 
 type Feedback = {
   type: 'input' | 'alert'
@@ -267,6 +268,7 @@ function ConfirmEmailSuccessfullForm({
   successButtonText: string
   redirectTo: string
 }) {
+  const location = useLocation()
   const submitHandler = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     location.assign(redirectTo)

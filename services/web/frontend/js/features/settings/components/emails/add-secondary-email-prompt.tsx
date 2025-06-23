@@ -8,6 +8,7 @@ import MaterialIcon from '@/shared/components/material-icon'
 import { sendMB } from '@/infrastructure/event-tracking'
 import { ReCaptcha2 } from '../../../../shared/components/recaptcha-2'
 import { useRecaptcha } from '../../../../shared/hooks/use-recaptcha'
+import { useLocation } from '@/shared/hooks/use-location'
 
 import { postJSON } from '../../../../infrastructure/fetch-json'
 import RecaptchaConditions from '@/shared/components/recaptcha-conditions'
@@ -25,6 +26,7 @@ export function AddSecondaryEmailPrompt() {
   const [error, setError] = useState<AddSecondaryEmailError | undefined>()
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
   const { ref: recaptchaRef, getReCaptchaToken } = useRecaptcha()
+  const location = useLocation()
 
   if (!isReady) {
     return null

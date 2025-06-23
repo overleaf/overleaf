@@ -78,7 +78,7 @@ function sentryReporter() {
               const refererUrl = new URL(event.request.headers.Referer)
 
               if (
-                refererUrl.hostname === location.hostname &&
+                refererUrl.hostname === window.location.hostname &&
                 refererUrl.pathname.startsWith('/read/')
               ) {
                 refererUrl.pathname = '/read/'
