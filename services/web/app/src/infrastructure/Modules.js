@@ -26,29 +26,18 @@ async function modules() {
 }
 
 async function loadModulesImpl() {
-  const settingsCheckModuleCjs = Path.join(
-    MODULE_BASE_PATH,
-    'settings-check',
-    'index.js'
-  )
-  const settingsCheckModuleEsm = Path.join(
+  const settingsCheckModule = Path.join(
     MODULE_BASE_PATH,
     'settings-check',
     'index.mjs'
   )
-  if (fs.existsSync(settingsCheckModuleCjs)) {
-    await import(settingsCheckModuleCjs)
-  } else if (fs.existsSync(settingsCheckModuleEsm)) {
-    await import(settingsCheckModuleEsm)
+  if (fs.existsSync(settingsCheckModule)) {
+    await import(settingsCheckModule)
   }
   for (const moduleName of Settings.moduleImportSequence || []) {
-    let path
-    if (fs.existsSync(Path.join(MODULE_BASE_PATH, moduleName, 'index.mjs'))) {
-      path = Path.join(MODULE_BASE_PATH, moduleName, 'index.mjs')
-    } else {
-      path = Path.join(MODULE_BASE_PATH, moduleName, 'index.js')
-    }
-    const module = await import(path)
+    const module = await import(
+      Path.join(MODULE_BASE_PATH, moduleName, 'index.mjs')
+    )
     const loadedModule = module.default || module
 
     loadedModule.name = moduleName
