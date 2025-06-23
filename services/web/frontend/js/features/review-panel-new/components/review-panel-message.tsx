@@ -135,6 +135,7 @@ export const ReviewPanelMessage: FC<{
           contentLimit={100}
           checkNewLines
           content={message.content}
+          translate="no"
         />
       )}
 

@@ -37,6 +37,7 @@ export default function SettingsImageName() {
       options={options}
       label={t('tex_live_version')}
       name="imageName"
+      translateOptions="no"
     />
   )
 }

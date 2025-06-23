@@ -42,6 +42,7 @@ function HistoryFileTreeDoc({
       aria-selected={selected}
       aria-label={name}
       tabIndex={0}
+      translate="no"
     >
       <HistoryFileTreeItem
         name={name}

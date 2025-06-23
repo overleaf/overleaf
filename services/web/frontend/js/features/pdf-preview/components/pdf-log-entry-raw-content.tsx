@@ -39,7 +39,7 @@ export default function PdfLogEntryRawContent({
           height: expanded || !needsExpander ? 'auto' : collapsedSize,
         }}
       >
-        <pre className="log-entry-content-raw" ref={elementRef}>
+        <pre className="log-entry-content-raw" ref={elementRef} translate="no">
           {rawContent.trim()}
         </pre>
       </div>

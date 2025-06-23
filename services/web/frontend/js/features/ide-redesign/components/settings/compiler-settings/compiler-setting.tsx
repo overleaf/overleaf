@@ -38,6 +38,7 @@ export default function CompilerSetting() {
       options={OPTIONS}
       onChange={setCompiler}
       value={compiler}
+      translateOptions="no"
     />
   )
 }

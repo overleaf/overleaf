@@ -9,6 +9,7 @@ type Props = {
   disabledAccesibilityText?: string
   type?: 'button' | 'link'
   href?: string
+  translate?: React.HTMLAttributes<HTMLElement>['translate']
 }
 
 function LeftMenuButtonIcon({
@@ -34,12 +35,13 @@ export default function LeftMenuButton({
   disabledAccesibilityText,
   type = 'button',
   href,
+  translate,
 }: PropsWithChildren<Props>) {
   if (disabled) {
     return (
       <div className="left-menu-button link-disabled">
         <LeftMenuButtonIcon svgIcon={svgIcon} icon={icon} />
-        <span>{children}</span>
+        <span translate={translate}>{children}</span>
         {disabledAccesibilityText ? (
           <span className="sr-only">{disabledAccesibilityText}</span>
         ) : null}
@@ -51,7 +53,7 @@ export default function LeftMenuButton({
     return (
       <button onClick={onClick} className="left-menu-button">
         <LeftMenuButtonIcon svgIcon={svgIcon} icon={icon} />
-        <span>{children}</span>
+        <span translate={translate}>{children}</span>
       </button>
     )
   } else {
@@ -63,7 +65,7 @@ export default function LeftMenuButton({
         className="left-menu-button"
       >
         <LeftMenuButtonIcon svgIcon={svgIcon} icon={icon} />
-        <span>{children}</span>
+        <span translate={translate}>{children}</span>
       </a>
     )
   }

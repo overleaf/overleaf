@@ -11,6 +11,7 @@ export const ExpandableContent = memo<{
   newLineCharsLimit?: number
   checkNewLines?: boolean
   inline?: boolean
+  translate?: 'yes' | 'no'
 }>(function ExpandableContent({
   content,
   className,
@@ -18,6 +19,7 @@ export const ExpandableContent = memo<{
   newLineCharsLimit = 3,
   checkNewLines = true,
   inline = false,
+  translate,
 }) {
   const { t } = useTranslation()
   const contentRef = useRef<HTMLDivElement>(null)
@@ -50,6 +52,7 @@ export const ExpandableContent = memo<{
       <div
         ref={contentRef}
         className={classNames('review-panel-expandable-content', className)}
+        translate={translate}
       >
         {isExpanded ? content : content.slice(0, limit)}
         {isOverflowing && !isExpanded && '...'}

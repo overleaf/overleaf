@@ -79,6 +79,7 @@ function HistoryFileTreeFolder({
             setExpanded(!expanded)
           }
         }}
+        translate="no"
       >
         <HistoryFileTreeItem name={name} icons={icons} />
       </li>

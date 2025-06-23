@@ -200,7 +200,7 @@ const expectInvitePage = (user, link, callback) => {
   tryFollowInviteLink(user, link, (err, response, body) => {
     expect(err).not.to.exist
     expect(response.statusCode).to.equal(200)
-    expect(body).to.match(/<title>Project Invite - .*<\/title>/)
+    expect(body).to.match(/<title[^>]*>Project Invite - .*<\/title>/)
     callback()
   })
 }
@@ -210,7 +210,7 @@ const expectInvalidInvitePage = (user, link, callback) => {
   tryFollowInviteLink(user, link, (err, response, body) => {
     expect(err).not.to.exist
     expect(response.statusCode).to.equal(404)
-    expect(body).to.match(/<title>Invalid Invite - .*<\/title>/)
+    expect(body).to.match(/<title[^>]*>Invalid Invite - .*<\/title>/)
     callback()
   })
 }
@@ -237,7 +237,9 @@ const expectLoginPage = (user, callback) => {
   tryFollowLoginLink(user, '/login', (err, response, body) => {
     expect(err).not.to.exist
     expect(response.statusCode).to.equal(200)
-    expect(body).to.match(/<title>(Login|Log in to Overleaf) - .*<\/title>/)
+    expect(body).to.match(
+      /<title[^>]*>(Login|Log in to Overleaf) - .*<\/title>/
+    )
     callback()
   })
 }

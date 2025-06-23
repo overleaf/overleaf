@@ -29,7 +29,7 @@ function Message({ message, fromSelf }: MessageProps) {
   return (
     <div className="message-wrapper">
       {!fromSelf && (
-        <div className="name">
+        <div className="name" translate="no">
           <span>{message.user.first_name || message.user.email}</span>
         </div>
       )}

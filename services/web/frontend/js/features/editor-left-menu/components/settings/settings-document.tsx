@@ -43,6 +43,7 @@ export default function SettingsDocument() {
       options={validDocsOptions}
       label={t('main_document')}
       name="rootDocId"
+      translateOptions="no"
     />
   )
 }

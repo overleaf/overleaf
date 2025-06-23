@@ -22,6 +22,7 @@ export default function PDFViewerSetting() {
       ]}
       onChange={setPdfViewer}
       value={pdfViewer}
+      translateOptions="no"
     />
   )
 }

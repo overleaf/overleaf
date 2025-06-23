@@ -83,7 +83,7 @@ export default function Breadcrumbs() {
   const numOutlineItems = outlineHierarchy.length
 
   return (
-    <div className="ol-cm-breadcrumbs">
+    <div className="ol-cm-breadcrumbs" translate="no">
       {folderHierarchy.map(folder => (
         <Fragment key={folder._id}>
           <div>{folder.name}</div>

@@ -86,7 +86,11 @@ function PreviewLogEntryHeader({
       onClick={onSourceLocationClick}
     >
       <MaterialIcon type="link" />
-      <span ref={logLocationSpanRef} className="log-entry-header-link-location">
+      <span
+        ref={logLocationSpanRef}
+        className="log-entry-header-link-location"
+        translate="no"
+      >
         {`\u202A${locationLinkText}\u202C`}
       </span>
     </OLButton>
@@ -105,7 +109,7 @@ function PreviewLogEntryHeader({
           id={locationLinkText}
           description={locationLinkText}
           overlayProps={{ placement: 'left' }}
-          tooltipProps={{ className: 'log-location-tooltip' }}
+          tooltipProps={{ className: 'log-location-tooltip', translate: 'no' }}
         >
           {locationLink}
         </OLTooltip>

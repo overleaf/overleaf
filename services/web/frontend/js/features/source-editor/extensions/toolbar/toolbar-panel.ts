@@ -238,7 +238,7 @@ const toolbarTheme = EditorView.theme({
       color: 'inherit',
     },
     '& .ol-cm-toolbar-menu': {
-      width: '120px',
+      minWidth: '120px',
       display: 'flex',
       flexDirection: 'column',
       boxSizing: 'border-box',

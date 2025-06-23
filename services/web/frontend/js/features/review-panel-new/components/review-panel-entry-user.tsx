@@ -12,7 +12,7 @@ const ReviewPanelEntryUser = ({
   const userName = buildName(user)
 
   return (
-    <div className="review-panel-entry-user">
+    <div className="review-panel-entry-user" translate="no">
       <span
         className="review-panel-entry-user-color-badge"
         style={{

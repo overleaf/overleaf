@@ -87,6 +87,7 @@ const ChangeTag = forwardRef<HTMLElement, TagProps>(
           className="history-version-badge"
           data-testid="history-version-badge"
           {...props}
+          translate={isPseudoCurrentStateLabel ? 'yes' : 'no'}
         >
           {isPseudoCurrentStateLabel
             ? t('history_label_project_current_state')
@@ -147,24 +148,32 @@ function TagTooltip({ label, currentUserId, showTooltip }: LabelBadgesProps) {
 
   const isPseudoCurrentStateLabel = isPseudoLabel(label)
   const currentLabelData = allLabels?.find(({ id }) => id === label.id)
-  const labelOwnerName =
-    currentLabelData && !isPseudoLabel(currentLabelData)
-      ? currentLabelData.user_display_name
-      : t('anonymous')
+  const isAnonymous = !currentLabelData || isPseudoLabel(currentLabelData)
+  const labelOwnerName = isAnonymous
+    ? t('anonymous')
+    : currentLabelData.user_display_name
+  const labelOwnerNameComponent = isAnonymous ? (
+    labelOwnerName
+  ) : (
+    <span translate="no">{labelOwnerName}</span>
+  )
 
   return !isPseudoCurrentStateLabel ? (
     <OLTooltip
       description={
         <div className="history-version-label-tooltip">
           <div className="history-version-label-tooltip-row">
-            <b className="history-version-label-tooltip-row-comment">
+            <b
+              className="history-version-label-tooltip-row-comment"
+              translate="no"
+            >
               <OLTagIcon />
               &nbsp;
               {label.comment}
             </b>
           </div>
           <div className="history-version-label-tooltip-row">
-            {t('history_label_created_by')} {labelOwnerName}
+            {t('history_label_created_by')} {labelOwnerNameComponent}
           </div>
           <div className="history-version-label-tooltip-row">
             <time>

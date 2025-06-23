@@ -12,7 +12,7 @@ export default {
   restricted: {
     html(response, body) {
       expect(response.statusCode).to.equal(403)
-      expect(body).to.match(/<head><title>Restricted/)
+      expect(body).to.match(/<head><title translate="no">Restricted/)
     },
     json(response, body) {
       expect(response.statusCode).to.equal(403)

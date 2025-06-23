@@ -29,6 +29,7 @@ export default function SettingsFontFamily() {
         ]}
         label={t('font_family')}
         name="fontFamily"
+        translateOptions="no"
       />
       <BetaBadge
         phase="release"

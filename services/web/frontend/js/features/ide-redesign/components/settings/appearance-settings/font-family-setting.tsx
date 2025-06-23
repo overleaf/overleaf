@@ -27,6 +27,7 @@ export default function FontFamilySetting() {
       onChange={setFontFamily}
       value={fontFamily}
       width="wide"
+      translateOptions="no"
     />
   )
 }

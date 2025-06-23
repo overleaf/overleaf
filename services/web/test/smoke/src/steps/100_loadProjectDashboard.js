@@ -1,4 +1,5 @@
-const TITLE_REGEX = /<title>Your projects - .*, Online LaTeX Editor<\/title>/
+const TITLE_REGEX =
+  /<title[^>]*>Your projects - .*, Online LaTeX Editor<\/title>/
 
 async function run({ request, assertHasStatusCode }) {
   const response = await request('/project')
