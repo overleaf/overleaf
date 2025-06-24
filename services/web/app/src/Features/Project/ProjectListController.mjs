@@ -411,24 +411,17 @@ async function projectListPage(req, res, next) {
     'papers-notification-banner'
   )
 
-  await SplitTestHandler.promises.getAssignment(
-    req,
-    res,
-    'ai-assist-notification'
-  )
+  const aiAssistNotificationAssignment =
+    await SplitTestHandler.promises.getAssignment(
+      req,
+      res,
+      'ai-assist-notification'
+    )
 
-  const canUseAi = await PermissionsManager.promises.checkUserPermissions(
-    user,
-    ['use-ai']
-  )
-  const assistantDisabled = user.aiErrorAssistant?.enabled === false // the assistant has been manually disabled by the user
-  const subscription =
-    await SubscriptionLocator.promises.getUsersSubscription(userId)
-  const hasManuallyCollectedSubscription =
-    subscription?.collectionMethod === 'manual'
-  const canUseAiAssist =
-    canUseAi && !hasManuallyCollectedSubscription && !assistantDisabled
-  const hasAiAssist = user.features?.aiErrorAssistant
+  let showAiAssistNotification = false
+  if (aiAssistNotificationAssignment.variant !== 'default') {
+    showAiAssistNotification = await _showAiAssistNotification(user)
+  }
 
   const customerIoEnabled =
     await SplitTestHandler.promises.hasUserBeenAssignedToVariant(
@@ -471,7 +464,7 @@ async function projectListPage(req, res, next) {
     hasIndividualPaidSubscription,
     userRestrictions: Array.from(req.userRestrictions || []),
     customerIoEnabled,
-    showAiAssistNotification: canUseAiAssist && !hasAiAssist,
+    showAiAssistNotification,
   })
 }
 
@@ -754,6 +747,43 @@ function _hasActiveFilter(filters) {
     filters.tag?.length ||
     filters.search?.length
   )
+}
+
+async function _showAiAssistNotification(user) {
+  // Check if the assistant has been manually disabled by the user
+  if (user.aiErrorAssistant?.enabled === false) {
+    return false
+  }
+
+  // Check if the user can use AI features (policy check)
+  const canUseAi = await PermissionsManager.promises.checkUserPermissions(
+    user,
+    ['use-ai']
+  )
+  if (!canUseAi) {
+    return false
+  }
+
+  // Check if the user has a subscription with manually collected group admins (#22822)
+  const subscription = await SubscriptionLocator.promises.getUsersSubscription(
+    user._id
+  )
+  if (subscription?.collectionMethod === 'manual') {
+    return false
+  }
+
+  // Check if the user already has AI Assist via Overleaf
+  if (user.features?.aiErrorAssistant) {
+    return false
+  }
+  // Check if the user already has AI Assist via Writefull
+  const { isPremium: hasAiAssistViaWritefull } =
+    await UserGetter.promises.getWritefullData(user._id)
+  if (hasAiAssistViaWritefull) {
+    return false
+  }
+
+  return true
 }
 
 export default {
