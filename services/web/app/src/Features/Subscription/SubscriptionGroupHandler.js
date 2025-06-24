@@ -296,39 +296,12 @@ async function updateSubscriptionPaymentTerms(
   await RecurlyClient.promises.updateSubscriptionDetails(updateRequest)
 }
 
-async function _getUpgradeTargetPlanCodeMaybeThrow(subscription) {
-  if (
-    subscription.planCode.includes('professional') ||
-    !subscription.groupPlan
-  ) {
-    throw new Error('Not eligible for group plan upgrade')
-  }
-
-  return subscription.planCode.replace('collaborator', 'professional')
-}
-
-async function _getGroupPlanUpgradeChangeRequest(ownerId) {
-  const olSubscription =
-    await SubscriptionLocator.promises.getUsersSubscription(ownerId)
-
-  await ensureSubscriptionIsActive(olSubscription)
-
-  const newPlanCode = await _getUpgradeTargetPlanCodeMaybeThrow(olSubscription)
-  const recurlySubscription = await RecurlyClient.promises.getSubscription(
-    olSubscription.recurlySubscription_id
-  )
-
-  await ensureSubscriptionCollectionMethodIsNotManual(recurlySubscription)
-  await ensureSubscriptionHasNoPendingChanges(recurlySubscription)
-
-  return recurlySubscription.getRequestForGroupPlanUpgrade(newPlanCode)
-}
-
 async function getGroupPlanUpgradePreview(ownerId) {
-  const changeRequest = await _getGroupPlanUpgradeChangeRequest(ownerId)
-  const subscriptionChange =
-    await RecurlyClient.promises.previewSubscriptionChange(changeRequest)
-  const paymentMethod = await RecurlyClient.promises.getPaymentMethod(ownerId)
+  const preview = await Modules.promises.hooks.fire(
+    'previewGroupPlanUpgrade',
+    ownerId
+  )
+  const { subscriptionChange, paymentMethod } = preview[0]
   return SubscriptionController.makeChangePreview(
     {
       type: 'group-plan-upgrade',
@@ -345,12 +318,7 @@ async function getGroupPlanUpgradePreview(ownerId) {
 }
 
 async function upgradeGroupPlan(ownerId) {
-  const changeRequest = await _getGroupPlanUpgradeChangeRequest(ownerId)
-  await RecurlyClient.promises.applySubscriptionChangeRequest(changeRequest)
-  await SubscriptionHandler.promises.syncSubscription(
-    { uuid: changeRequest.subscription.id },
-    ownerId
-  )
+  await Modules.promises.hooks.fire('upgradeGroupPlan', ownerId)
 }
 
 async function updateGroupMembersBulk(

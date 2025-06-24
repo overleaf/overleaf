@@ -779,100 +779,14 @@ describe('SubscriptionGroupHandler', function () {
     })
   })
 
-  describe('upgradeGroupPlan', function () {
-    it('should upgrade the subscription for flexible licensing group plans', async function () {
-      this.SubscriptionLocator.promises.getUsersSubscription = sinon
-        .stub()
-        .resolves({
-          groupPlan: true,
-          recurlyStatus: {
-            state: 'active',
-          },
-          planCode: 'group_collaborator',
-        })
-      await this.Handler.promises.upgradeGroupPlan(this.user_id)
-      this.recurlySubscription.getRequestForGroupPlanUpgrade
-        .calledWith('group_professional')
-        .should.equal(true)
-      this.RecurlyClient.promises.applySubscriptionChangeRequest
-        .calledWith(this.changeRequest)
-        .should.equal(true)
-      this.SubscriptionHandler.promises.syncSubscription
-        .calledWith({ uuid: this.changeRequest.subscription.id }, this.user_id)
-        .should.equal(true)
-    })
-
-    it('should upgrade the subscription for legacy group plans', async function () {
-      this.SubscriptionLocator.promises.getUsersSubscription = sinon
-        .stub()
-        .resolves({
-          groupPlan: true,
-          recurlyStatus: {
-            state: 'active',
-          },
-          planCode: 'group_collaborator_10_educational',
-        })
-      await this.Handler.promises.upgradeGroupPlan(this.user_id)
-      this.recurlySubscription.getRequestForGroupPlanUpgrade
-        .calledWith('group_professional_10_educational')
-        .should.equal(true)
-      this.RecurlyClient.promises.applySubscriptionChangeRequest
-        .calledWith(this.changeRequest)
-        .should.equal(true)
-      this.SubscriptionHandler.promises.syncSubscription
-        .calledWith({ uuid: this.changeRequest.subscription.id }, this.user_id)
-        .should.equal(true)
-    })
-
-    it('should fail the upgrade if is professional already', async function () {
-      this.SubscriptionLocator.promises.getUsersSubscription = sinon
-        .stub()
-        .resolves({
-          groupPlan: true,
-          recurlyStatus: {
-            state: 'active',
-          },
-          planCode: 'group_professional',
-        })
-      await expect(
-        this.Handler.promises.upgradeGroupPlan(this.user_id)
-      ).to.be.rejectedWith('Not eligible for group plan upgrade')
-    })
-
-    it('should fail the upgrade if not group plan', async function () {
-      this.SubscriptionLocator.promises.getUsersSubscription = sinon
-        .stub()
-        .resolves({
-          groupPlan: false,
-          recurlyStatus: {
-            state: 'active',
-          },
-          planCode: 'test_plan_code',
-        })
-      await expect(
-        this.Handler.promises.upgradeGroupPlan(this.user_id)
-      ).to.be.rejectedWith('Not eligible for group plan upgrade')
-    })
-  })
-
   describe('getGroupPlanUpgradePreview', function () {
     it('should generate preview for subscription upgrade', async function () {
-      this.SubscriptionLocator.promises.getUsersSubscription = sinon
-        .stub()
-        .resolves({
-          groupPlan: true,
-          recurlyStatus: {
-            state: 'active',
-          },
-          planCode: 'group_collaborator',
-        })
+      this.Modules.promises.hooks.fire.resolves([
+        { subscriptionChange: this.previewSubscriptionChange },
+      ])
       const result = await this.Handler.promises.getGroupPlanUpgradePreview(
         this.user_id
       )
-      this.RecurlyClient.promises.previewSubscriptionChange
-        .calledWith(this.changeRequest)
-        .should.equal(true)
-
       result.should.equal(this.changePreview)
     })
   })
