@@ -145,6 +145,18 @@ describe('ProjectListController', function () {
       },
     }
 
+    ctx.PermissionsManager = {
+      promises: {
+        checkUserPermissions: sinon.stub().resolves(true),
+      },
+    }
+
+    ctx.SubscriptionLocator = {
+      promises: {
+        getUsersSubscription: sinon.stub().resolves({}),
+      },
+    }
+
     vi.doMock('mongodb-legacy', () => ({
       default: { ObjectId },
     }))
@@ -249,6 +261,19 @@ describe('ProjectListController', function () {
     vi.doMock('../../../../app/src/Features/Tutorial/TutorialHandler', () => ({
       default: ctx.TutorialHandler,
     }))
+
+    vi.doMock(
+      '../../../../app/src/Features/Authorization/PermissionsManager',
+      () => ({
+        default: ctx.PermissionsManager,
+      })
+    )
+    vi.doMock(
+      '../../../../app/src/Features/Subscription/SubscriptionLocator',
+      () => ({
+        default: ctx.SubscriptionLocator,
+      })
+    )
 
     ctx.ProjectListController = (await import(MODULE_PATH)).default
 

@@ -14,6 +14,7 @@ import {
   isDeprecatedBrowser,
 } from '@/shared/components/deprecated-browser'
 import PapersNotificationBanner from './papers-notification-banner'
+import AiAssistBanner from './ai-assist-banner'
 import { usePapersNotification } from './hooks/use-papers-notification'
 
 const [enrollmentNotificationModule] = importOverleafModules(
@@ -57,6 +58,7 @@ function UserNotifications() {
         {USGovBanner && <USGovBanner />}
 
         {showPapersNotificationBanner && <PapersNotificationBanner />}
+        <AiAssistBanner />
         <AccessibilitySurveyBanner />
 
         {isDeprecatedBrowser() && <DeprecatedBrowser />}

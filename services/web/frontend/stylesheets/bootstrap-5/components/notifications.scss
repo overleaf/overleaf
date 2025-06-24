@@ -70,6 +70,12 @@
     padding: 18px $spacing-06 0 0;
   }
 
+  .notification-icon.notification-icon-center {
+    padding-top: 0;
+    display: flex;
+    align-items: center;
+  }
+
   .notification-content-and-cta {
     // shared container to align cta with text on smaller screens
     display: flex;

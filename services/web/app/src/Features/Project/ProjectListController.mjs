@@ -27,6 +27,8 @@ import SplitTestHandler from '../SplitTests/SplitTestHandler.js'
 import SplitTestSessionHandler from '../SplitTests/SplitTestSessionHandler.js'
 import TutorialHandler from '../Tutorial/TutorialHandler.js'
 import SubscriptionHelper from '../Subscription/SubscriptionHelper.js'
+import PermissionsManager from '../Authorization/PermissionsManager.js'
+import SubscriptionLocator from '../Subscription/SubscriptionLocator.js'
 
 /**
  * @import { GetProjectsRequest, GetProjectsResponse, AllUsersProjects, MongoProject } from "./types"
@@ -117,7 +119,7 @@ async function projectListPage(req, res, next) {
   const user = await User.findById(
     userId,
     `email emails features alphaProgram betaProgram lastPrimaryEmailCheck signUpDate refProviders${
-      isSaas ? ' enrollment writefull completedTutorials' : ''
+      isSaas ? ' enrollment writefull completedTutorials aiErrorAssistant' : ''
     }`
   )
 
@@ -409,6 +411,25 @@ async function projectListPage(req, res, next) {
     'papers-notification-banner'
   )
 
+  await SplitTestHandler.promises.getAssignment(
+    req,
+    res,
+    'ai-assist-notification'
+  )
+
+  const canUseAi = await PermissionsManager.promises.checkUserPermissions(
+    user,
+    ['use-ai']
+  )
+  const assistantDisabled = user.aiErrorAssistant?.enabled === false // the assistant has been manually disabled by the user
+  const subscription =
+    await SubscriptionLocator.promises.getUsersSubscription(userId)
+  const hasManuallyCollectedSubscription =
+    subscription?.collectionMethod === 'manual'
+  const canUseAiAssist =
+    canUseAi && !hasManuallyCollectedSubscription && !assistantDisabled
+  const hasAiAssist = user.features?.aiErrorAssistant
+
   const customerIoEnabled =
     await SplitTestHandler.promises.hasUserBeenAssignedToVariant(
       req,
@@ -450,6 +471,7 @@ async function projectListPage(req, res, next) {
     hasIndividualPaidSubscription,
     userRestrictions: Array.from(req.userRestrictions || []),
     customerIoEnabled,
+    showAiAssistNotification: canUseAiAssist && !hasAiAssist,
   })
 }
 
