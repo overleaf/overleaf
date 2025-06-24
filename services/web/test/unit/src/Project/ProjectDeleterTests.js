@@ -36,6 +36,7 @@ describe('ProjectDeleter', function () {
           deleterId: '588f3ddae8ebc1bac07c9fa4',
           deleterIpAddress: '172.19.0.1',
           deletedProjectId: '5cf9270b4eff6e186cf8b05e',
+          deletedProjectOwnerId: this.user._id,
         },
         project: {
           _id: '5cf9270b4eff6e186cf8b05e',
@@ -500,6 +501,16 @@ describe('ProjectDeleter', function () {
         expect(this.ProjectAuditLogEntry.deleteMany).to.have.been.calledWith({
           projectId: this.deletedProjects[0].project._id,
         })
+      })
+
+      it('should log a completed deletion', async function () {
+        expect(this.logger.info).to.have.been.calledWith(
+          {
+            projectId: this.deletedProjects[0].project._id,
+            userId: this.user._id,
+          },
+          'expired deleted project successfully'
+        )
       })
     })
 
