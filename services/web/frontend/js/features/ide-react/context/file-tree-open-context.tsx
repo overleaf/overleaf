@@ -11,8 +11,6 @@ import {
 import { useProjectContext } from '@/shared/context/project-context'
 import { useIdeReactContext } from '@/features/ide-react/context/ide-react-context'
 import { useEditorManagerContext } from '@/features/ide-react/context/editor-manager-context'
-import useScopeValueSetterOnly from '@/shared/hooks/use-scope-value-setter-only'
-import { BinaryFile } from '@/features/file-view/types/binary-file'
 import {
   FileTreeDocumentFindResult,
   FileTreeFileRefFindResult,
@@ -22,6 +20,7 @@ import { debugConsole } from '@/utils/debugging'
 import { convertFileRefToBinaryFile } from '@/features/ide-react/util/file-view'
 import { sendMB } from '@/infrastructure/event-tracking'
 import { FileRef } from '../../../../../types/file-ref'
+import { useLayoutContext } from '@/shared/context/layout-context'
 
 const FileTreeOpenContext = createContext<
   | {
@@ -43,7 +42,7 @@ export const FileTreeOpenProvider: FC<React.PropsWithChildren> = ({
   const { eventEmitter, projectJoined } = useIdeReactContext()
   const { openDocWithId, currentDocumentId, openInitialDoc } =
     useEditorManagerContext()
-  const [, setOpenFile] = useScopeValueSetterOnly<BinaryFile | null>('openFile')
+  const { setOpenFile } = useLayoutContext()
   const [openEntity, setOpenEntity] = useState<
     FileTreeDocumentFindResult | FileTreeFileRefFindResult | null
   >(null)

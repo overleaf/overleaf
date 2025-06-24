@@ -93,6 +93,8 @@ const createInitialValue = () =>
     pdfPreviewOpen: false,
     projectSearchIsOpen: true,
     setProjectSearchIsOpen: cy.stub(),
+    openFile: null,
+    setOpenFile: cy.stub(),
   }) satisfies LayoutContextValue
 
 const LayoutProvider: FC<React.PropsWithChildren> = ({ children }) => {

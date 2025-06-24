@@ -36,8 +36,6 @@ import { DocId } from '../../../../../types/project-settings'
 import { Update } from '@/features/history/services/types/update'
 import { useDebugDiffTracker } from '../hooks/use-debug-diff-tracker'
 import { useEditorContext } from '@/shared/context/editor-context'
-import useScopeValueSetterOnly from '@/shared/hooks/use-scope-value-setter-only'
-import { BinaryFile } from '@/features/file-view/types/binary-file'
 import { convertFileRefToBinaryFile } from '@/features/ide-react/util/file-view'
 
 export interface GotoOffsetOptions {
@@ -97,7 +95,7 @@ export const EditorManagerProvider: FC<React.PropsWithChildren> = ({
   const { reportError, eventEmitter, projectId } = useIdeReactContext()
   const { setOutOfSync } = useEditorContext()
   const { socket, closeConnection, connectionState } = useConnectionContext()
-  const { view, setView } = useLayoutContext()
+  const { view, setView, setOpenFile } = useLayoutContext()
   const { showGenericMessageModal, genericModalVisible, showOutOfSyncModal } =
     useModalsContext()
   const { id: userId } = useUserContext()
@@ -520,8 +518,6 @@ export const EditorManagerProvider: FC<React.PropsWithChildren> = ({
     },
     [fileTreeData, openDoc]
   )
-
-  const [, setOpenFile] = useScopeValueSetterOnly<BinaryFile | null>('openFile')
 
   const openFileWithId = useCallback(
     (fileRefId: string) => {

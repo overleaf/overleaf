@@ -47,10 +47,5 @@ export const mockScope = (scope?: Scope) => ({
     },
   },
   hasLintingError: false,
-  ui: {
-    view: 'editor',
-    pdfLayout: 'sideBySide',
-    leftMenuShown: false,
-  },
   ...scope,
 })

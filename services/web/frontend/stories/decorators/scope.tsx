@@ -59,10 +59,6 @@ const project: Project = {
 const initialScope = {
   user,
   project,
-  ui: {
-    chatOpen: true,
-    pdfLayout: 'flat',
-  },
   settings: {
     pdfViewer: 'js',
     syntaxValidation: true,

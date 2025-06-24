@@ -8,7 +8,6 @@ import React, {
   useCallback,
 } from 'react'
 import { ReactScopeValueStore } from '@/features/ide-react/scope-value-store/react-scope-value-store'
-import populateLayoutScope from '@/features/ide-react/scope-adapters/layout-context-adapter'
 import { IdeProvider } from '@/shared/context/ide-context'
 import {
   createIdeEventEmitter,
@@ -67,7 +66,6 @@ export function createReactScopeValueStore(projectId: string) {
   // necessary values in the store, but this is simpler for now
   populateIdeReactScope(scopeStore)
   populateEditorScope(scopeStore, projectId)
-  populateLayoutScope(scopeStore)
   populateProjectScope(scopeStore)
   populatePdfScope(scopeStore)
 

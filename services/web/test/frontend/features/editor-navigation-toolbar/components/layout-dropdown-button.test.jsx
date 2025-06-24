@@ -9,9 +9,11 @@ import * as eventTracking from '@/infrastructure/event-tracking'
 describe('<LayoutDropdownButton />', function () {
   let openStub
   let sendMBSpy
-  const defaultUi = {
+
+  const defaultLayout = {
     pdfLayout: 'flat',
     view: 'pdf',
+    chatIsOpen: false,
   }
 
   beforeEach(function () {
@@ -27,7 +29,9 @@ describe('<LayoutDropdownButton />', function () {
 
   it('should mark current layout option as selected', async function () {
     // Selected is aria-label, visually we show a checkmark
-    renderWithEditorContext(<LayoutDropdownButton />, { ui: defaultUi })
+    renderWithEditorContext(<LayoutDropdownButton />, {
+      layoutContext: defaultLayout,
+    })
 
     screen.getByRole('button', { name: 'Layout' }).click()
 
@@ -69,7 +73,7 @@ describe('<LayoutDropdownButton />', function () {
   it('should not select any option in history view', async function () {
     // Selected is aria-label, visually we show a checkmark
     renderWithEditorContext(<LayoutDropdownButton />, {
-      ui: { ...defaultUi, view: 'history' },
+      layoutContext: { ...defaultLayout, view: 'history' },
     })
 
     screen.getByRole('button', { name: 'Layout' }).click()
@@ -112,9 +116,10 @@ describe('<LayoutDropdownButton />', function () {
   it('should treat file and editor views the same way', async function () {
     // Selected is aria-label, visually we show a checkmark
     renderWithEditorContext(<LayoutDropdownButton />, {
-      ui: {
+      layoutContext: {
         pdfLayout: 'flat',
         view: 'file',
+        chatIsOpen: false,
       },
     })
 
@@ -161,7 +166,7 @@ describe('<LayoutDropdownButton />', function () {
       window.BroadcastChannel = originalBroadcastChannel || true // ensure that window.BroadcastChannel is truthy
 
       renderWithEditorContext(<LayoutDropdownButton />, {
-        ui: { ...defaultUi, view: 'editor' },
+        layoutContext: { ...defaultLayout, view: 'editor' },
       })
 
       screen.getByRole('button', { name: 'Layout' }).click()
@@ -192,7 +197,7 @@ describe('<LayoutDropdownButton />', function () {
     beforeEach(async function () {
       window.metaAttributesCache.set('ol-detachRole', 'detacher')
       renderWithEditorContext(<LayoutDropdownButton />, {
-        ui: { ...defaultUi, view: 'editor' },
+        layoutContext: { ...defaultLayout, view: 'editor' },
       })
 
       screen.getByRole('button', { name: 'Layout' }).click()

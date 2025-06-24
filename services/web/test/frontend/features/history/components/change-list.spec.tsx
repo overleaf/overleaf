@@ -14,11 +14,10 @@ import { withTestContainerErrorBoundary } from '../../../helpers/error-boundary'
 
 const TestContainerWithoutErrorBoundary: FC<{
   component: React.ReactNode
-  scope: Record<string, unknown>
   props: Record<string, unknown>
-}> = ({ component, scope, props }) => {
+}> = ({ component, props }) => {
   return (
-    <EditorProviders scope={scope} {...props}>
+    <EditorProviders {...props}>
       <HistoryProvider>
         <div style={{ display: 'flex', justifyContent: 'center' }}>
           <div className="history-react">{component}</div>
@@ -34,17 +33,12 @@ const TestContainer = withTestContainerErrorBoundary(
 
 const mountWithEditorProviders = (
   component: React.ReactNode,
-  scope: Record<string, unknown> = {},
   props: Record<string, unknown> = {}
 ) => {
-  cy.mount(<TestContainer component={component} scope={scope} props={props} />)
+  cy.mount(<TestContainer component={component} props={props} />)
 }
 
 describe('change list (Bootstrap 5)', function () {
-  const scope = {
-    ui: { view: 'history', pdfLayout: 'sideBySide', chatOpen: true },
-  }
-
   const waitForData = () => {
     cy.wait('@updates')
     cy.wait('@labels')
@@ -101,7 +95,8 @@ describe('change list (Bootstrap 5)', function () {
 
   describe('tags', function () {
     it('renders tags', function () {
-      mountWithEditorProviders(<ChangeList />, scope, {
+      mountWithEditorProviders(<ChangeList />, {
+        layoutContext: { view: 'history' },
         user: {
           id: USER_ID,
           email: USER_EMAIL,
@@ -173,13 +168,18 @@ describe('change list (Bootstrap 5)', function () {
     })
 
     it('deletes tag', function () {
-      mountWithEditorProviders(<ChangeList />, scope, {
-        user: {
-          id: USER_ID,
-          email: USER_EMAIL,
-          isAdmin: true,
-        },
-      })
+      mountWithEditorProviders(
+        <ChangeList />,
+
+        {
+          layoutContext: { view: 'history' },
+          user: {
+            id: USER_ID,
+            email: USER_EMAIL,
+            isAdmin: true,
+          },
+        }
+      )
       waitForData()
 
       cy.findByLabelText(/all history/i).click({ force: true })
@@ -235,7 +235,8 @@ describe('change list (Bootstrap 5)', function () {
     })
 
     it('verifies that selecting the same list item will not trigger a new diff', function () {
-      mountWithEditorProviders(<ChangeList />, scope, {
+      mountWithEditorProviders(<ChangeList />, {
+        layoutContext: { view: 'history' },
         user: {
           id: USER_ID,
           email: USER_EMAIL,
@@ -257,13 +258,18 @@ describe('change list (Bootstrap 5)', function () {
 
   describe('all history', function () {
     beforeEach(function () {
-      mountWithEditorProviders(<ChangeList />, scope, {
-        user: {
-          id: USER_ID,
-          email: USER_EMAIL,
-          isAdmin: true,
-        },
-      })
+      mountWithEditorProviders(
+        <ChangeList />,
+
+        {
+          layoutContext: { view: 'history' },
+          user: {
+            id: USER_ID,
+            email: USER_EMAIL,
+            isAdmin: true,
+          },
+        }
+      )
       waitForData()
     })
 
@@ -318,13 +324,18 @@ describe('change list (Bootstrap 5)', function () {
 
   describe('labels only', function () {
     beforeEach(function () {
-      mountWithEditorProviders(<ChangeList />, scope, {
-        user: {
-          id: USER_ID,
-          email: USER_EMAIL,
-          isAdmin: true,
-        },
-      })
+      mountWithEditorProviders(
+        <ChangeList />,
+
+        {
+          layoutContext: { view: 'history' },
+          user: {
+            id: USER_ID,
+            email: USER_EMAIL,
+            isAdmin: true,
+          },
+        }
+      )
       waitForData()
       cy.findByLabelText(/labels/i).click({ force: true })
     })
@@ -399,13 +410,18 @@ describe('change list (Bootstrap 5)', function () {
 
   describe('compare mode', function () {
     beforeEach(function () {
-      mountWithEditorProviders(<ChangeList />, scope, {
-        user: {
-          id: USER_ID,
-          email: USER_EMAIL,
-          isAdmin: true,
-        },
-      })
+      mountWithEditorProviders(
+        <ChangeList />,
+
+        {
+          layoutContext: { view: 'history' },
+          user: {
+            id: USER_ID,
+            email: USER_EMAIL,
+            isAdmin: true,
+          },
+        }
+      )
       waitForData()
     })
 
@@ -435,13 +451,18 @@ describe('change list (Bootstrap 5)', function () {
 
   describe('dropdown', function () {
     beforeEach(function () {
-      mountWithEditorProviders(<ChangeList />, scope, {
-        user: {
-          id: USER_ID,
-          email: USER_EMAIL,
-          isAdmin: true,
-        },
-      })
+      mountWithEditorProviders(
+        <ChangeList />,
+
+        {
+          layoutContext: { view: 'history' },
+          user: {
+            id: USER_ID,
+            email: USER_EMAIL,
+            isAdmin: true,
+          },
+        }
+      )
       waitForData()
     })
 
@@ -610,21 +631,18 @@ describe('change list (Bootstrap 5)', function () {
     })
 
     it('shows non-owner paywall', function () {
-      const scope = {
-        ui: {
-          view: 'history',
-          pdfLayout: 'sideBySide',
-          chatOpen: true,
-        },
-      }
+      mountWithEditorProviders(
+        <ChangeList />,
 
-      mountWithEditorProviders(<ChangeList />, scope, {
-        user: {
-          id: USER_ID,
-          email: USER_EMAIL,
-          isAdmin: false,
-        },
-      })
+        {
+          layoutContext: { view: 'history' },
+          user: {
+            id: USER_ID,
+            email: USER_EMAIL,
+            isAdmin: false,
+          },
+        }
+      )
 
       waitForData()
 
@@ -634,15 +652,8 @@ describe('change list (Bootstrap 5)', function () {
     })
 
     it('shows owner paywall', function () {
-      const scope = {
-        ui: {
-          view: 'history',
-          pdfLayout: 'sideBySide',
-          chatOpen: true,
-        },
-      }
-
-      mountWithEditorProviders(<ChangeList />, scope, {
+      mountWithEditorProviders(<ChangeList />, {
+        layoutContext: { view: 'history' },
         user: {
           id: USER_ID,
           email: USER_EMAIL,
@@ -662,15 +673,8 @@ describe('change list (Bootstrap 5)', function () {
     })
 
     it('shows all labels in free tier', function () {
-      const scope = {
-        ui: {
-          view: 'history',
-          pdfLayout: 'sideBySide',
-          chatOpen: true,
-        },
-      }
-
-      mountWithEditorProviders(<ChangeList />, scope, {
+      mountWithEditorProviders(<ChangeList />, {
+        layoutContext: { view: 'history' },
         user: {
           id: USER_ID,
           email: USER_EMAIL,

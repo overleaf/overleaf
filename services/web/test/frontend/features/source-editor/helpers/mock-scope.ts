@@ -81,9 +81,6 @@ export const mockScope = (
       write: true,
       ...permissions,
     },
-    ui: {
-      reviewPanelOpen: false,
-    },
     toggleReviewPanel: cy.stub(),
     toggleTrackChangesForEveryone: cy.stub(),
     refreshResolvedCommentsDropdown: cy.stub(() => sleep(1000)),

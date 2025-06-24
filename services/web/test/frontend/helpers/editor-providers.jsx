@@ -3,7 +3,7 @@
 import { merge } from 'lodash'
 import { SocketIOMock } from '@/ide/connection/SocketIoShim'
 import { IdeContext } from '@/shared/context/ide-context'
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   createReactScopeValueStore,
   IdeReactContext,
@@ -12,6 +12,9 @@ import { IdeEventEmitter } from '@/features/ide-react/create-ide-event-emitter'
 import { ReactScopeEventEmitter } from '@/features/ide-react/scope-event-emitter/react-scope-event-emitter'
 import { ConnectionContext } from '@/features/ide-react/context/connection-context'
 import { ReactContextRoot } from '@/features/ide-react/context/react-context-root'
+import useEventListener from '@/shared/hooks/use-event-listener'
+import useDetachLayout from '@/shared/hooks/use-detach-layout'
+import { LayoutContext } from '@/shared/context/layout-context'
 
 // these constants can be imported in tests instead of
 // using magic strings
@@ -33,6 +36,22 @@ const defaultUserSettings = {
   trackChanges: true,
   syntaxValidation: false,
   mathPreview: true,
+}
+
+/**
+ * @typedef {import('@/shared/context/layout-context').LayoutContextValue} LayoutContextValue
+ * @type Partial<LayoutContextValue>
+ */
+const layoutContextDefault = {
+  view: 'editor',
+  openFile: null,
+  chatIsOpen: true, // false in the application, true in tests
+  reviewPanelOpen: false,
+  miniReviewPanelVisible: false,
+  leftMenuShown: false,
+  projectSearchIsOpen: false,
+  pdfLayout: 'sideBySide',
+  loadingStyleSheet: false,
 }
 
 export function EditorProviders({
@@ -68,7 +87,8 @@ export function EditorProviders({
       fileRefs: [],
     },
   ],
-  ui = { view: 'editor', pdfLayout: 'sideBySide', chatOpen: true },
+  /** @type {Partial<LayoutContext>} */
+  layoutContext = layoutContextDefault,
   userSettings = {},
   providers = {},
 }) {
@@ -110,7 +130,6 @@ export function EditorProviders({
         imageName,
         compiler,
       },
-      ui,
       permissionsLevel,
     },
     defaultScope
@@ -125,6 +144,7 @@ export function EditorProviders({
       providers={{
         ConnectionProvider: makeConnectionProvider(socket),
         IdeReactProvider: makeIdeReactProvider(scope, socket),
+        LayoutProvider: makeLayoutProvider(layoutContext),
         ...providers,
       }}
     >
@@ -183,7 +203,6 @@ const makeIdeReactProvider = (scope, socket) => {
         scopeStore.set(key, value)
       }
       scopeStore.set('editor.sharejs_doc', scope.editor.sharejs_doc)
-      scopeStore.set('ui.chatOpen', scope.ui.chatOpen)
       const scopeEventEmitter = new ReactScopeEventEmitter(
         new IdeEventEmitter()
       )
@@ -214,4 +233,111 @@ const makeIdeReactProvider = (scope, socket) => {
     )
   }
   return IdeReactProvider
+}
+
+const makeLayoutProvider = layoutContextOverrides => {
+  const layout = {
+    ...layoutContextDefault,
+    ...layoutContextOverrides,
+  }
+  const LayoutProvider = ({ children }) => {
+    const [view, setView] = useState(layout.view)
+    const [openFile, setOpenFile] = useState(layout.openFile)
+    const [chatIsOpen, setChatIsOpen] = useState(layout.chatIsOpen)
+    const [reviewPanelOpen, setReviewPanelOpen] = useState(
+      layout.reviewPanelOpen
+    )
+    const [miniReviewPanelVisible, setMiniReviewPanelVisible] = useState(
+      layout.miniReviewPanelVisible
+    )
+    const [leftMenuShown, setLeftMenuShown] = useState(layout.leftMenuShown)
+    const [projectSearchIsOpen, setProjectSearchIsOpen] = useState(
+      layout.projectSearchIsOpen
+    )
+    const [pdfLayout, setPdfLayout] = useState(layout.pdfLayout)
+    const [loadingStyleSheet, setLoadingStyleSheet] = useState(
+      layout.loadingStyleSheet
+    )
+
+    useEventListener(
+      'ui.toggle-review-panel',
+      useCallback(() => {
+        setReviewPanelOpen(open => !open)
+      }, [setReviewPanelOpen])
+    )
+    const changeLayout = useCallback(
+      (newLayout, newView = 'editor') => {
+        setPdfLayout(newLayout)
+        setView(newLayout === 'sideBySide' ? 'editor' : newView)
+      },
+      [setPdfLayout, setView]
+    )
+    const {
+      reattach,
+      detach,
+      isLinked: detachIsLinked,
+      role: detachRole,
+    } = useDetachLayout()
+    const pdfPreviewOpen =
+      pdfLayout === 'sideBySide' || view === 'pdf' || detachRole === 'detacher'
+    const value = useMemo(
+      () => ({
+        reattach,
+        detach,
+        detachIsLinked,
+        detachRole,
+        changeLayout,
+        chatIsOpen,
+        leftMenuShown,
+        openFile,
+        pdfLayout,
+        pdfPreviewOpen,
+        projectSearchIsOpen,
+        setProjectSearchIsOpen,
+        reviewPanelOpen,
+        miniReviewPanelVisible,
+        loadingStyleSheet,
+        setChatIsOpen,
+        setLeftMenuShown,
+        setOpenFile,
+        setPdfLayout,
+        setReviewPanelOpen,
+        setMiniReviewPanelVisible,
+        setLoadingStyleSheet,
+        setView,
+        view,
+      }),
+      [
+        reattach,
+        detach,
+        detachIsLinked,
+        detachRole,
+        changeLayout,
+        chatIsOpen,
+        leftMenuShown,
+        openFile,
+        pdfLayout,
+        pdfPreviewOpen,
+        projectSearchIsOpen,
+        setProjectSearchIsOpen,
+        reviewPanelOpen,
+        miniReviewPanelVisible,
+        loadingStyleSheet,
+        setChatIsOpen,
+        setLeftMenuShown,
+        setOpenFile,
+        setPdfLayout,
+        setReviewPanelOpen,
+        setMiniReviewPanelVisible,
+        setLoadingStyleSheet,
+        setView,
+        view,
+      ]
+    )
+
+    return (
+      <LayoutContext.Provider value={value}>{children}</LayoutContext.Provider>
+    )
+  }
+  return LayoutProvider
 }
