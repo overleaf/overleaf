@@ -298,7 +298,16 @@ async function addChunkToArchive(
         logger.error({ filePath }, 'File not found in snapshot')
         continue
       }
-      await file.load('eager', blobStore)
+
+      try {
+        await file.load('eager', blobStore)
+      } catch (err) {
+        logger.error(
+          { filePath, err },
+          'Failed to load file from snapshot, skipping'
+        )
+        continue
+      }
 
       const hash = file.getHash()
 
