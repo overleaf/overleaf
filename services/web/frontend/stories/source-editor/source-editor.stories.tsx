@@ -189,6 +189,9 @@ const mockDoc = (content: string, changes: Array<Record<string, any>> = []) => {
     detachFromCM6: () => {
       // Do nothing
     },
+    getType: () => {
+      return 'history-ot'
+    },
     on: () => {
       // Do nothing
     },
