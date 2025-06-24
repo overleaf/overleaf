@@ -155,6 +155,7 @@ describe('UserPagesController', function () {
 
     ctx.UserPagesController = (await import(modulePath)).default
     ctx.req = new MockRequest()
+    ctx.req.capabilitySet = new Set()
     ctx.req.session.user = ctx.user
     ctx.res = new MockResponse()
   })
