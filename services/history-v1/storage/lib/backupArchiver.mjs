@@ -49,10 +49,18 @@ class BackupBlobStore {
    * Required for BlobStore interface - not supported.
    *
    * @template T
+   * @param {string} hash
    * @return {Promise<T>}
    */
-  async getObject() {
-    throw new Error('Not implemented')
+  async getObject(hash) {
+    try {
+      const stream = await this.getStream(hash)
+      const buffer = await streams.readStreamToBuffer(stream)
+      return JSON.parse(buffer.toString())
+    } catch (err) {
+      logger.warn({ err, hash }, 'Failed to fetch chunk blob')
+      throw err
+    }
   }
 
   /**
