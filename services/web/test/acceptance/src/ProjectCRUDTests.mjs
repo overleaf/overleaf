@@ -125,25 +125,6 @@ describe('Project CRUD', function () {
         expectObjectIdArrayEqual(trashedProject.archived, [])
       })
     })
-
-    describe('with a legacy boolean state', function () {
-      it('should mark the project as not archived for the user', async function () {
-        await Project.updateOne(
-          { _id: this.projectId },
-          { $set: { archived: true } }
-        ).exec()
-
-        const { response } = await this.user.doRequest(
-          'POST',
-          `/project/${this.projectId}/trash`
-        )
-
-        expect(response.statusCode).to.equal(200)
-
-        const trashedProject = await Project.findById(this.projectId).exec()
-        expectObjectIdArrayEqual(trashedProject.archived, [])
-      })
-    })
   })
 
   describe('when untrashing a project', function () {

@@ -24,16 +24,6 @@ describe('CollaboratorsHandler', function () {
       name: 'Foo',
     }
 
-    this.archivedProject = {
-      _id: new ObjectId(),
-      archived: [new ObjectId(this.userId)],
-    }
-
-    this.oldArchivedProject = {
-      _id: new ObjectId(),
-      archived: true,
-    }
-
     this.UserGetter = {
       promises: {
         getUser: sinon.stub().resolves(null),
@@ -59,9 +49,6 @@ describe('CollaboratorsHandler', function () {
       },
     }
 
-    this.ProjectHelper = {
-      calculateArchivedArray: sinon.stub(),
-    }
     this.CollaboratorsGetter = {
       promises: {
         dangerouslyGetAllProjectsUserIsMemberOf: sinon.stub(),
@@ -77,7 +64,6 @@ describe('CollaboratorsHandler', function () {
         '../ThirdPartyDataStore/TpdsProjectFlusher': this.TpdsProjectFlusher,
         '../ThirdPartyDataStore/TpdsUpdateSender': this.TpdsUpdateSender,
         '../Project/ProjectGetter': this.ProjectGetter,
-        '../Project/ProjectHelper': this.ProjectHelper,
         '../Editor/EditorRealTimeController': this.EditorRealTimeController,
         './CollaboratorsGetter': this.CollaboratorsGetter,
       },
@@ -130,15 +116,6 @@ describe('CollaboratorsHandler', function () {
 
   describe('removeUserFromProject', function () {
     describe('a non-archived project', function () {
-      beforeEach(function () {
-        this.ProjectMock.expects('findOne')
-          .withArgs({
-            _id: this.project._id,
-          })
-          .chain('exec')
-          .resolves(this.project)
-      })
-
       it('should remove the user from mongo', async function () {
         this.expectNullReferenceCleanup(this.project._id)
         this.ProjectMock.expects('updateOne')
@@ -164,89 +141,6 @@ describe('CollaboratorsHandler', function () {
           .resolves()
         await this.CollaboratorsHandler.promises.removeUserFromProject(
           this.project._id,
-          this.userId
-        )
-      })
-    })
-
-    describe('an archived project, archived with a boolean value', function () {
-      beforeEach(function () {
-        const archived = [new ObjectId(this.userId)]
-        this.ProjectHelper.calculateArchivedArray.returns(archived)
-
-        this.ProjectMock.expects('findOne')
-          .withArgs({
-            _id: this.oldArchivedProject._id,
-          })
-          .chain('exec')
-          .resolves(this.oldArchivedProject)
-      })
-
-      it('should remove the user from mongo', async function () {
-        this.expectNullReferenceCleanup(this.oldArchivedProject._id)
-        this.ProjectMock.expects('updateOne')
-          .withArgs(
-            {
-              _id: this.oldArchivedProject._id,
-            },
-            {
-              $set: {
-                archived: [],
-              },
-              $pull: {
-                collaberator_refs: this.userId,
-                reviewer_refs: this.userId,
-                readOnly_refs: this.userId,
-                pendingEditor_refs: this.userId,
-                pendingReviewer_refs: this.userId,
-                tokenAccessReadOnly_refs: this.userId,
-                tokenAccessReadAndWrite_refs: this.userId,
-                trashed: this.userId,
-              },
-            }
-          )
-          .resolves()
-        await this.CollaboratorsHandler.promises.removeUserFromProject(
-          this.oldArchivedProject._id,
-          this.userId
-        )
-      })
-    })
-
-    describe('an archived project, archived with an array value', function () {
-      beforeEach(function () {
-        this.ProjectMock.expects('findOne')
-          .withArgs({
-            _id: this.archivedProject._id,
-          })
-          .chain('exec')
-          .resolves(this.archivedProject)
-      })
-
-      it('should remove the user from mongo', async function () {
-        this.expectNullReferenceCleanup(this.archivedProject._id)
-        this.ProjectMock.expects('updateOne')
-          .withArgs(
-            {
-              _id: this.archivedProject._id,
-            },
-            {
-              $pull: {
-                collaberator_refs: this.userId,
-                reviewer_refs: this.userId,
-                readOnly_refs: this.userId,
-                pendingEditor_refs: this.userId,
-                pendingReviewer_refs: this.userId,
-                tokenAccessReadOnly_refs: this.userId,
-                tokenAccessReadAndWrite_refs: this.userId,
-                archived: this.userId,
-                trashed: this.userId,
-              },
-            }
-          )
-          .resolves()
-        await this.CollaboratorsHandler.promises.removeUserFromProject(
-          this.archivedProject._id,
           this.userId
         )
       })
@@ -539,13 +433,6 @@ describe('CollaboratorsHandler', function () {
         'token-read-only-1',
       ]
       for (const projectId of expectedProjects) {
-        this.ProjectMock.expects('findOne')
-          .withArgs({
-            _id: projectId,
-          })
-          .chain('exec')
-          .resolves({ _id: projectId })
-
         this.expectNullReferenceCleanup(projectId)
         this.ProjectMock.expects('updateOne')
           .withArgs(

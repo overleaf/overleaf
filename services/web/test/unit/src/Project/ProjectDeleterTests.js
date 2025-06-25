@@ -95,10 +95,6 @@ describe('ProjectDeleter', function () {
       },
     }
 
-    this.ProjectHelper = {
-      calculateArchivedArray: sinon.stub(),
-    }
-
     this.db = {
       projects: {
         insertOne: sinon.stub().resolves(),
@@ -143,7 +139,6 @@ describe('ProjectDeleter', function () {
         '../../infrastructure/Features': this.Features,
         '../Editor/EditorRealTimeController': this.EditorRealTimeController,
         '../../models/Project': { Project },
-        './ProjectHelper': this.ProjectHelper,
         '../../models/DeletedProject': { DeletedProject },
         '../DocumentUpdater/DocumentUpdaterHandler':
           this.DocumentUpdaterHandler,
@@ -559,19 +554,11 @@ describe('ProjectDeleter', function () {
 
   describe('archiveProject', function () {
     beforeEach(function () {
-      const archived = [new ObjectId(this.user._id)]
-      this.ProjectHelper.calculateArchivedArray.returns(archived)
-
-      this.ProjectMock.expects('findOne')
-        .withArgs({ _id: this.project._id })
-        .chain('exec')
-        .resolves(this.project)
-
       this.ProjectMock.expects('updateOne')
         .withArgs(
           { _id: this.project._id },
           {
-            $set: { archived },
+            $addToSet: { archived: new ObjectId(this.user._id) },
             $pull: { trashed: new ObjectId(this.user._id) },
           }
         )
@@ -585,32 +572,15 @@ describe('ProjectDeleter', function () {
       )
       this.ProjectMock.verify()
     })
-
-    it('calculates the archived array', async function () {
-      await this.ProjectDeleter.promises.archiveProject(
-        this.project._id,
-        this.user._id
-      )
-      expect(this.ProjectHelper.calculateArchivedArray).to.have.been.calledWith(
-        this.project,
-        this.user._id,
-        'ARCHIVE'
-      )
-    })
   })
 
   describe('unarchiveProject', function () {
     beforeEach(function () {
-      const archived = [new ObjectId(this.user._id)]
-      this.ProjectHelper.calculateArchivedArray.returns(archived)
-
-      this.ProjectMock.expects('findOne')
-        .withArgs({ _id: this.project._id })
-        .chain('exec')
-        .resolves(this.project)
-
       this.ProjectMock.expects('updateOne')
-        .withArgs({ _id: this.project._id }, { $set: { archived } })
+        .withArgs(
+          { _id: this.project._id },
+          { $pull: { archived: new ObjectId(this.user._id) } }
+        )
         .resolves()
     })
 
@@ -621,36 +591,16 @@ describe('ProjectDeleter', function () {
       )
       this.ProjectMock.verify()
     })
-
-    it('calculates the archived array', async function () {
-      await this.ProjectDeleter.promises.unarchiveProject(
-        this.project._id,
-        this.user._id
-      )
-      expect(this.ProjectHelper.calculateArchivedArray).to.have.been.calledWith(
-        this.project,
-        this.user._id,
-        'UNARCHIVE'
-      )
-    })
   })
 
   describe('trashProject', function () {
     beforeEach(function () {
-      const archived = [new ObjectId(this.user._id)]
-      this.ProjectHelper.calculateArchivedArray.returns(archived)
-
-      this.ProjectMock.expects('findOne')
-        .withArgs({ _id: this.project._id })
-        .chain('exec')
-        .resolves(this.project)
-
       this.ProjectMock.expects('updateOne')
         .withArgs(
           { _id: this.project._id },
           {
             $addToSet: { trashed: new ObjectId(this.user._id) },
-            $set: { archived },
+            $pull: { archived: new ObjectId(this.user._id) },
           }
         )
         .resolves()
@@ -663,27 +613,10 @@ describe('ProjectDeleter', function () {
       )
       this.ProjectMock.verify()
     })
-
-    it('unarchives the project', async function () {
-      await this.ProjectDeleter.promises.trashProject(
-        this.project._id,
-        this.user._id
-      )
-      expect(this.ProjectHelper.calculateArchivedArray).to.have.been.calledWith(
-        this.project,
-        this.user._id,
-        'UNARCHIVE'
-      )
-    })
   })
 
   describe('untrashProject', function () {
     beforeEach(function () {
-      this.ProjectMock.expects('findOne')
-        .withArgs({ _id: this.project._id })
-        .chain('exec')
-        .resolves(this.project)
-
       this.ProjectMock.expects('updateOne')
         .withArgs(
           { _id: this.project._id },
