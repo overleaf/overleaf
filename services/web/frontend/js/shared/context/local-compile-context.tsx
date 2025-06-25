@@ -50,8 +50,6 @@ import { isSplitTestEnabled } from '@/utils/splitTestUtils'
 import { captureException } from '@/infrastructure/error-reporter'
 import OError from '@overleaf/o-error'
 import getMeta from '@/utils/meta'
-import { useIsNewEditorEnabled } from '@/features/ide-redesign/utils/new-editor-utils'
-import { useRailContext } from '@/features/ide-redesign/contexts/rail-context'
 
 type PdfFile = Record<string, any>
 
@@ -132,8 +130,6 @@ export const LocalCompileProvider: FC<React.PropsWithChildren> = ({
   const { openDocWithId, openDocs, currentDocument } = useEditorManagerContext()
   const { role } = useDetachContext()
 
-  const newEditor = useIsNewEditorEnabled()
-
   const {
     _id: projectId,
     rootDocId,
@@ -143,8 +139,6 @@ export const LocalCompileProvider: FC<React.PropsWithChildren> = ({
   } = useProjectContext()
 
   const { pdfPreviewOpen } = useLayoutContext()
-
-  const { openTab: openRailTab } = useRailContext()
 
   const { features, alphaProgram, labsProgram } = useUserContext()
 
@@ -751,22 +745,6 @@ export const LocalCompileProvider: FC<React.PropsWithChildren> = ({
   // After a compile, the compiler sets `data.options` to the options that were
   // used for that compile.
   const lastCompileOptions = useMemo(() => data?.options || {}, [data])
-
-  useEffect(() => {
-    const listener = () => {
-      if (newEditor) {
-        openRailTab('errors')
-      } else {
-        setShowLogs(true)
-      }
-    }
-
-    window.addEventListener('editor:show-logs', listener)
-
-    return () => {
-      window.removeEventListener('editor:show-logs', listener)
-    }
-  }, [newEditor, openRailTab])
 
   const value = useMemo(
     () => ({

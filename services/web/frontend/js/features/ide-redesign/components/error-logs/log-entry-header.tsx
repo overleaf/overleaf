@@ -104,6 +104,8 @@ function LogEntryHeader({
         overlayProps={{ placement: 'bottom' }}
       >
         <button
+          data-action="expand-collapse"
+          data-collapsed={collapsed}
           className="log-entry-header-button"
           onClick={onToggleCollapsed}
           aria-label={collapsed ? t('expand') : t('collapse')}
@@ -150,13 +152,7 @@ function LogEntryHeader({
             </OLTooltip>
           )}
           {actionComponents.map(({ import: { default: Component }, path }) => (
-            <Component
-              key={path}
-              collapsed={collapsed}
-              onToggleCollapsed={onToggleCollapsed}
-              logEntry={logEntry}
-              id={id}
-            />
+            <Component key={path} logEntry={logEntry} id={id} />
           ))}
         </div>
       )}
