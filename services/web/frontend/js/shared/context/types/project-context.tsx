@@ -45,8 +45,6 @@ export type ProjectContextValue = {
     signUpDate: string
   }
   tags: Tag[]
-  // TODO: Remove __guests__ and boolean options when we have converted
-  // all projects to the current format.
   trackChangesState: boolean | Record<UserId | '__guests__', boolean>
   projectSnapshot: ProjectSnapshot
   joinedOnce: boolean

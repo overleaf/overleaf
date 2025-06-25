@@ -20,6 +20,7 @@ import { usePermissionsContext } from '@/features/ide-react/context/permissions-
 
 export type TrackChangesState = {
   onForEveryone: boolean
+  onForGuests: boolean
   onForMembers: Record<UserId, boolean | undefined>
 }
 
@@ -30,6 +31,7 @@ export const TrackChangesStateContext = createContext<
 type SaveTrackChangesRequestBody = {
   on?: boolean
   on_for?: Record<UserId, boolean | undefined>
+  on_for_guests?: boolean
 }
 
 type TrackChangesStateActions = {
@@ -60,20 +62,22 @@ export const TrackChangesStateProvider: FC<React.PropsWithChildren> = ({
   useEffect(() => {
     setWantTrackChanges(
       trackChangesValue === true ||
-        (trackChangesValue !== false && !!user.id && trackChangesValue[user.id])
+        (trackChangesValue !== false &&
+          trackChangesValue[user.id ?? '__guests__'])
     )
   }, [setWantTrackChanges, trackChangesValue, user.id])
 
   const trackChangesIsObject =
     trackChangesValue !== true && trackChangesValue !== false
   const onForEveryone = trackChangesValue === true
+  const onForGuests =
+    onForEveryone ||
+    (trackChangesIsObject && trackChangesValue.__guests__ === true)
 
   const onForMembers = useMemo(() => {
     const onForMembers: Record<UserId, boolean | undefined> = {}
     if (trackChangesIsObject) {
       for (const key of Object.keys(trackChangesValue)) {
-        // TODO: Remove this check when we have converted
-        // all projects to the current format.
         if (key !== '__guests__') {
           onForMembers[key as UserId] = trackChangesValue[key as UserId]
         }
@@ -141,8 +145,8 @@ export const TrackChangesStateProvider: FC<React.PropsWithChildren> = ({
   )
 
   const value = useMemo(
-    () => ({ onForEveryone, onForMembers }),
-    [onForEveryone, onForMembers]
+    () => ({ onForEveryone, onForGuests, onForMembers }),
+    [onForEveryone, onForGuests, onForMembers]
   )
 
   return (

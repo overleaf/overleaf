@@ -30,7 +30,8 @@ const useCurrentMode = (): Mode => {
   const user = useUserContext()
   const trackChangesForCurrentUser =
     trackChanges?.onForEveryone ||
-    (user && user.id && trackChanges?.onForMembers[user.id])
+    (user?.id && trackChanges?.onForMembers[user.id]) ||
+    (!user?.id && trackChanges?.onForGuests)
   const { permissionsLevel } = useEditorContext()
 
   if (permissionsLevel === 'readOnly') {
@@ -46,7 +47,8 @@ const useCurrentMode = (): Mode => {
 
 function ReviewModeSwitcher() {
   const { t } = useTranslation()
-  const { saveTrackChangesForCurrentUser } =
+  const user = useUserContext()
+  const { saveTrackChangesForCurrentUser, saveTrackChanges } =
     useTrackChangesStateActionsContext()
   const mode = useCurrentMode()
   const { permissionsLevel } = useEditorContext()
@@ -74,7 +76,11 @@ function ReviewModeSwitcher() {
                 previousMode: mode,
                 newMode: 'edit',
               })
-              saveTrackChangesForCurrentUser(false)
+              if (user?.id) {
+                saveTrackChangesForCurrentUser(false)
+              } else {
+                saveTrackChanges({ on_for_guests: false })
+              }
             }}
             description={t('edit_content_directly')}
             leadingIcon="edit"
@@ -96,7 +102,11 @@ function ReviewModeSwitcher() {
                   previousMode: mode,
                   newMode: 'review',
                 })
-                saveTrackChangesForCurrentUser(true)
+                if (user?.id) {
+                  saveTrackChangesForCurrentUser(true)
+                } else {
+                  saveTrackChanges({ on_for_guests: true })
+                }
               }
             }}
             description={
