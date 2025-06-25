@@ -184,7 +184,10 @@ const settings = {
   siteUrl: (siteUrl = process.env.OVERLEAF_SITE_URL || 'http://localhost'),
 
   // Status page URL as displayed on the maintenance/500 pages.
-  statusPageUrl: process.env.OVERLEAF_STATUS_PAGE_URL,
+  statusPageUrl: process.env.OVERLEAF_STATUS_PAGE_URL ?
+    // Add https:// protocol prefix if not set (Allow plain-text http:// for Server Pro/CE).
+    (process.env.OVERLEAF_STATUS_PAGE_URL.startsWith('http://') || process.env.OVERLEAF_STATUS_PAGE_URL.startsWith('https://')) ? process.env.OVERLEAF_STATUS_PAGE_URL : `https://${process.env.OVERLEAF_STATUS_PAGE_URL}`
+    : undefined,
 
   // The name this is used to describe your Overleaf Community Edition Installation
   appName: process.env.OVERLEAF_APP_NAME || 'Overleaf Community Edition',

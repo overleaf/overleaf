@@ -24,7 +24,7 @@ module.exports = {
     ? JSON.parse(process.env.ADMIN_DOMAINS)
     : ['example.com'],
 
-  statusPageUrl: 'status.example.com',
+  statusPageUrl: 'https://status.example.com',
   cdn: {
     web: {
       host: 'cdn.example.com',

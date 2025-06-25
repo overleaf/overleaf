@@ -146,7 +146,7 @@ module.exports = HttpErrorHandler = {
     }
     let message = `${Settings.appName} is currently down for maintenance.`
     if (Settings.statusPageUrl) {
-      message += ` Please check https://${Settings.statusPageUrl} for updates.`
+      message += ` Please check ${Settings.statusPageUrl} for updates.`
     }
     switch (req.accepts(['html', 'json'])) {
       case 'html':
