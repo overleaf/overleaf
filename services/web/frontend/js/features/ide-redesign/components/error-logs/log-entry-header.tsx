@@ -111,7 +111,6 @@ function LogEntryHeader({
           aria-label={collapsed ? t('expand') : t('collapse')}
         >
           <MaterialIcon
-            onClick={onToggleCollapsed}
             type={
               openCollapseIconOverride ??
               (collapsed ? 'chevron_right' : 'expand_more')

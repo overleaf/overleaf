@@ -78,6 +78,7 @@
       display: flex;
       align-items: center;
       border: none;
+      gap: var(--spacing-03);
     }
 
     .log-entry-header-button {
@@ -88,6 +89,7 @@
       flex: 1;
       border-radius: var(--border-radius-base);
       padding: var(--spacing-02) var(--spacing-03) var(--spacing-02) 0;
+      overflow: hidden;
 
       &:hover {
         cursor: pointer;
