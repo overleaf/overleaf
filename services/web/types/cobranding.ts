@@ -8,4 +8,5 @@ export type Cobranding = {
   partner?: string
   brandedMenu?: boolean
   submitBtnHtml?: string
+  submitBtnHtmlNoBreaks?: string
 }

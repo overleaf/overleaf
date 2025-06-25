@@ -11,12 +11,19 @@ import { useCallback } from 'react'
 import * as eventTracking from '../../../../infrastructure/event-tracking'
 import { ToolbarLogos } from './logos'
 import { useEditorContext } from '@/shared/context/editor-context'
+import importOverleafModules from '../../../../../macros/import-overleaf-module.macro'
 import UpgradeButton from './upgrade-button'
 import getMeta from '@/utils/meta'
 
+const [publishModalModules] = importOverleafModules('publishModal')
+const SubmitProjectButton = publishModalModules?.import.NewPublishToolbarButton
+
 export const Toolbar = () => {
   const { view, setView } = useLayoutContext()
-  const { cobranding } = useEditorContext()
+  const { cobranding, permissionsLevel } = useEditorContext()
+  const shouldDisplaySubmitButton =
+    (permissionsLevel === 'owner' || permissionsLevel === 'readAndWrite') &&
+    SubmitProjectButton
 
   const handleBackToEditorClick = useCallback(() => {
     eventTracking.sendMB('navigation-clicked-history', { action: 'close' })
@@ -47,6 +54,9 @@ export const Toolbar = () => {
         <OnlineUsers />
         <ShowHistoryButton />
         <ChangeLayoutButton />
+        {shouldDisplaySubmitButton && cobranding && (
+          <SubmitProjectButton cobranding={cobranding} />
+        )}
         <ShareProjectButton />
         {getMeta('ol-showUpgradePrompt') && <UpgradeButton />}
       </div>

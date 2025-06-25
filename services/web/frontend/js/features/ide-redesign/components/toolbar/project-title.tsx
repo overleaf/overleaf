@@ -16,9 +16,10 @@ import EditableLabel from './editable-label'
 import { DuplicateProject } from './duplicate-project'
 
 const [publishModalModules] = importOverleafModules('publishModal')
-const SubmitProjectButton = publishModalModules?.import.NewPublishToolbarButton
+const SubmitProjectButton = publishModalModules?.import.NewPublishDropdownButton
 
 export const ToolbarProjectTitle = () => {
+  const { cobranding } = useEditorContext()
   const { t } = useTranslation()
   const { permissionsLevel, renameProject } = useEditorContext()
   const { name } = useProjectContext()
@@ -67,7 +68,7 @@ export const ToolbarProjectTitle = () => {
         />
       </DropdownToggle>
       <DropdownMenu renderOnMount>
-        {shouldDisplaySubmitButton && (
+        {shouldDisplaySubmitButton && !cobranding && (
           <>
             <SubmitProjectButton />
             <DropdownDivider />

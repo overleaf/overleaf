@@ -118,5 +118,21 @@ describe('BrandVariationsHandler', function () {
         '<br /><strong style="color:#B39500">AGU Journal</strong>hello'
       )
     })
+
+    it("should sanitize and remove breaks in 'submit_button_html_no_br'", async function () {
+      this.mockedBrandVariationDetails.submit_button_html =
+        'Submit to<br class="break"/><strong style="color:#B39500">AGU Journal</strong><iframe>hello</iframe>'
+      this.V1Api.request.callsArgWith(
+        1,
+        null,
+        { statusCode: 200 },
+        this.mockedBrandVariationDetails
+      )
+      const brandVariationDetails =
+        await this.BrandVariationsHandler.promises.getBrandVariationById('12')
+      expect(brandVariationDetails.submit_button_html_no_br).to.equal(
+        'Submit to <strong style="color:#B39500">AGU Journal</strong>hello'
+      )
+    })
   })
 })

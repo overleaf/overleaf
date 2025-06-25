@@ -72,6 +72,7 @@ export const EditorProvider: FC<React.PropsWithChildren> = ({ children }) => {
         partner: brandVariation.partner,
         brandedMenu: brandVariation.branded_menu,
         submitBtnHtml: brandVariation.submit_button_html,
+        submitBtnHtmlNoBreaks: brandVariation.submit_button_html_no_br,
       }
     )
   }, [])
