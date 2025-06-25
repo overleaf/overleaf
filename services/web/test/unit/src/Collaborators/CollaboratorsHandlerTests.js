@@ -68,46 +68,6 @@ describe('CollaboratorsHandler', function () {
         './CollaboratorsGetter': this.CollaboratorsGetter,
       },
     })
-
-    // Helper function to set up mock expectations for null reference cleanup
-    this.expectNullReferenceCleanup = projectId => {
-      this.ProjectMock.expects('updateOne')
-        .withArgs(
-          {
-            _id: projectId,
-            pendingReviewer_refs: { $type: 'null' },
-          },
-          {
-            $set: { pendingReviewer_refs: [] },
-          }
-        )
-        .chain('exec')
-        .resolves()
-      this.ProjectMock.expects('updateOne')
-        .withArgs(
-          {
-            _id: projectId,
-            readOnly_refs: { $type: 'null' },
-          },
-          {
-            $set: { readOnly_refs: [] },
-          }
-        )
-        .chain('exec')
-        .resolves()
-      this.ProjectMock.expects('updateOne')
-        .withArgs(
-          {
-            _id: projectId,
-            reviewer_refs: { $type: 'null' },
-          },
-          {
-            $set: { reviewer_refs: [] },
-          }
-        )
-        .chain('exec')
-        .resolves()
-    }
   })
 
   afterEach(function () {
@@ -117,7 +77,6 @@ describe('CollaboratorsHandler', function () {
   describe('removeUserFromProject', function () {
     describe('a non-archived project', function () {
       it('should remove the user from mongo', async function () {
-        this.expectNullReferenceCleanup(this.project._id)
         this.ProjectMock.expects('updateOne')
           .withArgs(
             {
@@ -433,7 +392,6 @@ describe('CollaboratorsHandler', function () {
         'token-read-only-1',
       ]
       for (const projectId of expectedProjects) {
-        this.expectNullReferenceCleanup(projectId)
         this.ProjectMock.expects('updateOne')
           .withArgs(
             {
@@ -596,8 +554,6 @@ describe('CollaboratorsHandler', function () {
 
   describe('setCollaboratorPrivilegeLevel', function () {
     it('sets a collaborator to read-only', async function () {
-      this.expectNullReferenceCleanup(this.project._id)
-
       this.ProjectMock.expects('updateOne')
         .withArgs(
           {
@@ -628,8 +584,6 @@ describe('CollaboratorsHandler', function () {
     })
 
     it('sets a collaborator to read-write', async function () {
-      this.expectNullReferenceCleanup(this.project._id)
-
       this.ProjectMock.expects('updateOne')
         .withArgs(
           {
@@ -669,8 +623,6 @@ describe('CollaboratorsHandler', function () {
         })
       })
       it('should correctly update the project', async function () {
-        this.expectNullReferenceCleanup(this.project._id)
-
         this.ProjectMock.expects('updateOne')
           .withArgs(
             {
@@ -714,8 +666,6 @@ describe('CollaboratorsHandler', function () {
         })
       })
       it('should correctly update the project', async function () {
-        this.expectNullReferenceCleanup(this.project._id)
-
         this.ProjectMock.expects('updateOne')
           .withArgs(
             {
@@ -748,8 +698,6 @@ describe('CollaboratorsHandler', function () {
     })
 
     it('sets a collaborator to read-only as a pendingEditor', async function () {
-      this.expectNullReferenceCleanup(this.project._id)
-
       this.ProjectMock.expects('updateOne')
         .withArgs(
           {
@@ -783,8 +731,6 @@ describe('CollaboratorsHandler', function () {
     })
 
     it('sets a collaborator to read-only as a pendingReviewer', async function () {
-      this.expectNullReferenceCleanup(this.project._id)
-
       this.ProjectMock.expects('updateOne')
         .withArgs(
           {
@@ -818,8 +764,6 @@ describe('CollaboratorsHandler', function () {
     })
 
     it('throws a NotFoundError if the project or collaborator does not exist', async function () {
-      this.expectNullReferenceCleanup(this.project._id)
-
       this.ProjectMock.expects('updateOne')
         .chain('exec')
         .resolves({ matchedCount: 0 })

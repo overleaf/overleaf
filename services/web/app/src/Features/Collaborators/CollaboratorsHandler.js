@@ -27,33 +27,9 @@ module.exports = {
     convertTrackChangesToExplicitFormat,
   },
 }
-// Forces null pendingReviewer_refs, readOnly_refs, and reviewer_refs to
-// be empty arrays to avoid errors during $pull ops
-// See https://github.com/overleaf/internal/issues/24610
-async function fixNullCollaboratorRefs(projectId) {
-  // Temporary cleanup for the case where pendingReviewer_refs is null
-  await Project.updateOne(
-    { _id: projectId, pendingReviewer_refs: { $type: 'null' } },
-    { $set: { pendingReviewer_refs: [] } }
-  ).exec()
-
-  // Temporary cleanup for the case where readOnly_refs is null
-  await Project.updateOne(
-    { _id: projectId, readOnly_refs: { $type: 'null' } },
-    { $set: { readOnly_refs: [] } }
-  ).exec()
-
-  // Temporary cleanup for the case where reviewer_refs is null
-  await Project.updateOne(
-    { _id: projectId, reviewer_refs: { $type: 'null' } },
-    { $set: { reviewer_refs: [] } }
-  ).exec()
-}
 
 async function removeUserFromProject(projectId, userId) {
   try {
-    await fixNullCollaboratorRefs(projectId)
-
     await Project.updateOne(
       { _id: projectId },
       {
@@ -305,8 +281,6 @@ async function setCollaboratorPrivilegeLevel(
     ],
   }
   let update
-
-  await fixNullCollaboratorRefs(projectId)
 
   switch (privilegeLevel) {
     case PrivilegeLevels.READ_AND_WRITE: {
