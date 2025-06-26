@@ -386,7 +386,7 @@
   }
 
   .inline-green-link {
-    color: var(--green-50);
+    color: var(--link-web);
     padding: 0;
     text-decoration: underline;
 
@@ -395,7 +395,7 @@
     text-decoration-skip-ink: none;
 
     &:hover {
-      color: var(--green-60);
+      color: var(--link-web-hover);
     }
 
     // TODO: this is copied directly from the `.less` file, migrate this to scss

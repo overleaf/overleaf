@@ -47,11 +47,11 @@
       text-decoration: none;
 
       &:visited {
-        color: var(--green-50);
+        color: var(--link-web-visited);
       }
 
       &:hover {
-        color: var(--green-60);
+        color: var(--link-web-hover);
       }
 
       &.active {
