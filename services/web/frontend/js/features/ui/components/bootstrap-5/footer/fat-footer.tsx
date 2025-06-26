@@ -67,7 +67,6 @@ function FatFooter() {
     {
       title: t('Get Involved'),
       links: [
-        { href: '/for/community/advisors', label: t('become_an_advisor') },
         {
           href: 'https://forms.gle/67PSpN1bLnjGCmPQ9',
           label: t('let_us_know_what_you_think'),
