@@ -43,6 +43,7 @@ function EditorLeftMenu() {
             shown: leftMenuShown,
           })}
           id="left-menu"
+          data-testid="left-menu"
         >
           <LazyEditorLeftMenuWithErrorBoundary />
         </Offcanvas.Body>

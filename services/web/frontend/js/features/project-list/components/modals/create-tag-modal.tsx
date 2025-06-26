@@ -85,7 +85,7 @@ export default function CreateTagModal({
       </OLModalHeader>
 
       <OLModalBody>
-        <OLForm id="create-tag-modal-form" onSubmit={handleSubmit}>
+        <OLForm onSubmit={handleSubmit}>
           <OLFormGroup controlId="create-tag-modal-form">
             <OLFormLabel>{t('new_tag_name')}</OLFormLabel>
             <OLFormControl

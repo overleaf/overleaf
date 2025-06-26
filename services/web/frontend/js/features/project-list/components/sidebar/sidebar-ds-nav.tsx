@@ -49,7 +49,11 @@ function SidebarDsNav() {
         id="new-project-button-sidebar"
         className={scrolledDown ? 'show-shadow' : undefined}
       />
-      <div className="project-list-sidebar-scroll" ref={containerRef}>
+      <div
+        className="project-list-sidebar-scroll"
+        ref={containerRef}
+        data-testid="project-list-sidebar-scroll"
+      >
         <SidebarFilters />
         {showAddAffiliationWidget && <hr />}
         <AddAffiliation />

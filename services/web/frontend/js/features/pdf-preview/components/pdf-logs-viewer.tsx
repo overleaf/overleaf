@@ -51,6 +51,7 @@ function PdfLogsViewer({ alwaysVisible = false }: { alwaysVisible?: boolean }) {
       className={classnames('logs-pane', {
         hidden: !showLogs && !alwaysVisible && !loadingError,
       })}
+      data-testid="logs-pane"
     >
       <div className="logs-pane-content">
         {codeCheckFailed && <PdfCodeCheckFailedNotice />}

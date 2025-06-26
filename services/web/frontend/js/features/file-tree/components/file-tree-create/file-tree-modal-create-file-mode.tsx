@@ -2,7 +2,6 @@ import classnames from 'classnames'
 import { useFileTreeActionable } from '../../contexts/file-tree-actionable'
 import * as eventTracking from '../../../../infrastructure/event-tracking'
 import OLButton from '@/features/ui/components/ol/ol-button'
-import MaterialIcon from '@/shared/components/material-icon'
 
 export default function FileTreeModalCreateFileMode({
   mode,
@@ -26,9 +25,8 @@ export default function FileTreeModalCreateFileMode({
         variant="link"
         onClick={handleClick}
         className="modal-new-file-mode"
+        leadingIcon={icon}
       >
-        <MaterialIcon type={icon} />
-        &nbsp;
         {label}
       </OLButton>
     </li>

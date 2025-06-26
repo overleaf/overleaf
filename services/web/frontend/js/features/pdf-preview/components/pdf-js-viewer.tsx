@@ -497,7 +497,12 @@ function PdfJsViewer({ url, pdfFile }: PdfJsViewerProps) {
       onKeyDown={handleKeyDown}
       tabIndex={-1}
     >
-      <div className="pdfjs-viewer-inner" tabIndex={0} role="tabpanel">
+      <div
+        className="pdfjs-viewer-inner"
+        tabIndex={0}
+        role="tabpanel"
+        data-testid="pdfjs-viewer-inner"
+      >
         <div className="pdfViewer" />
       </div>
       {toolbarInfoLoaded && (

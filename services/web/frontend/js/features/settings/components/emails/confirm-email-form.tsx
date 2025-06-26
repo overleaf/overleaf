@@ -182,6 +182,7 @@ export function ConfirmEmailForm({
       onSubmit={submitHandler}
       onInvalid={invalidFormHandler}
       className="confirm-email-form"
+      data-testid="confirm-email-form"
     >
       <div className="confirm-email-form-inner">
         {(feedback?.type === 'alert' || outerErrorDisplay) && (
