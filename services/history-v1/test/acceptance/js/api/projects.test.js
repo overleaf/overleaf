@@ -10,7 +10,12 @@ const cleanup = require('../storage/support/cleanup')
 const fixtures = require('../storage/support/fixtures')
 const testFiles = require('../storage/support/test_files')
 
-const { zipStore, BlobStore, persistChanges } = require('../../../../storage')
+const {
+  zipStore,
+  BlobStore,
+  persistChanges,
+  redisBuffer,
+} = require('../../../../storage')
 
 const { expectHttpError } = require('./support/expect_response')
 const testServer = require('./support/test_server')
@@ -346,6 +351,61 @@ describe('project controller', function () {
       expect(deleteResponse.status).to.equal(HTTPStatus.NO_CONTENT)
       const response3 = await fetch(blobUrl, { headers: authHeaders })
       expect(response3.status).to.equal(HTTPStatus.NOT_FOUND)
+    })
+
+    it('deletes the project from the redis buffer', async function () {
+      const projectId = await createEmptyProject()
+      const blobStore = new BlobStore(projectId)
+      const blob = await blobStore.putString('this is a test')
+      const snapshot = new Snapshot()
+      const change = new Change(
+        [new AddFileOperation('test.tex', File.createLazyFromBlobs(blob))],
+        new Date(),
+        []
+      )
+
+      await redisBuffer.queueChanges(projectId, snapshot, 0, [change])
+      const changesBefore = await redisBuffer.getNonPersistedChanges(
+        projectId,
+        0
+      )
+      expect(changesBefore.length).to.equal(1)
+
+      const deleteResponse =
+        await testServer.basicAuthClient.apis.Project.deleteProject({
+          project_id: projectId,
+        })
+      expect(deleteResponse.status).to.equal(HTTPStatus.NO_CONTENT)
+
+      const changesAfter = await redisBuffer.getNonPersistedChanges(
+        projectId,
+        0
+      )
+      expect(changesAfter.length).to.equal(0)
+
+      const finalState = await redisBuffer.getState(projectId)
+      expect(finalState).to.deep.equal({
+        changes: [],
+        expireTime: null,
+        headSnapshot: null,
+        headVersion: null,
+        persistTime: null,
+        persistedVersion: null,
+      })
+    })
+
+    it('deletes an empty project from the redis buffer', async function () {
+      const projectId = await createEmptyProject()
+      const deleteResponse =
+        await testServer.basicAuthClient.apis.Project.deleteProject({
+          project_id: projectId,
+        })
+      expect(deleteResponse.status).to.equal(HTTPStatus.NO_CONTENT)
+      const changesAfter = await redisBuffer.getNonPersistedChanges(
+        projectId,
+        0
+      )
+      expect(changesAfter.length).to.equal(0)
     })
   })
 })
