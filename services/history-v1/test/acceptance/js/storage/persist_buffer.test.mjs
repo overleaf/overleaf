@@ -12,6 +12,7 @@ import {
 } from 'overleaf-editor-core'
 import persistBuffer from '../../../../storage/lib/persist_buffer.js'
 import chunkStore from '../../../../storage/lib/chunk_store/index.js'
+import { BlobStore } from '../../../../storage/lib/blob_store/index.js'
 import redisBackend from '../../../../storage/lib/chunk_store/redis.js'
 import persistChanges from '../../../../storage/lib/persist_changes.js'
 import cleanup from './support/cleanup.js'
@@ -22,6 +23,7 @@ describe('persistBuffer', function () {
   let projectId
   const initialVersion = 0
   let limitsToPersistImmediately
+  let blobStore
 
   before(function () {
     const farFuture = new Date()
@@ -39,6 +41,7 @@ describe('persistBuffer', function () {
   beforeEach(async function () {
     projectId = fixtures.docs.uninitializedProject.id
     await chunkStore.initializeProject(projectId)
+    blobStore = new BlobStore(projectId)
   })
 
   describe('with an empty initial chunk (new project)', function () {
@@ -340,6 +343,7 @@ describe('persistBuffer', function () {
         numberOfChangesPersisted: 0,
         originalEndVersion: persistedChunkEndVersion,
         currentChunk,
+        resyncNeeded: false,
       })
 
       const chunksAfter = await chunkStore.getProjectChunks(projectId)
@@ -389,6 +393,7 @@ describe('persistBuffer', function () {
         numberOfChangesPersisted: 0,
         originalEndVersion: persistedChunkEndVersion,
         currentChunk,
+        resyncNeeded: false,
       })
 
       const chunksAfter = await chunkStore.getProjectChunks(projectId)
@@ -514,6 +519,72 @@ describe('persistBuffer', function () {
       )
       expect(nonPersisted).to.be.an('array').with.lengthOf(1) // change3 should remain
       expect(nonPersisted).to.deep.equal([change3])
+    })
+  })
+
+  describe('with lots of changes to persist', function () {
+    it('should persist all changes', async function () {
+      const changes = []
+      // Create an initial file with some content
+      const blob = await blobStore.putString('')
+      changes.push(
+        new Change(
+          [new AddFileOperation('main.tex', File.createLazyFromBlobs(blob))],
+          new Date(),
+          []
+        )
+      )
+
+      for (let i = 0; i < 500; i++) {
+        const op = new TextOperation().retain(i).insert('x')
+        changes.push(
+          new Change([new EditFileOperation('main.tex', op)], new Date())
+        )
+      }
+
+      const now = Date.now()
+      await redisBackend.queueChanges(
+        projectId,
+        new Snapshot(), // dummy snapshot
+        0, // startVersion for queued changes
+        changes,
+        {
+          persistTime: now + redisBackend.MAX_PERSIST_DELAY_MS,
+          expireTime: now + redisBackend.PROJECT_TTL_MS,
+        }
+      )
+
+      const expectedEndVersion = 501
+      const persistResult = await persistBuffer(
+        projectId,
+        limitsToPersistImmediately
+      )
+      expect(persistResult.numberOfChangesPersisted).to.equal(
+        expectedEndVersion
+      )
+      expect(persistResult.originalEndVersion).to.equal(0)
+      expect(persistResult.resyncNeeded).to.be.false
+
+      // Check the latest persisted chunk
+      const latestChunk = await chunkStore.loadLatest(projectId, {
+        persistedOnly: true,
+      })
+      expect(latestChunk).to.exist
+      expect(latestChunk.getEndVersion()).to.equal(expectedEndVersion)
+
+      // Check that chunk returned by persistBuffer matches the latest chunk
+      expect(persistResult.currentChunk).to.deep.equal(latestChunk)
+
+      // Check persisted version in Redis
+      const state = await redisBackend.getState(projectId)
+      expect(state.persistedVersion).to.equal(expectedEndVersion)
+
+      // Check non-persisted changes in Redis
+      const nonPersisted = await redisBackend.getNonPersistedChanges(
+        projectId,
+        expectedEndVersion
+      )
+      expect(nonPersisted).to.deep.equal([])
     })
   })
 })

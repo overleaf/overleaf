@@ -541,10 +541,28 @@ describe('chunk buffer Redis backend', function () {
         expect(nonPersistedChanges).to.deep.equal(changes)
       })
 
-      it('should return part of the changes if requested', async function () {
+      it('should return part of the changes following a given base version if requested', async function () {
         const nonPersistedChanges = await redisBackend.getNonPersistedChanges(
           projectId,
           3
+        )
+        expect(nonPersistedChanges).to.deep.equal(changes.slice(1))
+      })
+
+      it('should limit the number of changes returned if requested', async function () {
+        const nonPersistedChanges = await redisBackend.getNonPersistedChanges(
+          projectId,
+          2,
+          { maxChanges: 2 }
+        )
+        expect(nonPersistedChanges).to.deep.equal(changes.slice(0, 2))
+      })
+
+      it('should return all changes if limit is not reached', async function () {
+        const nonPersistedChanges = await redisBackend.getNonPersistedChanges(
+          projectId,
+          3,
+          { maxChanges: 10 }
         )
         expect(nonPersistedChanges).to.deep.equal(changes.slice(1))
       })
