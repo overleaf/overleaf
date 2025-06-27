@@ -694,6 +694,7 @@ describe('<ShareProjectModal/>', function () {
           features: {
             collaborators: 0,
             compileGroup: 'standard',
+            trackChangesVisible: true,
           },
         },
       },
@@ -723,6 +724,7 @@ describe('<ShareProjectModal/>', function () {
           ...project,
           features: {
             collaborators: 1,
+            trackChangesVisible: true,
           },
           members: [
             {

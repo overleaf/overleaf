@@ -52,6 +52,7 @@ import OldErrorPane from './error-logs/old-error-pane'
 import { useFeatureFlag } from '@/shared/context/split-test-context'
 import { useSurveyUrl } from '../hooks/use-survey-url'
 import NewErrorLogsPromo from './error-logs/new-error-logs-promo'
+import { useProjectContext } from '@/shared/context/project-context'
 
 type RailElement = {
   icon: AvailableUnfilledIcon
@@ -111,6 +112,7 @@ export const RailLayout = () => {
     setResizing,
   } = useRailContext()
   const { logEntries } = useCompileContext()
+  const { features } = useProjectContext()
   const errorLogsDisabled = !logEntries
 
   const errorsTabRef = useRef<HTMLAnchorElement>(null)
@@ -149,6 +151,7 @@ export const RailLayout = () => {
         icon: 'rate_review',
         title: t('review_panel'),
         component: null,
+        hide: !features.trackChangesVisible,
       },
       {
         key: 'chat',
@@ -167,7 +170,7 @@ export const RailLayout = () => {
         disabled: errorLogsDisabled,
       },
     ],
-    [t, errorLogsDisabled, newErrorlogs]
+    [t, features.trackChangesVisible, newErrorlogs, errorLogsDisabled]
   )
 
   const railActions: RailAction[] = useMemo(

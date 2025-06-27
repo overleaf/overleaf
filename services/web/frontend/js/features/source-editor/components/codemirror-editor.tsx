@@ -18,6 +18,7 @@ import {
 } from './codemirror-context'
 import MathPreviewTooltip from './math-preview-tooltip'
 import { useToolbarMenuBarEditorCommands } from '@/features/ide-redesign/hooks/use-toolbar-menu-editor-commands'
+import { useProjectContext } from '@/shared/context/project-context'
 
 // TODO: remove this when definitely no longer used
 export * from './codemirror-context'
@@ -67,6 +68,7 @@ function CodeMirrorEditor() {
 
 function CodeMirrorEditorComponents() {
   useToolbarMenuBarEditorCommands()
+  const { features } = useProjectContext()
 
   return (
     <ReviewPanelProviders>
@@ -83,8 +85,8 @@ function CodeMirrorEditorComponents() {
       <CodeMirrorCommandTooltip />
 
       <MathPreviewTooltip />
-      <ReviewTooltipMenu />
-      <ReviewPanelNew />
+      {features.trackChangesVisible && <ReviewTooltipMenu />}
+      {features.trackChangesVisible && <ReviewPanelNew />}
 
       {sourceEditorComponents.map(
         ({ import: { default: Component }, path }) => (

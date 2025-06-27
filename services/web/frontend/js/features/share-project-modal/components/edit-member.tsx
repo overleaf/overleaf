@@ -244,14 +244,22 @@ function SelectPrivilege({
   const { features } = useProjectContext()
 
   const privileges = useMemo(
-    (): Privilege[] => [
-      { key: 'owner', label: t('make_owner') },
-      { key: 'readAndWrite', label: t('editor') },
-      { key: 'review', label: t('reviewer') },
-      { key: 'readOnly', label: t('viewer') },
-      { key: 'removeAccess', label: t('remove_access') },
-    ],
-    [t]
+    (): Privilege[] =>
+      features.trackChangesVisible
+        ? [
+            { key: 'owner', label: t('make_owner') },
+            { key: 'readAndWrite', label: t('editor') },
+            { key: 'review', label: t('reviewer') },
+            { key: 'readOnly', label: t('viewer') },
+            { key: 'removeAccess', label: t('remove_access') },
+          ]
+        : [
+            { key: 'owner', label: t('make_owner') },
+            { key: 'readAndWrite', label: t('editor') },
+            { key: 'readOnly', label: t('viewer') },
+            { key: 'removeAccess', label: t('remove_access') },
+          ],
+    [features.trackChangesVisible, t]
   )
 
   const downgradedPseudoPrivilege: Privilege = {

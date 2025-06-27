@@ -176,24 +176,34 @@ export default function AddCollaborators({ readOnly }: { readOnly?: boolean }) {
   ])
 
   const privilegeOptions = useMemo(() => {
-    return [
+    const options: {
+      key: string
+      label: string
+      description?: string | null
+    }[] = [
       {
         key: 'readAndWrite',
         label: t('editor'),
       },
-      {
+    ]
+
+    if (features.trackChangesVisible) {
+      options.push({
         key: 'review',
         label: t('reviewer'),
         description: !features.trackChanges
           ? t('comment_only_upgrade_for_track_changes')
           : null,
-      },
-      {
-        key: 'readOnly',
-        label: t('viewer'),
-      },
-    ]
-  }, [features.trackChanges, t])
+      })
+    }
+
+    options.push({
+      key: 'readOnly',
+      label: t('viewer'),
+    })
+
+    return options
+  }, [features.trackChanges, features.trackChangesVisible, t])
 
   return (
     <OLForm className="add-collabs">

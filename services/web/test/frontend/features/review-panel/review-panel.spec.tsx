@@ -181,6 +181,7 @@ describe('<ReviewPanel />', function () {
           removeChangeIds,
         },
       },
+      projectFeatures: { trackChangesVisible: true },
     })
 
     cy.wrap(scope).as('scope')
@@ -626,7 +627,7 @@ describe('<ReviewPanel /> for free users', function () {
   function mountEditor(ownerId = USER_ID) {
     const scope = mockScope(undefined, {
       permissions: { write: true, trackedWrite: false, comment: true },
-      projectFeatures: { trackChanges: false },
+      projectFeatures: { trackChanges: false, trackChangesVisible: true },
       projectOwner: {
         _id: ownerId,
       },
