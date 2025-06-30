@@ -248,7 +248,6 @@ export interface Meta {
   'ol-ssoDisabled': boolean
   'ol-ssoErrorMessage': string
   'ol-stripeCustomerId': string
-  'ol-stripeUKApiKey': string
   'ol-subscription': any // TODO: mixed types, split into two fields
   'ol-subscriptionChangePreview': SubscriptionChangePreview
   'ol-subscriptionId': string

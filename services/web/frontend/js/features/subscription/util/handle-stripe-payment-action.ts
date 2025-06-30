@@ -1,16 +1,14 @@
 import { FetchError, postJSON } from '@/infrastructure/fetch-json'
-import getMeta from '../../../utils/meta'
 import { loadStripe } from '@stripe/stripe-js/pure'
 
 export default async function handleStripePaymentAction(
   error: FetchError
 ): Promise<{ handled: boolean }> {
   const clientSecret = error?.data?.clientSecret
+  const publicKey = error?.data?.publicKey
 
-  if (clientSecret) {
-    // TODO: support both US and UK Stripe accounts
-    const stripeUKPublicKey = getMeta('ol-stripeUKApiKey')
-    const stripe = await loadStripe(stripeUKPublicKey)
+  if (clientSecret && publicKey) {
+    const stripe = await loadStripe(publicKey)
     if (stripe) {
       const manualConfirmationFlow =
         await stripe.confirmCardPayment(clientSecret)
