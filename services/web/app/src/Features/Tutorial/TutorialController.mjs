@@ -16,6 +16,7 @@ const VALID_KEYS = [
   'wf-features-moved',
   'review-mode',
   'new-error-logs-promo',
+  'try-redesign-again-nudge-promo',
 ]
 
 async function completeTutorial(req, res, next) {

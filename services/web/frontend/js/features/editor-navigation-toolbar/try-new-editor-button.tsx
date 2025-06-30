@@ -1,12 +1,21 @@
-import { useCallback } from 'react'
+import { useCallback, useRef } from 'react'
 import OLButton from '../ui/components/ol/ol-button'
 import { useIdeRedesignSwitcherContext } from '../ide-react/context/ide-redesign-switcher-context'
 import MaterialIcon from '@/shared/components/material-icon'
 import { useTranslation } from 'react-i18next'
+import TooltipPromotion from '../ide-redesign/components/tooltip-promo'
+import { useFeatureFlag } from '@/shared/context/split-test-context'
+
+const TUTORIAL_KEY = 'try-redesign-again-nudge-promo'
+const EVENT_DATA = { name: 'try-redesign-again-nudge-promotion' }
 
 const TryNewEditorButton = () => {
   const { t } = useTranslation()
   const { setShowSwitcherModal } = useIdeRedesignSwitcherContext()
+  const showNudge = useFeatureFlag('ide-redesign-experiment-nudge')
+
+  const switcherButtonRef = useRef(null)
+
   const onClick = useCallback(() => {
     setShowSwitcherModal(true)
   }, [setShowSwitcherModal])
@@ -18,9 +27,22 @@ const TryNewEditorButton = () => {
         size="sm"
         leadingIcon={<MaterialIcon type="experiment" unfilled />}
         variant="secondary"
+        ref={switcherButtonRef}
       >
         {t('try_the_new_editor')}
       </OLButton>
+      {showNudge && (
+        <TooltipPromotion
+          target={switcherButtonRef.current}
+          tutorialKey={TUTORIAL_KEY}
+          eventData={EVENT_DATA}
+          className="toolbar-experiment-tooltip"
+          header={t('dont_miss_out_on_the_updated_editor')}
+          content={t(
+            'weve_been_making_changes_and_improvements_why_not_give_it_a_try'
+          )}
+        />
+      )}
     </div>
   )
 }
