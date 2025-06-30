@@ -28,6 +28,7 @@ const RecurlyMetrics = require('./RecurlyMetrics')
  * @import { PaymentProviderSubscriptionChangeRequest } from './PaymentProviderEntities'
  * @import { PaymentProviderSubscriptionUpdateRequest } from './PaymentProviderEntities'
  * @import { PaymentMethod } from './types'
+ * @import { CurrencyCode } from '../../../../types/subscription/currency'
  */
 
 class RecurlyClientWithErrorHandling extends recurly.Client {
@@ -488,7 +489,7 @@ function subscriptionFromApi(apiSubscription) {
     taxRate: apiSubscription.taxInfo?.rate ?? 0,
     taxAmount: apiSubscription.tax ?? 0,
     total: apiSubscription.total,
-    currency: apiSubscription.currency,
+    currency: /** @type {CurrencyCode} */ (apiSubscription.currency),
     periodStart: apiSubscription.currentPeriodStartedAt,
     periodEnd: apiSubscription.currentPeriodEndsAt,
     collectionMethod: apiSubscription.collectionMethod,
