@@ -420,6 +420,7 @@ module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
         Settings.analytics &&
         Settings.analytics.ga &&
         Settings.analytics.ga.tokenV4,
+      propensityId: Settings?.analytics?.propensity?.id,
       cookieDomain: Settings.cookieDomain,
       templateLinks: Settings.templateLinks,
       labsEnabled: Settings.labs && Settings.labs.enable,

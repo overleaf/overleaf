@@ -26,6 +26,7 @@ const entryPoints = {
   'main-light-style': './frontend/stylesheets/main-light-style.less',
   'main-style-bootstrap-5':
     './frontend/stylesheets/bootstrap-5/main-style.scss',
+  tracking: './frontend/js/infrastructure/tracking.ts',
 }
 
 // Add entrypoints for each "page"

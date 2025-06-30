@@ -29,7 +29,8 @@ function setConsent(value) {
 
 if (
   getMeta('ol-ExposedSettings').gaToken ||
-  getMeta('ol-ExposedSettings').gaTokenV4
+  getMeta('ol-ExposedSettings').gaTokenV4 ||
+  getMeta('ol-ExposedSettings').propensityId
 ) {
   document
     .querySelectorAll('[data-ol-cookie-banner-set-consent]')
