@@ -108,6 +108,10 @@ export type MemberGroupSubscription = Omit<GroupSubscription, 'admin_id'> & {
 }
 
 type PaymentProviderService = 'stripe-us' | 'stripe-uk' | 'recurly'
+export type StripePaymentProviderService = Exclude<
+  PaymentProviderService,
+  'recurly'
+>
 
 export type PaymentProvider = {
   service: PaymentProviderService
