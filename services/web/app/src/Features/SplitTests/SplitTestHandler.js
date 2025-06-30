@@ -145,16 +145,12 @@ async function hasUserBeenAssignedToVariant(
   ignoreVersion = false
 ) {
   try {
-    const { session, query = {} } = req
+    const { session = {}, query = {} } = req
 
     const splitTest = await _getSplitTest(splitTestName)
     const currentVersion = SplitTestUtils.getCurrentVersion(splitTest)
 
-    if (
-      !userId ||
-      !SessionManager.isUserLoggedIn(session) ||
-      !currentVersion?.active
-    ) {
+    if (!userId || !currentVersion?.active) {
       return false
     }
 
