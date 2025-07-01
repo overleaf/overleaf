@@ -240,7 +240,6 @@
     "@types/mocha": "^9.1.0",
     "@types/mocha-each": "^2.0.0",
     "@types/react": "^18.3.20",
-    "@types/react-bootstrap": "^0.32.37",
     "@types/react-color": "^3.0.13",
     "@types/react-dom": "^18.3.6",
     "@types/react-google-recaptcha": "^2.1.9",
