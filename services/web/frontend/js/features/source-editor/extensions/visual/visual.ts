@@ -178,4 +178,5 @@ const extension = (options: Options) => [
   showContentWhenParsed,
   pasteHtml,
   tableGeneratorTheme,
+  EditorView.contentAttributes.of({ 'aria-label': 'Visual Editor editing' }),
 ]
