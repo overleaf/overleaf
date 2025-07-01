@@ -27,7 +27,7 @@ li.dropdown.dropup.subdued.language-picker(dropdown)
 					a.menu-indent(
 						href=subdomainDetails.url + currentUrlWithQueryParams
 						role='menuitem'
-						class=isActive ? 'dropdown-item active' : 'dropdown-item'
+						class=['dropdown-item', {active: isActive}]
 						aria-selected=isActive ? 'true' : 'false'
 					)
 						| #{settings.translatedLanguages[subdomainDetails.lngCode]}
