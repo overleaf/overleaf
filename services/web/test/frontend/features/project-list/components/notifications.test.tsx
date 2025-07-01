@@ -614,8 +614,13 @@ describe('<UserNotifications />', function () {
         unconfirmedUserData,
         signUpDate
       )
+      const dateOptions: Intl.DateTimeFormatOptions = {
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric',
+      }
       expect(emailDeletionDate).to.equal(
-        new Date('2025-09-03').toLocaleDateString()
+        new Date('2025-09-03').toLocaleDateString(undefined, dateOptions)
       )
     })
 
