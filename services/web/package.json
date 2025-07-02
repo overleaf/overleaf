@@ -181,7 +181,9 @@
     "xml-crypto": "^2.1.6",
     "xml2js": "^0.6.2",
     "xregexp": "^4.3.0",
-    "yauzl": "^2.10.0"
+    "yauzl": "^2.10.0",
+    "zod": "^4.0.17",
+    "zod-validation-error": "^4.0.1"
   },
   "devDependencies": {
     "@babel/cli": "^7.27.0",
