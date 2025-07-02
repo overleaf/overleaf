@@ -12,7 +12,10 @@ export default function EditorPanel() {
     <div className="ide-redesign-editor-container">
       {selectedEntityCount === 0 && <NoSelectionPane />}
       {selectedEntityCount === 1 && openEntity?.type === 'fileRef' && (
-        <FileView file={fileViewFile(openEntity.entity)} />
+        <FileView
+          file={fileViewFile(openEntity.entity)}
+          key={openEntity.entity._id}
+        />
       )}
       {selectedEntityCount > 1 && (
         <MultipleSelectionPane selectedEntityCount={selectedEntityCount} />
