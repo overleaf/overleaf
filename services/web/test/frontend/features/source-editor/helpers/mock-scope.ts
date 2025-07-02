@@ -22,9 +22,6 @@ export const mockScope = (
       showVisual: false,
       wantTrackChanges: false,
     },
-    pdf: {
-      logEntryAnnotations: {},
-    },
     project: {
       _id: 'test-project',
       name: 'Test Project',

@@ -11,7 +11,6 @@ import {
   SetStateAction,
 } from 'react'
 import useScopeValue from '../hooks/use-scope-value'
-import useScopeValueSetterOnly from '../hooks/use-scope-value-setter-only'
 import usePersistedState from '../hooks/use-persisted-state'
 import useAbortController from '../hooks/use-abort-controller'
 import DocumentCompiler from '../../features/pdf-preview/util/compiler'
@@ -51,6 +50,7 @@ import { isSplitTestEnabled } from '@/utils/splitTestUtils'
 import { captureException } from '@/infrastructure/error-reporter'
 import OError from '@overleaf/o-error'
 import getMeta from '@/utils/meta'
+import type { Annotation } from '../../../../types/annotation'
 
 type PdfFile = Record<string, any>
 
@@ -74,7 +74,7 @@ export type CompileContext = {
     warnings: LogEntry[]
     typesetting: LogEntry[]
   }
-  logEntryAnnotations?: Record<string, any>
+  logEntryAnnotations?: Record<string, Annotation[]>
   outputFilesArchive?: string
   pdfDownloadUrl?: string
   pdfFile?: PdfFile
@@ -98,7 +98,7 @@ export type CompileContext = {
   stopOnFirstError: boolean
   stopOnValidationError: boolean
   stoppedOnFirstError: boolean
-  uncompiled?: boolean
+  uncompiled: boolean
   validationIssues?: Record<string, any>
   firstRenderDone: (metrics: {
     latencyFetch: number
@@ -156,34 +156,22 @@ export const LocalCompileProvider: FC<React.PropsWithChildren> = ({
   const [hasShortCompileTimeout, setHasShortCompileTimeout] = useState(false)
 
   // the log entries parsed from the compile output log
-  const [logEntries, setLogEntries] = useScopeValueSetterOnly('pdf.logEntries')
+  const [logEntries, setLogEntries] = useState<CompileContext['logEntries']>()
 
   // annotations for display in the editor, built from the log entries
-  const [logEntryAnnotations, setLogEntryAnnotations] = useScopeValue(
-    'pdf.logEntryAnnotations'
-  )
+  const [logEntryAnnotations, setLogEntryAnnotations] = useState<
+    undefined | Record<string, Annotation[]>
+  >()
 
   // the PDF viewer and whether syntax validation is enabled globally
   const { userSettings } = useUserSettingsContext()
   const { pdfViewer, syntaxValidation } = userSettings
 
-  // the URL for downloading the PDF
-  const [, setPdfDownloadUrl] =
-    useScopeValueSetterOnly<string>('pdf.downloadUrl')
-
-  // the URL for loading the PDF in the preview pane
-  const [, setPdfUrl] = useScopeValueSetterOnly<string>('pdf.url')
-
   // low level details for metrics
   const [pdfFile, setPdfFile] = useState<PdfFile | undefined>()
 
-  useEffect(() => {
-    setPdfDownloadUrl(pdfFile?.pdfDownloadUrl)
-    setPdfUrl(pdfFile?.pdfUrl)
-  }, [pdfFile, setPdfDownloadUrl, setPdfUrl])
-
   // the project is considered to be "uncompiled" if a doc has changed, or finished saving, since the last compile started.
-  const [uncompiled, setUncompiled] = useScopeValue('pdf.uncompiled')
+  const [uncompiled, setUncompiled] = useState(false)
 
   // whether a doc has been edited since the last compile started
   const [editedSinceCompileStarted, setEditedSinceCompileStarted] =
@@ -294,7 +282,7 @@ export const LocalCompileProvider: FC<React.PropsWithChildren> = ({
 
   const cleanupCompileResult = useCallback(() => {
     setPdfFile(undefined)
-    setLogEntries(null)
+    setLogEntries(undefined)
     setLogEntryAnnotations({})
   }, [setPdfFile, setLogEntries, setLogEntryAnnotations])
 
@@ -513,8 +501,8 @@ export const LocalCompileProvider: FC<React.PropsWithChildren> = ({
 
         // handle log files
         // asynchronous (TODO: cancel on new compile?)
-        setLogEntryAnnotations(null)
-        setLogEntries(null)
+        setLogEntryAnnotations(undefined)
+        setLogEntries(undefined)
         setRawLog(undefined)
 
         handleLogFiles(outputFiles, data, abortController.signal).then(
