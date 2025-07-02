@@ -312,13 +312,13 @@ type UserEmailsProviderProps = {
   children: React.ReactNode
 } & Record<string, unknown>
 
-function UserEmailsProvider(props: UserEmailsProviderProps) {
+export function UserEmailsProvider(props: UserEmailsProviderProps) {
   const value = useUserEmails()
 
   return <UserEmailsContext.Provider value={value} {...props} />
 }
 
-const useUserEmailsContext = () => {
+export const useUserEmailsContext = () => {
   const context = useContext(UserEmailsContext)
 
   if (context === undefined) {
@@ -328,6 +328,4 @@ const useUserEmailsContext = () => {
   return context
 }
 
-type EmailContextType = ReturnType<typeof useUserEmailsContext>
-
-export { UserEmailsProvider, useUserEmailsContext, EmailContextType }
+export type EmailContextType = ReturnType<typeof useUserEmailsContext>

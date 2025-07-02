@@ -362,7 +362,7 @@
     "timekeeper": "^2.2.0",
     "to-string-loader": "^1.2.0",
     "tty-browserify": "^0.0.1",
-    "typescript": "^5.0.4",
+    "typescript": "^5.8.3",
     "uuid": "^9.0.1",
     "vitest": "^3.1.2",
     "w3c-keyname": "^2.2.8",
