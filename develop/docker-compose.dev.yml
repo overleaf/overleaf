@@ -113,7 +113,7 @@ services:
       - ../services/real-time/config:/overleaf/services/real-time/config
 
   web:
-    command: ["node", "--watch", "app.js", "--watch-locales"]
+    command: ["node", "--watch", "app.mjs", "--watch-locales"]
     environment:
       - NODE_OPTIONS=--inspect=0.0.0.0:9229
     ports:

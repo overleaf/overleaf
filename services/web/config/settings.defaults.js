@@ -996,9 +996,24 @@ module.exports = {
     settingsEntries: [],
     autoCompleteExtensions: [],
     sectionTitleGenerators: [],
-    toastGenerators: [],
-    editorSidebarComponents: [],
-    fileTreeToolbarComponents: [],
+    toastGenerators: [
+      Path.resolve(
+        __dirname,
+        '../frontend/js/features/pdf-preview/components/synctex-toasts'
+      ),
+    ],
+    editorSidebarComponents: [
+      Path.resolve(
+        __dirname,
+        '../modules/full-project-search/frontend/js/components/full-project-search.tsx'
+      ),
+    ],
+    fileTreeToolbarComponents: [
+      Path.resolve(
+        __dirname,
+        '../modules/full-project-search/frontend/js/components/full-project-search-button.tsx'
+      ),
+    ],
     fullProjectSearchPanel: [],
     integrationPanelComponents: [],
     referenceSearchSetting: [],

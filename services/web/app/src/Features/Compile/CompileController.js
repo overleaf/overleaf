@@ -1,4 +1,4 @@
-const { URL, URLSearchParams } = require('url')
+const { URL } = require('url')
 const { pipeline } = require('stream/promises')
 const { Cookie } = require('tough-cookie')
 const OError = require('@overleaf/o-error')
@@ -580,10 +580,18 @@ const _CompileController = {
     })
 
     url = new URL(`${Settings.apis.clsi.url}${url}`)
-    url.search = new URLSearchParams({
+
+    const searchParams = {
       ...persistenceOptions.qs,
       ...qs,
-    }).toString()
+    }
+    for (const [key, value] of Object.entries(searchParams)) {
+      if (value !== undefined) {
+        // avoid sending "undefined" as a string value
+        url.searchParams.set(key, value)
+      }
+    }
+
     const timer = new Metrics.Timer(
       'proxy_to_clsi',
       1,
