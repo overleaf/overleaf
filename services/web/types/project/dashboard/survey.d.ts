@@ -1,6 +1,7 @@
 export type Survey = {
   name: string
-  preText: string
-  linkText: string
+  title: string
+  text: string
+  cta?: string
   url: string
 }

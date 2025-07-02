@@ -14,7 +14,7 @@ import UserGetter from '../User/UserGetter.js'
  * determines if there is a survey to show, given current surveys and rollout percentages
  * uses userId in computation, to ensure that rollout groups always contain same users
  * @param {string} userId
- * @returns {Promise<Survey | undefined>}
+ * @returns {Promise<Pick<Survey, 'name' | 'title' | 'text' | 'cta' | 'url'> | undefined>}
  */
 async function getSurvey(userId) {
   const survey = await SurveyCache.get(true)
@@ -27,7 +27,7 @@ async function getSurvey(userId) {
       }
     }
 
-    const { name, preText, linkText, url, options } = survey?.toObject() || {}
+    const { name, title, text, cta, url, options } = survey?.toObject() || {}
     // default to full rollout for backwards compatibility
     const rolloutPercentage = options?.rolloutPercentage || 100
     if (!_userInRolloutPercentile(userId, name, rolloutPercentage)) {
@@ -53,7 +53,7 @@ async function getSurvey(userId) {
       }
     }
 
-    return { name, preText, linkText, url }
+    return { name, title, text, cta, url }
   }
 }
 

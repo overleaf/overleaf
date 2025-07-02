@@ -9,15 +9,16 @@ async function getSurvey() {
   }
 }
 
-async function updateSurvey({ name, preText, linkText, url, options }) {
+async function updateSurvey({ name, title, text, cta, url, options }) {
   validateOptions(options)
   let survey = await getSurvey()
   if (!survey) {
     survey = new Survey()
   }
   survey.name = name
-  survey.preText = preText
-  survey.linkText = linkText
+  survey.title = title
+  survey.text = text
+  survey.cta = cta
   survey.url = url
   survey.options = options
   await survey.save()

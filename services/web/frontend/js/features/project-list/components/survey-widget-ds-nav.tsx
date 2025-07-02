@@ -26,8 +26,8 @@ export function SurveyWidgetDsNav() {
       <div className="notification-entry">
         <div role="alert" className="survey-notification">
           <div className="notification-body">
-            <p className="fw-bold fs-6 pe-4">{survey.preText}</p>
-            <p>{survey.linkText}</p>
+            <p className="fw-bold fs-6 pe-4">{survey.title}</p>
+            <p>{survey.text}</p>
             <OLButton
               variant="secondary"
               size="sm"
@@ -35,7 +35,7 @@ export function SurveyWidgetDsNav() {
               target="_blank"
               rel="noreferrer noopener"
             >
-              {t('take_survey')}
+              {survey.cta || t('take_survey')}
             </OLButton>
           </div>
           <OLButton

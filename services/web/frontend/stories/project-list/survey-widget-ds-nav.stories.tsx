@@ -1,31 +1,32 @@
-import SurveyWidget from '../../js/features/project-list/components/survey-widget'
+import { SurveyWidgetDsNav } from '@/features/project-list/components/survey-widget-ds-nav'
 
 export const Survey = (args: any) => {
   localStorage.clear()
   window.metaAttributesCache.set('ol-survey', {
     name: 'my-survey',
-    preText: 'To help shape the future of Overleaf',
-    linkText: 'Click here!',
+    title: 'To help shape the future of Overleaf',
+    text: 'Click here!',
+    cta: 'Let’s go!',
     url: 'https://example.com/my-survey',
   })
 
-  return <SurveyWidget {...args} />
+  return <SurveyWidgetDsNav {...args} />
 }
 
 export const UndefinedSurvey = (args: any) => {
   localStorage.clear()
 
-  return <SurveyWidget {...args} />
+  return <SurveyWidgetDsNav {...args} />
 }
 
 export const EmptySurvey = (args: any) => {
   localStorage.clear()
   window.metaAttributesCache.set('ol-survey', {})
 
-  return <SurveyWidget {...args} />
+  return <SurveyWidgetDsNav {...args} />
 }
 
 export default {
   title: 'Project List / Survey Widget',
-  component: SurveyWidget,
+  component: SurveyWidgetDsNav,
 }
