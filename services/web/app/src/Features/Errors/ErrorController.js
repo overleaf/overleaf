@@ -1,3 +1,4 @@
+const { isZodErrorLike, fromZodError } = require('zod-validation-error')
 const Errors = require('./Errors')
 const SessionManager = require('../Authentication/SessionManager')
 const SamlLogHandler = require('../SamlLog/SamlLogHandler')
@@ -88,6 +89,13 @@ async function handleError(error, req, res, next) {
     if (shouldSendErrorResponse) {
       HttpErrorHandler.badRequest(req, res, error.message)
     }
+  } else if (isZodErrorLike(error)) {
+    req.logger.setLevel('warn')
+    res.status(400)
+    if (shouldSendErrorResponse) {
+      const validationError = fromZodError(error)
+      res.render('general/400', { message: validationError.message })
+    }
   } else {
     req.logger.setLevel('error')
     if (shouldSendErrorResponse) {
@@ -118,6 +126,9 @@ function handleApiError(err, req, res, next) {
   } else if (err instanceof Errors.ForbiddenError) {
     req.logger.setLevel('warn')
     res.sendStatus(403)
+  } else if (isZodErrorLike(err)) {
+    req.logger.setLevel('warn')
+    res.sendStatus(400)
   } else {
     req.logger.setLevel('error')
     res.sendStatus(500)
