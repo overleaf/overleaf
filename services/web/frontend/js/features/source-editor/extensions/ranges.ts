@@ -397,6 +397,9 @@ const trackChangesTheme = EditorView.baseTheme({
     {
       backgroundColor: 'rgba(194, 93, 11, 0.15)',
     },
+  '.ol-cm-change-focus .ol-cm-change': {
+    backgroundColor: 'transparent',
+  },
   '.ol-cm-change': {
     padding: 'var(--half-leading, 0) 0',
   },
@@ -420,14 +423,6 @@ const trackChangesTheme = EditorView.baseTheme({
   },
   '&dark .ol-cm-change-d-highlight': {
     borderLeft: '3px solid #c5060b',
-    marginLeft: '-2px',
-  },
-  '&light .ol-cm-change-d-focus': {
-    borderLeft: '3px solid #B83A33',
-    marginLeft: '-2px',
-  },
-  '&dark .ol-cm-change-d-focus': {
-    borderLeft: '3px solid #B83A33',
     marginLeft: '-2px',
   },
 })
