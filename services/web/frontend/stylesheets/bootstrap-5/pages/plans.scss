@@ -1081,10 +1081,6 @@ $z-index-group-member-picker-list: 1;
       .plans-card-price-container-mobile {
         display: flex;
         align-items: baseline;
-
-        .light-gray-text:has(.billed-annually-disclaimer) {
-          align-self: center;
-        }
       }
 
       .group-plans-card-price-container-mobile {
