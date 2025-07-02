@@ -102,19 +102,25 @@ export const ReviewPanelAddComment = memo<{
     }
   }, [])
 
+  const observerRef = useRef<MutationObserver | null>(null)
+
   const handleElement = useCallback(
     (element: HTMLElement | null) => {
       if (element) {
         element.dispatchEvent(new Event('review-panel:position'))
 
-        const observer = new MutationObserver(observerCallback)
+        observerRef.current = new MutationObserver(observerCallback)
         const entryWrapper = element.closest('.review-panel-entry')
         if (entryWrapper) {
-          observer.observe(entryWrapper, {
+          observerRef.current.observe(entryWrapper, {
             attributes: true,
             attributeFilter: ['style'],
           })
-          return () => observer.disconnect()
+        }
+      } else {
+        // [TODO React 19] return a cleanup function instead of using null element
+        if (observerRef.current) {
+          observerRef.current.disconnect()
         }
       }
     },
