@@ -34,9 +34,13 @@ async function getSurvey(userId) {
       return
     }
 
-    const { earliestSignupDate, latestSignupDate } = survey.options || {}
-    if (earliestSignupDate || latestSignupDate) {
-      const user = await UserGetter.promises.getUser(userId, { signUpDate: 1 })
+    const { earliestSignupDate, latestSignupDate, excludeLabsUsers } =
+      survey.options || {}
+    if (earliestSignupDate || latestSignupDate || excludeLabsUsers) {
+      const user = await UserGetter.promises.getUser(userId, {
+        signUpDate: 1,
+        labsProgram: 1,
+      })
       if (!user) {
         return
       }
@@ -49,6 +53,9 @@ async function getSurvey(userId) {
         }
       }
       if (earliestSignupDate && signUpDate < earliestSignupDate) {
+        return
+      }
+      if (excludeLabsUsers && user.labsProgram) {
         return
       }
     }

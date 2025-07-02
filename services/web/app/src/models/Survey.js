@@ -50,6 +50,10 @@ const SurveySchema = new Schema(
         type: Number,
         default: 100,
       },
+      excludeLabsUsers: {
+        type: Boolean,
+        default: false,
+      },
     },
   },
   {

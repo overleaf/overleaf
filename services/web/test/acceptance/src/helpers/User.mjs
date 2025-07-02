@@ -10,6 +10,7 @@ import fs from 'node:fs'
 import Path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { Cookie } from 'tough-cookie'
+
 const __dirname = fileURLToPath(new URL('.', import.meta.url))
 const COOKIE_DOMAIN = settings.cookieDomain
 // The cookie domain has a leading '.' but the cookie jar stores it without.
@@ -37,6 +38,7 @@ class User {
       jar: this.jar,
     })
     this.signUpDate = options.signUpDate ?? new Date()
+    this.labsProgram = options.labsProgram || false
   }
 
   getSession(options, callback) {
@@ -257,13 +259,19 @@ class User {
 
   getAuditLog(callback) {
     this.get((error, user) => {
-      if (error) return callback(error)
-      if (!user) return callback(new Error('User not found'))
+      if (error) {
+        return callback(error)
+      }
+      if (!user) {
+        return callback(new Error('User not found'))
+      }
 
       db.userAuditLogEntries
         .find({ userId: new ObjectId(this._id) })
         .toArray((error, auditLog) => {
-          if (error) return callback(error)
+          if (error) {
+            return callback(error)
+          }
           callback(null, auditLog || [])
         })
     })
@@ -271,7 +279,9 @@ class User {
 
   getAuditLogWithoutNoise(callback) {
     this.getAuditLog((error, auditLog) => {
-      if (error) return callback(error)
+      if (error) {
+        return callback(error)
+      }
       callback(
         null,
         auditLog.filter(entry => {
@@ -413,7 +423,9 @@ class User {
   }
 
   ensureUserExists(callback) {
-    if (this._id) return callback() // already exists
+    if (this._id) {
+      return callback()
+    } // already exists
     const filter = { email: this.email }
     const options = { upsert: true, new: true, setDefaultsOnInsert: true }
 
@@ -431,6 +443,7 @@ class User {
               hashedPassword,
               emails: this.emails,
               signUpDate: this.signUpDate,
+              labsProgram: this.labsProgram,
             },
           },
           options
@@ -447,7 +460,9 @@ class User {
   // Update and persist feature upgrade. Downgrades will be flaky!
   upgradeFeatures(features, callback) {
     this.setFeatures(features, err => {
-      if (err) return callback(err)
+      if (err) {
+        return callback(err)
+      }
       // Persist the feature update, otherwise the next feature refresh will reset them.
       this.setFeaturesOverride(
         {
@@ -1195,7 +1210,9 @@ class User {
           json: newSettings,
         },
         (err, response, body) => {
-          if (err) return callback(err)
+          if (err) {
+            return callback(err)
+          }
           if (response.statusCode !== 200) {
             return callback(
               new Error(
