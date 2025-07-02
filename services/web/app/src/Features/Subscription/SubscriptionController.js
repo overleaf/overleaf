@@ -304,20 +304,18 @@ async function resumeSubscription(req, res, next) {
   }
 }
 
-function cancelSubscription(req, res, next) {
+async function cancelSubscription(req, res, next) {
   const user = SessionManager.getSessionUser(req.session)
   logger.debug({ userId: user._id }, 'canceling subscription')
-  SubscriptionHandler.cancelSubscription(user, function (err) {
-    if (err) {
-      OError.tag(err, 'something went wrong canceling subscription', {
-        user_id: user._id,
-      })
-      return next(err)
-    }
-    // Note: this redirect isn't used in the main flow as the redirection is
-    // handled by Angular
-    res.redirect('/user/subscription/canceled')
-  })
+  try {
+    await SubscriptionHandler.promises.cancelSubscription(user)
+    return res.sendStatus(200)
+  } catch (err) {
+    OError.tag(err, 'something went wrong canceling subscription', {
+      user_id: user._id,
+    })
+    return next(err)
+  }
 }
 
 /**

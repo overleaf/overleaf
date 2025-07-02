@@ -487,28 +487,39 @@ describe('SubscriptionController', function () {
   })
 
   describe('cancelSubscription', function () {
-    beforeEach(function (done) {
-      this.res = {
-        redirect() {
-          done()
-        },
-      }
-      sinon.spy(this.res, 'redirect')
-      this.SubscriptionController.cancelSubscription(this.req, this.res)
-    })
-
-    it('should tell the handler to cancel this user', function (done) {
-      this.SubscriptionHandler.cancelSubscription
+    it('should tell the handler to cancel this user', async function () {
+      this.next = sinon.stub()
+      await this.SubscriptionController.cancelSubscription(
+        this.req,
+        this.res,
+        this.next
+      )
+      this.SubscriptionHandler.promises.cancelSubscription
         .calledWith(this.user)
         .should.equal(true)
-      done()
     })
 
-    it('should redurect to the subscription page', function (done) {
-      this.res.redirect
-        .calledWith('/user/subscription/canceled')
-        .should.equal(true)
-      done()
+    it('should return a 200 on success', async function () {
+      this.next = sinon.stub()
+      await this.SubscriptionController.cancelSubscription(
+        this.req,
+        this.res,
+        this.next
+      )
+      expect(this.res.statusCode).to.equal(200)
+    })
+
+    it('should call next with error', async function () {
+      this.SubscriptionHandler.promises.cancelSubscription.rejects(
+        new Error('cancel error')
+      )
+      this.next = sinon.stub()
+      await this.SubscriptionController.cancelSubscription(
+        this.req,
+        this.res,
+        this.next
+      )
+      this.next.calledWith(sinon.match.instanceOf(Error)).should.equal(true)
     })
   })
 
