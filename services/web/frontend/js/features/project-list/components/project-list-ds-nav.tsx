@@ -55,7 +55,11 @@ export function ProjectListDsNav() {
 
   return (
     <div className="project-ds-nav-page website-redesign">
-      <DefaultNavbar {...navbarProps} customLogo={overleafLogo} showCloseIcon />
+      <DefaultNavbar
+        {...navbarProps}
+        overleafLogo={overleafLogo}
+        showCloseIcon
+      />
       <main className="project-list-wrapper">
         <SidebarDsNav />
         <div className="project-ds-nav-content-and-messages">

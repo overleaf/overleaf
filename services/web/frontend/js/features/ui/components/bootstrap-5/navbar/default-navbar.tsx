@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { sendMB } from '@/infrastructure/event-tracking'
 import { useTranslation } from 'react-i18next'
 import { Button, Container, Nav, Navbar } from 'react-bootstrap'
@@ -13,9 +13,15 @@ import MaterialIcon from '@/shared/components/material-icon'
 import { useContactUsModal } from '@/shared/hooks/use-contact-us-modal'
 import { UserProvider } from '@/shared/context/user-context'
 import { X } from '@phosphor-icons/react'
+import overleafWhiteLogo from '@/shared/svgs/overleaf-white.svg'
+import overleafBlackLogo from '@/shared/svgs/overleaf-black.svg'
+import type { CSSPropertiesWithVariables } from '../../../../../../../types/css-properties-with-variables'
 
-function DefaultNavbar(props: DefaultNavbarMetadata) {
+function DefaultNavbar(
+  props: DefaultNavbarMetadata & { overleafLogo?: string }
+) {
   const {
+    overleafLogo,
     customLogo,
     title,
     canDisplayAdminMenu,
@@ -49,10 +55,20 @@ function DefaultNavbar(props: DefaultNavbarMetadata) {
         className="navbar-default navbar-main"
         expand="lg"
         onToggle={expanded => setExpanded(expanded)}
+        style={
+          {
+            '--navbar-brand-image-default-url': `url("${overleafWhiteLogo}")`,
+            '--navbar-brand-image-redesign-url': `url("${overleafBlackLogo}")`,
+          } as CSSPropertiesWithVariables
+        }
       >
         <Container className="navbar-container" fluid>
           <div className="navbar-header">
-            <HeaderLogoOrTitle title={title} customLogo={customLogo} />
+            <HeaderLogoOrTitle
+              title={title}
+              overleafLogo={overleafLogo}
+              customLogo={customLogo}
+            />
             {enableUpgradeButton ? (
               <Button
                 as="a"

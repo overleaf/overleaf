@@ -8,7 +8,10 @@
   --navbar-padding-h: var(--spacing-05);
   --navbar-padding: 0 var(--navbar-padding-h);
   --navbar-brand-width: 130px;
-  --navbar-brand-image-url: url('../../../../public/img/ol-brand/overleaf-white.svg');
+  --navbar-brand-image-url: var(
+    --navbar-brand-image-default-url,
+    url('../../../../public/img/ol-brand/overleaf-white.svg')
+  );
 
   // Title, when used instead of a logo
   --navbar-title-font-size: var(--font-size-05);
