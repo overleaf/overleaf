@@ -39,6 +39,7 @@ import { useFileTreePathContext } from '@/features/file-tree/contexts/file-tree-
 import { useUserSettingsContext } from '@/shared/context/user-settings-context'
 import { useFeatureFlag } from '@/shared/context/split-test-context'
 import { useEditorManagerContext } from '@/features/ide-react/context/editor-manager-context'
+import { useEditorOpenDocContext } from '@/features/ide-react/context/editor-open-doc-context'
 import { getJSON } from '@/infrastructure/fetch-json'
 import { CompileResponseData } from '../../../../types/compile'
 import {
@@ -127,7 +128,8 @@ export const LocalCompileProvider: FC<React.PropsWithChildren> = ({
   children,
 }) => {
   const { hasPremiumCompile, isProjectOwner } = useEditorContext()
-  const { openDocWithId, openDocs, currentDocument } = useEditorManagerContext()
+  const { openDocWithId, openDocs } = useEditorManagerContext()
+  const { currentDocument } = useEditorOpenDocContext()
   const { role } = useDetachContext()
 
   const {

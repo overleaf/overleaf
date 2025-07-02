@@ -12,6 +12,7 @@ import {
   USER_ID,
 } from '../../../helpers/editor-providers'
 import { location } from '@/shared/components/location'
+import useScopeValue from '@/shared/hooks/use-scope-value'
 
 async function changePrivilegeLevel(screen, { current, next }) {
   const select = screen.getByDisplayValue(current)
@@ -820,7 +821,14 @@ describe('<ShareProjectModal/>', function () {
     fetchMock.get(`/project/${project._id}/tokens`, {})
     fetchMock.post('express:/project/:projectId/settings/admin', 204)
 
-    renderWithEditorContext(<ShareProjectModal {...modalProps} />, {
+    let setPublicAccessLevel = function () {}
+
+    function WrappedModal() {
+      setPublicAccessLevel = useScopeValue('project.publicAccesLevel')[1]
+      return <ShareProjectModal {...modalProps} />
+    }
+
+    renderWithEditorContext(<WrappedModal />, {
       scope: {
         project: { ...project, publicAccesLevel: 'private' },
       },
@@ -839,13 +847,10 @@ describe('<ShareProjectModal/>', function () {
       publicAccessLevel: 'tokenBased',
     })
 
-    // NOTE: updating the scoped project data manually,
-    // as the project data is usually updated via the websocket connection
-    window.overleaf.unstable.store.set('project', {
-      ...project,
-      publicAccesLevel: 'tokenBased',
-    })
-    // watchCallbacks.project({ ...project, publicAccesLevel: 'tokenBased' })
+    // NOTE: the project data is usually updated via the websocket connection
+    // but we can't do that so we're doing it via the scope value store (this
+    // will be via the project context when this value has been migrated)
+    setPublicAccessLevel('tokenBased')
 
     await screen.findByText('Link sharing is on')
     const disableButton = await screen.findByRole('button', {
@@ -859,13 +864,7 @@ describe('<ShareProjectModal/>', function () {
       publicAccessLevel: 'private',
     })
 
-    // NOTE: updating the scoped project data manually,
-    // as the project data is usually updated via the websocket connection
-    window.overleaf.unstable.store.set('project', {
-      ...project,
-      publicAccesLevel: 'private',
-    })
-    // watchCallbacks.project({ ...project, publicAccesLevel: 'private' })
+    setPublicAccessLevel('private')
 
     await screen.findByText('Link sharing is off')
   })

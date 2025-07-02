@@ -57,6 +57,7 @@ import {
 } from '@/features/ide-react/context/editor-manager-context'
 import { GotoLineOptions } from '@/features/ide-react/types/goto-line-options'
 import { useOnlineUsersContext } from '@/features/ide-react/context/online-users-context'
+import { useEditorOpenDocContext } from '@/features/ide-react/context/editor-open-doc-context'
 
 function useCodeMirrorScope(view: EditorView) {
   const { fileTreeData } = useFileTreeData()
@@ -68,8 +69,8 @@ function useCodeMirrorScope(view: EditorView) {
   const { logEntryAnnotations, editedSinceCompileStarted, compiling } =
     useCompileContext()
 
-  const { currentDocument, openDocName, trackChanges } =
-    useEditorManagerContext()
+  const { openDocName, currentDocument } = useEditorOpenDocContext()
+  const { trackChanges } = useEditorManagerContext()
   const metadata = useMetadataContext()
 
   const { id: userId } = useUserContext()

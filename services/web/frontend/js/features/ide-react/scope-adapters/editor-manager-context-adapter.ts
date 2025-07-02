@@ -6,8 +6,6 @@ export type EditorScopeValue = {
   showSymbolPalette: false
   toggleSymbolPalette: () => void
   sharejs_doc: DocumentContainer | null
-  open_doc_id: string | null
-  open_doc_name: string | null
   opening: boolean
   trackChanges: boolean
   wantTrackChanges: boolean
@@ -25,8 +23,6 @@ export function populateEditorScope(
     showSymbolPalette: false,
     toggleSymbolPalette: () => {},
     sharejs_doc: null,
-    open_doc_id: null,
-    open_doc_name: null,
     opening: true,
     trackChanges: false,
     wantTrackChanges: false,

@@ -10,7 +10,7 @@ import {
 } from 'react'
 import { useIdeReactContext } from '@/features/ide-react/context/ide-react-context'
 import { useConnectionContext } from '@/features/ide-react/context/connection-context'
-import { useEditorManagerContext } from '@/features/ide-react/context/editor-manager-context'
+import { useEditorOpenDocContext } from '@/features/ide-react/context/editor-open-doc-context'
 import { getJSON, postJSON } from '@/infrastructure/fetch-json'
 import { useOnlineUsersContext } from '@/features/ide-react/context/online-users-context'
 import { useEditorContext } from '@/shared/context/editor-context'
@@ -54,7 +54,7 @@ export const MetadataProvider: FC<React.PropsWithChildren> = ({ children }) => {
   const { onlineUsersCount } = useOnlineUsersContext()
   const { permissionsLevel } = useEditorContext()
   const permissions = usePermissionsContext()
-  const { currentDocument } = useEditorManagerContext()
+  const { currentDocument } = useEditorOpenDocContext()
   const { showGenericMessageModal } = useModalsContext()
 
   const [documents, setDocuments] = useState<DocumentsMetadata>({})

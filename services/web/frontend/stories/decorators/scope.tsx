@@ -15,6 +15,7 @@ import {
   createReactScopeValueStore,
 } from '@/features/ide-react/context/ide-react-context'
 import { IdeEventEmitter } from '@/features/ide-react/create-ide-event-emitter'
+import { ReactScopeValueStore } from '@/features/ide-react/scope-value-store/react-scope-value-store'
 import { ReactScopeEventEmitter } from '@/features/ide-react/scope-event-emitter/react-scope-event-emitter'
 import { ConnectionContext } from '@/features/ide-react/context/connection-context'
 import { Socket } from '@/features/ide-react/connection/types/socket'
@@ -65,6 +66,8 @@ const initialScope = {
   },
   editor: {
     richText: false,
+
+    // FIXME: This is pretty useless because the editor relies on a much more fleshed-out document, so we rely on overriding it in individual stories
     sharejs_doc: {
       doc_id: 'test-doc',
       getSnapshot: () => 'some doc content',
@@ -195,12 +198,13 @@ const IdeReactProvider: FC<React.PropsWithChildren> = ({ children }) => {
       scopeStore.set(key, value)
     }
     const scopeEventEmitter = new ReactScopeEventEmitter(new IdeEventEmitter())
+    const unstableStore = new ReactScopeValueStore()
 
     window.overleaf = {
       ...window.overleaf,
       unstable: {
         ...window.overleaf?.unstable,
-        store: scopeStore,
+        store: unstableStore,
       },
     }
 
@@ -208,6 +212,7 @@ const IdeReactProvider: FC<React.PropsWithChildren> = ({ children }) => {
       socket,
       scopeStore,
       scopeEventEmitter,
+      unstableStore,
     }
   })
 

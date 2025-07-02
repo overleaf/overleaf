@@ -4,12 +4,12 @@ import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
 import { sendMB } from '../../../infrastructure/event-tracking'
 import { isValidTeXFile } from '../../../main/is-valid-tex-file'
 import { useTranslation } from 'react-i18next'
-import { useEditorManagerContext } from '@/features/ide-react/context/editor-manager-context'
+import { useEditorOpenDocContext } from '@/features/ide-react/context/editor-open-doc-context'
 
 function EditorSwitch() {
   const { t } = useTranslation()
   const [visual, setVisual] = useScopeValue('editor.showVisual')
-  const { openDocName } = useEditorManagerContext()
+  const { openDocName } = useEditorOpenDocContext()
 
   const richTextAvailable = openDocName ? isValidTeXFile(openDocName) : false
 

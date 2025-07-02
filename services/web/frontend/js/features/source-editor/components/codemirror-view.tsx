@@ -1,12 +1,12 @@
 import { memo, useCallback, useEffect } from 'react'
 import { useCodeMirrorViewContext } from './codemirror-context'
 import useCodeMirrorScope from '../hooks/use-codemirror-scope'
-import useScopeValueSetterOnly from '@/shared/hooks/use-scope-value-setter-only'
+import { useEditorViewContext } from '@/features/ide-react/context/editor-view-context'
 
 function CodeMirrorView() {
   const view = useCodeMirrorViewContext()
 
-  const [, setView] = useScopeValueSetterOnly('editor.view')
+  const { setView } = useEditorViewContext()
 
   // append the editor view dom to the container node when mounted
   const containerRef = useCallback(
@@ -25,7 +25,8 @@ function CodeMirrorView() {
     }
   }, [view])
 
-  // add the editor view to the scope value store, so it can be accessed by external extensions
+  // Add the CodeMirror view to the editor view context so that it can be
+  // accessed outside the editor component
   useEffect(() => {
     setView(view)
   }, [setView, view])

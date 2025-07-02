@@ -37,6 +37,7 @@ import { Update } from '@/features/history/services/types/update'
 import { useDebugDiffTracker } from '../hooks/use-debug-diff-tracker'
 import { useEditorContext } from '@/shared/context/editor-context'
 import { convertFileRefToBinaryFile } from '@/features/ide-react/util/file-view'
+import { useEditorOpenDocContext } from '@/features/ide-react/context/editor-open-doc-context'
 
 export interface GotoOffsetOptions {
   gotoOffset: number
@@ -53,8 +54,6 @@ interface OpenDocOptions
 export type EditorManager = {
   getEditorType: () => EditorType | null
   showSymbolPalette: boolean
-  currentDocument: DocumentContainer | null
-  currentDocumentId: DocId | null
   getCurrentDocValue: () => string | null
   getCurrentDocumentId: () => DocId | null
   setIgnoringExternalUpdates: (value: boolean) => void
@@ -63,8 +62,6 @@ export type EditorManager = {
   openDocs: OpenDocuments
   openFileWithId: (fileId: string) => void
   openInitialDoc: (docId: string) => void
-  openDocName: string | null
-  setOpenDocName: (openDocName: string) => void
   isLoading: boolean
   trackChanges: boolean
   jumpToLine: (options: GotoLineOptions) => void
@@ -104,14 +101,13 @@ export const EditorManagerProvider: FC<React.PropsWithChildren> = ({
     'editor.showSymbolPalette'
   )
   const [showVisual] = useScopeValue<boolean>('editor.showVisual')
-  const [currentDocument, setCurrentDocument] =
-    useScopeValue<DocumentContainer | null>('editor.sharejs_doc')
-  const [currentDocumentId, setCurrentDocumentId] = useScopeValue<DocId | null>(
-    'editor.open_doc_id'
-  )
-  const [openDocName, setOpenDocName] = useScopeValue<string | null>(
-    'editor.open_doc_name'
-  )
+  const {
+    currentDocumentId,
+    setCurrentDocumentId,
+    setOpenDocName,
+    currentDocument,
+    setCurrentDocument,
+  } = useEditorOpenDocContext()
   const [opening, setOpening] = useScopeValue<boolean>('editor.opening')
   const [errorState, setIsInErrorState] =
     useScopeValue<boolean>('editor.error_state')
@@ -667,16 +663,12 @@ export const EditorManagerProvider: FC<React.PropsWithChildren> = ({
     () => ({
       getEditorType,
       showSymbolPalette,
-      currentDocument,
-      currentDocumentId,
       getCurrentDocValue,
       getCurrentDocumentId,
       setIgnoringExternalUpdates,
       openDocWithId,
       openDoc,
       openDocs,
-      openDocName,
-      setOpenDocName,
       trackChanges,
       isLoading,
       openFileWithId,
@@ -689,8 +681,6 @@ export const EditorManagerProvider: FC<React.PropsWithChildren> = ({
     [
       getEditorType,
       showSymbolPalette,
-      currentDocument,
-      currentDocumentId,
       getCurrentDocValue,
       getCurrentDocumentId,
       setIgnoringExternalUpdates,
@@ -699,8 +689,6 @@ export const EditorManagerProvider: FC<React.PropsWithChildren> = ({
       openDocs,
       openFileWithId,
       openInitialDoc,
-      openDocName,
-      setOpenDocName,
       trackChanges,
       isLoading,
       jumpToLine,

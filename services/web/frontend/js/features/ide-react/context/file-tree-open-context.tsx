@@ -11,6 +11,7 @@ import {
 import { useProjectContext } from '@/shared/context/project-context'
 import { useIdeReactContext } from '@/features/ide-react/context/ide-react-context'
 import { useEditorManagerContext } from '@/features/ide-react/context/editor-manager-context'
+import { useEditorOpenDocContext } from '@/features/ide-react/context/editor-open-doc-context'
 import {
   FileTreeDocumentFindResult,
   FileTreeFileRefFindResult,
@@ -40,8 +41,8 @@ export const FileTreeOpenProvider: FC<React.PropsWithChildren> = ({
 }) => {
   const { rootDocId, owner } = useProjectContext()
   const { eventEmitter, projectJoined } = useIdeReactContext()
-  const { openDocWithId, currentDocumentId, openInitialDoc } =
-    useEditorManagerContext()
+  const { openDocWithId, openInitialDoc } = useEditorManagerContext()
+  const { currentDocumentId } = useEditorOpenDocContext()
   const { setOpenFile } = useLayoutContext()
   const [openEntity, setOpenEntity] = useState<
     FileTreeDocumentFindResult | FileTreeFileRefFindResult | null

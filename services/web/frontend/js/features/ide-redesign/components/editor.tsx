@@ -1,5 +1,5 @@
 import { LoadingPane } from '@/features/ide-react/components/editor/loading-pane'
-import { useEditorManagerContext } from '@/features/ide-react/context/editor-manager-context'
+import { useEditorOpenDocContext } from '@/features/ide-react/context/editor-open-doc-context'
 import { EditorScopeValue } from '@/features/ide-react/scope-adapters/editor-manager-context-adapter'
 import { useFileTreeOpenContext } from '@/features/ide-react/context/file-tree-open-context'
 import useScopeValue from '@/shared/hooks/use-scope-value'
@@ -14,16 +14,16 @@ import SymbolPalettePane from '@/features/ide-react/components/editor/symbol-pal
 export const Editor = () => {
   const [editor] = useScopeValue<EditorScopeValue>('editor')
   const { selectedEntityCount, openEntity } = useFileTreeOpenContext()
-  const { currentDocumentId } = useEditorManagerContext()
+  const { currentDocumentId, currentDocument } = useEditorOpenDocContext()
 
   if (!currentDocumentId) {
     return null
   }
 
   const isLoading = Boolean(
-    (!editor.sharejs_doc || editor.opening) &&
+    (!currentDocument || editor.opening) &&
       !editor.error_state &&
-      editor.open_doc_id
+      currentDocumentId
   )
 
   return (

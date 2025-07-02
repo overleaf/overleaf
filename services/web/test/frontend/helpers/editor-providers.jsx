@@ -9,12 +9,15 @@ import {
   IdeReactContext,
 } from '@/features/ide-react/context/ide-react-context'
 import { IdeEventEmitter } from '@/features/ide-react/create-ide-event-emitter'
+import { ReactScopeValueStore } from '@/features/ide-react/scope-value-store/react-scope-value-store'
 import { ReactScopeEventEmitter } from '@/features/ide-react/scope-event-emitter/react-scope-event-emitter'
 import { ConnectionContext } from '@/features/ide-react/context/connection-context'
+import { EditorOpenDocContext } from '@/features/ide-react/context/editor-open-doc-context'
 import { ReactContextRoot } from '@/features/ide-react/context/react-context-root'
 import useEventListener from '@/shared/hooks/use-event-listener'
 import useDetachLayout from '@/shared/hooks/use-detach-layout'
 import { LayoutContext } from '@/shared/context/layout-context'
+import useExposedState from '@/shared/hooks/use-exposed-state'
 
 // these constants can be imported in tests instead of
 // using magic strings
@@ -119,6 +122,8 @@ export function EditorProviders({
           off: () => {},
           leaveAndCleanUpPromise: async () => {},
         },
+        openDocName: null,
+        currentDocumentId: null,
       },
       project: {
         _id: projectId,
@@ -144,6 +149,11 @@ export function EditorProviders({
       providers={{
         ConnectionProvider: makeConnectionProvider(socket),
         IdeReactProvider: makeIdeReactProvider(scope, socket),
+        EditorOpenDocProvider: makeEditorOpenDocProvider({
+          openDocId: scope.editor.currentDocumentId,
+          openDocName: scope.editor.openDocName,
+          currentDocument: scope.editor.sharejs_doc,
+        }),
         LayoutProvider: makeLayoutProvider(layoutContext),
         ...providers,
       }}
@@ -202,15 +212,16 @@ const makeIdeReactProvider = (scope, socket) => {
         // TODO: path for nested entries
         scopeStore.set(key, value)
       }
-      scopeStore.set('editor.sharejs_doc', scope.editor.sharejs_doc)
       const scopeEventEmitter = new ReactScopeEventEmitter(
         new IdeEventEmitter()
       )
+      const unstableStore = new ReactScopeValueStore()
 
       return {
         socket,
         scopeStore,
         scopeEventEmitter,
+        unstableStore,
       }
     })
 
@@ -219,10 +230,10 @@ const makeIdeReactProvider = (scope, socket) => {
         ...window.overleaf,
         unstable: {
           ...window.overleaf?.unstable,
-          store: ideContextValue.scopeStore,
+          store: ideContextValue.unstableStore,
         },
       }
-    }, [ideContextValue.scopeStore])
+    }, [ideContextValue.unstableStore])
 
     return (
       <IdeReactContext.Provider value={ideReactContextValue}>
@@ -233,6 +244,44 @@ const makeIdeReactProvider = (scope, socket) => {
     )
   }
   return IdeReactProvider
+}
+
+export function makeEditorOpenDocProvider(initialValues) {
+  const {
+    currentDocumentId: initialCurrentDocumentId,
+    openDocName: initialOpenDocName,
+    currentDocument: initialCurrentDocument,
+  } = initialValues
+  const EditorOpenDocProvider = ({ children }) => {
+    const [currentDocumentId, setCurrentDocumentId] = useExposedState(
+      initialCurrentDocumentId,
+      'editor.open_doc_id'
+    )
+    const [openDocName, setOpenDocName] = useExposedState(
+      initialOpenDocName,
+      'editor.open_doc_name'
+    )
+    const [currentDocument, setCurrentDocument] = useState(
+      initialCurrentDocument
+    )
+
+    const value = {
+      currentDocumentId,
+      setCurrentDocumentId,
+      openDocName,
+      setOpenDocName,
+      currentDocument,
+      setCurrentDocument,
+    }
+
+    return (
+      <EditorOpenDocContext.Provider value={value}>
+        {children}
+      </EditorOpenDocContext.Provider>
+    )
+  }
+
+  return EditorOpenDocProvider
 }
 
 const makeLayoutProvider = layoutContextOverrides => {

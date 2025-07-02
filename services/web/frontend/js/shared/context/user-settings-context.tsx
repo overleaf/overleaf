@@ -9,11 +9,11 @@ import {
   useEffect,
 } from 'react'
 
-import { UserSettings, Keybindings } from '../../../../types/user-settings'
+import { UserSettings } from '../../../../types/user-settings'
 import getMeta from '@/utils/meta'
-import useScopeValue from '@/shared/hooks/use-scope-value'
 import { userStyles } from '../utils/styles'
 import { canUseNewEditor } from '@/features/ide-redesign/utils/new-editor-utils'
+import { useIdeContext } from '@/shared/context/ide-context'
 
 const defaultSettings: UserSettings = {
   pdfViewer: 'pdfjs',
@@ -39,15 +39,6 @@ type UserSettingsContextValue = {
   >
 }
 
-type ScopeSettings = {
-  overallTheme: 'light' | 'dark'
-  keybindings: Keybindings
-  fontSize: number
-  fontFamily: string
-  lineHeight: number
-  isNewEditor: boolean
-}
-
 export const UserSettingsContext = createContext<
   UserSettingsContextValue | undefined
 >(undefined)
@@ -60,10 +51,10 @@ export const UserSettingsProvider: FC<React.PropsWithChildren> = ({
   )
 
   // update the global scope 'settings' value, for extensions
-  const [, setScopeSettings] = useScopeValue<ScopeSettings>('settings')
+  const { unstableStore } = useIdeContext()
   useEffect(() => {
     const { fontFamily, lineHeight } = userStyles(userSettings)
-    setScopeSettings({
+    unstableStore.set('settings', {
       overallTheme: userSettings.overallTheme === 'light-' ? 'light' : 'dark',
       keybindings: userSettings.mode === 'none' ? 'default' : userSettings.mode,
       fontFamily,
@@ -71,7 +62,7 @@ export const UserSettingsProvider: FC<React.PropsWithChildren> = ({
       fontSize: userSettings.fontSize,
       isNewEditor: canUseNewEditor() && userSettings.enableNewEditor,
     })
-  }, [setScopeSettings, userSettings])
+  }, [unstableStore, userSettings])
 
   const value = useMemo<UserSettingsContextValue>(
     () => ({

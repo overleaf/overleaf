@@ -81,6 +81,13 @@ export const IdeReactProvider: FC<React.PropsWithChildren> = ({ children }) => {
   const [scopeEventEmitter] = useState(
     () => new ReactScopeEventEmitter(eventEmitter)
   )
+  const [unstableStore] = useState(() => {
+    const store = new ReactScopeValueStore()
+    // Add dummy editor.ready key for Writefull, that relies on this calling
+    // back once after watching it
+    store.set('editor.ready', undefined)
+    return store
+  })
   const [startedFreeTrial, setStartedFreeTrial] = useState(false)
   const release = getMeta('ol-ExposedSettings')?.sentryRelease ?? null
 
@@ -179,6 +186,7 @@ export const IdeReactProvider: FC<React.PropsWithChildren> = ({ children }) => {
         ide={ide}
         scopeStore={scopeStore}
         scopeEventEmitter={scopeEventEmitter}
+        unstableStore={unstableStore}
       >
         {children}
       </IdeProvider>

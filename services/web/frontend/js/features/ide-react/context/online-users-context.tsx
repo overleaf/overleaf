@@ -18,7 +18,7 @@ import useSocketListener from '@/features/ide-react/hooks/use-socket-listener'
 import { debugConsole } from '@/utils/debugging'
 import { IdeEvents } from '@/features/ide-react/create-ide-event-emitter'
 import { getHueForUserId } from '@/shared/utils/colors'
-import { useEditorManagerContext } from '@/features/ide-react/context/editor-manager-context'
+import { useEditorOpenDocContext } from '@/features/ide-react/context/editor-open-doc-context'
 
 export type OnlineUser = {
   id: string
@@ -70,7 +70,7 @@ export const OnlineUsersProvider: FC<React.PropsWithChildren> = ({
 }) => {
   const { eventEmitter } = useIdeReactContext()
   const { socket } = useConnectionContext()
-  const { currentDocumentId } = useEditorManagerContext()
+  const { currentDocumentId } = useEditorOpenDocContext()
   const { fileTreeData } = useFileTreeData()
 
   const [onlineUsers, setOnlineUsers] = useState<Record<string, OnlineUser>>({})

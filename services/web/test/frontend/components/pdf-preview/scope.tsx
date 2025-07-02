@@ -6,7 +6,6 @@ export const mockScope = () => ({
     pdfViewer: 'pdfjs',
   },
   editor: {
-    open_doc_name: 'main.tex',
     sharejs_doc: {
       doc_id: 'test-doc',
       getSnapshot: () => 'some doc content',

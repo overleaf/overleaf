@@ -3,6 +3,7 @@ import React, { FC, lazy, Suspense } from 'react'
 import useScopeValue from '@/shared/hooks/use-scope-value'
 import SourceEditor from '@/features/source-editor/components/source-editor'
 import { useEditorManagerContext } from '@/features/ide-react/context/editor-manager-context'
+import { useEditorOpenDocContext } from '@/features/ide-react/context/editor-open-doc-context'
 import { EditorScopeValue } from '@/features/ide-react/scope-adapters/editor-manager-context-adapter'
 import classNames from 'classnames'
 import { LoadingPane } from '@/features/ide-react/components/editor/loading-pane'
@@ -17,7 +18,8 @@ const SymbolPalettePane = lazy(
 export const EditorPane: FC = () => {
   const [editor] = useScopeValue<EditorScopeValue>('editor')
   const { selectedEntityCount, openEntity } = useFileTreeOpenContext()
-  const { currentDocumentId, isLoading } = useEditorManagerContext()
+  const { isLoading } = useEditorManagerContext()
+  const { currentDocumentId } = useEditorOpenDocContext()
 
   if (!currentDocumentId) {
     return null

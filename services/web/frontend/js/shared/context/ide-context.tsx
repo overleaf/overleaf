@@ -10,6 +10,7 @@ export type Ide = {
 type IdeContextValue = Ide & {
   scopeStore: ScopeValueStore
   scopeEventEmitter: ScopeEventEmitter
+  unstableStore: ScopeValueStore
 }
 
 export const IdeContext = createContext<IdeContextValue | undefined>(undefined)
@@ -19,14 +20,14 @@ export const IdeProvider: FC<
     ide: Ide
     scopeStore: ScopeValueStore
     scopeEventEmitter: ScopeEventEmitter
+    unstableStore: ScopeValueStore
   }>
-> = ({ ide, scopeStore, scopeEventEmitter, children }) => {
+> = ({ ide, scopeStore, scopeEventEmitter, unstableStore, children }) => {
   /**
-   * Expose scopeStore via `window.overleaf.unstable.store`, so it can be accessed by external extensions.
+   * Expose unstableStore via `window.overleaf.unstable.store`, so it can be accessed by external extensions.
    *
    * These properties are expected to be available:
    *   - `editor.view`
-   *   - `project.spellcheckLanguage`
    *   - `editor.open_doc_name`,
    *   - `editor.open_doc_id`,
    *   - `settings.theme`
@@ -40,18 +41,19 @@ export const IdeProvider: FC<
       ...window.overleaf,
       unstable: {
         ...window.overleaf?.unstable,
-        store: scopeStore,
+        store: unstableStore,
       },
     }
-  }, [scopeStore])
+  }, [unstableStore])
 
   const value = useMemo<IdeContextValue>(() => {
     return {
       ...ide,
       scopeStore,
       scopeEventEmitter,
+      unstableStore,
     }
-  }, [ide, scopeStore, scopeEventEmitter])
+  }, [ide, scopeStore, scopeEventEmitter, unstableStore])
 
   return <IdeContext.Provider value={value}>{children}</IdeContext.Provider>
 }

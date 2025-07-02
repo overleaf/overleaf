@@ -3,7 +3,10 @@ import { cloneDeep } from 'lodash'
 import { useDetachCompileContext as useCompileContext } from '../../../../frontend/js/shared/context/detach-compile-context'
 import { useFileTreeData } from '../../../../frontend/js/shared/context/file-tree-data-context'
 import { useEffect } from 'react'
-import { EditorProviders } from '../../helpers/editor-providers'
+import {
+  EditorProviders,
+  makeEditorOpenDocProvider,
+} from '../../helpers/editor-providers'
 import { mockScope } from './scope'
 import { detachChannel, testDetachChannel } from '../../helpers/detach-channel'
 import { FindResult } from '@/features/file-tree/util/path'
@@ -73,6 +76,22 @@ const WithSelectedEntities = ({
   return null
 }
 
+function mockProviders() {
+  return {
+    EditorOpenDocProvider: makeEditorOpenDocProvider({
+      openDocName: 'main.tex',
+      currentDocument: {
+        doc_id: 'test-doc',
+        getSnapshot: () => 'some doc content',
+        hasBufferedOps: () => false,
+        on: () => {},
+        off: () => {},
+        leaveAndCleanUpPromise: () => Promise.resolve(),
+      },
+    }),
+  }
+}
+
 describe('<PdfSynctexControls/>', function () {
   beforeEach(function () {
     window.metaAttributesCache.set('ol-project_id', 'test-project')
@@ -84,9 +103,10 @@ describe('<PdfSynctexControls/>', function () {
     cy.interceptCompile()
 
     const scope = mockScope()
+    const providers = mockProviders()
 
     cy.mount(
-      <EditorProviders scope={scope}>
+      <EditorProviders scope={scope} providers={providers}>
         <WithPosition mockPosition={mockPosition} />
         <WithSelectedEntities mockSelectedEntities={mockSelectedEntities} />
         <PdfSynctexControls />
@@ -145,9 +165,10 @@ describe('<PdfSynctexControls/>', function () {
     cy.interceptCompile()
 
     const scope = mockScope()
+    const providers = mockProviders()
 
     cy.mount(
-      <EditorProviders scope={scope}>
+      <EditorProviders scope={scope} providers={providers}>
         <WithPosition mockPosition={mockPosition} />
         <WithSelectedEntities
           mockSelectedEntities={
@@ -169,9 +190,10 @@ describe('<PdfSynctexControls/>', function () {
     cy.interceptCompile()
 
     const scope = mockScope()
+    const providers = mockProviders()
 
     cy.mount(
-      <EditorProviders scope={scope}>
+      <EditorProviders scope={scope} providers={providers}>
         <WithPosition mockPosition={mockPosition} />
         <WithSelectedEntities
           mockSelectedEntities={[{ type: 'fileRef' }] as FindResult[]}
@@ -196,9 +218,10 @@ describe('<PdfSynctexControls/>', function () {
       cy.interceptCompile()
 
       const scope = mockScope()
+      const providers = mockProviders()
 
       cy.mount(
-        <EditorProviders scope={scope}>
+        <EditorProviders scope={scope} providers={providers}>
           <WithPosition mockPosition={mockPosition} />
           <WithSelectedEntities mockSelectedEntities={mockSelectedEntities} />
           <PdfSynctexControls />
@@ -218,9 +241,10 @@ describe('<PdfSynctexControls/>', function () {
       cy.interceptCompile()
 
       const scope = mockScope()
+      const providers = mockProviders()
 
       cy.mount(
-        <EditorProviders scope={scope}>
+        <EditorProviders scope={scope} providers={providers}>
           <WithPosition mockPosition={mockPosition} />
           <WithSelectedEntities mockSelectedEntities={mockSelectedEntities} />
           <PdfSynctexControls />
@@ -279,9 +303,10 @@ describe('<PdfSynctexControls/>', function () {
       cy.interceptCompile()
 
       const scope = mockScope()
+      const providers = mockProviders()
 
       cy.mount(
-        <EditorProviders scope={scope}>
+        <EditorProviders scope={scope} providers={providers}>
           <WithPosition mockPosition={mockPosition} />
           <WithSelectedEntities mockSelectedEntities={mockSelectedEntities} />
           <PdfSynctexControls />
@@ -317,9 +342,10 @@ describe('<PdfSynctexControls/>', function () {
       cy.interceptCompile()
 
       const scope = mockScope()
+      const providers = mockProviders()
 
       cy.mount(
-        <EditorProviders scope={scope}>
+        <EditorProviders scope={scope} providers={providers}>
           <WithPosition mockPosition={mockPosition} />
           <PdfSynctexControls />
         </EditorProviders>
@@ -338,9 +364,10 @@ describe('<PdfSynctexControls/>', function () {
       cy.interceptCompile()
 
       const scope = mockScope()
+      const providers = mockProviders()
 
       cy.mount(
-        <EditorProviders scope={scope}>
+        <EditorProviders scope={scope} providers={providers}>
           <PdfSynctexControls />
         </EditorProviders>
       )
@@ -385,9 +412,10 @@ describe('<PdfSynctexControls/>', function () {
       cy.interceptCompile()
 
       const scope = mockScope()
+      const providers = mockProviders()
 
       cy.mount(
-        <EditorProviders scope={scope}>
+        <EditorProviders scope={scope} providers={providers}>
           <WithPosition mockPosition={mockPosition} />
           <PdfSynctexControls />
         </EditorProviders>

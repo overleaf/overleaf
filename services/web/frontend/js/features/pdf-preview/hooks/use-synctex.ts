@@ -13,6 +13,7 @@ import * as eventTracking from '../../../infrastructure/event-tracking'
 import { debugConsole } from '@/utils/debugging'
 import { useFileTreePathContext } from '@/features/file-tree/contexts/file-tree-path'
 import { useEditorManagerContext } from '@/features/ide-react/context/editor-manager-context'
+import { useEditorOpenDocContext } from '@/features/ide-react/context/editor-open-doc-context'
 import useEventListener from '@/shared/hooks/use-event-listener'
 import { CursorPosition } from '@/features/ide-react/types/cursor-position'
 import { isValidTeXFile } from '@/main/is-valid-tex-file'
@@ -34,8 +35,8 @@ export default function useSynctex(): {
 
   const { selectedEntities } = useFileTreeData()
   const { findEntityByPath, dirname, pathInFolder } = useFileTreePathContext()
-  const { getCurrentDocumentId, openDocWithId, openDocName } =
-    useEditorManagerContext()
+  const { openDocName } = useEditorOpenDocContext()
+  const { getCurrentDocumentId, openDocWithId } = useEditorManagerContext()
 
   const [cursorPosition, setCursorPosition] = useState<CursorPosition | null>(
     () => {

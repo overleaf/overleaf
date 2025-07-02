@@ -18,7 +18,7 @@ import {
 import { countFiles } from '../../features/file-tree/util/count-in-tree'
 import useDeepCompareEffect from '../../shared/hooks/use-deep-compare-effect'
 import { docsInFolder } from '@/features/file-tree/util/docs-in-folder'
-import useScopeValueSetterOnly from '@/shared/hooks/use-scope-value-setter-only'
+import { useEditorOpenDocContext } from '@/features/ide-react/context/editor-open-doc-context'
 import { Folder } from '../../../../types/folder'
 import { Project } from '../../../../types/project'
 import { MainDocument } from '../../../../types/project-settings'
@@ -180,8 +180,7 @@ export const FileTreeDataProvider: FC<React.PropsWithChildren> = ({
   children,
 }) => {
   const [project] = useScopeValue<Project>('project')
-  const [currentDocumentId] = useScopeValue('editor.open_doc_id')
-  const [, setOpenDocName] = useScopeValueSetterOnly('editor.open_doc_name')
+  const { currentDocumentId, setOpenDocName } = useEditorOpenDocContext()
   const [permissionsLevel] = useScopeValue('permissionsLevel')
   const { fileTreeFromHistory, snapshot, snapshotVersion } =
     useSnapshotContext()
