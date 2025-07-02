@@ -64,7 +64,7 @@ services:
     command: tar -czf /tmp/build/build.tar.gz --exclude=build.tar.gz --exclude-vcs .
     user: root
   certs:
-    image: node:22.15.1
+    image: node:22.17.0
     volumes:
       - ./test/acceptance/certs:/certs
     working_dir: /certs
