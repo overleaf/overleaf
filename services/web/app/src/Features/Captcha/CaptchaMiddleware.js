@@ -28,7 +28,9 @@ async function initializeDeviceHistory(req) {
 
 async function canSkipCaptcha(req, res) {
   const trustedUser =
-    req.body?.email && Settings.recaptcha.trustedUsers.includes(req.body.email)
+    req.body?.email &&
+    (Settings.recaptcha.trustedUsers.includes(req.body.email) ||
+      Settings.recaptcha.trustedUsersRegex?.test(req.body.email))
   if (trustedUser) {
     return res.json(true)
   }

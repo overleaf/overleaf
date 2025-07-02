@@ -104,6 +104,59 @@ describe('Captcha', function () {
     })
   })
 
+  describe('trustedUsersRegex', function () {
+    let resetTrustedUsersRegex
+    beforeEach(function () {
+      resetTrustedUsersRegex = Settings.recaptcha.trustedUsersRegex
+      Settings.recaptcha.trustedUsersRegex = /\+trusted@example\.com$/
+    })
+
+    afterEach(function () {
+      Settings.recaptcha.trustedUsersRegex = resetTrustedUsersRegex
+    })
+
+    describe('when user is trusted, can login without captcha', function () {
+      let trustedUser
+      beforeEach(async function () {
+        trustedUser = new User({
+          email: 'acceptance-test+trusted@example.com',
+        })
+        await trustedUser.ensureUserExists()
+      })
+
+      it('should be able to skip captcha', async function () {
+        expect(await canSkipCaptcha(trustedUser.email)).to.equal(true)
+      })
+
+      it('should note that the user is trusted', async function () {
+        const { response, body } = await login(
+          trustedUser.email,
+          trustedUser.password,
+          ''
+        )
+        expectSuccessfulLogin(response, body)
+        const auditLog = await trustedUser.getAuditLog()
+        expect(auditLog[0].info).to.deep.equal({
+          captcha: 'trusted',
+          method: 'Password login',
+        })
+      })
+    })
+
+    describe('when user is not trusted', function () {
+      it('should not be able to skip captcha', async function () {
+        expect(await canSkipCaptcha(user.email)).to.equal(false)
+      })
+
+      it('should not add an audit log entry for trusted user', async function () {
+        const { response, body } = await login(user.email, user.password, '')
+        expectBadCaptchaResponse(response, body)
+        const auditLog = await user.getAuditLog()
+        expect(auditLog).to.have.lengthOf(0)
+      })
+    })
+  })
+
   describe('deviceHistory', function () {
     beforeEach('login', async function () {
       const { response, body } = await loginWithCaptcha('valid')
