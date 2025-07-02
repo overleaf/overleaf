@@ -14,6 +14,8 @@ import { hasAdminAccess } from '../Helpers/AdminAuthorizationHelper.js'
 import TokenAccessHandler from '../TokenAccess/TokenAccessHandler.js'
 import ProjectAuditLogHandler from '../Project/ProjectAuditLogHandler.mjs'
 import LimitationsManager from '../Subscription/LimitationsManager.js'
+import PrivilegeLevels from '../Authorization/PrivilegeLevels.js'
+import { z, zz, validateReq } from '../../infrastructure/Validation.js'
 import Features from '../../infrastructure/Features.js'
 
 const ObjectId = mongodb.ObjectId
@@ -74,11 +76,26 @@ async function getAllMembers(req, res, next) {
   res.json({ members })
 }
 
+const setCollaboratorInfoSchema = z.object({
+  params: z.object({
+    Project_id: zz.objectId(),
+    user_id: zz.objectId(),
+  }),
+  body: z.object({
+    privilegeLevel: z.enum([
+      PrivilegeLevels.READ_ONLY,
+      PrivilegeLevels.READ_AND_WRITE,
+      PrivilegeLevels.REVIEW,
+    ]),
+  }),
+})
+
 async function setCollaboratorInfo(req, res, next) {
   try {
-    const projectId = req.params.Project_id
-    const userId = req.params.user_id
-    const { privilegeLevel } = req.body
+    const { params, body } = validateReq(req, setCollaboratorInfoSchema)
+    const projectId = params.Project_id
+    const userId = params.user_id
+    const { privilegeLevel } = body
 
     const allowed =
       await LimitationsManager.promises.canChangeCollaboratorPrivilegeLevel(

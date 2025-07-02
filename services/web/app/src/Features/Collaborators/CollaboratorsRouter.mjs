@@ -43,21 +43,6 @@ export default {
     webRouter.put(
       '/project/:Project_id/users/:user_id',
       AuthenticationController.requireLogin(),
-      validate({
-        params: Joi.object({
-          Project_id: Joi.objectId(),
-          user_id: Joi.objectId(),
-        }),
-        body: Joi.object({
-          privilegeLevel: Joi.string()
-            .valid(
-              PrivilegeLevels.READ_ONLY,
-              PrivilegeLevels.READ_AND_WRITE,
-              PrivilegeLevels.REVIEW
-            )
-            .required(),
-        }),
-      }),
       AuthorizationMiddleware.ensureUserCanAdminProject,
       CollaboratorsController.setCollaboratorInfo
     )
