@@ -13,19 +13,19 @@
  */
 import logger from '@overleaf/logger'
 import minimist from 'minimist'
+import { z } from 'zod'
 import { batchedUpdate } from '@overleaf/mongo-utils/batchedUpdate.js'
 import { db } from '../../app/src/infrastructure/mongodb.js'
 import AccountMappingHelper from '../../app/src/Features/Analytics/AccountMappingHelper.js'
 import { registerAccountMapping } from '../../app/src/Features/Analytics/AnalyticsManager.js'
 import { triggerGracefulShutdown } from '../../app/src/infrastructure/GracefulShutdown.js'
-import Validation from '../../app/src/infrastructure/Validation.js'
 import { scriptRunner } from '../lib/ScriptRunner.mjs'
 
-const paramsSchema = Validation.Joi.object({
-  endDate: Validation.Joi.string().isoDate(),
-  commit: Validation.Joi.boolean().default(false),
-  verbose: Validation.Joi.boolean().default(false),
-}).unknown(true)
+const paramsSchema = z.object({
+  endDate: z.string().datetime(),
+  commit: z.boolean().default(false),
+  verbose: z.boolean().default(false),
+})
 
 let mapped = 0
 let subscriptionCount = 0
@@ -54,7 +54,7 @@ function registerMapping(subscription) {
     },
     `processing subscription ${subscription._id}`
   )
-  if (commit) {
+  if (opts.commit) {
     registerAccountMapping(mapping)
     mapped++
   }
@@ -63,8 +63,8 @@ function registerMapping(subscription) {
 async function main(trackProgress) {
   const additionalBatchedUpdateOptions = {}
 
-  if (endDate) {
-    additionalBatchedUpdateOptions.BATCH_RANGE_END = endDate
+  if (opts.endDate) {
+    additionalBatchedUpdateOptions.BATCH_RANGE_END = opts.endDate
   }
 
   await batchedUpdate(
@@ -82,35 +82,32 @@ async function main(trackProgress) {
       readPreference: 'secondaryPreferred',
     },
     {
-      verboseLogging: verbose,
+      verboseLogging: opts.verbose,
       ...additionalBatchedUpdateOptions,
       trackProgress,
     }
   )
 
   logger.debug({}, `${subscriptionCount} subscriptions processed`)
-  if (commit) {
+  if (opts.commit) {
     logger.debug({}, `${mapped} mappings registered`)
   }
 }
 
-const {
-  error,
-  value: { commit, endDate, verbose },
-} = paramsSchema.validate(
+const { error, data: opts } = paramsSchema.safeParse(
   minimist(process.argv.slice(2), {
     boolean: ['commit', 'verbose'],
     string: ['endDate'],
   })
 )
 
-logger.logger.level(verbose ? 'debug' : 'info')
+logger.logger.level(opts.verbose ? 'debug' : 'info')
 
 if (error) {
   logger.error({ error }, 'error with parameters')
   triggerGracefulShutdown(done => done(1))
 } else {
-  logger.info({ verbose, commit, endDate }, commit ? 'COMMITTING' : 'DRY RUN')
+  logger.info(opts, opts.commit ? 'COMMITTING' : 'DRY RUN')
   await scriptRunner(main)
 
   triggerGracefulShutdown({
