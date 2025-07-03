@@ -3,7 +3,6 @@ import AuthenticationController from '../Authentication/AuthenticationController
 import AuthorizationMiddleware from '../Authorization/AuthorizationMiddleware.mjs'
 import { RateLimiter } from '../../infrastructure/RateLimiter.js'
 import RateLimiterMiddleware from '../Security/RateLimiterMiddleware.js'
-import { validate, Joi } from '../../infrastructure/Validation.js'
 
 const rateLimiters = {
   addDocToProject: new RateLimiter('add-doc-to-project', {
@@ -73,12 +72,6 @@ export default {
         params: ['Project_id'],
         // keep schema in sync with controller
         getUserId: req => req.body.userId,
-      }),
-      validate({
-        body: Joi.object({
-          userId: Joi.string().required(),
-          anonymousAccessToken: Joi.string().optional(),
-        }),
       }),
       EditorHttpController.joinProject
     )

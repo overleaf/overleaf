@@ -11,6 +11,7 @@ import Errors from '../Errors/Errors.js'
 import { expressify } from '@overleaf/promise-utils'
 import Settings from '@overleaf/settings'
 import CollaboratorsGetter from '../Collaborators/CollaboratorsGetter.js'
+import { z, zz, validateReq } from '../../infrastructure/Validation.js'
 
 const ProjectAccess = CollaboratorsGetter.ProjectAccess
 
@@ -27,9 +28,20 @@ export default {
   _nameIsAcceptableLength,
 }
 
+const joinProjectSchema = z.object({
+  params: z.object({
+    Project_id: zz.objectId(),
+  }),
+  body: z.object({
+    userId: z.string(),
+    anonymousAccessToken: z.string().optional(),
+  }),
+})
+
 async function joinProject(req, res, next) {
-  const projectId = req.params.Project_id
-  let userId = req.body.userId // keep schema in sync with router
+  const { params, body } = validateReq(req, joinProjectSchema)
+  const projectId = params.Project_id
+  let userId = body.userId
   if (userId === 'anonymous-user') {
     userId = null
   }
