@@ -37,6 +37,7 @@ import {
 } from '../Errors/Errors.js'
 import Modules from '../../infrastructure/Modules.js'
 import { plainTextResponse } from '../../infrastructure/Response.js'
+import { z, zz, validateReq } from '../../infrastructure/Validation.js'
 import ReferencesHandler from '../References/ReferencesHandler.mjs'
 import EditorRealTimeController from '../Editor/EditorRealTimeController.js'
 import { expressify } from '@overleaf/promise-utils'
@@ -46,9 +47,22 @@ import UrlAgent from './UrlAgent.mjs'
 
 let LinkedFilesController
 
+const createLinkedFileSchema = z.object({
+  params: z.object({
+    project_id: zz.objectId(),
+  }),
+  body: z.object({
+    name: z.string(),
+    provider: z.string(),
+    data: z.object({}).passthrough(),
+    parent_folder_id: zz.objectId(),
+  }),
+})
+
 async function createLinkedFile(req, res, next) {
-  const { project_id: projectId } = req.params
-  const { name, provider, data, parent_folder_id: parentFolderId } = req.body
+  const { params, body } = validateReq(req, createLinkedFileSchema)
+  const { project_id: projectId } = params
+  const { name, provider, data, parent_folder_id: parentFolderId } = body
   const userId = SessionManager.getLoggedInUserId(req.session)
 
   const Agent = await LinkedFilesController._getAgent(provider)

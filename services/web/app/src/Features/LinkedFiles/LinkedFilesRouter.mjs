@@ -3,7 +3,6 @@ import AuthenticationController from '../Authentication/AuthenticationController
 import { RateLimiter } from '../../infrastructure/RateLimiter.js'
 import RateLimiterMiddleware from '../Security/RateLimiterMiddleware.js'
 import LinkedFilesController from './LinkedFilesController.mjs'
-import { validate, Joi } from '../../infrastructure/Validation.js'
 
 const rateLimiters = {
   createLinkedFile: new RateLimiter('create-linked-file', {
@@ -24,12 +23,6 @@ export default {
       AuthorizationMiddleware.ensureUserCanWriteProjectContent,
       RateLimiterMiddleware.rateLimit(rateLimiters.createLinkedFile, {
         params: ['project_id'],
-      }),
-      validate({
-        body: {
-          name: Joi.string().required(),
-          // TODO: validate the remaining properties
-        },
       }),
       LinkedFilesController.createLinkedFile
     )
