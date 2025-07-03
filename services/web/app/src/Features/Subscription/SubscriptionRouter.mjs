@@ -177,11 +177,6 @@ export default {
     webRouter.post(
       '/user/subscription/addon/:addOnCode/add',
       AuthenticationController.requireLogin(),
-      validate({
-        params: Joi.object({
-          addOnCode: Joi.string(),
-        }),
-      }),
       RateLimiterMiddleware.rateLimit(subscriptionRateLimiter),
       SubscriptionController.purchaseAddon
     )

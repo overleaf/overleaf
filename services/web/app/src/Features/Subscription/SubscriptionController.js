@@ -40,6 +40,7 @@ const PermissionsManager = require('../Authorization/PermissionsManager')
 const {
   sanitizeSessionUserForFrontEnd,
 } = require('../../infrastructure/FrontEndUser')
+const { z, validateReq } = require('../../infrastructure/Validation')
 const { IndeterminateInvoiceError } = require('../Errors/Errors')
 const SubscriptionLocator = require('./SubscriptionLocator')
 
@@ -564,9 +565,16 @@ async function previewAddonPurchase(req, res) {
   })
 }
 
+const purchaseAddonSchema = z.object({
+  params: z.object({
+    addOnCode: z.string(),
+  }),
+})
+
 async function purchaseAddon(req, res, next) {
   const user = SessionManager.getSessionUser(req.session)
-  const addOnCode = req.params.addOnCode
+  const { params } = validateReq(req, purchaseAddonSchema)
+  const addOnCode = params.addOnCode
   // currently we only support having a quantity of 1
   const quantity = 1
   // currently we only support one add-on, the Ai add-on
