@@ -22,11 +22,6 @@ export default {
     )
     webRouter.post(
       '/user/password/reset',
-      validate({
-        body: Joi.object({
-          email: Joi.string().required(),
-        }),
-      }),
       rateLimit,
       CaptchaMiddleware.validateCaptcha('passwordReset'),
       PasswordResetController.requestReset
@@ -59,11 +54,6 @@ export default {
 
     webRouter.post(
       '/user/reconfirm',
-      validate({
-        body: Joi.object({
-          email: Joi.string().required(),
-        }),
-      }),
       rateLimit,
       CaptchaMiddleware.validateCaptcha('passwordReset'),
       PasswordResetController.requestReset

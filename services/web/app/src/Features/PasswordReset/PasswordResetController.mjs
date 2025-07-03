@@ -103,8 +103,15 @@ async function setNewUserPassword(req, res, next) {
   AuthenticationController.finishLogin(user, req, res, next)
 }
 
+const requestResetSchema = z.object({
+  body: z.object({
+    email: z.string(),
+  }),
+})
+
 async function requestReset(req, res, next) {
-  const email = EmailsHelper.parseEmail(req.body.email)
+  const { body } = validateReq(req, requestResetSchema)
+  const email = EmailsHelper.parseEmail(body.email)
   if (!email) {
     return res.status(400).json({
       message: req.i18n.translate('must_be_email_address'),
