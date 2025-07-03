@@ -650,9 +650,16 @@ async function purchaseAddon(req, res, next) {
   return res.sendStatus(200)
 }
 
+const removeAddonSchema = z.object({
+  params: z.object({
+    addOnCode: z.string(),
+  }),
+})
+
 async function removeAddon(req, res, next) {
   const user = SessionManager.getSessionUser(req.session)
-  const addOnCode = req.params.addOnCode
+  const { params } = validateReq(req, removeAddonSchema)
+  const addOnCode = params.addOnCode
 
   if (addOnCode !== AI_ADD_ON_CODE) {
     return res.sendStatus(404)

@@ -183,11 +183,6 @@ export default {
     webRouter.post(
       '/user/subscription/addon/:addOnCode/remove',
       AuthenticationController.requireLogin(),
-      validate({
-        params: Joi.object({
-          addOnCode: Joi.string(),
-        }),
-      }),
       RateLimiterMiddleware.rateLimit(subscriptionRateLimiter),
       SubscriptionController.removeAddon
     )
