@@ -131,10 +131,20 @@ async function setCollaboratorInfo(req, res, next) {
   }
 }
 
+const transferOwnershipSchema = z.object({
+  params: z.object({
+    Project_id: zz.objectId(),
+  }),
+  body: z.object({
+    user_id: zz.objectId(),
+  }),
+})
+
 async function transferOwnership(req, res, next) {
   const sessionUser = SessionManager.getSessionUser(req.session)
-  const projectId = req.params.Project_id
-  const toUserId = req.body.user_id
+  const { params, body } = validateReq(req, transferOwnershipSchema)
+  const projectId = params.Project_id
+  const toUserId = body.user_id
   try {
     await OwnershipTransferHandler.promises.transferOwnership(
       projectId,
