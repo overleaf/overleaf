@@ -453,6 +453,7 @@ async function purchaseAddon(req, res, next) {
       return res.status(402).json({
         message: 'Payment action required',
         clientSecret: err.info.clientSecret,
+        publicKey: err.info.publicKey,
       })
     } else {
       if (err instanceof Error) {
