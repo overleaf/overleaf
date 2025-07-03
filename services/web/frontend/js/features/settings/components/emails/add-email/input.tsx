@@ -32,6 +32,7 @@ export type DomainInfo = {
     name: string
     ssoEnabled?: boolean
     ssoBeta?: boolean
+    departments?: string[]
   }
 }
 
