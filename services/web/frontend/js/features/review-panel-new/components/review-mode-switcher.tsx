@@ -22,6 +22,7 @@ import UpgradeTrackChangesModal from './upgrade-track-changes-modal'
 import { ReviewModePromo } from '@/features/review-panel-new/components/review-mode-promo'
 import useTutorial from '@/shared/hooks/promotions/use-tutorial'
 import { useLayoutContext } from '@/shared/context/layout-context'
+import { useCodeMirrorViewContext } from '@/features/source-editor/components/codemirror-context'
 
 type Mode = 'view' | 'review' | 'edit'
 
@@ -56,6 +57,7 @@ function ReviewModeSwitcher() {
   const project = useProjectContext()
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
   const showViewOption = permissionsLevel === 'readOnly'
+  const view = useCodeMirrorViewContext()
 
   return (
     <div className="review-mode-switcher-container">
@@ -69,6 +71,7 @@ function ReviewModeSwitcher() {
             disabled={!write}
             onClick={() => {
               if (mode === 'edit') {
+                view.focus()
                 return
               }
               sendMB('editing-mode-change', {
@@ -81,6 +84,7 @@ function ReviewModeSwitcher() {
               } else {
                 saveTrackChanges({ on_for_guests: false })
               }
+              view.focus()
             }}
             description={t('edit_content_directly')}
             leadingIcon="edit"
@@ -92,6 +96,7 @@ function ReviewModeSwitcher() {
             disabled={permissionsLevel === 'readOnly'}
             onClick={() => {
               if (mode === 'review') {
+                view.focus()
                 return
               }
               if (!project.features.trackChanges) {
@@ -107,6 +112,7 @@ function ReviewModeSwitcher() {
                 } else {
                   saveTrackChanges({ on_for_guests: true })
                 }
+                view.focus()
               }
             }}
             description={
