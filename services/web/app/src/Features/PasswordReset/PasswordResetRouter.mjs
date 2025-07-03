@@ -18,9 +18,6 @@ export default {
 
     webRouter.get(
       '/user/password/reset',
-      validate({
-        query: { error: Joi.string() },
-      }),
       PasswordResetController.renderRequestResetForm
     )
     webRouter.post(

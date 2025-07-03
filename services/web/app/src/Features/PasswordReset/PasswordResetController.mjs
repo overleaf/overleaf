@@ -8,6 +8,7 @@ import UserSessionsManager from '../User/UserSessionsManager.js'
 import OError from '@overleaf/o-error'
 import EmailsHelper from '../Helpers/EmailHelper.js'
 import { expressify } from '@overleaf/promise-utils'
+import { z, validateReq } from '../../infrastructure/Validation.js'
 
 async function setNewUserPassword(req, res, next) {
   let user
@@ -195,8 +196,15 @@ async function renderSetPasswordForm(req, res, next) {
   })
 }
 
+const renderRequestResetFormSchema = z.object({
+  query: z.object({
+    error: z.string().optional(),
+  }),
+})
+
 async function renderRequestResetForm(req, res) {
-  const errorQuery = req.query.error
+  const { query } = validateReq(req, renderRequestResetFormSchema)
+  const errorQuery = query.error
   let error = null
   if (errorQuery === 'token_expired') {
     error = 'password_reset_token_expired'
