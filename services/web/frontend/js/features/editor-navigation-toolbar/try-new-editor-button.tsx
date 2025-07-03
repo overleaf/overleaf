@@ -4,7 +4,6 @@ import { useIdeRedesignSwitcherContext } from '../ide-react/context/ide-redesign
 import MaterialIcon from '@/shared/components/material-icon'
 import { useTranslation } from 'react-i18next'
 import TooltipPromotion from '../ide-redesign/components/tooltip-promo'
-import { useFeatureFlag } from '@/shared/context/split-test-context'
 
 const TUTORIAL_KEY = 'try-redesign-again-nudge-promo'
 const EVENT_DATA = { name: 'try-redesign-again-nudge-promotion' }
@@ -12,7 +11,6 @@ const EVENT_DATA = { name: 'try-redesign-again-nudge-promotion' }
 const TryNewEditorButton = () => {
   const { t } = useTranslation()
   const { setShowSwitcherModal } = useIdeRedesignSwitcherContext()
-  const showNudge = useFeatureFlag('ide-redesign-experiment-nudge')
 
   const switcherButtonRef = useRef(null)
 
@@ -31,18 +29,17 @@ const TryNewEditorButton = () => {
       >
         {t('try_the_new_editor')}
       </OLButton>
-      {showNudge && (
-        <TooltipPromotion
-          target={switcherButtonRef.current}
-          tutorialKey={TUTORIAL_KEY}
-          eventData={EVENT_DATA}
-          className="toolbar-experiment-tooltip"
-          header={t('dont_miss_out_on_the_updated_editor')}
-          content={t(
-            'weve_been_making_changes_and_improvements_why_not_give_it_a_try'
-          )}
-        />
-      )}
+      <TooltipPromotion
+        target={switcherButtonRef.current}
+        splitTestName="ide-redesign-experiment-nudge"
+        tutorialKey={TUTORIAL_KEY}
+        eventData={EVENT_DATA}
+        className="toolbar-experiment-tooltip"
+        header={t('dont_miss_out_on_the_updated_editor')}
+        content={t(
+          'weve_been_making_changes_and_improvements_why_not_give_it_a_try'
+        )}
+      />
     </div>
   )
 }

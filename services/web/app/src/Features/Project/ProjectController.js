@@ -355,6 +355,7 @@ const _ProjectController = {
       'editor-popup-ux-survey',
       'new-editor-error-logs-redesign',
       'ide-redesign-experiment-nudge',
+      'ide-redesign-new-survey-prompt',
     ].filter(Boolean)
 
     const getUserValues = async userId =>

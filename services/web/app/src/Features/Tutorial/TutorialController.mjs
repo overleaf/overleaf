@@ -17,6 +17,7 @@ const VALID_KEYS = [
   'review-mode',
   'new-error-logs-promo',
   'try-redesign-again-nudge-promo',
+  'ide-redesign-new-survey-promo',
 ]
 
 async function completeTutorial(req, res, next) {

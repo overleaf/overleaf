@@ -1,11 +1,4 @@
-import {
-  FC,
-  forwardRef,
-  ReactElement,
-  useCallback,
-  useMemo,
-  useRef,
-} from 'react'
+import { FC, forwardRef, ReactElement, useCallback, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Nav, NavLink, Tab, TabContainer } from 'react-bootstrap'
 import MaterialIcon, {
@@ -51,7 +44,6 @@ import { useDetachCompileContext as useCompileContext } from '@/shared/context/d
 import OldErrorPane from './error-logs/old-error-pane'
 import { useFeatureFlag } from '@/shared/context/split-test-context'
 import { useSurveyUrl } from '../hooks/use-survey-url'
-import NewErrorLogsPromo from './error-logs/new-error-logs-promo'
 import { useProjectContext } from '@/shared/context/project-context'
 
 type RailElement = {
@@ -114,8 +106,6 @@ export const RailLayout = () => {
   const { logEntries } = useCompileContext()
   const { features } = useProjectContext()
   const errorLogsDisabled = !logEntries
-
-  const errorsTabRef = useRef<HTMLAnchorElement>(null)
 
   const { view, setLeftMenuShown } = useLayoutContext()
 
@@ -243,7 +233,6 @@ export const RailLayout = () => {
             .filter(({ hide }) => !hide)
             .map(({ icon, key, indicator, title, disabled }) => (
               <RailTab
-                ref={key === 'errors' ? errorsTabRef : null}
                 open={isOpen && selectedTab === key}
                 key={key}
                 eventKey={key}
@@ -257,7 +246,6 @@ export const RailLayout = () => {
           {railActions?.map(action => (
             <RailActionElement key={action.key} action={action} />
           ))}
-          {newErrorlogs && <NewErrorLogsPromo target={errorsTabRef.current} />}
         </Nav>
       </div>
       <Panel

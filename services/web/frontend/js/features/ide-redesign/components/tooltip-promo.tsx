@@ -1,6 +1,7 @@
 import Close from '@/shared/components/close'
 import { useEditorContext } from '@/shared/context/editor-context'
 import useTutorial from '@/shared/hooks/promotions/use-tutorial'
+import { isSplitTestEnabled } from '@/utils/splitTestUtils'
 import classNames from 'classnames'
 import { useCallback, useEffect } from 'react'
 import { Overlay, OverlayProps, Popover } from 'react-bootstrap'
@@ -13,6 +14,7 @@ export default function TooltipPromotion({
   content,
   header,
   placement = 'bottom',
+  splitTestName,
 }: {
   target: HTMLElement | null
   tutorialKey: string
@@ -21,6 +23,7 @@ export default function TooltipPromotion({
   content: string
   header?: string
   placement?: OverlayProps['placement']
+  splitTestName?: string
 }) {
   const { inactiveTutorials } = useEditorContext()
   const { showPopup, tryShowingPopup, hideUntilReload, dismissTutorial } =
@@ -32,11 +35,15 @@ export default function TooltipPromotion({
     }
   }, [tryShowingPopup, inactiveTutorials, tutorialKey])
 
+  const isInSplitTestIfNeeded = splitTestName
+    ? isSplitTestEnabled(splitTestName)
+    : true
+
   const onHide = useCallback(() => {
     hideUntilReload()
   }, [hideUntilReload])
 
-  if (!target) {
+  if (!target || !isInSplitTestIfNeeded) {
     return null
   }
 
