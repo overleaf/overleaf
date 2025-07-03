@@ -6,7 +6,6 @@ import TeamInvitesController from './TeamInvitesController.mjs'
 import { RateLimiter } from '../../infrastructure/RateLimiter.js'
 import RateLimiterMiddleware from '../Security/RateLimiterMiddleware.js'
 import Settings from '@overleaf/settings'
-import { Joi, validate } from '../../infrastructure/Validation.js'
 
 const teamInviteRateLimiter = new RateLimiter('team-invite', {
   points: 10,
@@ -201,11 +200,6 @@ export default {
     webRouter.post(
       '/user/subscription/pause/:pauseCycles',
       AuthenticationController.requireLogin(),
-      validate({
-        params: Joi.object({
-          pauseCycles: Joi.number().integer().max(12),
-        }),
-      }),
       RateLimiterMiddleware.rateLimit(subscriptionRateLimiter),
       SubscriptionController.pauseSubscription
     )

@@ -10,6 +10,7 @@ const SubscriptionHelper = require('../../../../app/src/Features/Subscription/Su
 const {
   AI_ADD_ON_CODE,
 } = require('../../../../app/src/Features/Subscription/AiHelper')
+const Errors = require('../../../../app/src/Features/Errors/Errors')
 
 const mockSubscriptions = {
   'subscription-123-active': {
@@ -481,18 +482,19 @@ describe('SubscriptionController', function () {
       this.res = new MockResponse()
       this.req = new MockRequest()
       this.next = sinon.stub()
-      await this.SubscriptionController.pauseSubscription(
-        this.req,
-        this.res,
-        this.next
-      )
-      expect(this.res.statusCode).to.equal(400)
+      await expect(
+        this.SubscriptionController.pauseSubscription(
+          this.req,
+          this.res,
+          this.next
+        )
+      ).to.be.rejectedWith(Errors.NotFoundError)
     })
 
     it('should throw an error if an invalid pause length is provided', async function () {
       this.res = new MockResponse()
       this.req = new MockRequest()
-      this.req.params = { pauseCycles: -10 }
+      this.req.params = { pauseCycles: '-10' }
       this.next = sinon.stub()
       await this.SubscriptionController.pauseSubscription(
         this.req,
@@ -505,7 +507,7 @@ describe('SubscriptionController', function () {
     it('should return a 200 when requesting a pause', async function () {
       this.res = new MockResponse()
       this.req = new MockRequest()
-      this.req.params = { pauseCycles: 3 }
+      this.req.params = { pauseCycles: '3' }
       this.next = sinon.stub()
       await this.SubscriptionController.pauseSubscription(
         this.req,

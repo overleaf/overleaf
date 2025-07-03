@@ -355,16 +355,16 @@ async function successfulSubscription(req, res) {
   }
 }
 
+const pauseSubscriptionSchema = z.object({
+  params: z.object({
+    pauseCycles: z.coerce.number().int().max(12),
+  }),
+})
+
 async function pauseSubscription(req, res, next) {
   const user = SessionManager.getSessionUser(req.session)
-  const pauseCycles = req.params.pauseCycles
-  if (!('pauseCycles' in req.params)) {
-    return HttpErrorHandler.badRequest(
-      req,
-      res,
-      `Pausing subscription requires a 'pauseCycles' argument with number of billing cycles to pause for`
-    )
-  }
+  const { params } = validateReq(req, pauseSubscriptionSchema)
+  const pauseCycles = params.pauseCycles
   if (pauseCycles < 0) {
     return HttpErrorHandler.badRequest(
       req,
