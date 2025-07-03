@@ -19,14 +19,6 @@ const subscriptionRateLimiter = new RateLimiter('subscription', {
 })
 
 const MAX_NUMBER_OF_USERS = 20
-const MAX_NUMBER_OF_PO_NUMBER_CHARACTERS = 50
-
-const addSeatsValidateSchema = {
-  body: Joi.object({
-    adding: Joi.number().integer().min(1).max(MAX_NUMBER_OF_USERS).required(),
-    poNumber: Joi.string().max(MAX_NUMBER_OF_PO_NUMBER_CHARACTERS),
-  }),
-}
 
 export default {
   apply(webRouter, privateApiRouter, publicApiRouter) {
@@ -74,7 +66,6 @@ export default {
     webRouter.post(
       '/user/subscription/group/add-users/preview',
       AuthenticationController.requireLogin(),
-      validate(addSeatsValidateSchema),
       RateLimiterMiddleware.rateLimit(subscriptionRateLimiter),
       SubscriptionGroupController.previewAddSeatsSubscriptionChange
     )
@@ -82,7 +73,6 @@ export default {
     webRouter.post(
       '/user/subscription/group/add-users/create',
       AuthenticationController.requireLogin(),
-      validate(addSeatsValidateSchema),
       RateLimiterMiddleware.rateLimit(subscriptionRateLimiter),
       SubscriptionGroupController.createAddSeatsSubscriptionChange
     )

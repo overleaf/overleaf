@@ -10,6 +10,7 @@ import { expressify } from '@overleaf/promise-utils'
 import Modules from '../../infrastructure/Modules.js'
 import UserGetter from '../User/UserGetter.js'
 import { Subscription } from '../../models/Subscription.js'
+import { z, validateReq } from '../../infrastructure/Validation.js'
 import { isProfessionalGroupPlan } from './PlansHelper.mjs'
 import {
   MissingBillingInfoError,
@@ -21,6 +22,9 @@ import {
   HasNoAdditionalLicenseWhenManuallyCollectedError,
   PaymentActionRequiredError,
 } from './Errors.js'
+
+const MAX_NUMBER_OF_USERS = 20
+const MAX_NUMBER_OF_PO_NUMBER_CHARACTERS = 50
 
 /**
  * @import { Subscription } from "../../../../types/subscription/dashboard/subscription.js"
@@ -198,18 +202,26 @@ async function addSeatsToGroupSubscription(req, res) {
   }
 }
 
+const previewAddSeatsSubscriptionChangeSchema = z.object({
+  body: z.object({
+    adding: z.number().int().min(1).max(MAX_NUMBER_OF_USERS),
+    poNumber: z.string().max(MAX_NUMBER_OF_PO_NUMBER_CHARACTERS).optional(),
+  }),
+})
+
 /**
  * @param {import("express").Request} req
  * @param {import("express").Response} res
  * @returns {Promise<void>}
  */
 async function previewAddSeatsSubscriptionChange(req, res) {
+  const { body } = validateReq(req, previewAddSeatsSubscriptionChangeSchema)
   try {
     const userId = SessionManager.getLoggedInUserId(req.session)
     const preview =
       await SubscriptionGroupHandler.promises.previewAddSeatsSubscriptionChange(
         userId,
-        req.body.adding
+        body.adding
       )
 
     res.json(preview)
@@ -227,7 +239,7 @@ async function previewAddSeatsSubscriptionChange(req, res) {
     if (error instanceof SubtotalLimitExceededError) {
       return res.status(422).json({
         code: 'subtotal_limit_exceeded',
-        adding: req.body.adding,
+        adding: body.adding,
       })
     }
 
