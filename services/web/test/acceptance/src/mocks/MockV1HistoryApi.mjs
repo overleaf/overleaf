@@ -4,7 +4,7 @@ import {
   zipAttachment,
   prepareZipAttachment,
 } from '../../../../app/src/infrastructure/Response.js'
-import Joi from 'joi'
+import { z } from 'zod'
 
 class MockV1HistoryApi extends AbstractMockApi {
   reset() {
@@ -173,10 +173,10 @@ class MockV1HistoryApi extends AbstractMockApi {
     })
 
     this.app.post('/api/projects/:project_id/blobs/:hash', (req, res, next) => {
-      const schema = Joi.object({
-        copyFrom: Joi.number().required(),
+      const schema = z.object({
+        copyFrom: z.coerce.number(),
       })
-      const { error } = schema.validate(req.query)
+      const { error } = schema.safeParse(req.query)
       if (error) {
         return res.sendStatus(400)
       }
