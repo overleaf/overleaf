@@ -30,12 +30,6 @@ export default {
 
     webRouter.get(
       '/user/password/set',
-      validate({
-        query: {
-          email: Joi.string().required(),
-          passwordResetToken: Joi.string(),
-        },
-      }),
       rateLimit,
       PasswordResetController.renderSetPasswordForm
     )
