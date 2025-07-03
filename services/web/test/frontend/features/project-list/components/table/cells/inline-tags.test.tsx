@@ -58,15 +58,16 @@ describe('<InlineTags />', function () {
       name: 'Remove tag My Test Tag',
     })
     fireEvent.click(removeButton)
-    await waitFor(() =>
-      expect(
-        fetchMock.callHistory.called(
-          `/tag/789fff789fff/project/${copyableProject.id}`,
-          {
-            method: 'DELETE',
-          }
-        )
-      )
+    await waitFor(
+      () =>
+        expect(
+          fetchMock.callHistory.called(
+            `/tag/789fff789fff/project/${copyableProject.id}`,
+            {
+              method: 'DELETE',
+            }
+          )
+        ).to.be.true
     )
     expect(screen.queryByText('My Test Tag')).to.not.exist
     screen.getByText('Tag 2')

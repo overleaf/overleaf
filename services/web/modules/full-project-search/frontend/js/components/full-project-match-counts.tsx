@@ -5,7 +5,6 @@ import { useTranslation } from 'react-i18next'
 
 export const FullProjectMatchCounts: FC<{
   loading: boolean
-  totalResults?: number
   matchedFiles?: MatchedFile[]
 }> = ({ loading, matchedFiles }) => {
   const { t } = useTranslation()

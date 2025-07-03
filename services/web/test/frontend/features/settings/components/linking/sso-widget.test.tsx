@@ -100,8 +100,8 @@ describe('<SSOLinkingWidget />', function () {
         })
       )
       fireEvent.click(confirmBtn)
-      await waitFor(() =>
-        expect(screen.getByRole('button', { name: 'Unlinking' }))
+      await waitFor(
+        () => expect(screen.getByRole('button', { name: 'Unlinking' })).to.exist
       )
     })
   })
