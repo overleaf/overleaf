@@ -76,7 +76,9 @@ function ThinFooter({
                 {hasCustomLeftNav ? <Separator /> : null}
               </>
             ) : null}
-            {leftItems?.map(item => <FooterItemLi key={item.text} {...item} />)}
+            {leftItems?.map(item => (
+              <FooterItemLi key={item.text} {...item} />
+            ))}
           </ul>
           <ul className="site-footer-items col-lg-3 text-end">
             {rightItems?.map(item => (

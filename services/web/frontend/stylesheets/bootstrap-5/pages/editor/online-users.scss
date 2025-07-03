@@ -114,8 +114,8 @@
     min-width: var(--online-users-circle-size);
     height: var(--online-users-circle-size);
     line-height: calc(
-      var(--online-users-circle-size) - 2 * var(--online-users-border-size) - 2 *
-        var(--online-users-circle-padding)
+      var(--online-users-circle-size) - 2 * var(--online-users-border-size) -
+        2 * var(--online-users-circle-padding)
     );
     font-size: var(--font-size-01);
     text-align: center;
