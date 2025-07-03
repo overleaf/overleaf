@@ -18,8 +18,6 @@ const subscriptionRateLimiter = new RateLimiter('subscription', {
   duration: 60,
 })
 
-const MAX_NUMBER_OF_USERS = 20
-
 export default {
   apply(webRouter, privateApiRouter, publicApiRouter) {
     if (!Settings.enableSubscriptions) {
@@ -79,12 +77,6 @@ export default {
 
     webRouter.post(
       '/user/subscription/group/add-users/sales-contact-form',
-      validate({
-        body: Joi.object({
-          adding: Joi.number().integer().min(MAX_NUMBER_OF_USERS).required(),
-          poNumber: Joi.string(),
-        }),
-      }),
       RateLimiterMiddleware.rateLimit(subscriptionRateLimiter),
       SubscriptionGroupController.submitForm
     )

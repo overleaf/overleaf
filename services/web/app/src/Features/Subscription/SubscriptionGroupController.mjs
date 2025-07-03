@@ -1,4 +1,3 @@
-// ts-check
 import SubscriptionGroupHandler from './SubscriptionGroupHandler.js'
 
 import OError from '@overleaf/o-error'
@@ -303,10 +302,19 @@ async function createAddSeatsSubscriptionChange(req, res) {
   }
 }
 
+const submitFormSchema = z.object({
+  body: z.object({
+    adding: z.number().int().min(MAX_NUMBER_OF_USERS),
+    poNumber: z.string().optional(),
+  }),
+})
+
 async function submitForm(req, res) {
+  const { body } = validateReq(req, submitFormSchema)
+  const { adding, poNumber } = body
+
   const userId = SessionManager.getLoggedInUserId(req.session)
   const userEmail = await UserGetter.promises.getUserEmail(userId)
-  const { adding, poNumber } = req.body
 
   const { paymentProviderSubscription } =
     await SubscriptionGroupHandler.promises.getUsersGroupSubscriptionDetails(
