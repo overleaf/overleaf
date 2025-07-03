@@ -3,7 +3,6 @@ import AuthenticationController from '../Authentication/AuthenticationController
 import CaptchaMiddleware from '../../Features/Captcha/CaptchaMiddleware.mjs'
 import { RateLimiter } from '../../infrastructure/RateLimiter.js'
 import RateLimiterMiddleware from '../Security/RateLimiterMiddleware.js'
-import { Joi, validate } from '../../infrastructure/Validation.js'
 
 const rateLimiter = new RateLimiter('password_reset_rate_limit', {
   points: 6,
@@ -35,12 +34,6 @@ export default {
     )
     webRouter.post(
       '/user/password/set',
-      validate({
-        body: Joi.object({
-          password: Joi.string().required(),
-          passwordResetToken: Joi.string().required(),
-        }),
-      }),
       rateLimit,
       PasswordResetController.setNewUserPassword
     )

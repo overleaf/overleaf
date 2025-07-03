@@ -10,9 +10,17 @@ import EmailsHelper from '../Helpers/EmailHelper.js'
 import { expressify } from '@overleaf/promise-utils'
 import { z, validateReq } from '../../infrastructure/Validation.js'
 
+const setNewUserPasswordSchema = z.object({
+  body: z.object({
+    password: z.string(),
+    passwordResetToken: z.string(),
+  }),
+})
+
 async function setNewUserPassword(req, res, next) {
   let user
-  let { passwordResetToken, password, email } = req.body
+  const { body } = validateReq(req, setNewUserPasswordSchema)
+  let { passwordResetToken, password, email } = body
   if (!passwordResetToken || !password) {
     return res.status(400).json({
       message: {
