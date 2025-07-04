@@ -22,7 +22,7 @@ const isPropensityNetworkError = (err: ErrorEvent) => {
   }
 
   return Boolean(
-    errorBreadcrumbs[0].data?.url.startsWith(
+    errorBreadcrumbs[0]?.data?.url?.startsWith(
       'https://analytics.propensity.com/'
     )
   )
