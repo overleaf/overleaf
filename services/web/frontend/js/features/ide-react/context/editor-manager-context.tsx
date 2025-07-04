@@ -35,7 +35,6 @@ import { EditorType } from '@/features/ide-react/editor/types/editor-type'
 import { DocId } from '../../../../../types/project-settings'
 import { Update } from '@/features/history/services/types/update'
 import { useDebugDiffTracker } from '../hooks/use-debug-diff-tracker'
-import { useEditorContext } from '@/shared/context/editor-context'
 import { convertFileRefToBinaryFile } from '@/features/ide-react/util/file-view'
 import { useEditorOpenDocContext } from '@/features/ide-react/context/editor-open-doc-context'
 
@@ -89,8 +88,8 @@ export const EditorManagerProvider: FC<React.PropsWithChildren> = ({
 }) => {
   const { t } = useTranslation()
   const { scopeStore } = useIdeContext()
-  const { reportError, eventEmitter, projectId } = useIdeReactContext()
-  const { setOutOfSync } = useEditorContext()
+  const { reportError, eventEmitter, projectId, setOutOfSync } =
+    useIdeReactContext()
   const { socket, closeConnection, connectionState } = useConnectionContext()
   const { view, setView, setOpenFile } = useLayoutContext()
   const { showGenericMessageModal, genericModalVisible, showOutOfSyncModal } =

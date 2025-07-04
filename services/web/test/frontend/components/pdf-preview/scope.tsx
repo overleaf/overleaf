@@ -15,5 +15,4 @@ export const mockScope = () => ({
       doc: '\\documentclass{article}',
     }),
   },
-  hasLintingError: false,
 })

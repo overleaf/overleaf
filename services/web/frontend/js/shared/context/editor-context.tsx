@@ -17,7 +17,6 @@ import { useDetachContext } from './detach-context'
 import getMeta from '../../utils/meta'
 import { useUserContext } from './user-context'
 import { saveProjectSettings } from '@/features/editor-left-menu/utils/api'
-import { PermissionsLevel } from '@/features/ide-react/types/permissions'
 import { useModalsContext } from '@/features/ide-react/context/modals-context'
 import { WritefullAPI } from './types/writefull-instance'
 import { Cobranding } from '../../../../types/cobranding'
@@ -28,19 +27,16 @@ export const EditorContext = createContext<
       cobranding?: Cobranding
       hasPremiumCompile?: boolean
       renameProject: (newName: string) => void
-      setPermissionsLevel: (permissionsLevel: PermissionsLevel) => void
       showSymbolPalette?: boolean
       toggleSymbolPalette?: () => void
       insertSymbol?: (symbol: SymbolWithCharacter) => void
       isProjectOwner: boolean
       isRestrictedTokenMember?: boolean
       isPendingEditor: boolean
-      permissionsLevel: PermissionsLevel
       deactivateTutorial: (tutorial: string) => void
       inactiveTutorials: string[]
       currentPopup: string | null
       setCurrentPopup: Dispatch<SetStateAction<string | null>>
-      setOutOfSync: (value: boolean) => void
       hasPremiumSuggestion: boolean
       setHasPremiumSuggestion: (value: boolean) => void
       setPremiumSuggestionResetDate: (date: Date) => void
@@ -78,9 +74,6 @@ export const EditorProvider: FC<React.PropsWithChildren> = ({ children }) => {
   }, [])
 
   const [projectName, setProjectName] = useScopeValue('project.name')
-  const [permissionsLevel, setPermissionsLevel] =
-    useScopeValue('permissionsLevel')
-  const [outOfSync, setOutOfSync] = useState(false)
   const [showSymbolPalette] = useScopeValue('editor.showSymbolPalette')
   const [toggleSymbolPalette] = useScopeValue('editor.toggleSymbolPalette')
 
@@ -187,8 +180,6 @@ export const EditorProvider: FC<React.PropsWithChildren> = ({ children }) => {
       cobranding,
       hasPremiumCompile: features?.compileGroup === 'priority',
       renameProject,
-      permissionsLevel: outOfSync ? 'readOnly' : permissionsLevel,
-      setPermissionsLevel,
       isProjectOwner: owner?._id === userId,
       isRestrictedTokenMember: getMeta('ol-isRestrictedTokenMember'),
       isPendingEditor,
@@ -199,7 +190,6 @@ export const EditorProvider: FC<React.PropsWithChildren> = ({ children }) => {
       deactivateTutorial,
       currentPopup,
       setCurrentPopup,
-      setOutOfSync,
       hasPremiumSuggestion,
       setHasPremiumSuggestion,
       premiumSuggestionResetDate,
@@ -213,8 +203,6 @@ export const EditorProvider: FC<React.PropsWithChildren> = ({ children }) => {
       owner,
       userId,
       renameProject,
-      permissionsLevel,
-      setPermissionsLevel,
       isPendingEditor,
       showSymbolPalette,
       toggleSymbolPalette,
@@ -223,8 +211,6 @@ export const EditorProvider: FC<React.PropsWithChildren> = ({ children }) => {
       deactivateTutorial,
       currentPopup,
       setCurrentPopup,
-      outOfSync,
-      setOutOfSync,
       hasPremiumSuggestion,
       setHasPremiumSuggestion,
       premiumSuggestionResetDate,
@@ -238,6 +224,7 @@ export const EditorProvider: FC<React.PropsWithChildren> = ({ children }) => {
     <EditorContext.Provider value={value}>{children}</EditorContext.Provider>
   )
 }
+
 export function useEditorContext() {
   const context = useContext(EditorContext)
 

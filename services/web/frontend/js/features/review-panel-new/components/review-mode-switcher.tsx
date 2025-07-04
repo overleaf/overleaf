@@ -17,6 +17,7 @@ import { usePermissionsContext } from '@/features/ide-react/context/permissions-
 import usePersistedState from '@/shared/hooks/use-persisted-state'
 import { sendMB } from '@/infrastructure/event-tracking'
 import { useEditorContext } from '@/shared/context/editor-context'
+import { useIdeReactContext } from '@/features/ide-react/context/ide-react-context'
 import { useProjectContext } from '@/shared/context/project-context'
 import UpgradeTrackChangesModal from './upgrade-track-changes-modal'
 import { ReviewModePromo } from '@/features/review-panel-new/components/review-mode-promo'
@@ -33,7 +34,7 @@ const useCurrentMode = (): Mode => {
     trackChanges?.onForEveryone ||
     (user?.id && trackChanges?.onForMembers[user.id]) ||
     (!user?.id && trackChanges?.onForGuests)
-  const { permissionsLevel } = useEditorContext()
+  const { permissionsLevel } = useIdeReactContext()
 
   if (permissionsLevel === 'readOnly') {
     return 'view'
@@ -52,7 +53,7 @@ function ReviewModeSwitcher() {
   const { saveTrackChangesForCurrentUser, saveTrackChanges } =
     useTrackChangesStateActionsContext()
   const mode = useCurrentMode()
-  const { permissionsLevel } = useEditorContext()
+  const { permissionsLevel } = useIdeReactContext()
   const { write, trackedWrite } = usePermissionsContext()
   const project = useProjectContext()
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)

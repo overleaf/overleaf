@@ -28,6 +28,8 @@ import {
   useSnapshotContext,
 } from '@/features/ide-react/context/snapshot-context'
 import importOverleafModules from '../../../macros/import-overleaf-module.macro'
+import { useIdeReactContext } from '@/features/ide-react/context/ide-react-context'
+
 const { buildFileTree, createFolder } =
   (importOverleafModules('snapshotUtils')[0]
     ?.import as typeof StubSnapshotUtils) || StubSnapshotUtils
@@ -61,6 +63,7 @@ enum ACTION_TYPES {
   MOVE = 'MOVE',
   CREATE = 'CREATE',
 }
+
 /* eslint-enable no-unused-vars */
 
 type Action =
@@ -181,7 +184,7 @@ export const FileTreeDataProvider: FC<React.PropsWithChildren> = ({
 }) => {
   const [project] = useScopeValue<Project>('project')
   const { currentDocumentId, setOpenDocName } = useEditorOpenDocContext()
-  const [permissionsLevel] = useScopeValue('permissionsLevel')
+  const { permissionsLevel } = useIdeReactContext()
   const { fileTreeFromHistory, snapshot, snapshotVersion } =
     useSnapshotContext()
   const fileTreeReadOnly =

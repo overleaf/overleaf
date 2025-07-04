@@ -204,6 +204,7 @@ const makeIdeReactProvider = (scope, socket) => {
       setStartedFreeTrial,
       reportError: () => {},
       projectJoined: true,
+      permissionsLevel: scope.permissionsLevel,
     }))
 
     const [ideContextValue] = useState(() => {

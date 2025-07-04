@@ -12,7 +12,6 @@ type Scope = {
       getSnapshot?: () => string
     }
   }
-  hasLintingError?: boolean
   ui?: {
     view?: 'editor' | 'history' | 'file' | 'pdf'
     pdfLayout?: 'flat' | 'sideBySide' | 'split'
@@ -46,6 +45,5 @@ export const mockScope = (scope?: Scope) => ({
       getSnapshot: () => 'some doc content',
     },
   },
-  hasLintingError: false,
   ...scope,
 })

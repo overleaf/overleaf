@@ -19,6 +19,7 @@ import { populateEditorScope } from '@/features/ide-react/scope-adapters/editor-
 import { postJSON } from '@/infrastructure/fetch-json'
 import { ReactScopeEventEmitter } from '@/features/ide-react/scope-event-emitter/react-scope-event-emitter'
 import getMeta from '@/utils/meta'
+import { type PermissionsLevel } from '@/features/ide-react/types/permissions'
 
 const LOADED_AT = new Date()
 
@@ -31,6 +32,9 @@ type IdeReactContextValue = {
   >
   reportError: (error: any, meta?: Record<string, any>) => void
   projectJoined: boolean
+  permissionsLevel: PermissionsLevel
+  setPermissionsLevel: (permissionsLevel: PermissionsLevel) => void
+  setOutOfSync: (value: boolean) => void
 }
 
 export const IdeReactContext = createContext<IdeReactContextValue | undefined>(
@@ -43,13 +47,6 @@ function populateIdeReactScope(store: ReactScopeValueStore) {
 
 function populateProjectScope(store: ReactScopeValueStore) {
   store.allowNonExistentPath('project', true)
-  store.set('permissionsLevel', 'readOnly')
-  store.set('permissions', {
-    read: true,
-    write: false,
-    admin: false,
-    comment: true,
-  })
 }
 
 function populatePdfScope(store: ReactScopeValueStore) {
@@ -78,6 +75,9 @@ export const IdeReactProvider: FC<React.PropsWithChildren> = ({ children }) => {
   const projectId = getMeta('ol-project_id')
   const [scopeStore] = useState(() => createReactScopeValueStore(projectId))
   const [eventEmitter] = useState(createIdeEventEmitter)
+  const [permissionsLevel, setPermissionsLevel] =
+    useState<PermissionsLevel>('readOnly')
+  const [outOfSync, setOutOfSync] = useState(false)
   const [scopeEventEmitter] = useState(
     () => new ReactScopeEventEmitter(eventEmitter)
   )
@@ -137,7 +137,7 @@ export const IdeReactProvider: FC<React.PropsWithChildren> = ({ children }) => {
     }: JoinProjectPayload) {
       const project = { ..._project, rootDocId }
       scopeStore.set('project', project)
-      scopeStore.set('permissionsLevel', permissionsLevel)
+      setPermissionsLevel(permissionsLevel)
       // Make watchers update immediately
       scopeStore.flushUpdates()
       eventEmitter.emit('project:joined', { project, permissionsLevel })
@@ -173,11 +173,22 @@ export const IdeReactProvider: FC<React.PropsWithChildren> = ({ children }) => {
       eventEmitter,
       startedFreeTrial,
       setStartedFreeTrial,
+      permissionsLevel: outOfSync ? 'readOnly' : permissionsLevel,
+      setPermissionsLevel,
+      setOutOfSync,
       projectId,
       reportError,
       projectJoined,
     }),
-    [eventEmitter, projectId, projectJoined, reportError, startedFreeTrial]
+    [
+      eventEmitter,
+      outOfSync,
+      permissionsLevel,
+      projectId,
+      projectJoined,
+      reportError,
+      startedFreeTrial,
+    ]
   )
 
   return (

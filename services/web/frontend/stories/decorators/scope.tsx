@@ -75,7 +75,6 @@ const initialScope = {
     },
     open_doc_name: 'testfile.tex',
   },
-  hasLintingError: false,
   permissionsLevel: 'owner',
 }
 
@@ -190,6 +189,9 @@ const IdeReactProvider: FC<React.PropsWithChildren> = ({ children }) => {
     setStartedFreeTrial,
     reportError: () => {},
     projectJoined: true,
+    permissionsLevel: 'owner' as const,
+    setPermissionsLevel: () => {},
+    setOutOfSync: () => {},
   }))
 
   const [ideContextValue] = useState(() => {

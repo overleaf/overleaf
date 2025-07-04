@@ -7,7 +7,8 @@ import {
   IdeView,
   useLayoutContext,
 } from '../../../../frontend/js/shared/context/layout-context'
-import { FC, useEffect } from 'react'
+import { FC, PropsWithChildren, useEffect } from 'react'
+import { useLocalCompileContext } from '@/shared/context/local-compile-context'
 
 const storeAndFireEvent = (win: typeof window, key: string, value: unknown) => {
   localStorage.setItem(key, value)
@@ -462,14 +463,20 @@ describe('<PdfPreview/>', function () {
     const scope = mockScope()
     // enable linting in the editor
     const userSettings = { syntaxValidation: true }
-    // mock a linting error
-    scope.hasLintingError = true
+
+    const WithLintingErrors: FC<PropsWithChildren> = ({ children }) => {
+      const { setHasLintingError } = useLocalCompileContext()
+      useEffect(() => setHasLintingError(true), [setHasLintingError])
+      return children
+    }
 
     cy.mount(
       <EditorProviders scope={scope} userSettings={userSettings}>
-        <div className="pdf-viewer">
-          <PdfPreview />
-        </div>
+        <WithLintingErrors>
+          <div className="pdf-viewer">
+            <PdfPreview />
+          </div>
+        </WithLintingErrors>
       </EditorProviders>
     )
 

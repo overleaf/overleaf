@@ -13,7 +13,6 @@ import { useConnectionContext } from '@/features/ide-react/context/connection-co
 import { useEditorOpenDocContext } from '@/features/ide-react/context/editor-open-doc-context'
 import { getJSON, postJSON } from '@/infrastructure/fetch-json'
 import { useOnlineUsersContext } from '@/features/ide-react/context/online-users-context'
-import { useEditorContext } from '@/shared/context/editor-context'
 import useSocketListener from '@/features/ide-react/hooks/use-socket-listener'
 import useEventListener from '@/shared/hooks/use-event-listener'
 import { useModalsContext } from '@/features/ide-react/context/modals-context'
@@ -49,10 +48,9 @@ export const MetadataContext = createContext<
 
 export const MetadataProvider: FC<React.PropsWithChildren> = ({ children }) => {
   const { t } = useTranslation()
-  const { eventEmitter, projectId } = useIdeReactContext()
+  const { eventEmitter, permissionsLevel, projectId } = useIdeReactContext()
   const { socket } = useConnectionContext()
   const { onlineUsersCount } = useOnlineUsersContext()
-  const { permissionsLevel } = useEditorContext()
   const permissions = usePermissionsContext()
   const { currentDocument } = useEditorOpenDocContext()
   const { showGenericMessageModal } = useModalsContext()

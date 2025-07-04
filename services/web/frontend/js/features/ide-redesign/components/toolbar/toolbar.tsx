@@ -14,13 +14,15 @@ import { useEditorContext } from '@/shared/context/editor-context'
 import importOverleafModules from '../../../../../macros/import-overleaf-module.macro'
 import UpgradeButton from './upgrade-button'
 import getMeta from '@/utils/meta'
+import { useIdeReactContext } from '@/features/ide-react/context/ide-react-context'
 
 const [publishModalModules] = importOverleafModules('publishModal')
 const SubmitProjectButton = publishModalModules?.import.NewPublishToolbarButton
 
 export const Toolbar = () => {
   const { view, setView } = useLayoutContext()
-  const { cobranding, permissionsLevel } = useEditorContext()
+  const { cobranding } = useEditorContext()
+  const { permissionsLevel } = useIdeReactContext()
   const shouldDisplaySubmitButton =
     (permissionsLevel === 'owner' || permissionsLevel === 'readAndWrite') &&
     SubmitProjectButton

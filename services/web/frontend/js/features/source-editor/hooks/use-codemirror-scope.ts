@@ -58,11 +58,12 @@ import {
 import { GotoLineOptions } from '@/features/ide-react/types/goto-line-options'
 import { useOnlineUsersContext } from '@/features/ide-react/context/online-users-context'
 import { useEditorOpenDocContext } from '@/features/ide-react/context/editor-open-doc-context'
+import { usePermissionsContext } from '@/features/ide-react/context/permissions-context'
 
 function useCodeMirrorScope(view: EditorView) {
   const { fileTreeData } = useFileTreeData()
 
-  const [permissions] = useScopeValue<Permissions>('permissions')
+  const permissions: Permissions = usePermissionsContext()
 
   // set up scope listeners
 

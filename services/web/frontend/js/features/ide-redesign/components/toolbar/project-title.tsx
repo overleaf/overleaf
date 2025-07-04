@@ -9,6 +9,7 @@ import { useProjectContext } from '@/shared/context/project-context'
 import { useTranslation } from 'react-i18next'
 import importOverleafModules from '../../../../../macros/import-overleaf-module.macro'
 import { useEditorContext } from '@/shared/context/editor-context'
+import { useIdeReactContext } from '@/features/ide-react/context/ide-react-context'
 import { DownloadProjectPDF, DownloadProjectZip } from './download-project'
 import { useCallback, useState } from 'react'
 import OLDropdownMenuItem from '@/features/ui/components/ol/ol-dropdown-menu-item'
@@ -21,7 +22,8 @@ const SubmitProjectButton = publishModalModules?.import.NewPublishDropdownButton
 export const ToolbarProjectTitle = () => {
   const { cobranding } = useEditorContext()
   const { t } = useTranslation()
-  const { permissionsLevel, renameProject } = useEditorContext()
+  const { renameProject } = useEditorContext()
+  const { permissionsLevel } = useIdeReactContext()
   const { name } = useProjectContext()
   const shouldDisplaySubmitButton =
     (permissionsLevel === 'owner' || permissionsLevel === 'readAndWrite') &&

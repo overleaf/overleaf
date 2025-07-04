@@ -10,7 +10,6 @@ import {
   Dispatch,
   SetStateAction,
 } from 'react'
-import useScopeValue from '../hooks/use-scope-value'
 import usePersistedState from '../hooks/use-persisted-state'
 import useAbortController from '../hooks/use-abort-controller'
 import DocumentCompiler from '../../features/pdf-preview/util/compiler'
@@ -85,7 +84,7 @@ export type CompileContext = {
   setAutoCompile: (value: boolean) => void
   setDraft: (value: any) => void
   setError: (value: any) => void
-  setHasLintingError: (value: any) => void // only for storybook
+  setHasLintingError: (value: boolean) => void // only for storybook
   setHighlights: (value: any) => void
   setPosition: Dispatch<SetStateAction<PdfScrollPosition>>
   setShowCompileTimeWarning: (value: any) => void
@@ -273,7 +272,7 @@ export const LocalCompileProvider: FC<React.PropsWithChildren> = ({
   )
 
   // whether the editor linter found errors
-  const [hasLintingError, setHasLintingError] = useScopeValue('hasLintingError')
+  const [hasLintingError, setHasLintingError] = useState(false)
 
   // the timestamp that a doc was last changed
   const [changedAt, setChangedAt] = useState(0)
