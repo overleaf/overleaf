@@ -3,6 +3,7 @@
   "description": "An API to handle user notifications",
   "private": true,
   "main": "app.js",
+  "type": "module",
   "scripts": {
     "start": "node app.js",
     "test:acceptance:_run": "mocha --recursive --reporter spec --timeout 15000 --exit $@ test/acceptance/js",

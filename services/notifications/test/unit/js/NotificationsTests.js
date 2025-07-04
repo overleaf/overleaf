@@ -10,24 +10,24 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const sinon = require('sinon')
-const { expect } = require('chai')
-const modulePath = '../../../app/js/Notifications.js'
-const SandboxedModule = require('sandboxed-module')
-const assert = require('node:assert')
-const { ObjectId } = require('mongodb-legacy')
+import { stub, assert as _assert } from 'sinon'
+import { expect } from 'chai'
+import { require as _require } from 'sandboxed-module'
+import { deepEqual } from 'node:assert'
+import { ObjectId } from 'mongodb-legacy'
 
+const modulePath = '../../../app/js/Notifications.js'
 const userId = '51dc93e6fb625a261300003b'
 const notificationId = '574ee8d6f40c3a244e704249'
 const notificationKey = 'notification-key'
 
 describe('Notifications Tests', function () {
   beforeEach(function () {
-    this.findToArrayStub = sinon.stub()
-    this.findStub = sinon.stub().returns({ toArray: this.findToArrayStub })
-    this.countStub = sinon.stub()
-    this.updateOneStub = sinon.stub()
-    this.deleteOneStub = sinon.stub()
+    this.findToArrayStub = stub()
+    this.findStub = stub().returns({ toArray: this.findToArrayStub })
+    this.countStub = stub()
+    this.updateOneStub = stub()
+    this.deleteOneStub = stub()
     this.db = {
       notifications: {
         find: this.findStub,
@@ -37,7 +37,7 @@ describe('Notifications Tests', function () {
       },
     }
 
-    this.notifications = SandboxedModule.require(modulePath, {
+    this.notifications = _require(modulePath, {
       requires: {
         '@overleaf/settings': {},
         './mongodb': { db: this.db, ObjectId },
@@ -61,7 +61,7 @@ describe('Notifications Tests', function () {
         (err, notifications) => {
           if (err) return done(err)
           notifications.should.equal(this.stubbedNotificationArray)
-          assert.deepEqual(this.findStub.args[0][0], {
+          deepEqual(this.findStub.args[0][0], {
             user_id: new ObjectId(userId),
             templateKey: { $exists: true },
           })
@@ -99,7 +99,7 @@ describe('Notifications Tests', function () {
         this.stubbedNotification,
         err => {
           expect(err).not.to.exist
-          sinon.assert.calledWith(
+          _assert.calledWith(
             this.updateOneStub,
             this.expectedQuery,
             { $set: this.expectedDocument },
@@ -121,7 +121,7 @@ describe('Notifications Tests', function () {
           this.stubbedNotification,
           err => {
             expect(err).not.to.exist
-            sinon.assert.notCalled(this.updateOneStub)
+            _assert.notCalled(this.updateOneStub)
             return done()
           }
         )
@@ -134,7 +134,7 @@ describe('Notifications Tests', function () {
           this.stubbedNotification,
           err => {
             expect(err).not.to.exist
-            sinon.assert.calledWith(
+            _assert.calledWith(
               this.updateOneStub,
               this.expectedQuery,
               { $set: this.expectedDocument },
@@ -174,7 +174,7 @@ describe('Notifications Tests', function () {
           this.stubbedNotification,
           err => {
             expect(err).not.to.exist
-            sinon.assert.calledWith(
+            _assert.calledWith(
               this.updateOneStub,
               this.expectedQuery,
               { $set: this.expectedDocument },
@@ -210,7 +210,7 @@ describe('Notifications Tests', function () {
           this.stubbedNotification,
           err => {
             ;(err instanceof Error).should.equal(true)
-            sinon.assert.notCalled(this.updateOneStub)
+            _assert.notCalled(this.updateOneStub)
             return done()
           }
         )
@@ -234,8 +234,8 @@ describe('Notifications Tests', function () {
           const updateOperation = {
             $unset: { templateKey: true, messageOpts: true },
           }
-          assert.deepEqual(this.updateOneStub.args[0][0], searchOps)
-          assert.deepEqual(this.updateOneStub.args[0][1], updateOperation)
+          deepEqual(this.updateOneStub.args[0][0], searchOps)
+          deepEqual(this.updateOneStub.args[0][1], updateOperation)
           return done()
         }
       )
@@ -258,8 +258,8 @@ describe('Notifications Tests', function () {
           const updateOperation = {
             $unset: { templateKey: true },
           }
-          assert.deepEqual(this.updateOneStub.args[0][0], searchOps)
-          assert.deepEqual(this.updateOneStub.args[0][1], updateOperation)
+          deepEqual(this.updateOneStub.args[0][0], searchOps)
+          deepEqual(this.updateOneStub.args[0][1], updateOperation)
           return done()
         }
       )
@@ -276,8 +276,8 @@ describe('Notifications Tests', function () {
           if (err) return done(err)
           const searchOps = { key: notificationKey }
           const updateOperation = { $unset: { templateKey: true } }
-          assert.deepEqual(this.updateOneStub.args[0][0], searchOps)
-          assert.deepEqual(this.updateOneStub.args[0][1], updateOperation)
+          deepEqual(this.updateOneStub.args[0][0], searchOps)
+          deepEqual(this.updateOneStub.args[0][1], updateOperation)
           return done()
         }
       )
@@ -293,7 +293,7 @@ describe('Notifications Tests', function () {
         err => {
           if (err) return done(err)
           const searchOps = { key: notificationKey }
-          assert.deepEqual(this.deleteOneStub.args[0][0], searchOps)
+          deepEqual(this.deleteOneStub.args[0][0], searchOps)
           return done()
         }
       )

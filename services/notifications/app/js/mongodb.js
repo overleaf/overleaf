@@ -1,26 +1,22 @@
-// @ts-check
+import Metrics from '@overleaf/metrics'
+import MongoUtils from '@overleaf/mongo-utils'
+import Settings from '@overleaf/settings'
+import mongodb from 'mongodb-legacy'
 
-const Metrics = require('@overleaf/metrics')
-const MongoUtils = require('@overleaf/mongo-utils')
-const Settings = require('@overleaf/settings')
-const { MongoClient, ObjectId } = require('mongodb-legacy')
-
-const mongoClient = new MongoClient(Settings.mongo.url, Settings.mongo.options)
+export const mongoClient = new mongodb.MongoClient(
+  Settings.mongo.url,
+  Settings.mongo.options
+)
 const mongoDb = mongoClient.db()
 
-const db = {
+export const db = {
   notifications: mongoDb.collection('notifications'),
 }
 
+export const ObjectId = mongodb.ObjectId
+
 Metrics.mongodb.monitor(mongoClient)
 
-async function cleanupTestDatabase() {
+export async function cleanupTestDatabase() {
   await MongoUtils.cleanupTestDatabase(mongoClient)
-}
-
-module.exports = {
-  db,
-  mongoClient,
-  ObjectId,
-  cleanupTestDatabase,
 }

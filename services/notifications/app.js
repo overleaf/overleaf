@@ -1,38 +1,40 @@
 // Metrics must be initialized before importing anything else
-require('@overleaf/metrics/initialize')
+import '@overleaf/metrics/initialize.js'
+import metrics from '@overleaf/metrics'
+import Settings from '@overleaf/settings'
+import logger from '@overleaf/logger'
+import express from 'express'
+import methodOverride from 'method-override'
+import { mongoClient } from './app/js/mongodb.js'
+import NotificationsController from './app/js/NotificationsController.js'
+import HealthCheckController from './app/js/HealthCheckController.js'
 
-const metrics = require('@overleaf/metrics')
-const Settings = require('@overleaf/settings')
-const logger = require('@overleaf/logger')
-logger.initialize('notifications')
-const express = require('express')
 const app = express()
-const methodOverride = require('method-override')
-const bodyParser = require('body-parser')
-const { mongoClient } = require('./app/js/mongodb')
-const controller = require('./app/js/NotificationsController')
+
+logger.initialize('notifications')
 
 metrics.memory.monitor(logger)
 metrics.open_sockets.monitor()
 
-const HealthCheckController = require('./app/js/HealthCheckController')
-
 app.use(methodOverride())
-app.use(bodyParser())
+app.use(express.json())
 app.use(metrics.http.monitor(logger))
 
 metrics.injectMetricsRoute(app)
 
-app.post('/user/:user_id', controller.addNotification)
-app.get('/user/:user_id', controller.getUserNotifications)
+app.post('/user/:user_id', NotificationsController.addNotification)
+app.get('/user/:user_id', NotificationsController.getUserNotifications)
 app.delete(
   '/user/:user_id/notification/:notification_id',
-  controller.removeNotificationId
+  NotificationsController.removeNotificationId
 )
-app.delete('/user/:user_id', controller.removeNotificationKey)
-app.delete('/key/:key', controller.removeNotificationByKeyOnly)
-app.get('/key/:key/count', controller.countNotificationsByKeyOnly)
-app.delete('/key/:key/bulk', controller.deleteUnreadNotificationsByKeyOnlyBulk)
+app.delete('/user/:user_id', NotificationsController.removeNotificationKey)
+app.delete('/key/:key', NotificationsController.removeNotificationByKeyOnly)
+app.get('/key/:key/count', NotificationsController.countNotificationsByKeyOnly)
+app.delete(
+  '/key/:key/bulk',
+  NotificationsController.deleteUnreadNotificationsByKeyOnlyBulk
+)
 
 app.get('/status', (req, res) => res.send('notifications is up'))
 
@@ -49,17 +51,15 @@ app.get('/health_check', (req, res) =>
 
 app.get('*', (req, res) => res.sendStatus(404))
 
-const host = Settings.internal?.notifications?.host || '127.0.0.1'
-const port = Settings.internal?.notifications?.port || 3042
+const host = Settings.internal.notifications?.host || '127.0.0.1'
+const port = Settings.internal.notifications?.port || 3042
+try {
+  await mongoClient.connect()
+} catch (err) {
+  logger.fatal({ err }, 'Cannot connect to mongo. Exiting.')
+  process.exit(1)
+}
 
-mongoClient
-  .connect()
-  .then(() => {
-    app.listen(port, host, () =>
-      logger.debug(`notifications starting up, listening on ${host}:${port}`)
-    )
-  })
-  .catch(err => {
-    logger.fatal({ err }, 'Cannot connect to mongo. Exiting.')
-    process.exit(1)
-  })
+app.listen(port, host, () =>
+  logger.debug({}, `notifications starting up, listening on ${host}:${port}`)
+)

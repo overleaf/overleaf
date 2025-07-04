@@ -6,11 +6,11 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const Notifications = require('./Notifications')
-const logger = require('@overleaf/logger')
-const metrics = require('@overleaf/metrics')
+import logger from '@overleaf/logger'
+import metrics from '@overleaf/metrics'
+import Notifications from './Notifications.js'
 
-module.exports = {
+export default {
   getUserNotifications(req, res, next) {
     logger.debug(
       { userId: req.params.user_id },

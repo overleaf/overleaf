@@ -9,11 +9,11 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const sinon = require('sinon')
-const modulePath = '../../../app/js/NotificationsController.js'
-const SandboxedModule = require('sandboxed-module')
-const assert = require('node:assert')
+import { stub } from 'sinon'
+import { require as _require } from 'sandboxed-module'
+import assert from 'node:assert'
 
+const modulePath = '../../../app/js/NotificationsController.js'
 const userId = '51dc93e6fb625a261300003b'
 const notificationId = 'fb625a26f09d'
 const notificationKey = 'my-notification-key'
@@ -22,11 +22,11 @@ describe('Notifications Controller', function () {
   beforeEach(function () {
     const self = this
     this.notifications = {}
-    this.controller = SandboxedModule.require(modulePath, {
+    this.controller = _require(modulePath, {
       requires: {
         './Notifications': this.notifications,
         '@overleaf/metrics': {
-          inc: sinon.stub(),
+          inc: stub(),
         },
       },
     })
@@ -42,9 +42,11 @@ describe('Notifications Controller', function () {
 
   describe('getUserNotifications', function () {
     return it('should ask the notifications for the users notifications', function (done) {
-      this.notifications.getUserNotifications = sinon
-        .stub()
-        .callsArgWith(1, null, this.stubbedNotification)
+      this.notifications.getUserNotifications = stub().callsArgWith(
+        1,
+        null,
+        this.stubbedNotification
+      )
       const req = {
         params: {
           user_id: userId,
@@ -64,7 +66,7 @@ describe('Notifications Controller', function () {
 
   describe('addNotification', function () {
     return it('should tell the notifications to add the notification for the user', function (done) {
-      this.notifications.addNotification = sinon.stub().callsArgWith(2)
+      this.notifications.addNotification = stub().callsArgWith(2)
       const req = {
         params: {
           user_id: userId,
@@ -85,7 +87,7 @@ describe('Notifications Controller', function () {
 
   describe('removeNotificationId', function () {
     return it('should tell the notifications to mark the notification Id as read', function (done) {
-      this.notifications.removeNotificationId = sinon.stub().callsArgWith(2)
+      this.notifications.removeNotificationId = stub().callsArgWith(2)
       const req = {
         params: {
           user_id: userId,
@@ -106,7 +108,7 @@ describe('Notifications Controller', function () {
 
   describe('removeNotificationKey', function () {
     return it('should tell the notifications to mark the notification Key as read', function (done) {
-      this.notifications.removeNotificationKey = sinon.stub().callsArgWith(2)
+      this.notifications.removeNotificationKey = stub().callsArgWith(2)
       const req = {
         params: {
           user_id: userId,
@@ -127,9 +129,7 @@ describe('Notifications Controller', function () {
 
   return describe('removeNotificationByKeyOnly', function () {
     return it('should tell the notifications to mark the notification Key as read', function (done) {
-      this.notifications.removeNotificationByKeyOnly = sinon
-        .stub()
-        .callsArgWith(1)
+      this.notifications.removeNotificationByKeyOnly = stub().callsArgWith(1)
       const req = {
         params: {
           key: notificationKey,

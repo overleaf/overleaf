@@ -1,6 +1,3 @@
-/* eslint-disable
-    no-dupe-keys,
-*/
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
 /*
@@ -9,14 +6,15 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const { db, ObjectId } = require('./mongodb')
-const request = require('request')
-const async = require('async')
-const settings = require('@overleaf/settings')
-const { port } = settings.internal.notifications
-const logger = require('@overleaf/logger')
+import { db, ObjectId } from './mongodb.js'
+import request from 'request'
+import async from 'async'
+import settings from '@overleaf/settings'
+import logger from '@overleaf/logger'
 
-module.exports = {
+const { port } = settings.internal.notifications
+
+export default {
   check(callback) {
     const userId = new ObjectId()
     const cleanupNotifications = callback =>
@@ -28,7 +26,7 @@ module.exports = {
       timeout: 5000,
     })
     logger.debug(
-      { userId, opts: getOpts(), key: notificationKey, userId },
+      { opts: getOpts(), key: notificationKey, userId },
       'Health Check: running'
     )
     const jobs = [
