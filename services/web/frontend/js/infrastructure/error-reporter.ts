@@ -2,6 +2,7 @@
 import getMeta from '../utils/meta'
 import OError from '@overleaf/o-error'
 import { debugConsole } from '@/utils/debugging'
+import type { ErrorEvent } from '@sentry/types/types/event'
 
 const {
   sentryAllowedOriginRegex,
@@ -11,6 +12,21 @@ const {
 } = getMeta('ol-ExposedSettings')
 
 const reporterPromise = sentryDsn ? sentryReporter() : nullReporter()
+
+const isPropensityNetworkError = (err: ErrorEvent) => {
+  const errorBreadcrumbs = err.breadcrumbs?.filter(b => b.level === 'error')
+
+  if (!errorBreadcrumbs || errorBreadcrumbs.length !== 1) {
+    // don't ignore Propensity if there are more errors to report
+    return false
+  }
+
+  return Boolean(
+    errorBreadcrumbs[0].data?.url.startsWith(
+      'https://analytics.propensity.com/'
+    )
+  )
+}
 
 function sentryReporter() {
   return (
@@ -84,6 +100,10 @@ function sentryReporter() {
                 refererUrl.pathname = '/read/'
                 event.request.headers.Referer = refererUrl.toString()
               }
+            }
+
+            if (isPropensityNetworkError(event)) {
+              return null
             }
 
             return event
