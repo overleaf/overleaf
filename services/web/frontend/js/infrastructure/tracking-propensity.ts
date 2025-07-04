@@ -6,10 +6,6 @@ import {
 
 const { propensityId } = getMeta('ol-ExposedSettings')
 
-if (propensityId) {
-  createTrackingLoader(() => loadPropensityScript(propensityId), 'Propensity')
-}
-
 const loadPropensityScript = (id: string) => {
   insertScript({
     src: 'https://cdn.propensity.com/propensity/propensity_analytics.js',
@@ -20,4 +16,8 @@ const loadPropensityScript = (id: string) => {
       }
     },
   })
+}
+
+if (propensityId) {
+  createTrackingLoader(() => loadPropensityScript(propensityId), 'Propensity')
 }
