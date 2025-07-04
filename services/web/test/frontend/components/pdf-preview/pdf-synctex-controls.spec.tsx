@@ -80,6 +80,7 @@ function mockProviders() {
   return {
     EditorOpenDocProvider: makeEditorOpenDocProvider({
       openDocName: 'main.tex',
+      currentDocumentId: null,
       currentDocument: {
         doc_id: 'test-doc',
         getSnapshot: () => 'some doc content',
@@ -87,7 +88,7 @@ function mockProviders() {
         on: () => {},
         off: () => {},
         leaveAndCleanUpPromise: () => Promise.resolve(),
-      },
+      } as any,
     }),
   }
 }

@@ -39,6 +39,28 @@ const enableROMirrorOnClient =
   new URLSearchParams(window.location.search).get('ro-mirror-on-client') ===
     'enabled'
 
+export type ToolbarHeaderProps = {
+  cobranding: Cobranding | undefined
+  onShowLeftMenuClick: () => void
+  chatIsOpen: boolean
+  toggleChatOpen: () => void
+  reviewPanelOpen: boolean
+  toggleReviewPanelOpen: (e: React.MouseEvent) => void
+  historyIsOpen: boolean
+  toggleHistoryOpen: () => void
+  unreadMessageCount: number
+  onlineUsers: OnlineUser[]
+  goToUser: (user: OnlineUser) => void
+  isRestrictedTokenMember: boolean | undefined
+  hasPublishPermissions: boolean
+  chatVisible: boolean
+  projectName: string
+  renameProject: (name: string) => void
+  hasRenamePermissions: boolean
+  openShareModal: () => void
+  trackChangesVisible: boolean | undefined
+}
+
 const ToolbarHeader = React.memo(function ToolbarHeader({
   cobranding,
   onShowLeftMenuClick,
@@ -59,27 +81,7 @@ const ToolbarHeader = React.memo(function ToolbarHeader({
   hasRenamePermissions,
   openShareModal,
   trackChangesVisible,
-}: {
-  cobranding: Cobranding | undefined
-  onShowLeftMenuClick: () => void
-  chatIsOpen: boolean
-  toggleChatOpen: () => void
-  reviewPanelOpen: boolean
-  toggleReviewPanelOpen: (e: React.MouseEvent) => void
-  historyIsOpen: boolean
-  toggleHistoryOpen: () => void
-  unreadMessageCount: number
-  onlineUsers: OnlineUser[]
-  goToUser: (user: OnlineUser) => void
-  isRestrictedTokenMember: boolean | undefined
-  hasPublishPermissions: boolean
-  chatVisible: boolean
-  projectName: string
-  renameProject: (name: string) => void
-  hasRenamePermissions: boolean
-  openShareModal: () => void
-  trackChangesVisible: boolean | undefined
-}) {
+}: ToolbarHeaderProps) {
   const chatEnabled = getMeta('ol-capabilities')?.includes('chat')
 
   const { t } = useTranslation()

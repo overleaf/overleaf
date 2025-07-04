@@ -5,12 +5,13 @@ import { screen, waitFor } from '@testing-library/react'
 import LayoutDropdownButton from '../../../../../frontend/js/features/editor-navigation-toolbar/components/layout-dropdown-button'
 import { renderWithEditorContext } from '../../../helpers/render-with-context'
 import * as eventTracking from '@/infrastructure/event-tracking'
+import type { LayoutContextOwnStates } from '@/shared/context/layout-context'
 
 describe('<LayoutDropdownButton />', function () {
-  let openStub
-  let sendMBSpy
+  let openStub: sinon.SinonStub
+  let sendMBSpy: sinon.SinonSpy
 
-  const defaultLayout = {
+  const defaultLayout: Partial<LayoutContextOwnStates> = {
     pdfLayout: 'flat',
     view: 'pdf',
     chatIsOpen: false,
@@ -161,9 +162,10 @@ describe('<LayoutDropdownButton />', function () {
   })
 
   describe('on detach', async function () {
-    let originalBroadcastChannel
+    const originalBroadcastChannel = window.BroadcastChannel
     beforeEach(async function () {
-      window.BroadcastChannel = originalBroadcastChannel || true // ensure that window.BroadcastChannel is truthy
+      // @ts-expect-error
+      window.BroadcastChannel = true // ensure that window.BroadcastChannel is truthy
 
       renderWithEditorContext(<LayoutDropdownButton />, {
         layoutContext: { ...defaultLayout, view: 'editor' },

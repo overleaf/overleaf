@@ -3,7 +3,14 @@
 import { merge } from 'lodash'
 import { SocketIOMock } from '@/ide/connection/SocketIoShim'
 import { IdeContext } from '@/shared/context/ide-context'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, {
+  useCallback,
+  useEffect,
+  useState,
+  useMemo,
+  type FC,
+  type PropsWithChildren,
+} from 'react'
 import {
   createReactScopeValueStore,
   IdeReactContext,
@@ -12,12 +19,25 @@ import { IdeEventEmitter } from '@/features/ide-react/create-ide-event-emitter'
 import { ReactScopeValueStore } from '@/features/ide-react/scope-value-store/react-scope-value-store'
 import { ReactScopeEventEmitter } from '@/features/ide-react/scope-event-emitter/react-scope-event-emitter'
 import { ConnectionContext } from '@/features/ide-react/context/connection-context'
-import { EditorOpenDocContext } from '@/features/ide-react/context/editor-open-doc-context'
+import {
+  EditorOpenDocContext,
+  type EditorOpenDocContextState,
+} from '@/features/ide-react/context/editor-open-doc-context'
 import { ReactContextRoot } from '@/features/ide-react/context/react-context-root'
 import useEventListener from '@/shared/hooks/use-event-listener'
 import useDetachLayout from '@/shared/hooks/use-detach-layout'
-import { LayoutContext } from '@/shared/context/layout-context'
 import useExposedState from '@/shared/hooks/use-exposed-state'
+import {
+  type IdeLayout,
+  type IdeView,
+  LayoutContext,
+  type LayoutContextValue,
+} from '@/shared/context/layout-context'
+import type { Socket } from '@/features/ide-react/connection/types/socket'
+import type { PermissionsLevel } from '@/features/ide-react/types/permissions'
+import type { Folder } from '../../../types/folder'
+import type { SocketDebuggingInfo } from '@/features/ide-react/connection/types/connection-state'
+import type { DocumentContainer } from '@/features/ide-react/editor/document-container'
 
 // these constants can be imported in tests instead of
 // using magic strings
@@ -41,10 +61,26 @@ const defaultUserSettings = {
   mathPreview: true,
 }
 
-/**
- * @typedef {import('@/shared/context/layout-context').LayoutContextValue} LayoutContextValue
- * @type Partial<LayoutContextValue>
- */
+export type EditorProvidersProps = {
+  user?: { id: string; email: string }
+  projectId?: string
+  projectOwner?: { _id: string; email: string }
+  rootDocId?: string
+  imageName?: string
+  compiler?: string
+  socket?: Socket
+  isRestrictedTokenMember?: boolean
+  scope?: Record<string, any>
+  features?: Record<string, boolean>
+  projectFeatures?: Record<string, boolean>
+  permissionsLevel?: PermissionsLevel
+  children?: React.ReactNode
+  rootFolder?: Folder[]
+  layoutContext?: Partial<LayoutContextValue>
+  userSettings?: Record<string, any>
+  providers?: Record<string, React.FC<React.PropsWithChildren<any>>>
+}
+
 const layoutContextDefault = {
   view: 'editor',
   openFile: null,
@@ -55,7 +91,7 @@ const layoutContextDefault = {
   projectSearchIsOpen: false,
   pdfLayout: 'sideBySide',
   loadingStyleSheet: false,
-}
+} satisfies Partial<LayoutContextValue>
 
 export function EditorProviders({
   user = { id: USER_ID, email: USER_EMAIL },
@@ -67,7 +103,7 @@ export function EditorProviders({
   rootDocId = '_root_doc_id',
   imageName = 'texlive-full:2024.1',
   compiler = 'pdflatex',
-  socket = new SocketIOMock(),
+  socket = new SocketIOMock() as any as Socket,
   isRestrictedTokenMember = false,
   scope: defaultScope = {},
   features = {
@@ -94,7 +130,7 @@ export function EditorProviders({
   layoutContext = layoutContextDefault,
   userSettings = {},
   providers = {},
-}) {
+}: EditorProvidersProps) {
   window.metaAttributesCache.set(
     'ol-gitBridgePublicBaseUrl',
     'https://git.overleaf.test'
@@ -121,7 +157,7 @@ export function EditorProviders({
           on: () => {},
           off: () => {},
           leaveAndCleanUpPromise: async () => {},
-        },
+        } as any as DocumentContainer,
         openDocName: null,
         currentDocumentId: null,
       },
@@ -150,7 +186,7 @@ export function EditorProviders({
         ConnectionProvider: makeConnectionProvider(socket),
         IdeReactProvider: makeIdeReactProvider(scope, socket),
         EditorOpenDocProvider: makeEditorOpenDocProvider({
-          openDocId: scope.editor.currentDocumentId,
+          currentDocumentId: scope.editor.currentDocumentId,
           openDocName: scope.editor.openDocName,
           currentDocument: scope.editor.sharejs_doc,
         }),
@@ -163,8 +199,8 @@ export function EditorProviders({
   )
 }
 
-const makeConnectionProvider = socket => {
-  const ConnectionProvider = ({ children }) => {
+const makeConnectionProvider = (socket: Socket) => {
+  const ConnectionProvider: FC<PropsWithChildren> = ({ children }) => {
     const [value] = useState(() => ({
       socket,
       connectionState: {
@@ -174,7 +210,7 @@ const makeConnectionProvider = socket => {
         reconnectAt: null,
         forcedDisconnectDelay: 0,
         lastConnectionAttempt: 0,
-        error: '',
+        error: '' as const,
       },
       isConnected: true,
       isStillReconnecting: false,
@@ -182,6 +218,8 @@ const makeConnectionProvider = socket => {
       tryReconnectNow: () => {},
       registerUserActivity: () => {},
       disconnect: () => {},
+      closeConnection: () => {},
+      getSocketDebuggingInfo: () => ({}) as SocketDebuggingInfo,
     }))
 
     return (
@@ -193,8 +231,11 @@ const makeConnectionProvider = socket => {
   return ConnectionProvider
 }
 
-const makeIdeReactProvider = (scope, socket) => {
-  const IdeReactProvider = ({ children }) => {
+const makeIdeReactProvider = (
+  scope: Record<string, unknown>,
+  socket: Socket
+) => {
+  const IdeReactProvider: FC<PropsWithChildren> = ({ children }) => {
     const [startedFreeTrial, setStartedFreeTrial] = useState(false)
 
     const [ideReactContextValue] = useState(() => ({
@@ -204,7 +245,9 @@ const makeIdeReactProvider = (scope, socket) => {
       setStartedFreeTrial,
       reportError: () => {},
       projectJoined: true,
-      permissionsLevel: scope.permissionsLevel,
+      permissionsLevel: scope.permissionsLevel as PermissionsLevel,
+      setPermissionsLevel: () => {},
+      setOutOfSync: () => {},
     }))
 
     const [ideContextValue] = useState(() => {
@@ -247,13 +290,15 @@ const makeIdeReactProvider = (scope, socket) => {
   return IdeReactProvider
 }
 
-export function makeEditorOpenDocProvider(initialValues) {
+export function makeEditorOpenDocProvider(
+  initialValues: EditorOpenDocContextState
+) {
   const {
     currentDocumentId: initialCurrentDocumentId,
     openDocName: initialOpenDocName,
     currentDocument: initialCurrentDocument,
   } = initialValues
-  const EditorOpenDocProvider = ({ children }) => {
+  const EditorOpenDocProvider: FC<PropsWithChildren> = ({ children }) => {
     const [currentDocumentId, setCurrentDocumentId] = useExposedState(
       initialCurrentDocumentId,
       'editor.open_doc_id'
@@ -285,13 +330,15 @@ export function makeEditorOpenDocProvider(initialValues) {
   return EditorOpenDocProvider
 }
 
-const makeLayoutProvider = layoutContextOverrides => {
+const makeLayoutProvider = (
+  layoutContextOverrides?: Partial<LayoutContextValue>
+) => {
   const layout = {
     ...layoutContextDefault,
     ...layoutContextOverrides,
   }
-  const LayoutProvider = ({ children }) => {
-    const [view, setView] = useState(layout.view)
+  const LayoutProvider: FC<PropsWithChildren> = ({ children }) => {
+    const [view, setView] = useState<IdeView | null>(layout.view)
     const [openFile, setOpenFile] = useState(layout.openFile)
     const [chatIsOpen, setChatIsOpen] = useState(layout.chatIsOpen)
     const [reviewPanelOpen, setReviewPanelOpen] = useState(
@@ -316,7 +363,7 @@ const makeLayoutProvider = layoutContextOverrides => {
       }, [setReviewPanelOpen])
     )
     const changeLayout = useCallback(
-      (newLayout, newView = 'editor') => {
+      (newLayout: IdeLayout, newView: IdeView = 'editor') => {
         setPdfLayout(newLayout)
         setView(newLayout === 'sideBySide' ? 'editor' : newView)
       },

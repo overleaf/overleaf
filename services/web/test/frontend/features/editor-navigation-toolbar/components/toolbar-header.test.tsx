@@ -1,11 +1,13 @@
 import { expect } from 'chai'
 import { screen } from '@testing-library/react'
 
-import ToolbarHeader from '../../../../../frontend/js/features/editor-navigation-toolbar/components/toolbar-header'
+import ToolbarHeader, {
+  type ToolbarHeaderProps,
+} from '../../../../../frontend/js/features/editor-navigation-toolbar/components/toolbar-header'
 import { renderWithEditorContext } from '../../../helpers/render-with-context'
 
 describe('<ToolbarHeader />', function () {
-  const defaultProps = {
+  const defaultProps: ToolbarHeaderProps = {
     onShowLeftMenuClick: () => {},
     toggleChatOpen: () => {},
     toggleReviewPanelOpen: () => {},
@@ -19,11 +21,12 @@ describe('<ToolbarHeader />', function () {
     hasPublishPermissions: true,
     chatVisible: true,
     trackChangesVisible: true,
-    handleChangeLayout: () => {},
-    pdfLayout: 'sideBySide',
-    view: 'editor',
-    reattach: () => {},
-    detach: () => {},
+    cobranding: undefined,
+    isRestrictedTokenMember: false,
+    hasRenamePermissions: true,
+    historyIsOpen: false,
+    chatIsOpen: false,
+    reviewPanelOpen: false,
   }
 
   beforeEach(function () {
@@ -40,6 +43,8 @@ describe('<ToolbarHeader />', function () {
       const props = {
         ...defaultProps,
         cobranding: {
+          brandId: 12,
+          brandVariationId: 12,
           brandVariationHomeUrl: 'http://cobranding',
           brandVariationName: 'variation',
           logoImgUrl: 'http://cobranding/logo',

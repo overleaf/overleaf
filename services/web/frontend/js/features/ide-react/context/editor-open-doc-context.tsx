@@ -11,12 +11,15 @@ import { DocId } from '../../../../../types/project-settings'
 import useExposedState from '@/shared/hooks/use-exposed-state'
 import { DocumentContainer } from '@/features/ide-react/editor/document-container'
 
-type EditorOpenDocContextValue = {
+export interface EditorOpenDocContextState {
   currentDocumentId: DocId | null
-  setCurrentDocumentId: Dispatch<SetStateAction<DocId | null>>
   openDocName: string | null
-  setOpenDocName: Dispatch<SetStateAction<string | null>>
   currentDocument: DocumentContainer | null
+}
+
+interface EditorOpenDocContextValue extends EditorOpenDocContextState {
+  setCurrentDocumentId: Dispatch<SetStateAction<DocId | null>>
+  setOpenDocName: Dispatch<SetStateAction<string | null>>
   setCurrentDocument: Dispatch<SetStateAction<DocumentContainer | null>>
 }
 

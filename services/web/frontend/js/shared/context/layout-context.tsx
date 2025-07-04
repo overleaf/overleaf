@@ -25,37 +25,40 @@ import usePersistedState from '@/shared/hooks/use-persisted-state'
 export type IdeLayout = 'sideBySide' | 'flat'
 export type IdeView = 'editor' | 'file' | 'pdf' | 'history'
 
-export type LayoutContextValue = {
+export type LayoutContextOwnStates = {
+  view: IdeView | null
+  chatIsOpen: boolean
+  reviewPanelOpen: boolean
+  miniReviewPanelVisible: boolean
+  leftMenuShown: boolean
+  loadingStyleSheet: boolean
+  pdfLayout: IdeLayout
+  projectSearchIsOpen: boolean
+  openFile: BinaryFile | null
+}
+
+export type LayoutContextValue = LayoutContextOwnStates & {
   reattach: () => void
   detach: () => void
   detachIsLinked: boolean
   detachRole: DetachRole
   changeLayout: (newLayout: IdeLayout, newView?: IdeView) => void
-  view: IdeView | null
   setView: (view: IdeView | null) => void
-  chatIsOpen: boolean
   setChatIsOpen: Dispatch<SetStateAction<LayoutContextValue['chatIsOpen']>>
-  reviewPanelOpen: boolean
   setReviewPanelOpen: Dispatch<
     SetStateAction<LayoutContextValue['reviewPanelOpen']>
   >
-  miniReviewPanelVisible: boolean
   setMiniReviewPanelVisible: Dispatch<
     SetStateAction<LayoutContextValue['miniReviewPanelVisible']>
   >
-  leftMenuShown: boolean
   setLeftMenuShown: Dispatch<
     SetStateAction<LayoutContextValue['leftMenuShown']>
   >
-  loadingStyleSheet: boolean
   setLoadingStyleSheet: Dispatch<
     SetStateAction<LayoutContextValue['loadingStyleSheet']>
   >
-  pdfLayout: IdeLayout
   pdfPreviewOpen: boolean
-  projectSearchIsOpen: boolean
   setProjectSearchIsOpen: Dispatch<SetStateAction<boolean>>
-  openFile: BinaryFile | null
   setOpenFile: Dispatch<SetStateAction<BinaryFile | null>>
 }
 

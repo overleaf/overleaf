@@ -8,12 +8,16 @@ describe('<OnlineUsersWidget />', function () {
   const defaultProps = {
     onlineUsers: [
       {
+        id: 'test_user',
         user_id: 'test_user',
         name: 'test_user',
+        email: 'test_email',
       },
       {
+        id: 'another_test_user',
         user_id: 'another_test_user',
         name: 'another_test_user',
+        email: 'another_test_email',
       },
     ],
     goToUser: () => {},
@@ -44,8 +48,10 @@ describe('<OnlineUsersWidget />', function () {
       fireEvent.click(icon)
 
       expect(props.goToUser).to.be.calledWith({
-        name: 'test_user',
+        id: 'test_user',
         user_id: 'test_user',
+        name: 'test_user',
+        email: 'test_email',
       })
     })
   })
@@ -55,12 +61,16 @@ describe('<OnlineUsersWidget />', function () {
       ...defaultProps,
       onlineUsers: defaultProps.onlineUsers.concat([
         {
+          id: 'user_3',
           user_id: 'user_3',
           name: 'user_3',
+          email: 'user_3',
         },
         {
+          id: 'user_4',
           user_id: 'user_4',
           name: 'user_4',
+          email: 'user_4',
         },
       ]),
     }
@@ -96,8 +106,10 @@ describe('<OnlineUsersWidget />', function () {
       fireEvent.click(icon)
 
       expect(testProps.goToUser).to.be.calledWith({
-        name: 'user_3',
+        id: 'user_3',
         user_id: 'user_3',
+        name: 'user_3',
+        email: 'user_3',
       })
     })
   })

@@ -1,4 +1,4 @@
-import { FC } from 'react'
+import React, { FC, PropsWithChildren } from 'react'
 import { ChatProvider } from '@/features/chat/context/chat-context'
 import { ConnectionProvider } from './connection-context'
 import { DetachCompileProvider } from '@/shared/context/detach-compile-context'
@@ -32,7 +32,7 @@ import { CommandRegistryProvider } from './command-registry-context'
 
 export const ReactContextRoot: FC<
   React.PropsWithChildren<{
-    providers?: Record<string, FC>
+    providers?: Record<string, FC<PropsWithChildren>>
   }>
 > = ({ children, providers = {} }) => {
   const Providers = {
