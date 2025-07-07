@@ -74,7 +74,7 @@ async function createSubscription(user, subscriptionDetails, recurlyTokenIds) {
  */
 async function previewSubscriptionChange(userId, planCode) {
   const change = await Modules.promises.hooks.fire(
-    'previewSubscriptionChange',
+    'previewPlanChange',
     userId,
     planCode
   )

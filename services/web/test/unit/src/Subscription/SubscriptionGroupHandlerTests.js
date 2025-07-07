@@ -193,20 +193,25 @@ describe('SubscriptionGroupHandler', function () {
     this.Modules = {
       promises: {
         hooks: {
-          fire: sinon.stub().callsFake(hookName => {
-            if (hookName === 'generateTermsAndConditions') {
-              return Promise.resolve(['T&Cs'])
-            }
-            if (hookName === 'getPaymentFromRecord') {
-              return Promise.resolve([
-                { account: { hasPastDueInvoice: false } },
-              ])
-            }
-            return Promise.resolve()
-          }),
+          fire: sinon.stub(),
         },
       },
     }
+
+    this.Modules.promises.hooks.fire
+      .withArgs('generateTermsAndConditions')
+      .resolves(['T&Cs'])
+      .withArgs('getPaymentFromRecord')
+      .resolves([
+        {
+          subscription: this.recurlySubscription,
+          account: { hasPastDueInvoice: false },
+        },
+      ])
+      .withArgs('previewSubscriptionChangeRequest')
+      .resolves([this.previewSubscriptionChange])
+      .withArgs('previewGroupPlanUpgrade')
+      .resolves([{ subscriptionChange: this.previewSubscriptionChange }])
 
     this.Handler = SandboxedModule.require(modulePath, {
       requires: {
@@ -389,7 +394,7 @@ describe('SubscriptionGroupHandler', function () {
             this.PaymentProviderEntities.MEMBERS_LIMIT_ADD_ON_CODE,
           canUseFlexibleLicensing: true,
         },
-        recurlySubscription: this.recurlySubscription,
+        paymentProviderSubscription: this.recurlySubscription,
       })
     })
   })
@@ -441,11 +446,16 @@ describe('SubscriptionGroupHandler', function () {
               this.adminUser_id,
               this.adding
             )
-          this.RecurlyClient.promises.getPaymentMethod
-            .calledWith(this.adminUser_id)
+          this.Modules.promises.hooks.fire
+            .calledWith('getPaymentFromRecord', {
+              groupPlan: true,
+              recurlyStatus: {
+                state: 'active',
+              },
+            })
             .should.equal(true)
-          this.RecurlyClient.promises.previewSubscriptionChange
-            .calledWith(this.changeRequest)
+          this.Modules.promises.hooks.fire
+            .calledWith('previewSubscriptionChangeRequest', this.changeRequest)
             .should.equal(true)
           this.SubscriptionController.makeChangePreview
             .calledWith(
@@ -473,9 +483,14 @@ describe('SubscriptionGroupHandler', function () {
               return true
             },
           }
-          this.RecurlyClient.promises.getSubscription = sinon
-            .stub()
-            .resolves(this.recurlySubscription)
+          this.Modules.promises.hooks.fire
+            .withArgs('getPaymentFromRecord')
+            .resolves([
+              {
+                subscription: this.recurlySubscription,
+                account: { hasPastDueInvoice: false },
+              },
+            ])
 
           const result =
             await this.Handler.promises.createAddSeatsSubscriptionChange(
@@ -491,13 +506,10 @@ describe('SubscriptionGroupHandler', function () {
                 .and(sinon.match.has('termsAndConditions'))
             )
             .should.equal(true)
-          this.RecurlyClient.promises.applySubscriptionChangeRequest
-            .calledWith(this.changeRequest)
-            .should.equal(true)
-          this.SubscriptionHandler.promises.syncSubscription
+          this.Modules.promises.hooks.fire
             .calledWith(
-              { uuid: this.recurlySubscription.id },
-              this.adminUser_id
+              'applySubscriptionChangeRequestAndSync',
+              this.changeRequest
             )
             .should.equal(true)
           expect(result).to.deep.equal({
@@ -511,7 +523,6 @@ describe('SubscriptionGroupHandler', function () {
       describe('accounts with PO number', function () {
         it('should update the subscription PO number and T&C', async function () {
           await this.Handler.promises.updateSubscriptionPaymentTerms(
-            this.adminUser_id,
             this.recurlySubscription,
             this.poNumberAndTermsAndConditionsUpdate.poNumber
           )
@@ -525,12 +536,23 @@ describe('SubscriptionGroupHandler', function () {
             .calledWith(this.poNumberAndTermsAndConditionsUpdate)
             .should.equal(true)
         })
+
+        it('should fail for stripe', async function () {
+          this.recurlySubscription.service = 'stripe'
+          await expect(
+            this.Handler.promises.updateSubscriptionPaymentTerms(
+              this.recurlySubscription,
+              this.poNumberAndTermsAndConditionsUpdate.poNumber
+            )
+          ).to.be.rejectedWith(
+            'Updating payment terms is not supported for Stripe subscriptions'
+          )
+        })
       })
 
       describe('accounts with no PO number', function () {
         it('should update the subscription T&C only', async function () {
           await this.Handler.promises.updateSubscriptionPaymentTerms(
-            this.adminUser_id,
             this.recurlySubscription
           )
           this.recurlySubscription.getRequestForTermsAndConditionsUpdate
@@ -570,11 +592,16 @@ describe('SubscriptionGroupHandler', function () {
         let preview
 
         afterEach(function () {
-          this.RecurlyClient.promises.getPaymentMethod
-            .calledWith(this.adminUser_id)
+          this.Modules.promises.hooks.fire
+            .calledWith('getPaymentFromRecord', {
+              groupPlan: true,
+              recurlyStatus: {
+                state: 'active',
+              },
+            })
             .should.equal(true)
-          this.RecurlyClient.promises.previewSubscriptionChange
-            .calledWith(this.changeRequest)
+          this.Modules.promises.hooks.fire
+            .calledWith('previewSubscriptionChangeRequest', this.changeRequest)
             .should.equal(true)
           this.SubscriptionController.makeChangePreview
             .calledWith(
@@ -781,9 +808,6 @@ describe('SubscriptionGroupHandler', function () {
 
   describe('getGroupPlanUpgradePreview', function () {
     it('should generate preview for subscription upgrade', async function () {
-      this.Modules.promises.hooks.fire.resolves([
-        { subscriptionChange: this.previewSubscriptionChange },
-      ])
       const result = await this.Handler.promises.getGroupPlanUpgradePreview(
         this.user_id
       )
@@ -797,8 +821,8 @@ describe('SubscriptionGroupHandler', function () {
         this.recurlySubscription,
         this.adminUser_id
       )
-      this.RecurlyClient.promises.getPaymentMethod
-        .calledWith(this.adminUser_id)
+      this.Modules.promises.hooks.fire
+        .calledWith('getPaymentMethod', this.adminUser_id)
         .should.equal(true)
     })
 

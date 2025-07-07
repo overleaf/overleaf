@@ -55,7 +55,7 @@ describe('SubscriptionGroupController', function () {
         getUsersGroupSubscriptionDetails: sinon.stub().resolves({
           subscription: ctx.subscription,
           plan: ctx.plan,
-          recurlySubscription: ctx.recurlySubscription,
+          paymentProviderSubscription: ctx.recurlySubscription,
         }),
         previewAddSeatsSubscriptionChange: sinon
           .stub()

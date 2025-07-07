@@ -20,7 +20,6 @@ import {
   SubtotalLimitExceededError,
   HasPastDueInvoiceError,
 } from './Errors.js'
-import RecurlyClient from './RecurlyClient.js'
 
 /**
  * @import { Subscription } from "../../../../types/subscription/dashboard/subscription.js"
@@ -138,13 +137,13 @@ async function _removeUserFromGroup(
 async function addSeatsToGroupSubscription(req, res) {
   try {
     const userId = SessionManager.getLoggedInUserId(req.session)
-    const { subscription, recurlySubscription, plan } =
+    const { subscription, paymentProviderSubscription, plan } =
       await SubscriptionGroupHandler.promises.getUsersGroupSubscriptionDetails(
         userId
       )
     await SubscriptionGroupHandler.promises.ensureFlexibleLicensingEnabled(plan)
     await SubscriptionGroupHandler.promises.ensureSubscriptionHasNoPendingChanges(
-      recurlySubscription
+      paymentProviderSubscription
     )
     await SubscriptionGroupHandler.promises.ensureSubscriptionIsActive(
       subscription
@@ -162,15 +161,15 @@ async function addSeatsToGroupSubscription(req, res) {
 
     if (flexibleLicensingForManuallyBilledSubscriptionsVariant === 'enabled') {
       await SubscriptionGroupHandler.promises.checkBillingInfoExistence(
-        recurlySubscription,
+        paymentProviderSubscription,
         userId
       )
     } else {
       await SubscriptionGroupHandler.promises.ensureSubscriptionCollectionMethodIsNotManual(
-        recurlySubscription
+        paymentProviderSubscription
       )
       // Check if the user has missing billing details
-      await RecurlyClient.promises.getPaymentMethod(userId)
+      await Modules.promises.hooks.fire('getPaymentMethod', userId)
     }
 
     res.render('subscriptions/add-seats', {
@@ -178,7 +177,8 @@ async function addSeatsToGroupSubscription(req, res) {
       groupName: subscription.teamName,
       totalLicenses: subscription.membersLimit,
       isProfessional: isProfessionalGroupPlan(subscription),
-      isCollectionMethodManual: recurlySubscription.isCollectionMethodManual,
+      isCollectionMethodManual:
+        paymentProviderSubscription.isCollectionMethodManual,
     })
   } catch (error) {
     if (error instanceof MissingBillingInfoError) {
@@ -300,15 +300,15 @@ async function submitForm(req, res) {
   const userEmail = await UserGetter.promises.getUserEmail(userId)
   const { adding, poNumber } = req.body
 
-  const { recurlySubscription } =
+  const { paymentProviderSubscription } =
     await SubscriptionGroupHandler.promises.getUsersGroupSubscriptionDetails(
       userId
     )
 
-  if (recurlySubscription.isCollectionMethodManual) {
+  if (paymentProviderSubscription.isCollectionMethodManual) {
     await SubscriptionGroupHandler.promises.updateSubscriptionPaymentTerms(
       userId,
-      recurlySubscription,
+      paymentProviderSubscription,
       poNumber
     )
   }
