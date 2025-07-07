@@ -1,5 +1,9 @@
 import { CurrencyCode } from './currency'
-import { PaymentProvider } from './dashboard/subscription'
+import {
+  PaymentProvider,
+  StripePaymentProviderService,
+} from './dashboard/subscription'
+import { RecurlyPlanCode } from './plan'
 
 type PaymentPageFormSubmitEventBaseSegmentation = {
   currencyCode: CurrencyCode
@@ -12,7 +16,7 @@ type PaymentPageFormSubmitEventBaseSegmentation = {
 
 type PaymentPageFormSubmitEventStripeSegmentation =
   PaymentPageFormSubmitEventBaseSegmentation & {
-    payment_provider: Exclude<PaymentProvider['service'], 'recurly'>
+    payment_provider: StripePaymentProviderService
     stripe_price_id: string
     stripe_price_lookup_key: string
   }
@@ -28,3 +32,25 @@ type PaymentPageFormSubmitEventRecurlySegmentation =
 export type PaymentPageFormSubmitEventSegmentation =
   | PaymentPageFormSubmitEventStripeSegmentation
   | PaymentPageFormSubmitEventRecurlySegmentation
+
+type PaymentPageFormSuccessEventBaseSegmentation = {
+  plan?: RecurlyPlanCode
+  upgradeType: 'standalone'
+  referrer?: string
+}
+
+type PaymentPageFormSuccessEventStripeSegmentation =
+  PaymentPageFormSuccessEventBaseSegmentation & {
+    payment_provider: StripePaymentProviderService
+    stripe_price_id: string
+    stripe_price_lookup_key: string
+  }
+
+type PaymentPageFormSuccessEventRecurlySegmentation =
+  PaymentPageFormSuccessEventBaseSegmentation & {
+    payment_provider: 'recurly'
+  }
+
+export type PaymentPageFormSuccessEventSegmentation =
+  | PaymentPageFormSuccessEventStripeSegmentation
+  | PaymentPageFormSuccessEventRecurlySegmentation
