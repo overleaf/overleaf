@@ -12,15 +12,15 @@
     --matched-hit-selected-unfocused-highlight-color: var(--bg-accent-02);
     --collapsible-file-header-count-color: var(--content-primary);
     --collapsible-file-header-count-bg-color: var(--bg-light-tertiary);
+    --search-modifier-checked-bg: var(--bg-accent-03);
+    --search-modifier-hover-color: var(--bg-light-secondary);
 
     // Redesign additions
     --full-project-search-border-color: var(--border-divider);
     --collapsible-file-header-hover-bg: var(--bg-light-secondary);
     --matched-hit-highlight-text-color: var(--content-primary);
     --matched-file-hit-hover-bg: var(--bg-light-secondary);
-    --search-modifier-checked-bg: var(--bg-accent-03);
     --search-modifier-checked-color: var(--green-70);
-    --search-modifier-hover-color: var(--bg-light-secondary);
     --search-modifier-color: var(--content-primary);
 
     &[data-bs-theme='dark'] {
@@ -35,15 +35,15 @@
       --collapsible-file-header-count-color: var(--content-primary);
       --collapsible-file-header-count-bg-color: var(--bg-light-tertiary);
       --panel-heading-color: var(--content-primary-dark);
+      --search-modifier-checked-bg: var(--green-70);
+      --search-modifier-hover-color: var(--bg-dark-secondary);
 
       // Redesign additions
       --full-project-search-border-color: var(--border-divider-dark);
       --collapsible-file-header-hover-bg: var(--bg-dark-secondary);
       --matched-hit-highlight-text-color: var(--green-10);
       --matched-file-hit-hover-bg: var(--bg-dark-secondary);
-      --search-modifier-checked-bg: var(--green-70);
       --search-modifier-checked-color: var(--green-10);
-      --search-modifier-hover-color: var(--bg-dark-secondary);
       --search-modifier-color: var(--content-primary-dark);
 
       input[type='search']::selection {
@@ -53,17 +53,11 @@
 
     .full-project-search-modifiers {
       input:checked ~ .form-check-label {
-        background-color: var(--search-modifier-checked-bg);
         color: var(--search-modifier-checked-color);
       }
 
       .form-check-label {
         color: var(--search-modifier-color);
-
-        &:hover,
-        &:focus {
-          background-color: var(--search-modifier-hover-color);
-        }
       }
     }
 
@@ -136,6 +130,8 @@
   --matched-hit-selected-unfocused-highlight-color: var(--bg-accent-02);
   --collapsible-file-header-count-color: var(--bs-body-color);
   --collapsible-file-header-count-bg-color: var(--bg-light-secondary);
+  --search-modifier-checked-bg: var(--neutral-30);
+  --search-modifier-hover-color: var(--neutral-20);
 
   &[data-bs-theme='dark'] {
     --full-project-search-bg-color: var(--bg-dark-secondary);
@@ -149,23 +145,16 @@
     --collapsible-file-header-count-color: var(--bs-body-color);
     --collapsible-file-header-count-bg-color: var(--bg-dark-secondary);
     --panel-heading-color: var(--content-primary-dark);
+    --search-modifier-checked-bg: var(--neutral-90);
+    --search-modifier-hover-color: var(--neutral-70);
 
     input[type='search']::selection {
       background-color: #b4d1ff;
     }
 
     .full-project-search-modifiers {
-      input:checked ~ .form-check-label {
-        background-color: var(--neutral-90);
-      }
-
       .form-check-label {
         color: inherit;
-
-        &:hover,
-        &:focus {
-          background-color: var(--neutral-70);
-        }
       }
     }
 
@@ -238,7 +227,7 @@
 
       &:hover,
       &:focus {
-        background-color: var(--neutral-20);
+        background-color: var(--search-modifier-hover-color);
       }
     }
 
@@ -247,7 +236,7 @@
     }
 
     input:checked ~ .form-check-label {
-      background-color: var(--neutral-30);
+      background-color: var(--search-modifier-checked-bg);
     }
   }
 
