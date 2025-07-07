@@ -663,12 +663,12 @@ async function expireProject(projectId) {
       keySchema.persistTime({ projectId }),
       keySchema.expireTime({ projectId })
     )
-    metrics.inc('chunk_store.redis.set_persisted_version', 1, {
+    metrics.inc('chunk_store.redis.expire_project', 1, {
       status,
     })
     return status
   } catch (err) {
-    metrics.inc('chunk_store.redis.set_persisted_version', 1, {
+    metrics.inc('chunk_store.redis.expire_project', 1, {
       status: 'error',
     })
     throw err
