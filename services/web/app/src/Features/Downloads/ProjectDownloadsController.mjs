@@ -18,6 +18,11 @@ import { prepareZipAttachment } from '../../infrastructure/Response.js'
 
 let ProjectDownloadsController
 
+// Keep in sync with the logic for PDF files in CompileController
+function getSafeProjectName(project) {
+  return project.name.replace(/[^\p{L}\p{Nd}]/gu, '_')
+}
+
 export default ProjectDownloadsController = {
   downloadProject(req, res, next) {
     const projectId = req.params.Project_id
@@ -41,7 +46,7 @@ export default ProjectDownloadsController = {
                 if (error != null) {
                   return next(error)
                 }
-                prepareZipAttachment(res, `${project.name}.zip`)
+                prepareZipAttachment(res, `${getSafeProjectName(project)}.zip`)
                 return stream.pipe(res)
               }
             )

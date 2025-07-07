@@ -347,6 +347,7 @@ const _CompileController = {
     }
   },
 
+  // Keep in sync with the logic for zip files in ProjectDownloadsController
   _getSafeProjectName(project) {
     return project.name.replace(/[^\p{L}\p{Nd}]/gu, '_')
   },

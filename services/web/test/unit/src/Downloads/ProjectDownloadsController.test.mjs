@@ -52,7 +52,7 @@ describe('ProjectDownloadsController', function () {
         .stub()
         .callsArgWith(1, null, ctx.stream)
       ctx.req.params = { Project_id: ctx.project_id }
-      ctx.project_name = 'project name with accênts'
+      ctx.project_name = 'project name with accênts and % special characters'
       ctx.ProjectGetter.getProject = sinon
         .stub()
         .callsArgWith(2, null, { name: ctx.project_name })
@@ -95,9 +95,9 @@ describe('ProjectDownloadsController', function () {
         .should.equal(true)
     })
 
-    it('should name the downloaded file after the project', function (ctx) {
+    it('should name the downloaded file after the project but sanitise special characters', function (ctx) {
       ctx.res.headers.should.deep.equal({
-        'Content-Disposition': `attachment; filename="${ctx.project_name}.zip"`,
+        'Content-Disposition': `attachment; filename="project_name_with_accênts_and___special_characters.zip"`,
         'Content-Type': 'application/zip',
         'X-Content-Type-Options': 'nosniff',
       })
