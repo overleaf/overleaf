@@ -55,6 +55,7 @@ export function ProjectListDsNav() {
 
   return (
     <div className="project-ds-nav-page website-redesign">
+      <SystemMessages />
       <DefaultNavbar
         {...navbarProps}
         overleafLogo={overleafLogo}
@@ -123,9 +124,6 @@ export function ProjectListDsNav() {
               </div>
             </div>
             <Footer {...footerProps} />
-          </div>
-          <div>
-            <SystemMessages />
           </div>
         </div>
       </main>
