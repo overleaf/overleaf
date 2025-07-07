@@ -13,9 +13,7 @@ import {
   DeprecatedBrowser,
   isDeprecatedBrowser,
 } from '@/shared/components/deprecated-browser'
-import PapersNotificationBanner from './papers-notification-banner'
 import AiAssistBanner from './ai-assist-banner'
-import { usePapersNotification } from './hooks/use-papers-notification'
 
 const [enrollmentNotificationModule] = importOverleafModules(
   'managedGroupSubscriptionEnrollmentNotification'
@@ -34,8 +32,6 @@ const USGovBanner: JSXElementConstructor<Record<string, never>> =
 function UserNotifications() {
   const groupSubscriptionsPendingEnrollment =
     getMeta('ol-groupSubscriptionsPendingEnrollment') || []
-
-  const { shouldShow: showPapersNotificationBanner } = usePapersNotification()
 
   return (
     <div className="user-notifications notification-list">
@@ -57,7 +53,6 @@ function UserNotifications() {
         <GroupsAndEnterpriseBanner />
         {USGovBanner && <USGovBanner />}
 
-        {showPapersNotificationBanner && <PapersNotificationBanner />}
         <AiAssistBanner />
         <AccessibilitySurveyBanner />
 

@@ -403,15 +403,6 @@ async function projectListPage(req, res, next) {
     logger.error({ err: error }, 'Failed to get individual subscription')
   }
 
-  // Get the user's assignment for the papers notification banner split test,
-  // which populates splitTestVariants with a value for the split test name and
-  // allows Pug to send it to the browser
-  await SplitTestHandler.promises.getAssignment(
-    req,
-    res,
-    'papers-notification-banner'
-  )
-
   const aiAssistNotificationAssignment =
     await SplitTestHandler.promises.getAssignment(
       req,
