@@ -18,5 +18,10 @@ RUN patch -p1 < pr_26783.patch && rm pr_26783.patch
 COPY pr_26697.patch .
 RUN patch -p1 < pr_26697.patch && rm pr_26697.patch
 
+# Apply security updates to base image
+RUN apt update && apt install -y linux-libc-dev \
+  && unattended-upgrade --verbose --no-minimal-upgrade-steps \
+  && rm -rf /var/lib/apt/lists/*
+
 # Recompile frontend assets
 RUN node genScript compile | bash
