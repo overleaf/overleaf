@@ -100,9 +100,11 @@ function Tooltip({
       show={show}
       onToggle={setShow}
     >
-      {cloneElement(children, {
-        onClick: callFnsInSequence(children.props.onClick, hideTooltip),
-      })}
+      {overlayProps?.trigger === 'click'
+        ? children
+        : cloneElement(children, {
+            onClick: callFnsInSequence(children.props.onClick, hideTooltip),
+          })}
     </OverlayTrigger>
   )
 }
