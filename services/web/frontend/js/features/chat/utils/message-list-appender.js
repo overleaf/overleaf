@@ -15,6 +15,7 @@ export function appendMessage(messageList, message, uniqueMessageIds) {
     lastMessage &&
     message &&
     message.user &&
+    lastMessage.user &&
     message.user.id &&
     message.user.id === lastMessage.user.id &&
     message.timestamp - lastMessage.timestamp < TIMESTAMP_GROUP_SIZE
@@ -57,6 +58,7 @@ export function prependMessages(messageList, messages, uniqueMessageIds) {
       const shouldGroup =
         firstMessage &&
         message &&
+        firstMessage.user &&
         message.user &&
         message.user.id === firstMessage.user.id &&
         firstMessage.timestamp - message.timestamp < TIMESTAMP_GROUP_SIZE

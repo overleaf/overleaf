@@ -29,7 +29,7 @@ export type Message = {
   id: string
   timestamp: number
   contents: string[]
-  user: User
+  user?: User
 }
 
 type State = {

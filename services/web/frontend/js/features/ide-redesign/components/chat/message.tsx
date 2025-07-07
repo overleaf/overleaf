@@ -27,8 +27,6 @@ function getAvatarStyle(user?: User) {
 }
 
 function Message({ message, fromSelf }: MessageProps) {
-  const userAvailable = message.user?.id && message.user.email
-
   return (
     <div className="chat-message-redesign">
       <div className="message-row">
@@ -36,7 +34,7 @@ function Message({ message, fromSelf }: MessageProps) {
         {!fromSelf && (
           <div className="message-author">
             <span>
-              {userAvailable
+              {message.user?.id && message.user.email
                 ? message.user.first_name || message.user.email
                 : t('deleted_user')}
             </span>
@@ -49,7 +47,7 @@ function Message({ message, fromSelf }: MessageProps) {
             {!fromSelf && index === message.contents.length - 1 ? (
               <div className="message-avatar">
                 <div className="avatar" style={getAvatarStyle(message.user)}>
-                  {userAvailable ? (
+                  {message.user?.id && message.user.email ? (
                     message.user.first_name?.charAt(0) ||
                     message.user.email.charAt(0)
                   ) : (

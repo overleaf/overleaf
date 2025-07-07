@@ -2,6 +2,7 @@ import { getHueForUserId } from '@/shared/utils/colors'
 import MessageContent from './message-content'
 import type { Message as MessageType } from '@/features/chat/context/chat-context'
 import { User } from '../../../../../types/user'
+import { useTranslation } from 'react-i18next'
 
 export interface MessageProps {
   message: MessageType
@@ -26,11 +27,16 @@ function getArrowStyle(user?: User) {
 }
 
 function Message({ message, fromSelf }: MessageProps) {
+  const { t } = useTranslation()
   return (
     <div className="message-wrapper">
       {!fromSelf && (
         <div className="name" translate="no">
-          <span>{message.user.first_name || message.user.email}</span>
+          <span>
+            {message.user
+              ? message.user.first_name || message.user.email
+              : t('deleted_user')}
+          </span>
         </div>
       )}
       <div className="message" style={getMessageStyle(message.user)}>

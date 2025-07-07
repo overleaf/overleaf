@@ -40,7 +40,7 @@ export const ReviewPanelMessage: FC<{
   const user = useUserContext()
   const permissions = usePermissionsContext()
 
-  const isCommentAuthor = user.id === message.user.id
+  const isCommentAuthor = Boolean(message.user && user.id === message.user.id)
   const canEdit = isCommentAuthor && permissions.comment
   const canResolve =
     permissions.resolveAllComments ||
