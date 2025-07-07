@@ -44,8 +44,9 @@ describe('Project List', () => {
         cy.findByRole('button', { name: 'Download .zip file' }).click()
       )
 
+      const zipName = projectName.replaceAll('-', '_')
       cy.task('readFileInZip', {
-        pathToZip: `cypress/downloads/${projectName}.zip`,
+        pathToZip: `cypress/downloads/${zipName}.zip`,
         fileToRead: 'main.tex',
       }).should('contain', 'Your introduction goes here')
     })
