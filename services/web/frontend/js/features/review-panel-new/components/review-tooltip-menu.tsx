@@ -31,7 +31,7 @@ import { isCursorNearViewportEdge } from '@/features/source-editor/utils/is-curs
 import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
 import { useModalsContext } from '@/features/ide-react/context/modals-context'
 import { numberOfChangesInSelection } from '../utils/changes-in-selection'
-import { useEditorManagerContext } from '@/features/ide-react/context/editor-manager-context'
+import { useEditorPropertiesContext } from '@/features/ide-react/context/editor-properties-context'
 import classNames from 'classnames'
 import useEventListener from '@/shared/hooks/use-event-listener'
 import useReviewPanelLayout from '../hooks/use-review-panel-layout'
@@ -104,7 +104,7 @@ const ReviewTooltipMenuContent: FC<{ onAddComment: () => void }> = ({
   const ranges = useRangesContext()
   const { acceptChanges, rejectChanges } = useRangesActionsContext()
   const { showGenericConfirmModal } = useModalsContext()
-  const { wantTrackChanges } = useEditorManagerContext()
+  const { wantTrackChanges } = useEditorPropertiesContext()
   const [tooltipStyle, setTooltipStyle] = useState<CSSProperties | undefined>()
   const [visible, setVisible] = useState(false)
 

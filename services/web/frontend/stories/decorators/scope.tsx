@@ -195,7 +195,7 @@ const IdeReactProvider: FC<React.PropsWithChildren> = ({ children }) => {
   }))
 
   const [ideContextValue] = useState(() => {
-    const scopeStore = createReactScopeValueStore(projectId)
+    const scopeStore = createReactScopeValueStore()
     for (const [key, value] of Object.entries(initialScope)) {
       scopeStore.set(key, value)
     }

@@ -15,6 +15,7 @@ import { withinFormattingCommand } from '@/features/source-editor/utils/tree-ope
 import { isSplitTestEnabled } from '@/utils/splitTestUtils'
 import { isMac } from '@/shared/utils/os'
 import { useProjectContext } from '@/shared/context/project-context'
+import { useEditorPropertiesContext } from '@/features/ide-react/context/editor-properties-context'
 
 export const ToolbarItems: FC<{
   state: EditorState
@@ -30,8 +31,9 @@ export const ToolbarItems: FC<{
   listDepth,
 }) {
   const { t } = useTranslation()
-  const { toggleSymbolPalette, showSymbolPalette, writefullInstance } =
-    useEditorContext()
+  const { showSymbolPalette, toggleSymbolPalette } =
+    useEditorPropertiesContext()
+  const { writefullInstance } = useEditorContext()
   const { features } = useProjectContext()
   const isActive = withinFormattingCommand(state)
 

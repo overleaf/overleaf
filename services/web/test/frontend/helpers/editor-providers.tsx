@@ -28,6 +28,10 @@ import useEventListener from '@/shared/hooks/use-event-listener'
 import useDetachLayout from '@/shared/hooks/use-detach-layout'
 import useExposedState from '@/shared/hooks/use-exposed-state'
 import {
+  EditorPropertiesContext,
+  EditorPropertiesContextValue,
+} from '@/features/ide-react/context/editor-properties-context'
+import {
   type IdeLayout,
   type IdeView,
   LayoutContext,
@@ -160,6 +164,7 @@ export function EditorProviders({
         } as any as DocumentContainer,
         openDocName: null,
         currentDocumentId: null,
+        wantTrackChanges: false,
       },
       project: {
         _id: projectId,
@@ -189,6 +194,9 @@ export function EditorProviders({
           currentDocumentId: scope.editor.currentDocumentId,
           openDocName: scope.editor.openDocName,
           currentDocument: scope.editor.sharejs_doc,
+        }),
+        EditorPropertiesProvider: makeEditorPropertiesProvider({
+          wantTrackChanges: scope.editor.wantTrackChanges,
         }),
         LayoutProvider: makeLayoutProvider(layoutContext),
         ...providers,
@@ -251,7 +259,7 @@ const makeIdeReactProvider = (
     }))
 
     const [ideContextValue] = useState(() => {
-      const scopeStore = createReactScopeValueStore(PROJECT_ID)
+      const scopeStore = createReactScopeValueStore()
       for (const [key, value] of Object.entries(scope)) {
         // TODO: path for nested entries
         scopeStore.set(key, value)
@@ -437,4 +445,61 @@ const makeLayoutProvider = (
     )
   }
   return LayoutProvider
+}
+
+export function makeEditorPropertiesProvider(
+  initialValues: Partial<
+    Pick<
+      EditorPropertiesContextValue,
+      'showVisual' | 'showSymbolPalette' | 'wantTrackChanges'
+    >
+  >
+) {
+  const EditorPropertiesProvider: FC<PropsWithChildren> = ({ children }) => {
+    const {
+      showVisual: initialShowVisual,
+      showSymbolPalette: initialShowSymbolPalette,
+      wantTrackChanges: initialWantTrackChanges,
+    } = initialValues
+
+    const [showVisual, setShowVisual] = useState(initialShowVisual || false)
+    const [showSymbolPalette, setShowSymbolPalette] = useState(
+      initialShowSymbolPalette || false
+    )
+
+    function toggleSymbolPalette() {
+      setShowSymbolPalette(show => !show)
+    }
+
+    const [opening, setOpening] = useState(true)
+    const [trackChanges, setTrackChanges] = useState(false)
+    const [wantTrackChanges, setWantTrackChanges] = useState(
+      initialWantTrackChanges || false
+    )
+    const [errorState, setErrorState] = useState(false)
+
+    const value = {
+      showVisual,
+      setShowVisual,
+      showSymbolPalette,
+      setShowSymbolPalette,
+      toggleSymbolPalette,
+      opening,
+      setOpening,
+      trackChanges,
+      setTrackChanges,
+      wantTrackChanges,
+      setWantTrackChanges,
+      errorState,
+      setErrorState,
+    }
+
+    return (
+      <EditorPropertiesContext.Provider value={value}>
+        {children}
+      </EditorPropertiesContext.Provider>
+    )
+  }
+
+  return EditorPropertiesProvider
 }

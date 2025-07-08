@@ -224,7 +224,9 @@ function useUserEmails() {
   const [
     showInstitutionalLeaversSurveyUntil,
     setShowInstitutionalLeaversSurveyUntil,
-  ] = usePersistedState('showInstitutionalLeaversSurveyUntil', 0, true)
+  ] = usePersistedState('showInstitutionalLeaversSurveyUntil', 0, {
+    listen: true,
+  })
   const [state, unsafeDispatch] = useReducer(reducer, initialState)
   const dispatch = useSafeDispatch(unsafeDispatch)
   const { data, isLoading, isError, isSuccess, runAsync } =

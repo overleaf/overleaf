@@ -15,7 +15,6 @@ import {
 } from '@/features/ide-react/create-ide-event-emitter'
 import { JoinProjectPayload } from '@/features/ide-react/connection/join-project-payload'
 import { useConnectionContext } from '@/features/ide-react/context/connection-context'
-import { populateEditorScope } from '@/features/ide-react/scope-adapters/editor-manager-context-adapter'
 import { postJSON } from '@/infrastructure/fetch-json'
 import { ReactScopeEventEmitter } from '@/features/ide-react/scope-event-emitter/react-scope-event-emitter'
 import getMeta from '@/utils/meta'
@@ -53,7 +52,7 @@ function populatePdfScope(store: ReactScopeValueStore) {
   store.allowNonExistentPath('pdf', true)
 }
 
-export function createReactScopeValueStore(projectId: string) {
+export function createReactScopeValueStore() {
   const scopeStore = new ReactScopeValueStore()
 
   // Populate the scope value store with default values that will be used by
@@ -62,7 +61,6 @@ export function createReactScopeValueStore(projectId: string) {
   // initialization code together with the context and would only populate
   // necessary values in the store, but this is simpler for now
   populateIdeReactScope(scopeStore)
-  populateEditorScope(scopeStore, projectId)
   populateProjectScope(scopeStore)
   populatePdfScope(scopeStore)
 
@@ -73,7 +71,7 @@ export function createReactScopeValueStore(projectId: string) {
 
 export const IdeReactProvider: FC<React.PropsWithChildren> = ({ children }) => {
   const projectId = getMeta('ol-project_id')
-  const [scopeStore] = useState(() => createReactScopeValueStore(projectId))
+  const [scopeStore] = useState(() => createReactScopeValueStore())
   const [eventEmitter] = useState(createIdeEventEmitter)
   const [permissionsLevel, setPermissionsLevel] =
     useState<PermissionsLevel>('readOnly')

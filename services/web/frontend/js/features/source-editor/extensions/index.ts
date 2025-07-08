@@ -139,7 +139,7 @@ export const createExtensions = (options: Record<string, any>): Extension[] => [
   cursorHighlights(),
   autoPair(options.settings),
   editable(),
-  search(),
+  search(options.initialSearchQuery),
   phrases(options.phrases),
   spelling(options.spelling),
   shortcuts,

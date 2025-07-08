@@ -27,8 +27,6 @@ export const EditorContext = createContext<
       cobranding?: Cobranding
       hasPremiumCompile?: boolean
       renameProject: (newName: string) => void
-      showSymbolPalette?: boolean
-      toggleSymbolPalette?: () => void
       insertSymbol?: (symbol: SymbolWithCharacter) => void
       isProjectOwner: boolean
       isRestrictedTokenMember?: boolean
@@ -74,8 +72,6 @@ export const EditorProvider: FC<React.PropsWithChildren> = ({ children }) => {
   }, [])
 
   const [projectName, setProjectName] = useScopeValue('project.name')
-  const [showSymbolPalette] = useScopeValue('editor.showSymbolPalette')
-  const [toggleSymbolPalette] = useScopeValue('editor.toggleSymbolPalette')
 
   const [inactiveTutorials, setInactiveTutorials] = useState(
     () => getMeta('ol-inactiveTutorials') || []
@@ -183,8 +179,6 @@ export const EditorProvider: FC<React.PropsWithChildren> = ({ children }) => {
       isProjectOwner: owner?._id === userId,
       isRestrictedTokenMember: getMeta('ol-isRestrictedTokenMember'),
       isPendingEditor,
-      showSymbolPalette,
-      toggleSymbolPalette,
       insertSymbol,
       inactiveTutorials,
       deactivateTutorial,
@@ -204,8 +198,6 @@ export const EditorProvider: FC<React.PropsWithChildren> = ({ children }) => {
       userId,
       renameProject,
       isPendingEditor,
-      showSymbolPalette,
-      toggleSymbolPalette,
       insertSymbol,
       inactiveTutorials,
       deactivateTutorial,

@@ -1,7 +1,10 @@
 // Needed since eslint gets confused by mocha-each
 /* eslint-disable mocha/prefer-arrow-callback */
 import { FC } from 'react'
-import { EditorProviders } from '../../../helpers/editor-providers'
+import {
+  EditorProviders,
+  makeEditorPropertiesProvider,
+} from '../../../helpers/editor-providers'
 import CodemirrorEditor from '../../../../../frontend/js/features/source-editor/components/codemirror-editor'
 import { mockScope } from '../helpers/mock-scope'
 import forEach from 'mocha-each'
@@ -19,7 +22,6 @@ describe('<CodeMirrorEditor/> in Visual mode', function () {
     const content = '\n'.repeat(3)
 
     const scope = mockScope(content)
-    scope.editor.showVisual = true
 
     const FileTreePathProvider: FC<React.PropsWithChildren> = ({
       children,
@@ -41,7 +43,16 @@ describe('<CodeMirrorEditor/> in Visual mode', function () {
 
     cy.mount(
       <TestContainer>
-        <EditorProviders scope={scope} providers={{ FileTreePathProvider }}>
+        <EditorProviders
+          scope={scope}
+          providers={{
+            FileTreePathProvider,
+            EditorPropertiesProvider: makeEditorPropertiesProvider({
+              showVisual: true,
+              showSymbolPalette: false,
+            }),
+          }}
+        >
           <CodemirrorEditor />
         </EditorProviders>
       </TestContainer>

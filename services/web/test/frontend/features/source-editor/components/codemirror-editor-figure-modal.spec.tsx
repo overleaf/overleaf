@@ -1,5 +1,8 @@
 import CodemirrorEditor from '../../../../../frontend/js/features/source-editor/components/codemirror-editor'
-import { EditorProviders } from '../../../helpers/editor-providers'
+import {
+  EditorProviders,
+  makeEditorPropertiesProvider,
+} from '../../../helpers/editor-providers'
 import { mockScope, rootFolderId } from '../helpers/mock-scope'
 import { FC } from 'react'
 import { FileTreePathContext } from '@/features/file-tree/contexts/file-tree-path'
@@ -41,7 +44,6 @@ describe('<FigureModal />', function () {
   function mount() {
     const content = ''
     const scope = mockScope(content)
-    scope.editor.showVisual = true
 
     const FileTreePathProvider: FC<React.PropsWithChildren> = ({
       children,
@@ -63,7 +65,16 @@ describe('<FigureModal />', function () {
 
     cy.mount(
       <TestContainer>
-        <EditorProviders scope={scope} providers={{ FileTreePathProvider }}>
+        <EditorProviders
+          scope={scope}
+          providers={{
+            FileTreePathProvider,
+            EditorPropertiesProvider: makeEditorPropertiesProvider({
+              showVisual: true,
+              showSymbolPalette: false,
+            }),
+          }}
+        >
           <CodemirrorEditor />
         </EditorProviders>
       </TestContainer>

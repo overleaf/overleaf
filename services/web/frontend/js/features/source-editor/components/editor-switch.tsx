@@ -1,14 +1,15 @@
 import { ChangeEvent, FC, memo, useCallback } from 'react'
-import useScopeValue from '@/shared/hooks/use-scope-value'
 import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
 import { sendMB } from '../../../infrastructure/event-tracking'
 import { isValidTeXFile } from '../../../main/is-valid-tex-file'
 import { useTranslation } from 'react-i18next'
 import { useEditorOpenDocContext } from '@/features/ide-react/context/editor-open-doc-context'
+import { useEditorPropertiesContext } from '@/features/ide-react/context/editor-properties-context'
 
 function EditorSwitch() {
   const { t } = useTranslation()
-  const [visual, setVisual] = useScopeValue('editor.showVisual')
+  const { showVisual: visual, setShowVisual: setVisual } =
+    useEditorPropertiesContext()
   const { openDocName } = useEditorOpenDocContext()
 
   const richTextAvailable = openDocName ? isValidTeXFile(openDocName) : false

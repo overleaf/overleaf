@@ -1,8 +1,6 @@
 import { LoadingPane } from '@/features/ide-react/components/editor/loading-pane'
 import { useEditorOpenDocContext } from '@/features/ide-react/context/editor-open-doc-context'
-import { EditorScopeValue } from '@/features/ide-react/scope-adapters/editor-manager-context-adapter'
 import { useFileTreeOpenContext } from '@/features/ide-react/context/file-tree-open-context'
-import useScopeValue from '@/shared/hooks/use-scope-value'
 import classNames from 'classnames'
 import SourceEditor from '@/features/source-editor/components/source-editor'
 import { Panel, PanelGroup } from 'react-resizable-panels'
@@ -10,9 +8,11 @@ import { VerticalResizeHandle } from '@/features/ide-react/components/resize/ver
 import { Suspense } from 'react'
 import { FullSizeLoadingSpinner } from '@/shared/components/loading-spinner'
 import SymbolPalettePane from '@/features/ide-react/components/editor/symbol-palette-pane'
+import { useEditorPropertiesContext } from '@/features/ide-react/context/editor-properties-context'
 
 export const Editor = () => {
-  const [editor] = useScopeValue<EditorScopeValue>('editor')
+  const { opening, errorState, showSymbolPalette } =
+    useEditorPropertiesContext()
   const { selectedEntityCount, openEntity } = useFileTreeOpenContext()
   const { currentDocumentId, currentDocument } = useEditorOpenDocContext()
 
@@ -21,9 +21,7 @@ export const Editor = () => {
   }
 
   const isLoading = Boolean(
-    (!currentDocument || editor.opening) &&
-      !editor.error_state &&
-      currentDocumentId
+    (!currentDocument || opening) && !errorState && currentDocumentId
   )
 
   return (
@@ -44,7 +42,7 @@ export const Editor = () => {
           <SourceEditor />
           {isLoading && <LoadingPane />}
         </Panel>
-        {editor.showSymbolPalette && (
+        {showSymbolPalette && (
           <>
             <VerticalResizeHandle id="ide-redesign-editor-symbol-palette" />
             <Panel

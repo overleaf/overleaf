@@ -1,5 +1,8 @@
 import { mockScope } from '../helpers/mock-scope'
-import { EditorProviders } from '../../../helpers/editor-providers'
+import {
+  EditorProviders,
+  makeEditorPropertiesProvider,
+} from '../../../helpers/editor-providers'
 import CodemirrorEditor from '../../../../../frontend/js/features/source-editor/components/codemirror-editor'
 import { TestContainer } from '../helpers/test-container'
 
@@ -11,11 +14,18 @@ describe('<CodeMirrorEditor/> tooltips in Visual mode', function () {
     cy.interceptEvents()
 
     const scope = mockScope('\n\n\n')
-    scope.editor.showVisual = true
 
     cy.mount(
       <TestContainer>
-        <EditorProviders scope={scope}>
+        <EditorProviders
+          scope={scope}
+          providers={{
+            EditorPropertiesProvider: makeEditorPropertiesProvider({
+              showVisual: true,
+              showSymbolPalette: false,
+            }),
+          }}
+        >
           <CodemirrorEditor />
         </EditorProviders>
       </TestContainer>

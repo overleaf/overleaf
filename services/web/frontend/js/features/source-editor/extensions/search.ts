@@ -15,6 +15,7 @@ import {
   KeyBinding,
   keymap,
   ViewPlugin,
+  ViewUpdate,
 } from '@codemirror/view'
 import {
   Annotation,
@@ -29,6 +30,7 @@ import {
 } from '@codemirror/state'
 import { sendSearchEvent } from '@/features/event-tracking/search-events'
 import { isVisual } from '@/features/source-editor/extensions/visual/visual'
+import { beforeChangeDocEffect } from '@/features/source-editor/extensions/before-change-doc'
 
 const restoreSearchQueryAnnotation = Annotation.define<boolean>()
 
@@ -110,10 +112,6 @@ const highlightSelectionMatchesExtension = highlightSelectionMatches({
   wholeWords: true,
 })
 
-// store the search query for use when switching between files
-// TODO: move this into EditorContext?
-let searchQuery: SearchQuery | null
-
 const scrollToMatch = (range: SelectionRange, view: EditorView) => {
   const coords = {
     from: view.coordsAtPos(range.from),
@@ -153,7 +151,7 @@ const searchEventKeymap: KeyBinding[] = [
 /**
  * A collection of extensions related to the search feature.
  */
-export const search = () => {
+export const search = (initialSearchQuery: SearchQuery | null) => {
   let open = false
 
   return [
@@ -195,9 +193,7 @@ export const search = () => {
             }
           },
           destroy() {
-            window.setTimeout(() => {
-              open = false // in a timeout, so the view plugin below can run its destroy method first
-            }, 0)
+            open = false
           },
         }
       },
@@ -205,8 +201,8 @@ export const search = () => {
 
     // restore a stored search and re-open the search panel
     ViewPlugin.define(view => {
-      if (searchQuery) {
-        const _searchQuery = searchQuery
+      if (initialSearchQuery) {
+        const _searchQuery = initialSearchQuery
         window.setTimeout(() => {
           openSearchPanel(view)
           view.dispatch({
@@ -217,9 +213,21 @@ export const search = () => {
       }
 
       return {
-        destroy() {
-          // persist the current search query if the panel is open
-          searchQuery = open ? getSearchQuery(view.state) : null
+        // Fire an event containing the search query before a document change
+        // so that it can be persisted for the next document
+        update(update: ViewUpdate) {
+          for (const tr of update.transactions) {
+            for (const effect of tr.effects) {
+              if (effect.is(beforeChangeDocEffect)) {
+                const searchQuery = open ? getSearchQuery(view.state) : null
+                window.dispatchEvent(
+                  new CustomEvent('search-panel-before-doc-change', {
+                    detail: searchQuery,
+                  })
+                )
+              }
+            }
+          }
         },
       }
     }),

@@ -11,7 +11,7 @@ import {
 import useSocketListener from '@/features/ide-react/hooks/use-socket-listener'
 import { useConnectionContext } from '@/features/ide-react/context/connection-context'
 import { useProjectContext } from '@/shared/context/project-context'
-import { useEditorManagerContext } from '@/features/ide-react/context/editor-manager-context'
+import { useEditorPropertiesContext } from '@/features/ide-react/context/editor-properties-context'
 import { useUserContext } from '@/shared/context/user-context'
 import { postJSON } from '@/infrastructure/fetch-json'
 import useEventListener from '@/shared/hooks/use-event-listener'
@@ -50,7 +50,7 @@ export const TrackChangesStateProvider: FC<React.PropsWithChildren> = ({
   const { socket } = useConnectionContext()
   const project = useProjectContext()
   const user = useUserContext()
-  const { setWantTrackChanges } = useEditorManagerContext()
+  const { setWantTrackChanges } = useEditorPropertiesContext()
 
   // TODO: update project.trackChangesState instead?
   const [trackChangesValue, setTrackChangesValue] = useState<

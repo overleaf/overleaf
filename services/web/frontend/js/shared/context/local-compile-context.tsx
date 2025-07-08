@@ -248,17 +248,19 @@ export const LocalCompileProvider: FC<React.PropsWithChildren> = ({
   const [autoCompile, setAutoCompile] = usePersistedState(
     `autocompile_enabled:${projectId}`,
     false,
-    true
+    { listen: true }
   )
 
   // whether the compile should run in draft mode
-  const [draft, setDraft] = usePersistedState(`draft:${projectId}`, false, true)
+  const [draft, setDraft] = usePersistedState(`draft:${projectId}`, false, {
+    listen: true,
+  })
 
   // whether compiling should stop on first error
   const [stopOnFirstError, setStopOnFirstError] = usePersistedState(
     `stop_on_first_error:${projectId}`,
     false,
-    true
+    { listen: true }
   )
 
   // whether the last compiles stopped on first error
@@ -268,7 +270,7 @@ export const LocalCompileProvider: FC<React.PropsWithChildren> = ({
   const [stopOnValidationError, setStopOnValidationError] = usePersistedState(
     `stop_on_validation_error:${projectId}`,
     true,
-    true
+    { listen: true }
   )
 
   // whether the editor linter found errors

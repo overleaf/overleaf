@@ -1,5 +1,5 @@
-import { type Dispatch, type SetStateAction, useEffect, useState } from 'react'
-import { useIdeContext } from '../context/ide-context'
+import { type Dispatch, type SetStateAction, useState } from 'react'
+import { useUnstableStoreSync } from '@/shared/hooks/use-unstable-store-sync'
 
 /**
  * Creates a state variable that is exposed via window.overleaf.unstable.store,
@@ -13,13 +13,7 @@ export default function useExposedState<T = any>(
   path: string
 ): [T, Dispatch<SetStateAction<T>>] {
   const [value, setValue] = useState<T>(initialState)
-
-  const { unstableStore } = useIdeContext()
-
-  // Update the unstable store whenever the value changes
-  useEffect(() => {
-    unstableStore.set(path, value)
-  }, [unstableStore, path, value])
+  useUnstableStoreSync(path, value)
 
   return [value, setValue]
 }

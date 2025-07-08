@@ -51,14 +51,14 @@ import { updateRanges } from '@/features/source-editor/extensions/ranges'
 import { useThreadsContext } from '@/features/review-panel-new/context/threads-context'
 import { useHunspell } from '@/features/source-editor/hooks/use-hunspell'
 import { Permissions } from '@/features/ide-react/types/permissions'
-import {
-  GotoOffsetOptions,
-  useEditorManagerContext,
-} from '@/features/ide-react/context/editor-manager-context'
+import { GotoOffsetOptions } from '@/features/ide-react/context/editor-manager-context'
 import { GotoLineOptions } from '@/features/ide-react/types/goto-line-options'
 import { useOnlineUsersContext } from '@/features/ide-react/context/online-users-context'
 import { useEditorOpenDocContext } from '@/features/ide-react/context/editor-open-doc-context'
 import { usePermissionsContext } from '@/features/ide-react/context/permissions-context'
+import { useEditorPropertiesContext } from '@/features/ide-react/context/editor-properties-context'
+import { SearchQuery } from '@codemirror/search'
+import { beforeChangeDocEffect } from '@/features/source-editor/extensions/before-change-doc'
 
 function useCodeMirrorScope(view: EditorView) {
   const { fileTreeData } = useFileTreeData()
@@ -71,7 +71,6 @@ function useCodeMirrorScope(view: EditorView) {
     useCompileContext()
 
   const { openDocName, currentDocument } = useEditorOpenDocContext()
-  const { trackChanges } = useEditorManagerContext()
   const metadata = useMetadataContext()
 
   const { id: userId } = useUserContext()
@@ -106,7 +105,7 @@ function useCodeMirrorScope(view: EditorView) {
 
   const hunspellManager = useHunspell(spellCheckLanguage)
 
-  const [visual] = useScopeValue<boolean>('editor.showVisual')
+  const { showVisual: visual, trackChanges } = useEditorPropertiesContext()
 
   const { referenceKeys } = useReferencesContext()
 
@@ -271,6 +270,16 @@ function useCodeMirrorScope(view: EditorView) {
     visual: showVisual,
   })
 
+  // Persist the search query in this hook when the document changes by keeping
+  // a reference to the search query in sync with the editor state
+  const searchQueryRef = useRef<SearchQuery | null>(null)
+  useEventListener(
+    'search-panel-before-doc-change',
+    useCallback((event: CustomEvent) => {
+      searchQueryRef.current = event.detail
+    }, [])
+  )
+
   const { showBoundary } = useErrorBoundary()
 
   const handleException = useCallback((exception: any) => {
@@ -295,6 +304,13 @@ function useCodeMirrorScope(view: EditorView) {
     if (currentDocument) {
       debugConsole.log('creating new editor state')
 
+      // Warn any interested extension that the document is about to change,
+      // allowing it to perform any necessary actions before creating the new
+      // state. destroy() is too late because the new state is already created
+      view.dispatch({
+        effects: beforeChangeDocEffect.of(null),
+      })
+
       const state = EditorState.create({
         doc: currentDocument.getSnapshot(),
         extensions: createExtensions({
@@ -310,6 +326,7 @@ function useCodeMirrorScope(view: EditorView) {
           spelling: spellingRef.current,
           visual: visualRef.current,
           projectFeatures: projectFeaturesRef.current,
+          initialSearchQuery: searchQueryRef.current,
           showBoundary,
           handleException,
         }),

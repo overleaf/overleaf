@@ -10,6 +10,7 @@ import { EditorOpenDocContext } from '@/features/ide-react/context/editor-open-d
 import { DocId } from '../../../types/project-settings'
 import { StoryObj } from '@storybook/react'
 import { DocumentContainer } from '@/features/ide-react/editor/document-container'
+import { EditorPropertiesContext } from '@/features/ide-react/context/editor-properties-context'
 
 type Story = StoryObj<typeof SourceEditor>
 
@@ -82,6 +83,34 @@ const BibtexEditorOpenDocProvider: FC<React.PropsWithChildren> = ({
     {children}
   </EditorOpenDocProvider>
 )
+
+const VisualEditorPropertiesProvider: FC<React.PropsWithChildren> = ({
+  children,
+}) => {
+  const [showVisual, setShowVisual] = useState(true)
+
+  const value = {
+    showVisual,
+    setShowVisual,
+    showSymbolPalette: true,
+    setShowSymbolPalette: () => undefined,
+    toggleSymbolPalette: () => undefined,
+    opening: true,
+    setOpening: () => undefined,
+    trackChanges: false,
+    setTrackChanges: () => undefined,
+    wantTrackChanges: false,
+    setWantTrackChanges: () => undefined,
+    errorState: false,
+    setErrorState: () => undefined,
+  }
+
+  return (
+    <EditorPropertiesContext.Provider value={value}>
+      {children}
+    </EditorPropertiesContext.Provider>
+  )
+}
 
 const FileTreePathProvider: FC<React.PropsWithChildren> = ({ children }) => (
   <FileTreePathContext.Provider
@@ -218,15 +247,13 @@ export const Visual: Story = {
         providers: {
           FileTreePathProvider,
           EditorOpenDocProvider: LatexEditorOpenDocProvider,
+          EditorPropertiesProvider: VisualEditorPropertiesProvider,
         },
       }),
 
     (Story, { globals }) => {
-      // FIXME: useScope has no effect, so this does not default to the visual editor
+      // FIXME: useScope has no effect, so this does nothing
       useScope({
-        editor: {
-          showVisual: true,
-        },
         settings: {
           ...settings,
           overallTheme: globals.theme === 'default-' ? '' : globals.theme,
@@ -235,7 +262,6 @@ export const Visual: Story = {
       })
 
       useMeta({
-        'ol-showSymbolPalette': true,
         'ol-mathJaxPath': 'https://unpkg.com/mathjax@3.2.2/es5/tex-svg-full.js',
         'ol-project_id': '63e21c07946dd8c76505f85a',
       })

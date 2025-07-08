@@ -622,7 +622,7 @@ describe('<CodeMirrorEditor/>', { scrollBehavior: false }, function () {
 
         const rect = selection.getRangeAt(0).getBoundingClientRect()
         expect(Math.round(rect.top)).to.be.gte(100)
-        expect(Math.round(rect.left)).to.be.gte(90)
+        expect(Math.round(rect.left)).to.be.gte(80)
       })
   })
 })

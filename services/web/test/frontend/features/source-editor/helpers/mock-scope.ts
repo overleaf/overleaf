@@ -19,7 +19,6 @@ export const mockScope = (
       sharejs_doc: mockDoc(content, docOptions),
       openDocName: 'test.tex',
       currentDocumentId: docId,
-      showVisual: false,
       wantTrackChanges: false,
     },
     project: {

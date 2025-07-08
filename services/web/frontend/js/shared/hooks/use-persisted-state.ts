@@ -7,61 +7,59 @@ import {
 } from 'react'
 import _ from 'lodash'
 import localStorage from '../../infrastructure/local-storage'
-import { debugConsole } from '@/utils/debugging'
 
-const safeStringify = (value: unknown) => {
-  try {
-    return JSON.stringify(value)
-  } catch (e) {
-    debugConsole.error('double stringify exception', e)
-    return null
+type UsePersistedStateOptions<Value, PersistedValue> = {
+  listen?: boolean
+  converter?: {
+    toPersisted: (value: Value) => PersistedValue
+    fromPersisted: (persisted: PersistedValue) => Value
   }
 }
 
-const safeParse = (value: string) => {
-  try {
-    return JSON.parse(value)
-  } catch (e) {
-    debugConsole.error('double parse exception', e)
-    return null
-  }
-}
-
-function usePersistedState<T = any>(
+function usePersistedState<Value, PersistedValue = Value>(
   key: string,
-  defaultValue?: T,
-  listen = false,
-  // The option below is for backward compatibility with Angular
-  // which sometimes stringifies the values twice
-  doubleStringifyAndParse = false
-): [T, Dispatch<SetStateAction<T>>] {
+  defaultValue?: Value,
+  options?: UsePersistedStateOptions<Value, PersistedValue>
+): [Value, Dispatch<SetStateAction<Value>>] {
+  // Store the default value and options on first render so that they're stable
+  // and use them on subsequent renders. This is important for, for example, a
+  // non-primitive default value that should not change on every render.
+  const [allOptions] = useState<{
+    defaultValue?: Value
+    options?: UsePersistedStateOptions<Value, PersistedValue>
+  }>(() => ({ defaultValue, options }))
+  const listen = allOptions.options?.listen || false
+  const { toPersisted, fromPersisted } = allOptions.options?.converter || {}
+  const storedDefaultValue = allOptions.defaultValue
+
   const getItem = useCallback(
     (key: string) => {
       const item = localStorage.getItem(key)
-      return doubleStringifyAndParse ? safeParse(item) : item
+      return fromPersisted ? fromPersisted(item) : item
     },
-    [doubleStringifyAndParse]
+    [fromPersisted]
   )
   const setItem = useCallback(
-    (key: string, value: unknown) => {
-      const val = doubleStringifyAndParse ? safeStringify(value) : value
+    (key: string, value: Value) => {
+      // Nested ternary is convenient for type inference
+      const val = toPersisted ? toPersisted(value) : value
       localStorage.setItem(key, val)
     },
-    [doubleStringifyAndParse]
+    [toPersisted]
   )
 
-  const [value, setValue] = useState<T>(() => {
-    return getItem(key) ?? defaultValue
+  const [value, setValue] = useState<Value>(() => {
+    return getItem(key) ?? storedDefaultValue
   })
 
   const updateFunction = useCallback(
-    (newValue: SetStateAction<T>) => {
+    (newValue: SetStateAction<Value>) => {
       setValue(value => {
         const actualNewValue = _.isFunction(newValue)
           ? newValue(value)
           : newValue
 
-        if (actualNewValue === defaultValue) {
+        if (actualNewValue === storedDefaultValue) {
           localStorage.removeItem(key)
         } else {
           setItem(key, actualNewValue)
@@ -70,7 +68,7 @@ function usePersistedState<T = any>(
         return actualNewValue
       })
     },
-    [key, defaultValue, setItem]
+    [key, storedDefaultValue, setItem]
   )
 
   useEffect(() => {
@@ -79,7 +77,7 @@ function usePersistedState<T = any>(
         if (event.key === key) {
           // note: this value is read via getItem rather than from event.newValue
           // because getItem handles deserializing the JSON that's stored in localStorage.
-          setValue(getItem(key) ?? defaultValue)
+          setValue(getItem(key) ?? storedDefaultValue)
         }
       }
 
@@ -89,7 +87,7 @@ function usePersistedState<T = any>(
         window.removeEventListener('storage', listener)
       }
     }
-  }, [defaultValue, key, listen, getItem])
+  }, [storedDefaultValue, key, listen, getItem])
 
   return [value, updateFunction]
 }
