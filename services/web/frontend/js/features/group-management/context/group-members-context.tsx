@@ -31,7 +31,6 @@ export type GroupMembersContextValue = {
   updateMemberView: (userId: string, updatedUser: User) => void
   inviteMemberLoading: boolean
   inviteError?: APIError
-  memberAdded: boolean
   paths: { [key: string]: string }
 }
 
@@ -59,7 +58,6 @@ export function GroupMembersProvider({ children }: GroupMembersProviderProps) {
   const [inviteError, setInviteError] = useState<APIError>()
   const [removeMemberInflightCount, setRemoveMemberInflightCount] = useState(0)
   const [removeMemberError, setRemoveMemberError] = useState<APIError>()
-  const [memberAdded, setMemberAdded] = useState(false)
 
   const groupId = getMeta('ol-groupId')
 
@@ -76,9 +74,7 @@ export function GroupMembersProvider({ children }: GroupMembersProviderProps) {
   const addMembers = useCallback(
     (emailString: string) => {
       setInviteError(undefined)
-      setMemberAdded(false)
       const emails = parseEmails(emailString)
-      let isError = false
       mapSeries(emails, async email => {
         setInviteUserInflightCount(count => count + 1)
         try {
@@ -98,15 +94,8 @@ export function GroupMembersProvider({ children }: GroupMembersProviderProps) {
         } catch (error: unknown) {
           debugConsole.error(error)
           setInviteError((error as FetchError)?.data?.error || {})
-          isError = true
         }
-        setInviteUserInflightCount(count => {
-          const newCount = count - 1
-          if (newCount === 0 && !isError) {
-            setMemberAdded(true)
-          }
-          return newCount
-        })
+        setInviteUserInflightCount(count => count - 1)
       })
     },
     [paths.addMember, users, setUsers]
@@ -184,7 +173,6 @@ export function GroupMembersProvider({ children }: GroupMembersProviderProps) {
       removeMemberError,
       inviteMemberLoading: inviteUserInflightCount > 0,
       inviteError,
-      memberAdded,
       paths,
     }),
     [
@@ -203,7 +191,6 @@ export function GroupMembersProvider({ children }: GroupMembersProviderProps) {
       removeMemberError,
       inviteUserInflightCount,
       inviteError,
-      memberAdded,
       paths,
     ]
   )

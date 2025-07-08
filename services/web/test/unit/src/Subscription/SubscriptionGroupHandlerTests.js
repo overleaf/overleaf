@@ -806,49 +806,6 @@ describe('SubscriptionGroupHandler', function () {
     })
   })
 
-  describe('ensureSubscriptionHasAdditionalLicenseAddOnWhenCollectionMethodIsManual', function () {
-    it('should throw if the subscription is manually collected and has no additional license add-on', async function () {
-      await expect(
-        this.Handler.promises.ensureSubscriptionHasAdditionalLicenseAddOnWhenCollectionMethodIsManual(
-          {
-            isCollectionMethodManual: true,
-            hasAddOn: sinon
-              .stub()
-              .withArgs('additional-license')
-              .returns(false),
-          }
-        )
-      ).to.be.rejectedWith(
-        'This subscription is being collected manually has no "additional-license" add-on'
-      )
-    })
-
-    it('should not throw if the subscription is not manually collected and has no additional license add-on and ', async function () {
-      await expect(
-        this.Handler.promises.ensureSubscriptionHasAdditionalLicenseAddOnWhenCollectionMethodIsManual(
-          {
-            isCollectionMethodManual: false,
-            hasAddOn: sinon
-              .stub()
-              .withArgs('additional-license')
-              .returns(false),
-          }
-        )
-      ).to.not.be.rejected
-    })
-
-    it('should not throw if the subscription is not manually collected and has additional license add-on', async function () {
-      await expect(
-        this.Handler.promises.ensureSubscriptionHasAdditionalLicenseAddOnWhenCollectionMethodIsManual(
-          {
-            isCollectionMethodManual: true,
-            hasAddOn: sinon.stub().withArgs('additional-license').returns(true),
-          }
-        )
-      ).to.not.be.rejected
-    })
-  })
-
   describe('getGroupPlanUpgradePreview', function () {
     it('should generate preview for subscription upgrade', async function () {
       const result = await this.Handler.promises.getGroupPlanUpgradePreview(

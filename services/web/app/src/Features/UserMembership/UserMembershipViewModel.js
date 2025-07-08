@@ -23,59 +23,30 @@ const UserMembershipViewModel = {
     }
   },
 
-  buildAsync(userOrIdOrEmailArray, callback) {
+  buildAsync(userOrIdOrEmail, callback) {
     if (callback == null) {
       callback = function () {}
     }
+    if (!isObjectIdInstance(userOrIdOrEmail)) {
+      // userOrIdOrEmail is a user or an email and can be parsed by #build
+      return callback(null, UserMembershipViewModel.build(userOrIdOrEmail))
+    }
 
-    const userObjectIds = userOrIdOrEmailArray.filter(isObjectIdInstance)
-
-    return UserGetter.getUsers(
-      userObjectIds,
-      {
-        email: 1,
-        first_name: 1,
-        last_name: 1,
-        lastLoggedIn: 1,
-        lastActive: 1,
-        enrollment: 1,
-      },
-      function (error, users) {
-        const results = []
-
-        if (error != null) {
-          userOrIdOrEmailArray.forEach(item => {
-            if (isObjectIdInstance(item)) {
-              results.push(buildUserViewModelWithId(item.toString()))
-            } else {
-              // `item` is a user or an email and can be parsed by #build
-              results.push(UserMembershipViewModel.build(item))
-            }
-          })
-        } else {
-          const usersMap = new Map()
-          for (const user of users) {
-            usersMap.set(user._id.toString(), user)
-          }
-
-          userOrIdOrEmailArray.forEach(item => {
-            if (isObjectIdInstance(item)) {
-              const user = usersMap.get(item.toString())
-              if (user == null) {
-                results.push(buildUserViewModelWithId(item.toString()))
-              } else {
-                results.push(buildUserViewModel(user))
-              }
-            } else {
-              // `item` is a user or an email and can be parsed by #build
-              results.push(UserMembershipViewModel.build(item))
-            }
-          })
-        }
-
-        callback(null, results)
+    const userId = userOrIdOrEmail
+    const projection = {
+      email: 1,
+      first_name: 1,
+      last_name: 1,
+      lastLoggedIn: 1,
+      lastActive: 1,
+      enrollment: 1,
+    }
+    return UserGetter.getUser(userId, projection, function (error, user) {
+      if (error != null || user == null) {
+        return callback(null, buildUserViewModelWithId(userId.toString()))
       }
-    )
+      return callback(null, buildUserViewModel(user))
+    })
   },
 }
 

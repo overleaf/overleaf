@@ -30,6 +30,7 @@ import {
 } from '../../../../../../types/subscription/subscription-change-preview'
 import { MergeAndOverride, Nullable } from '../../../../../../types/utils'
 import { sendMB } from '../../../../infrastructure/event-tracking'
+import { useFeatureFlag } from '@/shared/context/split-test-context'
 
 export const MAX_NUMBER_OF_USERS = 20
 export const MAX_NUMBER_OF_PO_NUMBER_CHARACTERS = 50
@@ -49,6 +50,9 @@ function AddSeats() {
   const [addSeatsInputError, setAddSeatsInputError] = useState<string>()
   const [poNumberInputError, setPoNumberInputError] = useState<string>()
   const [shouldContactSales, setShouldContactSales] = useState(false)
+  const isFlexibleGroupLicensingForManuallyBilledSubscriptions = useFeatureFlag(
+    'flexible-group-licensing-for-manually-billed-subscriptions'
+  )
   const controller = useAbortController()
   const { signal: addSeatsSignal } = useAbortController()
   const { signal: contactSalesSignal } = useAbortController()
@@ -369,12 +373,13 @@ function AddSeats() {
                       <FormText type="error">{addSeatsInputError}</FormText>
                     )}
                   </FormGroup>
-                  {isCollectionMethodManual && (
-                    <PoNumber
-                      error={poNumberInputError}
-                      validate={validatePoNumber}
-                    />
-                  )}
+                  {isFlexibleGroupLicensingForManuallyBilledSubscriptions &&
+                    isCollectionMethodManual && (
+                      <PoNumber
+                        error={poNumberInputError}
+                        validate={validatePoNumber}
+                      />
+                    )}
                 </div>
                 <CostSummarySection
                   isLoadingCostSummary={isLoadingCostSummary}

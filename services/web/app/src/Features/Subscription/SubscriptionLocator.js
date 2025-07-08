@@ -4,7 +4,6 @@
 
 const { callbackifyAll } = require('@overleaf/promise-utils')
 const { Subscription } = require('../../models/Subscription')
-const SubscriptionHelper = require('./SubscriptionHelper')
 const { DeletedSubscription } = require('../../models/DeletedSubscription')
 const logger = require('@overleaf/logger')
 const {
@@ -176,8 +175,7 @@ const SubscriptionLocator = {
 
     const hasActiveGroupSubscription = memberSubscriptions.some(
       subscription =>
-        subscription.groupPlan &&
-        SubscriptionHelper.getPaidSubscriptionState(subscription) === 'active'
+        subscription.recurlyStatus?.state === 'active' && subscription.groupPlan
     )
     if (hasActiveGroupSubscription) {
       // Member of a group plan
@@ -189,8 +187,7 @@ const SubscriptionLocator = {
 
     if (personalSubscription) {
       const hasActivePersonalSubscription =
-        SubscriptionHelper.getPaidSubscriptionState(personalSubscription) ===
-        'active'
+        personalSubscription.recurlyStatus?.state === 'active'
       if (hasActivePersonalSubscription) {
         if (personalSubscription.groupPlan) {
           // Owner of a group plan

@@ -26,8 +26,6 @@ class SubtotalLimitExceededError extends OError {}
 
 class HasPastDueInvoiceError extends OError {}
 
-class HasNoAdditionalLicenseWhenManuallyCollectedError extends OError {}
-
 class PaymentActionRequiredError extends OError {
   constructor(info) {
     super('Payment action required', info)
@@ -45,5 +43,4 @@ module.exports = {
   InactiveError,
   SubtotalLimitExceededError,
   HasPastDueInvoiceError,
-  HasNoAdditionalLicenseWhenManuallyCollectedError,
 }

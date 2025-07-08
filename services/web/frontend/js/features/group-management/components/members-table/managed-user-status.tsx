@@ -30,6 +30,9 @@ export default function ManagedUserStatus({ user }: ManagedUserStatusProps) {
     </span>
   )
 
+  if (user.isEntityAdmin) {
+    return <span className="security-state-group-admin" />
+  }
   if (user.invite) {
     return managedUserInvite
   }

@@ -18,7 +18,6 @@ const {
   PendingChangeError,
   InactiveError,
   HasPastDueInvoiceError,
-  HasNoAdditionalLicenseWhenManuallyCollectedError,
 } = require('./Errors')
 const EmailHelper = require('../Helpers/EmailHelper')
 const { InvalidEmailError } = require('../Errors/Errors')
@@ -119,22 +118,6 @@ async function ensureSubscriptionHasNoPastDueInvoice(subscription) {
       'This subscription has a past due invoice',
       {
         subscriptionId: subscription._id.toString(),
-      }
-    )
-  }
-}
-
-async function ensureSubscriptionHasAdditionalLicenseAddOnWhenCollectionMethodIsManual(
-  paymentProviderSubscription
-) {
-  if (
-    paymentProviderSubscription.isCollectionMethodManual &&
-    !paymentProviderSubscription.hasAddOn(MEMBERS_LIMIT_ADD_ON_CODE)
-  ) {
-    throw new HasNoAdditionalLicenseWhenManuallyCollectedError(
-      'This subscription is being collected manually has no "additional-license" add-on',
-      {
-        subscription_id: paymentProviderSubscription.id,
       }
     )
   }
@@ -487,10 +470,6 @@ module.exports = {
   ensureSubscriptionHasNoPastDueInvoice: callbackify(
     ensureSubscriptionHasNoPastDueInvoice
   ),
-  ensureSubscriptionHasAdditionalLicenseAddOnWhenCollectionMethodIsManual:
-    callbackify(
-      ensureSubscriptionHasAdditionalLicenseAddOnWhenCollectionMethodIsManual
-    ),
   getTotalConfirmedUsersInGroup: callbackify(getTotalConfirmedUsersInGroup),
   isUserPartOfGroup: callbackify(isUserPartOfGroup),
   getGroupPlanUpgradePreview: callbackify(getGroupPlanUpgradePreview),
@@ -505,7 +484,6 @@ module.exports = {
     ensureSubscriptionCollectionMethodIsNotManual,
     ensureSubscriptionHasNoPendingChanges,
     ensureSubscriptionHasNoPastDueInvoice,
-    ensureSubscriptionHasAdditionalLicenseAddOnWhenCollectionMethodIsManual,
     getTotalConfirmedUsersInGroup,
     isUserPartOfGroup,
     getUsersGroupSubscriptionDetails,

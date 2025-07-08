@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useMemo } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { User } from '../../../../../../types/group-management/user'
 import { useGroupMembersContext } from '../../context/group-members-context'
@@ -13,9 +13,6 @@ import getMeta from '@/utils/meta'
 import UnlinkUserModal from './unlink-user-modal'
 import OLTable from '@/features/ui/components/ol/ol-table'
 import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
-import Pagination from '@/shared/components/pagination'
-
-const USERS_DISPLAY_LIMIT = 50
 
 type ManagedUsersListProps = {
   groupId: string
@@ -34,30 +31,13 @@ export default function MembersList({ groupId }: ManagedUsersListProps) {
   const managedUsersActive = getMeta('ol-managedUsersActive')
   const groupSSOActive = getMeta('ol-groupSSOActive')
   const tHeadRowRef = useRef<HTMLTableRowElement>(null)
-  const [pagination, setPagination] = useState({ currPage: 1, totalPages: 1 })
-
-  const usersForCurrentPage = useMemo(
-    () =>
-      users.slice(
-        (pagination.currPage - 1) * USERS_DISPLAY_LIMIT,
-        pagination.currPage * USERS_DISPLAY_LIMIT
-      ),
-    [users, pagination.currPage]
-  )
-
-  const handlePageClick = (
-    _e: React.MouseEvent<HTMLButtonElement>,
-    page: number
-  ) => {
-    setPagination(p => ({ ...p, currPage: page }))
-  }
+  const [colSpan, setColSpan] = useState(0)
 
   useEffect(() => {
-    setPagination(p => ({
-      ...p,
-      totalPages: Math.ceil(users.length / USERS_DISPLAY_LIMIT),
-    }))
-  }, [users.length])
+    if (tHeadRowRef.current) {
+      setColSpan(tHeadRowRef.current.querySelectorAll('th').length)
+    }
+  }, [])
 
   return (
     <div>
@@ -113,17 +93,12 @@ export default function MembersList({ groupId }: ManagedUsersListProps) {
         <tbody>
           {users.length === 0 && (
             <tr>
-              <td
-                className="text-center"
-                colSpan={
-                  tHeadRowRef.current?.querySelectorAll('th').length ?? 0
-                }
-              >
+              <td className="text-center" colSpan={colSpan}>
                 <small>{t('no_members')}</small>
               </td>
             </tr>
           )}
-          {usersForCurrentPage.map(user => (
+          {users.map(user => (
             <MemberRow
               key={user.email}
               user={user}
@@ -136,15 +111,6 @@ export default function MembersList({ groupId }: ManagedUsersListProps) {
           ))}
         </tbody>
       </OLTable>
-      {pagination.totalPages > 1 && (
-        <div className="d-flex justify-content-center">
-          <Pagination
-            handlePageClick={handlePageClick}
-            currentPage={pagination.currPage}
-            totalPages={pagination.totalPages}
-          />
-        </div>
-      )}
       {userToOffboard && (
         <OffboardManagedUserModal
           user={userToOffboard}
