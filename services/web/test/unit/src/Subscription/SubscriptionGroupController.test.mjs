@@ -107,12 +107,6 @@ describe('SubscriptionGroupController', function () {
       },
     }
 
-    ctx.SplitTestHandler = {
-      promises: {
-        getAssignment: sinon.stub().resolves({ variant: 'enabled' }),
-      },
-    }
-
     ctx.UserGetter = {
       promises: {
         getUserEmail: sinon.stub().resolves(ctx.user.email),
@@ -173,13 +167,6 @@ describe('SubscriptionGroupController', function () {
     vi.doMock('../../../../app/src/infrastructure/Modules', () => ({
       default: ctx.Modules,
     }))
-
-    vi.doMock(
-      '../../../../app/src/Features/SplitTests/SplitTestHandler',
-      () => ({
-        default: ctx.SplitTestHandler,
-      })
-    )
 
     vi.doMock('../../../../app/src/Features/User/UserGetter', () => ({
       default: ctx.UserGetter,
@@ -458,6 +445,9 @@ describe('SubscriptionGroupController', function () {
               .should.equal(true)
             ctx.SubscriptionGroupHandler.promises.checkBillingInfoExistence
               .calledWith(ctx.recurlySubscription, ctx.adminUserId)
+              .should.equal(true)
+            ctx.SubscriptionGroupHandler.promises.ensureSubscriptionHasAdditionalLicenseAddOnWhenCollectionMethodIsManual
+              .calledWith(ctx.recurlySubscription)
               .should.equal(true)
             page.should.equal('subscriptions/add-seats')
             props.subscriptionId.should.equal(ctx.subscriptionId)

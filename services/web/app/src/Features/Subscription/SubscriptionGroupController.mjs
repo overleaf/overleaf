@@ -8,7 +8,6 @@ import SessionManager from '../Authentication/SessionManager.js'
 import UserAuditLogHandler from '../User/UserAuditLogHandler.js'
 import { expressify } from '@overleaf/promise-utils'
 import Modules from '../../infrastructure/Modules.js'
-import SplitTestHandler from '../SplitTests/SplitTestHandler.js'
 import UserGetter from '../User/UserGetter.js'
 import { Subscription } from '../../models/Subscription.js'
 import { isProfessionalGroupPlan } from './PlansHelper.mjs'
@@ -152,29 +151,13 @@ async function addSeatsToGroupSubscription(req, res) {
     await SubscriptionGroupHandler.promises.ensureSubscriptionHasNoPastDueInvoice(
       subscription
     )
-
-    const { variant: flexibleLicensingForManuallyBilledSubscriptionsVariant } =
-      await SplitTestHandler.promises.getAssignment(
-        req,
-        res,
-        'flexible-group-licensing-for-manually-billed-subscriptions'
-      )
-
-    if (flexibleLicensingForManuallyBilledSubscriptionsVariant === 'enabled') {
-      await SubscriptionGroupHandler.promises.checkBillingInfoExistence(
-        paymentProviderSubscription,
-        userId
-      )
-      await SubscriptionGroupHandler.promises.ensureSubscriptionHasAdditionalLicenseAddOnWhenCollectionMethodIsManual(
-        paymentProviderSubscription
-      )
-    } else {
-      await SubscriptionGroupHandler.promises.ensureSubscriptionCollectionMethodIsNotManual(
-        paymentProviderSubscription
-      )
-      // Check if the user has missing billing details
-      await Modules.promises.hooks.fire('getPaymentMethod', userId)
-    }
+    await SubscriptionGroupHandler.promises.checkBillingInfoExistence(
+      paymentProviderSubscription,
+      userId
+    )
+    await SubscriptionGroupHandler.promises.ensureSubscriptionHasAdditionalLicenseAddOnWhenCollectionMethodIsManual(
+      paymentProviderSubscription
+    )
 
     res.render('subscriptions/add-seats', {
       subscriptionId: subscription._id,
@@ -191,10 +174,7 @@ async function addSeatsToGroupSubscription(req, res) {
       )
     }
 
-    if (
-      error instanceof ManuallyCollectedError ||
-      error instanceof HasNoAdditionalLicenseWhenManuallyCollectedError
-    ) {
+    if (error instanceof HasNoAdditionalLicenseWhenManuallyCollectedError) {
       return res.redirect(
         '/user/subscription/group/manually-collected-subscription'
       )
@@ -235,7 +215,6 @@ async function previewAddSeatsSubscriptionChange(req, res) {
   } catch (error) {
     if (
       error instanceof MissingBillingInfoError ||
-      error instanceof ManuallyCollectedError ||
       error instanceof PendingChangeError ||
       error instanceof InactiveError ||
       error instanceof HasPastDueInvoiceError ||
@@ -279,7 +258,6 @@ async function createAddSeatsSubscriptionChange(req, res) {
   } catch (error) {
     if (
       error instanceof MissingBillingInfoError ||
-      error instanceof ManuallyCollectedError ||
       error instanceof PendingChangeError ||
       error instanceof InactiveError ||
       error instanceof HasPastDueInvoiceError ||
@@ -419,12 +397,6 @@ async function manuallyCollectedSubscription(req, res) {
     const userId = SessionManager.getLoggedInUserId(req.session)
     const subscription =
       await SubscriptionLocator.promises.getUsersSubscription(userId)
-
-    await SplitTestHandler.promises.getAssignment(
-      req,
-      res,
-      'flexible-group-licensing-for-manually-billed-subscriptions'
-    )
 
     res.render('subscriptions/manually-collected-subscription', {
       groupName: subscription.teamName,
