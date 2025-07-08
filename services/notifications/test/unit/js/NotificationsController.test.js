@@ -1,7 +1,3 @@
-/* eslint-disable
-    no-return-assign,
-    no-unused-vars,
-*/
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
 /*
@@ -9,141 +5,157 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-import { stub } from 'sinon'
-import { require as _require } from 'sandboxed-module'
-import assert from 'node:assert'
-
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 const modulePath = '../../../app/js/NotificationsController.js'
+
 const userId = '51dc93e6fb625a261300003b'
 const notificationId = 'fb625a26f09d'
 const notificationKey = 'my-notification-key'
 
-describe('Notifications Controller', function () {
-  beforeEach(function () {
-    const self = this
-    this.notifications = {}
-    this.controller = _require(modulePath, {
-      requires: {
-        './Notifications': this.notifications,
-        '@overleaf/metrics': {
-          inc: stub(),
-        },
-      },
-    })
+describe('Notifications Controller', () => {
+  let controller, notifications, stubbedNotification
+  beforeEach(async () => {
+    notifications = {
+      addNotification: vi.fn(),
+      getUserNotifications: vi.fn(),
+      removeNotificationByKeyOnly: vi.fn(),
+      removeNotificationId: vi.fn(),
+      removeNotificationKey: vi.fn(),
+    }
 
-    return (this.stubbedNotification = [
+    vi.doMock('../../../app/js/Notifications', () => notifications)
+
+    vi.doMock('@overleaf/metrics', () => ({
+      default: {
+        inc: vi.fn(),
+      },
+    }))
+
+    controller = (await import(modulePath)).default
+
+    stubbedNotification = [
       {
         key: notificationKey,
         messageOpts: 'some info',
         templateKey: 'template-key',
       },
-    ])
+    ]
   })
 
-  describe('getUserNotifications', function () {
-    return it('should ask the notifications for the users notifications', function (done) {
-      this.notifications.getUserNotifications = stub().callsArgWith(
-        1,
-        null,
-        this.stubbedNotification
-      )
+  describe('getUserNotifications', () => {
+    it('should ask the notifications for the users notifications', async () => {
+      notifications.getUserNotifications.mockResolvedValue(stubbedNotification)
       const req = {
         params: {
           user_id: userId,
         },
       }
-      return this.controller.getUserNotifications(req, {
-        json: result => {
-          result.should.equal(this.stubbedNotification)
-          this.notifications.getUserNotifications
-            .calledWith(userId)
-            .should.equal(true)
-          return done()
-        },
+      await new Promise(resolve => {
+        controller.getUserNotifications(req, {
+          json: result => {
+            expect(result).toBe(stubbedNotification)
+            expect(notifications.getUserNotifications).toHaveBeenCalledWith(
+              userId
+            )
+            resolve()
+          },
+        })
       })
     })
   })
 
-  describe('addNotification', function () {
-    return it('should tell the notifications to add the notification for the user', function (done) {
-      this.notifications.addNotification = stub().callsArgWith(2)
+  describe('addNotification', () => {
+    it('should tell the notifications to add the notification for the user', async () => {
+      notifications.addNotification.mockResolvedValue()
       const req = {
         params: {
           user_id: userId,
         },
-        body: this.stubbedNotification,
+        body: stubbedNotification,
       }
-      return this.controller.addNotification(req, {
-        sendStatus: code => {
-          this.notifications.addNotification
-            .calledWith(userId, this.stubbedNotification)
-            .should.equal(true)
-          code.should.equal(200)
-          return done()
-        },
+      await new Promise(resolve => {
+        controller.addNotification(req, {
+          sendStatus: code => {
+            expect(notifications.addNotification).toHaveBeenCalledWith(
+              userId,
+              stubbedNotification
+            )
+            expect(code).toBe(200)
+            resolve()
+          },
+        })
       })
     })
   })
 
-  describe('removeNotificationId', function () {
-    return it('should tell the notifications to mark the notification Id as read', function (done) {
-      this.notifications.removeNotificationId = stub().callsArgWith(2)
+  describe('removeNotificationId', () => {
+    it('should tell the notifications to mark the notification Id as read', async () => {
+      notifications.removeNotificationId.mockResolvedValue()
       const req = {
         params: {
           user_id: userId,
           notification_id: notificationId,
         },
       }
-      return this.controller.removeNotificationId(req, {
-        sendStatus: code => {
-          this.notifications.removeNotificationId
-            .calledWith(userId, notificationId)
-            .should.equal(true)
-          code.should.equal(200)
-          return done()
-        },
+      await new Promise(resolve => {
+        controller.removeNotificationId(req, {
+          sendStatus: code => {
+            expect(notifications.removeNotificationId).toHaveBeenCalledWith(
+              userId,
+              notificationId
+            )
+            expect(code).toBe(200)
+            resolve()
+          },
+        })
       })
     })
   })
 
-  describe('removeNotificationKey', function () {
-    return it('should tell the notifications to mark the notification Key as read', function (done) {
-      this.notifications.removeNotificationKey = stub().callsArgWith(2)
+  describe('removeNotificationKey', () => {
+    it('should tell the notifications to mark the notification Key as read', async () => {
+      notifications.removeNotificationKey.mockResolvedValue()
       const req = {
         params: {
           user_id: userId,
         },
         body: { key: notificationKey },
       }
-      return this.controller.removeNotificationKey(req, {
-        sendStatus: code => {
-          this.notifications.removeNotificationKey
-            .calledWith(userId, notificationKey)
-            .should.equal(true)
-          code.should.equal(200)
-          return done()
-        },
+      await new Promise(resolve => {
+        controller.removeNotificationKey(req, {
+          sendStatus: code => {
+            expect(notifications.removeNotificationKey).toHaveBeenCalledWith(
+              userId,
+              notificationKey
+            )
+            expect(code).toBe(200)
+            resolve()
+          },
+        })
       })
     })
   })
 
-  return describe('removeNotificationByKeyOnly', function () {
-    return it('should tell the notifications to mark the notification Key as read', function (done) {
-      this.notifications.removeNotificationByKeyOnly = stub().callsArgWith(1)
+  describe('removeNotificationByKeyOnly', () => {
+    it('should tell the notifications to mark the notification Key as read', async () => {
+      notifications.removeNotificationByKeyOnly.mockResolvedValue()
       const req = {
         params: {
           key: notificationKey,
         },
       }
-      return this.controller.removeNotificationByKeyOnly(req, {
-        sendStatus: code => {
-          this.notifications.removeNotificationByKeyOnly
-            .calledWith(notificationKey)
-            .should.equal(true)
-          code.should.equal(200)
-          return done()
-        },
-      })
+      await new Promise(resolve =>
+        controller.removeNotificationByKeyOnly(req, {
+          sendStatus: code => {
+            expect(
+              notifications.removeNotificationByKeyOnly
+            ).toHaveBeenCalledWith(notificationKey)
+
+            expect(code).toBe(200)
+            resolve()
+          },
+        })
+      )
     })
   })
 })

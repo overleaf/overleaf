@@ -1,302 +1,239 @@
-/* eslint-disable
-    no-dupe-keys,
-    no-return-assign,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-import { stub, assert as _assert } from 'sinon'
-import { expect } from 'chai'
-import { require as _require } from 'sandboxed-module'
-import { deepEqual } from 'node:assert'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { ObjectId } from 'mongodb-legacy'
-
+import assert from 'node:assert'
 const modulePath = '../../../app/js/Notifications.js'
+
 const userId = '51dc93e6fb625a261300003b'
 const notificationId = '574ee8d6f40c3a244e704249'
 const notificationKey = 'notification-key'
 
-describe('Notifications Tests', function () {
-  beforeEach(function () {
-    this.findToArrayStub = stub()
-    this.findStub = stub().returns({ toArray: this.findToArrayStub })
-    this.countStub = stub()
-    this.updateOneStub = stub()
-    this.deleteOneStub = stub()
-    this.db = {
+describe('Notifications Tests', () => {
+  let countStub,
+    db,
+    deleteOneStub,
+    findStub,
+    findToArrayStub,
+    notifications,
+    stubbedNotification,
+    stubbedNotificationArray,
+    updateOneStub
+  beforeEach(async () => {
+    findToArrayStub = vi.fn()
+    findStub = vi.fn().mockReturnValue({ toArray: findToArrayStub })
+    countStub = vi.fn()
+    updateOneStub = vi.fn()
+    deleteOneStub = vi.fn()
+    db = {
       notifications: {
-        find: this.findStub,
-        count: this.countStub,
-        updateOne: this.updateOneStub,
-        deleteOne: this.deleteOneStub,
+        find: findStub,
+        count: countStub,
+        updateOne: updateOneStub,
+        deleteOne: deleteOneStub,
       },
     }
 
-    this.notifications = _require(modulePath, {
-      requires: {
-        '@overleaf/settings': {},
-        './mongodb': { db: this.db, ObjectId },
-      },
-    })
+    vi.doMock('@overleaf/settings', () => ({}))
+    vi.doMock('../../../app/js/mongodb', () => ({
+      db,
+      ObjectId,
+    }))
 
-    this.stubbedNotification = {
+    notifications = await import(modulePath)
+
+    stubbedNotification = {
       user_id: new ObjectId(userId),
       key: 'notification-key',
       messageOpts: 'some info',
       templateKey: 'template-key',
     }
-    return (this.stubbedNotificationArray = [this.stubbedNotification])
+    stubbedNotificationArray = [stubbedNotification]
   })
 
-  describe('getUserNotifications', function () {
-    return it('should find all notifications and return i', function (done) {
-      this.findToArrayStub.callsArgWith(0, null, this.stubbedNotificationArray)
-      return this.notifications.getUserNotifications(
-        userId,
-        (err, notifications) => {
-          if (err) return done(err)
-          notifications.should.equal(this.stubbedNotificationArray)
-          deepEqual(this.findStub.args[0][0], {
-            user_id: new ObjectId(userId),
-            templateKey: { $exists: true },
-          })
-          return done()
-        }
-      )
+  describe('getUserNotifications', () => {
+    it('should find all notifications and return i', async () => {
+      findToArrayStub.mockResolvedValue(stubbedNotificationArray)
+      const result = await notifications.getUserNotifications(userId)
+
+      result.should.equal(stubbedNotificationArray)
+      assert.deepEqual(findStub.mock.calls[0][0], {
+        user_id: new ObjectId(userId),
+        templateKey: { $exists: true },
+      })
     })
   })
 
-  describe('addNotification', function () {
-    beforeEach(function () {
-      this.stubbedNotification = {
+  describe('addNotification', () => {
+    let expectedDocument, expectedQuery
+    beforeEach(() => {
+      stubbedNotification = {
         user_id: new ObjectId(userId),
         key: 'notification-key',
         messageOpts: 'some info',
         templateKey: 'template-key',
       }
-      this.expectedDocument = {
-        user_id: this.stubbedNotification.user_id,
+      expectedDocument = {
+        user_id: stubbedNotification.user_id,
         key: 'notification-key',
         messageOpts: 'some info',
         templateKey: 'template-key',
       }
-      this.expectedQuery = {
-        user_id: this.stubbedNotification.user_id,
+      expectedQuery = {
+        user_id: stubbedNotification.user_id,
         key: 'notification-key',
       }
-      this.updateOneStub.yields()
-      return this.countStub.yields(null, 0)
+      updateOneStub.mockResolvedValue()
+      countStub.mockResolvedValue(0)
     })
 
-    it('should insert the notification into the collection', function (done) {
-      return this.notifications.addNotification(
-        userId,
-        this.stubbedNotification,
-        err => {
-          expect(err).not.to.exist
-          _assert.calledWith(
-            this.updateOneStub,
-            this.expectedQuery,
-            { $set: this.expectedDocument },
-            { upsert: true }
-          )
-          return done()
-        }
+    it('should insert the notification into the collection', async () => {
+      await notifications.addNotification(userId, stubbedNotification)
+
+      expect(updateOneStub).toHaveBeenCalledWith(
+        expectedQuery,
+        { $set: expectedDocument },
+        { upsert: true }
       )
     })
 
-    describe('when there is an existing notification', function (done) {
-      beforeEach(function () {
-        return this.countStub.yields(null, 1)
+    describe('when there is an existing notification', done => {
+      beforeEach(() => {
+        countStub.mockResolvedValue(1)
       })
 
-      it('should fail to insert', function (done) {
-        return this.notifications.addNotification(
-          userId,
-          this.stubbedNotification,
-          err => {
-            expect(err).not.to.exist
-            _assert.notCalled(this.updateOneStub)
-            return done()
-          }
-        )
+      it('should fail to insert', async () => {
+        await notifications.addNotification(userId, stubbedNotification)
+
+        expect(updateOneStub).not.toHaveBeenCalled()
       })
 
-      return it('should update the key if forceCreate is true', function (done) {
-        this.stubbedNotification.forceCreate = true
-        return this.notifications.addNotification(
-          userId,
-          this.stubbedNotification,
-          err => {
-            expect(err).not.to.exist
-            _assert.calledWith(
-              this.updateOneStub,
-              this.expectedQuery,
-              { $set: this.expectedDocument },
-              { upsert: true }
-            )
-            return done()
-          }
+      it('should update the key if forceCreate is true', async () => {
+        stubbedNotification.forceCreate = true
+        await notifications.addNotification(userId, stubbedNotification)
+
+        expect(updateOneStub).toHaveBeenCalledWith(
+          expectedQuery,
+          { $set: expectedDocument },
+          { upsert: true }
         )
       })
     })
 
-    describe('when the notification is set to expire', function () {
-      beforeEach(function () {
-        this.stubbedNotification = {
+    describe('when the notification is set to expire', () => {
+      beforeEach(() => {
+        stubbedNotification = {
           user_id: new ObjectId(userId),
           key: 'notification-key',
           messageOpts: 'some info',
           templateKey: 'template-key',
           expires: '2922-02-13T09:32:56.289Z',
         }
-        this.expectedDocument = {
-          user_id: this.stubbedNotification.user_id,
+        expectedDocument = {
+          user_id: stubbedNotification.user_id,
           key: 'notification-key',
           messageOpts: 'some info',
           templateKey: 'template-key',
-          expires: new Date(this.stubbedNotification.expires),
+          expires: new Date(stubbedNotification.expires),
         }
-        return (this.expectedQuery = {
-          user_id: this.stubbedNotification.user_id,
+        expectedQuery = {
+          user_id: stubbedNotification.user_id,
           key: 'notification-key',
-        })
+        }
       })
 
-      return it('should add an `expires` Date field to the document', function (done) {
-        return this.notifications.addNotification(
-          userId,
-          this.stubbedNotification,
-          err => {
-            expect(err).not.to.exist
-            _assert.calledWith(
-              this.updateOneStub,
-              this.expectedQuery,
-              { $set: this.expectedDocument },
-              { upsert: true }
-            )
-            return done()
-          }
+      it('should add an `expires` Date field to the document', async () => {
+        await notifications.addNotification(userId, stubbedNotification)
+
+        expect(updateOneStub).toHaveBeenCalledWith(
+          expectedQuery,
+          { $set: expectedDocument },
+          { upsert: true }
         )
       })
     })
 
-    return describe('when the notification has a nonsensical expires field', function () {
-      beforeEach(function () {
-        this.stubbedNotification = {
+    describe('when the notification has a nonsensical expires field', () => {
+      beforeEach(() => {
+        stubbedNotification = {
           user_id: new ObjectId(userId),
           key: 'notification-key',
           messageOpts: 'some info',
           templateKey: 'template-key',
           expires: 'WAT',
         }
-        return (this.expectedDocument = {
-          user_id: this.stubbedNotification.user_id,
+        expectedDocument = {
+          user_id: stubbedNotification.user_id,
           key: 'notification-key',
           messageOpts: 'some info',
           templateKey: 'template-key',
-          expires: new Date(this.stubbedNotification.expires),
-        })
+          expires: new Date(stubbedNotification.expires),
+        }
       })
 
-      return it('should produce an error', function (done) {
-        return this.notifications.addNotification(
-          userId,
-          this.stubbedNotification,
-          err => {
-            ;(err instanceof Error).should.equal(true)
-            _assert.notCalled(this.updateOneStub)
-            return done()
-          }
-        )
+      it('should produce an error', async () => {
+        await expect(
+          notifications.addNotification(userId, stubbedNotification)
+        ).to.eventually.be.rejectedWith(Error)
+
+        expect(updateOneStub).not.toHaveBeenCalled()
       })
     })
   })
 
-  describe('removeNotificationId', function () {
-    return it('should mark the notification id as read', function (done) {
-      this.updateOneStub.callsArgWith(2, null)
+  describe('removeNotificationId', () => {
+    it('should mark the notification id as read', async () => {
+      updateOneStub.mockResolvedValue(null)
 
-      return this.notifications.removeNotificationId(
-        userId,
-        notificationId,
-        err => {
-          if (err) return done(err)
-          const searchOps = {
-            user_id: new ObjectId(userId),
-            _id: new ObjectId(notificationId),
-          }
-          const updateOperation = {
-            $unset: { templateKey: true, messageOpts: true },
-          }
-          deepEqual(this.updateOneStub.args[0][0], searchOps)
-          deepEqual(this.updateOneStub.args[0][1], updateOperation)
-          return done()
-        }
-      )
+      await notifications.removeNotificationId(userId, notificationId)
+
+      const searchOps = {
+        user_id: new ObjectId(userId),
+        _id: new ObjectId(notificationId),
+      }
+      const updateOperation = {
+        $unset: { templateKey: true, messageOpts: true },
+      }
+      assert.deepEqual(updateOneStub.mock.calls[0][0], searchOps)
+      assert.deepEqual(updateOneStub.mock.calls[0][1], updateOperation)
     })
   })
 
-  describe('removeNotificationKey', function () {
-    return it('should mark the notification key as read', function (done) {
-      this.updateOneStub.callsArgWith(2, null)
+  describe('removeNotificationKey', () => {
+    it('should mark the notification key as read', async () => {
+      updateOneStub.mockResolvedValue(null)
 
-      return this.notifications.removeNotificationKey(
-        userId,
-        notificationKey,
-        err => {
-          if (err) return done(err)
-          const searchOps = {
-            user_id: new ObjectId(userId),
-            key: notificationKey,
-          }
-          const updateOperation = {
-            $unset: { templateKey: true },
-          }
-          deepEqual(this.updateOneStub.args[0][0], searchOps)
-          deepEqual(this.updateOneStub.args[0][1], updateOperation)
-          return done()
-        }
-      )
+      await notifications.removeNotificationKey(userId, notificationKey)
+      const searchOps = {
+        user_id: new ObjectId(userId),
+        key: notificationKey,
+      }
+      const updateOperation = {
+        $unset: { templateKey: true },
+      }
+      assert.deepEqual(updateOneStub.mock.calls[0][0], searchOps)
+      assert.deepEqual(updateOneStub.mock.calls[0][1], updateOperation)
     })
   })
 
-  describe('removeNotificationByKeyOnly', function () {
-    return it('should mark the notification key as read', function (done) {
-      this.updateOneStub.callsArgWith(2, null)
+  describe('removeNotificationByKeyOnly', () => {
+    it('should mark the notification key as read', async () => {
+      updateOneStub.mockResolvedValue(null)
 
-      return this.notifications.removeNotificationByKeyOnly(
-        notificationKey,
-        err => {
-          if (err) return done(err)
-          const searchOps = { key: notificationKey }
-          const updateOperation = { $unset: { templateKey: true } }
-          deepEqual(this.updateOneStub.args[0][0], searchOps)
-          deepEqual(this.updateOneStub.args[0][1], updateOperation)
-          return done()
-        }
-      )
+      await notifications.removeNotificationByKeyOnly(notificationKey)
+      const searchOps = { key: notificationKey }
+      const updateOperation = { $unset: { templateKey: true } }
+      assert.deepEqual(updateOneStub.mock.calls[0][0], searchOps)
+      assert.deepEqual(updateOneStub.mock.calls[0][1], updateOperation)
     })
   })
 
-  return describe('deleteNotificationByKeyOnly', function () {
-    return it('should completely remove the notification', function (done) {
-      this.deleteOneStub.callsArgWith(1, null)
+  describe('deleteNotificationByKeyOnly', () => {
+    it('should completely remove the notification', async () => {
+      deleteOneStub.mockResolvedValue()
 
-      return this.notifications.deleteNotificationByKeyOnly(
-        notificationKey,
-        err => {
-          if (err) return done(err)
-          const searchOps = { key: notificationKey }
-          deepEqual(this.deleteOneStub.args[0][0], searchOps)
-          return done()
-        }
-      )
+      await notifications.deleteNotificationByKeyOnly(notificationKey)
+
+      const searchOps = { key: notificationKey }
+      expect(deleteOneStub.mock.calls[0][0]).toEqual(searchOps)
     })
   })
 })

@@ -9,6 +9,7 @@ services:
       - .:/overleaf/services/notifications
       - ../../node_modules:/overleaf/node_modules
       - ../../libraries:/overleaf/libraries
+      - ../../tsconfig.backend.json:/overleaf/tsconfig.backend.json
       - ../../bin/shared/wait_for_it:/overleaf/bin/shared/wait_for_it
     working_dir: /overleaf/services/notifications
     environment:
@@ -61,4 +62,3 @@ services:
       # replica set. This override is not needed when running the setup after
       # starting up mongo.
       - mongo:127.0.0.1
-

@@ -8,9 +8,8 @@
     "start": "node app.js",
     "test:acceptance:_run": "mocha --recursive --reporter spec --timeout 15000 --exit $@ test/acceptance/js",
     "test:acceptance": "npm run test:acceptance:_run -- --grep=$MOCHA_GREP",
-    "test:unit:_run": "mocha --recursive --reporter spec --exit $@ test/unit/js",
-    "test:unit": "npm run test:unit:_run -- --grep=$MOCHA_GREP",
-    "nodemon": "node --watch app.js",
+    "test:unit:_run": "vitest ${NO_CACHE:+\"--no-cache\"} $@ test/unit/js",
+    "test:unit": "npm run test:unit:_run",
     "lint": "eslint --max-warnings 0 --format unix .",
     "format": "prettier --list-different $PWD/'**/*.*js'",
     "format:fix": "prettier --write $PWD/'**/*.*js'",
@@ -24,6 +23,7 @@
     "@overleaf/metrics": "*",
     "@overleaf/mongo-utils": "*",
     "@overleaf/settings": "*",
+    "@overleaf/promise-utils": "*",
     "async": "^3.2.5",
     "body-parser": "^1.20.3",
     "bunyan": "^1.8.15",
@@ -33,11 +33,9 @@
     "request": "^2.88.2"
   },
   "devDependencies": {
-    "chai": "^4.3.6",
+    "@types/request": "^2.48.12",
     "chai-as-promised": "^7.1.1",
-    "mocha": "^11.1.0",
-    "sandboxed-module": "^2.0.4",
-    "sinon": "^9.2.4",
-    "typescript": "^5.0.4"
+    "typescript": "^5.0.4",
+    "vitest": "^3.2.4"
   }
 }
