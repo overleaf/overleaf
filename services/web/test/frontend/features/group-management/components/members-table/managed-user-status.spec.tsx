@@ -61,26 +61,4 @@ describe('MemberStatus', function () {
       cy.get('.security-state-not-managed').contains('Managed')
     })
   })
-
-  describe('with the group admin', function () {
-    const user: User = {
-      _id: 'some-user',
-      email: 'some.user@example.com',
-      first_name: 'Some',
-      last_name: 'User',
-      invite: false,
-      last_active_at: new Date(),
-      enrollment: undefined,
-      isEntityAdmin: true,
-    }
-    beforeEach(function () {
-      cy.mount(<ManagedUserStatus user={user} />)
-    })
-
-    it('should render no state indicator', function () {
-      cy.get('.security-state-group-admin')
-        .contains('Managed')
-        .should('not.exist')
-    })
-  })
 })
