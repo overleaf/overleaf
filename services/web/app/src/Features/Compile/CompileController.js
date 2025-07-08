@@ -209,7 +209,11 @@ const _CompileController = {
           status,
           compileTime: timings?.compileE2E,
           timeout: limits.timeout,
-          server: clsiServerId?.includes('-c2d-') ? 'faster' : 'normal',
+          server:
+            clsiServerId?.includes('-c2d-') || clsiServerId?.includes('-c3d-')
+              ? 'faster'
+              : 'normal',
+          clsiServerId,
           isAutoCompile,
           isInitialCompile: stats?.isInitialCompile === 1,
           restoredClsiCache: stats?.restoredClsiCache === 1,
