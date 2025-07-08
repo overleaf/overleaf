@@ -79,11 +79,7 @@ async function getPopulatedListOfMembers(entity, attributes) {
     }
   }
 
-  const users = await Promise.all(
-    userObjects.map(userObject =>
-      UserMembershipViewModel.promises.buildAsync(userObject)
-    )
-  )
+  const users = await UserMembershipViewModel.promises.buildAsync(userObjects)
 
   for (const user of users) {
     if (

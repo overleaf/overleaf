@@ -25,7 +25,7 @@ const {
 
 describe('UserMembershipViewModel', function () {
   beforeEach(function () {
-    this.UserGetter = { getUser: sinon.stub() }
+    this.UserGetter = { getUsers: sinon.stub() }
     this.UserMembershipViewModel = SandboxedModule.require(modulePath, {
       requires: {
         'mongodb-legacy': { ObjectId },
@@ -87,9 +87,10 @@ describe('UserMembershipViewModel', function () {
     })
 
     it('build email', function (done) {
+      this.UserGetter.getUsers.yields(null, [])
       return this.UserMembershipViewModel.buildAsync(
-        this.email,
-        (error, viewModel) => {
+        [this.email],
+        (error, [viewModel]) => {
           assertCalledWith(this.UserMembershipViewModel.build, this.email)
           return done()
         }
@@ -97,9 +98,10 @@ describe('UserMembershipViewModel', function () {
     })
 
     it('build user', function (done) {
+      this.UserGetter.getUsers.yields(null, [])
       return this.UserMembershipViewModel.buildAsync(
-        this.user,
-        (error, viewModel) => {
+        [this.user],
+        (error, [viewModel]) => {
           assertCalledWith(this.UserMembershipViewModel.build, this.user)
           return done()
         }
@@ -107,30 +109,34 @@ describe('UserMembershipViewModel', function () {
     })
 
     it('build user id', function (done) {
-      this.UserGetter.getUser.yields(null, this.user)
+      const user = {
+        ...this.user,
+        _id: new ObjectId(),
+      }
+      this.UserGetter.getUsers.yields(null, [user])
       return this.UserMembershipViewModel.buildAsync(
-        new ObjectId(),
-        (error, viewModel) => {
+        [user._id],
+        (error, [viewModel]) => {
           expect(error).not.to.exist
           assertNotCalled(this.UserMembershipViewModel.build)
-          expect(viewModel._id).to.equal(this.user._id)
-          expect(viewModel.email).to.equal(this.user.email)
-          expect(viewModel.first_name).to.equal(this.user.first_name)
+          expect(viewModel._id.toString()).to.equal(user._id.toString())
+          expect(viewModel.email).to.equal(user.email)
+          expect(viewModel.first_name).to.equal(user.first_name)
           expect(viewModel.invite).to.equal(false)
           expect(viewModel.email).to.exist
           expect(viewModel.enrollment).to.exist
-          expect(viewModel.enrollment).to.deep.equal(this.user.enrollment)
+          expect(viewModel.enrollment).to.deep.equal(user.enrollment)
           return done()
         }
       )
     })
 
     it('build user id with error', function (done) {
-      this.UserGetter.getUser.yields(new Error('nope'))
+      this.UserGetter.getUsers.yields(new Error('nope'), [])
       const userId = new ObjectId()
       return this.UserMembershipViewModel.buildAsync(
-        userId,
-        (error, viewModel) => {
+        [userId],
+        (error, [viewModel]) => {
           expect(error).not.to.exist
           assertNotCalled(this.UserMembershipViewModel.build)
           expect(viewModel._id).to.equal(userId.toString())
