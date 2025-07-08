@@ -73,6 +73,8 @@ describe('SubscriptionGroupController', function () {
           .resolves(ctx.previewSubscriptionChangeData),
         checkBillingInfoExistence: sinon.stub().resolves(ctx.paymentMethod),
         updateSubscriptionPaymentTerms: sinon.stub().resolves(),
+        ensureSubscriptionHasAdditionalLicenseAddOnWhenCollectionMethodIsManual:
+          sinon.stub().resolves(),
       },
     }
 
@@ -140,6 +142,7 @@ describe('SubscriptionGroupController', function () {
       InactiveError: class extends Error {},
       SubtotalLimitExceededError: class extends Error {},
       HasPastDueInvoiceError: class extends Error {},
+      HasNoAdditionalLicenseWhenManuallyCollectedError: class extends Error {},
     }
 
     vi.doMock(
@@ -512,6 +515,28 @@ describe('SubscriptionGroupController', function () {
           redirect: url => {
             url.should.equal(
               '/user/subscription/group/missing-billing-information'
+            )
+            resolve()
+          },
+        }
+
+        ctx.Controller.addSeatsToGroupSubscription(ctx.req, res)
+      })
+    })
+
+    it('should redirect to manually collected subscription error page when collection method is manual and has no additional license add-on', async function (ctx) {
+      await new Promise(resolve => {
+        ctx.SubscriptionGroupHandler.promises.ensureSubscriptionHasAdditionalLicenseAddOnWhenCollectionMethodIsManual =
+          sinon
+            .stub()
+            .throws(
+              new ctx.Errors.HasNoAdditionalLicenseWhenManuallyCollectedError()
+            )
+
+        const res = {
+          redirect: url => {
+            url.should.equal(
+              '/user/subscription/group/manually-collected-subscription'
             )
             resolve()
           },

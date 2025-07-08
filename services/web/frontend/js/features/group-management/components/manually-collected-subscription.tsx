@@ -24,7 +24,7 @@ function ManuallyCollectedSubscription() {
         content={
           isFlexibleGroupLicensingForManuallyBilledSubscriptions ? (
             <Trans
-              i18nKey="it_looks_like_your_account_is_billed_manually_upgrading_subscription"
+              i18nKey="it_looks_like_your_account_is_billed_manually_purchasing_additional_license_or_upgrading_subscription"
               components={[
                 // eslint-disable-next-line jsx-a11y/anchor-has-content, react/jsx-key
                 <a href="/contact" rel="noreferrer noopener" />,

@@ -19,6 +19,7 @@ import {
   InactiveError,
   SubtotalLimitExceededError,
   HasPastDueInvoiceError,
+  HasNoAdditionalLicenseWhenManuallyCollectedError,
 } from './Errors.js'
 
 /**
@@ -164,6 +165,9 @@ async function addSeatsToGroupSubscription(req, res) {
         paymentProviderSubscription,
         userId
       )
+      await SubscriptionGroupHandler.promises.ensureSubscriptionHasAdditionalLicenseAddOnWhenCollectionMethodIsManual(
+        paymentProviderSubscription
+      )
     } else {
       await SubscriptionGroupHandler.promises.ensureSubscriptionCollectionMethodIsNotManual(
         paymentProviderSubscription
@@ -187,7 +191,10 @@ async function addSeatsToGroupSubscription(req, res) {
       )
     }
 
-    if (error instanceof ManuallyCollectedError) {
+    if (
+      error instanceof ManuallyCollectedError ||
+      error instanceof HasNoAdditionalLicenseWhenManuallyCollectedError
+    ) {
       return res.redirect(
         '/user/subscription/group/manually-collected-subscription'
       )
@@ -231,7 +238,8 @@ async function previewAddSeatsSubscriptionChange(req, res) {
       error instanceof ManuallyCollectedError ||
       error instanceof PendingChangeError ||
       error instanceof InactiveError ||
-      error instanceof HasPastDueInvoiceError
+      error instanceof HasPastDueInvoiceError ||
+      error instanceof HasNoAdditionalLicenseWhenManuallyCollectedError
     ) {
       return res.status(422).end()
     }
@@ -274,7 +282,8 @@ async function createAddSeatsSubscriptionChange(req, res) {
       error instanceof ManuallyCollectedError ||
       error instanceof PendingChangeError ||
       error instanceof InactiveError ||
-      error instanceof HasPastDueInvoiceError
+      error instanceof HasPastDueInvoiceError ||
+      error instanceof HasNoAdditionalLicenseWhenManuallyCollectedError
     ) {
       return res.status(422).end()
     }
