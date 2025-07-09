@@ -38,6 +38,7 @@ function ModalContentNewProjectForm({ onCancel, template = 'none' }: Props) {
   const { t } = useTranslation()
   const { autoFocusedRef } = useRefWithAutoFocus<HTMLInputElement>()
   const [projectName, setProjectName] = useState('')
+  const [redirecting, setRedirecting] = useState(false)
   const { isLoading, isError, error, runAsync } = useAsync<NewProjectData>()
   const location = useLocation()
 
@@ -52,6 +53,8 @@ function ModalContentNewProjectForm({ onCancel, template = 'none' }: Props) {
     )
       .then(data => {
         if (data.project_id) {
+          // prevents clicking on create again between async load of next page and pending state being finished
+          setRedirecting(true)
           location.assign(`/project/${data.project_id}`)
         }
       })
@@ -100,7 +103,7 @@ function ModalContentNewProjectForm({ onCancel, template = 'none' }: Props) {
         <OLButton
           variant="primary"
           onClick={createNewProject}
-          disabled={projectName === '' || isLoading}
+          disabled={projectName === '' || isLoading || redirecting}
           isLoading={isLoading}
         >
           {t('create')}
