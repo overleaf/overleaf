@@ -4,7 +4,7 @@ const { callbackify } = require('util')
 const { db, ObjectId } = require('../../infrastructure/mongodb')
 const Errors = require('../Errors/Errors')
 const { ReturnDocument } = require('mongodb-legacy')
-const safeCompilers = ['xelatex', 'pdflatex', 'latex', 'lualatex']
+const safeCompilers = ['xelatex', 'pdflatex', 'latex', 'lualatex', 'typst']
 
 const ProjectOptionsHandler = {
   async setCompiler(projectId, compiler) {

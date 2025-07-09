@@ -32,5 +32,8 @@ describe('<SettingsCompiler />', function () {
 
     const optionLuaLaTeX = within(select).getByText('LuaLaTeX')
     expect(optionLuaLaTeX.getAttribute('value')).to.equal('lualatex')
+
+    const optionTypst = within(select).getByText('Typst')
+    expect(optionTypst.getAttribute('value')).to.equal('typst')
   })
 })

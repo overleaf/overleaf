@@ -28,7 +28,7 @@ const Errors = require('../Errors/Errors')
 const ClsiCacheHandler = require('./ClsiCacheHandler')
 const { getBlobLocation } = require('../History/HistoryManager')
 
-const VALID_COMPILERS = ['pdflatex', 'latex', 'xelatex', 'lualatex']
+const VALID_COMPILERS = ['pdflatex', 'latex', 'xelatex', 'lualatex', 'typst']
 const OUTPUT_FILE_TIMEOUT_MS = 60000
 const CLSI_COOKIES_ENABLED = (Settings.clsiCookie?.key ?? '') !== ''
 

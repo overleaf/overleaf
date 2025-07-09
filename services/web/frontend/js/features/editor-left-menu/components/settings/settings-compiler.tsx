@@ -31,6 +31,10 @@ export default function SettingsCompiler() {
           value: 'lualatex',
           label: 'LuaLaTeX',
         },
+        {
+          value: 'typst',
+          label: 'Typst',
+        },
       ]}
       label={t('compiler')}
       name="compiler"

@@ -22,6 +22,10 @@ const OPTIONS: Option<ProjectCompiler>[] = [
     value: 'lualatex',
     label: 'LuaLaTeX',
   },
+  {
+    value: 'typst',
+    label: 'Typst',
+  },
 ]
 
 export default function CompilerSetting() {

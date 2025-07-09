@@ -149,46 +149,61 @@ function _buildLatexCommand(mainFile, opts = {}) {
     command.push('strace', '-o', 'strace', '-ff')
   }
 
-  if (Settings.clsi?.latexmkCommandPrefix) {
-    command.push(...Settings.clsi.latexmkCommandPrefix)
-  }
+  if (opts.compiler !== "typst") {
+    if (Settings.clsi?.latexmkCommandPrefix) {
+      command.push(...Settings.clsi.latexmkCommandPrefix)
+    }
 
-  // Basic command and flags
-  command.push(
-    'latexmk',
-    '-cd',
-    '-jobname=output',
-    '-auxdir=$COMPILE_DIR',
-    '-outdir=$COMPILE_DIR',
-    '-synctex=1',
-    '-interaction=batchmode'
-  )
+    // Basic command and flags
+    command.push(
+      'latexmk',
+      '-cd',
+      '-jobname=output',
+      '-auxdir=$COMPILE_DIR',
+      '-outdir=$COMPILE_DIR',
+      '-synctex=1',
+      '-interaction=batchmode'
+    )
 
-  // Stop on first error option
-  if (opts.stopOnFirstError) {
-    command.push('-halt-on-error')
+    // Stop on first error option
+    if (opts.stopOnFirstError) {
+      command.push('-halt-on-error')
+    } else {
+      // Run all passes despite errors
+      command.push('-f')
+    }
+    // Extra flags
+    if (opts.flags) {
+      command.push(...opts.flags)
+    }
+
+    // TeX Engine selection
+    const compilerFlag = COMPILER_FLAGS[opts.compiler]
+    if (compilerFlag) {
+      command.push(compilerFlag)
+    } else {
+      throw new Error(`unknown compiler: ${opts.compiler}`)
+    }
+
+    // We want to run latexmk on the tex file which we will automatically
+    // generate from the Rtex/Rmd/md file.
+    mainFile = mainFile.replace(/\.(Rtex|md|Rmd|Rnw)$/, '.tex')
+    command.push(Path.join('$COMPILE_DIR', mainFile))
   } else {
-    // Run all passes despite errors
-    command.push('-f')
-  }
+    // Basic command and flags
+    command.push(
+      'typst',
+      'compile',
+    )
 
-  // Extra flags
-  if (opts.flags) {
-    command.push(...opts.flags)
-  }
+    // Extra flags
+    if (opts.flags) {
+      command.push(...opts.flags)
+    }
 
-  // TeX Engine selection
-  const compilerFlag = COMPILER_FLAGS[opts.compiler]
-  if (compilerFlag) {
-    command.push(compilerFlag)
-  } else {
-    throw new Error(`unknown compiler: ${opts.compiler}`)
+    command.push(Path.join('$COMPILE_DIR', mainFile))
+    command.push(Path.join('$COMPILE_DIR', "output.pdf"))
   }
-
-  // We want to run latexmk on the tex file which we will automatically
-  // generate from the Rtex/Rmd/md file.
-  mainFile = mainFile.replace(/\.(Rtex|md|Rmd|Rnw)$/, '.tex')
-  command.push(Path.join('$COMPILE_DIR', mainFile))
 
   return command
 }
