@@ -9,7 +9,7 @@ const SubscriptionErrors = require('../../../../app/src/Features/Subscription/Er
 const SubscriptionHelper = require('../../../../app/src/Features/Subscription/SubscriptionHelper')
 const {
   AI_ADD_ON_CODE,
-} = require('../../../../app/src/Features/Subscription/PaymentProviderEntities')
+} = require('../../../../app/src/Features/Subscription/AiHelper')
 
 const mockSubscriptions = {
   'subscription-123-active': {

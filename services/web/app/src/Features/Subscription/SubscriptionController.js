@@ -27,9 +27,11 @@ const Modules = require('../../infrastructure/Modules')
 const async = require('async')
 const HttpErrorHandler = require('../Errors/HttpErrorHandler')
 const RecurlyClient = require('./RecurlyClient')
-const { AI_ADD_ON_CODE } = require('./PaymentProviderEntities')
+const {
+  AI_ADD_ON_CODE,
+  subscriptionChangeIsAiAssistUpgrade,
+} = require('./AiHelper')
 const PlansLocator = require('./PlansLocator')
-const PaymentProviderEntities = require('./PaymentProviderEntities')
 const { User } = require('../../models/User')
 const UserGetter = require('../User/UserGetter')
 const PermissionsManager = require('../Authorization/PermissionsManager')
@@ -377,10 +379,7 @@ async function previewAddonPurchase(req, res) {
 
     const { isPremium: hasAiAssistViaWritefull } =
       await UserGetter.promises.getWritefullData(userId)
-    const isAiUpgrade =
-      PaymentProviderEntities.subscriptionChangeIsAiAssistUpgrade(
-        subscriptionChange
-      )
+    const isAiUpgrade = subscriptionChangeIsAiAssistUpgrade(subscriptionChange)
     if (hasAiAssistViaWritefull && isAiUpgrade) {
       return res.redirect(
         '/user/subscription?redirect-reason=writefull-entitled'

@@ -9,13 +9,9 @@
 const OError = require('@overleaf/o-error')
 const { DuplicateAddOnError, AddOnNotPresentError } = require('./Errors')
 const PlansLocator = require('./PlansLocator')
-
-let SubscriptionHelper = null // Work around circular import (loaded at the bottom of the file)
-
+const SubscriptionHelper = require('./SubscriptionHelper')
+const { AI_ADD_ON_CODE, isStandaloneAiAddOnPlanCode } = require('./AiHelper')
 const MEMBERS_LIMIT_ADD_ON_CODE = 'additional-license'
-const AI_ASSIST_STANDALONE_MONTHLY_PLAN_CODE = 'assistant'
-const AI_ASSIST_STANDALONE_ANNUAL_PLAN_CODE = 'assistant-annual'
-const AI_ADD_ON_CODE = 'assistant'
 
 class PaymentProviderSubscription {
   /**
@@ -589,18 +585,6 @@ class PaymentProviderAccount {
 }
 
 /**
- * Returns whether the given plan code is a standalone AI plan
- *
- * @param {string} planCode
- */
-function isStandaloneAiAddOnPlanCode(planCode) {
-  return (
-    planCode === AI_ASSIST_STANDALONE_MONTHLY_PLAN_CODE ||
-    planCode === AI_ASSIST_STANDALONE_ANNUAL_PLAN_CODE
-  )
-}
-
-/**
  * Returns whether the given plan code is a group plan
  *
  * @param {string} planCode
@@ -609,27 +593,8 @@ function isGroupPlanCode(planCode) {
   return planCode.includes('group')
 }
 
-/**
- * Returns whether subscription change will have have the ai bundle once the change is processed
- *
- * @param {PaymentProviderSubscriptionChange} subscriptionChange The subscription change object coming from payment provider
- *
- * @return {boolean}
- */
-function subscriptionChangeIsAiAssistUpgrade(subscriptionChange) {
-  return Boolean(
-    isStandaloneAiAddOnPlanCode(subscriptionChange.nextPlanCode) ||
-      subscriptionChange.nextAddOns?.some(
-        addOn => addOn.code === AI_ADD_ON_CODE
-      )
-  )
-}
-
 module.exports = {
-  AI_ADD_ON_CODE,
   MEMBERS_LIMIT_ADD_ON_CODE,
-  AI_ASSIST_STANDALONE_MONTHLY_PLAN_CODE,
-  AI_ASSIST_STANDALONE_ANNUAL_PLAN_CODE,
   PaymentProviderSubscription,
   PaymentProviderSubscriptionAddOn,
   PaymentProviderSubscriptionChange,
@@ -643,9 +608,5 @@ module.exports = {
   PaymentProviderCoupon,
   PaymentProviderAccount,
   isGroupPlanCode,
-  isStandaloneAiAddOnPlanCode,
-  subscriptionChangeIsAiAssistUpgrade,
   PaymentProviderImmediateCharge,
 }
-
-SubscriptionHelper = require('./SubscriptionHelper')

@@ -46,9 +46,7 @@ const TutorialHandler = require('../Tutorial/TutorialHandler')
 const UserUpdater = require('../User/UserUpdater')
 const Modules = require('../../infrastructure/Modules')
 const UserGetter = require('../User/UserGetter')
-const {
-  isStandaloneAiAddOnPlanCode,
-} = require('../Subscription/PaymentProviderEntities')
+const { isStandaloneAiAddOnPlanCode } = require('../Subscription/AiHelper')
 const SubscriptionController = require('../Subscription/SubscriptionController.js')
 const { formatCurrency } = require('../../util/currency')
 

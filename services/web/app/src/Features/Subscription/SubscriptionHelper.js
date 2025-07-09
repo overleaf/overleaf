@@ -1,6 +1,6 @@
 const { formatCurrency } = require('../../util/currency')
 const GroupPlansData = require('./GroupPlansData')
-const { isStandaloneAiAddOnPlanCode } = require('./PaymentProviderEntities')
+const { isStandaloneAiAddOnPlanCode } = require('./AiHelper')
 
 /**
  * If the user changes to a less expensive plan, we shouldn't apply the change immediately.

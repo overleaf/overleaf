@@ -4,13 +4,15 @@ const SandboxedModule = require('sandboxed-module')
 const { expect } = require('chai')
 const Errors = require('../../../../app/src/Features/Subscription/Errors')
 const {
-  AI_ADD_ON_CODE,
   PaymentProviderSubscriptionChangeRequest,
   PaymentProviderSubscriptionUpdateRequest,
   PaymentProviderSubscriptionChange,
   PaymentProviderSubscription,
   PaymentProviderSubscriptionAddOnUpdate,
 } = require('../../../../app/src/Features/Subscription/PaymentProviderEntities')
+const {
+  AI_ADD_ON_CODE,
+} = require('../../../../app/src/Features/Subscription/AiHelper')
 const SubscriptionHelper = require('../../../../app/src/Features/Subscription/SubscriptionHelper')
 
 const MODULE_PATH =

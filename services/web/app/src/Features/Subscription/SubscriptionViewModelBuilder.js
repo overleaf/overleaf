@@ -1,10 +1,8 @@
 // ts-check
 const Settings = require('@overleaf/settings')
 const PlansLocator = require('./PlansLocator')
-const {
-  isStandaloneAiAddOnPlanCode,
-  MEMBERS_LIMIT_ADD_ON_CODE,
-} = require('./PaymentProviderEntities')
+const { isStandaloneAiAddOnPlanCode } = require('./AiHelper')
+const { MEMBERS_LIMIT_ADD_ON_CODE } = require('./PaymentProviderEntities')
 const SubscriptionFormatters = require('./SubscriptionFormatters')
 const SubscriptionLocator = require('./SubscriptionLocator')
 const InstitutionsGetter = require('../Institutions/InstitutionsGetter')
