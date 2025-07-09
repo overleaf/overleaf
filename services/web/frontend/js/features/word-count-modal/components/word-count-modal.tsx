@@ -11,7 +11,13 @@ const WordCountModal = memo(function WordCountModal({
   handleHide: () => void
 }) {
   return (
-    <OLModal animation show={show} onHide={handleHide} id="word-count-modal">
+    <OLModal
+      animation
+      show={show}
+      onHide={handleHide}
+      id="word-count-modal"
+      data-testid="word-count-modal"
+    >
       <WordCountModalContent handleHide={handleHide} />
     </OLModal>
   )
