@@ -673,7 +673,7 @@
   }
 
   // most of these are here to replace rules from core/type.less
-  blockquote {
+  blockquote.cms-quote {
     @include heading-lg;
 
     border-left: none;
