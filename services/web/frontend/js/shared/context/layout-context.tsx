@@ -21,6 +21,7 @@ import { isMac } from '@/shared/utils/os'
 import { sendSearchEvent } from '@/features/event-tracking/search-events'
 import { useRailContext } from '@/features/ide-redesign/contexts/rail-context'
 import usePersistedState from '@/shared/hooks/use-persisted-state'
+import { repositionAllTooltips } from '@/features/source-editor/extensions/tooltips-reposition'
 
 export type IdeLayout = 'sideBySide' | 'flat'
 export type IdeView = 'editor' | 'file' | 'pdf' | 'history'
@@ -197,6 +198,15 @@ export const LayoutProvider: FC<React.PropsWithChildren> = ({ children }) => {
     },
     [setPdfLayout, setView]
   )
+
+  // Force codemirror to reposition all tooltips to prevent an issue
+  // where tooltips would sometimes show on top of the pdf preview
+  // https://github.com/overleaf/internal/issues/23840
+  useEffect(() => {
+    if (view === 'pdf' && pdfLayout === 'flat') {
+      repositionAllTooltips()
+    }
+  }, [view, pdfLayout])
 
   const {
     reattach,

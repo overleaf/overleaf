@@ -53,6 +53,7 @@ import { ranges } from './ranges'
 import { historyOT } from './history-ot'
 import { trackDetachedComments } from './track-detached-comments'
 import { reviewTooltip } from './review-tooltip'
+import { tooltipsReposition } from './tooltips-reposition'
 
 const moduleExtensions: Array<(options: Record<string, any>) => Extension> =
   importOverleafModules('sourceEditorExtensions').map(
@@ -170,4 +171,5 @@ export const createExtensions = (options: Record<string, any>): Extension[] => [
   effectListeners(),
   geometryChangeEvent(),
   fileTreeItemDrop(),
+  tooltipsReposition(),
 ]
