@@ -565,6 +565,7 @@
   "document_updated_externally": "Document Updated Externally",
   "document_updated_externally_detail": "This document was just updated externally. Any recent changes you have made may have been overwritten. To see previous versions, please look in the history.",
   "documentation": "Documentation",
+  "documentation_articles": "Documentation and articles",
   "does_not_contain_or_significantly_match_your_email": "does not contain or significantly match your email",
   "doesnt_match": "Doesn’t match",
   "doing_this_allow_log_in_through_institution": "Doing this will allow you to log in to <b>__appName__</b> through your institution and will reconfirm your institutional email address.",

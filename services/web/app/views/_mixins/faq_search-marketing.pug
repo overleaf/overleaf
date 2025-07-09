@@ -1,22 +1,25 @@
+include ./material_symbol.pug
+
 mixin faq_search-marketing(headerText, headerClass)
 	if typeof settings.algolia != 'undefined' && typeof settings.algolia.indexes != 'undefined' && typeof settings.algolia.indexes.wiki != 'undefined'
 		if headerText
 			div(class=headerClass) #{headerText}
-		.wiki
+		search.wiki
 			form.project-search.form-horizontal(role='search' data-ol-faq-search)
 				.form-group.has-feedback.has-feedback-left
 					.col-sm-12
+						label.visually-hidden(for='search-help-library') Search help library…
 						input.form-control(
+							id='search-help-library'
 							type='search'
 							placeholder='Search help library…'
-							aria-label='Search help library…'
 						)
-						i.fa.fa-search.form-control-feedback-left(aria-hidden='true')
-						i.fa.fa-times.form-control-feedback(
-							style='cursor: pointer'
-							hidden
-							data-ol-clear-search
+						+material-symbol('search').form-control-feedback-left(
 							aria-hidden='true'
+						)
+						+material-symbol('clear').form-control-feedback(
+							data-ol-clear-search
+							hidden
 						)
 						button.sr-only(
 							type='button'
