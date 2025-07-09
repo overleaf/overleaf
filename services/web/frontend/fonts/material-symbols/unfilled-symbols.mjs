@@ -30,6 +30,7 @@ export default /** @type {const} */ ([
   'table_chart',
   'thumb_down',
   'thumb_up',
+  'upload',
   'upload_file',
   'web_asset',
 ])

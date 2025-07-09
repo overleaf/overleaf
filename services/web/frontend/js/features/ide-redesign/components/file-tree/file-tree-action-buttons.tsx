@@ -91,7 +91,7 @@ export default function FileTreeActionButtons() {
           id="upload"
           description={t('upload')}
           onClick={uploadWithAnalytics}
-          iconType="upload_file"
+          iconType="upload"
         />
       )}
       {canBulkDelete && (
