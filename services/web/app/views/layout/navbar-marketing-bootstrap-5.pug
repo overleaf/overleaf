@@ -36,7 +36,7 @@ nav.navbar.navbar-default.navbar-main.navbar-expand-lg(
 		- var canDisplayScriptLogMenu = hasFeature('saas') && canDisplayAdminMenu
 
 		if typeof suppressNavbarRight === 'undefined'
-			button.navbar-toggler.collapsed(
+			button#navbar-toggle-btn.navbar-toggler.collapsed(
 				type='button'
 				data-bs-toggle='collapse'
 				data-bs-target='#navbar-main-collapse'
