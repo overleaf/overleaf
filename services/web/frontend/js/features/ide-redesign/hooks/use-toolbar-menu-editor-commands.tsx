@@ -177,6 +177,7 @@ export const useToolbarMenuBarEditorCommands = () => {
         handler: () => {
           commands.addComment()
         },
+        disabled: state.selection.main.empty,
       },
       /************************************
        *         Format menu
@@ -286,6 +287,7 @@ export const useToolbarMenuBarEditorCommands = () => {
     newEditor,
     trackedWrite,
     isTeXFile,
+    state.selection.main.empty,
   ])
 
   const { toggleSymbolPalette } = useEditorPropertiesContext()
