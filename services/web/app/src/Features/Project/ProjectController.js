@@ -334,6 +334,7 @@ const _ProjectController = {
 
     const splitTests = [
       'compile-log-events',
+      'visual-preview',
       'external-socket-heartbeat',
       'null-test-share-modal',
       'populate-clsi-cache',

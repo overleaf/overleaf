@@ -10,6 +10,7 @@ import MaterialIcon from '@/shared/components/material-icon'
 import { Spinner } from 'react-bootstrap'
 import { Placement } from 'react-bootstrap/types'
 import useSynctex from '../hooks/use-synctex'
+import { useFeatureFlag } from '@/shared/context/split-test-context'
 
 const GoToCodeButton = memo(function GoToCodeButton({
   syncToCode,
@@ -135,6 +136,11 @@ function PdfSynctexControls() {
     syncToPdfInFlight,
     canSyncToPdf,
   } = useSynctex()
+  const visualPreviewEnabled = useFeatureFlag('visual-preview')
+
+  if (visualPreviewEnabled) {
+    return null
+  }
 
   if (!position) {
     return null

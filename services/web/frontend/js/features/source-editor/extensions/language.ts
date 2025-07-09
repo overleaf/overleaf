@@ -20,7 +20,7 @@ type Options = {
   syntaxValidation: boolean
 }
 
-type Metadata = {
+export type Metadata = {
   labels: Set<string>
   packageNames: Set<string>
   commands: Command[]

@@ -26,6 +26,7 @@ import { useIsNewEditorEnabled } from '@/features/ide-redesign/utils/new-editor-
 import Breadcrumbs from '@/features/ide-redesign/components/breadcrumbs'
 import classNames from 'classnames'
 import { useUserSettingsContext } from '@/shared/context/user-settings-context'
+import { useFeatureFlag } from '@/shared/context/split-test-context'
 
 export const CodeMirrorToolbar = () => {
   const view = useCodeMirrorViewContext()
@@ -45,6 +46,7 @@ const Toolbar = memo(function Toolbar() {
   const {
     userSettings: { breadcrumbs },
   } = useUserSettingsContext()
+  const visualPreviewEnabled = useFeatureFlag('visual-preview')
 
   const [overflowed, setOverflowed] = useState(false)
 
@@ -157,7 +159,7 @@ const Toolbar = memo(function Toolbar() {
           className="ol-cm-toolbar toolbar-editor"
           ref={elementRef}
         >
-          <EditorSwitch />
+          {!visualPreviewEnabled && <EditorSwitch />}
           {showActions && (
             <ToolbarItems
               state={state}
