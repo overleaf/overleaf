@@ -86,9 +86,10 @@ const OnlineUserWidget = ({
 
 const OnlineUserCircle = ({ user }: { user: OnlineUser }) => {
   const backgroundColor = getBackgroundColorForUserId(user.user_id)
+  const [character] = [...user.name]
   return (
     <span className="online-user-circle" style={{ backgroundColor }}>
-      {user.name.charAt(0)}
+      {character}
     </span>
   )
 }
