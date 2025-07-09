@@ -647,13 +647,6 @@ const _ProjectController = {
         }
       }
 
-      const hasPaidSubscription = isPaidSubscription(subscription)
-      const hasManuallyCollectedSubscription =
-        subscription?.collectionMethod === 'manual'
-      const assistantDisabled = user.aiErrorAssistant?.enabled === false // the assistant has been manually disabled by the user
-      const canUseErrorAssistant =
-        !hasManuallyCollectedSubscription && !assistantDisabled
-
       let featureUsage = {}
 
       if (Features.hasFeature('saas')) {
@@ -733,6 +726,15 @@ const _ProjectController = {
       if (!anonymous) {
         fullFeatureSet = await UserGetter.promises.getUserFeatures(userId)
       }
+
+      const hasPaidSubscription = isPaidSubscription(subscription)
+      const hasManuallyCollectedSubscription =
+        subscription?.collectionMethod === 'manual'
+      const assistantDisabled = user.aiErrorAssistant?.enabled === false // the assistant has been manually disabled by the user
+      const canUseErrorAssistant =
+        (!hasManuallyCollectedSubscription ||
+          fullFeatureSet?.aiErrorAssistant) &&
+        !assistantDisabled
 
       const customerIoEnabled =
         await SplitTestHandler.promises.hasUserBeenAssignedToVariant(
