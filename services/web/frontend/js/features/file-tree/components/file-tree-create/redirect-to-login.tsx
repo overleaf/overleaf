@@ -6,7 +6,7 @@ import { useLocation } from '../../../../shared/hooks/use-location'
 // handle "not-logged-in" errors by redirecting to the login page
 export default function RedirectToLogin() {
   const { t } = useTranslation()
-  const { _id: projectId } = useProjectContext()
+  const { projectId } = useProjectContext()
   const [secondsToRedirect, setSecondsToRedirect] = useState(10)
   const location = useLocation()
 

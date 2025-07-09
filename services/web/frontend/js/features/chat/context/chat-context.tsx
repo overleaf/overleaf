@@ -200,7 +200,7 @@ export const ChatProvider: FC<React.PropsWithChildren> = ({ children }) => {
     clientId.current = chatClientIdGenerator.generate()
   }
   const user = useUserContext()
-  const { _id: projectId } = useProjectContext()
+  const { projectId } = useProjectContext()
 
   const { chatIsOpen: chatIsOpenOldEditor } = useLayoutContext()
   const { selectedTab: selectedRailTab, isOpen: railIsOpen } = useRailContext()

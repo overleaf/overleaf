@@ -4,11 +4,16 @@ import {
   OverallThemeMeta,
   SpellCheckLanguage,
 } from '../../../../types/project-settings'
-import { EditorProviders } from '../../helpers/editor-providers'
+import {
+  EditorProviders,
+  makeProjectProvider,
+} from '../../helpers/editor-providers'
 import { mockScope } from './scope'
 import { Folder } from '../../../../types/folder'
 import { docsInFolder } from '@/features/file-tree/util/docs-in-folder'
 import getMeta from '@/utils/meta'
+import { mockProject } from '../../features/source-editor/helpers/mock-project'
+import { UserId } from '../../../../types/user'
 
 describe('<EditorLeftMenu />', function () {
   beforeEach(function () {
@@ -57,9 +62,14 @@ describe('<EditorLeftMenu />', function () {
 
     it('render full menu', function () {
       const scope = mockScope()
+      const project = mockProject()
 
       cy.mount(
-        <EditorProviders scope={scope} layoutContext={{ leftMenuShown: true }}>
+        <EditorProviders
+          scope={scope}
+          layoutContext={{ leftMenuShown: true }}
+          providers={{ ProjectProvider: makeProjectProvider(project) }}
+        >
           <EditorLeftMenu />
         </EditorProviders>
       )
@@ -209,12 +219,6 @@ describe('<EditorLeftMenu />', function () {
         })
 
         const scope = mockScope({
-          project: {
-            members: [],
-            owner: {
-              _id: '123',
-            },
-          },
           user: {
             features: {
               dropbox: false,
@@ -226,6 +230,14 @@ describe('<EditorLeftMenu />', function () {
           <EditorProviders
             scope={scope}
             layoutContext={{ leftMenuShown: true }}
+            projectOwner={{
+              _id: '123' as UserId,
+              email: 'owner@example.com',
+              first_name: 'Test',
+              last_name: 'Owner',
+              privileges: 'owner',
+              signUpDate: new Date('2025-07-07').toISOString(),
+            }}
           >
             <EditorLeftMenu />
           </EditorProviders>
@@ -236,21 +248,25 @@ describe('<EditorLeftMenu />', function () {
       })
 
       it('shows git modal correctly', function () {
-        const scope = mockScope({
-          project: {
-            owner: {
-              _id: '123',
-            },
-            features: {
-              gitBridge: true,
-            },
-          },
-        })
+        const scope = mockScope()
 
         cy.mount(
           <EditorProviders
             scope={scope}
             layoutContext={{ leftMenuShown: true }}
+            projectOwner={{
+              _id: '123' as UserId,
+              email: 'owner@example.com',
+              first_name: 'Test',
+              last_name: 'Owner',
+              privileges: 'owner',
+              signUpDate: new Date('2025-07-07').toISOString(),
+            }}
+            projectFeatures={
+              {
+                gitBridge: true,
+              } as any
+            }
           >
             <EditorLeftMenu />
           </EditorProviders>
@@ -262,21 +278,25 @@ describe('<EditorLeftMenu />', function () {
       })
 
       it('shows git modal paywall correctly', function () {
-        const scope = mockScope({
-          project: {
-            owner: {
-              _id: '123',
-            },
-            features: {
-              gitBridge: false,
-            },
-          },
-        })
+        const scope = mockScope()
 
         cy.mount(
           <EditorProviders
             scope={scope}
             layoutContext={{ leftMenuShown: true }}
+            projectOwner={{
+              _id: '123' as UserId,
+              email: 'owner@example.com',
+              first_name: 'Test',
+              last_name: 'Owner',
+              privileges: 'owner',
+              signUpDate: new Date('2025-07-07').toISOString(),
+            }}
+            projectFeatures={
+              {
+                gitBridge: false,
+              } as any
+            }
           >
             <EditorLeftMenu />
           </EditorProviders>

@@ -12,13 +12,13 @@ import OLModal, {
 import OLNotification from '@/features/ui/components/ol/ol-notification'
 import OLButton from '@/features/ui/components/ol/ol-button'
 import { Spinner } from 'react-bootstrap'
-import { ProjectContextMember } from '@/shared/context/types/project-context'
+import { ProjectMember } from '@/shared/context/types/project-metadata'
 
 export default function TransferOwnershipModal({
   member,
   cancel,
 }: {
-  member: ProjectContextMember
+  member: ProjectMember
   cancel: () => void
 }) {
   const { t } = useTranslation()
@@ -27,7 +27,7 @@ export default function TransferOwnershipModal({
   const [error, setError] = useState(false)
   const location = useLocation()
 
-  const { _id: projectId, name: projectName } = useProjectContext()
+  const { projectId, name: projectName } = useProjectContext()
 
   function confirm() {
     setError(false)

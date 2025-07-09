@@ -98,7 +98,7 @@ export const PermissionsProvider: React.FC<React.PropsWithChildren> = ({
   const { permissionsLevel } = useIdeReactContext()
   const hasViewerPermissions = useViewerPermissions()
   const anonymous = getMeta('ol-anonymous')
-  const project = useProjectContext()
+  const { features } = useProjectContext()
 
   useEffect(() => {
     let activePermissionsMap
@@ -106,7 +106,7 @@ export const PermissionsProvider: React.FC<React.PropsWithChildren> = ({
       activePermissionsMap = linkSharingWarningPermissionsMap
     } else if (anonymous) {
       activePermissionsMap = anonymousPermissionsMap
-    } else if (!project.features.trackChanges) {
+    } else if (!features.trackChanges) {
       activePermissionsMap = noTrackChangesPermissionsMap
     } else {
       activePermissionsMap = permissionsMap
@@ -117,7 +117,7 @@ export const PermissionsProvider: React.FC<React.PropsWithChildren> = ({
     permissionsLevel,
     setPermissions,
     hasViewerPermissions,
-    project.features.trackChanges,
+    features.trackChanges,
   ])
 
   useEffect(() => {

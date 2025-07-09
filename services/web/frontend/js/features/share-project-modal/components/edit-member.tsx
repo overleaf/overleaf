@@ -6,7 +6,7 @@ import { removeMemberFromProject, updateMember } from '../utils/api'
 import { useProjectContext } from '@/shared/context/project-context'
 import { sendMB } from '@/infrastructure/event-tracking'
 import { Select } from '@/shared/components/select'
-import type { ProjectContextMember } from '@/shared/context/types/project-context'
+import type { ProjectMember } from '@/shared/context/types/project-metadata'
 import { PermissionsLevel } from '@/features/ide-react/types/permissions'
 import { linkSharingEnforcementDate } from '../utils/link-sharing'
 import OLButton from '@/features/ui/components/ol/ol-button'
@@ -19,7 +19,7 @@ import { upgradePlan } from '@/main/account-upgrade'
 type PermissionsOption = PermissionsLevel | 'removeAccess' | 'downgraded'
 
 type EditMemberProps = {
-  member: ProjectContextMember
+  member: ProjectMember
   hasExceededCollaboratorLimit: boolean
   hasBeenDowngraded: boolean
   canAddCollaborators: boolean
@@ -51,8 +51,9 @@ export default function EditMember({
     setPrivileges(member.privileges)
   }, [member.privileges])
 
-  const { updateProject, monitorRequest } = useShareProjectContext()
-  const { _id: projectId, members, invites } = useProjectContext()
+  const { monitorRequest } = useShareProjectContext()
+  const { projectId, project, updateProject } = useProjectContext()
+  const { members, invites } = project || {}
   const user = useUserContext()
 
   // Immediately commit this change if it's lower impact (eg. editor > viewer)
@@ -88,14 +89,15 @@ export default function EditMember({
     } else if (newPrivileges === 'removeAccess') {
       monitorRequest(() => removeMemberFromProject(projectId, member)).then(
         () => {
-          const updatedMembers = members.filter(existing => existing !== member)
+          const updatedMembers =
+            members?.filter(existing => existing !== member) || []
           updateProject({
             members: updatedMembers,
           })
           sendMB('collaborator-removed', {
             project_id: projectId,
             current_collaborators_amount: updatedMembers.length,
-            current_invites_amount: invites.length,
+            current_invites_amount: invites?.length || 0,
           })
         }
       )
@@ -110,9 +112,10 @@ export default function EditMember({
         })
       ).then(() => {
         updateProject({
-          members: members.map(item =>
-            item._id === member._id ? { ...item, newPrivileges } : item
-          ),
+          members:
+            members?.map(item =>
+              item._id === member._id ? { ...item, newPrivileges } : item
+            ) || [],
         })
       })
     }

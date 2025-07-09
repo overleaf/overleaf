@@ -124,7 +124,7 @@ export const OutlineProvider: FC<React.PropsWithChildren> = ({ children }) => {
     [openDocName]
   )
 
-  const { _id: projectId } = useProjectContext()
+  const { projectId } = useProjectContext()
   const storageKey = `file_outline.expanded.${projectId}`
 
   const [outlineExpanded, setOutlineExpanded] = useState(

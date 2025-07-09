@@ -19,7 +19,8 @@ export const WordCountClient: FC = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
   const [data, setData] = useState<WordCountData | null>(null)
-  const { projectSnapshot, rootDocId } = useProjectContext()
+  const { projectSnapshot, project } = useProjectContext()
+  const rootDocId = project?.rootDocId
   const { spellCheckLanguage } = useProjectSettingsContext()
   const { openDocs } = useEditorManagerContext()
   const { currentDocument } = useEditorOpenDocContext()

@@ -31,7 +31,7 @@ export default function FileViewRefreshButton({
   setRefreshError,
   file,
 }: FileViewRefreshButtonProps) {
-  const { _id: projectId } = useProjectContext()
+  const { projectId } = useProjectContext()
   const [refreshing, setRefreshing] = useState(false)
   const isMountedRef = useIsMounted()
 

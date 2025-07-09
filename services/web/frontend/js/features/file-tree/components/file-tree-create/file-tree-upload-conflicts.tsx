@@ -96,7 +96,7 @@ export function FolderUploadConflicts({
   setError: (error: string) => void
 }) {
   const { t } = useTranslation()
-  const { _id: projectId } = useProjectContext()
+  const { projectId } = useProjectContext()
 
   // Don't allow overwriting files with a folder
   const hasFileConflict = conflicts.some(conflict => conflict.type === 'file')

@@ -131,13 +131,8 @@ export const LocalCompileProvider: FC<React.PropsWithChildren> = ({
   const { currentDocument } = useEditorOpenDocContext()
   const { role } = useDetachContext()
 
-  const {
-    _id: projectId,
-    rootDocId,
-    joinedOnce,
-    imageName,
-    compiler: compilerName,
-  } = useProjectContext()
+  const { projectId, joinedOnce, project } = useProjectContext()
+  const { rootDocId, imageName, compiler: compilerName } = project || {}
 
   const { pdfPreviewOpen } = useLayoutContext()
 

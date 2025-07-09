@@ -11,7 +11,7 @@ export default function FileViewImage({
   onLoad: () => void
   onError: () => void
 }) {
-  const { _id: projectId } = useProjectContext()
+  const { projectId } = useProjectContext()
   return (
     <img
       src={fileUrl(projectId, file.id, file.hash)}

@@ -34,7 +34,7 @@ export const FigureModalOtherProjectSource: FC = () => {
   const { t } = useTranslation()
   const view = useCodeMirrorViewContext()
   const { dispatch } = useFigureModalContext()
-  const { _id: projectId } = useProjectContext()
+  const { projectId } = useProjectContext()
   const { loading: projectsLoading, data: projects, error } = useUserProjects()
   const [selectedProject, setSelectedProject] = useState<null | Project>(null)
   const { hasLinkedProjectFileFeature, hasLinkedProjectOutputFileFeature } =

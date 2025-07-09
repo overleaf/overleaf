@@ -1,12 +1,14 @@
 import CodeMirrorEditor from '../../../../frontend/js/features/source-editor/components/codemirror-editor'
 import {
   EditorProviders,
+  makeProjectProvider,
   USER_EMAIL,
   USER_ID,
 } from '../../helpers/editor-providers'
 import { mockScope } from '../source-editor/helpers/mock-scope'
 import { TestContainer } from '../source-editor/helpers/test-container'
 import { docId } from '../source-editor/helpers/mock-doc'
+import { mockProject } from '../source-editor/helpers/mock-project'
 
 const userData = {
   avatar_text: 'User',
@@ -181,14 +183,22 @@ describe('<ReviewPanel />', function () {
           removeChangeIds,
         },
       },
-      projectFeatures: { trackChangesVisible: true },
+    })
+    const project = mockProject({
+      projectOwner: {
+        _id: USER_ID,
+      },
+      projectFeatures: { trackChanges: false, trackChangesVisible: true },
     })
 
     cy.wrap(scope).as('scope')
 
     cy.mount(
       <TestContainer className="rp-size-expanded">
-        <EditorProviders scope={scope}>
+        <EditorProviders
+          scope={scope}
+          providers={{ ProjectProvider: makeProjectProvider(project) }}
+        >
           <CodeMirrorEditor />
         </EditorProviders>
       </TestContainer>
@@ -653,6 +663,10 @@ describe('<ReviewPanel /> in mini mode', function () {
       projectFeatures: { trackChangesVisible: true },
     })
 
+    const project = mockProject({
+      projectFeatures: { trackChangesVisible: true },
+    })
+
     cy.intercept('GET', '/project/*/ranges', [
       {
         id: docId,
@@ -672,7 +686,10 @@ describe('<ReviewPanel /> in mini mode', function () {
 
     cy.mount(
       <TestContainer>
-        <EditorProviders scope={scope}>
+        <EditorProviders
+          scope={scope}
+          providers={{ ProjectProvider: makeProjectProvider(project) }}
+        >
           <CodeMirrorEditor />
         </EditorProviders>
       </TestContainer>
@@ -717,7 +734,7 @@ describe('<ReviewPanel /> in mini mode', function () {
     cy.get('.review-panel-mini').should('not.exist')
   })
 
-  it("doesn't render mini when a resolved comments is present in document", function () {
+  it("doesn't render mini when a resolved comment is present in document", function () {
     render({
       comments: [
         {
@@ -747,7 +764,7 @@ describe('<ReviewPanel /> in mini mode', function () {
     cy.get('.review-panel-mini').should('not.exist')
   })
 
-  it('renders mini when a unresolved comments is present in document', function () {
+  it('renders mini when an unresolved comment is present in document', function () {
     render({
       comments: [
         {
@@ -796,6 +813,8 @@ describe('<ReviewPanel /> for free users', function () {
   function mountEditor(ownerId = USER_ID) {
     const scope = mockScope(undefined, {
       permissions: { write: true, trackedWrite: false, comment: true },
+    })
+    const project = mockProject({
       projectFeatures: { trackChanges: false, trackChangesVisible: true },
       projectOwner: {
         _id: ownerId,
@@ -806,7 +825,10 @@ describe('<ReviewPanel /> for free users', function () {
 
     cy.mount(
       <TestContainer className="rp-size-expanded">
-        <EditorProviders scope={scope}>
+        <EditorProviders
+          scope={scope}
+          providers={{ ProjectProvider: makeProjectProvider(project) }}
+        >
           <CodeMirrorEditor />
         </EditorProviders>
       </TestContainer>

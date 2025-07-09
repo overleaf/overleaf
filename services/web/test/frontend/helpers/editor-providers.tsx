@@ -23,10 +23,12 @@ import {
   EditorOpenDocContext,
   type EditorOpenDocContextState,
 } from '@/features/ide-react/context/editor-open-doc-context'
+import { ProjectContext } from '@/shared/context/project-context'
 import { ReactContextRoot } from '@/features/ide-react/context/react-context-root'
 import useEventListener from '@/shared/hooks/use-event-listener'
 import useDetachLayout from '@/shared/hooks/use-detach-layout'
 import useExposedState from '@/shared/hooks/use-exposed-state'
+import { ProjectSnapshot } from '@/infrastructure/project-snapshot'
 import {
   EditorPropertiesContext,
   EditorPropertiesContextValue,
@@ -42,6 +44,12 @@ import type { PermissionsLevel } from '@/features/ide-react/types/permissions'
 import type { Folder } from '../../../types/folder'
 import type { SocketDebuggingInfo } from '@/features/ide-react/connection/types/connection-state'
 import type { DocumentContainer } from '@/features/ide-react/editor/document-container'
+import {
+  ProjectMetadata,
+  ProjectUpdate,
+} from '@/shared/context/types/project-metadata'
+import { UserId } from '../../../types/user'
+import { ProjectCompiler } from '../../../types/project-settings'
 
 // these constants can be imported in tests instead of
 // using magic strings
@@ -68,10 +76,11 @@ const defaultUserSettings = {
 export type EditorProvidersProps = {
   user?: { id: string; email: string }
   projectId?: string
-  projectOwner?: { _id: string; email: string }
+  projectName?: string
+  projectOwner?: ProjectMetadata['owner']
   rootDocId?: string
   imageName?: string
-  compiler?: string
+  compiler?: ProjectCompiler
   socket?: Socket
   isRestrictedTokenMember?: boolean
   scope?: Record<string, any>
@@ -85,6 +94,46 @@ export type EditorProvidersProps = {
   providers?: Record<string, React.FC<React.PropsWithChildren<any>>>
 }
 
+export const projectDefaults = {
+  _id: PROJECT_ID,
+  name: PROJECT_NAME,
+  owner: {
+    _id: '124abd' as UserId,
+    email: 'owner@example.com',
+    first_name: 'Test',
+    last_name: 'Owner',
+    privileges: 'owner',
+    signUpDate: new Date('2025-07-07').toISOString(),
+  },
+  features: {
+    referencesSearch: true,
+    gitBridge: false,
+  },
+  rootDocId: '_root_doc_id',
+  rootFolder: [
+    {
+      _id: 'root-folder-id',
+      name: 'rootFolder',
+      docs: [
+        {
+          _id: '_root_doc_id',
+          name: 'main.tex',
+        },
+      ],
+      folders: [],
+      fileRefs: [],
+    },
+  ],
+  imageName: 'texlive-full:2024.1',
+  compiler: 'pdflatex' as ProjectCompiler,
+  members: [],
+  invites: [],
+}
+
+/**
+ * @typedef {import('@/shared/context/layout-context').LayoutContextValue} LayoutContextValue
+ * @type Partial<LayoutContextValue>
+ */
 const layoutContextDefault = {
   view: 'editor',
   openFile: null,
@@ -99,37 +148,23 @@ const layoutContextDefault = {
 
 export function EditorProviders({
   user = { id: USER_ID, email: USER_EMAIL },
-  projectId = PROJECT_ID,
-  projectOwner = {
-    _id: '124abd',
-    email: 'owner@example.com',
-  },
-  rootDocId = '_root_doc_id',
-  imageName = 'texlive-full:2024.1',
-  compiler = 'pdflatex',
+  projectId = projectDefaults._id,
+  projectName = projectDefaults.name,
+  projectOwner = projectDefaults.owner,
+  rootDocId = projectDefaults.rootDocId,
+  imageName = projectDefaults.imageName,
+  compiler = projectDefaults.compiler,
   socket = new SocketIOMock() as any as Socket,
   isRestrictedTokenMember = false,
   scope: defaultScope = {},
   features = {
     referencesSearch: true,
+    gitBridge: false,
   },
   projectFeatures = features,
   permissionsLevel = 'owner',
   children,
-  rootFolder = [
-    {
-      _id: 'root-folder-id',
-      name: 'rootFolder',
-      docs: [
-        {
-          _id: '_root_doc_id',
-          name: 'main.tex',
-        },
-      ],
-      folders: [],
-      fileRefs: [],
-    },
-  ],
+  rootFolder = projectDefaults.rootFolder,
   /** @type {Partial<LayoutContext>} */
   layoutContext = layoutContextDefault,
   userSettings = {},
@@ -166,20 +201,25 @@ export function EditorProviders({
         currentDocumentId: null,
         wantTrackChanges: false,
       },
-      project: {
-        _id: projectId,
-        name: PROJECT_NAME,
-        owner: projectOwner,
-        features: projectFeatures,
-        rootDocId,
-        rootFolder,
-        imageName,
-        compiler,
-      },
       permissionsLevel,
     },
     defaultScope
   )
+
+  const project = {
+    _id: projectId,
+    name: projectName,
+    owner: projectOwner,
+    features: projectFeatures,
+    rootDocId,
+    rootFolder,
+    imageName,
+    compiler,
+    members: [],
+    invites: [],
+    trackChangesState: false,
+    spellCheckLanguage: 'en',
+  }
 
   // Add details for useUserContext
   window.metaAttributesCache.set('ol-user', { ...user, features })
@@ -199,6 +239,7 @@ export function EditorProviders({
           wantTrackChanges: scope.editor.wantTrackChanges,
         }),
         LayoutProvider: makeLayoutProvider(layoutContext),
+        ProjectProvider: makeProjectProvider(project),
         ...providers,
       }}
     >
@@ -502,4 +543,36 @@ export function makeEditorPropertiesProvider(
   }
 
   return EditorPropertiesProvider
+}
+
+export function makeProjectProvider(initialProject: ProjectMetadata) {
+  const ProjectProvider: FC<PropsWithChildren> = ({ children }) => {
+    const [project, setProject] = useState(initialProject)
+
+    const updateProject = useCallback((projectUpdateData: ProjectUpdate) => {
+      setProject(projectData =>
+        Object.assign({}, projectData, projectUpdateData)
+      )
+    }, [])
+
+    const value = {
+      projectId: project._id,
+      project,
+      joinProject: () => {},
+      updateProject,
+      joinedOnce: true,
+      projectSnapshot: new ProjectSnapshot(project._id),
+      tags: [],
+      features: project.features,
+      name: project.name,
+    }
+
+    return (
+      <ProjectContext.Provider value={value}>
+        {children}
+      </ProjectContext.Provider>
+    )
+  }
+
+  return ProjectProvider
 }

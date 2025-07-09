@@ -23,7 +23,7 @@ const safeParse = (value: string) => {
 }
 
 export default function useOverviewFileCollapsed(docId: DocId) {
-  const { _id: projectId } = useProjectContext()
+  const { projectId } = useProjectContext()
   const [collapsedDocs, setCollapsedDocs] = usePersistedState<
     Record<DocId, boolean>,
     string

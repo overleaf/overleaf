@@ -23,7 +23,7 @@ type PdfJsViewerProps = {
 }
 
 function PdfJsViewer({ url, pdfFile }: PdfJsViewerProps) {
-  const { _id: projectId } = useProjectContext()
+  const { projectId } = useProjectContext()
 
   const { setError, firstRenderDone, highlights, position, setPosition } =
     useCompileContext()

@@ -29,7 +29,8 @@ export const ChangesUsersContext = createContext<ChangesUsers | undefined>(
 export const ChangesUsersProvider: FC<React.PropsWithChildren> = ({
   children,
 }) => {
-  const { _id: projectId, members, owner } = useProjectContext()
+  const { projectId, project } = useProjectContext()
+  const { members, owner } = project || {}
   const { isRestrictedTokenMember } = useEditorContext()
 
   const [changesUsers, setChangesUsers] = useState<ChangesUsers>()
@@ -49,6 +50,9 @@ export const ChangesUsersProvider: FC<React.PropsWithChildren> = ({
 
   // add the project owner and members to the changes users data
   const value = useMemo(() => {
+    if (!owner || !members) {
+      return
+    }
     const value: ChangesUsers = new Map(changesUsers)
     value.set(owner._id, { ...owner, id: owner._id })
     for (const member of members) {

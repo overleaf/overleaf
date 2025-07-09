@@ -75,10 +75,10 @@ export const ReactContextRoot: FC<
     <Providers.SplitTestProvider>
       <Providers.ModalsContextProvider>
         <Providers.ConnectionProvider>
-          <Providers.IdeReactProvider>
-            <Providers.UserProvider>
-              <Providers.UserSettingsProvider>
-                <Providers.ProjectProvider>
+          <Providers.ProjectProvider>
+            <Providers.IdeReactProvider>
+              <Providers.UserProvider>
+                <Providers.UserSettingsProvider>
                   <Providers.SnapshotProvider>
                     <Providers.DetachProvider>
                       <Providers.EditorPropertiesProvider>
@@ -128,10 +128,10 @@ export const ReactContextRoot: FC<
                       </Providers.EditorPropertiesProvider>
                     </Providers.DetachProvider>
                   </Providers.SnapshotProvider>
-                </Providers.ProjectProvider>
-              </Providers.UserSettingsProvider>
-            </Providers.UserProvider>
-          </Providers.IdeReactProvider>
+                </Providers.UserSettingsProvider>
+              </Providers.UserProvider>
+            </Providers.IdeReactProvider>
+          </Providers.ProjectProvider>
         </Providers.ConnectionProvider>
       </Providers.ModalsContextProvider>
     </Providers.SplitTestProvider>

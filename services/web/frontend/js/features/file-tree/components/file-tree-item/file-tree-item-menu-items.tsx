@@ -25,14 +25,15 @@ function FileTreeItemMenuItems() {
     selectedFileName,
   } = useFileTreeActionable()
 
-  const { owner } = useProjectContext()
+  const { project } = useProjectContext()
+  const projectOwner = project?.owner?._id
 
   const downloadWithAnalytics = useCallback(() => {
     // we are only interested in downloads of bib files WRT analytics, for the purposes of promoting the tpr integrations
     if (selectedFileName?.endsWith('.bib')) {
-      eventTracking.sendMB('download-bib-file', { projectOwner: owner._id })
+      eventTracking.sendMB('download-bib-file', { projectOwner })
     }
-  }, [selectedFileName, owner])
+  }, [selectedFileName, projectOwner])
 
   const createWithAnalytics = useCallback(() => {
     eventTracking.sendMB('new-file-click', { location: 'file-menu' })

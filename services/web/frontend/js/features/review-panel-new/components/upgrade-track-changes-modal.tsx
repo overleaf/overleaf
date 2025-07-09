@@ -26,7 +26,7 @@ function UpgradeTrackChangesModal({
   setShow,
 }: UpgradeTrackChangesModalProps) {
   const { t } = useTranslation()
-  const project = useProjectContext()
+  const { project } = useProjectContext()
   const user = useUserContext()
 
   return (
@@ -62,9 +62,9 @@ function UpgradeTrackChangesModal({
             </ul>
           </OLCol>
         </OLRow>
-        {project.owner && (
+        {Boolean(project?.owner) && (
           <div className="text-center">
-            {project.owner._id === user.id ? (
+            {project?.owner._id === user.id ? (
               user.allowedFreeTrial ? (
                 <OLButton
                   variant="premium"

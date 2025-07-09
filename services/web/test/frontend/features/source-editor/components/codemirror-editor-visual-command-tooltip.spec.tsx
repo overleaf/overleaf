@@ -1,19 +1,24 @@
 import {
   EditorProviders,
   makeEditorPropertiesProvider,
+  makeProjectProvider,
 } from '../../../helpers/editor-providers'
 import CodemirrorEditor from '../../../../../frontend/js/features/source-editor/components/codemirror-editor'
 import { mockScope } from '../helpers/mock-scope'
 import { TestContainer } from '../helpers/test-container'
+import { mockProject } from '../helpers/mock-project'
 
 const mountEditor = (content: string) => {
   const scope = mockScope(content)
+
+  const project = mockProject()
 
   cy.mount(
     <TestContainer>
       <EditorProviders
         scope={scope}
         providers={{
+          ProjectProvider: makeProjectProvider(project),
           EditorPropertiesProvider: makeEditorPropertiesProvider({
             showVisual: true,
             showSymbolPalette: false,

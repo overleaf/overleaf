@@ -9,7 +9,7 @@ import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
 export default function DownloadPDF() {
   const { t } = useTranslation()
   const { pdfDownloadUrl, pdfUrl } = useCompileContext()
-  const { _id: projectId } = useProjectContext()
+  const { projectId } = useProjectContext()
 
   function sendDownloadEvent() {
     eventTracking.sendMB('download-pdf-button-click', {

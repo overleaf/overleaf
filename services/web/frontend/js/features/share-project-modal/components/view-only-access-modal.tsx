@@ -12,7 +12,8 @@ const ViewOnlyAccessModal = () => {
 
   const { isProjectOwner, isPendingEditor } = useEditorContext()
   const { permissionsLevel } = useIdeReactContext()
-  const { members, features, _id: projectId } = useProjectContext()
+  const { features, projectId, project } = useProjectContext()
+  const members = project?.members
 
   const handleHide = () => {
     setShow(false)

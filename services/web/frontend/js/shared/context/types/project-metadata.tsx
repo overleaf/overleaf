@@ -1,9 +1,9 @@
 import { UserId } from '../../../../../types/user'
 import { PublicAccessLevel } from '../../../../../types/public-access-level'
-import { ProjectSnapshot } from '@/infrastructure/project-snapshot'
-import { Tag } from '../../../../../app/src/Features/Tags/types'
+import { ProjectSettings } from '@/features/editor-left-menu/utils/api'
+import { Folder } from '../../../../../types/folder'
 
-export type ProjectContextMember = {
+export type ProjectMember = {
   _id: UserId
   privileges: 'readOnly' | 'readAndWrite' | 'review'
   email: string
@@ -13,15 +13,11 @@ export type ProjectContextMember = {
   pendingReviewer?: boolean
 }
 
-export type ProjectContextValue = {
+export interface ProjectMetadata extends ProjectSettings {
   _id: string
-  name: string
-  rootDocId?: string
   mainBibliographyDocId?: string
-  compiler: string
-  imageName: string
-  members: ProjectContextMember[]
-  invites: ProjectContextMember[]
+  members: ProjectMember[]
+  invites: ProjectMember[]
   features: {
     collaborators?: number
     compileGroup?: 'alpha' | 'standard' | 'priority'
@@ -44,10 +40,8 @@ export type ProjectContextValue = {
     privileges: string
     signUpDate: string
   }
-  tags: Tag[]
+  rootFolder?: Folder[]
   trackChangesState: boolean | Record<UserId | '__guests__', boolean>
-  projectSnapshot: ProjectSnapshot
-  joinedOnce: boolean
 }
 
-export type ProjectContextUpdateValue = Partial<ProjectContextValue>
+export type ProjectUpdate = Partial<ProjectMetadata>

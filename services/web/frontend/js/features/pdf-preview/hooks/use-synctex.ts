@@ -28,7 +28,8 @@ export default function useSynctex(): {
   syncToCodeInFlight: boolean
   canSyncToPdf: boolean
 } {
-  const { _id: projectId, rootDocId } = useProjectContext()
+  const { projectId, project } = useProjectContext()
+  const rootDocId = project?.rootDocId
 
   const { clsiServerId, pdfFile, position, setShowLogs, setHighlights } =
     useCompileContext()

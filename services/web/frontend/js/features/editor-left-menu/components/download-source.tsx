@@ -6,7 +6,7 @@ import MaterialIcon from '@/shared/components/material-icon'
 
 export default function DownloadSource() {
   const { t } = useTranslation()
-  const { _id: projectId } = useProjectContext()
+  const { projectId } = useProjectContext()
 
   function sendDownloadEvent() {
     eventTracking.sendMB('download-zip-button-click', {

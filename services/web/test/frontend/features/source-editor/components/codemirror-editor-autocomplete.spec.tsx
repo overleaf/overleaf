@@ -64,7 +64,6 @@ describe('autocomplete', { scrollBehavior: false }, function () {
     ]
 
     const scope = mockScope()
-    scope.project.rootFolder = rootFolder
 
     cy.mount(
       <TestContainer>
@@ -446,7 +445,6 @@ describe('autocomplete', { scrollBehavior: false }, function () {
     ]
 
     const scope = mockScope()
-    scope.project.rootFolder = rootFolder
 
     cy.mount(
       <TestContainer>
@@ -910,7 +908,6 @@ describe('autocomplete', { scrollBehavior: false }, function () {
     ]
 
     const scope = mockScope()
-    scope.project.rootFolder = rootFolder
 
     cy.mount(
       <TestContainer>

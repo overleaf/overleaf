@@ -1,12 +1,12 @@
 import { useCallback } from 'react'
 import { useIdeReactContext } from '@/features/ide-react/context/ide-react-context'
-import useScopeValue from '../../../shared/hooks/use-scope-value'
+import { useProjectContext } from '@/shared/context/project-context'
 import type { ProjectSettings } from '../utils/api'
 import useSaveProjectSettings from './use-save-project-settings'
 
 export default function useRootDocId() {
-  const [rootDocId] =
-    useScopeValue<ProjectSettings['rootDocId']>('project.rootDocId')
+  const { project } = useProjectContext()
+  const rootDocId = project?.rootDocId
   const { permissionsLevel } = useIdeReactContext()
   const saveProjectSettings = useSaveProjectSettings()
 

@@ -28,7 +28,7 @@ export default function FileTreeUploadDoc() {
   const { parentFolderId, cancel, droppedFiles, setDroppedFiles } =
     useFileTreeActionable()
   const { fileTreeData } = useFileTreeData()
-  const { _id: projectId } = useProjectContext()
+  const { projectId } = useProjectContext()
 
   const [error, setError] = useState<string>()
 

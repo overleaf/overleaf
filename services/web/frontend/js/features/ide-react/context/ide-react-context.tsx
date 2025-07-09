@@ -19,6 +19,8 @@ import { postJSON } from '@/infrastructure/fetch-json'
 import { ReactScopeEventEmitter } from '@/features/ide-react/scope-event-emitter/react-scope-event-emitter'
 import getMeta from '@/utils/meta'
 import { type PermissionsLevel } from '@/features/ide-react/types/permissions'
+import { useProjectContext } from '@/shared/context/project-context'
+import { ProjectMetadata } from '@/shared/context/types/project-metadata'
 
 const LOADED_AT = new Date()
 
@@ -44,10 +46,6 @@ function populateIdeReactScope(store: ReactScopeValueStore) {
   store.set('settings', {})
 }
 
-function populateProjectScope(store: ReactScopeValueStore) {
-  store.allowNonExistentPath('project', true)
-}
-
 function populatePdfScope(store: ReactScopeValueStore) {
   store.allowNonExistentPath('pdf', true)
 }
@@ -61,7 +59,6 @@ export function createReactScopeValueStore() {
   // initialization code together with the context and would only populate
   // necessary values in the store, but this is simpler for now
   populateIdeReactScope(scopeStore)
-  populateProjectScope(scopeStore)
   populatePdfScope(scopeStore)
 
   scopeStore.allowNonExistentPath('hasLintingError')
@@ -94,6 +91,8 @@ export const IdeReactProvider: FC<React.PropsWithChildren> = ({ children }) => {
   const [projectJoined, setProjectJoined] = useState(false)
 
   const { socket, getSocketDebuggingInfo } = useConnectionContext()
+  const { joinProject, project } = useProjectContext()
+  const spellCheckLanguage = project?.spellCheckLanguage
 
   const reportError = useCallback(
     (error: any, meta?: Record<string, any>) => {
@@ -105,7 +104,7 @@ export const IdeReactProvider: FC<React.PropsWithChildren> = ({ children }) => {
         performance_now: performance.now(),
         release,
         client_load: LOADED_AT,
-        spellCheckLanguage: scopeStore.get('project.spellCheckLanguage'),
+        spellCheckLanguage,
         ...getSocketDebuggingInfo(),
       }
 
@@ -124,17 +123,28 @@ export const IdeReactProvider: FC<React.PropsWithChildren> = ({ children }) => {
         },
       })
     },
-    [release, projectId, getSocketDebuggingInfo, scopeStore]
+    [release, projectId, getSocketDebuggingInfo, spellCheckLanguage]
   )
 
   // Populate scope values when joining project, then fire project:joined event
   useEffect(() => {
     function handleJoinProjectResponse({
-      project: { rootDoc_id: rootDocId, ..._project },
+      project: {
+        rootDoc_id: rootDocId,
+        publicAccesLevel: publicAccessLevel,
+        ..._project
+      },
       permissionsLevel,
     }: JoinProjectPayload) {
-      const project = { ..._project, rootDocId }
-      scopeStore.set('project', project)
+      const project = { ..._project, rootDocId, publicAccessLevel }
+
+      // Cast the project from the payload as ProjectMetadata to ensure it has
+      // the correct type for the context. It must be close enough because the
+      // data structure hasn't changed and it worked previously. This type
+      // coercion was previously sidestepped by adding the project to the scope
+      // store, which does not enforce types.
+      joinProject(project as unknown as ProjectMetadata)
+
       setPermissionsLevel(permissionsLevel)
       // Make watchers update immediately
       scopeStore.flushUpdates()
@@ -142,21 +152,12 @@ export const IdeReactProvider: FC<React.PropsWithChildren> = ({ children }) => {
       setProjectJoined(true)
     }
 
-    function handleMainBibliographyDocUpdated(payload: string) {
-      scopeStore.set('project.mainBibliographyDoc_id', payload)
-    }
-
     socket.on('joinProjectResponse', handleJoinProjectResponse)
-    socket.on('mainBibliographyDocUpdated', handleMainBibliographyDocUpdated)
 
     return () => {
       socket.removeListener('joinProjectResponse', handleJoinProjectResponse)
-      socket.removeListener(
-        'mainBibliographyDocUpdated',
-        handleMainBibliographyDocUpdated
-      )
     }
-  }, [socket, eventEmitter, scopeStore])
+  }, [socket, eventEmitter, scopeStore, joinProject])
 
   const ide = useMemo(() => {
     return {

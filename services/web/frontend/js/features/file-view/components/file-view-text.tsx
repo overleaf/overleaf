@@ -16,7 +16,7 @@ export default function FileViewText({
   onLoad: () => void
   onError: () => void
 }) {
-  const { _id: projectId } = useProjectContext()
+  const { projectId } = useProjectContext()
 
   const [textPreview, setTextPreview] = useState('')
   const [shouldShowDots, setShouldShowDots] = useState(false)

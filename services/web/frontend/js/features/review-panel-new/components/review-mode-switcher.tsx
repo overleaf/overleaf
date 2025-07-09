@@ -55,7 +55,7 @@ function ReviewModeSwitcher() {
   const mode = useCurrentMode()
   const { permissionsLevel } = useIdeReactContext()
   const { write, trackedWrite } = usePermissionsContext()
-  const project = useProjectContext()
+  const { features } = useProjectContext()
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
   const showViewOption = permissionsLevel === 'readOnly'
   const view = useCodeMirrorViewContext()
@@ -100,7 +100,7 @@ function ReviewModeSwitcher() {
                 view.focus()
                 return
               }
-              if (!project.features.trackChanges) {
+              if (!features.trackChanges) {
                 setShowUpgradeModal(true)
               } else {
                 sendMB('editing-mode-change', {
@@ -212,7 +212,7 @@ const ModeSwitcherToggleButtonContent = forwardRef<
   })
 
   const user = useUserContext()
-  const project = useProjectContext()
+  const { features } = useProjectContext()
   const { reviewPanelOpen } = useLayoutContext()
   const { inactiveTutorials } = useEditorContext()
 
@@ -222,7 +222,7 @@ const ModeSwitcherToggleButtonContent = forwardRef<
   const canShowReviewModePromo =
     reviewPanelOpen &&
     currentMode !== 'review' &&
-    project.features.trackChanges &&
+    features.trackChanges &&
     user.signUpDate &&
     user.signUpDate < '2025-03-15' &&
     !hasCompletedReviewModeTutorial

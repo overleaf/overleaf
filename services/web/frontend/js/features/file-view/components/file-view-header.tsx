@@ -49,7 +49,7 @@ type FileViewHeaderProps = {
 }
 
 export default function FileViewHeader({ file }: FileViewHeaderProps) {
-  const { _id: projectId } = useProjectContext()
+  const { projectId } = useProjectContext()
   const { fileTreeReadOnly } = useFileTreeData()
   const { t } = useTranslation()
 

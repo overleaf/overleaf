@@ -10,13 +10,13 @@ import OLCol from '@/features/ui/components/ol/ol-col'
 import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
 import OLButton from '@/features/ui/components/ol/ol-button'
 import MaterialIcon from '@/shared/components/material-icon'
-import { ProjectContextMember } from '@/shared/context/types/project-context'
+import { ProjectMember } from '@/shared/context/types/project-metadata'
 
 export default function Invite({
   invite,
   isProjectOwner,
 }: {
-  invite: ProjectContextMember
+  invite: ProjectMember
   isProjectOwner: boolean
 }) {
   const { t } = useTranslation()
@@ -44,10 +44,10 @@ export default function Invite({
   )
 }
 
-function ResendInvite({ invite }: { invite: ProjectContextMember }) {
+function ResendInvite({ invite }: { invite: ProjectMember }) {
   const { t } = useTranslation()
   const { monitorRequest, setError, inFlight } = useShareProjectContext()
-  const { _id: projectId } = useProjectContext()
+  const { projectId } = useProjectContext()
 
   // const buttonRef = useRef(null)
   //
@@ -87,23 +87,25 @@ function ResendInvite({ invite }: { invite: ProjectContextMember }) {
   )
 }
 
-function RevokeInvite({ invite }: { invite: ProjectContextMember }) {
+function RevokeInvite({ invite }: { invite: ProjectMember }) {
   const { t } = useTranslation()
-  const { updateProject, monitorRequest } = useShareProjectContext()
-  const { _id: projectId, invites, members } = useProjectContext()
+  const { monitorRequest } = useShareProjectContext()
+  const { projectId, project, updateProject } = useProjectContext()
+  const { invites, members } = project || {}
 
   function handleClick(event: React.MouseEvent) {
     event.preventDefault()
 
     monitorRequest(() => revokeInvite(projectId, invite)).then(() => {
-      const updatedInvites = invites.filter(existing => existing !== invite)
+      const updatedInvites =
+        invites?.filter(existing => existing !== invite) || []
       updateProject({
         invites: updatedInvites,
       })
       sendMB('collaborator-invite-revoked', {
         project_id: projectId,
         current_invites_amount: updatedInvites.length,
-        current_collaborators_amount: members.length,
+        current_collaborators_amount: members?.length || 0,
       })
     })
   }

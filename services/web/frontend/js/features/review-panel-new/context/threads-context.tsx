@@ -49,7 +49,7 @@ const ThreadsActionsContext = createContext<ThreadsActions | undefined>(
 )
 
 export const ThreadsProvider: FC<React.PropsWithChildren> = ({ children }) => {
-  const { _id: projectId } = useProjectContext()
+  const { projectId } = useProjectContext()
   const { currentDocument } = useEditorOpenDocContext()
   const { isRestrictedTokenMember } = useEditorContext()
 

@@ -15,9 +15,9 @@ describe('<EditorCloneProjectModalWrapper />', function () {
     fetchMock.removeRoutes().clearHistory()
   })
 
-  const project = {
-    _id: 'project-1',
-    name: 'Test Project',
+  const contextProps = {
+    projectId: 'project-1',
+    projectName: 'Test Project',
   }
 
   it('renders the translated modal title', async function () {
@@ -30,7 +30,7 @@ describe('<EditorCloneProjectModalWrapper />', function () {
         openProject={openProject}
         show
       />,
-      { scope: { project } }
+      contextProps
     )
 
     await screen.findByText('Copy project')
@@ -55,7 +55,7 @@ describe('<EditorCloneProjectModalWrapper />', function () {
         openProject={openProject}
         show
       />,
-      { scope: { project } }
+      contextProps
     )
 
     const cancelButton = await screen.findByRole('button', { name: 'Cancel' })
@@ -123,7 +123,7 @@ describe('<EditorCloneProjectModalWrapper />', function () {
         openProject={openProject}
         show
       />,
-      { scope: { project } }
+      contextProps
     )
 
     const button = await screen.findByRole('button', { name: 'Copy' })
@@ -160,7 +160,7 @@ describe('<EditorCloneProjectModalWrapper />', function () {
         openProject={openProject}
         show
       />,
-      { scope: { project } }
+      contextProps
     )
 
     const button = await screen.findByRole('button', { name: 'Copy' })

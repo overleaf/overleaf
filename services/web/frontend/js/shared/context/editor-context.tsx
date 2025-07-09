@@ -9,9 +9,7 @@ import {
   useMemo,
   useState,
 } from 'react'
-import useScopeValue from '../hooks/use-scope-value'
 import useBrowserWindow from '../hooks/use-browser-window'
-import { useIdeContext } from './ide-context'
 import { useProjectContext } from './project-context'
 import { useDetachContext } from './detach-context'
 import getMeta from '../../utils/meta'
@@ -46,12 +44,18 @@ export const EditorContext = createContext<
 >(undefined)
 
 export const EditorProvider: FC<React.PropsWithChildren> = ({ children }) => {
-  const { socket } = useIdeContext()
   const { id: userId, featureUsage } = useUserContext()
   const { role } = useDetachContext()
   const { showGenericMessageModal } = useModalsContext()
 
-  const { owner, features, _id: projectId, members } = useProjectContext()
+  const {
+    features,
+    projectId,
+    project,
+    name: projectName,
+    updateProject,
+  } = useProjectContext()
+  const { owner, members } = project || {}
 
   const cobranding = useMemo(() => {
     const brandVariation = getMeta('ol-brandVariation')
@@ -70,8 +74,6 @@ export const EditorProvider: FC<React.PropsWithChildren> = ({ children }) => {
       }
     )
   }, [])
-
-  const [projectName, setProjectName] = useScopeValue('project.name')
 
   const [inactiveTutorials, setInactiveTutorials] = useState(
     () => getMeta('ol-inactiveTutorials') || []
@@ -95,10 +97,12 @@ export const EditorProvider: FC<React.PropsWithChildren> = ({ children }) => {
 
   const isPendingEditor = useMemo(
     () =>
-      members?.some(
-        member =>
-          member._id === userId &&
-          (member.pendingEditor || member.pendingReviewer)
+      Boolean(
+        members?.some(
+          member =>
+            member._id === userId &&
+            (member.pendingEditor || member.pendingReviewer)
+        )
       ),
     [members, userId]
   )
@@ -110,33 +114,25 @@ export const EditorProvider: FC<React.PropsWithChildren> = ({ children }) => {
     [inactiveTutorials]
   )
 
-  useEffect(() => {
-    if (socket) {
-      socket.on('projectNameUpdated', setProjectName)
-      return () => socket.removeListener('projectNameUpdated', setProjectName)
-    }
-  }, [socket, setProjectName])
-
   const renameProject = useCallback(
     (newName: string) => {
-      setProjectName((oldName: string) => {
-        if (oldName !== newName) {
-          saveProjectSettings(projectId, { name: newName }).catch(
-            (response: any) => {
-              setProjectName(oldName)
-              const { data, status } = response
+      const oldName = projectName
+      if (newName !== oldName) {
+        updateProject({ name: newName })
+        saveProjectSettings(projectId, { name: newName }).catch(
+          (response: any) => {
+            updateProject({ name: oldName })
+            const { data, status } = response
 
-              showGenericMessageModal(
-                'Error renaming project',
-                status === 400 ? data : 'Please try again in a moment'
-              )
-            }
-          )
-        }
-        return newName
-      })
+            showGenericMessageModal(
+              'Error renaming project',
+              status === 400 ? data : 'Please try again in a moment'
+            )
+          }
+        )
+      }
     },
-    [setProjectName, projectId, showGenericMessageModal]
+    [projectName, updateProject, projectId, showGenericMessageModal]
   )
 
   const { setTitle } = useBrowserWindow()

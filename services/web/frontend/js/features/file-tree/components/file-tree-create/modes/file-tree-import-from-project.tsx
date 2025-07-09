@@ -191,7 +191,7 @@ function SelectProject({
   setSelectedProject,
 }: SelectProjectProps) {
   const { t } = useTranslation()
-  const { _id: projectId } = useProjectContext()
+  const { projectId } = useProjectContext()
 
   const { data, error, loading } = useUserProjects()
 

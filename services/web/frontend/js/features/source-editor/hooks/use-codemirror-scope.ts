@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef } from 'react'
 import { EditorState } from '@codemirror/state'
-import useScopeValue from '../../../shared/hooks/use-scope-value'
 import useScopeEventEmitter from '../../../shared/hooks/use-scope-event-emitter'
 import useEventListener from '../../../shared/hooks/use-event-listener'
 import useScopeEventListener from '../../../shared/hooks/use-scope-event-listener'
@@ -55,6 +54,7 @@ import { GotoOffsetOptions } from '@/features/ide-react/context/editor-manager-c
 import { GotoLineOptions } from '@/features/ide-react/types/goto-line-options'
 import { useOnlineUsersContext } from '@/features/ide-react/context/online-users-context'
 import { useEditorOpenDocContext } from '@/features/ide-react/context/editor-open-doc-context'
+import { useProjectContext } from '@/shared/context/project-context'
 import { usePermissionsContext } from '@/features/ide-react/context/permissions-context'
 import { useEditorPropertiesContext } from '@/features/ide-react/context/editor-properties-context'
 import { SearchQuery } from '@codemirror/search'
@@ -92,16 +92,12 @@ function useCodeMirrorScope(view: EditorView) {
 
   const { onlineUserCursorHighlights } = useOnlineUsersContext()
 
-  let [spellCheckLanguage] = useScopeValue<string>('project.spellCheckLanguage')
+  const { project, features: projectFeatures } = useProjectContext()
+  let spellCheckLanguage = project?.spellCheckLanguage || ''
   // spell check is off when read-only
   if (!permissions.write && !permissions.trackedWrite) {
     spellCheckLanguage = ''
   }
-
-  const [projectFeatures] =
-    useScopeValue<Record<string, boolean | string | number | undefined>>(
-      'project.features'
-    )
 
   const hunspellManager = useHunspell(spellCheckLanguage)
 

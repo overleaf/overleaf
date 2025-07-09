@@ -1,9 +1,13 @@
 import { mockScope } from '../helpers/mock-scope'
-import { EditorProviders } from '../../../helpers/editor-providers'
+import {
+  EditorProviders,
+  makeProjectProvider,
+} from '../../../helpers/editor-providers'
 import CodeMirrorEditor from '../../../../../frontend/js/features/source-editor/components/codemirror-editor'
 import { TestContainer } from '../helpers/test-container'
 import forEach from 'mocha-each'
 import PackageVersions from '../../../../../app/src/infrastructure/PackageVersions'
+import { mockProject } from '../helpers/mock-project'
 
 const languages = [
   { code: 'af', dic: 'af_ZA', name: 'Afrikaans' },
@@ -125,11 +129,14 @@ forEach(Object.keys(suggestions)).describe(
       cy.interceptEvents()
 
       const scope = mockScope(content)
-      scope.project.spellCheckLanguage = spellCheckLanguage
+      const project = mockProject({ spellCheckLanguage })
 
       cy.mount(
         <TestContainer>
-          <EditorProviders scope={scope}>
+          <EditorProviders
+            scope={scope}
+            providers={{ ProjectProvider: makeProjectProvider(project) }}
+          >
             <CodeMirrorEditor />
           </EditorProviders>
         </TestContainer>

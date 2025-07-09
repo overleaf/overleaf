@@ -9,6 +9,7 @@ import {
 } from '../../../../frontend/js/shared/context/layout-context'
 import { FC, PropsWithChildren, useEffect } from 'react'
 import { useLocalCompileContext } from '@/shared/context/local-compile-context'
+import { ProjectCompiler } from '../../../../types/project-settings'
 
 const storeAndFireEvent = (win: typeof window, key: string, value: unknown) => {
   localStorage.setItem(key, value)
@@ -215,7 +216,7 @@ describe('<PdfPreview/>', function () {
         cached: false,
         setup: () => {},
         props: {
-          compiler: 'lualatex',
+          compiler: 'lualatex' as ProjectCompiler,
         },
       },
       'ignores the compile from cache when draft mode changed': {

@@ -23,9 +23,10 @@ export default function AddCollaborators({ readOnly }: { readOnly?: boolean }) {
 
   const { t } = useTranslation()
 
-  const { updateProject, setInFlight, setError } = useShareProjectContext()
+  const { setInFlight, setError } = useShareProjectContext()
 
-  const { _id: projectId, members, invites, features } = useProjectContext()
+  const { projectId, project, features, updateProject } = useProjectContext()
+  const { members, invites } = project || {}
 
   const currentMemberEmails = useMemo(
     () => (members || []).map(member => member.email).sort(),
@@ -82,9 +83,7 @@ export default function AddCollaborators({ readOnly }: { readOnly?: boolean }) {
       let data
 
       try {
-        const invite = (invites || []).find(
-          invite => invite.email === normalisedEmail
-        )
+        const invite = invites?.find(invite => invite.email === normalisedEmail)
 
         if (invite) {
           data = await resendInvite(projectId, invite)
@@ -109,8 +108,8 @@ export default function AddCollaborators({ readOnly }: { readOnly?: boolean }) {
           // invitation is only populated on successful invite, meaning that for paywall and other cases this will be null
           successful_invite: !!data.invite,
           users_updated: !!(data.users || data.user),
-          current_collaborators_amount: members.length,
-          current_invites_amount: invites.length,
+          current_collaborators_amount: members?.length || 0,
+          current_invites_amount: invites?.length || 0,
           role,
           previousEditorsAmount,
           previousReviewersAmount,
@@ -144,15 +143,15 @@ export default function AddCollaborators({ readOnly }: { readOnly?: boolean }) {
         setInFlight(false)
       } else if (data.invite) {
         updateProject({
-          invites: invites.concat(data.invite),
+          invites: invites?.concat(data.invite) || [data.invite],
         })
       } else if (data.users) {
         updateProject({
-          members: members.concat(data.users),
+          members: members?.concat(data.users) || data.users,
         })
       } else if (data.user) {
         updateProject({
-          members: members.concat(data.user),
+          members: members?.concat(data.user) || [data.user],
         })
       }
 

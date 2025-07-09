@@ -12,7 +12,8 @@ const EditorOverLimitModal = () => {
 
   const { isProjectOwner } = useEditorContext()
   const { permissionsLevel } = useIdeReactContext()
-  const { members, features, _id: projectId } = useProjectContext()
+  const { project, features, projectId } = useProjectContext()
+  const members = project?.members
 
   const handleHide = () => {
     setShow(false)
@@ -24,7 +25,12 @@ const EditorOverLimitModal = () => {
   useEffect(() => {
     const showModalCooldownHours = 24
     const hasExceededCollaboratorLimit = () => {
-      if (isProjectOwner || !features || permissionsLevel === 'readOnly') {
+      if (
+        isProjectOwner ||
+        !features ||
+        !members ||
+        permissionsLevel === 'readOnly'
+      ) {
         return false
       }
 

@@ -6,7 +6,7 @@ import useSocketListener from '@/features/ide-react/hooks/use-socket-listener'
 import { useConnectionContext } from '@/features/ide-react/context/connection-context'
 
 export default function useProjectRanges() {
-  const { _id: projectId } = useProjectContext()
+  const { projectId } = useProjectContext()
   const [error, setError] = useState<Error>()
   const [projectRanges, setProjectRanges] = useState<Map<string, Ranges>>()
   const [loading, setLoading] = useState(true)

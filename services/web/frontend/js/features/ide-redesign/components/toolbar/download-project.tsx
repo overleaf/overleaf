@@ -9,7 +9,7 @@ import { useTranslation } from 'react-i18next'
 
 export const DownloadProjectZip = () => {
   const { t } = useTranslation()
-  const { _id: projectId } = useProjectContext()
+  const { projectId } = useProjectContext()
   const sendDownloadEvent = useCallback(() => {
     sendMB('download-zip-button-click', {
       projectId,
@@ -44,7 +44,7 @@ export const DownloadProjectZip = () => {
 export const DownloadProjectPDF = () => {
   const { t } = useTranslation()
   const { pdfDownloadUrl, pdfUrl } = useCompileContext()
-  const { _id: projectId } = useProjectContext()
+  const { projectId } = useProjectContext()
   const sendDownloadEvent = useCallback(() => {
     sendMB('download-pdf-button-click', {
       projectId,

@@ -12,7 +12,8 @@ import RecaptchaConditions from '@/shared/components/recaptcha-conditions'
 import getMeta from '@/utils/meta'
 
 export default function ShareModalBody() {
-  const { members, invites, features } = useProjectContext()
+  const { project, features } = useProjectContext()
+  const { members, invites } = project || {}
   const { isProjectOwner } = useEditorContext()
 
   // whether the project has not reached the collaborator limit
@@ -26,12 +27,12 @@ export default function ShareModalBody() {
       return true
     }
 
-    const editorInvites = invites.filter(
-      invite => invite.privileges !== 'readOnly'
-    ).length
+    const editorInvites =
+      invites?.filter(invite => invite.privileges !== 'readOnly').length || 0
 
     return (
-      members.filter(member => member.privileges !== 'readOnly').length +
+      (members?.filter(member => member.privileges !== 'readOnly').length ||
+        0) +
         editorInvites <
       (features.collaborators ?? 1)
     )
@@ -40,11 +41,11 @@ export default function ShareModalBody() {
   // determine if some but not all pending editors' permissions have been resolved,
   // for moving between warning and info notification states etc.
   const somePendingEditorsResolved = useMemo(() => {
-    return (
-      members.some(member =>
+    return Boolean(
+      members?.some(member =>
         ['readAndWrite', 'review'].includes(member.privileges)
       ) &&
-      members.some(member => member.pendingEditor || member.pendingReviewer)
+        members?.some(member => member.pendingEditor || member.pendingReviewer)
     )
   }, [members])
 
@@ -56,13 +57,14 @@ export default function ShareModalBody() {
     if (features.collaborators === -1) {
       return false
     }
-    return members.some(
-      member => member.pendingEditor || member.pendingReviewer
+    return (
+      members?.some(member => member.pendingEditor || member.pendingReviewer) ||
+      false
     )
   }, [features, isProjectOwner, members])
 
   const hasExceededCollaboratorLimit = useMemo(() => {
-    if (!isProjectOwner || !features) {
+    if (!isProjectOwner || !features || !members) {
       return false
     }
 
@@ -77,6 +79,9 @@ export default function ShareModalBody() {
   }, [features, isProjectOwner, members])
 
   const sortedMembers = useMemo(() => {
+    if (!members) {
+      return []
+    }
     return [
       ...members.filter(member => member.privileges === 'readAndWrite'),
       ...members.filter(member => member.pendingEditor),
@@ -126,7 +131,7 @@ export default function ShareModalBody() {
         )
       )}
 
-      {invites.map(invite => (
+      {(invites || []).map(invite => (
         <Invite
           key={invite._id}
           invite={invite}
