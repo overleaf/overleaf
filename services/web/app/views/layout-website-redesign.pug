@@ -15,8 +15,6 @@ block body
 
 	block content
 
-	//- bootstrapVersion needed here, because plans.pug uses both BS version
-	//- If the `plans-page-bs5` split test has been completed, remove bootstrapVersion logic
 	if typeof suppressFooter == 'undefined'
 		if showThinFooter
 			if bootstrapVersion === 5

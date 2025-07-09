@@ -14,30 +14,15 @@ include ../../_mixins/material_symbol
 
 	.row
 		.col-xs-12
-			div(
-				class={
-					'plans-faq-tabs': bootstrapVersion === 5,
-					'ol-tabs': bootstrapVersion === 5,
-					'ol-tabs-scrollable': bootstrapVersion === 3,
-				}
-			)
+			.ol-tabs.plans-faq-tabs
 				.nav-tabs-container
 					ul.nav.nav-tabs(role='tablist')
-						//- In the bs5 version of plans page, the `active` class need to be added to the `a` tag instead of the parent `li` tag
-						//- If the `plans-page-bs5` split test has been completed, remove the `active` class from the `li` tag since we're not using it anymore
-						//- If the `plans-page-bs5` split test has been completed, remove the `data-toggle` because it is not needed anymore (bs5 uses `data-bs-toggle`)
-						li(role='presentation' class={
-							active: bootstrapVersion === 3,
-						})
-							a(
+						li(role='presentation')
+							a.active(
 								role='tab'
-								data-toggle='tab'
 								data-bs-toggle='tab'
 								href='#' + managingYourSubscription
 								aria-controls=managingYourSubscription
-								class={
-									active: bootstrapVersion === 5,
-								}
 							)
 								| #{translate('managing_your_subscription')}
 						li(role='presentation')
@@ -72,8 +57,8 @@ include ../../_mixins/material_symbol
 			span #{translate('still_have_questions')}
 			button(
 				data-ol-open-contact-form-modal='general'
-				data-bs-toggle=bootstrapVersion === 5 ? 'modal' : undefined
-				data-bs-target=bootstrapVersion === 5 ? '#contactUsModal' : undefined
+				data-bs-toggle='modal'
+				data-bs-target='#contactUsModal'
 			)
 				span(style='margin-right: 4px') #{translate('contact_support')}
 				+material-symbol-rounded('arrow_right_alt', 'icon-md')
