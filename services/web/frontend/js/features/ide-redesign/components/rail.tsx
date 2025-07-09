@@ -31,7 +31,6 @@ import { RailHelpContactUsModal } from './help/contact-us'
 import { HistorySidebar } from '@/features/ide-react/components/history-sidebar'
 import DictionarySettingsModal from './settings/editor-settings/dictionary-settings-modal'
 import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
-import OLIconButton from '@/features/ui/components/ol/ol-icon-button'
 import { useChatContext } from '@/features/chat/context/chat-context'
 import { useEditorAnalytics } from '@/shared/hooks/use-editor-analytics'
 import {
@@ -391,13 +390,17 @@ const RailActionElement = ({ action }: { action: RailAction }) => {
         description={action.title}
         overlayProps={{ delay: 0, placement: 'right' }}
       >
-        <OLIconButton
+        <button
           onClick={onActionClick}
           className="ide-rail-tab-link ide-rail-tab-button"
-          icon={action.icon}
-          accessibilityLabel={action.title}
-          unfilled
-        />
+          aria-label={action.title}
+        >
+          <MaterialIcon
+            className="ide-rail-tab-link-icon"
+            type={action.icon}
+            unfilled
+          />
+        </button>
       </OLTooltip>
     )
   }
