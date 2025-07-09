@@ -146,7 +146,6 @@ export interface Meta {
   'ol-isCollectionMethodManual': boolean
   'ol-isExternalAuthenticationSystemUsed': boolean
   'ol-isManagedAccount': boolean
-  'ol-isPaywallChangeCompileTimeoutEnabled': boolean
   'ol-isProfessional': boolean
   'ol-isRegisteredViaGoogle': boolean
   'ol-isRestrictedTokenMember': boolean
@@ -180,7 +179,6 @@ export interface Meta {
   'ol-notificationsInstitution': InstitutionType[]
   'ol-oauthProviders': OAuthProviders
   'ol-odcData': OnboardingFormData
-  'ol-odcRole': string
   'ol-overallThemes': OverallThemeMeta[]
   'ol-pages': number
   'ol-passwordStrengthOptions': PasswordStrengthOptions

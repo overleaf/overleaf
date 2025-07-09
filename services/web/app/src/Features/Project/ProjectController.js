@@ -43,7 +43,6 @@ const ProjectAuditLogHandler = require('./ProjectAuditLogHandler')
 const PublicAccessLevels = require('../Authorization/PublicAccessLevels')
 const TagsHandler = require('../Tags/TagsHandler')
 const TutorialHandler = require('../Tutorial/TutorialHandler')
-const OnboardingDataCollectionManager = require('../OnboardingDataCollection/OnboardingDataCollectionManager')
 const UserUpdater = require('../User/UserUpdater')
 const Modules = require('../../infrastructure/Modules')
 const UserGetter = require('../User/UserGetter')
@@ -349,7 +348,6 @@ const _ProjectController = {
       !anonymous && 'writefull-oauth-promotion',
       'hotjar',
       'editor-redesign',
-      'paywall-change-compile-timeout',
       'overleaf-assist-bundle',
       'word-count-client',
       'editor-popup-ux-survey',
@@ -404,13 +402,6 @@ const _ProjectController = {
               userId,
               projectId
             ),
-          odcRole: OnboardingDataCollectionManager.getOnboardingDataValue(
-            userId,
-            'role'
-          ).catch(err => {
-            logger.error({ err, userId })
-            return null
-          }),
         })
       )
     const splitTestAssignments = {}
@@ -463,7 +454,6 @@ const _ProjectController = {
         subscription,
         isTokenMember,
         isInvitedMember,
-        odcRole,
       } = userValues
 
       const brandVariation = project?.brandVariationId
@@ -745,14 +735,6 @@ const _ProjectController = {
         fullFeatureSet = await UserGetter.promises.getUserFeatures(userId)
       }
 
-      const isPaywallChangeCompileTimeoutEnabled =
-        splitTestAssignments['paywall-change-compile-timeout']?.variant ===
-        'enabled'
-
-      const paywallPlans =
-        isPaywallChangeCompileTimeoutEnabled &&
-        (await ProjectController._getPaywallPlansPrices(req, res))
-
       const customerIoEnabled =
         await SplitTestHandler.promises.hasUserBeenAssignedToVariant(
           req,
@@ -873,17 +855,9 @@ const _ProjectController = {
         fixedSizeDocument: true,
         hasTrackChangesFeature: Features.hasFeature('track-changes'),
         projectTags,
-        odcRole:
-          // only use the ODC role value if the split test is enabled
-          splitTestAssignments['paywall-change-compile-timeout']?.variant ===
-          'enabled'
-            ? odcRole
-            : null,
         isSaas: Features.hasFeature('saas'),
         shouldLoadHotjar: splitTestAssignments.hotjar?.variant === 'enabled',
-        isPaywallChangeCompileTimeoutEnabled,
         isOverleafAssistBundleEnabled,
-        paywallPlans,
         customerIoEnabled,
         addonPrices,
         compileSettings: {
