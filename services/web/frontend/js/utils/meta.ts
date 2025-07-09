@@ -195,7 +195,7 @@ export interface Meta {
   'ol-preventCompileOnLoad'?: boolean
   'ol-primaryEmail': { email: string; confirmed: boolean }
   'ol-project': any // TODO
-  'ol-projectEntityCounts'?: { files: number; docs: number }
+  'ol-projectEntityCounts': { files: number; docs: number }
   'ol-projectHistoryBlobsEnabled': boolean
   'ol-projectName': string
   'ol-projectOwnerHasPremiumOnPageLoad': boolean
