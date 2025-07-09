@@ -15,7 +15,7 @@ describe('<HotkeysModalBottomText />', function () {
     })
 
     expect(link.getAttribute('href')).to.equal(
-      `/articles/overleaf-keyboard-shortcuts/qykqfvmxdnjf`
+      `https://www.overleaf.com/articles/overleaf-keyboard-shortcuts/qykqfvmxdnjf`
     )
   })
 })
