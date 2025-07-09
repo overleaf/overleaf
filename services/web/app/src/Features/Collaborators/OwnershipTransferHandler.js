@@ -85,6 +85,7 @@ async function _getProject(projectId) {
     owner_ref: 1,
     collaberator_refs: 1,
     readOnly_refs: 1,
+    reviewer_refs: 1,
     name: 1,
   })
   if (project == null) {
@@ -104,8 +105,13 @@ async function _getUser(userId) {
 function _getUserPermissions(user, project) {
   const collaboratorIds = project.collaberator_refs || []
   const readOnlyIds = project.readOnly_refs || []
+  const reviewerIds = project.reviewer_refs || []
   if (collaboratorIds.some(collaboratorId => collaboratorId.equals(user._id))) {
     return PrivilegeLevels.READ_AND_WRITE
+  } else if (
+    reviewerIds.some(collaboratorId => collaboratorId.equals(user._id))
+  ) {
+    return PrivilegeLevels.REVIEW
   } else if (
     readOnlyIds.some(collaboratorId => collaboratorId.equals(user._id))
   ) {

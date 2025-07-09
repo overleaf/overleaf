@@ -19,12 +19,17 @@ describe('OwnershipTransferHandler', function () {
       _id: new ObjectId(),
       email: 'readonly@example.com',
     }
+    this.reviewer = {
+      _id: new ObjectId(),
+      email: 'reviewer@example.com',
+    }
     this.project = {
       _id: new ObjectId(),
       name: 'project',
       owner_ref: this.user._id,
       collaberator_refs: [this.collaborator._id],
       readOnly_refs: [this.readOnlyCollaborator._id],
+      reviewer_refs: [this.reviewer._id],
     }
     this.ProjectGetter = {
       promises: {
@@ -97,6 +102,9 @@ describe('OwnershipTransferHandler', function () {
       this.UserGetter.promises.getUser
         .withArgs(this.readOnlyCollaborator._id)
         .resolves(this.readOnlyCollaborator)
+      this.UserGetter.promises.getUser
+        .withArgs(this.reviewer._id)
+        .resolves(this.reviewer)
     })
 
     it("should return a not found error if the project can't be found", async function () {
@@ -197,6 +205,32 @@ describe('OwnershipTransferHandler', function () {
         this.collaborator._id,
         this.user._id,
         PrivilegeLevels.READ_AND_WRITE
+      )
+    })
+
+    it('should transfer ownership of the project to a reviewer', async function () {
+      await this.handler.promises.transferOwnership(
+        this.project._id,
+        this.reviewer._id
+      )
+      expect(this.ProjectModel.updateOne).to.have.been.calledWith(
+        { _id: this.project._id },
+        sinon.match({ $set: { owner_ref: this.reviewer._id } })
+      )
+    })
+
+    it('gives old owner reviewer permissions if new owner was previously a reviewer', async function () {
+      await this.handler.promises.transferOwnership(
+        this.project._id,
+        this.reviewer._id
+      )
+      expect(
+        this.CollaboratorsHandler.promises.addUserIdToProject
+      ).to.have.been.calledWith(
+        this.project._id,
+        this.reviewer._id,
+        this.user._id,
+        PrivilegeLevels.REVIEW
       )
     })
 
