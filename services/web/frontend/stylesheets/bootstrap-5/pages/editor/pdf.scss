@@ -68,6 +68,12 @@
     border-radius: var(--border-radius-full);
     box-shadow: 0 2px 4px 0 #1e253029;
   }
+
+  .synctex-control {
+    .synctex-control-icon {
+      font-weight: normal;
+    }
+  }
 }
 
 .pdf .toolbar.toolbar-pdf {
