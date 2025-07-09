@@ -211,7 +211,8 @@
     border-radius: 50%;
     display: inline-block;
     line-height: 32px;
-    background-color: var(--bg-light-secondary);
+    background-color: var(--bg-secondary-themed);
+    color: var(--content-primary-themed);
 
     .material-symbols {
       font-size: 32px;
@@ -219,6 +220,7 @@
   }
 
   .chat-empty-state-title {
+    color: var(--content-primary-themed);
     font-size: var(--font-size-02);
     line-height: var(--line-height-02);
     font-weight: bold;
@@ -227,7 +229,7 @@
   .chat-empty-state-body {
     font-size: var(--font-size-02);
     line-height: var(--line-height-02);
-    color: var(--content-secondary);
+    color: var(--content-secondary-themed);
   }
 }
 
