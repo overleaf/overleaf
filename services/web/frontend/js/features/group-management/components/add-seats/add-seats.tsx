@@ -44,7 +44,7 @@ function AddSeats() {
   const { t } = useTranslation()
   const groupName = getMeta('ol-groupName')
   const subscriptionId = getMeta('ol-subscriptionId')
-  const totalLicenses = Number(getMeta('ol-totalLicenses'))
+  const totalLicenses = getMeta('ol-totalLicenses')
   const isProfessional = getMeta('ol-isProfessional')
   const isCollectionMethodManual = getMeta('ol-isCollectionMethodManual')
   const [addSeatsInputError, setAddSeatsInputError] = useState<string>()

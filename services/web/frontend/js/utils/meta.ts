@@ -159,7 +159,7 @@ export interface Meta {
   'ol-languages': SpellCheckLanguage[]
   'ol-learnedWords': string[]
   'ol-legacyEditorThemes': string[]
-  'ol-licenseQuantity': number | undefined
+  'ol-licenseQuantity'?: number
   'ol-loadingText': string
   'ol-managedGroupSubscriptions': ManagedGroupSubscription[]
   'ol-managedInstitutions': ManagedInstitution[]
@@ -320,6 +320,7 @@ export default function getMeta<T extends keyof Meta>(name: T): Meta[T] {
       value = element.hasAttribute('content')
       break
     case 'json':
+    case 'number':
       if (!plainTextValue) {
         // JSON.parse('') throws
         value = undefined
