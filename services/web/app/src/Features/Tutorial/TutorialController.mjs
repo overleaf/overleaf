@@ -17,6 +17,7 @@ const VALID_KEYS = [
   'review-mode',
   'new-error-logs-promo',
   'try-redesign-again-nudge-promo',
+  'write-and-cite-nudge-in-linked-file',
   'ide-redesign-new-survey-promo',
 ]
 
