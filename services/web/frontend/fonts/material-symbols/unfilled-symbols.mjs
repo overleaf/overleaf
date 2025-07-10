@@ -7,6 +7,7 @@ export default /** @type {const} */ ([
   'auto_delete',
   'book_5',
   'brush',
+  'close',
   'code',
   'content_copy',
   'create_new_folder',
