@@ -16,7 +16,9 @@ mixin managingYourSubscription
 			.collapse(id='managingYourSubscriptionQ1')
 				.custom-accordion-body
 					span Yes, you can do this at any time by going to
+					| &nbsp;
 					strong Account > Subscription
+					| &nbsp;
 					span when logged in to Overleaf. You can change plans, switch between monthly and annual billing options, or cancel to downgrade to the free plan. When canceling, your subscription will continue until the end of the billing period.
 		.custom-accordion-item
 			button.custom-accordion-header.collapsed(
@@ -59,7 +61,8 @@ mixin managingYourSubscription
 					+material-symbol-outlined('keyboard_arrow_down')
 			.collapse(id='managingYourSubscriptionQ4')
 				.custom-accordion-body
-					| You can view and update the card on file by going to Account >
+					span You can view and update the card on file by going to Account >
+					| &nbsp;
 					a.inline-green-link(
 						target='_blank'
 						href='/user/subscription'
@@ -87,8 +90,9 @@ mixin overleafIndividualPlans
 			.collapse(id='overleafIndividualPlansQ1')
 				.custom-accordion-body
 					span You get full access to your chosen plan during your 7-day free trial, and there’s no obligation to continue beyond the trial. Your card will be charged at the end of your trial unless you cancel before then. To cancel, go to
+					| &nbsp;
 					strong Account >
-						|
+						| &nbsp;
 						a.inline-green-link(
 							target='_blank'
 							href='/user/subscription'
@@ -98,6 +102,7 @@ mixin overleafIndividualPlans
 							event-segmentation={button: 'contact', location: 'faq'}
 						)
 							span Subscription
+					| &nbsp;
 					span when logged in to Overleaf (the trial will continue for the full 7 days).
 
 		.custom-accordion-item
@@ -129,7 +134,9 @@ mixin overleafIndividualPlans
 			.collapse(id='overleafIndividualPlansQ3')
 				.custom-accordion-body
 					span No. Only the subscriber’s account will be upgraded. An individual Standard subscription allows you to invite 10 people per project to edit the project with you. Your collaborators can access features such as the full document history and extended compile time, but
+					| &nbsp;
 					strong only
+					| &nbsp;
 					span for the project(s) they’re working on with you. If your collaborators want access to those features on their own projects, they will need to purchase their own subscription. (If you work with the same people regularly, you might find a group subscription more cost effective.)
 		.custom-accordion-item
 			button.custom-accordion-header.collapsed(
@@ -145,7 +152,9 @@ mixin overleafIndividualPlans
 			.collapse(id='overleafIndividualPlansQ4')
 				.custom-accordion-body
 					span If you have an Overleaf subscription, then your project collaborators will have access to features like real-time track changes and document history, but
+					| &nbsp;
 					strong only
+					| &nbsp;
 					span for the project(s) they’re working on with you. If your collaborators want access to those features on their own projects, they will need to purchase their own subscription. (If you work with the same people regularly, you might find a group subscription more cost effective.)
 		.custom-accordion-item
 			button.custom-accordion-header.collapsed(
@@ -220,7 +229,8 @@ mixin overleafGroupPlans
 					+material-symbol-outlined('keyboard_arrow_down')
 			.collapse(id='overleafGroupPlansQ2')
 				.custom-accordion-body
-					| Our Group subscriptions allow you to purchase access to our premium features for multiple people. They’re easy to manage, help save on paperwork, and allow groups of 5 or more to purchase via purchase order (PO). We also offer discounts on purchases of Group subscriptions for more than 20 users; just get in touch with our
+					span Our Group subscriptions allow you to purchase access to our premium features for multiple people. They’re easy to manage, help save on paperwork, and allow groups of 5 or more to purchase via purchase order (PO). We also offer discounts on purchases of Group subscriptions for more than 20 users; just get in touch with our
+					| &nbsp;
 					a.inline-green-link(
 						target='_blank'
 						href='/for/contact-sales'
@@ -259,7 +269,8 @@ mixin overleafGroupPlans
 			.collapse(id='overleafGroupPlansQ4')
 				.custom-accordion-body
 					div
-						| You can add up to 20 licenses using the
+						span You can add up to 20 licenses using the
+						| &nbsp;
 						a.inline-green-link(
 							target='_blank'
 							href='/user/subscription'
@@ -269,8 +280,9 @@ mixin overleafGroupPlans
 							event-segmentation={button: 'contact', location: 'faq'}
 						)
 							span subscription management page
-						|
-						| accessed by going to Account >
+						| &nbsp;
+						span accessed by going to Account >
+						| &nbsp;
 						a.inline-green-link(
 							target='_blank'
 							href='/user/subscription'
@@ -280,10 +292,11 @@ mixin overleafGroupPlans
 							event-segmentation={button: 'contact', location: 'faq'}
 						)
 							span Subscription
-						|
-						| when logged into Overleaf. The cost per license will be prorated at the current per license rate, and will end with your existing renewal date.
+						| &nbsp;
+						span when logged into Overleaf. The cost per license will be prorated at the current per license rate, and will end with your existing renewal date.
 					.mt-2
-						| If you need more than 20 licenses added to your subscription, please
+						span If you need more than 20 licenses added to your subscription, please
+						| &nbsp;
 						a.inline-green-link(
 							target='_blank'
 							href='/for/contact-sales'
@@ -307,7 +320,8 @@ mixin overleafGroupPlans
 					+material-symbol-outlined('keyboard_arrow_down')
 			.collapse(id='overleafGroupPlansQ5')
 				.custom-accordion-body
-					| You can upgrade your plan from Group Standard to Group Professional on the
+					span You can upgrade your plan from Group Standard to Group Professional on the
+					| &nbsp;
 					a.inline-green-link(
 						target='_blank'
 						href='/user/subscription'
