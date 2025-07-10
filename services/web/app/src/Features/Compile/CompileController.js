@@ -210,7 +210,9 @@ const _CompileController = {
           compileTime: timings?.compileE2E,
           timeout: limits.timeout,
           server:
-            clsiServerId?.includes('-c2d-') || clsiServerId?.includes('-c3d-')
+            clsiServerId?.includes('-c2d-') ||
+            clsiServerId?.includes('-c3d-') ||
+            clsiServerId?.includes('-c4d-')
               ? 'faster'
               : 'normal',
           clsiServerId,
