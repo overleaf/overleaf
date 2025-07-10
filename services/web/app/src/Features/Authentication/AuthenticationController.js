@@ -392,10 +392,6 @@ const AuthenticationController = {
         req.oauth_user = token.user
         next()
       } catch (err) {
-        logger.warn(
-          { errName: err.name, errMessage: err.message },
-          'OAuth authenticate error'
-        )
         if (
           err.code === 400 &&
           err.message === 'Invalid request: malformed authorization header'
