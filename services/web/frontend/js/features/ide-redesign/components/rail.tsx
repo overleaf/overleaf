@@ -44,6 +44,7 @@ import OldErrorPane from './error-logs/old-error-pane'
 import { useFeatureFlag } from '@/shared/context/split-test-context'
 import { useSurveyUrl } from '../hooks/use-survey-url'
 import { useProjectContext } from '@/shared/context/project-context'
+import usePreviousValue from '@/shared/hooks/use-previous-value'
 
 type RailElement = {
   icon: AvailableUnfilledIcon
@@ -217,6 +218,18 @@ export const RailLayout = () => {
 
   const isReviewPanelOpen = selectedTab === 'review-panel'
 
+  const prevTab = usePreviousValue(selectedTab)
+
+  const tabHasChanged = useMemo(() => {
+    return prevTab !== selectedTab
+  }, [prevTab, selectedTab])
+
+  const onCollapse = useCallback(() => {
+    if (!tabHasChanged) {
+      handlePaneCollapse()
+    }
+  }, [tabHasChanged, handlePaneCollapse])
+
   return (
     <TabContainer
       mountOnEnter // Only render when necessary (so that we can lazy load tab content)
@@ -260,7 +273,7 @@ export const RailLayout = () => {
         maxSize={80}
         ref={panelRef}
         collapsible
-        onCollapse={handlePaneCollapse}
+        onCollapse={onCollapse}
         onExpand={handlePaneExpand}
       >
         {isHistoryView && <HistorySidebar />}

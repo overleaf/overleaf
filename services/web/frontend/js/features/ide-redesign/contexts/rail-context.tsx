@@ -1,5 +1,4 @@
 import { sendSearchEvent } from '@/features/event-tracking/search-events'
-import useCollapsiblePanel from '@/features/ide-react/hooks/use-collapsible-panel'
 import useEventListener from '@/shared/hooks/use-event-listener'
 import { isMac } from '@/shared/utils/os'
 import {
@@ -9,6 +8,8 @@ import {
   SetStateAction,
   useCallback,
   useContext,
+  useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -55,7 +56,6 @@ export const RailProvider: FC<React.PropsWithChildren> = ({ children }) => {
     }, [])
 
   const panelRef = useRef<ImperativePanelHandle>(null)
-  useCollapsiblePanel(isOpen, panelRef)
 
   const togglePane = useCallback(() => {
     setIsOpen(value => !value)
@@ -72,6 +72,19 @@ export const RailProvider: FC<React.PropsWithChildren> = ({ children }) => {
   // NOTE: The file tree **MUST** be the first tab to be opened
   //       since it is responsible for opening the initial document.
   const [selectedTab, setSelectedTab] = useState<RailTabKey>('file-tree')
+
+  // Keep the panel collapse/expanded state in sync with isOpen and selectedTab
+  useLayoutEffect(() => {
+    const panelHandle = panelRef.current
+
+    if (panelHandle) {
+      if (isOpen) {
+        panelHandle.expand()
+      } else {
+        panelHandle.collapse()
+      }
+    }
+  }, [isOpen, selectedTab])
 
   const openTab = useCallback(
     (tab: RailTabKey) => {
