@@ -3,7 +3,7 @@ export function resetMeta() {
   window.metaAttributesCache.set('ol-i18n', { currentLangCode: 'en' })
   window.metaAttributesCache.set('ol-ExposedSettings', {
     appName: 'Overleaf',
-    validRootDocExtensions: ['tex', 'Rtex', 'ltx', 'Rnw'],
+    validRootDocExtensions: ['tex', 'Rtex', 'ltx', 'Rnw', 'typ'],
     fileIgnorePattern:
       '**/{{__MACOSX,.git,.texpadtmp,.R}{,/**},.!(latexmkrc),*.{dvi,aux,log,toc,out,pdfsync,synctex,synctex(busy),fdb_latexmk,fls,nlo,ind,glo,gls,glg,bbl,blg,doc,docx,gz,swp}}',
     hasLinkedProjectFileFeature: true,
