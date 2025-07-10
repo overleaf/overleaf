@@ -2169,6 +2169,8 @@
   "stop_on_validation_error": "Check syntax before compile",
   "store_your_work": "Store your work on your own infrastructure",
   "stretch_width_to_text": "Stretch width to text",
+  "stripe_error_please_wait_and_try_again": "There is an error with our payment processor, please wait a few minutes and try again.",
+  "stripe_key_error_please_contact_support": "There is an error with our payment processor, please <0>contact support.</0>",
   "strongly_agree": "Strongly agree",
   "strongly_disagree": "Strongly disagree",
   "student": "Student",
