@@ -72,6 +72,7 @@ function runLatex(projectId, options, callback) {
     compileGroup,
     function (error, output) {
       delete ProcessTable[id]
+      if (compiler != "typst") {
       if (error) {
         return callback(error)
       }
@@ -94,6 +95,14 @@ function runLatex(projectId, options, callback) {
             timings[timing] = parseFloat(match[1])
           }
         }
+        }
+      } else {
+        const failed = output?.stdout?.match(/^Typst failed/m) != null ? 1 : 0
+        stats['latexmk-errors'] = failed
+        stats['latex-runs'] = 1
+        stats['latex-runs-with-errors'] = failed ? 1 : 0
+        stats[`latex-runs-1`] = 1
+        stats[`latex-runs-with-errors-1`] = failed ? 1 : 0
       }
       // record output files
       _writeLogOutput(projectId, directory, output, () => {
@@ -192,7 +201,7 @@ function _buildLatexCommand(mainFile, opts = {}) {
   } else {
     // Basic command and flags
     command.push(
-      'typst',
+      'typst-wrapper',
       'compile',
     )
 

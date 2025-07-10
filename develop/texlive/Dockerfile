@@ -12,5 +12,7 @@ RUN mkdir -p /opt/typst && \
     ln -s /opt/typst/typst /bin/typst && \
     rm -f typst-*.tar.xz
 
+COPY typst-wrapper /usr/bin/typst-wrapper
+
 RUN useradd tex
 USER tex
