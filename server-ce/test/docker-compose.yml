@@ -91,6 +91,7 @@ services:
     volumes:
       - ./:/e2e
       - /tmp/.X11-unix:/tmp/.X11-unix
+      - ${XAUTHORITY:-/dev/null}:/home/node/.Xauthority
     user: "${DOCKER_USER:-1000:1000}"
     environment:
       CYPRESS_SHARD:

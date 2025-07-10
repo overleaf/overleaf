@@ -4,6 +4,7 @@ services:
     volumes:
       - ../../:/overleaf
       - /tmp/.X11-unix:/tmp/.X11-unix
+      - ${XAUTHORITY:-/dev/null}:/home/node/.Xauthority
     working_dir: /overleaf/services/web
     entrypoint: npm
     command: run cypress:open-ct
