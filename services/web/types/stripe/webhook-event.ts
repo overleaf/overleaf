@@ -22,6 +22,7 @@ export type CustomerSubscriptionUpdatedWebhookEvent = {
           },
         ]
       }
+      status?: Stripe.Subscription.Status
     }
   }
 }
