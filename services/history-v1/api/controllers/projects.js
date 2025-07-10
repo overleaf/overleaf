@@ -15,11 +15,10 @@ const {
   BlobStore,
   blobHash,
   chunkStore,
+  redisBuffer,
   HashCheckBlobStore,
   ProjectArchive,
   zipStore,
-  persistBuffer,
-  redisBuffer,
 } = require('../../storage')
 
 const render = require('./render')
@@ -229,19 +228,8 @@ async function deleteProject(req, res, next) {
   const projectId = req.swagger.params.project_id.value
   const blobStore = new BlobStore(projectId)
 
-  const farFuture = new Date()
-  farFuture.setTime(farFuture.getTime() + 7 * 24 * 3600 * 1000)
-  const limits = {
-    maxChanges: 0,
-    minChangeTimestamp: farFuture,
-    maxChangeTimestamp: farFuture,
-    autoResync: false,
-  }
-
-  await persistBuffer(projectId, limits)
-  await redisBuffer.expireProject(projectId)
-
   await Promise.all([
+    redisBuffer.hardDeleteProject(projectId),
     chunkStore.deleteProjectChunks(projectId),
     blobStore.deleteBlobs(),
   ])

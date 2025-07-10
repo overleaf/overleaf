@@ -1206,6 +1206,43 @@ describe('chunk buffer Redis backend', function () {
       expect(state.expireTime).to.equal(newTimestamp)
     })
   })
+
+  describe('hardDeleteProject', function () {
+    it('should delete all keys associated with the project', async function () {
+      // Setup project state
+      await setupState(projectId, {
+        headVersion: 5,
+        headSnapshot: new Snapshot(),
+        persistedVersion: 3,
+        persistTime: Date.now(),
+        expireTime: Date.now() + 3600 * 1000, // 1 hour from now
+        changes: 5,
+      })
+
+      // Verify that state exists before deletion
+      let state = await redisBackend.getState(projectId)
+      expect(state.headVersion).to.equal(5)
+
+      // Call hardDeleteProject
+      const result = await redisBackend.hardDeleteProject(projectId)
+      expect(result).to.equal('ok')
+
+      // Verify that all keys are deleted
+      state = await redisBackend.getState(projectId)
+      expect(state.headVersion).to.be.null
+      expect(state.headSnapshot).to.be.null
+      expect(state.persistedVersion).to.be.null
+      expect(state.persistTime).to.be.null
+      expect(state.expireTime).to.be.null
+      expect(state.changes).to.be.an('array').that.is.empty
+    })
+
+    it('should not throw an error if the project does not exist', async function () {
+      // Call hardDeleteProject on a non-existent project
+      const result = await redisBackend.hardDeleteProject(projectId)
+      expect(result).to.equal('ok')
+    })
+  })
 })
 
 async function queueChanges(projectId, changes, opts = {}) {
@@ -1235,6 +1272,7 @@ function makeChange() {
  * @param {string} projectId
  * @param {object} params
  * @param {number} params.headVersion
+ * @param {Snapshot} [params.headSnapshot]
  * @param {number | null} params.persistedVersion
  * @param {number | null} params.persistTime - time when the project should be persisted
  * @param {number | null} params.expireTime - time when the project should expire
@@ -1243,6 +1281,12 @@ function makeChange() {
  */
 async function setupState(projectId, params) {
   await rclient.set(keySchema.headVersion({ projectId }), params.headVersion)
+  if (params.headSnapshot) {
+    await rclient.set(
+      keySchema.head({ projectId }),
+      JSON.stringify(params.headSnapshot.toRaw())
+    )
+  }
   if (params.persistedVersion) {
     await rclient.set(
       keySchema.persistedVersion({ projectId }),

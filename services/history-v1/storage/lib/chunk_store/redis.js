@@ -585,6 +585,53 @@ async function setPersistedVersion(projectId, persistedVersion) {
   }
 }
 
+rclient.defineCommand('hard_delete_project', {
+  numberOfKeys: 6,
+  lua: `
+    local headKey = KEYS[1]
+    local headVersionKey = KEYS[2]
+    local persistedVersionKey = KEYS[3]
+    local expireTimeKey = KEYS[4]
+    local persistTimeKey = KEYS[5]
+    local changesKey = KEYS[6]
+    -- Delete all keys associated with the project
+    redis.call('DEL',
+      headKey,
+      headVersionKey,
+      persistedVersionKey,
+      expireTimeKey,
+      persistTimeKey,
+      changesKey
+    )
+      return 'ok'
+  `,
+})
+
+/** Hard delete a project from Redis by removing all keys associated with it.
+ * This is only to be used when a project is **permanently** deleted.
+ * DO NOT USE THIS FOR ANY OTHER PURPOSES AS IT WILL REMOVE NON-PERSISTED CHANGES.
+ * @param {string} projectId - The unique identifier of the project to delete.
+ * @returns {Promise<string>} A Promise that resolves to 'ok' on success.
+ * @throws {Error} If Redis operations fail.
+ */
+async function hardDeleteProject(projectId) {
+  try {
+    const status = await rclient.hard_delete_project(
+      keySchema.head({ projectId }),
+      keySchema.headVersion({ projectId }),
+      keySchema.persistedVersion({ projectId }),
+      keySchema.expireTime({ projectId }),
+      keySchema.persistTime({ projectId }),
+      keySchema.changes({ projectId })
+    )
+    metrics.inc('chunk_store.redis.hard_delete_project', 1, { status })
+    return status
+  } catch (err) {
+    metrics.inc('chunk_store.redis.hard_delete_project', 1, { status: 'error' })
+    throw err
+  }
+}
+
 rclient.defineCommand('set_expire_time', {
   numberOfKeys: 2,
   lua: `
@@ -794,6 +841,7 @@ module.exports = {
   getChangesSinceVersion,
   getNonPersistedChanges,
   setPersistedVersion,
+  hardDeleteProject,
   setExpireTime,
   expireProject,
   claimExpireJob,
