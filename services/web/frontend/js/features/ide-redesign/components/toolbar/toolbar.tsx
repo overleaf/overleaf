@@ -20,7 +20,7 @@ const [publishModalModules] = importOverleafModules('publishModal')
 const SubmitProjectButton = publishModalModules?.import.NewPublishToolbarButton
 
 export const Toolbar = () => {
-  const { view, setView } = useLayoutContext()
+  const { view, restoreView } = useLayoutContext()
   const { cobranding } = useEditorContext()
   const { permissionsLevel } = useIdeReactContext()
   const shouldDisplaySubmitButton =
@@ -29,8 +29,8 @@ export const Toolbar = () => {
 
   const handleBackToEditorClick = useCallback(() => {
     eventTracking.sendMB('navigation-clicked-history', { action: 'close' })
-    setView('editor')
-  }, [setView])
+    restoreView()
+  }, [restoreView])
 
   if (view === 'history') {
     return (

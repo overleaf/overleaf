@@ -7,7 +7,7 @@ type RestorationState = 'initial' | 'restoring' | 'restored' | 'error'
 
 export const useRestoreProject = () => {
   const { showBoundary } = useErrorBoundary()
-  const { setView } = useLayoutContext()
+  const { restoreView } = useLayoutContext()
 
   const [restorationState, setRestorationState] =
     useState<RestorationState>('initial')
@@ -18,14 +18,14 @@ export const useRestoreProject = () => {
       restoreProjectToVersion(projectId, version)
         .then(() => {
           setRestorationState('restored')
-          setView('editor')
+          restoreView()
         })
         .catch(err => {
           setRestorationState('error')
           showBoundary(err)
         })
     },
-    [showBoundary, setView]
+    [showBoundary, restoreView]
   )
 
   return {

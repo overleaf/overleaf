@@ -409,6 +409,11 @@ const makeLayoutProvider = (
       },
       [setPdfLayout, setView]
     )
+
+    const restoreView = useCallback(() => {
+      setView('editor')
+    }, [])
+
     const {
       reattach,
       detach,
@@ -443,6 +448,7 @@ const makeLayoutProvider = (
         setLoadingStyleSheet,
         setView,
         view,
+        restoreView,
       }),
       [
         reattach,
@@ -469,6 +475,7 @@ const makeLayoutProvider = (
         setLoadingStyleSheet,
         setView,
         view,
+        restoreView,
       ]
     )
 
