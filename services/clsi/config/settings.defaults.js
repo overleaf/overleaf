@@ -144,7 +144,7 @@ if ((process.env.DOCKER_RUNNER || process.env.SANDBOXED_COMPILES) === 'true') {
   let seccompProfilePath
   try {
     // FIXME: create a seccomp profile for typst
-    seccompProfilePath = Path.resolve(__dirname, '../seccomp/clsi-profile-permissive.json')
+    seccompProfilePath = Path.resolve(__dirname, '../seccomp/clsi-profile.json')
     module.exports.clsi.docker.seccomp_profile =
       process.env.SECCOMP_PROFILE ||
       JSON.stringify(
