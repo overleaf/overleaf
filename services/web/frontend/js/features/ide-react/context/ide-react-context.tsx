@@ -42,33 +42,8 @@ export const IdeReactContext = createContext<IdeReactContextValue | undefined>(
   undefined
 )
 
-function populateIdeReactScope(store: ReactScopeValueStore) {
-  store.set('settings', {})
-}
-
-function populatePdfScope(store: ReactScopeValueStore) {
-  store.allowNonExistentPath('pdf', true)
-}
-
-export function createReactScopeValueStore() {
-  const scopeStore = new ReactScopeValueStore()
-
-  // Populate the scope value store with default values that will be used by
-  // nested contexts that refer to scope values. The ideal would be to leave
-  // initialization of store values up to the nested context, which would keep
-  // initialization code together with the context and would only populate
-  // necessary values in the store, but this is simpler for now
-  populateIdeReactScope(scopeStore)
-  populatePdfScope(scopeStore)
-
-  scopeStore.allowNonExistentPath('hasLintingError')
-
-  return scopeStore
-}
-
 export const IdeReactProvider: FC<React.PropsWithChildren> = ({ children }) => {
   const projectId = getMeta('ol-project_id')
-  const [scopeStore] = useState(() => createReactScopeValueStore())
   const [eventEmitter] = useState(createIdeEventEmitter)
   const [permissionsLevel, setPermissionsLevel] =
     useState<PermissionsLevel>('readOnly')
@@ -146,8 +121,6 @@ export const IdeReactProvider: FC<React.PropsWithChildren> = ({ children }) => {
       joinProject(project as unknown as ProjectMetadata)
 
       setPermissionsLevel(permissionsLevel)
-      // Make watchers update immediately
-      scopeStore.flushUpdates()
       eventEmitter.emit('project:joined', { project, permissionsLevel })
       setProjectJoined(true)
     }
@@ -157,7 +130,7 @@ export const IdeReactProvider: FC<React.PropsWithChildren> = ({ children }) => {
     return () => {
       socket.removeListener('joinProjectResponse', handleJoinProjectResponse)
     }
-  }, [socket, eventEmitter, scopeStore, joinProject])
+  }, [socket, eventEmitter, joinProject])
 
   const ide = useMemo(() => {
     return {
@@ -194,7 +167,6 @@ export const IdeReactProvider: FC<React.PropsWithChildren> = ({ children }) => {
     <IdeReactContext.Provider value={value}>
       <IdeProvider
         ide={ide}
-        scopeStore={scopeStore}
         scopeEventEmitter={scopeEventEmitter}
         unstableStore={unstableStore}
       >

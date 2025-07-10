@@ -8,7 +8,6 @@ export type Ide = {
 }
 
 type IdeContextValue = Ide & {
-  scopeStore: ScopeValueStore
   scopeEventEmitter: ScopeEventEmitter
   unstableStore: ScopeValueStore
 }
@@ -18,11 +17,10 @@ export const IdeContext = createContext<IdeContextValue | undefined>(undefined)
 export const IdeProvider: FC<
   React.PropsWithChildren<{
     ide: Ide
-    scopeStore: ScopeValueStore
     scopeEventEmitter: ScopeEventEmitter
     unstableStore: ScopeValueStore
   }>
-> = ({ ide, scopeStore, scopeEventEmitter, unstableStore, children }) => {
+> = ({ ide, scopeEventEmitter, unstableStore, children }) => {
   /**
    * Expose unstableStore via `window.overleaf.unstable.store`, so it can be accessed by external extensions.
    *
@@ -49,11 +47,10 @@ export const IdeProvider: FC<
   const value = useMemo<IdeContextValue>(() => {
     return {
       ...ide,
-      scopeStore,
       scopeEventEmitter,
       unstableStore,
     }
-  }, [ide, scopeStore, scopeEventEmitter, unstableStore])
+  }, [ide, scopeEventEmitter, unstableStore])
 
   return <IdeContext.Provider value={value}>{children}</IdeContext.Provider>
 }

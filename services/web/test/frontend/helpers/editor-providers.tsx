@@ -11,10 +11,7 @@ import React, {
   type FC,
   type PropsWithChildren,
 } from 'react'
-import {
-  createReactScopeValueStore,
-  IdeReactContext,
-} from '@/features/ide-react/context/ide-react-context'
+import { IdeReactContext } from '@/features/ide-react/context/ide-react-context'
 import { IdeEventEmitter } from '@/features/ide-react/create-ide-event-emitter'
 import { ReactScopeValueStore } from '@/features/ide-react/scope-value-store/react-scope-value-store'
 import { ReactScopeEventEmitter } from '@/features/ide-react/scope-event-emitter/react-scope-event-emitter'
@@ -300,11 +297,6 @@ const makeIdeReactProvider = (
     }))
 
     const [ideContextValue] = useState(() => {
-      const scopeStore = createReactScopeValueStore()
-      for (const [key, value] of Object.entries(scope)) {
-        // TODO: path for nested entries
-        scopeStore.set(key, value)
-      }
       const scopeEventEmitter = new ReactScopeEventEmitter(
         new IdeEventEmitter()
       )
@@ -312,7 +304,6 @@ const makeIdeReactProvider = (
 
       return {
         socket,
-        scopeStore,
         scopeEventEmitter,
         unstableStore,
       }

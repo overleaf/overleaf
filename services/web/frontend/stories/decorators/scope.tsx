@@ -10,10 +10,7 @@ import useFetchMock from '../hooks/use-fetch-mock'
 import { useMeta } from '../hooks/use-meta'
 import SocketIOShim, { SocketIOMock } from '@/ide/connection/SocketIoShim'
 import { IdeContext } from '@/shared/context/ide-context'
-import {
-  IdeReactContext,
-  createReactScopeValueStore,
-} from '@/features/ide-react/context/ide-react-context'
+import { IdeReactContext } from '@/features/ide-react/context/ide-react-context'
 import { IdeEventEmitter } from '@/features/ide-react/create-ide-event-emitter'
 import { ReactScopeValueStore } from '@/features/ide-react/scope-value-store/react-scope-value-store'
 import { ReactScopeEventEmitter } from '@/features/ide-react/scope-event-emitter/react-scope-event-emitter'
@@ -55,27 +52,6 @@ const project: Project = {
       folders: [],
     },
   ],
-}
-
-const initialScope = {
-  user,
-  project,
-  settings: {
-    pdfViewer: 'js',
-    syntaxValidation: true,
-  },
-  editor: {
-    richText: false,
-
-    // FIXME: This is pretty useless because the editor relies on a much more fleshed-out document, so we rely on overriding it in individual stories
-    sharejs_doc: {
-      doc_id: 'test-doc',
-      getSnapshot: () => 'some doc content',
-      hasBufferedOps: () => false,
-    },
-    open_doc_name: 'testfile.tex',
-  },
-  permissionsLevel: 'owner',
 }
 
 const socket = new SocketIOShim.SocketShimNoop(
@@ -195,10 +171,6 @@ const IdeReactProvider: FC<React.PropsWithChildren> = ({ children }) => {
   }))
 
   const [ideContextValue] = useState(() => {
-    const scopeStore = createReactScopeValueStore()
-    for (const [key, value] of Object.entries(initialScope)) {
-      scopeStore.set(key, value)
-    }
     const scopeEventEmitter = new ReactScopeEventEmitter(new IdeEventEmitter())
     const unstableStore = new ReactScopeValueStore()
 
@@ -212,7 +184,6 @@ const IdeReactProvider: FC<React.PropsWithChildren> = ({ children }) => {
 
     return {
       socket,
-      scopeStore,
       scopeEventEmitter,
       unstableStore,
     }

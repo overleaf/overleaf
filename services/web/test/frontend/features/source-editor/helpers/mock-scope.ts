@@ -27,8 +27,5 @@ export const mockScope = (
     refreshResolvedCommentsDropdown: cy.stub(() => sleep(1000)),
     onlineUserCursorHighlights: {},
     permissionsLevel: 'owner',
-    $on: cy.stub().log(false),
-    $broadcast: cy.stub().log(false),
-    $emit: cy.stub().log(false),
   }
 }
