@@ -121,6 +121,16 @@ describe('MembersList', function () {
         users[1].last_name
       )
     })
+    it('should render the pagination navigation', function () {
+      cy.window().then(win => {
+        win.metaAttributesCache.set(
+          'ol-users',
+          Array.from({ length: 50 }).flatMap(() => users.flat())
+        )
+      })
+      mountManagedUsersList()
+      cy.findByRole('navigation', { name: /pagination navigation/i })
+    })
   })
 
   describe('empty user list', function () {

@@ -13,6 +13,7 @@ import OLCard from '@/features/ui/components/ol/ol-card'
 import OLButton from '@/features/ui/components/ol/ol-button'
 import OLFormControl from '@/features/ui/components/ol/ol-form-control'
 import OLFormText from '@/features/ui/components/ol/ol-form-text'
+import OLNotification from '@/features/ui/components/ol/ol-notification'
 
 export default function GroupMembers() {
   const { isReady } = useWaitForI18n()
@@ -26,6 +27,7 @@ export default function GroupMembers() {
     removeMemberError,
     inviteMemberLoading,
     inviteError,
+    memberAdded,
     paths,
   } = useGroupMembersContext()
   const [emailString, setEmailString] = useState<string>('')
@@ -140,6 +142,13 @@ export default function GroupMembers() {
                 data-testid="add-more-members-form"
               >
                 <p className="small">{t('invite_more_members')}</p>
+                {memberAdded && (
+                  <OLNotification
+                    content={t('members_added')}
+                    type="success"
+                    className="mt-2 mb-3"
+                  />
+                )}
                 <ErrorAlert error={inviteError} />
                 <form onSubmit={onAddMembersSubmit}>
                   <OLRow>

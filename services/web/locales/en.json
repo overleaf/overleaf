@@ -1342,6 +1342,7 @@
   "may": "May",
   "maybe_later": "Maybe later",
   "member_picker": "Select number of users for group plan",
+  "members_added": "Member(s) added.",
   "members_management": "Members management",
   "mendeley": "Mendeley",
   "mendeley_dynamic_sync_description": "With the Mendeley integration, you can import your references into __appName__. You can either import all your references at once or dynamically search your Mendeley library directly from __appName__.",
