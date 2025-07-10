@@ -42,6 +42,16 @@ module.exports = Client = {
     )
   },
 
+  stopCompile(projectId, callback) {
+    if (callback == null) {
+      callback = function () {}
+    }
+    return request.post(
+      { url: `${this.host}/project/${projectId}/compile/stop` },
+      callback
+    )
+  },
+
   clearCache(projectId, callback) {
     if (callback == null) {
       callback = function () {}

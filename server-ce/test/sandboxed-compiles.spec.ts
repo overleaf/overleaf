@@ -1,7 +1,7 @@
 import { ensureUserExists, login } from './helpers/login'
 import { createProject } from './helpers/project'
 import { isExcludedBySharding, startWith } from './helpers/config'
-import { throttledRecompile } from './helpers/compile'
+import { throttledRecompile, stopCompile } from './helpers/compile'
 import { v4 as uuid } from 'uuid'
 import { waitUntilScrollingFinished } from './helpers/waitUntilScrollingFinished'
 import { beforeWithReRunOnTestRetry } from './helpers/beforeWithReRunOnTestRetry'
@@ -56,7 +56,39 @@ describe('SandboxedCompiles', function () {
     checkSyncTeX()
     checkXeTeX()
     checkRecompilesAfterErrors()
+    checkStopCompile()
   })
+
+  function checkStopCompile() {
+    it('users can stop a running compile', function () {
+      login('user@example.com')
+      createProject('test-project')
+      // create an infinite loop in the main document
+      // this will cause the compile to run indefinitely
+      cy.findByText('\\maketitle').parent().click()
+      cy.findByText('\\maketitle')
+        .parent()
+        .type('\n\\def\\x{{}Hello!\\par\\x}\\x')
+      cy.log('Start compile')
+      // We need to start the compile manually because we do not want to wait for it to finish
+      cy.findByText('Recompile').click()
+      // Now stop the compile and kill the latex process
+      stopCompile({ delay: 1000 })
+      cy.get('.logs-pane')
+        .invoke('text')
+        .should('match', /PDF Rendering Error|Compilation cancelled/)
+      // Check that the previous compile is not running in the background by
+      // disabling the infinite loop and recompiling
+      cy.findByText('\\def').parent().click()
+      cy.findByText('\\def').parent().type('{home}disabled loop% ')
+      cy.findByText('Recompile').click()
+      cy.get('.pdf-viewer').should('contain.text', 'disabled loop')
+      cy.get('.logs-pane').should(
+        'not.contain.text',
+        'A previous compile is still running'
+      )
+    })
+  }
 
   function checkSyncTeX() {
     // TODO(25342): re-enable
@@ -227,6 +259,7 @@ describe('SandboxedCompiles', function () {
     checkSyncTeX()
     checkXeTeX()
     checkRecompilesAfterErrors()
+    checkStopCompile()
   })
 
   describe.skip('unavailable in CE', function () {
@@ -241,5 +274,6 @@ describe('SandboxedCompiles', function () {
     checkSyncTeX()
     checkXeTeX()
     checkRecompilesAfterErrors()
+    checkStopCompile()
   })
 })

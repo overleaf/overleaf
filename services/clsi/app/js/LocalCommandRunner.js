@@ -54,6 +54,7 @@ module.exports = CommandRunner = {
       cwd: directory,
       env,
       stdio: ['pipe', 'pipe', 'ignore'],
+      detached: true,
     })
 
     let stdout = ''
