@@ -47,6 +47,10 @@
   padding: 0;
 }
 
+.modal-backdrop.show.ide-settings-modal-transparent-backdrop {
+  opacity: 0;
+}
+
 .ide-settings-section {
   padding-top: var(--spacing-06);
   padding-bottom: var(--spacing-05);
