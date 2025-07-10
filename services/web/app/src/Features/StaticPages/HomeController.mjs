@@ -6,6 +6,7 @@ import ErrorController from '../Errors/ErrorController.js'
 import SessionManager from '../Authentication/SessionManager.js'
 import { expressify } from '@overleaf/promise-utils'
 import logger from '@overleaf/logger'
+import SplitTestHandler from '../SplitTests/SplitTestHandler.js'
 
 const __dirname = new URL('.', import.meta.url).pathname
 
@@ -31,7 +32,15 @@ async function home(req, res) {
       page: req.path,
     })
 
-    res.render('external/home/index')
+    const hotjarAssignment = await SplitTestHandler.promises.getAssignment(
+      req,
+      res,
+      'hotjar-marketing'
+    )
+
+    res.render('external/home/index', {
+      shouldLoadHotjar: hotjarAssignment?.variant === 'enabled',
+    })
   } else {
     res.redirect('/login')
   }

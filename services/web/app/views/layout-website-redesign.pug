@@ -6,6 +6,9 @@ include ./_mixins/bootstrap_js
 block entrypointVar
 	- entrypoint = 'marketing'
 
+block append meta
+	meta(name='ol-shouldLoadHotjar' data-type='boolean' content=shouldLoadHotjar)
+
 block body
 	if typeof suppressNavbar == 'undefined'
 		if bootstrapVersion === 5

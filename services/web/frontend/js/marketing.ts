@@ -1,5 +1,6 @@
 import './utils/webpack-public-path'
 import './infrastructure/error-reporter'
+import './infrastructure/hotjar'
 import './features/form-helpers/hydrate-form'
 import './features/form-helpers/password-visibility'
 import './features/link-helpers/slow-link'

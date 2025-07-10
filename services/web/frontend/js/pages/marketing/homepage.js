@@ -1,4 +1,5 @@
 import '../../marketing'
+import '@/infrastructure/hotjar'
 
 function homepageAnimation(homepageAnimationEl) {
   function createFrames(word, { buildTime, holdTime, breakTime }) {
