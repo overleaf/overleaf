@@ -25,6 +25,9 @@
     "prettier": "3.6.2",
     "typescript": "^5.8.3"
   },
+  "engines": {
+    "npm": "11.4.2"
+  },
   "overrides": {
     "swagger-tools@0.10.4": {
       "path-to-regexp": "3.3.0",
