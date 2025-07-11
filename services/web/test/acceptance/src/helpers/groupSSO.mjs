@@ -187,6 +187,29 @@ export async function linkGroupMember(
   return userHelper
 }
 
+export async function checkUserHasSSOLinked(userId, groupId) {
+  const internalProviderId = getProviderId(groupId)
+  const user = await UserGetter.promises.getUser(
+    { _id: userId },
+    { samlIdentifiers: 1, enrollment: 1 }
+  )
+
+  const { enrollment, samlIdentifiers } = user
+  const linkedToGroupSSO = samlIdentifiers.some(
+    identifier => identifier.providerId === internalProviderId
+  )
+  if (!linkedToGroupSSO) {
+    throw new Error('user saml identifiers are not linked to subscription')
+  }
+
+  const userIsEnrolledInSSO = enrollment.sso.some(
+    sso => sso.groupId.toString() === groupId.toString()
+  )
+  if (!userIsEnrolledInSSO) {
+    throw new Error('user is not enrolled in subscription')
+  }
+}
+
 export async function setConfigAndEnableSSO(
   subscriptionHelper,
   adminEmailPassword,

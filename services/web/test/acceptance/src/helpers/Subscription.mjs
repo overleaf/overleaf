@@ -88,6 +88,10 @@ class PromisifiedSubscription {
     await Modules.promises.hooks.fire('enableManagedUsers', this._id)
   }
 
+  async disableManagedUsers() {
+    await Modules.promises.hooks.fire('disableManagedUsers', this._id)
+  }
+
   async enableFeatureSSO() {
     await SubscriptionModel.findOneAndUpdate(
       { _id: new ObjectId(this._id) },
