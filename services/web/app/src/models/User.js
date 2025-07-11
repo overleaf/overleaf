@@ -225,6 +225,9 @@ const UserSchema = new Schema(
     analyticsId: { type: String },
     completedTutorials: Schema.Types.Mixed,
     suspended: { type: Boolean },
+    dsMobileApp: {
+      subscribed: { type: Boolean },
+    },
   },
   { minimize: false }
 )
