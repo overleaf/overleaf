@@ -201,6 +201,9 @@ module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
         if (res.locals.isIEEE(brandVariation?.brand_id)) {
           return enableIeeeBranding ? 'ieee-' : ''
         } else if (userSettings && userSettings.overallTheme != null) {
+          if (!['', 'light-'].includes(userSettings.overallTheme)) {
+            return ''
+          }
           return userSettings.overallTheme
         }
       }
@@ -349,6 +352,11 @@ module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
           name: 'Light',
           val: 'light-',
           path: res.locals.buildCssPath('light-'),
+        },
+        {
+          name: 'System',
+          val: 'system',
+          path: res.locals.buildCssPath(),
         },
       ]
     }

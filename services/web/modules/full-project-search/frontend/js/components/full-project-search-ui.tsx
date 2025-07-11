@@ -37,6 +37,7 @@ import { FullProjectSearchResults } from './full-project-search-results'
 import { signalWithTimeout } from '@/utils/abort-signal'
 import { useIsNewEditorEnabled } from '@/features/ide-redesign/utils/new-editor-utils'
 import RailPanelHeader from '@/features/ide-redesign/components/rail-panel-header'
+import { useActiveOverallTheme } from '@/shared/hooks/use-active-overall-theme'
 
 const FullProjectSearchUI: FC = () => {
   const { t } = useTranslation()
@@ -57,6 +58,7 @@ const FullProjectSearchUI: FC = () => {
     () => userStyles(userSettings),
     [userSettings]
   )
+  const activeOverallTheme = useActiveOverallTheme()
 
   const abortControllerRef = useRef<AbortController | null>(null)
 
@@ -183,7 +185,7 @@ const FullProjectSearchUI: FC = () => {
     <div
       className="full-project-search"
       style={variableStyle}
-      data-bs-theme={userSettings.overallTheme === 'light-' ? 'light' : 'dark'}
+      data-bs-theme={activeOverallTheme === 'light' ? 'light' : 'dark'}
     >
       {newEditor ? (
         <RailPanelHeader title={t('search')} />

@@ -69,7 +69,7 @@ export const VisualPreview: FC<{ view: EditorView }> = ({ view }) => {
           fontSize: 14,
           fontFamily: 'monaco',
           lineHeight: 'normal',
-          overallTheme: 'light-',
+          activeOverallTheme: 'light',
         }),
         EditorView.theme({
           '&.cm-editor': {

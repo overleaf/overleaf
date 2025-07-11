@@ -59,6 +59,7 @@ import { usePermissionsContext } from '@/features/ide-react/context/permissions-
 import { useEditorPropertiesContext } from '@/features/ide-react/context/editor-properties-context'
 import { SearchQuery } from '@codemirror/search'
 import { beforeChangeDocEffect } from '@/features/source-editor/extensions/before-change-doc'
+import { useActiveOverallTheme } from '@/shared/hooks/use-active-overall-theme'
 
 function useCodeMirrorScope(view: EditorView) {
   const { fileTreeData } = useFileTreeData()
@@ -79,7 +80,6 @@ function useCodeMirrorScope(view: EditorView) {
     fontFamily,
     fontSize,
     lineHeight,
-    overallTheme,
     autoComplete,
     editorTheme,
     autoPairDelimiters,
@@ -89,6 +89,7 @@ function useCodeMirrorScope(view: EditorView) {
     referencesSearchMode,
     enableNewEditor,
   } = userSettings
+  const activeOverallTheme = useActiveOverallTheme()
 
   const { onlineUserCursorHighlights } = useOnlineUsersContext()
 
@@ -119,7 +120,7 @@ function useCodeMirrorScope(view: EditorView) {
     fontFamily,
     fontSize,
     lineHeight,
-    overallTheme,
+    activeOverallTheme,
     editorTheme,
   })
 
@@ -128,7 +129,7 @@ function useCodeMirrorScope(view: EditorView) {
       fontFamily,
       fontSize,
       lineHeight,
-      overallTheme,
+      activeOverallTheme,
       editorTheme,
     }
 
@@ -137,14 +138,14 @@ function useCodeMirrorScope(view: EditorView) {
         fontFamily,
         fontSize,
         lineHeight,
-        overallTheme,
+        activeOverallTheme,
       })
     )
 
     setEditorTheme(editorTheme).then(spec => {
       view.dispatch(spec)
     })
-  }, [view, fontFamily, fontSize, lineHeight, overallTheme, editorTheme])
+  }, [view, fontFamily, fontSize, lineHeight, activeOverallTheme, editorTheme])
 
   const settingsRef = useRef({
     autoComplete,
