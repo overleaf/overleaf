@@ -1,8 +1,8 @@
-extends ../layout-marketing
+extends ../layout-website-redesign
 include ../_mixins/recaptcha
 
 block vars
-	- bootstrap5PageStatus = 'disabled'
+	- isWebsiteRedesign = true
 
 block content
 	- var email = reconfirm_email ? reconfirm_email : ''
@@ -22,53 +22,52 @@ block content
 			data-badge='inline'
 		)
 
-	main#main-content.content.content-alt(data-ol-captcha-retry-trigger-area='')
-		.container
-			.row
-				.col-sm-12.col-md-6.col-md-offset-3
-					.card
-						h1.card-header #{translate("reconfirm_account")}
-						p #{translate('reconfirm_explained')}&nbsp;
-							a(href=`mailto:${settings.adminEmail}`) #{settings.adminEmail}
-							| .
-						form(
-							name='reconfirmAccountForm'
-							captcha-action-name=showCaptcha ? 'passwordReset' : false
-							data-ol-async-form
-							action='/user/reconfirm'
-							method='POST'
-							aria-label=translate('request_reconfirmation_email')
-							captcha=showCaptcha ? '' : false
-						)
-							div(data-ol-not-sent)
-								+formMessages
+	main#main-content(data-ol-captcha-retry-trigger-area='')
+		.container.auth-aux-container(style='max-width: 420px')
+			form(
+				name='reconfirmAccountForm'
+				captcha-action-name=showCaptcha ? 'passwordReset' : false
+				data-ol-async-form
+				action='/user/reconfirm'
+				method='POST'
+				aria-label=translate('request_reconfirmation_email')
+				captcha=showCaptcha ? '' : false
+			)
+				h1.h5.mb-3 #{translate("reconfirm_account")}
+				p #{translate('reconfirm_explained')}
+					| &nbsp;
+					a(href=`mailto:${settings.adminEmail}`) #{settings.adminEmail}
+					| .
 
-								input(name='_csrf' type='hidden' value=csrfToken)
-								.form-group
-									label(for='email') #{translate("please_enter_email")}
-									input.form-control(
-										name='email'
-										aria-label='email'
-										type='email'
-										placeholder='email@example.com'
-										required
-										autofocus
-										value=email
-									)
-								.actions
-									button.btn.btn-primary(
-										type='submit'
-										data-ol-disabled-inflight
-										aria-label=translate('request_password_reset_to_reconfirm')
-									)
-										span(data-ol-inflight='idle')
-											| #{translate('request_password_reset_to_reconfirm')}
-										span(hidden data-ol-inflight='pending')
-											| #{translate('request_password_reset_to_reconfirm')}… 
-							div(hidden data-ol-sent)
-								.alert.alert-success(role='alert' aria-live='polite')
-									span #{translate('password_reset_email_sent')}
-			.row
-				.col-sm-12.col-md-6.col-md-offset-3
-					if showCaptcha
-						+recaptchaConditions
+				div(data-ol-not-sent)
+					+formMessagesNewStyle
+
+					input(name='_csrf' type='hidden' value=csrfToken)
+					.form-group.mb-3
+						label.form-label(for='email') #{translate("please_enter_email")}
+						input.form-control(
+							name='email'
+							aria-label='email'
+							type='email'
+							placeholder='email@example.com'
+							required
+							autofocus
+							value=email
+						)
+					.actions
+						button.btn.btn-primary.w-100(
+							style='white-space: normal'
+							type='submit'
+							data-ol-disabled-inflight
+							aria-label=translate('request_password_reset_to_reconfirm')
+						)
+							span(data-ol-inflight='idle')
+								| #{translate('request_password_reset_to_reconfirm')}
+							span(hidden data-ol-inflight='pending')
+								| #{translate('request_password_reset_to_reconfirm')}… 
+				div(hidden data-ol-sent)
+					.alert.alert-success(role='alert' aria-live='polite')
+						span #{translate('password_reset_email_sent')}
+
+			if showCaptcha
+				+recaptchaConditions

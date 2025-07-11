@@ -20,7 +20,6 @@ const { RateLimiter } = require('../../infrastructure/RateLimiter')
 const Features = require('../../infrastructure/Features')
 const tsscmp = require('tsscmp')
 const Modules = require('../../infrastructure/Modules')
-const SplitTestHandler = require('../SplitTests/SplitTestHandler')
 
 const AUDIT_LOG_TOKEN_PREFIX_LENGTH = 10
 
@@ -527,18 +526,8 @@ async function primaryEmailCheckPage(req, res) {
     userId,
     'primary-email-check-page-displayed'
   )
-  const { variant } = await SplitTestHandler.promises.getAssignment(
-    req,
-    res,
-    'bs5-auth-pages'
-  )
 
-  const template =
-    variant === 'enabled'
-      ? 'user/primaryEmailCheck-bs5'
-      : 'user/primaryEmailCheck'
-
-  res.render(template)
+  res.render('user/primaryEmailCheck')
 }
 
 async function primaryEmailCheck(req, res) {

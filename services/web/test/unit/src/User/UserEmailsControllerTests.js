@@ -101,11 +101,6 @@ describe('UserEmailsController', function () {
         '../Analytics/AnalyticsManager': this.AnalyticsManager,
         './UserAuditLogHandler': this.UserAuditLogHandler,
         '../../infrastructure/RateLimiter': this.RateLimiter,
-        '../SplitTests/SplitTestHandler': {
-          promises: {
-            getAssignment: sinon.stub().resolves('default'),
-          },
-        },
       },
     })
   })

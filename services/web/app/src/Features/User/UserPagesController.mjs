@@ -10,7 +10,6 @@ import SubscriptionLocator from '../Subscription/SubscriptionLocator.js'
 import _ from 'lodash'
 import { expressify } from '@overleaf/promise-utils'
 import Features from '../../infrastructure/Features.js'
-import SplitTestHandler from '../SplitTests/SplitTestHandler.js'
 import Modules from '../../infrastructure/Modules.js'
 
 async function settingsPage(req, res) {
@@ -193,16 +192,8 @@ async function reconfirmAccountPage(req, res) {
   const pageData = {
     reconfirm_email: req.session.reconfirm_email,
   }
-  const { variant } = await SplitTestHandler.promises.getAssignment(
-    req,
-    res,
-    'bs5-auth-pages'
-  )
 
-  const template =
-    variant === 'enabled' ? 'user/reconfirm-bs5' : 'user/reconfirm'
-
-  res.render(template, pageData)
+  res.render('user/reconfirm', pageData)
 }
 
 const UserPagesController = {
