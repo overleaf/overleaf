@@ -1461,7 +1461,7 @@
   "no_pdf_error_explanation": "This compile didn’t produce a PDF. This can happen if:",
   "no_pdf_error_reason_no_content": "The <code>document</code> environment contains no content. If it’s empty, please add some content and compile again.",
   "no_pdf_error_reason_output_pdf_already_exists": "This project contains a file called <code>output.pdf</code>. If that file exists, please rename it and compile again.",
-  "no_pdf_error_reason_unrecoverable_error": "There is an unrecoverable LaTeX error. If there are LaTeX errors shown below or in the raw logs, please try to fix them and compile again.",
+  "no_pdf_error_reason_unrecoverable_error": "There is an unrecoverable LaTeX/Typst error. If there are LaTeX/Typst errors shown below or in the raw logs, please try to fix them and compile again.",
   "no_pdf_error_title": "No PDF",
   "no_planned_maintenance": "There is currently no planned maintenance",
   "no_preview_available": "Sorry, no preview is available.",
