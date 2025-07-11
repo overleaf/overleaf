@@ -85,7 +85,10 @@ class PromisifiedSubscription {
   }
 
   async enableManagedUsers() {
-    await Modules.promises.hooks.fire('enableManagedUsers', this._id)
+    await Modules.promises.hooks.fire('enableManagedUsers', this._id, {
+      initiatorId: this.admin_id,
+      ipAddress: '123.456.789.0',
+    })
   }
 
   async disableManagedUsers() {
