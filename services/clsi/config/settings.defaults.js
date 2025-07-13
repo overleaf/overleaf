@@ -22,6 +22,7 @@ module.exports = {
     synctexBaseDir(projectId) {
       return Path.join(this.compilesDir, projectId)
     },
+    typstPackagesDir: process.env.TYPST_PACKAGES_PATH,
   },
 
   internal: {
@@ -53,7 +54,7 @@ module.exports = {
     clsiPerf: {
       host: `${process.env.CLSI_PERF_HOST || '127.0.0.1'}:${
         process.env.CLSI_PERF_PORT || '3043'
-      }`,
+        }`,
     },
     clsiCache: {
       enabled: !!process.env.CLSI_CACHE_SHARDS,
@@ -104,6 +105,7 @@ if ((process.env.DOCKER_RUNNER || process.env.SANDBOXED_COMPILES) === 'true') {
         'quay.io/sharelatex/texlive-full:2017.1',
       env: {
         HOME: '/tmp',
+        XDG_DATA_HOME: '/data',
         CLSI: 1,
       },
       socketPath: '/var/run/docker.sock',

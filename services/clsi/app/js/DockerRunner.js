@@ -74,10 +74,25 @@ const DockerRunner = {
       volumes[directory] += ':ro'
     }
 
+    const typstPackagesDir = Settings.path.typstPackagesDir;
+    const mounts = [];
+    if (typstPackagesDir) {
+      mounts.push({
+        "Target": "/data/typst/packages",
+        "Source": typstPackagesDir,
+        "Type": "bind",
+        "ReadOnly": true,
+        "BindOptions": {
+          "ReadOnlyForceRecursive": true
+        }
+      })
+    }
+
     const options = DockerRunner._getContainerOptions(
       command,
       image,
       volumes,
+      mounts,
       timeout,
       environment,
       compileGroup
@@ -207,6 +222,7 @@ const DockerRunner = {
     command,
     image,
     volumes,
+    mounts,
     timeout,
     environment,
     compileGroup
@@ -248,6 +264,7 @@ const DockerRunner = {
         Binds: Object.entries(volumes).map(
           ([hostVol, dockerVol]) => `${hostVol}:${dockerVol}`
         ),
+        Mounts: mounts,
         LogConfig: { Type: 'none', Config: {} },
         Ulimits: [
           {

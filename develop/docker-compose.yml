@@ -29,6 +29,7 @@ services:
       - SANDBOXED_COMPILES=true
       - SANDBOXED_COMPILES_HOST_DIR_COMPILES=${PWD}/compiles
       - SANDBOXED_COMPILES_HOST_DIR_OUTPUT=${PWD}/output
+      - TYPST_PACKAGES_PATH=${PWD}/typst-packages/packages
     user: root
     volumes:
       - ${PWD}/compiles:/overleaf/services/clsi/compiles
