@@ -42,6 +42,7 @@ const SubscriptionSchema = new Schema(
     features: {
       managedUsers: { type: Boolean, default: true },
       groupSSO: { type: Boolean, default: true },
+      domainCapture: { type: Boolean, default: false },
     },
     addOns: Schema.Types.Mixed,
     overleaf: {

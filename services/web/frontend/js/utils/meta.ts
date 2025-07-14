@@ -44,7 +44,10 @@ import {
 import { SuggestedLanguage } from '../../../types/system-message'
 import type { TeamInvite } from '../../../types/team-invite'
 import { GroupPlans } from '../../../types/subscription/dashboard/group-plans'
-import { GroupSSOLinkingStatus } from '../../../types/subscription/sso'
+import {
+  GroupSSOLinkingStatus,
+  SSOConfig,
+} from '../../../types/subscription/sso'
 import { PasswordStrengthOptions } from '../../../types/password-strength-options'
 import { Subscription as ProjectDashboardSubscription } from '../../../types/project/dashboard/subscription'
 import { ThirdPartyIds } from '../../../types/third-party-ids'
@@ -121,6 +124,7 @@ export interface Meta {
   'ol-groupPlans': GroupPlans
   'ol-groupPolicy': GroupPolicy
   'ol-groupSSOActive': boolean
+  'ol-groupSSOConfig'?: SSOConfig
   'ol-groupSSOTestResult': GroupSSOTestResult
   'ol-groupSettingsAdvertisedFor': string[]
   'ol-groupSettingsEnabledFor': string[]
