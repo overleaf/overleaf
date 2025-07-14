@@ -20,6 +20,7 @@ const {
   DuplicateAddOnError,
   AddOnNotPresentError,
   PaymentActionRequiredError,
+  PaymentFailedError,
 } = require('./Errors')
 const SplitTestHandler = require('../SplitTests/SplitTestHandler')
 const AuthorizationManager = require('../Authorization/AuthorizationManager')
@@ -449,10 +450,28 @@ async function purchaseAddon(req, res, next) {
         { addon: addOnCode }
       )
     } else if (err instanceof PaymentActionRequiredError) {
+      logger.debug(
+        { userId: user._id },
+        'Customer needs to perform payment action to complete transaction'
+      )
       return res.status(402).json({
         message: 'Payment action required',
         clientSecret: err.info.clientSecret,
         publicKey: err.info.publicKey,
+      })
+    } else if (err instanceof PaymentFailedError) {
+      logger.debug(
+        {
+          userId: user._id,
+          reason: err.info.reason,
+          adviceCode: err.info.adviceCode,
+        },
+        'Payment failed for transaction'
+      )
+      return res.status(402).json({
+        message: 'Payment failed',
+        reason: err.info.reason,
+        adviceCode: err.info.adviceCode,
       })
     } else {
       if (err instanceof Error) {

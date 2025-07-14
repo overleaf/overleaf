@@ -238,11 +238,11 @@ describe('<ChangePlanModal />', function () {
 
       screen.getByRole('button', { name: 'Processing…' })
 
-      await screen.findByText('Sorry, something went wrong. ', { exact: false })
-      await screen.findByText('Please try again. ', { exact: false })
-      await screen.findByText('If the problem continues please contact us.', {
-        exact: false,
-      })
+      await screen.findAllByText(
+        (content, element) =>
+          element?.textContent ===
+          'Sorry, something went wrong. Please try again. If the problem continues please contact us.'
+      )
 
       expect(
         within(screen.getByRole('dialog'))

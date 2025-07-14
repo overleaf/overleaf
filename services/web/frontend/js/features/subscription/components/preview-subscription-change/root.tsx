@@ -12,7 +12,6 @@ import useAsync from '@/shared/hooks/use-async'
 import { useLocation } from '@/shared/hooks/use-location'
 import { debugConsole } from '@/utils/debugging'
 import { FetchError, postJSON } from '@/infrastructure/fetch-json'
-import Notification from '@/shared/components/notification'
 import OLCard from '@/features/ui/components/ol/ol-card'
 import OLRow from '@/features/ui/components/ol/ol-row'
 import OLCol from '@/features/ui/components/ol/ol-col'
@@ -21,6 +20,7 @@ import { subscriptionUpdateUrl } from '@/features/subscription/data/subscription
 import * as eventTracking from '@/infrastructure/event-tracking'
 import sparkleText from '@/shared/svgs/ai-sparkle-text.svg'
 import { useFeatureFlag } from '@/shared/context/split-test-context'
+import PaymentErrorNotification from '@/features/subscription/components/shared/payment-error-notification'
 import handleStripePaymentAction from '../../util/handle-stripe-payment-action'
 
 function PreviewSubscriptionChange() {
@@ -96,15 +96,8 @@ function PreviewSubscriptionChange() {
             ) : null}
 
             {payNowTask.isError && (
-              <Notification
-                type="error"
-                aria-live="polite"
-                content={
-                  <>
-                    {t('generic_something_went_wrong')}. {t('try_again')}.{' '}
-                    {t('generic_if_problem_continues_contact_us')}.
-                  </>
-                }
+              <PaymentErrorNotification
+                error={payNowTask.error as FetchError}
               />
             )}
 
