@@ -1,0 +1,11 @@
+export type Capability =
+  | 'add-secondary-email'
+  | 'change-password'
+  | 'chat'
+  | 'delete-own-account'
+  | 'dropbox'
+  | 'endorse-email'
+  | 'join-subscription'
+  | 'leave-group-subscription'
+  | 'start-subscription'
+  | 'use-ai'
