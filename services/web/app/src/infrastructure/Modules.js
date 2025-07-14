@@ -1,3 +1,5 @@
+// @ts-check
+
 const fs = require('fs')
 const Path = require('path')
 const { promisify, callbackify } = require('util')
@@ -6,11 +8,17 @@ const Views = require('./Views')
 const _ = require('lodash')
 const Metrics = require('@overleaf/metrics')
 
+/** @import { WebModule } from "../../../types/web-module" */
+/** @import { RequestHandler } from "express" */
+
 const MODULE_BASE_PATH = Path.join(__dirname, '/../../../modules')
 
+/** @type {WebModule[]} */
 const _modules = []
 let _modulesLoaded = false
 const _hooks = {}
+
+/** @type {Record<string, RequestHandler[]>} */
 const _middleware = {}
 let _viewIncludes = {}
 
@@ -38,6 +46,7 @@ async function loadModulesImpl() {
     const module = await import(
       Path.join(MODULE_BASE_PATH, moduleName, 'index.mjs')
     )
+    /** @type {WebModule & {name: string}} */
     const loadedModule = module.default || module
 
     loadedModule.name = moduleName
@@ -161,12 +170,14 @@ function attachHook(name, method) {
 
 async function attachMiddleware() {
   for (const module of await modules()) {
-    for (const middleware in module.middleware || {}) {
-      const method = module.middleware[middleware]
-      if (_middleware[middleware] == null) {
-        _middleware[middleware] = []
+    if (module.middleware) {
+      for (const middleware in module.middleware) {
+        const method = module.middleware[middleware]
+        if (_middleware[middleware] == null) {
+          _middleware[middleware] = []
+        }
+        _middleware[middleware].push(method)
       }
-      _middleware[middleware].push(method)
     }
   }
 }
@@ -186,6 +197,9 @@ async function fireHook(name, ...args) {
   return results
 }
 
+/**
+ * @param {string} name
+ */
 async function getMiddleware(name) {
   // ensure that modules are loaded if we need to call a middleware
   if (!_modulesLoaded) {
