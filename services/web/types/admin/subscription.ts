@@ -18,6 +18,7 @@ export type Subscription = {
   groupPlan: boolean
   customAccount: boolean
   ssoConfig: SSOConfig
+  domainCaptureEnabled?: boolean
   managedUsersEnabled: boolean
   v1_id: number
   salesforce_id: string
@@ -25,4 +26,7 @@ export type Subscription = {
   paymentProvider:
     | RecurlyAdminClientPaymentProvider
     | StripeAdminClientPaymentProvider
+  features: {
+    domainCapture?: boolean
+  }
 }
