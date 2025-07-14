@@ -87,6 +87,7 @@ describe('ProjectListController', function () {
       promises: {
         getUsers: sinon.stub().resolves(ctx.usersArr),
         getUserFullEmails: sinon.stub().resolves([]),
+        getWritefullData: sinon.stub().resolves({ isPremium: true }),
       },
     }
     ctx.Features = {

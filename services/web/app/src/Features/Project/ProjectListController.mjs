@@ -423,6 +423,8 @@ async function projectListPage(req, res, next) {
   // customer.io: Premium nudge experiment
   // Only do customer-io-trial-conversion assignment for users not in India/China and not in group/commons
   let customerIoEnabled = false
+  const aiBlocked = !(await _canUseAIAssist(user))
+  const hasAiAssist = await _userHasAIAssist(user)
   if (!userIsMemberOfGroupSubscription && !inEnterpriseCommons) {
     try {
       const ip = req.ip
@@ -487,6 +489,8 @@ async function projectListPage(req, res, next) {
     userRestrictions: Array.from(req.userRestrictions || []),
     customerIoEnabled,
     showAiAssistNotification,
+    aiBlocked,
+    hasAiAssist,
   })
 }
 
@@ -771,6 +775,35 @@ function _hasActiveFilter(filters) {
   )
 }
 
+async function _userHasAIAssist(user) {
+  // Check if the user has AI Assist enabled via Overleaf
+  if (user.features?.aiErrorAssistant) {
+    return true
+  }
+  // Check if the user has AI Assist enabled via Writefull
+  const { isPremium: hasAiAssistViaWritefull } =
+    await UserGetter.promises.getWritefullData(user._id)
+  if (hasAiAssistViaWritefull) {
+    return true
+  }
+  return false
+}
+
+// Determines if user is able to enable AI assist
+// based on their permissions and settings
+// It does NOT determine if the user has AI Assist enabled
+async function _canUseAIAssist(user) {
+  // Check if the assistant has been manually disabled by the user
+  if (user.aiErrorAssistant?.enabled === false) {
+    return false
+  }
+
+  // Check if the user can use AI features (policy check)
+  return await PermissionsManager.promises.checkUserPermissions(user, [
+    'use-ai',
+  ])
+}
+
 async function _showAiAssistNotification(user) {
   // Check if the assistant has been manually disabled by the user
   if (user.aiErrorAssistant?.enabled === false) {
@@ -794,18 +827,8 @@ async function _showAiAssistNotification(user) {
     return false
   }
 
-  // Check if the user already has AI Assist via Overleaf
-  if (user.features?.aiErrorAssistant) {
-    return false
-  }
-  // Check if the user already has AI Assist via Writefull
-  const { isPremium: hasAiAssistViaWritefull } =
-    await UserGetter.promises.getWritefullData(user._id)
-  if (hasAiAssistViaWritefull) {
-    return false
-  }
-
-  return true
+  const userHasAiAssist = await _userHasAIAssist(user)
+  return !userHasAiAssist
 }
 
 export default {
