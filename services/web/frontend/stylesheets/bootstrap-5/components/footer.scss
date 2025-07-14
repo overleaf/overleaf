@@ -354,12 +354,12 @@ footer.site-footer {
     }
 
     .fat-footer-sections {
-      grid-template-columns: repeat(6, 1fr);
+      grid-template-columns: repeat(7, 1fr);
       grid-template-rows: auto;
     }
 
     .footer-section:last-of-type {
-      grid-column: 6;
+      grid-column: 7;
     }
   }
 }

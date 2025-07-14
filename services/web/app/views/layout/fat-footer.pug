@@ -14,13 +14,24 @@ footer.fat-footer.hidden-print
 					li
 						a(href='/about') #{translate('footer_about_us')}
 					li
-						a(href='/about/values') #{translate('our_values')}
-					li
 						a(href='https://digitalscience.pinpointhq.com/') #{translate('careers')}
 					li
-						a(href='/for/press') !{translate('press_and_awards')}
-					li
 						a(href='/blog') #{translate('blog')}
+
+			.footer-section
+				h2.footer-section-heading #{translate('solutions')}
+
+				ul.list-unstyled
+					li
+						a(href='/for/enterprises') #{translate('for_business')}
+					li
+						a(href='/for/universities') #{translate('for_universities')}
+					li
+						a(href='/for/government') #{translate('for_government')}
+					li
+						a(href='/for/publishers') #{translate('for_publishers')}
+					li
+						a(href='/about/customer-stories') #{translate('customer_stories')}
 
 			.footer-section
 				h2.footer-section-heading #{translate('learn')}
@@ -40,24 +51,19 @@ footer.fat-footer.hidden-print
 						a(href='/learn/latex/Tables') #{translate('how_to_create_tables')}
 
 			.footer-section
-				h2.footer-section-heading !{translate('footer_plans_and_pricing')}
+				h2.footer-section-heading !{translate('pricing')}
 
 				ul.list-unstyled
 					li
-						a(href='/learn/how-to/Overleaf_premium_features') #{translate('premium_features')}
-					li
-						a(href='/user/subscription/plans?itm_referrer=footer-for-indv-groups') !{translate('for_individuals_and_groups')}
-					li
-						a(href='/for/enterprises') #{translate('for_enterprise')}
-					li
-						a(href='/for/universities') #{translate('for_universities')}
+						a(href='/user/subscription/plans?itm_referrer=footer-for-indv') #{translate('for_individuals')}
 					li
 						a(
-							data-ol-for-students-link
+							href='/user/subscription/plans?plan=group&itm_referrer=footer-for-groups'
+						) !{translate('for_groups_and_organizations')}
+					li
+						a(
 							href='/user/subscription/plans?itm_referrer=footer-for-students#student-annual'
 						) #{translate('for_students')}
-					li
-						a(href='/for/government') #{translate('for_government')}
 
 			.footer-section
 				h2.footer-section-heading #{translate('get_involved')}
@@ -73,8 +79,6 @@ footer.fat-footer.hidden-print
 				h2.footer-section-heading #{translate('help')}
 
 				ul.list-unstyled
-					li
-						a(href='/about/why-latex') #{translate('why_latex')}
 					li
 						a(href='/learn') #{translate('Documentation')} 
 					li

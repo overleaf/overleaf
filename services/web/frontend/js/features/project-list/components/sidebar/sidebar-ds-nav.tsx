@@ -33,7 +33,7 @@ function SidebarDsNav() {
   const sendMB = useSendProjectListMB()
   const { sessionUser, showSubscriptionLink, items } = getMeta('ol-navbar')
   const helpItem = items.find(
-    item => item.text === 'help'
+    item => item.text === 'help_and_resources'
   ) as NavbarDropdownItemData
   const { containerRef, scrolledUp, scrolledDown } = useScrolled()
   return (
