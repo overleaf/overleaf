@@ -40,9 +40,15 @@ describe('Project creation and compilation', function () {
     cy.get('.cm-line').should('have.length', 1)
     cy.get('.cm-line').type(markdownContent)
     cy.findByText('main.tex').click()
-    cy.get('.cm-content').should('contain.text', '\\maketitle')
+    cy.findByRole('textbox', { name: /Source Editor editing/i }).should(
+      'contain.text',
+      '\\maketitle'
+    )
     cy.findByText(fileName).click()
-    cy.get('.cm-content').should('contain.text', markdownContent)
+    cy.findByRole('textbox', { name: /Source Editor editing/i }).should(
+      'contain.text',
+      markdownContent
+    )
   })
 
   it('can link and display linked image from other project', function () {

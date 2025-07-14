@@ -80,7 +80,7 @@ export const createExtensions = (options: Record<string, any>): Extension[] => [
   // A built-in extension that enables soft line wrapping.
   EditorView.lineWrapping,
   sourceOnly(
-    options.visual,
+    options.visual.visual,
     EditorView.contentAttributes.of({ 'aria-label': 'Source Editor editing' })
   ),
   // A built-in extension that re-indents input if the language defines an indentOnInput field in its language data.

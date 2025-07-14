@@ -104,7 +104,10 @@ describe('editor', () => {
         force: true,
       })
       cy.get('button').contains('𝜉').click()
-      cy.get('.cm-content').should('contain.text', '\\xi')
+      cy.findByRole('textbox', { name: /Source Editor editing/i }).should(
+        'contain.text',
+        '\\xi'
+      )
 
       cy.log('recompile to force flush and avoid "unsaved changes" prompt')
       recompile()

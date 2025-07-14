@@ -55,8 +55,15 @@ describe('Project Sharing', function () {
 
   function expectContentReadOnlyAccess() {
     cy.url().should('match', /\/project\/[a-fA-F0-9]{24}/)
-    cy.get('.cm-content').should('contain.text', '\\maketitle')
-    cy.get('.cm-content').should('have.attr', 'contenteditable', 'false')
+    cy.findByRole('textbox', { name: /Source Editor editing/i }).should(
+      'contain.text',
+      '\\maketitle'
+    )
+    cy.findByRole('textbox', { name: /Source Editor editing/i }).should(
+      'have.attr',
+      'contenteditable',
+      'false'
+    )
   }
 
   function expectContentWriteAccess() {
@@ -64,13 +71,23 @@ describe('Project Sharing', function () {
     cy.url().should('match', /\/project\/[a-fA-F0-9]{24}/)
     const recompile = throttledRecompile()
     // wait for the editor to finish loading
-    cy.get('.cm-content').should('contain.text', '\\maketitle')
+    cy.findByRole('textbox', { name: /Source Editor editing/i }).should(
+      'contain.text',
+      '\\maketitle'
+    )
     // the editor should be writable
-    cy.get('.cm-content').should('have.attr', 'contenteditable', 'true')
+    cy.findByRole('textbox', { name: /Source Editor editing/i }).should(
+      'have.attr',
+      'contenteditable',
+      'true'
+    )
     cy.findByText('\\maketitle').parent().click()
     cy.findByText('\\maketitle').parent().type(`\n\\section{{}${section}}`)
     // should have written
-    cy.get('.cm-content').should('contain.text', `\\section{${section}}`)
+    cy.findByRole('textbox', { name: /Source Editor editing/i }).should(
+      'contain.text',
+      `\\section{${section}}`
+    )
     // check PDF
     recompile()
     cy.get('.pdf-viewer').should('contain.text', projectName)

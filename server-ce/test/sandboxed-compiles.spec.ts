@@ -161,7 +161,9 @@ describe('SandboxedCompiles', function () {
         })
 
         cy.log('navigate to Section A')
-        cy.get('.cm-content').within(() => cy.findByText('Section A').click())
+        cy.findByRole('textbox', { name: /Source Editor editing/i }).within(
+          () => cy.findByText('Section A').click()
+        )
         cy.get('[aria-label="Go to code location in PDF"]').click()
         cy.get('@title').then((title: any) => {
           waitUntilScrollingFinished('.pdfjs-viewer-inner', title)
@@ -170,7 +172,9 @@ describe('SandboxedCompiles', function () {
         })
 
         cy.log('navigate to Section B')
-        cy.get('.cm-content').within(() => cy.findByText('Section B').click())
+        cy.findByRole('textbox', { name: /Source Editor editing/i }).within(
+          () => cy.findByText('Section B').click()
+        )
         cy.get('[aria-label="Go to code location in PDF"]').click()
         cy.get('@sectionA').then((title: any) => {
           waitUntilScrollingFinished('.pdfjs-viewer-inner', title)
