@@ -65,6 +65,10 @@ body {
   position: relative;
   overflow: visible;
 
+  &.disabled {
+    color: var(--content-disabled-themed);
+  }
+
   &:visited,
   &:focus {
     color: var(--ide-rail-color);

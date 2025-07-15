@@ -142,6 +142,7 @@ export const RailLayout = () => {
         title: t('review_panel'),
         component: null,
         hide: !features.trackChangesVisible,
+        disabled: view !== 'editor',
       },
       {
         key: 'chat',
@@ -160,7 +161,7 @@ export const RailLayout = () => {
         disabled: errorLogsDisabled,
       },
     ],
-    [t, features.trackChangesVisible, newErrorlogs, errorLogsDisabled]
+    [t, features.trackChangesVisible, newErrorlogs, errorLogsDisabled, view]
   )
 
   const railActions: RailAction[] = useMemo(
