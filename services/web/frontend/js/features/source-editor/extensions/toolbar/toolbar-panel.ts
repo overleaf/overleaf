@@ -319,8 +319,18 @@ const toolbarTheme = EditorView.theme({
   },
 })
 
+const toolbarBorderTheme = EditorView.baseTheme({
+  '&light.overall-theme-dark .cm-panels-top': {
+    borderBottom: '1px solid var(--border-divider-dark)',
+  },
+})
+
 /**
  * A panel which contains the editor toolbar, provided by a state field which allows the toolbar to be toggled,
  * and styles for the toolbar.
  */
-export const toolbarPanel = () => [toolbarState, toolbarTheme]
+export const toolbarPanel = () => [
+  toolbarState,
+  toolbarTheme,
+  toolbarBorderTheme,
+]
