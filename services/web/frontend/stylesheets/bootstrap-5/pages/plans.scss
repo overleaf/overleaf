@@ -23,6 +23,7 @@ $z-index-group-member-picker-list: 1;
   --border-radius-large-new: 16px; // TODO: put this variable in a decent location
 
   padding-top: $header-height;
+  overflow: unset;
 
   .container {
     padding: 0 var(--spacing-06);
