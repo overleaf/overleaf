@@ -23,6 +23,7 @@
     "@overleaf/o-error": "*",
     "@overleaf/promise-utils": "*",
     "@overleaf/settings": "*",
+    "@overleaf/stream-utils": "*",
     "archiver": "5.3.2",
     "async": "^3.2.5",
     "body-parser": "^1.20.3",

@@ -91,6 +91,7 @@
     "@overleaf/promise-utils": "*",
     "@overleaf/redis-wrapper": "*",
     "@overleaf/settings": "*",
+    "@overleaf/stream-utils": "*",
     "@phosphor-icons/react": "^2.1.7",
     "@slack/webhook": "^7.0.2",
     "@stripe/stripe-js": "^7.3.0",

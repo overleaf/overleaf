@@ -7,6 +7,7 @@ const SplitTestHandler = require('../SplitTests/SplitTestHandler')
 const UserGetter = require('../User/UserGetter')
 const Settings = require('@overleaf/settings')
 const { fetchJson, RequestFailedError } = require('@overleaf/fetch-utils')
+const Metrics = require('@overleaf/metrics')
 
 /**
  * Get the most recent build and metadata
@@ -71,7 +72,13 @@ async function getLatestCompileResult(projectId, userId) {
 async function tryGetLatestCompileResult(projectId, userId, signal) {
   const {
     internal: { location: metaLocation },
-    external: { isUpToDate, allFiles, zone, shard: clsiCacheShard },
+    external: {
+      isUpToDate,
+      allFiles,
+      zone,
+      shard: clsiCacheShard,
+      size: jsonSize,
+    },
   } = await getLatestBuildFromCache(
     projectId,
     userId,
@@ -93,6 +100,9 @@ async function tryGetLatestCompileResult(projectId, userId, signal) {
     }
     throw err
   }
+  Metrics.count('clsi_cache_egress', jsonSize, 1, {
+    path: ClsiCacheHandler.getEgressLabel('output.overleaf.json'),
+  })
 
   const [, editorId, buildId] = metaLocation.match(
     /\/build\/([a-f0-9-]+?)-([a-f0-9]+-[a-f0-9]+)\//

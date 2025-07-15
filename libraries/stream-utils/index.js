@@ -145,6 +145,24 @@ class LoggerStream extends Transform {
   }
 }
 
+class MeteredStream extends Transform {
+  #Metrics
+  #metric
+  #labels
+
+  constructor(Metrics, metric, labels) {
+    super()
+    this.#Metrics = Metrics
+    this.#metric = metric
+    this.#labels = labels
+  }
+
+  _transform(chunk, encoding, callback) {
+    this.#Metrics.count(this.#metric, chunk.byteLength, 1, this.#labels)
+    callback(null, chunk)
+  }
+}
+
 // Export our classes
 
 module.exports = {
@@ -153,6 +171,7 @@ module.exports = {
   LoggerStream,
   LimitedStream,
   TimeoutStream,
+  MeteredStream,
   SizeExceededError,
   AbortError,
 }
