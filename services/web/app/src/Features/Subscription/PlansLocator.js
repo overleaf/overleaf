@@ -137,9 +137,47 @@ function findLocalPlanInSettings(planCode) {
   return null
 }
 
+/**
+ * Returns whether the given plan code is a group plan
+ *
+ * @param {string} planCode
+ */
+function isGroupPlanCode(planCode) {
+  return planCode.includes('group')
+}
+
+/**
+ * Adapts a legacy Recurly group plan code (e.g., `group_professional_5_educational`)
+ * into its corresponding Stripe-compatible plan code (e.g., `group_professional_educational`),
+ * extracting the license quantity where applicable.
+ *
+ *  @param {RecurlyPlanCode} planCode
+ * @returns {{ planCode: RecurlyPlanCode, quantity: number }}
+ */
+function convertLegacyGroupPlanCodeToConsolidatedGroupPlanCodeIfNeeded(
+  planCode
+) {
+  const pattern =
+    /^group_(collaborator|professional)_(2|3|4|5|10|20|50)_(educational|enterprise)$/
+
+  const match = planCode.match(pattern)
+  if (match == null) {
+    return { planCode, quantity: 1 }
+  }
+
+  const [, tier, size, usage] = match
+  const newPlanCode = /** @type {RecurlyPlanCode} */ (
+    usage === 'enterprise' ? `group_${tier}` : `group_${tier}_${usage}`
+  )
+
+  return { planCode: newPlanCode, quantity: Number(size) }
+}
+
 module.exports = {
   ensurePlansAreSetupCorrectly,
   findLocalPlanInSettings,
   buildStripeLookupKey,
   getPlanTypeAndPeriodFromRecurlyPlanCode,
+  isGroupPlanCode,
+  convertLegacyGroupPlanCodeToConsolidatedGroupPlanCodeIfNeeded,
 }

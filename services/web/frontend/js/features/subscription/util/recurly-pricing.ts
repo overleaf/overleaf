@@ -1,9 +1,15 @@
 import { SubscriptionPricingState } from '@recurly/recurly-js'
 import { PriceForDisplayData } from '../../../../../types/subscription/plan'
 import { CurrencyCode } from '../../../../../types/subscription/currency'
-import { getRecurlyGroupPlanCode } from './recurly-group-plan-code'
+import {
+  getRecurlyGroupPlanCode,
+  getConsolidatedGroupPlanCode,
+} from './recurly-group-plan-code'
 import { debugConsole } from '@/utils/debugging'
 import { formatCurrency } from '@/shared/utils/currency'
+import { getJSON } from '../../../infrastructure/fetch-json'
+
+let groupPlanPerUserPrices: Record<string, number> | undefined
 
 function queryRecurlyPlanPrice(planCode: string, currency: CurrencyCode) {
   return new Promise(resolve => {
@@ -73,7 +79,7 @@ export async function loadDisplayPriceWithTaxPromise(
     )
 }
 
-export async function loadGroupDisplayPriceWithTaxPromise(
+export async function loadGroupDisplayPriceWithTaxForRecurlyPromise(
   groupPlanCode: string,
   currencyCode: CurrencyCode,
   taxRate: number,
@@ -101,4 +107,45 @@ export async function loadGroupDisplayPriceWithTaxPromise(
   }
 
   return price
+}
+
+export async function loadGroupDisplayPriceWithTaxForStripePromise(
+  groupPlanCode: string,
+  currencyCode: CurrencyCode,
+  taxRate: number,
+  size: string,
+  usage: string,
+  locale: string
+) {
+  if (!groupPlanPerUserPrices) {
+    groupPlanPerUserPrices = await getJSON<Record<string, number>>(
+      `/user/subscription/group/group-plan-per-user-prices?currency=${currencyCode}`
+    )
+  }
+
+  const planCode = getConsolidatedGroupPlanCode(groupPlanCode, usage)
+
+  if (!(planCode in groupPlanPerUserPrices)) {
+    throw new Error(
+      `Group plan code ${planCode} not found in groupPlanPerUserPrices`
+    )
+  }
+
+  const subtotalPrice = groupPlanPerUserPrices[planCode] * parseInt(size)
+
+  const result = formatPriceForDisplayData(
+    subtotalPrice.toString(),
+    taxRate,
+    currencyCode,
+    locale
+  )
+
+  result.perUserDisplayPrice = formatCurrency(
+    groupPlanPerUserPrices[planCode],
+    currencyCode,
+    locale,
+    true
+  )
+
+  return result
 }

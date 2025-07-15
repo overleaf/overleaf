@@ -27,6 +27,10 @@ describe('PaymentProviderEntities', function () {
           { planCode: 'cheap-plan', price_in_cents: 500 },
           { planCode: 'regular-plan', price_in_cents: 1000 },
           { planCode: 'premium-plan', price_in_cents: 2000 },
+          {
+            planCode: 'group_collaborator_10_enterprise',
+            price_in_cents: 10000,
+          },
         ],
         features: [],
       }
@@ -81,8 +85,11 @@ describe('PaymentProviderEntities', function () {
         it('returns a change request for upgrades', function () {
           const { PaymentProviderSubscriptionChangeRequest } =
             this.PaymentProviderEntities
-          const changeRequest =
-            this.subscription.getRequestForPlanChange('premium-plan')
+          const changeRequest = this.subscription.getRequestForPlanChange(
+            'premium-plan',
+            1,
+            this.subscription.shouldPlanChangeAtTermEnd('premium-plan')
+          )
           expect(changeRequest).to.deep.equal(
             new PaymentProviderSubscriptionChangeRequest({
               subscription: this.subscription,
@@ -95,8 +102,11 @@ describe('PaymentProviderEntities', function () {
         it('returns a change request for downgrades', function () {
           const { PaymentProviderSubscriptionChangeRequest } =
             this.PaymentProviderEntities
-          const changeRequest =
-            this.subscription.getRequestForPlanChange('cheap-plan')
+          const changeRequest = this.subscription.getRequestForPlanChange(
+            'cheap-plan',
+            1,
+            this.subscription.shouldPlanChangeAtTermEnd('cheap-plan')
+          )
           expect(changeRequest).to.deep.equal(
             new PaymentProviderSubscriptionChangeRequest({
               subscription: this.subscription,
@@ -112,8 +122,11 @@ describe('PaymentProviderEntities', function () {
           this.subscription.trialPeriodEnd = fiveDaysFromNow
           const { PaymentProviderSubscriptionChangeRequest } =
             this.PaymentProviderEntities
-          const changeRequest =
-            this.subscription.getRequestForPlanChange('cheap-plan')
+          const changeRequest = this.subscription.getRequestForPlanChange(
+            'cheap-plan',
+            1,
+            this.subscription.shouldPlanChangeAtTermEnd('cheap-plan')
+          )
           expect(changeRequest).to.deep.equal(
             new PaymentProviderSubscriptionChangeRequest({
               subscription: this.subscription,
@@ -127,8 +140,11 @@ describe('PaymentProviderEntities', function () {
           const { PaymentProviderSubscriptionChangeRequest } =
             this.PaymentProviderEntities
           this.addOn.code = AI_ADD_ON_CODE
-          const changeRequest =
-            this.subscription.getRequestForPlanChange('premium-plan')
+          const changeRequest = this.subscription.getRequestForPlanChange(
+            'premium-plan',
+            1,
+            this.subscription.shouldPlanChangeAtTermEnd('premium-plan')
+          )
           expect(changeRequest).to.deep.equal(
             new PaymentProviderSubscriptionChangeRequest({
               subscription: this.subscription,
@@ -148,8 +164,11 @@ describe('PaymentProviderEntities', function () {
           const { PaymentProviderSubscriptionChangeRequest } =
             this.PaymentProviderEntities
           this.addOn.code = AI_ADD_ON_CODE
-          const changeRequest =
-            this.subscription.getRequestForPlanChange('cheap-plan')
+          const changeRequest = this.subscription.getRequestForPlanChange(
+            'cheap-plan',
+            1,
+            this.subscription.shouldPlanChangeAtTermEnd('cheap-plan')
+          )
           expect(changeRequest).to.deep.equal(
             new PaymentProviderSubscriptionChangeRequest({
               subscription: this.subscription,
@@ -170,14 +189,74 @@ describe('PaymentProviderEntities', function () {
             this.PaymentProviderEntities
           this.subscription.planCode = 'assistant-annual'
           this.subscription.addOns = []
-          const changeRequest =
-            this.subscription.getRequestForPlanChange('cheap-plan')
+          const changeRequest = this.subscription.getRequestForPlanChange(
+            'cheap-plan',
+            1,
+            this.subscription.shouldPlanChangeAtTermEnd('cheap-plan')
+          )
           expect(changeRequest).to.deep.equal(
             new PaymentProviderSubscriptionChangeRequest({
               subscription: this.subscription,
               timeframe: 'now',
               planCode: 'cheap-plan',
               addOnUpdates: [
+                new PaymentProviderSubscriptionAddOnUpdate({
+                  code: AI_ADD_ON_CODE,
+                  quantity: 1,
+                }),
+              ],
+            })
+          )
+        })
+
+        it('upgrade from individual to group plan for Stripe subscription', function () {
+          this.subscription.service = 'stripe-uk'
+          const { PaymentProviderSubscriptionChangeRequest } =
+            this.PaymentProviderEntities
+          const changeRequest = this.subscription.getRequestForPlanChange(
+            'group_collaborator',
+            10,
+            this.subscription.shouldPlanChangeAtTermEnd(
+              'group_collaborator_10_enterprise'
+            )
+          )
+          expect(changeRequest).to.deep.equal(
+            new PaymentProviderSubscriptionChangeRequest({
+              subscription: this.subscription,
+              timeframe: 'now',
+              planCode: 'group_collaborator',
+              addOnUpdates: [
+                new PaymentProviderSubscriptionAddOnUpdate({
+                  code: 'additional-license',
+                  quantity: 10,
+                }),
+              ],
+            })
+          )
+        })
+
+        it('upgrade from individual to group plan and preserves the AI add-on for Stripe subscription', function () {
+          this.subscription.service = 'stripe-uk'
+          const { PaymentProviderSubscriptionChangeRequest } =
+            this.PaymentProviderEntities
+          this.addOn.code = AI_ADD_ON_CODE
+          const changeRequest = this.subscription.getRequestForPlanChange(
+            'group_collaborator',
+            10,
+            this.subscription.shouldPlanChangeAtTermEnd(
+              'group_collaborator_10_enterprise'
+            )
+          )
+          expect(changeRequest).to.deep.equal(
+            new PaymentProviderSubscriptionChangeRequest({
+              subscription: this.subscription,
+              timeframe: 'now',
+              planCode: 'group_collaborator',
+              addOnUpdates: [
+                new PaymentProviderSubscriptionAddOnUpdate({
+                  code: 'additional-license',
+                  quantity: 10,
+                }),
                 new PaymentProviderSubscriptionAddOnUpdate({
                   code: AI_ADD_ON_CODE,
                   quantity: 1,

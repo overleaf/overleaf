@@ -266,4 +266,39 @@ describe('PlansLocator', function () {
       expect(period).to.equal('annual')
     })
   })
+
+  describe('convertLegacyGroupPlanCodeToConsolidatedGroupPlanCodeIfNeeded', function () {
+    it('returns original plan name for non-group plan codes', function () {
+      expect(
+        this.PlansLocator.convertLegacyGroupPlanCodeToConsolidatedGroupPlanCodeIfNeeded(
+          'professional'
+        )
+      ).to.deep.equal({
+        planCode: 'professional',
+        quantity: 1,
+      })
+    })
+
+    it('converts Recurly enterprise group plan codes to Stripe group plan codes', function () {
+      expect(
+        this.PlansLocator.convertLegacyGroupPlanCodeToConsolidatedGroupPlanCodeIfNeeded(
+          'group_collaborator_10_enterprise'
+        )
+      ).to.deep.equal({
+        planCode: 'group_collaborator',
+        quantity: 10,
+      })
+    })
+
+    it('converts Recurly educational group plan codes to Stripe group plan codes', function () {
+      expect(
+        this.PlansLocator.convertLegacyGroupPlanCodeToConsolidatedGroupPlanCodeIfNeeded(
+          'group_professional_10_educational'
+        )
+      ).to.deep.equal({
+        planCode: 'group_professional_educational',
+        quantity: 10,
+      })
+    })
+  })
 })

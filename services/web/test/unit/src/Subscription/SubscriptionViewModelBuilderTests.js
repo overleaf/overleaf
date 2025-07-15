@@ -150,6 +150,11 @@ describe('SubscriptionViewModelBuilder', function () {
     this.PlansLocator = {
       findLocalPlanInSettings: sinon.stub(),
     }
+    this.SplitTestHandler = {
+      promises: {
+        getAssignmentForUser: sinon.stub().resolves({ variant: 'default' }),
+      },
+    }
     this.SubscriptionViewModelBuilder = SandboxedModule.require(modulePath, {
       requires: {
         '@overleaf/settings': this.Settings,
@@ -168,6 +173,7 @@ describe('SubscriptionViewModelBuilder', function () {
         './V1SubscriptionManager': {},
         '../Publishers/PublishersGetter': this.PublishersGetter,
         './SubscriptionHelper': SubscriptionHelper,
+        '../SplitTests/SplitTestHandler': this.SplitTestHandler,
       },
     })
 
@@ -659,6 +665,9 @@ describe('SubscriptionViewModelBuilder', function () {
       describe('isEligibleForGroupPlan', function () {
         it('is false for Stripe subscriptions', async function () {
           this.paymentRecord.service = 'stripe-us'
+          this.Modules.promises.hooks.fire
+            .withArgs('canUpgradeFromIndividualToGroup')
+            .resolves([false])
           const result =
             await this.SubscriptionViewModelBuilder.promises.buildUsersSubscriptionViewModel(
               this.user

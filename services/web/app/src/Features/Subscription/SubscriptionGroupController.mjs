@@ -425,6 +425,21 @@ async function subtotalLimitExceeded(req, res) {
   }
 }
 
+async function getGroupPlanPerUserPrices(req, res) {
+  try {
+    const userId = SessionManager.getLoggedInUserId(req.session)
+    const prices = await Modules.promises.hooks.fire(
+      'getGroupPlanPerUserPrices',
+      userId,
+      req.query.currency
+    )
+    return res.json(prices[0])
+  } catch (error) {
+    logger.err({ error }, 'error trying to get websale group product prices')
+    return res.sendStatus(500)
+  }
+}
+
 export default {
   removeUserFromGroup: expressify(removeUserFromGroup),
   removeSelfFromGroup: expressify(removeSelfFromGroup),
@@ -441,4 +456,5 @@ export default {
   missingBillingInformation: expressify(missingBillingInformation),
   manuallyCollectedSubscription: expressify(manuallyCollectedSubscription),
   subtotalLimitExceeded: expressify(subtotalLimitExceeded),
+  getGroupPlanPerUserPrices: expressify(getGroupPlanPerUserPrices),
 }

@@ -94,7 +94,7 @@ class PaymentProviderSubscription {
    * @return {boolean}
    */
   isGroupSubscription() {
-    return isGroupPlanCode(this.planCode)
+    return PlansLocator.isGroupPlanCode(this.planCode)
   }
 
   /**
@@ -118,32 +118,31 @@ class PaymentProviderSubscription {
 
   /**
    * Change this subscription's plan
-   *
+   * @param {string} planCode - the new plan code
+   * @param {number} [quantity] - the quantity of the plan
+   * @param {boolean} [shouldChangeAtTermEnd] - whether the change should be applied at the end of the term
    * @return {PaymentProviderSubscriptionChangeRequest}
    */
-  getRequestForPlanChange(planCode) {
-    const currentPlan = PlansLocator.findLocalPlanInSettings(this.planCode)
-    if (currentPlan == null) {
-      throw new OError('Unable to find plan in settings', {
-        planCode: this.planCode,
-      })
-    }
-    const newPlan = PlansLocator.findLocalPlanInSettings(planCode)
-    if (newPlan == null) {
-      throw new OError('Unable to find plan in settings', { planCode })
-    }
-    const isInTrial = SubscriptionHelper.isInTrial(this.trialPeriodEnd)
-    const shouldChangeAtTermEnd = SubscriptionHelper.shouldPlanChangeAtTermEnd(
-      currentPlan,
-      newPlan,
-      isInTrial
-    )
-
+  getRequestForPlanChange(planCode, quantity, shouldChangeAtTermEnd) {
     const changeRequest = new PaymentProviderSubscriptionChangeRequest({
       subscription: this,
       timeframe: shouldChangeAtTermEnd ? 'term_end' : 'now',
       planCode,
     })
+
+    if (quantity !== 1) {
+      // Only group plans in Stripe can have larger than 1 quantity
+      // This is because in Stripe, the group plans are configued with per-seat pricing
+      // and the quantity is the number of seats
+      // Setting the members limit add-on quantity accordingly
+      // so it is compitible with Recurly's group plan model (1 base plan + add-on for each member)
+      changeRequest.addOnUpdates = [
+        new PaymentProviderSubscriptionAddOnUpdate({
+          code: MEMBERS_LIMIT_ADD_ON_CODE,
+          quantity,
+        }),
+      ]
+    }
 
     // Carry the AI add-on to the new plan if applicable
     if (
@@ -155,7 +154,9 @@ class PaymentProviderSubscription {
         code: AI_ADD_ON_CODE,
         quantity: 1,
       })
-      changeRequest.addOnUpdates = [addOnUpdate]
+      changeRequest.addOnUpdates = changeRequest.addOnUpdates
+        ? [...changeRequest.addOnUpdates, addOnUpdate]
+        : [addOnUpdate]
     }
 
     return changeRequest
@@ -359,6 +360,31 @@ class PaymentProviderSubscription {
    */
   get isCollectionMethodManual() {
     return this.collectionMethod === 'manual'
+  }
+
+  /**
+   * Determine if a plan change should be applied at the end of the term
+   *
+   * @param {string} newPlanCode
+   * @returns {boolean}
+   */
+  shouldPlanChangeAtTermEnd(newPlanCode) {
+    const currentPlan = PlansLocator.findLocalPlanInSettings(this.planCode)
+    if (currentPlan == null) {
+      throw new OError('Unable to find plan in settings', {
+        planCode: this.planCode,
+      })
+    }
+    const newPlan = PlansLocator.findLocalPlanInSettings(newPlanCode)
+    if (newPlan == null) {
+      throw new OError('Unable to find plan in settings', { newPlanCode })
+    }
+    const isInTrial = SubscriptionHelper.isInTrial(this.trialPeriodEnd)
+    return SubscriptionHelper.shouldPlanChangeAtTermEnd(
+      currentPlan,
+      newPlan,
+      isInTrial
+    )
   }
 }
 
@@ -584,15 +610,6 @@ class PaymentProviderAccount {
   }
 }
 
-/**
- * Returns whether the given plan code is a group plan
- *
- * @param {string} planCode
- */
-function isGroupPlanCode(planCode) {
-  return planCode.includes('group')
-}
-
 module.exports = {
   MEMBERS_LIMIT_ADD_ON_CODE,
   PaymentProviderSubscription,
@@ -607,6 +624,5 @@ module.exports = {
   PaymentProviderPlan,
   PaymentProviderCoupon,
   PaymentProviderAccount,
-  isGroupPlanCode,
   PaymentProviderImmediateCharge,
 }

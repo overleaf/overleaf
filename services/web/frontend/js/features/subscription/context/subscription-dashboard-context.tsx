@@ -22,7 +22,8 @@ import { Institution } from '../../../../../types/institution'
 import getMeta from '../../../utils/meta'
 import {
   loadDisplayPriceWithTaxPromise,
-  loadGroupDisplayPriceWithTaxPromise,
+  loadGroupDisplayPriceWithTaxForRecurlyPromise,
+  loadGroupDisplayPriceWithTaxForStripePromise,
 } from '../util/recurly-pricing'
 import { isRecurlyLoaded } from '../util/is-recurly-loaded'
 import { SubscriptionDashModalIds } from '../../../../../types/subscription/dashboard/modal-ids'
@@ -199,36 +200,46 @@ export function SubscriptionDashboardProvider({
 
   useEffect(() => {
     if (
-      isRecurlyLoaded() &&
-      groupPlanToChangeToCode &&
-      groupPlanToChangeToSize &&
-      groupPlanToChangeToUsage &&
-      personalSubscription?.payment
+      !groupPlanToChangeToCode ||
+      !groupPlanToChangeToSize ||
+      !groupPlanToChangeToUsage ||
+      !personalSubscription?.payment
     ) {
-      setQueryingGroupPlanToChangeToPrice(true)
-
-      const { currency, taxRate } = personalSubscription.payment
-      const fetchGroupDisplayPrice = async () => {
-        setGroupPlanToChangeToPriceError(false)
-        let priceData
-        try {
-          priceData = await loadGroupDisplayPriceWithTaxPromise(
-            groupPlanToChangeToCode,
-            currency,
-            taxRate,
-            groupPlanToChangeToSize,
-            groupPlanToChangeToUsage,
-            i18n.language
-          )
-        } catch (e) {
-          debugConsole.error(e)
-          setGroupPlanToChangeToPriceError(true)
-        }
-        setQueryingGroupPlanToChangeToPrice(false)
-        setGroupPlanToChangeToPrice(priceData)
-      }
-      fetchGroupDisplayPrice()
+      return
     }
+
+    let loadGroupDisplayPrice
+    if (personalSubscription.service?.includes('stripe')) {
+      loadGroupDisplayPrice = loadGroupDisplayPriceWithTaxForStripePromise
+    } else if (isRecurlyLoaded()) {
+      loadGroupDisplayPrice = loadGroupDisplayPriceWithTaxForRecurlyPromise
+    } else {
+      return
+    }
+
+    setQueryingGroupPlanToChangeToPrice(true)
+
+    const { currency, taxRate } = personalSubscription.payment
+    const fetchGroupDisplayPrice = async () => {
+      setGroupPlanToChangeToPriceError(false)
+      let priceData
+      try {
+        priceData = await loadGroupDisplayPrice(
+          groupPlanToChangeToCode,
+          currency,
+          taxRate,
+          groupPlanToChangeToSize,
+          groupPlanToChangeToUsage,
+          i18n.language
+        )
+      } catch (e) {
+        debugConsole.error(e)
+        setGroupPlanToChangeToPriceError(true)
+      }
+      setQueryingGroupPlanToChangeToPrice(false)
+      setGroupPlanToChangeToPrice(priceData)
+    }
+    fetchGroupDisplayPrice()
   }, [
     groupPlanToChangeToUsage,
     groupPlanToChangeToSize,
