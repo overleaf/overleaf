@@ -807,7 +807,10 @@ module.exports = {
     '/templates/index': '/templates/',
   },
 
-  reloadModuleViewsOnEachRequest: process.env.NODE_ENV === 'development',
+  enablePugCache: process.env.ENABLE_PUG_CACHE === 'true',
+  reloadModuleViewsOnEachRequest:
+    process.env.ENABLE_PUG_CACHE !== 'true' &&
+    process.env.NODE_ENV === 'development',
 
   rateLimit: {
     subnetRateLimiterDisabled:

@@ -134,7 +134,7 @@ app.set('views', fileURLToPath(new URL('../../views', import.meta.url)))
 app.set('view engine', 'pug')
 
 if (Settings.enabledServices.includes('web')) {
-  if (app.get('env') !== 'development') {
+  if (Settings.enablePugCache || app.get('env') !== 'development') {
     logger.debug('enabling view cache for production or acceptance tests')
     app.enable('view cache')
   }
