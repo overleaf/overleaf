@@ -19,6 +19,7 @@ import {
   SubtotalLimitExceededError,
   HasPastDueInvoiceError,
   HasNoAdditionalLicenseWhenManuallyCollectedError,
+  PaymentActionRequiredError,
 } from './Errors.js'
 
 /**
@@ -273,6 +274,14 @@ async function createAddSeatsSubscriptionChange(req, res) {
       })
     }
 
+    if (error instanceof PaymentActionRequiredError) {
+      return res.status(402).json({
+        message: 'Payment action required',
+        clientSecret: error.info.clientSecret,
+        publicKey: error.info.publicKey,
+      })
+    }
+
     logger.err(
       { error },
       'error trying to create "add seats" subscription change'
@@ -369,6 +378,13 @@ async function upgradeSubscription(req, res) {
     await SubscriptionGroupHandler.promises.upgradeGroupPlan(userId)
     return res.sendStatus(200)
   } catch (error) {
+    if (error instanceof PaymentActionRequiredError) {
+      return res.status(402).json({
+        message: 'Payment action required',
+        clientSecret: error.info.clientSecret,
+        publicKey: error.info.publicKey,
+      })
+    }
     logger.err({ error }, 'error trying to upgrade subscription')
     return res.sendStatus(500)
   }

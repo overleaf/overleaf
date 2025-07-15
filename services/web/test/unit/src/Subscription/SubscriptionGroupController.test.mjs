@@ -137,6 +137,12 @@ describe('SubscriptionGroupController', function () {
       SubtotalLimitExceededError: class extends Error {},
       HasPastDueInvoiceError: class extends Error {},
       HasNoAdditionalLicenseWhenManuallyCollectedError: class extends Error {},
+      PaymentActionRequiredError: class extends Error {
+        constructor(info) {
+          super('Payment action required')
+          this.info = info
+        }
+      },
     }
 
     vi.doMock(
@@ -718,6 +724,38 @@ describe('SubscriptionGroupController', function () {
         ctx.Controller.createAddSeatsSubscriptionChange(ctx.req, res)
       })
     })
+
+    it('should send 402 response with PaymentActionRequiredError', async function (ctx) {
+      await new Promise(resolve => {
+        const adding = 2
+        ctx.req.body = { adding }
+        const error = new ctx.Errors.PaymentActionRequiredError({
+          clientSecret: 'secret',
+          publicKey: 'key',
+        })
+        ctx.SubscriptionGroupHandler.promises.createAddSeatsSubscriptionChange =
+          sinon.stub().throws(error)
+
+        const res = {
+          status: statusCode => {
+            statusCode.should.equal(402)
+
+            return {
+              json: data => {
+                data.should.deep.equal({
+                  message: 'Payment action required',
+                  clientSecret: error.info.clientSecret,
+                  publicKey: error.info.publicKey,
+                })
+                resolve()
+              },
+            }
+          },
+        }
+
+        ctx.Controller.createAddSeatsSubscriptionChange(ctx.req, res)
+      })
+    })
   })
 
   describe('submitForm', function () {
@@ -890,6 +928,35 @@ describe('SubscriptionGroupController', function () {
           sendStatus: code => {
             code.should.equal(500)
             resolve()
+          },
+        }
+
+        ctx.Controller.upgradeSubscription(ctx.req, res)
+      })
+    })
+
+    it('should send 402 response with PaymentActionRequiredError', async function (ctx) {
+      await new Promise(resolve => {
+        const error = new ctx.Errors.PaymentActionRequiredError({
+          clientSecret: 'secret',
+          publicKey: 'public',
+        })
+        ctx.SubscriptionGroupHandler.promises.upgradeGroupPlan = sinon
+          .stub()
+          .rejects(error)
+        const res = {
+          status: code => {
+            code.should.equal(402)
+            return {
+              json: data => {
+                data.should.deep.equal({
+                  message: 'Payment action required',
+                  clientSecret: error.info.clientSecret,
+                  publicKey: error.info.publicKey,
+                })
+                resolve()
+              },
+            }
           },
         }
 

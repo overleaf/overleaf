@@ -2,7 +2,10 @@ import { useEffect, useState } from 'react'
 import { useTranslation, Trans } from 'react-i18next'
 import { PaidSubscription } from '../../../../../../../../../../types/subscription/dashboard/subscription'
 import { PriceForDisplayData } from '../../../../../../../../../../types/subscription/plan'
-import { postJSON } from '../../../../../../../../infrastructure/fetch-json'
+import {
+  postJSON,
+  FetchError,
+} from '../../../../../../../../infrastructure/fetch-json'
 import getMeta from '../../../../../../../../utils/meta'
 import { useSubscriptionDashboardContext } from '../../../../../../context/subscription-dashboard-context'
 import GenericErrorAlert from '../../../../generic-error-alert'
@@ -23,6 +26,7 @@ import { useContactUsModal } from '@/shared/hooks/use-contact-us-modal'
 import { UserProvider } from '@/shared/context/user-context'
 import OLButton from '@/features/ui/components/ol/ol-button'
 import OLNotification from '@/features/ui/components/ol/ol-notification'
+import handleStripePaymentAction from '@/features/subscription/util/handle-stripe-payment-action'
 
 const educationalPercentDiscount = 40
 
@@ -136,6 +140,11 @@ export function ChangeToGroupModal() {
       })
       location.reload()
     } catch (e) {
+      const { handled } = await handleStripePaymentAction(e as FetchError)
+      if (handled) {
+        location.reload()
+        return
+      }
       setError(true)
       setInflight(false)
     }

@@ -30,6 +30,7 @@ import {
 } from '../../../../../../types/subscription/subscription-change-preview'
 import { MergeAndOverride, Nullable } from '../../../../../../types/utils'
 import { sendMB } from '../../../../infrastructure/event-tracking'
+import handleStripePaymentAction from '@/features/subscription/util/handle-stripe-payment-action'
 
 export const MAX_NUMBER_OF_USERS = 20
 export const MAX_NUMBER_OF_PO_NUMBER_CHARACTERS = 50
@@ -60,13 +61,12 @@ function AddSeats() {
     reset: resetCostSummaryData,
     error: errorCostSummary,
   } = useAsync<CostSummaryData, FetchError>()
-  const {
-    isLoading: isAddingSeats,
-    isError: isErrorAddingSeats,
-    isSuccess: isSuccessAddingSeats,
-    runAsync: runAsyncAddSeats,
-    data: addedSeatsData,
-  } = useAsync<{ adding: number }>()
+  const [isAddingSeats, setIsAddingSeats] = useState(false)
+  const [isErrorAddingSeats, setIsErrorAddingSeats] = useState(false)
+  const [isSuccessAddingSeats, setIsSuccessAddingSeats] = useState(false)
+  const [addedSeatsData, setAddedSeatsData] = useState<{
+    adding: number
+  } | null>(null)
   const {
     isLoading: isSendingMailToSales,
     isError: isErrorSendingMailToSales,
@@ -217,21 +217,34 @@ function AddSeats() {
       sendMB('flex-add-users-form', {
         action: 'click-add-user-button',
       })
-      const post = postJSON('/user/subscription/group/add-users/create', {
-        signal: addSeatsSignal,
-        body: {
-          adding: Number(rawSeats),
-          poNumber,
-        },
-      })
-      runAsyncAddSeats(post)
-        .then(() => {
+      setIsAddingSeats(true)
+      try {
+        const response = await postJSON<{
+          adding: number
+        }>('/user/subscription/group/add-users/create', {
+          signal: addSeatsSignal,
+          body: {
+            adding: Number(rawSeats),
+            poNumber,
+          },
+        })
+        sendMB('flex-add-users-success')
+        setIsSuccessAddingSeats(true)
+        setAddedSeatsData(response)
+      } catch (error) {
+        const { handled } = await handleStripePaymentAction(error as FetchError)
+        if (handled) {
           sendMB('flex-add-users-success')
-        })
-        .catch(() => {
-          debugConsole.error()
-          sendMB('flex-add-users-error')
-        })
+          setIsSuccessAddingSeats(true)
+          setAddedSeatsData({ adding: Number(rawSeats) })
+          return
+        }
+        debugConsole.error(error)
+        sendMB('flex-add-users-error')
+        setIsErrorAddingSeats(true)
+      } finally {
+        setIsAddingSeats(false)
+      }
     }
   }
 
