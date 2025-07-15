@@ -246,7 +246,7 @@ async function create(projectId, chunk, earliestChangeTimestamp) {
 
   const opts = {}
   if (chunkStart > 0) {
-    const oldChunk = await backend.getChunkForVersion(projectId, chunkStart - 1)
+    const oldChunk = await backend.getChunkForVersion(projectId, chunkStart)
 
     if (oldChunk.endVersion !== chunkStart) {
       throw new ChunkVersionConflictError(
