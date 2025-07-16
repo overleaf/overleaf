@@ -33,7 +33,6 @@ import {
   makeProjectKey,
 } from '../lib/blob_store/index.js'
 import { backedUpBlobs as backedUpBlobsCollection, db } from '../lib/mongodb.js'
-import filestorePersistor from '../lib/persistor.js'
 import commandLineArgs from 'command-line-args'
 import readline from 'node:readline'
 
@@ -178,6 +177,37 @@ const STREAM_HIGH_WATER_MARK = parseInt(
 )
 const LOGGING_INTERVAL = parseInt(process.env.LOGGING_INTERVAL || '60000', 10)
 const SLEEP_BEFORE_EXIT = parseInt(process.env.SLEEP_BEFORE_EXIT || '1000', 10)
+
+// Filestore endpoint location
+const FILESTORE_HOST = process.env.FILESTORE_HOST || '127.0.0.1'
+const FILESTORE_PORT = process.env.FILESTORE_PORT || '3009'
+
+async function fetchFromFilestore(projectId, fileId) {
+  const url = `http://${FILESTORE_HOST}:${FILESTORE_PORT}/project/${projectId}/file/${fileId}`
+  const response = await fetch(url)
+  if (!response.ok) {
+    if (response.status === 404) {
+      throw new NotFoundError('file not found in filestore', {
+        status: response.status,
+      })
+    }
+    const body = await response.text()
+    throw new OError('fetchFromFilestore failed', {
+      projectId,
+      fileId,
+      status: response.status,
+      body,
+    })
+  }
+  if (!response.body) {
+    throw new OError('fetchFromFilestore response has no body', {
+      projectId,
+      fileId,
+      status: response.status,
+    })
+  }
+  return response.body
+}
 
 const projectsCollection = db.collection('projects')
 /** @type {ProjectsCollection} */
@@ -348,8 +378,7 @@ async function processFile(entry, filePath) {
     } catch (err) {
       if (gracefulShutdownInitiated) throw err
       if (err instanceof NotFoundError) {
-        const { bucketName } = OError.getFullInfo(err)
-        if (bucketName === USER_FILES_BUCKET_NAME && !RETRY_FILESTORE_404) {
+        if (!RETRY_FILESTORE_404) {
           throw err // disable retries for not found in filestore bucket case
         }
       }
@@ -416,10 +445,8 @@ async function processFileOnce(entry, filePath) {
   }
 
   STATS.readFromGCSCount++
-  const src = await filestorePersistor.getObjectStream(
-    USER_FILES_BUCKET_NAME,
-    `${projectId}/${fileId}`
-  )
+  // make a fetch request to filestore itself
+  const src = await fetchFromFilestore(projectId, fileId)
   const dst = fs.createWriteStream(filePath, {
     highWaterMark: STREAM_HIGH_WATER_MARK,
   })
@@ -1327,14 +1354,21 @@ async function processDeletedProjects() {
 }
 
 async function main() {
+  console.log('Starting project file backup...')
   await loadGlobalBlobs()
+  console.log('Loaded global blobs:', GLOBAL_BLOBS.size)
   if (PROJECT_IDS_FROM) {
+    console.log(
+      `Processing projects from file: ${PROJECT_IDS_FROM}, this may take a while...`
+    )
     await processProjectsFromFile()
   } else {
     if (PROCESS_NON_DELETED_PROJECTS) {
+      console.log('Processing non-deleted projects...')
       await processNonDeletedProjects()
     }
     if (PROCESS_DELETED_PROJECTS) {
+      console.log('Processing deleted projects...')
       await processDeletedProjects()
     }
   }

@@ -15,7 +15,6 @@ import { execFile } from 'node:child_process'
 import chai, { expect } from 'chai'
 import chaiExclude from 'chai-exclude'
 import config from 'config'
-import ObjectPersistor from '@overleaf/object-persistor'
 import { WritableBuffer } from '@overleaf/stream-utils'
 import {
   backupPersistor,
@@ -27,6 +26,8 @@ import {
   makeProjectKey,
 } from '../../../../storage/lib/blob_store/index.js'
 
+import express from 'express'
+
 chai.use(chaiExclude)
 const TIMEOUT = 20 * 1_000
 
@@ -36,15 +37,58 @@ const { tieringStorageClass } = config.get('backupPersistor')
 const projectsCollection = db.collection('projects')
 const deletedProjectsCollection = db.collection('deletedProjects')
 
-const FILESTORE_PERSISTOR = ObjectPersistor({
-  backend: 'gcs',
-  gcs: {
-    endpoint: {
-      apiEndpoint: process.env.GCS_API_ENDPOINT,
-      projectId: process.env.GCS_PROJECT_ID,
-    },
-  },
-})
+class MockFilestore {
+  constructor() {
+    this.host = process.env.FILESTORE_HOST || '127.0.0.1'
+    this.port = process.env.FILESTORE_PORT || 3009
+    // create a server listening on this.host and this.port
+    this.files = {}
+
+    this.app = express()
+
+    this.app.get('/project/:projectId/file/:fileId', (req, res) => {
+      const { projectId, fileId } = req.params
+      const content = this.files[projectId]?.[fileId]
+      if (!content) return res.status(404).end()
+      res.status(200).end(content)
+    })
+  }
+
+  start() {
+    // reset stored files
+    this.files = {}
+    // start the server
+    if (this.serverPromise) {
+      return this.serverPromise
+    } else {
+      this.serverPromise = new Promise((resolve, reject) => {
+        this.server = this.app.listen(this.port, this.host, err => {
+          if (err) return reject(err)
+          resolve()
+        })
+      })
+      return this.serverPromise
+    }
+  }
+
+  addFile(projectId, fileId, fileContent) {
+    if (!this.files[projectId]) {
+      this.files[projectId] = {}
+    }
+    this.files[projectId][fileId] = fileContent
+  }
+
+  deleteObject(projectId, fileId) {
+    if (this.files[projectId]) {
+      delete this.files[projectId][fileId]
+      if (Object.keys(this.files[projectId]).length === 0) {
+        delete this.files[projectId]
+      }
+    }
+  }
+}
+
+const mockFilestore = new MockFilestore()
 
 /**
  * @param {ObjectId} objectId
@@ -472,67 +516,36 @@ describe('back_fill_file_hash script', function () {
   }
 
   async function populateFilestore() {
-    await FILESTORE_PERSISTOR.sendStream(
-      USER_FILES_BUCKET_NAME,
-      `${projectId0}/${fileId0}`,
-      Stream.Readable.from([fileId0.toString()])
-    )
-    await FILESTORE_PERSISTOR.sendStream(
-      USER_FILES_BUCKET_NAME,
-      `${projectId0}/${fileId6}`,
-      Stream.Readable.from([fileId6.toString()])
-    )
-    await FILESTORE_PERSISTOR.sendStream(
-      USER_FILES_BUCKET_NAME,
-      `${projectId0}/${fileId7}`,
-      Stream.Readable.from([contentFile7])
-    )
-    await FILESTORE_PERSISTOR.sendStream(
-      USER_FILES_BUCKET_NAME,
-      `${projectId1}/${fileId1}`,
-      Stream.Readable.from([fileId1.toString()])
-    )
-    await FILESTORE_PERSISTOR.sendStream(
-      USER_FILES_BUCKET_NAME,
-      `${projectId2}/${fileId2}`,
-      Stream.Readable.from([fileId2.toString()])
-    )
-    await FILESTORE_PERSISTOR.sendStream(
-      USER_FILES_BUCKET_NAME,
-      `${projectId3}/${fileId3}`,
-      Stream.Readable.from([fileId3.toString()])
-    )
-    await FILESTORE_PERSISTOR.sendStream(
-      USER_FILES_BUCKET_NAME,
-      `${projectId3}/${fileId10}`,
+    await mockFilestore.addFile(projectId0, fileId0, fileId0.toString())
+    await mockFilestore.addFile(projectId0, fileId6, fileId6.toString())
+    await mockFilestore.addFile(projectId0, fileId7, contentFile7)
+    await mockFilestore.addFile(projectId1, fileId1, fileId1.toString())
+    await mockFilestore.addFile(projectId2, fileId2, fileId2.toString())
+    await mockFilestore.addFile(projectId3, fileId3, fileId3.toString())
+    await mockFilestore.addFile(
+      projectId3,
+      fileId10,
       // fileId10 is dupe of fileId3
-      Stream.Readable.from([fileId3.toString()])
+      fileId3.toString()
     )
-    await FILESTORE_PERSISTOR.sendStream(
-      USER_FILES_BUCKET_NAME,
-      `${projectId3}/${fileId11}`,
+    await mockFilestore.addFile(
+      projectId3,
+      fileId11,
       // fileId11 is dupe of fileId3
-      Stream.Readable.from([fileId3.toString()])
+      fileId3.toString()
     )
-    await FILESTORE_PERSISTOR.sendStream(
-      USER_FILES_BUCKET_NAME,
-      `${projectIdDeleted0}/${fileId4}`,
-      Stream.Readable.from([fileId4.toString()])
-    )
-    await FILESTORE_PERSISTOR.sendStream(
-      USER_FILES_BUCKET_NAME,
-      `${projectIdDeleted1}/${fileId5}`,
-      Stream.Readable.from([fileId5.toString()])
-    )
-    await FILESTORE_PERSISTOR.sendStream(
-      USER_FILES_BUCKET_NAME,
-      `${projectIdBadFileTree3}/${fileId9}`,
-      Stream.Readable.from([fileId9.toString()])
+    await mockFilestore.addFile(projectIdDeleted0, fileId4, fileId4.toString())
+    await mockFilestore.addFile(projectIdDeleted1, fileId5, fileId5.toString())
+    await mockFilestore.addFile(
+      projectIdBadFileTree3,
+      fileId9,
+      fileId9.toString()
     )
   }
 
   async function prepareEnvironment() {
     await cleanup.everything()
+    await mockFilestore.start()
     await populateMongo()
     await populateHistoryV1()
     await populateFilestore()
@@ -1117,10 +1130,7 @@ describe('back_fill_file_hash script', function () {
     beforeEach('prepare environment', prepareEnvironment)
 
     it('should gracefully handle fatal errors', async function () {
-      await FILESTORE_PERSISTOR.deleteObject(
-        USER_FILES_BUCKET_NAME,
-        `${projectId0}/${fileId0}`
-      )
+      mockFilestore.deleteObject(projectId0, fileId0)
       const t0 = Date.now()
       const { stats, result } = await tryRunScript([], {
         RETRIES: '10',
@@ -1148,17 +1158,10 @@ describe('back_fill_file_hash script', function () {
     })
 
     it('should retry on error', async function () {
-      await FILESTORE_PERSISTOR.deleteObject(
-        USER_FILES_BUCKET_NAME,
-        `${projectId0}/${fileId0}`
-      )
+      mockFilestore.deleteObject(projectId0, fileId0)
       const restoreFileAfter5s = async () => {
         await setTimeout(5_000)
-        await FILESTORE_PERSISTOR.sendStream(
-          USER_FILES_BUCKET_NAME,
-          `${projectId0}/${fileId0}`,
-          Stream.Readable.from([fileId0.toString()])
-        )
+        mockFilestore.addFile(projectId0, fileId0, fileId0.toString())
       }
       // use Promise.allSettled to ensure the above sendStream call finishes before this test completes
       const [
