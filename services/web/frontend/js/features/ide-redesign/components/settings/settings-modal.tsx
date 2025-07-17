@@ -43,6 +43,12 @@ const SettingsModal = () => {
         icon: 'settings',
         href: '/user/settings',
       },
+      {
+        key: 'subscription',
+        title: t('subscription'),
+        icon: 'account_balance',
+        href: '/user/subscription',
+      },
     ],
     [t]
   )

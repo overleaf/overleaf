@@ -4,6 +4,7 @@
 // You may need to hard reload your browser window to see the changes.
 
 export default /** @type {const} */ ([
+  'account_balance',
   'auto_delete',
   'book_5',
   'brush',
