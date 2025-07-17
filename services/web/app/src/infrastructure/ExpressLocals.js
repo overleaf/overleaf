@@ -344,7 +344,7 @@ module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
     if (Settings.overleaf != null) {
       res.locals.overallThemes = [
         {
-          name: 'Default',
+          name: 'Dark',
           val: '',
           path: res.locals.buildCssPath(),
         },
