@@ -58,6 +58,7 @@ import { FooterMetadata } from '@/features/ui/components/types/footer-metadata'
 import type { ScriptLogType } from '../../../modules/admin-panel/frontend/js/features/script-logs/script-log'
 import { ActiveExperiment } from './labs-utils'
 import { Subscription as AdminSubscription } from '../../../types/admin/subscription'
+import { AdminCapability } from '../../../types/admin-capabilities'
 
 export interface Meta {
   'ol-ExposedSettings': ExposedSettings
@@ -65,6 +66,7 @@ export interface Meta {
     string,
     { annual: string; monthly: string; annualDividedByTwelve: string }
   >
+  'ol-adminCapabilities': AdminCapability[]
   'ol-adminSubscription': AdminSubscription
   'ol-aiAssistViaWritefullSource': string
   'ol-allInReconfirmNotificationPeriods': UserEmailData[]

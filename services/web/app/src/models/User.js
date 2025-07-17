@@ -58,6 +58,7 @@ const UserSchema = new Schema(
       enrolledAt: { type: Date },
     },
     isAdmin: { type: Boolean, default: false },
+    adminRoles: { type: Array },
     staffAccess: {
       publisherMetrics: { type: Boolean, default: false },
       publisherManagement: { type: Boolean, default: false },
