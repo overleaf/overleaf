@@ -61,6 +61,18 @@
       }
     }
   },
+  "overleaf-dark": {
+    "highlightStyle": {
+      ".tok-literal": {
+        "color": "#ff79c6"
+      }
+    },
+    "theme": {
+      ".cm-selectionMatch.cm-selectionMatch, .cm-searchMatch.cm-searchMatch": {
+        "boxShadow": "0px 0px 0px 1px inset #a29709"
+      }
+    }
+  },
   "gruvbox": {
     "theme": {
       ".cm-selectionMatch.cm-selectionMatch, .cm-searchMatch.cm-searchMatch": {

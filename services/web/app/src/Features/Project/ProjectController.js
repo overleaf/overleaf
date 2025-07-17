@@ -1164,6 +1164,7 @@ const THEME_LIST = [
   'eclipse',
   'monokai',
   'overleaf',
+  'overleaf_dark',
   'textmate',
 ]
 

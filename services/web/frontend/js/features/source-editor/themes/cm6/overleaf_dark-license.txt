@@ -1,3 +1,4 @@
+Derived from the Dracula theme for the Ace editor, with the background colour changed.
 Conversion by Overleaf from Ace to CodeMirror 6.
 
 Source: https://github.com/ajaxorg/ace/
