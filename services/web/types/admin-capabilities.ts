@@ -1,4 +1,7 @@
-export type AdminCapability = 'modify-user-email' | 'view-project'
+export type AdminCapability =
+  | 'clear-saml-data'
+  | 'modify-user-email'
+  | 'view-project'
 
 export type AdminRole =
   | 'engagement'
