@@ -36,7 +36,7 @@ export const DuplicateProject = () => {
   return (
     <>
       <OLDropdownMenuItem onClick={handleShowModal}>
-        {t('copy')}
+        {t('make_a_copy')}
       </OLDropdownMenuItem>
       <EditorCloneProjectModalWrapper
         show={showModal}
