@@ -141,7 +141,7 @@ async function sendReconfirmation(req, res) {
   res.sendStatus(204)
 }
 
-async function sendExistingSecondaryEmailConfirmationCode(req, res) {
+async function sendExistingEmailConfirmationCode(req, res) {
   const userId = SessionManager.getLoggedInUserId(req.session)
   const email = EmailHelper.parseEmail(req.body.email)
   if (!email) {
@@ -715,8 +715,8 @@ const UserEmailsController = {
 
   sendReconfirmation: expressify(sendReconfirmation),
 
-  sendExistingSecondaryEmailConfirmationCode: expressify(
-    sendExistingSecondaryEmailConfirmationCode
+  sendExistingEmailConfirmationCode: expressify(
+    sendExistingEmailConfirmationCode
   ),
 
   addSecondaryEmailPage: expressify(addSecondaryEmailPage),

@@ -345,7 +345,7 @@ async function initialize(webRouter, privateApiRouter, publicApiRouter) {
     '/user/emails/send-confirmation-code',
     AuthenticationController.requireLogin(),
     RateLimiterMiddleware.rateLimit(rateLimiters.sendConfirmation),
-    UserEmailsController.sendExistingSecondaryEmailConfirmationCode
+    UserEmailsController.sendExistingEmailConfirmationCode
   )
 
   webRouter.post(

@@ -905,7 +905,7 @@ describe('UserEmailsController', function () {
     })
   })
 
-  describe('sendExistingSecondaryEmailConfirmationCode', function () {
+  describe('sendExistingEmailConfirmationCode', function () {
     beforeEach(function () {
       this.email = 'existing-email@example.com'
       this.req.body.email = this.email
@@ -923,7 +923,7 @@ describe('UserEmailsController', function () {
     })
 
     it('should send confirmation code for existing email', async function () {
-      await this.UserEmailsController.sendExistingSecondaryEmailConfirmationCode(
+      await this.UserEmailsController.sendExistingEmailConfirmationCode(
         this.req,
         {
           sendStatus: code => {
@@ -944,7 +944,7 @@ describe('UserEmailsController', function () {
       this.UserEmailsConfirmationHandler.promises.sendConfirmationCode.resolves(
         { confirmCode, confirmCodeExpiresTimestamp }
       )
-      await this.UserEmailsController.sendExistingSecondaryEmailConfirmationCode(
+      await this.UserEmailsController.sendExistingEmailConfirmationCode(
         this.req,
         { sendStatus: sinon.stub() }
       )
@@ -958,7 +958,7 @@ describe('UserEmailsController', function () {
 
     it('should handle invalid email', async function () {
       this.EmailHelper.parseEmail.returns(null)
-      await this.UserEmailsController.sendExistingSecondaryEmailConfirmationCode(
+      await this.UserEmailsController.sendExistingEmailConfirmationCode(
         this.req,
         {
           sendStatus: code => {
@@ -975,7 +975,7 @@ describe('UserEmailsController', function () {
       this.UserGetter.promises.getUserByAnyEmail.resolves({
         _id: 'another-user-id',
       })
-      await this.UserEmailsController.sendExistingSecondaryEmailConfirmationCode(
+      await this.UserEmailsController.sendExistingEmailConfirmationCode(
         this.req,
         {
           sendStatus: code => {

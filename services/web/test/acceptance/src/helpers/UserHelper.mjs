@@ -7,7 +7,6 @@ import UserGetter from '../../../../app/src/Features/User/UserGetter.js'
 import UserUpdater from '../../../../app/src/Features/User/UserUpdater.js'
 import moment from 'moment'
 import fetch from 'node-fetch'
-import { db } from '../../../../app/src/infrastructure/mongodb.js'
 import mongodb from 'mongodb-legacy'
 
 import { UserAuditLogEntry } from '../../../../app/src/models/UserAuditLogEntry.js'
@@ -19,10 +18,19 @@ import { RateLimiter } from '../../../../app/src/infrastructure/RateLimiter.js'
 const { ObjectId } = mongodb
 
 const rateLimiters = {
-  resendConfirmation: new RateLimiter('resend-confirmation'),
+  sendConfirmation: new RateLimiter('send-confirmation'),
 }
 
 let globalUserNum = Settings.test.counterInit
+
+const throwIfErrorResponse = async response => {
+  if (response.status < 200 || response.status >= 300) {
+    const body = await response.text()
+    throw new Error(
+      `request failed: status=${response.status} body=${JSON.stringify(body)}`
+    )
+  }
+}
 
 class UserHelper {
   /**
@@ -129,13 +137,7 @@ class UserHelper {
     // get csrf token from api and store
     const response = await this.fetch('/dev/csrf')
     const body = await response.text()
-    if (response.status !== 200) {
-      throw new Error(
-        `get csrf token failed: status=${response.status} body=${JSON.stringify(
-          body
-        )}`
-      )
-    }
+    await throwIfErrorResponse(response)
     this._csrfToken = body
   }
 
@@ -145,14 +147,7 @@ class UserHelper {
   async getSession() {
     const response = await this.fetch('/dev/session')
     const body = await response.text()
-
-    if (response.status !== 200) {
-      throw new Error(
-        `get session failed: status=${response.status} body=${JSON.stringify(
-          body
-        )}`
-      )
-    }
+    await throwIfErrorResponse(response)
     return JSON.parse(body)
   }
 
@@ -160,24 +155,22 @@ class UserHelper {
     const response = await this.fetch(
       `/dev/split_test/get_assignment?splitTestName=${splitTestName}`
     )
+    await throwIfErrorResponse(response)
     const body = await response.text()
-
-    if (response.status !== 200) {
-      throw new Error(
-        `get split test assignment failed: status=${response.status} body=${JSON.stringify(
-          body
-        )}`
-      )
-    }
     return JSON.parse(body)
   }
 
-  async getEmailConfirmationCode() {
+  /**
+   *
+   * @param {'pendingExistingEmail'|'pendingUserRegistration'}sessionKey
+   * @return {Promise<*>}
+   */
+  async getEmailConfirmationCode(sessionKey) {
     const session = await this.getSession()
 
-    const code = session.pendingUserRegistration?.confirmCode
+    const code = session[sessionKey]?.confirmCode
     if (!code) {
-      throw new Error('No confirmation code found in session')
+      throw new Error(`No confirmation code found in session (${sessionKey})`)
     }
     return code
   }
@@ -383,14 +376,8 @@ class UserHelper {
       body: JSON.stringify(userData),
       ...options,
     })
+    await throwIfErrorResponse(response)
     const body = await response.json()
-    if (response.status !== 200) {
-      throw new Error(
-        `register failed: status=${response.status} body=${JSON.stringify(
-          body
-        )}`
-      )
-    }
     if (body.message && body.message.type === 'error') {
       throw new Error(`register api error: ${body.message.text}`)
     }
@@ -400,7 +387,9 @@ class UserHelper {
       )
     }
 
-    const code = await userHelper.getEmailConfirmationCode()
+    const code = await userHelper.getEmailConfirmationCode(
+      'pendingUserRegistration'
+    )
 
     const confirmationResponse = await userHelper.fetch(
       '/registration/confirm-email',
@@ -446,14 +435,7 @@ class UserHelper {
       method: 'POST',
       body: new URLSearchParams([['email', email]]),
     })
-    const body = await response.text()
-    if (response.status !== 204) {
-      throw new Error(
-        `add email failed: status=${response.status} body=${JSON.stringify(
-          body
-        )}`
-      )
-    }
+    await throwIfErrorResponse(response)
   }
 
   async addEmailAndConfirm(userId, email) {
@@ -519,40 +501,21 @@ class UserHelper {
 
   async confirmEmail(userId, email) {
     // clear ratelimiting on resend confirmation endpoint
-    await rateLimiters.resendConfirmation.delete(userId)
-    // UserHelper.createUser does not create a confirmation token
-    let response = await this.fetch('/user/emails/resend_confirmation', {
+    await rateLimiters.sendConfirmation.delete(userId)
+    const requestConfirmationCode = await this.fetch(
+      '/user/emails/send-confirmation-code',
+      {
+        method: 'POST',
+        body: new URLSearchParams({ email }),
+      }
+    )
+    await throwIfErrorResponse(requestConfirmationCode)
+    const code = await this.getEmailConfirmationCode('pendingExistingEmail')
+    const requestConfirmCode = await this.fetch('/user/emails/confirm-code', {
       method: 'POST',
-      body: new URLSearchParams([['email', email]]),
+      body: new URLSearchParams({ code }),
     })
-    if (response.status !== 200) {
-      const body = await response.text()
-      throw new Error(
-        `resend confirmation failed: status=${
-          response.status
-        } body=${JSON.stringify(body)}`
-      )
-    }
-    const tokenData = await db.tokens
-      .find({
-        use: 'email_confirmation',
-        'data.user_id': userId.toString(),
-        'data.email': email,
-        usedAt: { $exists: false },
-      })
-      .next()
-    response = await this.fetch('/user/emails/confirm', {
-      method: 'POST',
-      body: new URLSearchParams([['token', tokenData.token]]),
-    })
-    if (response.status !== 200) {
-      const body = await response.text()
-      throw new Error(
-        `confirm email failed: status=${response.status} body=${JSON.stringify(
-          body
-        )}`
-      )
-    }
+    await throwIfErrorResponse(requestConfirmCode)
   }
 }
 
