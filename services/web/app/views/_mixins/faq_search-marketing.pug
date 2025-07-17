@@ -21,7 +21,7 @@ mixin faq_search-marketing(headerText, headerClass)
 							data-ol-clear-search
 							hidden
 						)
-						button.sr-only(
+						button.visually-hidden(
 							type='button'
 							hidden
 							data-ol-clear-search
@@ -31,7 +31,7 @@ mixin faq_search-marketing(headerText, headerClass)
 				.row(role='region' aria-label='search results')
 					.col-md-12
 						div(data-ol-search-results-wrapper)
-							span.sr-only(aria-live='polite' data-ol-search-sr-help-message)
+							span.visually-hidden(aria-live='polite' data-ol-search-sr-help-message)
 							div(data-ol-search-results)
 						.row-spaced-small.search-result.card.card-thin(
 							hidden

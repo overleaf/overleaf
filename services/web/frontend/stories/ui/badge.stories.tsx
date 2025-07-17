@@ -1,5 +1,5 @@
 import Badge from '@/features/ui/components/bootstrap-5/badge'
-import Icon from '@/shared/components/icon'
+import MaterialIcon from '@/shared/components/material-icon'
 import type { Meta, StoryObj } from '@storybook/react'
 import classnames from 'classnames'
 
@@ -49,7 +49,7 @@ export const BadgePrepend: Story = {
     return (
       <Badge
         className={classnames({ 'text-dark': args.bg === 'light' })}
-        prepend={<Icon type="star" fw />}
+        prepend={<MaterialIcon type="star" />}
         {...args}
       />
     )

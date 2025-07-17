@@ -1,16 +1,17 @@
 import MaterialIcon from '@/shared/components/material-icon'
 import { useTranslation } from 'react-i18next'
 import { memo } from 'react'
+import classNames from 'classnames'
 
 function Check() {
   return <MaterialIcon type="check" />
 }
 
-function UpgradeBenefits() {
+function UpgradeBenefits({ className }: { className?: string }) {
   const { t } = useTranslation()
 
   return (
-    <ul className="list-unstyled upgrade-benefits">
+    <ul className={classNames('list-unstyled upgrade-benefits', className)}>
       <li>
         <Check />
         &nbsp;
@@ -19,7 +20,7 @@ function UpgradeBenefits() {
       <li>
         <Check />
         &nbsp;
-        {t('collabs_per_proj', { collabcount: 'Multiple' })}
+        {t('collabs_per_proj_multiple')}
       </li>
       <li>
         <Check />

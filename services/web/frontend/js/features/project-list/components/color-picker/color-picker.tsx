@@ -44,7 +44,7 @@ function ColorPickerItem({ color, name }: ColorPickerItemProps) {
       tabIndex={0}
       onKeyDown={handleKeyDown}
     >
-      <span id={name} className="sr-only">
+      <span id={name} className="visually-hidden">
         {t('select_color', { name })}
       </span>
       {!pickingCustomColor && color === selectedColor && (

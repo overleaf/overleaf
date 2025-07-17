@@ -172,7 +172,7 @@ export const LayoutDropdownButtonUi = ({
   return (
     <>
       {processing && (
-        <div aria-live="assertive" className="sr-only">
+        <div aria-live="assertive" className="visually-hidden">
           {t('layout_processing')}
         </div>
       )}

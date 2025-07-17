@@ -1,16 +1,8 @@
 import { useTranslation } from 'react-i18next'
-import Icon from '../../../../shared/components/icon'
 import { useCallback, useEffect, useState } from 'react'
 import * as eventTracking from '../../../../infrastructure/event-tracking'
 import StartFreeTrialButton from '../../../../shared/components/start-free-trial-button'
-
-function FeatureItem({ text }: { text: string }) {
-  return (
-    <li>
-      <Icon type="check" /> {text}
-    </li>
-  )
-}
+import UpgradeBenefits from '@/shared/components/upgrade-benefits'
 
 export function OwnerPaywallPrompt() {
   const { t } = useTranslation()
@@ -34,16 +26,7 @@ export function OwnerPaywallPrompt() {
           {t('upgrade_to_get_feature', { feature: 'full project history' })}
         </strong>
       </p>
-      <ul className="history-feature-list">
-        <FeatureItem text={t('unlimited_projects')} />
-        <FeatureItem
-          text={t('collabs_per_proj', { collabcount: 'Multiple' })}
-        />
-        <FeatureItem text={t('full_doc_history')} />
-        <FeatureItem text={t('sync_to_dropbox')} />
-        <FeatureItem text={t('sync_to_github')} />
-        <FeatureItem text={t('compile_larger_projects')} />
-      </ul>
+      <UpgradeBenefits className="history-feature-list" />
       <p>
         <StartFreeTrialButton
           source="history"

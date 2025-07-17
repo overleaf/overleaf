@@ -43,7 +43,7 @@ export default function LeftMenuButton({
         <LeftMenuButtonIcon svgIcon={svgIcon} icon={icon} />
         <span translate={translate}>{children}</span>
         {disabledAccesibilityText ? (
-          <span className="sr-only">{disabledAccesibilityText}</span>
+          <span className="visually-hidden">{disabledAccesibilityText}</span>
         ) : null}
       </div>
     )

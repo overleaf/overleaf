@@ -12,7 +12,7 @@ function Close({ onDismiss, variant = 'light' }: CloseProps) {
   return (
     <button
       type="button"
-      className={`close pull-right ${variant}`}
+      className={`close float-end ${variant}`}
       onClick={onDismiss}
     >
       <MaterialIcon
@@ -20,7 +20,6 @@ function Close({ onDismiss, variant = 'light' }: CloseProps) {
         className="align-text-bottom"
         accessibilityLabel={t('close')}
       />
-      <span className="sr-only">{t('close')}</span>
     </button>
   )
 }

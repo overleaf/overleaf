@@ -11,8 +11,8 @@ import {
   RequireAcceptData,
   RequireAcceptScreen,
 } from '@/features/token-access/components/require-accept-screen'
-import Icon from '@/shared/components/icon'
 import importOverleafModules from '../../../../macros/import-overleaf-module.macro'
+import MaterialIcon from '@/shared/components/material-icon'
 
 type Mode = 'access-attempt' | 'v1Import' | 'requireAccept'
 
@@ -111,14 +111,14 @@ function TokenAccessRoot() {
   }
 
   return (
-    <div className="full-size">
+    <div>
       <div>
         <a
           href="/project"
           // TODO: class name
           style={{ fontSize: '2rem', marginLeft: '1rem', color: '#ddd' }}
         >
-          <Icon type="arrow-left" />
+          <MaterialIcon type="arrow_left_alt" style={{ fontSize: 'inherit' }} />
         </a>
       </div>
 

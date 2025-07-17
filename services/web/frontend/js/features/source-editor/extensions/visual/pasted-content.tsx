@@ -100,6 +100,9 @@ const pastedContentTheme = EditorView.baseTheme({
     '&:hover': {
       backgroundColor: 'rgba(125, 125, 125, 0.2)',
     },
+    '& .material-symbols': {
+      verticalAlign: 'middle',
+    },
   },
   '.ol-cm-pasted-content-menu-item-label': {
     flex: 1,

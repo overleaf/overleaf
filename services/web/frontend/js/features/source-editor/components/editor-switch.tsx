@@ -39,7 +39,7 @@ function EditorSwitch() {
       aria-label={t('toolbar_code_visual_editor_switch')}
     >
       <fieldset className="toggle-switch">
-        <legend className="sr-only">Editor mode.</legend>
+        <legend className="visually-hidden">Editor mode.</legend>
 
         <input
           type="radio"

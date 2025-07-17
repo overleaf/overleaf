@@ -113,7 +113,7 @@ export default function GroupMembers() {
               className="page-header mb-4"
               data-testid="page-header-members-details"
             >
-              <div className="pull-right">
+              <div className="float-end">
                 {selectedUsers.length === 0 && groupSizeDetails()}
                 {removeMemberLoading ? (
                   <OLButton variant="danger" disabled>

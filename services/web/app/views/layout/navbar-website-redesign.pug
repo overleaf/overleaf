@@ -11,7 +11,7 @@ nav.navbar.navbar-default.navbar-main.website-redesign-navbar
 					i.fa.fa-bars(aria-hidden='true')
 			- var enableUpgradeButton = projectDashboardReact && usersBestSubscription && (usersBestSubscription.type === 'free' || usersBestSubscription.type === 'standalone-ai-add-on')
 			if enableUpgradeButton
-				a.btn.btn-primary.pull-right.me-2.visible-xs(
+				a.btn.btn-primary.float-end.me-2.visible-xs(
 					href='/user/subscription/plans'
 					event-tracking='upgrade-button-click'
 					event-tracking-mb='true'

@@ -216,7 +216,7 @@ export default function AddCollaborators({ readOnly }: { readOnly?: boolean }) {
       </OLFormGroup>
 
       <OLFormGroup>
-        <div className="pull-right add-collaborator-controls">
+        <div className="float-end add-collaborator-controls">
           <Select
             dataTestId="add-collaborator-select"
             items={privilegeOptions}

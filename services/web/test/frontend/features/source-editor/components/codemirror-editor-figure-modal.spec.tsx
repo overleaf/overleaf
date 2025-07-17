@@ -126,9 +126,11 @@ describe('<FigureModal />', function () {
         matchUrl(`/project/test-project/upload?folder_id=${rootFolderId}`)
       )
 
+      // Note that we have to include the 'edit' text from the edit button's
+      // icon, which is literal text in the document
       cy.get('.cm-content').should(
         'have.text',
-        '\\begin{figure}    \\centering    \\caption{Enter Caption}    🏷fig:enter-label\\end{figure}'
+        '\\begin{figure}    \\centeringedit    \\caption{Enter Caption}    🏷fig:enter-label\\end{figure}'
       )
     })
 
@@ -172,9 +174,12 @@ describe('<FigureModal />', function () {
         cy.findByText('frog.jpg').click()
       })
       cy.findByRole('button', { name: 'Insert figure' }).click()
+
+      // Note that we have to include the 'edit' text from the edit button's
+      // icon, which is literal text in the document
       cy.get('.cm-content').should(
         'have.text',
-        '\\begin{figure}    \\centering    \\caption{Enter Caption}    🏷fig:enter-label\\end{figure}'
+        '\\begin{figure}    \\centeringedit    \\caption{Enter Caption}    🏷fig:enter-label\\end{figure}'
       )
     })
   })
@@ -258,9 +263,11 @@ describe('<FigureModal />', function () {
         },
       })
 
+      // Note that we have to include the 'edit' text from the edit button's
+      // icon, which is literal text in the document
       cy.get('.cm-content').should(
         'have.text',
-        '\\begin{figure}    \\centering    \\caption{Enter Caption}    🏷fig:enter-label\\end{figure}'
+        '\\begin{figure}    \\centeringedit    \\caption{Enter Caption}    🏷fig:enter-label\\end{figure}'
       )
     })
 
@@ -285,9 +292,11 @@ describe('<FigureModal />', function () {
         },
       })
 
+      // Note that we have to include the 'edit' text from the edit button's
+      // icon, which is literal text in the document
       cy.get('.cm-content').should(
         'have.text',
-        '\\begin{figure}    \\centering    \\caption{Enter Caption}    🏷fig:enter-label\\end{figure}'
+        '\\begin{figure}    \\centeringedit    \\caption{Enter Caption}    🏷fig:enter-label\\end{figure}'
       )
     })
   })
@@ -429,9 +438,11 @@ describe('<FigureModal />', function () {
         },
       })
 
+      // Note that we have to include the 'edit' text from the edit button's
+      // icon, which is literal text in the document
       cy.get('.cm-content').should(
         'have.text',
-        '\\begin{figure}    \\centering    \\caption{Enter Caption}    🏷fig:enter-label\\end{figure}'
+        '\\begin{figure}    \\centeringedit    \\caption{Enter Caption}    🏷fig:enter-label\\end{figure}'
       )
     })
 
@@ -455,9 +466,12 @@ describe('<FigureModal />', function () {
 
       // If caption is selected then typing will replace the whole caption
       cy.focused().type('My caption')
+
+      // Note that we have to include the 'edit' text from the edit button's
+      // icon, which is literal text in the document
       cy.get('.cm-content').should(
         'have.text',
-        '\\begin{figure}    \\centering    \\caption{My caption}    🏷fig:enter-label\\end{figure}'
+        '\\begin{figure}    \\centeringedit    \\caption{My caption}    🏷fig:enter-label\\end{figure}'
       )
     })
 
@@ -482,9 +496,12 @@ describe('<FigureModal />', function () {
 
       // If label is selected then typing will replace the whole label
       cy.focused().type('fig:my-label')
+
+      // Note that we have to include the 'edit' text from the edit button's
+      // icon, which is literal text in the document
       cy.get('.cm-content').should(
         'have.text',
-        '\\begin{figure}    \\centering    \\label{fig:my-label}\\end{figure}'
+        '\\begin{figure}    \\centeringedit    \\label{fig:my-label}\\end{figure}'
       )
     })
 
@@ -504,16 +521,18 @@ describe('<FigureModal />', function () {
         },
       })
 
+      // Note that we have to include the 'edit' text from the edit button's
+      // icon, which is literal text in the document
       cy.get('.cm-content').should(
         'have.text',
-        '\\begin{figure}    \\centering\\end{figure}'
+        '\\begin{figure}    \\centeringedit\\end{figure}'
       )
 
       cy.focused().type('Some more text')
 
       cy.get('.cm-content').should(
         'have.text',
-        '\\begin{figure}    \\centering\\end{figure}Some more text'
+        '\\begin{figure}    \\centeringedit\\end{figure}Some more text'
       )
     })
   })

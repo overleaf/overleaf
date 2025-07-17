@@ -102,6 +102,7 @@ function setupSearch(formEl) {
 
   // display initial results
   handleChange()
+  updateClearBtnVisibility()
 }
 
 document.querySelectorAll('[data-ol-faq-search]').forEach(setupSearch)

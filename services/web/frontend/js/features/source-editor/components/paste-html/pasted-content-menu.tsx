@@ -7,7 +7,6 @@ import {
   useRef,
   useState,
 } from 'react'
-import Icon from '../../../../shared/components/icon'
 import { useTranslation } from 'react-i18next'
 import { EditorView } from '@codemirror/view'
 import { PastedContent } from '../../extensions/visual/pasted-content'
@@ -135,7 +134,7 @@ export const PastedContentMenu: FC<{
                 }}
               >
                 <span style={{ visibility: formatted ? 'visible' : 'hidden' }}>
-                  <Icon type="check" fw />
+                  <MaterialIcon type="check" />
                 </span>
                 <span className="ol-cm-pasted-content-menu-item-label">
                   {t('paste_with_formatting')}
@@ -155,7 +154,7 @@ export const PastedContentMenu: FC<{
                 }}
               >
                 <span style={{ visibility: formatted ? 'hidden' : 'visible' }}>
-                  <Icon type="check" fw />
+                  <MaterialIcon type="check" />
                 </span>
                 <span className="ol-cm-pasted-content-menu-item-label">
                   {t('paste_without_formatting')}

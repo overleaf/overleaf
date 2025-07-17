@@ -379,6 +379,9 @@ const mainVisualTheme = EditorView.theme({
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
+    '& .material-symbols': {
+      verticalAlign: 'middle',
+    },
   },
   '.ol-cm-preamble-expand-icon': {
     width: '32px',

@@ -1,8 +1,9 @@
-export default function createIcon(type) {
+export function materialIcon(type: string) {
   const icon = document.createElement('span')
   icon.className = 'material-symbols'
-  icon.setAttribute('aria-hidden', 'true')
-  icon.setAttribute('translate', 'no')
   icon.textContent = type
+  icon.ariaHidden = 'true'
+  icon.translate = false
+
   return icon
 }

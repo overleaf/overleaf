@@ -1,6 +1,7 @@
 import _ from 'lodash'
 import { formatWikiHit, searchWiki } from '../algolia-search/search-wiki'
 import { sendMB } from '../../infrastructure/event-tracking'
+import { materialIcon } from '@/features/utils/material-icon'
 
 export function setupSearch(formEl) {
   const inputEl = formEl.querySelector('[name="subject"]')
@@ -45,11 +46,8 @@ export function setupSearch(formEl) {
         contentEl.innerHTML = pageName
         linkEl.append(contentEl)
 
-        const iconEl = document.createElement('i')
-        iconEl.className = 'material-symbols dropdown-item-trailing-icon'
-        iconEl.textContent = 'open_in_new'
-        iconEl.setAttribute('aria-hidden', 'true')
-        iconEl.translate = false
+        const iconEl = materialIcon('open_in_new')
+        iconEl.classList.add('dropdown-item-trailing-icon')
         linkEl.append(iconEl)
 
         resultsEl.append(liEl)

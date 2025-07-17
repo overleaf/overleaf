@@ -73,7 +73,7 @@ function GroupPrice({
       <span aria-hidden>
         {totalPrice} <span className="small">/ {t('year')}</span>
       </span>
-      <span className="sr-only">
+      <span className="visually-hidden">
         {queryingGroupPlanToChangeToPrice
           ? t('loading_prices')
           : t('x_price_per_year', {
@@ -87,7 +87,7 @@ function GroupPrice({
             price: perUserPrice,
           })}
         </span>
-        <span className="sr-only">
+        <span className="visually-hidden">
           {queryingGroupPlanToChangeToPrice
             ? t('loading_prices')
             : t('x_price_per_user', {
@@ -216,7 +216,7 @@ export function ChangeToGroupModal() {
                   <li>{t('track_changes')}</li>
                   <li>
                     <span aria-hidden>+ {t('more').toLowerCase()}</span>
-                    <span className="sr-only">{t('plus_more')}</span>
+                    <span className="visually-hidden">{t('plus_more')}</span>
                   </li>
                 </ul>
               </div>

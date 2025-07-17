@@ -172,7 +172,7 @@ function PdfZoomDropdown({
 
 function Shortcut({ keys }: { keys: string[] }) {
   return (
-    <span className="pull-right">
+    <span className="float-end">
       {keys.map((key, idx) => (
         <span
           className={classNames({
