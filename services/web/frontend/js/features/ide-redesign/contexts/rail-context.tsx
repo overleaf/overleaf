@@ -69,9 +69,10 @@ export const RailProvider: FC<React.PropsWithChildren> = ({ children }) => {
     setIsOpen(false)
   }, [setIsOpen])
 
-  // NOTE: The file tree **MUST** be the first tab to be opened
-  //       since it is responsible for opening the initial document.
-  const [selectedTab, setSelectedTab] = useState<RailTabKey>('file-tree')
+  const [selectedTab, setSelectedTab] = usePersistedState<RailTabKey>(
+    'selected-rail-tab',
+    'file-tree'
+  )
 
   // Keep the panel collapse/expanded state in sync with isOpen and selectedTab
   useLayoutEffect(() => {

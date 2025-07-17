@@ -55,6 +55,7 @@ type RailElement = {
   title: string
   hide?: boolean
   disabled?: boolean
+  mountOnFirstLoad?: boolean
 }
 
 type RailActionButton = {
@@ -123,6 +124,9 @@ export const RailLayout = () => {
         icon: 'description',
         title: t('file_tree'),
         component: <FileTreeOutlinePanel />,
+        // NOTE: We always need to mount the file tree on first load
+        // since it is responsible for opening the initial document.
+        mountOnFirstLoad: true,
       },
       {
         key: 'full-project-search',
@@ -300,8 +304,12 @@ export const RailLayout = () => {
           <Tab.Content className="ide-rail-tab-content">
             {railTabs
               .filter(({ hide }) => !hide)
-              .map(({ key, component }) => (
-                <Tab.Pane eventKey={key} key={key}>
+              .map(({ key, component, mountOnFirstLoad }) => (
+                <Tab.Pane
+                  eventKey={key}
+                  key={key}
+                  mountOnEnter={!mountOnFirstLoad}
+                >
                   {component}
                 </Tab.Pane>
               ))}
