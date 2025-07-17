@@ -33,12 +33,18 @@ function runLatex(projectId, options, callback) {
     timings,
   } = options
   const compiler = options.compiler || 'pdflatex'
+  const typstVersion = options.typstVersion
   const timeout = options.timeout || 60000 // milliseconds
+
+  if (typstVersion && !typstVersion.includes('..') && !typstVersion.includes('/')) {
+    environment['TYPST_VERSION'] = typstVersion
+  }
 
   logger.debug(
     {
       directory,
       compiler,
+      typstVersion,
       timeout,
       mainFile,
       environment,
@@ -73,28 +79,28 @@ function runLatex(projectId, options, callback) {
     function (error, output) {
       delete ProcessTable[id]
       if (compiler != "typst") {
-      if (error) {
-        return callback(error)
-      }
-      const runs =
-        output?.stderr?.match(/^Run number \d+ of .*latex/gm)?.length || 0
-      const failed = output?.stdout?.match(/^Latexmk: Errors/m) != null ? 1 : 0
-      // counters from latexmk output
-      stats['latexmk-errors'] = failed
-      stats['latex-runs'] = runs
-      stats['latex-runs-with-errors'] = failed ? runs : 0
-      stats[`latex-runs-${runs}`] = 1
-      stats[`latex-runs-with-errors-${runs}`] = failed ? 1 : 0
-      // timing information from /usr/bin/time
-      const stderr = (output && output.stderr) || ''
-      if (stderr.includes('Command being timed:')) {
-        // Add metrics for runs with `$ time -v ...`
-        for (const [timing, matcher] of TIME_V_METRICS) {
-          const match = stderr.match(matcher)
-          if (match) {
-            timings[timing] = parseFloat(match[1])
-          }
+        if (error) {
+          return callback(error)
         }
+        const runs =
+          output?.stderr?.match(/^Run number \d+ of .*latex/gm)?.length || 0
+        const failed = output?.stdout?.match(/^Latexmk: Errors/m) != null ? 1 : 0
+        // counters from latexmk output
+        stats['latexmk-errors'] = failed
+        stats['latex-runs'] = runs
+        stats['latex-runs-with-errors'] = failed ? runs : 0
+        stats[`latex-runs-${runs}`] = 1
+        stats[`latex-runs-with-errors-${runs}`] = failed ? 1 : 0
+        // timing information from /usr/bin/time
+        const stderr = (output && output.stderr) || ''
+        if (stderr.includes('Command being timed:')) {
+          // Add metrics for runs with `$ time -v ...`
+          for (const [timing, matcher] of TIME_V_METRICS) {
+            const match = stderr.match(matcher)
+            if (match) {
+              timings[timing] = parseFloat(match[1])
+            }
+          }
         }
       } else {
         const failed = output?.stdout?.match(/^Typst failed/m) != null ? 1 : 0
@@ -155,7 +161,7 @@ function _buildLatexCommand(mainFile, opts = {}) {
   const command = []
 
   if (Settings.clsi?.strace) {
-    command.push('strace', '-o', 'strace', '-ff')
+    command.push('strace', '-o', 'strace', '-ff', '-Y', '-yy', '-s99999')
   }
 
   if (opts.compiler !== "typst") {

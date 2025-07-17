@@ -87,6 +87,18 @@ const DockerRunner = {
         }
       })
     }
+    const typstCompilersDir = Settings.path.typstCompilersDir
+    if (typstCompilersDir) {
+      mounts.push({
+        "Target": "/opt/typst",
+        "Source": typstCompilersDir,
+        "Type": "bind",
+        "ReadOnly": true,
+        "BindOptions": {
+          "ReadOnlyForceRecursive": true
+        }
+      })
+    }
 
     const options = DockerRunner._getContainerOptions(
       command,

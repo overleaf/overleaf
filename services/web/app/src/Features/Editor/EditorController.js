@@ -557,6 +557,20 @@ const EditorController = {
     })
   },
 
+  setTypstVersion(projectId, typstVersion, callback) {
+    ProjectOptionsHandler.setTypstVersion(projectId, typstVersion, function (err) {
+      if (err) {
+        return callback(err)
+      }
+      EditorRealTimeController.emitToRoom(
+        projectId,
+        'typstVersionUpdated',
+        typstVersion
+      )
+      callback()
+    })
+  },
+
   setImageName(projectId, imageName, callback) {
     ProjectOptionsHandler.setImageName(projectId, imageName, function (err) {
       if (err) {

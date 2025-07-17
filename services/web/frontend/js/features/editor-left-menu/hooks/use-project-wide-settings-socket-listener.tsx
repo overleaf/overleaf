@@ -8,6 +8,15 @@ export default function useProjectWideSettingsSocketListener() {
 
   const { project, updateProject } = useProjectContext()
 
+  const setTypstVersion = useCallback(
+    (typstVersion: ProjectSettings['typstVersion']) => {
+      if (project) {
+        updateProject({ typstVersion })
+      }
+    },
+    [project, updateProject]
+  )
+
   const setCompiler = useCallback(
     (compiler: ProjectSettings['compiler']) => {
       if (project) {
@@ -41,10 +50,12 @@ export default function useProjectWideSettingsSocketListener() {
 
     if (dataAvailable && socket) {
       socket.on('compilerUpdated', setCompiler)
+      socket.on('typstVersionUpdated', setTypstVersion)
       socket.on('imageNameUpdated', setImageName)
       socket.on('spellCheckLanguageUpdated', setSpellCheckLanguage)
       return () => {
         socket.removeListener('compilerUpdated', setCompiler)
+        socket.removeListener('setTypstVersion', setTypstVersion)
         socket.removeListener('imageNameUpdated', setImageName)
         socket.removeListener(
           'spellCheckLanguageUpdated',
@@ -52,5 +63,5 @@ export default function useProjectWideSettingsSocketListener() {
         )
       }
     }
-  }, [socket, project, setCompiler, setImageName, setSpellCheckLanguage])
+  }, [socket, project, setCompiler, setTypstVersion, setImageName, setSpellCheckLanguage])
 }

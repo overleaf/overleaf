@@ -543,6 +543,7 @@ async function _buildRequest(projectId, options) {
     rootDoc_id: 1,
     imageName: 1,
     rootFolder: 1,
+    typstVersion: 1,
     'overleaf.history.id': 1,
   })
   if (project == null) {
@@ -781,6 +782,7 @@ function _finaliseRequest(projectId, options, project, docs, files) {
         imageName: project.imageName,
         draft: Boolean(options.draft),
         stopOnFirstError: Boolean(options.stopOnFirstError),
+        typstVersion: project.typstVersion,
         check: options.check,
         syncType: options.syncType,
         syncState: options.syncState,

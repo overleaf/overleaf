@@ -1,0 +1,32 @@
+#!/bin/bash
+
+set -euo pipefail
+
+versions=(
+    v0.13.1
+    v0.12.0
+    v0.11.1
+    v0.10.0
+    v0.9.0
+    v0.8.0
+    v0.7.0
+    v0.6.0
+    v0.5.0
+    v0.4.0
+    v0.3.0
+)
+
+if [[ -z "$1" ]]; then
+    echo "Please provide the directory for storing the compilers"
+    exit 1
+fi
+
+outdir="$1"
+
+for version in "${versions[@]}";
+do
+    mkdir -p "$outdir/$version"
+    wget -O "$outdir/typst.tar.xz" \
+        "https://github.com/typst/typst/releases/download/$version/typst-x86_64-unknown-linux-musl.tar.xz"
+    tar -C "$outdir/$version" --strip-components=1 -xf "$outdir/typst.tar.xz"
+done

@@ -7,6 +7,19 @@ const { ReturnDocument } = require('mongodb-legacy')
 const safeCompilers = ['xelatex', 'pdflatex', 'latex', 'lualatex', 'typst']
 
 const ProjectOptionsHandler = {
+  async setTypstVersion(projectId, typstVersion) {
+    if (!typstVersion) {
+      return
+    }
+    if (typstVersion.includes("..") || typstVersion.includes("/")) {
+      // No path traversal for you 😅
+      throw new Error(`invalid typst version: ${typstVersion}`)
+    }
+    const conditions = { _id: projectId }
+    const update = { typstVersion }
+    return Project.updateOne(conditions, update, {})
+  },
+
   async setCompiler(projectId, compiler) {
     if (!compiler) {
       return
@@ -94,6 +107,7 @@ const ProjectOptionsHandler = {
 
 module.exports = {
   setCompiler: callbackify(ProjectOptionsHandler.setCompiler),
+  setTypstVersion: callbackify(ProjectOptionsHandler.setTypstVersion),
   setImageName: callbackify(ProjectOptionsHandler.setImageName),
   setSpellCheckLanguage: callbackify(
     ProjectOptionsHandler.setSpellCheckLanguage

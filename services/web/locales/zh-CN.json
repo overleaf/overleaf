@@ -2365,6 +2365,7 @@
   "turn_on": "打开",
   "turn_on_link_sharing": "开启通过链接分享功能。",
   "tutorials": "教程",
+  "typstVersion": "Typst 版本",
   "uk": "乌克兰语",
   "unable_to_extract_the_supplied_zip_file": "在Overleaf打开此内容失败，因为无法提取zip文件。请确保它是有效的zip文件。如果某个网站的链接经常出现这种情况，请向他们报告。",
   "unarchive": "恢复",

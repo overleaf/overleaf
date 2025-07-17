@@ -19,6 +19,8 @@ import SettingsMathPreview from './settings/settings-math-preview'
 import importOverleafModules from '../../../../macros/import-overleaf-module.macro'
 import { ElementType } from 'react'
 import OLForm from '@/features/ui/components/ol/ol-form'
+import SettingsTypstVersion from './settings/settings-typst-version'
+import { useProjectSettingsContext } from '../context/project-settings-context'
 
 const moduleSettings: Array<{
   import: { default: ElementType }
@@ -28,6 +30,7 @@ const moduleSettings: Array<{
 export default function SettingsMenu() {
   const { t } = useTranslation()
   const anonymous = getMeta('ol-anonymous')
+  const { compiler } = useProjectSettingsContext()
 
   if (anonymous) {
     return null
@@ -38,6 +41,7 @@ export default function SettingsMenu() {
       <h4>{t('settings')}</h4>
       <OLForm id="left-menu-setting" className="settings">
         <SettingsCompiler />
+        { compiler == "typst" && <SettingsTypstVersion  /> }
         <SettingsImageName />
         <SettingsDocument />
         <SettingsSpellCheckLanguage />

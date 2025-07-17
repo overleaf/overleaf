@@ -37,6 +37,8 @@ function parse(body, callback) {
       default: 'pdflatex',
       type: 'string',
     })
+    // we have done validation elsewhere
+    response.typstVersion = compile.options.typstVersion,
     response.compileFromClsiCache = _parseAttribute(
       'compileFromClsiCache',
       compile.options.compileFromClsiCache,

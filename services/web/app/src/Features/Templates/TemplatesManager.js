@@ -23,6 +23,7 @@ const TemplatesManager = {
   async createProjectFromV1Template(
     brandVariationId,
     compiler,
+    typstVersion,
     mainFile,
     templateId,
     templateName,
@@ -76,6 +77,7 @@ const TemplatesManager = {
       })
 
       await TemplatesManager._setCompiler(project._id, compiler)
+      await TemplatesManager._setTypstVersion(project._id, typstVersion)
       await TemplatesManager._setImage(project._id, imageName)
       await TemplatesManager._setMainFile(project._id, mainFile)
       await TemplatesManager._setBrandVariationId(project._id, brandVariationId)
@@ -99,6 +101,13 @@ const TemplatesManager = {
       return
     }
     await ProjectOptionsHandler.setCompiler(projectId, compiler)
+  },
+
+  async _setTypstVersion(projectId, typstVersion) {
+    if (typstVersion == null) {
+      return
+    }
+    await ProjectOptionsHandler.setTypstVersion(projectId, typstVersion)
   },
 
   async _setImage(projectId, imageName) {

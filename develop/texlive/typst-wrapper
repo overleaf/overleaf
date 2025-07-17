@@ -2,10 +2,10 @@
 
 if [ -n "$TYPST_VERSION" ]; then
     echo "Using manually selected typst $TYPST_VERSION" > output.log
-    typst="/opt/typst/typst-$TYPST_VERSION"
+    typst="/opt/typst/$TYPST_VERSION/typst"
 else
     echo "Using default typst" > output.log
-    typst="typst"
+    typst="/opt/typst/typst"
 fi
 
 "$typst" "$@" >>output.log 2>&1

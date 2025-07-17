@@ -45,6 +45,7 @@ async function getDetails(projectId) {
       name: true,
       description: true,
       compiler: true,
+      typstVersion: true,
       features: true,
       owner_ref: true,
       overleaf: true,

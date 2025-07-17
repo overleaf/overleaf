@@ -23,6 +23,7 @@ module.exports = {
       return Path.join(this.compilesDir, projectId)
     },
     typstPackagesDir: process.env.TYPST_PACKAGES_PATH,
+    typstCompilersDir: process.env.TYPST_COMPILERS_PATH,
   },
 
   internal: {
@@ -52,8 +53,7 @@ module.exports = {
       downloadHost: process.env.DOWNLOAD_HOST || 'http://localhost:3013',
     },
     clsiPerf: {
-      host: `${process.env.CLSI_PERF_HOST || '127.0.0.1'}:${
-        process.env.CLSI_PERF_PORT || '3043'
+      host: `${process.env.CLSI_PERF_HOST || '127.0.0.1'}:${process.env.CLSI_PERF_PORT || '3043'
         }`,
     },
     clsiCache: {

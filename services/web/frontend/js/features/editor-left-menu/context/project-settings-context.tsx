@@ -7,6 +7,7 @@ import { UserSettings } from '../../../../../types/user-settings'
 
 type ProjectSettingsSetterContextValue = {
   setCompiler: (compiler: ProjectSettings['compiler']) => void
+  setTypstVersion: (typstVersion: ProjectSettings['typstVersion']) => void
   setImageName: (imageName: ProjectSettings['imageName']) => void
   setRootDocId: (rootDocId: ProjectSettings['rootDocId']) => void
   setSpellCheckLanguage: (
@@ -44,6 +45,8 @@ export const ProjectSettingsProvider: FC<React.PropsWithChildren> = ({
   const {
     compiler,
     setCompiler,
+    typstVersion,
+    setTypstVersion,
     imageName,
     setImageName,
     rootDocId,
@@ -85,6 +88,8 @@ export const ProjectSettingsProvider: FC<React.PropsWithChildren> = ({
     () => ({
       compiler,
       setCompiler,
+      typstVersion,
+      setTypstVersion,
       imageName,
       setImageName,
       rootDocId,
@@ -119,6 +124,8 @@ export const ProjectSettingsProvider: FC<React.PropsWithChildren> = ({
     [
       compiler,
       setCompiler,
+      typstVersion,
+      setTypstVersion,
       imageName,
       setImageName,
       rootDocId,
