@@ -45,6 +45,7 @@ import { useFeatureFlag } from '@/shared/context/split-test-context'
 import { useSurveyUrl } from '../hooks/use-survey-url'
 import { useProjectContext } from '@/shared/context/project-context'
 import usePreviousValue from '@/shared/hooks/use-previous-value'
+import { useCommandProvider } from '@/features/ide-react/hooks/use-command-provider'
 
 type RailElement = {
   icon: AvailableUnfilledIcon
@@ -183,6 +184,19 @@ export const RailLayout = () => {
       },
     ],
     [setLeftMenuShown, t, sendEvent]
+  )
+
+  useCommandProvider(
+    () => [
+      {
+        id: 'open-settings',
+        handler: () => {
+          setLeftMenuShown(true)
+        },
+        label: t('settings'),
+      },
+    ],
+    [t, setLeftMenuShown]
   )
 
   const onTabSelect = useCallback(

@@ -72,6 +72,10 @@ export const ToolbarMenuBar = () => {
         id: 'file-download',
         children: ['download-as-source-zip', 'download-pdf'],
       },
+      {
+        id: 'settings',
+        children: ['open-settings'],
+      },
     ],
     []
   )
