@@ -90,6 +90,7 @@
       border-radius: var(--border-radius-base);
       padding: var(--spacing-02) var(--spacing-03) var(--spacing-02) 0;
       overflow: hidden;
+      user-select: text;
 
       &:hover {
         cursor: pointer;
