@@ -1,5 +1,6 @@
 import { sendSearchEvent } from '@/features/event-tracking/search-events'
 import useEventListener from '@/shared/hooks/use-event-listener'
+import usePersistedState from '@/shared/hooks/use-persisted-state'
 import { isMac } from '@/shared/utils/os'
 import {
   createContext,
@@ -44,7 +45,7 @@ const RailContext = createContext<
 >(undefined)
 
 export const RailProvider: FC<React.PropsWithChildren> = ({ children }) => {
-  const [isOpen, setIsOpen] = useState(true)
+  const [isOpen, setIsOpen] = usePersistedState('rail-is-open', true)
   const [resizing, setResizing] = useState(false)
   const [activeModal, setActiveModalInternal] = useState<RailModalKey | null>(
     null
@@ -58,15 +59,15 @@ export const RailProvider: FC<React.PropsWithChildren> = ({ children }) => {
 
   const togglePane = useCallback(() => {
     setIsOpen(value => !value)
-  }, [])
+  }, [setIsOpen])
 
   const handlePaneExpand = useCallback(() => {
     setIsOpen(true)
-  }, [])
+  }, [setIsOpen])
 
   const handlePaneCollapse = useCallback(() => {
     setIsOpen(false)
-  }, [])
+  }, [setIsOpen])
 
   // NOTE: The file tree **MUST** be the first tab to be opened
   //       since it is responsible for opening the initial document.
