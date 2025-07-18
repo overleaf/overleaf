@@ -123,6 +123,24 @@ async function stopCompile(projectId, userId, options) {
   )
 }
 
+async function getTypstVersions(projectId, userId, options) {
+  if (options == null) {
+    options = {}
+  }
+  const { compileBackendClass, compileGroup } = options
+  const url = new URL(`/typst-versions`, Settings.apis.clsi.url)
+  const opts = { method: 'GET' }
+
+  return (await _makeRequest(
+    projectId,
+    userId,
+    compileGroup,
+    compileBackendClass,
+    url,
+    opts
+  )).body
+}
+
 async function deleteAuxFiles(projectId, userId, options, clsiserverid) {
   if (options == null) {
     options = {}
@@ -874,6 +892,7 @@ module.exports = {
   promises: {
     sendRequest,
     sendExternalRequest,
+    getTypstVersions,
     stopCompile,
     deleteAuxFiles,
     getOutputFileStream,

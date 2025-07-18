@@ -30,6 +30,11 @@ function generateBuildId() {
   return `${Date.now().toString(16)}-${Crypto.randomBytes(8).toString('hex')}`
 }
 
+async function getTypstVersions(projectId, userId, options = {}) {
+  const { compileGroup, compileBackendClass } = await getProjectCompileLimits(projectId)
+  return await ClsiManager.promises.getTypstVersions(projectId, userId, { ...options, compileGroup, compileBackendClass })
+}
+
 async function compile(projectId, userId, options = {}) {
   const recentlyCompiled = await CompileManager._checkIfRecentlyCompiled(
     projectId,
@@ -170,6 +175,7 @@ async function deleteAuxFiles(projectId, userId, clsiserverid) {
 
 module.exports = CompileManager = {
   promises: {
+    getTypstVersions,
     compile: instrumentedCompile,
     deleteAuxFiles,
     getProjectCompileLimits,

@@ -597,6 +597,12 @@ async function initialize(webRouter, privateApiRouter, publicApiRouter) {
     ProjectController.updateProjectAdminSettings
   )
 
+  webRouter.get(
+    '/project/:Project_id/typst-versions',
+    AuthenticationController.requireLogin(),
+    CompileController.getTypstVersions
+  )
+
   webRouter.post(
     '/project/:Project_id/compile',
     RateLimiterMiddleware.rateLimit(rateLimiters.compileProjectHttp, {
