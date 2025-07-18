@@ -32,7 +32,7 @@
     "swagger-tools@0.10.4": {
       "path-to-regexp": "3.3.0",
       "body-parser": "1.20.3",
-      "multer": "2.0.1"
+      "multer": "2.0.2"
     },
     "request@2.88.2": {
       "tough-cookie": "5.1.2"
