@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -eux
+set -eu
 
 echo "-----------------------------------"
 echo "Retry project-history errors (soft)"
