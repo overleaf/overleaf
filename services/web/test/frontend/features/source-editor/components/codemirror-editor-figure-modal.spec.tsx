@@ -128,7 +128,7 @@ describe('<FigureModal />', function () {
 
       cy.get('.cm-content').should(
         'have.text',
-        '\\begin{figure}    \\centering    \\caption{Enter Caption}    🏷fig:enter-label\\end{figure}'
+        '\\begin{figure}    \\centering    \\caption{Enter Caption}    🏷fig:enter_label\\end{figure}'
       )
     })
 
@@ -174,7 +174,7 @@ describe('<FigureModal />', function () {
       cy.findByRole('button', { name: 'Insert figure' }).click()
       cy.get('.cm-content').should(
         'have.text',
-        '\\begin{figure}    \\centering    \\caption{Enter Caption}    🏷fig:enter-label\\end{figure}'
+        '\\begin{figure}    \\centering    \\caption{Enter Caption}    🏷fig:enter_label\\end{figure}'
       )
     })
   })
@@ -260,7 +260,7 @@ describe('<FigureModal />', function () {
 
       cy.get('.cm-content').should(
         'have.text',
-        '\\begin{figure}    \\centering    \\caption{Enter Caption}    🏷fig:enter-label\\end{figure}'
+        '\\begin{figure}    \\centering    \\caption{Enter Caption}    🏷fig:enter_label\\end{figure}'
       )
     })
 
@@ -287,7 +287,7 @@ describe('<FigureModal />', function () {
 
       cy.get('.cm-content').should(
         'have.text',
-        '\\begin{figure}    \\centering    \\caption{Enter Caption}    🏷fig:enter-label\\end{figure}'
+        '\\begin{figure}    \\centering    \\caption{Enter Caption}    🏷fig:enter_label\\end{figure}'
       )
     })
   })
@@ -431,7 +431,7 @@ describe('<FigureModal />', function () {
 
       cy.get('.cm-content').should(
         'have.text',
-        '\\begin{figure}    \\centering    \\caption{Enter Caption}    🏷fig:enter-label\\end{figure}'
+        '\\begin{figure}    \\centering    \\caption{Enter Caption}    🏷fig:enter_label\\end{figure}'
       )
     })
 
@@ -457,7 +457,7 @@ describe('<FigureModal />', function () {
       cy.focused().type('My caption')
       cy.get('.cm-content').should(
         'have.text',
-        '\\begin{figure}    \\centering    \\caption{My caption}    🏷fig:enter-label\\end{figure}'
+        '\\begin{figure}    \\centering    \\caption{My caption}    🏷fig:enter_label\\end{figure}'
       )
     })
 
