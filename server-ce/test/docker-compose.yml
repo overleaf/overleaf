@@ -35,7 +35,7 @@ services:
       MAILTRAP_PASSWORD: 'password-for-mailtrap'
 
   mongo:
-    image: mongo:6.0
+    image: mongo:8.0.11
     command: '--replSet overleaf'
     volumes:
       - ../bin/shared/mongodb-init-replica-set.js:/docker-entrypoint-initdb.d/mongodb-init-replica-set.js
