@@ -1111,6 +1111,7 @@
   "invalid_password_too_similar": "Password is too similar to parts of email address",
   "invalid_regular_expression": "Invalid regular expression",
   "invalid_request": "Invalid Request. Please correct the data and try again.",
+  "invalid_upload_request": "The upload failed. If the problem persists, <0>let us know</0>.",
   "invalid_zip_file": "Invalid zip file",
   "invite": "Invite",
   "invite_expired": "The invite may have expired",

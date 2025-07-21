@@ -867,6 +867,7 @@
   "invalid_password_too_similar": "",
   "invalid_regular_expression": "",
   "invalid_request": "",
+  "invalid_upload_request": "",
   "invite": "",
   "invite_expired": "",
   "invite_more_collabs": "",
