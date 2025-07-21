@@ -162,7 +162,7 @@ class UserHelper {
 
   /**
    *
-   * @param {'pendingExistingEmail'|'pendingUserRegistration'}sessionKey
+   * @param {'pendingExistingEmail'|'pendingUserRegistration'|'pendingSecondaryEmail'}sessionKey
    * @return {Promise<*>}
    */
   async getEmailConfirmationCode(sessionKey) {
@@ -431,16 +431,16 @@ class UserHelper {
   }
 
   async addEmail(email) {
-    const response = await this.fetch('/user/emails', {
+    const response = await this.fetch('/user/emails/secondary', {
       method: 'POST',
       body: new URLSearchParams([['email', email]]),
     })
     await throwIfErrorResponse(response)
   }
 
-  async addEmailAndConfirm(userId, email) {
+  async addEmailAndConfirm(email) {
     await this.addEmail(email)
-    await this.confirmEmail(userId, email)
+    await this.confirmSecondaryEmail()
   }
 
   async changeConfirmationDate(userId, email, date) {
@@ -499,9 +499,9 @@ class UserHelper {
     await this.changeConfirmationDate(userId, email, date)
   }
 
-  async confirmEmail(userId, email) {
+  async confirmEmail(email) {
     // clear ratelimiting on resend confirmation endpoint
-    await rateLimiters.sendConfirmation.delete(userId)
+    await rateLimiters.sendConfirmation.delete(this.user._id)
     const requestConfirmationCode = await this.fetch(
       '/user/emails/send-confirmation-code',
       {
@@ -516,6 +516,25 @@ class UserHelper {
       body: new URLSearchParams({ code }),
     })
     await throwIfErrorResponse(requestConfirmCode)
+  }
+
+  async confirmSecondaryEmail() {
+    const code = await this.getEmailConfirmationCode('pendingSecondaryEmail')
+    const requestConfirmCode = await this.fetch(
+      '/user/emails/confirm-secondary',
+      {
+        method: 'POST',
+        body: new URLSearchParams({ code }),
+      }
+    )
+    await throwIfErrorResponse(requestConfirmCode)
+  }
+
+  async unconfirmEmail(email) {
+    await UserUpdater.promises.updateUser(
+      { _id: this.user._id, 'emails.email': email.toLowerCase() },
+      { $unset: { 'emails.$.confirmedAt': 1, 'emails.$.reconfirmedAt': 1 } }
+    )
   }
 }
 
