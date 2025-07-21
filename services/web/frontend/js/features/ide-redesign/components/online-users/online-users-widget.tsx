@@ -7,7 +7,11 @@ import {
   DropdownToggle,
 } from '@/features/ui/components/bootstrap-5/dropdown-menu'
 import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
-import { getBackgroundColorForUserId } from '@/shared/utils/colors'
+import {
+  getBackgroundColorForUserId,
+  hslStringToLuminance,
+} from '@/shared/utils/colors'
+import classNames from 'classnames'
 import { useCallback, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -86,9 +90,16 @@ const OnlineUserWidget = ({
 
 const OnlineUserCircle = ({ user }: { user: OnlineUser }) => {
   const backgroundColor = getBackgroundColorForUserId(user.user_id)
+  const luminance = hslStringToLuminance(backgroundColor)
   const [character] = [...user.name]
   return (
-    <span className="online-user-circle" style={{ backgroundColor }}>
+    <span
+      className={classNames('online-user-circle', {
+        'online-user-circle-light-font': luminance < 0.5,
+        'online-user-circle-dark-font': luminance >= 0.5,
+      })}
+      style={{ backgroundColor }}
+    >
       {character}
     </span>
   )

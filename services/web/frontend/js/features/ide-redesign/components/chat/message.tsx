@@ -1,14 +1,13 @@
 import { MessageProps } from '@/features/chat/components/message'
 import { User } from '../../../../../../types/user'
-import { getHueForUserId } from '@/shared/utils/colors'
+import {
+  getBackgroundColorForUserId,
+  hslStringToLuminance,
+} from '@/shared/utils/colors'
 import MessageContent from '@/features/chat/components/message-content'
 import classNames from 'classnames'
 import MaterialIcon from '@/shared/components/material-icon'
 import { t } from 'i18next'
-
-function hue(user?: User) {
-  return user ? getHueForUserId(user.id) : 0
-}
 
 function getAvatarStyle(user?: User) {
   if (!user?.id) {
@@ -20,9 +19,15 @@ function getAvatarStyle(user?: User) {
     }
   }
 
+  const backgroundColor = getBackgroundColorForUserId(user.id)
+
   return {
-    borderColor: `hsl(${hue(user)}, 85%, 40%)`,
-    backgroundColor: `hsl(${hue(user)}, 85%, 40%`,
+    borderColor: backgroundColor,
+    backgroundColor,
+    color:
+      hslStringToLuminance(backgroundColor) < 0.5
+        ? 'var(--content-primary-dark)'
+        : 'var(--content-primary)',
   }
 }
 
