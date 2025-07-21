@@ -440,6 +440,9 @@ module.exports = {
     ','
   ),
 
+  filestoreMigrationLevel:
+    parseInt(process.env.OVERLEAF_FILESTORE_MIGRATION_LEVEL, 10) || 0,
+
   // i18n
   // ------
   //

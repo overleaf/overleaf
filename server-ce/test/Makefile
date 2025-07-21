@@ -21,9 +21,11 @@ test-e2e-native:
 
 test-e2e:
 	docker compose build host-admin
+	docker compose up -d host-admin
 	docker compose up --no-log-prefix --exit-code-from=e2e e2e
 
 test-e2e-open:
+	docker compose up -d host-admin
 	docker compose up --no-log-prefix --exit-code-from=e2e-open e2e-open
 
 clean:

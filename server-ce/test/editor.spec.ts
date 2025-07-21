@@ -2,6 +2,7 @@ import {
   createNewFile,
   createProject,
   openProjectById,
+  testNewFileUpload,
 } from './helpers/project'
 import { isExcludedBySharding, startWith } from './helpers/config'
 import { ensureUserExists, login } from './helpers/login'
@@ -119,24 +120,7 @@ describe('editor', () => {
       cy.get('button').contains('New file').click({ force: true })
     })
 
-    it('can upload file', () => {
-      const name = `${uuid()}.txt`
-      const content = `Test File Content ${name}`
-      cy.get('button').contains('Upload').click({ force: true })
-      cy.get('input[type=file]')
-        .first()
-        .selectFile(
-          {
-            contents: Cypress.Buffer.from(content),
-            fileName: name,
-            lastModified: Date.now(),
-          },
-          { force: true }
-        )
-      // force: The file-tree pane is too narrow to display the full name.
-      cy.findByTestId('file-tree').findByText(name).click({ force: true })
-      cy.findByText(content)
-    })
+    testNewFileUpload()
 
     it('should not display import from URL', () => {
       cy.findByText('From external URL').should('not.exist')

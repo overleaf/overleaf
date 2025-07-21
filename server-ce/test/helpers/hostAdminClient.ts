@@ -85,6 +85,12 @@ export async function getRedisKeys() {
   return stdout.split('\n')
 }
 
+export async function purgeFilestoreData() {
+  await fetchJSON(`${hostAdminURL}/data/user_files`, {
+    method: 'DELETE',
+  })
+}
+
 async function sleep(ms: number) {
   return new Promise(resolve => {
     setTimeout(resolve, ms)

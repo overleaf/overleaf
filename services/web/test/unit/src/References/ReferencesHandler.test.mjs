@@ -50,7 +50,7 @@ describe('ReferencesHandler', function () {
           filestore: { url: 'http://some.url/filestore' },
           project_history: { url: 'http://project-history.local' },
         },
-        enableProjectHistoryBlobs: true,
+        filestoreMigrationLevel: 2,
       }),
     }))
 

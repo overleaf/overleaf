@@ -9,6 +9,7 @@ export function isExcludedBySharding(
     | 'CE_DEFAULT'
     | 'CE_CUSTOM_1'
     | 'CE_CUSTOM_2'
+    | 'CE_CUSTOM_3'
     | 'PRO_DEFAULT_1'
     | 'PRO_DEFAULT_2'
     | 'PRO_CUSTOM_1'

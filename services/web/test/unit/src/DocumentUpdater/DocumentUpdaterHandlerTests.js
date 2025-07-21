@@ -29,6 +29,7 @@ describe('DocumentUpdaterHandler', function () {
           url: 'http://project_history.example.com',
         },
       },
+      filestoreMigrationLevel: 0,
       moduleImportSequence: [],
     }
     this.source = 'dropbox'
@@ -1491,7 +1492,7 @@ describe('DocumentUpdaterHandler', function () {
 
       describe('with filestore disabled', function () {
         beforeEach(function () {
-          this.settings.disableFilestore = true
+          this.settings.filestoreMigrationLevel = 2
         })
         it('should add files without URL and with createdBlob', async function () {
           this.fileId = new ObjectId()
@@ -1700,7 +1701,7 @@ describe('DocumentUpdaterHandler', function () {
     })
     describe('with filestore disabled', function () {
       beforeEach(function () {
-        this.settings.disableFilestore = true
+        this.settings.filestoreMigrationLevel = 2
       })
       it('should add files without URL', async function () {
         const fileId1 = new ObjectId()

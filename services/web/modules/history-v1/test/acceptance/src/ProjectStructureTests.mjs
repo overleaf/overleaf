@@ -8,7 +8,6 @@ import _ from 'lodash'
 import ProjectGetter from '../../../../../app/src/Features/Project/ProjectGetter.js'
 import User from '../../../../../test/acceptance/src/helpers/User.mjs'
 import MockDocUpdaterApiClass from '../../../../../test/acceptance/src/mocks/MockDocUpdaterApi.mjs'
-import Features from '../../../../../app/src/infrastructure/Features.js'
 
 const { ObjectId } = mongodb
 
@@ -188,32 +187,25 @@ describe('ProjectStructureChanges', function () {
   const cases = [
     {
       label: 'with filestore disabled and project-history-blobs enabled',
-      disableFilestore: true,
-      enableProjectHistoryBlobs: true,
+      filestoreMigrationLevel: 2,
     },
     {
       label: 'with filestore enabled and project-history-blobs enabled',
-      disableFilestore: false,
-      enableProjectHistoryBlobs: true,
+      filestoreMigrationLevel: 1,
     },
     {
       label: 'with filestore enabled and project-history-blobs disabled',
-      disableFilestore: false,
-      enableProjectHistoryBlobs: false,
+      filestoreMigrationLevel: 0,
     },
   ]
-  for (const { label, disableFilestore, enableProjectHistoryBlobs } of cases) {
+  for (const { label, filestoreMigrationLevel } of cases) {
     describe(label, function () {
-      const previousDisableFilestore = Settings.disableFilestore
-      const previousEnableProjectHistoryBlobs =
-        Settings.enableProjectHistoryBlobs
+      const previousFilestoreMigrationLevel = Settings.filestoreMigrationLevel
       beforeEach(function () {
-        Settings.disableFilestore = disableFilestore
-        Settings.enableProjectHistoryBlobs = enableProjectHistoryBlobs
+        Settings.filestoreMigrationLevel = filestoreMigrationLevel
       })
       afterEach(function () {
-        Settings.disableFilestore = previousDisableFilestore
-        Settings.enableProjectHistoryBlobs = previousEnableProjectHistoryBlobs
+        Settings.filestoreMigrationLevel = previousFilestoreMigrationLevel
       })
 
       describe('creating a project from the example template', function () {
@@ -244,7 +236,7 @@ describe('ProjectStructureChanges', function () {
           expect(updates[2].type).to.equal('add-file')
           expect(updates[2].userId).to.equal(owner._id)
           expect(updates[2].pathname).to.equal('/frog.jpg')
-          if (disableFilestore) {
+          if (filestoreMigrationLevel === 2) {
             expect(updates[2].url).to.not.exist
             expect(updates[2].createdBlob).to.be.true
           } else {
@@ -301,10 +293,10 @@ describe('ProjectStructureChanges', function () {
           expect(updates[2].type).to.equal('add-file')
           expect(updates[2].userId).to.equal(owner._id)
           expect(updates[2].pathname).to.equal('/frog.jpg')
-          if (disableFilestore) {
+          if (filestoreMigrationLevel === 2) {
             expect(updates[2].url).to.not.exist
             expect(updates[2].createdBlob).to.be.true
-          } else if (Features.hasFeature('project-history-blobs')) {
+          } else if (filestoreMigrationLevel === 1) {
             expect(updates[2].url).to.be.null
           } else {
             expect(updates[2].url).to.be.a('string')
@@ -378,7 +370,7 @@ describe('ProjectStructureChanges', function () {
           expect(updates[1].type).to.equal('add-file')
           expect(updates[1].userId).to.equal(owner._id)
           expect(updates[1].pathname).to.equal('/1pixel.png')
-          if (disableFilestore) {
+          if (filestoreMigrationLevel === 2) {
             expect(updates[1].url).to.not.exist
             expect(updates[1].createdBlob).to.be.true
           } else {
@@ -478,7 +470,7 @@ describe('ProjectStructureChanges', function () {
           expect(update.type).to.equal('add-file')
           expect(update.userId).to.equal(owner._id)
           expect(update.pathname).to.equal('/1pixel.png')
-          if (disableFilestore) {
+          if (filestoreMigrationLevel === 2) {
             expect(update.url).to.not.exist
             expect(update.createdBlob).to.be.true
           } else {
@@ -516,7 +508,7 @@ describe('ProjectStructureChanges', function () {
               expect(updates[1].type).to.equal('add-file')
               expect(updates[1].userId).to.equal(owner._id)
               expect(updates[1].pathname).to.equal('/1pixel.png')
-              if (disableFilestore) {
+              if (filestoreMigrationLevel === 2) {
                 expect(updates[1].url).to.not.exist
                 expect(updates[1].createdBlob).to.be.true
               } else {
@@ -1005,7 +997,7 @@ describe('ProjectStructureChanges', function () {
             expect(update.type).to.equal('add-file')
             expect(update.userId).to.equal(owner._id)
             expect(update.pathname).to.equal('/1pixel.png')
-            if (disableFilestore) {
+            if (filestoreMigrationLevel === 2) {
               expect(update.url).to.not.exist
               expect(update.createdBlob).to.be.true
             } else {
@@ -1068,7 +1060,7 @@ describe('ProjectStructureChanges', function () {
               expect(updates[1].type).to.equal('add-file')
               expect(updates[1].userId).to.equal(owner._id)
               expect(updates[1].pathname).to.equal('/1pixel.png')
-              if (disableFilestore) {
+              if (filestoreMigrationLevel === 2) {
                 expect(updates[1].url).to.not.exist
                 expect(updates[1].createdBlob).to.be.true
               } else {

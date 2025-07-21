@@ -150,10 +150,6 @@ const CONCURRENT_BATCHES = parseInt(process.env.CONCURRENT_BATCHES || '2', 10)
 const RETRIES = parseInt(process.env.RETRIES || '10', 10)
 const RETRY_DELAY_MS = parseInt(process.env.RETRY_DELAY_MS || '100', 10)
 
-const USER_FILES_BUCKET_NAME = process.env.USER_FILES_BUCKET_NAME || ''
-if (!USER_FILES_BUCKET_NAME) {
-  throw new Error('env var USER_FILES_BUCKET_NAME is missing')
-}
 const RETRY_FILESTORE_404 = process.env.RETRY_FILESTORE_404 === 'true'
 const BUFFER_DIR = fs.mkdtempSync(
   process.env.BUFFER_DIR_PREFIX || '/tmp/back_fill_file_hash-'
