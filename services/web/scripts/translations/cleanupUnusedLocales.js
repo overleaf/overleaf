@@ -74,6 +74,7 @@ async function main() {
     'dropbox_email_not_verified',
     'dropbox_unlinked_because_access_denied',
     'dropbox_unlinked_because_full',
+    'dropbox_unlinked_because_suspended',
 
     // Actually used without the spurious space.
     // TODO: fix the space and upload the changed locales

@@ -615,6 +615,7 @@
   "dropbox_synced": "Overleaf and Dropbox have processed all updates. Note that your local Dropbox might still be synchronizing",
   "dropbox_unlinked_because_access_denied": "Your Dropbox account has been unlinked because the Dropbox service rejected your stored credentials. Please relink your Dropbox account to continue using it with Overleaf.",
   "dropbox_unlinked_because_full": "Your Dropbox account has been unlinked because it is full, and we can no longer send updates to it. Please free up some space and relink your Dropbox account to continue using it with Overleaf.",
+  "dropbox_unlinked_because_suspended": "We’ve unlinked your Dropbox account because it’s been suspended by Dropbox. You’ll be able to relink once you’ve resolved the issue with Dropbox.",
   "dropbox_unlinked_premium_feature": "<0>Your Dropbox account has been unlinked</0> because Dropbox Sync is a premium feature that you had through an institutional license.",
   "due_date": "Due __date__",
   "due_today": "Due today",
