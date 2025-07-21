@@ -1,47 +1,23 @@
 import fs from 'node:fs'
 import Crypto from 'node:crypto'
-import Stream from 'node:stream'
 import { promisify } from 'node:util'
 import { Binary, ObjectId } from 'mongodb'
 import { Blob } from 'overleaf-editor-core'
-import { backedUpBlobs, blobs, db } from '../../../../storage/lib/mongodb.js'
+import { db } from '../../../../storage/lib/mongodb.js'
 import cleanup from './support/cleanup.js'
 import testProjects from '../api/support/test_projects.js'
 import { execFile } from 'node:child_process'
 import chai, { expect } from 'chai'
 import chaiExclude from 'chai-exclude'
-import config from 'config'
-import { WritableBuffer } from '@overleaf/stream-utils'
-import {
-  backupPersistor,
-  projectBlobsBucket,
-} from '../../../../storage/lib/backupPersistor.mjs'
-import projectKey from '../../../../storage/lib/project_key.js'
-import {
-  BlobStore,
-  makeProjectKey,
-} from '../../../../storage/lib/blob_store/index.js'
-import ObjectPersistor from '@overleaf/object-persistor'
+import { BlobStore } from '../../../../storage/lib/blob_store/index.js'
+import { mockFilestore } from './support/MockFilestore.mjs'
 
 chai.use(chaiExclude)
 
 const TIMEOUT = 20 * 1_000
 
-const { deksBucket } = config.get('backupStore')
-const { tieringStorageClass } = config.get('backupPersistor')
-
 const projectsCollection = db.collection('projects')
 const deletedProjectsCollection = db.collection('deletedProjects')
-
-const FILESTORE_PERSISTOR = ObjectPersistor({
-  backend: 'gcs',
-  gcs: {
-    endpoint: {
-      apiEndpoint: process.env.GCS_API_ENDPOINT,
-      projectId: process.env.GCS_PROJECT_ID,
-    },
-  },
-})
 
 /**
  * @param {ObjectId} objectId
@@ -70,17 +46,6 @@ function binaryForGitBlobHash(gitBlobHash) {
   return new Binary(Buffer.from(gitBlobHash, 'hex'))
 }
 
-async function listS3Bucket(bucket, wantStorageClass) {
-  const client = backupPersistor._getClientForBucket(bucket)
-  const response = await client.listObjectsV2({ Bucket: bucket }).promise()
-
-  for (const object of response.Contents || []) {
-    expect(object).to.have.property('StorageClass', wantStorageClass)
-  }
-
-  return (response.Contents || []).map(item => item.Key || '')
-}
-
 function objectIdFromTime(timestamp) {
   return ObjectId.createFromTime(new Date(timestamp).getTime() / 1000)
 }
@@ -97,7 +62,6 @@ describe('back_fill_file_hash_fix_up script', function () {
   const historyIdDeleted0 = projectIdDeleted0.toString()
   const fileIdWithDifferentHashFound = objectIdFromTime('2017-02-01T00:00:00Z')
   const fileIdInGoodState = objectIdFromTime('2017-02-01T00:01:00Z')
-  const fileIdBlobExistsInGCS0 = objectIdFromTime('2017-02-01T00:02:00Z')
   const fileIdWithDifferentHashNotFound0 = objectIdFromTime(
     '2017-02-01T00:03:00Z'
   )
@@ -112,9 +76,6 @@ describe('back_fill_file_hash_fix_up script', function () {
   const fileIdWithDifferentHashRestore = objectIdFromTime(
     '2017-02-01T00:08:00Z'
   )
-  const fileIdBlobExistsInGCS1 = objectIdFromTime('2017-02-01T00:09:00Z')
-  const fileIdRestoreFromFilestore0 = objectIdFromTime('2017-02-01T00:10:00Z')
-  const fileIdRestoreFromFilestore1 = objectIdFromTime('2017-02-01T00:11:00Z')
   const fileIdMissing2 = objectIdFromTime('2017-02-01T00:12:00Z')
   const fileIdHashMissing0 = objectIdFromTime('2017-02-01T00:13:00Z')
   const fileIdHashMissing1 = objectIdFromTime('2017-02-01T00:14:00Z')
@@ -128,27 +89,7 @@ describe('back_fill_file_hash_fix_up script', function () {
     {
       projectId: projectId0,
       historyId: historyId0,
-      fileId: fileIdBlobExistsInGCS0,
-    },
-    {
-      projectId: projectId0,
-      historyId: historyId0,
-      fileId: fileIdBlobExistsInGCS1,
-    },
-    {
-      projectId: projectId0,
-      historyId: historyId0,
       fileId: fileIdWithDifferentHashNotFound0,
-    },
-    {
-      projectId: projectId0,
-      historyId: historyId0,
-      fileId: fileIdRestoreFromFilestore0,
-    },
-    {
-      projectId: projectId0,
-      historyId: historyId0,
-      fileId: fileIdRestoreFromFilestore1,
     },
     {
       projectId: projectId0,
@@ -201,17 +142,6 @@ describe('back_fill_file_hash_fix_up script', function () {
       msg: 'failed to process file',
     },
     {
-      projectId: projectId0,
-      fileId: fileIdRestoreFromFilestore0,
-      err: { message: 'OError: hash mismatch' },
-      hash: gitBlobHash(fileIdRestoreFromFilestore0),
-      entry: {
-        ctx: { historyId: historyId0.toString() },
-        hash: hashDoesNotExistAsBlob,
-      },
-      msg: 'failed to process file',
-    },
-    {
       projectId: projectIdDeleted0,
       fileId: fileIdWithDifferentHashNotFound1,
       err: { message: 'OError: hash mismatch' },
@@ -234,33 +164,6 @@ describe('back_fill_file_hash_fix_up script', function () {
       fileId: fileIdMissing2,
       bucketName: USER_FILES_BUCKET_NAME,
       err: { message: 'NotFoundError' },
-      msg: 'failed to process file',
-    },
-    {
-      projectId: projectId0,
-      fileId: fileIdBlobExistsInGCS0,
-      hash: gitBlobHash(fileIdBlobExistsInGCS0),
-      err: { message: 'storage.objects.delete' },
-      msg: 'failed to process file',
-    },
-    {
-      projectId: projectId0,
-      fileId: fileIdBlobExistsInGCSCorrupted,
-      hash: gitBlobHash(fileIdBlobExistsInGCSCorrupted),
-      err: { message: 'storage.objects.delete' },
-      msg: 'failed to process file',
-    },
-    {
-      projectId: projectId0,
-      fileId: fileIdBlobExistsInGCS1,
-      hash: gitBlobHash(fileIdBlobExistsInGCS1),
-      err: { message: 'storage.objects.delete' },
-      msg: 'failed to process file',
-    },
-    {
-      projectId: projectId0,
-      fileId: fileIdRestoreFromFilestore1,
-      err: { message: 'storage.objects.delete' },
       msg: 'failed to process file',
     },
     {
@@ -291,22 +194,23 @@ describe('back_fill_file_hash_fix_up script', function () {
       reason: 'bad file hash',
       msg: 'bad file-tree path',
     },
+    {
+      projectId: projectId0,
+      _id: fileIdBlobExistsInGCSCorrupted,
+      reason: 'bad file hash',
+      msg: 'bad file-tree path',
+    },
   ]
   if (PRINT_IDS_AND_HASHES_FOR_DEBUGGING) {
     const fileIds = {
       fileIdWithDifferentHashFound,
       fileIdInGoodState,
-      fileIdBlobExistsInGCS0,
-      fileIdBlobExistsInGCS1,
       fileIdWithDifferentHashNotFound0,
       fileIdWithDifferentHashNotFound1,
-      fileIdBlobExistsInGCSCorrupted,
       fileIdMissing0,
       fileIdMissing1,
       fileIdMissing2,
       fileIdWithDifferentHashRestore,
-      fileIdRestoreFromFilestore0,
-      fileIdRestoreFromFilestore1,
       fileIdHashMissing0,
       fileIdHashMissing1,
     }
@@ -330,37 +234,24 @@ describe('back_fill_file_hash_fix_up script', function () {
   before(cleanup.everything)
 
   before('populate blobs/GCS', async function () {
-    await FILESTORE_PERSISTOR.sendStream(
-      USER_FILES_BUCKET_NAME,
-      `${projectId0}/${fileIdRestoreFromFilestore0}`,
-      Stream.Readable.from([fileIdRestoreFromFilestore0.toString()])
+    await mockFilestore.start()
+    mockFilestore.addFile(
+      projectId0,
+      fileIdHashMissing0,
+      fileIdHashMissing0.toString()
     )
-    await FILESTORE_PERSISTOR.sendStream(
-      USER_FILES_BUCKET_NAME,
-      `${projectId0}/${fileIdRestoreFromFilestore1}`,
-      Stream.Readable.from([fileIdRestoreFromFilestore1.toString()])
+    mockFilestore.addFile(
+      projectId0,
+      fileIdHashMissing1,
+      fileIdHashMissing1.toString()
     )
-    await FILESTORE_PERSISTOR.sendStream(
-      USER_FILES_BUCKET_NAME,
-      `${projectId0}/${fileIdHashMissing0}`,
-      Stream.Readable.from([fileIdHashMissing0.toString()])
-    )
-    await FILESTORE_PERSISTOR.sendStream(
-      USER_FILES_BUCKET_NAME,
-      `${projectId0}/${fileIdHashMissing1}`,
-      Stream.Readable.from([fileIdHashMissing1.toString()])
+    mockFilestore.addFile(
+      projectId0,
+      fileIdBlobExistsInGCSCorrupted,
+      fileIdBlobExistsInGCSCorrupted.toString()
     )
     await new BlobStore(historyId0.toString()).putString(
       fileIdHashMissing1.toString() // partially processed
-    )
-    await new BlobStore(historyId0.toString()).putString(
-      fileIdBlobExistsInGCS0.toString()
-    )
-    await new BlobStore(historyId0.toString()).putString(
-      fileIdBlobExistsInGCS1.toString()
-    )
-    await new BlobStore(historyId0.toString()).putString(
-      fileIdRestoreFromFilestore1.toString()
     )
     const path = '/tmp/test-blob-corrupted'
     try {
@@ -427,21 +318,9 @@ describe('back_fill_file_hash_fix_up script', function () {
                     hash: hashDoesNotExistAsBlob,
                   },
                   {
-                    _id: fileIdRestoreFromFilestore0,
-                    hash: hashDoesNotExistAsBlob,
-                  },
-                  {
-                    _id: fileIdRestoreFromFilestore1,
-                  },
-                  {
-                    _id: fileIdBlobExistsInGCS0,
-                    hash: gitBlobHash(fileIdBlobExistsInGCS0),
-                  },
-                  {
                     _id: fileIdBlobExistsInGCSCorrupted,
                     hash: gitBlobHash(fileIdBlobExistsInGCSCorrupted),
                   },
-                  { _id: fileIdBlobExistsInGCS1 },
                 ],
                 folders: [],
               },
@@ -546,8 +425,8 @@ describe('back_fill_file_hash_fix_up script', function () {
   })
   it('should print stats', function () {
     expect(stats).to.contain({
-      processedLines: 16,
-      success: 11,
+      processedLines: 12,
+      success: 7,
       alreadyProcessed: 0,
       fileDeleted: 0,
       skipped: 0,
@@ -558,9 +437,9 @@ describe('back_fill_file_hash_fix_up script', function () {
   it('should handle re-run on same logs', async function () {
     ;({ stats } = await runScriptWithLogs())
     expect(stats).to.contain({
-      processedLines: 16,
+      processedLines: 12,
       success: 0,
-      alreadyProcessed: 8,
+      alreadyProcessed: 4,
       fileDeleted: 3,
       skipped: 0,
       failed: 3,
@@ -663,30 +542,10 @@ describe('back_fill_file_hash_fix_up script', function () {
                       _id: fileIdWithDifferentHashNotFound0,
                       hash: gitBlobHash(fileIdWithDifferentHashNotFound0),
                     },
-                    // Updated hash
-                    {
-                      _id: fileIdRestoreFromFilestore0,
-                      hash: gitBlobHash(fileIdRestoreFromFilestore0),
-                    },
-                    // Added hash
-                    {
-                      _id: fileIdRestoreFromFilestore1,
-                      hash: gitBlobHash(fileIdRestoreFromFilestore1),
-                    },
-                    // No change, blob created
-                    {
-                      _id: fileIdBlobExistsInGCS0,
-                      hash: gitBlobHash(fileIdBlobExistsInGCS0),
-                    },
                     // No change, flagged
                     {
                       _id: fileIdBlobExistsInGCSCorrupted,
                       hash: gitBlobHash(fileIdBlobExistsInGCSCorrupted),
-                    },
-                    // Added hash
-                    {
-                      _id: fileIdBlobExistsInGCS1,
-                      hash: gitBlobHash(fileIdBlobExistsInGCS1),
                     },
                   ],
                   folders: [],
@@ -696,7 +555,7 @@ describe('back_fill_file_hash_fix_up script', function () {
           ],
           overleaf: { history: { id: historyId0 } },
           // Incremented when removing file/updating hash
-          version: 8,
+          version: 5,
         },
       ])
     expect(await deletedProjectsCollection.find({}).toArray()).to.deep.equal([
@@ -745,62 +604,6 @@ describe('back_fill_file_hash_fix_up script', function () {
         (writtenBlobsByProject.get(projectId) || []).concat([fileId])
       )
     }
-    expect(
-      (await backedUpBlobs.find({}, { sort: { _id: 1 } }).toArray()).map(
-        entry => {
-          // blobs are pushed unordered into mongo. Sort the list for consistency.
-          entry.blobs.sort()
-          return entry
-        }
-      )
-    ).to.deep.equal(
-      Array.from(writtenBlobsByProject.entries()).map(
-        ([projectId, fileIds]) => {
-          return {
-            _id: projectId,
-            blobs: fileIds
-              .map(fileId => binaryForGitBlobHash(gitBlobHash(fileId)))
-              .sort(),
-          }
-        }
-      )
-    )
-  })
-  it('should have backed up all the files', async function () {
-    expect(tieringStorageClass).to.exist
-    const objects = await listS3Bucket(projectBlobsBucket, tieringStorageClass)
-    expect(objects.sort()).to.deep.equal(
-      writtenBlobs
-        .map(({ historyId, fileId, hash }) =>
-          makeProjectKey(historyId, hash || gitBlobHash(fileId))
-        )
-        .sort()
-    )
-    for (let { historyId, fileId } of writtenBlobs) {
-      const hash = gitBlobHash(fileId.toString())
-      const s = await backupPersistor.getObjectStream(
-        projectBlobsBucket,
-        makeProjectKey(historyId, hash),
-        { autoGunzip: true }
-      )
-      const buf = new WritableBuffer()
-      await Stream.promises.pipeline(s, buf)
-      expect(gitBlobHashBuffer(buf.getContents())).to.equal(hash)
-      const id = buf.getContents().toString('utf-8')
-      expect(id).to.equal(fileId.toString())
-      // double check we are not comparing 'undefined' or '[object Object]' above
-      expect(id).to.match(/^[a-f0-9]{24}$/)
-    }
-    const deks = await listS3Bucket(deksBucket, 'STANDARD')
-    expect(deks.sort()).to.deep.equal(
-      Array.from(
-        new Set(
-          writtenBlobs.map(
-            ({ historyId }) => projectKey.format(historyId) + '/dek'
-          )
-        )
-      ).sort()
-    )
   })
   it('should have written the back filled files to history v1', async function () {
     for (const { historyId, fileId } of writtenBlobs) {
