@@ -524,6 +524,10 @@ $z-index-group-member-picker-list: 1;
         &[data-ol-plans-new-group-member-picker-button='group-all'] {
           height: $group-member-picker-top-height;
         }
+
+        .material-symbols {
+          pointer-events: none;
+        }
       }
 
       ul.plans-new-group-member-picker-list {
