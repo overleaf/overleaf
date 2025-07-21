@@ -53,7 +53,10 @@ export type WebModule = {
     apply: (webRouter: any, privateApiRouter: any, publicApiRouter: any) => void
   }
   hooks?: {
-    [name: string]: (args: any[]) => void
+    promises?: {
+      [name: string]: (...args: any[]) => Promise<any>
+    }
+    [name: string]: ((...args: any[]) => void) | any
   }
   middleware?: {
     [name: string]: RequestHandler

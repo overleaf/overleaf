@@ -150,8 +150,7 @@ async function linkedFileAgentsIncludes() {
 async function attachHooks() {
   for (const module of await modules()) {
     const { promises, ...hooks } = module.hooks || {}
-    for (const hook in promises || {}) {
-      const method = promises[hook]
+    for (const [hook, method] of Object.entries(promises || {})) {
       attachHook(hook, method)
     }
     for (const hook in hooks || {}) {

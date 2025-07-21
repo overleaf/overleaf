@@ -87,6 +87,14 @@ describe('DocumentController', function () {
       },
     }
 
+    ctx.Modules = {
+      promises: {
+        hooks: {
+          fire: sinon.stub().resolves(),
+        },
+      },
+    }
+
     vi.doMock('../../../../app/src/Features/Project/ProjectGetter', () => ({
       default: ctx.ProjectGetter,
     }))
@@ -111,6 +119,10 @@ describe('DocumentController', function () {
 
     vi.doMock('../../../../app/src/Features/Chat/ChatApiHandler', () => ({
       default: ctx.ChatApiHandler,
+    }))
+
+    vi.doMock('../../../../app/src/infrastructure/Modules.js', () => ({
+      default: ctx.Modules,
     }))
 
     ctx.DocumentController = (await import(MODULE_PATH)).default
@@ -207,6 +219,15 @@ describe('DocumentController', function () {
 
       it('should return a successful response', function (ctx) {
         ctx.res.success.should.equal(true)
+      })
+
+      it('should call the docModified hook', function (ctx) {
+        sinon.assert.calledWith(
+          ctx.Modules.promises.hooks.fire,
+          'docModified',
+          ctx.project._id,
+          ctx.doc._id
+        )
       })
     })
 
