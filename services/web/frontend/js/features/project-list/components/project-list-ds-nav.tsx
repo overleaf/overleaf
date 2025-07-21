@@ -20,6 +20,7 @@ import Footer from '@/features/ui/components/bootstrap-5/footer/footer'
 import SidebarDsNav from '@/features/project-list/components/sidebar/sidebar-ds-nav'
 import SystemMessages from '@/shared/components/system-messages'
 import overleafLogo from '@/shared/svgs/overleaf-a-ds-solution-mallard.svg'
+import CookieBanner from '@/shared/components/cookie-banner'
 
 export function ProjectListDsNav() {
   const navbarProps = getMeta('ol-navbar')
@@ -125,6 +126,7 @@ export function ProjectListDsNav() {
             </div>
             <Footer {...footerProps} />
           </div>
+          <CookieBanner />
         </div>
       </main>
     </div>

@@ -27,5 +27,6 @@ declare global {
     gtag?: (...args: any) => void
 
     propensity?: (propensityId?: string) => void
+    olLoadGA?: () => void
   }
 }

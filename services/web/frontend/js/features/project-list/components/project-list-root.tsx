@@ -18,6 +18,7 @@ import Footer from '@/features/ui/components/bootstrap-5/footer/footer'
 import WelcomePageContent from '@/features/project-list/components/welcome-page-content'
 import { ProjectListDsNav } from '@/features/project-list/components/project-list-ds-nav'
 import { DsNavStyleProvider } from '@/features/project-list/components/use-is-ds-nav'
+import CookieBanner from '@/shared/components/cookie-banner'
 
 function ProjectListRoot() {
   const { isReady } = useWaitForI18n()
@@ -88,9 +89,12 @@ function ProjectListPageContent() {
 
   if (totalProjectsCount === 0) {
     return (
-      <DefaultPageContentWrapper>
-        <WelcomePageContent />
-      </DefaultPageContentWrapper>
+      <>
+        <DefaultPageContentWrapper>
+          <WelcomePageContent />
+        </DefaultPageContentWrapper>
+        <CookieBanner />
+      </>
     )
   }
   return (
