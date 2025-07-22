@@ -362,6 +362,23 @@ class MockV1Api extends AbstractMockApi {
             },
           },
         ])
+      } else if (req.query.hostname === 'sharelatex.com') {
+        res.json([
+          {
+            id: 44,
+            hostname: 'sharelatex.com',
+            department: 'test dept',
+            confirmed: true,
+            university: {
+              id: 5000,
+              name: 'Institution sharelatex',
+              departments: [],
+              ssoBeta: false,
+              ssoEnabled: false,
+              commons: false,
+            },
+          },
+        ])
       } else {
         res.json([])
       }

@@ -34,6 +34,15 @@ export type DomainInfo = {
     ssoBeta?: boolean
     departments?: string[]
   }
+  group: {
+    teamName?: string
+    managedUsersEnabled?: boolean
+    domainCaptureEnabled?: boolean
+    ssoConfig?: {
+      useUkamfSettings?: boolean
+      enabled: boolean
+    }
+  }
 }
 
 let domainCache = new Map<string, DomainInfo>()

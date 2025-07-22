@@ -12,6 +12,11 @@ export const ssoAvailableForDomain = (
   if (domain.university.ssoEnabled) {
     return true
   }
+
+  if (domain.group?.ssoConfig?.enabled) {
+    return true
+  }
+
   return Boolean(hasSamlBeta && domain.university.ssoBeta)
 }
 

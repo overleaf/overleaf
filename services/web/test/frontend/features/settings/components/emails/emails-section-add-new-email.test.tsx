@@ -3,6 +3,7 @@ import {
   screen,
   fireEvent,
   waitForElementToBeRemoved,
+  within,
 } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import EmailsSection from '../../../../../../frontend/js/features/settings/components/emails-section'
@@ -12,6 +13,7 @@ import { UserEmailData } from '../../../../../../types/user-email'
 import { Affiliation } from '../../../../../../types/affiliation'
 import withMarkup from '../../../../helpers/with-markup'
 import getMeta from '@/utils/meta'
+import { clearDomainCache } from '../../../../../../frontend/js/features/settings/components/emails/add-email/input'
 
 const userEmailData: UserEmailData & { affiliation: Affiliation } = {
   affiliation: {
@@ -87,6 +89,7 @@ describe('<EmailsSection />', function () {
 
   afterEach(function () {
     resetFetchMock()
+    clearDomainCache()
   })
 
   it('renders "add another email" button', async function () {
@@ -707,6 +710,143 @@ describe('<EmailsSection />', function () {
     screen.getByText(userEmailDataCopy.affiliation.role!, { exact: false })
     screen.getByText(userEmailDataCopy.affiliation.department!, {
       exact: false,
+    })
+  })
+
+  describe('when domain is captured by a group', function () {
+    describe('and managed users is not enabled', function () {
+      beforeEach(async function () {
+        await fetchMock.callHistory.flush(true)
+        fetchMock.removeRoutes().clearHistory()
+        const institution = {
+          university: {
+            id: 1234,
+            ssoEnabled: false,
+            name: 'Auto Complete University',
+          },
+          hostname: 'autocomplete.edu',
+          confirmed: true,
+          group: {
+            domainCaptureEnabled: true,
+            ssoConfig: {
+              enabled: true,
+            },
+          },
+        }
+
+        fetchMock.get('express:/institutions/domains', [institution])
+      })
+
+      it('can add email address via SSO', async function () {
+        // note: this UI is a WIP
+        fetchMock.get('/user/emails?ensureAffiliation=true', [])
+        render(<EmailsSection />)
+
+        const button = await screen.findByRole<HTMLButtonElement>('button', {
+          name: /add another email/i,
+        })
+
+        await userEvent.click(button)
+
+        const input = screen.getByLabelText(/email/i, { selector: 'input' })
+        fireEvent.change(input, {
+          target: { value: 'user@autocomplete.edu' },
+        })
+        await screen.findByText('This feature is currently unavailable.')
+      })
+    })
+
+    describe('and managed users is enabled', function () {
+      beforeEach(async function () {
+        await fetchMock.callHistory.flush(true)
+        fetchMock.removeRoutes().clearHistory()
+        const institution = {
+          university: {
+            id: 1234,
+            ssoEnabled: false,
+            name: 'Auto Complete University',
+          },
+          hostname: 'autocomplete.edu',
+          confirmed: true,
+          group: {
+            domainCaptureEnabled: true,
+            managedUsersEnabled: true,
+            ssoConfig: {
+              enabled: true,
+            },
+          },
+        }
+
+        fetchMock.get('express:/institutions/domains', [institution])
+      })
+
+      it('renders error', async function () {
+        // note: this UI is a WIP
+        fetchMock.get('/user/emails?ensureAffiliation=true', [])
+        render(<EmailsSection />)
+
+        const button = await screen.findByRole<HTMLButtonElement>('button', {
+          name: /add another email/i,
+        })
+
+        await userEvent.click(button)
+
+        const input = screen.getByLabelText(/email/i, { selector: 'input' })
+        fireEvent.change(input, {
+          target: { value: 'user@autocomplete.edu' },
+        })
+
+        const notification = await screen.findByRole('alert')
+        within(notification).getByText(
+          'Your company email address has been registered under a verified domain, and cannot be added as a secondary email.',
+          { exact: false }
+        )
+      })
+    })
+
+    describe('if Commons SSO then enabled, that takes priority over group UI', function () {
+      // we shouldn't have SSO config in v1 and in v2 but adding test to ensure Commons takes priority
+      beforeEach(async function () {
+        await fetchMock.callHistory.flush(true)
+        fetchMock.removeRoutes().clearHistory()
+        const institution = {
+          university: {
+            id: 1234,
+            ssoEnabled: true,
+            name: 'Auto Complete University',
+          },
+          hostname: 'autocomplete.edu',
+          confirmed: true,
+          group: {
+            domainCaptureEnabled: true,
+            ssoConfig: {
+              enabled: true,
+            },
+          },
+        }
+
+        fetchMock.get('express:/institutions/domains', [institution])
+      })
+
+      it('renders Commons UI', async function () {
+        fetchMock.get('/user/emails?ensureAffiliation=true', [])
+        render(<EmailsSection />)
+
+        const button = await screen.findByRole<HTMLButtonElement>('button', {
+          name: /add another email/i,
+        })
+
+        await userEvent.click(button)
+
+        const input = screen.getByLabelText(/email/i, { selector: 'input' })
+        fireEvent.change(input, {
+          target: { value: 'user@autocomplete.edu' },
+        })
+
+        await screen.findByRole('button', {
+          name: 'Link accounts and add email',
+        })
+      })
     })
   })
 })
