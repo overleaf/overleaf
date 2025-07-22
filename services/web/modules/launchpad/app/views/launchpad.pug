@@ -1,31 +1,38 @@
 extends ../../../../app/views/layout-marketing
+include ../../../../app/views/_mixins/material_symbol
+include ../../../../app/views/_mixins/notification
 
 mixin launchpad-check(section)
 	div(data-ol-launchpad-check=section)
-		span(data-ol-inflight='pending')
-			i.fa.fa-fw.fa-spinner.fa-spin
+		span(
+			data-ol-inflight='pending'
+			style='display: inline-flex; align-items: center'
+		)
+			+material-symbol('sync')
 			span &nbsp;#{translate('checking')}
 
 		span(hidden data-ol-inflight='idle')
-			div(data-ol-result='success')
-				i.fa.fa-check
+			div(
+				data-ol-result='success'
+				style='display: inline-flex; align-items: center'
+			)
+				+material-symbol('check')
 				span &nbsp;#{translate('ok')}
 				button.btn.btn-inline-link
 					span.text-danger &nbsp;#{translate('retry')}
 			div(hidden data-ol-result='error')
-				i.fa.fa-exclamation
-				span &nbsp;#{translate('error')}
-				button.btn.btn-inline-link
-					span.text-danger &nbsp;#{translate('retry')}
-				.alert.alert-danger
-					span(data-ol-error)
+				span(style='display: inline-flex; align-items: center')
+					+material-symbol('warning')
+					span &nbsp;#{translate('error')}
+					button.btn.btn-inline-link
+						span.text-danger &nbsp;#{translate('retry')}
+				+notification({ariaLive: 'assertive', type: 'error', content: '<span data-ol-error></span>'})
 
 block entrypointVar
 	- entrypoint = 'modules/launchpad/pages/launchpad'
 
 block vars
 	- metadata = metadata || {}
-	- bootstrap5PageStatus = 'disabled'
 
 block append meta
 	meta(name='ol-adminUserExists' data-type='boolean' content=adminUserExists)
@@ -41,167 +48,167 @@ block content
 	#main-content.content.content-alt
 		.container
 			.row
-				.col-md-8.col-md-offset-2
-					.card.launchpad-body
-						.row
-							.col-md-12
-								.text-center
-									h1 #{translate('welcome_to_sl')}
-									p
-										img(src=buildImgPath('/ol-brand/overleaf-o.svg'))
+				.col-lg-8.offset-lg-2
+					.card
+						.card-body
+							.row
+								.col-lg-12
+									.text-center
+										h1 #{translate('welcome_to_sl')}
+										p
+											img(src=buildImgPath('/ol-brand/overleaf-o.svg'))
 
-						<!-- wrapper -->
-						.row
-							.col-md-8.col-md-offset-2
-								<!-- create first admin form -->
-								if !adminUserExists
-									.row(data-ol-not-sent)
-										.col-md-12
-											h2 #{translate('create_first_admin_account')}
+							<!-- wrapper -->
+							.row
+								.col-lg-8.offset-lg-2
+									<!-- create first admin form -->
+									if !adminUserExists
+										.row(data-ol-not-sent)
+											.col-lg-12
+												h2 #{translate('create_first_admin_account')}
 
-											// Local Auth Form
-											if authMethod === 'local'
-												form(
+												// Local Auth Form
+												if authMethod === 'local'
+													form(
+														data-ol-async-form
+														data-ol-register-admin
+														action='/launchpad/register_admin'
+														method='POST'
+													)
+														input(name='_csrf' type='hidden' value=csrfToken)
+														+formMessages
+														.form-group
+															label.form-label(for='email') #{translate("email")}
+															input.form-control(
+																name='email'
+																type='email'
+																id='email'
+																autocomplete='username'
+																required
+																autofocus='true'
+															)
+														.form-group
+															label.form-label(for='passwordField') #{translate("password")}
+															input#passwordField.form-control(
+																name='password'
+																type='password'
+																autocomplete='new-password'
+																required
+															)
+														.actions
+															button.btn-primary.btn(type='submit' data-ol-disabled-inflight)
+																span(data-ol-inflight='idle') #{translate("register")}
+																span(hidden data-ol-inflight='pending') #{translate("registering")}…
+
+												// Ldap Form
+												if authMethod === 'ldap'
+													h3 #{translate('ldap')}
+													p
+														| #{translate('ldap_create_admin_instructions')}
+
+													form(
+														data-ol-async-form
+														data-ol-register-admin
+														action='/launchpad/register_ldap_admin'
+														method='POST'
+													)
+														input(name='_csrf' type='hidden' value=csrfToken)
+														+formMessages
+														.form-group
+															label.form-label(for='email') #{translate("email")}
+															input.form-control(
+																name='email'
+																id='email'
+																type='email'
+																autocomplete='username'
+																required
+																autofocus='true'
+															)
+														.actions
+															button.btn-primary.btn(type='submit' data-ol-disabled-inflight)
+																span(data-ol-inflight='idle') #{translate("register")}
+																span(hidden data-ol-inflight='pending') #{translate("registering")}…
+
+												// Saml Form
+												if authMethod === 'saml'
+													h3 #{translate('saml')}
+													p
+														| #{translate('saml_create_admin_instructions')}
+
+													form(
+														data-ol-async-form
+														data-ol-register-admin
+														action='/launchpad/register_saml_admin'
+														method='POST'
+													)
+														input(name='_csrf' type='hidden' value=csrfToken)
+														+formMessages
+														.form-group
+															label.form-label(for='email') #{translate("email")}
+															input.form-control(
+																name='email'
+																type='email'
+																id='email'
+																autocomplete='username'
+																required
+																autofocus='true'
+															)
+														.actions
+															button.btn-primary.btn(type='submit' data-ol-disabled-inflight)
+																span(data-ol-inflight='idle') #{translate("register")}
+																span(hidden data-ol-inflight='pending') #{translate("registering")}…
+
+										br
+
+									<!-- status indicators -->
+									if adminUserExists
+										.row
+											.col-lg-12.status-indicators
+												h2 #{translate('status_checks')}
+
+												<!-- websocket -->
+												.row.row-spaced-small
+													.col-sm-5
+														| #{translate('websockets')}
+													.col-sm-7
+														+launchpad-check('websocket')
+
+										<!-- break -->
+										hr.thin
+
+										<!-- other actions -->
+										.row
+											.col-lg-12
+												h2 #{translate('other_actions')}
+
+												h3 #{translate('send_test_email')}
+												form.form(
 													data-ol-async-form
-													data-ol-register-admin
-													action='/launchpad/register_admin'
+													action='/launchpad/send_test_email'
 													method='POST'
 												)
-													input(name='_csrf' type='hidden' value=csrfToken)
-													+formMessages
 													.form-group
-														label(for='email') #{translate("email")}
-														input.form-control(
-															name='email'
-															type='email'
-															placeholder='email@example.com'
-															autocomplete='username'
-															required
-															autofocus='true'
-														)
-													.form-group
-														label(for='password') #{translate("password")}
-														input#passwordField.form-control(
-															name='password'
-															type='password'
-															placeholder='********'
-															autocomplete='new-password'
-															required
-														)
-													.actions
-														button.btn-primary.btn(type='submit' data-ol-disabled-inflight)
-															span(data-ol-inflight='idle') #{translate("register")}
-															span(hidden data-ol-inflight='pending') #{translate("registering")}…
+														label.form-label(for='email') Email
+														input.form-control(name='email' type='text' id='email' required)
+													button.btn-primary.btn(type='submit' data-ol-disabled-inflight)
+														span(data-ol-inflight='idle') #{translate("send")}
+														span(hidden data-ol-inflight='pending') #{translate("sending")}…
 
-											// Ldap Form
-											if authMethod === 'ldap'
-												h3 #{translate('ldap')}
-												p
-													| #{translate('ldap_create_admin_instructions')}
+													p
+														+formMessages
 
-												form(
-													data-ol-async-form
-													data-ol-register-admin
-													action='/launchpad/register_ldap_admin'
-													method='POST'
-												)
-													input(name='_csrf' type='hidden' value=csrfToken)
-													+formMessages
-													.form-group
-														label(for='email') #{translate("email")}
-														input.form-control(
-															name='email'
-															type='email'
-															placeholder='email@example.com'
-															autocomplete='username'
-															required
-															autofocus='true'
-														)
-													.actions
-														button.btn-primary.btn(type='submit' data-ol-disabled-inflight)
-															span(data-ol-inflight='idle') #{translate("register")}
-															span(hidden data-ol-inflight='pending') #{translate("registering")}…
+										<!-- break -->
+										hr.thin
 
-											// Saml Form
-											if authMethod === 'saml'
-												h3 #{translate('saml')}
-												p
-													| #{translate('saml_create_admin_instructions')}
-
-												form(
-													data-ol-async-form
-													data-ol-register-admin
-													action='/launchpad/register_saml_admin'
-													method='POST'
-												)
-													input(name='_csrf' type='hidden' value=csrfToken)
-													+formMessages
-													.form-group
-														label(for='email') #{translate("email")}
-														input.form-control(
-															name='email'
-															type='email'
-															placeholder='email@example.com'
-															autocomplete='username'
-															required
-															autofocus='true'
-														)
-													.actions
-														button.btn-primary.btn(type='submit' data-ol-disabled-inflight)
-															span(data-ol-inflight='idle') #{translate("register")}
-															span(hidden data-ol-inflight='pending') #{translate("registering")}…
-
-									br
-
-								<!-- status indicators -->
-								if adminUserExists
-									.row
-										.col-md-12.status-indicators
-											h2 #{translate('status_checks')}
-
-											<!-- websocket -->
-											.row.row-spaced-small
-												.col-sm-5
-													| #{translate('websockets')}
-												.col-sm-7
-													+launchpad-check('websocket')
-
-									<!-- break -->
-									hr.thin
-
-									<!-- other actions -->
-									.row
-										.col-md-12
-											h2 #{translate('other_actions')}
-
-											h3 #{translate('send_test_email')}
-											form.form(
-												data-ol-async-form
-												action='/launchpad/send_test_email'
-												method='POST'
-											)
-												.form-group
-													label(for='email') Email
-													input.form-control(name='email' type='text' id='email' required)
-												button.btn-primary.btn(type='submit' data-ol-disabled-inflight)
-													span(data-ol-inflight='idle') #{translate("send")}
-													span(hidden data-ol-inflight='pending') #{translate("sending")}…
-
-												p
-													+formMessages
-
-									<!-- break -->
-									hr.thin
-
-									<!-- Go to app -->
-									.row
-										.col-md-12
-											.text-center
-												br
-												p
-													a.btn.btn-info(href='/admin')
-														| Go To Admin Panel
-													| &nbsp;
-													a.btn.btn-primary(href='/project')
-														| Start Using #{settings.appName}
-												br
+										<!-- Go to app -->
+										.row
+											.col-lg-12
+												.text-center
+													br
+													p
+														a.btn.btn-secondary(href='/admin')
+															| Go To Admin Panel
+														| &nbsp;
+														a.btn.btn-primary(href='/project')
+															| Start Using #{settings.appName}
+													br
