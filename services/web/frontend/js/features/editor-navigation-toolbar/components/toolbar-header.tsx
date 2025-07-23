@@ -88,11 +88,7 @@ const ToolbarHeader = React.memo(function ToolbarHeader({
   const shouldDisplayPublishButton = hasPublishPermissions && PublishButton
 
   return (
-    <header
-      className="toolbar toolbar-header"
-      role="navigation"
-      aria-label={t('project_layout_sharing_submission')}
-    >
+    <nav className="toolbar toolbar-header" aria-label={t('project_actions')}>
       <div className="toolbar-left">
         <MenuButton onClick={onShowLeftMenuClick} />
         {cobranding && cobranding.logoImgUrl && (
@@ -158,7 +154,7 @@ const ToolbarHeader = React.memo(function ToolbarHeader({
           </>
         )}
       </div>
-    </header>
+    </nav>
   )
 })
 

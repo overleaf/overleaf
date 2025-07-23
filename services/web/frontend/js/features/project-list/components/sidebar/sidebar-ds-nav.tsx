@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import classnames from 'classnames'
 import { Question, User } from '@phosphor-icons/react'
 import NewProjectButton from '../new-project-button'
@@ -8,7 +9,6 @@ import { usePersistedResize } from '@/shared/hooks/use-resize'
 import { Dropdown } from 'react-bootstrap'
 import getMeta from '@/utils/meta'
 import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
-import { useTranslation } from 'react-i18next'
 import { NavDropdownMenuItems } from '@/features/ui/components/bootstrap-5/navbar/nav-dropdown-from-data'
 import { NavbarDropdownItemData } from '@/features/ui/components/types/navbar'
 import { useContactUsModal } from '@/shared/hooks/use-contact-us-modal'
@@ -45,29 +45,34 @@ function SidebarDsNav() {
         },
       })}
     >
-      <NewProjectButton
-        id="new-project-button-sidebar"
-        className={scrolledDown ? 'show-shadow' : undefined}
-      />
-      <div
-        className="project-list-sidebar-scroll"
-        ref={containerRef}
-        data-testid="project-list-sidebar-scroll"
-      >
-        <SidebarFilters />
-        {showAddAffiliationWidget && <hr />}
-        <AddAffiliation />
-      </div>
+      <nav aria-label={t('project_categories_tags')}>
+        <NewProjectButton
+          id="new-project-button-sidebar"
+          className={scrolledDown ? 'show-shadow' : undefined}
+        />
+        <div
+          className="project-list-sidebar-scroll"
+          ref={containerRef}
+          data-testid="project-list-sidebar-scroll"
+        >
+          <SidebarFilters />
+          {showAddAffiliationWidget && <hr />}
+          <AddAffiliation />
+        </div>
+      </nav>
       <div
         className={classnames(
           'ds-nav-sidebar-lower',
           scrolledUp && 'show-shadow'
         )}
       >
-        <div className="project-list-sidebar-survey-wrapper">
+        <aside
+          className="project-list-sidebar-survey-wrapper"
+          aria-label={t('feedback')}
+        >
           <SurveyWidgetDsNav />
-        </div>
-        <div className="d-flex gap-3 mb-2">
+        </aside>
+        <nav className="d-flex gap-3 mb-2" aria-label={t('account_help')}>
           {helpItem && (
             <Dropdown
               className="ds-nav-icon-dropdown"
@@ -157,7 +162,7 @@ function SidebarDsNav() {
               <UserProvider>{contactUsModal}</UserProvider>
             </>
           )}
-        </div>
+        </nav>
         <div className="ds-nav-ds-name" translate="no">
           <span>Digital Science</span>
         </div>

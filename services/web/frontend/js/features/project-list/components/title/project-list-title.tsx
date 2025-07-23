@@ -44,12 +44,14 @@ function ProjectListTitle({
   }
 
   return (
-    <div
+    <h1
+      id="main-content"
+      tabIndex={-1}
       className={classnames('project-list-title', className)}
       {...extraProps}
     >
       {message}
-    </div>
+    </h1>
   )
 }
 
