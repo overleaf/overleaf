@@ -79,16 +79,30 @@ ObjectId.cacheHexString = true
  */
 
 /**
- * @return {{PROJECT_IDS_FROM: string, PROCESS_HASHED_FILES: boolean, LOGGING_IDENTIFIER: string, BATCH_RANGE_START: string, PROCESS_BLOBS: boolean, BATCH_RANGE_END: string, PROCESS_NON_DELETED_PROJECTS: boolean, PROCESS_DELETED_PROJECTS: boolean}}
+ * @return {{PROJECT_IDS_FROM: string, PROCESS_HASHED_FILES: boolean, LOGGING_IDENTIFIER: string, BATCH_RANGE_START: string, BATCH_RANGE_END: string, PROCESS_NON_DELETED_PROJECTS: boolean, PROCESS_DELETED_PROJECTS: boolean, PROCESS_BLOBS: boolean, DRY_RUN: boolean, OUTPUT_FILE: string, DISPLAY_REPORT: boolean}}
  */
 function parseArgs() {
   const PUBLIC_LAUNCH_DATE = new Date('2012-01-01T00:00:00Z')
+  const DEFAULT_OUTPUT_FILE = `file-migration-${new Date()
+    .toISOString()
+    .replace(/[:.]/g, '_')}.log`
+
   const args = commandLineArgs([
-    { name: 'processNonDeletedProjects', type: String, defaultValue: 'false' },
-    { name: 'processDeletedProjects', type: String, defaultValue: 'false' },
-    { name: 'processHashedFiles', type: String, defaultValue: 'false' },
-    { name: 'processBlobs', type: String, defaultValue: 'true' },
-    { name: 'projectIdsFrom', type: String, defaultValue: '' },
+    { name: 'help', alias: 'h', type: Boolean },
+    { name: 'all', alias: 'a', type: Boolean },
+    { name: 'projects', type: Boolean },
+    { name: 'deleted-projects', type: Boolean },
+    { name: 'skip-hashed-files', type: Boolean },
+    { name: 'skip-existing-blobs', type: Boolean },
+    { name: 'from-file', type: String, defaultValue: '' },
+    { name: 'dry-run', alias: 'n', type: Boolean },
+    {
+      name: 'output',
+      alias: 'o',
+      type: String,
+      defaultValue: DEFAULT_OUTPUT_FILE,
+    },
+    { name: 'report', type: Boolean },
     {
       name: 'BATCH_RANGE_START',
       type: String,
@@ -99,31 +113,107 @@ function parseArgs() {
       type: String,
       defaultValue: new Date().toISOString(),
     },
-    { name: 'LOGGING_IDENTIFIER', type: String, defaultValue: '' },
+    { name: 'logging-id', type: String, defaultValue: '' },
   ])
-  /**
-   * commandLineArgs cannot handle --foo=false, so go the long way
-   * @param {string} name
-   * @return {boolean}
-   */
-  function boolVal(name) {
-    const v = args[name]
-    if (['true', 'false'].includes(v)) return v === 'true'
-    throw new Error(`expected "true" or "false" for boolean option ${name}`)
+
+  // If no arguments are provided, display a usage message
+  if (process.argv.length <= 2) {
+    console.error(
+      'Usage: node back_fill_file_hash.mjs --all | --projects | --deleted-projects'
+    )
+    process.exit(1)
   }
-  const BATCH_RANGE_START = objectIdFromInput(
-    args['BATCH_RANGE_START']
-  ).toString()
-  const BATCH_RANGE_END = objectIdFromInput(args['BATCH_RANGE_END']).toString()
+
+  // If --help is provided, display the help message
+  if (args.help) {
+    console.log(`Usage: node back_fill_file_hash.mjs [options]
+
+Project selection options:
+  --all, -a                  Process all projects, including deleted ones
+  --projects                 Process projects (excluding deleted ones)
+  --deleted-projects         Process deleted projects
+  --from-file <file>         Process selected projects ids from file
+
+File selection options:
+  --skip-hashed-files        Skip processing files that already have a hash
+  --skip-existing-blobs      Skip processing files already in the blob store
+
+Logging options:
+  --output <file>, -o <file> Output log to the specified file
+                             (default: file-migration-<timestamp>.log)
+  --logging-id <id>          Identifier for logging
+                             (default: BATCH_RANGE_START)
+
+Batch range options:
+  --BATCH_RANGE_START <date> Start date for processing
+                             (default: ${args.BATCH_RANGE_START})
+  --BATCH_RANGE_END <date>   End date for processing
+                             (default: ${args.BATCH_RANGE_END})
+
+Other options:
+  --report                   Display a report of the current status
+  --dry-run, -n              Perform a dry run without making changes
+  --help, -h                 Show this help message
+
+Typical usage:
+
+  node back_fill_file_hash.mjs --all
+
+is equivalent to
+
+  node back_fill_file_hash.mjs --projects --deleted-projects
+`)
+    process.exit(0)
+  }
+
+  // Require at least one of --projects, --deleted-projects and --all or --report
+  if (
+    !args.projects &&
+    !args['deleted-projects'] &&
+    !args.all &&
+    !args.report
+  ) {
+    console.error(
+      'Must specify at least one of --projects and --deleted-projects, --all or --report'
+    )
+    process.exit(1)
+  }
+
+  // Forbid --all with --projects or --deleted-projects
+  if (args.all && (args.projects || args['deleted-projects'])) {
+    console.error('Cannot use --all with --projects or --deleted-projects')
+    process.exit(1)
+  }
+
+  // Forbid --all, --projects, --deleted-projects with --report
+  if (args.report && (args.all || args.projects || args['deleted-projects'])) {
+    console.error(
+      'Cannot use --report with --all, --projects or --deleted-projects'
+    )
+    process.exit(1)
+  }
+
+  // The --all option processes all projects, including deleted ones
+  // and checks existing hashed files are present in the blob store.
+  if (args.all) {
+    args.projects = true
+    args['deleted-projects'] = true
+  }
+
+  const BATCH_RANGE_START = objectIdFromInput(args.BATCH_RANGE_START).toString()
+  const BATCH_RANGE_END = objectIdFromInput(args.BATCH_RANGE_END).toString()
   return {
-    PROCESS_NON_DELETED_PROJECTS: boolVal('processNonDeletedProjects'),
-    PROCESS_DELETED_PROJECTS: boolVal('processDeletedProjects'),
-    PROCESS_BLOBS: boolVal('processBlobs'),
-    PROCESS_HASHED_FILES: boolVal('processHashedFiles'),
+    PROCESS_NON_DELETED_PROJECTS: args.projects,
+    PROCESS_DELETED_PROJECTS: args['deleted-projects'],
+    PROCESS_HASHED_FILES: !args['skip-hashed-files'],
+    PROCESS_BLOBS: !args['skip-existing-blobs'],
+    DRY_RUN: args['dry-run'],
+    OUTPUT_FILE: args.output,
     BATCH_RANGE_START,
     BATCH_RANGE_END,
-    LOGGING_IDENTIFIER: args['LOGGING_IDENTIFIER'] || BATCH_RANGE_START,
-    PROJECT_IDS_FROM: args['projectIdsFrom'],
+    LOGGING_IDENTIFIER: args['logging-id'] || BATCH_RANGE_START,
+    PROJECT_IDS_FROM: args['from-file'],
+    DISPLAY_REPORT: args.report,
   }
 }
 
@@ -132,10 +222,13 @@ const {
   PROCESS_DELETED_PROJECTS,
   PROCESS_BLOBS,
   PROCESS_HASHED_FILES,
+  DRY_RUN,
+  OUTPUT_FILE,
   BATCH_RANGE_START,
   BATCH_RANGE_END,
   LOGGING_IDENTIFIER,
   PROJECT_IDS_FROM,
+  DISPLAY_REPORT,
 } = parseArgs()
 
 // We need to handle the start and end differently as ids of deleted projects are created at time of deletion.
@@ -161,6 +254,143 @@ const STREAM_HIGH_WATER_MARK = parseInt(
 )
 const LOGGING_INTERVAL = parseInt(process.env.LOGGING_INTERVAL || '60000', 10)
 const SLEEP_BEFORE_EXIT = parseInt(process.env.SLEEP_BEFORE_EXIT || '1000', 10)
+
+// Log output to a file
+logger.initialize('file-migration', {
+  streams: [
+    {
+      stream:
+        OUTPUT_FILE === '-'
+          ? process.stdout
+          : fs.createWriteStream(OUTPUT_FILE, { flags: 'a' }),
+    },
+  ],
+})
+
+let lastElapsedTime = 0
+async function displayProgress(options = {}) {
+  if (OUTPUT_FILE === '-') {
+    return // skip progress tracking when logging to stdout
+  }
+  if (options.completedAll) {
+    process.stdout.write('\n')
+    return
+  }
+  const elapsedTime = Math.floor((performance.now() - processStart) / 1000)
+  if (lastElapsedTime === elapsedTime && !options.completedBatch) {
+    // Avoid spamming the console with the same progress message
+    return
+  }
+  lastElapsedTime = elapsedTime
+  readline.clearLine(process.stdout, 0)
+  readline.cursorTo(process.stdout, 0)
+  process.stdout.write(
+    `Processed ${STATS.projects} projects, elapsed time ${elapsedTime}s`
+  )
+}
+
+/**
+ * Display the stats for the projects or deletedProjects collections.
+ *
+ * @param {number} N - Number of samples to take from the collection.
+ * @param {string} name - Name of the collection being sampled.
+ * @param {Collection} collection - MongoDB collection to query.
+ * @param {Object} query - MongoDB query to filter documents.
+ * @param {Object} projection - MongoDB projection to select fields.
+ * @param {number} collectionCount - Total number of documents in the collection.
+ * @returns {Promise<void>} Resolves when stats have been displayed.
+ */
+async function getStatsForCollection(
+  N,
+  name,
+  collection,
+  query,
+  projection,
+  collectionCount
+) {
+  const stats = {
+    projectCount: 0,
+    projectsWithAllHashes: 0,
+    fileCount: 0,
+    fileWithHashCount: 0,
+  }
+  // Pick a random sample of projects and estimate the number of files without hashes
+  const result = await collection
+    .aggregate([
+      { $sample: { size: N } },
+      { $match: query },
+      {
+        $project: projection,
+      },
+    ])
+    .toArray()
+
+  for (const project of result) {
+    const fileTree = JSON.stringify(project, [
+      'project',
+      'rootFolder',
+      'folders',
+      'fileRefs',
+      'hash',
+      '_id',
+    ])
+    // count the number of files without a hash, these are uniquely identified
+    // by entries with {"_id":"...."} since we have filtered the file tree
+    const filesWithoutHash = fileTree.match(/\{"_id":"[0-9a-f]{24}"\}/g) || []
+    // count the number of files with a hash, these are uniquely identified
+    // by the number of "hash" strings due to the filtering
+    const filesWithHash = fileTree.match(/"hash"/g) || []
+    stats.fileCount += filesWithoutHash.length + filesWithHash.length
+    stats.fileWithHashCount += filesWithHash.length
+    stats.projectCount++
+    stats.projectsWithAllHashes += filesWithoutHash.length === 0 ? 1 : 0
+  }
+  console.log(`Sampled stats for ${name}:`)
+  const fractionSampled = stats.projectCount / collectionCount
+  const percentageSampled = (fractionSampled * 100).toFixed(1)
+  const fractionConverted = stats.projectsWithAllHashes / stats.projectCount
+  const percentageConverted = (fractionConverted * 100).toFixed(1)
+  console.log(
+    `- Sampled ${name}: ${stats.projectCount} (${percentageSampled}%)`
+  )
+  console.log(
+    `- Sampled ${name} with all hashes present: ${stats.projectsWithAllHashes}`
+  )
+  console.log(
+    `- Percentage of ${name} converted: ${percentageConverted}% (estimated)`
+  )
+}
+
+/**
+ * Displays a report of the current status of projects and deleted projects,
+ * including counts and estimated progress based on a sample.
+ */
+async function displayReport() {
+  const projectsCountResult = await projectsCollection.countDocuments()
+  const deletedProjectsCountResult =
+    await deletedProjectsCollection.countDocuments()
+  const sampleSize = 1000
+  console.log('Current status:')
+  console.log(`- Projects: ${projectsCountResult}`)
+  console.log(`- Deleted projects: ${deletedProjectsCountResult}`)
+  console.log(`Sampling ${sampleSize} projects to estimate progress...`)
+  await getStatsForCollection(
+    sampleSize,
+    'projects',
+    projectsCollection,
+    { rootFolder: { $exists: true } },
+    { rootFolder: 1 },
+    projectsCountResult
+  )
+  await getStatsForCollection(
+    sampleSize,
+    'deleted projects',
+    deletedProjectsCollection,
+    { 'project.rootFolder': { $exists: true } },
+    { 'project.rootFolder': 1 },
+    deletedProjectsCountResult
+  )
+}
 
 // Filestore endpoint location
 const FILESTORE_HOST = process.env.FILESTORE_HOST || '127.0.0.1'
@@ -245,8 +475,8 @@ let lastEventLoopStats = performance.eventLoopUtilization()
  * @param {number} ms
  */
 function toMiBPerSecond(v, ms) {
-  const ONE_MiB = 1024 * 1024
-  return v / ONE_MiB / (ms / 1000)
+  const MiB = 1024 * 1024
+  return v / MiB / (ms / 1000)
 }
 
 /**
@@ -289,7 +519,7 @@ function computeDiff(nextEventLoopStats, now) {
 function printStats(isLast = false) {
   const now = performance.now()
   const nextEventLoopStats = performance.eventLoopUtilization()
-  const logLine = JSON.stringify({
+  const logLine = {
     time: new Date(),
     LOGGING_IDENTIFIER,
     ...STATS,
@@ -297,11 +527,11 @@ function printStats(isLast = false) {
     eventLoop: nextEventLoopStats,
     diff: computeDiff(nextEventLoopStats, now),
     deferredBatches: Array.from(deferredBatches.keys()),
-  })
-  if (isLast) {
-    console.warn(logLine)
+  }
+  if (isLast && OUTPUT_FILE === '-') {
+    console.warn(JSON.stringify(logLine))
   } else {
-    console.log(logLine)
+    logger.info(logLine, 'file-migration stats')
   }
   lastEventLoopStats = nextEventLoopStats
   lastLog = Object.assign({}, STATS)
@@ -321,7 +551,7 @@ function handleSignal() {
 
 /**
  * @param {QueueEntry} entry
- * @return {Promise<string>}
+ * @return {Promise<string|undefined>}
  */
 async function processFileWithCleanup(entry) {
   const {
@@ -332,17 +562,16 @@ async function processFileWithCleanup(entry) {
   try {
     return await processFile(entry, filePath)
   } finally {
-    await Promise.all([
-      fs.promises.rm(filePath, { force: true }),
-      fs.promises.rm(filePath + GZ_SUFFIX, { force: true }),
-    ])
+    if (!DRY_RUN) {
+      await fs.promises.rm(filePath, { force: true })
+    }
   }
 }
 
 /**
  * @param {QueueEntry} entry
  * @param {string} filePath
- * @return {Promise<string>}
+ * @return {Promise<string|undefined>}
  */
 async function processFile(entry, filePath) {
   for (let attempt = 0; attempt < RETRIES; attempt++) {
@@ -376,7 +605,7 @@ async function processFile(entry, filePath) {
 /**
  * @param {QueueEntry} entry
  * @param {string} filePath
- * @return {Promise<string>}
+ * @return {Promise<string|undefined>}
  */
 async function processFileOnce(entry, filePath) {
   const {
@@ -389,6 +618,9 @@ async function processFileOnce(entry, filePath) {
     // processed first, we can skip downloading the other one we already
     // know the hash of.
     return entry.hash
+  }
+  if (DRY_RUN) {
+    return // skip processing in dry-run mode by returning undefined
   }
   const blobStore = new BlobStore(historyId)
   STATS.readFromGCSCount++
@@ -458,8 +690,6 @@ async function uploadBlobToGCS(blobStore, entry, blob, hash, filePath) {
   entry.ctx.recordHistoryBlob(blob)
 }
 
-const GZ_SUFFIX = '.gz'
-
 /**
  * @param {Array<QueueEntry>} files
  * @return {Promise<void>}
@@ -499,6 +729,7 @@ async function waitForDeferredQueues() {
   // Wait for ALL pending batches to finish, especially wait for their mongo
   // writes to finish to avoid extra work when resuming the batch.
   const all = await Promise.allSettled(deferredBatches.values())
+  displayProgress({ completedAll: true })
   // Now that all batches finished, we can throw if needed.
   for (const res of all) {
     if (res.status === 'rejected') {
@@ -521,8 +752,10 @@ async function queueNextBatch(batch, prefix = 'rootFolder.0') {
   const end = renderObjectId(batch[batch.length - 1]._id)
   const deferred = processBatch(batch, prefix)
     .then(() => {
-      console.error(`Actually completed batch ending ${end}`)
+      logger.info({ end }, 'actually completed batch')
+      displayProgress({ completedBatch: true })
     })
+
     .catch(err => {
       logger.error({ err, start, end }, 'fatal error processing batch')
       throw err
@@ -600,6 +833,9 @@ async function handleDeletedFileTreeBatch(batch) {
  * @return {Promise<boolean>}
  */
 async function tryUpdateFileRefInMongo(entry) {
+  if (DRY_RUN) {
+    return true // skip mongo updates in dry-run mode
+  }
   if (entry.path.startsWith('project.')) {
     return await tryUpdateFileRefInMongoInDeletedProject(entry)
   }
@@ -622,6 +858,9 @@ async function tryUpdateFileRefInMongo(entry) {
  * @return {Promise<boolean>}
  */
 async function tryUpdateFileRefInMongoInDeletedProject(entry) {
+  if (DRY_RUN) {
+    return true // skip mongo updates in dry-run mode
+  }
   STATS.mongoUpdates++
   const result = await deletedProjectsCollection.updateOne(
     {
@@ -922,6 +1161,7 @@ class ProjectContext {
    */
   async #tryBatchHashWrites(collection, entries, query) {
     if (entries.length === 0) return []
+    if (DRY_RUN) return [] // skip mongo updates in dry-run mode
     const update = {}
     for (const entry of entries) {
       query[`${entry.path}._id`] = new ObjectId(entry.fileId)
@@ -967,7 +1207,7 @@ class ProjectContext {
     }
   }
 
-  /** @type {Map<string, Promise<string>>} */
+  /** @type {Map<string, Promise<string|undefined>>} */
   #pendingFiles = new Map()
 
   /**
@@ -980,7 +1220,16 @@ class ProjectContext {
       this.#pendingFiles.set(entry.cacheKey, processFileWithCleanup(entry))
     }
     try {
-      entry.hash = await this.#pendingFiles.get(entry.cacheKey)
+      const hash = await this.#pendingFiles.get(entry.cacheKey)
+      if (!hash) {
+        if (DRY_RUN) {
+          return // hash is undefined in dry-run mode
+        } else {
+          throw new Error('undefined hash outside dry-run mode')
+        }
+      } else {
+        entry.hash = hash
+      }
     } finally {
       this.remainingQueueEntries--
     }
@@ -1058,6 +1307,7 @@ async function processNonDeletedProjects() {
       {
         BATCH_RANGE_START,
         BATCH_RANGE_END,
+        trackProgress: async message => {},
       }
     )
   } catch (err) {
@@ -1085,7 +1335,9 @@ async function processDeletedProjects() {
         'project.rootFolder': 1,
         'project._id': 1,
         'project.overleaf.history.id': 1,
-      }
+      },
+      {},
+      { trackProgress: async message => {} }
     )
   } catch (err) {
     gracefulShutdownInitiated = true
@@ -1118,6 +1370,12 @@ async function main() {
   console.warn('Done.')
 }
 
+if (DISPLAY_REPORT) {
+  console.warn('Displaying report...')
+  await displayReport()
+  process.exit(0)
+}
+
 try {
   try {
     await main()
@@ -1134,7 +1392,9 @@ try {
 
   let code = 0
   if (STATS.filesFailed > 0) {
-    console.warn('Some files could not be processed, see logs and try again')
+    console.warn(
+      `Some files could not be processed, see logs in ${OUTPUT_FILE} and try again`
+    )
     code++
   }
   if (STATS.fileHardDeleted > 0) {

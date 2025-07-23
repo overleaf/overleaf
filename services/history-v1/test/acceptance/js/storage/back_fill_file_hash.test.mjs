@@ -491,8 +491,9 @@ describe('back_fill_file_hash script', function () {
         process.argv0,
         [
           'storage/scripts/back_fill_file_hash.mjs',
-          '--processNonDeletedProjects=true',
-          '--processDeletedProjects=true',
+          '--output=-',
+          '--projects',
+          '--deleted-projects',
           ...args,
         ],
         {
@@ -801,7 +802,7 @@ describe('back_fill_file_hash script', function () {
     // Practically, this is slow and moving it to the end of the tests gets us there most of the way.
     it('should process nothing on re-run', async function () {
       const rerun = await runScript(
-        processHashedFiles ? ['--processHashedFiles=true'] : [],
+        !processHashedFiles ? ['--skip-hashed-files'] : [],
         {},
         false
       )
@@ -921,13 +922,13 @@ describe('back_fill_file_hash script', function () {
     STATS_UP_FROM_PROJECT1_ONWARD
   )
 
-  describe('error cases', () => {
+  describe('error cases', function () {
     beforeEach('prepare environment', prepareEnvironment)
 
     it('should gracefully handle fatal errors', async function () {
       mockFilestore.deleteObject(projectId0, fileId0)
       const t0 = Date.now()
-      const { stats, result } = await tryRunScript([], {
+      const { stats, result } = await tryRunScript(['--skip-hashed-files'], {
         RETRIES: '10',
         RETRY_DELAY_MS: '1000',
       })
@@ -962,7 +963,7 @@ describe('back_fill_file_hash script', function () {
           value: { stats, result },
         },
       ] = await Promise.allSettled([
-        tryRunScript([], {
+        tryRunScript(['--skip-hashed-files'], {
           RETRY_DELAY_MS: '100',
           RETRIES: '60',
           RETRY_FILESTORE_404: 'true', // 404s are the easiest to simulate in tests
@@ -988,7 +989,7 @@ describe('back_fill_file_hash script', function () {
     let output
     before('prepare environment', prepareEnvironment)
     before('run script', async function () {
-      output = await runScript([], {
+      output = await runScript(['--skip-hashed-files'], {
         CONCURRENCY: '1',
       })
     })
@@ -1057,10 +1058,10 @@ describe('back_fill_file_hash script', function () {
     let output1, output2
     before('prepare environment', prepareEnvironment)
     before('run script without hashed files', async function () {
-      output1 = await runScript([], {})
+      output1 = await runScript(['--skip-hashed-files'], {})
     })
     before('run script with hashed files', async function () {
-      output2 = await runScript(['--processHashedFiles=true'], {})
+      output2 = await runScript([], {})
     })
     it('should print stats for the first run without hashed files', function () {
       expect(output1.stats).deep.equal(STATS_ALL)
@@ -1076,11 +1077,66 @@ describe('back_fill_file_hash script', function () {
     commonAssertions(true)
   })
 
+  describe('full run in dry-run mode', function () {
+    let output
+    let projectRecordsBefore
+    let deletedProjectRecordsBefore
+    before('prepare environment', prepareEnvironment)
+    before(async function () {
+      projectRecordsBefore = await projectsCollection.find({}).toArray()
+      deletedProjectRecordsBefore = await deletedProjectsCollection
+        .find({})
+        .toArray()
+    })
+    before('run script', async function () {
+      output = await runScript(
+        ['--dry-run'],
+        {
+          CONCURRENCY: '1',
+        },
+        false
+      )
+    })
+
+    it('should print stats for dry-run mode', function () {
+      // Compute the stats for running the script without dry-run mode.
+      const originalStats = sumStats(STATS_ALL, {
+        ...STATS_FILES_HASHED_EXTRA,
+        readFromGCSCount: 30,
+        readFromGCSIngress: 72,
+        mongoUpdates: 0,
+        filesWithHash: 3,
+      })
+      // For a dry-run mode, we expect the stats to be zero except for the
+      // count of projects, blobs, bad file trees, duplicated files
+      // and files with/without hash.  All the other stats such as mongoUpdates
+      // and writeToGCSCount, etc should be zero.
+      const expectedDryRunStats = {
+        ...STATS_ALL_ZERO,
+        projects: originalStats.projects,
+        blobs: originalStats.blobs,
+        badFileTrees: originalStats.badFileTrees,
+        filesDuplicated: originalStats.filesDuplicated,
+        filesWithHash: originalStats.filesWithHash,
+        filesWithoutHash: originalStats.filesWithoutHash,
+      }
+      expect(output.stats).deep.equal(expectedDryRunStats)
+    })
+    it('should not update mongo', async function () {
+      expect(await projectsCollection.find({}).toArray()).to.deep.equal(
+        projectRecordsBefore
+      )
+      expect(await deletedProjectsCollection.find({}).toArray()).to.deep.equal(
+        deletedProjectRecordsBefore
+      )
+    })
+  })
+
   describe('full run CONCURRENCY=10', function () {
     let output
     before('prepare environment', prepareEnvironment)
     before('run script', async function () {
-      output = await runScript([], {
+      output = await runScript(['--skip-hashed-files'], {
         CONCURRENCY: '10',
       })
     })
@@ -1094,7 +1150,7 @@ describe('back_fill_file_hash script', function () {
     let output
     before('prepare environment', prepareEnvironment)
     before('run script', async function () {
-      output = await runScript([], {
+      output = await runScript(['--skip-hashed-files'], {
         STREAM_HIGH_WATER_MARK: (1024 * 1024).toString(),
       })
     })
@@ -1108,7 +1164,7 @@ describe('back_fill_file_hash script', function () {
     let output
     before('prepare environment', prepareEnvironment)
     before('run script', async function () {
-      output = await runScript(['--processHashedFiles=true'], {})
+      output = await runScript([], {})
     })
     it('should print stats', function () {
       expect(output.stats).deep.equal(
@@ -1137,7 +1193,7 @@ describe('back_fill_file_hash script', function () {
     })
     let output
     before('run script', async function () {
-      output = await runScript([], {
+      output = await runScript(['--skip-hashed-files'], {
         CONCURRENCY: '1',
       })
     })
@@ -1158,14 +1214,20 @@ describe('back_fill_file_hash script', function () {
     let outputPart0, outputPart1
     before('prepare environment', prepareEnvironment)
     before('run script on part 0', async function () {
-      outputPart0 = await runScript([`--BATCH_RANGE_END=${edge}`], {
-        CONCURRENCY: '1',
-      })
+      outputPart0 = await runScript(
+        ['--skip-hashed-files', `--BATCH_RANGE_END=${edge}`],
+        {
+          CONCURRENCY: '1',
+        }
+      )
     })
     before('run script on part 1', async function () {
-      outputPart1 = await runScript([`--BATCH_RANGE_START=${edge}`], {
-        CONCURRENCY: '1',
-      })
+      outputPart1 = await runScript(
+        ['--skip-hashed-files', `--BATCH_RANGE_START=${edge}`],
+        {
+          CONCURRENCY: '1',
+        }
+      )
     })
 
     it('should print stats for part 0', function () {
@@ -1177,7 +1239,7 @@ describe('back_fill_file_hash script', function () {
     commonAssertions()
   })
 
-  describe('projectIds from file', () => {
+  describe('projectIds from file', function () {
     const path0 = '/tmp/project-ids-0.txt'
     const path1 = '/tmp/project-ids-1.txt'
     before('prepare environment', prepareEnvironment)
@@ -1210,10 +1272,16 @@ describe('back_fill_file_hash script', function () {
 
     let outputPart0, outputPart1
     before('run script on part 0', async function () {
-      outputPart0 = await runScript([`--projectIdsFrom=${path0}`])
+      outputPart0 = await runScript([
+        '--skip-hashed-files',
+        `--from-file=${path0}`,
+      ])
     })
     before('run script on part 1', async function () {
-      outputPart1 = await runScript([`--projectIdsFrom=${path1}`])
+      outputPart1 = await runScript([
+        '--skip-hashed-files',
+        `--from-file=${path1}`,
+      ])
     })
 
     /**
