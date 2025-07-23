@@ -7,7 +7,6 @@ import { OutlineContainer } from '@/features/outline/components/outline-containe
 import { useOutlinePane } from '@/features/ide-react/hooks/use-outline-pane'
 import React, { ElementType } from 'react'
 import importOverleafModules from '../../../../macros/import-overleaf-module.macro'
-import { t } from 'i18next'
 
 const editorSidebarComponents = importOverleafModules(
   'editorSidebarComponents'
@@ -19,11 +18,10 @@ export default function EditorSidebar() {
   const { outlineEnabled, outlinePanelRef } = useOutlinePane()
 
   return (
-    <nav
+    <aside
       className={classNames('ide-react-editor-sidebar', {
         hidden: view === 'history',
       })}
-      aria-label={t('project_files_outline')}
     >
       {editorSidebarComponents.map(
         ({ import: { default: Component }, path }) => (
@@ -55,6 +53,6 @@ export default function EditorSidebar() {
           <OutlineContainer />
         </Panel>
       </PanelGroup>
-    </nav>
+    </aside>
   )
 }

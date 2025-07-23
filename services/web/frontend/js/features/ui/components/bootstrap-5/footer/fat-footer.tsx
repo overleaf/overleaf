@@ -91,7 +91,11 @@ function FatFooter() {
 
   return (
     <footer className="fat-footer hidden-print">
-      <div className="fat-footer-container">
+      <div
+        role="navigation"
+        aria-label={t('footer_navigation')}
+        className="fat-footer-container"
+      >
         <div className={`fat-footer-sections ${hideFatFooter ? 'hidden' : ''}`}>
           <div className="footer-section" id="footer-brand">
             <a href="/" aria-label={t('overleaf')} className="footer-brand">

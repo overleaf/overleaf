@@ -1,5 +1,8 @@
 footer.fat-footer.hidden-print.website-redesign-fat-footer
-	.fat-footer-container
+	.fat-footer-container(
+		role='navigation'
+		aria-label=translate('footer_navigation')
+	)
 		.fat-footer-sections(class={hidden: hideFatFooter})
 			#footer-brand.footer-section
 				a.footer-brand(href='/' aria-label=settings.appName)

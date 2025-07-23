@@ -23,7 +23,7 @@ function FatFooterBase() {
   const currentYear = new Date().getFullYear()
 
   return (
-    <div className="fat-footer-base">
+    <footer className="fat-footer-base">
       <div className="fat-footer-base-section fat-footer-base-meta">
         <div className="fat-footer-base-item">
           <div className="fat-footer-base-copyright" translate="no">
@@ -62,7 +62,7 @@ function FatFooterBase() {
           />
         </div>
       </div>
-    </div>
+    </footer>
   )
 }
 

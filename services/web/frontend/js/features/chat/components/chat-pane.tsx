@@ -72,7 +72,7 @@ const ChatPane = React.memo(function ChatPane() {
   }
 
   return (
-    <aside className="chat" aria-label={t('chat')}>
+    <aside className="chat">
       <InfiniteScroll
         atEnd={atEnd}
         className="messages"

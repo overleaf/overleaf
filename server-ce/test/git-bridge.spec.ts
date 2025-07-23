@@ -85,11 +85,7 @@ describe('git-bridge', function () {
     it('should render the git-bridge UI in the editor', function () {
       maybeClearAllTokens()
       createProject('git').as('projectId')
-      cy.findByRole('navigation', {
-        name: /Project actions/i,
-      })
-        .findByRole('button', { name: /Menu/i })
-        .click()
+      cy.get('header').findByText('Menu').click()
       cy.findByText('Sync')
       cy.findByText('Git').click()
       cy.findByTestId('git-bridge-modal').within(() => {
@@ -104,11 +100,7 @@ describe('git-bridge', function () {
 
       // Re-open
       cy.url().then(url => cy.visit(url))
-      cy.findByRole('navigation', {
-        name: /Project actions/i,
-      })
-        .findByRole('button', { name: /Menu/i })
-        .click()
+      cy.get('header').findByText('Menu').click()
       cy.findByText('Git').click()
       cy.findByTestId('git-bridge-modal').within(() => {
         cy.get('@projectId').then(id => {
@@ -196,11 +188,7 @@ describe('git-bridge', function () {
     function checkGitAccess(access: 'readOnly' | 'readAndWrite') {
       const recompile = throttledRecompile()
 
-      cy.findByRole('navigation', {
-        name: /Project actions/i,
-      })
-        .findByRole('button', { name: /Menu/i })
-        .click()
+      cy.get('header').findByText('Menu').click()
       cy.findByText('Sync')
       cy.findByText('Git').click()
       cy.get('@projectId').then(projectId => {
@@ -382,11 +370,7 @@ Hello world
     it('should not render the git-bridge UI in the editor', function () {
       login('user@example.com')
       createProject('maybe git')
-      cy.findByRole('navigation', {
-        name: /Project actions/i,
-      })
-        .findByRole('button', { name: /Menu/i })
-        .click()
+      cy.get('header').findByText('Menu').click()
       cy.findByText('Word Count') // wait for lazy loading
       cy.findByText('Sync').should('not.exist')
       cy.findByText('Git').should('not.exist')

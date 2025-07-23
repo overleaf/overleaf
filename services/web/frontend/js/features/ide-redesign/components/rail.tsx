@@ -258,13 +258,7 @@ export const RailLayout = () => {
       onSelect={onTabSelect}
       id="ide-rail-tabs"
     >
-      {/* The <Nav> element is a "div" and has a "role="tablist"".
-          But it should be identified as a navigation landmark.
-          Therefore, we nest them: the parent <nav> is the landmark, and its child gets the "role="tablist"". */}
-      <nav
-        className={classNames('ide-rail', { hidden: isHistoryView })}
-        aria-label={t('files_collaboration_integrations_logs')}
-      >
+      <div className={classNames('ide-rail', { hidden: isHistoryView })}>
         <Nav activeKey={selectedTab} className="ide-rail-tabs-nav">
           {railTabs
             .filter(({ hide }) => !hide)
@@ -280,13 +274,11 @@ export const RailLayout = () => {
               />
             ))}
           <div className="flex-grow-1" />
-          <nav aria-label={t('help_editor_settings')}>
-            {railActions?.map(action => (
-              <RailActionElement key={action.key} action={action} />
-            ))}
-          </nav>
+          {railActions?.map(action => (
+            <RailActionElement key={action.key} action={action} />
+          ))}
         </Nav>
-      </nav>
+      </div>
       <Panel
         id={
           newErrorlogs

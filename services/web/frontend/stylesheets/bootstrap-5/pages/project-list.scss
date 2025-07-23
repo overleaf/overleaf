@@ -140,14 +140,15 @@
   align-items: center;
   margin-bottom: var(--spacing-05);
   min-height: 36px;
+}
 
-  .project-list-title {
-    @include heading-sm;
+.project-list-title {
+  min-width: 0;
+  color: $content-secondary;
 
-    color: $content-secondary;
-    font-weight: bold;
-    min-width: 0;
-  }
+  @include heading-sm;
+
+  font-weight: bold;
 }
 
 .project-tools {

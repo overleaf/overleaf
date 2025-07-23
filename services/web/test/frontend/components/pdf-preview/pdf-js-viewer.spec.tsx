@@ -31,12 +31,10 @@ describe('<PdfJSViewer/>', function () {
 
     cy.waitForCompile({ pdf: true })
 
-    cy.findByTestId('pdfjs-viewer-inner').within(() => {
-      cy.findByLabelText(`Page ${FSI}1${PDI}`)
-      cy.findByLabelText(`Page ${FSI}2${PDI}`)
-      cy.findByLabelText(`Page ${FSI}3${PDI}`)
-      cy.findByLabelText(`Page ${FSI}4${PDI}`).should('not.exist')
-    })
+    cy.findByRole('region', { name: `Page ${FSI}1${PDI}` })
+    cy.findByRole('region', { name: `Page ${FSI}2${PDI}` })
+    cy.findByRole('region', { name: `Page ${FSI}3${PDI}` })
+    cy.findByRole('region', { name: `Page ${FSI}4${PDI}` }).should('not.exist')
 
     cy.contains('Your Paper')
   })
@@ -98,9 +96,7 @@ describe('<PdfJSViewer/>', function () {
 
     cy.waitForCompile({ pdf: true })
 
-    cy.findByTestId('pdfjs-viewer-inner').within(() => {
-      cy.findByLabelText(`Page ${FSI}1${PDI}`)
-    })
+    cy.findByRole('region', { name: `Page ${FSI}1${PDI}` })
 
     cy.then(() => unmountComponentAtNode(getContainerEl()))
   })

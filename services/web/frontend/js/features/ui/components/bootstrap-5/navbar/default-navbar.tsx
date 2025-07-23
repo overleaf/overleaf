@@ -61,7 +61,6 @@ function DefaultNavbar(
             '--navbar-brand-image-redesign-url': `url("${overleafBlackLogo}")`,
           } as CSSPropertiesWithVariables
         }
-        aria-label={t('primary')}
       >
         <Container className="navbar-container" fluid>
           <div className="navbar-header">
@@ -93,7 +92,7 @@ function DefaultNavbar(
               <Navbar.Toggle
                 aria-controls="navbar-main-collapse"
                 aria-expanded="false"
-                aria-label={t('primary')}
+                aria-label={t('main_navigation')}
               >
                 {showCloseIcon && expanded ? (
                   <X />

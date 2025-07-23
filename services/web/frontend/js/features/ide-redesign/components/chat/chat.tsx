@@ -69,7 +69,7 @@ export const ChatPane = () => {
     <div className="chat-panel">
       <RailPanelHeader title={t('collaborator_chat')} />
       <div className="chat-wrapper">
-        <aside className="chat" aria-label={t('chat')}>
+        <aside className="chat">
           <InfiniteScroll
             atEnd={atEnd}
             className="messages"

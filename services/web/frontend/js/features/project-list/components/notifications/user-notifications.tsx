@@ -1,5 +1,4 @@
 import { JSXElementConstructor } from 'react'
-import { useTranslation } from 'react-i18next'
 import Common from './groups/common'
 import Institution from './groups/institution'
 import ConfirmEmail from './groups/confirm-email'
@@ -33,13 +32,9 @@ const USGovBanner: JSXElementConstructor<Record<string, never>> =
 function UserNotifications() {
   const groupSubscriptionsPendingEnrollment =
     getMeta('ol-groupSubscriptionsPendingEnrollment') || []
-  const { t } = useTranslation()
 
   return (
-    <section
-      className="user-notifications notification-list"
-      aria-label={t('notification')}
-    >
+    <div className="user-notifications notification-list">
       <ul className="list-unstyled">
         {EnrollmentNotification &&
           groupSubscriptionsPendingEnrollment.map(subscription => (
@@ -63,7 +58,7 @@ function UserNotifications() {
 
         {isDeprecatedBrowser() && <DeprecatedBrowser />}
       </ul>
-    </section>
+    </div>
   )
 }
 
