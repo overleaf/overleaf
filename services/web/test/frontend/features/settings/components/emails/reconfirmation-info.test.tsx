@@ -76,7 +76,9 @@ describe('<ReconfirmationInfo/>', function () {
       screen.getByText(
         /Please take a moment to confirm your institutional email address/
       )
-      screen.getByRole('link', { name: 'Learn more' })
+      screen.getByRole('link', {
+        name: 'Learn more about institutional email reconfirmation.',
+      })
       expect(screen.queryByText(/add a new primary email address/)).to.not.exist
     })
 
@@ -121,13 +123,13 @@ describe('<ReconfirmationInfo/>', function () {
         Object.assign(getMeta('ol-ExposedSettings'), {
           hasSamlFeature: false,
         })
-        fetchMock.post('/user/emails/send-reconfirmation', 200)
+        fetchMock.post('/user/emails/send-confirmation-code', 200)
       })
 
       it('sends and resends confirmation email', async function () {
         renderReconfirmationInfo(inReconfirmUserData)
         const confirmButton = (await screen.findByRole('button', {
-          name: 'Confirm affiliation',
+          name: 'Send confirmation code',
         })) as HTMLButtonElement
 
         await waitFor(() => {
@@ -141,12 +143,14 @@ describe('<ReconfirmationInfo/>', function () {
         expect(fetchMock.callHistory.called()).to.be.true
 
         // the confirmation text should now be displayed
-        await screen.findByText(/Please check your email inbox to confirm/)
+        await screen.findByLabelText(
+          /Enter the 6-digit code sent to sso-prof@sso-university\.edu/
+        )
 
         // try the resend button
         fetchMock.clearHistory()
         const resendButton = await screen.findByRole('button', {
-          name: 'Resend confirmation email',
+          name: /Resend confirmation code/,
         })
 
         fireEvent.click(resendButton)
@@ -154,9 +158,11 @@ describe('<ReconfirmationInfo/>', function () {
         // commented out as it's already gone by this point
         // await screen.findByText(/Sending/)
         expect(fetchMock.callHistory.called()).to.be.true
-        await waitForElementToBeRemoved(() => screen.getByText('Sending…'))
+        await waitForElementToBeRemoved(() =>
+          screen.getByText('Resending confirmation code')
+        )
         await screen.findByRole('button', {
-          name: 'Resend confirmation email',
+          name: 'Resend confirmation code',
         })
       })
     })

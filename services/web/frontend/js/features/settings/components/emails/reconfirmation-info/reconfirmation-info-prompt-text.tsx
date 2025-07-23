@@ -37,7 +37,7 @@ function ReconfirmationInfoPromptText({
         href="/learn/how-to/Institutional_Email_Reconfirmation"
         target="_blank"
       >
-        {t('learn_more')}
+        {t('learn_more_about_email_reconfirmation')}
       </a>
       <br />
       {primary ? <i>{t('need_to_add_new_primary_before_remove')}</i> : null}

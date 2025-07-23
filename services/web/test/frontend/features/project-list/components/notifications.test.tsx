@@ -842,24 +842,22 @@ describe('<UserNotifications />', function () {
       )
 
       const sendReconfirmationMock = fetchMock.post(
-        '/user/emails/send-reconfirmation',
+        '/user/emails/send-confirmation-code',
         200
       )
       fireEvent.click(
-        screen.getByRole('button', { name: /confirm affiliation/i })
+        screen.getByRole('button', { name: 'Send confirmation code' })
       )
 
       await waitForElementToBeRemoved(() => screen.getByText(/loading/i))
-      screen.getByText(/check your email inbox to confirm/i)
-      expect(screen.queryByRole('button', { name: /confirm affiliation/i })).to
-        .be.null
-      expect(screen.queryByRole('link', { name: /remove it/i })).to.be.null
-      expect(screen.queryByRole('link', { name: /learn more/i })).to.be.null
+      screen.getByText(/Enter the 6-digit code sent to foo@overleaf.com/i)
       expect(sendReconfirmationMock.callHistory.called()).to.be.true
       fireEvent.click(
-        screen.getByRole('button', { name: /resend confirmation email/i })
+        screen.getByRole('button', { name: /resend confirmation code/i })
       )
-      await waitForElementToBeRemoved(() => screen.getByText('Sending…'))
+      await waitForElementToBeRemoved(() =>
+        screen.getByText('Resending confirmation code')
+      )
       expect(sendReconfirmationMock.callHistory.calls()).to.have.lengthOf(2)
     })
 
