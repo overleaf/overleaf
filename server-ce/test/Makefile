@@ -26,7 +26,7 @@ test-e2e:
 
 test-e2e-open:
 	docker compose up -d host-admin
-	docker compose up --no-log-prefix --exit-code-from=e2e-open e2e-open
+	docker compose up --no-log-prefix --exit-code-from=e2e-open e2e-open host-admin
 
 clean:
 	docker compose down --volumes --timeout 0

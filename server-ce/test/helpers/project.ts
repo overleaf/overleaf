@@ -217,6 +217,19 @@ export function createNewFile() {
   return fileName
 }
 
+export function expectFileExists(
+  name: string,
+  binary: boolean,
+  content: string
+) {
+  cy.findByRole('treeitem', { name }).click()
+  if (binary) {
+    cy.findByText(content).should('not.have.class', 'cm-line')
+  } else {
+    cy.findByText(content).should('have.class', 'cm-line')
+  }
+}
+
 export function prepareFileUploadTest(binary = false) {
   const name = `${uuid()}.txt`
   const content = `Test File Content ${name}${binary ? ' \x00' : ''}`
@@ -235,14 +248,7 @@ export function prepareFileUploadTest(binary = false) {
   // wait for the upload to finish
   cy.findByRole('treeitem', { name })
 
-  return function check() {
-    cy.findByRole('treeitem', { name }).click()
-    if (binary) {
-      cy.findByText(content).should('not.have.class', 'cm-line')
-    } else {
-      cy.findByText(content).should('have.class', 'cm-line')
-    }
-  }
+  return () => expectFileExists(name, binary, content)
 }
 
 export function testNewFileUpload() {

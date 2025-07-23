@@ -6,6 +6,7 @@ export const STARTUP_TIMEOUT =
 
 export function isExcludedBySharding(
   shard:
+    | 'LOCAL_ONLY'
     | 'CE_DEFAULT'
     | 'CE_CUSTOM_1'
     | 'CE_CUSTOM_2'
@@ -29,6 +30,7 @@ export function startWith({
   varsFn = () => ({}),
   withDataDir = false,
   resetData = false,
+  mongoVersion = '',
 }) {
   before(async function () {
     Object.assign(vars, varsFn())
@@ -38,14 +40,18 @@ export function startWith({
       vars,
       withDataDir,
       resetData,
+      mongoVersion,
     })
     if (resetData) {
+      cy.log('resetting data and sessions')
       resetCreatedUsersCache()
       resetActivateUserRateLimit()
       // no return here, always reconfigure when resetting data
     } else if (previousConfigFrontend === cfg) {
+      cy.log(`already running with ${cfg}`)
       return
     }
+    cy.log(`starting with ${cfg}`)
 
     this.timeout(STARTUP_TIMEOUT)
     const { previousConfigServer } = await reconfigure({
@@ -54,6 +60,7 @@ export function startWith({
       vars,
       withDataDir,
       resetData,
+      mongoVersion,
     })
     if (previousConfigServer !== cfg) {
       await Cypress.session.clearAllSavedSessions()
