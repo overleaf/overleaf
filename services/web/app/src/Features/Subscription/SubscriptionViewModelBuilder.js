@@ -17,6 +17,7 @@ const { V1ConnectionError } = require('../Errors/Errors')
 const FeaturesHelper = require('./FeaturesHelper')
 const { formatCurrency } = require('../../util/currency')
 const Modules = require('../../infrastructure/Modules')
+const SplitTestHandler = require('../SplitTests/SplitTestHandler')
 
 /**
  * @import { Subscription } from "../../../../types/project/dashboard/subscription"
@@ -254,6 +255,32 @@ async function buildUsersSubscriptionViewModel(user, locale = 'en') {
     const isInTrial =
       paymentRecord.subscription.trialPeriodEnd &&
       paymentRecord.subscription.trialPeriodEnd.getTime() > Date.now()
+
+    let isEligibleForPause = false
+    const commonPauseConditions =
+      !personalSubscription.pendingPlan &&
+      !personalSubscription.groupPlan &&
+      !isInTrial &&
+      !paymentRecord.subscription.planCode.includes('ann') &&
+      !paymentRecord.subscription.addOns?.length
+
+    if (
+      paymentRecord.subscription.service === 'recurly' &&
+      commonPauseConditions
+    ) {
+      isEligibleForPause = true
+    } else if (
+      paymentRecord.subscription.service.includes('stripe') &&
+      commonPauseConditions
+    ) {
+      const stripePauseAssignment =
+        await SplitTestHandler.promises.getAssignmentForUser(
+          user._id,
+          'stripe-pause'
+        )
+      isEligibleForPause = stripePauseAssignment.variant === 'enabled'
+    }
+
     personalSubscription.payment = {
       taxRate,
       billingDetailsLink:
@@ -281,13 +308,7 @@ async function buildUsersSubscriptionViewModel(user, locale = 'en') {
       hasPastDueInvoice: paymentRecord.account.hasPastDueInvoice,
       pausedAt: paymentRecord.subscription.pausePeriodStart,
       remainingPauseCycles: paymentRecord.subscription.remainingPauseCycles,
-      isEligibleForPause:
-        paymentRecord.subscription.service === 'recurly' &&
-        !personalSubscription.pendingPlan &&
-        !personalSubscription.groupPlan &&
-        !isInTrial &&
-        !paymentRecord.subscription.planCode.includes('ann') &&
-        !paymentRecord.subscription.addOns?.length > 0,
+      isEligibleForPause,
       isEligibleForGroupPlan: await isEligibleForGroupPlan(
         paymentRecord.subscription.service,
         isInTrial

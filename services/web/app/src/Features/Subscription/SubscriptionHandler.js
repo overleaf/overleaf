@@ -319,8 +319,9 @@ async function pauseSubscription(user, pauseCycles) {
     throw new Error('Cannot pause a subscription with addons')
   }
 
-  await RecurlyClient.promises.pauseSubscriptionByUuid(
-    subscription.recurlySubscription_id,
+  await Modules.promises.hooks.fire(
+    'pausePaidSubscription',
+    subscription,
     pauseCycles
   )
 }
