@@ -1,0 +1,101 @@
+@use 'sass:color';
+
+.template-page {
+  --link-color: var(--green-60);
+  --link-hover-color: var(--green-70);
+  --link-visited-color: var(--green-60);
+  --link-text-decoration: none;
+  --link-hover-text-decoration: underline;
+}
+
+.template-page-header {
+  padding-top: var(--spacing-12);
+
+  h1,
+  h2 {
+    margin-top: var(--spacing-03);
+    margin-right: var(--spacing-03);
+    line-height: 1;
+  }
+}
+
+.template-thumbnail {
+  --link-color: var(--link-ui);
+  --link-hover-color: var(--link-ui-hover);
+  --link-visited-color: var(--link-ui-visited);
+
+  .thumbnail {
+    display: block;
+    padding: var(--spacing-02);
+    margin-bottom: var(--spacing-08);
+    line-height: $line-height-base;
+    background-color: var(--bg-light-primary);
+    border: 1px solid #ddd;
+    border-radius: var(--border-radius-base);
+    transition: all 0.2s ease-in-out;
+    box-shadow: 0 2px 4px rgb(0 0 0 / 10%);
+
+    img {
+      width: 100%;
+    }
+  }
+
+  > img,
+  a > img {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  a {
+    padding: 0;
+
+    h3 {
+      color: var(--link-color);
+      margin: 10px 0 10px 20px;
+    }
+
+    text-decoration: none;
+
+    // Add a hover state for linked versions only
+    &:hover,
+    &:focus,
+    .active {
+      border-color: var(--link-color);
+      text-decoration: underline;
+    }
+  }
+
+  .caption {
+    padding: var(--spacing-04); // was 9px
+    color: var(--neutral-70);
+    background: color.adjust($neutral-10, $lightness: 3%);
+    border-top: 1px solid #ddd;
+  }
+}
+
+.template-section-header {
+  @extend .page-header;
+
+  margin-top: 0;
+}
+
+/* stylelint-disable selector-class-pattern */
+.download-buttons,
+.social_buttons {
+  padding-top: var(--spacing-07);
+}
+/* stylelint-enable selector-class-pattern */
+
+.template-details-section {
+  padding-bottom: var(--spacing-07);
+
+  .btn {
+    margin-left: var(--spacing-03);
+  }
+}
+
+.template-large-pdf-preview {
+  img {
+    max-width: 100%;
+  }
+}
