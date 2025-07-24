@@ -7,6 +7,7 @@ const EntityConfigs = require('./UserMembershipEntityConfigs')
 const Errors = require('../Errors/Errors')
 const HttpErrorHandler = require('../Errors/HttpErrorHandler')
 const TemplatesManager = require('../Templates/TemplatesManager')
+const { useAdminCapabilities } = require('../Helpers/AdminAuthorizationHelper')
 
 // set of middleware arrays or functions that checks user access to an entity
 // (publisher, institution, group, template, etc.)
@@ -185,16 +186,20 @@ const UserMembershipMiddleware = {
 
   requireSplitTestMetricsAccess: [
     AuthenticationController.requireLogin(),
+    useAdminCapabilities,
     allowAccessIfAny([
       UserMembershipAuthorization.hasStaffAccess('splitTestMetrics'),
       UserMembershipAuthorization.hasStaffAccess('splitTestManagement'),
+      UserMembershipAuthorization.hasAdminCapability('view-split-test'),
     ]),
   ],
 
   requireSplitTestManagementAccess: [
     AuthenticationController.requireLogin(),
+    useAdminCapabilities,
     allowAccessIfAny([
       UserMembershipAuthorization.hasStaffAccess('splitTestManagement'),
+      UserMembershipAuthorization.hasAdminCapability('modify-split-test'),
     ]),
   ],
 
