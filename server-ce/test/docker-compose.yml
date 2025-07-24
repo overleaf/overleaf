@@ -72,6 +72,7 @@ services:
     working_dir: /e2e
     volumes:
       - ./:/e2e
+    user: "${DOCKER_USER:-1000:1000}"
     environment:
       CYPRESS_SHARD:
       CYPRESS_BASE_URL: http://sharelatex
@@ -83,26 +84,14 @@ services:
         condition: service_healthy
 
   e2e-open:
-    image: cypress/included:13.13.2
-    stop_grace_period: 0s
-    entrypoint: npm
+    extends:
+      service: e2e
     command: run cypress:open
-    working_dir: /e2e
     volumes:
-      - ./:/e2e
       - /tmp/.X11-unix:/tmp/.X11-unix
       - ${XAUTHORITY:-/dev/null}:/home/node/.Xauthority
-    user: "${DOCKER_USER:-1000:1000}"
     environment:
-      CYPRESS_SHARD:
-      CYPRESS_BASE_URL: http://sharelatex
-      SPEC_PATTERN: '**/*.spec.{js,jsx,ts,tsx}'
       DISPLAY: ${DISPLAY:-:0}
-    depends_on:
-      sharelatex:
-        condition: service_healthy
-      host-admin:
-        condition: service_healthy
 
   host-admin:
     build: .
