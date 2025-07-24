@@ -23,6 +23,7 @@ export type CustomerSubscriptionUpdatedWebhookEvent = {
         ]
       }
       status?: Stripe.Subscription.Status
+      metadata?: Record<string, string>
     }
   }
 }

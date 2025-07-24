@@ -7,7 +7,6 @@ const SubscriptionController = require('./SubscriptionController')
 const SubscriptionHelper = require('./SubscriptionHelper')
 const { Subscription } = require('../../models/Subscription')
 const { User } = require('../../models/User')
-const RecurlyClient = require('./RecurlyClient')
 const PlansLocator = require('./PlansLocator')
 const TeamInvitesHandler = require('./TeamInvitesHandler')
 const GroupPlansData = require('./GroupPlansData')
@@ -284,13 +283,18 @@ async function createAddSeatsSubscriptionChange(userId, adding, poNumber) {
   const { changeRequest, paymentProviderSubscription } =
     await _addSeatsSubscriptionChange(userId, adding)
 
+  let subscriptionDetailUpdateRequest
   if (paymentProviderSubscription.isCollectionMethodManual) {
-    await updateSubscriptionPaymentTerms(paymentProviderSubscription, poNumber)
+    subscriptionDetailUpdateRequest = await updateSubscriptionPaymentTerms(
+      paymentProviderSubscription,
+      poNumber
+    )
   }
   await Modules.promises.hooks.fire(
     'applySubscriptionChangeRequestAndSync',
     changeRequest,
-    userId
+    userId,
+    subscriptionDetailUpdateRequest?.termsAndConditions
   )
 
   return { adding }
@@ -300,22 +304,12 @@ async function updateSubscriptionPaymentTerms(
   paymentProviderSubscription,
   poNumber
 ) {
-  if (paymentProviderSubscription.service?.includes('stripe')) {
-    // TODO: Implement Stripe payment terms update
-    throw new OError(
-      'Updating payment terms is not supported for Stripe subscriptions',
-      {
-        subscriptionId: paymentProviderSubscription.id,
-      }
-    )
-  }
-
   const [termsAndConditions] = await Modules.promises.hooks.fire(
     'generateTermsAndConditions',
     { currency: paymentProviderSubscription.currency, poNumber }
   )
 
-  const updateRequest = poNumber
+  const subscriptionDetailUpdateRequest = poNumber
     ? paymentProviderSubscription.getRequestForPoNumberAndTermsAndConditionsUpdate(
         poNumber,
         termsAndConditions
@@ -323,8 +317,11 @@ async function updateSubscriptionPaymentTerms(
     : paymentProviderSubscription.getRequestForTermsAndConditionsUpdate(
         termsAndConditions
       )
-
-  await RecurlyClient.promises.updateSubscriptionDetails(updateRequest)
+  await Modules.promises.hooks.fire(
+    'updateSubscriptionDetails',
+    subscriptionDetailUpdateRequest
+  )
+  return subscriptionDetailUpdateRequest
 }
 
 async function getGroupPlanUpgradePreview(ownerId) {

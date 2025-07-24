@@ -498,9 +498,9 @@ describe('SubscriptionGroupHandler', function () {
               this.adding,
               '123'
             )
-
-          this.RecurlyClient.promises.updateSubscriptionDetails
+          this.Modules.promises.hooks.fire
             .calledWith(
+              'updateSubscriptionDetails',
               sinon.match
                 .has('poNumber')
                 .and(sinon.match.has('termsAndConditions'))
@@ -532,21 +532,12 @@ describe('SubscriptionGroupHandler', function () {
               'T&Cs'
             )
             .should.equal(true)
-          this.RecurlyClient.promises.updateSubscriptionDetails
-            .calledWith(this.poNumberAndTermsAndConditionsUpdate)
-            .should.equal(true)
-        })
-
-        it('should fail for stripe', async function () {
-          this.recurlySubscription.service = 'stripe'
-          await expect(
-            this.Handler.promises.updateSubscriptionPaymentTerms(
-              this.recurlySubscription,
-              this.poNumberAndTermsAndConditionsUpdate.poNumber
+          this.Modules.promises.hooks.fire
+            .calledWith(
+              'updateSubscriptionDetails',
+              this.poNumberAndTermsAndConditionsUpdate
             )
-          ).to.be.rejectedWith(
-            'Updating payment terms is not supported for Stripe subscriptions'
-          )
+            .should.equal(true)
         })
       })
 
@@ -558,8 +549,11 @@ describe('SubscriptionGroupHandler', function () {
           this.recurlySubscription.getRequestForTermsAndConditionsUpdate
             .calledWithMatch('T&Cs')
             .should.equal(true)
-          this.RecurlyClient.promises.updateSubscriptionDetails
-            .calledWith(this.termsAndConditionsUpdate)
+          this.Modules.promises.hooks.fire
+            .calledWith(
+              'updateSubscriptionDetails',
+              this.termsAndConditionsUpdate
+            )
             .should.equal(true)
         })
       })

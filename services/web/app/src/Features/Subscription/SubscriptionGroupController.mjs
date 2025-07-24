@@ -303,7 +303,6 @@ async function submitForm(req, res) {
 
   if (paymentProviderSubscription.isCollectionMethodManual) {
     await SubscriptionGroupHandler.promises.updateSubscriptionPaymentTerms(
-      userId,
       paymentProviderSubscription,
       poNumber
     )
