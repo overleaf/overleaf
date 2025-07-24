@@ -7,34 +7,33 @@ mixin faq_search-marketing(headerText, headerClass)
 		search.wiki
 			form.project-search.form-horizontal(role='search' data-ol-faq-search)
 				.form-group.has-feedback.has-feedback-left
-					.col-sm-12
-						label.visually-hidden(for='search-help-library') Search help library…
-						input.form-control(
-							id='search-help-library'
-							type='search'
-							placeholder='Search help library…'
-						)
-						+material-symbol('search').form-control-feedback-left(
-							aria-hidden='true'
-						)
-						+material-symbol('clear').form-control-feedback(
-							data-ol-clear-search
-							hidden
-						)
-						button.visually-hidden(
-							type='button'
-							hidden
-							data-ol-clear-search
-							aria-label=translate('clear_search')
-						)
+					.col-12
+						.form-control-wrapper
+							label.visually-hidden(for='search-help-library') Search help library…
+							span.form-control-start-icon
+								+material-symbol('search').form-control-feedback-left(
+									aria-hidden='true'
+								)
+							input.form-control.form-control-offset-start.form-control-offset-end(
+								id='search-help-library'
+								type='text'
+								placeholder='Search help library…'
+								data-ol-search-input
+							)
+							span.form-control-end-icon
+								button.form-control-search-clear-btn(
+									type='button'
+									hidden
+									data-ol-clear-search
+									aria-label=translate('clear_search')
+								)
+									+material-symbol('clear')
 
 				.row(role='region' aria-label='search results')
-					.col-md-12
+					.col-12
 						div(data-ol-search-results-wrapper)
 							span.visually-hidden(aria-live='polite' data-ol-search-sr-help-message)
 							div(data-ol-search-results)
-						.row-spaced-small.search-result.card.card-thin(
-							hidden
-							data-ol-search-no-results
-						)
-							p #{translate("no_search_results")}
+						.row-spaced-small.search-result.card(hidden data-ol-search-no-results)
+							.card-body
+								p #{translate("no_search_results")}

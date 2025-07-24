@@ -4,7 +4,7 @@ mixin reconfirmAffiliationNotification-marketing(userEmail, location)
 	- var ssoEnabled = userEmail.affiliation && userEmail.affiliation.institution && userEmail.affiliation.institution.ssoEnabled
 	if ssoEnabled
 		- var institutionId = userEmail.affiliation && userEmail.affiliation.institution && userEmail.affiliation.institution.id
-		a.btn-reconfirm.btn.btn-sm.btn-info(
+		a.btn-reconfirm.btn.btn-sm.btn-secondary(
 			data-ol-slow-link
 			href=`${settings.saml.ukamf.initPath}?university_id=${institutionId}&reconfirm=${location}`
 		)
@@ -12,7 +12,10 @@ mixin reconfirmAffiliationNotification-marketing(userEmail, location)
 			span(hidden data-ol-inflight='pending') #{translate("pending")}…
 
 	else
-		a.btn-reconfirm.btn.btn-sm.btn-info(data-ol-slow-link href='/user/settings')
+		a.btn-reconfirm.btn.btn-sm.btn-secondary(
+			data-ol-slow-link
+			href='/user/settings'
+		)
 			span(data-ol-inflight='idle') #{translate("go_to_account_settings")}
 			span(hidden data-ol-inflight='pending') #{translate("redirecting")}… 
 
