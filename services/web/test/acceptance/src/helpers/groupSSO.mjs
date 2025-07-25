@@ -101,6 +101,7 @@ export async function createGroupSSO(
     nonSSOMember,
     userHelper,
     enrollmentUrl,
+    certificates: baseSsoConfig.certificates,
   }
 }
 
