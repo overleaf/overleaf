@@ -146,7 +146,7 @@
     "moment": "^2.29.4",
     "mongodb-legacy": "6.1.3",
     "mongoose": "8.9.5",
-    "multer": "overleaf/multer#4dbceda355efc3fc8ac3cf5c66c3778c8a6fdb23",
+    "multer": "2.0.2",
     "nocache": "^2.1.0",
     "node-fetch": "^2.7.0",
     "nodemailer": "^6.7.0",
