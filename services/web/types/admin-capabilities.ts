@@ -1,6 +1,7 @@
 export type AdminCapability =
   | 'clear-saml-data'
   | 'clear-session'
+  | 'create-subscription'
   | 'modify-login-status'
   | 'modify-user-email'
   | 'modify-user-name'
