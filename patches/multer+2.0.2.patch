@@ -1,0 +1,13 @@
+diff --git a/node_modules/multer/lib/make-middleware.js b/node_modules/multer/lib/make-middleware.js
+index 260dcb4..895b4b2 100644
+--- a/node_modules/multer/lib/make-middleware.js
++++ b/node_modules/multer/lib/make-middleware.js
+@@ -113,7 +113,7 @@ function makeMiddleware (setup) {
+       if (fieldname == null) return abortWithCode('MISSING_FIELD_NAME')
+ 
+       // don't attach to the files object, if there is no file
+-      if (!filename) return fileStream.resume()
++      if (!filename) filename = 'undefined'
+ 
+       // Work around bug in Busboy (https://github.com/mscdex/busboy/issues/6)
+       if (limits && Object.prototype.hasOwnProperty.call(limits, 'fieldNameSize')) {
