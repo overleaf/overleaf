@@ -200,6 +200,131 @@ export const ToolbarItems: FC<{
           )}
         </>
       )}
+
+      {languageName === 'typst' && (
+        <>
+          {showGroup('group-format') && (
+            <div
+              className="ol-cm-toolbar-button-group"
+              aria-label={t('toolbar_text_style')}
+            >
+              <ToolbarButton
+                id="toolbar-format-bold"
+                label={t('toolbar_format_bold')}
+                command={commands.toggleTypstStrong}
+                active={isActive('typst-strong')}
+                icon="format_bold"
+                shortcut={isMac ? '⌘B' : 'Ctrl+B'}
+              />
+              <ToolbarButton
+                id="toolbar-format-italic"
+                label={t('toolbar_format_italic')}
+                command={commands.toggleTypstEmph}
+                active={isActive('typst-emph')}
+                icon="format_italic"
+                shortcut={isMac ? '⌘I' : 'Ctrl+I'}
+              />
+            </div>
+          )}
+          {showGroup('group-math') && (
+            <div
+              className="ol-cm-toolbar-button-group"
+              data-overflow="group-math"
+              aria-label={t('toolbar_insert_math_and_symbols')}
+            >
+              <MathDropdown />
+              {symbolPaletteAvailable && (
+                <ToolbarButton
+                  id="toolbar-toggle-symbol-palette"
+                  label={t('toolbar_toggle_symbol_palette')}
+                  active={showSymbolPalette}
+                  command={toggleSymbolPalette}
+                  icon="Ω"
+                  textIcon
+                  className="ol-cm-toolbar-button-math"
+                />
+              )}
+            </div>
+          )}
+          {showGroup('group-misc') && (
+            <div
+              className="ol-cm-toolbar-button-group"
+              data-overflow="group-misc"
+              aria-label={t('toolbar_insert_misc')}
+            >
+              <ToolbarButton
+                id="toolbar-href"
+                label={t('toolbar_insert_link')}
+                command={commands.wrapInHref}
+                icon="add_link"
+              />
+              {features.trackChangesVisible && (
+                <ToolbarButton
+                  id="toolbar-add-comment"
+                  label={t('add_comment')}
+                  disabled={state.selection.main.empty}
+                  command={commands.addComment}
+                  icon="add_comment"
+                />
+              )}
+              <ToolbarButton
+                id="toolbar-ref"
+                label={t('toolbar_insert_cross_reference')}
+                command={commands.insertRef}
+                icon="sell"
+              />
+              <ToolbarButton
+                id="toolbar-cite"
+                label={t('toolbar_insert_citation')}
+                command={commands.insertCite}
+                icon="book_5"
+              />
+              <InsertFigureDropdown />
+              {wfRebrandEnabled && writefullInstance ? (
+                <TableDropdown />
+              ) : (
+                <LegacyTableDropdown />
+              )}
+            </div>
+          )}
+          {showGroup('group-list') && (
+            <div
+              className="ol-cm-toolbar-button-group"
+              data-overflow="group-list"
+              aria-label={t('toolbar_list_indentation')}
+            >
+              <ToolbarButton
+                id="toolbar-bullet-list"
+                label={t('toolbar_bullet_list')}
+                command={commands.toggleBulletList}
+                icon="format_list_bulleted"
+              />
+              <ToolbarButton
+                id="toolbar-numbered-list"
+                label={t('toolbar_numbered_list')}
+                command={commands.toggleNumberedList}
+                icon="format_list_numbered"
+              />
+              <ToolbarButton
+                id="toolbar-format-indent-decrease"
+                label={t('toolbar_decrease_indent')}
+                command={commands.indentDecrease}
+                icon="format_indent_decrease"
+                shortcut={visual ? (isMac ? '⌘[' : 'Ctrl+[') : undefined}
+                disabled={listDepth < 2}
+              />
+              <ToolbarButton
+                id="toolbar-format-indent-increase"
+                label={t('toolbar_increase_indent')}
+                command={commands.indentIncrease}
+                icon="format_indent_increase"
+                shortcut={visual ? (isMac ? '⌘]' : 'Ctrl+]') : undefined}
+                disabled={listDepth < 1}
+              />
+            </div>
+          )}
+        </>
+      )}
     </>
   )
 })

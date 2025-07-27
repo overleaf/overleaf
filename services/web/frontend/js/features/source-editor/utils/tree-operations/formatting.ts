@@ -5,7 +5,7 @@ import {
   matchingAncestor,
 } from '@/features/source-editor/utils/tree-operations/ancestors'
 
-export type FormattingCommand = '\\textbf' | '\\textit'
+export type FormattingCommand = '\\textbf' | '\\textit' | 'typst-strong' | 'typst-emph'
 export type FormattingNodeType = string | number
 
 export const formattingCommandMap: Record<
@@ -14,6 +14,8 @@ export const formattingCommandMap: Record<
 > = {
   '\\textbf': 'TextBoldCommand',
   '\\textit': 'TextItalicCommand',
+  'typst-strong': 'Strong',
+  'typst-emph': 'Emph',
 }
 
 export const withinFormattingCommand = (state: EditorState) => {
