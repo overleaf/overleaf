@@ -9,6 +9,7 @@ import {
   getIndentUnit,
   IndentContext,
   indentString,
+  language,
   syntaxTree,
 } from '@codemirror/language'
 import {
@@ -28,6 +29,47 @@ export const ancestorListType = (state: EditorState): string | null => {
     return null
   }
   return getEnvironmentName(ancestorNode, state)
+}
+
+const wrapRangeInTypstList = (
+  state: EditorState,
+  range: SelectionRange,
+  environment: string,
+  prefix = ''
+) => {
+  const cx = new IndentContext(state)
+  const columns = cx.lineIndent(range.from)
+  const indent = indentString(state, columns)
+
+  const fromLine = state.doc.lineAt(range.from)
+  const toLine = state.doc.lineAt(range.to)
+  const marker = { itemize: '-', enumerate: '+' }[environment]
+
+  const lines: string[] = []
+  for (const line of state.doc.iterLines(fromLine.number, toLine.number + 1)) {
+    let content = line.trim()
+    if (lines.length == 0) {
+      lines.push(`${indent}${marker} ${content}`)
+    } else {
+      lines.push(`${indent}  ${content}`)
+    }
+  }
+
+  const changes = [
+    {
+      from: fromLine.from,
+      to: toLine.to,
+      insert: lines.join('\n'),
+    },
+  ]
+
+  // map through the prefix
+  range = EditorSelection.cursor(range.to, -1).map(state.changes(changes), 1)
+
+  return {
+    range,
+    changes,
+  }
 }
 
 const wrapRangeInList = (
@@ -83,16 +125,17 @@ const wrapRangeInList = (
 }
 
 const wrapRangesInList =
-  (environment: string) =>
-  (view: EditorView): boolean => {
-    view.dispatch(
-      view.state.changeByRange(range =>
-        wrapRangeInList(view.state, range, environment)
-      ),
-      { scrollIntoView: true }
-    )
-    return true
-  }
+  (wrapFn: Function) =>
+    (environment: string) =>
+      (view: EditorView): boolean => {
+        view.dispatch(
+          view.state.changeByRange(range =>
+            wrapFn(view.state, range, environment)
+          ),
+          { scrollIntoView: true }
+        )
+        return true
+      }
 
 const unwrapRangeFromList = (
   state: EditorState,
@@ -316,6 +359,17 @@ const toggleListForRange = (
   return { range }
 }
 
+const toggleTypstListForRange = (
+  view: EditorView,
+  range: SelectionRange,
+  environment: string
+) => {
+  // TODO: implement list unwrapping
+  // create a new list
+  return wrapRangeInTypstList(view.state, range, environment, '')
+}
+
+
 export const getListItems = (node: SyntaxNode): SyntaxNode[] => {
   const items: SyntaxNode[] = []
 
@@ -335,15 +389,27 @@ export const toggleListForRanges =
   (environment: string) => (view: EditorView) => {
     view.dispatch(
       view.state.changeByRange(range =>
-        toggleListForRange(view, range, environment)
+        (view.state.facet(language)?.name == "typst" ? toggleTypstListForRange : toggleListForRange)(view, range, environment)
       ),
       { scrollIntoView: true }
     )
   }
 
-export const wrapInBulletList = wrapRangesInList('itemize')
-export const wrapInNumberedList = wrapRangesInList('enumerate')
-export const wrapInDescriptionList = wrapRangesInList('description')
+export const wrapInBulletList = (view: EditorView) => {
+  if (view.state.facet(language)?.name == "typst") {
+    return wrapRangesInList(wrapRangeInTypstList)('itemize')(view)
+  } else {
+    return wrapRangesInList(wrapRangeInList)('itemize')(view)
+  }
+}
+export const wrapInNumberedList = (view: EditorView) => {
+  if (view.state.facet(language)?.name == "typst") {
+    return wrapRangesInList(wrapRangeInTypstList)('enumerate')(view)
+  } else {
+    return wrapRangesInList(wrapRangeInList)('enumerate')(view)
+  }
+}
+export const wrapInDescriptionList = wrapRangesInList(wrapRangeInList)('description')
 export const unwrapBulletList = unwrapRangesFromList('itemize')
 export const unwrapNumberedList = unwrapRangesFromList('enumerate')
 export const unwrapDescriptionList = unwrapRangesFromList('description')
