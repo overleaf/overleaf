@@ -108,6 +108,10 @@ module.exports = {
     libraryTarget: 'umd',
     // Name the exported variable from output bundle
     library: ['Frontend', '[name]'],
+
+    environment: {
+      asyncFunction: true,
+    }
   },
 
   optimization: {
@@ -154,6 +158,14 @@ module.exports = {
       {
         test: /\.wasm$/,
         type: 'asset/resource',
+        resourceQuery: /url/,
+        generator: {
+          filename: 'js/[name]-[contenthash][ext]',
+        },
+      },
+      {
+        test: /typst_syntax_bg\.wasm$/,
+        type: 'webassembly/async',
         generator: {
           filename: 'js/[name]-[contenthash][ext]',
         },
