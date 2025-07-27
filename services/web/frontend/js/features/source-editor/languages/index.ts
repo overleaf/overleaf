@@ -59,6 +59,13 @@ export const languages = [
     },
   }),
   LanguageDescription.of({
+    name: 'typst',
+    extensions: ['typ'],
+    load: () => {
+      return import('./typst').then(m => m.typst())
+    },
+  }),
+  LanguageDescription.of({
     name: 'markdown',
     extensions: ['md', 'markdown'],
     load: () => {

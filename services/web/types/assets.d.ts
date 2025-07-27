@@ -18,7 +18,7 @@ declare module '*.mp4' {
   export default src
 }
 
-declare module '*.wasm' {
+declare module '*.wasm?url' {
   const src: string
   export default src
 }
