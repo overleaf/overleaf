@@ -227,6 +227,12 @@ function clearProjectState(projectId, callback) {
   )
 }
 
+/**
+ * @param {string} projectId
+ * @param {string} docId
+ * @param {string[]} changeIds
+ * @param {Callback} callback
+ */
 function acceptChanges(projectId, docId, changeIds, callback) {
   _makeRequest(
     {
