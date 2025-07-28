@@ -130,6 +130,7 @@ export const TypstHighlightSytle = HighlightStyle.define([
   { tag: tags.definitionKeyword, fontWeight: 'bold' },
   { tag: tags.contentSeparator, fontWeight: 'bold' },
   { tag: tags.definitionOperator, fontWeight: 'bold' },
+  { tag: tags.list, fontWeight: 'bold' },
   { tag: tags.special(tags.contentSeparator), fontWeight: 'bolder' },
   { tag: tags.labelName, textDecoration: 'dotted blue underline', fontWeight: 'bold' },
   { tag: tags.monospace, fontFamily: "monospace", },
