@@ -6,5 +6,5 @@ export const isValidTeXFile = (filename: string) => {
     'i'
   )
 
-  return validTeXFileRegExp.test(filename)
+  return validTeXFileRegExp.test(filename) && !filename.endsWith(".typ")
 }
