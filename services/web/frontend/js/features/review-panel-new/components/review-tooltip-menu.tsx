@@ -18,7 +18,6 @@ import {
   reviewTooltipStateField,
 } from '@/features/source-editor/extensions/review-tooltip'
 import { EditorView, getTooltip } from '@codemirror/view'
-import useViewerPermissions from '@/shared/hooks/use-viewer-permissions'
 import usePreviousValue from '@/shared/hooks/use-previous-value'
 import { useLayoutContext } from '@/shared/context/layout-context'
 import { useReviewPanelViewActionsContext } from '../context/review-panel-view-context'
@@ -35,6 +34,7 @@ import { useEditorPropertiesContext } from '@/features/ide-react/context/editor-
 import classNames from 'classnames'
 import useEventListener from '@/shared/hooks/use-event-listener'
 import useReviewPanelLayout from '../hooks/use-review-panel-layout'
+import { usePermissionsContext } from '@/features/ide-react/context/permissions-context'
 
 const EDIT_MODE_SWITCH_WIDGET_HEIGHT = 40
 const CM_LINE_RIGHT_PADDING = 8
@@ -43,7 +43,7 @@ const TOOLTIP_SHOW_DELAY = 120
 const ReviewTooltipMenu: FC = () => {
   const state = useCodeMirrorStateContext()
   const view = useCodeMirrorViewContext()
-  const isViewer = useViewerPermissions()
+  const permissions = usePermissionsContext()
   const [show, setShow] = useState(true)
   const { setView } = useReviewPanelViewActionsContext()
   const { openReviewPanel } = useReviewPanelLayout()
@@ -58,7 +58,7 @@ const ReviewTooltipMenu: FC = () => {
 
   const addComment = useCallback(() => {
     const { main } = view.state.selection
-    if (main.empty) {
+    if (main.empty || !permissions.comment) {
       return
     }
 
@@ -74,11 +74,11 @@ const ReviewTooltipMenu: FC = () => {
 
     view.dispatch({ effects })
     setShow(false)
-  }, [openReviewPanel, setView, setShow, view])
+  }, [view, permissions.comment, openReviewPanel, setView])
 
   useEventListener('add-new-review-comment', addComment)
 
-  if (isViewer || !show || !tooltipState) {
+  if (!permissions.comment || !show || !tooltipState) {
     return null
   }
 

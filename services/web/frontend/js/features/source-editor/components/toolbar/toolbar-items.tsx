@@ -16,6 +16,7 @@ import { isSplitTestEnabled } from '@/utils/splitTestUtils'
 import { isMac } from '@/shared/utils/os'
 import { useProjectContext } from '@/shared/context/project-context'
 import { useEditorPropertiesContext } from '@/features/ide-react/context/editor-properties-context'
+import { usePermissionsContext } from '@/features/ide-react/context/permissions-context'
 
 export const ToolbarItems: FC<{
   state: EditorState
@@ -35,6 +36,7 @@ export const ToolbarItems: FC<{
     useEditorPropertiesContext()
   const { writefullInstance } = useEditorContext()
   const { features } = useProjectContext()
+  const permissions = usePermissionsContext()
   const isActive = withinFormattingCommand(state)
 
   const symbolPaletteAvailable = getMeta('ol-symbolPaletteAvailable')
@@ -131,7 +133,7 @@ export const ToolbarItems: FC<{
                 command={commands.wrapInHref}
                 icon="add_link"
               />
-              {features.trackChangesVisible && (
+              {features.trackChangesVisible && permissions.comment && (
                 <ToolbarButton
                   id="toolbar-add-comment"
                   label={t('add_comment')}

@@ -23,7 +23,7 @@ export const useToolbarMenuBarEditorCommands = () => {
   const { t } = useTranslation()
   const { view: layoutView } = useLayoutContext()
   const editorIsVisible = layoutView === 'editor'
-  const { trackedWrite } = usePermissionsContext()
+  const { trackedWrite, comment } = usePermissionsContext()
   const languageName = state.facet(language)?.name
   const isTeXFile = languageName === 'latex'
 
@@ -177,7 +177,7 @@ export const useToolbarMenuBarEditorCommands = () => {
         handler: () => {
           commands.addComment()
         },
-        disabled: state.selection.main.empty,
+        disabled: !comment || state.selection.main.empty,
       },
       /************************************
        *         Format menu
@@ -288,6 +288,7 @@ export const useToolbarMenuBarEditorCommands = () => {
     trackedWrite,
     isTeXFile,
     state.selection.main.empty,
+    comment,
   ])
 
   const { toggleSymbolPalette } = useEditorPropertiesContext()
