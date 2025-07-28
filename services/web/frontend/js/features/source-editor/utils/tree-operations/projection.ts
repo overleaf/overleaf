@@ -108,11 +108,21 @@ export function getUpdatedProjection<T extends ProjectionItem>(
 ): ProjectionResult<T> {
   // Only reuse results from a Complete parse, otherwise we may drop entries.
   // We keep items that lie outside the change range, and update their positions.
+  const linesNeedReparse: number[] = [];
   const items: T[] =
     previousResult.status === ProjectionStatus.Complete
       ? previousResult
-          .items!.filter(item => !intersects(item.from, item.to, fromA, toA))
-          .map(x => updatePosition(x, transaction))
+        .items!.filter(item => {
+          if (intersects(item.from, item.to, fromA, toA)) {
+            // if it intersects with the old change but not the new one, reparse it.
+            // FIXME: we don't want to parse deleted lines.
+            linesNeedReparse.push(item.line)
+            return false
+          } else {
+            return true
+          }
+        })
+        .map(x => updatePosition(x, transaction))
       : []
 
   if (previousResult.status !== ProjectionStatus.Complete) {
@@ -138,10 +148,25 @@ export function getUpdatedProjection<T extends ProjectionItem>(
       },
       mode: IterMode.IgnoreMounts | IterMode.IgnoreOverlays,
     })
+    for (const lineNo of linesNeedReparse) {
+      if (lineNo < state.doc.lines) {
+        console.log("reparsing line", lineNo)
+        const { from, to } = state.doc.line(lineNo);
+        tree.iterate({
+          from, to, enter(node) {
+            return enterNode(state, node, items, () => false)
+          },
+          mode: IterMode.IgnoreMounts | IterMode.IgnoreOverlays,
+        })
+      }
+    }
     // We know the exact projection. Return it.
     return {
       status: ProjectionStatus.Complete,
-      items: items.sort((a, b) => a.from - b.from),
+      items: items.sort((a, b) => a.from - b.from).filter((v, i, arr) => {
+        // Prefer new insertion. (Needed for typst heading)
+        return arr[i + 1]?.line != v.line
+      }),
     }
   } else if (previousResult.status !== ProjectionStatus.Pending) {
     // We don't know the latest projection, but we have an idea of a previous
