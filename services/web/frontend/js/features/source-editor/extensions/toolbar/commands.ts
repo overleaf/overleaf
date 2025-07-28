@@ -1,4 +1,4 @@
-import { language } from '@codemirror/language'
+import { IndentContext, indentString, language } from '@codemirror/language'
 import { EditorSelection, EditorState, SelectionRange } from '@codemirror/state'
 import { Command, EditorView } from '@codemirror/view'
 import {
@@ -100,7 +100,11 @@ export const insertTable = (view: EditorView, sizeX: number, sizeY: number) => {
   const placeholder = visual ? '' : '#{}'
   const placeholderAtStart = visual ? '#{}' : ''
   const { pos, suffix } = ensureEmptyLine(state, state.selection.main)
-  const template = `${placeholderAtStart}\n\\begin{table}
+  const cx = new IndentContext(state)
+  const columns = cx.lineIndent(state.selection.main.from)
+  const indent = indentString(state, columns)
+  const languageName = state.facet(language)?.name;
+  const latexTemplate = `${placeholderAtStart}\n\\begin{table}
 \t\\centering
 \t\\begin{tabular}{${'c'.repeat(sizeX)}}
 ${(
@@ -111,7 +115,20 @@ ${(
 \t\\caption{Caption}
 \t\\label{tab:my_label}
 \\end{table}${suffix}`
-  snippet(template)({ state, dispatch }, { label: 'Table' }, pos, pos)
+  const typstTemplate = `${indent}#figure(
+${indent}  caption: [Caption],
+${indent}  table(
+${indent}    columns: ${sizeX},
+${indent}    table.header(
+${indent}      ${("[" + placeholder + "], ").repeat(sizeX)}
+${indent}    ),
+${(
+  indent + "    " +
+  `[${placeholder}], `.repeat(sizeX) +
+  '\n'
+).repeat(sizeY - 1)}${indent}  )
+${indent}) <tab:table-name-here>${suffix}`
+  snippet(languageName == "typst" ? typstTemplate : latexTemplate)({ state, dispatch }, { label: 'Table' }, pos, pos)
   return true
 }
 
