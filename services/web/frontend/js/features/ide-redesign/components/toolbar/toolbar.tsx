@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { ToolbarMenuBar } from './menu-bar'
 import { ToolbarProjectTitle } from './project-title'
 import { OnlineUsers } from './online-users'
@@ -23,6 +24,7 @@ export const Toolbar = () => {
   const { view, restoreView } = useLayoutContext()
   const { cobranding } = useEditorContext()
   const { permissionsLevel } = useIdeReactContext()
+  const { t } = useTranslation()
   const shouldDisplaySubmitButton =
     (permissionsLevel === 'owner' || permissionsLevel === 'readAndWrite') &&
     SubmitProjectButton
@@ -34,18 +36,18 @@ export const Toolbar = () => {
 
   if (view === 'history') {
     return (
-      <div className="ide-redesign-toolbar">
+      <nav className="ide-redesign-toolbar" aria-label={t('project_actions')}>
         <div className="d-flex align-items-center">
           <BackToEditorButton onClick={handleBackToEditorClick} />
         </div>
         <ToolbarProjectTitle />
         <div /> {/* Empty div used for spacing */}
-      </div>
+      </nav>
     )
   }
 
   return (
-    <div className="ide-redesign-toolbar">
+    <nav className="ide-redesign-toolbar" aria-label={t('project_actions')}>
       <div className="ide-redesign-toolbar-menu">
         <ToolbarLogos cobranding={cobranding} />
         <ToolbarMenuBar />
@@ -62,6 +64,6 @@ export const Toolbar = () => {
         <ShareProjectButton />
         {getMeta('ol-showUpgradePrompt') && <UpgradeButton />}
       </div>
-    </div>
+    </nav>
   )
 }

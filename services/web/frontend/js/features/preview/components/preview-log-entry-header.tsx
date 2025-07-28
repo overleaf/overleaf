@@ -99,7 +99,7 @@ function PreviewLogEntryHeader({
   const headerTitleText = logType ? `${logType} ${headerTitle}` : headerTitle
 
   return (
-    <header className={logEntryHeaderClasses}>
+    <div className={logEntryHeaderClasses}>
       {headerIcon ? (
         <div className="log-entry-header-icon-container">{headerIcon}</div>
       ) : null}
@@ -116,7 +116,7 @@ function PreviewLogEntryHeader({
       ) : (
         locationLink
       )}
-    </header>
+    </div>
   )
 }
 

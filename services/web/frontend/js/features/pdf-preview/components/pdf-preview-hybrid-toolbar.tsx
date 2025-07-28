@@ -1,6 +1,6 @@
 import { memo, useState, useEffect, useRef } from 'react'
-import OlButtonToolbar from '@/features/ui/components/ol/ol-button-toolbar'
 import { useTranslation } from 'react-i18next'
+import OLButtonToolbar from '@/features/ui/components/ol/ol-button-toolbar'
 import { useLayoutContext } from '@/shared/context/layout-context'
 import PdfCompileButton from './pdf-compile-button'
 import SwitchToEditorButton from './switch-to-editor-button'
@@ -15,7 +15,7 @@ const ORPHAN_UI_TIMEOUT_MS = 5000
 
 function PdfPreviewHybridToolbar() {
   const { detachRole, detachIsLinked } = useLayoutContext()
-
+  const { t } = useTranslation()
   const uiTimeoutRef = useRef<number>()
   const [orphanPdfTabAfterDelay, setOrphanPdfTabAfterDelay] = useState(false)
 
@@ -47,9 +47,12 @@ function PdfPreviewHybridToolbar() {
   }
 
   return (
-    <OlButtonToolbar className="toolbar toolbar-pdf toolbar-pdf-hybrid">
+    <OLButtonToolbar
+      className="toolbar toolbar-pdf toolbar-pdf-hybrid"
+      aria-label={t('pdf')}
+    >
       {ToolbarInner}
-    </OlButtonToolbar>
+    </OLButtonToolbar>
   )
 }
 

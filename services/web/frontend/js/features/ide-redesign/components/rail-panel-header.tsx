@@ -14,7 +14,7 @@ export default function RailPanelHeader({
   const { t } = useTranslation()
   const { handlePaneCollapse } = useRailContext()
   return (
-    <header className="rail-panel-header">
+    <div className="rail-panel-header">
       <h4 className="rail-panel-title">{title}</h4>
 
       <div className="rail-panel-header-actions">
@@ -33,6 +33,6 @@ export default function RailPanelHeader({
           />
         </OLTooltip>
       </div>
-    </header>
+    </div>
   )
 }

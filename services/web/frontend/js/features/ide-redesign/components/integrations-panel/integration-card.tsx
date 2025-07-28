@@ -22,7 +22,7 @@ export default function IntegrationCard({
       <div className="integrations-panel-card-contents">
         {icon}
         <div className="integrations-panel-card-inner">
-          <header className="integrations-panel-card-header">
+          <div className="integrations-panel-card-header">
             <div className="integrations-panel-card-title">{title}</div>
             {showPaywallBadge && (
               <OLBadge
@@ -33,7 +33,7 @@ export default function IntegrationCard({
                 {t('premium')}
               </OLBadge>
             )}
-          </header>
+          </div>
           <p className="integrations-panel-card-description">{description}</p>
         </div>
       </div>

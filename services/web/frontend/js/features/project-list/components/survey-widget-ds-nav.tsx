@@ -22,7 +22,7 @@ export function SurveyWidgetDsNav() {
   }
 
   return (
-    <div className="user-notifications">
+    <aside className="user-notifications" aria-label={t('feedback')}>
       <div className="notification-entry">
         <div role="alert" className="survey-notification">
           <div className="notification-body">
@@ -48,6 +48,6 @@ export function SurveyWidgetDsNav() {
           </OLButton>
         </div>
       </div>
-    </div>
+    </aside>
   )
 }

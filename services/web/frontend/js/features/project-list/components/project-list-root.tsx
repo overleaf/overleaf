@@ -50,8 +50,8 @@ function DefaultNavbarAndFooter({ children }: { children: ReactNode }) {
     <>
       <DefaultNavbar {...navbarProps} />
       <main
-        id="main-content"
         className="content content-alt project-list-react"
+        aria-labelledby="main-content"
       >
         {children}
       </main>

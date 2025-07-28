@@ -68,6 +68,8 @@ export default function MainLayout() {
                 })}
                 minSize={5}
                 defaultSize={50}
+                tagName="section"
+                aria-label={t('editor')}
               >
                 <div className="ide-redesign-editor-container">
                   <EditorPanel />
@@ -108,6 +110,8 @@ export default function MainLayout() {
                 ref={pdfPanelRef}
                 onExpand={handlePdfPaneExpand}
                 onCollapse={handlePdfPaneCollapse}
+                tagName="section"
+                aria-label={t('pdf_preview')}
               >
                 <PdfPreview />
                 {pdfLayout === 'flat' && view === 'pdf' && (
