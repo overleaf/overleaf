@@ -10,6 +10,7 @@ import {
 
 import { shortcuts } from './shortcuts'
 import { typstLinter } from './linter'
+import { documentOutline } from '../latex/document-outline'
 
 export const typstHighlight = styleTags({
   "Shebang": tags.documentMeta,
@@ -144,6 +145,7 @@ export function typst(): LanguageSupport {
       updateListener,
       syntaxHighlighting(TypstHighlightSytle),
       shortcuts(),
-      typstLinter()
+      typstLinter(),
+      documentOutline
     ], 'typst'))
 }
