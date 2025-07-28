@@ -268,7 +268,10 @@ function PdfJsViewer({ url, pdfFile }: PdfJsViewerProps) {
 
               window.dispatchEvent(
                 new CustomEvent('synctex:sync-to-position', {
-                  detail: clickPosition,
+                  detail: {
+                    position: clickPosition,
+                    selectText: window.getSelection()?.toString(),
+                  },
                 })
               )
             }

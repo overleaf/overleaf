@@ -143,7 +143,7 @@ const dispatchSelectionAndScroll = (
 export const setCursorLineAndScroll = (
   view: EditorView,
   lineNumber: number,
-  columnNumber = 0,
+  columnNumber?: number,
   selectText?: string
 ) => {
   // TODO: map the position through any changes since the previous compile?
@@ -153,10 +153,23 @@ export const setCursorLineAndScroll = (
   const from = findValidPosition(doc, lineNumber, columnNumber)
 
   if (selectText) {
-    const to = from + selectText.length
-    if (doc.sliceString(from, to) === selectText) {
-      dispatchSelectionAndScroll(view, from, to)
-      return
+    if (columnNumber === undefined) {
+      // somewhere on this line
+      const line = doc.lineAt(from)
+      const index = line.text.indexOf(selectText)
+      if (index > -1 && index === line.text.lastIndexOf(selectText)) {
+        const from = line.from + index
+        const to = from + selectText.length
+        dispatchSelectionAndScroll(view, from, to)
+        return
+      }
+    } else {
+      // at this exact position
+      const to = from + selectText.length
+      if (doc.sliceString(from, to) === selectText) {
+        dispatchSelectionAndScroll(view, from, to)
+        return
+      }
     }
   }
 

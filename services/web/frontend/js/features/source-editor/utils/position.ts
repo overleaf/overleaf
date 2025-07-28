@@ -3,7 +3,7 @@ import { Text } from '@codemirror/state'
 export const findValidPosition = (
   doc: Text,
   lineNumber: number, // 1-indexed
-  columnNumber: number // 0-indexed
+  columnNumber = 0 // 0-indexed
 ): number => {
   const lines = doc.lines
 

@@ -89,12 +89,13 @@ export default function useSynctex(): {
   }, [dirname, getCurrentDocumentId, pathInFolder, rootDocId])
 
   const goToCodeLine = useCallback(
-    (file?: string, line?: number) => {
+    (file?: string, line?: number, selectText?: string) => {
       if (file) {
         const doc = findEntityByPath(file)?.entity
         if (doc) {
           openDocWithId(doc._id, {
             gotoLine: line,
+            selectText,
           })
           return
         }
@@ -186,9 +187,11 @@ export default function useSynctex(): {
   const _syncToCode = useCallback(
     ({
       position = positionRef.current,
+      selectText,
       visualOffset = 0,
     }: {
       position?: PdfScrollPosition
+      selectText?: string
       visualOffset?: number
     }) => {
       if (!position) {
@@ -231,7 +234,7 @@ export default function useSynctex(): {
       getJSON(`/project/${projectId}/sync/pdf?${params}`, { signal })
         .then(data => {
           const [{ file, line }] = data.code
-          goToCodeLine(file, line)
+          goToCodeLine(file, line, selectText)
           if (data.downloadedFromCache) {
             sendMB('synctex-downloaded-from-cache', {
               projectId,
@@ -266,10 +269,7 @@ export default function useSynctex(): {
 
   useEventListener(
     'synctex:sync-to-position',
-    useCallback(
-      (event: CustomEvent) => syncToCode({ position: event.detail }),
-      [syncToCode]
-    )
+    useCallback((event: CustomEvent) => syncToCode(event.detail), [syncToCode])
   )
 
   const [hasSingleSelectedDoc, setHasSingleSelectedDoc] = useDetachState(
