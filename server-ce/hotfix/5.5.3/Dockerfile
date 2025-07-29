@@ -23,3 +23,7 @@ RUN --mount=type=cache,target=/root/.cache \
 # Remove SaaS changes
 COPY pr_27476.patch-stage-2 .
 RUN patch -p1 < pr_27476.patch-stage-2 && rm pr_27476.patch-stage-2
+
+# Extra tweaks to output
+COPY pr_27397.patch-stage-2 .
+RUN patch -p1 < pr_27397.patch-stage-2 && rm pr_27397.patch-stage-2
