@@ -79,11 +79,11 @@ ObjectId.cacheHexString = true
  */
 
 /**
- * @return {{PROJECT_IDS_FROM: string, PROCESS_HASHED_FILES: boolean, LOGGING_IDENTIFIER: string, BATCH_RANGE_START: string, BATCH_RANGE_END: string, PROCESS_NON_DELETED_PROJECTS: boolean, PROCESS_DELETED_PROJECTS: boolean, PROCESS_BLOBS: boolean, DRY_RUN: boolean, OUTPUT_FILE: string, DISPLAY_REPORT: boolean}}
+ * @return {{PROJECT_IDS_FROM: string, PROCESS_HASHED_FILES: boolean, LOGGING_IDENTIFIER: string, BATCH_RANGE_START: string, BATCH_RANGE_END: string, PROCESS_NON_DELETED_PROJECTS: boolean, PROCESS_DELETED_PROJECTS: boolean, PROCESS_BLOBS: boolean, DRY_RUN: boolean, OUTPUT_FILE: string, DISPLAY_REPORT: boolean, CONCURRENCY: number, CONCURRENT_BATCHES: number, RETRIES: number, RETRY_DELAY_MS: number, RETRY_FILESTORE_404: boolean, BUFFER_DIR_PREFIX: string, STREAM_HIGH_WATER_MARK: number, LOGGING_INTERVAL: number, SLEEP_BEFORE_EXIT: number }}
  */
 function parseArgs() {
   const PUBLIC_LAUNCH_DATE = new Date('2012-01-01T00:00:00Z')
-  const DEFAULT_OUTPUT_FILE = `file-migration-${new Date()
+  const DEFAULT_OUTPUT_FILE = `/var/log/overleaf/file-migration-${new Date()
     .toISOString()
     .replace(/[:.]/g, '_')}.log`
 
@@ -95,6 +95,12 @@ function parseArgs() {
     { name: 'skip-hashed-files', type: Boolean },
     { name: 'skip-existing-blobs', type: Boolean },
     { name: 'from-file', type: String, defaultValue: '' },
+    { name: 'concurrency', type: Number, defaultValue: 10 },
+    { name: 'concurrent-batches', type: Number, defaultValue: 1 },
+    { name: 'stream-high-water-mark', type: Number, defaultValue: 1024 * 1024 },
+    { name: 'retries', type: Number, defaultValue: 10 },
+    { name: 'retry-delay-ms', type: Number, defaultValue: 100 },
+    { name: 'retry-filestore-404', type: Boolean },
     { name: 'dry-run', alias: 'n', type: Boolean },
     {
       name: 'output',
@@ -114,6 +120,13 @@ function parseArgs() {
       defaultValue: new Date().toISOString(),
     },
     { name: 'logging-id', type: String, defaultValue: '' },
+    { name: 'logging-interval-ms', type: Number, defaultValue: 60_000 },
+    {
+      name: 'buffer-dir-prefix',
+      type: String,
+      defaultValue: '/tmp/back_fill_file_hash-',
+    },
+    { name: 'sleep-before-exit-ms', type: Number, defaultValue: 1_000 },
   ])
 
   // If no arguments are provided, display a usage message
@@ -143,6 +156,8 @@ Logging options:
                              (default: file-migration-<timestamp>.log)
   --logging-id <id>          Identifier for logging
                              (default: BATCH_RANGE_START)
+  --logging-interval-ms <ms> Interval for logging progres stats
+                             (default: 60000, 1min)
 
 Batch range options:
   --BATCH_RANGE_START <date> Start date for processing
@@ -150,10 +165,30 @@ Batch range options:
   --BATCH_RANGE_END <date>   End date for processing
                              (default: ${args.BATCH_RANGE_END})
 
+Concurrency:
+  --concurrency <n>          Number of files to process concurrently
+                             (default: 10)
+  --concurrent-batches <n>   Number of project batches to process concurrently
+                             (default: 1)
+  --stream-high-water-mark n In-Memory buffering threshold
+                             (default: 1MiB)
+
+Retries:
+  --retries <n>              Number of times to retry processing a file
+                             (default: 10)
+  --retry-delay-ms <ms>      How long to wait before processing a file again
+                             (default: 100, 100ms)
+  --retry-filestore-404      Retry downloading a file when receiving a 404
+                             (default: false)
+
 Other options:
   --report                   Display a report of the current status
   --dry-run, -n              Perform a dry run without making changes
   --help, -h                 Show this help message
+  --buffer-dir-prefix <p>    Folder/prefix for buffering files on disk
+                             (default: ${args['buffer-dir-prefix']})
+  --sleep-before-exit-ms <n> Defer exiting from the script
+                             (default: 1000, 1s)
 
 Typical usage:
 
@@ -208,12 +243,21 @@ is equivalent to
     PROCESS_HASHED_FILES: !args['skip-hashed-files'],
     PROCESS_BLOBS: !args['skip-existing-blobs'],
     DRY_RUN: args['dry-run'],
-    OUTPUT_FILE: args.output,
+    OUTPUT_FILE: args.report ? '-' : args.output,
     BATCH_RANGE_START,
     BATCH_RANGE_END,
     LOGGING_IDENTIFIER: args['logging-id'] || BATCH_RANGE_START,
+    LOGGING_INTERVAL: args['logging-interval-ms'],
     PROJECT_IDS_FROM: args['from-file'],
     DISPLAY_REPORT: args.report,
+    CONCURRENCY: args.concurrency,
+    CONCURRENT_BATCHES: args['concurrent-batches'],
+    STREAM_HIGH_WATER_MARK: args['stream-high-water-mark'],
+    RETRIES: args.retries,
+    RETRY_DELAY_MS: args['retry-delay-ms'],
+    RETRY_FILESTORE_404: args['retry-filestore-404'],
+    BUFFER_DIR_PREFIX: args['buffer-dir-prefix'],
+    SLEEP_BEFORE_EXIT: args['sleep-before-exit-ms'],
   }
 }
 
@@ -229,6 +273,15 @@ const {
   LOGGING_IDENTIFIER,
   PROJECT_IDS_FROM,
   DISPLAY_REPORT,
+  CONCURRENCY,
+  CONCURRENT_BATCHES,
+  RETRIES,
+  RETRY_DELAY_MS,
+  RETRY_FILESTORE_404,
+  BUFFER_DIR_PREFIX,
+  STREAM_HIGH_WATER_MARK,
+  LOGGING_INTERVAL,
+  SLEEP_BEFORE_EXIT,
 } = parseArgs()
 
 // We need to handle the start and end differently as ids of deleted projects are created at time of deletion.
@@ -236,26 +289,12 @@ if (process.env.BATCH_RANGE_START || process.env.BATCH_RANGE_END) {
   throw new Error('use --BATCH_RANGE_START and --BATCH_RANGE_END')
 }
 
-// Concurrency for downloading from GCS and updating hashes in mongo
-const CONCURRENCY = parseInt(process.env.CONCURRENCY || '100', 10)
-const CONCURRENT_BATCHES = parseInt(process.env.CONCURRENT_BATCHES || '2', 10)
-// Retries for processing a given file
-const RETRIES = parseInt(process.env.RETRIES || '10', 10)
-const RETRY_DELAY_MS = parseInt(process.env.RETRY_DELAY_MS || '100', 10)
-
-const RETRY_FILESTORE_404 = process.env.RETRY_FILESTORE_404 === 'true'
-const BUFFER_DIR = fs.mkdtempSync(
-  process.env.BUFFER_DIR_PREFIX || '/tmp/back_fill_file_hash-'
-)
-// https://nodejs.org/api/stream.html#streamgetdefaulthighwatermarkobjectmode
-const STREAM_HIGH_WATER_MARK = parseInt(
-  process.env.STREAM_HIGH_WATER_MARK || (64 * 1024).toString(),
-  10
-)
-const LOGGING_INTERVAL = parseInt(process.env.LOGGING_INTERVAL || '60000', 10)
-const SLEEP_BEFORE_EXIT = parseInt(process.env.SLEEP_BEFORE_EXIT || '1000', 10)
+const BUFFER_DIR = fs.mkdtempSync(BUFFER_DIR_PREFIX)
 
 // Log output to a file
+if (OUTPUT_FILE !== '-') {
+  console.warn(`Writing logs into ${OUTPUT_FILE}`)
+}
 logger.initialize('file-migration', {
   streams: [
     {
@@ -313,6 +352,7 @@ async function getStatsForCollection(
     projectsWithAllHashes: 0,
     fileCount: 0,
     fileWithHashCount: 0,
+    fileMissingInHistoryCount: 0,
   }
   // Pick a random sample of projects and estimate the number of files without hashes
   const result = await collection
@@ -339,25 +379,44 @@ async function getStatsForCollection(
     const filesWithoutHash = fileTree.match(/\{"_id":"[0-9a-f]{24}"\}/g) || []
     // count the number of files with a hash, these are uniquely identified
     // by the number of "hash" strings due to the filtering
-    const filesWithHash = fileTree.match(/"hash"/g) || []
+    const filesWithHash = fileTree.match(/"hash":"[0-9a-f]{40}"/g) || []
     stats.fileCount += filesWithoutHash.length + filesWithHash.length
     stats.fileWithHashCount += filesWithHash.length
     stats.projectCount++
     stats.projectsWithAllHashes += filesWithoutHash.length === 0 ? 1 : 0
+    const projectId = project._id.toString()
+    const { blobs: perProjectBlobs } = await getProjectBlobsBatch([projectId])
+    const blobs = new Set(
+      (perProjectBlobs.get(projectId) || []).map(b => b.getHash())
+    )
+    const uniqueHashes = new Set(filesWithHash.map(m => m.slice(8, 48)))
+    for (const hash of uniqueHashes) {
+      if (blobs.has(hash) || GLOBAL_BLOBS.has(hash)) continue
+      stats.fileMissingInHistoryCount++
+    }
   }
   console.log(`Sampled stats for ${name}:`)
   const fractionSampled = stats.projectCount / collectionCount
-  const percentageSampled = (fractionSampled * 100).toFixed(1)
+  const percentageSampled = (fractionSampled * 100).toFixed(0)
   const fractionConverted = stats.projectsWithAllHashes / stats.projectCount
-  const percentageConverted = (fractionConverted * 100).toFixed(1)
+  const fractionToBackFill = 1 - fractionConverted
+  const percentageToBackFill = (fractionToBackFill * 100).toFixed(0)
+  const fractionMissing = stats.fileMissingInHistoryCount / stats.fileCount
+  const percentageMissing = (fractionMissing * 100).toFixed(0)
   console.log(
-    `- Sampled ${name}: ${stats.projectCount} (${percentageSampled}%)`
+    `- Sampled ${name}: ${stats.projectCount} (${percentageSampled}% of all ${name})`
   )
   console.log(
     `- Sampled ${name} with all hashes present: ${stats.projectsWithAllHashes}`
   )
   console.log(
-    `- Percentage of ${name} converted: ${percentageConverted}% (estimated)`
+    `- Percentage of ${name} that need back-filling hashes: ${percentageToBackFill}% (estimated)`
+  )
+  console.log(
+    `- Sampled ${name} have ${stats.fileCount} files that need to be checked against the full project history system.`
+  )
+  console.log(
+    `- Sampled ${name} have ${stats.fileMissingInHistoryCount} files that need to be uploaded to the full project history system (estimating ${percentageMissing}% of all files).`
   )
 }
 
@@ -366,13 +425,15 @@ async function getStatsForCollection(
  * including counts and estimated progress based on a sample.
  */
 async function displayReport() {
-  const projectsCountResult = await projectsCollection.countDocuments()
+  const projectsCountResult = await projectsCollection.estimatedDocumentCount()
   const deletedProjectsCountResult =
-    await deletedProjectsCollection.countDocuments()
+    await deletedProjectsCollection.estimatedDocumentCount()
   const sampleSize = 1000
   console.log('Current status:')
-  console.log(`- Projects: ${projectsCountResult}`)
-  console.log(`- Deleted projects: ${deletedProjectsCountResult}`)
+  console.log(`- Total number of projects: ${projectsCountResult}`)
+  console.log(
+    `- Total number of deleted projects: ${deletedProjectsCountResult}`
+  )
   console.log(`Sampling ${sampleSize} projects to estimate progress...`)
   await getStatsForCollection(
     sampleSize,
@@ -392,7 +453,7 @@ async function displayReport() {
   )
 }
 
-// Filestore endpoint location
+// Filestore endpoint location (configured by /etc/overleaf/env.sh)
 const FILESTORE_HOST = process.env.FILESTORE_HOST || '127.0.0.1'
 const FILESTORE_PORT = process.env.FILESTORE_PORT || '3009'
 
@@ -1370,7 +1431,18 @@ async function main() {
   console.warn('Done.')
 }
 
+async function cleanupBufferDir() {
+  try {
+    // Perform non-recursive removal of the BUFFER_DIR. Individual files
+    // should get removed in parallel as part of batch processing.
+    await fs.promises.rmdir(BUFFER_DIR)
+  } catch (err) {
+    console.error(`cleanup of BUFFER_DIR=${BUFFER_DIR} failed`, err)
+  }
+}
+
 if (DISPLAY_REPORT) {
+  await cleanupBufferDir()
   console.warn('Displaying report...')
   await displayReport()
   process.exit(0)
@@ -1381,13 +1453,7 @@ try {
     await main()
   } finally {
     printStats(true)
-    try {
-      // Perform non-recursive removal of the BUFFER_DIR. Individual files
-      // should get removed in parallel as part of batch processing.
-      await fs.promises.rmdir(BUFFER_DIR)
-    } catch (err) {
-      console.error(`cleanup of BUFFER_DIR=${BUFFER_DIR} failed`, err)
-    }
+    await cleanupBufferDir()
   }
 
   let code = 0

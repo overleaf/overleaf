@@ -63,7 +63,6 @@ const PRINT_IDS_AND_HASHES_FOR_DEBUGGING = false
 
 describe('back_fill_file_hash script', function () {
   this.timeout(TIMEOUT)
-  const USER_FILES_BUCKET_NAME = 'fake-user-files-gcs'
 
   const projectId0 = objectIdFromTime('2017-01-01T00:00:00Z')
   const projectId1 = objectIdFromTime('2017-01-01T00:01:00Z')
@@ -480,20 +479,16 @@ describe('back_fill_file_hash script', function () {
 
   /**
    * @param {Array<string>} args
-   * @param {Record<string, string>} env
-   * @param {boolean} shouldHaveWritten
-   * @return {Promise<{result, stats: any}>}
+   * @return {Promise<{result: { stdout: string, stderr: string, status: number }, stats: any}>}
    */
-  async function tryRunScript(args = [], env = {}, shouldHaveWritten) {
+  async function rawRunScript(args = []) {
     let result
     try {
       result = await promisify(execFile)(
         process.argv0,
         [
           'storage/scripts/back_fill_file_hash.mjs',
-          '--output=-',
-          '--projects',
-          '--deleted-projects',
+          '--sleep-before-exit-ms=1',
           ...args,
         ],
         {
@@ -501,9 +496,7 @@ describe('back_fill_file_hash script', function () {
           timeout: TIMEOUT - 500,
           env: {
             ...process.env,
-            USER_FILES_BUCKET_NAME,
-            SLEEP_BEFORE_EXIT: '1',
-            ...env,
+            AWS_SDK_JS_SUPPRESS_MAINTENANCE_MODE_MESSAGE: '1',
             LOG_LEVEL: 'warn', // Override LOG_LEVEL of acceptance tests
           },
         }
@@ -516,9 +509,25 @@ describe('back_fill_file_hash script', function () {
       }
       result = { stdout, stderr, status: code }
     }
+    // Ensure no tmp folder is left behind.
     expect((await fs.promises.readdir('/tmp')).join(';')).to.not.match(
       /back_fill_file_hash/
     )
+    return result
+  }
+
+  /**
+   * @param {Array<string>} args
+   * @param {boolean} shouldHaveWritten
+   * @return {Promise<{result, stats: any}>}
+   */
+  async function tryRunScript(args = [], shouldHaveWritten) {
+    const result = await rawRunScript([
+      '--output=-',
+      '--projects',
+      '--deleted-projects',
+      ...args,
+    ])
     const extraStatsKeys = ['eventLoop', 'readFromGCSThroughputMiBPerSecond']
     const stats = JSON.parse(
       result.stderr
@@ -549,12 +558,11 @@ describe('back_fill_file_hash script', function () {
 
   /**
    * @param {Array<string>} args
-   * @param {Record<string, string>} env
    * @param {boolean} shouldHaveWritten
    * @return {Promise<{result, stats: any}>}
    */
-  async function runScript(args = [], env = {}, shouldHaveWritten = true) {
-    const { stats, result } = await tryRunScript(args, env, shouldHaveWritten)
+  async function runScript(args = [], shouldHaveWritten = true) {
+    const { stats, result } = await tryRunScript(args, shouldHaveWritten)
     if (result.status !== 0) {
       console.log(result)
       expect(result).to.have.property('status', 0)
@@ -803,7 +811,6 @@ describe('back_fill_file_hash script', function () {
     it('should process nothing on re-run', async function () {
       const rerun = await runScript(
         !processHashedFiles ? ['--skip-hashed-files'] : [],
-        {},
         false
       )
       let stats = {
@@ -928,10 +935,11 @@ describe('back_fill_file_hash script', function () {
     it('should gracefully handle fatal errors', async function () {
       mockFilestore.deleteObject(projectId0, fileId0)
       const t0 = Date.now()
-      const { stats, result } = await tryRunScript(['--skip-hashed-files'], {
-        RETRIES: '10',
-        RETRY_DELAY_MS: '1000',
-      })
+      const { stats, result } = await tryRunScript([
+        '--skip-hashed-files',
+        '--retries=10',
+        '--retry-delay-ms=1000',
+      ])
       const t1 = Date.now()
       expectNotFoundError(result, 'failed to process file')
       expect(result.status).to.equal(1)
@@ -963,11 +971,12 @@ describe('back_fill_file_hash script', function () {
           value: { stats, result },
         },
       ] = await Promise.allSettled([
-        tryRunScript(['--skip-hashed-files'], {
-          RETRY_DELAY_MS: '100',
-          RETRIES: '60',
-          RETRY_FILESTORE_404: 'true', // 404s are the easiest to simulate in tests
-        }),
+        tryRunScript([
+          '--skip-hashed-files',
+          '--retries=60',
+          '--retry-delay-ms=1000',
+          '--retry-filestore-404',
+        ]),
         restoreFileAfter5s(),
       ])
       expectNotFoundError(result, 'failed to process file, trying again')
@@ -989,9 +998,7 @@ describe('back_fill_file_hash script', function () {
     let output
     before('prepare environment', prepareEnvironment)
     before('run script', async function () {
-      output = await runScript(['--skip-hashed-files'], {
-        CONCURRENCY: '1',
-      })
+      output = await runScript(['--skip-hashed-files', '--concurrency=1'])
     })
 
     /**
@@ -1058,10 +1065,10 @@ describe('back_fill_file_hash script', function () {
     let output1, output2
     before('prepare environment', prepareEnvironment)
     before('run script without hashed files', async function () {
-      output1 = await runScript(['--skip-hashed-files'], {})
+      output1 = await runScript(['--skip-hashed-files'])
     })
     before('run script with hashed files', async function () {
-      output2 = await runScript([], {})
+      output2 = await runScript([])
     })
     it('should print stats for the first run without hashed files', function () {
       expect(output1.stats).deep.equal(STATS_ALL)
@@ -1076,6 +1083,34 @@ describe('back_fill_file_hash script', function () {
     })
     commonAssertions(true)
   })
+  describe('report mode', function () {
+    let output
+    before('prepare environment', prepareEnvironment)
+    before('run script', async function () {
+      output = await rawRunScript(['--report'])
+    })
+    it('should print the report', () => {
+      expect(output.status).to.equal(0)
+      expect(output.stdout).to.equal(`\
+Current status:
+- Total number of projects: 10
+- Total number of deleted projects: 5
+Sampling 1000 projects to estimate progress...
+Sampled stats for projects:
+- Sampled projects: 9 (90% of all projects)
+- Sampled projects with all hashes present: 5
+- Percentage of projects that need back-filling hashes: 44% (estimated)
+- Sampled projects have 11 files that need to be checked against the full project history system.
+- Sampled projects have 3 files that need to be uploaded to the full project history system (estimating 27% of all files).
+Sampled stats for deleted projects:
+- Sampled deleted projects: 4 (80% of all deleted projects)
+- Sampled deleted projects with all hashes present: 3
+- Percentage of deleted projects that need back-filling hashes: 25% (estimated)
+- Sampled deleted projects have 2 files that need to be checked against the full project history system.
+- Sampled deleted projects have 1 files that need to be uploaded to the full project history system (estimating 50% of all files).
+`)
+    })
+  })
 
   describe('full run in dry-run mode', function () {
     let output
@@ -1089,13 +1124,7 @@ describe('back_fill_file_hash script', function () {
         .toArray()
     })
     before('run script', async function () {
-      output = await runScript(
-        ['--dry-run'],
-        {
-          CONCURRENCY: '1',
-        },
-        false
-      )
+      output = await runScript(['--dry-run', '--concurrency=1'], false)
     })
 
     it('should print stats for dry-run mode', function () {
@@ -1136,9 +1165,7 @@ describe('back_fill_file_hash script', function () {
     let output
     before('prepare environment', prepareEnvironment)
     before('run script', async function () {
-      output = await runScript(['--skip-hashed-files'], {
-        CONCURRENCY: '10',
-      })
+      output = await runScript(['--skip-hashed-files', '--concurrency=10'])
     })
     it('should print stats', function () {
       expect(output.stats).deep.equal(STATS_ALL)
@@ -1146,13 +1173,14 @@ describe('back_fill_file_hash script', function () {
     commonAssertions()
   })
 
-  describe('full run STREAM_HIGH_WATER_MARK=1MB', function () {
+  describe('full run STREAM_HIGH_WATER_MARK=64kiB', function () {
     let output
     before('prepare environment', prepareEnvironment)
     before('run script', async function () {
-      output = await runScript(['--skip-hashed-files'], {
-        STREAM_HIGH_WATER_MARK: (1024 * 1024).toString(),
-      })
+      output = await runScript([
+        '--skip-hashed-files',
+        `--stream-high-water-mark=${64 * 1024}`,
+      ])
     })
     it('should print stats', function () {
       expect(output.stats).deep.equal(STATS_ALL)
@@ -1164,7 +1192,7 @@ describe('back_fill_file_hash script', function () {
     let output
     before('prepare environment', prepareEnvironment)
     before('run script', async function () {
-      output = await runScript([], {})
+      output = await runScript([])
     })
     it('should print stats', function () {
       expect(output.stats).deep.equal(
@@ -1193,9 +1221,7 @@ describe('back_fill_file_hash script', function () {
     })
     let output
     before('run script', async function () {
-      output = await runScript(['--skip-hashed-files'], {
-        CONCURRENCY: '1',
-      })
+      output = await runScript(['--skip-hashed-files', '--concurrency=1'])
     })
 
     it('should print stats', function () {
@@ -1214,20 +1240,18 @@ describe('back_fill_file_hash script', function () {
     let outputPart0, outputPart1
     before('prepare environment', prepareEnvironment)
     before('run script on part 0', async function () {
-      outputPart0 = await runScript(
-        ['--skip-hashed-files', `--BATCH_RANGE_END=${edge}`],
-        {
-          CONCURRENCY: '1',
-        }
-      )
+      outputPart0 = await runScript([
+        '--skip-hashed-files',
+        `--BATCH_RANGE_END=${edge}`,
+        '--concurrency=1',
+      ])
     })
     before('run script on part 1', async function () {
-      outputPart1 = await runScript(
-        ['--skip-hashed-files', `--BATCH_RANGE_START=${edge}`],
-        {
-          CONCURRENCY: '1',
-        }
-      )
+      outputPart1 = await runScript([
+        '--skip-hashed-files',
+        `--BATCH_RANGE_START=${edge}`,
+        '--concurrency=1',
+      ])
     })
 
     it('should print stats for part 0', function () {
