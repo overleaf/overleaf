@@ -1,0 +1,84 @@
+diff --git a/cron/deactivate-projects.sh b/cron/deactivate-projects.sh
+index fab0fbfbf667..a391f99a5bd8 100755
+--- a/cron/deactivate-projects.sh
++++ b/cron/deactivate-projects.sh
+@@ -1,6 +1,6 @@
+ #!/usr/bin/env bash
+
+-set -eux
++set -eu
+
+ echo "-------------------------"
+ echo "Deactivating old projects"
+diff --git a/cron/delete-projects.sh b/cron/delete-projects.sh
+index e1ea5ac5e621..7cd45771716a 100755
+--- a/cron/delete-projects.sh
++++ b/cron/delete-projects.sh
+@@ -1,6 +1,6 @@
+ #!/usr/bin/env bash
+
+-set -eux
++set -eu
+
+ echo "-------------------------"
+ echo "Expiring deleted projects"
+diff --git a/cron/delete-users.sh b/cron/delete-users.sh
+index fe97bffeea0b..30872ac55657 100755
+--- a/cron/delete-users.sh
++++ b/cron/delete-users.sh
+@@ -1,6 +1,6 @@
+ #!/usr/bin/env bash
+
+-set -eux
++set -eu
+
+ echo "----------------------"
+ echo "Expiring deleted users"
+diff --git a/cron/project-history-flush-all.sh b/cron/project-history-flush-all.sh
+index d8bbb184aa37..8fe9eea5fc55 100755
+--- a/cron/project-history-flush-all.sh
++++ b/cron/project-history-flush-all.sh
+@@ -1,6 +1,6 @@
+ #!/usr/bin/env bash
+
+-set -eux
++set -eu
+
+ echo "---------------------------------"
+ echo "Flush all project-history changes"
+diff --git a/cron/project-history-periodic-flush.sh b/cron/project-history-periodic-flush.sh
+index 76feae410e26..1b8efff6cc7c 100755
+--- a/cron/project-history-periodic-flush.sh
++++ b/cron/project-history-periodic-flush.sh
+@@ -1,6 +1,6 @@
+ #!/usr/bin/env bash
+
+-set -eux
++set -eu
+
+ echo "--------------------------"
+ echo "Flush project-history queue"
+diff --git a/cron/project-history-retry-hard.sh b/cron/project-history-retry-hard.sh
+index 651a6615f22d..df9b4703a58e 100755
+--- a/cron/project-history-retry-hard.sh
++++ b/cron/project-history-retry-hard.sh
+@@ -1,6 +1,6 @@
+ #!/usr/bin/env bash
+
+-set -eux
++set -eu
+
+ echo "-----------------------------------"
+ echo "Retry project-history errors (hard)"
+diff --git a/cron/project-history-retry-soft.sh b/cron/project-history-retry-soft.sh
+index 70c597021b28..cbb6e714cae7 100755
+--- a/cron/project-history-retry-soft.sh
++++ b/cron/project-history-retry-soft.sh
+@@ -1,6 +1,6 @@
+ #!/usr/bin/env bash
+
+-set -eux
++set -eu
+
+ echo "-----------------------------------"
+ echo "Retry project-history errors (soft)"

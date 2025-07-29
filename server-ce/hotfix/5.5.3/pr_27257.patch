@@ -1,0 +1,1469 @@
+
+
+diff --git a/services/history-v1/storage/scripts/back_fill_file_hash.mjs b/services/history-v1/storage/scripts/back_fill_file_hash.mjs
+index 0ccadaf5a95..4111c42c4d1 100644
+--- a/services/history-v1/storage/scripts/back_fill_file_hash.mjs
++++ b/services/history-v1/storage/scripts/back_fill_file_hash.mjs
+@@ -111,10 +111,8 @@ function parseArgs() {
+     if (['true', 'false'].includes(v)) return v === 'true'
+     throw new Error(`expected "true" or "false" for boolean option ${name}`)
+   }
+-  const BATCH_RANGE_START = objectIdFromInput(
+-    args['BATCH_RANGE_START']
+-  ).toString()
+-  const BATCH_RANGE_END = objectIdFromInput(args['BATCH_RANGE_END']).toString()
++  const BATCH_RANGE_START = objectIdFromInput(args.BATCH_RANGE_START).toString()
++  const BATCH_RANGE_END = objectIdFromInput(args.BATCH_RANGE_END).toString()
+   return {
+     PROCESS_NON_DELETED_PROJECTS: boolVal('processNonDeletedProjects'),
+     PROCESS_DELETED_PROJECTS: boolVal('processDeletedProjects'),
+@@ -122,8 +120,8 @@ function parseArgs() {
+     PROCESS_HASHED_FILES: boolVal('processHashedFiles'),
+     BATCH_RANGE_START,
+     BATCH_RANGE_END,
+-    LOGGING_IDENTIFIER: args['LOGGING_IDENTIFIER'] || BATCH_RANGE_START,
+-    PROJECT_IDS_FROM: args['projectIdsFrom'],
++    LOGGING_IDENTIFIER: args.LOGGING_IDENTIFIER || BATCH_RANGE_START,
++    PROJECT_IDS_FROM: args.projectIdsFrom,
+   }
+ }
+
+@@ -249,8 +247,8 @@ let lastEventLoopStats = performance.eventLoopUtilization()
+  * @param {number} ms
+  */
+ function toMiBPerSecond(v, ms) {
+-  const ONE_MiB = 1024 * 1024
+-  return v / ONE_MiB / (ms / 1000)
++  const MiB = 1024 * 1024
++  return v / MiB / (ms / 1000)
+ }
+
+ /**
+
+
+
+diff --git a/services/history-v1/storage/scripts/back_fill_file_hash.mjs b/services/history-v1/storage/scripts/back_fill_file_hash.mjs
+index 4111c42c4d1..2d55b41b43e 100644
+--- a/services/history-v1/storage/scripts/back_fill_file_hash.mjs
++++ b/services/history-v1/storage/scripts/back_fill_file_hash.mjs
+@@ -84,11 +84,11 @@ ObjectId.cacheHexString = true
+ function parseArgs() {
+   const PUBLIC_LAUNCH_DATE = new Date('2012-01-01T00:00:00Z')
+   const args = commandLineArgs([
+-    { name: 'processNonDeletedProjects', type: String, defaultValue: 'false' },
+-    { name: 'processDeletedProjects', type: String, defaultValue: 'false' },
+-    { name: 'processHashedFiles', type: String, defaultValue: 'false' },
+-    { name: 'processBlobs', type: String, defaultValue: 'true' },
+-    { name: 'projectIdsFrom', type: String, defaultValue: '' },
++    { name: 'projects', type: Boolean },
++    { name: 'deleted-projects', type: Boolean },
++    { name: 'include-hashed-files', type: Boolean },
++    { name: 'skip-existing-blobs', type: Boolean },
++    { name: 'from-file', type: String, defaultValue: '' },
+     {
+       name: 'BATCH_RANGE_START',
+       type: String,
+@@ -99,29 +99,20 @@ function parseArgs() {
+       type: String,
+       defaultValue: new Date().toISOString(),
+     },
+-    { name: 'LOGGING_IDENTIFIER', type: String, defaultValue: '' },
++    { name: 'logging-id', type: String, defaultValue: '' },
+   ])
+-  /**
+-   * commandLineArgs cannot handle --foo=false, so go the long way
+-   * @param {string} name
+-   * @return {boolean}
+-   */
+-  function boolVal(name) {
+-    const v = args[name]
+-    if (['true', 'false'].includes(v)) return v === 'true'
+-    throw new Error(`expected "true" or "false" for boolean option ${name}`)
+-  }
++
+   const BATCH_RANGE_START = objectIdFromInput(args.BATCH_RANGE_START).toString()
+   const BATCH_RANGE_END = objectIdFromInput(args.BATCH_RANGE_END).toString()
+   return {
+-    PROCESS_NON_DELETED_PROJECTS: boolVal('processNonDeletedProjects'),
+-    PROCESS_DELETED_PROJECTS: boolVal('processDeletedProjects'),
+-    PROCESS_BLOBS: boolVal('processBlobs'),
+-    PROCESS_HASHED_FILES: boolVal('processHashedFiles'),
++    PROCESS_NON_DELETED_PROJECTS: args.projects,
++    PROCESS_DELETED_PROJECTS: args['deleted-projects'],
++    PROCESS_HASHED_FILES: args['include-hashed-files'],
++    PROCESS_BLOBS: !args['skip-existing-blobs'],
+     BATCH_RANGE_START,
+     BATCH_RANGE_END,
+-    LOGGING_IDENTIFIER: args.LOGGING_IDENTIFIER || BATCH_RANGE_START,
+-    PROJECT_IDS_FROM: args.projectIdsFrom,
++    LOGGING_IDENTIFIER: args['logging-id'] || BATCH_RANGE_START,
++    PROJECT_IDS_FROM: args['from-file'],
+   }
+ }
+
+diff --git a/services/history-v1/test/acceptance/js/storage/back_fill_file_hash.test.mjs b/services/history-v1/test/acceptance/js/storage/back_fill_file_hash.test.mjs
+index 62b0b1de25f..0f8bdbf3e1a 100644
+--- a/services/history-v1/test/acceptance/js/storage/back_fill_file_hash.test.mjs
++++ b/services/history-v1/test/acceptance/js/storage/back_fill_file_hash.test.mjs
+@@ -544,8 +544,8 @@ describe('back_fill_file_hash script', function () {
+         process.argv0,
+         [
+           'storage/scripts/back_fill_file_hash.mjs',
+-          '--processNonDeletedProjects=true',
+-          '--processDeletedProjects=true',
++          '--projects',
++          '--deleted-projects',
+           ...args,
+         ],
+         {
+@@ -854,7 +854,7 @@ describe('back_fill_file_hash script', function () {
+     // Practically, this is slow and moving it to the end of the tests gets us there most of the way.
+     it('should process nothing on re-run', async function () {
+       const rerun = await runScript(
+-        processHashedFiles ? ['--processHashedFiles=true'] : [],
++        processHashedFiles ? ['--include-hashed-files'] : [],
+         {},
+         false
+       )
+@@ -1113,7 +1113,7 @@ describe('back_fill_file_hash script', function () {
+       output1 = await runScript([], {})
+     })
+     before('run script with hashed files', async function () {
+-      output2 = await runScript(['--processHashedFiles=true'], {})
++      output2 = await runScript(['--include-hashed-files'], {})
+     })
+     it('should print stats for the first run without hashed files', function () {
+       expect(output1.stats).deep.equal(STATS_ALL)
+@@ -1161,7 +1161,7 @@ describe('back_fill_file_hash script', function () {
+     let output
+     before('prepare environment', prepareEnvironment)
+     before('run script', async function () {
+-      output = await runScript(['--processHashedFiles=true'], {})
++      output = await runScript(['--include-hashed-files'], {})
+     })
+     it('should print stats', function () {
+       expect(output.stats).deep.equal(
+@@ -1263,10 +1263,10 @@ describe('back_fill_file_hash script', function () {
+
+     let outputPart0, outputPart1
+     before('run script on part 0', async function () {
+-      outputPart0 = await runScript([`--projectIdsFrom=${path0}`])
++      outputPart0 = await runScript([`--from-file=${path0}`])
+     })
+     before('run script on part 1', async function () {
+-      outputPart1 = await runScript([`--projectIdsFrom=${path1}`])
++      outputPart1 = await runScript([`--from-file=${path1}`])
+     })
+
+     /**
+
+
+
+diff --git a/services/history-v1/storage/scripts/back_fill_file_hash.mjs b/services/history-v1/storage/scripts/back_fill_file_hash.mjs
+index 2d55b41b43e..68ce4b67aa2 100644
+--- a/services/history-v1/storage/scripts/back_fill_file_hash.mjs
++++ b/services/history-v1/storage/scripts/back_fill_file_hash.mjs
+@@ -79,7 +79,7 @@ ObjectId.cacheHexString = true
+  */
+
+ /**
+- * @return {{PROJECT_IDS_FROM: string, PROCESS_HASHED_FILES: boolean, LOGGING_IDENTIFIER: string, BATCH_RANGE_START: string, PROCESS_BLOBS: boolean, BATCH_RANGE_END: string, PROCESS_NON_DELETED_PROJECTS: boolean, PROCESS_DELETED_PROJECTS: boolean}}
++ * @return {{PROJECT_IDS_FROM: string, PROCESS_HASHED_FILES: boolean, LOGGING_IDENTIFIER: string, BATCH_RANGE_START: string, PROCESS_BLOBS: boolean, BATCH_RANGE_END: string, PROCESS_NON_DELETED_PROJECTS: boolean, PROCESS_DELETED_PROJECTS: boolean, DRY_RUN: boolean}}
+  */
+ function parseArgs() {
+   const PUBLIC_LAUNCH_DATE = new Date('2012-01-01T00:00:00Z')
+@@ -89,6 +89,7 @@ function parseArgs() {
+     { name: 'include-hashed-files', type: Boolean },
+     { name: 'skip-existing-blobs', type: Boolean },
+     { name: 'from-file', type: String, defaultValue: '' },
++    { name: 'dry-run', type: Boolean },
+     {
+       name: 'BATCH_RANGE_START',
+       type: String,
+@@ -109,6 +110,7 @@ function parseArgs() {
+     PROCESS_DELETED_PROJECTS: args['deleted-projects'],
+     PROCESS_HASHED_FILES: args['include-hashed-files'],
+     PROCESS_BLOBS: !args['skip-existing-blobs'],
++    DRY_RUN: args['dry-run'],
+     BATCH_RANGE_START,
+     BATCH_RANGE_END,
+     LOGGING_IDENTIFIER: args['logging-id'] || BATCH_RANGE_START,
+@@ -121,6 +123,7 @@ const {
+   PROCESS_DELETED_PROJECTS,
+   PROCESS_BLOBS,
+   PROCESS_HASHED_FILES,
++  DRY_RUN,
+   BATCH_RANGE_START,
+   BATCH_RANGE_END,
+   LOGGING_IDENTIFIER,
+@@ -325,10 +328,12 @@ async function processFileWithCleanup(entry) {
+   try {
+     return await processFile(entry, filePath)
+   } finally {
+-    await Promise.all([
+-      fs.promises.rm(filePath, { force: true }),
+-      fs.promises.rm(filePath + GZ_SUFFIX, { force: true }),
+-    ])
++    if (!DRY_RUN) {
++      await Promise.all([
++        fs.promises.rm(filePath, { force: true }),
++        fs.promises.rm(filePath + GZ_SUFFIX, { force: true }),
++      ])
++    }
+   }
+ }
+
+@@ -383,6 +388,12 @@ async function processFileOnce(entry, filePath) {
+     // know the hash of.
+     return entry.hash
+   }
++  if (DRY_RUN) {
++    console.log(
++      `DRY-RUN: would process file ${fileId} for project ${projectId}`
++    )
++    return 'dry-run'
++  }
+   const blobStore = new BlobStore(historyId)
+   STATS.readFromGCSCount++
+   // make a fetch request to filestore itself
+
+
+
+diff --git a/libraries/logger/logging-manager.js b/libraries/logger/logging-manager.js
+index edf922be72b..9fb4f284053 100644
+--- a/libraries/logger/logging-manager.js
++++ b/libraries/logger/logging-manager.js
+@@ -11,7 +11,7 @@ const LoggingManager = {
+   /**
+    * @param {string} name - The name of the logger
+    */
+-  initialize(name) {
++  initialize(name, options = {}) {
+     this.isProduction =
+       (process.env.NODE_ENV || '').toLowerCase() === 'production'
+     const isTest = (process.env.NODE_ENV || '').toLowerCase() === 'test'
+@@ -27,7 +27,7 @@ const LoggingManager = {
+         req: Serializers.req,
+         res: Serializers.res,
+       },
+-      streams: [this._getOutputStreamConfig()],
++      streams: options.streams ?? [this._getOutputStreamConfig()],
+     })
+     this._setupRingBuffer()
+     this._setupLogLevelChecker()
+
+
+
+diff --git a/services/history-v1/storage/scripts/back_fill_file_hash.mjs b/services/history-v1/storage/scripts/back_fill_file_hash.mjs
+index 68ce4b67aa2..a7f220ec362 100644
+--- a/services/history-v1/storage/scripts/back_fill_file_hash.mjs
++++ b/services/history-v1/storage/scripts/back_fill_file_hash.mjs
+@@ -79,10 +79,14 @@ ObjectId.cacheHexString = true
+  */
+
+ /**
+- * @return {{PROJECT_IDS_FROM: string, PROCESS_HASHED_FILES: boolean, LOGGING_IDENTIFIER: string, BATCH_RANGE_START: string, PROCESS_BLOBS: boolean, BATCH_RANGE_END: string, PROCESS_NON_DELETED_PROJECTS: boolean, PROCESS_DELETED_PROJECTS: boolean, DRY_RUN: boolean}}
++ * @return {{PROJECT_IDS_FROM: string, PROCESS_HASHED_FILES: boolean, LOGGING_IDENTIFIER: string, BATCH_RANGE_START: string, PROCESS_BLOBS: boolean, BATCH_RANGE_END: string, PROCESS_NON_DELETED_PROJECTS: boolean, PROCESS_DELETED_PROJECTS: boolean, DRY_RUN: boolean, OUTPUT_FILE: string, PROCESS_BLOBS: boolean}}
+  */
+ function parseArgs() {
+   const PUBLIC_LAUNCH_DATE = new Date('2012-01-01T00:00:00Z')
++  const DEFAULT_OUTPUT_FILE = `file-migration-${new Date()
++    .toISOString()
++    .replace(/[:.]/g, '_')}.log`
++
+   const args = commandLineArgs([
+     { name: 'projects', type: Boolean },
+     { name: 'deleted-projects', type: Boolean },
+@@ -90,6 +94,7 @@ function parseArgs() {
+     { name: 'skip-existing-blobs', type: Boolean },
+     { name: 'from-file', type: String, defaultValue: '' },
+     { name: 'dry-run', type: Boolean },
++    { name: 'output', type: String, defaultValue: DEFAULT_OUTPUT_FILE },
+     {
+       name: 'BATCH_RANGE_START',
+       type: String,
+@@ -111,6 +116,7 @@ function parseArgs() {
+     PROCESS_HASHED_FILES: args['include-hashed-files'],
+     PROCESS_BLOBS: !args['skip-existing-blobs'],
+     DRY_RUN: args['dry-run'],
++    OUTPUT_FILE: args.output,
+     BATCH_RANGE_START,
+     BATCH_RANGE_END,
+     LOGGING_IDENTIFIER: args['logging-id'] || BATCH_RANGE_START,
+@@ -124,6 +130,7 @@ const {
+   PROCESS_BLOBS,
+   PROCESS_HASHED_FILES,
+   DRY_RUN,
++  OUTPUT_FILE,
+   BATCH_RANGE_START,
+   BATCH_RANGE_END,
+   LOGGING_IDENTIFIER,
+@@ -158,6 +165,21 @@ const STREAM_HIGH_WATER_MARK = parseInt(
+ const LOGGING_INTERVAL = parseInt(process.env.LOGGING_INTERVAL || '60000', 10)
+ const SLEEP_BEFORE_EXIT = parseInt(process.env.SLEEP_BEFORE_EXIT || '1000', 10)
+
++// Log output to a file
++logger.initialize('file-migration', {
++  streams: [
++    {
++      stream:
++        OUTPUT_FILE === '-'
++          ? process.stdout
++          : fs.createWriteStream(OUTPUT_FILE, { flags: 'a' }),
++    },
++  ],
++})
++async function trackProgress(progress) {
++  logger.info({}, progress)
++}
++
+ // Filestore endpoint location
+ const FILESTORE_HOST = process.env.FILESTORE_HOST || '127.0.0.1'
+ const FILESTORE_PORT = process.env.FILESTORE_PORT || '3009'
+@@ -525,8 +547,9 @@ async function queueNextBatch(batch, prefix = 'rootFolder.0') {
+   const end = renderObjectId(batch[batch.length - 1]._id)
+   const deferred = processBatch(batch, prefix)
+     .then(() => {
+-      console.error(`Actually completed batch ending ${end}`)
++      logger.info({ end }, 'actually completed batch')
+     })
++
+     .catch(err => {
+       logger.error({ err, start, end }, 'fatal error processing batch')
+       throw err
+@@ -1062,6 +1085,7 @@ async function processNonDeletedProjects() {
+       {
+         BATCH_RANGE_START,
+         BATCH_RANGE_END,
++        trackProgress,
+       }
+     )
+   } catch (err) {
+diff --git a/services/history-v1/test/acceptance/js/storage/back_fill_file_hash.test.mjs b/services/history-v1/test/acceptance/js/storage/back_fill_file_hash.test.mjs
+index 0f8bdbf3e1a..117352d6164 100644
+--- a/services/history-v1/test/acceptance/js/storage/back_fill_file_hash.test.mjs
++++ b/services/history-v1/test/acceptance/js/storage/back_fill_file_hash.test.mjs
+@@ -544,6 +544,7 @@ describe('back_fill_file_hash script', function () {
+         process.argv0,
+         [
+           'storage/scripts/back_fill_file_hash.mjs',
++          '--output=-',
+           '--projects',
+           '--deleted-projects',
+           ...args,
+
+
+
+diff --git a/services/history-v1/storage/scripts/back_fill_file_hash.mjs b/services/history-v1/storage/scripts/back_fill_file_hash.mjs
+index a7f220ec362..4beba19cf4c 100644
+--- a/services/history-v1/storage/scripts/back_fill_file_hash.mjs
++++ b/services/history-v1/storage/scripts/back_fill_file_hash.mjs
+@@ -88,6 +88,7 @@ function parseArgs() {
+     .replace(/[:.]/g, '_')}.log`
+
+   const args = commandLineArgs([
++    { name: 'all', alias: 'a', type: Boolean },
+     { name: 'projects', type: Boolean },
+     { name: 'deleted-projects', type: Boolean },
+     { name: 'include-hashed-files', type: Boolean },
+@@ -108,6 +109,36 @@ function parseArgs() {
+     { name: 'logging-id', type: String, defaultValue: '' },
+   ])
+
++  // If no arguments are provided, display a usage message
++  if (process.argv.length <= 2) {
++    console.error(
++      'Usage: node back_fill_file_hash.mjs --all | --projects | --deleted-projects'
++    )
++    process.exit(1)
++  }
++
++  // Require at least one of --projects, --deleted-projects and --all
++  if (!args.projects && !args['deleted-projects'] && !args.all) {
++    console.error(
++      'Must specify at least one of --projects and --deleted-projects, or --all'
++    )
++    process.exit(1)
++  }
++
++  // Forbid --all with --projects or --deleted-projects
++  if (args.all && (args.projects || args['deleted-projects'])) {
++    console.error('Cannot use --all with --projects or --deleted-projects')
++    process.exit(1)
++  }
++
++  // The --all option processes all projects, including deleted ones
++  // and checks existing hashed files are present in the blob store.
++  if (args.all) {
++    args.projects = true
++    args['deleted-projects'] = true
++    args['include-hashed-files'] = true
++  }
++
+   const BATCH_RANGE_START = objectIdFromInput(args.BATCH_RANGE_START).toString()
+   const BATCH_RANGE_END = objectIdFromInput(args.BATCH_RANGE_END).toString()
+   return {
+
+
+
+diff --git a/services/history-v1/storage/scripts/back_fill_file_hash.mjs b/services/history-v1/storage/scripts/back_fill_file_hash.mjs
+index 4beba19cf4c..492c5ad939d 100644
+--- a/services/history-v1/storage/scripts/back_fill_file_hash.mjs
++++ b/services/history-v1/storage/scripts/back_fill_file_hash.mjs
+@@ -88,6 +88,7 @@ function parseArgs() {
+     .replace(/[:.]/g, '_')}.log`
+
+   const args = commandLineArgs([
++    { name: 'help', alias: 'h', type: Boolean },
+     { name: 'all', alias: 'a', type: Boolean },
+     { name: 'projects', type: Boolean },
+     { name: 'deleted-projects', type: Boolean },
+@@ -117,6 +118,48 @@ function parseArgs() {
+     process.exit(1)
+   }
+
++  // If --help is provided, display the help message
++  if (args.help) {
++    console.log(`Usage: node back_fill_file_hash.mjs [options]
++
++Project selection options:
++  --all, -a                  Process all projects, including deleted ones
++  --projects                 Process projects (excluding deleted ones)
++  --deleted-projects         Process deleted projects
++  --from-file <file>         Process selected projects ids from file
++
++File selection options:
++  --include-hashed-files     Process files that already have a hash
++  --skip-existing-blobs      Skip processing files already in the blob store
++
++Logging options:
++  --output <file>            Output log to the specified file
++                             (default: file-migration-<timestamp>.log)
++  --logging-id <id>          Identifier for logging
++                             (default: BATCH_RANGE_START)
++
++Batch range options:
++  --BATCH_RANGE_START <date> Start date for processing
++                             (default: ${args.BATCH_RANGE_START})
++  --BATCH_RANGE_END <date>   End date for processing
++                             (default: ${args.BATCH_RANGE_END})
++
++Other options:
++  --dry-run                  Perform a dry run without making changes
++  --help, -h                 Show this help message
++
++Typical usage:
++
++  node back_fill_file_hash.mjs --all
++
++is equivalent to
++
++  node back_fill_file_hash.mjs --projects --deleted-projects \\
++    --include-hashed-files
++`)
++    process.exit(0)
++  }
++
+   // Require at least one of --projects, --deleted-projects and --all
+   if (!args.projects && !args['deleted-projects'] && !args.all) {
+     console.error(
+
+
+
+diff --git a/services/history-v1/storage/scripts/back_fill_file_hash.mjs b/services/history-v1/storage/scripts/back_fill_file_hash.mjs
+index 492c5ad939d..b20e365c4ff 100644
+--- a/services/history-v1/storage/scripts/back_fill_file_hash.mjs
++++ b/services/history-v1/storage/scripts/back_fill_file_hash.mjs
+@@ -79,7 +79,7 @@ ObjectId.cacheHexString = true
+  */
+
+ /**
+- * @return {{PROJECT_IDS_FROM: string, PROCESS_HASHED_FILES: boolean, LOGGING_IDENTIFIER: string, BATCH_RANGE_START: string, PROCESS_BLOBS: boolean, BATCH_RANGE_END: string, PROCESS_NON_DELETED_PROJECTS: boolean, PROCESS_DELETED_PROJECTS: boolean, DRY_RUN: boolean, OUTPUT_FILE: string, PROCESS_BLOBS: boolean}}
++ * @return {{PROJECT_IDS_FROM: string, PROCESS_HASHED_FILES: boolean, LOGGING_IDENTIFIER: string, BATCH_RANGE_START: string, BATCH_RANGE_END: string, PROCESS_NON_DELETED_PROJECTS: boolean, PROCESS_DELETED_PROJECTS: boolean, PROCESS_BLOBS: boolean, DRY_RUN: boolean, OUTPUT_FILE: string, DISPLAY_REPORT: boolean}}
+  */
+ function parseArgs() {
+   const PUBLIC_LAUNCH_DATE = new Date('2012-01-01T00:00:00Z')
+@@ -97,6 +97,7 @@ function parseArgs() {
+     { name: 'from-file', type: String, defaultValue: '' },
+     { name: 'dry-run', type: Boolean },
+     { name: 'output', type: String, defaultValue: DEFAULT_OUTPUT_FILE },
++    { name: 'report', type: Boolean },
+     {
+       name: 'BATCH_RANGE_START',
+       type: String,
+@@ -145,6 +146,7 @@ Batch range options:
+                              (default: ${args.BATCH_RANGE_END})
+
+ Other options:
++  --report                   Display a report of the current status
+   --dry-run                  Perform a dry run without making changes
+   --help, -h                 Show this help message
+
+@@ -160,10 +162,15 @@ is equivalent to
+     process.exit(0)
+   }
+
+-  // Require at least one of --projects, --deleted-projects and --all
+-  if (!args.projects && !args['deleted-projects'] && !args.all) {
++  // Require at least one of --projects, --deleted-projects and --all or --report
++  if (
++    !args.projects &&
++    !args['deleted-projects'] &&
++    !args.all &&
++    !args.report
++  ) {
+     console.error(
+-      'Must specify at least one of --projects and --deleted-projects, or --all'
++      'Must specify at least one of --projects and --deleted-projects, --all or --report'
+     )
+     process.exit(1)
+   }
+@@ -174,6 +181,14 @@ is equivalent to
+     process.exit(1)
+   }
+
++  // Forbid --all, --projects, --deleted-projects with --report
++  if (args.report && (args.all || args.projects || args['deleted-projects'])) {
++    console.error(
++      'Cannot use --report with --all, --projects or --deleted-projects'
++    )
++    process.exit(1)
++  }
++
+   // The --all option processes all projects, including deleted ones
+   // and checks existing hashed files are present in the blob store.
+   if (args.all) {
+@@ -195,6 +210,7 @@ is equivalent to
+     BATCH_RANGE_END,
+     LOGGING_IDENTIFIER: args['logging-id'] || BATCH_RANGE_START,
+     PROJECT_IDS_FROM: args['from-file'],
++    DISPLAY_REPORT: args.report,
+   }
+ }
+
+@@ -209,6 +225,7 @@ const {
+   BATCH_RANGE_END,
+   LOGGING_IDENTIFIER,
+   PROJECT_IDS_FROM,
++  DISPLAY_REPORT,
+ } = parseArgs()
+
+ // We need to handle the start and end differently as ids of deleted projects are created at time of deletion.
+@@ -254,6 +271,108 @@ async function trackProgress(progress) {
+   logger.info({}, progress)
+ }
+
++/**
++ * Display the stats for the projects or deletedProjects collections.
++ *
++ * @param {number} N - Number of samples to take from the collection.
++ * @param {string} name - Name of the collection being sampled.
++ * @param {Collection} collection - MongoDB collection to query.
++ * @param {Object} query - MongoDB query to filter documents.
++ * @param {Object} projection - MongoDB projection to select fields.
++ * @param {number} collectionCount - Total number of documents in the collection.
++ * @returns {Promise<void>} Resolves when stats have been displayed.
++ */
++async function getStatsForCollection(
++  N,
++  name,
++  collection,
++  query,
++  projection,
++  collectionCount
++) {
++  const stats = {
++    projectCount: 0,
++    projectsWithAllHashes: 0,
++    fileCount: 0,
++    fileWithHashCount: 0,
++  }
++  // Pick a random sample of projects and estimate the number of files without hashes
++  const result = await collection
++    .aggregate([
++      { $sample: { size: N } },
++      { $match: query },
++      {
++        $project: projection,
++      },
++    ])
++    .toArray()
++
++  for (const project of result) {
++    const fileTree = JSON.stringify(project, [
++      'rootFolder',
++      'folders',
++      'fileRefs',
++      'hash',
++      '_id',
++    ])
++    // count the number of files without a hash, these are uniquely identified
++    // by entries with {"_id":"...."} since we have filtered the file tree
++    const filesWithoutHash = fileTree.match(/\{"_id":"[0-9a-f]{24}"\}/g) || []
++    // count the number of files with a hash, these are uniquely identified
++    // by the number of "hash" strings due to the filtering
++    const filesWithHash = fileTree.match(/"hash"/g) || []
++    stats.fileCount += filesWithoutHash.length + filesWithHash.length
++    stats.fileWithHashCount += filesWithHash.length
++    stats.projectCount++
++    stats.projectsWithAllHashes += filesWithoutHash.length === 0 ? 1 : 0
++  }
++  console.log(`Sampled stats for ${name}:`)
++  const fractionSampled = stats.projectCount / collectionCount
++  const percentageSampled = (fractionSampled * 100).toFixed(1)
++  const fractionConverted = stats.projectsWithAllHashes / stats.projectCount
++  const percentageConverted = (fractionConverted * 100).toFixed(1)
++  console.log(
++    `- Sampled ${name}: ${stats.projectCount} (${percentageSampled}%)`
++  )
++  console.log(
++    `- Sampled ${name} with all hashes present: ${stats.projectsWithAllHashes}`
++  )
++  console.log(
++    `- Percentage of ${name} converted: ${percentageConverted}% (estimated)`
++  )
++}
++
++/**
++ * Displays a report of the current status of projects and deleted projects,
++ * including counts and estimated progress based on a sample.
++ */
++async function displayReport() {
++  const projectsCountResult = await projectsCollection.countDocuments()
++  const deletedProjectsCountResult =
++    await deletedProjectsCollection.countDocuments()
++  const sampleSize = 1000
++  console.log('Current status:')
++  console.log(`- Projects: ${projectsCountResult}`)
++  console.log(`- Deleted projects: ${deletedProjectsCountResult}`)
++  console.log(`Sampling ${sampleSize} projects to estimate progress...`)
++  await getStatsForCollection(
++    sampleSize,
++    'projects',
++    projectsCollection,
++    { rootFolder: { $exists: true } },
++    { rootFolder: 1 },
++    projectsCountResult
++  )
++  await getStatsForCollection(
++    sampleSize,
++    'deleted projects',
++    deletedProjectsCollection,
++    { 'project.rootFolder': { $exists: true } },
++    { 'project.rootFolder': 1 },
++    deletedProjectsCountResult
++  )
++}
++
+ // Filestore endpoint location
+ const FILESTORE_HOST = process.env.FILESTORE_HOST || '127.0.0.1'
+ const FILESTORE_PORT = process.env.FILESTORE_PORT || '3009'
+@@ -1220,6 +1339,12 @@ async function main() {
+   console.warn('Done.')
+ }
+
++if (DISPLAY_REPORT) {
++  console.warn('Displaying report...')
++  await displayReport()
++  process.exit(0)
++}
++
+ try {
+   try {
+     await main()
+
+
+
+diff --git a/services/history-v1/storage/scripts/back_fill_file_hash.mjs b/services/history-v1/storage/scripts/back_fill_file_hash.mjs
+index b20e365c4ff..2bfc4051622 100644
+--- a/services/history-v1/storage/scripts/back_fill_file_hash.mjs
++++ b/services/history-v1/storage/scripts/back_fill_file_hash.mjs
+@@ -267,8 +267,20 @@ logger.initialize('file-migration', {
+     },
+   ],
+ })
++
++let lastElapsedTime = 0
+ async function trackProgress(progress) {
+-  logger.info({}, progress)
++  const elapsedTime = Math.floor((performance.now() - processStart) / 1000)
++  if (lastElapsedTime === elapsedTime) {
++    // Avoid spamming the console with the same progress message
++    return
++  }
++  lastElapsedTime = elapsedTime
++  readline.clearLine(process.stdout, 0)
++  readline.cursorTo(process.stdout, 0)
++  process.stdout.write(
++    `Processed ${STATS.projects} projects, elapsed time ${elapsedTime}s`
++  )
+ }
+
+ /**
+@@ -1287,7 +1299,7 @@ async function processNonDeletedProjects() {
+   } finally {
+     await waitForDeferredQueues()
+   }
+-  console.warn('Done updating live projects')
++  console.warn('\nDone updating live projects')
+ }
+
+ async function processDeletedProjects() {
+@@ -1306,7 +1318,9 @@ async function processDeletedProjects() {
+         'project.rootFolder': 1,
+         'project._id': 1,
+         'project.overleaf.history.id': 1,
+-      }
++      },
++      {},
++      { trackProgress }
+     )
+   } catch (err) {
+     gracefulShutdownInitiated = true
+@@ -1314,7 +1328,7 @@ async function processDeletedProjects() {
+   } finally {
+     await waitForDeferredQueues()
+   }
+-  console.warn('Done updating deleted projects')
++  console.warn('\nDone updating deleted projects')
+ }
+
+ async function main() {
+
+
+
+diff --git a/services/history-v1/storage/scripts/back_fill_file_hash.mjs b/services/history-v1/storage/scripts/back_fill_file_hash.mjs
+index 2bfc4051622..c9fd7d233a7 100644
+--- a/services/history-v1/storage/scripts/back_fill_file_hash.mjs
++++ b/services/history-v1/storage/scripts/back_fill_file_hash.mjs
+@@ -94,9 +94,14 @@ function parseArgs() {
+     { name: 'deleted-projects', type: Boolean },
+     { name: 'include-hashed-files', type: Boolean },
+     { name: 'skip-existing-blobs', type: Boolean },
+-    { name: 'from-file', type: String, defaultValue: '' },
+-    { name: 'dry-run', type: Boolean },
+-    { name: 'output', type: String, defaultValue: DEFAULT_OUTPUT_FILE },
++    { name: 'from-file', alias: 'f', type: String, defaultValue: '' },
++    { name: 'dry-run', alias: 'n', type: Boolean },
++    {
++      name: 'output',
++      alias: 'o',
++      type: String,
++      defaultValue: DEFAULT_OUTPUT_FILE,
++    },
+     { name: 'report', type: Boolean },
+     {
+       name: 'BATCH_RANGE_START',
+@@ -127,14 +132,14 @@ Project selection options:
+   --all, -a                  Process all projects, including deleted ones
+   --projects                 Process projects (excluding deleted ones)
+   --deleted-projects         Process deleted projects
+-  --from-file <file>         Process selected projects ids from file
++  --from-file <file>, -f <file> Process selected projects ids from file
+
+ File selection options:
+   --include-hashed-files     Process files that already have a hash
+   --skip-existing-blobs      Skip processing files already in the blob store
+
+ Logging options:
+-  --output <file>            Output log to the specified file
++  --output <file>, -o <file> Output log to the specified file
+                              (default: file-migration-<timestamp>.log)
+   --logging-id <id>          Identifier for logging
+                              (default: BATCH_RANGE_START)
+@@ -147,7 +152,7 @@ Batch range options:
+
+ Other options:
+   --report                   Display a report of the current status
+-  --dry-run                  Perform a dry run without making changes
++  --dry-run, -n              Perform a dry run without making changes
+   --help, -h                 Show this help message
+
+ Typical usage:
+
+
+
+diff --git a/services/history-v1/storage/scripts/back_fill_file_hash.mjs b/services/history-v1/storage/scripts/back_fill_file_hash.mjs
+index c9fd7d233a7..8f28e8a4d78 100644
+--- a/services/history-v1/storage/scripts/back_fill_file_hash.mjs
++++ b/services/history-v1/storage/scripts/back_fill_file_hash.mjs
+@@ -326,6 +326,7 @@ async function getStatsForCollection(
+
+   for (const project of result) {
+     const fileTree = JSON.stringify(project, [
++      'project',
+       'rootFolder',
+       'folders',
+       'fileRefs',
+
+
+
+diff --git a/libraries/mongo-utils/batchedUpdate.js b/libraries/mongo-utils/batchedUpdate.js
+index 41af41f0d4a..f1253c587d3 100644
+--- a/libraries/mongo-utils/batchedUpdate.js
++++ b/libraries/mongo-utils/batchedUpdate.js
+@@ -35,7 +35,7 @@ let BATCHED_UPDATE_RUNNING = false
+  * @property {string} [BATCH_RANGE_START]
+  * @property {string} [BATCH_SIZE]
+  * @property {string} [VERBOSE_LOGGING]
+- * @property {(progress: string) => Promise<void>} [trackProgress]
++ * @property {(progress: string, options?: object) => Promise<void>} [trackProgress]
+  */
+
+ /**
+@@ -269,9 +269,12 @@ async function batchedUpdate(
+           await performUpdate(collection, nextBatch, update)
+         }
+       }
+-      await trackProgress(`Completed batch ending ${renderObjectId(end)}`)
++      await trackProgress(`Completed batch ending ${renderObjectId(end)}`, {
++        completedBatch: true,
++      })
+       start = end
+     }
++    await trackProgress('Completed all batches', { completedAll: true })
+     return updated
+   } finally {
+     BATCHED_UPDATE_RUNNING = false
+
+
+
+diff --git a/services/history-v1/storage/scripts/back_fill_file_hash.mjs b/services/history-v1/storage/scripts/back_fill_file_hash.mjs
+index 8f28e8a4d78..2b54fdb1687 100644
+--- a/services/history-v1/storage/scripts/back_fill_file_hash.mjs
++++ b/services/history-v1/storage/scripts/back_fill_file_hash.mjs
+@@ -274,9 +274,16 @@ logger.initialize('file-migration', {
+ })
+
+ let lastElapsedTime = 0
+-async function trackProgress(progress) {
++async function trackProgress(progress, options = {}) {
++  if (OUTPUT_FILE === '-') {
++    return // skip progress tracking when logging to stdout
++  }
++  if (options.completedAll) {
++    process.stdout.write('\n')
++    return
++  }
+   const elapsedTime = Math.floor((performance.now() - processStart) / 1000)
+-  if (lastElapsedTime === elapsedTime) {
++  if (lastElapsedTime === elapsedTime && !options.completedBatch) {
+     // Avoid spamming the console with the same progress message
+     return
+   }
+@@ -1305,7 +1312,7 @@ async function processNonDeletedProjects() {
+   } finally {
+     await waitForDeferredQueues()
+   }
+-  console.warn('\nDone updating live projects')
++  console.warn('Done updating live projects')
+ }
+
+ async function processDeletedProjects() {
+@@ -1334,7 +1341,7 @@ async function processDeletedProjects() {
+   } finally {
+     await waitForDeferredQueues()
+   }
+-  console.warn('\nDone updating deleted projects')
++  console.warn('Done updating deleted projects')
+ }
+
+ async function main() {
+@@ -1381,7 +1388,9 @@ try {
+
+   let code = 0
+   if (STATS.filesFailed > 0) {
+-    console.warn('Some files could not be processed, see logs and try again')
++    console.warn(
++      `Some files could not be processed, see logs in ${OUTPUT_FILE} and try again`
++    )
+     code++
+   }
+   if (STATS.fileHardDeleted > 0) {
+
+
+
+diff --git a/services/history-v1/storage/scripts/back_fill_file_hash.mjs b/services/history-v1/storage/scripts/back_fill_file_hash.mjs
+index 2b54fdb1687..fc46f245d1a 100644
+--- a/services/history-v1/storage/scripts/back_fill_file_hash.mjs
++++ b/services/history-v1/storage/scripts/back_fill_file_hash.mjs
+@@ -525,7 +525,7 @@ function computeDiff(nextEventLoopStats, now) {
+ function printStats(isLast = false) {
+   const now = performance.now()
+   const nextEventLoopStats = performance.eventLoopUtilization()
+-  const logLine = JSON.stringify({
++  const logLine = {
+     time: new Date(),
+     LOGGING_IDENTIFIER,
+     ...STATS,
+@@ -533,11 +533,11 @@ function printStats(isLast = false) {
+     eventLoop: nextEventLoopStats,
+     diff: computeDiff(nextEventLoopStats, now),
+     deferredBatches: Array.from(deferredBatches.keys()),
+-  })
+-  if (isLast) {
+-    console.warn(logLine)
++  }
++  if (isLast && OUTPUT_FILE === '-') {
++    console.warn(JSON.stringify(logLine))
+   } else {
+-    console.log(logLine)
++    logger.info(logLine, 'file-migration stats')
+   }
+   lastEventLoopStats = nextEventLoopStats
+   lastLog = Object.assign({}, STATS)
+
+
+
+diff --git a/services/history-v1/storage/scripts/back_fill_file_hash.mjs b/services/history-v1/storage/scripts/back_fill_file_hash.mjs
+index fc46f245d1a..4a4d93d902c 100644
+--- a/services/history-v1/storage/scripts/back_fill_file_hash.mjs
++++ b/services/history-v1/storage/scripts/back_fill_file_hash.mjs
+@@ -92,7 +92,7 @@ function parseArgs() {
+     { name: 'all', alias: 'a', type: Boolean },
+     { name: 'projects', type: Boolean },
+     { name: 'deleted-projects', type: Boolean },
+-    { name: 'include-hashed-files', type: Boolean },
++    { name: 'skip-hashed-files', type: Boolean },
+     { name: 'skip-existing-blobs', type: Boolean },
+     { name: 'from-file', alias: 'f', type: String, defaultValue: '' },
+     { name: 'dry-run', alias: 'n', type: Boolean },
+@@ -135,7 +135,7 @@ Project selection options:
+   --from-file <file>, -f <file> Process selected projects ids from file
+
+ File selection options:
+-  --include-hashed-files     Process files that already have a hash
++  --skip-hashed-files        Skip processing files that already have a hash
+   --skip-existing-blobs      Skip processing files already in the blob store
+
+ Logging options:
+@@ -161,8 +161,7 @@ Typical usage:
+
+ is equivalent to
+
+-  node back_fill_file_hash.mjs --projects --deleted-projects \\
+-    --include-hashed-files
++  node back_fill_file_hash.mjs --projects --deleted-projects
+ `)
+     process.exit(0)
+   }
+@@ -199,7 +198,6 @@ is equivalent to
+   if (args.all) {
+     args.projects = true
+     args['deleted-projects'] = true
+-    args['include-hashed-files'] = true
+   }
+
+   const BATCH_RANGE_START = objectIdFromInput(args.BATCH_RANGE_START).toString()
+@@ -207,7 +205,7 @@ is equivalent to
+   return {
+     PROCESS_NON_DELETED_PROJECTS: args.projects,
+     PROCESS_DELETED_PROJECTS: args['deleted-projects'],
+-    PROCESS_HASHED_FILES: args['include-hashed-files'],
++    PROCESS_HASHED_FILES: !args['skip-hashed-files'],
+     PROCESS_BLOBS: !args['skip-existing-blobs'],
+     DRY_RUN: args['dry-run'],
+     OUTPUT_FILE: args.output,
+diff --git a/services/history-v1/test/acceptance/js/storage/back_fill_file_hash.test.mjs b/services/history-v1/test/acceptance/js/storage/back_fill_file_hash.test.mjs
+index 117352d6164..a95bcbabd7e 100644
+--- a/services/history-v1/test/acceptance/js/storage/back_fill_file_hash.test.mjs
++++ b/services/history-v1/test/acceptance/js/storage/back_fill_file_hash.test.mjs
+@@ -855,7 +855,7 @@ describe('back_fill_file_hash script', function () {
+     // Practically, this is slow and moving it to the end of the tests gets us there most of the way.
+     it('should process nothing on re-run', async function () {
+       const rerun = await runScript(
+-        processHashedFiles ? ['--include-hashed-files'] : [],
++        !processHashedFiles ? ['--skip-hashed-files'] : [],
+         {},
+         false
+       )
+@@ -981,7 +981,7 @@ describe('back_fill_file_hash script', function () {
+     it('should gracefully handle fatal errors', async function () {
+       mockFilestore.deleteObject(projectId0, fileId0)
+       const t0 = Date.now()
+-      const { stats, result } = await tryRunScript([], {
++      const { stats, result } = await tryRunScript(['--skip-hashed-files'], {
+         RETRIES: '10',
+         RETRY_DELAY_MS: '1000',
+       })
+@@ -1016,7 +1016,7 @@ describe('back_fill_file_hash script', function () {
+           value: { stats, result },
+         },
+       ] = await Promise.allSettled([
+-        tryRunScript([], {
++        tryRunScript(['--skip-hashed-files'], {
+           RETRY_DELAY_MS: '100',
+           RETRIES: '60',
+           RETRY_FILESTORE_404: 'true', // 404s are the easiest to simulate in tests
+@@ -1042,7 +1042,7 @@ describe('back_fill_file_hash script', function () {
+     let output
+     before('prepare environment', prepareEnvironment)
+     before('run script', async function () {
+-      output = await runScript([], {
++      output = await runScript(['--skip-hashed-files'], {
+         CONCURRENCY: '1',
+       })
+     })
+@@ -1111,10 +1111,10 @@ describe('back_fill_file_hash script', function () {
+     let output1, output2
+     before('prepare environment', prepareEnvironment)
+     before('run script without hashed files', async function () {
+-      output1 = await runScript([], {})
++      output1 = await runScript(['--skip-hashed-files'], {})
+     })
+     before('run script with hashed files', async function () {
+-      output2 = await runScript(['--include-hashed-files'], {})
++      output2 = await runScript([], {})
+     })
+     it('should print stats for the first run without hashed files', function () {
+       expect(output1.stats).deep.equal(STATS_ALL)
+@@ -1134,7 +1134,7 @@ describe('back_fill_file_hash script', function () {
+     let output
+     before('prepare environment', prepareEnvironment)
+     before('run script', async function () {
+-      output = await runScript([], {
++      output = await runScript(['--skip-hashed-files'], {
+         CONCURRENCY: '10',
+       })
+     })
+@@ -1148,7 +1148,7 @@ describe('back_fill_file_hash script', function () {
+     let output
+     before('prepare environment', prepareEnvironment)
+     before('run script', async function () {
+-      output = await runScript([], {
++      output = await runScript(['--skip-hashed-files'], {
+         STREAM_HIGH_WATER_MARK: (1024 * 1024).toString(),
+       })
+     })
+@@ -1162,7 +1162,7 @@ describe('back_fill_file_hash script', function () {
+     let output
+     before('prepare environment', prepareEnvironment)
+     before('run script', async function () {
+-      output = await runScript(['--include-hashed-files'], {})
++      output = await runScript([], {})
+     })
+     it('should print stats', function () {
+       expect(output.stats).deep.equal(
+@@ -1191,7 +1191,7 @@ describe('back_fill_file_hash script', function () {
+     })
+     let output
+     before('run script', async function () {
+-      output = await runScript([], {
++      output = await runScript(['--skip-hashed-files'], {
+         CONCURRENCY: '1',
+       })
+     })
+@@ -1212,14 +1212,20 @@ describe('back_fill_file_hash script', function () {
+     let outputPart0, outputPart1
+     before('prepare environment', prepareEnvironment)
+     before('run script on part 0', async function () {
+-      outputPart0 = await runScript([`--BATCH_RANGE_END=${edge}`], {
+-        CONCURRENCY: '1',
+-      })
++      outputPart0 = await runScript(
++        ['--skip-hashed-files', `--BATCH_RANGE_END=${edge}`],
++        {
++          CONCURRENCY: '1',
++        }
++      )
+     })
+     before('run script on part 1', async function () {
+-      outputPart1 = await runScript([`--BATCH_RANGE_START=${edge}`], {
+-        CONCURRENCY: '1',
+-      })
++      outputPart1 = await runScript(
++        ['--skip-hashed-files', `--BATCH_RANGE_START=${edge}`],
++        {
++          CONCURRENCY: '1',
++        }
++      )
+     })
+
+     it('should print stats for part 0', function () {
+@@ -1264,10 +1270,16 @@ describe('back_fill_file_hash script', function () {
+
+     let outputPart0, outputPart1
+     before('run script on part 0', async function () {
+-      outputPart0 = await runScript([`--from-file=${path0}`])
++      outputPart0 = await runScript([
++        '--skip-hashed-files',
++        `--from-file=${path0}`,
++      ])
+     })
+     before('run script on part 1', async function () {
+-      outputPart1 = await runScript([`--from-file=${path1}`])
++      outputPart1 = await runScript([
++        '--skip-hashed-files',
++        `--from-file=${path1}`,
++      ])
+     })
+
+     /**
+
+
+
+diff --git a/services/history-v1/test/acceptance/js/storage/back_fill_file_hash.test.mjs b/services/history-v1/test/acceptance/js/storage/back_fill_file_hash.test.mjs
+index a95bcbabd7e..fc6941bd7bb 100644
+--- a/services/history-v1/test/acceptance/js/storage/back_fill_file_hash.test.mjs
++++ b/services/history-v1/test/acceptance/js/storage/back_fill_file_hash.test.mjs
+@@ -975,7 +975,7 @@ describe('back_fill_file_hash script', function () {
+     STATS_UP_FROM_PROJECT1_ONWARD
+   )
+
+-  describe('error cases', () => {
++  describe('error cases', function () {
+     beforeEach('prepare environment', prepareEnvironment)
+
+     it('should gracefully handle fatal errors', async function () {
+@@ -1237,7 +1237,7 @@ describe('back_fill_file_hash script', function () {
+     commonAssertions()
+   })
+
+-  describe('projectIds from file', () => {
++  describe('projectIds from file', function () {
+     const path0 = '/tmp/project-ids-0.txt'
+     const path1 = '/tmp/project-ids-1.txt'
+     before('prepare environment', prepareEnvironment)
+
+
+
+diff --git a/services/history-v1/storage/scripts/back_fill_file_hash.mjs b/services/history-v1/storage/scripts/back_fill_file_hash.mjs
+index 4a4d93d902c..375e582c331 100644
+--- a/services/history-v1/storage/scripts/back_fill_file_hash.mjs
++++ b/services/history-v1/storage/scripts/back_fill_file_hash.mjs
+@@ -555,7 +555,7 @@ function handleSignal() {
+
+ /**
+  * @param {QueueEntry} entry
+- * @return {Promise<string>}
++ * @return {Promise<string|undefined>}
+  */
+ async function processFileWithCleanup(entry) {
+   const {
+@@ -578,7 +578,7 @@ async function processFileWithCleanup(entry) {
+ /**
+  * @param {QueueEntry} entry
+  * @param {string} filePath
+- * @return {Promise<string>}
++ * @return {Promise<string|undefined>}
+  */
+ async function processFile(entry, filePath) {
+   for (let attempt = 0; attempt < RETRIES; attempt++) {
+@@ -612,7 +612,7 @@ async function processFile(entry, filePath) {
+ /**
+  * @param {QueueEntry} entry
+  * @param {string} filePath
+- * @return {Promise<string>}
++ * @return {Promise<string|undefined>}
+  */
+ async function processFileOnce(entry, filePath) {
+   const {
+@@ -627,10 +627,7 @@ async function processFileOnce(entry, filePath) {
+     return entry.hash
+   }
+   if (DRY_RUN) {
+-    console.log(
+-      `DRY-RUN: would process file ${fileId} for project ${projectId}`
+-    )
+-    return 'dry-run'
++    return // skip processing in dry-run mode by returning undefined
+   }
+   const blobStore = new BlobStore(historyId)
+   STATS.readFromGCSCount++
+@@ -843,6 +840,9 @@ async function handleDeletedFileTreeBatch(batch) {
+  * @return {Promise<boolean>}
+  */
+ async function tryUpdateFileRefInMongo(entry) {
++  if (DRY_RUN) {
++    return true // skip mongo updates in dry-run mode
++  }
+   if (entry.path.startsWith('project.')) {
+     return await tryUpdateFileRefInMongoInDeletedProject(entry)
+   }
+@@ -865,6 +865,9 @@ async function tryUpdateFileRefInMongo(entry) {
+  * @return {Promise<boolean>}
+  */
+ async function tryUpdateFileRefInMongoInDeletedProject(entry) {
++  if (DRY_RUN) {
++    return true // skip mongo updates in dry-run mode
++  }
+   STATS.mongoUpdates++
+   const result = await deletedProjectsCollection.updateOne(
+     {
+@@ -1165,6 +1168,7 @@ class ProjectContext {
+    */
+   async #tryBatchHashWrites(collection, entries, query) {
+     if (entries.length === 0) return []
++    if (DRY_RUN) return [] // skip mongo updates in dry-run mode
+     const update = {}
+     for (const entry of entries) {
+       query[`${entry.path}._id`] = new ObjectId(entry.fileId)
+@@ -1210,7 +1214,7 @@ class ProjectContext {
+     }
+   }
+
+-  /** @type {Map<string, Promise<string>>} */
++  /** @type {Map<string, Promise<string|undefined>>} */
+   #pendingFiles = new Map()
+
+   /**
+@@ -1223,7 +1227,12 @@ class ProjectContext {
+       this.#pendingFiles.set(entry.cacheKey, processFileWithCleanup(entry))
+     }
+     try {
+-      entry.hash = await this.#pendingFiles.get(entry.cacheKey)
++      const hash = await this.#pendingFiles.get(entry.cacheKey)
++      if (!hash) {
++        return // hash is undefined in dry-run mode
++      } else {
++        entry.hash = hash
++      }
+     } finally {
+       this.remainingQueueEntries--
+     }
+diff --git a/services/history-v1/test/acceptance/js/storage/back_fill_file_hash.test.mjs b/services/history-v1/test/acceptance/js/storage/back_fill_file_hash.test.mjs
+index fc6941bd7bb..646e75e2b58 100644
+--- a/services/history-v1/test/acceptance/js/storage/back_fill_file_hash.test.mjs
++++ b/services/history-v1/test/acceptance/js/storage/back_fill_file_hash.test.mjs
+@@ -1130,6 +1130,45 @@ describe('back_fill_file_hash script', function () {
+     commonAssertions(true)
+   })
+
++  describe('full run in dry-run mode', function () {
++    let output
++    before('prepare environment', prepareEnvironment)
++    before('run script', async function () {
++      output = await runScript(
++        ['--dry-run'],
++        {
++          CONCURRENCY: '1',
++        },
++        false
++      )
++    })
++
++    it('should print stats for dry-run mode', function () {
++      // Compute the stats for running the script without dry-run mode.
++      const originalStats = sumStats(STATS_ALL, {
++        ...STATS_FILES_HASHED_EXTRA,
++        readFromGCSCount: 30,
++        readFromGCSIngress: 72,
++        mongoUpdates: 0,
++        filesWithHash: 3,
++      })
++      // For a dry-run mode, we expect the stats to be zero except for the
++      // count of projects, blobs, bad file trees, duplicated files
++      // and files with/without hash.  All the other stats such as mongoUpdates
++      // and writeToGCSCount, etc should be zero.
++      const expectedDryRunStats = {
++        ...STATS_ALL_ZERO,
++        projects: originalStats.projects,
++        blobs: originalStats.blobs,
++        badFileTrees: originalStats.badFileTrees,
++        filesDuplicated: originalStats.filesDuplicated,
++        filesWithHash: originalStats.filesWithHash,
++        filesWithoutHash: originalStats.filesWithoutHash,
++      }
++      expect(output.stats).deep.equal(expectedDryRunStats)
++    })
++  })
++
+   describe('full run CONCURRENCY=10', function () {
+     let output
+     before('prepare environment', prepareEnvironment)
+
+
+
+diff --git a/services/history-v1/storage/scripts/back_fill_file_hash.mjs b/services/history-v1/storage/scripts/back_fill_file_hash.mjs
+index 375e582c331..85920bcf03a 100644
+--- a/services/history-v1/storage/scripts/back_fill_file_hash.mjs
++++ b/services/history-v1/storage/scripts/back_fill_file_hash.mjs
+@@ -94,7 +94,7 @@ function parseArgs() {
+     { name: 'deleted-projects', type: Boolean },
+     { name: 'skip-hashed-files', type: Boolean },
+     { name: 'skip-existing-blobs', type: Boolean },
+-    { name: 'from-file', alias: 'f', type: String, defaultValue: '' },
++    { name: 'from-file', type: String, defaultValue: '' },
+     { name: 'dry-run', alias: 'n', type: Boolean },
+     {
+       name: 'output',
+@@ -132,7 +132,7 @@ Project selection options:
+   --all, -a                  Process all projects, including deleted ones
+   --projects                 Process projects (excluding deleted ones)
+   --deleted-projects         Process deleted projects
+-  --from-file <file>, -f <file> Process selected projects ids from file
++  --from-file <file>         Process selected projects ids from file
+
+ File selection options:
+   --skip-hashed-files        Skip processing files that already have a hash
+
+
+
+diff --git a/services/history-v1/storage/scripts/back_fill_file_hash.mjs b/services/history-v1/storage/scripts/back_fill_file_hash.mjs
+index 85920bcf03a..092b8f04e43 100644
+--- a/services/history-v1/storage/scripts/back_fill_file_hash.mjs
++++ b/services/history-v1/storage/scripts/back_fill_file_hash.mjs
+@@ -567,10 +567,7 @@ async function processFileWithCleanup(entry) {
+     return await processFile(entry, filePath)
+   } finally {
+     if (!DRY_RUN) {
+-      await Promise.all([
+-        fs.promises.rm(filePath, { force: true }),
+-        fs.promises.rm(filePath + GZ_SUFFIX, { force: true }),
+-      ])
++      await fs.promises.rm(filePath, { force: true })
+     }
+   }
+ }
+@@ -697,8 +694,6 @@ async function uploadBlobToGCS(blobStore, entry, blob, hash, filePath) {
+   entry.ctx.recordHistoryBlob(blob)
+ }
+
+-const GZ_SUFFIX = '.gz'
+-
+ /**
+  * @param {Array<QueueEntry>} files
+  * @return {Promise<void>}
+
+
+
+diff --git a/libraries/mongo-utils/batchedUpdate.js b/libraries/mongo-utils/batchedUpdate.js
+index f1253c587d3..41af41f0d4a 100644
+--- a/libraries/mongo-utils/batchedUpdate.js
++++ b/libraries/mongo-utils/batchedUpdate.js
+@@ -35,7 +35,7 @@ let BATCHED_UPDATE_RUNNING = false
+  * @property {string} [BATCH_RANGE_START]
+  * @property {string} [BATCH_SIZE]
+  * @property {string} [VERBOSE_LOGGING]
+- * @property {(progress: string, options?: object) => Promise<void>} [trackProgress]
++ * @property {(progress: string) => Promise<void>} [trackProgress]
+  */
+
+ /**
+@@ -269,12 +269,9 @@ async function batchedUpdate(
+           await performUpdate(collection, nextBatch, update)
+         }
+       }
+-      await trackProgress(`Completed batch ending ${renderObjectId(end)}`, {
+-        completedBatch: true,
+-      })
++      await trackProgress(`Completed batch ending ${renderObjectId(end)}`)
+       start = end
+     }
+-    await trackProgress('Completed all batches', { completedAll: true })
+     return updated
+   } finally {
+     BATCHED_UPDATE_RUNNING = false
+diff --git a/services/history-v1/storage/scripts/back_fill_file_hash.mjs b/services/history-v1/storage/scripts/back_fill_file_hash.mjs
+index 092b8f04e43..755443adf52 100644
+--- a/services/history-v1/storage/scripts/back_fill_file_hash.mjs
++++ b/services/history-v1/storage/scripts/back_fill_file_hash.mjs
+@@ -1305,7 +1305,7 @@ async function processNonDeletedProjects() {
+       {
+         BATCH_RANGE_START,
+         BATCH_RANGE_END,
+-        trackProgress,
++        trackProgress: async message => {},
+       }
+     )
+   } catch (err) {
+@@ -1335,7 +1335,7 @@ async function processDeletedProjects() {
+         'project.overleaf.history.id': 1,
+       },
+       {},
+-      { trackProgress }
++      { trackProgress: async message => {} }
+     )
+   } catch (err) {
+     gracefulShutdownInitiated = true
+
+
+
+diff --git a/services/history-v1/storage/scripts/back_fill_file_hash.mjs b/services/history-v1/storage/scripts/back_fill_file_hash.mjs
+index 755443adf52..4ca17ddf694 100644
+--- a/services/history-v1/storage/scripts/back_fill_file_hash.mjs
++++ b/services/history-v1/storage/scripts/back_fill_file_hash.mjs
+@@ -272,7 +272,7 @@ logger.initialize('file-migration', {
+ })
+
+ let lastElapsedTime = 0
+-async function trackProgress(progress, options = {}) {
++async function displayProgress(options = {}) {
+   if (OUTPUT_FILE === '-') {
+     return // skip progress tracking when logging to stdout
+   }
+@@ -733,6 +733,7 @@ async function waitForDeferredQueues() {
+   // Wait for ALL pending batches to finish, especially wait for their mongo
+   // writes to finish to avoid extra work when resuming the batch.
+   const all = await Promise.allSettled(deferredBatches.values())
++  displayProgress({ completedAll: true })
+   // Now that all batches finished, we can throw if needed.
+   for (const res of all) {
+     if (res.status === 'rejected') {
+@@ -756,6 +757,7 @@ async function queueNextBatch(batch, prefix = 'rootFolder.0') {
+   const deferred = processBatch(batch, prefix)
+     .then(() => {
+       logger.info({ end }, 'actually completed batch')
++      displayProgress({ completedBatch: true })
+     })
+
+     .catch(err => {
+
+
+
+diff --git a/services/history-v1/storage/scripts/back_fill_file_hash.mjs b/services/history-v1/storage/scripts/back_fill_file_hash.mjs
+index 4ca17ddf694..8664be21fbe 100644
+--- a/services/history-v1/storage/scripts/back_fill_file_hash.mjs
++++ b/services/history-v1/storage/scripts/back_fill_file_hash.mjs
+@@ -1226,7 +1226,11 @@ class ProjectContext {
+     try {
+       const hash = await this.#pendingFiles.get(entry.cacheKey)
+       if (!hash) {
+-        return // hash is undefined in dry-run mode
++        if (DRY_RUN) {
++          return // hash is undefined in dry-run mode
++        } else {
++          throw new Error('undefined hash outside dry-run mode')
++        }
+       } else {
+         entry.hash = hash
+       }
+
+
+
+diff --git a/services/history-v1/test/acceptance/js/storage/back_fill_file_hash.test.mjs b/services/history-v1/test/acceptance/js/storage/back_fill_file_hash.test.mjs
+index 646e75e2b58..43884adbe8f 100644
+--- a/services/history-v1/test/acceptance/js/storage/back_fill_file_hash.test.mjs
++++ b/services/history-v1/test/acceptance/js/storage/back_fill_file_hash.test.mjs
+@@ -1132,7 +1132,15 @@ describe('back_fill_file_hash script', function () {
+
+   describe('full run in dry-run mode', function () {
+     let output
++    let projectRecordsBefore
++    let deletedProjectRecordsBefore
+     before('prepare environment', prepareEnvironment)
++    before(async function () {
++      projectRecordsBefore = await projectsCollection.find({}).toArray()
++      deletedProjectRecordsBefore = await deletedProjectsCollection
++        .find({})
++        .toArray()
++    })
+     before('run script', async function () {
+       output = await runScript(
+         ['--dry-run'],
+@@ -1167,6 +1175,14 @@ describe('back_fill_file_hash script', function () {
+       }
+       expect(output.stats).deep.equal(expectedDryRunStats)
+     })
++    it('should not update mongo', async function () {
++      expect(await projectsCollection.find({}).toArray()).to.deep.equal(
++        projectRecordsBefore
++      )
++      expect(await deletedProjectsCollection.find({}).toArray()).to.deep.equal(
++        deletedProjectRecordsBefore
++      )
++    })
+   })
+
+   describe('full run CONCURRENCY=10', function () {
+
