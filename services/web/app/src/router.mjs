@@ -67,6 +67,7 @@ import { plainTextResponse } from './infrastructure/Response.js'
 import PublicAccessLevels from './Features/Authorization/PublicAccessLevels.js'
 import SocketDiagnostics from './Features/SocketDiagnostics/SocketDiagnostics.mjs'
 import ClsiCacheController from './Features/Compile/ClsiCacheController.js'
+
 const ClsiCookieManager = ClsiCookieManagerFactory(
   Settings.apis.clsi != null ? Settings.apis.clsi.backendGroupName : undefined
 )
@@ -384,15 +385,6 @@ async function initialize(webRouter, privateApiRouter, publicApiRouter) {
   )
 
   if (Features.hasFeature('affiliations')) {
-    webRouter.post(
-      '/user/emails',
-      AuthenticationController.requireLogin(),
-      PermissionsController.requirePermission('add-secondary-email'),
-      RateLimiterMiddleware.rateLimit(rateLimiters.addEmail),
-      CaptchaMiddleware.validateCaptcha('addEmail'),
-      UserEmailsController.add
-    )
-
     webRouter.post(
       '/user/emails/delete',
       AuthenticationController.requireLogin(),

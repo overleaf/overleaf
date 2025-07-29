@@ -54,55 +54,6 @@ async function _sendSecurityAlertEmail(user, email) {
   await EmailHandler.promises.sendEmail('securityAlert', emailOptions)
 }
 
-/**
- * This method is for adding a secondary email to be confirmed via an emailed link.
- * For code confirmation, see the `addWithConfirmationCode` method in this file.
- */
-async function add(req, res, next) {
-  const userId = SessionManager.getLoggedInUserId(req.session)
-  const email = EmailHelper.parseEmail(req.body.email)
-  if (!email) {
-    return res.sendStatus(422)
-  }
-  const user = await UserGetter.promises.getUser(userId, {
-    email: 1,
-    'emails.email': 1,
-  })
-
-  if (user.emails.length >= Settings.emailAddressLimit) {
-    return res.status(422).json({ message: 'secondary email limit exceeded' })
-  }
-
-  const affiliationOptions = {
-    university: req.body.university,
-    role: req.body.role,
-    department: req.body.department,
-  }
-
-  try {
-    await UserUpdater.promises.addEmailAddress(
-      userId,
-      email,
-      affiliationOptions,
-      {
-        initiatorId: user._id,
-        ipAddress: req.ip,
-      }
-    )
-  } catch (error) {
-    return UserEmailsController._handleEmailError(error, req, res, next)
-  }
-
-  await _sendSecurityAlertEmail(user, email)
-
-  await UserEmailsConfirmationHandler.promises.sendConfirmationEmail(
-    userId,
-    email
-  )
-
-  res.sendStatus(204)
-}
-
 async function resendConfirmation(req, res) {
   const userId = SessionManager.getLoggedInUserId(req.session)
   const email = EmailHelper.parseEmail(req.body.email)
@@ -160,7 +111,6 @@ async function sendExistingEmailConfirmationCode(req, res) {
 
 /**
  * This method is for adding a secondary email to be confirmed via a code.
- * For email link confirmation see the `add` method in this file.
  */
 async function addWithConfirmationCode(req, res) {
   delete req.session.pendingSecondaryEmail
@@ -665,8 +615,6 @@ const UserEmailsController = {
       res.json(fullEmails)
     })
   },
-
-  add: expressify(add),
 
   addWithConfirmationCode: expressify(addWithConfirmationCode),
 
