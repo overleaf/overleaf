@@ -78,6 +78,7 @@
     border: 0;
     padding: 0 var(--spacing-02);
     flex-grow: 1;
+    overflow: hidden;
 
     &:hover {
       background-color: var(--file-tree-item-hover-bg);
@@ -88,6 +89,9 @@
       font-size: var(--font-size-02);
       margin: 0;
       font-weight: normal;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
   }
 
