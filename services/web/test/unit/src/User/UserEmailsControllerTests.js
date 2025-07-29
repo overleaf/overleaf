@@ -93,7 +93,6 @@ describe('UserEmailsController', function () {
           {
             promises: {
               sendConfirmationEmail: sinon.stub().resolves(),
-              sendReconfirmationEmail: sinon.stub(),
             },
           }),
         '../Institutions/InstitutionsAPI': this.InstitutionsAPI,
@@ -603,69 +602,6 @@ describe('UserEmailsController', function () {
             message: this.req.i18n.translate('confirmation_token_invalid'),
           })
           .should.equal(true)
-      })
-    })
-  })
-
-  describe('sendReconfirmation', function () {
-    beforeEach(function () {
-      this.res.sendStatus = sinon.stub()
-      this.UserGetter.promises.getUserByAnyEmail.resolves({
-        _id: this.user._id,
-      })
-      this.EmailHelper.parseEmail.returnsArg(0)
-    })
-    it('should send the email', async function () {
-      this.req = {
-        body: {
-          email: 'test@example.com',
-        },
-      }
-      await this.UserEmailsController.sendReconfirmation(
-        this.req,
-        this.res,
-        this.next
-      )
-      expect(
-        this.UserEmailsConfirmationHandler.promises.sendReconfirmationEmail
-      ).to.have.been.calledOnce
-    })
-    it('should return 400 if email not valid', function (done) {
-      this.req = {
-        body: {},
-      }
-      this.UserEmailsController.sendReconfirmation(
-        this.req,
-        this.res,
-        this.next
-      )
-      expect(
-        this.UserEmailsConfirmationHandler.promises.sendReconfirmationEmail
-      ).to.not.have.been.called
-      expect(this.res.sendStatus.lastCall.args[0]).to.equal(400)
-      done()
-    })
-    describe('email on another user account', function () {
-      beforeEach(function () {
-        this.UserGetter.promises.getUserByAnyEmail.resolves({
-          _id: 'another-user-id',
-        })
-      })
-      it('should return 422', async function () {
-        this.req = {
-          body: {
-            email: 'test@example.com',
-          },
-        }
-        await this.UserEmailsController.sendReconfirmation(
-          this.req,
-          this.res,
-          this.next
-        )
-        expect(
-          this.UserEmailsConfirmationHandler.promises.sendReconfirmationEmail
-        ).to.not.have.been.called
-        expect(this.res.sendStatus.lastCall.args[0]).to.equal(422)
       })
     })
   })

@@ -640,8 +640,6 @@ const UserEmailsController = {
     )
   },
 
-  sendReconfirmation: expressify(sendReconfirmation),
-
   sendExistingEmailConfirmationCode: expressify(
     sendExistingEmailConfirmationCode
   ),
