@@ -363,14 +363,6 @@ async function initialize(webRouter, privateApiRouter, publicApiRouter) {
     UserEmailsController.checkExistingEmailConfirmationCode
   )
 
-  webRouter.post(
-    '/user/emails/resend_confirmation',
-    AuthenticationController.requireLogin(),
-    RateLimiterMiddleware.rateLimit(rateLimiters.resendConfirmation),
-    await Modules.middleware('resendConfirmationEmail'),
-    UserEmailsController.resendConfirmation
-  )
-
   webRouter.get(
     '/user/emails/primary-email-check',
     AuthenticationController.requireLogin(),

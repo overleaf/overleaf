@@ -100,9 +100,6 @@ export function setReconfirmationMeta() {
 
 export function reconfirmationSetupMocks(fetchMock: FetchMock) {
   defaultSetupMocks(fetchMock)
-  fetchMock.post(/\/user\/emails\/resend_confirmation/, 200, {
-    delay: MOCK_DELAY,
-  })
 }
 
 export function setReconfirmAffiliationMeta() {
