@@ -9,12 +9,12 @@ export type SSOConfig = {
   entryPoint?: string
   certificates: Certificate[]
   userIdAttribute?: string
+  userEmailAttribute?: string
   userFirstNameAttribute?: string
   userLastNameAttribute?: string
   validated?: boolean
   enabled?: boolean
   useSettingsUKAMF?: boolean
-  emailAttribute?: string
 }
 
 export type GroupSSOLinkingStatus = {

@@ -2128,6 +2128,7 @@
   "sso_error_idp_error": "Your identity provider responded with an error.",
   "sso_error_invalid_external_user_id": "The SAML attribute provided by your IdP that uniquely identifies your user has an invalid format, a string is expected. Attribute: <0>__expecting__</0>",
   "sso_error_invalid_signature": "Sorry, the information received from your identity provider has an invalid signature.",
+  "sso_error_missing_email_attribute": "The SAML attribute that specifies the user’s email is either missing or under a different name than the one you configured. Expecting: <0>__expecting__</0>",
   "sso_error_missing_external_user_id": "The SAML attribute provided by your IdP that uniquely identifies your user is either missing or under a different name than the one you configured. Expecting: <0>__expecting__</0>",
   "sso_error_missing_firstname_attribute": "The SAML attribute that specifies the user’s first name is either missing or under a different name than the one you configured. Expecting: <0>__expecting__</0>",
   "sso_error_missing_lastname_attribute": "The SAML attribute that specifies the user’s last name is either missing or under a different name than the one you configured. Expecting: <0>__expecting__</0>",

@@ -1646,6 +1646,7 @@
   "sso_error_idp_error": "",
   "sso_error_invalid_external_user_id": "",
   "sso_error_invalid_signature": "",
+  "sso_error_missing_email_attribute": "",
   "sso_error_missing_external_user_id": "",
   "sso_error_missing_firstname_attribute": "",
   "sso_error_missing_lastname_attribute": "",
