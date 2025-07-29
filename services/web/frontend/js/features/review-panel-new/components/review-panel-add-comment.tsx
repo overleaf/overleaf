@@ -7,13 +7,13 @@ import { EditorSelection } from '@codemirror/state'
 import { useTranslation } from 'react-i18next'
 import { useThreadsActionsContext } from '../context/threads-context'
 import { removeNewCommentRangeEffect } from '@/features/source-editor/extensions/review-tooltip'
-import useSubmittableTextInput from '../hooks/use-submittable-text-input'
 import AutoExpandingTextArea from '@/shared/components/auto-expanding-text-area'
 import { ReviewPanelEntry } from './review-panel-entry'
 import { ThreadId } from '../../../../../types/review-panel/review-panel'
 import { useModalsContext } from '@/features/ide-react/context/modals-context'
 import { debugConsole } from '@/utils/debugging'
 import OLButton from '@/features/ui/components/ol/ol-button'
+import { isFormSubmitKeypressEvent } from '@/features/review-panel-new/utils/form-events'
 
 export const ReviewPanelAddComment = memo<{
   docId: string
@@ -28,6 +28,7 @@ export const ReviewPanelAddComment = memo<{
   const { addComment } = useThreadsActionsContext()
   const [submitting, setSubmitting] = useState(false)
   const { showGenericMessageModal } = useModalsContext()
+  const [content, setContent] = useState('')
 
   const handleClose = useCallback(() => {
     view.dispatch({
@@ -35,32 +36,56 @@ export const ReviewPanelAddComment = memo<{
     })
   }, [view, threadId])
 
-  const submitForm = useCallback(
-    async (message: string) => {
-      setSubmitting(true)
+  const submitForm = useCallback(async () => {
+    if (content.trim().length === 0) {
+      return
+    }
 
-      const content = view.state.sliceDoc(from, to)
+    setSubmitting(true)
 
-      try {
-        await addComment(from, content, message)
-        handleClose()
-        view.dispatch({
-          selection: EditorSelection.cursor(view.state.selection.main.anchor),
-        })
-      } catch (err) {
-        debugConsole.error(err)
-        showGenericMessageModal(
-          t('add_comment_error_title'),
-          t('add_comment_error_message')
-        )
+    const text = view.state.sliceDoc(from, to)
+
+    try {
+      await addComment(from, text, content)
+      handleClose()
+      view.dispatch({
+        selection: EditorSelection.cursor(view.state.selection.main.anchor),
+      })
+    } catch (err) {
+      debugConsole.error(err)
+      showGenericMessageModal(
+        t('add_comment_error_title'),
+        t('add_comment_error_message')
+      )
+    }
+    setSubmitting(false)
+  }, [
+    content,
+    view,
+    from,
+    to,
+    addComment,
+    handleClose,
+    showGenericMessageModal,
+    t,
+  ])
+
+  const handleKeyPress = useCallback(
+    (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+      if (isFormSubmitKeypressEvent(event)) {
+        event.preventDefault()
+        submitForm()
       }
-      setSubmitting(false)
     },
-    [addComment, view, handleClose, from, to, showGenericMessageModal, t]
+    [submitForm]
   )
 
-  const { handleChange, handleKeyPress, content } =
-    useSubmittableTextInput(submitForm)
+  const handleChange = useCallback(
+    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+      setContent(e.target.value)
+    },
+    []
+  )
 
   const handleBlur = useCallback(() => {
     if (content === '') {
@@ -73,9 +98,9 @@ export const ReviewPanelAddComment = memo<{
   const handleSubmit = useCallback<FormEventHandler>(
     event => {
       event.preventDefault()
-      submitForm(content)
+      submitForm()
     },
-    [submitForm, content]
+    [submitForm]
   )
 
   // We only ever want to focus the element once
