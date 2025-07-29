@@ -9,9 +9,75 @@ const PrivilegeLevels = require('../Authorization/PrivilegeLevels')
 const TpdsProjectFlusher = require('../ThirdPartyDataStore/TpdsProjectFlusher')
 const ProjectAuditLogHandler = require('../Project/ProjectAuditLogHandler')
 const AnalyticsManager = require('../Analytics/AnalyticsManager')
+const OError = require('@overleaf/o-error')
+const TagsHandler = require('../Tags/TagsHandler')
+const { promiseMapWithLimit } = require('@overleaf/promise-utils')
 
 module.exports = {
-  promises: { transferOwnership },
+  promises: {
+    transferOwnership,
+    transferAllProjectsToUser,
+  },
+}
+
+const TAG_COLOR_BLUE = '#434AF0'
+
+/**
+ * @param {string} fromUserId
+ * @param {string} toUserId
+ * @param {string} ipAddress
+ * @return {Promise<{projectCount: number, newTagName: string}>}
+ */
+async function transferAllProjectsToUser({ fromUserId, toUserId, ipAddress }) {
+  // - Verify that both users exist
+  const fromUser = await UserGetter.promises.getUser(fromUserId, {
+    _id: 1,
+    email: 1,
+  })
+  const toUser = await UserGetter.promises.getUser(toUserId, { _id: 1 })
+  if (!fromUser) throw new OError('missing source user', { fromUserId })
+  if (!toUser) throw new OError('missing destination user', { toUserId })
+  if (fromUser._id.equals(toUser._id))
+    throw new OError('rejecting transfer between identical users', {
+      fromUserId,
+      toUserId,
+    })
+  logger.debug(
+    { fromUserId, toUserId },
+    'started bulk transfer of all projects from one user to another'
+  )
+  // - Get all owned projects for fromUserId
+  const projects = await Project.find({ owner_ref: fromUserId }, { _id: 1 })
+
+  // - Create new tag on toUserId
+  const newTag = await TagsHandler.promises.createTag(
+    toUserId,
+    `transferred-from-${fromUser.email}`,
+    TAG_COLOR_BLUE,
+    { truncate: true }
+  )
+
+  // - Add tag to projects (can happen before ownership is transferred)
+  await TagsHandler.promises.addProjectsToTag(
+    toUserId,
+    newTag._id,
+    projects.map(p => p._id)
+  )
+
+  // - Transfer all projects
+  await promiseMapWithLimit(5, projects, async project => {
+    await transferOwnership(project._id, toUserId, {
+      allowTransferToNonCollaborators: true,
+      skipEmails: true,
+      ipAddress,
+    })
+  })
+
+  logger.debug(
+    { fromUserId, toUserId },
+    'finished bulk transfer of all projects from one user to another'
+  )
+  return { projectCount: projects.length, newTagName: newTag.name }
 }
 
 async function transferOwnership(projectId, newOwnerId, options = {}) {
@@ -74,8 +140,8 @@ async function transferOwnership(projectId, newOwnerId, options = {}) {
   await TpdsProjectFlusher.promises.flushProjectToTpds(projectId)
 
   // Send confirmation emails
-  const previousOwner = await UserGetter.promises.getUser(previousOwnerId)
   if (!skipEmails) {
+    const previousOwner = await UserGetter.promises.getUser(previousOwnerId)
     await _sendEmails(project, previousOwner, newOwner)
   }
 }
