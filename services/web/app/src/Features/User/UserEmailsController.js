@@ -54,25 +54,6 @@ async function _sendSecurityAlertEmail(user, email) {
   await EmailHandler.promises.sendEmail('securityAlert', emailOptions)
 }
 
-async function sendReconfirmation(req, res) {
-  const userId = SessionManager.getLoggedInUserId(req.session)
-  const email = EmailHelper.parseEmail(req.body.email)
-  if (!email) {
-    return res.sendStatus(400)
-  }
-  const user = await UserGetter.promises.getUserByAnyEmail(email, { _id: 1 })
-
-  if (!user || user._id.toString() !== userId) {
-    return res.sendStatus(422)
-  }
-  await UserEmailsConfirmationHandler.promises.sendReconfirmationEmail(
-    userId,
-    email
-  )
-
-  res.sendStatus(204)
-}
-
 async function sendExistingEmailConfirmationCode(req, res) {
   const userId = SessionManager.getLoggedInUserId(req.session)
   const email = EmailHelper.parseEmail(req.body.email)
