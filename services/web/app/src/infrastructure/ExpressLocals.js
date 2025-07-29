@@ -13,15 +13,14 @@ const PackageVersions = require('./PackageVersions')
 const Modules = require('./Modules')
 const Errors = require('../Features/Errors/Errors')
 const {
+  addHasAdminCapabilityToLocals,
   canRedirectToAdminDomain,
-  getAdminCapabilities,
   hasAdminAccess,
 } = require('../Features/Helpers/AdminAuthorizationHelper')
 const {
   addOptionalCleanupHandlerAfterDrainingConnections,
 } = require('./GracefulShutdown')
 const { sanitizeSessionUserForFrontEnd } = require('./FrontEndUser')
-const { expressify } = require('@overleaf/promise-utils')
 
 const IEEE_BRAND_ID = Settings.ieeeBrandId
 
@@ -314,34 +313,7 @@ module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
     next()
   })
 
-  webRouter.use(
-    expressify(async function (req, res, next) {
-      const user = SessionManager.getSessionUser(req.session)
-      try {
-        const { adminCapabilities, adminCapabilitiesAvailable } =
-          await getAdminCapabilities(user)
-        res.locals.hasAdminCapability = capability => {
-          if (!hasAdminAccess(user)) {
-            return false
-          }
-          if (!adminCapabilitiesAvailable) {
-            // If admin capabilities are not available, then all admins have all capabilities
-            return true
-          }
-          return adminCapabilities.includes(capability)
-        }
-      } catch (error) {
-        if (user) {
-          // This is unexpected, it probably means that the session user does not exist.
-          logger.warn({ error, req, user }, 'Failed to get admin capabilities')
-        }
-        // adminCapabilitiesAvailable should be true if we are here so deny to be safe
-        res.locals.hasAdminCapability = () => false
-      }
-
-      next()
-    })
-  )
+  webRouter.use(addHasAdminCapabilityToLocals)
 
   webRouter.use(function (req, res, next) {
     // Clone the nav settings so they can be modified for each request
