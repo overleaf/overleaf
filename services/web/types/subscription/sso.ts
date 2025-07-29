@@ -14,6 +14,7 @@ export type SSOConfig = {
   validated?: boolean
   enabled?: boolean
   useSettingsUKAMF?: boolean
+  emailAttribute?: string
 }
 
 export type GroupSSOLinkingStatus = {

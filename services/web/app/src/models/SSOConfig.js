@@ -11,6 +11,7 @@ const SSOConfigSchema = new Schema(
     validated: { type: Boolean, default: false },
     enabled: { type: Boolean, default: false },
     useSettingsUKAMF: { type: Boolean, default: false },
+    emailAttribute: { type: String },
   },
 
   {

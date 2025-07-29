@@ -254,6 +254,11 @@ export interface Meta {
   'ol-stripeCustomerId': string
   'ol-subscription': any // TODO: mixed types, split into two fields
   'ol-subscriptionChangePreview': SubscriptionChangePreview
+  'ol-subscriptionFeatures': {
+    managedUsers?: boolean
+    groupSSO?: boolean
+    domainCapture?: boolean
+  }
   'ol-subscriptionId': string
   'ol-suggestedLanguage': SuggestedLanguage | undefined
   'ol-survey': Survey | undefined
