@@ -24,7 +24,7 @@ export default async function handleStripePaymentAction(
         return { handled: false }
       } else {
         try {
-          await postJSON('/user/subscription/sync')
+          await postJSON(`/user/subscription/sync`)
         } catch (error) {
           // if the sync fails, there may be stale data until the webhook is
           // processed but we can't do any special handling for that in here
