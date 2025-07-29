@@ -47,10 +47,14 @@ function LabelListItem({
 }: LabelListItemProps) {
   const { t } = useTranslation()
 
-  // first label
-  const fromVTimestamp = Date.parse(labels[labels.length - 1].created_at)
-  // most recent label
-  const toVTimestamp = Date.parse(labels[0].created_at)
+  // first label - use the actual version timestamp, fallback to created_at if not available
+  const fromLabel = labels[labels.length - 1]
+  const fromVTimestamp =
+    fromLabel.lastUpdatedTimestamp ?? Date.parse(fromLabel.created_at)
+  // most recent label - use the actual version timestamp, fallback to created_at if not available
+  const toLabel = labels[0]
+  const toVTimestamp =
+    toLabel.lastUpdatedTimestamp ?? Date.parse(toLabel.created_at)
 
   const updateRange: UpdateRange = {
     fromV: version,
