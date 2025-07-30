@@ -69,7 +69,7 @@ describe('AdminAuthorizationHelper', function () {
         this.next = sinon.stub()
 
         this.user = {
-          isAdmin: false,
+          isAdmin: true,
         }
 
         this.req.logger = {
@@ -101,6 +101,29 @@ describe('AdminAuthorizationHelper', function () {
       })
     })
     describe('when admin capabilities are not available', function () {
+      describe('user is null', function () {
+        beforeEach(async function () {
+          this.req = new MockRequest()
+          this.res = new MockResponse()
+          this.next = sinon.stub()
+
+          this.req.session = {
+            user: null,
+          }
+
+          await this.AdminAuthorizationHelper.addHasAdminCapabilityToLocals(
+            this.req,
+            this.res,
+            this.next
+          )
+        })
+        it('defines hasAdminCapability on res.locals', function () {
+          expect(this.res.locals).to.have.property('hasAdminCapability')
+        })
+        it('returns false when called with any capability', function () {
+          expect(this.res.locals.hasAdminCapability('capability1')).to.be.false
+        })
+      })
       describe('user is not an admin', function () {
         beforeEach(async function () {
           this.req = new MockRequest()

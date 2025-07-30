@@ -31,13 +31,14 @@ async function getAdminCapabilities(user) {
 
 async function addHasAdminCapabilityToLocals(req, res, next) {
   const user = SessionManager.getSessionUser(req.session)
+  if (!hasAdminAccess(user)) {
+    res.locals.hasAdminCapability = () => false
+    return next()
+  }
   try {
     const { adminCapabilities, adminCapabilitiesAvailable } =
       await getAdminCapabilities(user)
     res.locals.hasAdminCapability = capability => {
-      if (!hasAdminAccess(user)) {
-        return false
-      }
       if (!adminCapabilitiesAvailable) {
         // If admin capabilities are not available, then all admins have all capabilities
         return true
@@ -45,10 +46,7 @@ async function addHasAdminCapabilityToLocals(req, res, next) {
       return adminCapabilities.includes(capability)
     }
   } catch (error) {
-    if (user) {
-      // This is unexpected, it probably means that the session user does not exist.
-      logger.warn({ error, req, user }, 'Failed to get admin capabilities')
-    }
+    logger.warn({ error, req, user }, 'Failed to get admin capabilities')
     // A module probably threw so adminCapabilitiesAvailable should be true if we are here so deny to be safe
     res.locals.hasAdminCapability = () => false
   }
