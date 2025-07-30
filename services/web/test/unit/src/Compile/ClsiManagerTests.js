@@ -153,14 +153,11 @@ describe('ClsiManager', function () {
       hasFeature: sinon.stub().withArgs('project-history-blobs').returns(true),
     }
     this.HistoryManager = {
-      getBlobLocation: sinon.stub().callsFake((historyId, hash) => {
+      getFilestoreBlobURL: sinon.stub().callsFake((historyId, hash) => {
         if (hash === GLOBAL_BLOB_HASH) {
-          return {
-            bucket: 'global-blobs',
-            key: 'aa/aa/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-          }
+          return `${FILESTORE_URL}/history/global/hash/${hash}`
         }
-        return { bucket: 'project-blobs', key: `${historyId}/${hash}` }
+        return `${FILESTORE_URL}/history/project/${historyId}/hash/${hash}`
       }),
     }
 
@@ -1053,10 +1050,10 @@ function _makeResources(project, docs, files) {
   for (const [path, file] of Object.entries(files)) {
     let url, fallbackURL
     if (file.hash === GLOBAL_BLOB_HASH) {
-      url = `${FILESTORE_URL}/bucket/global-blobs/key/aa/aa/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa`
+      url = `${FILESTORE_URL}/history/global/hash/${file.hash}`
       fallbackURL = `${FILESTORE_URL}/project/${project._id}/file/${file._id}`
     } else if (file.hash) {
-      url = `${FILESTORE_URL}/bucket/project-blobs/key/${project.overleaf.history.id}/${file.hash}`
+      url = `${FILESTORE_URL}/history/project/${project.overleaf.history.id}/hash/${file.hash}`
       fallbackURL = `${FILESTORE_URL}/project/${project._id}/file/${file._id}`
     } else {
       url = `${FILESTORE_URL}/project/${project._id}/file/${file._id}`

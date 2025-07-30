@@ -107,13 +107,14 @@ app.post(
         cwd: Joi.string().required(),
         script: Joi.string().required(),
         args: Joi.array().items(Joi.string()),
+        user: Joi.string().required(),
         hasOverleafEnv: Joi.boolean().required(),
       },
     },
     { allowUnknown: false }
   ),
   (req, res) => {
-    const { cwd, script, args, hasOverleafEnv } = req.body
+    const { cwd, script, args, user, hasOverleafEnv } = req.body
 
     const env = hasOverleafEnv
       ? 'source /etc/overleaf/env.sh || source /etc/sharelatex/env.sh'
@@ -127,7 +128,7 @@ app.post(
         'sharelatex',
         'bash',
         '-c',
-        `source /etc/container_environment.sh && ${env} && /sbin/setuser www-data node ${JSON.stringify(script)} ${args.map(a => JSON.stringify(a)).join(' ')}`,
+        `source /etc/container_environment.sh && ${env} && /sbin/setuser ${user} node ${script} ${args.map(a => JSON.stringify(a)).join(' ')}`,
       ],
       (error, stdout, stderr) => {
         res.json({

@@ -75,6 +75,7 @@ services:
     environment:
       CYPRESS_SHARD:
       CYPRESS_BASE_URL: http://sharelatex
+      CYPRESS_FULL_FILESTORE_MIGRATION:
       SPEC_PATTERN: '**/*.spec.{js,jsx,ts,tsx}'
     depends_on:
       sharelatex:

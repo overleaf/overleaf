@@ -441,6 +441,8 @@ switch (process.env.OVERLEAF_FILESTORE_BACKEND) {
         user_files: process.env.OVERLEAF_FILESTORE_USER_FILES_BUCKET_NAME,
         template_files:
           process.env.OVERLEAF_FILESTORE_TEMPLATE_FILES_BUCKET_NAME,
+        project_blobs: process.env.OVERLEAF_HISTORY_PROJECT_BLOBS_BUCKET,
+        global_blobs: process.env.OVERLEAF_HISTORY_BLOBS_BUCKET,
       },
       s3: {
         key:
@@ -463,6 +465,15 @@ switch (process.env.OVERLEAF_FILESTORE_BACKEND) {
       stores: {
         user_files: Path.join(DATA_DIR, 'user_files'),
         template_files: Path.join(DATA_DIR, 'template_files'),
+
+        // NOTE: The below paths are hard-coded in server-ce/config/production.json, so hard code them here as well.
+        // We can use DATA_DIR after switching history-v1 from 'config' to '@overleaf/settings'.
+        project_blobs:
+          process.env.OVERLEAF_HISTORY_PROJECT_BLOBS_BUCKET ||
+          '/var/lib/overleaf/data/history/overleaf-project-blobs',
+        global_blobs:
+          process.env.OVERLEAF_HISTORY_BLOBS_BUCKET ||
+          '/var/lib/overleaf/data/history/overleaf-global-blobs',
       },
     }
 }

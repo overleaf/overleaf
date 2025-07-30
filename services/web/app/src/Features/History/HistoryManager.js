@@ -15,11 +15,6 @@ const { db, ObjectId, waitForDb } = require('../../infrastructure/mongodb')
 const Metrics = require('@overleaf/metrics')
 const logger = require('@overleaf/logger')
 const { NotFoundError } = require('../Errors/Errors')
-const projectKey = require('./project_key')
-
-// BEGIN copy from services/history-v1/storage/lib/blob_store/index.js
-
-const GLOBAL_BLOBS = new Set() // CHANGE FROM SOURCE: only store hashes.
 
 const HISTORY_V1_URL = settings.apis.v1_history.url
 const HISTORY_V1_BASIC_AUTH = {
@@ -27,27 +22,9 @@ const HISTORY_V1_BASIC_AUTH = {
   password: settings.apis.v1_history.pass,
 }
 
-function makeGlobalKey(hash) {
-  return `${hash.slice(0, 2)}/${hash.slice(2, 4)}/${hash.slice(4)}`
-}
+// BEGIN copy from services/history-v1/storage/lib/blob_store/index.js
 
-function makeProjectKey(projectId, hash) {
-  return `${projectKey.format(projectId)}/${hash.slice(0, 2)}/${hash.slice(2)}`
-}
-
-function getBlobLocation(projectId, hash) {
-  if (GLOBAL_BLOBS.has(hash)) {
-    return {
-      bucket: settings.apis.v1_history.buckets.globalBlobs,
-      key: makeGlobalKey(hash),
-    }
-  } else {
-    return {
-      bucket: settings.apis.v1_history.buckets.projectBlobs,
-      key: makeProjectKey(projectId, hash),
-    }
-  }
-}
+const GLOBAL_BLOBS = new Set() // CHANGE FROM SOURCE: only store hashes.
 
 async function loadGlobalBlobs() {
   await waitForDb() // CHANGE FROM SOURCE: wait for db before running query.
@@ -58,6 +35,14 @@ async function loadGlobalBlobs() {
 }
 
 // END copy from services/history-v1/storage/lib/blob_store/index.js
+
+function getFilestoreBlobURL(historyId, hash) {
+  if (GLOBAL_BLOBS.has(hash)) {
+    return `${settings.apis.filestore.url}/history/global/hash/${hash}`
+  } else {
+    return `${settings.apis.filestore.url}/history/project/${historyId}/hash/${hash}`
+  }
+}
 
 async function initializeProject(projectId) {
   const body = await fetchJson(`${settings.apis.project_history.url}/project`, {
@@ -421,7 +406,7 @@ function _userView(user) {
 const loadGlobalBlobsPromise = loadGlobalBlobs()
 
 module.exports = {
-  getBlobLocation,
+  getFilestoreBlobURL,
   loadGlobalBlobsPromise,
   initializeProject: callbackify(initializeProject),
   flushProject: callbackify(flushProject),

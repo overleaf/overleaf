@@ -65,11 +65,13 @@ export async function runScript({
   cwd,
   script,
   args = [],
+  user = 'www-data',
   hasOverleafEnv = true,
 }: {
   cwd: string
   script: string
   args?: string[]
+  user?: string
   hasOverleafEnv?: boolean
 }) {
   return await fetchJSON(`${hostAdminURL}/run/script`, {
@@ -78,6 +80,7 @@ export async function runScript({
       cwd,
       script,
       args,
+      user,
       hasOverleafEnv,
     }),
   })
