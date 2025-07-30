@@ -1,7 +1,7 @@
 import InstitutionsManager from '../app/src/Features/Institutions/InstitutionsManager.js'
 import { ensureRunningOnMongoSecondaryWithTimeout } from './helpers/env_variable_helper.mjs'
-import { scriptRunner } from './lib/ScriptRunner.mjs'
 
+// ScriptRunner can not be used when using this assertion
 ensureRunningOnMongoSecondaryWithTimeout(300000)
 
 const institutionId = parseInt(process.argv[2])
@@ -19,7 +19,7 @@ async function main() {
 }
 
 try {
-  await scriptRunner(main)
+  await main()
 } catch (error) {
   console.error(error)
   process.exit(1)
