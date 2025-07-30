@@ -127,7 +127,7 @@ app.post(
         'sharelatex',
         'bash',
         '-c',
-        `source /etc/container_environment.sh && ${env} && node ${JSON.stringify(script)} ${args.map(a => JSON.stringify(a)).join(' ')}`,
+        `source /etc/container_environment.sh && ${env} && /sbin/setuser www-data node ${JSON.stringify(script)} ${args.map(a => JSON.stringify(a)).join(' ')}`,
       ],
       (error, stdout, stderr) => {
         res.json({
@@ -162,7 +162,7 @@ app.post(
         'sharelatex',
         'bash',
         '-c',
-        `source /etc/container_environment.sh && grunt ${JSON.stringify(task)} ${args.map(a => JSON.stringify(a)).join(' ')}`,
+        `source /etc/container_environment.sh && /sbin/setuser www-data grunt ${JSON.stringify(task)} ${args.map(a => JSON.stringify(a)).join(' ')}`,
       ],
       (error, stdout, stderr) => {
         res.json({

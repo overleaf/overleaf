@@ -10,7 +10,7 @@ RESYNCS_NEEDED_FILE=/var/lib/overleaf/data/history/doc-version-recovery-resyncs-
 
 echo "Checking for doc version recovery. This can take a while if needed. Logs are in $LOG_FILE"
 cd /overleaf/services/history-v1
-LOG_LEVEL=info DOC_VERSION_RECOVERY_RESYNCS_NEEDED_FILE="$RESYNCS_NEEDED_FILE" node storage/scripts/recover_doc_versions.js 2>&1 | tee -a "$LOG_FILE"
+LOG_LEVEL=info DOC_VERSION_RECOVERY_RESYNCS_NEEDED_FILE="$RESYNCS_NEEDED_FILE" /sbin/setuser www-data node storage/scripts/recover_doc_versions.js 2>&1 | tee -a "$LOG_FILE"
 
 function resyncAllProjectsInBackground() {
   waitForService docstore 3016

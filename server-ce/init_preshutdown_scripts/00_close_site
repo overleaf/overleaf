@@ -12,7 +12,7 @@ echo "closed" > "${SITE_MAINTENANCE_FILE}"
 sleep 5
 
 # giving a grace period of 5 seconds for users before disconnecting them and start shutting down
-cd /overleaf/services/web && node scripts/disconnect_all_users.mjs --delay-in-seconds=5 >> /var/log/overleaf/web.log 2>&1
+cd /overleaf/services/web && /sbin/setuser www-data node scripts/disconnect_all_users.mjs --delay-in-seconds=5 >> /var/log/overleaf/web.log 2>&1
 
 EXIT_CODE="$?"
 if [ $EXIT_CODE -ne 0 ]

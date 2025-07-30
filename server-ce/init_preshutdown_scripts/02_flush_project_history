@@ -3,7 +3,7 @@
 . /etc/container_environment.sh
 . /etc/overleaf/env.sh
 
-cd /overleaf/services/project-history && node scripts/flush_all.js >> /var/log/overleaf/project-history.log 2>&1
+cd /overleaf/services/project-history && /sbin/setuser www-data node scripts/flush_all.js >> /var/log/overleaf/project-history.log 2>&1
 
 EXIT_CODE="$?"
 if [ $EXIT_CODE -ne 0 ]

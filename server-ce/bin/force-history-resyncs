@@ -5,4 +5,4 @@ set -euo pipefail
 source /etc/container_environment.sh
 source /etc/overleaf/env.sh
 cd /overleaf/services/project-history
-node scripts/force_resync.js 1000 force
+exec /sbin/setuser www-data node scripts/force_resync.js 1000 force
