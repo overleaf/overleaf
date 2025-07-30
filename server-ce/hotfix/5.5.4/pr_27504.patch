@@ -1,0 +1,34 @@
+
+
+diff --git a/bin/flush-history-queues b/bin/flush-history-queues
+index b54bc5558c6e..6c0cd896416e 100755
+--- a/bin/flush-history-queues
++++ b/bin/flush-history-queues
+@@ -5,4 +5,4 @@ set -euo pipefail
+ source /etc/container_environment.sh
+ source /etc/overleaf/env.sh
+ cd /overleaf/services/project-history
+-node scripts/flush_all.js 100000
++exec /sbin/setuser www-data node scripts/flush_all.js 100000
+diff --git a/bin/force-history-resyncs b/bin/force-history-resyncs
+index 389c98a4ad69..4f48890855b7 100755
+--- a/bin/force-history-resyncs
++++ b/bin/force-history-resyncs
+@@ -5,4 +5,4 @@ set -euo pipefail
+ source /etc/container_environment.sh
+ source /etc/overleaf/env.sh
+ cd /overleaf/services/project-history
+-node scripts/force_resync.js 1000 force
++exec /sbin/setuser www-data node scripts/force_resync.js 1000 force
+diff --git a/cron/project-history-flush-all.sh b/cron/project-history-flush-all.sh
+index 8fe9eea5fc55..689561737914 100755
+--- a/cron/project-history-flush-all.sh
++++ b/cron/project-history-flush-all.sh
+@@ -9,6 +9,6 @@ date
+
+ source /etc/container_environment.sh
+ source /etc/overleaf/env.sh
+-cd /overleaf/services/project-history && node scripts/flush_all.js
++cd /overleaf/services/project-history && /sbin/setuser www-data node scripts/flush_all.js
+
+ echo "Done flushing all project-history changes"
