@@ -155,7 +155,7 @@ const FigureModalContent = () => {
       dispatch({ error: String(error) })
       return
     }
-    const labelCommand = includeLabel ? '\\label{fig:enter-label}' : ''
+    const labelCommand = includeLabel ? '\\label{fig:placeholder}' : ''
     const captionCommand = includeCaption ? '\\caption{Enter Caption}' : ''
 
     if (figure) {
@@ -228,7 +228,7 @@ const FigureModalContent = () => {
       const widthArgument =
         width !== undefined ? `[width=${width}\\linewidth]` : ''
       const caption = includeCaption ? `\n\t\\caption{\${Enter Caption}}` : ''
-      const label = includeLabel ? `\n\t\\label{\${fig:enter-label}}` : ''
+      const label = includeLabel ? `\n\t\\label{\${fig:placeholder}}` : ''
 
       snippet(
         `\\begin{figure}

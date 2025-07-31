@@ -86,7 +86,7 @@ ${(
   '\\\\\n'
 ).repeat(sizeY)}\t\\end{tabular}
 \t\\caption{Caption}
-\t\\label{tab:my_label}
+\t\\label{tab:placeholder}
 \\end{table}${suffix}`
   snippet(template)({ state, dispatch }, { label: 'Table' }, pos, pos)
   return true

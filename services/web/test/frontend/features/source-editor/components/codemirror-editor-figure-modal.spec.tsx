@@ -130,7 +130,7 @@ describe('<FigureModal />', function () {
       // icon, which is literal text in the document
       cy.get('.cm-content').should(
         'have.text',
-        '\\begin{figure}    \\centeringedit    \\caption{Enter Caption}    🏷fig:enter-label\\end{figure}'
+        '\\begin{figure}    \\centeringedit    \\caption{Enter Caption}    🏷fig:placeholder\\end{figure}'
       )
     })
 
@@ -179,7 +179,7 @@ describe('<FigureModal />', function () {
       // icon, which is literal text in the document
       cy.get('.cm-content').should(
         'have.text',
-        '\\begin{figure}    \\centeringedit    \\caption{Enter Caption}    🏷fig:enter-label\\end{figure}'
+        '\\begin{figure}    \\centeringedit    \\caption{Enter Caption}    🏷fig:placeholder\\end{figure}'
       )
     })
   })
@@ -267,7 +267,7 @@ describe('<FigureModal />', function () {
       // icon, which is literal text in the document
       cy.get('.cm-content').should(
         'have.text',
-        '\\begin{figure}    \\centeringedit    \\caption{Enter Caption}    🏷fig:enter-label\\end{figure}'
+        '\\begin{figure}    \\centeringedit    \\caption{Enter Caption}    🏷fig:placeholder\\end{figure}'
       )
     })
 
@@ -296,7 +296,7 @@ describe('<FigureModal />', function () {
       // icon, which is literal text in the document
       cy.get('.cm-content').should(
         'have.text',
-        '\\begin{figure}    \\centeringedit    \\caption{Enter Caption}    🏷fig:enter-label\\end{figure}'
+        '\\begin{figure}    \\centeringedit    \\caption{Enter Caption}    🏷fig:placeholder\\end{figure}'
       )
     })
   })
@@ -442,7 +442,7 @@ describe('<FigureModal />', function () {
       // icon, which is literal text in the document
       cy.get('.cm-content').should(
         'have.text',
-        '\\begin{figure}    \\centeringedit    \\caption{Enter Caption}    🏷fig:enter-label\\end{figure}'
+        '\\begin{figure}    \\centeringedit    \\caption{Enter Caption}    🏷fig:placeholder\\end{figure}'
       )
     })
 
@@ -471,7 +471,7 @@ describe('<FigureModal />', function () {
       // icon, which is literal text in the document
       cy.get('.cm-content').should(
         'have.text',
-        '\\begin{figure}    \\centeringedit    \\caption{My caption}    🏷fig:enter-label\\end{figure}'
+        '\\begin{figure}    \\centeringedit    \\caption{My caption}    🏷fig:placeholder\\end{figure}'
       )
     })
 
