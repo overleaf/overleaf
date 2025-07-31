@@ -59,6 +59,7 @@ import type { ScriptLogType } from '../../../modules/admin-panel/frontend/js/fea
 import { ActiveExperiment } from './labs-utils'
 import { Subscription as AdminSubscription } from '../../../types/admin/subscription'
 import { AdminCapability } from '../../../types/admin-capabilities'
+import { GroupAuditLog } from '../../../modules/group-audit-log/frontend/js/components/logs'
 
 export interface Meta {
   'ol-ExposedSettings': ExposedSettings
@@ -167,6 +168,7 @@ export interface Meta {
   'ol-legacyEditorThemes': string[]
   'ol-licenseQuantity'?: number
   'ol-loadingText': string
+  'ol-logsForRendering': GroupAuditLog[]
   'ol-managedGroupSubscriptions': ManagedGroupSubscription[]
   'ol-managedInstitutions': ManagedInstitution[]
   'ol-managedPublishers': Publisher[]
