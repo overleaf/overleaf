@@ -7,6 +7,7 @@ export type AdminCapability =
   | 'modify-user-name'
   | 'view-project'
   | 'view-session'
+  | 'view-user-additional-info'
 
 export type AdminRole =
   | 'engagement'
