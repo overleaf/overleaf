@@ -17,7 +17,10 @@ import useEventListener from '@/shared/hooks/use-event-listener'
 import { CursorPosition } from '@/features/ide-react/types/cursor-position'
 import { isValidTeXFile } from '@/main/is-valid-tex-file'
 import { PdfScrollPosition } from '@/shared/hooks/use-pdf-scroll-position'
-import { showFileErrorToast } from '@/features/pdf-preview/components/synctex-toasts'
+import {
+  showFileErrorToast,
+  showSynctexRequestErrorToast,
+} from '@/features/pdf-preview/components/synctex-toasts'
 import { sendMB } from '@/infrastructure/event-tracking'
 
 export default function useSynctex(): {
@@ -125,7 +128,10 @@ export default function useSynctex(): {
             })
           }
         })
-        .catch(debugConsole.error)
+        .catch(error => {
+          showSynctexRequestErrorToast()
+          debugConsole.error(error)
+        })
         .finally(() => {
           if (isMounted.current) {
             setSyncToPdfInFlight(false)
@@ -236,7 +242,10 @@ export default function useSynctex(): {
             })
           }
         })
-        .catch(debugConsole.error)
+        .catch(error => {
+          debugConsole.error(error)
+          showSynctexRequestErrorToast()
+        })
         .finally(() => {
           if (isMounted.current) {
             setSyncToCodeInFlight(false)

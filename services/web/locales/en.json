@@ -2246,6 +2246,7 @@
   "sync_project_to_github_explanation": "Any changes you have made in __appName__ will be committed and merged with any updates in GitHub.",
   "sync_to_dropbox": "Sync to Dropbox",
   "sync_to_github": "Sync to GitHub",
+  "synctex_error_recompile_and_try_again": "That didn’t work. Recompile and try again.",
   "synctex_failed": "Couldn’t find the corresponding source file",
   "syntax_validation": "Code check",
   "tab_connecting": "Connecting with the editor",

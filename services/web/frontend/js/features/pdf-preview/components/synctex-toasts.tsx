@@ -21,11 +21,27 @@ export const SynctexFileErrorToast = () => {
   )
 }
 
+export const SynctexRequestErrorToast = () => {
+  const { t } = useTranslation()
+
+  return <span>{t('synctex_error_recompile_and_try_again')}</span>
+}
+
 const generators: GlobalToastGeneratorEntry[] = [
   {
     key: 'synctex:file-error',
     generator: () => ({
       content: <SynctexFileErrorToast />,
+      type: 'warning',
+      autoHide: true,
+      delay: 4000,
+      isDismissible: true,
+    }),
+  },
+  {
+    key: 'synctex:request-error',
+    generator: () => ({
+      content: <SynctexRequestErrorToast />,
       type: 'warning',
       autoHide: true,
       delay: 4000,
@@ -41,6 +57,16 @@ export const showFileErrorToast = () => {
     new CustomEvent('ide:show-toast', {
       detail: {
         key: 'synctex:file-error',
+      },
+    })
+  )
+}
+
+export const showSynctexRequestErrorToast = () => {
+  window.dispatchEvent(
+    new CustomEvent('ide:show-toast', {
+      detail: {
+        key: 'synctex:request-error',
       },
     })
   )
