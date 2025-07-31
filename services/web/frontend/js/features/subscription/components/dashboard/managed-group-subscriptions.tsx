@@ -97,6 +97,10 @@ export default function ManagedGroupSubscriptions() {
     getMeta('ol-groupSettingsAdvertisedFor') || []
   const groupSettingsEnabledFor = getMeta('ol-groupSettingsEnabledFor') || []
 
+  const splitTestVariants = getMeta('ol-splitTestVariants')
+  const displayAuditLogsLink =
+    splitTestVariants?.['group-audit-logs'] === 'active'
+
   return (
     <>
       {managedGroupSubscriptions.map(subscription => {
@@ -124,6 +128,14 @@ export default function ManagedGroupSubscriptions() {
               )}
               {groupSettingsAdvertisedFor?.includes(subscription._id) && (
                 <GroupSettingsButtonWithAdBadge subscription={subscription} />
+              )}
+              {displayAuditLogsLink && (
+                <RowLink
+                  href={`/manage/groups/${subscription._id}/audit-logs`}
+                  heading={t('audit_logs')}
+                  subtext={t('view_audit_logs_group_subtext')}
+                  icon="list"
+                />
               )}
               <RowLink
                 href={`/metrics/groups/${subscription._id}`}

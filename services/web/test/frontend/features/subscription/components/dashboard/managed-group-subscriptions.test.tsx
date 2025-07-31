@@ -97,6 +97,10 @@ describe('<ManagedGroupSubscriptions />', function () {
           value: managedGroupSubscriptions,
         },
         { name: 'ol-usersEmail', value: 'admin@example.com' },
+        {
+          name: 'ol-splitTestVariants',
+          value: { 'group-audit-logs': 'active' },
+        },
       ],
     })
 
@@ -124,28 +128,31 @@ describe('<ManagedGroupSubscriptions />', function () {
     expect(links[2].getAttribute('href')).to.equal(
       '/manage/groups/bcd567/managers'
     )
-    expect(links[3].getAttribute('href')).to.equal('/metrics/groups/bcd567')
-    expect(links[5].getAttribute('href')).to.equal(
+    expect(links[3].getAttribute('href')).to.equal(
+      '/manage/groups/bcd567/audit-logs'
+    )
+    expect(links[4].getAttribute('href')).to.equal('/metrics/groups/bcd567')
+    expect(links[6].getAttribute('href')).to.equal(
       '/manage/groups/def456/members'
     )
-    expect(links[6].getAttribute('href')).to.equal(
+    expect(links[7].getAttribute('href')).to.equal(
       '/manage/groups/def456/managers'
     )
-    expect(links[7].getAttribute('href')).to.equal('/metrics/groups/def456')
-    expect(links[9].getAttribute('href')).to.equal(
+    expect(links[9].getAttribute('href')).to.equal('/metrics/groups/def456')
+    expect(links[11].getAttribute('href')).to.equal(
       '/manage/groups/group2abc/members'
     )
-    expect(links[10].getAttribute('href')).to.equal(
+    expect(links[12].getAttribute('href')).to.equal(
       '/manage/groups/group2abc/managers'
     )
-    expect(links[11].getAttribute('href')).to.equal('/metrics/groups/group2abc')
-    expect(links[13].getAttribute('href')).to.equal(
+    expect(links[14].getAttribute('href')).to.equal('/metrics/groups/group2abc')
+    expect(links[16].getAttribute('href')).to.equal(
       '/manage/groups/group123abc/members'
     )
-    expect(links[14].getAttribute('href')).to.equal(
+    expect(links[17].getAttribute('href')).to.equal(
       '/manage/groups/group123abc/managers'
     )
-    expect(links[15].getAttribute('href')).to.equal(
+    expect(links[19].getAttribute('href')).to.equal(
       '/metrics/groups/group123abc'
     )
   })
