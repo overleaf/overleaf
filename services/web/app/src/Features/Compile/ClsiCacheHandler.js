@@ -35,6 +35,21 @@ function validateFilename(filename) {
 }
 
 /**
+ * Keep in sync with getIngressLabel in services/clsi-cache/app/js/utils.js
+ *
+ * @param {string} fsPath
+ * @return {string}
+ */
+function getEgressLabel(fsPath) {
+  if (fsPath.endsWith('.blg')) {
+    // .blg files may have custom names and can be in nested folders.
+    return 'output.blg'
+  }
+  // The rest is limited to 5 file names via validateFilename: output.pdf, etc.
+  return fsPath
+}
+
+/**
  * Clear the cache on all clsi-cache instances.
  *
  * @param projectId
@@ -224,6 +239,7 @@ async function prepareCacheSource(
 }
 
 module.exports = {
+  getEgressLabel,
   clearCache,
   getOutputFile,
   getLatestOutputFile,

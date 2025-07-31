@@ -13,7 +13,7 @@ import OLPopover from '@/features/ui/components/ol/ol-popover'
 import useEventListener from '../../../../shared/hooks/use-event-listener'
 import useDropdown from '../../../../shared/hooks/use-dropdown'
 import { emitToolbarEvent } from '../../extensions/toolbar/utils/analytics'
-import Icon from '../../../../shared/components/icon'
+import MaterialIcon from '@/shared/components/material-icon'
 import { useTranslation } from 'react-i18next'
 
 const levels = new Map([
@@ -66,7 +66,7 @@ export const SectionHeadingDropdown = () => {
         onClick={() => setOverflowOpen(!overflowOpen)}
       >
         <span>{currentLabel}</span>
-        <Icon type="caret-down" fw />
+        <MaterialIcon type="expand_more" />
       </button>
 
       {overflowOpen && (

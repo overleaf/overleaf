@@ -3,8 +3,9 @@ const redis = require('@overleaf/redis-wrapper')
 const { addConnectionDrainer } = require('./GracefulShutdown')
 
 if (
-  typeof global.beforeEach === 'function' &&
-  process.argv.join(' ').match(/unit/)
+  (typeof global.beforeEach === 'function' &&
+    process.argv.join(' ').match(/unit/)) ||
+  process.env.VITEST
 ) {
   throw new Error(
     'It looks like unit tests are running, but you are connecting to Redis. Missing a stub?'

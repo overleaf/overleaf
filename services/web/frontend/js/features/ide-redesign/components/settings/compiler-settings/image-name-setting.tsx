@@ -38,6 +38,7 @@ export default function ImageNameSetting() {
       options={options}
       onChange={setImageName}
       value={imageName}
+      translateOptions="no"
     />
   )
 }

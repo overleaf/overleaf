@@ -13,13 +13,9 @@ const EditorCloneProjectModalWrapper = React.memo(
     handleHide: () => void
     openProject: ({ project_id }: { project_id: string }) => void
   }) {
-    const {
-      _id: projectId,
-      name: projectName,
-      tags: projectTags,
-    } = useProjectContext()
+    const { project, tags: projectTags } = useProjectContext()
 
-    if (!projectName) {
+    if (!project) {
       // wait for useProjectContext
       return null
     } else {
@@ -28,8 +24,8 @@ const EditorCloneProjectModalWrapper = React.memo(
           handleHide={handleHide}
           show={show}
           handleAfterCloned={openProject}
-          projectId={projectId}
-          projectName={projectName}
+          projectId={project._id}
+          projectName={project.name}
           projectTags={projectTags}
         />
       )

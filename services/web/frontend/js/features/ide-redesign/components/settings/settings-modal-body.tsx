@@ -1,7 +1,8 @@
 import MaterialIcon, {
   AvailableUnfilledIcon,
 } from '@/shared/components/material-icon'
-import { ReactElement, useMemo, useState } from 'react'
+import { ReactElement } from 'react'
+
 import {
   Nav,
   NavLink,
@@ -9,10 +10,6 @@ import {
   TabContent,
   TabPane,
 } from 'react-bootstrap'
-import { useTranslation } from 'react-i18next'
-import EditorSettings from './editor-settings/editor-settings'
-import AppearanceSettings from './appearance-settings/appearance-settings'
-import CompilerSettings from './compiler-settings/compiler-settings'
 
 export type SettingsEntry = SettingsLink | SettingsTab
 
@@ -30,41 +27,15 @@ type SettingsLink = {
   title: string
 }
 
-export const SettingsModalBody = () => {
-  const { t } = useTranslation()
-  const settingsTabs: SettingsEntry[] = useMemo(
-    () => [
-      {
-        key: 'editor',
-        title: t('editor'),
-        icon: 'code',
-        component: <EditorSettings />,
-      },
-      {
-        key: 'compiler',
-        title: t('compiler'),
-        icon: 'picture_as_pdf',
-        component: <CompilerSettings />,
-      },
-      {
-        key: 'appearance',
-        title: t('appearance'),
-        icon: 'brush',
-        component: <AppearanceSettings />,
-      },
-      {
-        key: 'account_settings',
-        title: t('account_settings'),
-        icon: 'settings',
-        href: '/user/settings',
-      },
-    ],
-    [t]
-  )
-  const [activeTab, setActiveTab] = useState<string | null | undefined>(
-    settingsTabs[0]?.key
-  )
-
+export const SettingsModalBody = ({
+  activeTab,
+  setActiveTab,
+  settingsTabs,
+}: {
+  activeTab: string | null | undefined
+  setActiveTab: (tab: string | null | undefined) => void
+  settingsTabs: SettingsEntry[]
+}) => {
   return (
     <TabContainer
       transition={false}

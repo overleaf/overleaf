@@ -10,9 +10,9 @@ class Adapter {
     if (
       !process.env.SKIP_TAG_CHECK &&
       !process.argv.includes('create') &&
-      !(process.argv.includes('-t') || process.argv.includes('--tags'))
+      !(process.argv.includes('-t') || process.argv.includes('--tag'))
     ) {
-      console.error("ERROR: must pass tags using '-t' or '--tags', exiting")
+      console.error("ERROR: must pass tags using '-t' or '--tag', exiting")
       process.exit(1)
     }
     this.params = params || {}

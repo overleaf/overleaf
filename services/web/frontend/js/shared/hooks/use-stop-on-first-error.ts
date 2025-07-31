@@ -10,7 +10,7 @@ type UseStopOnFirstErrorProps = {
 export function useStopOnFirstError(opts: UseStopOnFirstErrorProps = {}) {
   const { eventSource } = opts
   const { stopOnFirstError, setStopOnFirstError } = useCompileContext()
-  const { _id: projectId } = useProjectContext()
+  const { projectId } = useProjectContext()
 
   type Opts = {
     projectId: string

@@ -1,4 +1,5 @@
 import { JSXElementConstructor } from 'react'
+import { useTranslation } from 'react-i18next'
 import Common from './groups/common'
 import Institution from './groups/institution'
 import ConfirmEmail from './groups/confirm-email'
@@ -13,8 +14,7 @@ import {
   DeprecatedBrowser,
   isDeprecatedBrowser,
 } from '@/shared/components/deprecated-browser'
-import PapersNotificationBanner from './papers-notification-banner'
-import { usePapersNotification } from './hooks/use-papers-notification'
+import AiAssistBanner from './ai-assist-banner'
 
 const [enrollmentNotificationModule] = importOverleafModules(
   'managedGroupSubscriptionEnrollmentNotification'
@@ -33,11 +33,13 @@ const USGovBanner: JSXElementConstructor<Record<string, never>> =
 function UserNotifications() {
   const groupSubscriptionsPendingEnrollment =
     getMeta('ol-groupSubscriptionsPendingEnrollment') || []
-
-  const { shouldShow: showPapersNotificationBanner } = usePapersNotification()
+  const { t } = useTranslation()
 
   return (
-    <div className="user-notifications notification-list">
+    <section
+      className="user-notifications notification-list"
+      aria-label={t('notification')}
+    >
       <ul className="list-unstyled">
         {EnrollmentNotification &&
           groupSubscriptionsPendingEnrollment.map(subscription => (
@@ -56,12 +58,12 @@ function UserNotifications() {
         <GroupsAndEnterpriseBanner />
         {USGovBanner && <USGovBanner />}
 
-        {showPapersNotificationBanner && <PapersNotificationBanner />}
+        <AiAssistBanner />
         <AccessibilitySurveyBanner />
 
         {isDeprecatedBrowser() && <DeprecatedBrowser />}
       </ul>
-    </div>
+    </section>
   )
 }
 

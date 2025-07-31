@@ -1,5 +1,5 @@
 import { isBootstrap5 } from '@/features/utils/bootstrap-5'
-import createIcon from '@/features/form-helpers/create-icon'
+import { materialIcon } from '@/features/utils/material-icon'
 
 export default function inputValidator(inputEl) {
   const messageEl = document.createElement('div')
@@ -15,7 +15,7 @@ export default function inputValidator(inputEl) {
 
   // In Bootstrap 5, add an icon
   if (isBootstrap5()) {
-    const iconEl = createIcon('error')
+    const iconEl = materialIcon('error')
     messageInnerEl.append(iconEl)
   }
   messageInnerEl.append(messageTextNode)

@@ -74,6 +74,10 @@ function sanitizeBrandVariationDetails(details) {
       details.submit_button_html,
       settings.modules.sanitize.options
     )
+    details.submit_button_html_no_br = sanitizeHtml(
+      details.submit_button_html.replace(/<br\s*\/?>/gi, ' '),
+      settings.modules.sanitize.options
+    )
   }
 }
 

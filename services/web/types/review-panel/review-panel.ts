@@ -20,6 +20,6 @@ export interface ReviewPanelCommentThreadMessage {
   content: string
   id: CommentId
   timestamp: Date
-  user: ReviewPanelUser
+  user?: ReviewPanelUser
   user_id: UserId
 }

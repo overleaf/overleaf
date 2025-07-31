@@ -3,7 +3,6 @@ import { useResizeObserver } from '../../../shared/hooks/use-resize-observer'
 import { useTranslation } from 'react-i18next'
 import classNames from 'classnames'
 import OLButton from '@/features/ui/components/ol/ol-button'
-import Icon from '../../../shared/components/icon'
 
 export default function PdfLogEntryRawContent({
   rawContent,
@@ -39,7 +38,7 @@ export default function PdfLogEntryRawContent({
           height: expanded || !needsExpander ? 'auto' : collapsedSize,
         }}
       >
-        <pre className="log-entry-content-raw" ref={elementRef}>
+        <pre className="log-entry-content-raw" ref={elementRef} translate="no">
           {rawContent.trim()}
         </pre>
       </div>
@@ -53,17 +52,10 @@ export default function PdfLogEntryRawContent({
           <OLButton
             variant="secondary"
             size="sm"
+            leadingIcon={expanded ? 'expand_less' : 'expand_more'}
             onClick={() => setExpanded(value => !value)}
           >
-            {expanded ? (
-              <>
-                <Icon type="angle-up" /> {t('collapse')}
-              </>
-            ) : (
-              <>
-                <Icon type="angle-down" /> {t('expand')}
-              </>
-            )}
+            {expanded ? t('collapse') : t('expand')}
           </OLButton>
         </div>
       )}

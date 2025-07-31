@@ -79,7 +79,7 @@ export function useSocketManager() {
         const beforeTime = info.data.time
         const now = Date.now()
         const latency = now - beforeTime
-        const clockDelta = (beforeTime + beforeTime) / 2 - info.serverTime
+        const clockDelta = (beforeTime + now) / 2 - info.serverTime
         setDebugInfo(prev => ({
           ...prev,
           received: prev.received + 1,

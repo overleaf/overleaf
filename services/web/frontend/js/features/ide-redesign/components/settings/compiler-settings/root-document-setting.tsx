@@ -44,6 +44,7 @@ export default function RootDocumentSetting() {
       options={validDocsOptions}
       onChange={setRootDocId}
       value={rootDocId}
+      translateOptions="no"
     />
   )
 }

@@ -21,10 +21,18 @@ function FatFooter() {
       title: t('About'),
       links: [
         { href: '/about', label: t('footer_about_us') },
-        { href: '/about/values', label: t('our_values') },
         { href: 'https://digitalscience.pinpointhq.com/', label: t('careers') },
-        { href: '/for/press', label: t('press_and_awards') },
         { href: '/blog', label: t('blog') },
+      ],
+    },
+    {
+      title: t('Solutions'),
+      links: [
+        { href: '/for/enterprises', label: t('for_business') },
+        { href: '/for/universities', label: t('for_universities') },
+        { href: '/for/government', label: t('for_government') },
+        { href: '/for/publishers', label: t('for_publishers') },
+        { href: '/about/customer-stories', label: t('customer_stories') },
       ],
     },
     {
@@ -45,29 +53,25 @@ function FatFooter() {
       ],
     },
     {
-      title: t('Plans and Pricing'),
+      title: t('Pricing'),
       links: [
         {
-          href: '/learn/how-to/Overleaf_premium_features',
-          label: t('premium_features'),
+          href: '/user/subscription/plans?itm_referrer=footer-for-indv',
+          label: t('for_individuals'),
         },
         {
-          href: '/user/subscription/plans?itm_referrer=footer-for-indv-groups',
-          label: t('for_individuals_and_groups'),
+          href: '/user/subscription/plans?plan=group&itm_referrer=footer-for-groups',
+          label: t('for_groups_and_organizations'),
         },
-        { href: '/for/enterprises', label: t('for_enterprise') },
-        { href: '/for/universities', label: t('for_universities') },
         {
           href: '/user/subscription/plans?itm_referrer=footer-for-students#student-annual',
           label: t('for_students'),
         },
-        { href: '/for/government', label: t('for_government') },
       ],
     },
     {
       title: t('Get Involved'),
       links: [
-        { href: '/for/community/advisors', label: t('become_an_advisor') },
         {
           href: 'https://forms.gle/67PSpN1bLnjGCmPQ9',
           label: t('let_us_know_what_you_think'),
@@ -78,7 +82,6 @@ function FatFooter() {
     {
       title: t('Help'),
       links: [
-        { href: '/about/why-latex', label: t('why_latex') },
         { href: '/learn', label: t('Documentation') },
         { href: '/contact', label: t('footer_contact_us') },
         { href: 'https://status.overleaf.com/', label: t('website_status') },
@@ -88,11 +91,7 @@ function FatFooter() {
 
   return (
     <footer className="fat-footer hidden-print">
-      <div
-        role="navigation"
-        aria-label={t('footer_navigation')}
-        className="fat-footer-container"
-      >
+      <div className="fat-footer-container">
         <div className={`fat-footer-sections ${hideFatFooter ? 'hidden' : ''}`}>
           <div className="footer-section" id="footer-brand">
             <a href="/" aria-label={t('overleaf')} className="footer-brand">

@@ -8,7 +8,12 @@ import {
 } from '../plan'
 import { User } from '../../user'
 
-export type SubscriptionState = 'active' | 'canceled' | 'expired' | 'paused'
+export type SubscriptionState =
+  | 'active'
+  | 'canceled'
+  | 'expired'
+  | 'paused'
+  | 'past_due'
 
 // when puchasing a new add-on in recurly, we only need to provide the code
 export type PurchasingAddOnCode = {
@@ -103,6 +108,10 @@ export type MemberGroupSubscription = Omit<GroupSubscription, 'admin_id'> & {
 }
 
 type PaymentProviderService = 'stripe-us' | 'stripe-uk' | 'recurly'
+export type StripePaymentProviderService = Exclude<
+  PaymentProviderService,
+  'recurly'
+>
 
 export type PaymentProvider = {
   service: PaymentProviderService

@@ -7,7 +7,8 @@ import OLRow from '@/features/ui/components/ol/ol-row'
 import OLCol from '@/features/ui/components/ol/ol-col'
 
 export default function SendInvitesNotice() {
-  const { publicAccessLevel } = useProjectContext()
+  const { project } = useProjectContext()
+  const { publicAccessLevel } = project || {}
   const { isPendingEditor } = useEditorContext()
   const { t } = useTranslation()
 

@@ -14,9 +14,6 @@ describe('<AddSeats />', function () {
       win.metaAttributesCache.set('ol-totalLicenses', this.totalLicenses)
       win.metaAttributesCache.set('ol-isProfessional', false)
       win.metaAttributesCache.set('ol-isCollectionMethodManual', true)
-      win.metaAttributesCache.set('ol-splitTestVariants', {
-        'flexible-group-licensing-for-manually-billed-subscriptions': 'enabled',
-      })
     })
 
     cy.mount(

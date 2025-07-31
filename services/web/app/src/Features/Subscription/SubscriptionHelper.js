@@ -1,6 +1,6 @@
 const { formatCurrency } = require('../../util/currency')
 const GroupPlansData = require('./GroupPlansData')
-const { isStandaloneAiAddOnPlanCode } = require('./PaymentProviderEntities')
+const { isStandaloneAiAddOnPlanCode } = require('./AiHelper')
 
 /**
  * If the user changes to a less expensive plan, we shouldn't apply the change immediately.
@@ -24,17 +24,6 @@ function shouldPlanChangeAtTermEnd(oldPlan, newPlan, isInTrial) {
 }
 
 /**
- * This is duplicated in:
- *   - services/web/scripts/plan-prices/plans.mjs
- *   - services/web/modules/subscriptions/frontend/js/pages/plans/group-member-picker/group-plan-pricing.js
- * @param {number} number
- * @returns {number}
- */
-function roundUpToNearest5Cents(number) {
-  return Math.ceil(number * 20) / 20
-}
-
-/**
  * @import { CurrencyCode } from '../../../../types/subscription/currency'
  */
 
@@ -48,7 +37,6 @@ function roundUpToNearest5Cents(number) {
  * @typedef {Object} LocalizedGroupPrice
  * @property {PlanToPrice} price
  * @property {PlanToPrice} pricePerUser
- * @property {PlanToPrice} pricePerUserPerMonth
  */
 
 /**
@@ -65,17 +53,11 @@ function generateInitialLocalizedGroupPrice(recommendedCurrency, locale) {
       INITIAL_LICENSE_SIZE
     ].price_in_cents / 100
   const collaboratorPricePerUser = collaboratorPrice / INITIAL_LICENSE_SIZE
-  const collaboratorPricePerUserPerMonth = roundUpToNearest5Cents(
-    collaboratorPrice / INITIAL_LICENSE_SIZE / 12
-  )
   const professionalPrice =
     GroupPlansData.enterprise.professional[recommendedCurrency][
       INITIAL_LICENSE_SIZE
     ].price_in_cents / 100
   const professionalPricePerUser = professionalPrice / INITIAL_LICENSE_SIZE
-  const professionalPricePerUserPerMonth = roundUpToNearest5Cents(
-    professionalPrice / INITIAL_LICENSE_SIZE / 12
-  )
 
   /**
    * @param {number} price
@@ -92,10 +74,6 @@ function generateInitialLocalizedGroupPrice(recommendedCurrency, locale) {
     pricePerUser: {
       collaborator: formatPrice(collaboratorPricePerUser),
       professional: formatPrice(professionalPricePerUser),
-    },
-    pricePerUserPerMonth: {
-      collaborator: formatPrice(collaboratorPricePerUserPerMonth),
-      professional: formatPrice(professionalPricePerUserPerMonth),
     },
   }
 }

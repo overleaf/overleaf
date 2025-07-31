@@ -21,7 +21,7 @@ import { useIdeReactContext } from '@/features/ide-react/context/ide-react-conte
 import { useConnectionContext } from '@/features/ide-react/context/connection-context'
 import useSocketListener from '@/features/ide-react/hooks/use-socket-listener'
 import { throttle } from 'lodash'
-import { useEditorManagerContext } from '@/features/ide-react/context/editor-manager-context'
+import { useEditorOpenDocContext } from '@/features/ide-react/context/editor-open-doc-context'
 
 export type Ranges = {
   docId: string
@@ -81,7 +81,7 @@ const RangesActionsContext = createContext<RangesActions | undefined>(undefined)
 export const RangesProvider: FC<React.PropsWithChildren> = ({ children }) => {
   const view = useCodeMirrorViewContext()
   const { projectId } = useIdeReactContext()
-  const { currentDocument } = useEditorManagerContext()
+  const { currentDocument } = useEditorOpenDocContext()
   const { socket } = useConnectionContext()
   const [ranges, setRanges] = useState<Ranges | undefined>(() =>
     buildRanges(currentDocument)

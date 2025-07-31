@@ -1,13 +1,13 @@
-li.dropdown.dropup.subdued(dropdown).language-picker
-	a.dropdown-toggle#language-picker-toggle(
-		href="#",
-		dropdown-toggle,
-		data-ol-lang-selector-tooltip,
-		data-toggle="dropdown",
-		role="button"
-		aria-haspopup="true",
-		aria-expanded="false",
-		aria-label="Select " + translate('language'),
+li.dropdown.dropup.subdued.language-picker(dropdown)
+	a#language-picker-toggle.dropdown-toggle(
+		href='#'
+		dropdown-toggle
+		data-ol-lang-selector-tooltip
+		data-toggle='dropdown'
+		role='button'
+		aria-haspopup='true'
+		aria-expanded='false'
+		aria-label='Select ' + translate('language')
 		tooltip=translate('language')
 		title=translate('language')
 	)
@@ -15,10 +15,13 @@ li.dropdown.dropup.subdued(dropdown).language-picker
 		|
 		| #{settings.translatedLanguages[currentLngCode]}
 
-	ul.dropdown-menu(role="menu" aria-labelledby="language-picker-toggle")
+	ul.dropdown-menu(role='menu' aria-labelledby='language-picker-toggle')
 		li.dropdown-header #{translate("language")}
 		each subdomainDetails, subdomain in settings.i18n.subdomainLang
 			if !subdomainDetails.hide
 				li.lng-option
-					a.menu-indent(href=subdomainDetails.url+currentUrlWithQueryParams role="menuitem")
+					a.menu-indent(
+						href=subdomainDetails.url + currentUrlWithQueryParams
+						role='menuitem'
+					)
 						| #{settings.translatedLanguages[subdomainDetails.lngCode]}

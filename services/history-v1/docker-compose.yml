@@ -2,7 +2,8 @@
 # Instead run bin/update_build_scripts from
 # https://github.com/overleaf/internal/
 
-version: "2.3"
+volumes:
+  minio-certs:
 
 services:
   test_unit:
@@ -32,7 +33,7 @@ services:
       - .:/overleaf/services/history-v1
       - ../../node_modules:/overleaf/node_modules
       - ../../libraries:/overleaf/libraries
-      - ./test/acceptance/certs:/certs
+      - minio-certs:/certs
       - ../../bin/shared/wait_for_it:/overleaf/bin/shared/wait_for_it
     working_dir: /overleaf/services/history-v1
     environment:
@@ -83,7 +84,7 @@ services:
       retries: 20
 
   mongo:
-    image: mongo:7.0.20
+    image: mongo:8.0.11
     command: --replSet overleaf
     volumes:
       - ../../bin/shared/mongodb-init-replica-set.js:/docker-entrypoint-initdb.d/mongodb-init-replica-set.js
@@ -109,27 +110,27 @@ services:
       retries: 20
 
   certs:
-    image: node:22.15.1
+    build:
+      dockerfile_inline: |
+        FROM node:22.17.0
+        RUN wget -O /certgen "https://github.com/minio/certgen/releases/download/v1.3.0/certgen-linux-$(dpkg --print-architecture)"
+        RUN chmod +x /certgen
     volumes:
-      - ./test/acceptance/certs:/certs
+      - minio-certs:/certs
     working_dir: /certs
     entrypoint: sh
     command:
       - '-cex'
       - |
-        if [ ! -f ./certgen ]; then
-          wget -O ./certgen "https://github.com/minio/certgen/releases/download/v1.3.0/certgen-linux-$(dpkg --print-architecture)"
-          chmod +x ./certgen
-        fi
         if [ ! -f private.key ] || [ ! -f public.crt ]; then
-          ./certgen -host minio
+          /certgen -host minio
         fi
 
   minio:
     image: minio/minio:RELEASE.2024-10-13T13-34-11Z
     command: server /data
     volumes:
-      - ./test/acceptance/certs:/root/.minio/certs
+      - minio-certs:/root/.minio/certs
     environment:
       MINIO_ROOT_USER: MINIO_ROOT_USER
       MINIO_ROOT_PASSWORD: MINIO_ROOT_PASSWORD
@@ -145,7 +146,7 @@ services:
         condition: service_started
     image: minio/mc:RELEASE.2024-10-08T09-37-26Z
     volumes:
-      - ./test/acceptance/certs:/root/.mc/certs/CAs
+      - minio-certs:/root/.mc/certs/CAs
     entrypoint: sh
     command:
       - '-cex'

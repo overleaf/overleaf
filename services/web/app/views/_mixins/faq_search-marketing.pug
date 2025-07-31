@@ -1,30 +1,39 @@
+include ./material_symbol.pug
+
 mixin faq_search-marketing(headerText, headerClass)
-	if (typeof(settings.algolia) != "undefined" && typeof(settings.algolia.indexes) != "undefined" && typeof(settings.algolia.indexes.wiki) != "undefined")
+	if typeof settings.algolia != 'undefined' && typeof settings.algolia.indexes != 'undefined' && typeof settings.algolia.indexes.wiki != 'undefined'
 		if headerText
 			div(class=headerClass) #{headerText}
-		.wiki
-			form.project-search.form-horizontal(role="search" data-ol-faq-search)
+		search.wiki
+			form.project-search.form-horizontal(role='search' data-ol-faq-search)
 				.form-group.has-feedback.has-feedback-left
-					.col-sm-12
-						input.form-control(type='search', placeholder="Search help library…" aria-label="Search help library…")
-						i.fa.fa-search.form-control-feedback-left(aria-hidden="true")
-						i.fa.fa-times.form-control-feedback(
-							style="cursor: pointer;",
-							hidden
-							data-ol-clear-search
-							aria-hidden="true"
-						)
-						button.sr-only(
-							type="button"
-							hidden
-							data-ol-clear-search
-							aria-label=translate('clear_search')
-						)
+					.col-12
+						.form-control-wrapper
+							label.visually-hidden(for='search-help-library') Search help library…
+							span.form-control-start-icon
+								+material-symbol('search').form-control-feedback-left(
+									aria-hidden='true'
+								)
+							input.form-control.form-control-offset-start.form-control-offset-end(
+								id='search-help-library'
+								type='text'
+								placeholder='Search help library…'
+								data-ol-search-input
+							)
+							span.form-control-end-icon
+								button.form-control-search-clear-btn(
+									type='button'
+									hidden
+									data-ol-clear-search
+									aria-label=translate('clear_search')
+								)
+									+material-symbol('clear')
 
-				.row(role="region" aria-label="search results")
-					.col-md-12()
+				.row(role='region' aria-label='search results')
+					.col-12
 						div(data-ol-search-results-wrapper)
-							span.sr-only(aria-live="polite" data-ol-search-sr-help-message)
+							span.visually-hidden(aria-live='polite' data-ol-search-sr-help-message)
 							div(data-ol-search-results)
-						.row-spaced-small.search-result.card.card-thin(hidden data-ol-search-no-results)
-							p #{translate("no_search_results")}
+						.row-spaced-small.search-result.card(hidden data-ol-search-no-results)
+							.card-body
+								p #{translate("no_search_results")}

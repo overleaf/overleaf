@@ -1,5 +1,4 @@
-// Keep in sync with services/web/app/src/Features/History/project_key.js
-const _ = require('lodash')
+// Keep in sync with services/filestore/app/js/project_key.js
 const path = require('node:path')
 
 //
@@ -13,7 +12,7 @@ function format(projectId) {
 }
 
 function pad(number) {
-  return _.padStart(number, 9, '0')
+  return (number || 0).toString().padStart(9, '0')
 }
 
 function naiveReverse(string) {

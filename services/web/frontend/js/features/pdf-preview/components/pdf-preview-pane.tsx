@@ -40,7 +40,7 @@ function PdfPreviewPane() {
           {compileTimeout < 60 && <CompileTimeWarningUpgradePrompt />}
         </PdfPreviewMessages>
         <Suspense fallback={<FullSizeLoadingSpinner delay={500} />}>
-          <div className="pdf-viewer">
+          <div className="pdf-viewer" data-testid="pdf-viewer">
             <PdfViewer />
           </div>
         </Suspense>

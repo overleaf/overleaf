@@ -4,7 +4,7 @@ import getMeta from '../../../../utils/meta'
 import { useProjectSettingsContext } from '../../context/project-settings-context'
 import SettingsMenuSelect from './settings-menu-select'
 import type { Optgroup } from './settings-menu-select'
-import { useEditorContext } from '@/shared/context/editor-context'
+import { useIdeReactContext } from '@/features/ide-react/context/ide-react-context'
 import { supportsWebAssembly } from '@/utils/wasm'
 
 export default function SettingsSpellCheckLanguage() {
@@ -12,7 +12,7 @@ export default function SettingsSpellCheckLanguage() {
 
   const { spellCheckLanguage, setSpellCheckLanguage } =
     useProjectSettingsContext()
-  const { permissionsLevel } = useEditorContext()
+  const { permissionsLevel } = useIdeReactContext()
 
   const optgroup: Optgroup = useMemo(() => {
     const options = (getMeta('ol-languages') ?? [])

@@ -20,7 +20,7 @@ export function LeaversSurveyAlert() {
   const [hide, setHide] = usePersistedState(
     'hideInstitutionalLeaversSurvey',
     false,
-    true
+    { listen: true }
   )
 
   function handleDismiss() {

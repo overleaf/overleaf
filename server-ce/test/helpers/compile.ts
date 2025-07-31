@@ -9,6 +9,14 @@ export function throttledRecompile() {
   return recompile
 }
 
+export function stopCompile(options: { delay?: number } = {}) {
+  const { delay = 0 } = options
+  cy.wait(delay)
+  cy.log('Stop compile')
+  cy.findByRole('button', { name: 'Toggle compile options menu' }).click()
+  cy.findByRole('menuitem', { name: 'Stop compilation' }).click()
+}
+
 export function prepareWaitForNextCompileSlot() {
   let lastCompile = 0
   function queueReset() {

@@ -25,10 +25,10 @@ function GenericConfirmModal({
   message,
   confirmLabel,
   primaryVariant = 'primary',
+  onConfirm,
   ...modalProps
 }: GenericConfirmModalProps) {
   const { t } = useTranslation()
-  const handleConfirmClick = modalProps.onConfirm
 
   return (
     <OLModal {...modalProps}>
@@ -42,7 +42,7 @@ function GenericConfirmModal({
         <OLButton variant="secondary" onClick={() => modalProps.onHide()}>
           {t('cancel')}
         </OLButton>
-        <OLButton variant={primaryVariant} onClick={handleConfirmClick}>
+        <OLButton variant={primaryVariant} onClick={onConfirm}>
           {confirmLabel || t('ok')}
         </OLButton>
       </OLModalFooter>

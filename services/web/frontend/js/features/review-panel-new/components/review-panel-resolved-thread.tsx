@@ -73,7 +73,10 @@ export const ReviewPanelResolvedThread: FC<{
             i18nKey="from_filename"
             components={[
               // eslint-disable-next-line react/jsx-key
-              <span className="review-panel-resolved-comment-filename" />,
+              <span
+                className="review-panel-resolved-comment-filename"
+                translate="no"
+              />,
             ]}
             values={{ filename: docName }}
             shouldUnescape
@@ -121,6 +124,7 @@ export const ReviewPanelResolvedThread: FC<{
           className="review-panel-resolved-comment-quoted-text-quote"
           content={comment?.op.c}
           checkNewLines
+          translate="no"
         />
       </div>
 

@@ -15,6 +15,7 @@ const {
   BlobStore,
   blobHash,
   chunkStore,
+  redisBuffer,
   HashCheckBlobStore,
   ProjectArchive,
   zipStore,
@@ -226,7 +227,9 @@ async function createZip(req, res, next) {
 async function deleteProject(req, res, next) {
   const projectId = req.swagger.params.project_id.value
   const blobStore = new BlobStore(projectId)
+
   await Promise.all([
+    redisBuffer.hardDeleteProject(projectId),
     chunkStore.deleteProjectChunks(projectId),
     blobStore.deleteBlobs(),
   ])

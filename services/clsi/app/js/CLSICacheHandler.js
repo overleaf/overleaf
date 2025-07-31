@@ -13,6 +13,7 @@ const {
 const logger = require('@overleaf/logger')
 const Metrics = require('@overleaf/metrics')
 const Settings = require('@overleaf/settings')
+const { MeteredStream } = require('@overleaf/stream-utils')
 const { CACHE_SUBDIR } = require('./OutputCacheManager')
 const { isExtraneousFile } = require('./ResourceWriter')
 
@@ -204,7 +205,13 @@ async function downloadOutputDotSynctexFromCompileCache(
   const dst = Path.join(outputDir, 'output.synctex.gz')
   const tmp = dst + crypto.randomUUID()
   try {
-    await pipeline(stream, fs.createWriteStream(tmp))
+    await pipeline(
+      stream,
+      new MeteredStream(Metrics, 'clsi_cache_egress', {
+        path: 'output.synctex.gz',
+      }),
+      fs.createWriteStream(tmp)
+    )
     await fs.promises.rename(tmp, dst)
   } catch (err) {
     try {
@@ -253,6 +260,7 @@ async function downloadLatestCompileCache(projectId, userId, compileDir) {
   let abort = false
   await pipeline(
     stream,
+    new MeteredStream(Metrics, 'clsi_cache_egress', { path: 'output.tar.gz' }),
     createGunzip(),
     tarFs.extract(compileDir, {
       // use ignore hook for counting entries (files+folders) and validation.

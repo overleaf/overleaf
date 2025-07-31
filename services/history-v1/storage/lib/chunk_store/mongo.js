@@ -287,6 +287,27 @@ async function updateProjectRecord(
 }
 
 /**
+ * @param {number} historyId
+ * @return {Promise<string>}
+ */
+async function lookupMongoProjectIdFromHistoryId(historyId) {
+  const project = await mongodb.projects.findOne(
+    // string for Object ids, number for postgres ids
+    { 'overleaf.history.id': historyId },
+    { projection: { _id: 1 } }
+  )
+  if (!project) {
+    // should not happen: We flush before allowing a project to be soft-deleted.
+    throw new OError('mongo project not found by history id', { historyId })
+  }
+  return project._id.toString()
+}
+
+async function resolveHistoryIdToMongoProjectId(projectId) {
+  return projectId
+}
+
+/**
  * Record that a chunk was replaced by a new one.
  *
  * @param {string} projectId
@@ -533,4 +554,6 @@ module.exports = {
   deleteProjectChunks,
   getOldChunksBatch,
   deleteOldChunks,
+  lookupMongoProjectIdFromHistoryId,
+  resolveHistoryIdToMongoProjectId,
 }

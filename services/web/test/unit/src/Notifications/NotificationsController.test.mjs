@@ -52,8 +52,8 @@ describe('NotificationsController', function () {
     ctx.controller = (await import(modulePath)).default
   })
 
-  it('should ask the handler for all unread notifications', function (ctx) {
-    return new Promise(resolve => {
+  it('should ask the handler for all unread notifications', async function (ctx) {
+    await new Promise(resolve => {
       const allNotifications = [{ _id: notificationId, user_id: userId }]
       ctx.handler.getUserNotifications = sinon
         .stub()
@@ -68,8 +68,8 @@ describe('NotificationsController', function () {
     })
   })
 
-  it('should send a delete request when a delete has been received to mark a notification', function (ctx) {
-    return new Promise(resolve => {
+  it('should send a delete request when a delete has been received to mark a notification', async function (ctx) {
+    await new Promise(resolve => {
       ctx.controller.markNotificationAsRead(ctx.req, {
         sendStatus: () => {
           ctx.handler.markAsRead
@@ -81,8 +81,8 @@ describe('NotificationsController', function () {
     })
   })
 
-  it('should get a notification by notification id', function (ctx) {
-    return new Promise(resolve => {
+  it('should get a notification by notification id', async function (ctx) {
+    await new Promise(resolve => {
       const notification = { _id: notificationId, user_id: userId }
       ctx.handler.getUserNotifications = sinon
         .stub()

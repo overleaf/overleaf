@@ -1,5 +1,6 @@
 import classNames from 'classnames'
 import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
+import MaterialIcon from '@/shared/components/material-icon'
 
 type HorizontalTogglerType = 'west' | 'east'
 
@@ -42,7 +43,16 @@ export function HorizontalToggler({
         aria-label={description}
         title=""
         onClick={() => setIsOpen(!isOpen)}
-      />
+      >
+        <MaterialIcon
+          type={
+            (togglerType === 'west' && isOpen) ||
+            (togglerType === 'east' && !isOpen)
+              ? 'chevron_left'
+              : 'chevron_right'
+          }
+        />
+      </button>
     </OLTooltip>
   )
 }

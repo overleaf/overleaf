@@ -115,7 +115,11 @@ export async function verifyProjectWithErrorContext(
  * @param {CachedPerProjectEncryptedS3Persistor} backupPersistorForProject
  * @return {Promise<any>}
  */
-async function loadChunk(historyId, startVersion, backupPersistorForProject) {
+export async function loadChunk(
+  historyId,
+  startVersion,
+  backupPersistorForProject
+) {
   const key = path.join(
     projectKey.format(historyId),
     projectKey.pad(startVersion)

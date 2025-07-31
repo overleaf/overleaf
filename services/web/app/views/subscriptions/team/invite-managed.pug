@@ -4,16 +4,20 @@ block entrypointVar
 	- entrypoint = 'pages/user/subscription/invite-managed'
 
 block append meta
-	meta(name="ol-inviteToken" content=inviteToken)
-	meta(name="ol-inviterName" content=inviterName)
-	meta(name="ol-expired" data-type="boolean" content=expired)
-	meta(name="ol-alreadyEnrolled" data-type="boolean" content=alreadyEnrolled)
-	meta(name="ol-validationStatus" data-type="json" content=validationStatus)
-	meta(name="ol-currentManagedUserAdminEmail" data-type="string" content=currentManagedUserAdminEmail)
-	meta(name="ol-groupSSOActive" data-type="boolean" content=groupSSOActive)
-	meta(name="ol-subscriptionId" data-type="string" content=subscriptionId)
-	meta(name="ol-user" data-type="json" content=user)
-	meta(name="ol-usersSubscription" data-type="json" content=usersSubscription)
+	meta(name='ol-inviteToken' content=inviteToken)
+	meta(name='ol-inviterName' content=inviterName)
+	meta(name='ol-expired' data-type='boolean' content=expired)
+	meta(name='ol-alreadyEnrolled' data-type='boolean' content=alreadyEnrolled)
+	meta(name='ol-validationStatus' data-type='json' content=validationStatus)
+	meta(
+		name='ol-currentManagedUserAdminEmail'
+		data-type='string'
+		content=currentManagedUserAdminEmail
+	)
+	meta(name='ol-groupSSOActive' data-type='boolean' content=groupSSOActive)
+	meta(name='ol-subscriptionId' data-type='string' content=subscriptionId)
+	meta(name='ol-user' data-type='json' content=user)
+	meta(name='ol-usersSubscription' data-type='json' content=usersSubscription)
 
 block content
-	main.content.content-alt.team-invite#invite-managed-root
+	main#invite-managed-root.content.content-alt.team-invite

@@ -1,23 +1,24 @@
 import { Panel, PanelGroup } from 'react-resizable-panels'
 import React, { FC, lazy, Suspense } from 'react'
-import useScopeValue from '@/shared/hooks/use-scope-value'
 import SourceEditor from '@/features/source-editor/components/source-editor'
 import { useEditorManagerContext } from '@/features/ide-react/context/editor-manager-context'
-import { EditorScopeValue } from '@/features/ide-react/scope-adapters/editor-manager-context-adapter'
+import { useEditorOpenDocContext } from '@/features/ide-react/context/editor-open-doc-context'
 import classNames from 'classnames'
 import { LoadingPane } from '@/features/ide-react/components/editor/loading-pane'
 import { FullSizeLoadingSpinner } from '@/shared/components/loading-spinner'
 import { VerticalResizeHandle } from '@/features/ide-react/components/resize/vertical-resize-handle'
 import { useFileTreeOpenContext } from '@/features/ide-react/context/file-tree-open-context'
+import { useEditorPropertiesContext } from '@/features/ide-react/context/editor-properties-context'
 
 const SymbolPalettePane = lazy(
   () => import('@/features/ide-react/components/editor/symbol-palette-pane')
 )
 
 export const EditorPane: FC = () => {
-  const [editor] = useScopeValue<EditorScopeValue>('editor')
+  const { showSymbolPalette } = useEditorPropertiesContext()
   const { selectedEntityCount, openEntity } = useFileTreeOpenContext()
-  const { currentDocumentId, isLoading } = useEditorManagerContext()
+  const { isLoading } = useEditorManagerContext()
+  const { currentDocumentId } = useEditorOpenDocContext()
 
   if (!currentDocumentId) {
     return null
@@ -39,7 +40,7 @@ export const EditorPane: FC = () => {
           {isLoading && <LoadingPane />}
         </Panel>
 
-        {editor.showSymbolPalette && (
+        {showSymbolPalette && (
           <>
             <VerticalResizeHandle id="editor-symbol-palette" />
             <Panel

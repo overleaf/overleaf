@@ -1,10 +1,10 @@
-mixin begin_now_card()
+mixin begin_now_card(eventTracking, locationEventSegmentation)
 	- var registerURL = '/register'
 	- var plansURL = '/user/subscription/plans'
 	- var isUserLoggedIn = !!getSessionUser()
 
 	.begin-now-card
-		div.card.card-pattern
+		.card.card-pattern
 			.card-body
 				p.dm-mono
 					span.font-size-display-xs
@@ -18,8 +18,16 @@ mixin begin_now_card()
 					if !isUserLoggedIn
 						a.btn.btn-primary.card-link(
 							href=registerURL
+							event-tracking-mb=eventTracking ? 'true' : null
+							event-tracking=eventTracking
+							event-tracking-trigger=eventTracking ? 'click' : null
+							event-segmentation=eventTracking ? {location: locationEventSegmentation, destination: registerURL} : null
 						) #{translate("sign_up_for_free")}
 					a.btn.card-link(
-						class = isUserLoggedIn ? 'btn-primary' : 'btn-secondary'
 						href=plansURL
+						class={'btn-primary': isUserLoggedIn, 'btn-secondary': !isUserLoggedIn}
+						event-tracking-mb=eventTracking ? 'true' : null
+						event-tracking=eventTracking
+						event-tracking-trigger=eventTracking ? 'click' : null
+						event-segmentation=eventTracking ? {location: locationEventSegmentation, destination: plansURL} : null
 					) #{translate("explore_all_plans")}

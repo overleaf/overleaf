@@ -1,13 +1,10 @@
 extends ../layout-marketing
 
-block vars
-	- bootstrap5PageStatus = 'disabled'
-
 block content
-	main.content.content-alt#main-content
+	main#main-content.content.content-alt
 		.container
 			.row
-				.registration_message
+				.registration-message
 					if sharedProjectData.user_first_name !== undefined
 						h1 #{translate("user_wants_you_to_see_project", {username:sharedProjectData.user_first_name, projectname:""})}
 							em #{sharedProjectData.project_name}
@@ -15,21 +12,24 @@ block content
 							| #{translate("join_sl_to_view_project")}.
 						div
 							| #{translate("already_have_sl_account")}
-							a(href="/login")  #{translate("login_here")}
+							|
+							a(href='/login') #{translate("login_here")}
 					else if newTemplateData.templateName !== undefined
 						h1 #{translate("register_to_edit_template", {templateName:newTemplateData.templateName})}
 
 						div #{translate("already_have_sl_account")}
-							a(href="/login")  #{translate("login_here")}
+							|
+							a(href='/login') #{translate("login_here")}
 
 			.row
-				.col-md-8.col-md-offset-2.col-lg-6.col-lg-offset-3
+				.col-lg-8.offset-lg-2.col-xl-6.offset-xl-3
 					.card
-						.page-header
-							h1 #{translate("register")}
-						p
-							| Please contact
-							|
-							strong #{settings.adminEmail}
-							|
-							| to create an account.
+						.card-body
+							.page-header
+								h1 #{translate("register")}
+							p
+								| Please contact
+								|
+								strong #{settings.adminEmail}
+								|
+								| to create an account.

@@ -148,6 +148,36 @@
       vertical-align: middle;
     }
   }
+
+  .ide-redesign-toolbar-logos {
+    display: flex;
+  }
+
+  .ide-redesign-toolbar-cobranding-separator {
+    $separator-height: 16px;
+
+    border-radius: var(--border-radius-base);
+    width: 1px;
+    height: $separator-height;
+    margin-top: math.div($toolbar-height - $separator-height, 2);
+
+    // To account for the 1px border of the rail so that they're aligned.
+    margin-left: calc(var(--spacing-02) - 1px);
+    margin-right: var(--spacing-01);
+    background: var(--redesign-toolbar-border-divider);
+  }
+
+  .ide-redesign-toolbar-cobranding-link {
+    display: inline-flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 0 var(--spacing-02);
+  }
+
+  .ide-redesign-toolbar-cobranding-logo {
+    max-height: calc($toolbar-height - var(--spacing-04) * 2);
+    max-width: 150px;
+  }
 }
 
 .ide-redesign-toolbar-menu-bar {

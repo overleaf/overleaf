@@ -13,6 +13,7 @@ import { Parser as CSVParser } from 'json2csv'
 import { expressify } from '@overleaf/promise-utils'
 import PlansLocator from '../Subscription/PlansLocator.js'
 import RecurlyClient from '../Subscription/RecurlyClient.js'
+import Modules from '../../infrastructure/Modules.js'
 
 async function manageGroupMembers(req, res, next) {
   const { entity: subscription, entityConfig } = req
@@ -121,6 +122,56 @@ async function _renderManagersPage(req, res, next, template) {
   })
 }
 
+async function exportCsv(req, res) {
+  let ssoEnabled
+  const { entity, entityConfig } = req
+  const fields = ['email', 'last_logged_in_at', 'last_active_at']
+
+  const { managedUsersEnabled } = entity
+
+  let users = await UserMembershipHandler.promises.getUsers(
+    entity,
+    entityConfig
+  )
+
+  if (entity.ssoConfig) {
+    const ssoEnabledResult = await Modules.promises.hooks.fire(
+      'hasGroupSSOEnabled',
+      entity
+    )
+    ssoEnabled = ssoEnabledResult?.[0]
+  }
+
+  if (managedUsersEnabled) {
+    fields.push('managed')
+  }
+
+  if (ssoEnabled) {
+    fields.push('sso')
+  }
+
+  if (managedUsersEnabled || ssoEnabled) {
+    users = users.map(user => {
+      if (managedUsersEnabled) {
+        user.managed =
+          user.enrollment?.managedBy?.toString() === entity._id.toString()
+      }
+
+      if (ssoEnabled) {
+        user.sso = !!user.enrollment?.sso?.some(
+          groupLinked =>
+            groupLinked.groupId.toString() === entity._id.toString()
+        )
+      }
+      return user
+    })
+  }
+
+  const csvParser = new CSVParser({ fields })
+
+  csvAttachment(res, csvParser.parse(users), 'Group.csv')
+}
+
 export default {
   manageGroupMembers: expressify(manageGroupMembers),
   manageGroupManagers: expressify(manageGroupManagers),
@@ -208,22 +259,7 @@ export default {
       }
     )
   },
-  exportCsv(req, res, next) {
-    const { entity, entityConfig } = req
-    const fields = ['email', 'last_logged_in_at', 'last_active_at']
-
-    UserMembershipHandler.getUsers(
-      entity,
-      entityConfig,
-      function (error, users) {
-        if (error != null) {
-          return next(error)
-        }
-        const csvParser = new CSVParser({ fields })
-        csvAttachment(res, csvParser.parse(users), 'Group.csv')
-      }
-    )
-  },
+  exportCsv: expressify(exportCsv),
   new(req, res, next) {
     res.render('user_membership/new', {
       entityName: req.params.name,

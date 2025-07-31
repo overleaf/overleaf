@@ -27,7 +27,7 @@ function AccessibilitySurveyBanner() {
 
   return (
     <Notification
-      className="sr-only"
+      className="visually-hidden"
       type="info"
       onDismiss={handleClose}
       content={<p>{t('help_improve_screen_reader_fill_out_this_survey')}</p>}

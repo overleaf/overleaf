@@ -15,6 +15,7 @@ export async function reconfigure({
   vars = {},
   withDataDir = false,
   resetData = false,
+  mongoVersion = '',
 }): Promise<{ previousConfigServer: string }> {
   return await fetchJSON(`${hostAdminURL}/reconfigure`, {
     method: 'POST',
@@ -24,6 +25,7 @@ export async function reconfigure({
       vars,
       withDataDir,
       resetData,
+      mongoVersion,
     }),
   })
 }
@@ -63,16 +65,38 @@ export async function runScript({
   cwd,
   script,
   args = [],
+  user = 'www-data',
+  hasOverleafEnv = true,
 }: {
   cwd: string
   script: string
   args?: string[]
+  user?: string
+  hasOverleafEnv?: boolean
 }) {
   return await fetchJSON(`${hostAdminURL}/run/script`, {
     method: 'POST',
     body: JSON.stringify({
       cwd,
       script,
+      args,
+      user,
+      hasOverleafEnv,
+    }),
+  })
+}
+
+export async function runGruntTask({
+  task,
+  args = [],
+}: {
+  task: string
+  args?: string[]
+}) {
+  return await fetchJSON(`${hostAdminURL}/run/gruntTask`, {
+    method: 'POST',
+    body: JSON.stringify({
+      task,
       args,
     }),
   })
@@ -83,6 +107,24 @@ export async function getRedisKeys() {
     method: 'GET',
   })
   return stdout.split('\n')
+}
+
+export async function setMongoFeatureCompatibilityVersion(
+  mongoVersion: string
+) {
+  cy.log(`advancing mongo featureCompatibilityVersion to ${mongoVersion}`)
+  await fetchJSON(`${hostAdminURL}/mongo/setFeatureCompatibilityVersion`, {
+    method: 'POST',
+    body: JSON.stringify({
+      mongoVersion,
+    }),
+  })
+}
+
+export async function purgeFilestoreData() {
+  await fetchJSON(`${hostAdminURL}/data/user_files`, {
+    method: 'DELETE',
+  })
 }
 
 async function sleep(ms: number) {

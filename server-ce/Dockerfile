@@ -115,9 +115,3 @@ ENV LOG_LEVEL="info"
 EXPOSE 80
 
 ENTRYPOINT ["/sbin/my_init"]
-
-# Store the revision
-# ------------------
-# This should be the last step to optimize docker image caching.
-ARG MONOREPO_REVISION
-RUN echo "monorepo-server-ce,$MONOREPO_REVISION" > /var/www/revisions.txt

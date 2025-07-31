@@ -166,7 +166,7 @@ export const setCursorHighlights = (
 
 class CursorMarker extends RectangleMarker {
   constructor(
-    private highlight: Highlight,
+    public highlight: Highlight,
     className: string,
     left: number,
     top: number,
@@ -180,6 +180,18 @@ class CursorMarker extends RectangleMarker {
     const element = super.draw()
     element.style.setProperty('--hue', String(this.highlight.hue))
     return element
+  }
+
+  update(element: HTMLDivElement, prev: CursorMarker) {
+    if (!super.update(element, prev)) {
+      return false
+    }
+    element.style.setProperty('--hue', String(this.highlight.hue))
+    return true
+  }
+
+  eq(other: CursorMarker) {
+    return super.eq(other) && this.highlight.hue === other.highlight.hue
   }
 }
 

@@ -36,7 +36,22 @@ function send401WithChallenge(res) {
 function checkCredentials(userDetailsMap, user, password) {
   const expectedPassword = userDetailsMap.get(user)
   const userExists = userDetailsMap.has(user) && expectedPassword // user exists with a non-null password
-  const isValid = userExists && tsscmp(expectedPassword, password)
+
+  let isValid = false
+  if (userExists) {
+    if (Array.isArray(expectedPassword)) {
+      const isValidPrimary = Boolean(
+        expectedPassword[0] && tsscmp(expectedPassword[0], password)
+      )
+      const isValidFallback = Boolean(
+        expectedPassword[1] && tsscmp(expectedPassword[1], password)
+      )
+      isValid = isValidPrimary || isValidFallback
+    } else {
+      isValid = tsscmp(expectedPassword, password)
+    }
+  }
+
   if (!isValid) {
     logger.err({ user }, 'invalid login details')
   }

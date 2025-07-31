@@ -1,3 +1,5 @@
+// @ts-check
+
 const fs = require('fs')
 const Path = require('path')
 const { promisify, callbackify } = require('util')
@@ -6,11 +8,17 @@ const Views = require('./Views')
 const _ = require('lodash')
 const Metrics = require('@overleaf/metrics')
 
+/** @import { WebModule } from "../../../types/web-module" */
+/** @import { RequestHandler } from "express" */
+
 const MODULE_BASE_PATH = Path.join(__dirname, '/../../../modules')
 
+/** @type {WebModule[]} */
 const _modules = []
 let _modulesLoaded = false
 const _hooks = {}
+
+/** @type {Record<string, RequestHandler[]>} */
 const _middleware = {}
 let _viewIncludes = {}
 
@@ -26,29 +34,19 @@ async function modules() {
 }
 
 async function loadModulesImpl() {
-  const settingsCheckModuleCjs = Path.join(
-    MODULE_BASE_PATH,
-    'settings-check',
-    'index.js'
-  )
-  const settingsCheckModuleEsm = Path.join(
+  const settingsCheckModule = Path.join(
     MODULE_BASE_PATH,
     'settings-check',
     'index.mjs'
   )
-  if (fs.existsSync(settingsCheckModuleCjs)) {
-    await import(settingsCheckModuleCjs)
-  } else if (fs.existsSync(settingsCheckModuleEsm)) {
-    await import(settingsCheckModuleEsm)
+  if (fs.existsSync(settingsCheckModule)) {
+    await import(settingsCheckModule)
   }
   for (const moduleName of Settings.moduleImportSequence || []) {
-    let path
-    if (fs.existsSync(Path.join(MODULE_BASE_PATH, moduleName, 'index.mjs'))) {
-      path = Path.join(MODULE_BASE_PATH, moduleName, 'index.mjs')
-    } else {
-      path = Path.join(MODULE_BASE_PATH, moduleName, 'index.js')
-    }
-    const module = await import(path)
+    const module = await import(
+      Path.join(MODULE_BASE_PATH, moduleName, 'index.mjs')
+    )
+    /** @type {WebModule & {name: string}} */
     const loadedModule = module.default || module
 
     loadedModule.name = moduleName
@@ -152,8 +150,7 @@ async function linkedFileAgentsIncludes() {
 async function attachHooks() {
   for (const module of await modules()) {
     const { promises, ...hooks } = module.hooks || {}
-    for (const hook in promises || {}) {
-      const method = promises[hook]
+    for (const [hook, method] of Object.entries(promises || {})) {
       attachHook(hook, method)
     }
     for (const hook in hooks || {}) {
@@ -172,12 +169,14 @@ function attachHook(name, method) {
 
 async function attachMiddleware() {
   for (const module of await modules()) {
-    for (const middleware in module.middleware || {}) {
-      const method = module.middleware[middleware]
-      if (_middleware[middleware] == null) {
-        _middleware[middleware] = []
+    if (module.middleware) {
+      for (const middleware in module.middleware) {
+        const method = module.middleware[middleware]
+        if (_middleware[middleware] == null) {
+          _middleware[middleware] = []
+        }
+        _middleware[middleware].push(method)
       }
-      _middleware[middleware].push(method)
     }
   }
 }
@@ -197,6 +196,9 @@ async function fireHook(name, ...args) {
   return results
 }
 
+/**
+ * @param {string} name
+ */
 async function getMiddleware(name) {
   // ensure that modules are loaded if we need to call a middleware
   if (!_modulesLoaded) {

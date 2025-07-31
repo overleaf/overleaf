@@ -26,27 +26,27 @@ export const WordCounts: FC<{
 
       <Row>
         <Col xs={4}>
-          <div className="pull-right">{t('total_words')}:</div>
+          <div className="float-end">{t('total_words')}:</div>
         </Col>
         <Col xs={6}>{data.textWords}</Col>
       </Row>
       <Row>
         <Col xs={4}>
-          <div className="pull-right">{t('headers')}:</div>
+          <div className="float-end">{t('headers')}:</div>
         </Col>
         <Col xs={6}>{data.headers}</Col>
       </Row>
 
       <Row>
         <Col xs={4}>
-          <div className="pull-right">{t('math_inline')}:</div>
+          <div className="float-end">{t('math_inline')}:</div>
         </Col>
         <Col xs={6}>{data.mathInline}</Col>
       </Row>
 
       <Row>
         <Col xs={4}>
-          <div className="pull-right">{t('math_display')}:</div>
+          <div className="float-end">{t('math_display')}:</div>
         </Col>
         <Col xs={6}>{data.mathDisplay}</Col>
       </Row>

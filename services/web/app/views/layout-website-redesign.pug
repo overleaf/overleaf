@@ -6,22 +6,35 @@ include ./_mixins/bootstrap_js
 block entrypointVar
 	- entrypoint = 'marketing'
 
+block append meta
+	meta(name='ol-shouldLoadHotjar' data-type='boolean' content=shouldLoadHotjar)
+
 block body
-	if (typeof(suppressNavbar) == "undefined")
-		include layout/navbar-website-redesign
+	if typeof suppressNavbar == 'undefined'
+		if bootstrapVersion === 5
+			include layout/navbar-marketing-bootstrap-5
+		else
+			include layout/navbar-website-redesign
 
 	block content
 
-	if (typeof(suppressFooter) == "undefined")
+	if typeof suppressFooter == 'undefined'
 		if showThinFooter
-			include layout/thin-footer
+			if bootstrapVersion === 5
+				include layout/thin-footer-bootstrap-5
+			else
+				include layout/thin-footer
 		else
 			include layout/fat-footer-website-redesign
 
-	if (typeof(suppressCookieBanner) == 'undefined')
+	if typeof suppressPugCookieBanner == 'undefined'
 		include _cookie_banner
 
-	!= moduleIncludes("contactModal-marketing", locals)
+	block contactModal
+		if bootstrapVersion === 5
+			!= moduleIncludes('contactModal-marketing-bootstrap-5', locals)
+		else
+			!= moduleIncludes('contactModal-marketing', locals)
 
 block prepend foot-scripts
 	+bootstrap-js(bootstrapVersion)

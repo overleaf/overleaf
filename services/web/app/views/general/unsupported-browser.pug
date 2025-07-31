@@ -1,11 +1,11 @@
 extends ../layout/layout-no-js
 
 block vars
-	- metadata = { title: 'Unsupported browser' }
+	- metadata = {title: 'Unsupported browser'}
 
 block body
 	body.full-height
-		main.content.content-alt.full-height#main-content
+		main#main-content.content.content-alt.full-height
 			.container.full-height
 				.error-container.full-height
 					.error-details
@@ -15,7 +15,7 @@ block body
 							br
 							| If you think you're seeing this message in error,
 							|
-							a(href="mailto:" + settings.adminEmail) please let us know
+							a(href='mailto:' + settings.adminEmail target='_blank') please let us know
 							| .
 
 						if fromURL
@@ -33,7 +33,7 @@ block body
 						p
 							| Support for beta or developer-preview browser versions cannot be guaranteed. Please
 							|
-							a(href="mailto:" + settings.adminEmail) get in touch
+							a(href='mailto:' + settings.adminEmail target='_blank') get in touch
 							|
 							| if you encounter any issues while using the service with beta or developer-preview releases of supported browsers.
 						p
@@ -41,5 +41,5 @@ block body
 						p
 							| If you cannot upgrade to one of the supported browsers,
 							|
-							a(href="mailto:" + settings.adminEmail) please let us know
+							a(href='mailto:' + settings.adminEmail target='_blank') please let us know
 							| .

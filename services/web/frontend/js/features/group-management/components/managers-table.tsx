@@ -153,7 +153,7 @@ export function ManagersTable({
               className="page-header mb-4"
               data-testid="page-header-members-details"
             >
-              <div className="pull-right">
+              <div className="float-end">
                 {removeMemberInflightCount > 0 ? (
                   <OLButton variant="danger" disabled>
                     {t('removing')}&hellip;

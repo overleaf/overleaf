@@ -1,6 +1,7 @@
 import React, { useState, useCallback } from 'react'
 import ToolbarHeader from './toolbar-header'
 import { useEditorContext } from '../../../shared/context/editor-context'
+import { useIdeReactContext } from '@/features/ide-react/context/ide-react-context'
 import { useChatContext } from '../../chat/context/chat-context'
 import { useLayoutContext } from '../../../shared/context/layout-context'
 import { useProjectContext } from '../../../shared/context/project-context'
@@ -27,12 +28,10 @@ const EditorNavigationToolbarRoot = React.memo(
       features: { trackChangesVisible },
     } = useProjectContext()
 
-    const {
-      cobranding,
-      isRestrictedTokenMember,
-      renameProject,
-      permissionsLevel,
-    } = useEditorContext()
+    const { cobranding, isRestrictedTokenMember, renameProject } =
+      useEditorContext()
+
+    const { permissionsLevel } = useIdeReactContext()
 
     const {
       chatIsOpen,

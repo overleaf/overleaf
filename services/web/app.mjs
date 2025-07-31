@@ -56,14 +56,8 @@ if (Settings.catchErrors) {
 // Create ./data/dumpFolder if needed
 FileWriter.ensureDumpFolderExists()
 
-if (
-  !Features.hasFeature('project-history-blobs') &&
-  !Features.hasFeature('filestore')
-) {
-  throw new Error(
-    'invalid config: must enable either project-history-blobs (Settings.enableProjectHistoryBlobs=true) or enable filestore (Settings.disableFilestore=false)'
-  )
-}
+// Validate combination of feature flags.
+Features.validateSettings()
 
 // handle SIGTERM for graceful shutdown in kubernetes
 process.on('SIGTERM', function (signal) {

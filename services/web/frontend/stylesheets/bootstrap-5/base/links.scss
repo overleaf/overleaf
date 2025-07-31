@@ -30,10 +30,10 @@ a {
   @include font-mono;
 
   font-weight: 500;
-  color: var(--green-50);
+  color: var(--link-web);
 
   &:hover {
-    color: var(--green-60);
+    color: var(--link-web-hover);
   }
 }
 

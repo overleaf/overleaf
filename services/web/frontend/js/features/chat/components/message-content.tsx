@@ -34,7 +34,7 @@ const MessageContent: FC<{ content: string }> = ({ content }) => {
   }, [content, mounted])
 
   return (
-    <p ref={root}>
+    <p ref={root} translate="no">
       <Linkify>{content}</Linkify>
     </p>
   )

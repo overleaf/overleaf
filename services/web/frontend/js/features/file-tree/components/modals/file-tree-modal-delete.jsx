@@ -9,6 +9,7 @@ import OLModal, {
 } from '@/features/ui/components/ol/ol-modal'
 import OLButton from '@/features/ui/components/ol/ol-button'
 import OLNotification from '@/features/ui/components/ol/ol-notification'
+import { useFileTreeSelectable } from '../../contexts/file-tree-selectable'
 
 function FileTreeModalDelete() {
   const { t } = useTranslation()
@@ -22,6 +23,8 @@ function FileTreeModalDelete() {
     error,
   } = useFileTreeActionable()
 
+  const { select } = useFileTreeSelectable()
+
   if (!isDeleting) return null // the modal will not be rendered; return early
 
   function handleHide() {
@@ -29,6 +32,7 @@ function FileTreeModalDelete() {
   }
 
   function handleDelete() {
+    select([])
     finishDeleting()
   }
 

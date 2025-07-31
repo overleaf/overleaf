@@ -1,3 +1,5 @@
+import logger from '@overleaf/logger'
+import sinon from 'sinon'
 import User from './helpers/User.mjs'
 import Subscription from './helpers/Subscription.mjs'
 import request from './helpers/request.js'
@@ -18,6 +20,8 @@ let MockDocstoreApi,
   MockGitBridgeApi,
   MockHistoryBackupDeletionApi
 
+let spy
+
 before(function () {
   MockDocstoreApi = MockDocstoreApiClass.instance()
   MockFilestoreApi = MockFilestoreApiClass.instance()
@@ -28,6 +32,7 @@ before(function () {
 
 describe('Deleting a user', function () {
   beforeEach(function (done) {
+    spy = sinon.spy(logger, 'info')
     async.auto(
       {
         user: cb => {
@@ -62,6 +67,10 @@ describe('Deleting a user', function () {
         done()
       }
     )
+  })
+
+  afterEach(function () {
+    spy.restore()
   })
 
   it('Should remove the user from active users', function (done) {
@@ -183,6 +192,7 @@ describe('Deleting a user', function () {
 
 describe('Deleting a project', function () {
   beforeEach(function (done) {
+    spy = sinon.spy(logger, 'info')
     this.user = new User()
     this.projectName = 'wombat'
     this.user.ensureUserExists(() => {
@@ -193,6 +203,10 @@ describe('Deleting a project', function () {
         })
       })
     })
+  })
+
+  afterEach(function () {
+    logger.info.restore()
   })
 
   it('Should remove the project from active projects', function (done) {
@@ -290,6 +304,28 @@ describe('Deleting a project', function () {
           }
           done()
         })
+      })
+
+      it('Should log a successful deletion', function (done) {
+        request.post(
+          `/internal/project/${this.projectId}/expire-deleted-project`,
+          {
+            auth: {
+              user: settings.apis.web.user,
+              pass: settings.apis.web.pass,
+              sendImmediately: true,
+            },
+          },
+          (error, res) => {
+            expect(error).not.to.exist
+            expect(res.statusCode).to.equal(200)
+            expect(spy).to.have.been.calledWithMatch(
+              { projectId: this.projectId, userId: this.user._id },
+              'expired deleted project successfully'
+            )
+            done()
+          }
+        )
       })
 
       it('Should destroy the docs', function (done) {

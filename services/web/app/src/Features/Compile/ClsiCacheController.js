@@ -11,6 +11,8 @@ const CompileController = require('./CompileController')
 const { expressify } = require('@overleaf/promise-utils')
 const ClsiCacheHandler = require('./ClsiCacheHandler')
 const ProjectGetter = require('../Project/ProjectGetter')
+const { MeteredStream } = require('@overleaf/stream-utils')
+const Metrics = require('@overleaf/metrics')
 
 /**
  * Download a file from a specific build on the clsi-cache.
@@ -64,7 +66,13 @@ async function downloadFromCache(req, res) {
   )
   try {
     res.writeHead(response.status)
-    await pipeline(stream, res)
+    await pipeline(
+      stream,
+      new MeteredStream(Metrics, 'clsi_cache_egress', {
+        path: ClsiCacheHandler.getEgressLabel(filename),
+      }),
+      res
+    )
   } catch (err) {
     const reqAborted = Boolean(req.destroyed)
     const streamingStarted = Boolean(res.headersSent)

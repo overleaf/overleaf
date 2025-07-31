@@ -1,5 +1,6 @@
 import { EditorView, WidgetType } from '@codemirror/view'
 import { SyntaxNode } from '@lezer/common'
+import { materialIcon } from '@/features/utils/material-icon'
 
 export class TableRenderingErrorWidget extends WidgetType {
   private hasTableNode: boolean
@@ -14,11 +15,7 @@ export class TableRenderingErrorWidget extends WidgetType {
     warning.role = 'alert'
     const icon = document.createElement('div')
     icon.classList.add('notification-icon')
-    const iconType = document.createElement('span')
-    iconType.classList.add('material-symbols')
-    iconType.setAttribute('aria-hidden', 'true')
-    iconType.textContent = 'info'
-    icon.appendChild(iconType)
+    icon.appendChild(materialIcon('info'))
     warning.appendChild(icon)
     const messageWrapper = document.createElement('div')
     messageWrapper.classList.add('notification-content-and-cta')

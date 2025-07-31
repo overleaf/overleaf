@@ -14,7 +14,7 @@ import * as eventTracking from '@/infrastructure/event-tracking'
 import { isValidTeXFile } from '@/main/is-valid-tex-file'
 import localStorage from '@/infrastructure/local-storage'
 import { useProjectContext } from '@/shared/context/project-context'
-import { useEditorManagerContext } from '@/features/ide-react/context/editor-manager-context'
+import { useEditorOpenDocContext } from '@/features/ide-react/context/editor-open-doc-context'
 
 export type PartialFlatOutline = {
   level: number
@@ -118,13 +118,13 @@ export const OutlineProvider: FC<React.PropsWithChildren> = ({ children }) => {
     [flatOutline, currentlyHighlightedLine]
   )
 
-  const { openDocName } = useEditorManagerContext()
+  const { openDocName } = useEditorOpenDocContext()
   const isTexFile = useMemo(
     () => (openDocName ? isValidTeXFile(openDocName) : false),
     [openDocName]
   )
 
-  const { _id: projectId } = useProjectContext()
+  const { projectId } = useProjectContext()
   const storageKey = `file_outline.expanded.${projectId}`
 
   const [outlineExpanded, setOutlineExpanded] = useState(

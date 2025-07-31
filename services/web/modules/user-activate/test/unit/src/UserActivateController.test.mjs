@@ -77,38 +77,39 @@ describe('UserActivateController', function () {
 
     it('should 404 without a user_id', async function (ctx) {
       delete ctx.req.query.user_id
-      return new Promise(resolve => {
+
+      await new Promise(resolve => {
         ctx.ErrorController.notFound = () => resolve()
         ctx.UserActivateController.activateAccountPage(ctx.req, ctx.res)
       })
     })
 
-    it('should 404 without a token', function (ctx) {
-      return new Promise(resolve => {
+    it('should 404 without a token', async function (ctx) {
+      await new Promise(resolve => {
         delete ctx.req.query.token
         ctx.ErrorController.notFound = resolve
         ctx.UserActivateController.activateAccountPage(ctx.req, ctx.res)
       })
     })
 
-    it('should 404 without a valid user_id', function (ctx) {
-      return new Promise(resolve => {
+    it('should 404 without a valid user_id', async function (ctx) {
+      await new Promise(resolve => {
         ctx.UserGetter.promises.getUser = sinon.stub().resolves(null)
         ctx.ErrorController.notFound = resolve
         ctx.UserActivateController.activateAccountPage(ctx.req, ctx.res)
       })
     })
 
-    it('should 403 for complex user_id', function (ctx) {
-      return new Promise(resolve => {
+    it('should 403 for complex user_id', async function (ctx) {
+      await new Promise(resolve => {
         ctx.ErrorController.forbidden = resolve
         ctx.req.query.user_id = { first_name: 'X' }
         ctx.UserActivateController.activateAccountPage(ctx.req, ctx.res)
       })
     })
 
-    it('should redirect activated users to login', function (ctx) {
-      return new Promise(resolve => {
+    it('should redirect activated users to login', async function (ctx) {
+      await new Promise(resolve => {
         ctx.user.loginCount = 1
         ctx.res.redirect = url => {
           sinon.assert.calledWith(ctx.UserGetter.promises.getUser, ctx.user_id)
@@ -119,8 +120,8 @@ describe('UserActivateController', function () {
       })
     })
 
-    it('render the activation page if the user has not logged in before', function (ctx) {
-      return new Promise(resolve => {
+    it('render the activation page if the user has not logged in before', async function (ctx) {
+      await new Promise(resolve => {
         ctx.user.loginCount = 0
         ctx.res.render = (page, opts) => {
           page.should.equal(VIEW_PATH)

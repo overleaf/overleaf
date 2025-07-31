@@ -8,6 +8,7 @@ function _canHaveNoIpAddressId(operation, info) {
   if (operation === 'must-reset-password-set') return true
   if (operation === 'remove-email' && info.script) return true
   if (operation === 'release-managed-user' && info.script) return true
+  if (operation === 'unlink-dropbox' && info.batch) return true
   return false
 }
 

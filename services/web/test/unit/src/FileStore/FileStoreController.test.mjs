@@ -214,8 +214,8 @@ describe('FileStoreController', function () {
       ctx.ProjectLocator.promises.findElement.resolves({ element: ctx.file })
     })
 
-    it('reports the file size', function (ctx) {
-      return new Promise(resolve => {
+    it('reports the file size', async function (ctx) {
+      await new Promise(resolve => {
         const expectedFileSize = 99393
         ctx.FileStoreHandler.promises.getFileSize.rejects(
           new Error('getFileSize: unexpected arguments')
@@ -237,8 +237,8 @@ describe('FileStoreController', function () {
       })
     })
 
-    it('returns 404 on NotFoundError', function (ctx) {
-      return new Promise(resolve => {
+    it('returns 404 on NotFoundError', async function (ctx) {
+      await new Promise(resolve => {
         ctx.FileStoreHandler.promises.getFileSize.rejects(
           new Errors.NotFoundError()
         )

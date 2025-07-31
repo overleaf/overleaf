@@ -30,8 +30,8 @@ describe('Project api controller', function () {
   })
 
   describe('getProjectDetails', function () {
-    it('should ask the project details handler for proj details', function (ctx) {
-      return new Promise(resolve => {
+    it('should ask the project details handler for proj details', async function (ctx) {
+      await new Promise(resolve => {
         ctx.ProjectDetailsHandler.getDetails.callsArgWith(
           1,
           null,

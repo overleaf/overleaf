@@ -89,7 +89,11 @@ function ErrorLogs() {
           {entries && (
             <PdfLogsEntries
               entries={entries}
-              hasErrors={includeErrors && entries.length > 0}
+              hasErrors={
+                includeErrors &&
+                logEntries?.errors &&
+                logEntries?.errors.length > 0
+              }
             />
           )}
 

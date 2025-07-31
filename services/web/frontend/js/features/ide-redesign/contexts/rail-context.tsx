@@ -1,6 +1,6 @@
 import { sendSearchEvent } from '@/features/event-tracking/search-events'
-import useCollapsiblePanel from '@/features/ide-react/hooks/use-collapsible-panel'
 import useEventListener from '@/shared/hooks/use-event-listener'
+import usePersistedState from '@/shared/hooks/use-persisted-state'
 import { isMac } from '@/shared/utils/os'
 import {
   createContext,
@@ -9,6 +9,7 @@ import {
   SetStateAction,
   useCallback,
   useContext,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -44,7 +45,7 @@ const RailContext = createContext<
 >(undefined)
 
 export const RailProvider: FC<React.PropsWithChildren> = ({ children }) => {
-  const [isOpen, setIsOpen] = useState(true)
+  const [isOpen, setIsOpen] = usePersistedState('rail-is-open', true)
   const [resizing, setResizing] = useState(false)
   const [activeModal, setActiveModalInternal] = useState<RailModalKey | null>(
     null
@@ -55,23 +56,36 @@ export const RailProvider: FC<React.PropsWithChildren> = ({ children }) => {
     }, [])
 
   const panelRef = useRef<ImperativePanelHandle>(null)
-  useCollapsiblePanel(isOpen, panelRef)
 
   const togglePane = useCallback(() => {
     setIsOpen(value => !value)
-  }, [])
+  }, [setIsOpen])
 
   const handlePaneExpand = useCallback(() => {
     setIsOpen(true)
-  }, [])
+  }, [setIsOpen])
 
   const handlePaneCollapse = useCallback(() => {
     setIsOpen(false)
-  }, [])
+  }, [setIsOpen])
 
-  // NOTE: The file tree **MUST** be the first tab to be opened
-  //       since it is responsible for opening the initial document.
-  const [selectedTab, setSelectedTab] = useState<RailTabKey>('file-tree')
+  const [selectedTab, setSelectedTab] = usePersistedState<RailTabKey>(
+    'selected-rail-tab',
+    'file-tree'
+  )
+
+  // Keep the panel collapse/expanded state in sync with isOpen and selectedTab
+  useLayoutEffect(() => {
+    const panelHandle = panelRef.current
+
+    if (panelHandle) {
+      if (isOpen) {
+        panelHandle.expand()
+      } else {
+        panelHandle.collapse()
+      }
+    }
+  }, [isOpen, selectedTab])
 
   const openTab = useCallback(
     (tab: RailTabKey) => {

@@ -25,6 +25,7 @@ function getFile(req, res, next) {
     format,
     style,
   }
+  if (req.useSubdirectories) options.useSubdirectories = true
 
   metrics.inc('getFile')
   req.requestLogger.setMessage('getting file')

@@ -264,8 +264,8 @@ describe('ProjectUploadController', function () {
     })
 
     describe('with folder structure', function () {
-      beforeEach(function (ctx) {
-        return new Promise(resolve => {
+      beforeEach(async function (ctx) {
+        await new Promise(resolve => {
           ctx.entity = {
             _id: '1234',
             type: 'file',

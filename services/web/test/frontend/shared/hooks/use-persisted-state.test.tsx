@@ -22,7 +22,7 @@ describe('usePersistedState', function () {
     expect(window.Storage.prototype.setItem).to.have.callCount(1)
 
     const Test = () => {
-      const [value] = usePersistedState(key)
+      const [value] = usePersistedState<string>(key)
 
       return <div>{value}</div>
     }
@@ -139,6 +139,35 @@ describe('usePersistedState', function () {
     expect(localStorage.getItem(key)).to.equal('foobar')
   })
 
+  it('converts persisted value (string to boolean)', function () {
+    const key = 'test:convert'
+    localStorage.setItem(key, 'yep')
+
+    const Test = () => {
+      const [value, setValue] = usePersistedState(key, true, {
+        converter: {
+          toPersisted(value) {
+            return value ? 'yep' : 'nope'
+          },
+          fromPersisted(persistedValue) {
+            return persistedValue === 'yep'
+          },
+        },
+      })
+
+      useEffect(() => {
+        setValue(false)
+      }, [setValue])
+
+      return <div>{String(value)}</div>
+    }
+
+    render(<Test />)
+
+    screen.getByText('false')
+    expect(localStorage.getItem(key)).to.equal('nope')
+  })
+
   it('handles syncing values via storage event', async function () {
     const key = 'test:sync'
     localStorage.setItem(key, 'foo')
@@ -149,7 +178,7 @@ describe('usePersistedState', function () {
     window.addEventListener('storage', storageEventListener)
 
     const Test = () => {
-      const [value, setValue] = usePersistedState(key, 'bar', true)
+      const [value, setValue] = usePersistedState(key, 'bar', { listen: true })
 
       useEffect(() => {
         setValue('baz')

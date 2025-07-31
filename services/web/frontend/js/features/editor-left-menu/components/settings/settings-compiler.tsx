@@ -34,6 +34,7 @@ export default function SettingsCompiler() {
       ]}
       label={t('compiler')}
       name="compiler"
+      translateOptions="no"
     />
   )
 }

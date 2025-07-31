@@ -23,12 +23,7 @@ export default function WelcomeMessageLink({
         rel="noopener"
       >
         <p>{title}</p>
-        <img
-          className="welcome-message-card-img"
-          src={imgSrc}
-          alt={title}
-          aria-hidden="true"
-        />
+        <img className="welcome-message-card-img" src={imgSrc} alt="" />
       </a>
     </div>
   )

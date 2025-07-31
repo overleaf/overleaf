@@ -2,11 +2,13 @@ import type { DefaultNavbarMetadata } from '@/features/ui/components/types/defau
 import getMeta from '@/utils/meta'
 
 export default function HeaderLogoOrTitle({
+  overleafLogo,
   customLogo,
   title,
-}: Pick<DefaultNavbarMetadata, 'customLogo' | 'title'>) {
+}: Pick<DefaultNavbarMetadata, 'customLogo' | 'title'> & {
+  overleafLogo?: string
+}) {
   const { appName } = getMeta('ol-ExposedSettings')
-
   if (customLogo) {
     return (
       // eslint-disable-next-line jsx-a11y/anchor-has-content
@@ -24,9 +26,16 @@ export default function HeaderLogoOrTitle({
       </a>
     )
   } else {
+    const style = overleafLogo
+      ? {
+          style: {
+            backgroundImage: `url("${overleafLogo}")`,
+          },
+        }
+      : null
     return (
       // eslint-disable-next-line jsx-a11y/anchor-has-content
-      <a href="/" aria-label={appName} className="navbar-brand" />
+      <a href="/" aria-label={appName} className="navbar-brand" {...style} />
     )
   }
 }

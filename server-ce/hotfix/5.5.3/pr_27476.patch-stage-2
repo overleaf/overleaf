@@ -1,0 +1,165 @@
+diff --git a/services/web/app/src/Features/Collaborators/OwnershipTransferHandler.js b/services/web/app/src/Features/Collaborators/OwnershipTransferHandler.js
+index e22818ebb880..81ec5ccb0aa5 100644
+--- a/services/web/app/src/Features/Collaborators/OwnershipTransferHandler.js
++++ b/services/web/app/src/Features/Collaborators/OwnershipTransferHandler.js
+@@ -9,9 +9,75 @@ const PrivilegeLevels = require('../Authorization/PrivilegeLevels')
+ const TpdsProjectFlusher = require('../ThirdPartyDataStore/TpdsProjectFlusher')
+ const ProjectAuditLogHandler = require('../Project/ProjectAuditLogHandler')
+ const AnalyticsManager = require('../Analytics/AnalyticsManager')
++const OError = require('@overleaf/o-error')
++const TagsHandler = require('../Tags/TagsHandler')
++const { promiseMapWithLimit } = require('@overleaf/promise-utils')
+
+ module.exports = {
+-  promises: { transferOwnership },
++  promises: {
++    transferOwnership,
++    transferAllProjectsToUser,
++  },
++}
++
++const TAG_COLOR_BLUE = '#434AF0'
++
++/**
++ * @param {string} fromUserId
++ * @param {string} toUserId
++ * @param {string} ipAddress
++ * @return {Promise<{projectCount: number, newTagName: string}>}
++ */
++async function transferAllProjectsToUser({ fromUserId, toUserId, ipAddress }) {
++  // - Verify that both users exist
++  const fromUser = await UserGetter.promises.getUser(fromUserId, {
++    _id: 1,
++    email: 1,
++  })
++  const toUser = await UserGetter.promises.getUser(toUserId, { _id: 1 })
++  if (!fromUser) throw new OError('missing source user', { fromUserId })
++  if (!toUser) throw new OError('missing destination user', { toUserId })
++  if (fromUser._id.equals(toUser._id))
++    throw new OError('rejecting transfer between identical users', {
++      fromUserId,
++      toUserId,
++    })
++  logger.debug(
++    { fromUserId, toUserId },
++    'started bulk transfer of all projects from one user to another'
++  )
++  // - Get all owned projects for fromUserId
++  const projects = await Project.find({ owner_ref: fromUserId }, { _id: 1 })
++
++  // - Create new tag on toUserId
++  const newTag = await TagsHandler.promises.createTag(
++    toUserId,
++    `transferred-from-${fromUser.email}`,
++    TAG_COLOR_BLUE,
++    { truncate: true }
++  )
++
++  // - Add tag to projects (can happen before ownership is transferred)
++  await TagsHandler.promises.addProjectsToTag(
++    toUserId,
++    newTag._id,
++    projects.map(p => p._id)
++  )
++
++  // - Transfer all projects
++  await promiseMapWithLimit(5, projects, async project => {
++    await transferOwnership(project._id, toUserId, {
++      allowTransferToNonCollaborators: true,
++      skipEmails: true,
++      ipAddress,
++    })
++  })
++
++  logger.debug(
++    { fromUserId, toUserId },
++    'finished bulk transfer of all projects from one user to another'
++  )
++  return { projectCount: projects.length, newTagName: newTag.name }
+ }
+
+ async function transferOwnership(projectId, newOwnerId, options = {}) {
+@@ -74,8 +140,8 @@ async function transferOwnership(projectId, newOwnerId, options = {}) {
+   await TpdsProjectFlusher.promises.flushProjectToTpds(projectId)
+
+   // Send confirmation emails
+-  const previousOwner = await UserGetter.promises.getUser(previousOwnerId)
+   if (!skipEmails) {
++    const previousOwner = await UserGetter.promises.getUser(previousOwnerId)
+     await _sendEmails(project, previousOwner, newOwner)
+   }
+ }
+diff --git a/services/web/modules/server-ce-scripts/scripts/transfer-all-projects-to-user.mjs b/services/web/modules/server-ce-scripts/scripts/transfer-all-projects-to-user.mjs
+new file mode 100644
+index 000000000000..6ff1215de53b
+--- /dev/null
++++ b/services/web/modules/server-ce-scripts/scripts/transfer-all-projects-to-user.mjs
+@@ -0,0 +1,46 @@
++import { ObjectId } from 'mongodb'
++import minimist from 'minimist'
++import OwnershipTransferHandler from '../../../app/src/Features/Collaborators/OwnershipTransferHandler.js'
++import UserGetter from '../../../app/src/Features/User/UserGetter.js'
++import EmailHelper from '../../../app/src/Features/Helpers/EmailHelper.js'
++
++const args = minimist(process.argv.slice(2), {
++  string: ['from-user', 'to-user'],
++})
++
++/**
++ * @param {string} flag
++ * @return {Promise<string>}
++ */
++async function resolveUser(flag) {
++  const raw = args[flag]
++  if (!raw) throw new Error(`missing parameter --${flag}`)
++  if (ObjectId.isValid(raw)) return raw
++  const email = EmailHelper.parseEmail(raw)
++  if (!email) throw new Error(`invalid email --${flag}=${raw}`)
++  const user = await UserGetter.promises.getUser({ email: email }, { _id: 1 })
++  if (!user)
++    throw new Error(`user with email --${flag}=${email} does not exist`)
++  return user._id.toString()
++}
++
++async function main() {
++  const fromUserId = await resolveUser('from-user')
++  const toUserId = await resolveUser('to-user')
++  await OwnershipTransferHandler.promises.transferAllProjectsToUser({
++    fromUserId,
++    toUserId,
++    ipAddress: '0.0.0.0',
++  })
++}
++
++main()
++  .then(() => {
++    console.error('Done.')
++    process.exit(0)
++  })
++  .catch(err => {
++    console.error('---')
++    console.error(err)
++    process.exit(1)
++  })
+
+
+diff --git a/services/web/modules/server-ce-scripts/scripts/transfer-all-projects-to-user.mjs b/services/web/modules/server-ce-scripts/scripts/transfer-all-projects-to-user.mjs
+index 6ff1215de53b..8c5951334403 100644
+--- a/services/web/modules/server-ce-scripts/scripts/transfer-all-projects-to-user.mjs
++++ b/services/web/modules/server-ce-scripts/scripts/transfer-all-projects-to-user.mjs
+@@ -1,4 +1,4 @@
+-import { ObjectId } from 'mongodb'
++import { ObjectId } from '../../../app/src/infrastructure/mongodb.js'
+ import minimist from 'minimist'
+ import OwnershipTransferHandler from '../../../app/src/Features/Collaborators/OwnershipTransferHandler.js'
+ import UserGetter from '../../../app/src/Features/User/UserGetter.js'
+@@ -18,7 +18,7 @@ async function resolveUser(flag) {
+   if (ObjectId.isValid(raw)) return raw
+   const email = EmailHelper.parseEmail(raw)
+   if (!email) throw new Error(`invalid email --${flag}=${raw}`)
+-  const user = await UserGetter.promises.getUser({ email: email }, { _id: 1 })
++  const user = await UserGetter.promises.getUser({ email }, { _id: 1 })
+   if (!user)
+     throw new Error(`user with email --${flag}=${email} does not exist`)
+   return user._id.toString()
+

@@ -3,15 +3,17 @@ import ViewOnlyAccessModalContent from './view-only-access-modal-content'
 import customLocalStorage from '@/infrastructure/local-storage'
 import { useProjectContext } from '@/shared/context/project-context'
 import { useEditorContext } from '@/shared/context/editor-context'
+import { useIdeReactContext } from '@/features/ide-react/context/ide-react-context'
 import { sendMB } from '@/infrastructure/event-tracking'
 import OLModal from '@/features/ui/components/ol/ol-modal'
 
 const ViewOnlyAccessModal = () => {
   const [show, setShow] = useState(false)
 
-  const { isProjectOwner, isPendingEditor, permissionsLevel } =
-    useEditorContext()
-  const { members, features, _id: projectId } = useProjectContext()
+  const { isProjectOwner, isPendingEditor } = useEditorContext()
+  const { permissionsLevel } = useIdeReactContext()
+  const { features, projectId, project } = useProjectContext()
+  const members = project?.members
 
   const handleHide = () => {
     setShow(false)

@@ -57,7 +57,11 @@ describe('Templates', () => {
       cy.visit('/')
       createProject(name).as('templateProjectId')
 
-      cy.get('header').findByText('Menu').click()
+      cy.findByRole('navigation', {
+        name: /Project actions/i,
+      })
+        .findByRole('button', { name: /Menu/i })
+        .click()
       cy.findByText('Manage Template').click()
 
       cy.findByText('Template Description')
@@ -136,7 +140,11 @@ describe('Templates', () => {
       cy.get('@templateProjectId').then(projectId =>
         cy.visit(`/project/${projectId}`)
       )
-      cy.get('header').findByText('Menu').click()
+      cy.findByRole('navigation', {
+        name: /Project actions/i,
+      })
+        .findByRole('button', { name: /Menu/i })
+        .click()
       cy.findByText('Manage Template').click()
       cy.findByText('Publish').click()
       cy.findByText('Unpublish', { timeout: 10_000 })
@@ -161,7 +169,11 @@ describe('Templates', () => {
       cy.findByText('Open as Template').click()
       cy.url().should('match', /\/project\/[a-f0-9]{24}$/)
       cy.get('.project-name').findByText(name)
-      cy.get('header').findByText('Menu').click()
+      cy.findByRole('navigation', {
+        name: /Project actions/i,
+      })
+        .findByRole('button', { name: /Menu/i })
+        .click()
       cy.findByText('Word Count') // wait for lazy loading
       cy.findByText('Manage Template').should('not.exist')
 
@@ -180,7 +192,11 @@ describe('Templates', () => {
       cy.get('@templateProjectId').then(projectId =>
         cy.visit(`/project/${projectId}`)
       )
-      cy.get('header').findByText('Menu').click()
+      cy.findByRole('navigation', {
+        name: /Project actions/i,
+      })
+        .findByRole('button', { name: /Menu/i })
+        .click()
       cy.findByText('Manage Template').click()
       cy.findByText('Unpublish')
 
@@ -191,7 +207,11 @@ describe('Templates', () => {
       cy.get('@templateProjectId').then(projectId =>
         cy.visit(`/project/${projectId}`)
       )
-      cy.get('header').findByText('Menu').click()
+      cy.findByRole('navigation', {
+        name: /Project actions/i,
+      })
+        .findByRole('button', { name: /Menu/i })
+        .click()
       cy.findByText('Manage Template').click()
       cy.findByText('Unpublish').click()
       cy.findByText('Publish')
@@ -217,7 +237,11 @@ describe('Templates', () => {
       cy.visit('/')
       createProject('maybe templates')
 
-      cy.get('header').findByText('Menu').click()
+      cy.findByRole('navigation', {
+        name: /Project actions/i,
+      })
+        .findByRole('button', { name: /Menu/i })
+        .click()
       cy.findByText('Word Count') // wait for lazy loading
       cy.findByText('Manage Template').should('not.exist')
 

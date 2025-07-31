@@ -222,7 +222,7 @@ function fileTreeActionableReducer(state: State, action: Action) {
 export const FileTreeActionableProvider: FC<React.PropsWithChildren> = ({
   children,
 }) => {
-  const { _id: projectId } = useProjectContext()
+  const { projectId } = useProjectContext()
   const { fileTreeReadOnly } = useFileTreeData()
   const { indexAllReferences } = useReferencesContext()
   const { write } = usePermissionsContext()

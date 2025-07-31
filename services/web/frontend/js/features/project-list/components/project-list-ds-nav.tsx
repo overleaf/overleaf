@@ -20,6 +20,7 @@ import Footer from '@/features/ui/components/bootstrap-5/footer/footer'
 import SidebarDsNav from '@/features/project-list/components/sidebar/sidebar-ds-nav'
 import SystemMessages from '@/shared/components/system-messages'
 import overleafLogo from '@/shared/svgs/overleaf-a-ds-solution-mallard.svg'
+import CookieBanner from '@/shared/components/cookie-banner'
 
 export function ProjectListDsNav() {
   const navbarProps = getMeta('ol-navbar')
@@ -55,76 +56,81 @@ export function ProjectListDsNav() {
 
   return (
     <div className="project-ds-nav-page website-redesign">
-      <DefaultNavbar {...navbarProps} customLogo={overleafLogo} showCloseIcon />
-      <main className="project-list-wrapper">
+      <SystemMessages />
+      <DefaultNavbar
+        {...navbarProps}
+        overleafLogo={overleafLogo}
+        showCloseIcon
+      />
+      <div className="project-list-wrapper">
         <SidebarDsNav />
         <div className="project-ds-nav-content-and-messages">
           <div className="project-ds-nav-content">
             <div className="project-ds-nav-main">
               {error ? <DashApiError /> : ''}
               <UserNotifications />
-              <div className="project-list-header-row">
-                <ProjectListTitle
-                  filter={filter}
-                  selectedTag={selectedTag}
-                  selectedTagId={selectedTagId}
-                  className="text-truncate d-none d-md-block"
-                />
-                <div className="project-tools">
-                  <div className="d-none d-md-block">
-                    {selectedProjects.length === 0 ? (
+              <main aria-labelledby="main-content">
+                <div className="project-list-header-row">
+                  <ProjectListTitle
+                    filter={filter}
+                    selectedTag={selectedTag}
+                    selectedTagId={selectedTagId}
+                    className="text-truncate d-none d-md-block"
+                  />
+                  <div className="project-tools">
+                    <div className="d-none d-md-block">
+                      {selectedProjects.length === 0 ? (
+                        <CurrentPlanWidget />
+                      ) : (
+                        <ProjectTools />
+                      )}
+                    </div>
+                    <div className="d-md-none">
                       <CurrentPlanWidget />
-                    ) : (
-                      <ProjectTools />
-                    )}
-                  </div>
-                  <div className="d-md-none">
-                    <CurrentPlanWidget />
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div className="project-ds-nav-project-list">
-                <OLRow className="d-none d-md-block">
-                  <OLCol lg={7}>
-                    <SearchForm
-                      inputValue={searchText}
-                      setInputValue={setSearchText}
-                      filter={filter}
-                      selectedTag={selectedTag}
-                    />
-                  </OLCol>
-                </OLRow>
-                <div className="project-list-sidebar-survey-wrapper d-md-none">
-                  {/* Omit the survey card in mobile view for now */}
-                </div>
-                <div className="mt-1 d-md-none">
-                  <div
-                    role="toolbar"
-                    className="projects-toolbar"
-                    aria-label={t('projects')}
-                  >
-                    <ProjectsDropdown />
-                    <SortByDropdown />
+                <div className="project-ds-nav-project-list">
+                  <OLRow className="d-none d-md-block">
+                    <OLCol lg={7}>
+                      <SearchForm
+                        inputValue={searchText}
+                        setInputValue={setSearchText}
+                        filter={filter}
+                        selectedTag={selectedTag}
+                      />
+                    </OLCol>
+                  </OLRow>
+                  <div className="project-list-sidebar-survey-wrapper d-md-none">
+                    {/* Omit the survey card in mobile view for now */}
+                  </div>
+                  <div className="mt-1 d-md-none">
+                    <div
+                      role="toolbar"
+                      className="projects-toolbar"
+                      aria-label={t('projects')}
+                    >
+                      <ProjectsDropdown />
+                      <SortByDropdown />
+                    </div>
+                  </div>
+                  <div className="mt-3">
+                    <TableContainer bordered>
+                      {tableTopArea}
+                      <ProjectListTable />
+                    </TableContainer>
+                  </div>
+                  <div className="mt-3">
+                    <LoadMore />
                   </div>
                 </div>
-                <div className="mt-3">
-                  <TableContainer bordered>
-                    {tableTopArea}
-                    <ProjectListTable />
-                  </TableContainer>
-                </div>
-                <div className="mt-3">
-                  <LoadMore />
-                </div>
-              </div>
+              </main>
             </div>
             <Footer {...footerProps} />
           </div>
-          <div>
-            <SystemMessages />
-          </div>
+          <CookieBanner />
         </div>
-      </main>
+      </div>
     </div>
   )
 }

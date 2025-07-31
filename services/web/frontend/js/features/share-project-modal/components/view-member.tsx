@@ -2,13 +2,9 @@ import MemberPrivileges from './member-privileges'
 import OLRow from '@/features/ui/components/ol/ol-row'
 import OLCol from '@/features/ui/components/ol/ol-col'
 import MaterialIcon from '@/shared/components/material-icon'
-import { ProjectContextMember } from '@/shared/context/types/project-context'
+import { ProjectMember } from '@/shared/context/types/project-metadata'
 
-export default function ViewMember({
-  member,
-}: {
-  member: ProjectContextMember
-}) {
+export default function ViewMember({ member }: { member: ProjectMember }) {
   return (
     <OLRow className="project-member">
       <OLCol xs={8}>

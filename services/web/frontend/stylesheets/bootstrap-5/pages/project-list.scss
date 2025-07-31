@@ -140,15 +140,14 @@
   align-items: center;
   margin-bottom: var(--spacing-05);
   min-height: 36px;
-}
 
-.project-list-title {
-  min-width: 0;
-  color: $content-secondary;
+  .project-list-title {
+    @include heading-sm;
 
-  @include heading-sm;
-
-  font-weight: bold;
+    color: $content-secondary;
+    font-weight: bold;
+    min-width: 0;
+  }
 }
 
 .project-tools {

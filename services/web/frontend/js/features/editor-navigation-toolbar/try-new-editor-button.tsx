@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next'
 const TryNewEditorButton = () => {
   const { t } = useTranslation()
   const { setShowSwitcherModal } = useIdeRedesignSwitcherContext()
+
   const onClick = useCallback(() => {
     setShowSwitcherModal(true)
   }, [setShowSwitcherModal])

@@ -1,7 +1,7 @@
 extends ../layout-marketing
 
 block content
-	main.content#main-content
+	main#main-content.content
 		.container
 			.row
 				.col-lg-8.offset-lg-2.text-center
@@ -10,7 +10,7 @@ block content
 					p
 						if settings.statusPageUrl
 							| #{settings.appName} is currently down for maintenance.
-							| Please check our #[a(href='https://' + settings.statusPageUrl) status page]
+							| Please check our #[a(href=settings.statusPageUrl target='_blank') status page]
 							| for updates.
 						else
 							| #{settings.appName} is currently down for maintenance.

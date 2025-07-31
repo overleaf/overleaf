@@ -1,6 +1,34 @@
 import { EditorSelection, StateEffect } from '@codemirror/state'
 import { EditorView, WidgetType } from '@codemirror/view'
 import { SyntaxNode } from '@lezer/common'
+import { materialIcon } from '@/features/utils/material-icon'
+
+function createIcon({
+  type,
+  accessibilityLabel,
+  className,
+}: {
+  type: string
+  accessibilityLabel: string
+  className?: string
+}) {
+  const docFragment = document.createDocumentFragment()
+
+  const buttonIcon = materialIcon(type)
+  if (className) {
+    buttonIcon.classList.add(className)
+  }
+  docFragment.append(buttonIcon)
+
+  if (accessibilityLabel) {
+    const accessibilityLabelEl = document.createElement('span')
+    accessibilityLabelEl.className = 'visually-hidden'
+    accessibilityLabelEl.textContent = accessibilityLabel
+    docFragment.append(accessibilityLabelEl)
+  }
+
+  return docFragment
+}
 
 export type Preamble = {
   from: number
@@ -29,20 +57,20 @@ export class PreambleWidget extends WidgetType {
     const element = document.createElement('div')
     wrapper.appendChild(element)
     element.classList.add('ol-cm-preamble-widget')
-    const expandIcon = document.createElement('i')
-    expandIcon.classList.add(
-      'ol-cm-preamble-expand-icon',
-      'fa',
-      'fa-chevron-down'
-    )
+    const expandIcon = createIcon({
+      type: 'expand_more',
+      accessibilityLabel: view.state.phrase('expand'),
+      className: 'ol-cm-preamble-expand-icon',
+    })
     const helpText = document.createElement('div')
     const helpLink = document.createElement('a')
     helpLink.href =
       '/learn/latex/Learn_LaTeX_in_30_minutes#The_preamble_of_a_document'
     helpLink.target = '_blank'
-    const icon = document.createElement('i')
-    icon.classList.add('fa', 'fa-question-circle')
-    icon.title = view.state.phrase('learn_more')
+    const icon = createIcon({
+      type: 'help',
+      accessibilityLabel: view.state.phrase('learn_more'),
+    })
     helpLink.appendChild(icon)
     const textNode = document.createElement('span')
     textNode.classList.add('ol-cm-preamble-text')

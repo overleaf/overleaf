@@ -1,0 +1,191 @@
+
+
+diff --git a/services/web/app.mjs b/services/web/app.mjs
+index b7c723da3d77..3f54cc36a8c3 100644
+--- a/services/web/app.mjs
++++ b/services/web/app.mjs
+@@ -56,14 +56,8 @@ if (Settings.catchErrors) {
+ // Create ./data/dumpFolder if needed
+ FileWriter.ensureDumpFolderExists()
+
+-if (
+-  !Features.hasFeature('project-history-blobs') &&
+-  !Features.hasFeature('filestore')
+-) {
+-  throw new Error(
+-    'invalid config: must enable either project-history-blobs (Settings.enableProjectHistoryBlobs=true) or enable filestore (Settings.disableFilestore=false)'
+-  )
+-}
++// Validate combination of feature flags.
++Features.validateSettings()
+
+ // handle SIGTERM for graceful shutdown in kubernetes
+ process.on('SIGTERM', function (signal) {
+diff --git a/services/web/app/src/Features/History/HistoryURLHelper.js b/services/web/app/src/Features/History/HistoryURLHelper.js
+index 8b8d8cbdd730..acb43ced68e0 100644
+--- a/services/web/app/src/Features/History/HistoryURLHelper.js
++++ b/services/web/app/src/Features/History/HistoryURLHelper.js
+@@ -8,7 +8,7 @@ function projectHistoryURLWithFilestoreFallback(
+ ) {
+   const filestoreURL = `${Settings.apis.filestore.url}/project/${projectId}/file/${fileRef._id}?from=${origin}`
+   // TODO: When this file is converted to ES modules we will be able to use Features.hasFeature('project-history-blobs'). Currently we can't stub the feature return value in tests.
+-  if (fileRef.hash && Settings.enableProjectHistoryBlobs) {
++  if (fileRef.hash && Settings.filestoreMigrationLevel >= 1) {
+     return {
+       url: `${Settings.apis.project_history.url}/project/${historyId}/blob/${fileRef.hash}`,
+       fallbackURL: filestoreURL,
+diff --git a/services/web/app/src/infrastructure/Features.js b/services/web/app/src/infrastructure/Features.js
+index aaf51103b9b8..89c8e6b841d0 100644
+--- a/services/web/app/src/infrastructure/Features.js
++++ b/services/web/app/src/infrastructure/Features.js
+@@ -19,8 +19,7 @@ const trackChangesModuleAvailable =
+  * @property {boolean | undefined} enableGithubSync
+  * @property {boolean | undefined} enableGitBridge
+  * @property {boolean | undefined} enableHomepage
+- * @property {boolean | undefined} enableProjectHistoryBlobs
+- * @property {boolean | undefined} disableFilestore
++ * @property {number} filestoreMigrationLevel
+  * @property {boolean | undefined} enableSaml
+  * @property {boolean | undefined} ldap
+  * @property {boolean | undefined} oauth
+@@ -29,7 +28,39 @@ const trackChangesModuleAvailable =
+  * @property {boolean | undefined} saml
+  */
+
++/**
++ * @return {{'project-history-blobs': boolean, filestore: boolean}}
++ */
++function getFilestoreMigrationOptions() {
++  switch (Settings.filestoreMigrationLevel) {
++    case 0:
++      return {
++        'project-history-blobs': false,
++        filestore: true,
++      }
++    case 1:
++      return {
++        'project-history-blobs': true,
++        filestore: true,
++      }
++
++    case 2:
++      return {
++        'project-history-blobs': true,
++        filestore: false,
++      }
++    default:
++      throw new Error(
++        `invalid OVERLEAF_FILESTORE_MIGRATION_LEVEL=${Settings.filestoreMigrationLevel}, expected 0, 1 or 2`
++      )
++  }
++}
++
+ const Features = {
++  validateSettings() {
++    getFilestoreMigrationOptions() // throws for invalid settings
++  },
++
+   /**
+    * @returns {boolean}
+    */
+@@ -89,9 +120,9 @@ const Features = {
+             Settings.enabledLinkedFileTypes.includes('url')
+         )
+       case 'project-history-blobs':
+-        return Boolean(Settings.enableProjectHistoryBlobs)
++        return getFilestoreMigrationOptions()['project-history-blobs']
+       case 'filestore':
+-        return Boolean(Settings.disableFilestore) === false
++        return getFilestoreMigrationOptions().filestore
+       case 'support':
+         return supportModuleAvailable
+       case 'symbol-palette':
+diff --git a/services/web/config/settings.defaults.js b/services/web/config/settings.defaults.js
+index bd0730d5d00c..4df63ebd7c6c 100644
+--- a/services/web/config/settings.defaults.js
++++ b/services/web/config/settings.defaults.js
+@@ -440,6 +440,9 @@ module.exports = {
+     ','
+   ),
+
++  filestoreMigrationLevel:
++    parseInt(process.env.OVERLEAF_FILESTORE_MIGRATION_LEVEL, 10) || 0,
++
+   // i18n
+   // ------
+   //
+
+diff --git a/services/history-v1/storage/scripts/back_fill_file_hash.mjs b/services/history-v1/storage/scripts/back_fill_file_hash.mjs
+index 0ccadaf5a955..2e12328e5c49 100644
+--- a/services/history-v1/storage/scripts/back_fill_file_hash.mjs
++++ b/services/history-v1/storage/scripts/back_fill_file_hash.mjs
+@@ -150,10 +150,6 @@ const CONCURRENT_BATCHES = parseInt(process.env.CONCURRENT_BATCHES || '2', 10)
+ const RETRIES = parseInt(process.env.RETRIES || '10', 10)
+ const RETRY_DELAY_MS = parseInt(process.env.RETRY_DELAY_MS || '100', 10)
+
+-const USER_FILES_BUCKET_NAME = process.env.USER_FILES_BUCKET_NAME || ''
+-if (!USER_FILES_BUCKET_NAME) {
+-  throw new Error('env var USER_FILES_BUCKET_NAME is missing')
+-}
+ const RETRY_FILESTORE_404 = process.env.RETRY_FILESTORE_404 === 'true'
+ const BUFFER_DIR = fs.mkdtempSync(
+   process.env.BUFFER_DIR_PREFIX || '/tmp/back_fill_file_hash-'
+
+diff --git a/services/web/app/src/infrastructure/Features.js b/services/web/app/src/infrastructure/Features.js
+index 89c8e6b841d0..6147e70e0faf 100644
+--- a/services/web/app/src/infrastructure/Features.js
++++ b/services/web/app/src/infrastructure/Features.js
+@@ -28,37 +28,13 @@ const trackChangesModuleAvailable =
+  * @property {boolean | undefined} saml
+  */
+
+-/**
+- * @return {{'project-history-blobs': boolean, filestore: boolean}}
+- */
+-function getFilestoreMigrationOptions() {
+-  switch (Settings.filestoreMigrationLevel) {
+-    case 0:
+-      return {
+-        'project-history-blobs': false,
+-        filestore: true,
+-      }
+-    case 1:
+-      return {
+-        'project-history-blobs': true,
+-        filestore: true,
+-      }
+-
+-    case 2:
+-      return {
+-        'project-history-blobs': true,
+-        filestore: false,
+-      }
+-    default:
++const Features = {
++  validateSettings() {
++    if (![0, 1, 2].includes(Settings.filestoreMigrationLevel)) {
+       throw new Error(
+         `invalid OVERLEAF_FILESTORE_MIGRATION_LEVEL=${Settings.filestoreMigrationLevel}, expected 0, 1 or 2`
+       )
+-  }
+-}
+-
+-const Features = {
+-  validateSettings() {
+-    getFilestoreMigrationOptions() // throws for invalid settings
++    }
+   },
+
+   /**
+@@ -120,9 +96,9 @@ const Features = {
+             Settings.enabledLinkedFileTypes.includes('url')
+         )
+       case 'project-history-blobs':
+-        return getFilestoreMigrationOptions()['project-history-blobs']
++        return Settings.filestoreMigrationLevel > 0
+       case 'filestore':
+-        return getFilestoreMigrationOptions().filestore
++        return Settings.filestoreMigrationLevel < 2
+       case 'support':
+         return supportModuleAvailable
+       case 'symbol-palette':

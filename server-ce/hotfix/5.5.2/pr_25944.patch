@@ -1,0 +1,219 @@
+diff --git a/services/web/frontend/js/features/review-panel-new/context/review-panel-providers.tsx b/services/web/frontend/js/features/review-panel-new/context/review-panel-providers.tsx
+index 20e157dfee9..ad943772d0d 100644
+--- a/services/web/frontend/js/features/review-panel-new/context/review-panel-providers.tsx
++++ b/services/web/frontend/js/features/review-panel-new/context/review-panel-providers.tsx
+@@ -4,10 +4,16 @@ import { ChangesUsersProvider } from './changes-users-context'
+ import { TrackChangesStateProvider } from './track-changes-state-context'
+ import { ThreadsProvider } from './threads-context'
+ import { ReviewPanelViewProvider } from './review-panel-view-context'
++import { useProjectContext } from '@/shared/context/project-context'
+ 
+ export const ReviewPanelProviders: FC<React.PropsWithChildren> = ({
+   children,
+ }) => {
++  const { features } = useProjectContext()
++  if (!features.trackChangesVisible) {
++    return children
++  }
++
+   return (
+     <ReviewPanelViewProvider>
+       <ChangesUsersProvider>
+diff --git a/services/web/frontend/js/features/share-project-modal/components/add-collaborators.tsx b/services/web/frontend/js/features/share-project-modal/components/add-collaborators.tsx
+index 8606fb11fad..e80fb037116 100644
+--- a/services/web/frontend/js/features/share-project-modal/components/add-collaborators.tsx
++++ b/services/web/frontend/js/features/share-project-modal/components/add-collaborators.tsx
+@@ -176,24 +176,34 @@ export default function AddCollaborators({ readOnly }: { readOnly?: boolean }) {
+   ])
+ 
+   const privilegeOptions = useMemo(() => {
+-    return [
++    const options: {
++      key: string
++      label: string
++      description?: string | null
++    }[] = [
+       {
+         key: 'readAndWrite',
+         label: t('editor'),
+       },
+-      {
++    ]
++
++    if (features.trackChangesVisible) {
++      options.push({
+         key: 'review',
+         label: t('reviewer'),
+         description: !features.trackChanges
+           ? t('comment_only_upgrade_for_track_changes')
+           : null,
+-      },
+-      {
+-        key: 'readOnly',
+-        label: t('viewer'),
+-      },
+-    ]
+-  }, [features.trackChanges, t])
++      })
++    }
++
++    options.push({
++      key: 'readOnly',
++      label: t('viewer'),
++    })
++
++    return options
++  }, [features.trackChanges, features.trackChangesVisible, t])
+ 
+   return (
+     <OLForm className="add-collabs">
+diff --git a/services/web/frontend/js/features/share-project-modal/components/edit-member.tsx b/services/web/frontend/js/features/share-project-modal/components/edit-member.tsx
+index 6d806968b12..9f24cddc4ad 100644
+--- a/services/web/frontend/js/features/share-project-modal/components/edit-member.tsx
++++ b/services/web/frontend/js/features/share-project-modal/components/edit-member.tsx
+@@ -244,14 +244,22 @@ function SelectPrivilege({
+   const { features } = useProjectContext()
+ 
+   const privileges = useMemo(
+-    (): Privilege[] => [
+-      { key: 'owner', label: t('make_owner') },
+-      { key: 'readAndWrite', label: t('editor') },
+-      { key: 'review', label: t('reviewer') },
+-      { key: 'readOnly', label: t('viewer') },
+-      { key: 'removeAccess', label: t('remove_access') },
+-    ],
+-    [t]
++    (): Privilege[] =>
++      features.trackChangesVisible
++        ? [
++            { key: 'owner', label: t('make_owner') },
++            { key: 'readAndWrite', label: t('editor') },
++            { key: 'review', label: t('reviewer') },
++            { key: 'readOnly', label: t('viewer') },
++            { key: 'removeAccess', label: t('remove_access') },
++          ]
++        : [
++            { key: 'owner', label: t('make_owner') },
++            { key: 'readAndWrite', label: t('editor') },
++            { key: 'readOnly', label: t('viewer') },
++            { key: 'removeAccess', label: t('remove_access') },
++          ],
++    [features.trackChangesVisible, t]
+   )
+ 
+   const downgradedPseudoPrivilege: Privilege = {
+diff --git a/services/web/frontend/js/features/source-editor/components/codemirror-editor.tsx b/services/web/frontend/js/features/source-editor/components/codemirror-editor.tsx
+index c1808cbb301..4bdfe2682c8 100644
+--- a/services/web/frontend/js/features/source-editor/components/codemirror-editor.tsx
++++ b/services/web/frontend/js/features/source-editor/components/codemirror-editor.tsx
+@@ -18,6 +18,7 @@ import {
+ } from './codemirror-context'
+ import MathPreviewTooltip from './math-preview-tooltip'
+ import { useToolbarMenuBarEditorCommands } from '@/features/ide-redesign/hooks/use-toolbar-menu-editor-commands'
++import { useProjectContext } from '@/shared/context/project-context'
+ 
+ // TODO: remove this when definitely no longer used
+ export * from './codemirror-context'
+@@ -67,6 +68,7 @@ function CodeMirrorEditor() {
+ 
+ function CodeMirrorEditorComponents() {
+   useToolbarMenuBarEditorCommands()
++  const { features } = useProjectContext()
+ 
+   return (
+     <ReviewPanelProviders>
+@@ -83,8 +85,8 @@ function CodeMirrorEditorComponents() {
+       <CodeMirrorCommandTooltip />
+ 
+       <MathPreviewTooltip />
+-      <ReviewTooltipMenu />
+-      <ReviewPanelNew />
++      {features.trackChangesVisible && <ReviewTooltipMenu />}
++      {features.trackChangesVisible && <ReviewPanelNew />}
+ 
+       {sourceEditorComponents.map(
+         ({ import: { default: Component }, path }) => (
+diff --git a/services/web/frontend/js/features/source-editor/components/toolbar/toolbar-items.tsx b/services/web/frontend/js/features/source-editor/components/toolbar/toolbar-items.tsx
+index e70663683fc..c5d9f3d3e47 100644
+--- a/services/web/frontend/js/features/source-editor/components/toolbar/toolbar-items.tsx
++++ b/services/web/frontend/js/features/source-editor/components/toolbar/toolbar-items.tsx
+@@ -14,6 +14,7 @@ import { LegacyTableDropdown } from './table-inserter-dropdown-legacy'
+ import { withinFormattingCommand } from '@/features/source-editor/utils/tree-operations/formatting'
+ import { isSplitTestEnabled } from '@/utils/splitTestUtils'
+ import { isMac } from '@/shared/utils/os'
++import { useProjectContext } from '@/shared/context/project-context'
+ 
+ export const ToolbarItems: FC<{
+   state: EditorState
+@@ -31,6 +32,7 @@ export const ToolbarItems: FC<{
+   const { t } = useTranslation()
+   const { toggleSymbolPalette, showSymbolPalette, writefullInstance } =
+     useEditorContext()
++  const { features } = useProjectContext()
+   const isActive = withinFormattingCommand(state)
+ 
+   const symbolPaletteAvailable = getMeta('ol-symbolPaletteAvailable')
+@@ -127,13 +129,15 @@ export const ToolbarItems: FC<{
+                 command={commands.wrapInHref}
+                 icon="add_link"
+               />
+-              <ToolbarButton
+-                id="toolbar-add-comment"
+-                label={t('add_comment')}
+-                disabled={state.selection.main.empty}
+-                command={commands.addComment}
+-                icon="add_comment"
+-              />
++              {features.trackChangesVisible && (
++                <ToolbarButton
++                  id="toolbar-add-comment"
++                  label={t('add_comment')}
++                  disabled={state.selection.main.empty}
++                  command={commands.addComment}
++                  icon="add_comment"
++                />
++              )}
+               <ToolbarButton
+                 id="toolbar-ref"
+                 label={t('toolbar_insert_cross_reference')}
+diff --git a/services/web/test/frontend/features/review-panel/review-panel.spec.tsx b/services/web/test/frontend/features/review-panel/review-panel.spec.tsx
+index d6677878108..58ac3e443da 100644
+--- a/services/web/test/frontend/features/review-panel/review-panel.spec.tsx
++++ b/services/web/test/frontend/features/review-panel/review-panel.spec.tsx
+@@ -181,6 +181,7 @@ describe('<ReviewPanel />', function () {
+           removeChangeIds,
+         },
+       },
++      projectFeatures: { trackChangesVisible: true },
+     })
+ 
+     cy.wrap(scope).as('scope')
+@@ -626,7 +627,7 @@ describe('<ReviewPanel /> for free users', function () {
+   function mountEditor(ownerId = USER_ID) {
+     const scope = mockScope(undefined, {
+       permissions: { write: true, trackedWrite: false, comment: true },
+-      projectFeatures: { trackChanges: false },
++      projectFeatures: { trackChanges: false, trackChangesVisible: true },
+       projectOwner: {
+         _id: ownerId,
+       },
+diff --git a/services/web/test/frontend/features/share-project-modal/components/share-project-modal.test.jsx b/services/web/test/frontend/features/share-project-modal/components/share-project-modal.test.jsx
+index b86207fb0f7..dfce8134d1c 100644
+--- a/services/web/test/frontend/features/share-project-modal/components/share-project-modal.test.jsx
++++ b/services/web/test/frontend/features/share-project-modal/components/share-project-modal.test.jsx
+@@ -694,6 +694,7 @@ describe('<ShareProjectModal/>', function () {
+           features: {
+             collaborators: 0,
+             compileGroup: 'standard',
++            trackChangesVisible: true,
+           },
+         },
+       },
+@@ -723,6 +724,7 @@ describe('<ShareProjectModal/>', function () {
+           ...project,
+           features: {
+             collaborators: 1,
++            trackChangesVisible: true,
+           },
+           members: [
+             {

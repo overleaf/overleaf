@@ -14,6 +14,7 @@ function UserNameWithColoredBadge({
   currentUserId,
 }: UserNameWithColoredBadgeProps) {
   const { t } = useTranslation()
+  let allowBrowserTranslate = true
 
   let userName: string
   if (!user) {
@@ -22,8 +23,10 @@ function UserNameWithColoredBadge({
     userName = t('you')
   } else if ('displayName' in user) {
     userName = user.displayName
+    allowBrowserTranslate = false
   } else {
     userName = formatUserName(user)
+    allowBrowserTranslate = false
   }
 
   return (
@@ -32,7 +35,12 @@ function UserNameWithColoredBadge({
         className="history-version-user-badge-color"
         style={{ backgroundColor: getBackgroundColorForUserId(user?.id) }}
       />
-      <span className="history-version-user-badge-text">{userName}</span>
+      <span
+        className="history-version-user-badge-text"
+        translate={allowBrowserTranslate ? 'yes' : 'no'}
+      >
+        {userName}
+      </span>
     </>
   )
 }

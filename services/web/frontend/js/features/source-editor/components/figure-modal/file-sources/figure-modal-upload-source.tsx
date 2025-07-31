@@ -34,7 +34,7 @@ export const FigureModalUploadFileSource: FC = () => {
   const { t } = useTranslation()
   const view = useCodeMirrorViewContext()
   const { dispatch, pastedImageData } = useFigureModalContext()
-  const { _id: projectId } = useProjectContext()
+  const { projectId } = useProjectContext()
   const { rootFile } = useCurrentProjectFolders()
   const [folder, setFolder] = useState<File | null>(null)
   const [nameDirty, setNameDirty] = useState<boolean>(false)

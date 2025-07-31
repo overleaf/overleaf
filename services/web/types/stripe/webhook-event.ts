@@ -22,6 +22,8 @@ export type CustomerSubscriptionUpdatedWebhookEvent = {
           },
         ]
       }
+      status?: Stripe.Subscription.Status
+      metadata?: Record<string, string>
     }
   }
 }
@@ -53,6 +55,15 @@ export type InvoicePaidWebhookEvent = {
   data: {
     object: Stripe.Invoice
   }
+  request: Stripe.Event.Request
+}
+
+export type PaymentIntentPaymentFailedWebhookEvent = {
+  type: 'payment_intent.payment_failed'
+  data: {
+    object: Stripe.PaymentIntent
+  }
+  request: Stripe.Event.Request
 }
 
 export type CustomerSubscriptionWebhookEvent =
@@ -63,3 +74,4 @@ export type CustomerSubscriptionWebhookEvent =
 export type WebhookEvent =
   | CustomerSubscriptionWebhookEvent
   | InvoicePaidWebhookEvent
+  | PaymentIntentPaymentFailedWebhookEvent

@@ -1,7 +1,7 @@
 import { ensureUserExists, login } from './helpers/login'
 import { createProject } from './helpers/project'
 import { isExcludedBySharding, startWith } from './helpers/config'
-import { throttledRecompile } from './helpers/compile'
+import { throttledRecompile, stopCompile } from './helpers/compile'
 import { v4 as uuid } from 'uuid'
 import { waitUntilScrollingFinished } from './helpers/waitUntilScrollingFinished'
 import { beforeWithReRunOnTestRetry } from './helpers/beforeWithReRunOnTestRetry'
@@ -37,7 +37,11 @@ describe('SandboxedCompiles', function () {
       cy.findByText(/This is pdfTeX, Version .+ \(TeX Live 2023\) /)
 
       cy.log('Switch TeXLive version from 2023 to 2022')
-      cy.get('header').findByText('Menu').click()
+      cy.findByRole('navigation', {
+        name: /Project actions/i,
+      })
+        .findByRole('button', { name: /Menu/i })
+        .click()
       cy.findByText(LABEL_TEX_LIVE_VERSION)
         .parent()
         .findByText('2023')
@@ -56,7 +60,39 @@ describe('SandboxedCompiles', function () {
     checkSyncTeX()
     checkXeTeX()
     checkRecompilesAfterErrors()
+    checkStopCompile()
   })
+
+  function checkStopCompile() {
+    it('users can stop a running compile', function () {
+      login('user@example.com')
+      createProject('test-project')
+      // create an infinite loop in the main document
+      // this will cause the compile to run indefinitely
+      cy.findByText('\\maketitle').parent().click()
+      cy.findByText('\\maketitle')
+        .parent()
+        .type('\n\\def\\x{{}Hello!\\par\\x}\\x')
+      cy.log('Start compile')
+      // We need to start the compile manually because we do not want to wait for it to finish
+      cy.findByText('Recompile').click()
+      // Now stop the compile and kill the latex process
+      stopCompile({ delay: 1000 })
+      cy.get('.logs-pane')
+        .invoke('text')
+        .should('match', /PDF Rendering Error|Compilation cancelled/)
+      // Check that the previous compile is not running in the background by
+      // disabling the infinite loop and recompiling
+      cy.findByText('\\def').parent().click()
+      cy.findByText('\\def').parent().type('{home}disabled loop% ')
+      cy.findByText('Recompile').click()
+      cy.get('.pdf-viewer').should('contain.text', 'disabled loop')
+      cy.get('.logs-pane').should(
+        'not.contain.text',
+        'A previous compile is still running'
+      )
+    })
+  }
 
   function checkSyncTeX() {
     // TODO(25342): re-enable
@@ -129,7 +165,9 @@ describe('SandboxedCompiles', function () {
         })
 
         cy.log('navigate to Section A')
-        cy.get('.cm-content').within(() => cy.findByText('Section A').click())
+        cy.findByRole('textbox', { name: /Source Editor editing/i }).within(
+          () => cy.findByText('Section A').click()
+        )
         cy.get('[aria-label="Go to code location in PDF"]').click()
         cy.get('@title').then((title: any) => {
           waitUntilScrollingFinished('.pdfjs-viewer-inner', title)
@@ -138,7 +176,9 @@ describe('SandboxedCompiles', function () {
         })
 
         cy.log('navigate to Section B')
-        cy.get('.cm-content').within(() => cy.findByText('Section B').click())
+        cy.findByRole('textbox', { name: /Source Editor editing/i }).within(
+          () => cy.findByText('Section B').click()
+        )
         cy.get('[aria-label="Go to code location in PDF"]').click()
         cy.get('@sectionA').then((title: any) => {
           waitUntilScrollingFinished('.pdfjs-viewer-inner', title)
@@ -177,7 +217,11 @@ describe('SandboxedCompiles', function () {
       cy.findByText(/This is pdfTeX/)
 
       cy.log('Switch compiler to from pdfLaTeX to XeLaTeX')
-      cy.get('header').findByText('Menu').click()
+      cy.findByRole('navigation', {
+        name: /Project actions/i,
+      })
+        .findByRole('button', { name: /Menu/i })
+        .click()
       cy.findByText('Compiler')
         .parent()
         .findByText('pdfLaTeX')
@@ -209,7 +253,11 @@ describe('SandboxedCompiles', function () {
       cy.findByText(/This is pdfTeX, Version .+ \(TeX Live 2025\) /)
 
       cy.log('Check that there is no TeX Live version toggle')
-      cy.get('header').findByText('Menu').click()
+      cy.findByRole('navigation', {
+        name: /Project actions/i,
+      })
+        .findByRole('button', { name: /Menu/i })
+        .click()
       cy.findByText('Word Count') // wait for lazy loading
       cy.findByText(LABEL_TEX_LIVE_VERSION).should('not.exist')
     })
@@ -227,6 +275,7 @@ describe('SandboxedCompiles', function () {
     checkSyncTeX()
     checkXeTeX()
     checkRecompilesAfterErrors()
+    checkStopCompile()
   })
 
   describe.skip('unavailable in CE', function () {
@@ -241,5 +290,6 @@ describe('SandboxedCompiles', function () {
     checkSyncTeX()
     checkXeTeX()
     checkRecompilesAfterErrors()
+    checkStopCompile()
   })
 })

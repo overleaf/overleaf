@@ -58,7 +58,7 @@
       @include box-shadow-button-input;
     }
 
-    i {
+    .material-symbols {
       vertical-align: middle;
       margin-left: var(--spacing-02);
       padding-bottom: 3px;
@@ -378,7 +378,7 @@
           }
         }
 
-        i.material-symbols {
+        .material-symbols {
           color: var(--sapphire-blue);
         }
       }
@@ -386,7 +386,7 @@
   }
 
   .inline-green-link {
-    color: var(--green-50);
+    color: var(--link-web);
     padding: 0;
     text-decoration: underline;
 
@@ -395,7 +395,7 @@
     text-decoration-skip-ink: none;
 
     &:hover {
-      color: var(--green-60);
+      color: var(--link-web-hover);
     }
 
     // TODO: this is copied directly from the `.less` file, migrate this to scss
@@ -673,7 +673,7 @@
   }
 
   // most of these are here to replace rules from core/type.less
-  blockquote {
+  blockquote.cms-quote {
     @include heading-lg;
 
     border-left: none;

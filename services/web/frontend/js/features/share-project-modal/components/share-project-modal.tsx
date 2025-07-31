@@ -9,12 +9,10 @@ import ShareProjectModalContent from './share-project-modal-content'
 import { useProjectContext } from '@/shared/context/project-context'
 import { useSplitTestContext } from '@/shared/context/split-test-context'
 import { sendMB } from '@/infrastructure/event-tracking'
-import { ProjectContextUpdateValue } from '@/shared/context/types/project-context'
 import { useEditorContext } from '@/shared/context/editor-context'
 import customLocalStorage from '@/infrastructure/local-storage'
 
 type ShareProjectContextValue = {
-  updateProject: (project: ProjectContextUpdateValue) => void
   monitorRequest: <T extends Promise<unknown>>(request: () => T) => T
   inFlight: boolean
   setInFlight: React.Dispatch<
@@ -61,7 +59,7 @@ const ShareProjectModal = React.memo(function ShareProjectModal({
     useState<ShareProjectContextValue['inFlight']>(false)
   const [error, setError] = useState<ShareProjectContextValue['error']>()
 
-  const project = useProjectContext()
+  const { project, projectId } = useProjectContext()
   const { isProjectOwner } = useEditorContext()
 
   const { splitTestVariants } = useSplitTestContext()
@@ -70,7 +68,7 @@ const ShareProjectModal = React.memo(function ShareProjectModal({
   // is over collaborator limit or has pending editors (once every 24 hours)
   useEffect(() => {
     const hasExceededCollaboratorLimit = () => {
-      if (!isProjectOwner || !project.features) {
+      if (!isProjectOwner || !project || !project.features) {
         return false
       }
 
@@ -88,7 +86,7 @@ const ShareProjectModal = React.memo(function ShareProjectModal({
     }
 
     if (hasExceededCollaboratorLimit()) {
-      const localStorageKey = `last-shown-share-modal.${project._id}`
+      const localStorageKey = `last-shown-share-modal.${projectId}`
       const lastShownShareModalTime =
         customLocalStorage.getItem(localStorageKey)
       if (
@@ -99,17 +97,17 @@ const ShareProjectModal = React.memo(function ShareProjectModal({
         customLocalStorage.setItem(localStorageKey, Date.now())
       }
     }
-  }, [project, isProjectOwner, handleOpen])
+  }, [project, isProjectOwner, handleOpen, projectId])
 
   // send tracking event when the modal is opened
   useEffect(() => {
     if (show) {
       sendMB('share-modal-opened', {
         splitTestVariant: splitTestVariants['null-test-share-modal'],
-        project_id: project._id,
+        project_id: projectId,
       })
     }
-  }, [splitTestVariants, project._id, show])
+  }, [splitTestVariants, projectId, show])
 
   // reset error when the modal is opened
   useEffect(() => {
@@ -147,12 +145,6 @@ const ShareProjectModal = React.memo(function ShareProjectModal({
     return promise
   }, [])
 
-  // merge the new data with the old project data
-  const updateProject = useCallback(
-    (data: ProjectContextUpdateValue) => Object.assign(project, data),
-    [project]
-  )
-
   if (!project) {
     return null
   }
@@ -160,7 +152,6 @@ const ShareProjectModal = React.memo(function ShareProjectModal({
   return (
     <ShareProjectContext.Provider
       value={{
-        updateProject,
         monitorRequest,
         inFlight,
         setInFlight,

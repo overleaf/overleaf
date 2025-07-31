@@ -40,7 +40,7 @@ type LogEntryProps = {
 }
 
 function LogEntry(props: LogEntryProps) {
-  const [collapsed, setCollapsed] = useState(true)
+  const [collapsed, setCollapsed] = useState(props.index !== 0)
 
   return (
     <ControlledLogEntry

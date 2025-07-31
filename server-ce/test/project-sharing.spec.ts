@@ -14,9 +14,9 @@ import { throttledRecompile } from './helpers/compile'
 import { beforeWithReRunOnTestRetry } from './helpers/beforeWithReRunOnTestRetry'
 
 describe('Project Sharing', function () {
-  if (isExcludedBySharding('CE_CUSTOM_2')) return
+  if (isExcludedBySharding('PRO_CUSTOM_2')) return
   ensureUserExists({ email: 'user@example.com' })
-  startWith({ withDataDir: true })
+  startWith({ withDataDir: true, pro: true })
 
   let projectName: string
   beforeWithReRunOnTestRetry(function () {
@@ -55,8 +55,15 @@ describe('Project Sharing', function () {
 
   function expectContentReadOnlyAccess() {
     cy.url().should('match', /\/project\/[a-fA-F0-9]{24}/)
-    cy.get('.cm-content').should('contain.text', '\\maketitle')
-    cy.get('.cm-content').should('have.attr', 'contenteditable', 'false')
+    cy.findByRole('textbox', { name: /Source Editor editing/i }).should(
+      'contain.text',
+      '\\maketitle'
+    )
+    cy.findByRole('textbox', { name: /Source Editor editing/i }).should(
+      'have.attr',
+      'contenteditable',
+      'false'
+    )
   }
 
   function expectContentWriteAccess() {
@@ -64,13 +71,23 @@ describe('Project Sharing', function () {
     cy.url().should('match', /\/project\/[a-fA-F0-9]{24}/)
     const recompile = throttledRecompile()
     // wait for the editor to finish loading
-    cy.get('.cm-content').should('contain.text', '\\maketitle')
+    cy.findByRole('textbox', { name: /Source Editor editing/i }).should(
+      'contain.text',
+      '\\maketitle'
+    )
     // the editor should be writable
-    cy.get('.cm-content').should('have.attr', 'contenteditable', 'true')
+    cy.findByRole('textbox', { name: /Source Editor editing/i }).should(
+      'have.attr',
+      'contenteditable',
+      'true'
+    )
     cy.findByText('\\maketitle').parent().click()
     cy.findByText('\\maketitle').parent().type(`\n\\section{{}${section}}`)
     // should have written
-    cy.get('.cm-content').should('contain.text', `\\section{${section}}`)
+    cy.findByRole('textbox', { name: /Source Editor editing/i }).should(
+      'contain.text',
+      `\\section{${section}}`
+    )
     // check PDF
     recompile()
     cy.get('.pdf-viewer').should('contain.text', projectName)
@@ -118,22 +135,57 @@ describe('Project Sharing', function () {
     cy.findByText('History').should('not.exist')
   }
 
+  function expectCommentAccess() {
+    cy.findByRole('textbox', { name: /Source Editor editing/i }).should(
+      'contain.text',
+      '\\maketitle'
+    )
+
+    cy.findByText('\\maketitle').parent().dblclick()
+
+    cy.findByRole('button', { name: 'Add comment' }).should('be.visible')
+
+    cy.findByRole('textbox', { name: /Source Editor editing/i }).click()
+  }
+
+  function expectNoCommentAccess() {
+    cy.findByRole('textbox', { name: /Source Editor editing/i }).should(
+      'contain.text',
+      '\\maketitle'
+    )
+
+    cy.findByText('\\maketitle').parent().dblclick()
+
+    cy.findByRole('button', { name: 'Add comment' }).should('not.exist')
+    cy.findByRole('textbox', { name: /Source Editor editing/i }).click()
+  }
+
   function expectFullReadOnlyAccess() {
     expectContentReadOnlyAccess()
     expectChatAccess()
     expectHistoryAccess()
+    expectNoCommentAccess()
   }
 
   function expectRestrictedReadOnlyAccess() {
     expectContentReadOnlyAccess()
     expectNoChatAccess()
     expectNoHistoryAccess()
+    expectNoCommentAccess()
   }
 
-  function expectReadAndWriteAccess() {
+  function expectFullReadAndWriteAccess() {
     expectContentWriteAccess()
     expectChatAccess()
     expectHistoryAccess()
+    expectCommentAccess()
+  }
+
+  function expectAnonymousReadAndWriteAccess() {
+    expectContentWriteAccess()
+    expectChatAccess()
+    expectHistoryAccess()
+    expectNoCommentAccess()
   }
 
   function expectProjectDashboardEntry() {
@@ -192,7 +244,7 @@ describe('Project Sharing', function () {
     it('should grant the collaborator write access', () => {
       login(email)
       openProjectByName(projectName)
-      expectReadAndWriteAccess()
+      expectFullReadAndWriteAccess()
       expectEditAuthoredAs('You')
       expectProjectDashboardEntry()
     })
@@ -227,7 +279,7 @@ describe('Project Sharing', function () {
             projectName,
             email
           )
-          expectReadAndWriteAccess()
+          expectFullReadAndWriteAccess()
           expectEditAuthoredAs('You')
           expectProjectDashboardEntry()
         })
@@ -237,6 +289,7 @@ describe('Project Sharing', function () {
     describe('with OVERLEAF_ALLOW_PUBLIC_ACCESS=false', () => {
       describe('wrap startup', () => {
         startWith({
+          pro: true,
           vars: {
             OVERLEAF_ALLOW_PUBLIC_ACCESS: 'false',
           },
@@ -249,6 +302,7 @@ describe('Project Sharing', function () {
 
       describe('with OVERLEAF_ALLOW_ANONYMOUS_READ_AND_WRITE_SHARING=true', () => {
         startWith({
+          pro: true,
           vars: {
             OVERLEAF_ALLOW_PUBLIC_ACCESS: 'false',
             OVERLEAF_ALLOW_ANONYMOUS_READ_AND_WRITE_SHARING: 'true',
@@ -264,6 +318,7 @@ describe('Project Sharing', function () {
     describe('with OVERLEAF_ALLOW_PUBLIC_ACCESS=true', () => {
       describe('wrap startup', () => {
         startWith({
+          pro: true,
           vars: {
             OVERLEAF_ALLOW_PUBLIC_ACCESS: 'true',
           },
@@ -282,6 +337,7 @@ describe('Project Sharing', function () {
 
       describe('with OVERLEAF_ALLOW_ANONYMOUS_READ_AND_WRITE_SHARING=true', () => {
         startWith({
+          pro: true,
           vars: {
             OVERLEAF_ALLOW_PUBLIC_ACCESS: 'true',
             OVERLEAF_ALLOW_ANONYMOUS_READ_AND_WRITE_SHARING: 'true',
@@ -296,7 +352,7 @@ describe('Project Sharing', function () {
 
         it('should grant write access with write link', () => {
           openProjectViaLinkSharingAsAnon(linkSharingReadAndWrite)
-          expectReadAndWriteAccess()
+          expectAnonymousReadAndWriteAccess()
           expectEditAuthoredAs('Anonymous')
         })
       })

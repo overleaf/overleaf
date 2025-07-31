@@ -20,7 +20,6 @@ const { RateLimiter } = require('../../infrastructure/RateLimiter')
 const Features = require('../../infrastructure/Features')
 const tsscmp = require('tsscmp')
 const Modules = require('../../infrastructure/Modules')
-const SplitTestHandler = require('../SplitTests/SplitTestHandler')
 
 const AUDIT_LOG_TOKEN_PREFIX_LENGTH = 10
 
@@ -55,94 +54,7 @@ async function _sendSecurityAlertEmail(user, email) {
   await EmailHandler.promises.sendEmail('securityAlert', emailOptions)
 }
 
-/**
- * This method is for adding a secondary email to be confirmed via an emailed link.
- * For code confirmation, see the `addWithConfirmationCode` method in this file.
- */
-async function add(req, res, next) {
-  const userId = SessionManager.getLoggedInUserId(req.session)
-  const email = EmailHelper.parseEmail(req.body.email)
-  if (!email) {
-    return res.sendStatus(422)
-  }
-  const user = await UserGetter.promises.getUser(userId, {
-    email: 1,
-    'emails.email': 1,
-  })
-
-  if (user.emails.length >= Settings.emailAddressLimit) {
-    return res.status(422).json({ message: 'secondary email limit exceeded' })
-  }
-
-  const affiliationOptions = {
-    university: req.body.university,
-    role: req.body.role,
-    department: req.body.department,
-  }
-
-  try {
-    await UserUpdater.promises.addEmailAddress(
-      userId,
-      email,
-      affiliationOptions,
-      {
-        initiatorId: user._id,
-        ipAddress: req.ip,
-      }
-    )
-  } catch (error) {
-    return UserEmailsController._handleEmailError(error, req, res, next)
-  }
-
-  await _sendSecurityAlertEmail(user, email)
-
-  await UserEmailsConfirmationHandler.promises.sendConfirmationEmail(
-    userId,
-    email
-  )
-
-  res.sendStatus(204)
-}
-
-async function resendConfirmation(req, res) {
-  const userId = SessionManager.getLoggedInUserId(req.session)
-  const email = EmailHelper.parseEmail(req.body.email)
-  if (!email) {
-    return res.sendStatus(422)
-  }
-  const user = await UserGetter.promises.getUserByAnyEmail(email, { _id: 1 })
-
-  if (!user || user._id.toString() !== userId) {
-    return res.sendStatus(422)
-  }
-
-  await UserEmailsConfirmationHandler.promises.sendConfirmationEmail(
-    userId,
-    email
-  )
-  res.sendStatus(200)
-}
-
-async function sendReconfirmation(req, res) {
-  const userId = SessionManager.getLoggedInUserId(req.session)
-  const email = EmailHelper.parseEmail(req.body.email)
-  if (!email) {
-    return res.sendStatus(400)
-  }
-  const user = await UserGetter.promises.getUserByAnyEmail(email, { _id: 1 })
-
-  if (!user || user._id.toString() !== userId) {
-    return res.sendStatus(422)
-  }
-  await UserEmailsConfirmationHandler.promises.sendReconfirmationEmail(
-    userId,
-    email
-  )
-
-  res.sendStatus(204)
-}
-
-async function sendExistingSecondaryEmailConfirmationCode(req, res) {
+async function sendExistingEmailConfirmationCode(req, res) {
   const userId = SessionManager.getLoggedInUserId(req.session)
   const email = EmailHelper.parseEmail(req.body.email)
   if (!email) {
@@ -161,7 +73,6 @@ async function sendExistingSecondaryEmailConfirmationCode(req, res) {
 
 /**
  * This method is for adding a secondary email to be confirmed via a code.
- * For email link confirmation see the `add` method in this file.
  */
 async function addWithConfirmationCode(req, res) {
   delete req.session.pendingSecondaryEmail
@@ -527,18 +438,8 @@ async function primaryEmailCheckPage(req, res) {
     userId,
     'primary-email-check-page-displayed'
   )
-  const { variant } = await SplitTestHandler.promises.getAssignment(
-    req,
-    res,
-    'bs5-auth-pages'
-  )
 
-  const template =
-    variant === 'enabled'
-      ? 'user/primaryEmailCheck-bs5'
-      : 'user/primaryEmailCheck'
-
-  res.render(template)
+  res.render('user/primaryEmailCheck')
 }
 
 async function primaryEmailCheck(req, res) {
@@ -677,8 +578,6 @@ const UserEmailsController = {
     })
   },
 
-  add: expressify(add),
-
   addWithConfirmationCode: expressify(addWithConfirmationCode),
 
   checkNewSecondaryEmailConfirmationCode: expressify(
@@ -722,12 +621,8 @@ const UserEmailsController = {
     )
   },
 
-  resendConfirmation: expressify(resendConfirmation),
-
-  sendReconfirmation: expressify(sendReconfirmation),
-
-  sendExistingSecondaryEmailConfirmationCode: expressify(
-    sendExistingSecondaryEmailConfirmationCode
+  sendExistingEmailConfirmationCode: expressify(
+    sendExistingEmailConfirmationCode
   ),
 
   addSecondaryEmailPage: expressify(addSecondaryEmailPage),

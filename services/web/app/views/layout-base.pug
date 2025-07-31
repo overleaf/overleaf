@@ -2,8 +2,8 @@ include ./_mixins/foot_scripts
 
 doctype html
 html(
-	lang=(currentLngCode || 'en')
-	class=(fixedSizeDocument ? 'fixed-size-document' : undefined)
+	lang=currentLngCode || 'en'
+	class=fixedSizeDocument ? 'fixed-size-document' : undefined
 )
 	- metadata = metadata || {}
 	- let bootstrap5PageStatus = 'enabled' // One of 'disabled' and 'enabled'
@@ -22,91 +22,128 @@ html(
 		include ./_metadata.pug
 
 		- const bootstrapVersion = bootstrap5PageStatus !== 'disabled' && (bootstrap5Override || bootstrap5PageSplitTest === '' || splitTestVariants[bootstrap5PageSplitTest] === 'enabled') ? 5 : 3
-	
+
 		//- Stylesheet
-		link(rel='stylesheet', href=buildCssPath(getCssThemeModifier(userSettings, brandVariation, enableIeeeBranding), bootstrapVersion), id="main-stylesheet")
+		link(
+			rel='stylesheet'
+			href=buildCssPath(getCssThemeModifier(userSettings, brandVariation, enableIeeeBranding), bootstrapVersion)
+			id='main-stylesheet'
+		)
 		block css
 			each file in entrypointStyles(entrypoint)
-				link(rel='stylesheet', href=file)
+				link(rel='stylesheet' href=file)
 
 		block _headLinks
 
-		if (typeof suppressRelAlternateLinks == "undefined")
+		if typeof suppressRelAlternateLinks == 'undefined'
 			if settings.i18n.subdomainLang
 				each subdomainDetails in settings.i18n.subdomainLang
 					if !subdomainDetails.hide
-						link(rel="alternate", href=subdomainDetails.url + currentUrl, hreflang=subdomainDetails.lngCode)
+						link(
+							rel='alternate'
+							href=subdomainDetails.url + currentUrl
+							hreflang=subdomainDetails.lngCode
+						)
 
-		if (entrypoint !== 'marketing')
-			link(rel="preload", href=buildJsPath(currentLngCode + "-json.js"), as="script", nonce=scriptNonce)
+		if entrypoint !== 'marketing'
+			link(
+				rel='preload'
+				href=buildJsPath(currentLngCode + '-json.js')
+				as='script'
+				nonce=scriptNonce
+			)
 
 		//- Scripts
-		if (typeof suppressGoogleAnalytics == "undefined")
+		if typeof suppressAnalytics == 'undefined'
 			include _google_analytics
 
 		block meta
-			meta(name="ol-csrfToken" content=csrfToken)
+			meta(name='ol-csrfToken' content=csrfToken)
 			//- Configure dynamically loaded assets (via webpack) to be downloaded from CDN
 			//- See: https://webpack.js.org/guides/public-path/#on-the-fly
-			meta(name="ol-baseAssetPath" content=buildBaseAssetPath())
-			meta(name="ol-mathJaxPath" content=mathJaxPath)
-			meta(name="ol-dictionariesRoot" content=dictionariesRoot)
+			meta(name='ol-baseAssetPath' content=buildBaseAssetPath())
+			meta(name='ol-mathJaxPath' content=mathJaxPath)
+			meta(name='ol-dictionariesRoot' content=dictionariesRoot)
 
-			meta(name="ol-usersEmail" content=getUserEmail())
-			meta(name="ol-ab" data-type="json" content={})
-			meta(name="ol-user_id" content=getLoggedInUserId())
+			meta(name='ol-usersEmail' content=getUserEmail())
+			meta(name='ol-ab' data-type='json' content={})
+			meta(name='ol-user_id' content=getLoggedInUserId())
 			//- Internationalisation settings
-			meta(name="ol-i18n" data-type="json" content={
-				currentLangCode: currentLngCode
-			})
+			meta(
+				name='ol-i18n'
+				data-type='json'
+				content={
+					currentLangCode: currentLngCode,
+				}
+			)
 			//- Expose some settings globally to the frontend
-			meta(name="ol-ExposedSettings" data-type="json" content=ExposedSettings)
-			meta(name="ol-splitTestVariants" data-type="json" content=splitTestVariants || {})
-			meta(name="ol-splitTestInfo" data-type="json" content=splitTestInfo || {})
+			meta(name='ol-ExposedSettings' data-type='json' content=ExposedSettings)
+			meta(
+				name='ol-splitTestVariants'
+				data-type='json'
+				content=splitTestVariants || {}
+			)
+			meta(name='ol-splitTestInfo' data-type='json' content=splitTestInfo || {})
 
-			if (typeof settings.algolia != "undefined")
-				meta(name="ol-algolia" data-type="json" content={
-					appId: settings.algolia.app_id,
-					apiKey: settings.algolia.read_only_api_key,
-					indexes: settings.algolia.indexes
-				})
+			if typeof settings.algolia != 'undefined'
+				meta(
+					name='ol-algolia'
+					data-type='json'
+					content={
+						appId: settings.algolia.app_id,
+						apiKey: settings.algolia.read_only_api_key,
+						indexes: settings.algolia.indexes,
+					}
+				)
 
-			meta(name="ol-isManagedAccount" data-type="boolean" content=isManagedAccount)
+			meta(
+				name='ol-isManagedAccount'
+				data-type='boolean'
+				content=isManagedAccount
+			)
 			each restriction in userRestrictions || []
-				meta(name='ol-cannot-' + restriction data-type="boolean" content=true)
-			meta(name="ol-bootstrapVersion" data-type="json" content=bootstrapVersion)
+				meta(name='ol-cannot-' + restriction data-type='boolean' content)
+			meta(name='ol-bootstrapVersion' data-type='json' content=bootstrapVersion)
 
 		block head-scripts
 
-	body(class={
-		'thin-footer': showThinFooter,
-		'website-redesign': isWebsiteRedesign === true || websiteRedesignOverride,
-		'application-page': isApplicationPage
-	}, data-theme="default")
-		if(settings.recaptcha && settings.recaptcha.siteKeyV3)
-			script(type="text/javascript", nonce=scriptNonce, src="https://www.recaptcha.net/recaptcha/api.js?render=" + settings.recaptcha.siteKeyV3, defer=deferScripts)
+	body(
+		class={
+			'thin-footer': showThinFooter,
+			'website-redesign': isWebsiteRedesign === true || websiteRedesignOverride,
+			'application-page': isApplicationPage,
+		}
+		data-theme='default'
+	)
+		if settings.recaptcha && settings.recaptcha.siteKeyV3
+			script(
+				type='text/javascript'
+				nonce=scriptNonce
+				src='https://www.recaptcha.net/recaptcha/api.js?render=' + settings.recaptcha.siteKeyV3
+				defer=deferScripts
+			)
 
-		if (typeof suppressSkipToContent == "undefined")
-			a(class="skip-to-content" href="#main-content") #{translate('skip_to_content')}
+		if typeof suppressSkipToContent == 'undefined'
+			a(class='skip-to-content' href='#main-content') #{translate('skip_to_content')}
 
 		block body
 
-		if (settings.devToolbar.enabled)
-			div#dev-toolbar
+		if settings.devToolbar.enabled
+			#dev-toolbar
 
 	block foot-scripts
 		+foot-scripts
 
 	include _customer_io
 
-	script(type="text/javascript", nonce=scriptNonce).
-		window.addEventListener('DOMContentLoaded', function() {
+	script(type='text/javascript' nonce=scriptNonce).
+		window.addEventListener('DOMContentLoaded', function () {
 			//- Look for bundle
 			var cdnBlocked = typeof Frontend === 'undefined'
 			//- Prevent loops
-			var noCdnAlreadyInUrl = window.location.href.indexOf("nocdn=true") != -1
-			if (cdnBlocked && !noCdnAlreadyInUrl && navigator.userAgent.indexOf("Googlebot") == -1) {
+			var noCdnAlreadyInUrl = window.location.href.indexOf('nocdn=true') != -1
+			if (cdnBlocked && !noCdnAlreadyInUrl && navigator.userAgent.indexOf('Googlebot') == -1) {
 				//- Set query param, server will not set CDN url
-				window.location.search += "&nocdn=true";
+				window.location.search += '&nocdn=true'
 			}
 		})

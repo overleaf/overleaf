@@ -10,8 +10,6 @@ import {
   Dispatch,
   SetStateAction,
 } from 'react'
-import useScopeValue from '../hooks/use-scope-value'
-import useScopeValueSetterOnly from '../hooks/use-scope-value-setter-only'
 import usePersistedState from '../hooks/use-persisted-state'
 import useAbortController from '../hooks/use-abort-controller'
 import DocumentCompiler from '../../features/pdf-preview/util/compiler'
@@ -39,6 +37,7 @@ import { useFileTreePathContext } from '@/features/file-tree/contexts/file-tree-
 import { useUserSettingsContext } from '@/shared/context/user-settings-context'
 import { useFeatureFlag } from '@/shared/context/split-test-context'
 import { useEditorManagerContext } from '@/features/ide-react/context/editor-manager-context'
+import { useEditorOpenDocContext } from '@/features/ide-react/context/editor-open-doc-context'
 import { getJSON } from '@/infrastructure/fetch-json'
 import { CompileResponseData } from '../../../../types/compile'
 import {
@@ -50,8 +49,7 @@ import { isSplitTestEnabled } from '@/utils/splitTestUtils'
 import { captureException } from '@/infrastructure/error-reporter'
 import OError from '@overleaf/o-error'
 import getMeta from '@/utils/meta'
-import { useIsNewEditorEnabled } from '@/features/ide-redesign/utils/new-editor-utils'
-import { useRailContext } from '@/features/ide-redesign/contexts/rail-context'
+import type { Annotation } from '../../../../types/annotation'
 
 type PdfFile = Record<string, any>
 
@@ -75,7 +73,7 @@ export type CompileContext = {
     warnings: LogEntry[]
     typesetting: LogEntry[]
   }
-  logEntryAnnotations?: Record<string, any>
+  logEntryAnnotations?: Record<string, Annotation[]>
   outputFilesArchive?: string
   pdfDownloadUrl?: string
   pdfFile?: PdfFile
@@ -86,7 +84,7 @@ export type CompileContext = {
   setAutoCompile: (value: boolean) => void
   setDraft: (value: any) => void
   setError: (value: any) => void
-  setHasLintingError: (value: any) => void // only for storybook
+  setHasLintingError: (value: boolean) => void // only for storybook
   setHighlights: (value: any) => void
   setPosition: Dispatch<SetStateAction<PdfScrollPosition>>
   setShowCompileTimeWarning: (value: any) => void
@@ -99,7 +97,7 @@ export type CompileContext = {
   stopOnFirstError: boolean
   stopOnValidationError: boolean
   stoppedOnFirstError: boolean
-  uncompiled?: boolean
+  uncompiled: boolean
   validationIssues?: Record<string, any>
   firstRenderDone: (metrics: {
     latencyFetch: number
@@ -129,22 +127,14 @@ export const LocalCompileProvider: FC<React.PropsWithChildren> = ({
   children,
 }) => {
   const { hasPremiumCompile, isProjectOwner } = useEditorContext()
-  const { openDocWithId, openDocs, currentDocument } = useEditorManagerContext()
+  const { openDocWithId, openDocs } = useEditorManagerContext()
+  const { currentDocument } = useEditorOpenDocContext()
   const { role } = useDetachContext()
 
-  const newEditor = useIsNewEditorEnabled()
-
-  const {
-    _id: projectId,
-    rootDocId,
-    joinedOnce,
-    imageName,
-    compiler: compilerName,
-  } = useProjectContext()
+  const { projectId, joinedOnce, project } = useProjectContext()
+  const { rootDocId, imageName, compiler: compilerName } = project || {}
 
   const { pdfPreviewOpen } = useLayoutContext()
-
-  const { openTab: openRailTab } = useRailContext()
 
   const { features, alphaProgram, labsProgram } = useUserContext()
 
@@ -160,34 +150,22 @@ export const LocalCompileProvider: FC<React.PropsWithChildren> = ({
   const [hasShortCompileTimeout, setHasShortCompileTimeout] = useState(false)
 
   // the log entries parsed from the compile output log
-  const [logEntries, setLogEntries] = useScopeValueSetterOnly('pdf.logEntries')
+  const [logEntries, setLogEntries] = useState<CompileContext['logEntries']>()
 
   // annotations for display in the editor, built from the log entries
-  const [logEntryAnnotations, setLogEntryAnnotations] = useScopeValue(
-    'pdf.logEntryAnnotations'
-  )
+  const [logEntryAnnotations, setLogEntryAnnotations] = useState<
+    undefined | Record<string, Annotation[]>
+  >()
 
   // the PDF viewer and whether syntax validation is enabled globally
   const { userSettings } = useUserSettingsContext()
   const { pdfViewer, syntaxValidation } = userSettings
 
-  // the URL for downloading the PDF
-  const [, setPdfDownloadUrl] =
-    useScopeValueSetterOnly<string>('pdf.downloadUrl')
-
-  // the URL for loading the PDF in the preview pane
-  const [, setPdfUrl] = useScopeValueSetterOnly<string>('pdf.url')
-
   // low level details for metrics
   const [pdfFile, setPdfFile] = useState<PdfFile | undefined>()
 
-  useEffect(() => {
-    setPdfDownloadUrl(pdfFile?.pdfDownloadUrl)
-    setPdfUrl(pdfFile?.pdfUrl)
-  }, [pdfFile, setPdfDownloadUrl, setPdfUrl])
-
   // the project is considered to be "uncompiled" if a doc has changed, or finished saving, since the last compile started.
-  const [uncompiled, setUncompiled] = useScopeValue('pdf.uncompiled')
+  const [uncompiled, setUncompiled] = useState(false)
 
   // whether a doc has been edited since the last compile started
   const [editedSinceCompileStarted, setEditedSinceCompileStarted] =
@@ -265,17 +243,19 @@ export const LocalCompileProvider: FC<React.PropsWithChildren> = ({
   const [autoCompile, setAutoCompile] = usePersistedState(
     `autocompile_enabled:${projectId}`,
     false,
-    true
+    { listen: true }
   )
 
   // whether the compile should run in draft mode
-  const [draft, setDraft] = usePersistedState(`draft:${projectId}`, false, true)
+  const [draft, setDraft] = usePersistedState(`draft:${projectId}`, false, {
+    listen: true,
+  })
 
   // whether compiling should stop on first error
   const [stopOnFirstError, setStopOnFirstError] = usePersistedState(
     `stop_on_first_error:${projectId}`,
     false,
-    true
+    { listen: true }
   )
 
   // whether the last compiles stopped on first error
@@ -285,11 +265,11 @@ export const LocalCompileProvider: FC<React.PropsWithChildren> = ({
   const [stopOnValidationError, setStopOnValidationError] = usePersistedState(
     `stop_on_validation_error:${projectId}`,
     true,
-    true
+    { listen: true }
   )
 
   // whether the editor linter found errors
-  const [hasLintingError, setHasLintingError] = useScopeValue('hasLintingError')
+  const [hasLintingError, setHasLintingError] = useState(false)
 
   // the timestamp that a doc was last changed
   const [changedAt, setChangedAt] = useState(0)
@@ -298,7 +278,7 @@ export const LocalCompileProvider: FC<React.PropsWithChildren> = ({
 
   const cleanupCompileResult = useCallback(() => {
     setPdfFile(undefined)
-    setLogEntries(null)
+    setLogEntries(undefined)
     setLogEntryAnnotations({})
   }, [setPdfFile, setLogEntries, setLogEntryAnnotations])
 
@@ -517,8 +497,8 @@ export const LocalCompileProvider: FC<React.PropsWithChildren> = ({
 
         // handle log files
         // asynchronous (TODO: cancel on new compile?)
-        setLogEntryAnnotations(null)
-        setLogEntries(null)
+        setLogEntryAnnotations(undefined)
+        setLogEntries(undefined)
         setRawLog(undefined)
 
         handleLogFiles(outputFiles, data, abortController.signal).then(
@@ -751,22 +731,6 @@ export const LocalCompileProvider: FC<React.PropsWithChildren> = ({
   // After a compile, the compiler sets `data.options` to the options that were
   // used for that compile.
   const lastCompileOptions = useMemo(() => data?.options || {}, [data])
-
-  useEffect(() => {
-    const listener = () => {
-      if (newEditor) {
-        openRailTab('errors')
-      } else {
-        setShowLogs(true)
-      }
-    }
-
-    window.addEventListener('editor:show-logs', listener)
-
-    return () => {
-      window.removeEventListener('editor:show-logs', listener)
-    }
-  }, [newEditor, openRailTab])
 
   const value = useMemo(
     () => ({

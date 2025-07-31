@@ -8,8 +8,8 @@
     "@types/chai": "^4.3.0",
     "@types/chai-as-promised": "^7.1.8",
     "@types/mocha": "^10.0.6",
-    "@typescript-eslint/eslint-plugin": "^8.0.0",
-    "@typescript-eslint/parser": "^8.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.30.1",
+    "@typescript-eslint/parser": "^8.30.1",
     "eslint": "^8.15.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-config-standard": "^17.0.0",
@@ -18,28 +18,24 @@
     "eslint-plugin-cypress": "^2.15.1",
     "eslint-plugin-import": "^2.26.0",
     "eslint-plugin-mocha": "^10.1.0",
-    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-n": "^15.7.0",
     "eslint-plugin-prettier": "^4.0.0",
     "eslint-plugin-promise": "^6.0.0",
     "eslint-plugin-unicorn": "^56.0.0",
-    "prettier": "3.3.3",
-    "typescript": "^5.5.4"
+    "prettier": "3.6.2",
+    "typescript": "^5.8.3"
+  },
+  "engines": {
+    "npm": "11.4.2"
   },
   "overrides": {
-    "cross-env": {
-      "cross-spawn": "^7.0.6"
-    },
-    "fetch-mock": {
-      "path-to-regexp": "3.3.0"
-    },
-    "google-gax": {
-      "protobufjs": "^7.2.5"
-    },
-    "swagger-tools": {
-      "body-parser": "1.20.3",
-      "multer": "2.0.1",
+    "swagger-tools@0.10.4": {
       "path-to-regexp": "3.3.0",
-      "qs": "6.13.0"
+      "body-parser": "1.20.3",
+      "multer": "2.0.2"
+    },
+    "request@2.88.2": {
+      "tough-cookie": "5.1.2"
     }
   },
   "scripts": {

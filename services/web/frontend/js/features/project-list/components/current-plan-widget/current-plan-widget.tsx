@@ -14,8 +14,12 @@ function CurrentPlanWidget() {
   }
 
   const { type } = usersBestSubscription
-  const isFreePlan = type === 'free' || type === 'standalone-ai-add-on'
-  const isIndividualPlan = type === 'individual'
+  const isFreePlan =
+    type === 'free' ||
+    type === 'standalone-ai-add-on' ||
+    (type === 'individual' && usersBestSubscription.plan?.name === 'Free')
+  const isIndividualPlan =
+    type === 'individual' && !(usersBestSubscription.plan?.name === 'Free')
   const isGroupPlan = type === 'group'
   const isCommonsPlan = type === 'commons'
   const isPaused =

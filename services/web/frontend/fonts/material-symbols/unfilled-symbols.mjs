@@ -4,9 +4,11 @@
 // You may need to hard reload your browser window to see the changes.
 
 export default /** @type {const} */ ([
+  'account_balance',
   'auto_delete',
   'book_5',
   'brush',
+  'close',
   'code',
   'content_copy',
   'create_new_folder',
@@ -30,6 +32,7 @@ export default /** @type {const} */ ([
   'table_chart',
   'thumb_down',
   'thumb_up',
+  'upload',
   'upload_file',
   'web_asset',
 ])

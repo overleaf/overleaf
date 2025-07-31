@@ -35,6 +35,7 @@ const setupFetchMock = fetchMock => {
 const fileData = {
   id: 'file-id',
   name: 'file.tex',
+  hash: 'c0ffee',
   created: new Date().toISOString(),
 }
 

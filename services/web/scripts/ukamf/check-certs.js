@@ -51,7 +51,7 @@ async function checkCert(ukamfDB, providerId) {
     if (entity) {
       const samlConfig = entity.getSamlConfig()
       // check if certificates match
-      if (samlConfig.cert === body.sso_cert) {
+      if (samlConfig.idpCert === body.sso_cert) {
         console.log(' * UKAMF certificate matches configuration')
       } else {
         console.log(' ! UKAMF certificate DOES NOT match configuration')

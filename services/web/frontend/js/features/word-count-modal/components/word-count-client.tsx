@@ -6,6 +6,7 @@ import { useProjectContext } from '@/shared/context/project-context'
 import useAbortController from '@/shared/hooks/use-abort-controller'
 import { useProjectSettingsContext } from '@/features/editor-left-menu/context/project-settings-context'
 import { useEditorManagerContext } from '@/features/ide-react/context/editor-manager-context'
+import { useEditorOpenDocContext } from '@/features/ide-react/context/editor-open-doc-context'
 import { useFileTreePathContext } from '@/features/file-tree/contexts/file-tree-path'
 import { debugConsole } from '@/utils/debugging'
 import { signalWithTimeout } from '@/utils/abort-signal'
@@ -18,9 +19,11 @@ export const WordCountClient: FC = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
   const [data, setData] = useState<WordCountData | null>(null)
-  const { projectSnapshot, rootDocId } = useProjectContext()
+  const { projectSnapshot, project } = useProjectContext()
+  const rootDocId = project?.rootDocId
   const { spellCheckLanguage } = useProjectSettingsContext()
-  const { openDocs, currentDocument } = useEditorManagerContext()
+  const { openDocs } = useEditorManagerContext()
+  const { currentDocument } = useEditorOpenDocContext()
   const { pathInFolder } = useFileTreePathContext()
 
   const { signal } = useAbortController()

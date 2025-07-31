@@ -13,6 +13,7 @@ export const LabsActions = () => {
     setShowSwitcherModal(true)
   }, [setShowSwitcherModal])
   const surveyURL = useSurveyUrl()
+
   return (
     <>
       <div className="ide-redesign-toolbar-button-container">

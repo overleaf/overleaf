@@ -6,11 +6,17 @@ import React from 'react'
 import { useCommandProvider } from '@/features/ide-react/hooks/use-command-provider'
 import { usePermissionsContext } from '@/features/ide-react/context/permissions-context'
 import FileTreeActionButton from './file-tree-action-button'
+import { useRailContext } from '../../contexts/rail-context'
 
-export default function FileTreeActionButtons() {
+export default function FileTreeActionButtons({
+  fileTreeExpanded,
+}: {
+  fileTreeExpanded: boolean
+}) {
   const { t } = useTranslation()
   const { fileTreeReadOnly } = useFileTreeData()
   const { write } = usePermissionsContext()
+  const { handlePaneCollapse } = useRailContext()
 
   const {
     canCreate,
@@ -70,38 +76,48 @@ export default function FileTreeActionButtons() {
 
   return (
     <div className="file-tree-toolbar-action-buttons">
-      {canCreate && (
-        <FileTreeActionButton
-          id="new-file"
-          description={t('new_file')}
-          onClick={createWithAnalytics}
-          iconType="note_add"
-        />
+      {fileTreeExpanded && (
+        <>
+          {canCreate && (
+            <FileTreeActionButton
+              id="new-file"
+              description={t('new_file')}
+              onClick={createWithAnalytics}
+              iconType="note_add"
+            />
+          )}
+          {canCreate && (
+            <FileTreeActionButton
+              id="new-folder"
+              description={t('new_folder')}
+              onClick={startCreatingFolder}
+              iconType="create_new_folder"
+            />
+          )}
+          {canCreate && (
+            <FileTreeActionButton
+              id="upload"
+              description={t('upload')}
+              onClick={uploadWithAnalytics}
+              iconType="upload"
+            />
+          )}
+          {canBulkDelete && (
+            <FileTreeActionButton
+              id="delete"
+              description={t('delete')}
+              onClick={startDeleting}
+              iconType="delete"
+            />
+          )}
+        </>
       )}
-      {canCreate && (
-        <FileTreeActionButton
-          id="new-folder"
-          description={t('new_folder')}
-          onClick={startCreatingFolder}
-          iconType="create_new_folder"
-        />
-      )}
-      {canCreate && (
-        <FileTreeActionButton
-          id="upload"
-          description={t('upload')}
-          onClick={uploadWithAnalytics}
-          iconType="upload_file"
-        />
-      )}
-      {canBulkDelete && (
-        <FileTreeActionButton
-          id="delete"
-          description={t('delete')}
-          onClick={startDeleting}
-          iconType="delete"
-        />
-      )}
+      <FileTreeActionButton
+        id="close"
+        description={t('close')}
+        onClick={handlePaneCollapse}
+        iconType="close"
+      />
     </div>
   )
 }

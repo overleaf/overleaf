@@ -7,6 +7,7 @@ describe('Features', function () {
     this.Features = SandboxedModule.require(modulePath, {
       requires: {
         '@overleaf/settings': (this.settings = {
+          filestoreMigrationLevel: 0,
           moduleImportSequence: [],
           enabledLinkedFileTypes: [],
         }),

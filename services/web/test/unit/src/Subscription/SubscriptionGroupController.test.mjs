@@ -55,7 +55,7 @@ describe('SubscriptionGroupController', function () {
         getUsersGroupSubscriptionDetails: sinon.stub().resolves({
           subscription: ctx.subscription,
           plan: ctx.plan,
-          recurlySubscription: ctx.recurlySubscription,
+          paymentProviderSubscription: ctx.recurlySubscription,
         }),
         previewAddSeatsSubscriptionChange: sinon
           .stub()
@@ -73,6 +73,8 @@ describe('SubscriptionGroupController', function () {
           .resolves(ctx.previewSubscriptionChangeData),
         checkBillingInfoExistence: sinon.stub().resolves(ctx.paymentMethod),
         updateSubscriptionPaymentTerms: sinon.stub().resolves(),
+        ensureSubscriptionHasAdditionalLicenseAddOnWhenCollectionMethodIsManual:
+          sinon.stub().resolves(),
       },
     }
 
@@ -105,12 +107,6 @@ describe('SubscriptionGroupController', function () {
       },
     }
 
-    ctx.SplitTestHandler = {
-      promises: {
-        getAssignment: sinon.stub().resolves({ variant: 'enabled' }),
-      },
-    }
-
     ctx.UserGetter = {
       promises: {
         getUserEmail: sinon.stub().resolves(ctx.user.email),
@@ -140,6 +136,13 @@ describe('SubscriptionGroupController', function () {
       InactiveError: class extends Error {},
       SubtotalLimitExceededError: class extends Error {},
       HasPastDueInvoiceError: class extends Error {},
+      HasNoAdditionalLicenseWhenManuallyCollectedError: class extends Error {},
+      PaymentActionRequiredError: class extends Error {
+        constructor(info) {
+          super('Payment action required')
+          this.info = info
+        }
+      },
     }
 
     vi.doMock(
@@ -170,13 +173,6 @@ describe('SubscriptionGroupController', function () {
     vi.doMock('../../../../app/src/infrastructure/Modules', () => ({
       default: ctx.Modules,
     }))
-
-    vi.doMock(
-      '../../../../app/src/Features/SplitTests/SplitTestHandler',
-      () => ({
-        default: ctx.SplitTestHandler,
-      })
-    )
 
     vi.doMock('../../../../app/src/Features/User/UserGetter', () => ({
       default: ctx.UserGetter,
@@ -231,8 +227,8 @@ describe('SubscriptionGroupController', function () {
   })
 
   describe('removeUserFromGroup', function () {
-    it('should use the subscription id for the logged in user and take the user id from the params', function (ctx) {
-      return new Promise(resolve => {
+    it('should use the subscription id for the logged in user and take the user id from the params', async function (ctx) {
+      await new Promise(resolve => {
         const userIdToRemove = '31231'
         ctx.req.params = { user_id: userIdToRemove }
         ctx.req.entity = ctx.subscription
@@ -252,8 +248,8 @@ describe('SubscriptionGroupController', function () {
       })
     })
 
-    it('should log that the user has been removed', function (ctx) {
-      return new Promise(resolve => {
+    it('should log that the user has been removed', async function (ctx) {
+      await new Promise(resolve => {
         const userIdToRemove = '31231'
         ctx.req.params = { user_id: userIdToRemove }
         ctx.req.entity = ctx.subscription
@@ -275,8 +271,8 @@ describe('SubscriptionGroupController', function () {
       })
     })
 
-    it('should call the group SSO hooks with group SSO enabled', function (ctx) {
-      return new Promise(resolve => {
+    it('should call the group SSO hooks with group SSO enabled', async function (ctx) {
+      await new Promise(resolve => {
         const userIdToRemove = '31231'
         ctx.req.params = { user_id: userIdToRemove }
         ctx.req.entity = ctx.subscription
@@ -304,8 +300,8 @@ describe('SubscriptionGroupController', function () {
       })
     })
 
-    it('should call the group SSO hooks with group SSO disabled', function (ctx) {
-      return new Promise(resolve => {
+    it('should call the group SSO hooks with group SSO disabled', async function (ctx) {
+      await new Promise(resolve => {
         const userIdToRemove = '31231'
         ctx.req.params = { user_id: userIdToRemove }
         ctx.req.entity = ctx.subscription
@@ -328,8 +324,8 @@ describe('SubscriptionGroupController', function () {
   })
 
   describe('removeSelfFromGroup', function () {
-    it('gets subscription and remove user', function (ctx) {
-      return new Promise(resolve => {
+    it('gets subscription and remove user', async function (ctx) {
+      await new Promise(resolve => {
         ctx.req.query = { subscriptionId: ctx.subscriptionId }
         const memberUserIdToremove = 123456789
         ctx.req.session.user._id = memberUserIdToremove
@@ -356,8 +352,8 @@ describe('SubscriptionGroupController', function () {
       })
     })
 
-    it('should log that the user has left the subscription', function (ctx) {
-      return new Promise(resolve => {
+    it('should log that the user has left the subscription', async function (ctx) {
+      await new Promise(resolve => {
         ctx.req.query = { subscriptionId: ctx.subscriptionId }
         const memberUserIdToremove = '123456789'
         ctx.req.session.user._id = memberUserIdToremove
@@ -379,8 +375,8 @@ describe('SubscriptionGroupController', function () {
       })
     })
 
-    it('should call the group SSO hooks with group SSO enabled', function (ctx) {
-      return new Promise(resolve => {
+    it('should call the group SSO hooks with group SSO enabled', async function (ctx) {
+      await new Promise(resolve => {
         ctx.req.query = { subscriptionId: ctx.subscriptionId }
         const memberUserIdToremove = '123456789'
         ctx.req.session.user._id = memberUserIdToremove
@@ -409,8 +405,8 @@ describe('SubscriptionGroupController', function () {
       })
     })
 
-    it('should call the group SSO hooks with group SSO disabled', function (ctx) {
-      return new Promise(resolve => {
+    it('should call the group SSO hooks with group SSO disabled', async function (ctx) {
+      await new Promise(resolve => {
         const userIdToRemove = '31231'
         ctx.req.session.user._id = userIdToRemove
         ctx.req.params = { user_id: userIdToRemove }
@@ -434,8 +430,8 @@ describe('SubscriptionGroupController', function () {
   })
 
   describe('addSeatsToGroupSubscription', function () {
-    it('should render the "add seats" page', function (ctx) {
-      return new Promise((resolve, reject) => {
+    it('should render the "add seats" page', async function (ctx) {
+      await new Promise((resolve, reject) => {
         const res = {
           render: (page, props) => {
             ctx.SubscriptionGroupHandler.promises.getUsersGroupSubscriptionDetails
@@ -456,6 +452,9 @@ describe('SubscriptionGroupController', function () {
             ctx.SubscriptionGroupHandler.promises.checkBillingInfoExistence
               .calledWith(ctx.recurlySubscription, ctx.adminUserId)
               .should.equal(true)
+            ctx.SubscriptionGroupHandler.promises.ensureSubscriptionHasAdditionalLicenseAddOnWhenCollectionMethodIsManual
+              .calledWith(ctx.recurlySubscription)
+              .should.equal(true)
             page.should.equal('subscriptions/add-seats')
             props.subscriptionId.should.equal(ctx.subscriptionId)
             props.groupName.should.equal(ctx.subscription.teamName)
@@ -470,8 +469,8 @@ describe('SubscriptionGroupController', function () {
       })
     })
 
-    it('should redirect to subscription page when getting subscription details fails', function (ctx) {
-      return new Promise(resolve => {
+    it('should redirect to subscription page when getting subscription details fails', async function (ctx) {
+      await new Promise(resolve => {
         ctx.SubscriptionGroupHandler.promises.getUsersGroupSubscriptionDetails =
           sinon.stub().rejects()
 
@@ -486,8 +485,8 @@ describe('SubscriptionGroupController', function () {
       })
     })
 
-    it('should redirect to subscription page when flexible licensing is not enabled', function (ctx) {
-      return new Promise(resolve => {
+    it('should redirect to subscription page when flexible licensing is not enabled', async function (ctx) {
+      await new Promise(resolve => {
         ctx.SubscriptionGroupHandler.promises.ensureFlexibleLicensingEnabled =
           sinon.stub().rejects()
 
@@ -502,8 +501,8 @@ describe('SubscriptionGroupController', function () {
       })
     })
 
-    it('should redirect to missing billing information page when billing information is missing', function (ctx) {
-      return new Promise(resolve => {
+    it('should redirect to missing billing information page when billing information is missing', async function (ctx) {
+      await new Promise(resolve => {
         ctx.SubscriptionGroupHandler.promises.checkBillingInfoExistence = sinon
           .stub()
           .throws(new ctx.Errors.MissingBillingInfoError())
@@ -521,8 +520,30 @@ describe('SubscriptionGroupController', function () {
       })
     })
 
-    it('should redirect to subscription page when there is a pending change', function (ctx) {
-      return new Promise(resolve => {
+    it('should redirect to manually collected subscription error page when collection method is manual and has no additional license add-on', async function (ctx) {
+      await new Promise(resolve => {
+        ctx.SubscriptionGroupHandler.promises.ensureSubscriptionHasAdditionalLicenseAddOnWhenCollectionMethodIsManual =
+          sinon
+            .stub()
+            .throws(
+              new ctx.Errors.HasNoAdditionalLicenseWhenManuallyCollectedError()
+            )
+
+        const res = {
+          redirect: url => {
+            url.should.equal(
+              '/user/subscription/group/manually-collected-subscription'
+            )
+            resolve()
+          },
+        }
+
+        ctx.Controller.addSeatsToGroupSubscription(ctx.req, res)
+      })
+    })
+
+    it('should redirect to subscription page when there is a pending change', async function (ctx) {
+      await new Promise(resolve => {
         ctx.SubscriptionGroupHandler.promises.ensureSubscriptionHasNoPendingChanges =
           sinon.stub().throws(new ctx.Errors.PendingChangeError())
 
@@ -537,8 +558,8 @@ describe('SubscriptionGroupController', function () {
       })
     })
 
-    it('should redirect to subscription page when subscription is not active', function (ctx) {
-      return new Promise(resolve => {
+    it('should redirect to subscription page when subscription is not active', async function (ctx) {
+      await new Promise(resolve => {
         ctx.SubscriptionGroupHandler.promises.ensureSubscriptionIsActive = sinon
           .stub()
           .rejects()
@@ -554,10 +575,11 @@ describe('SubscriptionGroupController', function () {
       })
     })
 
-    it('should redirect to subscription page when subscription has pending invoice', function (ctx) {
+    it('should redirect to subscription page when subscription has pending invoice', async function (ctx) {
       ctx.SubscriptionGroupHandler.promises.ensureSubscriptionHasNoPastDueInvoice =
         sinon.stub().rejects()
-      return new Promise(resolve => {
+
+      await new Promise(resolve => {
         const res = {
           redirect: url => {
             url.should.equal('/user/subscription')
@@ -571,8 +593,8 @@ describe('SubscriptionGroupController', function () {
   })
 
   describe('previewAddSeatsSubscriptionChange', function () {
-    it('should preview "add seats" change', function (ctx) {
-      return new Promise(resolve => {
+    it('should preview "add seats" change', async function (ctx) {
+      await new Promise(resolve => {
         ctx.req.body = { adding: 2 }
 
         const res = {
@@ -589,8 +611,8 @@ describe('SubscriptionGroupController', function () {
       })
     })
 
-    it('should fail previewing "add seats" change', function (ctx) {
-      return new Promise(resolve => {
+    it('should fail previewing "add seats" change', async function (ctx) {
+      await new Promise(resolve => {
         ctx.SubscriptionGroupHandler.promises.previewAddSeatsSubscriptionChange =
           sinon.stub().rejects()
 
@@ -610,8 +632,8 @@ describe('SubscriptionGroupController', function () {
       })
     })
 
-    it('should fail previewing "add seats" change with SubtotalLimitExceededError', function (ctx) {
-      return new Promise(resolve => {
+    it('should fail previewing "add seats" change with SubtotalLimitExceededError', async function (ctx) {
+      await new Promise(resolve => {
         ctx.req.body = { adding: 2 }
         ctx.SubscriptionGroupHandler.promises.previewAddSeatsSubscriptionChange =
           sinon.stub().throws(new ctx.Errors.SubtotalLimitExceededError())
@@ -638,8 +660,8 @@ describe('SubscriptionGroupController', function () {
   })
 
   describe('createAddSeatsSubscriptionChange', function () {
-    it('should apply "add seats" change', function (ctx) {
-      return new Promise(resolve => {
+    it('should apply "add seats" change', async function (ctx) {
+      await new Promise(resolve => {
         ctx.req.body = { adding: 2 }
 
         const res = {
@@ -656,8 +678,8 @@ describe('SubscriptionGroupController', function () {
       })
     })
 
-    it('should fail applying "add seats" change', function (ctx) {
-      return new Promise(resolve => {
+    it('should fail applying "add seats" change', async function (ctx) {
+      await new Promise(resolve => {
         ctx.SubscriptionGroupHandler.promises.createAddSeatsSubscriptionChange =
           sinon.stub().rejects()
 
@@ -677,8 +699,8 @@ describe('SubscriptionGroupController', function () {
       })
     })
 
-    it('should fail applying "add seats" change with SubtotalLimitExceededError', function (ctx) {
-      return new Promise(resolve => {
+    it('should fail applying "add seats" change with SubtotalLimitExceededError', async function (ctx) {
+      await new Promise(resolve => {
         ctx.req.body = { adding: 2 }
         ctx.SubscriptionGroupHandler.promises.createAddSeatsSubscriptionChange =
           sinon.stub().throws(new ctx.Errors.SubtotalLimitExceededError())
@@ -702,11 +724,43 @@ describe('SubscriptionGroupController', function () {
         ctx.Controller.createAddSeatsSubscriptionChange(ctx.req, res)
       })
     })
+
+    it('should send 402 response with PaymentActionRequiredError', async function (ctx) {
+      await new Promise(resolve => {
+        const adding = 2
+        ctx.req.body = { adding }
+        const error = new ctx.Errors.PaymentActionRequiredError({
+          clientSecret: 'secret',
+          publicKey: 'key',
+        })
+        ctx.SubscriptionGroupHandler.promises.createAddSeatsSubscriptionChange =
+          sinon.stub().throws(error)
+
+        const res = {
+          status: statusCode => {
+            statusCode.should.equal(402)
+
+            return {
+              json: data => {
+                data.should.deep.equal({
+                  message: 'Payment action required',
+                  clientSecret: error.info.clientSecret,
+                  publicKey: error.info.publicKey,
+                })
+                resolve()
+              },
+            }
+          },
+        }
+
+        ctx.Controller.createAddSeatsSubscriptionChange(ctx.req, res)
+      })
+    })
   })
 
   describe('submitForm', function () {
-    it('should build and pass the request body to the sales submit handler', function (ctx) {
-      return new Promise(resolve => {
+    it('should build and pass the request body to the sales submit handler', async function (ctx) {
+      await new Promise(resolve => {
         const adding = 100
         const poNumber = 'PO123456'
         ctx.req.body = { adding, poNumber }
@@ -747,8 +801,8 @@ describe('SubscriptionGroupController', function () {
   })
 
   describe('subscriptionUpgradePage', function () {
-    it('should render "subscription upgrade" page', function (ctx) {
-      return new Promise(resolve => {
+    it('should render "subscription upgrade" page', async function (ctx) {
+      await new Promise(resolve => {
         const olSubscription = { membersLimit: 1, teamName: 'test team' }
         ctx.SubscriptionModel.Subscription.findOne = () => {
           return {
@@ -773,8 +827,8 @@ describe('SubscriptionGroupController', function () {
       })
     })
 
-    it('should redirect if failed to generate preview', function (ctx) {
-      return new Promise(resolve => {
+    it('should redirect if failed to generate preview', async function (ctx) {
+      await new Promise(resolve => {
         ctx.SubscriptionGroupHandler.promises.getGroupPlanUpgradePreview = sinon
           .stub()
           .rejects()
@@ -790,8 +844,8 @@ describe('SubscriptionGroupController', function () {
       })
     })
 
-    it('should redirect to missing billing information page when billing information is missing', function (ctx) {
-      return new Promise(resolve => {
+    it('should redirect to missing billing information page when billing information is missing', async function (ctx) {
+      await new Promise(resolve => {
         ctx.SubscriptionGroupHandler.promises.getGroupPlanUpgradePreview = sinon
           .stub()
           .throws(new ctx.Errors.MissingBillingInfoError())
@@ -809,8 +863,8 @@ describe('SubscriptionGroupController', function () {
       })
     })
 
-    it('should redirect to manually collected subscription error page when collection method is manual', function (ctx) {
-      return new Promise(resolve => {
+    it('should redirect to manually collected subscription error page when collection method is manual', async function (ctx) {
+      await new Promise(resolve => {
         ctx.SubscriptionGroupHandler.promises.getGroupPlanUpgradePreview = sinon
           .stub()
           .throws(new ctx.Errors.ManuallyCollectedError())
@@ -828,8 +882,8 @@ describe('SubscriptionGroupController', function () {
       })
     })
 
-    it('should redirect to subtotal limit exceeded page', function (ctx) {
-      return new Promise(resolve => {
+    it('should redirect to subtotal limit exceeded page', async function (ctx) {
+      await new Promise(resolve => {
         ctx.SubscriptionGroupHandler.promises.getGroupPlanUpgradePreview = sinon
           .stub()
           .throws(new ctx.Errors.SubtotalLimitExceededError())
@@ -847,8 +901,8 @@ describe('SubscriptionGroupController', function () {
   })
 
   describe('upgradeSubscription', function () {
-    it('should send 200 response', function (ctx) {
-      return new Promise(resolve => {
+    it('should send 200 response', async function (ctx) {
+      await new Promise(resolve => {
         ctx.SubscriptionGroupHandler.promises.upgradeGroupPlan = sinon
           .stub()
           .resolves()
@@ -864,8 +918,8 @@ describe('SubscriptionGroupController', function () {
       })
     })
 
-    it('should send 500 response', function (ctx) {
-      return new Promise(resolve => {
+    it('should send 500 response', async function (ctx) {
+      await new Promise(resolve => {
         ctx.SubscriptionGroupHandler.promises.upgradeGroupPlan = sinon
           .stub()
           .rejects()
@@ -874,6 +928,35 @@ describe('SubscriptionGroupController', function () {
           sendStatus: code => {
             code.should.equal(500)
             resolve()
+          },
+        }
+
+        ctx.Controller.upgradeSubscription(ctx.req, res)
+      })
+    })
+
+    it('should send 402 response with PaymentActionRequiredError', async function (ctx) {
+      await new Promise(resolve => {
+        const error = new ctx.Errors.PaymentActionRequiredError({
+          clientSecret: 'secret',
+          publicKey: 'public',
+        })
+        ctx.SubscriptionGroupHandler.promises.upgradeGroupPlan = sinon
+          .stub()
+          .rejects(error)
+        const res = {
+          status: code => {
+            code.should.equal(402)
+            return {
+              json: data => {
+                data.should.deep.equal({
+                  message: 'Payment action required',
+                  clientSecret: error.info.clientSecret,
+                  publicKey: error.info.publicKey,
+                })
+                resolve()
+              },
+            }
           },
         }
 

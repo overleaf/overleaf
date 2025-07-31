@@ -9,6 +9,7 @@ import { useProjectContext } from '@/shared/context/project-context'
 import { useTranslation } from 'react-i18next'
 import importOverleafModules from '../../../../../macros/import-overleaf-module.macro'
 import { useEditorContext } from '@/shared/context/editor-context'
+import { useIdeReactContext } from '@/features/ide-react/context/ide-react-context'
 import { DownloadProjectPDF, DownloadProjectZip } from './download-project'
 import { useCallback, useState } from 'react'
 import OLDropdownMenuItem from '@/features/ui/components/ol/ol-dropdown-menu-item'
@@ -16,11 +17,13 @@ import EditableLabel from './editable-label'
 import { DuplicateProject } from './duplicate-project'
 
 const [publishModalModules] = importOverleafModules('publishModal')
-const SubmitProjectButton = publishModalModules?.import.NewPublishToolbarButton
+const SubmitProjectButton = publishModalModules?.import.NewPublishDropdownButton
 
 export const ToolbarProjectTitle = () => {
+  const { cobranding } = useEditorContext()
   const { t } = useTranslation()
-  const { permissionsLevel, renameProject } = useEditorContext()
+  const { renameProject } = useEditorContext()
+  const { permissionsLevel } = useIdeReactContext()
   const { name } = useProjectContext()
   const shouldDisplaySubmitButton =
     (permissionsLevel === 'owner' || permissionsLevel === 'readAndWrite') &&
@@ -58,14 +61,16 @@ export const ToolbarProjectTitle = () => {
         id="project-title-options"
         className="ide-redesign-toolbar-project-dropdown-toggle ide-redesign-toolbar-dropdown-toggle-subdued fw-bold ide-redesign-toolbar-button-subdued"
       >
-        <span className="ide-redesign-toolbar-project-name">{name}</span>
+        <span className="ide-redesign-toolbar-project-name" translate="no">
+          {name}
+        </span>
         <MaterialIcon
           type="keyboard_arrow_down"
           accessibilityLabel={t('project_title_options')}
         />
       </DropdownToggle>
       <DropdownMenu renderOnMount>
-        {shouldDisplaySubmitButton && (
+        {shouldDisplaySubmitButton && !cobranding && (
           <>
             <SubmitProjectButton />
             <DropdownDivider />

@@ -140,7 +140,7 @@ class AbstractMockApi {
         console.log('Starting mock on port', this.constructor.name, this.port)
       }
       this.server = this.app
-        .listen(this.port, err => {
+        .listen(this.port, '127.0.0.1', err => {
           if (err) {
             return reject(err)
           }

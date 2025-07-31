@@ -45,6 +45,18 @@ class PromisifiedSubscription {
     return await db.subscriptions.findOne({ _id: new ObjectId(this._id) })
   }
 
+  async getSSOConfig() {
+    const subscription = await this.get()
+
+    if (!subscription.ssoConfig) {
+      return
+    }
+
+    return await db.ssoConfigs.findOne({
+      _id: new ObjectId(subscription.ssoConfig),
+    })
+  }
+
   async getWithGroupPolicy() {
     // eslint-disable-next-line no-restricted-syntax
     return await SubscriptionModel.findById(this._id)
@@ -73,7 +85,14 @@ class PromisifiedSubscription {
   }
 
   async enableManagedUsers() {
-    await Modules.promises.hooks.fire('enableManagedUsers', this._id)
+    await Modules.promises.hooks.fire('enableManagedUsers', this._id, {
+      initiatorId: this.admin_id,
+      ipAddress: '123.456.789.0',
+    })
+  }
+
+  async disableManagedUsers() {
+    await Modules.promises.hooks.fire('disableManagedUsers', this._id)
   }
 
   async enableFeatureSSO() {

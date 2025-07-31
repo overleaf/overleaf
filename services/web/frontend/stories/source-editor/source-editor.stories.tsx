@@ -2,9 +2,115 @@ import SourceEditor from '../../js/features/source-editor/components/source-edit
 import { ScopeDecorator } from '../decorators/scope'
 import { useScope } from '../hooks/use-scope'
 import { useMeta } from '../hooks/use-meta'
-import { FC } from 'react'
+import React, { FC, useState } from 'react'
 import { FileTreePathContext } from '@/features/file-tree/contexts/file-tree-path'
 import RangesTracker from '@overleaf/ranges-tracker'
+import useExposedState from '@/shared/hooks/use-exposed-state'
+import { EditorOpenDocContext } from '@/features/ide-react/context/editor-open-doc-context'
+import { DocId } from '../../../types/project-settings'
+import { StoryObj } from '@storybook/react'
+import { DocumentContainer } from '@/features/ide-react/editor/document-container'
+import { EditorPropertiesContext } from '@/features/ide-react/context/editor-properties-context'
+
+type Story = StoryObj<typeof SourceEditor>
+
+const EditorOpenDocProvider: FC<
+  React.PropsWithChildren<{
+    initialOpenDocName: string | null
+    initialDocument: DocumentContainer
+  }>
+> = ({ children, initialOpenDocName, initialDocument }) => {
+  const [currentDocumentId, setCurrentDocumentId] =
+    useExposedState<DocId | null>(null, 'editor.open_doc_id')
+  const [openDocName, setOpenDocName] = useExposedState<string | null>(
+    initialOpenDocName,
+    'editor.open_doc_name'
+  )
+  const [currentDocument, setCurrentDocument] =
+    useState<DocumentContainer | null>(initialDocument)
+
+  const value = {
+    currentDocumentId,
+    setCurrentDocumentId,
+    openDocName,
+    setOpenDocName,
+    currentDocument,
+    setCurrentDocument,
+  }
+
+  return (
+    <EditorOpenDocContext.Provider value={value}>
+      {children}
+    </EditorOpenDocContext.Provider>
+  )
+}
+
+const LatexEditorOpenDocProvider: FC<React.PropsWithChildren> = ({
+  children,
+}) => (
+  <EditorOpenDocProvider
+    initialOpenDocName="example.tex"
+    initialDocument={
+      mockDoc(content.tex, changes.tex) as unknown as DocumentContainer
+    }
+  >
+    {children}
+  </EditorOpenDocProvider>
+)
+
+const MarkdownEditorOpenDocProvider: FC<React.PropsWithChildren> = ({
+  children,
+}) => (
+  <EditorOpenDocProvider
+    initialOpenDocName="example.md"
+    initialDocument={
+      mockDoc(content.md, changes.md) as unknown as DocumentContainer
+    }
+  >
+    {children}
+  </EditorOpenDocProvider>
+)
+
+const BibtexEditorOpenDocProvider: FC<React.PropsWithChildren> = ({
+  children,
+}) => (
+  <EditorOpenDocProvider
+    initialOpenDocName="example.bib"
+    initialDocument={
+      mockDoc(content.bib, changes.bib) as unknown as DocumentContainer
+    }
+  >
+    {children}
+  </EditorOpenDocProvider>
+)
+
+const VisualEditorPropertiesProvider: FC<React.PropsWithChildren> = ({
+  children,
+}) => {
+  const [showVisual, setShowVisual] = useState(true)
+
+  const value = {
+    showVisual,
+    setShowVisual,
+    showSymbolPalette: true,
+    setShowSymbolPalette: () => undefined,
+    toggleSymbolPalette: () => undefined,
+    opening: true,
+    setOpening: () => undefined,
+    trackChanges: false,
+    setTrackChanges: () => undefined,
+    wantTrackChanges: false,
+    setWantTrackChanges: () => undefined,
+    errorState: false,
+    setErrorState: () => undefined,
+  }
+
+  return (
+    <EditorPropertiesContext.Provider value={value}>
+      {children}
+    </EditorPropertiesContext.Provider>
+  )
+}
 
 const FileTreePathProvider: FC<React.PropsWithChildren> = ({ children }) => (
   <FileTreePathContext.Provider
@@ -29,11 +135,6 @@ export default {
   title: 'Editor / Source Editor',
   component: SourceEditor,
   decorators: [
-    (Story: any) =>
-      ScopeDecorator(Story, {
-        mockCompileOnLoad: true,
-        providers: { FileTreePathProvider },
-      }),
     (Story: any) => (
       <div style={{ height: '90vh' }}>
         <Story />
@@ -59,102 +160,141 @@ const permissions = {
   write: true,
 }
 
-export const Latex = (args: any, { globals: { theme } }: any) => {
-  // FIXME: useScope has no effect
-  useScope({
-    editor: {
-      sharejs_doc: mockDoc(content.tex, changes.tex),
-      open_doc_name: 'example.tex',
-    },
-    rootFolder: {
-      name: 'rootFolder',
-      id: 'root-folder-id',
-      type: 'folder',
-      children: [
-        {
-          name: 'example.tex.tex',
-          id: 'example-doc-id',
-          type: 'doc',
+export const Latex: Story = {
+  decorators: [
+    Story =>
+      ScopeDecorator(Story, {
+        mockCompileOnLoad: true,
+        providers: {
+          FileTreePathProvider,
+          EditorOpenDocProvider: LatexEditorOpenDocProvider,
+        },
+      }),
+
+    (Story, { globals }) => {
+      // FIXME: useScope has no effect
+      useScope({
+        rootFolder: {
+          name: 'rootFolder',
+          id: 'root-folder-id',
+          type: 'folder',
+          children: [
+            {
+              name: 'example.tex.tex',
+              id: 'example-doc-id',
+              type: 'doc',
+              selected: false,
+              $$hashKey: 'object:89',
+            },
+            {
+              name: 'frog.jpg',
+              id: 'frog-image-id',
+              type: 'file',
+              linkedFileData: null,
+              created: '2023-05-04T16:11:04.352Z',
+              $$hashKey: 'object:108',
+            },
+          ],
           selected: false,
-          $$hashKey: 'object:89',
         },
-        {
-          name: 'frog.jpg',
-          id: 'frog-image-id',
-          type: 'file',
-          linkedFileData: null,
-          created: '2023-05-04T16:11:04.352Z',
-          $$hashKey: 'object:108',
+        settings: {
+          ...settings,
+          overallTheme: globals.theme === 'default-' ? '' : globals.theme,
         },
-      ],
-      selected: false,
-    },
-    settings: {
-      ...settings,
-      overallTheme: theme === 'default-' ? '' : theme,
-    },
-    permissions,
-  })
+        permissions,
+      })
 
-  useMeta({
-    'ol-showSymbolPalette': true,
-  })
+      useMeta({
+        'ol-showSymbolPalette': true,
+      })
 
-  return <SourceEditor />
+      return <Story />
+    },
+  ],
 }
 
-export const Markdown = (args: any, { globals: { theme } }: any) => {
-  useScope({
-    editor: {
-      sharejs_doc: mockDoc(content.md, changes.md),
-      open_doc_name: 'example.md',
-    },
-    settings: {
-      ...settings,
-      overallTheme: theme === 'default-' ? '' : theme,
-    },
-    permissions,
-  })
+export const Markdown: Story = {
+  decorators: [
+    Story =>
+      ScopeDecorator(Story, {
+        mockCompileOnLoad: true,
+        providers: {
+          FileTreePathProvider,
+          EditorOpenDocProvider: MarkdownEditorOpenDocProvider,
+        },
+      }),
 
-  return <SourceEditor />
+    (Story, { globals }) => {
+      // FIXME: useScope has no effect
+      useScope({
+        settings: {
+          ...settings,
+          overallTheme: globals.theme === 'default-' ? '' : globals.theme,
+        },
+        permissions,
+      })
+
+      return <Story />
+    },
+  ],
 }
 
-export const Visual = (args: any, { globals: { theme } }: any) => {
-  useScope({
-    editor: {
-      sharejs_doc: mockDoc(content.tex, changes.tex),
-      open_doc_name: 'example.tex',
-      showVisual: true,
-    },
-    settings: {
-      ...settings,
-      overallTheme: theme === 'default-' ? '' : theme,
-    },
-    permissions,
-  })
-  useMeta({
-    'ol-showSymbolPalette': true,
-    'ol-mathJaxPath': 'https://unpkg.com/mathjax@3.2.2/es5/tex-svg-full.js',
-    'ol-project_id': '63e21c07946dd8c76505f85a',
-  })
+export const Visual: Story = {
+  decorators: [
+    Story =>
+      ScopeDecorator(Story, {
+        mockCompileOnLoad: true,
+        providers: {
+          FileTreePathProvider,
+          EditorOpenDocProvider: LatexEditorOpenDocProvider,
+          EditorPropertiesProvider: VisualEditorPropertiesProvider,
+        },
+      }),
 
-  return <SourceEditor />
+    (Story, { globals }) => {
+      // FIXME: useScope has no effect, so this does nothing
+      useScope({
+        settings: {
+          ...settings,
+          overallTheme: globals.theme === 'default-' ? '' : globals.theme,
+        },
+        permissions,
+      })
+
+      useMeta({
+        'ol-mathJaxPath': 'https://unpkg.com/mathjax@3.2.2/es5/tex-svg-full.js',
+        'ol-project_id': '63e21c07946dd8c76505f85a',
+      })
+
+      return <Story />
+    },
+  ],
 }
 
-export const Bibtex = (args: any, { globals: { theme } }: any) => {
-  useScope({
-    editor: {
-      sharejs_doc: mockDoc(content.bib, changes.bib),
-      open_doc_name: 'example.bib',
-    },
-    settings: {
-      ...settings,
-      overallTheme: theme === 'default-' ? '' : theme,
-    },
-    permissions,
-  })
+export const Bibtex: Story = {
+  decorators: [
+    Story =>
+      ScopeDecorator(Story, {
+        mockCompileOnLoad: true,
+        providers: {
+          FileTreePathProvider,
+          EditorOpenDocProvider: BibtexEditorOpenDocProvider,
+        },
+      }),
 
-  return <SourceEditor />
+    (Story, { globals }) => {
+      // FIXME: useScope has no effect
+      useScope({
+        settings: {
+          ...settings,
+          overallTheme: globals.theme === 'default-' ? '' : globals.theme,
+        },
+        permissions,
+      })
+
+      return <Story />
+    },
+  ],
 }
 
 const MAX_DOC_LENGTH = 2 * 1024 * 1024 // ol-maxDocLength
@@ -188,6 +328,9 @@ const mockDoc = (content: string, changes: Array<Record<string, any>> = []) => {
     },
     detachFromCM6: () => {
       // Do nothing
+    },
+    getType: () => {
+      return 'history-ot'
     },
     on: () => {
       // Do nothing

@@ -1,123 +1,140 @@
-
 //- Title
-if (metadata && metadata.title)
-	title= metadata.title + ' - ' + settings.appName + ', ' + translate("online_latex_editor")
-	meta(name="twitter:title", content=metadata.title)
-	meta(name="og:title", content=metadata.title)
-else if (typeof(title) == "undefined")
-	title= settings.appName + ', '+ translate("online_latex_editor")
-	meta(name="twitter:title", content=settings.appName + ', '+ translate("online_latex_editor"))
-	meta(name="og:title", content=settings.appName + ', '+ translate("online_latex_editor"))
+if metadata && metadata.title
+	title(translate='no')= metadata.title + ' - ' + settings.appName + ', ' + translate('online_latex_editor')
+	meta(name='twitter:title' content=metadata.title)
+	meta(name='og:title' content=metadata.title)
+else if typeof title == 'undefined'
+	title(translate='no')= settings.appName + ', ' + translate('online_latex_editor')
+	meta(
+		name='twitter:title'
+		content=settings.appName + ', ' + translate('online_latex_editor')
+	)
+	meta(
+		name='og:title'
+		content=settings.appName + ', ' + translate('online_latex_editor')
+	)
 else
-	title= translate(title) + ' - ' + settings.appName + ', ' + translate("online_latex_editor")
+	title(translate='no')= translate(title) + ' - ' + settings.appName + ', ' + translate('online_latex_editor')
 	//- to do - not translate?
-	meta(name="twitter:title", content=translate(title))
-	meta(name="og:title", content=translate(title))
+	meta(name='twitter:title' content=translate(title))
+	meta(name='og:title' content=translate(title))
 
 //- Description
-if (metadata && metadata.description)
-	meta(name="description" , content=metadata.description)
-	meta(itemprop="description" , content=metadata.description)
+if metadata && metadata.description
+	meta(name='description' content=metadata.description)
+	meta(itemprop='description' content=metadata.description)
 	//-twitter and og descriptions handeled in their sections below
 else
-	meta(name="description", content=translate("site_description"))
-	meta(itemprop="description", content=translate("site_description"))
+	meta(name='description' content=translate('site_description'))
+	meta(itemprop='description' content=translate('site_description'))
 
 //- Image
-if (metadata && metadata.image && metadata.image.fields)
+if metadata && metadata.image && metadata.image.fields
 	//- from the CMS
-	meta(itemprop="image", content=metadata.image.fields.file.url)
-	meta(name="image", content=metadata.image.fields.file.url)
-else if (metadata && metadata.image_src)
+	meta(itemprop='image' content=metadata.image.fields.file.url)
+	meta(name='image' content=metadata.image.fields.file.url)
+else if metadata && metadata.image_src
 	//- pages with custom metadata images, metadata.image_src is the full image URL
-	meta(itemprop="image", content=metadata.image_src)
-	meta(name="image", content=metadata.image_src)
-else if (settings.overleaf)
+	meta(itemprop='image' content=metadata.image_src)
+	meta(name='image' content=metadata.image_src)
+else if settings.overleaf
 	//- the default image for Overleaf
-	meta(itemprop="image", content=buildImgPath('ol-brand/overleaf_og_logo.png'))
-	meta(name="image", content=buildImgPath('ol-brand/overleaf_og_logo.png'))
+	meta(itemprop='image' content=buildImgPath('ol-brand/overleaf_og_logo.png'))
+	meta(name='image' content=buildImgPath('ol-brand/overleaf_og_logo.png'))
 else
 	//- the default image for Overleaf Community Edition/Server Pro
-	meta(itemprop="image", content='/apple-touch-icon.png')
-	meta(name="image", content='/apple-touch-icon.png')
+	meta(itemprop='image' content='/apple-touch-icon.png')
+	meta(name='image' content='/apple-touch-icon.png')
 
 //- Keywords
-if (metadata && metadata.keywords)
-	meta(name="keywords" content=metadata.keywords)
+if metadata && metadata.keywords
+	meta(name='keywords' content=metadata.keywords)
 
 //- Misc
-meta(itemprop="name", content=settings.appName + ", the Online LaTeX Editor")
+meta(itemprop='name' content=settings.appName + ', the Online LaTeX Editor')
 
-if (metadata && metadata.robotsNoindexNofollow)
-	meta(name="robots" content="noindex, nofollow")
+if metadata && metadata.robotsNoindexNofollow
+	meta(name='robots' content='noindex, nofollow')
 
 //- Twitter
-meta(name="twitter:card", content=metadata && metadata.twitterCardType ? metadata.twitterCardType : 'summary')
-if (settings.social && settings.social.twitter && settings.social.twitter.handle)
-	meta(name="twitter:site", content="@" + settings.social.twitter.handle)
-if (metadata && metadata.twitterDescription)
-	meta(name="twitter:description", content=metadata.twitterDescription)
+meta(
+	name='twitter:card'
+	content=metadata && metadata.twitterCardType ? metadata.twitterCardType : 'summary'
+)
+if settings.social && settings.social.twitter && settings.social.twitter.handle
+	meta(name='twitter:site' content='@' + settings.social.twitter.handle)
+if metadata && metadata.twitterDescription
+	meta(name='twitter:description' content=metadata.twitterDescription)
 else
-	meta(name="twitter:description", content=translate("site_description"))
-if (metadata && metadata.twitterImage && metadata.twitterImage.fields)
+	meta(name='twitter:description' content=translate('site_description'))
+if metadata && metadata.twitterImage && metadata.twitterImage.fields
 	//- from the CMS
-	meta(name="twitter:image", content=metadata.twitterImage.fields.file.url)
-	meta(name="twitter:image:alt", content=metadata.twitterImage.fields.title)
-else if (settings.overleaf)
+	meta(name='twitter:image' content=metadata.twitterImage.fields.file.url)
+	meta(name='twitter:image:alt' content=metadata.twitterImage.fields.title)
+else if settings.overleaf
 	//- the default image for Overleaf
-	meta(name="twitter:image", content=buildImgPath('ol-brand/overleaf_og_logo.png'))
+	meta(
+		name='twitter:image'
+		content=buildImgPath('ol-brand/overleaf_og_logo.png')
+	)
 else
 	//- the default image for Overleaf Community Edition/Server Pro
-	meta(name="twitter:image", content='/apple-touch-icon.png')
+	meta(name='twitter:image' content='/apple-touch-icon.png')
 
 //- Open Graph
 //- to do - add og:url
-if (settings.social && settings.social.facebook && settings.social.facebook.appId)
-	meta(property="fb:app_id", content=settings.social.facebook.appId)
+if settings.social && settings.social.facebook && settings.social.facebook.appId
+	meta(property='fb:app_id' content=settings.social.facebook.appId)
 
-if (metadata && metadata.openGraphDescription)
-	meta(property="og:description", content=metadata.openGraphDescription)
+if metadata && metadata.openGraphDescription
+	meta(property='og:description' content=metadata.openGraphDescription)
 else
-	meta(property="og:description", content=translate("site_description"))
+	meta(property='og:description' content=translate('site_description'))
 
-if (metadata && metadata.openGraphImage && metadata.openGraphImage.fields)
+if metadata && metadata.openGraphImage && metadata.openGraphImage.fields
 	//- from the CMS
-	meta(property="og:image", content=metadata.openGraphImage.fields.file.url)
-else if (settings.overleaf)
+	meta(property='og:image' content=metadata.openGraphImage.fields.file.url)
+else if settings.overleaf
 	//- the default image for Overleaf
-	meta(property="og:image", content=buildImgPath('ol-brand/overleaf_og_logo.png'))
+	meta(
+		property='og:image'
+		content=buildImgPath('ol-brand/overleaf_og_logo.png')
+	)
 else
 	//- the default image for Overleaf Community Edition/Server Pro
-	meta(property="og:image", content='/apple-touch-icon.png')
+	meta(property='og:image' content='/apple-touch-icon.png')
 
-if (metadata && metadata.openGraphType)
-	meta(property="og:type", metadata.openGraphType)
+if metadata && metadata.openGraphType
+	meta(property='og:type' metadata.openGraphType)
 else
-	meta(property="og:type", content="website")
+	meta(property='og:type' content='website')
 
-if (metadata && metadata.openGraphVideo)
+if metadata && metadata.openGraphVideo
 	//- from the CMS
-	meta(property="og:video", content=metadata.openGraphVideo)
+	meta(property='og:video' content=metadata.openGraphVideo)
 
 //- Viewport
 if !metadata || metadata.viewport !== false
-	meta(name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes")
+	meta(
+		name='viewport'
+		content='width=device-width, initial-scale=1.0, user-scalable=yes'
+	)
 
 //- Noindex
 if settings.robotsNoindex
-	meta(name="robots" content="noindex")
+	meta(name='robots' content='noindex')
 
 //- Icons
-link(rel="icon", sizes="32x32", href="/favicon-32x32.png")
-link(rel="icon", sizes="16x16", href="/favicon-16x16.png")
-link(rel="icon", href="/favicon.svg" type="image/svg+xml")
-link(rel="apple-touch-icon", href="/apple-touch-icon.png")
-link(rel="mask-icon", href="/mask-favicon.svg", color="#046530")
+link(rel='icon' sizes='32x32' href='/favicon-32x32.png')
+link(rel='icon' sizes='16x16' href='/favicon-16x16.png')
+link(rel='icon' href='/favicon.svg' type='image/svg+xml')
+link(rel='apple-touch-icon' href='/apple-touch-icon.png')
+link(rel='mask-icon' href='/mask-favicon.svg' color='#046530')
 
 //- Canonical Tag for SEO
-if (metadata && metadata.canonicalURL)
-	link(rel="canonical" href=metadata.canonicalURL)
+if metadata && metadata.canonicalURL
+	link(rel='canonical' href=metadata.canonicalURL)
 
 //- Manifest
 //- Does not currently contain a start_url to prevent browser installation prompts
-link(rel="manifest" href="/web.sitemanifest")
+link(rel='manifest' href='/web.sitemanifest')

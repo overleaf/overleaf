@@ -1,26 +1,21 @@
 //- to be kept in sync with frontend/js/shared/components/notification.tsx
+include ./material_symbol
 
 mixin notificationIcon(type)
 	if type === 'info'
-		span.material-symbols(aria-hidden="true") info
+		+material-symbol('info')
 	else if type === 'success'
-		span.material-symbols(aria-hidden="true") check_circle
+		+material-symbol('check_circle')
 	else if type === 'error'
-		span.material-symbols(aria-hidden="true") error
+		+material-symbol('error')
 	else if type === 'warning'
-		span.material-symbols(aria-hidden="true") warning
-
+		+material-symbol('warning')
 
 mixin notification(options)
 	- var {ariaLive, id, type, title, content, disclaimer, className} = options
 	- var classNames = `notification notification-type-${type} ${className ? className : ''} ${isActionBelowContent ? 'notification-cta-below-content' : ''}`
 
-	div(
-		aria-live=ariaLive,
-		role="alert",
-		id=id,
-		class=classNames
-	)
+	div(aria-live=ariaLive role='alert' id=id class=classNames)
 		.notification-icon
 			+notificationIcon(type)
 		.notification-content-and-cta
@@ -29,6 +24,7 @@ mixin notification(options)
 					p
 						b #{title}
 				| !{content}
+				block
 			//- TODO: handle action
 			//- if action
 			//- 	.notification-cta
@@ -39,4 +35,4 @@ mixin notification(options)
 		//- if isDismissible
 		//- 	.notification-close-btn
 		//- 		button(aria-label=translate('close'))
-		//- 			span.material-symbols(aria-hidden="true") close
+		//- 			+material-symbol("close")

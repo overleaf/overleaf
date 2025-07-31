@@ -39,7 +39,7 @@ const OutlinePane = React.memo<{
 
   return (
     <div className={headerClasses}>
-      <header className="outline-header">
+      <div className="outline-header">
         <OutlineToggleButton
           toggleExpanded={toggleExpanded}
           expanded={expanded}
@@ -47,7 +47,7 @@ const OutlinePane = React.memo<{
           isPartial={isPartial}
           isTexFile={isTexFile}
         />
-      </header>
+      </div>
       {isOpen && (
         <div className="outline-body">
           <OutlineRoot

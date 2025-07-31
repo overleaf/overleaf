@@ -1,0 +1,250 @@
+
+
+diff --git a/services/history-v1/storage/lib/project_key.js b/services/history-v1/storage/lib/project_key.js
+index 03fb2a5141ef..8727576b29f5 100644
+--- a/services/history-v1/storage/lib/project_key.js
++++ b/services/history-v1/storage/lib/project_key.js
+@@ -1,5 +1,4 @@
+ // Keep in sync with services/web/app/src/Features/History/project_key.js
+-const _ = require('lodash')
+ const path = require('node:path')
+
+ //
+@@ -13,7 +12,7 @@ function format(projectId) {
+ }
+
+ function pad(number) {
+-  return _.padStart(number, 9, '0')
++  return (number || 0).toString().padStart(9, '0')
+ }
+
+ function naiveReverse(string) {
+diff --git a/services/web/app/src/Features/History/project_key.js b/services/web/app/src/Features/History/project_key.js
+index a4722db09afd..1630bdad0b2b 100644
+--- a/services/web/app/src/Features/History/project_key.js
++++ b/services/web/app/src/Features/History/project_key.js
+@@ -1,5 +1,4 @@
+ // Keep in sync with services/history-v1/storage/lib/project_key.js
+-const _ = require('lodash')
+ const path = require('node:path')
+
+ //
+@@ -13,7 +12,7 @@ function format(projectId) {
+ }
+
+ function pad(number) {
+-  return _.padStart(number, 9, '0')
++  return (number || 0).toString().padStart(9, '0')
+ }
+
+ function naiveReverse(string) {
+
+
+diff --git a/libraries/object-persistor/src/FSPersistor.js b/libraries/object-persistor/src/FSPersistor.js
+index 38a81407df12..0b5891d2b2ed 100644
+--- a/libraries/object-persistor/src/FSPersistor.js
++++ b/libraries/object-persistor/src/FSPersistor.js
+@@ -86,7 +86,7 @@ module.exports = class FSPersistor extends AbstractPersistor {
+       metric: 'fs.ingress', // ingress to us from disk
+       bucket: location,
+     })
+-    const fsPath = this._getFsPath(location, name)
++    const fsPath = this._getFsPath(location, name, opts.useSubdirectories)
+
+     try {
+       opts.fd = await fsPromises.open(fsPath, 'r')
+@@ -295,9 +295,9 @@ module.exports = class FSPersistor extends AbstractPersistor {
+     await fsPromises.rm(dirPath, { force: true, recursive: true })
+   }
+
+-  _getFsPath(location, key) {
++  _getFsPath(location, key, useSubdirectories = false) {
+     key = key.replace(/\/$/, '')
+-    if (!this.useSubdirectories) {
++    if (!this.useSubdirectories && !useSubdirectories) {
+       key = key.replace(/\//g, '_')
+     }
+     return Path.join(location, key)
+diff --git a/services/filestore/app.js b/services/filestore/app.js
+index 24741e079c93..e69515ed7de0 100644
+--- a/services/filestore/app.js
++++ b/services/filestore/app.js
+@@ -119,6 +119,17 @@ app.get(
+   fileController.getFile
+ )
+
++app.get(
++  '/history/global/hash/:hash',
++  keyBuilder.globalBlobFileKeyMiddleware,
++  fileController.getFile
++)
++app.get(
++  '/history/project/:historyId/hash/:hash',
++  keyBuilder.projectBlobFileKeyMiddleware,
++  fileController.getFile
++)
++
+ app.get('/status', function (req, res) {
+   if (settings.shuttingDown) {
+     res.sendStatus(503) // Service unavailable
+diff --git a/services/filestore/app/js/FileController.js b/services/filestore/app/js/FileController.js
+index 127bbcc20f83..2f77bd015da9 100644
+--- a/services/filestore/app/js/FileController.js
++++ b/services/filestore/app/js/FileController.js
+@@ -25,6 +25,7 @@ function getFile(req, res, next) {
+     format,
+     style,
+   }
++  if (req.useSubdirectories) options.useSubdirectories = true
+
+   metrics.inc('getFile')
+   req.requestLogger.setMessage('getting file')
+diff --git a/services/filestore/app/js/KeyBuilder.js b/services/filestore/app/js/KeyBuilder.js
+index f67a0e81d7ef..66c738171033 100644
+--- a/services/filestore/app/js/KeyBuilder.js
++++ b/services/filestore/app/js/KeyBuilder.js
+@@ -1,4 +1,5 @@
+ const settings = require('@overleaf/settings')
++const projectKey = require('./project_key')
+
+ module.exports = {
+   getConvertedFolderKey,
+@@ -6,6 +7,8 @@ module.exports = {
+   userFileKeyMiddleware,
+   userProjectKeyMiddleware,
+   bucketFileKeyMiddleware,
++  globalBlobFileKeyMiddleware,
++  projectBlobFileKeyMiddleware,
+   templateFileKeyMiddleware,
+ }
+
+@@ -50,6 +53,22 @@ function bucketFileKeyMiddleware(req, res, next) {
+   next()
+ }
+
++function globalBlobFileKeyMiddleware(req, res, next) {
++  req.bucket = settings.filestore.stores.global_blobs
++  const { hash } = req.params
++  req.key = `${hash.slice(0, 2)}/${hash.slice(2, 4)}/${hash.slice(4)}`
++  req.useSubdirectories = true
++  next()
++}
++
++function projectBlobFileKeyMiddleware(req, res, next) {
++  req.bucket = settings.filestore.stores.project_blobs
++  const { historyId, hash } = req.params
++  req.key = `${projectKey.format(historyId)}/${hash.slice(0, 2)}/${hash.slice(2)}`
++  req.useSubdirectories = true
++  next()
++}
++
+ function templateFileKeyMiddleware(req, res, next) {
+   const {
+     template_id: templateId,
+diff --git a/services/web/app/src/Features/History/project_key.js b/services/filestore/app/js/project_key.js
+similarity index 100%
+rename from services/web/app/src/Features/History/project_key.js
+rename to services/filestore/app/js/project_key.js
+diff --git a/services/history-v1/storage/lib/project_key.js b/services/history-v1/storage/lib/project_key.js
+index 8727576b29f5..6ad239dd12cb 100644
+--- a/services/history-v1/storage/lib/project_key.js
++++ b/services/history-v1/storage/lib/project_key.js
+@@ -1,4 +1,4 @@
+-// Keep in sync with services/web/app/src/Features/History/project_key.js
++// Keep in sync with services/filestore/app/js/project_key.js
+ const path = require('node:path')
+
+ //
+diff --git a/services/web/app/src/Features/Compile/ClsiManager.js b/services/web/app/src/Features/Compile/ClsiManager.js
+index 6f11297248ee..19370684dd80 100644
+--- a/services/web/app/src/Features/Compile/ClsiManager.js
++++ b/services/web/app/src/Features/Compile/ClsiManager.js
+@@ -26,7 +26,7 @@ const DocumentUpdaterHandler = require('../DocumentUpdater/DocumentUpdaterHandle
+ const Metrics = require('@overleaf/metrics')
+ const Errors = require('../Errors/Errors')
+ const ClsiCacheHandler = require('./ClsiCacheHandler')
+-const { getBlobLocation } = require('../History/HistoryManager')
++const { getFilestoreBlobURL } = require('../History/HistoryManager')
+
+ const VALID_COMPILERS = ['pdflatex', 'latex', 'xelatex', 'lualatex']
+ const OUTPUT_FILE_TIMEOUT_MS = 60000
+@@ -755,8 +755,7 @@ function _finaliseRequest(projectId, options, project, docs, files) {
+     let url = filestoreURL
+     let fallbackURL
+     if (file.hash && Features.hasFeature('project-history-blobs')) {
+-      const { bucket, key } = getBlobLocation(historyId, file.hash)
+-      url = `${Settings.apis.filestore.url}/bucket/${bucket}/key/${key}`
++      url = getFilestoreBlobURL(historyId, file.hash)
+       fallbackURL = filestoreURL
+     }
+     resources.push({
+diff --git a/services/web/app/src/Features/History/HistoryManager.js b/services/web/app/src/Features/History/HistoryManager.js
+index 42d7e229bf97..a2fb201399d1 100644
+--- a/services/web/app/src/Features/History/HistoryManager.js
++++ b/services/web/app/src/Features/History/HistoryManager.js
+@@ -15,11 +15,6 @@ const { db, ObjectId, waitForDb } = require('../../infrastructure/mongodb')
+ const Metrics = require('@overleaf/metrics')
+ const logger = require('@overleaf/logger')
+ const { NotFoundError } = require('../Errors/Errors')
+-const projectKey = require('./project_key')
+-
+-// BEGIN copy from services/history-v1/storage/lib/blob_store/index.js
+-
+-const GLOBAL_BLOBS = new Set() // CHANGE FROM SOURCE: only store hashes.
+
+ const HISTORY_V1_URL = settings.apis.v1_history.url
+ const HISTORY_V1_BASIC_AUTH = {
+@@ -27,27 +22,9 @@ const HISTORY_V1_BASIC_AUTH = {
+   password: settings.apis.v1_history.pass,
+ }
+
+-function makeGlobalKey(hash) {
+-  return `${hash.slice(0, 2)}/${hash.slice(2, 4)}/${hash.slice(4)}`
+-}
+-
+-function makeProjectKey(projectId, hash) {
+-  return `${projectKey.format(projectId)}/${hash.slice(0, 2)}/${hash.slice(2)}`
+-}
++// BEGIN copy from services/history-v1/storage/lib/blob_store/index.js
+
+-function getBlobLocation(projectId, hash) {
+-  if (GLOBAL_BLOBS.has(hash)) {
+-    return {
+-      bucket: settings.apis.v1_history.buckets.globalBlobs,
+-      key: makeGlobalKey(hash),
+-    }
+-  } else {
+-    return {
+-      bucket: settings.apis.v1_history.buckets.projectBlobs,
+-      key: makeProjectKey(projectId, hash),
+-    }
+-  }
+-}
++const GLOBAL_BLOBS = new Set() // CHANGE FROM SOURCE: only store hashes.
+
+ async function loadGlobalBlobs() {
+   await waitForDb() // CHANGE FROM SOURCE: wait for db before running query.
+@@ -59,6 +36,14 @@ async function loadGlobalBlobs() {
+
+ // END copy from services/history-v1/storage/lib/blob_store/index.js
+
++function getFilestoreBlobURL(historyId, hash) {
++  if (GLOBAL_BLOBS.has(hash)) {
++    return `${settings.apis.filestore.url}/history/global/hash/${hash}`
++  } else {
++    return `${settings.apis.filestore.url}/history/project/${historyId}/hash/${hash}`
++  }
++}
++
+ async function initializeProject(projectId) {
+   const body = await fetchJson(`${settings.apis.project_history.url}/project`, {
+     method: 'POST',
+@@ -421,7 +406,7 @@ function _userView(user) {
+ const loadGlobalBlobsPromise = loadGlobalBlobs()
+
+ module.exports = {
+-  getBlobLocation,
++  getFilestoreBlobURL,
+   loadGlobalBlobsPromise,
+   initializeProject: callbackify(initializeProject),
+   flushProject: callbackify(flushProject),

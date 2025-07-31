@@ -13,6 +13,10 @@ import {
 } from 'react-bootstrap'
 import { callFnsInSequence } from '@/utils/functions'
 
+const DEFAULT_DELAY_SHOW = 300
+// Slightly lower value avoids flickering when an adjacent tooltip is shown before the previous one hides
+const DEFAULT_DELAY_HIDE = 290
+
 type OverlayProps = Omit<OverlayTriggerProps, 'overlay' | 'children'>
 
 const UpdatingTooltip = forwardRef<HTMLDivElement, BSTooltipProps>(
@@ -72,11 +76,11 @@ function Tooltip({
   }
 
   const delay = overlayProps?.delay
-  let delayShow = 300
-  let delayHide = 300
+  let delayShow = DEFAULT_DELAY_SHOW
+  let delayHide = DEFAULT_DELAY_HIDE
   if (delay) {
     delayShow = typeof delay === 'number' ? delay : delay.show
-    delayHide = typeof delay === 'number' ? delay : delay.hide
+    delayHide = typeof delay === 'number' ? Math.max(delay - 10, 0) : delay.hide
   }
 
   return (
@@ -96,9 +100,11 @@ function Tooltip({
       show={show}
       onToggle={setShow}
     >
-      {cloneElement(children, {
-        onClick: callFnsInSequence(children.props.onClick, hideTooltip),
-      })}
+      {overlayProps?.trigger === 'click'
+        ? children
+        : cloneElement(children, {
+            onClick: callFnsInSequence(children.props.onClick, hideTooltip),
+          })}
     </OverlayTrigger>
   )
 }

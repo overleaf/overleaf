@@ -3,10 +3,10 @@ mixin quoteLargeTextCentered(quote, person, position, affiliation, link, picture
 		.quote !{quote}
 		if pictureUrl
 			.quote-img
-				-var pictureAlt=`Photo of ${person}`
+				- var pictureAlt = `Photo of ${person}`
 				img(src=pictureUrl alt=pictureAlt)
 		footer
-			div.quote-person
+			.quote-person
 				strong #{person}
 			if person && position
 				div #{position}
@@ -29,27 +29,27 @@ mixin quoteLeftGreenBorder({quote, person, position, affiliation, link})
 
 mixin collinsQuote1
 	.card.card-dark-green-bg
-		-var quote = 'Overleaf is indispensable for us. We use it in our research, thesis writing, project proposals, and manuscripts for publication. When it comes to writing, it’s our main tool.'
-		-var quotePerson = 'Christopher Collins'
-		-var quotePersonPosition = 'Associate Professor and Lab Director, Ontario Tech University'
-		-var quotePersonImg = buildImgPath("advocates/collins.jpg")
+		- var quote = 'Overleaf is indispensable for us. We use it in our research, thesis writing, project proposals, and manuscripts for publication. When it comes to writing, it’s our main tool.'
+		- var quotePerson = 'Christopher Collins'
+		- var quotePersonPosition = 'Associate Professor and Lab Director, Ontario Tech University'
+		- var quotePersonImg = buildImgPath('advocates/collins.jpg')
 		.card-body
 			+quoteLargeTextCentered(quote, quotePerson, quotePersonPosition, null, null, quotePersonImg)
 
 mixin collinsQuote2
 	.card.card-dark-green-bg
-		-var quote = 'We are writing collaboratively right up until the last minute. We are faced with deadlines all the time, and Overleaf gives us the ability to polish right up until the last possible second.'
-		-var quotePerson = 'Christopher Collins'
-		-var quotePersonPosition = 'Associate Professor and Lab Director, Ontario Tech University'
-		-var quotePersonImg = buildImgPath("advocates/collins.jpg")
+		- var quote = 'We are writing collaboratively right up until the last minute. We are faced with deadlines all the time, and Overleaf gives us the ability to polish right up until the last possible second.'
+		- var quotePerson = 'Christopher Collins'
+		- var quotePersonPosition = 'Associate Professor and Lab Director, Ontario Tech University'
+		- var quotePersonImg = buildImgPath('advocates/collins.jpg')
 		.card-body
 			+quoteLargeTextCentered(quote, quotePerson, quotePersonPosition, null, null, quotePersonImg)
 
 mixin bennettQuote1
 	.card.card-dark-green-bg
-		-var quote = 'With Overleaf, we now have a process for developing technical documentation which has virtually eliminated the time required to properly format and layout documents.'
-		-var quotePerson = 'Andrew Bennett'
-		-var quotePersonPosition = 'Software Architect, Symplectic'
-		-var quotePersonImg = buildImgPath("advocates/bennett.jpg")
+		- var quote = 'With Overleaf, we now have a process for developing technical documentation which has virtually eliminated the time required to properly format and layout documents.'
+		- var quotePerson = 'Andrew Bennett'
+		- var quotePersonPosition = 'Software Architect, Symplectic'
+		- var quotePersonImg = buildImgPath('advocates/bennett.jpg')
 		.card-body
 			+quoteLargeTextCentered(quote, quotePerson, quotePersonPosition, null, null, quotePersonImg)

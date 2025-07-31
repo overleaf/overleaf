@@ -6,7 +6,7 @@ import {
 import { FigureModalSource } from '@/features/source-editor/components/figure-modal/figure-modal-context'
 import * as commands from '@/features/source-editor/extensions/toolbar/commands'
 import { setSectionHeadingLevel } from '@/features/source-editor/extensions/toolbar/sections'
-import { useEditorContext } from '@/shared/context/editor-context'
+import { useEditorPropertiesContext } from '@/features/ide-react/context/editor-properties-context'
 import { useLayoutContext } from '@/shared/context/layout-context'
 import getMeta from '@/utils/meta'
 import { redo, selectAll, undo } from '@codemirror/commands'
@@ -23,7 +23,7 @@ export const useToolbarMenuBarEditorCommands = () => {
   const { t } = useTranslation()
   const { view: layoutView } = useLayoutContext()
   const editorIsVisible = layoutView === 'editor'
-  const { trackedWrite } = usePermissionsContext()
+  const { trackedWrite, comment } = usePermissionsContext()
   const languageName = state.facet(language)?.name
   const isTeXFile = languageName === 'latex'
 
@@ -177,6 +177,7 @@ export const useToolbarMenuBarEditorCommands = () => {
         handler: () => {
           commands.addComment()
         },
+        disabled: !comment || state.selection.main.empty,
       },
       /************************************
        *         Format menu
@@ -286,9 +287,11 @@ export const useToolbarMenuBarEditorCommands = () => {
     newEditor,
     trackedWrite,
     isTeXFile,
+    state.selection.main.empty,
+    comment,
   ])
 
-  const { toggleSymbolPalette } = useEditorContext()
+  const { toggleSymbolPalette } = useEditorPropertiesContext()
   const symbolPaletteAvailable = getMeta('ol-symbolPaletteAvailable')
   useCommandProvider(() => {
     if (!newEditor || !editorIsVisible) {

@@ -1,36 +1,90 @@
 extends ../layout-react
 
 block entrypointVar
-  - entrypoint = 'pages/user/subscription/dashboard'
+	- entrypoint = 'pages/user/subscription/dashboard'
 
 block head-scripts
-  script(type="text/javascript", nonce=scriptNonce, src="https://js.recurly.com/v4/recurly.js")
+	script(
+		type='text/javascript'
+		nonce=scriptNonce
+		src='https://js.recurly.com/v4/recurly.js'
+	)
 
 block append meta
-  meta(name="ol-subscription" data-type="json" content=personalSubscription)
-  meta(name="ol-userCanExtendTrial" data-type="boolean" content=userCanExtendTrial)
-  meta(name="ol-managedGroupSubscriptions" data-type="json" content=managedGroupSubscriptions)
-  meta(name="ol-memberGroupSubscriptions" data-type="json" content=memberGroupSubscriptions)
-  meta(name="ol-managedInstitutions" data-type="json" content=managedInstitutions)
-  meta(name="ol-managedPublishers" data-type="json" content=managedPublishers)
-  meta(name="ol-planCodesChangingAtTermEnd" data-type="json", content=planCodesChangingAtTermEnd)
-  meta(name="ol-currentInstitutionsWithLicence" data-type="json" content=currentInstitutionsWithLicence)
-  meta(name="ol-hasSubscription" data-type="boolean" content=hasSubscription)
-  meta(name="ol-fromPlansPage" data-type="boolean" content=fromPlansPage)
-  meta(name="ol-plans" data-type="json" content=plans)
-  meta(name="ol-groupSettingsAdvertisedFor" data-type="json" content=groupSettingsAdvertisedFor)
-  meta(name="ol-canUseFlexibleLicensing" data-type="boolean", content=canUseFlexibleLicensing)
-  meta(name="ol-showGroupDiscount" data-type="boolean", content=showGroupDiscount)
-  meta(name="ol-groupSettingsEnabledFor" data-type="json" content=groupSettingsEnabledFor)
-  meta(name="ol-hasAiAssistViaWritefull" data-type="boolean", content=hasAiAssistViaWritefull)
-  meta(name="ol-aiAssistViaWritefullSource" data-type="string", content=aiAssistViaWritefullSource)
-  meta(name="ol-user" data-type="json" content=user)
-  if (personalSubscription && personalSubscription.payment)
-    meta(name="ol-recurlyApiKey" content=settings.apis.recurly.publicKey)
-    meta(name="ol-stripeUKApiKey" content=settings.apis.stripeUK.publishableKey)
-    meta(name="ol-recommendedCurrency" content=personalSubscription.payment.currency)
-    meta(name="ol-groupPlans" data-type="json" content=groupPlans)
+	meta(name='ol-subscription' data-type='json' content=personalSubscription)
+	meta(
+		name='ol-userCanExtendTrial'
+		data-type='boolean'
+		content=userCanExtendTrial
+	)
+	meta(
+		name='ol-managedGroupSubscriptions'
+		data-type='json'
+		content=managedGroupSubscriptions
+	)
+	meta(
+		name='ol-memberGroupSubscriptions'
+		data-type='json'
+		content=memberGroupSubscriptions
+	)
+	meta(
+		name='ol-managedInstitutions'
+		data-type='json'
+		content=managedInstitutions
+	)
+	meta(name='ol-managedPublishers' data-type='json' content=managedPublishers)
+	meta(
+		name='ol-planCodesChangingAtTermEnd'
+		data-type='json'
+		content=planCodesChangingAtTermEnd
+	)
+	meta(
+		name='ol-currentInstitutionsWithLicence'
+		data-type='json'
+		content=currentInstitutionsWithLicence
+	)
+	meta(name='ol-hasSubscription' data-type='boolean' content=hasSubscription)
+	meta(name='ol-fromPlansPage' data-type='boolean' content=fromPlansPage)
+	meta(name='ol-plans' data-type='json' content=plans)
+	meta(
+		name='ol-groupSettingsAdvertisedFor'
+		data-type='json'
+		content=groupSettingsAdvertisedFor
+	)
+	meta(
+		name='ol-canUseFlexibleLicensing'
+		data-type='boolean'
+		content=canUseFlexibleLicensing
+	)
+	meta(
+		name='ol-showGroupDiscount'
+		data-type='boolean'
+		content=showGroupDiscount
+	)
+	meta(
+		name='ol-groupSettingsEnabledFor'
+		data-type='json'
+		content=groupSettingsEnabledFor
+	)
+	meta(
+		name='ol-hasAiAssistViaWritefull'
+		data-type='boolean'
+		content=hasAiAssistViaWritefull
+	)
+	meta(
+		name='ol-aiAssistViaWritefullSource'
+		data-type='string'
+		content=aiAssistViaWritefullSource
+	)
+	meta(name='ol-user' data-type='json' content=user)
+	if personalSubscription && personalSubscription.payment
+		meta(name='ol-recurlyApiKey' content=settings.apis.recurly.publicKey)
+		meta(
+			name='ol-recommendedCurrency'
+			content=personalSubscription.payment.currency
+		)
+		meta(name='ol-groupPlans' data-type='json' content=groupPlans)
 
 block content
-  main.content.content-alt#main-content
-    #subscription-dashboard-root
+	main#main-content.content.content-alt
+		#subscription-dashboard-root

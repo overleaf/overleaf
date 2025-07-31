@@ -1,36 +1,36 @@
 extends ../../layout-marketing
 
 block vars
-  - var suppressFooter = true
-  - var suppressCookieBanner = true
-  - var suppressSkipToContent = true
+	- var suppressFooter = true
+	- var suppressPugCookieBanner = true
+	- var suppressSkipToContent = true
 
 block content
-  .editor.full-size
-    .loading-screen()
-      .loading-screen-brand-container
-        .loading-screen-brand(
-          style="height: 20%;"
-        )
+	.editor.full-size
+		.loading-screen()
+			.loading-screen-brand-container
+				.loading-screen-brand(
+					style="height: 20%;"
+				)
 
-      h3.loading-screen-label() #{translate("Opening template")}
-        span.loading-screen-ellip .
-        span.loading-screen-ellip .
-        span.loading-screen-ellip .
+			h3.loading-screen-label() #{translate("Opening template")}
+				span.loading-screen-ellip .
+				span.loading-screen-ellip .
+				span.loading-screen-ellip .
 
-  form(
-    data-ol-regular-form
-    data-ol-auto-submit
-    method='POST'
-    action='/project/new/template/'
-  )
-    input(type="hidden", name="_csrf", value=csrfToken)
-    input(type="hidden" name="templateId" value=templateId)
-    input(type="hidden" name="templateVersionId" value=templateVersionId)
-    input(type="hidden" name="templateName" value=name)
-    input(type="hidden" name="compiler" value=compiler)
-    input(type="hidden" name="imageName" value=imageName)
-    input(type="hidden" name="mainFile" value=mainFile)
-    if brandVariationId
-      input(type="hidden" name="brandVariationId" value=brandVariationId)
-    input(hidden type="submit")
+	form(
+		data-ol-regular-form
+		data-ol-auto-submit
+		method='POST'
+		action='/project/new/template/'
+	)
+		input(type="hidden", name="_csrf", value=csrfToken)
+		input(type="hidden" name="templateId" value=templateId)
+		input(type="hidden" name="templateVersionId" value=templateVersionId)
+		input(type="hidden" name="templateName" value=name)
+		input(type="hidden" name="compiler" value=compiler)
+		input(type="hidden" name="imageName" value=imageName)
+		input(type="hidden" name="mainFile" value=mainFile)
+		if brandVariationId
+			input(type="hidden" name="brandVariationId" value=brandVariationId)
+		input(hidden type="submit")

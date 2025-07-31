@@ -7,6 +7,9 @@ const modulePath =
   '../../../../app/src/Features/Subscription/SubscriptionController'
 const SubscriptionErrors = require('../../../../app/src/Features/Subscription/Errors')
 const SubscriptionHelper = require('../../../../app/src/Features/Subscription/SubscriptionHelper')
+const {
+  AI_ADD_ON_CODE,
+} = require('../../../../app/src/Features/Subscription/AiHelper')
 
 const mockSubscriptions = {
   'subscription-123-active': {
@@ -59,6 +62,7 @@ describe('SubscriptionController', function () {
         syncSubscription: sinon.stub().resolves(),
         attemptPaypalInvoiceCollection: sinon.stub().resolves(),
         startFreeTrial: sinon.stub().resolves(),
+        purchaseAddon: sinon.stub().resolves(),
       },
     }
 
@@ -487,28 +491,39 @@ describe('SubscriptionController', function () {
   })
 
   describe('cancelSubscription', function () {
-    beforeEach(function (done) {
-      this.res = {
-        redirect() {
-          done()
-        },
-      }
-      sinon.spy(this.res, 'redirect')
-      this.SubscriptionController.cancelSubscription(this.req, this.res)
-    })
-
-    it('should tell the handler to cancel this user', function (done) {
-      this.SubscriptionHandler.cancelSubscription
+    it('should tell the handler to cancel this user', async function () {
+      this.next = sinon.stub()
+      await this.SubscriptionController.cancelSubscription(
+        this.req,
+        this.res,
+        this.next
+      )
+      this.SubscriptionHandler.promises.cancelSubscription
         .calledWith(this.user)
         .should.equal(true)
-      done()
     })
 
-    it('should redurect to the subscription page', function (done) {
-      this.res.redirect
-        .calledWith('/user/subscription/canceled')
-        .should.equal(true)
-      done()
+    it('should return a 200 on success', async function () {
+      this.next = sinon.stub()
+      await this.SubscriptionController.cancelSubscription(
+        this.req,
+        this.res,
+        this.next
+      )
+      expect(this.res.statusCode).to.equal(200)
+    })
+
+    it('should call next with error', async function () {
+      this.SubscriptionHandler.promises.cancelSubscription.rejects(
+        new Error('cancel error')
+      )
+      this.next = sinon.stub()
+      await this.SubscriptionController.cancelSubscription(
+        this.req,
+        this.res,
+        this.next
+      )
+      this.next.calledWith(sinon.match.instanceOf(Error)).should.equal(true)
     })
   })
 
@@ -622,6 +637,111 @@ describe('SubscriptionController', function () {
       it('should respond with a 200 status', function () {
         this.res.sendStatus.calledWith(200)
       })
+    })
+  })
+
+  describe('purchaseAddon', function () {
+    beforeEach(function () {
+      this.SessionManager.getSessionUser.returns(this.user) // Make sure getSessionUser returns the user
+      this.next = sinon.stub()
+      this.req.params = { addOnCode: AI_ADD_ON_CODE } // Mock add-on code
+    })
+
+    it('should return 200 on successful purchase of AI add-on', async function () {
+      await this.SubscriptionController.purchaseAddon(
+        this.req,
+        this.res,
+        this.next
+      )
+      this.res.sendStatus = sinon.spy()
+
+      await this.SubscriptionController.purchaseAddon(
+        this.req,
+        this.res,
+        this.next
+      )
+
+      expect(this.SubscriptionHandler.promises.purchaseAddon).to.have.been
+        .called
+      expect(
+        this.SubscriptionHandler.promises.purchaseAddon
+      ).to.have.been.calledWith(this.user._id, AI_ADD_ON_CODE, 1)
+      expect(
+        this.FeaturesUpdater.promises.refreshFeatures
+      ).to.have.been.calledWith(this.user._id, 'add-on-purchase')
+      expect(this.res.sendStatus).to.have.been.calledWith(200)
+      expect(this.logger.debug).to.have.been.calledWith(
+        { userId: this.user._id, addOnCode: AI_ADD_ON_CODE },
+        'purchasing add-ons'
+      )
+    })
+
+    it('should return 404 if the add-on code is not AI_ADD_ON_CODE', async function () {
+      this.req.params = { addOnCode: 'some-other-addon' }
+      this.res.sendStatus = sinon.spy()
+
+      await this.SubscriptionController.purchaseAddon(
+        this.req,
+        this.res,
+        this.next
+      )
+
+      expect(this.SubscriptionHandler.promises.purchaseAddon).to.not.have.been
+        .called
+      expect(this.FeaturesUpdater.promises.refreshFeatures).to.not.have.been
+        .called
+      expect(this.res.sendStatus).to.have.been.calledWith(404)
+    })
+
+    it('should handle DuplicateAddOnError and send badRequest while sending 200', async function () {
+      this.req.params.addOnCode = AI_ADD_ON_CODE
+      this.SubscriptionHandler.promises.purchaseAddon.rejects(
+        new SubscriptionErrors.DuplicateAddOnError()
+      )
+
+      await this.SubscriptionController.purchaseAddon(
+        this.req,
+        this.res,
+        this.next
+      )
+
+      expect(this.HttpErrorHandler.badRequest).to.have.been.calledWith(
+        this.req,
+        this.res,
+        'Your subscription already includes this add-on',
+        { addon: AI_ADD_ON_CODE }
+      )
+      expect(
+        this.FeaturesUpdater.promises.refreshFeatures
+      ).to.have.been.calledWith(this.user._id, 'add-on-purchase')
+      expect(this.res.sendStatus).to.have.been.calledWith(200)
+    })
+
+    it('should handle PaymentActionRequiredError and return 402 with details', async function () {
+      this.req.params.addOnCode = AI_ADD_ON_CODE
+      const paymentError = new SubscriptionErrors.PaymentActionRequiredError({
+        clientSecret: 'secret123',
+        publicKey: 'pubkey456',
+      })
+      this.SubscriptionHandler.promises.purchaseAddon.rejects(paymentError)
+
+      await this.SubscriptionController.purchaseAddon(
+        this.req,
+        this.res,
+        this.next
+      )
+
+      this.res.status.calledWith(402).should.equal(true)
+      this.res.json
+        .calledWith({
+          message: 'Payment action required',
+          clientSecret: 'secret123',
+          publicKey: 'pubkey456',
+        })
+        .should.equal(true)
+
+      expect(this.FeaturesUpdater.promises.refreshFeatures).to.not.have.been
+        .called
     })
   })
 })

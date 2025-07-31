@@ -1,11 +1,12 @@
 import FileTreeRoot from '../../../../../frontend/js/features/file-tree/components/file-tree-root'
 import { EditorProviders } from '../../../helpers/editor-providers'
 import { SocketIOMock } from '@/ide/connection/SocketIoShim'
+import type { Socket } from '@/features/ide-react/connection/types/socket'
 
 describe('FileTree Create Folder Flow', function () {
-  let socket: SocketIOMock
+  let socket: SocketIOMock & Socket
   beforeEach(function () {
-    socket = new SocketIOMock()
+    socket = new SocketIOMock() as any
     cy.window().then(win => {
       win.metaAttributesCache.set('ol-user', { id: 'user1' })
     })

@@ -1,4 +1,3 @@
-import MaterialIcon from '@/shared/components/material-icon'
 import { useTranslation } from 'react-i18next'
 import { ToolbarMenuBar } from './menu-bar'
 import { ToolbarProjectTitle } from './project-title'
@@ -11,69 +10,60 @@ import { useLayoutContext } from '@/shared/context/layout-context'
 import BackToEditorButton from '@/features/editor-navigation-toolbar/components/back-to-editor-button'
 import { useCallback } from 'react'
 import * as eventTracking from '../../../../infrastructure/event-tracking'
-import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
+import { ToolbarLogos } from './logos'
+import { useEditorContext } from '@/shared/context/editor-context'
+import importOverleafModules from '../../../../../macros/import-overleaf-module.macro'
 import UpgradeButton from './upgrade-button'
 import getMeta from '@/utils/meta'
+import { useIdeReactContext } from '@/features/ide-react/context/ide-react-context'
+
+const [publishModalModules] = importOverleafModules('publishModal')
+const SubmitProjectButton = publishModalModules?.import.NewPublishToolbarButton
 
 export const Toolbar = () => {
-  const { view, setView } = useLayoutContext()
+  const { view, restoreView } = useLayoutContext()
+  const { cobranding } = useEditorContext()
+  const { permissionsLevel } = useIdeReactContext()
+  const { t } = useTranslation()
+  const shouldDisplaySubmitButton =
+    (permissionsLevel === 'owner' || permissionsLevel === 'readAndWrite') &&
+    SubmitProjectButton
 
   const handleBackToEditorClick = useCallback(() => {
     eventTracking.sendMB('navigation-clicked-history', { action: 'close' })
-    setView('editor')
-  }, [setView])
+    restoreView()
+  }, [restoreView])
 
   if (view === 'history') {
     return (
-      <div className="ide-redesign-toolbar">
+      <nav className="ide-redesign-toolbar" aria-label={t('project_actions')}>
         <div className="d-flex align-items-center">
           <BackToEditorButton onClick={handleBackToEditorClick} />
         </div>
         <ToolbarProjectTitle />
         <div /> {/* Empty div used for spacing */}
-      </div>
+      </nav>
     )
   }
 
   return (
-    <div className="ide-redesign-toolbar">
-      <ToolbarMenus />
+    <nav className="ide-redesign-toolbar" aria-label={t('project_actions')}>
+      <div className="ide-redesign-toolbar-menu">
+        <ToolbarLogos cobranding={cobranding} />
+        <ToolbarMenuBar />
+      </div>
       <ToolbarProjectTitle />
-      <ToolbarButtons />
-    </div>
-  )
-}
-
-const ToolbarMenus = () => {
-  const { t } = useTranslation()
-  return (
-    <div className="ide-redesign-toolbar-menu">
-      <OLTooltip
-        id="tooltip-home-button"
-        description={t('back_to_your_projects')}
-        overlayProps={{ delay: 0, placement: 'bottom' }}
-      >
-        <div className="ide-redesign-toolbar-home-button">
-          <a href="/project" className="ide-redesign-toolbar-home-link">
-            <span className="toolbar-ol-logo" aria-label={t('overleaf_logo')} />
-            <MaterialIcon type="home" className="toolbar-ol-home-button" />
-          </a>
-        </div>
-      </OLTooltip>
-      <ToolbarMenuBar />
-    </div>
-  )
-}
-
-const ToolbarButtons = () => {
-  return (
-    <div className="ide-redesign-toolbar-actions">
-      <LabsActions />
-      <OnlineUsers />
-      <ShowHistoryButton />
-      <ChangeLayoutButton />
-      <ShareProjectButton />
-      {getMeta('ol-showUpgradePrompt') && <UpgradeButton />}
-    </div>
+      <div className="ide-redesign-toolbar-actions">
+        <LabsActions />
+        <OnlineUsers />
+        <ShowHistoryButton />
+        <ChangeLayoutButton />
+        {shouldDisplaySubmitButton && cobranding && (
+          <SubmitProjectButton cobranding={cobranding} />
+        )}
+        <ShareProjectButton />
+        {getMeta('ol-showUpgradePrompt') && <UpgradeButton />}
+      </div>
+    </nav>
   )
 }

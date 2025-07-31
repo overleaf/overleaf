@@ -13,7 +13,7 @@ let EditFileOperation = null
 let SetFileMetadataOperation = null
 
 /**
- * @import { BlobStore } from "../types"
+ * @import { ReadonlyBlobStore } from "../types"
  * @import Snapshot from "../snapshot"
  */
 
@@ -80,7 +80,7 @@ class Operation {
    * If this operation references any files, load the files.
    *
    * @param {string} kind see {File#load}
-   * @param {BlobStore} blobStore
+   * @param {ReadOnlyBlobStore} blobStore
    * @return {Promise<void>}
    */
   async loadFiles(kind, blobStore) {}

@@ -193,20 +193,25 @@ describe('SubscriptionGroupHandler', function () {
     this.Modules = {
       promises: {
         hooks: {
-          fire: sinon.stub().callsFake(hookName => {
-            if (hookName === 'generateTermsAndConditions') {
-              return Promise.resolve(['T&Cs'])
-            }
-            if (hookName === 'getPaymentFromRecord') {
-              return Promise.resolve([
-                { account: { hasPastDueInvoice: false } },
-              ])
-            }
-            return Promise.resolve()
-          }),
+          fire: sinon.stub(),
         },
       },
     }
+
+    this.Modules.promises.hooks.fire
+      .withArgs('generateTermsAndConditions')
+      .resolves(['T&Cs'])
+      .withArgs('getPaymentFromRecord')
+      .resolves([
+        {
+          subscription: this.recurlySubscription,
+          account: { hasPastDueInvoice: false },
+        },
+      ])
+      .withArgs('previewSubscriptionChangeRequest')
+      .resolves([this.previewSubscriptionChange])
+      .withArgs('previewGroupPlanUpgrade')
+      .resolves([{ subscriptionChange: this.previewSubscriptionChange }])
 
     this.Handler = SandboxedModule.require(modulePath, {
       requires: {
@@ -389,7 +394,7 @@ describe('SubscriptionGroupHandler', function () {
             this.PaymentProviderEntities.MEMBERS_LIMIT_ADD_ON_CODE,
           canUseFlexibleLicensing: true,
         },
-        recurlySubscription: this.recurlySubscription,
+        paymentProviderSubscription: this.recurlySubscription,
       })
     })
   })
@@ -441,11 +446,16 @@ describe('SubscriptionGroupHandler', function () {
               this.adminUser_id,
               this.adding
             )
-          this.RecurlyClient.promises.getPaymentMethod
-            .calledWith(this.adminUser_id)
+          this.Modules.promises.hooks.fire
+            .calledWith('getPaymentFromRecord', {
+              groupPlan: true,
+              recurlyStatus: {
+                state: 'active',
+              },
+            })
             .should.equal(true)
-          this.RecurlyClient.promises.previewSubscriptionChange
-            .calledWith(this.changeRequest)
+          this.Modules.promises.hooks.fire
+            .calledWith('previewSubscriptionChangeRequest', this.changeRequest)
             .should.equal(true)
           this.SubscriptionController.makeChangePreview
             .calledWith(
@@ -473,9 +483,14 @@ describe('SubscriptionGroupHandler', function () {
               return true
             },
           }
-          this.RecurlyClient.promises.getSubscription = sinon
-            .stub()
-            .resolves(this.recurlySubscription)
+          this.Modules.promises.hooks.fire
+            .withArgs('getPaymentFromRecord')
+            .resolves([
+              {
+                subscription: this.recurlySubscription,
+                account: { hasPastDueInvoice: false },
+              },
+            ])
 
           const result =
             await this.Handler.promises.createAddSeatsSubscriptionChange(
@@ -483,21 +498,18 @@ describe('SubscriptionGroupHandler', function () {
               this.adding,
               '123'
             )
-
-          this.RecurlyClient.promises.updateSubscriptionDetails
+          this.Modules.promises.hooks.fire
             .calledWith(
+              'updateSubscriptionDetails',
               sinon.match
                 .has('poNumber')
                 .and(sinon.match.has('termsAndConditions'))
             )
             .should.equal(true)
-          this.RecurlyClient.promises.applySubscriptionChangeRequest
-            .calledWith(this.changeRequest)
-            .should.equal(true)
-          this.SubscriptionHandler.promises.syncSubscription
+          this.Modules.promises.hooks.fire
             .calledWith(
-              { uuid: this.recurlySubscription.id },
-              this.adminUser_id
+              'applySubscriptionChangeRequestAndSync',
+              this.changeRequest
             )
             .should.equal(true)
           expect(result).to.deep.equal({
@@ -511,7 +523,6 @@ describe('SubscriptionGroupHandler', function () {
       describe('accounts with PO number', function () {
         it('should update the subscription PO number and T&C', async function () {
           await this.Handler.promises.updateSubscriptionPaymentTerms(
-            this.adminUser_id,
             this.recurlySubscription,
             this.poNumberAndTermsAndConditionsUpdate.poNumber
           )
@@ -521,8 +532,11 @@ describe('SubscriptionGroupHandler', function () {
               'T&Cs'
             )
             .should.equal(true)
-          this.RecurlyClient.promises.updateSubscriptionDetails
-            .calledWith(this.poNumberAndTermsAndConditionsUpdate)
+          this.Modules.promises.hooks.fire
+            .calledWith(
+              'updateSubscriptionDetails',
+              this.poNumberAndTermsAndConditionsUpdate
+            )
             .should.equal(true)
         })
       })
@@ -530,14 +544,16 @@ describe('SubscriptionGroupHandler', function () {
       describe('accounts with no PO number', function () {
         it('should update the subscription T&C only', async function () {
           await this.Handler.promises.updateSubscriptionPaymentTerms(
-            this.adminUser_id,
             this.recurlySubscription
           )
           this.recurlySubscription.getRequestForTermsAndConditionsUpdate
             .calledWithMatch('T&Cs')
             .should.equal(true)
-          this.RecurlyClient.promises.updateSubscriptionDetails
-            .calledWith(this.termsAndConditionsUpdate)
+          this.Modules.promises.hooks.fire
+            .calledWith(
+              'updateSubscriptionDetails',
+              this.termsAndConditionsUpdate
+            )
             .should.equal(true)
         })
       })
@@ -570,11 +586,16 @@ describe('SubscriptionGroupHandler', function () {
         let preview
 
         afterEach(function () {
-          this.RecurlyClient.promises.getPaymentMethod
-            .calledWith(this.adminUser_id)
+          this.Modules.promises.hooks.fire
+            .calledWith('getPaymentFromRecord', {
+              groupPlan: true,
+              recurlyStatus: {
+                state: 'active',
+              },
+            })
             .should.equal(true)
-          this.RecurlyClient.promises.previewSubscriptionChange
-            .calledWith(this.changeRequest)
+          this.Modules.promises.hooks.fire
+            .calledWith('previewSubscriptionChangeRequest', this.changeRequest)
             .should.equal(true)
           this.SubscriptionController.makeChangePreview
             .calledWith(
@@ -779,100 +800,54 @@ describe('SubscriptionGroupHandler', function () {
     })
   })
 
-  describe('upgradeGroupPlan', function () {
-    it('should upgrade the subscription for flexible licensing group plans', async function () {
-      this.SubscriptionLocator.promises.getUsersSubscription = sinon
-        .stub()
-        .resolves({
-          groupPlan: true,
-          recurlyStatus: {
-            state: 'active',
-          },
-          planCode: 'group_collaborator',
-        })
-      await this.Handler.promises.upgradeGroupPlan(this.user_id)
-      this.recurlySubscription.getRequestForGroupPlanUpgrade
-        .calledWith('group_professional')
-        .should.equal(true)
-      this.RecurlyClient.promises.applySubscriptionChangeRequest
-        .calledWith(this.changeRequest)
-        .should.equal(true)
-      this.SubscriptionHandler.promises.syncSubscription
-        .calledWith({ uuid: this.changeRequest.subscription.id }, this.user_id)
-        .should.equal(true)
-    })
-
-    it('should upgrade the subscription for legacy group plans', async function () {
-      this.SubscriptionLocator.promises.getUsersSubscription = sinon
-        .stub()
-        .resolves({
-          groupPlan: true,
-          recurlyStatus: {
-            state: 'active',
-          },
-          planCode: 'group_collaborator_10_educational',
-        })
-      await this.Handler.promises.upgradeGroupPlan(this.user_id)
-      this.recurlySubscription.getRequestForGroupPlanUpgrade
-        .calledWith('group_professional_10_educational')
-        .should.equal(true)
-      this.RecurlyClient.promises.applySubscriptionChangeRequest
-        .calledWith(this.changeRequest)
-        .should.equal(true)
-      this.SubscriptionHandler.promises.syncSubscription
-        .calledWith({ uuid: this.changeRequest.subscription.id }, this.user_id)
-        .should.equal(true)
-    })
-
-    it('should fail the upgrade if is professional already', async function () {
-      this.SubscriptionLocator.promises.getUsersSubscription = sinon
-        .stub()
-        .resolves({
-          groupPlan: true,
-          recurlyStatus: {
-            state: 'active',
-          },
-          planCode: 'group_professional',
-        })
+  describe('ensureSubscriptionHasAdditionalLicenseAddOnWhenCollectionMethodIsManual', function () {
+    it('should throw if the subscription is manually collected and has no additional license add-on', async function () {
       await expect(
-        this.Handler.promises.upgradeGroupPlan(this.user_id)
-      ).to.be.rejectedWith('Not eligible for group plan upgrade')
+        this.Handler.promises.ensureSubscriptionHasAdditionalLicenseAddOnWhenCollectionMethodIsManual(
+          {
+            isCollectionMethodManual: true,
+            hasAddOn: sinon
+              .stub()
+              .withArgs('additional-license')
+              .returns(false),
+          }
+        )
+      ).to.be.rejectedWith(
+        'This subscription is being collected manually has no "additional-license" add-on'
+      )
     })
 
-    it('should fail the upgrade if not group plan', async function () {
-      this.SubscriptionLocator.promises.getUsersSubscription = sinon
-        .stub()
-        .resolves({
-          groupPlan: false,
-          recurlyStatus: {
-            state: 'active',
-          },
-          planCode: 'test_plan_code',
-        })
+    it('should not throw if the subscription is not manually collected and has no additional license add-on and ', async function () {
       await expect(
-        this.Handler.promises.upgradeGroupPlan(this.user_id)
-      ).to.be.rejectedWith('Not eligible for group plan upgrade')
+        this.Handler.promises.ensureSubscriptionHasAdditionalLicenseAddOnWhenCollectionMethodIsManual(
+          {
+            isCollectionMethodManual: false,
+            hasAddOn: sinon
+              .stub()
+              .withArgs('additional-license')
+              .returns(false),
+          }
+        )
+      ).to.not.be.rejected
+    })
+
+    it('should not throw if the subscription is not manually collected and has additional license add-on', async function () {
+      await expect(
+        this.Handler.promises.ensureSubscriptionHasAdditionalLicenseAddOnWhenCollectionMethodIsManual(
+          {
+            isCollectionMethodManual: true,
+            hasAddOn: sinon.stub().withArgs('additional-license').returns(true),
+          }
+        )
+      ).to.not.be.rejected
     })
   })
 
   describe('getGroupPlanUpgradePreview', function () {
     it('should generate preview for subscription upgrade', async function () {
-      this.SubscriptionLocator.promises.getUsersSubscription = sinon
-        .stub()
-        .resolves({
-          groupPlan: true,
-          recurlyStatus: {
-            state: 'active',
-          },
-          planCode: 'group_collaborator',
-        })
       const result = await this.Handler.promises.getGroupPlanUpgradePreview(
         this.user_id
       )
-      this.RecurlyClient.promises.previewSubscriptionChange
-        .calledWith(this.changeRequest)
-        .should.equal(true)
-
       result.should.equal(this.changePreview)
     })
   })
@@ -883,8 +858,8 @@ describe('SubscriptionGroupHandler', function () {
         this.recurlySubscription,
         this.adminUser_id
       )
-      this.RecurlyClient.promises.getPaymentMethod
-        .calledWith(this.adminUser_id)
+      this.Modules.promises.hooks.fire
+        .calledWith('getPaymentMethod', this.adminUser_id)
         .should.equal(true)
     })
 

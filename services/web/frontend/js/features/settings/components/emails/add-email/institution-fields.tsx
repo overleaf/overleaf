@@ -75,16 +75,21 @@ function InstitutionFields({
   }, [newEmailMatchedDomain, setRole, setDepartment])
 
   useEffect(() => {
+    if (newEmailMatchedDomain?.university?.departments?.length) {
+      setDepartments(newEmailMatchedDomain.university.departments)
+      return
+    }
+
+    // fallback if not matched on domain
     const selectedKnownUniversity = countryCode
       ? universities[countryCode]?.find(({ name }) => name === universityName)
       : undefined
-
     if (selectedKnownUniversity && selectedKnownUniversity.departments.length) {
       setDepartments(selectedKnownUniversity.departments)
     } else {
       setDepartments([...defaultDepartments])
     }
-  }, [countryCode, universities, universityName])
+  }, [countryCode, universities, universityName, newEmailMatchedDomain])
 
   // Fetch country institution
   useEffect(() => {

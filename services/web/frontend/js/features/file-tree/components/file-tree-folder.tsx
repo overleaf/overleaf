@@ -67,6 +67,7 @@ function FileTreeFolder({
         className={classNames(selectableEntityProps.className, {
           'dnd-droppable-hover': isOverRoot || isOverList,
         })}
+        translate="no"
       >
         <FileTreeItemInner
           id={id}

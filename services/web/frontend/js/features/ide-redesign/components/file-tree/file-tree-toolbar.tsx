@@ -24,7 +24,7 @@ function FileTreeToolbar() {
         />
         <h4>{t('file_tree')}</h4>
       </button>
-      <FileTreeActionButtons />
+      <FileTreeActionButtons fileTreeExpanded={fileTreeExpanded} />
     </div>
   )
 }

@@ -1,5 +1,8 @@
 import { mockScope } from '../helpers/mock-scope'
-import { EditorProviders } from '../../../helpers/editor-providers'
+import {
+  EditorProviders,
+  makeEditorPropertiesProvider,
+} from '../../../helpers/editor-providers'
 import CodemirrorEditor from '../../../../../frontend/js/features/source-editor/components/codemirror-editor'
 import { FC } from 'react'
 import { FileTreePathContext } from '@/features/file-tree/contexts/file-tree-path'
@@ -43,13 +46,19 @@ const mountEditor = (content: string) => {
   const scope = mockScope(content)
   scope.permissions.write = false
   scope.permissions.trackedWrite = false
-  scope.editor.showVisual = true
 
   cy.mount(
     <TestContainer>
       <EditorProviders
         scope={scope}
-        providers={{ FileTreePathProvider, PermissionsProvider }}
+        providers={{
+          FileTreePathProvider,
+          PermissionsProvider,
+          EditorPropertiesProvider: makeEditorPropertiesProvider({
+            showVisual: true,
+            showSymbolPalette: false,
+          }),
+        }}
       >
         <CodemirrorEditor />
       </EditorProviders>

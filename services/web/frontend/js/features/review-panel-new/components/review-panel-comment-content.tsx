@@ -1,4 +1,4 @@
-import { Dispatch, memo, SetStateAction, useCallback, useState } from 'react'
+import { memo, useCallback, useState } from 'react'
 import { Change, CommentOperation } from '../../../../../types/change'
 import { ReviewPanelMessage } from './review-panel-message'
 import { useTranslation } from 'react-i18next'
@@ -6,12 +6,12 @@ import { useThreadsContext } from '../context/threads-context'
 import AutoExpandingTextArea from '@/shared/components/auto-expanding-text-area'
 import ReviewPanelResolvedMessage from './review-panel-resolved-message'
 import { ReviewPanelResolvedCommentThread } from '../../../../../types/review-panel/comment-thread'
-import useSubmittableTextInput from '../hooks/use-submittable-text-input'
 import {
   CommentId,
   ThreadId,
 } from '../../../../../types/review-panel/review-panel'
 import { usePermissionsContext } from '@/features/ide-react/context/permissions-context'
+import { isFormSubmitKeypressEvent } from '@/features/review-panel-new/utils/form-events'
 
 export const ReviewPanelCommentContent = memo<{
   comment: Change<CommentOperation>
@@ -39,27 +39,46 @@ export const ReviewPanelCommentContent = memo<{
     const threads = useThreadsContext()
     const permissions = usePermissionsContext()
     const [submitting, setSubmitting] = useState(false)
+    const [content, setContent] = useState('')
 
-    const handleSubmit = useCallback(
-      (content: string, setContent: Dispatch<SetStateAction<string>>) => {
-        if (!onReply || submitting) {
-          return
+    const hasActiveContent = content.trim().length > 0
+
+    const handleSubmit = useCallback(() => {
+      if (!onReply || submitting) {
+        return
+      }
+
+      if (!hasActiveContent) {
+        return
+      }
+
+      setSubmitting(true)
+
+      return onReply(content)
+        .then(() => {
+          setContent('')
+        })
+        .finally(() => {
+          setSubmitting(false)
+        })
+    }, [onReply, submitting, content, hasActiveContent])
+
+    const handleKeyPress = useCallback(
+      (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+        if (isFormSubmitKeypressEvent(event)) {
+          event.preventDefault()
+          handleSubmit()
         }
-
-        setSubmitting(true)
-        onReply(content)
-          .then(() => {
-            setContent('')
-          })
-          .finally(() => {
-            setSubmitting(false)
-          })
       },
-      [onReply, submitting]
+      [handleSubmit]
     )
 
-    const { handleChange, handleKeyPress, content } =
-      useSubmittableTextInput(handleSubmit)
+    const handleChange = useCallback(
+      (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+        setContent(e.target.value)
+      },
+      []
+    )
 
     const thread = threads?.[comment.op.t]
     if (!thread) {
@@ -85,6 +104,7 @@ export const ReviewPanelCommentContent = memo<{
                 isReply={isReply}
                 hasReplies={!isReply && thread.messages.length > 1}
                 onResolve={onResolve}
+                hasActiveContent={hasActiveContent}
                 onEdit={onEdit}
                 onDelete={() =>
                   isReply

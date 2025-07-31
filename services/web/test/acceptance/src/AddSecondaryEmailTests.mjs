@@ -125,7 +125,9 @@ describe('Add secondary email address confirmation code email', function () {
       })
 
       expect(res.response.statusCode).to.equal(409)
-      expect(res.body.message.text).to.equal('This email is already registered')
+      expect(res.body.message.text).to.equal(
+        'This email address is already associated with a different Overleaf account.'
+      )
     })
   })
 

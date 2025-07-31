@@ -163,7 +163,10 @@ const ColumnWidthModalBody = () => {
                 <Select
                   label={
                     <>
-                      &nbsp;<span className="sr-only">{t('length_unit')}</span>
+                      &nbsp;
+                      <span className="visually-hidden">
+                        {t('length_unit')}
+                      </span>
                     </>
                   }
                   items={UNITS}

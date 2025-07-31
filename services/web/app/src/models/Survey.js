@@ -19,13 +19,17 @@ const SurveySchema = new Schema(
         message: `invalid, must match: ${NAME_REGEX}`,
       },
     },
-    preText: {
+    title: {
       type: String,
       required: true,
     },
-    linkText: {
+    text: {
       type: String,
       required: true,
+    },
+    cta: {
+      type: String,
+      required: false,
     },
     url: {
       type: String,
@@ -45,6 +49,10 @@ const SurveySchema = new Schema(
       rolloutPercentage: {
         type: Number,
         default: 100,
+      },
+      excludeLabsUsers: {
+        type: Boolean,
+        default: false,
       },
     },
   },

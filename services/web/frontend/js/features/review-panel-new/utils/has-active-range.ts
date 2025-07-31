@@ -15,8 +15,9 @@ export const hasActiveRange = (
     return true
   }
 
-  for (const thread of Object.values(threads)) {
-    if (!thread.resolved) {
+  for (const comment of ranges.comments) {
+    const thread = threads[comment.op.t]
+    if (thread && !thread.resolved) {
       return true
     }
   }

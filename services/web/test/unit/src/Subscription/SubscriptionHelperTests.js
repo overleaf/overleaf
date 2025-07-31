@@ -184,10 +184,6 @@ describe('SubscriptionHelper', function () {
             collaborator: '5 CHF',
             professional: '50 CHF',
           },
-          pricePerUserPerMonth: {
-            collaborator: '0,45 CHF',
-            professional: '4,20 CHF',
-          },
         })
       })
     })
@@ -209,10 +205,6 @@ describe('SubscriptionHelper', function () {
             collaborator: '10 kr.',
             professional: '100 kr.',
           },
-          pricePerUserPerMonth: {
-            collaborator: '0,85 kr.',
-            professional: '8,35 kr.',
-          },
         })
       })
     })
@@ -233,10 +225,6 @@ describe('SubscriptionHelper', function () {
           pricePerUser: {
             collaborator: '15 kr',
             professional: '150 kr',
-          },
-          pricePerUserPerMonth: {
-            collaborator: '1,25 kr',
-            professional: '12,50 kr',
           },
         })
       })
@@ -261,10 +249,6 @@ describe('SubscriptionHelper', function () {
             collaborator: 'kr 20',
             professional: 'kr 200',
           },
-          pricePerUserPerMonth: {
-            collaborator: 'kr 1.70',
-            professional: 'kr 16.70',
-          },
         })
       })
     })
@@ -285,10 +269,6 @@ describe('SubscriptionHelper', function () {
           pricePerUser: {
             collaborator: '$25',
             professional: '$250',
-          },
-          pricePerUserPerMonth: {
-            collaborator: '$2.10',
-            professional: '$20.85',
           },
         })
       })

@@ -1,17 +1,19 @@
 import { expect } from 'chai'
 import sinon from 'sinon'
-import { screen, fireEvent, render, waitFor } from '@testing-library/react'
+import { screen, fireEvent, waitFor } from '@testing-library/react'
 import fetchMock from 'fetch-mock'
 import userEvent from '@testing-library/user-event'
 
 import ShareProjectModal from '../../../../../frontend/js/features/share-project-modal/components/share-project-modal'
 import { renderWithEditorContext } from '../../../helpers/render-with-context'
 import {
-  EditorProviders,
+  makeProjectProvider,
+  projectDefaults,
   USER_EMAIL,
   USER_ID,
 } from '../../../helpers/editor-providers'
 import { location } from '@/shared/components/location'
+import { useProjectContext } from '@/shared/context/project-context'
 
 async function changePrivilegeLevel(screen, { current, next }) {
   const select = screen.getByDisplayValue(current)
@@ -22,22 +24,25 @@ async function changePrivilegeLevel(screen, { current, next }) {
   fireEvent.click(option)
 }
 
-describe('<ShareProjectModal/>', function () {
-  const project = {
-    _id: 'test-project',
-    name: 'Test Project',
-    features: {
-      collaborators: 10,
-      compileGroup: 'standard',
-    },
-    owner: {
-      _id: USER_ID,
-      email: USER_EMAIL,
-    },
-    members: [],
-    invites: [],
-  }
+const shareModalProjectDefaults = Object.assign({}, projectDefaults, {
+  _id: 'test-project',
+  name: 'Test Project',
+  features: {
+    collaborators: 10,
+    compileGroup: 'standard',
+  },
+  owner: {
+    _id: USER_ID,
+    email: USER_EMAIL,
+  },
+})
 
+function createContextProps(projectOverrides) {
+  const project = Object.assign({}, shareModalProjectDefaults, projectOverrides)
+  return { providers: { ProjectProvider: makeProjectProvider(project) } }
+}
+
+describe('<ShareProjectModal/>', function () {
   const contacts = [
     // user with edited name
     {
@@ -100,9 +105,10 @@ describe('<ShareProjectModal/>', function () {
   })
 
   it('renders the modal', async function () {
-    renderWithEditorContext(<ShareProjectModal {...modalProps} />, {
-      scope: { project },
-    })
+    renderWithEditorContext(
+      <ShareProjectModal {...modalProps} />,
+      createContextProps()
+    )
 
     await screen.findByText('Share Project')
   })
@@ -112,7 +118,7 @@ describe('<ShareProjectModal/>', function () {
 
     renderWithEditorContext(
       <ShareProjectModal {...modalProps} handleHide={handleHide} />,
-      { scope: { project } }
+      createContextProps()
     )
 
     const [headerCloseButton, footerCloseButton] = await screen.findAllByRole(
@@ -127,9 +133,10 @@ describe('<ShareProjectModal/>', function () {
   })
 
   it('handles access level "private"', async function () {
-    renderWithEditorContext(<ShareProjectModal {...modalProps} />, {
-      scope: { project: { ...project, publicAccesLevel: 'private' } },
-    })
+    renderWithEditorContext(
+      <ShareProjectModal {...modalProps} />,
+      createContextProps({ publicAccessLevel: 'private' })
+    )
 
     await screen.findByText('Link sharing is off')
     await screen.findByRole('button', { name: 'Turn on link sharing' })
@@ -148,10 +155,11 @@ describe('<ShareProjectModal/>', function () {
       readAndWriteHashPrefix: 'taEVki',
       readOnlyHashPrefix: 'j2xYbL',
     }
-    fetchMock.get(`/project/${project._id}/tokens`, tokens)
-    renderWithEditorContext(<ShareProjectModal {...modalProps} />, {
-      scope: { project: { ...project, publicAccesLevel: 'tokenBased' } },
-    })
+    fetchMock.get(`/project/${shareModalProjectDefaults._id}/tokens`, tokens)
+    renderWithEditorContext(
+      <ShareProjectModal {...modalProps} />,
+      createContextProps({ publicAccessLevel: 'tokenBased' })
+    )
 
     await screen.findByText('Link sharing is on')
     await screen.findByRole('button', { name: 'Turn off link sharing' })
@@ -170,9 +178,10 @@ describe('<ShareProjectModal/>', function () {
   })
 
   it('handles legacy access level "readAndWrite"', async function () {
-    renderWithEditorContext(<ShareProjectModal {...modalProps} />, {
-      scope: { project: { ...project, publicAccesLevel: 'readAndWrite' } },
-    })
+    renderWithEditorContext(
+      <ShareProjectModal {...modalProps} />,
+      createContextProps({ publicAccessLevel: 'readAndWrite' })
+    )
 
     await screen.findByText(
       'This project is public and can be edited by anyone with the URL.'
@@ -181,9 +190,10 @@ describe('<ShareProjectModal/>', function () {
   })
 
   it('handles legacy access level "readOnly"', async function () {
-    renderWithEditorContext(<ShareProjectModal {...modalProps} />, {
-      scope: { project: { ...project, publicAccesLevel: 'readOnly' } },
-    })
+    renderWithEditorContext(
+      <ShareProjectModal {...modalProps} />,
+      createContextProps({ publicAccessLevel: 'readOnly' })
+    )
 
     await screen.findByText(
       'This project is public and can be viewed but not edited by anyone with the URL'
@@ -192,7 +202,7 @@ describe('<ShareProjectModal/>', function () {
   })
 
   it('displays actions for project-owners', async function () {
-    fetchMock.get(`/project/${project._id}/tokens`, {})
+    fetchMock.get(`/project/${shareModalProjectDefaults._id}/tokens`, {})
 
     const invites = [
       {
@@ -203,18 +213,9 @@ describe('<ShareProjectModal/>', function () {
     ]
 
     // render as project owner: actions should be present
-    render(
-      <EditorProviders
-        scope={{
-          project: {
-            ...project,
-            invites,
-            publicAccesLevel: 'tokenBased',
-          },
-        }}
-      >
-        <ShareProjectModal {...modalProps} />
-      </EditorProviders>
+    renderWithEditorContext(
+      <ShareProjectModal {...modalProps} />,
+      createContextProps({ publicAccessLevel: 'tokenBased', invites })
     )
 
     await screen.findByRole('button', { name: 'Turn off link sharing' })
@@ -230,23 +231,13 @@ describe('<ShareProjectModal/>', function () {
       },
     ]
 
-    render(
-      <EditorProviders
-        scope={{
-          project: {
-            ...project,
-            invites,
-            publicAccesLevel: 'tokenBased',
-          },
-        }}
-        user={{
-          id: 'non-project-owner',
-          email: 'non-project-owner@example.com',
-        }}
-      >
-        <ShareProjectModal {...modalProps} />
-      </EditorProviders>
-    )
+    renderWithEditorContext(<ShareProjectModal {...modalProps} />, {
+      ...createContextProps({ publicAccessLevel: 'tokenBased', invites }),
+      user: {
+        id: 'non-project-owner',
+        email: 'non-project-owner@example.com',
+      },
+    })
 
     await screen.findByText(
       'To change access permissions, please ask the project owner'
@@ -268,23 +259,13 @@ describe('<ShareProjectModal/>', function () {
       },
     ]
 
-    render(
-      <EditorProviders
-        scope={{
-          project: {
-            ...project,
-            invites,
-            publicAccesLevel: 'private',
-          },
-        }}
-        user={{
-          id: 'non-project-owner',
-          email: 'non-project-owner@example.com',
-        }}
-      >
-        <ShareProjectModal {...modalProps} />
-      </EditorProviders>
-    )
+    renderWithEditorContext(<ShareProjectModal {...modalProps} />, {
+      ...createContextProps({ publicAccessLevel: 'private', invites }),
+      user: {
+        id: 'non-project-owner',
+        email: 'non-project-owner@example.com',
+      },
+    })
 
     await screen.findByText(
       'To add more collaborators or turn on link sharing, please ask the project owner'
@@ -299,11 +280,11 @@ describe('<ShareProjectModal/>', function () {
 
   it('only shows read-only token link to restricted token members', async function () {
     window.metaAttributesCache.set('ol-isRestrictedTokenMember', true)
-    fetchMock.get(`/project/${project._id}/tokens`, {})
+    fetchMock.get(`/project/${shareModalProjectDefaults._id}/tokens`, {})
 
     renderWithEditorContext(<ShareProjectModal {...modalProps} />, {
+      ...createContextProps({ publicAccessLevel: 'private' }),
       isRestrictedTokenMember: true,
-      scope: { project: { ...project, publicAccesLevel: 'tokenBased' } },
     })
 
     // no buttons
@@ -345,18 +326,12 @@ describe('<ShareProjectModal/>', function () {
       },
     ]
 
-    fetchMock.get(`/project/${project._id}/tokens`, {})
+    fetchMock.get(`/project/${shareModalProjectDefaults._id}/tokens`, {})
 
-    renderWithEditorContext(<ShareProjectModal {...modalProps} />, {
-      scope: {
-        project: {
-          ...project,
-          members,
-          invites,
-          publicAccesLevel: 'tokenBased',
-        },
-      },
-    })
+    renderWithEditorContext(
+      <ShareProjectModal {...modalProps} />,
+      createContextProps({ publicAccessLevel: 'tokenBased', members, invites })
+    )
 
     const projectOwnerEmail = USER_EMAIL
 
@@ -380,7 +355,7 @@ describe('<ShareProjectModal/>', function () {
   })
 
   it('resends an invite', async function () {
-    fetchMock.get(`/project/${project._id}/tokens`, {})
+    fetchMock.get(`/project/${shareModalProjectDefaults._id}/tokens`, {})
     fetchMock.postOnce(
       'express:/project/:projectId/invite/:inviteId/resend',
       204
@@ -394,15 +369,10 @@ describe('<ShareProjectModal/>', function () {
       },
     ]
 
-    renderWithEditorContext(<ShareProjectModal {...modalProps} />, {
-      scope: {
-        project: {
-          ...project,
-          invites,
-          publicAccesLevel: 'tokenBased',
-        },
-      },
-    })
+    renderWithEditorContext(
+      <ShareProjectModal {...modalProps} />,
+      createContextProps({ publicAccessLevel: 'tokenBased', invites })
+    )
 
     const [, closeButton] = screen.getAllByRole('button', {
       name: 'Close',
@@ -418,7 +388,7 @@ describe('<ShareProjectModal/>', function () {
   })
 
   it('revokes an invite', async function () {
-    fetchMock.get(`/project/${project._id}/tokens`, {})
+    fetchMock.get(`/project/${shareModalProjectDefaults._id}/tokens`, {})
     fetchMock.deleteOnce('express:/project/:projectId/invite/:inviteId', 204)
 
     const invites = [
@@ -429,15 +399,10 @@ describe('<ShareProjectModal/>', function () {
       },
     ]
 
-    renderWithEditorContext(<ShareProjectModal {...modalProps} />, {
-      scope: {
-        project: {
-          ...project,
-          invites,
-          publicAccesLevel: 'tokenBased',
-        },
-      },
-    })
+    renderWithEditorContext(
+      <ShareProjectModal {...modalProps} />,
+      createContextProps({ publicAccessLevel: 'tokenBased', invites })
+    )
 
     const [, closeButton] = screen.getAllByRole('button', {
       name: 'Close',
@@ -452,7 +417,7 @@ describe('<ShareProjectModal/>', function () {
   })
 
   it('changes member privileges to read + write', async function () {
-    fetchMock.get(`/project/${project._id}/tokens`, {})
+    fetchMock.get(`/project/${shareModalProjectDefaults._id}/tokens`, {})
     fetchMock.putOnce('express:/project/:projectId/users/:userId', 204)
 
     const members = [
@@ -463,17 +428,12 @@ describe('<ShareProjectModal/>', function () {
       },
     ]
 
-    renderWithEditorContext(<ShareProjectModal {...modalProps} />, {
-      scope: {
-        project: {
-          ...project,
-          members,
-          publicAccesLevel: 'tokenBased',
-        },
-      },
-    })
+    renderWithEditorContext(
+      <ShareProjectModal {...modalProps} />,
+      createContextProps({ publicAccessLevel: 'tokenBased', members })
+    )
 
-    const [, closeButton] = await screen.getAllByRole('button', {
+    const [, closeButton] = screen.getAllByRole('button', {
       name: 'Close',
     })
 
@@ -493,7 +453,7 @@ describe('<ShareProjectModal/>', function () {
   })
 
   it('removes a member from the project', async function () {
-    fetchMock.get(`/project/${project._id}/tokens`, {})
+    fetchMock.get(`/project/${shareModalProjectDefaults._id}/tokens`, {})
     fetchMock.deleteOnce('express:/project/:projectId/users/:userId', 204)
 
     const members = [
@@ -504,15 +464,10 @@ describe('<ShareProjectModal/>', function () {
       },
     ]
 
-    renderWithEditorContext(<ShareProjectModal {...modalProps} />, {
-      scope: {
-        project: {
-          ...project,
-          members,
-          publicAccesLevel: 'tokenBased',
-        },
-      },
-    })
+    renderWithEditorContext(
+      <ShareProjectModal {...modalProps} />,
+      createContextProps({ publicAccessLevel: 'tokenBased', members })
+    )
 
     expect(
       await screen.findAllByText('member-viewer@example.com')
@@ -536,7 +491,7 @@ describe('<ShareProjectModal/>', function () {
   })
 
   it('changes member privileges to owner with confirmation', async function () {
-    fetchMock.get(`/project/${project._id}/tokens`, {})
+    fetchMock.get(`/project/${shareModalProjectDefaults._id}/tokens`, {})
     fetchMock.postOnce('express:/project/:projectId/transfer-ownership', 204)
 
     const members = [
@@ -547,15 +502,10 @@ describe('<ShareProjectModal/>', function () {
       },
     ]
 
-    renderWithEditorContext(<ShareProjectModal {...modalProps} />, {
-      scope: {
-        project: {
-          ...project,
-          members,
-          publicAccesLevel: 'tokenBased',
-        },
-      },
-    })
+    renderWithEditorContext(
+      <ShareProjectModal {...modalProps} />,
+      createContextProps({ publicAccessLevel: 'tokenBased', members })
+    )
 
     await screen.findByText('member-viewer@example.com')
     expect(screen.queryAllByText('member-viewer@example.com')).to.have.length(1)
@@ -585,16 +535,12 @@ describe('<ShareProjectModal/>', function () {
   })
 
   it('sends invites to input email addresses', async function () {
-    fetchMock.get(`/project/${project._id}/tokens`, {})
+    fetchMock.get(`/project/${shareModalProjectDefaults._id}/tokens`, {})
 
-    renderWithEditorContext(<ShareProjectModal {...modalProps} />, {
-      scope: {
-        project: {
-          ...project,
-          publicAccesLevel: 'tokenBased',
-        },
-      },
-    })
+    renderWithEditorContext(
+      <ShareProjectModal {...modalProps} />,
+      createContextProps({ publicAccessLevel: 'tokenBased' })
+    )
 
     const [inputElement] = await screen.findAllByLabelText('Add people')
 
@@ -679,25 +625,24 @@ describe('<ShareProjectModal/>', function () {
   })
 
   it('displays a message when the collaborator limit is reached', async function () {
-    fetchMock.get(`/project/${project._id}/tokens`, {})
+    fetchMock.get(`/project/${shareModalProjectDefaults._id}/tokens`, {})
     fetchMock.post(
       '/event/paywall-prompt',
       {},
       { body: { 'paywall-type': 'project-sharing' } }
     )
 
-    renderWithEditorContext(<ShareProjectModal {...modalProps} />, {
-      scope: {
-        project: {
-          ...project,
-          publicAccesLevel: 'tokenBased',
-          features: {
-            collaborators: 0,
-            compileGroup: 'standard',
-          },
+    renderWithEditorContext(
+      <ShareProjectModal {...modalProps} />,
+      createContextProps({
+        publicAccessLevel: 'tokenBased',
+        features: {
+          collaborators: 0,
+          compileGroup: 'standard',
+          trackChangesVisible: true,
         },
-      },
-    })
+      })
+    )
 
     await screen.findByText('Add more collaborators')
 
@@ -717,23 +662,22 @@ describe('<ShareProjectModal/>', function () {
   })
 
   it('counts reviewers towards the collaborator limit', async function () {
-    renderWithEditorContext(<ShareProjectModal {...modalProps} />, {
-      scope: {
-        project: {
-          ...project,
-          features: {
-            collaborators: 1,
-          },
-          members: [
-            {
-              _id: 'reviewer-id',
-              email: 'reviewer@example.com',
-              privileges: 'review',
-            },
-          ],
+    renderWithEditorContext(
+      <ShareProjectModal {...modalProps} />,
+      createContextProps({
+        features: {
+          collaborators: 1,
+          trackChangesVisible: true,
         },
-      },
-    })
+        members: [
+          {
+            _id: 'reviewer-id',
+            email: 'reviewer@example.com',
+            privileges: 'review',
+          },
+        ],
+      })
+    )
 
     await screen.findByText('Add more collaborators')
 
@@ -754,16 +698,14 @@ describe('<ShareProjectModal/>', function () {
   })
 
   it('handles server error responses', async function () {
-    fetchMock.get(`/project/${project._id}/tokens`, {})
+    fetchMock.get(`/project/${shareModalProjectDefaults._id}/tokens`, {})
 
-    renderWithEditorContext(<ShareProjectModal {...modalProps} />, {
-      scope: {
-        project: {
-          ...project,
-          publicAccesLevel: 'tokenBased',
-        },
-      },
-    })
+    renderWithEditorContext(
+      <ShareProjectModal {...modalProps} />,
+      createContextProps({
+        publicAccessLevel: 'tokenBased',
+      })
+    )
 
     // loading contacts
     await waitFor(() => {
@@ -815,14 +757,25 @@ describe('<ShareProjectModal/>', function () {
   })
 
   it('handles switching between access levels', async function () {
-    fetchMock.get(`/project/${project._id}/tokens`, {})
+    fetchMock.get(`/project/${shareModalProjectDefaults._id}/tokens`, {})
     fetchMock.post('express:/project/:projectId/settings/admin', 204)
 
-    renderWithEditorContext(<ShareProjectModal {...modalProps} />, {
-      scope: {
-        project: { ...project, publicAccesLevel: 'private' },
-      },
-    })
+    let setPublicAccessLevel = function () {}
+
+    function WrappedModal() {
+      const { updateProject } = useProjectContext()
+      setPublicAccessLevel = publicAccessLevel => {
+        updateProject({ publicAccessLevel })
+      }
+      return <ShareProjectModal {...modalProps} />
+    }
+
+    renderWithEditorContext(
+      <WrappedModal />,
+      createContextProps({
+        publicAccessLevel: 'private',
+      })
+    )
 
     await screen.findByText('Link sharing is off')
 
@@ -837,13 +790,10 @@ describe('<ShareProjectModal/>', function () {
       publicAccessLevel: 'tokenBased',
     })
 
-    // NOTE: updating the scoped project data manually,
-    // as the project data is usually updated via the websocket connection
-    window.overleaf.unstable.store.set('project', {
-      ...project,
-      publicAccesLevel: 'tokenBased',
-    })
-    // watchCallbacks.project({ ...project, publicAccesLevel: 'tokenBased' })
+    // NOTE: the project data is usually updated via the websocket connection
+    // but we can't do that so we're doing it via the project context, which is
+    // exposed in a hacky way here
+    setPublicAccessLevel('tokenBased')
 
     await screen.findByText('Link sharing is on')
     const disableButton = await screen.findByRole('button', {
@@ -857,21 +807,16 @@ describe('<ShareProjectModal/>', function () {
       publicAccessLevel: 'private',
     })
 
-    // NOTE: updating the scoped project data manually,
-    // as the project data is usually updated via the websocket connection
-    window.overleaf.unstable.store.set('project', {
-      ...project,
-      publicAccesLevel: 'private',
-    })
-    // watchCallbacks.project({ ...project, publicAccesLevel: 'private' })
+    setPublicAccessLevel('private')
 
     await screen.findByText('Link sharing is off')
   })
 
   it('avoids selecting unmatched contact', async function () {
-    renderWithEditorContext(<ShareProjectModal {...modalProps} />, {
-      scope: { project },
-    })
+    renderWithEditorContext(
+      <ShareProjectModal {...modalProps} />,
+      createContextProps()
+    )
 
     const [inputElement] = await screen.findAllByLabelText('Add people')
 
@@ -923,9 +868,10 @@ describe('<ShareProjectModal/>', function () {
   })
 
   it('selects contact by typing the entire email and blurring the input', async function () {
-    renderWithEditorContext(<ShareProjectModal {...modalProps} />, {
-      scope: { project },
-    })
+    renderWithEditorContext(
+      <ShareProjectModal {...modalProps} />,
+      createContextProps()
+    )
 
     const [inputElement] = await screen.findAllByLabelText('Add people')
 
@@ -958,9 +904,10 @@ describe('<ShareProjectModal/>', function () {
   })
 
   it('selects contact by typing a partial email and selecting the suggestion', async function () {
-    renderWithEditorContext(<ShareProjectModal {...modalProps} />, {
-      scope: { project },
-    })
+    renderWithEditorContext(
+      <ShareProjectModal {...modalProps} />,
+      createContextProps()
+    )
 
     const [inputElement] = await screen.findAllByLabelText('Add people')
 
@@ -992,9 +939,10 @@ describe('<ShareProjectModal/>', function () {
   })
 
   it('allows an email address to be selected, removed, then re-added', async function () {
-    renderWithEditorContext(<ShareProjectModal {...modalProps} />, {
-      scope: { project },
-    })
+    renderWithEditorContext(
+      <ShareProjectModal {...modalProps} />,
+      createContextProps()
+    )
 
     const [inputElement] = await screen.findAllByLabelText('Add people')
 

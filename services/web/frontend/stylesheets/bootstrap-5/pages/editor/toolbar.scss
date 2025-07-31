@@ -435,9 +435,7 @@
 }
 
 .toggle-switch-input {
-  position: absolute;
-  opacity: 0;
-  pointer-events: none;
+  @include visually-hidden;
 }
 
 .toggle-switch-input:disabled + .toggle-switch-label {

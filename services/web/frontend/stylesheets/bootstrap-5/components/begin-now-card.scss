@@ -1,0 +1,25 @@
+.begin-now-card {
+  margin: calc(var(--spacing-16) * 2) 0;
+
+  .card-links {
+    .card-link + .card-link {
+      margin-left: var(--spacing-06);
+    }
+
+    @include media-breakpoint-down(md) {
+      .card-link + .card-link {
+        margin-left: 0;
+      }
+
+      .card-link {
+        width: 100%;
+        margin-left: 0;
+        margin-top: var(--spacing-05);
+      }
+
+      .card-link:first-child {
+        margin-top: 0;
+      }
+    }
+  }
+}

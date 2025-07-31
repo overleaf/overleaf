@@ -26,7 +26,7 @@ const DocumentUpdaterHandler = require('../DocumentUpdater/DocumentUpdaterHandle
 const Metrics = require('@overleaf/metrics')
 const Errors = require('../Errors/Errors')
 const ClsiCacheHandler = require('./ClsiCacheHandler')
-const { getBlobLocation } = require('../History/HistoryManager')
+const { getFilestoreBlobURL } = require('../History/HistoryManager')
 
 const VALID_COMPILERS = ['pdflatex', 'latex', 'xelatex', 'lualatex']
 const OUTPUT_FILE_TIMEOUT_MS = 60000
@@ -755,8 +755,7 @@ function _finaliseRequest(projectId, options, project, docs, files) {
     let url = filestoreURL
     let fallbackURL
     if (file.hash && Features.hasFeature('project-history-blobs')) {
-      const { bucket, key } = getBlobLocation(historyId, file.hash)
-      url = `${Settings.apis.filestore.url}/bucket/${bucket}/key/${key}`
+      url = getFilestoreBlobURL(historyId, file.hash)
       fallbackURL = filestoreURL
     }
     resources.push({

@@ -7,7 +7,9 @@ import { activeEditorLine } from '../helpers/active-editor-line'
 import { TestContainer } from '../helpers/test-container'
 import customLocalStorage from '@/infrastructure/local-storage'
 import { OnlineUsersContext } from '@/features/ide-react/context/online-users-context'
-import { FC } from 'react'
+import { LocalCompileContext } from '@/shared/context/local-compile-context'
+import type { FC, PropsWithChildren } from 'react'
+import type { Annotation } from '../../../../../types/annotation'
 
 describe('<CodeMirrorEditor/>', { scrollBehavior: false }, function () {
   beforeEach(function () {
@@ -64,27 +66,39 @@ describe('<CodeMirrorEditor/>', { scrollBehavior: false }, function () {
   it('renders annotations in the gutter', function () {
     const scope = mockScope()
 
-    scope.pdf.logEntryAnnotations = {
+    const logEntryAnnotations: Record<string, Annotation[]> = {
       [docId]: [
         {
+          id: '1',
+          entryIndex: 1,
           row: 20,
           type: 'error',
           text: 'Another error',
+          firstOnLine: true,
         },
         {
+          id: '2',
+          entryIndex: 2,
           row: 19,
           type: 'error',
           text: 'An error',
+          firstOnLine: true,
         },
         {
+          id: '3',
+          entryIndex: 3,
           row: 20,
           type: 'warning',
           text: 'A warning on the same line',
+          firstOnLine: false,
         },
         {
+          id: '4',
+          entryIndex: 4,
           row: 25,
           type: 'warning',
           text: 'Another warning',
+          firstOnLine: true,
         },
       ],
     }
@@ -93,9 +107,19 @@ describe('<CodeMirrorEditor/>', { scrollBehavior: false }, function () {
 
     cy.clock()
 
+    const LocalCompileProvider: FC<PropsWithChildren> = ({ children }) => (
+      // @ts-expect-error: not entering all the values for LocalCompileContext
+      <LocalCompileContext.Provider value={{ logEntryAnnotations }}>
+        {children}
+      </LocalCompileContext.Provider>
+    )
     cy.mount(
       <TestContainer>
-        <EditorProviders scope={scope} userSettings={userSettings}>
+        <EditorProviders
+          scope={scope}
+          userSettings={userSettings}
+          providers={{ LocalCompileProvider }}
+        >
           <CodeMirrorEditor />
         </EditorProviders>
       </TestContainer>
@@ -598,7 +622,7 @@ describe('<CodeMirrorEditor/>', { scrollBehavior: false }, function () {
 
         const rect = selection.getRangeAt(0).getBoundingClientRect()
         expect(Math.round(rect.top)).to.be.gte(100)
-        expect(Math.round(rect.left)).to.be.gte(90)
+        expect(Math.round(rect.left)).to.be.gte(80)
       })
   })
 })

@@ -1500,4 +1500,331 @@ describe('AuthenticationController', function () {
       })
     })
   })
+
+  describe('checkCredentials', function () {
+    beforeEach(function () {
+      this.userDetailsMap = new Map()
+      this.logger.err = sinon.stub()
+      this.Metrics.inc = sinon.stub()
+    })
+
+    describe('with valid credentials', function () {
+      describe('single password', function () {
+        beforeEach(function () {
+          this.userDetailsMap.set('testuser', 'correctpassword')
+          this.result = this.AuthenticationController.checkCredentials(
+            this.userDetailsMap,
+            'testuser',
+            'correctpassword'
+          )
+        })
+
+        it('should return true', function () {
+          this.result.should.equal(true)
+        })
+
+        it('should not log an error', function () {
+          this.logger.err.called.should.equal(false)
+        })
+
+        it('should record success metrics', function () {
+          this.Metrics.inc.should.have.been.calledWith(
+            'security.http-auth.check-credentials',
+            1,
+            {
+              path: 'known-user',
+              status: 'pass',
+            }
+          )
+        })
+      })
+
+      describe('array with primary password', function () {
+        beforeEach(function () {
+          this.userDetailsMap.set('testuser', ['primary', 'fallback'])
+          this.result = this.AuthenticationController.checkCredentials(
+            this.userDetailsMap,
+            'testuser',
+            'primary'
+          )
+        })
+
+        it('should return true', function () {
+          this.result.should.equal(true)
+        })
+
+        it('should not log an error', function () {
+          this.logger.err.called.should.equal(false)
+        })
+
+        it('should record success metrics', function () {
+          this.Metrics.inc.should.have.been.calledWith(
+            'security.http-auth.check-credentials',
+            1,
+            {
+              path: 'known-user',
+              status: 'pass',
+            }
+          )
+        })
+      })
+
+      describe('array with fallback password', function () {
+        beforeEach(function () {
+          this.userDetailsMap.set('testuser', ['primary', 'fallback'])
+          this.result = this.AuthenticationController.checkCredentials(
+            this.userDetailsMap,
+            'testuser',
+            'fallback'
+          )
+        })
+
+        it('should return true', function () {
+          this.result.should.equal(true)
+        })
+
+        it('should not log an error', function () {
+          this.logger.err.called.should.equal(false)
+        })
+
+        it('should record success metrics', function () {
+          this.Metrics.inc.should.have.been.calledWith(
+            'security.http-auth.check-credentials',
+            1,
+            {
+              path: 'known-user',
+              status: 'pass',
+            }
+          )
+        })
+      })
+    })
+
+    describe('with invalid credentials', function () {
+      describe('unknown user', function () {
+        beforeEach(function () {
+          this.userDetailsMap.set('testuser', 'correctpassword')
+          this.result = this.AuthenticationController.checkCredentials(
+            this.userDetailsMap,
+            'unknownuser',
+            'anypassword'
+          )
+        })
+
+        it('should return false', function () {
+          this.result.should.equal(false)
+        })
+
+        it('should log an error', function () {
+          this.logger.err.should.have.been.calledWith(
+            { user: 'unknownuser' },
+            'invalid login details'
+          )
+        })
+
+        it('should record failure metrics', function () {
+          this.Metrics.inc.should.have.been.calledWith(
+            'security.http-auth.check-credentials',
+            1,
+            {
+              path: 'unknown-user',
+              status: 'fail',
+            }
+          )
+        })
+      })
+
+      describe('wrong password', function () {
+        beforeEach(function () {
+          this.userDetailsMap.set('testuser', 'correctpassword')
+          this.result = this.AuthenticationController.checkCredentials(
+            this.userDetailsMap,
+            'testuser',
+            'wrongpassword'
+          )
+        })
+
+        it('should return false', function () {
+          this.result.should.equal(false)
+        })
+
+        it('should log an error', function () {
+          this.logger.err.should.have.been.calledWith(
+            { user: 'testuser' },
+            'invalid login details'
+          )
+        })
+
+        it('should record failure metrics', function () {
+          this.Metrics.inc.should.have.been.calledWith(
+            'security.http-auth.check-credentials',
+            1,
+            {
+              path: 'known-user',
+              status: 'fail',
+            }
+          )
+        })
+      })
+
+      describe('wrong password with array', function () {
+        beforeEach(function () {
+          this.userDetailsMap.set('testuser', ['primary', 'fallback'])
+          this.result = this.AuthenticationController.checkCredentials(
+            this.userDetailsMap,
+            'testuser',
+            'wrongpassword'
+          )
+        })
+
+        it('should return false', function () {
+          this.result.should.equal(false)
+        })
+
+        it('should log an error', function () {
+          this.logger.err.should.have.been.calledWith(
+            { user: 'testuser' },
+            'invalid login details'
+          )
+        })
+
+        it('should record failure metrics', function () {
+          this.Metrics.inc.should.have.been.calledWith(
+            'security.http-auth.check-credentials',
+            1,
+            {
+              path: 'known-user',
+              status: 'fail',
+            }
+          )
+        })
+      })
+
+      describe('null user entry', function () {
+        beforeEach(function () {
+          this.userDetailsMap.set('testuser', null)
+          this.result = this.AuthenticationController.checkCredentials(
+            this.userDetailsMap,
+            'testuser',
+            'anypassword'
+          )
+        })
+
+        it('should return false', function () {
+          this.result.should.equal(false)
+        })
+
+        it('should log an error', function () {
+          this.logger.err.should.have.been.calledWith(
+            { user: 'testuser' },
+            'invalid login details'
+          )
+        })
+
+        it('should record failure metrics for unknown user', function () {
+          this.Metrics.inc.should.have.been.calledWith(
+            'security.http-auth.check-credentials',
+            1,
+            {
+              path: 'unknown-user',
+              status: 'fail',
+            }
+          )
+        })
+      })
+
+      describe('empty primary password in array', function () {
+        beforeEach(function () {
+          this.userDetailsMap.set('testuser', ['', 'fallback'])
+          this.result = this.AuthenticationController.checkCredentials(
+            this.userDetailsMap,
+            'testuser',
+            'fallback'
+          )
+        })
+
+        it('should return true with fallback password', function () {
+          this.result.should.equal(true)
+        })
+
+        it('should not log an error', function () {
+          this.logger.err.called.should.equal(false)
+        })
+      })
+
+      describe('empty fallback password in array', function () {
+        beforeEach(function () {
+          this.userDetailsMap.set('testuser', ['primary', ''])
+          this.result = this.AuthenticationController.checkCredentials(
+            this.userDetailsMap,
+            'testuser',
+            'primary'
+          )
+        })
+
+        it('should return true with primary password', function () {
+          this.result.should.equal(true)
+        })
+
+        it('should not log an error', function () {
+          this.logger.err.called.should.equal(false)
+        })
+      })
+
+      describe('both passwords empty in array', function () {
+        beforeEach(function () {
+          this.userDetailsMap.set('testuser', ['', ''])
+          this.result = this.AuthenticationController.checkCredentials(
+            this.userDetailsMap,
+            'testuser',
+            'anypassword'
+          )
+        })
+
+        it('should return false', function () {
+          this.result.should.equal(false)
+        })
+
+        it('should log an error', function () {
+          this.logger.err.should.have.been.calledWith(
+            { user: 'testuser' },
+            'invalid login details'
+          )
+        })
+      })
+
+      describe('empty single password', function () {
+        beforeEach(function () {
+          this.userDetailsMap.set('testuser', '')
+          this.result = this.AuthenticationController.checkCredentials(
+            this.userDetailsMap,
+            'testuser',
+            'anypassword'
+          )
+        })
+
+        it('should return false', function () {
+          this.result.should.equal(false)
+        })
+
+        it('should log an error', function () {
+          this.logger.err.should.have.been.calledWith(
+            { user: 'testuser' },
+            'invalid login details'
+          )
+        })
+
+        it('should record failure metrics for unknown user', function () {
+          this.Metrics.inc.should.have.been.calledWith(
+            'security.http-auth.check-credentials',
+            1,
+            {
+              path: 'unknown-user',
+              status: 'fail',
+            }
+          )
+        })
+      })
+    })
+  })
 })

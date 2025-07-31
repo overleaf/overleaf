@@ -915,7 +915,7 @@ async function compareBackups(projectId, options) {
           const globalBlob = GLOBAL_BLOBS.get(blob.hash)
           console.log(
             `  ✓ Blob ${blob.hash} is a global blob`,
-            globalBlob.demoted ? '(demoted)' : ''
+            globalBlob?.demoted ? '(demoted)' : ''
           )
           continue
         }

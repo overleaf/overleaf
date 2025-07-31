@@ -8,6 +8,7 @@ type SwitchProps = {
 
 function Switch({ onChange, checked, disabled = false }: SwitchProps) {
   return (
+    // eslint-disable-next-line jsx-a11y/label-has-associated-control
     <label className={classNames('switch-input', { disabled })}>
       <input
         className="invisible-input"

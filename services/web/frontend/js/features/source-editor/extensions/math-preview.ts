@@ -1,10 +1,4 @@
-import {
-  EditorView,
-  repositionTooltips,
-  showTooltip,
-  Tooltip,
-  ViewPlugin,
-} from '@codemirror/view'
+import { EditorView, showTooltip, Tooltip, ViewPlugin } from '@codemirror/view'
 import {
   Compartment,
   EditorState,
@@ -24,8 +18,8 @@ import { documentCommands } from '../languages/latex/document-commands'
 import { debugConsole } from '@/utils/debugging'
 import { nodeHasError } from '../utils/tree-operations/common'
 import { documentEnvironments } from '../languages/latex/document-environments'
+import { repositionAllTooltips } from './tooltips-reposition'
 
-const REPOSITION_EVENT = 'editor:repositionMathTooltips'
 const HIDE_TOOLTIP_EVENT = 'editor:hideMathTooltip'
 
 export const mathPreview = (enabled: boolean): Extension => {
@@ -81,19 +75,16 @@ export const mathPreviewStateField = StateField.define<{
     showTooltip.compute([field], state => state.field(field).tooltip),
 
     ViewPlugin.define(view => {
-      const listener = () => repositionTooltips(view)
       const hideTooltip = () => {
         view.dispatch({
           effects: hideTooltipEffect.of(null),
         })
       }
 
-      window.addEventListener(REPOSITION_EVENT, listener)
       window.addEventListener(HIDE_TOOLTIP_EVENT, hideTooltip)
 
       return {
         destroy() {
-          window.removeEventListener(REPOSITION_EVENT, listener)
           window.removeEventListener(HIDE_TOOLTIP_EVENT, hideTooltip)
         },
       }
@@ -220,7 +211,7 @@ const buildTooltipContent = (
   renderMath(math.content, math.displayMode, element, definitions)
     .then(() => {
       element.style.opacity = '1'
-      window.dispatchEvent(new Event(REPOSITION_EVENT))
+      repositionAllTooltips()
     })
     .catch(error => {
       debugConsole.error(error)

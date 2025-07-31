@@ -32,6 +32,7 @@ describe('DocManager', function () {
         return r
       },
       shouldUpdateRanges: sinon.stub().returns(false),
+      fixCommentIds: sinon.stub(),
     }
     this.settings = { docstore: {} }
 
@@ -119,6 +120,27 @@ describe('DocManager', function () {
       await expect(
         this.DocManager.getDocLines(this.project_id, this.doc_id)
       ).to.be.rejectedWith(Errors.DocWithoutLinesError)
+    })
+  })
+
+  describe('_getDoc', function () {
+    it('should return error when get doc does not exist', async function () {
+      this.MongoManager.findDoc.resolves(null)
+      await expect(
+        this.DocManager._getDoc(this.project_id, this.doc_id, { inS3: true })
+      ).to.be.rejectedWith(Errors.NotFoundError)
+    })
+
+    it('should fix comment ids', async function () {
+      this.MongoManager.findDoc.resolves({
+        _id: this.doc_id,
+        ranges: {},
+      })
+      await this.DocManager._getDoc(this.project_id, this.doc_id, {
+        inS3: true,
+        ranges: true,
+      })
+      expect(this.RangeManager.fixCommentIds).to.have.been.called
     })
   })
 
@@ -270,7 +292,7 @@ describe('DocManager', function () {
         ]
         this.MongoManager.getProjectsDocs.resolves(this.docs)
         this.DocArchiveManager.unArchiveAllDocs.resolves(this.docs)
-        this.filter = { lines: true }
+        this.filter = { lines: true, ranges: true }
         this.result = await this.DocManager.getAllNonDeletedDocs(
           this.project_id,
           this.filter
@@ -283,6 +305,10 @@ describe('DocManager', function () {
           { include_deleted: false },
           this.filter
         )
+      })
+
+      it('should fix comment ids', async function () {
+        expect(this.RangeManager.fixCommentIds).to.have.been.called
       })
 
       it('should return the docs', function () {

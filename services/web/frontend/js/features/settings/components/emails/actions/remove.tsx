@@ -37,7 +37,7 @@ type RemoveProps = {
 
 function Remove({ userEmailData, deleteEmailAsync }: RemoveProps) {
   const { t } = useTranslation()
-  const { state, deleteEmail, resetLeaversSurveyExpiration } =
+  const { state, deleteEmail, resetLeaversSurveyExpiration, setLoading } =
     useUserEmailsContext()
   const isManaged = getMeta('ol-isManagedAccount')
 
@@ -62,8 +62,12 @@ function Remove({ userEmailData, deleteEmailAsync }: RemoveProps) {
       .then(() => {
         deleteEmail(userEmailData.email)
         resetLeaversSurveyExpiration(userEmailData)
+        // Reset the global loading state before this row is unmounted
+        setLoading(false)
       })
-      .catch(() => {})
+      .catch(() => {
+        setLoading(false)
+      })
   }
 
   if (deleteEmailAsync.isLoading) {

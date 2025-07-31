@@ -2,11 +2,9 @@
 # Instead run bin/update_build_scripts from
 # https://github.com/overleaf/internal/
 
-version: "2.3"
-
 services:
   test_unit:
-    image: node:22.15.1
+    image: node:22.17.0
     volumes:
       - .:/overleaf/services/notifications
       - ../../node_modules:/overleaf/node_modules
@@ -21,7 +19,7 @@ services:
     user: node
 
   test_acceptance:
-    image: node:22.15.1
+    image: node:22.17.0
     volumes:
       - .:/overleaf/services/notifications
       - ../../node_modules:/overleaf/node_modules
@@ -44,7 +42,7 @@ services:
     command: npm run --silent test:acceptance
 
   mongo:
-    image: mongo:7.0.20
+    image: mongo:8.0.11
     command: --replSet overleaf
     volumes:
       - ../../bin/shared/mongodb-init-replica-set.js:/docker-entrypoint-initdb.d/mongodb-init-replica-set.js

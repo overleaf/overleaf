@@ -1,61 +1,37 @@
+include ./notification
+
 mixin reconfirmAffiliationNotification-marketing(userEmail, location)
-	form(
-		data-ol-async-form
-		action='/user/emails/send-reconfirmation'
-	)
-		input(name="_csrf" type="hidden" value=csrfToken)
-		input(name="email" type="hidden" value=userEmail.email)
-		+formMessages()
+	- var ssoEnabled = userEmail.affiliation && userEmail.affiliation.institution && userEmail.affiliation.institution.ssoEnabled
+	if ssoEnabled
+		- var institutionId = userEmail.affiliation && userEmail.affiliation.institution && userEmail.affiliation.institution.id
+		a.btn-reconfirm.btn.btn-sm.btn-secondary(
+			data-ol-slow-link
+			href=`${settings.saml.ukamf.initPath}?university_id=${institutionId}&reconfirm=${location}`
+		)
+			span(data-ol-inflight='idle') #{translate("confirm_affiliation")}
+			span(hidden data-ol-inflight='pending') #{translate("pending")}…
 
-		.reconfirm-notification
-			div(data-ol-not-sent style="width:100%;")
-				i.fa.fa-warning
+	else
+		a.btn-reconfirm.btn.btn-sm.btn-secondary(
+			data-ol-slow-link
+			href='/user/settings'
+		)
+			span(data-ol-inflight='idle') #{translate("go_to_account_settings")}
+			span(hidden data-ol-inflight='pending') #{translate("redirecting")}… 
 
-				- var ssoEnabled = userEmail.affiliation && userEmail.affiliation.institution && userEmail.affiliation.institution.ssoEnabled
-				if ssoEnabled
-					- var institutionId = userEmail.affiliation && userEmail.affiliation.institution && userEmail.affiliation.institution.id
-					a.btn-reconfirm.btn.btn-sm.btn-info(
-						data-ol-slow-link
-						href=`${settings.saml.ukamf.initPath}?university_id=${institutionId}&reconfirm=${location}`
-					)
-						span(data-ol-inflight="idle") #{translate("confirm_affiliation")}
-						span(hidden data-ol-inflight="pending") #{translate("pending")}…
+	| !{translate("are_you_still_at", { institutionName: userEmail.affiliation.institution.name }, ['strong'])}&nbsp;
 
-				else
-					button.btn-reconfirm.btn.btn-sm.btn-info(
-						type="submit"
-						data-ol-disabled-inflight
-					)
-						span(data-ol-inflight="idle") #{translate("confirm_affiliation")}
-						span(hidden data-ol-inflight="pending") #{translate("pending")}…
+	if location == '/user/settings'
+		| !{translate('please_reconfirm_institutional_email', {}, [{ name: 'span' }])}
+		if userEmail.default
+			span &nbsp;#{translate('need_to_add_new_primary_before_remove')}
+	else
+		| !{translate("please_reconfirm_institutional_email_2")}
 
-				| !{translate("are_you_still_at", {institutionName: userEmail.affiliation.institution.name}, ['strong'])}&nbsp;
-
-				if location == '/user/settings'
-					| !{translate('please_reconfirm_institutional_email', {}, [{ name: 'span' }])}
-					if userEmail.default
-						span &nbsp;#{translate('need_to_add_new_primary_before_remove')}
-				else
-					| !{translate("please_reconfirm_institutional_email", {}, [{name: 'a', attrs: {href: '/user/settings?remove=' + userEmail.email}}])}
-
-				| &nbsp;
-				a(href="/learn/how-to/Institutional_Email_Reconfirmation" target="_blank") #{translate("learn_more")}
-
-			div(hidden data-ol-sent)
-				| !{translate("please_check_your_inbox_to_confirm", {institutionName: userEmail.affiliation.institution.name}, ['strong'])}
-				| &nbsp;
-				button.btn-inline-link(
-					type="submit"
-					data-ol-disabled-inflight
-				)
-					span(data-ol-inflight="idle") #{translate('resend_confirmation_email')}
-					span(hidden data-ol-inflight="pending") #{translate("pending")}…
+	| &nbsp;
+	a(href='/learn/how-to/Institutional_Email_Reconfirmation' target='_blank') #{translate("learn_more_about_email_reconfirmation")}
 
 mixin reconfirmedAffiliationNotification-marketing(userEmail)
-	.alert.alert-info
-		.reconfirm-notification
-			div(style="width:100%;")
-				//- extra div for flex styling
-				| !{translate("your_affiliation_is_confirmed", {institutionName: userEmail.affiliation.institution.name}, ['strong'])}
-				|
-				| #{translate('thank_you_exclamation')}
+	| !{translate("your_affiliation_is_confirmed", {institutionName: userEmail.affiliation.institution.name}, ['strong'])}
+	|
+	| #{translate('thank_you_exclamation')}

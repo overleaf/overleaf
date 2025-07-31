@@ -59,6 +59,48 @@ describe('UserMembershipController', function () {
         last_logged_in_at: '2020-05-20T10:41:11.407Z',
         last_active_at: '2021-05-20T10:41:11.407Z',
       },
+      {
+        _id: 'mock-member-id-3',
+        email: 'mock-email-3@foo.com',
+        last_logged_in_at: '2021-08-10T10:41:11.407Z',
+        last_active_at: '2021-08-20T10:41:11.407Z',
+        enrollment: {
+          managedBy: 'some-other-subscription-id',
+          enrolledAt: '2021-05-20T10:41:11.407Z',
+          sso: undefined,
+        },
+      },
+      {
+        _id: 'mock-member-id-4',
+        email: 'mock-email-4@foo.com',
+        last_logged_in_at: '2021-01-01T10:41:11.407Z',
+        last_active_at: '2021-01-02T10:41:11.407Z',
+        enrollment: {
+          managedBy: 'mock-subscription-id',
+          enrolledAt: '2021-01-02T10:41:11.407Z',
+          sso: undefined,
+        },
+      },
+      {
+        _id: 'mock-member-id-5',
+        email: 'mock-email-5@foo.com',
+        last_logged_in_at: '2023-01-01T10:41:11.407Z',
+        last_active_at: '2023-01-02T10:41:11.407Z',
+        enrollment: {
+          sso: [{ groupId: ctx.subscription._id }],
+        },
+      },
+      {
+        _id: 'mock-member-id-6',
+        email: 'mock-email-6@foo.com',
+        last_logged_in_at: '2024-01-01T10:41:11.407Z',
+        last_active_at: '2024-01-02T10:41:11.407Z',
+        enrollment: {
+          managedBy: 'mock-subscription-id',
+          enrolledAt: '2024-01-02T10:41:11.407Z',
+          sso: [{ groupId: ctx.subscription._id }],
+        },
+      },
     ]
 
     ctx.Settings = {
@@ -143,6 +185,17 @@ describe('UserMembershipController', function () {
       SSOConfig: ctx.SSOConfig,
     }))
 
+    ctx.Modules = {
+      promises: {
+        hooks: {
+          fire: sinon.stub(),
+        },
+      },
+    }
+    vi.doMock('../../../../app/src/infrastructure/Modules.js', () => ({
+      default: ctx.Modules,
+    }))
+
     ctx.UserMembershipController = (await import(modulePath)).default
   })
 
@@ -221,8 +274,8 @@ describe('UserMembershipController', function () {
       ctx.req.entityConfig = EntityConfigs.groupManagers
     })
 
-    it('add user', function (ctx) {
-      return new Promise(resolve => {
+    it('add user', async function (ctx) {
+      await new Promise(resolve => {
         ctx.UserMembershipController.add(ctx.req, {
           json: () => {
             sinon.assert.calledWithMatch(
@@ -237,8 +290,8 @@ describe('UserMembershipController', function () {
       })
     })
 
-    it('return user object', function (ctx) {
-      return new Promise(resolve => {
+    it('return user object', async function (ctx) {
+      await new Promise(resolve => {
         ctx.UserMembershipController.add(ctx.req, {
           json: payload => {
             payload.user.should.equal(ctx.newUser)
@@ -248,8 +301,8 @@ describe('UserMembershipController', function () {
       })
     })
 
-    it('handle readOnly entity', function (ctx) {
-      return new Promise(resolve => {
+    it('handle readOnly entity', async function (ctx) {
+      await new Promise(resolve => {
         ctx.req.entityConfig = EntityConfigs.group
         ctx.UserMembershipController.add(ctx.req, null, error => {
           expect(error).to.exist
@@ -259,8 +312,8 @@ describe('UserMembershipController', function () {
       })
     })
 
-    it('handle user already added', function (ctx) {
-      return new Promise(resolve => {
+    it('handle user already added', async function (ctx) {
+      await new Promise(resolve => {
         ctx.UserMembershipHandler.addUser.yields(new UserAlreadyAddedError())
         ctx.UserMembershipController.add(ctx.req, {
           status: () => ({
@@ -273,8 +326,8 @@ describe('UserMembershipController', function () {
       })
     })
 
-    it('handle user not found', function (ctx) {
-      return new Promise(resolve => {
+    it('handle user not found', async function (ctx) {
+      await new Promise(resolve => {
         ctx.UserMembershipHandler.addUser.yields(new UserNotFoundError())
         ctx.UserMembershipController.add(ctx.req, {
           status: () => ({
@@ -287,8 +340,8 @@ describe('UserMembershipController', function () {
       })
     })
 
-    it('handle invalid email', function (ctx) {
-      return new Promise(resolve => {
+    it('handle invalid email', async function (ctx) {
+      await new Promise(resolve => {
         ctx.req.body.email = 'not_valid_email'
         ctx.UserMembershipController.add(ctx.req, {
           status: () => ({
@@ -309,8 +362,8 @@ describe('UserMembershipController', function () {
       ctx.req.entityConfig = EntityConfigs.groupManagers
     })
 
-    it('remove user', function (ctx) {
-      return new Promise(resolve => {
+    it('remove user', async function (ctx) {
+      await new Promise(resolve => {
         ctx.UserMembershipController.remove(ctx.req, {
           sendStatus: () => {
             sinon.assert.calledWithMatch(
@@ -325,8 +378,8 @@ describe('UserMembershipController', function () {
       })
     })
 
-    it('handle readOnly entity', function (ctx) {
-      return new Promise(resolve => {
+    it('handle readOnly entity', async function (ctx) {
+      await new Promise(resolve => {
         ctx.req.entityConfig = EntityConfigs.group
         ctx.UserMembershipController.remove(ctx.req, null, error => {
           expect(error).to.exist
@@ -336,8 +389,8 @@ describe('UserMembershipController', function () {
       })
     })
 
-    it('prevent self removal', function (ctx) {
-      return new Promise(resolve => {
+    it('prevent self removal', async function (ctx) {
+      await new Promise(resolve => {
         ctx.req.params.userId = ctx.user._id
         ctx.UserMembershipController.remove(ctx.req, {
           status: () => ({
@@ -350,8 +403,8 @@ describe('UserMembershipController', function () {
       })
     })
 
-    it('prevent admin removal', function (ctx) {
-      return new Promise(resolve => {
+    it('prevent admin removal', async function (ctx) {
+      await new Promise(resolve => {
         ctx.UserMembershipHandler.removeUser.yields(new UserIsManagerError())
         ctx.UserMembershipController.remove(ctx.req, {
           status: () => ({
@@ -377,7 +430,7 @@ describe('UserMembershipController', function () {
 
     it('get users', function (ctx) {
       sinon.assert.calledWithMatch(
-        ctx.UserMembershipHandler.getUsers,
+        ctx.UserMembershipHandler.promises.getUsers,
         ctx.subscription,
         { modelName: 'Subscription' }
       )
@@ -398,7 +451,67 @@ describe('UserMembershipController', function () {
     it('should export the correct csv', function (ctx) {
       assertCalledWith(
         ctx.res.send,
-        '"email","last_logged_in_at","last_active_at"\n"mock-email-1@foo.com","2020-08-09T12:43:11.467Z","2021-08-09T12:43:11.467Z"\n"mock-email-2@foo.com","2020-05-20T10:41:11.407Z","2021-05-20T10:41:11.407Z"'
+        '"email","last_logged_in_at","last_active_at"\n"mock-email-1@foo.com","2020-08-09T12:43:11.467Z","2021-08-09T12:43:11.467Z"\n"mock-email-2@foo.com","2020-05-20T10:41:11.407Z","2021-05-20T10:41:11.407Z"\n"mock-email-3@foo.com","2021-08-10T10:41:11.407Z","2021-08-20T10:41:11.407Z"\n"mock-email-4@foo.com","2021-01-01T10:41:11.407Z","2021-01-02T10:41:11.407Z"\n"mock-email-5@foo.com","2023-01-01T10:41:11.407Z","2023-01-02T10:41:11.407Z"\n"mock-email-6@foo.com","2024-01-01T10:41:11.407Z","2024-01-02T10:41:11.407Z"'
+      )
+    })
+  })
+
+  describe('exportCsv when group is managed', function () {
+    beforeEach(function (ctx) {
+      ctx.req.entity = Object.assign(
+        { managedUsersEnabled: true },
+        ctx.subscription
+      )
+      ctx.req.entityConfig = EntityConfigs.groupManagers
+      ctx.res = new MockResponse()
+      ctx.UserMembershipController.exportCsv(ctx.req, ctx.res)
+    })
+
+    it('should export the correct csv', function (ctx) {
+      assertCalledWith(
+        ctx.res.send,
+        '"email","last_logged_in_at","last_active_at","managed"\n"mock-email-1@foo.com","2020-08-09T12:43:11.467Z","2021-08-09T12:43:11.467Z",false\n"mock-email-2@foo.com","2020-05-20T10:41:11.407Z","2021-05-20T10:41:11.407Z",false\n"mock-email-3@foo.com","2021-08-10T10:41:11.407Z","2021-08-20T10:41:11.407Z",false\n"mock-email-4@foo.com","2021-01-01T10:41:11.407Z","2021-01-02T10:41:11.407Z",true\n"mock-email-5@foo.com","2023-01-01T10:41:11.407Z","2023-01-02T10:41:11.407Z",false\n"mock-email-6@foo.com","2024-01-01T10:41:11.407Z","2024-01-02T10:41:11.407Z",true'
+      )
+    })
+  })
+
+  describe('exportCsv when group has SSO', function () {
+    beforeEach(function (ctx) {
+      ctx.req.entity = Object.assign(
+        { ssoConfig: 'sso-config-id' },
+        ctx.subscription
+      )
+      ctx.req.entityConfig = EntityConfigs.groupManagers
+      ctx.Modules.promises.hooks.fire.resolves([true])
+      ctx.res = new MockResponse()
+      ctx.UserMembershipController.exportCsv(ctx.req, ctx.res)
+    })
+
+    it('should export the correct csv', function (ctx) {
+      assertCalledWith(
+        ctx.res.send,
+        '"email","last_logged_in_at","last_active_at","sso"\n"mock-email-1@foo.com","2020-08-09T12:43:11.467Z","2021-08-09T12:43:11.467Z",false\n"mock-email-2@foo.com","2020-05-20T10:41:11.407Z","2021-05-20T10:41:11.407Z",false\n"mock-email-3@foo.com","2021-08-10T10:41:11.407Z","2021-08-20T10:41:11.407Z",false\n"mock-email-4@foo.com","2021-01-01T10:41:11.407Z","2021-01-02T10:41:11.407Z",false\n"mock-email-5@foo.com","2023-01-01T10:41:11.407Z","2023-01-02T10:41:11.407Z",true\n"mock-email-6@foo.com","2024-01-01T10:41:11.407Z","2024-01-02T10:41:11.407Z",true'
+      )
+    })
+  })
+
+  describe('exportCsv when group has SSO and managed users enabled', function () {
+    beforeEach(function (ctx) {
+      ctx.req.entity = Object.assign(
+        { managedUsersEnabled: true },
+        { ssoConfig: 'sso-config-id' },
+        ctx.subscription
+      )
+      ctx.req.entityConfig = EntityConfigs.groupManagers
+      ctx.Modules.promises.hooks.fire.resolves([true])
+      ctx.res = new MockResponse()
+      ctx.UserMembershipController.exportCsv(ctx.req, ctx.res)
+    })
+
+    it('should export the correct csv', function (ctx) {
+      assertCalledWith(
+        ctx.res.send,
+        '"email","last_logged_in_at","last_active_at","managed","sso"\n"mock-email-1@foo.com","2020-08-09T12:43:11.467Z","2021-08-09T12:43:11.467Z",false,false\n"mock-email-2@foo.com","2020-05-20T10:41:11.407Z","2021-05-20T10:41:11.407Z",false,false\n"mock-email-3@foo.com","2021-08-10T10:41:11.407Z","2021-08-20T10:41:11.407Z",false,false\n"mock-email-4@foo.com","2021-01-01T10:41:11.407Z","2021-01-02T10:41:11.407Z",true,false\n"mock-email-5@foo.com","2023-01-01T10:41:11.407Z","2023-01-02T10:41:11.407Z",false,true\n"mock-email-6@foo.com","2024-01-01T10:41:11.407Z","2024-01-02T10:41:11.407Z",true,true'
       )
     })
   })
@@ -409,8 +522,8 @@ describe('UserMembershipController', function () {
       ctx.req.params.id = 'abc'
     })
 
-    it('renders view', function (ctx) {
-      return new Promise(resolve => {
+    it('renders view', async function (ctx) {
+      await new Promise(resolve => {
         ctx.UserMembershipController.new(ctx.req, {
           render: (viewPath, data) => {
             expect(data.entityName).to.eq('publisher')
@@ -429,8 +542,8 @@ describe('UserMembershipController', function () {
       ctx.req.params.id = 123
     })
 
-    it('creates institution', function (ctx) {
-      return new Promise(resolve => {
+    it('creates institution', async function (ctx) {
+      await new Promise(resolve => {
         ctx.UserMembershipController.create(ctx.req, {
           redirect: path => {
             expect(path).to.eq(EntityConfigs.institution.pathsFor(123).index)

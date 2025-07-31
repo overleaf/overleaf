@@ -34,8 +34,6 @@ const argv = minimist(process.argv.slice(2), {
 const CURRENCY_CODE_REGEX = /^[A-Z]{3}$/
 // Group plans have a plan code of the form group_name_size_type, e.g.
 const GROUP_SIZE_REGEX = /group_\w+_([0-9]+)_\w+/
-// Only group plans with more than 4 users can have additional licenses
-const SINGLE_LICENSE_MAX_GROUP_SIZE = 4
 
 // Compute prices for the base plan
 
@@ -92,15 +90,13 @@ function transformRecordToPlan(record) {
   // Large group plans have an add-on for additional licenses
   if (isGroupPlan(record)) {
     const size = getGroupSize(record)
-    if (size > SINGLE_LICENSE_MAX_GROUP_SIZE) {
-      const addOnPrices = computeAddOnPrices(prices, size)
-      plan._addOns = [
-        {
-          code: 'additional-license',
-          currencies: addOnPrices,
-        },
-      ]
-    }
+    const addOnPrices = computeAddOnPrices(prices, size)
+    plan._addOns = [
+      {
+        code: 'additional-license',
+        currencies: addOnPrices,
+      },
+    ]
   }
   return plan
 }

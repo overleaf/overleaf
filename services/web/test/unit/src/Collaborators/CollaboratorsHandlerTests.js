@@ -24,16 +24,6 @@ describe('CollaboratorsHandler', function () {
       name: 'Foo',
     }
 
-    this.archivedProject = {
-      _id: new ObjectId(),
-      archived: [new ObjectId(this.userId)],
-    }
-
-    this.oldArchivedProject = {
-      _id: new ObjectId(),
-      archived: true,
-    }
-
     this.UserGetter = {
       promises: {
         getUser: sinon.stub().resolves(null),
@@ -59,9 +49,6 @@ describe('CollaboratorsHandler', function () {
       },
     }
 
-    this.ProjectHelper = {
-      calculateArchivedArray: sinon.stub(),
-    }
     this.CollaboratorsGetter = {
       promises: {
         dangerouslyGetAllProjectsUserIsMemberOf: sinon.stub(),
@@ -77,51 +64,10 @@ describe('CollaboratorsHandler', function () {
         '../ThirdPartyDataStore/TpdsProjectFlusher': this.TpdsProjectFlusher,
         '../ThirdPartyDataStore/TpdsUpdateSender': this.TpdsUpdateSender,
         '../Project/ProjectGetter': this.ProjectGetter,
-        '../Project/ProjectHelper': this.ProjectHelper,
         '../Editor/EditorRealTimeController': this.EditorRealTimeController,
         './CollaboratorsGetter': this.CollaboratorsGetter,
       },
     })
-
-    // Helper function to set up mock expectations for null reference cleanup
-    this.expectNullReferenceCleanup = projectId => {
-      this.ProjectMock.expects('updateOne')
-        .withArgs(
-          {
-            _id: projectId,
-            pendingReviewer_refs: { $type: 'null' },
-          },
-          {
-            $set: { pendingReviewer_refs: [] },
-          }
-        )
-        .chain('exec')
-        .resolves()
-      this.ProjectMock.expects('updateOne')
-        .withArgs(
-          {
-            _id: projectId,
-            readOnly_refs: { $type: 'null' },
-          },
-          {
-            $set: { readOnly_refs: [] },
-          }
-        )
-        .chain('exec')
-        .resolves()
-      this.ProjectMock.expects('updateOne')
-        .withArgs(
-          {
-            _id: projectId,
-            reviewer_refs: { $type: 'null' },
-          },
-          {
-            $set: { reviewer_refs: [] },
-          }
-        )
-        .chain('exec')
-        .resolves()
-    }
   })
 
   afterEach(function () {
@@ -130,17 +76,7 @@ describe('CollaboratorsHandler', function () {
 
   describe('removeUserFromProject', function () {
     describe('a non-archived project', function () {
-      beforeEach(function () {
-        this.ProjectMock.expects('findOne')
-          .withArgs({
-            _id: this.project._id,
-          })
-          .chain('exec')
-          .resolves(this.project)
-      })
-
       it('should remove the user from mongo', async function () {
-        this.expectNullReferenceCleanup(this.project._id)
         this.ProjectMock.expects('updateOne')
           .withArgs(
             {
@@ -164,89 +100,6 @@ describe('CollaboratorsHandler', function () {
           .resolves()
         await this.CollaboratorsHandler.promises.removeUserFromProject(
           this.project._id,
-          this.userId
-        )
-      })
-    })
-
-    describe('an archived project, archived with a boolean value', function () {
-      beforeEach(function () {
-        const archived = [new ObjectId(this.userId)]
-        this.ProjectHelper.calculateArchivedArray.returns(archived)
-
-        this.ProjectMock.expects('findOne')
-          .withArgs({
-            _id: this.oldArchivedProject._id,
-          })
-          .chain('exec')
-          .resolves(this.oldArchivedProject)
-      })
-
-      it('should remove the user from mongo', async function () {
-        this.expectNullReferenceCleanup(this.oldArchivedProject._id)
-        this.ProjectMock.expects('updateOne')
-          .withArgs(
-            {
-              _id: this.oldArchivedProject._id,
-            },
-            {
-              $set: {
-                archived: [],
-              },
-              $pull: {
-                collaberator_refs: this.userId,
-                reviewer_refs: this.userId,
-                readOnly_refs: this.userId,
-                pendingEditor_refs: this.userId,
-                pendingReviewer_refs: this.userId,
-                tokenAccessReadOnly_refs: this.userId,
-                tokenAccessReadAndWrite_refs: this.userId,
-                trashed: this.userId,
-              },
-            }
-          )
-          .resolves()
-        await this.CollaboratorsHandler.promises.removeUserFromProject(
-          this.oldArchivedProject._id,
-          this.userId
-        )
-      })
-    })
-
-    describe('an archived project, archived with an array value', function () {
-      beforeEach(function () {
-        this.ProjectMock.expects('findOne')
-          .withArgs({
-            _id: this.archivedProject._id,
-          })
-          .chain('exec')
-          .resolves(this.archivedProject)
-      })
-
-      it('should remove the user from mongo', async function () {
-        this.expectNullReferenceCleanup(this.archivedProject._id)
-        this.ProjectMock.expects('updateOne')
-          .withArgs(
-            {
-              _id: this.archivedProject._id,
-            },
-            {
-              $pull: {
-                collaberator_refs: this.userId,
-                reviewer_refs: this.userId,
-                readOnly_refs: this.userId,
-                pendingEditor_refs: this.userId,
-                pendingReviewer_refs: this.userId,
-                tokenAccessReadOnly_refs: this.userId,
-                tokenAccessReadAndWrite_refs: this.userId,
-                archived: this.userId,
-                trashed: this.userId,
-              },
-            }
-          )
-          .resolves()
-        await this.CollaboratorsHandler.promises.removeUserFromProject(
-          this.archivedProject._id,
           this.userId
         )
       })
@@ -447,6 +300,40 @@ describe('CollaboratorsHandler', function () {
       })
     })
 
+    describe('when user already exists as a reviewer', function () {
+      beforeEach(function () {
+        this.project.collaberator_refs = []
+        this.project.reviewer_refs = [this.userId]
+        this.project.readOnly_refs = []
+      })
+
+      it('should not add the user again', async function () {
+        await this.CollaboratorsHandler.promises.addUserIdToProject(
+          this.project._id,
+          this.addingUserId,
+          this.userId,
+          'readAndWrite'
+        )
+      })
+    })
+
+    describe('when user already exists as a read-only user', function () {
+      beforeEach(function () {
+        this.project.collaberator_refs = []
+        this.project.reviewer_refs = []
+        this.project.readOnly_refs = [this.userId]
+      })
+
+      it('should not add the user again', async function () {
+        await this.CollaboratorsHandler.promises.addUserIdToProject(
+          this.project._id,
+          this.addingUserId,
+          this.userId,
+          'readAndWrite'
+        )
+      })
+    })
+
     describe('with null addingUserId', function () {
       beforeEach(async function () {
         this.project.collaberator_refs = []
@@ -505,14 +392,6 @@ describe('CollaboratorsHandler', function () {
         'token-read-only-1',
       ]
       for (const projectId of expectedProjects) {
-        this.ProjectMock.expects('findOne')
-          .withArgs({
-            _id: projectId,
-          })
-          .chain('exec')
-          .resolves({ _id: projectId })
-
-        this.expectNullReferenceCleanup(projectId)
         this.ProjectMock.expects('updateOne')
           .withArgs(
             {
@@ -675,8 +554,6 @@ describe('CollaboratorsHandler', function () {
 
   describe('setCollaboratorPrivilegeLevel', function () {
     it('sets a collaborator to read-only', async function () {
-      this.expectNullReferenceCleanup(this.project._id)
-
       this.ProjectMock.expects('updateOne')
         .withArgs(
           {
@@ -707,8 +584,6 @@ describe('CollaboratorsHandler', function () {
     })
 
     it('sets a collaborator to read-write', async function () {
-      this.expectNullReferenceCleanup(this.project._id)
-
       this.ProjectMock.expects('updateOne')
         .withArgs(
           {
@@ -748,8 +623,6 @@ describe('CollaboratorsHandler', function () {
         })
       })
       it('should correctly update the project', async function () {
-        this.expectNullReferenceCleanup(this.project._id)
-
         this.ProjectMock.expects('updateOne')
           .withArgs(
             {
@@ -793,8 +666,6 @@ describe('CollaboratorsHandler', function () {
         })
       })
       it('should correctly update the project', async function () {
-        this.expectNullReferenceCleanup(this.project._id)
-
         this.ProjectMock.expects('updateOne')
           .withArgs(
             {
@@ -827,8 +698,6 @@ describe('CollaboratorsHandler', function () {
     })
 
     it('sets a collaborator to read-only as a pendingEditor', async function () {
-      this.expectNullReferenceCleanup(this.project._id)
-
       this.ProjectMock.expects('updateOne')
         .withArgs(
           {
@@ -862,8 +731,6 @@ describe('CollaboratorsHandler', function () {
     })
 
     it('sets a collaborator to read-only as a pendingReviewer', async function () {
-      this.expectNullReferenceCleanup(this.project._id)
-
       this.ProjectMock.expects('updateOne')
         .withArgs(
           {
@@ -897,8 +764,6 @@ describe('CollaboratorsHandler', function () {
     })
 
     it('throws a NotFoundError if the project or collaborator does not exist', async function () {
-      this.expectNullReferenceCleanup(this.project._id)
-
       this.ProjectMock.expects('updateOne')
         .chain('exec')
         .resolves({ matchedCount: 0 })

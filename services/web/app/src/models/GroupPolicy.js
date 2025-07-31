@@ -27,6 +27,9 @@ const GroupPolicySchema = new Schema(
 
     // User can't use the chat feature
     userCannotUseChat: Boolean,
+
+    // User can't use the Dropbox feature
+    userCannotUseDropbox: Boolean,
   },
   { minimize: false }
 )

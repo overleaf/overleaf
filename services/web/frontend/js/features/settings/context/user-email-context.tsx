@@ -224,7 +224,9 @@ function useUserEmails() {
   const [
     showInstitutionalLeaversSurveyUntil,
     setShowInstitutionalLeaversSurveyUntil,
-  ] = usePersistedState('showInstitutionalLeaversSurveyUntil', 0, true)
+  ] = usePersistedState('showInstitutionalLeaversSurveyUntil', 0, {
+    listen: true,
+  })
   const [state, unsafeDispatch] = useReducer(reducer, initialState)
   const dispatch = useSafeDispatch(unsafeDispatch)
   const { data, isLoading, isError, isSuccess, runAsync } =
@@ -312,13 +314,13 @@ type UserEmailsProviderProps = {
   children: React.ReactNode
 } & Record<string, unknown>
 
-function UserEmailsProvider(props: UserEmailsProviderProps) {
+export function UserEmailsProvider(props: UserEmailsProviderProps) {
   const value = useUserEmails()
 
   return <UserEmailsContext.Provider value={value} {...props} />
 }
 
-const useUserEmailsContext = () => {
+export const useUserEmailsContext = () => {
   const context = useContext(UserEmailsContext)
 
   if (context === undefined) {
@@ -328,6 +330,4 @@ const useUserEmailsContext = () => {
   return context
 }
 
-type EmailContextType = ReturnType<typeof useUserEmailsContext>
-
-export { UserEmailsProvider, useUserEmailsContext, EmailContextType }
+export type EmailContextType = ReturnType<typeof useUserEmailsContext>

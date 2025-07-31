@@ -1,3 +1,8 @@
+.registration-message {
+  text-align: center;
+  padding-bottom: var(--spacing-07);
+}
+
 .register-container {
   h1 {
     @include heading-sm;
@@ -33,9 +38,6 @@
       }
 
       .registration-message {
-        text-align: center;
-        padding-bottom: var(--spacing-07);
-
         .registration-message-heading {
           color: var(--neutral-70);
           font-size: var(--font-size-05);

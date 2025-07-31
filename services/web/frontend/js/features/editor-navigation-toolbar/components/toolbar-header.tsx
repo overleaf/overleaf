@@ -39,6 +39,28 @@ const enableROMirrorOnClient =
   new URLSearchParams(window.location.search).get('ro-mirror-on-client') ===
     'enabled'
 
+export type ToolbarHeaderProps = {
+  cobranding: Cobranding | undefined
+  onShowLeftMenuClick: () => void
+  chatIsOpen: boolean
+  toggleChatOpen: () => void
+  reviewPanelOpen: boolean
+  toggleReviewPanelOpen: (e: React.MouseEvent) => void
+  historyIsOpen: boolean
+  toggleHistoryOpen: () => void
+  unreadMessageCount: number
+  onlineUsers: OnlineUser[]
+  goToUser: (user: OnlineUser) => void
+  isRestrictedTokenMember: boolean | undefined
+  hasPublishPermissions: boolean
+  chatVisible: boolean
+  projectName: string
+  renameProject: (name: string) => void
+  hasRenamePermissions: boolean
+  openShareModal: () => void
+  trackChangesVisible: boolean | undefined
+}
+
 const ToolbarHeader = React.memo(function ToolbarHeader({
   cobranding,
   onShowLeftMenuClick,
@@ -59,38 +81,14 @@ const ToolbarHeader = React.memo(function ToolbarHeader({
   hasRenamePermissions,
   openShareModal,
   trackChangesVisible,
-}: {
-  cobranding: Cobranding | undefined
-  onShowLeftMenuClick: () => void
-  chatIsOpen: boolean
-  toggleChatOpen: () => void
-  reviewPanelOpen: boolean
-  toggleReviewPanelOpen: (e: React.MouseEvent) => void
-  historyIsOpen: boolean
-  toggleHistoryOpen: () => void
-  unreadMessageCount: number
-  onlineUsers: OnlineUser[]
-  goToUser: (user: OnlineUser) => void
-  isRestrictedTokenMember: boolean | undefined
-  hasPublishPermissions: boolean
-  chatVisible: boolean
-  projectName: string
-  renameProject: (name: string) => void
-  hasRenamePermissions: boolean
-  openShareModal: () => void
-  trackChangesVisible: boolean | undefined
-}) {
-  const chatEnabled = getMeta('ol-chatEnabled')
+}: ToolbarHeaderProps) {
+  const chatEnabled = getMeta('ol-capabilities')?.includes('chat')
 
   const { t } = useTranslation()
   const shouldDisplayPublishButton = hasPublishPermissions && PublishButton
 
   return (
-    <header
-      className="toolbar toolbar-header"
-      role="navigation"
-      aria-label={t('project_layout_sharing_submission')}
-    >
+    <nav className="toolbar toolbar-header" aria-label={t('project_actions')}>
       <div className="toolbar-left">
         <MenuButton onClick={onShowLeftMenuClick} />
         {cobranding && cobranding.logoImgUrl && (
@@ -156,7 +154,7 @@ const ToolbarHeader = React.memo(function ToolbarHeader({
           </>
         )}
       </div>
-    </header>
+    </nav>
   )
 })
 

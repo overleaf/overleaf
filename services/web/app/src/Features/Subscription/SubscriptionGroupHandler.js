@@ -7,9 +7,7 @@ const SubscriptionController = require('./SubscriptionController')
 const SubscriptionHelper = require('./SubscriptionHelper')
 const { Subscription } = require('../../models/Subscription')
 const { User } = require('../../models/User')
-const RecurlyClient = require('./RecurlyClient')
 const PlansLocator = require('./PlansLocator')
-const SubscriptionHandler = require('./SubscriptionHandler')
 const TeamInvitesHandler = require('./TeamInvitesHandler')
 const GroupPlansData = require('./GroupPlansData')
 const Modules = require('../../infrastructure/Modules')
@@ -19,6 +17,7 @@ const {
   PendingChangeError,
   InactiveError,
   HasPastDueInvoiceError,
+  HasNoAdditionalLicenseWhenManuallyCollectedError,
 } = require('./Errors')
 const EmailHelper = require('../Helpers/EmailHelper')
 const { InvalidEmailError } = require('../Errors/Errors')
@@ -86,22 +85,24 @@ async function ensureSubscriptionIsActive(subscription) {
 }
 
 async function ensureSubscriptionCollectionMethodIsNotManual(
-  recurlySubscription
+  paymentProviderSubscription
 ) {
-  if (recurlySubscription.isCollectionMethodManual) {
+  if (paymentProviderSubscription.isCollectionMethodManual) {
     throw new ManuallyCollectedError(
       'This subscription is being collected manually',
       {
-        recurlySubscription_id: recurlySubscription.id,
+        subscription_id: paymentProviderSubscription.id,
       }
     )
   }
 }
 
-async function ensureSubscriptionHasNoPendingChanges(recurlySubscription) {
-  if (recurlySubscription.pendingChange) {
+async function ensureSubscriptionHasNoPendingChanges(
+  paymentProviderSubscription
+) {
+  if (paymentProviderSubscription.pendingChange) {
     throw new PendingChangeError('This subscription has a pending change', {
-      recurlySubscription_id: recurlySubscription.id,
+      subscription_id: paymentProviderSubscription.id,
     })
   }
 }
@@ -122,6 +123,22 @@ async function ensureSubscriptionHasNoPastDueInvoice(subscription) {
   }
 }
 
+async function ensureSubscriptionHasAdditionalLicenseAddOnWhenCollectionMethodIsManual(
+  paymentProviderSubscription
+) {
+  if (
+    paymentProviderSubscription.isCollectionMethodManual &&
+    !paymentProviderSubscription.hasAddOn(MEMBERS_LIMIT_ADD_ON_CODE)
+  ) {
+    throw new HasNoAdditionalLicenseWhenManuallyCollectedError(
+      'This subscription is being collected manually has no "additional-license" add-on',
+      {
+        subscription_id: paymentProviderSubscription.id,
+      }
+    )
+  }
+}
+
 async function getUsersGroupSubscriptionDetails(userId) {
   const subscription =
     await SubscriptionLocator.promises.getUsersSubscription(userId)
@@ -136,47 +153,50 @@ async function getUsersGroupSubscriptionDetails(userId) {
 
   const plan = PlansLocator.findLocalPlanInSettings(subscription.planCode)
 
-  const recurlySubscription = await RecurlyClient.promises.getSubscription(
-    subscription.recurlySubscription_id
+  const response = await Modules.promises.hooks.fire(
+    'getPaymentFromRecord',
+    subscription
   )
+
+  const { subscription: paymentProviderSubscription } = response[0]
 
   return {
     userId,
     subscription,
-    recurlySubscription,
+    paymentProviderSubscription,
     plan,
   }
 }
 
-async function checkBillingInfoExistence(recurlySubscription, userId) {
+async function checkBillingInfoExistence(paymentProviderSubscription, userId) {
   // Verify the billing info only if the collection method is not manual (e.g. automatic)
-  if (!recurlySubscription.isCollectionMethodManual) {
+  if (!paymentProviderSubscription.isCollectionMethodManual) {
     // Check if the user has missing billing details
-    await RecurlyClient.promises.getPaymentMethod(userId)
+    await Modules.promises.hooks.fire('getPaymentMethod', userId)
   }
 }
 
 async function _addSeatsSubscriptionChange(userId, adding) {
-  const { subscription, recurlySubscription, plan } =
+  const { subscription, paymentProviderSubscription, plan } =
     await getUsersGroupSubscriptionDetails(userId)
   await ensureFlexibleLicensingEnabled(plan)
   await ensureSubscriptionIsActive(subscription)
-  await ensureSubscriptionHasNoPendingChanges(recurlySubscription)
-  await checkBillingInfoExistence(recurlySubscription, userId)
+  await ensureSubscriptionHasNoPendingChanges(paymentProviderSubscription)
+  await checkBillingInfoExistence(paymentProviderSubscription, userId)
   await ensureSubscriptionHasNoPastDueInvoice(subscription)
 
   const currentAddonQuantity =
-    recurlySubscription.addOns.find(
+    paymentProviderSubscription.addOns.find(
       addOn => addOn.code === MEMBERS_LIMIT_ADD_ON_CODE
     )?.quantity ?? 0
   // Keeps only the new total quantity of addon
   const nextAddonQuantity = currentAddonQuantity + adding
 
   let changeRequest
-  if (recurlySubscription.hasAddOn(MEMBERS_LIMIT_ADD_ON_CODE)) {
+  if (paymentProviderSubscription.hasAddOn(MEMBERS_LIMIT_ADD_ON_CODE)) {
     // Not providing a custom price as once the subscription is locked
     // to an add-on at a given price, it will use it for subsequent payments
-    changeRequest = recurlySubscription.getRequestForAddOnUpdate(
+    changeRequest = paymentProviderSubscription.getRequestForAddOnUpdate(
       MEMBERS_LIMIT_ADD_ON_CODE,
       nextAddonQuantity
     )
@@ -185,7 +205,7 @@ async function _addSeatsSubscriptionChange(userId, adding) {
     const pattern =
       /^group_(collaborator|professional)_(2|3|4|5|10|20|50)_(educational|enterprise)$/
     const [, planCode, size, usage] = plan.planCode.match(pattern)
-    const currency = recurlySubscription.currency
+    const currency = paymentProviderSubscription.currency
     const planPriceInCents =
       GroupPlansData[usage][planCode][currency][size].price_in_cents
     const legacyUnitPriceInCents =
@@ -194,7 +214,7 @@ async function _addSeatsSubscriptionChange(userId, adding) {
 
     if (
       _shouldUseLegacyPricing(
-        recurlySubscription.planPrice,
+        paymentProviderSubscription.planPrice,
         planPriceInCents / 100,
         usage,
         size
@@ -203,7 +223,7 @@ async function _addSeatsSubscriptionChange(userId, adding) {
       unitPrice = legacyUnitPriceInCents / 100
     }
 
-    changeRequest = recurlySubscription.getRequestForAddOnPurchase(
+    changeRequest = paymentProviderSubscription.getRequestForAddOnPurchase(
       MEMBERS_LIMIT_ADD_ON_CODE,
       nextAddonQuantity,
       unitPrice
@@ -213,7 +233,7 @@ async function _addSeatsSubscriptionChange(userId, adding) {
   return {
     changeRequest,
     currentAddonQuantity,
-    recurlySubscription,
+    paymentProviderSubscription,
   }
 }
 
@@ -237,98 +257,79 @@ function _shouldUseLegacyPricing(
 async function previewAddSeatsSubscriptionChange(userId, adding) {
   const { changeRequest, currentAddonQuantity } =
     await _addSeatsSubscriptionChange(userId, adding)
-  const subscriptionChange =
-    await RecurlyClient.promises.previewSubscriptionChange(changeRequest)
-  const subscriptionChangePreview =
-    await SubscriptionController.makeChangePreview(
-      {
-        type: 'add-on-update',
-        addOn: {
-          code: MEMBERS_LIMIT_ADD_ON_CODE,
-          quantity: subscriptionChange.nextAddOns.find(
-            addon => addon.code === MEMBERS_LIMIT_ADD_ON_CODE
-          ).quantity,
-          prevQuantity: currentAddonQuantity,
-        },
+  const response = await Modules.promises.hooks.fire(
+    'previewSubscriptionChangeRequest',
+    changeRequest
+  )
+  const subscriptionChange = response[0]
+  const subscriptionChangePreview = SubscriptionController.makeChangePreview(
+    {
+      type: 'add-on-update',
+      addOn: {
+        code: MEMBERS_LIMIT_ADD_ON_CODE,
+        quantity: subscriptionChange.nextAddOns.find(
+          addon => addon.code === MEMBERS_LIMIT_ADD_ON_CODE
+        ).quantity,
+        prevQuantity: currentAddonQuantity,
       },
-      subscriptionChange
-    )
+    },
+    subscriptionChange
+  )
 
   return subscriptionChangePreview
 }
 
 async function createAddSeatsSubscriptionChange(userId, adding, poNumber) {
-  const { changeRequest, recurlySubscription } =
+  const { changeRequest, paymentProviderSubscription } =
     await _addSeatsSubscriptionChange(userId, adding)
 
-  if (recurlySubscription.isCollectionMethodManual) {
-    await updateSubscriptionPaymentTerms(userId, recurlySubscription, poNumber)
+  let subscriptionDetailUpdateRequest
+  if (paymentProviderSubscription.isCollectionMethodManual) {
+    subscriptionDetailUpdateRequest = await updateSubscriptionPaymentTerms(
+      paymentProviderSubscription,
+      poNumber
+    )
   }
-
-  await RecurlyClient.promises.applySubscriptionChangeRequest(changeRequest)
-  await SubscriptionHandler.promises.syncSubscription(
-    { uuid: recurlySubscription.id },
-    userId
+  await Modules.promises.hooks.fire(
+    'applySubscriptionChangeRequestAndSync',
+    changeRequest,
+    userId,
+    subscriptionDetailUpdateRequest?.termsAndConditions
   )
 
   return { adding }
 }
 
 async function updateSubscriptionPaymentTerms(
-  userId,
-  recurlySubscription,
+  paymentProviderSubscription,
   poNumber
 ) {
   const [termsAndConditions] = await Modules.promises.hooks.fire(
     'generateTermsAndConditions',
-    { currency: recurlySubscription.currency, poNumber }
+    { currency: paymentProviderSubscription.currency, poNumber }
   )
 
-  const updateRequest = poNumber
-    ? recurlySubscription.getRequestForPoNumberAndTermsAndConditionsUpdate(
+  const subscriptionDetailUpdateRequest = poNumber
+    ? paymentProviderSubscription.getRequestForPoNumberAndTermsAndConditionsUpdate(
         poNumber,
         termsAndConditions
       )
-    : recurlySubscription.getRequestForTermsAndConditionsUpdate(
+    : paymentProviderSubscription.getRequestForTermsAndConditionsUpdate(
         termsAndConditions
       )
-
-  await RecurlyClient.promises.updateSubscriptionDetails(updateRequest)
-}
-
-async function _getUpgradeTargetPlanCodeMaybeThrow(subscription) {
-  if (
-    subscription.planCode.includes('professional') ||
-    !subscription.groupPlan
-  ) {
-    throw new Error('Not eligible for group plan upgrade')
-  }
-
-  return subscription.planCode.replace('collaborator', 'professional')
-}
-
-async function _getGroupPlanUpgradeChangeRequest(ownerId) {
-  const olSubscription =
-    await SubscriptionLocator.promises.getUsersSubscription(ownerId)
-
-  await ensureSubscriptionIsActive(olSubscription)
-
-  const newPlanCode = await _getUpgradeTargetPlanCodeMaybeThrow(olSubscription)
-  const recurlySubscription = await RecurlyClient.promises.getSubscription(
-    olSubscription.recurlySubscription_id
+  await Modules.promises.hooks.fire(
+    'updateSubscriptionDetails',
+    subscriptionDetailUpdateRequest
   )
-
-  await ensureSubscriptionCollectionMethodIsNotManual(recurlySubscription)
-  await ensureSubscriptionHasNoPendingChanges(recurlySubscription)
-
-  return recurlySubscription.getRequestForGroupPlanUpgrade(newPlanCode)
+  return subscriptionDetailUpdateRequest
 }
 
 async function getGroupPlanUpgradePreview(ownerId) {
-  const changeRequest = await _getGroupPlanUpgradeChangeRequest(ownerId)
-  const subscriptionChange =
-    await RecurlyClient.promises.previewSubscriptionChange(changeRequest)
-  const paymentMethod = await RecurlyClient.promises.getPaymentMethod(ownerId)
+  const preview = await Modules.promises.hooks.fire(
+    'previewGroupPlanUpgrade',
+    ownerId
+  )
+  const { subscriptionChange, paymentMethod } = preview[0]
   return SubscriptionController.makeChangePreview(
     {
       type: 'group-plan-upgrade',
@@ -345,12 +346,7 @@ async function getGroupPlanUpgradePreview(ownerId) {
 }
 
 async function upgradeGroupPlan(ownerId) {
-  const changeRequest = await _getGroupPlanUpgradeChangeRequest(ownerId)
-  await RecurlyClient.promises.applySubscriptionChangeRequest(changeRequest)
-  await SubscriptionHandler.promises.syncSubscription(
-    { uuid: changeRequest.subscription.id },
-    ownerId
-  )
+  await Modules.promises.hooks.fire('upgradeGroupPlan', ownerId)
 }
 
 async function updateGroupMembersBulk(
@@ -488,6 +484,10 @@ module.exports = {
   ensureSubscriptionHasNoPastDueInvoice: callbackify(
     ensureSubscriptionHasNoPastDueInvoice
   ),
+  ensureSubscriptionHasAdditionalLicenseAddOnWhenCollectionMethodIsManual:
+    callbackify(
+      ensureSubscriptionHasAdditionalLicenseAddOnWhenCollectionMethodIsManual
+    ),
   getTotalConfirmedUsersInGroup: callbackify(getTotalConfirmedUsersInGroup),
   isUserPartOfGroup: callbackify(isUserPartOfGroup),
   getGroupPlanUpgradePreview: callbackify(getGroupPlanUpgradePreview),
@@ -502,6 +502,7 @@ module.exports = {
     ensureSubscriptionCollectionMethodIsNotManual,
     ensureSubscriptionHasNoPendingChanges,
     ensureSubscriptionHasNoPastDueInvoice,
+    ensureSubscriptionHasAdditionalLicenseAddOnWhenCollectionMethodIsManual,
     getTotalConfirmedUsersInGroup,
     isUserPartOfGroup,
     getUsersGroupSubscriptionDetails,

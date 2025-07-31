@@ -150,6 +150,11 @@ describe('SubscriptionViewModelBuilder', function () {
     this.PlansLocator = {
       findLocalPlanInSettings: sinon.stub(),
     }
+    this.SplitTestHandler = {
+      promises: {
+        getAssignmentForUser: sinon.stub().resolves({ variant: 'default' }),
+      },
+    }
     this.SubscriptionViewModelBuilder = SandboxedModule.require(modulePath, {
       requires: {
         '@overleaf/settings': this.Settings,
@@ -168,6 +173,7 @@ describe('SubscriptionViewModelBuilder', function () {
         './V1SubscriptionManager': {},
         '../Publishers/PublishersGetter': this.PublishersGetter,
         './SubscriptionHelper': SubscriptionHelper,
+        '../SplitTests/SplitTestHandler': this.SplitTestHandler,
       },
     })
 
@@ -659,6 +665,9 @@ describe('SubscriptionViewModelBuilder', function () {
       describe('isEligibleForGroupPlan', function () {
         it('is false for Stripe subscriptions', async function () {
           this.paymentRecord.service = 'stripe-us'
+          this.Modules.promises.hooks.fire
+            .withArgs('canUpgradeFromIndividualToGroup')
+            .resolves([false])
           const result =
             await this.SubscriptionViewModelBuilder.promises.buildUsersSubscriptionViewModel(
               this.user
@@ -695,8 +704,58 @@ describe('SubscriptionViewModelBuilder', function () {
       })
 
       describe('isEligibleForPause', function () {
-        it('is false for Stripe subscriptions', async function () {
+        beforeEach(function () {
+          this.paymentRecord.service = 'recurly'
+          this.paymentRecord.addOns = []
+          this.paymentRecord.planCode = 'plan-code'
+          this.paymentRecord.trialPeriodEnd = null
+          this.individualSubscription.pendingPlan = undefined
+          this.individualSubscription.groupPlan = undefined
+        })
+
+        it('is false for Stripe subscriptions when feature flag is disabled', async function () {
           this.paymentRecord.service = 'stripe-us'
+          this.SplitTestHandler.promises.getAssignmentForUser
+            .withArgs(this.user._id, 'stripe-pause')
+            .resolves({ variant: 'default' })
+          const result =
+            await this.SubscriptionViewModelBuilder.promises.buildUsersSubscriptionViewModel(
+              this.user
+            )
+          assert.isFalse(result.personalSubscription.payment.isEligibleForPause)
+        })
+
+        it('is true for Stripe subscriptions when feature flag is enabled', async function () {
+          this.paymentRecord.service = 'stripe-us'
+          this.SplitTestHandler.promises.getAssignmentForUser
+            .withArgs(this.user._id, 'stripe-pause')
+            .resolves({ variant: 'enabled' })
+          const result =
+            await this.SubscriptionViewModelBuilder.promises.buildUsersSubscriptionViewModel(
+              this.user
+            )
+          assert.isTrue(result.personalSubscription.payment.isEligibleForPause)
+        })
+
+        it('is false for Stripe subscriptions with pending plan even when feature flag is enabled', async function () {
+          this.paymentRecord.service = 'stripe-us'
+          this.individualSubscription.pendingPlan = {} // anything
+          this.SplitTestHandler.promises.getAssignmentForUser
+            .withArgs(this.user._id, 'stripe-pause')
+            .resolves({ variant: 'enabled' })
+          const result =
+            await this.SubscriptionViewModelBuilder.promises.buildUsersSubscriptionViewModel(
+              this.user
+            )
+          assert.isFalse(result.personalSubscription.payment.isEligibleForPause)
+        })
+
+        it('is false for Stripe subscriptions with annual plan even when feature flag is enabled', async function () {
+          this.paymentRecord.service = 'stripe-us'
+          this.paymentRecord.planCode = 'collaborator-annual'
+          this.SplitTestHandler.promises.getAssignmentForUser
+            .withArgs(this.user._id, 'stripe-pause')
+            .resolves({ variant: 'enabled' })
           const result =
             await this.SubscriptionViewModelBuilder.promises.buildUsersSubscriptionViewModel(
               this.user

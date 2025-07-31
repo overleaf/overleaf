@@ -40,6 +40,7 @@ export default function SettingsEditorTheme() {
       options={options}
       label={t('editor_theme')}
       name="editorTheme"
+      translateOptions="no"
     />
   )
 }

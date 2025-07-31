@@ -17,11 +17,13 @@ import { usePermissionsContext } from '@/features/ide-react/context/permissions-
 import usePersistedState from '@/shared/hooks/use-persisted-state'
 import { sendMB } from '@/infrastructure/event-tracking'
 import { useEditorContext } from '@/shared/context/editor-context'
+import { useIdeReactContext } from '@/features/ide-react/context/ide-react-context'
 import { useProjectContext } from '@/shared/context/project-context'
 import UpgradeTrackChangesModal from './upgrade-track-changes-modal'
 import { ReviewModePromo } from '@/features/review-panel-new/components/review-mode-promo'
 import useTutorial from '@/shared/hooks/promotions/use-tutorial'
 import { useLayoutContext } from '@/shared/context/layout-context'
+import { useCodeMirrorViewContext } from '@/features/source-editor/components/codemirror-context'
 
 type Mode = 'view' | 'review' | 'edit'
 
@@ -30,8 +32,9 @@ const useCurrentMode = (): Mode => {
   const user = useUserContext()
   const trackChangesForCurrentUser =
     trackChanges?.onForEveryone ||
-    (user && user.id && trackChanges?.onForMembers[user.id])
-  const { permissionsLevel } = useEditorContext()
+    (user?.id && trackChanges?.onForMembers[user.id]) ||
+    (!user?.id && trackChanges?.onForGuests)
+  const { permissionsLevel } = useIdeReactContext()
 
   if (permissionsLevel === 'readOnly') {
     return 'view'
@@ -46,14 +49,16 @@ const useCurrentMode = (): Mode => {
 
 function ReviewModeSwitcher() {
   const { t } = useTranslation()
-  const { saveTrackChangesForCurrentUser } =
+  const user = useUserContext()
+  const { saveTrackChangesForCurrentUser, saveTrackChanges } =
     useTrackChangesStateActionsContext()
   const mode = useCurrentMode()
-  const { permissionsLevel } = useEditorContext()
+  const { permissionsLevel } = useIdeReactContext()
   const { write, trackedWrite } = usePermissionsContext()
-  const project = useProjectContext()
+  const { features } = useProjectContext()
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
   const showViewOption = permissionsLevel === 'readOnly'
+  const view = useCodeMirrorViewContext()
 
   return (
     <div className="review-mode-switcher-container">
@@ -67,6 +72,7 @@ function ReviewModeSwitcher() {
             disabled={!write}
             onClick={() => {
               if (mode === 'edit') {
+                view.focus()
                 return
               }
               sendMB('editing-mode-change', {
@@ -74,7 +80,12 @@ function ReviewModeSwitcher() {
                 previousMode: mode,
                 newMode: 'edit',
               })
-              saveTrackChangesForCurrentUser(false)
+              if (user?.id) {
+                saveTrackChangesForCurrentUser(false)
+              } else {
+                saveTrackChanges({ on_for_guests: false })
+              }
+              view.focus()
             }}
             description={t('edit_content_directly')}
             leadingIcon="edit"
@@ -86,9 +97,10 @@ function ReviewModeSwitcher() {
             disabled={permissionsLevel === 'readOnly'}
             onClick={() => {
               if (mode === 'review') {
+                view.focus()
                 return
               }
-              if (!project.features.trackChanges) {
+              if (!features.trackChanges) {
                 setShowUpgradeModal(true)
               } else {
                 sendMB('editing-mode-change', {
@@ -96,7 +108,12 @@ function ReviewModeSwitcher() {
                   previousMode: mode,
                   newMode: 'review',
                 })
-                saveTrackChangesForCurrentUser(true)
+                if (user?.id) {
+                  saveTrackChangesForCurrentUser(true)
+                } else {
+                  saveTrackChanges({ on_for_guests: true })
+                }
+                view.focus()
               }
             }}
             description={
@@ -195,7 +212,7 @@ const ModeSwitcherToggleButtonContent = forwardRef<
   })
 
   const user = useUserContext()
-  const project = useProjectContext()
+  const { features } = useProjectContext()
   const { reviewPanelOpen } = useLayoutContext()
   const { inactiveTutorials } = useEditorContext()
 
@@ -205,7 +222,7 @@ const ModeSwitcherToggleButtonContent = forwardRef<
   const canShowReviewModePromo =
     reviewPanelOpen &&
     currentMode !== 'review' &&
-    project.features.trackChanges &&
+    features.trackChanges &&
     user.signUpDate &&
     user.signUpDate < '2025-03-15' &&
     !hasCompletedReviewModeTutorial

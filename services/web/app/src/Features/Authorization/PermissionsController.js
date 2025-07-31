@@ -11,8 +11,15 @@ const { expressify } = require('@overleaf/promise-utils')
 const Features = require('../../infrastructure/Features')
 
 /**
+ * @typedef {(import('express').Request)} Request
+ * @typedef {(import('express').Response)} Response
+ * @typedef {(import('express').NextFunction)} NextFunction
+ * @typedef {import('./PermissionsManager').Capability} Capability
+ */
+
+/**
  * Function that returns middleware to add an `assertPermission` function to the request object to check if the user has a specific capability.
- * @returns {Function} The middleware function that adds the `assertPermission` function to the request object.
+ * @returns {() => (req: Request, res: Response, next: NextFunction) => void} The middleware function that adds the `assertPermission` function to the request object.
  */
 function useCapabilities() {
   const middleware = async function (req, res, next) {
@@ -30,12 +37,15 @@ function useCapabilities() {
       return next()
     }
     try {
-      let results = await Modules.promises.hooks.fire(
+      /**
+       * @type {{groupPolicy: Record<string, boolean>}[][]}
+       */
+      const hookResponses = await Modules.promises.hooks.fire(
         'getGroupPolicyForUser',
         req.user
       )
       // merge array of all results from all modules
-      results = results.flat()
+      const results = hookResponses.flat()
 
       if (results.length > 0) {
         // get the combined group policy applying to the user
@@ -70,8 +80,8 @@ function useCapabilities() {
 
 /**
  * Function that returns middleware to check if the user has permission to access a resource.
- * @param {[string]} requiredCapabilities - the capabilities required to access the resource.
- * @returns {Function} The middleware function that checks if the user has the required capabilities.
+ * @param {...Capability} requiredCapabilities - the capabilities required to access the resource.
+ * @returns {(req: Request, res: Response, next: NextFunction) => void} The middleware function that checks if the user has the required capabilities.
  */
 function requirePermission(...requiredCapabilities) {
   if (
@@ -80,6 +90,11 @@ function requirePermission(...requiredCapabilities) {
   ) {
     throw new Error('invalid required capabilities')
   }
+  /**
+   * @param {Request} req
+   * @param {Response} res
+   * @param {NextFunction} next
+   */
   const doRequest = async function (req, res, next) {
     if (!Features.hasFeature('saas')) {
       return next()

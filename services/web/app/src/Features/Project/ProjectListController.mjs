@@ -27,6 +27,9 @@ import SplitTestHandler from '../SplitTests/SplitTestHandler.js'
 import SplitTestSessionHandler from '../SplitTests/SplitTestSessionHandler.js'
 import TutorialHandler from '../Tutorial/TutorialHandler.js'
 import SubscriptionHelper from '../Subscription/SubscriptionHelper.js'
+import PermissionsManager from '../Authorization/PermissionsManager.js'
+import SubscriptionLocator from '../Subscription/SubscriptionLocator.js'
+import AnalyticsManager from '../Analytics/AnalyticsManager.js'
 
 /**
  * @import { GetProjectsRequest, GetProjectsResponse, AllUsersProjects, MongoProject } from "./types"
@@ -117,7 +120,7 @@ async function projectListPage(req, res, next) {
   const user = await User.findById(
     userId,
     `email emails features alphaProgram betaProgram lastPrimaryEmailCheck signUpDate refProviders${
-      isSaas ? ' enrollment writefull completedTutorials' : ''
+      isSaas ? ' enrollment writefull completedTutorials aiErrorAssistant' : ''
     }`
   )
 
@@ -400,23 +403,58 @@ async function projectListPage(req, res, next) {
     logger.error({ err: error }, 'Failed to get individual subscription')
   }
 
-  // Get the user's assignment for the papers notification banner split test,
-  // which populates splitTestVariants with a value for the split test name and
-  // allows Pug to send it to the browser
-  await SplitTestHandler.promises.getAssignment(
-    req,
-    res,
-    'papers-notification-banner'
+  const aiAssistNotificationAssignment =
+    await SplitTestHandler.promises.getAssignment(
+      req,
+      res,
+      'ai-assist-notification'
+    )
+
+  let showAiAssistNotification = false
+  if (aiAssistNotificationAssignment.variant !== 'default') {
+    showAiAssistNotification = await _showAiAssistNotification(user)
+  }
+
+  const affiliations = userAffiliations || []
+  const inEnterpriseCommons = affiliations.some(
+    affiliation => affiliation.institution?.enterpriseCommons
   )
 
-  const customerIoEnabled =
-    await SplitTestHandler.promises.hasUserBeenAssignedToVariant(
-      req,
-      userId,
-      'customer-io-trial-conversion',
-      'enabled',
-      true
-    )
+  // customer.io: Premium nudge experiment
+  // Only do customer-io-trial-conversion assignment for users not in India/China and not in group/commons
+  let customerIoEnabled = false
+  const aiBlocked = !(await _canUseAIAssist(user))
+  const hasAiAssist = await _userHasAIAssist(user)
+  if (!userIsMemberOfGroupSubscription && !inEnterpriseCommons) {
+    try {
+      const ip = req.ip
+      const { countryCode } = await GeoIpLookup.promises.getCurrencyCode(ip)
+      const excludedCountries = ['IN', 'CN']
+
+      if (!excludedCountries.includes(countryCode)) {
+        const cioAssignment =
+          await SplitTestHandler.promises.getAssignmentForUser(
+            userId,
+            'customer-io-trial-conversion'
+          )
+        if (cioAssignment.variant === 'enabled') {
+          customerIoEnabled = true
+          AnalyticsManager.setUserPropertyForUserInBackground(
+            userId,
+            'customer-io-integration',
+            true
+          )
+        }
+      }
+    } catch (err) {
+      logger.error(
+        { err },
+        'Error checking geo location for customer-io-trial-conversion'
+      )
+      // Fallback to not enabled if geoip fails
+      customerIoEnabled = false
+    }
+  }
 
   res.render('project/list-react', {
     title: 'your_projects',
@@ -450,6 +488,9 @@ async function projectListPage(req, res, next) {
     hasIndividualPaidSubscription,
     userRestrictions: Array.from(req.userRestrictions || []),
     customerIoEnabled,
+    showAiAssistNotification,
+    aiBlocked,
+    hasAiAssist,
   })
 }
 
@@ -732,6 +773,62 @@ function _hasActiveFilter(filters) {
     filters.tag?.length ||
     filters.search?.length
   )
+}
+
+async function _userHasAIAssist(user) {
+  // Check if the user has AI Assist enabled via Overleaf
+  if (user.features?.aiErrorAssistant) {
+    return true
+  }
+  // Check if the user has AI Assist enabled via Writefull
+  const { isPremium: hasAiAssistViaWritefull } =
+    await UserGetter.promises.getWritefullData(user._id)
+  if (hasAiAssistViaWritefull) {
+    return true
+  }
+  return false
+}
+
+// Determines if user is able to enable AI assist
+// based on their permissions and settings
+// It does NOT determine if the user has AI Assist enabled
+async function _canUseAIAssist(user) {
+  // Check if the assistant has been manually disabled by the user
+  if (user.aiErrorAssistant?.enabled === false) {
+    return false
+  }
+
+  // Check if the user can use AI features (policy check)
+  return await PermissionsManager.promises.checkUserPermissions(user, [
+    'use-ai',
+  ])
+}
+
+async function _showAiAssistNotification(user) {
+  // Check if the assistant has been manually disabled by the user
+  if (user.aiErrorAssistant?.enabled === false) {
+    return false
+  }
+
+  // Check if the user can use AI features (policy check)
+  const canUseAi = await PermissionsManager.promises.checkUserPermissions(
+    user,
+    ['use-ai']
+  )
+  if (!canUseAi) {
+    return false
+  }
+
+  // Check if the user has a subscription with manually collected group admins (#22822)
+  const subscription = await SubscriptionLocator.promises.getUsersSubscription(
+    user._id
+  )
+  if (subscription?.collectionMethod === 'manual') {
+    return false
+  }
+
+  const userHasAiAssist = await _userHasAIAssist(user)
+  return !userHasAiAssist
 }
 
 export default {

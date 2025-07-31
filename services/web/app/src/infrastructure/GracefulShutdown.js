@@ -52,8 +52,8 @@ async function runHandlers(stage, handlers, logOnly) {
 }
 
 /**
- * @param {import('net').Server} server
- * @param {string} signal
+ * @param {import('net').Server} [server]
+ * @param {number|string} [signal]
  */
 async function gracefulShutdown(server, signal) {
   logger.warn({ signal }, 'graceful shutdown: started shutdown sequence')

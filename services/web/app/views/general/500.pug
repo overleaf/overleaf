@@ -1,23 +1,29 @@
 extends ../layout/layout-no-js
 
 block vars
-	- metadata = { title: 'Something went wrong' }
+	- metadata = {title: 'Something went wrong'}
 
 block body
 	body.full-height
-		main.content.content-alt.full-height#main-content
+		main#main-content.content.content-alt.full-height
 			.container.full-height
 				.error-container.full-height
 					.error-details
 						p.error-status Something went wrong, sorry.
-						p.error-description Our staff are probably looking into this, but if it continues, please check our status page at
+						if settings.statusPageUrl
+							p.error-description Our staff are probably looking into this, but if it continues, please check our status page at
+								|
+								|
+								a(href=settings.statusPageUrl target='_blank') #{new URL(settings.statusPageUrl).hostname}
+								|
+								| or contact us at
+								|
+								a(href='mailto:' + settings.adminEmail target='_blank') #{settings.adminEmail}
+								| .
+						else
+							| If the problem persists, please contact us at
 							|
-							|
-							a(href="http://" + settings.statusPageUrl) #{settings.statusPageUrl}
-							|
-							| or contact us at
-							|
-							a(href="mailto:" + settings.adminEmail) #{settings.adminEmail}
+							a(href='mailto:' + settings.adminEmail target='_blank') #{settings.adminEmail}
 							| .
 						p.error-actions
-							a.error-btn(href="/") Home
+							a.error-btn(href='/') Home

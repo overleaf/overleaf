@@ -55,10 +55,15 @@ export const EditorAndPdf: FC = () => {
           'ide-panel-group-resizing': resizing,
           hidden: !editorIsOpen,
         })}
+        tagName="section"
+        aria-label={t('editor')}
       >
         {selectedEntityCount === 0 && <NoSelectionPane />}
         {selectedEntityCount === 1 && openEntity?.type === 'fileRef' && (
-          <FileView file={fileViewFile(openEntity.entity)} />
+          <FileView
+            file={fileViewFile(openEntity.entity)}
+            key={openEntity.entity._id}
+          />
         )}
         {selectedEntityCount > 1 && (
           <MultipleSelectionPane selectedEntityCount={selectedEntityCount} />
@@ -102,6 +107,8 @@ export const EditorAndPdf: FC = () => {
         onCollapse={handlePdfPaneCollapse}
         onExpand={handlePdfPaneExpand}
         className="ide-react-panel"
+        tagName="section"
+        aria-label={t('pdf_preview_logs')}
       >
         <PdfPreview />
         {/* ensure that "sync to code" is available in PDF only layout */}

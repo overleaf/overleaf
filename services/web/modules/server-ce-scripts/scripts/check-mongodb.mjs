@@ -9,6 +9,34 @@ const { ObjectId } = mongodb
 const MIN_MONGO_VERSION = [6, 0]
 const MIN_MONGO_FEATURE_COMPATIBILITY_VERSION = [6, 0]
 
+// Allow ignoring admin check failures via an environment variable
+const OVERRIDE_ENV_VAR_NAME = 'ALLOW_MONGO_ADMIN_CHECK_FAILURES'
+
+function shouldSkipAdminChecks() {
+  return process.env[OVERRIDE_ENV_VAR_NAME] === 'true'
+}
+
+function handleUnauthorizedError(err, feature) {
+  if (
+    err instanceof mongodb.MongoServerError &&
+    err.codeName === 'Unauthorized'
+  ) {
+    console.warn(`Warning: failed to check ${feature} (not authorised)`)
+    if (!shouldSkipAdminChecks()) {
+      console.error(
+        `Please ensure the MongoDB user has the required admin permissions, or\n` +
+          `set the environment variable ${OVERRIDE_ENV_VAR_NAME}=true to ignore this check.`
+      )
+      process.exit(1)
+    }
+    console.warn(
+      `Ignoring ${feature} check failure (${OVERRIDE_ENV_VAR_NAME}=${process.env[OVERRIDE_ENV_VAR_NAME]})`
+    )
+  } else {
+    throw err
+  }
+}
+
 async function main() {
   let mongoClient
   try {
@@ -18,8 +46,16 @@ async function main() {
     throw err
   }
 
-  await checkMongoVersion(mongoClient)
-  await checkFeatureCompatibilityVersion(mongoClient)
+  try {
+    await checkMongoVersion(mongoClient)
+  } catch (err) {
+    handleUnauthorizedError(err, 'MongoDB version')
+  }
+  try {
+    await checkFeatureCompatibilityVersion(mongoClient)
+  } catch (err) {
+    handleUnauthorizedError(err, 'MongoDB feature compatibility version')
+  }
 
   try {
     await testTransactions(mongoClient)

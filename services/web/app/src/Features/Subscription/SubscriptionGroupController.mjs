@@ -8,7 +8,6 @@ import SessionManager from '../Authentication/SessionManager.js'
 import UserAuditLogHandler from '../User/UserAuditLogHandler.js'
 import { expressify } from '@overleaf/promise-utils'
 import Modules from '../../infrastructure/Modules.js'
-import SplitTestHandler from '../SplitTests/SplitTestHandler.js'
 import UserGetter from '../User/UserGetter.js'
 import { Subscription } from '../../models/Subscription.js'
 import { isProfessionalGroupPlan } from './PlansHelper.mjs'
@@ -19,8 +18,9 @@ import {
   InactiveError,
   SubtotalLimitExceededError,
   HasPastDueInvoiceError,
+  HasNoAdditionalLicenseWhenManuallyCollectedError,
+  PaymentActionRequiredError,
 } from './Errors.js'
-import RecurlyClient from './RecurlyClient.js'
 
 /**
  * @import { Subscription } from "../../../../types/subscription/dashboard/subscription.js"
@@ -138,13 +138,13 @@ async function _removeUserFromGroup(
 async function addSeatsToGroupSubscription(req, res) {
   try {
     const userId = SessionManager.getLoggedInUserId(req.session)
-    const { subscription, recurlySubscription, plan } =
+    const { subscription, paymentProviderSubscription, plan } =
       await SubscriptionGroupHandler.promises.getUsersGroupSubscriptionDetails(
         userId
       )
     await SubscriptionGroupHandler.promises.ensureFlexibleLicensingEnabled(plan)
     await SubscriptionGroupHandler.promises.ensureSubscriptionHasNoPendingChanges(
-      recurlySubscription
+      paymentProviderSubscription
     )
     await SubscriptionGroupHandler.promises.ensureSubscriptionIsActive(
       subscription
@@ -152,33 +152,21 @@ async function addSeatsToGroupSubscription(req, res) {
     await SubscriptionGroupHandler.promises.ensureSubscriptionHasNoPastDueInvoice(
       subscription
     )
-
-    const { variant: flexibleLicensingForManuallyBilledSubscriptionsVariant } =
-      await SplitTestHandler.promises.getAssignment(
-        req,
-        res,
-        'flexible-group-licensing-for-manually-billed-subscriptions'
-      )
-
-    if (flexibleLicensingForManuallyBilledSubscriptionsVariant === 'enabled') {
-      await SubscriptionGroupHandler.promises.checkBillingInfoExistence(
-        recurlySubscription,
-        userId
-      )
-    } else {
-      await SubscriptionGroupHandler.promises.ensureSubscriptionCollectionMethodIsNotManual(
-        recurlySubscription
-      )
-      // Check if the user has missing billing details
-      await RecurlyClient.promises.getPaymentMethod(userId)
-    }
+    await SubscriptionGroupHandler.promises.checkBillingInfoExistence(
+      paymentProviderSubscription,
+      userId
+    )
+    await SubscriptionGroupHandler.promises.ensureSubscriptionHasAdditionalLicenseAddOnWhenCollectionMethodIsManual(
+      paymentProviderSubscription
+    )
 
     res.render('subscriptions/add-seats', {
       subscriptionId: subscription._id,
       groupName: subscription.teamName,
       totalLicenses: subscription.membersLimit,
       isProfessional: isProfessionalGroupPlan(subscription),
-      isCollectionMethodManual: recurlySubscription.isCollectionMethodManual,
+      isCollectionMethodManual:
+        paymentProviderSubscription.isCollectionMethodManual,
     })
   } catch (error) {
     if (error instanceof MissingBillingInfoError) {
@@ -187,7 +175,7 @@ async function addSeatsToGroupSubscription(req, res) {
       )
     }
 
-    if (error instanceof ManuallyCollectedError) {
+    if (error instanceof HasNoAdditionalLicenseWhenManuallyCollectedError) {
       return res.redirect(
         '/user/subscription/group/manually-collected-subscription'
       )
@@ -228,10 +216,10 @@ async function previewAddSeatsSubscriptionChange(req, res) {
   } catch (error) {
     if (
       error instanceof MissingBillingInfoError ||
-      error instanceof ManuallyCollectedError ||
       error instanceof PendingChangeError ||
       error instanceof InactiveError ||
-      error instanceof HasPastDueInvoiceError
+      error instanceof HasPastDueInvoiceError ||
+      error instanceof HasNoAdditionalLicenseWhenManuallyCollectedError
     ) {
       return res.status(422).end()
     }
@@ -271,10 +259,10 @@ async function createAddSeatsSubscriptionChange(req, res) {
   } catch (error) {
     if (
       error instanceof MissingBillingInfoError ||
-      error instanceof ManuallyCollectedError ||
       error instanceof PendingChangeError ||
       error instanceof InactiveError ||
-      error instanceof HasPastDueInvoiceError
+      error instanceof HasPastDueInvoiceError ||
+      error instanceof HasNoAdditionalLicenseWhenManuallyCollectedError
     ) {
       return res.status(422).end()
     }
@@ -283,6 +271,14 @@ async function createAddSeatsSubscriptionChange(req, res) {
       return res.status(422).json({
         code: 'subtotal_limit_exceeded',
         adding: req.body.adding,
+      })
+    }
+
+    if (error instanceof PaymentActionRequiredError) {
+      return res.status(402).json({
+        message: 'Payment action required',
+        clientSecret: error.info.clientSecret,
+        publicKey: error.info.publicKey,
       })
     }
 
@@ -300,15 +296,14 @@ async function submitForm(req, res) {
   const userEmail = await UserGetter.promises.getUserEmail(userId)
   const { adding, poNumber } = req.body
 
-  const { recurlySubscription } =
+  const { paymentProviderSubscription } =
     await SubscriptionGroupHandler.promises.getUsersGroupSubscriptionDetails(
       userId
     )
 
-  if (recurlySubscription.isCollectionMethodManual) {
+  if (paymentProviderSubscription.isCollectionMethodManual) {
     await SubscriptionGroupHandler.promises.updateSubscriptionPaymentTerms(
-      userId,
-      recurlySubscription,
+      paymentProviderSubscription,
       poNumber
     )
   }
@@ -382,6 +377,13 @@ async function upgradeSubscription(req, res) {
     await SubscriptionGroupHandler.promises.upgradeGroupPlan(userId)
     return res.sendStatus(200)
   } catch (error) {
+    if (error instanceof PaymentActionRequiredError) {
+      return res.status(402).json({
+        message: 'Payment action required',
+        clientSecret: error.info.clientSecret,
+        publicKey: error.info.publicKey,
+      })
+    }
     logger.err({ error }, 'error trying to upgrade subscription')
     return res.sendStatus(500)
   }
@@ -411,12 +413,6 @@ async function manuallyCollectedSubscription(req, res) {
     const subscription =
       await SubscriptionLocator.promises.getUsersSubscription(userId)
 
-    await SplitTestHandler.promises.getAssignment(
-      req,
-      res,
-      'flexible-group-licensing-for-manually-billed-subscriptions'
-    )
-
     res.render('subscriptions/manually-collected-subscription', {
       groupName: subscription.teamName,
     })
@@ -444,6 +440,21 @@ async function subtotalLimitExceeded(req, res) {
   }
 }
 
+async function getGroupPlanPerUserPrices(req, res) {
+  try {
+    const userId = SessionManager.getLoggedInUserId(req.session)
+    const prices = await Modules.promises.hooks.fire(
+      'getGroupPlanPerUserPrices',
+      userId,
+      req.query.currency
+    )
+    return res.json(prices[0])
+  } catch (error) {
+    logger.err({ error }, 'error trying to get websale group product prices')
+    return res.sendStatus(500)
+  }
+}
+
 export default {
   removeUserFromGroup: expressify(removeUserFromGroup),
   removeSelfFromGroup: expressify(removeSelfFromGroup),
@@ -460,4 +471,5 @@ export default {
   missingBillingInformation: expressify(missingBillingInformation),
   manuallyCollectedSubscription: expressify(manuallyCollectedSubscription),
   subtotalLimitExceeded: expressify(subtotalLimitExceeded),
+  getGroupPlanPerUserPrices: expressify(getGroupPlanPerUserPrices),
 }

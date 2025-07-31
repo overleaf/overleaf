@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -eux
+set -eu
 
 echo "---------------------------------"
 echo "Flush all project-history changes"
@@ -9,6 +9,6 @@ date
 
 source /etc/container_environment.sh
 source /etc/overleaf/env.sh
-cd /overleaf/services/project-history && node scripts/flush_all.js
+cd /overleaf/services/project-history && /sbin/setuser www-data node scripts/flush_all.js
 
 echo "Done flushing all project-history changes"

@@ -20,7 +20,6 @@ module.exports = {
   isArchived,
   isTrashed,
   isArchivedOrTrashed,
-  calculateArchivedArray,
   ensureNameIsUnique,
   getAllowedImagesForUser,
   promises: {
@@ -63,38 +62,6 @@ function isArchivedOrTrashed(project, userId) {
   return isArchived(project, userId) || isTrashed(project, userId)
 }
 
-function _allCollaborators(project) {
-  return _.unionWith(
-    [project.owner_ref],
-    project.collaberator_refs,
-    project.readOnly_refs,
-    project.tokenAccessReadAndWrite_refs,
-    project.tokenAccessReadOnly_refs,
-    _objectIdEquals
-  )
-}
-
-function calculateArchivedArray(project, userId, action) {
-  let archived = project.archived
-  userId = new ObjectId(userId)
-
-  if (archived === true) {
-    archived = _allCollaborators(project)
-  } else if (!archived) {
-    archived = []
-  }
-
-  if (action === 'ARCHIVE') {
-    archived = _.unionWith(archived, [userId], _objectIdEquals)
-  } else if (action === 'UNARCHIVE') {
-    archived = archived.filter(id => !_objectIdEquals(id, userId))
-  } else {
-    throw new Error('Unrecognised action')
-  }
-
-  return archived
-}
-
 function ensureNameIsUnique(nameList, name, suffixes, maxLength, callback) {
   // create a set of all project names
   if (suffixes == null) {
@@ -120,11 +87,6 @@ function ensureNameIsUnique(nameList, name, suffixes, maxLength, callback) {
   } else {
     callback(new Error(`Failed to generate a unique name for: ${name}`))
   }
-}
-
-function _objectIdEquals(firstVal, secondVal) {
-  // For use as a comparator for unionWith
-  return firstVal.toString() === secondVal.toString()
 }
 
 function _addSuffixToProjectName(name, suffix, maxLength) {

@@ -107,7 +107,8 @@
     color: var(--white);
     text-align: center;
     background-size: cover;
-    background-image: linear-gradient(
+    background-image:
+      linear-gradient(
         to right,
         rgba(0 0 0 / 40%) 0%,
         var(--dark-jungle-green) 25%,
@@ -142,7 +143,8 @@
     border-radius: var(--border-radius-medium);
     color: var(--white);
     background-size: cover;
-    background-image: linear-gradient(
+    background-image:
+      linear-gradient(
         to right,
         rgba(0 0 0 / 40%) 0%,
         var(--dark-jungle-green) 20%,

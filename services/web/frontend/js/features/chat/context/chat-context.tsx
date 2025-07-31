@@ -29,7 +29,7 @@ export type Message = {
   id: string
   timestamp: number
   contents: string[]
-  user: User
+  user?: User
 }
 
 type State = {
@@ -193,14 +193,14 @@ export const ChatContext = createContext<
 >(undefined)
 
 export const ChatProvider: FC<React.PropsWithChildren> = ({ children }) => {
-  const chatEnabled = getMeta('ol-chatEnabled')
+  const chatEnabled = getMeta('ol-capabilities')?.includes('chat')
 
   const clientId = useRef<string>()
   if (clientId.current === undefined) {
     clientId.current = chatClientIdGenerator.generate()
   }
   const user = useUserContext()
-  const { _id: projectId } = useProjectContext()
+  const { projectId } = useProjectContext()
 
   const { chatIsOpen: chatIsOpenOldEditor } = useLayoutContext()
   const { selectedTab: selectedRailTab, isOpen: railIsOpen } = useRailContext()

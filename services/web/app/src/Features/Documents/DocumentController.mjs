@@ -7,6 +7,7 @@ import logger from '@overleaf/logger'
 import _ from 'lodash'
 import { plainTextResponse } from '../../infrastructure/Response.js'
 import { expressify } from '@overleaf/promise-utils'
+import Modules from '../../infrastructure/Modules.js'
 
 async function getDocument(req, res) {
   const { Project_id: projectId, doc_id: docId } = req.params
@@ -92,6 +93,9 @@ async function setDocument(req, res) {
     { docId, projectId },
     'finished receiving set document request from api (docupdater)'
   )
+
+  await Modules.promises.hooks.fire('docModified', projectId, docId)
+
   res.json(result)
 }
 

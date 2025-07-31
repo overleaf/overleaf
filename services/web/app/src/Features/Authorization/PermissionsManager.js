@@ -45,16 +45,23 @@ const { callbackify } = require('util')
 const { ForbiddenError } = require('../Errors/Errors')
 const Modules = require('../../infrastructure/Modules')
 
+/**
+ * @typedef {(import('../../../../types/capabilities').Capability)} Capability
+ */
+
+/** @type {Map<string, Map<Capability, boolean>>} */
 const POLICY_TO_CAPABILITY_MAP = new Map()
 const POLICY_TO_VALIDATOR_MAP = new Map()
+/** @type {Map<Capability, boolean>} */
 const DEFAULT_PERMISSIONS = new Map()
+/** @type {Set<string>} */
 const ALLOWED_PROPERTIES = new Set()
 
 /**
  * Throws an error if the given capability is not registered.
  *
  * @private
- * @param {string} capability - The name of the capability to check.
+ * @param {Capability} capability - The name of the capability to check.
  * @throws {Error} If the capability is not registered.
  */
 function ensureCapabilityExists(capability) {
@@ -66,7 +73,7 @@ function ensureCapabilityExists(capability) {
 /**
  * Validates an group policy object
  *
- * @param {Object} policies - An object containing policy names and booleans
+ * @param {Record<string, boolean>} policies - An object containing policy names and booleans
  *   as key-value entries.
  * @throws {Error} if the `policies` object contains a policy that is not
  *   registered, or the policy value is not a boolean
@@ -85,7 +92,7 @@ function validatePolicies(policies) {
 /**
  * Registers a new capability with the given name and options.
  *
- * @param {string} name - The name of the capability to register.
+ * @param {Capability} name - The name of the capability to register.
  * @param {Object} options - The options for the capability.
  * @param {boolean} options.default - The default value for the capability
  *   (required).
@@ -108,7 +115,7 @@ function registerCapability(name, options) {
  * Registers a new policy with the given name, capabilities, and options.
  *
  * @param {string} name - The name of the policy to register.
- * @param {Object} capabilities - The capabilities for the policy.
+ * @param {Partial<Record<Capability, boolean>>|Map<Capability, boolean>} capabilities - The capabilities for the policy.
  * @param {Object} [options] - The options for the policy.
  * @param {Function?} [options.validator] - The optional validator function for the
  *   policy.
@@ -122,10 +129,11 @@ function registerPolicy(name, capabilities, options = {}) {
   if (POLICY_TO_CAPABILITY_MAP.has(name)) {
     throw new Error(`policy already registered: ${name}`)
   }
+
+  /** @type {[Capability, boolean][]} */
+  const entries = Object.entries(capabilities)
   // check that all the entries in the capability set exist and are booleans
-  for (const [capabilityName, capabilityValue] of Object.entries(
-    capabilities
-  )) {
+  for (const [capabilityName, capabilityValue] of entries) {
     // check that the capability exists (look in the default permissions)
     if (!DEFAULT_PERMISSIONS.has(capabilityName)) {
       throw new Error(`unknown capability: ${capabilityName}`)
@@ -158,19 +166,18 @@ function registerAllowedProperty(name) {
 
 /**
  * returns the set of allowed properties that have been registered
- *
- * @returns {Set} ALLOWED_PROPERTIES
  */
 function getAllowedProperties() {
   return ALLOWED_PROPERTIES
 }
+
 /**
  * Returns an array of policy names that are enforced based on the provided
  * group policy object.
  *
  * @private
- * @param {Object} groupPolicy - The group policy object to check.
- * @returns {Array} An array of policy names that are enforced.
+ * @param {Partial<Map<Capability , boolean>>} groupPolicy - The group policy object to check.
+ * @returns {Capability[]} An array of policy names that are enforced.
  */
 function getEnforcedPolicyNames(groupPolicy = {}) {
   if (!groupPolicy) {
@@ -192,7 +199,7 @@ function getEnforcedPolicyNames(groupPolicy = {}) {
  * @private
  * @param {string} policyName - The name of the policy to retrieve the
  *   capability value from.
- * @param {string} capability - The name of the capability to retrieve the value
+ * @param {Capability} capability - The name of the capability to retrieve the value
  *   for.
  * @returns {boolean | undefined} The value of the capability for the policy, or
  *   undefined if the policy or capability is not found.
@@ -205,7 +212,7 @@ function getCapabilityValueFromPolicy(policyName, capability) {
  * Returns the default value for the specified capability.
  *
  * @private
- * @param {string} capability - The name of the capability to retrieve the
+ * @param {Capability} capability - The name of the capability to retrieve the
  *   default value for.
  * @returns {boolean | undefined} The default value for the capability, or
  *   undefined if the capability is not found.
@@ -222,9 +229,10 @@ function getValidatorFromPolicy(policyName) {
  * Returns a set of default capabilities based on the DEFAULT_PERMISSIONS map.
  *
  * @private
- * @returns {Set} A set of default capabilities.
+ * @returns {Set<Capability>} A set of default capabilities.
  */
 function getDefaultCapabilities() {
+  /** @type {Set<Capability>} */
   const defaultCapabilities = new Set()
   for (const [
     capabilityName,
@@ -242,7 +250,7 @@ function getDefaultCapabilities() {
  * which are not allowed by the policy.
  *
  * @private
- * @param {Set} capabilitySet - The set of capabilities to apply the policy to.
+ * @param {Set<Capability>} capabilitySet - The set of capabilities to apply the policy to.
  * @param {string} policyName - The name of the policy to apply.
  * @throws {Error} If the policy is unknown.
  */
@@ -281,10 +289,11 @@ function getUserCapabilities(groupPolicy) {
 /**
  * Combines an array of group policies into a single policy object.
  *
- * @param {Array} groupPolicies - An array of group policies.
- * @returns {Object} - The combined group policy object.
+ * @param {Record<string, boolean>[]} groupPolicies - An array of group policies.
+ * @returns {Record<string, boolean>} - The combined group policy object.
  */
 function combineGroupPolicies(groupPolicies) {
+  /** @type {Record<string, boolean>} */
   const combinedGroupPolicy = {}
   for (const groupPolicy of groupPolicies) {
     const enforcedPolicyNames = getEnforcedPolicyNames(groupPolicy)
@@ -335,7 +344,7 @@ function getUserRestrictions(groupPolicy) {
  * policy.
  *
  * @param {Object} groupPolicy - The group policy object for the user.
- * @param {string} capability - The name of the capability to check permission
+ * @param {Capability} capability - The name of the capability to check permission
  *   for.
  * @returns {boolean} True if the user has permission for the capability, false
  *   otherwise.
@@ -349,7 +358,7 @@ function hasPermission(groupPolicy, capability) {
   )
   // if there are no results, or none of the policies apply, return the default permission
   if (results.length === 0 || results.every(result => result === undefined)) {
-    return getDefaultPermission(capability)
+    return !!getDefaultPermission(capability)
   }
   // only allow the permission if all the results are true, otherwise deny it
   return results.every(result => result === true)
@@ -395,7 +404,7 @@ async function getUserValidationStatus({ user, groupPolicy, subscription }) {
  *
  * @param {Object} user - The user object to retrieve the group policy for.
  *   Only the user's _id is required
- * @param {Array} capabilities - The list of the capabilities to check permission for.
+ * @param {Capability[]} requiredCapabilities - The list of the capabilities to check permission for.
  * @returns {Promise<void>}
  * @throws {Error} If the user does not have permission
  */
@@ -417,7 +426,7 @@ async function assertUserPermissions(user, requiredCapabilities) {
  *
  * @param {Object} user - The user object to retrieve the group policy for.
  *   Only the user's _id is required
- * @param {Array} capabilities - The list of the capabilities to check permission for.
+ * @param {Capability[]} requiredCapabilities - The list of the capabilities to check permission for.
  * @returns {Promise<Boolean>} - true if the user has all permissions, false if not
  */
 async function checkUserPermissions(user, requiredCapabilities) {

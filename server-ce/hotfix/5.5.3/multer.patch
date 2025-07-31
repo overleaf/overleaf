@@ -1,0 +1,27 @@
+commit 43d0476e489cdf8e2e7261eb419810140d252a6d
+Author: Andrew Rumble <andrew.rumble@overleaf.com>
+Date:   Fri Jul 25 12:18:26 2025 +0100
+
+    Add patch for multer 2.0.2
+    
+    Co-authored-by: Ersun Warncke <ersun.warncke@overleaf.com>
+
+diff --git a/patches/multer+2.0.2.patch b/patches/multer+2.0.2.patch
+new file mode 100644
+index 00000000000..f9959effe15
+--- /dev/null
++++ b/patches/multer+2.0.2.patch
+@@ -0,0 +1,13 @@
++diff --git a/node_modules/multer/lib/make-middleware.js b/node_modules/multer/lib/make-middleware.js
++index 260dcb4..895b4b2 100644
++--- a/node_modules/multer/lib/make-middleware.js
+++++ b/node_modules/multer/lib/make-middleware.js
++@@ -113,7 +113,7 @@ function makeMiddleware (setup) {
++       if (fieldname == null) return abortWithCode('MISSING_FIELD_NAME')
++ 
++       // don't attach to the files object, if there is no file
++-      if (!filename) return fileStream.resume()
+++      if (!filename) filename = 'undefined'
++ 
++       // Work around bug in Busboy (https://github.com/mscdex/busboy/issues/6)
++       if (limits && Object.prototype.hasOwnProperty.call(limits, 'fieldNameSize')) {

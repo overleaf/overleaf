@@ -1,0 +1,117 @@
+diff --git a/usr/local/bin/grunt b/usr/local/bin/grunt
+index 462c68df4d52..8595d67109ae 100755
+--- a/usr/local/bin/grunt
++++ b/usr/local/bin/grunt
+@@ -11,22 +11,22 @@ cd /overleaf/services/web
+ case "$TASK" in
+   user:create-admin)
+     echo "The grunt command is deprecated, run the create-user script using node instead"
+-    node modules/server-ce-scripts/scripts/create-user.mjs --admin "$@"
++    exec /sbin/setuser www-data node modules/server-ce-scripts/scripts/create-user.mjs --admin "$@"
+     ;;
+
+   user:delete)
+     echo "The grunt command is deprecated, run the delete-user script using node instead"
+-    node modules/server-ce-scripts/scripts/delete-user.mjs "$@"
++    exec /sbin/setuser www-data node modules/server-ce-scripts/scripts/delete-user.mjs "$@"
+     ;;
+
+   check:mongo)
+     echo "The grunt command is deprecated, run the check-mongodb script using node instead"
+-    node modules/server-ce-scripts/scripts/check-mongodb.mjs
++    exec /sbin/setuser www-data node modules/server-ce-scripts/scripts/check-mongodb.mjs
+     ;;
+
+   check:redis)
+     echo "The grunt command is deprecated, run the check-redis script using node instead"
+-    node modules/server-ce-scripts/scripts/check-redis.mjs
++    exec /sbin/setuser www-data node modules/server-ce-scripts/scripts/check-redis.mjs
+     ;;
+
+   *)
+diff --git a/etc/my_init.pre_shutdown.d/00_close_site b/etc/my_init.pre_shutdown.d/00_close_site
+index ed5404f8172f..ac579f4b10ff 100755
+--- a/etc/my_init.pre_shutdown.d/00_close_site
++++ b/etc/my_init.pre_shutdown.d/00_close_site
+@@ -12,7 +12,7 @@ echo "closed" > "${SITE_MAINTENANCE_FILE}"
+ sleep 5
+
+ # giving a grace period of 5 seconds for users before disconnecting them and start shutting down
+-cd /overleaf/services/web && node scripts/disconnect_all_users.mjs --delay-in-seconds=5 >> /var/log/overleaf/web.log 2>&1
++cd /overleaf/services/web && /sbin/setuser www-data node scripts/disconnect_all_users.mjs --delay-in-seconds=5 >> /var/log/overleaf/web.log 2>&1
+
+ EXIT_CODE="$?"
+ if [ $EXIT_CODE -ne 0 ]
+diff --git a/etc/my_init.pre_shutdown.d/01_flush_document_updater b/etc/my_init.pre_shutdown.d/01_flush_document_updater
+index 0900fe5fac04..b4529f856b1e 100755
+--- a/etc/my_init.pre_shutdown.d/01_flush_document_updater
++++ b/etc/my_init.pre_shutdown.d/01_flush_document_updater
+@@ -3,7 +3,7 @@
+ . /etc/container_environment.sh
+ . /etc/overleaf/env.sh
+
+-cd /overleaf/services/document-updater && node scripts/flush_all.js >> /var/log/overleaf/document-updater.log 2>&1
++cd /overleaf/services/document-updater && /sbin/setuser www-data node scripts/flush_all.js >> /var/log/overleaf/document-updater.log 2>&1
+
+ EXIT_CODE="$?"
+ if [ $EXIT_CODE -ne 0 ]
+diff --git a/etc/my_init.pre_shutdown.d/02_flush_project_history b/etc/my_init.pre_shutdown.d/02_flush_project_history
+index f8ac51600c98..2844379cebc1 100755
+--- a/etc/my_init.pre_shutdown.d/02_flush_project_history
++++ b/etc/my_init.pre_shutdown.d/02_flush_project_history
+@@ -3,7 +3,7 @@
+ . /etc/container_environment.sh
+ . /etc/overleaf/env.sh
+
+-cd /overleaf/services/project-history && node scripts/flush_all.js >> /var/log/overleaf/project-history.log 2>&1
++cd /overleaf/services/project-history && /sbin/setuser www-data node scripts/flush_all.js >> /var/log/overleaf/project-history.log 2>&1
+
+ EXIT_CODE="$?"
+ if [ $EXIT_CODE -ne 0 ]
+diff --git a/etc/my_init.d/500_check_db_access.sh b/etc/my_init.d/500_check_db_access.sh
+index bbf2b9ec267d..f71acc8e011e 100755
+--- a/etc/my_init.d/500_check_db_access.sh
++++ b/etc/my_init.d/500_check_db_access.sh
+@@ -3,6 +3,6 @@ set -e
+
+ echo "Checking can connect to mongo and redis"
+ cd /overleaf/services/web
+-node modules/server-ce-scripts/scripts/check-mongodb.mjs
+-node modules/server-ce-scripts/scripts/check-redis.mjs
++/sbin/setuser www-data node modules/server-ce-scripts/scripts/check-mongodb.mjs
++/sbin/setuser www-data node modules/server-ce-scripts/scripts/check-redis.mjs
+ echo "All checks passed"
+diff --git a/etc/my_init.d/900_run_web_migrations.sh b/etc/my_init.d/900_run_web_migrations.sh
+index 59b7d23ea07f..cc206a528bb6 100755
+--- a/etc/my_init.d/900_run_web_migrations.sh
++++ b/etc/my_init.d/900_run_web_migrations.sh
+@@ -9,5 +9,5 @@ fi
+
+ echo "Running migrations for $environment"
+ cd /overleaf/services/web
+-npm run migrations -- migrate -t "$environment"
++/sbin/setuser www-data npm run migrations -- migrate -t "$environment"
+ echo "Finished migrations"
+diff --git a/etc/my_init.d/910_check_texlive_images b/etc/my_init.d/910_check_texlive_images
+index 90dec0061f19..047dea5b603f 100755
+--- a/etc/my_init.d/910_check_texlive_images
++++ b/etc/my_init.d/910_check_texlive_images
+@@ -3,4 +3,4 @@ set -e
+
+ echo "Checking texlive images"
+ cd /overleaf/services/web
+-node modules/server-ce-scripts/scripts/check-texlive-images.mjs
++/sbin/setuser www-data node modules/server-ce-scripts/scripts/check-texlive-images.mjs
+diff --git a/etc/my_init.d/910_initiate_doc_version_recovery b/etc/my_init.d/910_initiate_doc_version_recovery
+index 1daecd3c2fcd..0602e19872dc 100755
+--- a/etc/my_init.d/910_initiate_doc_version_recovery
++++ b/etc/my_init.d/910_initiate_doc_version_recovery
+@@ -10,7 +10,7 @@ RESYNCS_NEEDED_FILE=/var/lib/overleaf/data/history/doc-version-recovery-resyncs-
+
+ echo "Checking for doc version recovery. This can take a while if needed. Logs are in $LOG_FILE"
+ cd /overleaf/services/history-v1
+-LOG_LEVEL=info DOC_VERSION_RECOVERY_RESYNCS_NEEDED_FILE="$RESYNCS_NEEDED_FILE" node storage/scripts/recover_doc_versions.js 2>&1 | tee -a "$LOG_FILE"
++LOG_LEVEL=info DOC_VERSION_RECOVERY_RESYNCS_NEEDED_FILE="$RESYNCS_NEEDED_FILE" /sbin/setuser www-data node storage/scripts/recover_doc_versions.js 2>&1 | tee -a "$LOG_FILE"
+
+ function resyncAllProjectsInBackground() {
+   waitForService docstore 3016

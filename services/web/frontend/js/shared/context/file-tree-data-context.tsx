@@ -8,7 +8,6 @@ import {
   FC,
   useEffect,
 } from 'react'
-import useScopeValue from '../hooks/use-scope-value'
 import {
   renameInTree,
   deleteInTree,
@@ -18,9 +17,8 @@ import {
 import { countFiles } from '../../features/file-tree/util/count-in-tree'
 import useDeepCompareEffect from '../../shared/hooks/use-deep-compare-effect'
 import { docsInFolder } from '@/features/file-tree/util/docs-in-folder'
-import useScopeValueSetterOnly from '@/shared/hooks/use-scope-value-setter-only'
+import { useEditorOpenDocContext } from '@/features/ide-react/context/editor-open-doc-context'
 import { Folder } from '../../../../types/folder'
-import { Project } from '../../../../types/project'
 import { MainDocument } from '../../../../types/project-settings'
 import { FindResult } from '@/features/file-tree/util/path'
 import {
@@ -28,6 +26,9 @@ import {
   useSnapshotContext,
 } from '@/features/ide-react/context/snapshot-context'
 import importOverleafModules from '../../../macros/import-overleaf-module.macro'
+import { useProjectContext } from '@/shared/context/project-context'
+import { useIdeReactContext } from '@/features/ide-react/context/ide-react-context'
+
 const { buildFileTree, createFolder } =
   (importOverleafModules('snapshotUtils')[0]
     ?.import as typeof StubSnapshotUtils) || StubSnapshotUtils
@@ -61,6 +62,7 @@ enum ACTION_TYPES {
   MOVE = 'MOVE',
   CREATE = 'CREATE',
 }
+
 /* eslint-enable no-unused-vars */
 
 type Action =
@@ -179,10 +181,9 @@ export function useFileTreeData() {
 export const FileTreeDataProvider: FC<React.PropsWithChildren> = ({
   children,
 }) => {
-  const [project] = useScopeValue<Project>('project')
-  const [currentDocumentId] = useScopeValue('editor.open_doc_id')
-  const [, setOpenDocName] = useScopeValueSetterOnly('editor.open_doc_name')
-  const [permissionsLevel] = useScopeValue('permissionsLevel')
+  const { project } = useProjectContext()
+  const { currentDocumentId, setOpenDocName } = useEditorOpenDocContext()
+  const { permissionsLevel } = useIdeReactContext()
   const { fileTreeFromHistory, snapshot, snapshotVersion } =
     useSnapshotContext()
   const fileTreeReadOnly =
@@ -193,7 +194,7 @@ export const FileTreeDataProvider: FC<React.PropsWithChildren> = ({
   useEffect(() => {
     if (fileTreeFromHistory) return
     setRootFolder(project?.rootFolder)
-  }, [project, fileTreeFromHistory])
+  }, [project?.rootFolder, fileTreeFromHistory])
 
   useEffect(() => {
     if (!fileTreeFromHistory) return

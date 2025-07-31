@@ -229,8 +229,8 @@ describe('CollaboratorsInviteController', function () {
     })
 
     describe('when all goes well', function () {
-      beforeEach(function (ctx) {
-        return new Promise(resolve => {
+      beforeEach(async function (ctx) {
+        await new Promise(resolve => {
           ctx.CollaboratorsInviteGetter.promises.getAllInvites.resolves(
             ctx.fakeInvites
           )
@@ -263,8 +263,8 @@ describe('CollaboratorsInviteController', function () {
     })
 
     describe('when CollaboratorsInviteHandler.getAllInvites produces an error', function () {
-      beforeEach(function (ctx) {
-        return new Promise(resolve => {
+      beforeEach(async function (ctx) {
+        await new Promise(resolve => {
           ctx.CollaboratorsInviteGetter.promises.getAllInvites.rejects(
             new Error('woops')
           )
@@ -378,8 +378,8 @@ describe('CollaboratorsInviteController', function () {
       })
 
       describe('readAndWrite collaborator', function () {
-        beforeEach(function (ctx) {
-          return new Promise(resolve => {
+        beforeEach(async function (ctx) {
+          await new Promise(resolve => {
             ctx.privileges = 'readAndWrite'
             ctx.CollaboratorsInviteController._checkShouldInviteEmail = sinon
               .stub()
@@ -420,8 +420,8 @@ describe('CollaboratorsInviteController', function () {
       })
 
       describe('readOnly collaborator (always allowed)', function () {
-        beforeEach(function (ctx) {
-          return new Promise(resolve => {
+        beforeEach(async function (ctx) {
+          await new Promise(resolve => {
             ctx.req.body = {
               email: ctx.targetEmail,
               privileges: (ctx.privileges = 'readOnly'),
@@ -500,8 +500,8 @@ describe('CollaboratorsInviteController', function () {
     })
 
     describe('when inviteToProject produces an error', function () {
-      beforeEach(function (ctx) {
-        return new Promise(resolve => {
+      beforeEach(async function (ctx) {
+        await new Promise(resolve => {
           ctx.CollaboratorsInviteController._checkShouldInviteEmail = sinon
             .stub()
             .resolves(true)
@@ -559,8 +559,8 @@ describe('CollaboratorsInviteController', function () {
     })
 
     describe('when _checkShouldInviteEmail disallows the invite', function () {
-      beforeEach(function (ctx) {
-        return new Promise(resolve => {
+      beforeEach(async function (ctx) {
+        await new Promise(resolve => {
           ctx.CollaboratorsInviteController._checkShouldInviteEmail = sinon
             .stub()
             .resolves(false)
@@ -601,8 +601,8 @@ describe('CollaboratorsInviteController', function () {
     })
 
     describe('when _checkShouldInviteEmail produces an error', function () {
-      beforeEach(function (ctx) {
-        return new Promise(resolve => {
+      beforeEach(async function (ctx) {
+        await new Promise(resolve => {
           ctx.CollaboratorsInviteController._checkShouldInviteEmail = sinon
             .stub()
             .rejects(new Error('woops'))
@@ -748,8 +748,8 @@ describe('CollaboratorsInviteController', function () {
     })
 
     describe('when the token is valid', function () {
-      beforeEach(function (ctx) {
-        return new Promise(resolve => {
+      beforeEach(async function (ctx) {
+        await new Promise(resolve => {
           ctx.res.callback = () => resolve()
           ctx.CollaboratorsInviteController.viewInvite(
             ctx.req,
@@ -802,8 +802,8 @@ describe('CollaboratorsInviteController', function () {
     })
 
     describe('when not logged in', function () {
-      beforeEach(function (ctx) {
-        return new Promise(resolve => {
+      beforeEach(async function (ctx) {
+        await new Promise(resolve => {
           ctx.SessionManager.getSessionUser.returns(null)
 
           ctx.res.callback = () => resolve()
@@ -833,8 +833,8 @@ describe('CollaboratorsInviteController', function () {
     })
 
     describe('when user is already a member of the project', function () {
-      beforeEach(function (ctx) {
-        return new Promise(resolve => {
+      beforeEach(async function (ctx) {
+        await new Promise(resolve => {
           ctx.CollaboratorsGetter.promises.isUserInvitedMemberOfProject.resolves(
             true
           )
@@ -883,8 +883,8 @@ describe('CollaboratorsInviteController', function () {
     })
 
     describe('when isUserInvitedMemberOfProject produces an error', function () {
-      beforeEach(function (ctx) {
-        return new Promise(resolve => {
+      beforeEach(async function (ctx) {
+        await new Promise(resolve => {
           ctx.CollaboratorsGetter.promises.isUserInvitedMemberOfProject.rejects(
             new Error('woops')
           )
@@ -927,8 +927,8 @@ describe('CollaboratorsInviteController', function () {
     })
 
     describe('when the getInviteByToken produces an error', function () {
-      beforeEach(function (ctx) {
-        return new Promise(resolve => {
+      beforeEach(async function (ctx) {
+        await new Promise(resolve => {
           ctx.CollaboratorsInviteGetter.promises.getInviteByToken.rejects(
             new Error('woops')
           )
@@ -974,8 +974,8 @@ describe('CollaboratorsInviteController', function () {
     })
 
     describe('when the getInviteByToken does not produce an invite', function () {
-      beforeEach(function (ctx) {
-        return new Promise(resolve => {
+      beforeEach(async function (ctx) {
+        await new Promise(resolve => {
           ctx.CollaboratorsInviteGetter.promises.getInviteByToken.resolves(null)
           ctx.res.callback = () => resolve()
           ctx.CollaboratorsInviteController.viewInvite(
@@ -1023,8 +1023,8 @@ describe('CollaboratorsInviteController', function () {
     })
 
     describe('when User.getUser produces an error', function () {
-      beforeEach(function (ctx) {
-        return new Promise(resolve => {
+      beforeEach(async function (ctx) {
+        await new Promise(resolve => {
           ctx.UserGetter.promises.getUser.rejects(new Error('woops'))
           ctx.next.callsFake(() => resolve())
           ctx.CollaboratorsInviteController.viewInvite(
@@ -1068,8 +1068,8 @@ describe('CollaboratorsInviteController', function () {
     })
 
     describe('when User.getUser does not find a user', function () {
-      beforeEach(function (ctx) {
-        return new Promise(resolve => {
+      beforeEach(async function (ctx) {
+        await new Promise(resolve => {
           ctx.UserGetter.promises.getUser.resolves(null)
           ctx.res.callback = () => resolve()
           ctx.CollaboratorsInviteController.viewInvite(
@@ -1117,8 +1117,8 @@ describe('CollaboratorsInviteController', function () {
     })
 
     describe('when getProject produces an error', function () {
-      beforeEach(function (ctx) {
-        return new Promise(resolve => {
+      beforeEach(async function (ctx) {
+        await new Promise(resolve => {
           ctx.ProjectGetter.promises.getProject.rejects(new Error('woops'))
           ctx.next.callsFake(() => resolve())
           ctx.CollaboratorsInviteController.viewInvite(
@@ -1162,8 +1162,8 @@ describe('CollaboratorsInviteController', function () {
     })
 
     describe('when Project.getUser does not find a user', function () {
-      beforeEach(function (ctx) {
-        return new Promise(resolve => {
+      beforeEach(async function (ctx) {
+        await new Promise(resolve => {
           ctx.ProjectGetter.promises.getProject.resolves(null)
           ctx.res.callback = () => resolve()
           ctx.CollaboratorsInviteController.viewInvite(
@@ -1224,8 +1224,8 @@ describe('CollaboratorsInviteController', function () {
 
     describe('when generateNewInvite does not produce an error', function () {
       describe('and returns an invite object', function () {
-        beforeEach(function (ctx) {
-          return new Promise(resolve => {
+        beforeEach(async function (ctx) {
+          await new Promise(resolve => {
             ctx.res.callback = () => resolve()
             ctx.CollaboratorsInviteController.generateNewInvite(
               ctx.req,
@@ -1274,8 +1274,8 @@ describe('CollaboratorsInviteController', function () {
       })
 
       describe('and returns a null invite', function () {
-        beforeEach(function (ctx) {
-          return new Promise(resolve => {
+        beforeEach(async function (ctx) {
+          await new Promise(resolve => {
             ctx.CollaboratorsInviteHandler.promises.generateNewInvite.resolves(
               null
             )
@@ -1303,8 +1303,8 @@ describe('CollaboratorsInviteController', function () {
     })
 
     describe('when generateNewInvite produces an error', function () {
-      beforeEach(function (ctx) {
-        return new Promise(resolve => {
+      beforeEach(async function (ctx) {
+        await new Promise(resolve => {
           ctx.CollaboratorsInviteHandler.promises.generateNewInvite.rejects(
             new Error('woops')
           )
@@ -1343,8 +1343,8 @@ describe('CollaboratorsInviteController', function () {
     })
 
     describe('when revokeInvite does not produce an error', function () {
-      beforeEach(function (ctx) {
-        return new Promise(resolve => {
+      beforeEach(async function (ctx) {
+        await new Promise(resolve => {
           ctx.res.callback = () => resolve()
           ctx.CollaboratorsInviteController.revokeInvite(
             ctx.req,
@@ -1387,8 +1387,8 @@ describe('CollaboratorsInviteController', function () {
     })
 
     describe('when revokeInvite produces an error', function () {
-      beforeEach(function (ctx) {
-        return new Promise(resolve => {
+      beforeEach(async function (ctx) {
+        await new Promise(resolve => {
           ctx.CollaboratorsInviteHandler.promises.revokeInvite.rejects(
             new Error('woops')
           )
@@ -1427,8 +1427,8 @@ describe('CollaboratorsInviteController', function () {
     })
 
     describe('when acceptInvite does not produce an error', function () {
-      beforeEach(function (ctx) {
-        return new Promise(resolve => {
+      beforeEach(async function (ctx) {
+        await new Promise(resolve => {
           ctx.res.callback = () => resolve()
           ctx.CollaboratorsInviteController.acceptInvite(
             ctx.req,
@@ -1476,8 +1476,8 @@ describe('CollaboratorsInviteController', function () {
     })
 
     describe('when the invite is not found', function () {
-      beforeEach(function (ctx) {
-        return new Promise(resolve => {
+      beforeEach(async function (ctx) {
+        await new Promise(resolve => {
           ctx.CollaboratorsInviteGetter.promises.getInviteByToken.resolves(null)
           ctx.next.callsFake(() => resolve())
           ctx.CollaboratorsInviteController.acceptInvite(
@@ -1496,8 +1496,8 @@ describe('CollaboratorsInviteController', function () {
     })
 
     describe('when acceptInvite produces an error', function () {
-      beforeEach(function (ctx) {
-        return new Promise(resolve => {
+      beforeEach(async function (ctx) {
+        await new Promise(resolve => {
           ctx.CollaboratorsInviteHandler.promises.acceptInvite.rejects(
             new Error('woops')
           )
@@ -1527,8 +1527,8 @@ describe('CollaboratorsInviteController', function () {
     })
 
     describe('when the project audit log entry fails', function () {
-      beforeEach(function (ctx) {
-        return new Promise(resolve => {
+      beforeEach(async function (ctx) {
+        await new Promise(resolve => {
           ctx.ProjectAuditLogHandler.promises.addEntry.rejects(
             new Error('oops')
           )

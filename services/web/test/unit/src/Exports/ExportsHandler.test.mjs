@@ -81,8 +81,8 @@ describe('ExportsHandler', function () {
     })
 
     describe('when all goes well', function () {
-      beforeEach(function (ctx) {
-        return new Promise(resolve => {
+      beforeEach(async function (ctx) {
+        await new Promise(resolve => {
           ctx.ExportsHandler.exportProject(
             ctx.export_params,
             (error, exportData) => {
@@ -111,8 +111,8 @@ describe('ExportsHandler', function () {
     })
 
     describe("when request can't be built", function () {
-      beforeEach(function (ctx) {
-        return new Promise(resolve => {
+      beforeEach(async function (ctx) {
+        await new Promise(resolve => {
           ctx.ExportsHandler._buildExport = sinon
             .stub()
             .yields(new Error('cannot export project without root doc'))
@@ -132,8 +132,8 @@ describe('ExportsHandler', function () {
     })
 
     describe('when export request returns an error to forward to the user', function () {
-      beforeEach(function (ctx) {
-        return new Promise(resolve => {
+      beforeEach(async function (ctx) {
+        await new Promise(resolve => {
           ctx.error_json = { status: 422, message: 'nope' }
           ctx.ExportsHandler._requestExport = sinon
             .stub()
@@ -158,8 +158,8 @@ describe('ExportsHandler', function () {
   })
 
   describe('_buildExport', function () {
-    beforeEach(function (ctx) {
-      return new Promise(resolve => {
+    beforeEach(async function (ctx) {
+      await new Promise(resolve => {
         ctx.project = {
           id: ctx.project_id,
           rootDoc_id: 'doc1_id',
@@ -202,8 +202,8 @@ describe('ExportsHandler', function () {
     })
 
     describe('when all goes well', function () {
-      beforeEach(function (ctx) {
-        return new Promise(resolve => {
+      beforeEach(async function (ctx) {
+        await new Promise(resolve => {
           ctx.ExportsHandler._buildExport(
             ctx.export_params,
             (error, exportData) => {
@@ -262,8 +262,8 @@ describe('ExportsHandler', function () {
     })
 
     describe('when we send replacement user first and last name', function () {
-      beforeEach(function (ctx) {
-        return new Promise(resolve => {
+      beforeEach(async function (ctx) {
+        await new Promise(resolve => {
           ctx.custom_first_name = 'FIRST'
           ctx.custom_last_name = 'LAST'
           ctx.export_params.first_name = ctx.custom_first_name
@@ -316,8 +316,8 @@ describe('ExportsHandler', function () {
     })
 
     describe('when project is not found', function () {
-      beforeEach(function (ctx) {
-        return new Promise(resolve => {
+      beforeEach(async function (ctx) {
+        await new Promise(resolve => {
           ctx.ProjectGetter.getProject = sinon
             .stub()
             .yields(new Error('project not found'))
@@ -338,8 +338,8 @@ describe('ExportsHandler', function () {
 
     describe('when project has no root doc', function () {
       describe('when a root doc can be set automatically', function () {
-        beforeEach(function (ctx) {
-          return new Promise(resolve => {
+        beforeEach(async function (ctx) {
+          await new Promise(resolve => {
             ctx.project.rootDoc_id = null
             ctx.ProjectLocator.findRootDoc = sinon
               .stub()
@@ -400,8 +400,8 @@ describe('ExportsHandler', function () {
 
     describe('when project has an invalid root doc', function () {
       describe('when a new root doc can be set automatically', function () {
-        beforeEach(function (ctx) {
-          return new Promise(resolve => {
+        beforeEach(async function (ctx) {
+          await new Promise(resolve => {
             ctx.fakeDoc_id = '1a2b3c4d5e6f'
             ctx.project.rootDoc_id = ctx.fakeDoc_id
             ctx.ProjectLocator.findRootDoc = sinon
@@ -461,8 +461,8 @@ describe('ExportsHandler', function () {
       })
 
       describe('when no root doc can be identified', function () {
-        beforeEach(function (ctx) {
-          return new Promise(resolve => {
+        beforeEach(async function (ctx) {
+          await new Promise(resolve => {
             ctx.ProjectLocator.findRootDoc = sinon
               .stub()
               .yields(null, [null, null])
@@ -483,8 +483,8 @@ describe('ExportsHandler', function () {
     })
 
     describe('when user is not found', function () {
-      beforeEach(function (ctx) {
-        return new Promise(resolve => {
+      beforeEach(async function (ctx) {
+        await new Promise(resolve => {
           ctx.UserGetter.getUser = sinon
             .stub()
             .yields(new Error('user not found'))
@@ -504,8 +504,8 @@ describe('ExportsHandler', function () {
     })
 
     describe('when project history request fails', function () {
-      beforeEach(function (ctx) {
-        return new Promise(resolve => {
+      beforeEach(async function (ctx) {
+        await new Promise(resolve => {
           ctx.ExportsHandler._requestVersion = sinon
             .stub()
             .yields(new Error('project history call failed'))
@@ -526,8 +526,8 @@ describe('ExportsHandler', function () {
   })
 
   describe('_requestExport', function () {
-    beforeEach(function (ctx) {
-      return new Promise(resolve => {
+    beforeEach(async function (ctx) {
+      await new Promise(resolve => {
         ctx.settings.apis = {
           v1: {
             url: 'http://127.0.0.1:5000',
@@ -546,8 +546,8 @@ describe('ExportsHandler', function () {
     })
 
     describe('when all goes well', function () {
-      beforeEach(function (ctx) {
-        return new Promise(resolve => {
+      beforeEach(async function (ctx) {
+        await new Promise(resolve => {
           ctx.stubRequest.post = ctx.stubPost
           ctx.ExportsHandler._requestExport(
             ctx.export_data,
@@ -579,8 +579,8 @@ describe('ExportsHandler', function () {
     })
 
     describe('when the request fails', function () {
-      beforeEach(function (ctx) {
-        return new Promise(resolve => {
+      beforeEach(async function (ctx) {
+        await new Promise(resolve => {
           ctx.stubRequest.post = sinon
             .stub()
             .yields(new Error('export request failed'))
@@ -600,13 +600,14 @@ describe('ExportsHandler', function () {
     })
 
     describe('when the request returns an error response to forward', function () {
-      beforeEach(function (ctx) {
+      beforeEach(async function (ctx) {
         ctx.error_code = 422
         ctx.error_json = { status: ctx.error_code, message: 'nope' }
         ctx.stubRequest.post = sinon
           .stub()
           .yields(null, { statusCode: ctx.error_code }, ctx.error_json)
-        return new Promise(resolve => {
+
+        await new Promise(resolve => {
           ctx.ExportsHandler._requestExport(
             ctx.export_data,
             (error, exportV1Id) => {
@@ -627,8 +628,8 @@ describe('ExportsHandler', function () {
   })
 
   describe('fetchExport', function () {
-    beforeEach(function (ctx) {
-      return new Promise(resolve => {
+    beforeEach(async function (ctx) {
+      await new Promise(resolve => {
         ctx.settings.apis = {
           v1: {
             url: 'http://127.0.0.1:5000',
@@ -647,8 +648,8 @@ describe('ExportsHandler', function () {
     })
 
     describe('when all goes well', function () {
-      beforeEach(function (ctx) {
-        return new Promise(resolve => {
+      beforeEach(async function (ctx) {
+        await new Promise(resolve => {
           ctx.stubRequest.get = ctx.stubGet
           ctx.ExportsHandler.fetchExport(ctx.export_id, (error, body) => {
             ctx.callback(error, body)
@@ -678,8 +679,8 @@ describe('ExportsHandler', function () {
   })
 
   describe('fetchDownload', function () {
-    beforeEach(function (ctx) {
-      return new Promise(resolve => {
+    beforeEach(async function (ctx) {
+      await new Promise(resolve => {
         ctx.settings.apis = {
           v1: {
             url: 'http://127.0.0.1:5000',
@@ -699,8 +700,8 @@ describe('ExportsHandler', function () {
     })
 
     describe('when all goes well', function () {
-      beforeEach(function (ctx) {
-        return new Promise(resolve => {
+      beforeEach(async function (ctx) {
+        await new Promise(resolve => {
           ctx.stubRequest.get = ctx.stubGet
           ctx.ExportsHandler.fetchDownload(
             ctx.export_id,

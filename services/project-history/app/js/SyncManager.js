@@ -23,6 +23,7 @@ import { isInsert, isDelete } from './Utils.js'
 
 /**
  * @import { Comment as HistoryComment, TrackedChange as HistoryTrackedChange } from 'overleaf-editor-core'
+ * @import { CommentRawData, TrackedChangeRawData } from 'overleaf-editor-core/lib/types'
  * @import { Comment, Entity, ResyncDocContentUpdate, RetainOp, TrackedChange } from './types'
  * @import { TrackedChangeTransition, TrackingDirective, TrackingType, Update } from './types'
  * @import { ProjectStructureUpdate } from './types'
@@ -764,11 +765,19 @@ class SyncUpdateExpander {
     }
 
     const persistedComments = file.getComments().toArray()
-    await this.queueUpdatesForOutOfSyncComments(
-      update,
-      pathname,
-      persistedComments
-    )
+    if (update.resyncDocContent.historyOTRanges) {
+      this.queueUpdatesForOutOfSyncCommentsHistoryOT(
+        update,
+        pathname,
+        file.getComments().toRaw()
+      )
+    } else {
+      await this.queueUpdatesForOutOfSyncComments(
+        update,
+        pathname,
+        persistedComments
+      )
+    }
 
     const persistedChanges = file.getTrackedChanges().asSorted()
     await this.queueUpdatesForOutOfSyncTrackedChanges(
@@ -823,6 +832,91 @@ class SyncUpdateExpander {
       status: 'update text file contents',
     })
     return expandedUpdate
+  }
+
+  /**
+   * Queue updates for out of sync comments
+   *
+   * @param {ResyncDocContentUpdate} update
+   * @param {string} pathname
+   * @param {CommentRawData[]} persistedComments
+   */
+  queueUpdatesForOutOfSyncCommentsHistoryOT(
+    update,
+    pathname,
+    persistedComments
+  ) {
+    const expectedComments =
+      update.resyncDocContent.historyOTRanges?.comments ?? []
+    const expectedCommentsById = new Map(
+      expectedComments.map(comment => [comment.id, comment])
+    )
+    const persistedCommentsById = new Map(
+      persistedComments.map(comment => [comment.id, comment])
+    )
+
+    // Delete any persisted comment that is not in the expected comment list.
+    for (const persistedComment of persistedComments) {
+      if (!expectedCommentsById.has(persistedComment.id)) {
+        this.expandedUpdates.push({
+          doc: update.doc,
+          op: [{ deleteComment: persistedComment.id }],
+          meta: {
+            pathname,
+            resync: true,
+            origin: this.origin,
+            ts: update.meta.ts,
+          },
+        })
+      }
+    }
+
+    for (const expectedComment of expectedComments) {
+      const persistedComment = persistedCommentsById.get(expectedComment.id)
+      if (
+        persistedComment &&
+        commentRangesAreInSyncHistoryOT(persistedComment, expectedComment)
+      ) {
+        if (expectedComment.resolved === persistedComment.resolved) {
+          // Both comments are identical; do nothing
+        } else {
+          // Only the resolved state differs
+          this.expandedUpdates.push({
+            doc: update.doc,
+            op: [
+              {
+                commentId: expectedComment.id,
+                resolved: expectedComment.resolved,
+              },
+            ],
+            meta: {
+              pathname,
+              resync: true,
+              origin: this.origin,
+              ts: update.meta.ts,
+            },
+          })
+        }
+      } else {
+        // New comment or ranges differ
+        this.expandedUpdates.push({
+          doc: update.doc,
+          op: [
+            {
+              commentId: expectedComment.id,
+              ranges: expectedComment.ranges,
+              resolved: expectedComment.resolved,
+            },
+          ],
+          meta: {
+            pathname,
+            resync: true,
+            origin: this.origin,
+            ts: update.meta.ts,
+          },
+        })
+      }
+    }
   }
 
   /**
@@ -951,6 +1045,7 @@ class SyncUpdateExpander {
     for (const transition of getTrackedChangesTransitions(
       persistedChanges,
       expectedChanges,
+      update.resyncDocContent.historyOTRanges?.trackedChanges || [],
       expectedContent.length
     )) {
       if (transition.pos > cursor) {
@@ -1021,6 +1116,25 @@ class SyncUpdateExpander {
 /**
  * Compares the ranges in the persisted and expected comments
  *
+ * @param {CommentRawData} persistedComment
+ * @param {CommentRawData} expectedComment
+ */
+function commentRangesAreInSyncHistoryOT(persistedComment, expectedComment) {
+  if (persistedComment.ranges.length !== expectedComment.ranges.length) {
+    return false
+  }
+  for (let i = 0; i < persistedComment.ranges.length; i++) {
+    const persistedRange = persistedComment.ranges[i]
+    const expectedRange = expectedComment.ranges[i]
+    if (persistedRange.pos !== expectedRange.pos) return false
+    if (persistedRange.length !== expectedRange.length) return false
+  }
+  return true
+}
+
+/**
+ * Compares the ranges in the persisted and expected comments
+ *
  * @param {HistoryComment} persistedComment
  * @param {Comment} expectedComment
  */
@@ -1049,11 +1163,13 @@ function commentRangesAreInSync(persistedComment, expectedComment) {
  *
  * @param {readonly HistoryTrackedChange[]} persistedChanges
  * @param {TrackedChange[]} expectedChanges
+ * @param {TrackedChangeRawData[]} persistedChangesHistoryOT
  * @param {number} docLength
  */
 function getTrackedChangesTransitions(
   persistedChanges,
   expectedChanges,
+  persistedChangesHistoryOT,
   docLength
 ) {
   /** @type {TrackedChangeTransition[]} */
@@ -1072,6 +1188,19 @@ function getTrackedChangesTransitions(
     transitions.push({
       stage: 'persisted',
       pos: change.range.end,
+      tracking: { type: 'none' },
+    })
+  }
+
+  for (const change of persistedChangesHistoryOT) {
+    transitions.push({
+      stage: 'expected',
+      pos: change.range.pos,
+      tracking: change.tracking,
+    })
+    transitions.push({
+      stage: 'expected',
+      pos: change.range.pos + change.range.length,
       tracking: { type: 'none' },
     })
   }

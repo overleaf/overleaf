@@ -1,12 +1,27 @@
 import CodeMirrorEditor from '../../../../frontend/js/features/source-editor/components/codemirror-editor'
 import {
   EditorProviders,
+  makeProjectProvider,
   USER_EMAIL,
   USER_ID,
 } from '../../helpers/editor-providers'
 import { mockScope } from '../source-editor/helpers/mock-scope'
 import { TestContainer } from '../source-editor/helpers/test-container'
 import { docId } from '../source-editor/helpers/mock-doc'
+import { mockProject } from '../source-editor/helpers/mock-project'
+
+const userData = {
+  avatar_text: 'User',
+  email: USER_EMAIL,
+  hue: 180,
+  id: USER_ID,
+  isSelf: true,
+  first_name: 'Test',
+  last_name: 'User',
+}
+
+const resolvedThreadId = 'resolved-thread-id'
+const unresolvedThreadId = 'unresolved-thread-id'
 
 describe('<ReviewPanel />', function () {
   beforeEach(function () {
@@ -22,19 +37,6 @@ describe('<ReviewPanel />', function () {
         last_name: 'User',
       },
     ])
-
-    const userData = {
-      avatar_text: 'User',
-      email: USER_EMAIL,
-      hue: 180,
-      id: USER_ID,
-      isSelf: true,
-      first_name: 'Test',
-      last_name: 'User',
-    }
-
-    const resolvedThreadId = 'resolved-thread-id'
-    const unresolvedThreadId = 'unresolved-thread-id'
 
     cy.intercept('GET', '/project/*/threads', {
       // Resolved comment thread
@@ -182,12 +184,21 @@ describe('<ReviewPanel />', function () {
         },
       },
     })
+    const project = mockProject({
+      projectOwner: {
+        _id: USER_ID,
+      },
+      projectFeatures: { trackChanges: false, trackChangesVisible: true },
+    })
 
     cy.wrap(scope).as('scope')
 
     cy.mount(
       <TestContainer className="rp-size-expanded">
-        <EditorProviders scope={scope}>
+        <EditorProviders
+          scope={scope}
+          providers={{ ProjectProvider: makeProjectProvider(project) }}
+        >
           <CodeMirrorEditor />
         </EditorProviders>
       </TestContainer>
@@ -622,11 +633,189 @@ describe('<ReviewPanel />', function () {
   })
 })
 
+describe('<ReviewPanel /> in mini mode', function () {
+  function render({ comments = [], changes = [], threads = {} }: any) {
+    window.metaAttributesCache.set('ol-preventCompileOnLoad', true)
+
+    cy.interceptEvents()
+
+    cy.intercept('GET', '/project/*/changes/users', [
+      {
+        id: USER_ID,
+        email: USER_EMAIL,
+        first_name: 'Test',
+        last_name: 'User',
+      },
+    ])
+
+    const getChanges = cy.stub().as('getChanges').returns([])
+    const removeChangeIds = cy.stub().as('removeChangeIds')
+
+    const scope = mockScope(undefined, {
+      docOptions: {
+        rangesOptions: {
+          comments,
+          changes,
+          getChanges,
+          removeChangeIds,
+        },
+      },
+      projectFeatures: { trackChangesVisible: true },
+    })
+
+    const project = mockProject({
+      projectFeatures: { trackChangesVisible: true },
+    })
+
+    cy.intercept('GET', '/project/*/ranges', [
+      {
+        id: docId,
+        ranges: {
+          changes,
+          comments,
+          docId,
+        },
+      },
+    ])
+
+    cy.intercept('GET', '/project/*/threads', threads)
+
+    cy.intercept('POST', `/project/*/doc/${docId}/metadata`, {})
+
+    cy.wrap(scope).as('scope')
+
+    cy.mount(
+      <TestContainer>
+        <EditorProviders
+          scope={scope}
+          providers={{ ProjectProvider: makeProjectProvider(project) }}
+        >
+          <CodeMirrorEditor />
+        </EditorProviders>
+      </TestContainer>
+    )
+    // Wait for editor
+    cy.get('.cm-content').should('have.css', 'opacity', '1')
+
+    // Toggle the review panel twice to ensure data is loaded
+    cy.findByText('contentLine 0').type('{command}jj', {
+      scrollBehavior: false,
+    })
+    cy.findByText('contentLine 1').type('{ctrl}jj', { scrollBehavior: false })
+  }
+
+  it("doesn't render mini when no comments or changes are present in project", function () {
+    render({
+      comments: [],
+      changes: [],
+      threads: {},
+    })
+    cy.get('.review-panel-mini').should('not.exist')
+  })
+
+  it("doesn't render mini when no comments or changes are present in document", function () {
+    render({
+      comments: [],
+      changes: [],
+      threads: {
+        'random-unrelated-thread': {
+          messages: [
+            {
+              content: 'a comment',
+              id: 'random-unrelated-thread-1',
+              timestamp: new Date('2025-01-01T01:00:00.000Z'),
+              user: userData,
+              user_id: USER_ID,
+            },
+          ],
+        },
+      },
+    })
+    cy.get('.review-panel-mini').should('not.exist')
+  })
+
+  it("doesn't render mini when a resolved comment is present in document", function () {
+    render({
+      comments: [
+        {
+          id: resolvedThreadId,
+          op: { p: 161, c: 'Your introduction', t: resolvedThreadId },
+        },
+      ],
+      changes: [],
+      threads: {
+        [resolvedThreadId]: {
+          resolved: true,
+          resolved_at: new Date('2025-01-02T00:00:00.000Z').toISOString(),
+          resolved_by_user_id: USER_ID,
+          resolved_by_user: userData,
+          messages: [
+            {
+              content: 'a comment',
+              id: `${resolvedThreadId}-1`,
+              timestamp: new Date('2025-01-01T01:00:00.000Z'),
+              user: userData,
+              user_id: USER_ID,
+            },
+          ],
+        },
+      },
+    })
+    cy.get('.review-panel-mini').should('not.exist')
+  })
+
+  it('renders mini when an unresolved comment is present in document', function () {
+    render({
+      comments: [
+        {
+          id: unresolvedThreadId,
+          op: { p: 161, c: 'Your introduction', t: unresolvedThreadId },
+        },
+      ],
+      changes: [],
+      threads: {
+        [unresolvedThreadId]: {
+          messages: [
+            {
+              content: 'a comment',
+              id: `${unresolvedThreadId}-1`,
+              timestamp: new Date('2025-01-01T01:00:00.000Z'),
+              user: userData,
+              user_id: USER_ID,
+            },
+          ],
+        },
+      },
+    })
+    cy.get('.review-panel-mini').should('exist')
+  })
+
+  it('renders mini when a tracked change is present in document', function () {
+    render({
+      comments: [],
+      changes: [
+        {
+          metadata: {
+            user_id: USER_ID,
+            ts: new Date('2025-01-01T00:00:00.000Z'),
+          },
+          id: 'inserted-op-id',
+          op: { p: 166, t: 'inserted-op-id', i: 'introduction' },
+        },
+      ],
+      threads: {},
+    })
+    cy.get('.review-panel-mini').should('exist')
+  })
+})
+
 describe('<ReviewPanel /> for free users', function () {
   function mountEditor(ownerId = USER_ID) {
     const scope = mockScope(undefined, {
       permissions: { write: true, trackedWrite: false, comment: true },
-      projectFeatures: { trackChanges: false },
+    })
+    const project = mockProject({
+      projectFeatures: { trackChanges: false, trackChangesVisible: true },
       projectOwner: {
         _id: ownerId,
       },
@@ -636,7 +825,10 @@ describe('<ReviewPanel /> for free users', function () {
 
     cy.mount(
       <TestContainer className="rp-size-expanded">
-        <EditorProviders scope={scope}>
+        <EditorProviders
+          scope={scope}
+          providers={{ ProjectProvider: makeProjectProvider(project) }}
+        >
           <CodeMirrorEditor />
         </EditorProviders>
       </TestContainer>

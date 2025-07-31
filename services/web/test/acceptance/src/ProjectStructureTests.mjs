@@ -138,6 +138,47 @@ describe('ProjectStructureChanges', function () {
     })
   })
 
+  describe('when sending an upload request without a file', function () {
+    describe('project', function () {
+      it('should reject the request with status 400', async function () {
+        const { response, body } = await owner.doRequest('POST', {
+          uri: 'project/new/upload',
+          json: true,
+          formData: {
+            name: 'foo',
+          },
+        })
+
+        expect(response.statusCode).to.equal(400)
+        expect(body).to.deep.equal({
+          success: false,
+          error: 'invalid_upload_request',
+        })
+      })
+    })
+
+    describe('file', function () {
+      it('should reject the request with status 400', async function () {
+        const projectId = await owner.createProject('foo', {
+          template: 'blank',
+        })
+        const { response, body } = await owner.doRequest('POST', {
+          uri: `project/${projectId}/upload`,
+          json: true,
+          formData: {
+            name: 'foo.txt',
+          },
+        })
+
+        expect(response.statusCode).to.equal(400)
+        expect(body).to.deep.equal({
+          success: false,
+          error: 'invalid_upload_request',
+        })
+      })
+    })
+  })
+
   describe('uploading an empty zipfile', function () {
     let res
 

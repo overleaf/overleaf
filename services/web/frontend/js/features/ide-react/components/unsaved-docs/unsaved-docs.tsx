@@ -1,5 +1,5 @@
 import { useEditorManagerContext } from '@/features/ide-react/context/editor-manager-context'
-import { useEditorContext } from '@/shared/context/editor-context'
+import { useIdeReactContext } from '@/features/ide-react/context/ide-react-context'
 import { FC, useCallback, useEffect, useRef, useState } from 'react'
 import { PermissionsLevel } from '@/features/ide-react/types/permissions'
 import { UnsavedDocsLockedAlert } from '@/features/ide-react/components/unsaved-docs/unsaved-docs-locked-alert'
@@ -12,7 +12,7 @@ const MAX_UNSAVED_SECONDS = 30 // lock the editor after this time if unsaved
 
 export const UnsavedDocs: FC = () => {
   const { openDocs, debugTimers } = useEditorManagerContext()
-  const { permissionsLevel, setPermissionsLevel } = useEditorContext()
+  const { permissionsLevel, setPermissionsLevel } = useIdeReactContext()
   const [isLocked, setIsLocked] = useState(false)
   const [unsavedDocs, setUnsavedDocs] = useState(new Map<string, number>())
   const globalAlertsContainer = useGlobalAlertsContainer()

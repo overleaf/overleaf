@@ -2,19 +2,16 @@
 
 /**
  * @import { PaymentProvider } from '../../../../types/subscription/dashboard/subscription'
+ * @import { CurrencyCode, StripeCurrencyCode } from '../../../../types/subscription/currency'
  * @import { AddOn } from '../../../../types/subscription/plan'
  */
 
 const OError = require('@overleaf/o-error')
 const { DuplicateAddOnError, AddOnNotPresentError } = require('./Errors')
 const PlansLocator = require('./PlansLocator')
-
-let SubscriptionHelper = null // Work around circular import (loaded at the bottom of the file)
-
+const SubscriptionHelper = require('./SubscriptionHelper')
+const { AI_ADD_ON_CODE, isStandaloneAiAddOnPlanCode } = require('./AiHelper')
 const MEMBERS_LIMIT_ADD_ON_CODE = 'additional-license'
-const AI_ASSIST_STANDALONE_MONTHLY_PLAN_CODE = 'assistant'
-const AI_ASSIST_STANDALONE_ANNUAL_PLAN_CODE = 'assistant-annual'
-const AI_ADD_ON_CODE = 'assistant'
 
 class PaymentProviderSubscription {
   /**
@@ -28,7 +25,8 @@ class PaymentProviderSubscription {
    * @param {number} props.subtotal
    * @param {number} [props.taxRate]
    * @param {number} [props.taxAmount]
-   * @param {string} props.currency
+   * // Recurly uses uppercase currency codes, but Stripe uses lowercase
+   * @param {CurrencyCode | StripeCurrencyCode} props.currency
    * @param {number} props.total
    * @param {Date} props.periodStart
    * @param {Date} props.periodEnd
@@ -54,7 +52,7 @@ class PaymentProviderSubscription {
     this.subtotal = props.subtotal
     this.taxRate = props.taxRate ?? 0
     this.taxAmount = props.taxAmount ?? 0
-    this.currency = props.currency
+    this.currency = props.currency.toUpperCase() // ensure that currency codes are always uppercase
     this.total = props.total
     this.periodStart = props.periodStart
     this.periodEnd = props.periodEnd
@@ -96,7 +94,7 @@ class PaymentProviderSubscription {
    * @return {boolean}
    */
   isGroupSubscription() {
-    return isGroupPlanCode(this.planCode)
+    return PlansLocator.isGroupPlanCode(this.planCode)
   }
 
   /**
@@ -120,32 +118,31 @@ class PaymentProviderSubscription {
 
   /**
    * Change this subscription's plan
-   *
+   * @param {string} planCode - the new plan code
+   * @param {number} [quantity] - the quantity of the plan
+   * @param {boolean} [shouldChangeAtTermEnd] - whether the change should be applied at the end of the term
    * @return {PaymentProviderSubscriptionChangeRequest}
    */
-  getRequestForPlanChange(planCode) {
-    const currentPlan = PlansLocator.findLocalPlanInSettings(this.planCode)
-    if (currentPlan == null) {
-      throw new OError('Unable to find plan in settings', {
-        planCode: this.planCode,
-      })
-    }
-    const newPlan = PlansLocator.findLocalPlanInSettings(planCode)
-    if (newPlan == null) {
-      throw new OError('Unable to find plan in settings', { planCode })
-    }
-    const isInTrial = SubscriptionHelper.isInTrial(this.trialPeriodEnd)
-    const shouldChangeAtTermEnd = SubscriptionHelper.shouldPlanChangeAtTermEnd(
-      currentPlan,
-      newPlan,
-      isInTrial
-    )
-
+  getRequestForPlanChange(planCode, quantity, shouldChangeAtTermEnd) {
     const changeRequest = new PaymentProviderSubscriptionChangeRequest({
       subscription: this,
       timeframe: shouldChangeAtTermEnd ? 'term_end' : 'now',
       planCode,
     })
+
+    if (quantity !== 1) {
+      // Only group plans in Stripe can have larger than 1 quantity
+      // This is because in Stripe, the group plans are configued with per-seat pricing
+      // and the quantity is the number of seats
+      // Setting the members limit add-on quantity accordingly
+      // so it is compitible with Recurly's group plan model (1 base plan + add-on for each member)
+      changeRequest.addOnUpdates = [
+        new PaymentProviderSubscriptionAddOnUpdate({
+          code: MEMBERS_LIMIT_ADD_ON_CODE,
+          quantity,
+        }),
+      ]
+    }
 
     // Carry the AI add-on to the new plan if applicable
     if (
@@ -157,7 +154,9 @@ class PaymentProviderSubscription {
         code: AI_ADD_ON_CODE,
         quantity: 1,
       })
-      changeRequest.addOnUpdates = [addOnUpdate]
+      changeRequest.addOnUpdates = changeRequest.addOnUpdates
+        ? [...changeRequest.addOnUpdates, addOnUpdate]
+        : [addOnUpdate]
     }
 
     return changeRequest
@@ -362,6 +361,31 @@ class PaymentProviderSubscription {
   get isCollectionMethodManual() {
     return this.collectionMethod === 'manual'
   }
+
+  /**
+   * Determine if a plan change should be applied at the end of the term
+   *
+   * @param {string} newPlanCode
+   * @returns {boolean}
+   */
+  shouldPlanChangeAtTermEnd(newPlanCode) {
+    const currentPlan = PlansLocator.findLocalPlanInSettings(this.planCode)
+    if (currentPlan == null) {
+      throw new OError('Unable to find plan in settings', {
+        planCode: this.planCode,
+      })
+    }
+    const newPlan = PlansLocator.findLocalPlanInSettings(newPlanCode)
+    if (newPlan == null) {
+      throw new OError('Unable to find plan in settings', { newPlanCode })
+    }
+    const isInTrial = SubscriptionHelper.isInTrial(this.trialPeriodEnd)
+    return SubscriptionHelper.shouldPlanChangeAtTermEnd(
+      currentPlan,
+      newPlan,
+      isInTrial
+    )
+  }
 }
 
 /**
@@ -439,7 +463,7 @@ class PaymentProviderSubscriptionAddOnUpdate {
    */
   constructor(props) {
     this.code = props.code
-    this.quantity = props.quantity ?? null
+    this.quantity = props.quantity
     this.unitPrice = props.unitPrice ?? null
   }
 }
@@ -560,7 +584,7 @@ class PaymentProviderCoupon {
    * @param {object} props
    * @param {string} props.code
    * @param {string} props.name
-   * @param {string} props.description
+   * @param {string} [props.description]
    */
   constructor(props) {
     this.code = props.code
@@ -586,48 +610,8 @@ class PaymentProviderAccount {
   }
 }
 
-/**
- * Returns whether the given plan code is a standalone AI plan
- *
- * @param {string} planCode
- */
-function isStandaloneAiAddOnPlanCode(planCode) {
-  return (
-    planCode === AI_ASSIST_STANDALONE_MONTHLY_PLAN_CODE ||
-    planCode === AI_ASSIST_STANDALONE_ANNUAL_PLAN_CODE
-  )
-}
-
-/**
- * Returns whether the given plan code is a group plan
- *
- * @param {string} planCode
- */
-function isGroupPlanCode(planCode) {
-  return planCode.includes('group')
-}
-
-/**
- * Returns whether subscription change will have have the ai bundle once the change is processed
- *
- * @param {PaymentProviderSubscriptionChange} subscriptionChange The subscription change object coming from payment provider
- *
- * @return {boolean}
- */
-function subscriptionChangeIsAiAssistUpgrade(subscriptionChange) {
-  return Boolean(
-    isStandaloneAiAddOnPlanCode(subscriptionChange.nextPlanCode) ||
-      subscriptionChange.nextAddOns?.some(
-        addOn => addOn.code === AI_ADD_ON_CODE
-      )
-  )
-}
-
 module.exports = {
-  AI_ADD_ON_CODE,
   MEMBERS_LIMIT_ADD_ON_CODE,
-  AI_ASSIST_STANDALONE_MONTHLY_PLAN_CODE,
-  AI_ASSIST_STANDALONE_ANNUAL_PLAN_CODE,
   PaymentProviderSubscription,
   PaymentProviderSubscriptionAddOn,
   PaymentProviderSubscriptionChange,
@@ -640,10 +624,5 @@ module.exports = {
   PaymentProviderPlan,
   PaymentProviderCoupon,
   PaymentProviderAccount,
-  isGroupPlanCode,
-  isStandaloneAiAddOnPlanCode,
-  subscriptionChangeIsAiAssistUpgrade,
   PaymentProviderImmediateCharge,
 }
-
-SubscriptionHelper = require('./SubscriptionHelper')

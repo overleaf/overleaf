@@ -63,7 +63,7 @@ function RegisterForm({
             aria-label="emails to register"
             aria-describedby="input-details"
           />
-          <p id="input-details" className="sr-only">
+          <p id="input-details" className="visually-hidden">
             Enter the emails you would like to register and separate them using
             commas
           </p>

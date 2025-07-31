@@ -1,3 +1,7 @@
+const _ = require('lodash')
+const confusingBrowserGlobals = require('confusing-browser-globals')
+const globals = require('globals')
+
 module.exports = {
   root: true,
   parser: '@typescript-eslint/parser',
@@ -19,6 +23,7 @@ module.exports = {
   },
   rules: {
     'no-constant-binary-expression': 'error',
+    'no-restricted-globals': ['error', ...confusingBrowserGlobals],
 
     // do not allow importing of implicit dependencies.
     'import/no-extraneous-dependencies': 'error',
@@ -529,6 +534,18 @@ module.exports = {
       ],
       rules: {
         'no-console': 'error',
+      },
+    },
+    {
+      files: ['**/*.worker.{js,ts}'],
+      rules: {
+        'no-restricted-globals': [
+          'error',
+          ..._.difference(
+            Object.keys({ ...globals.browser, ...globals.node }),
+            Object.keys(globals.worker)
+          ),
+        ],
       },
     },
   ],

@@ -43,13 +43,10 @@ const ProjectAuditLogHandler = require('./ProjectAuditLogHandler')
 const PublicAccessLevels = require('../Authorization/PublicAccessLevels')
 const TagsHandler = require('../Tags/TagsHandler')
 const TutorialHandler = require('../Tutorial/TutorialHandler')
-const OnboardingDataCollectionManager = require('../OnboardingDataCollection/OnboardingDataCollectionManager')
 const UserUpdater = require('../User/UserUpdater')
 const Modules = require('../../infrastructure/Modules')
 const UserGetter = require('../User/UserGetter')
-const {
-  isStandaloneAiAddOnPlanCode,
-} = require('../Subscription/PaymentProviderEntities')
+const { isStandaloneAiAddOnPlanCode } = require('../Subscription/AiHelper')
 const SubscriptionController = require('../Subscription/SubscriptionController.js')
 const { formatCurrency } = require('../../util/currency')
 
@@ -335,6 +332,7 @@ const _ProjectController = {
 
     const splitTests = [
       'compile-log-events',
+      'visual-preview',
       'external-socket-heartbeat',
       'null-test-share-modal',
       'populate-clsi-cache',
@@ -349,7 +347,6 @@ const _ProjectController = {
       !anonymous && 'writefull-oauth-promotion',
       'hotjar',
       'editor-redesign',
-      'paywall-change-compile-timeout',
       'overleaf-assist-bundle',
       'word-count-client',
       'editor-popup-ux-survey',
@@ -402,13 +399,6 @@ const _ProjectController = {
               userId,
               projectId
             ),
-          odcRole: OnboardingDataCollectionManager.getOnboardingDataValue(
-            userId,
-            'role'
-          ).catch(err => {
-            logger.error({ err, userId })
-            return null
-          }),
         })
       )
     const splitTestAssignments = {}
@@ -461,7 +451,6 @@ const _ProjectController = {
         subscription,
         isTokenMember,
         isInvitedMember,
-        odcRole,
       } = userValues
 
       const brandVariation = project?.brandVariationId
@@ -656,13 +645,6 @@ const _ProjectController = {
         }
       }
 
-      const hasPaidSubscription = isPaidSubscription(subscription)
-      const hasManuallyCollectedSubscription =
-        subscription?.collectionMethod === 'manual'
-      const assistantDisabled = user.aiErrorAssistant?.enabled === false // the assistant has been manually disabled by the user
-      const canUseErrorAssistant =
-        !hasManuallyCollectedSubscription && !assistantDisabled
-
       let featureUsage = {}
 
       if (Features.hasFeature('saas')) {
@@ -728,12 +710,11 @@ const _ProjectController = {
           ? 'project/ide-react-detached'
           : 'project/ide-react'
 
-      let chatEnabled
-      if (Features.hasFeature('saas')) {
-        chatEnabled =
-          Features.hasFeature('chat') && req.capabilitySet.has('chat')
-      } else {
-        chatEnabled = Features.hasFeature('chat')
+      const capabilities = [...req.capabilitySet]
+
+      // make sure the capability is added to CE/SP when the feature is enabled
+      if (!Features.hasFeature('saas') && Features.hasFeature('chat')) {
+        capabilities.push('chat')
       }
 
       const isOverleafAssistBundleEnabled =
@@ -744,13 +725,14 @@ const _ProjectController = {
         fullFeatureSet = await UserGetter.promises.getUserFeatures(userId)
       }
 
-      const isPaywallChangeCompileTimeoutEnabled =
-        splitTestAssignments['paywall-change-compile-timeout']?.variant ===
-        'enabled'
-
-      const paywallPlans =
-        isPaywallChangeCompileTimeoutEnabled &&
-        (await ProjectController._getPaywallPlansPrices(req, res))
+      const hasPaidSubscription = isPaidSubscription(subscription)
+      const hasManuallyCollectedSubscription =
+        subscription?.collectionMethod === 'manual'
+      const assistantDisabled = user.aiErrorAssistant?.enabled === false // the assistant has been manually disabled by the user
+      const canUseErrorAssistant =
+        (!hasManuallyCollectedSubscription ||
+          fullFeatureSet?.aiErrorAssistant) &&
+        !assistantDisabled
 
       const customerIoEnabled =
         await SplitTestHandler.promises.hasUserBeenAssignedToVariant(
@@ -841,7 +823,7 @@ const _ProjectController = {
           isTokenMember,
           isInvitedMember
         ),
-        chatEnabled,
+        capabilities,
         projectHistoryBlobsEnabled: Features.hasFeature(
           'project-history-blobs'
         ),
@@ -872,17 +854,9 @@ const _ProjectController = {
         fixedSizeDocument: true,
         hasTrackChangesFeature: Features.hasFeature('track-changes'),
         projectTags,
-        odcRole:
-          // only use the ODC role value if the split test is enabled
-          splitTestAssignments['paywall-change-compile-timeout']?.variant ===
-          'enabled'
-            ? odcRole
-            : null,
         isSaas: Features.hasFeature('saas'),
         shouldLoadHotjar: splitTestAssignments.hotjar?.variant === 'enabled',
-        isPaywallChangeCompileTimeoutEnabled,
         isOverleafAssistBundleEnabled,
-        paywallPlans,
         customerIoEnabled,
         addonPrices,
         compileSettings: {
@@ -1190,6 +1164,7 @@ const THEME_LIST = [
   'eclipse',
   'monokai',
   'overleaf',
+  'overleaf_dark',
   'textmate',
 ]
 

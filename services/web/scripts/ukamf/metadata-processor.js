@@ -29,7 +29,7 @@ async function main() {
 
   const certificate = Certificate.fromPEM(
     Buffer.from(
-      `-----BEGIN CERTIFICATE-----\n${samlConfig.cert}\n-----END CERTIFICATE-----`,
+      `-----BEGIN CERTIFICATE-----\n${samlConfig.idpCert}\n-----END CERTIFICATE-----`,
       'utf8'
     )
   )
@@ -53,7 +53,7 @@ async function main() {
 
   console.log(`SSO Entity ID: ${samlConfig.entityId}\n`)
   console.log(`SSO Entry Point: ${samlConfig.entryPoint}\n`)
-  console.log(`SSO Certificate: ${samlConfig.cert}\n`)
+  console.log(`SSO Certificate: ${samlConfig.idpCert}\n`)
   if (samlConfig.hiddenIdP) {
     console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
     console.log('!!!!!!!!!!!!!!! WARNING !!!!!!!!!!!!!!!')

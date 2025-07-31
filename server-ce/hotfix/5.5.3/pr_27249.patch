@@ -1,0 +1,76 @@
+
+
+diff --git a/package-lock.json b/package-lock.json
+index 2b3a5868a20..d9d8285618d 100644
+--- a/package-lock.json
++++ b/package-lock.json
+@@ -35581,6 +35581,7 @@
+       "resolved": "https://registry.npmjs.org/request/-/request-2.88.2.tgz",
+       "integrity": "sha512-MsvtOrfG9ZcrOwAW+Qi+F6HbD0CWXEh9ou77uOb7FM2WPhwT7smM833PzanhJLsgXjN89Ir6V2PczXNnMpwKhw==",
+       "deprecated": "request has been deprecated, see https://github.com/request/request/issues/3142",
++      "license": "Apache-2.0",
+       "dependencies": {
+         "aws-sign2": "~0.7.0",
+         "aws4": "^1.8.0",
+@@ -35638,15 +35639,15 @@
+       }
+     },
+     "node_modules/request/node_modules/tough-cookie": {
+-      "version": "2.5.0",
+-      "resolved": "https://registry.npmjs.org/tough-cookie/-/tough-cookie-2.5.0.tgz",
+-      "integrity": "sha512-nlLsUzgm1kfLXSXfRZMc1KLAugd4hqJHDTvc2hDIwS3mZAfMEuMbc03SujMF+GEcpaX/qboeycw6iO8JwVv2+g==",
++      "version": "5.1.2",
++      "resolved": "https://registry.npmjs.org/tough-cookie/-/tough-cookie-5.1.2.tgz",
++      "integrity": "sha512-FVDYdxtnj0G6Qm/DhNPSb8Ju59ULcup3tuJxkFb5K8Bv2pUXILbf0xZWU8PX8Ov19OXljbUyveOFwRMwkXzO+A==",
++      "license": "BSD-3-Clause",
+       "dependencies": {
+-        "psl": "^1.1.28",
+-        "punycode": "^2.1.1"
++        "tldts": "^6.1.32"
+       },
+       "engines": {
+-        "node": ">=0.8"
++        "node": ">=16"
+       }
+     },
+     "node_modules/requestretry": {
+@@ -39612,6 +39613,24 @@
+         "tlds": "bin.js"
+       }
+     },
++    "node_modules/tldts": {
++      "version": "6.1.86",
++      "resolved": "https://registry.npmjs.org/tldts/-/tldts-6.1.86.tgz",
++      "integrity": "sha512-WMi/OQ2axVTf/ykqCQgXiIct+mSQDFdH2fkwhPwgEwvJ1kSzZRiinb0zF2Xb8u4+OqPChmyI6MEu4EezNJz+FQ==",
++      "license": "MIT",
++      "dependencies": {
++        "tldts-core": "^6.1.86"
++      },
++      "bin": {
++        "tldts": "bin/cli.js"
++      }
++    },
++    "node_modules/tldts-core": {
++      "version": "6.1.86",
++      "resolved": "https://registry.npmjs.org/tldts-core/-/tldts-core-6.1.86.tgz",
++      "integrity": "sha512-Je6p7pkk+KMzMv2XXKmAE3McmolOQFdxkKw0R8EYNr7sELW46JqnNeTX8ybPiQgvg1ymCoF8LXs5fzFaZvJPTA==",
++      "license": "MIT"
++    },
+     "node_modules/tmp": {
+       "version": "0.2.3",
+       "resolved": "https://registry.npmjs.org/tmp/-/tmp-0.2.3.tgz",
+diff --git a/package.json b/package.json
+index 388b750c3d2..44fffc4664a 100644
+--- a/package.json
++++ b/package.json
+@@ -33,6 +33,9 @@
+       "multer": "2.0.1",
+       "path-to-regexp": "3.3.0",
+       "qs": "6.13.0"
++    },
++    "request@2.88.2": {
++      "tough-cookie": "5.1.2"
+     }
+   },
+   "scripts": {
+

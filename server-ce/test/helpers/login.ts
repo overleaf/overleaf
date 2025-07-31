@@ -1,6 +1,6 @@
 import { runScript } from './hostAdminClient'
 
-const DEFAULT_PASSWORD = 'Passw0rd!'
+export const DEFAULT_PASSWORD = 'Passw0rd!'
 
 const createdUsers = new Set<string>()
 

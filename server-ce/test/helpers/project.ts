@@ -216,3 +216,49 @@ export function createNewFile() {
 
   return fileName
 }
+
+export function expectFileExists(
+  name: string,
+  binary: boolean,
+  content: string
+) {
+  cy.findByRole('treeitem', { name }).click()
+  if (binary) {
+    cy.findByText(content).should('not.have.class', 'cm-line')
+  } else {
+    cy.findByText(content).should('have.class', 'cm-line')
+  }
+}
+
+export function prepareFileUploadTest(binary = false) {
+  const name = `${uuid()}.txt`
+  const content = `Test File Content ${name}${binary ? ' \x00' : ''}`
+  cy.get('button').contains('Upload').click({ force: true })
+  cy.get('input[type=file]')
+    .first()
+    .selectFile(
+      {
+        contents: Cypress.Buffer.from(content),
+        fileName: name,
+        lastModified: Date.now(),
+      },
+      { force: true }
+    )
+
+  // wait for the upload to finish
+  cy.findByRole('treeitem', { name })
+
+  return () => expectFileExists(name, binary, content)
+}
+
+export function testNewFileUpload() {
+  it('can upload text file', () => {
+    const check = prepareFileUploadTest(false)
+    check()
+  })
+
+  it('can upload binary file', () => {
+    const check = prepareFileUploadTest(true)
+    check()
+  })
+}

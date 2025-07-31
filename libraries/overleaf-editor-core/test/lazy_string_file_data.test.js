@@ -193,4 +193,13 @@ describe('LazyStringFileData', function () {
     expect(fileData.getStringLength()).to.equal(longString.length)
     expect(fileData.getOperations()).to.have.length(1)
   })
+
+  it('truncates its operations after being stored', async function () {
+    const testHash = File.EMPTY_FILE_HASH
+    const fileData = new LazyStringFileData(testHash, undefined, 0)
+    fileData.edit(new TextOperation().insert('abc'))
+    const stored = await fileData.store(this.blobStore)
+    expect(fileData.hash).to.equal(stored.hash)
+    expect(fileData.operations).to.deep.equal([])
+  })
 })

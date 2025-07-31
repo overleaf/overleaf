@@ -1,39 +1,35 @@
-mixin formMessages()
-	div(
-		data-ol-form-messages='',
-		role="alert"
-	)
+include ./material_symbol
+
+mixin formMessages
+	div(data-ol-form-messages='' role='alert')
 
 mixin formMessagesNewStyle(extraClass = 'form-messages-bottom-margin')
-	- const attrs = extraClass ? { 'class': extraClass }  : {}
-	div(
-		data-ol-form-messages-new-style='',
-		role="alert"
-	)&attributes(attrs)
+	- const attrs = extraClass ? {class: extraClass} : {}
+	div(data-ol-form-messages-new-style='' role='alert')&attributes(attrs)
 
 mixin customFormMessage(key, kind)
 	if kind === 'success'
-		div.alert.alert-success(
-			hidden,
-			data-ol-custom-form-message=key,
-			role="alert"
-			aria-live="polite"
+		.alert.alert-success(
+			hidden
+			data-ol-custom-form-message=key
+			role='alert'
+			aria-live='polite'
 		)
 			block
 	else if kind === 'danger'
-		div.alert.alert-danger(
-			hidden,
-			data-ol-custom-form-message=key,
-			role="alert"
-			aria-live="assertive"
+		.alert.alert-danger(
+			hidden
+			data-ol-custom-form-message=key
+			role='alert'
+			aria-live='assertive'
 		)
 			block
 	else
-		div.alert.alert-warning(
-			hidden,
-			data-ol-custom-form-message=key,
-			role="alert"
-			aria-live="polite"
+		.alert.alert-warning(
+			hidden
+			data-ol-custom-form-message=key
+			role='alert'
+			aria-live='polite'
 		)
 			block
 
@@ -41,56 +37,50 @@ mixin customFormMessageNewStyle(key, kind, extraClass = 'mb-3')
 	- extraClass = extraClass ? ' ' + extraClass : ''
 	if kind === 'success'
 		div(
-			class="notification notification-type-success" + extraClass,
-			hidden,
-			data-ol-custom-form-message=key,
-			role="alert"
-			aria-live="polite"
+			class='notification notification-type-success' + extraClass
+			hidden
+			data-ol-custom-form-message=key
+			role='alert'
+			aria-live='polite'
 		)
-			div.notification-icon
-				span.material-symbols(aria-hidden="true") check_circle
-			div.notification-content.text-left
+			.notification-icon
+				+material-symbol('check_circle')
+			.notification-content.text-left
 				block
 	else if kind === 'danger'
 		div(
-			class="notification notification-type-error" + extraClass,
-			hidden,
-			data-ol-custom-form-message=key,
-			role="alert"
-			aria-live="polite"
+			class='notification notification-type-error' + extraClass
+			hidden
+			data-ol-custom-form-message=key
+			role='alert'
+			aria-live='polite'
 		)
-			div.notification-icon
-				span.material-symbols(aria-hidden="true") error
-			div.notification-content.text-left
+			.notification-icon
+				+material-symbol('error')
+			.notification-content.text-left
 				block
 	else
 		div(
-			class="notification notification-type-warning" + extraClass,
-			hidden,
-			data-ol-custom-form-message=key,
-			role="alert"
-			aria-live="polite"
+			class='notification notification-type-warning' + extraClass
+			hidden
+			data-ol-custom-form-message=key
+			role='alert'
+			aria-live='polite'
 		)
-			div.notification-icon
-				span.material-symbols(aria-hidden="true") warning
-			div.notification-content.text-left
+			.notification-icon
+				+material-symbol('warning')
+			.notification-content.text-left
 				block
 
 mixin customValidationMessage(key)
-	div.invalid-feedback.mt-2(
-		hidden,
-		data-ol-custom-form-message=key
-	)
-		i.fa.fa-fw.fa-warning.me-1(aria-hidden="true")
+	.invalid-feedback.mt-2(hidden data-ol-custom-form-message=key)
+		i.fa.fa-fw.fa-warning.me-1(aria-hidden='true')
 		div
 			block
 
 mixin customValidationMessageNewStyle(key)
-	div.notification.notification-type-error(
-			hidden,
-			data-ol-custom-form-message=key
-		)
-		div.notification-icon
-			span.material-symbols(aria-hidden="true") error
-		div.notification-content.text-left.small
+	.notification.notification-type-error(hidden data-ol-custom-form-message=key)
+		.notification-icon
+			+material-symbol('error')
+		.notification-content.text-left.small
 			block

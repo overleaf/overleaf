@@ -33,7 +33,7 @@ build-community:
 	  --build-arg BUILDKIT_INLINE_CACHE=1 \
 	  --progress=plain \
 	  --build-arg OVERLEAF_BASE_TAG \
-	  --build-arg MONOREPO_REVISION \
+	  --label "com.overleaf.ce.revision=$(MONOREPO_REVISION)" \
 	  --cache-from $(OVERLEAF_LATEST) \
 	  --cache-from $(OVERLEAF_BRANCH) \
 	  --file Dockerfile \

@@ -169,7 +169,9 @@ export function concatUpdatesWithSameVersion(updates) {
         lastUpdate.op != null &&
         lastUpdate.v === update.v &&
         lastUpdate.doc === update.doc &&
-        lastUpdate.pathname === update.pathname
+        lastUpdate.pathname === update.pathname &&
+        EditOperationBuilder.isValid(update.op[0]) ===
+          EditOperationBuilder.isValid(lastUpdate.op[0])
       ) {
         lastUpdate.op = lastUpdate.op.concat(update.op)
         if (update.meta.doc_hash == null) {

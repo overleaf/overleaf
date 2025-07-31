@@ -1,4 +1,7 @@
-import { EditorProviders } from '../../../helpers/editor-providers'
+import {
+  EditorProviders,
+  makeEditorPropertiesProvider,
+} from '../../../helpers/editor-providers'
 import CodemirrorEditor from '../../../../../frontend/js/features/source-editor/components/codemirror-editor'
 import { mockScope } from '../helpers/mock-scope'
 import { TestContainer } from '../helpers/test-container'
@@ -18,11 +21,18 @@ const clickToolbarButton = (name: string) => {
 
 const mountEditor = (content: string) => {
   const scope = mockScope(content)
-  scope.editor.showVisual = true
 
   cy.mount(
     <TestContainer>
-      <EditorProviders scope={scope}>
+      <EditorProviders
+        scope={scope}
+        providers={{
+          EditorPropertiesProvider: makeEditorPropertiesProvider({
+            showVisual: true,
+            showSymbolPalette: false,
+          }),
+        }}
+      >
         <CodemirrorEditor />
       </EditorProviders>
     </TestContainer>

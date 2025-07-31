@@ -47,7 +47,8 @@ export const MainLayout: FC = () => {
     handlePaneExpand: handleChatExpand,
   } = useChatPane()
 
-  const chatEnabled = getMeta('ol-chatEnabled') && !isRestrictedTokenMember
+  const chatEnabled =
+    getMeta('ol-capabilities')?.includes('chat') && !isRestrictedTokenMember
 
   const { t } = useTranslation()
 

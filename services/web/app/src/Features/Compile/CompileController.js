@@ -1,4 +1,4 @@
-const { URL, URLSearchParams } = require('url')
+const { URL } = require('url')
 const { pipeline } = require('stream/promises')
 const { Cookie } = require('tough-cookie')
 const OError = require('@overleaf/o-error')
@@ -209,7 +209,13 @@ const _CompileController = {
           status,
           compileTime: timings?.compileE2E,
           timeout: limits.timeout,
-          server: clsiServerId?.includes('-c2d-') ? 'faster' : 'normal',
+          server:
+            clsiServerId?.includes('-c2d-') ||
+            clsiServerId?.includes('-c3d-') ||
+            clsiServerId?.includes('-c4d-')
+              ? 'faster'
+              : 'normal',
+          clsiServerId,
           isAutoCompile,
           isInitialCompile: stats?.isInitialCompile === 1,
           restoredClsiCache: stats?.restoredClsiCache === 1,
@@ -347,6 +353,7 @@ const _CompileController = {
     }
   },
 
+  // Keep in sync with the logic for zip files in ProjectDownloadsController
   _getSafeProjectName(project) {
     return project.name.replace(/[^\p{L}\p{Nd}]/gu, '_')
   },
@@ -580,10 +587,18 @@ const _CompileController = {
     })
 
     url = new URL(`${Settings.apis.clsi.url}${url}`)
-    url.search = new URLSearchParams({
+
+    const searchParams = {
       ...persistenceOptions.qs,
       ...qs,
-    }).toString()
+    }
+    for (const [key, value] of Object.entries(searchParams)) {
+      if (value !== undefined) {
+        // avoid sending "undefined" as a string value
+        url.searchParams.set(key, value)
+      }
+    }
+
     const timer = new Metrics.Timer(
       'proxy_to_clsi',
       1,

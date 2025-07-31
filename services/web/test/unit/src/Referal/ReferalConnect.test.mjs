@@ -8,8 +8,8 @@ describe('Referal connect middle wear', function () {
     ctx.connect = (await import(modulePath)).default
   })
 
-  it('should take a referal query string and put it on the session if it exists', function (ctx) {
-    return new Promise(resolve => {
+  it('should take a referal query string and put it on the session if it exists', async function (ctx) {
+    await new Promise(resolve => {
       const req = {
         query: { referal: '12345' },
         session: {},
@@ -21,8 +21,8 @@ describe('Referal connect middle wear', function () {
     })
   })
 
-  it('should not change the referal_id on the session if not in query', function (ctx) {
-    return new Promise(resolve => {
+  it('should not change the referal_id on the session if not in query', async function (ctx) {
+    await new Promise(resolve => {
       const req = {
         query: {},
         session: { referal_id: 'same' },
@@ -34,8 +34,8 @@ describe('Referal connect middle wear', function () {
     })
   })
 
-  it('should take a facebook referal query string and put it on the session if it exists', function (ctx) {
-    return new Promise(resolve => {
+  it('should take a facebook referal query string and put it on the session if it exists', async function (ctx) {
+    await new Promise(resolve => {
       const req = {
         query: { fb_ref: '12345' },
         session: {},
@@ -47,8 +47,8 @@ describe('Referal connect middle wear', function () {
     })
   })
 
-  it('should map the facebook medium into the session', function (ctx) {
-    return new Promise(resolve => {
+  it('should map the facebook medium into the session', async function (ctx) {
+    await new Promise(resolve => {
       const req = {
         query: { rm: 'fb' },
         session: {},
@@ -60,8 +60,8 @@ describe('Referal connect middle wear', function () {
     })
   })
 
-  it('should map the twitter medium into the session', function (ctx) {
-    return new Promise(resolve => {
+  it('should map the twitter medium into the session', async function (ctx) {
+    await new Promise(resolve => {
       const req = {
         query: { rm: 't' },
         session: {},
@@ -73,8 +73,8 @@ describe('Referal connect middle wear', function () {
     })
   })
 
-  it('should map the google plus medium into the session', function (ctx) {
-    return new Promise(resolve => {
+  it('should map the google plus medium into the session', async function (ctx) {
+    await new Promise(resolve => {
       const req = {
         query: { rm: 'gp' },
         session: {},
@@ -86,8 +86,8 @@ describe('Referal connect middle wear', function () {
     })
   })
 
-  it('should map the email medium into the session', function (ctx) {
-    return new Promise(resolve => {
+  it('should map the email medium into the session', async function (ctx) {
+    await new Promise(resolve => {
       const req = {
         query: { rm: 'e' },
         session: {},
@@ -99,8 +99,8 @@ describe('Referal connect middle wear', function () {
     })
   })
 
-  it('should map the direct medium into the session', function (ctx) {
-    return new Promise(resolve => {
+  it('should map the direct medium into the session', async function (ctx) {
+    await new Promise(resolve => {
       const req = {
         query: { rm: 'd' },
         session: {},
@@ -112,8 +112,8 @@ describe('Referal connect middle wear', function () {
     })
   })
 
-  it('should map the bonus source into the session', function (ctx) {
-    return new Promise(resolve => {
+  it('should map the bonus source into the session', async function (ctx) {
+    await new Promise(resolve => {
       const req = {
         query: { rs: 'b' },
         session: {},
@@ -125,8 +125,8 @@ describe('Referal connect middle wear', function () {
     })
   })
 
-  it('should map the public share source into the session', function (ctx) {
-    return new Promise(resolve => {
+  it('should map the public share source into the session', async function (ctx) {
+    await new Promise(resolve => {
       const req = {
         query: { rs: 'ps' },
         session: {},
@@ -138,8 +138,8 @@ describe('Referal connect middle wear', function () {
     })
   })
 
-  it('should map the collaborator invite into the session', function (ctx) {
-    return new Promise(resolve => {
+  it('should map the collaborator invite into the session', async function (ctx) {
+    await new Promise(resolve => {
       const req = {
         query: { rs: 'ci' },
         session: {},

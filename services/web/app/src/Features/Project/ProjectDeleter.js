@@ -9,7 +9,6 @@ const Errors = require('../Errors/Errors')
 const logger = require('@overleaf/logger')
 const DocumentUpdaterHandler = require('../DocumentUpdater/DocumentUpdaterHandler')
 const TagsHandler = require('../Tags/TagsHandler')
-const ProjectHelper = require('./ProjectHelper')
 const ProjectDetailsHandler = require('./ProjectDetailsHandler')
 const CollaboratorsHandler = require('../Collaborators/CollaboratorsHandler')
 const CollaboratorsGetter = require('../Collaborators/CollaboratorsGetter')
@@ -135,88 +134,37 @@ async function restoreProject(projectId) {
 }
 
 async function archiveProject(projectId, userId) {
-  try {
-    const project = await Project.findOne({ _id: projectId }).exec()
-    if (!project) {
-      throw new Errors.NotFoundError('project not found')
+  await Project.updateOne(
+    { _id: projectId },
+    {
+      $addToSet: { archived: new ObjectId(userId) },
+      $pull: { trashed: new ObjectId(userId) },
     }
-    const archived = ProjectHelper.calculateArchivedArray(
-      project,
-      userId,
-      'ARCHIVE'
-    )
-
-    await Project.updateOne(
-      { _id: projectId },
-      { $set: { archived }, $pull: { trashed: new ObjectId(userId) } }
-    )
-  } catch (err) {
-    logger.warn({ err }, 'problem archiving project')
-    throw err
-  }
+  )
 }
 
 async function unarchiveProject(projectId, userId) {
-  try {
-    const project = await Project.findOne({ _id: projectId }).exec()
-    if (!project) {
-      throw new Errors.NotFoundError('project not found')
-    }
-
-    const archived = ProjectHelper.calculateArchivedArray(
-      project,
-      userId,
-      'UNARCHIVE'
-    )
-
-    await Project.updateOne({ _id: projectId }, { $set: { archived } })
-  } catch (err) {
-    logger.warn({ err }, 'problem unarchiving project')
-    throw err
-  }
+  await Project.updateOne(
+    { _id: projectId },
+    { $pull: { archived: new ObjectId(userId) } }
+  )
 }
 
 async function trashProject(projectId, userId) {
-  try {
-    const project = await Project.findOne({ _id: projectId }).exec()
-    if (!project) {
-      throw new Errors.NotFoundError('project not found')
+  await Project.updateOne(
+    { _id: projectId },
+    {
+      $addToSet: { trashed: new ObjectId(userId) },
+      $pull: { archived: new ObjectId(userId) },
     }
-
-    const archived = ProjectHelper.calculateArchivedArray(
-      project,
-      userId,
-      'UNARCHIVE'
-    )
-
-    await Project.updateOne(
-      { _id: projectId },
-      {
-        $addToSet: { trashed: new ObjectId(userId) },
-        $set: { archived },
-      }
-    )
-  } catch (err) {
-    logger.warn({ err }, 'problem trashing project')
-    throw err
-  }
+  )
 }
 
 async function untrashProject(projectId, userId) {
-  try {
-    const project = await Project.findOne({ _id: projectId }).exec()
-    if (!project) {
-      throw new Errors.NotFoundError('project not found')
-    }
-
-    await Project.updateOne(
-      { _id: projectId },
-      { $pull: { trashed: new ObjectId(userId) } }
-    )
-  } catch (err) {
-    logger.warn({ err }, 'problem untrashing project')
-    throw err
-  }
+  await Project.updateOne(
+    { _id: projectId },
+    { $pull: { trashed: new ObjectId(userId) } }
+  )
 }
 
 async function deleteProject(projectId, options = {}) {
@@ -385,7 +333,7 @@ async function expireDeletedProject(projectId) {
       )
       return
     }
-    const userId = deletedProject.deletedProjectOwnerId
+    const userId = deletedProject.deleterData?.deletedProjectOwnerId?.toString()
     const historyId =
       deletedProject.project.overleaf &&
       deletedProject.project.overleaf.history &&

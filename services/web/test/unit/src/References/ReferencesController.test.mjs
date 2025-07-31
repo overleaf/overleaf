@@ -61,8 +61,8 @@ describe('ReferencesController', function () {
       }
     })
 
-    it('should not produce an error', function (ctx) {
-      return new Promise(resolve => {
+    it('should not produce an error', async function (ctx) {
+      await new Promise(resolve => {
         ctx.call(() => {
           ctx.res.sendStatus.callCount.should.equal(0)
           ctx.res.sendStatus.calledWith(500).should.equal(false)
@@ -72,8 +72,8 @@ describe('ReferencesController', function () {
       })
     })
 
-    it('should return data', function (ctx) {
-      return new Promise(resolve => {
+    it('should return data', async function (ctx) {
+      await new Promise(resolve => {
         ctx.call(() => {
           ctx.res.json.callCount.should.equal(1)
           ctx.res.json.calledWith(ctx.fakeResponseData).should.equal(true)
@@ -82,8 +82,8 @@ describe('ReferencesController', function () {
       })
     })
 
-    it('should call ReferencesHandler.indexAll', function (ctx) {
-      return new Promise(resolve => {
+    it('should call ReferencesHandler.indexAll', async function (ctx) {
+      await new Promise(resolve => {
         ctx.call(() => {
           ctx.ReferencesHandler.indexAll.callCount.should.equal(1)
           ctx.ReferencesHandler.indexAll
@@ -100,8 +100,8 @@ describe('ReferencesController', function () {
         ctx.req.body.shouldBroadcast = true
       })
 
-      it('should call EditorRealTimeController.emitToRoom', function (ctx) {
-        return new Promise(resolve => {
+      it('should call EditorRealTimeController.emitToRoom', async function (ctx) {
+        await new Promise(resolve => {
           ctx.call(() => {
             ctx.EditorRealTimeController.emitToRoom.callCount.should.equal(1)
             resolve()
@@ -109,8 +109,8 @@ describe('ReferencesController', function () {
         })
       })
 
-      it('should not produce an error', function (ctx) {
-        return new Promise(resolve => {
+      it('should not produce an error', async function (ctx) {
+        await new Promise(resolve => {
           ctx.call(() => {
             ctx.res.sendStatus.callCount.should.equal(0)
             ctx.res.sendStatus.calledWith(500).should.equal(false)
@@ -120,8 +120,8 @@ describe('ReferencesController', function () {
         })
       })
 
-      it('should still return data', function (ctx) {
-        return new Promise(resolve => {
+      it('should still return data', async function (ctx) {
+        await new Promise(resolve => {
           ctx.call(() => {
             ctx.res.json.callCount.should.equal(1)
             ctx.res.json.calledWith(ctx.fakeResponseData).should.equal(true)
@@ -137,8 +137,8 @@ describe('ReferencesController', function () {
         ctx.req.body.shouldBroadcast = false
       })
 
-      it('should not call EditorRealTimeController.emitToRoom', function (ctx) {
-        return new Promise(resolve => {
+      it('should not call EditorRealTimeController.emitToRoom', async function (ctx) {
+        await new Promise(resolve => {
           ctx.call(() => {
             ctx.EditorRealTimeController.emitToRoom.callCount.should.equal(0)
             resolve()
@@ -146,8 +146,8 @@ describe('ReferencesController', function () {
         })
       })
 
-      it('should not produce an error', function (ctx) {
-        return new Promise(resolve => {
+      it('should not produce an error', async function (ctx) {
+        await new Promise(resolve => {
           ctx.call(() => {
             ctx.res.sendStatus.callCount.should.equal(0)
             ctx.res.sendStatus.calledWith(500).should.equal(false)
@@ -157,8 +157,8 @@ describe('ReferencesController', function () {
         })
       })
 
-      it('should still return data', function (ctx) {
-        return new Promise(resolve => {
+      it('should still return data', async function (ctx) {
+        await new Promise(resolve => {
           ctx.call(() => {
             ctx.res.json.callCount.should.equal(1)
             ctx.res.json.calledWith(ctx.fakeResponseData).should.equal(true)
@@ -178,8 +178,8 @@ describe('ReferencesController', function () {
       }
     })
 
-    it('should not call EditorRealTimeController.emitToRoom', function (ctx) {
-      return new Promise(resolve => {
+    it('should not call EditorRealTimeController.emitToRoom', async function (ctx) {
+      await new Promise(resolve => {
         ctx.call(() => {
           ctx.EditorRealTimeController.emitToRoom.callCount.should.equal(0)
           resolve()
@@ -187,8 +187,8 @@ describe('ReferencesController', function () {
       })
     })
 
-    it('should not produce an error', function (ctx) {
-      return new Promise(resolve => {
+    it('should not produce an error', async function (ctx) {
+      await new Promise(resolve => {
         ctx.call(() => {
           ctx.res.sendStatus.callCount.should.equal(0)
           ctx.res.sendStatus.calledWith(500).should.equal(false)
@@ -198,8 +198,8 @@ describe('ReferencesController', function () {
       })
     })
 
-    it('should send a response with an empty keys list', function (ctx) {
-      return new Promise(resolve => {
+    it('should send a response with an empty keys list', async function (ctx) {
+      await new Promise(resolve => {
         ctx.call(() => {
           ctx.res.json.called.should.equal(true)
           ctx.res.json

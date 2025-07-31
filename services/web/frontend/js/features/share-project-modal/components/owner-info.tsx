@@ -6,14 +6,14 @@ import MaterialIcon from '@/shared/components/material-icon'
 
 export default function OwnerInfo() {
   const { t } = useTranslation()
-  const { owner } = useProjectContext()
+  const { project } = useProjectContext()
 
   return (
     <OLRow className="project-member">
       <OLCol xs={8}>
         <div className="project-member-email-icon">
           <MaterialIcon type="person" />
-          <div className="email-warning">{owner?.email}</div>
+          <div className="email-warning">{project?.owner.email}</div>
         </div>
       </OLCol>
       <OLCol xs={4} className="text-end">

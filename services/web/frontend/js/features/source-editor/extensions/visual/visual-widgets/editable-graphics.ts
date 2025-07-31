@@ -2,6 +2,7 @@ import { EditorView } from '@codemirror/view'
 import { GraphicsWidget } from './graphics'
 import { editFigureDataEffect } from '../../figure-modal'
 import { emitToolbarEvent } from '../../toolbar/utils/analytics'
+import { materialIcon } from '@/features/utils/material-icon'
 
 export class EditableGraphicsWidget extends GraphicsWidget {
   setEditDispatcher(button: HTMLButtonElement, view: EditorView) {
@@ -49,10 +50,19 @@ export class EditableGraphicsWidget extends GraphicsWidget {
     const button = document.createElement('button')
     button.setAttribute('aria-label', view.state.phrase('edit_figure'))
     this.setEditDispatcher(button, view)
-    button.classList.add('btn', 'btn-secondary', 'ol-cm-graphics-edit-button')
-    const buttonLabel = document.createElement('span')
-    buttonLabel.classList.add('fa', 'fa-pencil')
-    button.append(buttonLabel)
+    button.classList.add(
+      'btn',
+      'btn-secondary',
+      'ol-cm-graphics-edit-button',
+      'icon-button',
+      'd-inline-grid'
+    )
+
+    const buttonContent = button.appendChild(document.createElement('span'))
+    buttonContent.className = 'button-content'
+
+    buttonContent.appendChild(materialIcon('edit'))
+
     return button
   }
 

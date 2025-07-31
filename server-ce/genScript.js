@@ -24,7 +24,7 @@ switch (process.argv.pop()) {
           // run webpack
           console.log('npm run webpack:production')
           // uninstall webpack and frontend dependencies
-          console.log('npm install --omit=dev')
+          console.log('npm prune --omit=dev')
 
           // Wait for pug precompile to finish
           console.log('wait "$pug_precompile"')

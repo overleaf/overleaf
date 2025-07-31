@@ -119,6 +119,17 @@ app.get(
   fileController.getFile
 )
 
+app.get(
+  '/history/global/hash/:hash',
+  keyBuilder.globalBlobFileKeyMiddleware,
+  fileController.getFile
+)
+app.get(
+  '/history/project/:historyId/hash/:hash',
+  keyBuilder.projectBlobFileKeyMiddleware,
+  fileController.getFile
+)
+
 app.get('/status', function (req, res) {
   if (settings.shuttingDown) {
     res.sendStatus(503) // Service unavailable

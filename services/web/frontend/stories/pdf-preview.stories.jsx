@@ -319,7 +319,7 @@ export const HybridToolbar = () => {
 
 export const FileList = () => {
   const fileList = useMemo(() => {
-    return buildFileList(cloneDeep(outputFiles))
+    return buildFileList(cloneDeep(outputFiles), {})
   }, [])
 
   return (

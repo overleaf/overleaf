@@ -1,11 +1,11 @@
 extends ../layout-marketing
 
 block content
-	main.content.content-alt#main-content
+	main#main-content.content.content-alt
 		.container
 			.error-container
 				.error-details
 					p.error-status Not found
 					p.error-description #{translate("cant_find_page")}
 					p.error-actions
-						a.error-btn(href="/") Home
+						a.error-btn(href='/') Home

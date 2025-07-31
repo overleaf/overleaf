@@ -1,13 +1,14 @@
 import { expect } from 'chai'
 import { fireEvent, render, screen } from '@testing-library/react'
-import { SurveyWidgetDsNav } from '../../../../../frontend/js/features/project-list/components/survey-widget-ds-nav'
+import { SurveyWidgetDsNav } from '@/features/project-list/components/survey-widget-ds-nav'
 import { SplitTestProvider } from '@/shared/context/split-test-context'
 
 describe('<SurveyWidgetDsNav />', function () {
   beforeEach(function () {
     this.name = 'my-survey'
-    this.preText = 'To help shape the future of Overleaf'
-    this.linkText = 'Click here!'
+    this.title = 'To help shape the future of Overleaf'
+    this.text = 'Click here!'
+    this.cta = 'Let’s go!'
     this.url = 'https://example.com/my-survey'
 
     localStorage.clear()
@@ -17,8 +18,8 @@ describe('<SurveyWidgetDsNav />', function () {
     beforeEach(function () {
       window.metaAttributesCache.set('ol-survey', {
         name: this.name,
-        preText: this.preText,
-        linkText: this.linkText,
+        title: this.title,
+        text: this.text,
         url: this.url,
       })
 
@@ -33,8 +34,8 @@ describe('<SurveyWidgetDsNav />', function () {
       const dismissed = localStorage.getItem('dismissed-my-survey')
       expect(dismissed).to.equal(null)
 
-      screen.getByText(this.preText)
-      screen.getByText(this.linkText)
+      screen.getByText(this.title)
+      screen.getByText(this.text)
 
       const link = screen.getByRole('link', {
         name: 'Take survey',
@@ -48,7 +49,7 @@ describe('<SurveyWidgetDsNav />', function () {
       })
       fireEvent.click(dismissButton)
 
-      const text = screen.queryByText(this.preText)
+      const text = screen.queryByText(this.title)
       expect(text).to.be.null
 
       const link = screen.queryByRole('button')
@@ -59,12 +60,43 @@ describe('<SurveyWidgetDsNav />', function () {
     })
   })
 
+  describe('survey widget is visible with custom CTA', function () {
+    beforeEach(function () {
+      window.metaAttributesCache.set('ol-survey', {
+        name: this.name,
+        title: this.title,
+        text: this.text,
+        cta: this.cta,
+        url: this.url,
+      })
+
+      render(
+        <SplitTestProvider>
+          <SurveyWidgetDsNav />
+        </SplitTestProvider>
+      )
+    })
+
+    it('shows text and link with custom CTA', function () {
+      const dismissed = localStorage.getItem('dismissed-my-survey')
+      expect(dismissed).to.equal(null)
+
+      screen.getByText(this.title)
+      screen.getByText(this.text)
+
+      const link = screen.getByRole('link', {
+        name: this.cta,
+      }) as HTMLAnchorElement
+      expect(link.href).to.equal(this.url)
+    })
+  })
+
   describe('survey widget is not shown when already dismissed', function () {
     beforeEach(function () {
       window.metaAttributesCache.set('ol-survey', {
         name: this.name,
-        preText: this.preText,
-        linkText: this.linkText,
+        title: this.title,
+        text: this.text,
         url: this.url,
       })
       localStorage.setItem('dismissed-my-survey', 'true')
@@ -77,7 +109,7 @@ describe('<SurveyWidgetDsNav />', function () {
     })
 
     it('nothing is displayed', function () {
-      const text = screen.queryByText(this.preText)
+      const text = screen.queryByText(this.title)
       expect(text).to.be.null
 
       const link = screen.queryByRole('button')
@@ -95,7 +127,7 @@ describe('<SurveyWidgetDsNav />', function () {
     })
 
     it('nothing is displayed', function () {
-      const text = screen.queryByText(this.preText)
+      const text = screen.queryByText(this.title)
       expect(text).to.be.null
 
       const link = screen.queryByRole('button')

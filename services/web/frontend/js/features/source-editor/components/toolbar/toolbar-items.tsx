@@ -14,6 +14,9 @@ import { LegacyTableDropdown } from './table-inserter-dropdown-legacy'
 import { withinFormattingCommand } from '@/features/source-editor/utils/tree-operations/formatting'
 import { isSplitTestEnabled } from '@/utils/splitTestUtils'
 import { isMac } from '@/shared/utils/os'
+import { useProjectContext } from '@/shared/context/project-context'
+import { useEditorPropertiesContext } from '@/features/ide-react/context/editor-properties-context'
+import { usePermissionsContext } from '@/features/ide-react/context/permissions-context'
 
 export const ToolbarItems: FC<{
   state: EditorState
@@ -29,8 +32,11 @@ export const ToolbarItems: FC<{
   listDepth,
 }) {
   const { t } = useTranslation()
-  const { toggleSymbolPalette, showSymbolPalette, writefullInstance } =
-    useEditorContext()
+  const { showSymbolPalette, toggleSymbolPalette } =
+    useEditorPropertiesContext()
+  const { writefullInstance } = useEditorContext()
+  const { features } = useProjectContext()
+  const permissions = usePermissionsContext()
   const isActive = withinFormattingCommand(state)
 
   const symbolPaletteAvailable = getMeta('ol-symbolPaletteAvailable')
@@ -127,13 +133,15 @@ export const ToolbarItems: FC<{
                 command={commands.wrapInHref}
                 icon="add_link"
               />
-              <ToolbarButton
-                id="toolbar-add-comment"
-                label={t('add_comment')}
-                disabled={state.selection.main.empty}
-                command={commands.addComment}
-                icon="add_comment"
-              />
+              {features.trackChangesVisible && permissions.comment && (
+                <ToolbarButton
+                  id="toolbar-add-comment"
+                  label={t('add_comment')}
+                  disabled={state.selection.main.empty}
+                  command={commands.addComment}
+                  icon="add_comment"
+                />
+              )}
               <ToolbarButton
                 id="toolbar-ref"
                 label={t('toolbar_insert_cross_reference')}

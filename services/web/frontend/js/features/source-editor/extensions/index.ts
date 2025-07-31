@@ -35,7 +35,7 @@ import importOverleafModules from '../../../../macros/import-overleaf-module.mac
 import { emptyLineFiller } from './empty-line-filler'
 import { goToLinePanel } from './go-to-line'
 import { drawSelection } from './draw-selection'
-import { visual } from './visual/visual'
+import { sourceOnly, visual } from './visual/visual'
 import { inlineBackground } from './inline-background'
 import { indentationMarkers } from './indentation-markers'
 import { codemirrorDevTools } from '../languages/latex/codemirror-dev-tools'
@@ -53,6 +53,7 @@ import { ranges } from './ranges'
 import { historyOT } from './history-ot'
 import { trackDetachedComments } from './track-detached-comments'
 import { reviewTooltip } from './review-tooltip'
+import { tooltipsReposition } from './tooltips-reposition'
 
 const moduleExtensions: Array<(options: Record<string, any>) => Extension> =
   importOverleafModules('sourceEditorExtensions').map(
@@ -78,6 +79,10 @@ export const createExtensions = (options: Record<string, any>): Extension[] => [
   EditorState.allowMultipleSelections.of(true),
   // A built-in extension that enables soft line wrapping.
   EditorView.lineWrapping,
+  sourceOnly(
+    options.visual.visual,
+    EditorView.contentAttributes.of({ 'aria-label': 'Source Editor editing' })
+  ),
   // A built-in extension that re-indents input if the language defines an indentOnInput field in its language data.
   indentOnInput(),
   lineWrappingIndentation(options.visual.visual),
@@ -135,7 +140,7 @@ export const createExtensions = (options: Record<string, any>): Extension[] => [
   cursorHighlights(),
   autoPair(options.settings),
   editable(),
-  search(),
+  search(options.initialSearchQuery),
   phrases(options.phrases),
   spelling(options.spelling),
   shortcuts,
@@ -166,4 +171,5 @@ export const createExtensions = (options: Record<string, any>): Extension[] => [
   effectListeners(),
   geometryChangeEvent(),
   fileTreeItemDrop(),
+  tooltipsReposition(),
 ]

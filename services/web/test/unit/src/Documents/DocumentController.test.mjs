@@ -87,6 +87,14 @@ describe('DocumentController', function () {
       },
     }
 
+    ctx.Modules = {
+      promises: {
+        hooks: {
+          fire: sinon.stub().resolves(),
+        },
+      },
+    }
+
     vi.doMock('../../../../app/src/Features/Project/ProjectGetter', () => ({
       default: ctx.ProjectGetter,
     }))
@@ -113,6 +121,10 @@ describe('DocumentController', function () {
       default: ctx.ChatApiHandler,
     }))
 
+    vi.doMock('../../../../app/src/infrastructure/Modules.js', () => ({
+      default: ctx.Modules,
+    }))
+
     ctx.DocumentController = (await import(MODULE_PATH)).default
   })
 
@@ -125,8 +137,8 @@ describe('DocumentController', function () {
     })
 
     describe('when project exists with project history enabled', function () {
-      beforeEach(function (ctx) {
-        return new Promise(resolve => {
+      beforeEach(async function (ctx) {
+        await new Promise(resolve => {
           ctx.res.callback = err => {
             resolve(err)
           }
@@ -151,8 +163,8 @@ describe('DocumentController', function () {
     })
 
     describe('when the project does not exist', function () {
-      beforeEach(function (ctx) {
-        return new Promise(resolve => {
+      beforeEach(async function (ctx) {
+        await new Promise(resolve => {
           ctx.ProjectGetter.promises.getProject.resolves(null)
           ctx.res.callback = err => {
             resolve(err)
@@ -176,8 +188,8 @@ describe('DocumentController', function () {
     })
 
     describe('when the document exists', function () {
-      beforeEach(function (ctx) {
-        return new Promise(resolve => {
+      beforeEach(async function (ctx) {
+        await new Promise(resolve => {
           ctx.req.body = {
             lines: ctx.doc_lines,
             version: ctx.version,
@@ -208,11 +220,20 @@ describe('DocumentController', function () {
       it('should return a successful response', function (ctx) {
         ctx.res.success.should.equal(true)
       })
+
+      it('should call the docModified hook', function (ctx) {
+        sinon.assert.calledWith(
+          ctx.Modules.promises.hooks.fire,
+          'docModified',
+          ctx.project._id,
+          ctx.doc._id
+        )
+      })
     })
 
     describe("when the document doesn't exist", function () {
-      beforeEach(function (ctx) {
-        return new Promise(resolve => {
+      beforeEach(async function (ctx) {
+        await new Promise(resolve => {
           ctx.ProjectEntityUpdateHandler.promises.updateDocLines.rejects(
             new Errors.NotFoundError('document does not exist')
           )

@@ -2,14 +2,14 @@ extends ../layout-marketing
 include ../_mixins/back_to_btns
 
 block content
-	main.content.content-alt#main-content
+	main#main-content.content.content-alt
 		.container.beta-opt-in-wrapper
 			.row
 				.col-lg-10.offset-lg-1.col-xl-8.offset-xl-2
 					.card
 						.card-body
 							.page-header
-								h1 
+								h1
 									| #{translate("sharelatex_beta_program")}
 							.beta-opt-in
 								.container-fluid
@@ -28,7 +28,9 @@ block content
 											ul
 												li
 													| #{translate("beta_program_badge_description")}&nbsp;
-													span.badge.bg-warning-light-bg.text-warning(aria-label=translate("beta_feature_badge"))
+													span.badge.bg-warning-light-bg.text-warning(
+														aria-label=translate('beta_feature_badge')
+													)
 														span.badge-content β
 												li !{translate("you_will_be_able_to_contact_us_any_time_to_share_your_feedback", {}, ['strong'])}.
 												li !{translate("we_may_also_contact_you_from_time_to_time_by_email_with_a_survey", {}, ['strong'])}.
@@ -40,37 +42,30 @@ block content
 											if user.betaProgram
 												form(
 													data-ol-regular-form
-													method="post"
-													action="/beta/opt-out"
+													method='post'
+													action='/beta/opt-out'
 													novalidate
 												)
-													input(type="hidden", name="_csrf", value=csrfToken)
+													input(name='_csrf' type='hidden' value=csrfToken)
 													.form-group
-														a(
-															href="https://forms.gle/CFEsmvZQTAwHCd3X9"
-															target="_blank"
-															rel="noopener noreferrer"
-														).btn.btn-primary.btn-lg #{translate("give_feedback")}
+														a.btn.btn-primary.btn-lg(
+															href='https://forms.gle/CFEsmvZQTAwHCd3X9'
+															target='_blank'
+															rel='noopener noreferrer'
+														) #{translate("give_feedback")}
 													.form-group
 														button.btn.btn-secondary-info.btn-secondary.btn-sm(
-															type="submit"
+															type='submit'
 															data-ol-disabled-inflight
 														)
-															span(data-ol-inflight="idle") #{translate("beta_program_opt_out_action")}
-															span(hidden data-ol-inflight="pending") #{translate("processing")}…
+															span(data-ol-inflight='idle') #{translate("beta_program_opt_out_action")}
+															span(hidden data-ol-inflight='pending') #{translate("processing")}…
 											else
-												form(
-													data-ol-regular-form
-													method="post",
-													action="/beta/opt-in"
-												)
-													input(type="hidden", name="_csrf", value=csrfToken)
+												form(data-ol-regular-form method='post' action='/beta/opt-in')
+													input(name='_csrf' type='hidden' value=csrfToken)
 													.form-group
-														button.btn.btn-primary(
-															type="submit"
-															data-ol-disabled-inflight
-														)
-															span(data-ol-inflight="idle") #{translate("beta_program_opt_in_action")}
-															span(hidden data-ol-inflight="pending") #{translate("joining")}…
+														button.btn.btn-primary(type='submit' data-ol-disabled-inflight)
+															span(data-ol-inflight='idle') #{translate("beta_program_opt_in_action")}
+															span(hidden data-ol-inflight='pending') #{translate("joining")}…
 								.page-separator
-								+back-to-btns()
+								+back-to-btns

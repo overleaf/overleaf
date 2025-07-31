@@ -41,6 +41,7 @@ export default function EditorThemeSetting() {
       options={options}
       onChange={setEditorTheme}
       value={editorTheme}
+      translateOptions="no"
     />
   )
 }

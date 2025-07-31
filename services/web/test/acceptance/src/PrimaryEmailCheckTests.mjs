@@ -69,10 +69,7 @@ describe('PrimaryEmailCheck', function () {
           $set: { lastPrimaryEmailCheck: new Date(time) },
         })
 
-        await userHelper.confirmEmail(
-          userHelper.user._id,
-          userHelper.user.email
-        )
+        await userHelper.confirmEmail(userHelper.user.email)
       })
 
       it("shouldn't be redirected from project list to the primary email check page", async function () {
@@ -153,10 +150,7 @@ describe('PrimaryEmailCheck', function () {
           $set: { lastPrimaryEmailCheck: new Date(time) },
         })
 
-        await userHelper.confirmEmail(
-          userHelper.user._id,
-          userHelper.user.email
-        )
+        await userHelper.confirmEmail(userHelper.user.email)
       })
 
       it("shouldn't be redirected from project list to the primary email check page", async function () {
@@ -219,14 +213,8 @@ describe('PrimaryEmailCheck', function () {
       })
 
       beforeEach(async function () {
-        await userHelper.confirmEmail(
-          userHelper.user._id,
-          userHelper.user.email
-        )
-        await userHelper.addEmailAndConfirm(
-          userHelper.user._id,
-          'secondary@overleaf.com'
-        )
+        await userHelper.confirmEmail(userHelper.user.email)
+        await userHelper.addEmailAndConfirm('secondary@overleaf.com')
 
         checkResponse = await userHelper.fetch(
           '/user/emails/primary-email-check',

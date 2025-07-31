@@ -201,6 +201,9 @@ module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
         if (res.locals.isIEEE(brandVariation?.brand_id)) {
           return enableIeeeBranding ? 'ieee-' : ''
         } else if (userSettings && userSettings.overallTheme != null) {
+          if (!['', 'light-'].includes(userSettings.overallTheme)) {
+            return ''
+          }
           return userSettings.overallTheme
         }
       }
@@ -341,7 +344,7 @@ module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
     if (Settings.overleaf != null) {
       res.locals.overallThemes = [
         {
-          name: 'Default',
+          name: 'Dark',
           val: '',
           path: res.locals.buildCssPath(),
         },
@@ -349,6 +352,11 @@ module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
           name: 'Light',
           val: 'light-',
           path: res.locals.buildCssPath('light-'),
+        },
+        {
+          name: 'System',
+          val: 'system',
+          path: res.locals.buildCssPath(),
         },
       ]
     }
@@ -420,6 +428,7 @@ module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
         Settings.analytics &&
         Settings.analytics.ga &&
         Settings.analytics.ga.tokenV4,
+      propensityId: Settings?.analytics?.propensity?.id,
       cookieDomain: Settings.cookieDomain,
       templateLinks: Settings.templateLinks,
       labsEnabled: Settings.labs && Settings.labs.enable,

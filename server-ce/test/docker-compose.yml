@@ -1,4 +1,3 @@
-version: '2.2'
 services:
   sharelatex:
     image: ${IMAGE_TAG_CE:-sharelatex/sharelatex:latest}
@@ -35,7 +34,7 @@ services:
       MAILTRAP_PASSWORD: 'password-for-mailtrap'
 
   mongo:
-    image: mongo:6.0
+    image: mongo:8.0.11
     command: '--replSet overleaf'
     volumes:
       - ../bin/shared/mongodb-init-replica-set.js:/docker-entrypoint-initdb.d/mongodb-init-replica-set.js
@@ -72,9 +71,11 @@ services:
     working_dir: /e2e
     volumes:
       - ./:/e2e
+    user: "${DOCKER_USER:-1000:1000}"
     environment:
       CYPRESS_SHARD:
       CYPRESS_BASE_URL: http://sharelatex
+      CYPRESS_FULL_FILESTORE_MIGRATION:
       SPEC_PATTERN: '**/*.spec.{js,jsx,ts,tsx}'
     depends_on:
       sharelatex:
@@ -83,25 +84,14 @@ services:
         condition: service_healthy
 
   e2e-open:
-    image: cypress/included:13.13.2
-    stop_grace_period: 0s
-    entrypoint: npm
+    extends:
+      service: e2e
     command: run cypress:open
-    working_dir: /e2e
     volumes:
-      - ./:/e2e
       - /tmp/.X11-unix:/tmp/.X11-unix
-    user: "${DOCKER_USER:-1000:1000}"
+      - ${XAUTHORITY:-/dev/null}:/home/node/.Xauthority
     environment:
-      CYPRESS_SHARD:
-      CYPRESS_BASE_URL: http://sharelatex
-      SPEC_PATTERN: '**/*.spec.{js,jsx,ts,tsx}'
       DISPLAY: ${DISPLAY:-:0}
-    depends_on:
-      sharelatex:
-        condition: service_healthy
-      host-admin:
-        condition: service_healthy
 
   host-admin:
     build: .

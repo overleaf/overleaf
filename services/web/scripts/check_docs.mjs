@@ -16,7 +16,7 @@ const OPTS = parseArgs()
 function parseArgs() {
   const args = minimist(process.argv.slice(2), {
     string: ['min-project-id', 'max-project-id', 'project-modified-since'],
-    boolean: ['help', 'dangling-comments', 'tracked-changes'],
+    boolean: ['help', 'dangling-comments', 'tracked-changes', 'any-comments'],
   })
 
   if (args.help) {
@@ -26,9 +26,10 @@ function parseArgs() {
 
   const danglingComments = Boolean(args['dangling-comments'])
   const trackedChanges = Boolean(args['tracked-changes'])
-  if (!danglingComments && !trackedChanges) {
+  const anyComments = Boolean(args['any-comments'])
+  if (!danglingComments && !trackedChanges && !anyComments) {
     console.log(
-      'At least one of --dangling-comments or --tracked-changes must be enabled'
+      'At least one of --dangling-comments, --tracked-changes, or --any-comments must be enabled'
     )
     process.exit(1)
   }
@@ -41,6 +42,7 @@ function parseArgs() {
       : null,
     danglingComments,
     trackedChanges,
+    anyComments,
     concurrency: parseInt(args.concurrency ?? '1', 10),
   }
 }
@@ -56,6 +58,7 @@ Options:
                               Example: 2020-01-01
     --dangling-comments       Report projects with dangling comments
     --tracked-changes         Report projects with tracked changes
+    --any-comments            Report projects with any comments
     --concurrency             How many projects can be processed in parallel
     `)
 }
@@ -65,6 +68,8 @@ async function main() {
   let projectsProcessed = 0
   let danglingCommentsFound = 0
   let trackedChangesFound = 0
+  let anyCommentsFound = 0
+
   for await (const projectId of getProjectIds()) {
     await queue.onEmpty()
     queue.add(async () => {
@@ -87,6 +92,13 @@ async function main() {
         }
       }
 
+      if (OPTS.anyComments) {
+        if (docsHaveAnyComments(docs)) {
+          console.log(`Project ${projectId} has comments`)
+          anyCommentsFound += 1
+        }
+      }
+
       projectsProcessed += 1
       if (projectsProcessed % 100000 === 0) {
         console.log(
@@ -105,6 +117,10 @@ async function main() {
 
   if (OPTS.trackedChanges) {
     console.log(`${trackedChangesFound} projects with tracked changes found`)
+  }
+
+  if (OPTS.anyComments) {
+    console.log(`${anyCommentsFound} projects with any comments found`)
   }
 }
 
@@ -207,6 +223,16 @@ function docsHaveTrackedChanges(docs) {
   for (const doc of docs) {
     const changes = doc.ranges?.changes ?? []
     if (changes.length > 0) {
+      return true
+    }
+  }
+  return false
+}
+
+function docsHaveAnyComments(docs) {
+  for (const doc of docs) {
+    const comments = doc.ranges?.comments ?? []
+    if (comments.length > 0) {
       return true
     }
   }

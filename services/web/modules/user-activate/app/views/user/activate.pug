@@ -1,15 +1,19 @@
-extends ../../../../../app/views/layout-website-redesign-bootstrap-5
+extends ../../../../../app/views/layout-website-redesign
+
+block vars
+	- isWebsiteRedesign = true
+
+include ../../../../../app/views/_mixins/material_symbol
 
 block content
-	main.content.content-alt#main-content
+	main#main-content.content.content-alt
 		.container
-			div.col-lg-6.col-xl-4.m-auto
+			.col-lg-6.col-xl-4.m-auto
 				.notification-list
-					.notification.notification-type-success(aria-live="off" role="alert")
+					.notification.notification-type-success(aria-live='off' role='alert')
 						.notification-content-and-cta
 							.notification-icon
-								span.material-symbols(aria-hidden="true")
-									| check_circle
+								+material-symbol('check_circle')
 							.notification-content
 								p
 									| #{translate("nearly_activated")}
@@ -17,12 +21,12 @@ block content
 				h1.h3 #{translate("please_set_a_password")}
 
 				form(
+					name='activationForm'
 					data-ol-async-form
-					name="activationForm",
-					action="/user/password/set",
-					method="POST",
+					action='/user/password/set'
+					method='POST'
 				)
-					+formMessages()
+					+formMessages
 
 					+customFormMessage('token-expired', 'danger')
 						| #{translate("activation_token_expired")}
@@ -30,43 +34,39 @@ block content
 					+customFormMessage('invalid-password', 'danger')
 						| #{translate('invalid_password')}
 
-					input(name='_csrf', type='hidden', value=csrfToken)
-					input(
-						type="hidden",
-						name="passwordResetToken",
-						value=token
-					)
+					input(name='_csrf' type='hidden' value=csrfToken)
+					input(name='passwordResetToken' type='hidden' value=token)
 
 					.form-group
 						label(for='emailField') #{translate("email")}
-						input.form-control#emailField(
-							aria-label="email",
-							type='email',
-							name='email',
-							placeholder="email@example.com",
-							autocomplete="username"
+						input#emailField.form-control(
+							name='email'
+							aria-label='email'
+							type='email'
+							placeholder='email@example.com'
+							autocomplete='username'
 							value=email
-							required,
+							required
 							disabled
 						)
 					.form-group
 						label(for='passwordField') #{translate("password")}
-						input.form-control#passwordField(
-							type='password',
-							name='password',
-							placeholder="********",
-							autocomplete="new-password",
-							autofocus,
-							required,
+						input#passwordField.form-control(
+							name='password'
+							type='password'
+							placeholder='********'
+							autocomplete='new-password'
+							autofocus
+							required
 							minlength=settings.passwordStrengthOptions.length.min
 						)
 					.actions
 						button.btn.btn-primary(
-							type='submit',
+							type='submit'
 							data-ol-disabled-inflight
 							aria-label=translate('activate')
 						)
-							span(data-ol-inflight="idle")
+							span(data-ol-inflight='idle')
 								| #{translate('activate')}
-							span(hidden data-ol-inflight="pending")
+							span(hidden data-ol-inflight='pending')
 								| #{translate('activating')}…

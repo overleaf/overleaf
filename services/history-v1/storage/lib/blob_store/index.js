@@ -24,6 +24,7 @@ const logger = require('@overleaf/logger')
 
 /** @import { Readable } from 'stream' */
 
+/** @type {Map<string, { blob: core.Blob, demoted: boolean}>} */
 const GLOBAL_BLOBS = new Map()
 
 function makeGlobalKey(hash) {
@@ -343,6 +344,11 @@ class BlobStore {
     return blob
   }
 
+  /**
+   *
+   * @param {Array<string>} hashes
+   * @return {Promise<*[]>}
+   */
   async getBlobs(hashes) {
     assert.array(hashes, 'bad hashes')
     const nonGlobalHashes = []
@@ -427,6 +433,7 @@ module.exports = {
   getProjectBlobsBatch,
   loadGlobalBlobs,
   makeProjectKey,
+  makeGlobalKey,
   makeBlobForFile,
   getStringLengthOfFile,
   GLOBAL_BLOBS,

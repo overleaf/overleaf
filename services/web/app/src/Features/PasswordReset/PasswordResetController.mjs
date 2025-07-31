@@ -8,7 +8,6 @@ import UserSessionsManager from '../User/UserSessionsManager.js'
 import OError from '@overleaf/o-error'
 import EmailsHelper from '../Helpers/EmailHelper.js'
 import { expressify } from '@overleaf/promise-utils'
-import SplitTestHandler from '../SplitTests/SplitTestHandler.js'
 
 async function setNewUserPassword(req, res, next) {
   let user
@@ -149,12 +148,6 @@ async function requestReset(req, res, next) {
 }
 
 async function renderSetPasswordForm(req, res, next) {
-  const { variant } = await SplitTestHandler.promises.getAssignment(
-    req,
-    res,
-    'bs5-auth-pages'
-  )
-
   if (req.query.passwordResetToken != null) {
     try {
       const result =
@@ -167,10 +160,6 @@ async function renderSetPasswordForm(req, res, next) {
         return res.redirect('/user/password/reset?error=token_expired')
       }
       req.session.resetToken = req.query.passwordResetToken
-      if (variant === 'enabled') {
-        req.session.setPasswordBS5 = true
-      }
-
       let emailQuery = ''
 
       if (typeof req.query.email === 'string') {
@@ -199,13 +188,7 @@ async function renderSetPasswordForm(req, res, next) {
   const passwordResetToken = req.session.resetToken
   delete req.session.resetToken
 
-  const template = req.session.setPasswordBS5
-    ? 'user/setPassword-bs5'
-    : 'user/setPassword'
-
-  delete req.session.setPasswordBS5
-
-  res.render(template, {
+  res.render('user/setPassword', {
     title: 'set_password',
     email,
     passwordResetToken,
@@ -218,16 +201,8 @@ async function renderRequestResetForm(req, res) {
   if (errorQuery === 'token_expired') {
     error = 'password_reset_token_expired'
   }
-  const { variant } = await SplitTestHandler.promises.getAssignment(
-    req,
-    res,
-    'bs5-auth-pages'
-  )
 
-  const template =
-    variant === 'enabled' ? 'user/passwordReset-bs5' : 'user/passwordReset'
-
-  res.render(template, {
+  res.render('user/passwordReset', {
     title: 'reset_password',
     error,
   })

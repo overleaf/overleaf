@@ -9,7 +9,7 @@ import MaterialIcon from '@/shared/components/material-icon'
 function PdfHybridDownloadButton() {
   const { pdfDownloadUrl } = useCompileContext()
 
-  const { _id: projectId } = useProjectContext()
+  const { projectId } = useProjectContext()
 
   const { t } = useTranslation()
   const description = pdfDownloadUrl

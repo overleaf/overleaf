@@ -1,3 +1,8 @@
+.no-scroll {
+  height: 100vh;
+  overflow: hidden;
+}
+
 // Default navbar
 .navbar-default {
   background-color: var(--navbar-bg);
@@ -216,7 +221,10 @@
 .website-redesign .navbar-default {
   --navbar-title-color: var(--content-primary);
   --navbar-title-color-hover: var(--content-secondary);
-  --navbar-brand-image-url: url('../../../../public/img/ol-brand/overleaf-black.svg');
+  --navbar-brand-image-url: var(
+    --navbar-brand-image-redesign-url,
+    url('../../../../public/img/ol-brand/overleaf-black.svg')
+  );
   --navbar-subdued-color: var(--content-primary);
   --navbar-subdued-hover-bg: var(--bg-dark-primary);
   --navbar-subdued-hover-color: var(--content-primary-dark);

@@ -491,8 +491,8 @@ function receiveFileDelete() {
 }
 
 function receiveFileDeleteById() {
-  beforeEach(function (ctx) {
-    return new Promise(resolve => {
+  beforeEach(async function (ctx) {
+    await new Promise(resolve => {
       ctx.TpdsUpdateHandler.deleteUpdate(
         ctx.userId,
         ctx.projectId,

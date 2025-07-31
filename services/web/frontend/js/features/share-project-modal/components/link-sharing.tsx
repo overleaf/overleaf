@@ -33,7 +33,8 @@ export default function LinkSharing() {
 
   const { monitorRequest } = useShareProjectContext()
 
-  const { _id: projectId, publicAccessLevel } = useProjectContext()
+  const { projectId, project } = useProjectContext()
+  const { publicAccessLevel } = project || {}
 
   // set the access level of a project
   const setAccessLevel = useCallback(
@@ -145,7 +146,7 @@ function TokenBasedSharing({
   showLinks: boolean
 }) {
   const { t } = useTranslation()
-  const { _id: projectId } = useProjectContext()
+  const { projectId } = useProjectContext()
 
   const [tokens, setTokens] = useState<Tokens | null>(null)
 
@@ -244,7 +245,7 @@ function LegacySharing({
 
 export function ReadOnlyTokenLink() {
   const { t } = useTranslation()
-  const { _id: projectId } = useProjectContext()
+  const { projectId } = useProjectContext()
 
   const [tokens, setTokens] = useState<Tokens | null>(null)
 

@@ -387,6 +387,7 @@ module.exports = {
   adminUrl: process.env.ADMIN_URL,
   adminOnlyLogin: process.env.ADMIN_ONLY_LOGIN === 'true',
   adminPrivilegeAvailable: process.env.ADMIN_PRIVILEGE_AVAILABLE === 'true',
+  adminRolesEnabled: false,
   blockCrossOriginRequests: process.env.BLOCK_CROSS_ORIGIN_REQUESTS === 'true',
   allowedOrigins: (process.env.ALLOWED_ORIGINS || siteUrl).split(','),
 
@@ -438,6 +439,9 @@ module.exports = {
   enabledLinkedFileTypes: (process.env.ENABLED_LINKED_FILE_TYPES || '').split(
     ','
   ),
+
+  filestoreMigrationLevel:
+    parseInt(process.env.OVERLEAF_FILESTORE_MIGRATION_LEVEL, 10) || 0,
 
   // i18n
   // ------
@@ -710,12 +714,13 @@ module.exports = {
   //   - the doc content
   //   - text ranges spanning the whole doc
   //
-  // There's also overhead required for the JSON encoding and the UTF-8 encoding,
-  // theoretically up to 3 times the max doc length. On the other hand, we don't
-  // want to block the event loop with JSON parsing, so we try to find a
-  // practical compromise.
+  // There's also overhead required for the JSON encoding and the UTF-8
+  // encoding, theoretically up to 6 times the max doc length (e.g. a document
+  // entirely filled with "\u0011" characters). On the other hand, we don't want
+  // to block the event loop with JSON parsing, so we try to find a practical
+  // compromise.
   max_json_request_size:
-    parseInt(process.env.MAX_JSON_REQUEST_SIZE) || 6 * 1024 * 1024, // 6 MB
+    parseInt(process.env.MAX_JSON_REQUEST_SIZE) || 12 * 1024 * 1024, // 12 MB
 
   // Internal configs
   // ----------------
@@ -806,7 +811,10 @@ module.exports = {
     '/templates/index': '/templates/',
   },
 
-  reloadModuleViewsOnEachRequest: process.env.NODE_ENV === 'development',
+  enablePugCache: process.env.ENABLE_PUG_CACHE === 'true',
+  reloadModuleViewsOnEachRequest:
+    process.env.ENABLE_PUG_CACHE !== 'true' &&
+    process.env.NODE_ENV === 'development',
 
   rateLimit: {
     subnetRateLimiterDisabled:
@@ -919,7 +927,7 @@ module.exports = {
           col: ['width'],
           figure: ['class', 'id', 'style'],
           figcaption: ['class', 'id', 'style'],
-          i: ['aria-hidden', 'aria-label', 'class', 'id'],
+          i: ['aria-hidden', 'aria-label', 'class', 'id', 'translate'],
           iframe: [
             'allowfullscreen',
             'frameborder',
@@ -996,9 +1004,24 @@ module.exports = {
     settingsEntries: [],
     autoCompleteExtensions: [],
     sectionTitleGenerators: [],
-    toastGenerators: [],
-    editorSidebarComponents: [],
-    fileTreeToolbarComponents: [],
+    toastGenerators: [
+      Path.resolve(
+        __dirname,
+        '../frontend/js/features/pdf-preview/components/synctex-toasts'
+      ),
+    ],
+    editorSidebarComponents: [
+      Path.resolve(
+        __dirname,
+        '../modules/full-project-search/frontend/js/components/full-project-search.tsx'
+      ),
+    ],
+    fileTreeToolbarComponents: [
+      Path.resolve(
+        __dirname,
+        '../modules/full-project-search/frontend/js/components/full-project-search-button.tsx'
+      ),
+    ],
     fullProjectSearchPanel: [],
     integrationPanelComponents: [],
     referenceSearchSetting: [],

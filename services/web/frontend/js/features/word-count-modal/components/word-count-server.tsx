@@ -10,7 +10,7 @@ import { debugConsole } from '@/utils/debugging'
 import { WordCounts } from '@/features/word-count-modal/components/word-counts'
 
 export const WordCountServer: FC = () => {
-  const { _id: projectId } = useProjectContext()
+  const { projectId } = useProjectContext()
   const { clsiServerId } = useLocalCompileContext()
 
   const [loading, setLoading] = useState(true)

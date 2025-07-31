@@ -106,6 +106,13 @@ export default {
       SubscriptionGroupController.subscriptionUpgradePage
     )
 
+    webRouter.get(
+      '/user/subscription/group/group-plan-per-user-prices',
+      AuthenticationController.requireLogin(),
+      RateLimiterMiddleware.rateLimit(subscriptionRateLimiter),
+      SubscriptionGroupController.getGroupPlanPerUserPrices
+    )
+
     webRouter.post(
       '/user/subscription/group/upgrade-subscription',
       AuthenticationController.requireLogin(),

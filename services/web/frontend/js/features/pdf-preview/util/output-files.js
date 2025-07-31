@@ -143,6 +143,10 @@ export const handleLogFiles = async (outputFiles, data, signal) => {
   return result
 }
 
+/**
+ * @typedef {import('../../../../../types/annotation').Annotation} Annotation
+ * @returns {Record<string, Annotation[]>}
+ */
 export function buildLogEntryAnnotations(entries, fileTreeData, rootDocId) {
   const rootDocDirname = dirname(fileTreeData, rootDocId)
 

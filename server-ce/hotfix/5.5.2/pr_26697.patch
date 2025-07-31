@@ -1,0 +1,172 @@
+diff --git a/services/web/frontend/js/features/project-list/components/project-list-ds-nav.tsx b/services/web/frontend/js/features/project-list/components/project-list-ds-nav.tsx
+index 8f3b3a8e5d0..f8c8014e1c0 100644
+--- a/services/web/frontend/js/features/project-list/components/project-list-ds-nav.tsx
++++ b/services/web/frontend/js/features/project-list/components/project-list-ds-nav.tsx
+@@ -55,7 +55,11 @@ export function ProjectListDsNav() {
+
+   return (
+     <div className="project-ds-nav-page website-redesign">
+-      <DefaultNavbar {...navbarProps} customLogo={overleafLogo} showCloseIcon />
++      <DefaultNavbar
++        {...navbarProps}
++        overleafLogo={overleafLogo}
++        showCloseIcon
++      />
+       <main className="project-list-wrapper">
+         <SidebarDsNav />
+         <div className="project-ds-nav-content-and-messages">
+diff --git a/services/web/frontend/js/features/ui/components/bootstrap-5/navbar/default-navbar.tsx b/services/web/frontend/js/features/ui/components/bootstrap-5/navbar/default-navbar.tsx
+index 2480b7f061f..8e5429dbde6 100644
+--- a/services/web/frontend/js/features/ui/components/bootstrap-5/navbar/default-navbar.tsx
++++ b/services/web/frontend/js/features/ui/components/bootstrap-5/navbar/default-navbar.tsx
+@@ -1,4 +1,4 @@
+-import { useState } from 'react'
++import React, { useState } from 'react'
+ import { sendMB } from '@/infrastructure/event-tracking'
+ import { useTranslation } from 'react-i18next'
+ import { Button, Container, Nav, Navbar } from 'react-bootstrap'
+@@ -13,9 +13,15 @@ import MaterialIcon from '@/shared/components/material-icon'
+ import { useContactUsModal } from '@/shared/hooks/use-contact-us-modal'
+ import { UserProvider } from '@/shared/context/user-context'
+ import { X } from '@phosphor-icons/react'
++import overleafWhiteLogo from '@/shared/svgs/overleaf-white.svg'
++import overleafBlackLogo from '@/shared/svgs/overleaf-black.svg'
++import type { CSSPropertiesWithVariables } from '../../../../../../../types/css-properties-with-variables'
+
+-function DefaultNavbar(props: DefaultNavbarMetadata) {
++function DefaultNavbar(
++  props: DefaultNavbarMetadata & { overleafLogo?: string }
++) {
+   const {
++    overleafLogo,
+     customLogo,
+     title,
+     canDisplayAdminMenu,
+@@ -49,10 +55,20 @@ function DefaultNavbar(props: DefaultNavbarMetadata) {
+         className="navbar-default navbar-main"
+         expand="lg"
+         onToggle={expanded => setExpanded(expanded)}
++        style={
++          {
++            '--navbar-brand-image-default-url': `url("${overleafWhiteLogo}")`,
++            '--navbar-brand-image-redesign-url': `url("${overleafBlackLogo}")`,
++          } as CSSPropertiesWithVariables
++        }
+       >
+         <Container className="navbar-container" fluid>
+           <div className="navbar-header">
+-            <HeaderLogoOrTitle title={title} customLogo={customLogo} />
++            <HeaderLogoOrTitle
++              title={title}
++              overleafLogo={overleafLogo}
++              customLogo={customLogo}
++            />
+             {enableUpgradeButton ? (
+               <Button
+                 as="a"
+diff --git a/services/web/frontend/js/features/ui/components/bootstrap-5/navbar/header-logo-or-title.tsx b/services/web/frontend/js/features/ui/components/bootstrap-5/navbar/header-logo-or-title.tsx
+index 44500f1b826..3eefc8e2d1c 100644
+--- a/services/web/frontend/js/features/ui/components/bootstrap-5/navbar/header-logo-or-title.tsx
++++ b/services/web/frontend/js/features/ui/components/bootstrap-5/navbar/header-logo-or-title.tsx
+@@ -2,11 +2,13 @@ import type { DefaultNavbarMetadata } from '@/features/ui/components/types/defau
+ import getMeta from '@/utils/meta'
+
+ export default function HeaderLogoOrTitle({
++  overleafLogo,
+   customLogo,
+   title,
+-}: Pick<DefaultNavbarMetadata, 'customLogo' | 'title'>) {
++}: Pick<DefaultNavbarMetadata, 'customLogo' | 'title'> & {
++  overleafLogo?: string
++}) {
+   const { appName } = getMeta('ol-ExposedSettings')
+-
+   if (customLogo) {
+     return (
+       // eslint-disable-next-line jsx-a11y/anchor-has-content
+@@ -24,9 +26,16 @@ export default function HeaderLogoOrTitle({
+       </a>
+     )
+   } else {
++    const style = overleafLogo
++      ? {
++          style: {
++            backgroundImage: `url("${overleafLogo}")`,
++          },
++        }
++      : null
+     return (
+       // eslint-disable-next-line jsx-a11y/anchor-has-content
+-      <a href="/" aria-label={appName} className="navbar-brand" />
++      <a href="/" aria-label={appName} className="navbar-brand" {...style} />
+     )
+   }
+ }
+diff --git a/services/web/frontend/js/shared/svgs/overleaf-black.svg b/services/web/frontend/js/shared/svgs/overleaf-black.svg
+new file mode 100644
+index 00000000000..ea0678438ba
+--- /dev/null
++++ b/services/web/frontend/js/shared/svgs/overleaf-black.svg
+@@ -0,0 +1,9 @@
++<svg width="129" height="38" viewBox="0 0 129 38" fill="none" xmlns="http://www.w3.org/2000/svg">
++<mask id="mask0_2579_355" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="72" height="38">
++<path d="M71.7643 37.6327H0.0244141V0.0717773H71.7643V37.6327Z" fill="white"/>
++</mask>
++<g mask="url(#mask0_2579_355)">
++<path d="M47.2509 26.4555C47.3948 27.7507 47.8985 28.7821 48.81 29.5257C49.6974 30.2692 50.8487 30.653 52.2638 30.653C53.1993 30.653 54.0387 30.4611 54.7823 30.0773C55.5258 29.6696 56.1255 29.1419 56.5572 28.4223H61.0664C60.2989 30.3891 59.1716 31.9002 57.6365 33.0035C56.1255 34.0829 54.3506 34.6345 52.3598 34.6345C51.0166 34.6345 49.7934 34.3947 48.666 33.915C47.5387 33.4352 46.5314 32.7397 45.6199 31.8043C44.7804 30.9168 44.1089 29.9094 43.6531 28.7341C43.1974 27.5589 42.9576 26.3836 42.9576 25.1603C42.9576 23.9131 43.1734 22.7138 43.6052 21.6105C44.0369 20.5072 44.6605 19.4998 45.5 18.6124C46.4114 17.629 47.4668 16.8854 48.6181 16.3817C49.7694 15.8541 50.9686 15.5902 52.1919 15.5902C53.7509 15.5902 55.214 15.95 56.5572 16.6456C57.9004 17.3651 59.0517 18.3485 60.0111 19.6437C60.5867 20.4113 61.0185 21.2747 61.3063 22.2581C61.5941 23.2175 61.714 24.3209 61.714 25.5681C61.714 25.664 61.714 25.8079 61.69 26.0238C61.69 26.2397 61.6661 26.3836 61.6661 26.4795H47.2509V26.4555ZM57.2048 23.1216C56.845 21.9223 56.2454 21.0109 55.4059 20.3873C54.5664 19.7637 53.4871 19.4519 52.2159 19.4519C51.0886 19.4519 50.1052 19.7876 49.2177 20.4592C48.3303 21.1308 47.7306 22.0183 47.4188 23.1216H57.2048ZM71.7638 19.7637C70.1328 19.8836 69.0055 20.3153 68.3579 21.0349C67.7103 21.7544 67.3985 23.0496 67.3985 24.9205V34.1068H63.2011V16.1179H67.1347V18.2046C67.7583 17.3891 68.4539 16.8135 69.2214 16.4297C69.9649 16.0459 70.8284 15.8541 71.7638 15.8541V19.7637ZM32.428 1.24705C27.3432 -0.743722 8.9465 -1.46328 8.92251 9.52196C3.54982 12.9519 0 18.5404 0 24.5367C0 31.7803 5.87638 37.6567 13.1199 37.6567C20.3635 37.6567 26.2399 31.7803 26.2399 24.5367C26.2399 18.9482 22.738 14.1511 17.797 12.2803C16.8376 11.9205 14.7749 11.2729 13.1439 11.4168C10.7934 12.9039 7.91513 15.974 6.57196 19.0441C8.58672 16.6216 11.7288 15.5662 14.5351 16.022C18.6365 16.6936 21.7786 20.2434 21.7786 24.5607C21.7786 29.3338 17.917 33.1954 13.1439 33.1954C10.5055 33.1954 8.15498 32.0201 6.57196 30.1733C4.19742 27.415 3.59779 24.4408 4.07749 21.5386C5.73247 11.3688 17.797 5.58838 26.7675 3.35775C23.8413 4.9168 18.5646 7.45923 14.8708 10.2175C25.6402 14.391 27.3911 5.30056 32.428 1.24705ZM36.7934 34.1308H33.5074L26.6716 16.1179H31.1328L35.3303 28.0865L39.6476 16.1179H43.9889L36.7934 34.1308Z" fill="#1B222C"/>
++</g>
++<path d="M83.6127 26.4556C83.7567 27.7508 84.2843 28.7822 85.1718 29.5257C86.0592 30.2692 87.2105 30.653 88.6257 30.653C89.5611 30.653 90.4006 30.4611 91.1441 30.0774C91.8877 29.6696 92.4873 29.1419 92.919 28.4224H97.4282C96.6607 30.3892 95.5334 31.9002 93.9984 33.0036C92.4873 34.0829 90.7124 34.6346 88.7216 34.6346C87.3784 34.6346 86.1552 34.3947 85.0279 33.915C83.9006 33.4353 82.8932 32.7397 81.9817 31.8043C81.1423 30.9168 80.4707 29.9095 80.015 28.7342C79.5353 27.5829 79.3194 26.3836 79.3194 25.1604C79.3194 23.9131 79.5353 22.7139 79.967 21.6106C80.3987 20.5072 81.0223 19.4999 81.8618 18.6124C82.7733 17.629 83.8286 16.8855 84.9799 16.3818C86.1312 15.8541 87.3305 15.5903 88.5537 15.5903C90.1128 15.5903 91.5758 15.95 92.919 16.6456C94.2622 17.3652 95.4135 18.3486 96.3729 19.6438C96.9485 20.4113 97.3803 21.2748 97.6681 22.2582C97.9559 23.2176 98.0758 24.3209 98.0758 25.5681C98.0758 25.6641 98.0758 25.808 98.0519 26.0238C98.0519 26.2397 98.0279 26.3836 98.0279 26.4796H83.6127V26.4556ZM93.5426 23.1216C93.1829 21.9224 92.5832 21.0109 91.7437 20.3873C90.9043 19.7637 89.8249 19.4519 88.5537 19.4519C87.4264 19.4519 86.443 19.7877 85.5556 20.4593C84.6681 21.1309 84.0685 22.0183 83.7567 23.1216H93.5426ZM114.698 34.1309V31.9242C114.194 32.8117 113.498 33.4833 112.587 33.915C111.675 34.3467 110.5 34.5626 109.085 34.5626C106.423 34.5626 104.192 33.6512 102.417 31.8283C100.642 30.0054 99.7308 27.7508 99.7308 25.0644C99.7308 23.7932 99.9467 22.594 100.402 21.4667C100.858 20.3393 101.482 19.332 102.321 18.4685C103.209 17.5091 104.216 16.8135 105.295 16.3578C106.375 15.9021 107.622 15.6862 108.989 15.6862C110.308 15.6862 111.436 15.9021 112.371 16.3338C113.306 16.7655 114.074 17.4371 114.65 18.3246V16.1419H118.727V34.1548H114.698V34.1309ZM104.024 24.9685C104.024 26.4796 104.528 27.7508 105.535 28.7822C106.543 29.8135 107.766 30.3172 109.229 30.3172C110.548 30.3172 111.699 29.8135 112.707 28.7822C113.714 27.7508 114.218 26.5515 114.218 25.1844C114.218 23.7213 113.714 22.474 112.707 21.4187C111.699 20.3633 110.524 19.8357 109.157 19.8357C107.742 19.8357 106.543 20.3393 105.535 21.3227C104.528 22.3301 104.024 23.5294 104.024 24.9685ZM129.904 16.1179V19.8596H126.882V34.1309H122.829V19.8596H120.694V16.1179H122.709V15.6382C122.709 13.7434 123.236 12.3283 124.268 11.3929C125.323 10.4574 126.906 10.0017 129.041 10.0017C129.113 10.0017 129.257 10.0017 129.449 10.0257C129.64 10.0257 129.784 10.0497 129.904 10.0497V13.8154H129.616C128.657 13.8154 127.985 13.9833 127.578 14.2711C127.17 14.5829 126.954 15.0866 126.954 15.8301V16.1659H129.904V16.1179ZM73.5869 34.1309H77.6884V10.2895H73.5869V34.1309Z" fill="#1B222C"/>
++</svg>
+diff --git a/services/web/frontend/js/shared/svgs/overleaf-white.svg b/services/web/frontend/js/shared/svgs/overleaf-white.svg
+new file mode 100644
+index 00000000000..2ced81aa46d
+--- /dev/null
++++ b/services/web/frontend/js/shared/svgs/overleaf-white.svg
+@@ -0,0 +1 @@
++<svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 542 157" enable-background="new 0 0 542 157"><style>.st0{filter:url(#Adobe_OpacityMaskFilter);} .st1{fill:#FFFFFF;} .st2{mask:url(#mask-2);fill:#FFFFFF;}</style><g id="Page-1"><g id="Overleaf"><g id="Group-3"><defs><filter id="Adobe_OpacityMaskFilter" filterUnits="userSpaceOnUse" x="0" y=".3" width="299.2" height="156.7"><feColorMatrix values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 1 0"/></filter></defs><mask maskUnits="userSpaceOnUse" x="0" y=".3" width="299.2" height="156.7" id="mask-2"><g class="st0"><path id="path-1" class="st1" d="M299.2 156.9H.1V.3h299.1z"/></g></mask><path id="Fill-1" class="st2" d="M197 110.3c.6 5.4 2.7 9.7 6.5 12.8 3.7 3.1 8.5 4.7 14.4 4.7 3.9 0 7.4-.8 10.5-2.4 3.1-1.7 5.6-3.9 7.4-6.9h18.8c-3.2 8.2-7.9 14.5-14.3 19.1-6.3 4.5-13.7 6.8-22 6.8-5.6 0-10.7-1-15.4-3-4.7-2-8.9-4.9-12.7-8.8-3.5-3.7-6.3-7.9-8.2-12.8s-2.9-9.8-2.9-14.9c0-5.2.9-10.2 2.7-14.8 1.8-4.6 4.4-8.8 7.9-12.5 3.8-4.1 8.2-7.2 13-9.3 4.8-2.2 9.8-3.3 14.9-3.3 6.5 0 12.6 1.5 18.2 4.4 5.6 3 10.4 7.1 14.4 12.5 2.4 3.2 4.2 6.8 5.4 10.9 1.2 4 1.7 8.6 1.7 13.8 0 .4 0 1-.1 1.9 0 .9-.1 1.5-.1 1.9H197v-.1zm41.5-13.9c-1.5-5-4-8.8-7.5-11.4-3.5-2.6-8-3.9-13.3-3.9-4.7 0-8.8 1.4-12.5 4.2-3.7 2.8-6.2 6.5-7.5 11.1h40.8zm60.7-14c-6.8.5-11.5 2.3-14.2 5.3-2.7 3-4 8.4-4 16.2v38.3h-17.5v-75h16.4v8.7c2.6-3.4 5.5-5.8 8.7-7.4 3.1-1.6 6.7-2.4 10.6-2.4v16.3zm-164-77.2C114-3.1 37.3-6.1 37.2 39.7 14.8 54 0 77.3 0 102.3 0 132.5 24.5 157 54.7 157c30.2 0 54.7-24.5 54.7-54.7 0-23.3-14.6-43.3-35.2-51.1-4-1.5-12.6-4.2-19.4-3.6-9.8 6.2-21.8 19-27.4 31.8 8.4-10.1 21.5-14.5 33.2-12.6 17.1 2.8 30.2 17.6 30.2 35.6 0 19.9-16.1 36-36 36-11 0-20.8-4.9-27.4-12.6-9.9-11.5-12.4-23.9-10.4-36 6.9-42.4 57.2-66.5 94.6-75.8C99.4 20.5 77.4 31.1 62 42.6c44.9 17.4 52.2-20.5 73.2-37.4zm18.2 137.1h-13.7l-28.5-75.1h18.6l17.5 49.9 18-49.9h18.1l-30 75.1z"/></g><path id="Fill-4" class="st1" d="M348.6 110.3c.6 5.4 2.8 9.7 6.5 12.8 3.7 3.1 8.5 4.7 14.4 4.7 3.9 0 7.4-.8 10.5-2.4 3.1-1.7 5.6-3.9 7.4-6.9h18.8c-3.2 8.2-7.9 14.5-14.3 19.1-6.3 4.5-13.7 6.8-22 6.8-5.6 0-10.7-1-15.4-3-4.7-2-8.9-4.9-12.7-8.8-3.5-3.7-6.3-7.9-8.2-12.8-2-4.8-2.9-9.8-2.9-14.9 0-5.2.9-10.2 2.7-14.8 1.8-4.6 4.4-8.8 7.9-12.5 3.8-4.1 8.2-7.2 13-9.3 4.8-2.2 9.8-3.3 14.9-3.3 6.5 0 12.6 1.5 18.2 4.4 5.6 3 10.4 7.1 14.4 12.5 2.4 3.2 4.2 6.8 5.4 10.9 1.2 4 1.7 8.6 1.7 13.8 0 .4 0 1-.1 1.9 0 .9-.1 1.5-.1 1.9h-60.1v-.1zM390 96.4c-1.5-5-4-8.8-7.5-11.4-3.5-2.6-8-3.9-13.3-3.9-4.7 0-8.8 1.4-12.5 4.2-3.7 2.8-6.2 6.5-7.5 11.1H390zm88.2 45.9v-9.2c-2.1 3.7-5 6.5-8.8 8.3-3.8 1.8-8.7 2.7-14.6 2.7-11.1 0-20.4-3.8-27.8-11.4-7.4-7.6-11.2-17-11.2-28.2 0-5.3.9-10.3 2.8-15 1.9-4.7 4.5-8.9 8-12.5 3.7-4 7.9-6.9 12.4-8.8s9.7-2.8 15.4-2.8c5.5 0 10.2.9 14.1 2.7 3.9 1.8 7.1 4.6 9.5 8.3v-9.1h17v75.1h-16.8v-.1zm-44.5-38.2c0 6.3 2.1 11.6 6.3 15.9 4.2 4.3 9.3 6.4 15.4 6.4 5.5 0 10.3-2.1 14.5-6.4 4.2-4.3 6.3-9.3 6.3-15 0-6.1-2.1-11.3-6.3-15.7-4.2-4.4-9.1-6.6-14.8-6.6-5.9 0-10.9 2.1-15.1 6.2-4.2 4.2-6.3 9.2-6.3 15.2zm107.9-36.9v15.6H529v59.5h-16.9V82.8h-8.9V67.2h8.4v-2c0-7.9 2.2-13.8 6.5-17.7 4.4-3.9 11-5.8 19.9-5.8.3 0 .9 0 1.7.1.8 0 1.4.1 1.9.1v15.7h-1.2c-4 0-6.8.7-8.5 1.9-1.7 1.3-2.6 3.4-2.6 6.5v1.4h12.3v-.2zm-234.8 75.1h17.1V42.9h-17.1v99.4z"/></g></g></svg>
+\ No newline at end of file
+diff --git a/services/web/frontend/stylesheets/bootstrap-5/components/nav.scss b/services/web/frontend/stylesheets/bootstrap-5/components/nav.scss
+index 5d28341cf53..dd0600ed15d 100644
+--- a/services/web/frontend/stylesheets/bootstrap-5/components/nav.scss
++++ b/services/web/frontend/stylesheets/bootstrap-5/components/nav.scss
+@@ -8,7 +8,10 @@
+   --navbar-padding-h: var(--spacing-05);
+   --navbar-padding: 0 var(--navbar-padding-h);
+   --navbar-brand-width: 130px;
+-  --navbar-brand-image-url: url('../../../../public/img/ol-brand/overleaf-white.svg');
++  --navbar-brand-image-url: var(
++    --navbar-brand-image-default-url,
++    url('../../../../public/img/ol-brand/overleaf-white.svg')
++  );
+
+   // Title, when used instead of a logo
+   --navbar-title-font-size: var(--font-size-05);
+diff --git a/services/web/frontend/stylesheets/bootstrap-5/components/navbar.scss b/services/web/frontend/stylesheets/bootstrap-5/components/navbar.scss
+index 3b984bb6f36..a8855ea1ca3 100644
+--- a/services/web/frontend/stylesheets/bootstrap-5/components/navbar.scss
++++ b/services/web/frontend/stylesheets/bootstrap-5/components/navbar.scss
+@@ -216,7 +216,10 @@
+ .website-redesign .navbar-default {
+   --navbar-title-color: var(--content-primary);
+   --navbar-title-color-hover: var(--content-secondary);
+-  --navbar-brand-image-url: url('../../../../public/img/ol-brand/overleaf-black.svg');
++  --navbar-brand-image-url: var(
++    --navbar-brand-image-redesign-url,
++    url('../../../../public/img/ol-brand/overleaf-black.svg')
++  );
+   --navbar-subdued-color: var(--content-primary);
+   --navbar-subdued-hover-bg: var(--bg-dark-primary);
+   --navbar-subdued-hover-color: var(--content-primary-dark);
+diff --git a/services/web/types/css-properties-with-variables.tsx b/services/web/types/css-properties-with-variables.tsx
+new file mode 100644
+index 00000000000..fe0e85902a6
+--- /dev/null
++++ b/services/web/types/css-properties-with-variables.tsx
+@@ -0,0 +1,4 @@
++import { CSSProperties } from 'react'
++
++export type CSSPropertiesWithVariables = CSSProperties &
++  Record<`--${string}`, number | string>
+--
+2.43.0
+

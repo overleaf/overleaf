@@ -11,22 +11,22 @@ cd /overleaf/services/web
 case "$TASK" in
   user:create-admin)
     echo "The grunt command is deprecated, run the create-user script using node instead"
-    node modules/server-ce-scripts/scripts/create-user.mjs --admin "$@"
+    exec /sbin/setuser www-data node modules/server-ce-scripts/scripts/create-user.mjs --admin "$@"
     ;;
 
   user:delete)
     echo "The grunt command is deprecated, run the delete-user script using node instead"
-    node modules/server-ce-scripts/scripts/delete-user.mjs "$@"
+    exec /sbin/setuser www-data node modules/server-ce-scripts/scripts/delete-user.mjs "$@"
     ;;
 
   check:mongo)
     echo "The grunt command is deprecated, run the check-mongodb script using node instead"
-    node modules/server-ce-scripts/scripts/check-mongodb.mjs
+    exec /sbin/setuser www-data node modules/server-ce-scripts/scripts/check-mongodb.mjs
     ;;
 
   check:redis)
     echo "The grunt command is deprecated, run the check-redis script using node instead"
-    node modules/server-ce-scripts/scripts/check-redis.mjs
+    exec /sbin/setuser www-data node modules/server-ce-scripts/scripts/check-redis.mjs
     ;;
 
   *)

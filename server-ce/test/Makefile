@@ -11,6 +11,7 @@ export ALL_TEX_LIVE_DOCKER_IMAGES ?= us-east1-docker.pkg.dev/overleaf-ops/ol-doc
 export IMAGE_TAG_PRO ?= us-east1-docker.pkg.dev/overleaf-ops/ol-docker/pro:latest
 export CYPRESS_SHARD ?=
 export COMPOSE_PROJECT_NAME ?= test
+export DOCKER_USER := $(shell id -u):$(shell id -g)
 
 test-e2e-native:
 	docker compose -f docker-compose.yml -f docker-compose.native.yml up --no-log-prefix sharelatex host-admin -d
@@ -21,10 +22,12 @@ test-e2e-native:
 
 test-e2e:
 	docker compose build host-admin
+	docker compose up -d host-admin
 	docker compose up --no-log-prefix --exit-code-from=e2e e2e
 
 test-e2e-open:
-	docker compose up --no-log-prefix --exit-code-from=e2e-open e2e-open
+	docker compose up -d host-admin
+	docker compose up --no-log-prefix --exit-code-from=e2e-open e2e-open host-admin
 
 clean:
 	docker compose down --volumes --timeout 0

@@ -24,7 +24,7 @@ module.exports = {
     ? JSON.parse(process.env.ADMIN_DOMAINS)
     : ['example.com'],
 
-  statusPageUrl: 'status.example.com',
+  statusPageUrl: 'https://status.example.com',
   cdn: {
     web: {
       host: 'cdn.example.com',
@@ -198,6 +198,30 @@ module.exports = {
       name: 'Professional',
       price_in_cents: 3000,
       features: features.professional,
+    },
+    {
+      planCode: 'group_professional',
+      name: 'Professional - Group Account - Enterprise',
+      hideFromUsers: true,
+      price_in_cents: 0,
+      annual: true,
+      features: features.professional,
+      groupPlan: true,
+      membersLimit: 0,
+      membersLimitAddOn: 'additional-license',
+      canUseFlexibleLicensing: true,
+    },
+    {
+      planCode: 'group_collaborator',
+      name: 'Collaborator - Group Account - Enterprise',
+      hideFromUsers: true,
+      price_in_cents: 0,
+      annual: true,
+      features: features.collaborator,
+      groupPlan: true,
+      membersLimit: 0,
+      membersLimitAddOn: 'additional-license',
+      canUseFlexibleLicensing: true,
     },
   ],
 

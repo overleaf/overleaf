@@ -1,3 +1,5 @@
+import { debugConsole } from '@/utils/debugging'
+
 function setup(videoEl) {
   const reducedMotionReduce = window.matchMedia(
     '(prefers-reduced-motion: reduce)'
@@ -35,10 +37,18 @@ function setup(videoEl) {
           videoIsVisible = true
           if (videoEl.readyState >= videoEl.HAVE_FUTURE_DATA) {
             if (!videoEl.ended) {
-              videoEl.play()
+              videoEl
+                .play()
+                .catch(error =>
+                  debugConsole.error('Video autoplay failed:', error)
+                )
+            } else {
+              videoEl
+                .play()
+                .catch(error =>
+                  debugConsole.error('Video autoplay failed:', error)
+                )
             }
-          } else {
-            videoEl.play()
           }
         } else {
           videoIsVisible = false

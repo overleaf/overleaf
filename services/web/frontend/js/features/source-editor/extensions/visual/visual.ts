@@ -94,7 +94,7 @@ const parsedAttributesConf = new Compartment()
  * A view plugin which shows the editor content, makes it focusable,
  * and restores the scroll position, once the initial decorations have been applied.
  */
-const showContentWhenParsed = [
+export const showContentWhenParsed = [
   parsedAttributesConf.of([EditorView.editable.of(false)]),
   ViewPlugin.define(view => {
     const showContent = () => {
@@ -178,4 +178,5 @@ const extension = (options: Options) => [
   showContentWhenParsed,
   pasteHtml,
   tableGeneratorTheme,
+  EditorView.contentAttributes.of({ 'aria-label': 'Visual Editor editing' }),
 ]

@@ -60,6 +60,7 @@ function OnlineUsersWidget({
             id="online-user"
             description={user.name}
             overlayProps={{ placement: 'bottom', trigger: ['hover', 'focus'] }}
+            tooltipProps={{ translate: 'no' }}
           >
             <span>
               {/* OverlayTrigger won't fire unless UserIcon is wrapped in a span */}

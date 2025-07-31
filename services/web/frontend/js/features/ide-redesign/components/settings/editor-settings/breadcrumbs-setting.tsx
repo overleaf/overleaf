@@ -10,7 +10,7 @@ export default function BreadcrumbsSetting() {
     <ToggleSetting
       id="breadcrumbs-setting"
       label={t('breadcrumbs')}
-      description={t('show_breadcrumbs_in_toolbar')}
+      description={t('see_your_current_location_in_the_project')}
       checked={breadcrumbs}
       onChange={setBreadcrumbs}
     />

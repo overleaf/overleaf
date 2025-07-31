@@ -56,8 +56,8 @@ describe('BetaProgramHandler', function () {
       }
     })
 
-    it('should call userUpdater', function (ctx) {
-      return new Promise(resolve => {
+    it('should call userUpdater', async function (ctx) {
+      await new Promise(resolve => {
         ctx.call(err => {
           expect(err).to.not.exist
           ctx.UserUpdater.promises.updateUser.callCount.should.equal(1)
@@ -66,8 +66,8 @@ describe('BetaProgramHandler', function () {
       })
     })
 
-    it('should set beta-program user property to true', function (ctx) {
-      return new Promise(resolve => {
+    it('should set beta-program user property to true', async function (ctx) {
+      await new Promise(resolve => {
         ctx.call(err => {
           expect(err).to.not.exist
           sinon.assert.calledWith(
@@ -81,8 +81,8 @@ describe('BetaProgramHandler', function () {
       })
     })
 
-    it('should not produce an error', function (ctx) {
-      return new Promise(resolve => {
+    it('should not produce an error', async function (ctx) {
+      await new Promise(resolve => {
         ctx.call(err => {
           expect(err).to.not.exist
           resolve()
@@ -95,8 +95,8 @@ describe('BetaProgramHandler', function () {
         ctx.UserUpdater.promises.updateUser.rejects()
       })
 
-      it('should produce an error', function (ctx) {
-        return new Promise(resolve => {
+      it('should produce an error', async function (ctx) {
+        await new Promise(resolve => {
           ctx.call(err => {
             expect(err).to.exist
             expect(err).to.be.instanceof(Error)
@@ -115,8 +115,8 @@ describe('BetaProgramHandler', function () {
       }
     })
 
-    it('should call userUpdater', function (ctx) {
-      return new Promise(resolve => {
+    it('should call userUpdater', async function (ctx) {
+      await new Promise(resolve => {
         ctx.call(err => {
           expect(err).to.not.exist
           ctx.UserUpdater.promises.updateUser.callCount.should.equal(1)
@@ -125,8 +125,8 @@ describe('BetaProgramHandler', function () {
       })
     })
 
-    it('should set beta-program user property to false', function (ctx) {
-      return new Promise(resolve => {
+    it('should set beta-program user property to false', async function (ctx) {
+      await new Promise(resolve => {
         ctx.call(err => {
           expect(err).to.not.exist
           sinon.assert.calledWith(
@@ -140,8 +140,8 @@ describe('BetaProgramHandler', function () {
       })
     })
 
-    it('should not produce an error', function (ctx) {
-      return new Promise(resolve => {
+    it('should not produce an error', async function (ctx) {
+      await new Promise(resolve => {
         ctx.call(err => {
           expect(err).to.not.exist
           resolve()
@@ -154,8 +154,8 @@ describe('BetaProgramHandler', function () {
         ctx.UserUpdater.promises.updateUser.rejects()
       })
 
-      it('should produce an error', function (ctx) {
-        return new Promise(resolve => {
+      it('should produce an error', async function (ctx) {
+        await new Promise(resolve => {
           ctx.call(err => {
             expect(err).to.exist
             expect(err).to.be.instanceof(Error)

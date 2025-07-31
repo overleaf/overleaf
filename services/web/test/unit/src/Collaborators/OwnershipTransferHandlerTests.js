@@ -19,12 +19,17 @@ describe('OwnershipTransferHandler', function () {
       _id: new ObjectId(),
       email: 'readonly@example.com',
     }
+    this.reviewer = {
+      _id: new ObjectId(),
+      email: 'reviewer@example.com',
+    }
     this.project = {
       _id: new ObjectId(),
       name: 'project',
       owner_ref: this.user._id,
       collaberator_refs: [this.collaborator._id],
       readOnly_refs: [this.readOnlyCollaborator._id],
+      reviewer_refs: [this.reviewer._id],
     }
     this.ProjectGetter = {
       promises: {
@@ -32,13 +37,14 @@ describe('OwnershipTransferHandler', function () {
       },
     }
     this.ProjectModel = {
+      find: sinon.stub().resolves([]),
       updateOne: sinon.stub().returns({
         exec: sinon.stub().resolves(),
       }),
     }
     this.UserGetter = {
       promises: {
-        getUser: sinon.stub().resolves(this.user),
+        getUser: sinon.stub().resolves(),
       },
     }
     this.TpdsUpdateSender = {
@@ -67,12 +73,19 @@ describe('OwnershipTransferHandler', function () {
         addEntry: sinon.stub().resolves(),
       },
     }
+    this.TagsHandler = {
+      promises: {
+        createTag: sinon.stub().resolves(),
+        addProjectsToTag: sinon.stub().resolves(),
+      },
+    }
     this.handler = SandboxedModule.require(MODULE_PATH, {
       requires: {
         '../Project/ProjectGetter': this.ProjectGetter,
         '../../models/Project': {
           Project: this.ProjectModel,
         },
+        '../Tags/TagsHandler': this.TagsHandler,
         '../User/UserGetter': this.UserGetter,
         '../ThirdPartyDataStore/TpdsProjectFlusher': this.TpdsProjectFlusher,
         '../Project/ProjectAuditLogHandler': this.ProjectAuditLogHandler,
@@ -97,6 +110,9 @@ describe('OwnershipTransferHandler', function () {
       this.UserGetter.promises.getUser
         .withArgs(this.readOnlyCollaborator._id)
         .resolves(this.readOnlyCollaborator)
+      this.UserGetter.promises.getUser
+        .withArgs(this.reviewer._id)
+        .resolves(this.reviewer)
     })
 
     it("should return a not found error if the project can't be found", async function () {
@@ -200,6 +216,32 @@ describe('OwnershipTransferHandler', function () {
       )
     })
 
+    it('should transfer ownership of the project to a reviewer', async function () {
+      await this.handler.promises.transferOwnership(
+        this.project._id,
+        this.reviewer._id
+      )
+      expect(this.ProjectModel.updateOne).to.have.been.calledWith(
+        { _id: this.project._id },
+        sinon.match({ $set: { owner_ref: this.reviewer._id } })
+      )
+    })
+
+    it('gives old owner reviewer permissions if new owner was previously a reviewer', async function () {
+      await this.handler.promises.transferOwnership(
+        this.project._id,
+        this.reviewer._id
+      )
+      expect(
+        this.CollaboratorsHandler.promises.addUserIdToProject
+      ).to.have.been.calledWith(
+        this.project._id,
+        this.reviewer._id,
+        this.user._id,
+        PrivilegeLevels.REVIEW
+      )
+    })
+
     it('should flush the project to tpds', async function () {
       await this.handler.promises.transferOwnership(
         this.project._id,
@@ -290,6 +332,163 @@ describe('OwnershipTransferHandler', function () {
           this.collaborator._id
         )
       ).to.be.rejectedWith(Errors.UserNotCollaboratorError)
+    })
+  })
+
+  describe('transferAllProjectsToUser', function () {
+    const fromUserEmail = 'user.one@example.com'
+    const ipAddress = '1.2.3.4'
+    let fromUserId, toUserId
+    beforeEach(function () {
+      fromUserId = new ObjectId().toString()
+      toUserId = new ObjectId().toString()
+    })
+
+    describe('with missing user', function () {
+      it('should throw an error', async function () {
+        this.UserGetter.promises.getUser.withArgs(fromUserId).resolves(null)
+        this.UserGetter.promises.getUser
+          .withArgs(toUserId)
+          .resolves({ _id: new ObjectId(toUserId) })
+        await expect(
+          this.handler.promises.transferAllProjectsToUser({
+            toUserId,
+            fromUserId,
+            ipAddress,
+          })
+        ).to.be.rejectedWith(/missing source user/)
+
+        this.UserGetter.promises.getUser
+          .withArgs(fromUserId)
+          .resolves({ _id: new ObjectId(fromUserId), email: fromUserEmail })
+        this.UserGetter.promises.getUser.withArgs(toUserId).resolves(null)
+        await expect(
+          this.handler.promises.transferAllProjectsToUser({
+            fromUserId,
+            toUserId,
+            ipAddress,
+          })
+        ).to.be.rejectedWith(/missing destination user/)
+      })
+    })
+
+    describe('with the same id', function () {
+      it('should throw an error', async function () {
+        this.UserGetter.promises.getUser
+          .withArgs(fromUserId)
+          .resolves({ _id: new ObjectId(fromUserId), email: fromUserEmail })
+        await expect(
+          this.handler.promises.transferAllProjectsToUser({
+            fromUserId,
+            toUserId: fromUserId,
+            ipAddress,
+          })
+        ).to.be.rejectedWith(/rejecting transfer between identical users/)
+      })
+    })
+
+    describe('happy path', function () {
+      let tag, fromUserEmail, projects
+
+      beforeEach(function () {
+        tag = {
+          _id: new ObjectId(),
+          name: 'some-tag-name',
+        }
+        projects = [
+          { _id: 'project-1' },
+          { _id: 'project-2' },
+          { _id: 'project-3' },
+        ]
+
+        this.UserGetter.promises.getUser.withArgs(fromUserId).resolves({
+          _id: new ObjectId(fromUserId),
+          email: fromUserEmail,
+        })
+        this.UserGetter.promises.getUser.withArgs(toUserId).resolves({
+          _id: new ObjectId(toUserId),
+        })
+        this.ProjectModel.find.resolves(projects)
+        this.TagsHandler.promises.createTag.resolves({
+          _id: tag._id,
+          name: 'some-tag-name',
+        })
+        this.TagsHandler.promises.addProjectsToTag.resolves()
+      })
+
+      it('creates a tag', async function () {
+        await this.handler.promises.transferAllProjectsToUser({
+          fromUserId,
+          toUserId,
+          ipAddress,
+        })
+        expect(this.TagsHandler.promises.createTag).to.have.been.calledWith(
+          toUserId,
+          `transferred-from-${fromUserEmail}`,
+          '#434AF0',
+          { truncate: true }
+        )
+      })
+
+      it('returns a projectCount, and tag name', async function () {
+        const result = await this.handler.promises.transferAllProjectsToUser({
+          fromUserId,
+          toUserId,
+          ipAddress,
+        })
+        expect(result.projectCount).to.equal(projects.length)
+        expect(result.newTagName).to.equal('some-tag-name')
+      })
+
+      it('gets the user records', async function () {
+        await this.handler.promises.transferAllProjectsToUser({
+          fromUserId,
+          toUserId,
+          ipAddress,
+        })
+        expect(this.UserGetter.promises.getUser).to.have.been.calledWith(
+          fromUserId
+        )
+        expect(this.UserGetter.promises.getUser).to.have.been.calledWith(
+          toUserId
+        )
+      })
+
+      it('gets the list of affected projects', async function () {
+        await this.handler.promises.transferAllProjectsToUser({
+          fromUserId,
+          toUserId,
+          ipAddress,
+        })
+        expect(this.ProjectModel.find).to.have.been.calledWith({
+          owner_ref: fromUserId,
+        })
+      })
+
+      it('transfers all of the projects', async function () {
+        await this.handler.promises.transferAllProjectsToUser({
+          fromUserId,
+          toUserId,
+          ipAddress,
+        })
+
+        expect(this.ProjectModel.updateOne.callCount).to.equal(3)
+        expect(this.TagsHandler.promises.addProjectsToTag.callCount).to.equal(1)
+
+        for (const project of projects) {
+          expect(this.ProjectModel.updateOne).to.have.been.calledWith(
+            { _id: project._id },
+            sinon.match({ $set: { owner_ref: toUserId } })
+          )
+        }
+        expect(
+          this.TagsHandler.promises.addProjectsToTag
+        ).to.have.been.calledWith(
+          toUserId,
+          tag._id,
+          projects.map(p => p._id)
+        )
+      })
     })
   })
 })

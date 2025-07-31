@@ -65,28 +65,6 @@ async function sendConfirmationCode(email, welcomeUser) {
   }
 }
 
-async function sendReconfirmationEmail(userId, email) {
-  email = EmailHelper.parseEmail(email)
-  if (!email) {
-    throw new Error('invalid email')
-  }
-
-  const data = { user_id: userId, email }
-  const token = await OneTimeTokenHandler.promises.getNewToken(
-    TOKEN_USE,
-    data,
-    { expiresIn: TOKEN_EXPIRY_IN_S }
-  )
-
-  const emailOptions = {
-    to: email,
-    confirmEmailUrl: `${settings.siteUrl}/user/emails/confirm?token=${token}`,
-    sendingUser_id: userId,
-  }
-
-  await EmailHandler.promises.sendEmail('reconfirmEmail', emailOptions)
-}
-
 async function confirmEmailFromToken(req, token) {
   const { data } = await OneTimeTokenHandler.promises.peekValueFromToken(
     TOKEN_USE,
@@ -123,9 +101,6 @@ async function confirmEmailFromToken(req, token) {
 
 const UserEmailsConfirmationHandler = {
   sendConfirmationEmail,
-
-  sendReconfirmationEmail: callbackify(sendReconfirmationEmail),
-
   confirmEmailFromToken: callbackify(confirmEmailFromToken),
 }
 
@@ -133,7 +108,6 @@ UserEmailsConfirmationHandler.promises = {
   sendConfirmationEmail: promisify(sendConfirmationEmail),
   confirmEmailFromToken,
   sendConfirmationCode,
-  sendReconfirmationEmail,
 }
 
 module.exports = UserEmailsConfirmationHandler

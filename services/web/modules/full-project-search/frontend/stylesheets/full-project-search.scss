@@ -1,0 +1,356 @@
+@use 'sass:color';
+
+.ide-redesign-main {
+  .full-project-search {
+    --full-project-search-bg-color: var(--white);
+    --full-project-search-color: var(--content-primary);
+    --full-project-search-results-bg-color: var(--bg-light-primary);
+    --full-project-search-selected-hit-bg-color: var(--bg-accent-03);
+    --full-project-search-selected-hit-color: var(--green-70);
+    --matched-hit-highlight-color: var(--yellow-10);
+    --matched-hit-selected-highlight-color: var(--bg-accent-02);
+    --matched-hit-selected-unfocused-highlight-color: var(--bg-accent-02);
+    --collapsible-file-header-count-color: var(--content-primary);
+    --collapsible-file-header-count-bg-color: var(--bg-light-tertiary);
+    --search-modifier-checked-bg: var(--bg-accent-03);
+    --search-modifier-hover-color: var(--bg-light-secondary);
+
+    // Redesign additions
+    --full-project-search-border-color: var(--border-divider);
+    --collapsible-file-header-hover-bg: var(--bg-light-secondary);
+    --matched-hit-highlight-text-color: var(--content-primary);
+    --matched-file-hit-hover-bg: var(--bg-light-secondary);
+    --search-modifier-checked-color: var(--green-70);
+    --search-modifier-color: var(--content-primary);
+
+    &[data-bs-theme='dark'] {
+      --full-project-search-bg-color: var(--bg-dark-primary);
+      --full-project-search-color: var(--content-secondary-dark);
+      --full-project-search-results-bg-color: var(--bg-dark-primary);
+      --full-project-search-selected-hit-bg-color: var(--green-70);
+      --full-project-search-selected-hit-color: var(--green-10);
+      --matched-hit-highlight-color: var(--yellow-70);
+      --matched-hit-selected-highlight-color: var(--green-70);
+      --matched-hit-selected-unfocused-highlight-color: var(--content-primary);
+      --collapsible-file-header-count-color: var(--content-primary);
+      --collapsible-file-header-count-bg-color: var(--bg-light-tertiary);
+      --panel-heading-color: var(--content-primary-dark);
+      --search-modifier-checked-bg: var(--green-70);
+      --search-modifier-hover-color: var(--bg-dark-secondary);
+
+      // Redesign additions
+      --full-project-search-border-color: var(--border-divider-dark);
+      --collapsible-file-header-hover-bg: var(--bg-dark-secondary);
+      --matched-hit-highlight-text-color: var(--green-10);
+      --matched-file-hit-hover-bg: var(--bg-dark-secondary);
+      --search-modifier-checked-color: var(--green-10);
+      --search-modifier-color: var(--content-primary-dark);
+
+      input[type='search']::selection {
+        background-color: #b4d1ff;
+      }
+    }
+
+    .full-project-search-modifiers {
+      input:checked ~ .form-check-label {
+        color: var(--search-modifier-checked-color);
+      }
+
+      .form-check-label {
+        color: var(--search-modifier-color);
+      }
+    }
+
+    .full-project-search-form {
+      border-bottom: 1px solid var(--full-project-search-border-color);
+    }
+
+    .match-counts {
+      padding: var(--spacing-03) var(--spacing-04);
+      font-size: var(--font-size-01);
+    }
+
+    .matched-files {
+      padding: 0 var(--spacing-02);
+    }
+
+    .matched-hit-highlight {
+      color: var(--matched-hit-highlight-text-color);
+    }
+
+    .matched-file-hits {
+      width: unset;
+      overflow: unset;
+      margin-left: var(--spacing-08);
+      position: relative;
+
+      &::before {
+        content: '';
+        position: absolute;
+        left: calc(var(--spacing-04) * -1);
+        top: 0;
+        width: 1px;
+        height: 100%;
+        background-color: var(--full-project-search-border-color);
+        border-radius: 0;
+      }
+    }
+
+    .matched-file-hit {
+      border-radius: var(--border-radius-base);
+
+      &:hover {
+        background-color: var(--matched-file-hit-hover-bg);
+      }
+
+      &.matched-file-hit-selected:hover {
+        background-color: var(--full-project-search-selected-hit-bg-color);
+        color: var(--full-project-search-selected-hit-color);
+      }
+    }
+
+    .collapsible-file-header {
+      border-radius: var(--border-radius-base);
+
+      &:hover {
+        background-color: var(--collapsible-file-header-hover-bg);
+      }
+    }
+  }
+}
+
+.full-project-search {
+  --full-project-search-bg-color: var(--bg-light-secondary);
+  --full-project-search-color: var(--content-secondary);
+  --full-project-search-results-bg-color: var(--bg-light-primary);
+  --full-project-search-selected-hit-bg-color: var(--bg-light-tertiary);
+  --full-project-search-selected-hit-color: var(--content-primary-light);
+  --matched-hit-highlight-color: var(--bg-light-tertiary);
+  --matched-hit-selected-highlight-color: var(--bg-accent-02);
+  --matched-hit-selected-unfocused-highlight-color: var(--bg-accent-02);
+  --collapsible-file-header-count-color: var(--bs-body-color);
+  --collapsible-file-header-count-bg-color: var(--bg-light-secondary);
+  --search-modifier-checked-bg: var(--neutral-30);
+  --search-modifier-hover-color: var(--neutral-20);
+
+  &[data-bs-theme='dark'] {
+    --full-project-search-bg-color: var(--bg-dark-secondary);
+    --full-project-search-color: var(--content-secondary-dark);
+    --full-project-search-results-bg-color: var(--bg-dark-tertiary);
+    --full-project-search-selected-hit-bg-color: var(--bg-dark-secondary);
+    --full-project-search-selected-hit-color: var(--content-primary-dark);
+    --matched-hit-highlight-color: var(--bg-dark-secondary);
+    --matched-hit-selected-highlight-color: var(--bg-accent-02);
+    --matched-hit-selected-unfocused-highlight-color: var(--bg-dark-primary);
+    --collapsible-file-header-count-color: var(--bs-body-color);
+    --collapsible-file-header-count-bg-color: var(--bg-dark-secondary);
+    --panel-heading-color: var(--content-primary-dark);
+    --search-modifier-checked-bg: var(--neutral-90);
+    --search-modifier-hover-color: var(--neutral-70);
+
+    input[type='search']::selection {
+      background-color: #b4d1ff;
+    }
+
+    .full-project-search-modifiers {
+      .form-check-label {
+        color: inherit;
+      }
+    }
+
+    .panel-heading-close-button {
+      color: var(--content-primary-dark);
+
+      &:hover,
+      &:focus {
+        color: var(--content-primary);
+      }
+    }
+  }
+
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  z-index: 2;
+  background-color: var(--full-project-search-bg-color);
+  color: var(--full-project-search-color);
+
+  .full-project-search-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--spacing-02);
+    font-weight: bold;
+  }
+
+  .panel-heading-label {
+    margin-left: var(--spacing-02);
+  }
+
+  .full-project-search-form {
+    padding: 8px;
+    flex-shrink: 0;
+  }
+
+  .form-check {
+    padding-left: 0;
+  }
+
+  .form-check-inline {
+    display: inline-flex;
+    gap: var(--spacing-02);
+    margin-right: 0;
+  }
+
+  .full-project-search-modifiers {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-03);
+    margin-top: var(--spacing-02);
+
+    input[type='checkbox'] {
+      position: relative;
+      left: -999px;
+    }
+
+    .form-check-label {
+      border-radius: 50%;
+      cursor: pointer;
+      display: inline-flex;
+      width: 2em;
+      height: 2em;
+      align-items: center;
+      justify-content: center;
+      font-size: 90%;
+
+      &:hover,
+      &:focus {
+        background-color: var(--search-modifier-hover-color);
+      }
+    }
+
+    input:focus-visible ~ .form-check-label {
+      box-shadow: 0 0 0 2px var(--border-active-dark);
+    }
+
+    input:checked ~ .form-check-label {
+      background-color: var(--search-modifier-checked-bg);
+    }
+  }
+
+  .match-counts {
+    font-size: 80%;
+    padding: 0 var(--spacing-04) var(--spacing-04);
+  }
+
+  .matched-files {
+    flex: 1;
+    overflow: auto;
+    font-size: 14px;
+    background-color: var(--full-project-search-results-bg-color);
+  }
+
+  .matched-file {
+    margin-bottom: 8px;
+
+    .collapsible-file-header:focus-visible {
+      box-shadow: 0 0 0 2px var(--border-active-dark);
+    }
+  }
+
+  .collapsible-file-header {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background-color: var(--full-project-search-results-bg-color);
+    color: inherit;
+  }
+
+  .collapsible-file-header-count {
+    background-color: var(--collapsible-file-header-count-bg-color);
+    color: var(--collapsible-file-header-count-color);
+  }
+
+  .matched-file-hits {
+    width: 100%;
+    overflow: hidden;
+    border-radius: 0;
+  }
+
+  .matched-line-number {
+    white-space: nowrap;
+    margin-right: 8px;
+    color: #aaa;
+  }
+
+  .matched-file-hit {
+    border: none;
+    cursor: pointer;
+    align-items: flex-start;
+    padding: var(--spacing-02) var(--spacing-05);
+    word-break: break-all;
+    white-space: nowrap;
+    text-align: left;
+    font-family: var(--font-family);
+    font-size: var(--font-size);
+    min-height: fit-content;
+    border-radius: 0;
+    background-color: var(--full-project-search-results-bg-color);
+
+    &:hover {
+      background-color: var(--full-project-search-bg-color);
+    }
+
+    &.matched-file-hit-highlighted {
+      background-color: var(--full-project-search-bg-color);
+    }
+  }
+
+  .matched-hit-snippet {
+    overflow-wrap: break-word;
+    overflow: hidden;
+  }
+
+  .notification {
+    margin: var(--spacing-02) var(--spacing-04) var(--spacing-06);
+    width: auto;
+    align-items: center;
+    padding: 0 var(--spacing-04);
+
+    .notification-content {
+      padding: var(--spacing-02) 0;
+    }
+
+    .notification-icon {
+      padding: var(--spacing-02) var(--spacing-04) 0 0;
+    }
+  }
+
+  .matched-hit-highlight {
+    background-color: var(--matched-hit-highlight-color);
+    border-radius: 4px;
+    overflow-wrap: normal;
+  }
+
+  .matched-file-hit-selected {
+    background-color: var(--full-project-search-selected-hit-bg-color);
+    color: var(--full-project-search-selected-hit-color);
+
+    .matched-hit-highlight {
+      background-color: var(--matched-hit-unfocused-highlight-color);
+    }
+  }
+
+  /* &:focus-within {
+    .matched-file-hit-selected {
+      background-color: var(--bg-accent-01);
+      color: var(--bg-light-primary);
+
+      .matched-hit-highlight {
+        background-color: var(--matched-hit-selected-highlight-color);
+      }
+    }
+  } */
+}

@@ -31,6 +31,7 @@ type SettingsMenuSelectProps<T extends PossibleValue = string> = {
   disabled?: boolean
   width?: 'default' | 'wide'
   loading?: boolean
+  translateOptions?: 'yes' | 'no'
 }
 
 export default function DropdownSetting<T extends PossibleValue = string>({
@@ -44,6 +45,7 @@ export default function DropdownSetting<T extends PossibleValue = string>({
   disabled = false,
   width = 'default',
   loading = false,
+  translateOptions,
 }: SettingsMenuSelectProps<T>) {
   const handleChange: ChangeEventHandler<HTMLSelectElement> = useCallback(
     event => {
@@ -78,6 +80,7 @@ export default function DropdownSetting<T extends PossibleValue = string>({
           onChange={handleChange}
           value={value?.toString()}
           disabled={disabled}
+          translate={translateOptions}
         >
           {options.map(option => (
             <option

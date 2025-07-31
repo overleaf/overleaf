@@ -10,8 +10,9 @@ export default function HotkeysModalBottomText() {
           // eslint-disable-next-line jsx-a11y/anchor-has-content, react/jsx-key
           <a
             onClick={() => eventTracking.sendMB('left-menu-hotkeys-template')}
-            href="/articles/overleaf-keyboard-shortcuts/qykqfvmxdnjf"
+            href="https://www.overleaf.com/articles/overleaf-keyboard-shortcuts/qykqfvmxdnjf"
             target="_blank"
+            rel="noreferrer"
           />,
         ]}
       />

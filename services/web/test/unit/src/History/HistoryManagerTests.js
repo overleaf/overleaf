@@ -10,12 +10,10 @@ const {
 
 const MODULE_PATH = '../../../../app/src/Features/History/HistoryManager'
 
-const GLOBAL_BLOBS = {
-  e69de29bb2d1d6434b8b29ae775ad8c2e48c5391:
-    'e6/9d/e29bb2d1d6434b8b29ae775ad8c2e48c5391',
-  '02426c2b3a484003ca42ed52b374b7907b757d12':
-    '02/42/6c2b3a484003ca42ed52b374b7907b757d12',
-}
+const GLOBAL_BLOBS = [
+  'e69de29bb2d1d6434b8b29ae775ad8c2e48c5391',
+  '02426c2b3a484003ca42ed52b374b7907b757d12',
+]
 
 describe('HistoryManager', function () {
   before(async function () {
@@ -24,7 +22,7 @@ describe('HistoryManager', function () {
   before(cleanupTestDatabase)
   before(async function () {
     await db.projectHistoryGlobalBlobs.insertMany(
-      Object.keys(GLOBAL_BLOBS).map(sha => ({
+      GLOBAL_BLOBS.map(sha => ({
         _id: sha,
         byteLength: 0,
         stringLength: 0,
@@ -48,6 +46,9 @@ describe('HistoryManager', function () {
     this.v1HistoryPassword = 'verysecret'
     this.settings = {
       apis: {
+        filestore: {
+          url: 'http://filestore.example.com',
+        },
         project_history: {
           url: this.projectHistoryUrl,
         },
@@ -100,25 +101,30 @@ describe('HistoryManager', function () {
     })
   })
 
-  describe('getBlobLocation', function () {
+  describe('getFilestoreBlobURL', function () {
     beforeEach(async function () {
       await this.HistoryManager.loadGlobalBlobsPromise
     })
     it('should return a global blob location', function () {
-      for (const [sha, key] of Object.entries(GLOBAL_BLOBS)) {
-        expect(this.HistoryManager.getBlobLocation('42', sha)).to.deep.equal({
-          bucket: this.settings.apis.v1_history.buckets.globalBlobs,
-          key,
-        })
+      for (const sha of GLOBAL_BLOBS) {
+        expect(this.HistoryManager.getFilestoreBlobURL('42', sha)).to.equal(
+          `${this.settings.apis.filestore.url}/history/global/hash/${sha}`
+        )
       }
     })
-    it('should return a project blob location', function () {
+    it('should return a project blob location for a v1 project', function () {
+      const historyId = 42
       const sha = '6ddfa0578a67fe5ad6623a8665ec9aafce1eb5ca'
-      const key = '240/000/000/6d/dfa0578a67fe5ad6623a8665ec9aafce1eb5ca'
-      expect(this.HistoryManager.getBlobLocation('42', sha)).to.deep.equal({
-        bucket: this.settings.apis.v1_history.buckets.projectBlobs,
-        key,
-      })
+      expect(this.HistoryManager.getFilestoreBlobURL(historyId, sha)).to.equal(
+        `${this.settings.apis.filestore.url}/history/project/${historyId}/hash/${sha}`
+      )
+    })
+    it('should return a project blob location for a mongo project', function () {
+      const historyId = '424242424242424242424242'
+      const sha = '6ddfa0578a67fe5ad6623a8665ec9aafce1eb5ca'
+      expect(this.HistoryManager.getFilestoreBlobURL(historyId, sha)).to.equal(
+        `${this.settings.apis.filestore.url}/history/project/${historyId}/hash/${sha}`
+      )
     })
   })
 

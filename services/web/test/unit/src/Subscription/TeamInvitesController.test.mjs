@@ -144,8 +144,8 @@ describe('TeamInvitesController', function () {
   })
 
   describe('acceptInvite', function () {
-    it('should add an audit log entry', function (ctx) {
-      return new Promise(resolve => {
+    it('should add an audit log entry', async function (ctx) {
+      await new Promise(resolve => {
         ctx.req.params.token = 'foo'
         ctx.req.session.user = ctx.user
         const res = {
@@ -176,8 +176,8 @@ describe('TeamInvitesController', function () {
     }
 
     describe('hasIndividualPaidSubscription', function () {
-      it('is true for personal subscription', function (ctx) {
-        return new Promise(resolve => {
+      it('is true for personal subscription', async function (ctx) {
+        await new Promise(resolve => {
           ctx.SubscriptionLocator.promises.getUsersSubscription.resolves({
             recurlySubscription_id: 'subscription123',
             groupPlan: false,
@@ -192,8 +192,8 @@ describe('TeamInvitesController', function () {
         })
       })
 
-      it('is true for group subscriptions', function (ctx) {
-        return new Promise(resolve => {
+      it('is true for group subscriptions', async function (ctx) {
+        await new Promise(resolve => {
           ctx.SubscriptionLocator.promises.getUsersSubscription.resolves({
             recurlySubscription_id: 'subscription123',
             groupPlan: true,
@@ -208,8 +208,8 @@ describe('TeamInvitesController', function () {
         })
       })
 
-      it('is false for canceled subscriptions', function (ctx) {
-        return new Promise(resolve => {
+      it('is false for canceled subscriptions', async function (ctx) {
+        await new Promise(resolve => {
           ctx.SubscriptionLocator.promises.getUsersSubscription.resolves({
             recurlySubscription_id: 'subscription123',
             groupPlan: false,
@@ -229,8 +229,8 @@ describe('TeamInvitesController', function () {
     })
 
     describe('when user is logged out', function () {
-      it('renders logged out invite page', function (ctx) {
-        return new Promise(resolve => {
+      it('renders logged out invite page', async function (ctx) {
+        await new Promise(resolve => {
           const res = {
             render: (template, data) => {
               expect(template).to.equal('subscriptions/team/invite_logged_out')
@@ -245,8 +245,8 @@ describe('TeamInvitesController', function () {
         })
       })
 
-      it('includes groupSSOActive flag when the group has SSO enabled', function (ctx) {
-        return new Promise(resolve => {
+      it('includes groupSSOActive flag when the group has SSO enabled', async function (ctx) {
+        await new Promise(resolve => {
           ctx.Modules.promises.hooks.fire = sinon.stub().resolves([true])
           const res = {
             render: (template, data) => {
@@ -262,8 +262,8 @@ describe('TeamInvitesController', function () {
       })
     })
 
-    it('renders the view', function (ctx) {
-      return new Promise(resolve => {
+    it('renders the view', async function (ctx) {
+      await new Promise(resolve => {
         const res = {
           render: template => {
             expect(template).to.equal('subscriptions/team/invite')

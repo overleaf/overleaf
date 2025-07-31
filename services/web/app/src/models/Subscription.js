@@ -36,12 +36,14 @@ const SubscriptionSchema = new Schema(
     teamNotice: { type: String },
     planCode: { type: String },
     groupPlan: { type: Boolean, default: false },
+    domainCaptureEnabled: { type: Boolean, default: false },
     managedUsersEnabled: { type: Boolean, default: false },
     membersLimit: { type: Number, default: 0 },
     customAccount: Boolean,
     features: {
       managedUsers: { type: Boolean, default: true },
       groupSSO: { type: Boolean, default: true },
+      domainCapture: { type: Boolean, default: false },
     },
     addOns: Schema.Types.Mixed,
     overleaf: {

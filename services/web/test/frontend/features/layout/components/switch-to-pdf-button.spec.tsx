@@ -5,7 +5,7 @@ describe('<SwitchToPDFButton />', function () {
   it('shows button in full screen editor layout', function () {
     cy.mount(
       <EditorProviders
-        ui={{ view: 'editor', pdfLayout: 'flat', chatOpen: false }}
+        layoutContext={{ view: 'editor', pdfLayout: 'flat', chatIsOpen: false }}
       >
         <SwitchToPDFButton />
       </EditorProviders>
@@ -17,7 +17,11 @@ describe('<SwitchToPDFButton />', function () {
   it('does not show button in split screen layout', function () {
     cy.mount(
       <EditorProviders
-        ui={{ view: 'editor', pdfLayout: 'sideBySide', chatOpen: false }}
+        layoutContext={{
+          view: 'editor',
+          pdfLayout: 'sideBySide',
+          chatIsOpen: false,
+        }}
       >
         <SwitchToPDFButton />
       </EditorProviders>
@@ -31,7 +35,7 @@ describe('<SwitchToPDFButton />', function () {
 
     cy.mount(
       <EditorProviders
-        ui={{ view: 'editor', pdfLayout: 'flat', chatOpen: false }}
+        layoutContext={{ view: 'editor', pdfLayout: 'flat', chatIsOpen: false }}
       >
         <SwitchToPDFButton />
       </EditorProviders>

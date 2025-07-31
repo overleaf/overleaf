@@ -48,7 +48,7 @@ describe('UserMembershipHandler', function () {
 
     this.UserMembershipViewModel = {
       promises: {
-        buildAsync: sinon.stub().resolves({ _id: 'mock-member-id' }),
+        buildAsync: sinon.stub().resolves([{ _id: 'mock-member-id' }]),
       },
       build: sinon.stub().returns(this.newUser),
     }
@@ -118,26 +118,26 @@ describe('UserMembershipHandler', function () {
           this.subscription,
           EntityConfigs.group
         )
-        const expectedCallcount =
-          this.subscription.member_ids.length +
-          this.subscription.invited_emails.length +
-          this.subscription.teamInvites.length
         expect(
-          this.UserMembershipViewModel.promises.buildAsync.callCount
-        ).to.equal(expectedCallcount)
+          this.UserMembershipViewModel.promises.buildAsync
+        ).to.be.calledOnceWith(
+          this.subscription.invited_emails.concat(
+            this.subscription.teamInvites[0].email,
+            this.subscription.member_ids
+          )
+        )
       })
     })
 
-    describe('group mamagers', function () {
+    describe('group managers', function () {
       it('build view model for all managers', async function () {
         await this.UserMembershipHandler.promises.getUsers(
           this.subscription,
           EntityConfigs.groupManagers
         )
-        const expectedCallcount = this.subscription.manager_ids.length
         expect(
-          this.UserMembershipViewModel.promises.buildAsync.callCount
-        ).to.equal(expectedCallcount)
+          this.UserMembershipViewModel.promises.buildAsync
+        ).to.be.calledOnceWith(this.subscription.manager_ids)
       })
     })
 
@@ -147,11 +147,9 @@ describe('UserMembershipHandler', function () {
           this.institution,
           EntityConfigs.institution
         )
-
-        const expectedCallcount = this.institution.managerIds.length
         expect(
-          this.UserMembershipViewModel.promises.buildAsync.callCount
-        ).to.equal(expectedCallcount)
+          this.UserMembershipViewModel.promises.buildAsync
+        ).to.be.calledOnceWith(this.institution.managerIds)
       })
     })
   })

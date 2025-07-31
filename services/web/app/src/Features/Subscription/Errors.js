@@ -1,3 +1,5 @@
+// @ts-check
+
 const Errors = require('../Errors/Errors')
 const OError = require('@overleaf/o-error')
 
@@ -26,9 +28,34 @@ class SubtotalLimitExceededError extends OError {}
 
 class HasPastDueInvoiceError extends OError {}
 
+class HasNoAdditionalLicenseWhenManuallyCollectedError extends OError {}
+
+/**
+ * @typedef {Object} PaymentActionRequiredInfo
+ * @property {string} PaymentActionRequiredInfo.clientSecret
+ * @property {string} PaymentActionRequiredInfo.publicKey
+ */
 class PaymentActionRequiredError extends OError {
+  /**
+   * @param {PaymentActionRequiredInfo} info
+   */
   constructor(info) {
     super('Payment action required', info)
+  }
+}
+
+/**
+ * @typedef {Object} PaymentFailedInfo
+ * @property {string} PaymentFailedInfo.subscriptionId
+ * @property {string} PaymentFailedInfo.reason
+ * @property {string} PaymentFailedInfo.adviceCode
+ */
+class PaymentFailedError extends OError {
+  /**
+   * @param {PaymentFailedInfo} info
+   */
+  constructor(info) {
+    super('Failed to process payment', info)
   }
 }
 
@@ -37,10 +64,12 @@ module.exports = {
   DuplicateAddOnError,
   AddOnNotPresentError,
   PaymentActionRequiredError,
+  PaymentFailedError,
   MissingBillingInfoError,
   ManuallyCollectedError,
   PendingChangeError,
   InactiveError,
   SubtotalLimitExceededError,
   HasPastDueInvoiceError,
+  HasNoAdditionalLicenseWhenManuallyCollectedError,
 }

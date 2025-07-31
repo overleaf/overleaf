@@ -66,6 +66,7 @@ $editor-toggler-bg-dark-color: color.adjust(
     background-color: var(--bg-primary-themed);
     border-radius: var(--border-radius-full);
     border: 1px solid var(--border-divider-themed);
+    top: 130px;
   }
 
   .synctex-control:not(.detach-synctex-control) {
@@ -247,6 +248,15 @@ $editor-toggler-bg-dark-color: color.adjust(
   top: 50%;
   background-color: var(--editor-toggler-bg-color);
 
+  .material-symbols {
+    font-size: var(--font-size-02);
+    -moz-osx-font-smoothing: grayscale;
+    font-weight: bold;
+    color: var(--white);
+    user-select: none;
+    pointer-events: none;
+  }
+
   &:hover,
   &:focus {
     outline: none;
@@ -261,35 +271,9 @@ $editor-toggler-bg-dark-color: color.adjust(
     inset: 0 -3px;
   }
 
-  &::after {
-    font-family: FontAwesome; /* stylelint-disable-line font-family-no-missing-generic-family-keyword */
-    -moz-osx-font-smoothing: grayscale;
-    font-size: 65%;
-    font-weight: bold;
-    color: var(--white);
-    user-select: none;
-    pointer-events: none;
-  }
-
   &:hover {
     background-color: var(--bg-accent-01);
   }
-}
-
-.custom-toggler-east::after {
-  content: '\f105';
-}
-
-.custom-toggler-west::after {
-  content: '\f104';
-}
-
-.custom-toggler-closed.custom-toggler-east::after {
-  content: '\f104';
-}
-
-.custom-toggler-closed.custom-toggler-west::after {
-  content: '\f105';
 }
 
 .vertical-resize-handle {

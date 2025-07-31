@@ -25,5 +25,8 @@ declare global {
     }
     ga?: (...args: any) => void
     gtag?: (...args: any) => void
+
+    propensity?: (propensityId?: string) => void
+    olLoadGA?: () => void
   }
 }

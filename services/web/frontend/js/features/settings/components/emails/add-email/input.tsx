@@ -32,6 +32,16 @@ export type DomainInfo = {
     name: string
     ssoEnabled?: boolean
     ssoBeta?: boolean
+    departments?: string[]
+  }
+  group: {
+    teamName?: string
+    managedUsersEnabled?: boolean
+    domainCaptureEnabled?: boolean
+    ssoConfig?: {
+      useUkamfSettings?: boolean
+      enabled: boolean
+    }
   }
 }
 

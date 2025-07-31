@@ -23,7 +23,7 @@ type PdfJsViewerProps = {
 }
 
 function PdfJsViewer({ url, pdfFile }: PdfJsViewerProps) {
-  const { _id: projectId } = useProjectContext()
+  const { projectId } = useProjectContext()
 
   const { setError, firstRenderDone, highlights, position, setPosition } =
     useCompileContext()
@@ -268,7 +268,10 @@ function PdfJsViewer({ url, pdfFile }: PdfJsViewerProps) {
 
               window.dispatchEvent(
                 new CustomEvent('synctex:sync-to-position', {
-                  detail: clickPosition,
+                  detail: {
+                    position: clickPosition,
+                    selectText: window.getSelection()?.toString(),
+                  },
                 })
               )
             }
@@ -487,6 +490,21 @@ function PdfJsViewer({ url, pdfFile }: PdfJsViewerProps) {
   const toolbarInfoLoaded =
     rawScale !== null && page !== null && totalPages !== null
 
+  // Remove the 'region' role from each PDF page container.
+  // This prevents polluting the landmark navigation menu for every page,
+  // which creates a poor screen reader experience. Page navigation should be handled
+  // by the toolbar controls.
+  useEffect(() => {
+    if (!initialised || !pdfJsWrapper) return
+
+    const pageElements = pdfJsWrapper.container.querySelectorAll(
+      'div[data-page-number][role="region"]'
+    )
+    pageElements.forEach(element => {
+      element.removeAttribute('role')
+    })
+  }, [initialised, pdfJsWrapper])
+
   /* eslint-disable jsx-a11y/no-noninteractive-tabindex */
   /* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
   return (
@@ -497,7 +515,12 @@ function PdfJsViewer({ url, pdfFile }: PdfJsViewerProps) {
       onKeyDown={handleKeyDown}
       tabIndex={-1}
     >
-      <div className="pdfjs-viewer-inner" tabIndex={0} role="tabpanel">
+      <div
+        className="pdfjs-viewer-inner"
+        tabIndex={0}
+        role="tabpanel"
+        data-testid="pdfjs-viewer-inner"
+      >
         <div className="pdfViewer" />
       </div>
       {toolbarInfoLoaded && (

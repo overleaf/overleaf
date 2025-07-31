@@ -73,6 +73,12 @@ const EMAIL_DELETION_SCHEDULE = {
   '2025-09-03': '2025-03-03',
 }
 
+const dateOptions: Intl.DateTimeFormatOptions = {
+  month: 'long',
+  day: 'numeric',
+  year: 'numeric',
+}
+
 // Emails that remain unconfirmed after 90 days will be removed from the account
 function getEmailDeletionDate(emailData: UserEmailData, signUpDate: string) {
   if (emailData.default) return false
@@ -95,9 +101,9 @@ function getEmailDeletionDate(emailData: UserEmailData, signUpDate: string) {
       )
       if (currentDate >= notificationStartDate) {
         if (currentDate > emailDeletionDate) {
-          return new Date().toLocaleDateString()
+          return new Date().toLocaleDateString(undefined, dateOptions)
         }
-        return emailDeletionDate.toLocaleDateString()
+        return emailDeletionDate.toLocaleDateString(undefined, dateOptions)
       }
     }
   }

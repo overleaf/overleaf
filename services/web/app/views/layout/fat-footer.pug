@@ -1,84 +1,86 @@
 footer.fat-footer.hidden-print
-	.fat-footer-container(role="navigation" aria-label=translate('footer_navigation'))
-		.fat-footer-sections(class=hideFatFooter ? 'hidden' : undefined)
-			.footer-section#footer-brand
-				a(href='/', aria-label=settings.appName).footer-brand
-					
+	.fat-footer-container
+		.fat-footer-sections(class={hidden: hideFatFooter})
+			#footer-brand.footer-section
+				a.footer-brand(href='/' aria-label=settings.appName)
+
 			.footer-section
 				h2.footer-section-heading #{translate('About')}
-					
+
 				ul.list-unstyled
 					li
-						a(href="/about") #{translate('footer_about_us')}
+						a(href='/about') #{translate('footer_about_us')}
 					li
-						a(href="/about/values") #{translate('our_values')}
+						a(href='https://digitalscience.pinpointhq.com/') #{translate('careers')}
 					li
-						a(href="https://digitalscience.pinpointhq.com/") #{translate('careers')}
+						a(href='/blog') #{translate('blog')}
+
+			.footer-section
+				h2.footer-section-heading #{translate('solutions')}
+
+				ul.list-unstyled
 					li
-						a(href="/for/press") !{translate('press_and_awards')}
+						a(href='/for/enterprises') #{translate('for_business')}
 					li
-						a(href="/blog") #{translate('blog')}
-						
+						a(href='/for/universities') #{translate('for_universities')}
+					li
+						a(href='/for/government') #{translate('for_government')}
+					li
+						a(href='/for/publishers') #{translate('for_publishers')}
+					li
+						a(href='/about/customer-stories') #{translate('customer_stories')}
+
 			.footer-section
 				h2.footer-section-heading #{translate('learn')}
-		
+
 				ul.list-unstyled
 					li
-						a(href="/learn/latex/Learn_LaTeX_in_30_minutes") #{translate('latex_in_thirty_minutes')}
+						a(href='/learn/latex/Learn_LaTeX_in_30_minutes') #{translate('latex_in_thirty_minutes')}
 					li
-						a(href="/latex/templates") #{translate('templates')}
+						a(href='/latex/templates') #{translate('templates')}
 					li
-						a(href="/events/webinars") #{translate('webinars')}
+						a(href='/events/webinars') #{translate('webinars')}
 					li
-						a(href="/learn/latex/Tutorials") #{translate('tutorials')}
+						a(href='/learn/latex/Tutorials') #{translate('tutorials')}
 					li
-						a(href="/learn/latex/Inserting_Images") #{translate('how_to_insert_images')}
+						a(href='/learn/latex/Inserting_Images') #{translate('how_to_insert_images')}
 					li
-						a(href="/learn/latex/Tables") #{translate('how_to_create_tables')}
-						
+						a(href='/learn/latex/Tables') #{translate('how_to_create_tables')}
+
 			.footer-section
-				h2.footer-section-heading !{translate('footer_plans_and_pricing')}
-		
+				h2.footer-section-heading !{translate('pricing')}
+
 				ul.list-unstyled
 					li
-						a(href="/learn/how-to/Overleaf_premium_features") #{translate('premium_features')}
-					li
-						a(href="/user/subscription/plans?itm_referrer=footer-for-indv-groups") !{translate('for_individuals_and_groups')}
-					li
-						a(href="/for/enterprises") #{translate('for_enterprise')}
-					li
-						a(href="/for/universities") #{translate('for_universities')}
+						a(href='/user/subscription/plans?itm_referrer=footer-for-indv') #{translate('for_individuals')}
 					li
 						a(
-							data-ol-for-students-link
-							href="/user/subscription/plans?itm_referrer=footer-for-students#student-annual"
-						) #{translate('for_students')}
+							href='/user/subscription/plans?plan=group&itm_referrer=footer-for-groups'
+						) !{translate('for_groups_and_organizations')}
 					li
-						a(href="/for/government") #{translate('for_government')}
-						
+						a(
+							href='/user/subscription/plans?itm_referrer=footer-for-students#student-annual'
+						) #{translate('for_students')}
+
 			.footer-section
 				h2.footer-section-heading #{translate('get_involved')}
-		
+
 				ul.list-unstyled
 					li
-						a(href="/for/community/advisors") #{translate('become_an_advisor')}
-					li
-						a(href="https://forms.gle/67PSpN1bLnjGCmPQ9") #{translate('let_us_know_what_you_think')}
+						a(href='https://forms.gle/67PSpN1bLnjGCmPQ9') #{translate('let_us_know_what_you_think')}
 					if user
 						li
-							a(href="/beta/participate") #{translate('join_beta_program')}
-		
+							a(href='/beta/participate') #{translate('join_beta_program')}
+
 			.footer-section
 				h2.footer-section-heading #{translate('help')}
-		
+
 				ul.list-unstyled
 					li
-						a(href="/about/why-latex") #{translate('why_latex')}
+						a(href='/learn') #{translate('Documentation')} 
 					li
-						a(href="/learn") #{translate('Documentation')} 
+						a(href='/contact') #{translate('footer_contact_us')} 
 					li
-						a(href="/contact") #{translate('footer_contact_us')}  
-					li
-						a(href="https://status.overleaf.com/") #{translate('website_status')}
-					
+						a(href='https://status.overleaf.com/') #{translate('website_status')}
+
 		include fat-footer-base

@@ -4,7 +4,7 @@ import { saveUserSettings } from '../utils/api'
 import { UserSettings } from '../../../../../types/user-settings'
 import { useUserSettingsContext } from '@/shared/context/user-settings-context'
 import getMeta from '@/utils/meta'
-import { isIEEEBranded } from '@/utils/is-ieee-branded'
+import { useActiveOverallTheme } from '@/shared/hooks/use-active-overall-theme'
 
 export default function useSetOverallTheme() {
   const { userSettings, setUserSettings } = useUserSettingsContext()
@@ -16,13 +16,13 @@ export default function useSetOverallTheme() {
     },
     [setUserSettings]
   )
+  const activeOverallTheme = useActiveOverallTheme()
 
   useEffect(() => {
     // Sets the body's data-theme attribute for theming
-    const theme =
-      overallTheme === 'light-' && !isIEEEBranded() ? 'light' : 'default'
-    document.body.dataset.theme = theme
-  }, [overallTheme])
+    document.body.dataset.theme =
+      activeOverallTheme === 'dark' ? 'default' : 'light'
+  }, [activeOverallTheme])
 
   return useCallback(
     (newOverallTheme: UserSettings['overallTheme']) => {

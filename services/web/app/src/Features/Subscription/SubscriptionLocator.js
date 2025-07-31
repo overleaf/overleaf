@@ -4,12 +4,10 @@
 
 const { callbackifyAll } = require('@overleaf/promise-utils')
 const { Subscription } = require('../../models/Subscription')
+const SubscriptionHelper = require('./SubscriptionHelper')
 const { DeletedSubscription } = require('../../models/DeletedSubscription')
 const logger = require('@overleaf/logger')
-const {
-  AI_ADD_ON_CODE,
-  isStandaloneAiAddOnPlanCode,
-} = require('./PaymentProviderEntities')
+const { AI_ADD_ON_CODE, isStandaloneAiAddOnPlanCode } = require('./AiHelper')
 require('./GroupPlansData') // make sure dynamic group plans are loaded
 
 const SubscriptionLocator = {
@@ -175,7 +173,8 @@ const SubscriptionLocator = {
 
     const hasActiveGroupSubscription = memberSubscriptions.some(
       subscription =>
-        subscription.recurlyStatus?.state === 'active' && subscription.groupPlan
+        subscription.groupPlan &&
+        SubscriptionHelper.getPaidSubscriptionState(subscription) === 'active'
     )
     if (hasActiveGroupSubscription) {
       // Member of a group plan
@@ -187,7 +186,8 @@ const SubscriptionLocator = {
 
     if (personalSubscription) {
       const hasActivePersonalSubscription =
-        personalSubscription.recurlyStatus?.state === 'active'
+        SubscriptionHelper.getPaidSubscriptionState(personalSubscription) ===
+        'active'
       if (hasActivePersonalSubscription) {
         if (personalSubscription.groupPlan) {
           // Owner of a group plan

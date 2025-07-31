@@ -68,7 +68,9 @@ export default function DictionaryModalContent({
           <ul className="list-unstyled dictionary-entries-list">
             {[...learnedWords].sort(wordsSortFunction).map(learnedWord => (
               <li key={learnedWord} className="dictionary-entry">
-                <span className="dictionary-entry-name">{learnedWord}</span>
+                <span className="dictionary-entry-name" translate="no">
+                  {learnedWord}
+                </span>
                 <OLTooltip
                   id={`tooltip-remove-learned-word-${learnedWord}`}
                   description={t('edit_dictionary_remove')}

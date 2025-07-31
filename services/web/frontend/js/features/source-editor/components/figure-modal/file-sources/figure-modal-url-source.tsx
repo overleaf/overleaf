@@ -46,7 +46,7 @@ export const FigureModalUrlSource: FC = () => {
   const [url, setUrl] = useState<string>('')
   const [nameDirty, setNameDirty] = useState<boolean>(false)
   const [name, setName] = useState<string>('')
-  const { _id: projectId } = useProjectContext()
+  const { projectId } = useProjectContext()
   const { rootFile } = useCurrentProjectFolders()
   const [folder, setFolder] = useState<File>(rootFile)
 

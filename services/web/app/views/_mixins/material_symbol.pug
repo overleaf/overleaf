@@ -1,0 +1,12 @@
+mixin material-symbol(icon, extraClass = null)
+	- extraClass = extraClass ? ' ' + extraClass : ''
+	span(aria-hidden='true' translate='no' class='material-symbols' + extraClass)&attributes(attributes)
+		| #{icon}
+
+mixin material-symbol-outlined(icon, extraClass = null)
+	- extraClass = extraClass ? ' ' + extraClass : ''
+	+material-symbol(icon, 'material-symbols-outlined' + extraClass)&attributes(attributes)
+
+mixin material-symbol-rounded(icon, extraClass = null)
+	- extraClass = extraClass ? ' ' + extraClass : ''
+	+material-symbol(icon, 'material-symbols-rounded' + extraClass)&attributes(attributes)

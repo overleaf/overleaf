@@ -1,0 +1,351 @@
+
+
+diff --git a/services/history-v1/storage/scripts/back_fill_file_hash.mjs b/services/history-v1/storage/scripts/back_fill_file_hash.mjs
+index ba3e0d43598e..feb4612ddc23 100644
+--- a/services/history-v1/storage/scripts/back_fill_file_hash.mjs
++++ b/services/history-v1/storage/scripts/back_fill_file_hash.mjs
+@@ -33,7 +33,6 @@ import {
+   makeProjectKey,
+ } from '../lib/blob_store/index.js'
+ import { backedUpBlobs as backedUpBlobsCollection, db } from '../lib/mongodb.js'
+-import filestorePersistor from '../lib/persistor.js'
+ import commandLineArgs from 'command-line-args'
+ import readline from 'node:readline'
+
+@@ -179,6 +178,37 @@ const STREAM_HIGH_WATER_MARK = parseInt(
+ const LOGGING_INTERVAL = parseInt(process.env.LOGGING_INTERVAL || '60000', 10)
+ const SLEEP_BEFORE_EXIT = parseInt(process.env.SLEEP_BEFORE_EXIT || '1000', 10)
+
++// Filestore endpoint location, the port is always hardcoded
++const FILESTORE_HOST = process.env.FILESTORE_HOST || '127.0.0.1'
++const FILESTORE_PORT = process.env.FILESTORE_PORT || '3009'
++
++async function fetchFromFilestore(projectId, fileId) {
++  const url = `http://${FILESTORE_HOST}:${FILESTORE_PORT}/project/${projectId}/file/${fileId}`
++  const response = await fetch(url)
++  if (!response.ok) {
++    if (response.status === 404) {
++      throw new NotFoundError('file not found in filestore', {
++        status: response.status,
++      })
++    }
++    const body = await response.text()
++    throw new OError('fetchFromFilestore failed', {
++      projectId,
++      fileId,
++      status: response.status,
++      body,
++    })
++  }
++  if (!response.body) {
++    throw new OError('fetchFromFilestore response has no body', {
++      projectId,
++      fileId,
++      status: response.status,
++    })
++  }
++  return response.body
++}
++
+ const projectsCollection = db.collection('projects')
+ /** @type {ProjectsCollection} */
+ const typedProjectsCollection = db.collection('projects')
+@@ -348,8 +378,7 @@ async function processFile(entry, filePath) {
+     } catch (err) {
+       if (gracefulShutdownInitiated) throw err
+       if (err instanceof NotFoundError) {
+-        const { bucketName } = OError.getFullInfo(err)
+-        if (bucketName === USER_FILES_BUCKET_NAME && !RETRY_FILESTORE_404) {
++        if (!RETRY_FILESTORE_404) {
+           throw err // disable retries for not found in filestore bucket case
+         }
+       }
+@@ -416,10 +445,8 @@ async function processFileOnce(entry, filePath) {
+   }
+
+   STATS.readFromGCSCount++
+-  const src = await filestorePersistor.getObjectStream(
+-    USER_FILES_BUCKET_NAME,
+-    `${projectId}/${fileId}`
+-  )
++  // make a fetch request to filestore itself
++  const src = await fetchFromFilestore(projectId, fileId)
+   const dst = fs.createWriteStream(filePath, {
+     highWaterMark: STREAM_HIGH_WATER_MARK,
+   })
+@@ -1327,14 +1354,21 @@ async function processDeletedProjects() {
+ }
+
+ async function main() {
++  console.log('Starting project file backup...')
+   await loadGlobalBlobs()
++  console.log('Loaded global blobs:', GLOBAL_BLOBS.size)
+   if (PROJECT_IDS_FROM) {
++    console.log(
++      `Processing projects from file: ${PROJECT_IDS_FROM}, this may take a while...`
++    )
+     await processProjectsFromFile()
+   } else {
+     if (PROCESS_NON_DELETED_PROJECTS) {
++      console.log('Processing non-deleted projects...')
+       await processNonDeletedProjects()
+     }
+     if (PROCESS_DELETED_PROJECTS) {
++      console.log('Processing deleted projects...')
+       await processDeletedProjects()
+     }
+   }
+diff --git a/services/history-v1/test/acceptance/js/storage/back_fill_file_hash.test.mjs b/services/history-v1/test/acceptance/js/storage/back_fill_file_hash.test.mjs
+index fd39369a7189..4e697b8bec2c 100644
+--- a/services/history-v1/test/acceptance/js/storage/back_fill_file_hash.test.mjs
++++ b/services/history-v1/test/acceptance/js/storage/back_fill_file_hash.test.mjs
+@@ -15,7 +15,6 @@ import { execFile } from 'node:child_process'
+ import chai, { expect } from 'chai'
+ import chaiExclude from 'chai-exclude'
+ import config from 'config'
+-import ObjectPersistor from '@overleaf/object-persistor'
+ import { WritableBuffer } from '@overleaf/stream-utils'
+ import {
+   backupPersistor,
+@@ -27,6 +26,9 @@ import {
+   makeProjectKey,
+ } from '../../../../storage/lib/blob_store/index.js'
+
++import express from 'express'
++import bodyParser from 'body-parser'
++
+ chai.use(chaiExclude)
+ const TIMEOUT = 20 * 1_000
+
+@@ -36,15 +38,60 @@ const { tieringStorageClass } = config.get('backupPersistor')
+ const projectsCollection = db.collection('projects')
+ const deletedProjectsCollection = db.collection('deletedProjects')
+
+-const FILESTORE_PERSISTOR = ObjectPersistor({
+-  backend: 'gcs',
+-  gcs: {
+-    endpoint: {
+-      apiEndpoint: process.env.GCS_API_ENDPOINT,
+-      projectId: process.env.GCS_PROJECT_ID,
+-    },
+-  },
+-})
++class MockFilestore {
++  constructor() {
++    this.host = process.env.FILESTORE_HOST || '127.0.0.1'
++    this.port = process.env.FILESTORE_PORT || 3009
++    // create a server listening on this.host and this.port
++    this.files = {}
++
++    this.app = express()
++    this.app.use(bodyParser.json())
++    this.app.use(bodyParser.urlencoded({ extended: true }))
++
++    this.app.get('/project/:projectId/file/:fileId', (req, res) => {
++      const { projectId, fileId } = req.params
++      const content = this.files[projectId]?.[fileId]
++      if (!content) return res.status(404).end()
++      res.status(200).end(content)
++    })
++  }
++
++  start() {
++    // reset stored files
++    this.files = {}
++    // start the server
++    if (this.serverPromise) {
++      return this.serverPromise
++    } else {
++      this.serverPromise = new Promise((resolve, reject) => {
++        this.server = this.app.listen(this.port, this.host, err => {
++          if (err) return reject(err)
++          resolve()
++        })
++      })
++      return this.serverPromise
++    }
++  }
++
++  addFile(projectId, fileId, fileContent) {
++    if (!this.files[projectId]) {
++      this.files[projectId] = {}
++    }
++    this.files[projectId][fileId] = fileContent
++  }
++
++  deleteObject(projectId, fileId) {
++    if (this.files[projectId]) {
++      delete this.files[projectId][fileId]
++      if (Object.keys(this.files[projectId]).length === 0) {
++        delete this.files[projectId]
++      }
++    }
++  }
++}
++
++const mockFilestore = new MockFilestore()
+
+ /**
+  * @param {ObjectId} objectId
+@@ -472,67 +519,36 @@ describe('back_fill_file_hash script', function () {
+   }
+
+   async function populateFilestore() {
+-    await FILESTORE_PERSISTOR.sendStream(
+-      USER_FILES_BUCKET_NAME,
+-      `${projectId0}/${fileId0}`,
+-      Stream.Readable.from([fileId0.toString()])
+-    )
+-    await FILESTORE_PERSISTOR.sendStream(
+-      USER_FILES_BUCKET_NAME,
+-      `${projectId0}/${fileId6}`,
+-      Stream.Readable.from([fileId6.toString()])
+-    )
+-    await FILESTORE_PERSISTOR.sendStream(
+-      USER_FILES_BUCKET_NAME,
+-      `${projectId0}/${fileId7}`,
+-      Stream.Readable.from([contentFile7])
+-    )
+-    await FILESTORE_PERSISTOR.sendStream(
+-      USER_FILES_BUCKET_NAME,
+-      `${projectId1}/${fileId1}`,
+-      Stream.Readable.from([fileId1.toString()])
+-    )
+-    await FILESTORE_PERSISTOR.sendStream(
+-      USER_FILES_BUCKET_NAME,
+-      `${projectId2}/${fileId2}`,
+-      Stream.Readable.from([fileId2.toString()])
+-    )
+-    await FILESTORE_PERSISTOR.sendStream(
+-      USER_FILES_BUCKET_NAME,
+-      `${projectId3}/${fileId3}`,
+-      Stream.Readable.from([fileId3.toString()])
+-    )
+-    await FILESTORE_PERSISTOR.sendStream(
+-      USER_FILES_BUCKET_NAME,
+-      `${projectId3}/${fileId10}`,
++    await mockFilestore.addFile(projectId0, fileId0, fileId0.toString())
++    await mockFilestore.addFile(projectId0, fileId6, fileId6.toString())
++    await mockFilestore.addFile(projectId0, fileId7, contentFile7)
++    await mockFilestore.addFile(projectId1, fileId1, fileId1.toString())
++    await mockFilestore.addFile(projectId2, fileId2, fileId2.toString())
++    await mockFilestore.addFile(projectId3, fileId3, fileId3.toString())
++    await mockFilestore.addFile(
++      projectId3,
++      fileId10,
+       // fileId10 is dupe of fileId3
+-      Stream.Readable.from([fileId3.toString()])
++      fileId3.toString()
+     )
+-    await FILESTORE_PERSISTOR.sendStream(
+-      USER_FILES_BUCKET_NAME,
+-      `${projectId3}/${fileId11}`,
++    await mockFilestore.addFile(
++      projectId3,
++      fileId11,
+       // fileId11 is dupe of fileId3
+-      Stream.Readable.from([fileId3.toString()])
+-    )
+-    await FILESTORE_PERSISTOR.sendStream(
+-      USER_FILES_BUCKET_NAME,
+-      `${projectIdDeleted0}/${fileId4}`,
+-      Stream.Readable.from([fileId4.toString()])
++      fileId3.toString()
+     )
+-    await FILESTORE_PERSISTOR.sendStream(
+-      USER_FILES_BUCKET_NAME,
+-      `${projectIdDeleted1}/${fileId5}`,
+-      Stream.Readable.from([fileId5.toString()])
+-    )
+-    await FILESTORE_PERSISTOR.sendStream(
+-      USER_FILES_BUCKET_NAME,
+-      `${projectIdBadFileTree3}/${fileId9}`,
+-      Stream.Readable.from([fileId9.toString()])
++    await mockFilestore.addFile(projectIdDeleted0, fileId4, fileId4.toString())
++    await mockFilestore.addFile(projectIdDeleted1, fileId5, fileId5.toString())
++    await mockFilestore.addFile(
++      projectIdBadFileTree3,
++      fileId9,
++      fileId9.toString()
+     )
+   }
+
+   async function prepareEnvironment() {
+     await cleanup.everything()
++    await mockFilestore.start()
+     await populateMongo()
+     await populateHistoryV1()
+     await populateFilestore()
+@@ -1117,10 +1133,7 @@ describe('back_fill_file_hash script', function () {
+     beforeEach('prepare environment', prepareEnvironment)
+
+     it('should gracefully handle fatal errors', async function () {
+-      await FILESTORE_PERSISTOR.deleteObject(
+-        USER_FILES_BUCKET_NAME,
+-        `${projectId0}/${fileId0}`
+-      )
++      mockFilestore.deleteObject(projectId0, fileId0)
+       const t0 = Date.now()
+       const { stats, result } = await tryRunScript([], {
+         RETRIES: '10',
+@@ -1148,17 +1161,10 @@ describe('back_fill_file_hash script', function () {
+     })
+
+     it('should retry on error', async function () {
+-      await FILESTORE_PERSISTOR.deleteObject(
+-        USER_FILES_BUCKET_NAME,
+-        `${projectId0}/${fileId0}`
+-      )
++      mockFilestore.deleteObject(projectId0, fileId0)
+       const restoreFileAfter5s = async () => {
+         await setTimeout(5_000)
+-        await FILESTORE_PERSISTOR.sendStream(
+-          USER_FILES_BUCKET_NAME,
+-          `${projectId0}/${fileId0}`,
+-          Stream.Readable.from([fileId0.toString()])
+-        )
++        mockFilestore.addFile(projectId0, fileId0, fileId0.toString())
+       }
+       // use Promise.allSettled to ensure the above sendStream call finishes before this test completes
+       const [
+
+
+
+diff --git a/services/history-v1/storage/scripts/back_fill_file_hash.mjs b/services/history-v1/storage/scripts/back_fill_file_hash.mjs
+index feb4612ddc23..5a590e347a94 100644
+--- a/services/history-v1/storage/scripts/back_fill_file_hash.mjs
++++ b/services/history-v1/storage/scripts/back_fill_file_hash.mjs
+@@ -178,7 +178,7 @@ const STREAM_HIGH_WATER_MARK = parseInt(
+ const LOGGING_INTERVAL = parseInt(process.env.LOGGING_INTERVAL || '60000', 10)
+ const SLEEP_BEFORE_EXIT = parseInt(process.env.SLEEP_BEFORE_EXIT || '1000', 10)
+
+-// Filestore endpoint location, the port is always hardcoded
++// Filestore endpoint location
+ const FILESTORE_HOST = process.env.FILESTORE_HOST || '127.0.0.1'
+ const FILESTORE_PORT = process.env.FILESTORE_PORT || '3009'
+
+
+
+
+diff --git a/services/history-v1/test/acceptance/js/storage/back_fill_file_hash.test.mjs b/services/history-v1/test/acceptance/js/storage/back_fill_file_hash.test.mjs
+index 4e697b8bec2c..8f861d393451 100644
+--- a/services/history-v1/test/acceptance/js/storage/back_fill_file_hash.test.mjs
++++ b/services/history-v1/test/acceptance/js/storage/back_fill_file_hash.test.mjs
+@@ -27,7 +27,6 @@ import {
+ } from '../../../../storage/lib/blob_store/index.js'
+
+ import express from 'express'
+-import bodyParser from 'body-parser'
+
+ chai.use(chaiExclude)
+ const TIMEOUT = 20 * 1_000
+@@ -46,8 +45,6 @@ class MockFilestore {
+     this.files = {}
+
+     this.app = express()
+-    this.app.use(bodyParser.json())
+-    this.app.use(bodyParser.urlencoded({ extended: true }))
+
+     this.app.get('/project/:projectId/file/:fileId', (req, res) => {
+       const { projectId, fileId } = req.params
+

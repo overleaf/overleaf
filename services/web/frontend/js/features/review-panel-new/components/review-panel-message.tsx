@@ -21,6 +21,7 @@ export const ReviewPanelMessage: FC<{
   hasReplies: boolean
   isReply: boolean
   onResolve?: () => Promise<void>
+  hasActiveContent?: boolean
   onEdit?: (commentId: CommentId, content: string) => Promise<void>
   onDelete?: () => void
   isThreadResolved: boolean
@@ -32,6 +33,7 @@ export const ReviewPanelMessage: FC<{
   onEdit,
   onDelete,
   isThreadResolved,
+  hasActiveContent = false,
 }) => {
   const { t } = useTranslation()
   const [editing, setEditing] = useState(false)
@@ -40,7 +42,7 @@ export const ReviewPanelMessage: FC<{
   const user = useUserContext()
   const permissions = usePermissionsContext()
 
-  const isCommentAuthor = user.id === message.user.id
+  const isCommentAuthor = Boolean(message.user && user.id === message.user.id)
   const canEdit = isCommentAuthor && permissions.comment
   const canResolve =
     permissions.resolveAllComments ||
@@ -80,18 +82,21 @@ export const ReviewPanelMessage: FC<{
                 description={t('resolve_comment')}
                 tooltipProps={{ className: 'review-panel-tooltip' }}
               >
-                <button
-                  type="button"
-                  tabIndex={0}
-                  className="btn"
-                  onClick={onResolve}
-                >
-                  <MaterialIcon
-                    type="check"
-                    className="review-panel-entry-actions-icon"
-                    accessibilityLabel={t('resolve_comment')}
-                  />
-                </button>
+                <span>
+                  <button
+                    type="button"
+                    tabIndex={0}
+                    className="btn"
+                    onClick={onResolve}
+                    disabled={hasActiveContent}
+                  >
+                    <MaterialIcon
+                      type="check"
+                      className="review-panel-entry-actions-icon"
+                      accessibilityLabel={t('resolve_comment')}
+                    />
+                  </button>
+                </span>
               </OLTooltip>
             </PreventSelectingEntry>
           )}
@@ -135,6 +140,7 @@ export const ReviewPanelMessage: FC<{
           contentLimit={100}
           checkNewLines
           content={message.content}
+          translate="no"
         />
       )}
 

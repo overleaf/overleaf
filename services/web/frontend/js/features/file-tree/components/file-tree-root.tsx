@@ -40,7 +40,7 @@ const FileTreeRoot = React.memo<{
 }) {
   const [fileTreeContainer, setFileTreeContainer] =
     useState<HTMLDivElement | null>(null)
-  const { _id: projectId } = useProjectContext()
+  const { projectId } = useProjectContext()
   const { fileTreeData } = useFileTreeData()
   const isReady = Boolean(projectId && fileTreeData)
   const newEditor = useIsNewEditorEnabled()

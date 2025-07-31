@@ -21,7 +21,7 @@ type RestorationState =
 
 export function useRestoreDeletedFile() {
   const { projectId } = useHistoryContext()
-  const { setView } = useLayoutContext()
+  const { restoreView } = useLayoutContext()
   const { openDocWithId, openFileWithId } = useEditorManagerContext()
   const { showBoundary } = useErrorBoundary()
   const { fileTreeData } = useFileTreeData()
@@ -37,7 +37,7 @@ export function useRestoreDeletedFile() {
       if (result) {
         setState('complete')
         const { _id: id } = result.entity
-        setView('editor')
+        restoreView()
 
         if (restoredFileMetadata.type === 'doc') {
           openDocWithId(id)
@@ -52,7 +52,7 @@ export function useRestoreDeletedFile() {
     restoredFileMetadata,
     openDocWithId,
     openFileWithId,
-    setView,
+    restoreView,
   ])
 
   useEffect(() => {

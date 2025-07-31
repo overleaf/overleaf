@@ -1,0 +1,673 @@
+
+
+diff --git a/services/history-v1/storage/scripts/back_fill_file_hash.mjs b/services/history-v1/storage/scripts/back_fill_file_hash.mjs
+index c0fdda35d8f..09212d426e3 100644
+--- a/services/history-v1/storage/scripts/back_fill_file_hash.mjs
++++ b/services/history-v1/storage/scripts/back_fill_file_hash.mjs
+@@ -83,7 +83,7 @@ ObjectId.cacheHexString = true
+  */
+ function parseArgs() {
+   const PUBLIC_LAUNCH_DATE = new Date('2012-01-01T00:00:00Z')
+-  const DEFAULT_OUTPUT_FILE = `file-migration-${new Date()
++  const DEFAULT_OUTPUT_FILE = `/var/log/overleaf/file-migration-${new Date()
+     .toISOString()
+     .replace(/[:.]/g, '_')}.log`
+
+@@ -208,7 +208,7 @@ is equivalent to
+     PROCESS_HASHED_FILES: !args['skip-hashed-files'],
+     PROCESS_BLOBS: !args['skip-existing-blobs'],
+     DRY_RUN: args['dry-run'],
+-    OUTPUT_FILE: args.output,
++    OUTPUT_FILE: args.report ? '-' : args.output,
+     BATCH_RANGE_START,
+     BATCH_RANGE_END,
+     LOGGING_IDENTIFIER: args['logging-id'] || BATCH_RANGE_START,
+@@ -256,6 +256,9 @@ const LOGGING_INTERVAL = parseInt(process.env.LOGGING_INTERVAL || '60000', 10)
+ const SLEEP_BEFORE_EXIT = parseInt(process.env.SLEEP_BEFORE_EXIT || '1000', 10)
+
+ // Log output to a file
++if (OUTPUT_FILE !== '-') {
++  console.warn(`Writing logs into ${OUTPUT_FILE}`)
++}
+ logger.initialize('file-migration', {
+   streams: [
+     {
+diff --git a/services/history-v1/test/acceptance/js/storage/back_fill_file_hash.test.mjs b/services/history-v1/test/acceptance/js/storage/back_fill_file_hash.test.mjs
+index f6f4a6fb76d..c661ae9bc3f 100644
+--- a/services/history-v1/test/acceptance/js/storage/back_fill_file_hash.test.mjs
++++ b/services/history-v1/test/acceptance/js/storage/back_fill_file_hash.test.mjs
+@@ -501,6 +501,7 @@ describe('back_fill_file_hash script', function () {
+           timeout: TIMEOUT - 500,
+           env: {
+             ...process.env,
++            AWS_SDK_JS_SUPPRESS_MAINTENANCE_MODE_MESSAGE: '1',
+             USER_FILES_BUCKET_NAME,
+             SLEEP_BEFORE_EXIT: '1',
+             ...env,
+@@ -516,6 +517,7 @@ describe('back_fill_file_hash script', function () {
+       }
+       result = { stdout, stderr, status: code }
+     }
++    // Ensure no tmp folder is left behind.
+     expect((await fs.promises.readdir('/tmp')).join(';')).to.not.match(
+       /back_fill_file_hash/
+     )
+
+
+
+diff --git a/services/history-v1/storage/scripts/back_fill_file_hash.mjs b/services/history-v1/storage/scripts/back_fill_file_hash.mjs
+index 09212d426e3..de4fca51db4 100644
+--- a/services/history-v1/storage/scripts/back_fill_file_hash.mjs
++++ b/services/history-v1/storage/scripts/back_fill_file_hash.mjs
+@@ -1373,7 +1373,18 @@ async function main() {
+   console.warn('Done.')
+ }
+
++async function cleanupBufferDir() {
++  try {
++    // Perform non-recursive removal of the BUFFER_DIR. Individual files
++    // should get removed in parallel as part of batch processing.
++    await fs.promises.rmdir(BUFFER_DIR)
++  } catch (err) {
++    console.error(`cleanup of BUFFER_DIR=${BUFFER_DIR} failed`, err)
++  }
++}
++
+ if (DISPLAY_REPORT) {
++  await cleanupBufferDir()
+   console.warn('Displaying report...')
+   await displayReport()
+   process.exit(0)
+@@ -1384,13 +1395,7 @@ try {
+     await main()
+   } finally {
+     printStats(true)
+-    try {
+-      // Perform non-recursive removal of the BUFFER_DIR. Individual files
+-      // should get removed in parallel as part of batch processing.
+-      await fs.promises.rmdir(BUFFER_DIR)
+-    } catch (err) {
+-      console.error(`cleanup of BUFFER_DIR=${BUFFER_DIR} failed`, err)
+-    }
++    await cleanupBufferDir()
+   }
+
+   let code = 0
+
+
+
+diff --git a/services/history-v1/storage/scripts/back_fill_file_hash.mjs b/services/history-v1/storage/scripts/back_fill_file_hash.mjs
+index de4fca51db4..e9a7721944c 100644
+--- a/services/history-v1/storage/scripts/back_fill_file_hash.mjs
++++ b/services/history-v1/storage/scripts/back_fill_file_hash.mjs
+@@ -316,6 +316,7 @@ async function getStatsForCollection(
+     projectsWithAllHashes: 0,
+     fileCount: 0,
+     fileWithHashCount: 0,
++    fileMissingInHistoryCount: 0,
+   }
+   // Pick a random sample of projects and estimate the number of files without hashes
+   const result = await collection
+@@ -342,25 +343,43 @@ async function getStatsForCollection(
+     const filesWithoutHash = fileTree.match(/\{"_id":"[0-9a-f]{24}"\}/g) || []
+     // count the number of files with a hash, these are uniquely identified
+     // by the number of "hash" strings due to the filtering
+-    const filesWithHash = fileTree.match(/"hash"/g) || []
++    const filesWithHash = fileTree.match(/"hash":"[0-9a-f]{40}"/g) || []
+     stats.fileCount += filesWithoutHash.length + filesWithHash.length
+     stats.fileWithHashCount += filesWithHash.length
+     stats.projectCount++
+     stats.projectsWithAllHashes += filesWithoutHash.length === 0 ? 1 : 0
++    const projectId = project._id.toString()
++    const { blobs: perProjectBlobs } = await getProjectBlobsBatch([projectId])
++    const blobs = new Set(
++      (perProjectBlobs.get(projectId) || []).map(b => b.getHash())
++    )
++    const uniqueHashes = new Set(filesWithHash.map(m => m.slice(8, 48)))
++    for (const hash of uniqueHashes) {
++      if (blobs.has(hash) || GLOBAL_BLOBS.has(hash)) continue
++      stats.fileMissingInHistoryCount++
++    }
+   }
+   console.log(`Sampled stats for ${name}:`)
+   const fractionSampled = stats.projectCount / collectionCount
+-  const percentageSampled = (fractionSampled * 100).toFixed(1)
++  const percentageSampled = (fractionSampled * 100).toFixed(0)
+   const fractionConverted = stats.projectsWithAllHashes / stats.projectCount
+-  const percentageConverted = (fractionConverted * 100).toFixed(1)
++  const percentageConverted = (fractionConverted * 100).toFixed(0)
++  const fractionMissing = stats.fileMissingInHistoryCount / stats.fileCount
++  const percentageMissing = (fractionMissing * 100).toFixed(0)
+   console.log(
+-    `- Sampled ${name}: ${stats.projectCount} (${percentageSampled}%)`
++    `- Sampled ${name}: ${stats.projectCount} (${percentageSampled}% of all ${name})`
+   )
+   console.log(
+     `- Sampled ${name} with all hashes present: ${stats.projectsWithAllHashes}`
+   )
+   console.log(
+-    `- Percentage of ${name} converted: ${percentageConverted}% (estimated)`
++    `- Percentage of ${name} that need back-filling hashes: ${percentageConverted}% (estimated)`
++  )
++  console.log(
++    `- Sampled ${name} have ${stats.fileCount} files that need to be checked against the full project history system.`
++  )
++  console.log(
++    `- Sampled ${name} have ${stats.fileMissingInHistoryCount} files that need to be uploaded to the full project history system (estimating ${percentageMissing}% of all files).`
+   )
+ }
+
+@@ -369,13 +388,15 @@ async function getStatsForCollection(
+  * including counts and estimated progress based on a sample.
+  */
+ async function displayReport() {
+-  const projectsCountResult = await projectsCollection.countDocuments()
++  const projectsCountResult = await projectsCollection.estimatedDocumentCount()
+   const deletedProjectsCountResult =
+-    await deletedProjectsCollection.countDocuments()
++    await deletedProjectsCollection.estimatedDocumentCount()
+   const sampleSize = 1000
+   console.log('Current status:')
+-  console.log(`- Projects: ${projectsCountResult}`)
+-  console.log(`- Deleted projects: ${deletedProjectsCountResult}`)
++  console.log(`- Total number of projects: ${projectsCountResult}`)
++  console.log(
++    `- Total number of deleted projects: ${deletedProjectsCountResult}`
++  )
+   console.log(`Sampling ${sampleSize} projects to estimate progress...`)
+   await getStatsForCollection(
+     sampleSize,
+diff --git a/services/history-v1/test/acceptance/js/storage/back_fill_file_hash.test.mjs b/services/history-v1/test/acceptance/js/storage/back_fill_file_hash.test.mjs
+index c661ae9bc3f..7248e74cb3f 100644
+--- a/services/history-v1/test/acceptance/js/storage/back_fill_file_hash.test.mjs
++++ b/services/history-v1/test/acceptance/js/storage/back_fill_file_hash.test.mjs
+@@ -481,21 +481,14 @@ describe('back_fill_file_hash script', function () {
+   /**
+    * @param {Array<string>} args
+    * @param {Record<string, string>} env
+-   * @param {boolean} shouldHaveWritten
+-   * @return {Promise<{result, stats: any}>}
++   * @return {Promise<{result: { stdout: string, stderr: string, status: number }, stats: any}>}
+    */
+-  async function tryRunScript(args = [], env = {}, shouldHaveWritten) {
++  async function rawRunScript(args = [], env = {}) {
+     let result
+     try {
+       result = await promisify(execFile)(
+         process.argv0,
+-        [
+-          'storage/scripts/back_fill_file_hash.mjs',
+-          '--output=-',
+-          '--projects',
+-          '--deleted-projects',
+-          ...args,
+-        ],
++        ['storage/scripts/back_fill_file_hash.mjs', ...args],
+         {
+           encoding: 'utf-8',
+           timeout: TIMEOUT - 500,
+@@ -521,6 +514,20 @@ describe('back_fill_file_hash script', function () {
+     expect((await fs.promises.readdir('/tmp')).join(';')).to.not.match(
+       /back_fill_file_hash/
+     )
++    return result
++  }
++
++  /**
++   * @param {Array<string>} args
++   * @param {Record<string, string>} env
++   * @param {boolean} shouldHaveWritten
++   * @return {Promise<{result, stats: any}>}
++   */
++  async function tryRunScript(args = [], env = {}, shouldHaveWritten) {
++    const result = await rawRunScript(
++      ['--output=-', '--projects', '--deleted-projects', ...args],
++      env
++    )
+     const extraStatsKeys = ['eventLoop', 'readFromGCSThroughputMiBPerSecond']
+     const stats = JSON.parse(
+       result.stderr
+@@ -1078,6 +1085,35 @@ describe('back_fill_file_hash script', function () {
+     })
+     commonAssertions(true)
+   })
++  describe('report mode', function () {
++    let output
++    before('prepare environment', prepareEnvironment)
++    before('run script', async function () {
++      output = await rawRunScript(['--report'], {})
++    })
++    it('should print the report', () => {
++      expect(output.status).to.equal(0)
++      console.log(output.stdout)
++      expect(output.stdout).to.equal(`\
++Current status:
++- Total number of projects: 10
++- Total number of deleted projects: 5
++Sampling 1000 projects to estimate progress...
++Sampled stats for projects:
++- Sampled projects: 9 (90% of all projects)
++- Sampled projects with all hashes present: 5
++- Percentage of projects that need back-filling hashes: 56% (estimated)
++- Sampled projects have 11 files that need to be checked against the full project history system.
++- Sampled projects have 3 files that need to be uploaded to the full project history system (estimating 27% of all files).
++Sampled stats for deleted projects:
++- Sampled deleted projects: 4 (80% of all deleted projects)
++- Sampled deleted projects with all hashes present: 3
++- Percentage of deleted projects that need back-filling hashes: 75% (estimated)
++- Sampled deleted projects have 2 files that need to be checked against the full project history system.
++- Sampled deleted projects have 1 files that need to be uploaded to the full project history system (estimating 50% of all files).
++`)
++    })
++  })
+
+   describe('full run in dry-run mode', function () {
+     let output
+
+
+
+diff --git a/services/history-v1/storage/scripts/back_fill_file_hash.mjs b/services/history-v1/storage/scripts/back_fill_file_hash.mjs
+index e9a7721944c..9c2a9818680 100644
+--- a/services/history-v1/storage/scripts/back_fill_file_hash.mjs
++++ b/services/history-v1/storage/scripts/back_fill_file_hash.mjs
+@@ -79,7 +79,7 @@ ObjectId.cacheHexString = true
+  */
+
+ /**
+- * @return {{PROJECT_IDS_FROM: string, PROCESS_HASHED_FILES: boolean, LOGGING_IDENTIFIER: string, BATCH_RANGE_START: string, BATCH_RANGE_END: string, PROCESS_NON_DELETED_PROJECTS: boolean, PROCESS_DELETED_PROJECTS: boolean, PROCESS_BLOBS: boolean, DRY_RUN: boolean, OUTPUT_FILE: string, DISPLAY_REPORT: boolean}}
++ * @return {{PROJECT_IDS_FROM: string, PROCESS_HASHED_FILES: boolean, LOGGING_IDENTIFIER: string, BATCH_RANGE_START: string, BATCH_RANGE_END: string, PROCESS_NON_DELETED_PROJECTS: boolean, PROCESS_DELETED_PROJECTS: boolean, PROCESS_BLOBS: boolean, DRY_RUN: boolean, OUTPUT_FILE: string, DISPLAY_REPORT: boolean, CONCURRENCY: number, CONCURRENT_BATCHES: number, RETRIES: number, RETRY_DELAY_MS: number, RETRY_FILESTORE_404: boolean, BUFFER_DIR_PREFIX: string, STREAM_HIGH_WATER_MARK: number, LOGGING_INTERVAL: number, SLEEP_BEFORE_EXIT: number }}
+  */
+ function parseArgs() {
+   const PUBLIC_LAUNCH_DATE = new Date('2012-01-01T00:00:00Z')
+@@ -95,6 +95,12 @@ function parseArgs() {
+     { name: 'skip-hashed-files', type: Boolean },
+     { name: 'skip-existing-blobs', type: Boolean },
+     { name: 'from-file', type: String, defaultValue: '' },
++    { name: 'concurrency', type: Number, defaultValue: 10 },
++    { name: 'concurrent-batches', type: Number, defaultValue: 1 },
++    { name: 'stream-high-water-mark', type: Number, defaultValue: 1024 * 1024 },
++    { name: 'retries', type: Number, defaultValue: 10 },
++    { name: 'retry-delay-ms', type: Number, defaultValue: 100 },
++    { name: 'retry-filestore-404', type: Boolean },
+     { name: 'dry-run', alias: 'n', type: Boolean },
+     {
+       name: 'output',
+@@ -114,6 +120,13 @@ function parseArgs() {
+       defaultValue: new Date().toISOString(),
+     },
+     { name: 'logging-id', type: String, defaultValue: '' },
++    { name: 'logging-interval-ms', type: Number, defaultValue: 60_000 },
++    {
++      name: 'buffer-dir-prefix',
++      type: String,
++      defaultValue: '/tmp/back_fill_file_hash-',
++    },
++    { name: 'sleep-before-exit-ms', type: Number, defaultValue: 1_000 },
+   ])
+
+   // If no arguments are provided, display a usage message
+@@ -143,6 +156,8 @@ Logging options:
+                              (default: file-migration-<timestamp>.log)
+   --logging-id <id>          Identifier for logging
+                              (default: BATCH_RANGE_START)
++  --logging-interval-ms <ms> Interval for logging progres stats
++                             (default: 60000, 1min)
+
+ Batch range options:
+   --BATCH_RANGE_START <date> Start date for processing
+@@ -150,10 +165,30 @@ Batch range options:
+   --BATCH_RANGE_END <date>   End date for processing
+                              (default: ${args.BATCH_RANGE_END})
+
++Concurrency:
++  --concurrency <n>          Number of files to process concurrently
++                             (default: 10)
++  --concurrent-batches <n>   Number of project batches to process concurrently
++                             (default: 1)
++  --stream-high-water-mark n In-Memory buffering threshold
++                             (default: 1MiB)
++
++Retries:
++  --retries <n>              Number of times to retry processing a file
++                             (default: 10)
++  --retry-delay-ms <ms>      How long to wait before processing a file again
++                             (default: 100, 100ms)
++  --retry-filestore-404      Retry downloading a file when receiving a 404
++                             (default: false)
++
+ Other options:
+   --report                   Display a report of the current status
+   --dry-run, -n              Perform a dry run without making changes
+   --help, -h                 Show this help message
++  --buffer-dir-prefix <p>    Folder/prefix for buffering files on disk
++                             (default: ${args['buffer-dir-prefix']})
++  --sleep-before-exit-ms <n> Defer exiting from the script
++                             (default: 1000, 1s)
+
+ Typical usage:
+
+@@ -212,8 +247,17 @@ is equivalent to
+     BATCH_RANGE_START,
+     BATCH_RANGE_END,
+     LOGGING_IDENTIFIER: args['logging-id'] || BATCH_RANGE_START,
++    LOGGING_INTERVAL: args['logging-interval-ms'],
+     PROJECT_IDS_FROM: args['from-file'],
+     DISPLAY_REPORT: args.report,
++    CONCURRENCY: args.concurrency,
++    CONCURRENT_BATCHES: args['concurrent-batches'],
++    STREAM_HIGH_WATER_MARK: args['stream-high-water-mark'],
++    RETRIES: args.retries,
++    RETRY_DELAY_MS: args['retry-delay-ms'],
++    RETRY_FILESTORE_404: args['retry-filestore-404'],
++    BUFFER_DIR_PREFIX: args['buffer-dir-prefix'],
++    SLEEP_BEFORE_EXIT: args['sleep-before-exit-ms'],
+   }
+ }
+
+@@ -229,6 +273,15 @@ const {
+   LOGGING_IDENTIFIER,
+   PROJECT_IDS_FROM,
+   DISPLAY_REPORT,
++  CONCURRENCY,
++  CONCURRENT_BATCHES,
++  RETRIES,
++  RETRY_DELAY_MS,
++  RETRY_FILESTORE_404,
++  BUFFER_DIR_PREFIX,
++  STREAM_HIGH_WATER_MARK,
++  LOGGING_INTERVAL,
++  SLEEP_BEFORE_EXIT,
+ } = parseArgs()
+
+ // We need to handle the start and end differently as ids of deleted projects are created at time of deletion.
+@@ -236,24 +289,7 @@ if (process.env.BATCH_RANGE_START || process.env.BATCH_RANGE_END) {
+   throw new Error('use --BATCH_RANGE_START and --BATCH_RANGE_END')
+ }
+
+-// Concurrency for downloading from GCS and updating hashes in mongo
+-const CONCURRENCY = parseInt(process.env.CONCURRENCY || '100', 10)
+-const CONCURRENT_BATCHES = parseInt(process.env.CONCURRENT_BATCHES || '2', 10)
+-// Retries for processing a given file
+-const RETRIES = parseInt(process.env.RETRIES || '10', 10)
+-const RETRY_DELAY_MS = parseInt(process.env.RETRY_DELAY_MS || '100', 10)
+-
+-const RETRY_FILESTORE_404 = process.env.RETRY_FILESTORE_404 === 'true'
+-const BUFFER_DIR = fs.mkdtempSync(
+-  process.env.BUFFER_DIR_PREFIX || '/tmp/back_fill_file_hash-'
+-)
+-// https://nodejs.org/api/stream.html#streamgetdefaulthighwatermarkobjectmode
+-const STREAM_HIGH_WATER_MARK = parseInt(
+-  process.env.STREAM_HIGH_WATER_MARK || (64 * 1024).toString(),
+-  10
+-)
+-const LOGGING_INTERVAL = parseInt(process.env.LOGGING_INTERVAL || '60000', 10)
+-const SLEEP_BEFORE_EXIT = parseInt(process.env.SLEEP_BEFORE_EXIT || '1000', 10)
++const BUFFER_DIR = fs.mkdtempSync(BUFFER_DIR_PREFIX)
+
+ // Log output to a file
+ if (OUTPUT_FILE !== '-') {
+@@ -416,7 +452,7 @@ async function displayReport() {
+   )
+ }
+
+-// Filestore endpoint location
++// Filestore endpoint location (configured by /etc/overleaf/env.sh)
+ const FILESTORE_HOST = process.env.FILESTORE_HOST || '127.0.0.1'
+ const FILESTORE_PORT = process.env.FILESTORE_PORT || '3009'
+
+diff --git a/services/history-v1/test/acceptance/js/storage/back_fill_file_hash.test.mjs b/services/history-v1/test/acceptance/js/storage/back_fill_file_hash.test.mjs
+index 7248e74cb3f..601cea13b6a 100644
+--- a/services/history-v1/test/acceptance/js/storage/back_fill_file_hash.test.mjs
++++ b/services/history-v1/test/acceptance/js/storage/back_fill_file_hash.test.mjs
+@@ -61,9 +61,8 @@ function objectIdFromTime(timestamp) {
+
+ const PRINT_IDS_AND_HASHES_FOR_DEBUGGING = false
+
+-describe('back_fill_file_hash script', function () {
++describe.only('back_fill_file_hash script', function () {
+   this.timeout(TIMEOUT)
+-  const USER_FILES_BUCKET_NAME = 'fake-user-files-gcs'
+
+   const projectId0 = objectIdFromTime('2017-01-01T00:00:00Z')
+   const projectId1 = objectIdFromTime('2017-01-01T00:01:00Z')
+@@ -480,24 +479,24 @@ describe('back_fill_file_hash script', function () {
+
+   /**
+    * @param {Array<string>} args
+-   * @param {Record<string, string>} env
+    * @return {Promise<{result: { stdout: string, stderr: string, status: number }, stats: any}>}
+    */
+-  async function rawRunScript(args = [], env = {}) {
++  async function rawRunScript(args = []) {
+     let result
+     try {
+       result = await promisify(execFile)(
+         process.argv0,
+-        ['storage/scripts/back_fill_file_hash.mjs', ...args],
++        [
++          'storage/scripts/back_fill_file_hash.mjs',
++          '--sleep-before-exit-ms=1',
++          ...args,
++        ],
+         {
+           encoding: 'utf-8',
+           timeout: TIMEOUT - 500,
+           env: {
+             ...process.env,
+             AWS_SDK_JS_SUPPRESS_MAINTENANCE_MODE_MESSAGE: '1',
+-            USER_FILES_BUCKET_NAME,
+-            SLEEP_BEFORE_EXIT: '1',
+-            ...env,
+             LOG_LEVEL: 'warn', // Override LOG_LEVEL of acceptance tests
+           },
+         }
+@@ -519,15 +518,16 @@ describe('back_fill_file_hash script', function () {
+
+   /**
+    * @param {Array<string>} args
+-   * @param {Record<string, string>} env
+    * @param {boolean} shouldHaveWritten
+    * @return {Promise<{result, stats: any}>}
+    */
+-  async function tryRunScript(args = [], env = {}, shouldHaveWritten) {
+-    const result = await rawRunScript(
+-      ['--output=-', '--projects', '--deleted-projects', ...args],
+-      env
+-    )
++  async function tryRunScript(args = [], shouldHaveWritten) {
++    const result = await rawRunScript([
++      '--output=-',
++      '--projects',
++      '--deleted-projects',
++      ...args,
++    ])
+     const extraStatsKeys = ['eventLoop', 'readFromGCSThroughputMiBPerSecond']
+     const stats = JSON.parse(
+       result.stderr
+@@ -558,12 +558,11 @@ describe('back_fill_file_hash script', function () {
+
+   /**
+    * @param {Array<string>} args
+-   * @param {Record<string, string>} env
+    * @param {boolean} shouldHaveWritten
+    * @return {Promise<{result, stats: any}>}
+    */
+-  async function runScript(args = [], env = {}, shouldHaveWritten = true) {
+-    const { stats, result } = await tryRunScript(args, env, shouldHaveWritten)
++  async function runScript(args = [], shouldHaveWritten = true) {
++    const { stats, result } = await tryRunScript(args, shouldHaveWritten)
+     if (result.status !== 0) {
+       console.log(result)
+       expect(result).to.have.property('status', 0)
+@@ -812,7 +811,6 @@ describe('back_fill_file_hash script', function () {
+     it('should process nothing on re-run', async function () {
+       const rerun = await runScript(
+         !processHashedFiles ? ['--skip-hashed-files'] : [],
+-        {},
+         false
+       )
+       let stats = {
+@@ -937,10 +935,11 @@ describe('back_fill_file_hash script', function () {
+     it('should gracefully handle fatal errors', async function () {
+       mockFilestore.deleteObject(projectId0, fileId0)
+       const t0 = Date.now()
+-      const { stats, result } = await tryRunScript(['--skip-hashed-files'], {
+-        RETRIES: '10',
+-        RETRY_DELAY_MS: '1000',
+-      })
++      const { stats, result } = await tryRunScript([
++        '--skip-hashed-files',
++        '--retries=10',
++        '--retry-delay-ms=1000',
++      ])
+       const t1 = Date.now()
+       expectNotFoundError(result, 'failed to process file')
+       expect(result.status).to.equal(1)
+@@ -972,11 +971,12 @@ describe('back_fill_file_hash script', function () {
+           value: { stats, result },
+         },
+       ] = await Promise.allSettled([
+-        tryRunScript(['--skip-hashed-files'], {
+-          RETRY_DELAY_MS: '100',
+-          RETRIES: '60',
+-          RETRY_FILESTORE_404: 'true', // 404s are the easiest to simulate in tests
+-        }),
++        tryRunScript([
++          '--skip-hashed-files',
++          '--retries=60',
++          '--retry-delay-ms=1000',
++          '--retry-filestore-404',
++        ]),
+         restoreFileAfter5s(),
+       ])
+       expectNotFoundError(result, 'failed to process file, trying again')
+@@ -998,9 +998,7 @@ describe('back_fill_file_hash script', function () {
+     let output
+     before('prepare environment', prepareEnvironment)
+     before('run script', async function () {
+-      output = await runScript(['--skip-hashed-files'], {
+-        CONCURRENCY: '1',
+-      })
++      output = await runScript(['--skip-hashed-files', '--concurrency=1'])
+     })
+
+     /**
+@@ -1067,10 +1065,10 @@ describe('back_fill_file_hash script', function () {
+     let output1, output2
+     before('prepare environment', prepareEnvironment)
+     before('run script without hashed files', async function () {
+-      output1 = await runScript(['--skip-hashed-files'], {})
++      output1 = await runScript(['--skip-hashed-files'])
+     })
+     before('run script with hashed files', async function () {
+-      output2 = await runScript([], {})
++      output2 = await runScript([])
+     })
+     it('should print stats for the first run without hashed files', function () {
+       expect(output1.stats).deep.equal(STATS_ALL)
+@@ -1089,7 +1087,7 @@ describe('back_fill_file_hash script', function () {
+     let output
+     before('prepare environment', prepareEnvironment)
+     before('run script', async function () {
+-      output = await rawRunScript(['--report'], {})
++      output = await rawRunScript(['--report'])
+     })
+     it('should print the report', () => {
+       expect(output.status).to.equal(0)
+@@ -1127,13 +1125,7 @@ Sampled stats for deleted projects:
+         .toArray()
+     })
+     before('run script', async function () {
+-      output = await runScript(
+-        ['--dry-run'],
+-        {
+-          CONCURRENCY: '1',
+-        },
+-        false
+-      )
++      output = await runScript(['--dry-run', '--concurrency=1'], false)
+     })
+
+     it('should print stats for dry-run mode', function () {
+@@ -1174,9 +1166,7 @@ Sampled stats for deleted projects:
+     let output
+     before('prepare environment', prepareEnvironment)
+     before('run script', async function () {
+-      output = await runScript(['--skip-hashed-files'], {
+-        CONCURRENCY: '10',
+-      })
++      output = await runScript(['--skip-hashed-files', '--concurrency=10'])
+     })
+     it('should print stats', function () {
+       expect(output.stats).deep.equal(STATS_ALL)
+@@ -1184,13 +1174,14 @@ Sampled stats for deleted projects:
+     commonAssertions()
+   })
+
+-  describe('full run STREAM_HIGH_WATER_MARK=1MB', function () {
++  describe('full run STREAM_HIGH_WATER_MARK=64kiB', function () {
+     let output
+     before('prepare environment', prepareEnvironment)
+     before('run script', async function () {
+-      output = await runScript(['--skip-hashed-files'], {
+-        STREAM_HIGH_WATER_MARK: (1024 * 1024).toString(),
+-      })
++      output = await runScript([
++        '--skip-hashed-files',
++        `--stream-high-water-mark=${64 * 1024}`,
++      ])
+     })
+     it('should print stats', function () {
+       expect(output.stats).deep.equal(STATS_ALL)
+@@ -1202,7 +1193,7 @@ Sampled stats for deleted projects:
+     let output
+     before('prepare environment', prepareEnvironment)
+     before('run script', async function () {
+-      output = await runScript([], {})
++      output = await runScript([])
+     })
+     it('should print stats', function () {
+       expect(output.stats).deep.equal(
+@@ -1231,9 +1222,7 @@ Sampled stats for deleted projects:
+     })
+     let output
+     before('run script', async function () {
+-      output = await runScript(['--skip-hashed-files'], {
+-        CONCURRENCY: '1',
+-      })
++      output = await runScript(['--skip-hashed-files', '--concurrency=1'])
+     })
+
+     it('should print stats', function () {
+@@ -1252,20 +1241,18 @@ Sampled stats for deleted projects:
+     let outputPart0, outputPart1
+     before('prepare environment', prepareEnvironment)
+     before('run script on part 0', async function () {
+-      outputPart0 = await runScript(
+-        ['--skip-hashed-files', `--BATCH_RANGE_END=${edge}`],
+-        {
+-          CONCURRENCY: '1',
+-        }
+-      )
++      outputPart0 = await runScript([
++        '--skip-hashed-files',
++        `--BATCH_RANGE_END=${edge}`,
++        '--concurrency=1',
++      ])
+     })
+     before('run script on part 1', async function () {
+-      outputPart1 = await runScript(
+-        ['--skip-hashed-files', `--BATCH_RANGE_START=${edge}`],
+-        {
+-          CONCURRENCY: '1',
+-        }
+-      )
++      outputPart1 = await runScript([
++        '--skip-hashed-files',
++        `--BATCH_RANGE_START=${edge}`,
++        '--concurrency=1',
++      ])
+     })
+
+     it('should print stats for part 0', function () {
+

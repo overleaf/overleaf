@@ -8,6 +8,7 @@ const { ObjectId } = require('mongodb')
 const { projects } = require('../../../../storage/lib/mongodb')
 const {
   ChunkVersionConflictError,
+  VersionNotFoundError,
 } = require('../../../../storage/lib/chunk_store/errors')
 
 const {
@@ -396,7 +397,7 @@ describe('chunkStore', function () {
             const newChunk = makeChunk([change], 7)
             await expect(
               chunkStore.create(projectId, newChunk)
-            ).to.be.rejectedWith(ChunkVersionConflictError)
+            ).to.be.rejectedWith(VersionNotFoundError)
             const latestChunk = await chunkStore.loadLatest(projectId)
             expect(latestChunk.toRaw()).to.deep.equal(thirdChunk.toRaw())
           })

@@ -1,7 +1,7 @@
 extends ../../layout-marketing
 
 block content
-	main.content.content-alt#main-content
+	main#main-content.content.content-alt
 		.container
 			.row
 				.col-12.col-md-8.col-md-offset-2.offset-md-2
@@ -20,16 +20,16 @@ block content
 								.col-12.col-md-12
 									form.form(
 										data-ol-regular-form
-										method="POST",
-										action="/project/"+invite.projectId+"/invite/token/"+token+"/accept"
+										method='POST'
+										action='/project/' + invite.projectId + '/invite/token/' + token + '/accept'
 									)
-										input(name='_csrf', type='hidden', value=csrfToken)
-										input(name='token', type='hidden', value=token)
+										input(name='_csrf' type='hidden' value=csrfToken)
+										input(name='token' type='hidden' value=token)
 										.form-group.text-center
 											button.btn.btn-lg.btn-primary(
-												type="submit"
+												type='submit'
 												data-ol-disabled-inflight
 											)
-												span(data-ol-inflight="idle") #{translate("join_project")}
-												span(hidden data-ol-inflight="pending") #{translate("joining")}…
+												span(data-ol-inflight='idle') #{translate("join_project")}
+												span(hidden data-ol-inflight='pending') #{translate("joining")}…
 										.form-group.text-center

@@ -105,12 +105,18 @@
         > .dropdown-menu {
           // navbar + new-project spacing + new-project button height (36px) + extra padding
           max-height: calc(
-            100vh - #{$header-height} - var(--spacing-03) - var(--spacing-08) - 36px - var(
-                --spacing-05
-              )
+            100vh - #{$header-height} - var(--spacing-03) - var(--spacing-08) -
+              36px - var(--spacing-05)
           );
           overflow: auto;
         }
+      }
+
+      nav {
+        display: flex;
+        flex-direction: column;
+        flex: 1 1 auto;
+        min-height: 0;
       }
 
       .project-list-sidebar-scroll {
@@ -256,6 +262,12 @@
       display: flex;
       flex-direction: column;
 
+      > * {
+        @include media-breakpoint-up(md) {
+          border-left: 1px solid var(--border-divider);
+        }
+      }
+
       .project-ds-nav-content {
         flex-grow: 1;
         overflow-y: auto;
@@ -264,9 +276,19 @@
 
         @include media-breakpoint-up(md) {
           border-top-left-radius: var(--border-radius-large);
-          border-left: 1px solid var(--border-divider);
           border-top: 1px solid var(--border-divider);
         }
+      }
+
+      .cookie-banner {
+        position: static;
+        background-color: var(--bg-light-primary);
+
+        // Remove the parts of the shadow that stick out of the sides
+        clip-path: inset(-13px 0 0 0);
+
+        // Prevent the cookie banner being overlaid on top of the navigation
+        z-index: auto;
       }
     }
   }

@@ -155,28 +155,32 @@ describe('UserPagesController', function () {
 
     ctx.UserPagesController = (await import(modulePath)).default
     ctx.req = new MockRequest()
+    ctx.req.capabilitySet = new Set()
     ctx.req.session.user = ctx.user
     ctx.res = new MockResponse()
   })
 
   describe('registerPage', function () {
-    it('should render the register page', function (ctx) {
-      return new Promise(resolve => {
+    it('should render the register page', async function (ctx) {
+      await new Promise((resolve, reject) => {
         ctx.res.callback = () => {
           ctx.res.renderedTemplate.should.equal('user/register')
           resolve()
         }
-        ctx.UserPagesController.registerPage(ctx.req, ctx.res, resolve)
+        ctx.UserPagesController.registerPage(
+          ctx.req,
+          ctx.res,
+          ctx.rejectOnError(reject)
+        )
       })
     })
 
-    it('should set sharedProjectData', function (ctx) {
-      return new Promise(resolve => {
-        ctx.req.session.sharedProjectData = {
-          project_name: 'myProject',
-          user_first_name: 'user_first_name_here',
-        }
-
+    it('should set sharedProjectData', async function (ctx) {
+      ctx.req.session.sharedProjectData = {
+        project_name: 'myProject',
+        user_first_name: 'user_first_name_here',
+      }
+      await new Promise((resolve, reject) => {
         ctx.res.callback = () => {
           ctx.res.renderedVariables.sharedProjectData.project_name.should.equal(
             'myProject'
@@ -186,12 +190,16 @@ describe('UserPagesController', function () {
           )
           resolve()
         }
-        ctx.UserPagesController.registerPage(ctx.req, ctx.res, resolve)
+        ctx.UserPagesController.registerPage(
+          ctx.req,
+          ctx.res,
+          ctx.rejectOnError(reject)
+        )
       })
     })
 
-    it('should set newTemplateData', function (ctx) {
-      return new Promise(resolve => {
+    it('should set newTemplateData', async function (ctx) {
+      await new Promise((resolve, reject) => {
         ctx.req.session.templateData = { templateName: 'templateName' }
 
         ctx.res.callback = () => {
@@ -200,12 +208,16 @@ describe('UserPagesController', function () {
           )
           resolve()
         }
-        ctx.UserPagesController.registerPage(ctx.req, ctx.res, resolve)
+        ctx.UserPagesController.registerPage(
+          ctx.req,
+          ctx.res,
+          ctx.rejectOnError(reject)
+        )
       })
     })
 
-    it('should not set the newTemplateData if there is nothing in the session', function (ctx) {
-      return new Promise(resolve => {
+    it('should not set the newTemplateData if there is nothing in the session', async function (ctx) {
+      await new Promise((resolve, reject) => {
         ctx.res.callback = () => {
           assert.equal(
             ctx.res.renderedVariables.newTemplateData.templateName,
@@ -213,19 +225,27 @@ describe('UserPagesController', function () {
           )
           resolve()
         }
-        ctx.UserPagesController.registerPage(ctx.req, ctx.res, resolve)
+        ctx.UserPagesController.registerPage(
+          ctx.req,
+          ctx.res,
+          ctx.rejectOnError(reject)
+        )
       })
     })
   })
 
   describe('loginForm', function () {
-    it('should render the login page', function (ctx) {
-      return new Promise(resolve => {
+    it('should render the login page', async function (ctx) {
+      await new Promise((resolve, reject) => {
         ctx.res.callback = () => {
           ctx.res.renderedTemplate.should.equal('user/login')
           resolve()
         }
-        ctx.UserPagesController.loginPage(ctx.req, ctx.res, resolve)
+        ctx.UserPagesController.loginPage(
+          ctx.req,
+          ctx.res,
+          ctx.rejectOnError(reject)
+        )
       })
     })
 
@@ -238,8 +258,8 @@ describe('UserPagesController', function () {
         ctx.req.query.redir = '/somewhere/in/particular'
       })
 
-      it('should set a redirect', function (ctx) {
-        return new Promise(resolve => {
+      it('should set a redirect', async function (ctx) {
+        await new Promise((resolve, reject) => {
           ctx.res.callback = page => {
             ctx.AuthenticationController.setRedirectInSession.callCount.should.equal(
               1
@@ -249,7 +269,11 @@ describe('UserPagesController', function () {
             ).to.equal(ctx.req.query.redir)
             resolve()
           }
-          ctx.UserPagesController.loginPage(ctx.req, ctx.res, resolve)
+          ctx.UserPagesController.loginPage(
+            ctx.req,
+            ctx.res,
+            ctx.rejectOnError(reject)
+          )
         })
       })
     })
@@ -260,18 +284,22 @@ describe('UserPagesController', function () {
       ctx.UserSessionsManager.getAllUserSessions.callsArgWith(2, null, [])
     })
 
-    it('should render user/sessions', function (ctx) {
-      return new Promise(resolve => {
+    it('should render user/sessions', async function (ctx) {
+      await new Promise((resolve, reject) => {
         ctx.res.callback = () => {
           ctx.res.renderedTemplate.should.equal('user/sessions')
           resolve()
         }
-        ctx.UserPagesController.sessionsPage(ctx.req, ctx.res, resolve)
+        ctx.UserPagesController.sessionsPage(
+          ctx.req,
+          ctx.res,
+          ctx.rejectOnError(reject)
+        )
       })
     })
 
-    it('should include current session data in the view', function (ctx) {
-      return new Promise(resolve => {
+    it('should include current session data in the view', async function (ctx) {
+      await new Promise((resolve, reject) => {
         ctx.res.callback = () => {
           expect(ctx.res.renderedVariables.currentSession).to.deep.equal({
             ip_address: '1.1.1.1',
@@ -279,17 +307,25 @@ describe('UserPagesController', function () {
           })
           resolve()
         }
-        ctx.UserPagesController.sessionsPage(ctx.req, ctx.res, resolve)
+        ctx.UserPagesController.sessionsPage(
+          ctx.req,
+          ctx.res,
+          ctx.rejectOnError(reject)
+        )
       })
     })
 
-    it('should have called getAllUserSessions', function (ctx) {
-      return new Promise(resolve => {
+    it('should have called getAllUserSessions', async function (ctx) {
+      await new Promise((resolve, reject) => {
         ctx.res.callback = page => {
           ctx.UserSessionsManager.getAllUserSessions.callCount.should.equal(1)
           resolve()
         }
-        ctx.UserPagesController.sessionsPage(ctx.req, ctx.res, resolve)
+        ctx.UserPagesController.sessionsPage(
+          ctx.req,
+          ctx.res,
+          ctx.rejectOnError(reject)
+        )
       })
     })
 
@@ -301,8 +337,8 @@ describe('UserPagesController', function () {
         )
       })
 
-      it('should call next with an error', function (ctx) {
-        return new Promise(resolve => {
+      it('should call next with an error', async function (ctx) {
+        await new Promise(resolve => {
           ctx.next = err => {
             assert(err !== null)
             assert(err instanceof Error)
@@ -319,29 +355,37 @@ describe('UserPagesController', function () {
       ctx.UserGetter.getUser = sinon.stub().yields(null, ctx.user)
     })
 
-    it('render page with subscribed status', function (ctx) {
-      return new Promise(resolve => {
-        ctx.NewsletterManager.subscribed.yields(null, true)
+    it('render page with subscribed status', async function (ctx) {
+      ctx.NewsletterManager.subscribed.yields(null, true)
+      await new Promise((resolve, reject) => {
         ctx.res.callback = () => {
           ctx.res.renderedTemplate.should.equal('user/email-preferences')
           ctx.res.renderedVariables.title.should.equal('newsletter_info_title')
           ctx.res.renderedVariables.subscribed.should.equal(true)
           resolve()
         }
-        ctx.UserPagesController.emailPreferencesPage(ctx.req, ctx.res, resolve)
+        ctx.UserPagesController.emailPreferencesPage(
+          ctx.req,
+          ctx.res,
+          ctx.rejectOnError(reject)
+        )
       })
     })
 
-    it('render page with unsubscribed status', function (ctx) {
-      return new Promise(resolve => {
-        ctx.NewsletterManager.subscribed.yields(null, false)
+    it('render page with unsubscribed status', async function (ctx) {
+      ctx.NewsletterManager.subscribed.yields(null, false)
+      await new Promise((resolve, reject) => {
         ctx.res.callback = () => {
           ctx.res.renderedTemplate.should.equal('user/email-preferences')
           ctx.res.renderedVariables.title.should.equal('newsletter_info_title')
           ctx.res.renderedVariables.subscribed.should.equal(false)
           resolve()
         }
-        ctx.UserPagesController.emailPreferencesPage(ctx.req, ctx.res, resolve)
+        ctx.UserPagesController.emailPreferencesPage(
+          ctx.req,
+          ctx.res,
+          ctx.rejectOnError(reject)
+        )
       })
     })
   })
@@ -354,55 +398,71 @@ describe('UserPagesController', function () {
       ctx.UserGetter.promises.getUser = sinon.stub().resolves(ctx.user)
     })
 
-    it('should render user/settings', function (ctx) {
-      return new Promise(resolve => {
+    it('should render user/settings', async function (ctx) {
+      await new Promise((resolve, reject) => {
         ctx.res.callback = () => {
           ctx.res.renderedTemplate.should.equal('user/settings')
           resolve()
         }
-        ctx.UserPagesController.settingsPage(ctx.req, ctx.res, resolve)
+        ctx.UserPagesController.settingsPage(
+          ctx.req,
+          ctx.res,
+          ctx.rejectOnError(reject)
+        )
       })
     })
 
-    it('should send user', function (ctx) {
-      return new Promise(resolve => {
+    it('should send user', async function (ctx) {
+      await new Promise((resolve, reject) => {
         ctx.res.callback = () => {
           ctx.res.renderedVariables.user.id.should.equal(ctx.user._id)
           ctx.res.renderedVariables.user.email.should.equal(ctx.user.email)
           resolve()
         }
-        ctx.UserPagesController.settingsPage(ctx.req, ctx.res, resolve)
+        ctx.UserPagesController.settingsPage(
+          ctx.req,
+          ctx.res,
+          ctx.rejectOnError(reject)
+        )
       })
     })
 
-    it("should set 'shouldAllowEditingDetails' to true", function (ctx) {
-      return new Promise(resolve => {
+    it("should set 'shouldAllowEditingDetails' to true", async function (ctx) {
+      await new Promise((resolve, reject) => {
         ctx.res.callback = () => {
           ctx.res.renderedVariables.shouldAllowEditingDetails.should.equal(true)
           resolve()
         }
-        ctx.UserPagesController.settingsPage(ctx.req, ctx.res, resolve)
+        ctx.UserPagesController.settingsPage(
+          ctx.req,
+          ctx.res,
+          ctx.rejectOnError(reject)
+        )
       })
     })
 
-    it('should restructure thirdPartyIdentifiers data for template use', function (ctx) {
-      return new Promise(resolve => {
-        const expectedResult = {
-          google: 'testId',
-        }
+    it('should restructure thirdPartyIdentifiers data for template use', async function (ctx) {
+      const expectedResult = {
+        google: 'testId',
+      }
+      await new Promise((resolve, reject) => {
         ctx.res.callback = () => {
           expect(ctx.res.renderedVariables.thirdPartyIds).to.include(
             expectedResult
           )
           resolve()
         }
-        ctx.UserPagesController.settingsPage(ctx.req, ctx.res, resolve)
+        ctx.UserPagesController.settingsPage(
+          ctx.req,
+          ctx.res,
+          ctx.rejectOnError(reject)
+        )
       })
     })
 
-    it("should set and clear 'projectSyncSuccessMessage'", function (ctx) {
-      return new Promise(resolve => {
-        ctx.req.session.projectSyncSuccessMessage = 'Some Sync Success'
+    it("should set and clear 'projectSyncSuccessMessage'", async function (ctx) {
+      ctx.req.session.projectSyncSuccessMessage = 'Some Sync Success'
+      await new Promise((resolve, reject) => {
         ctx.res.callback = () => {
           ctx.res.renderedVariables.projectSyncSuccessMessage.should.equal(
             'Some Sync Success'
@@ -410,12 +470,16 @@ describe('UserPagesController', function () {
           expect(ctx.req.session.projectSyncSuccessMessage).to.not.exist
           resolve()
         }
-        ctx.UserPagesController.settingsPage(ctx.req, ctx.res, resolve)
+        ctx.UserPagesController.settingsPage(
+          ctx.req,
+          ctx.res,
+          ctx.rejectOnError(reject)
+        )
       })
     })
 
-    it('should cast refProviders to booleans', function (ctx) {
-      return new Promise(resolve => {
+    it('should cast refProviders to booleans', async function (ctx) {
+      await new Promise((resolve, reject) => {
         ctx.res.callback = () => {
           expect(ctx.res.renderedVariables.user.refProviders).to.deep.equal({
             mendeley: true,
@@ -424,53 +488,60 @@ describe('UserPagesController', function () {
           })
           resolve()
         }
-        ctx.UserPagesController.settingsPage(ctx.req, ctx.res, resolve)
+        ctx.UserPagesController.settingsPage(
+          ctx.req,
+          ctx.res,
+          ctx.rejectOnError(reject)
+        )
       })
     })
 
-    it('should send the correct managed user admin email', function (ctx) {
-      return new Promise(resolve => {
+    it('should send the correct managed user admin email', async function (ctx) {
+      await new Promise((resolve, reject) => {
         ctx.res.callback = () => {
           expect(
             ctx.res.renderedVariables.currentManagedUserAdminEmail
           ).to.equal(ctx.adminEmail)
           resolve()
         }
-        ctx.UserPagesController.settingsPage(ctx.req, ctx.res, resolve)
+        ctx.UserPagesController.settingsPage(
+          ctx.req,
+          ctx.res,
+          ctx.rejectOnError(reject)
+        )
       })
     })
 
-    it('should send info for groups with SSO enabled', function (ctx) {
-      return new Promise(resolve => {
-        ctx.user.enrollment = {
-          sso: [
-            {
-              groupId: 'abc123abc123',
-              primary: true,
-              linkedAt: new Date(),
-            },
-          ],
-        }
-        const group1 = {
-          _id: 'abc123abc123',
-          teamName: 'Group SSO Rulz',
-          admin_id: {
-            email: 'admin.email@ssolove.com',
+    it('should send info for groups with SSO enabled', async function (ctx) {
+      ctx.user.enrollment = {
+        sso: [
+          {
+            groupId: 'abc123abc123',
+            primary: true,
+            linkedAt: new Date(),
           },
-          linked: true,
-        }
-        const group2 = {
-          _id: 'def456def456',
-          admin_id: {
-            email: 'someone.else@noname.co.uk',
-          },
-          linked: false,
-        }
+        ],
+      }
+      const group1 = {
+        _id: 'abc123abc123',
+        teamName: 'Group SSO Rulz',
+        admin_id: {
+          email: 'admin.email@ssolove.com',
+        },
+        linked: true,
+      }
+      const group2 = {
+        _id: 'def456def456',
+        admin_id: {
+          email: 'someone.else@noname.co.uk',
+        },
+        linked: false,
+      }
 
-        ctx.Modules.promises.hooks.fire
-          .withArgs('getUserGroupsSSOEnrollmentStatus')
-          .resolves([[group1, group2]])
-
+      ctx.Modules.promises.hooks.fire
+        .withArgs('getUserGroupsSSOEnrollmentStatus')
+        .resolves([[group1, group2]])
+      await new Promise((resolve, reject) => {
         ctx.res.callback = () => {
           expect(
             ctx.res.renderedVariables.memberOfSSOEnabledGroups
@@ -491,7 +562,11 @@ describe('UserPagesController', function () {
           resolve()
         }
 
-        ctx.UserPagesController.settingsPage(ctx.req, ctx.res, resolve)
+        ctx.UserPagesController.settingsPage(
+          ctx.req,
+          ctx.res,
+          ctx.rejectOnError(reject)
+        )
       })
     })
 
@@ -504,15 +579,19 @@ describe('UserPagesController', function () {
         delete ctx.settings.ldap
       })
 
-      it('should set "shouldAllowEditingDetails" to false', function (ctx) {
-        return new Promise(resolve => {
+      it('should set "shouldAllowEditingDetails" to false', async function (ctx) {
+        await new Promise((resolve, reject) => {
           ctx.res.callback = () => {
             ctx.res.renderedVariables.shouldAllowEditingDetails.should.equal(
               false
             )
             resolve()
           }
-          ctx.UserPagesController.settingsPage(ctx.req, ctx.res, resolve)
+          ctx.UserPagesController.settingsPage(
+            ctx.req,
+            ctx.res,
+            ctx.rejectOnError(reject)
+          )
         })
       })
     })
@@ -526,15 +605,19 @@ describe('UserPagesController', function () {
         delete ctx.settings.saml
       })
 
-      it('should set "shouldAllowEditingDetails" to false', function (ctx) {
-        return new Promise(resolve => {
+      it('should set "shouldAllowEditingDetails" to false', async function (ctx) {
+        await new Promise((resolve, reject) => {
           ctx.res.callback = () => {
             ctx.res.renderedVariables.shouldAllowEditingDetails.should.equal(
               false
             )
             resolve()
           }
-          ctx.UserPagesController.settingsPage(ctx.req, ctx.res, resolve)
+          ctx.UserPagesController.settingsPage(
+            ctx.req,
+            ctx.res,
+            ctx.rejectOnError(reject)
+          )
         })
       })
     })

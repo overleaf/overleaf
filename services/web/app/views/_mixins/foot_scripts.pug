@@ -1,6 +1,21 @@
-mixin foot-scripts()
+mixin foot-scripts
 	each file in entrypointScripts(entrypoint)
-		script(type="text/javascript", nonce=scriptNonce, src=file, defer=deferScripts)
-	if (settings.devToolbar.enabled)
-		each file in entrypointScripts("devToolbar")
-			script(type="text/javascript", nonce=scriptNonce, src=file, defer=deferScripts)
+		script(type='text/javascript' nonce=scriptNonce src=file defer=deferScripts)
+
+	if settings.devToolbar.enabled
+		each file in entrypointScripts('devToolbar')
+			script(
+				type='text/javascript'
+				nonce=scriptNonce
+				src=file
+				defer=deferScripts
+			)
+
+	if typeof suppressAnalytics == 'undefined'
+		each file in entrypointScripts('tracking')
+			script(
+				type='text/javascript'
+				nonce=scriptNonce
+				src=file
+				defer=deferScripts
+			)

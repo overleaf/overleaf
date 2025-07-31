@@ -539,8 +539,8 @@
 }
 
 @editor-and-logs-pane-toolbars-height: @toolbar-small-height + @toolbar-height;
-@btn-small-height: (@padding-small-vertical * 2)+ (@font-size-small *
-      @line-height-small); // 5px * 2 + 14px * 1.5 = 31px
+@btn-small-height: (@padding-small-vertical * 2)+
+  (@font-size-small * @line-height-small); // 5px * 2 + 14px * 1.5 = 31px
 
 #dropdown-files-logs-pane-list {
   overflow-y: auto;
@@ -548,7 +548,7 @@
     white-space: nowrap;
   }
   max-height: calc(
-    ~'100vh - ' @editor-and-logs-pane-toolbars-height ~' - ' @btn-small-height ~' - '
-      @margin-md
+    ~'100vh - ' @editor-and-logs-pane-toolbars-height ~' - ' @btn-small-height
+      ~' - ' @margin-md
   );
 }

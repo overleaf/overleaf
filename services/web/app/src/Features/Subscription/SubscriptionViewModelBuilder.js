@@ -1,10 +1,8 @@
 // ts-check
 const Settings = require('@overleaf/settings')
 const PlansLocator = require('./PlansLocator')
-const {
-  isStandaloneAiAddOnPlanCode,
-  MEMBERS_LIMIT_ADD_ON_CODE,
-} = require('./PaymentProviderEntities')
+const { isStandaloneAiAddOnPlanCode } = require('./AiHelper')
+const { MEMBERS_LIMIT_ADD_ON_CODE } = require('./PaymentProviderEntities')
 const SubscriptionFormatters = require('./SubscriptionFormatters')
 const SubscriptionLocator = require('./SubscriptionLocator')
 const InstitutionsGetter = require('../Institutions/InstitutionsGetter')
@@ -19,6 +17,7 @@ const { V1ConnectionError } = require('../Errors/Errors')
 const FeaturesHelper = require('./FeaturesHelper')
 const { formatCurrency } = require('../../util/currency')
 const Modules = require('../../infrastructure/Modules')
+const SplitTestHandler = require('../SplitTests/SplitTestHandler')
 
 /**
  * @import { Subscription } from "../../../../types/project/dashboard/subscription"
@@ -34,6 +33,20 @@ function serializeMongooseObject(object) {
   return object && typeof object.toObject === 'function'
     ? object.toObject()
     : object
+}
+
+async function isEligibleForGroupPlan(service, isInTrial) {
+  if (isInTrial) {
+    return false
+  }
+
+  if (service === 'recurly') {
+    return true
+  }
+  const [result] = await Modules.promises.hooks.fire(
+    'canUpgradeFromIndividualToGroup'
+  )
+  return result
 }
 
 async function buildUsersSubscriptionViewModel(user, locale = 'en') {
@@ -114,9 +127,7 @@ async function buildUsersSubscriptionViewModel(user, locale = 'en') {
         _id: group._id,
         planCode: group.planCode,
         teamName: group.teamName,
-        admin_id: {
-          email: group.admin_id.email,
-        },
+        admin_id: { email: group.admin_id.email },
         userIsGroupManager,
       }
 
@@ -143,10 +154,7 @@ async function buildUsersSubscriptionViewModel(user, locale = 'en') {
         planCode: group.planCode,
         groupPlan: group.groupPlan,
         teamName: group.teamName,
-        admin_id: {
-          _id: group.admin_id._id,
-          email: group.admin_id.email,
-        },
+        admin_id: { _id: group.admin_id._id, email: group.admin_id.email },
         features: group.features,
         userIsGroupMember,
       }
@@ -223,6 +231,8 @@ async function buildUsersSubscriptionViewModel(user, locale = 'en') {
 
   if (personalSubscription && paymentRecord && paymentRecord.subscription) {
     // don't return subscription payment information
+    personalSubscription.service =
+      personalSubscription.paymentProvider?.service ?? 'recurly'
     delete personalSubscription.paymentProvider
     delete personalSubscription.recurly
     delete personalSubscription.recurlySubscription_id
@@ -245,6 +255,32 @@ async function buildUsersSubscriptionViewModel(user, locale = 'en') {
     const isInTrial =
       paymentRecord.subscription.trialPeriodEnd &&
       paymentRecord.subscription.trialPeriodEnd.getTime() > Date.now()
+
+    let isEligibleForPause = false
+    const commonPauseConditions =
+      !personalSubscription.pendingPlan &&
+      !personalSubscription.groupPlan &&
+      !isInTrial &&
+      !paymentRecord.subscription.planCode.includes('ann') &&
+      !paymentRecord.subscription.addOns?.length
+
+    if (
+      paymentRecord.subscription.service === 'recurly' &&
+      commonPauseConditions
+    ) {
+      isEligibleForPause = true
+    } else if (
+      paymentRecord.subscription.service.includes('stripe') &&
+      commonPauseConditions
+    ) {
+      const stripePauseAssignment =
+        await SplitTestHandler.promises.getAssignmentForUser(
+          user._id,
+          'stripe-pause'
+        )
+      isEligibleForPause = stripePauseAssignment.variant === 'enabled'
+    }
+
     personalSubscription.payment = {
       taxRate,
       billingDetailsLink:
@@ -272,15 +308,11 @@ async function buildUsersSubscriptionViewModel(user, locale = 'en') {
       hasPastDueInvoice: paymentRecord.account.hasPastDueInvoice,
       pausedAt: paymentRecord.subscription.pausePeriodStart,
       remainingPauseCycles: paymentRecord.subscription.remainingPauseCycles,
-      isEligibleForPause:
-        paymentRecord.subscription.service === 'recurly' &&
-        !personalSubscription.pendingPlan &&
-        !personalSubscription.groupPlan &&
-        !isInTrial &&
-        !paymentRecord.subscription.planCode.includes('ann') &&
-        !paymentRecord.subscription.addOns?.length > 0,
-      isEligibleForGroupPlan:
-        paymentRecord.subscription.service === 'recurly' && !isInTrial,
+      isEligibleForPause,
+      isEligibleForGroupPlan: await isEligibleForGroupPlan(
+        paymentRecord.subscription.service,
+        isInTrial
+      ),
     }
 
     const isMonthlyCollaboratorPlan =
@@ -407,9 +439,7 @@ async function getUsersSubscriptionDetails(user) {
     individualSubscription =
       await SubscriptionLocator.promises.getUsersSubscription(user)
   }
-  let bestSubscription = {
-    type: 'free',
-  }
+  let bestSubscription = { type: 'free' }
   if (currentInstitutionsWithLicence?.length) {
     for (const institutionMembership of currentInstitutionsWithLicence) {
       const plan = PlansLocator.findLocalPlanInSettings(
@@ -603,8 +633,5 @@ module.exports = {
   buildUsersSubscriptionViewModel: callbackify(buildUsersSubscriptionViewModel),
   buildPlansList,
   buildPlansListForSubscriptionDash,
-  promises: {
-    buildUsersSubscriptionViewModel,
-    getUsersSubscriptionDetails,
-  },
+  promises: { buildUsersSubscriptionViewModel, getUsersSubscriptionDetails },
 }

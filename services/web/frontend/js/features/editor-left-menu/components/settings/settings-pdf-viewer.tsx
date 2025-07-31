@@ -23,6 +23,7 @@ export default function SettingsPdfViewer() {
       ]}
       label={t('pdf_viewer')}
       name="pdfViewer"
+      translateOptions="no"
     />
   )
 }

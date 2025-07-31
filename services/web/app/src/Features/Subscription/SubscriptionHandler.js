@@ -74,7 +74,7 @@ async function createSubscription(user, subscriptionDetails, recurlyTokenIds) {
  */
 async function previewSubscriptionChange(userId, planCode) {
   const change = await Modules.promises.hooks.fire(
-    'previewSubscriptionChange',
+    'previewPlanChange',
     userId,
     planCode
   )
@@ -319,8 +319,9 @@ async function pauseSubscription(user, pauseCycles) {
     throw new Error('Cannot pause a subscription with addons')
   }
 
-  await RecurlyClient.promises.pauseSubscriptionByUuid(
-    subscription.recurlySubscription_id,
+  await Modules.promises.hooks.fire(
+    'pausePaidSubscription',
+    subscription,
     pauseCycles
   )
 }

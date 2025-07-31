@@ -1,4 +1,4 @@
-import { FC, ReactElement, useCallback, useMemo } from 'react'
+import { FC, forwardRef, ReactElement, useCallback, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Nav, NavLink, Tab, TabContainer } from 'react-bootstrap'
 import MaterialIcon, {
@@ -31,7 +31,6 @@ import { RailHelpContactUsModal } from './help/contact-us'
 import { HistorySidebar } from '@/features/ide-react/components/history-sidebar'
 import DictionarySettingsModal from './settings/editor-settings/dictionary-settings-modal'
 import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
-import OLIconButton from '@/features/ui/components/ol/ol-icon-button'
 import { useChatContext } from '@/features/chat/context/chat-context'
 import { useEditorAnalytics } from '@/shared/hooks/use-editor-analytics'
 import {
@@ -44,6 +43,9 @@ import { useDetachCompileContext as useCompileContext } from '@/shared/context/d
 import OldErrorPane from './error-logs/old-error-pane'
 import { useFeatureFlag } from '@/shared/context/split-test-context'
 import { useSurveyUrl } from '../hooks/use-survey-url'
+import { useProjectContext } from '@/shared/context/project-context'
+import usePreviousValue from '@/shared/hooks/use-previous-value'
+import { useCommandProvider } from '@/features/ide-react/hooks/use-command-provider'
 
 type RailElement = {
   icon: AvailableUnfilledIcon
@@ -53,6 +55,7 @@ type RailElement = {
   title: string
   hide?: boolean
   disabled?: boolean
+  mountOnFirstLoad?: boolean
 }
 
 type RailActionButton = {
@@ -103,6 +106,7 @@ export const RailLayout = () => {
     setResizing,
   } = useRailContext()
   const { logEntries } = useCompileContext()
+  const { features } = useProjectContext()
   const errorLogsDisabled = !logEntries
 
   const { view, setLeftMenuShown } = useLayoutContext()
@@ -120,6 +124,9 @@ export const RailLayout = () => {
         icon: 'description',
         title: t('file_tree'),
         component: <FileTreeOutlinePanel />,
+        // NOTE: We always need to mount the file tree on first load
+        // since it is responsible for opening the initial document.
+        mountOnFirstLoad: true,
       },
       {
         key: 'full-project-search',
@@ -139,6 +146,8 @@ export const RailLayout = () => {
         icon: 'rate_review',
         title: t('review_panel'),
         component: null,
+        hide: !features.trackChangesVisible,
+        disabled: view !== 'editor',
       },
       {
         key: 'chat',
@@ -146,7 +155,7 @@ export const RailLayout = () => {
         component: <ChatPane />,
         indicator: <ChatIndicator />,
         title: t('chat'),
-        hide: !getMeta('ol-chatEnabled'),
+        hide: !getMeta('ol-capabilities')?.includes('chat'),
       },
       {
         key: 'errors',
@@ -157,7 +166,7 @@ export const RailLayout = () => {
         disabled: errorLogsDisabled,
       },
     ],
-    [t, errorLogsDisabled, newErrorlogs]
+    [t, features.trackChangesVisible, newErrorlogs, errorLogsDisabled, view]
   )
 
   const railActions: RailAction[] = useMemo(
@@ -179,6 +188,19 @@ export const RailLayout = () => {
       },
     ],
     [setLeftMenuShown, t, sendEvent]
+  )
+
+  useCommandProvider(
+    () => [
+      {
+        id: 'open-settings',
+        handler: () => {
+          setLeftMenuShown(true)
+        },
+        label: t('settings'),
+      },
+    ],
+    [t, setLeftMenuShown]
   )
 
   const onTabSelect = useCallback(
@@ -215,6 +237,18 @@ export const RailLayout = () => {
 
   const isReviewPanelOpen = selectedTab === 'review-panel'
 
+  const prevTab = usePreviousValue(selectedTab)
+
+  const tabHasChanged = useMemo(() => {
+    return prevTab !== selectedTab
+  }, [prevTab, selectedTab])
+
+  const onCollapse = useCallback(() => {
+    if (!tabHasChanged) {
+      handlePaneCollapse()
+    }
+  }, [tabHasChanged, handlePaneCollapse])
+
   return (
     <TabContainer
       mountOnEnter // Only render when necessary (so that we can lazy load tab content)
@@ -224,7 +258,13 @@ export const RailLayout = () => {
       onSelect={onTabSelect}
       id="ide-rail-tabs"
     >
-      <div className={classNames('ide-rail', { hidden: isHistoryView })}>
+      {/* The <Nav> element is a "div" and has a "role="tablist"".
+          But it should be identified as a navigation landmark.
+          Therefore, we nest them: the parent <nav> is the landmark, and its child gets the "role="tablist"". */}
+      <nav
+        className={classNames('ide-rail', { hidden: isHistoryView })}
+        aria-label={t('files_collaboration_integrations_logs')}
+      >
         <Nav activeKey={selectedTab} className="ide-rail-tabs-nav">
           {railTabs
             .filter(({ hide }) => !hide)
@@ -240,11 +280,13 @@ export const RailLayout = () => {
               />
             ))}
           <div className="flex-grow-1" />
-          {railActions?.map(action => (
-            <RailActionElement key={action.key} action={action} />
-          ))}
+          <nav aria-label={t('help_editor_settings')}>
+            {railActions?.map(action => (
+              <RailActionElement key={action.key} action={action} />
+            ))}
+          </nav>
         </Nav>
-      </div>
+      </nav>
       <Panel
         id={
           newErrorlogs
@@ -258,7 +300,7 @@ export const RailLayout = () => {
         maxSize={80}
         ref={panelRef}
         collapsible
-        onCollapse={handlePaneCollapse}
+        onCollapse={onCollapse}
         onExpand={handlePaneExpand}
       >
         {isHistoryView && <HistorySidebar />}
@@ -270,8 +312,12 @@ export const RailLayout = () => {
           <Tab.Content className="ide-rail-tab-content">
             {railTabs
               .filter(({ hide }) => !hide)
-              .map(({ key, component }) => (
-                <Tab.Pane eventKey={key} key={key}>
+              .map(({ key, component, mountOnFirstLoad }) => (
+                <Tab.Pane
+                  eventKey={key}
+                  key={key}
+                  mountOnEnter={!mountOnFirstLoad}
+                >
                   {component}
                 </Tab.Pane>
               ))}
@@ -301,21 +347,17 @@ export const RailLayout = () => {
   )
 }
 
-const RailTab = ({
-  icon,
-  eventKey,
-  open,
-  indicator,
-  title,
-  disabled = false,
-}: {
-  icon: AvailableUnfilledIcon
-  eventKey: string
-  open: boolean
-  indicator?: ReactElement
-  title: string
-  disabled?: boolean
-}) => {
+const RailTab = forwardRef<
+  HTMLAnchorElement,
+  {
+    icon: AvailableUnfilledIcon
+    eventKey: string
+    open: boolean
+    indicator?: ReactElement
+    title: string
+    disabled?: boolean
+  }
+>(({ icon, eventKey, open, indicator, title, disabled = false }, ref) => {
   return (
     <OLTooltip
       id={`rail-tab-tooltip-${eventKey}`}
@@ -323,6 +365,7 @@ const RailTab = ({
       overlayProps={{ delay: 0, placement: 'right' }}
     >
       <NavLink
+        ref={ref}
         eventKey={eventKey}
         className={classNames('ide-rail-tab-link', {
           'open-rail': open,
@@ -347,7 +390,9 @@ const RailTab = ({
       </NavLink>
     </OLTooltip>
   )
-}
+})
+
+RailTab.displayName = 'RailTab'
 
 const RailActionElement = ({ action }: { action: RailAction }) => {
   const onActionClick = useCallback(() => {
@@ -389,13 +434,17 @@ const RailActionElement = ({ action }: { action: RailAction }) => {
         description={action.title}
         overlayProps={{ delay: 0, placement: 'right' }}
       >
-        <OLIconButton
+        <button
           onClick={onActionClick}
           className="ide-rail-tab-link ide-rail-tab-button"
-          icon={action.icon}
-          accessibilityLabel={action.title}
-          unfilled
-        />
+          aria-label={action.title}
+        >
+          <MaterialIcon
+            className="ide-rail-tab-link-icon"
+            type={action.icon}
+            unfilled
+          />
+        </button>
       </OLTooltip>
     )
   }

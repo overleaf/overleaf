@@ -41,6 +41,10 @@ const DocManager = {
       return await DocManager._getDoc(projectId, docId, filter)
     }
 
+    if (filter.ranges) {
+      RangeManager.fixCommentIds(doc)
+    }
+
     return doc
   },
 
@@ -128,6 +132,11 @@ const DocManager = {
     )
     if (docs == null) {
       throw new Errors.NotFoundError(`No docs for project ${projectId}`)
+    }
+    if (filter.ranges) {
+      for (const doc of docs) {
+        RangeManager.fixCommentIds(doc)
+      }
     }
     return docs
   },

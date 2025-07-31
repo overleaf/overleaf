@@ -10,11 +10,9 @@ import useFetchMock from '../hooks/use-fetch-mock'
 import { useMeta } from '../hooks/use-meta'
 import SocketIOShim, { SocketIOMock } from '@/ide/connection/SocketIoShim'
 import { IdeContext } from '@/shared/context/ide-context'
-import {
-  IdeReactContext,
-  createReactScopeValueStore,
-} from '@/features/ide-react/context/ide-react-context'
+import { IdeReactContext } from '@/features/ide-react/context/ide-react-context'
 import { IdeEventEmitter } from '@/features/ide-react/create-ide-event-emitter'
+import { ReactScopeValueStore } from '@/features/ide-react/scope-value-store/react-scope-value-store'
 import { ReactScopeEventEmitter } from '@/features/ide-react/scope-event-emitter/react-scope-event-emitter'
 import { ConnectionContext } from '@/features/ide-react/context/connection-context'
 import { Socket } from '@/features/ide-react/connection/types/socket'
@@ -54,30 +52,6 @@ const project: Project = {
       folders: [],
     },
   ],
-}
-
-const initialScope = {
-  user,
-  project,
-  ui: {
-    chatOpen: true,
-    pdfLayout: 'flat',
-  },
-  settings: {
-    pdfViewer: 'js',
-    syntaxValidation: true,
-  },
-  editor: {
-    richText: false,
-    sharejs_doc: {
-      doc_id: 'test-doc',
-      getSnapshot: () => 'some doc content',
-      hasBufferedOps: () => false,
-    },
-    open_doc_name: 'testfile.tex',
-  },
-  hasLintingError: false,
-  permissionsLevel: 'owner',
 }
 
 const socket = new SocketIOShim.SocketShimNoop(
@@ -191,27 +165,27 @@ const IdeReactProvider: FC<React.PropsWithChildren> = ({ children }) => {
     setStartedFreeTrial,
     reportError: () => {},
     projectJoined: true,
+    permissionsLevel: 'owner' as const,
+    setPermissionsLevel: () => {},
+    setOutOfSync: () => {},
   }))
 
   const [ideContextValue] = useState(() => {
-    const scopeStore = createReactScopeValueStore(projectId)
-    for (const [key, value] of Object.entries(initialScope)) {
-      scopeStore.set(key, value)
-    }
     const scopeEventEmitter = new ReactScopeEventEmitter(new IdeEventEmitter())
+    const unstableStore = new ReactScopeValueStore()
 
     window.overleaf = {
       ...window.overleaf,
       unstable: {
         ...window.overleaf?.unstable,
-        store: scopeStore,
+        store: unstableStore,
       },
     }
 
     return {
       socket,
-      scopeStore,
       scopeEventEmitter,
+      unstableStore,
     }
   })
 

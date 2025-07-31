@@ -13,6 +13,8 @@ describe('projectKey', function () {
   })
 
   it('pads numbers with zeros to length 9', function () {
+    expect(pad(undefined)).to.equal('000000000')
+    expect(pad(null)).to.equal('000000000')
     expect(pad(1)).to.equal('000000001')
     expect(pad(10)).to.equal('000000010')
     expect(pad(100000000)).to.equal('100000000')

@@ -100,7 +100,7 @@ export const mockClearCache = fetchMock =>
   })
 
 export const mockBuildFile = fetchMock =>
-  fetchMock.get('express:/build/:file', url => {
+  fetchMock.get('express:/build/:file', ({ url }) => {
     const { pathname } = new URL(url, 'https://example.com')
 
     switch (pathname) {

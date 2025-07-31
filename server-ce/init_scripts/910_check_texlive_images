@@ -3,4 +3,4 @@ set -e
 
 echo "Checking texlive images"
 cd /overleaf/services/web
-node modules/server-ce-scripts/scripts/check-texlive-images.mjs
+/sbin/setuser www-data node modules/server-ce-scripts/scripts/check-texlive-images.mjs

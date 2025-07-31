@@ -5,7 +5,10 @@ const assert = require('../assert')
 const knex = require('../knex')
 const knexReadOnly = require('../knex_read_only')
 const { ChunkVersionConflictError } = require('./errors')
-const { updateProjectRecord } = require('./mongo')
+const {
+  updateProjectRecord,
+  lookupMongoProjectIdFromHistoryId,
+} = require('./mongo')
 
 const DUPLICATE_KEY_ERROR_CODE = '23505'
 
@@ -472,6 +475,10 @@ async function generateProjectId() {
   return record.doc_id.toString()
 }
 
+async function resolveHistoryIdToMongoProjectId(projectId) {
+  return await lookupMongoProjectIdFromHistoryId(parseInt(projectId, 10))
+}
+
 module.exports = {
   getLatestChunk,
   getFirstChunkBeforeTimestamp,
@@ -488,4 +495,5 @@ module.exports = {
   getOldChunksBatch,
   deleteOldChunks,
   generateProjectId,
+  resolveHistoryIdToMongoProjectId,
 }

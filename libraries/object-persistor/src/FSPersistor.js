@@ -86,7 +86,7 @@ module.exports = class FSPersistor extends AbstractPersistor {
       metric: 'fs.ingress', // ingress to us from disk
       bucket: location,
     })
-    const fsPath = this._getFsPath(location, name)
+    const fsPath = this._getFsPath(location, name, opts.useSubdirectories)
 
     try {
       opts.fd = await fsPromises.open(fsPath, 'r')
@@ -295,9 +295,9 @@ module.exports = class FSPersistor extends AbstractPersistor {
     await fsPromises.rm(dirPath, { force: true, recursive: true })
   }
 
-  _getFsPath(location, key) {
+  _getFsPath(location, key, useSubdirectories = false) {
     key = key.replace(/\/$/, '')
-    if (!this.useSubdirectories) {
+    if (!this.useSubdirectories && !useSubdirectories) {
       key = key.replace(/\//g, '_')
     }
     return Path.join(location, key)
