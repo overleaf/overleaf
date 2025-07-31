@@ -16,7 +16,7 @@ block append meta
 	- const canDisplayAdminRedirect = canRedirectToAdminDomain()
 	- const sessionUser = getSessionUser()
 	- const staffAccess = sessionUser?.staffAccess
-	- const canDisplaySplitTestMenu = hasFeature('saas') && (canDisplayAdminMenu || staffAccess?.splitTestMetrics || staffAccess?.splitTestManagement)
+	- const canDisplaySplitTestMenu = hasFeature('saas') && ((canDisplayAdminMenu && hasAdminCapability('view-split-test')) || staffAccess?.splitTestMetrics || staffAccess?.splitTestManagement)
 	- const canDisplaySurveyMenu = hasFeature('saas') && canDisplayAdminMenu && hasAdminCapability('manage-survey')
 	- const canDisplayScriptLogMenu = hasFeature('saas') && hasAdminCapability('view-script-log') && canDisplayAdminMenu
 	- const enableUpgradeButton = projectDashboardReact && usersBestSubscription && (usersBestSubscription.type === 'free' || usersBestSubscription.type === 'standalone-ai-add-on')
