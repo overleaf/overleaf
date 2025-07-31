@@ -53,7 +53,15 @@ export type CustomerSubscriptionsDeletedWebhookEvent = {
 export type InvoicePaidWebhookEvent = {
   type: 'invoice.paid'
   data: {
-    object: Stripe.Invoice
+    object: Stripe.Invoice & {
+      parent: Stripe.Invoice.Parent & {
+        subscription_details: Stripe.Invoice.Parent.SubscriptionDetails & {
+          metadata: {
+            adminUserId?: string
+          }
+        }
+      }
+    }
   }
   request: Stripe.Event.Request
 }
