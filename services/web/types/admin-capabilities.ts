@@ -5,6 +5,7 @@ export type AdminCapability =
   | 'create-subscription'
   | 'modify-feature-override'
   | 'modify-login-status'
+  | 'manage-survey'
   | 'modify-user-email'
   | 'modify-user-name'
   | 'view-audit-log'
