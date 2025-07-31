@@ -6,12 +6,14 @@ export type AdminCapability =
   | 'modify-feature-override'
   | 'modify-login-status'
   | 'manage-survey'
+  | 'modify-split-test'
   | 'modify-user-email'
   | 'modify-user-name'
   | 'view-audit-log'
   | 'view-project'
   | 'view-session'
   | 'view-script-log'
+  | 'view-split-test'
   | 'view-user-additional-info'
 
 export type AdminRole =
