@@ -46,6 +46,10 @@ export function AddSecondaryEmailPrompt() {
       errorName = 'email_already_registered'
     } else if (err?.response?.status === 429) {
       errorName = 'too_many_attempts'
+    } else if (
+      err?.data.errorReason === 'group_domain_capture_and_managed_users_enabled'
+    ) {
+      errorName = 'email_already_registered_under_verified_domain'
     } else if (err?.response?.status === 422) {
       errorName = 'email_must_be_linked_to_institution'
     } else if (err?.data.errorReason === 'cannot_verify_user_not_robot') {
@@ -144,6 +148,15 @@ function ErrorMessage({ error }: { error: AddSecondaryEmailError }) {
           /* eslint-disable-next-line jsx-a11y/anchor-has-content, react/jsx-key */
           components={[<a href="/account/settings" />]}
         />
+      )
+      break
+    case 'email_already_registered_under_verified_domain':
+      errorText = (
+        <>
+          Your company email address has been registered under a verified
+          domain, and cannot be added as a secondary email. Please create a new{' '}
+          <strong>Overleaf</strong> account linked to this email address.
+        </>
       )
       break
     case 'cannot_verify_user_not_robot':
