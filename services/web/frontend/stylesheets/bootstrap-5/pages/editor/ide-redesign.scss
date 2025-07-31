@@ -53,3 +53,28 @@
 .ide-redesign-editor-content {
   height: 100%;
 }
+
+.ide-redesign-labs-user-beta-promo {
+  position: absolute;
+  top: 60px;
+  right: 28px;
+  z-index: 100000;
+  max-width: 560px;
+  font-size: var(--font-size-03);
+  line-height: var(--line-height-03);
+
+  .notification-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-02);
+    align-items: flex-start;
+  }
+}
+
+.ide-redesign-labs-user-beta-promo-title {
+  font-weight: bold;
+}
+
+.ide-redesign-labs-user-beta-promo-button {
+  margin-top: var(--spacing-05);
+}

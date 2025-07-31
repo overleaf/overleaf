@@ -3,10 +3,12 @@ import OLButton from '../ui/components/ol/ol-button'
 import { useIdeRedesignSwitcherContext } from '../ide-react/context/ide-redesign-switcher-context'
 import MaterialIcon from '@/shared/components/material-icon'
 import { useTranslation } from 'react-i18next'
+import { isNewEditorInBeta } from '../ide-redesign/utils/new-editor-utils'
 
 const TryNewEditorButton = () => {
   const { t } = useTranslation()
   const { setShowSwitcherModal } = useIdeRedesignSwitcherContext()
+  const newEditorBeta = isNewEditorInBeta()
 
   const onClick = useCallback(() => {
     setShowSwitcherModal(true)
@@ -17,7 +19,9 @@ const TryNewEditorButton = () => {
         className="toolbar-experiment-button"
         onClick={onClick}
         size="sm"
-        leadingIcon={<MaterialIcon type="experiment" unfilled />}
+        leadingIcon={
+          !newEditorBeta && <MaterialIcon type="experiment" unfilled />
+        }
         variant="secondary"
       >
         {t('try_the_new_editor')}

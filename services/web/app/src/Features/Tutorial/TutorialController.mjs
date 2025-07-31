@@ -19,6 +19,8 @@ const VALID_KEYS = [
   'try-redesign-again-nudge-promo',
   'write-and-cite-nudge-in-linked-file',
   'ide-redesign-new-survey-promo',
+  'ide-redesign-beta-intro',
+  'ide-redesign-labs-user-beta-promo',
 ]
 
 async function completeTutorial(req, res, next) {
