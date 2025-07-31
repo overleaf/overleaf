@@ -7,6 +7,7 @@ export type AdminCapability =
   | 'modify-login-status'
   | 'modify-user-email'
   | 'modify-user-name'
+  | 'view-audit-log'
   | 'view-project'
   | 'view-session'
   | 'view-user-additional-info'
