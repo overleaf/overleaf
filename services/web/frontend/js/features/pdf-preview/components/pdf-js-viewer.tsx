@@ -9,7 +9,6 @@ import withErrorBoundary from '../../../infrastructure/error-boundary'
 import PdfPreviewErrorBoundaryFallback from './pdf-preview-error-boundary-fallback'
 import { useDetachCompileContext as useCompileContext } from '../../../shared/context/detach-compile-context'
 import { captureException } from '../../../infrastructure/error-reporter'
-import * as eventTracking from '../../../infrastructure/event-tracking'
 import { getPdfCachingMetrics } from '../util/metrics'
 import { debugConsole } from '@/utils/debugging'
 import { usePdfPreviewContext } from '@/features/pdf-preview/components/pdf-preview-provider'
@@ -261,11 +260,6 @@ function PdfJsViewer({ url, pdfFile }: PdfJsViewerProps) {
             )
 
             if (clickPosition) {
-              eventTracking.sendMB('jump-to-location', {
-                direction: 'pdf-location-in-code',
-                method: 'double-click',
-              })
-
               window.dispatchEvent(
                 new CustomEvent('synctex:sync-to-position', {
                   detail: {

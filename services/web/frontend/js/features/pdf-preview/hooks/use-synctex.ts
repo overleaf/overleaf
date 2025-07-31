@@ -9,7 +9,6 @@ import useDetachAction from '../../../shared/hooks/use-detach-action'
 import localStorage from '../../../infrastructure/local-storage'
 import { useFileTreeData } from '../../../shared/context/file-tree-data-context'
 import useScopeEventListener from '../../../shared/hooks/use-scope-event-listener'
-import * as eventTracking from '../../../infrastructure/event-tracking'
 import { debugConsole } from '@/utils/debugging'
 import { useFileTreePathContext } from '@/features/file-tree/contexts/file-tree-path'
 import { useEditorManagerContext } from '@/features/ide-react/context/editor-manager-context'
@@ -162,11 +161,6 @@ export default function useSynctex(): {
         line: String(row + 1),
         column: String(column),
       }).toString()
-
-      eventTracking.sendMB('jump-to-location', {
-        direction: 'code-location-in-pdf',
-        method: 'arrow',
-      })
 
       goToPdfLocation(params)
     }
