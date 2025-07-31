@@ -46,14 +46,22 @@ prefetch_custom: prefetch_custom_compose_pull
 prefetch_custom_compose_pull:
 	docker compose pull saml ldap
 
-prefetch_custom: prefetch_custom_texlive
-prefetch_custom_texlive:
-	echo "$$ALL_TEX_LIVE_DOCKER_IMAGES" | tr ',' '\n' | xargs -I% \
-	sh -exc 'tag=%; re_tag=quay.io/sharelatex/$${tag#*/*/*/}; docker pull $$tag; docker tag $$tag $$re_tag'
+prefetch_custom: prefetch_custom_texlive_2023
+prefetch_custom_texlive_2023:
+	docker pull us-east1-docker.pkg.dev/overleaf-ops/ol-docker/texlive-full:2023.1
+	docker tag us-east1-docker.pkg.dev/overleaf-ops/ol-docker/texlive-full:2023.1 quay.io/sharelatex/texlive-full:2023.1
 
-prefetch_custom: prefetch_old
-prefetch_old:
+prefetch_custom: prefetch_custom_texlive_2022
+prefetch_custom_texlive_2022:
+	docker pull us-east1-docker.pkg.dev/overleaf-ops/ol-docker/texlive-full:2022.1
+	docker tag us-east1-docker.pkg.dev/overleaf-ops/ol-docker/texlive-full:2022.1 quay.io/sharelatex/texlive-full:2022.1
+
+prefetch_custom: prefetch_old_4_2
+prefetch_old_4_2:
 	docker pull $(IMAGE_TAG_PRO:latest=4.2)
+
+prefetch_custom: prefetch_old_5_0
+prefetch_old_5_0:
 	docker pull $(IMAGE_TAG_PRO:latest=5.0.1-RC1)
 	docker pull $(IMAGE_TAG_PRO:latest=5.0)
 
