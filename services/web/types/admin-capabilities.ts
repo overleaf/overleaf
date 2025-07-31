@@ -3,6 +3,7 @@ export type AdminCapability =
   | 'clear-session'
   | 'create-recurly-account'
   | 'create-subscription'
+  | 'modify-feature-override'
   | 'modify-login-status'
   | 'modify-user-email'
   | 'modify-user-name'
