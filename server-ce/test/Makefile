@@ -72,4 +72,14 @@ build_mailtrap:
 	git clone https://github.com/dbck/docker-mailtrap.git || true && cd docker-mailtrap && git checkout v1.5.0
 	docker build -t mailtrap docker-mailtrap/build
 
+npm_install_in_docker: export COMPOSE_PROJECT_NAME=
+npm_install_in_docker:
+	$(MAKE) -C ../../ .metadata/docker-image/monorepo
+	cd ../../ && bin/run --no-deps --workdir /overleaf/server-ce/test monorepo npm --no-dry-run install
+
+format_in_docker: export COMPOSE_PROJECT_NAME=
+format_in_docker:
+	$(MAKE) -C ../../ .metadata/docker-image/monorepo
+	cd ../../ && bin/run --no-deps --workdir /overleaf/server-ce/test monorepo npm run format
+
 .PHONY: test-e2e test-e2e-open
