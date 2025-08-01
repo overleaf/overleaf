@@ -56,15 +56,18 @@ describe('editor', () => {
 
       cy.log('edit project file')
       cy.get('.cm-line').type(word)
+      cy.findByText(word).should('have.class', 'ol-cm-spelling-error')
 
-      cy.get('.ol-cm-spelling-error').should('exist')
+      changeSpellCheckLanguageTo('Off')
+      cy.findByText(word).should('not.have.class', 'ol-cm-spelling-error')
 
       changeSpellCheckLanguageTo('Spanish')
+      cy.findByText(word).should('have.class', 'ol-cm-spelling-error')
 
       cy.log('add word to dictionary')
-      cy.get('.ol-cm-spelling-error').contains(word).rightclick()
-      cy.findByText('Add to dictionary').click()
-      cy.get('.ol-cm-spelling-error').should('not.exist')
+      cy.findByText(word).rightclick()
+      cy.findByRole('menuitem', { name: 'Add to dictionary' }).click()
+      cy.findByText(word).should('not.have.class', 'ol-cm-spelling-error')
 
       cy.log('remove word from dictionary')
       cy.get('button').contains('Menu').click()
