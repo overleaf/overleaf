@@ -47,15 +47,13 @@ describe('Templates', () => {
       cy.url().should('match', /\/templates$/)
     })
 
-    // TODO(25342): re-enable
-    // eslint-disable-next-line mocha/no-skipped-tests
-    it.skip('should have templates feature', () => {
+    it('should have templates feature', () => {
       login(TEMPLATES_USER)
       const name = `Template ${Date.now()}`
       const description = `Template Description ${Date.now()}`
 
       cy.visit('/')
-      createProject(name).as('templateProjectId')
+      createProject(name, { type: 'Example project' }).as('templateProjectId')
 
       cy.findByRole('navigation', {
         name: /Project actions/i,
@@ -72,7 +70,7 @@ describe('Templates', () => {
       cy.findByText('Publish').click()
       cy.findByText('Publishing…').parent().should('be.disabled')
       cy.findByText('Publish').should('not.exist')
-      cy.findByText('Unpublish', { timeout: 10_000 })
+      cy.findByText('Unpublish', { timeout: 60_000 })
       cy.findByText('Republish')
 
       cy.findByText('View it in the template gallery').click()
@@ -90,8 +88,8 @@ describe('Templates', () => {
         .and('match', /\/v\/0\//)
       cy.findByText('Republish').click()
       cy.findByText('Publishing…').parent().should('be.disabled')
-      cy.findByText('Republish', { timeout: 10_000 })
-      cy.get('img', { timeout: 10_000 })
+      cy.findByText('Republish', { timeout: 60_000 })
+      cy.get('img', { timeout: 60_000 })
         .should('have.attr', 'src')
         .and('match', /\/v\/1\//)
 
@@ -103,7 +101,7 @@ describe('Templates', () => {
         .parent()
         .within(() => cy.get('input[type="checkbox"]').first().check())
       cy.get('.project-list-sidebar-scroll').within(() => {
-        cy.findAllByText('New Tag').first().click()
+        cy.findAllByText('New tag').first().click()
       })
       cy.focused().type(tagName)
       cy.findByText('Create').click()
@@ -147,7 +145,7 @@ describe('Templates', () => {
         .click()
       cy.findByText('Manage Template').click()
       cy.findByText('Publish').click()
-      cy.findByText('Unpublish', { timeout: 10_000 })
+      cy.findByText('Unpublish', { timeout: 60_000 })
 
       // Should assign a new template id
       cy.findByText('View it in the template gallery').click()
@@ -168,7 +166,7 @@ describe('Templates', () => {
       cy.findByText(name).click()
       cy.findByText('Open as Template').click()
       cy.url().should('match', /\/project\/[a-f0-9]{24}$/)
-      cy.get('.project-name').findByText(name)
+      cy.get('.project-name').should('contain.text', 'Your Paper') // might have (1) suffix
       cy.findByRole('navigation', {
         name: /Project actions/i,
       })

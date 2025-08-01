@@ -95,9 +95,7 @@ describe('SandboxedCompiles', function () {
   }
 
   function checkSyncTeX() {
-    // TODO(25342): re-enable
-    // eslint-disable-next-line mocha/no-skipped-tests
-    describe.skip('SyncTeX', function () {
+    describe('SyncTeX', function () {
       let projectName: string
       beforeEach(function () {
         projectName = `Project ${uuid()}`
@@ -278,6 +276,7 @@ describe('SandboxedCompiles', function () {
     checkStopCompile()
   })
 
+  // https://github.com/overleaf/internal/issues/20216
   describe.skip('unavailable in CE', function () {
     if (isExcludedBySharding('CE_CUSTOM_1')) return
     startWith({ pro: false, vars: enabledVars, resetData: true })
