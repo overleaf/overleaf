@@ -35,7 +35,20 @@
       "multer": "2.0.2"
     },
     "request@2.88.2": {
-      "tough-cookie": "5.1.2"
+      "tough-cookie": "5.1.2",
+      "form-data": "2.5.5"
+    },
+    "superagent@7.1.6": {
+      "form-data": "4.0.4"
+    },
+    "superagent@3.8.3": {
+      "form-data": "2.5.5"
+    },
+    "retry-request@7.0.2": {
+      "form-data": "2.5.5"
+    },
+    "@types/request@2.48.12": {
+      "form-data": "2.5.5"
     }
   },
   "scripts": {
