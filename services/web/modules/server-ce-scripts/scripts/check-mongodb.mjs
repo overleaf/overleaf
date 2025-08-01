@@ -24,8 +24,9 @@ function handleUnauthorizedError(err, feature) {
     console.warn(`Warning: failed to check ${feature} (not authorised)`)
     if (!shouldSkipAdminChecks()) {
       console.error(
-        `Please ensure the MongoDB user has the required admin permissions, or\n` +
-          `set the environment variable ${OVERRIDE_ENV_VAR_NAME}=true to ignore this check.`
+        `Please ensure the MongoDB user has the required permissions, for more information see
+https://docs.overleaf.com/on-premises/maintenance/updating-mongodb#creating-a-custom-role
+or set the environment variable ${OVERRIDE_ENV_VAR_NAME}=true to ignore this check.`
       )
       process.exit(1)
     }
