@@ -88,8 +88,10 @@ export const ensureEmptyLine = (
 
 export const insertFigure: Command = view => {
   const { state, dispatch } = view
+  const languageName = state.facet(language)?.name ?? "latex"
   const { pos, suffix } = ensureEmptyLine(state, state.selection.main)
-  const template = `\n${snippets.figure}\n${suffix}`
+  const figureSnippet = snippets[`${languageName}_figure`]
+  const template = `\n${figureSnippet}\n${suffix}`
   snippet(template)({ state, dispatch }, { label: 'Figure' }, pos, pos)
   return true
 }
