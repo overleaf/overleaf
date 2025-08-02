@@ -130,7 +130,7 @@ The CLSI is based on a JSON API.
 {
     "compile": {
         "options": {
-            // Which compiler to use. Can be latex, pdflatex, xelatex or lualatex
+            // Which compiler to use. Can be latex, pdflatex, xelatex, lualatex or typst
             "compiler": "lualatex",
             // How many seconds to wait before killing the process. Default is 60.
             "timeout": 40

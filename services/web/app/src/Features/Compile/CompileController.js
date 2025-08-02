@@ -122,6 +122,13 @@ async function _getSplitTestOptions(req, res) {
 }
 
 const _CompileController = {
+  async getTypstVersions(req, res) {
+    const projectId = req.params.Project_id
+    const userId = SessionManager.getLoggedInUserId(req.session)
+    const typstVersions = await CompileManager.promises.getTypstVersions(projectId, userId, {});
+    res.json(typstVersions)
+  },
+
   async compile(req, res) {
     res.setTimeout(COMPILE_TIMEOUT_MS)
     const projectId = req.params.Project_id
@@ -719,11 +726,11 @@ async function _getPersistenceOptions(
       qs: { compileGroup, compileBackendClass },
       headers: clsiServerId
         ? {
-            Cookie: new Cookie({
-              key: Settings.clsiCookie.key,
-              value: clsiServerId,
-            }).cookieString(),
-          }
+          Cookie: new Cookie({
+            key: Settings.clsiCookie.key,
+            value: clsiServerId,
+          }).cookieString(),
+        }
         : {},
     }
   }
@@ -731,6 +738,7 @@ async function _getPersistenceOptions(
 
 const CompileController = {
   COMPILE_TIMEOUT_MS,
+  getTypstVersions: expressify(_CompileController.getTypstVersions),
   compile: expressify(_CompileController.compile),
   stopCompile: expressify(_CompileController.stopCompile),
   compileSubmission: expressify(_CompileController.compileSubmission),

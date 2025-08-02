@@ -1,5 +1,5 @@
 import Hunspell from './wasm/hunspell'
-import hunspellWasmPath from './wasm/hunspell.wasm'
+import hunspellWasmPath from './wasm/hunspell.wasm?url'
 import { buildAdditionalDictionary } from './wordlists/dictionary-additions'
 
 type SpellChecker = {

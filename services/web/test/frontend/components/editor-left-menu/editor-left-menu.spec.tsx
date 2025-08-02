@@ -365,6 +365,7 @@ describe('<EditorLeftMenu />', function () {
               'latex',
               'xelatex',
               'lualatex',
+              'typst',
             ])
 
             const texts = [...options].map(o => o.text)
@@ -373,6 +374,7 @@ describe('<EditorLeftMenu />', function () {
               'LaTeX',
               'XeLaTeX',
               'LuaLaTeX',
+              'Typst',
             ])
           }
         )

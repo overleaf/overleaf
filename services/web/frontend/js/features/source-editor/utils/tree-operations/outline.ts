@@ -5,6 +5,7 @@ import * as tokens from '../../lezer-latex/latex.terms.mjs'
 import { getEnvironmentArguments, getEnvironmentName } from './environments'
 import { PartialFlatOutline } from '@/features/ide-react/context/outline-context'
 import { texOrPdfString } from './commands'
+import { language } from '@codemirror/language'
 
 export type Outline = {
   line: number
@@ -108,10 +109,78 @@ const getEntryText = (state: EditorState, node: SyntaxNodeRef): string => {
   return titleParts.join('')
 }
 
+export const enterNode = (
+  state: EditorState,
+  node: SyntaxNodeRef,
+  items: FlatOutlineItem[],
+  nodeIntersectsChange: NodeIntersectsChangeFn
+): any => {
+  if (state.facet(language)?.name == "typst") {
+    return enterTypstNode(state, node, items, nodeIntersectsChange)
+  } else {
+    return enterLaTeXNode(state, node, items, nodeIntersectsChange)
+  }
+}
+
 /**
  * Extracts FlatOutlineItem instances from the syntax tree
  */
-export const enterNode = (
+const enterTypstNode = (
+  state: EditorState,
+  node: SyntaxNodeRef,
+  items: FlatOutlineItem[],
+  nodeIntersectsChange: NodeIntersectsChangeFn
+): any => {
+  if (node.type.is('Heading')) {
+    const heading = node.node
+
+    const marker = heading.getChild('HeadingMarker')
+
+    if (!marker) {
+      return
+    }
+
+    const titleParts: string[] = [];
+    heading.getChild('Markup')?.cursor().iterate((token) => {
+      // For some reason, iterate can possibly visit sibling nodes as well as
+      // child nodes
+      if (token.from >= node.to) {
+        return false
+      }
+
+      // Hide Ref, Cite, Label and scripting element
+      if (token.type.is('Ref') || token.type.is('Cite') || token.type.is('Label') || token.type.is('Hash') || token.type.is('FunctionCall')) {
+        return false
+      }
+
+      if (token.node.parent?.type.is("Strong") && token.type.is("Star")) return false;
+      if (token.node.parent?.type.is("Emph") && token.type.is("Underscore")) return false;
+
+      // Only add text from leaf nodes
+      if (token.node.firstChild) {
+        return true
+      }
+
+      titleParts.push(state.doc.sliceString(token.from, token.to))
+    },)
+    const level = marker.to - marker.from;
+
+    const thisNode = {
+      line: state.doc.lineAt(heading.from).number,
+      title: titleParts.join(""),
+      from: heading.from,
+      to: heading.to,
+      level,
+    }
+    items.push(thisNode)
+  }
+}
+
+
+/**
+ * Extracts FlatOutlineItem instances from the syntax tree
+ */
+const enterLaTeXNode = (
   state: EditorState,
   node: SyntaxNodeRef,
   items: FlatOutlineItem[],

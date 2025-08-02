@@ -28,7 +28,7 @@ const Errors = require('../Errors/Errors')
 const ClsiCacheHandler = require('./ClsiCacheHandler')
 const { getFilestoreBlobURL } = require('../History/HistoryManager')
 
-const VALID_COMPILERS = ['pdflatex', 'latex', 'xelatex', 'lualatex']
+const VALID_COMPILERS = ['pdflatex', 'latex', 'xelatex', 'lualatex', 'typst']
 const OUTPUT_FILE_TIMEOUT_MS = 60000
 const CLSI_COOKIES_ENABLED = (Settings.clsiCookie?.key ?? '') !== ''
 
@@ -121,6 +121,24 @@ async function stopCompile(projectId, userId, options) {
     url,
     opts
   )
+}
+
+async function getTypstVersions(projectId, userId, options) {
+  if (options == null) {
+    options = {}
+  }
+  const { compileBackendClass, compileGroup } = options
+  const url = new URL(`/typst-versions`, Settings.apis.clsi.url)
+  const opts = { method: 'GET' }
+
+  return (await _makeRequest(
+    projectId,
+    userId,
+    compileGroup,
+    compileBackendClass,
+    url,
+    opts
+  )).body
 }
 
 async function deleteAuxFiles(projectId, userId, options, clsiserverid) {
@@ -543,6 +561,7 @@ async function _buildRequest(projectId, options) {
     rootDoc_id: 1,
     imageName: 1,
     rootFolder: 1,
+    typstVersion: 1,
     'overleaf.history.id': 1,
   })
   if (project == null) {
@@ -780,6 +799,7 @@ function _finaliseRequest(projectId, options, project, docs, files) {
         imageName: project.imageName,
         draft: Boolean(options.draft),
         stopOnFirstError: Boolean(options.stopOnFirstError),
+        typstVersion: project.typstVersion,
         check: options.check,
         syncType: options.syncType,
         syncState: options.syncState,
@@ -871,6 +891,7 @@ module.exports = {
   promises: {
     sendRequest,
     sendExternalRequest,
+    getTypstVersions,
     stopCompile,
     deleteAuxFiles,
     getOutputFileStream,

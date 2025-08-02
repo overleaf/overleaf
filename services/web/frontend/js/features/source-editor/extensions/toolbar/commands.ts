@@ -1,3 +1,4 @@
+import { IndentContext, indentString, language } from '@codemirror/language'
 import { EditorSelection, EditorState, SelectionRange } from '@codemirror/state'
 import { Command, EditorView } from '@codemirror/view'
 import {
@@ -24,16 +25,38 @@ import { sendSearchEvent } from '@/features/event-tracking/search-events'
 
 export const toggleBold = toggleRanges('\\textbf')
 export const toggleItalic = toggleRanges('\\textit')
+export const toggleTypstStrong = wrapRanges(' *', '* ')
+export const toggleTypstEmph = wrapRanges(' _', '_ ')
 
 // TODO: apply as a snippet?
 // TODO: read URL from clipboard?
-export const wrapInHref = wrapRanges('\\href{}{', '}', false, (range, view) =>
-  isVisual(view) ? range : EditorSelection.cursor(range.from - 2)
-)
+export const wrapInHref = (view: EditorView) => {
+  if (view.state.facet(language)?.name == "typst") {
+    return wrapRanges('#link("")[', ']', false, (range, view) =>
+      isVisual(view) ? range : EditorSelection.cursor(range.from - 3)
+    )(view)
+  } else {
+    return wrapRanges('\\href{}{', '}', false, (range, view) =>
+      isVisual(view) ? range : EditorSelection.cursor(range.from - 2)
+    )(view)
+  }
+}
 export const toggleBulletList = toggleListForRanges('itemize')
 export const toggleNumberedList = toggleListForRanges('enumerate')
-export const wrapInInlineMath = wrapRanges('\\(', '\\)')
-export const wrapInDisplayMath = wrapRanges('\n\\[', '\\]\n')
+export const wrapInInlineMath = (view: EditorView) => {
+  if (view.state.facet(language)?.name == "typst") {
+    return wrapRanges('$', '$')(view)
+  } else {
+    return wrapRanges('\\(', '\\)')(view)
+  }
+}
+export const wrapInDisplayMath = (view: EditorView) => {
+  if (view.state.facet(language)?.name == "typst") {
+    return wrapRanges('$\n', '\n$')(view)
+  } else {
+    return wrapRanges('\n\\[', '\\]\n')(view)
+  }
+}
 
 export const ensureEmptyLine = (
   state: EditorState,
@@ -77,7 +100,11 @@ export const insertTable = (view: EditorView, sizeX: number, sizeY: number) => {
   const placeholder = visual ? '' : '#{}'
   const placeholderAtStart = visual ? '#{}' : ''
   const { pos, suffix } = ensureEmptyLine(state, state.selection.main)
-  const template = `${placeholderAtStart}\n\\begin{table}
+  const cx = new IndentContext(state)
+  const columns = cx.lineIndent(state.selection.main.from)
+  const indent = indentString(state, columns)
+  const languageName = state.facet(language)?.name;
+  const latexTemplate = `${placeholderAtStart}\n\\begin{table}
 \t\\centering
 \t\\begin{tabular}{${'c'.repeat(sizeX)}}
 ${(
@@ -88,14 +115,27 @@ ${(
 \t\\caption{Caption}
 \t\\label{tab:placeholder}
 \\end{table}${suffix}`
-  snippet(template)({ state, dispatch }, { label: 'Table' }, pos, pos)
+  const typstTemplate = `${indent}#figure(
+${indent}  caption: [Caption],
+${indent}  table(
+${indent}    columns: ${sizeX},
+${indent}    table.header(
+${indent}      ${("[" + placeholder + "], ").repeat(sizeX)}
+${indent}    ),
+${(
+  indent + "    " +
+  `[${placeholder}], `.repeat(sizeX) +
+  '\n'
+).repeat(sizeY - 1)}${indent}  )
+${indent}) <tab:table-name-here>${suffix}`
+  snippet(languageName == "typst" ? typstTemplate : latexTemplate)({ state, dispatch }, { label: 'Table' }, pos, pos)
   return true
 }
 
 export const insertCite: Command = view => {
   const { state, dispatch } = view
   const pos = state.selection.main.anchor
-  const template = snippets.cite
+  const template = snippets[`${view.state.facet(language)?.name}_cite`]
   snippet(template)({ state, dispatch }, { label: 'Cite' }, pos, pos)
   return true
 }
@@ -103,7 +143,7 @@ export const insertCite: Command = view => {
 export const insertRef: Command = view => {
   const { state, dispatch } = view
   const pos = state.selection.main.anchor
-  const template = snippets.ref
+  const template = snippets[`${view.state.facet(language)?.name}_ref`]
   snippet(template)({ state, dispatch }, { label: 'Ref' }, pos, pos)
   return true
 }

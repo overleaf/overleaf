@@ -64,6 +64,18 @@
             ]
         },
         {
+            "name": "clone3",
+            "action": "SCMP_ACT_ALLOW",
+            "args": [
+                {
+                    "index": 0,
+                    "value": 2080505856,
+                    "valueTwo": 0,
+                    "op": "SCMP_CMP_MASKED_EQ"
+                }
+            ]
+        },
+        {
             "name": "close",
             "action": "SCMP_ACT_ALLOW",
             "args": []
@@ -534,6 +546,11 @@
             "args": []
         },
         {
+            "name": "rseq",
+            "action": "SCMP_ACT_ALLOW",
+            "args": []
+        },
+        {
             "name": "rt_sigaction",
             "action": "SCMP_ACT_ALLOW",
             "args": []
@@ -660,6 +677,11 @@
         },
         {
             "name": "statfs64",
+            "action": "SCMP_ACT_ALLOW",
+            "args": []
+        },
+        {
+            "name": "statx",
             "action": "SCMP_ACT_ALLOW",
             "args": []
         },
@@ -795,6 +817,11 @@
         },
         {
             "name": "writev",
+            "action": "SCMP_ACT_ALLOW",
+            "args": []
+        },
+        {
+            "name": "poll",
             "action": "SCMP_ACT_ALLOW",
             "args": []
         },

@@ -1,0 +1,17 @@
+#!/bin/sh
+
+if [ ! "x$TYPST_VERSION" = "xdefault" ]; then
+    echo "Using manually selected typst $TYPST_VERSION" > output.log
+    typst="/opt/typst/$TYPST_VERSION/typst"
+else
+    echo "Using default typst" > output.log
+    typst="/opt/typst/default/typst"
+fi
+
+"$typst" "$@" >>output.log 2>&1
+
+if [ "$?" -ne 0 ]; then
+    echo "Typst failed with exit code $?"
+fi
+
+exit 0

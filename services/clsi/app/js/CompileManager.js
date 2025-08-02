@@ -196,6 +196,7 @@ async function doCompile(request, stats, timings) {
       directory: compileDir,
       mainFile: request.rootResourcePath,
       compiler: request.compiler,
+      typstVersion: request.typstVersion,
       timeout: request.timeout,
       image: request.imageName,
       flags: request.flags,

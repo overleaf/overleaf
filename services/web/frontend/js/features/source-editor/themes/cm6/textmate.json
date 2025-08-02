@@ -72,6 +72,9 @@
     },
     ".tok-list": {
       "color": "rgb(185, 6, 144)"
+    },
+    ".tok-variableName": {
+      "color": "fuchsia"
     }
   },
   "dark": false

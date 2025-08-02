@@ -6,6 +6,7 @@ import { UserSettings } from '../../../../../types/user-settings'
 
 export interface ProjectSettings {
   compiler: ProjectCompiler
+  typstVersion: string
   imageName: string
   rootDocId: string
   spellCheckLanguage: string

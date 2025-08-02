@@ -36,6 +36,7 @@ const ProjectSchema = new Schema(
     version: { type: Number }, // incremented for every change in the project structure (folders and filenames)
     publicAccesLevel: { type: String, default: 'private' },
     compiler: { type: String, default: 'pdflatex' },
+    typstVersion: { type: String, default: '' },
     spellCheckLanguage: { type: String, default: 'en' },
     deletedByExternalDataSource: { type: Boolean, default: false },
     description: { type: String, default: '' },

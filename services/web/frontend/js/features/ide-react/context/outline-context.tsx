@@ -11,7 +11,7 @@ import {
 import useScopeEventEmitter from '@/shared/hooks/use-scope-event-emitter'
 import useEventListener from '@/shared/hooks/use-event-listener'
 import * as eventTracking from '@/infrastructure/event-tracking'
-import { isValidTeXFile } from '@/main/is-valid-tex-file'
+import { isValidTeXOrTypFile } from '@/main/is-valid-tex-file'
 import localStorage from '@/infrastructure/local-storage'
 import { useProjectContext } from '@/shared/context/project-context'
 import { useEditorOpenDocContext } from '@/features/ide-react/context/editor-open-doc-context'
@@ -119,8 +119,8 @@ export const OutlineProvider: FC<React.PropsWithChildren> = ({ children }) => {
   )
 
   const { openDocName } = useEditorOpenDocContext()
-  const isTexFile = useMemo(
-    () => (openDocName ? isValidTeXFile(openDocName) : false),
+  const isTexOrTypstFile = useMemo(
+    () => (openDocName ? isValidTeXOrTypFile(openDocName) : false),
     [openDocName]
   )
 
@@ -131,7 +131,7 @@ export const OutlineProvider: FC<React.PropsWithChildren> = ({ children }) => {
     () => localStorage.getItem(storageKey) !== false
   )
 
-  const canShowOutline = isTexFile && !binaryFileOpened
+  const canShowOutline = isTexOrTypstFile && !binaryFileOpened
 
   const toggleOutlineExpanded = useCallback(() => {
     if (canShowOutline) {

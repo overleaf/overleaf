@@ -22,6 +22,7 @@ module.exports = ProjectEditorHandler = {
       publicAccesLevel: project.publicAccesLevel,
       dropboxEnabled: !!project.existsInDropbox,
       compiler: project.compiler,
+      typstVersion: project.typstVersion,
       description: project.description,
       spellCheckLanguage: project.spellCheckLanguage,
       deletedByExternalDataSource: project.deletedByExternalDataSource || false,

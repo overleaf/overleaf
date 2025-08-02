@@ -33,12 +33,18 @@ function runLatex(projectId, options, callback) {
     timings,
   } = options
   const compiler = options.compiler || 'pdflatex'
+  const typstVersion = options.typstVersion
   const timeout = options.timeout || 60000 // milliseconds
+
+  if (typstVersion && !typstVersion.includes('..') && !typstVersion.includes('/')) {
+    environment['TYPST_VERSION'] = typstVersion
+  }
 
   logger.debug(
     {
       directory,
       compiler,
+      typstVersion,
       timeout,
       mainFile,
       environment,
@@ -72,28 +78,37 @@ function runLatex(projectId, options, callback) {
     compileGroup,
     function (error, output) {
       delete ProcessTable[id]
-      if (error) {
-        return callback(error)
-      }
-      const runs =
-        output?.stderr?.match(/^Run number \d+ of .*latex/gm)?.length || 0
-      const failed = output?.stdout?.match(/^Latexmk: Errors/m) != null ? 1 : 0
-      // counters from latexmk output
-      stats['latexmk-errors'] = failed
-      stats['latex-runs'] = runs
-      stats['latex-runs-with-errors'] = failed ? runs : 0
-      stats[`latex-runs-${runs}`] = 1
-      stats[`latex-runs-with-errors-${runs}`] = failed ? 1 : 0
-      // timing information from /usr/bin/time
-      const stderr = (output && output.stderr) || ''
-      if (stderr.includes('Command being timed:')) {
-        // Add metrics for runs with `$ time -v ...`
-        for (const [timing, matcher] of TIME_V_METRICS) {
-          const match = stderr.match(matcher)
-          if (match) {
-            timings[timing] = parseFloat(match[1])
+      if (compiler != "typst") {
+        if (error) {
+          return callback(error)
+        }
+        const runs =
+          output?.stderr?.match(/^Run number \d+ of .*latex/gm)?.length || 0
+        const failed = output?.stdout?.match(/^Latexmk: Errors/m) != null ? 1 : 0
+        // counters from latexmk output
+        stats['latexmk-errors'] = failed
+        stats['latex-runs'] = runs
+        stats['latex-runs-with-errors'] = failed ? runs : 0
+        stats[`latex-runs-${runs}`] = 1
+        stats[`latex-runs-with-errors-${runs}`] = failed ? 1 : 0
+        // timing information from /usr/bin/time
+        const stderr = (output && output.stderr) || ''
+        if (stderr.includes('Command being timed:')) {
+          // Add metrics for runs with `$ time -v ...`
+          for (const [timing, matcher] of TIME_V_METRICS) {
+            const match = stderr.match(matcher)
+            if (match) {
+              timings[timing] = parseFloat(match[1])
+            }
           }
         }
+      } else {
+        const failed = output?.stdout?.match(/^Typst failed/m) != null ? 1 : 0
+        stats['latexmk-errors'] = failed
+        stats['latex-runs'] = 1
+        stats['latex-runs-with-errors'] = failed ? 1 : 0
+        stats[`latex-runs-1`] = 1
+        stats[`latex-runs-with-errors-1`] = failed ? 1 : 0
       }
       // record output files
       _writeLogOutput(projectId, directory, output, () => {
@@ -146,49 +161,64 @@ function _buildLatexCommand(mainFile, opts = {}) {
   const command = []
 
   if (Settings.clsi?.strace) {
-    command.push('strace', '-o', 'strace', '-ff')
+    command.push('strace', '-o', 'strace', '-ff', '-Y', '-yy', '-s99999')
   }
 
-  if (Settings.clsi?.latexmkCommandPrefix) {
-    command.push(...Settings.clsi.latexmkCommandPrefix)
-  }
+  if (opts.compiler !== "typst") {
+    if (Settings.clsi?.latexmkCommandPrefix) {
+      command.push(...Settings.clsi.latexmkCommandPrefix)
+    }
 
-  // Basic command and flags
-  command.push(
-    'latexmk',
-    '-cd',
-    '-jobname=output',
-    '-auxdir=$COMPILE_DIR',
-    '-outdir=$COMPILE_DIR',
-    '-synctex=1',
-    '-interaction=batchmode'
-  )
+    // Basic command and flags
+    command.push(
+      'latexmk',
+      '-cd',
+      '-jobname=output',
+      '-auxdir=$COMPILE_DIR',
+      '-outdir=$COMPILE_DIR',
+      '-synctex=1',
+      '-interaction=batchmode'
+    )
 
-  // Stop on first error option
-  if (opts.stopOnFirstError) {
-    command.push('-halt-on-error')
+    // Stop on first error option
+    if (opts.stopOnFirstError) {
+      command.push('-halt-on-error')
+    } else {
+      // Run all passes despite errors
+      command.push('-f')
+    }
+    // Extra flags
+    if (opts.flags) {
+      command.push(...opts.flags)
+    }
+
+    // TeX Engine selection
+    const compilerFlag = COMPILER_FLAGS[opts.compiler]
+    if (compilerFlag) {
+      command.push(compilerFlag)
+    } else {
+      throw new Error(`unknown compiler: ${opts.compiler}`)
+    }
+
+    // We want to run latexmk on the tex file which we will automatically
+    // generate from the Rtex/Rmd/md file.
+    mainFile = mainFile.replace(/\.(Rtex|md|Rmd|Rnw)$/, '.tex')
+    command.push(Path.join('$COMPILE_DIR', mainFile))
   } else {
-    // Run all passes despite errors
-    command.push('-f')
-  }
+    // Basic command and flags
+    command.push(
+      'typst-wrapper',
+      'compile',
+    )
 
-  // Extra flags
-  if (opts.flags) {
-    command.push(...opts.flags)
-  }
+    // Extra flags
+    if (opts.flags) {
+      command.push(...opts.flags)
+    }
 
-  // TeX Engine selection
-  const compilerFlag = COMPILER_FLAGS[opts.compiler]
-  if (compilerFlag) {
-    command.push(compilerFlag)
-  } else {
-    throw new Error(`unknown compiler: ${opts.compiler}`)
+    command.push(Path.join('$COMPILE_DIR', mainFile))
+    command.push(Path.join('$COMPILE_DIR', "output.pdf"))
   }
-
-  // We want to run latexmk on the tex file which we will automatically
-  // generate from the Rtex/Rmd/md file.
-  mainFile = mainFile.replace(/\.(Rtex|md|Rmd|Rnw)$/, '.tex')
-  command.push(Path.join('$COMPILE_DIR', mainFile))
 
   return command
 }

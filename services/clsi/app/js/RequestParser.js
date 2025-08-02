@@ -1,7 +1,7 @@
 const settings = require('@overleaf/settings')
 const OutputCacheManager = require('./OutputCacheManager')
 
-const VALID_COMPILERS = ['pdflatex', 'latex', 'xelatex', 'lualatex']
+const VALID_COMPILERS = ['pdflatex', 'latex', 'xelatex', 'lualatex', 'typst']
 const MAX_TIMEOUT = 600
 const EDITOR_ID_REGEX = /^[a-f0-9-]{36}$/ // UUID
 
@@ -37,6 +37,8 @@ function parse(body, callback) {
       default: 'pdflatex',
       type: 'string',
     })
+    // we have done validation elsewhere
+    response.typstVersion = compile.options.typstVersion,
     response.compileFromClsiCache = _parseAttribute(
       'compileFromClsiCache',
       compile.options.compileFromClsiCache,

@@ -72,6 +72,10 @@ const _ProjectController = {
       await EditorController.promises.setCompiler(projectId, req.body.compiler)
     }
 
+    if (req.body.typstVersion != null) {
+      await EditorController.promises.setTypstVersion(projectId, req.body.typstVersion)
+    }
+
     if (req.body.imageName != null) {
       await EditorController.promises.setImageName(
         projectId,

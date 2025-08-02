@@ -14,6 +14,7 @@ const Errors = require('./app/js/Errors')
 const { createOutputZip } = require('./app/js/OutputController')
 
 const Path = require('node:path')
+const fs = require('node:fs/promises');
 
 Metrics.open_sockets.monitor(true)
 Metrics.memory.monitor(logger)
@@ -205,6 +206,26 @@ app.get('/oops-internal', function (req, res, next) {
 })
 
 app.get('/status', (req, res, next) => res.send('CLSI is alive\n'))
+
+app.get('/typst-versions', async (req, res, next) => {
+  try {
+    let contents = await fs.readdir("/overleaf/services/clsi/typst", { withFileTypes: true })
+    const versions = [{ label: "Default", value: "default" },]
+    for (const dirent of contents) {
+      if (dirent.isDirectory() && dirent.name != "default") {
+        versions.push({
+          label: dirent.name,
+          value: dirent.name
+        })
+      }
+    }
+    res.json({
+      versions
+    })
+  } catch (error) {
+    next(error)
+  }
+})
 
 Settings.processTooOld = false
 if (Settings.processLifespanLimitMs) {

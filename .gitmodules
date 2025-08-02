@@ -1,0 +1,3 @@
+[submodule "services/typst-packages"]
+	path = develop/typst-packages
+	url = https://github.com/typst/packages/

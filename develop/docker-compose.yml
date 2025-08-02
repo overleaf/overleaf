@@ -29,10 +29,13 @@ services:
       - SANDBOXED_COMPILES=true
       - SANDBOXED_COMPILES_HOST_DIR_COMPILES=${PWD}/compiles
       - SANDBOXED_COMPILES_HOST_DIR_OUTPUT=${PWD}/output
+      - TYPST_PACKAGES_PATH=${PWD}/typst-packages/packages
+      - TYPST_COMPILERS_PATH=${PWD}/typst
     user: root
     volumes:
       - ${PWD}/compiles:/overleaf/services/clsi/compiles
       - ${PWD}/output:/overleaf/services/clsi/output
+      - ${PWD}/typst:/overleaf/services/clsi/typst:ro
       - ${DOCKER_SOCKET_PATH:-/var/run/docker.sock}:/var/run/docker.sock
       - clsi-cache:/overleaf/services/clsi/cache
 
