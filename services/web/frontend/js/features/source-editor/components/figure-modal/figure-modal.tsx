@@ -27,6 +27,7 @@ import useEventListener from '../../../../shared/hooks/use-event-listener'
 import { prepareLines } from '../../utils/prepare-lines'
 import { FeedbackBadge } from '@/shared/components/feedback-badge'
 import { FullSizeLoadingSpinner } from '@/shared/components/loading-spinner'
+import { language } from '@codemirror/language'
 
 const FigureModalBody = lazy(() => import('./figure-modal-body'))
 
@@ -144,6 +145,7 @@ const FigureModalContent = () => {
 
   const insert = useCallback(async () => {
     const figure = view.state.field<FigureData>(editFigureData, false)
+    const languageName = view.state.facet(language)?.name || 'latex'
 
     if (!getPath) {
       throw new Error('Cannot insert figure without a file path')
@@ -159,6 +161,10 @@ const FigureModalContent = () => {
     const captionCommand = includeCaption ? '\\caption{Enter Caption}' : ''
 
     if (figure) {
+      if (languageName == "typst") {
+        dispatch({ error: "Typst figure edit is not implemented" })
+        return
+      }
       // Updating existing figure
       const hadCaptionBefore = figure.caption !== null
       const hadLabelBefore = figure.label !== null
@@ -225,22 +231,38 @@ const FigureModalContent = () => {
         view.state.selection.main
       )
 
-      const widthArgument =
-        width !== undefined ? `[width=${width}\\linewidth]` : ''
-      const caption = includeCaption ? `\n\t\\caption{\${Enter Caption}}` : ''
-      const label = includeLabel ? `\n\t\\label{\${fig:enter-label}}` : ''
+      if (languageName == "typst") {
+        const widthArgument =
+          width !== undefined ? `, width: ${width * 100}%` : ''
+        const caption = includeCaption ? `\n\tcaption: [Enter Caption]` : ''
+        const label = includeLabel ? ` <fig:enter-label>` : ''
+        // TODO: escape path?
+        snippet(`#figure(
+\timage("${path}"${widthArgument}),${caption}
+)${label}`)(
+          { state: view.state, dispatch: view.dispatch },
+          { label: 'figure' },
+          pos,
+          pos
+        )
+      } else {
+        const widthArgument =
+          width !== undefined ? `[width=${width}\\linewidth]` : ''
+        const caption = includeCaption ? `\n\t\\caption{\${Enter Caption}}` : ''
+        const label = includeLabel ? `\n\t\\label{\${fig:enter-label}}` : ''
 
-      snippet(
-        `\\begin{figure}
+        snippet(
+          `\\begin{figure}
 \t\\centering
 \t\\includegraphics${widthArgument}{${path}}${caption}${label}
 \\end{figure}${suffix}\${}`
-      )(
-        { state: view.state, dispatch: view.dispatch },
-        { label: 'figure' },
-        pos,
-        pos
-      )
+        )(
+          { state: view.state, dispatch: view.dispatch },
+          { label: 'figure' },
+          pos,
+          pos
+        )
+      }
     }
     hide()
   }, [getPath, view, hide, includeCaption, includeLabel, width, dispatch])
