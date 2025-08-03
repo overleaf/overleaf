@@ -82,6 +82,7 @@ function resetMeta() {
       'rnw',
       'ltx',
       'inc',
+      'typ',
     ],
     editableFilenames: ['latexmkrc', '.latexmkrc', 'makefile', 'gnumakefile'],
     validRootDocExtensions: ['tex', 'Rtex', 'ltx', 'Rnw', 'typ'],

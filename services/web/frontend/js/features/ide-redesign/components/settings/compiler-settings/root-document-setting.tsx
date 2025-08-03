@@ -5,10 +5,10 @@ import type { Option } from '../dropdown-setting'
 import { useTranslation } from 'react-i18next'
 import { usePermissionsContext } from '@/features/ide-react/context/permissions-context'
 import { useFileTreeData } from '@/shared/context/file-tree-data-context'
-import { isValidTeXFile } from '@/main/is-valid-tex-file'
+import { isValidTeXFile, isValidTypFile } from '@/main/is-valid-tex-file'
 
 export default function RootDocumentSetting() {
-  const { rootDocId, setRootDocId } = useProjectSettingsContext()
+  const { rootDocId, setRootDocId, compiler } = useProjectSettingsContext()
   const { t } = useTranslation()
   const { write } = usePermissionsContext()
   const { docs } = useFileTreeData()
@@ -16,7 +16,7 @@ export default function RootDocumentSetting() {
   const validDocsOptions = useMemo(() => {
     const filteredDocs =
       docs?.filter(
-        doc => isValidTeXFile(doc.doc.name) || rootDocId === doc.doc.id
+        doc => (compiler == "typst" ? isValidTypFile(doc.doc.name) : isValidTeXFile(doc.doc.name)) || rootDocId === doc.doc.id || rootDocId === doc.doc.id
       ) ?? []
 
     const mappedDocs: Array<Option> = filteredDocs.map(doc => ({
@@ -33,7 +33,7 @@ export default function RootDocumentSetting() {
     }
 
     return mappedDocs
-  }, [docs, rootDocId])
+  }, [docs, rootDocId, compiler])
 
   return (
     <DropdownSetting

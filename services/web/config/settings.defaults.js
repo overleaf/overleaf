@@ -66,6 +66,7 @@ const defaultTextExtensions = [
   'rnw',
   'ltx',
   'inc',
+  'typ',
 ]
 
 const parseTextExtensions = function (extensions) {
