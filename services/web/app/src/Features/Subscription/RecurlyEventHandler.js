@@ -329,6 +329,8 @@ async function _sendInvoicePaidEvent(userId, eventData) {
   const country = invoice.address?.country
   const collectionMethod = invoice.collection_method
   const subscriptionIds = {}
+  // This logic is currently only resulting in `subscriptionId1` being set, because real data shows that
+  // there is only one subscription_id per invoice for recurly.
   invoice.subscription_ids?.forEach((e, idx) => {
     if (idx < INVOICE_SUBSCRIPTION_LIMIT) {
       subscriptionIds[`subscriptionId${idx + 1}`] = e
