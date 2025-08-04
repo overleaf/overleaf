@@ -15,6 +15,7 @@ pipeline {
 
   options {
     timestamps()
+    parallelsAlwaysFailFast()
   }
 
   environment {
