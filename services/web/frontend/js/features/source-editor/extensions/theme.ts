@@ -6,6 +6,7 @@ import classNames from 'classnames'
 import { FontFamily, LineHeight, userStyles } from '@/shared/utils/styles'
 import { ActiveOverallTheme } from '@/shared/hooks/use-active-overall-theme'
 import { ThemeCache } from '../utils/theme-cache'
+import getMeta from '@/utils/meta'
 
 const optionsThemeConf = new Compartment()
 const selectedThemeConf = new Compartment()
@@ -277,6 +278,14 @@ const loadSelectedTheme = async (editorTheme: string) => {
   }
 
   if (!themeCache.has(editorTheme)) {
+    const themes = getMeta('ol-editorThemes') || []
+    const legacyThemes = getMeta('ol-legacyEditorThemes') || []
+    const themeExists =
+      themes.includes(editorTheme) || legacyThemes.includes(editorTheme)
+    if (!themeExists) {
+      editorTheme = 'textmate' // fallback to default if the theme is not found
+    }
+
     const { theme, highlightStyle, dark } = await import(
       /* webpackChunkName: "cm6-theme" */ `../themes/cm6/${editorTheme}.json`
     )
