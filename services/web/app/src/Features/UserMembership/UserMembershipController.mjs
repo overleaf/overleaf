@@ -210,7 +210,7 @@ export default {
           return res.status(404).json({
             error: {
               code: 'user_not_found',
-              message: req.i18n.translate('user_not_found'),
+              message: req.i18n.translate('add_manager_user_not_found'),
             },
           })
         }

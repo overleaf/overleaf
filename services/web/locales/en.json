@@ -95,6 +95,7 @@
   "add_error_assist_annual_to_your_projects": "Add Error Assist Annual <sparkle/> to your projects and get unlimited AI help to fix LaTeX errors faster.",
   "add_error_assist_to_your_projects": "Add Error Assist <sparkle/> to your projects and get unlimited AI help to fix LaTeX errors faster.",
   "add_files": "Add files",
+  "add_manager_user_not_found": "This email address is not registered in Overleaf. Please ask the person you are trying to add as a manager to create an Overleaf account if they have not already done so. When adding a manager, please use one of the email addresses that are associated with their account.",
   "add_more_collaborators": "Add more collaborators",
   "add_more_licenses_to_my_plan": "Add more licenses to my plan",
   "add_more_managers": "Add more managers",
