@@ -41,6 +41,12 @@ build-community:
 	  --tag $(OVERLEAF_BRANCH) \
 	  $(MONOREPO_ROOT)
 
+push:
+	docker push $(OVERLEAF_BASE_TAG)
+	docker push $(OVERLEAF_BASE_BRANCH)
+	docker push $(OVERLEAF_TAG)
+	docker push $(OVERLEAF_BRANCH)
+
 SHELLCHECK_OPTS = \
 	--shell=bash \
 	--external-sources \

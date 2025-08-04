@@ -103,6 +103,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     stop_grace_period: 0s
     environment:
+      CI:
       PWD:
       CYPRESS_SHARD:
       COMPOSE_PROJECT_NAME:
@@ -110,9 +111,6 @@ services:
       ALL_TEX_LIVE_DOCKER_IMAGES:
       IMAGE_TAG_CE: ${IMAGE_TAG_CE:-sharelatex/sharelatex:latest}
       IMAGE_TAG_PRO: ${IMAGE_TAG_PRO:-quay.io/sharelatex/sharelatex-pro:latest}
-    depends_on:
-      mongo:
-        condition: service_healthy
     healthcheck:
       test: curl --fail http://localhost/status
       interval: 3s

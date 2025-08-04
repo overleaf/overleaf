@@ -28,6 +28,11 @@ const IMAGES = {
   CE: process.env.IMAGE_TAG_CE.replace(/:.+/, ''),
   PRO: process.env.IMAGE_TAG_PRO.replace(/:.+/, ''),
 }
+const LATEST = {
+  CE: process.env.IMAGE_TAG_CE.replace(/.+:/, '') || 'latest',
+  PRO: process.env.IMAGE_TAG_PRO.replace(/.+:/, '') || 'latest',
+  GIT_BRIDGE: 'latest', // TODO, build in CI?
+}
 
 function defaultDockerComposeOverride() {
   return {
@@ -80,10 +85,14 @@ app.get('/status', (req, res) => {
 app.use(bodyParser.json())
 app.use((req, res, next) => {
   // Basic access logs
-  console.log(req.method, req.url, req.body)
+  if (process.env.CI !== 'true') {
+    console.log(req.method, req.url, req.body)
+  }
   const json = res.json
   res.json = body => {
-    console.log(req.method, req.url, req.body, '->', body)
+    if (process.env.CI !== 'true' || body.error) {
+      console.log(req.method, req.url, req.body, '->', body)
+    }
     json.call(res, body)
   }
   next()
@@ -230,8 +239,9 @@ function setVarsDockerCompose({
 }) {
   const cfg = readDockerComposeOverride()
 
-  cfg.services.sharelatex.image = `${pro ? IMAGES.PRO : IMAGES.CE}:${version}`
-  cfg.services['git-bridge'].image = `quay.io/sharelatex/git-bridge:${version}`
+  cfg.services.sharelatex.image = `${pro ? IMAGES.PRO : IMAGES.CE}:${version === 'latest' ? (pro ? LATEST.PRO : LATEST.CE) : version}`
+  cfg.services['git-bridge'].image =
+    `quay.io/sharelatex/git-bridge:${version === 'latest' ? LATEST.GIT_BRIDGE : version}`
 
   cfg.services.sharelatex.environment = vars
 

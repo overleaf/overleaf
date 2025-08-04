@@ -22,11 +22,13 @@ test-e2e-native:
 
 test-e2e:
 	docker compose build host-admin
-	docker compose up -d host-admin
-	docker compose up --no-log-prefix --exit-code-from=e2e e2e
+	docker compose up --detach --wait host-admin
+	docker compose up --detach --wait mongo
+	docker compose up --no-log-prefix --exit-code-from=e2e e2e host-admin
 
 test-e2e-open:
-	docker compose up -d host-admin
+	docker compose up --detach --wait host-admin
+	docker compose up --detach --wait mongo
 	docker compose up --no-log-prefix --exit-code-from=e2e-open e2e-open host-admin
 
 clean:
@@ -58,12 +60,12 @@ prefetch_custom_texlive_2022:
 
 prefetch_custom: prefetch_old_4_2
 prefetch_old_4_2:
-	docker pull $(IMAGE_TAG_PRO:latest=4.2)
+	docker pull $(IMAGE_TAG_PRO:main=4.2)
 
 prefetch_custom: prefetch_old_5_0
 prefetch_old_5_0:
-	docker pull $(IMAGE_TAG_PRO:latest=5.0.1-RC1)
-	docker pull $(IMAGE_TAG_PRO:latest=5.0)
+	docker pull $(IMAGE_TAG_PRO:main=5.0.1-RC1)
+	docker pull $(IMAGE_TAG_PRO:main=5.0)
 
 # Google Cloud Build runs on a very ancient Docker version that does not support the subdir flag.
 # Use services -> mailtrap -> build -> context = https://github.com/dbck/docker-mailtrap.git#v1.5.0:build in docker-compose.yml eventually.
