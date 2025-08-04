@@ -37,7 +37,7 @@ describe('admin panel', function () {
 
       cy.then(() => {
         openEmail(
-          'Activate your Overleaf Community Edition Account',
+          'Activate your E2E test Account',
           (frame, { url }) => {
             frame.contains('Set password').then(el => {
               expect(el.attr('href')!).to.equal(url)
@@ -67,7 +67,7 @@ describe('admin panel', function () {
       })
       cy.then(() => {
         openEmail(
-          'Activate your Overleaf Community Edition Account',
+          'Activate your E2E test Account',
           (frame, { url }) => {
             frame.contains('Set password').then(el => {
               expect(el.attr('href')!).to.equal(url)

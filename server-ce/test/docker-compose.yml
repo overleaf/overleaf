@@ -11,7 +11,7 @@ services:
         condition: service_started
     environment:
       OVERLEAF_SITE_URL: 'http://sharelatex'
-      OVERLEAF_APP_NAME: Overleaf Community Edition
+      OVERLEAF_APP_NAME: E2E test
       OVERLEAF_MONGO_URL: mongodb://mongo/sharelatex?directConnection=true
       OVERLEAF_REDIS_HOST: redis
       REDIS_HOST: redis
