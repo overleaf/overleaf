@@ -522,6 +522,7 @@
   "email_attribute": "",
   "email_confirmed_onboarding": "",
   "email_confirmed_onboarding_message": "",
+  "email_does_not_belong_to_university": "",
   "email_limit_reached": "",
   "email_link_expired": "",
   "email_must_be_linked_to_institution": "",

@@ -273,6 +273,14 @@ const _checkConfirmationCode =
         })
       }
 
+      if (error.name === 'InvalidInstitutionalEmailError') {
+        return res.status(422).json({
+          message: {
+            key: 'email_does_not_belong_to_university',
+          },
+        })
+      }
+
       logger.err({ error }, 'failed to check confirmation code')
 
       return res.status(500).json({

@@ -307,6 +307,9 @@ function ErrorMessage({ error }: { error: string }) {
     case 'email_already_registered':
       return <span>{t('email_already_registered')}</span>
 
+    case 'email_does_not_belong_to_university':
+      return <span>{t('email_does_not_belong_to_university')}</span>
+
     case 'too_many_confirm_code_resend_attempts':
       return <span>{t('too_many_confirm_code_resend_attempts')}</span>
 
