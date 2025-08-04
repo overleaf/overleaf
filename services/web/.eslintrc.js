@@ -321,6 +321,7 @@ module.exports = {
         'react/no-did-update-set-state': 'error',
         'react/no-unused-prop-types': 'error',
         'react/prop-types': 'error',
+        '@overleaf/no-generated-editor-themes': 'error',
         // "react/react-in-jsx-scope": "error",
         // END: inline standard-react rules
 

@@ -5,6 +5,7 @@ import { classHighlighter } from './class-highlighter'
 import classNames from 'classnames'
 import { FontFamily, LineHeight, userStyles } from '@/shared/utils/styles'
 import { ActiveOverallTheme } from '@/shared/hooks/use-active-overall-theme'
+import { ThemeCache } from '../utils/theme-cache'
 
 const optionsThemeConf = new Compartment()
 const selectedThemeConf = new Compartment()
@@ -50,6 +51,8 @@ const svgUrl = (content: string) =>
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40">${content}</svg>`
   )}')`
 
+const tooltipThemeCache = new ThemeCache()
+
 const createThemeFromOptions = ({
   fontSize = 12,
   fontFamily = 'monaco',
@@ -74,9 +77,7 @@ const createThemeFromOptions = ({
         .map(([key, value]) => `${key}: ${value}`)
         .join(';'),
     }),
-    // set variables for tooltips, which are outside the editor
-    // TODO: set these on document.body, or a new container element for the tooltips, without using a style mod
-    EditorView.theme({
+    tooltipThemeCache.get({
       '.cm-tooltip': {
         '--font-size': styles.fontSize,
         '--source-font-family': styles.fontFamily,
@@ -280,8 +281,11 @@ const loadSelectedTheme = async (editorTheme: string) => {
       /* webpackChunkName: "cm6-theme" */ `../themes/cm6/${editorTheme}.json`
     )
 
+    // We store these in a cache, so we'll reuse after the first load
     const extension = [
+      // eslint-disable-next-line @overleaf/no-generated-editor-themes
       EditorView.theme(theme, { dark }),
+      // eslint-disable-next-line @overleaf/no-generated-editor-themes
       EditorView.theme(highlightStyle, { dark }),
     ]
 
