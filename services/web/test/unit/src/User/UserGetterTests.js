@@ -48,6 +48,11 @@ describe('UserGetter', function () {
     this.Modules = {
       promises: { hooks: { fire: sinon.stub().resolves() } },
     }
+    this.AsyncLocalStorage = {
+      storage: {
+        getStore: sinon.stub().returns(undefined),
+      },
+    }
 
     this.UserGetter = SandboxedModule.require(modulePath, {
       requires: {
@@ -68,6 +73,7 @@ describe('UserGetter', function () {
           User: (this.User = {}),
         },
         '../../infrastructure/Modules': this.Modules,
+        '../../infrastructure/AsyncLocalStorage': this.AsyncLocalStorage,
       },
     })
   })
@@ -287,19 +293,21 @@ describe('UserGetter', function () {
     })
 
     it('should get user when it has no emails field', function (done) {
-      this.fakeUser = {
+      this.fakeUserNoEmails = {
         _id: '12390i',
         email: 'email2@foo.bar',
       }
-      this.UserGetter.promises.getUser = sinon.stub().resolves(this.fakeUser)
+      this.UserGetter.promises.getUser = sinon
+        .stub()
+        .resolves(this.fakeUserNoEmails)
       const projection = { email: 1, emails: 1, samlIdentifiers: 1 }
       this.UserGetter.getUserFullEmails(
-        this.fakeUser._id,
+        this.fakeUserNoEmails._id,
         (error, fullEmails) => {
           expect(error).to.not.exist
           this.UserGetter.promises.getUser.called.should.equal(true)
           this.UserGetter.promises.getUser
-            .calledWith(this.fakeUser._id, projection)
+            .calledWith(this.fakeUserNoEmails._id, projection)
             .should.equal(true)
           assert.deepEqual(fullEmails, [])
           done()
@@ -1064,6 +1072,102 @@ describe('UserGetter', function () {
             lastDay
           )
         })
+      })
+    })
+
+    describe('caching full emails data if run inside AsyncLocalStorage context', function () {
+      it('should store the data in the AsyncLocalStorage store', async function () {
+        this.store = {}
+        this.AsyncLocalStorage.storage.getStore.returns(this.store)
+        this.UserGetter.promises.getUser = sinon.stub().resolves(this.fakeUser)
+        this.getUserAffiliations.resolves([
+          {
+            email: 'email1@foo.bar',
+            licence: 'professional',
+            institution: {},
+          },
+        ])
+        const fullEmails = await this.UserGetter.promises.getUserFullEmails(
+          this.fakeUser._id
+        )
+        expect(this.UserGetter.promises.getUser).to.have.been.calledOnce
+        expect(this.getUserAffiliations).to.have.been.calledOnce
+        expect(fullEmails).to.be.an('array')
+        expect(fullEmails.length).to.equal(2)
+        expect(this.store.userFullEmails[this.fakeUser._id]).to.deep.equal(
+          fullEmails
+        )
+      })
+
+      it('should fetch data from the store if available', async function () {
+        this.store = {
+          userFullEmails: {
+            [this.fakeUser._id]: [{ email: '1' }, { email: '2' }],
+          },
+        }
+        this.AsyncLocalStorage.storage.getStore.returns(this.store)
+        this.UserGetter.promises.getUser = sinon.stub().resolves(this.fakeUser)
+        const fullEmails = await this.UserGetter.promises.getUserFullEmails(
+          this.fakeUser._id,
+          this.req
+        )
+        expect(this.UserGetter.promises.getUser).to.not.have.been.called
+        expect(this.getUserAffiliations).to.not.have.been.called
+        expect(fullEmails).to.be.an('array')
+        expect(fullEmails.length).to.equal(2)
+        expect(this.store.userFullEmails[this.fakeUser._id]).to.deep.equal(
+          fullEmails
+        )
+      })
+
+      it('should not return cached data for different user ids', async function () {
+        this.store = {}
+        this.AsyncLocalStorage.storage.getStore.returns(this.store)
+        this.UserGetter.promises.getUser = sinon.stub().resolves(this.fakeUser)
+        const fullEmails = await this.UserGetter.promises.getUserFullEmails(
+          this.fakeUser._id,
+          this.req
+        )
+        expect(this.UserGetter.promises.getUser).to.have.been.calledOnce
+        expect(this.getUserAffiliations).to.have.been.calledOnce
+        expect(fullEmails).to.be.an('array')
+        expect(fullEmails.length).to.equal(2)
+        this.otherUser = {
+          _id: new ObjectId(),
+          email: 'other@foo.bar',
+          emails: [
+            {
+              email: 'other@foo.bar',
+              reversedHostname: 'rab.oof',
+              confirmedAt: new Date(),
+              lastConfirmedAt: new Date(),
+            },
+          ],
+        }
+        this.UserGetter.promises.getUser.resolves(this.otherUser)
+        this.getUserAffiliations.resolves([
+          {
+            email: 'other@foo.bar',
+            licence: 'professional',
+            institution: {},
+          },
+        ])
+        const fullEmailsOther =
+          await this.UserGetter.promises.getUserFullEmails(
+            this.otherUser._id,
+            this.req
+          )
+        expect(this.UserGetter.promises.getUser).to.have.been.calledTwice
+        expect(this.getUserAffiliations).to.have.been.calledTwice
+        expect(fullEmailsOther).to.not.deep.equal(fullEmails)
+        expect(fullEmailsOther).to.be.an('array')
+        expect(fullEmailsOther.length).to.equal(1)
+        expect(this.store.userFullEmails[this.fakeUser._id]).to.deep.equal(
+          fullEmails
+        )
+        expect(this.store.userFullEmails[this.otherUser._id]).to.deep.equal(
+          fullEmailsOther
+        )
       })
     })
   })

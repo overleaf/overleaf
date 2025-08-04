@@ -67,6 +67,7 @@ import { plainTextResponse } from './infrastructure/Response.js'
 import PublicAccessLevels from './Features/Authorization/PublicAccessLevels.js'
 import SocketDiagnostics from './Features/SocketDiagnostics/SocketDiagnostics.mjs'
 import ClsiCacheController from './Features/Compile/ClsiCacheController.js'
+import AsyncLocalStorage from './infrastructure/AsyncLocalStorage.js'
 
 const ClsiCookieManager = ClsiCookieManagerFactory(
   Settings.apis.clsi != null ? Settings.apis.clsi.backendGroupName : undefined
@@ -326,6 +327,7 @@ async function initialize(webRouter, privateApiRouter, publicApiRouter) {
   webRouter.get(
     '/user/emails',
     AuthenticationController.requireLogin(),
+    AsyncLocalStorage.middleware,
     PermissionsController.useCapabilities(),
     UserController.ensureAffiliationMiddleware,
     UserEmailsController.list
@@ -515,6 +517,7 @@ async function initialize(webRouter, privateApiRouter, publicApiRouter) {
     '/project',
     AuthenticationController.requireLogin(),
     RateLimiterMiddleware.rateLimit(rateLimiters.openDashboard),
+    AsyncLocalStorage.middleware,
     PermissionsController.useCapabilities(),
     ProjectListController.projectListPage
   )
@@ -542,6 +545,7 @@ async function initialize(webRouter, privateApiRouter, publicApiRouter) {
       RateLimiterMiddleware.rateLimit(openProjectRateLimiter, {
         params: ['Project_id'],
       }),
+      AsyncLocalStorage.middleware,
       PermissionsController.useCapabilities(),
       AuthorizationMiddleware.ensureUserCanReadProject,
       ProjectController.loadEditor

@@ -13,6 +13,7 @@ const { User } = require('../../models/User')
 const { normalizeQuery, normalizeMultiQuery } = require('../Helpers/Mongo')
 const Modules = require('../../infrastructure/Modules')
 const FeaturesHelper = require('../Subscription/FeaturesHelper')
+const AsyncLocalStorage = require('../../infrastructure/AsyncLocalStorage')
 
 function _lastDayToReconfirm(emailData, institutionData) {
   const globalReconfirmPeriod = settings.reconfirmNotificationDays
@@ -72,6 +73,10 @@ function _emailInReconfirmNotificationPeriod(
 }
 
 async function getUserFullEmails(userId) {
+  const store = AsyncLocalStorage.storage.getStore()
+  if (store?.userFullEmails?.[userId]) {
+    return store.userFullEmails[userId]
+  }
   const user = await UserGetter.promises.getUser(userId, {
     email: 1,
     emails: 1,
@@ -89,12 +94,20 @@ async function getUserFullEmails(userId) {
   const affiliationsData =
     await InstitutionsAPIPromises.getUserAffiliations(userId)
 
-  return decorateFullEmails(
+  const fullEmails = decorateFullEmails(
     user.email,
     user.emails || [],
     affiliationsData,
     user.samlIdentifiers || []
   )
+
+  if (store) {
+    if (!store.userFullEmails) {
+      store.userFullEmails = {}
+    }
+    store.userFullEmails[userId] = fullEmails
+  }
+  return fullEmails
 }
 
 async function getUserFeatures(userId) {
