@@ -168,7 +168,6 @@ function ipMatcherAffiliation(userId) {
           const messageOpts = {
             university_name: body.name,
             institutionId: body.id,
-            content: body.enrolment_ad_html,
             portalPath,
             ssoEnabled: body.sso_enabled,
           }

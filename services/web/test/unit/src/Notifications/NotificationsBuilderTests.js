@@ -97,7 +97,6 @@ describe('NotificationsBuilder', function () {
         this.body = {
           id: 1,
           name: 'stanford',
-          enrolment_ad_html: 'v1 ad content',
           is_university: true,
           portal_slug: null,
           sso_enabled: false,
@@ -112,7 +111,6 @@ describe('NotificationsBuilder', function () {
         const expectedOpts = {
           institutionId: this.body.id,
           university_name: this.body.name,
-          content: this.body.enrolment_ad_html,
           ssoEnabled: false,
           portalPath: undefined,
         }
@@ -131,7 +129,6 @@ describe('NotificationsBuilder', function () {
         this.body = {
           id: 1,
           name: 'stanford',
-          enrolment_ad_html: 'v1 ad content',
           is_university: true,
           portal_slug: 'stanford',
           sso_enabled: true,
@@ -146,7 +143,6 @@ describe('NotificationsBuilder', function () {
         const expectedOpts = {
           institutionId: this.body.id,
           university_name: this.body.name,
-          content: this.body.enrolment_ad_html,
           ssoEnabled: true,
           portalPath: '/edu/stanford',
         }
