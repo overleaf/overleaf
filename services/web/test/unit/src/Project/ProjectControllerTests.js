@@ -238,6 +238,7 @@ describe('ProjectController', function () {
         '../Subscription/LimitationsManager': this.LimitationsManager,
         '../Tags/TagsHandler': this.TagsHandler,
         '../../models/User': { User: this.UserModel },
+        '../../models/Subscription': {},
         '../Authorization/AuthorizationManager': this.AuthorizationManager,
         '../InactiveData/InactiveProjectManager': this.InactiveProjectManager,
         './ProjectUpdateHandler': this.ProjectUpdateHandler,

@@ -1,5 +1,6 @@
 const SandboxedModule = require('sandboxed-module')
 const { expect } = require('chai')
+const sinon = require('sinon')
 const modulePath =
   '../../../../app/src/Features/Subscription/SubscriptionHelper'
 
@@ -31,6 +32,23 @@ const plans = {
 
 describe('SubscriptionHelper', function () {
   beforeEach(function () {
+    this.clock = sinon.useFakeTimers(new Date('2023-06-15T10:00:00Z'))
+    this.Subscription = {
+      findOne: sinon.stub().returns({
+        exec: sinon.stub().resolves(),
+      }),
+      updateOne: sinon.stub().returns({
+        exec: sinon.stub().resolves(),
+      }),
+      find: sinon.stub().returns({
+        populate: sinon.stub().returns({
+          populate: sinon.stub().returns({
+            exec: sinon.stub().resolves([]),
+          }),
+        }),
+        exec: sinon.stub().resolves(),
+      }),
+    }
     this.INITIAL_LICENSE_SIZE = 2
     this.settings = {
       groupPlanModalOptions: {},
@@ -94,7 +112,13 @@ describe('SubscriptionHelper', function () {
       },
     }
     this.SubscriptionHelper = SandboxedModule.require(modulePath, {
+      globals: {
+        Date: this.clock.Date,
+      },
       requires: {
+        '../../models/Subscription': {
+          Subscription: this.Subscription,
+        },
         '@overleaf/settings': this.settings,
         './GroupPlansData': this.GroupPlansData,
       },
@@ -497,6 +521,175 @@ describe('SubscriptionHelper', function () {
       tenDaysFromNow.setDate(tenDaysFromNow.getDate() + 10)
       const result = this.SubscriptionHelper.isInTrial(tenDaysFromNow)
       expect(result).to.be.true
+    })
+  })
+
+  describe('recomputeSubscriptionState', function () {
+    beforeEach(function () {
+      this.clock.now = new Date('2023-06-15T10:00:00Z')
+
+      this.baseSubscription = {
+        _id: 'subscription_id',
+        paymentProvider: {
+          service: 'stripe-test',
+          subscriptionId: 'stripe_sub_123',
+          state: 'active',
+          pausePeriodStart: '2023-06-15T09:00:00Z',
+          pausePeriodEnd: '2023-06-15T11:00:00Z',
+        },
+      }
+    })
+
+    describe('when subscription has no paymentProvider subscriptionId', function () {
+      it('should return subscription unchanged', async function () {
+        const subscription = { _id: 'subscription_id' }
+        const result =
+          await this.SubscriptionHelper.recomputeSubscriptionState(subscription)
+        expect(result).to.equal(subscription)
+      })
+    })
+
+    describe('when subscription has no pausePeriodStart', function () {
+      it('should return subscription unchanged', async function () {
+        const subscription = {
+          _id: 'subscription_id',
+          paymentProvider: {
+            subscriptionId: 'stripe_sub_123',
+            state: 'active',
+          },
+        }
+        const result =
+          await this.SubscriptionHelper.recomputeSubscriptionState(subscription)
+        expect(result).to.equal(subscription)
+      })
+    })
+
+    describe('when subscription should be paused', function () {
+      describe('and current state is active', function () {
+        it('should change state to paused', async function () {
+          const subscription = { ...this.baseSubscription }
+          const result =
+            await this.SubscriptionHelper.recomputeSubscriptionState(
+              subscription
+            )
+
+          expect(result.paymentProvider.state).to.equal('paused')
+          expect(this.Subscription.updateOne).to.have.been.calledWith(
+            { _id: 'subscription_id' },
+            { 'paymentProvider.state': 'paused' }
+          )
+        })
+      })
+
+      describe('and current state is already paused', function () {
+        it('should not change state', async function () {
+          const subscription = {
+            ...this.baseSubscription,
+            paymentProvider: {
+              ...this.baseSubscription.paymentProvider,
+              state: 'paused',
+            },
+          }
+          const result =
+            await this.SubscriptionHelper.recomputeSubscriptionState(
+              subscription
+            )
+
+          expect(result.paymentProvider.state).to.equal('paused')
+          expect(this.Subscription.updateOne.called).to.be.false
+        })
+      })
+    })
+
+    describe('when subscription should not be paused', function () {
+      describe('before pause period starts', function () {
+        beforeEach(function () {
+          this.clock.now = new Date('2023-06-15T08:00:00Z')
+        })
+
+        it('should keep active state unchanged', async function () {
+          const subscription = { ...this.baseSubscription }
+          const result =
+            await this.SubscriptionHelper.recomputeSubscriptionState(
+              subscription
+            )
+
+          expect(result.paymentProvider.state).to.equal('active')
+          expect(this.Subscription.updateOne.called).to.be.false
+        })
+      })
+
+      describe('after pause period ends', function () {
+        beforeEach(function () {
+          this.clock.now = new Date('2023-06-15T12:00:00Z')
+        })
+
+        describe('and current state is paused', function () {
+          it('should change state to active', async function () {
+            const subscription = {
+              ...this.baseSubscription,
+              paymentProvider: {
+                ...this.baseSubscription.paymentProvider,
+                state: 'paused',
+              },
+            }
+            const result =
+              await this.SubscriptionHelper.recomputeSubscriptionState(
+                subscription
+              )
+
+            expect(result.paymentProvider.state).to.equal('active')
+            expect(this.Subscription.updateOne).to.have.been.calledWith(
+              { _id: 'subscription_id' },
+              { 'paymentProvider.state': 'active' }
+            )
+          })
+        })
+
+        describe('and current state is already active', function () {
+          it('should keep state unchanged', async function () {
+            const subscription = { ...this.baseSubscription }
+            const result =
+              await this.SubscriptionHelper.recomputeSubscriptionState(
+                subscription
+              )
+
+            expect(result.paymentProvider.state).to.equal('active')
+            expect(this.Subscription.updateOne.called).to.be.false
+          })
+        })
+      })
+    })
+
+    describe('when subscription has no pausePeriodEnd (indefinite pause)', function () {
+      beforeEach(function () {
+        this.baseSubscription.paymentProvider.pausePeriodEnd = undefined
+      })
+
+      it('should not transition to paused state when pausePeriodEnd is missing', async function () {
+        const subscription = { ...this.baseSubscription }
+        const result =
+          await this.SubscriptionHelper.recomputeSubscriptionState(subscription)
+
+        expect(result.paymentProvider.state).to.equal('active')
+        expect(this.Subscription.updateOne.called).to.be.false
+      })
+
+      it('should keep paused state when already paused and no end date', async function () {
+        const subscription = {
+          ...this.baseSubscription,
+          paymentProvider: {
+            ...this.baseSubscription.paymentProvider,
+            state: 'paused',
+            pausePeriodEnd: undefined,
+          },
+        }
+        const result =
+          await this.SubscriptionHelper.recomputeSubscriptionState(subscription)
+
+        expect(result.paymentProvider.state).to.equal('paused')
+        expect(this.Subscription.updateOne.called).to.be.false
+      })
     })
   })
 })

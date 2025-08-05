@@ -129,6 +129,7 @@ describe('FeaturesUpdater', function () {
         '../Analytics/AnalyticsManager': this.AnalyticsManager,
         '../../infrastructure/Modules': this.Modules,
         '../../infrastructure/Queues': this.Queues,
+        '../../models/Subscription': {},
       },
     })
   })

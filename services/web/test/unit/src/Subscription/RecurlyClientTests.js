@@ -144,6 +144,7 @@ describe('RecurlyClient', function () {
         },
         '../User/UserGetter': this.UserGetter,
         './Errors': this.Errors,
+        '../../models/Subscription': {},
       },
     }))
   })

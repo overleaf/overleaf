@@ -76,6 +76,12 @@ const SubscriptionSchema = new Schema(
       state: {
         type: String,
       },
+      pausePeriodStart: {
+        type: Date,
+      },
+      pausePeriodEnd: {
+        type: Date,
+      },
       trialStartedAt: {
         type: Date,
       },

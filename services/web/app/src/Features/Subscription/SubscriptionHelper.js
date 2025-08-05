@@ -1,6 +1,63 @@
 const { formatCurrency } = require('../../util/currency')
 const GroupPlansData = require('./GroupPlansData')
 const { isStandaloneAiAddOnPlanCode } = require('./AiHelper')
+const { Subscription } = require('../../models/Subscription')
+
+const MILLISECONDS = 1_000
+/**
+ * Recompute the subscription state for Stripe subscriptions based on pause periods.
+ * This function checks if a subscription should transition between 'active' and 'paused'
+ * states based on the current time and pause period metadata.
+ *
+ * @param {Object} subscription - The MongoDB subscription document
+ * @returns {Promise<Object>} - The updated subscription document with recomputed state
+ */
+async function recomputeSubscriptionState(subscription) {
+  if (
+    !subscription?.paymentProvider?.subscriptionId ||
+    !subscription.paymentProvider.pausePeriodStart ||
+    !subscription.paymentProvider.pausePeriodEnd ||
+    !subscription?.paymentProvider.service.includes('stripe')
+  ) {
+    return subscription
+  }
+  const now = Date.now() / MILLISECONDS
+  const pauseStartTime =
+    new Date(subscription.paymentProvider.pausePeriodStart).getTime() /
+    MILLISECONDS
+  const currentState = subscription.paymentProvider.state
+
+  const pauseEndTime =
+    new Date(subscription.paymentProvider.pausePeriodEnd).getTime() /
+    MILLISECONDS
+
+  const shouldBePaused =
+    pauseEndTime && now >= pauseStartTime && now < pauseEndTime
+
+  let newState
+
+  if (shouldBePaused && currentState !== 'paused') {
+    newState = 'paused'
+  } else if (
+    !shouldBePaused &&
+    currentState === 'paused' &&
+    pauseEndTime &&
+    now >= pauseEndTime
+  ) {
+    newState = 'active'
+  }
+
+  if (newState) {
+    await Subscription.updateOne(
+      { _id: subscription._id },
+      { 'paymentProvider.state': newState }
+    ).exec()
+
+    subscription.paymentProvider.state = newState
+  }
+
+  return subscription
+}
 
 /**
  * If the user changes to a less expensive plan, we shouldn't apply the change immediately.
@@ -149,4 +206,5 @@ module.exports = {
   getSubscriptionTrialStartedAt,
   getSubscriptionTrialEndsAt,
   isInTrial,
+  recomputeSubscriptionState,
 }

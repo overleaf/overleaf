@@ -40,6 +40,7 @@ class PaymentProviderSubscription {
    * @param {Date|null} [props.trialPeriodStart]
    * @param {Date|null} [props.trialPeriodEnd]
    * @param {Date|null} [props.pausePeriodStart]
+   * @param {Date|null} [props.pausePeriodEnd]
    * @param {number|null} [props.remainingPauseCycles]
    */
   constructor(props) {
@@ -66,6 +67,7 @@ class PaymentProviderSubscription {
     this.trialPeriodStart = props.trialPeriodStart ?? null
     this.trialPeriodEnd = props.trialPeriodEnd ?? null
     this.pausePeriodStart = props.pausePeriodStart ?? null
+    this.pausePeriodEnd = props.pausePeriodEnd ?? null
     this.remainingPauseCycles = props.remainingPauseCycles ?? null
   }
 
