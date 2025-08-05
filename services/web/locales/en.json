@@ -2331,7 +2331,7 @@
   "then_x_price_per_month": "Then __price__ per month",
   "then_x_price_per_year": "Then __price__ per year",
   "there_are_lots_of_options_to_edit_and_customize_your_figures": "There are lots of options to edit and customize your figures, such as wrapping text around the figure, rotating the image, or including multiple images in a single figure. You’ll need to edit the LaTeX code to do this. <0>Find out how</0>",
-  "there_is_an_unrecoverable_latex_error": "There is an unrecoverable LaTeX error. If there are LaTeX errors shown below or in the raw logs, please try to fix them and compile again.",
+  "there_is_an_unrecoverable_latex_error_check_logs": "There is an unrecoverable LaTeX error. If there are LaTeX errors shown in the logs, please try to fix them and compile again.",
   "there_was_a_problem_restoring_the_project_please_try_again_in_a_few_moments_or_contact_us": "There was a problem restoring the project. Please try again in a few moments. Contact us if the problem persists.",
   "there_was_an_error_opening_your_content": "There was an error creating your project",
   "thesis": "Thesis",

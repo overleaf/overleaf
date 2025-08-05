@@ -53,7 +53,7 @@ const GeneralErrorState = () => {
             {t('why_might_this_happen')}
           </div>
           <ul className="pdf-error-state-info-box-text">
-            <li>{t('there_is_an_unrecoverable_latex_error')}</li>
+            <li>{t('there_is_an_unrecoverable_latex_error_check_logs')}</li>
             <li>{t('the_document_environment_contains_no_content')}</li>
             <li>{t('this_project_contains_a_file_called_output')}</li>
           </ul>
