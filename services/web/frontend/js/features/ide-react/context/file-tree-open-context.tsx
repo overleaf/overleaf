@@ -32,6 +32,8 @@ const FileTreeOpenContext = createContext<
       handleFileTreeDelete: (entity: FileTreeFindResult) => void
       fileTreeExpanded: boolean
       toggleFileTreeExpanded: () => void
+      expandFileTree: () => void
+      collapseFileTree: () => void
     }
   | undefined
 >(undefined)
@@ -57,6 +59,14 @@ export const FileTreeOpenProvider: FC<React.PropsWithChildren> = ({
 
   const toggleFileTreeExpanded = useCallback(() => {
     setFileTreeExpanded(prev => !prev)
+  }, [])
+
+  const expandFileTree = useCallback(() => {
+    setFileTreeExpanded(true)
+  }, [])
+
+  const collapseFileTree = useCallback(() => {
+    setFileTreeExpanded(false)
   }, [])
 
   const handleFileTreeInit = useCallback(() => {
@@ -144,6 +154,8 @@ export const FileTreeOpenProvider: FC<React.PropsWithChildren> = ({
       handleFileTreeDelete,
       fileTreeExpanded,
       toggleFileTreeExpanded,
+      expandFileTree,
+      collapseFileTree,
     }
   }, [
     handleFileTreeDelete,
@@ -153,6 +165,8 @@ export const FileTreeOpenProvider: FC<React.PropsWithChildren> = ({
     selectedEntityCount,
     fileTreeExpanded,
     toggleFileTreeExpanded,
+    expandFileTree,
+    collapseFileTree,
   ])
 
   return (

@@ -7,8 +7,14 @@ import useCollapsibleFileTree from '../../hooks/use-collapsible-file-tree'
 import classNames from 'classnames'
 
 function FileTreeOutlinePanel() {
-  const { outlineEnabled, outlinePanelRef } = useOutlinePane()
-  const { fileTreeExpanded, fileTreePanelRef } = useCollapsibleFileTree()
+  const { canShowOutline, outlinePanelRef, expandOutline, collapseOutline } =
+    useOutlinePane()
+  const {
+    fileTreeExpanded,
+    fileTreePanelRef,
+    expandFileTree,
+    collapseFileTree,
+  } = useCollapsibleFileTree()
 
   return (
     <PanelGroup
@@ -25,12 +31,15 @@ function FileTreeOutlinePanel() {
         order={1}
         collapsible
         ref={fileTreePanelRef}
+        onExpand={expandFileTree}
+        onCollapse={collapseFileTree}
+        minSize={10}
       >
         <FileTree />
       </Panel>
       <VerticalResizeHandle
         hitAreaMargins={{ coarse: 0, fine: 0 }}
-        disabled={!outlineEnabled || !fileTreeExpanded}
+        disabled={!canShowOutline}
       />
       <Panel
         className="file-outline-panel"
@@ -39,6 +48,9 @@ function FileTreeOutlinePanel() {
         order={2}
         collapsible
         ref={outlinePanelRef}
+        onExpand={expandOutline}
+        onCollapse={collapseOutline}
+        minSize={10}
       >
         <OutlineContainer />
       </Panel>

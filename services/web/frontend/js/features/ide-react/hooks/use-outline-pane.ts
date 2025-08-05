@@ -4,11 +4,18 @@ import { useRef } from 'react'
 import { ImperativePanelHandle } from 'react-resizable-panels'
 
 export const useOutlinePane = () => {
-  const { canShowOutline, outlineExpanded } = useOutlineContext()
+  const { canShowOutline, outlineExpanded, expandOutline, collapseOutline } =
+    useOutlineContext()
   const outlinePanelRef = useRef<ImperativePanelHandle>(null)
   const outlineEnabled = canShowOutline && outlineExpanded
 
   useCollapsiblePanel(outlineEnabled, outlinePanelRef)
 
-  return { outlineEnabled, outlinePanelRef }
+  return {
+    outlineEnabled,
+    canShowOutline,
+    outlinePanelRef,
+    expandOutline,
+    collapseOutline,
+  }
 }

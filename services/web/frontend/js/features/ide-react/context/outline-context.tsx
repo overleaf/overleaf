@@ -38,6 +38,8 @@ const OutlineContext = createContext<
       canShowOutline: boolean
       outlineExpanded: boolean
       toggleOutlineExpanded: () => void
+      expandOutline: () => void
+      collapseOutline: () => void
     }
   | undefined
 >(undefined)
@@ -133,15 +135,29 @@ export const OutlineProvider: FC<React.PropsWithChildren> = ({ children }) => {
 
   const canShowOutline = isTexFile && !binaryFileOpened
 
-  const toggleOutlineExpanded = useCallback(() => {
+  const expandOutline = useCallback(() => {
     if (canShowOutline) {
-      localStorage.setItem(storageKey, !outlineExpanded)
-      eventTracking.sendMB(
-        outlineExpanded ? 'outline-collapse' : 'outline-expand'
-      )
-      setOutlineExpanded(!outlineExpanded)
+      localStorage.setItem(storageKey, true)
+      eventTracking.sendMB('outline-expand')
+      setOutlineExpanded(true)
     }
-  }, [canShowOutline, outlineExpanded, storageKey])
+  }, [canShowOutline, storageKey])
+
+  const collapseOutline = useCallback(() => {
+    if (canShowOutline) {
+      localStorage.setItem(storageKey, false)
+      eventTracking.sendMB('outline-collapse')
+      setOutlineExpanded(false)
+    }
+  }, [canShowOutline, storageKey])
+
+  const toggleOutlineExpanded = useCallback(() => {
+    if (outlineExpanded) {
+      collapseOutline()
+    } else {
+      expandOutline()
+    }
+  }, [collapseOutline, expandOutline, outlineExpanded])
 
   const value = useMemo(
     () => ({
@@ -152,6 +168,8 @@ export const OutlineProvider: FC<React.PropsWithChildren> = ({ children }) => {
       canShowOutline,
       outlineExpanded,
       toggleOutlineExpanded,
+      expandOutline,
+      collapseOutline,
     }),
     [
       flatOutline,
@@ -160,6 +178,8 @@ export const OutlineProvider: FC<React.PropsWithChildren> = ({ children }) => {
       canShowOutline,
       outlineExpanded,
       toggleOutlineExpanded,
+      expandOutline,
+      collapseOutline,
     ]
   )
 
