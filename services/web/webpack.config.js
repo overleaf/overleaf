@@ -21,11 +21,7 @@ const entryPoints = {
   devToolbar: './frontend/js/dev-toolbar.ts',
   'ide-detached': './frontend/js/ide-detached.ts',
   marketing: './frontend/js/marketing.ts',
-  'main-style': './frontend/stylesheets/main-style.less',
-  'main-ieee-style': './frontend/stylesheets/main-ieee-style.less',
-  'main-light-style': './frontend/stylesheets/main-light-style.less',
-  'main-style-bootstrap-5':
-    './frontend/stylesheets/bootstrap-5/main-style.scss',
+  'main-style': './frontend/stylesheets/main-style.scss',
   tracking: './frontend/js/infrastructure/tracking.ts',
 }
 
@@ -164,41 +160,6 @@ module.exports = {
         generator: {
           filename: 'js/[name]-[contenthash][ext]',
         },
-      },
-      {
-        // Pass Less files through less-loader/css-loader/mini-css-extract-
-        // plugin (note: run in reverse order)
-        test: /\.less$/,
-        use: [
-          // Allows the CSS to be extracted to a separate .css file
-          { loader: MiniCssExtractPlugin.loader },
-          // Resolves any CSS dependencies (e.g. url())
-          { loader: 'css-loader' },
-          {
-            // Runs autoprefixer on CSS via postcss
-            loader: 'postcss-loader',
-            options: {
-              postcssOptions: {
-                plugins: ['autoprefixer'],
-              },
-            },
-          },
-          // Compile Less off the main event loop
-          {
-            loader: 'thread-loader',
-            options: {
-              // keep workers alive for dev-server, and shut them down when not needed
-              poolTimeout:
-                process.env.NODE_ENV === 'development' ? 10 * 60 * 1000 : 500,
-              // bring up more workers after they timed out
-              poolRespawn: true,
-              // limit concurrency (one per entrypoint and let the small includes queue up)
-              workers: process.env.NODE_ENV === 'test' ? 1 : 6,
-            },
-          },
-          // Compiles the Less syntax to CSS
-          { loader: 'less-loader' },
-        ],
       },
       {
         // Pass Sass files through sass-loader/css-loader/mini-css-extract-

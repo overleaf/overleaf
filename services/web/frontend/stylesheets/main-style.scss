@@ -1,0 +1,51 @@
+// Web fonts
+@import '../fonts/noto-sans/noto-sans.css';
+@import '../fonts/dm-mono/dm-mono.css';
+@import '../fonts/merriweather/merriweather.css';
+@import '../fonts/source-code-pro/source-code-pro.css';
+@import '../fonts/STIXTwoMath/stix-two-math.css';
+@import '../fonts/noto-serif/noto-serif.css';
+@import '../fonts/open-dyslexic-mono/open-dyslexic-mono.css';
+@import '../fonts/material-symbols/material-symbols.css';
+
+// Vendor CSS
+// TODO Bootstrap 5: Check whether this works with Bootstrap 5, and whether we can replace it
+@import 'vendor/select/select';
+
+// Bootstrap-related
+
+// Note that files containing Bootstrap or Sass files that interact with
+// Bootstrap's Sass variables must use @import rather than @use because
+// Bootstrap relies on its variables, mixins etc. all being global.
+
+// Include Bootstrap 5 itself, plus overrides and extend Bootstrap styles.
+@import 'base/bootstrap';
+
+// Extra colours for the website redesign
+@import 'base/colors';
+
+// Components custom style
+@import 'components/all';
+
+// Typography-related
+@import 'base/typography';
+
+// Custom helpers
+@import 'helpers/all';
+
+// Modals
+@import 'modals/all';
+
+// Pages custom style
+@import 'pages/all';
+
+// Link styles
+@import 'base/links';
+@import 'base/base';
+
+// Page layout that isn't related to a particular component or page
+@import 'base/layout';
+
+// Module styles
+// TODO: find a way for modules to add styles dynamically
+@import 'modules/all';

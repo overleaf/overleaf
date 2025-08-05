@@ -1,0 +1,98 @@
+// Typography
+
+body {
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility; /* stylelint-disable-line value-keyword-case */
+  -moz-osx-font-smoothing: grayscale;
+}
+
+// Headings
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.h1,
+.h2,
+.h3,
+.h4,
+.h5,
+.h6 {
+  // Apply margin above the heading only when it has a preceding sibling or is inside a row with a preceding sibling
+  * > * + &,
+  * + .row & {
+    margin-top: $spacing-08;
+  }
+}
+
+h1,
+.h1 {
+  @include heading-xl;
+}
+
+h2,
+.h2 {
+  @include heading-md;
+}
+
+h3,
+.h3 {
+  @include heading-sm;
+}
+
+h4,
+.h4 {
+  @include heading-xs;
+}
+
+h5,
+.h5 {
+  @include body-base;
+}
+
+h6,
+.h6 {
+  @include body-sm;
+}
+
+// Miscellaneous
+.small {
+  @include body-sm;
+}
+
+// Peformatted text, sample output, code, keyboard input elements
+// E.g.: Git authentication token
+pre {
+  @include body-base;
+}
+
+code,
+kbd,
+samp {
+  font-size: 1em;
+}
+
+.list-style-check-green {
+  list-style-image: url('../../../public/img/fa-check-green.svg');
+}
+
+.text-muted {
+  color: var(--content-disabled) !important;
+}
+
+.dm-mono {
+  @include font-mono;
+}
+
+@include media-breakpoint-up(lg) {
+  .text-center-only-desktop {
+    text-align: center;
+  }
+}
+
+@include media-breakpoint-down(lg) {
+  .text-center-only-mobile {
+    text-align: center;
+  }
+}

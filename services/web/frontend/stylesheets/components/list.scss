@@ -1,0 +1,42 @@
+@mixin list-checkmark {
+  $icon-size: 24px;
+
+  ul {
+    list-style: none;
+    margin-top: var(--spacing-06);
+    padding-left: 0;
+  }
+
+  li {
+    min-height: $icon-size;
+    background-size: $icon-size $icon-size;
+    margin-bottom: var(--spacing-05);
+    padding-left: calc(var(--spacing-05) + $icon-size);
+
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+      margin-bottom: var(--spacing-04);
+    }
+  }
+}
+
+.list-checkmark-green {
+  @include list-checkmark;
+
+  li {
+    background: url('../../../public/img/website-redesign/check-in-green-circle.svg')
+      no-repeat left top;
+  }
+}
+
+.list-checkmark-blue {
+  @include list-checkmark;
+
+  li {
+    background: url('../../../public/img/website-redesign/check-in-blue-circle.svg')
+      no-repeat left top;
+  }
+}

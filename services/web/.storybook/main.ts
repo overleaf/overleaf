@@ -38,14 +38,6 @@ const config: StorybookConfig = {
             ],
           },
           {
-            test: /\.less$/,
-            use: [
-              { loader: MiniCssExtractPlugin.loader },
-              { loader: 'css-loader' },
-              { loader: 'less-loader' },
-            ],
-          },
-          {
             // Pass Sass files through sass-loader/css-loader/mini-css-extract-
             // plugin (note: run in reverse order)
             test: /\.s[ac]ss$/,

@@ -214,16 +214,8 @@ module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
       return staticFilesBase + webpackManifest[cssFileName]
     }
 
-    res.locals.buildCssPath = function (
-      themeModifier = '',
-      bootstrapVersion = 3
-    ) {
-      // Pick which main stylesheet to use based on Bootstrap version
-      return res.locals.buildStylesheetPath(
-        bootstrapVersion === 5
-          ? 'main-style-bootstrap-5.css'
-          : `main-${themeModifier}style.css`
-      )
+    res.locals.buildCssPath = function () {
+      return res.locals.buildStylesheetPath('main-style.css')
     }
 
     res.locals.buildImgPath = function (imgFile) {
@@ -346,17 +338,14 @@ module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
         {
           name: 'Dark',
           val: '',
-          path: res.locals.buildCssPath(),
         },
         {
           name: 'Light',
           val: 'light-',
-          path: res.locals.buildCssPath('light-'),
         },
         {
           name: 'System',
           val: 'system',
-          path: res.locals.buildCssPath(),
         },
       ]
     }
@@ -370,12 +359,6 @@ module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
 
   webRouter.use(function (req, res, next) {
     res.locals.showThinFooter = !Features.hasFeature('saas')
-    next()
-  })
-
-  webRouter.use(function (req, res, next) {
-    res.locals.bootstrap5Override =
-      req.query['bootstrap-5-override'] === 'enabled'
     next()
   })
 

@@ -154,7 +154,7 @@ const preview: Preview = {
       return {
         mainStyle: await import(
           // @ts-ignore
-          `!!to-string-loader!css-loader!resolve-url-loader!sass-loader!../../../services/web/frontend/stylesheets/bootstrap-5/main-style.scss`
+          `!!to-string-loader!css-loader!resolve-url-loader!sass-loader!../../../services/web/frontend/stylesheets/main-style.scss`
         ),
       }
     },

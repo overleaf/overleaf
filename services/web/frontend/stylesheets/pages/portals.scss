@@ -1,0 +1,231 @@
+.content-portal {
+  --link-color: var(--link-web);
+  --link-hover-color: var(--link-web-hover);
+  --link-visited-color: var(--link-web-visited);
+  --link-text-decoration: none;
+  --link-hover-text-decoration: underline;
+
+  $btn-portal-width: 200px;
+
+  padding-top: $header-height !important;
+
+  .join-rider {
+    // previously in bs3 this was a calculated var ~= 12.5px
+    margin-top: var(--line-height-01);
+  }
+
+  /*
+    Begin Header
+  */
+  .banner-image {
+    background-size: cover;
+    background-position: 50% 50%;
+    background-repeat: no-repeat;
+    height: 375px;
+  }
+
+  .image-fill {
+    display: inline-block;
+    height: 100%;
+    vertical-align: middle;
+  }
+
+  .institution-logo {
+    left: 50%;
+    margin-left: -100px;
+    padding: 0;
+    position: absolute;
+
+    div {
+      background-color: var(--white);
+      box-shadow: 1px 11px 22px -9px rgb(0 0 0 / 80%);
+      display: inline-block;
+      height: 125px;
+      overflow: hidden;
+      position: absolute;
+      text-align: center;
+      top: -110px;
+      white-space: nowrap;
+      width: $btn-portal-width;
+    }
+
+    img {
+      max-height: 75px;
+      max-width: 150px;
+      vertical-align: middle;
+    }
+  }
+
+  .portal-name {
+    background-color: var(--neutral-10);
+    padding-bottom: var(--line-height-03); // center header when no tabs
+    padding-top: var(--spacing-07);
+    text-align: center;
+    width: 100%;
+  }
+
+  // End Header
+
+  /*
+    Begin Layout
+  */
+  .button-pull,
+  .content-pull {
+    float: left;
+  }
+
+  .button-pull {
+    text-align: right;
+
+    > a.btn {
+      white-space: normal;
+      width: $btn-portal-width;
+      text-align: center;
+    }
+  }
+
+  .content-pull {
+    padding-right: var(--spacing-05);
+    width: calc(100% - #{$btn-portal-width});
+  }
+
+  // End Layout
+
+  /*
+    Begin Card
+  */
+  .card {
+    margin-bottom: var(--spacing-07);
+  }
+
+  // End Card
+
+  /*
+    Begin Actions
+  */
+  .portal-actions {
+    i {
+      margin-bottom: var(--spacing-05);
+    }
+  }
+
+  // End Actions
+
+  /*
+    Begin Print
+  */
+  @media print and (color) {
+    .basic-metrics {
+      margin-bottom: 50px; /* get Departments header on next page */
+    }
+
+    .container {
+      width: auto;
+    }
+
+    .custom-donut-container svg {
+      max-width: 570px; /* safe width for printing */
+    }
+
+    .hidden-print {
+      display: none;
+    }
+
+    .portal-col {
+      /* for firefox */
+      margin: 0;
+      width: 100%;
+    }
+
+    .portal-name {
+      padding: 0;
+    }
+
+    .visible-print {
+      display: block !important;
+    }
+  }
+
+  // End Print
+
+  .nav-tabs {
+    background-color: var(--neutral-10);
+  }
+
+  @include media-breakpoint-down(sm) {
+    .content-pull {
+      padding: 0;
+      width: auto;
+    }
+
+    .button-pull {
+      > a.btn {
+        width: auto;
+      }
+    }
+  }
+}
+
+.portal-share-icon {
+  color: var(--green-70);
+  font-size: 32px;
+}
+
+/*
+  IEEE Portal page
+*/
+
+$ieee-wedge: 30px;
+$ieee-blue: #00629b;
+$ieee-dark-blue: #002855;
+
+body > .portal-ieee {
+  padding-top: $header-height;
+}
+
+.portal-ieee {
+  .ieee-header {
+    background-color: $ieee-blue;
+    margin-bottom: var(--spacing-10);
+    padding-bottom: var(--spacing-05);
+    padding-top: var(--spacing-05);
+
+    h1 {
+      margin: 0;
+    }
+
+    .ieee-logo {
+      width: var(--navbar-brand-width);
+    }
+  }
+
+  .ieee-subheader {
+    background-color: $ieee-blue;
+    color: #fff;
+    line-height: 1;
+    padding: var(--spacing-07) $ieee-wedge;
+    position: relative;
+
+    &::after {
+      content: '';
+      display: block;
+      position: absolute;
+      border-style: solid;
+      left: -1px;
+      top: -1px;
+      border-color: var(--neutral-10) transparent;
+      border-width: $ieee-wedge $ieee-wedge 0 0;
+    }
+  }
+}
+
+.btn {
+  &.btn-ieee {
+    @include ol-button-variant(
+      $color: var(--content-primary-dark),
+      $background: $ieee-blue,
+      $hover-background: $ieee-dark-blue,
+      $hover-border: $ieee-dark-blue
+    );
+  }
+}

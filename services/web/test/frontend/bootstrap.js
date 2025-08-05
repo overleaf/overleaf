@@ -92,7 +92,7 @@ globalThis.fetch =
 // ignore style/image files
 const { addHook } = require('pirates')
 addHook(() => '', {
-  exts: ['.css', '.less', '.svg', '.png', '.gif', '.mp4'],
+  exts: ['.css', '.scss', '.svg', '.png', '.gif', '.mp4'],
   ignoreNodeModules: false,
 })
 

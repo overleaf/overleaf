@@ -1,1 +1,1 @@
-import '../../../frontend/stylesheets/bootstrap-5/main-style.scss'
+import '../../../frontend/stylesheets/main-style.scss'

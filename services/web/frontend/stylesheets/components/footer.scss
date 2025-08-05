@@ -1,0 +1,469 @@
+@use 'sass:map';
+
+// Max width of the sidebar
+$footer-width-delta: 320px;
+
+@mixin footer-container-up($bp) {
+  $size: map.get($grid-breakpoints, $bp);
+
+  @supports (container-type: inline-size) {
+    @container fatfooter (width >= #{$size}) {
+      @content;
+    }
+  }
+
+  @supports not (container-type: inline-size) {
+    @at-root {
+      .project-ds-nav-page & {
+        @media (min-width: #{$size + $footer-width-delta}) {
+          @content;
+        }
+      }
+
+      :not(.project-ds-nav-page *) & {
+        @media (min-width: #{$size}) {
+          @content;
+        }
+      }
+    }
+  }
+}
+
+@mixin footer-container-down($bp) {
+  $size: map.get($grid-breakpoints, $bp);
+
+  @supports (container-type: inline-size) {
+    @container fatfooter (width < #{$size}) {
+      @content;
+    }
+  }
+
+  @supports not (container-type: inline-size) {
+    @at-root {
+      .project-ds-nav-page & {
+        @media (max-width: #{$size + $footer-width-delta}) {
+          @content;
+        }
+      }
+
+      :not(.project-ds-nav-page *) & {
+        @media (max-width: #{$size}) {
+          @content;
+        }
+      }
+    }
+  }
+}
+
+footer.site-footer {
+  --link-color: var(--link-web);
+  --link-hover-color: var(--link-web-hover);
+  --link-visited-color: var(--link-web-visited);
+  --link-text-decoration: none;
+  --link-hover-text-decoration: underline;
+
+  background-color: var(--bg-light-primary);
+  border-top: 1px solid var(--border-primary-dark);
+
+  @include body-sm;
+
+  min-height: $thin-footer-height;
+  line-height: $thin-footer-height - 1; // Hack — in Chrome, using the full $footer-height would generate vertical scrolling
+
+  ul.site-footer-items {
+    list-style: none;
+    margin: 0;
+
+    > li {
+      display: inline-block;
+      margin: 0 var(--spacing-04);
+    }
+
+    i {
+      font-size: var(--font-size-05);
+    }
+  }
+}
+
+.site-footer-content {
+  @extend .container-fluid;
+}
+
+.sprite-icon-lang {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+#language-picker-toggle {
+  text-decoration: none;
+  cursor: pointer;
+
+  &::after {
+    display: none;
+  }
+
+  &:hover {
+    .language-picker-text {
+      text-decoration: var(--link-hover-text-decoration);
+    }
+  }
+
+  .material-symbols {
+    vertical-align: -0.1875rem;
+  }
+}
+
+.language-picker .dropdown-menu {
+  .dropdown-item {
+    &.active {
+      color: var(--green-70);
+    }
+
+    &:hover {
+      text-decoration: none;
+    }
+  }
+}
+
+.fat-footer {
+  --footer-text-color: var(--content-secondary-dark);
+  --footer-background-color: var(--bg-dark-primary);
+  --link-color: var(--footer-text-color);
+  --link-hover-color: var(--footer-text-color);
+  --link-visited-color: var(--footer-text-color);
+  --link-text-decoration: none;
+  --link-hover-text-decoration: underline;
+
+  container-name: fatfooter;
+  container-type: inline-size;
+  background: var(--footer-background-color);
+  color: var(--footer-text-color);
+  display: flex;
+  flex-direction: column;
+
+  .fat-footer-container {
+    margin: var(--spacing-11) auto;
+
+    @include footer-container-down(sm) {
+      margin: var(--spacing-11) 0;
+    }
+  }
+
+  .footer-brand-container {
+    flex: 1;
+  }
+
+  .fat-footer-sections {
+    display: grid;
+    column-gap: var(--spacing-07);
+    padding: 0 var(--spacing-07) var(--spacing-07);
+  }
+
+  .footer-brand {
+    display: block;
+    height: 37px;
+    width: 130px;
+    background-image: url('../../../public/img/ol-brand/overleaf-white.svg');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: left center;
+  }
+
+  .footer-section-heading {
+    color: var(--footer-text-color);
+
+    @include heading-sm;
+
+    margin-bottom: var(--spacing-07);
+    margin-top: var(--spacing-07);
+  }
+
+  .footer-section ul {
+    @include body-sm;
+  }
+
+  .footer-section li {
+    padding-bottom: var(--spacing-04);
+  }
+
+  #footer-brand {
+    grid-column: 1/-1;
+    margin-top: var(--spacing-07);
+  }
+
+  .fat-footer-base {
+    color: var(--content-disabled);
+
+    @include body-sm;
+
+    #language-picker-toggle {
+      color: var(--footer-text-color);
+    }
+
+    .fat-footer-base-meta a:not(.dropdown-toggle) {
+      color: inherit;
+    }
+
+    .language-picker .dropdown-menu {
+      .dropdown-header {
+        display: none; /* hiding rather than removing as still needed in the thin footer */
+      }
+    }
+  }
+
+  .fat-footer-base-item {
+    display: flex;
+    white-space: nowrap;
+  }
+
+  .fat-footer-social {
+    &.x-logo svg path {
+      fill: var(--footer-text-color);
+    }
+
+    &.facebook-logo svg,
+    &.linkedin-logo svg {
+      path.background {
+        fill: var(--footer-text-color);
+      }
+    }
+
+    &.facebook-logo svg {
+      path.text {
+        fill: transparent;
+      }
+    }
+
+    &.linkedin-logo svg {
+      path.text {
+        fill: var(--footer-background-color);
+      }
+    }
+  }
+
+  @include footer-container-down(md) {
+    .fat-footer-sections {
+      grid-template-columns: repeat(2, 1fr);
+      grid-template-rows: repeat(4, auto);
+    }
+
+    .fat-footer-base {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+
+      .fat-footer-base-section {
+        display: flex;
+        align-items: center;
+      }
+
+      .fat-footer-base-social {
+        order: 1;
+      }
+
+      .fat-footer-base-meta {
+        display: flex;
+        flex-direction: column-reverse;
+        align-items: center;
+        order: 2;
+      }
+
+      .fat-footer-base-item {
+        flex-wrap: wrap;
+        padding: var(--spacing-02);
+        margin: var(--spacing-06);
+      }
+
+      .fat-footer-base-meta .fat-footer-base-item {
+        gap: var(--spacing-09);
+        justify-content: center;
+
+        @include footer-container-down(sm) {
+          gap: var(--spacing-06);
+        }
+      }
+
+      .fat-footer-base-social .fat-footer-base-item {
+        gap: var(--spacing-07);
+        margin-top: var(--spacing-00);
+      }
+
+      .fat-footer-base-copyright {
+        order: 2;
+      }
+    }
+  }
+
+  @include footer-container-up(md) {
+    .fat-footer-container {
+      width: (map.get($grid-breakpoints, 'md') - ($spacing-04 * 2));
+    }
+
+    #footer-brand {
+      grid-column: auto;
+      grid-row: 1/-1;
+    }
+
+    .fat-footer-sections {
+      grid-template-columns: repeat(4, 1fr);
+      grid-template-rows: repeat(2, auto);
+    }
+
+    .footer-section:last-of-type {
+      grid-column: 4;
+    }
+
+    .fat-footer-base {
+      display: flex;
+      justify-content: space-between;
+      margin: var(--spacing-07) auto;
+
+      .fat-footer-base-section {
+        display: flex;
+        align-items: center;
+      }
+
+      .fat-footer-base-item {
+        padding: var(--spacing-02);
+        margin: var(--spacing-02);
+      }
+
+      .fat-footer-base-meta .fat-footer-base-item {
+        gap: var(--spacing-07);
+      }
+
+      .fat-footer-social {
+        margin: var(--spacing-07) var(--spacing-03);
+      }
+    }
+  }
+
+  @include footer-container-up(lg) {
+    .fat-footer-container {
+      width: (map.get($grid-breakpoints, 'lg') - $spacing-07);
+    }
+
+    .fat-footer-sections {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+
+  @include footer-container-up(xl) {
+    .fat-footer-container {
+      width: (map.get($grid-breakpoints, 'xl') - $spacing-09);
+    }
+
+    .fat-footer-sections {
+      grid-template-columns: repeat(7, 1fr);
+      grid-template-rows: auto;
+    }
+
+    .footer-section:last-of-type {
+      grid-column: 7;
+    }
+  }
+}
+
+.cookie-banner {
+  @include body-sm;
+
+  padding: var(--spacing-05) var(--spacing-07);
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  color: var(--content-secondary);
+  background: var(--bg-light-secondary);
+  box-shadow: 0 -5px 8px 0 #0000001a;
+
+  .cookie-banner-actions {
+    padding-top: var(--spacing-04);
+  }
+
+  @include media-breakpoint-up(md) {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+
+    .cookie-banner-content {
+      flex: 1;
+    }
+
+    .cookie-banner-actions {
+      flex-shrink: 0;
+      white-space: nowrap;
+      padding-top: var(--spacing-00);
+    }
+
+    .cookie-banner-content a,
+    .cookie-banner-actions .btn-link {
+      color: var(--link-ui);
+    }
+  }
+}
+
+.website-redesign-fat-footer,
+.website-redesign .fat-footer {
+  --footer-text-color: var(--content-primary);
+
+  .fat-footer-container {
+    @include footer-container-down(sm) {
+      margin: var(--spacing-11) 0;
+    }
+  }
+
+  &.fat-footer {
+    background: var(--content-primary-dark);
+
+    h2 {
+      font-weight: 400;
+    }
+
+    .fat-footer-base {
+      color: var(--content-primary);
+
+      #language-picker-toggle {
+        color: inherit;
+      }
+    }
+
+    // This is duplication of fill colours in the SVGs themselves. This could be fixed by using :has() but that's not
+    // supported in older versions of browsers and these logos need to be correct.
+    .fat-footer-social {
+      &.x-logo svg path {
+        fill: #0f1419;
+      }
+
+      &.facebook-logo svg,
+      &.linkedin-logo svg {
+        path.text {
+          fill: #fff;
+        }
+      }
+
+      &.facebook-logo svg {
+        path.background {
+          fill: #0866ff;
+        }
+      }
+
+      &.linkedin-logo svg {
+        path.background {
+          fill: #0b66c3;
+        }
+      }
+    }
+  }
+
+  .footer-brand {
+    background-image: url('../../../public/img/ol-brand/overleaf-black.svg');
+  }
+
+  @include footer-container-down(sm) {
+    .fat-footer-sections {
+      grid-template-columns: repeat(1, 1fr);
+      grid-template-rows: repeat(6, auto);
+    }
+  }
+}

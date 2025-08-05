@@ -1,0 +1,243 @@
+@use 'sass:math';
+
+:root {
+  --redesign-toolbar-home-button-hover-background: var(--bg-dark-secondary);
+  --redesign-toolbar-border-divider: var(--border-divider-dark);
+  --redesign-toolbar-background: var(--bg-dark-primary);
+  --redesign-toolbar-home-link-color: var(--content-primary-dark);
+  --redesign-toolbar-logo-url: url('../../../../public/img/ol-brand/overleaf-o-white.svg');
+  --redesign-subdued-button-color: var(--content-primary-dark);
+  --redesign-subdued-button-hover-background: var(--bg-dark-tertiary);
+  --redesign-toolbar-feedback-link-color: var(--link-ui-dark);
+}
+
+@include theme('light') {
+  --redesign-toolbar-home-button-hover-background: var(--neutral-20);
+  --redesign-toolbar-border-divider: var(--border-divider);
+  --redesign-toolbar-background: var(--bg-light-primary);
+  --redesign-toolbar-home-link-color: var(--content-primary);
+  --redesign-toolbar-logo-url: url('../../../../public/img/ol-brand/overleaf-o-dark.svg');
+  --redesign-subdued-button-color: var(--content-primary);
+  --redesign-subdued-button-hover-background: var(--bg-light-tertiary);
+  --redesign-toolbar-feedback-link-color: var(--link-ui);
+}
+
+.ide-redesign-toolbar {
+  $toolbar-height: 40px;
+  $home-button-size: 32px;
+  $ol-icon-height: 24px;
+  $home-icon-font-size: 24px;
+
+  border-bottom: 1px solid var(--redesign-toolbar-border-divider);
+  background-color: var(--redesign-toolbar-background);
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  box-sizing: border-box;
+  height: $toolbar-height;
+  padding: 0 var(--spacing-02);
+  gap: var(--spacing-05);
+
+  .ide-redesign-toolbar-menu {
+    display: flex;
+    gap: var(--spacing-05);
+  }
+
+  .ide-redesign-toolbar-menu,
+  .ide-redesign-toolbar-actions {
+    flex: 0 0 auto;
+  }
+
+  .ide-redesign-toolbar-home-button {
+    width: $home-button-size;
+    height: $home-button-size;
+    margin: math.div($toolbar-height - $home-button-size, 2) 0;
+  }
+
+  .ide-redesign-toolbar-button-subdued {
+    @include ol-button-variant(
+      var(--redesign-subdued-button-color),
+      transparent,
+      transparent,
+      var(--redesign-subdued-button-hover-background),
+      transparent,
+      true
+    );
+
+    text-decoration: none;
+
+    &.ide-redesign-toolbar-button-icon {
+      @include ol-button-variant(
+        var(--redesign-subdued-button-color),
+        var(--redesign-toolbar-background),
+        transparent,
+        var(--redesign-subdued-button-hover-background),
+        transparent,
+        true
+      );
+
+      border-radius: var(--border-radius-full);
+      display: flex;
+      justify-content: center;
+      padding: var(--spacing-02);
+
+      &:visited,
+      &:focus {
+        color: var(--redesign-subdued-button-color);
+      }
+    }
+  }
+
+  .ide-redesign-toolbar-home-link {
+    display: flex;
+    height: 100%;
+    width: 100%;
+    justify-content: center;
+    flex-direction: column;
+    text-align: center;
+    border-radius: 100%;
+    color: var(--redesign-toolbar-home-link-color);
+
+    .toolbar-ol-home-button {
+      display: none;
+      font-size: $home-icon-font-size;
+    }
+
+    .toolbar-ol-logo {
+      margin: 0 auto;
+      display: block;
+      width: $ol-icon-height;
+      height: $ol-icon-height;
+      background-image: var(--redesign-toolbar-logo-url);
+      background-position: center;
+      background-repeat: no-repeat;
+      background-size: contain;
+    }
+
+    &:hover {
+      background-color: var(--redesign-toolbar-home-button-hover-background);
+
+      .toolbar-ol-home-button {
+        display: block;
+      }
+
+      .toolbar-ol-logo {
+        display: none;
+      }
+    }
+  }
+
+  .ide-redesign-toolbar-dropdown-toggle-subdued {
+    $height: 28px;
+
+    border: none;
+    border-radius: var(--border-radius-base);
+    padding: var(--spacing-02);
+    height: $height;
+    font-size: var(--font-size-02);
+    line-height: var(--line-height-02);
+    font-weight: 400;
+    box-sizing: border-box;
+    margin: math.div($toolbar-height - $height, 2) 0;
+
+    &.dropdown-toggle::after {
+      display: none;
+    }
+
+    .material-symbols {
+      vertical-align: middle;
+    }
+  }
+
+  .ide-redesign-toolbar-logos {
+    display: flex;
+  }
+
+  .ide-redesign-toolbar-cobranding-separator {
+    $separator-height: 16px;
+
+    border-radius: var(--border-radius-base);
+    width: 1px;
+    height: $separator-height;
+    margin-top: math.div($toolbar-height - $separator-height, 2);
+
+    // To account for the 1px border of the rail so that they're aligned.
+    margin-left: calc(var(--spacing-02) - 1px);
+    margin-right: var(--spacing-01);
+    background: var(--redesign-toolbar-border-divider);
+  }
+
+  .ide-redesign-toolbar-cobranding-link {
+    display: inline-flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 0 var(--spacing-02);
+  }
+
+  .ide-redesign-toolbar-cobranding-logo {
+    max-height: calc($toolbar-height - var(--spacing-04) * 2);
+    max-width: 150px;
+  }
+}
+
+.ide-redesign-toolbar-menu-bar {
+  display: flex;
+  justify-content: flex-start;
+  height: 100%;
+  gap: var(--spacing-05);
+}
+
+.ide-redesign-toolbar-actions {
+  display: flex;
+  gap: var(--spacing-04);
+  padding-left: var(--spacing-05);
+}
+
+.ide-redesign-toolbar-button-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.ide-redesign-online-users {
+  display: flex;
+}
+
+.ide-redesign-toolbar-editable-project-name {
+  text-align: center;
+  width: 100%;
+  max-width: 400px;
+  margin: var(--spacing-02) 0;
+}
+
+.ide-redesign-toolbar-labs-feedback-link {
+  &,
+  &:hover,
+  &:visited {
+    color: var(--redesign-toolbar-feedback-link-color);
+  }
+}
+
+.ide-redesign-toolbar-project-dropdown {
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
+.ide-redesign-toolbar-project-dropdown-toggle {
+  display: flex;
+  max-width: 100%;
+}
+
+.ide-redesign-toolbar-project-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ide-redesign-labs-button.btn.btn-secondary {
+  @include labs-button;
+}
+
+.ide-redesign-beta-button.btn.btn-secondary {
+  @include labs-button;
+}
