@@ -41,6 +41,22 @@ export class OpenDocuments {
     return this.openDocs.get(docId)
   }
 
+  getUnsavedOpsSize() {
+    const docs = this.unsavedDocs()
+    let pendingOpsLength = 0
+    let inflightOpsLength = 0
+    for (const doc of docs) {
+      const pendingOp = doc.getPendingOp()
+      const inFlightOp = doc.getInflightOp()
+      pendingOpsLength += pendingOp?.length || 0
+      inflightOpsLength += inFlightOp?.length || 0
+    }
+    return {
+      pendingOpsLength,
+      inflightOpsLength,
+    }
+  }
+
   private createDoc(docId: string) {
     const doc = new DocumentContainer(
       docId,
