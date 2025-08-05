@@ -288,6 +288,7 @@ module.exports = {
     alias: {
       // custom prefixes for import paths
       '@': path.resolve(__dirname, './frontend/js/'),
+      '@ol-types': path.resolve(__dirname, './types/'),
     },
     // symlinks: false, // enable this while using `npm link`
     extensions: ['.js', '.jsx', '.ts', '.tsx', '.mjs', '.cjs', '.json'],

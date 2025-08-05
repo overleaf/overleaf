@@ -131,6 +131,32 @@ describe('MembersList', function () {
       mountManagedUsersList()
       cy.findByRole('navigation', { name: /pagination navigation/i })
     })
+    it('should show the user count', function () {
+      cy.findByTestId('x-of-n-users').should(
+        'contain.text',
+        'Showing 2 out of 2 users'
+      )
+    })
+    it('should filter users based on case-insensitive search string', function () {
+      cy.window().then(win => {
+        win.metaAttributesCache.set(
+          'ol-users',
+          Array.from({ length: 50 })
+            .flatMap(() => users.flat())
+            .map((user, i) => ({
+              ...user,
+              // create more than one page of users with same name
+              first_name: i < 75 ? 'Julie' : 'David',
+            }))
+        )
+      })
+      mountManagedUsersList()
+      cy.findByTestId('search-members-input').type('jul')
+      cy.findByTestId('x-of-n-users').should(
+        'contain.text',
+        'Showing 50 out of 75 users'
+      )
+    })
   })
 
   describe('empty user list', function () {

@@ -15,7 +15,10 @@
     "paths": {
       "@/*": ["./frontend/js/*"],
       "@overleaf/o-error": ["../../libraries/o-error"],
-      "@overleaf/ranges-tracker": ["../../libraries/ranges-tracker"]
+      "@overleaf/ranges-tracker": ["../../libraries/ranges-tracker"],
+      "@ol-types/*": [
+        "./types/*"
+      ] /* can't make this entry @types because that conflicts with the "types" entry below */
     },
     "types": ["cypress", "@testing-library/cypress"]
   },

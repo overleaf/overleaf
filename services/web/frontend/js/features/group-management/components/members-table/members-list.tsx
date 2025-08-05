@@ -14,11 +14,30 @@ import UnlinkUserModal from './unlink-user-modal'
 import OLTable from '@/features/ui/components/ol/ol-table'
 import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
 import Pagination from '@/shared/components/pagination'
+import OLFormControl from '@/features/ui/components/ol/ol-form-control'
+import OLForm from '@/features/ui/components/ol/ol-form'
+import OLFormGroup from '@/features/ui/components/ol/ol-form-group'
+import OLCol from '@/features/ui/components/ol/ol-col'
+import MaterialIcon from '@/shared/components/material-icon'
+import OLRow from '@/features/ui/components/ol/ol-row'
+import { isNonEmptyString, NonEmptyString } from '@ol-types/helpers/string'
 
 const USERS_DISPLAY_LIMIT = 50
 
 type ManagedUsersListProps = {
   groupId: string
+}
+
+function isUserSearchMatch(user: User, search: NonEmptyString): boolean {
+  const lowercaseSearch = search.toLowerCase()
+
+  return Boolean(
+    [user.email, user.first_name, user.last_name].find(
+      fieldValue =>
+        // if the field is null treat it as a match
+        fieldValue == null || fieldValue.toLowerCase().includes(lowercaseSearch)
+    )
+  )
 }
 
 export default function MembersList({ groupId }: ManagedUsersListProps) {
@@ -34,16 +53,39 @@ export default function MembersList({ groupId }: ManagedUsersListProps) {
   const managedUsersActive = getMeta('ol-managedUsersActive')
   const groupSSOActive = getMeta('ol-groupSSOActive')
   const tHeadRowRef = useRef<HTMLTableRowElement>(null)
+  const [userSearchString, setUserSearchString] = useState('')
+  const userSearchRef = useRef<HTMLInputElement>(null)
   const [pagination, setPagination] = useState({ currPage: 1, totalPages: 1 })
+
+  const filteredUsers = useMemo(
+    () =>
+      isNonEmptyString(userSearchString)
+        ? users.filter(user => isUserSearchMatch(user, userSearchString))
+        : users,
+    [users, userSearchString]
+  )
 
   const usersForCurrentPage = useMemo(
     () =>
-      users.slice(
+      filteredUsers.slice(
         (pagination.currPage - 1) * USERS_DISPLAY_LIMIT,
         pagination.currPage * USERS_DISPLAY_LIMIT
       ),
-    [users, pagination.currPage]
+    [filteredUsers, pagination.currPage]
   )
+
+  const handleUserSearchStringChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    setUserSearchString(e.target.value)
+  }
+
+  const handleClearUserSearchString = () => {
+    setUserSearchString('')
+    if (userSearchRef.current) {
+      userSearchRef.current.focus()
+    }
+  }
 
   const handlePageClick = (
     _e: React.MouseEvent<HTMLButtonElement>,
@@ -55,9 +97,9 @@ export default function MembersList({ groupId }: ManagedUsersListProps) {
   useEffect(() => {
     setPagination(p => ({
       ...p,
-      totalPages: Math.ceil(users.length / USERS_DISPLAY_LIMIT),
+      totalPages: Math.ceil(filteredUsers.length / USERS_DISPLAY_LIMIT),
     }))
-  }, [users.length])
+  }, [filteredUsers.length])
 
   return (
     <div>
@@ -68,6 +110,35 @@ export default function MembersList({ groupId }: ManagedUsersListProps) {
           onDismiss={() => setGroupUserAlert(undefined)}
         />
       )}
+      <OLForm role="search" onSubmit={e => e.preventDefault()}>
+        <OLFormGroup>
+          <OLRow>
+            <OLCol lg={7}>
+              <OLFormControl
+                ref={userSearchRef}
+                placeholder={t('search_members')}
+                aria-label={t('search_members')}
+                prepend={<MaterialIcon type="search" />}
+                append={
+                  userSearchString.length > 0 && (
+                    <button
+                      type="button"
+                      className="form-control-search-clear-btn"
+                      aria-label={t('clear_search')}
+                      onClick={handleClearUserSearchString}
+                    >
+                      <MaterialIcon type="clear" />
+                    </button>
+                  )
+                }
+                value={userSearchString}
+                onChange={handleUserSearchStringChange}
+                data-testid="search-members-input"
+              />
+            </OLCol>
+          </OLRow>
+        </OLFormGroup>
+      </OLForm>
       <OLTable
         className={classNames(
           'managed-entities-table',
@@ -111,7 +182,7 @@ export default function MembersList({ groupId }: ManagedUsersListProps) {
           </tr>
         </thead>
         <tbody>
-          {users.length === 0 && (
+          {filteredUsers.length === 0 && (
             <tr>
               <td
                 className="text-center"
@@ -136,6 +207,19 @@ export default function MembersList({ groupId }: ManagedUsersListProps) {
           ))}
         </tbody>
       </OLTable>
+      <div className="mt-3">
+        <div className="text-center">
+          <p>
+            <span aria-live="polite" data-testid="x-of-n-users">
+              {t('showing_x_out_of_n_users', {
+                x: usersForCurrentPage.length,
+                n: filteredUsers.length,
+              })}
+            </span>
+          </p>
+        </div>
+      </div>
+
       {pagination.totalPages > 1 && (
         <div className="d-flex justify-content-center">
           <Pagination

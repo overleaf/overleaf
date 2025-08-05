@@ -159,6 +159,7 @@ export default function GroupMembers() {
                         aria-describedby="add-members-description"
                         value={emailString}
                         onChange={handleEmailsChange}
+                        data-testid="add-members-input"
                       />
                     </OLCol>
                     <OLCol xs={4}>

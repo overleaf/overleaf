@@ -91,8 +91,8 @@ describe('GroupMembers', function () {
         },
       })
 
-      cy.get('.form-control').type('someone.else@test.com')
-      cy.get('.add-more-members-form button').click()
+      cy.findByTestId('add-members-input').type('someone.else@test.com')
+      cy.findByRole('button', { name: /invite/i }).click()
 
       cy.findByTestId('managed-entities-table')
         .find('tbody')
@@ -118,8 +118,8 @@ describe('GroupMembers', function () {
         },
       })
 
-      cy.get('.form-control').type('someone.else@test.com')
-      cy.get('.add-more-members-form button').click()
+      cy.findByTestId('add-members-input').type('someone.else@test.com')
+      cy.findByRole('button', { name: /invite/i }).click()
       cy.findByRole('alert').contains('Error: User already added')
     })
 
@@ -295,8 +295,8 @@ describe('GroupMembers', function () {
         },
       })
 
-      cy.get('.form-control').type('someone.else@test.com')
-      cy.get('.add-more-members-form button').click()
+      cy.findByTestId('add-members-input').type('someone.else@test.com')
+      cy.findByRole('button', { name: /invite/i }).click()
 
       cy.findByTestId('managed-entities-table')
         .find('tbody')
@@ -324,8 +324,8 @@ describe('GroupMembers', function () {
         },
       })
 
-      cy.get('.form-control').type('someone.else@test.com')
-      cy.get('.add-more-members-form button').click()
+      cy.findByTestId('add-members-input').type('someone.else@test.com')
+      cy.findByRole('button', { name: /invite/i }).click()
       cy.findByRole('alert').contains('Error: User already added')
     })
 
