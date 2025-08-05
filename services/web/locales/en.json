@@ -244,6 +244,7 @@
   "billing_period_sentence_case": "Billing period",
   "binary_history_error": "Preview not available for this file type",
   "blank_project": "Blank project",
+  "blank_typst_project": "Blank Typst project",
   "blocked_filename": "This file name is blocked.",
   "blog": "Blog",
   "bold": "Bold",

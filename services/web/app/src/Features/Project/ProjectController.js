@@ -250,10 +250,10 @@ const _ProjectController = {
 
     const project = await (template === 'example'
       ? ProjectCreationHandler.promises.createExampleProject(
-          userId,
-          projectName
-        )
-      : ProjectCreationHandler.promises.createBasicProject(userId, projectName))
+        userId,
+        projectName
+      )
+      : (template === "typst-none" ? ProjectCreationHandler.promises.createBasicTypstProject(userId, projectName) : ProjectCreationHandler.promises.createBasicProject(userId, projectName)))
 
     res.json({
       project_id: project._id,

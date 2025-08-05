@@ -10,6 +10,7 @@ const UploadProjectModal = lazy(() => import('./upload-project-modal'))
 
 export type NewProjectButtonModalVariant =
   | 'blank_project'
+  | 'blank_typst_project'
   | 'example_project'
   | 'upload_project'
   | 'import_from_github'
@@ -38,7 +39,9 @@ function NewProjectButtonModal({ modal, onHide }: NewProjectButtonModalProps) {
 
   switch (modal) {
     case 'blank_project':
-      return <BlankProjectModal onHide={onHide} />
+      return <BlankProjectModal onHide={onHide} language='latex'/>
+    case 'blank_typst_project':
+      return <BlankProjectModal onHide={onHide} language='typst'/>
     case 'example_project':
       return <ExampleProjectModal onHide={onHide} />
     case 'upload_project':

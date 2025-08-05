@@ -228,6 +228,7 @@
   "billing_period_sentence_case": "订单周期",
   "binary_history_error": "预览不适用于此文件类型",
   "blank_project": "空白项目",
+  "blank_typst_project": "空白 Typst 项目",
   "blocked_filename": "此文件名被阻止。",
   "blog": "博客",
   "bold": "粗体",

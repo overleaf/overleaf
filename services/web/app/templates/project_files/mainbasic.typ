@@ -1,0 +1,4 @@
+= <%= project_name %>
+
+== Introduction
+

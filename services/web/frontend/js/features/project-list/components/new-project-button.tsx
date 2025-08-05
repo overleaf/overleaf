@@ -188,6 +188,18 @@ function NewProjectButton({
             <DropdownItem
               onClick={e =>
                 handleModalMenuClick(e, {
+                  modalVariant: 'blank_typst_project',
+                  dropdownMenuEvent: 'blank-typst-project',
+                })
+              }
+            >
+              {t('blank_typst_project')}
+            </DropdownItem>
+          </li>
+          <li role="none">
+            <DropdownItem
+              onClick={e =>
+                handleModalMenuClick(e, {
                   modalVariant: 'example_project',
                   dropdownMenuEvent: 'example-project',
                 })
