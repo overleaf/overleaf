@@ -142,18 +142,6 @@ pipeline {
             }
           }
         }
-        stage('CE custom 2') {
-          environment {
-            CYPRESS_SHARD = "CE_CUSTOM_2"
-            COMPOSE_PROJECT_NAME = "test-ce-custom-2"
-          }
-          steps {
-            script { waitUntil { return job_npm_install_done && job_server_ce_build_done && job_prefetch_default_done && job_prefetch_custom_done } }
-            dir('server-ce/test') {
-              sh 'make test-e2e'
-            }
-          }
-        }
 
         stage('PRO default 1') {
           environment {
@@ -207,6 +195,18 @@ pipeline {
           environment {
             CYPRESS_SHARD = "PRO_CUSTOM_3"
             COMPOSE_PROJECT_NAME = "test-pro-custom-3"
+          }
+          steps {
+            script { waitUntil { return job_npm_install_done && job_server_pro_build_done && job_prefetch_default_done && job_prefetch_custom_done } }
+            dir('server-ce/test') {
+              sh 'make test-e2e'
+            }
+          }
+        }
+        stage('PRO custom 4') {
+          environment {
+            CYPRESS_SHARD = "PRO_CUSTOM_4"
+            COMPOSE_PROJECT_NAME = "test-pro-custom-4"
           }
           steps {
             script { waitUntil { return job_npm_install_done && job_server_pro_build_done && job_prefetch_default_done && job_prefetch_custom_done } }
