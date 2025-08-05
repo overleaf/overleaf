@@ -425,7 +425,7 @@ async function projectListPage(req, res, next) {
   let customerIoEnabled = false
   const aiBlocked = !(await _canUseAIAssist(user))
   const hasAiAssist = await _userHasAIAssist(user)
-  if (!userIsMemberOfGroupSubscription && !inEnterpriseCommons) {
+  if (!userIsMemberOfGroupSubscription && !inEnterpriseCommons && isSaas) {
     try {
       const ip = req.ip
       const { countryCode } = await GeoIpLookup.promises.getCurrencyCode(ip)
