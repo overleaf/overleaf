@@ -37,6 +37,8 @@ async function createUser(email) {
         // Override features.
         features,
         featuresOverrides: [{ features }],
+        // disable Writefull
+        'writefull.enabled': false,
       },
     }
   )
@@ -105,23 +107,6 @@ async function purgeNewUsers() {
   )
 }
 
-const SPLIT_TEST_OVERRIDES = [
-  // disable writefull, oauth registration does not work in dev-env and their banners hide our buttons.
-  {
-    name: 'writefull-auto-account-creation',
-    versions: [
-      {
-        versionNumber: 1,
-        phase: 'release',
-        active: true,
-        analyticsEnabled: false,
-        variants: [{ name: 'enabled', rolloutPercent: 0, rolloutStripes: [] }],
-        createdAt: new Date(),
-      },
-    ],
-  },
-]
-
 async function provisionSplitTests() {
   const backup = Path.join(
     MONOREPO,
@@ -147,10 +132,6 @@ async function provisionSplitTests() {
   )
   console.log(`> Importing ${SPLIT_TESTS.length} split-tests from production.`)
   await SplitTestManager.replaceSplitTests(SPLIT_TESTS)
-  console.log(
-    `> Importing ${SPLIT_TEST_OVERRIDES.length} split-tests for test compatibility.`
-  )
-  await SplitTestManager.mergeSplitTests(SPLIT_TEST_OVERRIDES, true)
 }
 
 async function main() {

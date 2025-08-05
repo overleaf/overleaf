@@ -673,36 +673,13 @@ const _ProjectController = {
         !userIsMemberOfGroupSubscription &&
         !inEnterpriseCommons
       ) {
-        const { variant } = await SplitTestHandler.promises.getAssignment(
-          req,
-          res,
-          'writefull-auto-account-creation'
-        )
-
-        if (variant === 'enabled') {
-          await UserUpdater.promises.updateUser(userId, {
-            $set: {
-              writefull: { enabled: true, autoCreatedAccount: true },
-            },
-          })
-          user.writefull.enabled = true
-          user.writefull.autoCreatedAccount = true
-        } else {
-          const { variant } = await SplitTestHandler.promises.getAssignment(
-            req,
-            res,
-            'writefull-auto-load'
-          )
-          if (variant === 'enabled') {
-            await UserUpdater.promises.updateUser(userId, {
-              $set: {
-                writefull: { enabled: true },
-              },
-            })
-            user.writefull.enabled = true
-            user.writefull.firstAutoLoad = true
-          }
-        }
+        await UserUpdater.promises.updateUser(userId, {
+          $set: {
+            writefull: { enabled: true, autoCreatedAccount: true },
+          },
+        })
+        user.writefull.enabled = true
+        user.writefull.autoCreatedAccount = true
       }
 
       const template =
