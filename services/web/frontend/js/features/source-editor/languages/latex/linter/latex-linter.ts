@@ -35,10 +35,10 @@ const runLinter = () => {
   })
 }
 
-lintWorker!.addEventListener('message', event => {
-  if (event.data) {
+lintWorker.addEventListener('message', event => {
+  if (event.data && event.data.errors && currentView) {
     const errors = event.data.errors as LintError[]
-    const editorState = currentView!.state
+    const editorState = currentView.state
     const doc = editorState.doc
     const cursorPosition = editorState.selection.main.head
     const diagnostics = errorsToDiagnostics(errors, cursorPosition, doc.length)
