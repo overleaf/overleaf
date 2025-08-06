@@ -108,8 +108,8 @@ services:
       COMPOSE_PROJECT_NAME:
       TEX_LIVE_DOCKER_IMAGE:
       ALL_TEX_LIVE_DOCKER_IMAGES:
-      IMAGE_TAG_CE: ${IMAGE_TAG_CE:-sharelatex/sharelatex:latest}
-      IMAGE_TAG_PRO: ${IMAGE_TAG_PRO:-quay.io/sharelatex/sharelatex-pro:latest}
+      IMAGE_TAG_CE:
+      IMAGE_TAG_PRO:
     healthcheck:
       test: curl --fail http://localhost/status
       interval: 3s

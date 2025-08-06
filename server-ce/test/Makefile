@@ -8,7 +8,8 @@ export PWD = $(shell pwd)
 
 export TEX_LIVE_DOCKER_IMAGE ?= us-east1-docker.pkg.dev/overleaf-ops/ol-docker/texlive-full:2023.1
 export ALL_TEX_LIVE_DOCKER_IMAGES ?= us-east1-docker.pkg.dev/overleaf-ops/ol-docker/texlive-full:2023.1,us-east1-docker.pkg.dev/overleaf-ops/ol-docker/texlive-full:2022.1
-export IMAGE_TAG_PRO ?= us-east1-docker.pkg.dev/overleaf-ops/ol-docker/pro:latest
+export IMAGE_TAG_CE ?= sharelatex/sharelatex:main
+export IMAGE_TAG_PRO ?= us-east1-docker.pkg.dev/overleaf-ops/ol-docker/pro:main
 export CYPRESS_SHARD ?=
 export COMPOSE_PROJECT_NAME ?= test
 export DOCKER_USER := $(shell id -u):$(shell id -g)
