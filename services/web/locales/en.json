@@ -2167,7 +2167,6 @@
   "sso_test_interstitial_info_2": "Clicking <0>Test configuration</0> will redirect you to your IdP’s login screen. <1>Read our documentation</1> for full details of what happens during the test. And check our <2>SSO troubleshooting advice</2> if you get stuck.",
   "sso_test_interstitial_title": "Let’s test your SSO configuration",
   "sso_test_result_error_message": "The test hasn’t worked this time, but don’t worry — errors can usually be quickly addressed by adjusting the configuration settings. Our <0>SSO troubleshooting guide</0> provides help with some of the common causes of testing errors.",
-  "sso_title": "Single sign-on",
   "sso_user_denied_access": "Cannot log in because __appName__ was not granted access to your __provider__ account. Please try again.",
   "sso_user_explanation_enabled_with_admin_email": "Your group administered by <0>__adminEmail__</0> has SSO enabled so you can log in without needing to remember a password.",
   "sso_user_explanation_enabled_with_group_name": "Your group <0>__groupName__</0> has SSO enabled so you can log in without needing to remember a password.",
