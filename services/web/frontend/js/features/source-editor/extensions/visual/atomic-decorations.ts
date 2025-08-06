@@ -86,6 +86,7 @@ import {
   mathAncestorNode,
   parseMathContainer,
 } from '../../utils/tree-operations/math'
+import { lineContainsOnlyNode } from './utils/line'
 
 type Options = {
   previewByPath: (path: string) => PreviewPath | null
@@ -325,14 +326,20 @@ export const atomicDecorations = (options: Options) => {
                 !selectionIntersects(state.selection, end) &&
                 getListItems(nodeRef.node).length > 0 // not empty
               ) {
-                decorations.push(
-                  Decoration.replace({
-                    block: true,
-                  }).range(begin.from, begin.to),
-                  Decoration.replace({
-                    block: true,
-                  }).range(end.from, end.to)
-                )
+                if (lineContainsOnlyNode(beginLine, beginNode)) {
+                  decorations.push(
+                    Decoration.replace({
+                      block: true,
+                    }).range(begin.from, begin.to)
+                  )
+                }
+                if (lineContainsOnlyNode(endLine, endNode)) {
+                  decorations.push(
+                    Decoration.replace({
+                      block: true,
+                    }).range(end.from, end.to)
+                  )
+                }
               }
             }
           } else if (nodeRef.type.is('TabularEnvironment')) {
@@ -904,10 +911,7 @@ export const atomicDecorations = (options: Options) => {
 
                 const line = state.doc.lineAt(nodeRef.from)
 
-                const lineContainsOnlyNode =
-                  line.text.trim().length === nodeRef.to - nodeRef.from
-
-                if (lineContainsOnlyNode) {
+                if (lineContainsOnlyNode(line, nodeRef)) {
                   const Widget = state.readOnly
                     ? GraphicsWidget
                     : EditableGraphicsWidget
