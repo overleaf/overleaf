@@ -24,17 +24,9 @@ export const TableGeneratorHelpModal = () => {
       </OLModalHeader>
       <OLModalBody>
         <p>
-          <Trans
-            i18nKey="this_tool_helps_you_insert_simple_tables_into_your_project_without_writing_latex_code_give_feedback"
-            components={[
-              // eslint-disable-next-line react/jsx-key, jsx-a11y/anchor-has-content
-              <a
-                href="https://forms.gle/ri3fzV1oQDAjmfmD7"
-                target="_blank"
-                rel="noopener noreferrer"
-              />,
-            ]}
-          />
+          {t(
+            'this_tool_helps_you_insert_simple_tables_into_your_project_without_writing_latex_code'
+          )}
         </p>
         <b>{t('how_it_works')}</b>
         <p>

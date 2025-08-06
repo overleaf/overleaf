@@ -2365,7 +2365,7 @@
   "this_project_is_public_read_only": "This project is public and can be viewed but not edited by anyone with the URL",
   "this_project_will_appear_in_your_dropbox_folder_at": "This project will appear in your Dropbox folder at ",
   "this_tool_helps_you_insert_figures": "This tool helps you insert figures into your project without needing to write the LaTeX code. The following information explains more about the options in the tool and how to further customize your figures.",
-  "this_tool_helps_you_insert_simple_tables_into_your_project_without_writing_latex_code_give_feedback": "This tool helps you insert simple tables into your project without writing LaTeX code. This tool is new, so please <0>give us feedback</0> and look out for additional functionality coming soon.",
+  "this_tool_helps_you_insert_simple_tables_into_your_project_without_writing_latex_code": "This tool helps you insert simple tables into your project without writing LaTeX code.",
   "this_total_reflects_the_amount_due_until": "This total reflects the amount due from today until <strong>__date__</strong>, the end of the billing period of your existing plan.",
   "this_was_helpful": "This was helpful",
   "this_wasnt_helpful": "This wasn’t helpful",

@@ -25,7 +25,6 @@ import { ensureEmptyLine } from '../../extensions/toolbar/commands'
 import { useTranslation } from 'react-i18next'
 import useEventListener from '../../../../shared/hooks/use-event-listener'
 import { prepareLines } from '../../utils/prepare-lines'
-import { FeedbackBadge } from '@/shared/components/feedback-badge'
 import { FullSizeLoadingSpinner } from '@/shared/components/loading-spinner'
 
 const FigureModalBody = lazy(() => import('./figure-modal-body'))
@@ -281,11 +280,6 @@ const FigureModalContent = () => {
             : sourcePickerShown
               ? t('replace_figure')
               : getTitle(source)}{' '}
-          <FeedbackBadge
-            id="figure-modal-feedback"
-            url="https://forms.gle/PfEtwceYBNQ32DF4A"
-            text="Please click to give feedback about editing figures."
-          />
         </OLModalTitle>
       </OLModalHeader>
 

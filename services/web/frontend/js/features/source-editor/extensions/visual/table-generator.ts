@@ -290,10 +290,6 @@ export const tableGeneratorTheme = EditorView.baseTheme({
     },
   },
 
-  '.toolbar-beta-badge': {
-    padding: '0 4px 2px 12px',
-  },
-
   '.table-generator-button-group': {
     display: 'inline-flex',
     'align-items': 'center',
