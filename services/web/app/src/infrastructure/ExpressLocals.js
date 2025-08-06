@@ -13,9 +13,10 @@ const PackageVersions = require('./PackageVersions')
 const Modules = require('./Modules')
 const Errors = require('../Features/Errors/Errors')
 const {
-  addHasAdminCapabilityToLocals,
   canRedirectToAdminDomain,
   hasAdminAccess,
+  useAdminCapabilities,
+  useHasAdminCapability,
 } = require('../Features/Helpers/AdminAuthorizationHelper')
 const {
   addOptionalCleanupHandlerAfterDrainingConnections,
@@ -313,7 +314,9 @@ module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
     next()
   })
 
-  webRouter.use(addHasAdminCapabilityToLocals)
+  webRouter.use(useAdminCapabilities)
+
+  webRouter.use(useHasAdminCapability)
 
   webRouter.use(function (req, res, next) {
     // Clone the nav settings so they can be modified for each request

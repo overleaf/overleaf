@@ -59,47 +59,7 @@ describe('AdminAuthorizationHelper', function () {
       })
     })
   })
-  describe('addHasAdminCapabilityToLocals', function () {
-    describe('when getting capabilities from modules throws an error', function () {
-      beforeEach(async function () {
-        this.fireHook.rejects(new Error('Module error'))
-
-        this.req = new MockRequest()
-        this.res = new MockResponse()
-        this.next = sinon.stub()
-
-        this.user = {
-          isAdmin: true,
-        }
-
-        this.req.logger = {
-          warn: sinon.stub(),
-        }
-
-        this.req.session = {
-          user: this.user,
-        }
-
-        await this.AdminAuthorizationHelper.addHasAdminCapabilityToLocals(
-          this.req,
-          this.res,
-          this.next
-        )
-      })
-      it('defines hasAdminCapability on res.locals', function () {
-        expect(this.res.locals).to.have.property('hasAdminCapability')
-      })
-      it('returns false when called with any capability', function () {
-        expect(this.res.locals.hasAdminCapability('capability1')).to.be.false
-      })
-      it('logs a warning', function () {
-        expect(this.logger.warn).to.have.been.calledOnce
-        expect(this.logger.warn.firstCall.args[0]).to.have.property('error')
-        expect(this.logger.warn.firstCall.args[0].error.message).to.equal(
-          'Module error'
-        )
-      })
-    })
+  describe('useAdminCapabilities', function () {
     describe('when admin capabilities are not available', function () {
       describe('user is null', function () {
         beforeEach(async function () {
@@ -111,17 +71,19 @@ describe('AdminAuthorizationHelper', function () {
             user: null,
           }
 
-          await this.AdminAuthorizationHelper.addHasAdminCapabilityToLocals(
+          await this.AdminAuthorizationHelper.useAdminCapabilities(
             this.req,
             this.res,
             this.next
           )
         })
-        it('defines hasAdminCapability on res.locals', function () {
-          expect(this.res.locals).to.have.property('hasAdminCapability')
+        it('does not define adminCapabilitiesAvailable on req', function () {
+          expect(this.req).not.to.have.property('adminCapabilitiesAvailable')
         })
-        it('returns false when called with any capability', function () {
-          expect(this.res.locals.hasAdminCapability('capability1')).to.be.false
+        it('defines adminCapabilities as an empty array on req', function () {
+          expect(this.req).to.have.property('adminCapabilities')
+          expect(this.req.adminCapabilities).to.be.an('array')
+          expect(this.req.adminCapabilities).to.be.empty
         })
       })
       describe('user is not an admin', function () {
@@ -138,17 +100,19 @@ describe('AdminAuthorizationHelper', function () {
             user: this.user,
           }
 
-          await this.AdminAuthorizationHelper.addHasAdminCapabilityToLocals(
+          await this.AdminAuthorizationHelper.useAdminCapabilities(
             this.req,
             this.res,
             this.next
           )
         })
-        it('defines hasAdminCapability on res.locals', function () {
-          expect(this.res.locals).to.have.property('hasAdminCapability')
+        it('does not define adminCapabilitiesAvailable on req', function () {
+          expect(this.req).not.to.have.property('adminCapabilitiesAvailable')
         })
-        it('returns false when called with any capability', function () {
-          expect(this.res.locals.hasAdminCapability('capability1')).to.be.false
+        it('defines adminCapabilities as an empty array on req', function () {
+          expect(this.req).to.have.property('adminCapabilities')
+          expect(this.req.adminCapabilities).to.be.an('array')
+          expect(this.req.adminCapabilities).to.be.empty
         })
       })
       describe('user is an admin', function () {
@@ -165,18 +129,21 @@ describe('AdminAuthorizationHelper', function () {
             user: this.user,
           }
 
-          await this.AdminAuthorizationHelper.addHasAdminCapabilityToLocals(
+          await this.AdminAuthorizationHelper.useAdminCapabilities(
             this.req,
             this.res,
             this.next
           )
         })
 
-        it('defines hasAdminCapability on res.locals', function () {
-          expect(this.res.locals).to.have.property('hasAdminCapability')
+        it('defines adminCapabilitiesAvailable as false on req', function () {
+          expect(this.req).to.have.property('adminCapabilitiesAvailable', false)
         })
-        it('returns true when called with any capability', function () {
-          expect(this.res.locals.hasAdminCapability('capability1')).to.be.true
+
+        it('defines adminCapabilities as an empty array', function () {
+          expect(this.req).to.have.property('adminCapabilities')
+          expect(this.req.adminCapabilities).to.be.an('array')
+          expect(this.req.adminCapabilities).to.be.empty
         })
       })
     })
@@ -198,20 +165,19 @@ describe('AdminAuthorizationHelper', function () {
             user: this.user,
           }
 
-          await this.AdminAuthorizationHelper.addHasAdminCapabilityToLocals(
+          await this.AdminAuthorizationHelper.useAdminCapabilities(
             this.req,
             this.res,
             this.next
           )
         })
-        it('defines hasAdminCapability on res.locals', function () {
-          expect(this.res.locals).to.have.property('hasAdminCapability')
+        it('does not define adminCapabilitiesAvailable on req', function () {
+          expect(this.req).not.to.have.property('adminCapabilitiesAvailable')
         })
-        it('returns false when called with a capability the user has', function () {
-          expect(this.res.locals.hasAdminCapability('capability1')).to.be.false
-        })
-        it('returns false when called with a capability the user does not have', function () {
-          expect(this.res.locals.hasAdminCapability('capability3')).to.be.false
+        it('defines adminCapabilities as an empty array on req', function () {
+          expect(this.req).to.have.property('adminCapabilities')
+          expect(this.req.adminCapabilities).to.be.an('array')
+          expect(this.req.adminCapabilities).to.be.empty
         })
       })
       describe('user is an admin', function () {
@@ -228,21 +194,177 @@ describe('AdminAuthorizationHelper', function () {
             user: this.user,
           }
 
-          await this.AdminAuthorizationHelper.addHasAdminCapabilityToLocals(
+          await this.AdminAuthorizationHelper.useAdminCapabilities(
             this.req,
             this.res,
             this.next
           )
         })
 
-        it('defines hasAdminCapability on res.locals', function () {
-          expect(this.res.locals).to.have.property('hasAdminCapability')
+        it('defines adminCapabilitiesAvailable as true on req', function () {
+          expect(this.req).to.have.property('adminCapabilitiesAvailable', true)
         })
-        it('returns true when called with a capability the user has', function () {
-          expect(this.res.locals.hasAdminCapability('capability2')).to.be.true
+        it('defines adminCapabilities with the capabilities returned from modules', function () {
+          expect(this.req).to.have.property('adminCapabilities')
+          expect(this.req.adminCapabilities).to.be.an('array')
+          expect(this.req.adminCapabilities).to.include('capability1')
+          expect(this.req.adminCapabilities).to.include('capability2')
         })
-        it('returns false when called with a capability the user does not have', function () {
-          expect(this.res.locals.hasAdminCapability('capability3')).to.be.false
+      })
+    })
+    describe('when getting capabilities from modules throws an error', function () {
+      beforeEach(async function () {
+        this.fireHook.rejects(new Error('Module error'))
+
+        this.req = new MockRequest()
+        this.res = new MockResponse()
+        this.next = sinon.stub()
+
+        this.user = {
+          isAdmin: true,
+        }
+
+        this.req.logger = {
+          warn: sinon.stub(),
+        }
+
+        this.req.session = {
+          user: this.user,
+        }
+
+        await this.AdminAuthorizationHelper.useAdminCapabilities(
+          this.req,
+          this.res,
+          this.next
+        )
+      })
+      it('logs the error', function () {
+        expect(this.logger.warn).to.have.been.calledWith(
+          sinon.match.has('err', sinon.match.instanceOf(Error))
+        )
+      })
+      it('defines adminCapabilitiesAvailable as true on req', function () {
+        expect(this.req).to.have.property('adminCapabilitiesAvailable', true)
+      })
+      it('defines adminCapabilities as an empty array', function () {
+        expect(this.req).to.have.property('adminCapabilities')
+        expect(this.req.adminCapabilities).to.be.an('array')
+        expect(this.req.adminCapabilities).to.be.empty
+      })
+    })
+  })
+  describe('useHasAdminCapability', function () {
+    it('adds hasAdminCapability to res.locals', function () {
+      const req = new MockRequest()
+      const res = new MockResponse()
+      const next = sinon.stub()
+
+      this.AdminAuthorizationHelper.useHasAdminCapability(req, res, next)
+
+      expect(res.locals).to.have.property('hasAdminCapability')
+      expect(res.locals.hasAdminCapability).to.be.a('function')
+    })
+
+    describe('when the user is not an admin', function () {
+      describe('when req.adminCapabilitiesAvailable is true', function () {
+        it('returns false for any capability', function () {
+          const req = new MockRequest()
+          const res = new MockResponse()
+          const next = sinon.stub()
+
+          req.adminCapabilitiesAvailable = true
+          req.adminCapabilities = []
+
+          req.session.user = { isAdmin: false }
+
+          this.AdminAuthorizationHelper.useHasAdminCapability(req, res, next)
+
+          expect(res.locals.hasAdminCapability('capability1')).to.be.false
+        })
+      })
+
+      describe('when req.adminCapabilitiesAvailable is false', function () {
+        it('returns false for any capability', function () {
+          const req = new MockRequest()
+          const res = new MockResponse()
+          const next = sinon.stub()
+
+          req.adminCapabilitiesAvailable = false
+          req.adminCapabilities = []
+
+          req.session.user = { isAdmin: false }
+
+          this.AdminAuthorizationHelper.useHasAdminCapability(req, res, next)
+
+          expect(res.locals.hasAdminCapability('capability1')).to.be.false
+        })
+      })
+
+      describe('when req.adminCapabilitiesAvailable is undefined', function () {
+        it('returns false for any capability', function () {
+          const req = new MockRequest()
+          const res = new MockResponse()
+          const next = sinon.stub()
+
+          req.session.user = { isAdmin: false }
+
+          this.AdminAuthorizationHelper.useHasAdminCapability(req, res, next)
+
+          expect(res.locals.hasAdminCapability('capability1')).to.be.false
+        })
+      })
+    })
+
+    describe('user is an admin', function () {
+      describe('when req.adminCapabilitiesAvailable is false', function () {
+        it('returns true for any capability', function () {
+          const req = new MockRequest()
+          const res = new MockResponse()
+          const next = sinon.stub()
+
+          req.session.user = { isAdmin: true }
+          req.adminCapabilitiesAvailable = false
+
+          this.AdminAuthorizationHelper.useHasAdminCapability(req, res, next)
+
+          expect(res.locals.hasAdminCapability('capability1')).to.be.true
+        })
+      })
+
+      describe('when req.adminCapabilitiesAvailable is undefined', function () {
+        it('returns true for any capability', function () {
+          const req = new MockRequest()
+          const res = new MockResponse()
+          const next = sinon.stub()
+
+          req.session.user = { isAdmin: true }
+
+          this.AdminAuthorizationHelper.useHasAdminCapability(req, res, next)
+
+          expect(res.locals.hasAdminCapability('capability1')).to.be.true
+        })
+      })
+
+      describe('when req.adminCapabilitiesAvailable is true', function () {
+        let req, res, next
+        beforeEach(function () {
+          req = new MockRequest()
+          res = new MockResponse()
+          next = sinon.stub()
+
+          req.session.user = { isAdmin: true }
+          req.adminCapabilitiesAvailable = true
+          req.adminCapabilities = ['capability1', 'capability2']
+
+          this.AdminAuthorizationHelper.useHasAdminCapability(req, res, next)
+        })
+
+        it('returns true for a capability the user has', function () {
+          expect(res.locals.hasAdminCapability('capability1')).to.be.true
+        })
+
+        it('returns false for a capability the user does not have', function () {
+          expect(res.locals.hasAdminCapability('capability3')).to.be.false
         })
       })
     })

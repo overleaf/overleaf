@@ -8,7 +8,8 @@ module.exports = {
   hasAdminAccess,
   canRedirectToAdminDomain,
   getAdminCapabilities,
-  addHasAdminCapabilityToLocals: expressify(addHasAdminCapabilityToLocals),
+  useHasAdminCapability,
+  useAdminCapabilities: expressify(useAdminCapabilities),
 }
 
 function hasAdminAccess(user) {
@@ -29,26 +30,40 @@ async function getAdminCapabilities(user) {
   }
 }
 
-async function addHasAdminCapabilityToLocals(req, res, next) {
+async function useAdminCapabilities(req, res, next) {
+  if (req.adminCapabilities) {
+    return next()
+  }
   const user = SessionManager.getSessionUser(req.session)
   if (!hasAdminAccess(user)) {
-    res.locals.hasAdminCapability = () => false
+    req.adminCapabilities = []
     return next()
   }
   try {
     const { adminCapabilities, adminCapabilitiesAvailable } =
       await getAdminCapabilities(user)
-    res.locals.hasAdminCapability = capability => {
-      if (!adminCapabilitiesAvailable) {
-        // If admin capabilities are not available, then all admins have all capabilities
-        return true
-      }
-      return adminCapabilities.includes(capability)
+    req.adminCapabilities = adminCapabilities
+    req.adminCapabilitiesAvailable = adminCapabilitiesAvailable
+  } catch (err) {
+    logger.warn({ err, req }, 'Failed to get admin capabilities')
+    req.adminCapabilities = []
+    // Admin capabilities are likely available because we shouldn't throw otherwise.
+    req.adminCapabilitiesAvailable = true
+  }
+  next()
+}
+
+function useHasAdminCapability(req, res, next) {
+  res.locals.hasAdminCapability = capability => {
+    if (!hasAdminAccess(SessionManager.getSessionUser(req.session))) {
+      return false
     }
-  } catch (error) {
-    logger.warn({ error, req, user }, 'Failed to get admin capabilities')
-    // A module probably threw so adminCapabilitiesAvailable should be true if we are here so deny to be safe
-    res.locals.hasAdminCapability = () => false
+    const { adminCapabilitiesAvailable, adminCapabilities } = req
+    if (!adminCapabilitiesAvailable) {
+      // We can't know which capabilities are possible, so we assume all are available for admins.
+      return true
+    }
+    return adminCapabilities.includes(capability)
   }
   next()
 }
