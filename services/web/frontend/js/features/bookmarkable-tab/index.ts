@@ -1,4 +1,4 @@
-import { Tab } from 'bootstrap-5'
+import { Tab } from 'bootstrap'
 
 function bookmarkableTab(tabEl: HTMLElement) {
   tabEl.addEventListener('click', () => {
@@ -17,7 +17,6 @@ function handleHashChange() {
 
   if (!tabEl) return
 
-  // Select the tab via Bootstrap 5
   const tab = new Tab(tabEl)
   tab.show()
 }

@@ -5,7 +5,7 @@ import './shared/commands'
 import './shared/exceptions'
 import './ct/commands'
 import './ct/codemirror'
-import '../../test/frontend/helpers/bootstrap-5'
+import '../../test/frontend/helpers/bootstrap'
 
 beforeEach(function () {
   cy.wrap(localesPromise).then(resetMeta)

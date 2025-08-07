@@ -186,32 +186,6 @@ module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
 
     res.locals.moment = moment
 
-    res.locals.isIEEE = brandId => brandId === IEEE_BRAND_ID
-
-    res.locals.getCssThemeModifier = function (
-      userSettings,
-      brandVariation,
-      enableIeeeBranding
-    ) {
-      // Themes only exist in OL v2
-      if (Settings.overleaf != null) {
-        // The IEEE theme is no longer applied in the editor, which sets
-        // enableIeeeBranding to false, but is used in the IEEE portal. If
-        // this is an IEEE-branded page and IEEE branding is disabled in this
-        // page, always use the default theme (i.e. no light theme in the
-        // IEEE-branded editor)
-        if (res.locals.isIEEE(brandVariation?.brand_id)) {
-          return enableIeeeBranding ? 'ieee-' : ''
-        } else if (userSettings && userSettings.overallTheme != null) {
-          if (!['', 'light-'].includes(userSettings.overallTheme)) {
-            return ''
-          }
-          return userSettings.overallTheme
-        }
-      }
-      return ''
-    }
-
     res.locals.buildStylesheetPath = function (cssFileName) {
       return staticFilesBase + webpackManifest[cssFileName]
     }

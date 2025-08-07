@@ -3,7 +3,6 @@ import { FetchError, postJSON } from '../../infrastructure/fetch-json'
 import { canSkipCaptcha, validateCaptchaV2 } from './captcha'
 import inputValidator from './input-validator'
 import { disableElement, enableElement } from '../utils/disableElement'
-import { isBootstrap5 } from '@/features/utils/bootstrap-5'
 import { materialIcon as createMaterialIcon } from '@/features/utils/material-icon'
 
 // Form helper(s) to handle:
@@ -136,7 +135,7 @@ function hideFormElements(formEl) {
 }
 
 /**
- * Creates a notification element from a message object, with BS5 classes.
+ * Creates a notification element from a message object.
  *
  * @param {Object} message
  * @param {'error' | 'success' | 'warning' | 'info'} message.type
@@ -145,7 +144,7 @@ function hideFormElements(formEl) {
  * @param {string[]} message.hints
  * @returns {HTMLDivElement}
  */
-function createNotificationFromMessageBS5(message) {
+function createNotificationFromMessage(message) {
   const messageEl = document.createElement('div')
   messageEl.className = classNames('mb-3 notification', {
     'notification-type-error': message.type === 'error',
@@ -216,32 +215,9 @@ function showMessages(formEl, messageBag) {
       customErrorElements.forEach(el => {
         el.hidden = false
       })
-    } else if (isBootstrap5()) {
-      const notification = createNotificationFromMessageBS5(message)
-      messagesEl.append(notification)
     } else {
-      // No custom error element for key on page, append a new error message
-      const messageEl = document.createElement('div')
-      messageEl.className = classNames('alert mb-2', {
-        'alert-danger': message.type === 'error',
-        'alert-success': message.type !== 'error',
-      })
-      messageEl.textContent = message.text || `Error: ${message.key}`
-      messageEl.setAttribute('aria-live', 'assertive')
-      messageEl.setAttribute(
-        'role',
-        message.type === 'error' ? 'alert' : 'status'
-      )
-      if (message.hints && message.hints.length) {
-        const listEl = document.createElement('ul')
-        message.hints.forEach(hint => {
-          const listItemEl = document.createElement('li')
-          listItemEl.textContent = hint
-          listEl.append(listItemEl)
-        })
-        messageEl.append(listEl)
-      }
-      messagesEl.append(messageEl)
+      const notification = createNotificationFromMessage(message)
+      messagesEl.append(notification)
     }
     if (message.key) {
       // Hide the form elements on specific message types

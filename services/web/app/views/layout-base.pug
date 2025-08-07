@@ -6,8 +6,6 @@ html(
 	class=fixedSizeDocument ? 'fixed-size-document' : undefined
 )
 	- metadata = metadata || {}
-	- let bootstrap5PageStatus = 'enabled' // One of 'disabled' and 'enabled'
-	- let bootstrap5PageSplitTest = '' // Limits Bootstrap 5 usage on this page to users with an assignment of "enabled" for the specified split test. If left empty and bootstrap5PageStatus is "enabled", the page always uses Bootstrap 5.
 	- let isWebsiteRedesign = false
 	- let isApplicationPage = false
 	- let enableIeeeBranding = true
@@ -21,14 +19,8 @@ html(
 	head
 		include ./_metadata.pug
 
-		- const bootstrapVersion = bootstrap5PageStatus !== 'disabled' && (bootstrap5Override || bootstrap5PageSplitTest === '' || splitTestVariants[bootstrap5PageSplitTest] === 'enabled') ? 5 : 3
-
 		//- Stylesheet
-		link(
-			rel='stylesheet'
-			href=buildCssPath(getCssThemeModifier(userSettings, brandVariation, enableIeeeBranding), bootstrapVersion)
-			id='main-stylesheet'
-		)
+		link(rel='stylesheet' href=buildCssPath() id='main-stylesheet')
 		block css
 			each file in entrypointStyles(entrypoint)
 				link(rel='stylesheet' href=file)
@@ -103,7 +95,6 @@ html(
 			)
 			each restriction in userRestrictions || []
 				meta(name='ol-cannot-' + restriction data-type='boolean' content)
-			meta(name='ol-bootstrapVersion' data-type='json' content=bootstrapVersion)
 
 		block head-scripts
 

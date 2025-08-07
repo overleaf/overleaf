@@ -1,4 +1,3 @@
-import { isBootstrap5 } from '@/features/utils/bootstrap-5'
 import { materialIcon } from '@/features/utils/material-icon'
 
 export default function inputValidator(inputEl) {
@@ -13,11 +12,8 @@ export default function inputValidator(inputEl) {
 
   const messageTextNode = document.createTextNode('')
 
-  // In Bootstrap 5, add an icon
-  if (isBootstrap5()) {
-    const iconEl = materialIcon('error')
-    messageInnerEl.append(iconEl)
-  }
+  const iconEl = materialIcon('error')
+  messageInnerEl.append(iconEl)
   messageInnerEl.append(messageTextNode)
 
   inputEl.insertAdjacentElement('afterend', messageEl)

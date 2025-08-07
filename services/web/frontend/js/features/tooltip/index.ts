@@ -1,4 +1,4 @@
-import { Tooltip } from 'bootstrap-5'
+import { Tooltip } from 'bootstrap'
 
 function getElementWidth(el: Element) {
   const elComputedStyle = window.getComputedStyle(el)

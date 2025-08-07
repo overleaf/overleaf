@@ -75,7 +75,6 @@ export interface Meta {
   'ol-allowedImageNames': AllowedImageName[]
   'ol-anonymous': boolean
   'ol-baseAssetPath': string
-  'ol-bootstrapVersion': 3 | 5
   'ol-brandVariation': Record<string, any>
 
   // dynamic keys based on permissions

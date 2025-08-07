@@ -1,9 +1,9 @@
 // Only include the parts of Bootstrap we need to minimize bundle size
 
 // Include functions first (enabling manipulation of colors, SVGs, calc, etc. in the variable overrides)
-@import 'bootstrap-5/scss/functions';
+@import 'bootstrap/scss/functions';
 
-// Overrides for Bootstrap 5 Sass variables. These have to be included before
+// Overrides for Bootstrap Sass variables. These have to be included before
 // Bootstrap itself because Bootstrap uses them to create the CSS variables it
 // uses, and in calculations to determine, for example, what color text to use
 // on a button based on contrast.
@@ -11,44 +11,44 @@
 @import '../abstracts/all';
 
 // Include remainder of required Bootstrap stylesheets (including any separate color mode stylesheets)
-@import 'bootstrap-5/scss/variables';
-@import 'bootstrap-5/scss/variables-dark';
+@import 'bootstrap/scss/variables';
+@import 'bootstrap/scss/variables-dark';
 
 // Include remainder of required parts
-@import 'bootstrap-5/scss/maps';
-@import 'bootstrap-5/scss/mixins';
-@import 'bootstrap-5/scss/utilities';
+@import 'bootstrap/scss/maps';
+@import 'bootstrap/scss/mixins';
+@import 'bootstrap/scss/utilities';
 
 // Layout & components
-@import 'bootstrap-5/scss/root';
-@import 'bootstrap-5/scss/reboot';
-@import 'bootstrap-5/scss/transitions';
-@import 'bootstrap-5/scss/type';
-@import 'bootstrap-5/scss/images';
-@import 'bootstrap-5/scss/containers';
-@import 'bootstrap-5/scss/grid';
-@import 'bootstrap-5/scss/tables';
-@import 'bootstrap-5/scss/forms';
-@import 'bootstrap-5/scss/buttons';
-@import 'bootstrap-5/scss/dropdown';
-@import 'bootstrap-5/scss/button-group';
-@import 'bootstrap-5/scss/badge';
-@import 'bootstrap-5/scss/list-group';
-@import 'bootstrap-5/scss/modal';
-@import 'bootstrap-5/scss/tooltip';
-@import 'bootstrap-5/scss/popover';
-@import 'bootstrap-5/scss/spinners';
-@import 'bootstrap-5/scss/card';
-@import 'bootstrap-5/scss/close';
-@import 'bootstrap-5/scss/nav';
-@import 'bootstrap-5/scss/navbar';
-@import 'bootstrap-5/scss/offcanvas';
+@import 'bootstrap/scss/root';
+@import 'bootstrap/scss/reboot';
+@import 'bootstrap/scss/transitions';
+@import 'bootstrap/scss/type';
+@import 'bootstrap/scss/images';
+@import 'bootstrap/scss/containers';
+@import 'bootstrap/scss/grid';
+@import 'bootstrap/scss/tables';
+@import 'bootstrap/scss/forms';
+@import 'bootstrap/scss/buttons';
+@import 'bootstrap/scss/dropdown';
+@import 'bootstrap/scss/button-group';
+@import 'bootstrap/scss/badge';
+@import 'bootstrap/scss/list-group';
+@import 'bootstrap/scss/modal';
+@import 'bootstrap/scss/tooltip';
+@import 'bootstrap/scss/popover';
+@import 'bootstrap/scss/spinners';
+@import 'bootstrap/scss/card';
+@import 'bootstrap/scss/close';
+@import 'bootstrap/scss/nav';
+@import 'bootstrap/scss/navbar';
+@import 'bootstrap/scss/offcanvas';
 
 // Helpers
-@import 'bootstrap-5/scss/helpers';
+@import 'bootstrap/scss/helpers';
 
 // Utilities
-@import 'bootstrap-5/scss/utilities/api';
+@import 'bootstrap/scss/utilities/api';
 
 // Mixins
-@import 'bootstrap-5/scss/mixins/breakpoints';
+@import 'bootstrap/scss/mixins/breakpoints';

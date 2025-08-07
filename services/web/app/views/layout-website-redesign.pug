@@ -11,19 +11,13 @@ block append meta
 
 block body
 	if typeof suppressNavbar == 'undefined'
-		if bootstrapVersion === 5
-			include layout/navbar-marketing-bootstrap-5
-		else
-			include layout/navbar-website-redesign
+		include layout/navbar-marketing-bootstrap-5
 
 	block content
 
 	if typeof suppressFooter == 'undefined'
 		if showThinFooter
-			if bootstrapVersion === 5
-				include layout/thin-footer-bootstrap-5
-			else
-				include layout/thin-footer
+			include layout/thin-footer-bootstrap-5
 		else
 			include layout/fat-footer-website-redesign
 
@@ -31,10 +25,7 @@ block body
 		include _cookie_banner
 
 	block contactModal
-		if bootstrapVersion === 5
-			!= moduleIncludes('contactModal-marketing-bootstrap-5', locals)
-		else
-			!= moduleIncludes('contactModal-marketing', locals)
+		!= moduleIncludes('contactModal-marketing-bootstrap-5', locals)
 
 block prepend foot-scripts
-	+bootstrap-js(bootstrapVersion)
+	+bootstrap-js

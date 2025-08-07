@@ -4,12 +4,10 @@ block append meta
 	meta(name='ol-user' data-type='json' content=user)
 
 block content
-	- var colClass = bootstrapVersion === 5 ? 'col-lg-8 m-auto' : 'col-md-8 col-md-offset-2'
-
 	main#main-content.content.content-alt.team-invite
 		.container
 			.row
-				div(class=colClass)
+				.col-lg-8.m-auto
 					.card.text-center
 						.card-body
 							.page-header
