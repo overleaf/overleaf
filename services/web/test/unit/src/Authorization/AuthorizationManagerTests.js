@@ -58,7 +58,12 @@ describe('AuthorizationManager', function () {
           .resolves({ metadata: { user_id: new ObjectId() } }),
       },
     }
-
+    this.Modules = { promises: { hooks: { fire: sinon.stub() } } }
+    this.settings = {
+      passwordStrengthOptions: {},
+      adminPrivilegeAvailable: true,
+      adminRolesEnabled: false,
+    }
     this.AuthorizationManager = SandboxedModule.require(modulePath, {
       requires: {
         'mongodb-legacy': { ObjectId },
@@ -69,10 +74,8 @@ describe('AuthorizationManager', function () {
         '../TokenAccess/TokenAccessHandler': this.TokenAccessHandler,
         '../DocumentUpdater/DocumentUpdaterHandler':
           this.DocumentUpdaterHandler,
-        '@overleaf/settings': {
-          passwordStrengthOptions: {},
-          adminPrivilegeAvailable: true,
-        },
+        '../../infrastructure/Modules': this.Modules,
+        '@overleaf/settings': this.settings,
       },
     })
   })
@@ -675,6 +678,36 @@ function testPermission(permission, privilegeLevels) {
       describe('when user is site admin', function () {
         beforeEach('set user as site admin', function () {
           this.user.isAdmin = true
+        })
+        expectPermission(permission, privilegeLevels.siteAdmin || false)
+      })
+      describe('admin without permissions', function () {
+        beforeEach(function () {
+          this.user.isAdmin = true
+          this.settings.adminRolesEnabled = true
+          this.Modules.promises.hooks.fire
+            .withArgs('getAdminCapabilities')
+            .resolves([])
+        })
+        expectPermission(permission, false)
+      })
+      describe('admin with `view-project`', function () {
+        beforeEach(function () {
+          this.user.isAdmin = true
+          this.settings.adminRolesEnabled = true
+          this.Modules.promises.hooks.fire
+            .withArgs('getAdminCapabilities')
+            .resolves([['view-project']])
+        })
+        expectPermission(permission, privilegeLevels.readOnly || false)
+      })
+      describe('admin with `modify-project`', function () {
+        beforeEach(function () {
+          this.user.isAdmin = true
+          this.settings.adminRolesEnabled = true
+          this.Modules.promises.hooks.fire
+            .withArgs('getAdminCapabilities')
+            .resolves([['view-project', 'modify-project']])
         })
         expectPermission(permission, privilegeLevels.siteAdmin || false)
       })

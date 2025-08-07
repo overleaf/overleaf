@@ -8,7 +8,10 @@ const PrivilegeLevels = require('./PrivilegeLevels')
 const TokenAccessHandler = require('../TokenAccess/TokenAccessHandler')
 const PublicAccessLevels = require('./PublicAccessLevels')
 const Errors = require('../Errors/Errors')
-const { hasAdminAccess } = require('../Helpers/AdminAuthorizationHelper')
+const {
+  hasAdminAccess,
+  getAdminCapabilities,
+} = require('../Helpers/AdminAuthorizationHelper')
 const Settings = require('@overleaf/settings')
 const DocumentUpdaterHandler = require('../DocumentUpdater/DocumentUpdaterHandler')
 
@@ -146,9 +149,17 @@ async function getPrivilegeLevelForProjectWithUser(
   projectAccess,
   opts = {}
 ) {
-  if (!opts.ignoreSiteAdmin) {
-    if (await isUserSiteAdmin(userId)) {
+  let adminReadOnly = false
+  if (!opts.ignoreSiteAdmin && (await isUserSiteAdmin(userId))) {
+    if (!Settings.adminRolesEnabled) {
       return PrivilegeLevels.OWNER
+    }
+    const { adminCapabilities } = await getAdminCapabilities({ _id: userId })
+    if (adminCapabilities.includes('modify-project')) {
+      return PrivilegeLevels.OWNER
+    }
+    if (adminCapabilities.includes('view-project')) {
+      adminReadOnly = true
     }
   }
 
@@ -172,6 +183,10 @@ async function getPrivilegeLevelForProjectWithUser(
     if (publicAccessLevel === PublicAccessLevels.READ_AND_WRITE) {
       return PrivilegeLevels.READ_AND_WRITE
     }
+  }
+
+  if (adminReadOnly) {
+    return PrivilegeLevels.READ_ONLY
   }
 
   return PrivilegeLevels.NONE
