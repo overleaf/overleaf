@@ -875,7 +875,7 @@ describe('<ProjectListRoot />', function () {
             const modals = await screen.findAllByRole('dialog')
             const modal = modals[0]
 
-            expect(sendMBSpy).to.have.been.calledThrice
+            expect(sendMBSpy).to.have.been.calledTwice
             expect(sendMBSpy).to.have.been.calledWith('loads_v2_dash')
             expect(sendMBSpy).to.have.been.calledWith(
               'project-list-page-interaction',
@@ -1014,7 +1014,7 @@ describe('<ProjectListRoot />', function () {
               )
             ).to.be.true
 
-            expect(sendMBSpy).to.have.been.calledThrice
+            expect(sendMBSpy).to.have.been.calledTwice
             expect(sendMBSpy).to.have.been.calledWith('loads_v2_dash')
             expect(sendMBSpy).to.have.been.calledWith(
               'project-list-page-interaction',
@@ -1179,7 +1179,7 @@ describe('<ProjectListRoot />', function () {
 
         await fetchMock.callHistory.flush(true)
 
-        expect(sendMBSpy).to.have.been.calledThrice
+        expect(sendMBSpy).to.have.been.calledTwice
         expect(sendMBSpy).to.have.been.calledWith('loads_v2_dash')
         expect(sendMBSpy).to.have.been.calledWith(
           'project-list-page-interaction',

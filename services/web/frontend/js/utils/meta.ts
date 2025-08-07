@@ -233,7 +233,6 @@ export interface Meta {
   'ol-settingsPlans': Plan[]
   'ol-shouldAllowEditingDetails': boolean
   'ol-shouldLoadHotjar': boolean
-  'ol-showAiAssistNotification': boolean
   'ol-showAiErrorAssistant': boolean
   'ol-showBrlGeoBanner': boolean
   'ol-showCouponField': boolean

@@ -14,7 +14,6 @@ import {
   DeprecatedBrowser,
   isDeprecatedBrowser,
 } from '@/shared/components/deprecated-browser'
-import AiAssistBanner from './ai-assist-banner'
 
 const [enrollmentNotificationModule] = importOverleafModules(
   'managedGroupSubscriptionEnrollmentNotification'
@@ -57,10 +56,7 @@ function UserNotifications() {
         <GeoBanners />
         <GroupsAndEnterpriseBanner />
         {USGovBanner && <USGovBanner />}
-
-        <AiAssistBanner />
         <AccessibilitySurveyBanner />
-
         {isDeprecatedBrowser() && <DeprecatedBrowser />}
       </ul>
     </section>

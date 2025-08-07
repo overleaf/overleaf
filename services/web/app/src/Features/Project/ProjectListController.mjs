@@ -28,7 +28,6 @@ import SplitTestSessionHandler from '../SplitTests/SplitTestSessionHandler.js'
 import TutorialHandler from '../Tutorial/TutorialHandler.js'
 import SubscriptionHelper from '../Subscription/SubscriptionHelper.js'
 import PermissionsManager from '../Authorization/PermissionsManager.js'
-import SubscriptionLocator from '../Subscription/SubscriptionLocator.js'
 import AnalyticsManager from '../Analytics/AnalyticsManager.js'
 
 /**
@@ -403,18 +402,6 @@ async function projectListPage(req, res, next) {
     logger.error({ err: error }, 'Failed to get individual subscription')
   }
 
-  const aiAssistNotificationAssignment =
-    await SplitTestHandler.promises.getAssignment(
-      req,
-      res,
-      'ai-assist-notification'
-    )
-
-  let showAiAssistNotification = false
-  if (aiAssistNotificationAssignment.variant !== 'default') {
-    showAiAssistNotification = await _showAiAssistNotification(user)
-  }
-
   const affiliations = userAffiliations || []
   const inEnterpriseCommons = affiliations.some(
     affiliation => affiliation.institution?.enterpriseCommons
@@ -488,7 +475,6 @@ async function projectListPage(req, res, next) {
     hasIndividualPaidSubscription,
     userRestrictions: Array.from(req.userRestrictions || []),
     customerIoEnabled,
-    showAiAssistNotification,
     aiBlocked,
     hasAiAssist,
   })
@@ -802,33 +788,6 @@ async function _canUseAIAssist(user) {
   return await PermissionsManager.promises.checkUserPermissions(user, [
     'use-ai',
   ])
-}
-
-async function _showAiAssistNotification(user) {
-  // Check if the assistant has been manually disabled by the user
-  if (user.aiErrorAssistant?.enabled === false) {
-    return false
-  }
-
-  // Check if the user can use AI features (policy check)
-  const canUseAi = await PermissionsManager.promises.checkUserPermissions(
-    user,
-    ['use-ai']
-  )
-  if (!canUseAi) {
-    return false
-  }
-
-  // Check if the user has a subscription with manually collected group admins (#22822)
-  const subscription = await SubscriptionLocator.promises.getUsersSubscription(
-    user._id
-  )
-  if (subscription?.collectionMethod === 'manual') {
-    return false
-  }
-
-  const userHasAiAssist = await _userHasAIAssist(user)
-  return !userHasAiAssist
 }
 
 export default {
