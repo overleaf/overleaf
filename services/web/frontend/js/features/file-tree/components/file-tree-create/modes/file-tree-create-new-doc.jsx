@@ -5,28 +5,34 @@ import { useFileTreeCreateName } from '../../../contexts/file-tree-create-name'
 import { useFileTreeCreateForm } from '../../../contexts/file-tree-create-form'
 import * as eventTracking from '../../../../../infrastructure/event-tracking'
 import ErrorMessage from '../error-message'
+import { useEditorManagerContext } from '@/features/ide-react/context/editor-manager-context'
 
 export default function FileTreeCreateNewDoc() {
   const { name, validName } = useFileTreeCreateName()
   const { setValid } = useFileTreeCreateForm()
   const { error, finishCreatingDoc, inFlight } = useFileTreeActionable()
+
   // form validation: name is valid
   useEffect(() => {
     setValid(validName)
   }, [setValid, validName])
 
+  const { openDoc } = useEditorManagerContext()
+
   // form submission: create an empty doc with this name
   const handleSubmit = useCallback(
-    event => {
+    async event => {
       event.preventDefault()
 
-      finishCreatingDoc({ name })
+      const doc = await finishCreatingDoc({ name })
       eventTracking.sendMB('new-file-created', {
         method: 'doc',
         extension: name.split('.').length > 1 ? name.split('.').pop() : '',
       })
+
+      openDoc(doc)
     },
-    [finishCreatingDoc, name]
+    [finishCreatingDoc, name, openDoc]
   )
 
   return (

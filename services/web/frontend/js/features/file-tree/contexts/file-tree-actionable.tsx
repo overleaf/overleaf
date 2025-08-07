@@ -445,8 +445,9 @@ export const FileTreeActionableProvider: FC<React.PropsWithChildren> = ({
       dispatch({ type: ACTION_TYPES.CREATING_FILE })
 
       return finishCreatingEntity(entity)
-        .then(() => {
+        .then(docOrFile => {
           dispatch({ type: ACTION_TYPES.CLEAR })
+          return docOrFile
         })
         .catch(error => {
           dispatch({ type: ACTION_TYPES.ERROR, error })
