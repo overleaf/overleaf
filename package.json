@@ -49,6 +49,9 @@
     },
     "@types/request@2.48.12": {
       "form-data": "2.5.5"
+    },
+    "@cypress/request@3.0.1": {
+      "form-data": "2.5.5"
     }
   },
   "scripts": {
