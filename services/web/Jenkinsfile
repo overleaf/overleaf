@@ -1,0 +1,489 @@
+def action_test_frontend_ct_build = false
+def action_pull_cache = false
+def action_build_deps = false
+def action_copy_external_pages = false
+def action_build_dev = false
+def action_test_acceptance_app_server_pro = false
+def action_build_webpack = false
+def action_test_acceptance_app_saas = false
+def action_build_pug = false
+def action_build_production= false
+def action_fetch_sentry_secret = false
+
+pipeline {
+  agent {
+    node {
+      label 'jenkins-agent-web'
+      customWorkspace '/workspace'
+    }
+  }
+
+  options {
+    timestamps()
+    parallelsAlwaysFailFast()
+  }
+
+  environment {
+      IMAGE_NAME = 'web'
+      PROJECT_NAME = 'web'
+      IMAGE_REPO = 'us-east1-docker.pkg.dev/overleaf-ops/ol-docker/web'
+      AR_REPO_LOCATION = 'us-east1'
+      AR_URL = 'us-east1-docker.pkg.dev/overleaf-ops/ol-docker'
+      DOCKER_COMPOSE_FLAGS = '-f docker-compose.ci.yml'
+      BRANCH_NAME = "${CHANGE_BRANCH || GIT_BRANCH.replace('origin/', '')}"
+      COMMIT_SHA = "${GIT_COMMIT}"
+      SHORT_SHA = "${GIT_COMMIT.take(7)}"
+      CDN_STAG = "gs://ol-stag-web-assets-1"
+      CDN_PROD = "gs://mgcp-1117973-ol-prod-web-assets-1"
+  }
+
+  stages {
+    stage ('Build, Test and Push') {
+      parallel {
+        stage('Copy external pages') {
+          steps {
+            dir('services/web') {
+              sh 'bin/copy_external_pages'
+              script {
+                action_copy_external_pages = true
+              }
+            }
+          }
+        }
+        stage('Pull cache') {
+          steps {
+            sh 'docker pull ${AR_URL}/${IMAGE_NAME}:main-deps'
+            script {
+              action_pull_cache = true
+            }
+          }
+        }
+        stage('Prefetch Tests Images') {
+          steps {
+            dir('services/web') {
+              sh 'docker compose -f docker-compose.ci.yml pull --quiet test_frontend_ct mongo redis ldap saml'
+            }
+          }
+        }
+        stage('Build Deps') {
+          steps {
+            script {
+              waitUntil { 
+                return action_pull_cache
+              }
+            }
+            dir('services/web') {
+              sh 'make build_deps'
+            }
+            script {
+              action_build_deps = true
+            }
+          }
+        }
+        stage('Push Deps') {
+          steps {
+            script {
+              waitUntil { 
+                return action_build_deps
+              }
+            }
+            dir('services/web') {
+              sh 'docker push ${AR_URL}/${IMAGE_NAME}:${BRANCH_NAME}-deps'
+            }
+          }
+        }
+        stage('Build Dev') {
+          steps {
+            script {
+              waitUntil { 
+                return action_build_deps && action_copy_external_pages
+              }
+            }
+            dir('services/web') {
+              sh 'make build_dev'
+            }
+            script {
+              action_build_dev = true
+            }
+          }
+        }
+        stage ('Format') {
+          steps {
+            script {
+              waitUntil { 
+                return action_build_dev
+              }
+            }
+            dir('services/web') {
+              sh 'make format_in_docker'
+            }
+          }
+        }
+        stage('Lint') {
+          steps {
+            script {
+              waitUntil { 
+                return action_build_dev
+              }
+            }
+            dir('services/web') {
+              sh 'make lint_in_docker'
+            }
+          }
+        }
+        stage('Shellcheck') {
+          steps {
+            dir('services/web') {
+              sh 'make shellcheck'
+            }
+          }
+        }
+        stage('Acceptance SaaS') {
+          steps {
+            script {
+              waitUntil { 
+                return action_build_dev
+              }
+            }
+            dir('services/web') {
+              sh 'make test_acceptance_app_saas'
+            }
+            script {
+              action_test_acceptance_app_saas = true
+            }
+          }
+        }
+        stage('Acceptance Server CE') {
+          steps {
+            script {
+              waitUntil { 
+                return action_build_dev
+              }
+            }
+            dir('services/web') {
+              sh "make test_acceptance_app_server_ce"
+            }
+          }
+        }
+        stage('Acceptance Server Pro') {
+          steps {
+            script {
+              waitUntil { 
+                return action_build_dev
+              }
+            }               
+            dir('services/web') {
+              sh "make test_acceptance_app_server_pro"
+            }
+            script {
+              action_test_acceptance_app_server_pro = true
+            }
+          }
+        }
+        stage('test_acceptance_modules_merged_saas_1') {
+          steps {
+            script {
+              waitUntil { 
+                return action_build_dev
+              }
+            }
+            dir('services/web') {
+              sh "make test_acceptance_modules_merged_saas_1"
+            }
+          }
+        }
+        stage('test_acceptance_modules_merged_saas_2') {
+          steps {
+            script {
+              waitUntil { 
+                return action_build_dev
+              }
+            }
+            dir('services/web') {
+              sh "make test_acceptance_modules_merged_saas_2"
+            }
+          }
+        }
+        stage('test_acceptance_modules_merged_saas_3') {
+          steps {
+            script {
+              waitUntil { 
+                return action_build_dev
+              }
+            }
+            dir('services/web') {
+              sh "make test_acceptance_modules_merged_saas_3"
+            }
+          }
+        }
+        stage('test_acceptance_modules_merged_saas_4') {
+          steps {
+            script {
+              waitUntil { 
+                return action_build_dev
+              }
+            }
+            dir('services/web') {
+              sh "make test_acceptance_modules_merged_saas_4"
+            }
+          }
+        }
+        stage('test_acceptance_modules_merged_server_ce') {
+          steps {
+            script {
+              waitUntil { 
+                return action_build_dev
+              }
+            }
+            dir('services/web') {
+              sh "make test_acceptance_modules_merged_server_ce"
+            }
+          }
+        }
+        stage('test_acceptance_modules_merged_server_pro') {
+          steps {
+            script {
+              waitUntil { 
+                return action_build_dev
+              }
+            }
+            dir('services/web') {
+              sh "make test_acceptance_modules_merged_server_pro"
+            }
+          }
+        }
+        stage('test_frontend') {
+          steps {
+            script {
+              waitUntil { 
+                return action_build_dev
+              }
+            }
+            dir('services/web') {
+              sh "make test_frontend"
+            }
+          }
+        }
+        stage('test_frontend_ct_build') {
+          steps {
+            script {
+              waitUntil { 
+                return action_build_dev
+              }
+            }
+            dir('services/web') {
+              sh "make build_test_frontend_ct"
+            }
+            script {
+              action_test_frontend_ct_build = true
+            }
+          }
+        }
+        stage('test_frontend_ct_core_other') {
+            environment {
+                CYPRESS_INTERNAL_BROWSER_CONNECT_TIMEOUT = '120000'
+            }
+            steps {
+                script {
+                    waitUntil {
+                      return action_test_frontend_ct_build
+                    }
+                }
+                dir('services/web') {
+                  sh "make test_frontend_ct_core_other"
+                }
+            }
+        }
+        stage('test_frontend_ct_core_features') {
+            environment {
+                CYPRESS_INTERNAL_BROWSER_CONNECT_TIMEOUT = '120000'
+            }
+            steps {
+                script {
+                    waitUntil {
+                      return action_test_frontend_ct_build
+                    }
+                }
+                dir('services/web') {
+                  sh "make test_frontend_ct_core_features"
+                }
+            }
+        }
+        stage('test_frontend_ct_modules') {
+            environment {
+                CYPRESS_INTERNAL_BROWSER_CONNECT_TIMEOUT = '120000'
+            }
+            steps {
+                script {
+                  waitUntil {
+                    return action_test_frontend_ct_build
+                  }
+                }
+                dir('services/web') {
+                  sh "make test_frontend_ct_modules"
+                }
+            }
+        }
+        stage('test_frontend_ct_editor_visual') {
+            steps {
+                script {
+                  waitUntil {
+                    return action_test_frontend_ct_build
+                  }
+                }
+                dir('services/web') {
+                  sh "make test_frontend_ct_editor_visual"
+                }
+            }
+        }
+        stage('test_frontend_ct_editor_other') {
+            steps {
+                script {
+                  waitUntil {
+                    return action_test_frontend_ct_build
+                  }
+                }
+                dir('services/web') {
+                  sh "make test_frontend_ct_editor_other"
+                }
+            }
+        }
+        stage('Test Unit ESM') {
+            steps {
+                script {
+                  waitUntil {
+                    return action_build_dev
+                  }
+                }
+                dir('services/web') {
+                  sh "make test_unit_esm"
+                }
+            }
+        }
+        stage('Test Unit Mocha') {
+            steps {
+                script {
+                  waitUntil {
+                    return action_build_dev
+                  }
+                }
+                dir('services/web') {
+                  sh "make test_unit_mocha"
+                }
+            }
+        }
+        stage('Build Webpack'){
+          steps {
+            script {
+              waitUntil { 
+                return action_build_dev && action_test_acceptance_app_server_pro
+              }
+            }
+            dir('services/web') {
+              sh 'make build_webpack'
+            }
+            script {
+              action_build_webpack = true
+            }
+          }
+        }
+        stage('Build Pug') {
+          steps {
+            script {
+              waitUntil { 
+                return action_build_dev && action_test_acceptance_app_server_pro
+              }
+            }
+            dir('services/web') {
+              sh 'make build_pug'
+            }
+            script {
+              action_build_pug = true
+            }
+          }
+        }
+        stage('CDN Upload Image') {
+          steps {
+            script {
+              waitUntil { 
+                return action_build_webpack
+              } 
+            }
+            dir('services/web') {
+              sh 'make tar'
+              sh 'bin/cdn_upload'
+            }
+          }
+        }
+        stage('Build Production'){
+          steps {
+            script {
+              waitUntil {
+                return action_build_webpack & action_build_pug
+              }
+            }
+            dir('services/web') {
+              sh 'make build'
+            }
+            script {
+              action_build_production = true
+            }
+          }
+        }
+        stage('Fetch Sentry Secret') {
+          steps {
+            script {
+              waitUntil {
+                return action_build_webpack & action_build_production
+              }
+            }
+            dir('services/web') {   
+              sh 'gcloud secrets versions access latest --secret=web-sentryclirc > .sentryclirc'
+            }
+            script {
+              action_fetch_sentry_secret = true
+            }
+          }
+        }      
+        stage('Sentry Upload') {
+          agent {
+              docker {
+                  image 'getsentry/sentry-cli:2.16.1'
+                  args '--entrypoint='
+                  reuseNode true
+              }
+          }
+          steps {
+            script {
+              waitUntil {
+                return action_fetch_sentry_secret
+              }
+            }
+            dir('services/web') {   
+              sh 'bin/sentry_upload'
+            }
+          }
+        }
+      }
+    }
+    stage('Push Production') {
+      steps {
+        dir('services/web') {
+          sh 'make publish'
+        }
+      }
+    }
+  }
+}  
+
+
+
+
+  
+
+// vim: set ft=groovy :
+
+
+
+
+

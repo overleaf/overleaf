@@ -1,0 +1,7 @@
+libraries/**
+patches/**
+services/web/**
+.eslint*
+.prettier*
+package.json
+package-lock.json
