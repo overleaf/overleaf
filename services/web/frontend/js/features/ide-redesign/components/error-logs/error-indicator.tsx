@@ -1,5 +1,5 @@
 import { useDetachCompileContext as useCompileContext } from '@/shared/context/detach-compile-context'
-import { RailIndicator } from '../rail-indicator'
+import { RailIndicator } from '../rail/rail-indicator'
 
 export default function ErrorIndicator() {
   const { logEntries } = useCompileContext()

@@ -9,8 +9,8 @@ import { useUserContext } from '@/shared/context/user-context'
 import { lazy, Suspense, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import classNames from 'classnames'
-import { RailIndicator } from '../rail-indicator'
-import RailPanelHeader from '../rail-panel-header'
+import { RailIndicator } from '../rail/rail-indicator'
+import RailPanelHeader from '../rail/rail-panel-header'
 
 const MessageList = lazy(() => import('../../../chat/components/message-list'))
 

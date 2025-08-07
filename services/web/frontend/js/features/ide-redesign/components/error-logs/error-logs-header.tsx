@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import RailPanelHeader from '../rail-panel-header'
+import RailPanelHeader from '../rail/rail-panel-header'
 import OLIconButton from '@/features/ui/components/ol/ol-icon-button'
 import { useDetachCompileContext as useCompileContext } from '@/shared/context/detach-compile-context'
 import {
