@@ -156,6 +156,12 @@
   --link-visited-color: var(--link-visited-color-dark);
 }
 
+@mixin themed-links {
+  --link-color: var(--link-ui-themed);
+  --link-hover-color: var(--link-ui-hover-themed);
+  --link-visited-color: var(--link-ui-visited-themed);
+}
+
 @mixin triangle($direction, $width, $height, $color) {
   position: absolute;
   border-color: transparent;

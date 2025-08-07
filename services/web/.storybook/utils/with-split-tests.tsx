@@ -5,6 +5,13 @@ import { SplitTestContext } from '../../frontend/js/shared/context/split-test-co
 export const splitTestsArgTypes = {
   // to be able to use this utility, you need to add the argTypes for each split test in this object
   // Check the original implementation for an example: https://github.com/overleaf/internal/pull/17809
+  'editor-redesign': {
+    description: 'Enable the new editor redesign',
+    control: {
+      type: 'select' as const,
+    },
+    options: ['enabled'],
+  },
 }
 
 export const withSplitTests = (

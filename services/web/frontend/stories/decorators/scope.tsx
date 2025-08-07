@@ -21,7 +21,7 @@ import { ReactContextRoot } from '@/features/ide-react/context/react-context-roo
 
 const scopeWatchers: [string, (value: any) => void][] = []
 
-const user: User = {
+export const user: User = {
   id: 'story-user' as UserId,
   email: 'story-user@example.com',
   allowedFreeTrial: true,
