@@ -153,10 +153,23 @@ function _buildLatexCommand(mainFile, opts = {}) {
     command.push(...Settings.clsi.latexmkCommandPrefix)
   }
 
+  // Detect if main file is in a subdirectory to handle naming collisions
+  const mainFileDir = Path.dirname(mainFile)
+  const isInSubdir = mainFileDir !== '.'
+
   // Basic command and flags
+  command.push('latexmk')
+
+  // Fix for naming collision bug: only use -cd flag for root-level files.
+  // When compiling subdirectory files (e.g., folder/main.tex), the -cd flag causes
+  // latexmk to incorrectly resolve paths when identical filenames exist at multiple
+  // levels. For subdirectory files, we stay in /compile and rely on TEXINPUTS
+  // (configured in CompileManager) to resolve relative paths correctly.
+  if (!isInSubdir) {
+    command.push('-cd')
+  }
+  
   command.push(
-    'latexmk',
-    '-cd',
     '-jobname=output',
     '-auxdir=$COMPILE_DIR',
     '-outdir=$COMPILE_DIR',
