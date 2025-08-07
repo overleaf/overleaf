@@ -62,6 +62,16 @@
   }
 }
 
+.unboxed-setting-row {
+  display: flex;
+  justify-content: space-between;
+  padding-right: var(--spacing-05);
+}
+
+.unboxed-setting-description {
+  flex: 0 1 60%;
+}
+
 .settings-widgets-container {
   border: 1px solid var(--border-divider);
 

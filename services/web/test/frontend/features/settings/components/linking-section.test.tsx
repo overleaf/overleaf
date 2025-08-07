@@ -55,15 +55,6 @@ describe('<LinkingSection />', function () {
     fetchMock.removeRoutes().clearHistory()
   })
 
-  it('shows header', async function () {
-    renderSectionWithProviders()
-
-    screen.getByText('Integrations')
-    screen.getByText(
-      'You can link your Overleaf account with other services to enable the features described below.'
-    )
-  })
-
   it('lists SSO providers', async function () {
     renderSectionWithProviders()
     screen.getByText('Linked accounts')

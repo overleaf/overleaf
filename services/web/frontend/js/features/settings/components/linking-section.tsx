@@ -86,22 +86,18 @@ function LinkingSection() {
 
   return (
     <>
-      <h3 id="integrations">{t('integrations')}</h3>
-      <p className="small">{t('linked_accounts_explained')}</p>
       {haslangFeedbackLinkingWidgets ? (
         <>
           <h3 id="language-feedback">{t('ai_features')}</h3>
-          <div className="settings-widgets-container">
-            {langFeedbackLinkingWidgets.map(
-              ({ import: { default: widget }, path }, widgetIndex) => (
-                <ModuleLinkingWidget
-                  key={path}
-                  ModuleComponent={widget}
-                  isLast={widgetIndex === langFeedbackLinkingWidgets.length - 1}
-                />
-              )
-            )}
-          </div>
+          {langFeedbackLinkingWidgets.map(
+            ({ import: { default: widget }, path }, widgetIndex) => (
+              <ModuleLinkingWidget
+                key={path}
+                ModuleComponent={widget}
+                isLast={widgetIndex === langFeedbackLinkingWidgets.length - 1}
+              />
+            )
+          )}
         </>
       ) : null}
       {hasIntegrationLinkingSection ? (
