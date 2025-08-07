@@ -22,6 +22,6 @@ export const SectionEnrolled = args => {
 }
 
 export default {
-  title: 'Account Settings / Beta Program',
+  title: 'Account Settings / Beta program',
   component: BetaProgramSection,
 }

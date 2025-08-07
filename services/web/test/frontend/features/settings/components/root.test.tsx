@@ -42,7 +42,7 @@ describe('<SettingsPageRoot />', function () {
     screen.getByText('Update account info')
     screen.getByText('Change password')
     screen.getByText('Integrations')
-    screen.getByText('Overleaf Beta Program')
+    screen.getByText('Overleaf beta program')
     screen.getByText('Sessions')
     screen.getByText('Newsletter')
     screen.getByRole('button', {
@@ -64,7 +64,7 @@ describe('<SettingsPageRoot />', function () {
     screen.getByText('Update account info')
     screen.getByText('Change password')
     screen.getByText('Integrations')
-    expect(screen.queryByText('Overleaf Beta Program')).to.not.exist
+    expect(screen.queryByText('Overleaf beta program')).to.not.exist
     screen.getByText('Sessions')
     expect(screen.queryByText('Newsletter')).to.not.exist
     expect(

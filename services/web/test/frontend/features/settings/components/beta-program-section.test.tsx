@@ -20,7 +20,7 @@ describe('<BetaProgramSection />', function () {
     renderSectionWithUserProvider()
 
     const link = screen.getByRole('link', {
-      name: 'Manage Beta Program Membership',
+      name: 'Manage beta program membership',
     })
 
     expect(link.getAttribute('href')).to.equal('/beta/participate')
@@ -28,7 +28,7 @@ describe('<BetaProgramSection />', function () {
 
   it('shows enrolled status', async function () {
     renderSectionWithUserProvider()
-    screen.getByText('You are enrolled in the Beta Program')
+    screen.getByText('You are enrolled in the beta program')
   })
 
   it('shows not enrolled status', async function () {
@@ -36,7 +36,7 @@ describe('<BetaProgramSection />', function () {
       betaProgram: false,
     })
     renderSectionWithUserProvider()
-    screen.getByText('You are not enrolled in the Beta Program')
+    screen.getByText('You are not enrolled in the beta program')
     screen.getByText(/By joining this program you can have/)
   })
 })
