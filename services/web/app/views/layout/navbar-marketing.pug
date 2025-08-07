@@ -45,7 +45,7 @@ nav.navbar.navbar-default.navbar-main(
 		- var canDisplayAdminRedirect = canRedirectToAdminDomain()
 		- var canDisplaySplitTestMenu = hasFeature('saas') && (canDisplayAdminMenu || (getSessionUser() && getSessionUser().staffAccess && (getSessionUser().staffAccess.splitTestMetrics || getSessionUser().staffAccess.splitTestManagement)))
 		- var canDisplaySurveyMenu = hasFeature('saas') && canDisplayAdminMenu
-		- var canDisplayScriptLogMenu = hasFeature('saas') && canDisplayAdminMenu
+		- var canDisplayScriptLogMenu = hasFeature('saas') && hasAdminCapability('view-script-log') && canDisplayAdminMenu
 
 		if typeof suppressNavbarRight == 'undefined'
 			#navbar-main-collapse.navbar-collapse.collapse
@@ -92,8 +92,8 @@ nav.navbar.navbar-default.navbar-main(
 							if ((item.only_when_logged_in && getSessionUser())
 											|| (item.only_when_logged_out && (!getSessionUser()))
 											|| (!item.only_when_logged_out && !item.only_when_logged_in && !item.only_content_pages)
-											|| (item.only_content_pages && (typeof(suppressNavContentLinks) == "undefined" || !suppressNavContentLinks))
-							){
+											|| (item.only_content_pages && (typeof (suppressNavContentLinks) == "undefined" || !suppressNavContentLinks))
+							) {
 								var showNavItem = true
 							} else {
 								var showNavItem = false

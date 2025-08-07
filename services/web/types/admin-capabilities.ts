@@ -10,6 +10,7 @@ export type AdminCapability =
   | 'view-audit-log'
   | 'view-project'
   | 'view-session'
+  | 'view-script-log'
   | 'view-user-additional-info'
 
 export type AdminRole =

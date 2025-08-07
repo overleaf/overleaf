@@ -35,7 +35,7 @@ nav.navbar.navbar-default.navbar-main.navbar-expand-lg(
 		- var canDisplayAdminRedirect = canRedirectToAdminDomain()
 		- var canDisplaySplitTestMenu = hasFeature('saas') && (canDisplayAdminMenu || (getSessionUser() && getSessionUser().staffAccess && (getSessionUser().staffAccess.splitTestMetrics || getSessionUser().staffAccess.splitTestManagement)))
 		- var canDisplaySurveyMenu = hasFeature('saas') && canDisplayAdminMenu
-		- var canDisplayScriptLogMenu = hasFeature('saas') && canDisplayAdminMenu
+		- var canDisplayScriptLogMenu = hasFeature('saas') && hasAdminCapability('view-script-log') && canDisplayAdminMenu
 
 		if typeof suppressNavbarRight === 'undefined'
 			button#navbar-toggle-btn.navbar-toggler.collapsed(
