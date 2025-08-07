@@ -21,7 +21,7 @@ async function log(req, data, samlAssertion) {
     const { saml } = req.session
     const userId = SessionManager.getLoggedInUserId(req.session)
 
-    providerId = (req.session.saml?.universityId || '').toString()
+    providerId = (req.session.saml?.providerId || '').toString()
     sessionId = (req.sessionID || '').toString().substr(0, 8)
 
     const samlLog = new SamlLog()

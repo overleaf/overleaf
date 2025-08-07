@@ -32,7 +32,7 @@ describe('SamlLogHandler', function () {
     beforeEach(async function () {
       await SamlLogHandler.promises.log(
         {
-          session: { saml: { universityId: providerId } },
+          session: { saml: { providerId } },
           sessionID: sessionId,
           path: '/saml/ukamf',
         },
@@ -46,7 +46,7 @@ describe('SamlLogHandler', function () {
       samlLog.jsonData.should.equal(
         JSON.stringify({
           foo: true,
-          samlSession: { universityId: 'provider-id' },
+          samlSession: { providerId: 'provider-id' },
         })
       )
       expect(samlLog.data).to.be.undefined
@@ -61,7 +61,7 @@ describe('SamlLogHandler', function () {
 
       await SamlLogHandler.promises.log(
         {
-          session: { saml: { universityId: providerId } },
+          session: { saml: { providerId } },
           sessionID: sessionId,
           path: '/saml/ukamf',
         },
