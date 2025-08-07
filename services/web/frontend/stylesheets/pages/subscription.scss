@@ -504,3 +504,9 @@
     font-weight: 600;
   }
 }
+
+.plan-terms {
+  @include body-xs;
+
+  margin-top: var(--spacing-04);
+}

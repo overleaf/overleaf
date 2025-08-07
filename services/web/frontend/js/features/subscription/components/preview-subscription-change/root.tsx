@@ -194,6 +194,11 @@ function PreviewSubscriptionChange() {
                 tOptions={{ interpolation: { escapeValue: true } }}
               />
             </div>
+            {aiAddOnChange && (
+              <div className="plan-terms mt-3">
+                *{t('fair_usage_policy_applies')}
+              </div>
+            )}
 
             <div className="mt-5">
               <OLButton
