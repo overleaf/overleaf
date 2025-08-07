@@ -7,7 +7,7 @@ function FileTreeFolderIcons({
   onExpandCollapseClick,
 }: {
   expanded: boolean
-  onExpandCollapseClick: () => void
+  onExpandCollapseClick?: () => void
 }) {
   const { t } = useTranslation()
   const newEditor = useIsNewEditorEnabled()
@@ -15,16 +15,16 @@ function FileTreeFolderIcons({
   if (newEditor) {
     return (
       <>
-        <button
+        <div
+          // TODO ide-redesign-cleanup: rename the class now its no longer a button
           className="folder-expand-collapse-button"
-          onClick={onExpandCollapseClick}
           aria-label={expanded ? t('collapse') : t('expand')}
         >
           <MaterialIcon
             type={expanded ? 'expand_more' : 'chevron_right'}
             className="file-tree-expand-icon"
           />
-        </button>
+        </div>
       </>
     )
   }

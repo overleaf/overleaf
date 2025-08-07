@@ -171,7 +171,6 @@
   .entity-name {
     color: var(--file-tree-item-color);
     border-radius: var(--border-radius-base);
-    padding: var(--spacing-02);
 
     // TODO ide-redesign-cleanup: This is here to override the fake-full-width-bg
     // mixin. We can just remove that mixin when we clean this up.
@@ -182,6 +181,12 @@
 
   .item-name-button {
     margin-left: var(--spacing-02);
+    overflow: hidden;
+
+    span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
   }
 
   .dnd-draggable-preview-item {
@@ -550,7 +555,6 @@
           .entity-menu-toggle {
             display: inline-block;
             background-color: transparent;
-            box-shadow: none;
             border: 0;
             padding-right: var(--spacing-02);
             padding-left: var(--spacing-02);
@@ -732,6 +736,18 @@
 
 .file-tree-modal-alert {
   margin-top: var(--spacing-06);
+}
+
+.file-tree-entity-button,
+.file-tree-entity-details {
+  display: flex;
+  width: 100%;
+  color: inherit;
+
+  // TODO ide-redesign-cleanup: Remove !important when we clean up the old file tree
+  padding: var(--spacing-02) !important;
+  text-overflow: ellipsis;
+  overflow: hidden;
 }
 
 .btn.modal-new-file-mode {

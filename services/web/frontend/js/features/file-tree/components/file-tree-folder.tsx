@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useCallback, useEffect } from 'react'
 import classNames from 'classnames'
 
 import {
@@ -14,6 +14,7 @@ import { Folder } from '../../../../../types/folder'
 import { Doc } from '../../../../../types/doc'
 import { FileRef } from '../../../../../types/file-ref'
 import FileTreeFolderIcons from './file-tree-folder-icons'
+import { useIsNewEditorEnabled } from '@/features/ide-redesign/utils/new-editor-utils'
 
 function FileTreeFolder({
   name,
@@ -28,6 +29,7 @@ function FileTreeFolder({
   docs: Doc[]
   files: FileRef[]
 }) {
+  const newEditor = useIsNewEditorEnabled()
   const { isSelected, props: selectableEntityProps } = useSelectableEntity(
     id,
     'folder'
@@ -46,9 +48,15 @@ function FileTreeFolder({
     }
   }, [id, selectedEntityParentIds, setExpanded])
 
-  function handleExpandCollapseClick() {
-    setExpanded(!expanded)
-  }
+  const handleExpandCollapseClick = useCallback(() => {
+    setExpanded(expanded => !expanded)
+  }, [setExpanded])
+
+  const onClick = useCallback(() => {
+    if (newEditor) {
+      handleExpandCollapseClick()
+    }
+  }, [newEditor, handleExpandCollapseClick])
 
   const { isOver: isOverRoot, dropRef: dropRefRoot } = useDroppable(id)
   const { isOver: isOverList, dropRef: dropRefList } = useDroppable(id)
@@ -62,7 +70,6 @@ function FileTreeFolder({
         {...selectableEntityProps}
         aria-expanded={expanded}
         aria-label={name}
-        tabIndex={0}
         ref={dropRefRoot}
         className={classNames(selectableEntityProps.className, {
           'dnd-droppable-hover': isOverRoot || isOverList,
@@ -74,6 +81,7 @@ function FileTreeFolder({
           name={name}
           type="folder"
           isSelected={isSelected}
+          onClick={onClick}
           icons={
             <FileTreeFolderIcons
               expanded={expanded}

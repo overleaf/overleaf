@@ -1,6 +1,7 @@
 import { useState, useEffect, RefObject } from 'react'
 import { useRefWithAutoFocus } from '../../../../shared/hooks/use-ref-with-auto-focus'
 import { useFileTreeActionable } from '../../contexts/file-tree-actionable'
+import { useIsNewEditorEnabled } from '@/features/ide-redesign/utils/new-editor-utils'
 
 function FileTreeItemName({
   name,
@@ -48,6 +49,7 @@ function DisplayName({
   startRenaming: () => void
 }) {
   const [clicksInSelectedCount, setClicksInSelectedCount] = useState(0)
+  const newEditor = useIsNewEditorEnabled()
 
   function onClick() {
     setClicksInSelectedCount(clicksInSelectedCount + 1)
@@ -61,6 +63,15 @@ function DisplayName({
     // causes UI problems.
     if (clicksInSelectedCount < 2) return
     startRenaming()
+  }
+
+  if (newEditor) {
+    return (
+      // TODO ide-redesign-cleanup: rename the class now its no longer a button
+      <div className="item-name-button">
+        <span>{name}</span>
+      </div>
+    )
   }
 
   return (

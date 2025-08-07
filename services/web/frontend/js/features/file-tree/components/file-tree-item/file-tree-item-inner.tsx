@@ -11,6 +11,7 @@ import FileTreeItemMenu from './file-tree-item-menu'
 import { useFileTreeSelectable } from '../../contexts/file-tree-selectable'
 import { useFileTreeActionable } from '../../contexts/file-tree-actionable'
 import { useDragDropManager } from 'react-dnd'
+import { useIsNewEditorEnabled } from '@/features/ide-redesign/utils/new-editor-utils'
 
 function FileTreeItemInner({
   id,
@@ -18,12 +19,14 @@ function FileTreeItemInner({
   type,
   isSelected,
   icons,
+  onClick,
 }: {
   id: string
   name: string
   type: string
   isSelected: boolean
   icons?: ReactNode
+  onClick?: () => void
 }) {
   const { fileTreeReadOnly } = useFileTreeData()
   const { setContextMenuCoords } = useFileTreeMainContext()
@@ -84,15 +87,65 @@ function FileTreeItemInner({
         role="presentation"
         ref={itemRef}
       >
+        <FileTreeItemIconsAndName
+          name={name}
+          isSelected={isSelected}
+          icons={icons}
+          onClick={onClick}
+          setIsDraggable={setIsDraggable}
+        />
+        {hasMenu ? <FileTreeItemMenu id={id} name={name} /> : null}
+      </div>
+    </div>
+  )
+}
+
+const FileTreeItemIconsAndName = ({
+  name,
+  isSelected,
+  icons,
+  onClick,
+  setIsDraggable,
+}: {
+  name: string
+  isSelected: boolean
+  icons?: ReactNode
+  onClick?: () => void
+  setIsDraggable: (isDraggable: boolean) => void
+}) => {
+  const newEditor = useIsNewEditorEnabled()
+
+  if (newEditor) {
+    return onClick ? (
+      <button className="file-tree-entity-button" onClick={onClick}>
         {icons}
         <FileTreeItemName
           name={name}
           isSelected={isSelected}
           setIsDraggable={setIsDraggable}
         />
-        {hasMenu ? <FileTreeItemMenu id={id} name={name} /> : null}
+      </button>
+    ) : (
+      <div className="file-tree-entity-details">
+        {icons}
+        <FileTreeItemName
+          name={name}
+          isSelected={isSelected}
+          setIsDraggable={setIsDraggable}
+        />
       </div>
-    </div>
+    )
+  }
+
+  return (
+    <>
+      {icons}
+      <FileTreeItemName
+        name={name}
+        isSelected={isSelected}
+        setIsDraggable={setIsDraggable}
+      />
+    </>
   )
 }
 
