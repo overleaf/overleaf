@@ -60,6 +60,13 @@ describe('DocumentUpdaterHandler', function () {
             return `http://filestore/project/${projectId}/file/${fileId}`
           }),
         },
+        '../../infrastructure/Modules': {
+          promises: {
+            hooks: {
+              fire: sinon.stub().resolves(),
+            },
+          },
+        },
       },
     })
     this.ProjectGetter.getProjectWithoutLock

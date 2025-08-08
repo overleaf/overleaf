@@ -5,11 +5,12 @@ const _ = require('lodash')
 const async = require('async')
 const logger = require('@overleaf/logger')
 const metrics = require('@overleaf/metrics')
-const { promisify } = require('util')
+const { promisify, callbackify } = require('util')
 const { promisifyMultiResult } = require('@overleaf/promise-utils')
 const ProjectGetter = require('../Project/ProjectGetter')
 const FileStoreHandler = require('../FileStore/FileStoreHandler')
 const Features = require('../../infrastructure/Features')
+const Modules = require('../../infrastructure/Modules')
 
 function getProjectLastUpdatedAt(projectId, callback) {
   _makeRequest(
@@ -233,17 +234,18 @@ function clearProjectState(projectId, callback) {
  * @param {string[]} changeIds
  * @param {Callback} callback
  */
-function acceptChanges(projectId, docId, changeIds, callback) {
-  _makeRequest(
+async function acceptChanges(projectId, docId, changeIds) {
+  await _makeRequestAsync(
     {
       path: `/project/${projectId}/doc/${docId}/change/accept`,
       json: { change_ids: changeIds },
       method: 'POST',
     },
     projectId,
-    'accept-changes',
-    callback
+    'accept-changes'
   )
+
+  await Modules.promises.hooks.fire('acceptedChanges', projectId, docId)
 }
 
 /**
@@ -538,6 +540,8 @@ function _makeRequest(options, projectId, metricsKey, callback) {
   )
 }
 
+const _makeRequestAsync = promisify(_makeRequest)
+
 function _getUpdates(
   entityType,
   oldEntities,
@@ -648,7 +652,7 @@ module.exports = {
   appendToDocument,
   getProjectDocsIfMatch,
   clearProjectState,
-  acceptChanges,
+  acceptChanges: callbackify(acceptChanges),
   rejectChanges,
   resolveThread,
   reopenThread,
@@ -674,7 +678,7 @@ module.exports = {
     getProjectDocsIfMatch: promisify(getProjectDocsIfMatch),
     getProjectLastUpdatedAt: promisify(getProjectLastUpdatedAt),
     clearProjectState: promisify(clearProjectState),
-    acceptChanges: promisify(acceptChanges),
+    acceptChanges,
     rejectChanges: promisify(rejectChanges),
     resolveThread: promisify(resolveThread),
     reopenThread: promisify(reopenThread),
