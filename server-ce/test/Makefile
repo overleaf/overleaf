@@ -32,8 +32,22 @@ test-e2e-open:
 	docker compose up --detach --wait mongo || (docker compose logs mongo && exit 42)
 	docker compose up --no-log-prefix --exit-code-from=e2e-open e2e-open host-admin || (docker compose logs mongo && exit 42)
 
-clean:
-	docker compose down --volumes --timeout 0
+SHARD_PROJECT_NAMES = \
+	test-ce-default \
+	test-ce-custom-1 \
+	test-pro-default-1 \
+	test-pro-default-2 \
+	test-pro-custom-1 \
+	test-pro-custom-2 \
+	test-pro-custom-3 \
+	test-pro-custom-4
+CLEAN_SHARDS=$(addprefix clean/,$(SHARD_PROJECT_NAMES))
+clean: $(CLEAN_SHARDS)
+	-docker compose run --no-deps --rm --entrypoint rm host-admin -rf docker-compose.override.yml docker-compose.*_*.yml data/
+	-docker compose down --volumes --timeout 0
+
+$(CLEAN_SHARDS): clean/%:
+	-COMPOSE_PROJECT_NAME=$* docker compose down --timeout=0 --volumes
 
 prefetch: prefetch_default
 prefetch_default: prefetch_default_compose

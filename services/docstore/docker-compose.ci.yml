@@ -33,7 +33,7 @@ services:
       gcs:
         condition: service_healthy
     user: node
-    entrypoint: /overleaf/bin/shared/wait_for_it mongo:27017 --timeout=0 --
+    entrypoint: /overleaf/bin/shared/wait_for_it mongo:27017 --timeout=60 --
     command: npm run test:acceptance
 
 

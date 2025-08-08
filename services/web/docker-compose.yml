@@ -19,7 +19,7 @@ services:
       LOG_LEVEL: ${LOG_LEVEL:-}
       NODE_ENV: test
       NODE_OPTIONS: "--unhandled-rejections=strict"
-    entrypoint: /overleaf/bin/shared/wait_for_it mongo:27017 --timeout=0 --
+    entrypoint: /overleaf/bin/shared/wait_for_it mongo:27017 --timeout=60 --
     command: npm run --silent test:unit:app
     user: node
     depends_on:
@@ -51,7 +51,7 @@ services:
       - mongo
       - saml
       - ldap
-    entrypoint: /overleaf/bin/shared/wait_for_it mongo:27017 --timeout=0 --
+    entrypoint: /overleaf/bin/shared/wait_for_it mongo:27017 --timeout=60 --
     command: npm run --silent test:acceptance:app
 
   test_frontend:

@@ -218,6 +218,13 @@ pipeline {
       }
     }
   }
+  post {
+    cleanup {
+      dir('server-ce/test') {
+        sh 'make clean'
+      }
+    }
+  }
 }
 
 // vim: set ft=groovy :

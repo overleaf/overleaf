@@ -68,7 +68,7 @@ pipeline {
         stage('Build Deps') {
           steps {
             script {
-              waitUntil { 
+              waitUntil {
                 return action_pull_cache
               }
             }
@@ -83,7 +83,7 @@ pipeline {
         stage('Push Deps') {
           steps {
             script {
-              waitUntil { 
+              waitUntil {
                 return action_build_deps
               }
             }
@@ -95,7 +95,7 @@ pipeline {
         stage('Build Dev') {
           steps {
             script {
-              waitUntil { 
+              waitUntil {
                 return action_build_deps && action_copy_external_pages
               }
             }
@@ -110,7 +110,7 @@ pipeline {
         stage ('Format') {
           steps {
             script {
-              waitUntil { 
+              waitUntil {
                 return action_build_dev
               }
             }
@@ -122,7 +122,7 @@ pipeline {
         stage('Lint') {
           steps {
             script {
-              waitUntil { 
+              waitUntil {
                 return action_build_dev
               }
             }
@@ -141,7 +141,7 @@ pipeline {
         stage('Acceptance SaaS') {
           steps {
             script {
-              waitUntil { 
+              waitUntil {
                 return action_build_dev
               }
             }
@@ -156,7 +156,7 @@ pipeline {
         stage('Acceptance Server CE') {
           steps {
             script {
-              waitUntil { 
+              waitUntil {
                 return action_build_dev
               }
             }
@@ -168,10 +168,10 @@ pipeline {
         stage('Acceptance Server Pro') {
           steps {
             script {
-              waitUntil { 
+              waitUntil {
                 return action_build_dev
               }
-            }               
+            }
             dir('services/web') {
               sh "make test_acceptance_app_server_pro"
             }
@@ -183,7 +183,7 @@ pipeline {
         stage('test_acceptance_modules_merged_saas_1') {
           steps {
             script {
-              waitUntil { 
+              waitUntil {
                 return action_build_dev
               }
             }
@@ -195,7 +195,7 @@ pipeline {
         stage('test_acceptance_modules_merged_saas_2') {
           steps {
             script {
-              waitUntil { 
+              waitUntil {
                 return action_build_dev
               }
             }
@@ -207,7 +207,7 @@ pipeline {
         stage('test_acceptance_modules_merged_saas_3') {
           steps {
             script {
-              waitUntil { 
+              waitUntil {
                 return action_build_dev
               }
             }
@@ -219,7 +219,7 @@ pipeline {
         stage('test_acceptance_modules_merged_saas_4') {
           steps {
             script {
-              waitUntil { 
+              waitUntil {
                 return action_build_dev
               }
             }
@@ -231,7 +231,7 @@ pipeline {
         stage('test_acceptance_modules_merged_server_ce') {
           steps {
             script {
-              waitUntil { 
+              waitUntil {
                 return action_build_dev
               }
             }
@@ -243,7 +243,7 @@ pipeline {
         stage('test_acceptance_modules_merged_server_pro') {
           steps {
             script {
-              waitUntil { 
+              waitUntil {
                 return action_build_dev
               }
             }
@@ -255,7 +255,7 @@ pipeline {
         stage('test_frontend') {
           steps {
             script {
-              waitUntil { 
+              waitUntil {
                 return action_build_dev
               }
             }
@@ -267,7 +267,7 @@ pipeline {
         stage('test_frontend_ct_build') {
           steps {
             script {
-              waitUntil { 
+              waitUntil {
                 return action_build_dev
               }
             }
@@ -375,7 +375,7 @@ pipeline {
         stage('Build Webpack'){
           steps {
             script {
-              waitUntil { 
+              waitUntil {
                 return action_build_dev && action_test_acceptance_app_server_pro
               }
             }
@@ -390,7 +390,7 @@ pipeline {
         stage('Build Pug') {
           steps {
             script {
-              waitUntil { 
+              waitUntil {
                 return action_build_dev && action_test_acceptance_app_server_pro
               }
             }
@@ -405,9 +405,9 @@ pipeline {
         stage('CDN Upload Image') {
           steps {
             script {
-              waitUntil { 
+              waitUntil {
                 return action_build_webpack
-              } 
+              }
             }
             dir('services/web') {
               sh 'make tar'
@@ -437,14 +437,14 @@ pipeline {
                 return action_build_webpack & action_build_production
               }
             }
-            dir('services/web') {   
+            dir('services/web') {
               sh 'gcloud secrets versions access latest --secret=web-sentryclirc > .sentryclirc'
             }
             script {
               action_fetch_sentry_secret = true
             }
           }
-        }      
+        }
         stage('Sentry Upload') {
           agent {
               docker {
@@ -459,7 +459,7 @@ pipeline {
                 return action_fetch_sentry_secret
               }
             }
-            dir('services/web') {   
+            dir('services/web') {
               sh 'bin/sentry_upload'
             }
           }
@@ -474,16 +474,13 @@ pipeline {
       }
     }
   }
-}  
-
-
-
-
-  
+  post {
+    cleanup {
+      dir('services/web') {
+        sh 'make clean'
+      }
+    }
+  }
+}
 
 // vim: set ft=groovy :
-
-
-
-
-
