@@ -10,6 +10,8 @@ const {
   InvalidInstitutionalEmailError,
 } = require('../Errors/Errors')
 const { fetchJson, fetchNothing } = require('@overleaf/fetch-utils')
+const { promiseMapWithLimit } = require('@overleaf/promise-utils')
+const Modules = require('../../infrastructure/Modules')
 
 function _makeRequestOptions(options) {
   const requestOptions = {
@@ -151,7 +153,37 @@ function getUserAffiliations(userId, callback) {
       path: `/api/v2/users/${userId.toString()}/affiliations`,
       defaultErrorMessage: "Couldn't get user affiliations",
     },
-    (error, body) => callback(error, body || [])
+    async (error, body) => {
+      if (error) {
+        return callback(error, [])
+      }
+
+      const affiliations = []
+
+      if (body?.length > 0) {
+        const concurrencyLimit = 10
+        await promiseMapWithLimit(concurrencyLimit, body, async affiliation => {
+          if (!affiliation.institution.commonsAccount) {
+            const group = (
+              await Modules.promises.hooks.fire(
+                'getGroupWithDomainCaptureByV1Id',
+                affiliation.institution.id
+              )
+            )?.[0]
+
+            if (group) {
+              affiliation.group = {
+                domainCaptureEnabled: Boolean(group.domainCaptureEnabled),
+              }
+            }
+          }
+
+          affiliations.push(affiliation)
+        })
+      }
+
+      callback(null, affiliations)
+    }
   )
 }
 
