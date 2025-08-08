@@ -1,0 +1,22 @@
+.labeled-divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: var(--spacing-06) 0;
+  color: var(--content-secondary);
+
+  @include body-sm;
+}
+
+.labeled-divider::before,
+.labeled-divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: var(--bs-border-width) solid var(--border-divider);
+}
+
+.labeled-divider span {
+  margin: 0 var(--spacing-04);
+  overflow: hidden;
+  word-break: break-word;
+}

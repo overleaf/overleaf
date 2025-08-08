@@ -193,6 +193,14 @@
       padding: var(--spacing-09);
     }
   }
+
+  .card-icon-left {
+    width: 52px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 }
 
 .card-gray {

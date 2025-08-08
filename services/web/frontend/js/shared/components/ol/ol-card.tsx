@@ -1,13 +1,22 @@
 import { Card } from 'react-bootstrap'
 import { FC } from 'react'
 
-const OLCard: FC<React.PropsWithChildren<{ className?: string }>> = ({
-  children,
-  className,
-}) => {
+type OLCardProps = {
+  children:
+    | React.ReactNode
+    | ((Component: typeof Card.Body) => React.ReactElement)
+  className?: string
+  'data-testid'?: string
+}
+
+const OLCard: FC<OLCardProps> = ({ children, className, ...rest }) => {
   return (
-    <Card className={className}>
-      <Card.Body>{children}</Card.Body>
+    <Card className={className} {...rest}>
+      {typeof children === 'function' ? (
+        children(Card.Body)
+      ) : (
+        <Card.Body>{children}</Card.Body>
+      )}
     </Card>
   )
 }
