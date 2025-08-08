@@ -1,4 +1,4 @@
-import OLButton from '@/features/ui/components/ol/ol-button'
+import OLButton from '@/shared/components/ol/ol-button'
 import MaterialIcon from '@/shared/components/material-icon'
 import Notification from '@/shared/components/notification'
 import { useEditorContext } from '@/shared/context/editor-context'

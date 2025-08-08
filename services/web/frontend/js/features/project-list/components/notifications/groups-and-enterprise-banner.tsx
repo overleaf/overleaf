@@ -9,7 +9,7 @@ import {
   GroupsAndEnterpriseBannerVariant,
   GroupsAndEnterpriseBannerVariants,
 } from '../../../../../../types/project/dashboard/notification'
-import OLButton from '@/features/ui/components/ol/ol-button'
+import OLButton from '@/shared/components/ol/ol-button'
 
 type urlForVariantsType = {
   [key in GroupsAndEnterpriseBannerVariant]: string // eslint-disable-line no-unused-vars

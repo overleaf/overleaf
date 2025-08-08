@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import OLButton from '@/features/ui/components/ol/ol-button'
+import OLButton from '@/shared/components/ol/ol-button'
 import { useTranslation } from 'react-i18next'
 import DeleteProjectModal from '../../../modals/delete-project-modal'
 import useIsMounted from '../../../../../../shared/hooks/use-is-mounted'

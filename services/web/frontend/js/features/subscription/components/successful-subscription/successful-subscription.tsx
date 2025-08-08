@@ -3,10 +3,10 @@ import { PriceExceptions } from '../shared/price-exceptions'
 import PremiumFeaturesLink from '../dashboard/premium-features-link'
 import getMeta from '../../../../utils/meta'
 import { useSubscriptionDashboardContext } from '../../context/subscription-dashboard-context'
-import OLRow from '@/features/ui/components/ol/ol-row'
-import OLCol from '@/features/ui/components/ol/ol-col'
-import OLPageContentCard from '@/features/ui/components/ol/ol-page-content-card'
-import OLNotification from '@/features/ui/components/ol/ol-notification'
+import OLRow from '@/shared/components/ol/ol-row'
+import OLCol from '@/shared/components/ol/ol-col'
+import OLPageContentCard from '@/shared/components/ol/ol-page-content-card'
+import OLNotification from '@/shared/components/ol/ol-notification'
 import {
   AI_ADD_ON_CODE,
   ADD_ON_NAME,

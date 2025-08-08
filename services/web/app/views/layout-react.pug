@@ -1,5 +1,5 @@
-//- This is used for pages that are migrated to Bootstrap 5 but don't use Bootstrap's own JS, instead using
-//- react-bootstrap for all Bootstrap components
+//- Avoids including Bootstrap's own JS to prevent conflicts with react-bootstrap,
+//- since Bootstrap 5's JS and react-bootstrap should not be used together on the same page.
 extends ./layout-base
 
 include ./_mixins/formMessages
@@ -59,15 +59,15 @@ block append meta
 
 block body
 	if typeof suppressNavbar === 'undefined'
-		include layout/navbar-marketing-react-bootstrap-5
+		include layout/navbar-marketing-react
 
 	block content
 
 	if typeof suppressFooter === 'undefined'
 		if showThinFooter
-			include layout/thin-footer-bootstrap-5
+			include layout/thin-footer
 		else
-			include layout/fat-footer-react-bootstrap-5
+			include layout/fat-footer-react
 
 	if typeof suppressPugCookieBanner === 'undefined'
 		include _cookie_banner

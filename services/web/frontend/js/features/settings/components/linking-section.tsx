@@ -5,7 +5,7 @@ import { useSSOContext, SSOSubscription } from '../context/sso-context'
 import { SSOLinkingWidget } from './linking/sso-widget'
 import getMeta from '../../../utils/meta'
 import { useBroadcastUser } from '@/shared/hooks/user-channel/use-broadcast-user'
-import OLNotification from '@/features/ui/components/ol/ol-notification'
+import OLNotification from '@/shared/components/ol/ol-notification'
 
 const availableIntegrationLinkingWidgets = importOverleafModules(
   'integrationLinkingWidgets'

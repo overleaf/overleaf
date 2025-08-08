@@ -1,6 +1,6 @@
 import PDFToolbarButton from './pdf-toolbar-button'
 import { useTranslation } from 'react-i18next'
-import OLButtonGroup from '@/features/ui/components/ol/ol-button-group'
+import OLButtonGroup from '@/shared/components/ol/ol-button-group'
 import { isMac } from '@/shared/utils/os'
 
 type PdfZoomButtonsProps = {

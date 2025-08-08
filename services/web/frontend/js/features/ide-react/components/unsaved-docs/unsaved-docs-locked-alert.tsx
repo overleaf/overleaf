@@ -1,6 +1,6 @@
 import { FC, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import OLNotification from '@/features/ui/components/ol/ol-notification'
+import OLNotification from '@/shared/components/ol/ol-notification'
 import { useEditorManagerContext } from '@/features/ide-react/context/editor-manager-context'
 import { useIdeReactContext } from '@/features/ide-react/context/ide-react-context'
 

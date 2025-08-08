@@ -8,7 +8,7 @@ import WelcomeMessageCreateNewProjectDropdown from './welcome-message-new/welcom
 import learnLatexImage from '../images/learn-latex.svg'
 import browseTemplatesImage from '../images/browse-templates.svg'
 import getMeta from '@/utils/meta'
-import OLPageContentCard from '@/features/ui/components/ol/ol-page-content-card'
+import OLPageContentCard from '@/shared/components/ol/ol-page-content-card'
 
 export default function WelcomeMessage() {
   const { t } = useTranslation()

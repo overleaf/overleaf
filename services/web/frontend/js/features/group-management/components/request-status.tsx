@@ -1,9 +1,9 @@
 import { useTranslation } from 'react-i18next'
 import { Card, CardBody, Row, Col } from 'react-bootstrap'
-import Button from '@/features/ui/components/bootstrap-5/button'
+import Button from '@/shared/components/button/button'
 import MaterialIcon from '@/shared/components/material-icon'
 import getMeta from '@/utils/meta'
-import IconButton from '@/features/ui/components/bootstrap-5/icon-button'
+import IconButton from '@/shared/components/button/icon-button'
 import classnames from 'classnames'
 
 type RequestStatusProps = {

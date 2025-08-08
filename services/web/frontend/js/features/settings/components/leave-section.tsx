@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import LeaveModal from './leave/modal'
 import getMeta from '../../../utils/meta'
-import OLButton from '@/features/ui/components/ol/ol-button'
+import OLButton from '@/shared/components/ol/ol-button'
 
 function LeaveSection() {
   const { t } = useTranslation()

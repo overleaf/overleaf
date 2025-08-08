@@ -7,7 +7,7 @@ import {
 import {
   DropdownDivider,
   DropdownHeader,
-} from '@/features/ui/components/bootstrap-5/dropdown-menu'
+} from '@/shared/components/dropdown/dropdown-menu'
 import {
   MenuBarDropdown,
   NestedMenuBarDropdown,

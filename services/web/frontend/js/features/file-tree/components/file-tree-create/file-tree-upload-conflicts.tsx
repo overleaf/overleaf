@@ -4,7 +4,7 @@ import { useProjectContext } from '@/shared/context/project-context'
 import { useCallback } from 'react'
 import { syncDelete } from '@/features/file-tree/util/sync-mutation'
 import { TFunction } from 'i18next'
-import OLButton from '@/features/ui/components/ol/ol-button'
+import OLButton from '@/shared/components/ol/ol-button'
 
 export type Conflict = {
   entity: FileTreeEntity

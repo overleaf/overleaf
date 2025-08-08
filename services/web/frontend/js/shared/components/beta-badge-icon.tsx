@@ -1,6 +1,6 @@
 import type { FC } from 'react'
 import MaterialIcon from '@/shared/components/material-icon'
-import OLBadge from '@/features/ui/components/ol/ol-badge'
+import OLBadge from '@/shared/components/ol/ol-badge'
 
 const BetaBadgeIcon: FC<{
   phase?: string

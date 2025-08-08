@@ -6,10 +6,10 @@ import {
   DuplicateFilenameError,
   InvalidFilenameError,
 } from '../../errors'
-import OLFormGroup from '@/features/ui/components/ol/ol-form-group'
-import OLFormLabel from '@/features/ui/components/ol/ol-form-label'
-import OLFormControl from '@/features/ui/components/ol/ol-form-control'
-import OLNotification from '@/features/ui/components/ol/ol-notification'
+import OLFormGroup from '@/shared/components/ol/ol-form-group'
+import OLFormLabel from '@/shared/components/ol/ol-form-label'
+import OLFormControl from '@/shared/components/ol/ol-form-control'
+import OLNotification from '@/shared/components/ol/ol-notification'
 
 /**
  * A form component that renders a text input with label,

@@ -10,10 +10,10 @@ import OLModal, {
   OLModalFooter,
   OLModalHeader,
   OLModalTitle,
-} from '@/features/ui/components/ol/ol-modal'
-import OLButton from '@/features/ui/components/ol/ol-button'
-import OLRow from '@/features/ui/components/ol/ol-row'
-import OLCol from '@/features/ui/components/ol/ol-col'
+} from '@/shared/components/ol/ol-modal'
+import OLButton from '@/shared/components/ol/ol-button'
+import OLRow from '@/shared/components/ol/ol-row'
+import OLCol from '@/shared/components/ol/ol-col'
 import MaterialIcon from '@/shared/components/material-icon'
 
 type UpgradeTrackChangesModalProps = {

@@ -3,7 +3,7 @@ import {
   DropdownDivider,
   DropdownMenu,
   DropdownToggle,
-} from '@/features/ui/components/bootstrap-5/dropdown-menu'
+} from '@/shared/components/dropdown/dropdown-menu'
 import MaterialIcon from '@/shared/components/material-icon'
 import { useProjectContext } from '@/shared/context/project-context'
 import { useTranslation } from 'react-i18next'
@@ -12,7 +12,7 @@ import { useEditorContext } from '@/shared/context/editor-context'
 import { useIdeReactContext } from '@/features/ide-react/context/ide-react-context'
 import { DownloadProjectPDF, DownloadProjectZip } from './download-project'
 import { useCallback, useState } from 'react'
-import OLDropdownMenuItem from '@/features/ui/components/ol/ol-dropdown-menu-item'
+import OLDropdownMenuItem from '@/shared/components/ol/ol-dropdown-menu-item'
 import EditableLabel from './editable-label'
 import { DuplicateProject } from './duplicate-project'
 

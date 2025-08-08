@@ -5,7 +5,7 @@ import {
 import { FC } from 'react'
 import { useTranslation } from 'react-i18next'
 import { sendMB } from '../../../../infrastructure/event-tracking'
-import OLButton from '@/features/ui/components/ol/ol-button'
+import OLButton from '@/shared/components/ol/ol-button'
 import MaterialIcon from '@/shared/components/material-icon'
 
 export const FigureModalFooter: FC<{

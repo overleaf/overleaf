@@ -1,9 +1,9 @@
 import { ReactNode, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import OLBadge from '@/features/ui/components/ol/ol-badge'
-import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
+import OLBadge from '@/shared/components/ol/ol-badge'
+import OLTooltip from '@/shared/components/ol/ol-tooltip'
 import { postJSON } from '@/infrastructure/fetch-json'
-import OLButton from '@/features/ui/components/ol/ol-button'
+import OLButton from '@/shared/components/ol/ol-button'
 import getMeta from '@/utils/meta'
 
 type IntegrationLinkingWidgetProps = {

@@ -1,7 +1,7 @@
 import { useTranslation, Trans } from 'react-i18next'
 import getMeta from '../../../../utils/meta'
 import { FetchError } from '../../../../infrastructure/fetch-json'
-import OLNotification from '@/features/ui/components/ol/ol-notification'
+import OLNotification from '@/shared/components/ol/ol-notification'
 
 type LeaveModalFormErrorProps = {
   error: FetchError

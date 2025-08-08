@@ -1,11 +1,11 @@
-import Button from '@/features/ui/components/bootstrap-5/button'
+import Button from '@/shared/components/button/button'
 import type { Meta, StoryObj } from '@storybook/react'
 import OLModal, {
   OLModalHeader,
   OLModalBody,
   OLModalFooter,
   OLModalTitle,
-} from '@/features/ui/components/ol/ol-modal'
+} from '@/shared/components/ol/ol-modal'
 
 type Story = StoryObj<typeof OLModal>
 

@@ -13,10 +13,10 @@ import {
   OLModalFooter,
   OLModalHeader,
   OLModalTitle,
-} from '@/features/ui/components/ol/ol-modal'
-import OLFormControl from '@/features/ui/components/ol/ol-form-control'
-import OLButton from '@/features/ui/components/ol/ol-button'
-import OLForm from '@/features/ui/components/ol/ol-form'
+} from '@/shared/components/ol/ol-modal'
+import OLFormControl from '@/shared/components/ol/ol-form-control'
+import OLButton from '@/shared/components/ol/ol-button'
+import OLForm from '@/shared/components/ol/ol-form'
 
 type NewProjectData = {
   project_id: string

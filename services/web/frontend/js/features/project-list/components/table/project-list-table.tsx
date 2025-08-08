@@ -4,8 +4,8 @@ import ProjectListTableRow from './project-list-table-row'
 import { useProjectListContext } from '../../context/project-list-context'
 import useSort from '../../hooks/use-sort'
 import withContent, { SortBtnProps } from '../sort/with-content'
-import OLTable from '@/features/ui/components/ol/ol-table'
-import OLFormCheckbox from '@/features/ui/components/ol/ol-form-checkbox'
+import OLTable from '@/shared/components/ol/ol-table'
+import OLFormCheckbox from '@/shared/components/ol/ol-form-checkbox'
 import MaterialIcon from '@/shared/components/material-icon'
 
 function SortBtn({ onClick, text, iconType, screenReaderText }: SortBtnProps) {

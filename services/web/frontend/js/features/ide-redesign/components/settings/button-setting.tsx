@@ -1,4 +1,4 @@
-import OLButton from '@/features/ui/components/ol/ol-button'
+import OLButton from '@/shared/components/ol/ol-button'
 import Setting from './setting'
 
 export default function ButtonSetting({

@@ -9,8 +9,8 @@ import OLModal, {
   OLModalFooter,
   OLModalHeader,
   OLModalTitle,
-} from '@/features/ui/components/ol/ol-modal'
-import OLButton from '@/features/ui/components/ol/ol-button'
+} from '@/shared/components/ol/ol-modal'
+import OLButton from '@/shared/components/ol/ol-button'
 import Notification from '@/shared/components/notification'
 
 type DeleteTagModalProps = {

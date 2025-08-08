@@ -14,8 +14,8 @@ import useEventListener from '../../../../shared/hooks/use-event-listener'
 import { FeedbackBadge } from '@/shared/components/feedback-badge'
 import { sendMB } from '@/infrastructure/event-tracking'
 import MaterialIcon from '@/shared/components/material-icon'
-import OLOverlay from '@/features/ui/components/ol/ol-overlay'
-import OLPopover from '@/features/ui/components/ol/ol-popover'
+import OLOverlay from '@/shared/components/ol/ol-overlay'
+import OLPopover from '@/shared/components/ol/ol-popover'
 import { isMac } from '@/shared/utils/os'
 
 export const PastedContentMenu: FC<{

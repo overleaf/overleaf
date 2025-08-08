@@ -1,6 +1,6 @@
 import React, { useRef, forwardRef, useImperativeHandle } from 'react'
 import { SearchQuery } from '@codemirror/search'
-import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
+import OLTooltip from '@/shared/components/ol/ol-tooltip'
 import { Form } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
 

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useTranslation, Trans } from 'react-i18next'
 import getMeta from '../../../../utils/meta'
-import OLNotification from '@/features/ui/components/ol/ol-notification'
+import OLNotification from '@/shared/components/ol/ol-notification'
 
 export function SSOAlert() {
   const { t } = useTranslation()

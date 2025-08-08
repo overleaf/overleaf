@@ -6,7 +6,7 @@ import { FullSizeLoadingSpinner } from '@/shared/components/loading-spinner'
 import { Offcanvas } from 'react-bootstrap'
 import { EditorLeftMenuProvider } from './editor-left-menu-context'
 import withErrorBoundary from '@/infrastructure/error-boundary'
-import OLNotification from '@/features/ui/components/ol/ol-notification'
+import OLNotification from '@/shared/components/ol/ol-notification'
 import { useTranslation } from 'react-i18next'
 
 const EditorLeftMenuBody = lazy(() => import('./editor-left-menu-body'))

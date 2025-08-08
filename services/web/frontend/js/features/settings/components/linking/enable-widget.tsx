@@ -1,8 +1,8 @@
 import { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { sendMB } from '@/infrastructure/event-tracking'
-import OLBadge from '@/features/ui/components/ol/ol-badge'
-import OLButton from '@/features/ui/components/ol/ol-button'
+import OLBadge from '@/shared/components/ol/ol-badge'
+import OLButton from '@/shared/components/ol/ol-button'
 
 function trackUpgradeClick() {
   sendMB('settings-upgrade-click')

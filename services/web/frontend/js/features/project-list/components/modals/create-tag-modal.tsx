@@ -14,12 +14,12 @@ import OLModal, {
   OLModalFooter,
   OLModalHeader,
   OLModalTitle,
-} from '@/features/ui/components/ol/ol-modal'
-import OLFormGroup from '@/features/ui/components/ol/ol-form-group'
-import OLFormLabel from '@/features/ui/components/ol/ol-form-label'
-import OLButton from '@/features/ui/components/ol/ol-button'
-import OLFormControl from '@/features/ui/components/ol/ol-form-control'
-import OLForm from '@/features/ui/components/ol/ol-form'
+} from '@/shared/components/ol/ol-modal'
+import OLFormGroup from '@/shared/components/ol/ol-form-group'
+import OLFormLabel from '@/shared/components/ol/ol-form-label'
+import OLButton from '@/shared/components/ol/ol-button'
+import OLFormControl from '@/shared/components/ol/ol-form-control'
+import OLForm from '@/shared/components/ol/ol-form'
 import Notification from '@/shared/components/notification'
 
 type CreateTagModalProps = {

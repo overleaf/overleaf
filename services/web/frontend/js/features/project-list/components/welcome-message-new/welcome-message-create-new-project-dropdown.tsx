@@ -10,7 +10,7 @@ import {
   DropdownItem,
   DropdownMenu,
   DropdownToggle,
-} from '@/features/ui/components/bootstrap-5/dropdown-menu'
+} from '@/shared/components/dropdown/dropdown-menu'
 import createNewProjectImage from '../../images/create-a-new-project.svg'
 
 const CustomDropdownToggle = forwardRef<

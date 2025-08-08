@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import OLDropdownMenuItem from '@/features/ui/components/ol/ol-dropdown-menu-item'
+import OLDropdownMenuItem from '@/shared/components/ol/ol-dropdown-menu-item'
 import MaterialIcon from '@/shared/components/material-icon'
 
 type DownloadProps = {

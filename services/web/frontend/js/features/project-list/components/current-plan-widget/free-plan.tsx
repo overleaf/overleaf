@@ -1,6 +1,6 @@
 import { useTranslation, Trans } from 'react-i18next'
-import OLButton from '@/features/ui/components/ol/ol-button'
-import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
+import OLButton from '@/shared/components/ol/ol-button'
+import OLTooltip from '@/shared/components/ol/ol-tooltip'
 import MaterialIcon from '@/shared/components/material-icon'
 import { FreePlanSubscription } from '../../../../../../types/project/dashboard/subscription'
 import * as eventTracking from '../../../../infrastructure/event-tracking'

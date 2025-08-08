@@ -1,6 +1,6 @@
 import { useCallback } from 'react'
 import { useTranslation, Trans } from 'react-i18next'
-import OLButton from '@/features/ui/components/ol/ol-button'
+import OLButton from '@/shared/components/ol/ol-button'
 import PdfLogEntry from './pdf-log-entry'
 import { useDetachCompileContext as useCompileContext } from '../../../shared/context/detach-compile-context'
 import { useStopOnFirstError } from '../../../shared/hooks/use-stop-on-first-error'

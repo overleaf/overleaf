@@ -1,15 +1,15 @@
 import { useCallback, useState, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import OLBadge from '@/features/ui/components/ol/ol-badge'
+import OLBadge from '@/shared/components/ol/ol-badge'
 import getMeta from '../../../../utils/meta'
 import { sendMB } from '../../../../infrastructure/event-tracking'
-import OLButton from '@/features/ui/components/ol/ol-button'
+import OLButton from '@/shared/components/ol/ol-button'
 import OLModal, {
   OLModalBody,
   OLModalFooter,
   OLModalHeader,
   OLModalTitle,
-} from '@/features/ui/components/ol/ol-modal'
+} from '@/shared/components/ol/ol-modal'
 
 function trackUpgradeClick(integration: string) {
   sendMB('settings-upgrade-click', { integration })

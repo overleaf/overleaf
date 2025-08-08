@@ -1,5 +1,5 @@
 import { memo, useCallback, useRef, useState } from 'react'
-import OLButton from '@/features/ui/components/ol/ol-button'
+import OLButton from '@/shared/components/ol/ol-button'
 import { useTranslation } from 'react-i18next'
 import classNames from 'classnames'
 import { PreventSelectingEntry } from './review-panel-prevent-selecting'

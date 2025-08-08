@@ -9,8 +9,8 @@ import { getJSON, postJSON } from '../../../../infrastructure/fetch-json'
 import defaultRoles from '../../data/roles'
 import defaultDepartments from '../../data/departments'
 import { University } from '../../../../../../types/university'
-import OLButton from '@/features/ui/components/ol/ol-button'
-import OLFormGroup from '@/features/ui/components/ol/ol-form-group'
+import OLButton from '@/shared/components/ol/ol-button'
+import OLFormGroup from '@/shared/components/ol/ol-form-group'
 
 type InstitutionAndRoleProps = {
   userEmailData: UserEmailData

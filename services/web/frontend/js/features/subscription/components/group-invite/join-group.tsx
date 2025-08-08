@@ -7,7 +7,7 @@ import useAsync from '@/shared/hooks/use-async'
 import classNames from 'classnames'
 import { debugConsole } from '@/utils/debugging'
 import Notification from '@/shared/components/notification'
-import OLButton from '@/features/ui/components/ol/ol-button'
+import OLButton from '@/shared/components/ol/ol-button'
 
 export default function JoinGroup({
   setView,

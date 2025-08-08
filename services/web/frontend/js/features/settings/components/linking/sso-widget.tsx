@@ -5,13 +5,13 @@ import IEEELogo from '../../../../shared/svgs/ieee-logo'
 import GoogleLogo from '../../../../shared/svgs/google-logo'
 import OrcidLogo from '../../../../shared/svgs/orcid-logo'
 import LinkingStatus from './status'
-import OLButton from '@/features/ui/components/ol/ol-button'
+import OLButton from '@/shared/components/ol/ol-button'
 import OLModal, {
   OLModalBody,
   OLModalFooter,
   OLModalHeader,
   OLModalTitle,
-} from '@/features/ui/components/ol/ol-modal'
+} from '@/shared/components/ol/ol-modal'
 
 const providerLogos: { readonly [p: string]: JSX.Element } = {
   collabratec: <IEEELogo />,

@@ -1,5 +1,5 @@
 import { Trans, useTranslation } from 'react-i18next'
-import OLNotification from '@/features/ui/components/ol/ol-notification'
+import OLNotification from '@/shared/components/ol/ol-notification'
 import Card from '@/features/group-management/components/card'
 import useWaitForI18n from '@/shared/hooks/use-wait-for-i18n'
 

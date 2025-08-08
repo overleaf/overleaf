@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import * as eventTracking from '../../../../../../infrastructure/event-tracking'
 import { useSubscriptionDashboardContext } from '../../../../context/subscription-dashboard-context'
-import OLButton from '@/features/ui/components/ol/ol-button'
+import OLButton from '@/shared/components/ol/ol-button'
 import { PaidSubscription } from '../../../../../../../../types/subscription/dashboard/subscription'
 import { useFeatureFlag } from '@/shared/context/split-test-context'
 import { useLocation } from '@/shared/hooks/use-location'

@@ -2,8 +2,8 @@ import { useTranslation } from 'react-i18next'
 import { useFileTreeCreateForm } from '../../contexts/file-tree-create-form'
 import { useFileTreeActionable } from '../../contexts/file-tree-actionable'
 import { useFileTreeData } from '../../../../shared/context/file-tree-data-context'
-import OLButton from '@/features/ui/components/ol/ol-button'
-import OLNotification from '@/features/ui/components/ol/ol-notification'
+import OLButton from '@/shared/components/ol/ol-button'
+import OLNotification from '@/shared/components/ol/ol-notification'
 
 export default function FileTreeModalCreateFileFooter() {
   const { valid } = useFileTreeCreateForm()

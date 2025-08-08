@@ -1,7 +1,7 @@
 import { formatDate, fromNowDate } from '../../../../../utils/dates'
 import { Project } from '../../../../../../../types/project/dashboard/api'
 import { LastUpdatedBy } from '@/features/project-list/components/table/cells/last-updated-by'
-import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
+import OLTooltip from '@/shared/components/ol/ol-tooltip'
 
 type LastUpdatedCellProps = {
   project: Project

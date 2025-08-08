@@ -3,13 +3,13 @@ import { useTranslation } from 'react-i18next'
 import { FetchError, postJSON } from '@/infrastructure/fetch-json'
 import useAsync from '../../../../shared/hooks/use-async'
 import { UserEmailData } from '../../../../../../types/user-email'
-import OLButton from '@/features/ui/components/ol/ol-button'
+import OLButton from '@/shared/components/ol/ol-button'
 import OLModal, {
   OLModalBody,
   OLModalFooter,
   OLModalHeader,
   OLModalTitle,
-} from '@/features/ui/components/ol/ol-modal'
+} from '@/shared/components/ol/ol-modal'
 import { ConfirmEmailForm } from '@/features/settings/components/emails/confirm-email-form'
 
 type ResendConfirmationEmailButtonProps = {

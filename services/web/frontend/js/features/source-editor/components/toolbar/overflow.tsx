@@ -3,8 +3,8 @@ import { useTranslation } from 'react-i18next'
 import classnames from 'classnames'
 import MaterialIcon from '@/shared/components/material-icon'
 import { useCodeMirrorViewContext } from '../codemirror-context'
-import OLOverlay from '@/features/ui/components/ol/ol-overlay'
-import OLPopover from '@/features/ui/components/ol/ol-popover'
+import OLOverlay from '@/shared/components/ol/ol-overlay'
+import OLPopover from '@/shared/components/ol/ol-popover'
 
 export const ToolbarOverflow: FC<
   React.PropsWithChildren<{

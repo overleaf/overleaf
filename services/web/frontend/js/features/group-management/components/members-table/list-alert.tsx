@@ -1,7 +1,7 @@
 import { Trans } from 'react-i18next'
 import type { GroupUserAlertVariant } from '../../utils/types'
 import NotificationScrolledTo from '@/shared/components/notification-scrolled-to'
-import OLNotification from '@/features/ui/components/ol/ol-notification'
+import OLNotification from '@/shared/components/ol/ol-notification'
 
 type GroupUsersListAlertProps = {
   variant: GroupUserAlertVariant

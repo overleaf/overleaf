@@ -1,15 +1,15 @@
 import { useTranslation } from 'react-i18next'
 import { useEffect, useState } from 'react'
-import OLForm from '@/features/ui/components/ol/ol-form'
-import OLFormGroup from '@/features/ui/components/ol/ol-form-group'
+import OLForm from '@/shared/components/ol/ol-form'
+import OLFormGroup from '@/shared/components/ol/ol-form-group'
 import ModalError from './modal-error'
 import OLModal, {
   OLModalBody,
   OLModalFooter,
   OLModalHeader,
   OLModalTitle,
-} from '@/features/ui/components/ol/ol-modal'
-import OLButton from '@/features/ui/components/ol/ol-button'
+} from '@/shared/components/ol/ol-modal'
+import OLButton from '@/shared/components/ol/ol-button'
 import useAsync from '../../../../shared/hooks/use-async'
 import useAbortController from '../../../../shared/hooks/use-abort-controller'
 import useAddOrRemoveLabels from '../../hooks/use-add-or-remove-labels'
@@ -18,7 +18,7 @@ import { addLabel } from '../../services/api'
 import { Label } from '../../services/types/label'
 import { useRefWithAutoFocus } from '../../../../shared/hooks/use-ref-with-auto-focus'
 import { debugConsole } from '@/utils/debugging'
-import OLFormControl from '@/features/ui/components/ol/ol-form-control'
+import OLFormControl from '@/shared/components/ol/ol-form-control'
 
 type AddLabelModalProps = {
   show: boolean

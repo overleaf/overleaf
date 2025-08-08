@@ -1,7 +1,7 @@
 import usePersistedState from '../../../shared/hooks/use-persisted-state'
 import getMeta from '../../../utils/meta'
 import { useCallback } from 'react'
-import OLButton from '@/features/ui/components/ol/ol-button'
+import OLButton from '@/shared/components/ol/ol-button'
 import { useTranslation } from 'react-i18next'
 import { X } from '@phosphor-icons/react'
 

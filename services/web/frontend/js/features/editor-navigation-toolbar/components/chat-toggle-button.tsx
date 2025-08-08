@@ -1,7 +1,7 @@
 import classNames from 'classnames'
 import { useTranslation } from 'react-i18next'
 import MaterialIcon from '@/shared/components/material-icon'
-import OLBadge from '@/features/ui/components/ol/ol-badge'
+import OLBadge from '@/shared/components/ol/ol-badge'
 
 function ChatToggleButton({
   chatIsOpen,

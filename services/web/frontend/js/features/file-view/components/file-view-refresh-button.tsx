@@ -11,7 +11,7 @@ import { useProjectContext } from '@/shared/context/project-context'
 import type { BinaryFile } from '../types/binary-file'
 import { Nullable } from '../../../../../types/utils'
 import importOverleafModules from '../../../../macros/import-overleaf-module.macro'
-import OLButton from '@/features/ui/components/ol/ol-button'
+import OLButton from '@/shared/components/ol/ol-button'
 import { sendMB } from '@/infrastructure/event-tracking'
 import useIsMounted from '@/shared/hooks/use-is-mounted'
 

@@ -2,7 +2,7 @@ import { useDetachCompileContext as useCompileContext } from '@/shared/context/d
 import { useTranslation } from 'react-i18next'
 import { isSplitTestEnabled } from '@/utils/splitTestUtils'
 import LeftMenuButton from '@/features/editor-left-menu/components/left-menu-button'
-import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
+import OLTooltip from '@/shared/components/ol/ol-tooltip'
 import { memo } from 'react'
 
 export const WordCountButton = memo<{

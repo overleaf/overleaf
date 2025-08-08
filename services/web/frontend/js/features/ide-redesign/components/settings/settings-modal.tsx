@@ -2,7 +2,7 @@ import OLModal, {
   OLModalBody,
   OLModalHeader,
   OLModalTitle,
-} from '@/features/ui/components/ol/ol-modal'
+} from '@/shared/components/ol/ol-modal'
 import { useLayoutContext } from '@/shared/context/layout-context'
 import { useTranslation } from 'react-i18next'
 import { SettingsEntry, SettingsModalBody } from './settings-modal-body'

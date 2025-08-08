@@ -1,4 +1,4 @@
-import OLFormControl from '@/features/ui/components/ol/ol-form-control'
+import OLFormControl from '@/shared/components/ol/ol-form-control'
 import {
   ChangeEventHandler,
   useCallback,

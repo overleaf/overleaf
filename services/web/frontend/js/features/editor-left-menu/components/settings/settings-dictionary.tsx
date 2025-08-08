@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import DictionaryModal from '../../../dictionary/components/dictionary-modal'
-import OLButton from '@/features/ui/components/ol/ol-button'
-import OLFormGroup from '@/features/ui/components/ol/ol-form-group'
-import OLFormLabel from '@/features/ui/components/ol/ol-form-label'
+import OLButton from '@/shared/components/ol/ol-button'
+import OLFormGroup from '@/shared/components/ol/ol-form-group'
+import OLFormLabel from '@/shared/components/ol/ol-form-label'
 
 export default function SettingsDictionary() {
   const { t } = useTranslation()

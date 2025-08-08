@@ -7,8 +7,8 @@ import {
   DropdownItem,
   DropdownMenu,
   DropdownToggle,
-} from '@/features/ui/components/bootstrap-5/dropdown-menu'
-import Button from '@/features/ui/components/bootstrap-5/button'
+} from '@/shared/components/dropdown/dropdown-menu'
+import Button from '@/shared/components/button/button'
 import { ButtonGroup } from 'react-bootstrap'
 
 export const Sizes = () => {

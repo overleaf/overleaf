@@ -14,8 +14,8 @@ import OLModal, {
   OLModalFooter,
   OLModalHeader,
   OLModalTitle,
-} from '@/features/ui/components/ol/ol-modal'
-import OLButton from '@/features/ui/components/ol/ol-button'
+} from '@/shared/components/ol/ol-modal'
+import OLButton from '@/shared/components/ol/ol-button'
 import PaymentErrorNotification from '@/features/subscription/components/shared/payment-error-notification'
 import handleStripePaymentAction from '@/features/subscription/util/handle-stripe-payment-action'
 

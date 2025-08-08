@@ -3,7 +3,7 @@ import type { Dispatch, SetStateAction } from 'react'
 import Notification from '../../notification'
 import { GroupInvitationStatus } from './hooks/use-group-invitation-notification'
 import type { NotificationGroupInvitation } from '../../../../../../../../types/project/dashboard/notification'
-import OLButton from '@/features/ui/components/ol/ol-button'
+import OLButton from '@/shared/components/ol/ol-button'
 
 type GroupInvitationCancelIndividualSubscriptionNotificationProps = {
   setGroupInvitationStatus: Dispatch<SetStateAction<GroupInvitationStatus>>

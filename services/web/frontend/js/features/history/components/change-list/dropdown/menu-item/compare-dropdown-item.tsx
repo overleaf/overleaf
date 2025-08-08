@@ -1,7 +1,7 @@
 import { useHistoryContext } from '../../../../context/history-context'
 import { UpdateRange } from '../../../../services/types/update'
 import { ReactNode } from 'react'
-import OLDropdownMenuItem from '@/features/ui/components/ol/ol-dropdown-menu-item'
+import OLDropdownMenuItem from '@/shared/components/ol/ol-dropdown-menu-item'
 
 type CompareProps = {
   comparisonRange: UpdateRange

@@ -7,7 +7,7 @@ import {
   DropdownDivider,
   DropdownItem,
   DropdownMenu,
-} from '@/features/ui/components/bootstrap-5/dropdown-menu'
+} from '@/shared/components/dropdown/dropdown-menu'
 
 export default function RailHelpDropdown() {
   const showSupport = getMeta('ol-showSupport')

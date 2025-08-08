@@ -6,7 +6,7 @@ import getMeta from '@/utils/meta'
 import { Dispatch, SetStateAction, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { InviteViewTypes } from './group-invite'
-import OLButton from '@/features/ui/components/ol/ol-button'
+import OLButton from '@/shared/components/ol/ol-button'
 
 export default function HasIndividualRecurlySubscription({
   setView,

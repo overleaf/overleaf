@@ -1,13 +1,13 @@
 import { Trans, useTranslation } from 'react-i18next'
 import { memo, useState } from 'react'
 import { useLocation } from '@/shared/hooks/use-location'
-import OLButton from '@/features/ui/components/ol/ol-button'
+import OLButton from '@/shared/components/ol/ol-button'
 import OLModal, {
   OLModalBody,
   OLModalFooter,
   OLModalHeader,
   OLModalTitle,
-} from '@/features/ui/components/ol/ol-modal'
+} from '@/shared/components/ol/ol-modal'
 
 export type OutOfSyncModalProps = {
   editorContent: string

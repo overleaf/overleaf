@@ -2,7 +2,7 @@ import AddCollaborators from './add-collaborators'
 import AddCollaboratorsUpgrade from './add-collaborators-upgrade'
 import CollaboratorsLimitUpgrade from './collaborators-limit-upgrade'
 import AccessLevelsChanged from './access-levels-changed'
-import OLRow from '@/features/ui/components/ol/ol-row'
+import OLRow from '@/shared/components/ol/ol-row'
 
 export default function SendInvites({
   canAddCollaborators,

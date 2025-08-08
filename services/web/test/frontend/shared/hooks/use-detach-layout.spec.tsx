@@ -1,10 +1,10 @@
 import useDetachLayout from '../../../../frontend/js/shared/hooks/use-detach-layout'
 import { detachChannel, testDetachChannel } from '../../helpers/detach-channel'
 import { EditorProviders } from '../../helpers/editor-providers'
-import OLFormGroup from '@/features/ui/components/ol/ol-form-group'
-import OLFormCheckbox from '@/features/ui/components/ol/ol-form-checkbox'
-import OLFormLabel from '@/features/ui/components/ol/ol-form-label'
-import OLButton from '@/features/ui/components/ol/ol-button'
+import OLFormGroup from '@/shared/components/ol/ol-form-group'
+import OLFormCheckbox from '@/shared/components/ol/ol-form-checkbox'
+import OLFormLabel from '@/shared/components/ol/ol-form-label'
+import OLButton from '@/shared/components/ol/ol-button'
 
 const DetachLayoutTest = () => {
   const { role, reattach, detach, isLinked, isLinking, isRedundant } =

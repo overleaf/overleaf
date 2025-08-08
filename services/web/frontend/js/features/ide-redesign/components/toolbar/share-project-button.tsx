@@ -1,5 +1,5 @@
 import ShareProjectModal from '@/features/share-project-modal/components/share-project-modal'
-import OLButton from '@/features/ui/components/ol/ol-button'
+import OLButton from '@/shared/components/ol/ol-button'
 import MaterialIcon from '@/shared/components/material-icon'
 import { useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'

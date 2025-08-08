@@ -3,9 +3,9 @@ import { useSubscriptionDashboardContext } from '../../context/subscription-dash
 import getMeta from '../../../../utils/meta'
 import useAsync from '../../../../shared/hooks/use-async'
 import { postJSON } from '../../../../infrastructure/fetch-json'
-import OLNotification from '@/features/ui/components/ol/ol-notification'
-import OLButton from '@/features/ui/components/ol/ol-button'
-import OLFormGroup from '@/features/ui/components/ol/ol-form-group'
+import OLNotification from '@/shared/components/ol/ol-notification'
+import OLButton from '@/shared/components/ol/ol-button'
+import OLFormGroup from '@/shared/components/ol/ol-form-group'
 
 function PersonalSubscriptionSyncEmail() {
   const { t } = useTranslation()

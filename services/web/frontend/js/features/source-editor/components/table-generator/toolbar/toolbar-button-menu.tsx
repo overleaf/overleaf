@@ -1,9 +1,9 @@
 import { FC, memo, useRef } from 'react'
 import useDropdown from '../../../../../shared/hooks/use-dropdown'
-import OLListGroup from '@/features/ui/components/ol/ol-list-group'
-import OLOverlay from '@/features/ui/components/ol/ol-overlay'
-import OLPopover from '@/features/ui/components/ol/ol-popover'
-import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
+import OLListGroup from '@/shared/components/ol/ol-list-group'
+import OLOverlay from '@/shared/components/ol/ol-overlay'
+import OLPopover from '@/shared/components/ol/ol-popover'
+import OLTooltip from '@/shared/components/ol/ol-tooltip'
 import MaterialIcon from '../../../../../shared/components/material-icon'
 import { useTabularContext } from '../contexts/tabular-context'
 

@@ -1,6 +1,6 @@
 import { Interstitial } from '@/shared/components/interstitial'
 import useWaitForI18n from '@/shared/hooks/use-wait-for-i18n'
-import OLButton from '@/features/ui/components/ol/ol-button'
+import OLButton from '@/shared/components/ol/ol-button'
 import { Trans, useTranslation } from 'react-i18next'
 import EmailInput from './add-email/input'
 import { useState } from 'react'

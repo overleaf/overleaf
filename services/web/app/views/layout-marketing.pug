@@ -8,20 +8,20 @@ block entrypointVar
 
 block body
 	if typeof suppressNavbar === 'undefined'
-		include layout/navbar-marketing-bootstrap-5
+		include layout/navbar-marketing
 
 	block content
 
 	if typeof suppressFooter === 'undefined'
 		if showThinFooter
-			include layout/thin-footer-bootstrap-5
+			include layout/thin-footer
 		else
 			include layout/fat-footer
 
 	if typeof suppressPugCookieBanner == 'undefined'
 		include _cookie_banner
 
-	!= moduleIncludes('contactModal-marketing-bootstrap-5', locals)
+	!= moduleIncludes('contactModal-marketing', locals)
 
 block prepend foot-scripts
 	+bootstrap-js

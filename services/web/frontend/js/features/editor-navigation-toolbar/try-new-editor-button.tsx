@@ -1,5 +1,5 @@
 import { useCallback } from 'react'
-import OLButton from '../ui/components/ol/ol-button'
+import OLButton from '../../shared/components/ol/ol-button'
 import { useIdeRedesignSwitcherContext } from '../ide-react/context/ide-redesign-switcher-context'
 import MaterialIcon from '@/shared/components/material-icon'
 import { useTranslation } from 'react-i18next'

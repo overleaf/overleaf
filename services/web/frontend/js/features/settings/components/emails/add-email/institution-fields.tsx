@@ -11,7 +11,7 @@ import { DomainInfo } from './input'
 import { getJSON } from '../../../../../infrastructure/fetch-json'
 import useAsync from '../../../../../shared/hooks/use-async'
 import UniversityName from './university-name'
-import OLFormGroup from '@/features/ui/components/ol/ol-form-group'
+import OLFormGroup from '@/shared/components/ol/ol-form-group'
 
 type InstitutionFieldsProps = {
   countryCode: CountryCode | null

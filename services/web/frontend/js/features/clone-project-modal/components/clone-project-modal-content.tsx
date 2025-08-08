@@ -8,13 +8,13 @@ import {
   OLModalFooter,
   OLModalHeader,
   OLModalTitle,
-} from '@/features/ui/components/ol/ol-modal'
+} from '@/shared/components/ol/ol-modal'
 import Notification from '@/shared/components/notification'
-import OLForm from '@/features/ui/components/ol/ol-form'
-import OLFormGroup from '@/features/ui/components/ol/ol-form-group'
-import OLFormControl from '@/features/ui/components/ol/ol-form-control'
-import OLFormLabel from '@/features/ui/components/ol/ol-form-label'
-import OLButton from '@/features/ui/components/ol/ol-button'
+import OLForm from '@/shared/components/ol/ol-form'
+import OLFormGroup from '@/shared/components/ol/ol-form-group'
+import OLFormControl from '@/shared/components/ol/ol-form-control'
+import OLFormLabel from '@/shared/components/ol/ol-form-label'
+import OLButton from '@/shared/components/ol/ol-button'
 import { Tag } from '../../../../../app/src/Features/Tags/types'
 
 export default function CloneProjectModalContent({

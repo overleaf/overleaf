@@ -2,10 +2,10 @@ import { useCallback, useEffect, useState } from 'react'
 import { File, FileOrDirectory } from '../../utils/file'
 import { useTranslation } from 'react-i18next'
 import { useCurrentProjectFolders } from '@/features/source-editor/hooks/use-current-project-folders'
-import OLFormControl from '@/features/ui/components/ol/ol-form-control'
-import OLFormLabel from '@/features/ui/components/ol/ol-form-label'
-import OLFormGroup from '@/features/ui/components/ol/ol-form-group'
-import OLNotification from '@/features/ui/components/ol/ol-notification'
+import OLFormControl from '@/shared/components/ol/ol-form-control'
+import OLFormLabel from '@/shared/components/ol/ol-form-label'
+import OLFormGroup from '@/shared/components/ol/ol-form-group'
+import OLNotification from '@/shared/components/ol/ol-notification'
 
 type FileNameInputProps = Omit<
   React.ComponentProps<typeof OLFormControl>,

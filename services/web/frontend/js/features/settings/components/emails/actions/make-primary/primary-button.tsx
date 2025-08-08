@@ -1,4 +1,4 @@
-import OLButton, { OLButtonProps } from '@/features/ui/components/ol/ol-button'
+import OLButton, { OLButtonProps } from '@/shared/components/ol/ol-button'
 
 function PrimaryButton({
   children,

@@ -1,6 +1,6 @@
 import { memo, useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import OLButtonToolbar from '@/features/ui/components/ol/ol-button-toolbar'
+import OLButtonToolbar from '@/shared/components/ol/ol-button-toolbar'
 import { useLayoutContext } from '@/shared/context/layout-context'
 import PdfCompileButton from './pdf-compile-button'
 import SwitchToEditorButton from './switch-to-editor-button'

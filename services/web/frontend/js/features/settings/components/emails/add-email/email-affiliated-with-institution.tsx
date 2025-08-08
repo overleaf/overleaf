@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import OLButton, { OLButtonProps } from '@/features/ui/components/ol/ol-button'
+import OLButton, { OLButtonProps } from '@/shared/components/ol/ol-button'
 
 function EmailAffiliatedWithInstitution({ onClick, ...props }: OLButtonProps) {
   const { t } = useTranslation()

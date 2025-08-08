@@ -4,7 +4,7 @@ import { postJSON } from '../../../../../../../infrastructure/fetch-json'
 import { subscriptionUpdateUrl } from '../../../../../data/subscription-url'
 import { useLocation } from '../../../../../../../shared/hooks/use-location'
 import { debugConsole } from '@/utils/debugging'
-import OLButton from '@/features/ui/components/ol/ol-button'
+import OLButton from '@/shared/components/ol/ol-button'
 
 export default function DowngradePlanButton({
   isButtonDisabled,

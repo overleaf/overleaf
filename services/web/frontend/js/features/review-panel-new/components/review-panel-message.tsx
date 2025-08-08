@@ -5,7 +5,7 @@ import {
 } from '../../../../../types/review-panel/review-panel'
 import { useTranslation } from 'react-i18next'
 import { FormatTimeBasedOnYear } from '@/shared/components/format-time-based-on-year'
-import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
+import OLTooltip from '@/shared/components/ol/ol-tooltip'
 import MaterialIcon from '@/shared/components/material-icon'
 import AutoExpandingTextArea from '@/shared/components/auto-expanding-text-area'
 import ReviewPanelCommentOptions from './review-panel-comment-options'

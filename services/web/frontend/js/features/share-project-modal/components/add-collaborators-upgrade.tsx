@@ -6,7 +6,7 @@ import { useProjectContext } from '@/shared/context/project-context'
 import { useUserContext } from '@/shared/context/user-context'
 import { sendMB } from '@/infrastructure/event-tracking'
 import StartFreeTrialButton from '@/shared/components/start-free-trial-button'
-import OLButton from '@/features/ui/components/ol/ol-button'
+import OLButton from '@/shared/components/ol/ol-button'
 
 export default function AddCollaboratorsUpgrade() {
   const { t } = useTranslation()

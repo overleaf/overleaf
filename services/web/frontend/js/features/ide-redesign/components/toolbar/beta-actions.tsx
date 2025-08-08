@@ -1,6 +1,6 @@
 import { useIdeRedesignSwitcherContext } from '@/features/ide-react/context/ide-redesign-switcher-context'
-import OLButton from '@/features/ui/components/ol/ol-button'
-import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
+import OLButton from '@/shared/components/ol/ol-button'
+import OLTooltip from '@/shared/components/ol/ol-tooltip'
 import { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { GiveFeedbackLink } from './give-feedback-link'

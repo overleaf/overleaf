@@ -1,5 +1,5 @@
-import OLTagIcon from '@/features/ui/components/ol/icons/ol-tag-icon'
-import Tag from '@/features/ui/components/bootstrap-5/tag'
+import OLTagIcon from '@/shared/components/ol/ol-tag-icon'
+import Tag from '@/shared/components/tag'
 import type { Meta, StoryObj } from '@storybook/react'
 
 const meta: Meta<typeof Tag> = {

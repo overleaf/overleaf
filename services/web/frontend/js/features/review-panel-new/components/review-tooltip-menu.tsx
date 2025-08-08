@@ -27,7 +27,7 @@ import {
 } from '../context/ranges-context'
 import { isInsertOperation } from '@/utils/operations'
 import { isCursorNearViewportEdge } from '@/features/source-editor/utils/is-cursor-near-edge'
-import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
+import OLTooltip from '@/shared/components/ol/ol-tooltip'
 import { useModalsContext } from '@/features/ide-react/context/modals-context'
 import { numberOfChangesInSelection } from '../utils/changes-in-selection'
 import { useEditorPropertiesContext } from '@/features/ide-react/context/editor-properties-context'

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import OLDropdownMenuItem from '@/features/ui/components/ol/ol-dropdown-menu-item'
-import OLTagIcon from '@/features/ui/components/ol/icons/ol-tag-icon'
+import OLDropdownMenuItem from '@/shared/components/ol/ol-dropdown-menu-item'
+import OLTagIcon from '@/shared/components/ol/ol-tag-icon'
 import AddLabelModal from '../../add-label-modal'
 
 type AddLabelProps = {

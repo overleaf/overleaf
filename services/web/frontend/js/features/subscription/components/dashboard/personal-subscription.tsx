@@ -6,7 +6,7 @@ import { CanceledSubscription } from './states/canceled'
 import { ExpiredSubscription } from './states/expired'
 import { useSubscriptionDashboardContext } from '../../context/subscription-dashboard-context'
 import PersonalSubscriptionSyncEmail from './personal-subscription-sync-email'
-import OLNotification from '@/features/ui/components/ol/ol-notification'
+import OLNotification from '@/shared/components/ol/ol-notification'
 
 function PastDueSubscriptionAlert({
   subscription,

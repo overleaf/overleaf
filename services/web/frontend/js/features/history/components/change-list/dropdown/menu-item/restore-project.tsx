@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react'
-import OLDropdownMenuItem from '@/features/ui/components/ol/ol-dropdown-menu-item'
+import OLDropdownMenuItem from '@/shared/components/ol/ol-dropdown-menu-item'
 import { useTranslation } from 'react-i18next'
 import { RestoreProjectModal } from '../../../diff-view/modals/restore-project-modal'
 import { useSplitTestContext } from '@/shared/context/split-test-context'

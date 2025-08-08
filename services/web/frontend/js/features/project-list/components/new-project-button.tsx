@@ -16,7 +16,7 @@ import {
   DropdownItem,
   DropdownMenu,
   DropdownToggle,
-} from '@/features/ui/components/bootstrap-5/dropdown-menu'
+} from '@/shared/components/dropdown/dropdown-menu'
 import { useSendProjectListMB } from '@/features/project-list/components/project-list-events'
 import type { PortalTemplate } from '../../../../../types/portal-template'
 

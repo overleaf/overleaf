@@ -5,9 +5,9 @@ import OLModal, {
   OLModalFooter,
   OLModalHeader,
   OLModalTitle,
-} from '@/features/ui/components/ol/ol-modal'
-import OLButton from '@/features/ui/components/ol/ol-button'
-import { ButtonProps } from '@/features/ui/components/types/button-props'
+} from '@/shared/components/ol/ol-modal'
+import OLButton from '@/shared/components/ol/ol-button'
+import { ButtonProps } from '@/shared/components/types/button-props'
 
 export type GenericConfirmModalOwnProps = {
   title: string

@@ -6,7 +6,7 @@ import { useProjectContext } from '@/shared/context/project-context'
 import {
   DropdownDivider,
   DropdownItem,
-} from '@/features/ui/components/bootstrap-5/dropdown-menu'
+} from '@/shared/components/dropdown/dropdown-menu'
 import { useFileTreeActionable } from '../../contexts/file-tree-actionable'
 
 function FileTreeItemMenuItems() {

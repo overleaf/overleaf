@@ -1,14 +1,14 @@
 import classNames from 'classnames'
 import { useState, useRef, MouseEventHandler, ElementType } from 'react'
 import { useTranslation } from 'react-i18next'
-import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
+import OLTooltip from '@/shared/components/ol/ol-tooltip'
 import {
   ErrorLevel,
   SourceLocation,
   LogEntry as LogEntryData,
 } from '@/features/pdf-preview/util/types'
 import useResizeObserver from '@/features/preview/hooks/use-resize-observer'
-import OLIconButton from '@/features/ui/components/ol/ol-icon-button'
+import OLIconButton from '@/shared/components/ol/ol-icon-button'
 import importOverleafModules from '../../../../../macros/import-overleaf-module.macro'
 import MaterialIcon from '@/shared/components/material-icon'
 import { useFileTreePathContext } from '@/features/file-tree/contexts/file-tree-path'

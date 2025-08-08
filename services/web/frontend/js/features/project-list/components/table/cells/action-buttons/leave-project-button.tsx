@@ -6,8 +6,8 @@ import useIsMounted from '../../../../../../shared/hooks/use-is-mounted'
 import { leaveProject } from '../../../../util/api'
 import { Project } from '../../../../../../../../types/project/dashboard/api'
 import getMeta from '@/utils/meta'
-import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
-import OLIconButton from '@/features/ui/components/ol/ol-icon-button'
+import OLTooltip from '@/shared/components/ol/ol-tooltip'
+import OLIconButton from '@/shared/components/ol/ol-icon-button'
 
 type LeaveProjectButtonProps = {
   project: Project

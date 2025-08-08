@@ -11,7 +11,7 @@ import { FigureModalCurrentProjectSource } from './file-sources/figure-modal-pro
 import { FigureModalUploadFileSource } from './file-sources/figure-modal-upload-source'
 import { FigureModalUrlSource } from './file-sources/figure-modal-url-source'
 import { useCallback } from 'react'
-import OLNotification from '@/features/ui/components/ol/ol-notification'
+import OLNotification from '@/shared/components/ol/ol-notification'
 
 const sourceModes = new Map([
   [FigureModalSource.FILE_TREE, FigureModalCurrentProjectSource],

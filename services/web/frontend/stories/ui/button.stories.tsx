@@ -1,4 +1,4 @@
-import Button from '@/features/ui/components/bootstrap-5/button'
+import Button from '@/shared/components/button/button'
 import { Meta } from '@storybook/react'
 
 type Args = React.ComponentProps<typeof Button>

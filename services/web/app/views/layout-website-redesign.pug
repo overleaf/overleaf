@@ -11,13 +11,13 @@ block append meta
 
 block body
 	if typeof suppressNavbar == 'undefined'
-		include layout/navbar-marketing-bootstrap-5
+		include layout/navbar-marketing
 
 	block content
 
 	if typeof suppressFooter == 'undefined'
 		if showThinFooter
-			include layout/thin-footer-bootstrap-5
+			include layout/thin-footer
 		else
 			include layout/fat-footer-website-redesign
 
@@ -25,7 +25,7 @@ block body
 		include _cookie_banner
 
 	block contactModal
-		!= moduleIncludes('contactModal-marketing-bootstrap-5', locals)
+		!= moduleIncludes('contactModal-marketing', locals)
 
 block prepend foot-scripts
 	+bootstrap-js

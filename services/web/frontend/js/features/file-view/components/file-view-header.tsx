@@ -13,7 +13,7 @@ import { BinaryFile, hasProvider, LinkedFile } from '../types/binary-file'
 import FileViewRefreshButton from './file-view-refresh-button'
 import FileViewRefreshError from './file-view-refresh-error'
 import MaterialIcon from '@/shared/components/material-icon'
-import OLButton from '@/features/ui/components/ol/ol-button'
+import OLButton from '@/shared/components/ol/ol-button'
 
 const tprFileViewInfo = importOverleafModules('tprFileViewInfo') as {
   import: { TPRFileViewInfo: ElementType }

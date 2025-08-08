@@ -4,7 +4,7 @@ import { useFigureModalContext } from '../figure-modal-context'
 import { filterFiles, isImageFile } from '../../../utils/file'
 import { useTranslation } from 'react-i18next'
 import { useCurrentProjectFolders } from '@/features/source-editor/hooks/use-current-project-folders'
-import OLFormGroup from '@/features/ui/components/ol/ol-form-group'
+import OLFormGroup from '@/shared/components/ol/ol-form-group'
 
 export const FigureModalCurrentProjectSource: FC = () => {
   const { t } = useTranslation()

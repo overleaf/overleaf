@@ -4,7 +4,7 @@ import { useConnectionContext } from '@/features/ide-react/context/connection-co
 import { debugging } from '@/utils/debugging'
 import { createPortal } from 'react-dom'
 import { useGlobalAlertsContainer } from '@/features/ide-react/context/global-alerts-context'
-import OLNotification from '@/features/ui/components/ol/ol-notification'
+import OLNotification from '@/shared/components/ol/ol-notification'
 
 export function Alerts() {
   const { t } = useTranslation()

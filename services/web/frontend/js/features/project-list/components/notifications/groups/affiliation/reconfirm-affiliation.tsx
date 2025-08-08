@@ -4,7 +4,7 @@ import getMeta from '../../../../../../utils/meta'
 import { UserEmailData } from '../../../../../../../../types/user-email'
 import { Institution } from '../../../../../../../../types/institution'
 import { useLocation } from '../../../../../../shared/hooks/use-location'
-import OLButton from '@/features/ui/components/ol/ol-button'
+import OLButton from '@/shared/components/ol/ol-button'
 import Notification from '@/features/project-list/components/notifications/notification'
 import ResendConfirmationCodeModal from '@/features/settings/components/emails/resend-confirmation-code-modal'
 

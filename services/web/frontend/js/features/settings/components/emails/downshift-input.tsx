@@ -2,9 +2,9 @@ import { useState, useEffect, forwardRef } from 'react'
 import { useCombobox } from 'downshift'
 import classnames from 'classnames'
 import { escapeRegExp } from 'lodash'
-import OLFormControl from '@/features/ui/components/ol/ol-form-control'
-import { DropdownItem } from '@/features/ui/components/bootstrap-5/dropdown-menu'
-import OLFormLabel from '@/features/ui/components/ol/ol-form-label'
+import OLFormControl from '@/shared/components/ol/ol-form-control'
+import { DropdownItem } from '@/shared/components/dropdown/dropdown-menu'
+import OLFormLabel from '@/shared/components/ol/ol-form-label'
 
 type DownshiftInputProps = {
   highlightMatches?: boolean

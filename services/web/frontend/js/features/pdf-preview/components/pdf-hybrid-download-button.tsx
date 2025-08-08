@@ -2,8 +2,8 @@ import { useTranslation } from 'react-i18next'
 import { useDetachCompileContext as useCompileContext } from '../../../shared/context/detach-compile-context'
 import { useProjectContext } from '@/shared/context/project-context'
 import { sendMB, isSmallDevice } from '@/infrastructure/event-tracking'
-import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
-import OLButton from '@/features/ui/components/ol/ol-button'
+import OLTooltip from '@/shared/components/ol/ol-tooltip'
+import OLButton from '@/shared/components/ol/ol-button'
 import MaterialIcon from '@/shared/components/material-icon'
 
 function PdfHybridDownloadButton() {

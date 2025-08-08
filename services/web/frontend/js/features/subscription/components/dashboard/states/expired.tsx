@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { PaidSubscription } from '../../../../../../../types/subscription/dashboard/subscription'
-import OLButton from '@/features/ui/components/ol/ol-button'
+import OLButton from '@/shared/components/ol/ol-button'
 
 export function ExpiredSubscription({
   subscription,

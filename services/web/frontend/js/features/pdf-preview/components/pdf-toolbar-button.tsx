@@ -1,6 +1,6 @@
 import MaterialIcon from '@/shared/components/material-icon'
-import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
-import OLButton from '@/features/ui/components/ol/ol-button'
+import OLTooltip from '@/shared/components/ol/ol-tooltip'
+import OLButton from '@/shared/components/ol/ol-button'
 
 type PDFToolbarButtonProps = {
   tooltipId: string

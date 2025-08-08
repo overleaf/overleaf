@@ -11,7 +11,7 @@ import {
   DropdownItem,
   DropdownMenu,
   DropdownToggle,
-} from '@/features/ui/components/bootstrap-5/dropdown-menu'
+} from '@/shared/components/dropdown/dropdown-menu'
 import ProjectsFilterMenu from '../projects-filter-menu'
 import TagsList from '../tags-list'
 

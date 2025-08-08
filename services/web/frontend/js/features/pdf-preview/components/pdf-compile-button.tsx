@@ -4,7 +4,7 @@ import classNames from 'classnames'
 import { useDetachCompileContext as useCompileContext } from '../../../shared/context/detach-compile-context'
 import { useStopOnFirstError } from '../../../shared/hooks/use-stop-on-first-error'
 import * as eventTracking from '../../../infrastructure/event-tracking'
-import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
+import OLTooltip from '@/shared/components/ol/ol-tooltip'
 import {
   DropdownToggleCustom,
   Dropdown,
@@ -13,9 +13,9 @@ import {
   DropdownItem,
   DropdownMenu,
   DropdownToggle,
-} from '@/features/ui/components/bootstrap-5/dropdown-menu'
-import OLButton from '@/features/ui/components/ol/ol-button'
-import OLButtonGroup from '@/features/ui/components/ol/ol-button-group'
+} from '@/shared/components/dropdown/dropdown-menu'
+import OLButton from '@/shared/components/ol/ol-button'
+import OLButtonGroup from '@/shared/components/ol/ol-button-group'
 import { useLayoutContext } from '@/shared/context/layout-context'
 
 const modifierKey = /Mac/i.test(navigator.platform) ? 'Cmd' : 'Ctrl'

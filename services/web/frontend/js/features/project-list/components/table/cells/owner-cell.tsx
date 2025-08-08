@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { getOwnerName } from '../../../util/project'
 import { Project } from '../../../../../../../types/project/dashboard/api'
-import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
+import OLTooltip from '@/shared/components/ol/ol-tooltip'
 import MaterialIcon from '@/shared/components/material-icon'
 
 type LinkSharingIconProps = {

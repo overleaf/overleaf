@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Plan } from '../../../../../../../../../types/subscription/plan'
 import MaterialIcon from '@/shared/components/material-icon'
 import { useSubscriptionDashboardContext } from '../../../../../context/subscription-dashboard-context'
-import OLButton from '@/features/ui/components/ol/ol-button'
+import OLButton from '@/shared/components/ol/ol-button'
 
 function ChangeToPlanButton({ planCode }: { planCode: string }) {
   const { t } = useTranslation()

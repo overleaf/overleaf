@@ -38,7 +38,7 @@ const mountWithEditorProviders = (
   cy.mount(<TestContainer component={component} props={props} />)
 }
 
-describe('change list (Bootstrap 5)', function () {
+describe('change list', function () {
   const waitForData = () => {
     cy.wait('@updates')
     cy.wait('@labels')

@@ -1,5 +1,5 @@
 import React from 'react'
-import LanguagePicker from '../../../../frontend/js/features/ui/components/bootstrap-5/language-picker'
+import LanguagePicker from '../../../../frontend/js/shared/components/language-picker'
 import getMeta from '@/utils/meta'
 import exposedSettings from '../../../../modules/admin-panel/test/frontend/js/features/user/data/exposedSettings'
 

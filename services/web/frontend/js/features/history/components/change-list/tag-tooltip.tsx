@@ -5,8 +5,8 @@ import OLModal, {
   OLModalFooter,
   OLModalHeader,
   OLModalTitle,
-} from '@/features/ui/components/ol/ol-modal'
-import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
+} from '@/shared/components/ol/ol-modal'
+import OLTooltip from '@/shared/components/ol/ol-tooltip'
 import ModalError from './modal-error'
 import useAbortController from '../../../../shared/hooks/use-abort-controller'
 import useAsync from '../../../../shared/hooks/use-async'
@@ -18,9 +18,9 @@ import { LoadedLabel } from '../../services/types/label'
 import { debugConsole } from '@/utils/debugging'
 import { FormatTimeBasedOnYear } from '@/shared/components/format-time-based-on-year'
 import { useEditorContext } from '@/shared/context/editor-context'
-import OLTag from '@/features/ui/components/ol/ol-tag'
-import OLButton from '@/features/ui/components/ol/ol-button'
-import OLTagIcon from '@/features/ui/components/ol/icons/ol-tag-icon'
+import OLTag from '@/shared/components/ol/ol-tag'
+import OLButton from '@/shared/components/ol/ol-button'
+import OLTagIcon from '@/shared/components/ol/ol-tag-icon'
 
 type TagProps = {
   label: LoadedLabel

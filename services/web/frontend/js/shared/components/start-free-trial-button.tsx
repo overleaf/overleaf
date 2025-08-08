@@ -2,7 +2,7 @@ import { useCallback, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { startFreeTrial } from '@/main/account-upgrade'
 import * as eventTracking from '../../infrastructure/event-tracking'
-import OLButton from '@/features/ui/components/ol/ol-button'
+import OLButton from '@/shared/components/ol/ol-button'
 
 type StartFreeTrialButtonProps = {
   source: string

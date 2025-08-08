@@ -1,15 +1,15 @@
 import { useTranslation } from 'react-i18next'
 import RailPanelHeader from '../rail/rail-panel-header'
-import OLIconButton from '@/features/ui/components/ol/ol-icon-button'
+import OLIconButton from '@/shared/components/ol/ol-icon-button'
 import { useDetachCompileContext as useCompileContext } from '@/shared/context/detach-compile-context'
 import {
   Dropdown,
   DropdownMenu,
   DropdownToggle,
-} from '@/features/ui/components/bootstrap-5/dropdown-menu'
+} from '@/shared/components/dropdown/dropdown-menu'
 import PdfFileList from '@/features/pdf-preview/components/pdf-file-list'
 import { forwardRef } from 'react'
-import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
+import OLTooltip from '@/shared/components/ol/ol-tooltip'
 
 export default function ErrorLogsHeader() {
   const { t } = useTranslation()

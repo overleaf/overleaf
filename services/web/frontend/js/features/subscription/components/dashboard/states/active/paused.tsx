@@ -7,7 +7,7 @@ import { ChangePlanModal } from './change-plan/modals/change-plan-modal'
 import { ConfirmChangePlanModal } from './change-plan/modals/confirm-change-plan-modal'
 import { KeepCurrentPlanModal } from './change-plan/modals/keep-current-plan-modal'
 import { ChangeToGroupModal } from './change-plan/modals/change-to-group-modal'
-import OLButton from '@/features/ui/components/ol/ol-button'
+import OLButton from '@/shared/components/ol/ol-button'
 import PauseSubscriptionModal from '../../pause-modal'
 import { ConfirmUnpauseSubscriptionModal } from './confirm-unpause-modal'
 

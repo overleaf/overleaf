@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import * as eventTracking from '../../../infrastructure/event-tracking'
-import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
+import OLTooltip from '@/shared/components/ol/ol-tooltip'
 import MaterialIcon from '@/shared/components/material-icon'
 
 function BackToProjectsButton() {

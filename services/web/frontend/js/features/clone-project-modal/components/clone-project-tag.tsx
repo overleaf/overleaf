@@ -1,7 +1,7 @@
 import { FC } from 'react'
 import { Tag as TagType } from '../../../../../app/src/Features/Tags/types'
 import { getTagColor } from '@/features/project-list/util/tag'
-import Tag from '@/features/ui/components/bootstrap-5/tag'
+import Tag from '@/shared/components/tag'
 
 export const CloneProjectTag: FC<{
   tag: TagType

@@ -10,7 +10,7 @@ import {
   DropdownItem,
   DropdownMenu,
   DropdownToggle,
-} from '@/features/ui/components/bootstrap-5/dropdown-menu'
+} from '@/shared/components/dropdown/dropdown-menu'
 
 function Item({ onClick, text, iconType }: SortBtnProps) {
   return (

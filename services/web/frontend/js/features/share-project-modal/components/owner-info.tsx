@@ -1,7 +1,7 @@
 import { useProjectContext } from '@/shared/context/project-context'
 import { useTranslation } from 'react-i18next'
-import OLRow from '@/features/ui/components/ol/ol-row'
-import OLCol from '@/features/ui/components/ol/ol-col'
+import OLRow from '@/shared/components/ol/ol-row'
+import OLCol from '@/shared/components/ol/ol-col'
 import MaterialIcon from '@/shared/components/material-icon'
 
 export default function OwnerInfo() {

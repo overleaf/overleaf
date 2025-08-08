@@ -5,8 +5,8 @@ import TrashProjectModal from '../../../modals/trash-project-modal'
 import useIsMounted from '../../../../../../shared/hooks/use-is-mounted'
 import { useProjectListContext } from '../../../../context/project-list-context'
 import { trashProject } from '../../../../util/api'
-import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
-import OLIconButton from '@/features/ui/components/ol/ol-icon-button'
+import OLTooltip from '@/shared/components/ol/ol-tooltip'
+import OLIconButton from '@/shared/components/ol/ol-icon-button'
 
 type TrashProjectButtonProps = {
   project: Project

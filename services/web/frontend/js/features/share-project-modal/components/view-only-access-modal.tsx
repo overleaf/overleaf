@@ -5,7 +5,7 @@ import { useProjectContext } from '@/shared/context/project-context'
 import { useEditorContext } from '@/shared/context/editor-context'
 import { useIdeReactContext } from '@/features/ide-react/context/ide-react-context'
 import { sendMB } from '@/infrastructure/event-tracking'
-import OLModal from '@/features/ui/components/ol/ol-modal'
+import OLModal from '@/shared/components/ol/ol-modal'
 
 const ViewOnlyAccessModal = () => {
   const [show, setShow] = useState(false)

@@ -1,4 +1,4 @@
-import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
+import OLTooltip from '@/shared/components/ol/ol-tooltip'
 
 describe('<OLTooltip />', function () {
   it('calls the bound handler and blur then hides text on click', function () {

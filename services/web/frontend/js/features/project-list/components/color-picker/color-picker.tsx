@@ -2,7 +2,7 @@ import useSelectColor from '../../hooks/use-select-color'
 import { SketchPicker } from 'react-color'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
+import OLTooltip from '@/shared/components/ol/ol-tooltip'
 import MaterialIcon from '@/shared/components/material-icon'
 
 const PRESET_COLORS: ReadonlyArray<{ color: string; name: string }> = [

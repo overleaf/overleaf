@@ -7,11 +7,11 @@ import OLModal, {
   OLModalFooter,
   OLModalHeader,
   OLModalTitle,
-} from '@/features/ui/components/ol/ol-modal'
-import OLButton from '@/features/ui/components/ol/ol-button'
+} from '@/shared/components/ol/ol-modal'
+import OLButton from '@/shared/components/ol/ol-button'
 import { postJSON } from '@/infrastructure/fetch-json'
 import { useLocation } from '@/shared/hooks/use-location'
-import OLNotification from '@/features/ui/components/ol/ol-notification'
+import OLNotification from '@/shared/components/ol/ol-notification'
 import { PaidSubscription } from '../../../../../../../../types/subscription/dashboard/subscription'
 
 export function ConfirmUnpauseSubscriptionModal() {

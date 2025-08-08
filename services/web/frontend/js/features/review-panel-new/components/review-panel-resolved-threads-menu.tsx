@@ -7,7 +7,7 @@ import { useFileTreeData } from '@/shared/context/file-tree-data-context'
 import { Change, CommentOperation } from '../../../../../types/change'
 import { ThreadId } from '../../../../../types/review-panel/review-panel'
 import LoadingSpinner from '@/shared/components/loading-spinner'
-import OLBadge from '@/features/ui/components/ol/ol-badge'
+import OLBadge from '@/shared/components/ol/ol-badge'
 
 export const ReviewPanelResolvedThreadsMenu: FC = () => {
   const { t } = useTranslation()

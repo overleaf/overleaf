@@ -1,4 +1,4 @@
-import IconButton from '@/features/ui/components/bootstrap-5/icon-button'
+import IconButton from '@/shared/components/button/icon-button'
 import type { Meta } from '@storybook/react'
 import { useTranslation } from 'react-i18next'
 

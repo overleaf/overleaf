@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next'
 import type { User } from '../../../../../../types/group-management/user'
 import { useGroupMembersContext } from '../../context/group-members-context'
 import { useCallback } from 'react'
-import OLFormCheckbox from '@/features/ui/components/ol/ol-form-checkbox'
+import OLFormCheckbox from '@/shared/components/ol/ol-form-checkbox'
 
 type ManagedUsersSelectUserCheckboxProps = {
   user: User

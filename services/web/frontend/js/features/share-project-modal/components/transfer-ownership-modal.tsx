@@ -8,9 +8,9 @@ import OLModal, {
   OLModalFooter,
   OLModalHeader,
   OLModalTitle,
-} from '@/features/ui/components/ol/ol-modal'
-import OLNotification from '@/features/ui/components/ol/ol-notification'
-import OLButton from '@/features/ui/components/ol/ol-button'
+} from '@/shared/components/ol/ol-modal'
+import OLNotification from '@/shared/components/ol/ol-notification'
+import OLButton from '@/shared/components/ol/ol-button'
 import { Spinner } from 'react-bootstrap'
 import { ProjectMember } from '@/shared/context/types/project-metadata'
 

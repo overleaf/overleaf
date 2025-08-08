@@ -1,6 +1,6 @@
 import { FetchError } from '@/infrastructure/fetch-json'
 import { Trans } from 'react-i18next'
-import OLNotification from '@/features/ui/components/ol/ol-notification'
+import OLNotification from '@/shared/components/ol/ol-notification'
 import { billingPortalUrl } from '../../data/subscription-url'
 
 type Props = {

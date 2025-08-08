@@ -5,8 +5,8 @@ import { useCombobox, UseMultipleSelectionReturnValue } from 'downshift'
 import classnames from 'classnames'
 
 import MaterialIcon from '@/shared/components/material-icon'
-import Tag from '@/features/ui/components/bootstrap-5/tag'
-import { DropdownItem } from '@/features/ui/components/bootstrap-5/dropdown-menu'
+import Tag from '@/shared/components/tag'
+import { DropdownItem } from '@/shared/components/dropdown/dropdown-menu'
 import { Spinner } from 'react-bootstrap'
 import { Contact } from '../utils/types'
 

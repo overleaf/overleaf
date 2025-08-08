@@ -20,7 +20,7 @@ import {
 } from '../../extensions/highlight-locations'
 import { useTranslation } from 'react-i18next'
 import { inlineBackground } from '../../../source-editor/extensions/inline-background'
-import OLButton from '@/features/ui/components/ol/ol-button'
+import OLButton from '@/shared/components/ol/ol-button'
 
 function extensions(themeOptions: Options): Extension[] {
   return [

@@ -1,6 +1,6 @@
 import { sendSearchEvent } from '@/features/event-tracking/search-events'
-import OLButton from '@/features/ui/components/ol/ol-button'
-import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
+import OLButton from '@/shared/components/ol/ol-button'
+import OLTooltip from '@/shared/components/ol/ol-tooltip'
 import { useLayoutContext } from '@/shared/context/layout-context'
 import { closeSearchPanel, SearchQuery } from '@codemirror/search'
 import { forwardRef, memo, Ref, useCallback, useEffect, useRef } from 'react'

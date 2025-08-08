@@ -8,7 +8,7 @@ import OLModal, {
   OLModalBody,
   OLModalHeader,
   OLModalTitle,
-} from '@/features/ui/components/ol/ol-modal'
+} from '@/shared/components/ol/ol-modal'
 
 function ChangePlanOptions() {
   const { plans, queryingIndividualPlansData, recurlyLoadError } =

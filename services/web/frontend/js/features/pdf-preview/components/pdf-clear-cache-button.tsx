@@ -1,4 +1,4 @@
-import OLButton from '@/features/ui/components/ol/ol-button'
+import OLButton from '@/shared/components/ol/ol-button'
 import { useTranslation } from 'react-i18next'
 import { memo } from 'react'
 import { useDetachCompileContext as useCompileContext } from '../../../shared/context/detach-compile-context'

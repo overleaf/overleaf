@@ -1,8 +1,8 @@
 import { memo, useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import OLButton from '@/features/ui/components/ol/ol-button'
-import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
-import OLIconButton from '@/features/ui/components/ol/ol-icon-button'
+import OLButton from '@/shared/components/ol/ol-button'
+import OLTooltip from '@/shared/components/ol/ol-tooltip'
+import OLIconButton from '@/shared/components/ol/ol-icon-button'
 
 export const CopyToClipboard = memo<{
   content: string

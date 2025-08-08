@@ -3,7 +3,7 @@ import Notification from '@/shared/components/notification'
 import { upgradePlan } from '@/main/account-upgrade'
 import { useUserContext } from '@/shared/context/user-context'
 import StartFreeTrialButton from '@/shared/components/start-free-trial-button'
-import OLButton from '@/features/ui/components/ol/ol-button'
+import OLButton from '@/shared/components/ol/ol-button'
 import addMoreEditorsImage from '../images/add-more-editors.svg'
 
 export default function CollaboratorsLimitUpgrade() {

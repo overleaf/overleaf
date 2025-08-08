@@ -3,8 +3,8 @@ import { memo, useCallback } from 'react'
 import { Project } from '../../../../../../../../types/project/dashboard/api'
 import { useProjectListContext } from '../../../../context/project-list-context'
 import { untrashProject } from '../../../../util/api'
-import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
-import OLIconButton from '@/features/ui/components/ol/ol-icon-button'
+import OLTooltip from '@/shared/components/ol/ol-tooltip'
+import OLIconButton from '@/shared/components/ol/ol-icon-button'
 
 type UntrashProjectButtonProps = {
   project: Project

@@ -1,6 +1,6 @@
 import { ReactNode } from 'react'
 import MaterialIcon from '@/shared/components/material-icon'
-import OLSpinner from '@/features/ui/components/ol/ol-spinner'
+import OLSpinner from '@/shared/components/ol/ol-spinner'
 
 type Status = 'pending' | 'success' | 'error'
 

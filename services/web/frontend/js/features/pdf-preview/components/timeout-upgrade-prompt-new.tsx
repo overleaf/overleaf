@@ -4,7 +4,7 @@ import StartFreeTrialButton from '../../../shared/components/start-free-trial-bu
 import { memo, useCallback, useMemo } from 'react'
 import PdfLogEntry from './pdf-log-entry'
 import { useStopOnFirstError } from '../../../shared/hooks/use-stop-on-first-error'
-import OLButton from '@/features/ui/components/ol/ol-button'
+import OLButton from '@/shared/components/ol/ol-button'
 import * as eventTracking from '../../../infrastructure/event-tracking'
 import getMeta from '@/utils/meta'
 

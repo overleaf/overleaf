@@ -2,13 +2,13 @@ import { useState, Dispatch, SetStateAction } from 'react'
 import { useTranslation, Trans } from 'react-i18next'
 import getMeta from '../../../../utils/meta'
 import LeaveModalForm, { LeaveModalFormProps } from './modal-form'
-import OLButton from '@/features/ui/components/ol/ol-button'
+import OLButton from '@/shared/components/ol/ol-button'
 import {
   OLModalBody,
   OLModalFooter,
   OLModalHeader,
   OLModalTitle,
-} from '@/features/ui/components/ol/ol-modal'
+} from '@/shared/components/ol/ol-modal'
 
 type LeaveModalContentProps = {
   handleHide: () => void

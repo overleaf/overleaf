@@ -2,7 +2,7 @@ import {
   DropdownDivider,
   DropdownHeader,
   DropdownItem,
-} from '@/features/ui/components/bootstrap-5/dropdown-menu'
+} from '@/shared/components/dropdown/dropdown-menu'
 import { MenuBar } from '@/shared/components/menu-bar/menu-bar'
 import { MenuBarDropdown } from '@/shared/components/menu-bar/menu-bar-dropdown'
 import { MenuBarOption } from '@/shared/components/menu-bar/menu-bar-option'
@@ -12,7 +12,7 @@ import { MouseEventHandler, useCallback, useMemo, useState } from 'react'
 import { useIdeRedesignSwitcherContext } from '@/features/ide-react/context/ide-redesign-switcher-context'
 import { useSwitchEnableNewEditorState } from '../../hooks/use-switch-enable-new-editor-state'
 import MaterialIcon from '@/shared/components/material-icon'
-import OLSpinner from '@/features/ui/components/ol/ol-spinner'
+import OLSpinner from '@/shared/components/ol/ol-spinner'
 import { useLayoutContext } from '@/shared/context/layout-context'
 import { useCommandProvider } from '@/features/ide-react/hooks/use-command-provider'
 import CommandDropdown, {

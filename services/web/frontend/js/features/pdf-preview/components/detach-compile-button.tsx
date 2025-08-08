@@ -2,8 +2,8 @@ import { useTranslation } from 'react-i18next'
 import { memo } from 'react'
 import classnames from 'classnames'
 import { useDetachCompileContext } from '../../../shared/context/detach-compile-context'
-import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
-import OLButton from '@/features/ui/components/ol/ol-button'
+import OLTooltip from '@/shared/components/ol/ol-tooltip'
+import OLButton from '@/shared/components/ol/ol-button'
 
 const modifierKey = /Mac/i.test(navigator.platform) ? 'Cmd' : 'Ctrl'
 

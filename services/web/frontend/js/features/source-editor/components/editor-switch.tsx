@@ -1,5 +1,5 @@
 import { ChangeEvent, FC, memo, useCallback } from 'react'
-import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
+import OLTooltip from '@/shared/components/ol/ol-tooltip'
 import { sendMB } from '../../../infrastructure/event-tracking'
 import { isValidTeXFile } from '../../../main/is-valid-tex-file'
 import { useTranslation } from 'react-i18next'

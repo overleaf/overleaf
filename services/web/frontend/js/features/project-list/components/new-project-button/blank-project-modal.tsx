@@ -1,5 +1,5 @@
 import ModalContentNewProjectForm from './modal-content-new-project-form'
-import OLModal from '@/features/ui/components/ol/ol-modal'
+import OLModal from '@/shared/components/ol/ol-modal'
 
 type BlankProjectModalProps = {
   onHide: () => void

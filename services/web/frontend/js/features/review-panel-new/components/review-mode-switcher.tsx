@@ -3,8 +3,8 @@ import {
   Dropdown,
   DropdownMenu,
   DropdownToggle,
-} from '@/features/ui/components/bootstrap-5/dropdown-menu'
-import OLDropdownMenuItem from '@/features/ui/components/ol/ol-dropdown-menu-item'
+} from '@/shared/components/dropdown/dropdown-menu'
+import OLDropdownMenuItem from '@/shared/components/ol/ol-dropdown-menu-item'
 import MaterialIcon from '@/shared/components/material-icon'
 import classNames from 'classnames'
 import {

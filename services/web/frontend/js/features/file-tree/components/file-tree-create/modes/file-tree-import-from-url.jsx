@@ -6,9 +6,9 @@ import { useFileTreeCreateName } from '../../../contexts/file-tree-create-name'
 import { useFileTreeCreateForm } from '../../../contexts/file-tree-create-form'
 import ErrorMessage from '../error-message'
 import * as eventTracking from '../../../../../infrastructure/event-tracking'
-import OLFormGroup from '@/features/ui/components/ol/ol-form-group'
-import OLFormLabel from '@/features/ui/components/ol/ol-form-label'
-import OLFormControl from '@/features/ui/components/ol/ol-form-control'
+import OLFormGroup from '@/shared/components/ol/ol-form-group'
+import OLFormLabel from '@/shared/components/ol/ol-form-label'
+import OLFormControl from '@/shared/components/ol/ol-form-control'
 
 export default function FileTreeImportFromUrl() {
   const { t } = useTranslation()

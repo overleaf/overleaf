@@ -3,9 +3,9 @@ import {
   DropdownItem,
   DropdownDivider,
   DropdownHeader,
-} from '@/features/ui/components/bootstrap-5/dropdown-menu'
+} from '@/shared/components/dropdown/dropdown-menu'
 import type { Meta } from '@storybook/react'
-import OLDropdownMenuItem from '@/features/ui/components/ol/ol-dropdown-menu-item'
+import OLDropdownMenuItem from '@/shared/components/ol/ol-dropdown-menu-item'
 
 type Args = React.ComponentProps<typeof DropdownMenu>
 

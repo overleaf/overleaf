@@ -1,4 +1,4 @@
-import OLButton from '@/features/ui/components/ol/ol-button'
+import OLButton from '@/shared/components/ol/ol-button'
 import { useTranslation } from 'react-i18next'
 import type { HistoryContextValue } from '../../../context/types/history-context-value'
 import withErrorBoundary from '@/infrastructure/error-boundary'

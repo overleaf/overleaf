@@ -1,4 +1,4 @@
-import OLFormSelect from '@/features/ui/components/ol/ol-form-select'
+import OLFormSelect from '@/shared/components/ol/ol-form-select'
 import { ChangeEventHandler, useCallback } from 'react'
 import Setting from './setting'
 import classNames from 'classnames'

@@ -1,6 +1,6 @@
 import { useCommandProvider } from '@/features/ide-react/hooks/use-command-provider'
-import OLDropdownMenuItem from '@/features/ui/components/ol/ol-dropdown-menu-item'
-import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
+import OLDropdownMenuItem from '@/shared/components/ol/ol-dropdown-menu-item'
+import OLTooltip from '@/shared/components/ol/ol-tooltip'
 import { isSmallDevice, sendMB } from '@/infrastructure/event-tracking'
 import { useDetachCompileContext as useCompileContext } from '@/shared/context/detach-compile-context'
 import { useProjectContext } from '@/shared/context/project-context'

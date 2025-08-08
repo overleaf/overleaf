@@ -8,8 +8,8 @@ import {
   DropdownItem,
   DropdownMenu,
   DropdownToggle,
-} from '@/features/ui/components/bootstrap-5/dropdown-menu'
-import FormControl from '@/features/ui/components/bootstrap-5/form/form-control'
+} from '@/shared/components/dropdown/dropdown-menu'
+import FormControl from '@/shared/components/form/form-control'
 import { isMac } from '@/shared/utils/os'
 
 const shortcuts = isMac

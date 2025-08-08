@@ -1,7 +1,7 @@
 import { memo, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useDetachCompileContext as useCompileContext } from '../../../shared/context/detach-compile-context'
-import OLButton from '@/features/ui/components/ol/ol-button'
+import OLButton from '@/shared/components/ol/ol-button'
 import MaterialIcon from '@/shared/components/material-icon'
 
 function PdfHybridCodeCheckButton() {

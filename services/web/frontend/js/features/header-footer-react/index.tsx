@@ -1,7 +1,7 @@
 import { createRoot } from 'react-dom/client'
 import getMeta from '@/utils/meta'
-import { DefaultNavbarRoot } from '@/features/ui/components/bootstrap-5/navbar/default-navbar'
-import Footer from '@/features/ui/components/bootstrap-5/footer/footer'
+import { DefaultNavbarRoot } from '@/shared/components/navbar/default-navbar'
+import Footer from '@/shared/components/footer/footer'
 import { SplitTestProvider } from '@/shared/context/split-test-context'
 
 const navbarElement = document.getElementById('navbar-container')

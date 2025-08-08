@@ -7,9 +7,9 @@ import ManagedUserCannotJoin from './managed-user-cannot-join'
 import Notification from '@/shared/components/notification'
 import JoinGroup from './join-group'
 import AcceptedInvite from './accepted-invite'
-import OLRow from '@/features/ui/components/ol/ol-row'
-import OLCol from '@/features/ui/components/ol/ol-col'
-import OLPageContentCard from '@/features/ui/components/ol/ol-page-content-card'
+import OLRow from '@/shared/components/ol/ol-row'
+import OLCol from '@/shared/components/ol/ol-col'
+import OLPageContentCard from '@/shared/components/ol/ol-page-content-card'
 
 export type InviteViewTypes =
   | 'invite'

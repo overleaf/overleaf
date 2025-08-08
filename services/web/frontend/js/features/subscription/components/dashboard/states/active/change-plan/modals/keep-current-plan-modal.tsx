@@ -10,9 +10,9 @@ import OLModal, {
   OLModalFooter,
   OLModalHeader,
   OLModalTitle,
-} from '@/features/ui/components/ol/ol-modal'
-import OLButton from '@/features/ui/components/ol/ol-button'
-import OLNotification from '@/features/ui/components/ol/ol-notification'
+} from '@/shared/components/ol/ol-modal'
+import OLButton from '@/shared/components/ol/ol-button'
+import OLNotification from '@/shared/components/ol/ol-notification'
 
 export function KeepCurrentPlanModal() {
   const modalId: SubscriptionDashModalIds = 'keep-current-plan'

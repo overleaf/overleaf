@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { useLocation } from '../../../shared/hooks/use-location'
-import OLButton from '@/features/ui/components/ol/ol-button'
+import OLButton from '@/shared/components/ol/ol-button'
 
 function FileTreeError() {
   const { t } = useTranslation()

@@ -10,12 +10,12 @@ import OLModal, {
   OLModalFooter,
   OLModalHeader,
   OLModalTitle,
-} from '@/features/ui/components/ol/ol-modal'
-import OLFormGroup from '@/features/ui/components/ol/ol-form-group'
-import OLButton from '@/features/ui/components/ol/ol-button'
-import OLNotification from '@/features/ui/components/ol/ol-notification'
-import OLFormControl from '@/features/ui/components/ol/ol-form-control'
-import OLFormLabel from '@/features/ui/components/ol/ol-form-label'
+} from '@/shared/components/ol/ol-modal'
+import OLFormGroup from '@/shared/components/ol/ol-form-group'
+import OLButton from '@/shared/components/ol/ol-button'
+import OLNotification from '@/shared/components/ol/ol-notification'
+import OLFormControl from '@/shared/components/ol/ol-form-control'
+import OLFormLabel from '@/shared/components/ol/ol-form-label'
 import { sendMB } from '@/infrastructure/event-tracking'
 
 type RemoveManagedUserModalProps = {

@@ -1,4 +1,4 @@
-import OLFormSwitch from '@/features/ui/components/ol/ol-form-switch'
+import OLFormSwitch from '@/shared/components/ol/ol-form-switch'
 import { disableControlsOf } from './utils/arg-types'
 
 export const Unchecked = () => {

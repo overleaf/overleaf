@@ -23,12 +23,12 @@ import {
   getSearchQuery,
   SearchCursor,
 } from '@codemirror/search'
-import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
-import OLButton from '@/features/ui/components/ol/ol-button'
+import OLTooltip from '@/shared/components/ol/ol-tooltip'
+import OLButton from '@/shared/components/ol/ol-button'
 import MaterialIcon from '@/shared/components/material-icon'
-import OLButtonGroup from '@/features/ui/components/ol/ol-button-group'
-import OLFormControl from '@/features/ui/components/ol/ol-form-control'
-import OLCloseButton from '@/features/ui/components/ol/ol-close-button'
+import OLButtonGroup from '@/shared/components/ol/ol-button-group'
+import OLFormControl from '@/shared/components/ol/ol-form-control'
+import OLCloseButton from '@/shared/components/ol/ol-close-button'
 import { useTranslation } from 'react-i18next'
 import classnames from 'classnames'
 import { useUserSettingsContext } from '@/shared/context/user-settings-context'

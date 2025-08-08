@@ -3,14 +3,14 @@ import {
   Dropdown,
   DropdownMenu,
   DropdownToggle,
-} from '@/features/ui/components/bootstrap-5/dropdown-menu'
-import OLButton from '@/features/ui/components/ol/ol-button'
+} from '@/shared/components/dropdown/dropdown-menu'
+import OLButton from '@/shared/components/ol/ol-button'
 import OLModal, {
   OLModalBody,
   OLModalFooter,
   OLModalHeader,
   OLModalTitle,
-} from '@/features/ui/components/ol/ol-modal'
+} from '@/shared/components/ol/ol-modal'
 import MaterialIcon from '@/shared/components/material-icon'
 import useEventListener from '@/shared/hooks/use-event-listener'
 import { FC, useCallback, useState } from 'react'
@@ -22,7 +22,7 @@ import {
 import { mathPreviewStateField } from '../extensions/math-preview'
 import { getTooltip } from '@codemirror/view'
 import ReactDOM from 'react-dom'
-import OLDropdownMenuItem from '@/features/ui/components/ol/ol-dropdown-menu-item'
+import OLDropdownMenuItem from '@/shared/components/ol/ol-dropdown-menu-item'
 import { useIsNewEditorEnabled } from '@/features/ide-redesign/utils/new-editor-utils'
 
 const MathPreviewTooltipContainer: FC = () => {

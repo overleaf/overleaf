@@ -5,7 +5,7 @@ import useAsync from '../../../../shared/hooks/use-async'
 import { useLocation } from '../../../../shared/hooks/use-location'
 import getMeta from '../../../../utils/meta'
 import { debugConsole } from '@/utils/debugging'
-import OLButton from '@/features/ui/components/ol/ol-button'
+import OLButton from '@/shared/components/ol/ol-button'
 
 function ReactivateSubscription() {
   const { t } = useTranslation()

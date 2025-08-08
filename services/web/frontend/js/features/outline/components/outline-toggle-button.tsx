@@ -1,4 +1,4 @@
-import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
+import OLTooltip from '@/shared/components/ol/ol-tooltip'
 import MaterialIcon from '@/shared/components/material-icon'
 import React, { memo } from 'react'
 import { useTranslation } from 'react-i18next'

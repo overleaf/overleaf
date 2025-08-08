@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom'
 import {
   Dropdown,
   DropdownMenu,
-} from '@/features/ui/components/bootstrap-5/dropdown-menu'
+} from '@/shared/components/dropdown/dropdown-menu'
 import { useFileTreeData } from '@/shared/context/file-tree-data-context'
 import { useFileTreeMainContext } from '../contexts/file-tree-main'
 

@@ -1,5 +1,5 @@
-import OLToggleButton from '@/features/ui/components/ol/ol-toggle-button'
-import OLToggleButtonGroup from '@/features/ui/components/ol/ol-toggle-button-group'
+import OLToggleButton from '@/shared/components/ol/ol-toggle-button'
+import OLToggleButtonGroup from '@/shared/components/ol/ol-toggle-button-group'
 
 export const Base = () => {
   return (

@@ -4,10 +4,10 @@ import {
   Dropdown,
   DropdownMenu,
   DropdownToggle,
-} from '@/features/ui/components/bootstrap-5/dropdown-menu'
+} from '@/shared/components/dropdown/dropdown-menu'
 import ChangeLayoutOptions from './change-layout-options'
 import MaterialIcon from '@/shared/components/material-icon'
-import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
+import OLTooltip from '@/shared/components/ol/ol-tooltip'
 
 export default function ChangeLayoutButton() {
   const { t } = useTranslation()

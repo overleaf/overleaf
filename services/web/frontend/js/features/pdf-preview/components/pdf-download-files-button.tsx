@@ -2,7 +2,7 @@ import {
   Dropdown,
   DropdownMenu,
   DropdownToggle,
-} from '@/features/ui/components/bootstrap-5/dropdown-menu'
+} from '@/shared/components/dropdown/dropdown-menu'
 import PdfFileList from './pdf-file-list'
 import { memo } from 'react'
 import { useTranslation } from 'react-i18next'

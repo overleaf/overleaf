@@ -3,7 +3,7 @@ import { useTranslation, Trans } from 'react-i18next'
 import Notification from '../notification'
 import getMeta from '../../../../../utils/meta'
 import useAsyncDismiss from '../hooks/useAsyncDismiss'
-import OLButton from '@/features/ui/components/ol/ol-button'
+import OLButton from '@/shared/components/ol/ol-button'
 
 function Institution() {
   const { t } = useTranslation()

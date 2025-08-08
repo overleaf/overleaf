@@ -1,6 +1,6 @@
 import { memo } from 'react'
 import { useTranslation } from 'react-i18next'
-import OLButtonToolbar from '@/features/ui/components/ol/ol-button-toolbar'
+import OLButtonToolbar from '@/shared/components/ol/ol-button-toolbar'
 import PdfCompileButton from '@/features/pdf-preview/components/pdf-compile-button'
 import PdfHybridDownloadButton from '@/features/pdf-preview/components/pdf-hybrid-download-button'
 import { DetachedSynctexControl } from '@/features/pdf-preview/components/detach-synctex-control'

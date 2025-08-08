@@ -6,11 +6,11 @@ import OLModal, {
   OLModalFooter,
   OLModalHeader,
   OLModalTitle,
-} from '@/features/ui/components/ol/ol-modal'
-import OLButton from '@/features/ui/components/ol/ol-button'
+} from '@/shared/components/ol/ol-modal'
+import OLButton from '@/shared/components/ol/ol-button'
 import sparkle from '@/shared/svgs/sparkle.svg'
 import { Dropdown, DropdownMenu, DropdownToggle } from 'react-bootstrap'
-import OLDropdownMenuItem from '@/features/ui/components/ol/ol-dropdown-menu-item'
+import OLDropdownMenuItem from '@/shared/components/ol/ol-dropdown-menu-item'
 import MaterialIcon from '@/shared/components/material-icon'
 import { ADD_ON_NAME } from '@/features/subscription/data/add-on-codes'
 import getMeta from '@/utils/meta'

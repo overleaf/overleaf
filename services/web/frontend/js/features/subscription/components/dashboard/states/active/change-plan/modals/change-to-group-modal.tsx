@@ -17,15 +17,15 @@ import OLModal, {
   OLModalFooter,
   OLModalHeader,
   OLModalTitle,
-} from '@/features/ui/components/ol/ol-modal'
-import OLFormSelect from '@/features/ui/components/ol/ol-form-select'
-import OLFormGroup from '@/features/ui/components/ol/ol-form-group'
-import OLFormLabel from '@/features/ui/components/ol/ol-form-label'
-import OLFormCheckbox from '@/features/ui/components/ol/ol-form-checkbox'
+} from '@/shared/components/ol/ol-modal'
+import OLFormSelect from '@/shared/components/ol/ol-form-select'
+import OLFormGroup from '@/shared/components/ol/ol-form-group'
+import OLFormLabel from '@/shared/components/ol/ol-form-label'
+import OLFormCheckbox from '@/shared/components/ol/ol-form-checkbox'
 import { useContactUsModal } from '@/shared/hooks/use-contact-us-modal'
 import { UserProvider } from '@/shared/context/user-context'
-import OLButton from '@/features/ui/components/ol/ol-button'
-import OLNotification from '@/features/ui/components/ol/ol-notification'
+import OLButton from '@/shared/components/ol/ol-button'
+import OLNotification from '@/shared/components/ol/ol-notification'
 import handleStripePaymentAction from '@/features/subscription/util/handle-stripe-payment-action'
 
 const educationalPercentDiscount = 40

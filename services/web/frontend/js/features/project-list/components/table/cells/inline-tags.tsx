@@ -4,7 +4,7 @@ import { Tag as TagType } from '../../../../../../../app/src/Features/Tags/types
 import { useProjectListContext } from '../../../context/project-list-context'
 import { removeProjectFromTag } from '../../../util/api'
 import { getTagColor } from '../../../util/tag'
-import Tag from '@/features/ui/components/bootstrap-5/tag'
+import Tag from '@/shared/components/tag'
 
 type InlineTagsProps = {
   projectId: string

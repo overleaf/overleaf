@@ -28,7 +28,7 @@ import { useTranslation } from 'react-i18next'
 import { ColumnWidthModal } from './toolbar/column-width-modal/modal'
 import { WidthSelection } from './toolbar/column-width-modal/column-width'
 import Notification from '@/shared/components/notification'
-import OLButton from '@/features/ui/components/ol/ol-button'
+import OLButton from '@/shared/components/ol/ol-button'
 
 export type ColumnDefinition = {
   alignment: 'left' | 'center' | 'right' | 'paragraph'

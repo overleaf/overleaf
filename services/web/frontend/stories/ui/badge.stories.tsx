@@ -1,4 +1,4 @@
-import Badge from '@/features/ui/components/bootstrap-5/badge'
+import Badge from '@/shared/components/badge/badge'
 import MaterialIcon from '@/shared/components/material-icon'
 import type { Meta, StoryObj } from '@storybook/react'
 import classnames from 'classnames'

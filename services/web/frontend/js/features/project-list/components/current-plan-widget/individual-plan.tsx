@@ -1,6 +1,6 @@
 import { useTranslation, Trans } from 'react-i18next'
 import { IndividualPlanSubscription } from '../../../../../../types/project/dashboard/subscription'
-import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
+import OLTooltip from '@/shared/components/ol/ol-tooltip'
 import MaterialIcon from '@/shared/components/material-icon'
 
 type IndividualPlanProps = Pick<

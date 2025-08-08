@@ -10,7 +10,7 @@ import {
 } from '../../../../../../../types/project/dashboard/notification'
 import GroupInvitationNotification from './group-invitation/group-invitation'
 import { debugConsole } from '@/utils/debugging'
-import OLButton from '@/features/ui/components/ol/ol-button'
+import OLButton from '@/shared/components/ol/ol-button'
 
 function Common() {
   const notifications = getMeta('ol-notifications') || []

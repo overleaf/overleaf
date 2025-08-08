@@ -16,11 +16,11 @@ import {
 } from '../../lezer-latex/latex.terms.mjs'
 import { EditorState } from '@codemirror/state'
 import { openURL } from '@/features/source-editor/utils/url'
-import OLFormGroup from '@/features/ui/components/ol/ol-form-group'
-import OLFormLabel from '@/features/ui/components/ol/ol-form-label'
-import OLFormControl from '@/features/ui/components/ol/ol-form-control'
-import OLForm from '@/features/ui/components/ol/ol-form'
-import OLButton from '@/features/ui/components/ol/ol-button'
+import OLFormGroup from '@/shared/components/ol/ol-form-group'
+import OLFormLabel from '@/shared/components/ol/ol-form-label'
+import OLFormControl from '@/shared/components/ol/ol-form-control'
+import OLForm from '@/shared/components/ol/ol-form'
+import OLButton from '@/shared/components/ol/ol-button'
 import MaterialIcon from '@/shared/components/material-icon'
 
 export const HrefTooltipContent: FC = () => {

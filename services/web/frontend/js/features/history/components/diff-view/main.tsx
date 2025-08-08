@@ -3,7 +3,7 @@ import { Diff } from '../../services/types/doc'
 import DocumentDiffViewer from './document-diff-viewer'
 import LoadingSpinner from '../../../../shared/components/loading-spinner'
 import { useTranslation } from 'react-i18next'
-import OLNotification from '@/features/ui/components/ol/ol-notification'
+import OLNotification from '@/shared/components/ol/ol-notification'
 
 type MainProps = {
   diff: Nullable<Diff>

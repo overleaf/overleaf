@@ -3,7 +3,7 @@ import { MemberGroupSubscription } from '../../../../../../types/subscription/da
 import { useSubscriptionDashboardContext } from '../../context/subscription-dashboard-context'
 import { LEAVE_GROUP_MODAL_ID } from './leave-group-modal'
 import getMeta from '../../../../utils/meta'
-import OLButton from '@/features/ui/components/ol/ol-button'
+import OLButton from '@/shared/components/ol/ol-button'
 
 type GroupSubscriptionMembershipProps = {
   subscription: MemberGroupSubscription

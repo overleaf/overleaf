@@ -1,7 +1,7 @@
 import { useTranslation, Trans } from 'react-i18next'
 import Notification from '../../notification'
 import type { NotificationGroupInvitation } from '../../../../../../../../types/project/dashboard/notification'
-import OLButton from '@/features/ui/components/ol/ol-button'
+import OLButton from '@/shared/components/ol/ol-button'
 
 type GroupInvitationNotificationProps = {
   acceptGroupInvite: () => void

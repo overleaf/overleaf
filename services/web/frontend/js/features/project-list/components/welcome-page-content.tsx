@@ -1,7 +1,7 @@
 import { useProjectListContext } from '@/features/project-list/context/project-list-context'
 import DashApiError from '@/features/project-list/components/dash-api-error'
-import OLRow from '@/features/ui/components/ol/ol-row'
-import OLCol from '@/features/ui/components/ol/ol-col'
+import OLRow from '@/shared/components/ol/ol-row'
+import OLCol from '@/shared/components/ol/ol-col'
 import UserNotifications from '@/features/project-list/components/notifications/user-notifications'
 import WelcomeMessage from '@/features/project-list/components/welcome-message'
 

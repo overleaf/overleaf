@@ -11,7 +11,7 @@ import Notification from '@/shared/components/notification'
 import { sendMB } from '@/infrastructure/event-tracking'
 
 import LeaveProjectModal from './leave-project-modal'
-import OLButton from '@/features/ui/components/ol/ol-button'
+import OLButton from '@/shared/components/ol/ol-button'
 import { useLocation } from '@/shared/hooks/use-location'
 
 function SharingUpdatesRoot() {

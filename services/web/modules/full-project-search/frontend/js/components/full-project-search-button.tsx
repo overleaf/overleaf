@@ -1,10 +1,10 @@
 import React, { FC, useMemo } from 'react'
-import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
+import OLTooltip from '@/shared/components/ol/ol-tooltip'
 import classnames from 'classnames'
 import MaterialIcon from '@/shared/components/material-icon'
 import { useLayoutContext } from '@/shared/context/layout-context'
 import { useTranslation } from 'react-i18next'
-import { TooltipProps } from '@/features/ui/components/bootstrap-5/tooltip-bs5'
+import { TooltipProps } from '@/shared/components/tooltip'
 import { isMac } from '@/shared/utils/os'
 import { sendSearchEvent } from '@/features/event-tracking/search-events'
 

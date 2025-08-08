@@ -1,8 +1,8 @@
 import { useTranslation } from 'react-i18next'
-import OLRow from '@/features/ui/components/ol/ol-row'
-import OLCol from '@/features/ui/components/ol/ol-col'
-import OLPageContentCard from '@/features/ui/components/ol/ol-page-content-card'
-import OLNotification from '@/features/ui/components/ol/ol-notification'
+import OLRow from '@/shared/components/ol/ol-row'
+import OLCol from '@/shared/components/ol/ol-col'
+import OLPageContentCard from '@/shared/components/ol/ol-page-content-card'
+import OLNotification from '@/shared/components/ol/ol-notification'
 
 function Canceled() {
   const { t } = useTranslation()

@@ -19,7 +19,7 @@ import {
   TransactionSpec,
 } from '@codemirror/state'
 import { EditorView } from '@codemirror/view'
-import OLButton from '@/features/ui/components/ol/ol-button'
+import OLButton from '@/shared/components/ol/ol-button'
 import MaterialIcon from '@/shared/components/material-icon'
 
 export const RefTooltipContent: FC = () => {

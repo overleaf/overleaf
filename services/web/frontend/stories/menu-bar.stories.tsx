@@ -1,4 +1,4 @@
-import { DropdownDivider } from '@/features/ui/components/bootstrap-5/dropdown-menu'
+import { DropdownDivider } from '@/shared/components/dropdown/dropdown-menu'
 import { MenuBar } from '@/shared/components/menu-bar/menu-bar'
 import { MenuBarDropdown } from '@/shared/components/menu-bar/menu-bar-dropdown'
 import { MenuBarOption } from '@/shared/components/menu-bar/menu-bar-option'

@@ -1,6 +1,6 @@
 import { ToolbarButtonMenu } from './button-menu'
 import MaterialIcon from '@/shared/components/material-icon'
-import OLListGroupItem from '@/features/ui/components/ol/ol-list-group-item'
+import OLListGroupItem from '@/shared/components/ol/ol-list-group-item'
 import { memo, useCallback } from 'react'
 import { FigureModalSource } from '../figure-modal/figure-modal-context'
 import { useTranslation } from 'react-i18next'

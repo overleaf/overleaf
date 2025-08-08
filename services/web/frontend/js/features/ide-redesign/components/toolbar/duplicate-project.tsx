@@ -1,5 +1,5 @@
 import EditorCloneProjectModalWrapper from '@/features/clone-project-modal/components/editor-clone-project-modal-wrapper'
-import OLDropdownMenuItem from '@/features/ui/components/ol/ol-dropdown-menu-item'
+import OLDropdownMenuItem from '@/shared/components/ol/ol-dropdown-menu-item'
 import { useEditorAnalytics } from '@/shared/hooks/use-editor-analytics'
 import { useLocation } from '@/shared/hooks/use-location'
 import getMeta from '@/utils/meta'

@@ -9,9 +9,9 @@ import { useTranslation } from 'react-i18next'
 import { useCodeMirrorViewContext } from '../../codemirror-context'
 import { EditorView } from '@codemirror/view'
 import { waitForFileTreeUpdate } from '../../../extensions/figure-modal'
-import OLFormGroup from '@/features/ui/components/ol/ol-form-group'
-import OLFormControl from '@/features/ui/components/ol/ol-form-control'
-import OLFormLabel from '@/features/ui/components/ol/ol-form-label'
+import OLFormGroup from '@/shared/components/ol/ol-form-group'
+import OLFormControl from '@/shared/components/ol/ol-form-control'
+import OLFormLabel from '@/shared/components/ol/ol-form-label'
 
 function generateLinkedFileFetcher(
   projectId: string,

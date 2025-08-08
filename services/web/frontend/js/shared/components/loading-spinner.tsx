@@ -1,8 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { useEffect, useState } from 'react'
-import OLSpinner, {
-  OLSpinnerSize,
-} from '@/features/ui/components/ol/ol-spinner'
+import OLSpinner, { OLSpinnerSize } from '@/shared/components/ol/ol-spinner'
 import classNames from 'classnames'
 
 function LoadingSpinner({

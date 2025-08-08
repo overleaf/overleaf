@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
-import OLNotification from '@/features/ui/components/ol/ol-notification'
-import OLButton from '@/features/ui/components/ol/ol-button'
+import OLNotification from '@/shared/components/ol/ol-notification'
+import OLButton from '@/shared/components/ol/ol-button'
 
 interface ChatFallbackErrorProps {
   reconnect?: () => void

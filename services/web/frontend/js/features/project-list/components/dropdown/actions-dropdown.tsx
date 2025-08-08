@@ -5,7 +5,7 @@ import {
   DropdownItem,
   DropdownMenu,
   DropdownToggle,
-} from '@/features/ui/components/bootstrap-5/dropdown-menu'
+} from '@/shared/components/dropdown/dropdown-menu'
 import CopyProjectButton from '../table/cells/action-buttons/copy-project-button'
 import DownloadProjectButton from '../table/cells/action-buttons/download-project-button'
 import ArchiveProjectButton from '../table/cells/action-buttons/archive-project-button'

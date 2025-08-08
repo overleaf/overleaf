@@ -1,5 +1,5 @@
 import { Meta, StoryObj } from '@storybook/react'
-import { OLToast } from '@/features/ui/components/ol/ol-toast'
+import { OLToast } from '@/shared/components/ol/ol-toast'
 import { SynctexFileErrorToast } from '@/features/pdf-preview/components/synctex-toasts'
 
 const meta = {

@@ -5,7 +5,7 @@ import OLModal, {
   OLModalBody,
   OLModalHeader,
   OLModalTitle,
-} from '@/features/ui/components/ol/ol-modal'
+} from '@/shared/components/ol/ol-modal'
 
 // show modal when editor is forcefully disconnected
 function ForceDisconnected() {

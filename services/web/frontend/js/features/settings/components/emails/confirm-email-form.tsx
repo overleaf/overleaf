@@ -7,8 +7,8 @@ import { Trans, useTranslation } from 'react-i18next'
 import LoadingSpinner from '@/shared/components/loading-spinner'
 import MaterialIcon from '@/shared/components/material-icon'
 import { sendMB } from '@/infrastructure/event-tracking'
-import OLFormLabel from '@/features/ui/components/ol/ol-form-label'
-import OLButton from '@/features/ui/components/ol/ol-button'
+import OLFormLabel from '@/shared/components/ol/ol-form-label'
+import OLButton from '@/shared/components/ol/ol-button'
 import { useLocation } from '@/shared/hooks/use-location'
 
 type Feedback = {

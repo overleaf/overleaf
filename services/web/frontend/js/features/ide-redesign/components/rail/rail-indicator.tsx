@@ -1,4 +1,4 @@
-import OLBadge from '@/features/ui/components/ol/ol-badge'
+import OLBadge from '@/shared/components/ol/ol-badge'
 
 type RailIndicatorProps = {
   type: 'danger' | 'warning' | 'info'

@@ -1,5 +1,5 @@
 import Setting from './setting'
-import OLFormSwitch from '@/features/ui/components/ol/ol-form-switch'
+import OLFormSwitch from '@/shared/components/ol/ol-form-switch'
 
 export default function ToggleSetting({
   id,

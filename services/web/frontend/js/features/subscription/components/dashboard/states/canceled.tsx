@@ -5,7 +5,7 @@ import {
   ADD_ON_NAME,
 } from '../../../data/add-on-codes'
 import ReactivateSubscription from '../reactivate-subscription'
-import OLButton from '@/features/ui/components/ol/ol-button'
+import OLButton from '@/shared/components/ol/ol-button'
 
 export function CanceledSubscription({
   subscription,

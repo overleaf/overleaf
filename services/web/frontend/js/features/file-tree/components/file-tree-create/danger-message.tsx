@@ -1,4 +1,4 @@
-import OLNotification from '@/features/ui/components/ol/ol-notification'
+import OLNotification from '@/shared/components/ol/ol-notification'
 
 export default function DangerMessage({
   children,

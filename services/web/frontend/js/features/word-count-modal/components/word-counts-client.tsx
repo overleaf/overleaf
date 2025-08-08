@@ -2,7 +2,7 @@ import { FC, useMemo } from 'react'
 import { WordCountData } from '@/features/word-count-modal/components/word-count-data'
 import { useTranslation } from 'react-i18next'
 import { Container, Row, Col, Form } from 'react-bootstrap'
-import OLNotification from '@/features/ui/components/ol/ol-notification'
+import OLNotification from '@/shared/components/ol/ol-notification'
 import usePersistedState from '@/shared/hooks/use-persisted-state'
 
 export const WordCountsClient: FC<{ data: WordCountData }> = ({ data }) => {

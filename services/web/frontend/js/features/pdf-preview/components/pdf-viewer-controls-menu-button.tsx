@@ -5,10 +5,10 @@ import PdfZoomButtons from './pdf-zoom-buttons'
 import { useTranslation } from 'react-i18next'
 import MaterialIcon from '@/shared/components/material-icon'
 import useDropdown from '@/shared/hooks/use-dropdown'
-import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
-import OLButton from '@/features/ui/components/ol/ol-button'
-import OLOverlay from '@/features/ui/components/ol/ol-overlay'
-import OLPopover from '@/features/ui/components/ol/ol-popover'
+import OLTooltip from '@/shared/components/ol/ol-tooltip'
+import OLButton from '@/shared/components/ol/ol-button'
+import OLOverlay from '@/shared/components/ol/ol-overlay'
+import OLPopover from '@/shared/components/ol/ol-popover'
 
 type PdfViewerControlsMenuButtonProps = {
   setZoom: (zoom: string) => void

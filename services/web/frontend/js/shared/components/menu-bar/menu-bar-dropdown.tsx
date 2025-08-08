@@ -2,14 +2,14 @@ import {
   Dropdown,
   DropdownMenu,
   DropdownToggle,
-} from '@/features/ui/components/bootstrap-5/dropdown-menu'
+} from '@/shared/components/dropdown/dropdown-menu'
 import { FC, forwardRef, useCallback } from 'react'
 import classNames from 'classnames'
 import { useNestableDropdown } from '@/shared/hooks/use-nestable-dropdown'
 import { NestableDropdownContextProvider } from '@/shared/context/nestable-dropdown-context'
 import { AnchorProps } from 'react-bootstrap'
 import MaterialIcon from '../material-icon'
-import { DropdownMenuProps } from '@/features/ui/components/types/dropdown-menu-props'
+import { DropdownMenuProps } from '@/shared/components/types/dropdown-menu-props'
 
 type MenuBarDropdownProps = {
   title: string

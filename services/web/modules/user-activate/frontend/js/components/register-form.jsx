@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import PropTypes from 'prop-types'
 import { postJSON } from '@/infrastructure/fetch-json'
-import OLButton from '@/features/ui/components/ol/ol-button'
-import OLForm from '@/features/ui/components/ol/ol-form'
-import OLFormControl from '@/features/ui/components/ol/ol-form-control'
+import OLButton from '@/shared/components/ol/ol-button'
+import OLForm from '@/shared/components/ol/ol-form'
+import OLFormControl from '@/shared/components/ol/ol-form-control'
 
 function RegisterForm({
   setRegistrationSuccess,

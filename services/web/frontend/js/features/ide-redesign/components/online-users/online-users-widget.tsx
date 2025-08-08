@@ -5,8 +5,8 @@ import {
   DropdownItem,
   DropdownMenu,
   DropdownToggle,
-} from '@/features/ui/components/bootstrap-5/dropdown-menu'
-import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
+} from '@/shared/components/dropdown/dropdown-menu'
+import OLTooltip from '@/shared/components/ol/ol-tooltip'
 import {
   getBackgroundColorForUserId,
   hslStringToLuminance,

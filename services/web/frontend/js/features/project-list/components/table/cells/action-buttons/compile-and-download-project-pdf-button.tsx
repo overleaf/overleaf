@@ -6,15 +6,15 @@ import { useLocation } from '../../../../../../shared/hooks/use-location'
 import useAbortController from '../../../../../../shared/hooks/use-abort-controller'
 import { postJSON } from '../../../../../../infrastructure/fetch-json'
 import { isSmallDevice } from '../../../../../../infrastructure/event-tracking'
-import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
-import OLButton from '@/features/ui/components/ol/ol-button'
+import OLTooltip from '@/shared/components/ol/ol-tooltip'
+import OLButton from '@/shared/components/ol/ol-button'
 import OLModal, {
   OLModalBody,
   OLModalFooter,
   OLModalHeader,
   OLModalTitle,
-} from '@/features/ui/components/ol/ol-modal'
-import OLIconButton from '@/features/ui/components/ol/ol-icon-button'
+} from '@/shared/components/ol/ol-modal'
+import OLIconButton from '@/shared/components/ol/ol-icon-button'
 
 type CompileAndDownloadProjectPDFButtonProps = {
   project: Project

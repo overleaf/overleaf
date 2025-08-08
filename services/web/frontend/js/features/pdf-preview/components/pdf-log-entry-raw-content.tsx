@@ -2,7 +2,7 @@ import { useCallback, useState } from 'react'
 import { useResizeObserver } from '../../../shared/hooks/use-resize-observer'
 import { useTranslation } from 'react-i18next'
 import classNames from 'classnames'
-import OLButton from '@/features/ui/components/ol/ol-button'
+import OLButton from '@/shared/components/ol/ol-button'
 
 export default function PdfLogEntryRawContent({
   rawContent,

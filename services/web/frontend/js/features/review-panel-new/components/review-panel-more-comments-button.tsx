@@ -2,7 +2,7 @@ import { FC, memo } from 'react'
 import MaterialIcon from '@/shared/components/material-icon'
 import classNames from 'classnames'
 import { useTranslation } from 'react-i18next'
-import OLButton from '@/features/ui/components/ol/ol-button'
+import OLButton from '@/shared/components/ol/ol-button'
 
 const MoreCommentsButton: FC<{
   onClick: () => void

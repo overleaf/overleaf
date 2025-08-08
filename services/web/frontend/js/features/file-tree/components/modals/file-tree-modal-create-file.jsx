@@ -8,7 +8,7 @@ import OLModal, {
   OLModalFooter,
   OLModalHeader,
   OLModalTitle,
-} from '@/features/ui/components/ol/ol-modal'
+} from '@/shared/components/ol/ol-modal'
 
 export default function FileTreeModalCreateFile() {
   const { t } = useTranslation()

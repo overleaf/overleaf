@@ -3,8 +3,8 @@ import { useTranslation } from 'react-i18next'
 import { useCombobox } from 'downshift'
 import classnames from 'classnames'
 import countries, { CountryCode } from '../../../data/countries-list'
-import OLFormControl from '@/features/ui/components/ol/ol-form-control'
-import { DropdownItem } from '@/features/ui/components/bootstrap-5/dropdown-menu'
+import OLFormControl from '@/shared/components/ol/ol-form-control'
+import { DropdownItem } from '@/shared/components/dropdown/dropdown-menu'
 
 type CountryInputProps = {
   setValue: React.Dispatch<React.SetStateAction<CountryCode | null>>

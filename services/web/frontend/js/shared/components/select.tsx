@@ -10,9 +10,9 @@ import classNames from 'classnames'
 import { useSelect } from 'downshift'
 import { useTranslation } from 'react-i18next'
 import { Form, Spinner } from 'react-bootstrap'
-import FormControl from '@/features/ui/components/bootstrap-5/form/form-control'
+import FormControl from '@/shared/components/form/form-control'
 import MaterialIcon from '@/shared/components/material-icon'
-import { DropdownItem } from '@/features/ui/components/bootstrap-5/dropdown-menu'
+import { DropdownItem } from '@/shared/components/dropdown/dropdown-menu'
 
 export type SelectProps<T> = {
   // The items rendered as dropdown options.

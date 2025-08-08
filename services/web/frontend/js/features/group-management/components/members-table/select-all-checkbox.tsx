@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useGroupMembersContext } from '../../context/group-members-context'
-import OLFormCheckbox from '@/features/ui/components/ol/ol-form-checkbox'
+import OLFormCheckbox from '@/shared/components/ol/ol-form-checkbox'
 
 export default function SelectAllCheckbox() {
   const { t } = useTranslation()

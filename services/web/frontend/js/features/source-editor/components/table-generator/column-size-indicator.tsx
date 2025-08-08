@@ -2,7 +2,7 @@ import MaterialIcon from '@/shared/components/material-icon'
 import { WidthSelection } from './toolbar/column-width-modal/column-width'
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
+import OLTooltip from '@/shared/components/ol/ol-tooltip'
 import { useSelectionContext } from './contexts/selection-context'
 
 function roundIfNeeded(width: number) {

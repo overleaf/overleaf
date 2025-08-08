@@ -4,7 +4,7 @@ import { File } from '../../utils/file'
 import { Select } from '../../../../shared/components/select'
 import { useCurrentProjectFolders } from '../../hooks/use-current-project-folders'
 import { useTranslation } from 'react-i18next'
-import OLFormGroup from '@/features/ui/components/ol/ol-form-group'
+import OLFormGroup from '@/shared/components/ol/ol-form-group'
 
 export const FileRelocator = ({
   name,

@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { UserEmailData } from '../../../../../../types/user-email'
 import { ssoAvailableForInstitution } from '../../utils/sso'
-import OLBadge from '@/features/ui/components/ol/ol-badge'
+import OLBadge from '@/shared/components/ol/ol-badge'
 import ResendConfirmationCodeModal from '@/features/settings/components/emails/resend-confirmation-code-modal'
 import { useUserEmailsContext } from '@/features/settings/context/user-email-context'
 

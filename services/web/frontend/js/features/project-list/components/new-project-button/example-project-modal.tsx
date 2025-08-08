@@ -1,4 +1,4 @@
-import OLModal from '@/features/ui/components/ol/ol-modal'
+import OLModal from '@/shared/components/ol/ol-modal'
 import ModalContentNewProjectForm from './modal-content-new-project-form'
 
 type ExampleProjectModalProps = {

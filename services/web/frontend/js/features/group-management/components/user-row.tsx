@@ -2,7 +2,7 @@ import moment from 'moment'
 import { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { User } from '../../../../../types/group-management/user'
-import OLFormCheckbox from '@/features/ui/components/ol/ol-form-checkbox'
+import OLFormCheckbox from '@/shared/components/ol/ol-form-checkbox'
 import MaterialIcon from '@/shared/components/material-icon'
 
 type GroupMemberRowProps = {

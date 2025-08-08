@@ -4,8 +4,8 @@ import {
   OLModalFooter,
   OLModalHeader,
   OLModalTitle,
-} from '@/features/ui/components/ol/ol-modal'
-import OLButton from '@/features/ui/components/ol/ol-button'
+} from '@/shared/components/ol/ol-modal'
+import OLButton from '@/shared/components/ol/ol-button'
 import { WordCountServer } from './word-count-server'
 import { WordCountClient } from './word-count-client'
 import { isSplitTestEnabled } from '@/utils/splitTestUtils'

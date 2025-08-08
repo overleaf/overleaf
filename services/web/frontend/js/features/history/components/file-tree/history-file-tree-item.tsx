@@ -1,7 +1,7 @@
 import classNames from 'classnames'
 import type { ReactNode } from 'react'
 import type { FileOperation } from '../../services/types/file-operation'
-import OLTag from '@/features/ui/components/ol/ol-tag'
+import OLTag from '@/shared/components/ol/ol-tag'
 
 type FileTreeItemProps = {
   name: string

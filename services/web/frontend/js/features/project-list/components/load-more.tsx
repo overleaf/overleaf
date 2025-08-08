@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { useProjectListContext } from '../context/project-list-context'
-import OLButton from '@/features/ui/components/ol/ol-button'
+import OLButton from '@/shared/components/ol/ol-button'
 
 export default function LoadMore() {
   const {

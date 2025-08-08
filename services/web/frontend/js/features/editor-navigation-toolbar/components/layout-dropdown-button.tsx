@@ -6,7 +6,7 @@ import {
   DropdownMenu,
   DropdownToggle,
   DropdownToggleCustom,
-} from '@/features/ui/components/bootstrap-5/dropdown-menu'
+} from '@/shared/components/dropdown/dropdown-menu'
 import { Trans, useTranslation } from 'react-i18next'
 import {
   IdeLayout,
@@ -17,7 +17,7 @@ import * as eventTracking from '../../../infrastructure/event-tracking'
 import useEventListener from '../../../shared/hooks/use-event-listener'
 import { DetachRole } from '@/shared/context/detach-context'
 import MaterialIcon from '@/shared/components/material-icon'
-import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
+import OLTooltip from '@/shared/components/ol/ol-tooltip'
 
 const isActiveDropdownItem = ({
   iconFor,

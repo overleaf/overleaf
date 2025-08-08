@@ -2,7 +2,7 @@ import MaterialIcon from '@/shared/components/material-icon'
 import { Trans, useTranslation } from 'react-i18next'
 import { GroupSSOLinkingStatus } from '../../../../../types/subscription/sso'
 import getMeta from '../../../utils/meta'
-import OLButton from '@/features/ui/components/ol/ol-button'
+import OLButton from '@/shared/components/ol/ol-button'
 
 function SecuritySection() {
   const { t } = useTranslation()

@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
-import OLRow from '@/features/ui/components/ol/ol-row'
-import OLCol from '@/features/ui/components/ol/ol-col'
+import OLRow from '@/shared/components/ol/ol-row'
+import OLCol from '@/shared/components/ol/ol-col'
 import Notification from '@/shared/components/notification'
 
 export default function DashApiError() {

@@ -11,8 +11,8 @@ import UntrashProjectsButton from './buttons/untrash-projects-button'
 import DeleteLeaveProjectsButton from './buttons/delete-leave-projects-button'
 import LeaveProjectsButton from './buttons/leave-projects-button'
 import DeleteProjectsButton from './buttons/delete-projects-button'
-import OLButtonToolbar from '@/features/ui/components/ol/ol-button-toolbar'
-import OLButtonGroup from '@/features/ui/components/ol/ol-button-group'
+import OLButtonToolbar from '@/shared/components/ol/ol-button-toolbar'
+import OLButtonGroup from '@/shared/components/ol/ol-button-group'
 
 function ProjectTools() {
   const { t } = useTranslation()

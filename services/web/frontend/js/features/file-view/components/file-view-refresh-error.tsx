@@ -2,7 +2,7 @@ import type { ElementType } from 'react'
 import { useTranslation } from 'react-i18next'
 import importOverleafModules from '../../../../macros/import-overleaf-module.macro'
 import { BinaryFile } from '../types/binary-file'
-import OLNotification from '@/features/ui/components/ol/ol-notification'
+import OLNotification from '@/shared/components/ol/ol-notification'
 
 type FileViewRefreshErrorProps = {
   file: BinaryFile

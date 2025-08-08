@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
-import OLIconButton from '@/features/ui/components/ol/ol-icon-button'
-import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
+import OLIconButton from '@/shared/components/ol/ol-icon-button'
+import OLTooltip from '@/shared/components/ol/ol-tooltip'
 import { useLayoutContext } from '@/shared/context/layout-context'
 import { useCallback } from 'react'
 import { useEditorAnalytics } from '@/shared/hooks/use-editor-analytics'

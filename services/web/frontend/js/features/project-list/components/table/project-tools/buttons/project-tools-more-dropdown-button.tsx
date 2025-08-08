@@ -6,7 +6,7 @@ import {
   Dropdown,
   DropdownMenu,
   DropdownToggle,
-} from '@/features/ui/components/bootstrap-5/dropdown-menu'
+} from '@/shared/components/dropdown/dropdown-menu'
 
 function ProjectToolsMoreDropdownButton() {
   const { t } = useTranslation()

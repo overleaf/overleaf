@@ -1,4 +1,4 @@
-import { DropdownHeader } from '@/features/ui/components/bootstrap-5/dropdown-menu'
+import { DropdownHeader } from '@/shared/components/dropdown/dropdown-menu'
 import { ToolbarButtonMenu } from './button-menu'
 import { emitToolbarEvent } from '../../extensions/toolbar/utils/analytics'
 import MaterialIcon from '../../../../shared/components/material-icon'
@@ -10,7 +10,7 @@ import {
   wrapInInlineMath,
 } from '../../extensions/toolbar/commands'
 import { memo } from 'react'
-import OLListGroupItem from '@/features/ui/components/ol/ol-list-group-item'
+import OLListGroupItem from '@/shared/components/ol/ol-list-group-item'
 import sparkleWhite from '@/shared/svgs/sparkle-small-white.svg'
 import sparkle from '@/shared/svgs/ai-sparkle-text.svg'
 import { isSplitTestEnabled } from '@/utils/splitTestUtils'

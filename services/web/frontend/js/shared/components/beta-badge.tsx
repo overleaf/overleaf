@@ -1,5 +1,5 @@
 import type { FC, MouseEventHandler, ReactNode } from 'react'
-import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
+import OLTooltip from '@/shared/components/ol/ol-tooltip'
 import BetaBadgeIcon from '@/shared/components/beta-badge-icon'
 
 type TooltipProps = {

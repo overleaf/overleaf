@@ -21,15 +21,15 @@ import OLModal, {
   OLModalFooter,
   OLModalHeader,
   OLModalTitle,
-} from '@/features/ui/components/ol/ol-modal'
-import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
-import OLButton from '@/features/ui/components/ol/ol-button'
-import OLFormGroup from '@/features/ui/components/ol/ol-form-group'
-import OLFormLabel from '@/features/ui/components/ol/ol-form-label'
-import OLFormControl from '@/features/ui/components/ol/ol-form-control'
-import OLCol from '@/features/ui/components/ol/ol-col'
-import OLRow from '@/features/ui/components/ol/ol-row'
-import OLForm from '@/features/ui/components/ol/ol-form'
+} from '@/shared/components/ol/ol-modal'
+import OLTooltip from '@/shared/components/ol/ol-tooltip'
+import OLButton from '@/shared/components/ol/ol-button'
+import OLFormGroup from '@/shared/components/ol/ol-form-group'
+import OLFormLabel from '@/shared/components/ol/ol-form-label'
+import OLFormControl from '@/shared/components/ol/ol-form-control'
+import OLCol from '@/shared/components/ol/ol-col'
+import OLRow from '@/shared/components/ol/ol-row'
+import OLForm from '@/shared/components/ol/ol-form'
 import MaterialIcon from '@/shared/components/material-icon'
 
 type UnitDescription = { label: string; tooltip?: string } | undefined

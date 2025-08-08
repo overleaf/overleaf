@@ -1,7 +1,7 @@
 import React from 'react'
 import DictionaryModalContent from './dictionary-modal-content'
 import withErrorBoundary from '../../../infrastructure/error-boundary'
-import OLModal from '@/features/ui/components/ol/ol-modal'
+import OLModal from '@/shared/components/ol/ol-modal'
 
 type DictionaryModalProps = {
   show?: boolean

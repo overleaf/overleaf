@@ -5,7 +5,7 @@ import withErrorBoundary from '@/infrastructure/error-boundary'
 import useAbortController from '@/shared/hooks/use-abort-controller'
 import LoadingSpinner from '@/shared/components/loading-spinner'
 import Notification from '@/shared/components/notification'
-import IconButton from '@/features/ui/components/bootstrap-5/icon-button'
+import IconButton from '@/shared/components/button/icon-button'
 import {
   Card,
   Row,
@@ -14,8 +14,8 @@ import {
   FormLabel,
   FormControl,
 } from 'react-bootstrap'
-import FormText from '@/features/ui/components/bootstrap-5/form/form-text'
-import Button from '@/features/ui/components/bootstrap-5/button'
+import FormText from '@/shared/components/form/form-text'
+import Button from '@/shared/components/button/button'
 import PoNumber from '@/features/group-management/components/add-seats/po-number'
 import CostSummary from '@/features/group-management/components/add-seats/cost-summary'
 import RequestStatus from '@/features/group-management/components/request-status'

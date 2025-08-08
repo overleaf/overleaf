@@ -1,7 +1,7 @@
 import { useHistoryContext } from '../../../../context/history-context'
 import { UpdateRange } from '../../../../services/types/update'
 import { ReactNode } from 'react'
-import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
+import OLTooltip from '@/shared/components/ol/ol-tooltip'
 
 type CompareProps = {
   comparisonRange: UpdateRange

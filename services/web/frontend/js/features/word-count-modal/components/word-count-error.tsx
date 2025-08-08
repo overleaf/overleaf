@@ -1,4 +1,4 @@
-import OLNotification from '@/features/ui/components/ol/ol-notification'
+import OLNotification from '@/shared/components/ol/ol-notification'
 import { useTranslation } from 'react-i18next'
 
 export const WordCountError = () => {

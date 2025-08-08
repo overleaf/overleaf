@@ -1,5 +1,5 @@
 import classNames from 'classnames'
-import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
+import OLTooltip from '@/shared/components/ol/ol-tooltip'
 import MaterialIcon from '@/shared/components/material-icon'
 
 type HorizontalTogglerType = 'west' | 'east'

@@ -1,8 +1,8 @@
 import { useEffect, useState, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import classNames from 'classnames'
-import OLFormControl from '@/features/ui/components/ol/ol-form-control'
-import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
+import OLFormControl from '@/shared/components/ol/ol-form-control'
+import OLTooltip from '@/shared/components/ol/ol-tooltip'
 import MaterialIcon from '@/shared/components/material-icon'
 
 type ProjectNameEditableLabelProps = {

@@ -4,12 +4,12 @@ import {
   useFigureModalExistingFigureContext,
 } from './figure-modal-context'
 import { useTranslation } from 'react-i18next'
-import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
-import OLFormGroup from '@/features/ui/components/ol/ol-form-group'
-import OLFormCheckbox from '@/features/ui/components/ol/ol-form-checkbox'
-import OLFormText from '@/features/ui/components/ol/ol-form-text'
-import OLToggleButtonGroup from '@/features/ui/components/ol/ol-toggle-button-group'
-import OLToggleButton from '@/features/ui/components/ol/ol-toggle-button'
+import OLTooltip from '@/shared/components/ol/ol-tooltip'
+import OLFormGroup from '@/shared/components/ol/ol-form-group'
+import OLFormCheckbox from '@/shared/components/ol/ol-form-checkbox'
+import OLFormText from '@/shared/components/ol/ol-form-text'
+import OLToggleButtonGroup from '@/shared/components/ol/ol-toggle-button-group'
+import OLToggleButton from '@/shared/components/ol/ol-toggle-button'
 import MaterialIcon from '@/shared/components/material-icon'
 
 export const FigureModalFigureOptions: FC = () => {

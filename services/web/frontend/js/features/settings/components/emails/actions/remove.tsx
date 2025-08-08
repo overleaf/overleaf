@@ -3,10 +3,10 @@ import { UserEmailData } from '../../../../../../../types/user-email'
 import { useUserEmailsContext } from '../../../context/user-email-context'
 import { postJSON } from '../../../../../infrastructure/fetch-json'
 import { UseAsyncReturnType } from '../../../../../shared/hooks/use-async'
-import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
+import OLTooltip from '@/shared/components/ol/ol-tooltip'
 import OLIconButton, {
   OLIconButtonProps,
-} from '@/features/ui/components/ol/ol-icon-button'
+} from '@/shared/components/ol/ol-icon-button'
 import getMeta from '@/utils/meta'
 
 type DeleteButtonProps = Pick<

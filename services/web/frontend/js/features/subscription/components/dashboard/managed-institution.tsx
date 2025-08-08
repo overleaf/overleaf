@@ -6,7 +6,7 @@ import { ManagedInstitution as Institution } from '../../../../../../types/subsc
 import { RowLink } from './row-link'
 import { debugConsole } from '@/utils/debugging'
 import getMeta from '@/utils/meta'
-import OLButton from '@/features/ui/components/ol/ol-button'
+import OLButton from '@/shared/components/ol/ol-button'
 
 type ManagedInstitutionProps = {
   institution: Institution

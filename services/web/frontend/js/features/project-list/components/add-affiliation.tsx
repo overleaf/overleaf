@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next'
 import { useProjectListContext } from '../context/project-list-context'
 import getMeta from '../../../utils/meta'
 import classNames from 'classnames'
-import OLButton from '@/features/ui/components/ol/ol-button'
+import OLButton from '@/shared/components/ol/ol-button'
 
 export function useAddAffiliation() {
   const { totalProjectsCount } = useProjectListContext()

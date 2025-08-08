@@ -1,7 +1,7 @@
 import { useCallback, FormEvent } from 'react'
-import OLButton from '@/features/ui/components/ol/ol-button'
-import OLForm from '@/features/ui/components/ol/ol-form'
-import OLFormControl from '@/features/ui/components/ol/ol-form-control'
+import OLButton from '@/shared/components/ol/ol-button'
+import OLForm from '@/shared/components/ol/ol-form'
+import OLFormControl from '@/shared/components/ol/ol-form-control'
 import {
   Select,
   SelectProps,

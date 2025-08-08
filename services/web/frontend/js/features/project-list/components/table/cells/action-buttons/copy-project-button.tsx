@@ -10,8 +10,8 @@ import {
 } from '../../../../../../../../types/project/dashboard/api'
 import { useProjectTags } from '@/features/project-list/hooks/use-project-tags'
 import { isSmallDevice } from '../../../../../../infrastructure/event-tracking'
-import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
-import OLIconButton from '@/features/ui/components/ol/ol-icon-button'
+import OLTooltip from '@/shared/components/ol/ol-tooltip'
+import OLIconButton from '@/shared/components/ol/ol-icon-button'
 
 type CopyButtonProps = {
   project: Project

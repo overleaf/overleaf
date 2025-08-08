@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import MaterialIcon from '@/shared/components/material-icon'
-import OLButton from '@/features/ui/components/ol/ol-button'
+import OLButton from '@/shared/components/ol/ol-button'
 
 function BackToEditorButton({ onClick }: { onClick: () => void }) {
   const { t } = useTranslation()

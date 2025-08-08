@@ -4,7 +4,7 @@ import { useProjectContext } from '../../../shared/context/project-context'
 import * as eventTracking from '../../../infrastructure/event-tracking'
 import { isSmallDevice } from '../../../infrastructure/event-tracking'
 import MaterialIcon from '@/shared/components/material-icon'
-import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
+import OLTooltip from '@/shared/components/ol/ol-tooltip'
 
 export default function DownloadPDF() {
   const { t } = useTranslation()

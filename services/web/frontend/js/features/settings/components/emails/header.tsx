@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import EmailCell from './cell'
-import OLCol from '@/features/ui/components/ol/ol-col'
-import OLRow from '@/features/ui/components/ol/ol-row'
+import OLCol from '@/shared/components/ol/ol-col'
+import OLRow from '@/shared/components/ol/ol-row'
 import classnames from 'classnames'
 
 function Header() {

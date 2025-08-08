@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import PropTypes from 'prop-types'
 import RegisterForm from './register-form'
-import OLRow from '@/features/ui/components/ol/ol-row'
-import OLCol from '@/features/ui/components/ol/ol-col'
-import OLCard from '@/features/ui/components/ol/ol-card'
+import OLRow from '@/shared/components/ol/ol-row'
+import OLCol from '@/shared/components/ol/ol-col'
+import OLCard from '@/shared/components/ol/ol-card'
 
 function UserActivateRegister() {
   const [emails, setEmails] = useState([])

@@ -2,7 +2,7 @@ import { memo, useEffect, useState } from 'react'
 import Notification from './notification'
 import customLocalStorage from '@/infrastructure/local-storage'
 import { useTranslation } from 'react-i18next'
-import OLButton from '@/features/ui/components/ol/ol-button'
+import OLButton from '@/shared/components/ol/ol-button'
 
 function AccessibilitySurveyBanner() {
   const { t } = useTranslation()

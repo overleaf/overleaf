@@ -8,8 +8,8 @@ import {
   setSectionHeadingLevel,
 } from '../../extensions/toolbar/sections'
 import { useCallback, useMemo, useRef } from 'react'
-import OLOverlay from '@/features/ui/components/ol/ol-overlay'
-import OLPopover from '@/features/ui/components/ol/ol-popover'
+import OLOverlay from '@/shared/components/ol/ol-overlay'
+import OLPopover from '@/shared/components/ol/ol-popover'
 import useEventListener from '../../../../shared/hooks/use-event-listener'
 import useDropdown from '../../../../shared/hooks/use-dropdown'
 import { emitToolbarEvent } from '../../extensions/toolbar/utils/analytics'

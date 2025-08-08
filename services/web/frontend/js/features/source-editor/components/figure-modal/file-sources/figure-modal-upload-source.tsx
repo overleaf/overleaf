@@ -15,10 +15,10 @@ import { useTranslation } from 'react-i18next'
 import { useCodeMirrorViewContext } from '../../codemirror-context'
 import { waitForFileTreeUpdate } from '../../../extensions/figure-modal'
 import getMeta from '@/utils/meta'
-import OLFormGroup from '@/features/ui/components/ol/ol-form-group'
-import OLButton from '@/features/ui/components/ol/ol-button'
+import OLFormGroup from '@/shared/components/ol/ol-form-group'
+import OLButton from '@/shared/components/ol/ol-button'
 import MaterialIcon from '@/shared/components/material-icon'
-import OLSpinner from '@/features/ui/components/ol/ol-spinner'
+import OLSpinner from '@/shared/components/ol/ol-spinner'
 
 /* eslint-disable no-unused-vars */
 export enum FileUploadStatus {

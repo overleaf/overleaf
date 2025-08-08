@@ -1,13 +1,13 @@
 import { useTranslation } from 'react-i18next'
 import { linkSharingEnforcementDate } from '../utils/link-sharing'
 import { sendMB } from '@/infrastructure/event-tracking'
-import OLButton from '@/features/ui/components/ol/ol-button'
+import OLButton from '@/shared/components/ol/ol-button'
 import {
   OLModalBody,
   OLModalFooter,
   OLModalHeader,
   OLModalTitle,
-} from '@/features/ui/components/ol/ol-modal'
+} from '@/shared/components/ol/ol-modal'
 
 type EditorOverLimitModalContentProps = {
   handleHide: () => void

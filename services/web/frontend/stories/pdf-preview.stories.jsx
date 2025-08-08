@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from 'react'
 import useFetchMock from './hooks/use-fetch-mock'
-import OLButton from '@/features/ui/components/ol/ol-button'
+import OLButton from '@/shared/components/ol/ol-button'
 import PdfPreviewPane from '../js/features/pdf-preview/components/pdf-preview-pane'
 import PdfPreview from '../js/features/pdf-preview/components/pdf-preview'
 import PdfFileList from '../js/features/pdf-preview/components/pdf-file-list'
@@ -25,7 +25,7 @@ import { PdfPreviewProvider } from '@/features/pdf-preview/components/pdf-previe
 import {
   Dropdown,
   DropdownMenu,
-} from '@/features/ui/components/bootstrap-5/dropdown-menu'
+} from '@/shared/components/dropdown/dropdown-menu'
 
 export default {
   title: 'Editor / PDF Preview',

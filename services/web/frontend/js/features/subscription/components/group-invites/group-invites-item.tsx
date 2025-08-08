@@ -1,9 +1,9 @@
 import { Trans } from 'react-i18next'
 import GroupInvitesItemFooter from './group-invites-item-footer'
 import type { TeamInvite } from '../../../../../../types/team-invite'
-import OLPageContentCard from '@/features/ui/components/ol/ol-page-content-card'
-import OLRow from '@/features/ui/components/ol/ol-row'
-import OLCol from '@/features/ui/components/ol/ol-col'
+import OLPageContentCard from '@/shared/components/ol/ol-page-content-card'
+import OLRow from '@/shared/components/ol/ol-row'
+import OLCol from '@/shared/components/ol/ol-col'
 
 type GroupInvitesItemProps = {
   teamInvite: TeamInvite

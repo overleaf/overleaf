@@ -1,6 +1,6 @@
 import { GlobalToastGeneratorEntry } from '@/features/ide-react/components/global-toasts'
 import { useTranslation } from 'react-i18next'
-import OLButton from '@/features/ui/components/ol/ol-button'
+import OLButton from '@/shared/components/ol/ol-button'
 
 export const SynctexFileErrorToast = () => {
   const { t } = useTranslation()

@@ -18,7 +18,7 @@ import SettingsSyntaxValidation from './settings/settings-syntax-validation'
 import SettingsMathPreview from './settings/settings-math-preview'
 import importOverleafModules from '../../../../macros/import-overleaf-module.macro'
 import { ElementType } from 'react'
-import OLForm from '@/features/ui/components/ol/ol-form'
+import OLForm from '@/shared/components/ol/ol-form'
 
 const moduleSettings: Array<{
   import: { default: ElementType }

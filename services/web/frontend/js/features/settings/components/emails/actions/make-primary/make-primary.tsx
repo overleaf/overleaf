@@ -14,7 +14,7 @@ import { UserEmailData } from '../../../../../../../../types/user-email'
 import { UseAsyncReturnType } from '../../../../../../shared/hooks/use-async'
 import { ssoAvailableForInstitution } from '../../../../utils/sso'
 import ConfirmationModal from './confirmation-modal'
-import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
+import OLTooltip from '@/shared/components/ol/ol-tooltip'
 
 const getDescription = (
   t: (s: string) => string,
