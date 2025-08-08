@@ -177,6 +177,10 @@ app.post(
   HttpController.acceptChanges
 )
 app.post(
+  '/project/:project_id/doc/:doc_id/change/reject',
+  HttpController.rejectChanges
+)
+app.post(
   '/project/:project_id/doc/:doc_id/comment/:comment_id/resolve',
   HttpController.resolveComment
 )

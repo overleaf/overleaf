@@ -246,6 +246,25 @@ function acceptChanges(projectId, docId, changeIds, callback) {
   )
 }
 
+/**
+ * @param {string} projectId
+ * @param {string} docId
+ * @param {string[]} changeIds
+ * @param {Callback} callback
+ */
+function rejectChanges(projectId, docId, changeIds, userId, callback) {
+  _makeRequest(
+    {
+      path: `/project/${projectId}/doc/${docId}/change/reject`,
+      json: { change_ids: changeIds, user_id: userId },
+      method: 'POST',
+    },
+    projectId,
+    'reject-changes',
+    callback
+  )
+}
+
 function resolveThread(projectId, docId, threadId, userId, callback) {
   _makeRequest(
     {
@@ -630,6 +649,7 @@ module.exports = {
   getProjectDocsIfMatch,
   clearProjectState,
   acceptChanges,
+  rejectChanges,
   resolveThread,
   reopenThread,
   deleteThread,
@@ -655,6 +675,7 @@ module.exports = {
     getProjectLastUpdatedAt: promisify(getProjectLastUpdatedAt),
     clearProjectState: promisify(clearProjectState),
     acceptChanges: promisify(acceptChanges),
+    rejectChanges: promisify(rejectChanges),
     resolveThread: promisify(resolveThread),
     reopenThread: promisify(reopenThread),
     deleteThread: promisify(deleteThread),

@@ -363,6 +363,33 @@ function acceptChanges(req, res, next) {
   })
 }
 
+function rejectChanges(req, res, next) {
+  const { project_id: projectId, doc_id: docId } = req.params
+  const changeIds = req.body.change_ids
+  const userId = req.body.user_id
+
+  logger.debug(
+    { projectId, docId },
+    `rejecting ${changeIds.length} changes via http`
+  )
+  DocumentManager.rejectChangesWithLock(
+    projectId,
+    docId,
+    changeIds,
+    userId,
+    (error, response) => {
+      if (error) {
+        return next(error)
+      }
+      logger.debug(
+        { projectId, docId, changeIds, response },
+        `rejected ${changeIds.length} changes via http`
+      )
+      res.json(response)
+    }
+  )
+}
+
 function resolveComment(req, res, next) {
   const {
     project_id: projectId,
@@ -559,6 +586,7 @@ module.exports = {
   deleteProject,
   deleteMultipleProjects,
   acceptChanges,
+  rejectChanges,
   resolveComment,
   reopenComment,
   deleteComment,

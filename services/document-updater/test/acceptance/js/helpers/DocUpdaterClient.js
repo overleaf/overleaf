@@ -215,6 +215,16 @@ module.exports = DocUpdaterClient = {
     )
   },
 
+  rejectChanges(projectId, docId, changeIds, userId, callback) {
+    request.post(
+      {
+        url: `http://127.0.0.1:3003/project/${projectId}/doc/${docId}/change/reject`,
+        json: { change_ids: changeIds, user_id: userId },
+      },
+      callback
+    )
+  },
+
   removeComment(projectId, docId, comment, callback) {
     request.del(
       `http://127.0.0.1:3003/project/${projectId}/doc/${docId}/comment/${comment}`,
