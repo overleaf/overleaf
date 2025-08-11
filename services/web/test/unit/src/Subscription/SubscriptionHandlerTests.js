@@ -436,11 +436,16 @@ describe('SubscriptionHandler', function () {
           },
         })
       })
-      it('should make a resume call to recurly', async function () {
+      it('should call resume hook', async function () {
         await this.SubscriptionHandler.promises.resumeSubscription(this.user)
 
-        this.RecurlyClient.promises.resumeSubscriptionByUuid.called.should.equal(
-          true
+        expect(this.Modules.promises.hooks.fire).to.have.been.calledWith(
+          'resumePaidSubscription',
+          {
+            recurlySubscription_id: this.activeRecurlySubscription.uuid,
+            recurlyStatus: { state: 'non-trial' },
+            planCode: 'collaborator',
+          }
         )
       })
     })

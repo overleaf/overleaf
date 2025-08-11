@@ -335,9 +335,7 @@ async function resumeSubscription(user) {
   ) {
     throw new Error('No active subscription to resume')
   }
-  await RecurlyClient.promises.resumeSubscriptionByUuid(
-    subscription.recurlySubscription_id
-  )
+  await Modules.promises.hooks.fire('resumePaidSubscription', subscription)
 }
 
 /**
