@@ -233,8 +233,10 @@ export const ToolbarMenuBar = () => {
             }
             onClick={toggleMathPreview}
           />
-          <DropdownDivider />
-          <CommandSection section={pdfControlsMenuSectionStructure} />
+          <CommandSection
+            section={pdfControlsMenuSectionStructure}
+            includeDivider
+          />
         </MenuBarDropdown>
         <CommandDropdown
           menu={formatMenuStructure}

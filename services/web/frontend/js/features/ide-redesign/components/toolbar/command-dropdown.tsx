@@ -64,11 +64,10 @@ const CommandDropdown = ({
       {populatedSections.map((section, index) => {
         return (
           <Fragment key={section.id}>
-            {index > 0 && <DropdownDivider />}
-            {section.title && <DropdownHeader>{section.title}</DropdownHeader>}
-            {section.children.map(child => (
-              <CommandDropdownChild item={child} key={child.id} />
-            ))}
+            <CommandSectionContent
+              section={section}
+              includeDivider={index > 0}
+            />
           </Fragment>
         )
       })}
@@ -78,16 +77,31 @@ const CommandDropdown = ({
 
 export const CommandSection = ({
   section: sectionStructure,
+  includeDivider = true,
 }: {
   section: MenuSectionStructure<CommandId>
+  includeDivider?: boolean
 }) => {
   const { registry, shortcuts } = useCommandRegistry()
   const section = populateSectionOrGroup(sectionStructure, registry, shortcuts)
+  return (
+    <CommandSectionContent section={section} includeDivider={includeDivider} />
+  )
+}
+
+function CommandSectionContent({
+  section,
+  includeDivider = true,
+}: {
+  section: MenuSectionStructure<TaggedCommand>
+  includeDivider?: boolean
+}) {
   if (section.children.length === 0) {
     return null
   }
   return (
     <>
+      {includeDivider && <DropdownDivider />}
       {section.title && <DropdownHeader>{section.title}</DropdownHeader>}
       {section.children.map(child => (
         <CommandDropdownChild item={child} key={child.id} />
