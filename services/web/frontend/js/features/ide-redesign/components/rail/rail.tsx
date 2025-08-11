@@ -29,6 +29,8 @@ import { RailElement } from '../../utils/rail-types'
 import RailPanel from './rail-panel'
 import RailResizeHandle from './rail-resize-handle'
 import RailModals from './rail-modals'
+import RailOverflowDropdown from './rail-overflow-dropdown'
+import useRailOverflow from '../../hooks/use-rail-overflow'
 
 export const RailLayout = () => {
   const { sendEvent } = useEditorAnalytics()
@@ -166,6 +168,25 @@ export const RailLayout = () => {
 
   const isReviewPanelOpen = selectedTab === 'review-panel'
 
+  const { tabsInRail, tabsInOverflow, tabWrapperRef } =
+    useRailOverflow(railTabs)
+
+  const moreOptionsAction: RailAction = useMemo(() => {
+    return {
+      key: 'more-options',
+      icon: 'more_vert',
+      title: t('more_options'),
+      hide: tabsInOverflow.length === 0,
+      dropdown: (
+        <RailOverflowDropdown
+          tabs={tabsInOverflow}
+          isOpen={isOpen}
+          selectedTab={selectedTab}
+        />
+      ),
+    }
+  }, [t, isOpen, selectedTab, tabsInOverflow])
+
   return (
     <TabContainer
       mountOnEnter // Only render when necessary (so that we can lazy load tab content)
@@ -183,22 +204,24 @@ export const RailLayout = () => {
         aria-label={t('files_collaboration_integrations_logs')}
       >
         <Nav activeKey={selectedTab} className="ide-rail-tabs-nav">
-          {railTabs
-            .filter(({ hide }) => !hide)
-            .map(({ icon, key, indicator, title, disabled }) => (
-              <RailTab
-                open={isOpen && selectedTab === key}
-                key={key}
-                eventKey={key}
-                icon={icon}
-                indicator={indicator}
-                title={title}
-                disabled={disabled}
-              />
-            ))}
-          <div className="flex-grow-1" />
+          <div className="ide-rail-tabs-wrapper" ref={tabWrapperRef}>
+            {tabsInRail
+              .filter(({ hide }) => !hide)
+              .map(({ icon, key, indicator, title, disabled }) => (
+                <RailTab
+                  open={isOpen && selectedTab === key}
+                  key={key}
+                  eventKey={key}
+                  icon={icon}
+                  indicator={indicator}
+                  title={title}
+                  disabled={disabled}
+                />
+              ))}
+            <RailActionElement key="more-options" action={moreOptionsAction} />
+          </div>
           <nav aria-label={t('help_editor_settings')}>
-            {railActions?.map(action => (
+            {railActions.map(action => (
               <RailActionElement key={action.key} action={action} />
             ))}
           </nav>

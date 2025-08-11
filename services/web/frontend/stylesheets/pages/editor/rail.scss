@@ -148,9 +148,16 @@ body {
 .ide-rail-tabs-nav {
   height: 100%;
   display: flex;
-  flex-direction: column;
+  flex-flow: column nowrap;
   gap: var(--spacing-02);
   padding-bottom: var(--spacing-04);
+}
+
+.ide-rail-tabs-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-02);
 }
 
 .ide-rail-tab-dropdown {
@@ -158,6 +165,17 @@ body {
 
   &.dropdown-toggle::after {
     display: none;
+  }
+}
+
+.ide-rail-overflow-dropdown {
+  min-width: 0;
+  background-color: var(--ide-rail-background);
+
+  &.show {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-02);
   }
 }
 

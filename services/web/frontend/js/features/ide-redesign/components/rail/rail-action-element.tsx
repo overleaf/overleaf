@@ -13,6 +13,7 @@ type RailActionButton = {
   icon: AvailableUnfilledIcon
   title: string
   action: () => void
+  hide?: boolean
 }
 
 type RailDropdown = {
@@ -20,6 +21,7 @@ type RailDropdown = {
   icon: AvailableUnfilledIcon
   title: string
   dropdown: ReactElement
+  hide?: boolean
 }
 
 export type RailAction = RailDropdown | RailActionButton
@@ -31,6 +33,10 @@ export default function RailActionElement({ action }: { action: RailAction }) {
     }
   }, [action])
 
+  if (action.hide) {
+    return null
+  }
+
   if ('dropdown' in action) {
     return (
       <Dropdown align="end" drop="end">
@@ -41,7 +47,7 @@ export default function RailActionElement({ action }: { action: RailAction }) {
         >
           <span>
             <DropdownToggle
-              id="rail-help-dropdown-btn"
+              id={`rail-dropdown-btn-${action.key}`}
               className="ide-rail-tab-link ide-rail-tab-button ide-rail-tab-dropdown"
               as="button"
               aria-label={action.title}

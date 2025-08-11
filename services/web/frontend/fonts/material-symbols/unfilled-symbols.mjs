@@ -22,6 +22,7 @@ export default /** @type {const} */ ([
   'info',
   'integration_instructions',
   'lightbulb',
+  'more_vert',
   'note_add',
   'picture_as_pdf',
   'rate_review',
