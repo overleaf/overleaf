@@ -30,24 +30,32 @@ $(MODULE_MAKEFILES): Makefile.module
 # Clean
 #
 
-clean:
-	-$(DOCKER_COMPOSE) down --rmi local
-	-COMPOSE_PROJECT_NAME=unit_test_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down --rmi local
-	-COMPOSE_PROJECT_NAME=unit_test_all_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down --rmi local
-	-COMPOSE_PROJECT_NAME=unit_test_parallel_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down --rmi local
-	-COMPOSE_PROJECT_NAME=unit_test_parallel_make_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down --rmi local
-	-COMPOSE_PROJECT_NAME=acceptance_test_saas_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down --rmi local
-	-COMPOSE_PROJECT_NAME=acceptance_test_server_ce_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down --rmi local
-	-COMPOSE_PROJECT_NAME=acceptance_test_server_pro_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down --rmi local
-	-COMPOSE_PROJECT_NAME=acceptance_modules_merged_saas_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down --rmi local
-	-COMPOSE_PROJECT_NAME=acceptance_modules_merged_saas_1_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down --rmi local
-	-COMPOSE_PROJECT_NAME=acceptance_modules_merged_saas_2_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down --rmi local
-	-COMPOSE_PROJECT_NAME=acceptance_modules_merged_saas_3_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down --rmi local
-	-COMPOSE_PROJECT_NAME=acceptance_modules_merged_saas_4_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down --rmi local
-	-COMPOSE_PROJECT_NAME=acceptance_modules_merged_server_ce_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down --rmi local
-	-COMPOSE_PROJECT_NAME=acceptance_modules_merged_server_pro_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down --rmi local
-	-COMPOSE_PROJECT_NAME=test_frontend_ct_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down --rmi local
-	-COMPOSE_PROJECT_NAME=tar_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down --rmi local
+SHARD_PROJECT_NAMES = \
+	unit_test_$(BUILD_DIR_NAME) \
+	unit_test_all_$(BUILD_DIR_NAME) \
+	unit_test_parallel_$(BUILD_DIR_NAME) \
+	unit_test_parallel_make_$(BUILD_DIR_NAME) \
+	acceptance_test_saas_$(BUILD_DIR_NAME) \
+	acceptance_test_server_ce_$(BUILD_DIR_NAME) \
+	acceptance_test_server_pro_$(BUILD_DIR_NAME) \
+	acceptance_modules_merged_saas_$(BUILD_DIR_NAME) \
+	acceptance_modules_merged_saas_1_$(BUILD_DIR_NAME) \
+	acceptance_modules_merged_saas_2_$(BUILD_DIR_NAME) \
+	acceptance_modules_merged_saas_3_$(BUILD_DIR_NAME) \
+	acceptance_modules_merged_saas_4_$(BUILD_DIR_NAME) \
+	acceptance_modules_merged_server_ce_$(BUILD_DIR_NAME) \
+	acceptance_modules_merged_server_pro_$(BUILD_DIR_NAME) \
+	test_frontend_ct_$(BUILD_DIR_NAME) \
+	tar_$(BUILD_DIR_NAME) \
+
+CLEAN_SHARDS=$(addprefix clean/,$(SHARD_PROJECT_NAMES))
+clean: $(CLEAN_SHARDS)
+	-docker rmi --force $(IMAGE_CI) $(IMAGE_CI)-dev $(IMAGE_CI)-pug $(IMAGE_CI)-webpack $(IMAGE_REPO_FINAL)
+	-docker compose down --remove-orphans --rmi local --timeout 0 --volumes
+	-git clean -dfX data/
+
+$(CLEAN_SHARDS): clean/%:
+	-COMPOSE_PROJECT_NAME=$* docker compose down --remove-orphans --rmi local --timeout 0 --volumes
 
 clean_ci:
 	$(DOCKER_COMPOSE) down -v -t 0

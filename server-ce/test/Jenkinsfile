@@ -223,6 +223,10 @@ pipeline {
       dir('server-ce/test') {
         sh 'make clean'
       }
+      dir('server-ce') {
+        sh 'make clean'
+      }
+      sh 'make clean_jenkins'
     }
   }
 }

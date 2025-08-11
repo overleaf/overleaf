@@ -44,10 +44,10 @@ SHARD_PROJECT_NAMES = \
 CLEAN_SHARDS=$(addprefix clean/,$(SHARD_PROJECT_NAMES))
 clean: $(CLEAN_SHARDS)
 	-docker compose run --no-deps --rm --entrypoint rm host-admin -rf docker-compose.override.yml docker-compose.*_*.yml data/
-	-docker compose down --volumes --timeout 0
+	-docker compose down --remove-orphans --rmi local --timeout 0 --volumes
 
 $(CLEAN_SHARDS): clean/%:
-	-COMPOSE_PROJECT_NAME=$* docker compose down --timeout=0 --volumes
+	-COMPOSE_PROJECT_NAME=$* docker compose down --remove-orphans --rmi local --timeout 0 --volumes
 
 prefetch: prefetch_default
 prefetch_default: prefetch_default_compose

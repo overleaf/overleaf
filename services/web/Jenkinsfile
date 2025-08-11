@@ -479,6 +479,7 @@ pipeline {
       dir('services/web') {
         sh 'make clean'
       }
+      sh 'make clean_jenkins'
     }
   }
 }
