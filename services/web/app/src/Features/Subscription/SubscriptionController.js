@@ -41,6 +41,99 @@ const {
 } = require('../../infrastructure/FrontEndUser')
 const { IndeterminateInvoiceError } = require('../Errors/Errors')
 
+const SUBSCRIPTION_PAUSED_REDIRECT_PATH =
+  '/user/subscription?redirect-reason=subscription-paused'
+
+/**
+ * Check if a Stripe subscription is currently paused
+ * @param {Object} subscription - The subscription object
+ * @returns {Promise<boolean>}
+ */
+async function _checkStripeSubscriptionPauseStatus(subscription) {
+  if (
+    !subscription.paymentProvider?.service?.includes('stripe') ||
+    !subscription.paymentProvider.subscriptionId
+  ) {
+    return false
+  }
+
+  const [paymentRecord] = await Modules.promises.hooks.fire(
+    'getPaymentFromRecord',
+    subscription
+  )
+
+  return !!(
+    paymentRecord.subscription.remainingPauseCycles &&
+    paymentRecord.subscription.remainingPauseCycles > 0
+  )
+}
+
+/**
+ * Check if a Recurly subscription is currently paused
+ * @param {Object} subscription - The subscription object
+ * @returns {Promise<boolean>}
+ */
+async function _checkRecurlySubscriptionPauseStatus(subscription) {
+  if (!subscription.recurlySubscription_id) {
+    return false
+  }
+
+  if (subscription.recurlyStatus?.state === 'paused') {
+    return true
+  }
+
+  // Get the recurly subscription as this may be a pending pause
+  const recurlySubscription = await RecurlyWrapper.promises.getSubscription(
+    subscription.recurlySubscription_id
+  )
+
+  return !!(
+    recurlySubscription.remaining_pause_cycles &&
+    recurlySubscription.remaining_pause_cycles > 0
+  )
+}
+
+/**
+ * Check if a user's subscription is currently paused
+ * @param {Object} user - The user object
+ * @returns {Promise<{isPaused: boolean, redirectPath?: string}>}
+ */
+async function checkSubscriptionPauseStatus(user) {
+  try {
+    const { subscription } =
+      await LimitationsManager.promises.userHasSubscription(user)
+
+    if (!subscription) {
+      return { isPaused: false }
+    }
+
+    const isStripePaused =
+      await _checkStripeSubscriptionPauseStatus(subscription)
+    if (isStripePaused) {
+      return {
+        isPaused: true,
+        redirectPath: SUBSCRIPTION_PAUSED_REDIRECT_PATH,
+      }
+    }
+
+    const isRecurlyPaused =
+      await _checkRecurlySubscriptionPauseStatus(subscription)
+    if (isRecurlyPaused) {
+      return {
+        isPaused: true,
+        redirectPath: SUBSCRIPTION_PAUSED_REDIRECT_PATH,
+      }
+    }
+  } catch (err) {
+    logger.warn(
+      { err, userId: user._id },
+      'Failed to check user subscription for pause status'
+    )
+  }
+
+  return { isPaused: false }
+}
+
 /**
  * @import { SubscriptionChangeDescription } from '../../../../types/subscription/subscription-change-preview'
  * @import { SubscriptionChangePreview } from '../../../../types/subscription/subscription-change-preview'
@@ -367,6 +460,11 @@ async function previewAddonPurchase(req, res) {
     )
   }
 
+  const { isPaused, redirectPath } = await checkSubscriptionPauseStatus(user)
+  if (isPaused) {
+    return res.redirect(redirectPath)
+  }
+
   /** @type {PaymentMethod[]} */
   const paymentMethod = await Modules.promises.hooks.fire(
     'getPaymentMethod',
@@ -432,6 +530,15 @@ async function purchaseAddon(req, res, next) {
   // currently we only support one add-on, the Ai add-on
   if (addOnCode !== AI_ADD_ON_CODE) {
     return res.sendStatus(404)
+  }
+
+  const { isPaused } = await checkSubscriptionPauseStatus(user)
+  if (isPaused) {
+    return HttpErrorHandler.badRequest(
+      req,
+      res,
+      'Cannot purchase add-ons while subscription is paused.'
+    )
   }
 
   logger.debug({ userId: user._id, addOnCode }, 'purchasing add-ons')
@@ -911,4 +1018,5 @@ module.exports = {
   getRecommendedCurrency,
   getLatamCountryBannerDetails,
   getPlanNameForDisplay,
+  checkSubscriptionPauseStatus,
 }

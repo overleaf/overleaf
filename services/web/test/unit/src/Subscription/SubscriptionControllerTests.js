@@ -159,6 +159,7 @@ describe('SubscriptionController', function () {
         './RecurlyWrapper': (this.RecurlyWrapper = {
           promises: {
             updateAccountEmailAddress: sinon.stub().resolves(),
+            getSubscription: sinon.stub().resolves({}),
           },
         }),
         './RecurlyEventHandler': {
@@ -742,6 +743,360 @@ describe('SubscriptionController', function () {
 
       expect(this.FeaturesUpdater.promises.refreshFeatures).to.not.have.been
         .called
+    })
+  })
+
+  describe('checkSubscriptionPauseStatus', function () {
+    beforeEach(function () {
+      this.user = {
+        _id: 'user-id-123',
+        email: 'test@example.com',
+      }
+    })
+
+    it('should return isPaused: false when user has no subscription', async function () {
+      this.LimitationsManager.promises.userHasSubscription.resolves({
+        subscription: null,
+      })
+
+      const result =
+        await this.SubscriptionController.checkSubscriptionPauseStatus(
+          this.user
+        )
+
+      expect(result).to.deep.equal({ isPaused: false })
+    })
+
+    it('should return isPaused: false when subscription has no paymentProvider', async function () {
+      const subscription = {
+        planCode: 'professional',
+      }
+      this.LimitationsManager.promises.userHasSubscription.resolves({
+        subscription,
+      })
+
+      const result =
+        await this.SubscriptionController.checkSubscriptionPauseStatus(
+          this.user
+        )
+
+      expect(result).to.deep.equal({ isPaused: false })
+    })
+
+    it('should return isPaused: false when subscription has no subscriptionId', async function () {
+      const subscription = {
+        paymentProvider: {
+          service: 'stripe',
+          subscriptionId: null,
+        },
+      }
+      this.LimitationsManager.promises.userHasSubscription.resolves({
+        subscription,
+      })
+
+      const result =
+        await this.SubscriptionController.checkSubscriptionPauseStatus(
+          this.user
+        )
+
+      expect(result).to.deep.equal({ isPaused: false })
+    })
+
+    it('should return isPaused: false when Stripe subscription has no remaining pause cycles', async function () {
+      const subscription = {
+        paymentProvider: {
+          service: 'stripe',
+          subscriptionId: 'sub-123',
+        },
+      }
+      this.LimitationsManager.promises.userHasSubscription.resolves({
+        subscription,
+      })
+
+      const paymentRecord = {
+        subscription: {
+          remainingPauseCycles: 0,
+        },
+      }
+      this.Modules.promises.hooks.fire
+        .withArgs('getPaymentFromRecord', subscription)
+        .resolves([paymentRecord])
+
+      const result =
+        await this.SubscriptionController.checkSubscriptionPauseStatus(
+          this.user
+        )
+
+      expect(result).to.deep.equal({ isPaused: false })
+    })
+
+    it('should return isPaused: false when Stripe subscription has no remainingPauseCycles property', async function () {
+      const subscription = {
+        paymentProvider: {
+          service: 'stripe',
+          subscriptionId: 'sub-123',
+        },
+      }
+      this.LimitationsManager.promises.userHasSubscription.resolves({
+        subscription,
+      })
+
+      const paymentRecord = {
+        subscription: {},
+      }
+      this.Modules.promises.hooks.fire
+        .withArgs('getPaymentFromRecord', subscription)
+        .resolves([paymentRecord])
+
+      const result =
+        await this.SubscriptionController.checkSubscriptionPauseStatus(
+          this.user
+        )
+
+      expect(result).to.deep.equal({ isPaused: false })
+    })
+
+    it('should return isPaused: true with redirect path when Stripe subscription has remaining pause cycles', async function () {
+      const subscription = {
+        paymentProvider: {
+          service: 'stripe',
+          subscriptionId: 'sub-123',
+        },
+      }
+      this.LimitationsManager.promises.userHasSubscription.resolves({
+        subscription,
+      })
+
+      const paymentRecord = {
+        subscription: {
+          remainingPauseCycles: 2,
+        },
+      }
+      this.Modules.promises.hooks.fire
+        .withArgs('getPaymentFromRecord', subscription)
+        .resolves([paymentRecord])
+
+      const result =
+        await this.SubscriptionController.checkSubscriptionPauseStatus(
+          this.user
+        )
+
+      expect(result).to.deep.equal({
+        isPaused: true,
+        redirectPath: '/user/subscription?redirect-reason=subscription-paused',
+      })
+    })
+
+    it('should return isPaused: true when remainingPauseCycles is exactly 1', async function () {
+      const subscription = {
+        paymentProvider: {
+          service: 'stripe',
+          subscriptionId: 'sub-123',
+        },
+      }
+      this.LimitationsManager.promises.userHasSubscription.resolves({
+        subscription,
+      })
+
+      const paymentRecord = {
+        subscription: {
+          remainingPauseCycles: 1,
+        },
+      }
+      this.Modules.promises.hooks.fire
+        .withArgs('getPaymentFromRecord', subscription)
+        .resolves([paymentRecord])
+
+      const result =
+        await this.SubscriptionController.checkSubscriptionPauseStatus(
+          this.user
+        )
+
+      expect(result).to.deep.equal({
+        isPaused: true,
+        redirectPath: '/user/subscription?redirect-reason=subscription-paused',
+      })
+    })
+
+    it('should return isPaused: false when userHasSubscription throws error', async function () {
+      const error = new Error('Something bad happened')
+      this.LimitationsManager.promises.userHasSubscription.rejects(error)
+
+      const result =
+        await this.SubscriptionController.checkSubscriptionPauseStatus(
+          this.user
+        )
+
+      expect(result).to.deep.equal({ isPaused: false })
+    })
+
+    it('should return isPaused: false when getPaymentFromRecord throws error', async function () {
+      const subscription = {
+        paymentProvider: {
+          service: 'stripe',
+          subscriptionId: 'sub-123',
+        },
+      }
+      this.LimitationsManager.promises.userHasSubscription.resolves({
+        subscription,
+      })
+
+      const error = new Error('Something bad happened')
+      this.Modules.promises.hooks.fire
+        .withArgs('getPaymentFromRecord', subscription)
+        .rejects(error)
+
+      const result =
+        await this.SubscriptionController.checkSubscriptionPauseStatus(
+          this.user
+        )
+
+      expect(result).to.deep.equal({ isPaused: false })
+    })
+
+    it('should return isPaused: false when Recurly subscription is not paused', async function () {
+      const subscription = {
+        recurlySubscription_id: 'uuid-123',
+        recurlyStatus: {
+          state: 'active',
+        },
+      }
+      this.LimitationsManager.promises.userHasSubscription.resolves({
+        subscription,
+      })
+
+      const result =
+        await this.SubscriptionController.checkSubscriptionPauseStatus(
+          this.user
+        )
+
+      expect(result).to.deep.equal({ isPaused: false })
+    })
+
+    it('should return isPaused: true when Recurly subscription is paused', async function () {
+      const subscription = {
+        recurlySubscription_id: 'uuid-123',
+        recurlyStatus: {
+          state: 'paused',
+        },
+      }
+      this.LimitationsManager.promises.userHasSubscription.resolves({
+        subscription,
+      })
+
+      const result =
+        await this.SubscriptionController.checkSubscriptionPauseStatus(
+          this.user
+        )
+
+      expect(result).to.deep.equal({
+        isPaused: true,
+        redirectPath: '/user/subscription?redirect-reason=subscription-paused',
+      })
+    })
+
+    it('should return isPaused: true when Recurly subscription has pending pause cycles', async function () {
+      const subscription = {
+        recurlySubscription_id: 'uuid-123',
+        recurlyStatus: {
+          state: 'active',
+        },
+      }
+      this.LimitationsManager.promises.userHasSubscription.resolves({
+        subscription,
+      })
+
+      const recurlySubscriptionData = {
+        remaining_pause_cycles: 2,
+      }
+      this.RecurlyWrapper.promises.getSubscription.resolves(
+        recurlySubscriptionData
+      )
+
+      const result =
+        await this.SubscriptionController.checkSubscriptionPauseStatus(
+          this.user
+        )
+
+      expect(result).to.deep.equal({
+        isPaused: true,
+        redirectPath: '/user/subscription?redirect-reason=subscription-paused',
+      })
+      expect(
+        this.RecurlyWrapper.promises.getSubscription
+      ).to.have.been.calledWith('uuid-123')
+    })
+
+    it('should return isPaused: false when Recurly subscription has no remaining pause cycles', async function () {
+      const subscription = {
+        recurlySubscription_id: 'uuid-123',
+        recurlyStatus: {
+          state: 'active',
+        },
+      }
+      this.LimitationsManager.promises.userHasSubscription.resolves({
+        subscription,
+      })
+
+      const recurlySubscriptionData = {
+        remaining_pause_cycles: 0,
+      }
+      this.RecurlyWrapper.promises.getSubscription.resolves(
+        recurlySubscriptionData
+      )
+
+      const result =
+        await this.SubscriptionController.checkSubscriptionPauseStatus(
+          this.user
+        )
+
+      expect(result).to.deep.equal({ isPaused: false })
+    })
+
+    it('should return isPaused: false when Recurly subscription has no remaining_pause_cycles property', async function () {
+      const subscription = {
+        recurlySubscription_id: 'uuid-123',
+        recurlyStatus: {
+          state: 'active',
+        },
+      }
+      this.LimitationsManager.promises.userHasSubscription.resolves({
+        subscription,
+      })
+
+      const recurlySubscriptionData = {}
+      this.RecurlyWrapper.promises.getSubscription.resolves(
+        recurlySubscriptionData
+      )
+
+      const result =
+        await this.SubscriptionController.checkSubscriptionPauseStatus(
+          this.user
+        )
+
+      expect(result).to.deep.equal({ isPaused: false })
+    })
+
+    it('should return isPaused: false when Recurly API call fails', async function () {
+      const subscription = {
+        recurlySubscription_id: 'uuid-123',
+        recurlyStatus: {
+          state: 'active',
+        },
+      }
+      this.LimitationsManager.promises.userHasSubscription.resolves({
+        subscription,
+      })
+
+      const error = new Error('Recurly API failed')
+      this.RecurlyWrapper.promises.getSubscription.rejects(error)
+
+      const result =
+        await this.SubscriptionController.checkSubscriptionPauseStatus(
+          this.user
+        )
+
+      expect(result).to.deep.equal({ isPaused: false })
     })
   })
 })
