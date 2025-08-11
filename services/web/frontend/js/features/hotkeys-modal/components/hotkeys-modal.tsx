@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types'
 import { Trans, useTranslation } from 'react-i18next'
 import HotkeysModalBottomText from './hotkeys-modal-bottom-text'
 import OLModal, {
@@ -17,6 +16,12 @@ export default function HotkeysModal({
   show,
   isMac = false,
   trackChangesVisible = false,
+}: {
+  animation?: boolean
+  handleHide: () => void
+  show: boolean
+  isMac?: boolean
+  trackChangesVisible?: boolean
 }) {
   const { t } = useTranslation()
 
@@ -201,23 +206,17 @@ export default function HotkeysModal({
   )
 }
 
-HotkeysModal.propTypes = {
-  animation: PropTypes.bool,
-  isMac: PropTypes.bool,
-  show: PropTypes.bool.isRequired,
-  handleHide: PropTypes.func.isRequired,
-  trackChangesVisible: PropTypes.bool,
-}
-
-function Hotkey({ combination, description }) {
+function Hotkey({
+  combination,
+  description,
+}: {
+  combination: string
+  description: string
+}) {
   return (
     <div className="hotkey" data-test-selector="hotkey">
       <span className="combination">{combination}</span>
       <span className="description">{description}</span>
     </div>
   )
-}
-Hotkey.propTypes = {
-  combination: PropTypes.string.isRequired,
-  description: PropTypes.string.isRequired,
 }

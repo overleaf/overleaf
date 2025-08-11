@@ -1,14 +1,17 @@
+import { ComponentProps } from 'react'
 import HotkeysModal from '../js/features/hotkeys-modal/components/hotkeys-modal'
 
-export const ReviewEnabled = args => {
+type HotkeysModalProps = ComponentProps<typeof HotkeysModal>
+
+export const ReviewEnabled = (args: HotkeysModalProps) => {
   return <HotkeysModal {...args} />
 }
 
-export const ReviewDisabled = args => {
+export const ReviewDisabled = (args: HotkeysModalProps) => {
   return <HotkeysModal {...args} trackChangesVisible={false} />
 }
 
-export const MacModifier = args => {
+export const MacModifier = (args: HotkeysModalProps) => {
   return <HotkeysModal {...args} isMac />
 }
 

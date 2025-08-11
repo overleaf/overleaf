@@ -13,7 +13,7 @@ describe('<HotkeysModal />', function () {
   it('renders the translated modal title on cm6', async function () {
     const { baseElement } = render(<HotkeysModal {...modalProps} />)
 
-    expect(baseElement.querySelector('.modal-title').textContent).to.equal(
+    expect(baseElement.querySelector('.modal-title')?.textContent).to.equal(
       'Hotkeys'
     )
   })
