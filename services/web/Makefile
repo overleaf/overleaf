@@ -33,19 +33,28 @@ $(MODULE_MAKEFILES): Makefile.module
 SHARD_PROJECT_NAMES = \
 	unit_test_$(BUILD_DIR_NAME) \
 	unit_test_all_$(BUILD_DIR_NAME) \
+	unit_test_esm_$(BUILD_DIR_NAME) \
+	unit_test_esm_watch_$(BUILD_DIR_NAME) \
+	unit_test_mocha_$(BUILD_DIR_NAME) \
 	unit_test_parallel_$(BUILD_DIR_NAME) \
 	unit_test_parallel_make_$(BUILD_DIR_NAME) \
 	acceptance_test_saas_$(BUILD_DIR_NAME) \
 	acceptance_test_server_ce_$(BUILD_DIR_NAME) \
 	acceptance_test_server_pro_$(BUILD_DIR_NAME) \
-	acceptance_modules_merged_saas_$(BUILD_DIR_NAME) \
-	acceptance_modules_merged_saas_1_$(BUILD_DIR_NAME) \
-	acceptance_modules_merged_saas_2_$(BUILD_DIR_NAME) \
-	acceptance_modules_merged_saas_3_$(BUILD_DIR_NAME) \
-	acceptance_modules_merged_saas_4_$(BUILD_DIR_NAME) \
-	acceptance_modules_merged_server_ce_$(BUILD_DIR_NAME) \
-	acceptance_modules_merged_server_pro_$(BUILD_DIR_NAME) \
+	acceptance_test_modules_merged_saas_$(BUILD_DIR_NAME) \
+	acceptance_test_modules_merged_saas_1_$(BUILD_DIR_NAME) \
+	acceptance_test_modules_merged_saas_2_$(BUILD_DIR_NAME) \
+	acceptance_test_modules_merged_saas_3_$(BUILD_DIR_NAME) \
+	acceptance_test_modules_merged_saas_4_$(BUILD_DIR_NAME) \
+	acceptance_test_modules_merged_server_ce_$(BUILD_DIR_NAME) \
+	acceptance_test_modules_merged_server_pro_$(BUILD_DIR_NAME) \
+	frontend_test_$(BUILD_DIR_NAME) \
 	test_frontend_ct_$(BUILD_DIR_NAME) \
+	test_frontend_ct_core_other_$(BUILD_DIR_NAME) \
+	test_frontend_ct_core_features_$(BUILD_DIR_NAME) \
+	test_frontend_ct_modules_$(BUILD_DIR_NAME) \
+	test_frontend_ct_editor_other_$(BUILD_DIR_NAME) \
+	test_frontend_ct_editor_visual_$(BUILD_DIR_NAME) \
 	tar_$(BUILD_DIR_NAME) \
 
 CLEAN_SHARDS=$(addprefix clean/,$(SHARD_PROJECT_NAMES))
