@@ -245,7 +245,6 @@ export interface Meta {
   'ol-showTemplatesServerPro': boolean
   'ol-showUSGovBanner': boolean
   'ol-showUpgradePrompt': boolean
-  'ol-skipUrl': string
   'ol-splitTestInfo': { [name: string]: SplitTestInfo }
   'ol-splitTestName': string
   'ol-splitTestVariants': { [name: string]: string }
