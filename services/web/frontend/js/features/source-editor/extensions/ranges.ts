@@ -18,9 +18,9 @@ import {
   isDeleteOperation,
   isInsertOperation,
 } from '@/utils/operations'
-import { Ranges } from '@/features/review-panel-new/context/ranges-context'
-import { Threads } from '@/features/review-panel-new/context/threads-context'
-import { isSelectionWithinOp } from '@/features/review-panel-new/utils/is-selection-within-op'
+import { Ranges } from '@/features/review-panel/context/ranges-context'
+import { Threads } from '@/features/review-panel/context/threads-context'
+import { isSelectionWithinOp } from '@/features/review-panel/utils/is-selection-within-op'
 
 type RangesData = {
   ranges: Ranges

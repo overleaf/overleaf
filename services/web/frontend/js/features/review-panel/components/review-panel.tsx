@@ -4,7 +4,7 @@ import ReviewPanelHeader from './review-panel-header'
 import ReviewPanelCurrentFile from './review-panel-current-file'
 import { ReviewPanelOverview } from './review-panel-overview'
 import classnames from 'classnames'
-import { useReviewPanelStyles } from '@/features/review-panel-new/hooks/use-review-panel-styles'
+import { useReviewPanelStyles } from '@/features/review-panel/hooks/use-review-panel-styles'
 import { useReviewPanelViewContext } from '../context/review-panel-view-context'
 import { useIsNewEditorEnabled } from '@/features/ide-redesign/utils/new-editor-utils'
 

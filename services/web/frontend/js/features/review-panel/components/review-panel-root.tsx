@@ -3,7 +3,7 @@ import LoadingSpinner from '@/shared/components/loading-spinner'
 
 const ReviewPanelContainer = lazy(() => import('./review-panel-container'))
 
-export const ReviewPanelNew: FC = () => {
+export const ReviewPanelRoot: FC = () => {
   return (
     <Suspense fallback={<LoadingSpinner delay={500} />}>
       <ReviewPanelContainer />

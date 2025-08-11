@@ -15,12 +15,12 @@ import { ReviewPanelEntry } from './review-panel-entry'
 import { useModalsContext } from '@/features/ide-react/context/modals-context'
 import { ExpandableContent } from './review-panel-expandable-content'
 import { useUserContext } from '@/shared/context/user-context'
-import { ChangeAction } from '@/features/review-panel-new/components/review-panel-change-action'
+import { ChangeAction } from '@/features/review-panel/components/review-panel-change-action'
 import {
   AddIcon,
   DeleteIcon,
   EditIcon,
-} from '@/features/review-panel-new/components/review-panel-action-icons'
+} from '@/features/review-panel/components/review-panel-action-icons'
 
 export const ReviewPanelChange = memo<{
   change: Change<EditOperation>

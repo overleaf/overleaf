@@ -1,5 +1,5 @@
 import { SelectionRange } from '@codemirror/state'
-import { Ranges } from '@/features/review-panel-new/context/ranges-context'
+import { Ranges } from '@/features/review-panel/context/ranges-context'
 import { isDeleteChange, isInsertChange } from '@/utils/operations'
 import { canAggregate } from './can-aggregate'
 import { Change, EditOperation } from '../../../../../types/change'

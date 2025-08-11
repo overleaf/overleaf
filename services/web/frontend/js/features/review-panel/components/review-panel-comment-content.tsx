@@ -11,7 +11,7 @@ import {
   ThreadId,
 } from '../../../../../types/review-panel/review-panel'
 import { usePermissionsContext } from '@/features/ide-react/context/permissions-context'
-import { isFormSubmitKeypressEvent } from '@/features/review-panel-new/utils/form-events'
+import { isFormSubmitKeypressEvent } from '@/features/review-panel/utils/form-events'
 
 export const ReviewPanelCommentContent = memo<{
   comment: Change<CommentOperation>

@@ -1,7 +1,7 @@
 import Tooltip from '@/shared/components/tooltip'
 import { ComponentProps, memo, MouseEventHandler } from 'react'
-import { PreventSelectingEntry } from '@/features/review-panel-new/components/review-panel-prevent-selecting'
 import OLTooltip from '@/shared/components/ol/ol-tooltip'
+import { PreventSelectingEntry } from '@/features/review-panel/components/review-panel-prevent-selecting'
 import MaterialIcon from '@/shared/components/material-icon'
 
 const changeActionTooltipProps: Partial<ComponentProps<typeof Tooltip>> = {

@@ -1,5 +1,5 @@
-import { Ranges } from '@/features/review-panel-new/context/ranges-context'
-import { Threads } from '@/features/review-panel-new/context/threads-context'
+import { Ranges } from '@/features/review-panel/context/ranges-context'
+import { Threads } from '@/features/review-panel/context/threads-context'
 
 export const hasActiveRange = (
   ranges: Ranges | undefined,

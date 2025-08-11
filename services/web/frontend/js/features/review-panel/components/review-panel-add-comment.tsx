@@ -13,7 +13,7 @@ import { ThreadId } from '../../../../../types/review-panel/review-panel'
 import { useModalsContext } from '@/features/ide-react/context/modals-context'
 import { debugConsole } from '@/utils/debugging'
 import OLButton from '@/shared/components/ol/ol-button'
-import { isFormSubmitKeypressEvent } from '@/features/review-panel-new/utils/form-events'
+import { isFormSubmitKeypressEvent } from '@/features/review-panel/utils/form-events'
 
 export const ReviewPanelAddComment = memo<{
   docId: string
