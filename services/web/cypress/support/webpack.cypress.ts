@@ -10,7 +10,10 @@ const buildConfig = () => {
       workerPublicPath: '/__cypress/src/',
     },
     devServer: {
-      static: path.join(__dirname, '../../public'),
+      static: {
+        directory: path.join(__dirname, '../../public'),
+        watch: false,
+      },
       port: 3200,
     },
     stats: 'none',
