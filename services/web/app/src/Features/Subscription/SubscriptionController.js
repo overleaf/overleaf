@@ -177,10 +177,6 @@ async function userSubscriptionPage(req, res) {
     premiumSource: aiAssistViaWritefullSource,
   } = await UserGetter.promises.getWritefullData(user._id)
 
-  // populate splitTestVariants in locals with a value for the split test, so
-  // it's available in meta ol-splitTestVariants in the browser
-  await SplitTestHandler.promises.getAssignment(req, res, 'group-audit-logs')
-
   const data = {
     title: 'your_subscription',
     plans: plansData?.plans,

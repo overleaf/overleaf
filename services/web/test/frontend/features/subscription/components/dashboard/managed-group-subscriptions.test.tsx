@@ -97,10 +97,6 @@ describe('<ManagedGroupSubscriptions />', function () {
           value: managedGroupSubscriptions,
         },
         { name: 'ol-usersEmail', value: 'admin@example.com' },
-        {
-          name: 'ol-splitTestVariants',
-          value: { 'group-audit-logs': 'active' },
-        },
       ],
     })
 
