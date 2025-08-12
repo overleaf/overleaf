@@ -1,140 +1,80 @@
-import Button from '@/shared/components/button/button'
 import type { Meta, StoryObj } from '@storybook/react'
+import { figmaDesignUrl } from './../../../.storybook/utils/figma-design-url'
 import OLModal, {
   OLModalHeader,
   OLModalBody,
   OLModalFooter,
   OLModalTitle,
 } from '@/shared/components/ol/ol-modal'
+import OLButton from '@/shared/components/ol/ol-button'
 
 type Story = StoryObj<typeof OLModal>
 
 export const Default: Story = {
-  render: args => {
-    return (
-      <OLModal show {...args}>
-        <OLModalHeader closeButton>
-          <OLModalTitle>Heading</OLModalTitle>
-        </OLModalHeader>
-        <OLModalBody>
-          <p>
-            Lorem ipsum dolor sit lorem a amet, consectetur adipiscing elit, sed
-            do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
-            enim ad minim veniam.
-          </p>
-        </OLModalBody>
-        <OLModalFooter>
-          <Button variant="secondary">Cancel</Button>
-          <Button variant="primary">Primary</Button>
-        </OLModalFooter>
-      </OLModal>
-    )
+  args: {
+    title: 'Heading',
+    children: (
+      <p>
+        Always use the modal actions in the footer and use descriptive words for
+        them.
+      </p>
+    ),
+    footer: (
+      <>
+        <OLButton variant="secondary">Cancel</OLButton>
+        <OLButton variant="primary">Primary</OLButton>
+      </>
+    ),
+  },
+  parameters: figmaDesignUrl(
+    'https://www.figma.com/design/V7Ogph1Ocs4ux2A4WMNAh7/Overleaf---Components?m=auto&node-id=3488-82657&m=dev'
+  ),
+}
+
+export const Informative: Story = {
+  parameters: figmaDesignUrl(
+    'https://www.figma.com/design/V7Ogph1Ocs4ux2A4WMNAh7/Overleaf---Components?m=auto&node-id=3488-86576&m=dev'
+  ),
+  args: {
+    title: 'Informative',
+    children: (
+      <p>
+        Presents information for the user to be aware of and doesn’t require any
+        action.
+      </p>
+    ),
   },
 }
 
-export const ModalWithAcknowledgment: Story = {
-  render: args => {
-    return (
-      <OLModal show {...args}>
-        <OLModalHeader closeButton>
-          <OLModalTitle>Acknowledgment</OLModalTitle>
-        </OLModalHeader>
-        <OLModalBody>
-          <p>
-            System requires an acknowledgment from the user. Usually contains
-            only one primary button.
-          </p>
-        </OLModalBody>
-        <OLModalFooter>
-          <Button variant="primary">Accept</Button>
-        </OLModalFooter>
-      </OLModal>
-    )
+export const Acknowledgment: Story = {
+  parameters: figmaDesignUrl(
+    'https://www.figma.com/design/V7Ogph1Ocs4ux2A4WMNAh7/Overleaf---Components?m=auto&node-id=3488-86581&m=dev'
+  ),
+  args: {
+    title: 'Acknowledgment',
+    children: (
+      <p>
+        System requires an acknowledgment from the user. Usually contains only
+        one primary button.
+      </p>
+    ),
+    footer: <OLButton variant="primary">Accept</OLButton>,
   },
 }
 
-export const ModalWithSecondary: Story = {
-  render: args => {
-    return (
-      <OLModal show {...args}>
-        <OLModalHeader closeButton>
-          <OLModalTitle>Heading</OLModalTitle>
-        </OLModalHeader>
-        <OLModalBody>
-          <p>
-            Lorem ipsum dolor sit lorem a amet, consectetur adipiscing elit, sed
-            do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
-            enim ad minim veniam.
-          </p>
-        </OLModalBody>
-        <OLModalFooter>
-          <Button variant="secondary">Cancel</Button>
-        </OLModalFooter>
-      </OLModal>
-    )
-  },
-}
-
-export const ModalWithTertiary: Story = {
-  render: args => {
-    return (
-      <OLModal show {...args}>
-        <OLModalHeader closeButton>
-          <OLModalTitle>Heading</OLModalTitle>
-        </OLModalHeader>
-        <OLModalBody>
-          <p>Used for destructive or irreversible actions.</p>
-        </OLModalBody>
-        <OLModalFooter>
-          <Button variant="secondary">Third</Button>
-          <Button variant="secondary" className="ms-auto">
-            Cancel
-          </Button>
-          <Button variant="primary">Primary</Button>
-        </OLModalFooter>
-      </OLModal>
-    )
-  },
-}
-
-export const ModalInformative: Story = {
-  render: args => {
-    return (
-      <OLModal show {...args}>
-        <OLModalHeader closeButton>
-          <OLModalTitle>Informative</OLModalTitle>
-        </OLModalHeader>
-        <OLModalBody>
-          <p>
-            Presents information for the user to be aware of and doesn’t require
-            any action.
-          </p>
-        </OLModalBody>
-      </OLModal>
-    )
-  },
-}
-
-export const ModalDanger: Story = {
-  render: args => {
-    return (
-      <OLModal show {...args}>
-        <OLModalHeader closeButton>
-          <OLModalTitle>Danger</OLModalTitle>
-        </OLModalHeader>
-        <OLModalBody>
-          <p>
-            Lorem ipsum dolor sit lorem a amet, consectetur adipiscing elit, sed
-            do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
-            enim ad minim veniam.
-          </p>
-        </OLModalBody>
-        <OLModalFooter>
-          <Button variant="secondary">Cancel</Button>
-          <Button variant="danger">Delete</Button>
-        </OLModalFooter>
-      </OLModal>
-    )
+export const Danger: Story = {
+  parameters: figmaDesignUrl(
+    'https://www.figma.com/design/V7Ogph1Ocs4ux2A4WMNAh7/Overleaf---Components?m=auto&node-id=3488-86586&m=dev'
+  ),
+  args: {
+    title: 'Danger',
+    children: <p>Used for destructive or irreversible actions.</p>,
+    footer: (
+      <>
+        <OLButton variant="secondary">Cancel</OLButton>
+        <OLButton variant="danger">Delete</OLButton>
+      </>
+    ),
   },
 }
 
@@ -146,7 +86,24 @@ const meta: Meta<typeof OLModal> = {
       control: 'radio',
       options: ['lg', 'md', 'sm'],
     },
+    title: { control: 'text' },
+    children: { control: false },
+    footer: { control: false },
   },
+  args: {
+    show: true,
+    size: 'sm',
+    onHide: () => {},
+  },
+  render: ({ title, children, footer, ...args }) => (
+    <OLModal {...args}>
+      <OLModalHeader closeButton>
+        <OLModalTitle>{title}</OLModalTitle>
+      </OLModalHeader>
+      <OLModalBody>{children}</OLModalBody>
+      {footer && <OLModalFooter>{footer}</OLModalFooter>}
+    </OLModal>
+  ),
 }
 
 export default meta

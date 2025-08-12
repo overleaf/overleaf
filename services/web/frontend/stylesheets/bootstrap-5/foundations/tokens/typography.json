@@ -1,0 +1,133 @@
+{
+  "Fontweight": {
+    "font-weight-regular": {
+      "$type": "number",
+      "$value": 400
+    },
+    "font-weight-medium": {
+      "$type": "number",
+      "$value": 500
+    },
+    "font-weight-semibold": {
+      "$type": "number",
+      "$value": 600
+    }
+  },
+  "Fontsize": {
+    "font-size-01": {
+      "$type": "number",
+      "$value": 12,
+      "$mixin": "body-xs"
+    },
+    "font-size-02": {
+      "$type": "number",
+      "$value": 14,
+      "$mixin": "body-sm"
+    },
+    "font-size-03": {
+      "$type": "number",
+      "$value": 16,
+      "$mixin": "body-base"
+    },
+    "font-size-04": {
+      "$type": "number",
+      "$value": 18,
+      "$mixin": ["body-lg", "heading-xs"]
+    },
+    "font-size-05": {
+      "$type": "number",
+      "$value": 20,
+      "$mixin": "heading-sm"
+    },
+    "font-size-06": {
+      "$type": "number",
+      "$value": 24,
+      "$mixin": "heading-md"
+    },
+    "font-size-07": {
+      "$type": "number",
+      "$value": 30,
+      "$mixin": "heading-lg"
+    },
+    "font-size-08": {
+      "$type": "number",
+      "$value": 36,
+      "$mixin": "heading-xl"
+    },
+    "font-size-09": {
+      "$type": "number",
+      "$value": 48,
+      "$mixin": "heading-2xl"
+    },
+    "font-size-10": {
+      "$type": "number",
+      "$value": 52,
+      "$mixin": "display-xs"
+    },
+    "font-size-11": {
+      "$type": "number",
+      "$value": 60,
+      "$mixin": "display-sm"
+    },
+    "font-size-12": {
+      "$type": "number",
+      "$value": 72,
+      "$mixin": "display-md"
+    },
+    "font-size-13": {
+      "$type": "number",
+      "$value": 96,
+      "$mixin": "display-lg"
+    }
+  },
+  "Lineheight": {
+    "line-height-01": {
+      "$type": "number",
+      "$value": 16
+    },
+    "line-height-02": {
+      "$type": "number",
+      "$value": 20
+    },
+    "line-height-03": {
+      "$type": "number",
+      "$value": 24
+    },
+    "line-height-04": {
+      "$type": "number",
+      "$value": 28
+    },
+    "line-height-05": {
+      "$type": "number",
+      "$value": 32
+    },
+    "line-height-06": {
+      "$type": "number",
+      "$value": 40
+    },
+    "line-height-07": {
+      "$type": "number",
+      "$value": 48
+    },
+    "line-height-08": {
+      "$type": "number",
+      "$value": 64
+    },
+    "line-height-09": {
+      "$type": "number",
+      "$value": 68
+    },
+    "line-height-10": {
+      "$type": "number",
+      "$value": 80
+    },
+    "line-height-11": {
+      "$type": "number",
+      "$value": 96
+    },
+    "line-height-12": {
+      "$type": "number",
+      "$value": 128
+    }
+  }
+}

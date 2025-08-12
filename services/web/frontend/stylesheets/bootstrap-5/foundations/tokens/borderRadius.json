@@ -1,0 +1,24 @@
+{
+  "BorderRadius": {
+    "border-radius-none": {
+      "$type": "number",
+      "$value": 0
+    },
+    "border-radius-base": {
+      "$type": "number",
+      "$value": 4
+    },
+    "border-radius-medium": {
+      "$type": "number",
+      "$value": 8
+    },
+    "border-radius-large": {
+      "$type": "number",
+      "$value": 16
+    },
+    "border-radius-full": {
+      "$type": "number",
+      "$value": 9999
+    }
+  }
+}

@@ -1,0 +1,24 @@
+import { Meta } from '@storybook/blocks';
+
+<Meta title="Storybook Guideline / Storybook builds" />
+
+
+# Cloud Builds
+
+Storybook builds can be used to share your development work. They can be found at [https://storybook.dev-overleaf.com/](https://storybook.dev-overleaf.com/).
+
+The naming scheme is predictable, i.e.: `https://storybook.dev-overleaf.com/<BRANCH_NAME>/`.
+
+# Triggers
+
+Storybook builds are automatically triggered for the main branch. For ad hoc builds of feature branches, the commits must be pushed to branches prefixed with `storybook-`.
+
+For example, you may temporarily push your branch to a `storybook-` branch: `git push origin my-example-feature:storybook-my-example-feature`
+
+You can delete it shortly after: `git push origin :storybook-my-example-feature`
+
+Alternatively, **if you already have a branch**, but you would like to create a Storybook, you can manually trigger the `storybook-push-trigger` on your branch via [Google Cloud Build triggers](https://console.cloud.google.com/cloud-build/triggers?project=overleaf-dev).
+
+Storybook builds take about 10 minutes to finish.
+
+**Source:** [Storybook in the developer manual](https://manual.dev-overleaf.com/development/code/storybook/)

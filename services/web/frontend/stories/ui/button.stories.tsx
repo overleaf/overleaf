@@ -1,27 +1,28 @@
-import Button from '@/shared/components/button/button'
 import { Meta } from '@storybook/react'
+import { figmaDesignUrl } from '../../../.storybook/utils/figma-design-url'
+import OLButton from '@/shared/components/ol/ol-button'
 
-type Args = React.ComponentProps<typeof Button>
+type Args = React.ComponentProps<typeof OLButton>
 
 export const NewButton = (args: Args) => {
-  return <Button {...args} />
+  return <OLButton {...args} />
 }
 
 export const ButtonWithLeadingIcon = (args: Args) => {
-  return <Button leadingIcon="add" {...args} />
+  return <OLButton leadingIcon="add" {...args} />
 }
 
 export const ButtonWithTrailingIcon = (args: Args) => {
-  return <Button trailingIcon="add" {...args} />
+  return <OLButton trailingIcon="add" {...args} />
 }
 
 export const ButtonWithIcons = (args: Args) => {
-  return <Button trailingIcon="add" leadingIcon="add" {...args} />
+  return <OLButton trailingIcon="add" leadingIcon="add" {...args} />
 }
 
-const meta: Meta<typeof Button> = {
+const meta: Meta<typeof OLButton> = {
   title: 'Shared / Components / Button',
-  component: Button,
+  component: OLButton,
   args: {
     children: 'A Button',
     disabled: false,
@@ -30,7 +31,7 @@ const meta: Meta<typeof Button> = {
   argTypes: {
     size: {
       control: 'radio',
-      options: ['small', 'default', 'large'],
+      options: ['lg', 'md', 'sm'],
     },
     variant: {
       control: 'radio',
@@ -42,9 +43,13 @@ const meta: Meta<typeof Button> = {
         'danger-ghost',
         'premium',
         'premium-secondary',
+        'link',
       ],
     },
   },
+  parameters: figmaDesignUrl(
+    'https://www.figma.com/design/V7Ogph1Ocs4ux2A4WMNAh7/Overleaf---Components?node-id=3458-22412&m=dev'
+  ),
 }
 
 export default meta

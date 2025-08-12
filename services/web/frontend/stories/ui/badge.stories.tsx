@@ -1,7 +1,8 @@
-import Badge from '@/shared/components/badge/badge'
-import MaterialIcon from '@/shared/components/material-icon'
 import type { Meta, StoryObj } from '@storybook/react'
 import classnames from 'classnames'
+import { figmaDesignUrl } from '../../../.storybook/utils/figma-design-url'
+import Badge from '@/shared/components/badge/badge'
+import MaterialIcon from '@/shared/components/material-icon'
 
 const meta: Meta<typeof Badge> = {
   title: 'Shared / Components / Badge',
@@ -31,20 +32,27 @@ export default meta
 type Story = StoryObj<typeof Badge>
 
 export const BadgeDefault: Story = {
-  render: args => {
-    return (
-      <Badge
-        className={classnames({ 'text-dark': args.bg === 'light' })}
-        {...args}
-      />
-    )
+  args: {
+    bg: meta.argTypes!.bg!.options![0],
   },
-}
-BadgeDefault.args = {
-  bg: meta.argTypes!.bg!.options![0],
+  parameters: figmaDesignUrl(
+    'https://www.figma.com/design/V7Ogph1Ocs4ux2A4WMNAh7/Overleaf---Components?node-id=3458-9502&m=dev'
+  ),
+  render: args => (
+    <Badge
+      className={classnames({ 'text-dark': args.bg === 'light' })}
+      {...args}
+    />
+  ),
 }
 
 export const BadgePrepend: Story = {
+  args: {
+    bg: meta.argTypes!.bg!.options![0],
+  },
+  parameters: figmaDesignUrl(
+    'https://www.figma.com/design/V7Ogph1Ocs4ux2A4WMNAh7/Overleaf---Components?node-id=3458-11319&m=dev'
+  ),
   render: args => {
     return (
       <Badge
@@ -54,7 +62,4 @@ export const BadgePrepend: Story = {
       />
     )
   },
-}
-BadgePrepend.args = {
-  bg: meta.argTypes!.bg!.options![0],
 }

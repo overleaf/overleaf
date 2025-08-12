@@ -131,7 +131,11 @@ const preview: Preview = {
     options: {
       storySort: {
         method: 'alphabetical',
-        order: ['Shared'],
+        order: [
+          'Storybook Guideline',
+          ['Foundations', 'Storybook builds', 'Feature Flags'],
+          'Shared',
+        ],
       },
     },
   },

@@ -1,0 +1,234 @@
+import { Meta, ColorItem, ColorPalette, Title, Typeset } from '@storybook/blocks';
+import colors from '../../stylesheets/bootstrap-5/foundations/tokens/colors.json';
+import typography from '../../stylesheets/bootstrap-5/foundations/tokens/typography.json';
+import borderRadius from '../../stylesheets/bootstrap-5/foundations/tokens/borderRadius.json';
+import spacing from '../../stylesheets/bootstrap-5/foundations/tokens/spacing.json';
+
+<Meta title="Storybook Guideline / Foundations" />
+
+# Foundations
+
+Foundations in UX design are the basic rules and core elements, like colors, fonts, and spacing, that ensure consistency across the design.
+<p>
+  These palettes are generated from our token files. The tokens were exported from Figma and split into separate files to categorise: <a href="https://github.com/overleaf/internal/tree/main/services/web/frontend/stylesheets/bootstrap-5/foundations/tokens" target="_blank" rel="noopener noreferrer">Token files on GitHub</a>
+</p>
+
+**Table of Contents**
+- [Primitive colors](#primitive-colors)
+- [Background colors](#background-colors)
+- [Content colors](#content-colors)
+- [Border colors](#border-colors)
+- [Link colors](#link-colors)
+- [Special colors](#special-colors)
+- [Font weight](#font-weight)
+- [Font size](#font-size)
+- [Border radius](#border-radius)
+- [Spacing](#spacing)
+
+# Colors
+<br/>
+
+## Primitive colors
+
+<ColorPalette>
+  {Object.entries(colors.PrimitiveColor).map(([name, color]) => (
+    <ColorItem
+      key={name}
+      title={name}
+      colors={[color.$value]}
+    />
+  ))}
+</ColorPalette>
+
+## Background colors
+
+Colors used for page and component backgrounds.
+
+<ColorPalette>
+  {Object.entries(colors)
+    .filter(([name]) => name.startsWith('bg-'))
+    .map(([name, colors]) => (
+      <ColorItem
+        key={name}
+        title={name}
+        subtitle={colors.$primitive}
+        colors={[colors.$value]}
+      />
+    ))}
+</ColorPalette>
+
+## Content colors
+
+Colors used for text and icons.
+
+<ColorPalette>
+  {Object.entries(colors)
+    .filter(([name]) => name.startsWith('content-'))
+    .map(([name, colors]) => (
+      <ColorItem
+        key={name}
+        title={name}
+        subtitle={colors.$primitive}
+        colors={[colors.$value]}
+      />
+    ))}
+</ColorPalette>
+
+## Border colors
+
+Colors used for borders and dividers.
+
+<ColorPalette>
+  {Object.entries(colors)
+    .filter(([name]) => name.startsWith('border-'))
+    .map(([name, colors]) => (
+      <ColorItem
+        key={name}
+        title={name}
+        subtitle={colors.$primitive}
+        colors={[colors.$value]}
+      />
+    ))}
+</ColorPalette>
+
+## Link colors
+
+Colors used for hyperlink states.
+
+<ColorPalette>
+  {Object.entries(colors)
+    .filter(([name]) => name.startsWith('link-'))
+    .map(([name, colors]) => (
+      <ColorItem
+        key={name}
+        title={name}
+        subtitle={colors.$primitive}
+        colors={[colors.$value]}
+      />
+    ))}
+</ColorPalette>
+
+## Special colors
+
+Colors used for specific UI elements like color pickers.
+
+<ColorPalette>
+  {Object.entries(colors)
+    .filter(([name]) => name.startsWith('special-'))
+    .map(([name, colors]) => (
+      <ColorItem
+        key={name}
+        title={name}
+        subtitle={colors.$primitive}
+        colors={[colors.$value]}
+      />
+    ))}
+</ColorPalette>
+
+# Typography
+<br/>
+
+## Font weight
+<br/>
+
+{Object.entries(typography.Fontweight).map(([name, typography]) => (
+  <div key={name}>
+    <strong>{name}</strong>
+    <Typeset
+      fontSizes={[14]}
+      fontWeight={typography.$value}
+      sampleText="The quick brown fox jumps over the lazy dog"
+    />
+  </div>
+))}
+
+## Font size
+<br/>
+
+{Object.entries(typography['Fontsize']).map(([name, typography]) => {
+  const mixins = typography.$mixin ? [].concat(typography.$mixin) : [];
+
+  return (
+    <div key={name} style={{ marginBottom: '2rem' }}>
+      <strong>
+        {name}
+        {mixins.map(mixin => (
+          <span key={mixin}> / @mixin {mixin}</span>
+        ))}
+      </strong>
+      <Typeset
+        fontSizes={[`${typography.$value}px`]}
+        fontWeight={500}
+        sampleText="The quick brown fox jumps over the lazy dog"
+      />
+    </div>
+  );
+})}
+
+## Border radius
+<br/>
+
+<table style={{ width: '100%' }}>
+  <thead>
+    <tr>
+      <th>Variable name</th>
+      <th>Value</th>
+      <th style={{ textAlign: 'center' }}>Example</th>
+    </tr>
+  </thead>
+  <tbody>
+    {Object.entries(borderRadius['BorderRadius']).map(([name, borderRadius]) => (
+      <tr key={name}>
+        <td>
+          <strong>{name}</strong>
+        </td>
+        <td style={{ textAlign: 'center' }}>{borderRadius.$value}px</td>
+        <td style={{ textAlign: 'center', padding: '0.5rem' }}>
+          <div
+            style={{
+              width: '80px',
+              height: '80px',
+              borderRadius: `${borderRadius.$value}px`,
+              backgroundColor: '#098842',
+              display: 'inline-block',
+            }}
+          />
+        </td>
+      </tr>
+    ))}
+  </tbody>
+</table>
+
+## Spacing
+<br/>
+
+<table style={{ width: '100%' }}>
+  <thead>
+    <tr>
+      <th>Variable Name</th>
+      <th>Value</th>
+      <th style={{ textAlign: 'left', paddingLeft: '1rem' }}>Example</th>
+    </tr>
+  </thead>
+  <tbody>
+    {Object.entries(spacing.Spacing)
+      .filter(([, spacing]) => spacing.$value > 0)
+      .map(([name, spacing]) => (
+        <tr key={name}>
+          <td>
+            <strong>{name}</strong>
+          </td>
+          <td style={{ textAlign: 'center' }}>{spacing.$value}px</td>
+          <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle' }}>
+            <div
+              style={{
+                height: `${spacing.$value}px`,
+                width: '100%',
+                backgroundColor: '#098842',
+              }}
+            />
+          </td>
+        </tr>
+      ))}
+  </tbody>
+</table>

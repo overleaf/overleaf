@@ -1,0 +1,40 @@
+import { Canvas, Controls, Meta } from '@storybook/blocks';
+import * as FormatCurrency from './format-currency.stories'
+
+<Meta title="Storybook Guideline / Feature flags" />
+
+# Feature flags
+
+You can wrap your story with the `withSplitTests` utility to add split test variants to your Storybook stories, so you can toggle feature flags directly in the Storybook UI. See [withSplitTests on GitHub](https://github.com/overleaf/internal/blob/main/services/web/.storybook/utils/with-split-tests.tsx).
+
+1. Define your split test argTypes:
+Add your split test configurations to the `splitTestsArgTypes` object.
+
+```js
+export const splitTestsArgTypes = {
+  'local-ccy-format': {
+    description: 'Use local currency formatting',
+    control: { type: 'radio' },
+    options: ['default', 'enabled'],
+  },
+}
+```
+2. Wrap your story with `withSplitTests`.
+
+Import `withSplitTests` and `Meta` from '@storybook/react' in your stories.
+
+```js
+export default {
+  ...config,
+  ...withSplitTests(config, ['local-ccy-format']),
+}
+```
+
+## Example
+
+Resulting stories will have added controls to define the variants of the split tests.
+
+<div>
+  <Canvas of={FormatCurrency.Story} />
+  <Controls of={FormatCurrency.Story} />
+</div>
