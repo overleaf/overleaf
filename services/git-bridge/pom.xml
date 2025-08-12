@@ -24,7 +24,7 @@
         <joda.time.version>2.9.9</joda.time.version>
         <google.oauth.client.version>1.37.0</google.oauth.client.version>
         <google.http.client.version>1.23.0</google.http.client.version>
-        <commons.lang3.version>3.17.0</commons.lang3.version>
+        <commons.lang3.version>3.18.0</commons.lang3.version>
         <logback.classic.version>1.2.13</logback.classic.version>
         <mockserver.version>5.12.0</mockserver.version>
         <mockito.version>5.12.0</mockito.version>
