@@ -6,6 +6,7 @@ const logger = require('@overleaf/logger')
 
 module.exports = {
   hasAdminAccess,
+  hasAdminCapability,
   canRedirectToAdminDomain,
   getAdminCapabilities,
   useHasAdminCapability,
@@ -16,6 +17,20 @@ function hasAdminAccess(user) {
   if (!Settings.adminPrivilegeAvailable) return false
   if (!user) return false
   return Boolean(user.isAdmin)
+}
+
+function hasAdminCapability(capability) {
+  return req => {
+    if (!hasAdminAccess(SessionManager.getSessionUser(req.session))) {
+      return false
+    }
+    const { adminCapabilitiesAvailable, adminCapabilities } = req
+    if (!adminCapabilitiesAvailable) {
+      // We can't know which capabilities are possible, so we assume all are available for admins.
+      return true
+    }
+    return adminCapabilities?.includes(capability)
+  }
 }
 
 async function getAdminCapabilities(user) {
@@ -54,17 +69,8 @@ async function useAdminCapabilities(req, res, next) {
 }
 
 function useHasAdminCapability(req, res, next) {
-  res.locals.hasAdminCapability = capability => {
-    if (!hasAdminAccess(SessionManager.getSessionUser(req.session))) {
-      return false
-    }
-    const { adminCapabilitiesAvailable, adminCapabilities } = req
-    if (!adminCapabilitiesAvailable) {
-      // We can't know which capabilities are possible, so we assume all are available for admins.
-      return true
-    }
-    return adminCapabilities.includes(capability)
-  }
+  res.locals.hasAdminCapability = capability =>
+    hasAdminCapability(capability)(req)
   next()
 }
 

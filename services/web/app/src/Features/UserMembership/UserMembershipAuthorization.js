@@ -1,4 +1,5 @@
-const { hasAdminAccess } = require('../Helpers/AdminAuthorizationHelper')
+const { hasAdminCapability } = require('../Helpers/AdminAuthorizationHelper')
+
 const UserMembershipAuthorization = {
   hasStaffAccess(requiredStaffAccess) {
     return req => {
@@ -13,17 +14,7 @@ const UserMembershipAuthorization = {
     }
   },
 
-  hasAdminCapability(capability) {
-    return req => {
-      if (!hasAdminAccess(req.user)) {
-        return false
-      }
-      if (!req.adminCapabilitiesAvailable) {
-        return true
-      }
-      return req.adminCapabilities?.includes(capability)
-    }
-  },
+  hasAdminCapability,
 
   hasEntityAccess() {
     return req => {

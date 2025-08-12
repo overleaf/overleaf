@@ -369,4 +369,63 @@ describe('AdminAuthorizationHelper', function () {
       })
     })
   })
+  describe('hasAdminCapability', function () {
+    describe('when user is not an admin', function () {
+      it('returns false', function () {
+        const req = {
+          session: {
+            user: { isAdmin: false },
+          },
+        }
+        expect(
+          this.AdminAuthorizationHelper.hasAdminCapability('capability')(req)
+        ).to.be.false
+      })
+    })
+    describe('when user is an admin', function () {
+      describe('when adminCapabilitiesAvailable is falsey', function () {
+        it('returns true', function () {
+          const req = {
+            session: {
+              user: { isAdmin: true },
+            },
+            adminCapabilitiesAvailable: false,
+          }
+          expect(
+            this.AdminAuthorizationHelper.hasAdminCapability('capability')(req)
+          ).to.be.true
+        })
+      })
+      describe('when adminCapabilitiesAvailable is true', function () {
+        describe('when user has the requested capability', function () {
+          it('returns true', function () {
+            const req = {
+              session: { user: { isAdmin: true } },
+              adminCapabilitiesAvailable: true,
+              adminCapabilities: ['capability'],
+            }
+            expect(
+              this.AdminAuthorizationHelper.hasAdminCapability('capability')(
+                req
+              )
+            ).to.be.true
+          })
+        })
+        describe('when user does not have the requested capability', function () {
+          it('returns false', function () {
+            const req = {
+              session: { user: { isAdmin: true } },
+              adminCapabilitiesAvailable: true,
+              adminCapabilities: ['other-capability'],
+            }
+            expect(
+              this.AdminAuthorizationHelper.hasAdminCapability('capability')(
+                req
+              )
+            ).to.be.false
+          })
+        })
+      })
+    })
+  })
 })
