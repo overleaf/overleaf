@@ -301,7 +301,6 @@ const checkNewSecondaryEmailConfirmationCode = _checkConfirmationCode(
       req.ip,
       { newSecondaryEmail: email }
     )
-    await _sendSecurityAlertEmail(user, email)
     await UserUpdater.promises.addEmailAddress(
       user._id,
       email,
@@ -311,6 +310,7 @@ const checkNewSecondaryEmailConfirmationCode = _checkConfirmationCode(
         ipAddress: req.ip,
       }
     )
+    await _sendSecurityAlertEmail(user, email)
   }
 )
 
