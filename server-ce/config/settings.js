@@ -188,6 +188,8 @@ const settings = {
     // Add https:// protocol prefix if not set (Allow plain-text http:// for Server Pro/CE).
     (process.env.OVERLEAF_STATUS_PAGE_URL.startsWith('http://') || process.env.OVERLEAF_STATUS_PAGE_URL.startsWith('https://')) ? process.env.OVERLEAF_STATUS_PAGE_URL : `https://${process.env.OVERLEAF_STATUS_PAGE_URL}`
     : undefined,
+  maintenanceMessage: process.env.OVERLEAF_MAINTENANCE_MESSAGE,
+  maintenanceMessageHTML: process.env.OVERLEAF_MAINTENANCE_MESSAGE_HTML,
 
   // The name this is used to describe your Overleaf Community Edition Installation
   appName: process.env.OVERLEAF_APP_NAME || 'Overleaf Community Edition',

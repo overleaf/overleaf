@@ -15,6 +15,11 @@ import Settings from '@overleaf/settings'
 import request from './helpers/request.js'
 
 describe('siteIsOpen', function () {
+  afterEach(function () {
+    delete Settings.maintenanceMessage
+    delete Settings.maintenanceMessageHTML
+  })
+
   describe('when siteIsOpen is default (true)', function () {
     it('should get page', function (done) {
       return request.get('/login', (error, response, body) => {
@@ -41,11 +46,46 @@ describe('siteIsOpen', function () {
       })
     })
 
+    it('should return a custom message on maintenance page', function (done) {
+      const message = `Hello world (${Math.random()})`
+      Settings.maintenanceMessage = message
+      request.get('/login', (error, response, body) => {
+        response.statusCode.should.equal(503)
+        body.should.contain(message)
+        done()
+      })
+    })
+
+    it('should return a custom HTML message on maintenance page', function (done) {
+      const message = `Hello world (${Math.random()})`
+      const messageHTML = `<p style="color: ghostwhite">Hello world (${Math.random()})</p>`
+      Settings.maintenanceMessage = message
+      Settings.maintenanceMessageHTML = messageHTML
+      request.get('/login', (error, response, body) => {
+        response.statusCode.should.equal(503)
+        body.should.not.contain(message)
+        body.should.contain(messageHTML)
+        done()
+      })
+    })
+
     it('should return a plain text message for a json request', function (done) {
       request.get('/some/route', { json: true }, (error, response, body) => {
         response.statusCode.should.equal(503)
         body.message.should.match(/maintenance/)
         body.message.should.match(/status.example.com/)
+        done()
+      })
+    })
+
+    it('should return a custom message for a json request', function (done) {
+      const message = `Hello world (${Math.random()})`
+      const messageHTML = `<p style="color: ghostwhite">Hello world (${Math.random()})</p>`
+      Settings.maintenanceMessage = message
+      Settings.maintenanceMessageHTML = messageHTML
+      request.get('/some/route', { json: true }, (error, response, body) => {
+        response.statusCode.should.equal(503)
+        body.message.should.equal(message)
         done()
       })
     })
