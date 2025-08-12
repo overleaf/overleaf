@@ -60,6 +60,12 @@ describe('SpamSafe', function () {
         'A Project'
       )
     ).to.equal('A Project')
+    expect(SpamSafe.safeProjectName(`JND-123456-100s68`, 'A Project')).to.equal(
+      'A Project'
+    )
+    expect(
+      SpamSafe.safeProjectName(`JiAqun123456s100sf68`, 'A Project')
+    ).to.equal('A Project')
     expect(
       SpamSafe.safeEmail('safe-ëmail@domain.com', 'A collaborator')
     ).to.equal('safe-ëmail@domain.com')
