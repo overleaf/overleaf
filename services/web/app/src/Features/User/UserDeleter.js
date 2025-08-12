@@ -1,6 +1,6 @@
 const { callbackify } = require('util')
 const logger = require('@overleaf/logger')
-const moment = require('moment')
+const Settings = require('@overleaf/settings')
 const { User } = require('../../models/User')
 const { DeletedUser } = require('../../models/DeletedUser')
 const { UserAuditLogEntry } = require('../../models/UserAuditLogEntry')
@@ -113,10 +113,9 @@ async function expireDeletedUser(userId) {
 }
 
 async function expireDeletedUsersAfterDuration() {
-  const DURATION = 90
   const deletedUsers = await DeletedUser.find({
     'deleterData.deletedAt': {
-      $lt: new Date(moment().subtract(DURATION, 'days')),
+      $lt: new Date(Date.now() - Settings.userHardDeletionDelay),
     },
     user: { $type: 'object' },
   }).exec()
@@ -125,7 +124,11 @@ async function expireDeletedUsersAfterDuration() {
     return
   }
   logger.info(
-    { deletedUsers: deletedUsers.length, retentionPeriodInDays: DURATION },
+    {
+      deletedUsers: deletedUsers.length,
+      retentionPeriodInDays:
+        Settings.userHardDeletionDelay / (1000 * 60 * 60 * 24),
+    },
     'expiring batch of deleted users older than retention period'
   )
   try {

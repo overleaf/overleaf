@@ -709,6 +709,13 @@ module.exports = {
 
   primary_email_check_expiration: 1000 * 60 * 60 * 24 * 90, // 90 days
 
+  userHardDeletionDelay:
+    parseInt(process.env.OVERLEAF_USER_HARD_DELETION_DELAY, 10) ||
+    1000 * 60 * 60 * 24 * 90, // 90 days
+  projectHardDeletionDelay:
+    parseInt(process.env.OVERLEAF_PROJECT_HARD_DELETION_DELAY, 10) ||
+    1000 * 60 * 60 * 24 * 90, // 90 days
+
   // Maximum JSON size in HTTP requests
   // We should be able to process twice the max doc length, to allow for
   //   - the doc content
