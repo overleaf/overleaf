@@ -1,4 +1,10 @@
-import { useCallback, useEffect, useState } from 'react'
+import {
+  ChangeEvent,
+  FormEventHandler,
+  useCallback,
+  useEffect,
+  useState,
+} from 'react'
 import { useTranslation } from 'react-i18next'
 import FileTreeCreateNameInput from '../file-tree-create-name-input'
 import { useFileTreeActionable } from '../../../contexts/file-tree-actionable'
@@ -18,7 +24,7 @@ export default function FileTreeImportFromUrl() {
 
   const [url, setUrl] = useState('')
 
-  const handleChange = useCallback(event => {
+  const handleChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
     setUrl(event.target.value)
   }, [])
 
@@ -36,7 +42,7 @@ export default function FileTreeImportFromUrl() {
   }, [setValid, validName, url])
 
   // form submission: create a linked file with this name, from this URL
-  const handleSubmit = event => {
+  const handleSubmit: FormEventHandler = event => {
     event.preventDefault()
     eventTracking.sendMB('new-file-created', {
       method: 'url',

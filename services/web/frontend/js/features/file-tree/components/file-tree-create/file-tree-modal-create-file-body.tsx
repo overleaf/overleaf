@@ -8,11 +8,14 @@ import { useFileTreeActionable } from '../../contexts/file-tree-actionable'
 import { useFileTreeData } from '../../../../shared/context/file-tree-data-context'
 
 import importOverleafModules from '../../../../../macros/import-overleaf-module.macro'
-import { lazy, Suspense } from 'react'
+import { ElementType, lazy, Suspense } from 'react'
 import { FullSizeLoadingSpinner } from '@/shared/components/loading-spinner'
 import getMeta from '@/utils/meta'
 
-const createFileModeModules = importOverleafModules('createFileModes')
+const createFileModeModules = importOverleafModules('createFileModes') as {
+  import: { CreateFilePane: ElementType; CreateFileMode: ElementType }
+  path: string
+}[]
 
 const FileTreeUploadDoc = lazy(() => import('./modes/file-tree-upload-doc'))
 
@@ -27,7 +30,10 @@ export default function FileTreeModalCreateFileBody() {
     hasLinkUrlFeature,
   } = getMeta('ol-ExposedSettings')
 
-  if (!fileCount || fileCount.status === 'error') {
+  if (
+    !fileCount ||
+    (typeof fileCount === 'object' && fileCount.status === 'error')
+  ) {
     return null
   }
 
