@@ -48,3 +48,8 @@ export type HighlightData = {
   width: number
   height: number
 }
+
+export type DeliveryLatencies = {
+  compileTimeClientE2E?: number
+  compileTimeServerE2E?: number
+}

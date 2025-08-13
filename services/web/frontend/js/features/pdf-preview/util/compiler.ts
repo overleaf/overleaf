@@ -1,11 +1,16 @@
 import { isMainFile } from './editor-files'
 import getMeta from '../../../utils/meta'
 import { deleteJSON, postJSON } from '../../../infrastructure/fetch-json'
-import { debounce } from 'lodash'
+import { debounce, DebouncedFunc } from 'lodash'
 import { EDITOR_SESSION_ID, trackPdfDownload } from './metrics'
 import { enablePdfCaching } from './pdf-caching-flags'
 import { debugConsole } from '@/utils/debugging'
 import { signalWithTimeout } from '@/utils/abort-signal'
+import { Dispatch, SetStateAction } from 'react'
+import { OpenDocuments } from '@/features/ide-react/editor/open-documents'
+import { DocumentContainer } from '@/features/ide-react/editor/document-container'
+import { CompileResponseData } from '@ol-types/compile'
+import { DeliveryLatencies } from './types'
 
 const AUTO_COMPILE_MAX_WAIT = 5000
 // We add a 2 second debounce to sending user changes to server if they aren't
@@ -19,7 +24,33 @@ const PENDING_OP_MAX_WAIT = 10000
 
 const searchParams = new URLSearchParams(window.location.search)
 
+type CompileOptions = {
+  draft?: boolean
+  stopOnFirstError?: boolean
+  isAutoCompileOnLoad?: boolean
+  isAutoCompileOnChange?: boolean
+}
+
 export default class DocumentCompiler {
+  compilingRef: React.MutableRefObject<boolean>
+  projectId: string
+  setChangedAt: Dispatch<SetStateAction<number>>
+  setCompiling: Dispatch<SetStateAction<boolean>>
+  setData: Dispatch<SetStateAction<CompileResponseData | undefined>>
+  setFirstRenderDone: Dispatch<SetStateAction<() => void>>
+  setDeliveryLatencies: Dispatch<SetStateAction<DeliveryLatencies>>
+  setError: Dispatch<SetStateAction<string | undefined>>
+  cleanupCompileResult: () => void
+  signal: AbortSignal
+  openDocs: OpenDocuments
+  projectRootDocId?: string | null
+  clsiServerId: string | null
+  currentDoc: DocumentContainer | null
+  error: Error | undefined
+  timer: number
+  defaultOptions: CompileOptions
+  debouncedAutoCompile: DebouncedFunc<() => void>
+
   constructor({
     compilingRef,
     projectId,
@@ -32,6 +63,18 @@ export default class DocumentCompiler {
     cleanupCompileResult,
     signal,
     openDocs,
+  }: {
+    compilingRef: React.MutableRefObject<boolean>
+    projectId: string
+    setChangedAt: Dispatch<SetStateAction<number>>
+    setCompiling: Dispatch<SetStateAction<boolean>>
+    setData: Dispatch<SetStateAction<CompileResponseData | undefined>>
+    setFirstRenderDone: Dispatch<SetStateAction<() => void>>
+    setDeliveryLatencies: Dispatch<SetStateAction<DeliveryLatencies>>
+    setError: Dispatch<SetStateAction<string | undefined>>
+    cleanupCompileResult: () => void
+    signal: AbortSignal
+    openDocs: OpenDocuments
   }) {
     this.compilingRef = compilingRef
     this.projectId = projectId
@@ -68,7 +111,7 @@ export default class DocumentCompiler {
 
   // The main "compile" function.
   // Call this directly to run a compile now, otherwise call debouncedAutoCompile.
-  async compile(options = {}) {
+  async compile(options: CompileOptions = {}) {
     options = { ...this.defaultOptions, ...options }
 
     if (options.isAutoCompileOnLoad && getMeta('ol-preventCompileOnLoad')) {
@@ -93,7 +136,6 @@ export default class DocumentCompiler {
 
       // reset values
       this.setChangedAt(0) // TODO: wait for doc:saved?
-      this.validationIssues = undefined
 
       const params = this.buildCompileParams(options)
 
@@ -135,7 +177,7 @@ export default class DocumentCompiler {
         this.clsiServerId = data.clsiServerId
       }
       this.setData(data)
-    } catch (error) {
+    } catch (error: any) {
       debugConsole.error(error)
       this.cleanupCompileResult()
       this.setError(error.info?.statusCode === 429 ? 'rate-limited' : 'error')
@@ -172,7 +214,7 @@ export default class DocumentCompiler {
   }
 
   // build the query parameters for the compile request
-  buildCompileParams(options) {
+  buildCompileParams(options: CompileOptions) {
     const params = new URLSearchParams()
 
     // note: no clsiserverid query param is set on "compile" requests,
@@ -190,7 +232,7 @@ export default class DocumentCompiler {
 
     // use the feature flag to enable "file line errors"
     if (searchParams.get('file_line_errors') === 'true') {
-      params.file_line_errors = 'true'
+      params.set('file_line_errors', 'true')
     }
 
     return params
@@ -227,7 +269,10 @@ export default class DocumentCompiler {
     })
   }
 
-  setOption(option, value) {
+  setOption<Key extends keyof CompileOptions>(
+    option: Key,
+    value: CompileOptions[Key]
+  ) {
     this.defaultOptions[option] = value
   }
 }
