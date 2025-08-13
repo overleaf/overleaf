@@ -14,8 +14,54 @@ const STATE = {
   ERROR: 1,
 }
 
+export type LatexParserOptions = {
+  fileBaseNames?: RegExp[]
+  ignoreDuplicates?: boolean
+}
+
+type LatexLogEntry = {
+  line: string | number | null
+  file: string | undefined
+  level: 'error' | 'warning' | 'typesetting'
+  message: string
+  content?: string
+  raw: string
+  ruleId?: string
+  contentDetails?: string[]
+  command?: string
+  suppressed?: boolean
+}
+
+type File = {
+  path: string
+  files: File[]
+}
+
+export type ParseResult = {
+  all: LatexLogEntry[]
+  errors: LatexLogEntry[]
+  warnings: LatexLogEntry[]
+  typesetting: LatexLogEntry[]
+  files: File[]
+}
 export default class LatexParser {
-  constructor(text, options = {}) {
+  state: number
+  fileBaseNames: RegExp[]
+  ignoreDuplicates?: boolean
+  data: LatexLogEntry[]
+  fileStack: File[]
+  rootFileList: File[]
+  currentFileList: File[]
+  openParens: number
+  latexWarningRegex: RegExp
+  packageWarningRegex: RegExp
+  packageRegex: RegExp
+  log: LogText
+  currentLine: string
+  currentFilePath: string | undefined
+  currentError: LatexLogEntry | undefined
+
+  constructor(text: string, options: LatexParserOptions = {}) {
     this.state = STATE.NORMAL
     this.fileBaseNames = options.fileBaseNames || [/compiles/, /\/usr\/local/]
     this.ignoreDuplicates = options.ignoreDuplicates
@@ -26,11 +72,14 @@ export default class LatexParser {
     this.latexWarningRegex = LATEX_WARNING_REGEX
     this.packageWarningRegex = PACKAGE_WARNING_REGEX
     this.packageRegex = PACKAGE_REGEX
+    this.currentLine = ''
     this.log = new LogText(text)
   }
 
-  parse() {
-    while ((this.currentLine = this.log.nextLine()) !== false) {
+  parse(): ParseResult {
+    let nextLine: string | false
+    while ((nextLine = this.log.nextLine()) !== false) {
+      this.currentLine = nextLine
       if (this.state === STATE.NORMAL) {
         if (this.currentLineIsError()) {
           this.state = STATE.ERROR
@@ -58,6 +107,9 @@ export default class LatexParser {
         }
       }
       if (this.state === STATE.ERROR) {
+        if (!this.currentError) {
+          throw new Error('LatexParser Error: currentError is undefined')
+        }
         this.currentError.content += this.log
           .linesUpToNextMatchingLine(/^l\.[0-9]+/)
           .join('\n')
@@ -111,6 +163,9 @@ export default class LatexParser {
 
   parseFileLineError() {
     const result = this.currentLine.match(FILE_LINE_ERROR_REGEX)
+    if (!result) {
+      throw new Error('LatexParser Error: Unable to extract error from line.')
+    }
     this.currentError = {
       line: result[2],
       file: result[1],
@@ -145,7 +200,7 @@ export default class LatexParser {
     return this.data.push(this.currentError)
   }
 
-  parseSingleWarningLine(prefixRegex) {
+  parseSingleWarningLine(prefixRegex: RegExp) {
     const warningMatch = this.currentLine.match(prefixRegex)
     if (!warningMatch) {
       return
@@ -173,6 +228,11 @@ export default class LatexParser {
     let lineMatch = this.currentLine.match(LINES_REGEX)
     let line = lineMatch ? parseInt(lineMatch[1], 10) : null
     const packageMatch = this.currentLine.match(this.packageRegex)
+    if (!packageMatch) {
+      throw new Error(
+        'LatexParser Error: Unable to extract package name from warning.'
+      )
+    }
     const packageName = packageMatch[1]
     // Regex to get rid of the unnecesary (packagename) prefix in most multi-line warnings
     const prefixRegex = new RegExp(
@@ -180,10 +240,15 @@ export default class LatexParser {
       'i'
     )
     // After every warning message there's a blank line, let's use it
-    while ((this.currentLine = this.log.nextLine())) {
+    let currentLine: string | false
+    while ((currentLine = this.log.nextLine())) {
+      this.currentLine = currentLine
       lineMatch = this.currentLine.match(LINES_REGEX)
       line = lineMatch ? parseInt(lineMatch[1], 10) : line
       warningMatch = this.currentLine.match(prefixRegex)
+      if (!warningMatch) {
+        throw new Error('LatexParser Error: Unable to extract warning message.')
+      }
       warningLines.push(warningMatch[1])
     }
     const rawMessage = warningLines.join(' ')
@@ -291,16 +356,19 @@ export default class LatexParser {
     return path
   }
 
-  postProcess(data) {
-    const all = []
-    const errorsByLevel = {
+  postProcess(data: LatexLogEntry[]) {
+    const all: LatexLogEntry[] = []
+    const errorsByLevel: Record<
+      'error' | 'warning' | 'typesetting',
+      LatexLogEntry[]
+    > = {
       error: [],
       warning: [],
       typesetting: [],
     }
     const hashes = new Set()
 
-    const hashEntry = entry => entry.raw
+    const hashEntry = (entry: LatexLogEntry) => entry.raw
 
     data.forEach(item => {
       const hash = hashEntry(item)
@@ -326,7 +394,11 @@ export default class LatexParser {
 }
 
 class LogText {
-  constructor(text) {
+  text: string
+  lines: string[]
+  row: number
+
+  constructor(text: string) {
     this.text = text.replace(/(\r\n)|\r/g, '\n')
     // Join any lines which look like they have wrapped.
     const wrappedLines = this.text.split('\n')
@@ -355,7 +427,7 @@ class LogText {
     this.row = 0
   }
 
-  nextLine() {
+  nextLine(): string | false {
     this.row++
     if (this.row >= this.lines.length) {
       return false
@@ -368,11 +440,11 @@ class LogText {
     this.row--
   }
 
-  linesUpToNextWhitespaceLine(stopAtError) {
+  linesUpToNextWhitespaceLine(stopAtError: boolean = false) {
     return this.linesUpToNextMatchingLine(/^ *$/, stopAtError)
   }
 
-  linesUpToNextMatchingLine(match, stopAtError) {
+  linesUpToNextMatchingLine(match: RegExp, stopAtError: boolean = false) {
     const lines = []
 
     while (true) {

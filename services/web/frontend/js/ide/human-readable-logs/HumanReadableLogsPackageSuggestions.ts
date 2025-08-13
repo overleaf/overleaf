@@ -1,4 +1,6 @@
-const commandSuggestions = [
+type Suggestion = [string, { name: string; command: string }]
+
+const commandSuggestions: Suggestion[] = [
   [
     '\\includegraphics',
     { name: 'graphicx', command: '\\usepackage{graphicx}' },
@@ -30,7 +32,7 @@ const commandSuggestions = [
   ['\\arraybackslash', { name: 'array', command: '\\usepackage{array}' }],
 ]
 
-const environmentSuggestions = [
+const environmentSuggestions: Suggestion[] = [
   ['justify', { name: 'ragged2e', command: '\\usepackage{ragged2e}' }],
   ['align', { name: 'amsmath', command: '\\usepackage{amsmath}' }],
   ['align*', { name: 'amsmath', command: '\\usepackage{amsmath}' }],

@@ -172,26 +172,28 @@ const hints: { [ruleId: string]: LogHint } = {
   },
   hint_undefined_control_sequence: {
     formattedContent: details => {
-      if (details?.length && packageSuggestionsForCommands.has(details[0])) {
+      if (details?.length) {
         const command = details[0]
         const suggestion = packageSuggestionsForCommands.get(command)
-        return (
-          <>
-            <p>
-              We think you’ve got a missing package! The <code>{command}</code>{' '}
-              command won't work unless you include
-              <code>{suggestion.command}</code> in your{' '}
-              <WikiLink url="https://www.overleaf.com/learn/latex/Learn_LaTeX_in_30_minutes#The_preamble_of_a_document">
-                document preamble
-              </WikiLink>
-              .{' '}
-              <WikiLink url="https://www.overleaf.com/learn/latex/Learn_LaTeX_in_30_minutes#Finding_and_using_LaTeX_packages">
-                Learn more about packages
-              </WikiLink>
-              .
-            </p>
-          </>
-        )
+        if (suggestion) {
+          return (
+            <>
+              <p>
+                We think you’ve got a missing package! The{' '}
+                <code>{command}</code> command won't work unless you include
+                <code>{suggestion.command}</code> in your{' '}
+                <WikiLink url="https://www.overleaf.com/learn/latex/Learn_LaTeX_in_30_minutes#The_preamble_of_a_document">
+                  document preamble
+                </WikiLink>
+                .{' '}
+                <WikiLink url="https://www.overleaf.com/learn/latex/Learn_LaTeX_in_30_minutes#Finding_and_using_LaTeX_packages">
+                  Learn more about packages
+                </WikiLink>
+                .
+              </p>
+            </>
+          )
+        }
       }
       return (
         <>
@@ -215,29 +217,28 @@ const hints: { [ruleId: string]: LogHint } = {
   },
   hint_undefined_environment: {
     formattedContent: details => {
-      if (
-        details?.length &&
-        packageSuggestionsForEnvironments.has(details[0])
-      ) {
+      if (details?.length) {
         const environment = details[0]
         const suggestion = packageSuggestionsForEnvironments.get(environment)
-        return (
-          <>
-            <p>
-              We think you’ve got a missing package! The{' '}
-              <code>{environment}</code> environment won't work unless you
-              include <code>{suggestion.command}</code> in your{' '}
-              <WikiLink url="https://www.overleaf.com/learn/latex/Learn_LaTeX_in_30_minutes#The_preamble_of_a_document">
-                document preamble
-              </WikiLink>
-              .{' '}
-              <WikiLink url="https://www.overleaf.com/learn/latex/Learn_LaTeX_in_30_minutes#Finding_and_using_LaTeX_packages">
-                Learn more about packages
-              </WikiLink>
-              .
-            </p>
-          </>
-        )
+        if (suggestion) {
+          return (
+            <>
+              <p>
+                We think you’ve got a missing package! The{' '}
+                <code>{environment}</code> environment won't work unless you
+                include <code>{suggestion.command}</code> in your{' '}
+                <WikiLink url="https://www.overleaf.com/learn/latex/Learn_LaTeX_in_30_minutes#The_preamble_of_a_document">
+                  document preamble
+                </WikiLink>
+                .{' '}
+                <WikiLink url="https://www.overleaf.com/learn/latex/Learn_LaTeX_in_30_minutes#Finding_and_using_LaTeX_packages">
+                  Learn more about packages
+                </WikiLink>
+                .
+              </p>
+            </>
+          )
+        }
       }
       return (
         <>

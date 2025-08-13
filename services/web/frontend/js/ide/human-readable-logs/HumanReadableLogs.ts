@@ -1,14 +1,17 @@
-import LatexLogParser from '../log-parser/latex-log-parser'
+import LatexLogParser, {
+  LatexParserOptions,
+  ParseResult,
+} from '../log-parser/latex-log-parser'
 import ruleset from './HumanReadableLogsRules'
 
 export default {
-  parse(rawLog, options) {
+  parse(rawLog: string | ParseResult, options: LatexParserOptions) {
     const parsedLogEntries =
       typeof rawLog === 'string'
         ? new LatexLogParser(rawLog, options).parse()
         : rawLog
 
-    const seenErrorTypes = {} // keep track of types of errors seen
+    const seenErrorTypes: Record<string, boolean> = {} // keep track of types of errors seen
 
     for (const entry of parsedLogEntries.all) {
       const ruleDetails = ruleset.find(rule =>
@@ -28,9 +31,11 @@ export default {
         }
 
         if (ruleDetails.contentRegex) {
-          const match = entry.content.match(ruleDetails.contentRegex)
-          if (match) {
-            entry.contentDetails = match.slice(1)
+          if (entry.content != null) {
+            const match = entry.content.match(ruleDetails.contentRegex)
+            if (match) {
+              entry.contentDetails = match.slice(1)
+            }
           }
         }
 
@@ -74,14 +79,14 @@ export default {
     }
 
     // filter out the suppressed errors (from the array entries in parsedLogEntries)
-    for (const [key, errors] of Object.entries(parsedLogEntries)) {
-      if (typeof errors === 'object' && errors.length > 0) {
-        parsedLogEntries[key] = Array.from(errors).filter(
+    for (const type of ['errors', 'warnings', 'typesetting'] as const) {
+      const errors = parsedLogEntries[type]
+      if (Array.isArray(errors) && errors.length > 0) {
+        parsedLogEntries[type] = Array.from(errors).filter(
           err => !err.suppressed
         )
       }
     }
-
     return parsedLogEntries
   },
 }

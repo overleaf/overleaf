@@ -18,12 +18,21 @@ const MESSAGE_LEVELS = {
   ERROR: 'error',
 }
 
-const parserReducer = function (maxErrors) {
-  return function (accumulator, parser) {
-    const consume = function (logText, regex, process) {
+type Parser<T> = [RegExp, (match: RegExpExecArray) => T]
+
+const parserReducer = function (maxErrors: number | null) {
+  return function <T>(
+    accumulator: [T[], string],
+    parser: Parser<T>
+  ): [T[], string] {
+    const consume = function (
+      logText: string,
+      regex: RegExp,
+      process: (match: RegExpExecArray) => T
+    ): [T[], string] {
       let match
       let text = logText
-      const result = []
+      const result: T[] = []
       let iterationCount = 0
 
       while ((match = regex.exec(text))) {
@@ -55,8 +64,22 @@ const parserReducer = function (maxErrors) {
   }
 }
 
+type BibLogEntry = {
+  file: string
+  level: string
+  message: string
+  line: string
+  raw: string
+}
+
 export default class BibLogParser {
-  constructor(text, options = {}) {
+  text: string
+  options: Record<string, any>
+  lines: string[]
+  warningParsers: Parser<BibLogEntry>[]
+  errorParsers: Parser<BibLogEntry>[]
+
+  constructor(text: string, options = {}) {
     if (typeof text !== 'string') {
       throw new Error('BibLogParser Error: text parameter must be a string')
     }
@@ -156,11 +179,11 @@ export default class BibLogParser {
     // reduce over the parsers, starting with the log text,
     const [allWarnings, remainingText] = this.warningParsers.reduce(
       parserReducer(this.options.maxErrors),
-      [[], this.text]
+      [[] as BibLogEntry[], this.text]
     )
     const [allErrors] = this.errorParsers.reduce(
       parserReducer(this.options.maxErrors),
-      [[], remainingText]
+      [[] as BibLogEntry[], remainingText]
     )
 
     return {
@@ -173,7 +196,10 @@ export default class BibLogParser {
   }
 
   parseBiber() {
-    const result = {
+    const result: Record<
+      'all' | 'errors' | 'warnings' | 'files' | 'typesetting',
+      BibLogEntry[]
+    > = {
       all: [],
       errors: [],
       warnings: [],
@@ -186,7 +212,9 @@ export default class BibLogParser {
         const [fullLine, , messageType, message] = match
         const newEntry = {
           file: '',
-          level: MESSAGE_LEVELS[messageType] || 'INFO',
+          level:
+            MESSAGE_LEVELS[messageType as keyof typeof MESSAGE_LEVELS] ||
+            'INFO',
           message,
           line: '',
           raw: fullLine,
