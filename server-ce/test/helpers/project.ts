@@ -132,6 +132,17 @@ export function shareProjectByEmailAndAcceptInviteViaDash(
   openProjectViaInviteNotification(projectName)
 }
 
+export function getSpamSafeProjectName() {
+  while (true) {
+    // Move from hex/16 to base64/64 possible characters per char in string
+    const name = Buffer.from(uuid().replaceAll('-', ''), 'hex')
+      .toString('base64')
+      .slice(0, 10)
+    const nDigits = (name.match(/\d/g) || []).length
+    if (nDigits < 6) return name
+  }
+}
+
 export function shareProjectByEmailAndAcceptInviteViaEmail(
   projectName: string,
   email: string,

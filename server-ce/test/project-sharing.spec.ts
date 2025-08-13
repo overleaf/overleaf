@@ -4,6 +4,7 @@ import { ensureUserExists, login } from './helpers/login'
 import {
   createProject,
   enableLinkSharing,
+  getSpamSafeProjectName,
   openProjectByName,
   openProjectViaLinkSharingAsAnon,
   openProjectViaLinkSharingAsUser,
@@ -20,7 +21,7 @@ describe('Project Sharing', function () {
 
   let projectName: string
   beforeWithReRunOnTestRetry(function () {
-    projectName = `Project ${uuid()}`
+    projectName = getSpamSafeProjectName()
     setupTestProject()
   })
 
