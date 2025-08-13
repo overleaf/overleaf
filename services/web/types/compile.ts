@@ -32,6 +32,16 @@ export type CompileResponseData = {
   outputFilesArchive?: CompileOutputFile
 
   // assigned on response body by DocumentCompiler in frontend
-  rootDocId?: string
-  options: any
+  rootDocId?: string | null
+  options: CompileOptions
+}
+
+export type CompileOptions = {
+  draft?: boolean
+  stopOnFirstError?: boolean
+  isAutoCompileOnLoad?: boolean
+  isAutoCompileOnChange?: boolean
+  rootResourcePath?: string
+  imageName?: string
+  compiler?: string
 }

@@ -9,7 +9,7 @@ import { signalWithTimeout } from '@/utils/abort-signal'
 import { Dispatch, SetStateAction } from 'react'
 import { OpenDocuments } from '@/features/ide-react/editor/open-documents'
 import { DocumentContainer } from '@/features/ide-react/editor/document-container'
-import { CompileResponseData } from '@ol-types/compile'
+import { CompileOptions, CompileResponseData } from '@ol-types/compile'
 import { DeliveryLatencies } from './types'
 
 const AUTO_COMPILE_MAX_WAIT = 5000
@@ -23,13 +23,6 @@ const AUTO_COMPILE_DEBOUNCE = 2500
 const PENDING_OP_MAX_WAIT = 10000
 
 const searchParams = new URLSearchParams(window.location.search)
-
-type CompileOptions = {
-  draft?: boolean
-  stopOnFirstError?: boolean
-  isAutoCompileOnLoad?: boolean
-  isAutoCompileOnChange?: boolean
-}
 
 export default class DocumentCompiler {
   compilingRef: React.MutableRefObject<boolean>
@@ -154,7 +147,7 @@ export default class DocumentCompiler {
         editorId: EDITOR_SESSION_ID,
       }
 
-      const data = await postJSON(
+      const data: CompileResponseData = await postJSON(
         `/project/${this.projectId}/compile?${params}`,
         { body, signal: this.signal }
       )

@@ -52,4 +52,7 @@ export type HighlightData = {
 export type DeliveryLatencies = {
   compileTimeClientE2E?: number
   compileTimeServerE2E?: number
+  totalDeliveryTime?: number
+  latencyFetch?: number
+  latencyRender?: number
 }
