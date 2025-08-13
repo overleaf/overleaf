@@ -51,6 +51,8 @@ async function createUser(email) {
 async function deleteUser(email) {
   const user = await db.users.findOne({ email })
   if (!user) return
+  // Delete the subscriptions of the user
+  await db.subscriptions.deleteMany({ admin_id: user._id })
   // Soft delete the user.
   await UserDeleter.promises.deleteUser(user._id, {
     force: true,
