@@ -28,5 +28,6 @@ declare global {
 
     propensity?: (propensityId?: string) => void
     olLoadGA?: () => void
+    grecaptcha?: any
   }
 }

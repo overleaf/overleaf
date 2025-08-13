@@ -13,9 +13,10 @@ import OLForm from '@/shared/components/ol/ol-form'
 import OLFormGroup from '@/shared/components/ol/ol-form-group'
 import { Select } from '@/shared/components/select'
 import OLButton from '@/shared/components/ol/ol-button'
+import { PermissionsLevel } from '@/features/ide-react/types/permissions'
 
 export default function AddCollaborators({ readOnly }: { readOnly?: boolean }) {
-  const [privileges, setPrivileges] = useState('readAndWrite')
+  const [privileges, setPrivileges] = useState<PermissionsLevel>('readAndWrite')
 
   const isMounted = useIsMounted()
 
@@ -176,7 +177,7 @@ export default function AddCollaborators({ readOnly }: { readOnly?: boolean }) {
 
   const privilegeOptions = useMemo(() => {
     const options: {
-      key: string
+      key: PermissionsLevel
       label: string
       description?: string | null
     }[] = [
