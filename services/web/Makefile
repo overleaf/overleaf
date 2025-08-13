@@ -86,34 +86,28 @@ test_module: test_unit_module test_acceptance_module
 
 test_unit: test_unit_all
 test_unit_all: export COMPOSE_PROJECT_NAME=unit_test_all_$(BUILD_DIR_NAME)
-test_unit_all:
+test_unit_all: mongo_migrations_for_tests
 	$(DOCKER_COMPOSE) run --rm test_unit npm run test:unit:all
-	$(DOCKER_COMPOSE) down -v -t 0
 
 test_unit_all_silent: export COMPOSE_PROJECT_NAME=unit_test_all_$(BUILD_DIR_NAME)
-test_unit_all_silent:
+test_unit_all_silent: mongo_migrations_for_tests
 	$(DOCKER_COMPOSE) run --rm test_unit npm run test:unit:all:silent
-	$(DOCKER_COMPOSE) down -v -t 0
 
 test_unit_app: export COMPOSE_PROJECT_NAME=unit_test_$(BUILD_DIR_NAME)
-test_unit_app:
+test_unit_app: mongo_migrations_for_tests
 	$(DOCKER_COMPOSE) run --name unit_test_$(BUILD_DIR_NAME) --rm test_unit
-	$(DOCKER_COMPOSE) down -v -t 0
 
 test_unit_mocha: export COMPOSE_PROJECT_NAME=unit_test_mocha_$(BUILD_DIR_NAME)
-test_unit_mocha:
+test_unit_mocha: mongo_migrations_for_tests
 	$(DOCKER_COMPOSE) run --rm test_unit npm run test:unit:mocha
-	$(DOCKER_COMPOSE) down -v -t 0
 
 test_unit_esm: export COMPOSE_PROJECT_NAME=unit_test_esm_$(BUILD_DIR_NAME)
-test_unit_esm:
+test_unit_esm: mongo_migrations_for_tests
 	$(DOCKER_COMPOSE) run --rm test_unit npm run test:unit:esm
-	$(DOCKER_COMPOSE) down -v -t 0
 
 test_unit_esm_watch: export COMPOSE_PROJECT_NAME=unit_test_esm_watch_$(BUILD_DIR_NAME)
-test_unit_esm_watch:
+test_unit_esm_watch: mongo_migrations_for_tests
 	$(DOCKER_COMPOSE) run --rm test_unit npm run test:unit:esm:watch
-	$(DOCKER_COMPOSE) down -v -t 0
 
 TEST_SUITES = $(sort $(filter-out \
 	$(wildcard test/unit/src/helpers/*), \
@@ -135,18 +129,19 @@ J ?= 1
 test_unit_app_parallel_gnu_make: $(TEST_SUITES)
 test_unit_app_parallel_gnu_make_docker: export COMPOSE_PROJECT_NAME = \
 	unit_test_parallel_make_$(BUILD_DIR_NAME)
-test_unit_app_parallel_gnu_make_docker:
+test_unit_app_parallel_gnu_make_docker: mongo_migrations_for_tests
 	$(DOCKER_COMPOSE) run --rm test_unit \
 		make test_unit_app_parallel_gnu_make --output-sync -j $(J)
-	$(DOCKER_COMPOSE) down -v -t 0
 
 TEST_UNIT_MODULES = $(MODULE_DIRS:=/test_unit)
 $(TEST_UNIT_MODULES): %/test_unit: %/Makefile
-test_unit_modules: $(TEST_UNIT_MODULES)
+test_unit_modules: mongo_migrations_for_tests $(TEST_UNIT_MODULES)
 
-test_unit_module:
+test_unit_module: mongo_migrations_for_tests
 	$(MAKE) modules/$(MODULE_NAME)/test_unit
 
+mongo_migrations_for_tests:
+	$(DOCKER_COMPOSE) run --rm test_unit npm run migrations -- migrate -t saas
 
 #
 # Frontend tests
@@ -602,7 +597,7 @@ $(MODULE_TARGETS):
 .PHONY:
 	$(MODULE_TARGETS) \
 	compile_modules compile_modules_full clean_ci \
-	test test_module test_unit test_unit_app \
+	test test_module mongo_migrations_for_tests test_unit test_unit_app \
 	test_unit_modules test_unit_module test_frontend \
 	test_acceptance test_acceptance_app test_acceptance_modules \
 	test_acceptance_module ci format format_fix lint \
