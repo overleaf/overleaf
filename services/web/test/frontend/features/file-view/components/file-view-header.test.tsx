@@ -5,39 +5,9 @@ import { renderWithEditorContext } from '../../../helpers/render-with-context'
 import FileViewHeader from '../../../../../frontend/js/features/file-view/components/file-view-header'
 import { USER_ID } from '../../../helpers/editor-providers'
 import { fileViewFile } from '@/features/ide-react/util/file-view'
+import { projectOutputFile, textFile, urlFile } from '../util/files'
 
 describe('<FileViewHeader/>', function () {
-  const urlFile = {
-    name: 'example.tex',
-    linkedFileData: {
-      url: 'https://overleaf.com',
-      provider: 'url',
-    },
-    created: new Date(2021, 1, 17, 3, 24).toISOString(),
-  }
-
-  const projectFile = {
-    name: 'example.tex',
-    linkedFileData: {
-      v1_source_doc_id: 'v1-source-id',
-      source_project_id: 'source-project-id',
-      source_entity_path: '/source-entity-path.ext',
-      provider: 'project_file',
-      importer_id: USER_ID,
-    },
-    created: new Date(2021, 1, 17, 3, 24).toISOString(),
-  }
-
-  const projectOutputFile = {
-    name: 'example.pdf',
-    linkedFileData: {
-      v1_source_doc_id: 'v1-source-id',
-      source_output_file_path: '/source-entity-path.ext',
-      provider: 'project_output_file',
-    },
-    created: new Date(2021, 1, 17, 3, 24).toISOString(),
-  }
-
   beforeEach(function () {
     fetchMock.removeRoutes().clearHistory()
   })
@@ -52,7 +22,7 @@ describe('<FileViewHeader/>', function () {
     })
 
     it('Renders the correct text for a file with the project_file provider', function () {
-      renderWithEditorContext(<FileViewHeader file={projectFile} />)
+      renderWithEditorContext(<FileViewHeader file={textFile} />)
       screen.getByText('Imported from', { exact: false })
       screen.getByText('Another project', { exact: false })
       screen.getByText('/source-entity-path.ext, at 3:24 am Wed, 17th Feb 21', {
@@ -61,12 +31,7 @@ describe('<FileViewHeader/>', function () {
     })
 
     it('Renders the correct text for a file with the project_output_file provider', function () {
-      renderWithEditorContext(
-        <FileViewHeader
-          file={projectOutputFile}
-          storeReferencesKeys={() => {}}
-        />
-      )
+      renderWithEditorContext(<FileViewHeader file={projectOutputFile} />)
       screen.getByText('Imported from the output of', { exact: false })
       screen.getByText('Another project', { exact: false })
       screen.getByText('/source-entity-path.ext, at 3:24 am Wed, 17th Feb 21', {
@@ -85,6 +50,8 @@ describe('<FileViewHeader/>', function () {
 
   it('should use importedAt as timestamp when present in the linked file data', function () {
     const fileFromServer = {
+      _id: 'some-id',
+      hash: 'some-hash',
       name: 'example.tex',
       linkedFileData: {
         v1_source_doc_id: 'v1-source-id',

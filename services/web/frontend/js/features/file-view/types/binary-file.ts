@@ -21,7 +21,7 @@ export type BinaryFile<T extends keyof LinkedFileData = keyof LinkedFileData> =
   {
     _id: string
     name: string
-    created: Date
+    created: Date | string
     id: string
     type: string
     selected: boolean

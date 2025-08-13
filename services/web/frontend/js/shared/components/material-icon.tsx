@@ -20,7 +20,7 @@ type UnfilledIconProps = BaseIconProps & {
   unfilled: true
 }
 
-type IconProps = FilledIconProps | UnfilledIconProps
+export type IconProps = FilledIconProps | UnfilledIconProps
 
 function MaterialIcon({
   type,

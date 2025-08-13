@@ -1,5 +1,4 @@
 import { useState, useCallback } from 'react'
-import PropTypes from 'prop-types'
 import { useTranslation } from 'react-i18next'
 
 import FileViewHeader from './file-view-header'
@@ -8,10 +7,11 @@ import FileViewPdf from './file-view-pdf'
 import FileViewText from './file-view-text'
 import LoadingSpinner from '@/shared/components/loading-spinner'
 import getMeta from '@/utils/meta'
+import { BinaryFile } from '../types/binary-file'
 
 const imageExtensions = ['png', 'jpg', 'jpeg', 'gif']
 
-export default function FileView({ file }) {
+export default function FileView({ file }: { file: BinaryFile }) {
   const [contentLoading, setContentLoading] = useState(true)
   const [hasError, setHasError] = useState(false)
 
@@ -19,13 +19,13 @@ export default function FileView({ file }) {
 
   const { textExtensions, editableFilenames } = getMeta('ol-ExposedSettings')
 
-  const extension = file.name.split('.').pop().toLowerCase()
+  const extension = file.name.split('.')?.pop()?.toLowerCase()
 
   const isEditableTextFile =
-    textExtensions.includes(extension) ||
+    (extension && textExtensions.includes(extension)) ||
     editableFilenames.includes(file.name.toLowerCase())
 
-  const isImageFile = imageExtensions.includes(extension)
+  const isImageFile = !!extension && imageExtensions.includes(extension)
   const isPdfFile = extension === 'pdf'
   const isUnpreviewableFile = !isEditableTextFile && !isImageFile && !isPdfFile
 
@@ -79,12 +79,4 @@ function FileViewLoadingIndicator() {
       <LoadingSpinner />
     </div>
   )
-}
-
-FileView.propTypes = {
-  file: PropTypes.shape({
-    id: PropTypes.string,
-    name: PropTypes.string,
-    hash: PropTypes.string,
-  }).isRequired,
 }

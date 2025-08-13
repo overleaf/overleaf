@@ -7,30 +7,9 @@ import fetchMock from 'fetch-mock'
 
 import { renderWithEditorContext } from '../../../helpers/render-with-context'
 import FileView from '../../../../../frontend/js/features/file-view/components/file-view'
+import { imageFile, textFile } from '../util/files'
 
 describe('<FileView/>', function () {
-  const textFile = {
-    id: 'text-file',
-    name: 'example.tex',
-    linkedFileData: {
-      v1_source_doc_id: 'v1-source-id',
-      source_project_id: 'source-project-id',
-      source_entity_path: '/source-entity-path.ext',
-      provider: 'project_file',
-    },
-    hash: '012345678901234567890123',
-    created: new Date(2021, 1, 17, 3, 24).toISOString(),
-  }
-
-  const imageFile = {
-    id: '60097ca20454610027c442a8',
-    name: 'file.jpg',
-    linkedFileData: {
-      source_entity_path: '/source-entity-path',
-      provider: 'project_file',
-    },
-  }
-
   beforeEach(function () {
     fetchMock.removeRoutes().clearHistory()
     window.metaAttributesCache.set('ol-preventCompileOnLoad', true)

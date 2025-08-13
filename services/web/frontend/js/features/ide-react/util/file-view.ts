@@ -22,10 +22,10 @@ export function convertFileRefToBinaryFile(fileRef: FileRef): BinaryFile {
 // is the only one making runtime complaints and it seems that other uses of
 // `FileViewHeader` pass in a string for `created`, so that's what this function
 // does too.
-export function fileViewFile(fileRef: FileRef) {
+export function fileViewFile(fileRef: FileRef): BinaryFile {
   const converted = convertFileRefToBinaryFile(fileRef)
   return {
     ...converted,
-    created: converted.created.toISOString(),
+    created: (converted.created as Date).toISOString(),
   }
 }
