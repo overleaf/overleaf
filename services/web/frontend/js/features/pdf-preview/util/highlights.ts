@@ -1,6 +1,11 @@
 import { PDFJS } from '@/features/pdf-preview/util/pdf-js'
+import { PDFViewer } from 'pdfjs-dist/web/pdf_viewer.mjs'
+import { HighlightData } from './types'
 
-export function buildHighlightElement(highlight, viewer) {
+export function buildHighlightElement(
+  highlight: HighlightData,
+  viewer: PDFViewer
+) {
   const { viewport, div } = viewer.getPageView(highlight.page - 1)
 
   // page coordinates from synctex

@@ -2,7 +2,9 @@ import { useCallback, useEffect } from 'react'
 import useEventListener from '../../../shared/hooks/use-event-listener'
 import useDetachAction from '../../../shared/hooks/use-detach-action'
 
-export const startCompileKeypress = event => {
+export const startCompileKeypress = (
+  event: KeyboardEvent | React.KeyboardEvent<Element>
+) => {
   if (event.shiftKey || event.altKey) {
     return false
   }
@@ -30,9 +32,12 @@ export const startCompileKeypress = event => {
   }
 }
 
-export default function useCompileTriggers(startCompile, setChangedAt) {
+export default function useCompileTriggers(
+  startCompile: (...args: any[]) => void,
+  setChangedAt: (...args: any[]) => void
+) {
   const handleKeyDown = useCallback(
-    event => {
+    (event: KeyboardEvent) => {
       if (startCompileKeypress(event)) {
         event.preventDefault()
         startCompile()

@@ -7,13 +7,16 @@ if (!hasTextEncoder) {
 }
 
 const isOpera =
-  Array.isArray(navigator.userAgentData?.brands) &&
-  navigator.userAgentData.brands.some(b => b.brand === 'Opera')
+  // userAgentData is experimental and not currently in the Navigator type
+  Array.isArray((navigator as any).userAgentData?.brands) &&
+  (navigator as any).userAgentData.brands.some(
+    (b: { brand: string }) => b.brand === 'Opera'
+  )
 if (isOpera) {
   debugConsole.warn('Browser cache is limited in Opera. Disabling pdf-caching.')
 }
 
-function isFlagEnabled(flag) {
+function isFlagEnabled(flag: string): boolean {
   if (!hasTextEncoder) return false
   if (isOpera) return false
   return getMeta('ol-splitTestVariants')?.[flag] === 'enabled'

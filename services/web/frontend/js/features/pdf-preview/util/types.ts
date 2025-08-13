@@ -40,3 +40,11 @@ export type PdfFileDataList = {
   other: PdfFileData[]
   archive?: PdfFileArchiveData
 }
+
+export type HighlightData = {
+  page: number
+  h: number
+  v: number
+  width: number
+  height: number
+}
