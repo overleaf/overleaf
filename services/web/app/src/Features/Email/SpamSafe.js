@@ -34,7 +34,14 @@ const SpamSafe = {
   },
 
   isSafeEmail(email) {
-    return EMAIL_REGEX.test(email) && email.length <= 40
+    if (!EMAIL_REGEX.test(email) || email.length > 40) {
+      return false
+    }
+
+    // All-digits, e.g. qq, is safe, but mixed digits and letters is not.
+    const localPart = email.split('@')[0]
+    const digitCount = countDigits(localPart)
+    return digitCount === localPart.length || digitCount <= 5
   },
 
   safeUserName(name, alternative, project) {

@@ -42,6 +42,11 @@ describe('SpamSafe', function () {
     expect(
       SpamSafe.isSafeEmail('realistic-email+1@domain.sub-hyphen.com')
     ).to.equal(true)
+    expect(SpamSafe.isSafeEmail('jnd-9807408-1oos68@@example.com')).to.equal(
+      false
+    )
+    expect(SpamSafe.isSafeEmail('123456789@example.com')).to.equal(true)
+    expect(SpamSafe.isSafeEmail('abcdefghi@example.com')).to.equal(true)
     expect(SpamSafe.isSafeEmail('notquiteRight@evil$.com')).to.equal(false)
 
     expect(SpamSafe.safeUserName('Tammy Weinstįen', 'A User')).to.equal(
