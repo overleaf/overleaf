@@ -9,6 +9,7 @@ import { mockScope } from '../source-editor/helpers/mock-scope'
 import { TestContainer } from '../source-editor/helpers/test-container'
 import { docId } from '../source-editor/helpers/mock-doc'
 import { mockProject } from '../source-editor/helpers/mock-project'
+import { UserId } from '@ol-types/user'
 
 const userData = {
   avatar_text: 'User',
@@ -874,7 +875,7 @@ describe('<ReviewPanel /> for free users', function () {
   it.skip('opens subscription page after clicking on `try it for free`', function () {})
 
   it('shows `ask project owner to upgrade` message', function () {
-    mountEditor('other-user-id')
+    mountEditor('other-user-id' as UserId)
     cy.findByRole('dialog').within(() => {
       cy.findByText(
         'Please ask the project owner to upgrade to use track changes'

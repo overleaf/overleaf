@@ -3,7 +3,7 @@ import { EditorProviders } from '../../../helpers/editor-providers'
 import { learnedWords } from '@/features/source-editor/extensions/spelling/learned-words'
 
 describe('<DictionaryModalContent />', function () {
-  let originalLearnedWords
+  let originalLearnedWords: Set<string>
 
   beforeEach(function () {
     cy.then(() => {

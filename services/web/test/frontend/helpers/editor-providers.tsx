@@ -52,7 +52,7 @@ import { ProjectCompiler } from '../../../types/project-settings'
 // using magic strings
 export const PROJECT_ID = 'project123'
 export const PROJECT_NAME = 'project-name'
-export const USER_ID = '123abd'
+export const USER_ID = '123abd' as UserId
 export const USER_EMAIL = 'testuser@example.com'
 
 const defaultUserSettings = {
@@ -91,7 +91,7 @@ export type EditorProvidersProps = {
   providers?: Record<string, React.FC<React.PropsWithChildren<any>>>
 }
 
-export const projectDefaults = {
+export const projectDefaults: ProjectMetadata = {
   _id: PROJECT_ID,
   name: PROJECT_NAME,
   owner: {
@@ -125,6 +125,8 @@ export const projectDefaults = {
   compiler: 'pdflatex' as ProjectCompiler,
   members: [],
   invites: [],
+  trackChangesState: {} as Record<UserId | '__guests__', boolean>,
+  spellCheckLanguage: 'en',
 }
 
 /**

@@ -58,10 +58,14 @@ describe('<EditorCloneProjectModalWrapper />', function () {
       contextProps
     )
 
-    const cancelButton = await screen.findByRole('button', { name: 'Cancel' })
+    const cancelButton: HTMLButtonElement = await screen.findByRole('button', {
+      name: 'Cancel',
+    })
     expect(cancelButton.disabled).to.be.false
 
-    const submitButton = await screen.findByRole('button', { name: 'Copy' })
+    const submitButton: HTMLButtonElement = await screen.findByRole('button', {
+      name: 'Copy',
+    })
     expect(submitButton.disabled).to.be.false
 
     const input = await screen.getByLabelText('New Name')
@@ -81,14 +85,21 @@ describe('<EditorCloneProjectModalWrapper />', function () {
 
     await fetchMock.callHistory.flush(true)
     expect(fetchMock.callHistory.done()).to.be.true
-    const { url, options } = fetchMock.callHistory
+
+    const callLog = fetchMock.callHistory
       .calls('express:/project/:projectId/clone')
       .at(-1)
+
+    expect(callLog).to.exist
+
+    const { url, options } = callLog!
     expect(url).to.equal(
       'https://www.test-overleaf.com/project/project-1/clone'
     )
 
-    expect(JSON.parse(options.body)).to.deep.equal({
+    expect(options.body).to.exist
+
+    expect(JSON.parse(options.body as string)).to.deep.equal({
       projectName: 'A Cloned Project',
       tags: [],
     })
@@ -126,10 +137,14 @@ describe('<EditorCloneProjectModalWrapper />', function () {
       contextProps
     )
 
-    const button = await screen.findByRole('button', { name: 'Copy' })
+    const button: HTMLButtonElement = await screen.findByRole('button', {
+      name: 'Copy',
+    })
     expect(button.disabled).to.be.false
 
-    const cancelButton = await screen.findByRole('button', { name: 'Cancel' })
+    const cancelButton: HTMLButtonElement = await screen.findByRole('button', {
+      name: 'Cancel',
+    })
     expect(cancelButton.disabled).to.be.false
 
     fireEvent.click(button)
@@ -163,10 +178,14 @@ describe('<EditorCloneProjectModalWrapper />', function () {
       contextProps
     )
 
-    const button = await screen.findByRole('button', { name: 'Copy' })
+    const button: HTMLButtonElement = await screen.findByRole('button', {
+      name: 'Copy',
+    })
     expect(button.disabled).to.be.false
 
-    const cancelButton = await screen.findByRole('button', { name: 'Cancel' })
+    const cancelButton: HTMLButtonElement = await screen.findByRole('button', {
+      name: 'Cancel',
+    })
     expect(cancelButton.disabled).to.be.false
 
     fireEvent.click(button)
