@@ -35,6 +35,7 @@ import { Folder } from '../../../../../types/folder'
 import { useReferencesContext } from '@/features/ide-react/context/references-context'
 import { usePermissionsContext } from '@/features/ide-react/context/permissions-context'
 import { fileUrl } from '@/features/utils/fileUrl'
+import { FileTreeEntity } from '@ol-types/file-tree-entity'
 
 type DroppedFile = File & {
   relativePath?: string
@@ -53,7 +54,7 @@ const FileTreeActionableContext = createContext<
       isCreatingFolder: boolean
       isMoving: boolean
       inFlight: boolean
-      actionedEntities: any | null
+      actionedEntities: FileTreeEntity[] | null
       newFileCreateMode: any | null
       error: any | null
       canDelete: boolean
@@ -106,7 +107,7 @@ type State = {
   isCreatingFolder: boolean
   isMoving: boolean
   inFlight: boolean
-  actionedEntities: any | null
+  actionedEntities: FileTreeEntity[] | null
   newFileCreateMode: any | null
   error: unknown | null
 }
@@ -133,7 +134,7 @@ type Action =
     }
   | {
       type: ACTION_TYPES.START_DELETE
-      actionedEntities: any | null
+      actionedEntities: FileTreeEntity[] | null
     }
   | {
       type: ACTION_TYPES.START_CREATE_FILE

@@ -108,18 +108,16 @@ describe('FileTree Rename Entity Flow', function () {
   it('shows error modal on invalid filename', function () {
     renameItem('a.tex', '///')
 
-    cy.findByRole('alert', {
-      name: 'File name is empty or contains invalid characters',
-      hidden: true,
+    cy.findByText('File name is empty or contains invalid characters', {
+      selector: '[role="alert"]',
     })
   })
 
   it('shows error modal on duplicate filename', function () {
     renameItem('a.tex', 'folder')
 
-    cy.findByRole('alert', {
-      name: 'A file or folder with this name already exists',
-      hidden: true,
+    cy.findByText('A file or folder with this name already exists', {
+      selector: '[role="alert"]',
     })
   })
 
@@ -128,18 +126,16 @@ describe('FileTree Rename Entity Flow', function () {
 
     renameItem('c.tex', 'e.tex')
 
-    cy.findByRole('alert', {
-      name: 'A file or folder with this name already exists',
-      hidden: true,
+    cy.findByText('A file or folder with this name already exists', {
+      selector: '[role="alert"]',
     })
   })
 
   it('shows error modal on blocked filename', function () {
     renameItem('a.tex', 'prototype')
 
-    cy.findByRole('alert', {
-      name: 'This file name is blocked.',
-      hidden: true,
+    cy.findByText('This file name is blocked.', {
+      selector: '[role="alert"]',
     })
   })
 

@@ -45,7 +45,7 @@ function FileTreeModalDelete() {
       <OLModalBody>
         <p>{t('sure_you_want_to_delete')}</p>
         <ul>
-          {actionedEntities.map(entity => (
+          {actionedEntities?.map(entity => (
             <li key={entity._id}>{entity.name}</li>
           ))}
         </ul>

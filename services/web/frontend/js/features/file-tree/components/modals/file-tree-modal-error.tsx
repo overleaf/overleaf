@@ -72,9 +72,7 @@ function FileTreeModalError() {
       </OLModalHeader>
 
       <OLModalBody>
-        <div role="alert" aria-label={errorMessage()}>
-          {errorMessage()}
-        </div>
+        <div role="alert">{errorMessage()}</div>
       </OLModalBody>
 
       <OLModalFooter>
