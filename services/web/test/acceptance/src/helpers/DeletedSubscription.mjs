@@ -3,6 +3,7 @@ import MockSubscription from './Subscription.mjs'
 import SubscriptionUpdater from '../../../../app/src/Features/Subscription/SubscriptionUpdater.js'
 import { Subscription as SubscriptionModel } from '../../../../app/src/models/Subscription.js'
 import { DeletedSubscription as DeletedSubscriptionModel } from '../../../../app/src/models/DeletedSubscription.js'
+import { promisifyClass } from '@overleaf/promise-utils'
 
 class DeletedSubscription {
   constructor(options = {}) {
@@ -40,5 +41,7 @@ class DeletedSubscription {
       .catch(callback)
   }
 }
+
+DeletedSubscription.promises = promisifyClass(DeletedSubscription)
 
 export default DeletedSubscription
