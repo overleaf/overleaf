@@ -32,6 +32,10 @@ export type Message = {
   user?: User
 }
 
+export type ServerMessageEntry = Omit<Message, 'contents'> & {
+  content: string
+}
+
 type State = {
   status: 'idle' | 'pending' | 'error'
   messages: Message[]
@@ -52,16 +56,16 @@ type Action =
     }
   | {
       type: 'FETCH_MESSAGES_SUCCESS'
-      messages: Message[]
+      messages: ServerMessageEntry[]
     }
   | {
       type: 'SEND_MESSAGE'
       user: any
-      content: any
+      content: string
     }
   | {
       type: 'RECEIVE_MESSAGE'
-      message: any
+      message: ServerMessageEntry
     }
   | {
       type: 'MARK_MESSAGES_AS_READ'

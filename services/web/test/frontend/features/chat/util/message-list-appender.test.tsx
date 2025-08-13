@@ -3,16 +3,23 @@ import {
   appendMessage,
   prependMessages,
 } from '../../../../../frontend/js/features/chat/utils/message-list-appender'
+import { User, UserId } from '@ol-types/user'
+import {
+  Message,
+  ServerMessageEntry,
+} from '@/features/chat/context/chat-context'
 
-const testUser = {
-  id: '123abc',
+const testUser: User = {
+  id: '123abc' as UserId,
+  email: 'test-user@example.com',
 }
 
-const otherUser = {
-  id: '234other',
+const otherUser: User = {
+  id: '234other' as UserId,
+  email: 'other-user@example.com',
 }
 
-function createTestMessageList() {
+function createTestMessageList(): Message[] {
   return [
     {
       id: 'msg_1',
@@ -30,7 +37,7 @@ function createTestMessageList() {
 }
 
 describe('prependMessages()', function () {
-  function createTestMessages() {
+  function createTestMessages(): ServerMessageEntry[] {
     const message1 = {
       id: 'prepended_message',
       content: 'hello',
@@ -43,7 +50,7 @@ describe('prependMessages()', function () {
 
   it('to an empty list', function () {
     const messages = createTestMessages()
-    const uniqueMessageIds = []
+    const uniqueMessageIds: string[] = []
 
     expect(
       prependMessages([], messages, uniqueMessageIds).messages
@@ -58,7 +65,7 @@ describe('prependMessages()', function () {
   })
 
   describe('when the messages to prepend are from the same user', function () {
-    let list, messages, uniqueMessageIds
+    let list, messages: ServerMessageEntry[], uniqueMessageIds: string[]
 
     beforeEach(function () {
       list = createTestMessageList()
@@ -106,7 +113,7 @@ describe('prependMessages()', function () {
   })
 
   describe('when the messages to prepend are from different users', function () {
-    let list, messages, uniqueMessageIds
+    let list, messages: ServerMessageEntry[], uniqueMessageIds: string[]
 
     beforeEach(function () {
       list = createTestMessageList()
@@ -141,7 +148,7 @@ describe('prependMessages()', function () {
     const list = createTestMessageList()
     const messages = createTestMessages()
     messages[0].user = messages[1].user = list[0].user
-    const uniqueMessageIds = []
+    const uniqueMessageIds: string[] = []
 
     const result = prependMessages(
       createTestMessageList(),
@@ -170,7 +177,7 @@ describe('appendMessage()', function () {
 
   it('to an empty list', function () {
     const testMessage = createTestMessage()
-    const uniqueMessageIds = []
+    const uniqueMessageIds: string[] = []
 
     expect(
       appendMessage([], testMessage, uniqueMessageIds).messages
@@ -185,7 +192,7 @@ describe('appendMessage()', function () {
   })
 
   describe('messages appended shortly after the last message on the list', function () {
-    let list, message, uniqueMessageIds
+    let list: Message[], message: ServerMessageEntry, uniqueMessageIds: string[]
 
     beforeEach(function () {
       list = createTestMessageList()
@@ -228,7 +235,7 @@ describe('appendMessage()', function () {
   })
 
   describe('messages appended later after the last message on the list', function () {
-    let list, message, uniqueMessageIds
+    let list: Message[], message: ServerMessageEntry, uniqueMessageIds: string[]
 
     beforeEach(function () {
       list = createTestMessageList()

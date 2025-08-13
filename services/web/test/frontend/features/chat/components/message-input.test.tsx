@@ -5,7 +5,8 @@ import { screen, render, fireEvent } from '@testing-library/react'
 import MessageInput from '../../../../../frontend/js/features/chat/components/message-input'
 
 describe('<MessageInput />', function () {
-  let resetUnreadMessages, sendMessage
+  let resetUnreadMessages: () => void
+  let sendMessage: (content: string) => void
 
   beforeEach(function () {
     resetUnreadMessages = sinon.stub()

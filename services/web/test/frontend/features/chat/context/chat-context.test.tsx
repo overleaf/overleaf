@@ -8,14 +8,20 @@ import fetchMock from 'fetch-mock'
 import {
   useChatContext,
   chatClientIdGenerator,
+  ServerMessageEntry,
 } from '@/features/chat/context/chat-context'
 import { stubMathJax, tearDownMathJaxStubs } from '../components/stubs'
 import { SocketIOMock } from '@/ide/connection/SocketIoShim'
-import { EditorProviders } from '../../../helpers/editor-providers'
+import {
+  EditorProviders,
+  EditorProvidersProps,
+} from '../../../helpers/editor-providers'
+import { User, UserId } from '@ol-types/user'
+import { Socket } from '@/features/ide-react/connection/types/socket'
 
 describe('ChatContext', function () {
-  const user = {
-    id: 'fake_user',
+  const user: User = {
+    id: 'fake_user' as UserId,
     first_name: 'fake_user_first_name',
     email: 'fake@example.com',
   }
@@ -55,13 +61,17 @@ describe('ChatContext', function () {
 
     it('subscribes when mounted', function () {
       const socket = new SocketIOMock()
-      renderChatContextHook({ socket })
+      renderChatContextHook({
+        socket: socket as any as Socket,
+      })
       expect(socket.countEventListeners('new-chat-message')).to.equal(1)
     })
 
     it('unsubscribes when unmounted', function () {
       const socket = new SocketIOMock()
-      const { unmount } = renderChatContextHook({ socket })
+      const { unmount } = renderChatContextHook({
+        socket: socket as any as Socket,
+      })
 
       unmount()
 
@@ -72,7 +82,7 @@ describe('ChatContext', function () {
       // Mock socket: we only need to emit events, not mock actual connections
       const socket = new SocketIOMock()
       const { result } = renderChatContextHook({
-        socket,
+        socket: socket as any as Socket,
       })
 
       // Wait until initial messages have loaded
@@ -107,7 +117,7 @@ describe('ChatContext', function () {
       // Mock socket: we only need to emit events, not mock actual connections
       const socket = new SocketIOMock()
       const { result } = renderChatContextHook({
-        socket,
+        socket: socket as any as Socket,
       })
 
       fetchMock.modifyRoute('fetchMessages', {
@@ -158,7 +168,7 @@ describe('ChatContext', function () {
       // Mock socket: we only need to emit events, not mock actual connections
       const socket = new SocketIOMock()
       const { result } = renderChatContextHook({
-        socket,
+        socket: socket as any as Socket,
       })
 
       fetchMock.modifyRoute('fetchMessages', {
@@ -205,7 +215,7 @@ describe('ChatContext', function () {
     it("doesn't add received messages from the current user if a message was just sent", async function () {
       const socket = new SocketIOMock()
       const { result } = renderChatContextHook({
-        socket,
+        socket: socket as any as Socket,
       })
 
       // Wait until initial messages have loaded
@@ -239,7 +249,7 @@ describe('ChatContext', function () {
     it('adds the new message from the current user if another message was received after sending', async function () {
       const socket = new SocketIOMock()
       const { result } = renderChatContextHook({
-        socket,
+        socket: socket as any as Socket,
       })
 
       // Wait until initial messages have loaded
@@ -411,7 +421,9 @@ describe('ChatContext', function () {
 
       // The before query param for the second request matches the timestamp
       // of the first message
-      const beforeParam = parseInt(getLastFetchMockQueryParam('before'), 10)
+      const beforeParamRaw = getLastFetchMockQueryParam('before')
+      expect(beforeParamRaw).to.not.be.null
+      const beforeParam = parseInt(beforeParamRaw!, 10)
       expect(beforeParam).to.equal(new Date('2021-03-04T10:00:00').getTime())
     })
 
@@ -442,7 +454,7 @@ describe('ChatContext', function () {
 
     it('handles socket messages while loading', async function () {
       // Mock GET messages so that we can control when the promise is resolved
-      let resolveLoadingMessages
+      let resolveLoadingMessages: (messages: ServerMessageEntry[]) => void
       fetchMock.get(
         'express:/project/:projectId/messages',
         new Promise(resolve => {
@@ -452,7 +464,7 @@ describe('ChatContext', function () {
 
       const socket = new SocketIOMock()
       const { result } = renderChatContextHook({
-        socket,
+        socket: socket as any as Socket,
       })
 
       // Start loading messages
@@ -472,7 +484,7 @@ describe('ChatContext', function () {
       })
 
       // Resolve messages being loaded
-      resolveLoadingMessages([
+      resolveLoadingMessages!([
         {
           id: 'fetched_msg',
           content: 'loaded message',
@@ -531,12 +543,19 @@ describe('ChatContext', function () {
 
       result.current.sendMessage('sent message')
 
+      const calls = fetchMock.callHistory.calls(
+        'express:/project/:projectId/messages',
+        { method: 'POST' }
+      )
+      expect(calls.length).to.be.greaterThanOrEqual(1)
+
       const {
         options: { body },
-      } = fetchMock.callHistory
-        .calls('express:/project/:projectId/messages', { method: 'POST' })
-        .at(-1)
-      expect(JSON.parse(body)).to.deep.include({ content: 'sent message' })
+      } = calls.at(-1)!
+      expect(body).to.not.be.undefined
+      expect(JSON.parse(body!.toString())).to.deep.include({
+        content: 'sent message',
+      })
     })
 
     it("doesn't send if the content is empty", function () {
@@ -574,7 +593,9 @@ describe('ChatContext', function () {
 
     it('increments unreadMessageCount when a new message is received', function () {
       const socket = new SocketIOMock()
-      const { result } = renderChatContextHook({ socket })
+      const { result } = renderChatContextHook({
+        socket: socket as any as Socket,
+      })
 
       // Receive a new message from the socket
       act(() => {
@@ -591,7 +612,9 @@ describe('ChatContext', function () {
 
     it('resets unreadMessageCount when markMessagesAsRead is called', function () {
       const socket = new SocketIOMock()
-      const { result } = renderChatContextHook({ socket })
+      const { result } = renderChatContextHook({
+        socket: socket as any as Socket,
+      })
 
       // Receive a new message from the socket, incrementing unreadMessageCount
       // by 1
@@ -609,7 +632,7 @@ describe('ChatContext', function () {
   })
 })
 
-function renderChatContextHook(props) {
+function renderChatContextHook(props: EditorProvidersProps) {
   return renderHook(() => useChatContext(), {
     // Wrap with ChatContext.Provider (and the other editor context providers)
     // eslint-disable-next-line react/display-name
@@ -619,7 +642,11 @@ function renderChatContextHook(props) {
   })
 }
 
-function createMessages(number, user, timestamp = Date.now()) {
+function createMessages(
+  number: number,
+  user: User,
+  timestamp = Date.now()
+): ServerMessageEntry[] {
   return Array.from({ length: number }, (_m, idx) => ({
     id: `msg_${idx + 1}`,
     content: `message ${idx + 1}`,
@@ -631,8 +658,12 @@ function createMessages(number, user, timestamp = Date.now()) {
 /*
  * Get query param by key from the last fetchMock response
  */
-function getLastFetchMockQueryParam(key) {
-  const { url } = fetchMock.callHistory.calls().at(-1)
+function getLastFetchMockQueryParam(key: string) {
+  const calls = fetchMock.callHistory.calls()
+  if (calls.length === 0) {
+    throw new Error('No fetchMock calls found')
+  }
+  const { url } = calls.at(-1)!
   const { searchParams } = new URL(url, 'https://www.overleaf.com')
   return searchParams.get(key)
 }

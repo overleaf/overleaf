@@ -1,6 +1,12 @@
+import { Message, ServerMessageEntry } from '../context/chat-context'
+
 const TIMESTAMP_GROUP_SIZE = 5 * 60 * 1000 // 5 minutes
 
-export function appendMessage(messageList, message, uniqueMessageIds) {
+export function appendMessage(
+  messageList: Message[],
+  message: ServerMessageEntry,
+  uniqueMessageIds: string[]
+) {
   if (uniqueMessageIds.includes(message.id)) {
     return { messages: messageList, uniqueMessageIds }
   }
@@ -41,7 +47,11 @@ export function appendMessage(messageList, message, uniqueMessageIds) {
   return { messages: messageList, uniqueMessageIds }
 }
 
-export function prependMessages(messageList, messages, uniqueMessageIds) {
+export function prependMessages(
+  messageList: Message[],
+  messages: ServerMessageEntry[],
+  uniqueMessageIds: string[]
+) {
   const listCopy = messageList.slice(0)
 
   uniqueMessageIds = uniqueMessageIds.slice(0)

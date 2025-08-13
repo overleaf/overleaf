@@ -10,5 +10,6 @@ export function stubMathJax() {
 }
 
 export function tearDownMathJaxStubs() {
+  // @ts-expect-error - this is a stub that we're setting ourselves per test
   delete window.MathJax
 }

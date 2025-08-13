@@ -5,15 +5,17 @@ import { screen, render, fireEvent } from '@testing-library/react'
 import MessageList from '../../../../../frontend/js/features/chat/components/message-list'
 import { stubMathJax, tearDownMathJaxStubs } from './stubs'
 import { UserProvider } from '@/shared/context/user-context'
+import { User, UserId } from '@ol-types/user'
+import { Message } from '@/features/chat/context/chat-context'
 
 describe('<MessageList />', function () {
-  const currentUser = {
-    id: 'fake_user',
+  const currentUser: User = {
+    id: 'fake_user' as UserId,
     first_name: 'fake_user_first_name',
     email: 'fake@example.com',
   }
 
-  function createMessages() {
+  function createMessages(): Message[] {
     return [
       {
         id: '1',
@@ -38,7 +40,7 @@ describe('<MessageList />', function () {
     tearDownMathJaxStubs()
   })
 
-  let olUser
+  let olUser: User
   beforeEach(function () {
     olUser = window.metaAttributesCache.get('ol-user')
     window.metaAttributesCache.set('ol-user', currentUser)
@@ -52,7 +54,6 @@ describe('<MessageList />', function () {
     render(
       <UserProvider>
         <MessageList
-          userId={currentUser.id}
           messages={createMessages()}
           resetUnreadMessages={() => {}}
         />
@@ -70,11 +71,7 @@ describe('<MessageList />', function () {
 
     render(
       <UserProvider>
-        <MessageList
-          userId={currentUser.id}
-          messages={msgs}
-          resetUnreadMessages={() => {}}
-        />
+        <MessageList messages={msgs} resetUnreadMessages={() => {}} />
       </UserProvider>
     )
 
@@ -89,11 +86,7 @@ describe('<MessageList />', function () {
 
     render(
       <UserProvider>
-        <MessageList
-          userId={currentUser.id}
-          messages={msgs}
-          resetUnreadMessages={() => {}}
-        />
+        <MessageList messages={msgs} resetUnreadMessages={() => {}} />
       </UserProvider>
     )
 
@@ -106,7 +99,6 @@ describe('<MessageList />', function () {
     render(
       <UserProvider>
         <MessageList
-          userId={currentUser.id}
           messages={createMessages()}
           resetUnreadMessages={resetUnreadMessages}
         />
