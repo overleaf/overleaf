@@ -21,6 +21,7 @@ pipeline {
   options {
     timestamps()
     parallelsAlwaysFailFast()
+    timeout(time: 15, unit: 'MINUTES')
   }
 
   environment {
