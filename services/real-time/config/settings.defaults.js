@@ -170,8 +170,8 @@ const settings = {
     shutdownOnUncaughtError: true,
   },
 
-  behindProxy: process.env.BEHIND_PROXY === 'true',
-  trustedProxyIps: process.env.TRUSTED_PROXY_IPS,
+  behindProxy: true,
+  trustedProxyIps: process.env.TRUSTED_PROXY_IPS || 'loopback',
   keepAliveTimeoutMs: parseInt(process.env.KEEPALIVE_TIMEOUT_MS ?? '5000', 10),
   allowedCorsOrigins: process.env.REAL_TIME_ALLOWED_CORS_ORIGINS,
 }

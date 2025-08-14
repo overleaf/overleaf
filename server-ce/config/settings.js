@@ -184,9 +184,12 @@ const settings = {
   siteUrl: (siteUrl = process.env.OVERLEAF_SITE_URL || 'http://localhost'),
 
   // Status page URL as displayed on the maintenance/500 pages.
-  statusPageUrl: process.env.OVERLEAF_STATUS_PAGE_URL ?
-    // Add https:// protocol prefix if not set (Allow plain-text http:// for Server Pro/CE).
-    (process.env.OVERLEAF_STATUS_PAGE_URL.startsWith('http://') || process.env.OVERLEAF_STATUS_PAGE_URL.startsWith('https://')) ? process.env.OVERLEAF_STATUS_PAGE_URL : `https://${process.env.OVERLEAF_STATUS_PAGE_URL}`
+  statusPageUrl: process.env.OVERLEAF_STATUS_PAGE_URL
+    ? // Add https:// protocol prefix if not set (Allow plain-text http:// for Server Pro/CE).
+      process.env.OVERLEAF_STATUS_PAGE_URL.startsWith('http://') ||
+      process.env.OVERLEAF_STATUS_PAGE_URL.startsWith('https://')
+      ? process.env.OVERLEAF_STATUS_PAGE_URL
+      : `https://${process.env.OVERLEAF_STATUS_PAGE_URL}`
     : undefined,
   maintenanceMessage: process.env.OVERLEAF_MAINTENANCE_MESSAGE,
   maintenanceMessageHTML: process.env.OVERLEAF_MAINTENANCE_MESSAGE_HTML,
@@ -244,8 +247,8 @@ const settings = {
   // then set this to true to allow it to correctly detect the forwarded IP
   // address and http/https protocol information.
 
-  behindProxy: process.env.OVERLEAF_BEHIND_PROXY || false,
-  trustedProxyIps: process.env.OVERLEAF_TRUSTED_PROXY_IPS,
+  behindProxy: true,
+  trustedProxyIps: process.env.OVERLEAF_TRUSTED_PROXY_IPS || 'loopback',
 
   // The amount of time, in milliseconds, until the (rolling) cookie session expires
   cookieSessionLength: parseInt(
@@ -478,6 +481,16 @@ switch (process.env.OVERLEAF_FILESTORE_BACKEND) {
           '/var/lib/overleaf/data/history/overleaf-global-blobs',
       },
     }
+}
+
+if (
+  !settings.trustedProxyIps.includes('loopback') &&
+  !settings.trustedProxyIps.includes('localhost') &&
+  !settings.trustedProxyIps.includes('127.0.0.1')
+) {
+  throw new Error(
+    'OVERLEAF_TRUSTED_PROXY_IPS must include one of "loopback", "localhost" or "127.0.0.1", which trusts the nginx instance running inside the container'
+  )
 }
 
 // With lots of incoming and outgoing HTTP connections to different services,
