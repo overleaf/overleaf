@@ -143,6 +143,7 @@ export interface Meta {
   'ol-hasSplitTestWriteAccess': boolean
   'ol-hasSubscription': boolean
   'ol-hasTrackChangesFeature': boolean
+  'ol-hasWriteAccess': boolean
   'ol-hideLinkingWidgets': boolean // CI only
   'ol-i18n': { currentLangCode: string }
   'ol-inactiveTutorials': string[]

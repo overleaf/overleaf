@@ -5,6 +5,7 @@ export type AdminCapability =
   | 'create-subscription'
   | 'modify-feature-override'
   | 'modify-group'
+  | 'modify-group-setting'
   | 'modify-login-status'
   | 'modify-managed-group'
   | 'modify-project'
