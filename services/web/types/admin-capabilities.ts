@@ -7,6 +7,7 @@ export type AdminCapability =
   | 'modify-group'
   | 'modify-login-status'
   | 'modify-managed-group'
+  | 'modify-project'
   | 'manage-survey'
   | 'modify-split-test'
   | 'modify-user-email'
