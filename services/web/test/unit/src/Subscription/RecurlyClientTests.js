@@ -193,11 +193,10 @@ describe('RecurlyClient', function () {
   describe('createAccountForUserId', function () {
     it('should return the Account as created by recurly', async function () {
       this.client.createAccount = sinon.stub().resolves(this.recurlyAccount)
-      await expect(
-        this.RecurlyClient.promises.createAccountForUserId(this.user._id)
+      const result = await this.RecurlyClient.promises.createAccountForUserId(
+        this.user._id
       )
-        .to.eventually.be.an.instanceOf(recurly.Account)
-        .that.has.property('code', this.user._id)
+      expect(result).to.has.property('code', this.user._id)
     })
 
     it('should throw any API errors', async function () {

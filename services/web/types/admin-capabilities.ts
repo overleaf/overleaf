@@ -17,6 +17,7 @@ export type AdminCapability =
   | 'view-script-log'
   | 'view-split-test'
   | 'view-user-additional-info'
+  | 'create-stripe-account'
 
 export type AdminRole =
   | 'engagement'

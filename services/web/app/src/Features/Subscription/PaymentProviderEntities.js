@@ -603,7 +603,7 @@ class PaymentProviderAccount {
    * @param {object} props
    * @param {string} props.code
    * @param {string} props.email
-   * @param {boolean} props.hasPastDueInvoice
+   * @param {boolean} [props.hasPastDueInvoice]
    */
   constructor(props) {
     this.code = props.code

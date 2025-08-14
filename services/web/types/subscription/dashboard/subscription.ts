@@ -107,11 +107,15 @@ export type MemberGroupSubscription = Omit<GroupSubscription, 'admin_id'> & {
   admin_id: User
 }
 
-type PaymentProviderService = 'stripe-us' | 'stripe-uk' | 'recurly'
-export type StripePaymentProviderService = Exclude<
-  PaymentProviderService,
-  'recurly'
->
+const STRIPE_PAYMENT_PROVIDER_SERVICES = ['stripe-uk', 'stripe-us'] as const
+const PAYMENT_PROVIDER_SERVICES = [
+  ...STRIPE_PAYMENT_PROVIDER_SERVICES,
+  'recurly',
+] as const
+
+export type PaymentProviderService = (typeof PAYMENT_PROVIDER_SERVICES)[number]
+export type StripePaymentProviderService =
+  (typeof STRIPE_PAYMENT_PROVIDER_SERVICES)[number]
 
 export type PaymentProvider = {
   service: PaymentProviderService

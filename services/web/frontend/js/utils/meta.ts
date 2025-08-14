@@ -30,6 +30,7 @@ import {
   GroupPolicy,
   ManagedGroupSubscription,
   MemberGroupSubscription,
+  StripePaymentProviderService,
 } from '../../../types/subscription/dashboard/subscription'
 import { SplitTestInfo } from '../../../types/split-test'
 import { ValidationStatus } from '../../../types/group-management/validation'
@@ -254,6 +255,7 @@ export interface Meta {
   'ol-stripeSubscriptionData': {
     customerId: string
     subscriptionState: string | null
+    paymentProviderService: StripePaymentProviderService | null
   }
   'ol-subscription': any // TODO: mixed types, split into two fields
   'ol-subscriptionChangePreview': SubscriptionChangePreview

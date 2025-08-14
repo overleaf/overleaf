@@ -90,7 +90,7 @@ async function createAccountForUserId(userId) {
   }
   const account = await client.createAccount(accountCreate)
   logger.debug({ userId, account }, 'created recurly account')
-  return account
+  return accountFromApi(account)
 }
 
 /**
