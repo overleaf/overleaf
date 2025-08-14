@@ -37,6 +37,7 @@ export default function GroupMembers() {
   const groupSize = getMeta('ol-groupSize')
   const canUseFlexibleLicensing = getMeta('ol-canUseFlexibleLicensing')
   const canUseAddSeatsFeature = getMeta('ol-canUseAddSeatsFeature')
+  const hasWriteAccess = getMeta('ol-hasWriteAccess')
 
   const handleEmailsChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
@@ -133,10 +134,10 @@ export default function GroupMembers() {
             </div>
             <div className="row-spaced-small">
               <ErrorAlert error={removeMemberError} />
-              <MembersList groupId={groupId} />
+              <MembersList groupId={groupId} hasWriteAccess={hasWriteAccess} />
             </div>
             <hr />
-            {users.length < groupSize && (
+            {hasWriteAccess && users.length < groupSize && (
               <div
                 className="add-more-members-form"
                 data-testid="add-more-members-form"
@@ -186,7 +187,8 @@ export default function GroupMembers() {
                 </form>
               </div>
             )}
-            {users.length >= groupSize && users.length > 0 && (
+            {(!hasWriteAccess ||
+              (users.length >= groupSize && users.length > 0)) && (
               <>
                 <ErrorAlert error={inviteError} />
                 <OLRow>

@@ -34,6 +34,7 @@ describe('MemberRow', function () {
               openUnlinkUserModal={sinon.stub()}
               groupId={subscriptionId}
               setGroupUserAlert={sinon.stub()}
+              hasWriteAccess
             />
           </GroupMembersProvider>
         )
@@ -87,6 +88,7 @@ describe('MemberRow', function () {
               openUnlinkUserModal={sinon.stub()}
               groupId={subscriptionId}
               setGroupUserAlert={sinon.stub()}
+              hasWriteAccess
             />
           </GroupMembersProvider>
         )
@@ -127,6 +129,7 @@ describe('MemberRow', function () {
               openUnlinkUserModal={sinon.stub()}
               groupId={subscriptionId}
               setGroupUserAlert={sinon.stub()}
+              hasWriteAccess
             />
           </GroupMembersProvider>
         )
@@ -166,6 +169,7 @@ describe('MemberRow', function () {
               openUnlinkUserModal={sinon.stub()}
               groupId={subscriptionId}
               setGroupUserAlert={sinon.stub()}
+              hasWriteAccess
             />
           </GroupMembersProvider>
         )
@@ -215,6 +219,7 @@ describe('MemberRow', function () {
               openUnlinkUserModal={sinon.stub()}
               groupId={subscriptionId}
               setGroupUserAlert={sinon.stub()}
+              hasWriteAccess
             />
           </GroupMembersProvider>
         )
@@ -267,6 +272,7 @@ describe('MemberRow', function () {
               openUnlinkUserModal={sinon.stub()}
               groupId={subscriptionId}
               setGroupUserAlert={sinon.stub()}
+              hasWriteAccess
             />
           </GroupMembersProvider>
         )
@@ -307,6 +313,7 @@ describe('MemberRow', function () {
               openUnlinkUserModal={sinon.stub()}
               groupId={subscriptionId}
               setGroupUserAlert={sinon.stub()}
+              hasWriteAccess
             />
           </GroupMembersProvider>
         )
@@ -346,6 +353,7 @@ describe('MemberRow', function () {
               openUnlinkUserModal={sinon.stub()}
               groupId={subscriptionId}
               setGroupUserAlert={sinon.stub()}
+              hasWriteAccess
             />
           </GroupMembersProvider>
         )
@@ -395,6 +403,7 @@ describe('MemberRow', function () {
               openUnlinkUserModal={sinon.stub()}
               groupId={subscriptionId}
               setGroupUserAlert={sinon.stub()}
+              hasWriteAccess
             />
           </GroupMembersProvider>
         )
@@ -448,6 +457,7 @@ describe('MemberRow', function () {
               openUnlinkUserModal={sinon.stub()}
               groupId={subscriptionId}
               setGroupUserAlert={sinon.stub()}
+              hasWriteAccess
             />
           </GroupMembersProvider>
         )
@@ -488,6 +498,7 @@ describe('MemberRow', function () {
               openUnlinkUserModal={sinon.stub()}
               groupId={subscriptionId}
               setGroupUserAlert={sinon.stub()}
+              hasWriteAccess
             />
           </GroupMembersProvider>
         )
@@ -527,6 +538,7 @@ describe('MemberRow', function () {
               openUnlinkUserModal={sinon.stub()}
               groupId={subscriptionId}
               setGroupUserAlert={sinon.stub()}
+              hasWriteAccess
             />
           </GroupMembersProvider>
         )
@@ -577,6 +589,7 @@ describe('MemberRow', function () {
               openUnlinkUserModal={sinon.stub()}
               groupId={subscriptionId}
               setGroupUserAlert={sinon.stub()}
+              hasWriteAccess
             />
           </GroupMembersProvider>
         )
@@ -630,6 +643,7 @@ describe('MemberRow', function () {
               openUnlinkUserModal={sinon.stub()}
               groupId={subscriptionId}
               setGroupUserAlert={sinon.stub()}
+              hasWriteAccess
             />
           </GroupMembersProvider>
         )
@@ -670,6 +684,7 @@ describe('MemberRow', function () {
               openUnlinkUserModal={sinon.stub()}
               groupId={subscriptionId}
               setGroupUserAlert={sinon.stub()}
+              hasWriteAccess
             />
           </GroupMembersProvider>
         )
@@ -709,6 +724,7 @@ describe('MemberRow', function () {
               openUnlinkUserModal={sinon.stub()}
               groupId={subscriptionId}
               setGroupUserAlert={sinon.stub()}
+              hasWriteAccess
             />
           </GroupMembersProvider>
         )

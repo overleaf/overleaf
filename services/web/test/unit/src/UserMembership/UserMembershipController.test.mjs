@@ -35,6 +35,7 @@ describe('UserMembershipController', function () {
     ctx.subscription = {
       _id: 'mock-subscription-id',
       admin_id: 'mock-admin-id',
+      manager_ids: ['mock-admin-id'],
       fetchV1Data: callback => callback(null, ctx.subscription),
     }
     ctx.institution = {
@@ -201,6 +202,7 @@ describe('UserMembershipController', function () {
 
   describe('index', function () {
     beforeEach(function (ctx) {
+      ctx.req.user = ctx.user
       ctx.req.entity = ctx.subscription
       ctx.req.entityConfig = EntityConfigs.group
     })

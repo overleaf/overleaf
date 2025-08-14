@@ -77,6 +77,7 @@ describe('group members, with managed users', function () {
       win.metaAttributesCache.set('ol-groupName', 'My Awesome Team')
       win.metaAttributesCache.set('ol-groupSize', 10)
       win.metaAttributesCache.set('ol-managedUsersActive', true)
+      win.metaAttributesCache.set('ol-hasWriteAccess', true)
     })
     mountGroupMembersProvider()
   })

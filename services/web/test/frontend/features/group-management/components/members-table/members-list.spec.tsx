@@ -7,7 +7,7 @@ const groupId = 'somegroup'
 function mountManagedUsersList() {
   cy.mount(
     <GroupMembersProvider>
-      <MembersList groupId={groupId} />
+      <MembersList groupId={groupId} hasWriteAccess />
     </GroupMembersProvider>
   )
 }
@@ -166,7 +166,7 @@ describe('MembersList', function () {
       })
       cy.mount(
         <GroupMembersProvider>
-          <MembersList groupId={groupId} />
+          <MembersList groupId={groupId} hasWriteAccess />
         </GroupMembersProvider>
       )
     })

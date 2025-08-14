@@ -43,6 +43,7 @@ describe('GroupMembers', function () {
         win.metaAttributesCache.set('ol-groupName', 'My Awesome Team')
         win.metaAttributesCache.set('ol-groupSize', 10)
         win.metaAttributesCache.set('ol-users', [JOHN_DOE, BOBBY_LAPOINTE])
+        win.metaAttributesCache.set('ol-hasWriteAccess', true)
       })
 
       cy.mount(
@@ -243,6 +244,7 @@ describe('GroupMembers', function () {
         win.metaAttributesCache.set('ol-groupName', 'My Awesome Team')
         win.metaAttributesCache.set('ol-groupSize', 10)
         win.metaAttributesCache.set('ol-managedUsersActive', true)
+        win.metaAttributesCache.set('ol-hasWriteAccess', true)
       })
       mountGroupMembersProvider()
     })
@@ -514,6 +516,7 @@ describe('GroupMembers', function () {
         win.metaAttributesCache.set('ol-groupSize', 10)
         win.metaAttributesCache.set('ol-canUseFlexibleLicensing', true)
         win.metaAttributesCache.set('ol-canUseAddSeatsFeature', true)
+        win.metaAttributesCache.set('ol-hasWriteAccess', true)
       })
     })
 

@@ -26,13 +26,13 @@ export default {
     )
     webRouter.post(
       '/manage/groups/:id/invites',
-      UserMembershipMiddleware.requireGroupManagementAccess,
+      UserMembershipMiddleware.requireGroupMemberManagementAccess,
       RateLimiterMiddleware.rateLimit(rateLimiters.createTeamInvite),
       TeamInvitesController.createInvite
     )
     webRouter.post(
       '/manage/groups/:id/resendInvite',
-      UserMembershipMiddleware.requireGroupManagementAccess,
+      UserMembershipMiddleware.requireGroupMemberManagementAccess,
       RateLimiterMiddleware.rateLimit(rateLimiters.createTeamInvite),
       TeamInvitesController.resendInvite
     )
@@ -43,7 +43,7 @@ export default {
     )
     webRouter.delete(
       '/manage/groups/:id/invites/:email',
-      UserMembershipMiddleware.requireGroupManagementAccess,
+      UserMembershipMiddleware.requireGroupMemberManagementAccess,
       TeamInvitesController.revokeInvite
     )
     webRouter.get(

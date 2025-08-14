@@ -14,6 +14,7 @@ import { expressify } from '@overleaf/promise-utils'
 import PlansLocator from '../Subscription/PlansLocator.js'
 import RecurlyClient from '../Subscription/RecurlyClient.js'
 import Modules from '../../infrastructure/Modules.js'
+import UserMembershipAuthorization from './UserMembershipAuthorization.js'
 
 async function manageGroupMembers(req, res, next) {
   const { entity: subscription, entityConfig } = req
@@ -59,6 +60,7 @@ async function manageGroupMembers(req, res, next) {
     groupSSOActive: ssoConfig?.enabled,
     canUseFlexibleLicensing: plan?.canUseFlexibleLicensing,
     canUseAddSeatsFeature,
+    entityAccess: UserMembershipAuthorization.hasEntityAccess()(req),
   })
 }
 

@@ -51,6 +51,19 @@ const UserMembershipMiddleware = {
     ]),
   ],
 
+  requireGroupMemberManagementAccess: [
+    AuthenticationController.requireLogin(),
+    fetchEntityConfig('group'),
+    fetchEntity(),
+    requireEntity(),
+    useAdminCapabilities,
+    allowAccessIfAny([
+      UserMembershipAuthorization.hasEntityAccess(),
+      UserMembershipAuthorization.hasStaffAccess('groupManagement'),
+      UserMembershipAuthorization.hasModifyGroupMemberCapability,
+    ]),
+  ],
+
   requireGroupMetricsAccess: [
     AuthenticationController.requireLogin(),
     fetchEntityConfig('group'),

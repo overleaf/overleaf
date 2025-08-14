@@ -26,6 +26,7 @@ const USERS_DISPLAY_LIMIT = 50
 
 type ManagedUsersListProps = {
   groupId: string
+  hasWriteAccess: boolean
 }
 
 function isUserSearchMatch(user: User, search: NonEmptyString): boolean {
@@ -40,7 +41,10 @@ function isUserSearchMatch(user: User, search: NonEmptyString): boolean {
   )
 }
 
-export default function MembersList({ groupId }: ManagedUsersListProps) {
+export default function MembersList({
+  groupId,
+  hasWriteAccess,
+}: ManagedUsersListProps) {
   const { t } = useTranslation()
   const [userToOffboard, setUserToOffboard] = useState<User | undefined>(
     undefined
@@ -155,7 +159,7 @@ export default function MembersList({ groupId }: ManagedUsersListProps) {
       >
         <thead>
           <tr ref={tHeadRowRef}>
-            <SelectAllCheckbox />
+            {hasWriteAccess && <SelectAllCheckbox />}
             <th className="cell-email">{t('email')}</th>
             <th className="cell-name">{t('name')}</th>
             <th className="cell-last-active">
@@ -178,7 +182,7 @@ export default function MembersList({ groupId }: ManagedUsersListProps) {
             {managedUsersActive && (
               <th className="cell-managed">{t('managed')}</th>
             )}
-            <th />
+            {hasWriteAccess && <th />}
           </tr>
         </thead>
         <tbody>
@@ -203,6 +207,7 @@ export default function MembersList({ groupId }: ManagedUsersListProps) {
               openUnlinkUserModal={setUserToUnlink}
               setGroupUserAlert={setGroupUserAlert}
               groupId={groupId}
+              hasWriteAccess={hasWriteAccess}
             />
           ))}
         </tbody>
