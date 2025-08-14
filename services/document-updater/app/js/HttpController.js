@@ -10,12 +10,16 @@ const DeleteQueueManager = require('./DeleteQueueManager')
 const { getTotalSizeOfLines } = require('./Limits')
 const async = require('async')
 const { StringFileData } = require('overleaf-editor-core')
+const { addTrackedDeletesToContent } = require('./Utils')
+const HistoryConversions = require('./HistoryConversions')
 
 function getDoc(req, res, next) {
   let fromVersion
   const docId = req.params.doc_id
   const projectId = req.params.project_id
-  logger.debug({ projectId, docId }, 'getting doc via http')
+  const historyRanges = req.query.historyRanges === 'true'
+
+  logger.debug({ projectId, docId, historyRanges }, 'getting doc via http')
   const timer = new Metrics.Timer('http.getDoc')
 
   if (req.query.fromVersion != null) {
@@ -33,7 +37,7 @@ function getDoc(req, res, next) {
       if (error) {
         return next(error)
       }
-      logger.debug({ projectId, docId }, 'got doc via http')
+      logger.debug({ projectId, docId, historyRanges }, 'got doc via http')
       if (lines == null || version == null) {
         return next(new Errors.NotFoundError('document not found'))
       }
@@ -42,16 +46,39 @@ function getDoc(req, res, next) {
         // TODO(24596): tc support for history-ot
         lines = file.getLines()
       }
-      res.json({
-        id: docId,
-        lines,
-        version,
-        ops,
-        ranges,
-        pathname,
-        ttlInS: RedisManager.DOC_OPS_TTL,
-        type,
-      })
+
+      if (historyRanges) {
+        const docContentWithTrackedDeletes = addTrackedDeletesToContent(
+          lines.join('\n'),
+          ranges?.changes ?? []
+        )
+        const docLinesWithTrackedDeletes =
+          docContentWithTrackedDeletes.split('\n')
+        const rangesWithTrackedDeletes =
+          HistoryConversions.toHistoryRanges(ranges)
+
+        res.json({
+          id: docId,
+          lines: docLinesWithTrackedDeletes,
+          version,
+          ops,
+          ranges: rangesWithTrackedDeletes,
+          pathname,
+          ttlInS: RedisManager.DOC_OPS_TTL,
+          type,
+        })
+      } else {
+        res.json({
+          id: docId,
+          lines,
+          version,
+          ops,
+          ranges,
+          pathname,
+          ttlInS: RedisManager.DOC_OPS_TTL,
+          type,
+        })
+      }
     }
   )
 }

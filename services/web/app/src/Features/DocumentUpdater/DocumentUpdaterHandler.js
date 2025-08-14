@@ -137,6 +137,29 @@ function getDocument(projectId, docId, fromVersion, callback) {
   )
 }
 
+/**
+ * Get a document with its history ranges
+ * @param {string} projectId
+ * @param {string} docId
+ * @param {Callback} callback
+ */
+function getDocumentWithHistoryRanges(projectId, docId, callback) {
+  _makeRequest(
+    {
+      path: `/project/${projectId}/doc/${docId}?historyRanges=true`,
+      json: true,
+    },
+    projectId,
+    'get-document-with-history-ranges',
+    function (error, doc) {
+      if (error) {
+        return callback(error)
+      }
+      callback(null, doc)
+    }
+  )
+}
+
 function setDocument(projectId, docId, userId, docLines, source, callback) {
   _makeRequest(
     {
@@ -661,6 +684,7 @@ module.exports = {
   blockProject,
   unblockProject,
   updateProjectStructure,
+  getDocumentWithHistoryRanges,
   promises: {
     flushProjectToMongo: promisify(flushProjectToMongo),
     flushMultipleProjectsToMongo: promisify(flushMultipleProjectsToMongo),
@@ -688,5 +712,6 @@ module.exports = {
     unblockProject: promisify(unblockProject),
     updateProjectStructure: promisify(updateProjectStructure),
     appendToDocument: promisify(appendToDocument),
+    getDocumentWithHistoryRanges: promisify(getDocumentWithHistoryRanges),
   },
 }

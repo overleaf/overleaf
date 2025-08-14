@@ -19,6 +19,12 @@ describe('HttpController', function () {
         }),
         './Metrics': (this.Metrics = {}),
         './Errors': Errors,
+        './Utils': (this.Utils = {
+          addTrackedDeletesToContent: sinon.stub().returnsArg(0),
+        }),
+        './HistoryConversions': (this.HistoryConversions = {
+          toHistoryRanges: sinon.stub().returnsArg(0),
+        }),
         '@overleaf/settings': { max_doc_length: 2 * 1024 * 1024 },
       },
     })
@@ -95,7 +101,11 @@ describe('HttpController', function () {
       it('should log the request', function () {
         this.logger.debug
           .calledWith(
-            { docId: this.doc_id, projectId: this.project_id },
+            {
+              docId: this.doc_id,
+              projectId: this.project_id,
+              historyRanges: false,
+            },
             'getting doc via http'
           )
           .should.equal(true)
@@ -147,7 +157,75 @@ describe('HttpController', function () {
       it('should log the request', function () {
         this.logger.debug
           .calledWith(
-            { docId: this.doc_id, projectId: this.project_id },
+            {
+              docId: this.doc_id,
+              projectId: this.project_id,
+              historyRanges: false,
+            },
+            'getting doc via http'
+          )
+          .should.equal(true)
+      })
+
+      it('should time the request', function () {
+        this.Metrics.Timer.prototype.done.called.should.equal(true)
+      })
+    })
+
+    describe('when historyRanges query param is true', function () {
+      beforeEach(function () {
+        this.DocumentManager.getDocAndRecentOpsWithLock = sinon
+          .stub()
+          .callsArgWith(
+            3,
+            null,
+            this.lines,
+            this.version,
+            [],
+            this.ranges,
+            this.pathname,
+            this.projectHistoryId,
+            'sharejs-text-ot'
+          )
+        this.req.query = { historyRanges: 'true' }
+        this.HttpController.getDoc(this.req, this.res, this.next)
+      })
+
+      it('should get the doc', function () {
+        this.DocumentManager.getDocAndRecentOpsWithLock
+          .calledWith(this.project_id, this.doc_id, -1)
+          .should.equal(true)
+      })
+
+      it('should return the doc as JSON with history ranges processing', function () {
+        this.res.json.should.have.been.calledWith({
+          id: this.doc_id,
+          lines: this.lines,
+          version: this.version,
+          ops: [],
+          ranges: this.ranges,
+          pathname: this.pathname,
+          ttlInS: 42,
+          type: 'sharejs-text-ot',
+        })
+      })
+
+      it('should call addTrackedDeletesToContent for history ranges processing', function () {
+        this.Utils.addTrackedDeletesToContent.called.should.equal(true)
+      })
+
+      it('should call toHistoryRanges for range conversion', function () {
+        this.HistoryConversions.toHistoryRanges.called.should.equal(true)
+      })
+
+      it('should log the request with historyRanges: true', function () {
+        this.logger.debug
+          .calledWith(
+            {
+              docId: this.doc_id,
+              projectId: this.project_id,
+              historyRanges: true,
+            },
             'getting doc via http'
           )
           .should.equal(true)
