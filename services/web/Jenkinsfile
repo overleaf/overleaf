@@ -52,7 +52,7 @@ pipeline {
         stage('Prefetch Tests Images') {
           steps {
             dir('services/web') {
-              sh 'docker compose -f docker-compose.ci.yml pull --quiet test_frontend_ct mongo redis ldap saml'
+              sh 'docker compose -f docker-compose.ci.yml pull --quiet test_frontend_ct mongo redis_test ldap saml'
             }
           }
         }
