@@ -14,7 +14,7 @@ export OVERLEAF_TAG ?= sharelatex/sharelatex:$(BRANCH_NAME)-$(MONOREPO_REVISION)
 all: build-base build-community
 
 clean:
-	-docker rmi $(OVERLEAF_BASE_TAG) $(OVERLEAF_TAG)
+	-docker rmi --force $(OVERLEAF_BASE_TAG) $(OVERLEAF_TAG)
 
 build-base:
 	cp .dockerignore $(MONOREPO_ROOT)
