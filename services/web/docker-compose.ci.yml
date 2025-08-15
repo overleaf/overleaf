@@ -22,8 +22,10 @@ services:
       OVERLEAF_CONFIG:
       NODE_ENV: test
       NODE_OPTIONS: "--unhandled-rejections=strict"
+      REDIS_HOST: redis_test
       VITEST_NO_CACHE: true
     depends_on:
+      - redis_test
       - mongo
 
   test_acceptance:
@@ -38,6 +40,7 @@ services:
     environment:
       BASE_CONFIG:
       OVERLEAF_CONFIG:
+      REDIS_HOST: redis_test
     extra_hosts:
       - 'www.overleaf.test:127.0.0.1'
     volumes:
@@ -46,7 +49,7 @@ services:
     command: npm run test:acceptance:app
     user: root
     depends_on:
-      - redis
+      - redis_test
       - mongo
       - saml
       - ldap
@@ -89,7 +92,7 @@ services:
     command: tar -cf /tmp/build/build.tar public/
     user: root
 
-  redis:
+  redis_test:
     image: redis:7.4.3
 
   mongo:

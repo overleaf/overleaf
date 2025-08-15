@@ -19,11 +19,13 @@ services:
       LOG_LEVEL: ${LOG_LEVEL:-}
       NODE_ENV: test
       NODE_OPTIONS: "--unhandled-rejections=strict"
+      REDIS_HOST: redis_test
     entrypoint: /overleaf/bin/shared/wait_for_it mongo:27017 --timeout=60 --
     command: npm run --silent test:unit:app
     user: node
     depends_on:
       - mongo
+      - redis_test
 
   test_acceptance:
     image: node:22.17.0
@@ -42,12 +44,13 @@ services:
       LOG_LEVEL: ${LOG_LEVEL:-}
       MONGO_SERVER_SELECTION_TIMEOUT: 600000
       MONGO_SOCKET_TIMEOUT: 300000
+      REDIS_HOST: redis_test
       # OVERLEAF_ALLOW_ANONYMOUS_READ_AND_WRITE_SHARING: 'true'
 
     extra_hosts:
       - 'www.overleaf.test:127.0.0.1'
     depends_on:
-      - redis
+      - redis_test
       - mongo
       - saml
       - ldap
@@ -85,7 +88,7 @@ services:
       - "run"
       - "cypress:run-ct"
 
-  redis:
+  redis_test:
     image: redis:7.4.3
 
   mongo:
