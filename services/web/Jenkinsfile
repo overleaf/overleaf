@@ -1,5 +1,4 @@
 def action_test_frontend_ct_build = false
-def action_pull_cache = false
 def action_build_deps = false
 def action_copy_external_pages = false
 def action_build_dev = false
@@ -8,7 +7,6 @@ def action_build_webpack = false
 def action_test_acceptance_app_saas = false
 def action_build_pug = false
 def action_build_production= false
-def action_fetch_sentry_secret = false
 
 pipeline {
   agent {
@@ -31,7 +29,7 @@ pipeline {
       AR_REPO_LOCATION = 'us-east1'
       AR_URL = 'us-east1-docker.pkg.dev/overleaf-ops/ol-docker'
       DOCKER_COMPOSE_FLAGS = '-f docker-compose.ci.yml'
-      BRANCH_NAME = "${CHANGE_BRANCH || GIT_BRANCH.replace('origin/', '')}"
+      BRANCH_NAME = "${GIT_BRANCH.replace('origin/', '')}"
       COMMIT_SHA = "${GIT_COMMIT}"
       SHORT_SHA = "${GIT_COMMIT.take(7)}"
       CDN_STAG = "gs://ol-stag-web-assets-1"
@@ -51,14 +49,6 @@ pipeline {
             }
           }
         }
-        stage('Pull cache') {
-          steps {
-            sh 'docker pull ${AR_URL}/${IMAGE_NAME}:main-deps'
-            script {
-              action_pull_cache = true
-            }
-          }
-        }
         stage('Prefetch Tests Images') {
           steps {
             dir('services/web') {
@@ -68,11 +58,6 @@ pipeline {
         }
         stage('Build Deps') {
           steps {
-            script {
-              waitUntil {
-                return action_pull_cache
-              }
-            }
             dir('services/web') {
               sh 'make build_deps'
             }
@@ -420,7 +405,7 @@ pipeline {
           steps {
             script {
               waitUntil {
-                return action_build_webpack & action_build_pug
+                return action_build_webpack && action_build_pug
               }
             }
             dir('services/web') {
@@ -431,37 +416,23 @@ pipeline {
             }
           }
         }
-        stage('Fetch Sentry Secret') {
+        stage('Sentry Upload') {
           steps {
             script {
               waitUntil {
-                return action_build_webpack & action_build_production
+                return action_build_webpack && action_build_production
               }
             }
             dir('services/web') {
               sh 'gcloud secrets versions access latest --secret=web-sentryclirc > .sentryclirc'
-            }
-            script {
-              action_fetch_sentry_secret = true
+              sh 'make sentry_upload'
             }
           }
-        }
-        stage('Sentry Upload') {
-          agent {
-              docker {
-                  image 'getsentry/sentry-cli:2.16.1'
-                  args '--entrypoint='
-                  reuseNode true
+          post {
+            cleanup {
+              dir('services/web') {
+                sh 'rm -f .sentryclirc'
               }
-          }
-          steps {
-            script {
-              waitUntil {
-                return action_fetch_sentry_secret
-              }
-            }
-            dir('services/web') {
-              sh 'bin/sentry_upload'
             }
           }
         }

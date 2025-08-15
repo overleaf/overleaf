@@ -1,13 +1,15 @@
 #!/bin/sh
 set -e
 
-if [[ "$BRANCH_NAME" == "master" || "$BRANCH_NAME" == "main" ]]; then
+echo "BRANCH_NAME=$BRANCH_NAME"
+echo "SENTRY_RELEASE=$SENTRY_RELEASE"
+
+if [[ "$BRANCH_NAME" == "main" ]]; then
   rm -rf sentry_upload
   mkdir sentry_upload
   tar --directory sentry_upload -xf build.tar
   cd sentry_upload/public
 
-  SENTRY_RELEASE=${COMMIT_SHA}
   sentry-cli releases new "$SENTRY_RELEASE"
   sentry-cli releases set-commits --auto "$SENTRY_RELEASE"
   sentry-cli sourcemaps upload --release="$SENTRY_RELEASE" .
@@ -15,4 +17,6 @@ if [[ "$BRANCH_NAME" == "master" || "$BRANCH_NAME" == "main" ]]; then
 
   cd ../..
   rm -rf sentry_upload
+else
+  echo "Not on main branch. Skipping sentry upload."
 fi

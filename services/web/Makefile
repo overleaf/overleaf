@@ -1,7 +1,8 @@
 DOCKER_COMPOSE_FLAGS ?= -f docker-compose.yml
 
 BUILD_NUMBER ?= local
-BRANCH_NAME ?= $(shell git rev-parse --abbrev-ref HEAD)
+export BRANCH_NAME ?= $(shell git rev-parse --abbrev-ref HEAD)
+export COMMIT_SHA ?= $(shell git rev-parse HEAD)
 PROJECT_NAME = web
 BUILD_DIR_NAME = $(shell pwd | xargs basename | tr -cd '[a-zA-Z0-9_.\-]')
 PWD = $(shell pwd)
@@ -568,6 +569,17 @@ build:
 
 publish:
 	docker push $(IMAGE_REPO_FINAL)
+
+SENTRY_IMAGE=getsentry/sentry-cli:2.16.1
+sentry_prefetch:
+	docker pull $(SENTRY_IMAGE)
+
+sentry_upload:
+	docker run --rm \
+		--volume $(PWD):$(PWD) --workdir $(PWD) \
+		--env BRANCH_NAME --env SENTRY_RELEASE \
+		--entrypoint bin/sentry_upload \
+		$(SENTRY_IMAGE)
 
 tar:
 	COMPOSE_PROJECT_NAME=tar_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) run --rm tar
