@@ -144,6 +144,7 @@ export interface Meta {
   'ol-hasGroupSSOFeature': boolean
   'ol-hasIndividualPaidSubscription': boolean
   'ol-hasManagedUsersFeature': boolean
+  'ol-hasModifyGroupManagerAccess': boolean
   'ol-hasPassword': boolean
   'ol-hasSplitTestWriteAccess': boolean
   'ol-hasSubscription': boolean
