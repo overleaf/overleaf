@@ -577,7 +577,7 @@ sentry_prefetch:
 sentry_upload: MONOREPO=$(shell cd ../../ && pwd)
 sentry_upload:
 	docker run --rm \
-		--volume $(MONOREPO):$(MONOREPO):ro --workdir $(PWD) \
+		--volume $(MONOREPO):$(MONOREPO) --workdir $(PWD) \
 		--env BRANCH_NAME --env SENTRY_RELEASE \
 		--entrypoint bin/sentry_upload \
 		$(SENTRY_IMAGE)
