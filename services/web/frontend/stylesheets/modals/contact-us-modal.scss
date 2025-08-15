@@ -15,22 +15,6 @@
   margin-bottom: var(--spacing-05);
 }
 
-.contact-suggestions {
-  @include body-sm;
-
-  margin: 0 calc(-1 * var(--bs-modal-padding)) var(--spacing-05);
-  padding: var(--spacing-05) 0;
-  color: var(--content-secondary);
-  background-color: var(--bg-light-secondary);
-  border-top: solid 1px var(--border-primary-dark);
-  border-bottom: solid 1px var(--border-primary-dark);
-}
-
-.contact-suggestion-label {
-  margin-bottom: var(--spacing-05);
-  padding: 0 var(--spacing-07);
-}
-
 .contact-suggestion-list {
   padding-left: 0;
   list-style: none;
@@ -64,6 +48,7 @@
 }
 
 .contact-suggestions-dropdown {
+  margin-top: $spacing-02;
   width: calc(100% - 2 * var(--bs-modal-padding));
 
   .dropdown-header {

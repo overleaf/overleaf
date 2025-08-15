@@ -9,7 +9,6 @@ document
   .forEach(el => {
     el.addEventListener('click', function (e) {
       e.preventDefault()
-      $('[data-ol-contact-form-modal="contact-us"]').modal()
     })
   })
 
@@ -18,7 +17,6 @@ document
   .forEach(el => {
     el.addEventListener('click', function (e) {
       e.preventDefault()
-      $('[data-ol-contact-form-modal="general"]').modal()
     })
   })
 

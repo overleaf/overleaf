@@ -1,17 +1,21 @@
 import _ from 'lodash'
+import DOMPurify from 'dompurify'
 import { formatWikiHit, searchWiki } from '../algolia-search/search-wiki'
 import { sendMB } from '../../infrastructure/event-tracking'
 import { materialIcon } from '@/features/utils/material-icon'
 
 export function setupSearch(formEl) {
   const inputEl = formEl.querySelector('[name="subject"]')
-  const resultsEl = formEl.querySelector('[data-ol-search-results]')
+  const resultsContainerEl = formEl.querySelector(
+    '[data-ol-search-results-container]'
+  )
   const wrapperEl = formEl.querySelector('[data-ol-search-results-wrapper]')
 
   let lastValue = ''
   function hideResults() {
     wrapperEl.setAttribute('hidden', '')
   }
+
   function showResults() {
     wrapperEl.removeAttribute('hidden')
   }
@@ -25,32 +29,55 @@ export function setupSearch(formEl) {
       return
     }
 
+    DOMPurify.addHook('uponSanitizeElement', node => {
+      if (node.nodeName === 'EM') {
+        const strong = document.createElement('strong')
+        strong.textContent = node.textContent
+        node.parentNode?.replaceChild(strong, node)
+      }
+    })
+
     try {
       const { hits, nbHits } = await searchWiki(value, {
         hitsPerPage: 3,
         typoTolerance: 'strict',
       })
-      resultsEl.innerText = ''
+
+      resultsContainerEl.innerHTML = ''
 
       for (const hit of hits) {
-        const { url, pageName } = formatWikiHit(hit)
+        const { url, rawPageName, sectionName } = formatWikiHit(hit)
         const liEl = document.createElement('li')
 
         const linkEl = document.createElement('a')
-        linkEl.className = 'contact-suggestion-list-item'
+        linkEl.className = 'dropdown-item'
         linkEl.href = url
         linkEl.target = '_blank'
+        linkEl.rel = 'noopener noreferrer'
+        linkEl.setAttribute('role', 'menuitem')
         liEl.append(linkEl)
 
-        const contentEl = document.createElement('span')
-        contentEl.innerHTML = pageName
-        linkEl.append(contentEl)
+        const contentWrapperEl = document.createElement('div')
+        contentWrapperEl.className = 'dropdown-item-description-container'
+        linkEl.append(contentWrapperEl)
+
+        const pageNameEl = document.createElement('div')
+        pageNameEl.innerHTML = DOMPurify.sanitize(rawPageName)
+        contentWrapperEl.append(pageNameEl)
 
         const iconEl = materialIcon('open_in_new')
         iconEl.classList.add('dropdown-item-trailing-icon')
-        linkEl.append(iconEl)
+        iconEl.setAttribute('aria-hidden', 'true')
+        contentWrapperEl.append(iconEl)
 
-        resultsEl.append(liEl)
+        if (sectionName) {
+          const sectionEl = document.createElement('span')
+          sectionEl.className = 'dropdown-item-description'
+          sectionEl.innerHTML = DOMPurify.sanitize(sectionName)
+          contentWrapperEl.append(sectionEl)
+        }
+
+        resultsContainerEl.append(liEl)
       }
       if (nbHits > 0) {
         showResults()
@@ -61,10 +88,31 @@ export function setupSearch(formEl) {
     } catch (e) {
       hideResults()
     }
+
+    DOMPurify.removeHook('uponSanitizeElement')
   }
 
   inputEl.addEventListener('input', _.debounce(handleChange, 350))
 
-  // display initial results
+  function handleClickOutside(event) {
+    if (!wrapperEl.contains(event.target) && !inputEl.contains(event.target)) {
+      hideResults()
+    }
+  }
+
+  document.addEventListener('click', handleClickOutside)
+
+  function handleKeyDown(event) {
+    if (event.key === 'Escape') {
+      if (!wrapperEl.hasAttribute('hidden')) {
+        hideResults()
+        event.stopPropagation()
+        event.preventDefault()
+      }
+    }
+  }
+
+  formEl.addEventListener('keydown', handleKeyDown)
+
   handleChange()
 }
