@@ -8,4 +8,4 @@
 
 ## Contributor Agreement
 
-- [ ] I confirm I have signed the [Contributor License Agreement](https://github.com/overleaf/overleaf/blob/master/CONTRIBUTING.md#contributor-license-agreement)
+- [ ] I confirm I have signed the [Contributor License Agreement](https://github.com/overleaf/overleaf/blob/main/CONTRIBUTING.md#contributor-license-agreement)
