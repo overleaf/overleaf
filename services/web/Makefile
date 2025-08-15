@@ -578,6 +578,7 @@ sentry_upload: MONOREPO=$(shell cd ../../ && pwd)
 sentry_upload:
 	docker run --rm \
 		--volume $(MONOREPO):$(MONOREPO) --workdir $(PWD) \
+		--user "$(shell id -u):$(shell id -g)" \
 		--env BRANCH_NAME --env SENTRY_RELEASE \
 		--entrypoint bin/sentry_upload \
 		$(SENTRY_IMAGE)
