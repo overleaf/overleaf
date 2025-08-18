@@ -1,3 +1,7 @@
+// Initialize variables to signal that a given stage finished.
+// We use them to build a graph of interconnected steps/dependencies.
+// - Incoming edges use "waitUntil" and reference the given variables of dependencies.
+// - Outgoing edges set the given variable to true.
 def job_copybara_done = false
 def job_npm_install_done = false
 def job_prefetch_custom_done = false
@@ -8,13 +12,17 @@ def job_server_pro_build_done = false
 pipeline {
   agent {
     node {
+      // Select a VM with the given tabel.
       label 'jenkins-agent-web'
+      // Use the monorepo checkout in /workspace.
       customWorkspace '/workspace'
     }
   }
 
   options {
+    // Print timestamp next to each log line.
     timestamps()
+    // Abort build after hitting first failure.
     parallelsAlwaysFailFast()
     timeout(time: 15, unit: 'MINUTES')
   }
@@ -220,6 +228,7 @@ pipeline {
     }
   }
   post {
+    // Ensure tear down of test containers, remove CE docker images, then run general Jenkins VM cleanup.
     cleanup {
       dir('server-ce/test') {
         sh 'make clean'

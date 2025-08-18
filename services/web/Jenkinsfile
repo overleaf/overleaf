@@ -1,3 +1,7 @@
+// Initialize variables to signal that a given stage finished.
+// We use them to build a graph of interconnected steps/dependencies.
+// - Incoming edges use "waitUntil" and reference the given variables of dependencies.
+// - Outgoing edges set the given variable to true.
 def action_test_frontend_ct_build = false
 def action_build_deps = false
 def action_copy_external_pages = false
@@ -11,13 +15,17 @@ def action_build_production= false
 pipeline {
   agent {
     node {
+      // Select a VM with the given tabel.
       label 'jenkins-agent-web'
+      // Use the monorepo checkout in /workspace.
       customWorkspace '/workspace'
     }
   }
 
   options {
+    // Print timestamp next to each log line.
     timestamps()
+    // Abort build after hitting first failure.
     parallelsAlwaysFailFast()
     timeout(time: 15, unit: 'MINUTES')
   }
@@ -447,6 +455,7 @@ pipeline {
     }
   }
   post {
+    // Ensure tear down of test containers, then run general Jenkins VM cleanup.
     cleanup {
       dir('services/web') {
         sh 'make clean'
