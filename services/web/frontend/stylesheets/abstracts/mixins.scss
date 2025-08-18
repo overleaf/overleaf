@@ -60,7 +60,7 @@
   }
 }
 
-@mixin labs-button {
+@mixin editor-switcher-button {
   @include ol-button-variant(
     $color: var(--green-60),
     $background: var(--bg-accent-03),

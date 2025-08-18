@@ -534,7 +534,7 @@
 // Override a secondary button to ensure that the border is visible because
 // overriding a borderless button will not add a border.
 .toolbar-experiment-button.btn-secondary {
-  @include labs-button;
+  @include editor-switcher-button;
 
   max-height: 39px;
   font-size: var(--font-size-01);

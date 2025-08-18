@@ -234,10 +234,6 @@
   white-space: nowrap;
 }
 
-.ide-redesign-labs-button.btn.btn-secondary {
-  @include labs-button;
-}
-
 .ide-redesign-beta-button.btn.btn-secondary {
-  @include labs-button;
+  @include editor-switcher-button;
 }

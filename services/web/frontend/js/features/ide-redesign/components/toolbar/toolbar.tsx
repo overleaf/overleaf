@@ -5,7 +5,6 @@ import { OnlineUsers } from './online-users'
 import ShareProjectButton from './share-project-button'
 import ChangeLayoutButton from './change-layout-button'
 import ShowHistoryButton from './show-history-button'
-import { LabsActions } from './labs-actions'
 import { useLayoutContext } from '@/shared/context/layout-context'
 import BackToEditorButton from '@/features/editor-navigation-toolbar/components/back-to-editor-button'
 import { useCallback } from 'react'
@@ -16,7 +15,6 @@ import importOverleafModules from '../../../../../macros/import-overleaf-module.
 import UpgradeButton from './upgrade-button'
 import getMeta from '@/utils/meta'
 import { useIdeReactContext } from '@/features/ide-react/context/ide-react-context'
-import { isNewEditorInBeta } from '../../utils/new-editor-utils'
 import { BetaActions } from './beta-actions'
 
 const [publishModalModules] = importOverleafModules('publishModal')
@@ -30,7 +28,6 @@ export const Toolbar = () => {
   const shouldDisplaySubmitButton =
     (permissionsLevel === 'owner' || permissionsLevel === 'readAndWrite') &&
     SubmitProjectButton
-  const newEditorBeta = isNewEditorInBeta()
 
   const handleBackToEditorClick = useCallback(() => {
     eventTracking.sendMB('navigation-clicked-history', { action: 'close' })
@@ -57,7 +54,7 @@ export const Toolbar = () => {
       </div>
       <ToolbarProjectTitle />
       <div className="ide-redesign-toolbar-actions">
-        {newEditorBeta ? <BetaActions /> : <LabsActions />}
+        <BetaActions />
         <OnlineUsers />
         <ShowHistoryButton />
         <ChangeLayoutButton />

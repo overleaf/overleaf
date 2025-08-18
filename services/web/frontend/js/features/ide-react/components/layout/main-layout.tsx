@@ -16,7 +16,6 @@ import HistoryContainer from '@/features/ide-react/components/history-container'
 import getMeta from '@/utils/meta'
 import { useEditorContext } from '@/shared/context/editor-context'
 import importOverleafModules from '../../../../../macros/import-overleaf-module.macro'
-import LabsUserBetaPromo from '@/features/ide-redesign/components/labs-user-beta-promo'
 
 const mainEditorLayoutModalsModules: Array<{
   import: { default: ElementType }
@@ -100,7 +99,6 @@ export const MainLayout: FC = () => {
             <PanelGroup autoSaveId="ide-inner-layout" direction="horizontal">
               <Panel className="ide-react-panel" id="panel-main" order={1}>
                 <HistoryContainer />
-                <LabsUserBetaPromo />
                 <EditorAndPdf />
               </Panel>
 
