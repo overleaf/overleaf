@@ -1,0 +1,85 @@
+diff --git a/services/history-v1/storage/scripts/back_fill_file_hash.mjs b/services/history-v1/storage/scripts/back_fill_file_hash.mjs
+index 33962c5da7d4..8b25fb8bd603 100644
+--- a/services/history-v1/storage/scripts/back_fill_file_hash.mjs
++++ b/services/history-v1/storage/scripts/back_fill_file_hash.mjs
+@@ -78,11 +78,29 @@ ObjectId.cacheHexString = true
+  * @property {Blob} [blob]
+  */
+
++/**
++ * Start and end for range.
++ * @type {Date}
++ */
++const PUBLIC_LAUNCH_DATE = new Date('2012-01-01T00:00:00Z')
++const DEFAULT_BATCH_RANGE_START_DATE = PUBLIC_LAUNCH_DATE
++const DEFAULT_BATCH_RANGE_END_DATE = new Date()
++
++function usesDefaultBatchRange() {
++  return (
++    BATCH_RANGE_START ===
++      objectIdFromInput(
++        DEFAULT_BATCH_RANGE_START_DATE.toISOString()
++      ).toString() &&
++    BATCH_RANGE_END ===
++      objectIdFromInput(DEFAULT_BATCH_RANGE_END_DATE.toISOString()).toString()
++  )
++}
++
+ /**
+  * @return {{PROJECT_IDS_FROM: string, PROCESS_HASHED_FILES: boolean, LOGGING_IDENTIFIER: string, BATCH_RANGE_START: string, BATCH_RANGE_END: string, PROCESS_NON_DELETED_PROJECTS: boolean, PROCESS_DELETED_PROJECTS: boolean, PROCESS_BLOBS: boolean, DRY_RUN: boolean, OUTPUT_FILE: string, DISPLAY_REPORT: boolean, CONCURRENCY: number, CONCURRENT_BATCHES: number, RETRIES: number, RETRY_DELAY_MS: number, RETRY_FILESTORE_404: boolean, BUFFER_DIR_PREFIX: string, STREAM_HIGH_WATER_MARK: number, LOGGING_INTERVAL: number, SLEEP_BEFORE_EXIT: number }}
+  */
+ function parseArgs() {
+-  const PUBLIC_LAUNCH_DATE = new Date('2012-01-01T00:00:00Z')
+   const DEFAULT_OUTPUT_FILE = `/var/log/overleaf/file-migration-${new Date()
+     .toISOString()
+     .replace(/[:.]/g, '_')}.log`
+@@ -1475,6 +1493,49 @@ try {
+     )
+     code++
+   }
++  console.warn('-'.repeat(79))
++  if (code === 0) {
++    const allProcessed =
++      !DRY_RUN &&
++      PROCESS_NON_DELETED_PROJECTS &&
++      PROCESS_DELETED_PROJECTS &&
++      PROCESS_HASHED_FILES &&
++      !PROJECT_IDS_FROM &&
++      usesDefaultBatchRange()
++    if (allProcessed) {
++      await db
++        .collection('migrations')
++        .updateOne(
++          { name: '20250519101128_binary_files_migration' },
++          { $set: { migratedAt: new Date(DEFAULT_BATCH_RANGE_END_DATE) } },
++          { upsert: true }
++        )
++      console.warn('The binary files migration succeeded.')
++      console.warn(
++        'You can now proceed to OVERLEAF_FILESTORE_MIGRATION_LEVEL=2.'
++      )
++    } else {
++      console.warn(
++        'The binary files migration succeeded on a subset of files (at least one of --dry-run, --skip-hashed-files, --from-file, --BATCH_RANGE_START or --BATCH_RANGE_END is set and --all is not set).'
++      )
++      console.warn(
++        'Once you are done with all the partial runs, you need to run the migration again on all projects/files to ensure that all files are migrated into the full project history system.'
++      )
++      console.warn('The full run will unlock the upgrade to Server Pro 6.0.')
++    }
++  } else {
++    console.warn('The binary files migration failed, see above.')
++    console.warn(
++      'Please review the failures and check the docs on remediating the failures.'
++    )
++    console.warn(
++      'Docs: https://docs.overleaf.com/on-premises/release-notes/release-notes-5.x.x/binary-files-migration#troubleshooting'
++    )
++    console.warn(
++      'In case there is not solution available, please reach out to support as detailed in the docs.'
++    )
++  }
++  console.warn('-'.repeat(79))
+   await setTimeout(SLEEP_BEFORE_EXIT)
+   process.exit(code)
+ } catch (err) {

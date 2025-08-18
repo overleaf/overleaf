@@ -61,6 +61,8 @@ async function dropCollection(collectionName) {
   await collection.drop()
 }
 
+class BadMigrationOrder extends Error {}
+
 /**
  * Asserts that a dependent migration has run. Throws an error otherwise.
  *
@@ -70,13 +72,14 @@ async function assertDependency(migrationName) {
   const migrations = await getCollectionInternal('migrations')
   const migration = await migrations.findOne({ name: migrationName })
   if (migration == null) {
-    throw new Error(
-      `Bad migration order: ${migrationName} should run before this migration`
+    throw new BadMigrationOrder(
+      `${migrationName} should run before this migration`
     )
   }
 }
 
 export default {
+  BadMigrationOrder,
   addIndexesToCollection,
   dropIndexesFromCollection,
   dropCollection,

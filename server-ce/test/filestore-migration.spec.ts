@@ -232,11 +232,13 @@ describe('filestore migration', function () {
     // ------------------------------------------
     // Server Pro 5.x + mongo upgrade 6 -> 7 -> 8
     startWith({
+      version: '5.5.5',
       pro: true,
       withDataDir: true,
       mongoVersion: '6.0',
     })
     startWith({
+      version: '5.5.5',
       pro: true,
       withDataDir: true,
       mongoVersion: '7.0',
@@ -245,6 +247,7 @@ describe('filestore migration', function () {
       await setMongoFeatureCompatibilityVersion('7.0')
     })
     startWith({
+      version: '5.5.5',
       pro: true,
       withDataDir: true,
       // implicit mongo upgrade to 8.0
@@ -254,7 +257,7 @@ describe('filestore migration', function () {
     })
   } else {
     // 5.x
-    startWith({ pro: true, withDataDir: true })
+    startWith({ version: '5.5.5', pro: true, withDataDir: true })
     defaultImage = 'frog.jpg'
     ensureUserExists({ email })
     before(function () {
@@ -337,12 +340,13 @@ describe('filestore migration', function () {
   }
 
   describe('OVERLEAF_FILESTORE_MIGRATION_LEVEL not set', function () {
-    startWith({ pro: true, withDataDir: true, vars: {} })
+    startWith({ version: '5.5.5', pro: true, withDataDir: true, vars: {} })
     checkFilesAreAccessible()
   })
 
   describe('OVERLEAF_FILESTORE_MIGRATION_LEVEL=0', function () {
     startWith({
+      version: '5.5.5',
       pro: true,
       withDataDir: true,
       vars: { OVERLEAF_FILESTORE_MIGRATION_LEVEL: '0' },
@@ -351,6 +355,7 @@ describe('filestore migration', function () {
 
     describe('OVERLEAF_FILESTORE_MIGRATION_LEVEL=1', function () {
       startWith({
+        version: '5.5.5',
         pro: true,
         withDataDir: true,
         vars: { OVERLEAF_FILESTORE_MIGRATION_LEVEL: '1' },
@@ -359,6 +364,7 @@ describe('filestore migration', function () {
 
       describe('OVERLEAF_FILESTORE_MIGRATION_LEVEL=2', function () {
         startWith({
+          version: '5.5.5',
           pro: true,
           withDataDir: true,
           vars: { OVERLEAF_FILESTORE_MIGRATION_LEVEL: '1' },
@@ -371,6 +377,7 @@ describe('filestore migration', function () {
           })
         })
         startWith({
+          version: '5.5.5',
           pro: true,
           withDataDir: true,
           vars: { OVERLEAF_FILESTORE_MIGRATION_LEVEL: '2' },
@@ -382,6 +389,15 @@ describe('filestore migration', function () {
             await purgeFilestoreData()
           })
           checkFilesAreAccessible()
+
+          describe('latest', function () {
+            startWith({
+              pro: true,
+              withDataDir: true,
+              vars: { OVERLEAF_FILESTORE_MIGRATION_LEVEL: '2' },
+            })
+            checkFilesAreAccessible()
+          })
         })
       })
     })

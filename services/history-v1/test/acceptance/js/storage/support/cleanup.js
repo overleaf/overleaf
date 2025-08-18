@@ -20,6 +20,7 @@ const MONGO_COLLECTIONS = [
   'deletedProjects',
   'projects',
   'projectHistoryBackedUpBlobs',
+  'migrations',
 ]
 
 // make sure we don't delete the wrong data by accident

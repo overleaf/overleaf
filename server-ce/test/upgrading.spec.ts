@@ -155,11 +155,31 @@ describe('Upgrading', function () {
     },
     newProjectButtonMatcher: /create first project/i,
   }
+  const optionsBinaryFilesMigration = {
+    version: '5.5.5',
+    hook() {
+      before(async function () {
+        await runScript({
+          cwd: 'services/history-v1',
+          script: 'storage/scripts/back_fill_file_hash.mjs',
+          args: ['--all'],
+        })
+      })
+    },
+  }
   describe('from 4.2 to latest', () => {
-    testUpgrade([optionsFourDotTwo, { version: 'latest' }])
+    testUpgrade([
+      optionsFourDotTwo,
+      optionsBinaryFilesMigration,
+      { version: 'latest' },
+    ])
   })
   describe('from 5.0 to latest', () => {
-    testUpgrade([{ version: '5.0' }, { version: 'latest' }])
+    testUpgrade([
+      { version: '5.0' },
+      optionsBinaryFilesMigration,
+      { version: 'latest' },
+    ])
   })
   describe('doc version recovery', () => {
     testUpgrade([
@@ -190,6 +210,7 @@ describe('Upgrading', function () {
           })
         },
       },
+      optionsBinaryFilesMigration,
       {
         version: 'latest',
         hook() {
