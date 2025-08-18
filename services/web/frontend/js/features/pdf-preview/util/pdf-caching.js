@@ -516,7 +516,7 @@ export async function fallbackRequest({ file, url, start, end, abortSignal }) {
     const init = getDynamicChunkInit({ file, start, end, signal: abortSignal })
     const response = await fetchWithBrowserCacheFallback(url, init)
     checkChunkResponse(response, end - start, init)
-    return await response.arrayBuffer()
+    return await response.bytes()
   } catch (e) {
     throw OError.tag(e, 'fallback request failed', { url, start, end })
   }

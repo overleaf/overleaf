@@ -1,21 +1,37 @@
-export type CompileOutputFile = {
+export type PDFRange = {
+  objectId: Uint8Array
+  end: number
+  hash: string
+  size: number
+  start: number
+  totalUsage: number
+}
+
+type OutputFileBase = {
   path: string
   url: string
-  downloadURL?: string
   type: string
   build: string
-  ranges?: {
-    start: number
-    end: number
-    hash: string
-    objectId: string
-  }[]
-  contentId?: string
-  size?: number
+  downloadURL: string
 
   // assigned by buildFileList in frontend
   main?: boolean
 }
+
+export type PDFFile = OutputFileBase & {
+  clsiCacheShard: string
+  contentId: string
+  createdAt: Date
+  editorId: string
+  pdfDownloadURL: string
+  pdfURL: string
+  prefetched: any[]
+  preprocessed: boolean
+  ranges: PDFRange[]
+  size: number
+}
+
+export type CompileOutputFile = OutputFileBase | PDFFile
 
 export type CompileResponseData = {
   fromCache?: boolean
