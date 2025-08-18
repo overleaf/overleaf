@@ -535,7 +535,7 @@ describe('GroupMembers', function () {
       )
 
       cy.findByTestId('group-size-details').contains(
-        'You have 2 licenses and your plan supports up to 10. Buy more licenses.'
+        'You have allocated 2 licenses and your plan supports up to 10. Buy more licenses.'
       )
       cy.findByTestId('add-more-members-form').within(() => {
         cy.contains('Invite more members')
