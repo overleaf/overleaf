@@ -21,10 +21,13 @@ const isPropensityNetworkError = (err: ErrorEvent) => {
     return false
   }
 
+  const breadcrumbUrl = errorBreadcrumbs[0]?.data?.url
   return Boolean(
-    errorBreadcrumbs[0]?.data?.url?.startsWith(
-      'https://analytics.propensity.com/'
-    )
+    breadcrumbUrl &&
+      [
+        'https://analytics.propensity.com/',
+        'https://analytics.propensity-abm.com/',
+      ].some(url => breadcrumbUrl.startsWith(url))
   )
 }
 
