@@ -9,7 +9,6 @@ import {
 } from 'pdfjs-dist/web/pdf_viewer.mjs'
 import 'pdfjs-dist/web/pdf_viewer.css'
 import browser from '@/features/source-editor/extensions/browser'
-import { PDFFile } from '@ol-types/compile'
 
 const DEFAULT_RANGE_CHUNK_SIZE = 128 * 1024 // 128K chunks
 
@@ -56,7 +55,7 @@ export default class PDFJSWrapper {
     handleFetchError,
   }: {
     url: string
-    pdfFile: PDFFile
+    pdfFile: Record<string, any>
     abortController: AbortController
     handleFetchError: (error: any) => void
   }) {
