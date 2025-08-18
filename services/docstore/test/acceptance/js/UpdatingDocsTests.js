@@ -521,11 +521,9 @@ describe('Applying updates to a doc', function () {
 
   return describe('when the json payload is too large', function () {
     beforeEach(function (done) {
-      const line = new Array(1025).join('x') // 1kb
-      this.largeLines = Array.apply(null, Array(1024)).map(() => line) // 1kb
-      this.originalRanges.padding = Array.apply(null, Array(6144)).map(
-        () => line
-      ) // 6mb
+      const line = new Array(1024).join('x') // 1 KB
+      this.largeLines = new Array(8192).fill(line) // 8 MB
+      this.originalRanges.padding = new Array(6144).fill(line) // 6 MB
       return DocstoreClient.updateDoc(
         this.project_id,
         this.doc_id,

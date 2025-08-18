@@ -119,7 +119,10 @@ async function persistChanges(projectId, allChanges, limits, clientEndVersion) {
       const change = changes[0]
       const changeBytes = countChangeBytes(change)
 
-      if (totalBytes + changeBytes > limits.maxChunkChangeBytes) {
+      if (
+        chunk.getChanges().length > 0 &&
+        totalBytes + changeBytes > limits.maxChunkChangeBytes
+      ) {
         break
       }
 
