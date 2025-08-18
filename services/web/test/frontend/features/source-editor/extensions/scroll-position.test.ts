@@ -37,15 +37,10 @@ describe('CodeMirror scroll position extension', function () {
     sinon
       .stub(HTMLElement.prototype, 'getBoundingClientRect')
       .returns({ top: 100, left: 0, right: 500, bottom: 200 } as DOMRect)
-
-    // Range.getClientRects doesn't exist yet in jsdom
-    window.Range.prototype.getClientRects = sinon.stub().returns([])
   })
 
   afterEach(function () {
     sinon.restore()
-    // @ts-ignore
-    delete window.Range.prototype.getClientRects
   })
 
   it('stores scroll position when the view is destroyed', async function () {

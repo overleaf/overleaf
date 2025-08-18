@@ -340,8 +340,6 @@ describe('<CurrentPlanWidget />', function () {
           '/learn/how-to/Overleaf_premium_features'
         )
 
-        fireEvent.click(links[0])
-
         window.metaAttributesCache.delete('ol-usersBestSubscription')
       })
     }

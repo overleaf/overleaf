@@ -25,7 +25,7 @@ const handleAPIError = async (source, id, error) => {
  *   USERS_COLLECTED: string[],
  * }>}
  */
-const main = async () => {
+export async function collectPastDueInvoices(DRY_RUN = false) {
   const attemptInvoiceCollection = async invoice => {
     const isPaypal = await isAccountUsingPaypal(invoice)
 
@@ -84,8 +84,6 @@ const main = async () => {
     }
   }
 
-  const argv = minimist(process.argv.slice(2))
-  const DRY_RUN = argv.n !== undefined
   const INVOICES_COLLECTED = []
   const INVOICES_COLLECTED_SUCCESS = []
   const USERS_COLLECTED = []
@@ -105,17 +103,20 @@ const main = async () => {
     }
   } finally {
     logger.info(
-      `DONE (DRY_RUN=${DRY_RUN}). ${INVOICES_COLLECTED.length} invoices collection attempts for ${USERS_COLLECTED.length} users. ${INVOICES_COLLECTED_SUCCESS.length} successful collections`
-    )
-    console.dir(
       {
         INVOICES_COLLECTED,
         INVOICES_COLLECTED_SUCCESS,
         USERS_COLLECTED,
       },
-      { maxArrayLength: null }
+      `DONE (DRY_RUN=${DRY_RUN}). ${INVOICES_COLLECTED.length} invoices collection attempts for ${USERS_COLLECTED.length} users. ${INVOICES_COLLECTED_SUCCESS.length} successful collections`
     )
   }
+}
+
+async function main() {
+  const argv = minimist(process.argv.slice(2))
+  const DRY_RUN = argv.n !== undefined
+  await collectPastDueInvoices(DRY_RUN)
 }
 
 if (fileURLToPath(import.meta.url) === process.argv[1]) {
@@ -128,5 +129,3 @@ if (fileURLToPath(import.meta.url) === process.argv[1]) {
     process.exit(1)
   }
 }
-
-export default { main }

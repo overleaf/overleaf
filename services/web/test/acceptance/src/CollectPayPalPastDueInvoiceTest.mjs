@@ -2,11 +2,9 @@ import sinon from 'sinon'
 import chai, { expect } from 'chai'
 import chaiAsPromised from 'chai-as-promised'
 import sinonChai from 'sinon-chai'
-import CollectPaypalPastDueInvoice from '../../../scripts/recurly/collect_paypal_past_due_invoice.mjs'
+import { collectPastDueInvoices } from '../../../scripts/recurly/collect_paypal_past_due_invoice.mjs'
 import RecurlyWrapper from '../../../app/src/Features/Subscription/RecurlyWrapper.js'
 import OError from '@overleaf/o-error'
-
-const { main } = CollectPaypalPastDueInvoice
 
 chai.use(chaiAsPromised)
 chai.use(sinonChai)
@@ -213,7 +211,7 @@ describe('CollectPayPalPastDueInvoice', function () {
 
   it('collects one valid invoice', async function () {
     fakeApiRequests([200])
-    const r = await main()
+    const r = await collectPastDueInvoices()
     expect(r).to.eql({
       INVOICES_COLLECTED: [200],
       INVOICES_COLLECTED_SUCCESS: [200],
@@ -224,7 +222,7 @@ describe('CollectPayPalPastDueInvoice', function () {
   it('collects several pages', async function () {
     // 10 invoices, from 200 to 209
     fakeApiRequests([...Array(10).keys()].map(i => i + 200))
-    const r = await main()
+    const r = await collectPastDueInvoices()
 
     expect(r).to.eql({
       INVOICES_COLLECTED: [200, 201, 202, 203, 204, 205, 206, 207, 208, 209],
@@ -253,7 +251,7 @@ describe('CollectPayPalPastDueInvoice', function () {
 
   it("resolves when no invoices are processed so we don't fail in staging", async function () {
     fakeApiRequests([404])
-    const r = await main()
+    const r = await collectPastDueInvoices()
     expect(r).to.eql({
       INVOICES_COLLECTED: [404],
       INVOICES_COLLECTED_SUCCESS: [],
@@ -263,7 +261,7 @@ describe('CollectPayPalPastDueInvoice', function () {
 
   it('doesnt reject when there are no invoices', async function () {
     fakeApiRequests([])
-    const r = await main()
+    const r = await collectPastDueInvoices()
     expect(r).to.eql({
       INVOICES_COLLECTED: [],
       INVOICES_COLLECTED_SUCCESS: [],
@@ -273,7 +271,7 @@ describe('CollectPayPalPastDueInvoice', function () {
 
   it("resolves when collection is partially successful so we don't fail in prod", async function () {
     fakeApiRequests([200, 404])
-    const r = await main()
+    const r = await collectPastDueInvoices()
     expect(r).to.eql({
       INVOICES_COLLECTED: [200, 404],
       INVOICES_COLLECTED_SUCCESS: [200],

@@ -17,12 +17,8 @@ function ProjectToolsMoreDropdownButton() {
         {t('more')}
       </DropdownToggle>
       <DropdownMenu flip={false} data-testid="project-tools-more-dropdown-menu">
-        <li role="none">
-          <RenameProjectMenuItem />
-        </li>
-        <li role="none">
-          <CopyProjectMenuItem />
-        </li>
+        <RenameProjectMenuItem />
+        <CopyProjectMenuItem />
       </DropdownMenu>
     </Dropdown>
   )
