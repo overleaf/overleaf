@@ -33,6 +33,22 @@ function PreviewSubscriptionChange() {
   const location = useLocation()
   const aiAssistEnabled = useFeatureFlag('overleaf-assist-bundle')
 
+  // Filter out items that cancel each other out (AI assist items with subtotals that sum to 0)
+  const filteredLineItems = preview.immediateCharge.lineItems.filter(
+    (item, index, arr) => {
+      if (!item.isAiAssist) return true
+
+      const isCanceledByAnotherItem = arr.some(
+        (otherItem, otherIndex) =>
+          otherIndex !== index &&
+          otherItem.isAiAssist &&
+          otherItem.subtotal + item.subtotal === 0
+      )
+
+      return !isCanceledByAnotherItem
+    }
+  )
+
   useEffect(() => {
     if (preview.change.type === 'add-on-purchase') {
       eventTracking.sendMB('preview-subscription-change-view', {
@@ -139,17 +155,38 @@ function PreviewSubscriptionChange() {
 
             <OLCard className="payment-summary-card mt-5">
               <h3>{t('due_today')}:</h3>
-              <OLRow>
-                <OLCol xs={9}>{changeName}</OLCol>
-                <OLCol xs={3} className="text-end">
-                  <strong>
-                    {formatCurrency(
-                      preview.immediateCharge.subtotal,
-                      preview.currency
-                    )}
-                  </strong>
-                </OLCol>
-              </OLRow>
+              {filteredLineItems.length > 1 ? (
+                <>
+                  {filteredLineItems.map((item, index) => (
+                    <OLRow key={index}>
+                      <OLCol xs={9}>
+                        {item.subtotal < 0
+                          ? `Refund: ${item.description}`
+                          : item.description}
+                      </OLCol>
+                      <OLCol xs={3} className="text-end">
+                        <strong>
+                          {formatCurrency(item.subtotal, preview.currency)}
+                        </strong>
+                      </OLCol>
+                    </OLRow>
+                  ))}
+                </>
+              ) : (
+                <>
+                  <OLRow>
+                    <OLCol xs={9}>{changeName}</OLCol>
+                    <OLCol xs={3} className="text-end">
+                      <strong>
+                        {formatCurrency(
+                          preview.immediateCharge.subtotal,
+                          preview.currency
+                        )}
+                      </strong>
+                    </OLCol>
+                  </OLRow>
+                </>
+              )}
 
               {preview.immediateCharge.tax > 0 && (
                 <OLRow className="mt-1">

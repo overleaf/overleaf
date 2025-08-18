@@ -23,6 +23,7 @@ const {
   SubtotalLimitExceededError,
 } = require('./Errors')
 const RecurlyMetrics = require('./RecurlyMetrics')
+const { isStandaloneAiAddOnPlanCode, AI_ADD_ON_CODE } = require('./AiHelper')
 
 /**
  * @import { PaymentProviderSubscriptionChangeRequest } from './PaymentProviderEntities'
@@ -585,6 +586,23 @@ function computeImmediateCharge(subscriptionChange) {
   let total = subscriptionChange.invoiceCollection?.chargeInvoice?.total ?? 0
   let discount =
     subscriptionChange.invoiceCollection?.chargeInvoice?.discount ?? 0
+
+  const lineItems = []
+
+  for (const lineItem of subscriptionChange.invoiceCollection?.chargeInvoice
+    ?.lineItems || []) {
+    lineItems.push({
+      planCode: lineItem.planCode,
+      isAiAssist:
+        lineItem.addOnCode === AI_ADD_ON_CODE ||
+        isStandaloneAiAddOnPlanCode(lineItem.planCode),
+      description: lineItem.description ?? '',
+      subtotal: roundToTwoDecimal(lineItem.subtotal ?? 0),
+      discount: roundToTwoDecimal(lineItem.discount ?? 0),
+      tax: roundToTwoDecimal(lineItem.tax ?? 0),
+    })
+  }
+
   for (const creditInvoice of subscriptionChange.invoiceCollection
     ?.creditInvoices ?? []) {
     // The credit invoice numbers are already negative
@@ -593,12 +611,26 @@ function computeImmediateCharge(subscriptionChange) {
     // Tax rate can be different in credit invoice if a user relocates
     tax = roundToTwoDecimal(tax + (creditInvoice.tax ?? 0))
     discount = roundToTwoDecimal(discount + (creditInvoice.discount ?? 0))
+
+    for (const lineItem of creditInvoice.lineItems || []) {
+      lineItems.push({
+        planCode: lineItem.planCode,
+        isAiAssist:
+          lineItem.addOnCode === AI_ADD_ON_CODE ||
+          isStandaloneAiAddOnPlanCode(lineItem.planCode),
+        description: lineItem.description ?? '',
+        subtotal: roundToTwoDecimal(lineItem.subtotal ?? 0),
+        discount: roundToTwoDecimal(lineItem.discount ?? 0),
+        tax: roundToTwoDecimal(lineItem.tax ?? 0),
+      })
+    }
   }
   return new PaymentProviderImmediateCharge({
     subtotal,
     total,
     tax,
     discount,
+    lineItems,
   })
 }
 

@@ -9,7 +9,7 @@ const AI_ADD_ON_CODE = 'assistant'
 /**
  * Returns whether the given plan code is a standalone AI plan
  *
- * @param {string} planCode
+ * @param {string | null | undefined} planCode
  * @return {boolean}
  */
 function isStandaloneAiAddOnPlanCode(planCode) {

@@ -6,6 +6,16 @@
  * @import { AddOn } from '../../../../types/subscription/plan'
  */
 
+/**
+ * @typedef {object} ImmediateChargeLineItem
+ * @property {string | null | undefined} planCode
+ * @property {string} description
+ * @property {number} subtotal
+ * @property {number} discount
+ * @property {number} tax
+ * @property {boolean} isAiAssist
+ */
+
 const OError = require('@overleaf/o-error')
 const { DuplicateAddOnError, AddOnNotPresentError } = require('./Errors')
 const PlansLocator = require('./PlansLocator')
@@ -539,12 +549,14 @@ class PaymentProviderImmediateCharge {
    * @param {number} props.tax
    * @param {number} props.total
    * @param {number} props.discount
+   * @param {ImmediateChargeLineItem[]} [props.lineItems]
    */
   constructor(props) {
     this.subtotal = props.subtotal
     this.tax = props.tax
     this.total = props.total
     this.discount = props.discount
+    this.lineItems = props.lineItems ?? []
   }
 }
 

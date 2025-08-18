@@ -11,6 +11,14 @@ export type SubscriptionChangePreview = {
     tax: number
     total: number
     discount: number
+    lineItems: {
+      planCode: string | null | undefined
+      description: string
+      subtotal: number
+      discount: number
+      tax: number
+      isAiAssist: boolean
+    }[]
   }
   nextInvoice: {
     date: string
