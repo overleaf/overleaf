@@ -44,7 +44,10 @@ import {
 } from '../../../types/settings-page'
 import { SuggestedLanguage } from '../../../types/system-message'
 import type { TeamInvite } from '../../../types/team-invite'
-import { GroupPlans } from '../../../types/subscription/dashboard/group-plans'
+import {
+  GroupPlans,
+  GroupPlansData,
+} from '../../../types/subscription/dashboard/group-plans'
 import {
   GroupSSOLinkingStatus,
   SSOConfig,
@@ -125,6 +128,7 @@ export interface Meta {
   'ol-groupId': string
   'ol-groupName': string
   'ol-groupPlans': GroupPlans
+  'ol-groupPlansData': GroupPlansData
   'ol-groupPolicy': GroupPolicy
   'ol-groupSSOActive': boolean
   'ol-groupSSOConfig'?: SSOConfig
