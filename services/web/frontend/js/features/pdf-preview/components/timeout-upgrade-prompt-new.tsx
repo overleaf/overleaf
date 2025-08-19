@@ -26,16 +26,14 @@ function TimeoutUpgradePromptNew() {
     setAnimateCompileDropdownArrow(true)
   }, [enableStopOnFirstError, startCompile, setAnimateCompileDropdownArrow])
 
-  const { reducedTimeoutWarning, compileTimeout } =
-    getMeta('ol-compileSettings')
+  const { compileTimeout } = getMeta('ol-compileSettings')
 
   const sharedSegmentation = useMemo(
     () => ({
-      '10s-timeout-warning': reducedTimeoutWarning,
       'is-owner': isProjectOwner,
       compileTime: compileTimeout,
     }),
-    [isProjectOwner, reducedTimeoutWarning, compileTimeout]
+    [isProjectOwner, compileTimeout]
   )
 
   return (
@@ -152,16 +150,14 @@ const PreventTimeoutHelpMessage = memo(function PreventTimeoutHelpMessage({
       headerTitle={t('reasons_for_compile_timeouts')}
       formattedContent={
         <>
-          {segmentation?.['10s-timeout-warning'] === 'enabled' && (
-            <p>
-              <em>
-                <Trans
-                  i18nKey="were_reducing_compile_timeout"
-                  components={[compileTimeoutChangesBlogLink]}
-                />
-              </em>
-            </p>
-          )}
+          <p>
+            <em>
+              <Trans
+                i18nKey="were_reducing_compile_timeout"
+                components={[compileTimeoutChangesBlogLink]}
+              />
+            </em>
+          </p>
           <p>{t('common_causes_of_compile_timeouts_include')}:</p>
           <ul>
             <li>

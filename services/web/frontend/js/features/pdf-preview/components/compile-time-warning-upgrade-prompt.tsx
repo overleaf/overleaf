@@ -15,42 +15,32 @@ function CompileTimeWarningUpgradePrompt() {
   const [dismissedUntilWarning, setDismissedUntilWarning] = usePersistedState<
     Date | undefined
   >(`has-dismissed-10s-compile-time-warning-until`)
-  const { reducedTimeoutWarning } = getMeta('ol-compileSettings')
-  const warningThreshold = reducedTimeoutWarning === 'enabled' ? 7 : 10
-
-  const sharedSegmentation = useMemo(
-    () => ({
-      '10s-timeout-warning': reducedTimeoutWarning,
-      'is-owner': isProjectOwner,
-    }),
-    [isProjectOwner, reducedTimeoutWarning]
-  )
 
   const warningSegmentation = useMemo(
     () => ({
       content: 'warning',
-      compileTime: warningThreshold,
-      ...sharedSegmentation,
+      compileTime: 7,
+      isProjectOwner,
     }),
-    [sharedSegmentation, warningThreshold]
+    [isProjectOwner]
   )
 
   const changingSoonSegmentation = useMemo(
     () => ({
       content: 'changes',
       compileTime: 10,
-      ...sharedSegmentation,
+      isProjectOwner,
     }),
-    [sharedSegmentation]
+    [isProjectOwner]
   )
 
   const handleNewCompile = useCallback(
     (compileTime: number) => {
       setShowWarning(false)
       setShowChangingSoon(false)
-      if (reducedTimeoutWarning === 'enabled' && compileTime > 10000) {
+      if (compileTime > 10000) {
         setShowChangingSoon(true)
-      } else if (compileTime > warningThreshold * 1000) {
+      } else if (compileTime > 7000) {
         if (isProjectOwner) {
           if (
             !dismissedUntilWarning ||
@@ -58,52 +48,42 @@ function CompileTimeWarningUpgradePrompt() {
           ) {
             setShowWarning(true)
             eventTracking.sendMB('compile-time-warning-displayed', {
-              compileTime: warningThreshold,
+              compileTime: 7,
               isProjectOwner,
             })
           }
         }
       }
     },
-    [
-      isProjectOwner,
-      dismissedUntilWarning,
-      reducedTimeoutWarning,
-      warningThreshold,
-    ]
+    [isProjectOwner, dismissedUntilWarning]
   )
 
   const handleDismissWarning = useCallback(() => {
     eventTracking.sendMB('compile-time-warning-dismissed', {
-      compileTime: warningThreshold,
+      compileTime: 7,
       isProjectOwner,
     })
     eventTracking.sendMB('paywall-dismiss', {
       'paywall-type': 'compile-time-warning',
       content: 'warning',
-      compileTime: warningThreshold,
-      ...sharedSegmentation,
+      compileTime: 7,
+      isProjectOwner,
     })
     setShowWarning(false)
     const until = new Date()
     until.setDate(until.getDate() + 1) // 1 day
     setDismissedUntilWarning(until)
-  }, [
-    isProjectOwner,
-    setDismissedUntilWarning,
-    warningThreshold,
-    sharedSegmentation,
-  ])
+  }, [isProjectOwner, setDismissedUntilWarning])
 
   const handleDismissChangingSoon = useCallback(() => {
     eventTracking.sendMB('paywall-dismiss', {
       'paywall-type': 'compile-time-warning',
       compileTime: 10,
       content: 'changes',
-      ...sharedSegmentation,
+      isProjectOwner,
     })
     setShowChangingSoon(false)
-  }, [sharedSegmentation])
+  }, [isProjectOwner])
 
   useEffect(() => {
     if (compiling || error || showLogs) return

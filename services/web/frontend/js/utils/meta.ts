@@ -95,7 +95,6 @@ export interface Meta {
   'ol-cannot-use-ai': boolean
   'ol-capabilities': Array<'dropbox' | 'chat' | 'use-ai' | 'link-sharing'>
   'ol-compileSettings': {
-    reducedTimeoutWarning: string
     compileTimeout: number
   }
   'ol-compilesUserContentDomain': string

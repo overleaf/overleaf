@@ -736,12 +736,6 @@ const _ProjectController = {
         isOverleafAssistBundleEnabled &&
         (await ProjectController._getAddonPrices(req, res))
 
-      const reducedTimeoutWarning =
-        await SplitTestHandler.promises.getAssignmentForUser(
-          project.owner_ref,
-          '10s-timeout-warning'
-        )
-
       let planCode = subscription?.planCode
       if (!planCode && !userInNonIndividualSub) {
         planCode = 'personal'
@@ -849,7 +843,6 @@ const _ProjectController = {
         customerIoEnabled,
         addonPrices,
         compileSettings: {
-          reducedTimeoutWarning: reducedTimeoutWarning?.variant,
           compileTimeout: ownerFeatures?.compileTimeout,
         },
       })

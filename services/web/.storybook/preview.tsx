@@ -16,7 +16,6 @@ function resetMeta() {
   window.metaAttributesCache.set('ol-projectHistoryBlobsEnabled', true)
   window.metaAttributesCache.set('ol-capabilities', ['chat'])
   window.metaAttributesCache.set('ol-compileSettings', {
-    reducedTimeoutWarning: 'default',
     compileTimeout: 20,
   })
   window.metaAttributesCache.set('ol-ExposedSettings', {
