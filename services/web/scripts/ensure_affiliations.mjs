@@ -1,5 +1,5 @@
 import { User } from '../app/src/models/User.js'
-import UserController from '../app/src/Features/User/UserController.js'
+import UserController from '../app/src/Features/User/UserController.mjs'
 import Logger from '@overleaf/logger'
 import pLimit from 'p-limit'
 
