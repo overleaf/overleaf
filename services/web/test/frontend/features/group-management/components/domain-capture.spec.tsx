@@ -4,6 +4,7 @@ describe('<DomainCapture />', function () {
   beforeEach(function () {
     this.email = 'user@example.com'
     this.groupName = 'test-group'
+    this.ssoInitPath = '/sso/init/path'
 
     cy.window().then(win => {
       win.metaAttributesCache.set('ol-user', {
@@ -13,6 +14,7 @@ describe('<DomainCapture />', function () {
       })
       win.metaAttributesCache.set('ol-email', this.email)
       win.metaAttributesCache.set('ol-groupName', this.groupName)
+      win.metaAttributesCache.set('ol-ssoInitPath', this.ssoInitPath)
     })
 
     cy.mount(<DomainCapture />)
@@ -51,7 +53,11 @@ describe('<DomainCapture />', function () {
         /get access to enterprise features and benefits provided by your organization/i
       )
       cy.findByText(/you’ll continue to have access to all of your projects/i)
-      cy.findByRole('button', { name: /join/i })
+      cy.findByRole('link', { name: /join/i }).should(
+        'have.attr',
+        'href',
+        this.ssoInitPath
+      )
     })
   })
 

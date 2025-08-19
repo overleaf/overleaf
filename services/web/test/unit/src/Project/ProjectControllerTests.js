@@ -600,11 +600,8 @@ describe('ProjectController', function () {
         .withArgs(this.req, this.res, 'domain-capture-redirect')
         .resolves({ variant: 'enabled' })
       this.Modules.promises.hooks.fire
-        .withArgs(
-          'findDomainCaptureAndManagedUsersGroupUserShouldBePartOf',
-          this.user._id
-        )
-        .resolves([{ _id: new ObjectId() }])
+        .withArgs('findDomainCaptureGroupUserCouldBePartOf', this.user._id)
+        .resolves([{ _id: new ObjectId(), managedUsersEnabled: true }])
       this.res.redirect = url => {
         url.should.equal('/domain-capture')
         done()

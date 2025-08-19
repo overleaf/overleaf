@@ -255,6 +255,7 @@ export interface Meta {
   'ol-splitTestVariants': { [name: string]: string }
   'ol-ssoDisabled': boolean
   'ol-ssoErrorMessage': string
+  'ol-ssoInitPath': string
   'ol-stripeAccountId': string
   'ol-stripeSubscriptionData': {
     customerId: string
