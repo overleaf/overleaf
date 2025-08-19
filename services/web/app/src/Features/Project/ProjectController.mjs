@@ -1,55 +1,56 @@
-const _ = require('lodash')
-const OError = require('@overleaf/o-error')
-const crypto = require('crypto')
-const { setTimeout } = require('timers/promises')
-const pProps = require('p-props')
-const logger = require('@overleaf/logger')
-const { expressify } = require('@overleaf/promise-utils')
-const { ObjectId } = require('mongodb-legacy')
-const ProjectDeleter = require('./ProjectDeleter')
-const ProjectDuplicator = require('./ProjectDuplicator')
-const ProjectCreationHandler = require('./ProjectCreationHandler')
-const EditorController = require('../Editor/EditorController')
-const ProjectHelper = require('./ProjectHelper')
-const metrics = require('@overleaf/metrics')
-const { User } = require('../../models/User')
-const SubscriptionLocator = require('../Subscription/SubscriptionLocator')
-const { isPaidSubscription } = require('../Subscription/SubscriptionHelper')
-const LimitationsManager = require('../Subscription/LimitationsManager')
-const Settings = require('@overleaf/settings')
-const AuthorizationManager = require('../Authorization/AuthorizationManager')
-const InactiveProjectManager = require('../InactiveData/InactiveProjectManager')
-const ProjectUpdateHandler = require('./ProjectUpdateHandler')
-const ProjectGetter = require('./ProjectGetter')
-const PrivilegeLevels = require('../Authorization/PrivilegeLevels')
-const SessionManager = require('../Authentication/SessionManager')
-const Sources = require('../Authorization/Sources')
-const TokenAccessHandler = require('../TokenAccess/TokenAccessHandler')
-const CollaboratorsGetter = require('../Collaborators/CollaboratorsGetter')
-const ProjectEntityHandler = require('./ProjectEntityHandler')
-const TpdsProjectFlusher = require('../ThirdPartyDataStore/TpdsProjectFlusher')
-const Features = require('../../infrastructure/Features')
-const BrandVariationsHandler = require('../BrandVariations/BrandVariationsHandler')
-const UserController = require('../User/UserController')
-const AnalyticsManager = require('../Analytics/AnalyticsManager')
-const SplitTestHandler = require('../SplitTests/SplitTestHandler')
-const SplitTestSessionHandler = require('../SplitTests/SplitTestSessionHandler')
-const FeaturesUpdater = require('../Subscription/FeaturesUpdater')
-const SpellingHandler = require('../Spelling/SpellingHandler')
-const { hasAdminAccess } = require('../Helpers/AdminAuthorizationHelper')
-const InstitutionsFeatures = require('../Institutions/InstitutionsFeatures')
-const InstitutionsGetter = require('../Institutions/InstitutionsGetter')
-const ProjectAuditLogHandler = require('./ProjectAuditLogHandler')
-const PublicAccessLevels = require('../Authorization/PublicAccessLevels')
-const TagsHandler = require('../Tags/TagsHandler')
-const TutorialHandler = require('../Tutorial/TutorialHandler')
-const UserUpdater = require('../User/UserUpdater')
-const Modules = require('../../infrastructure/Modules')
-const UserGetter = require('../User/UserGetter')
-const { isStandaloneAiAddOnPlanCode } = require('../Subscription/AiHelper')
-const SubscriptionController = require('../Subscription/SubscriptionController.js')
-const { formatCurrency } = require('../../util/currency')
+import _ from 'lodash'
+import OError from '@overleaf/o-error'
+import crypto from 'node:crypto'
+import { setTimeout } from 'node:timers/promises'
+import pProps from 'p-props'
+import logger from '@overleaf/logger'
+import { expressify } from '@overleaf/promise-utils'
+import mongodb from 'mongodb-legacy'
+import ProjectDeleter from './ProjectDeleter.js'
+import ProjectDuplicator from './ProjectDuplicator.js'
+import ProjectCreationHandler from './ProjectCreationHandler.js'
+import EditorController from '../Editor/EditorController.js'
+import ProjectHelper from './ProjectHelper.js'
+import metrics from '@overleaf/metrics'
+import { User } from '../../models/User.js'
+import SubscriptionLocator from '../Subscription/SubscriptionLocator.js'
+import { isPaidSubscription } from '../Subscription/SubscriptionHelper.js'
+import LimitationsManager from '../Subscription/LimitationsManager.js'
+import Settings from '@overleaf/settings'
+import AuthorizationManager from '../Authorization/AuthorizationManager.js'
+import InactiveProjectManager from '../InactiveData/InactiveProjectManager.js'
+import ProjectUpdateHandler from './ProjectUpdateHandler.js'
+import ProjectGetter from './ProjectGetter.js'
+import PrivilegeLevels from '../Authorization/PrivilegeLevels.js'
+import SessionManager from '../Authentication/SessionManager.js'
+import Sources from '../Authorization/Sources.js'
+import TokenAccessHandler from '../TokenAccess/TokenAccessHandler.js'
+import CollaboratorsGetter from '../Collaborators/CollaboratorsGetter.js'
+import ProjectEntityHandler from './ProjectEntityHandler.js'
+import TpdsProjectFlusher from '../ThirdPartyDataStore/TpdsProjectFlusher.js'
+import Features from '../../infrastructure/Features.js'
+import BrandVariationsHandler from '../BrandVariations/BrandVariationsHandler.js'
+import UserController from '../User/UserController.mjs'
+import AnalyticsManager from '../Analytics/AnalyticsManager.js'
+import SplitTestHandler from '../SplitTests/SplitTestHandler.js'
+import SplitTestSessionHandler from '../SplitTests/SplitTestSessionHandler.js'
+import FeaturesUpdater from '../Subscription/FeaturesUpdater.js'
+import SpellingHandler from '../Spelling/SpellingHandler.js'
+import { hasAdminAccess } from '../Helpers/AdminAuthorizationHelper.js'
+import InstitutionsFeatures from '../Institutions/InstitutionsFeatures.js'
+import InstitutionsGetter from '../Institutions/InstitutionsGetter.js'
+import ProjectAuditLogHandler from './ProjectAuditLogHandler.js'
+import PublicAccessLevels from '../Authorization/PublicAccessLevels.js'
+import TagsHandler from '../Tags/TagsHandler.js'
+import TutorialHandler from '../Tutorial/TutorialHandler.js'
+import UserUpdater from '../User/UserUpdater.js'
+import Modules from '../../infrastructure/Modules.js'
+import UserGetter from '../User/UserGetter.js'
+import { isStandaloneAiAddOnPlanCode } from '../Subscription/AiHelper.js'
+import SubscriptionController from '../Subscription/SubscriptionController.js'
+import { formatCurrency } from '../../util/currency.js'
 
+const { ObjectId } = mongodb
 /**
  * @import { GetProjectsRequest, GetProjectsResponse, Project } from "./types"
  */
@@ -1252,4 +1253,4 @@ const ProjectController = {
   _getAddonPrices: _ProjectController._getAddonPrices,
 }
 
-module.exports = ProjectController
+export default ProjectController

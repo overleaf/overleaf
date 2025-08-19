@@ -1,28 +1,26 @@
-const UserHandler = require('./UserHandler')
-const UserDeleter = require('./UserDeleter')
-const UserGetter = require('./UserGetter')
-const { User } = require('../../models/User')
-const NewsletterManager = require('../Newsletter/NewsletterManager')
-const logger = require('@overleaf/logger')
-const metrics = require('@overleaf/metrics')
-const AuthenticationManager = require('../Authentication/AuthenticationManager')
-const SessionManager = require('../Authentication/SessionManager')
-const Features = require('../../infrastructure/Features')
-const UserAuditLogHandler = require('./UserAuditLogHandler')
-const UserSessionsManager = require('./UserSessionsManager')
-const UserUpdater = require('./UserUpdater')
-const Errors = require('../Errors/Errors')
-const HttpErrorHandler = require('../Errors/HttpErrorHandler')
-const OError = require('@overleaf/o-error')
-const EmailHandler = require('../Email/EmailHandler')
-const UrlHelper = require('../Helpers/UrlHelper')
-const { promisify } = require('util')
-const { expressify } = require('@overleaf/promise-utils')
-const {
-  acceptsJson,
-} = require('../../infrastructure/RequestContentTypeDetection')
-const Modules = require('../../infrastructure/Modules')
-const OneTimeTokenHandler = require('../Security/OneTimeTokenHandler')
+import UserHandler from './UserHandler.js'
+import UserDeleter from './UserDeleter.js'
+import UserGetter from './UserGetter.js'
+import { User } from '../../models/User.js'
+import NewsletterManager from '../Newsletter/NewsletterManager.js'
+import logger from '@overleaf/logger'
+import metrics from '@overleaf/metrics'
+import AuthenticationManager from '../Authentication/AuthenticationManager.js'
+import SessionManager from '../Authentication/SessionManager.js'
+import Features from '../../infrastructure/Features.js'
+import UserAuditLogHandler from './UserAuditLogHandler.js'
+import UserSessionsManager from './UserSessionsManager.js'
+import UserUpdater from './UserUpdater.js'
+import Errors from '../Errors/Errors.js'
+import HttpErrorHandler from '../Errors/HttpErrorHandler.js'
+import OError from '@overleaf/o-error'
+import EmailHandler from '../Email/EmailHandler.js'
+import UrlHelper from '../Helpers/UrlHelper.js'
+import { promisify } from 'node:util'
+import { expressify } from '@overleaf/promise-utils'
+import { acceptsJson } from '../../infrastructure/RequestContentTypeDetection.js'
+import Modules from '../../infrastructure/Modules.js'
+import OneTimeTokenHandler from '../Security/OneTimeTokenHandler.js'
 
 async function _sendSecurityAlertClearedSessions(user) {
   const emailOptions = {
@@ -506,7 +504,7 @@ async function expireDeletedUsersAfterDuration(req, res, next) {
   res.sendStatus(204)
 }
 
-module.exports = {
+export default {
   clearSessions: expressify(clearSessions),
   changePassword: expressify(changePassword),
   tryDeleteUser: expressify(tryDeleteUser),
