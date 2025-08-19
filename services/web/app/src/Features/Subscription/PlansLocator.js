@@ -118,7 +118,7 @@ const recurlyPlanCodeToPlanTypeAndPeriod = {
 
 /**
  * @param {RecurlyPlanCode} recurlyPlanCode
- * @returns {PlanTypeAndPeriod}
+ * @returns {PlanTypeAndPeriod | undefined}
  */
 function getPlanTypeAndPeriodFromRecurlyPlanCode(recurlyPlanCode) {
   return recurlyPlanCodeToPlanTypeAndPeriod[recurlyPlanCode]
