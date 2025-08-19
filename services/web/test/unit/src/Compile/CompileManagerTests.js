@@ -45,6 +45,9 @@ describe('CompileManager', function () {
         '../Analytics/UserAnalyticsIdCache': (this.UserAnalyticsIdCache = {
           get: sinon.stub().resolves('abc'),
         }),
+        '../SplitTests/SplitTestHandler': (this.SplitTestHandler = {
+          promises: {},
+        }),
       },
     })
     this.project_id = 'mock-project-id-123'
