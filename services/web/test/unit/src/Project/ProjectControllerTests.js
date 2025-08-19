@@ -594,6 +594,24 @@ describe('ProjectController', function () {
       this.ProjectController.loadEditor(this.req, this.res)
     })
 
+    it('should redirect to domain capture page', function (done) {
+      this.Features.hasFeature.withArgs('saas').returns(true)
+      this.SplitTestHandler.promises.getAssignment
+        .withArgs(this.req, this.res, 'domain-capture-redirect')
+        .resolves({ variant: 'enabled' })
+      this.Modules.promises.hooks.fire
+        .withArgs(
+          'findDomainCaptureAndManagedUsersGroupUserShouldBePartOf',
+          this.user._id
+        )
+        .resolves([{ _id: new ObjectId() }])
+      this.res.redirect = url => {
+        url.should.equal('/domain-capture')
+        done()
+      }
+      this.ProjectController.loadEditor(this.req, this.res)
+    })
+
     it('should add user', function (done) {
       this.res.render = (pageName, opts) => {
         opts.user.email.should.equal(this.user.email)

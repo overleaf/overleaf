@@ -2,6 +2,7 @@ const { expect } = require('chai')
 const SandboxedModule = require('sandboxed-module')
 const path = require('path')
 const sinon = require('sinon')
+const { ObjectId } = require('mongodb-legacy')
 const modulePath = path.join(
   __dirname,
   '../../../../app/src/Features/Institutions/InstitutionsAPI'
@@ -160,9 +161,17 @@ describe('InstitutionsAPI', function () {
         },
       ]
       this.request.callsArgWith(1, null, { statusCode: 201 }, responseBody)
-      this.Modules.promises.hooks.fire.resolves([
-        { domainCaptureEnabled: true },
-      ])
+      const groupResponse = {
+        _id: new ObjectId(),
+        managedUsersEnabled: false,
+        domainCaptureEnabled: true,
+      }
+      this.Modules.promises.hooks.fire
+        .withArgs(
+          'getGroupWithDomainCaptureByV1Id',
+          responseBody[0].institution.id
+        )
+        .resolves([groupResponse])
       const body = await this.InstitutionsAPI.promises.getUserAffiliations(
         this.stubbedUser._id
       )
@@ -178,7 +187,12 @@ describe('InstitutionsAPI', function () {
       )
       expect(requestOptions.body).not.to.exist
       expect(body).to.deep.equal([
-        { ...responseBody[0], group: { domainCaptureEnabled: true } },
+        {
+          ...responseBody[0],
+          group: {
+            ...groupResponse,
+          },
+        },
       ])
     })
 

@@ -112,6 +112,29 @@ async function projectListPage(req, res, next) {
   const isSaas = Features.hasFeature('saas')
 
   const userId = SessionManager.getLoggedInUserId(req.session)
+
+  if (isSaas) {
+    const { variant: domainCaptureRedirect } =
+      await SplitTestHandler.promises.getAssignment(
+        req,
+        res,
+        'domain-capture-redirect'
+      )
+
+    if (domainCaptureRedirect === 'enabled') {
+      const subscription = (
+        await Modules.promises.hooks.fire(
+          'findDomainCaptureAndManagedUsersGroupUserShouldBePartOf',
+          userId
+        )
+      )?.[0]
+
+      if (subscription) {
+        return res.redirect('/domain-capture')
+      }
+    }
+  }
+
   const projectsBlobPending = _getProjects(userId).catch(err => {
     logger.err({ err, userId }, 'projects listing in background failed')
     return undefined

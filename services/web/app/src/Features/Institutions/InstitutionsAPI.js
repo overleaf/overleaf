@@ -173,6 +173,8 @@ function getUserAffiliations(userId, callback) {
 
             if (group) {
               affiliation.group = {
+                _id: group._id,
+                managedUsersEnabled: Boolean(group.managedUsersEnabled),
                 domainCaptureEnabled: Boolean(group.domainCaptureEnabled),
               }
             }

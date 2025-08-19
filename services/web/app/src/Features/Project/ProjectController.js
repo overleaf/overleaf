@@ -322,6 +322,28 @@ const _ProjectController = {
       userId = null
     }
 
+    if (Features.hasFeature('saas') && userId) {
+      const { variant: domainCaptureRedirect } =
+        await SplitTestHandler.promises.getAssignment(
+          req,
+          res,
+          'domain-capture-redirect'
+        )
+
+      if (domainCaptureRedirect === 'enabled') {
+        const subscription = (
+          await Modules.promises.hooks.fire(
+            'findDomainCaptureAndManagedUsersGroupUserShouldBePartOf',
+            userId
+          )
+        )?.[0]
+
+        if (subscription) {
+          return res.redirect('/domain-capture')
+        }
+      }
+    }
+
     const projectId = req.params.Project_id
 
     // should not be used in place of split tests query param overrides (?my-split-test-name=my-variant)

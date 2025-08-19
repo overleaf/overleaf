@@ -325,6 +325,7 @@ const decorateFullEmails = (
         past_reconfirm_date: cachedPastReconfirmDate,
         entitlement: cachedEntitlement,
         portal,
+        group,
       } = affiliation
       const lastDayToReconfirm = _lastDayToReconfirm(emailData, institution)
       let { last_day_to_reconfirm: cachedLastDayToReconfirm } = affiliation
@@ -352,6 +353,9 @@ const decorateFullEmails = (
         department,
         licence,
         portal,
+      }
+      if (group) {
+        emailData.affiliation.group = group
       }
     }
 

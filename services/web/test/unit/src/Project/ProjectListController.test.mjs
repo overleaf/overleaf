@@ -493,6 +493,26 @@ describe('ProjectListController', function () {
       })
     })
 
+    it('should redirect to domain capture page', async function (ctx) {
+      await new Promise(resolve => {
+        ctx.Features.hasFeature.withArgs('saas').returns(true)
+        ctx.SplitTestHandler.promises.getAssignment
+          .withArgs(ctx.req, ctx.res, 'domain-capture-redirect')
+          .resolves({ variant: 'enabled' })
+        ctx.Modules.promises.hooks.fire
+          .withArgs(
+            'findDomainCaptureAndManagedUsersGroupUserShouldBePartOf',
+            ctx.user._id
+          )
+          .resolves([{ _id: new ObjectId() }])
+        ctx.res.redirect = url => {
+          url.should.equal('/domain-capture')
+          resolve()
+        }
+        ctx.ProjectListController.projectListPage(ctx.req, ctx.res)
+      })
+    })
+
     describe('With Institution SSO feature', function () {
       beforeEach(async function (ctx) {
         await new Promise(resolve => {
