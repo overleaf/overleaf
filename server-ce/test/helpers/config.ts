@@ -68,4 +68,44 @@ export function startWith({
   })
 }
 
+// Allow reloading the server in other places, e.g. beforeEach hooks.
+export async function reloadWith({
+  pro = false,
+  version = 'latest',
+  vars = {},
+  varsFn = () => ({}),
+  withDataDir = false,
+  resetData = false,
+  mongoVersion = '',
+}) {
+  Object.assign(vars, varsFn())
+  const cfg = JSON.stringify({
+    pro,
+    version,
+    vars,
+    withDataDir,
+    resetData,
+    mongoVersion,
+  })
+  if (resetData) {
+    resetCreatedUsersCache()
+    resetActivateUserRateLimit()
+    // no return here, always reconfigure when resetting data
+  } else if (previousConfigFrontend === cfg) {
+    return
+  }
+  const { previousConfigServer } = await reconfigure({
+    pro,
+    version,
+    vars,
+    withDataDir,
+    resetData,
+    mongoVersion,
+  })
+  if (previousConfigServer !== cfg) {
+    await Cypress.session.clearAllSavedSessions()
+  }
+  previousConfigFrontend = cfg
+}
+
 export { reconfigure }

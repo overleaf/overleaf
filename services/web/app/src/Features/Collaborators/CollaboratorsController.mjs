@@ -14,6 +14,7 @@ import { hasAdminAccess } from '../Helpers/AdminAuthorizationHelper.js'
 import TokenAccessHandler from '../TokenAccess/TokenAccessHandler.js'
 import ProjectAuditLogHandler from '../Project/ProjectAuditLogHandler.js'
 import LimitationsManager from '../Subscription/LimitationsManager.js'
+import Features from '../../infrastructure/Features.js'
 
 const ObjectId = mongodb.ObjectId
 
@@ -158,6 +159,10 @@ async function _removeUserIdFromProject(projectId, userId) {
 async function getShareTokens(req, res) {
   const projectId = req.params.Project_id
   const userId = SessionManager.getLoggedInUserId(req.session)
+
+  if (!Features.hasFeature('link-sharing')) {
+    return res.sendStatus(403) // return Forbidden if link sharing is not enabled
+  }
 
   let tokens
   if (userId) {

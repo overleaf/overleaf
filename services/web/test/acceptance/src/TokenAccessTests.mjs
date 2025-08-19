@@ -5,6 +5,8 @@ import request from './helpers/request.js'
 import settings from '@overleaf/settings'
 import { db } from '../../../app/src/infrastructure/mongodb.js'
 import expectErrorResponse from './helpers/expectErrorResponse.mjs'
+import logger from '@overleaf/logger'
+import sinon from 'sinon'
 
 const tryEditorAccess = (user, projectId, test, callback) =>
   async.series(
@@ -808,6 +810,106 @@ describe('TokenAccess', function () {
           expect(response.statusCode).to.equal(403)
           done()
         })
+      })
+    })
+
+    describe('link sharing disabled', function () {
+      const previous = settings.disableLinkSharing
+      let loggerStub
+      beforeEach(function () {
+        settings.disableLinkSharing = true
+        loggerStub = sinon.spy(logger, 'error')
+      })
+      afterEach(function () {
+        settings.disableLinkSharing = previous
+        loggerStub.restore()
+      })
+
+      it('should deny access to project', function (done) {
+        async.series(
+          [
+            cb =>
+              tryEditorAccess(
+                this.anon,
+                this.projectId,
+                expectErrorResponse.restricted.html,
+                cb
+              ),
+            // should not allow the user to access read-only token
+            cb =>
+              tryReadOnlyTokenAccess(
+                this.anon,
+                this.tokens.readOnly,
+                (response, body) => {
+                  // NOTE: This would be 404 when recreating the router. The Server Pro E2E tests cover this.
+                  expect(response.statusCode).to.equal(200)
+                },
+                (response, body) => {
+                  // NOTE: This would be 404 when recreating the router. The Server Pro E2E tests cover this.
+                  expect(response.statusCode).to.equal(500)
+                  expect(loggerStub).to.have.been.calledWithMatch(
+                    {
+                      err: { message: 'link sharing is disabled' },
+                    },
+                    '%s %s',
+                    'POST',
+                    `/read/${this.tokens.readOnly}/grant`
+                  )
+                },
+                cb
+              ),
+            // still no access
+            cb =>
+              tryEditorAccess(
+                this.anon,
+                this.projectId,
+                expectErrorResponse.restricted.html,
+                cb
+              ),
+            // should not allow the user to join the project
+            cb =>
+              tryAnonContentAccess(
+                this.anon,
+                this.projectId,
+                this.tokens.readOnly,
+                (response, body) => {
+                  expect(response.statusCode).to.equal(403)
+                  expect(body).to.equal('Forbidden')
+                },
+                cb
+              ),
+          ],
+          done
+        )
+      })
+
+      it('should deny access to access tokens', function (done) {
+        tryFetchProjectTokens(this.anon, this.projectId, (error, response) => {
+          expect(error).to.equal(null)
+          expect(response.statusCode).to.equal(403)
+          done()
+        })
+      })
+
+      it('should deny access to legacy public project', function (done) {
+        async.series(
+          [
+            cb => this.owner.makePublic(this.projectId, 'readOnly', cb),
+
+            cb =>
+              tryAnonContentAccess(
+                this.anon,
+                this.projectId,
+                this.tokens.readOnly,
+                (response, body) => {
+                  expect(response.statusCode).to.equal(403)
+                  expect(body).to.equal('Forbidden')
+                },
+                cb
+              ),
+          ],
+          done
+        )
       })
     })
   })

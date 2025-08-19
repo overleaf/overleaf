@@ -382,6 +382,7 @@ describe('ProjectController', function () {
 
   describe('updateProjectAdminSettings', function () {
     it('should update the public access level', function (done) {
+      this.Features.hasFeature.withArgs('link-sharing').returns(true)
       this.EditorController.promises.setPublicAccessLevel = sinon
         .stub()
         .resolves()
@@ -399,6 +400,7 @@ describe('ProjectController', function () {
     })
 
     it('should record the change in the project audit log', function (done) {
+      this.Features.hasFeature.withArgs('link-sharing').returns(true)
       this.EditorController.promises.setPublicAccessLevel = sinon
         .stub()
         .resolves()
@@ -418,6 +420,24 @@ describe('ProjectController', function () {
             }
           )
           .should.equal(true)
+        done()
+      }
+      this.ProjectController.updateProjectAdminSettings(this.req, this.res)
+    })
+
+    it('should refuse to update the public access level when link sharing is disabled', function (done) {
+      this.Features.hasFeature.withArgs('link-sharing').returns(false)
+      this.EditorController.promises.setPublicAccessLevel = sinon
+        .stub()
+        .resolves()
+      this.req.body = {
+        publicAccessLevel: 'readOnly',
+      }
+      this.res.sendStatus = code => {
+        this.EditorController.promises.setPublicAccessLevel.called.should.equal(
+          false
+        )
+        code.should.equal(403) // Forbidden
         done()
       }
       this.ProjectController.updateProjectAdminSettings(this.req, this.res)

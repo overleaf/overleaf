@@ -107,6 +107,9 @@ const _ProjectController = {
   async updateProjectAdminSettings(req, res) {
     const projectId = req.params.Project_id
     const user = SessionManager.getSessionUser(req.session)
+    if (!Features.hasFeature('link-sharing')) {
+      return res.sendStatus(403) // return Forbidden if link sharing is not enabled
+    }
     const publicAccessLevel = req.body.publicAccessLevel
     const publicAccessLevels = [
       PublicAccessLevels.READ_ONLY,
@@ -692,6 +695,15 @@ const _ProjectController = {
       // make sure the capability is added to CE/SP when the feature is enabled
       if (!Features.hasFeature('saas') && Features.hasFeature('chat')) {
         capabilities.push('chat')
+      }
+
+      // Note: this is not part of the default capabilities in the backend.
+      // See services/web/modules/group-settings/app/src/DefaultGroupPolicy.mjs.
+      // We are only using it on the frontend at the moment.
+      // Add !Features.hasFeature('saas') to the conditional, as for chat above
+      // if you define the capability in the backend.
+      if (Features.hasFeature('link-sharing')) {
+        capabilities.push('link-sharing')
       }
 
       const isOverleafAssistBundleEnabled =

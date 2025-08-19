@@ -63,6 +63,7 @@ describe('AuthorizationManager', function () {
       passwordStrengthOptions: {},
       adminPrivilegeAvailable: true,
       adminRolesEnabled: false,
+      moduleImportSequence: [],
     }
     this.AuthorizationManager = SandboxedModule.require(modulePath, {
       requires: {
@@ -446,6 +447,28 @@ describe('AuthorizationManager', function () {
 
         it('should return the public privilege level', function () {
           expect(this.result).to.equal('readAndWrite')
+        })
+      })
+
+      describe('with link-sharing disabled', function () {
+        beforeEach(async function () {
+          this.settings.disableLinkSharing = true
+          this.result =
+            await this.AuthorizationManager.promises.getPrivilegeLevelForProject(
+              null,
+              this.project._id,
+              this.token
+            )
+        })
+
+        it('should not call CollaboratorsGetter.getProjectAccess', function () {
+          this.CollaboratorsGetter.promises.getProjectAccess.called.should.equal(
+            false
+          )
+        })
+
+        it('should return false', function () {
+          expect(this.result).to.equal(false)
         })
       })
     })

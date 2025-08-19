@@ -9,7 +9,7 @@ const V1Api = require('../V1/V1Api')
 const crypto = require('crypto')
 const { callbackifyAll } = require('@overleaf/promise-utils')
 const Analytics = require('../Analytics/AnalyticsManager')
-
+const Features = require('../../infrastructure/Features')
 const READ_AND_WRITE_TOKEN_PATTERN = '([0-9]+[a-z]{6,12})'
 const READ_ONLY_TOKEN_PATTERN = '([a-z]{12})'
 
@@ -152,6 +152,9 @@ const TokenAccessHandler = {
   },
 
   async addReadOnlyUserToProject(userId, projectId, ownerId) {
+    if (!Features.hasFeature('link-sharing')) {
+      throw new Error('link sharing is disabled')
+    }
     userId = new ObjectId(userId.toString())
     projectId = new ObjectId(projectId.toString())
     Analytics.recordEventForUserInBackground(userId, 'project-joined', {
@@ -202,6 +205,9 @@ const TokenAccessHandler = {
   },
 
   grantSessionTokenAccess(req, projectId, token) {
+    if (!Features.hasFeature('link-sharing')) {
+      throw new Error('link sharing is disabled')
+    }
     if (!req.session) {
       return
     }
@@ -213,6 +219,7 @@ const TokenAccessHandler = {
 
   getRequestToken(req, projectId) {
     const token =
+      Features.hasFeature('link-sharing') &&
       req.session &&
       req.session.anonTokenAccess &&
       req.session.anonTokenAccess[projectId.toString()]
@@ -220,7 +227,7 @@ const TokenAccessHandler = {
   },
 
   async validateTokenForAnonymousAccess(projectId, token, callback) {
-    if (!token) {
+    if (!Features.hasFeature('link-sharing') || !token) {
       return { isValidReadAndWrite: false, isValidReadOnly: false }
     }
 

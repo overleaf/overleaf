@@ -69,6 +69,8 @@ const Features = {
         return Boolean(Settings.overleaf)
       case 'chat':
         return Boolean(Settings.disableChat) === false
+      case 'link-sharing':
+        return Boolean(Settings.disableLinkSharing) === false
       case 'github-sync':
         return Boolean(Settings.enableGithubSync)
       case 'git-bridge':

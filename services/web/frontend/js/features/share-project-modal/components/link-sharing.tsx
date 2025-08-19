@@ -30,6 +30,8 @@ type AccessLevel = 'private' | 'tokenBased' | 'readAndWrite' | 'readOnly'
 export default function LinkSharing() {
   const [inflight, setInflight] = useState(false)
   const [showLinks, setShowLinks] = useState(true)
+  const linkSharingEnabled =
+    getMeta('ol-capabilities')?.includes('link-sharing')
 
   const { monitorRequest } = useShareProjectContext()
 
@@ -57,6 +59,10 @@ export default function LinkSharing() {
     },
     [monitorRequest, projectId]
   )
+
+  if (!linkSharingEnabled) {
+    return null
+  }
 
   switch (publicAccessLevel) {
     // Private (with token-access available)

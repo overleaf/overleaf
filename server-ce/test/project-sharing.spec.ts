@@ -1,5 +1,10 @@
 import { v4 as uuid } from 'uuid'
-import { isExcludedBySharding, startWith } from './helpers/config'
+import {
+  isExcludedBySharding,
+  startWith,
+  reloadWith,
+  STARTUP_TIMEOUT,
+} from './helpers/config'
 import { ensureUserExists, login } from './helpers/login'
 import {
   createProject,
@@ -356,6 +361,117 @@ describe('Project Sharing', function () {
           expectAnonymousReadAndWriteAccess()
           expectEditAuthoredAs('Anonymous')
         })
+      })
+    })
+
+    describe('with OVERLEAF_DISABLE_LINK_SHARING=true', () => {
+      const email = 'collaborator-email@example.com'
+      ensureUserExists({ email })
+
+      const invitedEmail = 'invited-email@example.com'
+      ensureUserExists({ email: invitedEmail })
+
+      const retainedViewerEmail = 'collaborator-retained-viewer@example.com'
+      ensureUserExists({ email: retainedViewerEmail })
+
+      const retainedEditorEmail = 'collaborator-retained-editor@example.com'
+      ensureUserExists({ email: retainedEditorEmail })
+
+      // Link-sharing urls have to be created before disabling link sharing.
+      // We use the `beforeEach` hook to reload the server with link sharing
+      // disabled **after** the initial setup which happens in the `before`
+      // block. The `before` hook always runs prior to the `beforeEach` hook.
+
+      // Set up retained access before disabling link sharing
+      before(function () {
+        // Set up retained viewer access
+        login(retainedViewerEmail)
+        openProjectViaLinkSharingAsUser(
+          linkSharingReadOnly,
+          projectName,
+          retainedViewerEmail
+        )
+
+        // Set up retained editor access
+        login(retainedEditorEmail)
+        openProjectViaLinkSharingAsUser(
+          linkSharingReadAndWrite,
+          projectName,
+          retainedEditorEmail
+        )
+      })
+
+      beforeEach(function () {
+        this.timeout(STARTUP_TIMEOUT) // Increase timeout for server reload
+
+        return cy.wrap(
+          reloadWith({
+            pro: true,
+            vars: {
+              OVERLEAF_ALLOW_PUBLIC_ACCESS: 'true',
+              OVERLEAF_ALLOW_ANONYMOUS_READ_AND_WRITE_SHARING: 'true',
+              OVERLEAF_DISABLE_LINK_SHARING: 'true',
+            },
+            withDataDir: true,
+          }),
+          { timeout: STARTUP_TIMEOUT }
+        )
+      })
+
+      it('should not display link sharing in the sharing modal', () => {
+        login('user@example.com')
+        openProjectByName(projectName)
+        cy.findByText('Share').click()
+        cy.findByText('Turn on link sharing').should('not.exist')
+      })
+
+      it('should block new access to read-only link shared projects', () => {
+        login(email)
+
+        // Test read-only link returns 404
+        cy.request({
+          url: linkSharingReadOnly,
+          failOnStatusCode: false,
+        }).then(response => {
+          expect(response.status).to.eq(404)
+        })
+      })
+
+      it('should block new access to read-write link shared projects', () => {
+        login(email)
+
+        // Test read-write link returns 404
+        cy.request({
+          url: linkSharingReadAndWrite,
+          failOnStatusCode: false,
+        }).then(response => {
+          expect(response.status).to.eq(404)
+        })
+      })
+
+      it('should continue to allow email sharing', () => {
+        login('user@example.com')
+        shareProjectByEmailAndAcceptInviteViaEmail(
+          projectName,
+          invitedEmail,
+          'Viewer'
+        )
+        expectFullReadOnlyAccess()
+        expectProjectDashboardEntry()
+      })
+
+      it('should retain read-only access when project was joined via link before link sharing was turned off', () => {
+        login(retainedViewerEmail)
+        openProjectByName(projectName)
+        expectRestrictedReadOnlyAccess()
+        expectProjectDashboardEntry()
+      })
+
+      it('should retain read-write access when project was joined via link before link sharing was turned off', () => {
+        login(retainedEditorEmail)
+        openProjectByName(projectName)
+        expectFullReadAndWriteAccess()
+        expectProjectDashboardEntry()
       })
     })
   })

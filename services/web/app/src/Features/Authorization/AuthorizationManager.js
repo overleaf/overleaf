@@ -1,5 +1,6 @@
 const { callbackify } = require('util')
 const { ObjectId } = require('mongodb-legacy')
+const Features = require('../../infrastructure/Features')
 const CollaboratorsGetter = require('../Collaborators/CollaboratorsGetter')
 const CollaboratorsHandler = require('../Collaborators/CollaboratorsHandler')
 const ProjectGetter = require('../Project/ProjectGetter')
@@ -213,6 +214,10 @@ async function _getPrivilegeLevelForProjectWithoutUserWithPublicAccessLevel(
   publicAccessLevel,
   opts = {}
 ) {
+  if (!Features.hasFeature('link-sharing')) {
+    // Link sharing disabled globally.
+    return PrivilegeLevels.NONE
+  }
   if (!opts.ignorePublicAccess) {
     if (publicAccessLevel === PublicAccessLevels.READ_ONLY) {
       // Legacy public read-only access for anonymous user

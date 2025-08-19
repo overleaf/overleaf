@@ -1226,39 +1226,41 @@ async function initialize(webRouter, privateApiRouter, publicApiRouter) {
     res.sendStatus(204)
   })
 
-  webRouter.get(
-    `/read/:token(${TokenAccessController.READ_ONLY_TOKEN_PATTERN})`,
-    RateLimiterMiddleware.rateLimit(rateLimiters.readOnlyToken),
-    AnalyticsRegistrationSourceMiddleware.setSource(
-      'collaboration',
-      'link-sharing'
-    ),
-    TokenAccessController.tokenAccessPage,
-    AnalyticsRegistrationSourceMiddleware.clearSource()
-  )
+  if (Features.hasFeature('link-sharing')) {
+    webRouter.get(
+      `/read/:token(${TokenAccessController.READ_ONLY_TOKEN_PATTERN})`,
+      RateLimiterMiddleware.rateLimit(rateLimiters.readOnlyToken),
+      AnalyticsRegistrationSourceMiddleware.setSource(
+        'collaboration',
+        'link-sharing'
+      ),
+      TokenAccessController.tokenAccessPage,
+      AnalyticsRegistrationSourceMiddleware.clearSource()
+    )
 
-  webRouter.get(
-    `/:token(${TokenAccessController.READ_AND_WRITE_TOKEN_PATTERN})`,
-    RateLimiterMiddleware.rateLimit(rateLimiters.readAndWriteToken),
-    AnalyticsRegistrationSourceMiddleware.setSource(
-      'collaboration',
-      'link-sharing'
-    ),
-    TokenAccessController.tokenAccessPage,
-    AnalyticsRegistrationSourceMiddleware.clearSource()
-  )
+    webRouter.get(
+      `/:token(${TokenAccessController.READ_AND_WRITE_TOKEN_PATTERN})`,
+      RateLimiterMiddleware.rateLimit(rateLimiters.readAndWriteToken),
+      AnalyticsRegistrationSourceMiddleware.setSource(
+        'collaboration',
+        'link-sharing'
+      ),
+      TokenAccessController.tokenAccessPage,
+      AnalyticsRegistrationSourceMiddleware.clearSource()
+    )
 
-  webRouter.post(
-    `/:token(${TokenAccessController.READ_AND_WRITE_TOKEN_PATTERN})/grant`,
-    RateLimiterMiddleware.rateLimit(rateLimiters.grantTokenAccessReadWrite),
-    TokenAccessController.grantTokenAccessReadAndWrite
-  )
+    webRouter.post(
+      `/:token(${TokenAccessController.READ_AND_WRITE_TOKEN_PATTERN})/grant`,
+      RateLimiterMiddleware.rateLimit(rateLimiters.grantTokenAccessReadWrite),
+      TokenAccessController.grantTokenAccessReadAndWrite
+    )
 
-  webRouter.post(
-    `/read/:token(${TokenAccessController.READ_ONLY_TOKEN_PATTERN})/grant`,
-    RateLimiterMiddleware.rateLimit(rateLimiters.grantTokenAccessReadOnly),
-    TokenAccessController.grantTokenAccessReadOnly
-  )
+    webRouter.post(
+      `/read/:token(${TokenAccessController.READ_ONLY_TOKEN_PATTERN})/grant`,
+      RateLimiterMiddleware.rateLimit(rateLimiters.grantTokenAccessReadOnly),
+      TokenAccessController.grantTokenAccessReadOnly
+    )
+  }
 
   webRouter.get('/unsupported-browser', renderUnsupportedBrowserPage)
 
