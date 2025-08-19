@@ -15,6 +15,7 @@ import { debugConsole } from '@/utils/debugging'
 import { PDFJS } from './pdf-js'
 import { sendMB } from '@/infrastructure/event-tracking'
 import getMeta from '@/utils/meta'
+import { PDFFile, PDFRange } from '@ol-types/compile'
 
 // 30 seconds: The shutdown grace period of a clsi pre-emp instance.
 const STALE_OUTPUT_REQUEST_THRESHOLD_MS = 30 * 1000
@@ -51,7 +52,26 @@ export function generatePdfCachingTransportFactory() {
     new URLSearchParams(window.location.search).get('verify_chunks') === 'true'
 
   class PDFDataRangeTransport extends PDFJS.PDFDataRangeTransport {
-    constructor({ url, pdfFile, abortController, handleFetchError }) {
+    url: string
+    pdfFile: PDFFile
+    abortController: AbortController
+    leanPdfRanges: PDFRange[]
+    handleFetchError: (error: any) => void
+    startTime: number
+    sentEventFallbackToClsiCache: boolean
+    queryForChunks: string
+
+    constructor({
+      url,
+      pdfFile,
+      abortController,
+      handleFetchError,
+    }: {
+      url: string
+      pdfFile: PDFFile
+      abortController: AbortController
+      handleFetchError: (error: any) => void
+    }) {
       super(pdfFile.size, new Uint8Array())
       this.url = url
       pdfFile.ranges = pdfFile.ranges || []
@@ -75,7 +95,7 @@ export function generatePdfCachingTransportFactory() {
       this.abortController.abort()
     }
 
-    requestDataRange(start, end) {
+    requestDataRange(start: number, end: number) {
       let recordFallbackToClsiCache = false
       const abortSignal = this.abortController.signal
       const getDebugInfo = () => ({
@@ -95,9 +115,12 @@ export function generatePdfCachingTransportFactory() {
 
       const isStaleOutputRequest = () =>
         performance.now() - this.startTime > STALE_OUTPUT_REQUEST_THRESHOLD_MS
-      const is404 = err => OError.getFullInfo(err).statusCode === 404
-      const isFromOutputPDFRequest = err =>
-        OError.getFullInfo(err).url?.includes?.('/output.pdf') === true
+      const is404 = (err: any) =>
+        (OError.getFullInfo(err) as { statusCode: number }).statusCode === 404
+      const isFromOutputPDFRequest = (err: any) =>
+        (OError.getFullInfo(err) as { url?: string }).url?.includes?.(
+          '/output.pdf'
+        ) === true
 
       // Do not consider "expected 404s" and network errors as pdf caching
       //  failures.
@@ -106,11 +129,11 @@ export function generatePdfCachingTransportFactory() {
       //   Example: The user returns to a browser tab after 1h and scrolls.
       // - requests for the main output.pdf file
       //   A fallback request would not be able to retrieve the PDF either.
-      const isExpectedError = err =>
+      const isExpectedError = (err: any) =>
         (is404(err) || isNetworkError(err)) &&
         (isStaleOutputRequest() || isFromOutputPDFRequest(err))
 
-      const usesCache = url => {
+      const usesCache = (url: string) => {
         if (!url) return false
         const u = new URL(url)
         return (
@@ -121,10 +144,10 @@ export function generatePdfCachingTransportFactory() {
             u.searchParams.get('clsiserverid')?.startsWith('clsi-cache-'))
         )
       }
-      const canTryFromCache = err => {
+      const canTryFromCache = (err: any) => {
         if (!fallBackToClsiCache) return false
         if (!is404(err)) return false
-        return !usesCache(OError.getFullInfo(err).url)
+        return !usesCache((OError.getFullInfo(err) as { url: string }).url)
       }
       const getOutputPDFURLFromCache = () => {
         if (usesCache(this.url)) return this.url
@@ -157,7 +180,10 @@ export function generatePdfCachingTransportFactory() {
             return blob
           })
           .catch(err => {
-            const { statusCode, url } = OError.getFullInfo(err)
+            const { statusCode, url } = OError.getFullInfo(err) as {
+              statusCode: number
+              url: string
+            }
             throw OError.tag(
               new PDFJS.ResponseException(undefined, statusCode, true),
               'cache-fallback',
@@ -166,6 +192,8 @@ export function generatePdfCachingTransportFactory() {
           })
       }
 
+      // @ts-ignore is incorrectly inferring the type of fetchRange.
+      // Remove this when we convert pdf-caching.js to typescript.
       fetchRange({
         url: this.url,
         start,
@@ -197,7 +225,10 @@ export function generatePdfCachingTransportFactory() {
               metrics.failedCount++
               metrics.failedOnce = true
             }
-            const { statusCode, url } = OError.getFullInfo(err)
+            const { statusCode, url } = OError.getFullInfo(err) as {
+              statusCode: number
+              url: string
+            }
             throw OError.tag(
               new PDFJS.ResponseException(undefined, statusCode, true),
               'caching',
@@ -226,7 +257,10 @@ export function generatePdfCachingTransportFactory() {
           }).catch(err => {
             if (canTryFromCache(err)) return fetchFromCache()
             if (isExpectedError(err)) {
-              const { statusCode, url } = OError.getFullInfo(err)
+              const { statusCode, url } = OError.getFullInfo(err) as {
+                statusCode: number
+                url: string
+              }
               throw OError.tag(
                 new PDFJS.ResponseException(undefined, statusCode, true),
                 'fallback',
@@ -246,7 +280,7 @@ export function generatePdfCachingTransportFactory() {
               ageMS: Math.ceil(performance.now() - this.startTime),
             })
           }
-          this.onDataRange(start, blob)
+          this.onDataRange(start, blob ? new Uint8Array(blob) : null)
         })
         .catch(err => {
           if (abortSignal.aborted) return
@@ -266,7 +300,17 @@ export function generatePdfCachingTransportFactory() {
     }
   }
 
-  return function ({ url, pdfFile, abortController, handleFetchError }) {
+  return function ({
+    url,
+    pdfFile,
+    abortController,
+    handleFetchError,
+  }: {
+    url: string
+    pdfFile: PDFFile
+    abortController: AbortController
+    handleFetchError: (error: any) => void
+  }) {
     if (metrics.failedOnce) {
       // Disable pdf caching once any fetch request failed.
       // Be trigger-happy here until we reached a stable state of the feature.

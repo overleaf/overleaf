@@ -15,10 +15,11 @@ import { usePdfPreviewContext } from '@/features/pdf-preview/components/pdf-prev
 import usePresentationMode from '../hooks/use-presentation-mode'
 import useMouseWheelZoom from '../hooks/use-mouse-wheel-zoom'
 import { PDFJS } from '../util/pdf-js'
+import { PDFFile } from '@ol-types/compile'
 
 type PdfJsViewerProps = {
   url: string
-  pdfFile: Record<string, any>
+  pdfFile: PDFFile
 }
 
 function PdfJsViewer({ url, pdfFile }: PdfJsViewerProps) {
