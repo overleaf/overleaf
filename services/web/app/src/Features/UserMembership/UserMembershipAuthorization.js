@@ -20,7 +20,8 @@ const UserMembershipAuthorization = {
     return hasAdminCapability(
       req.entity.managedUsersEnabled
         ? 'modify-managed-group-member'
-        : 'modify-group-member'
+        : 'modify-group-member',
+      true
     )(req, res)
   },
 

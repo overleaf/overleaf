@@ -19,8 +19,11 @@ function hasAdminAccess(user) {
   return Boolean(user.isAdmin)
 }
 
-function hasAdminCapability(capability) {
+function hasAdminCapability(capability, requireAdminRoles = true) {
   return req => {
+    if (requireAdminRoles && !Settings.adminRolesEnabled) {
+      return false
+    }
     if (!hasAdminAccess(SessionManager.getSessionUser(req.session))) {
       return false
     }
@@ -69,8 +72,8 @@ async function useAdminCapabilities(req, res, next) {
 }
 
 function useHasAdminCapability(req, res, next) {
-  res.locals.hasAdminCapability = capability =>
-    hasAdminCapability(capability)(req)
+  res.locals.hasAdminCapability = (capability, requireAdminRoles = true) =>
+    hasAdminCapability(capability, requireAdminRoles)(req)
   next()
 }
 

@@ -34,8 +34,8 @@ nav.navbar.navbar-default.navbar-main.navbar-expand-lg(
 		- var canDisplayAdminMenu = hasAdminAccess()
 		- var canDisplayAdminRedirect = canRedirectToAdminDomain()
 		- var canDisplaySplitTestMenu = hasFeature('saas') && ((canDisplayAdminMenu && hasAdminCapability('view-split-test')) || (getSessionUser() && getSessionUser().staffAccess && (getSessionUser().staffAccess.splitTestMetrics || getSessionUser().staffAccess.splitTestManagement)))
-		- var canDisplaySurveyMenu = hasFeature('saas') && canDisplayAdminMenu && hasAdminCapability('manage-survey')
-		- var canDisplayScriptLogMenu = hasFeature('saas') && hasAdminCapability('view-script-log') && canDisplayAdminMenu
+		- var canDisplaySurveyMenu = hasFeature('saas') && canDisplayAdminMenu && hasAdminCapability('manage-survey', false)
+		- var canDisplayScriptLogMenu = hasFeature('saas') && hasAdminCapability('view-script-log', false) && canDisplayAdminMenu
 
 		if typeof suppressNavbarRight === 'undefined'
 			button#navbar-toggle-btn.navbar-toggler.collapsed(

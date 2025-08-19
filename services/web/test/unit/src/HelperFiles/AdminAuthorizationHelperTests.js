@@ -10,12 +10,14 @@ const modulePath =
 describe('AdminAuthorizationHelper', function () {
   beforeEach(function () {
     this.fireHook = sinon.stub().resolves([])
+    this.settings = {
+      adminPrivilegeAvailable: true,
+      adminUrl: 'https://admin.overleaf.com',
+      adminRolesEnabled: true,
+    }
     this.AdminAuthorizationHelper = SandboxedModule.require(modulePath, {
       requires: {
-        '@overleaf/settings': {
-          adminPrivilegeAvailable: true,
-          adminUrl: 'https://admin.overleaf.com',
-        },
+        '@overleaf/settings': this.settings,
         '../../infrastructure/Modules': {
           promises: {
             hooks: {
@@ -395,6 +397,24 @@ describe('AdminAuthorizationHelper', function () {
             this.AdminAuthorizationHelper.hasAdminCapability('capability')(req)
           ).to.be.true
         })
+        it('ignores the "requireAdminRoles" argument', function () {
+          const req = {
+            session: { user: { isAdmin: true } },
+            adminCapabilitiesAvailable: false,
+          }
+          expect(
+            this.AdminAuthorizationHelper.hasAdminCapability(
+              'capability',
+              true
+            )(req)
+          ).to.be.true
+          expect(
+            this.AdminAuthorizationHelper.hasAdminCapability(
+              'capability',
+              false
+            )(req)
+          ).to.be.true
+        })
       })
       describe('when adminCapabilitiesAvailable is true', function () {
         describe('when user has the requested capability', function () {
@@ -425,6 +445,34 @@ describe('AdminAuthorizationHelper', function () {
             ).to.be.false
           })
         })
+      })
+    })
+
+    describe('when admin roles are not enabled', function () {
+      beforeEach(function () {
+        this.settings.adminRolesEnabled = false
+      })
+
+      it('returns false even for admins', function () {
+        const req = { session: { user: { isAdmin: true } } }
+        expect(
+          this.AdminAuthorizationHelper.hasAdminCapability('capability')(req)
+        ).to.be.false
+        expect(
+          this.AdminAuthorizationHelper.hasAdminCapability(
+            'capability',
+            true
+          )(req)
+        ).to.be.false
+      })
+      it('returns true when requireAdminRoles=false', function () {
+        const req = { session: { user: { isAdmin: true } } }
+        expect(
+          this.AdminAuthorizationHelper.hasAdminCapability(
+            'capability',
+            false
+          )(req)
+        ).to.be.true
       })
     })
   })

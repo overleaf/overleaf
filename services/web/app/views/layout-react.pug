@@ -17,8 +17,8 @@ block append meta
 	- const sessionUser = getSessionUser()
 	- const staffAccess = sessionUser?.staffAccess
 	- const canDisplaySplitTestMenu = hasFeature('saas') && ((canDisplayAdminMenu && hasAdminCapability('view-split-test')) || staffAccess?.splitTestMetrics || staffAccess?.splitTestManagement)
-	- const canDisplaySurveyMenu = hasFeature('saas') && canDisplayAdminMenu && hasAdminCapability('manage-survey')
-	- const canDisplayScriptLogMenu = hasFeature('saas') && hasAdminCapability('view-script-log') && canDisplayAdminMenu
+	- const canDisplaySurveyMenu = hasFeature('saas') && canDisplayAdminMenu && hasAdminCapability('manage-survey', false)
+	- const canDisplayScriptLogMenu = hasFeature('saas') && hasAdminCapability('view-script-log', false) && canDisplayAdminMenu
 	- const enableUpgradeButton = projectDashboardReact && usersBestSubscription && (usersBestSubscription.type === 'free' || usersBestSubscription.type === 'standalone-ai-add-on')
 	- const showSignUpLink = hasFeature('registration-page')
 
