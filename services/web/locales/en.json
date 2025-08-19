@@ -2725,7 +2725,7 @@
   "you_dont_have_any_repositories": "You don’t have any repositories",
   "you_have_0_free_suggestions_left": "You have 0 free suggestions left",
   "you_have_1_free_suggestion_left": "You have 1 free suggestion left",
-  "you_have_1_license_and_your_plan_supports_up_to_y": "You have 1 license and your plan supports up to __groupSize__.",
+  "you_have_1_license_and_your_plan_supports_up_to_y": "You have allocated 1 license and your plan supports up to __groupSize__.",
   "you_have_added_x_of_group_size_y": "You have added <0>__addedUsersSize__</0> of <1>__groupSize__</1> available members",
   "you_have_been_invited_to_transfer_management_of_your_account": "You have been invited to transfer management of your account.",
   "you_have_been_invited_to_transfer_management_of_your_account_to": "You have been invited to transfer management of your account to __groupName__.",

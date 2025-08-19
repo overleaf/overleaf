@@ -555,7 +555,7 @@ describe('GroupMembers', function () {
       )
 
       cy.findByTestId('group-size-details').contains(
-        'You have 1 license and your plan supports up to 10. Buy more licenses.'
+        'You have allocated 1 license and your plan supports up to 10. Buy more licenses.'
       )
     })
 
@@ -572,7 +572,9 @@ describe('GroupMembers', function () {
       )
 
       cy.findByTestId('group-size-details').within(() => {
-        cy.findByText(/you have \d+ license and your plan supports up to \d+/i)
+        cy.findByText(
+          /you have allocated \d+ license and your plan supports up to \d+/i
+        )
         cy.findByText(/buy more licenses/i).should('not.exist')
       })
     })
