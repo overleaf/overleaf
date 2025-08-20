@@ -21,6 +21,10 @@ export const NotificationError = (args: Args) => {
   return <Notification {...args} isDismissible type="error" />
 }
 
+export const NotificationOffer = (args: Args) => {
+  return <Notification {...args} isDismissible type="offer" />
+}
+
 export const NotificationWithActionBelowContent = (args: Args) => {
   return (
     <Notification
@@ -207,7 +211,7 @@ export const ShortTextAndActionAsLinkButStyledAsButton = (args: Args) => {
       {...args}
       content={<p>Lorem ipsum</p>}
       action={
-        <a href="/" className="btn btn-secondary btn-sm">
+        <a href="/" className="btn btn-secondary">
           An action
         </a>
       }
@@ -221,7 +225,7 @@ export const LongActionButton = (args: Args) => {
     <Notification
       {...args}
       action={
-        <button className="btn btn-secondary btn-sm">
+        <button className="btn btn-secondary">
           Action that has a lot of text
         </button>
       }
@@ -254,8 +258,8 @@ export const MultipleButtons = (args: Args) => {
       content={<p>Lorem ipsum</p>}
       action={
         <>
-          <button className="btn btn-secondary btn-sm">button1</button>
-          <button className="btn btn-secondary btn-sm">button2</button>
+          <button className="btn btn-secondary">button1</button>
+          <button className="btn btn-secondary">button2</button>
         </>
       }
       type="info"
@@ -280,8 +284,8 @@ export const OverlayedWithCustomClass = (args: Args) => {
         className="ol-overlay"
         action={
           <>
-            <button className="btn btn-secondary btn-sm">button1</button>
-            <button className="btn btn-secondary btn-sm">button2</button>
+            <button className="btn btn-secondary">button1</button>
+            <button className="btn btn-secondary">button2</button>
           </>
         }
         type="info"
@@ -326,7 +330,7 @@ export const SuccessFlow = (args: Args) => {
   const ctaText = isLoading ? 'Processing' : 'Click'
   const action = (
     <button
-      className="btn btn-secondary btn-sm"
+      className="btn btn-secondary"
       onClick={() => handleClick()}
       disabled={isLoading}
     >
@@ -377,7 +381,7 @@ export default {
         etc are all supported.
       </p>
     ),
-    action: <button className="btn btn-secondary btn-sm">An action</button>,
+    action: <button className="btn btn-secondary">An action</button>,
     isDismissible: true,
   },
 }
