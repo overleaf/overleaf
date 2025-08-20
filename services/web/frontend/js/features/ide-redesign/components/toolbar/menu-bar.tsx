@@ -27,6 +27,9 @@ import { useDetachCompileContext as useCompileContext } from '@/shared/context/d
 import { useEditorAnalytics } from '@/shared/hooks/use-editor-analytics'
 import { useProjectSettingsContext } from '@/features/editor-left-menu/context/project-settings-context'
 import { useSurveyUrl } from '../../hooks/use-survey-url'
+import getMeta from '@/utils/meta'
+import EditorCloneProjectModalWrapper from '@/features/clone-project-modal/components/editor-clone-project-modal-wrapper'
+import useOpenProject from '@/shared/hooks/use-open-project'
 
 export const ToolbarMenuBar = () => {
   const { t } = useTranslation()
@@ -38,6 +41,10 @@ export const ToolbarMenuBar = () => {
   const { pdfUrl } = useCompileContext()
   const wordCountEnabled = pdfUrl || isSplitTestEnabled('word-count-client')
   const [showWordCountModal, setShowWordCountModal] = useState(false)
+  const [showCloneProjectModal, setShowCloneProjectModal] = useState(false)
+  const openProject = useOpenProject()
+
+  const anonymous = getMeta('ol-anonymous')
 
   useCommandProvider(
     () => [
@@ -58,16 +65,26 @@ export const ToolbarMenuBar = () => {
         },
         id: 'word_count',
       },
+      {
+        type: 'command',
+        label: t('make_a_copy'),
+        disabled: anonymous,
+        handler: () => {
+          setShowCloneProjectModal(true)
+        },
+        id: 'copy_project',
+      },
     ],
-    [t, setView, view, wordCountEnabled]
+    [t, setView, view, wordCountEnabled, anonymous]
   )
   const fileMenuStructure: MenuStructure = useMemo(
     () => [
       {
         id: 'file-file-tree',
-        children: ['new_file', 'new_folder', 'upload_file'],
+        children: ['new_file', 'new_folder', 'upload_file', 'copy_project'],
       },
       { id: 'file-tools', children: ['show_version_history', 'word_count'] },
+      { id: 'submit', children: ['submit-project'] },
       {
         id: 'file-download',
         children: ['download-as-source-zip', 'download-pdf'],
@@ -285,6 +302,11 @@ export const ToolbarMenuBar = () => {
       <WordCountModal
         show={showWordCountModal}
         handleHide={() => setShowWordCountModal(false)}
+      />
+      <EditorCloneProjectModalWrapper
+        show={showCloneProjectModal}
+        handleHide={() => setShowCloneProjectModal(false)}
+        openProject={openProject}
       />
     </>
   )
