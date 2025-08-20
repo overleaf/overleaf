@@ -232,6 +232,7 @@
     "@testing-library/dom": "^10.4.0",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.4.3",
+    "@types/algoliasearch": "^3.34.11",
     "@types/bootstrap": "^5.2.10",
     "@types/chai": "^4.3.0",
     "@types/dateformat": "^5.0.2",

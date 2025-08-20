@@ -64,6 +64,7 @@ import { ActiveExperiment } from './labs-utils'
 import { Subscription as AdminSubscription } from '../../../types/admin/subscription'
 import { AdminCapability } from '../../../types/admin-capabilities'
 import { GroupAuditLog } from '../../../modules/group-audit-log/frontend/js/components/logs'
+import { AlgoliaConfig } from '../../../modules/algolia-search/frontend/js/types'
 
 export interface Meta {
   'ol-ExposedSettings': ExposedSettings
@@ -74,6 +75,7 @@ export interface Meta {
   'ol-adminCapabilities': AdminCapability[]
   'ol-adminSubscription': AdminSubscription
   'ol-aiAssistViaWritefullSource': string
+  'ol-algolia': AlgoliaConfig | undefined
   'ol-allInReconfirmNotificationPeriods': UserEmailData[]
   'ol-allowedExperiments': string[]
   'ol-allowedImageNames': AllowedImageName[]
