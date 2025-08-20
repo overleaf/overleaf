@@ -10,6 +10,7 @@ type GroupMemberRowProps = {
   selectUser: (user: User) => void
   unselectUser: (user: User) => void
   selected: boolean
+  hasWriteAccess: boolean
 }
 
 export default function UserRow({
@@ -17,6 +18,7 @@ export default function UserRow({
   selectUser,
   unselectUser,
   selected,
+  hasWriteAccess,
 }: GroupMemberRowProps) {
   const { t } = useTranslation()
 
@@ -34,13 +36,15 @@ export default function UserRow({
   return (
     <tr key={`user-${user.email}`} className="managed-entity-row">
       <td className="cell-checkbox">
-        <OLFormCheckbox
-          autoComplete="off"
-          checked={selected}
-          onChange={e => handleSelectUser(e, user)}
-          aria-label={t('select_user')}
-          data-testid="select-single-checkbox"
-        />
+        {hasWriteAccess && (
+          <OLFormCheckbox
+            autoComplete="off"
+            checked={selected}
+            onChange={e => handleSelectUser(e, user)}
+            aria-label={t('select_user')}
+            data-testid="select-single-checkbox"
+          />
+        )}
       </td>
       <td>{user.email}</td>
       <td className="cell-name">

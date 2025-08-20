@@ -86,6 +86,19 @@ const UserMembershipMiddleware = {
     ]),
   ],
 
+  requireGroupManagersWriteAccess: [
+    AuthenticationController.requireLogin(),
+    fetchEntityConfig('groupManagers'),
+    fetchEntity(),
+    requireEntity(),
+    useAdminCapabilities,
+    allowAccessIfAny([
+      UserMembershipAuthorization.hasEntityAccess(),
+      UserMembershipAuthorization.hasStaffAccess('groupManagement'),
+      UserMembershipAuthorization.hasAdminCapability('modify-group-manager'),
+    ]),
+  ],
+
   requireGroupAdminAccess: [
     AuthenticationController.requireLogin(),
     fetchEntityConfig('groupAdmin'),

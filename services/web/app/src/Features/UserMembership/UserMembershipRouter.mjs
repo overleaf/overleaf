@@ -61,12 +61,12 @@ export default {
     )
     webRouter.post(
       '/manage/groups/:id/managers',
-      UserMembershipMiddleware.requireGroupManagersManagementAccess,
+      UserMembershipMiddleware.requireGroupManagersWriteAccess,
       UserMembershipController.add
     )
     webRouter.delete(
       '/manage/groups/:id/managers/:userId',
-      UserMembershipMiddleware.requireGroupManagersManagementAccess,
+      UserMembershipMiddleware.requireGroupManagersWriteAccess,
       UserMembershipController.remove
     )
 

@@ -28,6 +28,7 @@ describe('group managers', function () {
       win.metaAttributesCache.set('ol-users', [JOHN_DOE, BOBBY_LAPOINTE])
       win.metaAttributesCache.set('ol-groupId', GROUP_ID)
       win.metaAttributesCache.set('ol-groupName', 'My Awesome Team')
+      win.metaAttributesCache.set('ol-hasWriteAccess', true)
     })
 
     cy.mount(<GroupManagers />)

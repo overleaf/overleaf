@@ -121,6 +121,7 @@ async function _renderManagersPage(req, res, next, template) {
     name: entityName,
     users,
     groupId: entityPrimaryKey,
+    entityAccess: UserMembershipAuthorization.hasEntityAccess()(req),
   })
 }
 
