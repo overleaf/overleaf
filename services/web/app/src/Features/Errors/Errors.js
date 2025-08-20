@@ -186,6 +186,8 @@ class SAMLEmailNotRecognizedError extends SAMLAuthenticationError {
   }
 }
 
+class SAMLDomainCaptureRegisterError extends SAMLAuthenticationError {}
+
 class SAMLSessionDataMissing extends BackwardCompatibleError {
   constructor(arg) {
     super(arg)
@@ -360,6 +362,7 @@ module.exports = {
   SAMLLoginFailureError,
   SAMLEmailNotRecognizedError,
   SAMLResponseAlreadyProcessedError,
+  SAMLDomainCaptureRegisterError,
   SLInV2Error,
   ThirdPartyIdentityExistsError,
   ThirdPartyUserNotFoundError,
