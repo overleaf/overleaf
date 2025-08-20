@@ -38,7 +38,7 @@ export default function RailPanel({
     <Panel
       id={
         newErrorlogs
-          ? `ide-redesign-sidebar-panel-${selectedTab}`
+          ? `ide-redesign-sidebar-panel-${isHistoryView ? 'file-tree' : selectedTab}`
           : 'ide-redesign-sidebar-panel'
       }
       className={classNames({ hidden: isReviewPanelOpen })}

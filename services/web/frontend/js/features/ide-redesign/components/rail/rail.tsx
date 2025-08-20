@@ -166,7 +166,8 @@ export const RailLayout = () => {
     [openTab, togglePane, selectedTab, railTabs, sendEvent, markMessagesAsRead]
   )
 
-  const isReviewPanelOpen = selectedTab === 'review-panel'
+  const isReviewPanelOpen =
+    selectedTab === 'review-panel' && isOpen && !isHistoryView
 
   const { tabsInRail, tabsInOverflow, tabWrapperRef } =
     useRailOverflow(railTabs)
