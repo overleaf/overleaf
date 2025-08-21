@@ -34,6 +34,9 @@
       "body-parser": "1.20.3",
       "multer": "2.0.2"
     },
+    "isomorphic-git@^1.33.0": {
+      "sha.js": "2.4.12"
+    },
     "request@2.88.2": {
       "tough-cookie": "5.1.2",
       "form-data": "2.5.5"

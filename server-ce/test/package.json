@@ -19,10 +19,15 @@
     "celebrate": "^15.0.3",
     "cypress": "13.13.2",
     "express": "^4.21.2",
-    "isomorphic-git": "^1.25.10",
+    "isomorphic-git": "^1.33.0",
     "js-yaml": "^4.1.0",
     "pdf-parse": "^1.1.1",
     "typescript": "^5.0.4",
     "uuid": "^9.0.1"
+  },
+  "overrides": {
+    "isomorphic-git@^1.33.0": {
+      "sha.js": "2.4.12"
+    }
   }
 }
