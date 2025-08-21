@@ -1,103 +1,13 @@
 import OLButton from '@/shared/components/ol/ol-button'
 import MaterialIcon from '@/shared/components/material-icon'
 import { Trans, useTranslation } from 'react-i18next'
-import { useRailContext } from '../../contexts/rail-context'
-import { usePdfPreviewContext } from '@/features/pdf-preview/components/pdf-preview-provider'
 import { useDetachCompileContext as useCompileContext } from '@/shared/context/detach-compile-context'
-import { useIsNewEditorEnabled } from '../../utils/new-editor-utils'
 import { upgradePlan } from '@/main/account-upgrade'
-import classNames from 'classnames'
 import { useStopOnFirstError } from '@/shared/hooks/use-stop-on-first-error'
 import { useCallback } from 'react'
+import ErrorState from './error-state'
 
-// AvailableStates
-// - rendering-error-expected
-// - rendering-error
-// - clsi-maintenance
-// - clsi-unavailable
-// - too-recently-compiled
-// - terminated
-// - rate-limited
-// - compile-in-progress
-// - autocompile-disabled
-// - project-too-large
-// - timedout
-// - failure
-// - clear-cache
-// - pdf-viewer-loading-error
-// - validation-problems
-function PdfErrorState() {
-  const { loadingError } = usePdfPreviewContext()
-  // TODO ide-redesign-cleanup: rename showLogs to something else and check usages
-  const { hasShortCompileTimeout, error, showLogs } = useCompileContext()
-  const newEditor = useIsNewEditorEnabled()
-  const { t } = useTranslation()
-
-  if (!newEditor || (!loadingError && !showLogs)) {
-    return null
-  }
-
-  switch (error) {
-    case 'timedout': {
-      if (hasShortCompileTimeout) {
-        return <CompileTimeoutErrorState />
-      } else {
-        return <LongCompileTimeoutErrorState />
-      }
-    }
-    case 'compile-in-progress':
-      return (
-        <ErrorState
-          title={t('pdf_compile_in_progress_error')}
-          description={t('pdf_compile_try_again')}
-          iconType="warning"
-        />
-      )
-    default:
-      return <GeneralErrorState />
-  }
-}
-
-const GeneralErrorState = () => {
-  const { t } = useTranslation()
-  const { openTab: openRailTab } = useRailContext()
-
-  return (
-    <ErrorState
-      title={t('pdf_couldnt_compile')}
-      description={t('we_are_unable_to_generate_the_pdf_at_this_time')}
-      iconType="warning"
-      actions={
-        <OLButton
-          variant="secondary"
-          size="sm"
-          onClick={() => {
-            openRailTab('errors')
-          }}
-        >
-          {t('check_logs')}
-        </OLButton>
-      }
-      extraContent={
-        <div className="pdf-error-state-info-box">
-          <div className="pdf-error-state-info-box-title">
-            <MaterialIcon type="info" unfilled />
-            {t('why_might_this_happen')}
-          </div>
-          <div className="pdf-error-state-info-box-text">
-            <ul className="pdf-error-state-info-box-list">
-              <li>{t('there_is_an_unrecoverable_latex_error_check_logs')}</li>
-              <li>{t('the_document_environment_contains_no_content')}</li>
-              <li>{t('this_project_contains_a_file_called_output')}</li>
-            </ul>
-          </div>
-        </div>
-      }
-    />
-  )
-}
-
-const CompileTimeoutErrorState = () => {
+export const ShortCompileTimeoutErrorState = () => {
   const { t } = useTranslation()
 
   return (
@@ -118,7 +28,7 @@ const CompileTimeoutErrorState = () => {
   )
 }
 
-const LongCompileTimeoutErrorState = () => {
+export const LongCompileTimeoutErrorState = () => {
   const { t } = useTranslation()
 
   const { enableStopOnFirstError } = useStopOnFirstError({
@@ -196,42 +106,3 @@ const LongCompileTimeoutErrorState = () => {
     />
   )
 }
-
-const ErrorState = ({
-  title,
-  description,
-  iconType,
-  actions,
-  iconClassName,
-  extraContent,
-}: {
-  title: string
-  description: string
-  iconType: string
-  actions?: React.ReactNode
-  iconClassName?: string
-  extraContent?: React.ReactNode
-}) => {
-  return (
-    <div className="pdf-error-state">
-      <div className="pdf-error-state-top-section">
-        <div
-          className={classNames(
-            'pdf-error-state-icon',
-            'pdf-error-state-warning-icon',
-            iconClassName
-          )}
-        >
-          <MaterialIcon type={iconType} />
-        </div>
-        <div className="pdf-error-state-text">
-          <p className="pdf-error-state-label">{title}</p>
-          <p className="pdf-error-state-description">{description}</p>
-        </div>
-        {actions}
-      </div>
-      {extraContent}
-    </div>
-  )
-}
-export default PdfErrorState

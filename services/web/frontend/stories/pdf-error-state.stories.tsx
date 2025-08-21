@@ -1,7 +1,7 @@
 import useFetchMock from './hooks/use-fetch-mock'
 import { mockCompile } from './fixtures/compile'
 import { ScopeDecorator, user } from './decorators/scope'
-import PdfErrorState from '@/features/ide-redesign/components/pdf-preview/pdf-error-state'
+import PdfErrorState from '@/features/ide-redesign/components/pdf-preview/pdf-error-state/pdf-error-state'
 import { useDetachCompileContext as useCompileContext } from '@/shared/context/detach-compile-context'
 import { useEffect } from 'react'
 import PdfPreview from '@/features/pdf-preview/components/pdf-preview'
@@ -12,13 +12,16 @@ export default {
 }
 
 const compileErrors = [
+  'autocompile-disabled',
   'autocompile-backoff',
   'clear-cache',
   'clsi-maintenance',
+  'clsi-unavailable',
   'compile-in-progress',
   'exited',
   'failure',
   'generic',
+  'pdf-viewer-loading-error',
   'project-too-large',
   'rate-limited',
   'success',
