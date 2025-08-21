@@ -34,7 +34,7 @@ const users = {
   },
 }
 
-export const copyableProject = <Project>{
+export const copyableProject = {
   id: '62f17f594641b405ca2b3264',
   name: 'Starfleet Report (owner)',
   lastUpdated: moment().subtract(1, 'day').toISOString(),
@@ -44,9 +44,9 @@ export const copyableProject = <Project>{
   archived: false,
   trashed: false,
   owner: users.riker,
-}
+} as Project
 
-export const archiveableProject = <Project>{
+export const archiveableProject = {
   id: '62d6d3721357e20a682110d5',
   name: "Captain's logs (Invite & Read Only)",
   lastUpdated: moment().subtract(1, 'week').toISOString(),
@@ -56,9 +56,9 @@ export const archiveableProject = <Project>{
   archived: false,
   trashed: false,
   owner: users.picard,
-}
+} as Project
 
-export const trashedProject = <Project>{
+export const trashedProject = {
   id: '42f17f594641b405ca2b3265',
   name: 'Starfleet Report draft (owner & trashed)',
   lastUpdated: moment().subtract(2, 'year').toISOString(),
@@ -68,9 +68,9 @@ export const trashedProject = <Project>{
   archived: false,
   trashed: true,
   owner: users.riker,
-}
+} as Project
 
-export const archivedProject = <Project>{
+export const archivedProject = {
   id: '52f17f594641b405ca2b3266',
   name: 'Starfleet Report old (owner & archive)',
   lastUpdated: moment().subtract(1, 'year').toISOString(),
@@ -80,9 +80,9 @@ export const archivedProject = <Project>{
   archived: true,
   trashed: false,
   owner: users.riker,
-}
+} as Project
 
-export const trashedAndNotOwnedProject = <Project>{
+export const trashedAndNotOwnedProject = {
   id: '63d6d3721357e20a682110d5',
   name: "Captain's logs very old (Trashed & Read Only & Not Owned)",
   lastUpdated: moment().subtract(11, 'year').toISOString(),
@@ -92,7 +92,7 @@ export const trashedAndNotOwnedProject = <Project>{
   archived: false,
   trashed: true,
   owner: users.picard,
-}
+} as Project
 
 export const sharedProject = archiveableProject
 

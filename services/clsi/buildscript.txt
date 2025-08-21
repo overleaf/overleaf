@@ -5,7 +5,7 @@ clsi
 --env-add=ENABLE_PDF_CACHING="true",PDF_CACHING_ENABLE_WORKER_POOL="true",ALLOWED_IMAGES=quay.io/sharelatex/texlive-full:2017.1,TEXLIVE_IMAGE=quay.io/sharelatex/texlive-full:2017.1,TEX_LIVE_IMAGE_NAME_OVERRIDE=us-east1-docker.pkg.dev/overleaf-ops/ol-docker,TEXLIVE_IMAGE_USER="tex",SANDBOXED_COMPILES="true",SANDBOXED_COMPILES_HOST_DIR_COMPILES=$PWD/compiles,SANDBOXED_COMPILES_HOST_DIR_OUTPUT=$PWD/output
 --env-pass-through=
 --esmock-loader=False
---node-version=22.17.0
+--node-version=22.18.0
 --public-repo=True
 --script-version=4.7.0
 --use-large-ci-runner=True

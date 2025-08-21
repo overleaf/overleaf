@@ -2,7 +2,7 @@
 # Instead run bin/update_build_scripts from
 # https://github.com/overleaf/internal/
 
-FROM node:22.17.0 AS base
+FROM node:22.18.0 AS base
 
 WORKDIR /overleaf/services/history-v1
 COPY services/history-v1/install_deps.sh /overleaf/services/history-v1/
