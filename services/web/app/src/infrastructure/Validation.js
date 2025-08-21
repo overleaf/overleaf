@@ -3,6 +3,7 @@
 const { Joi: CelebrateJoi, celebrate, errors } = require('celebrate')
 const { ObjectId } = require('mongodb-legacy')
 const { NotFoundError } = require('../Features/Errors/Errors')
+const { z } = require('zod')
 
 /**
  * @import { ZodType } from 'zod'
@@ -39,6 +40,11 @@ function validate(schema) {
   return celebrate(schema, { allowUnknown: true })
 }
 
+const zz = {
+  objectId: () =>
+    z.string().refine(ObjectId.isValid, { message: 'invalid Mongo ObjectId' }),
+}
+
 /**
  * Validate a request against a zod schema
  *
@@ -59,4 +65,4 @@ function validateReq(req, schema) {
   }
 }
 
-module.exports = { Joi, validate, errorMiddleware, validateReq }
+module.exports = { Joi, validate, errorMiddleware, validateReq, z, zz }
