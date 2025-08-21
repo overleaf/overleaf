@@ -24,13 +24,13 @@ test-e2e-native:
 test-e2e:
 	docker compose build host-admin
 	docker compose up --detach --wait host-admin
-	docker compose up --detach --wait mongo || (docker compose logs mongo && exit 42)
-	docker compose up --no-log-prefix --exit-code-from=e2e e2e host-admin || (docker compose logs mongo && exit 42)
+	docker compose up --detach --wait mongo || { docker compose logs mongo; exit 42; }
+	docker compose up --no-log-prefix --exit-code-from=e2e e2e host-admin || { docker compose logs mongo; exit 42; }
 
 test-e2e-open:
 	docker compose up --detach --wait host-admin
-	docker compose up --detach --wait mongo || (docker compose logs mongo && exit 42)
-	docker compose up --no-log-prefix --exit-code-from=e2e-open e2e-open host-admin || (docker compose logs mongo && exit 42)
+	docker compose up --detach --wait mongo || { docker compose logs mongo; exit 42; }
+	docker compose up --no-log-prefix --exit-code-from=e2e-open e2e-open host-admin || { docker compose logs mongo; exit 42; }
 
 SHARD_PROJECT_NAMES = \
 	test-ce-default \

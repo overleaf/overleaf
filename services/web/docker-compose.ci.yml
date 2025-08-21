@@ -97,8 +97,6 @@ services:
 
   mongo:
     image: mongo:8.0.11
-    logging:
-      driver: none
     command: --replSet overleaf
     volumes:
       - ../../bin/shared/mongodb-init-replica-set.js:/docker-entrypoint-initdb.d/mongodb-init-replica-set.js
