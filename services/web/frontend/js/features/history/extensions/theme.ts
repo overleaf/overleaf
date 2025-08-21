@@ -46,6 +46,9 @@ const createThemeFromOptions = ({
 }
 
 const baseTheme = EditorView.theme({
+  '&.cm-editor.cm-editor': {
+    colorScheme: 'light',
+  },
   '.cm-content': {
     fontSize: 'var(--font-size)',
     fontFamily: 'var(--source-font-family)',
