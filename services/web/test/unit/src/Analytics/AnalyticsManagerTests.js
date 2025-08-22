@@ -38,20 +38,25 @@ describe('AnalyticsManager', function () {
       add: sinon.stub().resolves(),
       process: sinon.stub().resolves(),
     }
-    const self = this
+    this.analyticsEmailChangeQueue = {
+      add: sinon.stub().resolves(),
+      process: sinon.stub().resolves(),
+    }
     this.Queues = {
       getQueue: queueName => {
         switch (queueName) {
           case 'analytics-events':
-            return self.analyticsEventsQueue
+            return this.analyticsEventsQueue
           case 'analytics-editing-sessions':
-            return self.analyticsEditingSessionQueue
+            return this.analyticsEditingSessionQueue
           case 'emails-onboarding':
-            return self.onboardingEmailsQueue
+            return this.onboardingEmailsQueue
           case 'analytics-user-properties':
-            return self.analyticsUserPropertiesQueue
+            return this.analyticsUserPropertiesQueue
           case 'analytics-account-mapping':
-            return self.analyticsAccountMappingQueue
+            return this.analyticsAccountMappingQueue
+          case 'analytics-email-change':
+            return this.analyticsEmailChangeQueue
           default:
             throw new Error('Unexpected queue name')
         }
@@ -308,7 +313,6 @@ describe('AnalyticsManager', function () {
     beforeEach(function () {
       this.userId = '123abc'
       this.analyticsId = 'bccd308c-5d72-426e-a106-662e88557795'
-      const self = this
       this.AnalyticsManager = SandboxedModule.require(MODULE_PATH, {
         requires: {
           '@overleaf/settings': {},
@@ -316,15 +320,17 @@ describe('AnalyticsManager', function () {
             getQueue: queueName => {
               switch (queueName) {
                 case 'analytics-events':
-                  return self.analyticsEventsQueue
+                  return this.analyticsEventsQueue
                 case 'analytics-editing-sessions':
-                  return self.analyticsEditingSessionQueue
+                  return this.analyticsEditingSessionQueue
                 case 'emails-onboarding':
-                  return self.onboardingEmailsQueue
+                  return this.onboardingEmailsQueue
                 case 'analytics-user-properties':
-                  return self.analyticsUserPropertiesQueue
+                  return this.analyticsUserPropertiesQueue
                 case 'analytics-account-mapping':
-                  return self.analyticsAccountMappingQueue
+                  return this.analyticsAccountMappingQueue
+                case 'analytics-email-change':
+                  return this.analyticsEmailChangeQueue
                 default:
                   throw new Error('Unexpected queue name')
               }
