@@ -13,6 +13,7 @@ const Errors = require('../Errors/Errors')
 const NewsletterManager = require('../Newsletter/NewsletterManager')
 const UserAuditLogHandler = require('./UserAuditLogHandler')
 const AnalyticsManager = require('../Analytics/AnalyticsManager')
+const EmailChangeHelper = require('../Analytics/EmailChangeHelper')
 const SubscriptionLocator = require('../Subscription/SubscriptionLocator')
 const NotificationsBuilder = require('../Notifications/NotificationsBuilder')
 const _ = require('lodash')
@@ -111,17 +112,36 @@ async function addEmailAddress(userId, newEmail, affiliationOptions, auditLog) {
     throw OError.tag(error, 'problem adding affiliation while adding email')
   }
 
+  const createdAt = new Date()
+  let res
   try {
     const reversedHostname = newEmail.split('@')[1].split('').reverse().join('')
     const update = {
       $push: {
-        emails: { email: newEmail, createdAt: new Date(), reversedHostname },
+        emails: { email: newEmail, createdAt, reversedHostname },
       },
     }
-    await updateUser({ _id: userId, 'emails.email': { $ne: newEmail } }, update)
+    res = await updateUser(
+      { _id: userId, 'emails.email': { $ne: newEmail } },
+      update
+    )
   } catch (error) {
     throw OError.tag(error, 'problem updating users emails')
   }
+
+  if (res.matchedCount !== 1) {
+    return
+  }
+
+  EmailChangeHelper.registerEmailCreation(userId, newEmail, {
+    createdAt: new Date(),
+    emailCreatedAt: createdAt,
+  }).catch(error => {
+    logger.warn(
+      { error, userId, newEmail },
+      'Error registering email creation with analytics'
+    )
+  })
 }
 
 async function clearSAMLData(userId, auditLog, sendEmail) {
@@ -220,6 +240,17 @@ async function setDefaultEmailAddress(
     userId,
     'primary-email-address-updated'
   )
+
+  EmailChangeHelper.registerEmailUpdate(userId, email, {
+    isPrimary: true,
+    action: 'updated',
+    createdAt: new Date(),
+  }).catch(err => {
+    logger.warn(
+      { err, userId, email },
+      'Error registering email change with analytics'
+    )
+  })
 
   if (sendSecurityAlert) {
     // no need to wait, errors are logged and not passed back
@@ -362,6 +393,18 @@ async function confirmEmail(userId, email, affiliationOptions) {
     throw new Errors.NotFoundError('user id and email do no match')
   }
   await FeaturesUpdater.promises.refreshFeatures(userId, 'confirm-email')
+
+  EmailChangeHelper.registerEmailUpdate(userId, email, {
+    emailConfirmedAt: confirmedAt,
+    action: 'updated',
+    isPrimary: false,
+  }).catch(error =>
+    logger.warn(
+      { error, userId, email },
+      'Error registering email confirmation with analytics'
+    )
+  )
+
   try {
     await maybeCreateRedundantSubscriptionNotification(userId, email)
   } catch (error) {
@@ -455,6 +498,16 @@ async function removeEmailAddress(
   if (res.matchedCount !== 1) {
     throw new Error('Cannot remove email')
   }
+
+  EmailChangeHelper.registerEmailDeletion(userId, email, {
+    isPrimary: false,
+    emailDeletedAt: new Date(),
+  }).catch(error =>
+    logger.warn(
+      { error, userId, email },
+      'Error registering email deletion with analytics'
+    )
+  )
 
   await FeaturesUpdater.promises.refreshFeatures(userId, 'remove-email')
 }
