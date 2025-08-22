@@ -16,7 +16,7 @@ describe('AnalyticsManager', function () {
     this.fakeUserId = 'dbfc9438d14996f73dd172fb'
     this.analyticsId = 'ecdb935a-52f3-4f91-aebc-7a70d2ffbb55'
     this.Settings = {
-      analytics: { enabled: true },
+      analytics: { enabled: true, hashedEmailSalt: 'salt' },
     }
     this.analyticsEventsQueue = {
       add: sinon.stub().resolves(),
@@ -305,6 +305,30 @@ describe('AnalyticsManager', function () {
         this.analyticsAccountMappingQueue.add,
         'account-mapping',
         message
+      )
+    })
+
+    it('email change', async function () {
+      const message = {
+        userId: this.fakeUserId,
+        email: 'test@example.com',
+        createdAt: '2021-01-01T00:00:00Z',
+        action: 'created',
+        emailCreatedAt: '2021-01-01T00:00:00Z',
+        isPrimary: false,
+      }
+      this.AnalyticsManager.registerEmailChange(message)
+      const convertedMessage = {
+        ...message,
+        emailConfirmedAt: undefined,
+        emailDeletedAt: undefined,
+        email:
+          '1778d425d64c5259ef7b574a2488647eb51ca739a0b16bfa0e2e3e16fff362db', // sha256 hash of email + salt
+      }
+      sinon.assert.calledWithMatch(
+        this.analyticsEmailChangeQueue.add,
+        'email-change',
+        convertedMessage
       )
     })
   })
