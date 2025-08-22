@@ -9,14 +9,20 @@ services:
       - .:/overleaf/services/notifications
       - ../../node_modules:/overleaf/node_modules
       - ../../libraries:/overleaf/libraries
+      - ../../bin/shared/wait_for_it:/overleaf/bin/shared/wait_for_it
     working_dir: /overleaf/services/notifications
     environment:
       MOCHA_GREP: ${MOCHA_GREP}
       LOG_LEVEL: ${LOG_LEVEL:-}
+      MONGO_CONNECTION_STRING: mongodb://mongo/test-overleaf
       NODE_ENV: test
       NODE_OPTIONS: "--unhandled-rejections=strict"
+    entrypoint: /overleaf/bin/shared/wait_for_it mongo:27017 --timeout=60 --
     command: npm run --silent test:unit
     user: node
+    depends_on:
+      mongo:
+        condition: service_started
 
   test_acceptance:
     image: node:22.18.0

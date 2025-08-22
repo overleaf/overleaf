@@ -11,6 +11,7 @@ services:
     user: node
     command: npm run test:unit:_run
     environment:
+      MONGO_CONNECTION_STRING: mongodb://mongo/test-overleaf
       NODE_ENV: test
       NODE_OPTIONS: "--unhandled-rejections=strict"
 

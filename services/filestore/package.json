@@ -14,7 +14,7 @@
     "format": "prettier --list-different $PWD/'**/*.*js'",
     "format:fix": "prettier --write $PWD/'**/*.*js'",
     "test:acceptance:_run": "mocha --recursive --reporter spec --timeout 15000 --exit $@ test/acceptance/js",
-    "test:unit:_run": "mocha --recursive --reporter spec $@ test/unit/js",
+    "test:unit:_run": "mocha --recursive --reporter spec --exit $@ test/unit/js",
     "lint:fix": "eslint --fix .",
     "types:check": "tsc --noEmit"
   },

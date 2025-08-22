@@ -87,7 +87,6 @@ test: format lint typecheck shellcheck test_unit test_acceptance
 test_unit:
 ifneq (,$(wildcard test/unit))
 	$(DOCKER_COMPOSE_TEST_UNIT) run --rm test_unit
-	$(MAKE) test_unit_clean
 endif
 
 test_clean: test_unit_clean

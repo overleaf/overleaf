@@ -16,6 +16,7 @@ services:
     environment:
       MOCHA_GREP: ${MOCHA_GREP}
       LOG_LEVEL: ${LOG_LEVEL:-}
+      MONGO_CONNECTION_STRING: mongodb://mongo/test-overleaf
       NODE_ENV: test
       NODE_OPTIONS: "--unhandled-rejections=strict"
     command: npm run --silent test:unit

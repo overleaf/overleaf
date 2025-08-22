@@ -1,4 +1,7 @@
+// @ts-check
+
 import Metrics from '@overleaf/metrics'
+import MongoUtils from '@overleaf/mongo-utils'
 import Settings from '@overleaf/settings'
 import { MongoClient } from 'mongodb'
 
@@ -15,3 +18,7 @@ export const db = {
 }
 
 Metrics.mongodb.monitor(mongoClient)
+
+export async function cleanupTestDatabase() {
+  await MongoUtils.cleanupTestDatabase(mongoClient)
+}

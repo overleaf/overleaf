@@ -13,10 +13,18 @@ services:
     environment:
       MOCHA_GREP: ${MOCHA_GREP}
       LOG_LEVEL: ${LOG_LEVEL:-}
+      MONGO_CONNECTION_STRING: mongodb://mongo/test-overleaf
       NODE_ENV: test
       NODE_OPTIONS: "--unhandled-rejections=strict"
+      REDIS_HOST: redis_test
+      HISTORY_REDIS_HOST: redis_test
+      QUEUES_REDIS_HOST: redis_test
+      ANALYTICS_QUEUES_REDIS_HOST: redis_test
     command: npm run --silent test:unit
     user: node
+    depends_on:
+      redis_test:
+        condition: service_healthy
 
   test_acceptance:
     image: node:22.18.0
@@ -27,10 +35,10 @@ services:
     working_dir: /overleaf/services/real-time
     environment:
       ELASTIC_SEARCH_DSN: es:9200
-      REDIS_HOST: redis
-      HISTORY_REDIS_HOST: redis
-      QUEUES_REDIS_HOST: redis
-      ANALYTICS_QUEUES_REDIS_HOST: redis
+      REDIS_HOST: redis_test
+      HISTORY_REDIS_HOST: redis_test
+      QUEUES_REDIS_HOST: redis_test
+      ANALYTICS_QUEUES_REDIS_HOST: redis_test
       MONGO_HOST: mongo
       POSTGRES_HOST: postgres
       MOCHA_GREP: ${MOCHA_GREP}
@@ -39,11 +47,11 @@ services:
       NODE_OPTIONS: "--unhandled-rejections=strict"
     user: node
     depends_on:
-      redis:
+      redis_test:
         condition: service_healthy
     command: npm run --silent test:acceptance
 
-  redis:
+  redis_test:
     image: redis:7.4.3
     healthcheck:
       test: ping=$$(redis-cli ping) && [ "$$ping" = 'PONG' ]

@@ -1,4 +1,7 @@
+// @ts-check
+
 const Metrics = require('@overleaf/metrics')
+const MongoUtils = require('@overleaf/mongo-utils')
 
 const config = require('config')
 const { MongoClient } = require('mongodb')
@@ -18,6 +21,10 @@ const backedUpBlobs = db.collection('projectHistoryBackedUpBlobs')
 
 Metrics.mongodb.monitor(client)
 
+async function cleanupTestDatabase() {
+  await MongoUtils.cleanupTestDatabase(client)
+}
+
 module.exports = {
   client,
   db,
@@ -27,4 +34,5 @@ module.exports = {
   projects,
   shardedBlobs,
   backedUpBlobs,
+  cleanupTestDatabase,
 }

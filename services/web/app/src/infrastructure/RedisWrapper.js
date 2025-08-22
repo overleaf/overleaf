@@ -20,18 +20,7 @@ function client(feature) {
 
 async function cleanupTestRedis() {
   const rclient = client()
-  ensureTestRedis(rclient)
-  await rclient.flushall()
-}
-
-function ensureTestRedis(rclient) {
-  const host = rclient.options.host
-  const env = process.env.NODE_ENV
-  if (host !== 'redis_test' || env !== 'test') {
-    throw new Error(
-      `Refusing to clear Redis instance '${host}' in environment '${env}'`
-    )
-  }
+  await redis.cleanupTestRedis(rclient)
 }
 
 module.exports = { client, cleanupTestRedis }

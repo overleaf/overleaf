@@ -365,6 +365,10 @@ async function clearCachedHistoryId(projectId) {
   await rclient.del(key)
 }
 
+async function cleanupTestRedis() {
+  await redis.cleanupTestRedis(rclient)
+}
+
 // EXPORTS
 
 const countUnprocessedUpdatesCb = callbackify(countUnprocessedUpdates)
@@ -442,4 +446,5 @@ export const promises = {
   getCachedHistoryId,
   setCachedHistoryId,
   clearCachedHistoryId,
+  cleanupTestRedis,
 }

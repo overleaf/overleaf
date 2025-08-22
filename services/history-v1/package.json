@@ -66,7 +66,7 @@
     "format:fix": "prettier --write $PWD/'**/*.*js'",
     "test:unit": "npm run test:unit:_run -- --grep=$MOCHA_GREP",
     "test:acceptance": "npm run test:acceptance:_run -- --grep=$MOCHA_GREP",
-    "test:unit:_run": "mocha --recursive --reporter spec $@ test/unit/js",
+    "test:unit:_run": "mocha --recursive --reporter spec --exit $@ test/unit/js",
     "test:acceptance:_run": "mocha --recursive --reporter spec --timeout 15000 --exit $@ test/acceptance/js",
     "nodemon": "node --watch app.js",
     "migrate": "knex migrate:latest",

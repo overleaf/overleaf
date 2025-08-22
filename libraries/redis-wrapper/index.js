@@ -1,3 +1,5 @@
+// @ts-check
+
 const crypto = require('node:crypto')
 const os = require('node:os')
 const { promisify } = require('node:util')
@@ -168,6 +170,34 @@ async function runWithTimeout({ runner, timeout, context }) {
   ])
 }
 
+/**
+ * Delete all data from the test Redis instance
+ *
+ * @param {Redis} rclient
+ */
+async function cleanupTestRedis(rclient) {
+  ensureTestRedis(rclient)
+  await rclient.flushall()
+}
+
+/**
+ * Checks that the Redis client points to a test database
+ *
+ * In tests, the Redis instance is on a host called redis_test
+ *
+ * @param {Redis} rclient
+ */
+function ensureTestRedis(rclient) {
+  const host = rclient.options.host
+  const env = process.env.NODE_ENV
+  if (host !== 'redis_test' || env !== 'test') {
+    throw new Error(
+      `Refusing to clear Redis instance '${host}' in environment '${env}'`
+    )
+  }
+}
+
 module.exports = {
   createClient,
+  cleanupTestRedis,
 }

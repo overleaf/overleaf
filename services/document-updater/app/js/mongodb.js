@@ -1,4 +1,7 @@
+// @ts-check
+
 const Metrics = require('@overleaf/metrics')
+const MongoUtils = require('@overleaf/mongo-utils')
 const Settings = require('@overleaf/settings')
 const { MongoClient, ObjectId } = require('mongodb-legacy')
 
@@ -20,9 +23,14 @@ async function healthCheck() {
 
 Metrics.mongodb.monitor(mongoClient)
 
+async function cleanupTestDatabase() {
+  await MongoUtils.cleanupTestDatabase(mongoClient)
+}
+
 module.exports = {
   db,
   ObjectId,
   mongoClient,
   healthCheck: require('node:util').callbackify(healthCheck),
+  cleanupTestDatabase,
 }

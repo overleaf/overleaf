@@ -6,10 +6,23 @@ services:
   test_unit:
     image: ci/$PROJECT_NAME:$BRANCH_NAME-$BUILD_NUMBER
     user: node
+    volumes:
+      - ../../bin/shared/wait_for_it:/overleaf/bin/shared/wait_for_it
+    entrypoint: /overleaf/bin/shared/wait_for_it mongo:27017 --timeout=60 --
     command: npm run test:unit:_run
     environment:
+      MONGO_CONNECTION_STRING: mongodb://mongo/test-overleaf
       NODE_ENV: test
       NODE_OPTIONS: "--unhandled-rejections=strict"
+      REDIS_HOST: redis_test
+      QUEUES_REDIS_HOST: redis_test
+      HISTORY_REDIS_HOST: redis_test
+      ANALYTICS_QUEUES_REDIS_HOST: redis_test
+    depends_on:
+      mongo:
+        condition: service_started
+      redis_test:
+        condition: service_healthy
 
 
   test_acceptance:
@@ -17,10 +30,10 @@ services:
     image: ci/$PROJECT_NAME:$BRANCH_NAME-$BUILD_NUMBER
     environment:
       ELASTIC_SEARCH_DSN: es:9200
-      REDIS_HOST: redis
-      QUEUES_REDIS_HOST: redis
-      HISTORY_REDIS_HOST: redis
-      ANALYTICS_QUEUES_REDIS_HOST: redis
+      REDIS_HOST: redis_test
+      QUEUES_REDIS_HOST: redis_test
+      HISTORY_REDIS_HOST: redis_test
+      ANALYTICS_QUEUES_REDIS_HOST: redis_test
       MONGO_HOST: mongo
       POSTGRES_HOST: postgres
       MOCHA_GREP: ${MOCHA_GREP}
@@ -31,7 +44,7 @@ services:
     depends_on:
       mongo:
         condition: service_started
-      redis:
+      redis_test:
         condition: service_healthy
     user: node
     entrypoint: /overleaf/bin/shared/wait_for_it mongo:27017 --timeout=60 --
@@ -45,7 +58,7 @@ services:
       - ./:/tmp/build/
     command: tar -czf /tmp/build/build.tar.gz --exclude=build.tar.gz --exclude-vcs .
     user: root
-  redis:
+  redis_test:
     image: redis:7.4.3
     healthcheck:
       test: ping="$$(redis-cli ping)" && [ "$$ping" = 'PONG' ]

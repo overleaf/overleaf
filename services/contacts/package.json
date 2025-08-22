@@ -8,7 +8,7 @@
     "start": "node app.js",
     "test:acceptance:_run": "mocha --loader=esmock --recursive --reporter spec --timeout 15000 --exit $@ test/acceptance/js",
     "test:acceptance": "npm run test:acceptance:_run -- --grep=$MOCHA_GREP",
-    "test:unit:_run": "mocha --loader=esmock --recursive --reporter spec $@ test/unit/js",
+    "test:unit:_run": "mocha --loader=esmock --recursive --reporter spec --exit $@ test/unit/js",
     "test:unit": "npm run test:unit:_run -- --grep=$MOCHA_GREP",
     "nodemon": "node --watch app.js",
     "lint": "eslint --max-warnings 0 --format unix .",
@@ -20,6 +20,7 @@
   "dependencies": {
     "@overleaf/logger": "*",
     "@overleaf/metrics": "*",
+    "@overleaf/mongo-utils": "*",
     "@overleaf/settings": "*",
     "async": "^3.2.5",
     "body-parser": "^1.20.3",

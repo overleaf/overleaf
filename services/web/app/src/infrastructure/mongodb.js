@@ -1,6 +1,7 @@
 const mongodb = require('mongodb-legacy')
 const OError = require('@overleaf/o-error')
 const Settings = require('@overleaf/settings')
+const MongoUtils = require('@overleaf/mongo-utils')
 const Mongoose = require('./Mongoose')
 const { addConnectionDrainer } = require('./GracefulShutdown')
 
@@ -93,32 +94,11 @@ async function getCollectionNames() {
 }
 
 async function cleanupTestDatabase() {
-  ensureTestDatabase()
-  const collectionNames = await getCollectionNames()
-  const collections = []
-  for (const name of collectionNames) {
-    if (name in db && name !== 'migrations') {
-      collections.push(db[name])
-    }
-  }
-  await Promise.all(collections.map(coll => coll.deleteMany({})))
+  await MongoUtils.cleanupTestDatabase(mongoClient)
 }
 
 async function dropTestDatabase() {
-  ensureTestDatabase()
-  await mongoClient.db().dropDatabase()
-}
-
-function ensureTestDatabase() {
-  const internalDb = mongoClient.db()
-  const dbName = internalDb.databaseName
-  const env = process.env.NODE_ENV
-
-  if (dbName !== 'test-overleaf' || env !== 'test') {
-    throw new OError(
-      `Refusing to clear database '${dbName}' in environment '${env}'`
-    )
-  }
+  await MongoUtils.dropTestDatabase(mongoClient)
 }
 
 /**

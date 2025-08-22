@@ -1,7 +1,5 @@
 const Settings = require('@overleaf/settings')
-const rclient = require('@overleaf/redis-wrapper').createClient(
-  Settings.redis.documentupdater
-)
+const RedisWrapper = require('@overleaf/redis-wrapper')
 const logger = require('@overleaf/logger')
 const OError = require('@overleaf/o-error')
 const { promisifyAll } = require('@overleaf/promise-utils')
@@ -10,6 +8,8 @@ const Errors = require('./Errors')
 const crypto = require('node:crypto')
 const async = require('async')
 const { docIsTooLarge } = require('./Limits')
+
+const rclient = RedisWrapper.createClient(Settings.redis.documentupdater)
 
 // Sometimes Redis calls take an unexpectedly long time.  We have to be
 // quick with Redis calls because we're holding a lock that expires
@@ -776,6 +776,10 @@ const RedisManager = {
     // note: must specify 'utf8' encoding explicitly, as the default is
     // binary in node < v5
     return crypto.createHash('sha1').update(docLines, 'utf8').digest('hex')
+  },
+
+  async cleanupTestRedis() {
+    await RedisWrapper.cleanupTestRedis(rclient)
   },
 }
 
