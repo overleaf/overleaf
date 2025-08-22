@@ -14,7 +14,7 @@ const {
   getAdminCapabilities,
 } = require('../Helpers/AdminAuthorizationHelper')
 const Settings = require('@overleaf/settings')
-const DocumentUpdaterHandler = require('../DocumentUpdater/DocumentUpdaterHandler')
+const ChatApiHandler = require('../Chat/ChatApiHandler')
 
 function isRestrictedUser(
   userId,
@@ -337,7 +337,6 @@ async function isUserSiteAdmin(userId) {
 async function canUserDeleteOrResolveThread(
   userId,
   projectId,
-  docId,
   threadId,
   token
 ) {
@@ -358,12 +357,14 @@ async function canUserDeleteOrResolveThread(
     return false
   }
 
-  const comment = await DocumentUpdaterHandler.promises.getComment(
-    projectId,
-    docId,
-    threadId
-  )
-  return comment.metadata.user_id === userId
+  try {
+    const thread = await ChatApiHandler.promises.getThread(projectId, threadId)
+    // Check if the user created the thread (first message)
+    return thread.messages.length > 0 && thread.messages[0].user_id === userId
+  } catch (error) {
+    // If thread doesn't exist or other error, deny access
+    return false
+  }
 }
 
 module.exports = {

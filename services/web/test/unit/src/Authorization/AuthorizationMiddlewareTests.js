@@ -95,19 +95,12 @@ describe('AuthorizationMiddleware', function () {
 
   describe('ensureUserCanDeleteOrResolveThread', function () {
     beforeEach(function () {
-      this.req.params.doc_id = this.doc_id
       this.req.params.thread_id = this.thread_id
     })
     describe('when user has permission', function () {
       beforeEach(function () {
         this.AuthorizationManager.promises.canUserDeleteOrResolveThread
-          .withArgs(
-            this.userId,
-            this.project_id,
-            this.doc_id,
-            this.thread_id,
-            this.token
-          )
+          .withArgs(this.userId, this.project_id, this.thread_id, this.token)
           .resolves(true)
       })
 
@@ -118,13 +111,7 @@ describe('AuthorizationMiddleware', function () {
     describe("when user doesn't have permission", function () {
       beforeEach(function () {
         this.AuthorizationManager.promises.canUserDeleteOrResolveThread
-          .withArgs(
-            this.userId,
-            this.project_id,
-            this.doc_id,
-            this.thread_id,
-            this.token
-          )
+          .withArgs(this.userId, this.project_id, this.thread_id, this.token)
           .resolves(false)
       })
 

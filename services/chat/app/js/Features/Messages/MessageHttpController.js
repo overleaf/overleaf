@@ -54,6 +54,10 @@ export async function getThreads(context) {
   return await callMessageHttpController(context, _getAllThreads)
 }
 
+export async function getThread(context) {
+  return await callMessageHttpController(context, _getThread)
+}
+
 export async function resolveThread(context) {
   return await callMessageHttpController(context, _resolveThread)
 }
@@ -142,6 +146,29 @@ const _generateThreadData = async (req, res) => {
   logger.debug({ rooms, messages }, 'looked up messages in the rooms')
   const threadData = MessageFormatter.groupMessagesByThreads(rooms, messages)
   res.json(threadData)
+}
+
+const _getThread = async (req, res) => {
+  const { projectId, threadId } = req.params
+  logger.debug({ projectId, threadId }, 'getting specific thread')
+  try {
+    const room = await ThreadManager.findThread(projectId, threadId)
+    const messages = await MessageManager.findAllMessagesInRooms([room._id])
+    const threads = MessageFormatter.groupMessagesByThreads([room], messages)
+
+    const thread = threads[threadId] || null
+    if (!thread) {
+      res.status(404)
+      return
+    }
+    res.json(thread)
+  } catch (error) {
+    if (error instanceof ThreadManager.MissingThreadError) {
+      res.status(404)
+      return
+    }
+    throw error
+  }
 }
 
 const _resolveThread = async (req, res) => {

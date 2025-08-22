@@ -4,6 +4,10 @@ const { fetchJson, fetchNothing } = require('@overleaf/fetch-utils')
 const settings = require('@overleaf/settings')
 const { callbackify } = require('util')
 
+async function getThread(projectId, threadId) {
+  return await fetchJson(chatApiUrl(`/project/${projectId}/thread/${threadId}`))
+}
+
 async function getThreads(projectId) {
   return await fetchJson(chatApiUrl(`/project/${projectId}/threads`))
 }
@@ -133,6 +137,7 @@ function chatApiUrl(path) {
 }
 
 module.exports = {
+  getThread: callbackify(getThread),
   getThreads: callbackify(getThreads),
   destroyProject: callbackify(destroyProject),
   sendGlobalMessage: callbackify(sendGlobalMessage),
@@ -148,6 +153,7 @@ module.exports = {
   duplicateCommentThreads: callbackify(duplicateCommentThreads),
   generateThreadData: callbackify(generateThreadData),
   promises: {
+    getThread,
     getThreads,
     destroyProject,
     sendGlobalMessage,

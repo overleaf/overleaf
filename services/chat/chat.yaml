@@ -270,6 +270,20 @@ paths:
         name: threadId
         in: path
         required: true
+    get:
+      summary: Get Thread
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Thread'
+        '404':
+          description: Thread not found
+      operationId: getThread
+      description: Get a thread with ThreadID and ProjectID provided
     delete:
       summary: Delete thread
       operationId: deleteThread

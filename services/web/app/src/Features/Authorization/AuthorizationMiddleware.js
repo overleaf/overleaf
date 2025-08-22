@@ -105,7 +105,6 @@ async function ensureUserCanWriteProjectSettings(req, res, next) {
 
 async function ensureUserCanDeleteOrResolveThread(req, res, next) {
   const projectId = _getProjectId(req)
-  const docId = _getDocId(req)
   const threadId = _getThreadId(req)
   const userId = _getUserId(req)
   const token = TokenAccessHandler.getRequestToken(req, projectId)
@@ -113,7 +112,6 @@ async function ensureUserCanDeleteOrResolveThread(req, res, next) {
     await AuthorizationManager.promises.canUserDeleteOrResolveThread(
       userId,
       projectId,
-      docId,
       threadId,
       token
     )
@@ -221,17 +219,6 @@ function _getProjectId(req) {
   return projectId
 }
 
-function _getDocId(req) {
-  const docId = req.params.doc_id
-  if (!docId) {
-    throw new Error('Expected doc_id in request parameters')
-  }
-  if (!ObjectId.isValid(docId)) {
-    throw new Errors.NotFoundError(`invalid docId: ${docId}`)
-  }
-  return docId
-}
-
 function _getThreadId(req) {
   const threadId = req.params.thread_id
   if (!threadId) {
@@ -246,7 +233,7 @@ function _getThreadId(req) {
 function _getUserId(req) {
   return (
     SessionManager.getLoggedInUserId(req.session) ||
-    (req.oauth_user && req.oauth_user._id) ||
+    (req.oauth_user && req.oauth_user._id?.toString()) ||
     null
   )
 }

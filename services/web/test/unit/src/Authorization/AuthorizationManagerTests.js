@@ -51,11 +51,11 @@ describe('AuthorizationManager', function () {
       },
     }
 
-    this.DocumentUpdaterHandler = {
+    this.ChatApiHandler = {
       promises: {
-        getComment: sinon
+        getThread: sinon
           .stub()
-          .resolves({ metadata: { user_id: new ObjectId() } }),
+          .resolves({ messages: [{ user_id: new ObjectId() }] }),
       },
     }
     this.Modules = { promises: { hooks: { fire: sinon.stub() } } }
@@ -73,8 +73,7 @@ describe('AuthorizationManager', function () {
         '../Project/ProjectGetter': this.ProjectGetter,
         '../../models/User': { User: this.User },
         '../TokenAccess/TokenAccessHandler': this.TokenAccessHandler,
-        '../DocumentUpdater/DocumentUpdaterHandler':
-          this.DocumentUpdaterHandler,
+        '../Chat/ChatApiHandler': this.ChatApiHandler,
         '../../infrastructure/Modules': this.Modules,
         '@overleaf/settings': this.settings,
       },
@@ -618,7 +617,6 @@ describe('AuthorizationManager', function () {
         await this.AuthorizationManager.promises.canUserDeleteOrResolveThread(
           this.user._id,
           this.project._id,
-          this.doc._id,
           this.thread._id,
           this.token
         )
@@ -641,7 +639,6 @@ describe('AuthorizationManager', function () {
         await this.AuthorizationManager.promises.canUserDeleteOrResolveThread(
           this.user._id,
           this.project._id,
-          this.doc._id,
           this.thread._id,
           this.token
         )
@@ -667,7 +664,6 @@ describe('AuthorizationManager', function () {
           await this.AuthorizationManager.promises.canUserDeleteOrResolveThread(
             this.user._id,
             this.project._id,
-            this.doc._id,
             this.thread._id,
             this.token
           )
@@ -675,16 +671,15 @@ describe('AuthorizationManager', function () {
         expect(canResolve).to.equal(false)
       })
 
-      it('should return true when user is the comment author', async function () {
-        this.DocumentUpdaterHandler.promises.getComment
-          .withArgs(this.project._id, this.doc._id, this.thread._id)
-          .resolves({ metadata: { user_id: this.user._id } })
+      it('should return true when user is the thread author', async function () {
+        this.ChatApiHandler.promises.getThread
+          .withArgs(this.project._id, this.thread._id)
+          .resolves({ messages: [{ user_id: this.user._id }] })
 
         const canResolve =
           await this.AuthorizationManager.promises.canUserDeleteOrResolveThread(
             this.user._id,
             this.project._id,
-            this.doc._id,
             this.thread._id,
             this.token
           )

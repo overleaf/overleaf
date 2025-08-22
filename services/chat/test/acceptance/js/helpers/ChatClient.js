@@ -46,6 +46,14 @@ export async function sendMessage(projectId, threadId, userId, content) {
   })
 }
 
+export async function getThread(projectId, threadId) {
+  return await asyncRequest({
+    method: 'get',
+    url: `/project/${projectId}/thread/${threadId}`,
+    json: true,
+  })
+}
+
 export async function getThreads(projectId) {
   return await asyncRequest({
     method: 'get',
