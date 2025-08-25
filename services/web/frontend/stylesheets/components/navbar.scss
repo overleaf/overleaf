@@ -147,7 +147,7 @@
 
     background-color: var(--navbar-bg);
     margin: 0 calc(-1 * var(--navbar-padding-h));
-    z-index: 1;
+    z-index: 10;
 
     .navbar-nav {
       > li {
