@@ -99,11 +99,14 @@ function requirePermission(...requiredCapabilities) {
     if (!Features.hasFeature('saas')) {
       return next()
     }
-    if (!req.user) {
+    if (!req.user && !req.oauth_user) {
       return next(new Error('no user'))
     }
     try {
-      await assertUserPermissions(req.user, requiredCapabilities)
+      await assertUserPermissions(
+        req.user || req.oauth_user,
+        requiredCapabilities
+      )
       next()
     } catch (error) {
       next(error)
