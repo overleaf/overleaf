@@ -300,6 +300,7 @@
     "eslint-plugin-testing-library": "^7.1.1",
     "eslint-plugin-unicorn": "^56.0.0",
     "events": "^3.3.0",
+    "eventsource-client": "^1.1.4",
     "fake-indexeddb": "^6.0.0",
     "fetch-mock": "^12.5.2",
     "formik": "^2.2.9",

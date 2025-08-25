@@ -395,7 +395,8 @@ describe('Deleting a project', function () {
             expect(error).not.to.exist
             expect(res.statusCode).to.equal(200)
 
-            expect(MockChatApi.projects[this.projectId.toString()]).not.to.exist
+            expect(MockChatApi.projects.has(this.projectId.toString())).to.be
+              .false
             done()
           }
         )
