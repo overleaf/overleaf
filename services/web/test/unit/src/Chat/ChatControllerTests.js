@@ -21,6 +21,13 @@ describe('ChatController', function () {
       promises: {},
     }
     this.UserInfoController = {}
+    this.Modules = {
+      promises: {
+        hooks: {
+          fire: sinon.stub().resolves(),
+        },
+      },
+    }
     this.ChatController = SandboxedModule.require(MODULE_PATH, {
       requires: {
         '@overleaf/settings': this.settings,
@@ -30,6 +37,7 @@ describe('ChatController', function () {
         '../Authentication/SessionManager': this.SessionManager,
         '../User/UserInfoManager': this.UserInfoManager,
         '../User/UserInfoController': this.UserInfoController,
+        '../../infrastructure/Modules': this.Modules,
       },
     })
     this.req = {

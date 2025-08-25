@@ -1,4 +1,5 @@
 const { expressify } = require('@overleaf/promise-utils')
+const Modules = require('../../infrastructure/Modules')
 const ChatApiHandler = require('./ChatApiHandler')
 const EditorRealTimeController = require('../Editor/EditorRealTimeController')
 const SessionManager = require('../Authentication/SessionManager')
@@ -24,6 +25,13 @@ async function sendMessage(req, res) {
   message.user = UserInfoController.formatPersonalInfo(user)
   message.clientId = clientId
   EditorRealTimeController.emitToRoom(projectId, 'new-chat-message', message)
+
+  await Modules.promises.hooks.fire('chatMessageSent', {
+    projectId,
+    userId,
+    messageId: message.id,
+  })
+
   res.sendStatus(204)
 }
 
