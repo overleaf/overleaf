@@ -231,6 +231,26 @@ describe('CollaboratorsGetter', function () {
         )
       expect(level).to.equal(false)
     })
+
+    it('should return review privilege level when user is both reviewer and token member', async function () {
+      const userWhoIsBothReviewerAndToken = new ObjectId()
+
+      const projectWithDuplicateUser = {
+        ...this.project,
+        reviewer_refs: [userWhoIsBothReviewerAndToken],
+        tokenAccessReadAndWrite_refs: [userWhoIsBothReviewerAndToken],
+      }
+
+      this.ProjectGetter.promises.getProject.resolves(projectWithDuplicateUser)
+
+      const level =
+        await this.CollaboratorsGetter.promises.getMemberIdPrivilegeLevel(
+          userWhoIsBothReviewerAndToken,
+          this.project._id
+        )
+
+      expect(level).to.equal('review')
+    })
   })
 
   describe('isUserInvitedMemberOfProject', function () {
@@ -531,6 +551,72 @@ describe('CollaboratorsGetter', function () {
           this.project._id
         )
       expect(count).to.equal(2)
+    })
+  })
+
+  describe('ProjectAccess', function () {
+    describe('privilegeLevelForUser', function () {
+      it('should return reviewer privilege when user is both reviewer and token member', function () {
+        const userWhoIsBothReviewerAndToken = new ObjectId()
+
+        const projectWithDuplicateUser = {
+          owner_ref: this.ownerRef,
+          collaberator_refs: [],
+          readOnly_refs: [],
+          tokenAccessReadAndWrite_refs: [userWhoIsBothReviewerAndToken],
+          tokenAccessReadOnly_refs: [],
+          publicAccesLevel: 'tokenBased',
+          pendingEditor_refs: [],
+          reviewer_refs: [userWhoIsBothReviewerAndToken],
+          pendingReviewer_refs: [],
+        }
+
+        const projectAccess = new this.CollaboratorsGetter.ProjectAccess(
+          projectWithDuplicateUser
+        )
+        const privilegeLevel = projectAccess.privilegeLevelForUser(
+          userWhoIsBothReviewerAndToken
+        )
+
+        expect(privilegeLevel).to.equal('review')
+      })
+
+      it('should return readOnly privilege when user is both readOnly and token readAndWrite member', function () {
+        const userWhoIsBothReadOnlyAndTokenRW = new ObjectId()
+
+        const projectWithDuplicateUser = {
+          owner_ref: this.ownerRef,
+          collaberator_refs: [],
+          readOnly_refs: [userWhoIsBothReadOnlyAndTokenRW],
+          tokenAccessReadAndWrite_refs: [userWhoIsBothReadOnlyAndTokenRW],
+          tokenAccessReadOnly_refs: [],
+          publicAccesLevel: 'tokenBased',
+          pendingEditor_refs: [],
+          reviewer_refs: [],
+          pendingReviewer_refs: [],
+        }
+
+        const projectAccess = new this.CollaboratorsGetter.ProjectAccess(
+          projectWithDuplicateUser
+        )
+        const privilegeLevel = projectAccess.privilegeLevelForUser(
+          userWhoIsBothReadOnlyAndTokenRW
+        )
+
+        // Should return 'readOnly' from invite, not 'readAndWrite' from token access
+        expect(privilegeLevel).to.equal('readOnly')
+      })
+
+      it('should return none for non-members', function () {
+        const projectAccess = new this.CollaboratorsGetter.ProjectAccess(
+          this.project
+        )
+        const privilegeLevel = projectAccess.privilegeLevelForUser(
+          this.nonMemberRef
+        )
+
+        expect(privilegeLevel).to.equal(false)
+      })
     })
   })
 })

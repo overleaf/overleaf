@@ -498,6 +498,14 @@ function _getMemberIdsWithPrivilegeLevelsFromFields(
     })
   }
 
+  for (const memberId of reviewerIds || []) {
+    members.push({
+      id: memberId.toString(),
+      privilegeLevel: PrivilegeLevels.REVIEW,
+      source: Sources.INVITE,
+    })
+  }
+
   for (const memberId of readOnlyIds || []) {
     const record = {
       id: memberId.toString(),
@@ -530,13 +538,6 @@ function _getMemberIdsWithPrivilegeLevelsFromFields(
     }
   }
 
-  for (const memberId of reviewerIds || []) {
-    members.push({
-      id: memberId.toString(),
-      privilegeLevel: PrivilegeLevels.REVIEW,
-      source: Sources.INVITE,
-    })
-  }
   return members
 }
 
