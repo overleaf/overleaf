@@ -166,9 +166,9 @@ describe('<EditorLeftMenu />', function () {
         cy.findByRole('button', { name: 'Cancel' }).click()
         cy.findByRole('button', { name: 'Copy project' }).click()
 
-        cy.findByLabelText('New Name').focus()
-        cy.findByLabelText('New Name').clear()
-        cy.findByLabelText('New Name').type('Project Renamed')
+        cy.findByLabelText(/New name/i).focus()
+        cy.findByLabelText(/New name/i).clear()
+        cy.findByLabelText(/New name/i).type('Project Renamed')
         cy.get('#clone-project-form-name[value="Project Renamed"')
       })
 

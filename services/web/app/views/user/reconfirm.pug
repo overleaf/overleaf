@@ -45,11 +45,9 @@ block content
 					input(name='_csrf' type='hidden' value=csrfToken)
 					.form-group.mb-3
 						label.form-label(for='email') #{translate("please_enter_email")}
-						input.form-control(
+						input#email.form-control(
 							name='email'
-							aria-label='email'
 							type='email'
-							placeholder='email@example.com'
 							required
 							autofocus
 							value=email

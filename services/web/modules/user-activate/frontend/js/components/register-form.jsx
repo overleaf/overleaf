@@ -1,10 +1,14 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import PropTypes from 'prop-types'
 import { postJSON } from '@/infrastructure/fetch-json'
 import OLButton from '@/shared/components/ol/ol-button'
 import OLForm from '@/shared/components/ol/ol-form'
 import OLFormControl from '@/shared/components/ol/ol-form-control'
-
+import OLFormLabel from '@/shared/components/ol/ol-form-label'
+import OLFormText from '@/shared/components/ol/ol-form-text'
+import OLCol from '@/shared/components/ol/ol-col'
+import OLRow from '@/shared/components/ol/ol-row'
 function RegisterForm({
   setRegistrationSuccess,
   setEmails,
@@ -12,6 +16,8 @@ function RegisterForm({
   setFailedEmails,
 }) {
   const [isLoading, setIsLoading] = useState(false)
+  const { t } = useTranslation()
+
   function handleRegister(event) {
     event.preventDefault()
     const formData = new FormData(event.target)
@@ -53,25 +59,30 @@ function RegisterForm({
 
   return (
     <OLForm onSubmit={handleRegister}>
-      <div className="d-flex gap-2 flex-wrap">
-        <div className="flex-grow-1 max-width">
+      <OLRow>
+        <OLCol lg={8}>
+          <OLFormLabel htmlFor="register-new-user-email">
+            Emails to register new users
+          </OLFormLabel>
           <OLFormControl
-            className="form-control"
+            id="register-new-user-email"
             name="email"
             type="text"
-            placeholder="jane@example.com, joe@example.com"
-            aria-label="emails to register"
-            aria-describedby="input-details"
+            aria-describedby="register-new-user-email-helper"
           />
-          <p id="input-details" className="visually-hidden">
-            Enter the emails you would like to register and separate them using
-            commas
-          </p>
-        </div>
-        <OLButton type="submit" className="ms-auto" isLoading={isLoading}>
-          Register
-        </OLButton>
-      </div>
+          <OLFormText id="register-new-user-email-helper">
+            {t('add_comma_separated_emails_help')}
+          </OLFormText>
+        </OLCol>
+        <OLCol
+          lg={4}
+          className="mt-3 mt-lg-0 d-flex align-items-center flex-column flex-lg-row"
+        >
+          <OLButton type="submit" isLoading={isLoading}>
+            Register
+          </OLButton>
+        </OLCol>
+      </OLRow>
     </OLForm>
   )
 }

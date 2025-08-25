@@ -77,7 +77,6 @@ function LeaveModalForm({
         <OLFormLabel>{t('email')}</OLFormLabel>
         <OLFormControl
           type="text"
-          placeholder={t('email')}
           required
           value={email}
           onChange={handleEmailChange}
@@ -87,7 +86,6 @@ function LeaveModalForm({
         <OLFormLabel>{t('password')}</OLFormLabel>
         <OLFormControl
           type="password"
-          placeholder={t('password')}
           required
           value={password}
           onChange={handlePasswordChange}

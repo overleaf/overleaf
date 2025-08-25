@@ -14,6 +14,7 @@ import OLButton from '@/shared/components/ol/ol-button'
 import OLFormControl from '@/shared/components/ol/ol-form-control'
 import OLFormText from '@/shared/components/ol/ol-form-text'
 import OLNotification from '@/shared/components/ol/ol-notification'
+import OLFormLabel from '@/shared/components/ol/ol-form-label'
 
 export default function GroupMembers() {
   const { isReady } = useWaitForI18n()
@@ -142,7 +143,6 @@ export default function GroupMembers() {
                 className="add-more-members-form"
                 data-testid="add-more-members-form"
               >
-                <p className="small">{t('invite_more_members')}</p>
                 {memberAdded && (
                   <OLNotification
                     content={t('members_added')}
@@ -152,36 +152,34 @@ export default function GroupMembers() {
                 )}
                 <ErrorAlert error={inviteError} />
                 <form onSubmit={onAddMembersSubmit}>
-                  <OLRow>
-                    <OLCol xs={6}>
+                  <OLRow className="align-items-center">
+                    <OLCol lg={8}>
+                      <OLFormLabel htmlFor="add-members-emails">
+                        {t('invite_more_members')}
+                      </OLFormLabel>
                       <OLFormControl
+                        id="add-members-emails"
                         type="input"
-                        placeholder="jane@example.com, joe@example.com"
-                        aria-describedby="add-members-description"
                         value={emailString}
                         onChange={handleEmailsChange}
-                        data-testid="add-members-input"
+                        aria-describedby="invite-more-members-help-text"
                       />
-                    </OLCol>
-                    <OLCol xs={4}>
-                      <OLButton
-                        variant="primary"
-                        onClick={onAddMembersSubmit}
-                        isLoading={inviteMemberLoading}
-                        loadingLabel={t('inviting')}
-                      >
-                        {t('invite')}
-                      </OLButton>
-                    </OLCol>
-                    <OLCol xs={2}>
-                      <a href={paths.exportMembers}>{t('export_csv')}</a>
-                    </OLCol>
-                  </OLRow>
-                  <OLRow>
-                    <OLCol xs={8}>
-                      <OLFormText>
+                      <OLFormText id="invite-more-members-help-text">
                         {t('add_comma_separated_emails_help')}
                       </OLFormText>
+                    </OLCol>
+                    <OLCol lg={4} className="mt-3 mt-lg-0">
+                      <div className="align-items-center d-flex flex-column flex-lg-row gap-3 text-center">
+                        <OLButton
+                          variant="primary"
+                          onClick={onAddMembersSubmit}
+                          isLoading={inviteMemberLoading}
+                          loadingLabel={t('inviting')}
+                        >
+                          {t('invite')}
+                        </OLButton>
+                        <a href={paths.exportMembers}>{t('export_csv')}</a>
+                      </div>
                     </OLCol>
                   </OLRow>
                 </form>

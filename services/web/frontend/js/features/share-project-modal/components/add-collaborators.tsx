@@ -14,6 +14,7 @@ import OLFormGroup from '@/shared/components/ol/ol-form-group'
 import { Select } from '@/shared/components/select'
 import OLButton from '@/shared/components/ol/ol-button'
 import { PermissionsLevel } from '@/features/ide-react/types/permissions'
+import OLFormText from '@/shared/components/ol/ol-form-text'
 
 export default function AddCollaborators({ readOnly }: { readOnly?: boolean }) {
   const [privileges, setPrivileges] = useState<PermissionsLevel>('readAndWrite')
@@ -211,11 +212,12 @@ export default function AddCollaborators({ readOnly }: { readOnly?: boolean }) {
         <SelectCollaborators
           loading={!nonMemberContacts}
           options={nonMemberContacts || []}
-          placeholder="Email, comma separated"
           multipleSelectionProps={multipleSelectionProps}
         />
+        <OLFormText id="add-collaborator-help-text">
+          {t('add_comma_separated_emails_help')}
+        </OLFormText>
       </OLFormGroup>
-
       <OLFormGroup>
         <div className="float-end add-collaborator-controls">
           <Select

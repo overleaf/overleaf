@@ -51,13 +51,13 @@ describe('<NewProjectButton />', function () {
     it('open new project modal when clicking at Blank project', function () {
       fireEvent.click(screen.getByRole('menuitem', { name: 'Blank project' }))
 
-      screen.getByPlaceholderText('Project Name')
+      screen.getByLabelText(/Project name/i)
     })
 
     it('open new project modal when clicking at Example project', function () {
       fireEvent.click(screen.getByRole('menuitem', { name: 'Example project' }))
 
-      screen.getByPlaceholderText('Project Name')
+      screen.getByLabelText(/Project name/i)
     })
 
     it('close the new project modal when clicking at the top right "x" button', function () {

@@ -18,6 +18,7 @@ import OLFormText from '@/shared/components/ol/ol-form-text'
 import OLTable from '@/shared/components/ol/ol-table'
 import OLTooltip from '@/shared/components/ol/ol-tooltip'
 import OLFormCheckbox from '@/shared/components/ol/ol-form-checkbox'
+import OLFormLabel from '@/shared/components/ol/ol-form-label'
 
 type ManagersPaths = {
   addMember: string
@@ -238,20 +239,28 @@ export function ManagersTable({
               <>
                 <hr />
                 <div>
-                  <p className="small">{t('add_more_managers')}</p>
                   <ErrorAlert error={inviteError} />
                   <form onSubmit={addManagers} data-testid="add-members-form">
                     <OLRow>
-                      <OLCol xs={6}>
+                      <OLCol lg={8}>
+                        <OLFormLabel htmlFor="add-manager-emails">
+                          {t('add_more_manager_emails')}
+                        </OLFormLabel>
                         <OLFormControl
+                          id="add-manager-emails"
                           type="input"
-                          placeholder="jane@example.com, joe@example.com"
-                          aria-describedby="add-members-description"
                           value={emailString}
                           onChange={handleEmailsChange}
+                          aria-describedby="invite-more-manager-help-text"
                         />
+                        <OLFormText id="invite-more-manager-help-text">
+                          {t('add_comma_separated_emails_help')}
+                        </OLFormText>
                       </OLCol>
-                      <OLCol xs={4}>
+                      <OLCol
+                        lg={2}
+                        className="mt-3 mt-lg-0 d-flex align-items-center d-flex flex-column flex-lg-row"
+                      >
                         <OLButton
                           variant="primary"
                           onClick={addManagers}
@@ -259,13 +268,6 @@ export function ManagersTable({
                         >
                           {t('add')}
                         </OLButton>
-                      </OLCol>
-                    </OLRow>
-                    <OLRow>
-                      <OLCol xs={8}>
-                        <OLFormText>
-                          {t('add_comma_separated_emails_help')}
-                        </OLFormText>
                       </OLCol>
                     </OLRow>
                   </form>

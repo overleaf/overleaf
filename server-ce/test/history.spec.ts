@@ -21,7 +21,9 @@ describe('History', function () {
         cy.findByText('Label this version').click()
       })
     cy.findByRole('dialog').within(() => {
-      cy.get('input[placeholder="New label name"]').type(`${name}{enter}`)
+      cy.findByLabelText(/New label name/i)
+        .as('input')
+        .type(`${name}{enter}`)
     })
   }
 

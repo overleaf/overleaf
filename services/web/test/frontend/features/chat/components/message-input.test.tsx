@@ -21,7 +21,7 @@ describe('<MessageInput />', function () {
       />
     )
 
-    screen.getByLabelText('Send a message to your collaborators')
+    screen.getByLabelText('Send a message to your collaborators…')
   })
 
   it('sends a message after typing and hitting enter', function () {

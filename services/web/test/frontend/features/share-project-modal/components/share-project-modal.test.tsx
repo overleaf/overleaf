@@ -603,7 +603,7 @@ describe('<ShareProjectModal/>', function () {
       createContextProps({ publicAccessLevel: 'tokenBased' })
     )
 
-    const [inputElement] = await screen.findAllByLabelText('Add people')
+    const [inputElement] = await screen.findAllByLabelText('Add email address')
 
     // loading contacts
     await waitFor(() => {
@@ -775,7 +775,7 @@ describe('<ShareProjectModal/>', function () {
       expect(fetchMock.callHistory.called('express:/user/contacts')).to.be.true
     })
 
-    const [inputElement] = await screen.findAllByLabelText('Add people')
+    const [inputElement] = await screen.findAllByLabelText('Add email address')
 
     const submitButton: HTMLButtonElement = screen.getByRole('button', {
       name: 'Invite',
@@ -883,7 +883,7 @@ describe('<ShareProjectModal/>', function () {
       createContextProps()
     )
 
-    const [inputElement] = await screen.findAllByLabelText('Add people')
+    const [inputElement] = await screen.findAllByLabelText('Add email address')
 
     // Wait for contacts to load
     await waitFor(() => {
@@ -938,7 +938,7 @@ describe('<ShareProjectModal/>', function () {
       createContextProps()
     )
 
-    const [inputElement] = await screen.findAllByLabelText('Add people')
+    const [inputElement] = await screen.findAllByLabelText('Add email address')
 
     // Wait for contacts to load
     await waitFor(() => {
@@ -974,7 +974,7 @@ describe('<ShareProjectModal/>', function () {
       createContextProps()
     )
 
-    const [inputElement] = await screen.findAllByLabelText('Add people')
+    const [inputElement] = await screen.findAllByLabelText('Add email address')
 
     // Wait for contacts to load
     await waitFor(() => {
@@ -1009,7 +1009,7 @@ describe('<ShareProjectModal/>', function () {
       createContextProps()
     )
 
-    const [inputElement] = await screen.findAllByLabelText('Add people')
+    const [inputElement] = await screen.findAllByLabelText('Add email address')
 
     // Wait for contacts to load
     await waitFor(() => {

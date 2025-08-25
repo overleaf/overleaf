@@ -92,7 +92,7 @@ describe('GroupMembers', function () {
         },
       })
 
-      cy.findByTestId('add-members-input').type('someone.else@test.com')
+      cy.findByLabelText('Invite more members').type('someone.else@test.com')
       cy.findByRole('button', { name: /invite/i }).click()
 
       cy.findByTestId('managed-entities-table')
@@ -119,7 +119,7 @@ describe('GroupMembers', function () {
         },
       })
 
-      cy.findByTestId('add-members-input').type('someone.else@test.com')
+      cy.findByLabelText('Invite more members').type('someone.else@test.com')
       cy.findByRole('button', { name: /invite/i }).click()
       cy.findByRole('alert').contains('Error: User already added')
     })
@@ -297,7 +297,7 @@ describe('GroupMembers', function () {
         },
       })
 
-      cy.findByTestId('add-members-input').type('someone.else@test.com')
+      cy.findByLabelText('Invite more members').type('someone.else@test.com')
       cy.findByRole('button', { name: /invite/i }).click()
 
       cy.findByTestId('managed-entities-table')
@@ -326,7 +326,7 @@ describe('GroupMembers', function () {
         },
       })
 
-      cy.findByTestId('add-members-input').type('someone.else@test.com')
+      cy.findByLabelText('Invite more members').type('someone.else@test.com')
       cy.findByRole('button', { name: /invite/i }).click()
       cy.findByRole('alert').contains('Error: User already added')
     })

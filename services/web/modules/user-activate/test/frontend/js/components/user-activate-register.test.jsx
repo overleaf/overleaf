@@ -19,7 +19,7 @@ describe('UserActivateRegister', function () {
     }
     fetchMock.get('/user/tpds/queues', TPDS_SYNCED)
     const registerMock = fetchMock.post('/admin/register', endPointResponse)
-    const registerInput = screen.getByLabelText('emails to register')
+    const registerInput = screen.getByLabelText('Emails to register new users')
     const registerButton = screen.getByRole('button', { name: /register/i })
 
     fireEvent.change(registerInput, { target: { value: email } })
@@ -41,7 +41,7 @@ describe('UserActivateRegister', function () {
     }
     fetchMock.get('/user/tpds/queues', TPDS_SYNCED)
     const registerMock = fetchMock.post('/admin/register', endPointResponse)
-    const registerInput = screen.getByLabelText('emails to register')
+    const registerInput = screen.getByLabelText('Emails to register new users')
     const registerButton = screen.getByRole('button', { name: /register/i })
 
     fireEvent.change(registerInput, { target: { value: email } })
@@ -76,7 +76,7 @@ describe('UserActivateRegister', function () {
       if (body.email === 'abc@gmail.com') return endPointResponse1
       else if (body.email === 'def@gmail.com') return endPointResponse2
     })
-    const registerInput = screen.getByLabelText('emails to register')
+    const registerInput = screen.getByLabelText('Emails to register new users')
     const registerButton = screen.getByRole('button', { name: /register/i })
 
     fireEvent.change(registerInput, { target: { value: email } })
@@ -102,7 +102,7 @@ describe('UserActivateRegister', function () {
       if (body.email === 'abc@') return endPointResponse1
       else if (body.email === 'def@') return endPointResponse2
     })
-    const registerInput = screen.getByLabelText('emails to register')
+    const registerInput = screen.getByLabelText('Emails to register new users')
     const registerButton = screen.getByRole('button', { name: /register/i })
 
     fireEvent.change(registerInput, { target: { value: email } })
@@ -133,7 +133,7 @@ describe('UserActivateRegister', function () {
       else if (body.email === 'def@gmail.com') return endPointResponse2
       else return 500
     })
-    const registerInput = screen.getByLabelText('emails to register')
+    const registerInput = screen.getByLabelText('Emails to register new users')
     const registerButton = screen.getByRole('button', { name: /register/i })
 
     fireEvent.change(registerInput, { target: { value: email } })

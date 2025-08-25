@@ -106,8 +106,10 @@ function shareProjectByEmail(
   openProjectByName(projectName)
   cy.findByText('Share').click()
   cy.findByRole('dialog').within(() => {
-    cy.findByLabelText('Add people', { selector: 'input' }).type(`${email},`)
-    cy.findByLabelText('Add people', { selector: 'input' })
+    cy.findByLabelText('Add email address', { selector: 'input' }).type(
+      `${email},`
+    )
+    cy.findByLabelText('Add email address', { selector: 'input' })
       .parents('form')
       .within(() => {
         cy.findByTestId('add-collaborator-select')

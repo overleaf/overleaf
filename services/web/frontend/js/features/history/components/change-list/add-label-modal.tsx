@@ -19,6 +19,7 @@ import { Label } from '../../services/types/label'
 import { useRefWithAutoFocus } from '../../../../shared/hooks/use-ref-with-auto-focus'
 import { debugConsole } from '@/utils/debugging'
 import OLFormControl from '@/shared/components/ol/ol-form-control'
+import OLFormLabel from '@/shared/components/ol/ol-form-label'
 
 type AddLabelModalProps = {
   show: boolean
@@ -91,11 +92,11 @@ function AddLabelModal({ show, setShow, version }: AddLabelModalProps) {
       <OLForm onSubmit={handleSubmit}>
         <OLModalBody>
           {isError && <ModalError error={responseError} />}
-          <OLFormGroup>
+          <OLFormGroup controlId="add-label-modal">
+            <OLFormLabel>{t('history_new_label_name')}</OLFormLabel>
             <OLFormControl
               ref={autoFocusedRef}
               type="text"
-              placeholder={t('history_new_label_name')}
               required
               value={comment}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>

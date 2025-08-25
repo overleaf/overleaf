@@ -20,6 +20,7 @@ import OLFormGroup from '@/shared/components/ol/ol-form-group'
 import OLFormLabel from '@/shared/components/ol/ol-form-label'
 import OLButton from '@/shared/components/ol/ol-button'
 import Notification from '@/shared/components/notification'
+import OLFormControl from '@/shared/components/ol/ol-form-control'
 
 type EditTagModalProps = {
   id: string
@@ -93,12 +94,12 @@ export function EditTagModal({ id, tag, onEdit, onClose }: EditTagModalProps) {
 
       <OLModalBody>
         <OLForm onSubmit={handleSubmit}>
-          <OLFormGroup>
-            <input
+          <OLFormGroup controlId="edit-tag-modal">
+            <OLFormLabel>{t('edit_tag_name')}</OLFormLabel>
+            <OLFormControl
               ref={autoFocusedRef}
               className="form-control"
               type="text"
-              placeholder="Tag Name"
               name="new-tag-name"
               value={newTagName === undefined ? (tag.name ?? '') : newTagName}
               required

@@ -79,7 +79,6 @@ export const FigureModalUrlSource: FC = () => {
         <OLFormLabel>{t('image_url')}</OLFormLabel>
         <OLFormControl
           type="text"
-          placeholder={t('enter_image_url')}
           value={url}
           onChange={e => {
             setUrl(e.target.value)

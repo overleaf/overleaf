@@ -88,37 +88,20 @@ export const Error: Story = {
     return (
       <>
         <FormGroup controlId="id-1">
-          <Form.Label>Label</Form.Label>
-          <FormControl
-            placeholder="Placeholder"
-            defaultValue="Large input"
-            size="lg"
-            isInvalid
-            {...args}
-          />
+          <Form.Label>Large input label</Form.Label>
+          <FormControl size="lg" isInvalid {...args} />
           <FormFeedback type="invalid">Error</FormFeedback>
         </FormGroup>
         <hr />
         <FormGroup controlId="id-2">
-          <Form.Label>Label</Form.Label>
-          <FormControl
-            placeholder="Placeholder"
-            defaultValue="Regular input"
-            isInvalid
-            {...args}
-          />
+          <Form.Label>Regular input label</Form.Label>
+          <FormControl isInvalid {...args} />
           <FormFeedback type="invalid">Error</FormFeedback>
         </FormGroup>
         <hr />
         <FormGroup controlId="id-3">
-          <Form.Label>Label</Form.Label>
-          <FormControl
-            placeholder="Placeholder"
-            defaultValue="Small input"
-            size="sm"
-            isInvalid
-            {...args}
-          />
+          <Form.Label>Small input label</Form.Label>
+          <FormControl size="sm" isInvalid {...args} />
           <FormFeedback type="invalid">Error</FormFeedback>
         </FormGroup>
       </>
@@ -131,34 +114,20 @@ export const Warning: Story = {
     return (
       <>
         <FormGroup controlId="id-1">
-          <Form.Label>Label</Form.Label>
-          <FormControl
-            placeholder="Placeholder"
-            defaultValue="Large input"
-            size="lg"
-            {...args}
-          />
+          <Form.Label>Large input label</Form.Label>
+          <FormControl size="lg" {...args} />
           <FormText type="warning">Warning</FormText>
         </FormGroup>
         <hr />
         <FormGroup controlId="id-2">
-          <Form.Label>Label</Form.Label>
-          <FormControl
-            placeholder="Placeholder"
-            defaultValue="Regular input"
-            {...args}
-          />
+          <Form.Label>Regular input label</Form.Label>
+          <FormControl {...args} />
           <FormText type="warning">Warning</FormText>
         </FormGroup>
         <hr />
         <FormGroup controlId="id-3">
-          <Form.Label>Label</Form.Label>
-          <FormControl
-            placeholder="Placeholder"
-            defaultValue="Small input"
-            size="sm"
-            {...args}
-          />
+          <Form.Label>Small input label</Form.Label>
+          <FormControl size="sm" {...args} />
           <FormText type="warning">Warning</FormText>
         </FormGroup>
       </>
@@ -171,34 +140,20 @@ export const Success: Story = {
     return (
       <>
         <FormGroup controlId="id-1">
-          <Form.Label>Label</Form.Label>
-          <FormControl
-            placeholder="Placeholder"
-            defaultValue="Large input"
-            size="lg"
-            {...args}
-          />
+          <Form.Label>Large input label</Form.Label>
+          <FormControl size="lg" {...args} />
           <FormText type="success">Success</FormText>
         </FormGroup>
         <hr />
         <FormGroup controlId="id-2">
-          <Form.Label>Label</Form.Label>
-          <FormControl
-            placeholder="Placeholder"
-            defaultValue="Regular input"
-            {...args}
-          />
+          <Form.Label>Regular input label</Form.Label>
+          <FormControl {...args} />
           <FormText type="success">Success</FormText>
         </FormGroup>
         <hr />
         <FormGroup controlId="id-3">
-          <Form.Label>Label</Form.Label>
-          <FormControl
-            placeholder="Placeholder"
-            defaultValue="Small input"
-            size="sm"
-            {...args}
-          />
+          <Form.Label>Small input label</Form.Label>
+          <FormControl size="sm" {...args} />
           <FormText type="success">Success</FormText>
         </FormGroup>
       </>

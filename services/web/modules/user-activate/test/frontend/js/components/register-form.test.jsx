@@ -25,7 +25,7 @@ describe('RegisterForm', function () {
         setFailedEmails={setFailedEmailsStub}
       />
     )
-    await screen.findByLabelText('emails to register')
+    await screen.findByLabelText('Emails to register new users')
     screen.getByRole('button', { name: /register/i })
   })
 
@@ -53,7 +53,7 @@ describe('RegisterForm', function () {
         setFailedEmails={setFailedEmailsStub}
       />
     )
-    const registerInput = screen.getByLabelText('emails to register')
+    const registerInput = screen.getByLabelText('Emails to register new users')
     const registerButton = screen.getByRole('button', { name: /register/i })
     fireEvent.change(registerInput, { target: { value: email } })
     fireEvent.click(registerButton)

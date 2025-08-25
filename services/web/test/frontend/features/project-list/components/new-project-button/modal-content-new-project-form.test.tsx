@@ -34,7 +34,7 @@ describe('<ModalContentNewProjectForm />', function () {
 
     expect(createButton.getAttribute('disabled')).to.exist
 
-    fireEvent.change(screen.getByPlaceholderText('Project Name'), {
+    fireEvent.change(screen.getByLabelText('Project name'), {
       target: { value: 'Test Name' },
     })
 
@@ -61,7 +61,7 @@ describe('<ModalContentNewProjectForm />', function () {
 
     render(<ModalContentNewProjectForm onCancel={() => {}} />)
 
-    fireEvent.change(screen.getByPlaceholderText('Project Name'), {
+    fireEvent.change(screen.getByLabelText('Project name'), {
       target: { value: '/' },
     })
 
@@ -87,7 +87,7 @@ describe('<ModalContentNewProjectForm />', function () {
 
     render(<ModalContentNewProjectForm onCancel={() => {}} />)
 
-    fireEvent.change(screen.getByPlaceholderText('Project Name'), {
+    fireEvent.change(screen.getByLabelText('Project name'), {
       target: { value: '\\' },
     })
 
@@ -113,7 +113,7 @@ describe('<ModalContentNewProjectForm />', function () {
 
     render(<ModalContentNewProjectForm onCancel={() => {}} />)
 
-    fireEvent.change(screen.getByPlaceholderText('Project Name'), {
+    fireEvent.change(screen.getByLabelText('Project name'), {
       target: {
         value: `
       Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Arcu risus quis varius quam quisque id diam vel quam. Sit amet porttitor eget dolor morbi non arcu risus quis. In aliquam sem fringilla ut. Gravida cum sociis natoque penatibus. Semper risus in hendrerit gravida rutrum quisque non. Ut aliquam purus sit amet luctus venenatis. Neque ornare aenean euismod elementum nisi. Adipiscing bibendum est ultricies integer quis auctor elit. Nulla posuere sollicitudin aliquam ultrices sagittis. Nulla facilisi nullam vehicula ipsum a arcu cursus. Tristique senectus et netus et malesuada fames ac. Pulvinar pellentesque habitant morbi tristique senectus et netus et. Nisi scelerisque eu ultrices vitae auctor eu. Hendrerit gravida rutrum quisque non tellus orci. Volutpat blandit aliquam etiam erat velit scelerisque in dictum non. Donec enim diam vulputate ut pharetra sit amet aliquam id. Ullamcorper eget nulla facilisi etiam.

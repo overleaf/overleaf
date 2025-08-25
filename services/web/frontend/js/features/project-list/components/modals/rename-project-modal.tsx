@@ -121,7 +121,6 @@ function RenameProjectModal({
             <OLFormLabel>{t('new_name')}</OLFormLabel>
             <OLFormControl
               type="text"
-              placeholder={t('project_name')}
               required
               value={newProjectName}
               onChange={handleOnChange}

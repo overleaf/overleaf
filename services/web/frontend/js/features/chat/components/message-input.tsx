@@ -27,7 +27,7 @@ function MessageInput({ resetUnreadMessages, sendMessage }: MessageInputProps) {
   return (
     <form className="new-message">
       <label htmlFor="chat-input" className="visually-hidden">
-        {t('your_message_to_collaborators')}
+        {`${t('your_message_to_collaborators')}…`}
       </label>
       <textarea
         id="chat-input"

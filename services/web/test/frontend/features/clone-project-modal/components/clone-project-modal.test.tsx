@@ -68,7 +68,7 @@ describe('<EditorCloneProjectModalWrapper />', function () {
     })
     expect(submitButton.disabled).to.be.false
 
-    const input = await screen.getByLabelText('New Name')
+    const input = await screen.getByLabelText(/New name/i)
 
     fireEvent.change(input, {
       target: { value: '' },

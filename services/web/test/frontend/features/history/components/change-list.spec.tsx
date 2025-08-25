@@ -515,7 +515,7 @@ describe('change list', function () {
         cy.findByRole('heading', { name: /add label/i })
         cy.findByRole('button', { name: /cancel/i })
         cy.findByRole('button', { name: /add label/i }).should('be.disabled')
-        cy.findByPlaceholderText(/new label name/i).as('input')
+        cy.findByLabelText(/New label name/i).as('input')
         cy.get('@input').type(newLabel)
         cy.findByRole('button', { name: /add label/i }).should('be.enabled')
         cy.get('@input').type('{enter}')

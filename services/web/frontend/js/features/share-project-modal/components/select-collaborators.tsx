@@ -9,6 +9,7 @@ import Tag from '@/shared/components/tag'
 import { DropdownItem } from '@/shared/components/dropdown/dropdown-menu'
 import { Spinner } from 'react-bootstrap'
 import { Contact } from '../utils/types'
+import OLFormLabel from '@/shared/components/ol/ol-form-label'
 
 export type ContactItem = {
   email: string
@@ -25,12 +26,10 @@ const matchAllSpaces =
 export default function SelectCollaborators({
   loading,
   options,
-  placeholder,
   multipleSelectionProps,
 }: {
   loading: boolean
   options: Contact[]
-  placeholder: string
   multipleSelectionProps: UseMultipleSelectionReturnValue<ContactItem>
 }) {
   const { t } = useTranslation()
@@ -166,20 +165,18 @@ export default function SelectCollaborators({
   return (
     <div className="tags-input tags-new">
       {/* eslint-disable-next-line jsx-a11y/label-has-for */}
-      <label className="small" {...getLabelProps()}>
-        <strong>
-          {t('add_people')}
-          &nbsp;
-        </strong>
+      <OLFormLabel className="small" {...getLabelProps()}>
+        {t('add_email_address')}
         {loading && (
           <Spinner
             animation="border"
             aria-hidden="true"
             size="sm"
             role="status"
+            className="ms-2"
           />
         )}
-      </label>
+      </OLFormLabel>
 
       <div className="host">
         {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events,jsx-a11y/no-static-element-interactions */}
@@ -197,16 +194,14 @@ export default function SelectCollaborators({
 
           <input
             data-testid="collaborator-email-input"
+            aria-describedby="add-collaborator-help-text"
             {...getInputProps(
               getDropdownProps({
                 className: classnames('input', {
                   'invalid-tag': !isValidInput,
                 }),
                 type: 'email',
-                placeholder,
-                size: inputValue.length
-                  ? inputValue.length + 5
-                  : placeholder.length,
+                size: inputValue.length ? inputValue.length + 5 : 5,
                 ref: inputRef,
                 // preventKeyAction: showDropdown,
                 onBlur: () => {

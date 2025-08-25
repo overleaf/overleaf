@@ -22,19 +22,21 @@ block content
 								+customFormMessageNewStyle('password-compromised')
 									| !{translate('password_compromised_try_again_or_use_known_device_or_reset', {}, [{name: 'a', attrs: {href: 'https://haveibeenpwned.com/passwords', rel: 'noopener noreferrer', target: '_blank'}}, {name: 'a', attrs: {href: '/user/password/reset', target: '_blank'}}])}.
 								.form-group
-									input.form-control(
+									label(for='email') #{translate("email")}
+									input#email.form-control(
 										name='email'
 										type='email'
 										required
-										placeholder='email@example.com'
 										autofocus='true'
+										autocomplete='username'
 									)
 								.form-group
-									input.form-control(
+									label(for='password') #{translate("password")}
+									input#password.form-control(
 										name='password'
 										type='password'
+										autocomplete='current-password'
 										required
-										placeholder='********'
 									)
 								.actions
 									button.btn-primary.btn(type='submit' data-ol-disabled-inflight)

@@ -11,6 +11,9 @@ import OLModal, {
   OLModalTitle,
 } from '@/shared/components/ol/ol-modal'
 import OLButton from '@/shared/components/ol/ol-button'
+import OLFormControl from '@/shared/components/ol/ol-form-control'
+import OLFormLabel from '@/shared/components/ol/ol-form-label'
+import OLFormGroup from '@/shared/components/ol/ol-form-group'
 
 function FileTreeModalCreateFolder() {
   const { t } = useTranslation()
@@ -116,6 +119,7 @@ function InputName({
   handleCreateFolder: () => void
 }) {
   const { autoFocusedRef } = useRefWithAutoFocus<HTMLInputElement>()
+  const { t } = useTranslation()
 
   function handleFocus(ev: React.FocusEvent<HTMLInputElement>) {
     ev.target.setSelectionRange(0, -1)
@@ -133,15 +137,17 @@ function InputName({
   }
 
   return (
-    <input
-      ref={autoFocusedRef}
-      className="form-control"
-      type="text"
-      value={name}
-      onKeyDown={handleKeyDown}
-      onChange={handleChange}
-      onFocus={handleFocus}
-    />
+    <OLFormGroup controlId="folder-name">
+      <OLFormLabel>{t('folder_name')}</OLFormLabel>
+      <OLFormControl
+        type="text"
+        ref={autoFocusedRef}
+        value={name}
+        onKeyDown={handleKeyDown}
+        onChange={handleChange}
+        onFocus={handleFocus}
+      />
+    </OLFormGroup>
   )
 }
 

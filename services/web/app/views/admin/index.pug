@@ -28,11 +28,10 @@ block content
 										form(method='post' action='/admin/messages')
 											input(name='_csrf' type='hidden' value=csrfToken)
 											.form-group
-												label.form-label(for='content')
-												input.form-control(
+												label.form-label(for='system-message') Message
+												input#system-message.form-control(
 													name='content'
 													type='text'
-													placeholder='Message…'
 													required
 												)
 											button.btn.btn-primary(type='submit') Post Message
@@ -79,11 +78,11 @@ block content
 												form.col-xs-6(method='post' action='/admin/flushProjectToTpds')
 													input(name='_csrf' type='hidden' value=csrfToken)
 													.form-group
-														label.form-label(for='project_id') project_id
+														label.form-label(for='project-id') project_id
 														input.form-control(
 															name='project_id'
+															id='project-id'
 															type='text'
-															placeholder='project_id'
 															required
 														)
 													.form-group
@@ -94,12 +93,7 @@ block content
 												form.col-xs-6(method='post' action='/admin/pollDropboxForUser')
 													input(name='_csrf' type='hidden' value=csrfToken)
 													.form-group
-														label.form-label(for='user_id') user_id
-														input.form-control(
-															name='user_id'
-															type='text'
-															placeholder='user_id'
-															required
-														)
+														label.form-label(for='user-id') user_id
+														input.form-control(name='user_id' id='user-id' type='text' required)
 													.form-group
 														button.btn-primary.btn(type='submit') Poll

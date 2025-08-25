@@ -68,8 +68,10 @@ describe('group managers', function () {
     })
 
     cy.findByTestId('add-members-form').within(() => {
-      cy.findByRole('textbox').type('someone.else@test.com')
-      cy.findByRole('button').click()
+      cy.findByLabelText(/Add more manager emails/i).type(
+        'someone.else@test.com'
+      )
+      cy.findByRole('button', { name: /add/i }).click()
     })
 
     cy.findByTestId('managed-entities-table')
@@ -94,8 +96,10 @@ describe('group managers', function () {
     })
 
     cy.findByTestId('add-members-form').within(() => {
-      cy.findByRole('textbox').type('someone.else@test.com')
-      cy.findByRole('button').click()
+      cy.findByLabelText(/Add more manager emails/i).type(
+        'someone.else@test.com'
+      )
+      cy.findByRole('button', { name: /add/i }).click()
     })
     cy.findByRole('alert').should('contain.text', 'Error: User already added')
   })
