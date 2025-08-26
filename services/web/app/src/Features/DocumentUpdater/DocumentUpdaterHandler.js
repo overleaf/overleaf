@@ -290,6 +290,13 @@ function rejectChanges(projectId, docId, changeIds, userId, callback) {
   )
 }
 
+/**
+ * @param {string} projectId
+ * @param {string} docId
+ * @param {string} threadId
+ * @param {string} userId
+ * @param {Callback} callback
+ */
 function resolveThread(projectId, docId, threadId, userId, callback) {
   _makeRequest(
     {
@@ -305,6 +312,13 @@ function resolveThread(projectId, docId, threadId, userId, callback) {
   )
 }
 
+/**
+ * @param {string} projectId
+ * @param {string} docId
+ * @param {string} threadId
+ * @param {string} userId
+ * @param {Callback} callback
+ */
 function reopenThread(projectId, docId, threadId, userId, callback) {
   _makeRequest(
     {
