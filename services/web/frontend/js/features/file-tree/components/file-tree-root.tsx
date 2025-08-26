@@ -20,6 +20,7 @@ import { useDragLayer } from 'react-dnd'
 import classnames from 'classnames'
 import { pathInFolder } from '@/features/file-tree/util/path'
 import { useIsNewEditorEnabled } from '@/features/ide-redesign/utils/new-editor-utils'
+import { FileTreeFindResult } from '@/features/ide-react/types/file-tree'
 
 const FileTreeRoot = React.memo<{
   onSelect: () => void
@@ -115,7 +116,11 @@ const FileTreeRoot = React.memo<{
   )
 })
 
-function FileTreeRootFolder({ onDelete }: { onDelete: () => void }) {
+function FileTreeRootFolder({
+  onDelete,
+}: {
+  onDelete: (entity: FileTreeFindResult, isFileRestore?: boolean) => void
+}) {
   useFileTreeSocketListener(onDelete)
   const { fileTreeData } = useFileTreeData()
 

@@ -121,10 +121,10 @@ export const FileTreeOpenProvider: FC<React.PropsWithChildren> = ({
   )
 
   const handleFileTreeDelete = useCallback(
-    (entity: FileTreeFindResult) => {
+    (entity: FileTreeFindResult, isFileRestore?: boolean) => {
       eventEmitter.emit('entity:deleted', entity)
-      // Select the root document if the current document was deleted
-      if (entity.entity._id === currentDocumentId) {
+      // Select the root document if the current document was deleted and delete is not part of a file restore
+      if (!isFileRestore && entity.entity._id === currentDocumentId) {
         openDocWithId(rootDocId!)
       }
     },
