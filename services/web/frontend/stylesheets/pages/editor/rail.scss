@@ -43,8 +43,10 @@ body {
 
 .rail-panel-title {
   font-size: var(--font-size-02);
+  line-height: var(--line-height-02);
   color: var(--ide-rail-color);
   margin-bottom: 0;
+  font-weight: bold;
 }
 
 .ide-rail-tab-button {

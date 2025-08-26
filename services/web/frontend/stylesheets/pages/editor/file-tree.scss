@@ -87,8 +87,9 @@
     h4 {
       color: var(--file-tree-expand-button-color);
       font-size: var(--font-size-02);
+      line-height: var(--line-height-02);
       margin: 0;
-      font-weight: normal;
+      font-weight: bold;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;

@@ -76,7 +76,9 @@
   }
 
   .outline-header-name {
-    font-weight: unset;
+    font-weight: bold;
+    font-size: var(--font-size-02);
+    line-height: var(--line-height-02);
   }
 
   .outline-carat-icon {
