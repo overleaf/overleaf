@@ -929,8 +929,6 @@
   "history_label_project_current_state": "当前状态",
   "history_label_this_version": "标记此版本",
   "history_new_label_name": "新标记名称",
-  "history_restore_promo_content": "现在，您可以将单个文件或整个项目恢复到以前的版本，包括注释和跟踪的更改。单击“恢复此版本”可恢复所选文件，或使用历史记录条目中的 <0>菜单</0> 可恢复整个项目。",
-  "history_restore_promo_title": "需要回归历史版本吗？",
   "history_resync": "重新同步历史记录",
   "history_view_a11y_description": "显示所有项目历史记录或仅显示带标签的版本。",
   "history_view_all": "所有历史",

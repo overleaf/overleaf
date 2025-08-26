@@ -11,7 +11,7 @@ import { useTranslation } from 'react-i18next'
 import { EditorView } from '@codemirror/view'
 import { PastedContent } from '../../extensions/visual/pasted-content'
 import useEventListener from '../../../../shared/hooks/use-event-listener'
-import { FeedbackBadge } from '@/shared/components/feedback-badge'
+
 import { sendMB } from '@/infrastructure/event-tracking'
 import MaterialIcon from '@/shared/components/material-icon'
 import OLOverlay from '@/shared/components/ol/ol-overlay'
@@ -161,28 +161,6 @@ export const PastedContentMenu: FC<{
                 </span>
                 <span className="ol-cm-pasted-content-menu-item-shortcut">
                   {isMac ? '⇧⌘V' : 'Ctrl+Shift+V'}
-                </span>
-              </MenuItem>
-
-              <MenuItem
-                style={{ borderTop: '1px solid #eee' }}
-                onClick={() => {
-                  window.open(
-                    'https://docs.google.com/forms/d/e/1FAIpQLSc7WcHrwz9fnCkUP5hXyvkG3LkSYZiR3lVJWZ0o6uqNQYrV7Q/viewform',
-                    '_blank'
-                  )
-                  sendMB('pasted-content-menu-click', {
-                    action: 'give-feedback',
-                  })
-                  setMenuOpen(false)
-                }}
-              >
-                <FeedbackBadge
-                  id="paste-html-feedback"
-                  url="https://docs.google.com/forms/d/e/1FAIpQLSc7WcHrwz9fnCkUP5hXyvkG3LkSYZiR3lVJWZ0o6uqNQYrV7Q/viewform"
-                />
-                <span className="ol-cm-pasted-content-menu-item-label">
-                  {t('give_feedback')}
                 </span>
               </MenuItem>
             </div>

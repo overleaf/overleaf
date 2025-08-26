@@ -781,8 +781,6 @@
   "history_label_project_current_state": "Nuværende indhold",
   "history_label_this_version": "Sæt mærkat på denne version",
   "history_new_label_name": "Navn på ny mærkat",
-  "history_restore_promo_content": "Nu kan du gendanne en enkel fil eller hele dit projekt til en tidligere version, inklusiv kommentarer og fulgte ændringer. Klik Gendan denne version for at gendanne den valgte fil, eller brug <0></0> menuen i et historik element til at gendanne det fulde projekt.",
-  "history_restore_promo_title": "Brug for at skrue tiden tilbage?",
   "history_resync": "Synkronisering af historik",
   "history_view_a11y_description": "Vis den komplette projekthistorie, eller kun mærkede versioner.",
   "history_view_all": "Komplet historie",
