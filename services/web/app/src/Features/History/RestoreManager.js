@@ -143,7 +143,11 @@ const RestoreManager = {
         userId
       )
 
-      if (file.element._id.toString() === project.rootDoc_id.toString()) {
+      if (
+        file.element._id &&
+        project.rootDoc_id &&
+        file.element._id.toString() === project.rootDoc_id.toString()
+      ) {
         hadDeletedRootFile = true
       }
 
