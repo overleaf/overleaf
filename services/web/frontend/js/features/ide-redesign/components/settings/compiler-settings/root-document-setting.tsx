@@ -43,7 +43,7 @@ export default function RootDocumentSetting() {
       disabled={!write}
       options={validDocsOptions}
       onChange={setRootDocId}
-      value={rootDocId}
+      value={rootDocId ?? ''}
       translateOptions="no"
     />
   )

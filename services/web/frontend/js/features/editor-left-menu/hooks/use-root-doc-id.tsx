@@ -12,9 +12,7 @@ export default function useRootDocId() {
 
   const setRootDocIdFunc = useCallback(
     async (newRootDocId: ProjectSettings['rootDocId']) => {
-      // rootDocId will be undefined on angular scope on initialisation
-      const allowUpdate =
-        typeof rootDocId !== 'undefined' && permissionsLevel !== 'readOnly'
+      const allowUpdate = permissionsLevel !== 'readOnly'
 
       if (allowUpdate) {
         try {
@@ -24,7 +22,7 @@ export default function useRootDocId() {
         }
       }
     },
-    [permissionsLevel, rootDocId, saveProjectSettings]
+    [permissionsLevel, saveProjectSettings]
   )
 
   return {
