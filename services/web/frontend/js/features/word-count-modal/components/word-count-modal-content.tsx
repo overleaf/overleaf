@@ -9,6 +9,7 @@ import OLButton from '@/shared/components/ol/ol-button'
 import { WordCountServer } from './word-count-server'
 import { WordCountClient } from './word-count-client'
 import { isSplitTestEnabled } from '@/utils/splitTestUtils'
+import SplitTestBadge from '@/shared/components/split-test-badge'
 
 // NOTE: this component is only mounted when the modal is open
 export default function WordCountModalContent({
@@ -21,7 +22,13 @@ export default function WordCountModalContent({
   return (
     <>
       <OLModalHeader closeButton>
-        <OLModalTitle>{t('word_count')}</OLModalTitle>
+        <OLModalTitle>
+          {t('word_count')}{' '}
+          <SplitTestBadge
+            splitTestName="word-count-client"
+            displayOnVariants={['enabled']}
+          />
+        </OLModalTitle>
       </OLModalHeader>
 
       <OLModalBody>

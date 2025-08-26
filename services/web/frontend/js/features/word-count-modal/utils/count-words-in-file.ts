@@ -5,7 +5,7 @@ import { debugConsole } from '@/utils/debugging'
 import { findPreambleExtent } from '@/features/word-count-modal/utils/find-preamble-extent'
 import { Segmenters } from './segmenters'
 
-const whiteSpaceRe = /^\s$/
+// const whiteSpaceRe = /^\s$/
 
 type Context = 'text' | 'header' | 'abstract' | 'caption' | 'footnote' | 'other'
 
@@ -301,9 +301,8 @@ export const countWordsInFile = (
   for (const [context, text] of Object.entries(texts)) {
     const counter = counters[context as Context]
 
-    // TODO: replace - and _ with a word character if hyphenated words should be counted as one word?
-
     for (const value of segmenters.word.segment(
+      // replace - and _ with a word character, so that hyphenated words are counted as one word
       text.replace(/\w[-_]\w/g, 'aaa')
     )) {
       if (value.isWordLike) {
@@ -311,13 +310,14 @@ export const countWordsInFile = (
       }
     }
 
-    // TODO: count hyphens as characters?
-
-    for (const value of segmenters.character.segment(text)) {
+    for (const _value of segmenters.character.segment(
+      // replace multiple spaces with a single space
+      text.replace(/\s+/, ' ').trim()
+    )) {
       // TODO: option for whether to include whitespace?
-      if (!whiteSpaceRe.test(value.segment)) {
-        data[counter.character]++
-      }
+      // if (!whiteSpaceRe.test(value.segment)) {
+      data[counter.character]++
+      // }
     }
   }
 }

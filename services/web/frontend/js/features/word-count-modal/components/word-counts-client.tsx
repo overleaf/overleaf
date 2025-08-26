@@ -5,6 +5,8 @@ import { Container, Row, Col, Form } from 'react-bootstrap'
 import OLNotification from '@/shared/components/ol/ol-notification'
 import usePersistedState from '@/shared/hooks/use-persisted-state'
 
+const numberFormat = new Intl.NumberFormat()
+
 export const WordCountsClient: FC<{ data: WordCountData }> = ({ data }) => {
   const { t } = useTranslation()
 
@@ -17,7 +19,7 @@ export const WordCountsClient: FC<{ data: WordCountData }> = ({ data }) => {
     return [
       {
         key: 'text',
-        label: t('text'),
+        label: t('main_text'),
         words: data.textWords,
         chars: data.textCharacters,
       },
@@ -85,52 +87,73 @@ export const WordCountsClient: FC<{ data: WordCountData }> = ({ data }) => {
         </Row>
       )}
 
-      {items.map(item => (
-        <Row
-          key={item.key}
-          style={{
-            borderBottom: '1px solid #eee',
-            padding: 5,
-            marginBottom: 5,
-          }}
-        >
-          <Col
-            style={{
-              display: 'flex',
-              alignItems: 'top',
-              justifyContent: 'space-between',
-            }}
-          >
-            <Form.Check
-              type="checkbox"
-              id={`word-count-${item.key}`}
-              label={item.label}
-              checked={included.includes(item.key)}
-              onChange={event =>
-                setIncluded(prevValue => {
-                  return event.target.checked
-                    ? prevValue.concat(item.key)
-                    : prevValue.filter(key => key !== item.key)
-                })
-              }
-              aria-label={`Include ${item.label} in total`}
-            />
-          </Col>
-          <Col>
-            {item.words} words
-            <br />
-            {item.chars} chars
-          </Col>
-        </Row>
-      ))}
+      <Row className="mb-4">
+        <table style={{ width: 'auto' }}>
+          <thead>
+            <tr>
+              <th />
+              <th className="visually-hidden">{t('words')}</th>
+              <th className="visually-hidden">{t('characters')}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th style={{ width: 100 }}>{t('total_words')}:</th>
+              <td style={{ width: 100, textAlign: 'right' }}>
+                {numberFormat.format(totals.words)}
+              </td>
+              <td style={{ width: 250, textAlign: 'right' }}>
+                <b style={{ marginRight: 10 }} aria-hidden="true">
+                  {t('characters')}:
+                </b>{' '}
+                {numberFormat.format(totals.chars)}
+              </td>
+            </tr>
+            {items.map(item => (
+              <tr key={item.key}>
+                <th style={{ fontWeight: 'normal', paddingLeft: 20 }}>
+                  <Form.Check
+                    type="checkbox"
+                    id={`word-count-${item.key}`}
+                    label={`${item.label}:`}
+                    checked={included.includes(item.key)}
+                    onChange={event =>
+                      setIncluded(prevValue => {
+                        return event.target.checked
+                          ? prevValue.concat(item.key)
+                          : prevValue.filter(key => key !== item.key)
+                      })
+                    }
+                    aria-label={`Include ${item.label} in total`}
+                  />
+                </th>
+                <td style={{ textAlign: 'right' }}>
+                  {numberFormat.format(item.words)}
+                </td>
+                <td style={{ textAlign: 'right' }}>
+                  {numberFormat.format(item.chars)}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </Row>
 
-      <Row>
-        <Col style={{ textAlign: 'right' }}>
-          <span style={{ fontWeight: 'bold' }}>
-            {t('total')}: {totals.words} words
-            <br />
-            {totals.chars} chars
-          </span>
+      <Row className="border-top py-2">
+        <Col xs={12}>
+          <b>Headers:</b> {data.headers}
+        </Col>
+      </Row>
+
+      <Row className="border-top py-2">
+        <Col xs={12}>
+          <b>Math Inline:</b> {data.mathInline}
+        </Col>
+      </Row>
+
+      <Row className="border-top py-2 pb-0">
+        <Col xs={12}>
+          <b>Math Display:</b> {data.mathDisplay}
         </Col>
       </Row>
     </Container>
