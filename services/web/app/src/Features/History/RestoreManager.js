@@ -79,6 +79,7 @@ const RestoreManager = {
   ) {
     const project = await ProjectGetter.promises.getProject(projectId, {
       overleaf: true,
+      rootDoc_id: true,
     })
     if (!project?.overleaf?.history?.rangesSupportEnabled) {
       throw new OError('project does not have ranges support', { projectId })
@@ -125,6 +126,7 @@ const RestoreManager = {
       pathname
     )
 
+    let hadDeletedRootFile = false
     if (file) {
       if (file.type !== 'doc' && file.type !== 'file') {
         throw new OError('unexpected file type', { type: file.type })
@@ -140,6 +142,11 @@ const RestoreManager = {
         origin,
         userId
       )
+
+      if (file.element._id.toString() === project.rootDoc_id.toString()) {
+        hadDeletedRootFile = true
+      }
+
       threadIds.delete(file.element._id.toString())
     }
 
@@ -274,6 +281,11 @@ const RestoreManager = {
       origin,
       userId
     )
+
+    if (hadDeletedRootFile) {
+      await EditorController.promises.setRootDoc(projectId, _id)
+    }
+
     // For revertProject: The next doc that gets reverted will need to duplicate all the threads seen here.
     threadIds.set(
       _id.toString(),

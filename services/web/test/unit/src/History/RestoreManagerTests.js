@@ -225,7 +225,10 @@ describe('RestoreManager', function () {
       this.ProjectGetter.promises.getProject = sinon.stub()
       this.ProjectGetter.promises.getProject
         .withArgs(this.project_id)
-        .resolves({ overleaf: { history: { rangesSupportEnabled: true } } })
+        .resolves({
+          overleaf: { history: { rangesSupportEnabled: true } },
+          rootDoc_id: 'root-doc-id',
+        })
       this.RestoreManager.promises._writeFileVersionToDisk = sinon
         .stub()
         .resolves((this.fsPath = '/tmp/path/on/disk'))
@@ -405,6 +408,13 @@ describe('RestoreManager', function () {
 
       describe('with an existing file in the current project', function () {
         beforeEach(async function () {
+          this.ProjectGetter.promises.getProject = sinon.stub()
+          this.ProjectGetter.promises.getProject
+            .withArgs(this.project_id)
+            .resolves({
+              overleaf: { history: { rangesSupportEnabled: true } },
+              rootDoc_id: 'root-doc-id',
+            })
           this.ProjectLocator.promises.findElementByPath = sinon
             .stub()
             .resolves({ type: 'file', element: { _id: 'mock-file-id' } })
@@ -438,6 +448,13 @@ describe('RestoreManager', function () {
 
       describe('with an existing document in the current project', function () {
         beforeEach(async function () {
+          this.ProjectGetter.promises.getProject = sinon.stub()
+          this.ProjectGetter.promises.getProject
+            .withArgs(this.project_id)
+            .resolves({
+              overleaf: { history: { rangesSupportEnabled: true } },
+              rootDoc_id: 'root-doc-id',
+            })
           this.ProjectLocator.promises.findElementByPath = sinon
             .stub()
             .resolves({ type: 'doc', element: { _id: 'mock-file-id' } })
@@ -512,6 +529,13 @@ describe('RestoreManager', function () {
       describe('with comments in same doc', function () {
         // copy of the above, addition: inject and later inspect threadIds set
         beforeEach(async function () {
+          this.ProjectGetter.promises.getProject = sinon.stub()
+          this.ProjectGetter.promises.getProject
+            .withArgs(this.project_id)
+            .resolves({
+              overleaf: { history: { rangesSupportEnabled: true } },
+              rootDoc_id: 'root-doc-id',
+            })
           this.ProjectLocator.promises.findElementByPath = sinon
             .stub()
             .resolves({ type: 'doc', element: { _id: 'mock-file-id' } })
@@ -595,6 +619,13 @@ describe('RestoreManager', function () {
       describe('with remapped comments during revertProject', function () {
         // copy of the above, addition: inject and later inspect threadIds set
         beforeEach(async function () {
+          this.ProjectGetter.promises.getProject = sinon.stub()
+          this.ProjectGetter.promises.getProject
+            .withArgs(this.project_id)
+            .resolves({
+              overleaf: { history: { rangesSupportEnabled: true } },
+              rootDoc_id: 'root-doc-id',
+            })
           this.ProjectLocator.promises.findElementByPath = sinon
             .stub()
             .resolves({ type: 'doc', element: { _id: 'mock-file-id' } })
@@ -643,6 +674,79 @@ describe('RestoreManager', function () {
           expect(nestedMapWithSetToObject(this.threadIds)).to.deep.equal(
             this.afterThreadIds
           )
+        })
+      })
+
+      describe('when restored file has the same id as root doc', function () {
+        beforeEach(async function () {
+          this.ProjectGetter.promises.getProject = sinon.stub()
+          this.ProjectGetter.promises.getProject
+            .withArgs(this.project_id)
+            .resolves({
+              overleaf: { history: { rangesSupportEnabled: true } },
+              rootDoc_id: 'root-doc-id',
+            })
+          this.ProjectLocator.promises.findElementByPath = sinon
+            .stub()
+            .resolves({ type: 'doc', element: { _id: 'root-doc-id' } })
+          this.EditorController.promises.deleteEntity = sinon.stub().resolves()
+          this.EditorController.promises.addDocWithRanges = sinon
+            .stub()
+            .resolves((this.addedFile = { _id: 'new-doc-id', type: 'doc' }))
+          this.EditorController.promises.setRootDoc = sinon.stub().resolves()
+
+          this.data = await this.RestoreManager.promises.revertFile(
+            this.user_id,
+            this.project_id,
+            this.version,
+            this.pathname
+          )
+        })
+
+        it('should delete the existing root document', async function () {
+          expect(
+            this.EditorController.promises.deleteEntity
+          ).to.have.been.calledWith(
+            this.project_id,
+            'root-doc-id',
+            'doc',
+            {
+              kind: 'file-restore',
+              path: this.pathname,
+              version: this.version,
+              timestamp: new Date(this.endTs).toISOString(),
+            },
+            this.user_id
+          )
+        })
+
+        it('should import the file', function () {
+          expect(
+            this.EditorController.promises.addDocWithRanges
+          ).to.have.been.calledWith(
+            this.project_id,
+            this.folder_id,
+            'foo.tex',
+            ['foo', 'bar', 'baz'],
+            { changes: this.tracked_changes, comments: this.remappedComments },
+            {
+              kind: 'file-restore',
+              path: this.pathname,
+              version: this.version,
+              timestamp: new Date(this.endTs).toISOString(),
+            }
+          )
+        })
+
+        it('should return the created entity with root doc id', function () {
+          expect(this.data).to.deep.equal(this.addedFile)
+          expect(this.data._id).to.equal('new-doc-id')
+        })
+
+        it('should set the restored document as the new root doc', function () {
+          expect(
+            this.EditorController.promises.setRootDoc
+          ).to.have.been.calledWith(this.project_id, this.addedFile._id)
         })
       })
     })
