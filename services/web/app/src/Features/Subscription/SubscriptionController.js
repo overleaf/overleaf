@@ -21,6 +21,7 @@ const {
   AddOnNotPresentError,
   PaymentActionRequiredError,
   PaymentFailedError,
+  MissingBillingInfoError,
 } = require('./Errors')
 const SplitTestHandler = require('../SplitTests/SplitTestHandler')
 const AuthorizationManager = require('../Authorization/AuthorizationManager')
@@ -40,6 +41,7 @@ const {
   sanitizeSessionUserForFrontEnd,
 } = require('../../infrastructure/FrontEndUser')
 const { IndeterminateInvoiceError } = require('../Errors/Errors')
+const SubscriptionLocator = require('./SubscriptionLocator')
 
 const SUBSCRIPTION_PAUSED_REDIRECT_PATH =
   '/user/subscription?redirect-reason=subscription-paused'
@@ -90,6 +92,23 @@ async function _checkRecurlySubscriptionPauseStatus(subscription) {
   return !!(
     recurlySubscription.remaining_pause_cycles &&
     recurlySubscription.remaining_pause_cycles > 0
+  )
+}
+
+/** Check if a user's subscription is manual or custom
+ * @param {Object} user - The user object
+ * @returns {Promise<boolean>}
+ */
+async function _isManualOrCustomSubscription(user) {
+  const subscription = await SubscriptionLocator.promises.getUsersSubscription(
+    user._id
+  )
+  if (!subscription) {
+    return false
+  }
+
+  return (
+    subscription.customAccount || subscription.collectionMethod === 'manual'
   )
 }
 
@@ -460,16 +479,39 @@ async function previewAddonPurchase(req, res) {
     )
   }
 
+  const isManualOrCustom = await _isManualOrCustomSubscription(user)
+  if (isManualOrCustom) {
+    return res.redirect(
+      '/user/subscription?redirect-reason=ai-assist-unavailable'
+    )
+  }
+
   const { isPaused, redirectPath } = await checkSubscriptionPauseStatus(user)
   if (isPaused) {
     return res.redirect(redirectPath)
   }
 
-  /** @type {PaymentMethod[]} */
-  const paymentMethod = await Modules.promises.hooks.fire(
-    'getPaymentMethod',
-    userId
-  )
+  let paymentMethod
+  try {
+    /** @type {PaymentMethod[]} */
+    paymentMethod = await Modules.promises.hooks.fire(
+      'getPaymentMethod',
+      userId
+    )
+  } catch (err) {
+    if (err instanceof MissingBillingInfoError) {
+      // We will get MissingBillingInfoError if a manual subscription doesn't have billing info
+      // but doesn't marked as manual on the Overleaf side
+      logger.error(
+        { err },
+        'User has no billing info, cannot preview add-on purchase'
+      )
+      return res.redirect(
+        '/user/subscription?redirect-reason=ai-assist-unavailable'
+      )
+    }
+    throw err
+  }
 
   let subscriptionChange
   try {

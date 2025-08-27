@@ -63,6 +63,22 @@ describe('SubscriptionController', function () {
         attemptPaypalInvoiceCollection: sinon.stub().resolves(),
         startFreeTrial: sinon.stub().resolves(),
         purchaseAddon: sinon.stub().resolves(),
+        previewAddonPurchase: sinon.stub().resolves({
+          subscription: {
+            currency: 'USD',
+            netTerms: 0,
+            periodEnd: new Date(),
+            taxRate: 0,
+          },
+          immediateCharge: { amount: 0 },
+          nextPlanCode: 'professional',
+          nextPlanName: 'Professional',
+          nextPlanPrice: 2000,
+          nextAddOns: [],
+          subtotal: 2000,
+          tax: 0,
+          total: 2000,
+        }),
       },
     }
 
@@ -201,6 +217,29 @@ describe('SubscriptionController', function () {
             findById: sinon.stub().resolves(this.user),
           },
         },
+        './SubscriptionLocator': (this.SubscriptionLocator = {
+          promises: {
+            getUsersSubscription: sinon.stub().resolves(null),
+          },
+        }),
+        '../Authorization/PermissionsManager': (this.PermissionsManager = {
+          promises: {
+            checkUserPermissions: sinon.stub().resolves(true),
+          },
+        }),
+        './RecurlyClient': (this.RecurlyClient = {
+          promises: {
+            getAddOn: sinon.stub().resolves({
+              code: 'ai-assistant',
+              name: 'AI Assistant',
+            }),
+          },
+        }),
+        './PlansLocator': (this.PlansLocator = {
+          findLocalPlanInSettings: sinon.stub().returns({
+            annual: false,
+          }),
+        }),
       },
     })
 
@@ -1097,6 +1136,140 @@ describe('SubscriptionController', function () {
         )
 
       expect(result).to.deep.equal({ isPaused: false })
+    })
+  })
+
+  describe('previewAddonPurchase', function () {
+    beforeEach(function () {
+      this.req = new MockRequest()
+      this.req.params = { addOnCode: 'assistant' }
+      this.req.query = { purchaseReferrer: 'fake-referrer' }
+      this.res = new MockResponse()
+
+      this.Modules.promises.hooks.fire
+        .withArgs('getPaymentMethod')
+        .resolves(['fake-method'])
+      this.SubscriptionLocator.promises.getUsersSubscription.resolves(null)
+    })
+
+    describe('when user has manual or custom subscription', function () {
+      it('should redirect with ai-assist-unavailable when subscription has customAccount = true', async function () {
+        const customSubscription = {
+          _id: 'sub-123',
+          customAccount: true,
+          collectionMethod: 'automatic',
+        }
+        this.SubscriptionLocator.promises.getUsersSubscription.resolves(
+          customSubscription
+        )
+
+        this.res.redirect = sinon.stub()
+
+        await this.SubscriptionController.previewAddonPurchase(
+          this.req,
+          this.res
+        )
+
+        expect(this.res.redirect).to.have.been.calledWith(
+          '/user/subscription?redirect-reason=ai-assist-unavailable'
+        )
+      })
+
+      it('should redirect with ai-assist-unavailable when subscription has collectionMethod = manual', async function () {
+        const manualSubscription = {
+          _id: 'sub-123',
+          customAccount: false,
+          collectionMethod: 'manual',
+        }
+        this.SubscriptionLocator.promises.getUsersSubscription.resolves(
+          manualSubscription
+        )
+
+        this.res.redirect = sinon.stub()
+
+        await this.SubscriptionController.previewAddonPurchase(
+          this.req,
+          this.res
+        )
+
+        expect(this.res.redirect).to.have.been.calledWith(
+          '/user/subscription?redirect-reason=ai-assist-unavailable'
+        )
+      })
+
+      it('should redirect with ai-assist-unavailable when subscription has both customAccount and manual collection', async function () {
+        const customManualSubscription = {
+          _id: 'sub-123',
+          customAccount: true,
+          collectionMethod: 'manual',
+        }
+        this.SubscriptionLocator.promises.getUsersSubscription.resolves(
+          customManualSubscription
+        )
+
+        this.res.redirect = sinon.stub()
+
+        await this.SubscriptionController.previewAddonPurchase(
+          this.req,
+          this.res
+        )
+
+        expect(this.res.redirect).to.have.been.calledWith(
+          '/user/subscription?redirect-reason=ai-assist-unavailable'
+        )
+      })
+    })
+
+    describe('when user has normal subscription', function () {
+      it('should proceed with preview when subscription is not manual or custom', async function () {
+        const normalSubscription = {
+          _id: 'sub-123',
+          customAccount: false,
+          collectionMethod: 'automatic',
+        }
+        this.SubscriptionLocator.promises.getUsersSubscription.resolves(
+          normalSubscription
+        )
+
+        this.res.render = sinon.stub()
+
+        await this.SubscriptionController.previewAddonPurchase(
+          this.req,
+          this.res
+        )
+
+        expect(this.res.render).to.have.been.calledWith(
+          'subscriptions/preview-change'
+        )
+        expect(
+          this.SubscriptionHandler.promises.previewAddonPurchase
+        ).to.have.been.calledWith(this.user._id, 'assistant')
+      })
+
+      it('should proceed with preview when customAccount is undefined and collectionMethod is automatic', async function () {
+        const normalSubscription = {
+          _id: 'sub-123',
+          // customAccount: undefined (not set)
+          collectionMethod: 'automatic',
+        }
+        this.SubscriptionLocator.promises.getUsersSubscription.resolves(
+          normalSubscription
+        )
+
+        this.res.render = sinon.stub()
+
+        await this.SubscriptionController.previewAddonPurchase(
+          this.req,
+          this.res
+        )
+
+        expect(this.res.render).to.have.been.calledWith(
+          'subscriptions/preview-change'
+        )
+        expect(
+          this.SubscriptionHandler.promises.previewAddonPurchase
+        ).to.have.been.calledWith(this.user._id, 'assistant')
+      })
     })
   })
 })
