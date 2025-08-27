@@ -339,7 +339,9 @@ describe('AnalyticsManager', function () {
       this.analyticsId = 'bccd308c-5d72-426e-a106-662e88557795'
       this.AnalyticsManager = SandboxedModule.require(MODULE_PATH, {
         requires: {
-          '@overleaf/settings': {},
+          '@overleaf/settings': {
+            analytics: { hashedEmailSalt: 'test-salt' },
+          },
           '../../infrastructure/Queues': {
             getQueue: queueName => {
               switch (queueName) {

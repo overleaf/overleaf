@@ -88,6 +88,7 @@ const overrides = {
 
   analytics: {
     enabled: true,
+    hashedEmailSalt: 'acceptance-test-salt',
   },
 }
 

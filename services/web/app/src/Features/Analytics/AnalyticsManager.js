@@ -9,6 +9,15 @@ const { expressify } = require('@overleaf/promise-utils')
 const logger = require('@overleaf/logger')
 const { createHash } = require('crypto')
 
+if (
+  Settings.analytics?.enabled &&
+  process.env.NODE_ENV !== 'test' &&
+  !Settings.analytics?.hashedEmailSalt
+) {
+  // This isn't important enough to crash the app, but we want to record the error
+  logger.error({}, 'Settings.analytics.hashedEmailSalt should be set')
+}
+
 const analyticsEventsQueue = Queues.getQueue('analytics-events')
 const analyticsEditingSessionsQueue = Queues.getQueue(
   'analytics-editing-sessions'
@@ -218,10 +227,8 @@ function registerEmailChange({
 }) {
   Metrics.analyticsQueue.inc({ status: 'adding', event_type: 'email-change' })
 
-  const salt = Settings.analytics?.hashedEmailSalt ?? ''
-
   const hashedEmail = createHash('sha256')
-    .update(`${email}${salt}`)
+    .update(`${email}${Settings.analytics?.hashedEmailSalt}`)
     .digest('hex')
 
   analyticsEmailChangeQueue
