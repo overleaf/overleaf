@@ -21,34 +21,34 @@ export default {
     // group members routes
     webRouter.get(
       '/manage/groups/:id/members',
-      UserMembershipMiddleware.requireGroupManagementAccess,
+      UserMembershipMiddleware.requireEntityAccessOrAdminAccess('group'),
       UserMembershipController.manageGroupMembers
     )
     webRouter.post(
       '/manage/groups/:id/invites',
-      UserMembershipMiddleware.requireGroupMemberManagementAccess,
+      UserMembershipMiddleware.requireGroupMemberManagement('group'),
       RateLimiterMiddleware.rateLimit(rateLimiters.createTeamInvite),
       TeamInvitesController.createInvite
     )
     webRouter.post(
       '/manage/groups/:id/resendInvite',
-      UserMembershipMiddleware.requireGroupMemberManagementAccess,
+      UserMembershipMiddleware.requireGroupMemberManagement('group'),
       RateLimiterMiddleware.rateLimit(rateLimiters.createTeamInvite),
       TeamInvitesController.resendInvite
     )
     webRouter.delete(
       '/manage/groups/:id/user/:user_id',
-      UserMembershipMiddleware.requireGroupManagementAccess,
+      UserMembershipMiddleware.requireGroupMemberManagement('group'),
       SubscriptionGroupController.removeUserFromGroup
     )
     webRouter.delete(
       '/manage/groups/:id/invites/:email',
-      UserMembershipMiddleware.requireGroupMemberManagementAccess,
+      UserMembershipMiddleware.requireGroupMemberManagement('group'),
       TeamInvitesController.revokeInvite
     )
     webRouter.get(
       '/manage/groups/:id/members/export',
-      UserMembershipMiddleware.requireGroupManagementAccess,
+      UserMembershipMiddleware.requireEntityAccessOrAdminAccess('group'),
       RateLimiterMiddleware.rateLimit(rateLimiters.exportTeamCsv),
       UserMembershipController.exportCsv
     )
@@ -56,17 +56,29 @@ export default {
     // group managers routes
     webRouter.get(
       '/manage/groups/:id/managers',
-      UserMembershipMiddleware.requireGroupManagersManagementAccess,
+      UserMembershipMiddleware.requireEntityAccess({
+        entityName: 'groupManagers',
+        staffAccess: 'groupManagement',
+        adminCapability: 'view-group-manager',
+      }),
       UserMembershipController.manageGroupManagers
     )
     webRouter.post(
       '/manage/groups/:id/managers',
-      UserMembershipMiddleware.requireGroupManagersWriteAccess,
+      UserMembershipMiddleware.requireEntityAccess({
+        entityName: 'groupManagers',
+        staffAccess: 'groupManagement',
+        adminCapability: 'modify-group-manager',
+      }),
       UserMembershipController.add
     )
     webRouter.delete(
       '/manage/groups/:id/managers/:userId',
-      UserMembershipMiddleware.requireGroupManagersWriteAccess,
+      UserMembershipMiddleware.requireEntityAccess({
+        entityName: 'groupManagers',
+        staffAccess: 'groupManagement',
+        adminCapability: 'modify-group-manager',
+      }),
       UserMembershipController.remove
     )
 
