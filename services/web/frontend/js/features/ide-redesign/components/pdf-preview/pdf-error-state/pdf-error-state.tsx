@@ -8,6 +8,8 @@ import {
   ShortCompileTimeoutErrorState,
 } from './compile-timeout-error-state'
 import GeneralErrorState from './general-error-state'
+import RenderingErrorExpectedState from './rendering-error-expected-state'
+import RenderingErrorState from './rendering-error-state'
 
 // AvailableStates
 // - rendering-error-expected
@@ -131,6 +133,10 @@ function PdfErrorState() {
           }
         />
       )
+    case 'rendering-error-expected':
+      return <RenderingErrorExpectedState />
+    case 'rendering-error':
+      return <RenderingErrorState />
     default:
       return <GeneralErrorState />
   }

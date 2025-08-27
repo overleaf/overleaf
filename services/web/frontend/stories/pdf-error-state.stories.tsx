@@ -24,6 +24,8 @@ const compileErrors = [
   'pdf-viewer-loading-error',
   'project-too-large',
   'rate-limited',
+  'rendering-error-expected',
+  'rendering-error',
   'success',
   'terminated',
   'timedout',
