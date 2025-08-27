@@ -6,6 +6,7 @@ const mappings = new Map([
 
 /**
  * @typedef {(import('./types.d.ts').AccountMapping)} AccountMapping
+ * @import { StripePaymentProviderService } from '../../../../types/subscription/dashboard/subscription'
  */
 
 /**
@@ -90,8 +91,34 @@ function generateSubscriptionToRecurlyMapping(
   }
 }
 
+/**
+ *
+ * @param {string} subscriptionId
+ * @param {string} stripeId
+ * @param {StripePaymentProviderService} stripePaymentProviderService
+ * @param {string} [createdAt] - Should be an ISO date
+ * @return {AccountMapping}
+ */
+function generateSubscriptionToStripeMapping(
+  subscriptionId,
+  stripeId,
+  stripePaymentProviderService,
+  createdAt = new Date().toISOString()
+) {
+  return {
+    source: stripePaymentProviderService,
+    sourceEntity: 'subscription',
+    sourceEntityId: stripeId,
+    target: 'v2',
+    targetEntity: 'subscription',
+    targetEntityId: subscriptionId,
+    createdAt,
+  }
+}
+
 module.exports = {
   extractAccountMappingsFromSubscription,
   generateV1Mapping,
   generateSubscriptionToRecurlyMapping,
+  generateSubscriptionToStripeMapping,
 }
