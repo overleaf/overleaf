@@ -367,6 +367,7 @@ if (process.env.OVERLEAF_EMAIL_FROM_ADDRESS != null) {
       // AWS Creds
       AWSAccessKeyID: process.env.OVERLEAF_EMAIL_AWS_SES_ACCESS_KEY_ID,
       AWSSecretKey: process.env.OVERLEAF_EMAIL_AWS_SES_SECRET_KEY,
+      region: process.env.OVERLEAF_EMAIL_AWS_SES_REGION || 'us-east-1',
 
       // SMTP Creds
       host: process.env.OVERLEAF_EMAIL_SMTP_HOST,
@@ -381,10 +382,6 @@ if (process.env.OVERLEAF_EMAIL_FROM_ADDRESS != null) {
     template: {
       customFooter: process.env.OVERLEAF_CUSTOM_EMAIL_FOOTER,
     },
-  }
-
-  if (process.env.OVERLEAF_EMAIL_AWS_SES_REGION != null) {
-    settings.email.parameters.region = process.env.OVERLEAF_EMAIL_AWS_SES_REGION
   }
 
   if (

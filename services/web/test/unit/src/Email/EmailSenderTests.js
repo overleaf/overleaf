@@ -33,10 +33,12 @@ describe('EmailSender', function () {
 
     this.ses = { createTransport: () => this.sesClient }
 
+    this.SESClient = sinon.stub()
+
     this.EmailSender = SandboxedModule.require(MODULE_PATH, {
       requires: {
         nodemailer: this.ses,
-        'nodemailer-ses-transport': sinon.stub(),
+        '@aws-sdk/client-ses': { SESClient: this.SESClient },
         '@overleaf/settings': this.Settings,
         '../../infrastructure/RateLimiter': this.RateLimiter,
         '@overleaf/metrics': {

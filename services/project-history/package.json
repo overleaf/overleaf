@@ -28,7 +28,6 @@
     "@overleaf/settings": "*",
     "@overleaf/stream-utils": "*",
     "async": "^3.2.5",
-    "aws-sdk": "^2.650.0",
     "body-parser": "^1.20.3",
     "bunyan": "^1.8.15",
     "celebrate": "^15.0.3",

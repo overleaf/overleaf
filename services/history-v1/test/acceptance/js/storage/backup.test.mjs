@@ -35,6 +35,7 @@ import {
   chunksBucket,
 } from '../../../../storage/lib/backupPersistor.mjs'
 import { Readable } from 'node:stream'
+import { ListObjectsV2Command } from '@aws-sdk/client-s3'
 
 const projectsCollection = client.db().collection('projects')
 
@@ -583,11 +584,13 @@ describe('backup script', function () {
       // Get all chunks and verify they were backed up
       const listing = await backupPersistor
         ._getClientForBucket(chunksBucket)
-        .listObjectsV2({
-          Bucket: chunksBucket,
-          Prefix: projectKey.format(historyId) + '/',
-        })
-        .promise()
+        .send(
+          new ListObjectsV2Command({
+            Bucket: chunksBucket,
+            Prefix: projectKey.format(historyId) + '/',
+          })
+        )
+
       const chunkKeys = listing.Contents.map(item => item.Key)
       expect(chunkKeys.length).to.equal(6) // Should have multiple chunks
 
