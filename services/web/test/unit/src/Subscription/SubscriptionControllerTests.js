@@ -187,6 +187,14 @@ describe('SubscriptionController', function () {
             refreshFeatures: sinon.stub().resolves({ features: {} }),
           },
         }),
+        celebrate: (this.celebrate = {
+          celebrate: sinon.stub(),
+          errors: sinon.stub(),
+          Joi: {
+            any: sinon.stub(),
+            extend: sinon.stub(),
+          },
+        }),
         './GroupPlansData': (this.GroupPlansData = {}),
         './V1SubscriptionManager': (this.V1SubscriptionManager = {}),
         '../Errors/HttpErrorHandler': (this.HttpErrorHandler = {

@@ -1,4 +1,4 @@
-import { vi } from 'vitest'
+import { beforeEach, describe, it, vi } from 'vitest'
 import sinon from 'sinon'
 
 const modulePath =
@@ -612,14 +612,14 @@ describe('SubscriptionGroupController', function () {
     })
 
     it('should fail previewing "add seats" change', async function (ctx) {
-      await new Promise(resolve => {
-        ctx.SubscriptionGroupHandler.promises.previewAddSeatsSubscriptionChange =
-          sinon.stub().rejects()
+      ctx.SubscriptionGroupHandler.promises.previewAddSeatsSubscriptionChange =
+        sinon.stub().rejects()
+      ctx.req.body = { adding: 2 }
 
+      await new Promise(resolve => {
         const res = {
           status: statusCode => {
             statusCode.should.equal(500)
-
             return {
               end: () => {
                 resolve()
