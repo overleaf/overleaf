@@ -1,31 +1,8 @@
-import MaterialIcon, {
-  AvailableUnfilledIcon,
-} from '@/shared/components/material-icon'
-import { ReactElement } from 'react'
+import MaterialIcon from '@/shared/components/material-icon'
 
-import {
-  Nav,
-  NavLink,
-  TabContainer,
-  TabContent,
-  TabPane,
-} from 'react-bootstrap'
-
-export type SettingsEntry = SettingsLink | SettingsTab
-
-type SettingsTab = {
-  icon: AvailableUnfilledIcon
-  key: string
-  component: ReactElement
-  title: string
-}
-
-type SettingsLink = {
-  key: string
-  icon: AvailableUnfilledIcon
-  href: string
-  title: string
-}
+import { Nav, NavLink, TabContainer, TabContent } from 'react-bootstrap'
+import { SettingsEntry } from '../../contexts/settings-modal-context'
+import SettingsTabPane from './settings-tab-pane'
 
 export const SettingsModalBody = ({
   activeTab,
@@ -40,12 +17,12 @@ export const SettingsModalBody = ({
     <TabContainer
       transition={false}
       onSelect={setActiveTab}
-      defaultActiveKey={activeTab ?? undefined}
+      activeKey={activeTab ?? undefined}
       id="ide-settings-tabs"
     >
       <div className="d-flex flex-row">
         <Nav
-          defaultActiveKey={settingsTabs[0]?.key}
+          activeKey={activeTab ?? undefined}
           className="d-flex flex-column ide-settings-tab-nav"
         >
           {settingsTabs.map(entry => (
@@ -54,11 +31,9 @@ export const SettingsModalBody = ({
         </Nav>
         <TabContent className="ide-settings-tab-content">
           {settingsTabs
-            .filter(t => 'component' in t)
-            .map(({ key, component }) => (
-              <TabPane eventKey={key} key={key}>
-                {component}
-              </TabPane>
+            .filter(t => 'sections' in t)
+            .map(tab => (
+              <SettingsTabPane tab={tab} key={tab.key} />
             ))}
         </TabContent>
       </div>

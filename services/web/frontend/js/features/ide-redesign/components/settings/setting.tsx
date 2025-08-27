@@ -10,7 +10,7 @@ export default function Setting({
   children: React.ReactNode
 }) {
   return (
-    <div className="ide-setting">
+    <div id={`setting-${controlId}`} className="ide-setting">
       <div>
         <label htmlFor={controlId} className="ide-setting-title">
           {label}

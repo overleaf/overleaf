@@ -3,62 +3,33 @@ import OLModal, {
   OLModalHeader,
   OLModalTitle,
 } from '@/shared/components/ol/ol-modal'
-import { useLayoutContext } from '@/shared/context/layout-context'
 import { useTranslation } from 'react-i18next'
-import { SettingsEntry, SettingsModalBody } from './settings-modal-body'
+import { SettingsModalBody } from './settings-modal-body'
+import {
+  SettingsModalProvider,
+  useSettingsModalContext,
+} from '../../contexts/settings-modal-context'
+import useFocusOnSetting from '../../hooks/use-focus-on-setting'
 
-import AppearanceSettings from './appearance-settings/appearance-settings'
-import CompilerSettings from './compiler-settings/compiler-settings'
-import EditorSettings from './editor-settings/editor-settings'
-import { useMemo, useState } from 'react'
+const SettingsModalWrapper = () => {
+  return (
+    <SettingsModalProvider>
+      <SettingsModal />
+    </SettingsModalProvider>
+  )
+}
 
 const SettingsModal = () => {
-  // TODO ide-redesign-cleanup: Either rename the field, or introduce a separate
-  // one
-  const { leftMenuShown, setLeftMenuShown } = useLayoutContext()
   const { t } = useTranslation()
-  const settingsTabs: SettingsEntry[] = useMemo(
-    () => [
-      {
-        key: 'editor',
-        title: t('editor'),
-        icon: 'code',
-        component: <EditorSettings />,
-      },
-      {
-        key: 'compiler',
-        title: t('compiler'),
-        icon: 'picture_as_pdf',
-        component: <CompilerSettings />,
-      },
-      {
-        key: 'appearance',
-        title: t('appearance'),
-        icon: 'brush',
-        component: <AppearanceSettings />,
-      },
-      {
-        key: 'account_settings',
-        title: t('account_settings'),
-        icon: 'settings',
-        href: '/user/settings',
-      },
-      {
-        key: 'subscription',
-        title: t('subscription'),
-        icon: 'account_balance',
-        href: '/user/subscription',
-      },
-    ],
-    [t]
-  )
-  const [activeTab, setActiveTab] = useState<string | null | undefined>(
-    settingsTabs[0]?.key
-  )
+  const { show, setShow, settingsTabs, activeTab, setActiveTab } =
+    useSettingsModalContext()
+
+  useFocusOnSetting()
+
   return (
     <OLModal
-      show={leftMenuShown}
-      onHide={() => setLeftMenuShown(false)}
+      show={show}
+      onHide={() => setShow(false)}
       size="lg"
       backdropClassName={
         activeTab === 'appearance'
@@ -80,4 +51,4 @@ const SettingsModal = () => {
   )
 }
 
-export default SettingsModal
+export default SettingsModalWrapper
