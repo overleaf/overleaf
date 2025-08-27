@@ -15,23 +15,18 @@ const PersistorHelper = require('./PersistorHelper')
 
 const { pipeline, PassThrough } = require('node:stream')
 const fs = require('node:fs')
-const {
-  S3Client,
-  CreateBucketCommand,
-  GetObjectCommand,
-  PutObjectCommand,
-  HeadObjectCommand,
-  DeleteObjectCommand,
-  ListObjectsV2Command,
-  DeleteObjectsCommand,
-  CopyObjectCommand,
-} = require('@aws-sdk/client-s3')
-const { Upload } = require('@aws-sdk/lib-storage')
-const { getSignedUrl } = require('@aws-sdk/s3-request-presigner')
-const { NodeHttpHandler } = require('@aws-sdk/node-http-handler')
+const S3 = require('aws-sdk/clients/s3')
+const { URL } = require('node:url')
 const { WriteError, ReadError, NotFoundError } = require('./Errors')
 const zlib = require('node:zlib')
-const { addMd5Middleware } = require('./S3Md5Middleware')
+
+/**
+ * @typedef {import('aws-sdk/clients/s3').ListObjectsV2Output} ListObjectsV2Output
+ */
+
+/**
+ * @typedef {import('aws-sdk/clients/s3').Object} S3Object
+ */
 
 /**
  * @typedef {import('./types').ListDirectoryResult} ListDirectoryResult
@@ -78,7 +73,7 @@ class SSECOptions {
 }
 
 class S3Persistor extends AbstractPersistor {
-  /** @type {Map<string, S3Client>} */
+  /** @type {Map<string, S3>} */
   #clients = new Map()
 
   constructor(settings = {}) {
@@ -122,7 +117,7 @@ class S3Persistor extends AbstractPersistor {
       // observer will catch errors, clean up and log a warning
       pipeline(readStream, observer, () => {})
 
-      /** @type {import('@aws-sdk/client-s3').PutObjectCommandInput} */
+      /** @type {S3.PutObjectRequest} */
       const uploadOptions = {
         Bucket: bucketName,
         Key: key,
@@ -159,16 +154,13 @@ class S3Persistor extends AbstractPersistor {
       }
 
       if (this.settings.disableMultiPartUpload) {
-        await this._getClientForBucket(bucketName, computeChecksums).send(
-          new PutObjectCommand(uploadOptions)
-        )
+        await this._getClientForBucket(bucketName, computeChecksums)
+          .putObject(uploadOptions)
+          .promise()
       } else {
-        const upload = new Upload({
-          client: this._getClientForBucket(bucketName, computeChecksums),
-          params: uploadOptions,
-          partSize: this.settings.partSize,
-        })
-        await upload.done()
+        await this._getClientForBucket(bucketName, computeChecksums)
+          .upload(uploadOptions, { partSize: this.settings.partSize })
+          .promise()
       }
     } catch (err) {
       throw PersistorHelper.wrapError(
@@ -193,7 +185,6 @@ class S3Persistor extends AbstractPersistor {
   async getObjectStream(bucketName, key, opts) {
     opts = opts || {}
 
-    /** @type {import('@aws-sdk/client-s3').GetObjectCommandInput} */
     const params = {
       Bucket: bucketName,
       Key: key,
@@ -209,18 +200,32 @@ class S3Persistor extends AbstractPersistor {
       bucket: bucketName,
     })
 
-    const abortController = new AbortController()
-    let stream, contentEncoding
+    const req = this._getClientForBucket(bucketName).getObject(params)
+    const stream = req.createReadStream()
+
+    let contentEncoding
     try {
-      const { Body, ContentEncoding } = await this._getClientForBucket(
-        bucketName
-      ).send(new GetObjectCommand(params), {
-        abortSignal: abortController.signal,
+      await new Promise((resolve, reject) => {
+        req.on('httpHeaders', (statusCode, headers) => {
+          switch (statusCode) {
+            case 200: // full response
+            case 206: // partial response
+              contentEncoding = headers['content-encoding']
+              return resolve(undefined)
+            case 403: // AccessDenied
+              return // handled by stream.on('error') handler below
+            case 404: // NoSuchKey
+              return reject(new NotFoundError('not found'))
+            default:
+            // handled by stream.on('error') handler below
+          }
+        })
+        // The AWS SDK is forwarding any errors from the request to the stream.
+        // The AWS SDK is emitting additional errors on the stream ahead of starting to stream.
+        stream.on('error', reject)
+        // The AWS SDK is kicking off the request in the next event loop cycle.
       })
-      stream = Body
-      contentEncoding = ContentEncoding
     } catch (err) {
-      abortController.abort()
       throw PersistorHelper.wrapError(
         err,
         'error reading file from S3',
@@ -234,11 +239,8 @@ class S3Persistor extends AbstractPersistor {
     if (contentEncoding === 'gzip' && opts.autoGunzip) {
       transformer.push(zlib.createGunzip())
     }
-    // @ts-ignore stream (Body) can be undefined in GetObjectCommand
     pipeline(stream, observer, ...transformer, pass, err => {
-      if (err) {
-        abortController.abort()
-      }
+      if (err) req.abort()
     })
     return pass
   }
@@ -251,13 +253,13 @@ class S3Persistor extends AbstractPersistor {
   async getRedirectUrl(bucketName, key) {
     const expiresSeconds = Math.round(this.settings.signedUrlExpiryInMs / 1000)
     try {
-      return await getSignedUrl(
-        this._getClientForBucket(bucketName),
-        new GetObjectCommand({
+      return await this._getClientForBucket(bucketName).getSignedUrlPromise(
+        'getObject',
+        {
           Bucket: bucketName,
           Key: key,
-        }),
-        { expiresIn: expiresSeconds }
+          Expires: expiresSeconds,
+        }
       )
     } catch (err) {
       throw PersistorHelper.wrapError(
@@ -284,15 +286,15 @@ class S3Persistor extends AbstractPersistor {
     const objects = contents.map(item => ({ Key: item.Key || '' }))
     if (objects?.length) {
       try {
-        await this._getClientForBucket(bucketName).send(
-          new DeleteObjectsCommand({
+        await this._getClientForBucket(bucketName)
+          .deleteObjects({
             Bucket: bucketName,
             Delete: {
               Objects: objects,
               Quiet: true,
             },
           })
-        )
+          .promise()
       } catch (err) {
         throw PersistorHelper.wrapError(
           err,
@@ -327,9 +329,9 @@ class S3Persistor extends AbstractPersistor {
     }
 
     try {
-      response = await this._getClientForBucket(bucketName).send(
-        new ListObjectsV2Command(options)
-      )
+      response = await this._getClientForBucket(bucketName)
+        .listObjectsV2(options)
+        .promise()
     } catch (err) {
       throw PersistorHelper.wrapError(
         err,
@@ -347,7 +349,7 @@ class S3Persistor extends AbstractPersistor {
    * @param {string} key
    * @param {Object} opts
    * @param {SSECOptions} [opts.ssecOptions]
-   * @return {Promise<import('@aws-sdk/client-s3').HeadObjectOutput>}
+   * @return {Promise<S3.HeadObjectOutput>}
    */
   async #headObject(bucketName, key, opts = {}) {
     const params = { Bucket: bucketName, Key: key }
@@ -355,8 +357,9 @@ class S3Persistor extends AbstractPersistor {
       Object.assign(params, opts.ssecOptions.getGetOptions())
     }
     try {
-      const client = await this._getClientForBucket(bucketName)
-      return await client.send(new HeadObjectCommand(params))
+      return await this._getClientForBucket(bucketName)
+        .headObject(params)
+        .promise()
     } catch (err) {
       throw PersistorHelper.wrapError(
         err,
@@ -430,9 +433,9 @@ class S3Persistor extends AbstractPersistor {
    */
   async deleteObject(bucketName, key) {
     try {
-      await this._getClientForBucket(bucketName).send(
-        new DeleteObjectCommand({ Bucket: bucketName, Key: key })
-      )
+      await this._getClientForBucket(bucketName)
+        .deleteObject({ Bucket: bucketName, Key: key })
+        .promise()
     } catch (err) {
       // s3 does not give us a NotFoundError here
       throw PersistorHelper.wrapError(
@@ -457,7 +460,7 @@ class S3Persistor extends AbstractPersistor {
     const params = {
       Bucket: bucketName,
       Key: destKey,
-      CopySource: `/${bucketName}/${sourceKey}`,
+      CopySource: `${bucketName}/${sourceKey}`,
     }
     if (opts.ssecSrcOptions) {
       Object.assign(params, opts.ssecSrcOptions.getCopyOptions())
@@ -466,9 +469,7 @@ class S3Persistor extends AbstractPersistor {
       Object.assign(params, opts.ssecOptions.getPutOptions())
     }
     try {
-      await this._getClientForBucket(bucketName).send(
-        new CopyObjectCommand(params)
-      )
+      await this._getClientForBucket(bucketName).copyObject(params).promise()
     } catch (err) {
       throw PersistorHelper.wrapError(
         err,
@@ -518,9 +519,9 @@ class S3Persistor extends AbstractPersistor {
       if (continuationToken) {
         options.ContinuationToken = continuationToken
       }
-      const response = await this._getClientForBucket(bucketName).send(
-        new ListObjectsV2Command(options)
-      )
+      const response = await this._getClientForBucket(bucketName)
+        .listObjectsV2(options)
+        .promise()
 
       const size =
         response.Contents?.reduce((acc, item) => (item.Size || 0) + acc, 0) || 0
@@ -548,38 +549,33 @@ class S3Persistor extends AbstractPersistor {
   /**
    * @param {string} bucket
    * @param {boolean} computeChecksums
-   * @return {S3Client}
+   * @return {S3}
    * @private
    */
   _getClientForBucket(bucket, computeChecksums = false) {
-    /** @type {import('@aws-sdk/client-s3').S3ClientConfig} */
+    /** @type {S3.Types.ClientConfiguration} */
     const clientOptions = {}
     const cacheKey = `${bucket}:${computeChecksums}`
     if (computeChecksums) {
-      clientOptions.requestChecksumCalculation = 'WHEN_SUPPORTED'
-      clientOptions.responseChecksumValidation = 'WHEN_SUPPORTED'
+      clientOptions.computeChecksums = true
     }
     let client = this.#clients.get(cacheKey)
     if (!client) {
-      client = new S3Client(
+      client = new S3(
         this._buildClientOptions(
           this.settings.bucketCreds?.[bucket],
           clientOptions
         )
       )
       this.#clients.set(cacheKey, client)
-
-      // https://github.com/aws/aws-sdk-js-v3/blob/main/supplemental-docs/MD5_FALLBACK.md
-      addMd5Middleware(client)
     }
-
     return client
   }
 
   /**
    * @param {Object} bucketCredentials
-   * @param {import('@aws-sdk/client-s3').S3ClientConfig} clientOptions
-   * @return {import('@aws-sdk/client-s3').S3ClientConfig}
+   * @param {S3.Types.ClientConfiguration} clientOptions
+   * @return {S3.Types.ClientConfiguration}
    * @private
    */
   _buildClientOptions(bucketCredentials, clientOptions) {
@@ -597,63 +593,39 @@ class S3Persistor extends AbstractPersistor {
       }
     } else {
       // Use the default credentials provider (process.env -> SSP -> ini -> IAM)
-      // Docs: https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/setting-credentials-node.html
+      // Docs: https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/CredentialProviderChain.html#defaultProviders-property
     }
 
-    let sslEnabled = false
     if (this.settings.endpoint) {
       const endpoint = new URL(this.settings.endpoint)
       options.endpoint = this.settings.endpoint
-      sslEnabled = endpoint.protocol === 'https:'
+      options.sslEnabled = endpoint.protocol === 'https:'
     }
 
     // path-style access is only used for acceptance tests
     if (this.settings.pathStyle) {
-      options.forcePathStyle = true
+      options.s3ForcePathStyle = true
     }
 
-    for (const opt of ['httpOptions', 'region']) {
+    for (const opt of ['httpOptions', 'maxRetries', 'region']) {
       if (this.settings[opt]) {
         options[opt] = this.settings[opt]
       }
     }
 
-    // maxRetries has been moved to maxAttempts in aws-sdk v3,
-    // we're keeping the existing setting
-    if (this.settings.maxRetries) {
-      options.maxAttempts = this.settings.maxRetries + 1
-    }
-
-    if (sslEnabled && this.settings.ca) {
-      const agent = new https.Agent({
+    if (options.sslEnabled && this.settings.ca && !options.httpOptions?.agent) {
+      options.httpOptions = options.httpOptions || {}
+      options.httpOptions.agent = new https.Agent({
         rejectUnauthorized: true,
         ca: this.settings.ca,
-      })
-      options.requestHandler = new NodeHttpHandler({
-        httpAgent: agent,
-        httpsAgent: agent,
       })
     }
 
     return options
   }
 
-  // test-only
-  _createBucket(bucketName) {
-    return this._getClientForBucket(bucketName).send(
-      new CreateBucketCommand({ Bucket: bucketName })
-    )
-  }
-
-  // test-only
-  _upload(bucketName, uploadOptions) {
-    return this._getClientForBucket(bucketName).send(
-      new PutObjectCommand(uploadOptions)
-    )
-  }
-
   /**
-   * @param {import('@aws-sdk/client-s3').HeadObjectOutput} response
+   * @param {S3.HeadObjectOutput} response
    * @return {string|null}
    * @private
    */

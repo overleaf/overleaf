@@ -144,22 +144,17 @@ function wrapError(error, message, params, ErrorType) {
     ...params,
     cause: error,
   }
-
-  // aws-sdk v3 renames `code` to `Code`, but it's not always present, so we
-  // add a fallback to `name` for compatibility.
-  const errorCode = error.code || error.Code || error.name
-
   if (
     error instanceof NotFoundError ||
     ['NoSuchKey', 'NotFound', 404, 'AccessDenied', 'ENOENT'].includes(
-      errorCode
+      error.code
     ) ||
     (error.response && error.response.statusCode === 404)
   ) {
     return new NotFoundError('no such file', params, error)
   } else if (
     params.ifNoneMatch === '*' &&
-    (errorCode === 'PreconditionFailed' ||
+    (error.code === 'PreconditionFailed' ||
       error.response?.statusCode === 412 ||
       error instanceof AlreadyWrittenError)
   ) {

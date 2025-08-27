@@ -21,6 +21,10 @@ const hkdf = promisify(Crypto.hkdf)
 const AES256_KEY_LENGTH = 32
 
 /**
+ * @typedef {import('aws-sdk').AWSError} AWSError
+ */
+
+/**
  * @typedef {Object} Settings
  * @property {boolean} automaticallyRotateDEKEncryption
  * @property {string} dataEncryptionKeyBucketName
@@ -34,6 +38,16 @@ const AES256_KEY_LENGTH = 32
  */
 
 /**
+ * Helper function to make TS happy when accessing error properties
+ * AWSError is not an actual class, so we cannot use instanceof.
+ * @param {any} err
+ * @return {err is AWSError}
+ */
+function isAWSError(err) {
+  return !!err
+}
+
+/**
  * @param {any} err
  * @return {boolean}
  */
@@ -41,8 +55,9 @@ function isForbiddenError(err) {
   if (!err || !(err instanceof ReadError || err instanceof NotFoundError)) {
     return false
   }
-  // @ts-ignore
-  return err?.cause.statusCode === 403 || err?.cause.Code === 'AccessDenied'
+  const cause = err.cause
+  if (!isAWSError(cause)) return false
+  return cause.statusCode === 403
 }
 
 class RootKeyEncryptionKey {

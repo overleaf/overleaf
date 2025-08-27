@@ -4,8 +4,6 @@ const { expect } = chai
 const SandboxedModule = require('sandboxed-module')
 const Errors = require('../../src/Errors')
 const { EventEmitter } = require('node:events')
-const { Readable } = require('node:stream')
-const mockS3 = require('./S3ClientMock')
 
 const MODULE_PATH = '../../src/S3Persistor.js'
 
@@ -36,18 +34,17 @@ describe('S3PersistorTests', function () {
     Transform,
     PassThrough,
     S3,
-    awsRequestPresigner,
-    awsLibStorage,
-    awsLibStorageUpload,
-    abortSignal,
     Fs,
     ReadStream,
     Stream,
     StreamPromises,
+    S3GetObjectRequest,
     S3Persistor,
+    S3Client,
     S3NotFoundError,
     S3AccessDeniedError,
     FileNotFoundError,
+    EmptyPromise,
     settings,
     Hash,
     crypto
@@ -75,7 +72,46 @@ describe('S3PersistorTests', function () {
       pipeline: sinon.stub().resolves(),
     }
 
+    EmptyPromise = {
+      promise: sinon.stub().resolves(),
+    }
+
     ReadStream = new EventEmitter()
+    class FakeS3GetObjectRequest extends EventEmitter {
+      constructor() {
+        super()
+        this.statusCode = 200
+        this.err = null
+        this.aborted = false
+      }
+
+      abort() {
+        this.aborted = true
+      }
+
+      createReadStream() {
+        setTimeout(() => {
+          if (this.notFoundSSEC) {
+            // special case for AWS S3: 404 NoSuchKey wrapped in a 400. A single request received a single response, and multiple httpHeaders events are triggered. Don't ask.
+            this.emit('httpHeaders', 400, {})
+            this.emit('httpHeaders', 404, {})
+            ReadStream.emit('error', S3NotFoundError)
+            return
+          }
+
+          if (this.err) return ReadStream.emit('error', this.err)
+          this.emit('httpHeaders', this.statusCode, {})
+          if (this.statusCode === 403) {
+            ReadStream.emit('error', S3AccessDeniedError)
+          }
+          if (this.statusCode === 404) {
+            ReadStream.emit('error', S3NotFoundError)
+          }
+        })
+        return ReadStream
+      }
+    }
+    S3GetObjectRequest = new FakeS3GetObjectRequest()
 
     FileNotFoundError = new Error('File not found')
     FileNotFoundError.code = 'ENOENT'
@@ -85,23 +121,33 @@ describe('S3PersistorTests', function () {
     }
 
     S3NotFoundError = new Error('not found')
-    S3NotFoundError.name = 'NoSuchKey'
+    S3NotFoundError.code = 'NoSuchKey'
 
     S3AccessDeniedError = new Error('access denied')
     S3AccessDeniedError.code = 'AccessDenied'
 
-    S3 = mockS3()
-
-    awsLibStorageUpload = sinon.stub().returns({
-      done: sinon.stub().resolves(),
-    })
-
-    awsLibStorage = {
-      Upload: awsLibStorageUpload,
+    S3Client = {
+      getObject: sinon.stub().returns(S3GetObjectRequest),
+      headObject: sinon.stub().returns({
+        promise: sinon.stub().resolves({
+          ContentLength: objectSize,
+          ETag: md5,
+        }),
+      }),
+      listObjectsV2: sinon.stub().returns({
+        promise: sinon.stub().resolves({
+          Contents: files,
+        }),
+      }),
+      upload: sinon
+        .stub()
+        .returns({ promise: sinon.stub().resolves({ ETag: `"${md5}"` }) }),
+      copyObject: sinon.stub().returns(EmptyPromise),
+      deleteObject: sinon.stub().returns(EmptyPromise),
+      deleteObjects: sinon.stub().returns(EmptyPromise),
+      getSignedUrlPromise: sinon.stub().resolves(redirectUrl),
     }
-    awsRequestPresigner = {
-      getSignedUrl: sinon.stub().resolves(redirectUrl),
-    }
+    S3 = sinon.stub().callsFake(() => Object.assign({}, S3Client))
 
     Hash = {
       end: sinon.stub(),
@@ -116,29 +162,17 @@ describe('S3PersistorTests', function () {
       warn: sinon.stub(),
     }
 
-    abortSignal = sinon.stub()
-
-    const AbortCtrl = sinon.stub().returns({
-      signal: {},
-      abort: abortSignal,
-    })
-
     S3Persistor = new (SandboxedModule.require(MODULE_PATH, {
       requires: {
-        '@aws-sdk/client-s3': S3,
-        '@aws-sdk/lib-storage': awsLibStorage,
-        '@aws-sdk/s3-request-presigner': awsRequestPresigner,
+        'aws-sdk/clients/s3': S3,
         '@overleaf/logger': Logger,
-        '@aws-sdk/node-http-handler': {
-          NodeHttpHandler: sinon.stub(),
-        },
         './Errors': Errors,
         fs: Fs,
         stream: Stream,
         'stream/promises': StreamPromises,
         crypto,
       },
-      globals: { console, Buffer, AbortController: AbortCtrl },
+      globals: { console, Buffer },
     }).S3Persistor)(settings)
   })
 
@@ -147,10 +181,6 @@ describe('S3PersistorTests', function () {
       let stream
 
       beforeEach(async function () {
-        S3.mockSend(S3.GetObjectCommand, {
-          Body: Readable.from('content'),
-          ContentEncoding: 'gzip',
-        })
         stream = await S3Persistor.getObjectStream(bucket, key)
       })
 
@@ -158,8 +188,12 @@ describe('S3PersistorTests', function () {
         expect(stream).to.be.instanceOf(PassThrough)
       })
 
+      it('sets the AWS client up with credentials from settings', function () {
+        expect(S3).to.have.been.calledWith(defaultS3Credentials)
+      })
+
       it('fetches the right key from the right bucket', function () {
-        S3.assertSendCalledWith(S3.GetObjectCommand, {
+        expect(S3Client.getObject).to.have.been.calledWith({
           Bucket: bucket,
           Key: key,
         })
@@ -167,14 +201,14 @@ describe('S3PersistorTests', function () {
 
       it('pipes the stream through the meter', async function () {
         expect(Stream.pipeline).to.have.been.calledWith(
-          sinon.match.instanceOf(Readable),
+          ReadStream,
           sinon.match.instanceOf(Transform),
           sinon.match.instanceOf(PassThrough)
         )
       })
 
       it('does not abort the request', function () {
-        expect(abortSignal).not.to.have.been.called
+        expect(S3GetObjectRequest.aborted).to.equal(false)
       })
     })
 
@@ -182,10 +216,6 @@ describe('S3PersistorTests', function () {
       let stream
 
       beforeEach(async function () {
-        S3.mockSend(S3.GetObjectCommand, {
-          Body: Readable.from('this is a longer content'),
-          ContentEncoding: 'gzip',
-        })
         stream = await S3Persistor.getObjectStream(bucket, key, {
           start: 5,
           end: 10,
@@ -197,7 +227,7 @@ describe('S3PersistorTests', function () {
       })
 
       it('passes the byte range on to S3', function () {
-        S3.assertSendCalledWith(S3.GetObjectCommand, {
+        expect(S3Client.getObject).to.have.been.calledWith({
           Bucket: bucket,
           Key: key,
           Range: 'bytes=5-10',
@@ -209,10 +239,6 @@ describe('S3PersistorTests', function () {
       let stream
 
       beforeEach(async function () {
-        S3.mockSend(S3.GetObjectCommand, {
-          Body: Readable.from('content'),
-          ContentEncoding: 'gzip',
-        })
         Stream.pipeline.yields(new Error())
         stream = await S3Persistor.getObjectStream(bucket, key)
       })
@@ -222,7 +248,7 @@ describe('S3PersistorTests', function () {
       })
 
       it('aborts the request', function () {
-        expect(abortSignal).to.have.been.calledOnce
+        expect(S3GetObjectRequest.aborted).to.equal(true)
       })
     })
 
@@ -238,10 +264,6 @@ describe('S3PersistorTests', function () {
       }
 
       beforeEach(async function () {
-        S3.mockSend(S3.GetObjectCommand, {
-          Body: Readable.from('content'),
-          ContentEncoding: 'gzip',
-        })
         settings.bucketCreds = {}
         settings.bucketCreds[bucket] = {
           auth_key: alternativeKey,
@@ -256,11 +278,11 @@ describe('S3PersistorTests', function () {
       })
 
       it('sets the AWS client up with the alternative credentials', function () {
-        expect(S3.S3Client).to.have.been.calledWith(alternativeS3Credentials)
+        expect(S3).to.have.been.calledWith(alternativeS3Credentials)
       })
 
       it('fetches the right key from the right bucket', function () {
-        S3.assertSendCalledWith(S3.GetObjectCommand, {
+        expect(S3Client.getObject).to.have.been.calledWith({
           Bucket: bucket,
           Key: key,
         })
@@ -269,13 +291,9 @@ describe('S3PersistorTests', function () {
       it('uses the default credentials for an unknown bucket', async function () {
         stream = await S3Persistor.getObjectStream('anotherBucket', key)
 
-        expect(S3.S3Client).to.have.been.calledTwice
-        expect(S3.S3Client.firstCall).to.have.been.calledWith(
-          alternativeS3Credentials
-        )
-        expect(S3.S3Client.secondCall).to.have.been.calledWith(
-          defaultS3Credentials
-        )
+        expect(S3).to.have.been.calledTwice
+        expect(S3.firstCall).to.have.been.calledWith(alternativeS3Credentials)
+        expect(S3.secondCall).to.have.been.calledWith(defaultS3Credentials)
       })
     })
 
@@ -284,14 +302,9 @@ describe('S3PersistorTests', function () {
         delete settings.key
         delete settings.secret
 
-        S3.mockSend(S3.GetObjectCommand, {
-          Body: Readable.from('content'),
-          ContentEncoding: 'gzip',
-        })
-
         await S3Persistor.getObjectStream(bucket, key)
-        expect(S3.S3Client).to.have.been.calledOnce
-        expect(S3.S3Client.args[0].credentials).to.not.exist
+        expect(S3).to.have.been.calledOnce
+        expect(S3.args[0].credentials).to.not.exist
       })
     })
 
@@ -302,20 +315,11 @@ describe('S3PersistorTests', function () {
       beforeEach(async function () {
         settings.httpOptions = httpOptions
         settings.maxRetries = maxRetries
-
-        S3.mockSend(S3.GetObjectCommand, {
-          Body: Readable.from('content'),
-          ContentEncoding: 'gzip',
-        })
-
         await S3Persistor.getObjectStream(bucket, key)
       })
 
       it('configures the S3 client appropriately', function () {
-        expect(S3.S3Client).to.have.been.calledWithMatch({
-          httpOptions,
-          maxAttempts: maxRetries + 1,
-        })
+        expect(S3).to.have.been.calledWithMatch({ httpOptions, maxRetries })
       })
     })
 
@@ -323,7 +327,7 @@ describe('S3PersistorTests', function () {
       let error, stream
 
       beforeEach(async function () {
-        S3.mockSend(S3.GetObjectCommand, S3NotFoundError, { rejects: true })
+        S3GetObjectRequest.statusCode = 404
         try {
           stream = await S3Persistor.getObjectStream(bucket, key)
         } catch (err) {
@@ -352,7 +356,7 @@ describe('S3PersistorTests', function () {
       let error, stream
 
       beforeEach(async function () {
-        S3.mockSend(S3.GetObjectCommand, S3NotFoundError, { rejects: true })
+        S3GetObjectRequest.notFoundSSEC = 404
         try {
           stream = await S3Persistor.getObjectStream(bucket, key)
         } catch (err) {
@@ -380,7 +384,7 @@ describe('S3PersistorTests', function () {
       let error, stream
 
       beforeEach(async function () {
-        S3.mockSend(S3.GetObjectCommand, S3AccessDeniedError, { rejects: true })
+        S3GetObjectRequest.statusCode = 403
         try {
           stream = await S3Persistor.getObjectStream(bucket, key)
         } catch (err) {
@@ -409,7 +413,7 @@ describe('S3PersistorTests', function () {
       let error, stream
 
       beforeEach(async function () {
-        S3.mockSend(S3.GetObjectCommand, genericError, { rejects: true })
+        S3GetObjectRequest.err = genericError
         try {
           stream = await S3Persistor.getObjectStream(bucket, key)
         } catch (err) {
@@ -443,7 +447,7 @@ describe('S3PersistorTests', function () {
     })
 
     it('should request a signed URL', function () {
-      expect(awsRequestPresigner.getSignedUrl).to.have.been.called
+      expect(S3Client.getSignedUrlPromise).to.have.been.called
     })
 
     it('should return the url', function () {
@@ -456,7 +460,6 @@ describe('S3PersistorTests', function () {
       let size
 
       beforeEach(async function () {
-        S3.mockSend(S3.HeadObjectCommand, { ContentLength: objectSize })
         size = await S3Persistor.getObjectSize(bucket, key)
       })
 
@@ -465,7 +468,7 @@ describe('S3PersistorTests', function () {
       })
 
       it('should pass the bucket and key to S3', function () {
-        S3.assertSendCalledWith(S3.HeadObjectCommand, {
+        expect(S3Client.headObject).to.have.been.calledWith({
           Bucket: bucket,
           Key: key,
         })
@@ -476,7 +479,9 @@ describe('S3PersistorTests', function () {
       let error
 
       beforeEach(async function () {
-        S3.mockSend(S3.HeadObjectCommand, S3NotFoundError, { rejects: true })
+        S3Client.headObject = sinon.stub().returns({
+          promise: sinon.stub().rejects(S3NotFoundError),
+        })
         try {
           await S3Persistor.getObjectSize(bucket, key)
         } catch (err) {
@@ -497,7 +502,9 @@ describe('S3PersistorTests', function () {
       let error
 
       beforeEach(async function () {
-        S3.mockSend(S3.HeadObjectCommand, genericError, { rejects: true })
+        S3Client.headObject = sinon.stub().returns({
+          promise: sinon.stub().rejects(genericError),
+        })
         try {
           await S3Persistor.getObjectSize(bucket, key)
         } catch (err) {
@@ -518,17 +525,19 @@ describe('S3PersistorTests', function () {
   describe('sendStream', function () {
     describe('with valid parameters', function () {
       beforeEach(async function () {
-        await S3Persistor.sendStream(bucket, key, ReadStream)
+        return S3Persistor.sendStream(bucket, key, ReadStream)
       })
 
-      it('should upload the stream in a single part', function () {
-        expect(awsLibStorageUpload).to.have.been.calledWith({
-          client: S3.s3ClientStub,
-          params: {
-            Bucket: bucket,
-            Key: key,
-            Body: sinon.match.instanceOf(Stream.Transform),
-          },
+      it('should upload the stream', function () {
+        expect(S3Client.upload).to.have.been.calledWith({
+          Bucket: bucket,
+          Key: key,
+          Body: sinon.match.instanceOf(Stream.Transform),
+        })
+      })
+
+      it('should upload files in a single part', function () {
+        expect(S3Client.upload).to.have.been.calledWith(sinon.match.any, {
           partSize: 100 * 1024 * 1024,
         })
       })
@@ -543,21 +552,17 @@ describe('S3PersistorTests', function () {
 
     describe('when a hash is supplied', function () {
       beforeEach(async function () {
-        await S3Persistor.sendStream(bucket, key, ReadStream, {
+        return S3Persistor.sendStream(bucket, key, ReadStream, {
           sourceMd5: 'aaaaaaaabbbbbbbbaaaaaaaabbbbbbbb',
         })
       })
 
       it('sends the hash in base64', function () {
-        expect(awsLibStorageUpload).to.have.been.calledWith({
-          client: S3.s3ClientStub,
-          params: {
-            Bucket: bucket,
-            Key: key,
-            Body: sinon.match.instanceOf(Transform),
-            ContentMD5: 'qqqqqru7u7uqqqqqu7u7uw==',
-          },
-          partSize: 100 * 1024 * 1024,
+        expect(S3Client.upload).to.have.been.calledWith({
+          Bucket: bucket,
+          Key: key,
+          Body: sinon.match.instanceOf(Transform),
+          ContentMD5: 'qqqqqru7u7uqqqqqu7u7uw==',
         })
       })
     })
@@ -567,23 +572,19 @@ describe('S3PersistorTests', function () {
       const contentEncoding = 'gzip'
 
       beforeEach(async function () {
-        await S3Persistor.sendStream(bucket, key, ReadStream, {
+        return S3Persistor.sendStream(bucket, key, ReadStream, {
           contentType,
           contentEncoding,
         })
       })
 
       it('sends the metadata to S3', function () {
-        expect(awsLibStorageUpload).to.have.been.calledWith({
-          client: S3.s3ClientStub,
-          params: {
-            Bucket: bucket,
-            Key: key,
-            Body: sinon.match.instanceOf(Transform),
-            ContentType: contentType,
-            ContentEncoding: contentEncoding,
-          },
-          partSize: 100 * 1024 * 1024,
+        expect(S3Client.upload).to.have.been.calledWith({
+          Bucket: bucket,
+          Key: key,
+          Body: sinon.match.instanceOf(Transform),
+          ContentType: contentType,
+          ContentEncoding: contentEncoding,
         })
       })
     })
@@ -591,7 +592,9 @@ describe('S3PersistorTests', function () {
     describe('when the upload fails', function () {
       let error
       beforeEach(async function () {
-        awsLibStorageUpload.rejects(genericError)
+        S3Client.upload = sinon.stub().returns({
+          promise: sinon.stub().rejects(genericError),
+        })
         try {
           await S3Persistor.sendStream(bucket, key, ReadStream)
         } catch (err) {
@@ -608,8 +611,7 @@ describe('S3PersistorTests', function () {
   describe('sendFile', function () {
     describe('with valid parameters', function () {
       beforeEach(async function () {
-        S3.s3ClientStub.send.resolves()
-        await S3Persistor.sendFile(bucket, key, filename)
+        return S3Persistor.sendFile(bucket, key, filename)
       })
 
       it('should create a read stream for the file', function () {
@@ -617,14 +619,10 @@ describe('S3PersistorTests', function () {
       })
 
       it('should upload the stream', function () {
-        expect(awsLibStorageUpload).to.have.been.calledWith({
-          client: S3.s3ClientStub,
-          params: {
-            Bucket: bucket,
-            Key: key,
-            Body: sinon.match.instanceOf(Transform),
-          },
-          partSize: settings.partSize,
+        expect(S3Client.upload).to.have.been.calledWith({
+          Bucket: bucket,
+          Key: key,
+          Body: sinon.match.instanceOf(Transform),
         })
       })
     })
@@ -634,10 +632,6 @@ describe('S3PersistorTests', function () {
     describe('when the etag is a valid md5 hash', function () {
       let hash
       beforeEach(async function () {
-        S3.mockSend(S3.HeadObjectCommand, {
-          ContentLength: objectSize,
-          ETag: md5,
-        })
         hash = await S3Persistor.getObjectMd5Hash(bucket, key)
       })
 
@@ -646,34 +640,33 @@ describe('S3PersistorTests', function () {
       })
 
       it('should get the hash from the object metadata', function () {
-        S3.assertSendCalledWith(S3.HeadObjectCommand, {
+        expect(S3Client.headObject).to.have.been.calledWith({
           Bucket: bucket,
           Key: key,
         })
       })
 
       it('should not download the object', function () {
-        S3.assertSendNotCalledWith(S3.GetObjectCommand)
+        expect(S3Client.getObject).not.to.have.been.called
       })
     })
 
     describe("when the etag isn't a valid md5 hash", function () {
       let hash
       beforeEach(async function () {
-        S3.mockSend(S3.GetObjectCommand, {
-          ContentLength: objectSize,
-          ETag: md5,
+        S3Client.headObject = sinon.stub().returns({
+          promise: sinon.stub().resolves({
+            ETag: 'somethingthatisntanmd5',
+            Bucket: bucket,
+            Key: key,
+          }),
         })
-        S3.mockSend(S3.HeadObjectCommand, {
-          ETag: 'somethingthatisntanmd5',
-          Bucket: bucket,
-          Key: key,
-        })
+
         hash = await S3Persistor.getObjectMd5Hash(bucket, key)
       })
 
       it('should re-fetch the file to verify it', function () {
-        S3.assertSendCalledWith(S3.GetObjectCommand, {
+        expect(S3Client.getObject).to.have.been.calledWith({
           Bucket: bucket,
           Key: key,
         })
@@ -692,15 +685,14 @@ describe('S3PersistorTests', function () {
   describe('copyObject', function () {
     describe('with valid parameters', function () {
       beforeEach(async function () {
-        S3.mockSend(S3.CopyObjectCommand)
-        await S3Persistor.copyObject(bucket, key, destKey)
+        return S3Persistor.copyObject(bucket, key, destKey)
       })
 
       it('should copy the object', function () {
-        S3.assertSendCalledWith(S3.CopyObjectCommand, {
+        expect(S3Client.copyObject).to.have.been.calledWith({
           Bucket: bucket,
           Key: destKey,
-          CopySource: `/${bucket}/${key}`,
+          CopySource: `${bucket}/${key}`,
         })
       })
     })
@@ -709,7 +701,9 @@ describe('S3PersistorTests', function () {
       let error
 
       beforeEach(async function () {
-        S3.mockSend(S3.CopyObjectCommand, S3NotFoundError, { rejects: true })
+        S3Client.copyObject = sinon.stub().returns({
+          promise: sinon.stub().rejects(S3NotFoundError),
+        })
         try {
           await S3Persistor.copyObject(bucket, key, destKey)
         } catch (err) {
@@ -726,12 +720,11 @@ describe('S3PersistorTests', function () {
   describe('deleteObject', function () {
     describe('with valid parameters', function () {
       beforeEach(async function () {
-        S3.mockSend(S3.DeleteObjectCommand)
-        await S3Persistor.deleteObject(bucket, key)
+        return S3Persistor.deleteObject(bucket, key)
       })
 
       it('should delete the object', function () {
-        S3.assertSendCalledWith(S3.DeleteObjectCommand, {
+        expect(S3Client.deleteObject).to.have.been.calledWith({
           Bucket: bucket,
           Key: key,
         })
@@ -742,76 +735,68 @@ describe('S3PersistorTests', function () {
   describe('deleteDirectory', function () {
     describe('with valid parameters', function () {
       beforeEach(async function () {
-        S3.mockSend(S3.ListObjectsV2Command, { Contents: files })
-        await S3Persistor.deleteDirectory(bucket, key)
+        return S3Persistor.deleteDirectory(bucket, key)
       })
 
       it('should list the objects in the directory', function () {
-        S3.assertSendCalledWith(S3.ListObjectsV2Command, {
+        expect(S3Client.listObjectsV2).to.have.been.calledWith({
           Bucket: bucket,
           Prefix: key,
         })
       })
 
       it('should delete the objects using their keys', function () {
-        S3.s3ClientStub.send.withArgs(new S3.DeleteObjectsCommand()).resolves()
-        S3.assertSendCalledWith(
-          S3.DeleteObjectsCommand,
-          {
-            Bucket: bucket,
-            Delete: {
-              Objects: [{ Key: 'llama' }, { Key: 'hippo' }],
-              Quiet: true,
-            },
+        expect(S3Client.deleteObjects).to.have.been.calledWith({
+          Bucket: bucket,
+          Delete: {
+            Objects: [{ Key: 'llama' }, { Key: 'hippo' }],
+            Quiet: true,
           },
-          1
-        )
+        })
       })
     })
 
     describe('when there are no files', function () {
       beforeEach(async function () {
-        S3.mockSend(S3.ListObjectsV2Command, { Contents: [] })
-        await S3Persistor.deleteDirectory(bucket, key)
+        S3Client.listObjectsV2 = sinon
+          .stub()
+          .returns({ promise: sinon.stub().resolves({ Contents: [] }) })
+        return S3Persistor.deleteDirectory(bucket, key)
       })
 
       it('should list the objects in the directory', function () {
-        S3.assertSendCalledWith(S3.ListObjectsV2Command, {
+        expect(S3Client.listObjectsV2).to.have.been.calledWith({
           Bucket: bucket,
           Prefix: key,
         })
       })
 
       it('should not try to delete any objects', function () {
-        S3.assertSendNotCalledWith(S3.DeleteObjectsCommand)
+        expect(S3Client.deleteObjects).not.to.have.been.called
       })
     })
 
     describe('when there are more files available', function () {
       const continuationToken = 'wombat'
       beforeEach(async function () {
-        S3.mockSend(
-          S3.ListObjectsV2Command,
-          {
+        S3Client.listObjectsV2.onCall(0).returns({
+          promise: sinon.stub().resolves({
             Contents: files,
             IsTruncated: true,
             NextContinuationToken: continuationToken,
-          },
-          {
-            nextResponses: [{ Contents: [{ Key: 'last-file', Size: 33 }] }],
-          }
-        )
-        S3.mockSend(S3.DeleteObjectsCommand)
+          }),
+        })
+
         return S3Persistor.deleteDirectory(bucket, key)
       })
 
       it('should list the objects a second time, with a continuation token', function () {
-        S3.assertSendCallCount(S3.ListObjectsV2Command, 2)
-        expect(S3.s3ClientStub.send.firstCall.args[0].payload).to.deep.equal({
+        expect(S3Client.listObjectsV2).to.be.calledTwice
+        expect(S3Client.listObjectsV2).to.be.calledWith({
           Bucket: bucket,
           Prefix: key,
         })
-        expect(S3.s3ClientStub.send.thirdCall.args[0].payload).to.deep.equal({
+        expect(S3Client.listObjectsV2).to.be.calledWith({
           Bucket: bucket,
           Prefix: key,
           ContinuationToken: continuationToken,
@@ -819,7 +804,7 @@ describe('S3PersistorTests', function () {
       })
 
       it('should delete both sets of files', function () {
-        S3.assertSendCallCount(S3.DeleteObjectsCommand, 2)
+        expect(S3Client.deleteObjects).to.have.been.calledTwice
       })
     })
 
@@ -827,7 +812,9 @@ describe('S3PersistorTests', function () {
       let error
 
       beforeEach(async function () {
-        S3.mockSend(S3.ListObjectsV2Command, genericError, { rejects: true })
+        S3Client.listObjectsV2 = sinon
+          .stub()
+          .returns({ promise: sinon.stub().rejects(genericError) })
         try {
           await S3Persistor.deleteDirectory(bucket, key)
         } catch (err) {
@@ -844,8 +831,7 @@ describe('S3PersistorTests', function () {
       })
 
       it('should not try to delete any objects', function () {
-        // call count should be 1, only the ListObjectsV2Command tested above
-        expect(S3.s3ClientStub.send.callCount).to.equal(1)
+        expect(S3Client.deleteObjects).not.to.have.been.called
       })
     })
 
@@ -853,8 +839,9 @@ describe('S3PersistorTests', function () {
       let error
 
       beforeEach(async function () {
-        S3.mockSend(S3.ListObjectsV2Command, { Contents: files })
-        S3.mockSend(S3.DeleteObjectsCommand, genericError, { rejects: true })
+        S3Client.deleteObjects = sinon
+          .stub()
+          .returns({ promise: sinon.stub().rejects(genericError) })
         try {
           await S3Persistor.deleteDirectory(bucket, key)
         } catch (err) {
@@ -877,12 +864,11 @@ describe('S3PersistorTests', function () {
       let size
 
       beforeEach(async function () {
-        S3.mockSend(S3.ListObjectsV2Command, { Contents: files })
         size = await S3Persistor.directorySize(bucket, key)
       })
 
       it('should list the objects in the directory', function () {
-        S3.assertSendCalledWith(S3.ListObjectsV2Command, {
+        expect(S3Client.listObjectsV2).to.have.been.calledWith({
           Bucket: bucket,
           Prefix: key,
         })
@@ -897,12 +883,14 @@ describe('S3PersistorTests', function () {
       let size
 
       beforeEach(async function () {
-        S3.mockSend(S3.ListObjectsV2Command, { Contents: [] })
+        S3Client.listObjectsV2 = sinon
+          .stub()
+          .returns({ promise: sinon.stub().resolves({ Contents: [] }) })
         size = await S3Persistor.directorySize(bucket, key)
       })
 
       it('should list the objects in the directory', function () {
-        S3.assertSendCalledWith(S3.ListObjectsV2Command, {
+        expect(S3Client.listObjectsV2).to.have.been.calledWith({
           Bucket: bucket,
           Prefix: key,
         })
@@ -917,28 +905,24 @@ describe('S3PersistorTests', function () {
       const continuationToken = 'wombat'
       let size
       beforeEach(async function () {
-        S3.mockSend(
-          S3.ListObjectsV2Command,
-          {
+        S3Client.listObjectsV2.onCall(0).returns({
+          promise: sinon.stub().resolves({
             Contents: files,
             IsTruncated: true,
             NextContinuationToken: continuationToken,
-          },
-          {
-            nextResponses: [{ Contents: [{ Key: 'last-file', Size: 33 }] }],
-          }
-        )
+          }),
+        })
 
         size = await S3Persistor.directorySize(bucket, key)
       })
 
       it('should list the objects a second time, with a continuation token', function () {
-        S3.assertSendCallCount(S3.ListObjectsV2Command, 2)
-        expect(S3.s3ClientStub.send.firstCall.args[0].payload).to.deep.equal({
+        expect(S3Client.listObjectsV2).to.be.calledTwice
+        expect(S3Client.listObjectsV2).to.be.calledWith({
           Bucket: bucket,
           Prefix: key,
         })
-        expect(S3.s3ClientStub.send.secondCall.args[0].payload).to.deep.equal({
+        expect(S3Client.listObjectsV2).to.be.calledWith({
           Bucket: bucket,
           Prefix: key,
           ContinuationToken: continuationToken,
@@ -954,7 +938,9 @@ describe('S3PersistorTests', function () {
       let error
 
       beforeEach(async function () {
-        S3.mockSend(S3.ListObjectsV2Command, genericError, { rejects: true })
+        S3Client.listObjectsV2 = sinon
+          .stub()
+          .returns({ promise: sinon.stub().rejects(genericError) })
         try {
           await S3Persistor.directorySize(bucket, key)
         } catch (err) {
@@ -977,12 +963,11 @@ describe('S3PersistorTests', function () {
       let exists
 
       beforeEach(async function () {
-        S3.mockSend(S3.HeadObjectCommand, { ContentLength: objectSize })
         exists = await S3Persistor.checkIfObjectExists(bucket, key)
       })
 
       it('should get the object header', function () {
-        S3.assertSendCalledWith(S3.HeadObjectCommand, {
+        expect(S3Client.headObject).to.have.been.calledWith({
           Bucket: bucket,
           Key: key,
         })
@@ -997,13 +982,14 @@ describe('S3PersistorTests', function () {
       let exists
 
       beforeEach(async function () {
-        S3.mockSend(S3.HeadObjectCommand, S3NotFoundError, { rejects: true })
-        S3.s3ClientStub.send.rejects(S3NotFoundError)
+        S3Client.headObject = sinon
+          .stub()
+          .returns({ promise: sinon.stub().rejects(S3NotFoundError) })
         exists = await S3Persistor.checkIfObjectExists(bucket, key)
       })
 
       it('should get the object header', function () {
-        S3.assertSendCalledWith(S3.HeadObjectCommand, {
+        expect(S3Client.headObject).to.have.been.calledWith({
           Bucket: bucket,
           Key: key,
         })
@@ -1018,7 +1004,9 @@ describe('S3PersistorTests', function () {
       let error
 
       beforeEach(async function () {
-        S3.mockSend(S3.HeadObjectCommand, genericError, { rejects: true })
+        S3Client.headObject = sinon
+          .stub()
+          .returns({ promise: sinon.stub().rejects(genericError) })
         try {
           await S3Persistor.checkIfObjectExists(bucket, key)
         } catch (err) {
@@ -1037,6 +1025,24 @@ describe('S3PersistorTests', function () {
       it('should eventually wrap the error', function () {
         expect(error.cause.cause).to.equal(genericError)
       })
+    })
+  })
+
+  describe('_getClientForBucket', function () {
+    it('should return same instance for same bucket', function () {
+      const a = S3Persistor._getClientForBucket('foo')
+      const b = S3Persistor._getClientForBucket('foo')
+      expect(a).to.equal(b)
+    })
+    it('should return different instance for different bucket', function () {
+      const a = S3Persistor._getClientForBucket('foo')
+      const b = S3Persistor._getClientForBucket('bar')
+      expect(a).to.not.equal(b)
+    })
+    it('should return different instance for same bucket different computeChecksums', function () {
+      const a = S3Persistor._getClientForBucket('foo', false)
+      const b = S3Persistor._getClientForBucket('foo', true)
+      expect(a).to.not.equal(b)
     })
   })
 })
