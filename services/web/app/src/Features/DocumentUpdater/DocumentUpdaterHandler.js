@@ -268,7 +268,7 @@ async function acceptChanges(projectId, docId, changeIds) {
     'accept-changes'
   )
 
-  await Modules.promises.hooks.fire('acceptedChanges', projectId, docId)
+  await Modules.promises.hooks.fire('changesAccepted', projectId, docId)
 }
 
 /**
