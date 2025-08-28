@@ -1,14 +1,24 @@
 import 'abort-controller/polyfill'
 import { postJSON } from '../../infrastructure/fetch-json'
 import { debugConsole } from '@/utils/debugging'
+import { ReCaptchaInstance } from '@ol-types/recaptcha'
 
-const grecaptcha = window.grecaptcha
+interface RecaptchaCallback {
+  resolve: (token: string) => void
+  reject: (error: Error) => void
+  resetTimeout: () => void
+}
 
-let recaptchaId, canResetCaptcha, isFromReset, resetFailed
-const recaptchaCallbacks = []
+const grecaptcha: ReCaptchaInstance | undefined = window.grecaptcha
+
+let recaptchaId: string | undefined
+let canResetCaptcha: boolean
+let isFromReset: boolean
+let resetFailed: boolean
+const recaptchaCallbacks: RecaptchaCallback[] = []
 
 function resetCaptcha() {
-  if (!canResetCaptcha) return
+  if (!canResetCaptcha || !grecaptcha || recaptchaId === undefined) return
   canResetCaptcha = false
   isFromReset = true
   grecaptcha.reset(recaptchaId)
@@ -27,7 +37,7 @@ function handleAbortedCaptcha() {
   }
 }
 
-function emitToken(token) {
+function emitToken(token: string) {
   recaptchaCallbacks.splice(0).forEach(({ resolve, resetTimeout }) => {
     resetTimeout()
     resolve(token)
@@ -38,24 +48,24 @@ function emitToken(token) {
   resetCaptcha()
 }
 
-function getMessage(err) {
-  return (err && err.message) || 'no details returned'
+function getMessage(err: Error | unknown): string {
+  return (err as Error)?.message || 'no details returned'
 }
 
-function emitError(err, src) {
+function emitError(err: Error, src: string) {
   if (isFromReset) {
     resetFailed = true
   }
 
-  err = new Error(
+  const error = new Error(
     `captcha check failed: ${getMessage(err)}, please retry again`
   )
   // Keep a record of this error. 2nd line might request a screenshot of it.
-  debugConsole.error(err, src)
+  debugConsole.error(error, src)
 
   recaptchaCallbacks.splice(0).forEach(({ reject, resetTimeout }) => {
     resetTimeout()
-    reject(err)
+    reject(error)
   })
 
   // Unhappy path: Only reset if not failed before.
@@ -63,16 +73,16 @@ function emitError(err, src) {
   resetCaptcha()
 }
 
-export async function canSkipCaptcha(email) {
-  let timer
-  let canSkip
+export async function canSkipCaptcha(email: string): Promise<boolean> {
+  let timer: ReturnType<typeof setTimeout> | undefined
+  let canSkip: boolean
   try {
     const controller = new AbortController()
     const signal = controller.signal
     timer = setTimeout(() => {
       controller.abort()
     }, 1000)
-    canSkip = await postJSON('/login/can-skip-captcha', {
+    canSkip = await postJSON<boolean>('/login/can-skip-captcha', {
       signal,
       body: { email },
       swallowAbortError: false,
@@ -80,12 +90,14 @@ export async function canSkipCaptcha(email) {
   } catch (e) {
     canSkip = false
   } finally {
-    clearTimeout(timer)
+    if (timer) {
+      clearTimeout(timer)
+    }
   }
   return canSkip
 }
 
-export async function validateCaptchaV2() {
+export async function validateCaptchaV2(): Promise<string | undefined> {
   if (
     // Detect blocked recaptcha
     typeof grecaptcha === 'undefined' ||
@@ -98,8 +110,11 @@ export async function validateCaptchaV2() {
   }
   if (recaptchaId === undefined) {
     const el = document.getElementById('recaptcha')
+    if (!el) {
+      throw new Error('recaptcha element not found')
+    }
     recaptchaId = grecaptcha.render(el, {
-      callback: token => {
+      callback: (token: string) => {
         emitToken(token)
       },
       'error-callback': () => {
@@ -113,9 +128,12 @@ export async function validateCaptchaV2() {
       },
     })
     // Attach abort handler once when setting up the captcha.
-    document
-      .querySelector('[data-ol-captcha-retry-trigger-area]')
-      .addEventListener('click', handleAbortedCaptcha)
+    const retryArea = document.querySelector(
+      '[data-ol-captcha-retry-trigger-area]'
+    )
+    if (retryArea) {
+      retryArea.addEventListener('click', handleAbortedCaptcha)
+    }
   }
 
   if (resetFailed) {
@@ -126,7 +144,7 @@ export async function validateCaptchaV2() {
   canResetCaptcha = true
   isFromReset = false
 
-  return await new Promise((resolve, reject) => {
+  return await new Promise<string>((resolve, reject) => {
     const timeout = setTimeout(() => {
       // We triggered this error. Ensure that we can reset to captcha.
       canResetCaptcha = true
@@ -142,9 +160,11 @@ export async function validateCaptchaV2() {
       resetTimeout: () => clearTimeout(timeout),
     })
     try {
-      grecaptcha.execute(recaptchaId).catch(err => {
-        emitError(new Error(`recaptcha: ${getMessage(err)}`), '.catch()')
-      })
+      if (grecaptcha && recaptchaId !== undefined) {
+        grecaptcha.execute(recaptchaId).catch((err: Error) => {
+          emitError(new Error(`recaptcha: ${getMessage(err)}`), '.catch()')
+        })
+      }
     } catch (err) {
       emitError(new Error(`recaptcha: ${getMessage(err)}`), 'try/catch')
     }
@@ -152,8 +172,8 @@ export async function validateCaptchaV2() {
     // Try to (re-)attach a handler to the backdrop element of the popup.
     for (const delay of [1, 10, 100, 1000]) {
       setTimeout(() => {
-        const el = document.body.lastChild
-        if (el.tagName !== 'DIV') return
+        const el = document.body.lastChild as HTMLElement
+        if (!el || el.tagName !== 'DIV') return
         el.removeEventListener('click', handleAbortedCaptcha)
         el.addEventListener('click', handleAbortedCaptcha)
       }, delay)

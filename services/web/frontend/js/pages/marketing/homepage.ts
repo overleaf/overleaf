@@ -1,9 +1,23 @@
 import '../../marketing'
 import '@/infrastructure/hotjar'
 
-function homepageAnimation(homepageAnimationEl) {
-  function createFrames(word, { buildTime, holdTime, breakTime }) {
-    const frames = []
+interface FrameOptions {
+  buildTime: number
+  holdTime: number
+  breakTime: number
+}
+
+interface Frame {
+  before: string
+  time: number
+}
+
+function homepageAnimation(homepageAnimationEl: HTMLElement) {
+  function createFrames(
+    word: string,
+    { buildTime, holdTime, breakTime }: FrameOptions
+  ): Frame[] {
+    const frames: Frame[] = []
     let current = ''
 
     // Build up the word
@@ -27,13 +41,13 @@ function homepageAnimation(homepageAnimationEl) {
     return frames
   }
 
-  const opts = {
+  const opts: FrameOptions = {
     buildTime: 100,
     holdTime: 1000,
     breakTime: 100,
   }
 
-  const frames = [
+  const frames: Frame[] = [
     // 1.5s pause before starting
     { before: '', time: 1500 },
     ...createFrames('articles', opts),
@@ -45,7 +59,7 @@ function homepageAnimation(homepageAnimationEl) {
   ]
 
   let index = 0
-  function nextFrame() {
+  function nextFrame(): void {
     const frame = frames[index]
     index = (index + 1) % frames.length
 
@@ -56,8 +70,10 @@ function homepageAnimation(homepageAnimationEl) {
   nextFrame()
 }
 
-const homepageAnimationEl = document.querySelector('#home-animation-text')
-const reducedMotionReduce = window.matchMedia(
+const homepageAnimationEl: HTMLElement | null = document.querySelector(
+  '#home-animation-text'
+)
+const reducedMotionReduce: MediaQueryList = window.matchMedia(
   '(prefers-reduced-motion: reduce)'
 )
 

@@ -1,6 +1,8 @@
 import { materialIcon } from '@/features/utils/material-icon'
 
-export default function inputValidator(inputEl) {
+export default function inputValidator(
+  inputEl: HTMLInputElement | HTMLTextAreaElement
+) {
   const messageEl = document.createElement('div')
   messageEl.className =
     inputEl.getAttribute('data-ol-validation-message-classes') ||
@@ -29,7 +31,7 @@ export default function inputValidator(inputEl) {
   inputEl.addEventListener('blur', displayValidationMessages)
 
   // The user has submitted the form and the current field has errors.
-  inputEl.addEventListener('invalid', e => {
+  inputEl.addEventListener('invalid', (e: Event) => {
     // Block the display of browser error messages.
     e.preventDefault()
 

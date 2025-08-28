@@ -4,14 +4,21 @@ import { formatWikiHit, searchWiki } from '../algolia-search/search-wiki'
 import { sendMB } from '../../infrastructure/event-tracking'
 import { materialIcon } from '@/features/utils/material-icon'
 
-export function setupSearch(formEl) {
-  const inputEl = formEl.querySelector('[name="subject"]')
+export function setupSearch(formEl: Element) {
+  const inputEl = formEl.querySelector('[name="subject"]') as HTMLInputElement
   const resultsContainerEl = formEl.querySelector(
     '[data-ol-search-results-container]'
-  )
-  const wrapperEl = formEl.querySelector('[data-ol-search-results-wrapper]')
+  ) as HTMLElement
+  const wrapperEl = formEl.querySelector(
+    '[data-ol-search-results-wrapper]'
+  ) as HTMLElement
+
+  if (!inputEl || !resultsContainerEl || !wrapperEl) {
+    return
+  }
 
   let lastValue = ''
+
   function hideResults() {
     wrapperEl.setAttribute('hidden', '')
   }
@@ -94,20 +101,22 @@ export function setupSearch(formEl) {
 
   inputEl.addEventListener('input', _.debounce(handleChange, 350))
 
-  function handleClickOutside(event) {
-    if (!wrapperEl.contains(event.target) && !inputEl.contains(event.target)) {
+  function handleClickOutside(event: Event) {
+    const target = event.target as Element
+    if (!wrapperEl.contains(target) && !inputEl.contains(target)) {
       hideResults()
     }
   }
 
   document.addEventListener('click', handleClickOutside)
 
-  function handleKeyDown(event) {
-    if (event.key === 'Escape') {
+  function handleKeyDown(event: Event) {
+    const keyboardEvent = event as KeyboardEvent
+    if (keyboardEvent.key === 'Escape') {
       if (!wrapperEl.hasAttribute('hidden')) {
         hideResults()
-        event.stopPropagation()
-        event.preventDefault()
+        keyboardEvent.stopPropagation()
+        keyboardEvent.preventDefault()
       }
     }
   }

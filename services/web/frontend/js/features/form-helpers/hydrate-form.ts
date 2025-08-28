@@ -14,16 +14,42 @@ import { materialIcon as createMaterialIcon } from '@/features/utils/material-ic
 // - Showing errors
 // - Disabled state
 
-function formSubmitHelper(formEl) {
-  formEl.addEventListener('submit', async e => {
+interface FormResponse {
+  redir?: string
+  redirect?: string
+  message?:
+    | {
+        text?: string
+      }
+    | string
+}
+
+interface ErrorWithData {
+  data?: {
+    message?: {
+      key?: string
+      hints?: string[]
+    }
+  }
+}
+
+interface MessageBagItem {
+  type: 'error' | 'message' | 'success' | 'warning' | 'info'
+  key?: string
+  text: string
+  hints?: string[]
+}
+
+function formSubmitHelper(formEl: HTMLFormElement) {
+  formEl.addEventListener('submit', async (e: Event) => {
     e.preventDefault()
 
     formEl.dispatchEvent(new Event('pending'))
 
-    const messageBag = []
+    const messageBag: MessageBagItem[] = []
 
     try {
-      let data
+      let data: FormResponse
       try {
         const captchaResponse = await validateCaptcha(formEl)
         data = await sendFormRequest(formEl, captchaResponse)
@@ -46,7 +72,7 @@ function formSubmitHelper(formEl) {
 
       // Handle redirects
       if (data.redir || data.redirect) {
-        window.location = data.redir || data.redirect
+        window.location.href = data.redir || data.redirect!
         return
       }
 
@@ -54,7 +80,10 @@ function formSubmitHelper(formEl) {
       if (data.message) {
         messageBag.push({
           type: 'message',
-          text: data.message.text || data.message,
+          text:
+            typeof data.message === 'string'
+              ? data.message
+              : data.message.text || '',
         })
       }
 
@@ -67,15 +96,25 @@ function formSubmitHelper(formEl) {
       // Let the user re-submit the form.
       formEl.dispatchEvent(new Event('idle'))
     } catch (error) {
-      let text = error.message
+      let text = (error as Error).message
+      let key: string | undefined
+      let hints: string[] | undefined
+
       if (error instanceof FetchError) {
         text = error.getUserFacingMessage()
       }
+
+      const errorWithData = error as ErrorWithData
+      if (errorWithData.data?.message) {
+        key = errorWithData.data.message.key
+        hints = errorWithData.data.message.hints
+      }
+
       messageBag.push({
         type: 'error',
-        key: error.data?.message?.key,
+        key,
         text,
-        hints: error.data?.message?.hints,
+        hints,
       })
 
       // Let the user re-submit the form.
@@ -89,8 +128,10 @@ function formSubmitHelper(formEl) {
   })
 }
 
-async function validateCaptcha(formEl) {
-  let captchaResponse
+async function validateCaptcha(
+  formEl: HTMLFormElement
+): Promise<string | undefined> {
+  let captchaResponse: string | undefined
   if (
     formEl.hasAttribute('captcha') &&
     // Disable captcha for E2E tests in dev-env.
@@ -98,7 +139,7 @@ async function validateCaptcha(formEl) {
   ) {
     if (
       formEl.getAttribute('action') === '/login' &&
-      (await canSkipCaptcha(new FormData(formEl).get('email')))
+      (await canSkipCaptcha(new FormData(formEl).get('email') as string))
     ) {
       // The email is present in the deviceHistory, and we can skip the display
       //  of a captcha challenge.
@@ -112,7 +153,10 @@ async function validateCaptcha(formEl) {
   return captchaResponse
 }
 
-async function sendFormRequest(formEl, captchaResponse) {
+async function sendFormRequest(
+  formEl: HTMLFormElement,
+  captchaResponse?: string
+): Promise<FormResponse> {
   const formData = new FormData(formEl)
   if (captchaResponse) {
     formData.set('g-recaptcha-response', captchaResponse)
@@ -124,27 +168,24 @@ async function sendFormRequest(formEl, captchaResponse) {
       return [key, val.length > 1 ? val : val.pop()]
     })
   )
-  const url = formEl.getAttribute('action')
-  return postJSON(url, { body })
+  const url = formEl.getAttribute('action')!
+  return postJSON<FormResponse>(url, { body })
 }
 
-function hideFormElements(formEl) {
-  for (const e of formEl.elements) {
-    e.hidden = true
+function hideFormElements(formEl: HTMLFormElement) {
+  for (const element of formEl.elements) {
+    if (element instanceof HTMLElement) {
+      element.hidden = true
+    }
   }
 }
 
 /**
  * Creates a notification element from a message object.
- *
- * @param {Object} message
- * @param {'error' | 'success' | 'warning' | 'info'} message.type
- * @param {string} message.key
- * @param {string} message.text
- * @param {string[]} message.hints
- * @returns {HTMLDivElement}
  */
-function createNotificationFromMessage(message) {
+function createNotificationFromMessage(
+  message: MessageBagItem
+): HTMLDivElement {
   const messageEl = document.createElement('div')
   messageEl.className = classNames('mb-3 notification', {
     'notification-type-error': message.type === 'error',
@@ -155,12 +196,14 @@ function createNotificationFromMessage(message) {
   messageEl.setAttribute('aria-live', 'assertive')
   messageEl.setAttribute('role', message.type === 'error' ? 'alert' : 'status')
 
-  const materialIcon = {
+  const materialIconLookup: Record<string, string> = {
     info: 'info',
     success: 'check_circle',
     error: 'error',
     warning: 'warning',
-  }[message.type]
+  }
+  const materialIcon = materialIconLookup[message.type]
+
   if (materialIcon) {
     const iconEl = document.createElement('div')
     iconEl.className = 'notification-icon'
@@ -193,20 +236,22 @@ function createNotificationFromMessage(message) {
 
 // TODO: remove the showMessages function after every form alerts are updated to use the new style
 // TODO: rename showMessagesNewStyle to showMessages after the above is done
-function showMessages(formEl, messageBag) {
+function showMessages(formEl: HTMLFormElement, messageBag: MessageBagItem[]) {
   const messagesEl = formEl.querySelector('[data-ol-form-messages]')
   if (!messagesEl) return
 
   // Clear content
   messagesEl.textContent = ''
-  formEl.querySelectorAll('[data-ol-custom-form-message]').forEach(el => {
-    el.hidden = true
-  })
+  formEl
+    .querySelectorAll<HTMLElement>('[data-ol-custom-form-message]')
+    .forEach(el => {
+      el.hidden = true
+    })
 
   // Render messages
   messageBag.forEach(message => {
     const customErrorElements = message.key
-      ? formEl.querySelectorAll(
+      ? formEl.querySelectorAll<HTMLElement>(
           `[data-ol-custom-form-message="${message.key}"]`
         )
       : []
@@ -221,7 +266,9 @@ function showMessages(formEl, messageBag) {
     }
     if (message.key) {
       // Hide the form elements on specific message types
-      const hideOnError = formEl.attributes['data-ol-hide-on-error']
+      const hideOnError = formEl.attributes.getNamedItem(
+        'data-ol-hide-on-error'
+      )
       if (
         hideOnError &&
         hideOnError.value &&
@@ -231,7 +278,9 @@ function showMessages(formEl, messageBag) {
       }
       // Hide any elements with specific `data-ol-hide-on-error-message` message
       document
-        .querySelectorAll(`[data-ol-hide-on-error-message="${message.key}"]`)
+        .querySelectorAll<HTMLElement>(
+          `[data-ol-hide-on-error-message="${message.key}"]`
+        )
         .forEach(el => {
           el.hidden = true
         })
@@ -239,20 +288,25 @@ function showMessages(formEl, messageBag) {
   })
 }
 
-function showMessagesNewStyle(formEl, messageBag) {
+function showMessagesNewStyle(
+  formEl: HTMLFormElement,
+  messageBag: MessageBagItem[]
+) {
   const messagesEl = formEl.querySelector('[data-ol-form-messages-new-style]')
   if (!messagesEl) return
 
   // Clear content
   messagesEl.textContent = ''
-  formEl.querySelectorAll('[data-ol-custom-form-message]').forEach(el => {
-    el.hidden = true
-  })
+  formEl
+    .querySelectorAll<HTMLElement>('[data-ol-custom-form-message]')
+    .forEach(el => {
+      el.hidden = true
+    })
 
   // Render messages
   messageBag.forEach(message => {
     const customErrorElements = message.key
-      ? formEl.querySelectorAll(
+      ? formEl.querySelectorAll<HTMLElement>(
           `[data-ol-custom-form-message="${message.key}"]`
         )
       : []
@@ -303,7 +357,9 @@ function showMessagesNewStyle(formEl, messageBag) {
     }
     if (message.key) {
       // Hide the form elements on specific message types
-      const hideOnError = formEl.attributes['data-ol-hide-on-error']
+      const hideOnError = formEl.attributes.getNamedItem(
+        'data-ol-hide-on-error'
+      )
       if (
         hideOnError &&
         hideOnError.value &&
@@ -313,7 +369,9 @@ function showMessagesNewStyle(formEl, messageBag) {
       }
       // Hide any elements with specific `data-ol-hide-on-error-message` message
       document
-        .querySelectorAll(`[data-ol-hide-on-error-message="${message.key}"]`)
+        .querySelectorAll<HTMLElement>(
+          `[data-ol-hide-on-error-message="${message.key}"]`
+        )
         .forEach(el => {
           el.hidden = true
         })
@@ -321,10 +379,14 @@ function showMessagesNewStyle(formEl, messageBag) {
   })
 }
 
-export function inflightHelper(el) {
+export function inflightHelper(el: HTMLElement) {
   const disabledInflight = el.querySelectorAll('[data-ol-disabled-inflight]')
-  const showWhenNotInflight = el.querySelectorAll('[data-ol-inflight="idle"]')
-  const showWhenInflight = el.querySelectorAll('[data-ol-inflight="pending"]')
+  const showWhenNotInflight = el.querySelectorAll<HTMLElement>(
+    '[data-ol-inflight="idle"]'
+  )
+  const showWhenInflight = el.querySelectorAll<HTMLElement>(
+    '[data-ol-inflight="pending"]'
+  )
 
   el.addEventListener('pending', () => {
     disabledInflight.forEach(disableElement)
@@ -337,9 +399,9 @@ export function inflightHelper(el) {
   })
 }
 
-function formSentHelper(el) {
-  const showWhenPending = el.querySelectorAll('[data-ol-not-sent]')
-  const showWhenDone = el.querySelectorAll('[data-ol-sent]')
+function formSentHelper(el: HTMLElement) {
+  const showWhenPending = el.querySelectorAll<HTMLElement>('[data-ol-not-sent]')
+  const showWhenDone = el.querySelectorAll<HTMLElement>('[data-ol-sent]')
   if (showWhenDone.length === 0) return
 
   el.addEventListener('sent', () => {
@@ -347,26 +409,32 @@ function formSentHelper(el) {
   })
 }
 
-function formValidationHelper(el) {
+function formValidationHelper(el: HTMLFormElement) {
   el.querySelectorAll('input, textarea').forEach(inputEl => {
+    const element = inputEl as HTMLInputElement | HTMLTextAreaElement
     if (
-      inputEl.willValidate &&
+      element.willValidate &&
       !inputEl.hasAttribute('data-ol-no-custom-form-validation-messages')
     ) {
-      inputValidator(inputEl)
+      inputValidator(element)
     }
   })
 }
 
-function formAutoSubmitHelper(el) {
+function formAutoSubmitHelper(el: HTMLFormElement) {
   if (el.hasAttribute('data-ol-auto-submit')) {
     setTimeout(() => {
-      el.querySelector('[type="submit"]').click()
+      const submitButton =
+        el.querySelector<HTMLButtonElement>('[type="submit"]')
+      submitButton?.click()
     }, 0)
   }
 }
 
-export function toggleDisplay(hide, show) {
+export function toggleDisplay(
+  hide: NodeListOf<HTMLElement>,
+  show: NodeListOf<HTMLElement>
+) {
   hide.forEach(el => {
     el.hidden = true
   })
@@ -375,7 +443,7 @@ export function toggleDisplay(hide, show) {
   })
 }
 
-function hydrateAsyncForm(el) {
+function hydrateAsyncForm(el: HTMLFormElement) {
   formSubmitHelper(el)
   inflightHelper(el)
   formSentHelper(el)
@@ -383,7 +451,7 @@ function hydrateAsyncForm(el) {
   formAutoSubmitHelper(el)
 }
 
-function hydrateRegularForm(el) {
+function hydrateRegularForm(el: HTMLFormElement) {
   inflightHelper(el)
   formValidationHelper(el)
 
@@ -394,6 +462,10 @@ function hydrateRegularForm(el) {
   formAutoSubmitHelper(el)
 }
 
-document.querySelectorAll(`[data-ol-async-form]`).forEach(hydrateAsyncForm)
+document
+  .querySelectorAll<HTMLFormElement>('[data-ol-async-form]')
+  .forEach(hydrateAsyncForm)
 
-document.querySelectorAll(`[data-ol-regular-form]`).forEach(hydrateRegularForm)
+document
+  .querySelectorAll<HTMLFormElement>('[data-ol-regular-form]')
+  .forEach(hydrateRegularForm)

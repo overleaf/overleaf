@@ -42,7 +42,7 @@ glob
 glob
   .sync(path.join(__dirname, 'frontend/js/pages/**/*.{js,jsx,ts,tsx}'))
   .forEach(page => {
-    // in: /workspace/services/web/frontend/js/pages/marketing/homepage.js
+    // in: /workspace/services/web/frontend/js/pages/marketing/homepage.ts
     // out: pages/marketing/homepage
     const name = path
       .relative(path.join(__dirname, 'frontend/js/'), page)

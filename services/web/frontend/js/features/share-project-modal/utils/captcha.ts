@@ -8,14 +8,16 @@ export function executeV2Captcha(disabled: boolean = false) {
     }
 
     try {
-      if (!_recaptchaId) {
+      if (!_recaptchaId && window.grecaptcha) {
         _recaptchaId = window.grecaptcha.render('recaptcha', {
           callback: (token: string) => {
             if (_recaptchaResolve) {
               _recaptchaResolve(token)
               _recaptchaResolve = undefined
             }
-            window.grecaptcha.reset()
+            if (window.grecaptcha) {
+              window.grecaptcha.reset(_recaptchaId)
+            }
           },
         })
       }

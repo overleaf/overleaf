@@ -1,6 +1,7 @@
 import 'recurly__recurly-js'
 import { ScopeValueStore } from './ide/scope-value-store'
 import { MetaAttributesCache } from '@/utils/meta'
+import { ReCaptchaInstance } from './recaptcha'
 
 declare global {
   // eslint-disable-next-line no-unused-vars
@@ -28,6 +29,6 @@ declare global {
 
     propensity?: (propensityId?: string) => void
     olLoadGA?: () => void
-    grecaptcha?: any
+    grecaptcha?: ReCaptchaInstance
   }
 }
