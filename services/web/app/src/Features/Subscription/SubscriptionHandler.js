@@ -134,26 +134,19 @@ async function cancelPendingSubscriptionChange(user) {
  * @param user
  */
 async function cancelSubscription(user) {
-  try {
-    const { hasSubscription, subscription } =
-      await LimitationsManager.promises.userHasSubscription(user)
-    if (hasSubscription && subscription != null) {
-      await Modules.promises.hooks.fire('cancelPaidSubscription', subscription)
-      const emailOpts = {
-        to: user.email,
-        first_name: user.first_name,
-      }
-      const ONE_HOUR_IN_MS = 1000 * 60 * 60
-      EmailHandler.sendDeferredEmail(
-        'canceledSubscription',
-        emailOpts,
-        ONE_HOUR_IN_MS
-      )
+  const { hasSubscription, subscription } =
+    await LimitationsManager.promises.userHasSubscription(user)
+  if (hasSubscription && subscription != null) {
+    await Modules.promises.hooks.fire('cancelPaidSubscription', subscription)
+    const emailOpts = {
+      to: user.email,
+      first_name: user.first_name,
     }
-  } catch (err) {
-    logger.warn(
-      { err, userId: user._id },
-      'there was an error checking user v2 subscription'
+    const ONE_HOUR_IN_MS = 1000 * 60 * 60
+    EmailHandler.sendDeferredEmail(
+      'canceledSubscription',
+      emailOpts,
+      ONE_HOUR_IN_MS
     )
   }
 }

@@ -516,35 +516,6 @@ describe('<ActiveSubscription />', function () {
     })
   })
 
-  describe('contact support for paused subscription with 0 remaining cycles', function () {
-    beforeEach(function () {
-      this.locationWrapperSandbox = sinon.createSandbox()
-      this.locationWrapperStub = this.locationWrapperSandbox.stub(location)
-    })
-
-    afterEach(function () {
-      this.locationWrapperSandbox.restore()
-    })
-
-    it('redirects to contact page when cancel button clicked', function () {
-      const pausedSubscription = cloneDeep(annualActiveSubscription)
-      pausedSubscription.payment.state = 'paused'
-      pausedSubscription.payment.remainingPauseCycles = 0
-
-      renderActiveSubscription(pausedSubscription)
-
-      const button = screen.getByRole('button', {
-        name: 'Cancel your subscription',
-      })
-      fireEvent.click(button)
-
-      expect(sendMBSpy).to.be.calledOnceWith(
-        'subscription-page-cancel-button-click'
-      )
-      expect(this.locationWrapperStub.assign).to.be.calledOnceWith('/contact')
-    })
-  })
-
   describe('group plans', function () {
     it('does not show "Change plan" option for group plans', function () {
       renderActiveSubscription(groupActiveSubscription)

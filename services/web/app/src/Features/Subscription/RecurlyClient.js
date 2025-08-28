@@ -331,18 +331,32 @@ async function cancelSubscriptionByUuid(subscriptionUuid) {
   try {
     return await client.cancelSubscription('uuid-' + subscriptionUuid)
   } catch (err) {
-    if (err instanceof recurly.errors.ValidationError) {
-      if (
-        err.message === 'Only active and future subscriptions can be canceled.'
-      ) {
-        logger.debug(
-          { subscriptionUuid },
-          'subscription cancellation failed, subscription not active'
-        )
-      }
-    } else {
+    if (!(err instanceof recurly.errors.ValidationError)) {
       throw err
     }
+
+    const errorMessage = err.message || ''
+
+    if (
+      errorMessage === 'Only active and future subscriptions can be canceled.'
+    ) {
+      logger.debug(
+        { subscriptionUuid },
+        'subscription cancellation failed, subscription not active'
+      )
+    } else if (
+      errorMessage.includes(
+        'Cannot cancel a paused subscription in the last cycle of the term'
+      )
+    ) {
+      logger.debug(
+        { subscriptionUuid },
+        'Terminating subscription in last cycle of paused term'
+      )
+      return await terminateSubscriptionByUuid(subscriptionUuid)
+    }
+
+    throw err
   }
 }
 
