@@ -223,6 +223,12 @@ class SAMLSessionDataMissing extends BackwardCompatibleError {
 
 class SAMLProviderRequesterError extends SAMLAuthenticationError {}
 
+class SAMLProviderRequesterInvalidNameIDPolicyError extends SAMLProviderRequesterError {
+  get i18nKey() {
+    return 'sso_provider_error_invalid_name'
+  }
+}
+
 class ThirdPartyIdentityExistsError extends BackwardCompatibleError {
   constructor(arg) {
     super(arg)
@@ -358,6 +364,7 @@ module.exports = {
   SAMLMissingUserIdentifierError,
   SAMLMissingSignatureError,
   SAMLProviderRequesterError,
+  SAMLProviderRequesterInvalidNameIDPolicyError,
   SAMLInvalidResponseError,
   SAMLLoginFailureError,
   SAMLEmailNotRecognizedError,

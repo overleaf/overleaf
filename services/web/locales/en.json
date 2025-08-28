@@ -2160,6 +2160,7 @@
   "sso_logs": "SSO Logs",
   "sso_not_active": "SSO not active",
   "sso_not_linked": "You have not linked your account to __provider__. Please log in to your account another way and link your __provider__ account via your account settings.",
+  "sso_provider_error_invalid_name": "The identity provider returned an InvalidNameIDPolicy error. This happens when the identity provider is unable to provide a user identity in the format requested by this application.",
   "sso_reauth_request": "SSO reauthentication request has been sent to <0>__email__</0>",
   "sso_test_interstitial_info_1": "<0>Before starting this test</0>, please ensure you’ve <1>configured Overleaf as a Service Provider in your IdP</1>, and authorized access to the Overleaf service.",
   "sso_test_interstitial_info_2": "Clicking <0>Test configuration</0> will redirect you to your IdP’s login screen. <1>Read our documentation</1> for full details of what happens during the test. And check our <2>SSO troubleshooting advice</2> if you get stuck.",
