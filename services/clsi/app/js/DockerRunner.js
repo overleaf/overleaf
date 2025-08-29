@@ -213,11 +213,8 @@ const DockerRunner = {
   ) {
     const timeoutInSeconds = timeout / 1000
 
-    const dockerVolumes = {}
     for (const hostVol in volumes) {
       const dockerVol = volumes[hostVol]
-      dockerVolumes[dockerVol] = {}
-
       if (volumes[hostVol].slice(-3).indexOf(':r') === -1) {
         volumes[hostVol] = `${dockerVol}:rw`
       }
@@ -238,7 +235,6 @@ const DockerRunner = {
     const options = {
       Cmd: command,
       Image: image,
-      Volumes: dockerVolumes,
       WorkingDir: '/compile',
       NetworkDisabled: true,
       Memory: 1024 * 1024 * 1024 * 1024, // 1 Gb
