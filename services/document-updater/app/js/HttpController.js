@@ -1,3 +1,4 @@
+const { expressify } = require('@overleaf/promise-utils')
 const DocumentManager = require('./DocumentManager')
 const HistoryManager = require('./HistoryManager')
 const ProjectManager = require('./ProjectManager')
@@ -8,12 +9,11 @@ const Settings = require('@overleaf/settings')
 const Metrics = require('./Metrics')
 const DeleteQueueManager = require('./DeleteQueueManager')
 const { getTotalSizeOfLines } = require('./Limits')
-const async = require('async')
 const { StringFileData } = require('overleaf-editor-core')
 const { addTrackedDeletesToContent } = require('./Utils')
 const HistoryConversions = require('./HistoryConversions')
 
-function getDoc(req, res, next) {
+async function getDoc(req, res) {
   let fromVersion
   const docId = req.params.doc_id
   const projectId = req.params.project_id
@@ -28,106 +28,99 @@ function getDoc(req, res, next) {
     fromVersion = -1
   }
 
-  DocumentManager.getDocAndRecentOpsWithLock(
-    projectId,
-    docId,
-    fromVersion,
-    (error, lines, version, ops, ranges, pathname, _projectHistoryId, type) => {
-      timer.done()
-      if (error) {
-        return next(error)
-      }
-      logger.debug({ projectId, docId, historyRanges }, 'got doc via http')
-      if (lines == null || version == null) {
-        return next(new Errors.NotFoundError('document not found'))
-      }
-      if (!Array.isArray(lines) && req.query.historyOTSupport !== 'true') {
-        const file = StringFileData.fromRaw(lines)
-        // TODO(24596): tc support for history-ot
-        lines = file.getLines()
-      }
+  let { lines, version, ops, ranges, pathname, type } =
+    await DocumentManager.promises.getDocAndRecentOpsWithLock(
+      projectId,
+      docId,
+      fromVersion
+    )
+  timer.done()
+  logger.debug({ projectId, docId, historyRanges }, 'got doc via http')
 
-      if (historyRanges) {
-        const docContentWithTrackedDeletes = addTrackedDeletesToContent(
-          lines.join('\n'),
-          ranges?.changes ?? []
-        )
-        const docLinesWithTrackedDeletes =
-          docContentWithTrackedDeletes.split('\n')
-        const rangesWithTrackedDeletes =
-          HistoryConversions.toHistoryRanges(ranges)
+  if (lines == null || version == null) {
+    throw new Errors.NotFoundError('document not found')
+  }
 
-        res.json({
-          id: docId,
-          lines: docLinesWithTrackedDeletes,
-          version,
-          ops,
-          ranges: rangesWithTrackedDeletes,
-          pathname,
-          ttlInS: RedisManager.DOC_OPS_TTL,
-          type,
-        })
-      } else {
-        res.json({
-          id: docId,
-          lines,
-          version,
-          ops,
-          ranges,
-          pathname,
-          ttlInS: RedisManager.DOC_OPS_TTL,
-          type,
-        })
-      }
-    }
-  )
+  if (!Array.isArray(lines) && req.query.historyOTSupport !== 'true') {
+    const file = StringFileData.fromRaw(lines)
+    // TODO(24596): tc support for history-ot
+    lines = file.getLines()
+  }
+
+  if (historyRanges) {
+    const docContentWithTrackedDeletes = addTrackedDeletesToContent(
+      lines.join('\n'),
+      ranges?.changes ?? []
+    )
+    const docLinesWithTrackedDeletes = docContentWithTrackedDeletes.split('\n')
+    const rangesWithTrackedDeletes = HistoryConversions.toHistoryRanges(ranges)
+
+    res.json({
+      id: docId,
+      lines: docLinesWithTrackedDeletes,
+      version,
+      ops,
+      ranges: rangesWithTrackedDeletes,
+      pathname,
+      ttlInS: RedisManager.DOC_OPS_TTL,
+      type,
+    })
+  } else {
+    res.json({
+      id: docId,
+      lines,
+      version,
+      ops,
+      ranges,
+      pathname,
+      ttlInS: RedisManager.DOC_OPS_TTL,
+      type,
+    })
+  }
 }
 
-function getComment(req, res, next) {
+async function getComment(req, res) {
   const docId = req.params.doc_id
   const projectId = req.params.project_id
   const commentId = req.params.comment_id
 
   logger.debug({ projectId, docId, commentId }, 'getting comment via http')
 
-  DocumentManager.getCommentWithLock(
+  const comment = await DocumentManager.promises.getCommentWithLock(
     projectId,
     docId,
-    commentId,
-    (error, comment) => {
-      if (error) {
-        return next(error)
-      }
-      if (comment == null) {
-        return next(new Errors.NotFoundError('comment not found'))
-      }
-      res.json(comment)
-    }
+    commentId
   )
+
+  if (comment == null) {
+    throw new Errors.NotFoundError('comment not found')
+  }
+
+  res.json(comment)
 }
 
 // return the doc from redis if present, but don't load it from mongo
-function peekDoc(req, res, next) {
+async function peekDoc(req, res) {
   const docId = req.params.doc_id
   const projectId = req.params.project_id
+
   logger.debug({ projectId, docId }, 'peeking at doc via http')
-  RedisManager.getDoc(projectId, docId, function (error, lines, version) {
-    if (error) {
-      return next(error)
-    }
-    if (lines == null || version == null) {
-      return next(new Errors.NotFoundError('document not found'))
-    }
-    if (!Array.isArray(lines) && req.query.historyOTSupport !== 'true') {
-      const file = StringFileData.fromRaw(lines)
-      // TODO(24596): tc support for history-ot
-      lines = file.getLines()
-    }
-    res.json({ id: docId, lines, version })
-  })
+  let { lines, version } = await RedisManager.promises.getDoc(projectId, docId)
+
+  if (lines == null || version == null) {
+    throw new Errors.NotFoundError('document not found')
+  }
+
+  if (!Array.isArray(lines) && req.query.historyOTSupport !== 'true') {
+    const file = StringFileData.fromRaw(lines)
+    // TODO(24596): tc support for history-ot
+    lines = file.getLines()
+  }
+
+  res.json({ id: docId, lines, version })
 }
 
-function getProjectDocsAndFlushIfOld(req, res, next) {
+async function getProjectDocsAndFlushIfOld(req, res) {
   const projectId = req.params.project_id
   const projectStateHash = req.query.state
   // exclude is string of existing docs "id:version,id:version,..."
@@ -136,73 +129,73 @@ function getProjectDocsAndFlushIfOld(req, res, next) {
   logger.debug({ projectId, exclude: excludeItems }, 'getting docs via http')
   const timer = new Metrics.Timer('http.getAllDocs')
   const excludeVersions = {}
+
   for (const item of excludeItems) {
     const [id, version] = item.split(':')
     excludeVersions[id] = version
   }
+
   logger.debug(
     { projectId, projectStateHash, excludeVersions },
     'excluding versions'
   )
-  ProjectManager.getProjectDocsAndFlushIfOld(
-    projectId,
-    projectStateHash,
-    excludeVersions,
-    (error, result) => {
-      timer.done()
-      if (error instanceof Errors.ProjectStateChangedError) {
-        res.sendStatus(409) // conflict
-      } else if (error) {
-        next(error)
-      } else {
-        logger.debug(
-          {
-            projectId,
-            result: result.map(doc => `${doc._id}:${doc.v}`),
-          },
-          'got docs via http'
-        )
-        res.send(result)
-      }
+
+  let result
+  try {
+    result = await ProjectManager.promises.getProjectDocsAndFlushIfOld(
+      projectId,
+      projectStateHash,
+      excludeVersions
+    )
+  } catch (error) {
+    if (error instanceof Errors.ProjectStateChangedError) {
+      return res.sendStatus(409) // conflict
+    } else {
+      throw error
     }
+  }
+
+  timer.done()
+  logger.debug(
+    {
+      projectId,
+      result: result.map(doc => `${doc._id}:${doc.v}`),
+    },
+    'got docs via http'
   )
+  res.send(result)
 }
 
-function getProjectLastUpdatedAt(req, res, next) {
+async function getProjectLastUpdatedAt(req, res) {
   const projectId = req.params.project_id
-  ProjectManager.getProjectDocsTimestamps(projectId, (err, timestamps) => {
-    if (err) return next(err)
+  let timestamps =
+    await ProjectManager.promises.getProjectDocsTimestamps(projectId)
 
-    // Filter out nulls. This can happen when
-    // - docs get flushed between the listing and getting the individual docs ts
-    // - a doc flush failed half way (doc keys removed, project tracking not updated)
-    timestamps = timestamps.filter(ts => !!ts)
+  // Filter out nulls. This can happen when
+  // - docs get flushed between the listing and getting the individual docs ts
+  // - a doc flush failed half way (doc keys removed, project tracking not updated)
+  timestamps = timestamps.filter(ts => !!ts)
 
-    timestamps = timestamps.map(ts => parseInt(ts, 10))
-    timestamps.sort((a, b) => (a > b ? 1 : -1))
-    res.json({ lastUpdatedAt: timestamps.pop() })
-  })
+  timestamps = timestamps.map(ts => parseInt(ts, 10))
+  timestamps.sort((a, b) => (a > b ? 1 : -1))
+  res.json({ lastUpdatedAt: timestamps.pop() })
 }
 
-function clearProjectState(req, res, next) {
+async function clearProjectState(req, res) {
   const projectId = req.params.project_id
   const timer = new Metrics.Timer('http.clearProjectState')
   logger.debug({ projectId }, 'clearing project state via http')
-  ProjectManager.clearProjectState(projectId, error => {
-    timer.done()
-    if (error) {
-      next(error)
-    } else {
-      res.sendStatus(200)
-    }
-  })
+  await ProjectManager.promises.clearProjectState(projectId)
+  timer.done()
+  res.sendStatus(200)
 }
 
-function setDoc(req, res, next) {
+async function setDoc(req, res) {
   const docId = req.params.doc_id
   const projectId = req.params.project_id
   const { lines, source, user_id: userId, undoing } = req.body
   const lineSize = getTotalSizeOfLines(lines)
+
   if (lineSize > Settings.max_doc_length) {
     logger.warn(
       { projectId, docId, source, lineSize, userId },
@@ -215,109 +208,97 @@ function setDoc(req, res, next) {
     'setting doc via http'
   )
   const timer = new Metrics.Timer('http.setDoc')
-  DocumentManager.setDocWithLock(
+
+  const result = await DocumentManager.promises.setDocWithLock(
     projectId,
     docId,
     lines,
     source,
     userId,
     undoing,
-    true,
-    (error, result) => {
-      timer.done()
-      if (error) {
-        return next(error)
-      }
-      logger.debug({ projectId, docId }, 'set doc via http')
-      res.json(result)
-    }
+    true
   )
+  timer.done()
+  logger.debug({ projectId, docId }, 'set doc via http')
+  res.json(result)
 }
 
-function appendToDoc(req, res, next) {
+async function appendToDoc(req, res) {
   const docId = req.params.doc_id
   const projectId = req.params.project_id
   const { lines, source, user_id: userId } = req.body
   const timer = new Metrics.Timer('http.appendToDoc')
-  DocumentManager.appendToDocWithLock(
-    projectId,
-    docId,
-    lines,
-    source,
-    userId,
-    (error, result) => {
-      timer.done()
-      if (error instanceof Errors.FileTooLargeError) {
-        logger.warn('refusing to append to file, it would become too large')
-        return res.sendStatus(422)
-      }
-      if (error) {
-        return next(error)
-      }
-      logger.debug(
-        { projectId, docId, lines, source, userId },
-        'appending to doc via http'
-      )
-      res.json(result)
+
+  let result
+  try {
+    result = await DocumentManager.promises.appendToDocWithLock(
+      projectId,
+      docId,
+      lines,
+      source,
+      userId
+    )
+  } catch (error) {
+    if (error instanceof Errors.FileTooLargeError) {
+      logger.warn('refusing to append to file, it would become too large')
+      return res.sendStatus(422)
+    } else {
+      throw error
     }
+  }
+
+  timer.done()
+  logger.debug(
+    { projectId, docId, lines, source, userId },
+    'appending to doc via http'
   )
+  res.json(result)
 }
 
-function flushDocIfLoaded(req, res, next) {
+async function flushDocIfLoaded(req, res) {
   const docId = req.params.doc_id
   const projectId = req.params.project_id
   logger.debug({ projectId, docId }, 'flushing doc via http')
   const timer = new Metrics.Timer('http.flushDoc')
-  DocumentManager.flushDocIfLoadedWithLock(projectId, docId, error => {
-    timer.done()
-    if (error) {
-      return next(error)
-    }
-    logger.debug({ projectId, docId }, 'flushed doc via http')
-    res.sendStatus(204) // No Content
-  })
+  await DocumentManager.promises.flushDocIfLoadedWithLock(projectId, docId)
+  timer.done()
+  logger.debug({ projectId, docId }, 'flushed doc via http')
+  res.sendStatus(204) // No Content
 }
 
-function deleteDoc(req, res, next) {
+async function deleteDoc(req, res) {
   const docId = req.params.doc_id
   const projectId = req.params.project_id
   const ignoreFlushErrors = req.query.ignore_flush_errors === 'true'
   const timer = new Metrics.Timer('http.deleteDoc')
   logger.debug({ projectId, docId }, 'deleting doc via http')
-  DocumentManager.flushAndDeleteDocWithLock(
-    projectId,
-    docId,
-    { ignoreFlushErrors },
-    error => {
-      timer.done()
-      // There is no harm in flushing project history if the previous call
-      // failed and sometimes it is required
-      HistoryManager.flushProjectChangesAsync(projectId)
 
-      if (error) {
-        return next(error)
-      }
-      logger.debug({ projectId, docId }, 'deleted doc via http')
-      res.sendStatus(204) // No Content
-    }
-  )
+  try {
+    await DocumentManager.promises.flushAndDeleteDocWithLock(projectId, docId, {
+      ignoreFlushErrors,
+    })
+  } finally {
+    timer.done()
+    // There is no harm in flushing project history if the previous call
+    // failed and sometimes it is required
+    HistoryManager.flushProjectChangesAsync(projectId)
+  }
+
+  logger.debug({ projectId, docId }, 'deleted doc via http')
+  res.sendStatus(204) // No Content
 }
 
-function flushProject(req, res, next) {
+async function flushProject(req, res) {
   const projectId = req.params.project_id
   logger.debug({ projectId }, 'flushing project via http')
   const timer = new Metrics.Timer('http.flushProject')
-  ProjectManager.flushProjectWithLocks(projectId, error => {
-    timer.done()
-    if (error) {
-      return next(error)
-    }
-    logger.debug({ projectId }, 'flushed project via http')
-    res.sendStatus(204) // No Content
-  })
+  await ProjectManager.promises.flushProjectWithLocks(projectId)
+  timer.done()
+  logger.debug({ projectId }, 'flushed project via http')
+  res.sendStatus(204) // No Content
 }
 
-function deleteProject(req, res, next) {
+async function deleteProject(req, res) {
   const projectId = req.params.project_id
   logger.debug({ projectId }, 'deleting project via http')
   const options = {}
@@ -328,45 +309,32 @@ function deleteProject(req, res, next) {
     options.skip_history_flush = true
   } // don't flush history when realtime shuts down
   if (req.query.background) {
-    ProjectManager.queueFlushAndDeleteProject(projectId, error => {
-      if (error) {
-        return next(error)
-      }
-      logger.debug({ projectId }, 'queue delete of project via http')
-      res.sendStatus(204)
-    }) // No Content
+    await ProjectManager.promises.queueFlushAndDeleteProject(projectId)
+    logger.debug({ projectId }, 'queue delete of project via http')
   } else {
     const timer = new Metrics.Timer('http.deleteProject')
-    ProjectManager.flushAndDeleteProjectWithLocks(projectId, options, error => {
-      timer.done()
-      if (error) {
-        return next(error)
-      }
-      logger.debug({ projectId }, 'deleted project via http')
-      res.sendStatus(204) // No Content
-    })
+    await ProjectManager.promises.flushAndDeleteProjectWithLocks(
+      projectId,
+      options
+    )
+    timer.done()
+    logger.debug({ projectId }, 'deleted project via http')
   }
+
+  res.sendStatus(204)
 }
 
-function deleteMultipleProjects(req, res, next) {
+async function deleteMultipleProjects(req, res) {
   const projectIds = req.body.project_ids || []
   logger.debug({ projectIds }, 'deleting multiple projects via http')
-  async.eachSeries(
-    projectIds,
-    (projectId, cb) => {
-      logger.debug({ projectId }, 'queue delete of project via http')
-      ProjectManager.queueFlushAndDeleteProject(projectId, cb)
-    },
-    error => {
-      if (error) {
-        return next(error)
-      }
-      res.sendStatus(204) // No Content
-    }
-  )
+  for (const projectId of projectIds) {
+    logger.debug({ projectId }, 'queue delete of project via http')
+    await ProjectManager.promises.queueFlushAndDeleteProject(projectId)
+  }
+  res.sendStatus(204) // No Content
 }
 
-function acceptChanges(req, res, next) {
+async function acceptChanges(req, res) {
   const { project_id: projectId, doc_id: docId } = req.params
   let changeIds = req.body.change_ids
   if (changeIds == null) {
@@ -377,20 +345,20 @@ function acceptChanges(req, res, next) {
     `accepting ${changeIds.length} changes via http`
   )
   const timer = new Metrics.Timer('http.acceptChanges')
-  DocumentManager.acceptChangesWithLock(projectId, docId, changeIds, error => {
-    timer.done()
-    if (error) {
-      return next(error)
-    }
-    logger.debug(
-      { projectId, docId },
-      `accepted ${changeIds.length} changes via http`
-    )
-    res.sendStatus(204) // No Content
-  })
+  await DocumentManager.promises.acceptChangesWithLock(
+    projectId,
+    docId,
+    changeIds
+  )
+  timer.done()
+  logger.debug(
+    { projectId, docId },
+    `accepted ${changeIds.length} changes via http`
+  )
+  res.sendStatus(204) // No Content
 }
 
-function rejectChanges(req, res, next) {
+async function rejectChanges(req, res) {
   const { project_id: projectId, doc_id: docId } = req.params
   const changeIds = req.body.change_ids
   const userId = req.body.user_id
@@ -399,25 +367,20 @@ function rejectChanges(req, res, next) {
     { projectId, docId },
     `rejecting ${changeIds.length} changes via http`
   )
-  DocumentManager.rejectChangesWithLock(
+  const response = await DocumentManager.promises.rejectChangesWithLock(
     projectId,
     docId,
     changeIds,
-    userId,
-    (error, response) => {
-      if (error) {
-        return next(error)
-      }
-      logger.debug(
-        { projectId, docId, changeIds, response },
-        `rejected ${changeIds.length} changes via http`
-      )
-      res.json(response)
-    }
+    userId
   )
+  logger.debug(
+    { projectId, docId, changeIds, response },
+    `rejected ${changeIds.length} changes via http`
+  )
+  res.json(response)
 }
 
-function resolveComment(req, res, next) {
+async function resolveComment(req, res) {
   const {
     project_id: projectId,
     doc_id: docId,
@@ -425,23 +388,18 @@ function resolveComment(req, res, next) {
   } = req.params
   const userId = req.body.user_id
   logger.debug({ projectId, docId, commentId }, 'resolving comment via http')
-  DocumentManager.updateCommentStateWithLock(
+  await DocumentManager.promises.updateCommentStateWithLock(
     projectId,
     docId,
     commentId,
     userId,
-    true,
-    error => {
-      if (error) {
-        return next(error)
-      }
-      logger.debug({ projectId, docId, commentId }, 'resolved comment via http')
-      res.sendStatus(204) // No Content
-    }
+    true
   )
+  logger.debug({ projectId, docId, commentId }, 'resolved comment via http')
+  res.sendStatus(204) // No Content
 }
 
-function reopenComment(req, res, next) {
+async function reopenComment(req, res) {
   const {
     project_id: projectId,
     doc_id: docId,
@@ -449,23 +407,18 @@ function reopenComment(req, res, next) {
   } = req.params
   const userId = req.body.user_id
   logger.debug({ projectId, docId, commentId }, 'reopening comment via http')
-  DocumentManager.updateCommentStateWithLock(
+  await DocumentManager.promises.updateCommentStateWithLock(
     projectId,
     docId,
     commentId,
     userId,
-    false,
-    error => {
-      if (error) {
-        return next(error)
-      }
-      logger.debug({ projectId, docId, commentId }, 'reopened comment via http')
-      res.sendStatus(204) // No Content
-    }
+    false
   )
+  logger.debug({ projectId, docId, commentId }, 'reopened comment via http')
+  res.sendStatus(204) // No Content
 }
 
-function deleteComment(req, res, next) {
+async function deleteComment(req, res) {
   const {
     project_id: projectId,
     doc_id: docId,
@@ -474,46 +427,36 @@ function deleteComment(req, res, next) {
   const userId = req.body.user_id
   logger.debug({ projectId, docId, commentId }, 'deleting comment via http')
   const timer = new Metrics.Timer('http.deleteComment')
-  DocumentManager.deleteCommentWithLock(
+  await DocumentManager.promises.deleteCommentWithLock(
     projectId,
     docId,
     commentId,
-    userId,
-    error => {
-      timer.done()
-      if (error) {
-        return next(error)
-      }
-      logger.debug({ projectId, docId, commentId }, 'deleted comment via http')
-      res.sendStatus(204) // No Content
-    }
+    userId
   )
+  timer.done()
+  logger.debug({ projectId, docId, commentId }, 'deleted comment via http')
+  res.sendStatus(204) // No Content
 }
 
-function updateProject(req, res, next) {
+async function updateProject(req, res) {
   const timer = new Metrics.Timer('http.updateProject')
   const projectId = req.params.project_id
   const { projectHistoryId, userId, updates = [], version, source } = req.body
   logger.debug({ projectId, updates, version }, 'updating project via http')
-  ProjectManager.updateProjectWithLocks(
+  await ProjectManager.promises.updateProjectWithLocks(
     projectId,
     projectHistoryId,
     userId,
     updates,
     version,
-    source,
-    error => {
-      timer.done()
-      if (error) {
-        return next(error)
-      }
-      logger.debug({ projectId }, 'updated project via http')
-      res.sendStatus(204) // No Content
-    }
+    source
   )
+  timer.done()
+  logger.debug({ projectId }, 'updated project via http')
+  res.sendStatus(204) // No Content
 }
 
-function resyncProjectHistory(req, res, next) {
+async function resyncProjectHistory(req, res) {
   const projectId = req.params.project_id
   const {
     projectHistoryId,
@@ -536,38 +479,36 @@ function resyncProjectHistory(req, res, next) {
     opts.resyncProjectStructureOnly = resyncProjectStructureOnly
   }
 
-  HistoryManager.resyncProjectHistory(
+  await HistoryManager.promises.resyncProjectHistory(
     projectId,
     projectHistoryId,
     docs,
     files,
-    opts,
-    error => {
-      if (error) {
-        return next(error)
-      }
-      logger.debug({ projectId }, 'queued project history resync via http')
-      res.sendStatus(204)
-    }
+    opts
   )
+  logger.debug({ projectId }, 'queued project history resync via http')
+  res.sendStatus(204)
 }
 
-function flushQueuedProjects(req, res, next) {
+async function flushQueuedProjects(req, res) {
   res.setTimeout(10 * 60 * 1000)
   const options = {
     limit: req.query.limit || 1000,
     timeout: 5 * 60 * 1000,
     min_delete_age: req.query.min_delete_age || 5 * 60 * 1000,
   }
-  DeleteQueueManager.flushAndDeleteOldProjects(options, (err, flushed) => {
-    if (err) {
-      logger.err({ err }, 'error flushing old projects')
-      res.sendStatus(500)
-    } else {
-      logger.info({ flushed }, 'flush of queued projects completed')
-      res.send({ flushed })
+  await DeleteQueueManager.promises.flushAndDeleteOldProjects(
+    options,
+    (err, flushed) => {
+      if (err) {
+        logger.err({ err }, 'error flushing old projects')
+        res.sendStatus(500)
+      } else {
+        logger.info({ flushed }, 'flush of queued projects completed')
+        res.send({ flushed })
+      }
     }
-  })
+  )
 }
 
 /**
@@ -576,51 +517,43 @@ function flushQueuedProjects(req, res, next) {
  * The project is blocked only if it's not already loaded in docupdater. The
  * response indicates whether the project has been blocked or not.
  */
-function blockProject(req, res, next) {
+async function blockProject(req, res) {
   const projectId = req.params.project_id
-  RedisManager.blockProject(projectId, (err, blocked) => {
-    if (err) {
-      return next(err)
-    }
-    res.json({ blocked })
-  })
+  const blocked = await RedisManager.promises.blockProject(projectId)
+  res.json({ blocked })
 }
 
 /**
  * Unblock a project
  */
-function unblockProject(req, res, next) {
+async function unblockProject(req, res) {
   const projectId = req.params.project_id
-  RedisManager.unblockProject(projectId, (err, wasBlocked) => {
-    if (err) {
-      return next(err)
-    }
-    res.json({ wasBlocked })
-  })
+  const wasBlocked = await RedisManager.promises.unblockProject(projectId)
+  res.json({ wasBlocked })
 }
 
 module.exports = {
-  getDoc,
-  peekDoc,
-  getProjectDocsAndFlushIfOld,
-  getProjectLastUpdatedAt,
-  clearProjectState,
-  appendToDoc,
-  setDoc,
-  flushDocIfLoaded,
-  deleteDoc,
-  flushProject,
-  deleteProject,
-  deleteMultipleProjects,
-  acceptChanges,
-  rejectChanges,
-  resolveComment,
-  reopenComment,
-  deleteComment,
-  updateProject,
-  resyncProjectHistory,
-  flushQueuedProjects,
-  blockProject,
-  unblockProject,
-  getComment,
+  getDoc: expressify(getDoc),
+  peekDoc: expressify(peekDoc),
+  getProjectDocsAndFlushIfOld: expressify(getProjectDocsAndFlushIfOld),
+  getProjectLastUpdatedAt: expressify(getProjectLastUpdatedAt),
+  clearProjectState: expressify(clearProjectState),
+  appendToDoc: expressify(appendToDoc),
+  setDoc: expressify(setDoc),
+  flushDocIfLoaded: expressify(flushDocIfLoaded),
+  deleteDoc: expressify(deleteDoc),
+  flushProject: expressify(flushProject),
+  deleteProject: expressify(deleteProject),
+  deleteMultipleProjects: expressify(deleteMultipleProjects),
+  acceptChanges: expressify(acceptChanges),
+  rejectChanges: expressify(rejectChanges),
+  resolveComment: expressify(resolveComment),
+  reopenComment: expressify(reopenComment),
+  deleteComment: expressify(deleteComment),
+  updateProject: expressify(updateProject),
+  resyncProjectHistory: expressify(resyncProjectHistory),
+  flushQueuedProjects: expressify(flushQueuedProjects),
+  blockProject: expressify(blockProject),
+  unblockProject: expressify(unblockProject),
+  getComment: expressify(getComment),
 }

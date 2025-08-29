@@ -12,6 +12,7 @@
  */
 let DeleteQueueManager
 const Settings = require('@overleaf/settings')
+const { promisifyAll } = require('@overleaf/promise-utils')
 const RedisManager = require('./RedisManager')
 const ProjectManager = require('./ProjectManager')
 const logger = require('@overleaf/logger')
@@ -143,3 +144,5 @@ module.exports = DeleteQueueManager = {
     return doFlush()
   },
 }
+
+DeleteQueueManager.promises = promisifyAll(DeleteQueueManager)

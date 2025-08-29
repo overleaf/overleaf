@@ -870,9 +870,7 @@ describe('DocumentManager', function () {
             this.doc_id,
             'mock-comment-id-1'
           )
-        ).to.eventually.deep.equal({
-          comment: { id: 'mock-comment-id-1' },
-        })
+        ).to.eventually.deep.equal({ id: 'mock-comment-id-1' })
       })
 
       it("should get the document's current ranges", function () {

@@ -481,7 +481,7 @@ const DocumentManager = {
       })
     }
 
-    return { comment }
+    return comment
   },
 
   async deleteComment(projectId, docId, commentId, userId) {
@@ -823,7 +823,6 @@ module.exports = {
         'projectHistoryId',
         'type',
       ],
-      getCommentWithLock: ['comment'],
     },
   }),
   promises: DocumentManager,

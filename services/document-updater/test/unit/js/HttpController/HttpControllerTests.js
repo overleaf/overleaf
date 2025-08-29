@@ -5,32 +5,6 @@ const Errors = require('../../../../app/js/Errors.js')
 
 describe('HttpController', function () {
   beforeEach(function () {
-    this.HttpController = SandboxedModule.require(modulePath, {
-      requires: {
-        './DocumentManager': (this.DocumentManager = {}),
-        './HistoryManager': (this.HistoryManager = {
-          flushProjectChangesAsync: sinon.stub(),
-        }),
-        './ProjectHistoryRedisManager': (this.ProjectHistoryRedisManager = {}),
-        './ProjectManager': (this.ProjectManager = {}),
-        './DeleteQueueManager': (this.DeleteQueueManager = {}),
-        './RedisManager': (this.RedisManager = {
-          DOC_OPS_TTL: 42,
-        }),
-        './Metrics': (this.Metrics = {}),
-        './Errors': Errors,
-        './Utils': (this.Utils = {
-          addTrackedDeletesToContent: sinon.stub().returnsArg(0),
-        }),
-        './HistoryConversions': (this.HistoryConversions = {
-          toHistoryRanges: sinon.stub().returnsArg(0),
-        }),
-        '@overleaf/settings': { max_doc_length: 2 * 1024 * 1024 },
-      },
-    })
-    this.Metrics.Timer = class Timer {}
-    this.Metrics.Timer.prototype.done = sinon.stub()
-
     this.project_id = 'project-id-123'
     this.projectHistoryId = '123'
     this.doc_id = 'doc-id-123'
@@ -41,6 +15,78 @@ describe('HttpController', function () {
       sendStatus: sinon.stub(),
       json: sinon.stub(),
     }
+
+    this.DocumentManager = {
+      promises: {
+        getDocAndRecentOpsWithLock: sinon.stub(),
+        getCommentWithLock: sinon.stub(),
+        setDocWithLock: sinon.stub(),
+        flushDocIfLoadedWithLock: sinon.stub().resolves(),
+        flushAndDeleteDocWithLock: sinon.stub().resolves(),
+        acceptChangesWithLock: sinon.stub().resolves(),
+        updateCommentStateWithLock: sinon.stub().resolves(),
+        deleteCommentWithLock: sinon.stub().resolves(),
+        appendToDocWithLock: sinon.stub(),
+      },
+    }
+
+    this.HistoryManager = {
+      flushProjectChangesAsync: sinon.stub(),
+      promises: {
+        resyncProjectHistory: sinon.stub().resolves(),
+      },
+    }
+
+    this.ProjectHistoryRedisManager = {
+      promises: {
+        queueOps: sinon.stub().resolves(),
+      },
+    }
+
+    this.ProjectManager = {
+      promises: {
+        flushProjectWithLocks: sinon.stub().resolves(),
+        flushAndDeleteProjectWithLocks: sinon.stub().resolves(),
+        queueFlushAndDeleteProject: sinon.stub().resolves(),
+        getProjectDocsAndFlushIfOld: sinon.stub(),
+        updateProjectWithLocks: sinon.stub().resolves(),
+      },
+    }
+
+    this.DeleteQueueManager = {}
+
+    this.RedisManager = {
+      DOC_OPS_TTL: 42,
+    }
+
+    this.Metrics = {
+      Timer: class Timer {},
+    }
+    this.Metrics.Timer.prototype.done = sinon.stub()
+
+    this.Utils = {
+      addTrackedDeletesToContent: sinon.stub().returnsArg(0),
+    }
+
+    this.HistoryConversions = {
+      toHistoryRanges: sinon.stub().returnsArg(0),
+    }
+
+    this.HttpController = SandboxedModule.require(modulePath, {
+      requires: {
+        './DocumentManager': this.DocumentManager,
+        './HistoryManager': this.HistoryManager,
+        './ProjectHistoryRedisManager': this.ProjectHistoryRedisManager,
+        './ProjectManager': this.ProjectManager,
+        './DeleteQueueManager': this.DeleteQueueManager,
+        './RedisManager': this.RedisManager,
+        './Metrics': this.Metrics,
+        './Errors': Errors,
+        './Utils': this.Utils,
+        './HistoryConversions': this.HistoryConversions,
+        '@overleaf/settings': { max_doc_length: 2 * 1024 * 1024 },
+      },
+    })
   })
 
   describe('getDoc', function () {
@@ -62,27 +108,25 @@ describe('HttpController', function () {
     })
 
     describe('when the document exists and no recent ops are requested', function () {
-      beforeEach(function () {
-        this.DocumentManager.getDocAndRecentOpsWithLock = sinon
-          .stub()
-          .callsArgWith(
-            3,
-            null,
-            this.lines,
-            this.version,
-            [],
-            this.ranges,
-            this.pathname,
-            this.projectHistoryId,
-            'sharejs-text-ot'
-          )
-        this.HttpController.getDoc(this.req, this.res, this.next)
+      beforeEach(async function () {
+        this.DocumentManager.promises.getDocAndRecentOpsWithLock.resolves({
+          lines: this.lines,
+          version: this.version,
+          ops: [],
+          ranges: this.ranges,
+          pathname: this.pathname,
+          projectHistoryId: this.projectHistoryId,
+          type: 'sharejs-text-ot',
+        })
+        await this.HttpController.getDoc(this.req, this.res, this.next)
       })
 
       it('should get the doc', function () {
-        this.DocumentManager.getDocAndRecentOpsWithLock
-          .calledWith(this.project_id, this.doc_id, -1)
-          .should.equal(true)
+        this.DocumentManager.promises.getDocAndRecentOpsWithLock.should.have.been.calledWith(
+          this.project_id,
+          this.doc_id,
+          -1
+        )
       })
 
       it('should return the doc as JSON', function () {
@@ -117,28 +161,26 @@ describe('HttpController', function () {
     })
 
     describe('when recent ops are requested', function () {
-      beforeEach(function () {
-        this.DocumentManager.getDocAndRecentOpsWithLock = sinon
-          .stub()
-          .callsArgWith(
-            3,
-            null,
-            this.lines,
-            this.version,
-            this.ops,
-            this.ranges,
-            this.pathname,
-            this.projectHistoryId,
-            'sharejs-text-ot'
-          )
+      beforeEach(async function () {
+        this.DocumentManager.promises.getDocAndRecentOpsWithLock.resolves({
+          lines: this.lines,
+          version: this.version,
+          ops: this.ops,
+          ranges: this.ranges,
+          pathname: this.pathname,
+          projectHistoryId: this.projectHistoryId,
+          type: 'sharejs-text-ot',
+        })
         this.req.query = { fromVersion: `${this.fromVersion}` }
-        this.HttpController.getDoc(this.req, this.res, this.next)
+        await this.HttpController.getDoc(this.req, this.res, this.next)
       })
 
       it('should get the doc', function () {
-        this.DocumentManager.getDocAndRecentOpsWithLock
-          .calledWith(this.project_id, this.doc_id, this.fromVersion)
-          .should.equal(true)
+        this.DocumentManager.promises.getDocAndRecentOpsWithLock.should.have.been.calledWith(
+          this.project_id,
+          this.doc_id,
+          this.fromVersion
+        )
       })
 
       it('should return the doc as JSON', function () {
@@ -173,28 +215,26 @@ describe('HttpController', function () {
     })
 
     describe('when historyRanges query param is true', function () {
-      beforeEach(function () {
-        this.DocumentManager.getDocAndRecentOpsWithLock = sinon
-          .stub()
-          .callsArgWith(
-            3,
-            null,
-            this.lines,
-            this.version,
-            [],
-            this.ranges,
-            this.pathname,
-            this.projectHistoryId,
-            'sharejs-text-ot'
-          )
+      beforeEach(async function () {
+        this.DocumentManager.promises.getDocAndRecentOpsWithLock.resolves({
+          lines: this.lines,
+          version: this.version,
+          ops: [],
+          ranges: this.ranges,
+          pathname: this.pathname,
+          projectHistoryId: this.projectHistoryId,
+          type: 'sharejs-text-ot',
+        })
         this.req.query = { historyRanges: 'true' }
-        this.HttpController.getDoc(this.req, this.res, this.next)
+        await this.HttpController.getDoc(this.req, this.res, this.next)
       })
 
       it('should get the doc', function () {
-        this.DocumentManager.getDocAndRecentOpsWithLock
-          .calledWith(this.project_id, this.doc_id, -1)
-          .should.equal(true)
+        this.DocumentManager.promises.getDocAndRecentOpsWithLock.should.have.been.calledWith(
+          this.project_id,
+          this.doc_id,
+          -1
+        )
       })
 
       it('should return the doc as JSON with history ranges processing', function () {
@@ -237,11 +277,12 @@ describe('HttpController', function () {
     })
 
     describe('when the document does not exist', function () {
-      beforeEach(function () {
-        this.DocumentManager.getDocAndRecentOpsWithLock = sinon
-          .stub()
-          .callsArgWith(3, null, null, null)
-        this.HttpController.getDoc(this.req, this.res, this.next)
+      beforeEach(async function () {
+        this.DocumentManager.promises.getDocAndRecentOpsWithLock.resolves({
+          lines: null,
+          version: null,
+        })
+        await this.HttpController.getDoc(this.req, this.res, this.next)
       })
 
       it('should call next with NotFoundError', function () {
@@ -252,11 +293,11 @@ describe('HttpController', function () {
     })
 
     describe('when an errors occurs', function () {
-      beforeEach(function () {
-        this.DocumentManager.getDocAndRecentOpsWithLock = sinon
-          .stub()
-          .callsArgWith(3, new Error('oops'), null, null)
-        this.HttpController.getDoc(this.req, this.res, this.next)
+      beforeEach(async function () {
+        this.DocumentManager.promises.getDocAndRecentOpsWithLock.rejects(
+          new Error('oops')
+        )
+        await this.HttpController.getDoc(this.req, this.res, this.next)
       })
 
       it('should call next with the error', function () {
@@ -289,17 +330,19 @@ describe('HttpController', function () {
       }
     })
 
-    beforeEach(function () {
-      this.DocumentManager.getCommentWithLock = sinon
-        .stub()
-        .callsArgWith(3, null, this.ranges.comments[0])
-      this.HttpController.getComment(this.req, this.res, this.next)
+    beforeEach(async function () {
+      this.DocumentManager.promises.getCommentWithLock.resolves(
+        this.ranges.comments[0]
+      )
+      await this.HttpController.getComment(this.req, this.res, this.next)
     })
 
     it('should get the comment', function () {
-      this.DocumentManager.getCommentWithLock
-        .calledWith(this.project_id, this.doc_id, this.comment_id)
-        .should.equal(true)
+      this.DocumentManager.promises.getCommentWithLock.should.have.been.calledWith(
+        this.project_id,
+        this.doc_id,
+        this.comment_id
+      )
     })
 
     it('should return the comment as JSON', function () {
@@ -346,25 +389,21 @@ describe('HttpController', function () {
     })
 
     describe('successfully', function () {
-      beforeEach(function () {
-        this.DocumentManager.setDocWithLock = sinon
-          .stub()
-          .callsArgWith(7, null, { rev: '123' })
-        this.HttpController.setDoc(this.req, this.res, this.next)
+      beforeEach(async function () {
+        this.DocumentManager.promises.setDocWithLock.resolves({ rev: '123' })
+        await this.HttpController.setDoc(this.req, this.res, this.next)
       })
 
       it('should set the doc', function () {
-        this.DocumentManager.setDocWithLock
-          .calledWith(
-            this.project_id,
-            this.doc_id,
-            this.lines,
-            this.source,
-            this.user_id,
-            this.undoing,
-            true
-          )
-          .should.equal(true)
+        this.DocumentManager.promises.setDocWithLock.should.have.been.calledWith(
+          this.project_id,
+          this.doc_id,
+          this.lines,
+          this.source,
+          this.user_id,
+          this.undoing,
+          true
+        )
       })
 
       it('should return a json response with the document rev from web', function () {
@@ -393,11 +432,9 @@ describe('HttpController', function () {
     })
 
     describe('when an errors occurs', function () {
-      beforeEach(function () {
-        this.DocumentManager.setDocWithLock = sinon
-          .stub()
-          .callsArgWith(7, new Error('oops'))
-        this.HttpController.setDoc(this.req, this.res, this.next)
+      beforeEach(async function () {
+        this.DocumentManager.promises.setDocWithLock.rejects(new Error('oops'))
+        await this.HttpController.setDoc(this.req, this.res, this.next)
       })
 
       it('should call next with the error', function () {
@@ -406,14 +443,14 @@ describe('HttpController', function () {
     })
 
     describe('when the payload is too large', function () {
-      beforeEach(function () {
+      beforeEach(async function () {
         const lines = []
         for (let _ = 0; _ <= 200000; _++) {
           lines.push('test test test')
         }
         this.req.body.lines = lines
-        this.DocumentManager.setDocWithLock = sinon.stub().callsArgWith(6)
-        this.HttpController.setDoc(this.req, this.res, this.next)
+        this.DocumentManager.promises.setDocWithLock.resolves()
+        await this.HttpController.setDoc(this.req, this.res, this.next)
       })
 
       it('should send back a 406 response', function () {
@@ -421,7 +458,7 @@ describe('HttpController', function () {
       })
 
       it('should not call setDocWithLock', function () {
-        this.DocumentManager.setDocWithLock.callCount.should.equal(0)
+        this.DocumentManager.promises.setDocWithLock.should.not.have.been.called
       })
     })
   })
@@ -438,15 +475,14 @@ describe('HttpController', function () {
     })
 
     describe('successfully', function () {
-      beforeEach(function () {
-        this.ProjectManager.flushProjectWithLocks = sinon.stub().callsArgWith(1)
-        this.HttpController.flushProject(this.req, this.res, this.next)
+      beforeEach(async function () {
+        await this.HttpController.flushProject(this.req, this.res, this.next)
       })
 
       it('should flush the project', function () {
-        this.ProjectManager.flushProjectWithLocks
-          .calledWith(this.project_id)
-          .should.equal(true)
+        this.ProjectManager.promises.flushProjectWithLocks.should.have.been.calledWith(
+          this.project_id
+        )
       })
 
       it('should return a successful No Content response', function () {
@@ -468,11 +504,11 @@ describe('HttpController', function () {
     })
 
     describe('when an errors occurs', function () {
-      beforeEach(function () {
-        this.ProjectManager.flushProjectWithLocks = sinon
-          .stub()
-          .callsArgWith(1, new Error('oops'))
-        this.HttpController.flushProject(this.req, this.res, this.next)
+      beforeEach(async function () {
+        this.ProjectManager.promises.flushProjectWithLocks.rejects(
+          new Error('oops')
+        )
+        await this.HttpController.flushProject(this.req, this.res, this.next)
       })
 
       it('should call next with the error', function () {
@@ -496,17 +532,19 @@ describe('HttpController', function () {
     })
 
     describe('successfully', function () {
-      beforeEach(function () {
-        this.DocumentManager.flushDocIfLoadedWithLock = sinon
-          .stub()
-          .callsArgWith(2)
-        this.HttpController.flushDocIfLoaded(this.req, this.res, this.next)
+      beforeEach(async function () {
+        await this.HttpController.flushDocIfLoaded(
+          this.req,
+          this.res,
+          this.next
+        )
       })
 
       it('should flush the doc', function () {
-        this.DocumentManager.flushDocIfLoadedWithLock
-          .calledWith(this.project_id, this.doc_id)
-          .should.equal(true)
+        this.DocumentManager.promises.flushDocIfLoadedWithLock.should.have.been.calledWith(
+          this.project_id,
+          this.doc_id
+        )
       })
 
       it('should return a successful No Content response', function () {
@@ -528,11 +566,15 @@ describe('HttpController', function () {
     })
 
     describe('when an errors occurs', function () {
-      beforeEach(function () {
-        this.DocumentManager.flushDocIfLoadedWithLock = sinon
-          .stub()
-          .callsArgWith(2, new Error('oops'))
-        this.HttpController.flushDocIfLoaded(this.req, this.res, this.next)
+      beforeEach(async function () {
+        this.DocumentManager.promises.flushDocIfLoadedWithLock.rejects(
+          new Error('oops')
+        )
+        await this.HttpController.flushDocIfLoaded(
+          this.req,
+          this.res,
+          this.next
+        )
       })
 
       it('should call next with the error', function () {
@@ -554,19 +596,16 @@ describe('HttpController', function () {
     })
 
     describe('successfully', function () {
-      beforeEach(function () {
-        this.DocumentManager.flushAndDeleteDocWithLock = sinon
-          .stub()
-          .callsArgWith(3)
-        this.HttpController.deleteDoc(this.req, this.res, this.next)
+      beforeEach(async function () {
+        await this.HttpController.deleteDoc(this.req, this.res, this.next)
       })
 
       it('should flush and delete the doc', function () {
-        this.DocumentManager.flushAndDeleteDocWithLock
-          .calledWith(this.project_id, this.doc_id, {
-            ignoreFlushErrors: false,
-          })
-          .should.equal(true)
+        this.DocumentManager.promises.flushAndDeleteDocWithLock.should.have.been.calledWith(
+          this.project_id,
+          this.doc_id,
+          { ignoreFlushErrors: false }
+        )
       })
 
       it('should flush project history', function () {
@@ -594,16 +633,17 @@ describe('HttpController', function () {
     })
 
     describe('ignoring errors', function () {
-      beforeEach(function () {
+      beforeEach(async function () {
         this.req.query.ignore_flush_errors = 'true'
-        this.DocumentManager.flushAndDeleteDocWithLock = sinon.stub().yields()
-        this.HttpController.deleteDoc(this.req, this.res, this.next)
+        await this.HttpController.deleteDoc(this.req, this.res, this.next)
       })
 
       it('should delete the doc', function () {
-        this.DocumentManager.flushAndDeleteDocWithLock
-          .calledWith(this.project_id, this.doc_id, { ignoreFlushErrors: true })
-          .should.equal(true)
+        this.DocumentManager.promises.flushAndDeleteDocWithLock.should.have.been.calledWith(
+          this.project_id,
+          this.doc_id,
+          { ignoreFlushErrors: true }
+        )
       })
 
       it('should return a successful No Content response', function () {
@@ -612,11 +652,11 @@ describe('HttpController', function () {
     })
 
     describe('when an errors occurs', function () {
-      beforeEach(function () {
-        this.DocumentManager.flushAndDeleteDocWithLock = sinon
-          .stub()
-          .callsArgWith(3, new Error('oops'))
-        this.HttpController.deleteDoc(this.req, this.res, this.next)
+      beforeEach(async function () {
+        this.DocumentManager.promises.flushAndDeleteDocWithLock.rejects(
+          new Error('oops')
+        )
+        await this.HttpController.deleteDoc(this.req, this.res, this.next)
       })
 
       it('should flush project history', function () {
@@ -643,17 +683,14 @@ describe('HttpController', function () {
     })
 
     describe('successfully', function () {
-      beforeEach(function () {
-        this.ProjectManager.flushAndDeleteProjectWithLocks = sinon
-          .stub()
-          .callsArgWith(2)
-        this.HttpController.deleteProject(this.req, this.res, this.next)
+      beforeEach(async function () {
+        await this.HttpController.deleteProject(this.req, this.res, this.next)
       })
 
       it('should delete the project', function () {
-        this.ProjectManager.flushAndDeleteProjectWithLocks
-          .calledWith(this.project_id)
-          .should.equal(true)
+        this.ProjectManager.promises.flushAndDeleteProjectWithLocks.should.have.been.calledWith(
+          this.project_id
+        )
       })
 
       it('should return a successful No Content response', function () {
@@ -675,27 +712,24 @@ describe('HttpController', function () {
     })
 
     describe('with the background=true option from realtime', function () {
-      beforeEach(function () {
-        this.ProjectManager.queueFlushAndDeleteProject = sinon
-          .stub()
-          .callsArgWith(1)
+      beforeEach(async function () {
         this.req.query = { background: true, shutdown: true }
-        this.HttpController.deleteProject(this.req, this.res, this.next)
+        await this.HttpController.deleteProject(this.req, this.res, this.next)
       })
 
       it('should queue the flush and delete', function () {
-        this.ProjectManager.queueFlushAndDeleteProject
-          .calledWith(this.project_id)
-          .should.equal(true)
+        this.ProjectManager.promises.queueFlushAndDeleteProject.should.have.been.calledWith(
+          this.project_id
+        )
       })
     })
 
     describe('when an errors occurs', function () {
-      beforeEach(function () {
-        this.ProjectManager.flushAndDeleteProjectWithLocks = sinon
-          .stub()
-          .callsArgWith(2, new Error('oops'))
-        this.HttpController.deleteProject(this.req, this.res, this.next)
+      beforeEach(async function () {
+        this.ProjectManager.promises.flushAndDeleteProjectWithLocks.rejects(
+          new Error('oops')
+        )
+        await this.HttpController.deleteProject(this.req, this.res, this.next)
       })
 
       it('should call next with the error', function () {
@@ -718,17 +752,16 @@ describe('HttpController', function () {
     })
 
     describe('successfully with a single change', function () {
-      beforeEach(function () {
-        this.DocumentManager.acceptChangesWithLock = sinon
-          .stub()
-          .callsArgWith(3)
-        this.HttpController.acceptChanges(this.req, this.res, this.next)
+      beforeEach(async function () {
+        await this.HttpController.acceptChanges(this.req, this.res, this.next)
       })
 
       it('should accept the change', function () {
-        this.DocumentManager.acceptChangesWithLock
-          .calledWith(this.project_id, this.doc_id, [this.change_id])
-          .should.equal(true)
+        this.DocumentManager.promises.acceptChangesWithLock.should.have.been.calledWith(
+          this.project_id,
+          this.doc_id,
+          [this.change_id]
+        )
       })
 
       it('should return a successful No Content response', function () {
@@ -750,7 +783,7 @@ describe('HttpController', function () {
     })
 
     describe('succesfully with with multiple changes', function () {
-      beforeEach(function () {
+      beforeEach(async function () {
         this.change_ids = [
           'mock-change-od-1',
           'mock-change-od-2',
@@ -758,16 +791,15 @@ describe('HttpController', function () {
           'mock-change-od-4',
         ]
         this.req.body = { change_ids: this.change_ids }
-        this.DocumentManager.acceptChangesWithLock = sinon
-          .stub()
-          .callsArgWith(3)
-        this.HttpController.acceptChanges(this.req, this.res, this.next)
+        await this.HttpController.acceptChanges(this.req, this.res, this.next)
       })
 
       it('should accept the changes in the body payload', function () {
-        this.DocumentManager.acceptChangesWithLock
-          .calledWith(this.project_id, this.doc_id, this.change_ids)
-          .should.equal(true)
+        this.DocumentManager.promises.acceptChangesWithLock.should.have.been.calledWith(
+          this.project_id,
+          this.doc_id,
+          this.change_ids
+        )
       })
 
       it('should log the request with the correct number of changes', function () {
@@ -781,11 +813,11 @@ describe('HttpController', function () {
     })
 
     describe('when an errors occurs', function () {
-      beforeEach(function () {
-        this.DocumentManager.acceptChangesWithLock = sinon
-          .stub()
-          .callsArgWith(3, new Error('oops'))
-        this.HttpController.acceptChanges(this.req, this.res, this.next)
+      beforeEach(async function () {
+        this.DocumentManager.promises.acceptChangesWithLock.rejects(
+          new Error('oops')
+        )
+        await this.HttpController.acceptChanges(this.req, this.res, this.next)
       })
 
       it('should call next with the error', function () {
@@ -812,26 +844,18 @@ describe('HttpController', function () {
     })
 
     describe('successfully', function () {
-      beforeEach(function (done) {
-        this.DocumentManager.updateCommentStateWithLock = sinon
-          .stub()
-          .callsArgWith(5)
-
-        this.ProjectHistoryRedisManager.queueOps = sinon.stub()
-        this.res.sendStatus.callsFake(() => done())
-        this.HttpController.resolveComment(this.req, this.res, this.next)
+      beforeEach(async function () {
+        await this.HttpController.resolveComment(this.req, this.res, this.next)
       })
 
       it('should accept the change', function () {
-        this.DocumentManager.updateCommentStateWithLock
-          .calledWith(
-            this.project_id,
-            this.doc_id,
-            this.comment_id,
-            this.user_id,
-            this.resolved
-          )
-          .should.equal(true)
+        this.DocumentManager.promises.updateCommentStateWithLock.should.have.been.calledWith(
+          this.project_id,
+          this.doc_id,
+          this.comment_id,
+          this.user_id,
+          this.resolved
+        )
       })
 
       it('should return a successful No Content response', function () {
@@ -853,11 +877,11 @@ describe('HttpController', function () {
     })
 
     describe('when an errors occurs', function () {
-      beforeEach(function () {
-        this.DocumentManager.updateCommentStateWithLock = sinon
-          .stub()
-          .callsArgWith(5, new Error('oops'))
-        this.HttpController.resolveComment(this.req, this.res, this.next)
+      beforeEach(async function () {
+        this.DocumentManager.promises.updateCommentStateWithLock.rejects(
+          new Error('oops')
+        )
+        await this.HttpController.resolveComment(this.req, this.res, this.next)
       })
 
       it('should call next with the error', function () {
@@ -884,25 +908,18 @@ describe('HttpController', function () {
     })
 
     describe('successfully', function () {
-      beforeEach(function () {
-        this.DocumentManager.updateCommentStateWithLock = sinon
-          .stub()
-          .callsArgWith(5)
-
-        this.ProjectHistoryRedisManager.queueOps = sinon.stub()
-        this.HttpController.reopenComment(this.req, this.res, this.next)
+      beforeEach(async function () {
+        await this.HttpController.reopenComment(this.req, this.res, this.next)
       })
 
       it('should accept the change', function () {
-        this.DocumentManager.updateCommentStateWithLock
-          .calledWith(
-            this.project_id,
-            this.doc_id,
-            this.comment_id,
-            this.user_id,
-            this.resolved
-          )
-          .should.equal(true)
+        this.DocumentManager.promises.updateCommentStateWithLock.should.have.been.calledWith(
+          this.project_id,
+          this.doc_id,
+          this.comment_id,
+          this.user_id,
+          this.resolved
+        )
       })
 
       it('should return a successful No Content response', function () {
@@ -924,11 +941,11 @@ describe('HttpController', function () {
     })
 
     describe('when an errors occurs', function () {
-      beforeEach(function () {
-        this.DocumentManager.updateCommentStateWithLock = sinon
-          .stub()
-          .callsArgWith(5, new Error('oops'))
-        this.HttpController.reopenComment(this.req, this.res, this.next)
+      beforeEach(async function () {
+        this.DocumentManager.promises.updateCommentStateWithLock.rejects(
+          new Error('oops')
+        )
+        await this.HttpController.reopenComment(this.req, this.res, this.next)
       })
 
       it('should call next with the error', function () {
@@ -954,24 +971,17 @@ describe('HttpController', function () {
     })
 
     describe('successfully', function () {
-      beforeEach(function () {
-        this.DocumentManager.deleteCommentWithLock = sinon
-          .stub()
-          .callsArgWith(4)
-
-        this.ProjectHistoryRedisManager.queueOps = sinon.stub()
-        this.HttpController.deleteComment(this.req, this.res, this.next)
+      beforeEach(async function () {
+        await this.HttpController.deleteComment(this.req, this.res, this.next)
       })
 
       it('should accept the change', function () {
-        this.DocumentManager.deleteCommentWithLock
-          .calledWith(
-            this.project_id,
-            this.doc_id,
-            this.comment_id,
-            this.user_id
-          )
-          .should.equal(true)
+        this.DocumentManager.promises.deleteCommentWithLock.should.have.been.calledWith(
+          this.project_id,
+          this.doc_id,
+          this.comment_id,
+          this.user_id
+        )
       })
 
       it('should return a successful No Content response', function () {
@@ -997,11 +1007,11 @@ describe('HttpController', function () {
     })
 
     describe('when an errors occurs', function () {
-      beforeEach(function () {
-        this.DocumentManager.deleteCommentWithLock = sinon
-          .stub()
-          .callsArgWith(4, new Error('oops'))
-        this.HttpController.deleteComment(this.req, this.res, this.next)
+      beforeEach(async function () {
+        this.DocumentManager.promises.deleteCommentWithLock.rejects(
+          new Error('oops')
+        )
+        await this.HttpController.deleteComment(this.req, this.res, this.next)
       })
 
       it('should call next with the error', function () {
@@ -1029,11 +1039,11 @@ describe('HttpController', function () {
     })
 
     describe('successfully', function () {
-      beforeEach(function () {
-        this.ProjectManager.getProjectDocsAndFlushIfOld = sinon
-          .stub()
-          .callsArgWith(3, null, this.docs)
-        this.HttpController.getProjectDocsAndFlushIfOld(
+      beforeEach(async function () {
+        this.ProjectManager.promises.getProjectDocsAndFlushIfOld.resolves(
+          this.docs
+        )
+        await this.HttpController.getProjectDocsAndFlushIfOld(
           this.req,
           this.res,
           this.next
@@ -1041,9 +1051,11 @@ describe('HttpController', function () {
       })
 
       it('should get docs from the project manager', function () {
-        this.ProjectManager.getProjectDocsAndFlushIfOld
-          .calledWith(this.project_id, this.state, {})
-          .should.equal(true)
+        this.ProjectManager.promises.getProjectDocsAndFlushIfOld.should.have.been.calledWith(
+          this.project_id,
+          this.state,
+          {}
+        )
       })
 
       it('should return a successful response', function () {
@@ -1074,14 +1086,11 @@ describe('HttpController', function () {
     })
 
     describe('when there is a conflict', function () {
-      beforeEach(function () {
-        this.ProjectManager.getProjectDocsAndFlushIfOld = sinon
-          .stub()
-          .callsArgWith(
-            3,
-            new Errors.ProjectStateChangedError('project state changed')
-          )
-        this.HttpController.getProjectDocsAndFlushIfOld(
+      beforeEach(async function () {
+        this.ProjectManager.promises.getProjectDocsAndFlushIfOld.rejects(
+          new Errors.ProjectStateChangedError('project state changed')
+        )
+        await this.HttpController.getProjectDocsAndFlushIfOld(
           this.req,
           this.res,
           this.next
@@ -1094,11 +1103,11 @@ describe('HttpController', function () {
     })
 
     describe('when an error occurs', function () {
-      beforeEach(function () {
-        this.ProjectManager.getProjectDocsAndFlushIfOld = sinon
-          .stub()
-          .callsArgWith(3, new Error('oops'))
-        this.HttpController.getProjectDocsAndFlushIfOld(
+      beforeEach(async function () {
+        this.ProjectManager.promises.getProjectDocsAndFlushIfOld.rejects(
+          new Error('oops')
+        )
+        await this.HttpController.getProjectDocsAndFlushIfOld(
           this.req,
           this.res,
           this.next
@@ -1148,22 +1157,19 @@ describe('HttpController', function () {
     })
 
     describe('successfully', function () {
-      beforeEach(function () {
-        this.ProjectManager.updateProjectWithLocks = sinon.stub().yields()
-        this.HttpController.updateProject(this.req, this.res, this.next)
+      beforeEach(async function () {
+        await this.HttpController.updateProject(this.req, this.res, this.next)
       })
 
       it('should accept the change', function () {
-        this.ProjectManager.updateProjectWithLocks
-          .calledWith(
-            this.project_id,
-            this.projectHistoryId,
-            this.userId,
-            this.updates,
-            this.version,
-            this.source
-          )
-          .should.equal(true)
+        this.ProjectManager.promises.updateProjectWithLocks.should.have.been.calledWith(
+          this.project_id,
+          this.projectHistoryId,
+          this.userId,
+          this.updates,
+          this.version,
+          this.source
+        )
       })
 
       it('should return a successful No Content response', function () {
@@ -1176,11 +1182,11 @@ describe('HttpController', function () {
     })
 
     describe('when an errors occurs', function () {
-      beforeEach(function () {
-        this.ProjectManager.updateProjectWithLocks = sinon
-          .stub()
-          .yields(new Error('oops'))
-        this.HttpController.updateProject(this.req, this.res, this.next)
+      beforeEach(async function () {
+        this.ProjectManager.promises.updateProjectWithLocks.rejects(
+          new Error('oops')
+        )
+        await this.HttpController.updateProject(this.req, this.res, this.next)
       })
 
       it('should call next with the error', function () {
@@ -1209,21 +1215,22 @@ describe('HttpController', function () {
     })
 
     describe('successfully', function () {
-      beforeEach(function () {
-        this.HistoryManager.resyncProjectHistory = sinon.stub().callsArgWith(5)
-        this.HttpController.resyncProjectHistory(this.req, this.res, this.next)
+      beforeEach(async function () {
+        await this.HttpController.resyncProjectHistory(
+          this.req,
+          this.res,
+          this.next
+        )
       })
 
       it('should accept the change', function () {
-        this.HistoryManager.resyncProjectHistory
-          .calledWith(
-            this.project_id,
-            this.projectHistoryId,
-            this.docs,
-            this.files,
-            {}
-          )
-          .should.equal(true)
+        this.HistoryManager.promises.resyncProjectHistory.should.have.been.calledWith(
+          this.project_id,
+          this.projectHistoryId,
+          this.docs,
+          this.files,
+          {}
+        )
       })
 
       it('should return a successful No Content response', function () {
@@ -1232,11 +1239,15 @@ describe('HttpController', function () {
     })
 
     describe('when an errors occurs', function () {
-      beforeEach(function () {
-        this.HistoryManager.resyncProjectHistory = sinon
-          .stub()
-          .callsArgWith(5, new Error('oops'))
-        this.HttpController.resyncProjectHistory(this.req, this.res, this.next)
+      beforeEach(async function () {
+        this.HistoryManager.promises.resyncProjectHistory.rejects(
+          new Error('oops')
+        )
+        await this.HttpController.resyncProjectHistory(
+          this.req,
+          this.res,
+          this.next
+        )
       })
 
       it('should call next with the error', function () {
@@ -1267,23 +1278,21 @@ describe('HttpController', function () {
     })
 
     describe('successfully', function () {
-      beforeEach(function () {
-        this.DocumentManager.appendToDocWithLock = sinon
-          .stub()
-          .callsArgWith(5, null, { rev: '123' })
-        this.HttpController.appendToDoc(this.req, this.res, this.next)
+      beforeEach(async function () {
+        this.DocumentManager.promises.appendToDocWithLock.resolves({
+          rev: '123',
+        })
+        await this.HttpController.appendToDoc(this.req, this.res, this.next)
       })
 
       it('should append to the doc', function () {
-        this.DocumentManager.appendToDocWithLock
-          .calledWith(
-            this.project_id,
-            this.doc_id,
-            this.lines,
-            this.source,
-            this.user_id
-          )
-          .should.equal(true)
+        this.DocumentManager.promises.appendToDocWithLock.should.have.been.calledWith(
+          this.project_id,
+          this.doc_id,
+          this.lines,
+          this.source,
+          this.user_id
+        )
       })
 
       it('should return a json response with the document rev from web', function () {
@@ -1311,11 +1320,11 @@ describe('HttpController', function () {
     })
 
     describe('when an errors occurs', function () {
-      beforeEach(function () {
-        this.DocumentManager.appendToDocWithLock = sinon
-          .stub()
-          .callsArgWith(5, new Error('oops'))
-        this.HttpController.appendToDoc(this.req, this.res, this.next)
+      beforeEach(async function () {
+        this.DocumentManager.promises.appendToDocWithLock.rejects(
+          new Error('oops')
+        )
+        await this.HttpController.appendToDoc(this.req, this.res, this.next)
       })
 
       it('should call next with the error', function () {
@@ -1324,11 +1333,11 @@ describe('HttpController', function () {
     })
 
     describe('when the payload is too large', function () {
-      beforeEach(function () {
-        this.DocumentManager.appendToDocWithLock = sinon
-          .stub()
-          .callsArgWith(5, new Errors.FileTooLargeError())
-        this.HttpController.appendToDoc(this.req, this.res, this.next)
+      beforeEach(async function () {
+        this.DocumentManager.promises.appendToDocWithLock.rejects(
+          new Errors.FileTooLargeError()
+        )
+        await this.HttpController.appendToDoc(this.req, this.res, this.next)
       })
 
       it('should send back a 422 response', function () {
