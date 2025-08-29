@@ -53,6 +53,7 @@ export function startWith({
     cy.log(`starting with ${cfg}`)
 
     this.timeout(STARTUP_TIMEOUT)
+    previousConfigFrontend = ''
     const { previousConfigServer } = await reconfigure({
       pro,
       version,
@@ -94,6 +95,7 @@ export async function reloadWith({
   } else if (previousConfigFrontend === cfg) {
     return
   }
+  previousConfigFrontend = ''
   const { previousConfigServer } = await reconfigure({
     pro,
     version,
