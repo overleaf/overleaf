@@ -12,6 +12,17 @@ const { useAdminCapabilities } = require('../Helpers/AdminAuthorizationHelper')
 // set of middleware arrays or functions that checks user access to an entity
 // (publisher, institution, group, template, etc.)
 const UserMembershipMiddleware = {
+  requireTeamMetricsAccess: [
+    AuthenticationController.requireLogin(),
+    fetchEntityConfig('team'),
+    fetchEntity(),
+    requireEntity(),
+    allowAccessIfAny([
+      UserMembershipAuthorization.hasEntityAccess(),
+      UserMembershipAuthorization.hasStaffAccess('groupMetrics'),
+    ]),
+  ],
+
   requireGroup: [fetchEntityConfig('group'), fetchEntity(), requireEntity()],
 
   requireGroupAccess: [
@@ -59,6 +70,17 @@ const UserMembershipMiddleware = {
       UserMembershipAuthorization.hasEntityAccess(),
       UserMembershipAuthorization.hasStaffAccess('groupManagement'),
       UserMembershipAuthorization.hasModifyGroupMemberCapability,
+    ]),
+  ],
+
+  requireGroupMetricsAccess: [
+    AuthenticationController.requireLogin(),
+    fetchEntityConfig('group'),
+    fetchEntity(),
+    requireEntity(),
+    allowAccessIfAny([
+      UserMembershipAuthorization.hasEntityAccess(),
+      UserMembershipAuthorization.hasStaffAccess('groupMetrics'),
     ]),
   ],
 
