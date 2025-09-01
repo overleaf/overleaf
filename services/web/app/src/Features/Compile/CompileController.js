@@ -220,6 +220,7 @@ const _CompileController = {
           isInitialCompile: stats?.isInitialCompile === 1,
           restoredClsiCache: stats?.restoredClsiCache === 1,
           stopOnFirstError,
+          isDraftMode: !!options.draft,
         }
       )
     }
