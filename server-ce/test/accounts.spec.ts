@@ -10,7 +10,7 @@ describe('Accounts', function () {
     login('user@example.com')
     cy.visit('/project')
     cy.findByRole('menuitem', { name: 'Account' }).click()
-    cy.findByText('Log Out').click()
+    cy.findByRole('menuitem', { name: 'Log Out' }).click()
     cy.url().should('include', '/login')
     cy.visit('/project')
     cy.url().should('include', '/login')

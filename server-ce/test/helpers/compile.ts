@@ -32,7 +32,7 @@ export function prepareWaitForNextCompileSlot() {
       queueReset()
       triggerCompile()
       cy.log('Wait for compile to finish')
-      cy.findByText('Recompile').should('be.visible')
+      cy.findByRole('button', { name: 'Recompile' }).should('be.visible')
     })
   }
   function recompile() {

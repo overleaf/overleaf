@@ -1,6 +1,6 @@
 import { isExcludedBySharding, startWith } from './helpers/config'
 import { ensureUserExists, login } from './helpers/login'
-import { createProject } from './helpers/project'
+import { createProject, NEW_PROJECT_BUTTON_MATCHER } from './helpers/project'
 
 const WITHOUT_PROJECTS_USER = 'user-without-projects@example.com'
 const ADMIN_USER = 'admin@example.com'
@@ -43,7 +43,9 @@ describe('Templates', () => {
     it('should show templates link on welcome page', () => {
       login(WITHOUT_PROJECTS_USER)
       cy.visit('/')
-      cy.findByText(LABEL_BROWSE_TEMPLATES).click()
+      cy.findByRole('link', { name: LABEL_BROWSE_TEMPLATES })
+        .should('have.attr', 'href', '/templates')
+        .click()
       cy.url().should('match', /\/templates$/)
     })
 
@@ -56,9 +58,9 @@ describe('Templates', () => {
       createProject(name, { type: 'Example project' }).as('templateProjectId')
 
       cy.findByRole('navigation', {
-        name: /Project actions/i,
+        name: 'Project actions',
       })
-        .findByRole('button', { name: /Menu/i })
+        .findByRole('button', { name: 'Menu' })
         .click()
       cy.findByText('Manage Template').click()
 
@@ -139,9 +141,9 @@ describe('Templates', () => {
         cy.visit(`/project/${projectId}`)
       )
       cy.findByRole('navigation', {
-        name: /Project actions/i,
+        name: 'Project actions',
       })
-        .findByRole('button', { name: /Menu/i })
+        .findByRole('button', { name: 'Menu' })
         .click()
       cy.findByText('Manage Template').click()
       cy.findByText('Publish').click()
@@ -168,9 +170,9 @@ describe('Templates', () => {
       cy.url().should('match', /\/project\/[a-f0-9]{24}$/)
       cy.get('.project-name').should('contain.text', 'Your Paper') // might have (1) suffix
       cy.findByRole('navigation', {
-        name: /Project actions/i,
+        name: 'Project actions',
       })
-        .findByRole('button', { name: /Menu/i })
+        .findByRole('button', { name: 'Menu' })
         .click()
       cy.findByText('Word Count') // wait for lazy loading
       cy.findByText('Manage Template').should('not.exist')
@@ -191,9 +193,9 @@ describe('Templates', () => {
         cy.visit(`/project/${projectId}`)
       )
       cy.findByRole('navigation', {
-        name: /Project actions/i,
+        name: 'Project actions',
       })
-        .findByRole('button', { name: /Menu/i })
+        .findByRole('button', { name: 'Menu' })
         .click()
       cy.findByText('Manage Template').click()
       cy.findByText('Unpublish')
@@ -206,9 +208,9 @@ describe('Templates', () => {
         cy.visit(`/project/${projectId}`)
       )
       cy.findByRole('navigation', {
-        name: /Project actions/i,
+        name: 'Project actions',
       })
-        .findByRole('button', { name: /Menu/i })
+        .findByRole('button', { name: 'Menu' })
         .click()
       cy.findByText('Manage Template').click()
       cy.findByText('Unpublish').click()
@@ -218,9 +220,7 @@ describe('Templates', () => {
 
       // check for template links, after creating the first project
       cy.visit('/')
-      cy.findAllByRole('button')
-        .contains(/new project/i)
-        .click()
+      cy.findAllByRole('button', { name: NEW_PROJECT_BUTTON_MATCHER }).click()
       cy.findAllByText('All Templates')
         .first()
         .parent()
@@ -236,9 +236,9 @@ describe('Templates', () => {
       createProject('maybe templates')
 
       cy.findByRole('navigation', {
-        name: /Project actions/i,
+        name: 'Project actions',
       })
-        .findByRole('button', { name: /Menu/i })
+        .findByRole('button', { name: 'Menu' })
         .click()
       cy.findByText('Word Count') // wait for lazy loading
       cy.findByText('Manage Template').should('not.exist')
@@ -250,16 +250,14 @@ describe('Templates', () => {
 
       // check for template links, after creating the first project
       cy.visit('/')
-      cy.findAllByRole('button')
-        .contains(/new project/i)
-        .click()
+      cy.findAllByRole('button', { name: NEW_PROJECT_BUTTON_MATCHER }).click()
       cy.findAllByText('All Templates').should('not.exist')
     })
 
     it('should not show templates link on welcome page', () => {
       login(WITHOUT_PROJECTS_USER)
       cy.visit('/')
-      cy.findByText(/new project/i) // wait for lazy loading
+      cy.findByText(NEW_PROJECT_BUTTON_MATCHER) // wait for lazy loading
       cy.findByText(LABEL_BROWSE_TEMPLATES).should('not.exist')
     })
   }

@@ -21,8 +21,10 @@ describe('Project List', () => {
     it("'Import from GitHub' is not displayed in the welcome page", () => {
       login(WITHOUT_PROJECTS_USER)
       cy.visit('/project')
-      cy.findByText('Create a new project').click()
-      cy.findByText(/Import from GitHub/i).should('not.exist')
+      cy.findByRole('button', { name: 'Create a new project' }).click()
+      cy.findByRole('menuitem', { name: 'Import from GitHub' }).should(
+        'not.exist'
+      )
     })
   })
 
@@ -66,42 +68,50 @@ describe('Project List', () => {
     it('can assign and remove tags to projects', () => {
       const tagName = uuid().slice(0, 7) // long tag names are truncated in the UI, which affects selectors
       cy.log('select project')
-      cy.get(`[aria-label="Select ${projectName}"]`).click()
+      cy.findByRole('checkbox', { name: `Select ${projectName}` }).check()
 
       cy.log('add tag to project')
-      cy.get('button[aria-label="Tags"]').click()
-      cy.findByText('Create new tag').click()
-      cy.get('input[name="new-tag-form-name"]').type(`${tagName}{enter}`)
-      cy.get(`button[aria-label="Select tag ${tagName}"]`) // tag label in project row
+      cy.findByRole('button', { name: 'Tags' }).click()
+      cy.findByRole('menuitem', { name: 'Create new tag' }).click()
+      cy.findByRole('dialog').within(() => {
+        cy.findByRole('heading', { name: 'Create new tag' })
+        cy.findByLabelText('New tag name').type(`${tagName}{enter}`)
+      })
+      cy.findByRole('button', { name: `Select tag ${tagName}` }) // tag label in project row
 
       cy.log('remove tag')
-      cy.get(`button[aria-label="Remove tag ${tagName}"]`)
+      cy.findByRole('button', { name: `Remove tag ${tagName}` })
         .first()
-        .click({ force: true })
-      cy.get(`button[aria-label="Select tag ${tagName}"]`).should('not.exist')
+        .click()
+      cy.findByRole('button', { name: `Select tag ${tagName}` }).should(
+        'not.exist'
+      )
     })
 
     it('can filter by tag', () => {
       cy.log('create a separate project to filter')
       const nonTaggedProjectName = `project-${uuid()}`
-      login(REGULAR_USER)
       createProject(nonTaggedProjectName, { open: false })
 
       cy.log('select project')
-      cy.get(`[aria-label="Select ${projectName}"]`).click()
+      cy.findByRole('checkbox', { name: `Select ${projectName}` }).check()
 
       cy.log('add tag to project')
       const tagName = uuid().slice(0, 7) // long tag names are truncated in the UI, which affects selectors
-      cy.get('button[aria-label="Tags"]').click()
-      cy.findByText('Create new tag').click()
-      cy.get('input[name="new-tag-form-name"]').type(`${tagName}{enter}`)
+      cy.findByRole('button', { name: 'Tags' }).click()
+      cy.findByRole('menuitem', { name: 'Create new tag' }).click()
+
+      cy.findByRole('dialog').within(() => {
+        cy.findByRole('heading', { name: 'Create new tag' })
+        cy.findByLabelText('New tag name').type(`${tagName}{enter}`)
+      })
 
       cy.log(
         'check the non-tagged project is filtered out after clicking the tag'
       )
-      cy.findByText(nonTaggedProjectName).should('exist')
-      cy.get('button').contains(tagName).click({ force: true })
-      cy.findByText(nonTaggedProjectName).should('not.exist')
+      cy.findByRole('link', { name: nonTaggedProjectName }).should('exist')
+      cy.findByRole('button', { name: `Select tag ${tagName}` }).click()
+      cy.findByRole('link', { name: nonTaggedProjectName }).should('not.exist')
     })
   })
 })

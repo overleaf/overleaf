@@ -13,29 +13,49 @@ describe('History', function () {
 
   function addLabel(name: string) {
     cy.log(`add label ${JSON.stringify(name)}`)
-    cy.findByText('Labels').click()
-    cy.findAllByTestId('history-version-details')
-      .first()
-      .within(() => {
-        cy.get('button').click() // TODO: add test-id or aria-label
-        cy.findByText('Label this version').click()
+    // The input is not clickable due to being visually hidden, click its label instead
+    cy.findByRole('complementary', {
+      name: 'Project history and labels',
+    }).within(() => {
+      cy.findByRole('group', {
+        name: 'Show all of the project history or only labelled versions.',
+      }).within(() => {
+        cy.findByText('Labels').click()
       })
+      cy.findByRole('radio', { name: 'Labels' }).should('be.checked')
+      cy.findByRole('radio', { name: 'All history' }).should('not.be.checked')
+      cy.findAllByTestId('history-version-details')
+        .first()
+        .within(() => {
+          cy.findByRole('button', { name: 'More actions' }).click()
+          cy.findByRole('menuitem', { name: 'Label this version' }).click()
+        })
+    })
     cy.findByRole('dialog').within(() => {
-      cy.findByLabelText(/New label name/i)
-        .as('input')
-        .type(`${name}{enter}`)
+      cy.findByLabelText('New label name').type(`${name}{enter}`)
     })
   }
 
   function downloadVersion(name: string) {
     cy.log(`download version ${JSON.stringify(name)}`)
-    cy.findByText('Labels').click()
-    cy.findByText(name)
-      .closest('[data-testid="history-version-details"]')
-      .within(() => {
-        cy.get('.history-version-dropdown-menu-btn').click()
-        cy.findByText('Download this version').click()
+    // The input is not clickable due to being visually hidden, click its label instead
+    cy.findByRole('complementary', {
+      name: 'Project history and labels',
+    }).within(() => {
+      cy.findByRole('group', {
+        name: 'Show all of the project history or only labelled versions.',
+      }).within(() => {
+        cy.findByText('Labels').click()
       })
+      cy.findByRole('radio', { name: 'Labels' }).should('be.checked')
+      cy.findByRole('radio', { name: 'All history' }).should('not.be.checked')
+      cy.findByText(name)
+        .closest('[data-testid="history-version-details"]')
+        .within(() => {
+          cy.findByRole('button', { name: 'More actions' }).click()
+          cy.findByRole('menuitem', { name: 'Download this version' }).click()
+        })
+    })
   }
 
   const CLASS_ADDITION = 'ol-cm-addition-marker'
@@ -46,11 +66,13 @@ describe('History', function () {
     const recompile = throttledRecompile()
 
     cy.log('add content, including a line that will get removed soon')
-    cy.findByText('\\maketitle').parent().click()
-    cy.findByText('\\maketitle').parent().type('\n% added')
-    cy.findByText('\\maketitle').parent().type('\n% to be removed')
+    cy.findByRole('textbox', { name: 'Source Editor editing' }).within(() => {
+      cy.findByText('\\maketitle').parent().click()
+      cy.findByText('\\maketitle').parent().type('\n% added')
+      cy.findByText('\\maketitle').parent().type('\n% to be removed')
+    })
     recompile()
-    cy.findByText('History').click()
+    cy.findByRole('button', { name: 'History' }).click()
 
     cy.log('expect to see additions in history')
     cy.get('.document-diff-container').within(() => {
@@ -61,10 +83,10 @@ describe('History', function () {
     addLabel('Before removal')
 
     cy.log('remove content')
-    cy.findByText('Back to editor').click()
+    cy.findByRole('button', { name: 'Back to editor' }).click()
     cy.findByText('% to be removed').parent().type('{end}{shift}{upArrow}{del}')
     recompile()
-    cy.findByText('History').click()
+    cy.findByRole('button', { name: 'History' }).click()
 
     cy.log('expect to see annotation for newly removed content in history')
     cy.get('.document-diff-container').within(() => {
@@ -75,18 +97,32 @@ describe('History', function () {
     addLabel('After removal')
 
     cy.log('add more content after labeling')
-    cy.findByText('Back to editor').click()
-    cy.findByText('\\maketitle').parent().click()
-    cy.findByText('\\maketitle').parent().type('\n% more')
+    cy.findByRole('button', { name: 'Back to editor' }).click()
+    cy.findByRole('textbox', { name: 'Source Editor editing' }).within(() => {
+      cy.findByText('\\maketitle').parent().click()
+      cy.findByText('\\maketitle').parent().type('\n% more')
+    })
     recompile()
 
     cy.log('compare non current versions')
-    cy.findByText('History').click()
-    cy.findByText('Labels').click()
-    cy.findAllByTestId('compare-icon-version').last().click()
-    cy.findAllByTestId('compare-icon-version').filter(':visible').click()
-    cy.findByText('Compare up to this version').click()
-
+    cy.findByRole('button', { name: 'History' }).click()
+    // The input is not clickable due to being visually hidden, click its label instead
+    cy.findByRole('complementary', {
+      name: 'Project history and labels',
+    }).within(() => {
+      cy.findByRole('group', {
+        name: 'Show all of the project history or only labelled versions.',
+      }).within(() => {
+        cy.findByText('Labels').click()
+      })
+      cy.findByRole('radio', { name: 'Labels' }).should('be.checked')
+      cy.findByRole('radio', { name: 'All history' }).should('not.be.checked')
+      cy.findAllByTestId('compare-icon-version').last().click()
+      cy.findAllByTestId('compare-icon-version').filter(':visible').click()
+      cy.findByRole('menuitem', {
+        name: 'Compare up to this version',
+      }).click()
+    })
     cy.log(
       'expect to see annotation for removed content between the two versions'
     )

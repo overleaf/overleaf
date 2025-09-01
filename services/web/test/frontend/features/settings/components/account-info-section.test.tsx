@@ -47,7 +47,7 @@ describe('<AccountInfoSection />', function () {
     })
     fireEvent.click(
       screen.getByRole('button', {
-        name: /update/i,
+        name: 'Update account info',
       })
     )
     expect(updateMock.callHistory.called()).to.be.true
@@ -68,7 +68,7 @@ describe('<AccountInfoSection />', function () {
       target: { value: 'john' },
     })
     const button = screen.getByRole('button', {
-      name: /update/i,
+      name: 'Update account info',
     }) as HTMLButtonElement
 
     expect(button.disabled).to.be.true

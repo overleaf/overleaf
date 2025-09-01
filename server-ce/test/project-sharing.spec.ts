@@ -43,7 +43,7 @@ describe('Project Sharing', function () {
     createProject(projectName)
 
     // Add chat message
-    cy.findByText('Chat').click()
+    cy.findByRole('button', { name: 'Chat' }).click()
     // wait for lazy loading of the chat pane
     cy.findByText('Send your first message to your collaborators')
     cy.get(
@@ -61,11 +61,11 @@ describe('Project Sharing', function () {
 
   function expectContentReadOnlyAccess() {
     cy.url().should('match', /\/project\/[a-fA-F0-9]{24}/)
-    cy.findByRole('textbox', { name: /Source Editor editing/i }).should(
+    cy.findByRole('textbox', { name: 'Source Editor editing' }).should(
       'contain.text',
       '\\maketitle'
     )
-    cy.findByRole('textbox', { name: /Source Editor editing/i }).should(
+    cy.findByRole('textbox', { name: 'Source Editor editing' }).should(
       'have.attr',
       'contenteditable',
       'false'
@@ -77,12 +77,12 @@ describe('Project Sharing', function () {
     cy.url().should('match', /\/project\/[a-fA-F0-9]{24}/)
     const recompile = throttledRecompile()
     // wait for the editor to finish loading
-    cy.findByRole('textbox', { name: /Source Editor editing/i }).should(
+    cy.findByRole('textbox', { name: 'Source Editor editing' }).should(
       'contain.text',
       '\\maketitle'
     )
     // the editor should be writable
-    cy.findByRole('textbox', { name: /Source Editor editing/i }).should(
+    cy.findByRole('textbox', { name: 'Source Editor editing' }).should(
       'have.attr',
       'contenteditable',
       'true'
@@ -90,14 +90,20 @@ describe('Project Sharing', function () {
     cy.findByText('\\maketitle').parent().click()
     cy.findByText('\\maketitle').parent().type(`\n\\section{{}${section}}`)
     // should have written
-    cy.findByRole('textbox', { name: /Source Editor editing/i }).should(
+    cy.findByRole('textbox', { name: 'Source Editor editing' }).should(
       'contain.text',
       `\\section{${section}}`
     )
     // check PDF
     recompile()
-    cy.get('.pdf-viewer').should('contain.text', projectName)
-    cy.get('.pdf-viewer').should('contain.text', section)
+    cy.findByRole('region', { name: 'PDF preview and logs' }).within(() => {
+      cy.findByLabelText(/Page.*1/i).should('be.visible')
+      cy.findByText(projectName).should('be.visible')
+    })
+    cy.findByRole('region', { name: 'PDF preview and logs' }).within(() => {
+      cy.findByLabelText(/Page.*1/i).should('be.visible')
+      cy.contains(section)
+    })
   }
 
   function expectNoAccess() {
@@ -117,7 +123,7 @@ describe('Project Sharing', function () {
   }
 
   function expectChatAccess() {
-    cy.findByText('Chat').click()
+    cy.findByRole('button', { name: 'Chat' }).click()
     cy.findByText('New Chat Message')
   }
 
@@ -132,17 +138,17 @@ describe('Project Sharing', function () {
   }
 
   function expectNoChatAccess() {
-    cy.findByText('Layout') // wait for lazy loading
-    cy.findByText('Chat').should('not.exist')
+    cy.findByRole('button', { name: 'Layout' }) // wait for lazy loading
+    cy.findByRole('button', { name: 'Chat' }).should('not.exist')
   }
 
   function expectNoHistoryAccess() {
-    cy.findByText('Layout') // wait for lazy loading
-    cy.findByText('History').should('not.exist')
+    cy.findByRole('button', { name: 'Layout' }) // wait for lazy loading
+    cy.findByRole('button', { name: 'History' }).should('not.exist')
   }
 
   function expectCommentAccess() {
-    cy.findByRole('textbox', { name: /Source Editor editing/i }).should(
+    cy.findByRole('textbox', { name: 'Source Editor editing' }).should(
       'contain.text',
       '\\maketitle'
     )
@@ -151,11 +157,11 @@ describe('Project Sharing', function () {
 
     cy.findByRole('button', { name: 'Add comment' }).should('be.visible')
 
-    cy.findByRole('textbox', { name: /Source Editor editing/i }).click()
+    cy.findByRole('textbox', { name: 'Source Editor editing' }).click()
   }
 
   function expectNoCommentAccess() {
-    cy.findByRole('textbox', { name: /Source Editor editing/i }).should(
+    cy.findByRole('textbox', { name: 'Source Editor editing' }).should(
       'contain.text',
       '\\maketitle'
     )
@@ -163,7 +169,7 @@ describe('Project Sharing', function () {
     cy.findByText('\\maketitle').parent().dblclick()
 
     cy.findByRole('button', { name: 'Add comment' }).should('not.exist')
-    cy.findByRole('textbox', { name: /Source Editor editing/i }).click()
+    cy.findByRole('textbox', { name: 'Source Editor editing' }).click()
   }
 
   function expectFullReadOnlyAccess() {
@@ -200,12 +206,15 @@ describe('Project Sharing', function () {
   }
 
   function expectEditAuthoredAs(author: string) {
-    cy.findByText('History').click()
-    cy.findAllByTestId('history-version-metadata-users')
-      .first()
-      .should('contain.text', author) // might have other edits in the same group
+    cy.findByRole('button', { name: 'History' }).click()
+    cy.findByRole('complementary', {
+      name: 'Project history and labels',
+    }).within(() => {
+      cy.findAllByTestId('history-version-metadata-users')
+        .first()
+        .should('contain.text', author) // might have other edits in the same group
+    })
   }
-
   describe('via email', function () {
     const email = 'collaborator-email@example.com'
     ensureUserExists({ email })

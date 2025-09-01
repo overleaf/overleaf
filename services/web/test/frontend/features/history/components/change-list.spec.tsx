@@ -148,7 +148,7 @@ describe('change list', function () {
         name: /Project history and labels/i,
       }).within(() => {
         cy.findByRole('group', {
-          name: /Show all of the project history/i,
+          name: 'Show all of the project history or only labelled versions.',
         }).within(() => {
           cy.findByText(/Labels/i).click()
         })
@@ -353,7 +353,7 @@ describe('change list', function () {
         name: /Project history and labels/i,
       }).within(() => {
         cy.findByRole('group', {
-          name: /Show all of the project history/i,
+          name: 'Show all of the project history or only labelled versions.',
         }).within(() => {
           cy.findByText(/Labels/i).click()
         })
@@ -716,7 +716,7 @@ describe('change list', function () {
         name: /Project history and labels/i,
       }).within(() => {
         cy.findByRole('group', {
-          name: /Show all of the project history/i,
+          name: 'Show all of the project history or only labelled versions.',
         }).within(() => {
           cy.findByText(/Labels/i).click()
         })

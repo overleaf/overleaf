@@ -33,7 +33,9 @@ describe('<IntegrationLinkingWidgetTest/>', function () {
     })
 
     it('should render an upgrade link and track clicks', function () {
-      const upgradeLink = screen.getByRole('link', { name: /upgrade/i })
+      const upgradeLink = screen.getByRole('link', {
+        name: 'Integration Upgrade',
+      })
       expect(upgradeLink.getAttribute('href')).to.equal(
         '/user/subscription/plans'
       )
@@ -52,7 +54,9 @@ describe('<IntegrationLinkingWidgetTest/>', function () {
 
     it('should render a link to initiate integration linking', function () {
       expect(
-        screen.getByRole('link', { name: 'Link' }).getAttribute('href')
+        screen
+          .getByRole('link', { name: 'Link Integration' })
+          .getAttribute('href')
       ).to.equal('/link')
     })
 
@@ -86,11 +90,13 @@ describe('<IntegrationLinkingWidgetTest/>', function () {
     })
 
     it('should display an `unlink` button', function () {
-      screen.getByRole('button', { name: 'Unlink' })
+      screen.getByRole('button', { name: 'Unlink Integration' })
     })
 
     it('should open a modal with a link to confirm integration unlinking', function () {
-      fireEvent.click(screen.getByRole('button', { name: 'Unlink' }))
+      fireEvent.click(
+        screen.getByRole('button', { name: 'Unlink Integration' })
+      )
       const withinModal = within(screen.getByRole('dialog'))
       withinModal.getByText('confirm unlink')
       withinModal.getByText('you will be unlinked')
@@ -99,7 +105,9 @@ describe('<IntegrationLinkingWidgetTest/>', function () {
     })
 
     it('should cancel unlinking when clicking "cancel" in the confirmation modal', async function () {
-      fireEvent.click(screen.getByRole('button', { name: 'Unlink' }))
+      fireEvent.click(
+        screen.getByRole('button', { name: 'Unlink Integration' })
+      )
       screen.getByText('confirm unlink')
       const cancelBtn = screen.getByRole('button', {
         name: 'Cancel',

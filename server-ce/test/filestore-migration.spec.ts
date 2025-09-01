@@ -106,7 +106,7 @@ describe('filestore migration', function () {
         name: /Create First Project|New Project/,
       }).click()
       cy.findByRole('link', { name: 'Example Project' }).click()
-      cy.findByLabelText(/Project name/i).type(projectName)
+      cy.findByLabelText('Project name').type(projectName)
       cy.findByRole('button', { name: 'Create' }).click()
       cy.url()
         .should('match', /\/project\/[a-fA-F0-9]{24}/)

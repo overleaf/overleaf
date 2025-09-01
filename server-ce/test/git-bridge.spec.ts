@@ -14,6 +14,8 @@ import http from 'isomorphic-git/http/web'
 import LightningFS from '@isomorphic-git/lightning-fs'
 import { throttledRecompile } from './helpers/compile'
 
+const USER = 'user@example.com'
+
 describe('git-bridge', function () {
   const ENABLED_VARS = {
     GIT_BRIDGE_ENABLED: 'true',
@@ -35,18 +37,21 @@ describe('git-bridge', function () {
       pro: true,
       vars: ENABLED_VARS,
     })
-    ensureUserExists({ email: 'user@example.com' })
+    ensureUserExists({ email: USER })
 
     function clearAllTokens() {
-      cy.get('button.linking-git-bridge-revoke-button').each(el => {
-        cy.wrap(el).click()
-        cy.findByText('Delete token').click()
-      })
+      cy.findAllByRole('button', { name: 'Remove' })
+        .not('[disabled]')
+        .each($button => {
+          cy.wrap($button).click()
+          cy.findByRole('button', { name: 'Delete token' }).click()
+        })
+      cy.findByRole('dialog').should('not.exist')
     }
 
     function maybeClearAllTokens() {
       cy.visit('/user/settings')
-      cy.findByText('Git integration')
+      cy.findByRole('heading', { name: 'Git integration' })
       cy.get('button')
         .contains(/Generate token|Add another token/)
         .then(btn => {
@@ -57,66 +62,83 @@ describe('git-bridge', function () {
     }
 
     beforeEach(function () {
-      login('user@example.com')
+      login(USER)
     })
 
     it('should render the git-bridge UI in the settings', () => {
       maybeClearAllTokens()
       cy.visit('/user/settings')
-      cy.findByText('Git integration')
-      cy.get('button').contains('Generate token').click()
-      cy.get('code')
+      cy.findByRole('heading', { name: 'Git integration' })
+      cy.findByRole('button', {
+        name: 'Git integration Generate token',
+      }).click()
+      cy.findByLabelText('Git authentication token')
         .contains(/olp_[a-zA-Z0-9]{16}/)
+        .then(el => el.text())
         .as('newToken')
       cy.findAllByText('Close').last().click()
       cy.get('@newToken').then(token => {
         // There can be more than one token with the same prefix when retrying
         cy.findAllByText(
-          `${token.text().slice(0, 'olp_1234'.length)}${'*'.repeat(12)}`
+          `${token.slice(0, 'olp_1234'.length)}${'*'.repeat(12)}`
         ).should('have.length.at.least', 1)
       })
-      cy.get('button').contains('Generate token').should('not.exist')
-      cy.get('button').contains('Add another token').should('exist')
+      cy.findByRole('button', {
+        name: 'Git integration Generate token',
+      }).should('not.exist')
+      cy.findByRole('button', { name: 'Add another token' }).should('exist')
       clearAllTokens()
-      cy.get('button').contains('Generate token').should('exist')
-      cy.get('button').contains('Add another token').should('not.exist')
+      cy.findByRole('button', {
+        name: 'Git integration Generate token',
+      }).should('exist')
+      cy.findByRole('button', { name: 'Add another token' }).should('not.exist')
     })
 
     it('should render the git-bridge UI in the editor', function () {
       maybeClearAllTokens()
       createProject('git').as('projectId')
       cy.findByRole('navigation', {
-        name: /Project actions/i,
+        name: 'Project actions',
       })
-        .findByRole('button', { name: /Menu/i })
+        .findByRole('button', { name: 'Menu' })
         .click()
-      cy.findByText('Sync')
-      cy.findByText('Git').click()
+      cy.findByTestId('left-menu').within(() => {
+        cy.findByRole('heading', { name: 'Sync' })
+        cy.findByRole('button', { name: 'Git' }).click()
+      })
       cy.findByTestId('git-bridge-modal').within(() => {
         cy.get('@projectId').then(id => {
-          cy.get('code').contains(`git clone ${gitURL(id.toString())}`)
+          cy.findByLabelText('Git clone project command').contains(
+            `git clone ${gitURL(id.toString())}`
+          )
         })
         cy.findByRole('button', {
-          name: /generate token/i,
+          name: 'Generate token',
         }).click()
-        cy.get('code').contains(/olp_[a-zA-Z0-9]{16}/)
+        cy.findByLabelText('Git authentication token').contains(
+          /olp_[a-zA-Z0-9]{16}/
+        )
       })
 
       // Re-open
       cy.url().then(url => cy.visit(url))
       cy.findByRole('navigation', {
-        name: /Project actions/i,
+        name: 'Project actions',
       })
-        .findByRole('button', { name: /Menu/i })
+        .findByRole('button', { name: 'Menu' })
         .click()
-      cy.findByText('Git').click()
+      cy.findByTestId('left-menu').within(() => {
+        cy.findByRole('button', { name: 'Git' }).click()
+      })
       cy.findByTestId('git-bridge-modal').within(() => {
         cy.get('@projectId').then(id => {
           cy.get('code').contains(`git clone ${gitURL(id.toString())}`)
         })
-        cy.findByText('Generate token').should('not.exist')
+        cy.findByRole('button', {
+          name: 'Generate token',
+        }).should('not.exist')
         cy.findByText(/generate a new one in Account settings/)
-        cy.findByText('Go to settings')
+        cy.findByRole('link', { name: 'Go to settings' })
           .should('have.attr', 'target', '_blank')
           .and('have.attr', 'href', '/user/settings')
       })
@@ -197,18 +219,23 @@ describe('git-bridge', function () {
       const recompile = throttledRecompile()
 
       cy.findByRole('navigation', {
-        name: /Project actions/i,
+        name: 'Project actions',
       })
-        .findByRole('button', { name: /Menu/i })
+        .findByRole('button', { name: 'Menu' })
         .click()
-      cy.findByText('Sync')
-      cy.findByText('Git').click()
+      cy.findByTestId('left-menu').within(() => {
+        cy.findByRole('heading', { name: 'Sync' })
+        cy.findByRole('button', { name: 'Git' }).click()
+      })
       cy.get('@projectId').then(projectId => {
         cy.findByTestId('git-bridge-modal').within(() => {
-          cy.get('code').contains(`git clone ${gitURL(projectId.toString())}`)
+          cy.findByLabelText('Git clone project command').contains(
+            `git clone ${gitURL(projectId.toString())}`
+          )
         })
+        cy.findByRole('heading', { name: 'Clone with Git' })
         cy.findByRole('button', {
-          name: /generate token/i,
+          name: 'Generate token',
         }).click()
         cy.get('code')
           .contains(/olp_[a-zA-Z0-9]{16}/)
@@ -255,8 +282,8 @@ describe('git-bridge', function () {
               },
             }
             const authorOptions = {
-              author: { name: 'user', email: 'user@example.com' },
-              committer: { name: 'user', email: 'user@example.com' },
+              author: { name: 'user', email: USER },
+              committer: { name: 'user', email: USER },
             }
             const mainTex = `${dir}/main.tex`
 
@@ -372,24 +399,26 @@ Hello world
   })
 
   function checkDisabled() {
-    ensureUserExists({ email: 'user@example.com' })
+    ensureUserExists({ email: USER })
 
     it('should not render the git-bridge UI in the settings', () => {
-      login('user@example.com')
+      login(USER)
       cy.visit('/user/settings')
-      cy.findByText('Git integration').should('not.exist')
+      cy.findByRole('heading', { name: 'Git integration' }).should('not.exist')
     })
     it('should not render the git-bridge UI in the editor', function () {
-      login('user@example.com')
+      login(USER)
       createProject('maybe git')
       cy.findByRole('navigation', {
-        name: /Project actions/i,
+        name: 'Project actions',
       })
-        .findByRole('button', { name: /Menu/i })
+        .findByRole('button', { name: 'Menu' })
         .click()
-      cy.findByText('Word Count') // wait for lazy loading
-      cy.findByText('Sync').should('not.exist')
-      cy.findByText('Git').should('not.exist')
+      cy.findByTestId('left-menu').within(() => {
+        cy.findByRole('button', { name: 'Word Count' }) // wait for lazy loading
+        cy.findByRole('heading', { name: 'Sync' }).should('not.exist')
+        cy.findByRole('button', { name: 'Git' }).should('not.exist')
+      })
     })
   }
 

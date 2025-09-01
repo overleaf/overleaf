@@ -56,9 +56,9 @@ describe('Upgrading', function () {
         cy.log('Trigger full flush')
         recompile()
         cy.findByRole('navigation', {
-          name: /Project Layout, Sharing, and Submission/i,
+          name: 'Project Layout, Sharing, and Submission',
         })
-          .findByRole('button', { name: /Menu/i })
+          .findByRole('button', { name: 'Menu' })
           .click()
         cy.findByText('Source').click()
         cy.get('.left-menu-modal-backdrop').click({ force: true })
@@ -121,7 +121,7 @@ describe('Upgrading', function () {
 
       cy.url().should('match', /\/project\/[a-fA-F0-9]{24}/)
       cy.findByRole('navigation', {
-        name: /Project actions/i,
+        name: 'Project actions',
       }).within(() => {
         cy.findByText(PROJECT_NAME)
       })
