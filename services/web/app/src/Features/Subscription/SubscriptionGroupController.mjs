@@ -304,7 +304,7 @@ async function createAddSeatsSubscriptionChange(req, res) {
 
 const submitFormSchema = z.object({
   body: z.object({
-    adding: z.number().int().min(MAX_NUMBER_OF_USERS),
+    adding: z.coerce.number().int().min(MAX_NUMBER_OF_USERS),
     poNumber: z.string().optional(),
   }),
 })
