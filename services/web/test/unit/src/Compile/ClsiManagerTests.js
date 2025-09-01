@@ -149,9 +149,6 @@ describe('ClsiManager', function () {
     this.ClsiCacheHandler = {
       clearCache: sinon.stub().resolves(),
     }
-    this.Features = {
-      hasFeature: sinon.stub().withArgs('project-history-blobs').returns(true),
-    }
     this.HistoryManager = {
       getFilestoreBlobURL: sinon.stub().callsFake((historyId, hash) => {
         if (hash === GLOBAL_BLOB_HASH) {
@@ -167,7 +164,6 @@ describe('ClsiManager', function () {
         '../../models/Project': {
           Project: this.Project,
         },
-        '../../infrastructure/Features': this.Features,
         '../Project/ProjectEntityHandler': this.ProjectEntityHandler,
         '../Project/ProjectGetter': this.ProjectGetter,
         '../DocumentUpdater/DocumentUpdaterHandler':
@@ -1048,20 +1044,15 @@ function _makeResources(project, docs, files) {
     })
   }
   for (const [path, file] of Object.entries(files)) {
-    let url, fallbackURL
+    let url
     if (file.hash === GLOBAL_BLOB_HASH) {
       url = `${FILESTORE_URL}/history/global/hash/${file.hash}`
-      fallbackURL = `${FILESTORE_URL}/project/${project._id}/file/${file._id}`
-    } else if (file.hash) {
-      url = `${FILESTORE_URL}/history/project/${project.overleaf.history.id}/hash/${file.hash}`
-      fallbackURL = `${FILESTORE_URL}/project/${project._id}/file/${file._id}`
     } else {
-      url = `${FILESTORE_URL}/project/${project._id}/file/${file._id}`
+      url = `${FILESTORE_URL}/history/project/${project.overleaf.history.id}/hash/${file.hash}`
     }
     resources.push({
       path: path.replace(/^\//, ''),
       url,
-      fallbackURL,
       modified: file.created.getTime(),
     })
   }

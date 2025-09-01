@@ -7,10 +7,10 @@ import minimist from 'minimist'
 import mongodb from 'mongodb-legacy'
 import { db } from '../app/src/infrastructure/mongodb.js'
 import Errors from '../app/src/Features/Errors/Errors.js'
-import FileStoreHandler from '../app/src/Features/FileStore/FileStoreHandler.js'
 import ProjectEntityMongoUpdateHandler from '../app/src/Features/Project/ProjectEntityMongoUpdateHandler.js'
 import { iterablePaths } from '../app/src/Features/Project/IterablePath.js'
 import { scriptRunner } from './lib/ScriptRunner.mjs'
+import HistoryManager from '../app/src/Features/History/HistoryManager.js'
 
 const { ObjectId } = mongodb
 
@@ -57,22 +57,22 @@ async function getProjects() {
 
 async function processProject(project) {
   console.log(`Processing project ${project._id}`)
-  const { docIds, fileIds } = findRefsInFolder(project.rootFolder[0])
+  const { docIds, fileRefs } = findRefsInFolder(project.rootFolder[0])
   for (const docId of docIds) {
     if (!(await docExists(docId))) {
       await deleteDoc(project._id, docId)
     }
   }
-  for (const fileId of fileIds) {
-    if (!(await fileExists(project._id, fileId))) {
-      await deleteFile(project._id, fileId)
+  for (const fileRef of fileRefs) {
+    if (!(await fileExists(project._id, fileRef.hash))) {
+      await deleteFile(project._id, fileRef._id)
     }
   }
 }
 
 function findRefsInFolder(folder) {
   let docIds = folder.docs.map(doc => doc._id)
-  let fileIds = folder.fileRefs.map(file => file._id)
+  let fileIds = folder.fileRefs.slice()
   for (const subfolder of iterablePaths(folder, 'folders')) {
     const subrefs = findRefsInFolder(subfolder)
     docIds = docIds.concat(subrefs.docIds)
@@ -86,10 +86,14 @@ async function docExists(docId) {
   return doc != null
 }
 
-async function fileExists(projectId, fileId) {
+async function fileExists(projectId, hash) {
   try {
     // Getting the file size to avoid downloading the whole file
-    await FileStoreHandler.promises.getFileSize(projectId, fileId)
+    await HistoryManager.promises.requestBlobWithProjectId(
+      projectId,
+      hash,
+      'HEAD'
+    )
   } catch (err) {
     if (err instanceof Errors.NotFoundError) {
       return false

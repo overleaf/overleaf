@@ -115,11 +115,6 @@ describe('ProjectDeleter', function () {
 
     this.ProjectMock = sinon.mock(Project)
     this.DeletedProjectMock = sinon.mock(DeletedProject)
-    this.FileStoreHandler = {
-      promises: {
-        deleteProject: sinon.stub().resolves(),
-      },
-    }
     this.Features = {
       hasFeature: sinon.stub().returns(true),
     }
@@ -143,7 +138,6 @@ describe('ProjectDeleter', function () {
         '../DocumentUpdater/DocumentUpdaterHandler':
           this.DocumentUpdaterHandler,
         '../Tags/TagsHandler': this.TagsHandler,
-        '../FileStore/FileStoreHandler': this.FileStoreHandler,
         '../Chat/ChatApiHandler': this.ChatApiHandler,
         '../Collaborators/CollaboratorsHandler': this.CollaboratorsHandler,
         '../Collaborators/CollaboratorsGetter': this.CollaboratorsGetter,
@@ -480,12 +474,6 @@ describe('ProjectDeleter', function () {
         )
       })
 
-      it('should destroy the files in filestore', function () {
-        expect(
-          this.FileStoreHandler.promises.deleteProject
-        ).to.have.been.calledWith(this.deletedProjects[0].project._id)
-      })
-
       it('should destroy the chat threads and messages', function () {
         expect(
           this.ChatApiHandler.promises.destroyProject
@@ -537,11 +525,6 @@ describe('ProjectDeleter', function () {
 
       it('should not delete the project in history', function () {
         expect(this.HistoryManager.promises.deleteProject).to.not.have.been
-          .called
-      })
-
-      it('should not destroy the files in filestore', function () {
-        expect(this.FileStoreHandler.promises.deleteProject).to.not.have.been
           .called
       })
 

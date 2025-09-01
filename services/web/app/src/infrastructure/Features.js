@@ -19,7 +19,6 @@ const trackChangesModuleAvailable =
  * @property {boolean | undefined} enableGithubSync
  * @property {boolean | undefined} enableGitBridge
  * @property {boolean | undefined} enableHomepage
- * @property {number} filestoreMigrationLevel
  * @property {boolean | undefined} enableSaml
  * @property {boolean | undefined} ldap
  * @property {boolean | undefined} oauth
@@ -29,14 +28,6 @@ const trackChangesModuleAvailable =
  */
 
 const Features = {
-  validateSettings() {
-    if (![0, 1, 2].includes(Settings.filestoreMigrationLevel)) {
-      throw new Error(
-        `invalid OVERLEAF_FILESTORE_MIGRATION_LEVEL=${Settings.filestoreMigrationLevel}, expected 0, 1 or 2`
-      )
-    }
-  },
-
   /**
    * @returns {boolean}
    */
@@ -97,10 +88,6 @@ const Features = {
           _.get(Settings, ['apis', 'linkedUrlProxy', 'url']) &&
             Settings.enabledLinkedFileTypes.includes('url')
         )
-      case 'project-history-blobs':
-        return Settings.filestoreMigrationLevel > 0
-      case 'filestore':
-        return Settings.filestoreMigrationLevel < 2
       case 'support':
         return supportModuleAvailable
       case 'symbol-palette':

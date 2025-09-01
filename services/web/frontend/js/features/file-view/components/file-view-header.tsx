@@ -2,7 +2,6 @@ import { useState, type ElementType } from 'react'
 import { Trans, useTranslation } from 'react-i18next'
 
 import { formatTime, relativeDate } from '../../utils/format-date'
-import { fileUrl } from '../../utils/fileUrl'
 import { useFileTreeData } from '@/shared/context/file-tree-data-context'
 import { useProjectContext } from '@/shared/context/project-context'
 
@@ -83,7 +82,7 @@ export default function FileViewHeader({ file }: FileViewHeaderProps) {
         <OLButton
           variant="secondary"
           download={file.name}
-          href={fileUrl(projectId, file.id, file.hash)}
+          href={`/project/${projectId}/blob/${file.hash}`}
         >
           <MaterialIcon type="download" className="align-middle" />{' '}
           <span>{t('download')}</span>

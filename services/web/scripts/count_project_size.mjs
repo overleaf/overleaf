@@ -3,7 +3,7 @@ import { ObjectId, db } from '../app/src/infrastructure/mongodb.js'
 import ProjectEntityHandler from '../app/src/Features/Project/ProjectEntityHandler.js'
 import ProjectGetter from '../app/src/Features/Project/ProjectGetter.js'
 import Errors from '../app/src/Features/Errors/Errors.js'
-import FileStoreHandler from '../app/src/Features/FileStore/FileStoreHandler.js'
+import HistoryManager from '../app/src/Features/History/HistoryManager.js'
 
 // Handles a list of project IDs from stdin, one per line, and outputs the count of files and docs
 // in the project, along with the aggregated size in bytes for all files and docs.
@@ -63,24 +63,16 @@ async function countFilesSize(files, projectId) {
     return 0
   }
 
-  const ids = files.map(fileObject => fileObject.file._id)
-
   let totalFileSize = 0
 
-  for (const fileId of ids) {
-    const contentLength = await FileStoreHandler.promises.getFileSize(
-      projectId,
-      fileId
-    )
-    const size = parseInt(contentLength, 10)
-
-    if (isNaN(size)) {
-      throw new Error(
-        `Unable to fetch file size for fileId=${fileId} and projectId=${projectId}`
+  for (const { file } of files) {
+    const { contentLength } =
+      await HistoryManager.promises.requestBlobWithProjectId(
+        projectId,
+        file.hash,
+        'HEAD'
       )
-    }
-
-    totalFileSize += size
+    totalFileSize += contentLength
   }
 
   return totalFileSize

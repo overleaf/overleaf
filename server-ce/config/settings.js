@@ -443,7 +443,6 @@ switch (process.env.OVERLEAF_FILESTORE_BACKEND) {
     settings.filestore = {
       backend: 's3',
       stores: {
-        user_files: process.env.OVERLEAF_FILESTORE_USER_FILES_BUCKET_NAME,
         template_files:
           process.env.OVERLEAF_FILESTORE_TEMPLATE_FILES_BUCKET_NAME,
         project_blobs: process.env.OVERLEAF_HISTORY_PROJECT_BLOBS_BUCKET,
@@ -468,7 +467,6 @@ switch (process.env.OVERLEAF_FILESTORE_BACKEND) {
     settings.filestore = {
       backend: 'fs',
       stores: {
-        user_files: Path.join(DATA_DIR, 'user_files'),
         template_files: Path.join(DATA_DIR, 'template_files'),
 
         // NOTE: The below paths are hard-coded in server-ce/config/production.json, so hard code them here as well.

@@ -24,7 +24,6 @@ import _ from 'lodash'
 import Async from 'async'
 import Errors from '../Errors/Errors.js'
 import { promisify } from '@overleaf/promise-utils'
-import HistoryURLHelper from '../History/HistoryURLHelper.js'
 
 let ReferencesHandler
 
@@ -167,21 +166,15 @@ export default ReferencesHandler = {
           const bibDocUrls = docIds.map(docId =>
             ReferencesHandler._buildDocUrl(projectId, docId)
           )
-          const bibFileUrls = fileRefs.map(fileRef =>
-            HistoryURLHelper.projectHistoryURLWithFilestoreFallback(
-              settings,
-              projectId,
-              historyId,
-              fileRef,
-              'bibFileUrls'
-            )
-          )
+          const bibFileUrls = fileRefs.map(fileRef => ({
+            url: `${settings.apis.project_history.url}/project/${historyId}/blob/${fileRef.hash}`,
+          }))
           const sourceURLs = bibDocUrls.concat(bibFileUrls)
           return request.post(
             {
               url: `${settings.apis.references.url}/project/${projectId}/index`,
               json: {
-                docUrls: sourceURLs.map(item => item.fallbackURL || item.url),
+                docUrls: sourceURLs.map(item => item.url),
                 sourceURLs,
                 fullIndex: isFullIndex,
               },

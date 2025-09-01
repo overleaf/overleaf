@@ -1,7 +1,6 @@
 let ProjectEditorHandler
 const _ = require('lodash')
 const Path = require('path')
-const Features = require('../../infrastructure/Features')
 
 module.exports = ProjectEditorHandler = {
   trackChangesAvailable: false,
@@ -98,18 +97,12 @@ module.exports = ProjectEditorHandler = {
   },
 
   buildFileModelView(file) {
-    const additionalFileProperties = {}
-
-    if (Features.hasFeature('project-history-blobs')) {
-      additionalFileProperties.hash = file.hash
-    }
-
     return {
       _id: file._id,
       name: file.name,
       linkedFileData: file.linkedFileData,
       created: file.created,
-      ...additionalFileProperties,
+      hash: file.hash,
     }
   },
 

@@ -15,7 +15,6 @@ const AuthorizationManager = require('../Authorization/AuthorizationManager')
 const ProjectLocator = require('../Project/ProjectLocator')
 const DocstoreManager = require('../Docstore/DocstoreManager')
 const DocumentUpdaterHandler = require('../DocumentUpdater/DocumentUpdaterHandler')
-const FileStoreHandler = require('../FileStore/FileStoreHandler')
 const _ = require('lodash')
 const LinkedFilesHandler = require('./LinkedFilesHandler')
 const {
@@ -25,6 +24,7 @@ const {
   SourceFileNotFoundError,
 } = require('./LinkedFilesErrors')
 const { promisify } = require('@overleaf/promise-utils')
+const HistoryManager = require('../History/HistoryManager')
 
 module.exports = ProjectFileAgent = {
   createLinkedFile(
@@ -134,17 +134,17 @@ module.exports = ProjectFileAgent = {
                 }
               ) // Created
             } else if (type === 'file') {
-              return FileStoreHandler.getFileStreamNew(
-                sourceProject,
-                entity,
-                null,
-                function (err, fileStream) {
+              return HistoryManager.requestBlob(
+                sourceProject.overleaf.history.id,
+                entity.hash,
+                'GET',
+                function (err, result) {
                   if (err != null) {
                     return callback(err)
                   }
                   return LinkedFilesHandler.importFromStream(
                     projectId,
-                    fileStream,
+                    result.stream,
                     linkedFileData,
                     name,
                     parentFolderId,

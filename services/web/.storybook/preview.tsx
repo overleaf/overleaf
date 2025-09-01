@@ -13,7 +13,6 @@ import en from '../../../services/web/locales/en.json'
 function resetMeta() {
   window.metaAttributesCache = new Map()
   window.metaAttributesCache.set('ol-i18n', { currentLangCode: 'en' })
-  window.metaAttributesCache.set('ol-projectHistoryBlobsEnabled', true)
   window.metaAttributesCache.set('ol-capabilities', ['chat'])
   window.metaAttributesCache.set('ol-compileSettings', {
     compileTimeout: 20,

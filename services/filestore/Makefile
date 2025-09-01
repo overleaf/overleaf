@@ -27,7 +27,7 @@ clean:
 	-docker rmi us-east1-docker.pkg.dev/overleaf-ops/ol-docker/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER)
 	-$(DOCKER_COMPOSE_TEST_UNIT) down --remove-orphans --rmi local --timeout 0 --volumes
 	-$(DOCKER_COMPOSE_TEST_ACCEPTANCE) down --remove-orphans --rmi local --timeout 0 --volumes
-	-git clean -dfX uploads user_files template_files
+	-git clean -dfX uploads template_files
 
 HERE=$(shell pwd)
 MONOREPO=$(shell cd ../../ && pwd)

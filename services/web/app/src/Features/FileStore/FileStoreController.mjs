@@ -4,11 +4,9 @@ import { pipeline } from 'node:stream/promises'
 import logger from '@overleaf/logger'
 import { expressify } from '@overleaf/promise-utils'
 import Metrics from '@overleaf/metrics'
-import FileStoreHandler from './FileStoreHandler.js'
 import ProjectLocator from '../Project/ProjectLocator.js'
 import HistoryManager from '../History/HistoryManager.js'
 import Errors from '../Errors/Errors.js'
-import Features from '../../infrastructure/Features.js'
 import { preparePlainTextResponse } from '../../infrastructure/Response.js'
 
 async function getFile(req, res) {
@@ -55,25 +53,15 @@ async function getFile(req, res) {
     status: Boolean(file?.hash),
   })
 
-  let source, stream, contentLength
+  let stream, contentLength
   try {
-    if (Features.hasFeature('project-history-blobs') && file?.hash) {
-      // Get the file from history
-      ;({ source, stream, contentLength } =
-        await HistoryManager.promises.requestBlobWithFallback(
-          projectId,
-          file.hash,
-          fileId
-        ))
-    } else {
-      // The file-hash is missing. Fall back to filestore.
-      stream = await FileStoreHandler.promises.getFileStream(
+    // Get the file from history
+    ;({ stream, contentLength } =
+      await HistoryManager.promises.requestBlobWithProjectId(
         projectId,
-        fileId,
-        queryString
-      )
-      source = 'filestore'
-    }
+        file.hash,
+        'GET'
+      ))
   } catch (err) {
     if (err instanceof Errors.NotFoundError) {
       return res.status(404).end()
@@ -97,7 +85,6 @@ async function getFile(req, res) {
   // allow the browser to cache these immutable files
   // note: both "private" and "max-age" appear to be required for caching
   res.setHeader('Cache-Control', 'private, max-age=3600')
-  res.appendHeader('X-Served-By', source)
   try {
     await pipeline(stream, res)
   } catch (err) {
@@ -150,20 +137,14 @@ async function getFileHead(req, res) {
     status: Boolean(file?.hash),
   })
 
-  let fileSize, source
+  let fileSize
   try {
-    if (Features.hasFeature('project-history-blobs') && file?.hash) {
-      ;({ source, contentLength: fileSize } =
-        await HistoryManager.promises.requestBlobWithFallback(
-          projectId,
-          file.hash,
-          fileId,
-          'HEAD'
-        ))
-    } else {
-      fileSize = await FileStoreHandler.promises.getFileSize(projectId, fileId)
-      source = 'filestore'
-    }
+    ;({ contentLength: fileSize } =
+      await HistoryManager.promises.requestBlobWithProjectId(
+        projectId,
+        file.hash,
+        'HEAD'
+      ))
   } catch (err) {
     if (err instanceof Errors.NotFoundError) {
       return res.status(404).end()
@@ -174,7 +155,6 @@ async function getFileHead(req, res) {
   }
 
   res.setHeader('Content-Length', fileSize)
-  res.appendHeader('X-Served-By', source)
   res.status(200).end()
 }
 

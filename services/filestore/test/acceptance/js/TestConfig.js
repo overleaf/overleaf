@@ -49,7 +49,7 @@ function s3SSECConfig() {
       return S3SSECKeys
     },
     storageClass: {
-      [process.env.AWS_S3_USER_FILES_BUCKET_NAME]:
+      [process.env.AWS_S3_TEMPLATE_FILES_BUCKET_NAME]:
         AWS_S3_USER_FILES_STORAGE_CLASS,
     },
   }
@@ -63,7 +63,6 @@ function s3ConfigDefaultProviderCredentials() {
 
 function s3Stores() {
   return {
-    user_files: process.env.AWS_S3_USER_FILES_BUCKET_NAME,
     template_files: process.env.AWS_S3_TEMPLATE_FILES_BUCKET_NAME,
   }
 }
@@ -82,21 +81,18 @@ function gcsConfig() {
 
 function gcsStores() {
   return {
-    user_files: process.env.GCS_USER_FILES_BUCKET_NAME,
     template_files: process.env.GCS_TEMPLATE_FILES_BUCKET_NAME,
   }
 }
 
 function fsStores() {
   return {
-    user_files: Path.resolve(__dirname, '../../../user_files'),
     template_files: Path.resolve(__dirname, '../../../template_files'),
   }
 }
 
 function fallbackStores(primaryConfig, fallbackConfig) {
   return {
-    [primaryConfig.user_files]: fallbackConfig.user_files,
     [primaryConfig.template_files]: fallbackConfig.template_files,
   }
 }

@@ -4,8 +4,6 @@ import logger from '@overleaf/logger'
 import ProjectEntityHandler from '../Project/ProjectEntityHandler.js'
 import ProjectGetter from '../Project/ProjectGetter.js'
 import HistoryManager from '../History/HistoryManager.js'
-import FileStoreHandler from '../FileStore/FileStoreHandler.js'
-import Features from '../../infrastructure/Features.js'
 let ProjectZipStreamManager
 
 export default ProjectZipStreamManager = {
@@ -111,22 +109,17 @@ export default ProjectZipStreamManager = {
   },
 
   getFileStream: (projectId, file, callback) => {
-    if (Features.hasFeature('project-history-blobs')) {
-      HistoryManager.requestBlobWithFallback(
-        projectId,
-        file.hash,
-        file._id,
-        (error, result) => {
-          if (error) {
-            return callback(error)
-          }
-          const { stream } = result
-          callback(null, stream)
+    HistoryManager.requestBlobWithProjectId(
+      projectId,
+      file.hash,
+      (error, result) => {
+        if (error) {
+          return callback(error)
         }
-      )
-    } else {
-      FileStoreHandler.getFileStream(projectId, file._id, {}, callback)
-    }
+        const { stream } = result
+        callback(null, stream)
+      }
+    )
   },
 
   addAllFilesToArchive(projectId, archive, callback) {

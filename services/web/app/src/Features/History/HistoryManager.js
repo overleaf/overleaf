@@ -11,9 +11,8 @@ const OError = require('@overleaf/o-error')
 const UserGetter = require('../User/UserGetter')
 const ProjectGetter = require('../Project/ProjectGetter')
 const HistoryBackupDeletionHandler = require('./HistoryBackupDeletionHandler')
-const { db, ObjectId, waitForDb } = require('../../infrastructure/mongodb')
+const { db, waitForDb } = require('../../infrastructure/mongodb')
 const Metrics = require('@overleaf/metrics')
-const logger = require('@overleaf/logger')
 const { NotFoundError } = require('../Errors/Errors')
 
 const HISTORY_V1_URL = settings.apis.v1_history.url
@@ -169,22 +168,25 @@ async function copyBlob(sourceHistoryId, targetHistoryId, hash) {
   )
 }
 
-async function requestBlobWithFallback(
+async function requestBlobWithProjectId(
   projectId,
   hash,
-  fileId,
   method = 'GET',
   range = ''
 ) {
   const project = await ProjectGetter.promises.getProject(projectId, {
     'overleaf.history.id': true,
   })
+  return requestBlob(project.overleaf.history.id, hash, method, range)
+}
+
+async function requestBlob(historyId, hash, method = 'GET', range = '') {
   // Talk to history-v1 directly to avoid streaming via project-history.
-  let url = new URL(HISTORY_V1_URL)
-  url.pathname += `/projects/${project.overleaf.history.id}/blobs/${hash}`
+  const url = new URL(HISTORY_V1_URL)
+  url.pathname += `/projects/${historyId}/blobs/${hash}`
 
   const opts = { method, headers: { Range: range } }
-  let stream, response, source
+  let stream, response
   try {
     ;({ stream, response } = await fetchStreamWithResponse(url, {
       ...opts,
@@ -193,38 +195,18 @@ async function requestBlobWithFallback(
         password: settings.apis.v1_history.pass,
       },
     }))
-    source = 'history-v1'
   } catch (err) {
     if (err instanceof RequestFailedError && err.response.status === 404) {
-      if (ObjectId.isValid(fileId)) {
-        url = new URL(settings.apis.filestore.url)
-        url.pathname = `/project/${projectId}/file/${fileId}`
-        try {
-          ;({ stream, response } = await fetchStreamWithResponse(url, opts))
-        } catch (err) {
-          if (
-            err instanceof RequestFailedError &&
-            err.response.status === 404
-          ) {
-            throw new NotFoundError()
-          }
-          throw err
-        }
-        logger.warn({ projectId, hash, fileId }, 'missing history blob')
-        source = 'filestore'
-      } else {
-        throw new NotFoundError()
-      }
+      throw new NotFoundError()
     } else {
       throw err
     }
   }
-  Metrics.inc('request_blob', 1, { path: source })
+  Metrics.inc('request_blob', 1, { path: 'history-v1' })
   return {
     url,
     stream,
-    source,
-    contentLength: response.headers.get('Content-Length'),
+    contentLength: parseInt(response.headers.get('Content-Length'), 10),
   }
 }
 
@@ -417,7 +399,8 @@ module.exports = {
   getCurrentContent: callbackify(getCurrentContent),
   uploadBlobFromDisk: callbackify(uploadBlobFromDisk),
   copyBlob: callbackify(copyBlob),
-  requestBlobWithFallback: callbackify(requestBlobWithFallback),
+  requestBlob: callbackify(requestBlob),
+  requestBlobWithProjectId: callbackify(requestBlobWithProjectId),
   getLatestHistory: callbackify(getLatestHistory),
   getChanges: callbackify(getChanges),
   promises: {
@@ -431,7 +414,8 @@ module.exports = {
     getContentAtVersion,
     uploadBlobFromDisk,
     copyBlob,
-    requestBlobWithFallback,
+    requestBlob,
+    requestBlobWithProjectId,
     getLatestHistory,
     getChanges,
   },

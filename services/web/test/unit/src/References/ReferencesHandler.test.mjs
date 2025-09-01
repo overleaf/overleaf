@@ -30,8 +30,8 @@ describe('ReferencesHandler', function () {
             {
               docs: [{ name: 'three.bib', _id: 'ccc' }],
               fileRefs: [
-                { name: 'four.bib', _id: 'fff' },
-                { name: 'five.bib', _id: 'ggg', hash: 'hash' },
+                { name: 'four.bib', _id: 'fff', hash: 'abc' },
+                { name: 'five.bib', _id: 'ggg', hash: 'def' },
               ],
               folders: [],
             },
@@ -50,7 +50,6 @@ describe('ReferencesHandler', function () {
           filestore: { url: 'http://some.url/filestore' },
           project_history: { url: 'http://project-history.local' },
         },
-        filestoreMigrationLevel: 2,
       }),
     }))
 
@@ -98,9 +97,10 @@ describe('ReferencesHandler', function () {
   describe('indexAll', function () {
     beforeEach(function (ctx) {
       sinon.stub(ctx.handler, '_findBibDocIds').returns(['aaa', 'ccc'])
-      sinon
-        .stub(ctx.handler, '_findBibFileRefs')
-        .returns([{ _id: 'fff' }, { _id: 'ggg', hash: 'hash' }])
+      sinon.stub(ctx.handler, '_findBibFileRefs').returns([
+        { _id: 'fff', hash: 'abc' },
+        { _id: 'ggg', hash: 'def' },
+      ])
       sinon.stub(ctx.handler, '_isFullIndex').callsArgWith(1, null, true)
       ctx.request.post.callsArgWith(
         1,
@@ -164,8 +164,8 @@ describe('ReferencesHandler', function () {
           expect(arg.json.docUrls).to.deep.equal([
             `${ctx.settings.apis.docstore.url}/project/${ctx.projectId}/doc/aaa/raw`,
             `${ctx.settings.apis.docstore.url}/project/${ctx.projectId}/doc/ccc/raw`,
-            `${ctx.settings.apis.filestore.url}/project/${ctx.projectId}/file/fff?from=bibFileUrls`,
-            `${ctx.settings.apis.filestore.url}/project/${ctx.projectId}/file/ggg?from=bibFileUrls`,
+            `${ctx.settings.apis.project_history.url}/project/${ctx.historyId}/blob/abc`,
+            `${ctx.settings.apis.project_history.url}/project/${ctx.historyId}/blob/def`,
           ])
           expect(arg.json.sourceURLs.length).to.equal(4)
           expect(arg.json.sourceURLs).to.deep.equal([
@@ -176,11 +176,10 @@ describe('ReferencesHandler', function () {
               url: `${ctx.settings.apis.docstore.url}/project/${ctx.projectId}/doc/ccc/raw`,
             },
             {
-              url: `${ctx.settings.apis.filestore.url}/project/${ctx.projectId}/file/fff?from=bibFileUrls`,
+              url: `${ctx.settings.apis.project_history.url}/project/${ctx.historyId}/blob/abc`,
             },
             {
-              url: `${ctx.settings.apis.project_history.url}/project/${ctx.historyId}/blob/hash`,
-              fallbackURL: `${ctx.settings.apis.filestore.url}/project/${ctx.projectId}/file/ggg?from=bibFileUrls`,
+              url: `${ctx.settings.apis.project_history.url}/project/${ctx.historyId}/blob/def`,
             },
           ])
           expect(arg.json.fullIndex).to.equal(true)

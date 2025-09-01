@@ -6,7 +6,6 @@ const metrics = require('@overleaf/metrics')
 const Path = require('path')
 const { fetchNothing } = require('@overleaf/fetch-utils')
 const settings = require('@overleaf/settings')
-const HistoryURLHelper = require('../History/HistoryURLHelper')
 
 const CollaboratorsGetter =
   require('../Collaborators/CollaboratorsGetter').promises
@@ -81,24 +80,14 @@ async function addFile(params) {
     rev,
     folderId,
   } = params
-  // Go through project-history to avoid the need for handling history-v1 authentication.
-  const { url, fallbackURL } =
-    HistoryURLHelper.projectHistoryURLWithFilestoreFallback(
-      settings,
-      projectId,
-      historyId,
-      { _id: fileId, hash },
-      'tpdsAddFile'
-    )
-
   await addEntity({
     projectId,
     path,
     projectName,
     rev,
     folderId,
-    streamOrigin: url,
-    streamFallback: fallbackURL,
+    // Go through project-history to avoid the need for handling history-v1 authentication.
+    streamOrigin: `${settings.apis.project_history.url}/project/${historyId}/blob/${hash}`,
     entityId: fileId,
     entityType: 'file',
   })

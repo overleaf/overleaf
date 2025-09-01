@@ -58,15 +58,6 @@ describe('ProjectZipStreamManager', function () {
       })
     )
 
-    vi.doMock('../../../../app/src/infrastructure/Features', () => ({
-      default: (ctx.Features = {
-        hasFeature: sinon
-          .stub()
-          .withArgs('project-history-blobs')
-          .returns(true),
-      }),
-    }))
-
     ctx.ProjectZipStreamManager = (await import(modulePath)).default
   })
 
@@ -411,93 +402,55 @@ describe('ProjectZipStreamManager', function () {
         },
       }
       ctx.streams = {
-        'file-id-1': new EventEmitter(),
-        'file-id-2': new EventEmitter(),
+        abc: new EventEmitter(),
+        def: new EventEmitter(),
       }
       ctx.ProjectEntityHandler.getAllFiles = sinon
         .stub()
         .callsArgWith(1, null, ctx.files)
+      ctx.HistoryManager.requestBlobWithProjectId = (
+        projectId,
+        hash,
+        callback
+      ) => {
+        return callback(null, { stream: ctx.streams[hash] })
+      }
+      sinon.spy(ctx.HistoryManager, 'requestBlobWithProjectId')
+      ctx.ProjectZipStreamManager.addAllFilesToArchive(
+        ctx.project_id,
+        ctx.archive,
+        ctx.callback
+      )
+      for (const hash in ctx.streams) {
+        const stream = ctx.streams[hash]
+        stream.emit('end')
+      }
     })
-    describe('with project-history-blobs feature enabled', function () {
-      beforeEach(function (ctx) {
-        ctx.HistoryManager.requestBlobWithFallback = (
-          projectId,
-          hash,
-          fileId,
-          callback
-        ) => {
-          return callback(null, { stream: ctx.streams[fileId] })
-        }
-        sinon.spy(ctx.HistoryManager, 'requestBlobWithFallback')
-        ctx.ProjectZipStreamManager.addAllFilesToArchive(
-          ctx.project_id,
-          ctx.archive,
-          ctx.callback
-        )
-        for (const path in ctx.streams) {
-          const stream = ctx.streams[path]
-          stream.emit('end')
-        }
-      })
 
-      it('should get the files for the project', function (ctx) {
-        return ctx.ProjectEntityHandler.getAllFiles
-          .calledWith(ctx.project_id)
+    it('should get the files for the project', function (ctx) {
+      return ctx.ProjectEntityHandler.getAllFiles
+        .calledWith(ctx.project_id)
+        .should.equal(true)
+    })
+
+    it('should get a stream for each file', function (ctx) {
+      for (const path in ctx.files) {
+        const file = ctx.files[path]
+
+        ctx.HistoryManager.requestBlobWithProjectId
+          .calledWith(ctx.project_id, file.hash)
           .should.equal(true)
-      })
-
-      it('should get a stream for each file', function (ctx) {
-        for (const path in ctx.files) {
-          const file = ctx.files[path]
-
-          ctx.HistoryManager.requestBlobWithFallback
-            .calledWith(ctx.project_id, file.hash, file._id)
-            .should.equal(true)
-        }
-      })
-
-      it('should add each file to the archive', function (ctx) {
-        for (let path in ctx.files) {
-          const file = ctx.files[path]
-          path = path.slice(1) // remove "/"
-          ctx.archive.append
-            .calledWith(ctx.streams[file._id], { name: path })
-            .should.equal(true)
-        }
-      })
+      }
     })
 
-    describe('with project-history-blobs feature disabled', function () {
-      beforeEach(function (ctx) {
-        ctx.FileStoreHandler.getFileStream = (
-          projectId,
-          fileId,
-          query,
-          callback
-        ) => callback(null, ctx.streams[fileId])
-
-        sinon.spy(ctx.FileStoreHandler, 'getFileStream')
-        ctx.Features.hasFeature.withArgs('project-history-blobs').returns(false)
-        ctx.ProjectZipStreamManager.addAllFilesToArchive(
-          ctx.project_id,
-          ctx.archive,
-          ctx.callback
-        )
-        for (const path in ctx.streams) {
-          const stream = ctx.streams[path]
-          stream.emit('end')
-        }
-      })
-
-      it('should get a stream for each file', function (ctx) {
-        for (const path in ctx.files) {
-          const file = ctx.files[path]
-
-          ctx.FileStoreHandler.getFileStream
-            .calledWith(ctx.project_id, file._id)
-            .should.equal(true)
-        }
-      })
+    it('should add each file to the archive', function (ctx) {
+      for (let path in ctx.files) {
+        const file = ctx.files[path]
+        path = path.slice(1) // remove "/"
+        ctx.archive.append.should.have.been.calledWith(ctx.streams[file.hash], {
+          name: path,
+        })
+      }
     })
   })
 })

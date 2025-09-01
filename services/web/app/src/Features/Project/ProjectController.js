@@ -844,9 +844,6 @@ const _ProjectController = {
           isInvitedMember
         ),
         capabilities,
-        projectHistoryBlobsEnabled: Features.hasFeature(
-          'project-history-blobs'
-        ),
         roMirrorOnClientNoLocalStorage:
           Settings.adminOnlyLogin || project.name.startsWith('Debug: '),
         languages: Settings.languages,

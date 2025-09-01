@@ -8,7 +8,6 @@ const MODULE_PATH =
 
 const expectedFileHeaders = {
   'Cache-Control': 'private, max-age=3600',
-  'X-Served-By': 'filestore',
 }
 
 vi.mock('../../../../app/src/Features/Errors/Errors.js', () =>
@@ -17,15 +16,11 @@ vi.mock('../../../../app/src/Features/Errors/Errors.js', () =>
 
 describe('FileStoreController', function () {
   beforeEach(async function (ctx) {
-    ctx.FileStoreHandler = {
-      promises: {
-        getFileStream: sinon.stub(),
-        getFileSize: sinon.stub(),
-      },
-    }
     ctx.ProjectLocator = { promises: { findElement: sinon.stub() } }
     ctx.Stream = { pipeline: sinon.stub().resolves() }
-    ctx.HistoryManager = {}
+    ctx.HistoryManager = {
+      promises: { requestBlobWithProjectId: sinon.stub() },
+    }
 
     vi.doMock('node:stream/promises', () => ctx.Stream)
 
@@ -36,13 +31,6 @@ describe('FileStoreController', function () {
     vi.doMock('../../../../app/src/Features/Project/ProjectLocator', () => ({
       default: ctx.ProjectLocator,
     }))
-
-    vi.doMock(
-      '../../../../app/src/Features/FileStore/FileStoreHandler',
-      () => ({
-        default: ctx.FileStoreHandler,
-      })
-    )
 
     vi.doMock('../../../../app/src/Features/History/HistoryManager', () => ({
       default: ctx.HistoryManager,
@@ -67,21 +55,24 @@ describe('FileStoreController', function () {
     }
     ctx.res = new MockResponse()
     ctx.next = sinon.stub()
-    ctx.file = { name: 'myfile.png' }
+    ctx.hash = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
+    ctx.file = { name: 'myfile.png', hash: ctx.hash }
   })
 
   describe('getFile', function () {
     beforeEach(function (ctx) {
-      ctx.FileStoreHandler.promises.getFileStream.resolves(ctx.stream)
+      ctx.HistoryManager.promises.requestBlobWithProjectId.resolves({
+        stream: ctx.stream,
+      })
       ctx.ProjectLocator.promises.findElement.resolves({ element: ctx.file })
     })
 
-    it('should call the file store handler with the project_id file_id and any query string', async function (ctx) {
+    it('should call the history manager with the project_id hash', async function (ctx) {
       await ctx.controller.getFile(ctx.req, ctx.res)
-      ctx.FileStoreHandler.promises.getFileStream.should.have.been.calledWith(
+      ctx.HistoryManager.promises.requestBlobWithProjectId.should.have.been.calledWith(
         ctx.req.params.Project_id,
-        ctx.req.params.File_id,
-        ctx.req.query
+        ctx.hash,
+        'GET'
       )
     })
 
@@ -217,12 +208,12 @@ describe('FileStoreController', function () {
     it('reports the file size', async function (ctx) {
       await new Promise(resolve => {
         const expectedFileSize = 99393
-        ctx.FileStoreHandler.promises.getFileSize.rejects(
+        ctx.HistoryManager.promises.requestBlobWithProjectId.rejects(
           new Error('getFileSize: unexpected arguments')
         )
-        ctx.FileStoreHandler.promises.getFileSize
-          .withArgs(ctx.projectId, ctx.fileId)
-          .resolves(expectedFileSize)
+        ctx.HistoryManager.promises.requestBlobWithProjectId
+          .withArgs(ctx.projectId, ctx.hash)
+          .resolves({ contentLength: expectedFileSize })
 
         ctx.res.end = () => {
           expect(ctx.res.status.lastCall.args).to.deep.equal([200])
@@ -239,7 +230,7 @@ describe('FileStoreController', function () {
 
     it('returns 404 on NotFoundError', async function (ctx) {
       await new Promise(resolve => {
-        ctx.FileStoreHandler.promises.getFileSize.rejects(
+        ctx.HistoryManager.promises.requestBlobWithProjectId.rejects(
           new Errors.NotFoundError()
         )
 

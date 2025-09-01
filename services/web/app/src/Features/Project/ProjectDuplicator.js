@@ -7,7 +7,6 @@ const { Doc } = require('../../models/Doc')
 const { File } = require('../../models/File')
 const DocstoreManager = require('../Docstore/DocstoreManager')
 const DocumentUpdaterHandler = require('../DocumentUpdater/DocumentUpdaterHandler')
-const FileStoreHandler = require('../FileStore/FileStoreHandler')
 const HistoryManager = require('../History/HistoryManager')
 const ProjectCreationHandler = require('./ProjectCreationHandler')
 const ProjectDeleter = require('./ProjectDeleter')
@@ -20,7 +19,6 @@ const SafePath = require('./SafePath')
 const TpdsProjectFlusher = require('../ThirdPartyDataStore/TpdsProjectFlusher')
 const _ = require('lodash')
 const TagsHandler = require('../Tags/TagsHandler')
-const Features = require('../../infrastructure/Features')
 const ClsiCacheManager = require('../Compile/ClsiCacheManager')
 
 module.exports = {
@@ -225,66 +223,29 @@ async function _copyFiles(sourceEntries, sourceProject, targetProject) {
     async sourceEntry => {
       const sourceFile = sourceEntry.file
       const path = sourceEntry.path
-      const file = new File({ name: SafePath.clean(sourceFile.name) })
+      const file = new File({
+        name: SafePath.clean(sourceFile.name),
+        hash: sourceFile.hash,
+      })
       if (sourceFile.linkedFileData != null) {
         file.linkedFileData = sourceFile.linkedFileData
         file.created = sourceFile.created
       }
-      if (sourceFile.hash != null) {
-        file.hash = sourceFile.hash
-      }
-      let createdBlob = false
-      const usingFilestore = Features.hasFeature('filestore')
-      if (file.hash != null && Features.hasFeature('project-history-blobs')) {
-        try {
-          await HistoryManager.promises.copyBlob(
-            sourceHistoryId,
-            targetHistoryId,
-            file.hash
-          )
-          createdBlob = true
-          if (!usingFilestore) {
-            return { createdBlob, file, path, url: null }
-          }
-        } catch (err) {
-          if (!usingFilestore) {
-            throw OError.tag(err, 'unexpected error copying blob', {
-              sourceProjectId: sourceProject._id,
-              targetProjectId: targetProject._id,
-              sourceFile,
-              sourceHistoryId,
-            })
-          } else {
-            logger.error(
-              {
-                err,
-                sourceProjectId: sourceProject._id,
-                targetProjectId: targetProject._id,
-                sourceFile,
-                sourceHistoryId,
-              },
-              'unexpected error copying blob'
-            )
-          }
-        }
-      }
-      if (createdBlob && Features.hasFeature('project-history-blobs')) {
-        return { createdBlob, file, path, url: null }
-      }
-      if (!usingFilestore) {
-        // Note: This is also checked in app.mjs
-        throw new OError(
-          'bad config: need to enable either filestore or project-history-blobs'
+      try {
+        await HistoryManager.promises.copyBlob(
+          sourceHistoryId,
+          targetHistoryId,
+          file.hash
         )
+        return { createdBlob: true, file, path }
+      } catch (err) {
+        throw OError.tag(err, 'unexpected error copying blob', {
+          sourceProjectId: sourceProject._id,
+          targetProjectId: targetProject._id,
+          sourceFile,
+          sourceHistoryId,
+        })
       }
-      const url = await FileStoreHandler.promises.copyFile(
-        sourceProject._id,
-        sourceFile._id,
-        targetProject._id,
-        file._id
-      )
-
-      return { createdBlob, file, path, url }
     }
   )
   return targetEntries

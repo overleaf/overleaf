@@ -333,7 +333,7 @@ const addFile = wrapWithLock({
     if (!SafePath.isCleanFilename(fileName)) {
       throw new Errors.InvalidNameError('invalid element name')
     }
-    const { url, fileRef, createdBlob } =
+    const { fileRef, createdBlob } =
       await ProjectEntityUpdateHandler._uploadFile(
         projectId,
         folderId,
@@ -347,7 +347,6 @@ const addFile = wrapWithLock({
       folderId,
       userId,
       fileRef,
-      fileStoreUrl: url,
       createdBlob,
       source,
     }
@@ -357,7 +356,6 @@ const addFile = wrapWithLock({
     folderId,
     userId,
     fileRef,
-    fileStoreUrl,
     createdBlob,
     source,
   }) {
@@ -374,7 +372,6 @@ const addFile = wrapWithLock({
         createdBlob,
         file: fileRef,
         path: result && result.path && result.path.fileSystem,
-        url: fileStoreUrl,
       },
     ]
     await DocumentUpdaterHandler.promises.updateProjectStructure(
@@ -548,7 +545,7 @@ const upsertFile = wrapWithLock({
       name: fileName,
       linkedFileData,
     }
-    const { url, fileRef, createdBlob } =
+    const { fileRef, createdBlob } =
       await FileStoreHandler.promises.uploadFileFromDisk(
         projectId,
         fileArgs,
@@ -563,7 +560,6 @@ const upsertFile = wrapWithLock({
       linkedFileData,
       userId,
       fileRef,
-      fileStoreUrl: url,
       createdBlob,
       source,
     }
@@ -574,7 +570,6 @@ const upsertFile = wrapWithLock({
     fileName,
     userId,
     fileRef,
-    fileStoreUrl,
     createdBlob,
     source,
   }) {
@@ -639,7 +634,6 @@ const upsertFile = wrapWithLock({
               createdBlob,
               file: fileRef,
               path: path.fileSystem,
-              url: fileStoreUrl,
             },
           ],
           newProject: project,
@@ -659,7 +653,6 @@ const upsertFile = wrapWithLock({
         existingFile._id,
         userId,
         fileRef,
-        fileStoreUrl,
         folderId,
         source,
         createdBlob
@@ -673,7 +666,6 @@ const upsertFile = wrapWithLock({
         folderId,
         userId,
         fileRef,
-        fileStoreUrl,
         createdBlob,
         source,
       })
@@ -733,15 +725,12 @@ const upsertFileWithPath = wrapWithLock({
       name: fileName,
       linkedFileData,
     }
-    const {
-      url: fileStoreUrl,
-      fileRef,
-      createdBlob,
-    } = await FileStoreHandler.promises.uploadFileFromDisk(
-      projectId,
-      fileArgs,
-      fsPath
-    )
+    const { fileRef, createdBlob } =
+      await FileStoreHandler.promises.uploadFileFromDisk(
+        projectId,
+        fileArgs,
+        fsPath
+      )
 
     return {
       projectId,
@@ -751,7 +740,6 @@ const upsertFileWithPath = wrapWithLock({
       linkedFileData,
       userId,
       fileRef,
-      fileStoreUrl,
       createdBlob,
       source,
     }
@@ -764,7 +752,6 @@ const upsertFileWithPath = wrapWithLock({
     linkedFileData,
     userId,
     fileRef,
-    fileStoreUrl,
     createdBlob,
     source,
   }) {
@@ -787,7 +774,6 @@ const upsertFileWithPath = wrapWithLock({
       linkedFileData,
       userId,
       fileRef,
-      fileStoreUrl,
       createdBlob,
       source,
     })
@@ -1084,15 +1070,12 @@ const convertDocToFile = wrapWithLock({
     }
     await DocumentUpdaterHandler.promises.deleteDoc(projectId, docId, false)
     const fsPath = await FileWriter.promises.writeLinesToDisk(projectId, lines)
-    const {
-      url: fileStoreUrl,
-      fileRef,
-      createdBlob,
-    } = await FileStoreHandler.promises.uploadFileFromDisk(
-      projectId,
-      { name: doc.name, rev: rev + 1 },
-      fsPath
-    )
+    const { fileRef, createdBlob } =
+      await FileStoreHandler.promises.uploadFileFromDisk(
+        projectId,
+        { name: doc.name, rev: rev + 1 },
+        fsPath
+      )
     try {
       await fs.promises.unlink(fsPath)
     } catch (err) {
@@ -1103,7 +1086,6 @@ const convertDocToFile = wrapWithLock({
       doc,
       path: docPath,
       fileRef,
-      fileStoreUrl,
       userId,
       source,
       createdBlob,
@@ -1114,7 +1096,6 @@ const convertDocToFile = wrapWithLock({
     doc,
     path,
     fileRef,
-    fileStoreUrl,
     userId,
     source,
     createdBlob,
@@ -1133,7 +1114,7 @@ const convertDocToFile = wrapWithLock({
       userId,
       {
         oldDocs: [{ doc, path }],
-        newFiles: [{ file: fileRef, path, url: fileStoreUrl, createdBlob }],
+        newFiles: [{ file: fileRef, path, createdBlob }],
         newProject: project,
       },
       source
@@ -1380,7 +1361,6 @@ const ProjectEntityUpdateHandler = {
     fileId,
     userId,
     newFileRef,
-    fileStoreUrl,
     folderId,
     source,
     createdBlob
@@ -1409,7 +1389,6 @@ const ProjectEntityUpdateHandler = {
         file: updatedFileRef,
         createdBlob,
         path: path.fileSystem,
-        url: fileStoreUrl,
       },
     ]
     const projectHistoryId = project.overleaf?.history?.id

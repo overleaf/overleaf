@@ -29,7 +29,6 @@ describe('DocumentUpdaterHandler', function () {
           url: 'http://project_history.example.com',
         },
       },
-      filestoreMigrationLevel: 0,
       moduleImportSequence: [],
     }
     this.source = 'dropbox'
@@ -54,11 +53,6 @@ describe('DocumentUpdaterHandler', function () {
           Timer: class {
             done() {}
           },
-        },
-        '../FileStore/FileStoreHandler': {
-          _buildUrl: sinon.stub().callsFake((projectId, fileId) => {
-            return `http://filestore/project/${projectId}/file/${fileId}`
-          }),
         },
         '../../infrastructure/Modules': {
           promises: {
@@ -1157,11 +1151,10 @@ describe('DocumentUpdaterHandler', function () {
               pathname: '/foo',
               docLines: 'a\nb',
               historyRangesSupport: false,
-              url: undefined,
               hash: undefined,
               ranges: undefined,
               metadata: undefined,
-              createdBlob: false,
+              createdBlob: true,
             },
           ]
 
@@ -1195,7 +1188,6 @@ describe('DocumentUpdaterHandler', function () {
             newFiles: [
               {
                 path: '/bar',
-                url: 'filestore.example.com/file',
                 file: { _id: this.fileId, hash: '12345' },
               },
             ],
@@ -1207,12 +1199,11 @@ describe('DocumentUpdaterHandler', function () {
               type: 'add-file',
               id: this.fileId.toString(),
               pathname: '/bar',
-              url: 'filestore.example.com/file',
               docLines: undefined,
               historyRangesSupport: false,
               hash: '12345',
               ranges: undefined,
-              createdBlob: false,
+              createdBlob: true,
               metadata: undefined,
             },
           ]
@@ -1290,7 +1281,6 @@ describe('DocumentUpdaterHandler', function () {
             oldFiles: [
               {
                 path: '/foo.doc',
-                url: 'filestore.example.com/file',
                 file: { _id: this.fileId },
               },
             ],
@@ -1317,11 +1307,10 @@ describe('DocumentUpdaterHandler', function () {
               pathname: '/foo.doc',
               docLines: 'hello there',
               historyRangesSupport: false,
-              url: undefined,
               hash: undefined,
               ranges: undefined,
               metadata: undefined,
-              createdBlob: false,
+              createdBlob: true,
             },
           ]
 
@@ -1421,11 +1410,10 @@ describe('DocumentUpdaterHandler', function () {
               pathname: '/foo',
               docLines: 'foo\nbar',
               historyRangesSupport: false,
-              url: undefined,
               hash: undefined,
               ranges: this.ranges,
               metadata: undefined,
-              createdBlob: false,
+              createdBlob: true,
             },
           ]
 
@@ -1466,11 +1454,10 @@ describe('DocumentUpdaterHandler', function () {
               pathname: '/foo',
               docLines: 'foo\nbar',
               historyRangesSupport: true,
-              url: undefined,
               hash: undefined,
               ranges: this.ranges,
               metadata: undefined,
-              createdBlob: false,
+              createdBlob: true,
             },
           ]
 
@@ -1498,16 +1485,12 @@ describe('DocumentUpdaterHandler', function () {
       })
 
       describe('with filestore disabled', function () {
-        beforeEach(function () {
-          this.settings.filestoreMigrationLevel = 2
-        })
         it('should add files without URL and with createdBlob', async function () {
           this.fileId = new ObjectId()
           this.changes = {
             newFiles: [
               {
                 path: '/bar',
-                url: 'filestore.example.com/file',
                 file: { _id: this.fileId, hash: '12345' },
               },
             ],
@@ -1521,7 +1504,6 @@ describe('DocumentUpdaterHandler', function () {
               pathname: '/bar',
               docLines: undefined,
               historyRangesSupport: false,
-              url: undefined,
               hash: '12345',
               ranges: undefined,
               createdBlob: true,
@@ -1556,7 +1538,6 @@ describe('DocumentUpdaterHandler', function () {
             newFiles: [
               {
                 path: '/bar',
-                url: 'filestore.example.com/file',
                 file: { _id: this.fileId },
               },
             ],
@@ -1671,16 +1652,14 @@ describe('DocumentUpdaterHandler', function () {
               file: fileId1,
               _hash: '42',
               path: '1.png',
-              url: `http://filestore/project/${projectId}/file/${fileId1}`,
-              createdBlob: false,
+              createdBlob: true,
               metadata: undefined,
             },
             {
               file: fileId2,
               _hash: '1337',
               path: '1.bib',
-              url: `http://filestore/project/${projectId}/file/${fileId2}`,
-              createdBlob: false,
+              createdBlob: true,
               metadata: {
                 importedAt: fileCreated2,
                 provider: 'references-provider',
@@ -1690,8 +1669,7 @@ describe('DocumentUpdaterHandler', function () {
               file: fileId3,
               _hash: '21',
               path: 'bar.txt',
-              url: `http://filestore/project/${projectId}/file/${fileId3}`,
-              createdBlob: false,
+              createdBlob: true,
               metadata: {
                 importedAt: fileCreated3,
                 provider: 'project_output_file',
@@ -1706,151 +1684,143 @@ describe('DocumentUpdaterHandler', function () {
         timeout: 6 * 60 * 1000,
       })
     })
-    describe('with filestore disabled', function () {
-      beforeEach(function () {
-        this.settings.filestoreMigrationLevel = 2
-      })
-      it('should add files without URL', async function () {
-        const fileId1 = new ObjectId()
-        const fileId2 = new ObjectId()
-        const fileId3 = new ObjectId()
-        const fileCreated2 = new Date()
-        const fileCreated3 = new Date()
-        const otherProjectId = new ObjectId().toString()
-        const files = [
-          { file: { _id: fileId1, hash: '42' }, path: '1.png' },
-          {
-            file: {
-              _id: fileId2,
-              hash: '1337',
-              created: fileCreated2,
-              linkedFileData: {
+    it('should add files without URL', async function () {
+      const fileId1 = new ObjectId()
+      const fileId2 = new ObjectId()
+      const fileId3 = new ObjectId()
+      const fileCreated2 = new Date()
+      const fileCreated3 = new Date()
+      const otherProjectId = new ObjectId().toString()
+      const files = [
+        { file: { _id: fileId1, hash: '42' }, path: '1.png' },
+        {
+          file: {
+            _id: fileId2,
+            hash: '1337',
+            created: fileCreated2,
+            linkedFileData: {
+              provider: 'references-provider',
+            },
+          },
+          path: '1.bib',
+        },
+        {
+          file: {
+            _id: fileId3,
+            hash: '21',
+            created: fileCreated3,
+            linkedFileData: {
+              provider: 'project_output_file',
+              build_id: '1234-abc',
+              clsiServerId: 'server-1',
+              source_project_id: otherProjectId,
+              source_output_file_path: 'foo/bar.txt',
+            },
+          },
+          path: 'bar.txt',
+        },
+      ]
+      const docs = []
+      this.request.yields(null, { statusCode: 200 })
+      const projectId = new ObjectId()
+      const projectHistoryId = 99
+      await this.handler.promises.resyncProjectHistory(
+        projectId,
+        projectHistoryId,
+        docs,
+        files,
+        {}
+      )
+      this.request.should.have.been.calledWith({
+        url: `${this.settings.apis.documentupdater.url}/project/${projectId}/history/resync`,
+        method: 'POST',
+        json: {
+          docs: [],
+          files: [
+            {
+              file: fileId1,
+              _hash: '42',
+              path: '1.png',
+              createdBlob: true,
+              metadata: undefined,
+            },
+            {
+              file: fileId2,
+              _hash: '1337',
+              path: '1.bib',
+              createdBlob: true,
+              metadata: {
+                importedAt: fileCreated2,
                 provider: 'references-provider',
               },
             },
-            path: '1.bib',
-          },
-          {
-            file: {
-              _id: fileId3,
-              hash: '21',
-              created: fileCreated3,
-              linkedFileData: {
+            {
+              file: fileId3,
+              _hash: '21',
+              path: 'bar.txt',
+              createdBlob: true,
+              metadata: {
+                importedAt: fileCreated3,
                 provider: 'project_output_file',
-                build_id: '1234-abc',
-                clsiServerId: 'server-1',
                 source_project_id: otherProjectId,
                 source_output_file_path: 'foo/bar.txt',
+                // build_id and clsiServerId are omitted
               },
             },
-            path: 'bar.txt',
+          ],
+          projectHistoryId,
+        },
+        timeout: 6 * 60 * 1000,
+      })
+    })
+    it('should flag files with missing hashes', async function () {
+      const fileId1 = new ObjectId()
+      const fileId2 = new ObjectId()
+      const fileId3 = new ObjectId()
+      const fileCreated2 = new Date()
+      const fileCreated3 = new Date()
+      const otherProjectId = new ObjectId().toString()
+      const files = [
+        { file: { _id: fileId1, hash: '42' }, path: '1.png' },
+        {
+          file: {
+            _id: fileId2,
+            created: fileCreated2,
+            linkedFileData: {
+              provider: 'references-provider',
+            },
           },
-        ]
-        const docs = []
-        this.request.yields(null, { statusCode: 200 })
-        const projectId = new ObjectId()
-        const projectHistoryId = 99
-        await this.handler.promises.resyncProjectHistory(
+          path: '1.bib',
+        },
+        {
+          file: {
+            _id: fileId3,
+            hash: '21',
+            created: fileCreated3,
+            linkedFileData: {
+              provider: 'project_output_file',
+              build_id: '1234-abc',
+              clsiServerId: 'server-1',
+              source_project_id: otherProjectId,
+              source_output_file_path: 'foo/bar.txt',
+            },
+          },
+          path: 'bar.txt',
+        },
+      ]
+      const docs = []
+      this.request.yields(null, { statusCode: 200 })
+      const projectId = new ObjectId()
+      const projectHistoryId = 99
+      await expect(
+        this.handler.promises.resyncProjectHistory(
           projectId,
           projectHistoryId,
           docs,
           files,
           {}
         )
-        this.request.should.have.been.calledWith({
-          url: `${this.settings.apis.documentupdater.url}/project/${projectId}/history/resync`,
-          method: 'POST',
-          json: {
-            docs: [],
-            files: [
-              {
-                file: fileId1,
-                _hash: '42',
-                path: '1.png',
-                url: undefined,
-                createdBlob: true,
-                metadata: undefined,
-              },
-              {
-                file: fileId2,
-                _hash: '1337',
-                path: '1.bib',
-                url: undefined,
-                createdBlob: true,
-                metadata: {
-                  importedAt: fileCreated2,
-                  provider: 'references-provider',
-                },
-              },
-              {
-                file: fileId3,
-                _hash: '21',
-                path: 'bar.txt',
-                url: undefined,
-                createdBlob: true,
-                metadata: {
-                  importedAt: fileCreated3,
-                  provider: 'project_output_file',
-                  source_project_id: otherProjectId,
-                  source_output_file_path: 'foo/bar.txt',
-                  // build_id and clsiServerId are omitted
-                },
-              },
-            ],
-            projectHistoryId,
-          },
-          timeout: 6 * 60 * 1000,
-        })
-      })
-      it('should flag files with missing hashes', async function () {
-        const fileId1 = new ObjectId()
-        const fileId2 = new ObjectId()
-        const fileId3 = new ObjectId()
-        const fileCreated2 = new Date()
-        const fileCreated3 = new Date()
-        const otherProjectId = new ObjectId().toString()
-        const files = [
-          { file: { _id: fileId1, hash: '42' }, path: '1.png' },
-          {
-            file: {
-              _id: fileId2,
-              created: fileCreated2,
-              linkedFileData: {
-                provider: 'references-provider',
-              },
-            },
-            path: '1.bib',
-          },
-          {
-            file: {
-              _id: fileId3,
-              hash: '21',
-              created: fileCreated3,
-              linkedFileData: {
-                provider: 'project_output_file',
-                build_id: '1234-abc',
-                clsiServerId: 'server-1',
-                source_project_id: otherProjectId,
-                source_output_file_path: 'foo/bar.txt',
-              },
-            },
-            path: 'bar.txt',
-          },
-        ]
-        const docs = []
-        this.request.yields(null, { statusCode: 200 })
-        const projectId = new ObjectId()
-        const projectHistoryId = 99
-        await expect(
-          this.handler.promises.resyncProjectHistory(
-            projectId,
-            projectHistoryId,
-            docs,
-            files,
-            {}
-          )
-        ).to.be.rejected
-      })
+      ).to.be.rejected
     })
   })
 

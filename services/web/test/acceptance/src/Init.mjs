@@ -6,7 +6,6 @@ import MockChatApi from './mocks/MockChatApi.mjs'
 import MockClsiApi from './mocks/MockClsiApi.mjs'
 import MockDocstoreApi from './mocks/MockDocstoreApi.mjs'
 import MockDocUpdaterApi from './mocks/MockDocUpdaterApi.mjs'
-import MockFilestoreApi from './mocks/MockFilestoreApi.mjs'
 import MockGitBridgeApi from './mocks/MockGitBridgeApi.mjs'
 import MockNotificationsApi from './mocks/MockNotificationsApi.mjs'
 import MockProjectHistoryApi from './mocks/MockProjectHistoryApi.mjs'
@@ -25,7 +24,6 @@ MockChatApi.initialize(23010, mockOpts)
 MockClsiApi.initialize(23013, mockOpts)
 MockDocstoreApi.initialize(23016, mockOpts)
 MockDocUpdaterApi.initialize(23003, mockOpts)
-MockFilestoreApi.initialize(23009, mockOpts)
 MockNotificationsApi.initialize(23042, mockOpts)
 MockSpellingApi.initialize(23005, mockOpts)
 MockHaveIBeenPwnedApi.initialize(1337, mockOpts)

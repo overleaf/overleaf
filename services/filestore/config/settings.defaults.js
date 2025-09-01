@@ -13,13 +13,10 @@ if (process.env.AWS_SECRET && !process.env.AWS_SECRET_ACCESS_KEY) {
 if (process.env.BACKEND == null) {
   if (process.env.AWS_ACCESS_KEY_ID || process.env.S3_BUCKET_CREDENTIALS) {
     process.env.BACKEND = 's3'
-    process.env.USER_FILES_BUCKET_NAME =
-      process.env.AWS_S3_USER_FILES_BUCKET_NAME
     process.env.TEMPLATE_FILES_BUCKET_NAME =
       process.env.AWS_S3_TEMPLATE_FILES_BUCKET_NAME
   } else {
     process.env.BACKEND = 'fs'
-    process.env.USER_FILES_BUCKET_NAME = Path.join(__dirname, '../user_files')
     process.env.TEMPLATE_FILES_BUCKET_NAME = Path.join(
       __dirname,
       '../template_files'
@@ -71,7 +68,6 @@ const settings = {
     // which will be picked up automatically.
 
     stores: {
-      user_files: process.env.USER_FILES_BUCKET_NAME,
       template_files: process.env.TEMPLATE_FILES_BUCKET_NAME,
 
       // allow signed links to be generated for these buckets
@@ -105,16 +101,6 @@ const settings = {
 
   gracefulShutdownDelayInMs:
     parseInt(process.env.GRACEFUL_SHUTDOWN_DELAY_SECONDS ?? '30', 10) * 1000,
-}
-
-// Filestore health check
-// ----------------------
-// Project and file details to check in persistor when calling /health_check
-if (process.env.HEALTH_CHECK_PROJECT_ID && process.env.HEALTH_CHECK_FILE_ID) {
-  settings.health_check = {
-    project_id: process.env.HEALTH_CHECK_PROJECT_ID,
-    file_id: process.env.HEALTH_CHECK_FILE_ID,
-  }
 }
 
 module.exports = settings

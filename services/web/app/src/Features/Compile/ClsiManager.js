@@ -15,7 +15,6 @@ const { Cookie } = require('tough-cookie')
 const ClsiCookieManager = require('./ClsiCookieManager')(
   Settings.apis.clsi?.backendGroupName
 )
-const Features = require('../../infrastructure/Features')
 const NewBackendCloudClsiCookieManager = require('./ClsiCookieManager')(
   Settings.apis.clsi_new?.backendGroupName
 )
@@ -750,18 +749,9 @@ function _finaliseRequest(projectId, options, project, docs, files) {
   for (let path in files) {
     const file = files[path]
     path = path.replace(/^\//, '') // Remove leading /
-
-    const filestoreURL = `${Settings.apis.filestore.url}/project/${project._id}/file/${file._id}`
-    let url = filestoreURL
-    let fallbackURL
-    if (file.hash && Features.hasFeature('project-history-blobs')) {
-      url = getFilestoreBlobURL(historyId, file.hash)
-      fallbackURL = filestoreURL
-    }
     resources.push({
       path,
-      url,
-      fallbackURL,
+      url: getFilestoreBlobURL(historyId, file.hash),
       modified: file.created?.getTime(),
     })
   }

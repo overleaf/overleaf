@@ -16,7 +16,6 @@ const CollaboratorsGetter = require('../Collaborators/CollaboratorsGetter')
 const DocstoreManager = require('../Docstore/DocstoreManager')
 const EditorRealTimeController = require('../Editor/EditorRealTimeController')
 const HistoryManager = require('../History/HistoryManager')
-const FilestoreHandler = require('../FileStore/FileStoreHandler')
 const ChatApiHandler = require('../Chat/ChatApiHandler')
 const { promiseMapWithLimit } = require('@overleaf/promise-utils')
 const { READ_PREFERENCE_SECONDARY } = require('../../infrastructure/mongodb')
@@ -350,7 +349,6 @@ async function expireDeletedProject(projectId) {
         deletedProject.project._id,
         historyId
       ),
-      FilestoreHandler.promises.deleteProject(deletedProject.project._id),
       ChatApiHandler.promises.destroyProject(deletedProject.project._id),
       ProjectAuditLogEntry.deleteMany({ projectId }),
       Modules.promises.hooks.fire('projectExpired', deletedProject.project._id),

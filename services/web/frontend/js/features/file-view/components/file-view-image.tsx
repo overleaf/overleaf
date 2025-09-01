@@ -1,6 +1,5 @@
 import { useProjectContext } from '../../../shared/context/project-context'
 import { BinaryFile } from '@/features/file-view/types/binary-file'
-import { fileUrl } from '../../utils/fileUrl'
 
 export default function FileViewImage({
   file,
@@ -14,7 +13,7 @@ export default function FileViewImage({
   const { projectId } = useProjectContext()
   return (
     <img
-      src={fileUrl(projectId, file.id, file.hash)}
+      src={`/project/${projectId}/blob/${file.hash}`}
       onLoad={onLoad}
       onError={onError}
       alt={file.name}

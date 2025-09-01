@@ -26,7 +26,6 @@ describe('ProjectEntityUpdateHandler', function () {
         },
       },
     }
-    this.fileUrl = 'filestore.example.com/file'
     this.user = { _id: new ObjectId() }
 
     this.DocModel = class Doc {
@@ -152,16 +151,8 @@ describe('ProjectEntityUpdateHandler', function () {
     }
     this.FileStoreHandler = {
       promises: {
-        copyFile: sinon.stub(),
         uploadFileFromDisk: sinon.stub(),
-        deleteFile: sinon.stub(),
       },
-
-      _buildUrl: sinon
-        .stub()
-        .callsFake(
-          (projectId, fileId) => `www.filestore.test/${projectId}/${fileId}`
-        ),
     }
     this.FileWriter = {
       promises: {
@@ -670,7 +661,6 @@ describe('ProjectEntityUpdateHandler', function () {
           linkedFileData: this.linkedFileData,
         }
         this.FileStoreHandler.promises.uploadFileFromDisk.resolves({
-          url: this.fileUrl,
           fileRef: this.newFile,
           createdBlob: true,
         })
@@ -730,7 +720,6 @@ describe('ProjectEntityUpdateHandler', function () {
           {
             file: this.newFile,
             path: this.path,
-            url: this.fileUrl,
             createdBlob: true,
           },
         ]
@@ -1069,7 +1058,6 @@ describe('ProjectEntityUpdateHandler', function () {
   describe('upsertFile', function () {
     beforeEach(function () {
       this.FileStoreHandler.promises.uploadFileFromDisk.resolves({
-        url: this.fileUrl,
         fileRef: this.file,
         createdBlob: true,
       })
@@ -1181,7 +1169,6 @@ describe('ProjectEntityUpdateHandler', function () {
           {
             file: this.newFile,
             path: this.fileSystemPath,
-            url: this.fileUrl,
             createdBlob: true,
           },
         ]
@@ -1218,7 +1205,6 @@ describe('ProjectEntityUpdateHandler', function () {
           element: this.folder,
         })
         this.FileStoreHandler.promises.uploadFileFromDisk.resolves({
-          url: this.fileUrl,
           fileRef: this.newFile,
           createdBlob: true,
         })
@@ -1254,7 +1240,6 @@ describe('ProjectEntityUpdateHandler', function () {
           folderId,
           userId,
           fileRef: this.newFile,
-          fileStoreUrl: this.fileUrl,
           source: this.source,
           createdBlob: true,
         })
@@ -1327,7 +1312,6 @@ describe('ProjectEntityUpdateHandler', function () {
             folder: this.folder,
           })
 
-        this.newFileUrl = 'new-file-url'
         this.newFile = {
           _id: newFileId,
           name: 'dummy-upload-filename',
@@ -1339,7 +1323,6 @@ describe('ProjectEntityUpdateHandler', function () {
           overleaf: { history: { id: projectHistoryId } },
         }
         this.FileStoreHandler.promises.uploadFileFromDisk.resolves({
-          url: this.newFileUrl,
           fileRef: this.newFile,
           createdBlob: true,
         })
@@ -1380,7 +1363,6 @@ describe('ProjectEntityUpdateHandler', function () {
           {
             file: this.newFile,
             path: this.path,
-            url: this.newFileUrl,
             createdBlob: true,
           },
         ]
@@ -1559,7 +1541,6 @@ describe('ProjectEntityUpdateHandler', function () {
         this.file = { _id: fileId }
         this.isNewFile = true
         this.FileStoreHandler.promises.uploadFileFromDisk.resolves({
-          url: this.fileUrl,
           fileRef: this.newFile,
           createdBlob: true,
         })
@@ -1601,7 +1582,6 @@ describe('ProjectEntityUpdateHandler', function () {
             linkedFileData: this.linkedFileData,
             userId,
             fileRef: this.newFile,
-            fileStoreUrl: this.fileUrl,
             source: this.source,
             createdBlob: true,
           }
@@ -2567,7 +2547,6 @@ describe('ProjectEntityUpdateHandler', function () {
   describe('_cleanUpEntity', function () {
     beforeEach(function () {
       this.entityId = '4eecaffcbffa66588e000009'
-      this.FileStoreHandler.promises.deleteFile.resolves()
       this.ProjectEntityUpdateHandler.promises.unsetRootDoc = sinon
         .stub()
         .resolves()
@@ -2588,12 +2567,6 @@ describe('ProjectEntityUpdateHandler', function () {
             userId,
             this.source
           )
-      })
-
-      it('should not delete the file from FileStoreHandler', function () {
-        this.FileStoreHandler.promises.deleteFile
-          .calledWith(projectId, this.entityId)
-          .should.equal(false)
       })
 
       it('should not attempt to delete from the document updater', function () {
@@ -2862,7 +2835,6 @@ describe('ProjectEntityUpdateHandler', function () {
         .resolves({ lines: this.docLines, rev: this.rev })
       this.FileWriter.promises.writeLinesToDisk.resolves(this.tmpFilePath)
       this.FileStoreHandler.promises.uploadFileFromDisk.resolves({
-        url: this.fileStoreUrl,
         fileRef: this.file,
         createdBlob: true,
       })
@@ -2927,7 +2899,6 @@ describe('ProjectEntityUpdateHandler', function () {
               {
                 file: this.file,
                 path: this.path,
-                url: this.fileStoreUrl,
                 createdBlob: true,
               },
             ],

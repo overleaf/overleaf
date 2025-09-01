@@ -61,7 +61,6 @@ describe('ProjectUploadManager', function () {
       {
         file: this.file,
         path: `/${this.file.name}`,
-        url: this.fileStoreUrl,
         createdBlob: true,
       },
     ]
@@ -101,7 +100,6 @@ describe('ProjectUploadManager', function () {
       promises: {
         uploadFileFromDiskWithHistoryId: sinon.stub().resolves({
           fileRef: this.file,
-          url: this.fileStoreUrl,
           createdBlob: true,
         }),
       },

@@ -22,7 +22,6 @@ describe('FileHandler', function () {
   const bucket = 'my_bucket'
   const key = `${new ObjectId()}/${new ObjectId()}`
   const convertedFolderKey = `${new ObjectId()}/${new ObjectId()}`
-  const projectKey = `${new ObjectId()}/`
   const sourceStream = 'sourceStream'
   const convertedKey = 'convertedKey'
   const redirectUrl = 'https://wombat.potato/giraffe'
@@ -41,7 +40,6 @@ describe('FileHandler', function () {
       sendStream: sinon.stub().resolves(),
       insertFile: sinon.stub().resolves(),
       sendFile: sinon.stub().resolves(),
-      directorySize: sinon.stub().resolves(),
     }
     LocalFileWriter = {
       // the callback style is used for detached cleanup calls
@@ -69,7 +67,7 @@ describe('FileHandler', function () {
     }
     Settings = {
       filestore: {
-        stores: { template_files: 'template_files', user_files: 'user_files' },
+        stores: { template_files: 'template_files' },
       },
     }
     fs = {
@@ -133,98 +131,6 @@ describe('FileHandler', function () {
     it('should throw an error when the key is in the wrong format', function (done) {
       KeyBuilder.getConvertedFolderKey.returns('wombat')
       FileHandler.insertFile(bucket, key, stream, err => {
-        expect(err).to.exist
-        done()
-      })
-    })
-  })
-
-  describe('deleteFile', function () {
-    it('should tell the filestore manager to delete the file', function (done) {
-      FileHandler.deleteFile(bucket, key, err => {
-        expect(err).not.to.exist
-        expect(PersistorManager.deleteObject).to.have.been.calledWith(
-          bucket,
-          key
-        )
-        done()
-      })
-    })
-
-    it('should not tell the filestore manager to delete the cached folder', function (done) {
-      FileHandler.deleteFile(bucket, key, err => {
-        expect(err).not.to.exist
-        expect(PersistorManager.deleteDirectory).not.to.have.been.called
-        done()
-      })
-    })
-
-    it('should accept templates-api key format', function (done) {
-      KeyBuilder.getConvertedFolderKey.returns(
-        '5ecba29f1a294e007d0bccb4/v/0/pdf'
-      )
-      FileHandler.deleteFile(bucket, key, err => {
-        expect(err).not.to.exist
-        done()
-      })
-    })
-
-    it('should throw an error when the key is in the wrong format', function (done) {
-      KeyBuilder.getConvertedFolderKey.returns('wombat')
-      FileHandler.deleteFile(bucket, key, err => {
-        expect(err).to.exist
-        done()
-      })
-    })
-
-    describe('when conversions are enabled', function () {
-      beforeEach(function () {
-        Settings.enableConversions = true
-      })
-
-      it('should delete the convertedKey folder for template files', function (done) {
-        FileHandler.deleteFile(
-          Settings.filestore.stores.template_files,
-          key,
-          err => {
-            expect(err).not.to.exist
-            expect(PersistorManager.deleteDirectory).to.have.been.calledWith(
-              Settings.filestore.stores.template_files,
-              convertedFolderKey
-            )
-            done()
-          }
-        )
-      })
-
-      it('should not delete the convertedKey folder for user files', function (done) {
-        FileHandler.deleteFile(
-          Settings.filestore.stores.user_files,
-          key,
-          err => {
-            expect(err).not.to.exist
-            expect(PersistorManager.deleteDirectory).to.not.have.been.called
-            done()
-          }
-        )
-      })
-    })
-  })
-
-  describe('deleteProject', function () {
-    it('should tell the filestore manager to delete the folder', function (done) {
-      FileHandler.deleteProject(bucket, projectKey, err => {
-        expect(err).not.to.exist
-        expect(PersistorManager.deleteDirectory).to.have.been.calledWith(
-          bucket,
-          projectKey
-        )
-        done()
-      })
-    })
-
-    it('should throw an error when the key is in the wrong format', function (done) {
-      FileHandler.deleteProject(bucket, 'wombat', err => {
         expect(err).to.exist
         done()
       })
@@ -385,19 +291,6 @@ describe('FileHandler', function () {
       FileHandler.getRedirectUrl(bucket, key, (err, url) => {
         expect(err).not.to.exist
         expect(url).to.be.null
-        done()
-      })
-    })
-  })
-
-  describe('getDirectorySize', function () {
-    it('should call the filestore manager to get directory size', function (done) {
-      FileHandler.getDirectorySize(bucket, key, err => {
-        expect(err).not.to.exist
-        expect(PersistorManager.directorySize).to.have.been.calledWith(
-          bucket,
-          key
-        )
         done()
       })
     })

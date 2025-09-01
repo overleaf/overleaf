@@ -1,10 +1,10 @@
 const Path = require('path')
 const DocstoreManager = require('../app/src/Features/Docstore/DocstoreManager')
 const DocumentUpdaterHandler = require('../app/src/Features/DocumentUpdater/DocumentUpdaterHandler')
-const FileStoreHandler = require('../app/src/Features/FileStore/FileStoreHandler')
 const ProjectGetter = require('../app/src/Features/Project/ProjectGetter')
 const ProjectEntityMongoUpdateHandler = require('../app/src/Features/Project/ProjectEntityMongoUpdateHandler')
 const { waitForDb, db, ObjectId } = require('../app/src/infrastructure/mongodb')
+const HistoryManager = require('../app/src/Features/History/HistoryManager')
 const logger = require('@overleaf/logger').logger
 
 const args = require('minimist')(process.argv.slice(2), {
@@ -211,10 +211,12 @@ async function checkProject(projectId) {
   }
   for (const { file, path } of fileEntries) {
     try {
-      const fileSize = await FileStoreHandler.promises.getFileSize(
-        projectId,
-        file._id
-      )
+      const { contentLength: fileSize } =
+        await HistoryManager.promises.requestBlobWithProjectId(
+          projectId,
+          file.hash,
+          'HEAD'
+        )
       if (pathCounts.get(path) > 1) {
         logFile(projectId, path, { ...file, fileSize }, 'duplicate path')
         errors++

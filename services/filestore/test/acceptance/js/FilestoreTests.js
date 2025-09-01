@@ -103,16 +103,18 @@ describe('Filestore', function () {
         previousEgress,
         previousIngress,
         metricPrefix,
-        projectId,
-        otherProjectId
+        templateId,
+        otherProjectId,
+        templateUrl,
+        fileId,
+        fileKey,
+        fileUrl
 
       const dataEncryptionKeySize =
         backendSettings.backend === 's3SSEC' ? 32 : 0
 
       const BUCKET_NAMES = [
-        process.env.GCS_USER_FILES_BUCKET_NAME,
         process.env.GCS_TEMPLATE_FILES_BUCKET_NAME,
-        `${process.env.GCS_USER_FILES_BUCKET_NAME}-deleted`,
         `${process.env.GCS_TEMPLATE_FILES_BUCKET_NAME}-deleted`,
       ]
 
@@ -156,8 +158,12 @@ describe('Filestore', function () {
             `${metricPrefix}_egress`
           )
         }
-        projectId = new ObjectId().toString()
+        templateId = new ObjectId().toString()
         otherProjectId = new ObjectId().toString()
+        templateUrl = `${filestoreUrl}/template/${templateId}/v/0`
+        fileId = new ObjectId().toString()
+        fileUrl = `${templateUrl}/${fileId}`
+        fileKey = `${templateId}/v/0/${fileId}`
       })
 
       it('should send a 200 for the status endpoint', async function () {
@@ -169,14 +175,12 @@ describe('Filestore', function () {
       })
 
       describe('with a file on the server', function () {
-        let fileId, fileUrl, constantFileContent
+        let constantFileContent
 
         const localFileReadPath =
           '/tmp/filestore_acceptance_tests_file_read.txt'
 
         beforeEach('upload file', async function () {
-          fileId = new ObjectId().toString()
-          fileUrl = `${filestoreUrl}/project/${projectId}/file/${fileId}`
           constantFileContent = [
             'hello world',
             `line 2 goes here ${Math.random()}`,
@@ -224,10 +228,6 @@ describe('Filestore', function () {
         })
 
         it('should send a 200 for the health-check endpoint using the file', async function () {
-          Settings.health_check = {
-            project_id: projectId,
-            file_id: fileId,
-          }
           const response = await fetch(`${filestoreUrl}/health_check`)
           expect(response.status).to.equal(200)
           const body = await response.text()
@@ -254,8 +254,10 @@ describe('Filestore', function () {
         })
 
         it('should be able to delete the file', async function () {
-          const response = await fetch(fileUrl, { method: 'DELETE' })
-          expect(response.status).to.equal(204)
+          await app.persistor.deleteObject(
+            Settings.filestore.stores.template_files,
+            fileKey
+          )
           const response2 = await fetch(fileUrl)
           expect(response2.status).to.equal(404)
         })
@@ -263,23 +265,18 @@ describe('Filestore', function () {
         it('should be able to copy files', async function () {
           const newProjectID = new ObjectId().toString()
           const newFileId = new ObjectId().toString()
-          const newFileUrl = `${filestoreUrl}/project/${newProjectID}/file/${newFileId}`
-          let response = await fetch(newFileUrl, {
-            method: 'PUT',
-            body: JSON.stringify({
-              source: {
-                project_id: projectId,
-                file_id: fileId,
-              },
-            }),
-            headers: {
-              'Content-Type': 'application/json',
-            },
-          })
-          expect(response.status).to.equal(200)
-          response = await fetch(fileUrl, { method: 'DELETE' })
-          expect(response.status).to.equal(204)
-          response = await fetch(newFileUrl)
+          const newFileUrl = `${filestoreUrl}/template/${newProjectID}/v/0/${newFileId}`
+          const newFileKey = `${newProjectID}/v/0/${newFileId}`
+          await app.persistor.copyObject(
+            Settings.filestore.stores.template_files,
+            fileKey,
+            newFileKey
+          )
+          await app.persistor.deleteObject(
+            Settings.filestore.stores.template_files,
+            fileKey
+          )
+          const response = await fetch(newFileUrl)
           const body = await response.text()
           expect(body).to.equal(constantFileContent)
         })
@@ -299,8 +296,8 @@ describe('Filestore', function () {
             it('should refuse to handle IfNoneMatch', async function () {
               await expect(
                 app.persistor.sendStream(
-                  Settings.filestore.stores.user_files,
-                  `${projectId}/${fileId}`,
+                  Settings.filestore.stores.template_files,
+                  fileKey,
                   fs.createReadStream(localFileReadPath),
                   { ifNoneMatch: '*' }
                 )
@@ -310,8 +307,8 @@ describe('Filestore', function () {
             it('should reject sendStream on the same key with IfNoneMatch', async function () {
               await expect(
                 app.persistor.sendStream(
-                  Settings.filestore.stores.user_files,
-                  `${projectId}/${fileId}`,
+                  Settings.filestore.stores.template_files,
+                  fileKey,
                   fs.createReadStream(localFileReadPath),
                   { ifNoneMatch: '*' }
                 )
@@ -319,8 +316,8 @@ describe('Filestore', function () {
             })
             it('should allow sendStream on a different key with IfNoneMatch', async function () {
               await app.persistor.sendStream(
-                Settings.filestore.stores.user_files,
-                `${projectId}/${fileId}-other`,
+                Settings.filestore.stores.template_files,
+                `${templateId}/v/0/${fileId}-other`,
                 fs.createReadStream(localFileReadPath),
                 { ifNoneMatch: '*' }
               )
@@ -368,7 +365,7 @@ describe('Filestore', function () {
       })
 
       describe('with multiple files', function () {
-        let fileIds, fileUrls, otherFileUrls, projectUrl, otherProjectUrl
+        let fileIds, fileUrls, otherFileUrls, otherProjectUrl
         const localFileReadPaths = [
           '/tmp/filestore_acceptance_tests_file_read_1.txt',
           '/tmp/filestore_acceptance_tests_file_read_2.txt',
@@ -401,18 +398,17 @@ describe('Filestore', function () {
         })
 
         beforeEach('upload two files', async function () {
-          projectUrl = `${filestoreUrl}/project/${projectId}`
-          otherProjectUrl = `${filestoreUrl}/project/${otherProjectId}`
+          otherProjectUrl = `${filestoreUrl}/template/${otherProjectId}/v/0`
           fileIds = [
             new ObjectId().toString(),
             new ObjectId().toString(),
             new ObjectId().toString(),
           ]
           fileUrls = [
-            `${projectUrl}/file/${fileIds[0]}`,
-            `${projectUrl}/file/${fileIds[1]}`,
+            `${templateUrl}/${fileIds[0]}`,
+            `${templateUrl}/${fileIds[1]}`,
           ]
-          otherFileUrls = [`${otherProjectUrl}/file/${fileIds[2]}`]
+          otherFileUrls = [`${otherProjectUrl}/${fileIds[2]}`]
 
           await Promise.all([
             fetch(fileUrls[0], {
@@ -431,11 +427,12 @@ describe('Filestore', function () {
         })
 
         it('should get the directory size', async function () {
-          const response = await fetch(
-            `${filestoreUrl}/project/${projectId}/size`
-          )
-          const body = await response.text()
-          expect(parseInt(JSON.parse(body)['total bytes'])).to.equal(
+          expect(
+            await app.persistor.directorySize(
+              Settings.filestore.stores.template_files,
+              templateId
+            )
+          ).to.equal(
             constantFileContents[0].length + constantFileContents[1].length
           )
         })
@@ -448,12 +445,14 @@ describe('Filestore', function () {
           }
         })
 
-        it('should be able to delete the project', async function () {
-          let response = await fetch(projectUrl, { method: 'DELETE' })
-          expect(response.status).to.equal(204)
+        it('should be able to delete a folder', async function () {
+          await app.persistor.deleteDirectory(
+            Settings.filestore.stores.template_files,
+            templateId + '/'
+          )
 
           for (const index in fileUrls) {
-            response = await fetch(fileUrls[index])
+            const response = await fetch(fileUrls[index])
             expect(response.status).to.equal(404)
           }
         })
@@ -464,23 +463,13 @@ describe('Filestore', function () {
             expect(response.status).to.equal(200)
           }
         })
-
-        it('should not delete a partial project id', async function () {
-          const response = await fetch(`${filestoreUrl}/project/5`, {
-            method: 'DELETE',
-          })
-          expect(response.status).to.equal(400)
-        })
       })
 
       describe('with a large file', function () {
         this.timeout(1000 * 20)
-        let fileId, fileUrl, largeFileContent, error
+        let largeFileContent
 
         beforeEach('upload large file', async function () {
-          fileId = new ObjectId().toString()
-          fileUrl = `${filestoreUrl}/project/${projectId}/file/${fileId}`
-
           largeFileContent = '_wombat_'.repeat(1024 * 1024) // 8 megabytes
           largeFileContent += Math.random()
 
@@ -493,10 +482,6 @@ describe('Filestore', function () {
           const response = await fetch(fileUrl)
           const body = await response.text()
           expect(body).to.equal(largeFileContent)
-        })
-
-        it('should not throw an error', function () {
-          expect(error).not.to.exist
         })
 
         it('should not leak a socket', async function () {
@@ -557,21 +542,23 @@ describe('Filestore', function () {
 
       if (backendSettings.backend === 'gcs') {
         describe('when deleting a file in GCS', function () {
-          let fileId, fileUrl, content, error, dateBefore, dateAfter
+          let content, error, dateBefore, dateAfter
 
           beforeEach('upload and delete file', async function () {
-            fileId = new ObjectId()
-            fileUrl = `${filestoreUrl}/project/${projectId}/file/${fileId}`
-
             content = '_wombat_' + Math.random()
 
             const readStream = streamifier.createReadStream(content)
-            let res = await fetch(fileUrl, { method: 'POST', body: readStream })
+            const res = await fetch(fileUrl, {
+              method: 'POST',
+              body: readStream,
+            })
             if (!res.ok) throw new Error(res.statusText)
             dateBefore = new Date()
-            res = await fetch(fileUrl, { method: 'DELETE' })
+            await app.persistor.deleteObject(
+              Settings.filestore.stores.template_files,
+              fileKey
+            )
             dateAfter = new Date()
-            if (!res.ok) throw new Error(res.statusText)
           })
 
           it('should not throw an error', function () {
@@ -582,12 +569,12 @@ describe('Filestore', function () {
             let date = dateBefore
             const keys = []
             while (date <= dateAfter) {
-              keys.push(`${projectId}/${fileId}-${date.toISOString()}`)
+              keys.push(`${templateId}/v/0/${fileId}-${date.toISOString()}`)
               date = new Date(date.getTime() + 1)
             }
             await TestHelper.expectPersistorToHaveSomeFile(
               app.persistor,
-              `${Settings.filestore.stores.user_files}-deleted`,
+              `${Settings.filestore.stores.template_files}-deleted`,
               keys,
               content
             )
@@ -596,8 +583,8 @@ describe('Filestore', function () {
           it('should remove the file from the original bucket', async function () {
             await TestHelper.expectPersistorNotToHaveFile(
               app.persistor,
-              Settings.filestore.stores.user_files,
-              `${projectId}/${fileId}`
+              Settings.filestore.stores.template_files,
+              fileKey
             )
           })
         })
@@ -605,20 +592,11 @@ describe('Filestore', function () {
 
       if (backendSettings.fallback) {
         describe('with a fallback', function () {
-          let constantFileContent,
-            fileId,
-            fileKey,
-            fileUrl,
-            bucket,
-            fallbackBucket
+          let constantFileContent, bucket, fallbackBucket
 
           beforeEach('prepare fallback', function () {
             constantFileContent = `This is yet more file content ${Math.random()}`
-            fileId = new ObjectId().toString()
-            fileKey = `${projectId}/${fileId}`
-            fileUrl = `${filestoreUrl}/project/${projectId}/file/${fileId}`
-
-            bucket = Settings.filestore.stores.user_files
+            bucket = Settings.filestore.stores.template_files
             fallbackBucket = Settings.filestore.fallback.buckets[bucket]
           })
 
@@ -701,34 +679,23 @@ describe('Filestore', function () {
             })
 
             describe('when copying a file', function () {
-              let newFileId, newFileUrl, newFileKey, opts
+              let newFileKey
 
               beforeEach('prepare to copy file', function () {
                 const newProjectID = new ObjectId().toString()
-                newFileId = new ObjectId().toString()
-                newFileUrl = `${filestoreUrl}/project/${newProjectID}/file/${newFileId}`
-                newFileKey = `${newProjectID}/${newFileId}`
-
-                opts = {
-                  method: 'put',
-                  body: JSON.stringify({
-                    source: {
-                      project_id: projectId,
-                      file_id: fileId,
-                    },
-                  }),
-                  headers: {
-                    'Content-Type': 'application/json',
-                  },
-                }
+                const newFileId = new ObjectId().toString()
+                newFileKey = `${newProjectID}/v/0/${newFileId}`
               })
 
               describe('when copyOnMiss is false', function () {
                 beforeEach('copy with copyOnMiss=false', async function () {
                   app.persistor.settings.copyOnMiss = false
 
-                  const response = await fetch(newFileUrl, opts)
-                  expect(response.status).to.equal(200)
+                  await app.persistor.copyObject(
+                    Settings.filestore.stores.template_files,
+                    fileKey,
+                    newFileKey
+                  )
                 })
 
                 it('should leave the old file in the old bucket', async function () {
@@ -773,8 +740,11 @@ describe('Filestore', function () {
                 beforeEach('copy with copyOnMiss=false', async function () {
                   app.persistor.settings.copyOnMiss = true
 
-                  const response = await fetch(newFileUrl, opts)
-                  expect(response.status).to.equal(200)
+                  await app.persistor.copyObject(
+                    Settings.filestore.stores.template_files,
+                    fileKey,
+                    newFileKey
+                  )
                 })
 
                 it('should leave the old file in the old bucket', async function () {
@@ -842,7 +812,7 @@ describe('Filestore', function () {
               await TestHelper.expectPersistorNotToHaveFile(
                 app.persistor.fallbackPersistor,
                 fallbackBucket,
-                `${projectId}/${fileId}`
+                fileKey
               )
             })
           })
@@ -859,8 +829,10 @@ describe('Filestore', function () {
               })
 
               it('should delete the file', async function () {
-                const response1 = await fetch(fileUrl, { method: 'DELETE' })
-                expect(response1.status).to.equal(204)
+                await app.persistor.deleteObject(
+                  Settings.filestore.stores.template_files,
+                  fileKey
+                )
                 const response2 = await fetch(fileUrl)
                 expect(response2.status).to.equal(404)
               })
@@ -877,8 +849,10 @@ describe('Filestore', function () {
               })
 
               it('should delete the file', async function () {
-                const response1 = await fetch(fileUrl, { method: 'DELETE' })
-                expect(response1.status).to.equal(204)
+                await app.persistor.deleteObject(
+                  Settings.filestore.stores.template_files,
+                  fileKey
+                )
                 const response2 = await fetch(fileUrl)
                 expect(response2.status).to.equal(404)
               })
@@ -904,19 +878,23 @@ describe('Filestore', function () {
               )
 
               it('should delete the files', async function () {
-                const response1 = await fetch(fileUrl, { method: 'DELETE' })
-                expect(response1.status).to.equal(204)
+                await app.persistor.deleteObject(
+                  Settings.filestore.stores.template_files,
+                  fileKey
+                )
                 const response2 = await fetch(fileUrl)
                 expect(response2.status).to.equal(404)
               })
             })
 
             describe('when the file does not exist', function () {
-              it('should return return 204', async function () {
+              it('should return success', async function () {
                 // S3 doesn't give us a 404 when the object doesn't exist, so to stay
-                // consistent we merrily return 204 ourselves here as well
-                const response = await fetch(fileUrl, { method: 'DELETE' })
-                expect(response.status).to.equal(204)
+                // consistent we merrily return success ourselves here as well
+                await app.persistor.deleteObject(
+                  Settings.filestore.stores.template_files,
+                  fileKey
+                )
               })
             })
           })
@@ -924,15 +902,13 @@ describe('Filestore', function () {
       }
 
       describe('with a pdf file', function () {
-        let fileId, fileUrl, localFileSize
+        let localFileSize
         const localFileReadPath = Path.resolve(
           __dirname,
           '../../fixtures/test.pdf'
         )
 
         beforeEach('upload test.pdf', async function () {
-          fileId = new ObjectId().toString()
-          fileUrl = `${filestoreUrl}/project/${projectId}/file/${fileId}`
           const stat = await fsStat(localFileReadPath)
           localFileSize = stat.size
           const readStream = fs.createReadStream(localFileReadPath)
@@ -1032,18 +1008,18 @@ describe('Filestore', function () {
         beforeEach('prepare ids', function () {
           fileId1 = new ObjectId().toString()
           fileId2 = new ObjectId().toString()
-          fileKey1 = `${projectId}/${fileId1}`
-          fileKey2 = `${projectId}/${fileId2}`
-          fileKeyOtherProject = `${new ObjectId().toString()}/${new ObjectId().toString()}`
-          fileUrl1 = `${filestoreUrl}/project/${projectId}/file/${fileId1}`
-          fileUrl2 = `${filestoreUrl}/project/${projectId}/file/${fileId2}`
+          fileKey1 = `${templateId}/v/0/${fileId1}`
+          fileKey2 = `${templateId}/v/0/${fileId2}`
+          fileKeyOtherProject = `${new ObjectId().toString()}/v/0/${new ObjectId().toString()}`
+          fileUrl1 = `${templateUrl}/${fileId1}`
+          fileUrl2 = `${templateUrl}/${fileId2}`
         })
 
         beforeEach('ensure DEK is missing', async function () {
           // Cannot use test helper expectPersistorNotToHaveFile here, we need to use the KEK.
           await expect(
             app.persistor.getDataEncryptionKeySize(
-              backendSettings.stores.user_files,
+              backendSettings.stores.template_files,
               fileKey1
             )
           ).to.rejectedWith(NotFoundError)
@@ -1065,12 +1041,12 @@ describe('Filestore', function () {
 
         it('should create a DEK when asked explicitly', async function () {
           await app.persistor.generateDataEncryptionKey(
-            backendSettings.stores.user_files,
+            backendSettings.stores.template_files,
             fileKey1
           )
           expect(
             await app.persistor.getDataEncryptionKeySize(
-              backendSettings.stores.user_files,
+              backendSettings.stores.template_files,
               fileKey1
             )
           ).to.equal(32)
@@ -1080,7 +1056,7 @@ describe('Filestore', function () {
           await createRandomContent(fileUrl1)
           expect(
             await app.persistor.getDataEncryptionKeySize(
-              backendSettings.stores.user_files,
+              backendSettings.stores.template_files,
               fileKey1
             )
           ).to.equal(32)
@@ -1095,7 +1071,7 @@ describe('Filestore', function () {
           // Cannot use test helper expectPersistorNotToHaveFile here, we need to use the KEK.
           await expect(
             app.persistor.getDataEncryptionKeySize(
-              backendSettings.stores.user_files,
+              backendSettings.stores.template_files,
               fileKey1
             )
           ).to.rejectedWith(NotFoundError)
@@ -1106,7 +1082,7 @@ describe('Filestore', function () {
 
           await expect(
             app.persistor.generateDataEncryptionKey(
-              backendSettings.stores.user_files,
+              backendSettings.stores.template_files,
               fileKey1
             )
           ).to.rejectedWith(AlreadyWrittenError)
@@ -1167,7 +1143,7 @@ describe('Filestore', function () {
           ) {
             const content = Math.random().toString()
             await writer.sendStream(
-              Settings.filestore.stores.user_files,
+              Settings.filestore.stores.template_files,
               fileKey,
               Stream.Readable.from([content])
             )
@@ -1175,7 +1151,7 @@ describe('Filestore', function () {
             for (const persistor of readersSuccess) {
               await TestHelper.expectPersistorToHaveFile(
                 persistor,
-                backendSettings.stores.user_files,
+                backendSettings.stores.template_files,
                 fileKey,
                 content
               )
@@ -1185,7 +1161,7 @@ describe('Filestore', function () {
               await expect(
                 TestHelper.expectPersistorToHaveFile(
                   persistor,
-                  backendSettings.stores.user_files,
+                  backendSettings.stores.template_files,
                   fileKey,
                   content
                 )
@@ -1277,7 +1253,7 @@ describe('Filestore', function () {
           const { Contents: dekEntries } = await s3Client
             .listObjectsV2({
               Bucket: process.env.AWS_S3_USER_FILES_DEK_BUCKET_NAME,
-              Prefix: `${projectId}/`,
+              Prefix: `${templateId}/`,
             })
             .promise()
           expect(dekEntries).to.have.length(dekBucketKeys.length)
@@ -1286,8 +1262,8 @@ describe('Filestore', function () {
 
           const { Contents: userFilesEntries } = await s3Client
             .listObjectsV2({
-              Bucket: backendSettings.stores.user_files,
-              Prefix: `${projectId}/`,
+              Bucket: backendSettings.stores.template_files,
+              Prefix: `${templateId}/`,
             })
             .promise()
           expect(userFilesEntries).to.have.length(userFilesBucketKeys.length)
@@ -1299,7 +1275,7 @@ describe('Filestore', function () {
 
         it('should use a custom bucket for DEKs', async function () {
           await checkDEKStorage({
-            dekBucketKeys: [`${projectId}/dek`],
+            dekBucketKeys: [`${templateId}/dek`],
             userFilesBucketKeys: [fileKey1],
           })
         })
@@ -1313,26 +1289,26 @@ describe('Filestore', function () {
           it('should refuse to delete top-level prefix', async function () {
             await expect(
               app.persistor.deleteDirectory(
-                Settings.filestore.stores.user_files,
-                projectId.slice(0, 3)
+                Settings.filestore.stores.template_files,
+                templateId.slice(0, 3)
               )
             ).to.be.rejectedWith('not a project-folder')
             expect(
               await app.persistor.checkIfObjectExists(
-                Settings.filestore.stores.user_files,
+                Settings.filestore.stores.template_files,
                 fileKey1
               )
             ).to.equal(true)
             await checkGET1()
             expect(
               await app.persistor.checkIfObjectExists(
-                Settings.filestore.stores.user_files,
+                Settings.filestore.stores.template_files,
                 fileKey2
               )
             ).to.equal(true)
             expect(
               await app.persistor.getDataEncryptionKeySize(
-                Settings.filestore.stores.user_files,
+                Settings.filestore.stores.template_files,
                 fileKey2
               )
             ).to.equal(32)
@@ -1340,24 +1316,24 @@ describe('Filestore', function () {
           })
           it('should delete sub-folder and keep DEK', async function () {
             await app.persistor.deleteDirectory(
-              Settings.filestore.stores.user_files,
+              Settings.filestore.stores.template_files,
               fileKey1 // not really a sub-folder, but it will do for this test.
             )
             expect(
               await app.persistor.checkIfObjectExists(
-                Settings.filestore.stores.user_files,
+                Settings.filestore.stores.template_files,
                 fileKey1
               )
             ).to.equal(false)
             expect(
               await app.persistor.checkIfObjectExists(
-                Settings.filestore.stores.user_files,
+                Settings.filestore.stores.template_files,
                 fileKey2
               )
             ).to.equal(true)
             expect(
               await app.persistor.getDataEncryptionKeySize(
-                Settings.filestore.stores.user_files,
+                Settings.filestore.stores.template_files,
                 fileKey2
               )
             ).to.equal(32)
@@ -1365,24 +1341,24 @@ describe('Filestore', function () {
           })
           it('should delete project folder and DEK', async function () {
             await app.persistor.deleteDirectory(
-              Settings.filestore.stores.user_files,
-              `${projectId}/`
+              Settings.filestore.stores.template_files,
+              `${templateId}/`
             )
             expect(
               await app.persistor.checkIfObjectExists(
-                Settings.filestore.stores.user_files,
+                Settings.filestore.stores.template_files,
                 fileKey1
               )
             ).to.equal(false)
             expect(
               await app.persistor.checkIfObjectExists(
-                Settings.filestore.stores.user_files,
+                Settings.filestore.stores.template_files,
                 fileKey2
               )
             ).to.equal(false)
             await expect(
               app.persistor.getDataEncryptionKeySize(
-                Settings.filestore.stores.user_files,
+                Settings.filestore.stores.template_files,
                 fileKey2
               )
             ).to.rejectedWith(NotFoundError)
@@ -1393,8 +1369,6 @@ describe('Filestore', function () {
       describe('getObjectSize', function () {
         it('should return a number', async function () {
           const buf = Buffer.from('hello')
-          const fileId = new ObjectId().toString()
-          const fileUrl = `${filestoreUrl}/project/${projectId}/file/${fileId}`
           const res = await fetch(fileUrl, {
             method: 'POST',
             body: Stream.Readable.from([buf]),
@@ -1402,8 +1376,8 @@ describe('Filestore', function () {
           if (!res.ok) throw new Error(res.statusText)
           expect(
             await app.persistor.getObjectSize(
-              Settings.filestore.stores.user_files,
-              `${projectId}/${fileId}`
+              Settings.filestore.stores.template_files,
+              fileKey
             )
           ).to.equal(buf.byteLength)
         })
@@ -1413,14 +1387,12 @@ describe('Filestore', function () {
         it('should return false when the object does not exist', async function () {
           expect(
             await app.persistor.checkIfObjectExists(
-              Settings.filestore.stores.user_files,
-              `${projectId}/${new ObjectId().toString()}`
+              Settings.filestore.stores.template_files,
+              fileKey
             )
           ).to.equal(false)
         })
         it('should return true when the object exists', async function () {
-          const fileId = new ObjectId().toString()
-          const fileUrl = `${filestoreUrl}/project/${projectId}/file/${fileId}`
           const res = await fetch(fileUrl, {
             method: 'POST',
             body: Stream.Readable.from(['hello']),
@@ -1428,8 +1400,8 @@ describe('Filestore', function () {
           if (!res.ok) throw new Error(res.statusText)
           expect(
             await app.persistor.checkIfObjectExists(
-              Settings.filestore.stores.user_files,
-              `${projectId}/${fileId}`
+              Settings.filestore.stores.template_files,
+              fileKey
             )
           ).to.equal(true)
         })
@@ -1438,31 +1410,29 @@ describe('Filestore', function () {
       if (backendSettings.backend === 's3SSEC') {
         describe('storageClass', function () {
           it('should use the default storage class for dek', async function () {
-            const key = `${projectId}/${new ObjectId()}`
             const dekBucket = process.env.AWS_S3_USER_FILES_DEK_BUCKET_NAME
             await app.persistor.sendStream(
               dekBucket,
-              key,
+              fileKey,
               Stream.Readable.from(['hello'])
             )
             expect(
-              await app.persistor.getObjectStorageClass(dekBucket, key)
+              await app.persistor.getObjectStorageClass(dekBucket, fileKey)
             ).to.equal(undefined)
           })
 
           it('should use the custom storage class for user files', async function () {
-            const key = `${projectId}/${new ObjectId()}`
             await app.persistor.sendStream(
-              Settings.filestore.stores.user_files,
-              key,
+              Settings.filestore.stores.template_files,
+              fileKey,
               Stream.Readable.from(['hello'])
             )
             const sc = AWS_S3_USER_FILES_STORAGE_CLASS
             expect(sc).to.exist
             expect(
               await app.persistor.getObjectStorageClass(
-                Settings.filestore.stores.user_files,
-                key
+                Settings.filestore.stores.template_files,
+                fileKey
               )
             ).to.equal(sc)
           })
@@ -1470,10 +1440,6 @@ describe('Filestore', function () {
       }
 
       describe('autoGunzip', function () {
-        let key
-        beforeEach('new key', function () {
-          key = `${projectId}/${new ObjectId().toString()}`
-        })
         this.timeout(60 * 1000)
         const body = Buffer.alloc(10 * 1024 * 1024, 'hello')
         const gzippedBody = gzipSync(body)
@@ -1486,7 +1452,7 @@ describe('Filestore', function () {
          */
         async function checkBodyIsTheSame(key, wantBody, autoGunzip) {
           const s = await app.persistor.getObjectStream(
-            Settings.filestore.stores.user_files,
+            Settings.filestore.stores.template_files,
             key,
             { autoGunzip }
           )
@@ -1499,8 +1465,8 @@ describe('Filestore', function () {
           it('should refuse to handle autoGunzip', async function () {
             await expect(
               app.persistor.getObjectStream(
-                Settings.filestore.stores.user_files,
-                key,
+                Settings.filestore.stores.template_files,
+                fileKey,
                 { autoGunzip: true }
               )
             ).to.be.rejectedWith(NotImplementedError)
@@ -1508,54 +1474,54 @@ describe('Filestore', function () {
         } else {
           it('should return the raw body with gzip', async function () {
             await app.persistor.sendStream(
-              Settings.filestore.stores.user_files,
-              key,
+              Settings.filestore.stores.template_files,
+              fileKey,
               Stream.Readable.from([gzippedBody]),
               { contentEncoding: 'gzip' }
             )
             expect(
               await app.persistor.getObjectSize(
-                Settings.filestore.stores.user_files,
-                key
+                Settings.filestore.stores.template_files,
+                fileKey
               )
             ).to.equal(gzippedBody.byteLength)
             // raw body with autoGunzip=true
-            await checkBodyIsTheSame(key, body, true)
+            await checkBodyIsTheSame(fileKey, body, true)
             // gzip body without autoGunzip=false
-            await checkBodyIsTheSame(key, gzippedBody, false)
+            await checkBodyIsTheSame(fileKey, gzippedBody, false)
           })
           it('should return the raw body without gzip compression', async function () {
             await app.persistor.sendStream(
-              Settings.filestore.stores.user_files,
-              key,
+              Settings.filestore.stores.template_files,
+              fileKey,
               Stream.Readable.from([body])
             )
             expect(
               await app.persistor.getObjectSize(
-                Settings.filestore.stores.user_files,
-                key
+                Settings.filestore.stores.template_files,
+                fileKey
               )
             ).to.equal(body.byteLength)
             // raw body with both autoGunzip options
-            await checkBodyIsTheSame(key, body, true)
-            await checkBodyIsTheSame(key, body, false)
+            await checkBodyIsTheSame(fileKey, body, true)
+            await checkBodyIsTheSame(fileKey, body, false)
           })
 
           it('should return the gzip body without gzip header', async function () {
             await app.persistor.sendStream(
-              Settings.filestore.stores.user_files,
-              key,
+              Settings.filestore.stores.template_files,
+              fileKey,
               Stream.Readable.from([gzippedBody])
             )
             expect(
               await app.persistor.getObjectSize(
-                Settings.filestore.stores.user_files,
-                key
+                Settings.filestore.stores.template_files,
+                fileKey
               )
             ).to.equal(gzippedBody.byteLength)
             // gzip body with both autoGunzip options
-            await checkBodyIsTheSame(key, gzippedBody, true)
-            await checkBodyIsTheSame(key, gzippedBody, false)
+            await checkBodyIsTheSame(fileKey, gzippedBody, true)
+            await checkBodyIsTheSame(fileKey, gzippedBody, false)
           })
         }
       })

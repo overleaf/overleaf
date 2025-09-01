@@ -39,7 +39,6 @@ describe('SplitTestHandler', function () {
     }
     this.SplitTestCache.get.resolves(this.cachedSplitTests)
     this.Settings = {
-      filestoreMigrationLevel: 0,
       moduleImportSequence: [],
       overleaf: {},
       devToolbar: {

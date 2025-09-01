@@ -10,7 +10,7 @@ describe('FileController', function () {
   const settings = {
     s3: {
       buckets: {
-        user_files: 'user_files',
+        template_files: 'template_files',
       },
     },
   }
@@ -20,19 +20,15 @@ describe('FileController', function () {
   }
   const projectId = 'projectId'
   const fileId = 'file_id'
-  const bucket = 'user_files'
+  const bucket = 'template_files'
   const key = `${projectId}/${fileId}`
   const error = new Error('incorrect utensil')
 
   beforeEach(function () {
     FileHandler = {
-      copyObject: sinon.stub().yields(),
       getFile: sinon.stub().yields(null, fileStream),
       getFileSize: sinon.stub().yields(null, fileSize),
-      deleteFile: sinon.stub().yields(),
-      deleteProject: sinon.stub().yields(),
       insertFile: sinon.stub().yields(),
-      getDirectorySize: sinon.stub().yields(null, fileSize),
       getRedirectUrl: sinon.stub().yields(null, null),
     }
 
@@ -233,104 +229,6 @@ describe('FileController', function () {
         done()
       }
       FileController.insertFile(req, res, next)
-    })
-  })
-
-  describe('copyFile', function () {
-    const oldFileId = 'oldFileId'
-    const oldProjectId = 'oldProjectid'
-    const oldKey = `${oldProjectId}/${oldFileId}`
-
-    beforeEach(function () {
-      req.body = {
-        source: {
-          project_id: oldProjectId,
-          file_id: oldFileId,
-        },
-      }
-    })
-
-    it('should send bucket name and both keys to FileHandler', function (done) {
-      res.sendStatus = code => {
-        code.should.equal(200)
-        expect(FileHandler.copyObject).to.have.been.calledWith(
-          bucket,
-          oldKey,
-          key
-        )
-        done()
-      }
-      FileController.copyFile(req, res, next)
-    })
-
-    it('should send a 404 if the original file was not found', function (done) {
-      FileHandler.copyObject.yields(
-        new Errors.NotFoundError({ message: 'not found', info: {} })
-      )
-      res.sendStatus = code => {
-        code.should.equal(404)
-        done()
-      }
-      FileController.copyFile(req, res, next)
-    })
-
-    it('should send an error if there was an error', function (done) {
-      FileHandler.copyObject.yields(error)
-      FileController.copyFile(req, res, err => {
-        expect(err).to.equal(error)
-        done()
-      })
-    })
-  })
-
-  describe('delete file', function () {
-    it('should tell the file handler', function (done) {
-      res.sendStatus = code => {
-        code.should.equal(204)
-        expect(FileHandler.deleteFile).to.have.been.calledWith(bucket, key)
-        done()
-      }
-      FileController.deleteFile(req, res, next)
-    })
-
-    it('should send a 500 if there was an error', function () {
-      FileHandler.deleteFile.yields(error)
-      FileController.deleteFile(req, res, next)
-      expect(next).to.have.been.calledWith(error)
-    })
-  })
-
-  describe('delete project', function () {
-    it('should tell the file handler', function (done) {
-      res.sendStatus = code => {
-        code.should.equal(204)
-        expect(FileHandler.deleteProject).to.have.been.calledWith(bucket, key)
-        done()
-      }
-      FileController.deleteProject(req, res, next)
-    })
-
-    it('should send a 500 if there was an error', function () {
-      FileHandler.deleteProject.yields(error)
-      FileController.deleteProject(req, res, next)
-      expect(next).to.have.been.calledWith(error)
-    })
-  })
-
-  describe('directorySize', function () {
-    it('should return total directory size bytes', function (done) {
-      FileController.directorySize(req, {
-        json: result => {
-          expect(result['total bytes']).to.equal(fileSize)
-          done()
-        },
-      })
-    })
-
-    it('should send a 500 if there was an error', function () {
-      FileHandler.getDirectorySize.yields(error)
-      FileController.directorySize(req, res, next)
-      expect(next).to.have.been.calledWith(error)
     })
   })
 })

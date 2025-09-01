@@ -18,7 +18,6 @@ import mongoose from './app/src/infrastructure/Mongoose.js'
 import { triggerGracefulShutdown } from './app/src/infrastructure/GracefulShutdown.js'
 import FileWriter from './app/src/infrastructure/FileWriter.js'
 import { fileURLToPath } from 'node:url'
-import Features from './app/src/infrastructure/Features.js'
 
 metrics.gauge(
   'web_startup',
@@ -55,9 +54,6 @@ if (Settings.catchErrors) {
 
 // Create ./data/dumpFolder if needed
 FileWriter.ensureDumpFolderExists()
-
-// Validate combination of feature flags.
-Features.validateSettings()
 
 // handle SIGTERM for graceful shutdown in kubernetes
 process.on('SIGTERM', function (signal) {

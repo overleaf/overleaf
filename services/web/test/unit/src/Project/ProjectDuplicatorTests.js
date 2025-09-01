@@ -14,7 +14,7 @@ describe('ProjectDuplicator', function () {
     this.doc1Lines = ['one']
     this.doc2Lines = ['two']
     this.file0 = { name: 'file0', _id: 'file0', hash: 'abcde' }
-    this.file1 = { name: 'file1', _id: 'file1' }
+    this.file1 = { name: 'file1', _id: 'file1', hash: 'fffff' }
     this.file2 = {
       name: 'file2',
       _id: 'file2',
@@ -105,22 +105,19 @@ describe('ProjectDuplicator', function () {
     ]
     this.fileEntries = [
       {
-        createdBlob: false,
+        createdBlob: true,
         path: this.file0Path,
         file: this.newFile0,
-        url: this.filestoreUrl,
       },
       {
-        createdBlob: false,
+        createdBlob: true,
         path: this.file1Path,
         file: this.newFile1,
-        url: this.filestoreUrl,
       },
       {
         createdBlob: true,
         path: this.file2Path,
         file: this.newFile2,
-        url: null,
       },
     ]
 
@@ -143,15 +140,10 @@ describe('ProjectDuplicator', function () {
         updateProjectStructure: sinon.stub().resolves(),
       },
     }
-    this.FileStoreHandler = {
-      promises: {
-        copyFile: sinon.stub().resolves(this.filestoreUrl),
-      },
-    }
     this.HistoryManager = {
       promises: {
         copyBlob: sinon.stub().callsFake((historyId, newHistoryId, hash) => {
-          if (hash === 'abcde') {
+          if (hash === '500') {
             return Promise.reject(new Error('copy blob error'))
           }
           return Promise.resolve()
@@ -221,9 +213,6 @@ describe('ProjectDuplicator', function () {
         flushProjectToTpds: sinon.stub().resolves(),
       },
     }
-    this.Features = {
-      hasFeature: sinon.stub().withArgs('project-history-blobs').returns(true),
-    }
 
     this.ProjectDuplicator = SandboxedModule.require(MODULE_PATH, {
       requires: {
@@ -232,7 +221,6 @@ describe('ProjectDuplicator', function () {
         '../Docstore/DocstoreManager': this.DocstoreManager,
         '../DocumentUpdater/DocumentUpdaterHandler':
           this.DocumentUpdaterHandler,
-        '../FileStore/FileStoreHandler': this.FileStoreHandler,
         './ProjectCreationHandler': this.ProjectCreationHandler,
         './ProjectDeleter': this.ProjectDeleter,
         './ProjectEntityMongoUpdateHandler':
@@ -244,7 +232,6 @@ describe('ProjectDuplicator', function () {
         '../ThirdPartyDataStore/TpdsProjectFlusher': this.TpdsProjectFlusher,
         '../Tags/TagsHandler': this.TagsHandler,
         '../History/HistoryManager': this.HistoryManager,
-        '../../infrastructure/Features': this.Features,
         '../Compile/ClsiCacheManager': {
           prepareClsiCache: sinon.stub().rejects(new Error('ignore this')),
         },
@@ -281,53 +268,13 @@ describe('ProjectDuplicator', function () {
     })
 
     it('should duplicate the files with hashes by copying the blobs in history v1', function () {
-      for (const file of [this.file0, this.file2]) {
+      for (const file of [this.file0, this.file1, this.file2]) {
         this.HistoryManager.promises.copyBlob.should.have.been.calledWith(
           this.project.overleaf.history.id,
           this.newProject.overleaf.history.id,
           file.hash
         )
       }
-    })
-
-    it('should ignore any errors when copying the blobs in history v1', async function () {
-      await expect(
-        this.HistoryManager.promises.copyBlob(
-          this.project.overleaf.history.id,
-          this.newProject.overleaf.history.id,
-          this.file0.hash
-        )
-      ).to.be.rejectedWith('copy blob error')
-    })
-
-    it('should not try to copy the blobs for any files without hashes', function () {
-      for (const file of [this.file1]) {
-        this.HistoryManager.promises.copyBlob.should.not.have.been.calledWith(
-          this.project.overleaf.history.id,
-          this.newProject.overleaf.history.id,
-          file.hash
-        )
-      }
-    })
-
-    it('should copy files to the filestore', function () {
-      for (const file of [this.file0, this.file1]) {
-        this.FileStoreHandler.promises.copyFile.should.have.been.calledWith(
-          this.project._id,
-          file._id,
-          this.newProject._id,
-          this.newFileId
-        )
-      }
-    })
-
-    it('should not copy files that have been sent to history-v1 to the filestore', function () {
-      this.FileStoreHandler.promises.copyFile.should.not.have.been.calledWith(
-        this.project._id,
-        this.file2._id,
-        this.newProject._id,
-        this.newFileId
-      )
     })
 
     it('should create a blank project', function () {
@@ -418,6 +365,19 @@ describe('ProjectDuplicator', function () {
     it('should not set the root doc on the copy', function () {
       this.ProjectEntityUpdateHandler.promises.setRootDoc.should.not.have.been
         .called
+    })
+  })
+
+  describe('when cloning in history-v1 fails', function () {
+    it('should fail the clone operation', async function () {
+      this.file0.hash = '500'
+      await expect(
+        this.ProjectDuplicator.promises.duplicate(
+          this.owner,
+          this.project._id,
+          'name'
+        )
+      ).to.be.rejectedWith('copy blob error')
     })
   })
 

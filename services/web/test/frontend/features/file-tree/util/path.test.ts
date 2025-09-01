@@ -154,7 +154,7 @@ describe('Path utils', function () {
         'test-folder/example.png'
       )
       expect(preview).to.deep.equal({
-        url: '/project/test-project-id/blob/42?fallback=test-file-in-folder',
+        url: '/project/test-project-id/blob/42',
         extension: 'png',
       })
     })

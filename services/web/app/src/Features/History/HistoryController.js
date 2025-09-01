@@ -52,13 +52,12 @@ async function requestBlob(method, req, res) {
   }
 
   const range = req.get('Range')
-  let stream, source, contentLength
+  let stream, contentLength
   try {
-    ;({ stream, source, contentLength } =
-      await HistoryManager.promises.requestBlobWithFallback(
+    ;({ stream, contentLength } =
+      await HistoryManager.promises.requestBlobWithProjectId(
         projectId,
         hash,
-        req.query.fallback,
         method,
         range
       ))
@@ -66,7 +65,6 @@ async function requestBlob(method, req, res) {
     if (err instanceof Errors.NotFoundError) return res.status(404).end()
     throw err
   }
-  res.appendHeader('X-Served-By', source)
 
   if (contentLength) res.setHeader('Content-Length', contentLength) // set on HEAD
   res.setHeader('Content-Type', 'application/octet-stream')
