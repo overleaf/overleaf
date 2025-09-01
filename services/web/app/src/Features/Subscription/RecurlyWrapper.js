@@ -700,11 +700,12 @@ const promises = {
     if (trialEndsAt == null) {
       trialEndsAt = new Date()
     }
-    const nextRenewalDate = new Date()
-    nextRenewalDate.setDate(trialEndsAt.getDate() + daysUntilExpire)
+    const nextRenewalDate = new Date(
+      trialEndsAt.getTime() + daysUntilExpire * 24 * 60 * 60 * 1000
+    )
     logger.debug(
       { subscriptionId, daysUntilExpire },
-      'Exending Free trial for user'
+      'Extending Free trial for user'
     )
     try {
       await RecurlyWrapper.promises.apiRequest({

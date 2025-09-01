@@ -1472,4 +1472,57 @@ describe('RecurlyWrapper', function () {
       })
     })
   })
+
+  describe('extendTrial', function () {
+    beforeEach(function () {
+      this.subscriptionId = 'subscription-id-123'
+    })
+
+    afterEach(function () {
+      this.RecurlyWrapper.promises.apiRequest.restore()
+      tk.reset()
+    })
+
+    describe('with default parameters (7 days)', function () {
+      beforeEach(async function () {
+        tk.freeze(new Date('2025-01-25T10:30:00Z'))
+
+        this.apiRequest = sinon
+          .stub(this.RecurlyWrapper.promises, 'apiRequest')
+          .resolves()
+        await this.RecurlyWrapper.promises.extendTrial(this.subscriptionId)
+      })
+
+      it('should extend trial by 7 days from current time', function () {
+        const options = this.apiRequest.lastCall.args[0]
+        expect(options.qs.next_bill_date).to.deep.equal(
+          new Date('2025-02-01T10:30:00Z')
+        )
+      })
+    })
+
+    describe('extending trial across year boundary', function () {
+      beforeEach(async function () {
+        // Trial ends on December 28, 2025, extend by 14 days to cross into 2026
+        this.trialEndsAt = new Date('2025-12-28T12:00:00Z')
+        this.daysUntilExpire = 14
+
+        this.apiRequest = sinon
+          .stub(this.RecurlyWrapper.promises, 'apiRequest')
+          .resolves()
+        await this.RecurlyWrapper.promises.extendTrial(
+          this.subscriptionId,
+          this.trialEndsAt,
+          this.daysUntilExpire
+        )
+      })
+
+      it('should correctly calculate date across year boundary', function () {
+        const options = this.apiRequest.lastCall.args[0]
+        expect(options.qs.next_bill_date).to.deep.equal(
+          new Date('2026-01-11T12:00:00Z')
+        )
+      })
+    })
+  })
 })
