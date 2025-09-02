@@ -139,6 +139,10 @@ export const countWordsInFile = (
   const headMatcher = NodeType.match<
     (nodeRef: SyntaxNodeRef) => boolean | void
   >({
+    Comment(nodeRef) {
+      handleComment(nodeRef)
+      return false
+    },
     Title(nodeRef) {
       data.headers++
       iterateNode(nodeRef, 'header')
@@ -149,6 +153,10 @@ export const countWordsInFile = (
   const bodyMatcher = NodeType.match<
     (nodeRef: SyntaxNodeRef) => boolean | void
   >({
+    Comment(nodeRef) {
+      handleComment(nodeRef)
+      return false
+    },
     Normal(nodeRef) {
       textNodes.push({
         from: nodeRef.from,
@@ -265,17 +273,48 @@ export const countWordsInFile = (
 
   const preambleExtent = findPreambleExtent(tree)
 
+  const state = {
+    skipping: false,
+  }
+
+  const TC_REGEX = /^%+TC:\s*(\w+)\s*/i
+
+  const handleComment = (nodeRef: SyntaxNodeRef) => {
+    const comment = content.slice(nodeRef.from, nodeRef.to)
+
+    // look for TeXcount instructions
+    const match = TC_REGEX.exec(comment)
+    if (match) {
+      switch (match[1].toLowerCase()) {
+        case 'ignore':
+          state.skipping = true
+          break
+        case 'endignore':
+          state.skipping = false
+          break
+        default:
+          break
+      }
+    }
+  }
+
   tree.iterate({
     from: 0,
     to: preambleExtent.to,
-    enter(nodeRef) {
+    enter(nodeRef: SyntaxNodeRef) {
+      if (state.skipping && !nodeRef.type.is('Comment')) {
+        return false
+      }
       return headMatcher(nodeRef.type)?.(nodeRef)
     },
   })
 
   tree.iterate({
     from: preambleExtent.to,
-    enter(nodeRef) {
+    enter(nodeRef: SyntaxNodeRef) {
+      if (state.skipping && !nodeRef.type.is('Comment')) {
+        return false
+      }
       return bodyMatcher(nodeRef.type)?.(nodeRef)
     },
   })

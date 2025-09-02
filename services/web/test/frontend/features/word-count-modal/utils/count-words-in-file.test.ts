@@ -5,7 +5,7 @@ import { WordCountData } from '@/features/word-count-modal/components/word-count
 import { createSegmenters } from '@/features/word-count-modal/utils/segmenters'
 import { expect } from 'chai'
 
-describe('word count', function () {
+describe('word-count', function () {
   beforeEach(async function () {
     this.data = {
       encode: '',
@@ -33,6 +33,10 @@ describe('word count', function () {
     const content = {
       'word-count.tex': await readFile(
         path.join(__dirname, 'word-count.tex'),
+        'utf-8'
+      ),
+      'word-count-with-ignored-sections.tex': await readFile(
+        path.join(__dirname, 'word-count-with-ignored-sections.tex'),
         'utf-8'
       ),
     }
@@ -67,6 +71,30 @@ describe('word count', function () {
       otherWords: 2,
       textCharacters: 193,
       textWords: 42,
+    })
+  })
+
+  it('skips ignored sections', function () {
+    countWordsInFile(
+      this.data,
+      this.projectSnapshot,
+      'word-count-with-ignored-sections.tex',
+      this.segmenters
+    )
+
+    expect(this.data).to.deep.include({
+      abstractCharacters: 0,
+      abstractWords: 0,
+      captionCharacters: 0,
+      captionWords: 0,
+      footnoteCharacters: 0,
+      footnoteWords: 0,
+      headCharacters: 0,
+      headWords: 0,
+      otherCharacters: 0,
+      otherWords: 0,
+      textCharacters: 10,
+      textWords: 3,
     })
   })
 })
