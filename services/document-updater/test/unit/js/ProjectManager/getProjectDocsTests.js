@@ -1,55 +1,47 @@
-/* eslint-disable
-    no-return-assign,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS206: Consider reworking classes to avoid initClass
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
+const { expect } = require('chai')
 const sinon = require('sinon')
-const modulePath = '../../../../app/js/ProjectManager.js'
 const SandboxedModule = require('sandboxed-module')
 const Errors = require('../../../../app/js/Errors.js')
 
+const MODULE_PATH = '../../../../app/js/ProjectManager.js'
+
 describe('ProjectManager - getProjectDocsAndFlushIfOld', function () {
   beforeEach(function () {
-    let Timer
-    this.LockManager = {
-      getLock: sinon.stub().yields(),
-      releaseLock: sinon.stub().yields(),
+    this.RedisManager = {
+      promises: {
+        checkOrSetProjectState: sinon.stub().resolves(),
+        getDocIdsInProject: sinon.stub(),
+        clearProjectState: sinon.stub().resolves(),
+      },
     }
-    this.ProjectManager = SandboxedModule.require(modulePath, {
+    this.ProjectHistoryRedisManager = {}
+    this.DocumentManager = {
+      promises: {
+        getDocAndFlushIfOldWithLock: sinon.stub(),
+      },
+    }
+    this.HistoryManager = {}
+    this.Metrics = {
+      Timer: class Timer {},
+    }
+    this.Metrics.Timer.prototype.done = sinon.stub()
+
+    this.ProjectManager = SandboxedModule.require(MODULE_PATH, {
       requires: {
-        './RedisManager': (this.RedisManager = {}),
-        './ProjectHistoryRedisManager': (this.ProjectHistoryRedisManager = {}),
-        './DocumentManager': (this.DocumentManager = {}),
-        './HistoryManager': (this.HistoryManager = {}),
-        './LockManager': this.LockManager,
-        './Metrics': (this.Metrics = {
-          Timer: (Timer = (function () {
-            Timer = class Timer {
-              static initClass() {
-                this.prototype.done = sinon.stub()
-              }
-            }
-            Timer.initClass()
-            return Timer
-          })()),
-        }),
+        './RedisManager': this.RedisManager,
+        './ProjectHistoryRedisManager': this.ProjectHistoryRedisManager,
+        './DocumentManager': this.DocumentManager,
+        './HistoryManager': this.HistoryManager,
+        './Metrics': this.Metrics,
         './Errors': Errors,
       },
     })
     this.project_id = 'project-id-123'
-    this.callback = sinon.stub()
-    return (this.doc_versions = [111, 222, 333])
+    this.doc_versions = [111, 222, 333]
   })
 
   describe('successfully', function () {
-    beforeEach(function (done) {
+    beforeEach(async function () {
       this.doc_ids = ['doc-id-1', 'doc-id-2', 'doc-id-3']
       this.doc_lines = [
         ['aaa', 'aaa'],
@@ -73,152 +65,104 @@ describe('ProjectManager - getProjectDocsAndFlushIfOld', function () {
           v: this.doc_versions[2],
         },
       ]
-      this.RedisManager.checkOrSetProjectState = sinon
-        .stub()
-        .callsArgWith(2, null)
-      this.RedisManager.getDocIdsInProject = sinon
-        .stub()
-        .callsArgWith(1, null, this.doc_ids)
-      this.DocumentManager.getDocAndFlushIfOldWithLock = sinon.stub()
-      this.DocumentManager.getDocAndFlushIfOldWithLock
+      this.RedisManager.promises.getDocIdsInProject.resolves(this.doc_ids)
+      this.DocumentManager.promises.getDocAndFlushIfOldWithLock
         .withArgs(this.project_id, this.doc_ids[0])
-        .callsArgWith(2, null, this.doc_lines[0], this.doc_versions[0])
-      this.DocumentManager.getDocAndFlushIfOldWithLock
+        .resolves({ lines: this.doc_lines[0], version: this.doc_versions[0] })
+      this.DocumentManager.promises.getDocAndFlushIfOldWithLock
         .withArgs(this.project_id, this.doc_ids[1])
-        .callsArgWith(2, null, this.doc_lines[1], this.doc_versions[1])
-      this.DocumentManager.getDocAndFlushIfOldWithLock
+        .resolves({ lines: this.doc_lines[1], version: this.doc_versions[1] })
+      this.DocumentManager.promises.getDocAndFlushIfOldWithLock
         .withArgs(this.project_id, this.doc_ids[2])
-        .callsArgWith(2, null, this.doc_lines[2], this.doc_versions[2])
-      return this.ProjectManager.getProjectDocsAndFlushIfOld(
-        this.project_id,
-        this.projectStateHash,
-        this.excludeVersions,
-        (error, docs) => {
-          this.callback(error, docs)
-          return done()
-        }
-      )
+        .resolves({ lines: this.doc_lines[2], version: this.doc_versions[2] })
+      this.result =
+        await this.ProjectManager.promises.getProjectDocsAndFlushIfOld(
+          this.project_id,
+          this.projectStateHash,
+          this.excludeVersions
+        )
     })
 
     it('should check the project state', function () {
-      return this.RedisManager.checkOrSetProjectState
-        .calledWith(this.project_id, this.projectStateHash)
-        .should.equal(true)
+      this.RedisManager.promises.checkOrSetProjectState.should.have.been.calledWith(
+        this.project_id,
+        this.projectStateHash
+      )
     })
 
     it('should get the doc ids in the project', function () {
-      return this.RedisManager.getDocIdsInProject
-        .calledWith(this.project_id)
-        .should.equal(true)
+      this.RedisManager.promises.getDocIdsInProject.should.have.been.calledWith(
+        this.project_id
+      )
     })
 
-    it('should call the callback without error', function () {
-      return this.callback.calledWith(null, this.docs).should.equal(true)
+    it('should return docs', function () {
+      expect(this.result).to.deep.equal(this.docs)
     })
 
-    return it('should time the execution', function () {
-      return this.Metrics.Timer.prototype.done.called.should.equal(true)
+    it('should time the execution', function () {
+      this.Metrics.Timer.prototype.done.called.should.equal(true)
     })
   })
 
   describe('when the state does not match', function () {
-    beforeEach(function (done) {
+    beforeEach(async function () {
       this.doc_ids = ['doc-id-1', 'doc-id-2', 'doc-id-3']
-      this.RedisManager.checkOrSetProjectState = sinon
-        .stub()
-        .callsArgWith(2, null, true)
-      return this.ProjectManager.getProjectDocsAndFlushIfOld(
-        this.project_id,
-        this.projectStateHash,
-        this.excludeVersions,
-        (error, docs) => {
-          this.callback(error, docs)
-          return done()
-        }
-      )
+      this.RedisManager.promises.checkOrSetProjectState.resolves(true)
+      await expect(
+        this.ProjectManager.promises.getProjectDocsAndFlushIfOld(
+          this.project_id,
+          this.projectStateHash,
+          this.excludeVersions
+        )
+      ).to.be.rejectedWith(Errors.ProjectStateChangedError)
     })
 
     it('should check the project state', function () {
-      return this.RedisManager.checkOrSetProjectState
-        .calledWith(this.project_id, this.projectStateHash)
-        .should.equal(true)
+      this.RedisManager.promises.checkOrSetProjectState.should.have.been.calledWith(
+        this.project_id,
+        this.projectStateHash
+      )
     })
 
-    it('should call the callback with an error', function () {
-      return this.callback
-        .calledWith(sinon.match.instanceOf(Errors.ProjectStateChangedError))
-        .should.equal(true)
-    })
-
-    return it('should time the execution', function () {
-      return this.Metrics.Timer.prototype.done.called.should.equal(true)
+    it('should time the execution', function () {
+      this.Metrics.Timer.prototype.done.called.should.equal(true)
     })
   })
 
   describe('when a doc errors', function () {
-    beforeEach(function (done) {
+    it('should call the callback with an error', async function () {
       this.doc_ids = ['doc-id-1', 'doc-id-2', 'doc-id-3']
-      this.RedisManager.checkOrSetProjectState = sinon
-        .stub()
-        .callsArgWith(2, null)
-      this.RedisManager.getDocIdsInProject = sinon
-        .stub()
-        .callsArgWith(1, null, this.doc_ids)
-      this.DocumentManager.getDocAndFlushIfOldWithLock = sinon.stub()
-      this.DocumentManager.getDocAndFlushIfOldWithLock
+      this.error = new Error('oops')
+      this.RedisManager.promises.getDocIdsInProject.resolves(this.doc_ids)
+      this.DocumentManager.promises.getDocAndFlushIfOldWithLock
         .withArgs(this.project_id, 'doc-id-1')
-        .callsArgWith(2, null, ['test doc content'], this.doc_versions[1])
-      this.DocumentManager.getDocAndFlushIfOldWithLock
+        .resolves({
+          lines: ['test doc content'],
+          version: this.doc_versions[1],
+        })
+      this.DocumentManager.promises.getDocAndFlushIfOldWithLock
         .withArgs(this.project_id, 'doc-id-2')
-        .callsArgWith(2, (this.error = new Error('oops'))) // trigger an error
-      return this.ProjectManager.getProjectDocsAndFlushIfOld(
-        this.project_id,
-        this.projectStateHash,
-        this.excludeVersions,
-        (error, docs) => {
-          this.callback(error)
-          return done()
-        }
-      )
-    })
-
-    it('should record the error', function () {
-      return this.logger.error
-        .calledWith(
-          { err: this.error, projectId: this.project_id, docId: 'doc-id-2' },
-          'error getting project doc lines in getProjectDocsAndFlushIfOld'
+        .rejects(this.error)
+      await expect(
+        this.ProjectManager.promises.getProjectDocsAndFlushIfOld(
+          this.project_id,
+          this.projectStateHash,
+          this.excludeVersions
         )
-        .should.equal(true)
-    })
-
-    it('should call the callback with an error', function () {
-      return this.callback
-        .calledWith(sinon.match.instanceOf(Error))
-        .should.equal(true)
-    })
-
-    return it('should time the execution', function () {
-      return this.Metrics.Timer.prototype.done.called.should.equal(true)
+      ).to.be.rejected
     })
   })
 
-  return describe('clearing the project state with clearProjectState', function () {
-    beforeEach(function (done) {
-      this.RedisManager.clearProjectState = sinon.stub().callsArg(1)
-      return this.ProjectManager.clearProjectState(this.project_id, error => {
-        this.callback(error)
-        return done()
-      })
+  describe('clearing the project state with clearProjectState', function () {
+    beforeEach(async function () {
+      await this.ProjectManager.promises.clearProjectState(this.project_id)
     })
 
     it('should clear the project state', function () {
-      return this.RedisManager.clearProjectState
-        .calledWith(this.project_id)
-        .should.equal(true)
-    })
-
-    return it('should call the callback', function () {
-      return this.callback.called.should.equal(true)
+      this.RedisManager.promises.clearProjectState.should.have.been.calledWith(
+        this.project_id
+      )
     })
   })
 })

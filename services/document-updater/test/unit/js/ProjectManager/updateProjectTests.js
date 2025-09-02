@@ -1,3 +1,4 @@
+const { expect } = require('chai')
 const sinon = require('sinon')
 const modulePath = '../../../../app/js/ProjectManager.js'
 const SandboxedModule = require('sandboxed-module')
@@ -7,19 +8,19 @@ describe('ProjectManager', function () {
   beforeEach(function () {
     this.RedisManager = {}
     this.ProjectHistoryRedisManager = {
-      queueRenameEntity: sinon.stub().yields(),
-      queueAddEntity: sinon.stub().yields(),
+      promises: {
+        queueRenameEntity: sinon.stub().resolves(),
+        queueAddEntity: sinon.stub().resolves(),
+      },
     }
     this.DocumentManager = {
-      renameDocWithLock: sinon.stub().yields(),
+      promises: {
+        renameDocWithLock: sinon.stub().resolves(),
+      },
     }
     this.HistoryManager = {
       flushProjectChangesAsync: sinon.stub(),
       shouldFlushHistoryOps: sinon.stub().returns(false),
-    }
-    this.LockManager = {
-      getLock: sinon.stub().yields(),
-      releaseLock: sinon.stub().yields(),
     }
     this.Metrics = {
       Timer: class Timer {},
@@ -32,7 +33,6 @@ describe('ProjectManager', function () {
         './ProjectHistoryRedisManager': this.ProjectHistoryRedisManager,
         './DocumentManager': this.DocumentManager,
         './HistoryManager': this.HistoryManager,
-        './LockManager': this.LockManager,
         './Metrics': this.Metrics,
       },
     })
@@ -42,7 +42,6 @@ describe('ProjectManager', function () {
     this.user_id = 'user-id-123'
     this.version = 1234567
     this.source = 'editor'
-    this.callback = sinon.stub()
   })
 
   describe('updateProjectWithLocks', function () {
@@ -74,15 +73,14 @@ describe('ProjectManager', function () {
       })
 
       describe('successfully', function () {
-        beforeEach(function () {
-          this.ProjectManager.updateProjectWithLocks(
+        beforeEach(async function () {
+          await this.ProjectManager.promises.updateProjectWithLocks(
             this.project_id,
             this.projectHistoryId,
             this.user_id,
             this.updates,
             this.version,
-            this.source,
-            this.callback
+            this.source
           )
         })
 
@@ -95,24 +93,20 @@ describe('ProjectManager', function () {
             this.secondDocUpdate,
             { version: `${this.version}.1` }
           )
-          this.DocumentManager.renameDocWithLock
-            .calledWith(
-              this.project_id,
-              this.firstDocUpdate.id,
-              this.user_id,
-              firstDocUpdateWithVersion,
-              this.projectHistoryId
-            )
-            .should.equal(true)
-          this.DocumentManager.renameDocWithLock
-            .calledWith(
-              this.project_id,
-              this.secondDocUpdate.id,
-              this.user_id,
-              secondDocUpdateWithVersion,
-              this.projectHistoryId
-            )
-            .should.equal(true)
+          this.DocumentManager.promises.renameDocWithLock.should.have.been.calledWith(
+            this.project_id,
+            this.firstDocUpdate.id,
+            this.user_id,
+            firstDocUpdateWithVersion,
+            this.projectHistoryId
+          )
+          this.DocumentManager.promises.renameDocWithLock.should.have.been.calledWith(
+            this.project_id,
+            this.secondDocUpdate.id,
+            this.user_id,
+            secondDocUpdateWithVersion,
+            this.projectHistoryId
+          )
         })
 
         it('should rename the files in the updates', function () {
@@ -121,17 +115,15 @@ describe('ProjectManager', function () {
             this.firstFileUpdate,
             { version: `${this.version}.2` }
           )
-          this.ProjectHistoryRedisManager.queueRenameEntity
-            .calledWith(
-              this.project_id,
-              this.projectHistoryId,
-              'file',
-              this.firstFileUpdate.id,
-              this.user_id,
-              firstFileUpdateWithVersion,
-              this.source
-            )
-            .should.equal(true)
+          this.ProjectHistoryRedisManager.promises.queueRenameEntity.should.have.been.calledWith(
+            this.project_id,
+            this.projectHistoryId,
+            'file',
+            this.firstFileUpdate.id,
+            this.user_id,
+            firstFileUpdateWithVersion,
+            this.source
+          )
         })
 
         it('should not flush the history', function () {
@@ -139,63 +131,54 @@ describe('ProjectManager', function () {
             .calledWith(this.project_id)
             .should.equal(false)
         })
-
-        it('should call the callback', function () {
-          this.callback.called.should.equal(true)
-        })
       })
 
       describe('when renaming a doc fails', function () {
-        beforeEach(function () {
-          this.error = new Error('error')
-          this.DocumentManager.renameDocWithLock.yields(this.error)
-          this.ProjectManager.updateProjectWithLocks(
-            this.project_id,
-            this.projectHistoryId,
-            this.user_id,
-            this.updates,
-            this.version,
-            this.source,
-            this.callback
+        it('throws an error', async function () {
+          this.DocumentManager.promises.renameDocWithLock.rejects(
+            new Error('error')
           )
-        })
-
-        it('should call the callback with the error', function () {
-          this.callback.calledWith(this.error).should.equal(true)
+          await expect(
+            this.ProjectManager.promises.updateProjectWithLocks(
+              this.project_id,
+              this.projectHistoryId,
+              this.user_id,
+              this.updates,
+              this.version,
+              this.source
+            )
+          ).to.be.rejected
         })
       })
 
       describe('when renaming a file fails', function () {
-        beforeEach(function () {
-          this.error = new Error('error')
-          this.ProjectHistoryRedisManager.queueRenameEntity.yields(this.error)
-          this.ProjectManager.updateProjectWithLocks(
-            this.project_id,
-            this.projectHistoryId,
-            this.user_id,
-            this.updates,
-            this.version,
-            this.source,
-            this.callback
+        it('throws an error', async function () {
+          this.ProjectHistoryRedisManager.promises.queueRenameEntity.rejects(
+            new Error('error')
           )
-        })
-
-        it('should call the callback with the error', function () {
-          this.callback.calledWith(this.error).should.equal(true)
+          await expect(
+            this.ProjectManager.promises.updateProjectWithLocks(
+              this.project_id,
+              this.projectHistoryId,
+              this.user_id,
+              this.updates,
+              this.version,
+              this.source
+            )
+          ).to.be.rejected
         })
       })
 
       describe('with enough ops to flush', function () {
-        beforeEach(function () {
+        beforeEach(async function () {
           this.HistoryManager.shouldFlushHistoryOps.returns(true)
-          this.ProjectManager.updateProjectWithLocks(
+          await this.ProjectManager.promises.updateProjectWithLocks(
             this.project_id,
             this.projectHistoryId,
             this.user_id,
             this.updates,
             this.version,
-            this.source,
-            this.callback
+            this.source
           )
         })
 
@@ -238,15 +221,14 @@ describe('ProjectManager', function () {
       })
 
       describe('successfully', function () {
-        beforeEach(function () {
-          this.ProjectManager.updateProjectWithLocks(
+        beforeEach(async function () {
+          await this.ProjectManager.promises.updateProjectWithLocks(
             this.project_id,
             this.projectHistoryId,
             this.user_id,
             this.updates,
             this.version,
-            this.source,
-            this.callback
+            this.source
           )
         })
 
@@ -259,7 +241,7 @@ describe('ProjectManager', function () {
             this.secondDocUpdate,
             { version: `${this.version}.1` }
           )
-          this.ProjectHistoryRedisManager.queueAddEntity
+          this.ProjectHistoryRedisManager.promises.queueAddEntity
             .getCall(0)
             .calledWith(
               this.project_id,
@@ -271,7 +253,7 @@ describe('ProjectManager', function () {
               this.source
             )
             .should.equal(true)
-          this.ProjectHistoryRedisManager.queueAddEntity
+          this.ProjectHistoryRedisManager.promises.queueAddEntity
             .getCall(1)
             .calledWith(
               this.project_id,
@@ -296,7 +278,7 @@ describe('ProjectManager', function () {
             this.secondFileUpdate,
             { version: `${this.version}.3` }
           )
-          this.ProjectHistoryRedisManager.queueAddEntity
+          this.ProjectHistoryRedisManager.promises.queueAddEntity
             .getCall(2)
             .calledWith(
               this.project_id,
@@ -308,7 +290,7 @@ describe('ProjectManager', function () {
               this.source
             )
             .should.equal(true)
-          this.ProjectHistoryRedisManager.queueAddEntity
+          this.ProjectHistoryRedisManager.promises.queueAddEntity
             .getCall(3)
             .calledWith(
               this.project_id,
@@ -327,63 +309,55 @@ describe('ProjectManager', function () {
             .calledWith(this.project_id)
             .should.equal(false)
         })
-
-        it('should call the callback', function () {
-          this.callback.called.should.equal(true)
-        })
       })
 
       describe('when adding a doc fails', function () {
-        beforeEach(function () {
+        it('it should throw an error', async function () {
           this.error = new Error('error')
-          this.ProjectHistoryRedisManager.queueAddEntity.yields(this.error)
-          this.ProjectManager.updateProjectWithLocks(
-            this.project_id,
-            this.projectHistoryId,
-            this.user_id,
-            this.updates,
-            this.version,
-            this.source,
-            this.callback
+          this.ProjectHistoryRedisManager.promises.queueAddEntity.rejects(
+            this.error
           )
-        })
-
-        it('should call the callback with the error', function () {
-          this.callback.calledWith(this.error).should.equal(true)
+          await expect(
+            this.ProjectManager.promises.updateProjectWithLocks(
+              this.project_id,
+              this.projectHistoryId,
+              this.user_id,
+              this.updates,
+              this.version,
+              this.source
+            )
+          ).to.be.rejected
         })
       })
 
       describe('when adding a file fails', function () {
-        beforeEach(function () {
-          this.error = new Error('error')
-          this.ProjectHistoryRedisManager.queueAddEntity.yields(this.error)
-          this.ProjectManager.updateProjectWithLocks(
-            this.project_id,
-            this.projectHistoryId,
-            this.user_id,
-            this.updates,
-            this.version,
-            this.source,
-            this.callback
+        beforeEach(async function () {
+          this.ProjectHistoryRedisManager.promises.queueAddEntity.rejects(
+            new Error('error')
           )
-        })
-
-        it('should call the callback with the error', function () {
-          this.callback.calledWith(this.error).should.equal(true)
+          await expect(
+            this.ProjectManager.promises.updateProjectWithLocks(
+              this.project_id,
+              this.projectHistoryId,
+              this.user_id,
+              this.updates,
+              this.version,
+              this.source
+            )
+          ).to.be.rejected
         })
       })
 
       describe('with enough ops to flush', function () {
-        beforeEach(function () {
+        beforeEach(async function () {
           this.HistoryManager.shouldFlushHistoryOps.returns(true)
-          this.ProjectManager.updateProjectWithLocks(
+          await this.ProjectManager.promises.updateProjectWithLocks(
             this.project_id,
             this.projectHistoryId,
             this.user_id,
             this.updates,
             this.version,
-            this.source,
-            this.callback
+            this.source
           )
         })
 
@@ -396,21 +370,18 @@ describe('ProjectManager', function () {
     })
 
     describe('when given an unknown operation type', function () {
-      beforeEach(function () {
+      it('throws an error', async function () {
         this.updates = [{ type: 'brew-coffee' }]
-        this.ProjectManager.updateProjectWithLocks(
-          this.project_id,
-          this.projectHistoryId,
-          this.user_id,
-          this.updates,
-          this.version,
-          this.source,
-          this.callback
-        )
-      })
-
-      it('should call back with an error', function () {
-        this.callback.calledWith(sinon.match.instanceOf(Error)).should.be.true
+        await expect(
+          this.ProjectManager.promises.updateProjectWithLocks(
+            this.project_id,
+            this.projectHistoryId,
+            this.user_id,
+            this.updates,
+            this.version,
+            this.source
+          )
+        ).to.be.rejected
       })
     })
   })
