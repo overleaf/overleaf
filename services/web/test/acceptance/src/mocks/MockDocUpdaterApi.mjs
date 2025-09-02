@@ -34,6 +34,21 @@ class MockDocUpdaterApi extends AbstractMockApi {
       res.sendStatus(200)
     })
 
+    this.app.post(
+      '/project/:projectId/doc/:docId/change/accept',
+      (req, res) => {
+        res.sendStatus(204)
+      }
+    )
+
+    this.app.post(
+      '/project/:projectId/doc/:docId/change/reject',
+      (req, res) => {
+        const { change_ids: changeIds } = req.body
+        res.json({ rejectedChangeIds: changeIds })
+      }
+    )
+
     this.app.post('/project/:projectId/doc/:doc_id', (req, res) => {
       res.sendStatus(204)
     })

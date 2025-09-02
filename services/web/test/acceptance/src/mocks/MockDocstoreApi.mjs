@@ -6,6 +6,20 @@ class MockDocstoreApi extends AbstractMockApi {
     this.docs = {}
   }
 
+  addDocument(projectId, docId, { lines, version, ranges }) {
+    if (!this.docs[projectId]) {
+      this.docs[projectId] = {}
+    }
+    this.docs[projectId][docId] = {
+      _id: docId,
+      lines: lines || [],
+      version: version || 1,
+      ranges: ranges || {},
+      rev: 1,
+    }
+    return this.docs[projectId][docId]
+  }
+
   createLegacyDeletedDoc(projectId, docId) {
     if (!this.docs[projectId]) {
       this.docs[projectId] = {}
@@ -51,6 +65,14 @@ class MockDocstoreApi extends AbstractMockApi {
 
     this.app.get('/project/:projectId/doc', (req, res) => {
       res.json(Object.values(this.docs[req.params.projectId] || {}))
+    })
+
+    this.app.get('/project/:projectId/ranges', (req, res) => {
+      const { projectId } = req.params
+      const docs = Object.values(this.docs[projectId] || {})
+        .filter(doc => !doc.deleted)
+        .map(doc => ({ _id: doc._id, ranges: doc.ranges }))
+      res.json(docs)
     })
 
     this.app.get('/project/:projectId/doc-deleted', (req, res) => {
