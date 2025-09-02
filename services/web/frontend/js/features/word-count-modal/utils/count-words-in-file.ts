@@ -303,7 +303,7 @@ export const countWordsInFile = (
     to: preambleExtent.to,
     enter(nodeRef: SyntaxNodeRef) {
       if (state.skipping && !nodeRef.type.is('Comment')) {
-        return false
+        return
       }
       return headMatcher(nodeRef.type)?.(nodeRef)
     },
@@ -313,7 +313,7 @@ export const countWordsInFile = (
     from: preambleExtent.to,
     enter(nodeRef: SyntaxNodeRef) {
       if (state.skipping && !nodeRef.type.is('Comment')) {
-        return false
+        return
       }
       return bodyMatcher(nodeRef.type)?.(nodeRef)
     },
