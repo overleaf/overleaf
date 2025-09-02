@@ -66,21 +66,18 @@
   padding: var(--spacing-06);
   border: 1px solid var(--border-divider-themed);
   border-radius: var(--border-radius-base);
+  font-size: var(--font-size-02);
+  line-height: var(--line-height-02);
 
   @include themed-links;
 }
 
 .pdf-error-state-info-box-title {
-  font-size: var(--font-size-02);
   font-weight: 600;
   display: flex;
   align-items: center;
   gap: var(--spacing-02);
   margin-bottom: var(--spacing-04);
-}
-
-.pdf-error-state-info-box-text {
-  font-size: var(--font-size-02);
 }
 
 .pdf-error-state-info-box-list {

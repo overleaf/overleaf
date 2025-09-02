@@ -162,7 +162,7 @@ const PreventTimeoutHelpMessage = memo(function PreventTimeoutHelpMessage({
           <ul>
             <li>
               <Trans
-                i18nKey="large_or_high-resolution_images_taking_too_long"
+                i18nKey="project_timed_out_optimize_images"
                 components={[
                   // eslint-disable-next-line jsx-a11y/anchor-has-content, react/jsx-key
                   <a
@@ -208,7 +208,7 @@ const PreventTimeoutHelpMessage = memo(function PreventTimeoutHelpMessage({
           </ul>
           <p>
             <Trans
-              i18nKey="learn_more_about_other_causes_of_compile_timeouts"
+              i18nKey="project_timed_out_learn_more"
               components={[
                 // eslint-disable-next-line jsx-a11y/anchor-has-content, react/jsx-key
                 <a
