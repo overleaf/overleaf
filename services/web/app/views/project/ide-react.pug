@@ -12,7 +12,8 @@ block entrypointVar
 	- entrypoint = 'pages/ide'
 
 block content
-	#ide-root
+	//- TODO: remove `main` once it's no longer needed by browser extensions
+	main#ide-root
 		.loading-screen
 			.loading-screen-brand-container
 				.loading-screen-brand(style='height: 20%')
