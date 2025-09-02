@@ -64,8 +64,12 @@ export const useLogEvents = (setShowLogs: (show: boolean) => void) => {
 
   const handleViewCompileLogEntryEventNewEditor = useCallback(
     (event: Event) => {
-      const { id, suggestFix } = (
-        event as CustomEvent<{ id: string; suggestFix?: boolean }>
+      const { id, suggestFix, showPaywallIfOutOfSuggestions } = (
+        event as CustomEvent<{
+          id: string
+          suggestFix?: boolean
+          showPaywallIfOutOfSuggestions?: boolean
+        }>
       ).detail
 
       openRailTab('errors')
@@ -99,7 +103,7 @@ export const useLogEvents = (setShowLogs: (show: boolean) => void) => {
                   'button[data-action="suggest-fix"]'
                 )
                 ?.click()
-            } else {
+            } else if (showPaywallIfOutOfSuggestions) {
               window.dispatchEvent(
                 new CustomEvent('aiAssist:showPaywall', {
                   detail: { origin: 'suggest-fix' },
