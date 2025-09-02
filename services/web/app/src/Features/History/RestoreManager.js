@@ -359,8 +359,9 @@ const RestoreManager = {
     }
     const threadIds = await getCommentThreadIds(projectId)
 
+    const reverted = []
     for (const pathname of pathsAtPastVersion) {
-      await RestoreManager._revertSingleFile(
+      const res = await RestoreManager._revertSingleFile(
         userId,
         projectId,
         version,
@@ -368,6 +369,11 @@ const RestoreManager = {
         threadIds,
         { origin }
       )
+      reverted.push({
+        id: res._id,
+        type: res.type,
+        path: pathname,
+      })
     }
 
     const entitiesAtLiveVersion =
@@ -391,6 +397,8 @@ const RestoreManager = {
         )
       }
     }
+
+    return reverted
   },
 
   async _writeFileVersionToDisk(projectId, version, pathname) {

@@ -993,7 +993,10 @@ describe('RestoreManager', function () {
       this.ProjectGetter.promises.getProject
         .withArgs(this.project_id)
         .resolves({ overleaf: { history: { rangesSupportEnabled: true } } })
-      this.RestoreManager.promises._revertSingleFile = sinon.stub().resolves()
+      this.RestoreManager.promises._revertSingleFile = sinon.stub().resolves({
+        _id: 'mock-doc-id',
+        type: 'doc',
+      })
       this.RestoreManager.promises._getProjectPathsAtVersion = sinon
         .stub()
         .resolves([])

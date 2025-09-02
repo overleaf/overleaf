@@ -204,9 +204,13 @@ async function revertProject(req, res, next) {
   const { version } = req.body
   const userId = SessionManager.getLoggedInUserId(req.session)
 
-  await RestoreManager.promises.revertProject(userId, projectId, version)
+  const reverted = await RestoreManager.promises.revertProject(
+    userId,
+    projectId,
+    version
+  )
 
-  res.sendStatus(200)
+  res.json(reverted)
 }
 
 async function getLabels(req, res, next) {
