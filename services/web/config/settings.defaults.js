@@ -1032,6 +1032,7 @@ module.exports = {
     integrationPanelComponents: [],
     referenceSearchSetting: [],
     errorLogsComponents: [],
+    referenceIndices: [],
   },
 
   moduleImportSequence: [

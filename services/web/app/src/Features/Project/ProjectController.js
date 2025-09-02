@@ -380,6 +380,7 @@ const _ProjectController = {
       'word-count-client',
       'editor-popup-ux-survey',
       'new-editor-error-logs-redesign',
+      'client-side-references',
     ].filter(Boolean)
 
     const getUserValues = async userId =>

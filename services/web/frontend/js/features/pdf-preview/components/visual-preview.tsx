@@ -56,6 +56,9 @@ export const VisualPreview: FC<{ view: EditorView }> = ({ view }) => {
     labels: new Set(),
     packageNames: new Set(),
     referenceKeys: new Set(),
+    searchLocalReferences() {
+      return Promise.resolve({ hits: [] })
+    },
     commands: [],
     fileTreeData,
   })

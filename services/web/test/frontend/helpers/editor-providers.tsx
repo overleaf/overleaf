@@ -47,6 +47,7 @@ import {
 } from '@/shared/context/types/project-metadata'
 import { UserId } from '../../../types/user'
 import { ProjectCompiler } from '../../../types/project-settings'
+import { ReferencesContext } from '@/features/ide-react/context/references-context'
 
 // these constants can be imported in tests instead of
 // using magic strings
@@ -243,12 +244,34 @@ export function EditorProviders({
         }),
         LayoutProvider: makeLayoutProvider(layoutContext),
         ProjectProvider: makeProjectProvider(project),
+        ReferencesProvider: makeReferencesProvider(),
         ...providers,
       }}
     >
       {children}
     </ReactContextRoot>
   )
+}
+
+const makeReferencesProvider = () => {
+  const ReferencesProvider: FC<PropsWithChildren> = ({ children }) => {
+    return (
+      <ReferencesContext.Provider
+        value={{
+          referenceKeys: new Set(),
+          indexAllReferences: () => Promise.resolve(),
+          searchLocalReferences() {
+            return Promise.resolve({
+              hits: [],
+            })
+          },
+        }}
+      >
+        {children}
+      </ReferencesContext.Provider>
+    )
+  }
+  return ReferencesProvider
 }
 
 const makeConnectionProvider = (socket: Socket) => {

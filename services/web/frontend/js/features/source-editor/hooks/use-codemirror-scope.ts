@@ -104,7 +104,7 @@ function useCodeMirrorScope(view: EditorView) {
 
   const { showVisual: visual, trackChanges } = useEditorPropertiesContext()
 
-  const { referenceKeys } = useReferencesContext()
+  const { referenceKeys, searchLocalReferences } = useReferencesContext()
 
   const ranges = useRangesContext()
   const threads = useThreadsContext()
@@ -227,6 +227,7 @@ function useCodeMirrorScope(view: EditorView) {
   const metadataRef = useRef({
     ...metadata,
     referenceKeys,
+    searchLocalReferences,
     fileTreeData,
   })
 
@@ -245,6 +246,14 @@ function useCodeMirrorScope(view: EditorView) {
       view.dispatch(setMetadata(metadataRef.current))
     })
   }, [view, referenceKeys])
+
+  // listen to project reference search updates
+  useEffect(() => {
+    metadataRef.current.searchLocalReferences = searchLocalReferences
+    window.setTimeout(() => {
+      view.dispatch(setMetadata(metadataRef.current))
+    })
+  }, [view, searchLocalReferences])
 
   // listen to project root folder updates
   useEffect(() => {

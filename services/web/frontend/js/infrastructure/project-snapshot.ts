@@ -62,6 +62,30 @@ export class ProjectSnapshot {
   }
 
   /**
+   * Get the list of paths to binary files.
+   */
+  getBinaryFilePathsWithHash(): { path: string; hash: string; size: number }[] {
+    const allPaths = this.snapshot.getFilePathnames()
+    const paths = []
+    for (const path of allPaths) {
+      const file = this.snapshot.getFile(path)
+      if (file == null || file.isEditable()) {
+        continue
+      }
+      const hash = file.getHash()
+      const size = file.getByteLength()
+      if (hash == null) {
+        continue
+      }
+      if (size == null) {
+        continue
+      }
+      paths.push({ path, hash, size })
+    }
+    return paths
+  }
+
+  /**
    * Get the doc content at the given path.
    */
   getDocContents(path: string): string | null {
@@ -70,6 +94,18 @@ export class ProjectSnapshot {
       return null
     }
     return file.getContent({ filterTrackedDeletes: true }) ?? null
+  }
+
+  async getBinaryFileContents(
+    path: string,
+    options?: { maxSize?: number }
+  ): Promise<any> {
+    const file = this.snapshot.getFile(path)
+    const hash = file?.getHash()
+    if (hash == null) {
+      return null
+    }
+    return await this.blobStore.getString(hash, options)
   }
 
   /**
@@ -166,8 +202,11 @@ class SimpleBlobStore {
     this.projectId = projectId
   }
 
-  async getString(hash: string): Promise<string> {
-    return await fetchBlob(this.projectId, hash)
+  async getString(
+    hash: string,
+    options?: { maxSize?: number }
+  ): Promise<string> {
+    return await fetchBlob(this.projectId, hash, options)
   }
 
   async getObject(hash: string) {
@@ -226,11 +265,50 @@ async function fetchLatestChanges(
   }
 }
 
-async function fetchBlob(projectId: string, hash: string): Promise<string> {
+async function fetchBlob(
+  projectId: string,
+  hash: string,
+  options?: { maxSize?: number }
+): Promise<string> {
   const url = `/project/${projectId}/blob/${hash}`
+  if (options?.maxSize) {
+    return await fetchTextFileWithSizeLimit(url, options.maxSize)
+  }
   const res = await fetch(url)
   if (!res.ok) {
     throw new FetchError('Failed to fetch blob', url, undefined, res)
   }
   return await res.text()
+}
+
+async function fetchTextFileWithSizeLimit(url: string, maxSize: number) {
+  let result = ''
+  try {
+    const abortController = new AbortController()
+    const response = await fetch(url, {
+      signal: abortController.signal,
+    })
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch blob')
+    }
+    if (!response.body) {
+      throw new Error('Response body is empty')
+    }
+
+    const reader = response.body.pipeThrough(new TextDecoderStream())
+    for await (const chunk of reader) {
+      result += chunk
+      if (result.length > maxSize) {
+        abortController.abort()
+      }
+    }
+  } catch (error: any) {
+    if (error?.name === 'AbortError') {
+      // This is fine, we just return the result we have so far
+    } else {
+      throw error
+    }
+  }
+  return result.slice(0, maxSize)
 }

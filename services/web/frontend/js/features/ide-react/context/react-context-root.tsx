@@ -87,13 +87,13 @@ export const ReactContextRoot: FC<
                             <Providers.EditorProvider>
                               <Providers.FileTreeDataProvider>
                                 <Providers.FileTreePathProvider>
-                                  <Providers.ReferencesProvider>
-                                    <Providers.UserFeaturesProvider>
-                                      <Providers.PermissionsProvider>
-                                        <Providers.RailProvider>
-                                          <Providers.LayoutProvider>
-                                            <Providers.ProjectSettingsProvider>
-                                              <Providers.EditorManagerProvider>
+                                  <Providers.UserFeaturesProvider>
+                                    <Providers.PermissionsProvider>
+                                      <Providers.RailProvider>
+                                        <Providers.LayoutProvider>
+                                          <Providers.ProjectSettingsProvider>
+                                            <Providers.EditorManagerProvider>
+                                              <Providers.ReferencesProvider>
                                                 <Providers.LocalCompileProvider>
                                                   <Providers.DetachCompileProvider>
                                                     <Providers.ChatProvider>
@@ -113,13 +113,13 @@ export const ReactContextRoot: FC<
                                                     </Providers.ChatProvider>
                                                   </Providers.DetachCompileProvider>
                                                 </Providers.LocalCompileProvider>
-                                              </Providers.EditorManagerProvider>
-                                            </Providers.ProjectSettingsProvider>
-                                          </Providers.LayoutProvider>
-                                        </Providers.RailProvider>
-                                      </Providers.PermissionsProvider>
-                                    </Providers.UserFeaturesProvider>
-                                  </Providers.ReferencesProvider>
+                                              </Providers.ReferencesProvider>
+                                            </Providers.EditorManagerProvider>
+                                          </Providers.ProjectSettingsProvider>
+                                        </Providers.LayoutProvider>
+                                      </Providers.RailProvider>
+                                    </Providers.PermissionsProvider>
+                                  </Providers.UserFeaturesProvider>
                                 </Providers.FileTreePathProvider>
                               </Providers.FileTreeDataProvider>
                             </Providers.EditorProvider>

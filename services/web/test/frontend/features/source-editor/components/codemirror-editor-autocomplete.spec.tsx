@@ -381,6 +381,11 @@ describe('autocomplete', { scrollBehavior: false }, function () {
           value={{
             referenceKeys: new Set(['ref-1', 'ref-2', 'ref-3']),
             indexAllReferences: cy.stub(),
+            searchLocalReferences() {
+              return Promise.resolve({
+                hits: [],
+              })
+            },
           }}
         >
           {children}

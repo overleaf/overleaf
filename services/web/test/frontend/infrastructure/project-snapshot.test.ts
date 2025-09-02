@@ -37,6 +37,13 @@ describe('ProjectSnapshot', function () {
       contents: "We're done here",
       hash: 'dddddddddddddddddddddddddddddddddddddddd',
     },
+    'bibliography.bib': {
+      contents:
+        '@book{example2020,\n  title={An example book},\n  author={Doe, John},\n  year={2020},\n  publisher={Publisher}\n}\n'.repeat(
+          60_000
+        ), // 6.5MB
+      hash: 'eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
+    },
   }
 
   const chunk = {
@@ -66,6 +73,13 @@ describe('ProjectSnapshot', function () {
               file: {
                 hash: 'cccccccccccccccccccccccccccccccccccccccc',
                 byteLength: 97080,
+              },
+            },
+            {
+              pathname: 'bibliography.bib',
+              file: {
+                hash: files['bibliography.bib'].hash,
+                byteLength: files['bibliography.bib'].contents.length,
               },
             },
           ],
@@ -212,6 +226,45 @@ describe('ProjectSnapshot', function () {
         expect(snapshot.getDocContents('goodbye.txt')).to.equal(
           files['goodbye.txt'].contents
         )
+      })
+    })
+
+    describe('getBinaryFilePathsWithHash()', function () {
+      it('returns the binary files', function () {
+        const binaries = snapshot.getBinaryFilePathsWithHash()
+        expect(binaries).to.deep.equal([
+          {
+            path: 'frog.jpg',
+            hash: 'cccccccccccccccccccccccccccccccccccccccc',
+            size: 97080,
+          },
+          {
+            path: 'bibliography.bib',
+            hash: files['bibliography.bib'].hash,
+            size: files['bibliography.bib'].contents.length,
+          },
+        ])
+      })
+    })
+
+    describe('getBinaryFileContents', function () {
+      beforeEach(function () {
+        mockBlobs(['bibliography.bib'])
+      })
+
+      it('can fetch whole file', async function () {
+        const blob = await snapshot.getBinaryFileContents('bibliography.bib')
+        expect(blob).to.equal(files['bibliography.bib'].contents)
+      })
+
+      // NOTE: fetch-mock does not support the .response.body.pipeThrough API,
+      // so this test is skipped for now.
+      // eslint-disable-next-line mocha/no-skipped-tests
+      it.skip('can fetch part of file', async function () {
+        const blob = await snapshot.getBinaryFileContents('bibliography.bib', {
+          maxSize: 100,
+        })
+        expect(blob).to.equal(files['bibliography.bib'].contents.slice(0, 100))
       })
     })
   })

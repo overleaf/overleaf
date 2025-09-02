@@ -10,6 +10,7 @@ import { indentUnit, LanguageDescription } from '@codemirror/language'
 import { updateHasEffect } from '../utils/effects'
 import { Folder } from '../../../../../types/folder'
 import { Command } from '@/features/ide-react/context/metadata-context'
+import { AdvancedReferenceSearchResult } from '@/features/ide-react/references/types'
 
 export const languageLoadedEffect = StateEffect.define()
 export const hasLanguageLoadedEffect = updateHasEffect(languageLoadedEffect)
@@ -25,6 +26,9 @@ export type Metadata = {
   packageNames: Set<string>
   commands: Command[]
   referenceKeys: Set<string>
+  searchLocalReferences: (
+    query: string
+  ) => Promise<AdvancedReferenceSearchResult>
   fileTreeData: Folder
 }
 

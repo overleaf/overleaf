@@ -46,6 +46,12 @@ const buildConfig = () => {
     '../../frontend/js/features/source-editor/hunspell/hunspell.worker'
   )
 
+  // add entrypoint under '/' for references worker
+  addWorker(
+    'references-worker',
+    '../../frontend/js/features/ide-react/references/references.worker.ts'
+  )
+
   // add entrypoints under '/' for pdfjs workers
   addWorker('pdfjs-dist', 'pdfjs-dist/build/pdf.worker.mjs')
 
