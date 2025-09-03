@@ -34,6 +34,17 @@ const CLSI_COOKIES_ENABLED = (Settings.clsiCookie?.key ?? '') !== ''
 // The timeout in services/clsi/app.js is 10 minutes, so we'll be on the safe side with 12 minutes
 const COMPILE_REQUEST_TIMEOUT_MS = 12 * 60 * 1000
 
+async function clearClsiServerId(projectId, userId) {
+  const jobs = [ClsiCookieManager.promises.clearServerId(projectId, userId)]
+  if (Settings.apis.clsi_new?.url) {
+    // Mirror resetting the clsiserverid in both backends.
+    jobs.push(
+      NewBackendCloudClsiCookieManager.promises.clearServerId(projectId, userId)
+    )
+  }
+  await Promise.all(jobs)
+}
+
 function collectMetricsOnBlgFiles(outputFiles) {
   let topLevel = 0
   let nested = 0
@@ -160,14 +171,15 @@ async function deleteAuxFiles(projectId, userId, options, clsiserverid) {
     try {
       await DocumentUpdaterHandler.promises.clearProjectState(projectId)
     } finally {
-      await ClsiCookieManager.promises.clearServerId(projectId, userId)
+      // always clear the clsi server id, even if prior actions failed
+      await clearClsiServerId(projectId, userId)
     }
   }
 }
 
-async function _sendBuiltRequest(projectId, userId, req, options, callback) {
+async function _sendBuiltRequest(projectId, userId, req, options) {
   if (options.forceNewClsiServer) {
-    await ClsiCookieManager.promises.clearServerId(projectId, userId)
+    await clearClsiServerId(projectId, userId)
   }
   const validationProblems =
     await ClsiFormatChecker.promises.checkRecoursesForProblems(
@@ -221,13 +233,12 @@ async function _makeRequestWithClsiServerId(
 ) {
   if (clsiserverid) {
     // ignore cookies and newBackend, go straight to the clsi node
-    url.searchParams.set('compileGroup', compileGroup)
-    url.searchParams.set('compileBackendClass', compileBackendClass)
-    url.searchParams.set('clsiserverid', clsiserverid)
+    const urlWithId = new URL(url)
+    urlWithId.searchParams.set('clsiserverid', clsiserverid)
 
     let body
     try {
-      body = await fetchString(url, opts)
+      body = await fetchString(urlWithId, opts)
     } catch (err) {
       throw OError.tag(err, 'error making request to CLSI', {
         userId,
@@ -241,6 +252,17 @@ async function _makeRequestWithClsiServerId(
     } catch (err) {
       // some responses are empty. Ignore JSON parsing errors.
     }
+
+    _makeNewBackendRequest(
+      projectId,
+      userId,
+      compileGroup,
+      compileBackendClass,
+      url,
+      opts
+    ).catch(err => {
+      logger.warn({ err }, 'Error making request to new CLSI backend')
+    })
 
     return { body: json }
   } else {
@@ -372,9 +394,9 @@ async function _makeNewBackendRequest(
   if (Settings.apis.clsi_new?.url == null) {
     return null
   }
-  url = url
-    .toString()
-    .replace(Settings.apis.clsi.url, Settings.apis.clsi_new.url)
+  url = new URL(
+    url.toString().replace(Settings.apis.clsi.url, Settings.apis.clsi_new.url)
+  )
 
   const clsiServerId =
     await NewBackendCloudClsiCookieManager.promises.getServerId(
@@ -383,9 +405,12 @@ async function _makeNewBackendRequest(
       compileGroup,
       compileBackendClass
     )
-  opts.headers = {
-    Accept: 'application/json',
-    'Content-Type': 'application/json',
+  opts = {
+    ...opts,
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    },
   }
 
   if (CLSI_COOKIES_ENABLED) {

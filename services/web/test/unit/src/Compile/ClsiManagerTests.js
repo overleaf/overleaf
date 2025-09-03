@@ -970,6 +970,47 @@ describe('ClsiManager', function () {
           .called
       })
     })
+
+    describe('when a new backend is configured', function () {
+      beforeEach(async function () {
+        this.Settings.apis.clsi_new = { url: 'https://compiles.somewhere.test' }
+        await this.ClsiManager.promises.deleteAuxFiles(
+          this.project._id,
+          this.user_id,
+          { compileBackendClass: 'n2d', compileGroup: 'standard' },
+          'node-1'
+        )
+        // wait for the background task to finish
+        await setTimeout(0)
+      })
+
+      it('should forward delete request', function () {
+        expect(this.FetchUtils.fetchString).to.have.been.calledWith(
+          sinon.match(
+            url =>
+              url.host === CLSI_HOST &&
+              url.pathname ===
+                `/project/${this.project._id}/user/${this.user_id}` &&
+              url.searchParams.get('compileBackendClass') === 'n2d' &&
+              url.searchParams.get('compileGroup') === 'standard' &&
+              url.searchParams.get('clsiserverid') === 'node-1'
+          ),
+          { method: 'DELETE' }
+        )
+        expect(this.FetchUtils.fetchStringWithResponse).to.have.been.calledWith(
+          sinon.match(
+            url =>
+              url.host === 'compiles.somewhere.test' &&
+              url.pathname ===
+                `/project/${this.project._id}/user/${this.user_id}` &&
+              url.searchParams.get('compileBackendClass') === 'n2d' &&
+              url.searchParams.get('compileGroup') === 'standard' &&
+              !url.searchParams.has('clsiserverid')
+          ),
+          sinon.match({ method: 'DELETE' })
+        )
+      })
+    })
   })
 
   describe('wordCount', function () {
@@ -1030,6 +1071,38 @@ describe('ClsiManager', function () {
       it('should not persist a cookie on response', function () {
         expect(this.ClsiCookieManager.promises.setServerId).not.to.have.been
           .called
+      })
+    })
+
+    describe('when a new backend is configured', function () {
+      beforeEach(async function () {
+        this.Settings.apis.clsi_new = { url: 'https://compiles.somewhere.test' }
+        await this.ClsiManager.promises.wordCount(
+          this.project._id,
+          this.user_id,
+          false,
+          { compileBackendClass: 'n2d', compileGroup: 'standard' },
+          'node-1'
+        )
+        // wait for the background task to finish
+        await setTimeout(0)
+      })
+
+      it('should forward wordcount request', function () {
+        expect(this.FetchUtils.fetchString).to.have.been.calledWith(
+          sinon.match(
+            url =>
+              url.toString() ===
+              `http://clsi.example.com/project/${this.project._id}/user/${this.user_id}/wordcount?compileBackendClass=n2d&compileGroup=standard&file=main.tex&image=mock-image-name&clsiserverid=node-1`
+          )
+        )
+        expect(this.FetchUtils.fetchStringWithResponse).to.have.been.calledWith(
+          sinon.match(
+            url =>
+              url.toString() ===
+              `${this.Settings.apis.clsi_new.url}/project/${this.project._id}/user/${this.user_id}/wordcount?compileBackendClass=n2d&compileGroup=standard&file=main.tex&image=mock-image-name`
+          )
+        )
       })
     })
   })
