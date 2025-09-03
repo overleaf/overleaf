@@ -32,7 +32,7 @@
   "repository": "github:overleaf/o-error",
   "devDependencies": {
     "@types/chai": "^4.3.0",
-    "@types/node": "^18.17.4",
+    "@types/node": "^18.19.123",
     "chai": "^4.3.6",
     "mocha": "^11.1.0",
     "typescript": "^5.0.4"

@@ -11,8 +11,8 @@
   "dependencies": {
     "@isomorphic-git/lightning-fs": "^4.6.0",
     "@testing-library/cypress": "^10.0.3",
-    "@types/adm-zip": "^0.5.5",
-    "@types/pdf-parse": "^1.1.4",
+    "@types/adm-zip": "^0.5.7",
+    "@types/pdf-parse": "^1.1.5",
     "@types/uuid": "^9.0.8",
     "adm-zip": "^0.5.12",
     "body-parser": "^1.20.3",
