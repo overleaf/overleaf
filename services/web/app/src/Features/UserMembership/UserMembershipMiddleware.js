@@ -246,13 +246,39 @@ function fetchEntityConfig(entityName) {
   }
 }
 
-// fetch the entity with id and config, and set it in the request
-const fetchEntitySchema = z.object({
+const SlugEntitySchema = z.object({
+  entityName: z.literal('publisher'),
   params: z.object({
-    id: zz.objectId(),
+    id: z.string(), // slug
   }),
 })
 
+const PostgresIdEntitySchema = z.object({
+  entityName: z.literal(['institution', 'team']),
+  params: z.object({
+    id: z.coerce.number().positive(),
+  }),
+})
+
+const ObjectIdEntitySchema = z.object({
+  entityName: z.literal([
+    'group',
+    'groupAdmin',
+    'groupManagers',
+    'groupMember',
+  ]),
+  params: z.object({
+    id: zz.coercedObjectId(),
+  }),
+})
+
+const fetchEntitySchema = z.discriminatedUnion('entityName', [
+  SlugEntitySchema,
+  ObjectIdEntitySchema,
+  PostgresIdEntitySchema,
+])
+
+// fetch the entity with id and config, and set it in the request
 function fetchEntity() {
   return expressify(async (req, res, next) => {
     const { params } = validateReq(req, fetchEntitySchema)

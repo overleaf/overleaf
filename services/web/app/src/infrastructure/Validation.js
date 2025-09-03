@@ -43,6 +43,11 @@ function validate(schema) {
 const zz = {
   objectId: () =>
     z.string().refine(ObjectId.isValid, { message: 'invalid Mongo ObjectId' }),
+  coercedObjectId: () =>
+    z
+      .string()
+      .refine(ObjectId.isValid, { message: 'invalid Mongo ObjectId' })
+      .transform(val => new ObjectId(val)),
 }
 
 /**
