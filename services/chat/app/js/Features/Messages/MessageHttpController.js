@@ -42,6 +42,10 @@ export async function getGlobalMessages(context) {
   return await callMessageHttpController(context, _getGlobalMessages)
 }
 
+export async function getGlobalMessage(context) {
+  return await callMessageHttpController(context, _getGlobalMessage)
+}
+
 export async function sendGlobalMessage(context) {
   return await callMessageHttpController(context, _sendGlobalMessage)
 }
@@ -106,6 +110,31 @@ export async function getStatus(context) {
 
 const _getGlobalMessages = async (req, res) => {
   await _getMessages(ThreadManager.GLOBAL_THREAD, req, res)
+}
+
+const _getGlobalMessage = async (req, res) => {
+  const { projectId, messageId } = req.params
+  logger.debug({ projectId, messageId }, 'getting single global message')
+  try {
+    const room = await ThreadManager.findThread(
+      projectId,
+      ThreadManager.GLOBAL_THREAD
+    )
+
+    const message = await MessageManager.getMessage(room._id, messageId)
+    const formattedMsg = MessageFormatter.formatMessageForClientSide(message)
+
+    res.status(200).setBody(formattedMsg)
+  } catch (error) {
+    if (
+      error instanceof ThreadManager.MissingThreadError ||
+      error instanceof MessageManager.MissingMessageError
+    ) {
+      res.status(404)
+      return
+    }
+    throw error
+  }
 }
 
 async function _sendGlobalMessage(req, res) {

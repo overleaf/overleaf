@@ -148,9 +148,14 @@ export async function duplicateThread(projectId, threadId) {
 }
 
 export async function findThread(projectId, threadId) {
+  projectId = new ObjectId(projectId.toString())
+  if (threadId !== GLOBAL_THREAD) {
+    threadId = new ObjectId(threadId.toString())
+  }
+
   const room = await db.rooms.findOne({
-    project_id: new ObjectId(projectId),
-    thread_id: new ObjectId(threadId),
+    project_id: projectId,
+    thread_id: threadId === GLOBAL_THREAD ? { $exists: false } : threadId,
   })
   if (!room) {
     throw new MissingThreadError('Thread not found')

@@ -42,6 +42,16 @@ class MockChatApi extends AbstractMockApi {
     this.app.post('/project/:project_id/messages', (req, res) => {
       res.json(this.sendMessage(req.params.project_id, 'global', req.body))
     })
+    this.app.get('/project/:project_id/messages/:message_id', (req, res) => {
+      const projectId = req.params.project_id
+      const messageId = req.params.message_id
+      const thread = this.getThread(projectId, 'global')
+      const message = thread.find(msg => msg.id === messageId)
+      if (!message) {
+        return res.status(404).json({ error: 'Message not found' })
+      }
+      res.json(message)
+    })
     this.app.get(
       '/project/:project_id/thread/:thread_id/messages',
       (req, res) => {

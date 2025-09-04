@@ -39,6 +39,12 @@ async function getGlobalMessages(projectId, limit, before) {
   return await fetchJson(url)
 }
 
+async function getGlobalMessage(projectId, messageId) {
+  return await fetchJson(
+    chatApiUrl(`/project/${projectId}/messages/${messageId}`)
+  )
+}
+
 async function sendComment(projectId, threadId, userId, content) {
   const comment = await fetchJson(
     chatApiUrl(`/project/${projectId}/thread/${threadId}/messages`),
@@ -142,6 +148,7 @@ module.exports = {
   destroyProject: callbackify(destroyProject),
   sendGlobalMessage: callbackify(sendGlobalMessage),
   getGlobalMessages: callbackify(getGlobalMessages),
+  getGlobalMessage: callbackify(getGlobalMessage),
   sendComment: callbackify(sendComment),
   resolveThread: callbackify(resolveThread),
   reopenThread: callbackify(reopenThread),
@@ -158,6 +165,7 @@ module.exports = {
     destroyProject,
     sendGlobalMessage,
     getGlobalMessages,
+    getGlobalMessage,
     sendComment,
     resolveThread,
     reopenThread,

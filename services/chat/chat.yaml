@@ -56,6 +56,32 @@ paths:
                   content: string
         description: 'UserID and Content of the message to be posted. '
       description: Send global message  for the project with Project ID provided
+  '/project/{projectId}/messages/{messageId}':
+    parameters:
+      - schema:
+          type: string
+        name: projectId
+        in: path
+        required: true
+      - schema:
+          type: string
+        name: messageId
+        in: path
+        required: true
+    get:
+      summary: Get single global message
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        '404':
+          description: Message not found
+      operationId: getGlobalMessage
+      description: Get a single global message by message ID for the project with Project ID provided
   '/project/{projectId}/thread/{threadId}/messages':
     parameters:
       - schema:
