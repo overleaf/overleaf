@@ -250,6 +250,11 @@ export const search = (initialSearchQuery: SearchQuery | null) => {
             const query = effect.value
             if (!query) return
 
+            const currentQuery = getSearchQuery(tr.startState)
+            if (currentQuery === query) {
+              return // avoiding selecting the next match when opening the search form with no selected text
+            }
+
             // The rest of this messes up searching in Vim, which is handled by
             // the Vim extension, so bail out here in Vim mode. Happily, the
             // Vim extension sticks an extra property on the query value that
