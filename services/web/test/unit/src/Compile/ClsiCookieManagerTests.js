@@ -52,7 +52,7 @@ describe('ClsiCookieManager', function () {
         this.project_id,
         this.user_id,
         '',
-        'e2'
+        'n2d'
       )
       this.redis.get
         .calledWith(`clsiserver:${this.project_id}:${this.user_id}`)
@@ -84,7 +84,7 @@ describe('ClsiCookieManager', function () {
         this.project_id,
         this.user_id,
         '',
-        'e2'
+        'n2d'
       )
       this.ClsiCookieManager.promises._populateServerIdViaRequest
         .calledWith(this.project_id, this.user_id)
@@ -115,13 +115,13 @@ describe('ClsiCookieManager', function () {
           this.project_id,
           this.user_id,
           'standard',
-          'e2'
+          'n2d'
         )
         const args = this.ClsiCookieManager.promises.setServerId.args[0]
         args[0].should.equal(this.project_id)
         args[1].should.equal(this.user_id)
         args[2].should.equal('standard')
-        args[3].should.equal('e2')
+        args[3].should.equal('n2d')
         args[4].should.deep.equal(this.clsiServerId)
       })
 
@@ -131,7 +131,7 @@ describe('ClsiCookieManager', function () {
             this.project_id,
             this.user_id,
             '',
-            'e2'
+            'n2d'
           )
         serverId.should.equal(this.clsiServerId)
       })
@@ -150,7 +150,7 @@ describe('ClsiCookieManager', function () {
           this.project_id,
           this.user_id,
           'standard',
-          'e2',
+          'n2d',
           this.clsiServerId,
           null
         )
@@ -172,7 +172,7 @@ describe('ClsiCookieManager', function () {
         this.project_id,
         this.user_id,
         'standard',
-        'e2',
+        'n2d',
         this.clsiServerId,
         null
       )
@@ -189,7 +189,7 @@ describe('ClsiCookieManager', function () {
         this.project_id,
         this.user_id,
         'standard',
-        'e2',
+        'n2d',
         this.clsiServerId,
         null
       )
@@ -212,7 +212,7 @@ describe('ClsiCookieManager', function () {
         this.project_id,
         this.user_id,
         'standard',
-        'e2',
+        'n2d',
         this.clsiServerId,
         null
       )
@@ -240,7 +240,7 @@ describe('ClsiCookieManager', function () {
         this.project_id,
         this.user_id,
         'standard',
-        'e2',
+        'n2d',
         this.clsiServerId,
         null
       )
@@ -259,14 +259,14 @@ describe('ClsiCookieManager', function () {
             this.project_id,
             this.user_id,
             'standard',
-            'e2',
+            'n2d',
             this.clsiServerId,
             'previous-clsi-server-id'
           )
           expect(
             this.fetchUtils.fetchStringWithResponse
           ).to.have.been.calledWith(
-            `${this.settings.apis.clsi.url}/instance-state?clsiserverid=previous-clsi-server-id&compileGroup=standard&compileBackendClass=e2`,
+            `${this.settings.apis.clsi.url}/instance-state?clsiserverid=previous-clsi-server-id&compileGroup=standard&compileBackendClass=n2d`,
             { method: 'GET', signal: sinon.match.instanceOf(AbortSignal) }
           )
         }

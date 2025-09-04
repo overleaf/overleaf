@@ -26,6 +26,8 @@ const Metrics = require('@overleaf/metrics')
 const Errors = require('../Errors/Errors')
 const ClsiCacheHandler = require('./ClsiCacheHandler')
 const { getFilestoreBlobURL } = require('../History/HistoryManager')
+const SplitTestHandler = require('../SplitTests/SplitTestHandler')
+const AnalyticsManager = require('../Analytics/AnalyticsManager')
 
 const VALID_COMPILERS = ['pdflatex', 'latex', 'xelatex', 'lualatex']
 const OUTPUT_FILE_TIMEOUT_MS = 60000
@@ -352,15 +354,16 @@ async function _makeRequest(
     opts
   )
     .then(result => {
-      if (result == null) {
+      if (result == null || !url.pathname.endsWith('/compile')) {
         return
       }
-      const { response: newBackendResponse } = result
-      Metrics.inc(`compile.newBackend.response.${newBackendResponse.status}`)
+      const current = json.compile
+      const {
+        body: { compile: next },
+        newCompileBackendClass,
+      } = result
       const newBackendCompileTime = new Date() - newBackendStartTime
-      const currentStatusCode = response.status
-      const newStatusCode = newBackendResponse.status
-      const statusCodeSame = newStatusCode === currentStatusCode
+      const statusCodeSame = next.status === current.status
       const timeDifference = newBackendCompileTime - currentCompileTime
       logger.debug(
         {
@@ -372,6 +375,44 @@ async function _makeRequest(
         },
         'both clsi requests returned'
       )
+      if (
+        current.status === 'success' &&
+        current.status === next.status &&
+        current.stats.isInitialCompile === next.stats.isInitialCompile &&
+        current.stats.restoredClsiCache === next.stats.restoredClsiCache
+      ) {
+        const fraction = next.timings.compileE2E / current.timings.compileE2E
+        Metrics.histogram(
+          'compile_backend_difference_v1',
+          fraction * 100,
+          [
+            // Increment the version in the metrics name when changing the buckets.
+            0,
+            10, 20, 30, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100,
+            105, 110, 115, 120,
+          ],
+          { path: compileBackendClass, method: newCompileBackendClass }
+        )
+        AnalyticsManager.recordEventForUserInBackground(
+          userId,
+          'double-compile-result',
+          {
+            projectId,
+            compileBackendClass,
+            newCompileBackendClass,
+            status: current.status,
+            compileTime: current.timings.compileE2E,
+            newCompileTime: next.timings.compileE2E,
+            clsiServerId: newClsiServerId || clsiServerId,
+            newClsiServerId: result.newClsiServerId,
+            // Successful compiles are guaranteed to have an output.pdf file.
+            pdfSize: current.outputFiles.find(f => f.path === 'output.pdf')
+              .size,
+            newPdfSize: next.outputFiles.find(f => f.path === 'output.pdf')
+              .size,
+          }
+        )
+      }
     })
     .catch(err => {
       logger.warn({ err }, 'Error making request to new CLSI backend')
@@ -387,7 +428,7 @@ async function _makeNewBackendRequest(
   projectId,
   userId,
   compileGroup,
-  compileBackendClass,
+  currentCompileBackendClass,
   url,
   opts
 ) {
@@ -398,12 +439,33 @@ async function _makeNewBackendRequest(
     url.toString().replace(Settings.apis.clsi.url, Settings.apis.clsi_new.url)
   )
 
+  // Sample x% of premium compile projects to move up one bracket.
+  if (currentCompileBackendClass !== 'c2d') return null
+  if (
+    SplitTestHandler.getPercentile(projectId, 'double-compile', 'release') >=
+    Settings.apis.clsi_new.sample
+  )
+    return null
+
+  let newCompileBackendClass
+  switch (currentCompileBackendClass) {
+    case 'n2d':
+      newCompileBackendClass = 'c2d'
+      break
+    case 'c2d':
+      newCompileBackendClass = 'c4d'
+      break
+    default:
+      throw new Error('unknown ?compileBackendClass')
+  }
+  url.searchParams.set('compileBackendClass', newCompileBackendClass)
+
   const clsiServerId =
     await NewBackendCloudClsiCookieManager.promises.getServerId(
       projectId,
       userId,
       compileGroup,
-      compileBackendClass
+      newCompileBackendClass
     )
   opts = {
     ...opts,
@@ -440,18 +502,24 @@ async function _makeNewBackendRequest(
     // Some responses are empty. Ignore JSON parsing errors
   }
   timer.done()
+  let newClsiServerId
   if (CLSI_COOKIES_ENABLED) {
-    const newClsiServerId = _getClsiServerIdFromResponse(response)
+    newClsiServerId = _getClsiServerIdFromResponse(response)
     await NewBackendCloudClsiCookieManager.promises.setServerId(
       projectId,
       userId,
       compileGroup,
-      compileBackendClass,
+      newCompileBackendClass,
       newClsiServerId,
       clsiServerId
     )
   }
-  return { response, body: json }
+  return {
+    response,
+    body: json,
+    newCompileBackendClass,
+    newClsiServerId: clsiServerId || newClsiServerId,
+  }
 }
 
 function _getCompilerUrl(
