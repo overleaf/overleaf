@@ -98,7 +98,7 @@ export const WordCountsClient: FC<{ data: WordCountData }> = ({ data }) => {
           </thead>
           <tbody>
             <tr>
-              <th style={{ width: 100 }}>{t('total_words')}:</th>
+              <th style={{ width: 100 }}>{t('total_words_lower')}:</th>
               <td style={{ width: 100, textAlign: 'right' }}>
                 {numberFormat.format(totals.words)}
               </td>
@@ -141,19 +141,19 @@ export const WordCountsClient: FC<{ data: WordCountData }> = ({ data }) => {
 
       <Row className="border-top py-2">
         <Col xs={12}>
-          <b>Headers:</b> {data.headers}
+          <b>{t('headers')}:</b> {data.headers}
         </Col>
       </Row>
 
       <Row className="border-top py-2">
         <Col xs={12}>
-          <b>Math Inline:</b> {data.mathInline}
+          <b>{t('inline_math')}:</b> {data.mathInline}
         </Col>
       </Row>
 
       <Row className="border-top py-2 pb-0">
         <Col xs={12}>
-          <b>Math Display:</b> {data.mathDisplay}
+          <b>{t('display_math')}:</b> {data.mathDisplay}
         </Col>
       </Row>
     </Container>

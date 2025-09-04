@@ -17,7 +17,7 @@ describe('<WordCountModal />', function () {
       </EditorProviders>
     )
 
-    cy.findByText('Word Count')
+    cy.findByText('Word count')
     cy.findByText(/something went wrong/).should('not.exist')
   })
 

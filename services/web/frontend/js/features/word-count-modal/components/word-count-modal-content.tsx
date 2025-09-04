@@ -23,7 +23,7 @@ export default function WordCountModalContent({
     <>
       <OLModalHeader closeButton>
         <OLModalTitle>
-          {t('word_count')}{' '}
+          {t('word_count_lower')}{' '}
           <SplitTestBadge
             splitTestName="word-count-client"
             displayOnVariants={['enabled']}
