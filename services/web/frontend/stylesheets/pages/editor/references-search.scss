@@ -74,3 +74,35 @@
     }
   }
 }
+
+.write-and-cite-pros-list-wrapper {
+  max-width: 450px;
+  margin: 0 auto;
+}
+
+.write-and-cite-pros-list li {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-03);
+  font-size: var(--font-size-03);
+}
+
+.write-and-cite-pros-check-icon {
+  align-self: start;
+
+  & > span {
+    vertical-align: middle;
+  }
+
+  flex: 0 0 auto;
+}
+
+.write-and-cite-pro {
+  flex: 0 1 100%;
+}
+
+.write-and-cite-upgrade-prompt-header {
+  font-size: var(--font-size-05);
+}

@@ -27,6 +27,8 @@
 
 .integrations-panel-card-button {
   all: unset;
+  display: block;
+  cursor: pointer;
   background-color: var(--integrations-panel-card-button-background);
   width: 100%;
 
@@ -34,6 +36,10 @@
     background-color: var(
       --integrations-panel-card-button-hover-background
     ) !important;
+
+    .integrations-panel-card-icon {
+      background-color: var(--bg-light-secondary);
+    }
   }
 }
 
@@ -43,6 +49,17 @@
   padding: var(--spacing-04) 0;
   gap: var(--spacing-04);
   border-bottom: 1px solid var(--integrations-panel-card-border);
+}
+
+.integrations-panel-card-icon {
+  background-color: var(--bg-light-primary);
+  color: var(--content-primary);
+  border-radius: var(--border-radius-medium);
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .integrations-panel-card-header {

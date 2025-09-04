@@ -7,7 +7,6 @@ function DropboxLogo({ size = 40 }: { size?: number }) {
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
-      <rect width="40" height="40" fill="none" />
       <g clipPath="url(#clip0_10_138)">
         <path
           d="M10.8328 4.33334L1.6665 10.1732L10.8328 16.0131L20.0006 10.1732L10.8328 4.33334Z"
