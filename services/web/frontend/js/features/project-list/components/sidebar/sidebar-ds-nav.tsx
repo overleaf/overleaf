@@ -93,8 +93,8 @@ function SidebarDsNav() {
                   id="help-icon"
                   overlayProps={{
                     placement: 'top',
-                    show: showHelpDropdown ? false : undefined,
                   }}
+                  hidden={showHelpDropdown}
                 >
                   <div>
                     <Question size={24} />
@@ -138,8 +138,8 @@ function SidebarDsNav() {
                     id="open-account"
                     overlayProps={{
                       placement: 'top',
-                      show: showAccountDropdown ? false : undefined,
                     }}
+                    hidden={showAccountDropdown}
                   >
                     <div>
                       <User size={24} />
