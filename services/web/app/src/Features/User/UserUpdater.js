@@ -19,6 +19,7 @@ const NotificationsBuilder = require('../Notifications/NotificationsBuilder')
 const _ = require('lodash')
 const Modules = require('../../infrastructure/Modules')
 const UserSessionsManager = require('./UserSessionsManager')
+const ThirdPartyIdentityManager = require('./ThirdPartyIdentityManager')
 
 async function _sendSecurityAlertPrimaryEmailChanged(
   userId,
@@ -179,6 +180,26 @@ async function clearSAMLData(userId, auditLog, sendEmail) {
 
   if (sendEmail) {
     await EmailHandler.promises.sendEmail('SAMLDataCleared', { to: user.email })
+  }
+}
+
+async function clearThirdPartyIdentifiers(userId, auditLog) {
+  const user = await UserGetter.promises.getUser(userId, {
+    thirdPartyIdentifiers: 1,
+  })
+  await UserAuditLogHandler.promises.addEntry(
+    userId,
+    'clear-third-party-identifiers',
+    auditLog.initiatorId,
+    auditLog.ipAddress,
+    {}
+  )
+  for (const thirdPartyIdentifier of user.thirdPartyIdentifiers || []) {
+    await ThirdPartyIdentityManager.promises.unlink(
+      userId,
+      thirdPartyIdentifier.providerId,
+      auditLog
+    )
   }
 }
 
@@ -665,6 +686,7 @@ module.exports = {
     addEmailAddress,
     changeEmailAddress,
     clearSAMLData,
+    clearThirdPartyIdentifiers,
     confirmEmail,
     removeEmailAddress,
     removeReconfirmFlag,

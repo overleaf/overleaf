@@ -135,6 +135,7 @@ describe('UserUpdater', function () {
         '../Notifications/NotificationsBuilder': this.NotificationsBuilder,
         '../../infrastructure/Modules': this.Modules,
         './UserSessionsManager': this.UserSessionsManager,
+        './ThirdPartyIdentityManager': this.ThirdPartyIdentityManager,
       },
     })
 
