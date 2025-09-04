@@ -10,6 +10,7 @@ import {
 import GeneralErrorState from './general-error-state'
 import RenderingErrorExpectedState from './rendering-error-expected-state'
 import RenderingErrorState from './rendering-error-state'
+import getMeta from '@/utils/meta'
 
 // AvailableStates
 // - rendering-error-expected
@@ -30,7 +31,9 @@ import RenderingErrorState from './rendering-error-state'
 function PdfErrorState() {
   const { loadingError } = usePdfPreviewContext()
   // TODO ide-redesign-cleanup: rename showLogs to something else and check usages
-  const { hasShortCompileTimeout, error, showLogs } = useCompileContext()
+  const { error, showLogs } = useCompileContext()
+  const { compileTimeout } = getMeta('ol-compileSettings')
+
   const newEditor = useIsNewEditorEnabled()
   const { t } = useTranslation()
 
@@ -40,7 +43,7 @@ function PdfErrorState() {
 
   switch (error) {
     case 'timedout': {
-      if (hasShortCompileTimeout) {
+      if (compileTimeout < 60) {
         return <ShortCompileTimeoutErrorState />
       } else {
         return <LongCompileTimeoutErrorState />
