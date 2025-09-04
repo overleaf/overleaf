@@ -30,7 +30,9 @@ export default function FileTreeCreateNewDoc() {
         extension: name.split('.').length > 1 ? name.split('.').pop() : '',
       })
 
-      openDoc(doc)
+      if (doc) {
+        openDoc(doc)
+      }
     },
     [finishCreatingDoc, name, openDoc]
   )

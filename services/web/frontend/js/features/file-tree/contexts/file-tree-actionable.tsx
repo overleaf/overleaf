@@ -16,6 +16,9 @@ import {
   syncDelete,
   syncMove,
   syncCreateEntity,
+  NewDocEntity,
+  NewLinkedFileEntity,
+  NewEntity,
 } from '../util/sync-mutation'
 import { findInTree, findInTreeOrThrow } from '../util/find-in-tree'
 import { isNameUniqueInFolder } from '../util/is-name-unique-in-folder'
@@ -35,6 +38,7 @@ import { Folder } from '../../../../../types/folder'
 import { useReferencesContext } from '@/features/ide-react/context/references-context'
 import { usePermissionsContext } from '@/features/ide-react/context/permissions-context'
 import { FileTreeEntity } from '@ol-types/file-tree-entity'
+import { Doc } from '@ol-types/doc'
 
 type DroppedFile = File & {
   relativePath?: string
@@ -73,8 +77,12 @@ const FileTreeActionableContext = createContext<
       finishCreatingFolder: any
       startCreatingDocOrFile: any
       startUploadingDocOrFile: any
-      finishCreatingDoc: any
-      finishCreatingLinkedFile: any
+      finishCreatingDoc: (
+        entity: Omit<NewDocEntity, 'endpoint'>
+      ) => Promise<Doc | undefined>
+      finishCreatingLinkedFile: (
+        entity: Omit<NewLinkedFileEntity, 'endpoint'>
+      ) => Promise<{ new_file_id: string } | undefined>
       cancel: () => void
       droppedFiles: { files: File[]; targetFolderId: string } | null
       setDroppedFiles: (value: DroppedFiles | null) => void
@@ -403,7 +411,7 @@ export const FileTreeActionableProvider: FC<React.PropsWithChildren> = ({
   }, [fileTreeData, selectedEntityIds])
 
   const finishCreatingEntity = useCallback(
-    (entity: any) => {
+    (entity: NewEntity) => {
       const error = validateCreate(fileTreeData, parentFolderId, entity)
       if (error) {
         return Promise.reject(error)
@@ -415,7 +423,7 @@ export const FileTreeActionableProvider: FC<React.PropsWithChildren> = ({
   )
 
   const finishCreatingFolder = useCallback(
-    (name: any) => {
+    (name: string) => {
       dispatch({ type: ACTION_TYPES.CREATING_FOLDER })
       return finishCreatingEntity({ endpoint: 'folder', name })
         .then(() => {
@@ -440,8 +448,16 @@ export const FileTreeActionableProvider: FC<React.PropsWithChildren> = ({
     startCreatingFile('upload')
   }, [startCreatingFile])
 
+  type FinishCreatingDocOrFileReturn<T> = T extends NewDocEntity
+    ? Promise<Doc | undefined>
+    : T extends NewLinkedFileEntity
+      ? Promise<{ new_file_id: string } | undefined>
+      : never
+
   const finishCreatingDocOrFile = useCallback(
-    (entity: any) => {
+    <T extends NewDocEntity | NewLinkedFileEntity>(
+      entity: T
+    ): FinishCreatingDocOrFileReturn<T> => {
       dispatch({ type: ACTION_TYPES.CREATING_FILE })
 
       return finishCreatingEntity(entity)
@@ -451,23 +467,21 @@ export const FileTreeActionableProvider: FC<React.PropsWithChildren> = ({
         })
         .catch(error => {
           dispatch({ type: ACTION_TYPES.ERROR, error })
-        })
+        }) as FinishCreatingDocOrFileReturn<T>
     },
     [finishCreatingEntity]
   )
 
   const finishCreatingDoc = useCallback(
-    (entity: any) => {
-      entity.endpoint = 'doc'
-      return finishCreatingDocOrFile(entity)
+    (entity: Omit<NewDocEntity, 'endpoint'>) => {
+      return finishCreatingDocOrFile({ ...entity, endpoint: 'doc' })
     },
     [finishCreatingDocOrFile]
   )
 
   const finishCreatingLinkedFile = useCallback(
-    (entity: any) => {
-      entity.endpoint = 'linked_file'
-      return finishCreatingDocOrFile(entity)
+    (entity: Omit<NewLinkedFileEntity, 'endpoint'>) => {
+      return finishCreatingDocOrFile({ ...entity, endpoint: 'linked_file' })
     },
     [finishCreatingDocOrFile]
   )
