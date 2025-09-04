@@ -1266,6 +1266,7 @@
   "log_entry_maximum_entries": "Maximum log entries limit hit",
   "log_entry_maximum_entries_enable_stop_on_first_error": "Try to fix the first error and recompile. Often one error causes many later error messages. You can <0>Enable “Stop on first error”</0> to focus on fixing errors. We recommend fixing errors as soon as possible; letting them accumulate may lead to hard-to-debug and fatal errors. <1>Learn more</1>",
   "log_entry_maximum_entries_see_full_logs": "If you need to see the full logs, you can still download them or view the raw logs below.",
+  "log_entry_maximum_entries_see_full_logs_new": "If you need to see the full logs, you can still view the raw logs at the bottom of this pane or download them using the button at the top.",
   "log_entry_maximum_entries_title": "__total__ log messages total. Showing the first __displayed__",
   "log_hint_extra_info": "Learn more",
   "log_in": "Log in",

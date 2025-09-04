@@ -980,6 +980,7 @@
   "log_entry_maximum_entries": "",
   "log_entry_maximum_entries_enable_stop_on_first_error": "",
   "log_entry_maximum_entries_see_full_logs": "",
+  "log_entry_maximum_entries_see_full_logs_new": "",
   "log_entry_maximum_entries_title": "",
   "log_hint_extra_info": "",
   "log_in": "",

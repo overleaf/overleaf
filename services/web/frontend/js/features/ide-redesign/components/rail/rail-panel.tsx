@@ -1,4 +1,3 @@
-import { useFeatureFlag } from '@/shared/context/split-test-context'
 import { Panel } from 'react-resizable-panels'
 import { useRailContext } from '../../contexts/rail-context'
 import classNames from 'classnames'
@@ -20,8 +19,6 @@ export default function RailPanel({
   const { selectedTab, panelRef, handlePaneExpand, handlePaneCollapse } =
     useRailContext()
 
-  const newErrorlogs = useFeatureFlag('new-editor-error-logs-redesign')
-
   const prevTab = usePreviousValue(selectedTab)
 
   const tabHasChanged = useMemo(() => {
@@ -36,11 +33,7 @@ export default function RailPanel({
 
   return (
     <Panel
-      id={
-        newErrorlogs
-          ? `ide-redesign-sidebar-panel-${isHistoryView ? 'file-tree' : selectedTab}`
-          : 'ide-redesign-sidebar-panel'
-      }
+      id={`ide-redesign-sidebar-panel-${isHistoryView ? 'file-tree' : selectedTab}`}
       className={classNames({ hidden: isReviewPanelOpen })}
       order={1}
       defaultSize={15}

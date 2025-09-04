@@ -18,8 +18,6 @@ import {
 import { sendSearchEvent } from '@/features/event-tracking/search-events'
 import ErrorLogsPanel from '../error-logs/error-logs-panel'
 import { useDetachCompileContext as useCompileContext } from '@/shared/context/detach-compile-context'
-import OldErrorPane from '../error-logs/old-error-pane'
-import { useFeatureFlag } from '@/shared/context/split-test-context'
 import { useProjectContext } from '@/shared/context/project-context'
 import { useCommandProvider } from '@/features/ide-react/hooks/use-command-provider'
 import RailHelpDropdown from './rail-help-dropdown'
@@ -31,6 +29,7 @@ import RailResizeHandle from './rail-resize-handle'
 import RailModals from './rail-modals'
 import RailOverflowDropdown from './rail-overflow-dropdown'
 import useRailOverflow from '../../hooks/use-rail-overflow'
+import { useAreNewErrorLogsEnabled } from '../../utils/new-editor-utils'
 
 export const RailLayout = () => {
   const { sendEvent } = useEditorAnalytics()
@@ -46,7 +45,7 @@ export const RailLayout = () => {
 
   const isHistoryView = view === 'history'
 
-  const newErrorlogs = useFeatureFlag('new-editor-error-logs-redesign')
+  const newErrorlogs = useAreNewErrorLogsEnabled()
 
   const railTabs: RailElement[] = useMemo(
     () => [
@@ -92,9 +91,10 @@ export const RailLayout = () => {
         key: 'errors',
         icon: 'report',
         title: t('error_log'),
-        component: newErrorlogs ? <ErrorLogsPanel /> : <OldErrorPane />,
+        component: <ErrorLogsPanel />,
         indicator: <ErrorIndicator />,
         disabled: errorLogsDisabled,
+        hide: !newErrorlogs,
       },
     ],
     [t, features.trackChangesVisible, newErrorlogs, errorLogsDisabled, view]
