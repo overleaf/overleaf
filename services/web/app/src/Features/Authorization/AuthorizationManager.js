@@ -156,10 +156,10 @@ async function getPrivilegeLevelForProjectWithUser(
       return PrivilegeLevels.OWNER
     }
     const { adminCapabilities } = await getAdminCapabilities({ _id: userId })
-    if (adminCapabilities.includes('modify-project')) {
+    if (adminCapabilities.includes('modify-project-content')) {
       return PrivilegeLevels.OWNER
     }
-    if (adminCapabilities.includes('view-project')) {
+    if (adminCapabilities.includes('view-project-content')) {
       adminReadOnly = true
     }
   }
@@ -261,24 +261,31 @@ async function canUserReadProject(userId, projectId, token) {
   const privilegeLevel = await getPrivilegeLevelForProject(
     userId,
     projectId,
-    token
+    token,
+    { ignoreSiteAdmin: true }
   )
-  return [
-    PrivilegeLevels.OWNER,
-    PrivilegeLevels.READ_AND_WRITE,
-    PrivilegeLevels.READ_ONLY,
-    PrivilegeLevels.REVIEW,
-  ].includes(privilegeLevel)
+  return (
+    [
+      PrivilegeLevels.OWNER,
+      PrivilegeLevels.READ_AND_WRITE,
+      PrivilegeLevels.READ_ONLY,
+      PrivilegeLevels.REVIEW,
+    ].includes(privilegeLevel) ||
+    (await hasAdminProjectCapability(userId, 'view-project-content'))
+  )
 }
 
 async function canUserWriteProjectContent(userId, projectId, token) {
   const privilegeLevel = await getPrivilegeLevelForProject(
     userId,
     projectId,
-    token
+    token,
+    { ignoreSiteAdmin: true }
   )
-  return [PrivilegeLevels.OWNER, PrivilegeLevels.READ_AND_WRITE].includes(
-    privilegeLevel
+  return (
+    [PrivilegeLevels.OWNER, PrivilegeLevels.READ_AND_WRITE].includes(
+      privilegeLevel
+    ) || (await hasAdminProjectCapability(userId, 'modify-project-content'))
   )
 }
 
@@ -286,12 +293,14 @@ async function canUserWriteOrReviewProjectContent(userId, projectId, token) {
   const privilegeLevel = await getPrivilegeLevelForProject(
     userId,
     projectId,
-    token
+    token,
+    { ignoreSiteAdmin: true }
   )
   return (
     privilegeLevel === PrivilegeLevels.OWNER ||
     privilegeLevel === PrivilegeLevels.READ_AND_WRITE ||
-    privilegeLevel === PrivilegeLevels.REVIEW
+    privilegeLevel === PrivilegeLevels.REVIEW ||
+    (await hasAdminProjectCapability(userId, 'modify-project-content'))
   )
 }
 
@@ -300,10 +309,12 @@ async function canUserWriteProjectSettings(userId, projectId, token) {
     userId,
     projectId,
     token,
-    { ignorePublicAccess: true }
+    { ignorePublicAccess: true, ignoreSiteAdmin: true }
   )
-  return [PrivilegeLevels.OWNER, PrivilegeLevels.READ_AND_WRITE].includes(
-    privilegeLevel
+  return (
+    [PrivilegeLevels.OWNER, PrivilegeLevels.READ_AND_WRITE].includes(
+      privilegeLevel
+    ) || (await hasAdminProjectCapability(userId, 'modify-project-setting'))
   )
 }
 
@@ -311,18 +322,26 @@ async function canUserRenameProject(userId, projectId, token) {
   const privilegeLevel = await getPrivilegeLevelForProject(
     userId,
     projectId,
-    token
+    token,
+    { ignoreSiteAdmin: true }
   )
-  return privilegeLevel === PrivilegeLevels.OWNER
+  return (
+    privilegeLevel === PrivilegeLevels.OWNER ||
+    (await hasAdminProjectCapability(userId, 'modify-project-setting'))
+  )
 }
 
 async function canUserAdminProject(userId, projectId, token) {
   const privilegeLevel = await getPrivilegeLevelForProject(
     userId,
     projectId,
-    token
+    token,
+    { ignoreSiteAdmin: true }
   )
-  return privilegeLevel === PrivilegeLevels.OWNER
+  return (
+    privilegeLevel === PrivilegeLevels.OWNER ||
+    (await hasAdminProjectCapability(userId, 'modify-project-setting'))
+  )
 }
 
 async function isUserSiteAdmin(userId) {
@@ -332,6 +351,21 @@ async function isUserSiteAdmin(userId) {
   if (!Settings.adminPrivilegeAvailable) return false
   const user = await User.findOne({ _id: userId }, { isAdmin: 1 }).exec()
   return hasAdminAccess(user)
+}
+
+/**
+ * @param {string} userId
+ * @param {'view-project-setting'|'view-project-content'|'modify-project-setting'|'modify-project-content'} adminCapability
+ */
+async function hasAdminProjectCapability(userId, adminCapability) {
+  if (!Settings.adminPrivilegeAvailable || !(await isUserSiteAdmin(userId))) {
+    return false
+  }
+  if (!Settings.adminRolesEnabled) {
+    return true
+  }
+  const { adminCapabilities } = await getAdminCapabilities({ _id: userId })
+  return adminCapabilities.includes(adminCapability)
 }
 
 async function canUserDeleteOrResolveThread(

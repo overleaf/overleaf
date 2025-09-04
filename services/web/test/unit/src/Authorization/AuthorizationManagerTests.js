@@ -709,13 +709,13 @@ function testPermission(permission, privilegeLevels) {
         })
         expectPermission(permission, false)
       })
-      describe('admin with `view-project`', function () {
+      describe('admin with `view-project-content`', function () {
         beforeEach(function () {
           this.user.isAdmin = true
           this.settings.adminRolesEnabled = true
           this.Modules.promises.hooks.fire
             .withArgs('getAdminCapabilities')
-            .resolves([['view-project']])
+            .resolves([['view-project-content']])
         })
         expectPermission(permission, privilegeLevels.readOnly || false)
       })
@@ -725,7 +725,14 @@ function testPermission(permission, privilegeLevels) {
           this.settings.adminRolesEnabled = true
           this.Modules.promises.hooks.fire
             .withArgs('getAdminCapabilities')
-            .resolves([['view-project', 'modify-project']])
+            .resolves([
+              [
+                'view-project-content',
+                'view-project-setting',
+                'modify-project-content',
+                'modify-project-setting',
+              ],
+            ])
         })
         expectPermission(permission, privilegeLevels.siteAdmin || false)
       })

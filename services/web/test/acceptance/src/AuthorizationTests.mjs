@@ -364,6 +364,87 @@ describe('Authorization', function () {
         await expectRedirectedAdminAccess(this.site_admin)
       })
     })
+
+    describe('with admin roles', function () {
+      beforeEach(function () {
+        if (!settings.moduleImportSequence.includes('admin-roles')) {
+          this.skip()
+        }
+        settings.adminRolesEnabled = true
+        settings.adminPrivilegeAvailable = true
+      })
+
+      afterEach(function () {
+        settings.adminRolesEnabled = false
+        settings.adminPrivilegeAvailable = true
+        this.site_admin.mongoUpdate({
+          $set: { adminRoles: [] },
+        })
+      })
+
+      describe('engineering', function () {
+        beforeEach(function () {
+          this.site_admin.mongoUpdate({
+            $set: { adminRoles: ['engineering'] },
+          })
+        })
+
+        it('should allow site admin users read access to it', async function () {
+          await expectReadAccess(this.site_admin, this.projectId)
+        })
+
+        it('should not allow site admin users write access to its content', async function () {
+          await expectNoContentWriteAccess(this.site_admin, this.projectId)
+        })
+
+        it('should allow site admin users write access to its settings', async function () {
+          await expectSettingsWriteAccess(this.site_admin, this.projectId)
+        })
+
+        it('should allow site admin users to rename the project', async function () {
+          await expectRenameProjectAccess(this.site_admin, this.projectId)
+        })
+
+        it('should allow site admin users project admin access to it', async function () {
+          await expectProjectAdminAccess(this.site_admin, this.projectId)
+        })
+
+        it('should allow site admin users site admin access to site admin endpoints', async function () {
+          await expectAdminAccess(this.site_admin)
+        })
+      })
+      describe('no admin role assigned', function () {
+        beforeEach(function () {
+          this.site_admin.mongoUpdate({
+            $set: { adminRoles: [] },
+          })
+        })
+
+        it('should not allow site admin users read access to it', async function () {
+          await expectNoReadAccess(this.site_admin, this.projectId)
+        })
+
+        it('should not allow site admin users write access to its content', async function () {
+          await expectNoContentWriteAccess(this.site_admin, this.projectId)
+        })
+
+        it('should not allow site admin users write access to its settings', async function () {
+          await expectNoSettingsWriteAccess(this.site_admin, this.projectId)
+        })
+
+        it('should not allow site admin users to rename the project', async function () {
+          await expectNoRenameProjectAccess(this.site_admin, this.projectId)
+        })
+
+        it('should not allow site admin users project admin access to it', async function () {
+          await expectNoProjectAdminAccess(this.site_admin, this.projectId)
+        })
+
+        it('should allow site admin users site admin access to site admin endpoints', async function () {
+          await expectAdminAccess(this.site_admin)
+        })
+      })
+    })
   })
 
   describe('shared project', function () {
