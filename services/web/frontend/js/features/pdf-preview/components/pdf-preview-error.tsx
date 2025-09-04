@@ -253,10 +253,12 @@ function PdfPreviewError({
 export default memo(PdfPreviewError)
 
 function ErrorLogEntry({
+  autoExpand,
   title,
   headerIcon,
   children,
 }: {
+  autoExpand?: boolean
   title: string
   headerIcon?: React.ReactElement
   children: React.ReactNode
@@ -265,6 +267,7 @@ function ErrorLogEntry({
 
   return (
     <PdfLogEntry
+      autoExpand={autoExpand}
       headerTitle={title}
       headerIcon={headerIcon}
       formattedContent={children}
@@ -289,7 +292,7 @@ function TimedOutLogEntry() {
   }, [enableStopOnFirstError, startCompile, setAnimateCompileDropdownArrow])
 
   return (
-    <ErrorLogEntry title={t('timedout')}>
+    <ErrorLogEntry autoExpand title={t('timedout')}>
       <p>{t('project_timed_out_intro')}</p>
       <ul>
         <li>

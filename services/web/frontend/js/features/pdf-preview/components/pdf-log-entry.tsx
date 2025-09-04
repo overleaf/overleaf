@@ -10,6 +10,7 @@ import NewLogEntry from '@/features/ide-redesign/components/error-logs/log-entry
 import { useFeatureFlag } from '@/shared/context/split-test-context'
 
 function PdfLogEntry({
+  autoExpand,
   ruleId,
   headerTitle,
   headerIcon,
@@ -29,6 +30,7 @@ function PdfLogEntry({
 }: {
   headerTitle: string | React.ReactNode
   level: ErrorLevel
+  autoExpand?: boolean
   ruleId?: string
   headerIcon?: React.ReactElement
   rawContent?: string
@@ -75,6 +77,7 @@ function PdfLogEntry({
   if (newEditor && newErrorlogs) {
     return (
       <NewLogEntry
+        autoExpand={autoExpand}
         index={index}
         id={id}
         logEntry={logEntry}

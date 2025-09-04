@@ -12,6 +12,8 @@ import { Nav, NavLink, TabContainer, TabContent } from 'react-bootstrap'
 import { LogEntry as LogEntryData } from '@/features/pdf-preview/util/types'
 import LogEntry from './log-entry'
 import importOverleafModules from '../../../../../macros/import-overleaf-module.macro'
+import TimeoutUpgradePromptNew from '@/features/pdf-preview/components/timeout-upgrade-prompt-new'
+import getMeta from '@/utils/meta'
 
 const logsComponents: Array<{
   import: { default: ElementType }
@@ -27,6 +29,7 @@ type ErrorLogTab = {
 function ErrorLogs() {
   const { error, logEntries, rawLog, validationIssues, stoppedOnFirstError } =
     useCompileContext()
+  const { compileTimeout } = getMeta('ol-compileSettings')
 
   const tabs = useMemo(() => {
     return [
@@ -72,12 +75,10 @@ function ErrorLogs() {
             />
           )}
 
-          {error && (
-            <PdfPreviewError
-              error={error}
-              includeErrors={includeErrors}
-              includeWarnings={includeWarnings}
-            />
+          {compileTimeout < 60 && error === 'timedout' ? (
+            <TimeoutUpgradePromptNew />
+          ) : (
+            <>{error && <PdfPreviewError error={error} />}</>
           )}
 
           {includeErrors &&

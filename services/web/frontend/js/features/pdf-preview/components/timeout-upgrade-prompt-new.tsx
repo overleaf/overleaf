@@ -66,6 +66,7 @@ const CompileTimeout = memo(function CompileTimeout({
 
   return (
     <PdfLogEntry
+      autoExpand
       headerTitle={t('your_compile_timed_out')}
       formattedContent={
         getMeta('ol-ExposedSettings').enableSubscriptions && (
@@ -147,6 +148,7 @@ const PreventTimeoutHelpMessage = memo(function PreventTimeoutHelpMessage({
 
   return (
     <PdfLogEntry
+      autoExpand
       headerTitle={t('reasons_for_compile_timeouts')}
       formattedContent={
         <>

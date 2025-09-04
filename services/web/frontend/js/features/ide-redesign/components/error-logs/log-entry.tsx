@@ -39,8 +39,8 @@ type LogEntryProps = {
   openCollapseIconOverride?: string
 }
 
-function LogEntry(props: LogEntryProps) {
-  const [collapsed, setCollapsed] = useState(props.index !== 0)
+function LogEntry(props: LogEntryProps & { autoExpand?: boolean }) {
+  const [collapsed, setCollapsed] = useState(!props.autoExpand)
 
   return (
     <ControlledLogEntry
