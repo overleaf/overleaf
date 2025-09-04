@@ -37,7 +37,7 @@ pipeline {
       AR_REPO_LOCATION = 'us-east1'
       AR_URL = 'us-east1-docker.pkg.dev/overleaf-ops/ol-docker'
       DOCKER_COMPOSE_FLAGS = '-f docker-compose.ci.yml'
-      BRANCH_NAME = "${GIT_BRANCH.replace('origin/', '')}"
+      BRANCH_NAME = "${env.CHANGE_BRANCH ? env.CHANGE_BRANCH : env.BRANCH_NAME}"
       COMMIT_SHA = "${GIT_COMMIT}"
       SHORT_SHA = "${GIT_COMMIT.take(7)}"
       CDN_STAG = "gs://ol-stag-web-assets-1"
