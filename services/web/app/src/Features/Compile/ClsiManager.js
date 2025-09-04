@@ -818,9 +818,9 @@ function _finaliseRequest(projectId, options, project, docs, files) {
   }
 }
 
-async function wordCount(projectId, userId, file, options, clsiserverid) {
-  const { compileBackendClass, compileGroup } = options
-  const req = await _buildRequest(projectId, options)
+async function wordCount(projectId, userId, file, limits, clsiserverid) {
+  const { compileBackendClass, compileGroup } = limits
+  const req = await _buildRequest(projectId, limits)
   const filename = file || req.compile.rootResourcePath
   const url = _getCompilerUrl(
     compileBackendClass,
@@ -845,6 +845,56 @@ async function wordCount(projectId, userId, file, options, clsiserverid) {
     clsiserverid
   )
   return body
+}
+
+async function syncTeX(
+  projectId,
+  userId,
+  {
+    direction,
+    compileFromClsiCache,
+    limits,
+    imageName,
+    validatedOptions,
+    clsiServerId,
+  }
+) {
+  const { compileBackendClass, compileGroup } = limits
+  const url = _getCompilerUrl(
+    compileBackendClass,
+    compileGroup,
+    projectId,
+    userId,
+    `sync/${direction}`
+  )
+  url.searchParams.set(
+    'compileFromClsiCache',
+    compileFromClsiCache && ['alpha', 'priority'].includes(compileGroup)
+  )
+  url.searchParams.set('imageName', imageName)
+  for (const [key, value] of Object.entries(validatedOptions)) {
+    url.searchParams.set(key, value)
+  }
+  const opts = {
+    method: 'GET',
+  }
+  try {
+    const { body } = await _makeRequestWithClsiServerId(
+      projectId,
+      userId,
+      compileGroup,
+      compileBackendClass,
+      url,
+      opts,
+      clsiServerId
+    )
+    return body
+  } catch (err) {
+    if (err instanceof RequestFailedError && err.response.status === 404) {
+      throw new Errors.NotFoundError()
+    }
+    throw err
+  }
 }
 
 function _getClsiServerIdFromResponse(response) {
@@ -883,6 +933,7 @@ module.exports = {
   deleteAuxFiles: callbackify(deleteAuxFiles),
   getOutputFileStream: callbackify(getOutputFileStream),
   wordCount: callbackify(wordCount),
+  syncTeX: callbackify(syncTeX),
   promises: {
     sendRequest,
     sendExternalRequest,
@@ -890,5 +941,6 @@ module.exports = {
     deleteAuxFiles,
     getOutputFileStream,
     wordCount,
+    syncTeX,
   },
 }

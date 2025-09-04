@@ -8,6 +8,7 @@ const CompileManager = require('./CompileManager')
 const ClsiManager = require('./ClsiManager')
 const logger = require('@overleaf/logger')
 const Settings = require('@overleaf/settings')
+const Errors = require('../Errors/Errors')
 const SessionManager = require('../Authentication/SessionManager')
 const { RateLimiter } = require('../../infrastructure/RateLimiter')
 const ClsiCookieManager = require('./ClsiCookieManager')(
@@ -36,16 +37,6 @@ function getOutputFilesArchiveSpecification(projectId, userId, buildId) {
     url: _CompileController._getFileUrl(projectId, userId, buildId, fileName),
     type: 'zip',
   }
-}
-
-async function getImageNameForProject(projectId) {
-  const project = await ProjectGetter.promises.getProject(projectId, {
-    imageName: 1,
-  })
-  if (!project) {
-    throw new Error('project not found')
-  }
-  return project.imageName
 }
 
 async function getPdfCachingMinChunkSize(req, res) {
@@ -118,6 +109,32 @@ async function _getSplitTestOptions(req, res) {
     pdfDownloadDomain,
     enablePdfCaching,
     pdfCachingMinChunkSize,
+  }
+}
+
+async function _syncTeX(req, res, direction, validatedOptions) {
+  const projectId = req.params.Project_id
+  const { editorId, buildId, clsiserverid: clsiServerId } = req.query
+  if (!editorId?.match(/^[a-f0-9-]+$/)) throw new Error('invalid ?editorId')
+  if (!buildId?.match(/^[a-f0-9-]+$/)) throw new Error('invalid ?buildId')
+
+  const userId = CompileController._getUserIdForCompile(req)
+  const { compileFromClsiCache } = await _getSplitTestOptions(req, res)
+  try {
+    const body = await CompileManager.promises.syncTeX(projectId, userId, {
+      direction,
+      compileFromClsiCache,
+      validatedOptions: {
+        ...validatedOptions,
+        editorId,
+        buildId,
+      },
+      clsiServerId,
+    })
+    res.json(body)
+  } catch (err) {
+    if (err instanceof Errors.NotFoundError) return res.status(404).end()
+    throw err
   }
 }
 
@@ -470,18 +487,8 @@ const _CompileController = {
     return url
   },
 
-  // compute a POST url for a project, user (optional) and action
-  _getUrl(projectId, userId, action) {
-    let path = `/project/${projectId}`
-    if (userId != null) {
-      path += `/user/${userId}`
-    }
-    return `${path}/${action}`
-  },
-
   async proxySyncPdf(req, res) {
-    const projectId = req.params.Project_id
-    const { page, h, v, editorId, buildId } = req.query
+    const { page, h, v } = req.query
     if (!page?.match(/^\d+$/)) {
       throw new Error('invalid page parameter')
     }
@@ -491,28 +498,11 @@ const _CompileController = {
     if (!v?.match(/^-?\d+\.\d+$/)) {
       throw new Error('invalid v parameter')
     }
-    // whether this request is going to a per-user container
-    const userId = CompileController._getUserIdForCompile(req)
-
-    const imageName = await getImageNameForProject(projectId)
-
-    const { compileFromClsiCache } = await _getSplitTestOptions(req, res)
-
-    const url = _CompileController._getUrl(projectId, userId, 'sync/pdf')
-
-    await CompileController._proxyToClsi(
-      projectId,
-      'sync-to-pdf',
-      url,
-      { page, h, v, imageName, editorId, buildId, compileFromClsiCache },
-      req,
-      res
-    )
+    await _syncTeX(req, res, 'pdf', { page, h, v })
   },
 
   async proxySyncCode(req, res) {
-    const projectId = req.params.Project_id
-    const { file, line, column, editorId, buildId } = req.query
+    const { file, line, column } = req.query
     if (file == null) {
       throw new Error('missing file parameter')
     }
@@ -531,40 +521,12 @@ const _CompileController = {
     if (!column?.match(/^\d+$/)) {
       throw new Error('invalid column parameter')
     }
-    const userId = CompileController._getUserIdForCompile(req)
-
-    const imageName = await getImageNameForProject(projectId)
-
-    const { compileFromClsiCache } = await _getSplitTestOptions(req, res)
-
-    const url = _CompileController._getUrl(projectId, userId, 'sync/code')
-    await CompileController._proxyToClsi(
-      projectId,
-      'sync-to-code',
-      url,
-      {
-        file,
-        line,
-        column,
-        imageName,
-        editorId,
-        buildId,
-        compileFromClsiCache,
-      },
-      req,
-      res
-    )
+    await _syncTeX(req, res, 'code', { file, line, column })
   },
 
   async _proxyToClsi(projectId, action, url, qs, req, res) {
     const limits =
       await CompileManager.promises.getProjectCompileLimits(projectId)
-    if (
-      qs?.compileFromClsiCache &&
-      !['alpha', 'priority'].includes(limits.compileGroup)
-    ) {
-      qs.compileFromClsiCache = false
-    }
     return CompileController._proxyToClsiWithLimits(
       projectId,
       action,

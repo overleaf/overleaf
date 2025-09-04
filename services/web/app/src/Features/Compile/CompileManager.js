@@ -110,7 +110,13 @@ async function getProjectCompileLimits(projectId) {
   const project = await ProjectGetter.promises.getProject(projectId, {
     owner_ref: 1,
   })
+  return _getProjectCompileLimits(project)
+}
 
+async function _getProjectCompileLimits(project) {
+  if (!project) {
+    throw new Error('project not found')
+  }
   const owner = await UserGetter.promises.getUser(project.owner_ref, {
     _id: 1,
     alphaProgram: 1,
@@ -162,6 +168,27 @@ async function wordCount(projectId, userId, file, clsiserverid) {
   )
 }
 
+async function syncTeX(
+  projectId,
+  userId,
+  { direction, compileFromClsiCache, validatedOptions, clsiServerId }
+) {
+  const project = await ProjectGetter.promises.getProject(projectId, {
+    owner_ref: 1,
+    imageName: 1,
+  })
+  const limits = await _getProjectCompileLimits(project)
+  const { imageName } = project
+  return await ClsiManager.promises.syncTeX(projectId, userId, {
+    direction,
+    limits,
+    imageName,
+    compileFromClsiCache,
+    validatedOptions,
+    clsiServerId,
+  })
+}
+
 async function stopCompile(projectId, userId) {
   const limits =
     await CompileManager.promises.getProjectCompileLimits(projectId)
@@ -188,6 +215,7 @@ module.exports = CompileManager = {
     getProjectCompileLimits,
     stopCompile,
     wordCount,
+    syncTeX,
   },
   compile: callbackifyMultiResult(instrumentedCompile, [
     'status',
@@ -249,6 +277,7 @@ module.exports = CompileManager = {
   },
 
   wordCount: callbackify(wordCount),
+  syncTeX: callbackify(syncTeX),
 }
 
 const autoCompileRateLimiters = new Map()
