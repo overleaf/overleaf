@@ -1,3 +1,6 @@
+/* eslint-disable @overleaf/require-script-runner */
+// This *is* ScriptRunner.
+
 import { ScriptLog } from '../../app/src/models/ScriptLog.mjs'
 import Settings from '@overleaf/settings'
 

@@ -48,7 +48,7 @@ function parseArgs() {
 }
 
 function usage() {
-  console.log(`Usage: find_dangling_comments.mjs [OPTS]
+  console.log(`Usage: check_docs.mjs [OPTS]
 
 Options:
 
@@ -205,7 +205,7 @@ async function findDanglingThreadIds(projectId, docs) {
     return []
   }
 
-  const rooms = await db.rooms.find(
+  const rooms = db.rooms.find(
     { project_id: new ObjectId(projectId), thread_id: { $exists: true } },
     { readPreference: READ_PREFERENCE_SECONDARY }
   )
