@@ -1,4 +1,5 @@
 // Metrics must be initialized before importing anything else
+// test
 import { metricsModuleImportStartTime } from '@overleaf/metrics/initialize.js'
 
 import Modules from './app/src/infrastructure/Modules.js'
