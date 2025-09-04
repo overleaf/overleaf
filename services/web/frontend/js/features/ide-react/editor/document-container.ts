@@ -29,6 +29,10 @@ import {
 import { ThreadId } from '../../../../../types/review-panel/review-panel'
 import getMeta from '@/utils/meta'
 import OError from '@overleaf/o-error'
+import {
+  HistoryOTShareDoc,
+  ShareLatexOTShareDoc,
+} from '../../../../../types/share-doc'
 
 const MAX_PENDING_OP_SIZE = 64
 
@@ -119,6 +123,27 @@ export class DocumentContainer extends EventEmitter {
     this.connected = this.socket.socket.connected
     this.bindToEditorEvents()
     this.bindToSocketEvents()
+  }
+
+  get shareDoc() {
+    if (!this.doc) {
+      throw new Error('Missing ShareJSDoc')
+    }
+    if (!this.doc._doc) {
+      throw new Error('Missing ShareJS Doc')
+    }
+    return this.doc._doc as HistoryOTShareDoc | ShareLatexOTShareDoc
+  }
+
+  isHistoryOT() {
+    return this.shareDoc.otType === 'history-ot'
+  }
+
+  get historyOTShareDoc() {
+    if (!this.isHistoryOT()) {
+      throw new Error('shareDoc is not historyOT')
+    }
+    return this.shareDoc as HistoryOTShareDoc
   }
 
   attachToCM6(cm6: EditorFacade) {
@@ -612,6 +637,9 @@ export class DocumentContainer extends EventEmitter {
     this.doc.on('op:timeout', () => {
       this.trigger('op:timeout')
       return this.onError(new Error('op timed out'))
+    })
+    this.doc.on('ranges:dirty', (...args) => {
+      return this.trigger('ranges:dirty', ...args)
     })
 
     let docChangedTimeout: number | null = null

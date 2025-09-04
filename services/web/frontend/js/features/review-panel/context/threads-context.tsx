@@ -24,6 +24,15 @@ import { useEditorOpenDocContext } from '@/features/ide-react/context/editor-ope
 import { useEditorContext } from '@/shared/context/editor-context'
 import { debugConsole } from '@/utils/debugging'
 import { captureException } from '@/infrastructure/error-reporter'
+import {
+  AddCommentOperation,
+  DeleteCommentOperation,
+  SetCommentStateOperation,
+} from 'overleaf-editor-core'
+import Range from 'overleaf-editor-core/lib/range'
+import { trackedDeletesFromState } from '@/features/source-editor/utils/tracked-deletes'
+import { useCodeMirrorViewContext } from '@/features/source-editor/components/codemirror-context'
+import { rangesUpdatedEffect } from '@/features/source-editor/extensions/history-ot'
 
 export type Threads = Record<ThreadId, ReviewPanelCommentThread>
 
@@ -52,9 +61,12 @@ export const ThreadsProvider: FC<React.PropsWithChildren> = ({ children }) => {
   const { projectId } = useProjectContext()
   const { currentDocument } = useEditorOpenDocContext()
   const { isRestrictedTokenMember } = useEditorContext()
+  const view = useCodeMirrorViewContext()
 
   // const [error, setError] = useState<Error>()
   const [data, setData] = useState<Threads>()
+
+  const isHistoryOT = currentDocument?.isHistoryOT()
 
   // load the initial threads data
   useEffect(() => {
@@ -250,8 +262,12 @@ export const ThreadsProvider: FC<React.PropsWithChildren> = ({ children }) => {
     }, [])
   )
 
-  const actions = useMemo(
-    () => ({
+  const actions = useMemo(() => {
+    if (!currentDocument) {
+      return
+    }
+
+    const actions = {
       async addComment(pos: number, text: string, content: string) {
         const threadId = RangesTracker.generateId() as ThreadId
 
@@ -265,23 +281,23 @@ export const ThreadsProvider: FC<React.PropsWithChildren> = ({ children }) => {
           t: threadId,
         }
 
-        currentDocument?.submitOp(op)
+        currentDocument.submitOp(op)
       },
       async resolveThread(threadId: string) {
         await postJSON(
-          `/project/${projectId}/doc/${currentDocument?.doc_id}/thread/${threadId}/resolve`
+          `/project/${projectId}/doc/${currentDocument.doc_id}/thread/${threadId}/resolve`
         )
       },
       async reopenThread(threadId: string) {
         await postJSON(
-          `/project/${projectId}/doc/${currentDocument?.doc_id}/thread/${threadId}/reopen`
+          `/project/${projectId}/doc/${currentDocument.doc_id}/thread/${threadId}/reopen`
         )
       },
       async deleteThread(threadId: string) {
         await deleteJSON(
-          `/project/${projectId}/doc/${currentDocument?.doc_id}/thread/${threadId}`
+          `/project/${projectId}/doc/${currentDocument.doc_id}/thread/${threadId}`
         )
-        currentDocument?.ranges?.removeCommentId(threadId)
+        currentDocument.ranges?.removeCommentId(threadId)
       },
       async addMessage(threadId: ThreadId, content: string) {
         await postJSON(`/project/${projectId}/thread/${threadId}/messages`, {
@@ -308,9 +324,57 @@ export const ThreadsProvider: FC<React.PropsWithChildren> = ({ children }) => {
           `/project/${projectId}/thread/${threadId}/own-messages/${commentId}`
         )
       },
-    }),
-    [currentDocument, projectId]
-  )
+    }
+
+    if (isHistoryOT) {
+      // TODO: dispatch on view instead?
+      Object.assign(actions, {
+        async addComment(pos: number, text: string, content: string) {
+          const threadId = RangesTracker.generateId() as ThreadId // TODO
+
+          await postJSON(`/project/${projectId}/thread/${threadId}/messages`, {
+            body: { content },
+          })
+
+          const trackedDeletes = trackedDeletesFromState(view.state)
+          pos = trackedDeletes.toSnapshot(pos)
+          const ranges = [new Range(pos, text.length)]
+          const op = new AddCommentOperation(threadId, ranges)
+          currentDocument.historyOTShareDoc.submitOp([op])
+          view.dispatch({
+            effects: rangesUpdatedEffect.of(null),
+          })
+        },
+        async resolveThread(threadId: string) {
+          const op = new SetCommentStateOperation(threadId, true)
+          currentDocument.historyOTShareDoc.submitOp([op])
+          view.dispatch({
+            effects: rangesUpdatedEffect.of(null),
+          })
+        },
+        async reopenThread(threadId: string) {
+          const op = new SetCommentStateOperation(threadId, false)
+          currentDocument.historyOTShareDoc.submitOp([op])
+          view.dispatch({
+            effects: rangesUpdatedEffect.of(null),
+          })
+        },
+        async deleteThread(threadId: string) {
+          const op = new DeleteCommentOperation(threadId)
+          currentDocument.historyOTShareDoc.submitOp([op])
+          view.dispatch({
+            effects: rangesUpdatedEffect.of(null),
+          })
+        },
+      })
+    }
+
+    return actions
+  }, [view, currentDocument, projectId, isHistoryOT])
+
+  if (!actions) {
+    return null
+  }
 
   return (
     <ThreadsActionsContext.Provider value={actions}>

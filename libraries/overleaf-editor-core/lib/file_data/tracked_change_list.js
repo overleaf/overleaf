@@ -22,6 +22,13 @@ class TrackedChangeList {
   }
 
   /**
+   * @returns {IterableIterator<TrackedChange>}
+   */
+  [Symbol.iterator]() {
+    return this._trackedChanges.values()
+  }
+
+  /**
    *
    * @param {TrackedChangeRawData[]} raw
    * @returns {TrackedChangeList}

@@ -22,18 +22,34 @@ import { useConnectionContext } from '@/features/ide-react/context/connection-co
 import useSocketListener from '@/features/ide-react/hooks/use-socket-listener'
 import { throttle } from 'lodash'
 import { useEditorOpenDocContext } from '@/features/ide-react/context/editor-open-doc-context'
+import { TextOperation, Range } from 'overleaf-editor-core'
+import { rangesUpdatedEffect } from '@/features/source-editor/extensions/history-ot'
+import ClearTrackingProps from 'overleaf-editor-core/lib/file_data/clear_tracking_props'
+import { isInsertOperation } from '@/utils/operations'
+import {
+  EditorSelection,
+  Transaction,
+  TransactionSpec,
+} from '@codemirror/state'
+import { buildRangesFromSnapshot } from '@/features/review-panel/utils/snapshot-ranges'
 
 export type Ranges = {
   docId: string
-  changes: Change<EditOperation>[]
-  comments: Change<CommentOperation>[]
+  changes: Array<Change<EditOperation> & { snapshotRange?: Range }>
+  comments: Array<
+    Change<CommentOperation> & { snapshotRange?: Range; resolved?: boolean }
+  >
 }
 
 export const RangesContext = createContext<Ranges | undefined>(undefined)
 
 type RangesActions = {
-  acceptChanges: (...ids: string[]) => Promise<void>
-  rejectChanges: (...ids: string[]) => Promise<void>
+  acceptChanges: (
+    ...changes: Array<Change<EditOperation> & { snapshotRange?: Range }>
+  ) => Promise<void>
+  rejectChanges: (
+    ...changes: Array<Change<EditOperation> & { snapshotRange?: Range }>
+  ) => Promise<void>
 }
 
 const buildRanges = (currentDocument: DocumentContainer | null) => {
@@ -76,6 +92,13 @@ const buildRanges = (currentDocument: DocumentContainer | null) => {
   }
 }
 
+const buildRangesFromHistoryOT = (currentDocument: DocumentContainer) => {
+  return buildRangesFromSnapshot(
+    currentDocument.historyOTShareDoc.snapshot,
+    currentDocument.doc_id
+  )
+}
+
 const RangesActionsContext = createContext<RangesActions | undefined>(undefined)
 
 export const RangesProvider: FC<React.PropsWithChildren> = ({ children }) => {
@@ -89,11 +112,37 @@ export const RangesProvider: FC<React.PropsWithChildren> = ({ children }) => {
 
   // rebuild the ranges when the current doc changes
   useEffect(() => {
-    setRanges(buildRanges(currentDocument))
+    if (currentDocument) {
+      if (currentDocument.isHistoryOT()) {
+        setRanges(buildRangesFromHistoryOT(currentDocument))
+      } else {
+        setRanges(buildRanges(currentDocument))
+      }
+    }
   }, [currentDocument])
 
   useEffect(() => {
-    if (currentDocument) {
+    if (currentDocument && currentDocument.isHistoryOT()) {
+      const listener = throttle(
+        () => {
+          window.setTimeout(() => {
+            setRanges(buildRangesFromHistoryOT(currentDocument))
+          })
+        },
+        500,
+        { leading: true, trailing: true }
+      )
+
+      currentDocument.on('ranges:dirty.ot', listener)
+
+      return () => {
+        currentDocument.off('ranges:dirty.ot')
+      }
+    }
+  }, [currentDocument])
+
+  useEffect(() => {
+    if (currentDocument && !currentDocument.isHistoryOT()) {
       const listener = throttle(
         () => {
           window.setTimeout(() => {
@@ -156,24 +205,151 @@ export const RangesProvider: FC<React.PropsWithChildren> = ({ children }) => {
     )
   )
 
-  const actions = useMemo(
-    () => ({
-      async acceptChanges(...ids: string[]) {
-        if (currentDocument?.ranges) {
-          const url = `/project/${projectId}/doc/${currentDocument.doc_id}/changes/accept`
-          await postJSON(url, { body: { change_ids: ids } })
-          currentDocument.ranges.removeChangeIds(ids)
-          setRanges(buildRanges(currentDocument))
-        }
-      },
-      async rejectChanges(...ids: string[]) {
-        if (currentDocument?.ranges) {
-          view.dispatch(rejectChanges(view.state, currentDocument.ranges, ids))
-        }
-      },
-    }),
-    [currentDocument, projectId, view]
-  )
+  const actions = useMemo(() => {
+    if (!currentDocument) {
+      return
+    }
+
+    if (currentDocument.isHistoryOT()) {
+      return {
+        async acceptChanges(...changes) {
+          const op = new TextOperation()
+
+          let currentSnapshotPos = 0
+          for (const change of changes) {
+            const { start, end, length } = change.snapshotRange!
+
+            if (start > currentSnapshotPos) {
+              op.retain(start - currentSnapshotPos)
+            }
+
+            currentSnapshotPos = end
+
+            if (isInsertOperation(change.op)) {
+              // accept tracked insertion
+
+              // clear tracking from snapshot
+              op.retain({ r: length }, { tracking: new ClearTrackingProps() }) // TODO: { type: 'none' })
+            } else {
+              // accept tracked deletion
+
+              // remove text from snapshot
+              op.remove(length) // NOTE: tracking is removed automatically
+            }
+          }
+
+          const shareDoc = currentDocument.historyOTShareDoc
+
+          const length = shareDoc.snapshot.getStringLength()
+
+          if (currentSnapshotPos < length) {
+            op.retain(length - currentSnapshotPos)
+          }
+
+          shareDoc.submitOp([op])
+
+          // dispatch an effect as the editor's doc doesn't change when tracked changes are accepted
+          view.dispatch({
+            effects: rangesUpdatedEffect.of(null),
+          })
+        },
+        async rejectChanges(...changes) {
+          const shareDoc = currentDocument.historyOTShareDoc
+
+          const originalLength = shareDoc.snapshot.getStringLength()
+
+          const op = new TextOperation()
+
+          let currentSnapshotPos = 0
+          const specs: TransactionSpec[] = []
+          for (const change of changes) {
+            const { start, end, length } = change.snapshotRange!
+
+            if (start > currentSnapshotPos) {
+              op.retain(start - currentSnapshotPos)
+            }
+
+            currentSnapshotPos = end
+
+            if (isInsertOperation(change.op)) {
+              // reject tracked insertion
+
+              // remove text from snapshot
+              op.remove(length) // NOTE: tracking is removed automatically
+
+              // remove text from editor
+              specs.push({
+                changes: {
+                  from: change.op.p,
+                  to: change.op.p + change.op.i.length,
+                  insert: '',
+                },
+                annotations: [
+                  Transaction.remote.of(true),
+                  // Transaction.addToHistory.of(false), // TODO: is this needed for the undo stack?
+                ],
+              })
+            } else {
+              // reject tracked deletion
+
+              // remove tracking from snapshot
+              op.retain({ r: length }, { tracking: new ClearTrackingProps() }) // TODO: { type: 'none' })
+
+              // re-add text to editor
+              specs.push({
+                changes: {
+                  from: change.op.p,
+                  insert: change.op.d,
+                },
+                selection: EditorSelection.cursor(
+                  change.op.p + change.op.d.length
+                ), // TODO: map selection through changes?
+                annotations: [
+                  Transaction.remote.of(true),
+                  // Transaction.addToHistory.of(false), // TODO: is this needed for the undo stack?
+                ],
+              })
+            }
+          }
+
+          if (currentSnapshotPos < originalLength) {
+            op.retain(originalLength - currentSnapshotPos)
+          }
+
+          shareDoc.submitOp([op])
+
+          // in case the doc didn't change
+          view.dispatch(...specs, {
+            effects: rangesUpdatedEffect.of(null),
+          })
+        },
+      } satisfies RangesActions
+    } else {
+      return {
+        async acceptChanges(...changes) {
+          if (currentDocument.ranges) {
+            const ids = changes.map(change => change.id)
+            const url = `/project/${projectId}/doc/${currentDocument.doc_id}/changes/accept`
+            await postJSON(url, { body: { change_ids: ids } })
+            currentDocument.ranges.removeChangeIds(ids)
+            setRanges(buildRanges(currentDocument))
+          }
+        },
+        async rejectChanges(...changes) {
+          if (currentDocument.ranges) {
+            const ids = changes.map(change => change.id)
+            view.dispatch(
+              rejectChanges(view.state, currentDocument.ranges, ids)
+            )
+          }
+        },
+      } satisfies RangesActions
+    }
+  }, [currentDocument, projectId, view])
+
+  if (!actions) {
+    return null
+  }
 
   return (
     <RangesActionsContext.Provider value={actions}>

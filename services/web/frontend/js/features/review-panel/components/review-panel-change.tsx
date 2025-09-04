@@ -57,9 +57,9 @@ export const ReviewPanelChange = memo<{
       setAccepting(true)
       try {
         if (aggregate) {
-          await acceptChanges(change.id, aggregate.id)
+          await acceptChanges(change, aggregate)
         } else {
-          await acceptChanges(change.id)
+          await acceptChanges(change)
         }
       } catch (err) {
         showGenericMessageModal(
@@ -69,13 +69,13 @@ export const ReviewPanelChange = memo<{
       } finally {
         setAccepting(false)
       }
-    }, [acceptChanges, aggregate, change.id, showGenericMessageModal, t])
+    }, [acceptChanges, aggregate, change, showGenericMessageModal, t])
 
     const rejectHandler = useCallback(async () => {
       if (aggregate) {
-        await rejectChanges(change.id, aggregate.id)
+        await rejectChanges(change, aggregate)
       } else {
-        await rejectChanges(change.id)
+        await rejectChanges(change)
       }
     }, [aggregate, change, rejectChanges])
 

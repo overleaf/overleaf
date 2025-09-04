@@ -22,11 +22,13 @@ import {
   StringFileData,
   TrackedChangeList,
   EditOperationBuilder,
+  CommentList,
 } from 'overleaf-editor-core'
 import {
   StringFileRawData,
   RawEditOperation,
 } from 'overleaf-editor-core/lib/types'
+import { HistoryOTShareDoc } from '../../../../../types/share-doc'
 
 // All times below are in milliseconds
 const SINGLE_USER_FLUSH_DELAY = 2000
@@ -267,11 +269,26 @@ export class ShareJsDoc extends EventEmitter {
   processUpdateFromServer(message: Message) {
     try {
       if (this.type === 'history-ot' && message.op != null) {
+        const shareDoc = this._doc as HistoryOTShareDoc
+        const trackedChangesBefore = shareDoc.snapshot.getTrackedChanges()
+        const commentsBefore = shareDoc.snapshot.getComments()
+
         const ops = message.op as RawEditOperation[]
         this._doc._onMessage({
           ...message,
           op: ops.map(EditOperationBuilder.fromJSON),
         })
+
+        if (
+          this.rangesUpdated(
+            trackedChangesBefore,
+            commentsBefore,
+            shareDoc.snapshot.getTrackedChanges(),
+            shareDoc.snapshot.getComments()
+          )
+        ) {
+          this.trigger('ranges:dirty')
+        }
       } else {
         this._doc._onMessage(message)
       }
@@ -471,6 +488,29 @@ export class ShareJsDoc extends EventEmitter {
       doc.pendingCallbacks.push(() => {
         return this.trigger('op:acknowledged', op)
       })
+
+      // history-ot: submit the op and detect whether tracked changes or comments have updated
+      if (this.type === 'history-ot') {
+        const shareDoc = doc as HistoryOTShareDoc
+        const trackedChangesBefore = shareDoc.snapshot.getTrackedChanges()
+        const commentsBefore = shareDoc.snapshot.getComments()
+        const result = submitOp.call(doc, op, callback)
+
+        if (
+          this.rangesUpdated(
+            trackedChangesBefore,
+            commentsBefore,
+            shareDoc.snapshot.getTrackedChanges(),
+            shareDoc.snapshot.getComments()
+          )
+        ) {
+          this.trigger('ranges:dirty')
+        }
+
+        return result
+      }
+
+      // non-history-ot: just submit the op
       return submitOp.call(doc, op, callback)
     }
 
@@ -478,6 +518,33 @@ export class ShareJsDoc extends EventEmitter {
     doc.flush = () => {
       this.trigger('flush', doc.inflightOp, doc.pendingOp, doc.version)
       return flush.call(doc)
+    }
+  }
+
+  private rangesUpdated(
+    trackedChangesBefore: TrackedChangeList,
+    commentsBefore: CommentList,
+    trackedChangesAfter: TrackedChangeList,
+    commentsAfter: CommentList
+  ) {
+    return (
+      // quick length comparison first
+      trackedChangesBefore.length !== trackedChangesAfter.length ||
+      commentsBefore.length !== commentsAfter.length ||
+      // then compare each item by identity
+      this.itemsChanged(
+        trackedChangesBefore.asSorted(),
+        trackedChangesAfter.asSorted()
+      ) ||
+      this.itemsChanged(commentsBefore.toArray(), commentsAfter.toArray())
+    )
+  }
+
+  private itemsChanged(before: readonly any[], after: readonly any[]) {
+    for (let i = 0; i < before.length; i++) {
+      if (before[i] !== after[i]) {
+        return true
+      }
     }
   }
 }

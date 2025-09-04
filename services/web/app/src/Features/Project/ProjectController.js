@@ -871,6 +871,7 @@ const _ProjectController = {
         showUpgradePrompt,
         fixedSizeDocument: true,
         hasTrackChangesFeature: Features.hasFeature('track-changes'),
+        otMigrationStage: project.overleaf?.history?.otMigrationStage ?? 0,
         projectTags,
         isSaas: Features.hasFeature('saas'),
         shouldLoadHotjar: splitTestAssignments.hotjar?.variant === 'enabled',

@@ -115,5 +115,6 @@ export const mockDoc = (
     getPendingOp: () => null,
     hasBufferedOps: () => false,
     leaveAndCleanUpPromise: () => false,
+    isHistoryOT: () => false,
   }
 }

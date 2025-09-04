@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { ReviewPanelOverviewFile } from './review-panel-overview-file'
 import ReviewPanelEmptyState from './review-panel-empty-state'
 import useProjectRanges from '../hooks/use-project-ranges'
+import getMeta from '@/utils/meta'
 
 export const ReviewPanelOverview: FC = () => {
   const { t } = useTranslation()
@@ -16,12 +17,13 @@ export const ReviewPanelOverview: FC = () => {
   const rangesForDocs = useMemo(() => {
     if (docs && docRanges && projectRanges) {
       const rangesForDocs = new Map<string, Ranges>()
+      const otMigrationStage = getMeta('ol-otMigrationStage')
 
       for (const doc of docs) {
         const ranges =
           doc.doc.id === docRanges.docId
             ? docRanges
-            : projectRanges.get(doc.doc.id)
+            : projectRanges.get(otMigrationStage === 1 ? doc.path : doc.doc.id)
 
         if (ranges) {
           rangesForDocs.set(doc.doc.id, ranges)

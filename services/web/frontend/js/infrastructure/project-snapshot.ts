@@ -1,5 +1,5 @@
 import pLimit from 'p-limit'
-import { Change, Chunk, Snapshot } from 'overleaf-editor-core'
+import { Change, Chunk, Snapshot, File } from 'overleaf-editor-core'
 import { RawChange, RawChunk } from 'overleaf-editor-core/lib/types'
 import { FetchError, getJSON, postJSON } from '@/infrastructure/fetch-json'
 
@@ -106,6 +106,17 @@ export class ProjectSnapshot {
       return null
     }
     return await this.blobStore.getString(hash, options)
+  }
+
+  getDocs(): Map<string, File> {
+    const files = new Map()
+    for (const path of this.snapshot.getFilePathnames()) {
+      const file = this.snapshot.getFile(path)
+      if (file?.isEditable()) {
+        files.set(path, file)
+      }
+    }
+    return files
   }
 
   /**

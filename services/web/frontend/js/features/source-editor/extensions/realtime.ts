@@ -23,12 +23,8 @@ import {
   RemoveOp,
   RetainOp,
 } from 'overleaf-editor-core'
-import {
-  updateTrackedChangesEffect,
-  setTrackChangesUserId,
-  trackedChangesState,
-  shareDocState,
-} from './history-ot'
+import { rangesUpdatedEffect, setTrackChangesUserId } from './history-ot'
+import { trackedDeletesFromState } from '@/features/source-editor/utils/tracked-deletes'
 
 /*
  * Integrate CodeMirror 6 with the real-time system, via ShareJS.
@@ -355,8 +351,7 @@ class HistoryOTAdapter {
   }
 
   onRemoteOp(operations: EditOperation[]) {
-    const positionMapper =
-      this.editor.view.state.field(trackedChangesState).positionMapper
+    const trackedDeletes = trackedDeletesFromState(this.editor.view.state)
     const changes: ChangeSpec[] = []
     let trackedChangesUpdated = false
     for (const operation of operations) {
@@ -366,15 +361,15 @@ class HistoryOTAdapter {
           if (op instanceof InsertOp) {
             if (op.tracking?.type !== 'delete') {
               changes.push({
-                from: positionMapper.toCM6(cursor),
+                from: trackedDeletes.toCodeMirror(cursor),
                 insert: op.insertion,
               })
             }
             trackedChangesUpdated = true
           } else if (op instanceof RemoveOp) {
             changes.push({
-              from: positionMapper.toCM6(cursor),
-              to: positionMapper.toCM6(cursor + op.length),
+              from: trackedDeletes.toCodeMirror(cursor),
+              to: trackedDeletes.toCodeMirror(cursor + op.length),
             })
             cursor += op.length
             trackedChangesUpdated = true
@@ -382,8 +377,8 @@ class HistoryOTAdapter {
             if (op.tracking != null) {
               if (op.tracking.type === 'delete') {
                 changes.push({
-                  from: positionMapper.toCM6(cursor),
-                  to: positionMapper.toCM6(cursor + op.length),
+                  from: trackedDeletes.toCodeMirror(cursor),
+                  to: trackedDeletes.toCodeMirror(cursor + op.length),
                 })
               }
               trackedChangesUpdated = true
@@ -402,11 +397,7 @@ class HistoryOTAdapter {
         effects.push(scrollEffect)
       }
       if (trackedChangesUpdated) {
-        const shareDoc = this.editor.view.state.field(shareDocState)
-        if (shareDoc != null) {
-          const trackedChanges = shareDoc.snapshot.getTrackedChanges()
-          effects.push(updateTrackedChangesEffect.of(trackedChanges))
-        }
+        effects.push(rangesUpdatedEffect.of(null))
       }
 
       view.dispatch({

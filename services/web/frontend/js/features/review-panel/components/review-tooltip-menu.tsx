@@ -108,16 +108,14 @@ const ReviewTooltipMenuContent: FC<{ onAddComment: () => void }> = ({
   const [tooltipStyle, setTooltipStyle] = useState<CSSProperties | undefined>()
   const [visible, setVisible] = useState(false)
 
-  const changeIdsInSelection = useMemo(() => {
-    return (ranges?.changes ?? [])
-      .filter(({ op }) => {
-        const opFrom = op.p
-        const opLength = isInsertOperation(op) ? op.i.length : 0
-        const opTo = opFrom + opLength
-        const selection = state.selection.main
-        return opFrom >= selection.from && opTo <= selection.to
-      })
-      .map(({ id }) => id)
+  const changesInSelection = useMemo(() => {
+    return (ranges?.changes ?? []).filter(({ op }) => {
+      const opFrom = op.p
+      const opLength = isInsertOperation(op) ? op.i.length : 0
+      const opTo = opFrom + opLength
+      const selection = state.selection.main
+      return opFrom >= selection.from && opTo <= selection.to
+    })
   }, [ranges, state.selection.main])
 
   const acceptChangesHandler = useCallback(() => {
@@ -129,13 +127,13 @@ const ReviewTooltipMenuContent: FC<{ onAddComment: () => void }> = ({
       message: t('confirm_accept_selected_changes', { count: nChanges }),
       title: t('accept_selected_changes'),
       onConfirm: async () => {
-        await acceptChanges(...changeIdsInSelection)
+        await acceptChanges(...changesInSelection)
       },
       primaryVariant: 'danger',
     })
   }, [
     acceptChanges,
-    changeIdsInSelection,
+    changesInSelection,
     ranges,
     showGenericConfirmModal,
     view,
@@ -151,7 +149,7 @@ const ReviewTooltipMenuContent: FC<{ onAddComment: () => void }> = ({
       message: t('confirm_reject_selected_changes', { count: nChanges }),
       title: t('reject_selected_changes'),
       onConfirm: async () => {
-        await rejectChanges(...changeIdsInSelection)
+        await rejectChanges(...changesInSelection)
       },
       primaryVariant: 'danger',
     })
@@ -161,10 +159,10 @@ const ReviewTooltipMenuContent: FC<{ onAddComment: () => void }> = ({
     ranges,
     view,
     rejectChanges,
-    changeIdsInSelection,
+    changesInSelection,
   ])
 
-  const showChangesButtons = changeIdsInSelection.length > 0
+  const showChangesButtons = changesInSelection.length > 0
 
   useEffect(() => {
     view.requestMeasure({

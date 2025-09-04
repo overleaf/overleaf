@@ -4,6 +4,8 @@ import { useProjectContext } from '@/shared/context/project-context'
 import { getJSON } from '@/infrastructure/fetch-json'
 import useSocketListener from '@/features/ide-react/hooks/use-socket-listener'
 import { useConnectionContext } from '@/features/ide-react/context/connection-context'
+import getMeta from '@/utils/meta'
+import { buildProjectRangesFromSnapshot } from '@/features/review-panel/utils/snapshot-ranges'
 
 export default function useProjectRanges() {
   const { projectId } = useProjectContext()
@@ -11,27 +13,36 @@ export default function useProjectRanges() {
   const [projectRanges, setProjectRanges] = useState<Map<string, Ranges>>()
   const [loading, setLoading] = useState(true)
   const { socket } = useConnectionContext()
+  const otMigrationStage = getMeta('ol-otMigrationStage')
+  const { projectSnapshot } = useProjectContext()
 
   useEffect(() => {
-    setLoading(true)
-    getJSON<{ id: string; ranges: Ranges }[]>(`/project/${projectId}/ranges`)
-      .then(data => {
-        setProjectRanges(
-          new Map(
-            data.map(item => [
-              item.id,
-              {
-                docId: item.id,
-                changes: item.ranges.changes ?? [],
-                comments: item.ranges.comments ?? [],
-              },
-            ])
-          )
-        )
+    if (otMigrationStage === 1) {
+      projectSnapshot.refresh().then(() => {
+        setProjectRanges(buildProjectRangesFromSnapshot(projectSnapshot))
+        setLoading(false)
       })
-      .catch(error => setError(error))
-      .finally(() => setLoading(false))
-  }, [projectId])
+    } else {
+      setLoading(true)
+      getJSON<{ id: string; ranges: Ranges }[]>(`/project/${projectId}/ranges`)
+        .then(data => {
+          setProjectRanges(
+            new Map(
+              data.map(item => [
+                item.id,
+                {
+                  docId: item.id,
+                  changes: item.ranges.changes ?? [],
+                  comments: item.ranges.comments ?? [],
+                },
+              ])
+            )
+          )
+        })
+        .catch(error => setError(error))
+        .finally(() => setLoading(false))
+    }
+  }, [projectId, otMigrationStage, projectSnapshot])
 
   useSocketListener(
     socket,
@@ -58,6 +69,19 @@ export default function useProjectRanges() {
         return updatedProjectRanges
       })
     }, [])
+  )
+
+  useSocketListener(
+    socket,
+    'new-comment',
+    useCallback(() => {
+      if (otMigrationStage === 1) {
+        projectSnapshot.refresh().then(() => {
+          setProjectRanges(buildProjectRangesFromSnapshot(projectSnapshot))
+          setLoading(false)
+        })
+      }
+    }, [otMigrationStage, projectSnapshot])
   )
 
   return { projectRanges, error, loading }

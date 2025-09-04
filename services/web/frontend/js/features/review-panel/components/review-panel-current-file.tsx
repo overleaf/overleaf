@@ -94,7 +94,11 @@ const ReviewPanelCurrentFile: FC = () => {
 
       if (threads) {
         for (const comment of ranges.comments) {
-          if (threads[comment.op.t] && !threads[comment.op.t]?.resolved) {
+          if (
+            !comment.resolved &&
+            threads[comment.op.t] &&
+            !threads[comment.op.t]?.resolved
+          ) {
             output.comments.push(comment)
           }
         }
