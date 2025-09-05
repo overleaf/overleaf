@@ -65,12 +65,12 @@ describe('word-count', function () {
       captionWords: 4,
       footnoteCharacters: 8,
       footnoteWords: 2,
-      headCharacters: 296,
-      headWords: 52,
+      headCharacters: 305,
+      headWords: 53,
       otherCharacters: 10,
       otherWords: 2,
-      textCharacters: 193,
-      textWords: 42,
+      textCharacters: 201,
+      textWords: 44,
     })
   })
 

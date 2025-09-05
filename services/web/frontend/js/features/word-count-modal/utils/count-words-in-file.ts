@@ -165,15 +165,24 @@ export const countWordsInFile = (
         context: currentContext,
       })
     },
-    Command(nodeRef) {
-      const child = nodeRef.node.getChild('UnknownCommand')
-      if (!child) return
+    Cite(nodeRef) {
+      // Count as \cite[text]{citation}
+      const optionalArgs = nodeRef.node.getChildren('OptionalArgument')
+      for (const arg of optionalArgs) {
+        // We normally ignore ShortOptionalArg, so we need to iterate it
+        // explicitly
+        const child = arg.getChild('ShortOptionalArg')
+        if (!child) continue
+        iterateNode(child, 'text')
+      }
+      return false
+    },
+    UnknownCommand(nodeRef) {
+      const macro =
+        nodeRef.node.getChild('$CtrlSeq') ?? nodeRef.node.getChild('$CtrlSym')
+      if (!macro) return
 
-      const grandchild =
-        child.getChild('$CtrlSeq') ?? child.getChild('$CtrlSym')
-      if (!grandchild) return
-
-      const commandName = content.substring(grandchild.from + 1, grandchild.to)
+      const commandName = content.substring(macro.from + 1, macro.to)
       if (!commandName) return
 
       switch (commandName) {
