@@ -18,6 +18,7 @@ $rp-type-blue: #6b7797;
   --review-panel-border-color: var(--border-divider);
   --review-panel-width: 230px;
   --review-panel-width-mini: 24px;
+  --review-panel-color-scheme: light;
 
   @include theme('default') {
     .ide-redesign-main {
@@ -30,6 +31,7 @@ $rp-type-blue: #6b7797;
       --review-panel-empty-state-bg-color: var(--bg-dark-primary);
       --review-panel-button-hover-bg-color: var(--bg-dark-tertiary);
       --review-panel-border-color: var(--border-divider-dark);
+      --review-panel-color-scheme: dark;
     }
   }
 }
@@ -75,6 +77,7 @@ $rp-type-blue: #6b7797;
 }
 
 .review-panel-container {
+  color-scheme: var(--review-panel-color-scheme);
   height: 100%;
   flex-shrink: 0;
   position: relative;
