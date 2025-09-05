@@ -84,6 +84,7 @@ async function createLinkedFile(req, res, next) {
 
 async function refreshLinkedFile(req, res, next) {
   const { project_id: projectId, file_id: fileId } = req.params
+  const { clientId } = req.body
   const userId = SessionManager.getLoggedInUserId(req.session)
 
   const { file, parentFolder } = await LinkedFilesHandler.promises.getFileById(
@@ -138,7 +139,8 @@ async function refreshLinkedFile(req, res, next) {
       projectId,
       'references:keys:updated',
       data.keys,
-      true
+      true,
+      clientId
     )
     res.json({ new_file_id: newFileId })
   } else {

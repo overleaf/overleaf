@@ -8,8 +8,7 @@ import {
   useRef,
   FC,
 } from 'react'
-import { v4 as uuid } from 'uuid'
-
+import clientIdGenerator from '@/utils/client-id'
 import { useUserContext } from '../../../shared/context/user-context'
 import { useProjectContext } from '../../../shared/context/project-context'
 import { getJSON, postJSON } from '../../../infrastructure/fetch-json'
@@ -77,11 +76,6 @@ type Action =
       type: 'ERROR'
       error: any
     }
-
-// Wrap uuid in an object method so that it can be stubbed
-export const chatClientIdGenerator = {
-  generate: () => uuid(),
-}
 
 let nextChatMessageId = 1
 
@@ -201,7 +195,7 @@ export const ChatProvider: FC<React.PropsWithChildren> = ({ children }) => {
 
   const clientId = useRef<string>()
   if (clientId.current === undefined) {
-    clientId.current = chatClientIdGenerator.generate()
+    clientId.current = clientIdGenerator.get()
   }
   const user = useUserContext()
   const { projectId } = useProjectContext()

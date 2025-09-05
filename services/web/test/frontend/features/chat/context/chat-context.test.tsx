@@ -5,9 +5,9 @@ import { renderHook, act, waitFor } from '@testing-library/react'
 import { expect } from 'chai'
 import sinon from 'sinon'
 import fetchMock from 'fetch-mock'
+import clientIdGenerator from '@/utils/client-id'
 import {
   useChatContext,
-  chatClientIdGenerator,
   ServerMessageEntry,
 } from '@/features/chat/context/chat-context'
 import { stubMathJax, tearDownMathJaxStubs } from '../components/stubs'
@@ -35,7 +35,7 @@ describe('ChatContext', function () {
     window.metaAttributesCache.set('ol-user', user)
     window.metaAttributesCache.set('ol-preventCompileOnLoad', true)
 
-    this.stub = sinon.stub(chatClientIdGenerator, 'generate').returns(uuidValue)
+    this.stub = sinon.stub(clientIdGenerator, 'get').returns(uuidValue)
   })
 
   afterEach(function () {

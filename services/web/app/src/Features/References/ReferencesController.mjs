@@ -19,7 +19,7 @@ let ReferencesController
 export default ReferencesController = {
   indexAll(req, res, next) {
     const projectId = req.params.Project_id
-    const { shouldBroadcast } = req.body
+    const { shouldBroadcast, clientId } = req.body
     return ReferencesHandler.indexAll(projectId, function (error, data) {
       if (error) {
         OError.tag(error, 'failed to index references', { projectId })
@@ -31,12 +31,21 @@ export default ReferencesController = {
         projectId,
         shouldBroadcast,
         true,
-        data
+        data,
+        clientId
       )
     })
   },
 
-  _handleIndexResponse(req, res, projectId, shouldBroadcast, isAllDocs, data) {
+  _handleIndexResponse(
+    req,
+    res,
+    projectId,
+    shouldBroadcast,
+    isAllDocs,
+    data,
+    clientId
+  ) {
     if (data == null || data.keys == null) {
       return res.json({ projectId, keys: [] })
     }
@@ -45,7 +54,8 @@ export default ReferencesController = {
         projectId,
         'references:keys:updated',
         data.keys,
-        isAllDocs
+        isAllDocs,
+        clientId
       )
     }
     return res.json(data)

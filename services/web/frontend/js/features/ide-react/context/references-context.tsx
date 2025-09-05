@@ -24,6 +24,7 @@ import { debugConsole } from '@/utils/debugging'
 import { useFeatureFlag } from '@/shared/context/split-test-context'
 import type { ReferenceIndexer } from '../references/reference-indexer'
 import { AdvancedReferenceSearchResult } from '@/features/ide-react/references/types'
+import clientId from '@/utils/client-id'
 
 export const ReferencesContext = createContext<
   | {
@@ -105,7 +106,7 @@ export const ReferencesProvider: FC<React.PropsWithChildren> = ({
       if (shouldBroadcast) {
         // Inform other clients about change in keys
         await postJSON(`/project/${projectId}/references/indexAll`, {
-          body: { shouldBroadcast: true },
+          body: { shouldBroadcast: true, clientId: clientId.get() },
         }).catch(error => {
           // allow the request to fail
           debugConsole.error(error)
@@ -176,8 +177,12 @@ export const ReferencesProvider: FC<React.PropsWithChildren> = ({
     const handleProjectJoined = () => {
       // We only need to grab the references when the editor first loads,
       // not on every reconnect
-      socket.on('references:keys:updated', (keys, allDocs) => {
+      socket.on('references:keys:updated', (keys, allDocs, refresherId) => {
         if (clientSideReferences) {
+          if (refresherId === clientId.get()) {
+            // We asked for this broadcast, so we must have already done the indexing
+            return
+          }
           indexAllReferences(false)
         } else {
           setReferenceKeys(oldDocs =>
