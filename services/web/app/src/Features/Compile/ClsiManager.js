@@ -439,8 +439,7 @@ async function _makeNewBackendRequest(
     url.toString().replace(Settings.apis.clsi.url, Settings.apis.clsi_new.url)
   )
 
-  // Sample x% of premium compile projects to move up one bracket.
-  if (currentCompileBackendClass !== 'c2d') return null
+  // Sample x% of projects to move up one bracket.
   if (
     SplitTestHandler.getPercentile(projectId, 'double-compile', 'release') >=
     Settings.apis.clsi_new.sample
