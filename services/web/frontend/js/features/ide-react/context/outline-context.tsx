@@ -15,6 +15,7 @@ import { isValidTeXFile } from '@/main/is-valid-tex-file'
 import localStorage from '@/infrastructure/local-storage'
 import { useProjectContext } from '@/shared/context/project-context'
 import { useEditorOpenDocContext } from '@/features/ide-react/context/editor-open-doc-context'
+import { useFileTreeOpenContext } from './file-tree-open-context'
 
 export type PartialFlatOutline = {
   level: number
@@ -126,6 +127,9 @@ export const OutlineProvider: FC<React.PropsWithChildren> = ({ children }) => {
     [openDocName]
   )
 
+  const { selectedEntityCount } = useFileTreeOpenContext()
+  const hasSingleEntityOpen = selectedEntityCount === 1
+
   const { projectId } = useProjectContext()
   const storageKey = `file_outline.expanded.${projectId}`
 
@@ -133,7 +137,7 @@ export const OutlineProvider: FC<React.PropsWithChildren> = ({ children }) => {
     () => localStorage.getItem(storageKey) !== false
   )
 
-  const canShowOutline = isTexFile && !binaryFileOpened
+  const canShowOutline = hasSingleEntityOpen && isTexFile && !binaryFileOpened
 
   const expandOutline = useCallback(() => {
     if (canShowOutline) {
