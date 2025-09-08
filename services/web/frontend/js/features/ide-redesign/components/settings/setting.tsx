@@ -1,10 +1,12 @@
+import React from 'react'
+
 export default function Setting({
   label,
   controlId,
   children,
   description = undefined,
 }: {
-  label: string
+  label: React.ReactNode
   description: string | undefined
   controlId: string
   children: React.ReactNode
@@ -19,7 +21,7 @@ export default function Setting({
           <div className="ide-setting-description">{description}</div>
         )}
       </div>
-      {children}
+      <div className="ide-setting-input">{children}</div>
     </div>
   )
 }

@@ -1,3 +1,4 @@
+import React from 'react'
 import Setting from './setting'
 import OLFormSwitch from '@/shared/components/ol/ol-form-switch'
 
@@ -10,7 +11,7 @@ export default function ToggleSetting({
   disabled,
 }: {
   id: string
-  label: string
+  label: React.ReactNode
   description: string
   checked: boolean | undefined
   onChange: (newValue: boolean) => void

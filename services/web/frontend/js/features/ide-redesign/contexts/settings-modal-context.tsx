@@ -24,6 +24,8 @@ import LineHeightSetting from '../components/settings/appearance-settings/line-h
 import FontFamilySetting from '../components/settings/appearance-settings/font-family-setting'
 import { AvailableUnfilledIcon } from '@/shared/components/material-icon'
 import { EditorLeftMenuProvider } from '@/features/editor-left-menu/components/editor-left-menu-context'
+import NewEditorSetting from '../components/settings/editor-settings/new-editor-setting'
+import { canUseNewEditorViaNewUserFeatureFlag } from '../utils/new-editor-utils'
 
 const [referenceSearchSettingModule] = importOverleafModules(
   'referenceSearchSetting'
@@ -75,6 +77,7 @@ export const SettingsModalProvider: FC<React.PropsWithChildren> = ({
   children,
 }) => {
   const { t } = useTranslation()
+  const showEditorSwitch = canUseNewEditorViaNewUserFeatureFlag()
 
   // TODO ide-redesign-cleanup: Rename this field and move it directly into this context
   const { leftMenuShown, setLeftMenuShown } = useLayoutContext()
@@ -209,6 +212,11 @@ export const SettingsModalProvider: FC<React.PropsWithChildren> = ({
                 key: 'lineHeight',
                 component: <LineHeightSetting />,
               },
+              {
+                key: 'newEditor',
+                component: <NewEditorSetting />,
+                hidden: !showEditorSwitch,
+              },
             ],
           },
         ],
@@ -226,7 +234,7 @@ export const SettingsModalProvider: FC<React.PropsWithChildren> = ({
         href: '/user/subscription',
       },
     ],
-    [t]
+    [t, showEditorSwitch]
   )
 
   const settingToTabMap = useMemo(() => {

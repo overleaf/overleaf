@@ -15,10 +15,10 @@ import importOverleafModules from '../../../../macros/import-overleaf-module.mac
 import BackToEditorButton from './back-to-editor-button'
 import getMeta from '@/utils/meta'
 import { isSplitTestEnabled } from '@/utils/splitTestUtils'
-import { canUseNewEditor } from '@/features/ide-redesign/utils/new-editor-utils'
 import TryNewEditorButton from '../try-new-editor-button'
 import { OnlineUser } from '@/features/ide-react/context/online-users-context'
 import { Cobranding } from '../../../../../types/cobranding'
+import { canUseNewEditor } from '@/features/ide-redesign/utils/new-editor-utils'
 
 const [publishModalModules] = importOverleafModules('publishModal') as {
   import: { default: ElementType }

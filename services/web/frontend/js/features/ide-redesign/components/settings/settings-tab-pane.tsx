@@ -9,9 +9,10 @@ export default function SettingsTabPane({ tab }: { tab: SettingsTab }) {
     <TabPane eventKey={key} key={key}>
       {sections.map(section => (
         <SettingsSection key={section.key} title={section.title}>
-          {section.settings.map(({ key, component }) => (
-            <Fragment key={key}>{component}</Fragment>
-          ))}
+          {section.settings.map(
+            ({ key, component, hidden }) =>
+              !hidden && <Fragment key={key}>{component}</Fragment>
+          )}
         </SettingsSection>
       ))}
     </TabPane>

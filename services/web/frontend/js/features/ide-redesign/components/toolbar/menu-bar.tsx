@@ -30,6 +30,7 @@ import { useSurveyUrl } from '../../hooks/use-survey-url'
 import getMeta from '@/utils/meta'
 import EditorCloneProjectModalWrapper from '@/features/clone-project-modal/components/editor-clone-project-modal-wrapper'
 import useOpenProject from '@/shared/hooks/use-open-project'
+import { canUseNewEditorViaPrimaryFeatureFlag } from '../../utils/new-editor-utils'
 
 export const ToolbarMenuBar = () => {
   const { t } = useTranslation()
@@ -43,6 +44,7 @@ export const ToolbarMenuBar = () => {
   const [showWordCountModal, setShowWordCountModal] = useState(false)
   const [showCloneProjectModal, setShowCloneProjectModal] = useState(false)
   const openProject = useOpenProject()
+  const showEditorSwitchMenuOption = canUseNewEditorViaPrimaryFeatureFlag()
 
   const anonymous = getMeta('ol-anonymous')
 
@@ -283,20 +285,24 @@ export const ToolbarMenuBar = () => {
             title={t('contact_us')}
             onClick={openContactUsModal}
           />
-          <MenuBarOption
-            eventKey="give_feedback"
-            title={t('give_feedback')}
-            href={surveyURL}
-            target="_blank"
-            rel="noopener noreferrer"
-          />
-          <DropdownDivider />
-          <SwitchToOldEditorMenuBarOption />
-          <MenuBarOption
-            eventKey="whats_new"
-            title="What's new?"
-            onClick={openEditorRedesignSwitcherModal}
-          />
+          {showEditorSwitchMenuOption && (
+            <>
+              <MenuBarOption
+                eventKey="give_feedback"
+                title={t('give_feedback')}
+                href={surveyURL}
+                target="_blank"
+                rel="noopener noreferrer"
+              />
+              <DropdownDivider />
+              <SwitchToOldEditorMenuBarOption />
+              <MenuBarOption
+                eventKey="whats_new"
+                title="What's new?"
+                onClick={openEditorRedesignSwitcherModal}
+              />
+            </>
+          )}
         </MenuBarDropdown>
       </MenuBar>
       <WordCountModal

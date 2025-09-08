@@ -14,30 +14,43 @@ const isNewUser = () => {
   return createdAt > NEW_USER_CUTOFF_DATE
 }
 
-export const canUseNewEditor = () => {
+export const canUseNewEditorViaPrimaryFeatureFlag = () => {
+  return isSplitTestEnabled('editor-redesign')
+}
+
+export const canUseNewEditorViaNewUserFeatureFlag = () => {
   const newUserTestVariant = getSplitTestVariant('editor-redesign-new-users')
 
-  const canUseNewEditorViaPrimaryFeatureFlag =
-    isSplitTestEnabled('editor-redesign')
-  const canUseNewEditorViaNewUserFeatureFlag =
+  return (
+    !canUseNewEditorViaPrimaryFeatureFlag() &&
     isNewUser() &&
     (newUserTestVariant === 'new-editor' ||
       newUserTestVariant === 'new-editor-old-logs')
+  )
+}
+
+export const canUseNewEditor = () => {
   return (
-    canUseNewEditorViaPrimaryFeatureFlag || canUseNewEditorViaNewUserFeatureFlag
+    canUseNewEditorViaPrimaryFeatureFlag() ||
+    canUseNewEditorViaNewUserFeatureFlag()
   )
 }
 
 const canUseNewLogs = () => {
   const newUserTestVariant = getSplitTestVariant('editor-redesign-new-users')
-  const canUseNewLogsViaPrimaryFeatureFlag =
-    isSplitTestEnabled('editor-redesign')
   const canUseNewLogsViaNewUserFeatureFlag =
     isNewUser() && newUserTestVariant === 'new-editor'
 
   return (
-    canUseNewLogsViaPrimaryFeatureFlag || canUseNewLogsViaNewUserFeatureFlag
+    canUseNewEditorViaPrimaryFeatureFlag() || canUseNewLogsViaNewUserFeatureFlag
   )
+}
+
+export const useIsNewEditorEnabledViaPrimaryFeatureFlag = () => {
+  const { userSettings } = useUserSettingsContext()
+  const hasAccess = canUseNewEditorViaPrimaryFeatureFlag()
+  const enabled = userSettings.enableNewEditor
+  return hasAccess && enabled
 }
 
 export const useIsNewEditorEnabled = () => {

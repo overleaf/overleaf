@@ -4,6 +4,7 @@ import OLTooltip from '@/shared/components/ol/ol-tooltip'
 import { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { GiveFeedbackLink } from './give-feedback-link'
+import { useIsNewEditorEnabledViaPrimaryFeatureFlag } from '../../utils/new-editor-utils'
 
 export const BetaActions = () => {
   const { t } = useTranslation()
@@ -11,6 +12,11 @@ export const BetaActions = () => {
   const openEditorRedesignSwitcherModal = useCallback(() => {
     setShowSwitcherModal(true)
   }, [setShowSwitcherModal])
+  const showBetaActions = useIsNewEditorEnabledViaPrimaryFeatureFlag()
+
+  if (!showBetaActions) {
+    return null
+  }
 
   return (
     <>
