@@ -25,6 +25,7 @@ import { useFeatureFlag } from '@/shared/context/split-test-context'
 import type { ReferenceIndexer } from '../references/reference-indexer'
 import { AdvancedReferenceSearchResult } from '@/features/ide-react/references/types'
 import clientId from '@/utils/client-id'
+import { sendMBOnce } from '@/infrastructure/event-tracking'
 
 export const ReferencesContext = createContext<
   | {
@@ -81,6 +82,7 @@ export const ReferencesProvider: FC<React.PropsWithChildren> = ({
 
   const indexAllReferencesLocally = useCallback(
     async (shouldBroadcast: boolean) => {
+      sendMBOnce('client-side-references-index')
       abortControllerRef.current?.abort()
 
       if (!indexerRef.current) {
