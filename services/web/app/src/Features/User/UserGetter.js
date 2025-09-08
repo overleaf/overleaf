@@ -377,17 +377,19 @@ const decorateFullEmails = (
   return emailsData
 }
 
-UserGetter.promises = promisifyAll(UserGetter, {
-  without: [
-    'getSsoUsersAtInstitution',
-    'getUserFullEmails',
-    'getUserFeatures',
-    'getWritefullData',
-  ],
-})
-UserGetter.promises.getUserFullEmails = getUserFullEmails
-UserGetter.promises.getSsoUsersAtInstitution = getSsoUsersAtInstitution
-UserGetter.promises.getUserFeatures = getUserFeatures
-UserGetter.promises.getWritefullData = getWritefullData
+UserGetter.promises = {
+  ...promisifyAll(UserGetter, {
+    without: [
+      'getSsoUsersAtInstitution',
+      'getUserFullEmails',
+      'getUserFeatures',
+      'getWritefullData',
+    ],
+  }),
+  getUserFullEmails,
+  getSsoUsersAtInstitution,
+  getUserFeatures,
+  getWritefullData,
+}
 
 module.exports = UserGetter

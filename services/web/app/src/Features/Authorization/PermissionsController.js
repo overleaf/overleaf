@@ -1,3 +1,4 @@
+// @ts-check
 const { ForbiddenError, UserNotFoundError } = require('../Errors/Errors')
 const {
   getUserCapabilities,

@@ -12,18 +12,20 @@ const ProjectEditorHandler = require('../Project/ProjectEditorHandler')
 const Sources = require('../Authorization/Sources')
 const PrivilegeLevels = require('../Authorization/PrivilegeLevels')
 
+/** @import { PrivilegeLevel, Source, PublicAccessLevel } from "../Authorization/types" */
+
 /**
  * @typedef ProjectMember
  * @property {string} id
- * @property {typeof PrivilegeLevels[keyof PrivilegeLevels]} privilegeLevel
- * @property {typeof Sources[keyof Sources]} source
+ * @property {PrivilegeLevel} privilegeLevel
+ * @property {Source} source
  * @property {boolean} [pendingEditor]
  * @property {boolean} [pendingReviewer]
  */
 
 /**
  * @typedef LoadedProjectMember
- * @property {typeof PrivilegeLevels[keyof PrivilegeLevels]} privilegeLevel
+ * @property {PrivilegeLevel} privilegeLevel
  * @property {{_id: ObjectId, email: string, features: any, first_name: string, last_name: string, signUpDate: Date}} user
  * @property {boolean} [pendingEditor]
  * @property {boolean} [pendingReviewer]
@@ -34,11 +36,11 @@ class ProjectAccess {
   /** @type {ProjectMember[]} */
   #members
 
-  /** @type {typeof PublicAccessLevels[keyof PublicAccessLevels]} */
+  /** @type {PublicAccessLevel} */
   #publicAccessLevel
 
   /**
-   * @param {{ owner_ref: ObjectId; collaberator_refs: ObjectId[]; readOnly_refs: ObjectId[]; tokenAccessReadAndWrite_refs: ObjectId[]; tokenAccessReadOnly_refs: ObjectId[]; publicAccesLevel: typeof PublicAccessLevels[keyof PublicAccessLevels]; pendingEditor_refs: ObjectId[]; reviewer_refs: ObjectId[]; pendingReviewer_refs: ObjectId[]; }} project
+   * @param {{ owner_ref: ObjectId; collaberator_refs: ObjectId[]; readOnly_refs: ObjectId[]; tokenAccessReadAndWrite_refs: ObjectId[]; tokenAccessReadOnly_refs: ObjectId[]; publicAccesLevel: PublicAccessLevel; pendingEditor_refs: ObjectId[]; reviewer_refs: ObjectId[]; pendingReviewer_refs: ObjectId[]; }} project
    */
   constructor(project) {
     this.#members = _getMemberIdsWithPrivilegeLevelsFromFields(
@@ -99,7 +101,7 @@ class ProjectAccess {
   }
 
   /**
-   * @return {typeof PublicAccessLevels[keyof PublicAccessLevels]}
+   * @return {PublicAccessLevel}
    */
   publicAccessLevel() {
     return this.#publicAccessLevel
@@ -121,7 +123,7 @@ class ProjectAccess {
 
   /**
    * @param {string | ObjectId} userId
-   * @return {typeof PrivilegeLevels[keyof PrivilegeLevels]}
+   * @return {PrivilegeLevel}
    */
   privilegeLevelForUser(userId) {
     if (!userId) return PrivilegeLevels.NONE
@@ -427,7 +429,7 @@ async function userIsReadWriteTokenMember(userId, projectId) {
  * @param {ObjectId[]} readOnlyIds
  * @param {ObjectId[]} tokenAccessIds
  * @param {ObjectId[]} tokenAccessReadOnlyIds
- * @param {typeof PublicAccessLevels[keyof PublicAccessLevels]} publicAccessLevel
+ * @param {PublicAccessLevel} publicAccessLevel
  * @param {ObjectId[]} pendingEditorIds
  * @param {ObjectId[]} reviewerIds
  * @param {ObjectId[]} pendingReviewerIds

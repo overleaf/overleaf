@@ -1,3 +1,6 @@
+// @ts-check
+
+/** @type {import('./types').PrivilegeLevelsType} */
 const PrivilegeLevels = {
   NONE: false,
   READ_ONLY: 'readOnly',

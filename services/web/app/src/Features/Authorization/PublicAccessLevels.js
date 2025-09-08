@@ -1,3 +1,5 @@
+// @ts-check
+
 /**
  * Note:
  * It used to be that `project.publicAccessLevel` could be set to `private`,
@@ -9,6 +11,8 @@
  * `publicAccessLevel` to the legacy values, there are projects in the system
  * that already have those values set.
  */
+
+/** @type {import('./types').PublicAccessLevelsType} */
 module.exports = {
   READ_ONLY: 'readOnly', // LEGACY
   READ_AND_WRITE: 'readAndWrite', // LEGACY

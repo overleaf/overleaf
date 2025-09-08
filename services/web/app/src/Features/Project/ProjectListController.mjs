@@ -1,4 +1,4 @@
-// ts-check
+// @ts-check
 import _ from 'lodash'
 
 import Metrics from '@overleaf/metrics'
@@ -31,11 +31,19 @@ import PermissionsManager from '../Authorization/PermissionsManager.js'
 import AnalyticsManager from '../Analytics/AnalyticsManager.js'
 
 /**
- * @import { GetProjectsRequest, GetProjectsResponse, AllUsersProjects, MongoProject } from "./types"
- * @import { ProjectApi, Filters, Page, Sort } from "../../../../types/project/dashboard/api"
- * @import { Tag } from "../Tags/types"
+ * @import { GetProjectsRequest, GetProjectsResponse, AllUsersProjects, MongoProject, FormattedProject, MongoTag } from "./types"
+ * @import { Project, ProjectApi, ProjectAccessLevel, Filters, Page, Sort, UserRef } from "../../../../types/project/dashboard/api"
+ * @import { Affiliation } from "../../../../types/affiliation"
+ * @import { Source } from "../Authorization/types"
  */
 
+/**
+ * @param {Affiliation} affiliation
+ * @param session
+ * @param linkedInstitutionIds
+ * @returns {boolean}
+ * @private
+ */
 const _ssoAvailable = (affiliation, session, linkedInstitutionIds) => {
   if (!affiliation.institution) return false
 
@@ -55,6 +63,10 @@ const _ssoAvailable = (affiliation, session, linkedInstitutionIds) => {
   return false
 }
 
+/**
+ * @param {Affiliation[]} affiliations
+ * @returns {Array<{ name: string, url: string }>}
+ */
 const _buildPortalTemplatesList = affiliations => {
   if (affiliations == null) {
     affiliations = []
@@ -64,7 +76,7 @@ const _buildPortalTemplatesList = affiliations => {
   const uniqueAffiliations = _.uniqBy(affiliations, 'institution.id')
   for (const aff of uniqueAffiliations) {
     const hasSlug = aff.portal?.slug
-    const hasTemplates = aff.portal?.templates_count > 0
+    const hasTemplates = (aff.portal?.templates_count || 0) > 0
 
     if (hasSlug && hasTemplates) {
       const portalPath = aff.institution.isUniversity ? '/edu/' : '/org/'
@@ -198,14 +210,25 @@ async function projectListPage(req, res, next) {
       logger.err({ err: error, userId }, 'Failed to load the active survey')
     }
 
-    if (user && UserPrimaryEmailCheckHandler.requiresPrimaryEmailCheck(user)) {
+    if (
+      user &&
+      UserPrimaryEmailCheckHandler.requiresPrimaryEmailCheck({
+        email: user.email,
+        emails: user.emails,
+        lastPrimaryEmailCheck: user.lastPrimaryEmailCheck,
+        signUpDate: user.signUpDate,
+      })
+    ) {
       return res.redirect('/user/emails/primary-email-check')
     }
   }
 
   const tags = await TagsHandler.promises.getAllTags(userId)
 
-  let userEmailsData = { list: [], allInReconfirmNotificationPeriods: [] }
+  /** @type {{ list: any[], allInReconfirmNotificationPeriods?: any[], error?: any }} */
+  let userEmailsData = {
+    list: [],
+  }
 
   try {
     const fullEmails = await UserGetter.promises.getUserFullEmails(userId)
@@ -226,7 +249,7 @@ async function projectListPage(req, res, next) {
           allInReconfirmNotificationPeriods,
         }
       } catch (error) {
-        userEmailsData = error
+        userEmailsData.error = error
       }
     }
   } catch (error) {
@@ -526,7 +549,7 @@ async function getProjectsJson(req, res) {
  * @param {Filters} filters
  * @param {Sort} sort
  * @param {Page} page
- * @returns {Promise<{totalSize: number, projects: ProjectApi[]}>}
+ * @returns {Promise<{totalSize: number, projects: Project[]}>}
  * @private
  */
 async function _getProjects(
@@ -535,16 +558,15 @@ async function _getProjects(
   sort = { by: 'lastUpdated', order: 'desc' },
   page = { size: 20 }
 ) {
-  const [
-    /** @type {AllUsersProjects} **/ allProjects,
-    /** @type {Tag[]} **/ tags,
-  ] = await Promise.all([
+  /** @type {[AllUsersProjects, MongoTag[]]} */
+  const results = await Promise.all([
     ProjectGetter.promises.findAllUsersProjects(
       userId,
       'name lastUpdated lastUpdatedBy publicAccesLevel archived trashed owner_ref tokens'
     ),
     TagsHandler.promises.getAllTags(userId),
   ])
+  const [allProjects, tags] = results
   const formattedProjects = _formatProjects(allProjects, userId)
   const filteredProjects = _applyFilters(
     formattedProjects,
@@ -554,18 +576,18 @@ async function _getProjects(
   )
   const pagedProjects = _sortAndPaginate(filteredProjects, sort, page)
 
-  await _injectProjectUsers(pagedProjects)
+  const projects = await _injectProjectUsers(pagedProjects)
 
   return {
     totalSize: filteredProjects.length,
-    projects: pagedProjects,
+    projects,
   }
 }
 
 /**
  * @param {AllUsersProjects} projects
  * @param {string} userId
- * @returns {Project[]}
+ * @returns {FormattedProject[]}
  * @private
  */
 function _formatProjects(projects, userId) {
@@ -578,7 +600,7 @@ function _formatProjects(projects, userId) {
     tokenReadOnly,
   } = projects
 
-  const formattedProjects = /** @type {Project[]} **/ []
+  const formattedProjects = /** @type {FormattedProject[]} **/ []
   for (const project of owned) {
     formattedProjects.push(
       _formatProjectInfo(project, 'owner', Sources.OWNER, userId)
@@ -622,11 +644,11 @@ function _formatProjects(projects, userId) {
 }
 
 /**
- * @param {Project[]} projects
- * @param {Tag[]} tags
+ * @param {FormattedProject[]} projects
+ * @param {MongoTag[]} tags
  * @param {Filters} filters
  * @param {string} userId
- * @returns {Project[]}
+ * @returns {FormattedProject[]}
  * @private
  */
 function _applyFilters(projects, tags, filters, userId) {
@@ -637,10 +659,10 @@ function _applyFilters(projects, tags, filters, userId) {
 }
 
 /**
- * @param {Project[]} projects
+ * @param {FormattedProject[]} projects
  * @param {Sort} sort
  * @param {Page} page
- * @returns {Project[]}
+ * @returns {FormattedProject[]}
  * @private
  */
 function _sortAndPaginate(projects, sort, page) {
@@ -661,38 +683,35 @@ function _sortAndPaginate(projects, sort, page) {
 
 /**
  * @param {MongoProject} project
- * @param {string} accessLevel
- * @param {'owner' | 'invite' | 'token'} source
+ * @param {ProjectAccessLevel} accessLevel
+ * @param {Source} source
  * @param {string} userId
- * @returns {object}
+ * @returns {FormattedProject}
  * @private
  */
 function _formatProjectInfo(project, accessLevel, source, userId) {
   const archived = ProjectHelper.isArchived(project, userId)
   // If a project is simultaneously trashed and archived, we will consider it archived but not trashed.
   const trashed = ProjectHelper.isTrashed(project, userId) && !archived
+  const readOnlyTokenAccess =
+    accessLevel === PrivilegeLevels.READ_ONLY && source === Sources.TOKEN
 
-  const model = {
+  return {
     id: project._id.toString(),
     name: project.name,
-    owner_ref: project.owner_ref,
+    owner_ref: readOnlyTokenAccess ? null : project.owner_ref,
     lastUpdated: project.lastUpdated,
-    lastUpdatedBy: project.lastUpdatedBy,
+    lastUpdatedBy: readOnlyTokenAccess ? null : project.lastUpdatedBy,
     accessLevel,
     source,
     archived,
     trashed,
   }
-  if (accessLevel === PrivilegeLevels.READ_ONLY && source === Sources.TOKEN) {
-    model.owner_ref = null
-    model.lastUpdatedBy = null
-  }
-  return model
 }
 
 /**
- * @param {Project[]} projects
- * @returns {Promise<void>}
+ * @param {FormattedProject[]} projects
+ * @returns {Promise<Project[]>}
  * @private
  */
 async function _injectProjectUsers(projects) {
@@ -711,6 +730,7 @@ async function _injectProjectUsers(projects) {
     last_name: 1,
     email: 1,
   }
+  /** @type {Record<string, UserRef>} */
   const users = {}
   for (const user of await UserGetter.promises.getUsers(userIds, projection)) {
     const userId = user._id.toString()
@@ -721,21 +741,30 @@ async function _injectProjectUsers(projects) {
       lastName: user.last_name,
     }
   }
-  for (const project of projects) {
-    if (project.owner_ref != null) {
-      project.owner = users[project.owner_ref.toString()]
-    }
-    if (project.lastUpdatedBy != null) {
-      project.lastUpdatedBy = users[project.lastUpdatedBy.toString()] || null
-    }
 
-    delete project.owner_ref
-  }
+  return projects.map(project => ({
+    id: project.id,
+    name: project.name,
+    archived: project.archived,
+    trashed: project.trashed,
+    accessLevel: project.accessLevel,
+    source: project.source,
+    lastUpdated: project.lastUpdated.toISOString(),
+    lastUpdatedBy:
+      project.lastUpdatedBy == null
+        ? null
+        : users[project.lastUpdatedBy.toString()] || null,
+    owner:
+      project.owner_ref == null
+        ? undefined
+        : users[project.owner_ref.toString()],
+    owner_ref: undefined,
+  }))
 }
 
 /**
  * @param {any} project
- * @param {Tag[]} tags
+ * @param {MongoTag[]} tags
  * @param {Filters} filters
  * @private
  */
@@ -777,14 +806,14 @@ function _matchesFilters(project, tags, filters) {
  * @private
  */
 function _hasActiveFilter(filters) {
-  return (
+  return Boolean(
     filters.ownedByUser ||
-    filters.sharedWithUser ||
-    filters.archived ||
-    filters.trashed ||
-    filters.tag === null ||
-    filters.tag?.length ||
-    filters.search?.length
+      filters.sharedWithUser ||
+      filters.archived ||
+      filters.trashed ||
+      filters.tag === null ||
+      filters.tag?.length ||
+      filters.search?.length
   )
 }
 

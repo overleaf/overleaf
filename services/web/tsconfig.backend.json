@@ -9,6 +9,7 @@
     "scripts/**/*",
     "test/acceptance/**/*",
     "test/smoke/**/*",
-    "test/unit/**/*"
+    "test/unit/**/*",
+    "types/backend/**/*"
   ]
 }
