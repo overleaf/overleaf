@@ -15,7 +15,6 @@ import {
   unconfirmedCommonsUserData,
   untrustedUserData,
 } from '../fixtures/test-user-email-data'
-import localStorage from '@/infrastructure/local-storage'
 
 const renderUserEmailsContext = () =>
   renderHook(() => useUserEmailsContext(), {
@@ -274,121 +273,6 @@ describe('UserEmailContext', function () {
           'new department'
         )
         expect(result.current.state.data.byId).to.deep.equal(emails)
-      })
-    })
-
-    describe('resetLeaversSurveyExpiration()', function () {
-      beforeEach(function () {
-        localStorage.removeItem('showInstitutionalLeaversSurveyUntil')
-      })
-
-      it('when the leaver has institution license, and there is another email with institution license, it should not reset the survey expiration date', async function () {
-        const affiliatedEmail1 = cloneDeep(professionalUserData)
-        affiliatedEmail1.email = 'institution-test@example.com'
-        affiliatedEmail1.emailHasInstitutionLicence = true
-
-        const affiliatedEmail2 = cloneDeep(professionalUserData)
-        affiliatedEmail2.emailHasInstitutionLicence = true
-
-        fetchMock.removeRoutes().clearHistory()
-        fetchMock.get(/\/user\/emails/, [affiliatedEmail1, affiliatedEmail2])
-
-        result.current.getEmails()
-        await fetchMock.callHistory.flush(true)
-
-        // `resetLeaversSurveyExpiration` always happens after deletion
-        result.current.deleteEmail(affiliatedEmail1.email)
-        result.current.resetLeaversSurveyExpiration(affiliatedEmail1)
-
-        const expiration = localStorage.getItem(
-          'showInstitutionalLeaversSurveyUntil'
-        ) as number
-        expect(expiration).to.be.null
-      })
-
-      it("when the leaver's affiliation is past reconfirmation date, and there is another email with institution license, it should not reset the survey expiration date", async function () {
-        const affiliatedEmail1 = cloneDeep(professionalUserData)
-        affiliatedEmail1.email = 'institution-test@example.com'
-        affiliatedEmail1.affiliation.pastReconfirmDate = true
-
-        const affiliatedEmail2 = cloneDeep(professionalUserData)
-        affiliatedEmail2.emailHasInstitutionLicence = true
-
-        fetchMock.removeRoutes().clearHistory()
-        fetchMock.get(/\/user\/emails/, [affiliatedEmail1, affiliatedEmail2])
-
-        result.current.getEmails()
-        await fetchMock.callHistory.flush(true)
-
-        // `resetLeaversSurveyExpiration` always happens after deletion
-        result.current.deleteEmail(affiliatedEmail1.email)
-        result.current.resetLeaversSurveyExpiration(affiliatedEmail1)
-
-        const expiration = localStorage.getItem(
-          'showInstitutionalLeaversSurveyUntil'
-        ) as number
-        expect(expiration).to.be.null
-      })
-
-      it('when there are no other emails with institution license, it should reset the survey expiration date', async function () {
-        const affiliatedEmail1 = cloneDeep(professionalUserData)
-        affiliatedEmail1.emailHasInstitutionLicence = true
-        affiliatedEmail1.email = 'institution-test@example.com'
-        affiliatedEmail1.affiliation.pastReconfirmDate = true
-
-        fetchMock.removeRoutes().clearHistory()
-        fetchMock.get(/\/user\/emails/, [confirmedUserData, affiliatedEmail1])
-
-        result.current.getEmails()
-        await fetchMock.callHistory.flush(true)
-
-        // `resetLeaversSurveyExpiration` always happens after deletion
-        result.current.deleteEmail(affiliatedEmail1.email)
-        result.current.resetLeaversSurveyExpiration(affiliatedEmail1)
-
-        await waitFor(() =>
-          expect(
-            localStorage.getItem('showInstitutionalLeaversSurveyUntil')
-          ).to.be.greaterThan(Date.now())
-        )
-      })
-
-      it("when the leaver has no institution license, it shouldn't reset the survey expiration date", async function () {
-        const emailWithInstitutionLicense = cloneDeep(professionalUserData)
-        emailWithInstitutionLicense.email = 'institution-licensed@example.com'
-        emailWithInstitutionLicense.emailHasInstitutionLicence = false
-
-        fetchMock.removeRoutes().clearHistory()
-        fetchMock.get(/\/user\/emails/, [emailWithInstitutionLicense])
-
-        result.current.getEmails()
-        await fetchMock.callHistory.flush(true)
-
-        // `resetLeaversSurveyExpiration` always happens after deletion
-        result.current.deleteEmail(emailWithInstitutionLicense.email)
-        result.current.resetLeaversSurveyExpiration(professionalUserData)
-
-        expect(localStorage.getItem('showInstitutionalLeaversSurveyUntil')).to
-          .be.null
-      })
-
-      it("when the leaver is not past its reconfirmation date, it shouldn't reset the survey expiration date", async function () {
-        const emailWithInstitutionLicense = cloneDeep(professionalUserData)
-        emailWithInstitutionLicense.email = 'institution-licensed@example.com'
-        emailWithInstitutionLicense.affiliation.pastReconfirmDate = false
-
-        fetchMock.removeRoutes().clearHistory()
-        fetchMock.get(/\/user\/emails/, [emailWithInstitutionLicense])
-
-        result.current.getEmails()
-        await fetchMock.callHistory.flush(true)
-
-        // `resetLeaversSurveyExpiration` always happens after deletion
-        result.current.deleteEmail(emailWithInstitutionLicense.email)
-        result.current.resetLeaversSurveyExpiration(professionalUserData)
-
-        expect(localStorage.getItem('showInstitutionalLeaversSurveyUntil')).to
-          .be.null
       })
     })
   })

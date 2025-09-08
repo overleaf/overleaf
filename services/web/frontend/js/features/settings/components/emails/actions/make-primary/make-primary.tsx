@@ -53,8 +53,7 @@ function MakePrimary({
 }: MakePrimaryProps) {
   const [show, setShow] = useState(false)
   const { t } = useTranslation()
-  const { state, makePrimary, deleteEmail, resetLeaversSurveyExpiration } =
-    useUserEmailsContext()
+  const { state, makePrimary, deleteEmail } = useUserEmailsContext()
 
   const handleShowModal = () => setShow(true)
   const handleHideModal = () => setShow(false)
@@ -76,7 +75,6 @@ function MakePrimary({
         makePrimary(userEmailData.email)
         if (primary && !primary.confirmedAt) {
           deleteEmail(primary.email)
-          resetLeaversSurveyExpiration(primary)
         }
       })
       .catch(() => {})

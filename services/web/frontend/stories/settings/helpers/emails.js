@@ -200,10 +200,6 @@ export function setDefaultMeta() {
     hasSamlFeature: true,
     samlInitPath: 'saml/init',
   })
-  localStorage.setItem(
-    'showInstitutionalLeaversSurveyUntil',
-    (Date.now() - 1000 * 60 * 60).toString()
-  )
 }
 
 export function setReconfirmationMeta() {
