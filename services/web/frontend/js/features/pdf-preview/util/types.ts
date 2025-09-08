@@ -56,3 +56,32 @@ export type DeliveryLatencies = {
   latencyFetch?: number
   latencyRender?: number
 }
+
+export type PdfCachingMetrics = {
+  viewerId: string
+}
+
+export type PdfCachingMetricsFull = PdfCachingMetrics & {
+  failedCount: number
+  failedOnce: boolean
+  tooMuchBandwidthCount: number
+  tooManyRequestsCount: number
+  cachedCount: number
+  cachedBytes: number
+  fetchedCount: number
+  fetchedBytes: number
+  latencyComputeMax: number
+  latencyComputeTotal: number
+  requestedCount: number
+  requestedBytes: number
+  oldUrlHitCount: number
+  oldUrlMissCount: number
+  enablePdfCaching: boolean
+  prefetchingEnabled: boolean
+  prefetchLargeEnabled: boolean
+  cachedUrlLookupEnabled: boolean
+  chunkVerifySizeDiffers?: number
+  chunkVerifyMismatch?: number
+  chunkVerifySuccess?: number
+  headerVerifyFailure?: number
+}

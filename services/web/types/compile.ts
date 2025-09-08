@@ -1,9 +1,16 @@
-export type PDFRange = {
-  objectId: Uint8Array
+export type Chunk = {
+  start: number
   end: number
+}
+
+export type PrefetchedChunk<ChunkType extends Chunk> = ChunkType & {
+  buffer: Uint8Array
+}
+
+export type PDFRange<ObjectIdType = Uint8Array | string> = Chunk & {
+  objectId: ObjectIdType
   hash: string
   size: number
-  start: number
   totalUsage: number
 }
 
@@ -18,17 +25,36 @@ type OutputFileBase = {
   main?: boolean
 }
 
-export type PDFFile = OutputFileBase & {
+type PDFFileBase = OutputFileBase & {
   clsiCacheShard: string
   contentId: string
-  createdAt: Date
   editorId: string
-  pdfDownloadURL: string
-  pdfURL: string
-  prefetched: any[]
-  preprocessed: boolean
-  ranges: PDFRange[]
+  pdfDownloadUrl: string
+  pdfUrl: string
   size: number
+  startXRefTable?: number
+}
+
+export type PDFFile = PDFFileBase & {
+  createdAt?: string
+  ranges: PDFRange<string>[]
+  prefetched?: PrefetchedChunk<PDFRange<Uint8Array>>[]
+}
+
+export type ProcessedPDFFile = PDFFileBase & {
+  preprocessed: true
+  createdAt: Date
+  prefetched: PrefetchedChunk<PDFRange<Uint8Array>>[]
+  ranges: PDFRange<Uint8Array>[]
+}
+
+// This type is a little bit of a hack to work around the fact that we mutate
+// the PDFFile object directly when processed into a ProcessedPDFFile
+export type PartiallyProcessedPDFFile = PDFFileBase & {
+  preprocessed?: boolean
+  createdAt?: Date | string
+  prefetched?: PrefetchedChunk<PDFRange<Uint8Array>>[]
+  ranges: PDFRange<Uint8Array>[] | PDFRange<string>[]
 }
 
 export type CompileOutputFile = OutputFileBase | PDFFile

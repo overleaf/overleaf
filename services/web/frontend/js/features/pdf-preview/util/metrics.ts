@@ -2,7 +2,7 @@ import { v4 as uuid } from 'uuid'
 import { sendMB } from '../../../infrastructure/event-tracking'
 import { trackPdfDownloadEnabled } from './pdf-caching-flags'
 import { debugConsole } from '@/utils/debugging'
-import { DeliveryLatencies } from './types'
+import { DeliveryLatencies, PdfCachingMetrics } from './types'
 import { CompileResponseData } from '@ol-types/compile'
 
 // VERSION should get incremented when making changes to caching behavior or
@@ -11,10 +11,6 @@ const VERSION = 9
 
 // editing session id
 export const EDITOR_SESSION_ID = uuid()
-
-type PdfCachingMetrics = {
-  viewerId: string
-}
 
 const pdfCachingMetrics: PdfCachingMetrics = {
   viewerId: EDITOR_SESSION_ID,

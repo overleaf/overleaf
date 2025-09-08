@@ -1,5 +1,5 @@
 import OError from '@overleaf/o-error'
-import { fallbackRequest, fetchRange } from './pdf-caching'
+import { fallbackRequest, fetchRange, preprocessFileOnce } from './pdf-caching'
 import { captureException } from '@/infrastructure/error-reporter'
 import { EDITOR_SESSION_ID, getPdfCachingMetrics } from './metrics'
 import {
@@ -15,7 +15,8 @@ import { debugConsole } from '@/utils/debugging'
 import { PDFJS } from './pdf-js'
 import { sendMB } from '@/infrastructure/event-tracking'
 import getMeta from '@/utils/meta'
-import { PDFFile, PDFRange } from '@ol-types/compile'
+import { PDFFile, PDFRange, ProcessedPDFFile } from '@ol-types/compile'
+import { PdfCachingMetricsFull } from './types'
 
 // 30 seconds: The shutdown grace period of a clsi pre-emp instance.
 const STALE_OUTPUT_REQUEST_THRESHOLD_MS = 30 * 1000
@@ -28,7 +29,7 @@ export function generatePdfCachingTransportFactory() {
   const projectId = getMeta('ol-project_id')
   const usageScore = new Map()
   const cachedUrls = new Map()
-  const metrics = Object.assign(getPdfCachingMetrics(), {
+  const metrics: PdfCachingMetricsFull = Object.assign(getPdfCachingMetrics(), {
     failedCount: 0,
     failedOnce: false,
     tooMuchBandwidthCount: 0,
@@ -53,7 +54,7 @@ export function generatePdfCachingTransportFactory() {
 
   class PDFDataRangeTransport extends PDFJS.PDFDataRangeTransport {
     url: string
-    pdfFile: PDFFile
+    pdfFile: ProcessedPDFFile
     abortController: AbortController
     leanPdfRanges: PDFRange[]
     handleFetchError: (error: any) => void
@@ -76,7 +77,13 @@ export function generatePdfCachingTransportFactory() {
       this.url = url
       pdfFile.ranges = pdfFile.ranges || []
       pdfFile.editorId = pdfFile.editorId || EDITOR_SESSION_ID
-      this.pdfFile = pdfFile
+      preprocessFileOnce({
+        file: pdfFile,
+        usageScore,
+        cachedUrls,
+      })
+      // We can safely cast as preprocessFileOnce mutates the file object into a ProcessedPDFFile
+      this.pdfFile = pdfFile as unknown as ProcessedPDFFile
       // Clone the chunks as the objectId field is encoded to a Uint8Array.
       this.leanPdfRanges = pdfFile.ranges.map(r => Object.assign({}, r))
       this.handleFetchError = handleFetchError
@@ -192,8 +199,6 @@ export function generatePdfCachingTransportFactory() {
           })
       }
 
-      // @ts-ignore is incorrectly inferring the type of fetchRange.
-      // Remove this when we convert pdf-caching.js to typescript.
       fetchRange({
         url: this.url,
         start,
@@ -248,6 +253,7 @@ export function generatePdfCachingTransportFactory() {
               isFromOutputPDFRequest: isFromOutputPDFRequest(err),
             },
           })
+
           return fallbackRequest({
             file: this.pdfFile,
             url: this.url,

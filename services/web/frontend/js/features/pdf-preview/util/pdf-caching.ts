@@ -1,4 +1,12 @@
+import {
+  Chunk,
+  PartiallyProcessedPDFFile,
+  PDFRange,
+  PrefetchedChunk,
+  ProcessedPDFFile,
+} from '@ol-types/compile'
 import OError from '@overleaf/o-error'
+import { PdfCachingMetricsFull } from './types'
 
 const PDF_JS_CHUNK_SIZE = 128 * 1024
 const MAX_SUB_REQUEST_COUNT = 4
@@ -21,20 +29,19 @@ const CHUNK_USAGE_THRESHOLD_CACHED = 42
 // 42 * 0.7^11 < 1, aka we keep stale entries around for 11 compiles.
 const CHUNK_USAGE_STALE_DECAY_RATE = 0.7
 
-let cacheFlag = 'default'
+let cacheFlag: RequestCache = 'default'
 // Work around a Chrome bug: https://issues.chromium.org/issues/40542704
 // Multiple simultaneous requests to same URL with Range header cause failure (block backend returns ERR_CACHE_OPERATION_NOT_SUPPORTED)
 const CACHE_NO_STORE = 'no-store'
 
-/**
- * @param {string} url
- * @param {RequestInit} init
- */
-async function fetchWithBrowserCacheFallback(url, init) {
+async function fetchWithBrowserCacheFallback(url: string, init: RequestInit) {
   try {
     return await fetch(url, init)
   } catch (err) {
-    if (init.headers?.has('Range') && init.cache !== CACHE_NO_STORE) {
+    if (
+      (init.headers as Headers | undefined)?.has('Range') &&
+      init.cache !== CACHE_NO_STORE
+    ) {
       cacheFlag = CACHE_NO_STORE
       init.cache = CACHE_NO_STORE
       return await fetch(url, init)
@@ -43,30 +50,29 @@ async function fetchWithBrowserCacheFallback(url, init) {
   }
 }
 
-/**
- * @param {Object} file
- */
-function backfillEdgeBounds(file) {
+function backfillEdgeBounds(file: PartiallyProcessedPDFFile) {
   const encoder = new TextEncoder()
   for (const chunk of file.ranges) {
     if (chunk.objectId) {
-      chunk.objectId = encoder.encode(chunk.objectId)
+      chunk.objectId = encoder.encode(chunk.objectId as string)
       chunk.start -= chunk.objectId.byteLength
       chunk.size = chunk.end - chunk.start
     }
   }
 }
 
-/**
- * @param {Map} usageScore
- * @param {Map} cachedUrls
- */
-function trimState({ usageScore, cachedUrls }) {
-  for (const hash of usageScore) {
+function trimState({
+  usageScore,
+  cachedUrls,
+}: {
+  usageScore: Map<string, number>
+  cachedUrls: Map<string, { url: string; init: RequestInit }>
+}) {
+  for (const [hash, score] of usageScore) {
     if (usageScore.size < INCREMENTAL_CACHE_SIZE) {
       break
     }
-    const score = usageScore.get(hash)
+
     if (score >= CHUNK_USAGE_THRESHOLD_TRIGGER_PREFERRED) {
       // Keep entries that are worth caching around for longer.
       usageScore.set(hash, score * CHUNK_USAGE_STALE_DECAY_RATE)
@@ -77,25 +83,25 @@ function trimState({ usageScore, cachedUrls }) {
   }
 }
 
-/**
- * @param {Object} file
- * @param {Map} usageScore
- * @param {Map} cachedUrls
- */
-function preprocessFileOnce({ file, usageScore, cachedUrls }) {
-  if (file.preprocessed) return
+export function preprocessFileOnce({
+  file,
+  usageScore,
+  cachedUrls,
+}: {
+  file: PartiallyProcessedPDFFile
+  usageScore: Map<string, number>
+  cachedUrls: Map<string, { url: string; init: RequestInit }>
+}) {
+  if ('preprocessed' in file && file.preprocessed) return file
   file.preprocessed = true
 
-  file.createdAt = new Date(file.createdAt)
+  file.createdAt = new Date(file.createdAt || '')
   file.prefetched = file.prefetched || []
   trimState({ usageScore, cachedUrls })
   backfillEdgeBounds(file)
 }
 
-/**
- * @param {Array} chunks
- */
-export function estimateSizeOfMultipartResponse(chunks) {
+function estimateSizeOfMultipartResponse(chunks: Chunk[]) {
   /*
   --boundary
   HEADER
@@ -116,18 +122,21 @@ export function estimateSizeOfMultipartResponse(chunks) {
   )
 }
 
-/**
- *
- * @param {Object} metrics
- * @param {number} size
- * @param {number} cachedCount
- * @param {number} cachedBytes
- * @param {number} fetchedCount
- * @param {number} fetchedBytes
- */
 function trackDownloadStats(
-  metrics,
-  { size, cachedCount, cachedBytes, fetchedCount, fetchedBytes }
+  metrics: PdfCachingMetricsFull,
+  {
+    size,
+    cachedCount,
+    cachedBytes,
+    fetchedCount,
+    fetchedBytes,
+  }: {
+    size: number
+    cachedCount: number
+    cachedBytes: number
+    fetchedCount: number
+    fetchedBytes: number
+  }
 ) {
   metrics.cachedCount += cachedCount
   metrics.cachedBytes += cachedBytes
@@ -137,34 +146,34 @@ function trackDownloadStats(
   metrics.requestedBytes += size
 }
 
-/**
- * @param {Object} metrics
- * @param {boolean} sizeDiffers
- * @param {boolean} mismatch
- * @param {boolean} success
- */
-function trackChunkVerify(metrics, { sizeDiffers, mismatch, success }) {
+function trackChunkVerify(
+  metrics: PdfCachingMetricsFull,
+  {
+    sizeDiffers,
+    mismatch,
+    success,
+  }: {
+    sizeDiffers: boolean
+    mismatch: boolean
+    success: boolean
+  }
+) {
   if (sizeDiffers) {
-    metrics.chunkVerifySizeDiffers |= 0
-    metrics.chunkVerifySizeDiffers += 1
+    incrementMetric(metrics, 'chunkVerifySizeDiffers')
   }
   if (mismatch) {
-    metrics.chunkVerifyMismatch |= 0
-    metrics.chunkVerifyMismatch += 1
+    incrementMetric(metrics, 'chunkVerifyMismatch')
   }
   if (success) {
-    metrics.chunkVerifySuccess |= 0
-    metrics.chunkVerifySuccess += 1
+    incrementMetric(metrics, 'chunkVerifySuccess')
   }
 }
 
-/**
- * @param chunk
- * @param {ArrayBuffer} arrayBuffer
- * @return {Uint8Array}
- */
-function backFillObjectContext(chunk, arrayBuffer) {
-  if (!chunk.objectId) {
+function backFillObjectContext(
+  chunk: Chunk | Chunk[] | PDFRange<Uint8Array>,
+  arrayBuffer: ArrayBuffer
+) {
+  if (!('objectId' in chunk)) {
     // This is a dynamic chunk
     return new Uint8Array(arrayBuffer)
   }
@@ -185,14 +194,12 @@ function backFillObjectContext(chunk, arrayBuffer) {
   return fullBuffer
 }
 
-/**
- * @param {Array} chunks
- * @param {number} start
- * @param {number} end
- * @returns {Array}
- */
-function getMatchingChunks(chunks, start, end) {
-  const matchingChunks = []
+function getMatchingChunks<ChunkType extends Chunk>(
+  chunks: ChunkType[],
+  start: number,
+  end: number
+) {
+  const matchingChunks: ChunkType[] = []
   for (const chunk of chunks) {
     if (chunk.end <= start) {
       // no overlap:
@@ -211,39 +218,19 @@ function getMatchingChunks(chunks, start, end) {
   return matchingChunks
 }
 
-/**
- * @param {Object} a
- * @param {Object} b
- */
-function sortBySizeDESC(a, b) {
+function sortBySizeDESC(a: { size: number }, b: { size: number }) {
   return a.size > b.size ? -1 : 1
 }
 
-/**
- * @param {Object} a
- * @param {Object} b
- */
-function sortByStartASC(a, b) {
+function sortByStartASC(a: { start: number }, b: { start: number }) {
   return a.start > b.start ? 1 : -1
 }
 
-/**
- * @param {Object} chunk
- */
-function usageAboveThreshold(chunk) {
+function usageAboveThreshold(chunk: PDFRange) {
   // We fetched enough shards of this chunk. Cache it in full now.
   return chunk.totalUsage > CHUNK_USAGE_THRESHOLD_TRIGGER_PREFERRED
 }
 
-/**
- * @param {Array} potentialChunks
- * @param {Map} usageScore
- * @param {Map} cachedUrls
- * @param {Object} metrics
- * @param {number} start
- * @param {number} end
- * @param {boolean} prefetchLargeEnabled
- */
 function cutRequestAmplification({
   potentialChunks,
   usageScore,
@@ -251,12 +238,19 @@ function cutRequestAmplification({
   start,
   end,
   prefetchLargeEnabled,
+}: {
+  potentialChunks: PDFRange[]
+  usageScore: Map<string, number>
+  metrics: PdfCachingMetricsFull
+  start: number
+  end: number
+  prefetchLargeEnabled: boolean
 }) {
   // NOTE: Map keys are stored in insertion order.
   // We re-insert keys on cache hit and turn 'usageScore' into a cheap LRU.
 
-  const chunks = []
-  const skipAlreadyAdded = chunk => !chunks.includes(chunk)
+  const chunks: PDFRange[] = []
+  const skipAlreadyAdded = (chunk: PDFRange) => !chunks.includes(chunk)
   let tooManyRequests = false
   let tooMuchBandwidth = false
   let newChunks = 0
@@ -332,14 +326,12 @@ function cutRequestAmplification({
   return chunks
 }
 
-/**
- * @param {Array} chunks
- * @param {number} start
- * @param {number} end
- * @returns {Array}
- */
-function getInterleavingDynamicChunks(chunks, start, end) {
-  const dynamicChunks = []
+function getInterleavingDynamicChunks(
+  chunks: Chunk[],
+  start: number,
+  end: number
+) {
+  const dynamicChunks: Chunk[] = []
   for (const chunk of chunks) {
     if (start < chunk.start) {
       dynamicChunks.push({ start, end: chunk.start })
@@ -353,36 +345,24 @@ function getInterleavingDynamicChunks(chunks, start, end) {
   return dynamicChunks
 }
 
-/**
- *
- * @param {Response} response
- */
-function getServerTime(response) {
+function getServerTime(response: Response) {
   const raw = response.headers.get('Date')
   if (!raw) return new Date()
   return new Date(raw)
 }
 
-/**
- *
- * @param {Response} response
- */
-function getResponseSize(response) {
+function getResponseSize(response: Response) {
   const raw = response.headers.get('Content-Length')
   if (!raw) return 0
   return parseInt(raw, 10)
 }
 
-/**
- *
- * @param {Response} response
- * @param chunk
- */
-export function getMultipartBoundary(response, chunk) {
+function getMultipartBoundary(response: Response, chunk: Chunk | Chunk[]) {
   if (!Array.isArray(chunk)) return ''
 
   const raw = response.headers.get('Content-Type')
-  if (raw.includes('multipart/byteranges')) {
+
+  if (raw?.includes('multipart/byteranges')) {
     const idx = raw.indexOf('boundary=')
     if (idx !== -1) return raw.slice(idx + 'boundary='.length)
   }
@@ -393,32 +373,45 @@ export function getMultipartBoundary(response, chunk) {
   })
 }
 
-/**
- * @param {string} boundary
- * @param {number} start
- * @param {number} end
- * @param {number} size
- * @return {string}
- */
-function composeMultipartHeader({ boundary, start, end, size }) {
+function composeMultipartHeader({
+  boundary,
+  start,
+  end,
+  size,
+}: {
+  boundary: string
+  start: number
+  end: number
+  size: number
+}) {
   return `\r\n--${boundary}\r\nContent-Type: application/pdf\r\nContent-Range: bytes ${start}-${
     end - 1
   }/${size}\r\n\r\n`
 }
 
-/**
- * @param {Object} file
- * @param {Array} chunks
- * @param {Uint8Array} data
- * @param {string} boundary
- * @param {Object} metrics
- */
-export function resolveMultiPartResponses({
+function incrementMetric(
+  metrics: PdfCachingMetricsFull,
+  key: keyof PdfCachingMetricsFull
+) {
+  if (key in metrics) {
+    metrics[key]++
+  } else {
+    ;(metrics[key] as number) = 1
+  }
+}
+
+function resolveMultiPartResponses({
   file,
   chunks,
   data,
   boundary,
   metrics,
+}: {
+  file: ProcessedPDFFile
+  chunks: Chunk[]
+  data: Uint8Array
+  boundary: string
+  metrics: PdfCachingMetricsFull
 }) {
   const responses = []
   let offsetStart = 0
@@ -439,8 +432,7 @@ export function resolveMultiPartResponses({
         .subarray(offsetStart, offsetStart + headerSize)
         .every((v, idx) => v === headerRaw[idx])
     ) {
-      metrics.headerVerifyFailure |= 0
-      metrics.headerVerifyFailure++
+      incrementMetric(metrics, 'headerVerifyFailure')
       throw new OError('multipart response header does not match', {
         actual: new TextDecoder().decode(
           data.subarray(offsetStart, offsetStart + headerSize)
@@ -457,16 +449,15 @@ export function resolveMultiPartResponses({
     })
     offsetStart += chunkSize
   }
+
   return responses
 }
 
-/**
- *
- * @param {Response} response
- * @param {number} estimatedSize
- * @param {RequestInit} init
- */
-export function checkChunkResponse(response, estimatedSize, init) {
+function checkChunkResponse(
+  response: Response,
+  estimatedSize: number,
+  init: RequestInit
+) {
   if (!(response.status === 206 || response.status === 200)) {
     throw new OError('non successful response status: ' + response.status, {
       statusCode: response.status,
@@ -491,7 +482,17 @@ export function checkChunkResponse(response, estimatedSize, init) {
   }
 }
 
-function getDynamicChunkInit({ file, start, end, signal }) {
+function getDynamicChunkInit({
+  file,
+  start,
+  end,
+  signal,
+}: {
+  file: ProcessedPDFFile
+  start: number
+  end: number
+  signal?: AbortSignal | null
+}): RequestInit {
   // Avoid making range request when downloading the PDF file in full.
   const isFullFile = start === 0 && end === file.size
   return {
@@ -503,15 +504,19 @@ function getDynamicChunkInit({ file, start, end, signal }) {
   }
 }
 
-/**
- *
- * @param {Object} file
- * @param {string} url
- * @param {number} start
- * @param {number} end
- * @param {AbortSignal} abortSignal
- */
-export async function fallbackRequest({ file, url, start, end, abortSignal }) {
+export async function fallbackRequest({
+  file,
+  url,
+  start,
+  end,
+  abortSignal,
+}: {
+  file: ProcessedPDFFile
+  url: string
+  start: number
+  end: number
+  abortSignal: AbortSignal
+}) {
   try {
     const init = getDynamicChunkInit({ file, start, end, signal: abortSignal })
     const response = await fetchWithBrowserCacheFallback(url, init)
@@ -522,16 +527,6 @@ export async function fallbackRequest({ file, url, start, end, abortSignal }) {
   }
 }
 
-/**
- *
- * @param {Object} file
- * @param {string} url
- * @param {number} start
- * @param {number} end
- * @param {Object} metrics
- * @param {Uint8Array} actual
- * @param {AbortSignal} abortSignal
- */
 async function verifyRange({
   file,
   url,
@@ -540,6 +535,14 @@ async function verifyRange({
   metrics,
   actual,
   abortSignal,
+}: {
+  file: ProcessedPDFFile
+  url: string
+  start: number
+  end: number
+  metrics: PdfCachingMetricsFull
+  actual: Uint8Array
+  abortSignal: AbortSignal
 }) {
   let expectedRaw
   try {
@@ -554,7 +557,11 @@ async function verifyRange({
     throw OError.tag(error, 'cannot verify range', { url, start, end })
   }
   const expected = new Uint8Array(expectedRaw)
-  const stats = {}
+  const stats = {
+    sizeDiffers: false,
+    mismatch: false,
+    success: false,
+  }
   if (actual.byteLength !== expected.byteLength) {
     stats.sizeDiffers = true
   } else if (!expected.every((v, idx) => v === actual[idx])) {
@@ -566,13 +573,12 @@ async function verifyRange({
   return expected
 }
 
-/**
- * @param {Array} chunks
- * @param {Array} prefetched
- * @param {number} start
- * @param {number} end
- */
-function skipPrefetched(chunks, prefetched, start, end) {
+function skipPrefetched<ChunkType extends Chunk>(
+  chunks: ChunkType[],
+  prefetched: PDFRange[],
+  start: number,
+  end: number
+): ChunkType[] {
   return chunks.filter(chunk => {
     return !prefetched.find(
       c =>
@@ -582,18 +588,6 @@ function skipPrefetched(chunks, prefetched, start, end) {
   })
 }
 
-/**
- * @param {Object|Object[]} chunk
- * @param {string} url
- * @param {RequestInit} init
- * @param {Map<string, {url:string,init:RequestInit}>} cachedUrls
- * @param {Object} metrics
- * @param {boolean} cachedUrlLookupEnabled
- * @param {() => boolean} canTryFromCache
- * @param {string} fallbackToCacheURL
- * @param {Object} file
- * @param {() => void} recordFallbackToClsiCache
- */
 async function fetchChunk({
   chunk,
   url,
@@ -605,47 +599,61 @@ async function fetchChunk({
   fallbackToCacheURL,
   file,
   recordFallbackToClsiCache,
+}: {
+  chunk: Chunk | PDFRange<Uint8Array> | Chunk[]
+  url: string
+  init: RequestInit
+  cachedUrls: Map<string, { url: string; init: RequestInit }>
+  metrics: PdfCachingMetricsFull
+  cachedUrlLookupEnabled: boolean
+  canTryFromCache: (error: any) => boolean
+  fallbackToCacheURL: string
+  file: ProcessedPDFFile
+  recordFallbackToClsiCache: () => void
 }) {
   const estimatedSize = Array.isArray(chunk)
     ? estimateSizeOfMultipartResponse(chunk)
     : chunk.end - chunk.start
 
-  const oldUrl = cachedUrls.get(chunk.hash)
-  if (cachedUrlLookupEnabled && chunk.hash && oldUrl && oldUrl.url !== url) {
-    // When the clsi server id changes, the content id changes too and as a
-    //  result all the browser cache keys (aka urls) get invalidated.
-    // We memorize the previous browser cache keys in `cachedUrls`.
-    try {
-      oldUrl.init.signal = init.signal
-      const response = await fetchWithBrowserCacheFallback(
-        oldUrl.url,
-        oldUrl.init
-      )
-      if (response.status === 200) {
-        checkChunkResponse(response, estimatedSize, init)
-        metrics.oldUrlHitCount += 1
-        return response
+  if ('hash' in chunk) {
+    const oldUrl = cachedUrls.get(chunk.hash)
+    if (cachedUrlLookupEnabled && chunk.hash && oldUrl && oldUrl.url !== url) {
+      // When the clsi server id changes, the content id changes too and as a
+      //  result all the browser cache keys (aka urls) get invalidated.
+      // We memorize the previous browser cache keys in `cachedUrls`.
+      try {
+        oldUrl.init.signal = init.signal
+        const response = await fetchWithBrowserCacheFallback(
+          oldUrl.url,
+          oldUrl.init
+        )
+        if (response.status === 200) {
+          checkChunkResponse(response, estimatedSize, init)
+          metrics.oldUrlHitCount += 1
+          return response
+        }
+        if (response.status === 404) {
+          // The old browser cache entry is gone and the old file is gone too.
+          metrics.oldUrlMissCount += 1
+        }
+        // Fallback to the latest url.
+      } catch (e) {
+        // Fallback to the latest url.
       }
-      if (response.status === 404) {
-        // The old browser cache entry is gone and the old file is gone too.
-        metrics.oldUrlMissCount += 1
-      }
-      // Fallback to the latest url.
-    } catch (e) {
-      // Fallback to the latest url.
+      cachedUrls.delete(chunk.hash) // clear cached state
     }
-    cachedUrls.delete(chunk.hash) // clear cached state
   }
+
   let response
   try {
     response = await fetchWithBrowserCacheFallback(url, init)
     checkChunkResponse(response, estimatedSize, init)
-    if (chunk.hash) {
+    if ('hash' in chunk && chunk.hash) {
       delete init.signal // omit the signal from the cache
       cachedUrls.set(chunk.hash, { url, init })
     }
   } catch (err1) {
-    if (chunk.hash) {
+    if ('hash' in chunk && chunk.hash) {
       cachedUrls.delete(chunk.hash)
     }
     const hasOthersCached = cachedUrls.size > 0
@@ -656,7 +664,7 @@ async function fetchChunk({
       file.ranges = file.ranges.filter(r => cachedUrls.has(r.hash))
       // Try harder at fetching the chunk, fallback to cache
       url = fallbackToCacheURL
-      if (chunk.hash) {
+      if ('hash' in chunk && chunk.hash) {
         init = getDynamicChunkInit({
           file,
           // skip object id prefix
@@ -679,14 +687,6 @@ async function fetchChunk({
   return response
 }
 
-/**
- * @param {Object} file
- * @param {number} start
- * @param {number} end
- * @param {Array} dynamicChunks
- * @param {boolean} prefetchXRefTable
- * @param {number} startXRefTableRange
- */
 function addPrefetchingChunks({
   file,
   start,
@@ -694,6 +694,13 @@ function addPrefetchingChunks({
   dynamicChunks,
   prefetchXRefTable,
   startXRefTableRange,
+}: {
+  file: ProcessedPDFFile
+  start: number
+  end: number
+  dynamicChunks: Chunk[]
+  prefetchXRefTable: boolean
+  startXRefTableRange: number
 }) {
   // Prefetch in case this is the first range, or we are fetching dynamic
   //  chunks anyway (so we can ride-share the round trip).
@@ -703,7 +710,7 @@ function addPrefetchingChunks({
     return
   }
 
-  let extraChunks = []
+  let extraChunks: Chunk[] = []
   if (prefetchXRefTable) {
     // Prefetch the dynamic chunks around the xref table.
     extraChunks = skipPrefetched(
@@ -779,6 +786,10 @@ function addPrefetchingChunks({
 }
 
 class Timer {
+  max: number
+  total: number
+  lastStart: number
+
   constructor() {
     this.max = 0
     this.total = 0
@@ -799,7 +810,7 @@ class Timer {
     this.lastStart = 0
   }
 
-  reportInto(metrics) {
+  reportInto(metrics: PdfCachingMetricsFull) {
     const max = Math.ceil(this.max)
     const total = Math.ceil(this.total)
     if (max > metrics.latencyComputeMax) {
@@ -809,25 +820,6 @@ class Timer {
   }
 }
 
-/**
- *
- * @param {string} url
- * @param {number} start
- * @param {number} end
- * @param {Object} file
- * @param {queryForChunks} start
- * @param {Object} metrics
- * @param {Map} usageScore
- * @param {Map} cachedUrls
- * @param {boolean} verifyChunks
- * @param {boolean} prefetchingEnabled
- * @param {boolean} prefetchLargeEnabled
- * @param {boolean} tryOldCachedUrlEnabled
- * @param {AbortSignal} abortSignal
- * @param {() => boolean} canTryFromCache
- * @param {string} fallbackToCacheURL
- * @param {() => void} recordFallbackToClsiCache
- */
 export async function fetchRange({
   url,
   start,
@@ -845,19 +837,39 @@ export async function fetchRange({
   canTryFromCache,
   fallbackToCacheURL,
   recordFallbackToClsiCache,
+}: {
+  url: string
+  start: number
+  end: number
+  file: ProcessedPDFFile
+  queryForChunks: string
+  metrics: PdfCachingMetricsFull
+  usageScore: Map<string, number>
+  cachedUrls: Map<string, { url: string; init: RequestInit }>
+  verifyChunks: boolean
+  prefetchingEnabled: boolean
+  prefetchLargeEnabled: boolean
+  cachedUrlLookupEnabled: boolean
+  abortSignal: AbortSignal
+  canTryFromCache: (error: any) => boolean
+  fallbackToCacheURL: string
+  recordFallbackToClsiCache: () => void
 }) {
   const timer = new Timer()
   timer.startBlockingCompute()
-  preprocessFileOnce({ file, usageScore, cachedUrls })
+
   const startXRefTableRange =
-    Math.floor(file.startXRefTable / PDF_JS_CHUNK_SIZE) * PDF_JS_CHUNK_SIZE
+    file.startXRefTable !== undefined
+      ? Math.floor(file.startXRefTable / PDF_JS_CHUNK_SIZE) * PDF_JS_CHUNK_SIZE
+      : 0
+
   const prefetchXRefTable =
     prefetchingEnabled && startXRefTableRange > 0 && start === 0
   const prefetched = getMatchingChunks(file.prefetched, start, end)
 
   // Check that handling the range request won't trigger excessive sub-requests,
   // (to avoid unwanted latency compared to the original request).
-  const chunks = cutRequestAmplification({
+  const chunks: PDFRange[] = cutRequestAmplification({
     potentialChunks: skipPrefetched(
       getMatchingChunks(file.ranges, start, end),
       prefetched,
@@ -865,7 +877,6 @@ export async function fetchRange({
       end
     ),
     usageScore,
-    cachedUrls,
     metrics,
     start,
     end,
@@ -913,7 +924,13 @@ export async function fetchRange({
   const byteRanges = dynamicChunks
     .map(chunk => `${chunk.start}-${chunk.end - 1}`)
     .join(',')
-  const coalescedDynamicChunks = []
+
+  const coalescedDynamicChunks: {
+    chunk: Chunk | Chunk[]
+    url: string
+    init: RequestInit
+  }[] = []
+
   switch (true) {
     case dynamicChunks.length === 0:
       break
@@ -962,11 +979,16 @@ export async function fetchRange({
   const perUserPrefix = url.slice(0, url.indexOf('/build/'))
   const requests = chunks
     .map(chunk => ({
-      chunk,
+      chunk: chunk as Chunk | Chunk[],
       url: `${perUserPrefix}/content/${file.contentId}/${chunk.hash}?${queryForChunks}`,
       init: {},
     }))
-    .concat(coalescedDynamicChunks)
+    .concat(coalescedDynamicChunks) as {
+    chunk: PDFRange | Chunk | Chunk[]
+    url: string
+    init: RequestInit
+  }[]
+
   let cachedCount = 0
   let cachedBytes = 0
   let fetchedCount = 0
@@ -1000,7 +1022,7 @@ export async function fetchRange({
           //     | pdf.js chunk |
           //   | A BIG IMAGE BLOB |
           // |     THE     FULL     PDF     |
-          if (chunk.hash && blobFetchDate < file.createdAt) {
+          if ('hash' in chunk && chunk.hash && blobFetchDate < file.createdAt) {
             const usedChunkSection =
               Math.min(end, chunk.end) - Math.max(start, chunk.start)
             cachedCount++
@@ -1021,6 +1043,7 @@ export async function fetchRange({
         if (!Array.isArray(chunk)) {
           return [{ chunk, data }]
         }
+
         return resolveMultiPartResponses({
           file,
           chunks: chunk,
@@ -1041,52 +1064,65 @@ export async function fetchRange({
   rawResponses
     .flat() // flatten after splitting multipart responses
     .concat(prefetched.map(chunk => ({ chunk, data: chunk.buffer })))
-    .forEach(({ chunk, data }) => {
-      if (!chunk.hash && chunk.end > end) {
-        // This is a (partially) prefetched chunk.
-        chunk.buffer = data
-        file.prefetched.push(chunk)
-        if (chunk.start > end) return // This is a fully prefetched chunk.
-      }
-      // overlap:
-      //     | REQUESTED_RANGE |
-      //  | CHUNK |
-      const offsetStart = Math.max(start - chunk.start, 0)
-      // overlap:
-      //     | REQUESTED_RANGE |
-      //                   | CHUNK |
-      const offsetEnd = Math.max(chunk.end - end, 0)
-      const oldDataLength = data.length
-      if (offsetStart > 0 || offsetEnd > 0) {
-        // compute index positions for slice to handle case where offsetEnd=0
-        const chunkSize = chunk.end - chunk.start
-        data = data.subarray(offsetStart, chunkSize - offsetEnd)
-      }
-      const newDataLength = data.length
-      const insertPosition = Math.max(chunk.start - start, 0)
-      try {
-        reassembledBlob.set(data, insertPosition)
-      } catch (err) {
-        const reassembledBlobLength = reassembledBlob.length
-        const trimmedChunk = {
-          start: chunk.start,
-          end: chunk.end,
-          hash: chunk.hash,
-          objectId: new TextDecoder().decode(chunk.objectId),
+    .forEach(
+      ({
+        chunk,
+        data,
+      }: {
+        chunk: Chunk | PrefetchedChunk<Chunk | PDFRange<Uint8Array>>
+        data: Uint8Array
+      }) => {
+        if ('hash' in chunk && chunk.end > end) {
+          // This is a (partially) prefetched chunk.
+          chunk.buffer = data
+          file.prefetched.push(chunk)
+          if (chunk.start > end) return // This is a fully prefetched chunk.
         }
-        throw OError.tag(err, 'broken reassembly', {
-          start,
-          end,
-          chunk: trimmedChunk,
-          oldDataLength,
-          newDataLength,
-          offsetStart,
-          offsetEnd,
-          insertPosition,
-          reassembledBlobLength,
-        })
+        // overlap:
+        //     | REQUESTED_RANGE |
+        //  | CHUNK |
+        const offsetStart = Math.max(start - chunk.start, 0)
+        // overlap:
+        //     | REQUESTED_RANGE |
+        //                   | CHUNK |
+        const offsetEnd = Math.max(chunk.end - end, 0)
+        const oldDataLength = data.length
+        if (offsetStart > 0 || offsetEnd > 0) {
+          // compute index positions for slice to handle case where offsetEnd=0
+          const chunkSize = chunk.end - chunk.start
+          data = data.subarray(offsetStart, chunkSize - offsetEnd)
+        }
+        const newDataLength = data.length
+        const insertPosition = Math.max(chunk.start - start, 0)
+
+        try {
+          reassembledBlob.set(data, insertPosition)
+        } catch (err) {
+          const reassembledBlobLength = reassembledBlob.length
+
+          const trimmedChunk = {
+            start: chunk.start,
+            end: chunk.end,
+            hash: 'hash' in chunk ? chunk.hash : undefined,
+            objectId:
+              'objectId' in chunk
+                ? new TextDecoder().decode(chunk.objectId)
+                : undefined,
+          }
+          throw OError.tag(err, 'broken reassembly', {
+            start,
+            end,
+            chunk: trimmedChunk,
+            oldDataLength,
+            newDataLength,
+            offsetStart,
+            offsetEnd,
+            insertPosition,
+            reassembledBlobLength,
+          })
+        }
       }
-    })
+    )
 
   timer.finishBlockingCompute()
   timer.reportInto(metrics)
@@ -1100,6 +1136,7 @@ export async function fetchRange({
 
   if (verifyChunks) {
     return await verifyRange({
+      file,
       url,
       start,
       end,
