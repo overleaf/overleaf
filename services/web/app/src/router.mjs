@@ -1,5 +1,5 @@
 import AdminController from './Features/ServerAdmin/AdminController.js'
-import ErrorController from './Features/Errors/ErrorController.js'
+import ErrorController from './Features/Errors/ErrorController.mjs'
 import Features from './infrastructure/Features.js'
 import ProjectController from './Features/Project/ProjectController.js'
 import ProjectApiController from './Features/Project/ProjectApiController.mjs'
@@ -34,7 +34,7 @@ import HistoryRouter from './Features/History/HistoryRouter.mjs'
 import ExportsController from './Features/Exports/ExportsController.mjs'
 import PasswordResetRouter from './Features/PasswordReset/PasswordResetRouter.mjs'
 import StaticPagesRouter from './Features/StaticPages/StaticPagesRouter.mjs'
-import ChatController from './Features/Chat/ChatController.js'
+import ChatController from './Features/Chat/ChatController.mjs'
 import Modules from './infrastructure/Modules.js'
 import {
   RateLimiter,
@@ -57,7 +57,7 @@ import UserMembershipRouter from './Features/UserMembership/UserMembershipRouter
 import SystemMessageController from './Features/SystemMessages/SystemMessageController.js'
 import AnalyticsRegistrationSourceMiddleware from './Features/Analytics/AnalyticsRegistrationSourceMiddleware.js'
 import AnalyticsUTMTrackingMiddleware from './Features/Analytics/AnalyticsUTMTrackingMiddleware.mjs'
-import CaptchaMiddleware from './Features/Captcha/CaptchaMiddleware.js'
+import CaptchaMiddleware from './Features/Captcha/CaptchaMiddleware.mjs'
 import { Joi, validate } from './infrastructure/Validation.js'
 import UnsupportedBrowserMiddleware from './infrastructure/UnsupportedBrowserMiddleware.js'
 import logger from '@overleaf/logger'
@@ -65,7 +65,7 @@ import _ from 'lodash'
 import { plainTextResponse } from './infrastructure/Response.js'
 import PublicAccessLevels from './Features/Authorization/PublicAccessLevels.js'
 import SocketDiagnostics from './Features/SocketDiagnostics/SocketDiagnostics.mjs'
-import ClsiCacheController from './Features/Compile/ClsiCacheController.js'
+import ClsiCacheController from './Features/Compile/ClsiCacheController.mjs'
 import AsyncLocalStorage from './infrastructure/AsyncLocalStorage.js'
 
 const { renderUnsupportedBrowserPage, unsupportedBrowserMiddleware } =

@@ -102,7 +102,7 @@ describe('CollaboratorsController', function () {
     )
 
     vi.doMock(
-      '../../../../app/src/Features/Collaborators/OwnershipTransferHandler.js',
+      '../../../../app/src/Features/Collaborators/OwnershipTransferHandler.mjs',
       () => ({
         default: ctx.OwnershipTransferHandler,
       })

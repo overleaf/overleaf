@@ -1,6 +1,9 @@
-const { ObjectId } = require('mongodb-legacy')
-const { Project } = require('../../models/Project')
-const { callbackifyAll } = require('@overleaf/promise-utils')
+import mongodb from 'mongodb-legacy'
+
+import { Project } from '../../models/Project.js'
+import { callbackifyAll } from '@overleaf/promise-utils'
+
+const { ObjectId } = mongodb
 
 const ProjectCollabratecDetailsHandler = {
   async initializeCollabratecProject(
@@ -94,7 +97,7 @@ const ProjectCollabratecDetailsHandler = {
   },
 }
 
-module.exports = {
+export default {
   ...callbackifyAll(ProjectCollabratecDetailsHandler),
   promises: ProjectCollabratecDetailsHandler,
 }

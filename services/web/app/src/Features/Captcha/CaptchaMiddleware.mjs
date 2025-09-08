@@ -1,12 +1,12 @@
-const { fetchJson } = require('@overleaf/fetch-utils')
-const logger = require('@overleaf/logger')
-const Settings = require('@overleaf/settings')
-const Metrics = require('@overleaf/metrics')
-const OError = require('@overleaf/o-error')
-const DeviceHistory = require('./DeviceHistory')
-const AuthenticationController = require('../Authentication/AuthenticationController')
-const { expressify } = require('@overleaf/promise-utils')
-const EmailsHelper = require('../Helpers/EmailHelper')
+import { fetchJson } from '@overleaf/fetch-utils'
+import logger from '@overleaf/logger'
+import Settings from '@overleaf/settings'
+import Metrics from '@overleaf/metrics'
+import OError from '@overleaf/o-error'
+import DeviceHistory from './DeviceHistory.js'
+import AuthenticationController from '../Authentication/AuthenticationController.js'
+import { expressify } from '@overleaf/promise-utils'
+import EmailsHelper from '../Helpers/EmailHelper.js'
 
 function respondInvalidCaptcha(req, res) {
   res.status(400).json({
@@ -114,7 +114,7 @@ function validateCaptcha(action) {
   })
 }
 
-module.exports = {
+export default {
   respondInvalidCaptcha,
   validateCaptcha,
   canSkipCaptcha: expressify(canSkipCaptcha),

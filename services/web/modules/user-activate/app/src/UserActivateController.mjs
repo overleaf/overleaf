@@ -2,7 +2,7 @@ import Path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import UserGetter from '../../../../app/src/Features/User/UserGetter.js'
 import UserRegistrationHandler from '../../../../app/src/Features/User/UserRegistrationHandler.js'
-import ErrorController from '../../../../app/src/Features/Errors/ErrorController.js'
+import ErrorController from '../../../../app/src/Features/Errors/ErrorController.mjs'
 import { expressify } from '@overleaf/promise-utils'
 
 const __dirname = Path.dirname(fileURLToPath(import.meta.url))

@@ -1,7 +1,7 @@
 import AuthorizationManager from '../Authorization/AuthorizationManager.js'
 import CompileManager from '../Compile/CompileManager.js'
 import ClsiManager from '../Compile/ClsiManager.js'
-import ProjectFileAgent from './ProjectFileAgent.js'
+import ProjectFileAgent from './ProjectFileAgent.mjs'
 import _ from 'lodash'
 import {
   CompileFailedError,

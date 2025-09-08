@@ -1,4 +1,4 @@
-const { GlobalMetric } = require('../../models/GlobalMetric')
+import { GlobalMetric } from '../../models/GlobalMetric.js'
 /**
  * A Generic collection used to track metrics shared across the entirety of the application
  * examples:
@@ -31,7 +31,7 @@ async function incrementMetric(key, value = 1) {
   )
 }
 
-module.exports = {
+export default {
   getMetric,
   setMetric,
   incrementMetric,

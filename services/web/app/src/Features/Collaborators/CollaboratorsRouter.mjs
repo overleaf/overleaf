@@ -5,7 +5,7 @@ import PrivilegeLevels from '../Authorization/PrivilegeLevels.js'
 import CollaboratorsInviteController from './CollaboratorsInviteController.mjs'
 import { RateLimiter } from '../../infrastructure/RateLimiter.js'
 import RateLimiterMiddleware from '../Security/RateLimiterMiddleware.js'
-import CaptchaMiddleware from '../Captcha/CaptchaMiddleware.js'
+import CaptchaMiddleware from '../Captcha/CaptchaMiddleware.mjs'
 import AnalyticsRegistrationSourceMiddleware from '../Analytics/AnalyticsRegistrationSourceMiddleware.js'
 import { Joi, validate } from '../../infrastructure/Validation.js'
 

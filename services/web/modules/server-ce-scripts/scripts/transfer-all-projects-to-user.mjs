@@ -1,6 +1,6 @@
 import { ObjectId } from '../../../app/src/infrastructure/mongodb.js'
 import minimist from 'minimist'
-import OwnershipTransferHandler from '../../../app/src/Features/Collaborators/OwnershipTransferHandler.js'
+import OwnershipTransferHandler from '../../../app/src/Features/Collaborators/OwnershipTransferHandler.mjs'
 import UserGetter from '../../../app/src/Features/User/UserGetter.js'
 import EmailHelper from '../../../app/src/Features/Helpers/EmailHelper.js'
 

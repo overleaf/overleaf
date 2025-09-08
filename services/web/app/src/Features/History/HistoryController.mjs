@@ -1,28 +1,30 @@
 // @ts-check
 
-const { setTimeout } = require('timers/promises')
-const { pipeline } = require('stream/promises')
-const OError = require('@overleaf/o-error')
-const logger = require('@overleaf/logger')
-const { expressify } = require('@overleaf/promise-utils')
-const {
+import { setTimeout } from 'node:timers/promises'
+import { pipeline } from 'node:stream/promises'
+import OError from '@overleaf/o-error'
+import logger from '@overleaf/logger'
+import { expressify } from '@overleaf/promise-utils'
+
+import {
   fetchStream,
   fetchStreamWithResponse,
   fetchJson,
   fetchNothing,
   RequestFailedError,
-} = require('@overleaf/fetch-utils')
-const settings = require('@overleaf/settings')
-const SessionManager = require('../Authentication/SessionManager')
-const UserGetter = require('../User/UserGetter')
-const ProjectGetter = require('../Project/ProjectGetter')
-const Errors = require('../Errors/Errors')
-const HistoryManager = require('./HistoryManager')
-const ProjectDetailsHandler = require('../Project/ProjectDetailsHandler')
-const ProjectEntityUpdateHandler = require('../Project/ProjectEntityUpdateHandler')
-const RestoreManager = require('./RestoreManager')
-const { prepareZipAttachment } = require('../../infrastructure/Response')
-const Features = require('../../infrastructure/Features')
+} from '@overleaf/fetch-utils'
+
+import settings from '@overleaf/settings'
+import SessionManager from '../Authentication/SessionManager.js'
+import UserGetter from '../User/UserGetter.js'
+import ProjectGetter from '../Project/ProjectGetter.js'
+import Errors from '../Errors/Errors.js'
+import HistoryManager from './HistoryManager.js'
+import ProjectDetailsHandler from '../Project/ProjectDetailsHandler.js'
+import ProjectEntityUpdateHandler from '../Project/ProjectEntityUpdateHandler.js'
+import RestoreManager from './RestoreManager.js'
+import { prepareZipAttachment } from '../../infrastructure/Response.js'
+import Features from '../../infrastructure/Features.js'
 
 // Number of seconds after which the browser should send a request to revalidate
 // blobs
@@ -508,7 +510,7 @@ function isPrematureClose(err) {
   )
 }
 
-module.exports = {
+export default {
   getBlob: expressify(getBlob),
   headBlob: expressify(headBlob),
   proxyToHistoryApi: expressify(proxyToHistoryApi),

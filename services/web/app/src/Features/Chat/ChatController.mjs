@@ -1,11 +1,11 @@
-const { expressify } = require('@overleaf/promise-utils')
-const Modules = require('../../infrastructure/Modules')
-const ChatApiHandler = require('./ChatApiHandler')
-const EditorRealTimeController = require('../Editor/EditorRealTimeController')
-const SessionManager = require('../Authentication/SessionManager')
-const UserInfoManager = require('../User/UserInfoManager')
-const UserInfoController = require('../User/UserInfoController')
-const ChatManager = require('./ChatManager')
+import { expressify } from '@overleaf/promise-utils'
+import Modules from '../../infrastructure/Modules.js'
+import ChatApiHandler from './ChatApiHandler.js'
+import EditorRealTimeController from '../Editor/EditorRealTimeController.js'
+import SessionManager from '../Authentication/SessionManager.js'
+import UserInfoManager from '../User/UserInfoManager.js'
+import UserInfoController from '../User/UserInfoController.js'
+import ChatManager from './ChatManager.js'
 
 async function sendMessage(req, res) {
   const { project_id: projectId } = req.params
@@ -48,7 +48,7 @@ async function getMessages(req, res) {
   res.json(messages)
 }
 
-module.exports = {
+export default {
   sendMessage: expressify(sendMessage),
   getMessages: expressify(getMessages),
 }

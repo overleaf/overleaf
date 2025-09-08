@@ -1,4 +1,4 @@
-import EditorHttpController from './EditorHttpController.js'
+import EditorHttpController from './EditorHttpController.mjs'
 import AuthenticationController from '../Authentication/AuthenticationController.js'
 import AuthorizationMiddleware from '../Authorization/AuthorizationMiddleware.js'
 import { RateLimiter } from '../../infrastructure/RateLimiter.js'

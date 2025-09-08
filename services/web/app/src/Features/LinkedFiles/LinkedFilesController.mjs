@@ -41,7 +41,7 @@ import ReferencesHandler from '../References/ReferencesHandler.mjs'
 import EditorRealTimeController from '../Editor/EditorRealTimeController.js'
 import { expressify } from '@overleaf/promise-utils'
 import ProjectOutputFileAgent from './ProjectOutputFileAgent.mjs'
-import ProjectFileAgent from './ProjectFileAgent.js'
+import ProjectFileAgent from './ProjectFileAgent.mjs'
 import UrlAgent from './UrlAgent.mjs'
 
 let LinkedFilesController

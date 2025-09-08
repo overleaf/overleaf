@@ -1,18 +1,18 @@
-const { NotFoundError, ResourceGoneError } = require('../Errors/Errors')
-const {
+import { NotFoundError, ResourceGoneError } from '../Errors/Errors.js'
+import {
   fetchStreamWithResponse,
   RequestFailedError,
-} = require('@overleaf/fetch-utils')
-const Path = require('path')
-const { pipeline } = require('stream/promises')
-const logger = require('@overleaf/logger')
-const ClsiCacheManager = require('./ClsiCacheManager')
-const CompileController = require('./CompileController')
-const { expressify } = require('@overleaf/promise-utils')
-const ClsiCacheHandler = require('./ClsiCacheHandler')
-const ProjectGetter = require('../Project/ProjectGetter')
-const { MeteredStream } = require('@overleaf/stream-utils')
-const Metrics = require('@overleaf/metrics')
+} from '@overleaf/fetch-utils'
+import Path from 'node:path'
+import { pipeline } from 'node:stream/promises'
+import logger from '@overleaf/logger'
+import ClsiCacheManager from './ClsiCacheManager.js'
+import CompileController from './CompileController.js'
+import { expressify } from '@overleaf/promise-utils'
+import ClsiCacheHandler from './ClsiCacheHandler.js'
+import ProjectGetter from '../Project/ProjectGetter.js'
+import { MeteredStream } from '@overleaf/stream-utils'
+import Metrics from '@overleaf/metrics'
 
 /**
  * Download a file from a specific build on the clsi-cache.
@@ -150,7 +150,7 @@ async function getLatestBuildFromCache(req, res) {
   }
 }
 
-module.exports = {
+export default {
   downloadFromCache: expressify(downloadFromCache),
   getLatestBuildFromCache: expressify(getLatestBuildFromCache),
 }

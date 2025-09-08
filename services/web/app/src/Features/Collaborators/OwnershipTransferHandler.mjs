@@ -1,19 +1,19 @@
-const logger = require('@overleaf/logger')
-const { Project } = require('../../models/Project')
-const ProjectGetter = require('../Project/ProjectGetter')
-const UserGetter = require('../User/UserGetter')
-const CollaboratorsHandler = require('./CollaboratorsHandler')
-const EmailHandler = require('../Email/EmailHandler')
-const Errors = require('../Errors/Errors')
-const PrivilegeLevels = require('../Authorization/PrivilegeLevels')
-const TpdsProjectFlusher = require('../ThirdPartyDataStore/TpdsProjectFlusher')
-const ProjectAuditLogHandler = require('../Project/ProjectAuditLogHandler')
-const AnalyticsManager = require('../Analytics/AnalyticsManager')
-const OError = require('@overleaf/o-error')
-const TagsHandler = require('../Tags/TagsHandler')
-const { promiseMapWithLimit } = require('@overleaf/promise-utils')
+import logger from '@overleaf/logger'
+import { Project } from '../../models/Project.js'
+import ProjectGetter from '../Project/ProjectGetter.js'
+import UserGetter from '../User/UserGetter.js'
+import CollaboratorsHandler from './CollaboratorsHandler.js'
+import EmailHandler from '../Email/EmailHandler.js'
+import Errors from '../Errors/Errors.js'
+import PrivilegeLevels from '../Authorization/PrivilegeLevels.js'
+import TpdsProjectFlusher from '../ThirdPartyDataStore/TpdsProjectFlusher.js'
+import ProjectAuditLogHandler from '../Project/ProjectAuditLogHandler.js'
+import AnalyticsManager from '../Analytics/AnalyticsManager.js'
+import OError from '@overleaf/o-error'
+import TagsHandler from '../Tags/TagsHandler.js'
+import { promiseMapWithLimit } from '@overleaf/promise-utils'
 
-module.exports = {
+export default {
   promises: {
     transferOwnership,
     transferAllProjectsToUser,

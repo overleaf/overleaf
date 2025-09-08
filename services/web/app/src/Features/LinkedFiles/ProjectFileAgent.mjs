@@ -10,23 +10,26 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-let ProjectFileAgent
-const AuthorizationManager = require('../Authorization/AuthorizationManager')
-const ProjectLocator = require('../Project/ProjectLocator')
-const DocstoreManager = require('../Docstore/DocstoreManager')
-const DocumentUpdaterHandler = require('../DocumentUpdater/DocumentUpdaterHandler')
-const _ = require('lodash')
-const LinkedFilesHandler = require('./LinkedFilesHandler')
-const {
+import AuthorizationManager from '../Authorization/AuthorizationManager.js'
+import ProjectLocator from '../Project/ProjectLocator.js'
+import DocstoreManager from '../Docstore/DocstoreManager.js'
+import DocumentUpdaterHandler from '../DocumentUpdater/DocumentUpdaterHandler.js'
+import _ from 'lodash'
+import LinkedFilesHandler from './LinkedFilesHandler.js'
+
+import {
   BadDataError,
   AccessDeniedError,
   BadEntityTypeError,
   SourceFileNotFoundError,
-} = require('./LinkedFilesErrors')
-const { promisify } = require('@overleaf/promise-utils')
-const HistoryManager = require('../History/HistoryManager')
+} from './LinkedFilesErrors.js'
 
-module.exports = ProjectFileAgent = {
+import { promisify } from '@overleaf/promise-utils'
+import HistoryManager from '../History/HistoryManager.js'
+
+let ProjectFileAgent
+
+export default ProjectFileAgent = {
   createLinkedFile(
     projectId,
     linkedFileData,

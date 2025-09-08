@@ -12,42 +12,6 @@ const ProjectEditorHandler = require('../Project/ProjectEditorHandler')
 const Sources = require('../Authorization/Sources')
 const PrivilegeLevels = require('../Authorization/PrivilegeLevels')
 
-module.exports = {
-  getMemberIdsWithPrivilegeLevels: callbackify(getMemberIdsWithPrivilegeLevels),
-  getMemberIds: callbackify(getMemberIds),
-  getInvitedMemberIds: callbackify(getInvitedMemberIds),
-  getInvitedMembersWithPrivilegeLevelsFromFields: callbackify(
-    getInvitedMembersWithPrivilegeLevelsFromFields
-  ),
-  getMemberIdPrivilegeLevel: callbackify(getMemberIdPrivilegeLevel),
-  getProjectsUserIsMemberOf: callbackify(getProjectsUserIsMemberOf),
-  dangerouslyGetAllProjectsUserIsMemberOf: callbackify(
-    dangerouslyGetAllProjectsUserIsMemberOf
-  ),
-  isUserInvitedMemberOfProject: callbackify(isUserInvitedMemberOfProject),
-  getPublicShareTokens: callbackify(getPublicShareTokens),
-  userIsTokenMember: callbackify(userIsTokenMember),
-  getAllInvitedMembers: callbackify(getAllInvitedMembers),
-  promises: {
-    getProjectAccess,
-    getMemberIdsWithPrivilegeLevels,
-    getMemberIds,
-    getInvitedMemberIds,
-    getInvitedMembersWithPrivilegeLevelsFromFields,
-    getMemberIdPrivilegeLevel,
-    getInvitedEditCollaboratorCount,
-    getInvitedPendingEditorCount,
-    getProjectsUserIsMemberOf,
-    dangerouslyGetAllProjectsUserIsMemberOf,
-    isUserInvitedMemberOfProject,
-    isUserInvitedReadWriteMemberOfProject,
-    getPublicShareTokens,
-    userIsTokenMember,
-    userIsReadWriteTokenMember,
-    getAllInvitedMembers,
-  },
-}
-
 /**
  * @typedef ProjectMember
  * @property {string} id
@@ -240,8 +204,6 @@ class ProjectAccess {
     ).length
   }
 }
-
-module.exports.ProjectAccess = ProjectAccess
 
 async function getProjectAccess(projectId) {
   const project = await ProjectGetter.promises.getProject(projectId, {
@@ -576,4 +538,41 @@ async function _loadMembers(members) {
       return record
     })
     .filter(r => r != null)
+}
+
+module.exports = {
+  getMemberIdsWithPrivilegeLevels: callbackify(getMemberIdsWithPrivilegeLevels),
+  getMemberIds: callbackify(getMemberIds),
+  getInvitedMemberIds: callbackify(getInvitedMemberIds),
+  getInvitedMembersWithPrivilegeLevelsFromFields: callbackify(
+    getInvitedMembersWithPrivilegeLevelsFromFields
+  ),
+  getMemberIdPrivilegeLevel: callbackify(getMemberIdPrivilegeLevel),
+  getProjectsUserIsMemberOf: callbackify(getProjectsUserIsMemberOf),
+  dangerouslyGetAllProjectsUserIsMemberOf: callbackify(
+    dangerouslyGetAllProjectsUserIsMemberOf
+  ),
+  isUserInvitedMemberOfProject: callbackify(isUserInvitedMemberOfProject),
+  getPublicShareTokens: callbackify(getPublicShareTokens),
+  userIsTokenMember: callbackify(userIsTokenMember),
+  getAllInvitedMembers: callbackify(getAllInvitedMembers),
+  promises: {
+    getProjectAccess,
+    getMemberIdsWithPrivilegeLevels,
+    getMemberIds,
+    getInvitedMemberIds,
+    getInvitedMembersWithPrivilegeLevelsFromFields,
+    getMemberIdPrivilegeLevel,
+    getInvitedEditCollaboratorCount,
+    getInvitedPendingEditorCount,
+    getProjectsUserIsMemberOf,
+    dangerouslyGetAllProjectsUserIsMemberOf,
+    isUserInvitedMemberOfProject,
+    isUserInvitedReadWriteMemberOfProject,
+    getPublicShareTokens,
+    userIsTokenMember,
+    userIsReadWriteTokenMember,
+    getAllInvitedMembers,
+  },
+  ProjectAccess,
 }

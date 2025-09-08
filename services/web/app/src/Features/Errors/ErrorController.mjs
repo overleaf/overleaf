@@ -1,10 +1,10 @@
-const { isZodErrorLike, fromZodError } = require('zod-validation-error')
-const Errors = require('./Errors')
-const SessionManager = require('../Authentication/SessionManager')
-const SamlLogHandler = require('../SamlLog/SamlLogHandler')
-const HttpErrorHandler = require('./HttpErrorHandler')
-const { plainTextResponse } = require('../../infrastructure/Response')
-const { expressifyErrorHandler } = require('@overleaf/promise-utils')
+import { isZodErrorLike, fromZodError } from 'zod-validation-error'
+import Errors from './Errors.js'
+import SessionManager from '../Authentication/SessionManager.js'
+import SamlLogHandler from '../SamlLog/SamlLogHandler.js'
+import HttpErrorHandler from './HttpErrorHandler.js'
+import { plainTextResponse } from '../../infrastructure/Response.js'
+import { expressifyErrorHandler } from '@overleaf/promise-utils'
 
 function notFound(req, res) {
   res.status(404)
@@ -135,7 +135,7 @@ function handleApiError(err, req, res, next) {
   }
 }
 
-module.exports = {
+export default {
   notFound,
   forbidden,
   serverError,

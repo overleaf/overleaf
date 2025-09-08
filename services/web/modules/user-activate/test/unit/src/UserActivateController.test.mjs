@@ -42,7 +42,7 @@ describe('UserActivateController', function () {
     )
 
     vi.doMock(
-      '../../../../../app/src/Features/Errors/ErrorController.js',
+      '../../../../../app/src/Features/Errors/ErrorController.mjs',
       () => ({
         default: ctx.ErrorController,
       })

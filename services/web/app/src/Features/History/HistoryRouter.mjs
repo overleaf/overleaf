@@ -6,7 +6,7 @@ import { RateLimiter } from '../../infrastructure/RateLimiter.js'
 import AuthenticationController from '../Authentication/AuthenticationController.js'
 import AuthorizationMiddleware from '../Authorization/AuthorizationMiddleware.js'
 import RateLimiterMiddleware from '../Security/RateLimiterMiddleware.js'
-import HistoryController from './HistoryController.js'
+import HistoryController from './HistoryController.mjs'
 
 const rateLimiters = {
   downloadProjectRevision: new RateLimiter('download-project-revision', {

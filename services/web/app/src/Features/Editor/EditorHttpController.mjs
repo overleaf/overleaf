@@ -1,18 +1,20 @@
-const ProjectDeleter = require('../Project/ProjectDeleter')
-const EditorController = require('./EditorController')
-const ProjectGetter = require('../Project/ProjectGetter')
-const AuthorizationManager = require('../Authorization/AuthorizationManager')
-const ProjectEditorHandler = require('../Project/ProjectEditorHandler')
-const Metrics = require('@overleaf/metrics')
-const CollaboratorsInviteGetter = require('../Collaborators/CollaboratorsInviteGetter')
-const PrivilegeLevels = require('../Authorization/PrivilegeLevels')
-const SessionManager = require('../Authentication/SessionManager')
-const Errors = require('../Errors/Errors')
-const { expressify } = require('@overleaf/promise-utils')
-const Settings = require('@overleaf/settings')
-const { ProjectAccess } = require('../Collaborators/CollaboratorsGetter')
+import ProjectDeleter from '../Project/ProjectDeleter.js'
+import EditorController from './EditorController.js'
+import ProjectGetter from '../Project/ProjectGetter.js'
+import AuthorizationManager from '../Authorization/AuthorizationManager.js'
+import ProjectEditorHandler from '../Project/ProjectEditorHandler.js'
+import Metrics from '@overleaf/metrics'
+import CollaboratorsInviteGetter from '../Collaborators/CollaboratorsInviteGetter.js'
+import PrivilegeLevels from '../Authorization/PrivilegeLevels.js'
+import SessionManager from '../Authentication/SessionManager.js'
+import Errors from '../Errors/Errors.js'
+import { expressify } from '@overleaf/promise-utils'
+import Settings from '@overleaf/settings'
+import CollaboratorsGetter from '../Collaborators/CollaboratorsGetter.js'
 
-module.exports = {
+const ProjectAccess = CollaboratorsGetter.ProjectAccess
+
+export default {
   joinProject: expressify(joinProject),
   addDoc: expressify(addDoc),
   addFolder: expressify(addFolder),
