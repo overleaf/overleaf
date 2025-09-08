@@ -1,4 +1,4 @@
-// ts-check
+// @ts-check
 const { ObjectId } = require('mongodb-legacy')
 const _ = require('lodash')
 const { promisify } = require('util')
@@ -33,22 +33,22 @@ function compilerFromV1Engine(engine) {
 
 /**
  @param {MongoProject} project
- @param {string} userId
+ @param {string} rawUserId
  * @returns {boolean}
  */
-function isArchived(project, userId) {
-  userId = new ObjectId(userId)
+function isArchived(project, rawUserId) {
+  const userId = new ObjectId(rawUserId)
 
   return (project.archived || []).some(id => id.equals(userId))
 }
 
 /**
  * @param {MongoProject} project
- * @param {string} userId
+ * @param {string} rawUserId
  * @returns {boolean}
  */
-function isTrashed(project, userId) {
-  userId = new ObjectId(userId)
+function isTrashed(project, rawUserId) {
+  const userId = new ObjectId(rawUserId)
 
   return (project.trashed || []).some(id => id.equals(userId))
 }
@@ -62,6 +62,12 @@ function isArchivedOrTrashed(project, userId) {
   return isArchived(project, userId) || isTrashed(project, userId)
 }
 
+/**
+ * @param {string[]} nameList
+ * @param {string} name
+ * @param {string[]} suffixes
+ * @param {number} maxLength
+ */
 function ensureNameIsUnique(nameList, name, suffixes, maxLength, callback) {
   // create a set of all project names
   if (suffixes == null) {
@@ -98,6 +104,11 @@ function _addSuffixToProjectName(name, suffix, maxLength) {
   return name.substr(0, truncatedLength) + suffix
 }
 
+/**
+ * @param {string} name
+ * @param {Set<string>} allProjectNames
+ * @param {number} maxLength
+ */
 function _addNumericSuffixToProjectName(name, allProjectNames, maxLength) {
   const NUMERIC_SUFFIX_MATCH = / \((\d+)\)$/
   const suffixedName = function (basename, number) {

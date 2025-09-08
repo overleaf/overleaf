@@ -3,6 +3,7 @@ import {
   GetProjectsRequestBody,
   GetProjectsResponseBody,
 } from '../../../../types/project/dashboard/api'
+import { ObjectId } from 'mongodb-legacy'
 
 export type GetProjectsRequest = express.Request<
   unknown,
@@ -19,8 +20,8 @@ export type MongoProject = {
   lastUpdated: Date
   lastUpdatedBy: string
   publicAccesLevel: string
-  archived: string[]
-  trashed: boolean
+  archived: ObjectId[]
+  trashed: ObjectId[]
   owner_ref: string
   tokens: {
     readOnly: string[]
