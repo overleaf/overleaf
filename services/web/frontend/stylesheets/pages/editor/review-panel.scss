@@ -442,6 +442,7 @@ del.review-panel-content-highlight {
   top: 0;
   bottom: 0;
   pointer-events: none;
+  overflow-y: auto;
 }
 
 .review-panel-empty-state-inner {
