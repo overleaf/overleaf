@@ -120,7 +120,8 @@ async function _getIndividualFeatures(userId) {
     await SubscriptionLocator.promises.getUsersSubscription(userId)
   if (
     subscription == null ||
-    SubscriptionHelper.getPaidSubscriptionState(subscription) === 'paused'
+    SubscriptionHelper.getPaidSubscriptionState(subscription) === 'paused' ||
+    subscription.userFeaturesDisabled
   ) {
     return {}
   }
@@ -140,7 +141,9 @@ async function _getIndividualFeatures(userId) {
 async function _getGroupFeatureSets(userId) {
   const subs =
     await SubscriptionLocator.promises.getGroupSubscriptionsMemberOf(userId)
-  return (subs || []).map(_subscriptionToFeatures)
+  return (subs || [])
+    .filter(sub => sub.userFeaturesDisabled !== true)
+    .map(_subscriptionToFeatures)
 }
 
 async function _getFeaturesOverrides(user) {

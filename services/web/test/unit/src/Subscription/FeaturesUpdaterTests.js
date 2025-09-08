@@ -135,6 +135,49 @@ describe('FeaturesUpdater', function () {
   })
 
   describe('computeFeatures', function () {
+    describe('when userFeaturesDisabled is true for individual plan', function () {
+      beforeEach(function () {
+        this.SubscriptionLocator.promises.getUsersSubscription
+          .withArgs(this.user._id)
+          .resolves({
+            planCode: 'individual-plan',
+            userFeaturesDisabled: true,
+            groupPlan: false,
+            addOns: [this.aiAddOn],
+          })
+      })
+
+      it('removes all individual plan features', async function () {
+        const features = await this.FeaturesUpdater.promises.computeFeatures(
+          this.user._id
+        )
+        expect(features).to.deep.equal({ default: 'features' })
+      })
+    })
+
+    describe('when userFeaturesDisabled is true for group plan', function () {
+      beforeEach(function () {
+        const groupSubscription = {
+          planCode: 'group-plan-1',
+          userFeaturesDisabled: true,
+          groupPlan: true,
+          addOns: [this.aiAddOn],
+        }
+        this.SubscriptionLocator.promises.getUsersSubscription
+          .withArgs(this.user._id)
+          .resolves(groupSubscription)
+        this.SubscriptionLocator.promises.getGroupSubscriptionsMemberOf
+          .withArgs(this.user._id)
+          .resolves([groupSubscription])
+      })
+
+      it('removes all group plan features', async function () {
+        const features = await this.FeaturesUpdater.promises.computeFeatures(
+          this.user._id
+        )
+        expect(features).to.deep.equal({ default: 'features' })
+      })
+    })
     beforeEach(function () {
       this.SubscriptionLocator.promises.getUsersSubscription
         .withArgs(this.user._id)

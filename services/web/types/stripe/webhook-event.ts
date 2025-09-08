@@ -82,6 +82,14 @@ export type InvoiceVoidedWebhookEvent = {
   request: Stripe.Event.Request
 }
 
+export type InvoiceOverdueWebhookEvent = {
+  type: 'invoice.overdue'
+  data: {
+    object: Stripe.Invoice
+  }
+  request: Stripe.Event.Request
+}
+
 export type CustomerSubscriptionWebhookEvent =
   | CustomerSubscriptionUpdatedWebhookEvent
   | CustomerSubscriptionCreatedWebhookEvent
@@ -92,3 +100,4 @@ export type WebhookEvent =
   | InvoicePaidWebhookEvent
   | InvoiceVoidedWebhookEvent
   | PaymentIntentPaymentFailedWebhookEvent
+  | InvoiceOverdueWebhookEvent
