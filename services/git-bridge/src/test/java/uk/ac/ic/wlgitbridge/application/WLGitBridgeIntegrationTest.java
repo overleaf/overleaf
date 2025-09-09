@@ -750,8 +750,8 @@ public class WLGitBridgeIntegrationTest {
           + PROJECT_ID
           + "'\n"
           + "hint: Updates were rejected because the tip of your current branch is behind\n"
-          + "hint: its remote counterpart. Integrate the remote changes (e.g.\n"
-          + "hint: 'git pull ...') before pushing again.\n"
+          + "hint: its remote counterpart. If you want to integrate the remote changes,\n"
+          + "hint: use 'git pull' before pushing again.\n"
           + "hint: See the 'Note about fast-forwards' in 'git push --help' for details.\n";
 
   @Test
@@ -779,8 +779,8 @@ public class WLGitBridgeIntegrationTest {
           + PROJECT_ID
           + "'\n"
           + "hint: Updates were rejected because the tip of your current branch is behind\n"
-          + "hint: its remote counterpart. Integrate the remote changes (e.g.\n"
-          + "hint: 'git pull ...') before pushing again.\n"
+          + "hint: its remote counterpart. If you want to integrate the remote changes,\n"
+          + "hint: use 'git pull' before pushing again.\n"
           + "hint: See the 'Note about fast-forwards' in 'git push --help' for details.\n";
 
   @Test
