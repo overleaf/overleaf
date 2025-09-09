@@ -33,6 +33,8 @@ import Range from 'overleaf-editor-core/lib/range'
 import { trackedDeletesFromState } from '@/features/source-editor/utils/tracked-deletes'
 import { useCodeMirrorViewContext } from '@/features/source-editor/components/codemirror-context'
 import { rangesUpdatedEffect } from '@/features/source-editor/extensions/history-ot'
+import { useEditorAnalytics } from '@/shared/hooks/use-editor-analytics'
+import { useReviewPanelViewContext } from './review-panel-view-context'
 
 export type Threads = Record<ThreadId, ReviewPanelCommentThread>
 
@@ -62,6 +64,8 @@ export const ThreadsProvider: FC<React.PropsWithChildren> = ({ children }) => {
   const { currentDocument } = useEditorOpenDocContext()
   const { isRestrictedTokenMember } = useEditorContext()
   const view = useCodeMirrorViewContext()
+  const { sendEvent } = useEditorAnalytics()
+  const reviewPanelView = useReviewPanelViewContext()
 
   // const [error, setError] = useState<Error>()
   const [data, setData] = useState<Threads>()
@@ -275,6 +279,8 @@ export const ThreadsProvider: FC<React.PropsWithChildren> = ({ children }) => {
           body: { content },
         })
 
+        sendEvent('rp-new-comment', { size: content.length })
+
         const op: CommentOperation = {
           c: text,
           p: pos,
@@ -287,21 +293,30 @@ export const ThreadsProvider: FC<React.PropsWithChildren> = ({ children }) => {
         await postJSON(
           `/project/${projectId}/doc/${currentDocument.doc_id}/thread/${threadId}/resolve`
         )
+        sendEvent('rp-comment-resolve', { view: reviewPanelView })
       },
       async reopenThread(threadId: string) {
         await postJSON(
           `/project/${projectId}/doc/${currentDocument.doc_id}/thread/${threadId}/reopen`
         )
+        sendEvent('rp-comment-reopen')
       },
       async deleteThread(threadId: string) {
         await deleteJSON(
           `/project/${projectId}/doc/${currentDocument.doc_id}/thread/${threadId}`
         )
         currentDocument.ranges?.removeCommentId(threadId)
+        sendEvent('rp-comment-delete')
       },
       async addMessage(threadId: ThreadId, content: string) {
         await postJSON(`/project/${projectId}/thread/${threadId}/messages`, {
           body: { content },
+        })
+
+        sendEvent('rp-comment-reply', {
+          view,
+          size: content.length,
+          thread: threadId,
         })
       },
       async editMessage(
@@ -336,6 +351,8 @@ export const ThreadsProvider: FC<React.PropsWithChildren> = ({ children }) => {
             body: { content },
           })
 
+          sendEvent('rp-new-comment', { size: content.length })
+
           const trackedDeletes = trackedDeletesFromState(view.state)
           pos = trackedDeletes.toSnapshot(pos)
           const ranges = [new Range(pos, text.length)]
@@ -348,6 +365,7 @@ export const ThreadsProvider: FC<React.PropsWithChildren> = ({ children }) => {
         async resolveThread(threadId: string) {
           const op = new SetCommentStateOperation(threadId, true)
           currentDocument.historyOTShareDoc.submitOp([op])
+          sendEvent('rp-comment-resolve', { view: reviewPanelView })
           view.dispatch({
             effects: rangesUpdatedEffect.of(null),
           })
@@ -355,6 +373,7 @@ export const ThreadsProvider: FC<React.PropsWithChildren> = ({ children }) => {
         async reopenThread(threadId: string) {
           const op = new SetCommentStateOperation(threadId, false)
           currentDocument.historyOTShareDoc.submitOp([op])
+          sendEvent('rp-comment-reopen')
           view.dispatch({
             effects: rangesUpdatedEffect.of(null),
           })
@@ -362,6 +381,7 @@ export const ThreadsProvider: FC<React.PropsWithChildren> = ({ children }) => {
         async deleteThread(threadId: string) {
           const op = new DeleteCommentOperation(threadId)
           currentDocument.historyOTShareDoc.submitOp([op])
+          sendEvent('rp-comment-delete')
           view.dispatch({
             effects: rangesUpdatedEffect.of(null),
           })
@@ -370,7 +390,14 @@ export const ThreadsProvider: FC<React.PropsWithChildren> = ({ children }) => {
     }
 
     return actions
-  }, [view, currentDocument, projectId, isHistoryOT])
+  }, [
+    view,
+    reviewPanelView,
+    currentDocument,
+    projectId,
+    isHistoryOT,
+    sendEvent,
+  ])
 
   if (!actions) {
     return null

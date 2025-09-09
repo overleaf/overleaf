@@ -1,8 +1,8 @@
+import { useEditorAnalytics } from '@/shared/hooks/use-editor-analytics'
 import {
   createContext,
-  Dispatch,
   FC,
-  SetStateAction,
+  useCallback,
   useContext,
   useMemo,
   useState,
@@ -13,7 +13,7 @@ export type View = 'cur_file' | 'overview'
 export const ReviewPanelViewContext = createContext<View>('cur_file')
 
 type ViewActions = {
-  setView: Dispatch<SetStateAction<View>>
+  setView: (newView: View) => void
 }
 
 const ReviewPanelViewActionsContext = createContext<ViewActions | undefined>(
@@ -24,12 +24,21 @@ export const ReviewPanelViewProvider: FC<React.PropsWithChildren> = ({
   children,
 }) => {
   const [view, setView] = useState<View>('cur_file')
+  const { sendEvent } = useEditorAnalytics()
+
+  const handleSetView = useCallback(
+    (newView: View) => {
+      sendEvent('rp-subview-change', { subView: newView })
+      setView(newView)
+    },
+    [sendEvent]
+  )
 
   const actions = useMemo(
     () => ({
-      setView,
+      setView: handleSetView,
     }),
-    [setView]
+    [handleSetView]
   )
 
   return (

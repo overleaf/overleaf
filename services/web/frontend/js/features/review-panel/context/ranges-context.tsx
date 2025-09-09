@@ -32,6 +32,8 @@ import {
   TransactionSpec,
 } from '@codemirror/state'
 import { buildRangesFromSnapshot } from '@/features/review-panel/utils/snapshot-ranges'
+import { useEditorAnalytics } from '@/shared/hooks/use-editor-analytics'
+import { useReviewPanelViewContext } from './review-panel-view-context'
 
 export type Ranges = {
   docId: string
@@ -106,9 +108,11 @@ export const RangesProvider: FC<React.PropsWithChildren> = ({ children }) => {
   const { projectId } = useIdeReactContext()
   const { currentDocument } = useEditorOpenDocContext()
   const { socket } = useConnectionContext()
+  const { sendEvent } = useEditorAnalytics()
   const [ranges, setRanges] = useState<Ranges | undefined>(() =>
     buildRanges(currentDocument)
   )
+  const reviewPanelView = useReviewPanelViewContext()
 
   // rebuild the ranges when the current doc changes
   useEffect(() => {
@@ -247,6 +251,10 @@ export const RangesProvider: FC<React.PropsWithChildren> = ({ children }) => {
           }
 
           shareDoc.submitOp([op])
+          sendEvent('rp-changes-accepted', {
+            count: changes.length,
+            view: reviewPanelView,
+          })
 
           // dispatch an effect as the editor's doc doesn't change when tracked changes are accepted
           view.dispatch({
@@ -317,6 +325,10 @@ export const RangesProvider: FC<React.PropsWithChildren> = ({ children }) => {
           }
 
           shareDoc.submitOp([op])
+          sendEvent('rp-changes-rejected', {
+            count: changes.length,
+            view: reviewPanelView,
+          })
 
           // in case the doc didn't change
           view.dispatch(...specs, {
@@ -333,6 +345,10 @@ export const RangesProvider: FC<React.PropsWithChildren> = ({ children }) => {
             await postJSON(url, { body: { change_ids: ids } })
             currentDocument.ranges.removeChangeIds(ids)
             setRanges(buildRanges(currentDocument))
+            sendEvent('rp-changes-accepted', {
+              count: ids.length,
+              view: reviewPanelView,
+            })
           }
         },
         async rejectChanges(...changes) {
@@ -341,11 +357,15 @@ export const RangesProvider: FC<React.PropsWithChildren> = ({ children }) => {
             view.dispatch(
               rejectChanges(view.state, currentDocument.ranges, ids)
             )
+            sendEvent('rp-changes-rejected', {
+              count: ids.length,
+              view: reviewPanelView,
+            })
           }
         },
       } satisfies RangesActions
     }
-  }, [currentDocument, projectId, view])
+  }, [currentDocument, projectId, view, sendEvent, reviewPanelView])
 
   if (!actions) {
     return null
