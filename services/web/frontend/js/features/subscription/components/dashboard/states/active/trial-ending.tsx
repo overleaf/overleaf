@@ -10,7 +10,7 @@ export function TrialEnding({
   className,
 }: TrialEndingProps) {
   return (
-    <p className={className}>
+    <p className={className} data-testid="trial-ending">
       <Trans
         i18nKey="youre_on_free_trial_which_ends_on"
         values={{ date: trialEndsAtFormatted }}
