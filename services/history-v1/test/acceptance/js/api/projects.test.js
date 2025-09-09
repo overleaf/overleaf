@@ -30,6 +30,7 @@ const {
   TextOperation,
 } = require('overleaf-editor-core')
 const testProjects = require('./support/test_projects')
+const { ObjectId } = require('mongodb')
 
 describe('project controller', function () {
   beforeEach(cleanup.everything)
@@ -101,6 +102,165 @@ describe('project controller', function () {
         /^http:\/\/gcs:9090\/download\/storage\/v1\/b\/overleaf-test-zips/
       )
       expect(zipStore.storeZip.calledOnce).to.be.true
+    })
+  })
+
+  describe('blob stats', function () {
+    let populatedPostgresProjectId,
+      populatedMongoProjectId,
+      emptyPostgresProjectId,
+      emptyMongoProjectId
+
+    async function populateProject(projectId) {
+      const files = {
+        [testFiles.GRAPH_PNG_HASH]: testFiles.path('graph.png'),
+        [testFiles.HELLO_TXT_HASH]: testFiles.path('hello.txt'),
+      }
+      for (const [hash, path] of Object.entries(files)) {
+        const response = await fetch(
+          testServer.url(`/api/projects/${projectId}/blobs/${hash}`),
+          {
+            method: 'PUT',
+            body: fs.createReadStream(path),
+            headers: {
+              Authorization: testServer.basicAuthHeader,
+            },
+          }
+        )
+        expect(response.status).to.equal(201)
+      }
+    }
+
+    beforeEach(async function () {
+      emptyPostgresProjectId = await testProjects.createEmptyProject()
+      emptyMongoProjectId = await testProjects.createEmptyProject(
+        new ObjectId().toString()
+      )
+
+      populatedPostgresProjectId = await testProjects.createEmptyProject()
+      await populateProject(populatedPostgresProjectId)
+      populatedMongoProjectId = await testProjects.createEmptyProject(
+        new ObjectId().toString()
+      )
+      await populateProject(populatedMongoProjectId)
+    })
+
+    it('handles empty postgres project', async function () {
+      const { body } =
+        await testServer.basicAuthClient.apis.Project.getProjectBlobsStats({
+          body: { projectIds: [emptyPostgresProjectId] },
+        })
+      expect(body).to.deep.equal([
+        {
+          projectId: emptyPostgresProjectId,
+          textBlobBytes: 0,
+          binaryBlobBytes: 0,
+          totalBytes: 0,
+          nTextBlobs: 0,
+          nBinaryBlobs: 0,
+        },
+      ])
+    })
+    it('handles populated postgres project', async function () {
+      const { body } =
+        await testServer.basicAuthClient.apis.Project.getProjectBlobsStats({
+          body: { projectIds: [populatedPostgresProjectId] },
+        })
+      expect(body).to.deep.equal([
+        {
+          projectId: populatedPostgresProjectId,
+          textBlobBytes: testFiles.HELLO_TXT_BYTE_LENGTH,
+          binaryBlobBytes: testFiles.GRAPH_PNG_BYTE_LENGTH,
+          totalBytes:
+            testFiles.HELLO_TXT_BYTE_LENGTH + testFiles.GRAPH_PNG_BYTE_LENGTH,
+          nTextBlobs: 1,
+          nBinaryBlobs: 1,
+        },
+      ])
+    })
+
+    it('handles empty mongo project', async function () {
+      const { body } =
+        await testServer.basicAuthClient.apis.Project.getProjectBlobsStats({
+          body: { projectIds: [emptyMongoProjectId] },
+        })
+      expect(body).to.deep.equal([
+        {
+          projectId: emptyMongoProjectId,
+          textBlobBytes: 0,
+          binaryBlobBytes: 0,
+          totalBytes: 0,
+          nTextBlobs: 0,
+          nBinaryBlobs: 0,
+        },
+      ])
+    })
+    it('handles populated mongo project', async function () {
+      const { body } =
+        await testServer.basicAuthClient.apis.Project.getProjectBlobsStats({
+          body: { projectIds: [populatedMongoProjectId] },
+        })
+      expect(body).to.deep.equal([
+        {
+          projectId: populatedMongoProjectId,
+          textBlobBytes: testFiles.HELLO_TXT_BYTE_LENGTH,
+          binaryBlobBytes: testFiles.GRAPH_PNG_BYTE_LENGTH,
+          totalBytes:
+            testFiles.HELLO_TXT_BYTE_LENGTH + testFiles.GRAPH_PNG_BYTE_LENGTH,
+          nTextBlobs: 1,
+          nBinaryBlobs: 1,
+        },
+      ])
+    })
+
+    it('handles batch of projects', async function () {
+      const { body } =
+        await testServer.basicAuthClient.apis.Project.getProjectBlobsStats({
+          body: {
+            projectIds: [
+              populatedPostgresProjectId,
+              populatedMongoProjectId,
+              emptyPostgresProjectId,
+              emptyMongoProjectId,
+            ],
+          },
+        })
+      expect(body).to.deep.equal([
+        {
+          projectId: populatedPostgresProjectId,
+          textBlobBytes: testFiles.HELLO_TXT_BYTE_LENGTH,
+          binaryBlobBytes: testFiles.GRAPH_PNG_BYTE_LENGTH,
+          totalBytes:
+            testFiles.HELLO_TXT_BYTE_LENGTH + testFiles.GRAPH_PNG_BYTE_LENGTH,
+          nTextBlobs: 1,
+          nBinaryBlobs: 1,
+        },
+        {
+          projectId: populatedMongoProjectId,
+          textBlobBytes: testFiles.HELLO_TXT_BYTE_LENGTH,
+          binaryBlobBytes: testFiles.GRAPH_PNG_BYTE_LENGTH,
+          totalBytes:
+            testFiles.HELLO_TXT_BYTE_LENGTH + testFiles.GRAPH_PNG_BYTE_LENGTH,
+          nTextBlobs: 1,
+          nBinaryBlobs: 1,
+        },
+        {
+          projectId: emptyPostgresProjectId,
+          textBlobBytes: 0,
+          binaryBlobBytes: 0,
+          totalBytes: 0,
+          nTextBlobs: 0,
+          nBinaryBlobs: 0,
+        },
+        {
+          projectId: emptyMongoProjectId,
+          textBlobBytes: 0,
+          binaryBlobBytes: 0,
+          totalBytes: 0,
+          nTextBlobs: 0,
+          nBinaryBlobs: 0,
+        },
+      ])
     })
   })
 

@@ -16,6 +16,21 @@ class MockV1HistoryApi extends AbstractMockApi {
   }
 
   applyRoutes() {
+    this.app.post('/api/projects/blob-stats', (req, res, next) => {
+      res.json(
+        req.body.projectIds.map(projectId => {
+          return {
+            projectId,
+            textBlobBytes: 7331,
+            binaryBlobBytes: 1337,
+            totalBytes: 7331 + 1337,
+            nTextBlobs: 13,
+            nBinaryBlobs: 42,
+          }
+        })
+      )
+    })
+
     this.app.get(
       '/api/projects/:project_id/version/:version/zip',
       (req, res, next) => {

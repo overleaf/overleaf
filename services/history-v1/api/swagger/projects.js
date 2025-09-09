@@ -37,6 +37,46 @@ exports.paths = {
       ],
     },
   },
+  '/projects/blob-stats': {
+    post: {
+      'x-swagger-router-controller': 'projects',
+      operationId: 'getProjectBlobsStats',
+      tags: ['Project'],
+      description: 'Get Blob stats for projects.',
+      consumes: ['application/json'],
+      parameters: [
+        {
+          name: 'body',
+          in: 'body',
+          schema: {
+            type: 'object',
+            properties: {
+              projectIds: {
+                type: 'array',
+                items: { type: 'string' },
+              },
+            },
+          },
+        },
+      ],
+      responses: {
+        200: {
+          description: 'Initialized',
+          schema: {
+            type: 'array',
+            items: {
+              $ref: '#/definitions/ProjectBlobStats',
+            },
+          },
+        },
+      },
+      security: [
+        {
+          basic: [],
+        },
+      ],
+    },
+  },
   '/projects/{project_id}': {
     delete: {
       'x-swagger-router-controller': 'projects',

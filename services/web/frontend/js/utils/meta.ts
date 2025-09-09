@@ -151,6 +151,15 @@ export interface Meta {
   'ol-hasTrackChangesFeature': boolean
   'ol-hasWriteAccess': boolean
   'ol-hideLinkingWidgets': boolean // CI only
+  'ol-historyBlobStats': {
+    projectId: string
+    textBlobsBytes: number
+    binaryBlobsBytes: number
+    totalBytes: number
+    nTextBlobs: number
+    nBinaryBlobs: number
+    owned?: boolean
+  }
   'ol-i18n': { currentLangCode: string }
   'ol-inactiveTutorials': string[]
   'ol-institutionEmailNonCanonical': string | undefined

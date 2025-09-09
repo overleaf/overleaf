@@ -307,6 +307,14 @@ async function getHistoryId(projectId) {
   return historyId
 }
 
+async function getProjectBlobStats(historyIds) {
+  return await fetchJson(`${HISTORY_V1_URL}/projects/blob-stats`, {
+    method: 'POST',
+    basicAuth: HISTORY_V1_BASIC_AUTH,
+    json: { projectIds: historyIds.map(id => id.toString()) },
+  })
+}
+
 async function injectUserDetails(data) {
   // data can be either:
   // {
@@ -418,5 +426,6 @@ module.exports = {
     requestBlobWithProjectId,
     getLatestHistory,
     getChanges,
+    getProjectBlobStats,
   },
 }

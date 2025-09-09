@@ -32,6 +32,28 @@ module.exports = {
       },
       required: ['projectId'],
     },
+    ProjectBlobStats: {
+      properties: {
+        projectId: {
+          type: 'string',
+        },
+        textBlobBytes: {
+          type: 'integer',
+        },
+        binaryBlobBytes: {
+          type: 'integer',
+        },
+        totalBytes: {
+          type: 'integer',
+        },
+        nTextBlobs: {
+          type: 'integer',
+        },
+        nBinaryBlobs: {
+          type: 'integer',
+        },
+      },
+    },
     File: {
       properties: {
         hash: {
