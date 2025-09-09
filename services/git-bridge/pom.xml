@@ -35,7 +35,7 @@
         <commons.io.version>2.18.0</commons.io.version>
         <commons.compress.version>1.27.1</commons.compress.version>
         <simpleclient.version>0.10.0</simpleclient.version>
-        <bouncycastle.crypto.version>1.70</bouncycastle.crypto.version>
+        <bouncycastle.crypto.version>1.81</bouncycastle.crypto.version>
     </properties>
     <build>
         <plugins>
@@ -261,13 +261,13 @@
         <!-- Require by MockServerClient to load 'sun.security.x509' / 'sun.security.util' -->
         <dependency>
             <groupId>org.bouncycastle</groupId>
-            <artifactId>bcprov-jdk15on</artifactId>
+            <artifactId>bcprov-jdk18on</artifactId>
             <version>${bouncycastle.crypto.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
            <groupId>org.bouncycastle</groupId>
-            <artifactId>bcpkix-jdk15on</artifactId>
+            <artifactId>bcpkix-jdk18on</artifactId>
             <version>${bouncycastle.crypto.version}</version>
             <scope>test</scope>
         </dependency>
