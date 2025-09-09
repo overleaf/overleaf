@@ -314,7 +314,7 @@ export const ThreadsProvider: FC<React.PropsWithChildren> = ({ children }) => {
         })
 
         sendEvent('rp-comment-reply', {
-          view,
+          view: reviewPanelView,
           size: content.length,
           thread: threadId,
         })
