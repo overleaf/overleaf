@@ -159,7 +159,7 @@ export interface Meta {
     nTextBlobs: number
     nBinaryBlobs: number
     owned?: boolean
-  }
+  }[]
   'ol-i18n': { currentLangCode: string }
   'ol-inactiveTutorials': string[]
   'ol-institutionEmailNonCanonical': string | undefined
