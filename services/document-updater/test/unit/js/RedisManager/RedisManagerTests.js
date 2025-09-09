@@ -9,8 +9,8 @@ const MODULE_PATH = '../../../../app/js/RedisManager.js'
 
 describe('RedisManager', function () {
   beforeEach(function () {
-    this.multi = { exec: sinon.stub().yields() }
-    this.rclient = { multi: () => this.multi, srem: sinon.stub().yields() }
+    this.multi = { exec: sinon.stub().resolves() }
+    this.rclient = { multi: () => this.multi, srem: sinon.stub().resolves() }
     tk.freeze(new Date())
     this.RedisManager = SandboxedModule.require(MODULE_PATH, {
       requires: {
@@ -102,7 +102,6 @@ describe('RedisManager', function () {
     this.project_id = 'project-id-123'
     this.projectHistoryId = '123'
     this.historyRangesSupport = false
-    this.callback = sinon.stub()
   })
 
   afterEach(function () {
@@ -125,7 +124,7 @@ describe('RedisManager', function () {
       this.pathname = '/a/b/c.tex'
       this.rclient.mget = sinon
         .stub()
-        .yields(null, [
+        .resolves([
           this.jsonlines,
           this.version,
           this.hash,
@@ -138,16 +137,19 @@ describe('RedisManager', function () {
       this.rclient.sismember = sinon.stub()
       this.rclient.sismember
         .withArgs('HistoryRangesSupport', this.docId)
-        .yields(null, 0)
+        .resolves(0)
       this.rclient.smembers = sinon.stub()
       this.rclient.smembers
         .withArgs(`ResolvedCommentIds:${this.docId}`)
-        .yields(null, this.resolvedCommentIds)
+        .resolves(this.resolvedCommentIds)
     })
 
     describe('successfully', function () {
-      beforeEach(function () {
-        this.RedisManager.getDoc(this.project_id, this.docId, this.callback)
+      beforeEach(async function () {
+        this.result = await this.RedisManager.promises.getDoc(
+          this.project_id,
+          this.docId
+        )
       })
 
       it('should get all the details in one call to redis', function () {
@@ -168,19 +170,18 @@ describe('RedisManager', function () {
       })
 
       it('should return the document', function () {
-        this.callback.should.have.been.calledWithExactly(
-          null,
-          this.lines,
-          this.version,
-          this.ranges,
-          this.pathname,
-          this.projectHistoryId,
-          this.unflushed_time,
-          this.lastUpdatedAt,
-          this.lastUpdatedBy,
-          this.historyRangesSupport,
-          this.resolvedCommentIds
-        )
+        expect(this.result).to.deep.equal({
+          lines: this.lines,
+          version: this.version,
+          ranges: this.ranges,
+          pathname: this.pathname,
+          projectHistoryId: this.projectHistoryId,
+          unflushedTime: this.unflushed_time,
+          lastUpdatedAt: this.lastUpdatedAt,
+          lastUpdatedBy: this.lastUpdatedBy,
+          historyRangesSupport: this.historyRangesSupport,
+          resolvedCommentIds: this.resolvedCommentIds,
+        })
       })
 
       it('should not log any errors', function () {
@@ -189,18 +190,21 @@ describe('RedisManager', function () {
     })
 
     describe('with a corrupted document', function () {
-      beforeEach(function () {
+      beforeEach(async function () {
         this.badHash = 'INVALID-HASH-VALUE'
         this.rclient.mget = sinon
           .stub()
-          .yields(null, [
+          .resolves([
             this.jsonlines,
             this.version,
             this.badHash,
             this.project_id,
             this.json_ranges,
           ])
-        this.RedisManager.getDoc(this.project_id, this.docId, this.callback)
+        this.result = await this.RedisManager.promises.getDoc(
+          this.project_id,
+          this.docId
+        )
       })
 
       it('should log a hash error', function () {
@@ -208,48 +212,47 @@ describe('RedisManager', function () {
       })
 
       it('should return the document', function () {
-        this.callback
-          .calledWith(null, this.lines, this.version, this.ranges)
-          .should.equal(true)
+        expect(this.result).to.deep.include({
+          lines: this.lines,
+          version: this.version,
+          ranges: this.ranges,
+        })
       })
     })
 
     describe('with a slow request to redis', function () {
       beforeEach(function () {
         this.clock = sinon.useFakeTimers()
-        this.rclient.mget = (...args) => {
-          const cb = args.pop()
+        this.rclient.mget = async (...args) => {
           this.clock.tick(6000)
-          cb(null, [
+          return [
             this.jsonlines,
             this.version,
             this.another_project_id,
             this.json_ranges,
             this.pathname,
             this.unflushed_time,
-          ])
+          ]
         }
-
-        this.RedisManager.getDoc(this.project_id, this.docId, this.callback)
       })
 
       afterEach(function () {
         this.clock.restore()
       })
 
-      it('should return an error', function () {
-        this.callback
-          .calledWith(sinon.match.instanceOf(Error))
-          .should.equal(true)
+      it('should return an error', async function () {
+        await expect(
+          this.RedisManager.promises.getDoc(this.project_id, this.docId)
+        ).to.be.rejected
       })
     })
 
     describe('getDoc with an invalid project id', function () {
-      beforeEach(function () {
+      beforeEach(async function () {
         this.another_project_id = 'project-id-456'
         this.rclient.mget = sinon
           .stub()
-          .yields(null, [
+          .resolves([
             this.jsonlines,
             this.version,
             this.hash,
@@ -258,45 +261,46 @@ describe('RedisManager', function () {
             this.pathname,
             this.unflushed_time,
           ])
-        this.RedisManager.getDoc(this.project_id, this.docId, this.callback)
       })
 
-      it('should return an error', function () {
-        this.callback
-          .calledWith(sinon.match.instanceOf(Errors.NotFoundError))
-          .should.equal(true)
+      it('should throw an error', async function () {
+        await expect(
+          this.RedisManager.promises.getDoc(this.project_id, this.docId)
+        ).to.be.rejectedWith(Errors.NotFoundError)
       })
     })
 
     describe('with history ranges support', function () {
-      beforeEach(function () {
+      beforeEach(async function () {
         this.rclient.sismember
           .withArgs('HistoryRangesSupport', this.docId)
-          .yields(null, 1)
-        this.RedisManager.getDoc(this.project_id, this.docId, this.callback)
+          .resolves(1)
+        this.result = await this.RedisManager.promises.getDoc(
+          this.project_id,
+          this.docId
+        )
       })
 
       it('should return the document with the history ranges flag set', function () {
-        this.callback.should.have.been.calledWithExactly(
-          null,
-          this.lines,
-          this.version,
-          this.ranges,
-          this.pathname,
-          this.projectHistoryId,
-          this.unflushed_time,
-          this.lastUpdatedAt,
-          this.lastUpdatedBy,
-          true,
-          this.resolvedCommentIds
-        )
+        expect(this.result).to.deep.equal({
+          lines: this.lines,
+          version: this.version,
+          ranges: this.ranges,
+          pathname: this.pathname,
+          projectHistoryId: this.projectHistoryId,
+          unflushedTime: this.unflushed_time,
+          lastUpdatedAt: this.lastUpdatedAt,
+          lastUpdatedBy: this.lastUpdatedBy,
+          historyRangesSupport: true,
+          resolvedCommentIds: this.resolvedCommentIds,
+        })
       })
     })
   })
 
   describe('getPreviousDocOpsTests', function () {
     describe('with a start and an end value', function () {
-      beforeEach(function () {
+      beforeEach(async function () {
         this.first_version_in_redis = 30
         this.version = 70
         this.length = this.version - this.first_version_in_redis
@@ -304,16 +308,13 @@ describe('RedisManager', function () {
         this.end = 60
         this.ops = [{ mock: 'op-1' }, { mock: 'op-2' }]
         this.jsonOps = this.ops.map(op => JSON.stringify(op))
-        this.rclient.llen = sinon.stub().callsArgWith(1, null, this.length)
-        this.rclient.get = sinon
-          .stub()
-          .callsArgWith(1, null, this.version.toString())
-        this.rclient.lrange = sinon.stub().callsArgWith(3, null, this.jsonOps)
-        this.RedisManager.getPreviousDocOps(
+        this.rclient.llen = sinon.stub().resolves(this.length)
+        this.rclient.get = sinon.stub().resolves(this.version.toString())
+        this.rclient.lrange = sinon.stub().resolves(this.jsonOps)
+        this.result = await this.RedisManager.promises.getPreviousDocOps(
           this.docId,
           this.start,
-          this.end,
-          this.callback
+          this.end
         )
       })
 
@@ -338,12 +339,12 @@ describe('RedisManager', function () {
       })
 
       it('should return the docs with the doc ops deserialized', function () {
-        this.callback.calledWith(null, this.ops).should.equal(true)
+        this.result.should.deep.equal(this.ops)
       })
     })
 
     describe('with an end value of -1', function () {
-      beforeEach(function () {
+      beforeEach(async function () {
         this.first_version_in_redis = 30
         this.version = 70
         this.length = this.version - this.first_version_in_redis
@@ -351,16 +352,13 @@ describe('RedisManager', function () {
         this.end = -1
         this.ops = [{ mock: 'op-1' }, { mock: 'op-2' }]
         this.jsonOps = this.ops.map(op => JSON.stringify(op))
-        this.rclient.llen = sinon.stub().callsArgWith(1, null, this.length)
-        this.rclient.get = sinon
-          .stub()
-          .callsArgWith(1, null, this.version.toString())
-        this.rclient.lrange = sinon.stub().callsArgWith(3, null, this.jsonOps)
-        this.RedisManager.getPreviousDocOps(
+        this.rclient.llen = sinon.stub().resolves(this.length)
+        this.rclient.get = sinon.stub().resolves(this.version.toString())
+        this.rclient.lrange = sinon.stub().resolves(this.jsonOps)
+        this.result = await this.RedisManager.promises.getPreviousDocOps(
           this.docId,
           this.start,
-          this.end,
-          this.callback
+          this.end
         )
       })
 
@@ -375,12 +373,12 @@ describe('RedisManager', function () {
       })
 
       it('should return the docs with the doc ops deserialized', function () {
-        this.callback.calledWith(null, this.ops).should.equal(true)
+        this.result.should.deep.equal(this.ops)
       })
     })
 
     describe('when the requested range is not in Redis', function () {
-      beforeEach(function () {
+      beforeEach(async function () {
         this.first_version_in_redis = 30
         this.version = 70
         this.length = this.version - this.first_version_in_redis
@@ -388,44 +386,35 @@ describe('RedisManager', function () {
         this.end = -1
         this.ops = [{ mock: 'op-1' }, { mock: 'op-2' }]
         this.jsonOps = this.ops.map(op => JSON.stringify(op))
-        this.rclient.llen = sinon.stub().callsArgWith(1, null, this.length)
-        this.rclient.get = sinon
-          .stub()
-          .callsArgWith(1, null, this.version.toString())
-        this.rclient.lrange = sinon.stub().callsArgWith(3, null, this.jsonOps)
-        this.RedisManager.getPreviousDocOps(
-          this.docId,
-          this.start,
-          this.end,
-          this.callback
-        )
+        this.rclient.llen = sinon.stub().resolves(this.length)
+        this.rclient.get = sinon.stub().resolves(this.version.toString())
+        this.rclient.lrange = sinon.stub().resolves(this.jsonOps)
+        try {
+          await this.RedisManager.promises.getPreviousDocOps(
+            this.docId,
+            this.start,
+            this.end
+          )
+        } catch (err) {
+          this.err = err
+        }
       })
 
-      it('should return an error', function () {
-        this.callback
-          .calledWith(sinon.match.instanceOf(Errors.OpRangeNotAvailableError))
-          .should.equal(true)
+      it('should throw an error', function () {
+        expect(this.err).to.be.instanceOf(Errors.OpRangeNotAvailableError)
       })
 
       it('should send details for metrics', function () {
-        this.callback.should.have.been.calledWith(
-          sinon.match({
-            info: {
-              firstVersionInRedis: this.first_version_in_redis,
-              version: this.version,
-              ttlInS: this.RedisManager.DOC_OPS_TTL,
-            },
-          })
-        )
-      })
-
-      it('should log out the problem as a debug message', function () {
-        this.logger.debug.called.should.equal(true)
+        expect(this.err.info).to.deep.equal({
+          firstVersionInRedis: this.first_version_in_redis,
+          version: this.version,
+          ttlInS: this.RedisManager.DOC_OPS_TTL,
+        })
       })
     })
 
     describe('with a slow request to redis', function () {
-      beforeEach(function () {
+      beforeEach(async function () {
         this.first_version_in_redis = 30
         this.version = 70
         this.length = this.version - this.first_version_in_redis
@@ -433,31 +422,27 @@ describe('RedisManager', function () {
         this.end = 60
         this.ops = [{ mock: 'op-1' }, { mock: 'op-2' }]
         this.jsonOps = this.ops.map(op => JSON.stringify(op))
-        this.rclient.llen = sinon.stub().callsArgWith(1, null, this.length)
-        this.rclient.get = sinon
-          .stub()
-          .callsArgWith(1, null, this.version.toString())
+        this.rclient.llen = sinon.stub().resolves(this.length)
+        this.rclient.get = sinon.stub().resolves(this.version.toString())
         this.clock = sinon.useFakeTimers()
-        this.rclient.lrange = (key, start, end, cb) => {
+        this.rclient.lrange = async (key, start, end) => {
           this.clock.tick(6000)
-          cb(null, this.jsonOps)
+          return this.jsonOps
         }
-        this.RedisManager.getPreviousDocOps(
-          this.docId,
-          this.start,
-          this.end,
-          this.callback
-        )
       })
 
       afterEach(function () {
         this.clock.restore()
       })
 
-      it('should return an error', function () {
-        this.callback
-          .calledWith(sinon.match.instanceOf(Error))
-          .should.equal(true)
+      it('should return an error', async function () {
+        await expect(
+          this.RedisManager.promises.getPreviousDocOps(
+            this.docId,
+            this.start,
+            this.end
+          )
+        ).to.be.rejected
       })
     })
   })
@@ -476,7 +461,7 @@ describe('RedisManager', function () {
       this.doc_update_list_length = sinon.stub()
       this.project_update_list_length = sinon.stub()
 
-      this.RedisManager.getDocVersion = sinon.stub()
+      this.RedisManager.promises.getDocVersion = sinon.stub()
       this.multi.mset = sinon.stub()
       this.multi.set = sinon.stub()
       this.multi.rpush = sinon.stub()
@@ -485,7 +470,7 @@ describe('RedisManager', function () {
       this.multi.del = sinon.stub()
       this.multi.exec = sinon
         .stub()
-        .callsArgWith(0, null, [
+        .resolves([
           null,
           null,
           null,
@@ -497,26 +482,25 @@ describe('RedisManager', function () {
     })
 
     describe('with a consistent version', function () {
-      beforeEach(function () {
-        this.RedisManager.getDocVersion
+      beforeEach(async function () {
+        this.RedisManager.promises.getDocVersion
           .withArgs(this.docId)
-          .yields(null, this.version - this.ops.length)
-        this.RedisManager.updateDocument(
+          .resolves(this.version - this.ops.length)
+        await this.RedisManager.promises.updateDocument(
           this.project_id,
           this.docId,
           this.lines,
           this.version,
           this.ops,
           this.ranges,
-          this.updateMeta,
-          this.callback
+          this.updateMeta
         )
       })
 
       it('should get the current doc version to check for consistency', function () {
-        this.RedisManager.getDocVersion
-          .calledWith(this.docId)
-          .should.equal(true)
+        this.RedisManager.promises.getDocVersion.should.have.been.calledWith(
+          this.docId
+        )
       })
 
       it('should set most details in a single MSET call', function () {
@@ -564,79 +548,67 @@ describe('RedisManager', function () {
           .should.equal(true)
       })
 
-      it('should call the callback', function () {
-        this.callback.should.have.been.called
-      })
-
       it('should not log any errors', function () {
         this.logger.error.calledWith().should.equal(false)
       })
 
       describe('with a doc using project history only', function () {
         beforeEach(function () {
-          this.RedisManager.getDocVersion
+          this.RedisManager.promises.getDocVersion
             .withArgs(this.docId)
-            .yields(null, this.version - this.ops.length)
-          this.RedisManager.updateDocument(
+            .resolves(this.version - this.ops.length)
+        })
+
+        it('should succeed', async function () {
+          await this.RedisManager.promises.updateDocument(
             this.project_id,
             this.docId,
             this.lines,
             this.version,
             this.ops,
             this.ranges,
-            this.updateMeta,
-            this.callback
+            this.updateMeta
           )
-        })
-
-        it('should call the callback', function () {
-          this.callback.should.have.been.called
         })
       })
     })
 
     describe('with an inconsistent version', function () {
-      beforeEach(function () {
-        this.RedisManager.getDocVersion
+      beforeEach(async function () {
+        this.RedisManager.promises.getDocVersion
           .withArgs(this.docId)
-          .yields(null, this.version - this.ops.length - 1)
-        this.RedisManager.updateDocument(
-          this.project_id,
-          this.docId,
-          this.lines,
-          this.version,
-          this.ops,
-          this.ranges,
-          this.updateMeta,
-          this.callback
-        )
+          .resolves(this.version - this.ops.length - 1)
+        await expect(
+          this.RedisManager.promises.updateDocument(
+            this.project_id,
+            this.docId,
+            this.lines,
+            this.version,
+            this.ops,
+            this.ranges,
+            this.updateMeta
+          )
+        ).to.be.rejected
       })
 
       it('should not call multi.exec', function () {
         this.multi.exec.called.should.equal(false)
       })
-
-      it('should call the callback with an error', function () {
-        this.callback
-          .calledWith(sinon.match.instanceOf(Error))
-          .should.equal(true)
-      })
     })
 
     describe('with no updates', function () {
-      beforeEach(function () {
-        this.RedisManager.getDocVersion
+      beforeEach(async function () {
+        this.RedisManager.promises.getDocVersion
           .withArgs(this.docId)
-          .yields(null, this.version)
-        this.RedisManager.updateDocument(
+          .resolves(this.version)
+        await this.RedisManager.promises.updateDocument(
           this.project_id,
           this.docId,
           this.lines,
           this.version,
           [],
           this.ranges,
-          this.updateMeta,
-          this.callback
+          this.updateMeta
         )
       })
 
@@ -665,19 +637,18 @@ describe('RedisManager', function () {
     })
 
     describe('with empty ranges', function () {
-      beforeEach(function () {
-        this.RedisManager.getDocVersion
+      beforeEach(async function () {
+        this.RedisManager.promises.getDocVersion
           .withArgs(this.docId)
-          .yields(null, this.version - this.ops.length)
-        this.RedisManager.updateDocument(
+          .resolves(this.version - this.ops.length)
+        await this.RedisManager.promises.updateDocument(
           this.project_id,
           this.docId,
           this.lines,
           this.version,
           this.ops,
           {},
-          this.updateMeta,
-          this.callback
+          this.updateMeta
         )
       })
 
@@ -697,84 +668,71 @@ describe('RedisManager', function () {
 
     describe('with null bytes in the serialized doc lines', function () {
       beforeEach(function () {
-        this.RedisManager.getDocVersion
+        this.RedisManager.promises.getDocVersion
           .withArgs(this.docId)
-          .yields(null, this.version - this.ops.length)
+          .resolves(this.version - this.ops.length)
         this.stringifyStub = sinon
           .stub(JSON, 'stringify')
           .callsFake(() => '["bad bytes! \u0000 <- here"]')
-        this.RedisManager.updateDocument(
-          this.project_id,
-          this.docId,
-          this.lines,
-          this.version,
-          this.ops,
-          this.ranges,
-          this.updateMeta,
-          this.callback
-        )
       })
 
       afterEach(function () {
         this.stringifyStub.restore()
       })
 
-      it('should log an error', function () {
-        this.logger.error.called.should.equal(true)
-      })
-
-      it('should call the callback with an error', function () {
-        this.callback
-          .calledWith(sinon.match.instanceOf(Error))
-          .should.equal(true)
+      it('should throw an error', async function () {
+        await expect(
+          this.RedisManager.promises.updateDocument(
+            this.project_id,
+            this.docId,
+            this.lines,
+            this.version,
+            this.ops,
+            this.ranges,
+            this.updateMeta
+          )
+        ).to.be.rejected
       })
     })
 
     describe('with ranges that are too big', function () {
       beforeEach(function () {
-        this.RedisManager.getDocVersion
+        this.RedisManager.promises.getDocVersion
           .withArgs(this.docId)
-          .yields(null, this.version - this.ops.length)
-        this.RedisManager._serializeRanges = sinon
+          .resolves(this.version - this.ops.length)
+        this.RedisManager.promises._serializeRanges = sinon
           .stub()
-          .yields(new Error('ranges are too large'))
-        this.RedisManager.updateDocument(
-          this.project_id,
-          this.docId,
-          this.lines,
-          this.version,
-          this.ops,
-          this.ranges,
-          this.updateMeta,
-          this.callback
-        )
+          .throws(new Error('ranges are too large'))
       })
 
-      it('should log an error', function () {
-        this.logger.error.called.should.equal(true)
-      })
-
-      it('should call the callback with the error', function () {
-        this.callback
-          .calledWith(sinon.match.instanceOf(Error))
-          .should.equal(true)
+      it('should throw an error', async function () {
+        await expect(
+          this.RedisManager.promises.updateDocument(
+            this.project_id,
+            this.docId,
+            this.lines,
+            this.version,
+            this.ops,
+            this.ranges,
+            this.updateMeta
+          )
+        ).to.be.rejected
       })
     })
 
     describe('without user id from meta', function () {
-      beforeEach(function () {
-        this.RedisManager.getDocVersion
+      beforeEach(async function () {
+        this.RedisManager.promises.getDocVersion
           .withArgs(this.docId)
-          .yields(null, this.version - this.ops.length)
-        this.RedisManager.updateDocument(
+          .resolves(this.version - this.ops.length)
+        await this.RedisManager.promises.updateDocument(
           this.project_id,
           this.docId,
           this.lines,
           this.version,
           this.ops,
           this.ranges,
-          {},
-          this.callback
+          {}
         )
       })
 
@@ -799,8 +757,8 @@ describe('RedisManager', function () {
       this.multi.sadd = sinon.stub()
       this.multi.del = sinon.stub()
       this.multi.exists = sinon.stub()
-      this.multi.exec.onCall(0).yields(null, [0])
-      this.rclient.sadd = sinon.stub().yields()
+      this.multi.exec.onCall(0).resolves([0])
+      this.rclient.sadd = sinon.stub().resolves()
       this.lines = ['one', 'two', 'three', 'これは']
       this.version = 42
       this.hash = crypto
@@ -813,8 +771,8 @@ describe('RedisManager', function () {
     })
 
     describe('with non-empty ranges', function () {
-      beforeEach(function (done) {
-        this.RedisManager.putDocInMemory(
+      beforeEach(async function () {
+        await this.RedisManager.promises.putDocInMemory(
           this.project_id,
           this.docId,
           this.lines,
@@ -823,8 +781,7 @@ describe('RedisManager', function () {
           this.resolvedCommentIds,
           this.pathname,
           this.projectHistoryId,
-          this.historyRangesSupport,
-          done
+          this.historyRangesSupport
         )
       })
 
@@ -867,8 +824,8 @@ describe('RedisManager', function () {
     })
 
     describe('with empty ranges', function () {
-      beforeEach(function (done) {
-        this.RedisManager.putDocInMemory(
+      beforeEach(async function () {
+        await this.RedisManager.promises.putDocInMemory(
           this.project_id,
           this.docId,
           this.lines,
@@ -877,8 +834,7 @@ describe('RedisManager', function () {
           [],
           this.pathname,
           this.projectHistoryId,
-          this.historyRangesSupport,
-          done
+          this.historyRangesSupport
         )
       })
 
@@ -900,69 +856,57 @@ describe('RedisManager', function () {
         this.stringifyStub = sinon
           .stub(JSON, 'stringify')
           .callsFake(() => '["bad bytes! \u0000 <- here"]')
-        this.RedisManager.putDocInMemory(
-          this.project_id,
-          this.docId,
-          this.lines,
-          this.version,
-          this.ranges,
-          this.resolvedCommentIds,
-          this.pathname,
-          this.projectHistoryId,
-          this.historyRangesSupport,
-          this.callback
-        )
       })
 
       afterEach(function () {
         this.stringifyStub.restore()
       })
 
-      it('should log an error', function () {
-        this.logger.error.called.should.equal(true)
-      })
-
-      it('should call the callback with an error', function () {
-        this.callback
-          .calledWith(sinon.match.instanceOf(Error))
-          .should.equal(true)
+      it('should throw an error', async function () {
+        await expect(
+          this.RedisManager.promises.putDocInMemory(
+            this.project_id,
+            this.docId,
+            this.lines,
+            this.version,
+            this.ranges,
+            this.resolvedCommentIds,
+            this.pathname,
+            this.projectHistoryId,
+            this.historyRangesSupport
+          )
+        ).to.be.rejected
       })
     })
 
     describe('with ranges that are too big', function () {
       beforeEach(function () {
-        this.RedisManager._serializeRanges = sinon
+        this.RedisManager.promises._serializeRanges = sinon
           .stub()
-          .yields(new Error('ranges are too large'))
-        this.RedisManager.putDocInMemory(
-          this.project_id,
-          this.docId,
-          this.lines,
-          this.version,
-          this.ranges,
-          this.resolvedCommentIds,
-          this.pathname,
-          this.projectHistoryId,
-          this.historyRangesSupport,
-          this.callback
-        )
+          .throws(new Error('ranges are too large'))
       })
 
-      it('should log an error', function () {
-        this.logger.error.called.should.equal(true)
-      })
-
-      it('should call the callback with the error', function () {
-        this.callback
-          .calledWith(sinon.match.instanceOf(Error))
-          .should.equal(true)
+      it('should throw an error', async function () {
+        await expect(
+          this.RedisManager.promises.putDocInMemory(
+            this.project_id,
+            this.docId,
+            this.lines,
+            this.version,
+            this.ranges,
+            this.resolvedCommentIds,
+            this.pathname,
+            this.projectHistoryId,
+            this.historyRangesSupport
+          )
+        ).to.be.rejected
       })
     })
 
     describe('with history ranges support', function () {
-      beforeEach(function (done) {
+      beforeEach(async function () {
         this.historyRangesSupport = true
-        this.RedisManager.putDocInMemory(
+        await this.RedisManager.promises.putDocInMemory(
           this.project_id,
           this.docId,
           this.lines,
@@ -971,8 +915,7 @@ describe('RedisManager', function () {
           this.resolvedCommentIds,
           this.pathname,
           this.projectHistoryId,
-          this.historyRangesSupport,
-          done
+          this.historyRangesSupport
         )
       })
 
@@ -995,27 +938,21 @@ describe('RedisManager', function () {
     })
 
     describe('when the project is blocked', function () {
-      beforeEach(function (done) {
-        this.multi.exec.onCall(0).yields(null, [1])
-        this.RedisManager.putDocInMemory(
-          this.project_id,
-          this.docId,
-          this.lines,
-          this.version,
-          this.ranges,
-          this.resolvedCommentIds,
-          this.pathname,
-          this.projectHistoryId,
-          this.historyRangesSupport,
-          err => {
-            this.error = err
-            done()
-          }
-        )
-      })
-
-      it('should throw an error', function () {
-        expect(this.error.message).to.equal('Project blocked from loading docs')
+      beforeEach(async function () {
+        this.multi.exec.onCall(0).resolves([1])
+        await expect(
+          this.RedisManager.promises.putDocInMemory(
+            this.project_id,
+            this.docId,
+            this.lines,
+            this.version,
+            this.ranges,
+            this.resolvedCommentIds,
+            this.pathname,
+            this.projectHistoryId,
+            this.historyRangesSupport
+          )
+        ).to.be.rejectedWith('Project blocked from loading docs')
       })
 
       it('should not store the doc', function () {
@@ -1025,12 +962,15 @@ describe('RedisManager', function () {
   })
 
   describe('removeDocFromMemory', function () {
-    beforeEach(function (done) {
+    beforeEach(async function () {
       this.multi.strlen = sinon.stub()
       this.multi.del = sinon.stub()
       this.multi.srem = sinon.stub()
-      this.multi.exec.yields()
-      this.RedisManager.removeDocFromMemory(this.project_id, this.docId, done)
+      this.multi.exec.resolves()
+      await this.RedisManager.promises.removeDocFromMemory(
+        this.project_id,
+        this.docId
+      )
     })
 
     it('should check the length of the current doclines', function () {
@@ -1070,9 +1010,9 @@ describe('RedisManager', function () {
   })
 
   describe('clearProjectState', function () {
-    beforeEach(function (done) {
-      this.rclient.del = sinon.stub().callsArg(1)
-      this.RedisManager.clearProjectState(this.project_id, done)
+    beforeEach(async function () {
+      this.rclient.del = sinon.stub().resolves()
+      await this.RedisManager.promises.clearProjectState(this.project_id)
     })
 
     it('should delete the project state', function () {
@@ -1084,8 +1024,8 @@ describe('RedisManager', function () {
 
   describe('renameDoc', function () {
     beforeEach(function () {
-      this.rclient.rpush = sinon.stub().yields()
-      this.rclient.set = sinon.stub().yields()
+      this.rclient.rpush = sinon.stub().resolves()
+      this.rclient.set = sinon.stub().resolves()
       this.update = {
         id: this.docId,
         pathname: (this.pathname = 'pathname'),
@@ -1094,17 +1034,16 @@ describe('RedisManager', function () {
     })
 
     describe('the document is cached in redis', function () {
-      beforeEach(function () {
-        this.RedisManager.getDoc = sinon
+      beforeEach(async function () {
+        this.RedisManager.promises.getDoc = sinon
           .stub()
-          .callsArgWith(2, null, 'lines', 'version')
-        this.RedisManager.renameDoc(
+          .resolves({ lines: 'lines', version: 'version' })
+        await this.RedisManager.promises.renameDoc(
           this.project_id,
           this.docId,
           this.userId,
           this.update,
-          this.projectHistoryId,
-          this.callback
+          this.projectHistoryId
         )
       })
 
@@ -1116,17 +1055,16 @@ describe('RedisManager', function () {
     })
 
     describe('the document is not cached in redis', function () {
-      beforeEach(function () {
-        this.RedisManager.getDoc = sinon
+      beforeEach(async function () {
+        this.RedisManager.promises.getDoc = sinon
           .stub()
-          .callsArgWith(2, null, null, null)
-        this.RedisManager.renameDoc(
+          .resolves({ lines: null, version: null })
+        await this.RedisManager.promises.renameDoc(
           this.project_id,
           this.docId,
           this.userId,
           this.update,
-          this.projectHistoryId,
-          this.callback
+          this.projectHistoryId
         )
       })
 
@@ -1136,17 +1074,17 @@ describe('RedisManager', function () {
     })
 
     describe('getDocVersion', function () {
-      beforeEach(function () {
+      beforeEach(async function () {
         this.version = 12345
         this.rclient.mget = sinon
           .stub()
           .withArgs(`DocVersion:${this.docId}`)
-          .callsArgWith(1, null, [`${this.version}`])
-        this.RedisManager.getDocVersion(this.docId, this.callback)
+          .resolves([`${this.version}`])
+        this.result = await this.RedisManager.promises.getDocVersion(this.docId)
       })
 
       it('should return the document version', function () {
-        this.callback.calledWithExactly(null, this.version).should.equal(true)
+        this.result.should.equal(this.version)
       })
     })
   })
