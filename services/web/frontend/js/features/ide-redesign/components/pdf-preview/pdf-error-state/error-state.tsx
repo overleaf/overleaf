@@ -13,7 +13,7 @@ export default function ErrorState({
   extraContent,
 }: {
   title: string
-  description: React.ReactNode
+  description?: React.ReactNode
   iconType?: string
   actions?: React.ReactNode
   iconClassName?: string
@@ -33,7 +33,9 @@ export default function ErrorState({
         </div>
         <div className="pdf-error-state-text">
           <p className="pdf-error-state-label">{title}</p>
-          <p className="pdf-error-state-description">{description}</p>
+          {description && (
+            <p className="pdf-error-state-description">{description}</p>
+          )}
         </div>
         {actions}
       </div>
@@ -54,7 +56,7 @@ export const CheckLogsButton = () => {
         openRailTab('errors')
       }}
     >
-      {t('check_logs')}
+      {t('check_error_logs')}
     </OLButton>
   )
 }
