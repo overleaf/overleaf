@@ -569,6 +569,21 @@ describe('ProjectListController', function () {
         }
         ctx.ProjectListController.projectListPage(ctx.req, ctx.res)
       })
+      it('should show a linked group notification via domain capture', function (ctx) {
+        ctx.req.session.saml = {
+          linkedGroup: true,
+          universityName: ctx.institutionName,
+          domainCaptureJoin: true,
+        }
+        ctx.res.render = (pageName, opts) => {
+          expect(opts).to.deep.include({
+            groupSsoSetupSuccess: true,
+            joinedGroupName: ctx.institutionName,
+            viaDomainCapture: true,
+          })
+        }
+        ctx.ProjectListController.projectListPage(ctx.req, ctx.res)
+      })
       it('should show a linked another email notification', function (ctx) {
         // when they request to link an email but the institution returns
         // a different email

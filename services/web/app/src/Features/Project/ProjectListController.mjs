@@ -285,6 +285,8 @@ async function projectListPage(req, res, next) {
   const notificationsInstitution = []
   // Institution and group SSO Notifications
   let groupSsoSetupSuccess
+  let viaDomainCapture
+  let joinedGroupName = ''
   let reconfirmedViaSAML
   if (Features.hasFeature('saml')) {
     reconfirmedViaSAML = _.get(req.session, ['saml', 'reconfirmed'])
@@ -324,6 +326,8 @@ async function projectListPage(req, res, next) {
       // Notification group SSO: After SSO Linked
       if (samlSession.linkedGroup) {
         groupSsoSetupSuccess = true
+        viaDomainCapture = samlSession.domainCaptureJoin
+        joinedGroupName = samlSession.universityName
       }
 
       // Notification institution SSO: After SSO Linked or Logging in
@@ -517,6 +521,8 @@ async function projectListPage(req, res, next) {
     showBrlGeoBanner,
     projectDashboardReact: true, // used in navbar
     groupSsoSetupSuccess,
+    joinedGroupName,
+    viaDomainCapture,
     groupSubscriptionsPendingEnrollment:
       groupSubscriptionsPendingEnrollment.map(subscription => ({
         groupId: subscription._id,

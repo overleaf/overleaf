@@ -1045,5 +1045,17 @@ describe('<UserNotifications />', function () {
         screen.queryByText('Success! Single sign-on is all set up for you.')
       ).to.be.null
     })
+
+    it('shows group SSO linked notification when joining via domain capture', function () {
+      const groupName = 'Group Name'
+      window.metaAttributesCache.set('ol-groupSsoSetupSuccess', true)
+      window.metaAttributesCache.set('ol-viaDomainCapture', true)
+      window.metaAttributesCache.set('ol-joinedGroupName', groupName)
+      renderWithinProjectListProvider(GroupSsoSetupSuccess)
+      const alert = screen.getByRole('alert')
+      expect(alert.textContent).to.contain(
+        `Success! You’ve joined the ${groupName} group subscription. Your group has SSO enabled so you can log in without needing to remember a password.`
+      )
+    })
   })
 })

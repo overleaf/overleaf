@@ -168,6 +168,7 @@ export interface Meta {
   'ol-itm_campaign': string
   'ol-itm_content': string
   'ol-itm_referrer': string
+  'ol-joinedGroupName': string
   'ol-labs': boolean
   'ol-labsExperiments': ActiveExperiment[] | undefined
   'ol-languages': SpellCheckLanguage[]
@@ -298,6 +299,7 @@ export interface Meta {
   'ol-usersEmail': string | undefined
   'ol-usersSubscription': { personal: boolean; group: boolean }
   'ol-validationStatus': ValidationStatus
+  'ol-viaDomainCapture': boolean
   'ol-wikiEnabled': boolean
   'ol-writefullCssUrl': string
   'ol-writefullEnabled': boolean

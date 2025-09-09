@@ -2219,6 +2219,7 @@
   "subscription_will_remain_active_until_end_of_billing_period_x": "Your subscription will remain active until the end of your billing period, <0>__terminationDate__</0>.",
   "subscription_will_remain_active_until_end_of_trial_period_x": "Your subscription will remain active until the end of your trial period, <0>__terminationDate__</0>.",
   "success_sso_set_up": "Success! Single sign-on is all set up for you.",
+  "success_youve_successfully_join_group": "Success! You’ve joined the <0>__groupName__</0> group subscription. Your group has SSO enabled so you can log in without needing to remember a password.",
   "suggest_a_different_fix": "Suggest a different fix",
   "suggest_fix": "Suggest fix",
   "suggested": "Suggested",
