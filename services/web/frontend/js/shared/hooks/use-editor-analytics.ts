@@ -7,14 +7,23 @@ import {
 } from '@/infrastructure/event-tracking'
 import { useCallback } from 'react'
 
+export function populateEditorRedesignSegmentation<
+  SegmentationType extends Segmentation,
+>(
+  segmentation: SegmentationType | undefined = {} as SegmentationType,
+  editorRedesign: boolean
+): SegmentationType & { 'editor-redesign'?: 'enabled' } {
+  return editorRedesign
+    ? { ...segmentation, 'editor-redesign': 'enabled' }
+    : segmentation
+}
+
 export const useEditorAnalytics = () => {
   const editorRedesign = useIsNewEditorEnabled()
 
   const populateSegmentation = useCallback(
     (segmentation: Segmentation | undefined = {}): Segmentation => {
-      return editorRedesign
-        ? { ...segmentation, 'editor-redesign': 'enabled' }
-        : segmentation
+      return populateEditorRedesignSegmentation(segmentation, editorRedesign)
     },
     [editorRedesign]
   )

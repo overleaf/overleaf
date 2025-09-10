@@ -111,7 +111,11 @@ const FullProjectSearchUI: FC = () => {
 
         await projectSnapshot.refresh()
         if (!abortControllerRef.current.signal.aborted) {
-          const results = await searchSnapshot(projectSnapshot, searchQuery)
+          const results = await searchSnapshot(
+            projectSnapshot,
+            searchQuery,
+            newEditor
+          )
           setMatchedFiles(results)
         }
       } catch (error) {
@@ -121,7 +125,7 @@ const FullProjectSearchUI: FC = () => {
         setLoading(false)
       }
     },
-    [openDocs, projectSnapshot, t]
+    [openDocs, projectSnapshot, t, newEditor]
   )
 
   const searchInputRef = useRef<HTMLInputElement>(null)

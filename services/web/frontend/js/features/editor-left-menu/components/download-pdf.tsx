@@ -1,18 +1,19 @@
 import { useTranslation } from 'react-i18next'
 import { useDetachCompileContext as useCompileContext } from '../../../shared/context/detach-compile-context'
 import { useProjectContext } from '../../../shared/context/project-context'
-import * as eventTracking from '../../../infrastructure/event-tracking'
 import { isSmallDevice } from '../../../infrastructure/event-tracking'
 import MaterialIcon from '@/shared/components/material-icon'
 import OLTooltip from '@/shared/components/ol/ol-tooltip'
+import { useEditorAnalytics } from '@/shared/hooks/use-editor-analytics'
 
 export default function DownloadPDF() {
   const { t } = useTranslation()
   const { pdfDownloadUrl, pdfUrl } = useCompileContext()
   const { projectId } = useProjectContext()
+  const { sendEvent } = useEditorAnalytics()
 
   function sendDownloadEvent() {
-    eventTracking.sendMB('download-pdf-button-click', {
+    sendEvent('download-pdf-button-click', {
       projectId,
       location: 'left-menu',
       isSmallDevice,

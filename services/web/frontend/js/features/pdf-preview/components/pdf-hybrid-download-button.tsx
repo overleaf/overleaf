@@ -1,13 +1,15 @@
 import { useTranslation } from 'react-i18next'
 import { useDetachCompileContext as useCompileContext } from '../../../shared/context/detach-compile-context'
 import { useProjectContext } from '@/shared/context/project-context'
-import { sendMB, isSmallDevice } from '@/infrastructure/event-tracking'
+import { isSmallDevice } from '@/infrastructure/event-tracking'
 import OLTooltip from '@/shared/components/ol/ol-tooltip'
 import OLButton from '@/shared/components/ol/ol-button'
 import MaterialIcon from '@/shared/components/material-icon'
+import { useEditorAnalytics } from '@/shared/hooks/use-editor-analytics'
 
 function PdfHybridDownloadButton() {
   const { pdfDownloadUrl } = useCompileContext()
+  const { sendEvent } = useEditorAnalytics()
 
   const { projectId } = useProjectContext()
 
@@ -23,7 +25,7 @@ function PdfHybridDownloadButton() {
       return
     }
 
-    sendMB('download-pdf-button-click', {
+    sendEvent('download-pdf-button-click', {
       projectId,
       location: 'pdf-preview',
       isSmallDevice,

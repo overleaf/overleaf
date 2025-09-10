@@ -17,6 +17,7 @@ type SearchEventSegmentation = {
     searchType: 'full-project'
     totalDocs: number
     totalResults: number
+    'editor-redesign'?: 'enabled'
   }
   'search-result-click': {
     searchType: 'full-project'

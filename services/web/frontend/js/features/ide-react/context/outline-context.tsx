@@ -10,12 +10,12 @@ import {
 } from 'react'
 import useScopeEventEmitter from '@/shared/hooks/use-scope-event-emitter'
 import useEventListener from '@/shared/hooks/use-event-listener'
-import * as eventTracking from '@/infrastructure/event-tracking'
 import { isValidTeXFile } from '@/main/is-valid-tex-file'
 import localStorage from '@/infrastructure/local-storage'
 import { useProjectContext } from '@/shared/context/project-context'
 import { useEditorOpenDocContext } from '@/features/ide-react/context/editor-open-doc-context'
 import { useFileTreeOpenContext } from './file-tree-open-context'
+import { useEditorAnalytics } from '@/shared/hooks/use-editor-analytics'
 
 export type PartialFlatOutline = {
   level: number
@@ -53,6 +53,7 @@ export const OutlineProvider: FC<React.PropsWithChildren> = ({ children }) => {
   const [ignoreNextCursorUpdate, setIgnoreNextCursorUpdate] =
     useState<boolean>(false)
   const [ignoreNextScroll, setIgnoreNextScroll] = useState<boolean>(false)
+  const { sendEvent } = useEditorAnalytics()
 
   const goToLineEmitter = useScopeEventEmitter('editor:gotoLine', true)
 
@@ -110,9 +111,9 @@ export const OutlineProvider: FC<React.PropsWithChildren> = ({ children }) => {
         gotoColumn: 0,
         syncToPdf,
       })
-      eventTracking.sendMB('outline-jump-to-line')
+      sendEvent('outline-jump-to-line')
     },
-    [goToLineEmitter]
+    [goToLineEmitter, sendEvent]
   )
 
   const highlightedLine = useMemo(
@@ -142,18 +143,18 @@ export const OutlineProvider: FC<React.PropsWithChildren> = ({ children }) => {
   const expandOutline = useCallback(() => {
     if (canShowOutline) {
       localStorage.setItem(storageKey, true)
-      eventTracking.sendMB('outline-expand')
+      sendEvent('outline-expand')
       setOutlineExpanded(true)
     }
-  }, [canShowOutline, storageKey])
+  }, [canShowOutline, storageKey, sendEvent])
 
   const collapseOutline = useCallback(() => {
     if (canShowOutline) {
       localStorage.setItem(storageKey, false)
-      eventTracking.sendMB('outline-collapse')
+      sendEvent('outline-collapse')
       setOutlineExpanded(false)
     }
-  }, [canShowOutline, storageKey])
+  }, [canShowOutline, storageKey, sendEvent])
 
   const toggleOutlineExpanded = useCallback(() => {
     if (outlineExpanded) {

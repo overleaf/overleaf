@@ -3,6 +3,7 @@ import { RegExpCursor, SearchCursor, SearchQuery } from '@codemirror/search'
 import { ProjectSnapshot } from '@/infrastructure/project-snapshot'
 import { categorizer, regexpWordTest, stringWordTest } from './search'
 import { sendSearchEvent } from '@/features/event-tracking/search-events'
+import { populateEditorRedesignSegmentation } from '@/shared/hooks/use-editor-analytics'
 
 export type Hit = {
   lineIndex: number
@@ -20,7 +21,8 @@ const toLowerCase = (string: string) => string.toLowerCase()
 
 export const searchSnapshot = async (
   projectSnapshot: ProjectSnapshot,
-  searchQuery: SearchQuery
+  searchQuery: SearchQuery,
+  newEditor: boolean
 ) => {
   if (!searchQuery.search.trim().length) {
     return
@@ -82,11 +84,17 @@ export const searchSnapshot = async (
     a.path.localeCompare(b.path)
   )
 
-  sendSearchEvent('search-execute', {
-    searchType: 'full-project',
-    totalDocs: docPaths.length,
-    totalResults: results.flatMap(file => file.hits).length,
-  })
+  sendSearchEvent(
+    'search-execute',
+    populateEditorRedesignSegmentation(
+      {
+        searchType: 'full-project',
+        totalDocs: docPaths.length,
+        totalResults: results.flatMap(file => file.hits).length,
+      },
+      newEditor
+    )
+  )
 
   return results
 }
