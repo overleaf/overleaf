@@ -3,17 +3,18 @@ import OLButton from '@/shared/components/ol/ol-button'
 import MaterialIcon from '@/shared/components/material-icon'
 import { useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import * as eventTracking from '@/infrastructure/event-tracking'
+import { useEditorAnalytics } from '@/shared/hooks/use-editor-analytics'
 
 export default function ShareProjectButton() {
   const { t } = useTranslation()
+  const { sendEventOnce } = useEditorAnalytics()
 
   const [showShareModal, setShowShareModal] = useState(false)
 
   const handleOpenShareModal = useCallback(() => {
-    eventTracking.sendMBOnce('ide-open-share-modal-once')
+    sendEventOnce('ide-open-share-modal-once')
     setShowShareModal(true)
-  }, [])
+  }, [sendEventOnce])
 
   const handleHideShareModal = useCallback(() => {
     setShowShareModal(false)

@@ -1,8 +1,11 @@
 import { useRailContext } from '@/features/ide-redesign/contexts/rail-context'
+import { sendMB } from '@/infrastructure/event-tracking'
 import MaterialIcon from '@/shared/components/material-icon'
 import OLButton from '@/shared/components/ol/ol-button'
 import classNames from 'classnames'
+import { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useDetachCompileContext as useCompileContext } from '@/shared/context/detach-compile-context'
 
 export default function ErrorState({
   title,
@@ -47,15 +50,15 @@ export default function ErrorState({
 export const CheckLogsButton = () => {
   const { t } = useTranslation()
   const { openTab: openRailTab } = useRailContext()
+  const { error } = useCompileContext()
+
+  const onClick = useCallback(() => {
+    openRailTab('errors')
+    sendMB('check-logs-click', { error })
+  }, [openRailTab, error])
 
   return (
-    <OLButton
-      variant="secondary"
-      size="sm"
-      onClick={() => {
-        openRailTab('errors')
-      }}
-    >
+    <OLButton variant="secondary" size="sm" onClick={onClick}>
       {t('check_error_logs')}
     </OLButton>
   )

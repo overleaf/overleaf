@@ -1,13 +1,11 @@
 import {
   Dispatch,
   MouseEventHandler,
-  useCallback,
   memo,
   SetStateAction,
   useState,
 } from 'react'
 import HumanReadableLogsHints from '../../../../ide/human-readable-logs/HumanReadableLogsHints'
-import { sendMB } from '@/infrastructure/event-tracking'
 import {
   ErrorLevel,
   LogEntry as LogEntryData,
@@ -29,7 +27,7 @@ type LogEntryProps = {
   showSourceLocationLink?: boolean
   entryAriaLabel?: string
   contentDetails?: string[]
-  onSourceLocationClick?: (sourceLocation: SourceLocation) => void
+  onSourceLocationClick?: MouseEventHandler<HTMLButtonElement>
   index?: number
   logEntry?: LogEntryData
   id?: string
@@ -83,23 +81,6 @@ export function ControlledLogEntry({
     extraInfoURL = hint.extraInfoURL
   }
 
-  const handleLogEntryLinkClick: MouseEventHandler<HTMLButtonElement> =
-    useCallback(
-      event => {
-        event.preventDefault()
-
-        if (onSourceLocationClick && sourceLocation) {
-          onSourceLocationClick(sourceLocation)
-
-          const parts = sourceLocation?.file?.split('.')
-          const extension =
-            parts?.length && parts?.length > 1 ? parts.pop() : ''
-          sendMB('log-entry-link-click', { level, ruleId, extension })
-        }
-      },
-      [level, onSourceLocationClick, ruleId, sourceLocation]
-    )
-
   return (
     <div
       className={classNames('log-entry', className)}
@@ -113,7 +94,7 @@ export function ControlledLogEntry({
         headerTitle={headerTitle}
         logType={logType}
         showSourceLocationLink={showSourceLocationLink}
-        onSourceLocationClick={handleLogEntryLinkClick}
+        onSourceLocationClick={onSourceLocationClick}
         collapsed={collapsed}
         onToggleCollapsed={() => setCollapsed(collapsed => !collapsed)}
         id={id}
