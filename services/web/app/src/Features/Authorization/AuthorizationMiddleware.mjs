@@ -10,6 +10,7 @@ import TokenAccessHandler from '../TokenAccess/TokenAccessHandler.mjs'
 import { expressify } from '@overleaf/promise-utils'
 import AdminAuthorizationHelper from '../Helpers/AdminAuthorizationHelper.mjs'
 import UrlHelper from '../Helpers/UrlHelper.mjs'
+import ChatApiHandler from '../Chat/ChatApiHandler.mjs'
 
 const { ObjectId } = mongodb
 
@@ -202,6 +203,34 @@ async function ensureUserCanAdminProject(req, res, next) {
   HttpErrorHandler.forbidden(req, res)
 }
 
+async function ensureUserIsMessageAuthor(req, res, next) {
+  const projectId = _getProjectId(req)
+  const messageId = _getMessageId(req)
+  const userId = _getUserId(req)
+
+  if (!userId) {
+    logger.debug({ projectId, messageId }, 'denying access: no logged in user')
+    return HttpErrorHandler.forbidden(req, res)
+  }
+
+  const message = await ChatApiHandler.promises.getGlobalMessage(
+    projectId,
+    messageId
+  )
+  if (message.user_id === userId) {
+    logger.debug(
+      { userId, projectId, messageId },
+      'allowing user to modify their own message'
+    )
+    return next()
+  }
+  logger.debug(
+    { userId, projectId, messageId, messageAuthor: message.user_id },
+    'denying user access to modify message: not the author'
+  )
+  return HttpErrorHandler.forbidden(req, res)
+}
+
 async function ensureUserIsSiteAdmin(req, res, next) {
   const userId = _getUserId(req)
   if (await AuthorizationManager.promises.isUserSiteAdmin(userId)) {
@@ -233,6 +262,17 @@ function _getThreadId(req) {
     throw new Errors.NotFoundError(`invalid threadId: ${threadId}`)
   }
   return threadId
+}
+
+function _getMessageId(req) {
+  const messageId = req.params.message_id
+  if (!messageId) {
+    throw new Error('Expected message_id in request parameters')
+  }
+  if (!ObjectId.isValid(messageId)) {
+    throw new Errors.NotFoundError(`invalid messageId: ${messageId}`)
+  }
+  return messageId
 }
 
 function _getUserId(req) {
@@ -280,5 +320,6 @@ export default {
   ),
   ensureUserCanAdminProject: expressify(ensureUserCanAdminProject),
   ensureUserIsSiteAdmin: expressify(ensureUserIsSiteAdmin),
+  ensureUserIsMessageAuthor: expressify(ensureUserIsMessageAuthor),
   restricted,
 }
