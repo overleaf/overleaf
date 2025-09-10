@@ -690,6 +690,43 @@ async function removeAddon(req, res, next) {
   }
 }
 
+const reactivateAddonSchema = z.object({
+  params: z.object({
+    addOnCode: z.string(),
+  }),
+})
+
+/**
+ * Reactivate an add-on pending cancellation
+ *
+ * This "cancels" the cancellation.
+ */
+async function reactivateAddon(req, res) {
+  const user = SessionManager.getSessionUser(req.session)
+  const { params } = validateReq(req, reactivateAddonSchema)
+  const addOnCode = params.addOnCode
+
+  if (addOnCode !== AI_ADD_ON_CODE) {
+    return res.sendStatus(404)
+  }
+
+  try {
+    await SubscriptionHandler.promises.reactivateAddon(user._id, addOnCode)
+    res.sendStatus(200)
+  } catch (err) {
+    if (err instanceof AddOnNotPresentError) {
+      HttpErrorHandler.badRequest(
+        req,
+        res,
+        'The requested add-on is not pending cancellation',
+        { addon: addOnCode }
+      )
+    } else {
+      throw err
+    }
+  }
+}
+
 async function previewSubscription(req, res, next) {
   const planCode = req.query.planCode
   if (!planCode) {
@@ -1071,6 +1108,7 @@ module.exports = {
   previewAddonPurchase: expressify(previewAddonPurchase),
   purchaseAddon,
   removeAddon,
+  reactivateAddon,
   makeChangePreview,
   getRecommendedCurrency,
   getLatamCountryBannerDetails,

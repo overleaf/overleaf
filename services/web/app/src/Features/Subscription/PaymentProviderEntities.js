@@ -272,6 +272,36 @@ class PaymentProviderSubscription {
   }
 
   /**
+   * Reactivate an add-on on this subscription
+   *
+   * @param {string} code - add-on code
+   * @return {PaymentProviderSubscriptionChangeRequest}
+   *
+   * @throws {AddOnNotPresentError} if the add-on is not pending cancellation
+   */
+  getRequestForAddOnReactivation(code) {
+    const reactivatedAddOn = this.addOns.find(addOn => addOn.code === code)
+    const pendingChange = this.pendingChange
+    if (reactivatedAddOn == null || pendingChange == null) {
+      throw new AddOnNotPresentError('Add-on is not pending cancellation', {
+        subscriptionId: this.id,
+        addOnCode: code,
+      })
+    }
+
+    const addOnUpdates = pendingChange.nextAddOns
+      .filter(addOn => addOn.code !== code)
+      .map(addOn => addOn.toAddOnUpdate())
+    addOnUpdates.push(reactivatedAddOn.toAddOnUpdate())
+
+    return new PaymentProviderSubscriptionChangeRequest({
+      subscription: this,
+      timeframe: 'term_end',
+      addOnUpdates,
+    })
+  }
+
+  /**
    * Form a request to revert the plan to it's last saved backup state
    *
    * @param {string} previousPlanCode

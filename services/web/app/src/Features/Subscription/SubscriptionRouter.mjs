@@ -186,6 +186,12 @@ export default {
       SubscriptionController.removeAddon
     )
     webRouter.post(
+      '/user/subscription/addon/:addOnCode/reactivate',
+      AuthenticationController.requireLogin(),
+      RateLimiterMiddleware.rateLimit(subscriptionRateLimiter),
+      SubscriptionController.reactivateAddon
+    )
+    webRouter.post(
       '/user/subscription/cancel-pending',
       AuthenticationController.requireLogin(),
       RateLimiterMiddleware.rateLimit(subscriptionRateLimiter),

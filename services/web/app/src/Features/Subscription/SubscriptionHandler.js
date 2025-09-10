@@ -285,6 +285,16 @@ async function removeAddon(userId, addOnCode) {
   await Modules.promises.hooks.fire('removeAddOn', userId, addOnCode)
 }
 
+/**
+ * Reactivates an add-on pending cancellation
+ *
+ * @param {string} userId
+ * @param {string} addOnCode
+ */
+async function reactivateAddon(userId, addOnCode) {
+  await Modules.promises.hooks.fire('reactivateAddOn', userId, addOnCode)
+}
+
 async function pauseSubscription(user, pauseCycles) {
   // only allow pausing on monthly plans not in a trial
   const { subscription } =
@@ -419,6 +429,7 @@ module.exports = {
   previewAddonPurchase: callbackify(previewAddonPurchase),
   purchaseAddon: callbackify(purchaseAddon),
   removeAddon: callbackify(removeAddon),
+  reactivateAddon: callbackify(reactivateAddon),
   pauseSubscription: callbackify(pauseSubscription),
   resumeSubscription: callbackify(resumeSubscription),
   revertPlanChange: callbackify(revertPlanChange),
@@ -438,6 +449,7 @@ module.exports = {
     previewAddonPurchase,
     purchaseAddon,
     removeAddon,
+    reactivateAddon,
     pauseSubscription,
     resumeSubscription,
     revertPlanChange,

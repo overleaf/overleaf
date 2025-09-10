@@ -72,6 +72,7 @@ export function ActiveSubscription({
   }
 
   const handlePlanChange = () => setModalIdShown('change-plan')
+
   const handleCancelClick = (addOnCode: string) => {
     if (
       [AI_ASSIST_STANDALONE_MONTHLY_PLAN_CODE, AI_ADD_ON_CODE].includes(
@@ -81,6 +82,7 @@ export function ActiveSubscription({
       setModalIdShown('cancel-ai-add-on')
     }
   }
+
   const hasPendingPause = Boolean(
     subscription.payment.state === 'active' &&
       subscription.payment.remainingPauseCycles &&
