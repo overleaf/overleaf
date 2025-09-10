@@ -23,7 +23,9 @@ describe('Notifications Controller', () => {
       removeNotificationKey: vi.fn(),
     }
 
-    vi.doMock('../../../app/js/Notifications', () => notifications)
+    vi.doMock('../../../app/js/Notifications', () => ({
+      default: notifications,
+    }))
 
     vi.doMock('@overleaf/metrics', () => ({
       default: {

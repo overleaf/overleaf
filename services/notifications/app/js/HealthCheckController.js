@@ -1,110 +1,130 @@
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 import { db, ObjectId } from './mongodb.js'
-import request from 'request'
-import async from 'async'
 import settings from '@overleaf/settings'
 import logger from '@overleaf/logger'
+import {
+  fetchJson,
+  fetchNothing,
+  RequestFailedError,
+} from '@overleaf/fetch-utils'
+import { expressify } from '@overleaf/promise-utils'
 
 const { port } = settings.internal.notifications
 
-export default {
-  check(callback) {
-    const userId = new ObjectId()
-    const cleanupNotifications = callback =>
-      db.notifications.deleteOne({ user_id: userId }, callback)
+function makeUrl(userId, endPath = '') {
+  return new URL(`/user/${userId}/${endPath}`, `http://127.0.0.1:${port}`)
+}
 
-    let notificationKey = `smoke-test-notification-${new ObjectId()}`
-    const getOpts = endPath => ({
-      url: `http://127.0.0.1:${port}/user/${userId}${endPath}`,
-      timeout: 5000,
+async function makeNotification(notificationKey, userId) {
+  const postOpts = {
+    method: 'POST',
+    json: {
+      key: notificationKey,
+      messageOpts: '',
+      templateKey: 'f4g5',
+      user_id: userId,
+    },
+    signal: AbortSignal.timeout(5000),
+  }
+  const url = makeUrl(userId)
+  await fetchNothing(url, postOpts)
+}
+
+async function getUsersNotifications(userId) {
+  const url = makeUrl(userId)
+  try {
+    return await fetchJson(url, {
+      signal: AbortSignal.timeout(5000),
     })
-    logger.debug(
-      { opts: getOpts(), key: notificationKey, userId },
-      'Health Check: running'
+  } catch (err) {
+    if (err instanceof RequestFailedError) {
+      logger.err({ err }, 'Non-2xx status code received')
+      throw err
+    }
+    logger.err({ err }, 'Health Check: error getting notification')
+    throw err
+  }
+}
+
+async function userHasNotification(userId, notificationKey) {
+  const body = await getUsersNotifications(userId)
+  const hasNotification = body.some(
+    notification =>
+      notification.key === notificationKey && notification.user_id === userId
+  )
+  if (hasNotification) {
+    return body
+  } else {
+    logger.err(
+      { body, notificationKey },
+      'Health Check: notification not in response'
     )
-    const jobs = [
-      function (cb) {
-        const opts = getOpts('/')
-        opts.json = {
-          key: notificationKey,
-          messageOpts: '',
-          templateKey: 'f4g5',
-          user_id: userId,
-        }
-        return request.post(opts, cb)
-      },
-      function (cb) {
-        const opts = getOpts('/')
-        opts.json = true
-        return request.get(opts, function (err, res, body) {
-          if (err != null) {
-            logger.err({ err }, 'Health Check: error getting notification')
-            return callback(err)
-          } else if (res.statusCode !== 200) {
-            const e = `status code not 200 ${res.statusCode}`
-            logger.err({ err }, e)
-            return cb(e)
-          }
-          const hasNotification = body.some(
-            notification =>
-              notification.key === notificationKey &&
-              notification.user_id === userId.toString()
-          )
-          if (hasNotification) {
-            return cb(null, body)
-          } else {
-            logger.err(
-              { body, notificationKey },
-              'Health Check: notification not in response'
-            )
-            return cb(new Error('notification not found in response'))
-          }
-        })
-      },
-    ]
-    return async.series(jobs, function (err, body) {
-      if (err != null) {
-        logger.err({ err }, 'Health Check: error running health check')
-        return cleanupNotifications(() => callback(err))
-      } else {
-        const notificationId = body[1][0]._id
-        notificationKey = body[1][0].key
-        let opts = getOpts(`/notification/${notificationId}`)
-        logger.debug(
-          { notificationId, notificationKey },
-          'Health Check: doing cleanup'
-        )
-        return request.del(opts, function (err, res, body) {
-          if (err != null) {
-            logger.err(
-              err,
-              opts,
-              'Health Check: error cleaning up notification'
-            )
-            return callback(err)
-          }
-          opts = getOpts('')
-          opts.json = { key: notificationKey }
-          return request.del(opts, function (err, res, body) {
-            if (err != null) {
-              logger.err(
-                err,
-                opts,
-                'Health Check: error cleaning up notification'
-              )
-              return callback(err)
-            }
-            return cleanupNotifications(callback)
-          })
-        })
-      }
+    throw new Error('notification not found in response')
+  }
+}
+
+async function cleanupNotifications(userId) {
+  await db.notifications.deleteOne({ user_id: userId })
+}
+
+async function deleteNotification(userId, notificationId, notificationKey) {
+  const deleteByIdUrl = makeUrl(userId, `notification/${notificationId}`)
+  try {
+    await fetchNothing(deleteByIdUrl, {
+      signal: AbortSignal.timeout(5000),
+      method: 'DELETE',
     })
-  },
+  } catch (err) {
+    logger.err(
+      { err, url: deleteByIdUrl },
+      'Health Check: error cleaning up notification'
+    )
+    throw err
+  }
+
+  const deleteByKeyUrl = makeUrl(userId)
+
+  try {
+    await fetchNothing(deleteByKeyUrl, {
+      signal: AbortSignal.timeout(5000),
+      method: 'DELETE',
+      body: {
+        key: notificationKey,
+      },
+    })
+  } catch (err) {
+    logger.err(
+      { err, url: deleteByKeyUrl },
+      'Health Check: error cleaning up notification'
+    )
+    throw err
+  }
+}
+
+async function check(req, res) {
+  const userId = new ObjectId().toString()
+  let notificationKey = `smoke-test-notification-${new ObjectId()}`
+
+  logger.debug({ userId, key: notificationKey }, 'Health Check: running')
+
+  await makeNotification(notificationKey, userId)
+  try {
+    const body = await userHasNotification(userId, notificationKey)
+    const notificationId = body[0]._id
+    notificationKey = body[0].key
+    logger.debug(
+      { notificationId, notificationKey },
+      'Health Check: doing cleanup'
+    )
+    await deleteNotification(userId, notificationId, notificationKey)
+    res.sendStatus(200)
+  } catch (err) {
+    logger.err({ err }, 'Health Check: error running health check')
+    res.sendStatus(500)
+  } finally {
+    await cleanupNotifications(userId)
+  }
+}
+
+export default {
+  check: expressify(check),
 }

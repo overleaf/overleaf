@@ -38,7 +38,7 @@ describe('Notifications Tests', () => {
       ObjectId,
     }))
 
-    notifications = await import(modulePath)
+    notifications = (await import(modulePath)).default
 
     stubbedNotification = {
       user_id: new ObjectId(userId),

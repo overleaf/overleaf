@@ -38,16 +38,7 @@ app.delete(
 
 app.get('/status', (req, res) => res.send('notifications is up'))
 
-app.get('/health_check', (req, res) =>
-  HealthCheckController.check(function (err) {
-    if (err) {
-      logger.err({ err }, 'error performing health check')
-      res.sendStatus(500)
-    } else {
-      res.sendStatus(200)
-    }
-  })
-)
+app.get('/health_check', HealthCheckController.check)
 
 app.get('*', (req, res) => res.sendStatus(404))
 
