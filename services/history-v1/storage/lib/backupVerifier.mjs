@@ -147,31 +147,40 @@ export async function loadChunk(
 export async function verifyProject(historyId, endTimestamp) {
   const backend = chunkStore.getBackend(historyId)
   const [first, last] = await Promise.all([
-    backend.getFirstChunkBeforeTimestamp(historyId, endTimestamp),
-    backend.getLastActiveChunkBeforeTimestamp(historyId, endTimestamp),
+    backend.getChunkForVersion(historyId, 0),
+    backend.getChunkForTimestamp(historyId, endTimestamp),
   ])
 
   const chunksRecordsToVerify = [
     {
       chunkId: first.id,
       chunkLabel: 'first',
+      ...first,
     },
   ]
   if (first.startVersion !== last.startVersion) {
     chunksRecordsToVerify.push({
       chunkId: last.id,
       chunkLabel: 'last before RPO',
+      ...last,
     })
   }
 
   const projectCache = await getProjectPersistor(historyId)
-
   const chunks = await Promise.all(
     chunksRecordsToVerify.map(async chunk => {
       try {
-        return History.fromRaw(
-          await loadChunk(historyId, chunk.startVersion, projectCache)
+        const chunkContents = await loadChunk(
+          historyId,
+          chunk.startVersion,
+          projectCache
         )
+        // filter the raw changes to only those that are <= endTimestamp
+        // to simulate the state of the project at endTimestamp
+        chunkContents.changes = chunkContents.changes.filter(
+          change => new Date(change.timestamp) <= endTimestamp
+        )
+        return History.fromRaw(chunkContents)
       } catch (err) {
         if (err instanceof Chunk.NotPersistedError) {
           throw new BackupRPOViolationChunkNotBackedUpError(

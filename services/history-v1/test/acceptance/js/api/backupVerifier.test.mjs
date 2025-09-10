@@ -19,7 +19,14 @@ import { promisify } from 'node:util'
 import { execFile } from 'node:child_process'
 import { NotFoundError } from '@overleaf/object-persistor/src/Errors.js'
 import { chunkStore } from '../../../../storage/index.js'
-import { Change, File, Operation } from 'overleaf-editor-core'
+import {
+  Change,
+  File,
+  Operation,
+  Snapshot,
+  History,
+  Chunk,
+} from 'overleaf-editor-core'
 import Crypto from 'node:crypto'
 import path from 'node:path'
 import projectKey from '../../../../storage/lib/project_key.js'
@@ -150,10 +157,7 @@ async function addFileInNewChunk(
   { creationDate = new Date() }
 ) {
   const chunk = await chunkStore.loadLatest(historyId, { persistedOnly: true })
-  const operation = Operation.addFile(
-    `${historyId}.txt`,
-    File.fromString(fileContents)
-  )
+  const operation = Operation.addFile(filePath, File.fromString(fileContents))
   const changes = [new Change([operation], creationDate, [])]
   chunk.pushChanges(changes)
   await chunkStore.update(historyId, chunk)
@@ -166,37 +170,86 @@ async function addFileInNewChunk(
  */
 async function prepareProjectAndBlob(
   historyId,
-  { shouldBackupBlob, shouldBackupChunk, shouldCreateChunk } = {
-    shouldBackupBlob: true,
-    shouldBackupChunk: true,
-    shouldCreateChunk: true,
-  }
+  {
+    shouldBackupBlob = true,
+    shouldBackupChunk = true,
+    shouldCreateChunk = true,
+    extraChunks = 0, // number of additional chunks to create after the first one
+    skipBackupForLastChunk = false, // when true, do not back up the last created chunk (simulates missing last chunk backup)
+  } = {}
 ) {
   await testProjects.createEmptyProject(historyId)
   const blobStore = new BlobStore(historyId)
   const fileContents = historyId
-  const blob = await blobStore.putString(fileContents)
+  const initialBlob = await blobStore.putString(fileContents)
+  const now = Date.now()
+  const creationTime = now - FIFTEEN_MINUTES_IN_MS
+
+  // Create first (updated) chunk if requested
   if (shouldCreateChunk) {
     await addFileInNewChunk(fileContents, `${historyId}.txt`, historyId, {
-      creationDate: new Date(new Date().getTime() - FIFTEEN_MINUTES_IN_MS),
+      creationDate: new Date(creationTime),
     })
   }
 
+  // Backup the initial blob if requested
   if (shouldBackupBlob) {
-    const gzipped = zlib.gzipSync(Buffer.from(historyId))
+    const gzipped = zlib.gzipSync(Buffer.from(fileContents))
     await backupPersistor.sendStream(
       projectBlobsBucket,
-      makeProjectKey(historyId, blob.getHash()),
+      makeProjectKey(historyId, initialBlob.getHash()),
       Stream.Readable.from([gzipped]),
       { contentLength: gzipped.byteLength, contentEncoding: 'gzip' }
     )
     await checkDEKExists(historyId)
   }
+  // Backup first chunk if requested
   if (shouldCreateChunk && shouldBackupChunk) {
     await backupChunk(historyId)
   }
 
-  return blob.getHash()
+  for (let index = 0; index < extraChunks; index++) {
+    // Create an additional chunk starting at current endVersion
+    const latestMeta = await chunkStore.getLatestChunkMetadata(historyId)
+    const startVersion = latestMeta.endVersion
+    const snapshot = Snapshot.fromRaw({ files: {} })
+    const history = new History(snapshot, [])
+    const newChunk = new Chunk(history, startVersion)
+    const extraContent = `${fileContents}-extra-${index + 1}`
+    const extraBlob = await blobStore.putString(extraContent)
+    // ensure strictly increasing timestamps
+    const changeTimestamp = new Date(creationTime + (index + 1) * 60_000)
+    const change = new Change(
+      [
+        Operation.addFile(
+          `${historyId}-extra-${index + 1}.txt`,
+          File.createLazyFromBlobs(extraBlob)
+        ),
+      ],
+      changeTimestamp,
+      []
+    )
+    newChunk.pushChanges([change])
+    await chunkStore.create(historyId, newChunk)
+
+    // Backup blob for this chunk if requested
+    if (shouldBackupBlob) {
+      const gzipped = zlib.gzipSync(Buffer.from(extraContent))
+      await backupPersistor.sendStream(
+        projectBlobsBucket,
+        makeProjectKey(historyId, extraBlob.getHash()),
+        Stream.Readable.from([gzipped]),
+        { contentLength: gzipped.byteLength, contentEncoding: 'gzip' }
+      )
+    }
+    // Backup the chunk unless we're intentionally skipping the last one
+    const isLast = index === extraChunks - 1
+    if (shouldBackupChunk && (!isLast || !skipBackupForLastChunk)) {
+      await backupChunk(historyId)
+    }
+  }
+
+  return initialBlob.getHash()
 }
 
 /**
@@ -279,6 +332,50 @@ describe('backupVerifier', function () {
         expect(response.stderr).to.include(
           'BackupCorruptedMissingBlobError: missing blob'
         )
+      })
+    })
+    describe('for a project with multiple chunks', function () {
+      const multiHistoryIdOk = '100'
+      const multiHistoryIdMissingLast = '101'
+      let okResponse
+      let missingLastResponse
+
+      describe('when multiple chunks are fully backed up', function () {
+        beforeEach(async function () {
+          await prepareProjectAndBlob(multiHistoryIdOk, {
+            shouldBackupBlob: true,
+            shouldBackupChunk: true,
+            shouldCreateChunk: true,
+            extraChunks: 2, // total 3 chunks including first
+          })
+          okResponse = await verifyProjectScript(multiHistoryIdOk, false)
+        })
+        it('returns 0', function () {
+          expect(okResponse.status).to.equal(0)
+        })
+      })
+
+      describe('when the last chunk backup is missing', function () {
+        beforeEach(async function () {
+          await prepareProjectAndBlob(multiHistoryIdMissingLast, {
+            shouldBackupBlob: true,
+            shouldBackupChunk: true,
+            shouldCreateChunk: true,
+            extraChunks: 2,
+            skipBackupForLastChunk: true, // simulate missing backup for last chunk
+          })
+          missingLastResponse = await verifyProjectScript(
+            multiHistoryIdMissingLast
+          )
+        })
+        it('returns 1', function () {
+          expect(missingLastResponse.status).to.equal(1)
+        })
+        it('emits a BackupRPOViolationChunkNotBackedUpError', function () {
+          expect(missingLastResponse.stderr).to.include(
+            'BackupRPOViolationChunkNotBackedUpError'
+          )
+        })
       })
     })
   })
