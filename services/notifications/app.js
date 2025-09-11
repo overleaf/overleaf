@@ -69,6 +69,9 @@ try {
   process.exit(1)
 }
 
-app.listen(port, host, () =>
-  logger.debug({}, `notifications starting up, listening on ${host}:${port}`)
-)
+if (import.meta.url === `file://${process.argv[1]}`) {
+  app.listen(port, host, () =>
+    logger.debug({}, `notifications starting up, listening on ${host}:${port}`)
+  )
+}
+export default app

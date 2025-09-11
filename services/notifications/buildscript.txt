@@ -6,5 +6,6 @@ notifications
 --esmock-loader=False
 --node-version=22.18.0
 --public-repo=True
+--test-acceptance-vitest=True
 --test-unit-vitest=True
 --tsconfig-extra-includes=vitest.config.unit.cjs,vitest.config.acceptance.cjs

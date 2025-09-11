@@ -6,13 +6,13 @@
   "type": "module",
   "scripts": {
     "start": "node app.js",
-    "test:acceptance:_run": "mocha --recursive --reporter spec --timeout 15000 --exit $@ test/acceptance/js",
-    "test:acceptance": "npm run test:acceptance:_run -- --grep=$MOCHA_GREP",
+    "test:acceptance:_run": "vitest --config ./vitest.config.acceptance.cjs",
+    "test:acceptance": "npm run test:acceptance:_run",
     "test:unit:_run": "vitest --config ./vitest.config.unit.cjs",
     "test:unit": "npm run test:unit:_run",
     "lint": "eslint --max-warnings 0 --format unix .",
-    "format": "prettier --list-different $PWD/'**/{*.*js,Jenkinsfile}'",
-    "format:fix": "prettier --write $PWD/'**/{*.*js,Jenkinsfile}'",
+    "format": "prettier --list-different $PWD/'**/{*.*js, *.*ts,Jenkinsfile}'",
+    "format:fix": "prettier --write $PWD/'**/{*.*js,*.*ts,Jenkinsfile}'",
     "lint:fix": "eslint --fix .",
     "types:check": "tsc --noEmit",
     "nodemon": "node --watch app.js"

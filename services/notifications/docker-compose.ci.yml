@@ -33,6 +33,7 @@ services:
       NODE_OPTIONS: "--unhandled-rejections=strict"
     volumes:
       - ../../bin/shared/wait_for_it:/overleaf/bin/shared/wait_for_it
+      - ../../tsconfig.backend.json:/overleaf/tsconfig.backend.json
     depends_on:
       mongo:
         condition: service_started
