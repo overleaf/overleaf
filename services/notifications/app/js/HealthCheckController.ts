@@ -7,14 +7,19 @@ import {
   RequestFailedError,
 } from '@overleaf/fetch-utils'
 import { expressify } from '@overleaf/promise-utils'
+import { z, zz } from '@overleaf/validation-tools'
+import type { Request, Response } from 'express'
 
 const { port } = settings.internal.notifications
 
-function makeUrl(userId, endPath = '') {
-  return new URL(`/user/${userId}/${endPath}`, `http://127.0.0.1:${port}`)
+function makeUrl(userId: string, endPath?: string) {
+  return new URL(
+    `/user/${userId}${endPath ? `/${endPath}` : ''}`,
+    `http://127.0.0.1:${port}`
+  )
 }
 
-async function makeNotification(notificationKey, userId) {
+async function makeNotification(notificationKey: string, userId: string) {
   const postOpts = {
     method: 'POST',
     json: {
@@ -29,12 +34,23 @@ async function makeNotification(notificationKey, userId) {
   await fetchNothing(url, postOpts)
 }
 
-async function getUsersNotifications(userId) {
+const getUserNotificationsResponseSchema = z
+  .object({
+    _id: zz.objectId(),
+    key: z.string(),
+    messageOpts: z.string().optional(),
+    templateKey: z.string().optional(),
+    user_id: zz.objectId(),
+  })
+  .array()
+
+async function getUsersNotifications(userId: string) {
   const url = makeUrl(userId)
   try {
-    return await fetchJson(url, {
+    const body = await fetchJson(url, {
       signal: AbortSignal.timeout(5000),
     })
+    return getUserNotificationsResponseSchema.parse(body)
   } catch (err) {
     if (err instanceof RequestFailedError) {
       logger.err({ err }, 'Non-2xx status code received')
@@ -45,7 +61,7 @@ async function getUsersNotifications(userId) {
   }
 }
 
-async function userHasNotification(userId, notificationKey) {
+async function userHasNotification(userId: string, notificationKey: string) {
   const body = await getUsersNotifications(userId)
   const hasNotification = body.some(
     notification =>
@@ -62,11 +78,15 @@ async function userHasNotification(userId, notificationKey) {
   }
 }
 
-async function cleanupNotifications(userId) {
+async function cleanupNotifications(userId: string) {
   await db.notifications.deleteOne({ user_id: userId })
 }
 
-async function deleteNotification(userId, notificationId, notificationKey) {
+async function deleteNotification(
+  userId: string,
+  notificationId: string,
+  notificationKey: string
+) {
   const deleteByIdUrl = makeUrl(userId, `notification/${notificationId}`)
   try {
     await fetchNothing(deleteByIdUrl, {
@@ -100,7 +120,7 @@ async function deleteNotification(userId, notificationId, notificationKey) {
   }
 }
 
-async function check(req, res) {
+async function check(req: Request, res: Response) {
   const userId = new ObjectId().toString()
   let notificationKey = `smoke-test-notification-${new ObjectId()}`
 

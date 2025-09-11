@@ -7,7 +7,7 @@ import express from 'express'
 import methodOverride from 'method-override'
 import { mongoClient } from './app/js/mongodb.js'
 import NotificationsController from './app/js/NotificationsController.ts'
-import HealthCheckController from './app/js/HealthCheckController.js'
+import HealthCheckController from './app/js/HealthCheckController.ts'
 import { isZodErrorLike } from 'zod-validation-error'
 import { ParamsError } from '@overleaf/validation-tools'
 
