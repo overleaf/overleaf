@@ -1,0 +1,109 @@
+pipeline {
+
+    agent {
+      node {
+        label 'jenkins-agent-web'
+        customWorkspace '/workspace'
+      }
+    }
+
+    options {
+        timestamps()
+        parallelsAlwaysFailFast()
+        timeout(time: 15, unit: 'MINUTES')
+    }
+
+    environment {
+        IMAGE_NAME = 'contacts'
+        PROJECT_NAME = 'contacts'
+        IMAGE_REPO = 'us-east1-docker.pkg.dev/overleaf-ops/ol-docker/contacts'
+        AR_REPO_LOCATION = 'us-east1'
+        AR_URL = 'us-east1-docker.pkg.dev/overleaf-ops/ol-docker'
+        BRANCH_NAME = "${env.CHANGE_BRANCH ? env.CHANGE_BRANCH : env.BRANCH_NAME}"
+        JENKINS_BUILD_NUMBER = "${BUILD_NUMBER}"      
+        BUILD_NUMBER = "${SHORT_SHA}_${BUILD_NUMBER}" 
+        DOCKER_COMPOSE_FLAGS = '-f docker-compose.ci.yml'
+        COMMIT_SHA = "${GIT_COMMIT}"
+        SHORT_SHA = "${GIT_COMMIT.take(7)}"
+    }
+
+
+    stages {
+        stage ('Build') {
+            steps {
+                dir ('services/contacts') {
+                    sh 'make build'
+                }
+            }
+        }
+        stage ('Tests') {
+            parallel {
+                stage ('Push Branch Image') {
+                    steps {
+                        dir ('services/contacts') {
+                            sh 'docker push ${AR_URL}/${IMAGE_NAME}:${BRANCH_NAME}'
+                        }
+                    }
+                }
+                stage ('Shellcheck') {
+                    steps {
+                        dir ('services/contacts') {
+                            sh 'make shellcheck'
+                        }
+                    }
+                }
+                stage ('Lint') {
+                    steps {
+                        dir ('services/contacts') {
+                            sh 'make lint_ci'
+                        }
+                    }
+                }
+                stage ('Format') {
+                    steps {
+                        dir ('services/contacts') {
+                            sh 'make format_ci'
+                        }
+                    }
+                }
+                stage ('Typecheck') {
+                    steps {
+                        dir ('services/contacts') {
+                            sh 'make typecheck_ci'
+                        }
+                    }
+                }
+                stage ('Test Unit') {
+                    steps {
+                        dir ('services/contacts') {
+                            sh 'make test_unit'
+                        }
+                    }
+                }
+                stage ('Test Acceptance') {
+                    steps {
+                        dir ('services/contacts') {
+                            sh 'make test_acceptance'
+                        }
+                    }
+                }
+            }
+        }
+        stage('Push Production') {
+            steps {
+                dir('services/contacts') {
+                    sh 'docker push ${AR_URL}/${IMAGE_NAME}:${BRANCH_NAME}-${BUILD_NUMBER}'
+                }
+            }
+        }
+    }
+    post {
+        cleanup {
+            dir('services/contacts') {
+                sh 'make clean'
+            }
+            sh 'make clean_jenkins'
+        }
+    }
+}
+

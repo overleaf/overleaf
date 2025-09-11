@@ -1,0 +1,10 @@
+libraries/logger/**
+libraries/metrics/**
+libraries/mongo-utils/**
+libraries/settings/**
+patches/**
+services/contacts/**
+.eslint*
+.prettier*
+package.json
+package-lock.json
