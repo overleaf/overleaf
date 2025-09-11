@@ -1,28 +1,58 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import NotificationsController from '../../../app/js/NotificationsController.ts'
+import Notifications from '../../../app/js/Notifications.js'
+import { ObjectId } from 'mongodb-legacy'
 const modulePath = '../../../app/js/NotificationsController.js'
 
 const userId = '51dc93e6fb625a261300003b'
 const notificationId = '51dc93e6fb625a261300003c'
 const notificationKey = 'my-notification-key'
 
+vi.mock('../../../app/js/Notifications', () => ({
+  default: {
+    addNotification: vi.fn(),
+    getUserNotifications: vi.fn(),
+    removeNotificationByKeyOnly: vi.fn(),
+    removeNotificationId: vi.fn(),
+    removeNotificationKey: vi.fn(),
+  },
+}))
+
+interface InputNotification {
+  user_id: string
+  key: string
+  messageOpts?: object
+  templateKey?: string
+}
+
+interface DatabaseNotification {
+  _id: ObjectId
+  user_id: ObjectId
+  key: string
+  messageOpts?: object
+  templateKey?: string
+}
+
+function convertInputNotificationToDatabaseNotification(
+  inputNotification: InputNotification
+): DatabaseNotification {
+  return {
+    ...inputNotification,
+    _id: new ObjectId(),
+    user_id: new ObjectId(inputNotification.user_id),
+  }
+}
+
 describe('Notifications Controller', () => {
-  let controller, notifications, stubbedNotification
+  let controller: typeof NotificationsController,
+    stubbedNotification: Array<InputNotification>
   beforeEach(async () => {
-    notifications = {
-      addNotification: vi.fn(),
-      getUserNotifications: vi.fn(),
-      removeNotificationByKeyOnly: vi.fn(),
-      removeNotificationId: vi.fn(),
-      removeNotificationKey: vi.fn(),
-    }
-
-    vi.doMock('../../../app/js/Notifications', () => ({
-      default: notifications,
-    }))
-
     vi.doMock('@overleaf/metrics', () => ({
       default: {
         inc: vi.fn(),
+        mongodb: {
+          monitor: vi.fn(),
+        },
       },
     }))
 
@@ -30,8 +60,9 @@ describe('Notifications Controller', () => {
 
     stubbedNotification = [
       {
+        user_id: new ObjectId().toString(),
         key: notificationKey,
-        messageOpts: 'some info',
+        messageOpts: { info: 'some info' },
         templateKey: 'template-key',
       },
     ]
@@ -39,17 +70,22 @@ describe('Notifications Controller', () => {
 
   describe('getUserNotifications', () => {
     it('should ask the notifications for the users notifications', async () => {
-      notifications.getUserNotifications.mockResolvedValue(stubbedNotification)
+      const databaseNotifications = stubbedNotification.map(
+        convertInputNotificationToDatabaseNotification
+      )
+      vi.mocked(Notifications.getUserNotifications).mockResolvedValue(
+        databaseNotifications
+      )
       const req = {
         params: {
           user_id: userId,
         },
       }
-      await new Promise(resolve => {
+      await new Promise<void>(resolve => {
         controller.getUserNotifications(req, {
           json: result => {
-            expect(result).toBe(stubbedNotification)
-            expect(notifications.getUserNotifications).toHaveBeenCalledWith(
+            expect(result).toBe(databaseNotifications)
+            expect(Notifications.getUserNotifications).toHaveBeenCalledWith(
               userId
             )
             resolve()
@@ -61,17 +97,23 @@ describe('Notifications Controller', () => {
 
   describe('addNotification', () => {
     it('should tell the notifications to add the notification for the user', async () => {
-      notifications.addNotification.mockResolvedValue()
+      vi.mocked(Notifications.addNotification).mockResolvedValue({
+        acknowledged: true,
+        upsertedId: new ObjectId(),
+        matchedCount: 1,
+        modifiedCount: 1,
+        upsertedCount: 0,
+      })
       const req = {
         params: {
           user_id: userId,
         },
         body: stubbedNotification[0],
       }
-      await new Promise(resolve => {
+      await new Promise<void>(resolve => {
         controller.addNotification(req, {
           sendStatus: code => {
-            expect(notifications.addNotification).toHaveBeenCalledWith(
+            expect(Notifications.addNotification).toHaveBeenCalledWith(
               userId,
               stubbedNotification[0]
             )
@@ -85,17 +127,23 @@ describe('Notifications Controller', () => {
 
   describe('removeNotificationId', () => {
     it('should tell the notifications to mark the notification Id as read', async () => {
-      notifications.removeNotificationId.mockResolvedValue()
+      vi.mocked(Notifications.removeNotificationId).mockResolvedValue({
+        acknowledged: true,
+        upsertedId: null,
+        upsertedCount: 0,
+        matchedCount: 1,
+        modifiedCount: 1,
+      })
       const req = {
         params: {
           user_id: userId,
           notification_id: notificationId,
         },
       }
-      await new Promise(resolve => {
+      await new Promise<void>(resolve => {
         controller.removeNotificationId(req, {
           sendStatus: code => {
-            expect(notifications.removeNotificationId).toHaveBeenCalledWith(
+            expect(Notifications.removeNotificationId).toHaveBeenCalledWith(
               userId,
               notificationId
             )
@@ -109,17 +157,23 @@ describe('Notifications Controller', () => {
 
   describe('removeNotificationKey', () => {
     it('should tell the notifications to mark the notification Key as read', async () => {
-      notifications.removeNotificationKey.mockResolvedValue()
+      vi.mocked(Notifications.removeNotificationKey).mockResolvedValue({
+        acknowledged: true,
+        upsertedId: null,
+        upsertedCount: 0,
+        matchedCount: 1,
+        modifiedCount: 1,
+      })
       const req = {
         params: {
           user_id: userId,
         },
         body: { key: notificationKey },
       }
-      await new Promise(resolve => {
+      await new Promise<void>(resolve => {
         controller.removeNotificationKey(req, {
           sendStatus: code => {
-            expect(notifications.removeNotificationKey).toHaveBeenCalledWith(
+            expect(Notifications.removeNotificationKey).toHaveBeenCalledWith(
               userId,
               notificationKey
             )
@@ -133,17 +187,23 @@ describe('Notifications Controller', () => {
 
   describe('removeNotificationByKeyOnly', () => {
     it('should tell the notifications to mark the notification Key as read', async () => {
-      notifications.removeNotificationByKeyOnly.mockResolvedValue()
+      vi.mocked(Notifications.removeNotificationByKeyOnly).mockResolvedValue({
+        acknowledged: true,
+        upsertedId: null,
+        upsertedCount: 0,
+        matchedCount: 1,
+        modifiedCount: 1,
+      })
       const req = {
         params: {
           key: notificationKey,
         },
       }
-      await new Promise(resolve =>
+      await new Promise<void>(resolve =>
         controller.removeNotificationByKeyOnly(req, {
           sendStatus: code => {
             expect(
-              notifications.removeNotificationByKeyOnly
+              Notifications.removeNotificationByKeyOnly
             ).toHaveBeenCalledWith(notificationKey)
 
             expect(code).toBe(200)
