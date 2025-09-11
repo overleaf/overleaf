@@ -23,7 +23,13 @@
       z-index: 15;
 
       @include media-breakpoint-up(md) {
-        top: var(--spacing-05);
+        &.navbar-brand {
+          top: var(--spacing-05);
+        }
+
+        &.navbar-title {
+          padding-top: var(--spacing-05);
+        }
       }
     }
 
