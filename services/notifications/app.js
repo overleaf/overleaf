@@ -6,7 +6,7 @@ import logger from '@overleaf/logger'
 import express from 'express'
 import methodOverride from 'method-override'
 import { mongoClient } from './app/js/mongodb.js'
-import NotificationsController from './app/js/NotificationsController.js'
+import NotificationsController from './app/js/NotificationsController.ts'
 import HealthCheckController from './app/js/HealthCheckController.js'
 
 const app = express()

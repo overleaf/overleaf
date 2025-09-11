@@ -1,15 +1,8 @@
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 const modulePath = '../../../app/js/NotificationsController.js'
 
 const userId = '51dc93e6fb625a261300003b'
-const notificationId = 'fb625a26f09d'
+const notificationId = '51dc93e6fb625a261300003c'
 const notificationKey = 'my-notification-key'
 
 describe('Notifications Controller', () => {
@@ -73,14 +66,14 @@ describe('Notifications Controller', () => {
         params: {
           user_id: userId,
         },
-        body: stubbedNotification,
+        body: stubbedNotification[0],
       }
       await new Promise(resolve => {
         controller.addNotification(req, {
           sendStatus: code => {
             expect(notifications.addNotification).toHaveBeenCalledWith(
               userId,
-              stubbedNotification
+              stubbedNotification[0]
             )
             expect(code).toBe(200)
             resolve()
