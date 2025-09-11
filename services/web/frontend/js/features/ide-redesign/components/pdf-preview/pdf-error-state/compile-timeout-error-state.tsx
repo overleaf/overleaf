@@ -7,28 +7,39 @@ import { useCallback, useMemo } from 'react'
 import ErrorState from './error-state'
 import StartFreeTrialButton from '@/shared/components/start-free-trial-button'
 import getMeta from '@/utils/meta'
-import { sendMB } from '@/infrastructure/event-tracking'
+import {
+  populateEditorRedesignSegmentation,
+  useEditorAnalytics,
+} from '@/shared/hooks/use-editor-analytics'
+import { useIsNewEditorEnabled } from '@/features/ide-redesign/utils/new-editor-utils'
 
 export const ShortCompileTimeoutErrorState = () => {
   const { t } = useTranslation()
   const { isProjectOwner } = useCompileContext()
+  const { sendEvent } = useEditorAnalytics()
+  const newEditor = useIsNewEditorEnabled()
 
   const { compileTimeout } = getMeta('ol-compileSettings')
   const segmentation = useMemo(
-    () => ({
-      'is-owner': isProjectOwner,
-      compileTime: compileTimeout,
-    }),
-    [isProjectOwner, compileTimeout]
+    () =>
+      populateEditorRedesignSegmentation(
+        {
+          'is-owner': isProjectOwner,
+          compileTime: compileTimeout,
+          location: 'error-state',
+        },
+        newEditor
+      ),
+    [isProjectOwner, compileTimeout, newEditor]
   )
 
   const sendInfoClickEvent = useCallback(() => {
-    sendMB('paywall-info-click', {
+    sendEvent('paywall-info-click', {
       ...segmentation,
       'paywall-type': 'compile-timeout',
       content: 'blog',
     })
-  }, [segmentation])
+  }, [segmentation, sendEvent])
 
   return (
     <ErrorState

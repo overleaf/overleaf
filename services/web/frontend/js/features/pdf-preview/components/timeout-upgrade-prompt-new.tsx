@@ -7,6 +7,11 @@ import { useStopOnFirstError } from '../../../shared/hooks/use-stop-on-first-err
 import OLButton from '@/shared/components/ol/ol-button'
 import * as eventTracking from '../../../infrastructure/event-tracking'
 import getMeta from '@/utils/meta'
+import {
+  populateEditorRedesignSegmentation,
+  useEditorAnalytics,
+} from '@/shared/hooks/use-editor-analytics'
+import { useIsNewEditorEnabled } from '@/features/ide-redesign/utils/new-editor-utils'
 
 function TimeoutUpgradePromptNew() {
   const {
@@ -15,6 +20,7 @@ function TimeoutUpgradePromptNew() {
     setAnimateCompileDropdownArrow,
     isProjectOwner,
   } = useDetachCompileContext()
+  const newEditor = useIsNewEditorEnabled()
 
   const { enableStopOnFirstError } = useStopOnFirstError({
     eventSource: 'timeout-new',
@@ -29,11 +35,16 @@ function TimeoutUpgradePromptNew() {
   const { compileTimeout } = getMeta('ol-compileSettings')
 
   const sharedSegmentation = useMemo(
-    () => ({
-      'is-owner': isProjectOwner,
-      compileTime: compileTimeout,
-    }),
-    [isProjectOwner, compileTimeout]
+    () =>
+      populateEditorRedesignSegmentation(
+        {
+          'is-owner': isProjectOwner,
+          compileTime: compileTimeout,
+          location: 'logs',
+        },
+        newEditor
+      ),
+    [isProjectOwner, compileTimeout, newEditor]
   )
 
   return (
@@ -126,9 +137,10 @@ const PreventTimeoutHelpMessage = memo(function PreventTimeoutHelpMessage({
   segmentation,
 }: PreventTimeoutHelpMessageProps) {
   const { t } = useTranslation()
+  const { sendEvent } = useEditorAnalytics()
 
   function sendInfoClickEvent() {
-    eventTracking.sendMB('paywall-info-click', {
+    sendEvent('paywall-info-click', {
       ...segmentation,
       'paywall-type': 'compile-timeout',
       content: 'blog',
