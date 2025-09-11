@@ -124,31 +124,28 @@ describe('<ManagedGroupSubscriptions />', function () {
     expect(links[2].getAttribute('href')).to.equal(
       '/manage/groups/bcd567/managers'
     )
-    expect(links[3].getAttribute('href')).to.equal(
-      '/manage/groups/bcd567/audit-logs'
-    )
-    expect(links[4].getAttribute('href')).to.equal('/metrics/groups/bcd567')
-    expect(links[6].getAttribute('href')).to.equal(
+    expect(links[3].getAttribute('href')).to.equal('/metrics/groups/bcd567')
+    expect(links[5].getAttribute('href')).to.equal(
       '/manage/groups/def456/members'
     )
-    expect(links[7].getAttribute('href')).to.equal(
+    expect(links[6].getAttribute('href')).to.equal(
       '/manage/groups/def456/managers'
     )
-    expect(links[9].getAttribute('href')).to.equal('/metrics/groups/def456')
-    expect(links[11].getAttribute('href')).to.equal(
+    expect(links[7].getAttribute('href')).to.equal('/metrics/groups/def456')
+    expect(links[9].getAttribute('href')).to.equal(
       '/manage/groups/group2abc/members'
     )
-    expect(links[12].getAttribute('href')).to.equal(
+    expect(links[10].getAttribute('href')).to.equal(
       '/manage/groups/group2abc/managers'
     )
-    expect(links[14].getAttribute('href')).to.equal('/metrics/groups/group2abc')
-    expect(links[16].getAttribute('href')).to.equal(
+    expect(links[12].getAttribute('href')).to.equal('/metrics/groups/group2abc')
+    expect(links[14].getAttribute('href')).to.equal(
       '/manage/groups/group123abc/members'
     )
-    expect(links[17].getAttribute('href')).to.equal(
+    expect(links[15].getAttribute('href')).to.equal(
       '/manage/groups/group123abc/managers'
     )
-    expect(links[19].getAttribute('href')).to.equal(
+    expect(links[17].getAttribute('href')).to.equal(
       '/metrics/groups/group123abc'
     )
   })
@@ -178,6 +175,37 @@ describe('<ManagedGroupSubscriptions />', function () {
     expect(screen.queryByText('Manage group settings')).to.be.null
     expect(screen.queryByText('Configure and manage SSO and Managed Users')).to
       .be.null
+  })
+
+  it('does not render the Group Audit Log settings row when the user is not the group admin', function () {
+    renderWithSubscriptionDashContext(<ManagedGroupSubscriptions />, {
+      metaTags: [
+        {
+          name: 'ol-managedGroupSubscriptions',
+          value: managedGroupSubscriptions2,
+        },
+        {
+          name: 'ol-groupSettingsEnabledFor',
+          value: [],
+        },
+      ],
+    })
+
+    expect(screen.queryByText('Audit logs')).to.be.null
+  })
+
+  it('renders the Group Audit Log settings row when the user is the group admin', async function () {
+    renderWithSubscriptionDashContext(<ManagedGroupSubscriptions />, {
+      metaTags: [
+        {
+          name: 'ol-managedGroupSubscriptions',
+          value: managedGroupSubscriptions,
+        },
+        { name: 'ol-usersEmail', value: 'admin@example.com' },
+      ],
+    })
+
+    await screen.findAllByText('Audit logs')
   })
 
   it('renders Managed Group / Group SSO settings row when both features are turned on', async function () {

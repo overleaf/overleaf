@@ -88,6 +88,9 @@ function ManagedGroupAdministrator({
 
 export default function ManagedGroupSubscriptions() {
   const { t } = useTranslation()
+
+  const usersEmail = getMeta('ol-usersEmail')
+
   const { managedGroupSubscriptions } = useSubscriptionDashboardContext()
 
   if (!managedGroupSubscriptions) {
@@ -101,6 +104,8 @@ export default function ManagedGroupSubscriptions() {
   return (
     <>
       {managedGroupSubscriptions.map(subscription => {
+        const isAdmin = usersEmail === subscription.admin_id.email
+
         return (
           <div key={`managed-group-${subscription._id}`}>
             <h2 className="h3 fw-bold">{t('group_management')}</h2>
@@ -126,17 +131,19 @@ export default function ManagedGroupSubscriptions() {
               {groupSettingsAdvertisedFor?.includes(subscription._id) && (
                 <GroupSettingsButtonWithAdBadge subscription={subscription} />
               )}
-              <RowLink
-                href={`/manage/groups/${subscription._id}/audit-logs`}
-                heading={t('audit_logs')}
-                subtext={t('view_audit_logs_group_subtext')}
-                icon="list"
-                onClick={() =>
-                  sendMB('group-audit-log-click', {
-                    subscriptionId: subscription._id,
-                  })
-                }
-              />
+              {isAdmin && (
+                <RowLink
+                  href={`/manage/groups/${subscription._id}/audit-logs`}
+                  heading={t('audit_logs')}
+                  subtext={t('view_audit_logs_group_subtext')}
+                  icon="list"
+                  onClick={() =>
+                    sendMB('group-audit-log-click', {
+                      subscriptionId: subscription._id,
+                    })
+                  }
+                />
+              )}
               <RowLink
                 href={`/metrics/groups/${subscription._id}`}
                 heading={t('usage_metrics')}
