@@ -157,7 +157,7 @@ async function projectListPage(req, res, next) {
   })
   const user = await User.findById(
     userId,
-    `email emails features alphaProgram betaProgram lastPrimaryEmailCheck signUpDate refProviders${
+    `email emails features alphaProgram betaProgram lastPrimaryEmailCheck lastActive signUpDate refProviders${
       isSaas ? ' enrollment writefull completedTutorials aiErrorAssistant' : ''
     }`
   )
@@ -533,6 +533,7 @@ async function projectListPage(req, res, next) {
     customerIoEnabled,
     aiBlocked,
     hasAiAssist,
+    lastActive: user.lastActive,
   })
 }
 
