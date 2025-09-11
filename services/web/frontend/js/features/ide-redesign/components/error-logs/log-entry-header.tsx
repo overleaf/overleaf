@@ -107,41 +107,35 @@ function LogEntryHeader({
 
   return (
     <header className="log-entry-header-card">
-      <OLTooltip
-        id={`expand-collapse-${locationText}`}
-        description={collapsed ? t('expand') : t('collapse')}
-        overlayProps={{ placement: 'bottom' }}
+      <button
+        data-action="expand-collapse"
+        data-collapsed={collapsed}
+        className="log-entry-header-button"
+        onClick={onToggleCollapsed}
+        aria-label={collapsed ? t('expand') : t('collapse')}
       >
-        <button
-          data-action="expand-collapse"
-          data-collapsed={collapsed}
-          className="log-entry-header-button"
-          onClick={onToggleCollapsed}
-          aria-label={collapsed ? t('expand') : t('collapse')}
-        >
-          <MaterialIcon
-            type={
-              openCollapseIconOverride ??
-              (collapsed ? 'chevron_right' : 'expand_more')
-            }
-          />
-          <div className="log-entry-header-content">
-            <h3 className={logEntryHeaderTextClasses}>{headerTitleText}</h3>
-            {locationSpanOverflown && formattedLocationText && locationText ? (
-              <OLTooltip
-                id={locationText}
-                description={locationText}
-                overlayProps={{ placement: 'left' }}
-                tooltipProps={{ className: 'log-location-tooltip' }}
-              >
-                {formattedLocationText}
-              </OLTooltip>
-            ) : (
-              formattedLocationText
-            )}
-          </div>
-        </button>
-      </OLTooltip>
+        <MaterialIcon
+          type={
+            openCollapseIconOverride ??
+            (collapsed ? 'chevron_right' : 'expand_more')
+          }
+        />
+        <div className="log-entry-header-content">
+          <h3 className={logEntryHeaderTextClasses}>{headerTitleText}</h3>
+          {locationSpanOverflown && formattedLocationText && locationText ? (
+            <OLTooltip
+              id={locationText}
+              description={locationText}
+              overlayProps={{ placement: 'right' }}
+              tooltipProps={{ className: 'log-location-tooltip' }}
+            >
+              {formattedLocationText}
+            </OLTooltip>
+          ) : (
+            formattedLocationText
+          )}
+        </div>
+      </button>
 
       {actionButtonsOverride ?? (
         <div className="log-entry-header-actions">

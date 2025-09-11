@@ -78,7 +78,9 @@
       display: flex;
       align-items: center;
       border: none;
-      gap: var(--spacing-03);
+      flex-wrap: wrap;
+      container-type: inline-size;
+      column-gap: var(--spacing-03);
     }
 
     .log-entry-header-button {
@@ -88,7 +90,7 @@
       align-items: center;
       flex: 1;
       border-radius: var(--border-radius-base);
-      padding: var(--spacing-02) var(--spacing-03) var(--spacing-02) 0;
+      padding: var(--spacing-02) 0;
       overflow: hidden;
       user-select: text;
 
@@ -152,7 +154,16 @@
 
     .log-entry-header-actions {
       display: flex;
-      gap: var(--spacing-03);
+    }
+
+    @container (width <= 250px) {
+      .log-entry-header-actions {
+        padding-left: var(--spacing-06);
+      }
+
+      .log-entry-header-button {
+        min-width: 100%;
+      }
     }
 
     .log-entry-content-button-container {
