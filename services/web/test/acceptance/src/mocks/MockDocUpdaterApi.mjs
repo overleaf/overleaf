@@ -3,6 +3,7 @@ import AbstractMockApi from './AbstractMockApi.mjs'
 class MockDocUpdaterApi extends AbstractMockApi {
   reset() {
     this.updates = {}
+    this.docsByProject = new Map()
   }
 
   getProjectStructureUpdates(projectId) {
@@ -20,6 +21,15 @@ class MockDocUpdaterApi extends AbstractMockApi {
     }
 
     this.updates[projectId].version = version
+  }
+
+  setDoc(projectId, docId, lines, ranges) {
+    let docsById = this.docsByProject.get(projectId)
+    if (docsById == null) {
+      docsById = new Map()
+      this.docsByProject.set(projectId, docsById)
+    }
+    docsById.set(docId, { id: docId, lines, ranges })
   }
 
   applyRoutes() {
@@ -67,6 +77,17 @@ class MockDocUpdaterApi extends AbstractMockApi {
 
     this.app.post('/project/:projectId/history/resync', (req, res) => {
       res.sendStatus(204)
+    })
+
+    this.app.get('/project/:projectId/ranges', (req, res) => {
+      const docsById = this.docsByProject.get(req.params.projectId)
+      const docs = docsById == null ? [] : Array.from(docsById.values())
+      res.json({
+        docs: docs.map(doc => ({
+          id: doc.id,
+          ranges: doc.ranges,
+        })),
+      })
     })
   }
 }

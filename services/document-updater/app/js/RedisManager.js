@@ -296,6 +296,12 @@ const RedisManager = {
     }
   },
 
+  async getDocRanges(docId) {
+    const json = await rclient.get(keys.ranges({ doc_id: docId }))
+    const ranges = RedisManager._deserializeRanges(json)
+    return ranges
+  },
+
   async getDocVersion(docId) {
     const result = await rclient.mget(keys.docVersion({ doc_id: docId }))
     let [version] = result || []

@@ -118,6 +118,16 @@ async function getProjectDocsAndFlushIfOld(
   return docs
 }
 
+async function getProjectRanges(projectId) {
+  const docIds = await RedisManager.promises.getDocIdsInProject(projectId)
+  const docs = []
+  for (const docId of docIds) {
+    const ranges = await RedisManager.promises.getDocRanges(docId)
+    docs.push({ id: docId, ranges })
+  }
+  return docs
+}
+
 async function clearProjectState(projectId) {
   await RedisManager.promises.clearProjectState(projectId)
 }
@@ -234,6 +244,7 @@ const ProjectManager = {
   queueFlushAndDeleteProject,
   getProjectDocsTimestamps,
   getProjectDocsAndFlushIfOld,
+  getProjectRanges,
   clearProjectState,
   updateProjectWithLocks,
 }

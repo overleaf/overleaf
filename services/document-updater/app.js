@@ -140,6 +140,8 @@ app.get(
   HttpController.getComment
 )
 app.get('/project/:project_id/doc/:doc_id/peek', HttpController.peekDoc)
+app.get('/project/:project_id/ranges', HttpController.getProjectRanges)
+
 // temporarily keep the GET method for backwards compatibility
 app.get('/project/:project_id/doc', HttpController.getProjectDocsAndFlushIfOld)
 // will migrate to the POST method of get_and_flush_if_old instead

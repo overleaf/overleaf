@@ -181,6 +181,12 @@ async function getProjectLastUpdatedAt(req, res) {
   res.json({ lastUpdatedAt: timestamps.pop() })
 }
 
+async function getProjectRanges(req, res) {
+  const projectId = req.params.project_id
+  const docs = await ProjectManager.promises.getProjectRanges(projectId)
+  res.json({ docs })
+}
+
 async function clearProjectState(req, res) {
   const projectId = req.params.project_id
   const timer = new Metrics.Timer('http.clearProjectState')
@@ -537,6 +543,7 @@ module.exports = {
   peekDoc: expressify(peekDoc),
   getProjectDocsAndFlushIfOld: expressify(getProjectDocsAndFlushIfOld),
   getProjectLastUpdatedAt: expressify(getProjectLastUpdatedAt),
+  getProjectRanges: expressify(getProjectRanges),
   clearProjectState: expressify(clearProjectState),
   appendToDoc: expressify(appendToDoc),
   setDoc: expressify(setDoc),

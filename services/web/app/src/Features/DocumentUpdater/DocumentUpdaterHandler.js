@@ -24,6 +24,13 @@ async function getProjectLastUpdatedAt(projectId) {
   return body.lastUpdatedAt != null ? new Date(body.lastUpdatedAt) : null
 }
 
+async function getProjectRanges(projectId) {
+  const { docs } = await fetchJson(`${BASE_URL}/project/${projectId}/ranges`, {
+    signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+  })
+  return docs
+}
+
 /**
  * @param {string} projectId
  */
@@ -518,6 +525,7 @@ const DocumentUpdaterHandler = {
   getComment,
   getDocument,
   getProjectLastUpdatedAt,
+  getProjectRanges,
   setDocument,
   appendToDocument,
   getProjectDocsIfMatch,
