@@ -232,7 +232,7 @@ async function runScript() {
 
   if (churnUsers.length === 0) {
     console.log('No day 1 churn users found for the specified period')
-    return
+    process.exit(0)
   }
 
   console.log(`Writing ${churnUsers.length} users to ${args.outputPath}...`)
