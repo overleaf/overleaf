@@ -118,4 +118,16 @@ $ 2+3 \text{ is equal to } 5 $
 \section{citations}
 \cite[two words]{example2025} % 2 in text (citekey ignored)
 
+% no extension
+\input{extra-words}
+\input{subfolder/extra-words}
+
+% .tex extension
+\input{extra-words.tex}
+\input{subfolder/extra-words.tex}
+
+% .tex extension, in subfolder
+\include{extra-words.tex}
+\include{subfolder/extra-words.tex}
+
 \end{document}

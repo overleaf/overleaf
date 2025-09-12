@@ -72,7 +72,13 @@ export const WordCountClient: FC = () => {
           messages: '',
         }
 
-        countWordsInFile(data, projectSnapshot, currentRootDocPath, segmenters)
+        countWordsInFile(
+          data,
+          projectSnapshot,
+          currentRootDocPath,
+          '/',
+          segmenters
+        )
 
         return data
       }

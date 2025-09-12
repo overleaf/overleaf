@@ -86,6 +86,47 @@ export class ProjectSnapshot {
   }
 
   /**
+   * Use an algorithm similar to Kpathsea to locate files in the project snapshot:
+   *
+   * 1. look for the exact path relative to the root path
+   * 2. look for the path + extension relative to the root path
+   * 3. look for the exact path relative to the current path
+   * 4. look for the path + extension relative to the current path
+   */
+  locateFile(filePath: string, currentPath = '/', extensions = ['.tex']) {
+    // ignore absolute paths
+    if (filePath.startsWith('/')) {
+      return null
+    }
+
+    const snapshotPaths = new Set(this.snapshot.getFilePathnames())
+
+    const baseURLs = [
+      // relative to the root of the compile directory
+      new URL('https://overleaf.invalid'),
+    ]
+
+    if (currentPath !== '/') {
+      // relative to the current directory
+      baseURLs.push(new URL(currentPath, 'https://overleaf.invalid'))
+    }
+
+    const extensionsToTest = ['', ...extensions]
+
+    for (const baseURL of baseURLs) {
+      for (const extension of extensionsToTest) {
+        const { pathname } = new URL(`${filePath}${extension}`, baseURL)
+        const snapshotPath = pathname.substring(1) // remove leading slash
+        if (snapshotPaths.has(snapshotPath)) {
+          return snapshotPath
+        }
+      }
+    }
+
+    return null
+  }
+
+  /**
    * Get the doc content at the given path.
    */
   getDocContents(path: string): string | null {
