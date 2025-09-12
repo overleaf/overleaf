@@ -159,6 +159,9 @@ export const countWordsInFile = (
       iterateNode(nodeRef, 'header')
       return false
     },
+    $Environment(nodeRef) {
+      return handleEnvironment(nodeRef)
+    },
   })
 
   const bodyMatcher = NodeType.match<
@@ -220,27 +223,7 @@ export const countWordsInFile = (
       return false
     },
     $Environment(nodeRef) {
-      const envNameNode = nodeRef.node
-        .getChild('BeginEnv')
-        ?.getChild('EnvNameGroup')
-        ?.getChild('EnvName')
-
-      if (envNameNode) {
-        const envName = content
-          ?.substring(envNameNode.from, envNameNode.to)
-          .replace(/\*$/, '')
-
-        if (envName === 'abstract') {
-          data.headers++
-
-          const contentNode = nodeRef.node.getChild('Content')
-          if (contentNode) {
-            iterateNode(contentNode, 'abstract')
-          }
-
-          return false
-        }
-      }
+      return handleEnvironment(nodeRef)
     },
     BeginEnv() {
       return false // ignore text in \begin arguments
@@ -311,6 +294,30 @@ export const countWordsInFile = (
           break
         default:
           break
+      }
+    }
+  }
+
+  const handleEnvironment = (nodeRef: SyntaxNodeRef) => {
+    const envNameNode = nodeRef.node
+      .getChild('BeginEnv')
+      ?.getChild('EnvNameGroup')
+      ?.getChild('EnvName')
+
+    if (envNameNode) {
+      const envName = content
+        ?.substring(envNameNode.from, envNameNode.to)
+        .replace(/\*$/, '')
+
+      if (envName === 'abstract') {
+        data.headers++
+
+        const contentNode = nodeRef.node.getChild('Content')
+        if (contentNode) {
+          iterateNode(contentNode, 'abstract')
+        }
+
+        return false
       }
     }
   }
