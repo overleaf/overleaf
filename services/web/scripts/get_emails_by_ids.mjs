@@ -2,7 +2,11 @@ import { scriptRunner } from './lib/ScriptRunner.mjs'
 import fs from 'node:fs'
 import readline from 'node:readline'
 import minimist from 'minimist'
-import { db, ObjectId } from '../app/src/infrastructure/mongodb.js'
+import {
+  db,
+  ObjectId,
+  READ_PREFERENCE_SECONDARY,
+} from '../app/src/infrastructure/mongodb.js'
 
 /**
  * This script extracts user emails given a list of newline separated IDs
@@ -64,14 +68,18 @@ function parseArgs() {
 
 async function processBatch(idBatch, writeStream) {
   try {
-    const cursor = db.users
-      .find({
+    const cursor = db.users.find(
+      {
         _id: { $in: idBatch },
-      })
-      .project({
-        _id: 0,
-        email: 1,
-      })
+      },
+      {
+        projection: {
+          _id: 0,
+          email: 1,
+        },
+        readPreference: READ_PREFERENCE_SECONDARY,
+      }
+    )
 
     for await (const doc of cursor) {
       if (doc.email) {
