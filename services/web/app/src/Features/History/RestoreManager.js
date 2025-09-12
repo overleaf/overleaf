@@ -1,6 +1,7 @@
 const Settings = require('@overleaf/settings')
 const Path = require('path')
 const FileWriter = require('../../infrastructure/FileWriter')
+const Metrics = require('../../infrastructure/Metrics')
 const FileSystemImportManager = require('../Uploads/FileSystemImportManager')
 const EditorController = require('../Editor/EditorController')
 const Errors = require('../Errors/Errors')
@@ -77,6 +78,7 @@ const RestoreManager = {
     threadIds,
     options = {}
   ) {
+    const endTimer = Metrics.revertFileDurationSeconds.startTimer()
     const project = await ProjectGetter.promises.getProject(projectId, {
       overleaf: true,
       rootDoc_id: true,
@@ -176,6 +178,7 @@ const RestoreManager = {
         userId
       )
 
+      endTimer({ type: 'file' })
       return {
         _id: newFile._id,
         type: 'file',
@@ -296,6 +299,7 @@ const RestoreManager = {
       new Set(newRanges.comments.map(({ op: { t } }) => t))
     )
 
+    endTimer({ type: 'doc' })
     return {
       _id,
       type: importInfo.type,
@@ -333,6 +337,7 @@ const RestoreManager = {
   },
 
   async revertProject(userId, projectId, version) {
+    const endTimer = Metrics.revertProjectDurationSeconds.startTimer()
     const project = await ProjectGetter.promises.getProject(projectId, {
       overleaf: true,
     })
@@ -398,6 +403,7 @@ const RestoreManager = {
       }
     }
 
+    endTimer()
     return reverted
   },
 
