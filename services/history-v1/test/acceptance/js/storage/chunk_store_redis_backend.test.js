@@ -470,10 +470,8 @@ describe('chunk buffer Redis backend', function () {
       expect(result.status).to.equal('ok')
       expect(result.changes).to.be.an('array').with.lengthOf(2)
 
-      // The changes array should contain the raw changes
-      // Note: We're comparing raw objects, not the Change instances
-      expect(result.changes[0]).to.deep.equal(change2.toRaw())
-      expect(result.changes[1]).to.deep.equal(change3.toRaw())
+      expect(result.changes[0]).to.deep.equal(change2)
+      expect(result.changes[1]).to.deep.equal(change3)
     })
 
     it('should return all changes when requested version is earliest available', async function () {
@@ -503,9 +501,9 @@ describe('chunk buffer Redis backend', function () {
 
       expect(result.status).to.equal('ok')
       expect(result.changes).to.be.an('array').with.lengthOf(3)
-      expect(result.changes[0]).to.deep.equal(change1.toRaw())
-      expect(result.changes[1]).to.deep.equal(change2.toRaw())
-      expect(result.changes[2]).to.deep.equal(change3.toRaw())
+      expect(result.changes[0]).to.deep.equal(change1)
+      expect(result.changes[1]).to.deep.equal(change2)
+      expect(result.changes[2]).to.deep.equal(change3)
     })
   })
 

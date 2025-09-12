@@ -24,6 +24,7 @@
 
 const config = require('config')
 const OError = require('@overleaf/o-error')
+const metrics = require('@overleaf/metrics')
 const { Chunk, History, Snapshot } = require('overleaf-editor-core')
 
 const assert = require('../assert')
@@ -227,6 +228,52 @@ async function loadAtTimestamp(projectId, timestamp, opts = {}) {
 
   await lazyLoadHistoryFiles(history, batchBlobStore)
   return new Chunk(history, startVersion)
+}
+
+/** Get the changes since a given version (since), including non-persisted changes.
+ * Note that if there are multiple chunks since the given version, the changes from
+ * the first chunk will be returned with a hasMore flag to indicate that there are
+ * more changes available.   The 'since' version is exclusive.
+ * @param {string} projectId
+ * @param {number} since - version to get changes since (exclusive)
+ * @return {Promise<{changes: Change[], hasMore: boolean}>} - object with array of changes and boolean indicating if there are more changes available
+ */
+async function getChangesSinceVersion(projectId, since) {
+  assert.projectId(projectId, 'bad projectId')
+  assert.integer(since, 'bad since version')
+
+  // First try to get changes directly from Redis buffer
+  const result = await redisBackend.getChangesSinceVersion(projectId, since)
+  if (result.status === 'ok') {
+    // Successfully got changes from Redis, no more changes available beyond what Redis has
+    metrics.inc('chunk_store.get_changes_since_version', 1, { source: 'redis' })
+    return { changes: result.changes || [], hasMore: false }
+  }
+
+  // If status is 'not_found' or 'out_of_bounds', fall through to chunk-based approach
+  const chunk = await loadAtVersion(projectId, since, {
+    preferNewer: true,
+  })
+
+  // Validate that 'since' is within the bounds of the chunk
+  if (since < chunk.getStartVersion()) {
+    throw new VersionOutOfBoundsError('Chunk does not include since version', {
+      projectId,
+      since,
+    })
+  }
+  // Extract the changes after 'since' from the chunk
+  const changes = chunk.getChanges().slice(since - chunk.getStartVersion())
+
+  // Check if there are more changes beyond the current chunk
+  const latestChunkMetadata = await getLatestChunkMetadata(projectId)
+  const hasMore = latestChunkMetadata.endVersion > chunk.getEndVersion()
+  metrics.inc('chunk_store.get_changes_since_version', 1, {
+    source: 'gcs',
+    hasMore: hasMore ? 'true' : 'false',
+    status: result.status,
+  })
+  return { changes, hasMore }
 }
 
 /**
@@ -581,6 +628,7 @@ module.exports = {
   getProjectChunkIds,
   getProjectChunks,
   getProjectChunksFromVersion,
+  getChangesSinceVersion,
   deleteProjectChunks,
   deleteOldChunks,
   AlreadyInitialized,

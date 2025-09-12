@@ -364,9 +364,11 @@ async function getChangesSinceVersion(projectId, version) {
     if (status === 'ok') {
       // If status is OK, parse the changes
       const changes = result[1]
-        ? result[1].map(rawChange =>
-            typeof rawChange === 'string' ? JSON.parse(rawChange) : rawChange
-          )
+        ? result[1]
+            .map(rawChange =>
+              typeof rawChange === 'string' ? JSON.parse(rawChange) : rawChange
+            )
+            .map(Change.fromRaw)
         : []
 
       metrics.inc('chunk_store.redis.get_changes_since_version', 1, {

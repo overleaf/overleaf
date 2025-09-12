@@ -156,11 +156,12 @@ async function getChanges(req, res, next) {
     })
   }
 
-  let chunk
   try {
-    chunk = await chunkStore.loadAtVersion(projectId, since, {
-      preferNewer: true,
-    })
+    const { changes, hasMore } = await chunkStore.getChangesSinceVersion(
+      projectId,
+      since
+    )
+    res.json({ changes: changes.map(change => change.toRaw()), hasMore })
   } catch (err) {
     if (err instanceof Chunk.VersionNotFoundError) {
       return res.status(400).json({
@@ -169,14 +170,6 @@ async function getChanges(req, res, next) {
     }
     throw err
   }
-
-  const latestChunkMetadata = await chunkStore.getLatestChunkMetadata(projectId)
-
-  // Extract the relevant changes from the chunk that contains the start version
-  const changes = chunk.getChanges().slice(since - chunk.getStartVersion())
-  const hasMore = latestChunkMetadata.endVersion > chunk.getEndVersion()
-
-  res.json({ changes: changes.map(change => change.toRaw()), hasMore })
 }
 
 async function getZip(req, res, next) {
