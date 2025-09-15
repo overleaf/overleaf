@@ -1,4 +1,4 @@
-import SubscriptionGroupHandler from './SubscriptionGroupHandler.js'
+import SubscriptionGroupHandler from './SubscriptionGroupHandler.mjs'
 
 import OError from '@overleaf/o-error'
 import logger from '@overleaf/logger'

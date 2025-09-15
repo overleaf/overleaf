@@ -1,5 +1,5 @@
-const { Survey } = require('../../models/Survey')
-const OError = require('@overleaf/o-error')
+import { Survey } from '../../models/Survey.js'
+import OError from '@overleaf/o-error'
 
 async function getSurvey() {
   try {
@@ -67,7 +67,7 @@ async function deleteSurvey() {
   }
 }
 
-module.exports = {
+export default {
   getSurvey,
   updateSurvey,
   deleteSurvey,

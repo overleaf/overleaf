@@ -9,6 +9,6 @@ function getProviderId(subscriptionId) {
   return `ol-group-subscription-id:${subscriptionId.toString()}`
 }
 
-module.exports = {
+export default {
   getProviderId,
 }

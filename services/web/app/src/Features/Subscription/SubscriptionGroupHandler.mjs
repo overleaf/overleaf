@@ -1,26 +1,29 @@
-const { callbackify } = require('util')
-const _ = require('lodash')
-const OError = require('@overleaf/o-error')
-const SubscriptionUpdater = require('./SubscriptionUpdater')
-const SubscriptionLocator = require('./SubscriptionLocator')
-const SubscriptionController = require('./SubscriptionController')
-const SubscriptionHelper = require('./SubscriptionHelper')
-const { Subscription } = require('../../models/Subscription')
-const { User } = require('../../models/User')
-const PlansLocator = require('./PlansLocator')
-const TeamInvitesHandler = require('./TeamInvitesHandler')
-const GroupPlansData = require('./GroupPlansData')
-const Modules = require('../../infrastructure/Modules')
-const { MEMBERS_LIMIT_ADD_ON_CODE } = require('./PaymentProviderEntities')
-const {
+import { callbackify } from 'node:util'
+import _ from 'lodash'
+import OError from '@overleaf/o-error'
+import SubscriptionUpdater from './SubscriptionUpdater.js'
+import SubscriptionLocator from './SubscriptionLocator.js'
+import SubscriptionController from './SubscriptionController.js'
+import SubscriptionHelper from './SubscriptionHelper.js'
+import { Subscription } from '../../models/Subscription.js'
+import { User } from '../../models/User.js'
+import PlansLocator from './PlansLocator.js'
+import TeamInvitesHandler from './TeamInvitesHandler.js'
+import GroupPlansData from './GroupPlansData.js'
+import Modules from '../../infrastructure/Modules.js'
+import PaymentProviderEntities from './PaymentProviderEntities.js'
+import {
   ManuallyCollectedError,
   PendingChangeError,
   InactiveError,
   HasPastDueInvoiceError,
   HasNoAdditionalLicenseWhenManuallyCollectedError,
-} = require('./Errors')
-const EmailHelper = require('../Helpers/EmailHelper')
-const { InvalidEmailError } = require('../Errors/Errors')
+} from './Errors.js'
+import EmailHelper from '../Helpers/EmailHelper.js'
+import { InvalidEmailError } from '../Errors/Errors.js'
+
+const MEMBERS_LIMIT_ADD_ON_CODE =
+  PaymentProviderEntities.MEMBERS_LIMIT_ADD_ON_CODE
 
 async function removeUserFromGroup(subscriptionId, userIdToRemove, auditLog) {
   await SubscriptionUpdater.promises.removeUserFromGroup(
@@ -470,7 +473,7 @@ async function updateGroupMembersBulk(
   return result
 }
 
-module.exports = {
+export default {
   removeUserFromGroup: callbackify(removeUserFromGroup),
   replaceUserReferencesInGroups: callbackify(replaceUserReferencesInGroups),
   ensureFlexibleLicensingEnabled: callbackify(ensureFlexibleLicensingEnabled),

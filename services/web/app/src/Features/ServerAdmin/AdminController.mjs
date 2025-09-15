@@ -1,11 +1,11 @@
-const logger = require('@overleaf/logger')
-const http = require('http')
-const https = require('https')
-const Settings = require('@overleaf/settings')
-const TpdsUpdateSender = require('../ThirdPartyDataStore/TpdsUpdateSender')
-const TpdsProjectFlusher = require('../ThirdPartyDataStore/TpdsProjectFlusher')
-const EditorRealTimeController = require('../Editor/EditorRealTimeController')
-const SystemMessageManager = require('../SystemMessages/SystemMessageManager')
+import logger from '@overleaf/logger'
+import http from 'node:http'
+import https from 'node:https'
+import Settings from '@overleaf/settings'
+import TpdsUpdateSender from '../ThirdPartyDataStore/TpdsUpdateSender.js'
+import TpdsProjectFlusher from '../ThirdPartyDataStore/TpdsProjectFlusher.js'
+import EditorRealTimeController from '../Editor/EditorRealTimeController.js'
+import SystemMessageManager from '../SystemMessages/SystemMessageManager.js'
 
 const AdminController = {
   _sendDisconnectAllUsersMessage: delay => {
@@ -94,4 +94,4 @@ const AdminController = {
   },
 }
 
-module.exports = AdminController
+export default AdminController

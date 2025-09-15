@@ -2,7 +2,7 @@ import fs from 'node:fs'
 import minimist from 'minimist'
 import { parse } from 'csv'
 import Stream from 'node:stream/promises'
-import SubscriptionGroupHandler from '../app/src/Features/Subscription/SubscriptionGroupHandler.js'
+import SubscriptionGroupHandler from '../app/src/Features/Subscription/SubscriptionGroupHandler.mjs'
 import { Subscription } from '../app/src/models/Subscription.js'
 import { InvalidEmailError } from '../app/src/Features/Errors/Errors.js'
 

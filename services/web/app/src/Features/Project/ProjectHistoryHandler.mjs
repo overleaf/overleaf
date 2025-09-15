@@ -1,8 +1,8 @@
-const { Project } = require('../../models/Project')
-const ProjectDetailsHandler = require('./ProjectDetailsHandler')
-const HistoryManager = require('../History/HistoryManager')
-const ProjectEntityUpdateHandler = require('./ProjectEntityUpdateHandler')
-const { callbackify } = require('util')
+import { Project } from '../../models/Project.js'
+import ProjectDetailsHandler from './ProjectDetailsHandler.js'
+import HistoryManager from '../History/HistoryManager.js'
+import ProjectEntityUpdateHandler from './ProjectEntityUpdateHandler.js'
+import { callbackify } from 'node:util'
 
 const ProjectHistoryHandler = {
   async setHistoryId(projectId, historyId) {
@@ -55,7 +55,7 @@ const ProjectHistoryHandler = {
   },
 }
 
-module.exports = {
+export default {
   setHistoryId: callbackify(ProjectHistoryHandler.setHistoryId),
   getHistoryId: callbackify(ProjectHistoryHandler.getHistoryId),
   ensureHistoryExistsForProject: callbackify(

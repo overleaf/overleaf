@@ -4,7 +4,7 @@ import minimist from 'minimist'
 
 import { db, ObjectId } from '../app/src/infrastructure/mongodb.js'
 import ProjectEntityUpdateHandler from '../app/src/Features/Project/ProjectEntityUpdateHandler.js'
-import ProjectEntityRestoreHandler from '../app/src/Features/Project/ProjectEntityRestoreHandler.js'
+import ProjectEntityRestoreHandler from '../app/src/Features/Project/ProjectEntityRestoreHandler.mjs'
 import RedisWrapper from '@overleaf/redis-wrapper'
 import Settings from '@overleaf/settings'
 import logger from '@overleaf/logger'

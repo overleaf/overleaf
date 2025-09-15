@@ -1,6 +1,6 @@
 import { promisify } from 'node:util'
 import Settings from '@overleaf/settings'
-import AdminController from '../app/src/Features/ServerAdmin/AdminController.js'
+import AdminController from '../app/src/Features/ServerAdmin/AdminController.mjs'
 import minimist from 'minimist'
 import { fileURLToPath } from 'node:url'
 import { scriptRunner } from './lib/ScriptRunner.mjs'

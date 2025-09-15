@@ -1,4 +1,4 @@
-import ProjectEntityRestoreHandler from '../app/src/Features/Project/ProjectEntityRestoreHandler.js'
+import ProjectEntityRestoreHandler from '../app/src/Features/Project/ProjectEntityRestoreHandler.mjs'
 import ProjectEntityHandler from '../app/src/Features/Project/ProjectEntityHandler.js'
 import DocstoreManager from '../app/src/Features/Docstore/DocstoreManager.js'
 import { scriptRunner } from './lib/ScriptRunner.mjs'

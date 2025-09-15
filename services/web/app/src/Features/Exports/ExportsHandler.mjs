@@ -13,7 +13,7 @@
  */
 import OError from '@overleaf/o-error'
 import ProjectGetter from '../Project/ProjectGetter.js'
-import ProjectHistoryHandler from '../Project/ProjectHistoryHandler.js'
+import ProjectHistoryHandler from '../Project/ProjectHistoryHandler.mjs'
 import ProjectLocator from '../Project/ProjectLocator.js'
 import ProjectRootDocManager from '../Project/ProjectRootDocManager.js'
 import UserGetter from '../User/UserGetter.js'

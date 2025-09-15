@@ -1,8 +1,8 @@
-const logger = require('@overleaf/logger')
-const Settings = require('@overleaf/settings')
-const { IncomingWebhook } = require('@slack/webhook')
-const moment = require('moment')
-const SplitTestUtils = require('./SplitTestUtils')
+import logger from '@overleaf/logger'
+import Settings from '@overleaf/settings'
+import { IncomingWebhook } from '@slack/webhook'
+import moment from 'moment'
+import SplitTestUtils from './SplitTestUtils.js'
 
 async function sendNotification(splitTest, action, user) {
   const lastVersion = SplitTestUtils.getCurrentVersion(splitTest)
@@ -60,6 +60,6 @@ async function sendNotification(splitTest, action, user) {
   }
 }
 
-module.exports = {
+export default {
   sendNotification,
 }

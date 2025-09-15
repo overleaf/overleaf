@@ -1,4 +1,4 @@
-import SurveyManager from './SurveyManager.js'
+import SurveyManager from './SurveyManager.mjs'
 import { Survey } from '../../models/Survey.js'
 import { CacheLoader } from 'cache-flow'
 

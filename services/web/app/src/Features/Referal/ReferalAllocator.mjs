@@ -1,7 +1,7 @@
-const OError = require('@overleaf/o-error')
-const { User } = require('../../models/User')
-const FeaturesUpdater = require('../Subscription/FeaturesUpdater')
-const { callbackify } = require('@overleaf/promise-utils')
+import OError from '@overleaf/o-error'
+import { User } from '../../models/User.js'
+import FeaturesUpdater from '../Subscription/FeaturesUpdater.js'
+import { callbackify } from '@overleaf/promise-utils'
 
 async function allocate(referalId, newUserId, referalSource, referalMedium) {
   if (referalId == null) {
@@ -40,7 +40,7 @@ async function allocate(referalId, newUserId, referalSource, referalMedium) {
   }
 }
 
-module.exports = {
+export default {
   allocate: callbackify(allocate),
   promises: {
     allocate,

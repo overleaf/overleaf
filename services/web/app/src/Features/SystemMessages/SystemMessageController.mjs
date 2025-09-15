@@ -1,6 +1,6 @@
-const Settings = require('@overleaf/settings')
-const SessionManager = require('../Authentication/SessionManager')
-const SystemMessageManager = require('./SystemMessageManager')
+import Settings from '@overleaf/settings'
+import SessionManager from '../Authentication/SessionManager.js'
+import SystemMessageManager from './SystemMessageManager.js'
 
 const ProjectController = {
   getMessages(req, res, next) {
@@ -24,4 +24,4 @@ const ProjectController = {
   },
 }
 
-module.exports = ProjectController
+export default ProjectController

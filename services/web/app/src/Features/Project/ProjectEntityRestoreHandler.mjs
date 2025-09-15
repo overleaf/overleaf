@@ -1,7 +1,7 @@
-const { callbackify } = require('util')
-const Path = require('path')
-const ProjectEntityHandler = require('./ProjectEntityHandler')
-const EditorController = require('../Editor/EditorController')
+import { callbackify } from 'node:util'
+import Path from 'node:path'
+import ProjectEntityHandler from './ProjectEntityHandler.js'
+import EditorController from '../Editor/EditorController.js'
 
 // generate a new name based on the original, with an optional label.
 // e.g. origname-20210101-122345.tex          (default)
@@ -36,7 +36,7 @@ async function restoreDeletedDoc(projectId, docId, docName, userId) {
   )
 }
 
-module.exports = {
+export default {
   restoreDeletedDoc: callbackify(restoreDeletedDoc),
   generateRestoredName,
   promises: {

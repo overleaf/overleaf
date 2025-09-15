@@ -1,7 +1,7 @@
-const SplitTestHandler = require('./SplitTestHandler')
-const logger = require('@overleaf/logger')
-const { expressify } = require('@overleaf/promise-utils')
-const Errors = require('../Errors/Errors')
+import SplitTestHandler from './SplitTestHandler.js'
+import logger from '@overleaf/logger'
+import { expressify } from '@overleaf/promise-utils'
+import Errors from '../Errors/Errors.js'
 
 function loadAssignmentsInLocals(splitTestNames) {
   return async function (req, res, next) {
@@ -43,7 +43,7 @@ function ensureSplitTestEnabledForUser(
   })
 }
 
-module.exports = {
+export default {
   loadAssignmentsInLocals,
   ensureSplitTestEnabledForUser,
 }
