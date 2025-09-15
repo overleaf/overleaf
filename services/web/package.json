@@ -94,6 +94,7 @@
     "@overleaf/redis-wrapper": "*",
     "@overleaf/settings": "*",
     "@overleaf/stream-utils": "*",
+    "@overleaf/validation-tools": "*",
     "@phosphor-icons/react": "^2.1.7",
     "@slack/webhook": "^7.0.2",
     "@stripe/react-stripe-js": "^3.9.0",
