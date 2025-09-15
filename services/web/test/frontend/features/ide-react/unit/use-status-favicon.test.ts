@@ -53,6 +53,11 @@ describe('useStatusFavicon', function () {
     document
       .querySelectorAll('link[data-compile-status="true"]')
       .forEach(el => el.remove())
+
+    window.metaAttributesCache.set(
+      'ol-baseAssetPath',
+      'https://cdn.test-overleaf.com/'
+    )
   })
 
   afterEach(function () {

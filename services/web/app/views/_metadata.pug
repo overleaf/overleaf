@@ -43,8 +43,8 @@ else if settings.overleaf
 	meta(name='image' content=buildImgPath('ol-brand/overleaf_og_logo.png'))
 else
 	//- the default image for Overleaf Community Edition/Server Pro
-	meta(itemprop='image' content='/apple-touch-icon.png')
-	meta(name='image' content='/apple-touch-icon.png')
+	meta(itemprop='image' content=buildBaseAssetPath() + 'apple-touch-icon.png')
+	meta(name='image' content=buildBaseAssetPath() + 'apple-touch-icon.png')
 
 //- Keywords
 if metadata && metadata.keywords
@@ -79,7 +79,10 @@ else if settings.overleaf
 	)
 else
 	//- the default image for Overleaf Community Edition/Server Pro
-	meta(name='twitter:image' content='/apple-touch-icon.png')
+	meta(
+		name='twitter:image'
+		content=buildBaseAssetPath() + 'apple-touch-icon.png'
+	)
 
 //- Open Graph
 //- to do - add og:url
@@ -102,7 +105,10 @@ else if settings.overleaf
 	)
 else
 	//- the default image for Overleaf Community Edition/Server Pro
-	meta(property='og:image' content='/apple-touch-icon.png')
+	meta(
+		property='og:image'
+		content=buildBaseAssetPath() + 'apple-touch-icon.png'
+	)
 
 if metadata && metadata.openGraphType
 	meta(property='og:type' metadata.openGraphType)
@@ -125,11 +131,15 @@ if settings.robotsNoindex
 	meta(name='robots' content='noindex')
 
 //- Icons
-link(rel='icon' sizes='32x32' href='/favicon-32x32.png')
-link(rel='icon' sizes='16x16' href='/favicon-16x16.png')
-link(rel='icon' href='/favicon.svg' type='image/svg+xml')
-link(rel='apple-touch-icon' href='/apple-touch-icon.png')
-link(rel='mask-icon' href='/mask-favicon.svg' color='#046530')
+link(rel='icon' sizes='32x32' href=buildBaseAssetPath() + 'favicon-32x32.png')
+link(rel='icon' sizes='16x16' href=buildBaseAssetPath() + 'favicon-16x16.png')
+link(rel='icon' href=buildBaseAssetPath() + 'favicon.svg' type='image/svg+xml')
+link(rel='apple-touch-icon' href=buildBaseAssetPath() + 'apple-touch-icon.png')
+link(
+	rel='mask-icon'
+	href=buildBaseAssetPath() + 'mask-favicon.svg'
+	color='#046530'
+)
 
 //- Canonical Tag for SEO
 if metadata && metadata.canonicalURL
@@ -137,4 +147,4 @@ if metadata && metadata.canonicalURL
 
 //- Manifest
 //- Does not currently contain a start_url to prevent browser installation prompts
-link(rel='manifest' href='/web.sitemanifest')
+link(rel='manifest' href=buildBaseAssetPath() + 'web.sitemanifest')
