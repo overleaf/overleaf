@@ -1,0 +1,11 @@
+{
+  "extends": "../../tsconfig.backend.json",
+  "compilerOptions": {
+    "allowImportingTsExtensions": true
+  },
+  "include": [
+    "**/*.js",
+    "**/*.ts",
+    "**/*.cjs"
+  ]
+}

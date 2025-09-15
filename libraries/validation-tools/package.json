@@ -1,0 +1,31 @@
+{
+  "name": "@overleaf/validation-tools",
+  "homepage": "www.overleaf.com",
+  "description": "Validation tools that can be used in a service.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/overleaf/overleaf"
+  },
+  "main": "index.js",
+  "license": "AGPL-3.0-only",
+  "version": "1.0.0",
+  "scripts": {
+    "test": "npm run lint && npm run format && npm run types:check && npm run test:unit",
+    "format": "prettier --list-different $PWD/'**/*.{js,cjs,ts}'",
+    "format:fix": "prettier --write $PWD/'**/*.{js,cjs,ts}'",
+    "lint": "eslint --ext .js --ext .cjs --ext .ts --max-warnings 0 --format unix .",
+    "lint:fix": "eslint --fix --ext .js --ext .cjs --ext .ts .",
+    "test:ci": "npm run test:unit",
+    "test:unit": "vitest test/unit/src/*.test.ts --isolate=false",
+    "types:check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@overleaf/o-error": "*",
+    "mongodb": "^6.12.0",
+    "zod": "^4.1.8"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.4",
+    "vitest": "^3.2.4"
+  }
+}
