@@ -11,6 +11,7 @@ const Settings = require('@overleaf/settings')
 const Errors = require('../Errors/Errors')
 const SessionManager = require('../Authentication/SessionManager')
 const { RateLimiter } = require('../../infrastructure/RateLimiter')
+const { z, zz, validateReq } = require('../../infrastructure/Validation')
 const ClsiCookieManager = require('./ClsiCookieManager')(
   Settings.apis.clsi?.backendGroupName
 )
@@ -137,6 +138,25 @@ async function _syncTeX(req, res, direction, validatedOptions) {
     throw err
   }
 }
+
+const deleteAuxFilesSchema = z.object({
+  params: z.object({
+    Project_id: zz.objectId(),
+  }),
+  query: z.object({
+    clsiserverid: z.string().optional(),
+  }),
+})
+
+const wordCountSchema = z.object({
+  params: z.object({
+    Project_id: zz.objectId(),
+  }),
+  query: z.object({
+    clsiserverid: z.string().optional(),
+    file: z.string().optional(),
+  }),
+})
 
 const _CompileController = {
   async compile(req, res) {
@@ -384,8 +404,9 @@ const _CompileController = {
   },
 
   async deleteAuxFiles(req, res) {
-    const projectId = req.params.Project_id
-    const { clsiserverid } = req.query
+    const { params, query } = validateReq(req, deleteAuxFilesSchema)
+    const projectId = params.Project_id
+    const { clsiserverid } = query
     const userId = await CompileController._getUserIdForCompile(req)
     await CompileManager.promises.deleteAuxFiles(
       projectId,
@@ -650,9 +671,10 @@ const _CompileController = {
   },
 
   async wordCount(req, res) {
-    const projectId = req.params.Project_id
-    const file = req.query.file || false
-    const { clsiserverid } = req.query
+    const { params, query } = validateReq(req, wordCountSchema)
+    const projectId = params.Project_id
+    const file = query.file || false
+    const { clsiserverid } = query
     const userId = CompileController._getUserIdForCompile(req)
 
     const body = await CompileManager.promises.wordCount(

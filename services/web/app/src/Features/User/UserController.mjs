@@ -8,6 +8,7 @@ import metrics from '@overleaf/metrics'
 import AuthenticationManager from '../Authentication/AuthenticationManager.js'
 import SessionManager from '../Authentication/SessionManager.js'
 import Features from '../../infrastructure/Features.js'
+import { z, validateReq } from '../../infrastructure/Validation.js'
 import UserAuditLogHandler from './UserAuditLogHandler.js'
 import UserSessionsManager from './UserSessionsManager.js'
 import UserUpdater from './UserUpdater.js'
@@ -328,7 +329,18 @@ async function unsubscribe(req, res, next) {
   })
 }
 
+const updateUserSettingsSchema = z.object({
+  body: z
+    .object({
+      first_name: z.string().max(255).nullish(),
+      last_name: z.string().max(255).nullish(),
+    })
+    .passthrough(),
+  // TODO: complete the schema and remove the passthrough
+})
+
 async function updateUserSettings(req, res, next) {
+  const { body } = validateReq(req, updateUserSettingsSchema)
   const userId = SessionManager.getLoggedInUserId(req.session)
   req.logger.addFields({ userId })
 
@@ -337,68 +349,67 @@ async function updateUserSettings(req, res, next) {
     throw new OError('problem updating user settings', { userId })
   }
 
-  if (req.body.first_name != null) {
-    user.first_name = req.body.first_name.trim()
+  if (body.first_name != null) {
+    user.first_name = body.first_name.trim()
   }
-  if (req.body.last_name != null) {
-    user.last_name = req.body.last_name.trim()
+  if (body.last_name != null) {
+    user.last_name = body.last_name.trim()
   }
-  if (req.body.role != null) {
-    user.role = req.body.role.trim()
+  if (body.role != null) {
+    user.role = body.role.trim()
   }
-  if (req.body.institution != null) {
-    user.institution = req.body.institution.trim()
+  if (body.institution != null) {
+    user.institution = body.institution.trim()
   }
-  if (req.body.mode != null) {
-    user.ace.mode = req.body.mode
+  if (body.mode != null) {
+    user.ace.mode = body.mode
   }
-  if (req.body.editorTheme != null) {
-    user.ace.theme = req.body.editorTheme
+  if (body.editorTheme != null) {
+    user.ace.theme = body.editorTheme
   }
-  if (req.body.overallTheme != null) {
-    user.ace.overallTheme = req.body.overallTheme
+  if (body.overallTheme != null) {
+    user.ace.overallTheme = body.overallTheme
   }
-  if (req.body.fontSize != null) {
-    user.ace.fontSize = req.body.fontSize
+  if (body.fontSize != null) {
+    user.ace.fontSize = body.fontSize
   }
-  if (req.body.autoComplete != null) {
-    user.ace.autoComplete = req.body.autoComplete
+  if (body.autoComplete != null) {
+    user.ace.autoComplete = body.autoComplete
   }
-  if (req.body.autoPairDelimiters != null) {
-    user.ace.autoPairDelimiters = req.body.autoPairDelimiters
+  if (body.autoPairDelimiters != null) {
+    user.ace.autoPairDelimiters = body.autoPairDelimiters
   }
-  if (req.body.spellCheckLanguage != null) {
-    user.ace.spellCheckLanguage = req.body.spellCheckLanguage
+  if (body.spellCheckLanguage != null) {
+    user.ace.spellCheckLanguage = body.spellCheckLanguage
   }
-  if (req.body.pdfViewer != null) {
-    user.ace.pdfViewer = req.body.pdfViewer
+  if (body.pdfViewer != null) {
+    user.ace.pdfViewer = body.pdfViewer
   }
-  if (req.body.syntaxValidation != null) {
-    user.ace.syntaxValidation = req.body.syntaxValidation
+  if (body.syntaxValidation != null) {
+    user.ace.syntaxValidation = body.syntaxValidation
   }
-  if (req.body.fontFamily != null) {
-    user.ace.fontFamily = req.body.fontFamily
+  if (body.fontFamily != null) {
+    user.ace.fontFamily = body.fontFamily
   }
-  if (req.body.lineHeight != null) {
-    user.ace.lineHeight = req.body.lineHeight
+  if (body.lineHeight != null) {
+    user.ace.lineHeight = body.lineHeight
   }
-  if (req.body.mathPreview != null) {
-    user.ace.mathPreview = req.body.mathPreview
+  if (body.mathPreview != null) {
+    user.ace.mathPreview = body.mathPreview
   }
-  if (req.body.breadcrumbs != null) {
-    user.ace.breadcrumbs = Boolean(req.body.breadcrumbs)
+  if (body.breadcrumbs != null) {
+    user.ace.breadcrumbs = Boolean(body.breadcrumbs)
   }
-  if (req.body.referencesSearchMode != null) {
-    const mode =
-      req.body.referencesSearchMode === 'simple' ? 'simple' : 'advanced'
+  if (body.referencesSearchMode != null) {
+    const mode = body.referencesSearchMode === 'simple' ? 'simple' : 'advanced'
     user.ace.referencesSearchMode = mode
   }
-  if (req.body.enableNewEditor != null) {
-    user.ace.enableNewEditor = Boolean(req.body.enableNewEditor)
+  if (body.enableNewEditor != null) {
+    user.ace.enableNewEditor = Boolean(body.enableNewEditor)
   }
   await user.save()
 
-  const newEmail = req.body.email?.trim().toLowerCase()
+  const newEmail = body.email?.trim().toLowerCase()
   if (
     newEmail == null ||
     newEmail === user.email ||

@@ -45,6 +45,7 @@ import TagsHandler from '../Tags/TagsHandler.js'
 import TutorialHandler from '../Tutorial/TutorialHandler.js'
 import UserUpdater from '../User/UserUpdater.js'
 import Modules from '../../infrastructure/Modules.js'
+import { z, zz, validateReq } from '../../infrastructure/Validation.js'
 import UserGetter from '../User/UserGetter.js'
 import { isStandaloneAiAddOnPlanCode } from '../Subscription/AiHelper.js'
 import SubscriptionController from '../Subscription/SubscriptionController.js'
@@ -54,6 +55,34 @@ const { ObjectId } = mongodb
 /**
  * @import { GetProjectsRequest, GetProjectsResponse, Project } from "./types"
  */
+
+const updateProjectAdminSettingsSchema = z.object({
+  params: z.object({
+    Project_id: zz.coercedObjectId(ObjectId),
+  }),
+  body: z.object({
+    publicAccessLevel: z
+      .enum(
+        [PublicAccessLevels.PRIVATE, PublicAccessLevels.TOKEN_BASED],
+        'unexpected access level'
+      )
+      .optional(),
+  }),
+})
+
+const updateProjectSettingsSchema = z.object({
+  params: z.object({
+    Project_id: zz.coercedObjectId(),
+  }),
+  body: z.object({
+    compiler: z.string().optional(),
+    imageName: z.string().optional(),
+    mainBibliographyDocId: zz.objectId().optional(),
+    name: z.string().optional(),
+    rootDocId: zz.objectId().optional(),
+    spellCheckLanguage: z.string().optional(),
+  }),
+})
 
 const _ProjectController = {
   _isInPercentageRollout(rolloutName, objectId, percentage) {
@@ -67,38 +96,36 @@ const _ProjectController = {
   },
 
   async updateProjectSettings(req, res) {
-    const projectId = req.params.Project_id
+    const { params, body } = validateReq(req, updateProjectSettingsSchema)
+    const projectId = params.Project_id
 
-    if (req.body.compiler != null) {
-      await EditorController.promises.setCompiler(projectId, req.body.compiler)
+    if (body.compiler != null) {
+      await EditorController.promises.setCompiler(projectId, body.compiler)
     }
 
-    if (req.body.imageName != null) {
-      await EditorController.promises.setImageName(
-        projectId,
-        req.body.imageName
-      )
+    if (body.imageName != null) {
+      await EditorController.promises.setImageName(projectId, body.imageName)
     }
 
-    if (req.body.name != null) {
-      await EditorController.promises.renameProject(projectId, req.body.name)
+    if (body.name != null) {
+      await EditorController.promises.renameProject(projectId, body.name)
     }
 
-    if (req.body.spellCheckLanguage != null) {
+    if (body.spellCheckLanguage != null) {
       await EditorController.promises.setSpellCheckLanguage(
         projectId,
-        req.body.spellCheckLanguage
+        body.spellCheckLanguage
       )
     }
 
-    if (req.body.rootDocId != null) {
-      await EditorController.promises.setRootDoc(projectId, req.body.rootDocId)
+    if (body.rootDocId != null) {
+      await EditorController.promises.setRootDoc(projectId, body.rootDocId)
     }
 
-    if (req.body.mainBibliographyDocId != null) {
+    if (body.mainBibliographyDocId != null) {
       await EditorController.promises.setMainBibliographyDoc(
         projectId,
-        req.body.mainBibliographyDocId
+        body.mainBibliographyDocId
       )
     }
 
@@ -106,26 +133,17 @@ const _ProjectController = {
   },
 
   async updateProjectAdminSettings(req, res) {
-    const projectId = req.params.Project_id
+    const { params, body } = validateReq(req, updateProjectAdminSettingsSchema)
+    const projectId = params.Project_id
     const user = SessionManager.getSessionUser(req.session)
     if (!Features.hasFeature('link-sharing')) {
       return res.sendStatus(403) // return Forbidden if link sharing is not enabled
     }
-    const publicAccessLevel = req.body.publicAccessLevel
-    const publicAccessLevels = [
-      PublicAccessLevels.READ_ONLY,
-      PublicAccessLevels.READ_AND_WRITE,
-      PublicAccessLevels.PRIVATE,
-      PublicAccessLevels.TOKEN_BASED,
-    ]
 
-    if (
-      req.body.publicAccessLevel != null &&
-      publicAccessLevels.includes(publicAccessLevel)
-    ) {
+    if (body.publicAccessLevel != null) {
       await EditorController.promises.setPublicAccessLevel(
         projectId,
-        req.body.publicAccessLevel
+        body.publicAccessLevel
       )
 
       await ProjectAuditLogHandler.promises.addEntry(
@@ -133,7 +151,7 @@ const _ProjectController = {
         'toggle-access-level',
         user._id,
         req.ip,
-        { publicAccessLevel: req.body.publicAccessLevel, status: 'OK' }
+        { publicAccessLevel: body.publicAccessLevel, status: 'OK' }
       )
       res.sendStatus(204)
     } else {

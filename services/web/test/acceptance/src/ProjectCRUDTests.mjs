@@ -165,6 +165,53 @@ describe('Project CRUD', function () {
       expectObjectIdArrayEqual(trashedProject.trashed, [])
     })
   })
+
+  describe('ProjectAdminSettings', async function () {
+    it('publicAccessLevel can be set to private', async function () {
+      const { response } = await this.user.doRequest('POST', {
+        url: `/project/${this.projectId}/settings/admin`,
+        json: {
+          publicAccessLevel: 'private',
+        },
+      })
+      expect(response.statusCode).to.equal(204)
+      const project = await Project.findById(this.projectId).exec()
+      expect(project.publicAccesLevel).to.equal('private')
+    })
+    it('publicAccessLevel can be set to tokenBased', async function () {
+      await this.user.makePrivate(this.projectId)
+      const { response } = await this.user.doRequest('POST', {
+        url: `/project/${this.projectId}/settings/admin`,
+        json: {
+          publicAccessLevel: 'tokenBased',
+        },
+      })
+      expect(response.statusCode).to.equal(204)
+      const project = await Project.findById(this.projectId).exec()
+      expect(project.publicAccesLevel).to.equal('tokenBased')
+    })
+    it('returns a 400 when publicAccessLevel is set an unsupported access level', async function () {
+      await this.user.makePrivate(this.projectId)
+      const { response, body } = await this.user.doRequest('POST', {
+        url: `/project/${this.projectId}/settings/admin`,
+        json: {
+          publicAccessLevel: 'readOnly',
+        },
+      })
+      expect(response.statusCode).to.equal(400)
+      expect(body).to.include('Unexpected access level')
+      const project = await Project.findById(this.projectId).exec()
+      expect(project.publicAccesLevel).to.equal('private')
+    })
+    it('returns a 500 when no publicAccessLevel is provided', async function () {
+      const { response, body } = await this.user.doRequest('POST', {
+        url: `/project/${this.projectId}/settings/admin`,
+        json: {},
+      })
+      expect(response.statusCode).to.equal(500)
+      expect(body).to.equal('Internal Server Error')
+    })
+  })
 })
 
 function expectObjectIdArrayEqual(objectIdArray, stringArray) {

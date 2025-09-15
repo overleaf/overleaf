@@ -97,6 +97,15 @@ describe('CompileController', function () {
             done() {}
           },
         }),
+        // TODO: remove this once we remove Joi/Celebrate
+        celebrate: (this.celebrate = {
+          celebrate: sinon.stub(),
+          errors: sinon.stub(),
+          Joi: {
+            any: sinon.stub(),
+            extend: sinon.stub(),
+          },
+        }),
         './CompileManager': this.CompileManager,
         '../User/UserGetter': this.UserGetter,
         './ClsiManager': this.ClsiManager,
@@ -118,7 +127,7 @@ describe('CompileController', function () {
         },
       },
     })
-    this.projectId = 'project-id'
+    this.projectId = 'abc123def456abc123def456'
     this.build_id = '18fbe9e7564-30dcb2f71250c690'
     this.next = sinon.stub()
     this.req = new MockRequest()

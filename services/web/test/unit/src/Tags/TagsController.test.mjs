@@ -1,5 +1,6 @@
-import { assert, vi } from 'vitest'
+import { assert, beforeEach, describe, it, vi } from 'vitest'
 import sinon from 'sinon'
+import { ZodError } from 'zod'
 
 const modulePath = '../../../../app/src/Features/Tags/TagsController.mjs'
 
@@ -198,20 +199,11 @@ describe('TagsController', function () {
       })
     })
 
-    it('without a name', async function (ctx) {
-      await new Promise(resolve => {
-        ctx.req.body = { name: undefined }
-        ctx.TagsController.renameTag(ctx.req, {
-          status: code => {
-            assert.equal(code, 400)
-            sinon.assert.notCalled(ctx.TagsHandler.promises.renameTag)
-            resolve()
-            return {
-              end: () => {},
-            }
-          },
-        })
-      })
+    it('without a name', function (ctx) {
+      ctx.req.body = { name: undefined }
+      ctx.TagsController.renameTag(ctx.req, ctx.res).should.be.rejectedWith(
+        ZodError
+      )
     })
   })
 

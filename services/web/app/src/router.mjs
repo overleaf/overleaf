@@ -58,12 +58,10 @@ import SystemMessageController from './Features/SystemMessages/SystemMessageCont
 import AnalyticsRegistrationSourceMiddleware from './Features/Analytics/AnalyticsRegistrationSourceMiddleware.js'
 import AnalyticsUTMTrackingMiddleware from './Features/Analytics/AnalyticsUTMTrackingMiddleware.mjs'
 import CaptchaMiddleware from './Features/Captcha/CaptchaMiddleware.mjs'
-import { Joi, validate } from './infrastructure/Validation.js'
 import UnsupportedBrowserMiddleware from './infrastructure/UnsupportedBrowserMiddleware.js'
 import logger from '@overleaf/logger'
 import _ from 'lodash'
 import { plainTextResponse } from './infrastructure/Response.js'
-import PublicAccessLevels from './Features/Authorization/PublicAccessLevels.js'
 import SocketDiagnostics from './Features/SocketDiagnostics/SocketDiagnostics.mjs'
 import ClsiCacheController from './Features/Compile/ClsiCacheController.mjs'
 import AsyncLocalStorage from './infrastructure/AsyncLocalStorage.js'
@@ -305,12 +303,6 @@ async function initialize(webRouter, privateApiRouter, publicApiRouter) {
   webRouter.post(
     '/user/settings',
     AuthenticationController.requireLogin(),
-    validate({
-      body: Joi.object({
-        first_name: Joi.string().allow(null, '').max(255),
-        last_name: Joi.string().allow(null, '').max(255),
-      }).unknown(),
-    }),
     UserController.updateUserSettings
   )
   webRouter.post(
@@ -565,13 +557,6 @@ async function initialize(webRouter, privateApiRouter, publicApiRouter) {
   )
   webRouter.post(
     '/project/:Project_id/settings',
-    validate({
-      body: Joi.object({
-        publicAccessLevel: Joi.string()
-          .valid(PublicAccessLevels.PRIVATE, PublicAccessLevels.TOKEN_BASED)
-          .optional(),
-      }),
-    }),
     AuthorizationMiddleware.ensureUserCanWriteProjectSettings,
     ProjectController.updateProjectSettings
   )
@@ -659,7 +644,6 @@ async function initialize(webRouter, privateApiRouter, publicApiRouter) {
 
   webRouter.delete(
     '/project/:Project_id/output',
-    validate({ query: { clsiserverid: Joi.string() } }),
     AuthorizationMiddleware.ensureUserCanReadProject,
     CompileController.deleteAuxFiles
   )
@@ -675,7 +659,6 @@ async function initialize(webRouter, privateApiRouter, publicApiRouter) {
   )
   webRouter.get(
     '/project/:Project_id/wordcount',
-    validate({ query: { clsiserverid: Joi.string() } }),
     AuthorizationMiddleware.ensureUserCanReadProject,
     CompileController.wordCount
   )
@@ -817,35 +800,18 @@ async function initialize(webRouter, privateApiRouter, publicApiRouter) {
     '/tag',
     AuthenticationController.requireLogin(),
     RateLimiterMiddleware.rateLimit(rateLimiters.createTag),
-    validate({
-      body: Joi.object({
-        name: Joi.string().required(),
-        color: Joi.string(),
-      }),
-    }),
     TagsController.createTag
   )
   webRouter.post(
     '/tag/:tagId/rename',
     AuthenticationController.requireLogin(),
     RateLimiterMiddleware.rateLimit(rateLimiters.renameTag),
-    validate({
-      body: Joi.object({
-        name: Joi.string().required(),
-      }),
-    }),
     TagsController.renameTag
   )
   webRouter.post(
     '/tag/:tagId/edit',
     AuthenticationController.requireLogin(),
     RateLimiterMiddleware.rateLimit(rateLimiters.renameTag),
-    validate({
-      body: Joi.object({
-        name: Joi.string().required(),
-        color: Joi.string(),
-      }),
-    }),
     TagsController.editTag
   )
   webRouter.delete(
@@ -864,11 +830,6 @@ async function initialize(webRouter, privateApiRouter, publicApiRouter) {
     '/tag/:tagId/projects',
     AuthenticationController.requireLogin(),
     RateLimiterMiddleware.rateLimit(rateLimiters.addProjectsToTag),
-    validate({
-      body: Joi.object({
-        projectIds: Joi.array().items(Joi.string()).required(),
-      }),
-    }),
     TagsController.addProjectsToTag
   )
   webRouter.delete(
@@ -881,11 +842,6 @@ async function initialize(webRouter, privateApiRouter, publicApiRouter) {
     '/tag/:tagId/projects/remove',
     AuthenticationController.requireLogin(),
     RateLimiterMiddleware.rateLimit(rateLimiters.removeProjectsFromTag),
-    validate({
-      body: Joi.object({
-        projectIds: Joi.array().items(Joi.string()).required(),
-      }),
-    }),
     TagsController.removeProjectsFromTag
   )
 
@@ -996,22 +952,12 @@ async function initialize(webRouter, privateApiRouter, publicApiRouter) {
 
   webRouter.post(
     '/spelling/learn',
-    validate({
-      body: Joi.object({
-        word: Joi.string().required(),
-      }),
-    }),
     AuthenticationController.requireLogin(),
     SpellingController.learn
   )
 
   webRouter.post(
     '/spelling/unlearn',
-    validate({
-      body: Joi.object({
-        word: Joi.string().required(),
-      }),
-    }),
     AuthenticationController.requireLogin(),
     SpellingController.unlearn
   )

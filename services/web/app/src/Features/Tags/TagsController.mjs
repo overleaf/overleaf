@@ -1,6 +1,7 @@
 import TagsHandler from './TagsHandler.js'
 import SessionManager from '../Authentication/SessionManager.js'
 import Errors from '../Errors/Errors.js'
+import { z, validateReq } from '../../infrastructure/Validation.js'
 import { expressify } from '@overleaf/promise-utils'
 
 async function _getTags(userId, _req, res) {
@@ -21,9 +22,17 @@ async function getAllTags(req, res) {
   await _getTags(userId, req, res)
 }
 
+const createTagSchema = z.object({
+  body: z.object({
+    name: z.string(),
+    color: z.string().optional(),
+  }),
+})
+
 async function createTag(req, res) {
+  const { body } = validateReq(req, createTagSchema)
+  const { name, color } = body
   const userId = SessionManager.getLoggedInUserId(req.session)
-  const { name, color } = req.body
   const tag = await TagsHandler.promises.createTag(userId, name, color)
   res.json(tag)
 }
@@ -35,10 +44,20 @@ async function addProjectToTag(req, res) {
   res.status(204).end()
 }
 
+const addProjectsToTagSchema = z.object({
+  params: z.object({
+    tagId: z.string(),
+  }),
+  body: z.object({
+    projectIds: z.string().array(),
+  }),
+})
+
 async function addProjectsToTag(req, res) {
+  const { params, body } = validateReq(req, addProjectsToTagSchema)
+  const { tagId } = params
+  const { projectIds } = body
   const userId = SessionManager.getLoggedInUserId(req.session)
-  const { tagId } = req.params
-  const { projectIds } = req.body
   await TagsHandler.promises.addProjectsToTag(userId, tagId, projectIds)
   res.status(204).end()
 }
@@ -50,10 +69,20 @@ async function removeProjectFromTag(req, res, next) {
   res.status(204).end()
 }
 
+const removeProjectsFromTagSchema = z.object({
+  params: z.object({
+    tagId: z.string(),
+  }),
+  body: z.object({
+    projectIds: z.string().array(),
+  }),
+})
+
 async function removeProjectsFromTag(req, res, next) {
+  const { params, body } = validateReq(req, removeProjectsFromTagSchema)
+  const { tagId } = params
+  const { projectIds } = body
   const userId = SessionManager.getLoggedInUserId(req.session)
-  const { tagId } = req.params
-  const { projectIds } = req.body
   await TagsHandler.promises.removeProjectsFromTag(userId, tagId, projectIds)
   res.status(204).end()
 }
@@ -65,10 +94,20 @@ async function deleteTag(req, res) {
   res.status(204).end()
 }
 
+const renameTagSchema = z.object({
+  params: z.object({
+    tagId: z.string(),
+  }),
+  body: z.object({
+    name: z.string(),
+  }),
+})
+
 async function renameTag(req, res) {
+  const { params, body } = validateReq(req, renameTagSchema)
   const userId = SessionManager.getLoggedInUserId(req.session)
-  const { tagId } = req.params
-  const name = req.body?.name
+  const { tagId } = params
+  const name = body.name
   if (!name) {
     return res.status(400).end()
   }
@@ -76,11 +115,22 @@ async function renameTag(req, res) {
   res.status(204).end()
 }
 
+const editTagSchema = z.object({
+  params: z.object({
+    tagId: z.string(),
+  }),
+  body: z.object({
+    name: z.string(),
+    color: z.string().optional(),
+  }),
+})
+
 async function editTag(req, res) {
+  const { params, body } = validateReq(req, editTagSchema)
+  const { tagId } = params
+  const name = body.name
+  const color = body.color
   const userId = SessionManager.getLoggedInUserId(req.session)
-  const { tagId } = req.params
-  const name = req.body?.name
-  const color = req.body?.color
   if (!name) {
     return res.status(400).end()
   }

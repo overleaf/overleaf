@@ -505,6 +505,10 @@ describe('ProjectController', function () {
   })
 
   describe('updateProjectSettings', function () {
+    beforeEach(function (ctx) {
+      ctx.req.params.Project_id = ctx.project_id.toString()
+    })
+
     it('should update the name', async function (ctx) {
       await new Promise(resolve => {
         ctx.EditorController.promises.renameProject = sinon.stub().resolves()
@@ -570,7 +574,9 @@ describe('ProjectController', function () {
     it('should update the root doc', async function (ctx) {
       await new Promise(resolve => {
         ctx.EditorController.promises.setRootDoc = sinon.stub().resolves()
-        ctx.req.body = { rootDocId: (ctx.rootDocId = 'root-doc-id') }
+        ctx.req.body = {
+          rootDocId: (ctx.rootDocId = 'abc123def456abc123def456'),
+        }
         ctx.res.sendStatus = code => {
           ctx.EditorController.promises.setRootDoc
             .calledWith(ctx.project_id, ctx.rootDocId)
@@ -590,13 +596,14 @@ describe('ProjectController', function () {
       ctx.EditorController.promises.setPublicAccessLevel = sinon
         .stub()
         .resolves()
+      ctx.req.params.Project_id = ctx.project_id.toString()
       ctx.req.body = {
-        publicAccessLevel: 'readOnly',
+        publicAccessLevel: 'tokenBased',
       }
       await new Promise(resolve => {
         ctx.res.sendStatus = code => {
           ctx.EditorController.promises.setPublicAccessLevel
-            .calledWith(ctx.project_id, 'readOnly')
+            .calledWith(ctx.project_id, 'tokenBased')
             .should.equal(true)
           code.should.equal(204)
           resolve()
@@ -611,8 +618,9 @@ describe('ProjectController', function () {
         .stub()
         .resolves()
       ctx.req.body = {
-        publicAccessLevel: 'readOnly',
+        publicAccessLevel: 'tokenBased',
       }
+      ctx.req.params.Project_id = ctx.project_id.toString()
       await new Promise(resolve => {
         ctx.res.sendStatus = code => {
           ctx.ProjectAuditLogHandler.promises.addEntry
@@ -622,7 +630,7 @@ describe('ProjectController', function () {
               ctx.user._id,
               ctx.req.ip,
               {
-                publicAccessLevel: 'readOnly',
+                publicAccessLevel: 'tokenBased',
                 status: 'OK',
               }
             )
@@ -638,8 +646,9 @@ describe('ProjectController', function () {
       ctx.EditorController.promises.setPublicAccessLevel = sinon
         .stub()
         .resolves()
+      ctx.req.params.Project_id = ctx.project_id.toString()
       ctx.req.body = {
-        publicAccessLevel: 'readOnly',
+        publicAccessLevel: 'tokenBased',
       }
       await new Promise(resolve => {
         ctx.res.sendStatus = code => {
@@ -740,6 +749,7 @@ describe('ProjectController', function () {
     beforeEach(function (ctx) {
       ctx.newProjectName = 'my supper great new project'
       ctx.req.body.newProjectName = ctx.newProjectName
+      ctx.req.params.Project_id = ctx.project_id.toString()
     })
 
     it('should call the editor controller', async function (ctx) {
@@ -747,9 +757,16 @@ describe('ProjectController', function () {
         ctx.EditorController.promises.renameProject.resolves()
         ctx.res.sendStatus = code => {
           code.should.equal(200)
-          ctx.EditorController.promises.renameProject
-            .calledWith(ctx.project_id, ctx.newProjectName)
-            .should.equal(true)
+
+          expect(ctx.EditorController.promises.renameProject).to.have.been
+            .called
+          expect(
+            ctx.EditorController.promises.renameProject.args[0][0].toString()
+          ).to.equal(ctx.project_id.toString())
+          expect(
+            ctx.EditorController.promises.renameProject.args[0][1]
+          ).to.equal(ctx.newProjectName)
+
           resolve()
         }
         ctx.ProjectController.renameProject(ctx.req, ctx.res)
