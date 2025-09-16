@@ -5,7 +5,7 @@ import { isSplitTestEnabled, getSplitTestVariant } from '@/utils/splitTestUtils'
 // TODO: change this when we have a launch date
 const NEW_USER_CUTOFF_DATE = new Date('2100-01-01')
 
-const isNewUser = () => {
+export const isNewUser = () => {
   const user = getMeta('ol-user')
 
   if (!user.signUpDate) return false

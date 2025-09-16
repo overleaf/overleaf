@@ -11,7 +11,11 @@ import {
   populateEditorRedesignSegmentation,
   useEditorAnalytics,
 } from '@/shared/hooks/use-editor-analytics'
-import { useIsNewEditorEnabled } from '@/features/ide-redesign/utils/new-editor-utils'
+import {
+  isNewUser,
+  useIsNewEditorEnabled,
+} from '@/features/ide-redesign/utils/new-editor-utils'
+import { getSplitTestVariant } from '@/utils/splitTestUtils'
 
 function TimeoutUpgradePromptNew() {
   const {
@@ -75,6 +79,22 @@ const CompileTimeout = memo(function CompileTimeout({
 }: CompileTimeoutProps) {
   const { t } = useTranslation()
 
+  const extraSearchParams = useMemo(() => {
+    if (!isNewUser()) {
+      return undefined
+    }
+
+    const variant = getSplitTestVariant('editor-redesign-new-users')
+
+    if (!variant) {
+      return undefined
+    }
+
+    return {
+      itm_content: variant,
+    }
+  }, [])
+
   return (
     <PdfLogEntry
       autoExpand
@@ -110,6 +130,7 @@ const CompileTimeout = memo(function CompileTimeout({
                   source="compile-timeout"
                   buttonProps={{ variant: 'primary', className: 'w-100' }}
                   segmentation={segmentation}
+                  extraSearchParams={extraSearchParams}
                 >
                   {t('start_a_free_trial')}
                 </StartFreeTrialButton>

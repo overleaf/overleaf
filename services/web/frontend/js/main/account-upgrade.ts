@@ -3,7 +3,8 @@ import * as eventTracking from '../infrastructure/event-tracking'
 export function startFreeTrial(
   source: string,
   variant?: string,
-  segmentation?: eventTracking.Segmentation
+  segmentation?: eventTracking.Segmentation,
+  extraSearchParams?: Record<string, string>
 ) {
   const eventSegmentation: Record<string, string> = {
     'paywall-type': source,
@@ -18,6 +19,7 @@ export function startFreeTrial(
 
   const searchParams = new URLSearchParams({
     itm_campaign: source,
+    ...extraSearchParams,
   })
 
   window.open(`/user/subscription/choose-your-plan?${searchParams.toString()}`)
