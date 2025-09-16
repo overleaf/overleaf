@@ -87,7 +87,7 @@ async function deleteNotification(userId, notificationId, notificationKey) {
     await fetchNothing(deleteByKeyUrl, {
       signal: AbortSignal.timeout(5000),
       method: 'DELETE',
-      body: {
+      json: {
         key: notificationKey,
       },
     })
