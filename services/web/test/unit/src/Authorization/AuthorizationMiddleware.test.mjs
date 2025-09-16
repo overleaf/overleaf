@@ -1,26 +1,27 @@
-const sinon = require('sinon')
-const { expect } = require('chai')
-const SandboxedModule = require('sandboxed-module')
-const { ObjectId } = require('mongodb-legacy')
-const Errors = require('../../../../app/src/Features/Errors/Errors')
+import { vi, expect } from 'vitest'
+import sinon from 'sinon'
+import mongodb from 'mongodb-legacy'
+import Errors from '../../../../app/src/Features/Errors/Errors.js'
+
+const { ObjectId } = mongodb
 
 const MODULE_PATH =
-  '../../../../app/src/Features/Authorization/AuthorizationMiddleware.js'
+  '../../../../app/src/Features/Authorization/AuthorizationMiddleware.mjs'
 
 describe('AuthorizationMiddleware', function () {
-  beforeEach(function () {
-    this.userId = new ObjectId().toString()
-    this.project_id = new ObjectId().toString()
-    this.doc_id = new ObjectId().toString()
-    this.thread_id = new ObjectId().toString()
-    this.token = 'some-token'
-    this.AuthenticationController = {}
-    this.SessionManager = {
+  beforeEach(async function (ctx) {
+    ctx.userId = new ObjectId().toString()
+    ctx.project_id = new ObjectId().toString()
+    ctx.doc_id = new ObjectId().toString()
+    ctx.thread_id = new ObjectId().toString()
+    ctx.token = 'some-token'
+    ctx.AuthenticationController = {}
+    ctx.SessionManager = {
       getSessionUser: sinon.stub().returns(null),
-      getLoggedInUserId: sinon.stub().returns(this.userId),
+      getLoggedInUserId: sinon.stub().returns(ctx.userId),
       isUserLoggedIn: sinon.stub().returns(true),
     }
-    this.AuthorizationManager = {
+    ctx.AuthorizationManager = {
       promises: {
         canUserReadProject: sinon.stub(),
         canUserWriteProjectSettings: sinon.stub(),
@@ -33,46 +34,88 @@ describe('AuthorizationMiddleware', function () {
         isRestrictedUserForProject: sinon.stub(),
       },
     }
-    this.HttpErrorHandler = {
+    ctx.HttpErrorHandler = {
       forbidden: sinon.stub(),
     }
-    this.TokenAccessHandler = {
-      getRequestToken: sinon.stub().returns(this.token),
+    ctx.TokenAccessHandler = {
+      getRequestToken: sinon.stub().returns(ctx.token),
     }
-    this.DocumentUpdaterHandler = {
+    ctx.DocumentUpdaterHandler = {
       promises: {
         getComment: sinon.stub().resolves(),
       },
     }
-    this.AuthorizationMiddleware = SandboxedModule.require(MODULE_PATH, {
-      requires: {
-        './AuthorizationManager': this.AuthorizationManager,
-        '../Errors/HttpErrorHandler': this.HttpErrorHandler,
-        'mongodb-legacy': { ObjectId },
-        '../Authentication/AuthenticationController':
-          this.AuthenticationController,
-        '../Authentication/SessionManager': this.SessionManager,
-        '../TokenAccess/TokenAccessHandler': this.TokenAccessHandler,
-        '../Helpers/AdminAuthorizationHelper': {
+
+    vi.doMock('../../../../app/src/Features/Errors/Errors.js', () => ({
+      default: Errors,
+    }))
+
+    vi.doMock(
+      '../../../../app/src/Features/Authorization/AuthorizationManager',
+      () => ({
+        default: ctx.AuthorizationManager,
+      })
+    )
+
+    vi.doMock('../../../../app/src/Features/Errors/HttpErrorHandler', () => ({
+      default: ctx.HttpErrorHandler,
+    }))
+
+    vi.doMock('mongodb-legacy', () => ({
+      default: { ObjectId },
+    }))
+
+    vi.doMock(
+      '../../../../app/src/Features/Authentication/AuthenticationController',
+      () => ({
+        default: ctx.AuthenticationController,
+      })
+    )
+
+    vi.doMock(
+      '../../../../app/src/Features/Authentication/SessionManager',
+      () => ({
+        default: ctx.SessionManager,
+      })
+    )
+
+    vi.doMock(
+      '../../../../app/src/Features/TokenAccess/TokenAccessHandler',
+      () => ({
+        default: ctx.TokenAccessHandler,
+      })
+    )
+
+    vi.doMock(
+      '../../../../app/src/Features/Helpers/AdminAuthorizationHelper',
+      () => ({
+        default: {
           canRedirectToAdminDomain: sinon.stub().returns(false),
         },
-        '../DocumentUpdater/DocumentUpdaterHandler':
-          this.DocumentUpdaterHandler,
-      },
-    })
-    this.req = {
+      })
+    )
+
+    vi.doMock(
+      '../../../../app/src/Features/DocumentUpdater/DocumentUpdaterHandler',
+      () => ({
+        default: ctx.DocumentUpdaterHandler,
+      })
+    )
+
+    ctx.AuthorizationMiddleware = (await import(MODULE_PATH)).default
+    ctx.req = {
       params: {
-        project_id: this.project_id,
+        project_id: ctx.project_id,
       },
       body: {},
     }
-    this.res = {
+    ctx.res = {
       redirect: sinon.stub(),
       locals: {
         currentUrl: '/current/url',
       },
     }
-    this.next = sinon.stub()
+    ctx.next = sinon.stub()
   })
 
   describe('ensureCanReadProject', function () {
@@ -94,13 +137,13 @@ describe('AuthorizationMiddleware', function () {
   })
 
   describe('ensureUserCanDeleteOrResolveThread', function () {
-    beforeEach(function () {
-      this.req.params.thread_id = this.thread_id
+    beforeEach(function (ctx) {
+      ctx.req.params.thread_id = ctx.thread_id
     })
     describe('when user has permission', function () {
-      beforeEach(function () {
-        this.AuthorizationManager.promises.canUserDeleteOrResolveThread
-          .withArgs(this.userId, this.project_id, this.thread_id, this.token)
+      beforeEach(function (ctx) {
+        ctx.AuthorizationManager.promises.canUserDeleteOrResolveThread
+          .withArgs(ctx.userId, ctx.project_id, ctx.thread_id, ctx.token)
           .resolves(true)
       })
 
@@ -109,9 +152,9 @@ describe('AuthorizationMiddleware', function () {
     })
 
     describe("when user doesn't have permission", function () {
-      beforeEach(function () {
-        this.AuthorizationManager.promises.canUserDeleteOrResolveThread
-          .withArgs(this.userId, this.project_id, this.thread_id, this.token)
+      beforeEach(function (ctx) {
+        ctx.AuthorizationManager.promises.canUserDeleteOrResolveThread
+          .withArgs(ctx.userId, ctx.project_id, ctx.thread_id, ctx.token)
           .resolves(false)
       })
 
@@ -122,8 +165,8 @@ describe('AuthorizationMiddleware', function () {
 
   describe('ensureUserCanWriteProjectSettings', function () {
     describe('when renaming a project', function () {
-      beforeEach(function () {
-        this.req.body.name = 'new project name'
+      beforeEach(function (ctx) {
+        ctx.req.body.name = 'new project name'
       })
 
       testMiddleware(
@@ -133,8 +176,8 @@ describe('AuthorizationMiddleware', function () {
     })
 
     describe('when setting another parameter', function () {
-      beforeEach(function () {
-        this.req.body.compiler = 'texlive-2017'
+      beforeEach(function (ctx) {
+        ctx.req.body.compiler = 'texlive-2017'
       })
 
       testMiddleware(
@@ -201,18 +244,18 @@ describe('AuthorizationMiddleware', function () {
   })
 
   describe('ensureUserCanReadMultipleProjects', function () {
-    beforeEach(function () {
-      this.req.query = { project_ids: 'project1,project2' }
+    beforeEach(function (ctx) {
+      ctx.req.query = { project_ids: 'project1,project2' }
     })
 
     describe('with logged in user', function () {
       describe('when user has permission to access all projects', function () {
-        beforeEach(function () {
-          this.AuthorizationManager.promises.canUserReadProject
-            .withArgs(this.userId, 'project1', this.token)
+        beforeEach(function (ctx) {
+          ctx.AuthorizationManager.promises.canUserReadProject
+            .withArgs(ctx.userId, 'project1', ctx.token)
             .resolves(true)
-          this.AuthorizationManager.promises.canUserReadProject
-            .withArgs(this.userId, 'project2', this.token)
+          ctx.AuthorizationManager.promises.canUserReadProject
+            .withArgs(ctx.userId, 'project2', ctx.token)
             .resolves(true)
         })
 
@@ -221,12 +264,12 @@ describe('AuthorizationMiddleware', function () {
       })
 
       describe("when user doesn't have permission to access one of the projects", function () {
-        beforeEach(function () {
-          this.AuthorizationManager.promises.canUserReadProject
-            .withArgs(this.userId, 'project1', this.token)
+        beforeEach(function (ctx) {
+          ctx.AuthorizationManager.promises.canUserReadProject
+            .withArgs(ctx.userId, 'project1', ctx.token)
             .resolves(true)
-          this.AuthorizationManager.promises.canUserReadProject
-            .withArgs(this.userId, 'project2', this.token)
+          ctx.AuthorizationManager.promises.canUserReadProject
+            .withArgs(ctx.userId, 'project2', ctx.token)
             .resolves(false)
         })
 
@@ -238,12 +281,12 @@ describe('AuthorizationMiddleware', function () {
     describe('with oauth user', function () {
       setupOAuthUser()
 
-      beforeEach(function () {
-        this.AuthorizationManager.promises.canUserReadProject
-          .withArgs(this.userId, 'project1', this.token)
+      beforeEach(function (ctx) {
+        ctx.AuthorizationManager.promises.canUserReadProject
+          .withArgs(ctx.userId, 'project1', ctx.token)
           .resolves(true)
-        this.AuthorizationManager.promises.canUserReadProject
-          .withArgs(this.userId, 'project2', this.token)
+        ctx.AuthorizationManager.promises.canUserReadProject
+          .withArgs(ctx.userId, 'project2', ctx.token)
           .resolves(true)
       })
 
@@ -256,12 +299,12 @@ describe('AuthorizationMiddleware', function () {
 
       describe('when user has permission', function () {
         describe('when user has permission to access all projects', function () {
-          beforeEach(function () {
-            this.AuthorizationManager.promises.canUserReadProject
-              .withArgs(null, 'project1', this.token)
+          beforeEach(function (ctx) {
+            ctx.AuthorizationManager.promises.canUserReadProject
+              .withArgs(null, 'project1', ctx.token)
               .resolves(true)
-            this.AuthorizationManager.promises.canUserReadProject
-              .withArgs(null, 'project2', this.token)
+            ctx.AuthorizationManager.promises.canUserReadProject
+              .withArgs(null, 'project2', ctx.token)
               .resolves(true)
           })
 
@@ -270,12 +313,12 @@ describe('AuthorizationMiddleware', function () {
         })
 
         describe("when user doesn't have permission to access one of the projects", function () {
-          beforeEach(function () {
-            this.AuthorizationManager.promises.canUserReadProject
-              .withArgs(null, 'project1', this.token)
+          beforeEach(function (ctx) {
+            ctx.AuthorizationManager.promises.canUserReadProject
+              .withArgs(null, 'project1', ctx.token)
               .resolves(true)
-            this.AuthorizationManager.promises.canUserReadProject
-              .withArgs(null, 'project2', this.token)
+            ctx.AuthorizationManager.promises.canUserReadProject
+              .withArgs(null, 'project2', ctx.token)
               .resolves(false)
           })
 
@@ -350,99 +393,101 @@ function testMiddleware(middleware, permission) {
 }
 
 function setupAnonymousUser() {
-  beforeEach('set up anonymous user', function () {
-    this.SessionManager.getLoggedInUserId.returns(null)
-    this.SessionManager.isUserLoggedIn.returns(false)
+  beforeEach(function (ctx) {
+    ctx.SessionManager.getLoggedInUserId.returns(null)
+    ctx.SessionManager.isUserLoggedIn.returns(false)
   })
 }
 
 function setupOAuthUser() {
-  beforeEach('set up oauth user', function () {
-    this.SessionManager.getLoggedInUserId.returns(null)
-    this.req.oauth_user = { _id: this.userId }
+  beforeEach(function (ctx) {
+    ctx.SessionManager.getLoggedInUserId.returns(null)
+    ctx.req.oauth_user = { _id: ctx.userId }
   })
 }
 
 function setupPermission(permission, value) {
-  beforeEach(`set permission ${permission} to ${value}`, function () {
-    this.AuthorizationManager.promises[permission]
-      .withArgs(this.userId, this.project_id, this.token)
+  beforeEach(function (ctx) {
+    ctx.AuthorizationManager.promises[permission]
+      .withArgs(ctx.userId, ctx.project_id, ctx.token)
       .resolves(value)
   })
 }
 
 function setupAnonymousPermission(permission, value) {
-  beforeEach(`set anonymous permission ${permission} to ${value}`, function () {
-    this.AuthorizationManager.promises[permission]
-      .withArgs(null, this.project_id, this.token)
+  beforeEach(function (ctx) {
+    ctx.AuthorizationManager.promises[permission]
+      .withArgs(null, ctx.project_id, ctx.token)
       .resolves(value)
   })
 }
 
 function setupSiteAdmin(value) {
-  beforeEach(`set site admin to ${value}`, function () {
-    this.AuthorizationManager.promises.isUserSiteAdmin
-      .withArgs(this.userId)
+  beforeEach(function (ctx) {
+    ctx.AuthorizationManager.promises.isUserSiteAdmin
+      .withArgs(ctx.userId)
       .resolves(value)
   })
 }
 
 function setupMissingProjectId() {
-  beforeEach('set up missing project id', function () {
-    delete this.req.params.project_id
+  beforeEach(function (ctx) {
+    delete ctx.req.params.project_id
   })
 }
 
 function setupMalformedProjectId() {
-  beforeEach('set up malformed project id', function () {
-    this.req.params = { project_id: 'bad-project-id' }
+  beforeEach(function (ctx) {
+    ctx.req.params = { project_id: 'bad-project-id' }
   })
 }
 
 function invokeMiddleware(method) {
-  beforeEach(`invoke ${method}`, function (done) {
-    this.next.callsFake(() => done())
-    this.HttpErrorHandler.forbidden.callsFake(() => done())
-    this.res.redirect.callsFake(() => done())
-    this.AuthorizationMiddleware[method](this.req, this.res, this.next)
+  beforeEach(async function (ctx) {
+    await new Promise(resolve => {
+      ctx.next.callsFake(() => resolve())
+      ctx.HttpErrorHandler.forbidden.callsFake(() => resolve())
+      ctx.res.redirect.callsFake(() => resolve())
+      ctx.AuthorizationMiddleware[method](ctx.req, ctx.res, ctx.next)
+    })
   })
 }
 
 function expectNext() {
-  it('calls the next middleware', function () {
-    expect(this.next).to.have.been.calledWithExactly()
+  it('calls the next middleware', function (ctx) {
+    expect(ctx.next).to.have.been.calledWithExactly()
   })
 }
 
 function expectError() {
-  it('calls the error middleware', function () {
-    expect(this.next).to.have.been.calledWith(sinon.match.instanceOf(Error))
+  it('calls the error middleware', function (ctx) {
+    expect(ctx.next).to.have.been.calledWith(sinon.match.instanceOf(Error))
   })
 }
 
 function expectNotFound() {
-  it('raises a 404', function () {
-    expect(this.next).to.have.been.calledWith(
+  it('raises a 404', function (ctx) {
+    expect(ctx.next).to.have.been.calledWith(
       sinon.match.instanceOf(Errors.NotFoundError)
     )
   })
 }
 
 function expectForbidden() {
-  it('raises a 403', function () {
-    expect(this.HttpErrorHandler.forbidden).to.have.been.calledWith(
-      this.req,
-      this.res
+  it('raises a 403', function (ctx) {
+    expect(ctx.HttpErrorHandler.forbidden).to.have.been.calledWith(
+      ctx.req,
+      ctx.res
     )
-    expect(this.next).not.to.have.been.called
+    expect(ctx.next).not.to.have.been.called
   })
 }
 
 function expectRedirectToRestricted() {
-  it('redirects to restricted', function () {
-    expect(this.res.redirect).to.have.been.calledWith(
+  it('redirects to restricted', function (ctx) {
+    expect(ctx.res.redirect).to.have.been.calledWith(
       '/restricted?from=%2Fcurrent%2Furl'
     )
-    expect(this.next).not.to.have.been.called
+    expect(ctx.next).not.to.have.been.called
   })
 }

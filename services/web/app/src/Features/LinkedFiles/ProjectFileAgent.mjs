@@ -15,7 +15,7 @@ import ProjectLocator from '../Project/ProjectLocator.js'
 import DocstoreManager from '../Docstore/DocstoreManager.js'
 import DocumentUpdaterHandler from '../DocumentUpdater/DocumentUpdaterHandler.js'
 import _ from 'lodash'
-import LinkedFilesHandler from './LinkedFilesHandler.js'
+import LinkedFilesHandler from './LinkedFilesHandler.mjs'
 
 import {
   BadDataError,

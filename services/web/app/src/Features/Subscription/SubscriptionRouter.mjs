@@ -1,5 +1,5 @@
 import AuthenticationController from '../Authentication/AuthenticationController.js'
-import PermissionsController from '../Authorization/PermissionsController.js'
+import PermissionsController from '../Authorization/PermissionsController.mjs'
 import SubscriptionController from './SubscriptionController.js'
 import SubscriptionGroupController from './SubscriptionGroupController.mjs'
 import TeamInvitesController from './TeamInvitesController.mjs'

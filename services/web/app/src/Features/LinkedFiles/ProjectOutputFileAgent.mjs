@@ -9,7 +9,7 @@ import {
   AccessDeniedError,
 } from './LinkedFilesErrors.js'
 import { OutputFileFetchFailedError } from '../Errors/Errors.js'
-import LinkedFilesHandler from './LinkedFilesHandler.js'
+import LinkedFilesHandler from './LinkedFilesHandler.mjs'
 import { promisify } from '@overleaf/promise-utils'
 
 function _prepare(projectId, linkedFileData, userId, callback) {

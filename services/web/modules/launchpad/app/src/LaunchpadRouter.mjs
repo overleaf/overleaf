@@ -2,7 +2,7 @@ import logger from '@overleaf/logger'
 
 import LaunchpadController from './LaunchpadController.mjs'
 import AuthenticationController from '../../../../app/src/Features/Authentication/AuthenticationController.js'
-import AuthorizationMiddleware from '../../../../app/src/Features/Authorization/AuthorizationMiddleware.js'
+import AuthorizationMiddleware from '../../../../app/src/Features/Authorization/AuthorizationMiddleware.mjs'
 
 export default {
   apply(webRouter) {

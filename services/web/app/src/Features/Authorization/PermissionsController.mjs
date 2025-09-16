@@ -1,15 +1,9 @@
 // @ts-check
-const { ForbiddenError, UserNotFoundError } = require('../Errors/Errors')
-const {
-  getUserCapabilities,
-  getUserRestrictions,
-  combineGroupPolicies,
-  combineAllowedProperties,
-} = require('./PermissionsManager')
-const { assertUserPermissions } = require('./PermissionsManager').promises
-const Modules = require('../../infrastructure/Modules')
-const { expressify } = require('@overleaf/promise-utils')
-const Features = require('../../infrastructure/Features')
+import { ForbiddenError, UserNotFoundError } from '../Errors/Errors.js'
+import PermissionsManager from './PermissionsManager.js'
+import Modules from '../../infrastructure/Modules.js'
+import { expressify } from '@overleaf/promise-utils'
+import Features from '../../infrastructure/Features.js'
 
 /**
  * @typedef {(import('express').Request)} Request
@@ -17,6 +11,14 @@ const Features = require('../../infrastructure/Features')
  * @typedef {(import('express').NextFunction)} NextFunction
  * @typedef {import('./PermissionsManager').Capability} Capability
  */
+
+const {
+  getUserCapabilities,
+  getUserRestrictions,
+  combineGroupPolicies,
+  combineAllowedProperties,
+  promises: { assertUserPermissions },
+} = PermissionsManager
 
 /**
  * Function that returns middleware to add an `assertPermission` function to the request object to check if the user has a specific capability.
@@ -116,7 +118,7 @@ function requirePermission(...requiredCapabilities) {
   return doRequest
 }
 
-module.exports = {
+export default {
   requirePermission,
   useCapabilities,
 }

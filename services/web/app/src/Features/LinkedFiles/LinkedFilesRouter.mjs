@@ -1,4 +1,4 @@
-import AuthorizationMiddleware from '../Authorization/AuthorizationMiddleware.js'
+import AuthorizationMiddleware from '../Authorization/AuthorizationMiddleware.mjs'
 import AuthenticationController from '../Authentication/AuthenticationController.js'
 import { RateLimiter } from '../../infrastructure/RateLimiter.js'
 import RateLimiterMiddleware from '../Security/RateLimiterMiddleware.js'

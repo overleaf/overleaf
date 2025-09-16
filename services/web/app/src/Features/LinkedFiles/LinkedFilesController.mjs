@@ -14,7 +14,7 @@ import SessionManager from '../Authentication/SessionManager.js'
 import Settings from '@overleaf/settings'
 import _ from 'lodash'
 import AnalyticsManager from '../../../../app/src/Features/Analytics/AnalyticsManager.js'
-import LinkedFilesHandler from './LinkedFilesHandler.js'
+import LinkedFilesHandler from './LinkedFilesHandler.mjs'
 import {
   CompileFailedError,
   UrlFetchFailedError,

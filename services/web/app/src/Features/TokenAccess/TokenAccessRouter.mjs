@@ -1,5 +1,5 @@
 import AuthenticationController from '../Authentication/AuthenticationController.js'
-import AuthorizationMiddleware from '../Authorization/AuthorizationMiddleware.js'
+import AuthorizationMiddleware from '../Authorization/AuthorizationMiddleware.mjs'
 import TokenAccessController from './TokenAccessController.mjs'
 
 export default {

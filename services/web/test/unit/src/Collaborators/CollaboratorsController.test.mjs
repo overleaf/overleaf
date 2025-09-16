@@ -141,7 +141,7 @@ describe('CollaboratorsController', function () {
     )
 
     vi.doMock(
-      '../../../../app/src/Features/Project/ProjectAuditLogHandler.js',
+      '../../../../app/src/Features/Project/ProjectAuditLogHandler.mjs',
       () => ({
         default: ctx.ProjectAuditLogHandler,
       })

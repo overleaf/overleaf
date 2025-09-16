@@ -1,14 +1,14 @@
-const FileWriter = require('../../infrastructure/FileWriter')
-const EditorController = require('../Editor/EditorController')
-const ProjectLocator = require('../Project/ProjectLocator')
-const { Project } = require('../../models/Project')
-const ProjectGetter = require('../Project/ProjectGetter')
-const {
+import FileWriter from '../../infrastructure/FileWriter.js'
+import EditorController from '../Editor/EditorController.js'
+import ProjectLocator from '../Project/ProjectLocator.js'
+import { Project } from '../../models/Project.js'
+import ProjectGetter from '../Project/ProjectGetter.js'
+import {
   ProjectNotFoundError,
   V1ProjectNotFoundError,
   BadDataError,
-} = require('./LinkedFilesErrors')
-const { callbackifyAll } = require('@overleaf/promise-utils')
+} from './LinkedFilesErrors.js'
+import { callbackifyAll } from '@overleaf/promise-utils'
 
 const LinkedFilesHandler = {
   async getFileById(projectId, fileId) {
@@ -100,7 +100,7 @@ const LinkedFilesHandler = {
   },
 }
 
-module.exports = {
+export default {
   promises: LinkedFilesHandler,
   ...callbackifyAll(LinkedFilesHandler, {
     multiResult: { getFileById: ['file', 'path', 'parentFolder'] },

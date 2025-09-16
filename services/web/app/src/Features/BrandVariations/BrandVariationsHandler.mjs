@@ -1,12 +1,12 @@
-const OError = require('@overleaf/o-error')
-const { URL } = require('url')
-const settings = require('@overleaf/settings')
-const logger = require('@overleaf/logger')
-const V1Api = require('../V1/V1Api')
-const sanitizeHtml = require('sanitize-html')
-const { promisify } = require('@overleaf/promise-utils')
+import OError from '@overleaf/o-error'
+import { URL } from 'node:url'
+import settings from '@overleaf/settings'
+import logger from '@overleaf/logger'
+import V1Api from '../V1/V1Api.js'
+import sanitizeHtml from 'sanitize-html'
+import { promisify } from '@overleaf/promise-utils'
 
-module.exports = {
+export default {
   getBrandVariationById,
   promises: {
     getBrandVariationById: promisify(getBrandVariationById),

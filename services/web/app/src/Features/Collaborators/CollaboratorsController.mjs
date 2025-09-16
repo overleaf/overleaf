@@ -12,7 +12,7 @@ import logger from '@overleaf/logger'
 import { expressify } from '@overleaf/promise-utils'
 import { hasAdminAccess } from '../Helpers/AdminAuthorizationHelper.js'
 import TokenAccessHandler from '../TokenAccess/TokenAccessHandler.js'
-import ProjectAuditLogHandler from '../Project/ProjectAuditLogHandler.js'
+import ProjectAuditLogHandler from '../Project/ProjectAuditLogHandler.mjs'
 import LimitationsManager from '../Subscription/LimitationsManager.js'
 import Features from '../../infrastructure/Features.js'
 

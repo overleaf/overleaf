@@ -1,21 +1,26 @@
-const AuthorizationManager = require('./AuthorizationManager')
-const logger = require('@overleaf/logger')
-const { ObjectId } = require('mongodb-legacy')
-const Errors = require('../Errors/Errors')
-const HttpErrorHandler = require('../Errors/HttpErrorHandler')
-const AuthenticationController = require('../Authentication/AuthenticationController')
-const SessionManager = require('../Authentication/SessionManager')
-const TokenAccessHandler = require('../TokenAccess/TokenAccessHandler')
-const { expressify } = require('@overleaf/promise-utils')
-const {
-  canRedirectToAdminDomain,
-} = require('../Helpers/AdminAuthorizationHelper')
-const { getSafeAdminDomainRedirect } = require('../Helpers/UrlHelper')
+import AuthorizationManager from './AuthorizationManager.js'
+import logger from '@overleaf/logger'
+import mongodb from 'mongodb-legacy'
+
+import Errors from '../Errors/Errors.js'
+import HttpErrorHandler from '../Errors/HttpErrorHandler.js'
+import AuthenticationController from '../Authentication/AuthenticationController.js'
+import SessionManager from '../Authentication/SessionManager.js'
+import TokenAccessHandler from '../TokenAccess/TokenAccessHandler.js'
+import { expressify } from '@overleaf/promise-utils'
+import AdminAuthorizationHelper from '../Helpers/AdminAuthorizationHelper.js'
+import UrlHelper from '../Helpers/UrlHelper.js'
+
+const { ObjectId } = mongodb
 
 function _handleAdminDomainRedirect(req, res) {
-  if (canRedirectToAdminDomain(SessionManager.getSessionUser(req.session))) {
+  if (
+    AdminAuthorizationHelper.canRedirectToAdminDomain(
+      SessionManager.getSessionUser(req.session)
+    )
+  ) {
     logger.warn({ req }, 'redirecting admin user to admin domain')
-    res.redirect(getSafeAdminDomainRedirect(req.originalUrl))
+    res.redirect(UrlHelper.getSafeAdminDomainRedirect(req.originalUrl))
     return true
   }
   return false
@@ -255,7 +260,7 @@ function restricted(req, res, next) {
   res.redirect('/login')
 }
 
-module.exports = {
+export default {
   ensureUserCanReadMultipleProjects: expressify(
     ensureUserCanReadMultipleProjects
   ),

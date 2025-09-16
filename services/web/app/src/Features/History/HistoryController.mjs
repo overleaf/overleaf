@@ -22,7 +22,7 @@ import Errors from '../Errors/Errors.js'
 import HistoryManager from './HistoryManager.js'
 import ProjectDetailsHandler from '../Project/ProjectDetailsHandler.js'
 import ProjectEntityUpdateHandler from '../Project/ProjectEntityUpdateHandler.js'
-import RestoreManager from './RestoreManager.js'
+import RestoreManager from './RestoreManager.mjs'
 import { prepareZipAttachment } from '../../infrastructure/Response.js'
 import Features from '../../infrastructure/Features.js'
 

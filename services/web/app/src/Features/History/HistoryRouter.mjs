@@ -4,7 +4,7 @@ import Settings from '@overleaf/settings'
 import { Joi, validate } from '../../infrastructure/Validation.js'
 import { RateLimiter } from '../../infrastructure/RateLimiter.js'
 import AuthenticationController from '../Authentication/AuthenticationController.js'
-import AuthorizationMiddleware from '../Authorization/AuthorizationMiddleware.js'
+import AuthorizationMiddleware from '../Authorization/AuthorizationMiddleware.mjs'
 import RateLimiterMiddleware from '../Security/RateLimiterMiddleware.js'
 import HistoryController from './HistoryController.mjs'
 

@@ -1,7 +1,7 @@
 import logger from '@overleaf/logger'
 import urlValidator from 'valid-url'
 import { InvalidUrlError, UrlFetchFailedError } from './LinkedFilesErrors.js'
-import LinkedFilesHandler from './LinkedFilesHandler.js'
+import LinkedFilesHandler from './LinkedFilesHandler.mjs'
 import UrlHelper from '../Helpers/UrlHelper.js'
 import { fetchStream, RequestFailedError } from '@overleaf/fetch-utils'
 import { callbackify } from '@overleaf/promise-utils'

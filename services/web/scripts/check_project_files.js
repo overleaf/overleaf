@@ -70,7 +70,7 @@ function findPathCounts(projectId, docEntries, fileEntries) {
   return pathCounts
 }
 
-// copied from services/web/app/src/Features/Project/ProjectDuplicator.js
+// copied from services/web/app/src/Features/Project/ProjectDuplicator.mjs
 function _getFolderEntries(folder, folderPath = '/') {
   const docEntries = []
   const fileEntries = []

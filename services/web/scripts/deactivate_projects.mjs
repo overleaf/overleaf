@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import minimist from 'minimist'
 import PQueue from 'p-queue'
-import InactiveProjectManager from '../app/src/Features/InactiveData/InactiveProjectManager.js'
+import InactiveProjectManager from '../app/src/Features/InactiveData/InactiveProjectManager.mjs'
 import { gracefulShutdown } from '../app/src/infrastructure/GracefulShutdown.js'
 import logger from '@overleaf/logger'
 

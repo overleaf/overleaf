@@ -106,9 +106,12 @@ describe('HistoryController', function () {
       default: (ctx.ProjectGetter = {}),
     }))
 
-    vi.doMock('../../../../app/src/Features/History/RestoreManager.js', () => ({
-      default: (ctx.RestoreManager = {}),
-    }))
+    vi.doMock(
+      '../../../../app/src/Features/History/RestoreManager.mjs',
+      () => ({
+        default: (ctx.RestoreManager = {}),
+      })
+    )
 
     vi.doMock('../../../../app/src/infrastructure/Features.js', () => ({
       default: (ctx.Features = sinon.stub().withArgs('saas').returns(true)),

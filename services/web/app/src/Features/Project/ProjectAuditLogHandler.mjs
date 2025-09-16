@@ -1,8 +1,8 @@
-const logger = require('@overleaf/logger')
-const { ProjectAuditLogEntry } = require('../../models/ProjectAuditLogEntry')
-const { callbackify } = require('@overleaf/promise-utils')
+import logger from '@overleaf/logger'
+import { ProjectAuditLogEntry } from '../../models/ProjectAuditLogEntry.js'
+import { callbackify } from '@overleaf/promise-utils'
 
-module.exports = {
+export default {
   promises: {
     addEntry,
   },

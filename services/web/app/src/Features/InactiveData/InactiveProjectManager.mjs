@@ -1,14 +1,14 @@
-const OError = require('@overleaf/o-error')
-const logger = require('@overleaf/logger')
-const DocstoreManager = require('../Docstore/DocstoreManager')
-const DocumentUpdaterHandler = require('../DocumentUpdater/DocumentUpdaterHandler')
-const ProjectGetter = require('../Project/ProjectGetter')
-const ProjectUpdateHandler = require('../Project/ProjectUpdateHandler')
-const { Project } = require('../../models/Project')
-const Modules = require('../../infrastructure/Modules')
-const { READ_PREFERENCE_SECONDARY } = require('../../infrastructure/mongodb')
-const { callbackifyAll } = require('@overleaf/promise-utils')
-const Metrics = require('@overleaf/metrics')
+import OError from '@overleaf/o-error'
+import logger from '@overleaf/logger'
+import DocstoreManager from '../Docstore/DocstoreManager.js'
+import DocumentUpdaterHandler from '../DocumentUpdater/DocumentUpdaterHandler.js'
+import ProjectGetter from '../Project/ProjectGetter.js'
+import ProjectUpdateHandler from '../Project/ProjectUpdateHandler.js'
+import { Project } from '../../models/Project.js'
+import Modules from '../../infrastructure/Modules.js'
+import { READ_PREFERENCE_SECONDARY } from '../../infrastructure/mongodb.js'
+import { callbackifyAll } from '@overleaf/promise-utils'
+import Metrics from '@overleaf/metrics'
 
 const MILISECONDS_IN_DAY = 86400000
 
@@ -132,7 +132,7 @@ const InactiveProjectManager = {
   },
 }
 
-module.exports = {
+export default {
   ...callbackifyAll(InactiveProjectManager),
   promises: InactiveProjectManager,
   findInactiveProjects,

@@ -1,7 +1,7 @@
-const crypto = require('crypto')
-const jose = require('jose')
-const Metrics = require('@overleaf/metrics')
-const Settings = require('@overleaf/settings')
+import crypto from 'node:crypto'
+import * as jose from 'jose'
+import Metrics from '@overleaf/metrics'
+import Settings from '@overleaf/settings'
 
 const COOKIE_NAME = Settings.deviceHistory.cookieName
 const ENTRY_EXPIRY = Settings.deviceHistory.entryExpiry
@@ -100,4 +100,4 @@ class DeviceHistory {
   }
 }
 
-module.exports = DeviceHistory
+export default DeviceHistory

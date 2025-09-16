@@ -10,7 +10,7 @@ import ProjectGetter from '../Project/ProjectGetter.js'
 import NotificationsBuilder from '../Notifications/NotificationsBuilder.js'
 import PrivilegeLevels from '../Authorization/PrivilegeLevels.js'
 import LimitationsManager from '../Subscription/LimitationsManager.js'
-import ProjectAuditLogHandler from '../Project/ProjectAuditLogHandler.js'
+import ProjectAuditLogHandler from '../Project/ProjectAuditLogHandler.mjs'
 import _ from 'lodash'
 
 const CollaboratorsInviteHandler = {

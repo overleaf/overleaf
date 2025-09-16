@@ -1,6 +1,6 @@
 import EditorHttpController from './EditorHttpController.mjs'
 import AuthenticationController from '../Authentication/AuthenticationController.js'
-import AuthorizationMiddleware from '../Authorization/AuthorizationMiddleware.js'
+import AuthorizationMiddleware from '../Authorization/AuthorizationMiddleware.mjs'
 import { RateLimiter } from '../../infrastructure/RateLimiter.js'
 import RateLimiterMiddleware from '../Security/RateLimiterMiddleware.js'
 import { validate, Joi } from '../../infrastructure/Validation.js'

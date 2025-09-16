@@ -1,28 +1,31 @@
-const { URL } = require('url')
-const { pipeline } = require('stream/promises')
-const { Cookie } = require('tough-cookie')
-const OError = require('@overleaf/o-error')
-const Metrics = require('@overleaf/metrics')
-const ProjectGetter = require('../Project/ProjectGetter')
-const CompileManager = require('./CompileManager')
-const ClsiManager = require('./ClsiManager')
-const logger = require('@overleaf/logger')
-const Settings = require('@overleaf/settings')
-const Errors = require('../Errors/Errors')
-const SessionManager = require('../Authentication/SessionManager')
-const { RateLimiter } = require('../../infrastructure/RateLimiter')
-const { z, zz, validateReq } = require('../../infrastructure/Validation')
-const ClsiCookieManager = require('./ClsiCookieManager')(
-  Settings.apis.clsi?.backendGroupName
-)
-const Path = require('path')
-const AnalyticsManager = require('../Analytics/AnalyticsManager')
-const SplitTestHandler = require('../SplitTests/SplitTestHandler')
-const { expressify } = require('@overleaf/promise-utils')
-const {
+import { URL } from 'node:url'
+import { pipeline } from 'node:stream/promises'
+import { Cookie } from 'tough-cookie'
+import OError from '@overleaf/o-error'
+import Metrics from '@overleaf/metrics'
+import ProjectGetter from '../Project/ProjectGetter.js'
+import CompileManager from './CompileManager.js'
+import ClsiManager from './ClsiManager.js'
+import logger from '@overleaf/logger'
+import Settings from '@overleaf/settings'
+import Errors from '../Errors/Errors.js'
+import SessionManager from '../Authentication/SessionManager.js'
+import { RateLimiter } from '../../infrastructure/RateLimiter.js'
+import Validation from '../../infrastructure/Validation.js'
+import ClsiCookieManagerFactory from './ClsiCookieManager.js'
+import Path from 'node:path'
+import AnalyticsManager from '../Analytics/AnalyticsManager.js'
+import SplitTestHandler from '../SplitTests/SplitTestHandler.js'
+import { expressify } from '@overleaf/promise-utils'
+import {
   fetchStreamWithResponse,
   RequestFailedError,
-} = require('@overleaf/fetch-utils')
+} from '@overleaf/fetch-utils'
+
+const { z, zz, validateReq } = Validation
+const ClsiCookieManager = ClsiCookieManagerFactory(
+  Settings.apis.clsi?.backendGroupName
+)
 
 const COMPILE_TIMEOUT_MS = 10 * 60 * 1000
 
@@ -744,4 +747,4 @@ const CompileController = {
   _proxyToClsiWithLimits: _CompileController._proxyToClsiWithLimits,
 }
 
-module.exports = CompileController
+export default CompileController

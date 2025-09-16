@@ -1,6 +1,6 @@
-const { UserSchema } = require('../../models/User')
+import { UserSchema } from '../../models/User.js'
 
-module.exports = {
+export default {
   hasAnyStaffAccess,
 }
 

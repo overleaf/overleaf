@@ -1,27 +1,27 @@
-const { callbackify } = require('util')
-const Path = require('path')
-const logger = require('@overleaf/logger')
-const OError = require('@overleaf/o-error')
-const { promiseMapWithLimit } = require('@overleaf/promise-utils')
-const { Doc } = require('../../models/Doc')
-const { File } = require('../../models/File')
-const DocstoreManager = require('../Docstore/DocstoreManager')
-const DocumentUpdaterHandler = require('../DocumentUpdater/DocumentUpdaterHandler')
-const HistoryManager = require('../History/HistoryManager')
-const ProjectCreationHandler = require('./ProjectCreationHandler')
-const ProjectDeleter = require('./ProjectDeleter')
-const ProjectEntityMongoUpdateHandler = require('./ProjectEntityMongoUpdateHandler')
-const ProjectEntityUpdateHandler = require('./ProjectEntityUpdateHandler')
-const ProjectGetter = require('./ProjectGetter')
-const ProjectLocator = require('./ProjectLocator')
-const ProjectOptionsHandler = require('./ProjectOptionsHandler')
-const SafePath = require('./SafePath')
-const TpdsProjectFlusher = require('../ThirdPartyDataStore/TpdsProjectFlusher')
-const _ = require('lodash')
-const TagsHandler = require('../Tags/TagsHandler')
-const ClsiCacheManager = require('../Compile/ClsiCacheManager')
+import { callbackify } from 'node:util'
+import Path from 'node:path'
+import logger from '@overleaf/logger'
+import OError from '@overleaf/o-error'
+import { promiseMapWithLimit } from '@overleaf/promise-utils'
+import { Doc } from '../../models/Doc.js'
+import { File } from '../../models/File.js'
+import DocstoreManager from '../Docstore/DocstoreManager.js'
+import DocumentUpdaterHandler from '../DocumentUpdater/DocumentUpdaterHandler.js'
+import HistoryManager from '../History/HistoryManager.js'
+import ProjectCreationHandler from './ProjectCreationHandler.js'
+import ProjectDeleter from './ProjectDeleter.js'
+import ProjectEntityMongoUpdateHandler from './ProjectEntityMongoUpdateHandler.js'
+import ProjectEntityUpdateHandler from './ProjectEntityUpdateHandler.js'
+import ProjectGetter from './ProjectGetter.js'
+import ProjectLocator from './ProjectLocator.js'
+import ProjectOptionsHandler from './ProjectOptionsHandler.js'
+import SafePath from './SafePath.js'
+import TpdsProjectFlusher from '../ThirdPartyDataStore/TpdsProjectFlusher.js'
+import _ from 'lodash'
+import TagsHandler from '../Tags/TagsHandler.js'
+import ClsiCacheManager from '../Compile/ClsiCacheManager.js'
 
-module.exports = {
+export default {
   duplicate: callbackify(duplicate),
   promises: {
     duplicate,

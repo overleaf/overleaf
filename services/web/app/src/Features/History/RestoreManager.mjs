@@ -1,23 +1,23 @@
-const Settings = require('@overleaf/settings')
-const Path = require('path')
-const FileWriter = require('../../infrastructure/FileWriter')
-const Metrics = require('../../infrastructure/Metrics')
-const FileSystemImportManager = require('../Uploads/FileSystemImportManager')
-const EditorController = require('../Editor/EditorController')
-const Errors = require('../Errors/Errors')
-const moment = require('moment')
-const { callbackifyAll } = require('@overleaf/promise-utils')
-const { fetchJson } = require('@overleaf/fetch-utils')
-const ProjectLocator = require('../Project/ProjectLocator')
-const DocumentUpdaterHandler = require('../DocumentUpdater/DocumentUpdaterHandler')
-const ChatApiHandler = require('../Chat/ChatApiHandler')
-const DocstoreManager = require('../Docstore/DocstoreManager')
-const logger = require('@overleaf/logger')
-const EditorRealTimeController = require('../Editor/EditorRealTimeController')
-const ChatManager = require('../Chat/ChatManager')
-const OError = require('@overleaf/o-error')
-const ProjectGetter = require('../Project/ProjectGetter')
-const ProjectEntityHandler = require('../Project/ProjectEntityHandler')
+import Settings from '@overleaf/settings'
+import Path from 'node:path'
+import FileWriter from '../../infrastructure/FileWriter.js'
+import Metrics from '../../infrastructure/Metrics.js'
+import FileSystemImportManager from '../Uploads/FileSystemImportManager.js'
+import EditorController from '../Editor/EditorController.js'
+import Errors from '../Errors/Errors.js'
+import moment from 'moment'
+import { callbackifyAll } from '@overleaf/promise-utils'
+import { fetchJson } from '@overleaf/fetch-utils'
+import ProjectLocator from '../Project/ProjectLocator.js'
+import DocumentUpdaterHandler from '../DocumentUpdater/DocumentUpdaterHandler.js'
+import ChatApiHandler from '../Chat/ChatApiHandler.js'
+import DocstoreManager from '../Docstore/DocstoreManager.js'
+import logger from '@overleaf/logger'
+import EditorRealTimeController from '../Editor/EditorRealTimeController.js'
+import ChatManager from '../Chat/ChatManager.js'
+import OError from '@overleaf/o-error'
+import ProjectGetter from '../Project/ProjectGetter.js'
+import ProjectEntityHandler from '../Project/ProjectEntityHandler.js'
 
 async function getCommentThreadIds(projectId) {
   await DocumentUpdaterHandler.promises.flushProjectToMongo(projectId)
@@ -441,4 +441,4 @@ const RestoreManager = {
   },
 }
 
-module.exports = { ...callbackifyAll(RestoreManager), promises: RestoreManager }
+export default { ...callbackifyAll(RestoreManager), promises: RestoreManager }
