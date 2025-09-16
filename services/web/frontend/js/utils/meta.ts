@@ -57,6 +57,7 @@ import { Subscription as ProjectDashboardSubscription } from '../../../types/pro
 import { ThirdPartyIds } from '../../../types/third-party-ids'
 import { Publisher } from '../../../types/subscription/dashboard/publisher'
 import { SubscriptionChangePreview } from '../../../types/subscription/subscription-change-preview'
+import { SubscriptionCreationPreview } from '../../../types/subscription/subscription-creation-preview'
 import { DefaultNavbarMetadata } from '@/shared/components/types/default-navbar-metadata'
 import { FooterMetadata } from '@/shared/components/types/footer-metadata'
 import type { ScriptLogType } from '../../../modules/admin-panel/frontend/js/features/script-logs/script-log'
@@ -270,6 +271,8 @@ export interface Meta {
   'ol-ssoErrorMessage': string
   'ol-ssoInitPath': string
   'ol-stripeAccountId': string
+  'ol-stripePublicKeyUK': string
+  'ol-stripePublicKeyUS': string
   'ol-stripeSubscriptionData': {
     customerId: string
     subscriptionState: string | null
@@ -277,6 +280,7 @@ export interface Meta {
   }
   'ol-subscription': any // TODO: mixed types, split into two fields
   'ol-subscriptionChangePreview': SubscriptionChangePreview
+  'ol-subscriptionCreationPreview': SubscriptionCreationPreview
   'ol-subscriptionFeatures': {
     managedUsers?: boolean
     groupSSO?: boolean

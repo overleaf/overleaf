@@ -20,10 +20,12 @@ export type PurchasingAddOnCode = {
   code: string
 }
 
-type PaymentProviderCoupon = {
+export type PaymentProviderCoupon = {
   code: string
   name: string
-  description: string
+  description?: string
+  isSingleUse?: boolean
+  discountMonths?: number | null
 }
 
 type PaymentProviderRecord = {

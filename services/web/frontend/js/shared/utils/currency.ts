@@ -26,3 +26,19 @@ export function formatCurrency(
 
   return `${currency} ${amount}`
 }
+
+export function convertToMinorUnits(amount: number, currency: string): number {
+  const isNoCentsCurrency = ['clp', 'jpy', 'krw', 'vnd'].includes(
+    currency.toLowerCase()
+  )
+
+  // Determine the multiplier based on currency
+  let multiplier = 100 // default for most currencies (2 decimal places)
+
+  if (isNoCentsCurrency) {
+    multiplier = 1 // no decimal places
+  }
+
+  // Convert and round to an integer
+  return Math.round(amount * multiplier)
+}
