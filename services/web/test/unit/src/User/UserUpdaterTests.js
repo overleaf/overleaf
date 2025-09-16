@@ -116,6 +116,10 @@ describe('UserUpdater', function () {
       },
     }
 
+    this.AsyncLocalStorage = {
+      removeItem: sinon.stub(),
+    }
+
     this.UserUpdater = SandboxedModule.require(MODULE_PATH, {
       requires: {
         '../Helpers/Mongo': { normalizeQuery },
@@ -136,6 +140,7 @@ describe('UserUpdater', function () {
         '../../infrastructure/Modules': this.Modules,
         './UserSessionsManager': this.UserSessionsManager,
         './ThirdPartyIdentityManager': this.ThirdPartyIdentityManager,
+        '../../infrastructure/AsyncLocalStorage': this.AsyncLocalStorage,
       },
     })
 
@@ -176,6 +181,16 @@ describe('UserUpdater', function () {
       await this.UserUpdater.promises.addAffiliationForNewUser(
         this.user._id,
         this.newEmail
+      )
+    })
+
+    it('calls to remove userFullEmails from AsyncLocalStorage', async function () {
+      await this.UserUpdater.promises.addAffiliationForNewUser(
+        this.user._id,
+        this.newEmail
+      )
+      expect(this.AsyncLocalStorage.removeItem).to.have.been.calledWith(
+        'userFullEmails'
       )
     })
   })
@@ -385,6 +400,18 @@ describe('UserUpdater', function () {
         })
       })
     })
+
+    it('calls to remove userFullEmails from AsyncLocalStorage', async function () {
+      await this.UserUpdater.promises.addEmailAddress(
+        this.user._id,
+        this.newEmail,
+        {},
+        { initiatorId: this.user._id, ipAddress: '127:0:0:0' }
+      )
+      expect(this.AsyncLocalStorage.removeItem).to.have.been.calledWith(
+        'userFullEmails'
+      )
+    })
   })
 
   describe('removeEmailAddress', function () {
@@ -562,6 +589,17 @@ describe('UserUpdater', function () {
         }
       )
     })
+
+    it('calls to remove userFullEmails from AsyncLocalStorage', async function () {
+      await this.UserUpdater.promises.removeEmailAddress(
+        this.user._id,
+        this.newEmail,
+        this.auditLog
+      )
+      expect(this.AsyncLocalStorage.removeItem).to.have.been.calledWith(
+        'userFullEmails'
+      )
+    })
   })
 
   describe('setDefaultEmailAddress', function () {
@@ -689,6 +727,18 @@ describe('UserUpdater', function () {
         )
       ).to.be.rejected
       expect(this.db.users.updateOne).to.not.have.been.called
+    })
+
+    it('calls to remove userFullEmails from AsyncLocalStorage', async function () {
+      await this.UserUpdater.promises.setDefaultEmailAddress(
+        this.user._id,
+        this.newEmail,
+        false,
+        this.auditLog
+      )
+      expect(this.AsyncLocalStorage.removeItem).to.have.been.calledWith(
+        'userFullEmails'
+      )
     })
 
     describe('when email not confirmed', function () {
@@ -1021,6 +1071,14 @@ describe('UserUpdater', function () {
       await this.UserUpdater.promises.confirmEmail(this.user._id, this.newEmail)
       sinon.assert.notCalled(
         this.NotificationsBuilder.promises.redundantPersonalSubscription
+      )
+    })
+
+    it('calls to remove userFullEmails from AsyncLocalStorage', async function () {
+      await this.UserUpdater.promises.confirmEmail(this.user._id, this.newEmail)
+      expect(this.AsyncLocalStorage.removeItem).to.have.been.called
+      expect(this.AsyncLocalStorage.removeItem).to.have.been.calledWith(
+        'userFullEmails'
       )
     })
 

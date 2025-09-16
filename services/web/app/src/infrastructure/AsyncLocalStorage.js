@@ -18,4 +18,21 @@ function middleware(req, res, next) {
   asyncLocalStorage.run({}, next)
 }
 
-module.exports = { middleware, storage: asyncLocalStorage }
+/**
+ * Remove a key from the AsyncLocalStorage cache
+ *
+ * @param {string} key
+ */
+function removeItem(key) {
+  const store = asyncLocalStorage.getStore()
+
+  if (store?.[key]) {
+    delete store[key]
+  }
+}
+
+module.exports = {
+  middleware,
+  storage: asyncLocalStorage,
+  removeItem,
+}

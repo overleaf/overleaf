@@ -20,6 +20,7 @@ const _ = require('lodash')
 const Modules = require('../../infrastructure/Modules')
 const UserSessionsManager = require('./UserSessionsManager')
 const ThirdPartyIdentityManager = require('./ThirdPartyIdentityManager')
+const AsyncLocalStorage = require('../../infrastructure/AsyncLocalStorage')
 
 async function _sendSecurityAlertPrimaryEmailChanged(
   userId,
@@ -81,6 +82,7 @@ async function _sendSecurityAlertPrimaryEmailChanged(
  * or any other user
  */
 async function addEmailAddress(userId, newEmail, affiliationOptions, auditLog) {
+  AsyncLocalStorage.removeItem('userFullEmails')
   newEmail = EmailHelper.parseEmail(newEmail)
   if (!newEmail) {
     throw new Error('invalid email')
@@ -134,15 +136,17 @@ async function addEmailAddress(userId, newEmail, affiliationOptions, auditLog) {
     return
   }
 
-  EmailChangeHelper.registerEmailCreation(userId, newEmail, {
-    createdAt: new Date(),
-    emailCreatedAt: createdAt,
-  }).catch(error => {
+  try {
+    await EmailChangeHelper.registerEmailCreation(userId, newEmail, {
+      createdAt: new Date(),
+      emailCreatedAt: createdAt,
+    })
+  } catch (error) {
     logger.warn(
       { error, userId, newEmail },
       'Error registering email creation with analytics'
     )
-  })
+  }
 }
 
 async function clearSAMLData(userId, auditLog, sendEmail) {
@@ -215,6 +219,7 @@ async function setDefaultEmailAddress(
   sendSecurityAlert,
   deleteOldEmail = false
 ) {
+  AsyncLocalStorage.removeItem('userFullEmails')
   email = EmailHelper.parseEmail(email)
   if (email == null) {
     throw new Error('invalid email')
@@ -262,16 +267,18 @@ async function setDefaultEmailAddress(
     'primary-email-address-updated'
   )
 
-  EmailChangeHelper.registerEmailUpdate(userId, email, {
-    isPrimary: true,
-    action: 'updated',
-    createdAt: new Date(),
-  }).catch(err => {
+  try {
+    await EmailChangeHelper.registerEmailUpdate(userId, email, {
+      isPrimary: true,
+      action: 'updated',
+      createdAt: new Date(),
+    })
+  } catch (err) {
     logger.warn(
       { err, userId, email },
       'Error registering email change with analytics'
     )
-  })
+  }
 
   if (sendSecurityAlert) {
     // no need to wait, errors are logged and not passed back
@@ -366,6 +373,7 @@ async function migrateDefaultEmailAddress(
 }
 
 async function confirmEmail(userId, email, affiliationOptions) {
+  AsyncLocalStorage.removeItem('userFullEmails')
   // used for initial email confirmation (non-SSO and SSO)
   // also used for reconfirmation of non-SSO emails
   const confirmedAt = new Date()
@@ -415,16 +423,18 @@ async function confirmEmail(userId, email, affiliationOptions) {
   }
   await FeaturesUpdater.promises.refreshFeatures(userId, 'confirm-email')
 
-  EmailChangeHelper.registerEmailUpdate(userId, email, {
-    emailConfirmedAt: confirmedAt,
-    action: 'updated',
-    isPrimary: false,
-  }).catch(error =>
+  try {
+    await EmailChangeHelper.registerEmailUpdate(userId, email, {
+      emailConfirmedAt: confirmedAt,
+      action: 'updated',
+      isPrimary: false,
+    })
+  } catch (error) {
     logger.warn(
       { error, userId, email },
       'Error registering email confirmation with analytics'
     )
-  )
+  }
 
   try {
     await maybeCreateRedundantSubscriptionNotification(userId, email)
@@ -467,6 +477,7 @@ async function removeEmailAddress(
   auditLog,
   skipParseEmail = false
 ) {
+  AsyncLocalStorage.removeItem('userFullEmails')
   // remove one of the user's email addresses. The email cannot be the user's
   // default email address
   if (!skipParseEmail) {
@@ -520,15 +531,17 @@ async function removeEmailAddress(
     throw new Error('Cannot remove email')
   }
 
-  EmailChangeHelper.registerEmailDeletion(userId, email, {
-    isPrimary: false,
-    emailDeletedAt: new Date(),
-  }).catch(error =>
+  try {
+    await EmailChangeHelper.registerEmailDeletion(userId, email, {
+      isPrimary: false,
+      emailDeletedAt: new Date(),
+    })
+  } catch (error) {
     logger.warn(
       { error, userId, email },
       'Error registering email deletion with analytics'
     )
-  )
+  }
 
   await FeaturesUpdater.promises.refreshFeatures(userId, 'remove-email')
 }
@@ -538,6 +551,7 @@ async function addAffiliationForNewUser(
   email,
   affiliationOptions = {}
 ) {
+  AsyncLocalStorage.removeItem('userFullEmails')
   await InstitutionsAPI.promises.addAffiliation(
     userId,
     email,
