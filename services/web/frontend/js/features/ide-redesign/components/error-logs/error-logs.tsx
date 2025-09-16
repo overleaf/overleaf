@@ -74,7 +74,7 @@ function ErrorLogs({
       {logsComponents.map(({ import: { default: Component }, path }) => (
         <Component key={path} />
       ))}
-      <TabContent className="error-logs">
+      <TabContent className="error-logs new-error-logs">
         <div className="logs-pane-content">
           {stoppedOnFirstError && includeErrors && <StopOnFirstErrorPrompt />}
 
