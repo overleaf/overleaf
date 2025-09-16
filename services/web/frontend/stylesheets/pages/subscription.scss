@@ -159,6 +159,10 @@
     align-items: center;
   }
 
+  .notification {
+    align-self: flex-start;
+  }
+
   .payment-review-panel {
     width: 339px;
     height: 100%;
