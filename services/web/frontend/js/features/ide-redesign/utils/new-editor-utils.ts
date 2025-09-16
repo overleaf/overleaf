@@ -2,10 +2,14 @@ import { useUserSettingsContext } from '@/shared/context/user-settings-context'
 import getMeta from '@/utils/meta'
 import { isSplitTestEnabled, getSplitTestVariant } from '@/utils/splitTestUtils'
 
+export const ignoringUserCutoffDate =
+  new URLSearchParams(window.location.search).get('skip-new-user-check') ===
+  'true'
 // TODO: change this when we have a launch date
 const NEW_USER_CUTOFF_DATE = new Date('2100-01-01')
 
 export const isNewUser = () => {
+  if (ignoringUserCutoffDate) return true
   const user = getMeta('ol-user')
 
   if (!user.signUpDate) return false
