@@ -629,11 +629,15 @@ class PaymentProviderCoupon {
    * @param {string} props.code
    * @param {string} props.name
    * @param {string} [props.description]
+   * @param {boolean} [props.isSingleUse]
+   * @param {number | null} [props.discountMonths]
    */
   constructor(props) {
     this.code = props.code
     this.name = props.name
     this.description = props.description
+    this.isSingleUse = props.isSingleUse
+    this.discountMonths = props.discountMonths
   }
 }
 
