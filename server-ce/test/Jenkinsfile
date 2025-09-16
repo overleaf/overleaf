@@ -24,6 +24,7 @@ pipeline {
     timestamps()
     // Abort build after hitting first failure.
     parallelsAlwaysFailFast()
+    retry(3)
     timeout(time: 15, unit: 'MINUTES')
   }
 

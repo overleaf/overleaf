@@ -10,6 +10,7 @@ pipeline {
     options {
         timestamps()
         parallelsAlwaysFailFast()
+        retry(3)
         timeout(time: 15, unit: 'MINUTES')
     }
 
@@ -20,8 +21,8 @@ pipeline {
         AR_REPO_LOCATION = 'us-east1'
         AR_URL = 'us-east1-docker.pkg.dev/overleaf-ops/ol-docker'
         BRANCH_NAME = "${env.CHANGE_BRANCH ? env.CHANGE_BRANCH : env.BRANCH_NAME}"
-        JENKINS_BUILD_NUMBER = "${BUILD_NUMBER}"      
-        BUILD_NUMBER = "${SHORT_SHA}_${BUILD_NUMBER}" 
+        JENKINS_BUILD_NUMBER = "${BUILD_NUMBER}"
+        BUILD_NUMBER = "${SHORT_SHA}_${BUILD_NUMBER}"
         DOCKER_COMPOSE_FLAGS = '-f docker-compose.ci.yml'
         COMMIT_SHA = "${GIT_COMMIT}"
         SHORT_SHA = "${GIT_COMMIT.take(7)}"
