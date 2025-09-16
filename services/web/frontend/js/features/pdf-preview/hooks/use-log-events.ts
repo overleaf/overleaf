@@ -1,79 +1,65 @@
-import { useCallback, useEffect } from 'react'
+import { useCallback } from 'react'
 import { useLayoutContext } from '@/shared/context/layout-context'
-import { useIsNewEditorEnabled } from '@/features/ide-redesign/utils/new-editor-utils'
+import {
+  useAreNewErrorLogsEnabled,
+  useIsNewErrorLogsPositionEnabled,
+} from '@/features/ide-redesign/utils/new-editor-utils'
 import { useRailContext } from '@/features/ide-redesign/contexts/rail-context'
 import { useEditorContext } from '@/shared/context/editor-context'
+import useEventListener from '@/shared/hooks/use-event-listener'
 
 /**
  * This hook adds an event listener for events dispatched from the editor to the compile logs pane
  */
 export const useLogEvents = (setShowLogs: (show: boolean) => void) => {
   const { pdfLayout, setView } = useLayoutContext()
-  const newEditor = useIsNewEditorEnabled()
+  const newLogs = useAreNewErrorLogsEnabled()
+  const newLogsPosition = useIsNewErrorLogsPositionEnabled()
   const { openTab: openRailTab } = useRailContext()
   const { hasPremiumSuggestion } = useEditorContext()
 
-  const handleViewCompileLogEntryEventOldEditor = useCallback(
-    (event: Event) => {
-      const { id, suggestFix } = (
-        event as CustomEvent<{ id: string; suggestFix?: boolean }>
-      ).detail
+  const selectLogOldLogs = useCallback((id: string, suggestFix: boolean) => {
+    window.setTimeout(() => {
+      const element = document.querySelector(
+        `.log-entry[data-log-entry-id="${id}"]`
+      )
 
-      setShowLogs(true)
+      if (element) {
+        element.scrollIntoView({
+          block: 'start',
+          inline: 'nearest',
+        })
 
-      if (pdfLayout === 'flat') {
-        setView('pdf')
-      }
+        if (suggestFix) {
+          // if they are paywalled, click that instead
+          const paywall = document.querySelector<HTMLButtonElement>(
+            'button[data-action="assistant-paywall-show"]'
+          )
 
-      window.setTimeout(() => {
-        const element = document.querySelector(
-          `.log-entry[data-log-entry-id="${id}"]`
-        )
-
-        if (element) {
-          element.scrollIntoView({
-            block: 'start',
-            inline: 'nearest',
-          })
-
-          if (suggestFix) {
-            // if they are paywalled, click that instead
-            const paywall = document.querySelector<HTMLButtonElement>(
-              'button[data-action="assistant-paywall-show"]'
-            )
-
-            if (paywall) {
-              paywall.scrollIntoView({
-                block: 'start',
-                inline: 'nearest',
-              })
-              paywall.click()
-            } else {
-              element
-                .querySelector<HTMLButtonElement>(
-                  'button[data-action="suggest-fix"]'
-                )
-                ?.click()
-            }
+          if (paywall) {
+            paywall.scrollIntoView({
+              block: 'start',
+              inline: 'nearest',
+            })
+            paywall.click()
+          } else {
+            element
+              .querySelector<HTMLButtonElement>(
+                'button[data-action="suggest-fix"]'
+              )
+              ?.click()
           }
         }
-      })
-    },
-    [pdfLayout, setView, setShowLogs]
-  )
+      }
+    })
+  }, [])
 
-  const handleViewCompileLogEntryEventNewEditor = useCallback(
-    (event: Event) => {
-      const { id, suggestFix, showPaywallIfOutOfSuggestions } = (
-        event as CustomEvent<{
-          id: string
-          suggestFix?: boolean
-          showPaywallIfOutOfSuggestions?: boolean
-        }>
-      ).detail
-
-      openRailTab('errors')
-
+  const selectLogNewLogs = useCallback(
+    (
+      id: string,
+      suggestFix: boolean,
+      showPaywallIfOutOfSuggestions: boolean
+    ) => {
       window.setTimeout(() => {
         const logEntry = document.querySelector(
           `.log-entry[data-log-entry-id="${id}"]`
@@ -114,26 +100,59 @@ export const useLogEvents = (setShowLogs: (show: boolean) => void) => {
         }
       })
     },
-    [openRailTab, hasPremiumSuggestion]
+    [hasPremiumSuggestion]
   )
 
-  useEffect(() => {
-    const listener = (event: Event) => {
-      if (newEditor) {
-        handleViewCompileLogEntryEventNewEditor(event)
+  const openNewLogsPosition = useCallback(() => {
+    openRailTab('errors')
+  }, [openRailTab])
+
+  const openOldLogsPosition = useCallback(() => {
+    setShowLogs(true)
+
+    if (pdfLayout === 'flat') {
+      setView('pdf')
+    }
+  }, [pdfLayout, setView, setShowLogs])
+
+  const handleViewCompileLogEntryEvent = useCallback(
+    (event: Event) => {
+      const { id, suggestFix, showPaywallIfOutOfSuggestions } = (
+        event as CustomEvent<{
+          id: string
+          suggestFix?: boolean
+          showPaywallIfOutOfSuggestions?: boolean
+        }>
+      ).detail
+
+      if (newLogsPosition) {
+        openNewLogsPosition()
       } else {
-        handleViewCompileLogEntryEventOldEditor(event)
+        openOldLogsPosition()
       }
-    }
 
-    window.addEventListener('editor:view-compile-log-entry', listener)
+      if (newLogs) {
+        selectLogNewLogs(
+          id,
+          Boolean(suggestFix),
+          Boolean(showPaywallIfOutOfSuggestions)
+        )
+      } else {
+        selectLogOldLogs(id, Boolean(suggestFix))
+      }
+    },
+    [
+      openNewLogsPosition,
+      openOldLogsPosition,
+      selectLogNewLogs,
+      selectLogOldLogs,
+      newLogs,
+      newLogsPosition,
+    ]
+  )
 
-    return () => {
-      window.removeEventListener('editor:view-compile-log-entry', listener)
-    }
-  }, [
-    handleViewCompileLogEntryEventNewEditor,
-    handleViewCompileLogEntryEventOldEditor,
-    newEditor,
-  ])
+  useEventListener(
+    'editor:view-compile-log-entry',
+    handleViewCompileLogEntryEvent
+  )
 }

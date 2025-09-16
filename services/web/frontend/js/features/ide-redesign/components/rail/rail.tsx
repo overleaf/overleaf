@@ -29,7 +29,7 @@ import RailResizeHandle from './rail-resize-handle'
 import RailModals from './rail-modals'
 import RailOverflowDropdown from './rail-overflow-dropdown'
 import useRailOverflow from '../../hooks/use-rail-overflow'
-import { useAreNewErrorLogsEnabled } from '../../utils/new-editor-utils'
+import { useIsNewErrorLogsPositionEnabled } from '../../utils/new-editor-utils'
 
 export const RailLayout = () => {
   const { sendEvent } = useEditorAnalytics()
@@ -45,7 +45,7 @@ export const RailLayout = () => {
 
   const isHistoryView = view === 'history'
 
-  const newErrorlogs = useAreNewErrorLogsEnabled()
+  const newErrorlogsPosition = useIsNewErrorLogsPositionEnabled()
 
   const railTabs: RailElement[] = useMemo(
     () => [
@@ -94,10 +94,16 @@ export const RailLayout = () => {
         component: <ErrorLogsPanel />,
         indicator: <ErrorIndicator />,
         disabled: errorLogsDisabled,
-        hide: !newErrorlogs,
+        hide: !newErrorlogsPosition,
       },
     ],
-    [t, features.trackChangesVisible, newErrorlogs, errorLogsDisabled, view]
+    [
+      t,
+      features.trackChangesVisible,
+      newErrorlogsPosition,
+      errorLogsDisabled,
+      view,
+    ]
   )
 
   const railActions: RailAction[] = useMemo(

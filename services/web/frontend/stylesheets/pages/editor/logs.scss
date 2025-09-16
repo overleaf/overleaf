@@ -177,6 +177,7 @@
 
   .error-logs-tabs {
     display: flex;
+    background-color: var(--bg-primary-themed);
   }
 
   .error-logs-tab-header {
@@ -204,6 +205,14 @@
   }
 }
 
+.new-logs-pane {
+  position: absolute;
+  inset: 0;
+  z-index: 11; // above the PDF viewer + controls
+  top: var(--toolbar-small-height);
+  background-color: var(--bg-secondary-themed);
+}
+
 .logs-pane {
   position: absolute;
   inset: 0;
@@ -218,16 +227,6 @@
     padding: 10px;
     gap: 10px;
     min-height: 100%;
-  }
-
-  .logs-pane-actions {
-    display: flex;
-    flex-wrap: wrap;
-    place-content: flex-end flex-end;
-    padding: var(--spacing-03) 0;
-    flex-grow: 1;
-    align-items: flex-end;
-    gap: var(--spacing-04);
   }
 
   .log-entry {
@@ -338,6 +337,16 @@
     text-overflow: ellipsis;
     overflow: hidden;
   }
+}
+
+.logs-pane-actions {
+  display: flex;
+  flex-wrap: wrap;
+  place-content: flex-end flex-end;
+  padding: var(--spacing-03) 0;
+  flex-grow: 1;
+  align-items: flex-end;
+  gap: var(--spacing-04);
 }
 
 .log-entry-content {

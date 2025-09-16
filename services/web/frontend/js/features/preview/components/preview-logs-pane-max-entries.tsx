@@ -5,7 +5,7 @@ import { useDetachCompileContext as useCompileContext } from '../../../shared/co
 import { useStopOnFirstError } from '../../../shared/hooks/use-stop-on-first-error'
 import MaterialIcon from '@/shared/components/material-icon'
 import PdfLogEntry from '@/features/pdf-preview/components/pdf-log-entry'
-import { useAreNewErrorLogsEnabled } from '@/features/ide-redesign/utils/new-editor-utils'
+import { useIsNewErrorLogsPositionEnabled } from '@/features/ide-redesign/utils/new-editor-utils'
 
 function PreviewLogsPaneMaxEntries({
   totalEntries,
@@ -40,7 +40,7 @@ function PreviewLogsPaneMaxEntriesContent({
 }: {
   hasErrors?: boolean
 }) {
-  const newLogs = useAreNewErrorLogsEnabled()
+  const newLogsPosition = useIsNewErrorLogsPositionEnabled()
   const { t } = useTranslation()
   const { startCompile, stoppedOnFirstError, setAnimateCompileDropdownArrow } =
     useCompileContext()
@@ -79,7 +79,7 @@ function PreviewLogsPaneMaxEntriesContent({
           />{' '}
         </p>
         <p>
-          {newLogs
+          {newLogsPosition
             ? t('log_entry_maximum_entries_see_full_logs_new')
             : t('log_entry_maximum_entries_see_full_logs')}
         </p>
@@ -92,7 +92,7 @@ function PreviewLogsPaneMaxEntriesContent({
       <MaterialIcon type="lightbulb" className="align-middle" />
       &nbsp;
       <strong>{t('tip')}: </strong>
-      {newLogs
+      {newLogsPosition
         ? t('log_entry_maximum_entries_see_full_logs_new')
         : t('log_entry_maximum_entries_see_full_logs')}
     </p>

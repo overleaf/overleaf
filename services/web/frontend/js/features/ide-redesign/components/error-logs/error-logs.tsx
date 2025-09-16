@@ -14,6 +14,9 @@ import LogEntry from './log-entry'
 import importOverleafModules from '../../../../../macros/import-overleaf-module.macro'
 import TimeoutUpgradePromptNew from '@/features/pdf-preview/components/timeout-upgrade-prompt-new'
 import getMeta from '@/utils/meta'
+import PdfClearCacheButton from '@/features/pdf-preview/components/pdf-clear-cache-button'
+import PdfDownloadFilesButton from '@/features/pdf-preview/components/pdf-download-files-button'
+import { useIsNewErrorLogsPositionEnabled } from '../../utils/new-editor-utils'
 
 const logsComponents: Array<{
   import: { default: ElementType }
@@ -26,23 +29,31 @@ type ErrorLogTab = {
   entries: LogEntryData[] | undefined
 }
 
-function ErrorLogs() {
+function ErrorLogs({
+  includeActionButtons,
+}: {
+  includeActionButtons?: boolean
+}) {
   const { error, logEntries, rawLog, validationIssues, stoppedOnFirstError } =
     useCompileContext()
   const { compileTimeout } = getMeta('ol-compileSettings')
+  const newLogsPosition = useIsNewErrorLogsPositionEnabled()
+  const { t } = useTranslation()
 
   const tabs = useMemo(() => {
     return [
-      { key: 'all', label: 'All', entries: logEntries?.all },
-      { key: 'errors', label: 'Errors', entries: logEntries?.errors },
-      { key: 'warnings', label: 'Warnings', entries: logEntries?.warnings },
-      { key: 'info', label: 'Info', entries: logEntries?.typesetting },
+      {
+        key: 'all',
+        label: newLogsPosition ? t('all') : t('all_logs'),
+        entries: logEntries?.all,
+      },
+      { key: 'errors', label: t('errors'), entries: logEntries?.errors },
+      { key: 'warnings', label: t('warnings'), entries: logEntries?.warnings },
+      { key: 'info', label: t('info'), entries: logEntries?.typesetting },
     ]
-  }, [logEntries])
+  }, [logEntries, newLogsPosition, t])
 
   const { loadingError } = usePdfPreviewContext()
-
-  const { t } = useTranslation()
 
   const [activeTab, setActiveTab] = useState<string | null>('all')
 
@@ -107,6 +118,13 @@ function ErrorLogs() {
               alwaysExpandRawContent
               showSourceLocationLink={false}
             />
+          )}
+
+          {includeActionButtons && (
+            <div className="logs-pane-actions">
+              <PdfClearCacheButton />
+              <PdfDownloadFilesButton />
+            </div>
           )}
         </div>
       </TabContent>
