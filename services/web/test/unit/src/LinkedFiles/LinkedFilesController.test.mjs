@@ -47,7 +47,7 @@ describe('LinkedFilesController', function () {
     ctx.settings = { enabledLinkedFileTypes: [] }
 
     vi.doMock(
-      '.../../../../app/src/Features/Authentication/SessionManager',
+      '../../../../app/src/Features/Authentication/SessionManager',
       () => ({
         default: ctx.SessionManager,
       })

@@ -12,7 +12,9 @@ while true; do
   if [ -z "$FILES" ]; then
     break
   fi
-  node transform/cjs-to-esm/cjs-to-esm.mjs "$FILES"
+  # We want word splitting here
+  # shellcheck disable=SC2086
+  node transform/cjs-to-esm/cjs-to-esm.mjs $FILES
 done
 
 make format_fix > /dev/null

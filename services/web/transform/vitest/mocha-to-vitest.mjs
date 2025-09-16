@@ -17,7 +17,7 @@ const {
 
 function printUsage() {
   console.log(
-    'node scripts/esm-migration/cjs-to-esm.mjs [files] [--dryRun] [--format] [--lint] [--usage] [--verbose]'
+    'node scripts/vitest/mocha-to-vitest.mjs [files] [--dryRun] [--format] [--lint] [--usage] [--verbose]'
   )
   console.log(
     'WARNING: this will only work in local development as important dependencies will be missing in production'
@@ -45,11 +45,10 @@ if (!Array.isArray(files) || files.length === 0) {
 const promisifiedExec = promisify(exec)
 
 const transforms = [
-  '5to6-codemod/transforms/cjs.js',
-  '5to6-codemod/transforms/exports.js',
-  './codemods/esmoduleDirname.js',
-  './codemods/addExtensions.js',
-  './codemods/fixMongodbImport.js',
+  './codemods/replaceDoneWithPromise.js',
+  './codemods/convertThisToCtx.js',
+  './codemods/replaceSandboxedModuleWithDoMock.js',
+  './codemods/replaceDirectChaiUsage.js',
 ]
 
 const config = {
@@ -79,11 +78,14 @@ const webRoot = fileURLToPath(new URL('../../', import.meta.url))
 if (!dryRun) {
   for (const file of files) {
     // move files with git mv
-    const newFileName = file.replace('.js', '.mjs')
+    const newFileName = file
+      .replace('Tests.mjs', '.test.mjs')
+      .replace('Tests.js', '.test.js')
+      .replace('Test.js', '.test.js')
+      .replace('Test.mjs', '.test.mjs')
+
     await promisifiedExec(`git mv ${file} ${newFileName}`)
     const relativePath = path.relative(webRoot, file)
-    console.log(
-      `transformed ${relativePath} and renamed it to have a .mjs extension`
-    )
+    console.log(`transformed ${relativePath} and renamed it for vitest`)
   }
 }

@@ -126,6 +126,7 @@ module.exports = {
         'chai-expect/missing-assertion': 'error',
         'chai-expect/terminating-properties': 'error',
         '@typescript-eslint/no-unused-expressions': 'off',
+        '@overleaf/require-vi-doMock-valid-path': 'error',
       },
     },
     {
