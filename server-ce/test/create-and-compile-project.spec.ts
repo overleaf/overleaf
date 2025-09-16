@@ -4,7 +4,7 @@ import {
   openProjectViaInviteNotification,
 } from './helpers/project'
 import { isExcludedBySharding, startWith } from './helpers/config'
-import { throttledRecompile } from './helpers/compile'
+import { prepareWaitForNextCompileSlot } from './helpers/compile'
 
 const USER = 'user@example.com'
 const COLLABORATOR = 'collaborator@example.com'
@@ -17,8 +17,10 @@ describe('Project creation and compilation', function () {
 
   it('users can create project and compile it', function () {
     login(USER)
-    createProject('test-project')
-    const recompile = throttledRecompile()
+    const { recompile, waitForCompile } = prepareWaitForNextCompileSlot()
+    waitForCompile(() => {
+      createProject('test-project')
+    })
     cy.findByRole('textbox', { name: 'Source Editor editing' }).within(() => {
       cy.findByText('\\maketitle').parent().click()
       cy.findByText('\\maketitle').parent().type('\n\\section{{}Test Section}')
@@ -109,7 +111,6 @@ describe('Project creation and compilation', function () {
     cy.findByRole('navigation', { name: 'Project files and outline' })
       .findByRole('button', { name: 'New file' })
       .click()
-
     cy.findByRole('dialog').within(() => {
       cy.findByRole('button', { name: 'From another project' }).click()
       cy.findByLabelText('Select a Project').select(sourceProjectName)

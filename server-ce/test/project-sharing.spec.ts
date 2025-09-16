@@ -16,7 +16,7 @@ import {
   shareProjectByEmailAndAcceptInviteViaDash,
   shareProjectByEmailAndAcceptInviteViaEmail,
 } from './helpers/project'
-import { throttledRecompile } from './helpers/compile'
+import { prepareWaitForNextCompileSlot } from './helpers/compile'
 import { beforeWithReRunOnTestRetry } from './helpers/beforeWithReRunOnTestRetry'
 
 describe('Project Sharing', function () {
@@ -25,8 +25,11 @@ describe('Project Sharing', function () {
   startWith({ withDataDir: true, pro: true })
 
   let projectName: string
+  let recompile: () => void
+  let waitForCompile: (triggerCompile: () => void) => void
   beforeWithReRunOnTestRetry(function () {
     projectName = getSpamSafeProjectName()
+    ;({ recompile, waitForCompile } = prepareWaitForNextCompileSlot())
     setupTestProject()
   })
 
@@ -40,7 +43,9 @@ describe('Project Sharing', function () {
 
   function setupTestProject() {
     login('user@example.com')
-    createProject(projectName)
+    waitForCompile(() => {
+      createProject(projectName)
+    })
 
     // Add chat message
     cy.findByRole('button', { name: 'Chat' }).click()
@@ -75,7 +80,6 @@ describe('Project Sharing', function () {
   function expectContentWriteAccess() {
     const section = `Test Section ${uuid()}`
     cy.url().should('match', /\/project\/[a-fA-F0-9]{24}/)
-    const recompile = throttledRecompile()
     // wait for the editor to finish loading
     cy.findByRole('textbox', { name: 'Source Editor editing' }).should(
       'contain.text',
@@ -87,8 +91,10 @@ describe('Project Sharing', function () {
       'contenteditable',
       'true'
     )
-    cy.findByText('\\maketitle').parent().click()
-    cy.findByText('\\maketitle').parent().type(`\n\\section{{}${section}}`)
+    cy.findByRole('textbox', { name: 'Source Editor editing' }).within(() => {
+      cy.findByText('\\maketitle').parent().click()
+      cy.findByText('\\maketitle').parent().type(`\n\\section{{}${section}}`)
+    })
     // should have written
     cy.findByRole('textbox', { name: 'Source Editor editing' }).should(
       'contain.text',
@@ -128,13 +134,28 @@ describe('Project Sharing', function () {
   }
 
   function expectHistoryAccess() {
-    cy.findByText('History').click()
-    cy.findByText('Labels')
+    cy.findByRole('button', { name: 'History' }).click()
+    // The input is not clickable due to being visually hidden, click its label instead
+    cy.findByRole('complementary', {
+      name: 'Project history and labels',
+    }).within(() => {
+      cy.findByRole('group', {
+        name: 'Show all of the project history or only labelled versions.',
+      }).within(() => {
+        cy.findByText('All history').click()
+      })
+      cy.findByRole('radio', { name: 'Labels' }).should('not.be.checked')
+      cy.findByRole('radio', { name: 'All history' }).should('be.checked')
+    })
     cy.findByText(/\\begin\{document}/)
-    cy.findAllByTestId('history-version-metadata-users')
-      .last()
-      .should('have.text', 'user')
-    cy.findByText('Back to editor').click()
+    cy.findByRole('complementary', {
+      name: 'Project history and labels',
+    }).within(() => {
+      cy.findAllByTestId('history-version-metadata-users')
+        .last()
+        .should('have.text', 'user')
+    })
+    cy.findByRole('button', { name: 'Back to editor' }).click()
   }
 
   function expectNoChatAccess() {

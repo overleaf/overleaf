@@ -39,7 +39,7 @@ describe('filestore migration', function () {
   const projectName = `project-${uuid()}`
   let defaultImage: string
   let projectId: string
-  let waitForCompileRateLimitCoolOff: (fn: () => void) => void
+  let waitForCompile: (fn: () => void) => void
   const previousBinaryFiles: (() => void)[] = []
 
   function avoid502() {
@@ -55,7 +55,7 @@ describe('filestore migration', function () {
   ) {
     before(function () {
       login(email)
-      waitForCompileRateLimitCoolOff(() => {
+      waitForCompile(() => {
         cy.visit(`/project/${projectId}`)
       })
       previousBinaryFiles.push(prepareFileUploadTest(true))
@@ -112,8 +112,7 @@ describe('filestore migration', function () {
         .should('match', /\/project\/[a-fA-F0-9]{24}/)
         .then(url => (projectId = url.split('/').pop()!))
       let queueReset
-      ;({ waitForCompileRateLimitCoolOff, queueReset } =
-        prepareWaitForNextCompileSlot())
+      ;({ waitForCompile, queueReset } = prepareWaitForNextCompileSlot())
       queueReset()
 
       // Create a new binary file
@@ -265,7 +264,7 @@ describe('filestore migration', function () {
       createProject(projectName, { type: 'Example project', open: false }).then(
         id => (projectId = id)
       )
-      ;({ waitForCompileRateLimitCoolOff } = prepareWaitForNextCompileSlot())
+      ;({ waitForCompile } = prepareWaitForNextCompileSlot())
     })
   }
   addNewBinaryFileAndCheckPrevious()
@@ -298,7 +297,7 @@ describe('filestore migration', function () {
   // filestore-migration
   beforeEach(() => {
     login(email)
-    waitForCompileRateLimitCoolOff(() => {
+    waitForCompile(() => {
       openProjectById(projectId)
     })
     ensureStopOnFirstErrorIsActive()
@@ -327,7 +326,7 @@ describe('filestore migration', function () {
         .parent()
         .type(`\n\\section{{}Test Section ${id}}`)
 
-      waitForCompileRateLimitCoolOff(() => {
+      waitForCompile(() => {
         cy.findByRole('button', { name: 'Toggle compile options menu' }).click()
 
         cy.findByRole('menuitem', {

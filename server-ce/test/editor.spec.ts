@@ -22,20 +22,19 @@ describe('editor', () => {
   let projectName: string
   let projectId: string
   let recompile: () => void
-  let waitForCompileRateLimitCoolOff: (fn: () => void) => void
+  let waitForCompile: (fn: () => void) => void
   beforeWithReRunOnTestRetry(function () {
     projectName = `project-${uuid()}`
     login(USER)
     createProject(projectName, { type: 'Example project', open: false }).then(
       id => (projectId = id)
     )
-    ;({ recompile, waitForCompileRateLimitCoolOff } =
-      prepareWaitForNextCompileSlot())
+    ;({ recompile, waitForCompile } = prepareWaitForNextCompileSlot())
   })
 
   beforeEach(() => {
     login(USER)
-    waitForCompileRateLimitCoolOff(() => {
+    waitForCompile(() => {
       openProjectById(projectId)
     })
   })

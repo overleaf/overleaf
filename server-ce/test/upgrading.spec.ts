@@ -2,7 +2,7 @@ import { ensureUserExists, login } from './helpers/login'
 import { isExcludedBySharding, startWith } from './helpers/config'
 import { dockerCompose, runScript } from './helpers/hostAdminClient'
 import { createProject, openProjectByName } from './helpers/project'
-import { throttledRecompile } from './helpers/compile'
+import { prepareWaitForNextCompileSlot } from './helpers/compile'
 import { v4 as uuid } from 'uuid'
 
 const USER = 'user@example.com'
@@ -10,6 +10,9 @@ const PROJECT_NAME = 'Old Project'
 
 describe('Upgrading', function () {
   if (isExcludedBySharding('PRO_CUSTOM_3')) return
+
+  let recompile: () => void
+  let waitForCompile: (triggerCompile: () => void) => void
 
   function testUpgrade(
     steps: {
@@ -38,10 +41,13 @@ describe('Upgrading', function () {
     before(() => {
       cy.log('Populate old instance')
       login(USER)
-      createProject(PROJECT_NAME, {
-        newProjectButtonMatcher: startOptions.newProjectButtonMatcher,
+      ;({ recompile, waitForCompile } = prepareWaitForNextCompileSlot())
+      waitForCompile(() => {
+        createProject(PROJECT_NAME, {
+          newProjectButtonMatcher: startOptions.newProjectButtonMatcher,
+        })
       })
-      const recompile = throttledRecompile()
+
       cy.log('Wait for successful compile')
       cy.get('.pdf-viewer').should('contain.text', PROJECT_NAME)
 
@@ -117,7 +123,9 @@ describe('Upgrading', function () {
     })
 
     it('should open the old project', () => {
-      openProjectByName(PROJECT_NAME)
+      waitForCompile(() => {
+        openProjectByName(PROJECT_NAME)
+      })
 
       cy.url().should('match', /\/project\/[a-fA-F0-9]{24}/)
       cy.findByRole('navigation', {
@@ -125,7 +133,6 @@ describe('Upgrading', function () {
       }).within(() => {
         cy.findByText(PROJECT_NAME)
       })
-      const recompile = throttledRecompile()
 
       cy.log('wait for successful compile')
       cy.get('.pdf-viewer').should('contain.text', PROJECT_NAME)
@@ -189,9 +196,9 @@ describe('Upgrading', function () {
         hook() {
           before(function () {
             login(USER)
-            cy.visit('/')
-            cy.findByText(PROJECT_NAME).click()
-            const recompile = throttledRecompile()
+            waitForCompile(() => {
+              openProjectByName(PROJECT_NAME)
+            })
 
             cy.log('Make a change')
             cy.findByText('\\maketitle').parent().click()

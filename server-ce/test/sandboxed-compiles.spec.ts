@@ -1,10 +1,9 @@
 import { ensureUserExists, login } from './helpers/login'
 import { createProject } from './helpers/project'
 import { isExcludedBySharding, startWith } from './helpers/config'
-import { throttledRecompile, stopCompile } from './helpers/compile'
+import { prepareWaitForNextCompileSlot, stopCompile } from './helpers/compile'
 import { v4 as uuid } from 'uuid'
 import { waitUntilScrollingFinished } from './helpers/waitUntilScrollingFinished'
-import { beforeWithReRunOnTestRetry } from './helpers/beforeWithReRunOnTestRetry'
 
 const LABEL_TEX_LIVE_VERSION = 'TeX Live version'
 
@@ -27,8 +26,10 @@ describe('SandboxedCompiles', function () {
     })
 
     it('should offer TexLive images and switch the compiler', function () {
-      createProject('sandboxed')
-      const recompile = throttledRecompile()
+      const { recompile, waitForCompile } = prepareWaitForNextCompileSlot()
+      waitForCompile(() => {
+        createProject('sandboxed')
+      })
       cy.log('wait for compile')
       cy.findByRole('region', { name: 'PDF preview and logs' }).should(
         'contain.text',
@@ -53,7 +54,6 @@ describe('SandboxedCompiles', function () {
       })
       cy.get('body').type('{esc}')
       cy.findByRole('dialog').should('not.exist')
-
       cy.log('Trigger compile with other TeX Live version')
       recompile()
 
@@ -71,13 +71,18 @@ describe('SandboxedCompiles', function () {
   function checkStopCompile() {
     it('users can stop a running compile', function () {
       login('user@example.com')
-      createProject('test-project')
+      const { recompile, waitForCompile, waitForCompileRateLimitCoolOff } =
+        prepareWaitForNextCompileSlot()
+      waitForCompile(() => {
+        createProject('test-project')
+      })
       // create an infinite loop in the main document
       // this will cause the compile to run indefinitely
       cy.findByText('\\maketitle').parent().click()
       cy.findByText('\\maketitle')
         .parent()
         .type('\n\\def\\x{{}Hello!\\par\\x}\\x')
+      waitForCompileRateLimitCoolOff()
       cy.log('Start compile')
       // We need to start the compile manually because we do not want to wait for it to finish
       cy.findByText('Recompile').click()
@@ -90,7 +95,7 @@ describe('SandboxedCompiles', function () {
       // disabling the infinite loop and recompiling
       cy.findByText('\\def').parent().click()
       cy.findByText('\\def').parent().type('{home}disabled loop% ')
-      cy.findByText('Recompile').click()
+      recompile()
       cy.get('.pdf-viewer').should('contain.text', 'disabled loop')
       cy.get('.logs-pane').should(
         'not.contain.text',
@@ -104,8 +109,10 @@ describe('SandboxedCompiles', function () {
       let projectName: string
       beforeEach(function () {
         projectName = `Project ${uuid()}`
-        createProject(projectName)
-        const recompile = throttledRecompile()
+        const { recompile, waitForCompile } = prepareWaitForNextCompileSlot()
+        waitForCompile(() => {
+          createProject(projectName)
+        })
         cy.findByRole('textbox', { name: 'Source Editor editing' }).within(
           () => {
             cy.findByText('\\maketitle').parent().click()
@@ -205,8 +212,10 @@ describe('SandboxedCompiles', function () {
   function checkRecompilesAfterErrors() {
     it('recompiles even if there are Latex errors', function () {
       login('user@example.com')
-      createProject('test-project')
-      const recompile = throttledRecompile()
+      const { recompile, waitForCompile } = prepareWaitForNextCompileSlot()
+      waitForCompile(() => {
+        createProject('test-project')
+      })
       cy.findByRole('textbox', { name: 'Source Editor editing' }).within(() => {
         cy.findByText('\\maketitle').parent().click()
         cy.findByText('\\maketitle')
@@ -224,8 +233,10 @@ describe('SandboxedCompiles', function () {
 
   function checkXeTeX() {
     it('should be able to use XeLaTeX', function () {
-      createProject('XeLaTeX')
-      const recompile = throttledRecompile()
+      const { recompile, waitForCompile } = prepareWaitForNextCompileSlot()
+      waitForCompile(() => {
+        createProject('XeLaTeX')
+      })
       cy.log('wait for compile')
       cy.findByRole('region', { name: 'PDF preview and logs' }).should(
         'contain.text',

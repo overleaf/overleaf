@@ -6,7 +6,7 @@ import {
 } from './helpers/config'
 import { dockerCompose, getRedisKeys } from './helpers/hostAdminClient'
 import { createProject } from './helpers/project'
-import { throttledRecompile } from './helpers/compile'
+import { prepareWaitForNextCompileSlot } from './helpers/compile'
 
 const USER = 'user@example.com'
 const PROJECT_NAME = 'Old Project'
@@ -31,10 +31,12 @@ describe('GracefulShutdown', function () {
   it('should display banner and flush changes out of redis', () => {
     bringServerProBackUp()
     login(USER)
-    createProject(PROJECT_NAME).then(id => {
-      projectId = id
+    const { recompile, waitForCompile } = prepareWaitForNextCompileSlot()
+    waitForCompile(() => {
+      createProject(PROJECT_NAME).then(id => {
+        projectId = id
+      })
     })
-    const recompile = throttledRecompile()
 
     cy.log('add additional content')
     cy.findByText('\\maketitle').parent().click()

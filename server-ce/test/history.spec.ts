@@ -1,5 +1,5 @@
 import { createProject } from './helpers/project'
-import { throttledRecompile } from './helpers/compile'
+import { prepareWaitForNextCompileSlot } from './helpers/compile'
 import { ensureUserExists, login } from './helpers/login'
 import { isExcludedBySharding, startWith } from './helpers/config'
 
@@ -62,8 +62,10 @@ describe('History', function () {
   const CLASS_DELETION = 'ol-cm-deletion-marker'
 
   it('should support labels, comparison and download', () => {
-    createProject('labels')
-    const recompile = throttledRecompile()
+    const { recompile, waitForCompile } = prepareWaitForNextCompileSlot()
+    waitForCompile(() => {
+      createProject('labels')
+    })
 
     cy.log('add content, including a line that will get removed soon')
     cy.findByRole('textbox', { name: 'Source Editor editing' }).within(() => {

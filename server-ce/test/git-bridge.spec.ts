@@ -12,7 +12,7 @@ import {
 import git from 'isomorphic-git'
 import http from 'isomorphic-git/http/web'
 import LightningFS from '@isomorphic-git/lightning-fs'
-import { throttledRecompile } from './helpers/compile'
+import { prepareWaitForNextCompileSlot } from './helpers/compile'
 
 const USER = 'user@example.com'
 
@@ -52,13 +52,13 @@ describe('git-bridge', function () {
     function maybeClearAllTokens() {
       cy.visit('/user/settings')
       cy.findByRole('heading', { name: 'Git integration' })
-      cy.get('button')
-        .contains(/Generate token|Add another token/)
-        .then(btn => {
-          if (btn.text() === 'Add another token') {
-            clearAllTokens()
-          }
-        })
+      cy.findByRole('button', {
+        name: /Generate token|Add another token/i,
+      }).then(btn => {
+        if (btn.text() === 'Add another token') {
+          clearAllTokens()
+        }
+      })
     }
 
     beforeEach(function () {
@@ -130,9 +130,12 @@ describe('git-bridge', function () {
       cy.findByTestId('left-menu').within(() => {
         cy.findByRole('button', { name: 'Git' }).click()
       })
+
       cy.findByTestId('git-bridge-modal').within(() => {
         cy.get('@projectId').then(id => {
-          cy.get('code').contains(`git clone ${gitURL(id.toString())}`)
+          cy.findByLabelText('Git clone project command').contains(
+            `git clone ${gitURL(id.toString())}`
+          )
         })
         cy.findByRole('button', {
           name: 'Generate token',
@@ -151,14 +154,19 @@ describe('git-bridge', function () {
       ensureUserExists({ email: 'collaborator-link-ro@example.com' })
 
       let projectName: string
+      let recompile: () => void
+      let waitForCompile: (triggerCompile: () => void) => void
       beforeEach(() => {
         projectName = uuid()
         createProject(projectName, { open: false }).as('projectId')
+        ;({ recompile, waitForCompile } = prepareWaitForNextCompileSlot())
       })
 
       it('should expose r/w interface to owner', () => {
         maybeClearAllTokens()
-        openProjectByName(projectName)
+        waitForCompile(() => {
+          openProjectByName(projectName)
+        })
         checkGitAccess('readAndWrite')
       })
 
@@ -169,7 +177,9 @@ describe('git-bridge', function () {
           'Editor'
         )
         maybeClearAllTokens()
-        openProjectByName(projectName)
+        waitForCompile(() => {
+          openProjectByName(projectName)
+        })
         checkGitAccess('readAndWrite')
       })
 
@@ -180,7 +190,9 @@ describe('git-bridge', function () {
           'Viewer'
         )
         maybeClearAllTokens()
-        openProjectByName(projectName)
+        waitForCompile(() => {
+          openProjectByName(projectName)
+        })
         checkGitAccess('readOnly')
       })
 
@@ -190,212 +202,232 @@ describe('git-bridge', function () {
           const email = 'collaborator-link-rw@example.com'
           login(email)
           maybeClearAllTokens()
-          openProjectViaLinkSharingAsUser(
-            linkSharingReadAndWrite,
-            projectName,
-            email
-          )
+          waitForCompile(() => {
+            openProjectViaLinkSharingAsUser(
+              linkSharingReadAndWrite,
+              projectName,
+              email
+            )
+          })
           checkGitAccess('readAndWrite')
         })
       })
 
       it('should expose r/o interface to link-sharing r/o collaborator', () => {
-        openProjectByName(projectName)
+        waitForCompile(() => {
+          openProjectByName(projectName)
+        })
         enableLinkSharing().then(({ linkSharingReadOnly }) => {
           const email = 'collaborator-link-ro@example.com'
           login(email)
           maybeClearAllTokens()
-          openProjectViaLinkSharingAsUser(
-            linkSharingReadOnly,
-            projectName,
-            email
-          )
+          waitForCompile(() => {
+            openProjectViaLinkSharingAsUser(
+              linkSharingReadOnly,
+              projectName,
+              email
+            )
+          })
           checkGitAccess('readOnly')
         })
       })
-    })
 
-    function checkGitAccess(access: 'readOnly' | 'readAndWrite') {
-      const recompile = throttledRecompile()
-
-      cy.findByRole('navigation', {
-        name: 'Project actions',
-      })
-        .findByRole('button', { name: 'Menu' })
-        .click()
-      cy.findByTestId('left-menu').within(() => {
-        cy.findByRole('heading', { name: 'Sync' })
-        cy.findByRole('button', { name: 'Git' }).click()
-      })
-      cy.get('@projectId').then(projectId => {
-        cy.findByTestId('git-bridge-modal').within(() => {
-          cy.findByLabelText('Git clone project command').contains(
-            `git clone ${gitURL(projectId.toString())}`
-          )
+      function checkGitAccess(access: 'readOnly' | 'readAndWrite') {
+        cy.findByRole('navigation', {
+          name: 'Project actions',
         })
-        cy.findByRole('heading', { name: 'Clone with Git' })
-        cy.findByRole('button', {
-          name: 'Generate token',
-        }).click()
-        cy.get('code')
-          .contains(/olp_[a-zA-Z0-9]{16}/)
-          .then(async tokenEl => {
-            const token = tokenEl.text()
+          .findByRole('button', { name: 'Menu' })
+          .click()
+        cy.findByTestId('left-menu').within(() => {
+          cy.findByRole('heading', { name: 'Sync' })
+          cy.findByRole('button', { name: 'Git' }).click()
+        })
+        cy.get('@projectId').then(projectId => {
+          cy.findByTestId('git-bridge-modal').within(() => {
+            cy.findByLabelText('Git clone project command').contains(
+              `git clone ${gitURL(projectId.toString())}`
+            )
+            cy.findByRole('heading', { name: 'Clone with Git' })
+            cy.findByRole('button', {
+              name: 'Generate token',
+            }).click()
+          })
+          cy.findByLabelText('Git authentication token')
+            .contains(/olp_[a-zA-Z0-9]{16}/)
+            .then(async tokenEl => {
+              const token = tokenEl.text()
 
-            // close Git modal
-            cy.findAllByText('Close').last().click()
-            // close editor menu
-            cy.get('.left-menu-modal-backdrop').click()
+              // close Git modal
+              cy.get('body').type('{esc}')
+              cy.findByTestId('git-bridge-modal').should('not.exist')
+              // close the modal
+              cy.get('body').type('{esc}')
+              cy.findByTestId('left-menu').should('not.exist')
+              const fs = new LightningFS('fs')
+              const dir = `/${projectId}`
 
-            const fs = new LightningFS('fs')
-            const dir = `/${projectId}`
+              async function readFile(path: string): Promise<string> {
+                return new Promise((resolve, reject) => {
+                  fs.readFile(path, { encoding: 'utf8' }, (err, blob) => {
+                    if (err) return reject(err)
+                    resolve(blob as string)
+                  })
+                })
+              }
 
-            async function readFile(path: string): Promise<string> {
-              return new Promise((resolve, reject) => {
-                fs.readFile(path, { encoding: 'utf8' }, (err, blob) => {
-                  if (err) return reject(err)
-                  resolve(blob as string)
+              async function writeFile(path: string, data: string) {
+                return new Promise<void>((resolve, reject) => {
+                  fs.writeFile(path, data, undefined, err => {
+                    if (err) return reject(err)
+                    resolve()
+                  })
+                })
+              }
+
+              const commonOptions = {
+                dir,
+                fs,
+              }
+              const url = gitURL(projectId.toString())
+              url.username = '' // basic auth is specified separately.
+              const httpOptions = {
+                http,
+                url: url.toString(),
+                headers: {
+                  Authorization: `Basic ${Buffer.from(`git:${token}`).toString('base64')}`,
+                },
+              }
+              const authorOptions = {
+                author: { name: 'user', email: USER },
+                committer: { name: 'user', email: USER },
+              }
+              const mainTex = `${dir}/main.tex`
+
+              // Clone
+              cy.then({ timeout: 10_000 }, async () => {
+                await git.clone({
+                  ...commonOptions,
+                  ...httpOptions,
                 })
               })
-            }
-
-            async function writeFile(path: string, data: string) {
-              return new Promise<void>((resolve, reject) => {
-                fs.writeFile(path, data, undefined, err => {
-                  if (err) return reject(err)
-                  resolve()
+              cy.findByText(/\\documentclass/)
+                .parent()
+                .parent()
+                .then(async editor => {
+                  const onDisk = await readFile(mainTex)
+                  expect(onDisk.replaceAll('\n', '')).to.equal(editor.text())
                 })
-              })
-            }
-
-            const commonOptions = {
-              dir,
-              fs,
-            }
-            const url = gitURL(projectId.toString())
-            url.username = '' // basic auth is specified separately.
-            const httpOptions = {
-              http,
-              url: url.toString(),
-              headers: {
-                Authorization: `Basic ${Buffer.from(`git:${token}`).toString('base64')}`,
-              },
-            }
-            const authorOptions = {
-              author: { name: 'user', email: USER },
-              committer: { name: 'user', email: USER },
-            }
-            const mainTex = `${dir}/main.tex`
-
-            // Clone
-            cy.then({ timeout: 10_000 }, async () => {
-              await git.clone({
-                ...commonOptions,
-                ...httpOptions,
-              })
-            })
-
-            cy.findByText(/\\documentclass/)
-              .parent()
-              .parent()
-              .then(async editor => {
-                const onDisk = await readFile(mainTex)
-                expect(onDisk.replaceAll('\n', '')).to.equal(editor.text())
-              })
-
-            const text = `
+              const text = `
 \\documentclass{article}
 \\begin{document}
 Hello world
 \\end{document}
 `
 
-            // Make a change
-            cy.then(async () => {
-              await writeFile(mainTex, text)
-              await git.add({
-                ...commonOptions,
-                filepath: 'main.tex',
-              })
-              await git.commit({
-                ...commonOptions,
-                ...authorOptions,
-                message: 'Swap main.tex',
-              })
-            })
-
-            if (access === 'readAndWrite') {
-              // check history before push
-              cy.findAllByText('History').last().click()
-              cy.findByText('(via Git)').should('not.exist')
-              cy.findAllByText('Back to editor').last().click()
-
+              // Make a change
               cy.then(async () => {
-                await git.push({
+                await writeFile(mainTex, text)
+                await git.add({
                   ...commonOptions,
-                  ...httpOptions,
+                  filepath: 'main.tex',
+                })
+                await git.commit({
+                  ...commonOptions,
+                  ...authorOptions,
+                  message: 'Swap main.tex',
                 })
               })
-            } else {
-              cy.then(async () => {
-                try {
+
+              if (access === 'readAndWrite') {
+                // check history before push
+                cy.findByRole('navigation', {
+                  name: 'Project actions',
+                })
+                  .findByRole('button', { name: 'History' })
+                  .click()
+                cy.findByText('(via Git)').should('not.exist')
+                cy.findAllByText('Back to editor').last().click()
+                cy.then(async () => {
                   await git.push({
                     ...commonOptions,
                     ...httpOptions,
                   })
-                  expect.fail('push should have failed')
-                } catch (err) {
-                  expect(err).to.match(/branches were not updated/)
-                  expect(err).to.match(/forbidden/)
-                }
+                })
+              } else {
+                cy.then(async () => {
+                  try {
+                    await git.push({
+                      ...commonOptions,
+                      ...httpOptions,
+                    })
+                    expect.fail('push should have failed')
+                  } catch (err) {
+                    expect(err).to.match(/branches were not updated/)
+                    expect(err).to.match(/forbidden/)
+                  }
+                })
+
+                return // return early, below are write access bits
+              }
+
+              // check push in editor
+              cy.findByText(/\\documentclass/)
+                .parent()
+                .parent()
+                .should('have.text', text.replaceAll('\n', ''))
+
+              // Wait for history sync - trigger flush by toggling the UI
+              cy.findByRole('navigation', {
+                name: 'Project actions',
               })
+                .findByRole('button', { name: 'History' })
+                .click()
+              cy.findAllByText('Back to editor').last().click()
 
-              return // return early, below are write access bits
-            }
-
-            // check push in editor
-            cy.findByText(/\\documentclass/)
-              .parent()
-              .parent()
-              .should('have.text', text.replaceAll('\n', ''))
-
-            // Wait for history sync - trigger flush by toggling the UI
-            cy.findAllByText('History').last().click()
-            cy.findAllByText('Back to editor').last().click()
-
-            // check push in history
-            cy.findAllByText('History').last().click()
-            cy.findByText(/Hello world/)
-            cy.findByText('(via Git)').should('exist')
-
-            // Back to the editor
-            cy.findAllByText('Back to editor').last().click()
-            cy.findByText(/\\documentclass/)
-              .parent()
-              .parent()
-              .click()
-              .type('% via editor{enter}')
-
-            // Trigger flush via compile
-            recompile()
-
-            // Back into the history, check what we just added
-            cy.findAllByText('History').last().click()
-            cy.findByText(/% via editor/)
-
-            // Pull the change
-            cy.then(async () => {
-              await git.pull({
-                ...commonOptions,
-                ...httpOptions,
-                ...authorOptions,
+              // check push in history
+              cy.findByRole('navigation', {
+                name: 'Project actions',
               })
+                .findByRole('button', { name: 'History' })
+                .click()
+              cy.findByText(/Hello world/)
+              cy.findByText('(via Git)').should('exist')
 
-              expect(await readFile(mainTex)).to.equal(text + '% via editor\n')
+              // Back to the editor
+              cy.findAllByText('Back to editor').last().click()
+              cy.findByText(/\\documentclass/)
+                .parent()
+                .parent()
+                .click()
+                .type('% via editor{enter}')
+
+              // Trigger flush via compile
+              recompile()
+
+              // Back into the history, check what we just added
+              cy.findByRole('navigation', {
+                name: 'Project actions',
+              })
+                .findByRole('button', { name: 'History' })
+                .click()
+              cy.findByText(/% via editor/)
+
+              // Pull the change
+              cy.then(async () => {
+                await git.pull({
+                  ...commonOptions,
+                  ...httpOptions,
+                  ...authorOptions,
+                })
+
+                expect(await readFile(mainTex)).to.equal(
+                  text + '% via editor\n'
+                )
+              })
             })
-          })
-      })
-    }
+        })
+      }
+    })
   })
 
   function checkDisabled() {
