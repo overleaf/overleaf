@@ -14,8 +14,8 @@ const mockRecurlySubscriptions = {
   'subscription-123-active': {
     uuid: 'subscription-123-active',
     plan: {
-      name: 'Gold',
-      plan_code: 'gold',
+      name: 'Collaborator',
+      plan_code: 'collaborator',
     },
     current_period_ends_at: new Date(),
     state: 'active',
@@ -107,15 +107,17 @@ describe('SubscriptionHandler', function () {
           .resolves(this.activeRecurlyClientSubscription),
         pauseSubscriptionByUuid: sinon.stub().resolves(),
         resumeSubscriptionByUuid: sinon.stub().resolves(),
+        failInvoice: sinon.stub(),
+        getPastDueInvoices: sinon.stub(),
       },
     }
-
     this.SubscriptionUpdater = {
       promises: {
         updateSubscriptionFromRecurly: sinon.stub().resolves(),
         syncSubscription: sinon.stub().resolves(),
         syncStripeSubscription: sinon.stub().resolves(),
         startFreeTrial: sinon.stub().resolves(),
+        setSubscriptionWasReverted: sinon.stub().resolves(),
       },
     }
 
@@ -757,6 +759,152 @@ describe('SubscriptionHandler', function () {
 
       it('should return true', function () {
         expect(this.isValid).to.equal(true)
+      })
+    })
+  })
+
+  describe('revertPlanChange', function () {
+    describe('with correct invoices', function () {
+      beforeEach(async function () {
+        this.subscriptionRestorePoint = {
+          planCode: 'collaborator',
+          addOns: [
+            { addOnCode: 'addon-1', quantity: 1, unitAmountInCents: 500 },
+          ],
+          _id: 'restore-point-id',
+        }
+        this.pastDueInvoice = {
+          id: 'invoice-123',
+          dueAt: new Date(),
+          collectionMethod: 'automatic',
+        }
+        this.user.id = this.activeRecurlySubscription.account.account_code
+        this.User.findById = (userId, projection) => ({
+          exec: () => {
+            userId.should.equal(this.user.id)
+            return Promise.resolve(this.user)
+          },
+        })
+        this.RecurlyClient.promises.getSubscription.resolves(
+          this.activeRecurlyClientSubscription
+        )
+        this.RecurlyClient.promises.getPastDueInvoices.resolves([
+          this.pastDueInvoice,
+        ])
+        this.RecurlyClient.promises.failInvoice.resolves()
+        this.SubscriptionUpdater.promises.setSubscriptionWasReverted.resolves()
+        this.RecurlyClient.promises.applySubscriptionChangeRequest.resolves()
+
+        await this.SubscriptionHandler.promises.revertPlanChange(
+          this.activeRecurlyClientSubscription.id,
+          this.subscriptionRestorePoint
+        )
+      })
+
+      it('should fetch the subscription from recurly', async function () {
+        expect(
+          this.RecurlyClient.promises.getSubscription.calledWith(
+            this.activeRecurlyClientSubscription.id
+          )
+        ).to.be.true
+      })
+
+      it('should fail the invoice', async function () {
+        expect(
+          this.RecurlyClient.promises.failInvoice.calledWith(
+            this.pastDueInvoice.id
+          )
+        ).to.be.true
+      })
+
+      it('should call setSubscriptionWasReverted', async function () {
+        expect(
+          this.SubscriptionUpdater.promises.setSubscriptionWasReverted.calledWith(
+            this.subscriptionRestorePoint._id
+          )
+        ).to.be.true
+      })
+
+      it('should sync the subscription', async function () {
+        this.SubscriptionUpdater.promises.syncSubscription.calledOnce.should.equal(
+          true
+        )
+        this.SubscriptionUpdater.promises.syncSubscription.args[0][0].should.deep.equal(
+          this.activeRecurlySubscription
+        )
+        this.SubscriptionUpdater.promises.syncSubscription.args[0][1].should.deep.equal(
+          this.user._id
+        )
+      })
+    })
+
+    describe('should throw an IndeterminateInvoiceError when', function () {
+      beforeEach(function () {
+        this.subscriptionRestorePoint = {
+          planCode: 'collaborator',
+          addOns: [
+            { addOnCode: 'addon-1', quantity: 1, unitAmountInCents: 500 },
+          ],
+          _id: 'restore-point-id',
+        }
+        this.RecurlyClient.promises.getSubscription.resolves(
+          this.activeRecurlyClientSubscription
+        )
+      })
+
+      it('finds a past due invoice older than 24 hours', async function () {
+        const oldInvoice = {
+          id: 'invoice-123',
+          dueAt: new Date(Date.now() - 25 * 60 * 60 * 1000), // 25 hours ago
+          collectionMethod: 'automatic',
+        }
+        this.RecurlyClient.promises.getPastDueInvoices.resolves([oldInvoice])
+
+        await expect(
+          this.SubscriptionHandler.promises.revertPlanChange(
+            this.activeRecurlyClientSubscription.id,
+            this.subscriptionRestorePoint
+          )
+        ).to.be.rejectedWith('cant determine invoice to fail for plan revert')
+      })
+
+      it('finds more than one past due invoice', async function () {
+        const invoices = [
+          {
+            id: 'invoice-123',
+            dueAt: new Date(),
+            collectionMethod: 'automatic',
+          },
+          {
+            id: 'invoice-456',
+            dueAt: new Date(),
+            collectionMethod: 'automatic',
+          },
+        ]
+        this.RecurlyClient.promises.getPastDueInvoices.resolves(invoices)
+
+        await expect(
+          this.SubscriptionHandler.promises.revertPlanChange(
+            this.activeRecurlyClientSubscription.id,
+            this.subscriptionRestorePoint
+          )
+        ).to.be.rejectedWith('cant determine invoice to fail for plan revert')
+      })
+
+      it('finds an invoice with a collectionMethod other than automatic', async function () {
+        const manualInvoice = {
+          id: 'invoice-123',
+          dueAt: new Date(),
+          collectionMethod: 'manual',
+        }
+        this.RecurlyClient.promises.getPastDueInvoices.resolves([manualInvoice])
+
+        await expect(
+          this.SubscriptionHandler.promises.revertPlanChange(
+            this.activeRecurlyClientSubscription.id,
+            this.subscriptionRestorePoint
+          )
+        ).to.be.rejectedWith('cant determine invoice to fail for plan revert')
       })
     })
   })

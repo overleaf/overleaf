@@ -53,6 +53,7 @@ describe('SubscriptionController', function () {
       syncSubscription: sinon.stub().yields(),
       attemptPaypalInvoiceCollection: sinon.stub().yields(),
       startFreeTrial: sinon.stub(),
+      revertPlanChange: sinon.stub(),
       promises: {
         createSubscription: sinon.stub().resolves(),
         updateSubscription: sinon.stub().resolves(),
@@ -80,6 +81,7 @@ describe('SubscriptionController', function () {
           tax: 0,
           total: 2000,
         }),
+        revertPlanChange: sinon.stub().resolves(),
       },
     }
 
@@ -126,6 +128,9 @@ describe('SubscriptionController', function () {
         recurly: {
           subdomain: 'sl',
         },
+      },
+      planReverts: {
+        enabled: false,
       },
       siteUrl: 'http://de.overleaf.dev:3000',
     }
@@ -688,6 +693,136 @@ describe('SubscriptionController', function () {
         this.res.sendStatus.calledWith(200)
       })
     })
+
+    describe('with a failed payment notification', function () {
+      describe('with planReverts disabled in settings', function () {
+        beforeEach(function (done) {
+          this.settings.planReverts = { enabled: false }
+          this.SubscriptionHandler.revertPlanChange = sinon.stub()
+
+          this.req.body = {
+            failed_payment_notification: {
+              transaction: {
+                subscription_id: 'subscription-123',
+              },
+            },
+          }
+
+          this.res = {
+            sendStatus() {
+              done()
+            },
+          }
+          sinon.spy(this.res, 'sendStatus')
+          this.SubscriptionController.recurlyCallback(this.req, this.res)
+        })
+        it('should not call revertPlanChange', function () {
+          expect(this.SubscriptionHandler.revertPlanChange.called).to.be.false
+        })
+
+        it('should respond with 200', function (done) {
+          this.res.sendStatus.calledWith(200)
+          done()
+        })
+      })
+
+      describe('with planReverts enabled in settings', function () {
+        beforeEach(function () {
+          this.settings.planReverts = { enabled: true }
+        })
+
+        describe('with no valid restore point', function () {
+          beforeEach(function (done) {
+            this.SubscriptionHandler.getSubscriptionRestorePoint = sinon
+              .stub()
+              .yields(null, null)
+            this.SubscriptionHandler.revertPlanChange = sinon.stub()
+
+            this.req.body = {
+              failed_payment_notification: {
+                transaction: {
+                  subscription_id: 'subscription-123',
+                },
+              },
+            }
+            this.res = {
+              sendStatus() {
+                done()
+              },
+            }
+            sinon.spy(this.res, 'sendStatus')
+            this.SubscriptionController.recurlyCallback(this.req, this.res)
+          })
+          it('should not call revertPlanChange()', function () {
+            expect(this.SubscriptionHandler.revertPlanChange.called).to.be.false
+          })
+
+          it('should respond with 200', function () {
+            this.res.sendStatus.calledWith(200)
+          })
+        })
+
+        describe('with a valid restore point', function () {
+          beforeEach(function (done) {
+            this.addOns = [
+              {
+                addOnCode: 'addon-1',
+                quantity: 2,
+                unitAmountInCents: 500,
+              },
+              {
+                addOnCode: 'addon-2',
+                quantity: 1,
+                unitAmountInCents: 600,
+              },
+            ]
+            this.lastSubscription = {
+              planCode: 'gold',
+              addOns: this.addOns,
+            }
+            this.SubscriptionHandler.getSubscriptionRestorePoint = sinon
+              .stub()
+              .yields(null, this.lastSubscription)
+            this.SubscriptionHandler.revertPlanChange = sinon.stub().yields()
+            this.req.body = {
+              failed_payment_notification: {
+                transaction: {
+                  subscription_id: 'subscription-123',
+                },
+              },
+            }
+            this.res = {
+              sendStatus() {
+                done()
+              },
+            }
+            sinon.spy(this.res, 'sendStatus')
+            this.SubscriptionController.recurlyCallback(this.req, this.res)
+          })
+
+          it('should get the subscription restore point', function () {
+            expect(
+              this.SubscriptionHandler.getSubscriptionRestorePoint.calledWith(
+                'subscription-123'
+              )
+            ).to.be.true
+          })
+
+          it('should call revertPlanChange()', function () {
+            expect(
+              this.SubscriptionHandler.revertPlanChange.calledWith(
+                'subscription-123',
+                this.lastSubscription
+              )
+            ).to.be.true
+          })
+
+          it('should respond with 200', function () {
+            this.res.sendStatus.calledWith(200)
+          })
+        })
+      })
+    })
   })
 
   describe('purchaseAddon', function () {
@@ -792,6 +927,39 @@ describe('SubscriptionController', function () {
 
       expect(this.FeaturesUpdater.promises.refreshFeatures).to.not.have.been
         .called
+    })
+
+    it('should refresh features', async function () {
+      this.req.params.addOnCode = 'assistant'
+      this.SubscriptionHandler.promises.purchaseAddon = sinon.stub().resolves()
+      this.FeaturesUpdater.promises.refreshFeatures = sinon.stub().resolves()
+
+      await this.SubscriptionController.purchaseAddon(this.req, this.res)
+
+      expect(
+        this.FeaturesUpdater.promises.refreshFeatures.calledWith(
+          this.user._id,
+          'add-on-purchase'
+        )
+      ).to.be.true
+    })
+
+    it('should respond with a bad request if the subscription already includes the addOn', async function () {
+      this.req.params.addOnCode = 'assistant'
+      this.SubscriptionHandler.promises.purchaseAddon = sinon
+        .stub()
+        .rejects(new SubscriptionErrors.DuplicateAddOnError())
+
+      await this.SubscriptionController.purchaseAddon(this.req, this.res)
+
+      expect(
+        this.HttpErrorHandler.badRequest.calledWith(
+          this.req,
+          this.res,
+          'Your subscription already includes this add-on',
+          { addon: 'assistant' }
+        )
+      ).to.be.true
     })
   })
 

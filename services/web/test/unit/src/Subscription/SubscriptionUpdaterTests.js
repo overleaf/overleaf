@@ -906,4 +906,97 @@ describe('SubscriptionUpdater', function () {
       ).to.equal(4)
     })
   })
+  describe('setRestorePoint', function () {
+    it('should set the restore point with the given plan code and add-ons', async function () {
+      const subscriptionId = new ObjectId()
+      const planCode = 'gold-plan'
+      const addOns = [
+        { addOnCode: 'addon-1', quantity: 2, unitAmountInCents: 500 },
+        { addOnCode: 'addon-2', quantity: 1, unitAmountInCents: 1000 },
+      ]
+      const consumed = false
+
+      await this.SubscriptionUpdater.promises.setRestorePoint(
+        subscriptionId,
+        planCode,
+        addOns,
+        consumed
+      )
+
+      sinon.assert.calledWith(
+        this.SubscriptionModel.updateOne,
+        { _id: subscriptionId },
+        {
+          $set: {
+            'lastSuccesfulSubscription.planCode': planCode,
+            'lastSuccesfulSubscription.addOns': addOns,
+          },
+        }
+      )
+    })
+
+    it('should increment revertedDueToFailedPayment if consumed is true', async function () {
+      const consumed = true
+      const subscriptionId = new ObjectId()
+
+      await this.SubscriptionUpdater.promises.setRestorePoint(
+        subscriptionId,
+        null,
+        null,
+        consumed
+      )
+
+      sinon.assert.calledWith(
+        this.SubscriptionModel.updateOne,
+        { _id: subscriptionId },
+        {
+          $set: {
+            'lastSuccesfulSubscription.planCode': null,
+            'lastSuccesfulSubscription.addOns': null,
+          },
+          $inc: { timesRevertedDueToFailedPayment: 1 },
+        }
+      )
+    })
+  })
+
+  describe('setSubscriptionWasReverted', function () {
+    it('should clear the restore point and mark the subscription as reverted', async function () {
+      const subscriptionId = new ObjectId().toString()
+
+      await this.SubscriptionUpdater.promises.setSubscriptionWasReverted(
+        subscriptionId
+      )
+
+      this.SubscriptionModel.updateOne.should.have.been.calledWith(
+        { _id: subscriptionId },
+        {
+          $set: {
+            'lastSuccesfulSubscription.planCode': null,
+            'lastSuccesfulSubscription.addOns': null,
+          },
+          $inc: { timesRevertedDueToFailedPayment: 1 },
+        }
+      )
+    })
+  })
+
+  describe('voidRestorePoint', function () {
+    it('should clear the restore point without marking the subscription as reverted', async function () {
+      const subscriptionId = new ObjectId().toString()
+
+      await this.SubscriptionUpdater.promises.voidRestorePoint(subscriptionId)
+
+      sinon.assert.calledWith(
+        this.SubscriptionModel.updateOne,
+        { _id: subscriptionId },
+        {
+          $set: {
+            'lastSuccesfulSubscription.planCode': null,
+            'lastSuccesfulSubscription.addOns': null,
+          },
+        }
+      )
+    })
+  })
 })

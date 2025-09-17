@@ -116,6 +116,7 @@ describe('RecurlyClient', function () {
       listAccountSubscriptions: sinon.stub(),
       listActiveCouponRedemptions: sinon.stub(),
       previewSubscriptionChange: sinon.stub(),
+      listSubscriptionInvoices: sinon.stub(),
     }
     this.recurly = {
       errors: recurly.errors,
@@ -730,6 +731,53 @@ describe('RecurlyClient', function () {
       expect(this.client.terminateSubscription).to.be.calledWith(
         'uuid-' + this.subscription.uuid
       )
+    })
+  })
+
+  describe('getPastDueInvoices', function () {
+    beforeEach(function () {
+      this.client.listSubscriptionInvoices = sinon.stub()
+    })
+
+    it('should return empty if no past due are found', async function () {
+      this.client.listSubscriptionInvoices.returns({
+        each: async function* () {},
+      })
+      const invoices = await this.RecurlyClient.promises.getPastDueInvoices(
+        this.subscription.id
+      )
+      expect(invoices).to.deep.equal([])
+    })
+
+    it('should return past due invoice', async function () {
+      const pastDueInvoice = { id: 'invoice-1', state: 'past_due' }
+      this.client.listSubscriptionInvoices.returns({
+        each: async function* () {
+          yield pastDueInvoice
+        },
+      })
+      const invoices = await this.RecurlyClient.promises.getPastDueInvoices(
+        this.subscription.id
+      )
+      expect(invoices).to.deep.equal([pastDueInvoice])
+    })
+
+    it('should return multiple invoices if multiple past due exist', async function () {
+      const pastDueInvoices = [
+        { id: 'invoice-1', state: 'past_due' },
+        { id: 'invoice-2', state: 'past_due' },
+      ]
+      this.client.listSubscriptionInvoices.returns({
+        each: async function* () {
+          for (const invoice of pastDueInvoices) {
+            yield invoice
+          }
+        },
+      })
+      const invoices = await this.RecurlyClient.promises.getPastDueInvoices(
+        this.subscription.id
+      )
+      expect(invoices).to.deep.equal(pastDueInvoices)
     })
   })
 })
