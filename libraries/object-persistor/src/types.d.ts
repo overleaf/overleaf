@@ -1,6 +1,6 @@
-import type { ListObjectsV2Output, Object } from 'aws-sdk/clients/s3'
+import type { ListObjectsV2Output, _Object } from '@aws-sdk/client-s3'
 
 export type ListDirectoryResult = {
-  contents: Array<Object>
+  contents: Array<_Object>
   response: ListObjectsV2Output
 }

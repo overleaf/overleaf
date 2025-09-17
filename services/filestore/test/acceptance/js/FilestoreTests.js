@@ -13,6 +13,7 @@ const streamifier = require('streamifier')
 chai.use(require('chai-as-promised'))
 const { ObjectId } = require('mongodb')
 const ChildProcess = require('node:child_process')
+const { ListObjectsV2Command } = require('@aws-sdk/client-s3')
 
 const fsWriteFile = promisify(fs.writeFile)
 const fsStat = promisify(fs.stat)
@@ -517,19 +518,13 @@ describe('Filestore', function () {
               ...s3Config(),
               key: process.env.MINIO_ROOT_USER,
               secret: process.env.MINIO_ROOT_PASSWORD,
-            })._getClientForBucket(bucketName)
-            await s3
-              .createBucket({
-                Bucket: bucketName,
-              })
-              .promise()
-            await s3
-              .upload({
-                Bucket: bucketName,
-                Key: fileId,
-                Body: constantFileContent,
-              })
-              .promise()
+            })
+            await s3._createBucket(bucketName)
+            await s3._upload(bucketName, {
+              Bucket: bucketName,
+              Key: fileId,
+              Body: constantFileContent,
+            })
           })
 
           it('should get the file from the specified bucket', async function () {
@@ -1250,22 +1245,22 @@ describe('Filestore', function () {
         }) {
           await createRandomContent(fileUrl1)
 
-          const { Contents: dekEntries } = await s3Client
-            .listObjectsV2({
+          const { Contents: dekEntries } = await s3Client.send(
+            new ListObjectsV2Command({
               Bucket: process.env.AWS_S3_USER_FILES_DEK_BUCKET_NAME,
               Prefix: `${templateId}/`,
             })
-            .promise()
+          )
           expect(dekEntries).to.have.length(dekBucketKeys.length)
           // Order is not predictable, use members
           expect(dekEntries.map(o => o.Key)).to.have.members(dekBucketKeys)
 
-          const { Contents: userFilesEntries } = await s3Client
-            .listObjectsV2({
+          const { Contents: userFilesEntries } = await s3Client.send(
+            new ListObjectsV2Command({
               Bucket: backendSettings.stores.template_files,
               Prefix: `${templateId}/`,
             })
-            .promise()
+          )
           expect(userFilesEntries).to.have.length(userFilesBucketKeys.length)
           // Order is not predictable, use members
           expect(userFilesEntries.map(o => o.Key)).to.have.members(

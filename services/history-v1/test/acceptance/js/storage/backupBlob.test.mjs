@@ -25,10 +25,11 @@ import {
 } from '../../../../storage/lib/backupPersistor.mjs'
 import { WritableBuffer } from '@overleaf/stream-utils'
 import cleanup from './support/cleanup.js'
+import { ListObjectsV2Command } from '@aws-sdk/client-s3'
 
 async function listS3BucketRaw(bucket) {
   const client = backupPersistor._getClientForBucket(bucket)
-  return await client.listObjectsV2({ Bucket: bucket }).promise()
+  return await client.send(new ListObjectsV2Command({ Bucket: bucket }))
 }
 
 async function listS3Bucket(bucket, wantStorageClass) {

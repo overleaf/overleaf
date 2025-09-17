@@ -264,7 +264,8 @@ For the `FS` persistor, the `bucketName` should be the full path to the folder o
 - `s3.key` (required): The AWS access key ID
 - `s3.secret` (required): The AWS secret access key
 - `s3.partSize`: The part size for S3 uploads. Defaults to 100 megabytes.
-- `s3.httpOptions`: HTTP options passed directly to the [S3 constructor](https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html#constructor-property).
+- `s3.httpOptions`: HTTP Options passed to the [`NodeHttpHandler` constructor](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/Package/-smithy-node-http-handler/Class/NodeHttpHandler/)
+  - For backwards compatibility reasons, the `timeout` property that was passed to the [S3 constructor](https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html#constructor-property) before migrating to AWS SDK v3 is now passed to the `NodeHttpHandler` constructor as `connectionTimeout`.
 - `s3.maxRetries`: The number of times the S3 client will retry in case of an error
 - `s3.endpoint`: For testing - overrides the S3 endpoint to use a different service (e.g. a fake S3 server)
 - `s3.pathStyle`: For testing - use old path-style URLs, for services that do not support subdomain-based access

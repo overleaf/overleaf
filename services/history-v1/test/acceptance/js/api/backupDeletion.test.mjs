@@ -15,6 +15,7 @@ import { makeProjectKey } from '../../../../storage/lib/blob_store/index.js'
 import config from 'config'
 import Stream from 'stream'
 import projectKey from '../../../../storage/lib/project_key.js'
+import { ListObjectsV2Command } from '@aws-sdk/client-s3'
 
 /**
  * @typedef {import("node-fetch").Response} Response
@@ -32,9 +33,11 @@ const deletedProjectsCollection = db.collection('deletedProjects')
 async function listS3Bucket(bucket, prefix) {
   // @ts-ignore access to internal library helper
   const client = backupPersistor._getClientForBucket(bucket)
-  const response = await client
-    .listObjectsV2({ Bucket: bucket, Prefix: prefix })
-    .promise()
+
+  const response = await client.send(
+    new ListObjectsV2Command({ Bucket: bucket, Prefix: prefix })
+  )
+
   return (response.Contents || []).map(item => item.Key || '')
 }
 
