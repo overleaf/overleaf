@@ -78,6 +78,7 @@
     SubParagraphCtrlSeq,
     InputCtrlSeq,
     IncludeCtrlSeq,
+    SubfileCtrlSeq,
     ItemCtrlSeq,
     NewTheoremCtrlSeq,
     TheoremStyleCtrlSeq,
@@ -349,6 +350,9 @@ KnownCommand<ArgumentType> {
     } |
     Include {
         IncludeCtrlSeq IncludeArgument { FilePathArgument }
+    } |
+    Subfile {
+        SubfileCtrlSeq SubfileArgument { FilePathArgument }
     } |
     Centering {
         CenteringCtrlSeq

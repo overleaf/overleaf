@@ -51,6 +51,7 @@ const typeMap: Record<string, string[]> = {
   HrefCommand: ['$CommandTooltipCommand'],
   Include: ['$CommandTooltipCommand'],
   Input: ['$CommandTooltipCommand'],
+  Subfile: ['$CommandTooltipCommand'],
   Ref: ['$CommandTooltipCommand'],
   UrlCommand: ['$CommandTooltipCommand'],
   // text formatting commands that can be toggled via the toolbar

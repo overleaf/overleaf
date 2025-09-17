@@ -56,6 +56,14 @@ export function buildIncludeCompletions(
         apply: `\\input{${removeTexExtension(path)}}`,
         extend: extendOverUnpairedClosingBrace,
       })
+
+      // \subfile{path}
+      completions.commands.push({
+        type: 'cmd',
+        label: `\\subfile{${path}}`,
+        apply: `\\subfile{${removeTexExtension(path)}}`,
+        extend: extendOverUnpairedClosingBrace,
+      })
     }
 
     // TODO: a better list of graphics extensions?

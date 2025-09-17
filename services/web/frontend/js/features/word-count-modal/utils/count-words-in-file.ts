@@ -254,7 +254,7 @@ export const countWordsInFile = (
       iterateNode(nodeRef, 'footnote')
       return false
     },
-    'IncludeArgument InputArgument'(nodeRef) {
+    'IncludeArgument InputArgument SubfileArgument'(nodeRef) {
       const path = content.substring(nodeRef.from + 1, nodeRef.to - 1)
       debugConsole.log(path)
       if (path) {

@@ -14,6 +14,7 @@ import { RefTooltipContent } from './command-tooltip/ref-tooltip'
 import { IncludeTooltipContent } from './command-tooltip/include-tooltip'
 import { InputTooltipContent } from './command-tooltip/input-tooltip'
 import { getTooltip } from '@codemirror/view'
+import { SubfileTooltipContent } from '@/features/source-editor/components/command-tooltip/subfile-tooltip'
 
 export const CodeMirrorCommandTooltip = memo(function CodeMirrorLinkTooltip() {
   const view = useCodeMirrorViewContext()
@@ -86,6 +87,8 @@ const CodeMirrorCommandTooltipContent = memo<{
       return <IncludeTooltipContent />
     case 'Input':
       return <InputTooltipContent />
+    case 'Subfile':
+      return <SubfileTooltipContent />
     default:
       return null
   }
