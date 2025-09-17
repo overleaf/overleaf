@@ -402,20 +402,31 @@ export const EditorManagerProvider: FC<React.PropsWithChildren> = ({
           })
         )
         if (hasGotoLine(options)) {
-          window.setTimeout(() => jumpToLine(options))
+          const jump = () => jumpToLine(options)
 
-          // Jump to the line again after a stored scroll position has been restored
           if (isNewDoc) {
-            window.addEventListener(
-              'editor:scroll-position-restored',
-              () => jumpToLine(options),
-              { once: true }
-            )
+            // Jump to the line after a stored scroll position has been restored
+            window.addEventListener('editor:scroll-position-restored', jump, {
+              once: true,
+            })
+          } else {
+            // Jump directly to the line
+            jump()
           }
         } else if (hasGotoOffset(options)) {
-          window.setTimeout(() => {
+          const jump = () => {
             eventEmitter.emit('editor:gotoOffset', options)
-          })
+          }
+
+          if (isNewDoc) {
+            // Jump to the offset after a stored scroll position has been restored
+            window.addEventListener('editor:scroll-position-restored', jump, {
+              once: true,
+            })
+          } else {
+            // Jump directly to the offset
+            jump()
+          }
         }
 
         resolve(doc)

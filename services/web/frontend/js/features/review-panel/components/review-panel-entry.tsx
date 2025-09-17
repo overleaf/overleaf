@@ -15,6 +15,7 @@ import { EditorSelection } from '@codemirror/state'
 import { OFFSET_FOR_ENTRIES_ABOVE } from '../utils/position-items'
 import useReviewPanelLayout from '../hooks/use-review-panel-layout'
 import { EntryIndicator } from './review-panel-entry-indicator'
+import { EditorView } from '@codemirror/view'
 
 export const ReviewPanelEntry: FC<
   React.PropsWithChildren<{
@@ -86,9 +87,22 @@ export const ReviewPanelEntry: FC<
         openDocWithId(docId, { gotoOffset: position, keepCurrentView: true })
       } else {
         setTimeout(() => {
-          view.dispatch({
-            selection: EditorSelection.cursor(position),
-          })
+          const selection = EditorSelection.cursor(position)
+
+          // if the position is outside the viewport, so could be estimated,
+          // use EditorView.scrollIntoView (accurate, not smooth)
+          if (position < view.viewport.from || view.viewport.to < position) {
+            view.dispatch({
+              selection,
+              effects: EditorView.scrollIntoView(selection, { y: 'center' }),
+            })
+            return
+          }
+
+          // if the position is inside the viewport, so accurate,
+          // use scrollDOM.scrollTo (smooth)
+
+          view.dispatch({ selection })
 
           // scroll to line (centered)
           const blockInfo = view.lineBlockAt(position)
