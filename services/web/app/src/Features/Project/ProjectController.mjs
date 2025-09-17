@@ -707,30 +707,13 @@ const _ProjectController = {
         })
       }
 
-      let inEnterpriseCommons = false
-      const affiliations = userValues.affiliations || []
-      for (const affiliation of affiliations) {
-        inEnterpriseCommons =
-          inEnterpriseCommons || affiliation.institution?.enterpriseCommons
-      }
-
-      // check if a user has never tried writefull before (writefull.enabled will be null)
-      //  if they previously accepted writefull, or are have been already assigned to a trial, user.writefull will be true,
-      //  if they explicitly disabled it, user.writefull will be false
-      if (
-        aiFeaturesAllowed &&
-        user.writefull?.enabled === null &&
-        !userIsMemberOfGroupSubscription &&
-        !inEnterpriseCommons
-      ) {
-        await UserUpdater.promises.updateUser(userId, {
-          $set: {
-            writefull: { enabled: true, autoCreatedAccount: true },
-          },
-        })
-        user.writefull.enabled = true
-        user.writefull.autoCreatedAccount = true
-      }
+      await ProjectController._setWritefullTrialState(
+        user,
+        userValues,
+        userId,
+        aiFeaturesAllowed,
+        userIsMemberOfGroupSubscription
+      )
 
       const template =
         detachRole === 'detached'
@@ -1147,6 +1130,51 @@ const _ProjectController = {
     }
     return portalTemplates
   },
+
+  async _setWritefullTrialState(
+    user,
+    userValues,
+    userId,
+    aiFeaturesAllowed,
+    userIsMemberOfGroupSubscription
+  ) {
+    let inEnterpriseCommons = false
+    const affiliations = userValues.affiliations || []
+    for (const affiliation of affiliations) {
+      inEnterpriseCommons =
+        inEnterpriseCommons || affiliation.institution?.enterpriseCommons
+    }
+
+    // check if a user has never tried writefull before (writefull.enabled will be null)
+    //  if they previously accepted writefull, or are have been already assigned to a trial, user.writefull will be true,
+    //  if they explicitly disabled it, user.writefull will be false
+    const shouldPushWritefull =
+      aiFeaturesAllowed &&
+      user.writefull?.enabled === null &&
+      !userIsMemberOfGroupSubscription
+
+    // we dont have legal approval to push enterprise commons into WF auto-account-create, but we are able to auto-load it into the toolbar
+    const shouldAutoCreateAccount = shouldPushWritefull && !inEnterpriseCommons
+    const shouldAutoLoad = shouldPushWritefull && inEnterpriseCommons
+
+    if (shouldAutoCreateAccount) {
+      await UserUpdater.promises.updateUser(userId, {
+        $set: {
+          writefull: { enabled: true, autoCreatedAccount: true },
+        },
+      })
+      user.writefull.enabled = true
+      user.writefull.autoCreatedAccount = true
+    } else if (shouldAutoLoad) {
+      await UserUpdater.promises.updateUser(userId, {
+        $set: {
+          writefull: { enabled: true, autoCreatedAccount: false },
+        },
+      })
+      user.writefull.enabled = true
+      user.writefull.autoCreatedAccount = false
+    }
+  },
 }
 
 const defaultSettingsForAnonymousUser = userId => ({
@@ -1259,6 +1287,7 @@ const ProjectController = {
   _refreshFeatures: _ProjectController._refreshFeatures,
   _getPaywallPlansPrices: _ProjectController._getPaywallPlansPrices,
   _getAddonPrices: _ProjectController._getAddonPrices,
+  _setWritefullTrialState: _ProjectController._setWritefullTrialState,
 }
 
 export default ProjectController
