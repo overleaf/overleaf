@@ -307,6 +307,14 @@ async function getHistoryId(projectId) {
   return historyId
 }
 
+async function getBlobStats(historyId, blobHashes) {
+  return await fetchJson(`${HISTORY_V1_URL}/projects/${historyId}/blob-stats`, {
+    method: 'POST',
+    basicAuth: HISTORY_V1_BASIC_AUTH,
+    json: { blobHashes: blobHashes.map(id => id.toString()) },
+  })
+}
+
 async function getProjectBlobStats(historyIds) {
   return await fetchJson(`${HISTORY_V1_URL}/projects/blob-stats`, {
     method: 'POST',
@@ -427,5 +435,6 @@ module.exports = {
     getLatestHistory,
     getChanges,
     getProjectBlobStats,
+    getBlobStats,
   },
 }

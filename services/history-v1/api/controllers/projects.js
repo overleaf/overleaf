@@ -13,6 +13,7 @@ const logger = require('@overleaf/logger')
 const { Chunk, ChunkResponse, Blob } = require('overleaf-editor-core')
 const {
   BlobStore,
+  BatchBlobStore,
   blobHash,
   chunkStore,
   redisBuffer,
@@ -377,6 +378,30 @@ function sumUpByteLength(blobs) {
   return blobs.reduce((sum, blob) => sum + blob.getByteLength(), 0)
 }
 
+async function getBlobStats(req, res) {
+  const projectId = req.swagger.params.project_id.value
+  const blobHashes = req.swagger.params.body.value.blobHashes || []
+  for (const hash of blobHashes) {
+    assert.blobHash(hash, 'bad hash')
+  }
+  const blobStore = new BlobStore(projectId)
+  const batchBlobStore = new BatchBlobStore(blobStore)
+  await batchBlobStore.preload(Array.from(blobHashes))
+  const blobs = Array.from(batchBlobStore.blobs.values()).filter(Boolean)
+  const textBlobs = blobs.filter(b => b.getStringLength() !== null)
+  const binaryBlobs = blobs.filter(b => b.getStringLength() === null)
+  const textBlobBytes = sumUpByteLength(textBlobs)
+  const binaryBlobBytes = sumUpByteLength(binaryBlobs)
+  res.json({
+    projectId,
+    textBlobBytes,
+    binaryBlobBytes,
+    totalBytes: textBlobBytes + binaryBlobBytes,
+    nTextBlobs: textBlobs.length,
+    nBinaryBlobs: binaryBlobs.length,
+  })
+}
+
 async function getProjectBlobsStats(req, res) {
   const projectIds = req.swagger.params.body.value.projectIds
   const { blobs } = await getProjectBlobsBatch(
@@ -425,5 +450,6 @@ module.exports = {
   getProjectBlob: expressify(getProjectBlob),
   headProjectBlob: expressify(headProjectBlob),
   copyProjectBlob: expressify(copyProjectBlob),
+  getBlobStats: expressify(getBlobStats),
   getProjectBlobsStats: expressify(getProjectBlobsStats),
 }

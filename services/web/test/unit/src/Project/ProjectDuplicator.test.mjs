@@ -212,6 +212,13 @@ describe('ProjectDuplicator', function () {
         flushProjectToTpds: sinon.stub().resolves(),
       },
     }
+    ctx.Modules = {
+      promises: {
+        hooks: {
+          fire: sinon.stub().resolves([]),
+        },
+      },
+    }
 
     vi.doMock('../../../../app/src/models/Doc', () => ({
       Doc: ctx.Doc,
@@ -285,6 +292,10 @@ describe('ProjectDuplicator', function () {
 
     vi.doMock('../../../../app/src/Features/History/HistoryManager', () => ({
       default: ctx.HistoryManager,
+    }))
+
+    vi.doMock('../../../../app/src/infrastructure/Modules', () => ({
+      default: ctx.Modules,
     }))
 
     vi.doMock('../../../../app/src/Features/Compile/ClsiCacheManager', () => ({

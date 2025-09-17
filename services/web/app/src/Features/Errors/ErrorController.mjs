@@ -89,6 +89,12 @@ async function handleError(error, req, res, next) {
     if (shouldSendErrorResponse) {
       HttpErrorHandler.badRequest(req, res, error.message)
     }
+  } else if (error instanceof Errors.FileTooLargeError) {
+    req.logger.setLevel('warn')
+    if (shouldSendErrorResponse) {
+      res.status(400)
+      plainTextResponse(res, error.message)
+    }
   } else if (isZodErrorLike(error)) {
     req.logger.setLevel('warn')
     res.status(400)

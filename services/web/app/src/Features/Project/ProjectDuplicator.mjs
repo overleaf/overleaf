@@ -20,6 +20,7 @@ import TpdsProjectFlusher from '../ThirdPartyDataStore/TpdsProjectFlusher.js'
 import _ from 'lodash'
 import TagsHandler from '../Tags/TagsHandler.js'
 import ClsiCacheManager from '../Compile/ClsiCacheManager.js'
+import Modules from '../../infrastructure/Modules.js'
 
 export default {
   duplicate: callbackify(duplicate),
@@ -47,6 +48,15 @@ async function duplicate(owner, originalProjectId, newProjectName, tags = []) {
   })
 
   const originalEntries = _getFolderEntries(originalProject.rootFolder[0])
+
+  await Modules.promises.hooks.fire('preDuplicateProject', {
+    owner,
+    originalProjectId,
+    newProjectName,
+    tags,
+    originalProject,
+    originalEntries,
+  })
 
   // Pass template ID as analytics segmentation if duplicating project from a template
   const segmentation = _.pick(originalProject, [
