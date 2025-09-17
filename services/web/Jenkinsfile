@@ -261,6 +261,18 @@ pipeline {
             }
           }
         }
+        stage('test_writefull') {
+          steps {
+            script {
+              waitUntil {
+                return action_build_dev
+              }
+            }
+            dir('services/web') {
+              sh "make test_writefull"
+            }
+          }
+        }
         stage('test_frontend_ct_build') {
           steps {
             script {

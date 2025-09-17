@@ -12,15 +12,24 @@
     "esModuleInterop": true /* Enables emit interoperability between CommonJS and ES Modules via creation of namespace objects for all imports. Implies 'allowSyntheticDefaultImports'. */,
     "skipLibCheck": true /* Skip type checking of declaration files. */,
     "forceConsistentCasingInFileNames": true /* Disallow inconsistently-cased references to the same file. */,
+    "experimentalDecorators": true /* Allow decorators in writefull - inversify */,
+    "emitDecoratorMetadata": true /* Allow decorators in writefull - inversify */,
     "paths": {
       "@/*": ["./frontend/js/*"],
       "@overleaf/o-error": ["../../libraries/o-error"],
       "@overleaf/ranges-tracker": ["../../libraries/ranges-tracker"],
-      "@ol-types/*": [
-        "./types/*"
-      ] /* can't make this entry @types because that conflicts with the "types" entry below */
+      /* can't make this entry @types because that conflicts with the "types" entry below */
+      "@ol-types/*": ["./types/*"],
+      "@wf/*": ["./modules/writefull/frontend/js/integration/src/*"],
+      "@wf-tests/*": ["./modules/writefull/frontend/js/integration/tests/*"]
     },
-    "types": ["cypress", "@testing-library/cypress"]
+    "types": [
+      "cypress",
+      "@testing-library/cypress",
+      "reflect-metadata",
+      "vitest/globals",
+      "@testing-library/jest-dom"
+    ]
   },
   "include": [
     "frontend/js/**/*.*",

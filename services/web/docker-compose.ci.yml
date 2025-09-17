@@ -85,6 +85,19 @@ services:
       - "run"
       - "cypress:run-ct"
 
+  test_writefull:
+    build:
+      context: ../..
+      dockerfile: services/web/Dockerfile
+    image: ci/$PROJECT_NAME:$BRANCH_NAME-$BUILD_NUMBER
+    logging:
+      driver: local
+    user: node
+    working_dir: /overleaf/services/web
+    command: npm run test:writefull
+    environment:
+      NODE_OPTIONS: "--unhandled-rejections=strict"
+
   tar:
     image: ci/$PROJECT_NAME:$BRANCH_NAME-$BUILD_NUMBER-webpack
     volumes:

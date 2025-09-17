@@ -1,6 +1,7 @@
 import i18n from 'i18next'
 import { initReactI18next } from 'react-i18next'
 import getMeta from '@/utils/meta'
+import { resources } from '@/i18n-resources/writefull'
 
 const LANG = getMeta('ol-i18n').currentLangCode
 
@@ -57,6 +58,11 @@ const localesPromise = import(
   /* webpackChunkName: "[request]" */ `../../locales/${LANG}.json`
 ).then(lang => {
   i18n.addResourceBundle(LANG, 'translation', lang)
+  i18n.addResourceBundle(
+    LANG,
+    'writefull',
+    LANG === 'es' ? resources.es.writefull : resources.en.writefull
+  )
 })
 
 export default localesPromise

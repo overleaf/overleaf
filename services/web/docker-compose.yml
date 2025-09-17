@@ -88,6 +88,22 @@ services:
       - "run"
       - "cypress:run-ct"
 
+  test_writefull:
+    build:
+      context: ../..
+      dockerfile: services/web/Dockerfile
+      target: base
+    volumes:
+      - .:/overleaf/services/web
+      - ../../node_modules:/overleaf/node_modules
+      - ../../libraries:/overleaf/libraries
+    working_dir: /overleaf/services/web
+    environment:
+      NODE_OPTIONS: "--unhandled-rejections=strict"
+      VERBOSE_LOGGING:
+    command: npm run --silent test:writefull
+    user: node
+
   redis_test:
     image: redis:7.4.3
 

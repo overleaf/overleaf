@@ -120,6 +120,25 @@ module.exports = {
   module: {
     rules: [
       {
+        test: /\.tsx?$/,
+        include: path.resolve(
+          __dirname,
+          'modules/writefull/frontend/js/integration'
+        ),
+        use: [
+          {
+            loader: 'ts-loader',
+            options: {
+              configFile: path.resolve(
+                __dirname,
+                'modules/writefull/frontend/js/integration/tsconfig.json'
+              ),
+              transpileOnly: true,
+            },
+          },
+        ],
+      },
+      {
         // Pass application JS/TS files through babel-loader,
         // transpiling to targets defined in browserslist
         test: /\.([jt]sx?|[cm]js)$/,
@@ -128,6 +147,7 @@ module.exports = {
         exclude: [
           /node_modules\/(?!(react-dnd|chart\.js|@uppy|pdfjs-dist|react-resizable-panels)\/)/,
           vendorDir,
+          path.resolve(__dirname, 'modules/writefull/frontend/js/integration'),
         ],
         use: [
           {
@@ -203,7 +223,24 @@ module.exports = {
       {
         // Pass CSS files through css-loader & mini-css-extract-plugin (note: run in reverse order)
         test: /\.css$/i,
-        use: [MiniCssExtractPlugin.loader, 'css-loader'],
+        oneOf: [
+          {
+            // Import as a string (for Shadow DOM usage): import styles from './file.css?inline'
+            resourceQuery: /inline/,
+            use: [
+              {
+                loader: 'css-loader',
+              },
+              {
+                loader: 'postcss-loader',
+              },
+            ],
+          },
+          {
+            // Standard CSS processing (extracted into separate file)
+            use: [MiniCssExtractPlugin.loader, 'css-loader'],
+          },
+        ],
       },
       {
         // Load fonts
@@ -249,6 +286,10 @@ module.exports = {
       // custom prefixes for import paths
       '@': path.resolve(__dirname, './frontend/js/'),
       '@ol-types': path.resolve(__dirname, './types/'),
+      '@wf': path.resolve(
+        __dirname,
+        './modules/writefull/frontend/js/integration/src/'
+      ),
     },
     // symlinks: false, // enable this while using `npm link`
     extensions: ['.js', '.jsx', '.ts', '.tsx', '.mjs', '.cjs', '.json'],

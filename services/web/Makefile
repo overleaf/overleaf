@@ -77,7 +77,7 @@ clean_ci:
 # Tests
 #
 
-test: test_unit test_acceptance test_frontend test_frontend_ct
+test: test_unit test_acceptance test_frontend test_frontend_ct test_writefull
 
 test_module: test_unit_module test_acceptance_module
 
@@ -164,6 +164,14 @@ TEST_FRONTEND_CT_VARIANTS = \
 	test_frontend_ct_modules \
 	test_frontend_ct_editor_other \
 	test_frontend_ct_editor_visual \
+
+#
+# Writefull tests
+#
+
+test_writefull:
+	COMPOSE_PROJECT_NAME=writefull_test_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) run --rm test_writefull
+	COMPOSE_PROJECT_NAME=writefull_test_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down -v -t 0
 
 # Note: The below cypress targets are for CI only
 build_test_frontend_ct:

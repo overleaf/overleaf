@@ -66,6 +66,7 @@ import { Subscription as AdminSubscription } from '../../../types/admin/subscrip
 import { AdminCapability } from '../../../types/admin-capabilities'
 import { GroupAuditLog } from '../../../modules/group-audit-log/frontend/js/components/logs'
 import { AlgoliaConfig } from '../../../modules/algolia-search/frontend/js/types'
+import { WritefullPublicEnv } from '@wf/domain/writefull-public-env'
 
 export interface Meta {
   'ol-ExposedSettings': ExposedSettings
@@ -314,9 +315,8 @@ export interface Meta {
   'ol-validationStatus': ValidationStatus
   'ol-viaDomainCapture': boolean
   'ol-wikiEnabled': boolean
-  'ol-writefullCssUrl': string
   'ol-writefullEnabled': boolean
-  'ol-writefullJsUrl': string
+  'ol-writefullEnv': WritefullPublicEnv
   'ol-wsUrl': string
 }
 

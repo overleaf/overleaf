@@ -400,6 +400,7 @@ const _ProjectController = {
       'editor-popup-ux-survey',
       'client-side-references',
       'editor-redesign-new-users',
+      'writefull-frontend-migration',
     ].filter(Boolean)
 
     const getUserValues = async userId =>
