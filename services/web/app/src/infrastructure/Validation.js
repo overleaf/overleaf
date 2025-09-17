@@ -48,6 +48,7 @@ const zz = {
       .string()
       .refine(ObjectId.isValid, { message: 'invalid Mongo ObjectId' })
       .transform(val => new ObjectId(val)),
+  hex: () => z.string().regex(/^[0-9a-f]*$/),
 }
 
 /**

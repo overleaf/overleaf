@@ -280,8 +280,8 @@ async function getLatestHistory(projectId) {
  * Get history changes since a given version
  *
  * @param {string} projectId
- * @param {object} opts
- * @param {number} opts.since - The start version of changes to get
+ * @param {object} [opts]
+ * @param {number} [opts.since] - The start version of changes to get
  */
 async function getChanges(projectId, opts = {}) {
   const historyId = await getHistoryId(projectId)

@@ -1,7 +1,6 @@
 // @ts-check
 
 import Settings from '@overleaf/settings'
-import { Joi, validate } from '../../infrastructure/Validation.js'
 import { RateLimiter } from '../../infrastructure/RateLimiter.js'
 import AuthenticationController from '../Authentication/AuthenticationController.js'
 import AuthorizationMiddleware from '../Authorization/AuthorizationMiddleware.mjs'
@@ -29,30 +28,12 @@ function apply(webRouter, privateApiRouter) {
 
   webRouter.head(
     '/project/:project_id/blob/:hash',
-    validate({
-      params: Joi.object({
-        project_id: Joi.objectId().required(),
-        hash: Joi.string().required().hex().length(40),
-      }),
-      query: Joi.object({
-        fallback: Joi.objectId().optional(),
-      }),
-    }),
     RateLimiterMiddleware.rateLimit(rateLimiters.getProjectBlob),
     AuthorizationMiddleware.ensureUserCanReadProject,
     HistoryController.headBlob
   )
   webRouter.get(
     '/project/:project_id/blob/:hash',
-    validate({
-      params: Joi.object({
-        project_id: Joi.objectId().required(),
-        hash: Joi.string().required().hex().length(40),
-      }),
-      query: Joi.object({
-        fallback: Joi.objectId().optional(),
-      }),
-    }),
     RateLimiterMiddleware.rateLimit(rateLimiters.getProjectBlob),
     AuthorizationMiddleware.ensureUserCanReadProject,
     HistoryController.getBlob
@@ -151,25 +132,12 @@ function apply(webRouter, privateApiRouter) {
 
   webRouter.get(
     '/project/:project_id/latest/history',
-    validate({
-      params: Joi.object({
-        project_id: Joi.objectId().required(),
-      }),
-    }),
     AuthorizationMiddleware.blockRestrictedUserFromProject,
     AuthorizationMiddleware.ensureUserCanReadProject,
     HistoryController.getLatestHistory
   )
   webRouter.get(
     '/project/:project_id/changes',
-    validate({
-      params: Joi.object({
-        project_id: Joi.objectId().required(),
-      }),
-      query: Joi.object({
-        since: Joi.number().integer().min(0).optional(),
-      }),
-    }),
     AuthorizationMiddleware.blockRestrictedUserFromProject,
     AuthorizationMiddleware.ensureUserCanReadProject,
     HistoryController.getChanges

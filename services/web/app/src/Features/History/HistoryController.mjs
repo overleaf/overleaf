@@ -25,6 +25,7 @@ import ProjectEntityUpdateHandler from '../Project/ProjectEntityUpdateHandler.js
 import RestoreManager from './RestoreManager.mjs'
 import { prepareZipAttachment } from '../../infrastructure/Response.js'
 import Features from '../../infrastructure/Features.js'
+import { z, zz, validateReq } from '../../infrastructure/Validation.js'
 
 // Number of seconds after which the browser should send a request to revalidate
 // blobs
@@ -44,8 +45,19 @@ async function headBlob(req, res) {
   await requestBlob('HEAD', req, res)
 }
 
+const requestBlobSchema = z.object({
+  params: z.object({
+    project_id: zz.coercedObjectId(),
+    hash: zz.hex().length(40),
+  }),
+  query: z.object({
+    fallback: zz.coercedObjectId().optional(),
+  }),
+})
+
 async function requestBlob(method, req, res) {
-  const { project_id: projectId, hash } = req.params
+  const { params } = validateReq(req, requestBlobSchema)
+  const { project_id: projectId, hash } = params
 
   // Handle conditional GET request
   if (req.get('If-None-Match') === hash) {
@@ -461,17 +473,35 @@ async function _pipeHistoryZipToResponse(v1ProjectId, version, name, req, res) {
   }
 }
 
+const getLatestHistorySchema = z.object({
+  params: z.object({
+    project_id: zz.objectId(),
+  }),
+})
+
 async function getLatestHistory(req, res, next) {
-  const projectId = req.params.project_id
+  const { params } = validateReq(req, getLatestHistorySchema)
+  const projectId = params.project_id
   const history = await HistoryManager.promises.getLatestHistory(projectId)
   res.json(history)
 }
 
+const getChangesSchema = z.object({
+  params: z.object({
+    project_id: zz.objectId(),
+  }),
+  query: z.object({
+    since: z.coerce.number().int().min(0).optional(),
+    paginated: z.stringbool().optional(),
+  }),
+})
+
 async function getChanges(req, res, next) {
-  const projectId = req.params.project_id
-  let since = req.query.since
+  const { params, query } = validateReq(req, getChangesSchema)
+  const projectId = params.project_id
+  let since = query.since
   // TODO: Transition flag; remove after a while
-  const paginated = req.query.paginated === 'true'
+  const paginated = query.paginated
 
   if (paginated) {
     const changes = await HistoryManager.promises.getChanges(projectId, {
