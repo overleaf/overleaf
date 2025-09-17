@@ -188,7 +188,7 @@ const PreventTimeoutHelpMessage = memo(function PreventTimeoutHelpMessage({
           <p>
             <em>
               <Trans
-                i18nKey="were_reducing_compile_timeout"
+                i18nKey="weve_reduced_compile_timeout"
                 components={[compileTimeoutChangesBlogLink]}
               />
             </em>

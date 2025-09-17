@@ -4,14 +4,12 @@ import { useDetachCompileContext } from '@/shared/context/detach-compile-context
 import usePersistedState from '@/shared/hooks/use-persisted-state'
 import { CompileTimeWarningUpgradePromptInner } from '@/features/pdf-preview/components/compile-time-warning-upgrade-prompt-inner'
 import getMeta from '@/utils/meta'
-import { CompileTimeoutChangingSoon } from './compile-time-changing-soon'
 
 function CompileTimeWarningUpgradePrompt() {
   const { isProjectOwner, deliveryLatencies, compiling, showLogs, error } =
     useDetachCompileContext()
 
   const [showWarning, setShowWarning] = useState(false)
-  const [showChangingSoon, setShowChangingSoon] = useState(false)
   const [dismissedUntilWarning, setDismissedUntilWarning] = usePersistedState<
     Date | undefined
   >(`has-dismissed-10s-compile-time-warning-until`)
@@ -25,22 +23,10 @@ function CompileTimeWarningUpgradePrompt() {
     [isProjectOwner]
   )
 
-  const changingSoonSegmentation = useMemo(
-    () => ({
-      content: 'changes',
-      compileTime: 10,
-      isProjectOwner,
-    }),
-    [isProjectOwner]
-  )
-
   const handleNewCompile = useCallback(
     (compileTime: number) => {
       setShowWarning(false)
-      setShowChangingSoon(false)
-      if (compileTime > 10000) {
-        setShowChangingSoon(true)
-      } else if (compileTime > 7000) {
+      if (compileTime > 7000) {
         if (isProjectOwner) {
           if (
             !dismissedUntilWarning ||
@@ -75,16 +61,6 @@ function CompileTimeWarningUpgradePrompt() {
     setDismissedUntilWarning(until)
   }, [isProjectOwner, setDismissedUntilWarning])
 
-  const handleDismissChangingSoon = useCallback(() => {
-    eventTracking.sendMB('paywall-dismiss', {
-      'paywall-type': 'compile-time-warning',
-      compileTime: 10,
-      content: 'changes',
-      isProjectOwner,
-    })
-    setShowChangingSoon(false)
-  }, [isProjectOwner])
-
   useEffect(() => {
     if (compiling || error || showLogs) return
     handleNewCompile(deliveryLatencies.compileTimeServerE2E)
@@ -103,7 +79,7 @@ function CompileTimeWarningUpgradePrompt() {
     return null
   }
 
-  if (!showWarning && !showChangingSoon) {
+  if (!showWarning) {
     return null
   }
 
@@ -113,13 +89,6 @@ function CompileTimeWarningUpgradePrompt() {
         <CompileTimeWarningUpgradePromptInner
           handleDismissWarning={handleDismissWarning}
           segmentation={warningSegmentation}
-        />
-      )}
-      {showChangingSoon && (
-        <CompileTimeoutChangingSoon
-          isProjectOwner={isProjectOwner}
-          handleDismissChangingSoon={handleDismissChangingSoon}
-          segmentation={changingSoonSegmentation}
         />
       )}
     </div>

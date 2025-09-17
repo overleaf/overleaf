@@ -95,7 +95,7 @@ export const ShortCompileTimeoutErrorState = () => {
           <p>
             <em>
               <Trans
-                i18nKey="were_reducing_compile_timeout"
+                i18nKey="weve_reduced_compile_timeout"
                 components={[
                   /* eslint-disable-next-line jsx-a11y/anchor-has-content, react/jsx-key */
                   <a

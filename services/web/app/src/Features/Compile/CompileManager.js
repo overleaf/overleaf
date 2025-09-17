@@ -10,7 +10,6 @@ const ClsiManager = require('./ClsiManager')
 const Metrics = require('@overleaf/metrics')
 const { RateLimiter } = require('../../infrastructure/RateLimiter')
 const UserAnalyticsIdCache = require('../Analytics/UserAnalyticsIdCache')
-const SplitTestHandler = require('../SplitTests/SplitTestHandler')
 const {
   callbackify,
   callbackifyMultiResult,
@@ -131,17 +130,6 @@ async function _getProjectCompileLimits(project) {
     ownerFeatures.compileGroup = 'alpha'
   }
 
-  if (ownerFeatures.compileTimeout === 20) {
-    const overrideCompileTimeout =
-      await SplitTestHandler.promises.getAssignmentForUser(
-        project.owner_ref,
-        '10s-timeout-enforcement'
-      )
-
-    if (overrideCompileTimeout.variant === 'enabled') {
-      ownerFeatures.compileTimeout = 10
-    }
-  }
   const analyticsId = await UserAnalyticsIdCache.get(owner._id)
 
   const compileGroup =
