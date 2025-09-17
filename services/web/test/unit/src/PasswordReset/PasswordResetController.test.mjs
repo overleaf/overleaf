@@ -1,11 +1,9 @@
-import { expect, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import sinon from 'sinon'
 import MockResponse from '../helpers/MockResponse.js'
 
-const MODULE_PATH = new URL(
-  '../../../../app/src/Features/PasswordReset/PasswordResetController.mjs',
-  import.meta.url
-).pathname
+const MODULE_PATH =
+  '../../../../app/src/Features/PasswordReset/PasswordResetController.mjs'
 
 describe('PasswordResetController', function () {
   beforeEach(async function (ctx) {
@@ -501,15 +499,18 @@ describe('PasswordResetController', function () {
         ctx.req.query.email = { foo: 'bar' }
       })
 
-      it('should set session.resetToken and redirect without email', async function (ctx) {
+      it('should call next with an error', async function (ctx) {
         await new Promise(resolve => {
           ctx.req.session.should.not.have.property('resetToken')
-          ctx.res.redirect = path => {
-            path.should.equal('/user/password/set')
-            ctx.req.session.resetToken.should.equal(ctx.token)
+          const next = error => {
+            expect(error).to.exist
             resolve()
           }
-          ctx.PasswordResetController.renderSetPasswordForm(ctx.req, ctx.res)
+          ctx.PasswordResetController.renderSetPasswordForm(
+            ctx.req,
+            ctx.res,
+            next
+          )
         })
       })
     })
