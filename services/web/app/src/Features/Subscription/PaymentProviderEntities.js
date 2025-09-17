@@ -650,11 +650,14 @@ class PaymentProviderAccount {
    * @param {string} props.code
    * @param {string} props.email
    * @param {boolean} [props.hasPastDueInvoice]
+   * @param {object} [props.metadata]
+   * @param {string} [props.metadata.userId]
    */
   constructor(props) {
     this.code = props.code
     this.email = props.email
     this.hasPastDueInvoice = props.hasPastDueInvoice ?? false
+    this.metadata = props.metadata ?? {}
   }
 }
 

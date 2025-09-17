@@ -7,6 +7,7 @@ export type CustomerSubscriptionUpdatedWebhookEvent = {
       metadata: {
         adminUserId?: string
       }
+      customer: string
     }
     // https://docs.stripe.com/api/events/object?api-version=2025-04-30.basil#event_object-data-previous_attributes
     previous_attributes: {
@@ -35,6 +36,7 @@ export type CustomerSubscriptionCreatedWebhookEvent = {
       metadata: {
         adminUserId?: string
       }
+      customer: string
     }
   }
 }
@@ -46,6 +48,7 @@ export type CustomerSubscriptionsDeletedWebhookEvent = {
       metadata: {
         adminUserId?: string
       }
+      customer: string
     }
   }
 }
@@ -90,6 +93,25 @@ export type InvoiceOverdueWebhookEvent = {
   request: Stripe.Event.Request
 }
 
+export type CheckoutSessionCompletedWebhookEvent = {
+  type: 'checkout.session.completed'
+  data: {
+    object: Stripe.Checkout.Session & {
+      metadata: {
+        userId?: string
+      }
+    }
+  }
+  request: Stripe.Event.Request
+}
+
+export type CustomerCreatedWebhookEvent = {
+  type: 'customer.created'
+  data: {
+    object: Stripe.Customer
+  }
+}
+
 export type CustomerSubscriptionWebhookEvent =
   | CustomerSubscriptionUpdatedWebhookEvent
   | CustomerSubscriptionCreatedWebhookEvent
@@ -101,3 +123,5 @@ export type WebhookEvent =
   | InvoiceVoidedWebhookEvent
   | PaymentIntentPaymentFailedWebhookEvent
   | InvoiceOverdueWebhookEvent
+  | CheckoutSessionCompletedWebhookEvent
+  | CustomerCreatedWebhookEvent
