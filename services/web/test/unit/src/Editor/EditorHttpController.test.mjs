@@ -1,4 +1,4 @@
-import { vi, expect } from 'vitest'
+import { beforeEach, describe, it, vi, expect } from 'vitest'
 import sinon from 'sinon'
 import mongodb from 'mongodb-legacy'
 import Errors from '../../../../app/src/Features/Errors/Errors.js'
@@ -264,9 +264,9 @@ describe('EditorHttpController', function () {
 
   describe('joinProject', function () {
     beforeEach(function (ctx) {
-      ctx.req.params = { Project_id: ctx.project._id }
+      ctx.req.params = { Project_id: ctx.project._id.toString() }
       ctx.req.query = { user_id: ctx.user._id }
-      ctx.req.body = { userId: ctx.user._id }
+      ctx.req.body = { userId: ctx.user._id.toString() }
     })
 
     describe('successfully', function () {
@@ -327,20 +327,20 @@ describe('EditorHttpController', function () {
       it('should unmark the project as deleted', function (ctx) {
         expect(
           ctx.ProjectDeleter.promises.unmarkAsDeletedByExternalSource
-        ).to.have.been.calledWith(ctx.project._id)
+        ).to.have.been.calledWith(ctx.project._id.toString())
       })
     })
 
     describe('with a restricted user', function () {
       beforeEach(async function (ctx) {
+        ctx.ProjectEditorHandler.buildProjectModelView.returns(
+          ctx.reducedProjectView
+        )
+        ctx.AuthorizationManager.isRestrictedUser.returns(true)
+        ctx.AuthorizationManager.promises.getPrivilegeLevelForProjectWithProjectAccess.resolves(
+          'readOnly'
+        )
         await new Promise(resolve => {
-          ctx.ProjectEditorHandler.buildProjectModelView.returns(
-            ctx.reducedProjectView
-          )
-          ctx.AuthorizationManager.isRestrictedUser.returns(true)
-          ctx.AuthorizationManager.promises.getPrivilegeLevelForProjectWithProjectAccess.resolves(
-            'readOnly'
-          )
           ctx.res.callback = resolve
           ctx.EditorHttpController.joinProject(ctx.req, ctx.res)
         })
@@ -381,23 +381,23 @@ describe('EditorHttpController', function () {
 
     describe('with an anonymous user', function () {
       beforeEach(async function (ctx) {
+        ctx.token = 'token'
+        ctx.TokenAccessHandler.getRequestToken.returns(ctx.token)
+        ctx.ProjectEditorHandler.buildProjectModelView.returns(
+          ctx.reducedProjectView
+        )
+        ctx.req.body = {
+          userId: 'anonymous-user',
+          anonymousAccessToken: ctx.token,
+        }
+        ctx.AuthorizationManager.isRestrictedUser
+          .withArgs(null, 'readOnly', false, false)
+          .returns(true)
+        ctx.AuthorizationManager.promises.getPrivilegeLevelForProjectWithProjectAccess
+          .withArgs(null, ctx.project._id.toString(), ctx.token)
+          .resolves('readOnly')
         await new Promise(resolve => {
-          ctx.token = 'token'
-          ctx.TokenAccessHandler.getRequestToken.returns(ctx.token)
-          ctx.ProjectEditorHandler.buildProjectModelView.returns(
-            ctx.reducedProjectView
-          )
-          ctx.req.body = {
-            userId: 'anonymous-user',
-            anonymousAccessToken: ctx.token,
-          }
           ctx.res.callback = resolve
-          ctx.AuthorizationManager.isRestrictedUser
-            .withArgs(null, 'readOnly', false, false)
-            .returns(true)
-          ctx.AuthorizationManager.promises.getPrivilegeLevelForProjectWithProjectAccess
-            .withArgs(null, ctx.project._id, ctx.token)
-            .resolves('readOnly')
           ctx.EditorHttpController.joinProject(ctx.req, ctx.res)
         })
       })

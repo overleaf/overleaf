@@ -1,4 +1,4 @@
-import { expect, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import sinon from 'sinon'
 import mongodb from 'mongodb-legacy'
 import Errors from '../../../../app/src/Features/Errors/Errors.js'
@@ -323,8 +323,8 @@ describe('CollaboratorsController', function () {
   describe('setCollaboratorInfo', function () {
     beforeEach(function (ctx) {
       ctx.req.params = {
-        Project_id: ctx.projectId,
-        user_id: ctx.user._id,
+        Project_id: ctx.projectId.toString(),
+        user_id: ctx.user._id.toString(),
       }
       ctx.req.body = { privilegeLevel: 'readOnly' }
     })
@@ -335,7 +335,11 @@ describe('CollaboratorsController', function () {
           expect(status).to.equal(204)
           expect(
             ctx.CollaboratorsHandler.promises.setCollaboratorPrivilegeLevel
-          ).to.have.been.calledWith(ctx.projectId, ctx.user._id, 'readOnly')
+          ).to.have.been.calledWith(
+            ctx.projectId.toString(),
+            ctx.user._id.toString(),
+            'readOnly'
+          )
           resolve()
         }
         ctx.CollaboratorsController.setCollaboratorInfo(ctx.req, ctx.res)
@@ -389,8 +393,8 @@ describe('CollaboratorsController', function () {
                 ctx.LimitationsManager.promises
                   .canChangeCollaboratorPrivilegeLevel
               ).to.have.been.calledWith(
-                ctx.projectId,
-                ctx.user._id,
+                ctx.projectId.toString(),
+                ctx.user._id.toString(),
                 'readAndWrite'
               )
               resolve()
@@ -416,8 +420,8 @@ describe('CollaboratorsController', function () {
                 ctx.LimitationsManager.promises
                   .canChangeCollaboratorPrivilegeLevel
               ).to.have.been.calledWith(
-                ctx.projectId,
-                ctx.user._id,
+                ctx.projectId.toString(),
+                ctx.user._id.toString(),
                 'readAndWrite'
               )
               expect(
@@ -451,7 +455,11 @@ describe('CollaboratorsController', function () {
                 .to.not.have.been.called
               expect(
                 ctx.CollaboratorsHandler.promises.setCollaboratorPrivilegeLevel
-              ).to.have.been.calledWith(ctx.projectId, ctx.user._id, 'readOnly')
+              ).to.have.been.calledWith(
+                ctx.projectId.toString(),
+                ctx.user._id.toString(),
+                'readOnly'
+              )
               resolve()
             }
             ctx.CollaboratorsController.setCollaboratorInfo(ctx.req, ctx.res)
@@ -463,6 +471,7 @@ describe('CollaboratorsController', function () {
 
   describe('transferOwnership', function () {
     beforeEach(function (ctx) {
+      ctx.req.params = { Project_id: ctx.projectId.toString() }
       ctx.req.body = { user_id: ctx.user._id.toString() }
     })
 
@@ -507,11 +516,11 @@ describe('CollaboratorsController', function () {
     })
 
     it('invokes HTTP forbidden error handler if the user is not a collaborator', async function (ctx) {
+      ctx.OwnershipTransferHandler.promises.transferOwnership.rejects(
+        new Errors.UserNotCollaboratorError()
+      )
       await new Promise(resolve => {
         ctx.HttpErrorHandler.forbidden = sinon.spy(() => resolve())
-        ctx.OwnershipTransferHandler.promises.transferOwnership.rejects(
-          new Errors.UserNotCollaboratorError()
-        )
         ctx.CollaboratorsController.transferOwnership(ctx.req, ctx.res)
       })
     })

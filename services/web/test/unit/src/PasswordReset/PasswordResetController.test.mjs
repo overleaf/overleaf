@@ -10,7 +10,7 @@ const MODULE_PATH = new URL(
 describe('PasswordResetController', function () {
   beforeEach(async function (ctx) {
     ctx.email = 'bob@bob.com'
-    ctx.user_id = 'mock-user-id'
+    ctx.user_id = '507f1f77bcf86cd799439011'
     ctx.token = 'my security token that was emailed to me'
     ctx.password = 'my new password'
     ctx.req = {
@@ -416,13 +416,14 @@ describe('PasswordResetController', function () {
     describe('with token in query-string', function () {
       beforeEach(function (ctx) {
         ctx.req.query.passwordResetToken = ctx.token
+        ctx.req.query.email = 'test@example.com'
       })
 
       it('should set session.resetToken and redirect', async function (ctx) {
         await new Promise(resolve => {
           ctx.req.session.should.not.have.property('resetToken')
           ctx.res.redirect = path => {
-            path.should.equal('/user/password/set')
+            path.should.equal('/user/password/set?email=test%40example.com')
             ctx.req.session.resetToken.should.equal(ctx.token)
             resolve()
           }
@@ -433,6 +434,7 @@ describe('PasswordResetController', function () {
 
     describe('with expired token in query', function () {
       beforeEach(function (ctx) {
+        ctx.req.query.email = 'test@example.com'
         ctx.req.query.passwordResetToken = ctx.token
         ctx.PasswordResetHandler.promises.getUserForPasswordResetToken = sinon
           .stub()
@@ -441,14 +443,14 @@ describe('PasswordResetController', function () {
       })
 
       it('should redirect to the reset request page with an error message', async function (ctx) {
-        await new Promise(resolve => {
+        await new Promise((resolve, reject) => {
           ctx.res.redirect = path => {
             path.should.equal('/user/password/reset?error=token_expired')
             ctx.req.session.should.not.have.property('resetToken')
             resolve()
           }
           ctx.res.render = (templatePath, options) => {
-            resolve('should not render')
+            reject(new Error('should not render'))
           }
           ctx.PasswordResetController.renderSetPasswordForm(ctx.req, ctx.res)
         })
@@ -516,6 +518,7 @@ describe('PasswordResetController', function () {
       describe('with token in session', function () {
         beforeEach(function (ctx) {
           ctx.req.session.resetToken = ctx.token
+          ctx.req.query.email = 'test@example.com'
         })
 
         it('should render the page, passing the reset token', async function (ctx) {
@@ -547,6 +550,7 @@ describe('PasswordResetController', function () {
               ctx.req.session.should.not.have.property('resetToken')
               resolve()
             }
+            ctx.req.query.email = 'test@example.com'
             ctx.PasswordResetController.renderSetPasswordForm(ctx.req, ctx.res)
           })
         })

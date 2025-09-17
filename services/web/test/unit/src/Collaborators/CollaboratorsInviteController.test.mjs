@@ -17,7 +17,7 @@ vi.mock('../../../../app/src/Features/Errors/Errors.js', () =>
 
 describe('CollaboratorsInviteController', function () {
   beforeEach(async function (ctx) {
-    ctx.projectId = 'project-id-123'
+    ctx.projectId = '650f1f4f4f1c2c6d88f0e8b1'
     ctx.token = 'some-opaque-token'
     ctx.tokenHmac = 'some-hmac-token'
     ctx.targetEmail = 'user@example.com'
