@@ -631,8 +631,12 @@ class S3Persistor extends AbstractPersistor {
 
     // maxRetries has been moved to maxAttempts in aws-sdk v3,
     // we're keeping the existing setting for backwards compatibility
-    if (!noRetries && this.settings.maxRetries) {
+    if (this.settings.maxRetries) {
       options.maxAttempts = this.settings.maxRetries + 1
+    }
+
+    if (noRetries) {
+      options.maxAttempts = 1
     }
 
     const requestHandlerParams = this.settings.httpOptions || {}

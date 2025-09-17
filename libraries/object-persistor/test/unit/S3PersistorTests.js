@@ -594,10 +594,24 @@ describe('S3PersistorTests', function () {
           partSize: 100 * 1024 * 1024,
         })
       })
+    })
+
+    describe('when multipart upload is disabled', function () {
+      const contentType = 'text/csv'
+      const contentEncoding = 'gzip'
+
+      beforeEach(async function () {
+        S3.mockSend(S3.PutObjectCommand, {})
+        settings.disableMultiPartUpload = true
+        await S3Persistor.sendStream(bucket, key, ReadStream, {
+          contentType,
+          contentEncoding,
+        })
+      })
 
       it('configures the options to not to retry requests', function () {
-        expect(S3.S3Client).not.to.have.been.calledWithMatch({
-          maxAttempts: sinon.match.number,
+        expect(S3.S3Client).to.have.been.calledWithMatch({
+          maxAttempts: 1,
         })
       })
     })

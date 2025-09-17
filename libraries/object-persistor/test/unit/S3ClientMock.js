@@ -108,5 +108,11 @@ module.exports = function () {
         this.payload = payload
       }
     },
+    PutObjectCommand: class PutObjectCommand {
+      constructor(payload) {
+        this.name = 'PutObjectCommand'
+        this.payload = payload
+      }
+    },
   }
 }
