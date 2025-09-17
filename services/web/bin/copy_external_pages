@@ -2,5 +2,5 @@
 set -e
 
 # Branding
-mv app/views/external/robots.txt public/robots.txt
-mv app/views/external/googlebdb0f8f7f4a17241.html public/googlebdb0f8f7f4a17241.html
+cp app/views/external/robots.txt public/robots.txt
+cp app/views/external/googlebdb0f8f7f4a17241.html public/googlebdb0f8f7f4a17241.html
