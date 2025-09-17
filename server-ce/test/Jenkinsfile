@@ -48,7 +48,7 @@ pipeline {
       parallel {
         stage('Install deps') {
           steps {
-            sh 'make install'
+            sh 'make install -j10'
             sh 'make -C server-ce/test npm_install_in_docker'
             script { job_npm_install_done = true }
           }

@@ -38,7 +38,11 @@ The parser is written in a "grammar" file, (and a "tokens" file with custom toke
 
 From the monorepo root:
 
-``` sh
+```sh
+# automatic (on changes)
+make install
+
+# manually
 bin/npm -w services/web run 'lezer-latex:generate'
 ```
 
