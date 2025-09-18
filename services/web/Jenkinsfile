@@ -48,6 +48,22 @@ pipeline {
   }
 
   stages {
+    // Retries will use the same pipeline instance. Reset the vars.
+    stage('Reset vars') {
+      steps {
+        script {
+          action_test_frontend_ct_build = false
+          action_build_deps = false
+          action_copy_external_pages = false
+          action_build_dev = false
+          action_test_acceptance_app_server_pro = false
+          action_build_webpack = false
+          action_test_acceptance_app_saas = false
+          action_build_pug = false
+          action_build_production = false
+        }
+      }
+    }
     stage ('Build, Test and Push') {
       parallel {
         stage('Copy external pages') {

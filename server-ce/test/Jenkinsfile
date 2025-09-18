@@ -44,6 +44,19 @@ pipeline {
   }
 
   stages {
+    // Retries will use the same pipeline instance. Reset the vars.
+    stage('Reset vars') {
+      steps {
+        script {
+          job_copybara_done = false
+          job_npm_install_done = false
+          job_prefetch_custom_done = false
+          job_prefetch_default_done = false
+          job_server_ce_build_done = false
+          job_server_pro_build_done = false
+        }
+      }
+    }
     stage('Parallel') {
       parallel {
         stage('Install deps') {
