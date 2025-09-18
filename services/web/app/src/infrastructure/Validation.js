@@ -9,6 +9,11 @@ const {
   zz,
   ParamsError,
 } = require('@overleaf/validation-tools')
+const { isZodErrorLike, fromError } = require('zod-validation-error')
+
+/**
+ * @typedef {import('express').ErrorRequestHandler} ErrorRequestHandler
+ */
 
 const objectIdValidator = {
   type: 'objectId',
@@ -31,10 +36,21 @@ const objectIdValidator = {
 }
 
 const Joi = CelebrateJoi.extend(objectIdValidator)
-const errorMiddleware = errors()
+const errorMiddleware = [
+  errors(),
+  /** @type {ErrorRequestHandler} */
+  (err, req, res, next) => {
+    if (!isZodErrorLike(err)) {
+      return next(err)
+    }
+
+    res.status(400).json({ ...fromError(err), statusCode: 400 })
+  },
+]
 
 /**
  * Validation middleware
+ * @deprecated Please use Zod schemas and `validateReq` instead
  */
 function validate(schema) {
   return celebrate(schema, { allowUnknown: true })
