@@ -12,6 +12,7 @@ import { z, validateReq } from '../../infrastructure/Validation.js'
 
 const setNewUserPasswordSchema = z.object({
   body: z.object({
+    email: z.string().optional(),
     password: z.string(),
     passwordResetToken: z.string(),
   }),
