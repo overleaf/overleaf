@@ -457,7 +457,7 @@ footer.site-footer {
   }
 
   .footer-brand {
-    background-image: url('../../../public/img/ol-brand/overleaf-black.svg');
+    background-image: url('../../../frontend/js/shared/svgs/overleaf-green.svg');
   }
 
   @include footer-container-down(sm) {
