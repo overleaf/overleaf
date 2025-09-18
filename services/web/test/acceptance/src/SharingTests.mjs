@@ -77,7 +77,7 @@ describe('Sharing', function () {
 
     it('validates the privilege level', async function () {
       await expect(
-        this.collaboratorSession.setCollaboratorInfo(
+        this.ownerSession.setCollaboratorInfo(
           this.projectId,
           this.collaborator._id,
           { privilegeLevel: 'superpowers' }
