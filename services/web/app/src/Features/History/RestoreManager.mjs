@@ -18,6 +18,8 @@ import ChatManager from '../Chat/ChatManager.js'
 import OError from '@overleaf/o-error'
 import ProjectGetter from '../Project/ProjectGetter.js'
 import ProjectEntityHandler from '../Project/ProjectEntityHandler.js'
+import HistoryManager from './HistoryManager.js'
+import { Snapshot, getDocUpdaterCompatibleRanges } from 'overleaf-editor-core'
 
 async function getCommentThreadIds(projectId) {
   await DocumentUpdaterHandler.promises.flushProjectToMongo(projectId)
@@ -60,22 +62,41 @@ const RestoreManager = {
 
   async revertFile(userId, projectId, version, pathname, options = {}) {
     const threadIds = await getCommentThreadIds(projectId)
+
+    const snapshotRaw = await HistoryManager.promises.getContentAtVersion(
+      projectId,
+      version
+    )
+    const snapshot = Snapshot.fromRaw(snapshotRaw)
+
     return await RestoreManager._revertSingleFile(
       userId,
       projectId,
       version,
       pathname,
       threadIds,
+      snapshot,
       options
     )
   },
 
+  /**
+   *
+   * @param {string} userId
+   * @param {string} projectId
+   * @param {string} version
+   * @param {string} pathname
+   * @param {Set<string>} threadIds
+   * @param {Snapshot} projectSnapshotAtVersion
+   * @param {object} options
+   */
   async _revertSingleFile(
     userId,
     projectId,
     version,
     pathname,
     threadIds,
+    projectSnapshotAtVersion,
     options = {}
   ) {
     const endTimer = Metrics.revertFileDurationSeconds.startTimer()
@@ -156,16 +177,16 @@ const RestoreManager = {
       threadIds.delete(file.element._id.toString())
     }
 
-    const { metadata } = await RestoreManager._getMetadataFromHistory(
-      projectId,
-      version,
-      pathname
-    )
+    const snapshotFile = projectSnapshotAtVersion.getFile(pathname)
+    if (!snapshotFile) {
+      throw new OError('file not found in snapshot', { pathname })
+    }
 
     // Look for metadata indicating a linked file.
-    const isFileMetadata = metadata && 'provider' in metadata
+    const fileMetadata = snapshotFile.getMetadata()
+    const isFileMetadata = fileMetadata && 'provider' in fileMetadata
 
-    logger.debug({ metadata }, 'metadata from history')
+    logger.debug({ fileMetadata }, 'metadata from history')
 
     if (importInfo.type === 'file' || isFileMetadata) {
       const newFile = await EditorController.promises.upsertFile(
@@ -173,7 +194,7 @@ const RestoreManager = {
         parentFolderId,
         basename,
         fsPath,
-        metadata,
+        fileMetadata,
         origin,
         userId
       )
@@ -185,11 +206,7 @@ const RestoreManager = {
       }
     }
 
-    const ranges = await RestoreManager._getRangesFromHistory(
-      projectId,
-      version,
-      pathname
-    )
+    const ranges = getDocUpdaterCompatibleRanges(snapshotFile)
 
     const documentCommentIds = new Set(
       ranges.comments?.map(({ op: { t } }) => t)
@@ -364,6 +381,12 @@ const RestoreManager = {
     }
     const threadIds = await getCommentThreadIds(projectId)
 
+    const snapshotRaw = await HistoryManager.promises.getContentAtVersion(
+      projectId,
+      version
+    )
+    const snapshot = Snapshot.fromRaw(snapshotRaw)
+
     const reverted = []
     for (const pathname of pathsAtPastVersion) {
       const res = await RestoreManager._revertSingleFile(
@@ -372,6 +395,7 @@ const RestoreManager = {
         version,
         pathname,
         threadIds,
+        snapshot,
         { origin }
       )
       reverted.push({
@@ -412,20 +436,6 @@ const RestoreManager = {
       Settings.apis.project_history.url
     }/project/${projectId}/version/${version}/${encodeURIComponent(pathname)}`
     return await FileWriter.promises.writeUrlToDisk(projectId, url)
-  },
-
-  async _getRangesFromHistory(projectId, version, pathname) {
-    const url = `${
-      Settings.apis.project_history.url
-    }/project/${projectId}/ranges/version/${version}/${encodeURIComponent(pathname)}`
-    return await fetchJson(url)
-  },
-
-  async _getMetadataFromHistory(projectId, version, pathname) {
-    const url = `${
-      Settings.apis.project_history.url
-    }/project/${projectId}/metadata/version/${version}/${encodeURIComponent(pathname)}`
-    return await fetchJson(url)
   },
 
   async _getUpdatesFromHistory(projectId, version) {

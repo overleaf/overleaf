@@ -20,6 +20,60 @@ describe('RestoreManager', function () {
       default: Errors,
     }))
 
+    vi.doMock('../../../../app/src/Features/History/HistoryManager.js', () => ({
+      default: (ctx.HistoryManager = {
+        promises: {
+          getContentAtVersion: sinon.stub().resolves({
+            // Raw snapshot data that will be passed to Snapshot.fromRaw
+            files: {
+              'main.tex': {
+                hash: 'abcdef1234567890abcdef1234567890abcdef12',
+                stringLength: 100,
+                metadata: {
+                  editorId: 'test-editor',
+                },
+              },
+              'foo.tex': {
+                hash: 'abcdef1234567890abcdef1234567890abcdef12',
+                stringLength: 100,
+                metadata: {
+                  editorId: 'test-editor',
+                },
+              },
+              'folder/file.tex': {
+                hash: 'abcdef1234567890abcdef1234567890abcdef12',
+                stringLength: 100,
+                metadata: {
+                  editorId: 'test-editor',
+                },
+              },
+              'foo.png': {
+                hash: 'abcdef1234567890abcdef1234567890abcdef12',
+                stringLength: 100,
+                metadata: {
+                  provider: 'bar',
+                },
+              },
+              'linkedFile.bib': {
+                hash: 'abcdef1234567890abcdef1234567890abcdef12',
+                stringLength: 100,
+                metadata: {
+                  provider: 'mendeley',
+                },
+              },
+              'withMainTrue.tex': {
+                hash: 'abcdef1234567890abcdef1234567890abcdef12',
+                stringLength: 100,
+                metadata: {
+                  main: true,
+                },
+              },
+            },
+          }),
+        },
+      }),
+    }))
+
     vi.doMock('../../../../app/src/infrastructure/Metrics.js', () => ({
       default: {
         revertFileDurationSeconds: {
@@ -101,10 +155,46 @@ describe('RestoreManager', function () {
       })
     )
 
+    vi.doMock('overleaf-editor-core', () => ({
+      Snapshot: {
+        fromRaw: sinon.stub().callsFake(snapshotData => ({
+          getFile: pathname => ({
+            getStringLength: sinon.stub().returns(100),
+            getByteLength: sinon.stub().returns(100),
+            getContent: sinon.stub().returns('file content'),
+            isEditable: sinon.stub().returns(true),
+            getMetadata: sinon
+              .stub()
+              .returns(snapshotData?.files?.[pathname]?.metadata),
+          }),
+        })),
+      },
+      getDocUpdaterCompatibleRanges: (ctx.getDocUpdaterCompatibleRanges = sinon
+        .stub()
+        .returns({
+          changes: ctx.tracked_changes || [],
+          comments: ctx.comments || [],
+        })),
+    }))
+
     ctx.RestoreManager = (await import(modulePath)).default
     ctx.user_id = 'mock-user-id'
     ctx.project_id = 'mock-project-id'
     ctx.version = 42
+
+    // Add missing method mocks to RestoreManager
+    ctx.RestoreManager.promises._getUpdatesFromHistory = sinon.stub().resolves([
+      {
+        toV: ctx.version,
+        meta: { end_ts: new Date('2024-01-01T00:00:00.000Z') },
+      },
+    ])
+    ctx.RestoreManager.promises._getProjectPathsAtVersion = sinon
+      .stub()
+      .resolves([])
+    ctx.RestoreManager.promises._writeFileVersionToDisk = sinon
+      .stub()
+      .resolves('/tmp/mock-file-path')
   })
 
   afterEach(function () {
@@ -290,10 +380,6 @@ describe('RestoreManager', function () {
       ctx.FileSystemImportManager.promises.addEntity = sinon
         .stub()
         .resolves((ctx.entity = 'mock-entity'))
-      ctx.RestoreManager.promises._getRangesFromHistory = sinon.stub().rejects()
-      ctx.RestoreManager.promises._getMetadataFromHistory = sinon
-        .stub()
-        .resolves({ metadata: undefined })
     })
 
     describe('reverting a project without ranges support', function () {
@@ -395,12 +481,10 @@ describe('RestoreManager', function () {
         ctx.FileSystemImportManager.promises.importFile = sinon
           .stub()
           .resolves({ type: 'doc', lines: ['foo', 'bar', 'baz'] })
-        ctx.RestoreManager.promises._getRangesFromHistory = sinon
-          .stub()
-          .resolves({
-            changes: ctx.tracked_changes,
-            comments: ctx.comments,
-          })
+        ctx.getDocUpdaterCompatibleRanges.returns({
+          changes: ctx.tracked_changes,
+          comments: ctx.comments,
+        })
         ctx.RestoreManager.promises._getUpdatesFromHistory = sinon
           .stub()
           .resolves([
@@ -443,12 +527,6 @@ describe('RestoreManager', function () {
 
         it('should return the created entity', function (ctx) {
           expect(ctx.data).to.deep.equal(ctx.addedFile)
-        })
-
-        it('should look up ranges', function (ctx) {
-          expect(
-            ctx.RestoreManager.promises._getRangesFromHistory
-          ).to.have.been.calledWith(ctx.project_id, ctx.version, ctx.pathname)
         })
       })
 
@@ -560,12 +638,6 @@ describe('RestoreManager', function () {
         it('should return the created entity', function (ctx) {
           expect(ctx.data).to.deep.equal(ctx.addedFile)
         })
-
-        it('should look up ranges', function (ctx) {
-          expect(
-            ctx.RestoreManager.promises._getRangesFromHistory
-          ).to.have.been.calledWith(ctx.project_id, ctx.version, ctx.pathname)
-        })
       })
 
       describe('with comments in same doc', function () {
@@ -623,7 +695,14 @@ describe('RestoreManager', function () {
             ctx.project_id,
             ctx.version,
             ctx.pathname,
-            ctx.threadIds
+            ctx.threadIds,
+            {
+              getFile: sinon.stub().returns({
+                getMetadata: sinon.stub().returns(undefined),
+                getContent: sinon.stub().returns('file content'),
+                isEditable: sinon.stub().returns(true),
+              }),
+            }
           )
         })
 
@@ -687,7 +766,14 @@ describe('RestoreManager', function () {
             ctx.project_id,
             ctx.version,
             ctx.pathname,
-            ctx.threadIds
+            ctx.threadIds,
+            {
+              getFile: sinon.stub().returns({
+                getMetadata: sinon.stub().returns(undefined),
+                getContent: sinon.stub().returns('file content'),
+                isEditable: sinon.stub().returns(true),
+              }),
+            }
           )
         })
 
@@ -803,12 +889,6 @@ describe('RestoreManager', function () {
         ctx.EditorController.promises.upsertFile = sinon
           .stub()
           .resolves({ _id: 'mock-file-id', type: 'file' })
-        ctx.RestoreManager.promises._getRangesFromHistory = sinon
-          .stub()
-          .resolves({
-            changes: [],
-            comments: [],
-          })
         ctx.EditorController.promises.addDocWithRanges = sinon
           .stub()
           .resolves((ctx.addedFile = { _id: 'mock-doc-id', type: 'doc' }))
@@ -831,9 +911,6 @@ describe('RestoreManager', function () {
           ctx.FileSystemImportManager.promises.importFile = sinon
             .stub()
             .resolves({ type: 'file' })
-          ctx.RestoreManager.promises._getMetadataFromHistory = sinon
-            .stub()
-            .resolves({ metadata: { provider: 'bar' } })
           ctx.result = await ctx.RestoreManager.promises.revertFile(
             ctx.user_id,
             ctx.project_id,
@@ -868,11 +945,6 @@ describe('RestoreManager', function () {
           )
         })
 
-        it('should not look up ranges', function (ctx) {
-          expect(ctx.RestoreManager.promises._getRangesFromHistory).to.not.have
-            .been.called
-        })
-
         it('should not try to add a document', function (ctx) {
           expect(ctx.EditorController.promises.addDocWithRanges).to.not.have
             .been.called
@@ -881,13 +953,10 @@ describe('RestoreManager', function () {
 
       describe('when reverting a linked document with provider', function () {
         beforeEach(async function (ctx) {
-          ctx.pathname = 'foo.tex'
+          ctx.pathname = 'linkedFile.bib'
           ctx.FileSystemImportManager.promises.importFile = sinon
             .stub()
             .resolves({ type: 'doc', lines: ['foo', 'bar', 'baz'] })
-          ctx.RestoreManager.promises._getMetadataFromHistory = sinon
-            .stub()
-            .resolves({ metadata: { provider: 'bar' } })
           ctx.result = await ctx.RestoreManager.promises.revertFile(
             ctx.user_id,
             ctx.project_id,
@@ -909,9 +978,9 @@ describe('RestoreManager', function () {
           ).to.have.been.calledWith(
             ctx.project_id,
             'mock-folder-id',
-            'foo.tex',
+            'linkedFile.bib',
             ctx.fsPath,
-            { provider: 'bar' },
+            { provider: 'mendeley' },
             {
               kind: 'file-restore',
               path: ctx.pathname,
@@ -922,11 +991,6 @@ describe('RestoreManager', function () {
           )
         })
 
-        it('should not look up ranges', function (ctx) {
-          expect(ctx.RestoreManager.promises._getRangesFromHistory).to.not.have
-            .been.called
-        })
-
         it('should not try to add a document', function (ctx) {
           expect(ctx.EditorController.promises.addDocWithRanges).to.not.have
             .been.called
@@ -935,13 +999,10 @@ describe('RestoreManager', function () {
 
       describe('when reverting a linked document with { main: true }', function () {
         beforeEach(async function (ctx) {
-          ctx.pathname = 'foo.tex'
+          ctx.pathname = 'withMainTrue.tex'
           ctx.FileSystemImportManager.promises.importFile = sinon
             .stub()
             .resolves({ type: 'doc', lines: ['foo', 'bar', 'baz'] })
-          ctx.RestoreManager.promises._getMetadataFromHistory = sinon
-            .stub()
-            .resolves({ metadata: { main: true } })
           ctx.result = await ctx.RestoreManager.promises.revertFile(
             ctx.user_id,
             ctx.project_id,
@@ -962,18 +1023,13 @@ describe('RestoreManager', function () {
             .called
         })
 
-        it('should look up ranges', function (ctx) {
-          expect(ctx.RestoreManager.promises._getRangesFromHistory).to.have.been
-            .called
-        })
-
         it('should add the document', function (ctx) {
           expect(
             ctx.EditorController.promises.addDocWithRanges
           ).to.have.been.calledWith(
             ctx.project_id,
             ctx.folder_id,
-            'foo.tex',
+            'withMainTrue.tex',
             ['foo', 'bar', 'baz'],
             { changes: [], comments: [] }
           )
