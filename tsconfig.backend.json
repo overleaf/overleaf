@@ -20,7 +20,8 @@
       "@overleaf/ranges-tracker": ["./libraries/ranges-tracker"],
       "@overleaf/redis-wrapper": ["./libraries/redis-wrapper"],
       "@overleaf/settings": ["./libraries/settings"],
-      "@overleaf/stream-utils": ["./libraries/stream-utils"]
+      "@overleaf/stream-utils": ["./libraries/stream-utils"],
+      "@overleaf/validation-tools": ["./libraries/validation-tools"]
     },
     "skipLibCheck": true,
     "strict": true,
