@@ -480,6 +480,10 @@ format: format_pug
 format_pug:
 	npm run --silent format:pug
 
+format: format_jenkins
+format_jenkins:
+	npm run --silent format:jenkins
+
 format_fix:
 	npm run --silent format:fix
 
@@ -488,6 +492,9 @@ format_styles_fix:
 
 format_pug_fix:
 	npm run --silent format:pug:fix
+
+format_jenkins_fix:
+	npm run --silent format:jenkins:fix
 
 format_in_docker:
 	$(RUN_LINT_FORMAT) make format -j2 --output-sync

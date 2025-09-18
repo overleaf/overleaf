@@ -10,7 +10,7 @@ def action_test_acceptance_app_server_pro = false
 def action_build_webpack = false
 def action_test_acceptance_app_saas = false
 def action_build_pug = false
-def action_build_production= false
+def action_build_production = false
 
 pipeline {
   agent {
@@ -21,7 +21,6 @@ pipeline {
       customWorkspace '/workspace'
     }
   }
-
   options {
     // Print timestamp next to each log line.
     timestamps()
@@ -30,23 +29,21 @@ pipeline {
     retry(3)
     timeout(time: 15, unit: 'MINUTES')
   }
-
   environment {
-      IMAGE_NAME = 'web'
-      PROJECT_NAME = 'web'
-      IMAGE_REPO = 'us-east1-docker.pkg.dev/overleaf-ops/ol-docker/web'
-      AR_REPO_LOCATION = 'us-east1'
-      AR_URL = 'us-east1-docker.pkg.dev/overleaf-ops/ol-docker'
-      DOCKER_COMPOSE_FLAGS = '-f docker-compose.ci.yml'
-      BRANCH_NAME = "${env.CHANGE_BRANCH ? env.CHANGE_BRANCH : env.BRANCH_NAME}"
-      JENKINS_BUILD_NUMBER = "${BUILD_NUMBER}"       // preserve original BUILD_NUMBER
-      BUILD_NUMBER = "${SHORT_SHA}_${BUILD_NUMBER}"  // mimic the format used for Cloud Build
-      COMMIT_SHA = "${GIT_COMMIT}"
-      SHORT_SHA = "${GIT_COMMIT.take(7)}"
-      CDN_STAG = "gs://ol-stag-web-assets-1"
-      CDN_PROD = "gs://mgcp-1117973-ol-prod-web-assets-1"
+    IMAGE_NAME = 'web'
+    PROJECT_NAME = 'web'
+    IMAGE_REPO = 'us-east1-docker.pkg.dev/overleaf-ops/ol-docker/web'
+    AR_REPO_LOCATION = 'us-east1'
+    AR_URL = 'us-east1-docker.pkg.dev/overleaf-ops/ol-docker'
+    DOCKER_COMPOSE_FLAGS = '-f docker-compose.ci.yml'
+    BRANCH_NAME = "${env.CHANGE_BRANCH ? env.CHANGE_BRANCH : env.BRANCH_NAME}"
+    JENKINS_BUILD_NUMBER = "${BUILD_NUMBER}"       // preserve original BUILD_NUMBER
+    BUILD_NUMBER = "${SHORT_SHA}_${BUILD_NUMBER}"  // mimic the format used for Cloud Build
+    COMMIT_SHA = "${GIT_COMMIT}"
+    SHORT_SHA = "${GIT_COMMIT.take(7)}"
+    CDN_STAG = "gs://ol-stag-web-assets-1"
+    CDN_PROD = "gs://mgcp-1117973-ol-prod-web-assets-1"
   }
-
   stages {
     // Retries will use the same pipeline instance. Reset the vars.
     stage('Reset vars') {
@@ -305,99 +302,99 @@ pipeline {
           }
         }
         stage('test_frontend_ct_core_other') {
-            environment {
-                CYPRESS_INTERNAL_BROWSER_CONNECT_TIMEOUT = '120000'
+          environment {
+            CYPRESS_INTERNAL_BROWSER_CONNECT_TIMEOUT = '120000'
+          }
+          steps {
+            script {
+              waitUntil {
+                return action_test_frontend_ct_build
+              }
             }
-            steps {
-                script {
-                    waitUntil {
-                      return action_test_frontend_ct_build
-                    }
-                }
-                dir('services/web') {
-                  sh "make test_frontend_ct_core_other"
-                }
+            dir('services/web') {
+              sh "make test_frontend_ct_core_other"
             }
+          }
         }
         stage('test_frontend_ct_core_features') {
-            environment {
-                CYPRESS_INTERNAL_BROWSER_CONNECT_TIMEOUT = '120000'
+          environment {
+            CYPRESS_INTERNAL_BROWSER_CONNECT_TIMEOUT = '120000'
+          }
+          steps {
+            script {
+              waitUntil {
+                return action_test_frontend_ct_build
+              }
             }
-            steps {
-                script {
-                    waitUntil {
-                      return action_test_frontend_ct_build
-                    }
-                }
-                dir('services/web') {
-                  sh "make test_frontend_ct_core_features"
-                }
+            dir('services/web') {
+              sh "make test_frontend_ct_core_features"
             }
+          }
         }
         stage('test_frontend_ct_modules') {
-            environment {
-                CYPRESS_INTERNAL_BROWSER_CONNECT_TIMEOUT = '120000'
+          environment {
+            CYPRESS_INTERNAL_BROWSER_CONNECT_TIMEOUT = '120000'
+          }
+          steps {
+            script {
+              waitUntil {
+                return action_test_frontend_ct_build
+              }
             }
-            steps {
-                script {
-                  waitUntil {
-                    return action_test_frontend_ct_build
-                  }
-                }
-                dir('services/web') {
-                  sh "make test_frontend_ct_modules"
-                }
+            dir('services/web') {
+              sh "make test_frontend_ct_modules"
             }
+          }
         }
         stage('test_frontend_ct_editor_visual') {
-            steps {
-                script {
-                  waitUntil {
-                    return action_test_frontend_ct_build
-                  }
-                }
-                dir('services/web') {
-                  sh "make test_frontend_ct_editor_visual"
-                }
+          steps {
+            script {
+              waitUntil {
+                return action_test_frontend_ct_build
+              }
             }
+            dir('services/web') {
+              sh "make test_frontend_ct_editor_visual"
+            }
+          }
         }
         stage('test_frontend_ct_editor_other') {
-            steps {
-                script {
-                  waitUntil {
-                    return action_test_frontend_ct_build
-                  }
-                }
-                dir('services/web') {
-                  sh "make test_frontend_ct_editor_other"
-                }
+          steps {
+            script {
+              waitUntil {
+                return action_test_frontend_ct_build
+              }
             }
+            dir('services/web') {
+              sh "make test_frontend_ct_editor_other"
+            }
+          }
         }
         stage('Test Unit ESM') {
-            steps {
-                script {
-                  waitUntil {
-                    return action_build_dev
-                  }
-                }
-                dir('services/web') {
-                  sh "make test_unit_esm"
-                }
+          steps {
+            script {
+              waitUntil {
+                return action_build_dev
+              }
             }
+            dir('services/web') {
+              sh "make test_unit_esm"
+            }
+          }
         }
         stage('Test Unit Mocha') {
-            steps {
-                script {
-                  waitUntil {
-                    return action_build_dev
-                  }
-                }
-                dir('services/web') {
-                  sh "make test_unit_mocha"
-                }
+          steps {
+            script {
+              waitUntil {
+                return action_build_dev
+              }
             }
+            dir('services/web') {
+              sh "make test_unit_mocha"
+            }
+          }
         }
-        stage('Build Webpack'){
+        stage('Build Webpack') {
           steps {
             script {
               waitUntil {
@@ -440,7 +437,7 @@ pipeline {
             }
           }
         }
-        stage('Build Production'){
+        stage('Build Production') {
           steps {
             script {
               waitUntil {

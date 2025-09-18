@@ -95,11 +95,7 @@ async function runCheck(client, uniqueToken, context) {
     .del(healthCheckKey)
     .exec()
     .catch(err => {
-      throw new RedisHealthCheckVerifyError(
-        'read/delete errored',
-        context,
-        err
-      )
+      throw new RedisHealthCheckVerifyError('read/delete errored', context, err)
     })
   if (roundTrippedHealthCheckValue !== healthCheckValue) {
     context.roundTrippedHealthCheckValue = roundTrippedHealthCheckValue

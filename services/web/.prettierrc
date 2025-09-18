@@ -6,7 +6,7 @@
   "pugClassNotation": "as-is",
   "pugIdNotation": "as-is",
   "pugSortAttributesBeginning": ["name", "data-type"],
-  "plugins": ["@prettier/plugin-pug"],
+  "plugins": ["@prettier/plugin-pug", "prettier-plugin-groovy"],
   "semi": false,
   "singleQuote": true,
   "trailingComma": "es5",

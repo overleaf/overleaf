@@ -18,7 +18,6 @@ pipeline {
       customWorkspace '/workspace'
     }
   }
-
   options {
     // Print timestamp next to each log line.
     timestamps()
@@ -27,12 +26,10 @@ pipeline {
     retry(3)
     timeout(time: 15, unit: 'MINUTES')
   }
-
   environment {
     BRANCH_NAME = "${GIT_BRANCH.replace('origin/', '')}"
     COMMIT_SHA = "${GIT_COMMIT}"
     SHORT_SHA = "${GIT_COMMIT.take(7)}"
-
     OVERLEAF_BASE_BRANCH = "us-east1-docker.pkg.dev/overleaf-ops/ol-docker/overleaf-base-internal:${BRANCH_NAME}"
     OVERLEAF_BASE_LATEST = "us-east1-docker.pkg.dev/overleaf-ops/ol-docker/overleaf-base-internal:main"
     OVERLEAF_BASE_TAG = "us-east1-docker.pkg.dev/overleaf-ops/ol-docker/overleaf-base-internal:${BRANCH_NAME}-${SHORT_SHA}_${BUILD_ID}"
@@ -42,7 +39,6 @@ pipeline {
     IMAGE_TAG_CE = "${OVERLEAF_TAG}"
     IMAGE_TAG_PRO = "us-east1-docker.pkg.dev/overleaf-ops/ol-docker/pro:main"
   }
-
   stages {
     // Retries will use the same pipeline instance. Reset the vars.
     stage('Reset vars') {
@@ -63,10 +59,11 @@ pipeline {
           steps {
             sh 'make install -j10'
             sh 'make -C server-ce/test npm_install_in_docker'
-            script { job_npm_install_done = true }
+            script {
+              job_npm_install_done = true
+            }
           }
         }
-
         stage('shellcheck') {
           steps {
             dir('server-ce') {
@@ -74,62 +71,81 @@ pipeline {
             }
           }
         }
-
         stage('Format') {
           steps {
-            script { waitUntil { return job_npm_install_done } }
+            script {
+              waitUntil {
+                return job_npm_install_done
+              }
+            }
             dir('server-ce/test') {
               sh 'make format_in_docker'
             }
           }
         }
-
         stage('Copybara') {
           steps {
             sh 'copybara/bin/sync'
-            script { job_copybara_done = true }
+            script {
+              job_copybara_done = true
+            }
           }
         }
-
         stage('Build CE image') {
           steps {
-            script { waitUntil { return job_copybara_done } }
+            script {
+              waitUntil {
+                return job_copybara_done
+              }
+            }
             dir('copybara/public/repo/server-ce') {
               sh 'make build-base'
               sh 'make build-community'
             }
-            script { job_server_ce_build_done = true }
+            script {
+              job_server_ce_build_done = true
+            }
           }
         }
         stage('Push CE to internal') {
           steps {
-            script { waitUntil { return job_server_ce_build_done } }
+            script {
+              waitUntil {
+                return job_server_ce_build_done
+              }
+            }
             dir('copybara/public/repo/server-ce') {
               sh 'make push'
             }
           }
         }
-
         stage('Build Pro image') {
           environment {
             OVERLEAF_CE_TAG = "${OVERLEAF_TAG}"
-            OVERLEAF_PRO_TAG= "${IMAGE_TAG_PRO}"
+            OVERLEAF_PRO_TAG = "${IMAGE_TAG_PRO}"
           }
           steps {
-            script { waitUntil { return job_server_ce_build_done } }
+            script {
+              waitUntil {
+                return job_server_ce_build_done
+              }
+            }
             dir('server-pro') {
               sh 'make build-ci'
             }
-            script { job_server_pro_build_done = true }
+            script {
+              job_server_pro_build_done = true
+            }
           }
         }
-
         stage('Prefetch default') {
           steps {
             dir('server-ce/test') {
               sh 'make prefetch_default -j4'
             }
-            script { job_prefetch_default_done = true }
+            script {
+              job_prefetch_default_done = true
+            }
           }
         }
         stage('Prefetch custom') {
@@ -137,17 +153,22 @@ pipeline {
             dir('server-ce/test') {
               sh 'make prefetch_custom -j4'
             }
-            script { job_prefetch_custom_done = true }
+            script {
+              job_prefetch_custom_done = true
+            }
           }
         }
-
         stage('CE default') {
           environment {
             CYPRESS_SHARD = "CE_DEFAULT"
             COMPOSE_PROJECT_NAME = "test-ce-default"
           }
           steps {
-            script { waitUntil { return job_npm_install_done && job_server_ce_build_done && job_prefetch_default_done } }
+            script {
+              waitUntil {
+                return job_npm_install_done && job_server_ce_build_done && job_prefetch_default_done
+              }
+            }
             dir('server-ce/test') {
               sh 'make test-e2e'
             }
@@ -159,20 +180,27 @@ pipeline {
             COMPOSE_PROJECT_NAME = "test-ce-custom-1"
           }
           steps {
-            script { waitUntil { return job_npm_install_done && job_server_ce_build_done && job_prefetch_default_done && job_prefetch_custom_done } }
+            script {
+              waitUntil {
+                return job_npm_install_done && job_server_ce_build_done && job_prefetch_default_done && job_prefetch_custom_done
+              }
+            }
             dir('server-ce/test') {
               sh 'make test-e2e'
             }
           }
         }
-
         stage('PRO default 1') {
           environment {
             CYPRESS_SHARD = "PRO_DEFAULT_1"
             COMPOSE_PROJECT_NAME = "test-pro-default-1"
           }
           steps {
-            script { waitUntil { return job_npm_install_done && job_server_pro_build_done && job_prefetch_default_done } }
+            script {
+              waitUntil {
+                return job_npm_install_done && job_server_pro_build_done && job_prefetch_default_done
+              }
+            }
             dir('server-ce/test') {
               sh 'make test-e2e'
             }
@@ -184,7 +212,11 @@ pipeline {
             COMPOSE_PROJECT_NAME = "test-pro-default-2"
           }
           steps {
-            script { waitUntil { return job_npm_install_done && job_server_pro_build_done && job_prefetch_default_done } }
+            script {
+              waitUntil {
+                return job_npm_install_done && job_server_pro_build_done && job_prefetch_default_done
+              }
+            }
             dir('server-ce/test') {
               sh 'make test-e2e'
             }
@@ -196,7 +228,11 @@ pipeline {
             COMPOSE_PROJECT_NAME = "test-pro-custom-1"
           }
           steps {
-            script { waitUntil { return job_npm_install_done && job_server_pro_build_done && job_prefetch_default_done && job_prefetch_custom_done } }
+            script {
+              waitUntil {
+                return job_npm_install_done && job_server_pro_build_done && job_prefetch_default_done && job_prefetch_custom_done
+              }
+            }
             dir('server-ce/test') {
               sh 'make test-e2e'
             }
@@ -208,7 +244,11 @@ pipeline {
             COMPOSE_PROJECT_NAME = "test-pro-custom-2"
           }
           steps {
-            script { waitUntil { return job_npm_install_done && job_server_pro_build_done && job_prefetch_default_done && job_prefetch_custom_done } }
+            script {
+              waitUntil {
+                return job_npm_install_done && job_server_pro_build_done && job_prefetch_default_done && job_prefetch_custom_done
+              }
+            }
             dir('server-ce/test') {
               sh 'make test-e2e'
             }
@@ -220,7 +260,11 @@ pipeline {
             COMPOSE_PROJECT_NAME = "test-pro-custom-3"
           }
           steps {
-            script { waitUntil { return job_npm_install_done && job_server_pro_build_done && job_prefetch_default_done && job_prefetch_custom_done } }
+            script {
+              waitUntil {
+                return job_npm_install_done && job_server_pro_build_done && job_prefetch_default_done && job_prefetch_custom_done
+              }
+            }
             dir('server-ce/test') {
               sh 'make test-e2e'
             }
@@ -232,7 +276,11 @@ pipeline {
             COMPOSE_PROJECT_NAME = "test-pro-custom-4"
           }
           steps {
-            script { waitUntil { return job_npm_install_done && job_server_pro_build_done && job_prefetch_default_done && job_prefetch_custom_done } }
+            script {
+              waitUntil {
+                return job_npm_install_done && job_server_pro_build_done && job_prefetch_default_done && job_prefetch_custom_done
+              }
+            }
             dir('server-ce/test') {
               sh 'make test-e2e'
             }

@@ -31,6 +31,8 @@
     "format:styles:fix": "prettier --write $PWD/'**/*.{css,scss}'",
     "format:pug": "prettier --list-different $PWD/'**/*.pug'",
     "format:pug:fix": "prettier --write $PWD/'**/*.pug'",
+    "format:jenkins": "prettier --list-different $PWD/'**/Jenkinsfile'",
+    "format:jenkins:fix": "prettier --write $PWD/'**/Jenkinsfile'",
     "lint": "eslint --max-warnings 0 --format unix --ext .js,.jsx,.mjs,.ts,.tsx .",
     "lint:fix": "eslint --fix --ext .js,.jsx,.mjs,.ts,.tsx .",
     "lint:styles": "stylelint '**/*.scss'",
