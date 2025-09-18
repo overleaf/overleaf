@@ -211,6 +211,12 @@
   z-index: 11; // above the PDF viewer + controls
   top: var(--toolbar-small-height);
   background-color: var(--bg-secondary-themed);
+  display: flex;
+  flex-direction: column;
+
+  .logs-pane-content {
+    min-height: 100%;
+  }
 }
 
 .logs-pane {
