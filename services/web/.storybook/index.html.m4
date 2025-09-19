@@ -72,7 +72,7 @@ divert`'dnl
     <small>
       Last updated on syscmd(date)dnl
       for ifdef(`BRANCH_NAME',<a href="BRANCH_NAME/">BRANCH_NAME</a>,unknown branch)
-      (<a href="https://console.cloud.google.com/cloud-build/builds?project=overleaf-dev&pageState=(%22builds%22:(%22f%22:%22%255B%257B_22k_22_3A_22Trigger%2520Name_22_2C_22t_22_3A10_2C_22v_22_3A_22_5C_22storybook-pr-trigger_5C_22_22_2C_22s_22_3Atrue_2C_22i_22_3A_22triggerName_22%257D_2C%257B_22k_22_3A_22_22_2C_22t_22_3A10_2C_22v_22_3A_22_5C_22OR_5C_22_22_2C_22o_22_3Atrue_2C_22s_22_3Atrue%257D_2C%257B_22k_22_3A_22Trigger%2520Name_22_2C_22t_22_3A10_2C_22v_22_3A_22_5C_22storybook-push-trigger_5C_22_22_2C_22s_22_3Atrue_2C_22i_22_3A_22triggerName_22%257D%255D%22))">build history</a>).
+      (<a href="https://jenkins.ops-overleaf.com/job/Overleaf_Organization/job/Storybook/view/default/builds">build history</a>).
     </small>
   </body>
 </html>

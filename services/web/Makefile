@@ -615,7 +615,7 @@ storybook_index:
 										| grep -v -e index.html \
 										| sort \
 										| tr '\n' ,)" \
-		-DBRANCH_NAME="$BRANCH_NAME" .storybook/index.html.m4 \
+		-DBRANCH_NAME="${BRANCH_NAME}" .storybook/index.html.m4 \
 	> data/storybook/index.html
 
 MODULE_TARGETS = \
